@@ -1,46 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/local/bin/perl -w
 
 BEGIN { push @INC, q(.) } # XXX 
-=comment
-
-TODO 
-re-enable effects
-
-want to merge this
-
-find
-list
-add guitar rec 1
-add vocal rec 2
-del guitar guitar
-del 1 
-
-mix
-guitar 2
-
-vol 36
-pan 50
-
-guitar vol 36
-mix vol 600
-
-mon guitar
-guitar mon 
-guitar rec
-
-rec guitar
-r gui
-m vo
-v 36
-p 50
-
-
-t s h (start stop help) iam
-
-
-=cut
-
-
 
 ### COMMAND LINE PARSER 
 
@@ -54,36 +14,40 @@ my $grammar = q(
 command: session | add | mix | norm |  mon | rec | mute | quit 
 
 session: 'session' name 'new' {
-	$session = $item{name};
-	&new_session;
+	$::session = $item{name};
+	&::new_session;
+	1;
 }
-
 session: 'session' name { 
-	return if $item{name} eq $session_name;
-	$session_name = $item{name};
-	&load_session; 
+	return if $item{name} eq $::session_name;
+	$::session_name = $item{name};
+	&::load_session; 
+	1;
 }
 
 mix: 'mix' {}
 
 norm: 'norm' {}
 
-name: wav 
+name: /\w*[._\-A-Za-z0-9]/i
+
+wav: name
 
 take: 'take' dd { $::state_t{active} = $item{dd} }
 
 add: 'add' wav channel(s?) { 
-	if ($track_names{$item{wav}} ){
+	if ($::track_names{$item{wav}} ){
 		print "Track name already in use.\n";
 	} else {
-		&add_track{$item{wav}} ;
-		::%ch = ( @{$item{channel} );	
-		$ch{rc} and $state_c{$i}->{ch_r} = $ch{rc};
-		$ch{mc} and $state_c{$i}->{ch_m} = $ch{mc};
-		# no checking yet
+		&::add_track($item{wav}) ;
+		%::ch = ( @{$item{channel}} );	
+		$::ch{rc} and $::state_c{$::i}->{ch_r} = $::ch{rc};
+		$::ch{mc} and $::state_c{$::i}->{ch_m} = $::ch{mc};
+		
 	}
+	1;
 }
-channel: 'rc' dd | 'mc' dd
+channel: ('rc' dd | 'mc' dd)
 
 rec: 'rec' dd 
 { 	$::state_t{active} = $item{dd}; 
@@ -113,7 +77,6 @@ mute: 'mute' wav(s?)
 }
 
 
-wav: /\w*[._\-A-Za-z0-9]/i
 
 mon: 'mon' target(s)
 
@@ -281,7 +244,7 @@ $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
 my $debug  = 1; # detailed debugging info 
 my $debug2 = 1; # subroutine names
-my $gui = 1;
+my $gui = 0;
 
 use strict;
 use Storable; 
@@ -503,10 +466,8 @@ if ($gui) {
 	my $prompt = "Enter command: ";
 	$::OUT = $term->OUT || \*STDOUT;
 	my $user_input;
-	my $parser = Parse::RecDescent->new($grammar);
-	 # $parser = new Parse::RecDescent ($grammar);
-
-	use vars qw(%iam_cmd);
+	use vars qw($parser %iam_cmd);
+ 	$parser = new Parse::RecDescent ($grammar) or die "Bad grammar!\n";
 	require "iam.pl";
 
 	while (1) {
@@ -514,16 +475,20 @@ if ($gui) {
 		($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
-		my ($cmd, $predicate) = $user_input =~ /(\w+)(.*)/;
+		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
+		$debug and print "cmd: $cmd\predicate: $predicate\n";
 		if ($iam_cmd{$cmd}){
 			&eval_iam($user_input) ;
 		} elsif ( grep { $cmd eq $_ } qw( session add take mon rec mute quit ) ) {
-			eval { $parser->command($user_input) };
-			$@ and print "Ecmd input error: $@\n";
+			$debug and print "Found Ecmd command\n";
+			$parser->command($user_input) or print ("Bad input!\n"), next;
 		} elsif ($cmd eq 'eval') {
 			eval $predicate;
+			print "\n";
 			$@ and print "Perl command failed: $@\n";
 		} elsif ( my $begins_with_trackname = 0) {
+			# set the current track
+			# evaluate the predicate
 		} else { print "Unknown command\n";}
 
 	}
@@ -600,6 +565,7 @@ sub decrement_take {
 }
 
 sub new_session {
+	$debug2 and print "&new_session\n";
 	# from $session set $session_name and create 
 	# a directory of that name
 	$session = &remove_spaces($session);
@@ -620,13 +586,15 @@ sub new_session {
 	$session = q();
 }
 sub load_session {
-	$debug2 and print "&load_session\n";
+	$debug2 and warn "&load_session\n";
 	$session = &remove_spaces($session);
 	return if ! $session;
 	$opts{m} = undef; #  XXX what behavior would I want?
 	$session_name = $session;
-	print ("Directory not found!! Maybe new??\n"), return 
-		if ! -d &join_path($ecmd_home , $session_name);
+	print ("Directory not found!! Maybe new??\n"),
+		($session_name = undef), 
+		return 
+			if ! -d &join_path($ecmd_home , $session_name);
 	&set_dirs($session, 0);
 	&session_init;
 	$session = q();
