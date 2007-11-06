@@ -1,5 +1,171 @@
 #!/usr/bin/perl -w
 
+BEGIN { push @INC, q(.) } # XXX 
+=comment
+
+TODO 
+re-enable effects
+
+want to merge this
+
+find
+list
+add guitar rec 1
+add vocal rec 2
+del guitar guitar
+del 1 
+
+mix
+guitar 2
+
+vol 36
+pan 50
+
+guitar vol 36
+mix vol 600
+
+mon guitar
+guitar mon 
+guitar rec
+
+rec guitar
+r gui
+m vo
+v 36
+p 50
+
+
+t s h (start stop help) iam
+
+
+=cut
+
+
+
+### COMMAND LINE PARSER 
+
+$::RD_AUTOSTUB = 1;
+$::RD_HINT = 1;
+
+# rec command changes active take
+
+my $grammar = q(
+
+command: session | add | mix | norm |  mon | rec | mute | quit 
+
+session: 'session' name 'new' {
+	$session = $item{name};
+	&new_session;
+}
+
+session: 'session' name { 
+	return if $item{name} eq $session_name;
+	$session_name = $item{name};
+	&load_session; 
+}
+
+mix: 'mix' {}
+
+norm: 'norm' {}
+
+name: wav 
+
+take: 'take' dd { $::state_t{active} = $item{dd} }
+
+add: 'add' wav channel(s?) { 
+	if ($track_names{$item{wav}} ){
+		print "Track name already in use.\n";
+	} else {
+		&add_track{$item{wav}} ;
+		::%ch = ( @{$item{channel} );	
+		$ch{rc} and $state_c{$i}->{ch_r} = $ch{rc};
+		$ch{mc} and $state_c{$i}->{ch_m} = $ch{mc};
+		# no checking yet
+	}
+}
+channel: 'rc' dd | 'mc' dd
+
+rec: 'rec' dd 
+{ 	$::state_t{active} = $item{dd}; 
+	$::state_t{ $::state_t{active} }->{rw} = 'rec';
+	$::playback_only = 0;
+}
+
+rec: 'rec' wav(s?) 
+{ 
+	$::state_t{ $::state_t{active} }->{rw} = 'rec';
+	$::playback_only = 0;
+	@{$item{wav}} and &::rec 
+	  ( 
+		$::state_t{active},
+	     	map { s/\.wav\s*$//i; $_ } @{$item{wav}}
+	  )
+}
+mute: 'mute' dd(s) 
+{ 
+	map{$::state_t{$_}->{rw} = 'mute' } @{$item{dd}}  ;
+}
+mute: 'mute' wav(s?) 
+{ 
+	map{$::state_c{$::chain{$_}}->{rw} = 'mute'}
+	map { s/\.wav\s*$//i; $_ }
+	@{$item{wav}}  ;
+}
+
+
+wav: /\w*[._\-A-Za-z0-9]/i
+
+mon: 'mon' target(s)
+
+mon: 'mon' take_no '_' version {&::mon_vert($item{take_no}, $item{version})} 
+
+take_no: /\d+/
+version: /\d+/
+
+mon: 'mon' dd(s) {
+	map{$::state_t{$_}->{rw} = 'mon'} @{$item{dd}}  ;
+}
+	
+take_version: take_no  {}
+	
+
+target: wav ordinal 
+	{
+	my $wav = &::wav_off( $item{wav} );
+	my $nth = $item{ordinal};
+	$::state_c{$::chain{$wav}}->{rw} = 'mon';
+	$::state_c{$::chain{$wav}}->{versions}->[$nth - 1] 
+	   and $::state_c{$::chain{$wav}}->{active} = 
+	   $::state_c{$::chain{$wav}}->{versions}->[$nth - 1]
+	}	
+
+target: wav numeral
+	{
+	my $wav = &::wav_off ($item{wav});
+	$::state_c{$::chain{$wav}}->{rw} = 'mon';
+	my $n = $item{numeral};
+	my $vers_arr = $::state_c{$::chain{$wav}}->{versions};
+	die "undefined versions" unless defined $vers_arr;
+	for my $v ( reverse @{ $vers_arr } ) {
+	     $v <= $n and $::state_c{$::chain{$wav}}->{active} = $v, last;
+	}
+	}	
+
+target: wav last {&::vlast(&::wav_off($item{wav})) }
+
+ordinal: '__' dd
+
+numeral:  dd
+
+last: ('last' | '$' ) 
+
+dd: /\d+/
+
+quit: ( 'quit' | 'exit' ) { &::save_state($::statestore); exit; }
+
+
+);
+
 
 
 my $configuration=<<'PARAMETERS';
@@ -115,6 +281,7 @@ $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
 my $debug  = 1; # detailed debugging info 
 my $debug2 = 1; # subroutine names
+my $gui = 1;
 
 use strict;
 use Storable; 
@@ -122,6 +289,7 @@ use Data::Dumper;
 use Getopt::Std;
 use Tk;
 use Audio::Ecasound;
+use Parse::RecDescent;
 
 
 ### More Global Variables
@@ -143,38 +311,34 @@ use constant {REC => 'rec',
 
 # lexical variables
 
+use vars qw(
+	%state_c
+	%state_t
+	$statestore
+	$sessionsetup
+	@monitor
+	@record 
+	@mute
+	%track_names 
+	@effects		
+	%effect_i	
+	@ladspa_sorted
+	%effects_ladspa
+	$e
+    $last_version
+	$monitor_version
+	%cops 			
+	%copp 		
+    %e_bound
+	@marks 
+	$unit	
+	$markers_armed 
+	%old_vol   
+	$length   
+	$jack_on 
+);
+
 my (
-	%state_c,
-	%state_t,
-	$statestore,
-	$sessionsetup,
-	@monitor,
-	@record ,
-	@mute,
-	%track_names, # so I use each one once
-
-	@effects,		# effects library, indexed by effect index 
-	%effect_i,		# effect code -> index
-	@ladspa_sorted, # indexes, ordered alphabetically by name
-	%effects_ladspa, # hinted ladspa effects data, indexed by effect code
-	                 # to be combined into @effects
-
-	$e,
-    $last_version,
-	$monitor_version, # for global version setting
-
-	%cops, 			# id -> chain
-	%copp, 			# holds all chain-op parameters, indexed by $id
-    %e_bound,		 # index boundaries of effects groups
-
-	@marks, 		# position memory button settings
-	$unit,			# 1s or 60s, used for fast-forward
-	$markers_armed, # memory buttons armed to store
-	%old_vol,   	# volume level before muting
-	$length,        # don't fast-forward past this value!
-	# $is_armed, 		# am i ready to start transport?
-	
-	$jack_on, 
 
 ##  WIDGETS  ##
 
@@ -307,23 +471,63 @@ $session_name  = shift;
 $session_name = &remove_spaces($session_name);
 $debug and print "session name: $session_name\n";
 my $create = $opts{c} ? 1 : 0;
-$session_name and &set_dirs($create, $session_name); 
+$session_name and &set_dirs($session_name,$create); 
 &new_engine;
 &initialize_oids;
-#print Dumper @oids; exit;
-&read_in_effects_data; 
-	&get_ladspa_hints, 
-	&integrate_ladspa_hints, 
-	&sort_ladspa_effects
-unless $opts{e}; # doesn't work
-&sort_ladspa_effects;
-&init_gui; 
-&transport_gui;
-&oid_gui;
-&time_gui;
-&session_init if $session_name; 
-MainLoop;
 
+#print Dumper @oids; exit;
+#  EFFECTS
+
+if ($gui) { ### XXX (temporary)
+&read_in_effects_data; 
+&get_ladspa_hints, 
+&integrate_ladspa_hints, 
+&sort_ladspa_effects;
+} 
+
+
+# GUI or Terminal mode
+
+if ($gui) {
+	&init_gui; 
+	&transport_gui;
+	&oid_gui;
+	&time_gui;
+	&session_init if $session_name; 
+	MainLoop;
+
+} else {
+	
+	use Term::ReadLine;
+	my $term = new Term::ReadLine 'Ecmd';
+	my $prompt = "Enter command: ";
+	$::OUT = $term->OUT || \*STDOUT;
+	my $user_input;
+	my $parser = Parse::RecDescent->new($grammar);
+	 # $parser = new Parse::RecDescent ($grammar);
+
+	use vars qw(%iam_cmd);
+	require "iam.pl";
+
+	while (1) {
+
+		($user_input) = $term->readline($prompt) ;
+		$user_input =~ /^\s*$/ and next;
+		$term->addhistory($user_input) ;
+		my ($cmd, $predicate) = $user_input =~ /(\w+)(.*)/;
+		if ($iam_cmd{$cmd}){
+			&eval_iam($user_input) ;
+		} elsif ( grep { $cmd eq $_ } qw( session add take mon rec mute quit ) ) {
+			eval { $parser->command($user_input) };
+			$@ and print "Ecmd input error: $@\n";
+		} elsif ($cmd eq 'eval') {
+			eval $predicate;
+			$@ and print "Perl command failed: $@\n";
+		} elsif ( my $begins_with_trackname = 0) {
+		} else { print "Unknown command\n";}
+
+	}
+}
 
 ########### end of main program body ##########
 #
@@ -331,10 +535,11 @@ sub session_init{
 	&read_parameters_file;
 	&initialize_session_data;
 	&remove_small_wavs; 
+
 	&retrieve_state(&join_path($session_dir,$statestore)) unless $opts{m};
 	&mix_track unless scalar @all_chains;
 	&dig_ruins;
-	&global_version_buttons;
+	&global_version_buttons if $gui;
 }
 
 #The mix track will always be track index 1 i.e. $state_c{$n}
@@ -383,7 +588,8 @@ sub decrement_take {
 			return if &transport_running; 
 			return if $t == 1; 
 			# can't proceed if tracks already defined for this take
-			$debug and print ("found chains, aborting"),return if grep{$take{$_}==$t} @all_chains;
+			$debug and print ("found chains, aborting"),return 
+				if grep{$take{$_}==$t} @all_chains;
 			pop @takes;
 			$t--;
 			$state_t{active} = $t;
@@ -393,6 +599,38 @@ sub decrement_take {
 			
 }
 
+sub new_session {
+	# from $session set $session_name and create 
+	# a directory of that name
+	$session = &remove_spaces($session);
+	return if ! $session;
+	print ("Session already exists\n"), return 
+		if -e &join_path($ecmd_home, $session);
+	&set_dirs($session, 1);
+	$session_name = $session;
+=comment 
+	# OPEN EDITOR
+	my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
+	open PARAMS, ">$new_file" or warn "couldn't open $new_file for write: $!\n";
+	print PARAMS $configuration;
+	close PARAMS;
+	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
+=cut
+	&session_init;
+	$session = q();
+}
+sub load_session {
+	$debug2 and print "&load_session\n";
+	$session = &remove_spaces($session);
+	return if ! $session;
+	$opts{m} = undef; #  XXX what behavior would I want?
+	$session_name = $session;
+	print ("Directory not found!! Maybe new??\n"), return 
+		if ! -d &join_path($ecmd_home , $session_name);
+	&set_dirs($session, 0);
+	&session_init;
+	$session = q();
+}
 
 sub init_gui {
 
@@ -454,59 +692,15 @@ sub init_gui {
 	$build_track_mon_label = $add_frame->Label(-text => "MON")->pack(-side => 'left');
 	$build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
 	$build_track_add = $add_frame->Button->pack(-side => 'left');;
-=comment TAKE
-	$build_new_take = $add_frame->Button->pack(-side => 'left');;
-=cut
-
-=comment TAKE
-	$take_label->AddItems([
-		'command' => "Remove empty last take)",
-		-background => $old_bg,
-		-command => sub { &decrement_take },
-	]);
-=cut
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => sub { 
-			return if ! $session;
-			$opts{m} = undef;
-			$session_name = $session;
-			print ("Directory not found!! Maybe new??\n"), return 
-				if ! -d &join_path($ecmd_home , $session_name);
-			&set_dirs(0, $session);
-			&session_init;
-			$session = q();
-			});
-=comment
-	$sn_load_nostate->configure(
-		-text => 'Load No-State',
-		-command => sub { 
-			return if ! $session;
-			$opts{m}++;
-			$session_name = $session;
-			print ("Directory not found!! Maybe new??\n"), return 
-				if ! -d &join_path($ecmd_home , $session_name);
-			&set_dirs(0, $session);
-			&session_init;
-			$session = q();
-			});
-=cut
+		-command => \&load_session,
+		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { 
-			return if ! $session;
-			$session = &remove_spaces($session);
-			&set_dirs(1, $session);
-			$session_name = $session;
-			my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
-			open PARAMS, ">$new_file" or warn "couldn't open $new_file for write: $!\n";
-			print PARAMS $configuration;
-			close PARAMS;
-			system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
-			&session_init;
-			$session = q();
-			});
+		-command => \&new_session,
+		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if &transport_running;
@@ -719,10 +913,10 @@ sub time_gui {
 }
 
 sub add_track {
-	return if &transport_running;
+	return 0 if &transport_running;
 	my $name = shift;
 	$name and my $track_name = $name; 
-	# HACK!--otherwise we use $trackname from previous scope
+	# otherwise we use $trackname from previous scope
 	#
 	# 
 
@@ -730,7 +924,7 @@ sub add_track {
 	
 	$track_name = &remove_spaces($track_name);
 
-	return if $track_names{$track_name};
+	print ("Track name in use\n"), return 0 if $track_names{$track_name};
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
 	&register_track($i, $track_name, $ch_r, $ch_m);
@@ -740,8 +934,8 @@ sub add_track {
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = REC if ! defined $state_c{$i}->{rw};
-	&track_gui($i);
-#	&refresh;
+	&track_gui($i) if $gui;
+	return 1;
 }
 
 sub remove_spaces {
@@ -761,13 +955,11 @@ sub remove_spaces {
 sub restore_track {
 	my $n = shift;
 	&find_wavs($n);
-	&track_gui($n);
-#	&refresh;
+	&track_gui($n), &refresh if $gui;
 }
 sub new_take {
 	&increment_take;
-	&take_gui($t); 
-	&refresh_t;
+	&take_gui($t), &refresh_t if $gui;
 }
 
 
@@ -916,7 +1108,7 @@ sub mix_suffix {
 	$stub eq $session_name ? ' (mix)' : ''
 }
 
-sub track_gui {
+sub track_gui { # nearly 300 lines! 
 
 	my $n = shift; # chain index is lexicalized, will remain static in callbacks
 					# my $j is effect index
@@ -1306,16 +1498,18 @@ sub initialize_session_data {
 	%widget_c = ();
 	@widget_t = ();
 	%widget_e = ();
-	# @widget_o = ();
 
+if ($gui) {
 	map{ $_->destroy } map{ $_->children } $effect_frame;
 	my @children = $take_frame->children;
 	map{ $_->destroy  } @children[1..$#children];
 	@children = $track_frame->children;
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$state_t{active} = 1; 
+}
 	&increment_take; 
-	&take_gui($t);
+
+&take_gui($t) if $gui;
 
 	@item        = ();
 	%take        = (); # maps chain index to take
@@ -1348,13 +1542,14 @@ sub join_path {
 }
 
 sub set_dirs {
-	my ($create, $session_name) = @_;
+	$debug2 and print "&set_dirs\n";
+	my ($session_name, $create) = @_;
 	$debug and print "\$create: $create  \$session_name: $session_name\n"; 
 	-d $ecmd_home or die "$ecmd_home not a directory; it should be.";
 
 	$session_dir  = &join_path($ecmd_home, $session_name);
     $this_wav_dir = &join_path($wav_dir, $session_name);
-	$mix_dir = &join_path($this_wav_dir, 'mix');
+	# $mix_dir = &join_path($this_wav_dir, 'mix');
 
 	$debug and print "this_wav_dir; $this_wav_dir\n";
 	$debug and print "session_dir; $session_dir\n";
@@ -1403,8 +1598,6 @@ sub dig_ruins {
 	}
 
 }
-		  
-
 
 sub find_wavs {
 
