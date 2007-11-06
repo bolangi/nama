@@ -1,5 +1,8 @@
 use vars qw(%iam_cmd);
 map { $iam_cmd{$_}++ } split "\n", <<CMD;
+fs
+es
+cs
 quit
 q 
 start

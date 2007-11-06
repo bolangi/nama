@@ -11,7 +11,12 @@ $::RD_HINT = 1;
 
 my $grammar = q(
 
-command: session | setup | add | mix | norm |  mon | rec | mute | quit 
+command: session | add | setup 
+command: mix | norm 
+command: mon | rec | mute 
+command: vol | pan 
+command: renew | exit | eval
+command: fx
 
 session: 'session' name 'new' {
 	$::session = $item{name};
@@ -40,7 +45,7 @@ add: 'add' wav channel(s?) {
 
 setup: 'setup' { &::setup_transport; &::connect_transport}
 
-renew: 'renew' {&::new_engine};
+renew: 'renew' {&::new_engine}
 
 mix: 'mix' {}
 
@@ -52,51 +57,65 @@ wav: name
 
 take: 'take' dd { $::state_t{active} = $item{dd} }
 
-channel: 'r' dd  { $::state_c{$::i}->{ch_r} = $item{dd}
-channel: 'm' dd  { $::state_c{$::i}->{ch_m} = $item{dd}
+channel: 'r' dd  { $::state_c{$::i}->{ch_r} = $item{dd} }
+channel: 'm' dd  { $::state_c{$::i}->{ch_m} = $item{dd} }
 
-rec: 'rec' dd 
-{ 	$::state_t{active} = $item{dd}; 
-	$::state_t{ $::state_t{active} }->{rw} = 'rec';
-	$::playback_only = 0;
+eval: 'eval' predicate {
+			eval $item{predicate};
+			print "\n";
+			$@ and print "Perl command failed: $@\n";
 }
 
-rec: 'rec' wav(s?) 
-{ 
-	$::state_t{ $::state_t{active} }->{rw} = 'rec';
-	$::playback_only = 0;
-	@{$item{wav}} and &::rec 
-	  ( 
-		$::state_t{active},
-	     	map { s/\.wav\s*$//i; $_ } @{$item{wav}}
-	  )
+predicate: /.+/
+
+
+rec: 'rec' wav(s?) { 
+	map{$::state_c{$::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
 }
-mute: 'mute' dd(s) 
-{ 
-	map{$::state_t{$_}->{rw} = 'mute' } @{$item{dd}}  ;
+mon: 'mon' wav(s?) { 
+	map{$::state_c{$::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
 }
-mute: 'mute' wav(s?) 
-{ 
-	map{$::state_c{$::chain{$_}}->{rw} = 'mute'}
-	map { s/\.wav\s*$//i; $_ }
-	@{$item{wav}}  ;
+mute: 'mute' wav(s?) { 
+	map{$::state_c{$::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
 }
 
+mon: 'mon' {$::state_c{$::chain{$::select_track}} = q(mon); }
+
+mute: 'mute' {$::state_c{$::chain{$::select_track}} = q(mute); }
+
+rec: 'rec' {$::state_c{$::chain{$::select_track}} = q(rec); }
+
+last: ('last' | '$' ) 
+
+dd: /\d+/
+
+exit: 'exit' { &::save_state($::statestore); exit; }
 
 
-mon: 'mon' target(s)
+);
+=comment
+mon: 'mon' dd {}
 
-mon: 'mon' take_no '_' version {&::mon_vert($item{take_no}, $item{version})} 
 
-take_no: /\d+/
-version: /\d+/
+ordinal: '__' dd
+
+numeral:  dd
 
 mon: 'mon' dd(s) {
 	map{$::state_t{$_}->{rw} = 'mon'} @{$item{dd}}  ;
 }
+mute: 'mute' dd(s) 
+rec: 'rec' dd 
+{ 	$::state_t{active} = $item{dd}; 
+	$::state_t{ $::state_t{active} }->{rw} = 'rec';
+}
 	
 take_version: take_no  {}
 	
+mon: 'mon' take_no '_' version {&::mon_vert($item{take_no}, $item{version})} 
+
+take_no: /\d+/
+version: /\d+/
 
 target: wav ordinal 
 	{
@@ -121,21 +140,17 @@ target: wav numeral
 	}	
 
 target: wav last {&::vlast(&::wav_off($item{wav})) }
-
-ordinal: '__' dd
-
-numeral:  dd
-
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-quit: ( 'quit' | 'exit' ) { &::save_state($::statestore); exit; }
+=cut
 
 
-);
+my @ecmd_commands = map{split /\s*\|\s*|command:/, $_} 
+	grep {/command:/} split "\n", $grammar;
+@ecmd_commands = grep{$_} map{&remove_spaces($_)} @ecmd_commands;
+# print join "\n", @ecmd_commands; 
 
-
+my %ecmd_commands;
+@ecmd_commands{@ecmd_commands} = 1..@ecmd_commands;
+#print join $/, keys %ecmd_commands; 
 
 my $configuration=<<'PARAMETERS';
 
@@ -238,6 +253,7 @@ use vars qw( $ecasound $general $ecmd_home $wav_dir
 			 $one_ch24 $one_ch16 %devices %opts
 			 %oid_status $clock_id $use_monitor_version_for_mixdown);
 
+use vars qw( $select_track ); 
 
 # Use environment variable ECMD in preference to $ecmd_home.
 
@@ -479,24 +495,20 @@ if ($gui) {
 	require "iam.pl";
 
 	while (1) {
-
+		
 		($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
 		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
-		if ($iam_cmd{$cmd}){
+		if ($track_names{$cmd}) { 
+			$select_track = $cmd; 
+			$parser->command($predicate) or print ("Bad input!\n");
+		} elsif ($iam_cmd{$cmd}){
 			&eval_iam($user_input) ;
-		} elsif ( grep { $cmd eq $_ } qw( session add take mon rec mute quit ) ) {
+		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Bad input!\n"), next;
-		} elsif ($cmd eq 'eval') {
-			eval $predicate;
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-		} elsif ( my $begins_with_trackname = 0) {
-			# set the current track
-			# evaluate the predicate
 		} else { print "Unknown command\n";}
 
 	}
@@ -1088,6 +1100,30 @@ sub mix_suffix {
 	$stub eq $session_name ? ' (mix)' : ''
 }
 
+sub add_volume_control {
+	my $n = shift;
+	
+	my $vol_id = &cop_add({
+				chain => $n, 
+				type => 'ea',
+				cop_id => $state_c{$n}->{vol}, # often undefined
+				});
+	
+	$state_c{$n}->{vol} = $vol_id;  # save the id for next time
+}
+
+sub add_pan_control {
+	my $n = shift;
+	
+	my $vol_id = &cop_add({
+				chain => $n, 
+				type => 'epp',
+				cop_id => $state_c{$n}->{pan}, # often undefined
+				});
+	
+	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
+}
+	
 sub track_gui { # nearly 300 lines! 
 
 	my $n = shift; # chain index is lexicalized, will remain static in callbacks
@@ -1170,21 +1206,17 @@ sub track_gui { # nearly 300 lines!
 					}
 			],
 		);
-	map{$rw->AddItems($_) unless $n == 1} @items; # MIX
+	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
 	$state_c{$n}->{rw} = MON if $n == 1;          # MIX
+
  
    ## XXX general code mixed with GUI code
 
 	# Volume
 
-	my $p_num = 0; # needed only for parameter controllers
-	my $vol_id = &cop_add({
-				chain => $n, 
-				type => 'ea',
-				cop_id => $state_c{$n}->{vol},
-				});
+	my $p_num = 0; # needed when using parameter controllers
+	my $vol_id = &add_volume_control($n);
 
-	$state_c{$n}->{vol} = $vol_id;  # save the id for next time
 
 	$debug and print "vol cop_id: $vol_id\n";
 	my %p = ( 	parent => \$track_frame,
@@ -1295,14 +1327,11 @@ sub track_gui { # nearly 300 lines!
 	  
 	# Pan
 	# effects code mixed with GUI code XXX
+	# run on initializing the track gui
 
-	my $pan_id = &cop_add({
-				chain => $n, 
-				type => 'epp',
-				cop_id => $state_c{$n}->{pan} 
-				});
-
-	$state_c{$n}->{pan} = $pan_id;  # save the id for next time
+	
+	my $pan_id = &add_pan_control($n);
+	
 	$debug and print "pan cop_id: $pan_id\n";
 	$p_num = 0;           # first parameter
 	my %q = ( 	parent => \$track_frame,
