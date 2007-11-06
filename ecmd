@@ -11,7 +11,7 @@ $::RD_HINT = 1;
 
 my $grammar = q(
 
-command: session | add | mix | norm |  mon | rec | mute | quit 
+command: session | setup | add | mix | norm |  mon | rec | mute | quit 
 
 session: 'session' name 'new' {
 	$::session = $item{name};
@@ -25,16 +25,6 @@ session: 'session' name {
 	1;
 }
 
-mix: 'mix' {}
-
-norm: 'norm' {}
-
-name: /\w*[._\-A-Za-z0-9]/i
-
-wav: name
-
-take: 'take' dd { $::state_t{active} = $item{dd} }
-
 add: 'add' wav channel(s?) { 
 	if ($::track_names{$item{wav}} ){
 		print "Track name already in use.\n";
@@ -47,7 +37,23 @@ add: 'add' wav channel(s?) {
 	}
 	1;
 }
-channel: ('rc' dd | 'mc' dd)
+
+setup: 'setup' { &::setup_transport; &::connect_transport}
+
+renew: 'renew' {&::new_engine};
+
+mix: 'mix' {}
+
+norm: 'norm' {}
+
+name: /\w*[._\-A-Za-z0-9]/i
+
+wav: name
+
+take: 'take' dd { $::state_t{active} = $item{dd} }
+
+channel: 'r' dd  { $::state_c{$::i}->{ch_r} = $item{dd}
+channel: 'm' dd  { $::state_c{$::i}->{ch_m} = $item{dd}
 
 rec: 'rec' dd 
 { 	$::state_t{active} = $item{dd}; 
@@ -242,7 +248,7 @@ $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
 # set the following to 1 to output debugging info
 
-my $debug  = 1; # detailed debugging info 
+my $debug  = 0; # detailed debugging info 
 my $debug2 = 1; # subroutine names
 my $gui = 0;
 
@@ -278,7 +284,7 @@ use vars qw(
 	%state_c
 	%state_t
 	$statestore
-	$sessionsetup
+	$chain_setup_file
 	@monitor
 	@record 
 	@mute
@@ -410,7 +416,7 @@ $unit  = 1; # fast-forward multiplier default;
 
 my $parameters     = "parameters.pl";
 $statestore   = "State";  # filename to store state
-$sessionsetup = "session.ecs";
+$chain_setup_file = "session.ecs";
 my ($track_name, $ch_r, $ch_m); 
 my @oids;
 my %inputs;
@@ -420,8 +426,9 @@ my %pre_output;
 
 
 ### Option Processing ###
-getopts('mce', \%opts);  # options as above. Values in %opts 
+getopts('mceg', \%opts);  # options as above. Values in %opts 
 $debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
+$opts{g} and $gui = 1;
 
 die qq(Directory for Ecmd control files not found: "$ecmd_home"
 Set \$ecmd_home variable and/or create directory.)
@@ -431,7 +438,6 @@ warn( qq(Directory for .wav files not found: "$wav_dir", using $ecmd_home instea
 	$wav_dir = $ecmd_home if ! -d $wav_dir;
 
 $session_name  = shift;
-$session_name = &remove_spaces($session_name);
 $debug and print "session name: $session_name\n";
 my $create = $opts{c} ? 1 : 0;
 $session_name and &set_dirs($session_name,$create); 
@@ -441,7 +447,8 @@ $session_name and &set_dirs($session_name,$create);
 #print Dumper @oids; exit;
 #  EFFECTS
 
-if ($gui) { ### XXX (temporary)
+if ($gui) { ### XXX (temporary, we want effects for others,
+# too. why not cache?)
 &read_in_effects_data; 
 &get_ladspa_hints, 
 &integrate_ladspa_hints, 
@@ -461,6 +468,7 @@ if ($gui) {
 
 } else {
 	
+	&session_init if $session_name; 
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -476,7 +484,7 @@ if ($gui) {
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
 		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
-		$debug and print "cmd: $cmd\predicate: $predicate\n";
+		$debug and print "cmd: $cmd \npredicate: $predicate\n";
 		if ($iam_cmd{$cmd}){
 			&eval_iam($user_input) ;
 		} elsif ( grep { $cmd eq $_ } qw( session add take mon rec mute quit ) ) {
@@ -497,6 +505,7 @@ if ($gui) {
 ########### end of main program body ##########
 #
 sub session_init{
+	$debug2 and print "&session_init\n";
 	&read_parameters_file;
 	&initialize_session_data;
 	&remove_small_wavs; 
@@ -569,7 +578,7 @@ sub new_session {
 	# from $session set $session_name and create 
 	# a directory of that name
 	$session = &remove_spaces($session);
-	return if ! $session;
+	print ("Missing session name\n"), return if ! $session;
 	print ("Session already exists\n"), return 
 		if -e &join_path($ecmd_home, $session);
 	&set_dirs($session, 1);
@@ -586,9 +595,9 @@ sub new_session {
 	$session = q();
 }
 sub load_session {
-	$debug2 and warn "&load_session\n";
+	$debug2 and print "&load_session\n";
 	$session = &remove_spaces($session);
-	return if ! $session;
+	print ("Missing session name\n"), return if ! $session;
 	$opts{m} = undef; #  XXX what behavior would I want?
 	$session_name = $session;
 	print ("Directory not found!! Maybe new??\n"),
@@ -881,6 +890,7 @@ sub time_gui {
 }
 
 sub add_track {
+	$debug2 and print "&add_track\n";
 	return 0 if &transport_running;
 	my $name = shift;
 	$name and my $track_name = $name; 
@@ -921,13 +931,15 @@ sub remove_spaces {
 
 
 sub restore_track {
+	$debug2 and print "&restore_track\n";
 	my $n = shift;
 	&find_wavs($n);
 	&track_gui($n), &refresh if $gui;
 }
 sub new_take {
+	$debug2 and print "&new_take\n";
 	&increment_take;
-	&take_gui($t), &refresh_t if $gui;
+	$gui and &take_gui($t), &refresh_t;
 }
 
 
@@ -1160,7 +1172,8 @@ sub track_gui { # nearly 300 lines!
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX
 	$state_c{$n}->{rw} = MON if $n == 1;          # MIX
-	
+ 
+   ## XXX general code mixed with GUI code
 
 	# Volume
 
@@ -1281,6 +1294,7 @@ sub track_gui { # nearly 300 lines!
 
 	  
 	# Pan
+	# effects code mixed with GUI code XXX
 
 	my $pan_id = &cop_add({
 				chain => $n, 
@@ -1439,9 +1453,12 @@ sub is_muted {
 sub initialize_session_data {
 
 	return if &transport_running;
-	my $sf = &join_path($session_dir, $sessionsetup);
+	my $sf = &join_path($session_dir, $chain_setup_file);
 	warn ("missing session file $sf\n") unless -f $sf;
-	$session_label->configure(-text => uc $session_name, -background => 'lightyellow');
+	$gui and $session_label->configure(
+		-text => uc $session_name, 
+		-background => 'lightyellow',
+		); 
 	$last_version = 0;
 
 	%track_names = ();
@@ -1508,6 +1525,9 @@ sub join_path {
 	$path;
 	use warnings;
 }
+
+sub this_wav_dir {&join_path($wav_dir, $session_name);}
+sub session_dir  { &join_path($ecmd_home, $session_name)};
 
 sub set_dirs {
 	$debug2 and print "&set_dirs\n";
@@ -1689,11 +1709,11 @@ sub connect_transport {
 	warn("Invalid chain setup, cannot arm transport.\n"), return
 		unless &eval_iam("engine-status") eq 'stopped' ;
 	$length = &eval_iam('cs-get-length'); 
-	$setup_length->configure(-text => &colonize($length));
-	$clock->configure(-text => &colonize(0));
+	$gui and $setup_length->configure(-text => &colonize($length));
 	&eval_iam("cs-set-length $length") unless @record;
+	$gui and $clock->configure(-text => &colonize(0));
 	print &eval_iam("fs");
-	&flash_ready;
+	$gui and &flash_ready;
 	
 }
 
@@ -1713,7 +1733,7 @@ sub flash_ready {
 sub disconnect_transport { &eval_iam('cs-disconnect') }
 
 sub load_ecs {
-		my $session_file = &join_path($session_dir , $sessionsetup);
+		my $session_file = &join_path($session_dir , $chain_setup_file);
 		&eval_iam("cs-remove $session_file");
 		&eval_iam("cs-load ". $session_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -2080,7 +2100,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = &join_path($session_dir, $sessionsetup);
+	my $sf = &join_path($session_dir, $chain_setup_file);
 	open ECS, ">$sf" or die "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -2088,7 +2108,7 @@ sub write_chains {
 
 
 sub remove_effect {
-	my $debug = 1;
+	# my $debug = 1;
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -2252,8 +2272,10 @@ sub retrieve_state {
 
 	# restore take and track guis
 	
-	for my $t (@takes) { next if $t == 1; &take_gui($t) }; #
-	# Why skip first????? XXXX first in &initialize_session
+	for my $t (@takes) { 
+		next if $t == 1; 
+		&take_gui($t) if $gui;
+	}; #
 	my $did_apply = 0;
 	$last_version = 0; 
 	for my $n (@all_chains) { 
@@ -2276,7 +2298,7 @@ sub retrieve_state {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	}
-	$did_apply and $ew->deiconify();
+	$did_apply and $gui and $ew->deiconify();
 
 }
 
@@ -2313,15 +2335,17 @@ sub save_effects {
 
 }
 
+=comment
 sub r {
 	&retrieve_effects(shift);
 }
 
 sub r5 { &r("eff5") };
+=cut
 	
 
 sub retrieve_effects {
-	my $debug = 1;
+	#my $debug = 1;
 	$debug2 and print "&retrieve_state\n";
 	my $file = shift;
 	-e $file or warn ("file: $file not found\n"),return 0;
@@ -2447,12 +2471,12 @@ sub global_version_buttons {
 		use warnings;
  		push @global_version_buttons,
 			$widget_t[1]->radiobutton(
-				### XXX HARDCODED, second take widget
+				###  HARDCODED, second take widget
 				-label => ($v ? $v : ''),
 				-variable => \$monitor_version,
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = MON; ### XXX HARDCODED SECOND TAKE; MIX
+					$state_t{2}->{rw} = MON; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
 					&setup_transport; 
 					&connect_transport;
@@ -2544,7 +2568,7 @@ sub mon_vert {
 	&refresh;
 }
 sub eval_iam {
-	my $debug = 1;
+	# my $debug = 1;
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -2573,7 +2597,7 @@ sub transport_running {
 	 $e->eci('engine-status') eq 'running' ;
 }
 sub rec_cleanup {
-	 my $debug = 1;
+	# my $debug = 1;
 	$debug2 and print "&rec_cleanup\n";
 	$debug and print "I was recording!\n";
  	my @k = &really_recording;
@@ -2980,83 +3004,90 @@ sub add_effect {
 	$id = &cop_add(\%p); 
 
 
-	$debug and print "cop_id: $id, parent_id: $parent_id\n";
-	# $id is determined by &cop_add, which will return the
-	# existing cop_id if supplied
+		$debug and print "cop_id: $id, parent_id: $parent_id\n";
+		# $id is determined by &cop_add, which will return the
+		# existing cop_id if supplied
 
-	# check display format, may be 'scale' 'field' or 'hidden'
-	
-	my $display_type = $cops{$id}->{display}; # individual setting
-	defined $display_type or $display_type = $effects[$i]->{display}; # template
-	$debug and print "display type: $display_type\n";
+		# check display format, may be 'scale' 'field' or 'hidden'
+		
+		my $display_type = $cops{$id}->{display}; # individual setting
+		defined $display_type or $display_type = $effects[$i]->{display}; # template
+		$debug and print "display type: $display_type\n";
 
-	# work is done if controller is hidden
+		
+		if (! $gui or $display_type eq q(hidden) ){
 
-	return if $display_type eq q(hidden);
+			my $frame ;
+			if ( ! $parent_id ){ # independent effect
+				$frame = $widget_c{$n}->{parents}->Frame->pack(
+					-side => 'left', 
+					-anchor => 'nw',)
+			} else {                 # controller
+				$frame = $widget_c{$n}->{children}->Frame->pack(
+					-side => 'top', 
+					-anchor => 'nw')
+			}
 
-	my $frame ;
-	if ( ! $parent_id ){ # independent effect
-		$frame = $widget_c{$n}->{parents}->Frame->pack(-side => 'left', -anchor => 'nw')
-	} else {                 # controller
-		$frame = $widget_c{$n}->{children}->Frame->pack(-side => 'top', -anchor => 'nw')
-	}
+			no warnings;
+			$widget_e{$id} = $frame; 
+			# we need a separate frame so title can be long
 
-	no warnings;
-	$widget_e{$id} = $frame; 
-	# we need a separate frame so title can be long
+			# here add menu items for Add Controller, and Remove
 
-	# here add menu items for Add Controller, and Remove
+			my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
+				->{name};
+			$parentage and $parentage .=  " - ";
+			$debug and print "parentage: $parentage\n";
+			my $eff = $frame->Menubutton(
+				-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
+			use warnings;
 
-	my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]->{name};
-	$parentage and $parentage .=  " - ";
-	$debug and print "parentage: $parentage\n";
-	my $eff = $frame->Menubutton(-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-	use warnings;
+			$eff->AddItems([
+				'command' => "Remove",
+				-command => sub {&remove_effect($id) }
+			]);
+			$eff->grid();
+			my @labels;
+			my @sliders;
 
-	$eff->AddItems([
-		'command' => "Remove",
-		-command => sub {&remove_effect($id) }
-	]);
-	$eff->grid();
-	my @labels;
-	my @sliders;
+			# make widgets
 
-	# make widgets
+			for my $p (0..$effects[$i]->{count} - 1 ) {
+			my @items;
+			#$debug and print "p_first: $p_first, p_last: $p_last\n";
+			for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
+				push @items, 				
+					[ 'command' => $effects[$j]->{name},
+						-command => sub { &add_effect ({
+								parent_id => $id,
+								chain => $n,
+								parameter  => $p,
+								type => $effects[$j]->{code} } )  }
+					];
 
-	for my $p (0..$effects[$i]->{count} - 1 ) {
-	my @items;
-	#$debug and print "p_first: $p_first, p_last: $p_last\n";
-	for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-		push @items, 				
-			[ 'command' => $effects[$j]->{name},
-				-command => sub { &add_effect ({
-						parent_id => $id,
-						chain => $n,
-						parameter  => $p,
-						type => $effects[$j]->{code} } )  }
-			];
+			}
+			push @labels, $frame->Menubutton(
+					-text => $effects[$i]->{params}->[$p]->{name},
+					-menuitems => [@items],
+					-tearoff => 0,
+			);
+				$debug and print "parameter name: ",
+					$effects[$i]->{params}->[$p]->{name},"\n";
+				my $v =  # for argument vector 
+				{	parent => \$frame,
+					cop_id => $id, 
+					p_num  => $p,
+				};
+				push @sliders,&make_scale($v);
+			}
 
-	}
-	push @labels, $frame->Menubutton(
-			-text => $effects[$i]->{params}->[$p]->{name},
-			-menuitems => [@items],
-			-tearoff => 0,
-	);
-		$debug and print "parameter name: ",$effects[$i]->{params}->[$p]->{name},"\n";
-		my $v =  # for argument vector 
-		{	parent => \$frame,
-			cop_id => $id, 
-			p_num  => $p,
-		};
-		push @sliders,&make_scale($v);
-	}
+			if (@sliders) {
 
-	if (@sliders) {
-
-		$sliders[0]->grid(@sliders[1..$#sliders]);
-		 $labels[0]->grid(@labels[1..$#labels]);
-	}
-	 &apply_op($id) if &eval_iam("cs-is-valid");
+				$sliders[0]->grid(@sliders[1..$#sliders]);
+				 $labels[0]->grid(@labels[1..$#labels]);
+			}
+		}
+	&apply_op($id) if &eval_iam("cs-is-valid");
 }
 
 
