@@ -1,14 +1,27 @@
 use vars qw(%iam_cmd);
+my %un_abbr = qw(
+	
+	st cs-status
+	cs c-status
+	es cop-status
+	fs aio-status
+
+);
+
+sub un_abbr{  # replace abbreviations
+	my $a = shift;
+	$un_abbr{$a} ? $un_abbr{$a} : $a
+} 
+
+
 map { $iam_cmd{$_}++ } split "\n", <<CMD;
-fs
+st
 es
 cs
-quit
+s 
 q 
 start
-t 
 stop
-s 
 run 
 debug  
 help 
