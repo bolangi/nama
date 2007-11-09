@@ -2,230 +2,47 @@
 
 BEGIN { push @INC, q(.) } # XXX 
 
-### COMMAND LINE PARSER 
 
-$::RD_AUTOSTUB = 1;
-$::RD_HINT = 1;
+my $yaml = <<CONFIGURATION_FILE; 
+#
+#   Abbreviations may be added as necessary.
+#   
+#   Care must be taken to avoid circular definitions.
+#
+#   
+---
+application: ecmd
+abbreviations:
+    cd-stereo: s16_le,2,44100,i
+    cd-mono:   s16_le,1,44100
+    24-mono:   s24_le,1,frequency
+    32-10:     s32_le,10,frequency
+    32-12:     s32_le,12,frequency
+    frequency: 44100
+wave_directory:   /media/sessions
+ecmd_home: /home/jroth/ecmd
+ecasound_globals: -B auto
+devices:
+    multi: 
+        ecasound_id:   alsaplugin,1,0
+        input_format:  32_12
+        output_format: 32_10
+    stereo: 
+        ecasound_id:   alsaplugin,0,0
+        input_format:  cd-stereo
+        output_format: cd-stereo
+    jack: 
+        ecasound_id:   jack_alsa
+        input_format:  32-12 
+        output_format: 32-10
+raw-to-disk: 
+    format:        cd-mono
+mix-to-disk:
+    format:        cd-stereo 
+mixer_out: 
+    format:        cd-stereo
+CONFIGURATION_FILE
 
-# rec command changes active take
-
-my $grammar = q(
-
-command: new | load | add | setup 
-command: show | fx
-command: mon | rec | mute | r | m
-command: vol | pan 
-command: renew | exit
-command: keep | set
-command: version 
-
-show: 'show' { 	map { push @::format_fields,  
-							$_,
-							$::state_c{$_}->{active},
-							$::state_c{$_}->{file},
-							$::state_c{$_}->{rw},
-							&::rec_status($_),
-							$::state_c{$_}->{ch_r},
-							$::state_c{$_}->{ch_m},
-					} sort keys %::state_c;
-				write;
-				1;
-}
-
-load: 'load' name {
-	$::session = $item{name};
-	&::load_session unless $::session_name eq $item{name};
-	1;
-}
-new: 'new' name {
-	$::session = $item{name};
-	&::new_session;
-	1;
-}
-
-
-name: /\w+/
-
-wav: name
-
-setup: 'setup' { &::setup_transport; &::connect_transport; 1}
-
-renew: 'renew' {&::new_engine; 1}
-
-mix: 'mix' {1}
-
-norm: 'norm' {1}
-
-exit: 'exit' { &::save_state($::statestore); exit; }
-
-
-channel: r | m
-
-r: 'r' dd  { $::state_c{$::chain{$::select_track}}->{ch_r} = $item{dd} }
-m: 'm' dd  { $::state_c{$::chain{$::select_track}}->{ch_m} = $item{dd} }
-
-
-rec: 'rec' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
-}
-mon: 'mon' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
-}
-mute: 'mute' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
-}
-
-mon: 'mon' {$::state_c{$::chain{$::select_track}} = q(mon); }
-
-mute: 'mute' {$::state_c{$::chain{$::select_track}} = q(mute); }
-
-rec: 'rec' {$::state_c{$::chain{$::select_track}} = q(rec); }
-
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-add: 'add' wav channel(s?) { 
-	if ($::track_names{$item{wav}} ){
-		print "Track name already in use.\n";
-	} else {
-		&::add_track($item{wav}) ;
-		my %ch = ( @{$item{channel}} );	
-		$ch{r} and $::state_c{$::i}->{ch_r} = $::ch{r};
-		$ch{m} and $::state_c{$::i}->{ch_m} = $::ch{m};
-		
-	}
-	1;
-}
-
-);
-print "reached here\n";
-
-
-my @ecmd_commands = map{split /\s*\|\s*|command:/, $_} 
-	grep {/command:/} split "\n", $grammar;
-@ecmd_commands = grep{$_} map{&remove_spaces($_)} @ecmd_commands;
-# print join "\n", @ecmd_commands; 
-
-my %ecmd_commands;
-@ecmd_commands{@ecmd_commands} = 1..@ecmd_commands;
-# print join $/, keys %ecmd_commands; exit;
-
-my $configuration=<<'PARAMETERS';
-
-#==================================================================#
-#                      CONFIGURATION 
-#==================================================================#
-
-#  Directory for chain setup files, saving session state, per-session #
-#  parameter settings, each session gets its own subdirectory.        #
-                                                                      #
-$ecmd_home =  "$ENV{HOME}/ecmd/" ;                               #
-
-# Directory for .wav files recorded by ecasound
-# .Wav files for each session will be kept under a 
-# subdirectory of that session name.
-
-	$wav_dir      = qq(/media/sessions);
-
-# Ecasound command-line configuration parameters 
-
-	$general = qq( -B auto );
-
-# Sound device settings
-
-	%devices = ( 
-
-# The following for a multichannel sound card such as Delta 1010.
-# Ecmd currently assumes 'multi' for audio input (see Rec_setup
-# in source code.)
-
-# multi => { qw(
-# 
-# 	source_format      s32_le,12,44100,i
-# 	destination_format s32_le,10,44100,i
-# 	name               alsa,ice1712
-# 
-# )},
-
-
-# The following for a simple stereo sound card
-multi => { qw(
-
-	source_format      s16_le,2,44100,i
-	destination_format s16_le,2,44100,i
-    name               alsa,default
-
-)},
-
-stereo => { qw(
-
-	source_format      s16_le,2,44100,i
-	destination_format s16_le,2,44100,i
-    name               alsa,default
-
-)},
-jack => { qw(
-
-	source_format      s32_le,12,44100,i
-	destination_format s32_le,10,44100,i
-    name               jack_alsa
-
-)}
-
-);
-
-$input_channels = 10; 
-
-# Recording format, first some abbreviations
-
-$one_ch24    = qq(s24_le,1,44100,i); # envy24/ice1712 can do this
-$one_ch16    = qq(s16_le,1,44100,i);
-
-# Format for recording mono tracks, 24 bits is better than 16
-
-$rec_format      = $one_ch16;
-
-# Mixdown format
-						 
-$mixdown_format =  qw(s16_le,2,44100,i); # typical for burning to a CD
-
-# Tie mixdown version suffix to global monitor version 
-# (useful when recording/mixing multiple songs in one session) 
-
-$use_monitor_version_for_mixdown = 1;
-
-#==================================================================#
-#                     CONFIGURATION ENDS                           #
-#==================================================================#
-1; # important to leave untouched
-
-PARAMETERS
-
-eval $configuration or die "configuration error: $!";
-
-
-### Some Global Variables
-
-use vars qw( $ecasound $general $ecmd_home $wav_dir 
-			 $input_channels $rec_format $mixdown_format 
-			 $one_ch24 $one_ch16 %devices %opts
-			 %oid_status $clock_id $use_monitor_version_for_mixdown);
-
-use vars qw( $select_track @format_fields); 
-
-# Use environment variable ECMD in preference to $ecmd_home.
-
-$ecmd_home = $ENV{ECMD}     ? $ENV{ECMD}     : $ecmd_home;
-$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
-
-# &read_parameters_file;
-
-# set the following to 1 to output debugging info
-
-my $debug  = 0; # detailed debugging info 
-my $debug2 = 1; # subroutine names
-my $gui = 0;
 
 use strict;
 use Storable; 
@@ -234,62 +51,116 @@ use Getopt::Std;
 use Tk;
 use Audio::Ecasound;
 use Parse::RecDescent;
+use YAML::Tiny;
 
+### Some Global Variables
 
-### More Global Variables
-use vars qw(
-	$session
- 	$session_name 
-	$session_dir  
-	$this_wav_dir 
-	$mix_dir
-	$cop_id
-	$i
-	$t
-);
+#grep{ s/^\s+//; s/(\S+).*$/$1/; !/^\s*$/} split "\n",
+use vars qw( 	$ecasound
+				$grammar
+				@ecmd_commands
+				%ecmd_commands 
+				$ecmd_home
+				$wav_dir 
+			 	$input_channels
+				$config
+			 	%devices
+				%opts
+			 	%oid_status
+				$clock_id
+				$use_monitor_version_for_mixdown
+			 	$select_track
+				@format_fields 
+				$session
+				$session_name 
+				$mix_dir
+				$cop_id
+				$i
+				$t
+				%state_c
+				%state_t
+				$statestore
+				$chain_setup_file
+				@monitor
+				@record 
+				@mute
+				%track_names 
+				@effects		
+				%effect_i	
+				@ladspa_sorted
+				%effects_ladspa
+				$e
+				$last_version
+				$monitor_version
+				%cops 			
+				%copp 		
+				%e_bound
+				@marks 
+				$unit	
+				$markers_armed 
+				%old_vol   
+				$length   
+				$jack_on 
 
+				@all_chains
+				@input_chains
+				@output_chains
 
+				%take
+				@takes
+				%alias
+				%chain
+
+				%subst
+); 
 use constant {REC => 'rec',
 			  MON => 'mon',
 			  MUTE => 'mute'};
 
+$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+
+require "grammar.pl";
+
+
+$config = YAML::Tiny->new;
+$config = YAML::Tiny->read_string($yaml);
+
+### replace abbreviations
+
+*subst = \%{ $config->{abbreviations} };
+&substitute($config->[0]);
+
+sub substitute_helper{
+	my ($val, $parent)  = @_;
+	ref $val and &subst_a($val) 
+		or $subst{$val}  
+			and $parent->{$val} = $subst{$val};
+}
+sub substitute {
+	my $ref = shift;
+	map { &substitute_helper($ref, $_) } 
+	grep {$_ ne q(abbreviations)} 
+	keys %{ $ref };
+}
+
+$wav_dir = $config->[0]->{wave_directory};
+-d $wav_dir or die qq("$wav_dir" not a directory\n);
+
+$ecmd_home = $config->[0]->{ecmd_home};  # deprecated
+
+$input_channels = 10;  # fixed value for Tk widget
+
+$use_monitor_version_for_mixdown = 1;
+# Tie mixdown version suffix to global monitor version 
+
+*devices = \%{ $config->[0]->{devices} }; # %devices is an alia
+
 # lexical variables
-
-use vars qw(
-	%state_c
-	%state_t
-	$statestore
-	$chain_setup_file
-	@monitor
-	@record 
-	@mute
-	%track_names 
-	@effects		
-	%effect_i	
-	@ladspa_sorted
-	%effects_ladspa
-	$e
-    $last_version
-	$monitor_version
-	%cops 			
-	%copp 		
-    %e_bound
-	@marks 
-	$unit	
-	$markers_armed 
-	%old_vol   
-	$length   
-	$jack_on 
-
- 	@all_chains
- 	@input_chains
-	@output_chains
-
- 	%take
- 	@takes
-	%alias
-	%chain
-);
+#
+# set the following to 1 to output debugging info
+my $debug  = 1; # detailed debugging info 
+my $debug2 = 1; # subroutine names
+my $gui = 0;
 
 my (
 
@@ -404,17 +275,10 @@ getopts('mceg', \%opts);  # options as above. Values in %opts
 $debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
 $opts{g} and $gui = 1;
 
-die qq(Directory for Ecmd control files not found: "$ecmd_home"
-Set \$ecmd_home variable and/or create directory.)
-unless -d $ecmd_home;
-
-warn( qq(Directory for .wav files not found: "$wav_dir", using $ecmd_home instead\n) ), 
-	$wav_dir = $ecmd_home if ! -d $wav_dir;
-
 $session_name  = shift;
 $debug and print "session name: $session_name\n";
 my $create = $opts{c} ? 1 : 0;
-$session_name and &set_dirs($session_name,$create); 
+$session_name and &set_dirs($create); 
 &new_engine;
 &initialize_oids;
 
@@ -482,11 +346,11 @@ if ($gui) {
 #
 sub session_init{
 	$debug2 and print "&session_init\n";
-	&read_parameters_file;
+	# &read_parameters_file; # yaml
 	&initialize_session_data;
 	&remove_small_wavs; 
 
-	&retrieve_state(&join_path($session_dir,$statestore)) unless $opts{m};
+	&retrieve_state(&join_path(&session_dir,$statestore)) unless $opts{m};
 	&mix_track unless scalar @all_chains;
 	&dig_ruins;
 	&global_version_buttons if $gui;
@@ -496,7 +360,7 @@ sub session_init{
 # for $n = 1, And take index 1.
 
 sub mix_track {
-	# return if $opts{m} or ! -e &join_path($session_dir,$statestore);
+	# return if $opts{m} or ! -e &join_path(&session_dir,$statestore);
 	&add_track($session_name) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = MUTE; 
@@ -504,17 +368,19 @@ sub mix_track {
 	$state_t{$t}->{rw} = MON;
 }
 
-
+=comment
 sub read_parameters_file {
+	# TODO READ YAML
 	$debug2 and print "&read_parameters_file\n";
-	my @parts = $ecmd_home;
-	push @parts, $session_name if $session_name;
-	push @parts, $parameters;
+	push my (@parts), $ecmd_home;
+	push    @parts, $session_name if $session_name;
+	push    @parts, $parameters;
 	my $g = &join_path(@parts);
 	if (-f $g) { 
-		require $g or die qq(Session parameter file "$g" not found);
+		require $g or warn qq(Session parameter file "$g" not found);
 	}
 }
+=cut
 
 sub pre_multi {
 	$debug2 and print "&pre_multi\n";
@@ -549,17 +415,18 @@ sub decrement_take {
 			
 }
 
-sub new_session {
-	$debug2 and print "&new_session\n";
-	# from $session set $session_name and create 
-	# a directory of that name
-	$debug and print "session:- $session\n";
-	$session = &remove_spaces($session);
-	print ("Missing session name\n"), return if ! $session;
-	print ("Session already exists\n"), return 
-		if -e &join_path($ecmd_home, $session);
-	&set_dirs($session, 1);
-	$session_name = $session;
+sub load_session {
+	my $hash = shift;
+	$debug = 1;
+	$debug2 and print "&load_session\n";
+	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
+	$session = &remove_spaces($session); # internal spaces to underscores
+	$session_name = $hash->name ? $hash->{name} : $session;
+
+	# $opts{m} = undef; #  XXX what behavior would I want?
+	$hash->{create} and 
+		print ("Creating directories....\n"),
+		map{&create_dir} &this_wav_dir, &session_dir;
 =comment 
 	# OPEN EDITOR
 	my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
@@ -569,29 +436,14 @@ sub new_session {
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
 	&session_init;
-	$session = q();
 }
-sub load_session {
-	$debug = 1;
-	$debug2 and print "&load_session\n";
-=comment
-	my $s = shift;
-	$s and $session = $s;
-=cut
-	$debug and print "session:- $session\n";
-	$session = &remove_spaces($session);
-	$debug and print "session:- $session\n";
-	print ("Missing session name\n"), return if ! $session;
-	$opts{m} = undef; #  XXX what behavior would I want?
-	$session_name = $session;
-	print ("Directory not found!! Maybe new??\n"),
-		($session_name = undef), 
-		return 
-			if ! -d &join_path($ecmd_home , $session_name);
-	&set_dirs($session, 0);
-	&session_init;
-	$session = q();
+sub create_dir {
+	my $dir = shift;
+	-d $dir 
+		or mkdir $dir 
+		or die qq(failed to create directory "$dir", died: $!);
 }
+
 
 sub init_gui {
 
@@ -660,13 +512,13 @@ sub init_gui {
 		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => \&new_session,
+		-command => \&load_session({create => 1}),
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if &transport_running;
-				&save_state(&join_path($session_dir,$statestore)) 
-					if $session_dir;
+				&save_state(&join_path(&session_dir,$statestore)) 
+					if &session_dir;
 		$debug2 and print "\%state_c\n================\n", Dumper(%state_c);
 		$debug2 and print "\%state_t\n================\n", Dumper(%state_t);
 		$debug2 and print "\%copp\n================\n", Dumper(%copp);
@@ -1455,7 +1307,7 @@ sub is_muted {
 sub initialize_session_data {
 
 	return if &transport_running;
-	my $sf = &join_path($session_dir, $chain_setup_file);
+	my $sf = &join_path(&session_dir, $chain_setup_file);
 	warn ("missing session file $sf\n") unless -f $sf;
 	$gui and $session_label->configure(
 		-text => uc $session_name, 
@@ -1528,32 +1380,12 @@ sub join_path {
 }
 
 sub this_wav_dir {&join_path($wav_dir, $session_name);}
-sub session_dir  { &join_path($ecmd_home, $session_name)};
-
-sub set_dirs {
-	$debug2 and print "&set_dirs\n";
-	my ($session_name, $create) = @_;
-	$debug and print "\$create: $create  \$session_name: $session_name\n"; 
-	-d $ecmd_home or die "$ecmd_home not a directory; it should be.";
-
-	$session_dir  = &join_path($ecmd_home, $session_name);
-    $this_wav_dir = &join_path($wav_dir, $session_name);
-	# $mix_dir = &join_path($this_wav_dir, 'mix');
-
-	$debug and print "this_wav_dir; $this_wav_dir\n";
-	$debug and print "session_dir; $session_dir\n";
-
-
-	-e $session_dir and ! -d $session_dir and 
-		die "$session_dir is not a directory; it should be.";
-	-e $this_wav_dir and ! -d $this_wav_dir and 
-		die "$session_dir is not a directory; it should be.";
-	-d $session_dir and warn ("session exists\n");
-	mkdir $session_dir if ! -d $session_dir and $create;
-	mkdir $this_wav_dir if ! -d $this_wav_dir and $create;
-	# mkdir $mix_dir if ! -d $mix_dir and $create;
-
+sub session_dir  { 
+	$a = &join_path($ecmd_home, $session_name);
+	$b = &join_path($wav_dir, $session_name, ".ecmd" );
+	-d $a ? $a : $b;
 }
+
 sub set_active_version {
 	my $n = shift;
 	$debug and print "chain $n: versions: @{$state_c{$n}->{versions}}\n";    
@@ -1574,7 +1406,7 @@ sub dig_ruins {
 
 		# look for wave files
 		
-		my $d = $this_wav_dir;
+		my $d = &this_wav_dir;
 		opendir WAV , $d or warn "couldn't open $d: $!";
 
 		# remove version numbers
@@ -1591,22 +1423,19 @@ sub dig_ruins {
 sub find_wavs {
 
 
-	die ('$this_wav_dir undefined') if not defined $this_wav_dir; 
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
 	$debug and print "track: $n\n";
-	$debug and print "this_wav dir: $this_wav_dir: $n\n";
+	$debug and print "this_wav dir: ", &this_wav_dir,": $n\n";
 
 	
 	# GET VERSIONS 
 	#  Assign bare (unversioned) file as version 1 
 	
-		$debug and print "getting versions for chain $n...\n
-PATH	$this_wav_dir
-NAME	$state_c{$n}->{file}
-";
+	$debug and 
+	print "getting versions for chain $n, state_c{$n}->{file}\n";
 		my %versions =  &get_versions (
-			$this_wav_dir,
+			&this_wav_dir,
 			$state_c{$n}->{file},
 			'_', 'wav' )  ;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
@@ -1660,7 +1489,7 @@ sub rec_status {
 	use warnings;
 
 no warnings;
-my $file_exists = -f &join_path($this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
+my $file_exists = -f &join_path(&this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
 use warnings;
     return MUTE if $state_c{$n}->{rw} eq MON and ! $file_exists;
 	return MUTE if $state_c{$n}->{rw} eq MUTE;
@@ -1734,7 +1563,7 @@ sub flash_ready {
 sub disconnect_transport { &eval_iam('cs-disconnect') }
 
 sub load_ecs {
-		my $session_file = &join_path($session_dir , $chain_setup_file);
+		my $session_file = &join_path(&session_dir , $chain_setup_file);
 		&eval_iam("cs-remove $session_file");
 		&eval_iam("cs-load ". $session_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -1761,14 +1590,14 @@ sub new_wav_name {
 				)
 			: &new_version;
 	}
-	&join_path($this_wav_dir,	"$stub\_$version.wav");
+	&join_path(&this_wav_dir,	"$stub\_$version.wav");
 }
 
 sub output_format {
 	my $stub = shift;
-	$stub eq $session_name
-		? $mixdown_format
-		: $rec_format
+	$stub eq $session_name or $stub eq 'mix'
+		? $config->[0]->{mix_to_disk}->{format}
+		: $config->[0]->{mixer_out}->{format}
 }
 
 
@@ -2011,8 +1840,8 @@ sub write_chains {
 		$debug and print "dev: $dev\n";
 		push  @input_chains, 
 		join " ", "-a:" . (join ",", @{ $inputs{$dev} }),
-			"-f:" .  $devices{$dev}->{source_format},
-			"-i:" .  $devices{$dev}->{name}, 
+			"-f:" .  $devices{$dev}->{input_format},
+			"-i:" .  $devices{$dev}->{ecasound_id}, 
 	}
 	### SETTING LOOPS AS INPUTS (used by any @oids wanting processed signals)
 
@@ -2045,7 +1874,7 @@ sub write_chains {
 		$debug and print "track number: $n\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:" .  &join_path($this_wav_dir, 
+			 		"-i:" .  &join_path(&this_wav_dir, 
 					         $state_c{$n}->{targets}->{&selected_version($n)}),
 	   );
  	}
@@ -2069,8 +1898,8 @@ sub write_chains {
 	for my $dev ( grep{!/file/ and !/loop/} keys %outputs ){
 			push @output_chains, join " ",
 				"-a:" . (join "," , @{ $outputs{$dev} }),
-				"-f:" . $devices{$dev}->{destination_format},
-				"-o:". $devices{$dev}->{name};
+				"-f:" . $devices{$dev}->{output_format},
+				"-o:". $devices{$dev}->{ecasound_id};
 
 		
 	}
@@ -2090,8 +1919,8 @@ sub write_chains {
 	
 	my $ecs_file = "# ecasound chainsetup file\n\n\n";
 	$ecs_file   .= "# general\n\n";
-	$ecs_file   .= "$general\n\n";
-	$ecs_file   .= "\n# audio inputs\n\n";
+	$ecs_file   .= $config->[0]->{ecasound_globals};
+	$ecs_file   .= "\n\n\n# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
 	$ecs_file   .= join "\n", sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
@@ -2101,7 +1930,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = &join_path($session_dir, $chain_setup_file);
+	my $sf = &join_path(&session_dir, $chain_setup_file);
 	open ECS, ">$sf" or die "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -2537,11 +2366,12 @@ sub rec_route {
 	my $n = shift;
 	return if $state_c{$n}->{ch_r} == 1;
 	return if ! defined $state_c{$n}->{ch_r};
-	"-erc:$state_c{$n}->{ch_r},1 -f:$rec_format ";
+	"-erc:$state_c{$n}->{ch_r},1
+	-f:$config->[0]->{raw_to_disk}->{format}"
 }
 sub route {
 	my ($width, $dest) = @_;
-	return '' if $dest == 1 or $dest == 0;
+	return undef if $dest == 1 or $dest == 0;
 	$debug and print "\&route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $map ;
@@ -2639,7 +2469,8 @@ sub remove_small_wavs {
 	# left by a recording chainsetup that is 
 	# connected by not started
 
-	my $cmd = qq(find $this_wav_dir  -name '*.wav' -size 44c);
+	my $a = &this_wav_dir;
+	my $cmd = qq(find $a  -name '*.wav' -size 44c);
 	$debug and print $cmd; 
 	my @wavs = split "\n",qx($cmd);
 	#map {system qq(ls -l $_ ) } @wavs; exit;
@@ -3702,8 +3533,6 @@ Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, inte
 
 sub mono_to_stereo { " -erc:1,2 " }
 
-#sub rec_format { " -f:$rec_format " }
-
 sub initialize_oids {
 
 # my $debug = 1;
@@ -3803,8 +3632,6 @@ my $null_id = undef;
 	output	=>  q(file),
 	type	=>  q(raw),
 	default	=>  q(on),
-
-#	pre_output => \&rec_format,
 
 	},{
 
