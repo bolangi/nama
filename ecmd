@@ -4,9 +4,9 @@ BEGIN { push @INC, q(.) } # XXX
 
 
 my $yaml = <<CONFIGURATION_FILE; 
+### Ecmd configuration file
 #
 #   Abbreviations may be added as necessary.
-#   
 #   Care must be taken to avoid circular definitions.
 #
 #   
@@ -24,11 +24,11 @@ ecmd_home: /home/jroth/ecmd
 ecasound_globals: -B auto
 devices:
     multi: 
-        ecasound_id:   alsaplugin,1,0
-        input_format:  32_12
-        output_format: 32_10
+        ecasound_id:   alsa,ice1712
+        input_format:  32-12
+        output_format: 32-10
     stereo: 
-        ecasound_id:   alsaplugin,0,0
+        ecasound_id:   alsa,via
         input_format:  cd-stereo
         output_format: cd-stereo
     jack: 
@@ -112,6 +112,7 @@ use vars qw( 	$ecasound
 				%chain
 
 				%subst
+				%cfg
 ); 
 use constant {REC => 'rec',
 			  MON => 'mon',
@@ -121,26 +122,43 @@ $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
 require "grammar.pl";
 
+print "reached here, too\n";
+
 
 $config = YAML::Tiny->new;
 $config = YAML::Tiny->read_string($yaml);
 
+#
+# set the following to 1 to output debugging info
+my $debug  = 1; # detailed debugging info 
+my $debug2 = 1; # subroutine names
+
 ### replace abbreviations
 
-*subst = \%{ $config->{abbreviations} };
-&substitute($config->[0]);
+*cfg = \%{$config->[0]};
+#print keys %cfg;
+#print $config->write_string();
+*subst = \%{$cfg{abbreviations}};
+my $edit_leaf = \&substitute;
+#print $config->write_string();
+# print keys %subst; exit;
+ref $config->[0] or die "not ref!";
+&walk_tree(\%cfg);
+&walk_tree(\%cfg);
 
-sub substitute_helper{
-	my ($val, $parent)  = @_;
-	ref $val and &subst_a($val) 
-		or $subst{$val}  
-			and $parent->{$val} = $subst{$val};
-}
-sub substitute {
+print $config->write_string; 
+sub walk_tree {
 	my $ref = shift;
-	map { &substitute_helper($ref, $_) } 
+	map { $edit_leaf->($ref, $_) } 
 	grep {$_ ne q(abbreviations)} 
 	keys %{ $ref };
+}
+sub substitute{
+	my ($parent, $key)  = @_;
+	my $val = $parent->{$key};
+	$debug and print qq(key: $key val: $val\n);
+	ref $val and &walk_tree($val)
+		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 
 $wav_dir = $config->[0]->{wave_directory};
@@ -156,10 +174,6 @@ $use_monitor_version_for_mixdown = 1;
 *devices = \%{ $config->[0]->{devices} }; # %devices is an alia
 
 # lexical variables
-#
-# set the following to 1 to output debugging info
-my $debug  = 1; # detailed debugging info 
-my $debug2 = 1; # subroutine names
 my $gui = 0;
 
 my (
@@ -278,7 +292,6 @@ $opts{g} and $gui = 1;
 $session_name  = shift;
 $debug and print "session name: $session_name\n";
 my $create = $opts{c} ? 1 : 0;
-$session_name and &set_dirs($create); 
 &new_engine;
 &initialize_oids;
 

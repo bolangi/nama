@@ -1,5 +1,6 @@
 ### COMMAND LINE PARSER 
 
+print "Reading grammar\n";
 $::RD_AUTOSTUB = 1;
 $::RD_HINT = 1;
 
@@ -95,7 +96,6 @@ add: 'add' wav channel(s?) {
 }
 
 );
-print "reached here\n";
 
 # extract top-level commands from grammar
 
@@ -105,4 +105,4 @@ print "reached here\n";
 	grep {/command:/} split "\n", $grammar; # only commands
 
 @ecmd_commands{@ecmd_commands} = 1..@ecmd_commands;
-# print join $/, keys %ecmd_commands; exit;
+#print join $/, keys %ecmd_commands; 
