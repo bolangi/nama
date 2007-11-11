@@ -5,6 +5,10 @@ my %un_abbr = qw(
 	cs c-status
 	es cop-status
 	fs aio-status
+	fw cs-forward
+	rw cs-rewind
+	forward cs-forward
+	rewind cs-rewind
 
 );
 
@@ -14,12 +18,7 @@ sub un_abbr{  # replace abbreviations
 } 
 
 
-map { $iam_cmd{$_}++ } split "\n", <<CMD;
-st
-es
-cs
-s 
-q 
+map { $iam_cmd{$_}++ } keys %un_abbr, split "\n", <<CMD;
 start
 stop
 run 
