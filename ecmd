@@ -3,6 +3,7 @@
 BEGIN { push @INC, q(.) } # XXX 
 
 
+my $yamlfile = qq(config.yaml); # we will look for this
 my $yaml = <<CONFIGURATION_FILE; 
 ### Ecmd configuration file
 #
@@ -20,7 +21,7 @@ abbreviations:
     32-12:     s32_le,12,frequency
     frequency: 44100
 wave_directory:   /media/sessions
-ecmd_home: /home/jroth/ecmd
+ecmd_home: /home/jroth/ecmd # deprecated
 ecasound_globals: -B auto
 devices:
     multi: 
@@ -45,6 +46,8 @@ CONFIGURATION_FILE
 
 
 use strict;
+use IO::All;
+use Cwd;
 use Storable; 
 use Data::Dumper;
 use Getopt::Std;
@@ -55,6 +58,7 @@ use YAML::Tiny;
 
 ### Some Global Variables
 
+# I would like to have this with comments
 #grep{ s/^\s+//; s/(\S+).*$/$1/; !/^\s*$/} split "\n",
 use vars qw( 	$ecasound
 				$grammar
@@ -124,42 +128,12 @@ require "grammar.pl";
 
 print "reached here, too\n";
 
-
-$config = YAML::Tiny->new;
-$config = YAML::Tiny->read_string($yaml);
-
 #
 # set the following to 1 to output debugging info
 my $debug  = 1; # detailed debugging info 
 my $debug2 = 1; # subroutine names
 
-### replace abbreviations
-
-*cfg = \%{$config->[0]};
-#print keys %cfg;
-#print $config->write_string();
-*subst = \%{$cfg{abbreviations}};
-my $edit_leaf = \&substitute;
-#print $config->write_string();
-# print keys %subst; exit;
-ref $config->[0] or die "not ref!";
-&walk_tree(\%cfg);
-&walk_tree(\%cfg);
-
-print $config->write_string; 
-sub walk_tree {
-	my $ref = shift;
-	map { $edit_leaf->($ref, $_) } 
-	grep {$_ ne q(abbreviations)} 
-	keys %{ $ref };
-}
-sub substitute{
-	my ($parent, $key)  = @_;
-	my $val = $parent->{$key};
-	$debug and print qq(key: $key val: $val\n);
-	ref $val and &walk_tree($val)
-		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
-}
+&read_config($yaml);
 
 $wav_dir = $config->[0]->{wave_directory};
 -d $wav_dir or die qq("$wav_dir" not a directory\n);
@@ -176,11 +150,10 @@ $use_monitor_version_for_mixdown = 1;
 # lexical variables
 my $gui = 0;
 my $mixname = qq(mix);
-
-my (
+my %state_c_ops;
 
 ##  WIDGETS  ##
-
+my (
 	$mw,  # main window
 	$ew,  # effect window
 	$canvas, # to make effect frame scrollable
@@ -246,7 +219,7 @@ my (
 	$iam,
 	$old_bg,
 
-	);
+);
 
 # name the track groupings
 
@@ -274,7 +247,6 @@ $unit  = 1; # fast-forward multiplier default;
 
 # some file definitions
 
-my $parameters     = "parameters.pl";
 $statestore   = "State";  # filename to store state
 $chain_setup_file = "session.ecs";
 my ($track_name, $ch_r, $ch_m); 
@@ -290,23 +262,36 @@ getopts('mceg', \%opts);  # options as above. Values in %opts
 $debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
 $opts{g} and $gui = 1;
 
+&new_engine;
+&initialize_oids;
+&read_config($yaml);
+
+## READ IN STATIC EFFECTS PARAMETERS
+
+my $effects_cache = &join_path($wav_dir, 'ecmd.effects.yaml');
+my $effects_data = <<'VARS';
+@effects		
+%effect_i	
+@ladspa_sorted
+%effects_ladspa
+VARS
+
+# TODO re-read effects data if ladspa or user presets are
+# newer than cache
+
+if (-f $effects_cache){ &assign_vars($effects_cache, $effects_data);
+} else {
+	&read_in_effects_data; 
+	&get_ladspa_hints, 
+	&integrate_ladspa_hints, 
+	&sort_ladspa_effects;
+	&store_vars($effects_cache, $effects_data);
+}
+
+
 $session_name  = shift;
 $debug and print "session name: $session_name\n";
 my $create = $opts{c} ? 1 : 0;
-&new_engine;
-&initialize_oids;
-
-#print Dumper @oids; exit;
-#  EFFECTS
-
-if ($gui) { ### XXX (temporary, we want effects for others,
-# too. why not cache?)
-&read_in_effects_data; 
-&get_ladspa_hints, 
-&integrate_ladspa_hints, 
-&sort_ladspa_effects;
-} 
-
 
 # GUI or Terminal mode
 
@@ -315,12 +300,12 @@ if ($gui) {
 	&transport_gui;
 	&oid_gui;
 	&time_gui;
-	&session_init if $session_name; 
+	&session_init, &load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 
 } else {
 	
-	&session_init if $session_name; 
+	&session_init, &load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -360,7 +345,6 @@ if ($gui) {
 #
 sub session_init{
 	$debug2 and print "&session_init\n";
-	# &read_parameters_file; # yaml
 	&initialize_session_data;
 	&remove_small_wavs; 
 
@@ -382,19 +366,50 @@ sub mix_track {
 	$state_t{$t}->{rw} = MON;
 }
 
-=comment
-sub read_parameters_file {
-	# TODO READ YAML
-	$debug2 and print "&read_parameters_file\n";
-	push my (@parts), $ecmd_home;
-	push    @parts, $session_name if $session_name;
-	push    @parts, $parameters;
-	my $g = &join_path(@parts);
-	if (-f $g) { 
-		require $g or warn qq(Session parameter file "$g" not found);
-	}
+my $edit_leaf;
+
+sub read_config {
+	$debug2 and print "&read_config\n";
+	$config = YAML::Tiny->new;
+
+# overwrite local copy if config.yaml in current session directory
+#
+# looks to $session_dir
+
+	my $yaml = $yaml;  
+	my $yamlfile = &join_path(&session_dir,$yamlfile);
+	$yaml = io($yamlfile)->all if -f $yamlfile;
+
+	$config = YAML::Tiny->read_string($yaml);
+
+	### replace abbreviations
+
+	*cfg = \%{$config->[0]};
+	#print keys %cfg;
+	#print $config->write_string();
+	*subst = \%{$cfg{abbreviations}};
+	#print $config->write_string();
+	# print keys %subst; exit;
+	ref $config->[0] or die "not ref!";
+	&walk_tree(\%cfg);
+	&walk_tree(\%cfg);
+	print $config->write_string; 
+
 }
-=cut
+
+sub walk_tree {
+	my $ref = shift;
+	map { &substitute($ref, $_) } 
+		grep {$_ ne q(abbreviations)} 
+			keys %{ $ref };
+}
+sub substitute{
+	my ($parent, $key)  = @_;
+	my $val = $parent->{$key};
+	$debug and print qq(key: $key val: $val\n);
+	ref $val and &walk_tree($val)
+		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
+}
 
 sub pre_multi {
 	$debug2 and print "&pre_multi\n";
@@ -435,27 +450,27 @@ sub load_session {
 	$debug2 and print "&load_session\n";
 	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
 	$session = &remove_spaces($session); # internal spaces to underscores
-	$session_name = $hash->name ? $hash->{name} : $session;
-
-	# $opts{m} = undef; #  XXX what behavior would I want?
+	$session_name = $hash->{name} ? $hash->{name} : $session;
+	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
 		map{&create_dir} &this_wav_dir, &session_dir;
 =comment 
-	# OPEN EDITOR
+	# OPEN EDITOR TODO
 	my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
 	open PARAMS, ">$new_file" or warn "couldn't open $new_file for write: $!\n";
 	print PARAMS $configuration;
 	close PARAMS;
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
+	&read_config;
 	&session_init;
 }
 sub create_dir {
 	my $dir = shift;
 	-d $dir 
 		or mkdir $dir 
-		or die qq(failed to create directory "$dir", died: $!);
+		or die qq(failed to create directory "$dir": $!);
 }
 
 
@@ -1401,6 +1416,7 @@ sub join_path {
 }
 
 sub this_wav_dir {&join_path($wav_dir, $session_name);}
+
 sub session_dir  { 
 	$a = &join_path($ecmd_home, $session_name);
 	$b = &join_path($wav_dir, $session_name, ".ecmd" );
@@ -2029,6 +2045,28 @@ sub paint_button {
 }
 
 
+my $persistent_vars = <<'PERSISTENT';
+$monitor_version
+$last_version 
+%track_names 	
+%state_c 		
+%state_t 		
+%cops 			
+$cop_id 		
+%copp 			
+@all_chains 	
+$i 				
+$t 				
+%take 			
+@takes 			
+%chain 			
+@marks			
+$unit			
+%oid_status		
+%old_vol		
+$jack_on		
+PERSISTENT
+
 sub save_state {
 	$debug2 and print "&save_state\n";
 	my $file = shift;
@@ -2044,28 +2082,10 @@ sub save_state {
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
 
-	my %state = (
-		monitor_version => \$monitor_version,
-		last_version 	=> \$last_version,
-		track_names 	=> \%track_names,
-		state_c    		=> \%state_c,
-		state_t   		=> \%state_t,  
-		cops     		=> \%cops,    
-		cop_id      	=> \$cop_id,     
-		copp    		=> \%copp,   
-		all_chains 		=> \@all_chains,
-		i 				=> \$i,
-		t 				=> \$t,
-		take  			=> \%take,
-		takes  			=> \@takes,
-		chain 			=> \%chain,
-		marks			=> \@marks, 	
-		unit			=> \$unit,	
-		oid_status		=> \%oid_status,
-		old_vol			=> \%old_vol,
-		jack_on			=> \$jack_on,
-				);
-	my $result1 = store \%state, $file;
+	&store_vars($file, $persistent_vars);
+
+# store alsa settings
+
 	my $result2 = system "alsactl -f $file.alsa store";
 	$debug and print "alsactl store result: ", $result2 >>8, "\n";
 
@@ -2078,35 +2098,14 @@ sub save_state {
 }
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
-	my %oid_status_temp;
-	my $file = shift;
-	-e $file or warn ("file: $file not found\n"),return 0;
-	my $hash_ref = retrieve($file);
-	$monitor_version= ${ $hash_ref->{monitor_version} } if defined $hash_ref->{monitor_version} ;
-	$last_version =   ${ $hash_ref->{last_version} } if defined $hash_ref->{last_version} ;
-	%track_names 	= %{ $hash_ref->{track_names} } if defined $hash_ref->{track_names} ;
-	%state_c 		= %{ $hash_ref->{state_c} } if defined $hash_ref->{state_c} ;
-	%state_t 		= %{ $hash_ref->{state_t} } if defined $hash_ref->{state_t} ;
-	%cops 			= %{ $hash_ref->{cops} } if defined $hash_ref->{cops} ;
-	$cop_id 		= ${ $hash_ref->{cop_id} } if defined $hash_ref->{cop_id} ;
-	%copp 			= %{ $hash_ref->{copp} } if defined $hash_ref->{copp} ;
-	@all_chains 	= @{ $hash_ref->{all_chains} } if defined $hash_ref->{all_chains} ;
-	$i 				= ${ $hash_ref->{i} } if defined $hash_ref->{i} ;
-	$t 				= ${ $hash_ref->{t} } if defined $hash_ref->{t} ;
-	%take 			= %{ $hash_ref->{take} } if defined $hash_ref->{take} ;
-	@takes 			= @{ $hash_ref->{takes} } if defined $hash_ref->{takes} ;
-	%chain 			= %{ $hash_ref->{chain} } if defined $hash_ref->{chain} ;
-	@marks			= @{ $hash_ref->{marks} } if defined $hash_ref->{marks} ;	
-	$unit			= ${ $hash_ref->{unit} } if defined $hash_ref->{unit} ;	
-	%oid_status		= %{ $hash_ref->{oid_status} } if defined $hash_ref->{oid_status} ;	
-	%old_vol		= %{ $hash_ref->{old_vol} } if defined $hash_ref->{old_vol} ;	
-	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
-	
+	my ($file, $list)  = @_;
+
+	&assign_vars($file, $list);
+
 	my $toggle_jack = $widget_o[$#widget_o];
-	&convert_to_jack, &paint_button($toggle_jack, q(lightblue) ) if $jack_on;
-
+	&convert_to_jack if $jack_on;
+	&paint_button($toggle_jack, q(lightblue)) if $jack_on and $gui;
 	&refresh_oids;
-
 
 	# restore mixer settings
 
@@ -2152,6 +2151,47 @@ sub retrieve_state {
 	$did_apply and $gui and $ew->deiconify();
 
 }
+sub assign_vars {
+	# TODO, simplify: use full var name, including sigils.
+	my ($file, $var_list) = @_;
+	-f $file or warn ("file: $file not found\n"),return 0;
+	my @vars = split "\n", $var_list;
+	my $hash_ref = retrieve($file);
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string = $_
+						. q( = )
+						. $sigil
+						. q({ $hash_ref->{)
+						. $identifier
+						. q(} } if defined $hash_ref->{)
+						. $identifier
+						. qq(};) ;
+		print $eval_string;
+		eval $eval_string or print "failed to eval $eval_string: $!\n";
+	} @vars;
+}
+sub store_vars {
+	my ($file, $var_list) = @_;
+	my @vars = split "\n", $var_list;
+	my %state;
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string =  q($state{)
+							. $identifier
+							. q(} = \\) # double backslash needed
+							. $_;
+	eval($eval_string) or print "failed to eval $eval_string: $!\n";
+	} @vars;
+	my $result1 = store \%state, $file;
+}
+
+my $effects_state = <<'VARS';
+%state_c_ops
+%cops    
+$cop_id     
+%copp   
+@marks 	
+$unit
+VARS
 
 sub save_effects {
 	$debug2 and print "&save_effects\n";
@@ -2168,22 +2208,17 @@ sub save_effects {
 	@all_chains;
 
 	# we need the ops list for each track
+	#
+	# i dont see why, do we overwrite the effects section
+	# in one of the init routines?
+	# I will follow for now 12/6/07
 	
-	my %state_c_ops;
+	%state_c_ops = ();
 	map{ 	$state_c_ops{$_} = $state_c{$_}->{ops} } @all_chains;
 
 	# map {&remove_op} @{ $state_c{$_}->{ops}
 
-	my %state = (
-		state_c_ops     => \%state_c_ops,
-		cops     		=> \%cops,    
-		cop_id      	=> \$cop_id,     
-		copp    		=> \%copp,   
-		marks			=> \@marks, 	
-		unit			=> \$unit,	
-				);
-	my $result1 = store \%state, $file;
-
+	&store_vars($file, $effects_state);
 }
 
 =comment
@@ -2199,14 +2234,13 @@ sub retrieve_effects {
 	#my $debug = 1;
 	$debug2 and print "&retrieve_state\n";
 	my $file = shift;
-	-e $file or warn ("file: $file not found\n"),return 0;
-	my $hash_ref = retrieve($file);
-	my %state_c_ops = %{ $hash_ref->{state_c_ops} };
-	my %old_cops	= %{ $hash_ref->{cops} };
-	$cop_id 		= ${ $hash_ref->{cop_id} };
-	my %old_copp	= %{ $hash_ref->{copp} };
-	@marks			= @{ $hash_ref->{marks} };	
-	$unit			= ${ $hash_ref->{unit} };	
+	my %current_cops = %cops; # XXX why bother
+	my %current_copp = %copp; # XXX why bother
+	&assign_vars($file, $effects_state);
+	my %old_copp = %copp;  # XXX why bother
+	my %old_cops = %cops; 
+	%cops = %current_cops;
+	%copp = %current_copp;
 
 
 	print "\%state_c_ops\n ", Dumper %state_c_ops, "\n\n";
@@ -2263,7 +2297,7 @@ sub retrieve_effects {
 
 	# restore ops->chain mapping
 	
-	%cops = %old_cops;
+	%cops = %old_copp;
 
 	# add the correct copp entry for each id except vol/pan
 	map{ my $n = $_;
