@@ -29,11 +29,13 @@ show: 'show' { 	map { push @::format_fields,
 				1;
 }
 
+load_session: load
 load: 'load' name {
 	$::session = $item{name};
 	&::load_session unless $::session_name eq $item{name};
 	1;
 }
+new_session: new
 new: 'new' name {
 	$::session = $item{name};
 	&::new_session;
@@ -47,7 +49,10 @@ wav: name
 
 setup: 'setup' { &::setup_transport; &::connect_transport; 1}
 
+renew_engine: renew
 renew: 'renew' {&::new_engine; 1}
+
+
 
 mix: 'mix' {1}
 
@@ -82,6 +87,7 @@ last: ('last' | '$' )
 
 dd: /\d+/
 
+add_track: add
 add: 'add' wav channel(s?) { 
 	if ($::track_names{$item{wav}} ){
 		print "Track name already in use.\n";

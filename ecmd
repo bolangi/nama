@@ -175,6 +175,7 @@ $use_monitor_version_for_mixdown = 1;
 
 # lexical variables
 my $gui = 0;
+my $mixname = qq(mix);
 
 my (
 
@@ -374,7 +375,7 @@ sub session_init{
 
 sub mix_track {
 	# return if $opts{m} or ! -e &join_path(&session_dir,$statestore);
-	&add_track($session_name) ;
+	&add_track($mixname) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = MUTE; 
 	&new_take;
@@ -878,18 +879,15 @@ sub take_gui {
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
-			$name->AddItems([
-				'command' => REC,
-				-background => $old_bg,
-				-command => sub { 
-					return if &transport_running;
-					$state_t{$t}->{rw} = REC;
-					# set this take active if necessary
-					$state_t{active} = $t; 
-					&refresh;
-					&setup_transport;
-					&connect_transport;
-					}
+		$name->AddItems([
+			'command' => REC,
+			-background => $old_bg,
+			-command => sub { 
+				no strict qw(vars);
+				defined $my_t or my $my_t = $t;
+				use strict qw(vars);
+				&select_take ($my_t, qq(REC) );
+				}
 			]);
 		}
 
@@ -897,26 +895,36 @@ sub take_gui {
 			'command' => MON,
 			-background => $old_bg,
 			-command => sub {
-				return if &transport_running;
-				$state_t{$t}->{rw} = MON; 
-				&refresh;
-				&setup_transport;
-				&connect_transport;
+				no strict qw(vars);
+				defined $my_t or my $my_t = $t;
+				use strict qw(vars);
+				&select_take($my_t, qq(MON)); 
 				}
-		]);
+			]);
 		$name->AddItems([
 			'command' => MUTE,
 			-background => $old_bg,
 			-command => sub {
-				return if &transport_running;
-				$state_t{$t}->{rw} = MUTE; 
-				&refresh;
-				&disconnect_transport;
+				no strict qw(vars);
+				defined $my_t or my $my_t = $t;
+				use strict qw(vars);
+				&select_take($my_t, qq(MUTE)); 
 				}
 
 		]);
 
 							   
+}
+sub select_take {
+	my ($t, $status) = shift;
+	$status =~ m/REC|MON|MUTE/
+		or die "illegal status: $status, expected one of REC|MON|MUTE\n";
+	return if &transport_running;
+	$state_t{$t}->{rw} = $status; 
+	$state_t{active} = $t; 
+	&refresh if $gui;
+	&setup_transport;
+	&connect_transport;
 }
  
 sub selected_version {
@@ -935,7 +943,7 @@ use warnings;
 
 sub mix_suffix {
 	my $stub = shift;
-	$stub eq $session_name ? ' (mix)' : ''
+	$stub eq $mixname ? ' (mix)' : ''
 }
 
 sub add_volume_control {
@@ -969,12 +977,12 @@ sub track_gui { # nearly 300 lines!
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
 	$debug2 and print "&track_gui\n";
-	my $stub = $state_c{$n}->{file} ;  
+	my $stub = $state_c{$n}->{active};
 	$name = $track_frame->Label(
-			-text => $stub.&mix_suffix($stub),
+			-text => $state_c{$n}->{file},
 			-justify => 'left');
 	$version = $track_frame->Menubutton( 
-					-text => $state_c{$n}->{active},
+					-text => $stub,
 					-tearoff => 0);
 	for my $v (undef, @{$state_c{$n}->{versions}}) {
 					$version->radiobutton(
@@ -1210,7 +1218,7 @@ sub track_gui { # nearly 300 lines!
 
 	$widget_c{$n}->{children} = $children; # children go here
 	
-	$parents->Label(-text => (uc $stub) . &mix_suffix($stub))->pack(-side => 'left');
+	$parents->Label(-text => (uc $stub) )->pack(-side => 'left');
 
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
 	my @starts =   ( $e_bound{tkeca}{a}, 
@@ -1415,7 +1423,7 @@ sub dig_ruins {
 	
 	$debug2 and print "&dig_ruins";
 
-	if ( ! grep { $_ ne $mixchain} keys %state_c ) {  # there are no tracks yet
+	if ( ! grep { $_ ne $mixchain and $_ ne $session_name} keys %state_c ) {  # there are no tracks yet
 
 		# look for wave files
 		
@@ -1596,7 +1604,7 @@ sub new_wav_name {
 		$version = &new_version; # even mix track
 	}
 	else { # we are only mixing
-		$version = $stub eq $session_name  # mix track 
+		$version = $stub eq $mixname  # mix track 
 			? ($use_monitor_version_for_mixdown 
 					? $monitor_version 
 					: $state_c{1}->{versions}->[-1] + 1
@@ -1608,7 +1616,7 @@ sub new_wav_name {
 
 sub output_format {
 	my $stub = shift;
-	$stub eq $session_name or $stub eq 'mix'
+	$stub eq $session_name or $stub eq $mixname
 		? $config->[0]->{mix_to_disk}->{format}
 		: $config->[0]->{mixer_out}->{format}
 }
@@ -1632,7 +1640,7 @@ sub make_io_lists {
 		next unless $oid{type} eq 'mixed' and $oid_status{ $oid{name} };
 			push @{ $inputs{mixed} }, $oid{id};
 		if ($oid{output} eq 'file') {
-			$outputs{file}->{ $session_name } = [ $oid{id} ] ;
+			$outputs{file}->{ $mixname } = [ $oid{id} ] ;
 		} else { # assume device
 			defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
 			push @{ $outputs{$oid{output}} }, $oid{id}
@@ -2464,11 +2472,11 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
-	my $mixed = scalar ( grep{ $_ eq $session_name} @k );
+	my $mixed = scalar ( grep{ $_ eq $session_name or $_ eq $mixname} @k );
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			&update_master_version_button;
+			&update_master_version_button if $gui;
 			$state_t{ $state_t{active} }->{rw} = MON;
 			&setup_transport;
 			&connect_transport;
