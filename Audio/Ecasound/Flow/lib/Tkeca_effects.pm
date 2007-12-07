@@ -1,3 +1,6 @@
+package qw(Audio::Flow);
+
+$tkeca_effects = <<EFFECTS;
 ea|Volume|1|Level %|0|600|100|0
 epp|Pan|1|Level %|0|100|50|0
 set effect(1) "eal|Limiter|1|Limit %|0|100|100|0"
@@ -21,3 +24,5 @@ set effect(18) "etl|Flanger|4|Delay Time (ms)|0|1000|200|0|Variance Time Samples
 set effect(19) "etm|Multitap Delay|3|Delay Time (ms)|0|2000|200|0|Number of Delays|0|100|20|0|Mix %|0|100|50|0"
 set effect(20) "etp|Phaser|4|Delay Time (ms)|0|2000|200|0|Variance Time Samples|0|10000|100|0|Feedback %|0|100|50|0|LFO Frequency (Hz)|0|100|50|0"
 set effect(21) "pn:metronome|Metronome|1|BPM|30|300|120|1"
+EFFECTS
+1;

@@ -1,3 +1,5 @@
+package qw(Audio::Flow);
+
 use vars qw(%iam_cmd);
 my %un_abbr = qw(
 	

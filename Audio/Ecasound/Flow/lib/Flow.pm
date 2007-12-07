@@ -1,53 +1,10 @@
-#!/usr/local/bin/perl -w
+package Audio::Flow;
 
 # BROKEN effects date store/retrieve
 # BROKEN state recall in text mode
 # BROKEN gui mode
 
-BEGIN { push @INC, q(.) } # XXX 
-
-
 my $yamlfile = qq(config.yaml); # we will look for this
-my $yaml = <<CONFIGURATION_FILE; 
-### Ecmd configuration file
-#
-#   Abbreviations may be added as necessary.
-#   Care must be taken to avoid circular definitions.
-#
-#   
----
-application: ecmd
-abbreviations:
-    cd-stereo: s16_le,2,44100,i
-    cd-mono:   s16_le,1,44100
-    24-mono:   s24_le,1,frequency
-    32-10:     s32_le,10,frequency
-    32-12:     s32_le,12,frequency
-    frequency: 44100
-wave_directory:   /media/sessions
-ecmd_home: /home/jroth/ecmd # deprecated
-ecasound_globals: -B auto
-devices:
-    multi: 
-        ecasound_id:   alsa,ice1712
-        input_format:  32-12
-        output_format: 32-10
-    stereo: 
-        ecasound_id:   alsa,via
-        input_format:  cd-stereo
-        output_format: cd-stereo
-    jack: 
-        ecasound_id:   jack_alsa
-        input_format:  32-12 
-        output_format: 32-10
-raw-to-disk: 
-    format:        cd-mono
-mix-to-disk:
-    format:        cd-stereo 
-mixer_out: 
-    format:        cd-stereo
-CONFIGURATION_FILE
-
 
 use strict;
 use Carp;
@@ -67,9 +24,7 @@ use YAML::Tiny;
 my $gui = 0;
 my $mixname = qq(mix);
 my %state_c_ops;
-my $tkeca_effects_data = q(tkeca_effects.tcl);
 my $effects_cache_file = q(ecmd_effects);
-my $grammar_file =       q(grammar.pl);
 
 # set the following to 1 to output debugging info
 my $debug  = 1; # detailed debugging info 
@@ -77,8 +32,6 @@ my $debug2 = 1; # subroutine names
 
 ### Some Global Variables
 
-# I would like to have this with comments
-#grep{ s/^\s+//; s/(\S+).*$/$1/; !/^\s*$/} split "\n",
 use vars qw( 	$ecasound
 				$grammar
 				@ecmd_commands
@@ -136,6 +89,8 @@ use vars qw( 	$ecasound
 
 				%subst
 				%cfg
+				$tkeca_effects_data
+				$yaml
 ); 
 use constant {REC => 'rec',
 			  MON => 'mon',
@@ -143,9 +98,10 @@ use constant {REC => 'rec',
 
 $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
-require $grammar_file;
+require qw(Audio::Ecasound::Config.pm); 
+require qw(Audio::Ecasound::Grammar.pm); 
+
 print "reached here, too\n";
-&read_config($yaml);
 
 $wav_dir = $cfg{wave_directory};
 -d $wav_dir or croak qq("$wav_dir" not a directory\n);
@@ -300,7 +256,7 @@ if ($gui) {
 	my $user_input;
 	use vars qw($parser %iam_cmd);
  	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-	require "iam.pl";
+	require qw(Iam.pm);
 	$debug = 1;
 	while (1) {
 		
@@ -620,9 +576,9 @@ sub find_wavs {
 		 	keys %{$state_c{$n}->{targets}} ];
 		$debug and print join " ", "versions: ",@ {$state_c{$n}->{versions}} , "\n\n";
 		my $this_last = $state_c{$n}->{versions}->[-1];
-no carpings;
+#no warnings;
 		$last_version = $this_last if $this_last > $last_version ;
-use carpings;
+#use warnings;
 # VERSION	
 		# set last version active if the current active version is missing
 		#$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]
@@ -1104,10 +1060,10 @@ sub global_version_buttons {
 	@global_version_buttons = ();
 	$debug and print "making global version buttons range:", join ' ',1..$last_version, " \n";
  	for my $v (undef, 1..$last_version) {
-		no carpings;
+		#no carpings;
 		next unless grep{  grep{ $v == $_ } @{ $state_c{$_}->{versions} } }
 			grep{ $_ != 1 } @all_chains; # MIX 
-		use carpings;
+		#use carpings;
  		push @global_version_buttons,
 			$widget_t[1]->radiobutton(
 				###  HARDCODED, second take widget
@@ -1525,7 +1481,7 @@ sub make_scale {
 		  );
 
 		# auxiliary field for logarithmic display
-		no carpings;	
+		# no carpings;	
 		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
 			my $log_display = $frame->Label(
 				-text => exp $effects[$i]->{params}->[$p]->{default},
@@ -1546,7 +1502,7 @@ sub make_scale {
 		else { $controller->grid; }
 
 		return $frame;
-		use carpings;
+		# use carpings;
 
 	}	
 
@@ -1607,13 +1563,12 @@ sub is_muted {
 ## support functions
 
 sub join_path {
-	no carpings;
 	my @parts = @_;
 	my $path = join '/', @parts;
-	$path =~ s(/{2,})(/)g;
+	$path =~ s(/{2,})(/)g;# multiple slashes to single
+	$path =~ s(/$)()g;    # remove trailing slash
 	$debug and print "Path: $path\n";
 	$path;
-	use carpings;
 }
 
 sub this_wav_dir {&join_path($wav_dir, $session_name);}
@@ -1635,13 +1590,13 @@ sub selected_version {
 	# otherwise return global version selection
 	# but only if this version exists
 	my $n = shift;
-no carpings;
+# no carpings;
 	my $version = $state_c{$n}->{active} 
 		? $state_c{$n}->{active} 
 		: $monitor_version ;
 	(grep {$_ == $version } @{$state_c{$n}->{versions}}) ? $version : undef;
 
-use carpings;
+# use carpings;
 }
 sub set_active_version {
 	my $n = shift;
@@ -1705,13 +1660,13 @@ sub rec_status {
 # VERSION: replace state_c{$n}->{active} by  &selected_version($n)
 	my $n = shift;
 	$debug2 and print "&rec_status\n";
-	no carpings;
+	# no carpings;
 	$debug and print "chain $n: active: &selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
-	use carpings;
+	# use carpings;
 
-no carpings;
+# no carpings;
 my $file_exists = -f &join_path(&this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
-use carpings;
+# use carpings;
     return MUTE if $state_c{$n}->{rw} eq MON and ! $file_exists;
 	return MUTE if $state_c{$n}->{rw} eq MUTE;
 	return MUTE if $state_t{$take{$n}}->{rw} eq MUTE;
@@ -1779,9 +1734,9 @@ OID:		for my $oid (@oids) {
 			next if $oid{name} eq 'rec_setup' and ! $inputs{cooked}->{$n};
 			next if $oid{name} eq 'mix_setup' and ! @{ $inputs{mixed} };
 
-			no carpings;
+			# no carpings;
 			my $chain_id = $oid{id}. $n; 
-			use carpings;
+			# use carpings;
 			$debug and print "chain_id: $chain_id\n";
 			$debug and print "oid name: $oid{name}\n";
 			$debug and print "oid target: $oid{target}\n";
@@ -1929,9 +1884,9 @@ sub eliminate_loops {
 
 	# add chain $n to the list of the customer's output device 
 	
-	no carpings;
+	# no carpings;
 	my ($oid) = grep{ $cooked_id =~ /$_->{id}/ } @oids;
-	use carpings;
+	# use carpings;
 	my %oid = %{$oid};
 	defined $outputs{ $oid{output} } or $outputs{ $oid{output}} = [];
 	push @{ $outputs{ $oid{output} } }, $n;
@@ -1953,10 +1908,10 @@ sub eliminate_loops {
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
-	no carpings;
+	# no carpings;
 	$post_input{$n} .= $post_input{$cooked_id};
 	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	use carpings;
+	# use carpings;
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 
@@ -2583,7 +2538,7 @@ sub add_effect {
 					-anchor => 'nw')
 			}
 
-			no carpings;
+			#  no carpings;
 			$widget_e{$id} = $frame; 
 			# we need a separate frame so title can be long
 
@@ -2595,7 +2550,7 @@ sub add_effect {
 			$debug and print "parentage: $parentage\n";
 			my $eff = $frame->Menubutton(
 				-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-			use carpings;
+			# use carpings;
 
 			$eff->AddItems([
 				'command' => "Remove",
@@ -3059,15 +3014,15 @@ sub read_in_effects_data {
 
 
 	for my $i (0..$#effects){
-		no carpings;
+		# no carpings;
 		 $effect_i{ $effects[$i]->{code} } = $i; 
-		 use carpings;
+		#  use carpings;
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
 	$debug and print "\@effects\n======\n", Dumper (@effects); ; 
 }
-sub read_in_tkeca_effects_data {
+sub parse_tkeca_effects_data {
 
 # Based on GPL code in Tkeca
 
@@ -3077,7 +3032,7 @@ sub read_in_tkeca_effects_data {
 # I left the tcl code 'as is' in the following pasted section, using regexes 
 # so future updates from him can be pasted in without editing.
 
-my $effects_data = io($tkeca_effects_data)->all;
+my $effects_data = $tkeca_effects_data;
 
 # divide by lines, remove stuff outside quotes, 
 # then make an anonymous array of the fields of each line
@@ -3188,7 +3143,7 @@ sub get_ladspa_hints{
 	#print Dumper %params;
 	$debug and print Dumper %effects_ladspa; 
 }
-no carpings;
+# no carpings;
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
 	my $multiplier = 1;;
@@ -3224,7 +3179,7 @@ sub range {
 	($beg, $end, $default, $resolution)
 
 }
-use carpings;
+# use carpings;
 sub integrate_ladspa_hints {
 	map{ 
 		my $i = $effect_i{$_};

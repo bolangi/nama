@@ -1,3 +1,5 @@
+package qw(Audio::Flow);
+
 ### COMMAND LINE PARSER 
 
 print "Reading grammar\n";

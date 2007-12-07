@@ -1,3 +1,6 @@
+package qw(Audio::Flow);
+
+$yaml = <<CONFIG;
 ### Ecmd configuration file
 #
 #   Abbreviations may be added as necessary.
@@ -35,3 +38,5 @@ mix-to-disk:
     format:        cd-stereo 
 mixer_out: 
     format:        cd-stereo
+CONFIG
+1;
