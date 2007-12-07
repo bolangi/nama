@@ -50,6 +50,8 @@ CONFIGURATION_FILE
 
 
 use strict;
+use Carp;
+use Data::YAML;
 use IO::All;
 use Cwd;
 use Storable; 
@@ -146,7 +148,7 @@ print "reached here, too\n";
 &read_config($yaml);
 
 $wav_dir = $cfg{wave_directory};
--d $wav_dir or die qq("$wav_dir" not a directory\n);
+-d $wav_dir or croak qq("$wav_dir" not a directory\n);
 
 $ecmd_home = $cfg{ecmd_home};  # deprecated
 
@@ -297,7 +299,7 @@ if ($gui) {
 	$::OUT = $term->OUT || \*STDOUT;
 	my $user_input;
 	use vars qw($parser %iam_cmd);
- 	$parser = new Parse::RecDescent ($grammar) or die "Bad grammar!\n";
+ 	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 	require "iam.pl";
 	$debug = 1;
 	while (1) {
@@ -336,7 +338,7 @@ sub eval_iam {
 	my $result = $e->eci($command);
 	$debug and print "$result\n" unless $command =~ /register/;
 	my $errmsg = $e->errmsg();
-	# $errmsg and warn("IAM WARN: ",$errmsg), 
+	# $errmsg and carp("IAM WARN: ",$errmsg), 
 	# not needed ecasound prints error on STDOUT
 	$e->errmsg('');
 	$result;
@@ -359,7 +361,7 @@ sub read_config {
 
 	### replace abbreviations
 
-	ref $config->[0] or die "not ref!";
+	ref $config->[0] or croak "not ref!";
 	*cfg = \%{$config->[0]}; # alias
 	#print keys %cfg;
 	#print $config->write_string();
@@ -401,7 +403,7 @@ sub load_session {
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
-	open PARAMS, ">$new_file" or warn "couldn't open $new_file for write: $!\n";
+	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
 	print PARAMS $configuration;
 	close PARAMS;
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
@@ -425,7 +427,7 @@ sub initialize_session_data {
 
 	return if &transport_running;
 	my $sf = &join_path(&session_dir, $chain_setup_file);
-	warn ("missing session file $sf\n") unless -f $sf;
+	carp ("missing session file $sf\n") unless -f $sf;
 	$gui and $session_label->configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
@@ -501,7 +503,7 @@ sub create_dir {
 	my $dir = shift;
 	-d $dir 
 		or mkdir $dir 
-		or die qq(failed to create directory "$dir": $!);
+		or croak qq(failed to create directory "$dir": $!);
 }
 ## track and wav file handling
 
@@ -578,7 +580,7 @@ sub dig_ruins {
 		# look for wave files
 		
 		my $d = &this_wav_dir;
-		opendir WAV , $d or warn "couldn't open $d: $!";
+		opendir WAV , $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
 		
@@ -618,9 +620,9 @@ sub find_wavs {
 		 	keys %{$state_c{$n}->{targets}} ];
 		$debug and print join " ", "versions: ",@ {$state_c{$n}->{versions}} , "\n\n";
 		my $this_last = $state_c{$n}->{versions}->[-1];
-no warnings;
+no carpings;
 		$last_version = $this_last if $this_last > $last_version ;
-use warnings;
+use carpings;
 # VERSION	
 		# set last version active if the current active version is missing
 		#$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]
@@ -677,7 +679,7 @@ sub decrement_take {
 sub select_take {
 	my ($t, $status) = shift;
 	$status =~ m/REC|MON|MUTE/
-		or die "illegal status: $status, expected one of REC|MON|MUTE\n";
+		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
 	return if &transport_running;
 	$state_t{$t}->{rw} = $status; 
 	$state_t{active} = $t; 
@@ -1102,10 +1104,10 @@ sub global_version_buttons {
 	@global_version_buttons = ();
 	$debug and print "making global version buttons range:", join ' ',1..$last_version, " \n";
  	for my $v (undef, 1..$last_version) {
-		no warnings;
+		no carpings;
 		next unless grep{  grep{ $v == $_ } @{ $state_c{$_}->{versions} } }
 			grep{ $_ != 1 } @all_chains; # MIX 
-		use warnings;
+		use carpings;
  		push @global_version_buttons,
 			$widget_t[1]->radiobutton(
 				###  HARDCODED, second take widget
@@ -1523,7 +1525,7 @@ sub make_scale {
 		  );
 
 		# auxiliary field for logarithmic display
-		no warnings;	
+		no carpings;	
 		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
 			my $log_display = $frame->Label(
 				-text => exp $effects[$i]->{params}->[$p]->{default},
@@ -1544,7 +1546,7 @@ sub make_scale {
 		else { $controller->grid; }
 
 		return $frame;
-		use warnings;
+		use carpings;
 
 	}	
 
@@ -1560,7 +1562,7 @@ sub make_scale {
 			);	
 
 	}
-	else { die "missing or unexpected display type: $display_type" }
+	else { croak "missing or unexpected display type: $display_type" }
 
 }
 =comment
@@ -1605,13 +1607,13 @@ sub is_muted {
 ## support functions
 
 sub join_path {
-	no warnings;
+	no carpings;
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
 	$debug and print "Path: $path\n";
 	$path;
-	use warnings;
+	use carpings;
 }
 
 sub this_wav_dir {&join_path($wav_dir, $session_name);}
@@ -1633,13 +1635,13 @@ sub selected_version {
 	# otherwise return global version selection
 	# but only if this version exists
 	my $n = shift;
-no warnings;
+no carpings;
 	my $version = $state_c{$n}->{active} 
 		? $state_c{$n}->{active} 
 		: $monitor_version ;
 	(grep {$_ == $version } @{$state_c{$n}->{versions}}) ? $version : undef;
 
-use warnings;
+use carpings;
 }
 sub set_active_version {
 	my $n = shift;
@@ -1655,7 +1657,7 @@ sub get_versions {
 	my ($dir, $basename, $sep, $ext) = @_;
 
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or warn ("can't read directory $dir: $!");
+	opendir WD, $dir or carp ("can't read directory $dir: $!");
 	$debug and print "reading directory: $dir\n\n";
 	my %versions = ();
 	for my $candidate ( readdir WD ) {
@@ -1703,13 +1705,13 @@ sub rec_status {
 # VERSION: replace state_c{$n}->{active} by  &selected_version($n)
 	my $n = shift;
 	$debug2 and print "&rec_status\n";
-	no warnings;
+	no carpings;
 	$debug and print "chain $n: active: &selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
-	use warnings;
+	use carpings;
 
-no warnings;
+no carpings;
 my $file_exists = -f &join_path(&this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
-use warnings;
+use carpings;
     return MUTE if $state_c{$n}->{rw} eq MON and ! $file_exists;
 	return MUTE if $state_c{$n}->{rw} eq MUTE;
 	return MUTE if $state_t{$take{$n}}->{rw} eq MUTE;
@@ -1777,9 +1779,9 @@ OID:		for my $oid (@oids) {
 			next if $oid{name} eq 'rec_setup' and ! $inputs{cooked}->{$n};
 			next if $oid{name} eq 'mix_setup' and ! @{ $inputs{mixed} };
 
-			no warnings;
+			no carpings;
 			my $chain_id = $oid{id}. $n; 
-			use warnings;
+			use carpings;
 			$debug and print "chain_id: $chain_id\n";
 			$debug and print "oid name: $oid{name}\n";
 			$debug and print "oid target: $oid{target}\n";
@@ -1827,7 +1829,7 @@ OID:		for my $oid (@oids) {
 			defined $inputs{cooked}->{$n} or $inputs{cooked}->{$n} = [];
 			push @{ $inputs{cooked}->{$n} }, $chain_id;
 		}
-		else { die "$oid{name}: neither input defined nor type 'cooked'"; }
+		else { croak "$oid{name}: neither input defined nor type 'cooked'"; }
 
  #######     OUTPUTS
 
@@ -1927,9 +1929,9 @@ sub eliminate_loops {
 
 	# add chain $n to the list of the customer's output device 
 	
-	no warnings;
+	no carpings;
 	my ($oid) = grep{ $cooked_id =~ /$_->{id}/ } @oids;
-	use warnings;
+	use carpings;
 	my %oid = %{$oid};
 	defined $outputs{ $oid{output} } or $outputs{ $oid{output}} = [];
 	push @{ $outputs{ $oid{output} } }, $n;
@@ -1951,10 +1953,10 @@ sub eliminate_loops {
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
-	no warnings;
+	no carpings;
 	$post_input{$n} .= $post_input{$cooked_id};
 	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	use warnings;
+	use carpings;
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 
@@ -2086,7 +2088,7 @@ sub write_chains {
 	
 	$debug and print "ECS:\n",$ecs_file;
 	my $sf = &join_path(&session_dir, $chain_setup_file);
-	open ECS, ">$sf" or die "can't open file $sf:  $!\n";
+	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
 }
@@ -2282,14 +2284,14 @@ sub setup_transport {
 }
 sub connect_transport {
 	&load_ecs; 
-	warn("Invalid chain setup, cannot arm transport.\n"),return unless &eval_iam("cs-is-valid");
+	carp("Invalid chain setup, cannot arm transport.\n"),return unless &eval_iam("cs-is-valid");
 	&find_op_offsets; 
 	&apply_ops;
 	&eval_iam('cs-connect');
-	warn("Invalid chain setup, cannot arm transport.\n"), return 
+	carp("Invalid chain setup, cannot arm transport.\n"), return 
 		unless &eval_iam("engine-status") eq 'not started' ;
 	&eval_iam('engine-launch');
-	warn("Invalid chain setup, cannot arm transport.\n"), return
+	carp("Invalid chain setup, cannot arm transport.\n"), return
 		unless &eval_iam("engine-status") eq 'stopped' ;
 	$length = &eval_iam('cs-get-length'); 
 	$gui and $setup_length->configure(-text => &colonize($length));
@@ -2301,7 +2303,7 @@ sub connect_transport {
 }
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
-	warn("Invalid chain setup, aborting start.\n"),return unless &eval_iam("cs-is-valid");
+	carp("Invalid chain setup, aborting start.\n"),return unless &eval_iam("cs-is-valid");
 	&eval_iam('start');
 	sleep 1; # time for engine
 	&start_clock;
@@ -2411,7 +2413,7 @@ sub refresh_t {
 		
 		}
 
-	die "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 	$debug and print "take_frame child: $t\n";
 
@@ -2462,7 +2464,7 @@ sub refresh_c {
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
 		$widget_c{$n}->{version}->configure(-text => &selected_version($n));
 		}  
-		else { warn "\$rec_status contains something unknown: $rec_status";}
+		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh { 
  	&refresh_t; 
@@ -2516,7 +2518,7 @@ sub rec_cleanup {
 } 
 sub update_version_button {
 	my ($n, $v) = @_;
-	die "no version provided \n" if not $v;
+	croak "no version provided \n" if not $v;
 	my $w = $widget_c{$n}->{version};
 					$w->radiobutton(
 						-label => $v,
@@ -2581,7 +2583,7 @@ sub add_effect {
 					-anchor => 'nw')
 			}
 
-			no warnings;
+			no carpings;
 			$widget_e{$id} = $frame; 
 			# we need a separate frame so title can be long
 
@@ -2593,7 +2595,7 @@ sub add_effect {
 			$debug and print "parentage: $parentage\n";
 			my $eff = $frame->Menubutton(
 				-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-			use warnings;
+			use carpings;
 
 			$eff->AddItems([
 				'command' => "Remove",
@@ -2937,7 +2939,7 @@ sub prepare_static_effects_data{
 }
 sub extract_effects_data {
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
-	warn ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
+	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
 	$debug and print"lower: $lower upper: $upper  separator: $separator\n";
 	#$debug and print "lines: ". join "\n",@lines, "\n";
@@ -2946,7 +2948,7 @@ sub extract_effects_data {
 	for (my $j = $lower; $j <= $upper; $j++) {
 		my $line = shift @lines;
 	
-		$line =~ /$regex/ or warn("bad effect data line: $line\n"),next;
+		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
 		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
 		$debug and print "Number: $no Name: $name Code: $id Rest: $rest\n";
 		my @p_names = split $separator,$rest; 
@@ -3057,9 +3059,9 @@ sub read_in_effects_data {
 
 
 	for my $i (0..$#effects){
-		no warnings;
+		no carpings;
 		 $effect_i{ $effects[$i]->{code} } = $i; 
-		 use warnings;
+		 use carpings;
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
@@ -3115,7 +3117,7 @@ sub get_ladspa_hints{
 	my @dirs =  split ':', $ENV{LADSPA_PATH};
 	my $data = '';
 	for my $dir (@dirs) {
-		opendir DIR, $dir or warn qq(can't open LADSPA dir "$dir" for read: $!\n);
+		opendir DIR, $dir or carp qq(can't open LADSPA dir "$dir" for read: $!\n);
 		my @plugins = grep{ /\.so$/ } readdir DIR;
 		$data .= join "", map { `analyseplugin $_` } @plugins;
 		closedir DIR;
@@ -3147,7 +3149,7 @@ sub get_ladspa_hints{
 
 	for my $stanza (@plugin_stanzas) {
 
-		$stanza =~ /$pluginre/ or warn "*** couldn't match plugin stanza $stanza ***";
+		$stanza =~ /$pluginre/ or carp "*** couldn't match plugin stanza $stanza ***";
 
 		my ($plugin_name, $plugin_label, $ports) = ($1, $2, $3);
 		#print "$1\n$2\n$3"; exit;
@@ -3186,7 +3188,7 @@ sub get_ladspa_hints{
 	#print Dumper %params;
 	$debug and print Dumper %effects_ladspa; 
 }
-no warnings;
+no carpings;
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
 	my $multiplier = 1;;
@@ -3222,7 +3224,7 @@ sub range {
 	($beg, $end, $default, $resolution)
 
 }
-use warnings;
+use carpings;
 sub integrate_ladspa_hints {
 	map{ 
 		my $i = $effect_i{$_};
@@ -3559,7 +3561,7 @@ sub retrieve_effects {
 sub assign_vars {
 	# TODO, simplify: use full var name, including sigils.
 	my ($file, $var_list) = @_;
-	-f $file or warn ("file: $file not found\n"),return 0;
+	-f $file or carp ("file: $file not found\n"),return 0;
 	my @vars = split "\n", $var_list;
 	my $hash_ref = retrieve($file);
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
