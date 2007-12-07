@@ -1,5 +1,9 @@
 #!/usr/local/bin/perl -w
 
+# BROKEN effects date store/retrieve
+# BROKEN state recall in text mode
+# BROKEN gui mode
+
 BEGIN { push @INC, q(.) } # XXX 
 
 
@@ -62,7 +66,7 @@ my $gui = 0;
 my $mixname = qq(mix);
 my %state_c_ops;
 my $tkeca_effects_data = q(tkeca_effects.tcl);
-my $effects_cache_file = q(ecmd_effects.yaml);
+my $effects_cache_file = q(ecmd_effects);
 my $grammar_file =       q(grammar.pl);
 
 # set the following to 1 to output debugging info
@@ -750,7 +754,7 @@ sub init_gui {
 		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => \&load_session({create => 1}),
+		-command => sub { &load_session({create => 1}) },
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
