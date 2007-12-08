@@ -1,7 +1,7 @@
-package qw(Audio::Flow);
+package Audio::Flow;
 
 use vars qw(%iam_cmd);
-my %un_abbr = qw(
+my %replace = qw(
 	
 	st cs-status
 	cs c-status
@@ -14,13 +14,13 @@ my %un_abbr = qw(
 
 );
 
-sub un_abbr{  # replace abbreviations
+sub replace_abbreviations{  # replace abbreviations
 	my $a = shift;
-	$un_abbr{$a} ? $un_abbr{$a} : $a
+	$replace{$a} ? $replace{$a} : $a
 } 
 
 
-map { $iam_cmd{$_}++ } keys %un_abbr, split "\n", <<CMD;
+map { $iam_cmd{$_}++ } keys %replace, split "\n", <<CMD;
 start
 stop
 run 
@@ -177,3 +177,4 @@ dump-ao-open-state
 dump-cop-value  
 CMD
 #print keys %iam_cmd;
+1;

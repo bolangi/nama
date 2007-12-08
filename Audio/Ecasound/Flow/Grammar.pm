@@ -1,4 +1,4 @@
-package qw(Audio::Flow);
+package Audio::Flow;
 
 ### COMMAND LINE PARSER 
 
@@ -114,3 +114,4 @@ add: 'add' wav channel(s?) {
 
 @ecmd_commands{@ecmd_commands} = 1..@ecmd_commands;
 #print join $/, keys %ecmd_commands; 
+1;

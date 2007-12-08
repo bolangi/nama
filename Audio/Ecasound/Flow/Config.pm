@@ -1,4 +1,4 @@
-package qw(Audio::Flow);
+package Audio::Flow;
 
 $yaml = <<CONFIG;
 ### Ecmd configuration file

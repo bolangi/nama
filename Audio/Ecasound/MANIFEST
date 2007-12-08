@@ -1,5 +1,9 @@
 Changes
-Ecaflow.pm
+Flow.pm
+Grammar.pm
+Iam.pm
+Hello.pm
+Tkeca_effects.pm
 Makefile.PL
 MANIFEST
 README
