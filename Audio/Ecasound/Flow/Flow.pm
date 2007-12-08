@@ -1,25 +1,24 @@
-package Audio::Ecasound::Flow;
-
 use 5.008;
 use strict;
 use warnings;
 
-require Exporter;
-
-our @ISA = qw(Exporter);
-
-# Items to export into callers namespace by default. Note: do not export
-# names by default without a very good reason. Use EXPORT_OK instead.
-# Do not simply export all your public functions/methods/constants.
-
-our @EXPORT_OK = qw( );
-
-our @EXPORT = qw( );
-
 our $VERSION = '0.01';
 
-
 # Preloaded methods go here.
+package UI;
+our @ISA;
+use Object::Tiny qw(dummy);
+sub hello {print "superclass hello\n"};
+
+package UI::Graphical;
+our @ISA = 'UI';
+sub hello {print "make a window\n";}
+
+package UI::Text;
+our @ISA = 'UI';
+sub hello {print "hello world!\n"}
+
+1;
 
 package Ecasound::Flow;
 
@@ -118,9 +117,9 @@ use constant {REC => 'rec',
 			  MON => 'mon',
 			  MUTE => 'mute'};
 
-use Audio::Ecasound::Config; # Default configuration file
-use Audio::Ecasound::Grammar;# Command line grammar
-use Audio::Ecasound::Iam;    # 
+use Audio::Ecasound::Flow::Config; # Default configuration file
+#use Audio::Ecasound::Flow::Grammar;# Command line grammar
+use Audio::Ecasound::Flow::Iam;    # 
 
 ##  widget declarations
 
@@ -277,11 +276,10 @@ sub prepare {
 
 1;
 
+__END__
 package UI::Graphical;
 
 our @ISA = 'UI';
-
-
 
 sub main {
 	&init_gui; 

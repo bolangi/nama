@@ -3,6 +3,7 @@ Flow.pm
 Grammar.pm
 Config.pm
 Iam.pm
+UI.pm
 Makefile.PL
 MANIFEST
 README
