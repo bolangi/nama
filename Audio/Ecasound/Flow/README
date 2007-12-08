@@ -1,0 +1,51 @@
+Audio/Ecasound/Flow version 0.01
+================================
+
+Ecasound Flow assists multitrack recording
+by adding high-level functionality to the Ecasound
+audio processing engine.
+
+Currently two interfaces are supported: a recorder/mixer GUI
+based on the Tk widget set, and a command-line interface for
+console users.
+
+For screenshots, see http://ecmdr.infogami.com/ 
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+DEPENDENCIES
+
+This module requires that you have installed these Perl modules:
+
+	Carp
+	Data::YAML
+	IO::All
+	Cwd
+	Storable 
+	Data::Dumper
+	Getopt::Std
+	Tk
+	Audio::Ecasound
+	Parse::RecDescent
+	YAML::Tiny
+	Data::YAML
+
+The Ecasound audio processing libraries must also be
+installed on your system. Ecasound may be obtained from
+http://ecasound.seul.org/ecasound/ or as precompiled
+binary packages for your Un*x distribution.
+
+COPYRIGHT AND LICENCE
+
+Copyright (C) 2007 Joel Roth
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+

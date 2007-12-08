@@ -1,6 +1,0 @@
-Revision history for Perl extension Ecaflow.
-
-0.01  Fri Dec  7 20:37:11 2007
-	- original version; created by h2xs 1.22 with options
-		-AXc -n Ecaflow
-

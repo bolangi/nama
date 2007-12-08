@@ -1,9 +1,8 @@
 Changes
 Flow.pm
 Grammar.pm
+Config.pm
 Iam.pm
-Hello.pm
-Tkeca_effects.pm
 Makefile.PL
 MANIFEST
 README
