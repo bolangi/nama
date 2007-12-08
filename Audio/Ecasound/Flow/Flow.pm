@@ -129,71 +129,94 @@ use constant {REC => 'rec',
 
 ##  widget declarations
 
-my (
-	$mw,  # main window
-	$ew,  # effect window
-	$canvas, # to make effect frame scrollable
+# were 'my' now globals
 
-	$load_frame,
-	$add_frame,
-	$take_frame,
-	$time_frame,
-	$clock_frame,
-	$oid_frame,
-	$track_frame,
-	$effect_frame,
-	$iam_frame,
-	$perl_eval_frame,
-	$transport_frame,
+use vars qw(
+	$mw 
+	$ew
+	$canvas
 
-	@widget_t,  # take-related widgets, index by $take
-	%widget_c,  # chain-related widgets, index by $n
-	%widget_e,  # effect-related widgets, index by $id
-	@widget_o,  # session-level oid-related widgets, array
-	%widget_o,  # session-level oid-related widgets, name as key
+	$load_frame
+	$add_frame
+	$take_frame
+	$time_frame
+	$clock_frame
+	$oid_frame
+	$track_frame
+	$effect_frame
+	$iam_frame
+	$perl_eval_frame
+	$transport_frame
 
-	@global_version_buttons,
-	@time_marks, # marker buttons
-	$time_step,  # Sec/Min selector
-	$clock,      # clock widget
-	$setup_length, # how long will this go on?
+	@widget_t
+	%widget_c
+	%widget_e
+	@widget_o
+	%widget_o
 
-
-	$session_label,
-	$take_label,
-
-	$sn_label,
-	$sn_text, 
-	$sn_load, 
-	$sn_load_nostate, 
-	$sn_new,
-	$sn_quit,
-	$iam_label,
-	$iam_text,
-	$iam_execute,
-	$iam_error,
-	$build_track_label,
-	$build_track_text,
-	$build_track_add, 
-	$build_track_rec_label, 
-	$build_track_rec_text,
-	$build_track_mon_label, 
-	$build_track_mon_text, 
-	$build_new_take,
-	$transport_label,
-	$transport_setup_and_connect,
-	$transport_setup,
-	$transport_connect,
-	$transport_disconnect,
-	$transport_new,
-	$transport_start,
-	$transport_stop,
+	@global_version_buttons
+	@time_marks
+	$time_step 
+	$clock     
+	$setup_length 
 
 
+	$session_label
+	$take_label
 
-	$tkcmd,
-	$iam,
-	$old_bg,
+	$sn_label
+	$sn_text 
+	$sn_load 
+	$sn_load_nostate 
+	$sn_new
+	$sn_quit
+	$iam_label
+	$iam_text
+	$iam_execute
+	$iam_error
+	$build_track_label
+	$build_track_text
+	$build_track_add 
+	$build_track_rec_label 
+	$build_track_rec_text
+	$build_track_mon_label 
+	$build_track_mon_text 
+	$build_new_take
+	$transport_label
+	$transport_setup_and_connect
+	$transport_setup
+	$transport_connect
+	$transport_disconnect
+	$transport_new
+	$transport_start
+	$transport_stop
+
+
+
+	$tkcmd
+	$iam
+	$old_bg
+
+
+	$loopa
+	$loopb
+	$mixchain
+	$mixchain_aux
+
+	@oids
+	%inputs
+	%outputs
+	%post_input
+	%pre_output
+
+	$ladspa_sample_rate
+	$statestore
+	$chain_setup_file
+
+	$track_name
+	$ch_r
+	$ch_m 
+
 
 );
 
@@ -203,13 +226,13 @@ my (
 
 # terminations for mixing chain
 
-my $loopa = 'loop,111';
-my $loopb = 'loop,222';
+$loopa = 'loop,111';
+$loopb = 'loop,222';
 
 # chain names
 
-my $mixchain = 1; 
-my $mixchain_aux = 'MixDown'; # used for playing back mixes
+$mixchain = 1; 
+$mixchain_aux = 'MixDown'; # used for playing back mixes
                               # when chain 1 is active
 							  
 # the following value, used to set the range of acceptable values
@@ -217,7 +240,7 @@ my $mixchain_aux = 'MixDown'; # used for playing back mixes
 # should change with per-project sample rates in parameters.pl
 # but this setting should serve most purposes
 
-my $ladspa_sample_rate = 44100; # for sample-rate dependent effect
+$ladspa_sample_rate = 44100; # for sample-rate dependent effect
 
 $unit  = 1; # fast-forward multiplier default;
 
@@ -225,12 +248,6 @@ $unit  = 1; # fast-forward multiplier default;
 
 $statestore   = "State";  # filename to store state
 $chain_setup_file = "session.ecs";
-my ($track_name, $ch_r, $ch_m); 
-my @oids;
-my %inputs;
-my %outputs;
-my %post_input;
-my %pre_output;
 
 
 ### this concludes the Audio::Ecasound::Flow class data
