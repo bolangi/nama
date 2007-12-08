@@ -4,6 +4,10 @@ use warnings;
 
 our $VERSION = '0.01';
 
+=comment
+
+WORKING CLASS DEFINITIONS
+
 # Preloaded methods go here.
 package UI;
 our @ISA;
@@ -21,6 +25,8 @@ sub hello {print "hello world!\n"}
 1;
 
 package Ecasound::Flow;
+
+=cut
 
 # BROKEN effects date store/retrieve
 # BROKEN state recall in text mode
@@ -117,9 +123,9 @@ use constant {REC => 'rec',
 			  MON => 'mon',
 			  MUTE => 'mute'};
 
-use Audio::Ecasound::Flow::Config; # Default configuration file
+#use Audio::Ecasound::Flow::Config; # Default configuration file
 #use Audio::Ecasound::Flow::Grammar;# Command line grammar
-use Audio::Ecasound::Flow::Iam;    # 
+#use Audio::Ecasound::Flow::Iam;    # 
 
 ##  widget declarations
 
@@ -230,7 +236,7 @@ my %pre_output;
 ### this concludes the Audio::Ecasound::Flow class data
 ##
 
-package UI;
+# package UI;
 
 use Object::Tiny qw{mode};
 
@@ -265,7 +271,7 @@ sub prepare {
 	$use_monitor_version_for_mixdown =
 	$cfg{use_monitor_version_for_mixdown};
 
-	TODO
+	# TODO
 	# Tie mixdown version suffix to global monitor version 
 
 	&new_engine;
@@ -276,10 +282,9 @@ sub prepare {
 
 1;
 
-__END__
-package UI::Graphical;
+# package UI::Graphical;
 
-our @ISA = 'UI';
+# our @ISA = 'UI';
 
 sub main {
 	&init_gui; 
@@ -290,9 +295,9 @@ sub main {
 	MainLoop;
 }
 
-package UI::Text;
+# package UI::Text;
 
-our @ISA = 'UI';
+# our @ISA = 'UI';
 
 sub main {
 	&session_init, &load_session({create => $opts{c}}) if $session_name;
