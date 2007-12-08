@@ -21,9 +21,7 @@ our $VERSION = '0.01';
 
 # Preloaded methods go here.
 
-package Audio::Flow;
-
-#use lib '/home/jroth/ecmd-dev';
+package Ecasound::Flow;
 
 # BROKEN effects date store/retrieve
 # BROKEN state recall in text mode
@@ -229,52 +227,76 @@ my %outputs;
 my %post_input;
 my %pre_output;
 
-sub main { 
 
-$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+### this concludes the Audio::Ecasound::Flow class data
+##
 
-print "reached here, too\n";
+package UI;
 
-$wav_dir = $cfg{wave_directory};
--d $wav_dir or croak qq("$wav_dir" not a directory\n);
+use Object::Tiny qw{mode};
 
-$ecmd_home = $cfg{ecmd_home};  # deprecated
+sub create{
+	my $mode = shift; # Text or Graphical
+	croak unless $mode eq q(Text) or $mode eq q(Graphical);
+	my $class = "UI::$mode";
+	&debug and print "creating class: $class\n";
+	my $self = $$class->new;
+	return $self;
+}
 
-$input_channels = 10;  # fixed value for Tk widget
+sub prepare { 
 
-$use_monitor_version_for_mixdown = 1;
-# Tie mixdown version suffix to global monitor version 
+	$debug2 and print "&prepare\n";
+	$debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
+
+	$session_name  = shift;
+	$debug and print "session name: $session_name\n";
+	my $create = $opts{c} ? 1 : 0;
+	$opts{g} and $gui = 1;
+
+	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+
+	$wav_dir = $cfg{wave_directory};
+
+	-d $wav_dir or croak qq("$wav_dir" not a directory\n);
+
+	$ecmd_home = $cfg{ecmd_home};  # deprecated
+
+	$input_channels = $cfg{input_channels};  # fixed value for Tk widget
+	$use_monitor_version_for_mixdown =
+	$cfg{use_monitor_version_for_mixdown};
+
+	TODO
+	# Tie mixdown version suffix to global monitor version 
+
+	&new_engine;
+	&initialize_oids;
+	&prepare_static_effects_data;
+
+}
+
+1;
+
+package UI::Graphical;
+
+our @ISA = 'UI';
 
 
 
-
-### Option Processing ###
-
-getopts('mceg', \%opts);  # options as above. Values in %opts 
-$debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
-$opts{g} and $gui = 1;
-
-&new_engine;
-&initialize_oids;
-&read_config($yaml);
-&prepare_static_effects_data;
-
-$session_name  = shift;
-$debug and print "session name: $session_name\n";
-my $create = $opts{c} ? 1 : 0;
-
-# GUI or Terminal mode
-
-if ($gui) {
+sub main {
 	&init_gui; 
 	&transport_gui;
 	&oid_gui;
 	&time_gui;
 	&session_init, &load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
+}
 
-} else {
-	
+package UI::Text;
+
+our @ISA = 'UI';
+
+sub main {
 	&session_init, &load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
@@ -310,9 +332,6 @@ if ($gui) {
 	}
 }
 
-} 
-
-########### end of main program body ##########
 	
 sub eval_iam {
 	my $debug = 1;
@@ -338,8 +357,9 @@ sub read_config {
 # looks to $session_dir
 
 	my $yaml = $yaml;  
-	my $yamlfile = &join_path(&session_dir,$yamlfile);
-	$yaml = io($yamlfile)->all if -f $yamlfile;
+	# TODO 
+	#my $yamlfile = &join_path(&session_dir,$yamlfile);
+	#$yaml = io($yamlfile)->all if -f $yamlfile;
 
 	$config = YAML::Tiny->read_string($yaml);
 
@@ -3656,6 +3676,7 @@ recording and processing by Ecasound
 
 	$ui->main(%options);
 
+	
 
 
 =head1 ABSTRACT

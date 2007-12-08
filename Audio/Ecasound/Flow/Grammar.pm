@@ -1,4 +1,4 @@
-package Audio::Flow;
+package Ecasound::Flow;
 
 ### COMMAND LINE PARSER 
 

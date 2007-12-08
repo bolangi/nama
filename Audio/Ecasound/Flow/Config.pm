@@ -1,4 +1,4 @@
-package Audio::Flow;
+package Ecasound::Flow;
 
 $yaml = <<CONFIG;
 ### Ecmd configuration file
@@ -38,5 +38,7 @@ mix-to-disk:
     format:        cd-stereo 
 mixer_out: 
     format:        cd-stereo
+tk_input_channels: 10  # fixed value for Tk widget
+use_monitor_version_for_mixdown: 1
 CONFIG
 1;
