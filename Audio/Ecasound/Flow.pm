@@ -30,6 +30,8 @@ our (
 	$gui,
 	$mixname, 		# 'mix' for the mixer track display
 	$yamlfile, 		# configuration file
+	$yw,			# yaml writer object
+	$yr,			# yaml writer object
 	%state_c_ops, 	# intermediate copy for storage/retrieval
 	$effects_cache_file, # where we keep info on Ecasound
 					# and LADSPA effects, presets, etc.
@@ -132,6 +134,8 @@ our (
 	$perl_eval_frame,
 	$transport_frame,
 
+	## collected widgets (i may need to destroy them)
+
 	@widget_t, # widgets for displaying track groups (busses!)
 	%widget_c, # for chains (tracks)
 	%widget_e, # for effects
@@ -139,8 +143,9 @@ our (
 	%widget_o, # 
 
 	@global_version_buttons, # to set the same version for
-						 	#	all tracks
+						  	#	all tracks
 	@time_marks,	# how different from @marks?
+					# one is widgets one is the data
 	$time_step,
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time
@@ -154,12 +159,14 @@ our (
 	$sn_load_nostate,
 	$sn_new,
 	$sn_quit,
+
+	### A separate box for entering IAM (and other) commands
 	$iam_label,
 	$iam_text,
 	$iam_execute,
 	$iam_error,
 
-	# add track
+	# add track gui
 	#
 	$build_track_label,
 	$build_track_text,
@@ -3629,26 +3636,43 @@ sub assign_vars {
 	# TODO, simplify: use full var name, including sigils.
 	$debug2 and print "&assign_vars\n";
 	my ($file, $var_list) = @_;
-	-f $file or carp ("file: $file not found\n"),return 0;
+	my $yamlfile = "$file.yaml";
+	my $ref; # to receive yaml data
+	if (-f $yamlfile) {
+		my $yaml = IO($yamlfile)->all;
+		$yr = Data::YAML::Reader->new;
+		$ref = $yr->read( $yaml );
+		$debug and print qq($yamlfile: YAML file found\n);
+	} else {
+		$debug and print qq($yamlfile: YAML file not found, i'll look for type
+		Storable\n);
+	}
+
+	if (! -f $file and ! -f $yamlfile){
+		print qq($file: Type 'Storable' data file not found\n); 
+	  	return;
+  	}
+	$debug and print qq($file: Type 'Storable' data file found\n); 
 	my @vars = split /\s+/, $var_list;
 	$debug and print "variable list: @vars\n";
-	my $hash_ref = retrieve($file);
+	my $ref = retrieve($file);
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string = $_
 						. q( = )
 						. $sigil
-						. q({ $hash_ref->{)
+						. q({ $ref->{)
 						. $identifier
-						. q(} } if defined $hash_ref->{)
+						. q(} } if defined $ref->{)
 						. $identifier
 						. qq(};) ;
 	#	print $eval_string;
 		eval $eval_string or carp "failed to eval $eval_string: $!\n";
 	} @vars;
 }
-my $yw;
 sub store_vars {
+	# now we will only store in YAML
+	$debug2 and print "&store_vars\n";
 	my ($file, $var_list) = @_;
 	my @vars = split "\n", $var_list;
 	my %state;
@@ -3659,7 +3683,7 @@ sub store_vars {
 							. $_;
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
-	my $result1 = store \%state, $file;
+	# my $result1 = store \%state, $file; # OLD METHOD
 	my $yamlout;
     my $yw = Data::YAML::Writer->new;
     $yw->write( \%state, \$yamlout );
@@ -3668,10 +3692,6 @@ sub store_vars {
 
 use Data::YAML::Reader;
 
-    my $yr = Data::YAML::Reader->new;
-    
-    # ...a string containing YAML...
-    my $from_string = $yr->read( $some_string );
 
  use Data::YAML::Writer;
     
