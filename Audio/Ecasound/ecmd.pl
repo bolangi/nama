@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-
 package Audio::Ecasound::Flow;
 use strict;
 use lib '/home/jroth/ecmd-dev';

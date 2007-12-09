@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 ## Imported modules
+use lib '/home/jroth/ecmd-dev';
 
 sub c{print "hello from flow"}
 
@@ -3688,36 +3689,6 @@ sub store_vars {
     my $yw = Data::YAML::Writer->new;
     $yw->write( \%state, \$yamlout );
 	$yamlout > io("$file.yaml");
-=comment
-
-use Data::YAML::Reader;
-
-
- use Data::YAML::Writer;
-    
-    my $data = {
-        one => 1,
-        two => 2,
-        three => [ 1, 2, 3 ],
-    };
-    
-    my $yw = Data::YAML::Writer->new;
-    
-    # Write to an array...
-    $yw->write( $data, \@some_array );
-    
-    # ...an open file handle...
-    $yw->write( $data, $some_file_handle );
-    
-    # ...a string ...
-    $yw->write( $data, \$some_string );
-    
-    # ...or a closure
-    $yw->write( $data, sub {
-        my $line = shift;
-        print "$line\n";
-    } );
-=cut
 }
 
 sub arm_mark { 
