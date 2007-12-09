@@ -1,4 +1,4 @@
-package Ecasound::Flow;
+package Audio::Ecasound::Flow;
 
 use vars qw(%iam_cmd);
 my %replace = qw(

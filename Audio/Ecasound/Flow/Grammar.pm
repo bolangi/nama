@@ -1,4 +1,4 @@
-package Ecasound::Flow;
+package Audio::Ecasound::Flow;
 
 ### COMMAND LINE PARSER 
 
@@ -114,4 +114,19 @@ add: 'add' wav channel(s?) {
 
 @ecmd_commands{@ecmd_commands} = 1..@ecmd_commands;
 #print join $/, keys %ecmd_commands; 
+#
+
+sub remove_spaces {
+	my $entry = shift;
+	# remove leading and trailing spaces
+	
+	$entry =~ s/^\s*//;
+	$entry =~ s/\s*$//;
+
+	# convert other spaces to underscores
+	
+	$entry =~ s/\s+/_/g;
+	$entry;
+}
 1;
+

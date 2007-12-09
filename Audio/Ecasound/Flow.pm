@@ -1,38 +1,26 @@
+package Audio::Ecasound::Flow;
 use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+## Imported modules
 
-=comment
+sub c{print "hello from flow"}
 
-WORKING CLASS DEFINITIONS
+use Carp;
+use Data::YAML;
+use IO::All;
+use Cwd;
+use Storable; 
+use Data::Dumper;
+use Getopt::Std;
+use Tk;
+use Audio::Ecasound;
+use Parse::RecDescent;
+use YAML::Tiny;
 
-# Preloaded methods go here.
-package UI;
-our @ISA;
-use Object::Tiny qw(dummy);
-sub hello {print "superclass hello\n"};
-
-package UI::Graphical;
-our @ISA = 'UI';
-sub hello {print "make a window\n";}
-
-package UI::Text;
-our @ISA = 'UI';
-sub hello {print "hello world!\n"}
-
-1;
-
-package Ecasound::Flow;
-
-=cut
-
-# BROKEN effects date store/retrieve
-# BROKEN state recall in text mode
-# BROKEN gui mode
 #
-# BROKEN constants
+######## Definitions ###########
 
 our (
 	$gui,
@@ -40,16 +28,16 @@ our (
 	$yamlfile,
 	%state_c_ops,
 	$effects_cache_file,
-	$mw ,
+	$mw,
 	$ew,
 	$canvas,
 
 	$ecasound,
 	$grammar,
 	@ecmd_commands,
-	%ecmd_commands ,
+	%ecmd_commands,
 	$ecmd_home,
-	$wav_dir ,
+	$wav_dir,
 	$input_channels,
 	$config,
 	%devices,
@@ -58,9 +46,9 @@ our (
 	$clock_id,
 	$use_monitor_version_for_mixdown,
 	$select_track,
-	@format_fields ,
+	@format_fields,
 	$session,
-	$session_name ,
+	$session_name,
 	$mix_dir,
 	$cop_id,
 	$i,
@@ -70,25 +58,25 @@ our (
 	$statestore,
 	$chain_setup_file,
 	@monitor,
-	@record ,
+	@record,
 	@mute,
-	%track_names ,
-	@effects		,
-	%effect_i	,
+	%track_names,
+	@effects,
+	%effect_i,
 	@ladspa_sorted,
 	%effects_ladspa,
 	$e,
 	$last_version,
 	$monitor_version,
-	%cops 			,
-	%copp 		,
+	%cops,
+	%copp,
 	%e_bound,
-	@marks ,
-	$unit	,
-	$markers_armed ,
-	%old_vol   ,
-	$length   ,
-	$jack_on ,
+	@marks,
+	$unit,
+	$markers_armed,
+	%old_vol,
+	$length,
+	$jack_on,
 
 	@all_chains,
 	@input_chains,
@@ -124,17 +112,17 @@ our (
 
 	@global_version_buttons,
 	@time_marks,
-	$time_step ,
-	$clock     ,
-	$setup_length ,
+	$time_step,
+	$clock,
+	$setup_length,
 
 	$session_label,
 	$take_label,
 
 	$sn_label,
-	$sn_text ,
-	$sn_load ,
-	$sn_load_nostate ,
+	$sn_text,
+	$sn_load,
+	$sn_load_nostate,
 	$sn_new,
 	$sn_quit,
 	$iam_label,
@@ -143,11 +131,11 @@ our (
 	$iam_error,
 	$build_track_label,
 	$build_track_text,
-	$build_track_add ,
-	$build_track_rec_label ,
+	$build_track_add,
+	$build_track_rec_label,
 	$build_track_rec_text,
-	$build_track_mon_label ,
-	$build_track_mon_text ,
+	$build_track_mon_label,
+	$build_track_mon_text,
 	$build_new_take,
 	$transport_label,
 	$transport_setup_and_connect,
@@ -178,7 +166,7 @@ our (
 
 	$track_name,
 	$ch_r,
-	$ch_m ,
+	$ch_m,
 
 	$effects_data_vars,
 	%L,
@@ -191,19 +179,8 @@ our (
 );
 
 	
-use Carp;
-use Data::YAML;
-use IO::All;
-use Cwd;
-use Storable; 
-use Data::Dumper;
-use Getopt::Std;
-use Tk;
-use Audio::Ecasound;
-use Parse::RecDescent;
-use YAML::Tiny;
 
-$gui = 0;
+$gui = 0; 
 $mixname = qq(mix);
 $yamlfile = qq(config.yaml); # we will look for this
 $effects_cache_file = q(ecmd_effects);
@@ -218,10 +195,32 @@ use constant (REC => 'rec',
 			  MON => 'mon',
 			  MUTE => 'mute');
 
-#use Audio::Ecasound::Flow::Config; # Default configuration file
-#use Audio::Ecasound::Flow::Grammar;# Command line grammar
-#use Audio::Ecasound::Flow::Iam;    # 
+use Audio::Ecasound::Flow::Config; # Default configuration file
+use Audio::Ecasound::Flow::Grammar;# Command line grammar
+use Audio::Ecasound::Flow::Iam;    # 
 
+#print ("yaml: $yaml") if $yaml or print "no  yaml";
+#exit;
+# use Config;
+# use Grammar;
+# use Iam;
+
+## definitions 
+
+$ladspa_sample_rate = 44100; # for sample-rate dependent effect
+# LIMITATION: sample rate fixed at 44100
+# the following value, used to set the range of acceptable values
+# for sample-rate dependent LADSPA effect parameters, ideally 
+# should change with per-project sample rates in parameters.pl
+# but this setting should serve temporarily.
+# This value should come from the object using the effect
+
+$unit  = 1; # fast-forward multiplier default;
+
+# some file definitions
+
+$statestore   = "State";  # filename to store state
+$chain_setup_file = "session.ecs";
 
 # name the track groupings
 
@@ -238,58 +237,70 @@ $mixchain = 1;
 $mixchain_aux = 'MixDown'; # used for playing back mixes
                               # when chain 1 is active
 							  
-# the following value, used to set the range of acceptable values
-# for sample-rate dependent LADSPA effect parameters, ideally 
-# should change with per-project sample rates in parameters.pl
-# but this setting should serve most purposes
-
-$ladspa_sample_rate = 44100; # for sample-rate dependent effect
-
-$unit  = 1; # fast-forward multiplier default;
-
-# some file definitions
-
-$statestore   = "State";  # filename to store state
-$chain_setup_file = "session.ecs";
+######## End Definitions ########
 
 
-### this concludes the Audio::Ecasound::Flow class data
-##
+our $VERSION = '0.01';
+
+=comment
+
+WORKING CLASS DEFINITIONS
+
+# Preloaded methods go here.
+package UI;
+our @ISA;
+use Object::Tiny qw(dummy);
+sub hello {print "superclass hello\n"};
+
+package UI::Graphical;
+our @ISA = 'UI';
+sub hello {print "make a window\n";}
+
+package UI::Text;
+our @ISA = 'UI';
+sub hello {print "hello world!\n"}
+
+1;
+
+#package Ecasound::Flow;
+
+=cut
+
+# BROKEN effects date store/retrieve
+# BROKEN state recall in text mode
+# BROKEN gui mode
+#
+# BROKEN constants
 
 # package UI;
 
 use Object::Tiny qw{mode};
 
-sub create{
-	my $mode = shift; # Text or Graphical
-	croak unless $mode eq q(Text) or $mode eq q(Graphical);
-	my $class = "UI::$mode";
-	&debug and print "creating class: $class\n";
-	my $self = $$class->new;
-	return $self;
-}
 
 sub prepare { 
 
 	$debug2 and print "&prepare\n";
 	$debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
 
-	$session_name  = shift;
-	$debug and print "session name: $session_name\n";
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
+	&read_config;
+
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
-	$wav_dir = $cfg{wave_directory};
+	## Aliases
 
-	-d $wav_dir or croak qq("$wav_dir" not a directory\n);
+	*wav_dir = \$cfg{wave_directory};
 
-	$ecmd_home = $cfg{ecmd_home};  # deprecated
+	-d $wav_dir or croak qq(wave_directory: "$wav_dir" in Config.pm
+	either doesn't exist or is not a directory\n);
 
-	$input_channels = $cfg{input_channels};  # fixed value for Tk widget
-	$use_monitor_version_for_mixdown =
-	$cfg{use_monitor_version_for_mixdown};
+	*ecmd_home = \$cfg{ecmd_home};  # deprecated
+
+	*input_channels = \$cfg{input_channels};  # fixed value for Tk widget
+	*use_monitor_version_for_mixdown = 
+		\$cfg{use_monitor_version_for_mixdown};
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -306,7 +317,7 @@ sub prepare {
 
 # our @ISA = 'UI';
 
-sub main {
+sub loop {
 	&init_gui; 
 	&transport_gui;
 	&oid_gui;
@@ -319,7 +330,7 @@ sub main {
 
 # our @ISA = 'UI';
 
-sub main {
+sub loop {
 	&session_init, &load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
@@ -514,18 +525,6 @@ if ($gui) {
 
 	# $is_armed = 0;
 }
-sub remove_spaces {
-	my $entry = shift;
-	# remove leading and trailing spaces
-	
-	$entry =~ s/^\s*//;
-	$entry =~ s/\s*$//;
-
-	# convert other spaces to underscores
-	
-	$entry =~ s/\s+/_/g;
-	$entry;
-}
 sub create_dir {
 	my $dir = shift;
 	-d $dir 
@@ -548,7 +547,7 @@ sub add_track {
 	$track_name = &remove_spaces($track_name);
 
 	print ("Track name in use\n"), return 0 if $track_names{$track_name};
-	$state_t{$t}->{rw} = ::REC;
+	$state_t{$t}->{rw} = $::REC;
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
 	&register_track($i, $track_name, $ch_r, $ch_m);
@@ -557,7 +556,7 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = ::REC if ! defined $state_c{$i}->{rw};
+	$state_c{$i}->{rw} = $::REC if ! defined $state_c{$i}->{rw};
 	&track_gui($i) if $gui;
 	return 1;
 }
@@ -586,7 +585,7 @@ sub register_track {
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
 	$chain{$name} = $i;
-	$state_c{$i}->{rw} = ::REC;
+	$state_c{$i}->{rw} = $::REC;
 	$state_c{$i}->{ch_m} = $ch_m;
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
@@ -684,7 +683,7 @@ sub increment_take {
 			return if &transport_running; 
 					$t++;
 					$state_t{active} = $t;
-					$state_t{$t}->{rw} = ::REC;
+					$state_t{$t}->{rw} = $::REC;
 					push @takes, $t;
 					# print SESSION "take $t\n";
 }
@@ -1086,7 +1085,7 @@ sub take_gui {
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
 		$name->AddItems([
-			'command' => ::REC,
+			'command' => $::REC,
 			-background => $old_bg,
 			-command => sub { 
 				no strict qw(vars);
@@ -1173,7 +1172,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> &selected_version($n) ) 
-	#		unless &rec_status($n) eq ::REC
+	#		unless &rec_status($n) eq $::REC
 			}
 					);
 	}
@@ -1189,7 +1188,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_r},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = ::REC;
+							$state_c{$n}->{rw} = $::REC;
 							&refresh }
 				 		)
 				}
@@ -1744,10 +1743,10 @@ use warnings;
 	return $::MUTE if $state_t{$take{$n}}->{rw} eq $::MUTE;
 	if ($take{$n} == $state_t{active} ) {
 
-		if ($state_t{$take{$n}}->{rw} eq ::REC) {
+		if ($state_t{$take{$n}}->{rw} eq $::REC) {
 
 			
-			if ($state_c{$n}->{rw} eq ::REC){
+			if ($state_c{$n}->{rw} eq $::REC){
 				return $::REC if $state_c{$n}->{ch_r};
 				return $::MON if $file_exists;
 				return $::MUTE;
@@ -2428,7 +2427,7 @@ sub refresh_t {
 		#  rec if @record entry for this take
 		if ( grep{$take{$_}==$t}@record ) { 
 			$debug and print "t-rec $t\n";	
-			$status = ::REC } 
+			$status = $::REC } 
 		# 	mon if @monitor entry
 		elsif ( grep{$take{$_}==$t}@monitor )
 			{ 
@@ -2553,7 +2552,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless &rec_status($n) eq ::REC }
+				unless &rec_status($n) eq $::REC }
 					);
 }
 sub update_master_version_button {
@@ -2955,8 +2954,10 @@ sub prepare_static_effects_data{
 	# newer than cache
 
 	if (-f $effects_cache and ! $opts{e}){ 
+		$debug and print "looking for effects cache: $effects_cache\n";
 		&assign_vars($effects_cache, $effects_data_vars);
 	} else {
+		$debug and print "reading in effects data\n";
 		&read_in_effects_data; 
 		&get_ladspa_hints, 
 		&integrate_ladspa_hints, 
@@ -3602,7 +3603,7 @@ sub assign_vars {
 						. $identifier
 						. qq(};) ;
 	#	print $eval_string;
-		eval $eval_string or print "failed to eval $eval_string: $!\n";
+		eval $eval_string or carp "failed to eval $eval_string: $!\n";
 	} @vars;
 }
 sub store_vars {

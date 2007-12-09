@@ -1,5 +1,6 @@
-package Ecasound::Flow;
-
+package Audio::Ecasound::Flow;
+use strict;
+use vars qw($yaml);
 $yaml = <<CONFIG;
 ### Ecmd configuration file
 #
