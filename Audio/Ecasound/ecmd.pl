@@ -11,6 +11,6 @@ getopts('mceg', \%opts);
 $session_name = shift;
 $debug and print "session name: $session_name\n";
 &prepare;
-&loop;
+&loopg;
 
 

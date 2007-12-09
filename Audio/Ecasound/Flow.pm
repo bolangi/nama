@@ -267,16 +267,16 @@ sub hello {print "hello world!\n"}
 
 =cut
 
-# BROKEN effects date store/retrieve, fixed!
+# BROKEN effects data store/retrieve, fixed!
 # BROKEN state recall in text mode 
-# BROKEN gui mode
+# BROKEN gui mode... fixed! 
 #
 # BROKEN constants fixed!
 # BROKEN &load session loads after &dig_ruins,
 # and wipes out config information.
+# Grammar expanded
 
 use Object::Tiny qw{mode};
-
 
 sub prepare { 
 
@@ -318,7 +318,7 @@ sub prepare {
 
 # our @ISA = 'UI';
 
-sub loop {
+sub loopg {
 	&init_gui; 
 	&transport_gui;
 	&oid_gui;
@@ -385,6 +385,7 @@ sub eval_iam {
 
 sub read_config {
 	$debug2 and print "&read_config\n";
+	local $debug = 0;
 	$config = YAML::Tiny->new;
 
 # overwrite local copy if config.yaml in current session directory
@@ -392,9 +393,9 @@ sub read_config {
 # looks to $session_dir
 
 	my $yaml = $yaml;  
-	# TODO 
-	#my $yamlfile = &join_path(&session_dir,$yamlfile);
-	#$yaml = io($yamlfile)->all if -f $yamlfile;
+
+	my $yamlfile = &join_path(&session_dir,$yamlfile);
+	$yaml = io($yamlfile)->all if -f $yamlfile;
 
 	$config = YAML::Tiny->read_string($yaml);
 
@@ -454,7 +455,7 @@ sub session_init{
 	$debug2 and print "&session_init\n";
 	&initialize_session_data;
 	&remove_small_wavs; 
-
+	## XXX need second argument
 	&retrieve_state(&join_path(&session_dir,$statestore)) unless $opts{m};
 	&mix_track, &dig_ruins unless scalar @all_chains;
 	&global_version_buttons if $gui;
@@ -536,6 +537,7 @@ sub create_dir {
 
 sub add_track {
 	$debug2 and print "&add_track\n";
+	local $debug = 0;
 	return 0 if &transport_running;
 	my $name = shift;
 	$name and my $track_name = $name; 
@@ -596,6 +598,7 @@ sub register_track {
 }
 sub dig_ruins { 
 
+	local $debug = 0;
 	# only if there are no tracks , 
 	# we exclude the mixchain
 	#
@@ -3243,7 +3246,6 @@ sub range {
 		$default = &round (log $default);
 	}
 	
-
 	$resolution = &d2( $resolution + 0.002) if $resolution < 1  and $resolution > 0.01;
 	$resolution = &dn ( $resolution, 3 ) if $resolution < 0.01;
 	$resolution = int ($resolution + 0.1) if $resolution > 1 ;
@@ -3479,7 +3481,7 @@ sub r5 { &r("eff5") };
 =cut
 sub retrieve_effects {
 	#my $debug = 1;
-	$debug2 and print "&retrieve_state\n";
+	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
 	my %current_cops = %cops; # XXX why bother
 	my %current_copp = %copp; # XXX why bother
