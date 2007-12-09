@@ -31,8 +31,166 @@ package Ecasound::Flow;
 # BROKEN effects date store/retrieve
 # BROKEN state recall in text mode
 # BROKEN gui mode
+#
+# BROKEN constants
+
+our (
+	$gui,
+	$mixname,
+	$yamlfile,
+	%state_c_ops,
+	$effects_cache_file,
+	$mw ,
+	$ew,
+	$canvas,
+
+	$ecasound,
+	$grammar,
+	@ecmd_commands,
+	%ecmd_commands ,
+	$ecmd_home,
+	$wav_dir ,
+	$input_channels,
+	$config,
+	%devices,
+	%opts,
+	%oid_status,
+	$clock_id,
+	$use_monitor_version_for_mixdown,
+	$select_track,
+	@format_fields ,
+	$session,
+	$session_name ,
+	$mix_dir,
+	$cop_id,
+	$i,
+	$t,
+	%state_c,
+	%state_t,
+	$statestore,
+	$chain_setup_file,
+	@monitor,
+	@record ,
+	@mute,
+	%track_names ,
+	@effects		,
+	%effect_i	,
+	@ladspa_sorted,
+	%effects_ladspa,
+	$e,
+	$last_version,
+	$monitor_version,
+	%cops 			,
+	%copp 		,
+	%e_bound,
+	@marks ,
+	$unit	,
+	$markers_armed ,
+	%old_vol   ,
+	$length   ,
+	$jack_on ,
+
+	@all_chains,
+	@input_chains,
+	@output_chains,
+
+	%take,
+	@takes,
+	%alias,
+	%chain,
+
+	%subst,
+	%cfg,
+	$tkeca_effects_data,
+	$yaml,
+
+	$load_frame,
+	$add_frame,
+	$take_frame,
+	$time_frame,
+	$clock_frame,
+	$oid_frame,
+	$track_frame,
+	$effect_frame,
+	$iam_frame,
+	$perl_eval_frame,
+	$transport_frame,
+
+	@widget_t,
+	%widget_c,
+	%widget_e,
+	@widget_o,
+	%widget_o,
+
+	@global_version_buttons,
+	@time_marks,
+	$time_step ,
+	$clock     ,
+	$setup_length ,
+
+	$session_label,
+	$take_label,
+
+	$sn_label,
+	$sn_text ,
+	$sn_load ,
+	$sn_load_nostate ,
+	$sn_new,
+	$sn_quit,
+	$iam_label,
+	$iam_text,
+	$iam_execute,
+	$iam_error,
+	$build_track_label,
+	$build_track_text,
+	$build_track_add ,
+	$build_track_rec_label ,
+	$build_track_rec_text,
+	$build_track_mon_label ,
+	$build_track_mon_text ,
+	$build_new_take,
+	$transport_label,
+	$transport_setup_and_connect,
+	$transport_setup,
+	$transport_connect,
+	$transport_disconnect,
+	$transport_new,
+	$transport_start,
+	$transport_stop,
+
+	$tkcmd,
+	$iam,
+	$old_bg,
 
 
+	$loopa,
+	$loopb,
+	$mixchain,
+	$mixchain_aux,
+
+	@oids,
+	%inputs,
+	%outputs,
+	%post_input,
+	%pre_output,
+
+	$ladspa_sample_rate,
+
+	$track_name,
+	$ch_r,
+	$ch_m ,
+
+	$effects_data_vars,
+	%L,
+	%M,
+	$persistent_vars,
+	$effects_state,
+	$debug,
+	$debug2,
+
+);
+
+	
 use Carp;
 use Data::YAML;
 use IO::All;
@@ -45,180 +203,25 @@ use Audio::Ecasound;
 use Parse::RecDescent;
 use YAML::Tiny;
 
-## Some lexical variables
-
-my $gui = 0;
-my $mixname = qq(mix);
-my $yamlfile = qq(config.yaml); # we will look for this
-my %state_c_ops;
-my $effects_cache_file = q(ecmd_effects);
+$gui = 0;
+$mixname = qq(mix);
+$yamlfile = qq(config.yaml); # we will look for this
+$effects_cache_file = q(ecmd_effects);
 
 # set the following to 1 to output debugging info
-my $debug  = 1; # detailed debugging info 
-my $debug2 = 1; # subroutine names
+$debug  = 1; # detailed debugging info 
+$debug2 = 1; # subroutine names
 
 ### Some Global Variables
 
-use vars qw( 	$ecasound
-				$grammar
-				@ecmd_commands
-				%ecmd_commands 
-				$ecmd_home
-				$wav_dir 
-			 	$input_channels
-				$config
-			 	%devices
-				%opts
-			 	%oid_status
-				$clock_id
-				$use_monitor_version_for_mixdown
-			 	$select_track
-				@format_fields 
-				$session
-				$session_name 
-				$mix_dir
-				$cop_id
-				$i
-				$t
-				%state_c
-				%state_t
-				$statestore
-				$chain_setup_file
-				@monitor
-				@record 
-				@mute
-				%track_names 
-				@effects		
-				%effect_i	
-				@ladspa_sorted
-				%effects_ladspa
-				$e
-				$last_version
-				$monitor_version
-				%cops 			
-				%copp 		
-				%e_bound
-				@marks 
-				$unit	
-				$markers_armed 
-				%old_vol   
-				$length   
-				$jack_on 
-
-				@all_chains
-				@input_chains
-				@output_chains
-
-				%take
-				@takes
-				%alias
-				%chain
-
-				%subst
-				%cfg
-				$tkeca_effects_data
-				$yaml
-); 
-use constant {REC => 'rec',
+use constant (REC => 'rec',
 			  MON => 'mon',
-			  MUTE => 'mute'};
+			  MUTE => 'mute');
 
 #use Audio::Ecasound::Flow::Config; # Default configuration file
 #use Audio::Ecasound::Flow::Grammar;# Command line grammar
 #use Audio::Ecasound::Flow::Iam;    # 
 
-##  widget declarations
-
-# were 'my' now globals
-
-use vars qw(
-	$mw 
-	$ew
-	$canvas
-
-	$load_frame
-	$add_frame
-	$take_frame
-	$time_frame
-	$clock_frame
-	$oid_frame
-	$track_frame
-	$effect_frame
-	$iam_frame
-	$perl_eval_frame
-	$transport_frame
-
-	@widget_t
-	%widget_c
-	%widget_e
-	@widget_o
-	%widget_o
-
-	@global_version_buttons
-	@time_marks
-	$time_step 
-	$clock     
-	$setup_length 
-
-
-	$session_label
-	$take_label
-
-	$sn_label
-	$sn_text 
-	$sn_load 
-	$sn_load_nostate 
-	$sn_new
-	$sn_quit
-	$iam_label
-	$iam_text
-	$iam_execute
-	$iam_error
-	$build_track_label
-	$build_track_text
-	$build_track_add 
-	$build_track_rec_label 
-	$build_track_rec_text
-	$build_track_mon_label 
-	$build_track_mon_text 
-	$build_new_take
-	$transport_label
-	$transport_setup_and_connect
-	$transport_setup
-	$transport_connect
-	$transport_disconnect
-	$transport_new
-	$transport_start
-	$transport_stop
-
-
-
-	$tkcmd
-	$iam
-	$old_bg
-
-
-	$loopa
-	$loopb
-	$mixchain
-	$mixchain_aux
-
-	@oids
-	%inputs
-	%outputs
-	%post_input
-	%pre_output
-
-	$ladspa_sample_rate
-	$statestore
-	$chain_setup_file
-
-	$track_name
-	$ch_r
-	$ch_m 
-
-
-);
 
 # name the track groupings
 
@@ -545,7 +548,7 @@ sub add_track {
 	$track_name = &remove_spaces($track_name);
 
 	print ("Track name in use\n"), return 0 if $track_names{$track_name};
-	$state_t{$t}->{rw} = REC;
+	$state_t{$t}->{rw} = ::REC;
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
 	&register_track($i, $track_name, $ch_r, $ch_m);
@@ -554,7 +557,7 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = REC if ! defined $state_c{$i}->{rw};
+	$state_c{$i}->{rw} = ::REC if ! defined $state_c{$i}->{rw};
 	&track_gui($i) if $gui;
 	return 1;
 }
@@ -562,9 +565,9 @@ sub mix_track {
 	# return if $opts{m} or ! -e &join_path(&session_dir,$statestore);
 	&add_track($mixname) ;
 	# the variable $t magically increments
-	$state_t{$t}->{rw} = MUTE; 
+	$state_t{$t}->{rw} = $::MUTE; 
 	&new_take;
-	$state_t{$t}->{rw} = MON;
+	$state_t{$t}->{rw} = $::MON;
 }
 sub mix_suffix {
 	my $stub = shift;
@@ -583,7 +586,7 @@ sub register_track {
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
 	$chain{$name} = $i;
-	$state_c{$i}->{rw} = REC;
+	$state_c{$i}->{rw} = ::REC;
 	$state_c{$i}->{ch_m} = $ch_m;
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
@@ -681,7 +684,7 @@ sub increment_take {
 			return if &transport_running; 
 					$t++;
 					$state_t{active} = $t;
-					$state_t{$t}->{rw} = REC;
+					$state_t{$t}->{rw} = ::REC;
 					push @takes, $t;
 					# print SESSION "take $t\n";
 }
@@ -1083,7 +1086,7 @@ sub take_gui {
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
 		$name->AddItems([
-			'command' => REC,
+			'command' => ::REC,
 			-background => $old_bg,
 			-command => sub { 
 				no strict qw(vars);
@@ -1095,7 +1098,7 @@ sub take_gui {
 		}
 
 		$name->AddItems([
-			'command' => MON,
+			'command' => $::MON,
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -1105,7 +1108,7 @@ sub take_gui {
 				}
 			]);
 		$name->AddItems([
-			'command' => MUTE,
+			'command' => $::MUTE,
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -1139,7 +1142,7 @@ sub global_version_buttons {
 				-variable => \$monitor_version,
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = MON; ### HARDCODED SECOND TAKE; MIX
+					$state_t{2}->{rw} = $::MON; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
 					&setup_transport; 
 					&connect_transport;
@@ -1170,7 +1173,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> &selected_version($n) ) 
-	#		unless &rec_status($n) eq REC
+	#		unless &rec_status($n) eq ::REC
 			}
 					);
 	}
@@ -1186,7 +1189,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_r},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = REC;
+							$state_c{$n}->{rw} = ::REC;
 							&refresh }
 				 		)
 				}
@@ -1201,7 +1204,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_m},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = MON;
+							$state_c{$n}->{rw} = $::MON;
 							&refresh_c($n) }
 				 		)
 				}
@@ -1211,28 +1214,28 @@ sub track_gui { # nearly 300 lines!
 	);
 
 	my @items = (
-			[ 'command' => REC,
+			[ 'command' => $::REC,
 				-foreground => 'red',
 				-command  => sub { 
-					$state_c{$n}->{rw} = REC;
+					$state_c{$n}->{rw} = $::REC;
 					&refresh;
 					}
 			],
-			[ 'command' => MON,
+			[ 'command' => $::MON,
 				-command  => sub { 
-					$state_c{$n}->{rw} = MON;
+					$state_c{$n}->{rw} = $::MON;
 					&refresh;
 					}
 			],
-			[ 'command' => MUTE, 
+			[ 'command' => $::MUTE, 
 				-command  => sub { 
-					$state_c{$n}->{rw} = MUTE;
+					$state_c{$n}->{rw} = $::MUTE;
 					&refresh;
 					}
 			],
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$state_c{$n}->{rw} = MON if $n == 1;          # MIX
+	$state_c{$n}->{rw} = $::MON if $n == 1;          # MIX
 
  
    ## XXX general code mixed with GUI code
@@ -1715,8 +1718,8 @@ sub collect_chains {
 	
 	for my $n (@all_chains) {
 	$debug and print "rec_status $n: ", &rec_status($n), "\n";
-		push (@monitor, $n) if &rec_status($n) eq MON; 
-		push (@record, $n) if &rec_status($n) eq REC;
+		push (@monitor, $n) if &rec_status($n) eq $::MON; 
+		push (@record, $n) if &rec_status($n) eq $::REC;
 	}
 
 	$debug and print "monitor chains:  @monitor\n\n";
@@ -1736,23 +1739,23 @@ sub rec_status {
 no warnings;
 my $file_exists = -f &join_path(&this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
 use warnings;
-    return MUTE if $state_c{$n}->{rw} eq MON and ! $file_exists;
-	return MUTE if $state_c{$n}->{rw} eq MUTE;
-	return MUTE if $state_t{$take{$n}}->{rw} eq MUTE;
+    return $::MUTE if $state_c{$n}->{rw} eq $::MON and ! $file_exists;
+	return $::MUTE if $state_c{$n}->{rw} eq $::MUTE;
+	return $::MUTE if $state_t{$take{$n}}->{rw} eq $::MUTE;
 	if ($take{$n} == $state_t{active} ) {
 
-		if ($state_t{$take{$n}}->{rw} eq REC) {
+		if ($state_t{$take{$n}}->{rw} eq ::REC) {
 
 			
-			if ($state_c{$n}->{rw} eq REC){
-				return REC if $state_c{$n}->{ch_r};
-				return MON if $file_exists;
-				return MUTE;
+			if ($state_c{$n}->{rw} eq ::REC){
+				return $::REC if $state_c{$n}->{ch_r};
+				return $::MON if $file_exists;
+				return $::MUTE;
 			}
 		}
 	}
-	return MON if &selected_version($n);
-	return MUTE;
+	return $::MON if &selected_version($n);
+	return $::MUTE;
 }
 sub really_recording {  # returns filename stubs
 
@@ -1789,7 +1792,7 @@ sub make_io_lists {
 	for my $n (@all_chains) {
 		$debug and print "chain $n: begin\n";
 		$rec_status = &rec_status($n);
-		next if $rec_status eq MUTE;
+		next if $rec_status eq $::MUTE;
 
 OID:		for my $oid (@oids) {
 
@@ -2009,7 +2012,7 @@ sub write_chains {
 	# but when playing back a mix, we want mixchain to be 
 	# something else
 	
-	my $mixchain = &rec_status(1) eq MON
+	my $mixchain = &rec_status(1) eq $::MON
 						? $mixchain_aux
 						: $mixchain;
 
@@ -2425,14 +2428,14 @@ sub refresh_t {
 		#  rec if @record entry for this take
 		if ( grep{$take{$_}==$t}@record ) { 
 			$debug and print "t-rec $t\n";	
-			$status = REC } 
+			$status = ::REC } 
 		# 	mon if @monitor entry
 		elsif ( grep{$take{$_}==$t}@monitor )
 			{ 
 			$debug and print "t-mon $t\n";	
-			$status = MON }
+			$status = $::MON }
 
-		else  { $status = MUTE;
+		else  { $status = $::MUTE;
 			$debug and print "t-mute $t\n";	
 		
 		}
@@ -2455,7 +2458,7 @@ sub refresh_c {
 		return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 	
-	if ($rec_status eq REC) {
+	if ($rec_status eq $::REC) {
 		$debug and print "REC! \n";
 
 		$widget_c{$n}->{name}->configure(-background => 'lightpink');
@@ -2467,7 +2470,7 @@ sub refresh_c {
 		$widget_c{$n}->{version}->configure(-text => &new_version);
 
 	}
-	elsif ( $rec_status eq MON ) {
+	elsif ( $rec_status eq $::MON ) {
 		$debug and print "MON! \n";
 
 		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
@@ -2479,7 +2482,7 @@ sub refresh_c {
 		$widget_c{$n}->{version}->configure(-text => &selected_version($n));
 
 		}
-	elsif ( $rec_status eq MUTE ) {
+	elsif ( $rec_status eq $::MUTE ) {
 		$debug and print "MUTE! \n";
 		 $widget_c{$n}->{name}->configure(-background => $old_bg);
 		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
@@ -2533,7 +2536,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			&update_master_version_button if $gui;
-			$state_t{ $state_t{active} }->{rw} = MON;
+			$state_t{ $state_t{active} }->{rw} = $::MON;
 			&setup_transport;
 			&connect_transport;
 			&refresh;
@@ -2550,7 +2553,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless &rec_status($n) eq REC }
+				unless &rec_status($n) eq ::REC }
 					);
 }
 sub update_master_version_button {
@@ -2822,7 +2825,7 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	# my $debug = 1;
-	# return if &rec_status($chain) eq MUTE; 
+	# return if &rec_status($chain) eq $::MUTE; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless &transport_running;
  	$debug and print join " ", @_, "\n";	
@@ -2892,7 +2895,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if &rec_status($n) eq MUTE and $n != 1; #MIX
+ 		next if &rec_status($n) eq $::MUTE and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {
@@ -2936,14 +2939,15 @@ sub apply_op {
 }
 ## static effects data
 
-my $effects_data_vars = <<'VARS';
+
+$effects_data_vars = <<'VARS';
 @effects		
 %effect_i	
 @ladspa_sorted
 %effects_ladspa
 VARS
-
 sub prepare_static_effects_data{
+
 
 	my $effects_cache = &join_path($wav_dir, $effects_cache_file);
 
@@ -3323,7 +3327,7 @@ Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, inte
 =cut
 ## persistent state support
 
-my $persistent_vars = <<'PERSISTENT';
+$persistent_vars = <<'PERSISTENT';
 $monitor_version
 $last_version 
 %track_names 	
@@ -3430,7 +3434,7 @@ sub retrieve_state {
 
 }
 
-my $effects_state = <<'VARS';
+$effects_state = <<'VARS';
 %state_c_ops
 %cops    
 $cop_id     
