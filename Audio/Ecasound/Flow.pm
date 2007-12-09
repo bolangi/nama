@@ -195,9 +195,10 @@ use constant (REC => 'rec',
 			  MON => 'mon',
 			  MUTE => 'mute');
 
-use Audio::Ecasound::Flow::Config; # Default configuration file
+use Audio::Ecasound::Flow::Config; # Global configuration file
 use Audio::Ecasound::Flow::Grammar;# Command line grammar
-use Audio::Ecasound::Flow::Iam;    # 
+use Audio::Ecasound::Flow::Iam;    # IAM commands listing 
+use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 
 #print ("yaml: $yaml") if $yaml or print "no  yaml";
 #exit;
@@ -3106,14 +3107,12 @@ sub read_in_tkeca_effects_data {
 # I left the tcl code 'as is' in the following pasted section, using regexes 
 # so future updates from him can be pasted in without editing.
 
-my $effects_data = io($tkeca_effects_data)->all;
-
 # divide by lines, remove stuff outside quotes, 
 # then make an anonymous array of the fields of each line
 
 	my @effects_data = 	map { [split /\|/, $_ ]  }  
 						map{ s/^.*?"//; s/"\s*$//; $_} 
-						split "\n",$effects_data; 
+						split "\n",$tkeca_effects_data; 
 	
 	$e_bound{tkeca}{a}  = 1;
 	$e_bound{tkeca}{z}  = scalar @effects_data;  
