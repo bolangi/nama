@@ -1,0 +1,42 @@
+1. Comment out package declarations, all will be in main:: .
+
+2. get it to compile
+
+3. Convert top-level lexicals to globals
+
+4. check for compile errors
+
+5. Extract all global labels
+
+6. Saerch-and-replace them all as fully-qualified
+$::state_c, etc.
+
+OH GOD! to have been saved from that by our!!
+
+Use 'our' in one place and 'use vars' everywhere
+else, and thank the LOrd! High for not having
+to destroy my program.
+
+7. check for compile errors
+
+8. divide subroutines into base, GUI and TUI classes,
+   placing sub stubs in base class as necessary
+
+9. begin debugging, writing tests where possible.
+
+10. convert other data structures to OO. 
+
+11. convert to YAML fully
+
+12. Mark generator, text
+
+13. Mark generator, Tk
+
+14. Mute and Rec buttons insetad of selector # fuck you it
+works already
+
+
+
+
+
+

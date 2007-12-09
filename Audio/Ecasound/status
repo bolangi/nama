@@ -1,0 +1,84 @@
+I am fascinated by certain aspects of computer
+science. It is the hunger for the clever organization of
+computer cycles. It is computer cycles that drive my editor.
+Electromagnetic energy ringing through this device, both
+computer, and monitor, through the copper wire,
+modem and ethernet adaptor, wireless link, a transportation
+of information so that people knew in advance of 911 to
+place big bets on the airline stock direction, puts.
+
+Now I am introducing my first class hierarchy. 
+To support both text and GUI interfaces, 
+I would begin sprouting even more conditionals,
+which I could see would be unsupportable.
+
+I can make a simple class declaration.
+
+	package UI;
+	our @ISA;
+	use Object::Tiny qw(dummy);
+	sub hello {print "superclass hello\n"};
+
+	package UI::Graphical;
+	our @ISA = 'UI';
+	sub hello {print "make a window\n";}
+	1;
+	package UI::Text;
+	our @ISA = 'UI';
+	sub hello {print "hello world!\n"}
+
+Then I can test it:
+
+	my $tui = UI::Text->new;
+
+	$tui->hello;
+
+	my $gui = UI::Graphical->new;
+
+	$gui->hello;
+
+	my $ui = UI->new;
+
+	$ui->hello;
+
+
+So I separate all my subroutines into
+base class and derived classes, 
+add in some stubs for example, sub refresh {};
+in the Text class. 
+
+All the really orderly code doesn't need
+any objects, it is the messy places
+that need them, and OO is extremely
+elegant solution. 
+
+I got just far enough procedurally:
+
+1 mix track for a group
+of tracks--which is available now,
+I can easily get busses.
+
+And I've got sliders for my busses.
+
+So getting this object stuff happening
+as the beginning of bringing the control
+functions to another level of excitation.
+
+What is Ecasound missing?
+
+Ecasound provides the engine that does everything,
+I only add an alternative interface, and 
+provide handling for managing wav. files,
+for simplifying and systematizing the
+configuration issues.
+
+So I need concepts that relate to projects,
+sessions, tracks, versions, 
+
+I'm still on the lookout for a graphic 
+capability. 
+
+Assuming I can get this how much is there
+to do?
+
+

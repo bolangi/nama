@@ -21,76 +21,104 @@ use YAML::Tiny;
 
 #
 ######## Definitions ###########
-
 our (
+
+
+	### 
+
+
 	$gui,
-	$mixname,
-	$yamlfile,
-	%state_c_ops,
-	$effects_cache_file,
-	$mw,
-	$ew,
-	$canvas,
+	$mixname, 		# 'mix' for the mixer track display
+	$yamlfile, 		# configuration file
+	%state_c_ops, 	# intermediate copy for storage/retrieval
+	$effects_cache_file, # where we keep info on Ecasound
+					# and LADSPA effects, presets, etc.
+	
+	$ecasound, 		# the name to invoke, but I don't think
+					# we invoke by name, that's why i have these
+					# libraries
 
-	$ecasound,
-	$grammar,
-	@ecmd_commands,
-	%ecmd_commands,
-	$ecmd_home,
-	$wav_dir,
-	$input_channels,
-	$config,
-	%devices,
-	%opts,
-	%oid_status,
-	$clock_id,
-	$use_monitor_version_for_mixdown,
-	$select_track,
-	@format_fields,
-	$session,
-	$session_name,
-	$mix_dir,
-	$cop_id,
-	$i,
-	$t,
-	%state_c,
-	%state_t,
-	$statestore,
-	$chain_setup_file,
-	@monitor,
-	@record,
-	@mute,
-	%track_names,
-	@effects,
-	%effect_i,
-	@ladspa_sorted,
-	%effects_ladspa,
-	$e,
-	$last_version,
-	$monitor_version,
-	%cops,
-	%copp,
-	%e_bound,
-	@marks,
-	$unit,
-	$markers_armed,
-	%old_vol,
-	$length,
-	$jack_on,
+	$grammar, 		# filled by Grammar.pm
+	@ecmd_commands,# array of commands my functions provide
+	%ecmd_commands,# as hash as well
+	$wav_dir, 		# each session will get a directory here
+	                # and one .ecmd directory, also with 
+	
+					# /wav_dir/project_dir/vocal_1.wav
+					# /wav_dir/.flow/project_dir
+	$statestore,	# filename for storing state info
+	$chain_setup_file, # Ecasound uses this 
 
-	@all_chains,
-	@input_chains,
-	@output_chains,
+	$input_channels,# this many radiobuttons appear
+	                # on the menubutton
+	$config,        # all config information from config.yaml 
+					# or Config.pm
+	%devices, 		# alias to data in $config
+	%opts,          # command line options (set by command stub)
+	%oid_status,    # state information for the chain templates
+	$clock_id,		# for the Tk event system
+	$use_monitor_version_for_mixdown, # sync mixdown version numbers
+	              	# to selected track versions 
+	$select_track,	 # the currently active track -- for Text UI
+	@format_fields, # data for replies to text commands
 
-	%take,
-	@takes,
-	%alias,
+	$session,		# Tk types session name here
+	$session_name,	# Official session name
+	$i, 			# index for incrementing track numbers
+	$t,				# index for incrementing track groups
+	%state_c,		# data for Track object, except effects
+	%state_t,		# data for track groups (takes)
+	%take,			# which group a track number belongs to 
+	@takes,			# we collect them here
+	%alias,			# key: name value: take number
 	%chain,
 
-	%subst,
-	%cfg,
-	$tkeca_effects_data,
-	$yaml,
+
+	### for effects
+
+	$cop_id, 		# chain operator id, that how we create, 
+					# store, find them, adjust them, and destroy them,
+					# per track or per session?
+	%cops,			 # chain operators stored here
+	%copp,			# their parameters for effect update
+	%track_names,	# to know if they are taken
+	@effects,		# static effects information (parameters, hints, etc.)
+	%effect_i,		# an index
+	@ladspa_sorted, # ld
+	%effects_ladspa,# an index
+	$e,				# a counter for partitioning the effects into groups
+	$last_version,  # to know where the next recording should start
+	$monitor_version,# which global version we are currently using
+	%e_bound,		# for displaying hundreds of effects in groups
+	@marks,			# where we want to come back tto
+	$unit,			# multiples of seconds or minutes
+	$markers_armed, # two states forth the markers
+	%old_vol,		# a copy of volume settings, for muting
+	$length,		# maximum duration of the recording/playback if known
+	$jack_on,		# whether we use device jack_alsa
+
+## for &make_io_lists
+#
+	@monitor,		# tracks that will playback
+	@record,		# tracks thatwill record
+	@mute,			# tracks we'll exclude from chain setup
+	@all_chains,	# all that will be a part of our setup
+	@input_chains,	# we sort them in input chains and output chains
+	@output_chains,
+
+	%cfg,			# the config file, as hash (alias to $config->[0])
+	$yaml,			# the text form of the config file
+	%subst,			# alias, substitutions for the config file
+	$tkeca_effects_data,	# original tcl code, actually
+
+	### Widgets
+	
+	$mw, 			# main window
+	$ew, 			# effects window
+	$canvas, 		# to lay out the effects window
+
+	# each part of the main window gets its own frame
+	# to control the layout better
 
 	$load_frame,
 	$add_frame,
@@ -104,22 +132,23 @@ our (
 	$perl_eval_frame,
 	$transport_frame,
 
-	@widget_t,
-	%widget_c,
-	%widget_e,
-	@widget_o,
-	%widget_o,
+	@widget_t, # widgets for displaying track groups (busses!)
+	%widget_c, # for chains (tracks)
+	%widget_e, # for effects
+	@widget_o, # for templates (oids) 
+	%widget_o, # 
 
-	@global_version_buttons,
-	@time_marks,
+	@global_version_buttons, # to set the same version for
+						 	#	all tracks
+	@time_marks,	# how different from @marks?
 	$time_step,
-	$clock,
-	$setup_length,
+	$clock, 		# displays clock
+	$setup_length,  # displays runing time
 
-	$session_label,
-	$take_label,
+	$session_label,	# project name
+	$take_label,	# bus name
 
-	$sn_label,
+	$sn_label,		# session load/save/quit	
 	$sn_text,
 	$sn_load,
 	$sn_load_nostate,
@@ -129,6 +158,9 @@ our (
 	$iam_text,
 	$iam_execute,
 	$iam_error,
+
+	# add track
+	#
 	$build_track_label,
 	$build_track_text,
 	$build_track_add,
@@ -136,7 +168,11 @@ our (
 	$build_track_rec_text,
 	$build_track_mon_label,
 	$build_track_mon_text,
+
 	$build_new_take,
+
+	# transport controls
+	
 	$transport_label,
 	$transport_setup_and_connect,
 	$transport_setup,
@@ -146,39 +182,42 @@ our (
 	$transport_start,
 	$transport_stop,
 
-	$tkcmd,
-	$iam,
-	$old_bg,
+	$iam,    # unused
+	$old_bg, # old background
 
 
-	$loopa,
-	$loopb,
-	$mixchain,
-	$mixchain_aux,
+	$loopa,  # loopback nodes 
+	$loopb,  
+	$mixchain, # name of my mix track: 'mix'
+	$mixchain_aux, # an extra node due to name conflict
 
-	@oids,
+	@oids,	# output templates, are applied to the
+			# chains collected previously
+			# the results are grouped as
+			# input, output and intermediate sections
+
 	%inputs,
 	%outputs,
 	%post_input,
 	%pre_output,
 
-	$ladspa_sample_rate,
+	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
 
-	$track_name,
-	$ch_r,
-	$ch_m,
+	$track_name,	# received from Tk text input form
+	$ch_r,			# this too, recording channel assignment
+	$ch_m,			# monitoring channel assignment
 
-	$effects_data_vars,
-	%L,
+	$effects_data_vars,	# the list of which variables to store and retrieve
+	%L,	# for effects
 	%M,
-	$persistent_vars,
-	$effects_state,
-	$debug,
-	$debug2,
+	$persistent_vars, 	# big data structure marshalling for storage 
+					  	# as one big config file
+	$effects_state,		# same for all chain operators
+	$debug,				# debug level flags for diagnostics
+	$debug2,			# for subroutine names as execute
 
 );
 
-	
 
 $gui = 0; 
 $mixname = qq(mix);
@@ -626,6 +665,7 @@ sub find_wavs {
 
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
+	local $debug = 0;
 	$debug and print "track: $n\n";
 	$debug and print "this_wav dir: ", &this_wav_dir,": $n\n";
 
@@ -1649,9 +1689,7 @@ sub join_path {
 sub this_wav_dir {&join_path($wav_dir, $session_name);}
 
 sub session_dir  { 
-	$a = &join_path($ecmd_home, $session_name);
-	$b = &join_path($wav_dir, $session_name, ".ecmd" );
-	-d $a ? $a : $b;
+	&join_path($wav_dir, ".ecmd", $session_name);
 }
 sub wav_off {
 	my $wav = shift;
@@ -3354,7 +3392,6 @@ PERSISTENT
 sub save_state {
 	$debug2 and print "&save_state\n";
 	my $file = shift;
-	
 	# restore muted volume levels
 	#
 	my %muted;
@@ -3382,9 +3419,9 @@ sub save_state {
 }
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
-	my ($file, $list)  = @_;
+	my ($file)  = shift;
 
-	&assign_vars($file, $list);
+	&assign_vars($file, $persistent_vars);
 
 	my $toggle_jack = $widget_o[$#widget_o];
 	&convert_to_jack if $jack_on;
@@ -3590,10 +3627,13 @@ sub retrieve_effects {
 }
 sub assign_vars {
 	# TODO, simplify: use full var name, including sigils.
+	$debug2 and print "&assign_vars\n";
 	my ($file, $var_list) = @_;
 	-f $file or carp ("file: $file not found\n"),return 0;
-	my @vars = split "\n", $var_list;
+	my @vars = split /\s+/, $var_list;
+	$debug and print "variable list: @vars\n";
 	my $hash_ref = retrieve($file);
+##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string = $_
 						. q( = )
@@ -3607,6 +3647,7 @@ sub assign_vars {
 		eval $eval_string or carp "failed to eval $eval_string: $!\n";
 	} @vars;
 }
+my $yw;
 sub store_vars {
 	my ($file, $var_list) = @_;
 	my @vars = split "\n", $var_list;
@@ -3619,7 +3660,46 @@ sub store_vars {
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
 	my $result1 = store \%state, $file;
+	my $yamlout;
+    my $yw = Data::YAML::Writer->new;
+    $yw->write( \%state, \$yamlout );
+	$yamlout > io("$file.yaml");
+=comment
+
+use Data::YAML::Reader;
+
+    my $yr = Data::YAML::Reader->new;
+    
+    # ...a string containing YAML...
+    my $from_string = $yr->read( $some_string );
+
+ use Data::YAML::Writer;
+    
+    my $data = {
+        one => 1,
+        two => 2,
+        three => [ 1, 2, 3 ],
+    };
+    
+    my $yw = Data::YAML::Writer->new;
+    
+    # Write to an array...
+    $yw->write( $data, \@some_array );
+    
+    # ...an open file handle...
+    $yw->write( $data, $some_file_handle );
+    
+    # ...a string ...
+    $yw->write( $data, \$some_string );
+    
+    # ...or a closure
+    $yw->write( $data, sub {
+        my $line = shift;
+        print "$line\n";
+    } );
+=cut
 }
+
 sub arm_mark { 
 	if ($markers_armed) {
 		$markers_armed = 0;
