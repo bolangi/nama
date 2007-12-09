@@ -267,13 +267,13 @@ sub hello {print "hello world!\n"}
 
 =cut
 
-# BROKEN effects date store/retrieve
-# BROKEN state recall in text mode
+# BROKEN effects date store/retrieve, fixed!
+# BROKEN state recall in text mode 
 # BROKEN gui mode
 #
-# BROKEN constants
-
-# package UI;
+# BROKEN constants fixed!
+# BROKEN &load session loads after &dig_ruins,
+# and wipes out config information.
 
 use Object::Tiny qw{mode};
 
