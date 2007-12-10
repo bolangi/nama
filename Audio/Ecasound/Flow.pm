@@ -325,7 +325,9 @@ sub hello {print "hello world!\n"}
 
 use Object::Tiny qw{mode};
 
-sub prepare { 
+sub prepare {  # actions begin here
+
+    $yw = Data::YAML::Writer->new; # to replace Data::Dumper;
 
 	$debug2 and print "&prepare\n";
 	$debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
@@ -3657,6 +3659,11 @@ sub assign_vars {
 	my @vars = split /\s+/, $var_list;
 	$debug and print "variable list: @vars\n";
 	my $ref = retrieve($file);
+	$debug and print join " ", keys %{ $ref };
+	$debug and print ref $ref->{marks};
+	$debug and print ref $ref->{marks};
+	 @marks = @{ $ref->{marks} };
+	 print "array size ", scalar @marks;
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string = $_
@@ -3686,9 +3693,27 @@ sub store_vars {
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD
 	my $yamlout;
-    my $yw = Data::YAML::Writer->new;
     $yw->write( \%state, \$yamlout );
+   $yw->write( $data, \$some_string );
 	$yamlout > io("$file.yaml");
+   use Data::YAML::Writer;
+
+           my $data = {
+               one => 1,
+               two => 2,
+               three => [ 1, 2, 3 ],
+           };
+
+           my $yw = Data::YAML::Writer->new;
+
+           # Write to an array...
+           $yw->write( $data, \@some_array );
+
+           # ...an open file handle...
+           $yw->write( $data, $some_file_handle );
+
+           # ...a string ...
+
 }
 
 sub arm_mark { 

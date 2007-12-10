@@ -1,0 +1,67 @@
+package Project;
+
+use Object::Tiny qw( name );
+
+sub commits {} # returns a list of objects
+
+package UI;
+
+UI->new(mode => 'Text', project => $project_object);
+
+package Track;
+
+package Bus;
+
+package Template;
+
+package Mark;
+
+package Effect;
+
+package Git;
+
+package Git::Commit;
+use Object::Tiny qw(sha1 date comment);
+
+sub checkout; 
+
+package Git::Branch;
+our @ISA = 'Git::Commit';
+use Object::Tiny qw(name);
+
+package Audio::Ecasound::Flow;
+
+sub init_repository {
+	my $cmd = q(git init);
+	chdir $session_dir;
+	&shell_command($cmd);
+}
+
+@commits;  # select by date/time
+@branches; # select by name as well
+
+sub shell_command {
+	my $cmd = shift;
+	$debug and print $cmd, $/;
+	my $result = system $cmd;
+	if ($result){ 
+		print qq(result: $result\n) if $debug;
+	} else {
+		my $msg = qq(error on executing command: $cmd: $!
+in directory: ).Cwd.$/;
+		carp $msg;
+
+	}
+}
+		
+__END__
+
+my $project = Project->new(name => $name);
+my @commits $project->commits;
+
+my @commits = &Project::commits($name); # easier for now
+
+my $sha1 = &select_commit;
+
+&retrieve_state($sha1)
+
