@@ -4,7 +4,8 @@ use strict;
 use warnings;
 
 ## Imported modules
-use lib '/home/jroth/ecmd-dev';
+use lib '/home/jroth/flow/build/lib';
+#use lib '/home/jroth/flow/build/lib/'; # frustrating!!
 
 sub c{print "hello from flow"}
 
@@ -311,7 +312,7 @@ sub hello {print "hello world!\n"}
 
 1;
 
-#package Ecasound::Flow;
+package Audio::Ecasound::Flow;
 
 =cut
 
@@ -323,6 +324,7 @@ sub hello {print "hello world!\n"}
 # BROKEN &load session loads after &dig_ruins,
 # and wipes out config information.
 # Grammar expanded
+# BROKEN storing @ladspa_sorted
 
 use Object::Tiny qw{mode};
 
@@ -3440,19 +3442,25 @@ sub retrieve_state {
 	my $yamlfile = "$file.yaml" ;
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
-		$debug and print qq($yamlfile: YAML file found\n);
-		&assign_vars($file, $persistent_vars);
+		$debug and print qq($yamlfile: YAML file found\n), return;
+		$ref = &assign_vars($yamlfile, $persistent_vars);
+	} elsif (-f $file) {
+		$debug and print qq($file: 'Storable' file found\n), return;
+		$ref = &assign_vars($file, $persistent_vars);
 	} else {
-		$debug and print qq($yamlfile: YAML file not found, i'll look for type
-		Storable\n);
+		$debug and 
+		carp("no state files found, neither $file, nor $yamlfile\n");
+		return;
 	}
 
-	if (! -f $file and ! -f $yamlfile){
-		print qq($file: Type 'Storable' data file not found\n); 
-	  	return;
-  	}
-	$debug and print qq($file: Type 'Storable' data file found\n); 
+	# variables successfully assigned
 
+=comment
+	$debug and print join " ", keys %{ $ref };
+	$debug and print ref $ref->{marks};
+	 @marks = @{ $ref->{marks} };
+	 print "array size ", scalar @marks;
+=cut
 
 	my $toggle_jack = $widget_o[$#widget_o];
 	&convert_to_jack if $jack_on;
@@ -3657,6 +3665,8 @@ sub retrieve_effects {
 
 }
 sub assign_vars {
+	# assigns vars in $var_list to values from $file
+	# returns a $ref containing the retrieved data structure
 	# TODO, simplify: use full var name, including sigils.
 	$debug2 and print "&assign_vars\n";
 	my ($file, $var_list) = @_;
@@ -3669,11 +3679,6 @@ sub assign_vars {
 	$file =~ m/.yaml/ 
 		and  $ref = &yaml_in($file)
 		or  $ref = retrieve($file);
-	$debug and print join " ", keys %{ $ref };
-	$debug and print ref $ref->{marks};
-	$debug and print ref $ref->{marks};
-	 @marks = @{ $ref->{marks} };
-	 print "array size ", scalar @marks;
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string = $_
@@ -3687,12 +3692,14 @@ sub assign_vars {
 	#	print $eval_string;
 		eval $eval_string or carp "failed to eval $eval_string: $!\n";
 	} @vars;
+	$ref;
 }
 sub store_vars {
 	# now we will only store in YAML
 	$debug2 and print "&store_vars\n";
 	my ($file, $var_list) = @_;
 	$file .= '.yaml' unless $file =~ /\.yaml$/;
+	$debug and print "file: $file\n";
 	my @vars = split "\n", $var_list;
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
@@ -3708,7 +3715,11 @@ sub store_vars {
 
 }
 sub yaml_out {
-	my ($data_ref) = @_;
+	$debug2 and print "&yaml_out\n";
+	my ($data_ref) = shift; 
+	$debug and print "data ref type: ", ref $data_ref, $/;
+
+
 	my $output;
     $yw->write( $data_ref, \$output );
 	$output;
