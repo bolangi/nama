@@ -1945,9 +1945,9 @@ OID:		for my $oid (@oids) {
 			}
 			# add intermediate processing
 		} # fi
-		# XXX deprecated
-		my $pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
-		my $post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
+		my ($post_input, $pre_output);
+		$post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
+		$pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
 		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 		$pre_output{$chain_id} .= $pre_output if defined $pre_output;
 		$post_input{$chain_id} .= $post_input 
