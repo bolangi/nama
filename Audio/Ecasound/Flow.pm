@@ -3049,7 +3049,7 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	$debug2 and print "&sort_ladspa_effects\n";
-#	print &yaml_out \%e_bound; 
+#	print &yaml_out(\%e_bound); 
 	my $aa = $e_bound{ladspa}{a};
 	my $zz = $e_bound{ladspa}{z};
 #	print "start: $aa end $zz\n";
@@ -3148,7 +3148,7 @@ sub read_in_effects_data {
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
-	$debug and print "\@effects\n======\n", &yaml_out (\@effects); ; 
+	$debug and print "\@effects\n======\n", &yaml_out(\@effects); ; 
 }
 sub read_in_tkeca_effects_data {
 
@@ -3267,7 +3267,7 @@ sub get_ladspa_hints{
 
 	#print "@params\n";
 	#print &yaml_out \%params;
-	$debug and print &yaml_out \%effects_ladspa; 
+	$debug and print &yaml_out (\%effects_ladspa); 
 }
 no warnings;
 sub range {
@@ -3641,10 +3641,11 @@ sub assign_vars {
 	# TODO, simplify: use full var name, including sigils.
 	$debug2 and print "&assign_vars\n";
 	my ($file, $var_list) = @_;
+	$debug and print "file: $file\n";
 	my $yamlfile = "$file.yaml";
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
-		my $yaml = IO($yamlfile)->all;
+		my $yaml = io($yamlfile)->all;
 		$yr = Data::YAML::Reader->new;
 		$ref = $yr->read( $yaml );
 		$debug and print qq($yamlfile: YAML file found\n);
