@@ -231,7 +231,7 @@ our (
 $gui = 0; 
 $mixname = qq(mix);
 $yamlfile = qq(config.yaml); # we will look for this
-$effects_cache_file = q(ecmd_effects);
+$effects_cache_file = q(ecmd_effects.yaml);
 
 # set the following to 1 to output debugging info
 $debug  = 1; # detailed debugging info 
@@ -329,6 +329,7 @@ use Object::Tiny qw{mode};
 sub prepare {  # actions begin here
 
     $yw = Data::YAML::Writer->new; # to replace Data::Dumper;
+    $yr = Data::YAML::Reader->new; # to replace Data::Dumper;
 
 	$debug2 and print "&prepare\n";
 	$debug and print ("\%opts\n======\n", &yaml_out (\%opts)); ; 
@@ -3429,11 +3430,29 @@ sub save_state {
 	@all_chains;
 
 }
+=comment
+=cut
 sub retrieve_state {
+	# look for yaml if not look for standard
+	
 	$debug2 and print "&retrieve_state\n";
-	my ($file)  = shift;
+	my ($file)  = shift; # assuming $file will never have .yaml
+	my $yamlfile = "$file.yaml" ;
+	my $ref; # to receive yaml data
+	if (-f $yamlfile) {
+		$debug and print qq($yamlfile: YAML file found\n);
+		&assign_vars($file, $persistent_vars);
+	} else {
+		$debug and print qq($yamlfile: YAML file not found, i'll look for type
+		Storable\n);
+	}
 
-	&assign_vars($file, $persistent_vars);
+	if (! -f $file and ! -f $yamlfile){
+		print qq($file: Type 'Storable' data file not found\n); 
+	  	return;
+  	}
+	$debug and print qq($file: Type 'Storable' data file found\n); 
+
 
 	my $toggle_jack = $widget_o[$#widget_o];
 	&convert_to_jack if $jack_on;
@@ -3642,26 +3661,14 @@ sub assign_vars {
 	$debug2 and print "&assign_vars\n";
 	my ($file, $var_list) = @_;
 	$debug and print "file: $file\n";
-	my $yamlfile = "$file.yaml";
-	my $ref; # to receive yaml data
-	if (-f $yamlfile) {
-		my $yaml = io($yamlfile)->all;
-		$yr = Data::YAML::Reader->new;
-		$ref = $yr->read( $yaml );
-		$debug and print qq($yamlfile: YAML file found\n);
-	} else {
-		$debug and print qq($yamlfile: YAML file not found, i'll look for type
-		Storable\n);
-	}
-
-	if (! -f $file and ! -f $yamlfile){
-		print qq($file: Type 'Storable' data file not found\n); 
-	  	return;
-  	}
-	$debug and print qq($file: Type 'Storable' data file found\n); 
+	# TODO
 	my @vars = split /\s+/, $var_list;
 	$debug and print "variable list: @vars\n";
-	$ref = retrieve($file);
+	my $ref;
+	$debug and carp("no file found\n"), return 0 unless -f $file;
+	$file =~ m/.yaml/ 
+		and  $ref = &yaml_in($file)
+		or  $ref = retrieve($file);
 	$debug and print join " ", keys %{ $ref };
 	$debug and print ref $ref->{marks};
 	$debug and print ref $ref->{marks};
@@ -3697,15 +3704,21 @@ sub store_vars {
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD
 	my $yamlout = &yaml_out(\%state);
-	$yamlout > io("$file");
+	$yamlout > io $file;
 
 }
 sub yaml_out {
 	my ($data_ref) = @_;
 	my $output;
-    $yw->write( $data_ref, $output );
+    $yw->write( $data_ref, \$output );
 	$output;
 }
+sub yaml_in {
+	my $file = shift;
+	my $yaml = io($file)->all;
+	$yr->read( $yaml ); # returns ref
+}
+
 	
 
 sub arm_mark { 
