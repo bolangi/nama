@@ -1,14 +1,13 @@
 package Audio::Ecasound::Flow;
-
 use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
-
 ## Imported modules
+use lib '/home/jroth/flow/build/lib';
+#use lib '/home/jroth/flow/build/lib/'; # frustrating!!
 
-use lib '/home/jroth/flow/build/lib'; # no trailing slash
+sub c{print "hello from flow"}
 
 use Carp;
 use IO::All;
@@ -23,13 +22,8 @@ use YAML::Tiny;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 
+#
 ######## Definitions ###########
-
-use constant (REC => 'rec',
-			  MON => 'mon',
-			  MUTE => 'mute');
-
-
 our (
 
 
@@ -244,6 +238,25 @@ $effects_cache_file = q(ecmd_effects.yaml);
 $debug  = 1; # detailed debugging info 
 $debug2 = 1; # subroutine names
 
+### Some Global Variables
+
+use constant (REC => 'rec',
+			  MON => 'mon',
+			  MUTE => 'mute');
+
+use Audio::Ecasound::Flow::Config; # Global configuration file
+use Audio::Ecasound::Flow::Grammar;# Command line grammar
+use Audio::Ecasound::Flow::Iam;    # IAM commands listing 
+use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
+
+#print ("yaml: $yaml") if $yaml or print "no  yaml";
+#exit;
+# use Config;
+# use Grammar;
+# use Iam;
+
+## definitions 
+
 $ladspa_sample_rate = 44100; # for sample-rate dependent effect
 # LIMITATION: sample rate fixed at 44100
 # the following value, used to set the range of acceptable values
@@ -257,29 +270,27 @@ $unit  = 1; # fast-forward multiplier default;
 # some file definitions
 
 $statestore   = "State";  # filename to store state
-							# new files get .yaml suffix
 $chain_setup_file = "session.ecs";
 
 # name the track groupings
 
 %alias = ( 1 => 'Mixdown', 2 => 'Tracker');
 
-# chain names
+# terminations for mixing chain
 
 $loopa = 'loop,111';
 $loopb = 'loop,222';
 
+# chain names
+
 $mixchain = 1; 
 $mixchain_aux = 'MixDown'; # used for playing back mixes
                               # when chain 1 is active
-
-
+							  
 ######## End Definitions ########
 
-use Audio::Ecasound::Flow::Config; 	# Global configuration file
-use Audio::Ecasound::Flow::Grammar;	# Command line grammar
-use Audio::Ecasound::Flow::Iam;    	# IAM command support
-use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
+
+our $VERSION = '0.01';
 
 =comment
 
@@ -319,10 +330,10 @@ use Object::Tiny qw{mode};
 
 sub prepare {  # actions begin here
 
-	$debug2 and print "&prepare\n";
-    $yw = Data::YAML::Writer->new;
-    $yr = Data::YAML::Reader->new;
+    $yw = Data::YAML::Writer->new; # to replace Data::Dumper;
+    $yr = Data::YAML::Reader->new; # to replace Data::Dumper;
 
+	$debug2 and print "&prepare\n";
 	$debug and print ("\%opts\n======\n", &yaml_out (\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
@@ -3809,24 +3820,10 @@ recording and processing by Ecasound
 
 =head1 ABSTRACT
 
-	UAudio::Ecasound interface to the 
-	Ecasound audio processing engine to facilitate
-	multitrack audio recording by adding:
-
-	- Functions for generating chain setups, managing wav
-	files, handling persistent configuration data.
-
-	- Useful text-mode and Tk user interfaces
-
-	- A foundation for high-level abstractions such 
-	  as track, group, effect, mark, etc.
-
-	Hash data structures representing system state are
-	serialized to YAML and written to file. 
-	The Git version control system cheaply provides 
-	infrastructure for switching among various parameter
-	sets. 
-
+  This should be the abstract for Audio::Ecasound::Flow.
+  The abstract is used when making PPD (Perl Package Description) files.
+  If you don't want an ABSTRACT you should also edit Makefile.PL to
+  remove the ABSTRACT_FROM option.
 
 =head1 DESCRIPTION
 
