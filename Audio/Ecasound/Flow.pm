@@ -9,7 +9,6 @@ use lib '/home/jroth/ecmd-dev';
 sub c{print "hello from flow"}
 
 use Carp;
-use Data::YAML;
 use IO::All;
 use Cwd;
 use Storable; 
@@ -19,6 +18,8 @@ use Tk;
 use Audio::Ecasound;
 use Parse::RecDescent;
 use YAML::Tiny;
+use Data::YAML::Writer;
+use Data::YAML::Reader;
 
 #
 ######## Definitions ###########
@@ -330,7 +331,7 @@ sub prepare {  # actions begin here
     $yw = Data::YAML::Writer->new; # to replace Data::Dumper;
 
 	$debug2 and print "&prepare\n";
-	$debug and print ("\%opts\n======\n", Dumper (%opts)); ; 
+	$debug and print ("\%opts\n======\n", &yaml_out (\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
@@ -345,8 +346,6 @@ sub prepare {  # actions begin here
 
 	-d $wav_dir or croak qq(wave_directory: "$wav_dir" in Config.pm
 	either doesn't exist or is not a directory\n);
-
-	*ecmd_home = \$cfg{ecmd_home};  # deprecated
 
 	*input_channels = \$cfg{input_channels};  # fixed value for Tk widget
 	*use_monitor_version_for_mixdown = 
@@ -692,7 +691,7 @@ sub find_wavs {
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	$debug and print "\%versions\n================\n", Dumper (%versions);
+	$debug and print "\%versions\n================\n", &yaml_out (%versions);
 		delete $state_c{$n}->{targets};
 		$state_c{$n}->{targets} = { %versions };
 
@@ -843,12 +842,12 @@ sub init_gui {
 				return if &transport_running;
 				&save_state(&join_path(&session_dir,$statestore)) 
 					if &session_dir;
-		$debug2 and print "\%state_c\n================\n", Dumper(%state_c);
-		$debug2 and print "\%state_t\n================\n", Dumper(%state_t);
-		$debug2 and print "\%copp\n================\n", Dumper(%copp);
-		$debug2 and print "\%cops\n================\n", Dumper(%cops);
-		$debug2 and print "\%pre_output\n================\n", Dumper(%pre_output);
-		$debug2 and print "\%post_input\n================\n", Dumper(%post_input);
+		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
+		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
+		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
+		$debug2 and print "\%cops\n================\n", &yaml_out(\%cops);
+		$debug2 and print "\%pre_output\n================\n", &yaml_out(\%pre_output); 
+		$debug2 and print "\%post_input\n================\n", &yaml_out(\%post_input);
 		exit;
 				 }
 				);
@@ -1134,7 +1133,7 @@ sub take_gui {
 				-tearoff =>0,
 			)->pack(-side => 'left');
 		push @widget_t, $name;
-	$debug and print "=============\n\@widget_t\n",Dumper(@widget_t);
+	$debug and print "=============\n\@widget_t\n",&yaml_out(\@widget_t);
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
@@ -1309,7 +1308,8 @@ sub track_gui { # nearly 300 lines!
 			);
 
 
-	 $debug and do {my %q = %p; delete $q{parent}; print "x=============\n%p\n",Dumper(%q)};
+	 $debug and do {my %q = %p; delete $q{parent}; print
+	 "x=============\n%p\n",&yaml_out(\%q)};
 
 	$vol = &make_scale ( \%p );
 	# Mute
@@ -1421,7 +1421,9 @@ sub track_gui { # nearly 300 lines!
 			cop_id => $pan_id,
 			p_num		=> $p_num,
 			);
-	 $debug and do {my %q = %p; delete $q{parent}; print "x=============\n%p\n",Dumper(%q)};
+	 $debug and do {my %q = %p; 
+		 delete $q{parent}; 
+	 	 print "x=============\n%p\n",&yaml_out(\%q)};
 	$pan = &make_scale ( \%q );
 
 	# Center
@@ -1440,7 +1442,7 @@ sub track_gui { # nearly 300 lines!
 
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	$debug and print "=============\n\%widget_c\n",Dumper(%widget_c);
+	$debug and print "=============\n\%widget_c\n",&yaml_out(\%widget_c);
 	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 	# parents are the independent effects
@@ -1747,7 +1749,7 @@ sub get_versions {
 		$debug and print "match: $&  num: $3\n\n";
 		$versions{ $3 ? $3 : 'bare' } =  $1 ;
 	}
-	$debug and print "\&get_version: " , Dumper(%versions);
+	$debug and print "\&get_version: " , &yaml_out(\%versions);
 	closedir WD;
 	%versions;
 }
@@ -1965,11 +1967,11 @@ OID:		for my $oid (@oids) {
 # 		} @chain_ids;
 # 	}
 
-	$debug and print "\@oids\n================\n", Dumper(@oids);
-	$debug and print "\%post_input\n================\n", Dumper(%post_input);
-	$debug and print "\%pre_output\n================\n", Dumper(%pre_output);
-	$debug and print "\%inputs\n================\n", Dumper(%inputs);
-	$debug and print "\%outputs\n================\n", Dumper(%outputs);
+	$debug and print "\@oids\n================\n", &yaml_out(\@oids);
+	$debug and print "\%post_input\n================\n", &yaml_out(\%post_input);
+	$debug and print "\%pre_output\n================\n", &yaml_out(\%pre_output);
+	$debug and print "\%inputs\n================\n", &yaml_out(\%inputs);
+	$debug and print "\%outputs\n================\n", &yaml_out(\%outputs);
 
 
 }
@@ -2146,8 +2148,8 @@ sub write_chains {
 		
 	}
 		
-	# $debug and print "\%state_c\n================\n", Dumper(%state_c);
-	# $debug and print "\%state_t\n================\n", Dumper(%state_t);
+	# $debug and print "\%state_c\n================\n", &yaml_out(\%state_c);
+	# $debug and print "\%state_t\n================\n", &yaml_out(\state_t);
 							
 		
 	## write general options
@@ -2319,7 +2321,7 @@ my $null_id = undef;
 	# oid settings
 	
 	map{ $oid_status{$_->{name}} = $_->{default} eq 'on' ? 1 : 0 } @oids;
-	$debug and print Dumper \%oid_status; 
+	$debug and print &yaml_out(\%oid_status); 
 
 }
 sub mono_to_stereo { " -erc:1,2 " }
@@ -2356,8 +2358,8 @@ sub setup_transport {
 	&collect_chains;
 	&make_io_lists;
 	map{ &eliminate_loops($_) } @all_chains;
-	#print "minus loops\n \%inputs\n================\n", Dumper(%inputs);
-	#print "\%outputs\n================\n", Dumper(%outputs);
+	#print "minus loops\n \%inputs\n================\n", &yaml_out(\%inputs);
+	#print "\%outputs\n================\n", &yaml_out(\%outputs);
 	&write_chains;
 }
 sub connect_transport {
@@ -3047,7 +3049,7 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	$debug2 and print "&sort_ladspa_effects\n";
-#	print Dumper %e_bound; 
+#	print &yaml_out \%e_bound; 
 	my $aa = $e_bound{ladspa}{a};
 	my $zz = $e_bound{ladspa}{z};
 #	print "start: $aa end $zz\n";
@@ -3146,7 +3148,7 @@ sub read_in_effects_data {
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
-	$debug and print "\@effects\n======\n", Dumper (@effects); ; 
+	$debug and print "\@effects\n======\n", &yaml_out (\@effects); ; 
 }
 sub read_in_tkeca_effects_data {
 
@@ -3184,7 +3186,7 @@ sub read_in_tkeca_effects_data {
 				my %p;
 				#print join " / ",splice (@row, 0,5), "\n";
 				@p{ qw(name begin end default resolution) }  =  splice @row, 0, 5;
-				# print "\%p\n======\n", Dumper (%p);
+				# print "\%p\n======\n", &yaml_out (\%p);
 				push @{$effects[$i]->{params}}, \%p;
 
 			}
@@ -3264,8 +3266,8 @@ sub get_ladspa_hints{
 	}
 
 	#print "@params\n";
-	#print Dumper %params;
-	$debug and print Dumper %effects_ladspa; 
+	#print &yaml_out \%params;
+	$debug and print &yaml_out \%effects_ladspa; 
 }
 no warnings;
 sub range {
@@ -3331,7 +3333,7 @@ print join "\n", sort keys %effects_ladspa;
 print '-' x 60, "\n";
 print join "\n", grep {/el:/} sort keys %effect_i;
 
-#print Dumper @effects; exit;
+#print &yaml_out \@effects; exit;
 exit;
 
 =cut
@@ -3539,9 +3541,9 @@ sub retrieve_effects {
 	%copp = %current_copp;
 
 
-	print "\%state_c_ops\n ", Dumper %state_c_ops, "\n\n";
-	print "\%old_cops\n ", Dumper %old_cops, "\n\n";
-	print "\%old_copp\n ", Dumper %old_copp, "\n\n";
+	print "\%state_c_ops\n ", &yaml_out( \%state_c_ops), "\n\n";
+	print "\%old_cops\n ", &yaml_out( \%old_cops), "\n\n";
+	print "\%old_copp\n ", &yaml_out( \%old_copp), "\n\n";
 #	return;
 
 	
@@ -3658,7 +3660,7 @@ sub assign_vars {
 	$debug and print qq($file: Type 'Storable' data file found\n); 
 	my @vars = split /\s+/, $var_list;
 	$debug and print "variable list: @vars\n";
-	my $ref = retrieve($file);
+	$ref = retrieve($file);
 	$debug and print join " ", keys %{ $ref };
 	$debug and print ref $ref->{marks};
 	$debug and print ref $ref->{marks};
@@ -3682,6 +3684,7 @@ sub store_vars {
 	# now we will only store in YAML
 	$debug2 and print "&store_vars\n";
 	my ($file, $var_list) = @_;
+	$file .= '.yaml' unless $file =~ /\.yaml$/;
 	my @vars = split "\n", $var_list;
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
@@ -3692,29 +3695,17 @@ sub store_vars {
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD
-	my $yamlout;
-    $yw->write( \%state, \$yamlout );
-   $yw->write( $data, \$some_string );
-	$yamlout > io("$file.yaml");
-   use Data::YAML::Writer;
-
-           my $data = {
-               one => 1,
-               two => 2,
-               three => [ 1, 2, 3 ],
-           };
-
-           my $yw = Data::YAML::Writer->new;
-
-           # Write to an array...
-           $yw->write( $data, \@some_array );
-
-           # ...an open file handle...
-           $yw->write( $data, $some_file_handle );
-
-           # ...a string ...
+	my $yamlout = &yaml_out(\%state);
+	$yamlout > io("$file");
 
 }
+sub yaml_out {
+	my ($data_ref) = @_;
+	my $output;
+    $yw->write( $data_ref, $output );
+	$output;
+}
+	
 
 sub arm_mark { 
 	if ($markers_armed) {
