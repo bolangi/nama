@@ -1,5 +1,0 @@
-
-
-[% INSERT declarations %]
-
-[% INCLUDE definitions  %]

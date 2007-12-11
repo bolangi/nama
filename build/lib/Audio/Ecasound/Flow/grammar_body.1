@@ -1,0 +1,105 @@
+new_session: _new_session name {
+	$Audio::Ecasound::Flow::session = $item{name};
+	&Audio::Ecasound::Flow::new_session;
+	1;
+}
+
+load_session: _load_session name {
+	$Audio::Ecasound::Flow::session = $item{name};
+	&Audio::Ecasound::Flow::load_session unless $Audio::Ecasound::Flow::session_name eq $item{name};
+	1;
+}
+
+add_track: _add_track wav channel(s?) { 
+	if ($Audio::Ecasound::Flow::track_names{$item{wav}} ){
+		print "Track name already in use.\n";
+	} else {
+		&Audio::Ecasound::Flow::add_track($item{wav}) ;
+		my %ch = ( @{$item{channel}} );	
+		$ch{r} and $Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::i}->{ch_r} = $Audio::Ecasound::Flow::ch{r};
+		$ch{m} and $Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::i}->{ch_m} = $Audio::Ecasound::Flow::ch{m};
+		
+	}
+	1;
+}
+
+generate_setup: _generate_setup {}
+setup: 'setup'{ &Audio::Ecasound::Flow::setup_transport and &Audio::Ecasound::Flow::connect_transport; 1}
+
+list_marks: _list_marks {}
+
+show_setup: _show_setup { 	map { push @Audio::Ecasound::Flow::format_fields,  
+							$_,
+							$Audio::Ecasound::Flow::state_c{$_}->{active},
+							$Audio::Ecasound::Flow::state_c{$_}->{file},
+							$Audio::Ecasound::Flow::state_c{$_}->{rw},
+							&Audio::Ecasound::Flow::rec_status($_),
+							$Audio::Ecasound::Flow::state_c{$_}->{ch_r},
+							$Audio::Ecasound::Flow::state_c{$_}->{ch_m},
+					} sort keys %Audio::Ecasound::Flow::state_c;
+				write; # using format at end of file
+				1;
+}
+
+show_effects: _show_effects {}
+
+ecasound_start: _ecasound_start {}
+
+ecasound_stop: _ecasound_stop {}
+
+add_effect: _add_effect {}
+
+remove_effect: _remove_effect {}
+
+renew_engine: _renew_engine {&Audio::Ecasound::Flow::new_engine; 1}
+
+mark: _mark {}
+
+start: _start {}
+
+stop: _stop {}
+
+show_marks: _show_marks {}
+
+rename_mark: _rename_mark {}
+
+loop: {}
+
+name: /\w+/
+
+wav: name
+
+
+mix: 'mix' {1}
+
+norm: 'norm' {1}
+
+exit: 'exit' { &Audio::Ecasound::Flow::save_state($Audio::Ecasound::Flow::statestore); exit; }
+
+
+channel: r | m
+
+r: 'r' dd  { $Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$Audio::Ecasound::Flow::select_track}}->{ch_r} = $item{dd} }
+m: 'm' dd  { $Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$Audio::Ecasound::Flow::select_track}}->{ch_m} = $item{dd} }
+
+
+rec: 'rec' wav(s?) { 
+	map{$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
+}
+mon: 'mon' wav(s?) { 
+	map{$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
+}
+mute: 'mute' wav(s?) { 
+	map{$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
+}
+
+mon: 'mon' {$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$Audio::Ecasound::Flow::select_track}} = q(mon); }
+
+mute: 'mute' {$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$Audio::Ecasound::Flow::select_track}} = q(mute); }
+
+rec: 'rec' {$Audio::Ecasound::Flow::state_c{$Audio::Ecasound::Flow::chain{$Audio::Ecasound::Flow::select_track}} = q(rec); }
+
+last: ('last' | '$' ) 
+
+dd: /\d+/
+

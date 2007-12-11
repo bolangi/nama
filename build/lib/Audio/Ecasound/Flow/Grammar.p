@@ -13,7 +13,8 @@ $RD_HINT = 1;
 
 $grammar = q(
 
-[% INSERT grammar %]
+[% INSERT command_headers %]
+[% INSERT grammar_body %]
 
 );
 
