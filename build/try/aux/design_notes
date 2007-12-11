@@ -1,0 +1,34 @@
+I've been working on adding various high-level functions to
+Ecasound through a perl front-end.  For a while I focused on
+a Tk-based GUI.  Recently, I added a text user interface
+that accepts the following kinds of input:
+
+- Ecasound IAM commands
+- 'Ecmd' commands for high-level functions
+- Perl code
+
+The configuration file is now more user friendly.
+
+First, I converted to a YAML style file. A device
+entry for a stereo soundcard will now look like this:
+
+	stereo: 
+		ecasound_id:   alsa,default
+		input_format:  cd-stereo
+		output_format: cd-stereo
+
+Second, I introduced an abbreviations section, which itself
+can contain abbreviations. 
+		
+	abbreviations:
+		cd-stereo: s16_le,2,44100,i
+		24-mono:   s24_le,1,frequency
+		32-12:     s32_le,12,frequency
+		frequency: 48000
+
+The high-level functions would work something like this:
+
+	new test-1   # init new session, "test1", creating directories, etc.
+	add vocal r2 # new track "vocal" that will record from channel 2
+	REC          # create chain setups for recording
+	start        # start engine

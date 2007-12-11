@@ -1,0 +1,6 @@
+package Audio::Ecasound::Flow;
+sub hello {print "hello world"};
+*AEF:: = \*{Audio::Ecasound::Flow::};
+*AEF = \*Audio::Ecasound::Flow::;
+&AEF::hello;
+

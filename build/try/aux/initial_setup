@@ -1,0 +1,199 @@
+#!/usr/local/bin/perl -w
+
+use Data::Dumper;
+use YAML::Tiny;
+
+#############################################
+#  
+---
+rootproperty: ecmd
+
+wave_directory: 
+
+ecasound_globals:  -B auto
+multichannel: ~
+	ecasound_id: alsaplugin,1,0
+	input_format: s32_le,12,44100,i
+	output_format: s32_le,10,44100,i
+stereo: ~
+	ecasound_id: alsaplugin,0,0
+	input_format: s16_le,2,44100,i
+	output_format: s16_le,2,44100,i
+jack: ~
+	ecasound_id: jack_alsa
+	format: s16_le,2,44100,i
+raw_recording: ~
+	format: s16_le,1,44100,i
+mixdown_recording: ~
+	format: s16_le,2,44100,i
+	
+#########################
+
+
+	
+
+# multi => { qw(
+# 
+# 	source_format      s32_le,12,44100,i
+# 	destination_format s32_le,10,44100,i
+# 	name               alsa,ice1712
+# 
+# )},
+	section: 
+	   rootproperty: blah
+	   section:
+		 one: two
+		 three: four
+             Foo: Bar
+             empty: ~
+
+           #############################################
+           # In your program
+
+           use YAML::Tiny;
+
+           # Create a YAML file
+           my $yaml = YAML::Tiny->new;
+
+           # Open the config
+           $yaml = YAML::Tiny->read( 'file.yml' );
+
+while(1){
+
+print <<IRP;
+Type Q or Ctrl-C anytime to quit.
+
+Where do you want your your wav files kept? 
+
+Type Y<ENTER> to accept the default, or type the full directory path.
+
+
+Use $ENV{HOME}/audio_ecmd ?
+IRP
+
+my $wav_dir =  <>;
+chomp $wav_dir;
+
+last if -d $wav_dir;
+ 
+print "$wav_dir does not exist or is not a directory\n";
+
+}
+
+my %card;
+
+for (0..5) {
+	last if ! -d "/proc/asound/card$_";
+	my @attr = split "\n",`ls /proc/asound/card$_`;
+	$card{$_}->{pcm_play} =  scalar @{  [ grep{/^pcm\d+p$/} @attr ] };
+	$card{$_}->{pcm_capture} = scalar @{  [ grep{/^pcm\d+c$/} @attr ] };
+	$card{$_}->{module} = pop @attr;
+} 
+
+my ($max, $index);
+for (keys %card){ my $a = $card{$_}->{pcm_capture};
+					$a > $max and ($max = $a, $index = $_}
+	
+
+
+print Dumper (\%card); exit; 
+__END__
+for (sort keys %card) {
+
+	if $card{
+
+	}
+
+
+=
+codec97#0
+id
+oss_mixer
+pcm0c
+pcm0p
+pcm1c
+pcm1p
+via82xx
+
+=
+
+
+
+
+
+$ecmd_home =  "$ENV{HOME}/ecmd/" ;                               #
+	$wav_dir      = qq(/media/sessions);
+
+
+
+# Ecasound command-line configuration parameters 
+
+	$general = qq( -B auto );
+
+# Sound device settings
+
+	%devices = ( 
+
+# The following for a multichannel sound card such as Delta 1010.
+# Ecmd currently assumes 'multi' for audio input (see Rec_setup
+# in source code.)
+
+# multi => { qw(
+# 
+# 	source_format      s32_le,12,44100,i
+# 	destination_format s32_le,10,44100,i
+# 	name               alsa,ice1712
+# 
+# )},
+
+
+# The following for a simple stereo sound card
+multi => { qw(
+
+	source_format      s16_le,2,44100,i
+	destination_format s16_le,2,44100,i
+    name               alsa,default
+
+)},
+
+stereo => { qw(
+
+	source_format      s16_le,2,44100,i
+	destination_format s16_le,2,44100,i
+    name               alsa,default
+
+)},
+jack => { qw(
+
+	source_format      s32_le,12,44100,i
+	destination_format s32_le,10,44100,i
+    name               jack_alsa
+
+)}
+
+);
+
+$input_channels = 10; 
+
+# Recording format, first some abbreviations
+
+$one_ch24    = qq(s24_le,1,44100,i); # envy24/ice1712 can do this
+$one_ch16    = qq(s16_le,1,44100,i);
+
+# Format for recording mono tracks, 24 bits is better than 16
+
+$rec_format      = $one_ch16;
+
+# Mixdown format
+						 
+$mixdown_format =  qw(s16_le,2,44100,i); # typical for burning to a CD
+
+# Tie mixdown version suffix to global monitor version 
+# (useful when recording/mixing multiple songs in one session) 
+
+$use_monitor_version_for_mixdown = 1;
+
+#==================================================================#
+#                     CONFIGURATION ENDS                           #
+#==================================================================#
+1; # important to leave untouched

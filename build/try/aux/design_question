@@ -1,0 +1,25 @@
+I have a program which processes data and produces
+outputs. It seeks to support two operating modes: 
+
+     A Tk GUI event loop
+	 
+	 A command-line parse and execute loop
+
+My code, already close to 4k lines, is sprouting
+conditionals as:
+
+	&refresh_track_display if $gui;
+
+How can I get rid of these? What are my alternatives?
+
+I have concepts like Track and Track_Group,
+and templates for converting them into 
+the chain configurations used by a sound
+engine to mix, route and process audio signals.
+
+Right now all my code (except the GUI widgets part)
+is procedural, using hashes and arrays to store data.
+
+How might OO design of some other abstraction help
+me support this dual-interface ability?
+

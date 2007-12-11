@@ -1,0 +1,27 @@
+#!/usr/local/bin/perl -w
+use YAML::Tiny;
+$config = YAML::Tiny->new;
+$config = YAML::Tiny->read("config.yaml");
+*cfg = \%{$config->[0]};
+#print keys %cfg;
+#print $config->write_string();
+$debug = 1;
+*subst = \%{$cfg{abbreviations}};
+my $edit_leaf = \&substitute;
+&follow(\%cfg);
+&follow(\%cfg);
+print $config->write_string();
+
+sub follow {
+	my $ref = shift;
+	map { $edit_leaf->($ref, $_) } 
+	grep {$_ ne q(abbreviations)} 
+	keys %{ $ref };
+}
+sub substitute{
+	my ($parent, $key)  = @_;
+	my $val = $parent->{$key};
+	$debug and print qq(key: hello"$key" val: "$val"\n);
+	ref $val and &follow($val)
+		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
+}

@@ -1,0 +1,25 @@
+    require Devel::Symdump;
+	use Data::Dumper;
+    @packs = qw(UI);
+	@array = Devel::Symdump->packages(@packs);
+	print Dumper(\@array);
+	my $pkg = pop @array;
+	print $pkg->as_string;
+   # $obj = Devel::Symdump->new(@packs);        # no recursion
+	
+    #$obj = Devel::Symdump->rnew(@packs);       # with recursion
+__END__
+    # Methods
+    @array = $obj->packages;
+    @array = $obj->scalars;
+    @array = $obj->arrays;
+    @array = $obj->hashes;
+    @array = $obj->functions;
+    @array = $obj->filehandles;  # deprecated, use ios instead
+    @array = $obj->dirhandles;   # deprecated, use ios instead
+    @array = $obj->ios;
+    @array = $obj->unknowns;     # only perl version < 5.003 had some
+
+    $string = $obj->as_string;
+    $string = $obj->as_HTML;
+    $string = $obj1->diff($obj2);

@@ -591,16 +591,16 @@ sub add_track {
 	local $debug = 0;
 	return 0 if &transport_running;
 	my $name = shift;
-	$name and my $track_name = $name; 
+	# new scoping code!
+	###### old, deprecated  $name and my $track_name = $name; 
 	# otherwise we use $trackname from previous scope
-	#
-	# 
-
-	# remove leading and trailing spaces
 	
+	local $track_name = $name if $name;
+	if ($track_names{$track_name}){
+		$debug and carp ("Track name in use\n");
+		return 0;
+	}
 	$track_name = &remove_spaces($track_name);
-
-	print ("Track name in use\n"), return 0 if $track_names{$track_name};
 	$state_t{$t}->{rw} = $::REC;
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
@@ -1945,6 +1945,7 @@ OID:		for my $oid (@oids) {
 			}
 			# add intermediate processing
 		} # fi
+		# XXX deprecated
 		my $pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
 		my $post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
 		$debug and print "pre_output: $pre_output, post_input: $post_input\n";

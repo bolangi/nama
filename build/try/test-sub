@@ -1,0 +1,11 @@
+#!/usr/local/bin/perl -w
+package Audio::Ecasound::Flow;
+use vars q($foo);
+
+use lib q(/home/jroth/ecmd-dev);
+use Audio::Ecasound::Flow::B;
+
+sub a {print "i'ma sub $foo", &b}
+
+&c;
+
