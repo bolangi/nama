@@ -5,10 +5,23 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 1;
+use Test::More tests => 2;
 BEGIN { use_ok('Audio::Ecasound::Flow') };
 
 #########################
+
+package Audio::Ecasound::Flow;
+
+### Option Processing ###
+use vars qw(%opts $session_name $debug);
+getopts('mceg', \%opts); 
+$session_name = 'paul_brocante';
+$debug and print "session name: $session_name\n";
+&prepare;
+&loopg;
+
+ok(1);
+ok(1);
 
 =comment
 ok(my $ui = UI->new, 'UI new');
