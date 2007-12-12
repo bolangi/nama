@@ -1,0 +1,110 @@
+#!/usr/bin/env perl
+use Template;
+use IO::All;
+use File::Find;
+#use IO::Capture::STDOUT;
+
+my $debug = 1;
+my $build = shift;
+my $build_dir = $build ? $build : '/home/jroth/flow/build';
+my ($ext_in, $ext_out) = qw( .p .pm);
+my $special = { Grammar => \&grammar, };
+my %output_file;
+
+&preprocess( $build_dir, $ext_in, $ext_out, $special);
+
+# my $special = { Grammar => \&generate_header_text, };
+sub preprocess {
+	my ($dir, $ext_in, $ext_out, $special) = @_;
+	$debug and print "dir: $dir, ext_in: $ext_in, ext_out: $ext_out, special: ". ref $special, $/;
+  find(\&wanted, $build_dir);
+
+	%dispatcher = %{ $special };
+
+	# Execute 
+	print join "\n","keys", keys %output_file;
+	
+
+	map{ 
+		undef if ! $_ 
+			or  $dispatcher{$_} 
+			and &{ $dispatcher{$_} }($_, "$_$ext_in") # custom routine
+			or  &default($_); 
+	} keys %output_file;
+
+}
+sub wanted { 
+	my $ext = $ext_in;
+	$ext =~ s/^\.//;
+	my $re = qr/\.$ext/;
+	return if $File::Find::name =~ m(blib/lib);
+	if ($File::Find::name =~ m(([^/]+)$re$) ){
+		my $stub = $1;
+	#	print "found stub: $stub\n";
+	#	$debug and print "$_\n";
+		$output_file{$stub} = "$File::Find::dir/$stub.$ext_out";
+	}
+}
+
+sub default {
+	$debug and print "default replace\n";
+	my $template = Template->new;
+	my ($input, $output) = @_; # Flow.p Flow.pm
+
+	# for some reason TT insists on routing to STDOUT
+
+    my $capture = IO::Capture::Stdout->new();
+#    $capture->start(); # STDOUT Output captured
+
+	# process input template, substituting variables
+	$template->process($input)
+		 || die $template->error();
+#    $capture->stop(); # STDOUT output sent to wherever it was before 'start'
+#    @all_lines = $capture->read;
+	print @all_lines;
+}
+
+
+sub grammar {
+
+	$debug and print "grammar replace\n";
+
+	my $template = Template->new;
+	my $command_headers;
+
+	# define template variables for replacement
+
+	# specify input filename, or file handle, text reference, etc.
+	my $input = 'Grammar.p';
+
+	my $list = io('commands')->all;
+	my $body = io('grammar_body')->all;
+	$body =~ s/::/Audio::Ecasound::Flow::/g;
+
+
+	my (@abbrevs, @stubs, @commands);
+
+	map{
+
+		my @parts = my @all_parts = split " ", $_;
+		my $full = shift @parts;
+		my @short = @parts;
+		push @abbrevs,	"_$full: " . join (" | " , @all_parts);
+		push @stubs,   	"$full: _$full {}";
+		push @commands,	"command: $full";
+
+	} split "\n", $list;
+
+	my $command_headers = join "\n", @commands, @abbrevs, @stubs ;
+
+	my $vars = { 
+		commands 	 => $command_headers,
+		grammar_body => $body,
+	};
+# process input template, substituting variables
+$template->process($input, $vars)
+	 || die $template->error();
+}
+	
+__END__
+
