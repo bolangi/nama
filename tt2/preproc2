@@ -21,7 +21,8 @@ use vars qw(
 	$vars
 );
 my $config = {
-	 INCLUDE_PATH => '~/build/flow/tt2',  # or list ref
+	 INCLUDE_PATH => [qw( ~/build/flow/tt2 ~/build/flow/tt2/Flow) ];
+	 # or list ref
      #INTERPOLATE  => 1,               # expand "$var" in plain text
 #	 POST_CHOMP   => 1,               # cleanup whitespace
 #	 PRE_PROCESS  => 'header',        # prefix each template

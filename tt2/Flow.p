@@ -29,7 +29,7 @@ use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
 
 [% INSERT declarations %]
 
-[% INSERT definitions  %]
+[% INSERT definitions %]
 
 ######## End Definitions ########
 
@@ -860,13 +860,15 @@ sub paint_button {
 						-activebackground => $color);
 }
 sub flash_ready {
-	$setup_length->configure(-background =>
-		@record 
-			? 'lightpink'  # live recording, maybe mixing too
-			: really_recording # just mixing
-				? 'yellow'
-				: 'lightgreen'); # just playback
+	my $color;
+		if (@record ){
+			$color = 'lightpink'; # live recording
+		} elsif ( really_recording ){  # mixing only
+			$color = 'yellow';
+		} else {  $color = 'lightgreen'; }; # just playback
 
+	$debug and print "flash color: $color\n";
+	$setup_length->configure(-background => $color);
 	$setup_length->after(10000, 
 		sub{ $setup_length->configure(-background => $old_bg) }
 	);
@@ -1495,10 +1497,10 @@ sub get_versions {
 		   ($sep (\d+))? 
 		   \.$ext )
 		   $/x or next;
-		$debug and print "match: $  num: $3\n\n";
+		$debug and print "match: $1,  num: $3\n\n";
 		$versions{ $3 ? $3 : 'bare' } =  $1 ;
 	}
-	$debug and print "\get_version: " , yaml_out(\%versions);
+	$debug and print "get_version: " , yaml_out(\%versions);
 	closedir WD;
 	%versions;
 }
@@ -1692,8 +1694,8 @@ OID:		for my $oid (@oids) {
 			# add intermediate processing
 		} # fi
 		my ($post_input, $pre_output);
-		$post_input = {$oid{post_input}}($n) if defined $oid{post_input};
-		$pre_output = {$oid{pre_output}}($n) if defined $oid{pre_output};
+		$post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
+		$pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
 		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 		$pre_output{$chain_id} .= $pre_output if defined $pre_output;
 		$post_input{$chain_id} .= $post_input 
