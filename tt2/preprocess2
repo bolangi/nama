@@ -1,9 +1,0 @@
-
-for each File.ext found;
-
-is there a File.template
-
-preprocess that file.
-
-I don't want to preprocess the data of a file
-I want to prepare data (as files to include or variables for substitution)
