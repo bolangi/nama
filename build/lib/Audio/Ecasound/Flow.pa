@@ -14,7 +14,7 @@ use Carp;
 use IO::All;
 use Cwd;
 use Storable; 
-use Data::Dumper;
+use Data::Dumper();
 use Getopt::Std;
 use Tk;
 use Audio::Ecasound;
@@ -25,254 +25,9 @@ use Data::YAML::Reader;
 
 ######## Definitions ###########
 
-use constant (REC => 'rec',
-			  MON => 'mon',
-			  MUTE => 'mute');
+[% INSERT declarations %]
 
-
-our (
-
-
-	### 
-
-
-	$gui,
-	$mixname, 		# 'mix' for the mixer track display
-	$yamlfile, 		# configuration file
-	$yw,			# yaml writer object
-	$yr,			# yaml writer object
-	%state_c_ops, 	# intermediate copy for storage/retrieval
-	$effects_cache_file, # where we keep info on Ecasound
-					# and LADSPA effects, presets, etc.
-	
-	$ecasound, 		# the name to invoke, but I don't think
-					# we invoke by name, that's why i have these
-					# libraries
-
-	$grammar, 		# filled by Grammar.pm
-	@ecmd_commands,# array of commands my functions provide
-	%ecmd_commands,# as hash as well
-	$wav_dir, 		# each session will get a directory here
-	                # and one .ecmd directory, also with 
-	
-					# /wav_dir/project_dir/vocal_1.wav
-					# /wav_dir/.flow/project_dir
-	$statestore,	# filename for storing state info
-	$chain_setup_file, # Ecasound uses this 
-
-	$input_channels,# this many radiobuttons appear
-	                # on the menubutton
-	$config,        # all config information from config.yaml 
-					# or Config.pm
-	%devices, 		# alias to data in $config
-	%opts,          # command line options (set by command stub)
-	%oid_status,    # state information for the chain templates
-	$clock_id,		# for the Tk event system
-	$use_monitor_version_for_mixdown, # sync mixdown version numbers
-	              	# to selected track versions 
-	$select_track,	 # the currently active track -- for Text UI
-	@format_fields, # data for replies to text commands
-
-	$session,		# Tk types session name here
-	$session_name,	# Official session name
-	$i, 			# index for incrementing track numbers
-	$t,				# index for incrementing track groups
-	%state_c,		# data for Track object, except effects
-	%state_t,		# data for track groups (takes)
-	%take,			# which group a track number belongs to 
-	@takes,			# we collect them here
-	%alias,			# key: name value: take number
-	%chain,
-
-
-	### for effects
-
-	$cop_id, 		# chain operator id, that how we create, 
-					# store, find them, adjust them, and destroy them,
-					# per track or per session?
-	%cops,			 # chain operators stored here
-	%copp,			# their parameters for effect update
-	%track_names,	# to know if they are taken
-	@effects,		# static effects information (parameters, hints, etc.)
-	%effect_i,		# an index
-	@ladspa_sorted, # ld
-	%effects_ladspa,# an index
-	$e,				# a counter for partitioning the effects into groups
-	$last_version,  # to know where the next recording should start
-	$monitor_version,# which global version we are currently using
-	%e_bound,		# for displaying hundreds of effects in groups
-	@marks,			# where we want to come back tto
-	$unit,			# multiples of seconds or minutes
-	$markers_armed, # two states forth the markers
-	%old_vol,		# a copy of volume settings, for muting
-	$length,		# maximum duration of the recording/playback if known
-	$jack_on,		# whether we use device jack_alsa
-
-## for &make_io_lists
-#
-	@monitor,		# tracks that will playback
-	@record,		# tracks thatwill record
-	@mute,			# tracks we'll exclude from chain setup
-	@all_chains,	# all that will be a part of our setup
-	@input_chains,	# we sort them in input chains and output chains
-	@output_chains,
-
-	%cfg,			# the config file, as hash (alias to $config->[0])
-	$yaml,			# the text form of the config file
-	%subst,			# alias, substitutions for the config file
-	$tkeca_effects_data,	# original tcl code, actually
-
-	### Widgets
-	
-	$mw, 			# main window
-	$ew, 			# effects window
-	$canvas, 		# to lay out the effects window
-
-	# each part of the main window gets its own frame
-	# to control the layout better
-
-	$load_frame,
-	$add_frame,
-	$take_frame,
-	$time_frame,
-	$clock_frame,
-	$oid_frame,
-	$track_frame,
-	$effect_frame,
-	$iam_frame,
-	$perl_eval_frame,
-	$transport_frame,
-
-	## collected widgets (i may need to destroy them)
-
-	@widget_t, # widgets for displaying track groups (busses!)
-	%widget_c, # for chains (tracks)
-	%widget_e, # for effects
-	@widget_o, # for templates (oids) 
-	%widget_o, # 
-
-	@global_version_buttons, # to set the same version for
-						  	#	all tracks
-	@time_marks,	# how different from @marks?
-					# one is widgets one is the data
-	$time_step,
-	$clock, 		# displays clock
-	$setup_length,  # displays runing time
-
-	$session_label,	# project name
-	$take_label,	# bus name
-
-	$sn_label,		# session load/save/quit	
-	$sn_text,
-	$sn_load,
-	$sn_load_nostate,
-	$sn_new,
-	$sn_quit,
-
-	### A separate box for entering IAM (and other) commands
-	$iam_label,
-	$iam_text,
-	$iam_execute,
-	$iam_error,
-
-	# add track gui
-	#
-	$build_track_label,
-	$build_track_text,
-	$build_track_add,
-	$build_track_rec_label,
-	$build_track_rec_text,
-	$build_track_mon_label,
-	$build_track_mon_text,
-
-	$build_new_take,
-
-	# transport controls
-	
-	$transport_label,
-	$transport_setup_and_connect,
-	$transport_setup,
-	$transport_connect,
-	$transport_disconnect,
-	$transport_new,
-	$transport_start,
-	$transport_stop,
-
-	$iam,    # unused
-	$old_bg, # old background
-
-
-	$loopa,  # loopback nodes 
-	$loopb,  
-	$mixchain, # name of my mix track: 'mix'
-	$mixchain_aux, # an extra node due to name conflict
-
-	@oids,	# output templates, are applied to the
-			# chains collected previously
-			# the results are grouped as
-			# input, output and intermediate sections
-
-	%inputs,
-	%outputs,
-	%post_input,
-	%pre_output,
-
-	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
-
-	$track_name,	# received from Tk text input form
-	$ch_r,			# this too, recording channel assignment
-	$ch_m,			# monitoring channel assignment
-
-	$effects_data_vars,	# the list of which variables to store and retrieve
-	%L,	# for effects
-	%M,
-	$persistent_vars, 	# big data structure marshalling for storage 
-					  	# as one big config file
-	$effects_state,		# same for all chain operators
-	$debug,				# debug level flags for diagnostics
-	$debug2,			# for subroutine names as execute
-
-);
-
-
-$gui = 0; 
-$mixname = qq(mix);
-$yamlfile = qq(config.yaml); # we will look for this
-$effects_cache_file = q(ecmd_effects.yaml);
-
-# set the following to 1 to output debugging info
-$debug  = 1; # detailed debugging info 
-$debug2 = 1; # subroutine names
-
-$ladspa_sample_rate = 44100; # for sample-rate dependent effect
-# LIMITATION: sample rate fixed at 44100
-# the following value, used to set the range of acceptable values
-# for sample-rate dependent LADSPA effect parameters, ideally 
-# should change with per-project sample rates in parameters.pl
-# but this setting should serve temporarily.
-# This value should come from the object using the effect
-
-$unit  = 1; # fast-forward multiplier default;
-
-# some file definitions
-
-$statestore   = "State";  # filename to store state
-							# new files get .yaml suffix
-$chain_setup_file = "session.ecs";
-
-# name the track groupings
-
-%alias = ( 1 => 'Mixdown', 2 => 'Tracker');
-
-# chain names
-
-$loopa = 'loop,111';
-$loopb = 'loop,222';
-
-$mixchain = 1; 
-$mixchain_aux = 'MixDown'; # used for playing back mixes
-                              # when chain 1 is active
-
+[% INSERT definitions  %]
 
 ######## End Definitions ########
 
@@ -310,7 +65,7 @@ package Audio::Ecasound::Flow;
 # BROKEN gui mode... fixed! 
 #
 # BROKEN constants fixed!
-# BROKEN &load session loads after &dig_ruins,
+# BROKEN load session loads after dig_ruins,
 # and wipes out config information.
 # Grammar expanded
 # BROKEN storing @ladspa_sorted
@@ -323,12 +78,12 @@ sub prepare {  # actions begin here
     $yw = Data::YAML::Writer->new;
     $yr = Data::YAML::Reader->new;
 
-	$debug and print ("\%opts\n======\n", &yaml_out (\%opts)); ; 
+	$debug and print ("\%opts\n======\n", yaml_out (\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
-	&read_config;
+	read_config();
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
@@ -346,9 +101,9 @@ sub prepare {  # actions begin here
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
 
-	&new_engine;
-	&initialize_oids;
-	&prepare_static_effects_data;
+	new_engine();
+	initialize_oids();
+	prepare_static_effects_data();
 
 }
 
@@ -359,11 +114,11 @@ sub prepare {  # actions begin here
 # our @ISA = 'UI';
 
 sub loopg {
-	&init_gui; 
-	&transport_gui;
-	&oid_gui;
-	&time_gui;
-	&session_init, &load_session({create => $opts{c}}) if $session_name;
+	init_gui(); 
+	transport_gui();
+	oid_gui();
+	time_gui();
+	session_init, load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
 
@@ -372,7 +127,7 @@ sub loopg {
 # our @ISA = 'UI';
 
 sub loop {
-	&session_init, &load_session({create => $opts{c}}) if $session_name;
+	session_init, load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -398,7 +153,7 @@ sub loop {
 			$parser->command($predicate) or print ("Returned false\n");
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found IAM command\n";
-			&eval_iam($user_input) ;
+			eval_iam($user_input) ;
 		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
@@ -434,7 +189,7 @@ sub read_config {
 
 	my $yaml = $yaml;  
 
-	my $yamlfile = &join_path(&session_dir,$yamlfile);
+	my $yamlfile = join_path(session_dir,$yamlfile);
 	$yaml = io($yamlfile)->all if -f $yamlfile;
 
 	$config = YAML::Tiny->read_string($yaml);
@@ -449,14 +204,14 @@ sub read_config {
 	*devices = \%{ $cfg{devices} }; # %devices is an alias
 	#print $config->write_string();
 	# print keys %subst; exit;
-	&walk_tree(\%cfg);
-	&walk_tree(\%cfg); # second pass completes substitutions
+	walk_tree(\%cfg);
+	walk_tree(\%cfg); # second pass completes substitutions
 	$debug and print $config->write_string; 
 
 }
 sub walk_tree {
 	my $ref = shift;
-	map { &substitute($ref, $_) } 
+	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 
 			keys %{ $ref };
 }
@@ -464,7 +219,7 @@ sub substitute{
 	my ($parent, $key)  = @_;
 	my $val = $parent->{$key};
 	$debug and print qq(key: $key val: $val\n);
-	ref $val and &walk_tree($val)
+	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 ## session handling
@@ -474,39 +229,39 @@ sub load_session {
 	$debug = 1;
 	$debug2 and print "&load_session\n";
 	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
-	$session = &remove_spaces($session); # internal spaces to underscores
+	$session = remove_spaces($session); # internal spaces to underscores
 	$session_name = $hash->{name} ? $hash->{name} : $session;
 	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{&create_dir} &this_wav_dir, &session_dir;
+		map{create_dir} this_wav_dir, session_dir();
 =comment 
 	# OPEN EDITOR TODO
-	my $new_file = &join_path ($ecmd_home, $session_name, $parameters);
+	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
 	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
 	print PARAMS $configuration;
 	close PARAMS;
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
-	&read_config;
-	&session_init;
+	read_config;
+	session_init();
 }
 sub session_init{
 	$debug2 and print "&session_init\n";
-	&initialize_session_data;
-	&remove_small_wavs; 
+	initialize_session_data();
+	remove_small_wavs(); 
 	## XXX need second argument
-	&retrieve_state(&join_path(&session_dir,$statestore)) unless $opts{m};
-	&mix_track, &dig_ruins unless scalar @all_chains;
-	&global_version_buttons if $gui;
+	retrieve_state(join_path(session_dir,$statestore)) unless $opts{m};
+	mix_track, dig_ruins unless scalar @all_chains;
+	global_version_buttons if $gui;
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
 
 sub initialize_session_data {
 
-	return if &transport_running;
-	my $sf = &join_path(&session_dir, $chain_setup_file);
+	return if transport_running();
+	my $sf = join_path(session_dir, $chain_setup_file);
 	carp ("missing session file $sf\n") unless -f $sf;
 	$gui and $session_label->configure(
 		-text => uc $session_name, 
@@ -545,9 +300,9 @@ if ($gui) {
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$state_t{active} = 1; 
 }
-	&increment_take; 
+	increment_take(); 
 
-&take_gui($t) if $gui;
+take_gui($t) if $gui;
 
 	%take        = (); # maps chain index to take
 	%chain       = (); # maps track name (filename w/o .wav) to chain
@@ -578,7 +333,7 @@ sub create_dir {
 sub add_track {
 	$debug2 and print "&add_track\n";
 	local $debug = 0;
-	return 0 if &transport_running;
+	return 0 if transport_running;
 	my $name = shift;
 	# new scoping code!
 	###### old, deprecated  $name and my $track_name = $name; 
@@ -589,26 +344,26 @@ sub add_track {
 		$debug and carp ("Track name in use\n");
 		return 0;
 	}
-	$track_name = &remove_spaces($track_name);
+	$track_name = remove_spaces($track_name);
 	$state_t{$t}->{rw} = $::REC;
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
-	&register_track($i, $track_name, $ch_r, $ch_m);
-	&find_wavs($i);
-	#&set_active_version($i) if ! defined $state_c{$i}->{active};
+	register_track($i, $track_name, $ch_r, $ch_m);
+	find_wavs($i);
+	#set_active_version($i) if ! defined $state_c{$i}->{active};
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = $::REC if ! defined $state_c{$i}->{rw};
-	&track_gui($i) if $gui;
+	track_gui($i) if $gui;
 	return 1;
 }
 sub mix_track {
-	# return if $opts{m} or ! -e &join_path(&session_dir,$statestore);
-	&add_track($mixname) ;
+	# return if $opts{m} or ! -e join_path(session_dir,$statestore);
+	add_track($mixname) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = $::MUTE; 
-	&new_take;
+	new_take();
 	$state_t{$t}->{rw} = $::MON;
 }
 sub mix_suffix {
@@ -618,8 +373,8 @@ sub mix_suffix {
 sub restore_track {
 	$debug2 and print "&restore_track\n";
 	my $n = shift;
-	&find_wavs($n);
-	&track_gui($n), &refresh if $gui;
+	find_wavs($n);
+	track_gui($n), refresh if $gui;
 }
 sub register_track {
 	$debug2 and print "&register_track\n";
@@ -649,7 +404,7 @@ sub dig_ruins {
 
 		# look for wave files
 		
-		my $d = &this_wav_dir;
+		my $d = this_wav_dir();
 		opendir WAV , $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
@@ -657,7 +412,7 @@ sub dig_ruins {
 		my @wavs = grep{s/(_\d+)?\.wav//i} readdir WAV;
 
 		$debug and print "tracks found: @wavs\n";
-		map{&add_track($_)}@wavs;
+		map{add_track($_)}@wavs;
 
 	}
 }
@@ -668,7 +423,7 @@ sub find_wavs {
 	$debug2 and print "&find_wavs\n";
 	local $debug = 0;
 	$debug and print "track: $n\n";
-	$debug and print "this_wav dir: ", &this_wav_dir,": $n\n";
+	$debug and print "this_wav dir: ", this_wav_dir,": $n\n";
 
 	
 	# GET VERSIONS 
@@ -676,14 +431,14 @@ sub find_wavs {
 	
 	$debug and 
 	print "getting versions for chain $n, state_c{$n}->{file}\n";
-		my %versions =  &get_versions (
-			&this_wav_dir,
+		my %versions =  get_versions (
+			this_wav_dir,
 			$state_c{$n}->{file},
 			'_', 'wav' )  ;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	$debug and print "\%versions\n================\n", &yaml_out (%versions);
+	$debug and print "\%versions\n================\n", yaml_out (%versions);
 		delete $state_c{$n}->{targets};
 		$state_c{$n}->{targets} = { %versions };
 
@@ -709,7 +464,7 @@ sub remove_small_wavs {
 	# left by a recording chainsetup that is 
 	# connected by not started
 
-	my $a = &this_wav_dir;
+	my $a = this_wav_dir;
 	my $cmd = qq(find $a  -name '*.wav' -size 44c);
 	$debug and print $cmd; 
 	my @wavs = split "\n",qx($cmd);
@@ -721,11 +476,11 @@ sub remove_small_wavs {
 #
 sub new_take {
 	$debug2 and print "&new_take\n";
-	&increment_take;
-	$gui and &take_gui($t), &refresh_t;
+	increment_take;
+	$gui and take_gui($t), refresh_t();
 }
 sub increment_take {
-			return if &transport_running; 
+			return if transport_running; 
 					$t++;
 					$state_t{active} = $t;
 					$state_t{$t}->{rw} = $::REC;
@@ -734,7 +489,7 @@ sub increment_take {
 }
 sub decrement_take {
 			$debug2 and print "&decrement_take\n";
-			return if &transport_running; 
+			return if transport_running; 
 			return if $t == 1; 
 			# can't proceed if tracks already defined for this take
 			$debug and print ("found chains, aborting"),return 
@@ -751,12 +506,12 @@ sub select_take {
 	my ($t, $status) = shift;
 	$status =~ m/REC|MON|MUTE/
 		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
-	return if &transport_running;
+	return if transport_running;
 	$state_t{$t}->{rw} = $status; 
 	$state_t{active} = $t; 
-	&refresh if $gui;
-	&setup_transport;
-	&connect_transport;
+	refresh if $gui;
+	setup_transport();
+	connect_transport();
 }
 ## gui handling
 
@@ -823,17 +578,17 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => \&load_session,
+		-command => \load_session,
 		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { &load_session({create => 1}) },
+		-command => sub { load_session({create => 1}) },
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
-				return if &transport_running;
-				&save_state(&join_path(&session_dir,$statestore)) 
-					if &session_dir;
+				return if transport_running;
+				save_state(join_path(session_dir,$statestore)) 
+					if session_dir;
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
 		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
@@ -847,14 +602,14 @@ sub init_gui {
 
 	$build_track_add->configure( 
 			-text => 'Add',
-			-command => sub { &add_track($track_name) }
+			-command => sub { add_track($track_name) }
 	);
 
 =comment TAKE
 	$build_new_take->configure( 
 			-text => 'New Group',
 			-command =>
-			\&new_take, # used for mixdown
+			\new_take, # used for mixdown
 
 			
 			);
@@ -876,7 +631,7 @@ sub init_gui {
 		->pack(-side => 'left');;
 	$iam_execute = $iam_frame->Button(
 			-text => 'Execute',
-			-command => sub { print &eval_iam($iam), "\n" }
+			-command => sub { print eval_iam($iam), "\n" }
 		)->pack(-side => 'left');;
 	my $perl_eval;
 	my $perl_eval_label = $perl_eval_frame->Label(
@@ -907,40 +662,40 @@ sub transport_gui {
 
 	$transport_stop->configure(-text => "Stop",
 	-command => sub { 
-					&stop_transport;
+					stop_transport();
 				}
 		);
 	$transport_start->configure(
 		-text => "Start!",
 		-command => sub { 
-		return if &transport_running;
-		if ( &really_recording ) {
+		return if transport_running;
+		if ( really_recording ) {
 			$session_label->configure(-background => 'lightpink') 
 		}
 		else {
 			$session_label->configure(-background => 'lightgreen') 
 		}
-		&start_transport;
+		start_transport();
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Generate and connect',
-			-command => sub {&setup_transport; &connect_transport}
+			-command => sub {setup_transport; connect_transport}
 						 );
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
-			-command => \&setup_transport,
+			-command => \setup_transport,
 						 );
 	$transport_connect->configure(
 			-text => 'Connect chain setup',
-			-command => \&connect_transport,
+			-command => \connect_transport,
 						 );
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
-			-command => sub { &disconnect_transport },
+			-command => sub { disconnect_transport },
 						);
 	$transport_new->configure(
 			-text => 'New Engine',
-			-command => \&new_engine,
+			-command => \new_engine,
 						 );
 }
 sub time_gui {
@@ -979,21 +734,21 @@ sub time_gui {
 	my @minuses = map{ - $_ } reverse @pluses;
 	my @fw = map{ my $d = $_; $fast_frame->Button(
 			-text => $d,
-			-command => sub { &jump($d) },
+			-command => sub { jump($d) },
 			)
 		}  @pluses ;
 	my @rew = map{ my $d = $_; $fast_frame->Button(
 			-text => $d,
-			-command => sub { &jump($d) },
+			-command => sub { jump($d) },
 			)
 		}  @minuses ;
 	my $beg = $fast_frame->Button(
 			-text => 'Beg',
-			-command => \&to_start,
+			-command => \to_start,
 			);
 	my $end = $fast_frame->Button(
 			-text => 'End',
-			-command => \&to_end,
+			-command => \to_end,
 			);
 
 	$time_step = $fast_frame->Button( 
@@ -1003,7 +758,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \&toggle_unit);
+	$time_step->configure (-command => \toggle_unit);
 
 	# Marks
 	
@@ -1011,19 +766,19 @@ sub time_gui {
 	push @label_and_arm, $mark_label;	
 	push @label_and_arm, $mark_frame->Button(
 		-text => 'Set',
-		-command => sub { &arm_mark },
+		-command => sub { arm_mark },
 	);
 	my $marks = 18; # number of marker buttons
 	my @m = (1..$marks);
 	my $label = qw(A);
 	map { push @time_marks, $mark_frame->Button( 
 		-text => $_,
-		-command => sub { &mark(eval $_)},
+		-command => sub { mark(eval $_)},
 		-background => $marks[$_] ? $old_bg : 'lightblue',
 		) } @m;
-	# map { $time_marks[$_]->configure( -command => sub { # &mark($_)} ) } @m[1..$#m];
+	# map { $time_marks[$_]->configure( -command => sub { # mark($_)} ) } @m[1..$#m];
 	for my $m (@m) {
-		$time_marks[$m]->configure( -command => sub { &mark($m)} )
+		$time_marks[$m]->configure( -command => sub { mark($m)} )
 			unless ! defined $time_marks[$m];
 		
 		;
@@ -1079,14 +834,14 @@ sub oid_gui {
 
 					# jack is on, turn it off
 				
-					&convert_to_alsa;
-					&paint_button($toggle_jack, $old_bg);
+					convert_to_alsa();
+					paint_button($toggle_jack, $old_bg);
 					$jack_on = 0;
 				}
 				else {
 
-					&convert_to_jack;
-					&paint_button($toggle_jack, q(lightblue));
+					convert_to_jack();
+					paint_button($toggle_jack, q(lightblue));
 					$jack_on = 1;
 				}
 			}
@@ -1106,7 +861,7 @@ sub flash_ready {
 	$setup_length->configure(-background =>
 		@record 
 			? 'lightpink'  # live recording, maybe mixing too
-			: &really_recording # just mixing
+			: really_recording # just mixing
 				? 'yellow'
 				: 'lightgreen'); # just playback
 
@@ -1125,7 +880,7 @@ sub take_gui {
 				-tearoff =>0,
 			)->pack(-side => 'left');
 		push @widget_t, $name;
-	$debug and print "=============\n\@widget_t\n",&yaml_out(\@widget_t);
+	$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
@@ -1136,7 +891,7 @@ sub take_gui {
 				no strict qw(vars);
 				defined $my_t or my $my_t = $t;
 				use strict qw(vars);
-				&select_take ($my_t, qq(REC) );
+				select_take ($my_t, qq(REC) );
 				}
 			]);
 		}
@@ -1148,7 +903,7 @@ sub take_gui {
 				no strict qw(vars);
 				defined $my_t or my $my_t = $t;
 				use strict qw(vars);
-				&select_take($my_t, qq(MON)); 
+				select_take($my_t, qq(MON)); 
 				}
 			]);
 		$name->AddItems([
@@ -1158,7 +913,7 @@ sub take_gui {
 				no strict qw(vars);
 				defined $my_t or my $my_t = $t;
 				use strict qw(vars);
-				&select_take($my_t, qq(MUTE)); 
+				select_take($my_t, qq(MUTE)); 
 				}
 
 		]);
@@ -1166,7 +921,7 @@ sub take_gui {
 							   
 }
 sub global_version_buttons {
-#	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
+#	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons(); 
     my @children = $widget_t[1]->children;
 	for (@children) {
 		$_->cget(-value) and $_->destroy;
@@ -1188,9 +943,9 @@ sub global_version_buttons {
 				-command => sub { 
 					$state_t{2}->{rw} = $::MON; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
-					&setup_transport; 
-					&connect_transport;
-					&refresh;
+					setup_transport; 
+					connect_transport;
+					refresh();
 					}
 
  					);
@@ -1216,8 +971,8 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{active},
 						-value => $v,
 						-command => 
-		sub { $version->configure(-text=> &selected_version($n) ) 
-	#		unless &rec_status($n) eq $::REC
+		sub { $version->configure(-text=> selected_version($n) ) 
+	#		unless rec_status($n) eq $::REC
 			}
 					);
 	}
@@ -1234,7 +989,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => sub { 
 							$state_c{$n}->{rw} = $::REC;
-							&refresh }
+							refresh }
 				 		)
 				}
 			}
@@ -1249,7 +1004,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => sub { 
 							$state_c{$n}->{rw} = $::MON;
-							&refresh_c($n) }
+							refresh_c($n) }
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
@@ -1262,19 +1017,19 @@ sub track_gui { # nearly 300 lines!
 				-foreground => 'red',
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::REC;
-					&refresh;
+					refresh;
 					}
 			],
 			[ 'command' => $::MON,
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::MON;
-					&refresh;
+					refresh;
 					}
 			],
 			[ 'command' => $::MUTE, 
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::MUTE;
-					&refresh;
+					refresh;
 					}
 			],
 		);
@@ -1287,7 +1042,7 @@ sub track_gui { # nearly 300 lines!
 	# Volume
 
 	my $p_num = 0; # needed when using parameter controllers
-	my $vol_id = &add_volume_control($n);
+	my $vol_id = add_volume_control($n);
 
 
 	$debug and print "vol cop_id: $vol_id\n";
@@ -1301,28 +1056,28 @@ sub track_gui { # nearly 300 lines!
 
 
 	 $debug and do {my %q = %p; delete $q{parent}; print
-	 "x=============\n%p\n",&yaml_out(\%q)};
+	 "x=============\n%p\n",yaml_out(\%q)};
 
-	$vol = &make_scale ( \%p );
+	$vol = make_scale ( \%p );
 	# Mute
 
 =comment
 	$mute = $track_frame->Button;
 	
-	$mute->configure( -command => sub { &toggle_muting($mute, $n) });
+	$mute->configure( -command => sub { toggle_muting($mute, $n) });
 =cut;
 	$mute = $track_frame->Button(
 	  		-command => sub { 
 				if ($copp{$vol_id}->[0]) {  # non-zero volume
 					$old_vol{$n}=$copp{$vol_id}->[0];
 					$copp{$vol_id}->[0] = 0;
-					&effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
+					effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
 					$mute->configure(-background => 'brown');
 					$mute->configure(-activebackground => 'brown');
 				}
 				else {
 					$copp{$vol_id}->[0] = $old_vol{$n};
-					&effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
+					effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
 						$old_vol{$n});
 					$old_vol{$n} = 0;
 					$mute->configure(-background => $old_bg);
@@ -1345,38 +1100,38 @@ sub track_gui { # nearly 300 lines!
 
 		# do nothing if setup not connected
 		
-		return if ! grep{/$session_name/} &eval_iam(q(cs-connected));
+		return if ! grep{/$session_name/} eval_iam(q(cs-connected));
 
 		# do nothing if someone else is soloing;
 		
-		return if grep{ &is_soloing($_) } grep {$_ != $n} @all_chains; # but some may
+		return if grep{ is_soloing($_) } grep {$_ != $n} @all_chains; # but some may
 		                                                               # not be in
 																	   # chain
 																	   # setup
 
 		# restore prior mute settings if I had been soloing
 		
-		if (&is_soloing($n) ) {
+		if (is_soloing($n) ) {
 		
 			$solo->configure(-foreground => $old_bg );
 			$solo->configure(-activeforeground => $old_bg );
 
-			map{ &toggle_mute($_) if $muted[$_] != &is_muted($_) } 
+			map{ toggle_mute($_) if $muted[$_] != is_muted($_) } 
 				grep{$_ != 1} @all_chains; # MIX
 		}
 
 		# otherwise save muted status for each track and mute all
 		
 		else {
-			map{ $mute($_) = &is_muted($_) } grep{$_ != 1} @all_chains; # MIX
+			map{ $mute($_) = is_muted($_) } grep{$_ != 1} @all_chains; # MIX
 
-			map{ &toggle_mute($_) } 
-			grep {! &is_muted($_) } 
+			map{ toggle_mute($_) } 
+			grep {! is_muted($_) } 
 			grep {$_ != $n} 
 			grep {$_ != 1} 
 			@all_chains;
 
-			&is_muted($n) and &toggle_mute($n);
+			is_muted($n) and toggle_mute($n);
 			
 			$solo->configure(-foreground => q(yellow) );
 			$solo->configure(-activeforeground => q(yellow) );
@@ -1393,7 +1148,7 @@ sub track_gui { # nearly 300 lines!
 	$unity = $track_frame->Button(
 	  		-command => sub { 
 				$copp{$vol_id}->[0] = 100;
-	 			&effect_update($p{chain}, $p{cop_id}, $p{p_num}, 100);
+	 			effect_update($p{chain}, $p{cop_id}, $p{p_num}, 100);
 			}
 	  );
 
@@ -1403,7 +1158,7 @@ sub track_gui { # nearly 300 lines!
 	# run on initializing the track gui
 
 	
-	my $pan_id = &add_pan_control($n);
+	my $pan_id = add_pan_control($n);
 	
 	$debug and print "pan cop_id: $pan_id\n";
 	$p_num = 0;           # first parameter
@@ -1415,15 +1170,15 @@ sub track_gui { # nearly 300 lines!
 			);
 	 $debug and do {my %q = %p; 
 		 delete $q{parent}; 
-	 	 print "x=============\n%p\n",&yaml_out(\%q)};
-	$pan = &make_scale ( \%q );
+	 	 print "x=============\n%p\n",yaml_out(\%q)};
+	$pan = make_scale ( \%q );
 
 	# Center
 
 	$center = $track_frame->Button(
 	  	-command => sub { 
 			$copp{$pan_id}->[0] = 50;
-			&effect_update($q{chain}, $q{cop_id}, $q{p_num}, 50);
+			effect_update($q{chain}, $q{cop_id}, $q{p_num}, 50);
 		}
 	  );
 	
@@ -1434,7 +1189,7 @@ sub track_gui { # nearly 300 lines!
 
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	$debug and print "=============\n\%widget_c\n",&yaml_out(\%widget_c);
+	$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
 	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 	# parents are the independent effects
@@ -1466,20 +1221,20 @@ sub track_gui { # nearly 300 lines!
 					 $e_bound{ladspa}{d}-1, 
 					 $e_bound{ladspa}{z}, 
 					);
-	my @add_effect;
+	my @add_effect();
 
-	map{push @add_effect, &effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
+	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
 	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	&refresh;
+	refresh;
 
 	
 }
 sub add_volume_control {
 	my $n = shift;
 	
-	my $vol_id = &cop_add({
+	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'ea',
 				cop_id => $state_c{$n}->{vol}, # often undefined
@@ -1490,7 +1245,7 @@ sub add_volume_control {
 sub add_pan_control {
 	my $n = shift;
 	
-	my $vol_id = &cop_add({
+	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'epp',
 				cop_id => $state_c{$n}->{pan}, # often undefined
@@ -1521,7 +1276,7 @@ sub effect_button {
 		push @items, 				
 			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
 				-command  => sub { 
-					 &add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
+					 add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
 					$ew->deiconify; # display effects window
 					} 
 			];
@@ -1595,7 +1350,7 @@ sub make_scale {
 							$effects[$i]->{params}->[$p]->{begin} ) / 100),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { &effect_update($n, $id, $p, $copp{$id}->[$p]) }
+		  -command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) }
 		  );
 
 		# auxiliary field for logarithmic display
@@ -1607,11 +1362,11 @@ sub make_scale {
 				);
 			$controller->configure(
 		  		-command => sub { 
-					&effect_update($n, $id, $p, exp $copp{$id}->[$p]);
+					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
 					$log_display->configure(
 						-text => $effects[$i]->{params}->[$p]->{name} =~ /hz/i
 							? int exp $copp{$id}->[$p]
-							: &dn(exp $copp{$id}->[$p], 1)
+							: dn(exp $copp{$id}->[$p], 1)
 						);
 					}
 				);
@@ -1631,7 +1386,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$copp{$id}->[$p],
 			-width => 6,
-	#		-command => sub { &effect_update($n, $id, $p, $copp{$id}->[$p]) },
+	#		-command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) },
 			# doesn't work with Entry widget
 			);	
 
@@ -1646,8 +1401,8 @@ sub is_soloing {
 }
 sub toggle_muting {
 	my ($widget, $n) = @_;
-	&toggle_mute($n);
-	if (&is_muted($n)){
+	toggle_mute($n);
+	if (is_muted($n)){
 		$widget->configure(-background => 'brown');
 		$widget->configure(-activebackground => 'brown');
 	} 
@@ -1657,17 +1412,17 @@ sub toggle_muting {
 	}
 }
 sub toggle_mute {
-	my $setup = &eval_iam("cs-connected");
+	my $setup = eval_iam("cs-connected");
 	$setup =~ /$session_name/ or return; # only work if connected setup
 	my $n = shift;
-	&is_muted;
-	&eval_iam("c-select $n");
-	&eval_iam("c-muting");
-	&is_muted;
+	is_muted();
+	eval_iam("c-select $n");
+	eval_iam("c-muting");
+	is_muted;
 }
 sub is_muted {
 	my $n = shift;
-		my ($cs) = grep{/Chain "$n"/} split "\n", &eval_iam("cs");
+		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
 		# print "CS: $cs\n";
 		my $status = $cs =~ /muted/;
 		print ( $status 
@@ -1690,10 +1445,10 @@ sub join_path {
 	use warnings;
 }
 
-sub this_wav_dir {&join_path($wav_dir, $session_name);}
+sub this_wav_dir {join_path($wav_dir, $session_name);}
 
 sub session_dir  { 
-	&join_path($wav_dir, ".ecmd", $session_name);
+	join_path($wav_dir, ".ecmd", $session_name);
 }
 sub wav_off {
 	my $wav = shift;
@@ -1738,10 +1493,10 @@ sub get_versions {
 		   ($sep (\d+))? 
 		   \.$ext )
 		   $/x or next;
-		$debug and print "match: $&  num: $3\n\n";
+		$debug and print "match: $  num: $3\n\n";
 		$versions{ $3 ? $3 : 'bare' } =  $1 ;
 	}
-	$debug and print "\&get_version: " , &yaml_out(\%versions);
+	$debug and print "\get_version: " , yaml_out(\%versions);
 	closedir WD;
 	%versions;
 }
@@ -1752,7 +1507,7 @@ sub mon_vert {
 	# store %copp
 	# remove effects  and use $ver's set if there are effects for $v
 	$monitor_version = $ver;
-	&refresh;
+	refresh;
 }
 ## chain setup generation
 #
@@ -1762,9 +1517,9 @@ sub collect_chains {
 
 	
 	for my $n (@all_chains) {
-	$debug and print "rec_status $n: ", &rec_status($n), "\n";
-		push (@monitor, $n) if &rec_status($n) eq $::MON; 
-		push (@record, $n) if &rec_status($n) eq $::REC;
+	$debug and print "rec_status $n: ", rec_status($n), "\n";
+		push (@monitor, $n) if rec_status($n) eq $::MON; 
+		push (@record, $n) if rec_status($n) eq $::REC;
 	}
 
 	$debug and print "monitor chains:  @monitor\n\n";
@@ -1774,15 +1529,15 @@ sub collect_chains {
 }
 sub rec_status {
 
-# VERSION: replace state_c{$n}->{active} by  &selected_version($n)
+# VERSION: replace state_c{$n}->{active} by  selected_version($n)
 	my $n = shift;
 	$debug2 and print "&rec_status\n";
 	no warnings;
-	$debug and print "chain $n: active: &selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
+	$debug and print "chain $n: active: selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
 	use warnings;
 
 no warnings;
-my $file_exists = -f &join_path(&this_wav_dir ,  $state_c{$n}->{targets}->{&selected_version($n)});
+my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
 use warnings;
     return $::MUTE if $state_c{$n}->{rw} eq $::MON and ! $file_exists;
 	return $::MUTE if $state_c{$n}->{rw} eq $::MUTE;
@@ -1799,7 +1554,7 @@ use warnings;
 			}
 		}
 	}
-	return $::MON if &selected_version($n);
+	return $::MON if selected_version($n);
 	return $::MUTE;
 }
 sub really_recording {  # returns filename stubs
@@ -1818,7 +1573,7 @@ sub make_io_lists {
 	%outputs = ();      
 	%post_input = ();
 	%pre_output = ();
-	my $rec_status;
+	my $rec_status();
 
 	# set up track independent chains for MIX and STEREO (type: mixed)
 	for my $oid (@oids) {
@@ -1830,13 +1585,13 @@ sub make_io_lists {
 		} else { # assume device
 			defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
 			push @{ $outputs{$oid{output}} }, $oid{id}
-		#	&hash_push( \%outputs, $oid{output}, $oid{id});
+		#	hash_push( \%outputs, $oid{output}, $oid{id});
 		}
 	}
 
 	for my $n (@all_chains) {
 		$debug and print "chain $n: begin\n";
-		$rec_status = &rec_status($n);
+		$rec_status = rec_status($n);
 		next if $rec_status eq $::MUTE;
 
 OID:		for my $oid (@oids) {
@@ -1892,7 +1647,7 @@ OID:		for my $oid (@oids) {
 					#   if status is 'rec' every raw customer gets
 					#   rec_setup's post_input string
 
-				$post_input{$chain_id} .= &rec_route($n) if $rec_status eq 'rec';
+				$post_input{$chain_id} .= rec_route($n) if $rec_status eq 'rec';
 
 				}
 		}
@@ -1935,8 +1690,8 @@ OID:		for my $oid (@oids) {
 			# add intermediate processing
 		} # fi
 		my ($post_input, $pre_output);
-		$post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
-		$pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
+		$post_input = {$oid{post_input}}($n) if defined $oid{post_input};
+		$pre_output = {$oid{pre_output}}($n) if defined $oid{pre_output};
 		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 		$pre_output{$chain_id} .= $pre_output if defined $pre_output;
 		$post_input{$chain_id} .= $post_input 
@@ -1960,11 +1715,11 @@ OID:		for my $oid (@oids) {
 # 		} @chain_ids;
 # 	}
 
-	$debug and print "\@oids\n================\n", &yaml_out(\@oids);
-	$debug and print "\%post_input\n================\n", &yaml_out(\%post_input);
-	$debug and print "\%pre_output\n================\n", &yaml_out(\%pre_output);
-	$debug and print "\%inputs\n================\n", &yaml_out(\%inputs);
-	$debug and print "\%outputs\n================\n", &yaml_out(\%outputs);
+	$debug and print "\@oids\n================\n", yaml_out(\@oids);
+	$debug and print "\%post_input\n================\n", yaml_out(\%post_input);
+	$debug and print "\%pre_output\n================\n", yaml_out(\%pre_output);
+	$debug and print "\%inputs\n================\n", yaml_out(\%inputs);
+	$debug and print "\%outputs\n================\n", yaml_out(\%outputs);
 
 
 }
@@ -1978,7 +1733,7 @@ sub rec_route {
 sub route {
 	my ($width, $dest) = @_;
 	return undef if $dest == 1 or $dest == 0;
-	$debug and print "\&route: width: $width, destination: $dest\n\n";
+	$debug and print "\route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
@@ -2058,7 +1813,7 @@ sub write_chains {
 	# but when playing back a mix, we want mixchain to be 
 	# something else
 	
-	my $mixchain = &rec_status(1) eq $::MON
+	my $mixchain = rec_status(1) eq $::MON
 						? $mixchain_aux
 						: $mixchain;
 
@@ -2104,8 +1859,8 @@ sub write_chains {
 		$debug and print "track number: $n\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:" .  &join_path(&this_wav_dir, 
-					         $state_c{$n}->{targets}->{&selected_version($n)}),
+			 		"-i:" .  join_path(this_wav_dir, 
+					         $state_c{$n}->{targets}->{selected_version($n)}),
 	   );
  	}
 	##### SETTING FILES AS OUTPUTS (used by rec_file and mix)
@@ -2118,8 +1873,8 @@ sub write_chains {
 		
 		push @output_chains, join ( " ",
 			 "-a:".$chain_ids,
-			 "-f:".&output_format($file),
-			 "-o:". &new_wav_name( $file ),
+			 "-f:".output_format($file),
+			 "-o:". new_wav_name( $file ),
 		 );
 			 
 	}
@@ -2141,8 +1896,8 @@ sub write_chains {
 		
 	}
 		
-	# $debug and print "\%state_c\n================\n", &yaml_out(\%state_c);
-	# $debug and print "\%state_t\n================\n", &yaml_out(\state_t);
+	# $debug and print "\%state_c\n================\n", yaml_out(\%state_c);
+	# $debug and print "\%state_t\n================\n", yaml_out(\state_t);
 							
 		
 	## write general options
@@ -2160,7 +1915,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = &join_path(&session_dir, $chain_setup_file);
+	my $sf = join_path(session_dir, $chain_setup_file);
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -2170,7 +1925,7 @@ sub new_wav_name {
 	my $stub = shift;
 	my $version;
 	if (@record) {  # we are recording an audio input
-		$version = &new_version; # even mix track
+		$version = new_version(); # even mix track
 	}
 	else { # we are only mixing
 		$version = $stub eq $mixname  # mix track 
@@ -2178,9 +1933,9 @@ sub new_wav_name {
 					? $monitor_version 
 					: $state_c{1}->{versions}->[-1] + 1
 				)
-			: &new_version;
+			: new_version;
 	}
-	&join_path(&this_wav_dir,	"$stub\_$version.wav");
+	join_path(this_wav_dir,	"$stub\_$version.wav");
 }
 sub output_format {
 	my $stub = shift;
@@ -2217,14 +1972,14 @@ my $null_id = undef;
 
 # Multi: output 'cooked' monitor channels to side-by-side
 # PCMs starting at the monitor channel assignment in the track menu.
-#  Default to PCMs 1 & 2.
+#  Default to PCMs 1  2.
 
 	name	=>	q(multi), 
 	target	=>	q(mon),  
 	id		=>	q(m),
 	output	=>	q(multi),
 	type	=>	q(cooked),
-	pre_output	=>	\&pre_multi,
+	pre_output	=>	\pre_multi,
 	default	=> q(off),
 
 }, 
@@ -2238,7 +1993,7 @@ my $null_id = undef;
 	id		=>	q(L),
 	output	=>  q(multi),
 	type	=>  q(cooked),
-	pre_output	=>	\&pre_multi,
+	pre_output	=>	\pre_multi,
 	default	=>  q(off),
 
 	},{
@@ -2275,7 +2030,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
+	post_input	=>	\mono_to_stereo,
 
 	},{
 	
@@ -2303,7 +2058,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
+	post_input	=>	\mono_to_stereo,
 	id		=>  $null_id, 
 
 	},
@@ -2314,7 +2069,7 @@ my $null_id = undef;
 	# oid settings
 	
 	map{ $oid_status{$_->{name}} = $_->{default} eq 'on' ? 1 : 0 } @oids;
-	$debug and print &yaml_out(\%oid_status); 
+	$debug and print yaml_out(\%oid_status); 
 
 }
 sub mono_to_stereo { " -erc:1,2 " }
@@ -2324,20 +2079,20 @@ sub pre_multi {
 	my $n = shift;
 	$debug and print "track: $n\n";
 	return if ! defined $state_c{$n}->{ch_m} or $state_c{$n}{ch_m} == 1;
-	&route(2,$state_c{$n}->{ch_m}); # stereo signal
+	route(2,$state_c{$n}->{ch_m}); # stereo signal
 }
 sub convert_to_jack {
 	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
 	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	
 }
-sub convert_to_alsa { &initialize_oids }
+sub convert_to_alsa { initialize_oids }
 
 ## transport functions
 
 sub load_ecs {
-		my $session_file = &join_path(&session_dir , $chain_setup_file);
-		&eval_iam("cs-remove $session_file");
-		&eval_iam("cs-load ". $session_file);
+		my $session_file = join_path(session_dir , $chain_setup_file);
+		eval_iam("cs-remove $session_file");
+		eval_iam("cs-load ". $session_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
@@ -2348,38 +2103,38 @@ sub new_engine {
 }
 sub setup_transport {
 	$debug2 and print "&setup_transport\n";
-	&collect_chains;
-	&make_io_lists;
-	map{ &eliminate_loops($_) } @all_chains;
-	#print "minus loops\n \%inputs\n================\n", &yaml_out(\%inputs);
-	#print "\%outputs\n================\n", &yaml_out(\%outputs);
-	&write_chains;
+	collect_chains();
+	make_io_lists();
+	map{ eliminate_loops($_) } @all_chains;
+	#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
+	#print "\%outputs\n================\n", yaml_out(\%outputs);
+	write_chains();
 }
 sub connect_transport {
-	&load_ecs; 
-	carp("Invalid chain setup, cannot arm transport.\n"),return unless &eval_iam("cs-is-valid");
-	&find_op_offsets; 
-	&apply_ops;
-	&eval_iam('cs-connect');
+	load_ecs(); 
+	carp("Invalid chain setup, cannot arm transport.\n"),return unless eval_iam("cs-is-valid");
+	find_op_offsets(); 
+	apply_ops();
+	eval_iam('cs-connect');
 	carp("Invalid chain setup, cannot arm transport.\n"), return 
-		unless &eval_iam("engine-status") eq 'not started' ;
-	&eval_iam('engine-launch');
+		unless eval_iam("engine-status") eq 'not started' ;
+	eval_iam('engine-launch');
 	carp("Invalid chain setup, cannot arm transport.\n"), return
-		unless &eval_iam("engine-status") eq 'stopped' ;
-	$length = &eval_iam('cs-get-length'); 
-	$gui and $setup_length->configure(-text => &colonize($length));
-	&eval_iam("cs-set-length $length") unless @record;
-	$gui and $clock->configure(-text => &colonize(0));
-	print &eval_iam("fs");
-	$gui and &flash_ready;
+		unless eval_iam("engine-status") eq 'stopped' ;
+	$length = eval_iam('cs-get-length'); 
+	$gui and $setup_length->configure(-text => colonize($length));
+	eval_iam("cs-set-length $length") unless @record;
+	$gui and $clock->configure(-text => colonize(0));
+	print eval_iam("fs");
+	$gui and flash_ready();
 	
 }
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
-	carp("Invalid chain setup, aborting start.\n"),return unless &eval_iam("cs-is-valid");
-	&eval_iam('start');
+	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
+	eval_iam('start');
 	sleep 1; # time for engine
-	&start_clock;
+	start_clock();
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; $e->eci('stop'); $session_label->configure(-background => $old_bg);
@@ -2389,34 +2144,34 @@ sub transport_running {
 #	$debug2 and print "&transport_running\n";
 	 $e->eci('engine-status') eq 'running' ;
 }
-sub disconnect_transport { &eval_iam('cs-disconnect') }
+sub disconnect_transport { eval_iam('cs-disconnect') }
 
 ## clock and gui refresh functions
 
 sub start_clock {
-	$clock_id = $clock->repeat(1000, \&refresh_clock);
+	$clock_id = $clock->repeat(1000, \refresh_clock);
 }
 sub update_clock {
-	$clock->configure(-text => &colonize(&eval_iam('cs-get-position')));
+	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
-	&start_clock;
+	start_clock;
 }
 sub refresh_clock{
-	$clock->configure(-text => &colonize(&eval_iam('cs-get-position')));
-	my $status = &eval_iam('engine-status');
+	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
+	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
 	$session_label->configure(-background => $old_bg);
-	if ($status eq 'error') { &new_engine;
-		&connect_transport unless &really_recording; 
+	if ($status eq 'error') { new_engine;
+		connect_transport unless really_recording(); 
 	}
 	elsif ($status eq 'finished') {
-		&connect_transport unless &really_recording; 
+		connect_transport unless really_recording; 
 	}
 	else { # status: stopped, not started, undefined
-	&rec_cleanup if &really_recording;
+	rec_cleanup if really_recording;
 	}
 
 }
@@ -2433,31 +2188,31 @@ sub toggle_unit {
 ## recording head positioning
 
 sub to_start { 
-	return if &really_recording;
-	&eval_iam(qq(cs-set-position 0));
-	&restart_clock;
+	return if really_recording;
+	eval_iam(qq(cs-set-position 0));
+	restart_clock();
 }
 sub to_end { 
 	# ten seconds shy of end
-	return if &really_recording;
-	my $end = &eval_iam(qq(cs-get-length)) - 10 ;  
-	&eval_iam(qq(cs-set-position $end));
-	&restart_clock;
+	return if really_recording;
+	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
+	eval_iam(qq(cs-set-position $end));
+	restart_clock;
 } 
 sub jump {
 	# my $debug = 1;
 	$debug2 and print "&jump\n";
-	return if &really_recording;
+	return if really_recording;
 	my $delta = shift;
-	my $here = &eval_iam(qq(getpos));
+	my $here = eval_iam(qq(getpos));
 	$debug and print "delta: $delta\nhere: $here\nunit: $unit\n\n";
 	my $new_pos = $here + $delta * $unit;
 	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
-	# &eval_iam("setpos $new_pos");
+	# eval_iam("setpos $new_pos");
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
 	print "$cmd\n";
-	&restart_clock;
+	restart_clock;
 }
 ## refresh functions
 
@@ -2466,7 +2221,7 @@ sub refresh_t {
 	my %take_color = (rec  => 'LightPink', 
 					mon => 'AntiqueWhite',
 					mute => $old_bg);
-	&collect_chains;
+	collect_chains;
 	my @w = $take_frame->children;
 	for my $t (1..@takes){
 		# skip 0th item, the label
@@ -2498,7 +2253,7 @@ sub refresh_c {
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";
 	
-		my $rec_status = &rec_status($n);
+		my $rec_status = rec_status($n);
 #	$debug and print "track: $n rec_status: $rec_status\n";
 
 		return unless $widget_c{$n}; # obsolete ??
@@ -2513,7 +2268,7 @@ sub refresh_c {
 		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
 		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(-text => &new_version);
+		$widget_c{$n}->{version}->configure(-text => new_version);
 
 	}
 	elsif ( $rec_status eq $::MON ) {
@@ -2525,7 +2280,7 @@ sub refresh_c {
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
 		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
 		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => &selected_version($n));
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
 
 		}
 	elsif ( $rec_status eq $::MUTE ) {
@@ -2535,12 +2290,12 @@ sub refresh_c {
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
 		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(-text => &selected_version($n));
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
 		}  
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh { 
- 	&refresh_t; 
+ 	refresh_t; 
 	map{ refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{
@@ -2557,21 +2312,21 @@ sub rec_cleanup {
 	# my $debug = 1;
 	$debug2 and print "&rec_cleanup\n";
 	$debug and print "I was recording!\n";
- 	my @k = &really_recording;
-	&disconnect_transport;
+ 	my @k = really_recording;
+	disconnect_transport();
 	my $recorded = 0;
  	for my $k (@k) {   
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
- 		my $test_wav = &new_wav_name($k);
-		$debug and print "new wave name for $k: ", &new_wav_name($k), "\n";
+ 		my $test_wav = new_wav_name($k);
+		$debug and print "new wave name for $k: ", new_wav_name($k), "\n";
  		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); # #01 regex error, fixed
 		$debug and print "n: $n\nv: $v\n";
 		$debug and print "testing for $test_wav\n";
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
-				&find_wavs($n);
+				find_wavs($n);
 				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1];
-				&update_version_button($n, $v);
+				update_version_button($n, $v);
 			$recorded++;
 			}
 			else { unlink $test_wav }
@@ -2581,11 +2336,11 @@ sub rec_cleanup {
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			&update_master_version_button if $gui;
+			update_master_version_button if $gui;
 			$state_t{ $state_t{active} }->{rw} = $::MON;
-			&setup_transport;
-			&connect_transport;
-			&refresh;
+			setup_transport;
+			connect_transport;
+			refresh;
 	}
 		
 } 
@@ -2599,7 +2354,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless &rec_status($n) eq $::REC }
+				unless rec_status($n) eq $::REC }
 					);
 }
 sub update_master_version_button {
@@ -2607,7 +2362,7 @@ sub update_master_version_button {
 						-label => $last_version,
 						-variable => \$monitor_version,
 						-value => $last_version,
-						-command => sub { &mon_vert(eval $last_version) }
+						-command => sub { mon_vert(eval $last_version) }
 					);
 }
 
@@ -2627,13 +2382,13 @@ sub add_effect {
 
 	return if $id eq $state_c{$n}->{vol} or
 	          $id eq $state_c{$n}->{pan};   # skip these effects 
-			   								# already created in &add_track
+			   								# already created in add_track
 
-	$id = &cop_add(\%p); 
+	$id = cop_add(\%p); 
 
 
 		$debug and print "cop_id: $id, parent_id: $parent_id\n";
-		# $id is determined by &cop_add, which will return the
+		# $id is determined by cop_add, which will return the
 		# existing cop_id if supplied
 
 		# check display format, may be 'scale' 'field' or 'hidden'
@@ -2672,7 +2427,7 @@ sub add_effect {
 
 			$eff->AddItems([
 				'command' => "Remove",
-				-command => sub {&remove_effect($id) }
+				-command => sub {remove_effect($id) }
 			]);
 			$eff->grid();
 			my @labels;
@@ -2686,7 +2441,7 @@ sub add_effect {
 			for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
 				push @items, 				
 					[ 'command' => $effects[$j]->{name},
-						-command => sub { &add_effect ({
+						-command => sub { add_effect ({
 								parent_id => $id,
 								chain => $n,
 								parameter  => $p,
@@ -2706,7 +2461,7 @@ sub add_effect {
 					cop_id => $id, 
 					p_num  => $p,
 				};
-				push @sliders,&make_scale($v);
+				push @sliders,make_scale($v);
 			}
 
 			if (@sliders) {
@@ -2715,7 +2470,7 @@ sub add_effect {
 				 $labels[0]->grid(@labels[1..$#labels]);
 			}
 		}
-	&apply_op($id) if &eval_iam("cs-is-valid");
+	apply_op($id) if eval_iam("cs-is-valid");
 }
 sub remove_effect {
 	# my $debug = 1;
@@ -2739,11 +2494,11 @@ sub remove_effect {
 	# recursively remove children
 	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
 		
-	map{&remove_effect($_)}@{ $cops{$id}->{owns} };
+	map{remove_effect($_)}@{ $cops{$id}->{owns} };
 
 	# parameter controllers are not separate ops
 	
-	&remove_op($id) unless $cops{$id}->{belongs_to};
+	remove_op($id) unless $cops{$id}->{belongs_to};
 
 	# remove my own cop_id from the stack
 
@@ -2770,11 +2525,11 @@ sub remove_op {
 			($index = $pos), last if $state_c{$n}->{ops}->[$pos] eq $id;
 		};
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
-	$debug and &eval_iam ("cs");
-	 &eval_iam ("c-select $n");
-	&eval_iam ("cop-select ". ($state_c{$n}->{offset} + $index));
-	&eval_iam ("cop-remove");
-	$debug and &eval_iam ("cs");
+	$debug and eval_iam ("cs");
+	 eval_iam ("c-select $n");
+	eval_iam ("cop-select ". ($state_c{$n}->{offset} + $index));
+	eval_iam ("cop-remove");
+	$debug and eval_iam ("cs");
 
 	delete $cops{$id};
 	delete $copp{$id};
@@ -2802,7 +2557,7 @@ sub cop_add {
 					  display => $effects[$i]->{display},
 					  owns => [] };
 
- 	&cop_init ( { %p, cop_id => $cop_id} );
+ 	cop_init ( { %p, cop_id => $cop_id} );
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -2871,24 +2626,24 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	# my $debug = 1;
-	# return if &rec_status($chain) eq $::MUTE; 
+	# return if rec_status($chain) eq $::MUTE; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
-	return unless &transport_running;
+	return unless transport_running;
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
 
-	$debug and print "valid: ", &eval_iam("cs-is-valid"), "\n";
+	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
 	$param++; # so the value at $p[0] is applied to parameter 1
 	my $controller; 
 	for my $op (0..scalar @{ $state_c{$chain}->{ops} } - 1) {
 		${ $state_c{$chain}->{ops} } [$op] eq $id and $controller = $op 
 	}
 	$debug and print "cop_id $id corresponds to track: $chain, controller: $controller, offset: $state_c{$chain}->{offset}\n";
-	&eval_iam ("c-select $chain");
-	&eval_iam ("cop-select ". ($state_c{$chain}->{offset} + $controller));
-	&eval_iam ("copp-select $param");
-	&eval_iam ("copp-set $val");
+	eval_iam ("c-select $chain");
+	eval_iam ("cop-select ". ($state_c{$chain}->{offset} + $controller));
+	eval_iam ("copp-select $param");
+	eval_iam ("copp-set $val");
 }
 sub find_op_offsets {
 
@@ -2899,7 +2654,7 @@ sub find_op_offsets {
 	setup file) plus operators for volume and pan, which are provided for each
 	track.
 
-	&find_op_offsets reads the output of the cs command to determine
+	find_op_offsets reads the output of the cs command to determine
 	the number of chain operators from the setup file, then adds 
 	two for the volume and pan operators, to give the index offset
 	for the first user effect.
@@ -2920,8 +2675,8 @@ sub find_op_offsets {
 
 	# my $debug = 1;
 	$debug2 and print "&find_op_offsets\n";
-	&eval_iam('c-select-all');
-		my @op_offsets = split "\n",&eval_iam("cs");
+	eval_iam('c-select-all');
+		my @op_offsets = split "\n",eval_iam("cs");
 		shift @op_offsets; # remove comment line
 		$debug and print join "\n\n",@op_offsets; 
 		for my $output (@op_offsets){
@@ -2941,12 +2696,12 @@ sub apply_ops {  # in addition to operators in .ecs file
 	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if &rec_status($n) eq $::MUTE and $n != 1; #MIX
+ 		next if rec_status($n) eq $::MUTE and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {
 		#	next if $cops{$id}->{belongs_to}; 
-		&apply_op($id);
+		apply_op($id);
 		}
 	}
 }
@@ -2976,11 +2731,11 @@ sub apply_op {
 	$add .= " -kx" if $cops{$dad}->{belongs_to};
 	$debug and print "operator:  ", $add, "\n";
 
-	&eval_iam ("c-select $cops{$id}->{chain}") 
+	eval_iam ("c-select $cops{$id}->{chain}") 
 		unless $cops{$id}->{belongs_to}; # avoid reset
-	&eval_iam ($add);
+	eval_iam ($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
-	map{&apply_op($_)} @{ $cops{$id}->{owns} };
+	map{apply_op($_)} @{ $cops{$id}->{owns} };
 
 }
 ## static effects data
@@ -2995,21 +2750,21 @@ VARS
 sub prepare_static_effects_data{
 
 
-	my $effects_cache = &join_path($wav_dir, $effects_cache_file);
+	my $effects_cache = join_path($wav_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
 	if (-f $effects_cache and ! $opts{e}){ 
 		$debug and print "looking for effects cache: $effects_cache\n";
-		&assign_vars($effects_cache, $effects_data_vars);
+		assign_vars($effects_cache, $effects_data_vars);
 	} else {
 		$debug and print "reading in effects data\n";
-		&read_in_effects_data; 
-		&get_ladspa_hints, 
-		&integrate_ladspa_hints, 
-		&sort_ladspa_effects;
-		&store_vars($effects_cache, $effects_data_vars);
+		read_in_effects_data(); 
+		get_ladspa_hints, 
+		integrate_ladspa_hints, 
+		sort_ladspa_effects();
+		store_vars($effects_cache, $effects_data_vars);
 	}
 
 }
@@ -3042,7 +2797,7 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	$debug2 and print "&sort_ladspa_effects\n";
-#	print &yaml_out(\%e_bound); 
+#	print yaml_out(\%e_bound); 
 	my $aa = $e_bound{ladspa}{a};
 	my $zz = $e_bound{ladspa}{z};
 #	print "start: $aa end $zz\n";
@@ -3053,17 +2808,17 @@ sub sort_ladspa_effects {
 }		
 sub read_in_effects_data {
 
-	&read_in_tkeca_effects_data ;
+	read_in_tkeca_effects_data ;
 
 	# read in other effects data
 	
-	my @ladspa = grep {! /^\w*$/ } split "\n", &eval_iam("ladspa-register");
+	my @ladspa = grep {! /^\w*$/ } split "\n", eval_iam("ladspa-register");
 	
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
 
-	my @preset = grep {! /^\w*$/ } split "\n", &eval_iam("preset-register");
-	my @ctrl  = grep {! /^\w*$/ } split "\n", &eval_iam("ctrl-register");
+	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
+	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
 
 	# index boundaries we need to make effects list and menus
 
@@ -3109,7 +2864,7 @@ sub read_in_effects_data {
 		(.*$)        # rest
 	/x;
 
-	&extract_effects_data(
+	extract_effects_data(
 		$e_bound{ladspa}{a},
 		$e_bound{ladspa}{z},
 		$ladspa_re,
@@ -3117,14 +2872,14 @@ sub read_in_effects_data {
 		@lad,
 	);
 
-	&extract_effects_data(
+	extract_effects_data(
 		$e_bound{preset}{a},
 		$e_bound{preset}{z},
 		$preset_re,
 		q(,),
 		@preset,
 	);
-	&extract_effects_data(
+	extract_effects_data(
 		$e_bound{ctrl}{a},
 		$e_bound{ctrl}{z},
 		$ctrl_re,
@@ -3141,7 +2896,7 @@ sub read_in_effects_data {
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
-	$debug and print "\@effects\n======\n", &yaml_out(\@effects); ; 
+	$debug and print "\@effects\n======\n", yaml_out(\@effects); ; 
 }
 sub read_in_tkeca_effects_data {
 
@@ -3179,7 +2934,7 @@ sub read_in_tkeca_effects_data {
 				my %p;
 				#print join " / ",splice (@row, 0,5), "\n";
 				@p{ qw(name begin end default resolution) }  =  splice @row, 0, 5;
-				# print "\%p\n======\n", &yaml_out (\%p);
+				# print "\%p\n======\n", yaml_out (\%p);
 				push @{$effects[$i]->{params}}, \%p;
 
 			}
@@ -3244,7 +2999,7 @@ sub get_ladspa_hints{
 			$p{name} = $name;
 			$p{dir} = $dir;
 			$p{hint} = $hint;
-			my ($beg, $end, $default_val, $resolution) = &range($name, $range, $default, $hint);
+			my ($beg, $end, $default_val, $resolution) = range($name, $range, $default, $hint);
 			$p{begin} = $beg;
 			$p{end} = $end;
 			$p{default} = $default_val;
@@ -3259,15 +3014,15 @@ sub get_ladspa_hints{
 	}
 
 	#print "@params\n";
-	#print &yaml_out \%params;
-	$debug and print &yaml_out (\%effects_ladspa); 
+	#print yaml_out \%params;
+	$debug and print yaml_out (\%effects_ladspa); 
 }
 no warnings;
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
 	my $multiplier = 1;;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
-	my ($beg, $end) = split /\s+to\s+/, $range;
+	my ($beg, $end) = split /\s+to\s+/, $range();
 	# if end is '...' set to $default + 10dB or $default * 10
 	$default =~ s/default\s+//;
 	$end =~ /\.{3}/ and $end = (
@@ -3283,14 +3038,14 @@ sub range {
 	if    ($hint =~ /integer/ ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
 		$beg = 0.0001 * $multiplier if ! $beg;
-		$beg = &round ( log $beg );
-		$end = &round ( log $end );
+		$beg = round ( log $beg );
+		$end = round ( log $end );
 		$resolution = ($end - $beg) / 100;
-		$default = &round (log $default);
+		$default = round (log $default);
 	}
 	
-	$resolution = &d2( $resolution + 0.002) if $resolution < 1  and $resolution > 0.01;
-	$resolution = &dn ( $resolution, 3 ) if $resolution < 0.01;
+	$resolution = d2( $resolution + 0.002) if $resolution < 1  and $resolution > 0.01;
+	$resolution = dn ( $resolution, 3 ) if $resolution < 0.01;
 	$resolution = int ($resolution + 0.1) if $resolution > 1 ;
 	
 	#print "3 beg: $beg  end: $end\n";
@@ -3326,7 +3081,7 @@ print join "\n", sort keys %effects_ladspa;
 print '-' x 60, "\n";
 print join "\n", grep {/el:/} sort keys %effect_i;
 
-#print &yaml_out \@effects; exit;
+#print yaml_out \@effects; exit;
 exit;
 
 =cut
@@ -3343,7 +3098,7 @@ sub round {
 	my $n = shift;
 	return 0 if $n == 0;
 	$n = int $n if $n > 10;
-	$n = &d2($n) if $n < 10;
+	$n = d2($n) if $n < 10;
 	$n;
 }
 	
@@ -3403,12 +3158,12 @@ sub save_state {
 	
 	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
-	#	 &paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 paint_button($widget_c{$_}{mute}, q(brown) );
 		}
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
 
-	&store_vars($file, $persistent_vars);
+	store_vars($file, $persistent_vars);
 
 # store alsa settings
 
@@ -3433,10 +3188,10 @@ sub retrieve_state {
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
 		$debug and print qq($yamlfile: YAML file found\n), return;
-		$ref = &assign_vars($yamlfile, $persistent_vars);
+		$ref = assign_vars($yamlfile, $persistent_vars);
 	} elsif (-f $file) {
 		$debug and print qq($file: 'Storable' file found\n), return;
-		$ref = &assign_vars($file, $persistent_vars);
+		$ref = assign_vars($file, $persistent_vars);
 	} else {
 		$debug and 
 		carp("no state files found, neither $file, nor $yamlfile\n");
@@ -3453,9 +3208,9 @@ sub retrieve_state {
 =cut
 
 	my $toggle_jack = $widget_o[$#widget_o];
-	&convert_to_jack if $jack_on;
-	&paint_button($toggle_jack, q(lightblue)) if $jack_on and $gui;
-	&refresh_oids if $gui;
+	convert_to_jack if $jack_on;
+	paint_button($toggle_jack, q(lightblue)) if $jack_on and $gui;
+	refresh_oids if $gui;
 
 	# restore mixer settings
 
@@ -3465,7 +3220,7 @@ sub retrieve_state {
 	# restore time marker labels
 	
 	map{ $time_marks[$_]->configure( 
-		-text => &colonize($marks[$_]),
+		-text => colonize($marks[$_]),
 		-background => $old_bg,
 	)} 
 	grep{ $marks[$_] }1..$#time_marks;
@@ -3474,20 +3229,20 @@ sub retrieve_state {
 	
 	for my $t (@takes) { 
 		next if $t == 1; 
-		&take_gui($t) if $gui;
+		take_gui($t) if $gui;
 	}; #
 	my $did_apply = 0;
 	$last_version = 0; 
 	for my $n (@all_chains) { 
 		$debug and print "restoring track: $n\n";
-		&restore_track($n) ;
+		restore_track($n) ;
 		for my $id (@{$state_c{$n}->{ops}}){
 			$did_apply++ 
 				unless $id eq $state_c{$n}->{vol}
 					or $id eq $state_c{$n}->{pan};
 
 			
-			&add_effect({
+			add_effect({
 						chain => $cops{$id}->{chain},
 						type => $cops{$id}->{type},
 						cop_id => $id,
@@ -3520,7 +3275,7 @@ sub save_effects {
 	my %muted;
 	
 	map  {$copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
-		  &paint_button($widget_c{$_}{mute}, $old_bg ) if $gui }
+		  paint_button($widget_c{$_}{mute}, $old_bg ) if $gui }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	@all_chains;
 
@@ -3533,17 +3288,17 @@ sub save_effects {
 	%state_c_ops = ();
 	map{ 	$state_c_ops{$_} = $state_c{$_}->{ops} } @all_chains;
 
-	# map {&remove_op} @{ $state_c{$_}->{ops} }
+	# map {remove_op} @{ $state_c{$_}->{ops} }
 
-	&store_vars($file, $effects_state);
+	store_vars($file, $effects_state);
 }
 
 =comment
 sub r {
-	&retrieve_effects(shift);
+	retrieve_effects(shift);
 }
 
-sub r5 { &r("eff5") };
+sub r5 { r("eff5") };
 =cut
 sub retrieve_effects {
 	#my $debug = 1;
@@ -3551,16 +3306,16 @@ sub retrieve_effects {
 	my $file = shift;
 	my %current_cops = %cops; # XXX why bother
 	my %current_copp = %copp; # XXX why bother
-	&assign_vars($file, $effects_state);
+	assign_vars($file, $effects_state);
 	my %old_copp = %copp;  # XXX why bother
 	my %old_cops = %cops; 
 	%cops = %current_cops;
 	%copp = %current_copp;
 
 
-	print "\%state_c_ops\n ", &yaml_out( \%state_c_ops), "\n\n";
-	print "\%old_cops\n ", &yaml_out( \%old_cops), "\n\n";
-	print "\%old_copp\n ", &yaml_out( \%old_copp), "\n\n";
+	print "\%state_c_ops\n ", yaml_out( \%state_c_ops), "\n\n";
+	print "\%old_cops\n ", yaml_out( \%old_cops), "\n\n";
+	print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
 #	return;
 
 	
@@ -3568,7 +3323,7 @@ sub retrieve_effects {
 	
 	map{ $time_marks[$_]->configure( 
 		-text => $marks[$_]
-			?  &colonize($marks[$_])
+			?  colonize($marks[$_])
 			:  $_,
 		-background => $marks[$_]
 			?  $old_bg
@@ -3597,8 +3352,8 @@ sub retrieve_effects {
 				else {
 					
 					$debug and print "is something else\n";
-					&remove_effect($id) ;
-					&remove_op($id)
+					remove_effect($id) ;
+					remove_op($id)
 			}
 
 		} @{ $state_c{$_}->{ops} }
@@ -3638,7 +3393,7 @@ sub retrieve_effects {
 					or $id eq $state_c{$n}->{pan};
 
 			
-			&add_effect({  
+			add_effect({  
 						chain => $cops{$id}->{chain},
 						type => $cops{$id}->{type},
 						cop_id => $id,
@@ -3667,7 +3422,7 @@ sub assign_vars {
 	my $ref;
 	$debug and carp("no file found\n"), return 0 unless -f $file;
 	$file =~ m/.yaml/ 
-		and  $ref = &yaml_in($file)
+		and  $ref = yaml_in($file)
 		or  $ref = retrieve($file);
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
@@ -3700,7 +3455,7 @@ sub store_vars {
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD
-	my $yamlout = &yaml_out(\%state);
+	my $yamlout = yaml_out(\%state);
 	$yamlout > io $file;
 
 }
@@ -3744,21 +3499,21 @@ sub mark {
 	# print "my marker is $_\n";
 	# record without arming if marker undefined
 	if ($markers_armed or ! $marks[$marker]){  
-		my $here = &eval_iam("cs-get-position");
+		my $here = eval_iam("cs-get-position");
 		return if ! $here;
 		$marks[$marker] = $here;
 		my $widget = $time_marks[$marker];
 		$widget->configure(
-			-text => &colonize($here),
+			-text => colonize($here),
 			-background => $old_bg,
 		);
-		if ($markers_armed){ &arm_mark } # disarm
+		if ($markers_armed){ arm_mark } # disarm
 	}
 	else{ 
-		return if &really_recording;
-		&eval_iam(qq(cs-set-position $marks[$marker]));
-	#	&update_clock;
-	#	&start_clock;
+		return if really_recording;
+		eval_iam(qq(cs-set-position $marks[$marker]));
+	#	update_clock();
+	#	start_clock;
 	}
 }
 

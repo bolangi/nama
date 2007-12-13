@@ -1,0 +1,26 @@
+use IO::All;
+my $source = 'Flow.p';
+my @lines = io('$source')->slurp;
+$debug and print "lines: ". scalar @lines, $/;
+my $sub_re = qr/^sub\s+(\w+)/;
+@subs = map{ /$sub_re/; $1 } grep {/$sub_re/} @lines;
+$debug and print "subs:". scalar @subs, $/; 
+#print join $/, @subs;
+my $text = join '', @lines;
+map {$text =~ s/$_;/$_();/ } @subs;
+print $text;
+__END__
+
+
+} @subs;
+#print
+=comment
+=cut
+__END__
+my $cmd = q(grep -e '^sub ' Flow.pm  | perl -ne 's/^\S+\s//; s/\s*\{.*//; print');
+$cmd = q(grep -e '^sub ' Flow.pm) 
+
+$cmd =~ s/\\/\\\\/g;
+my @subs = ` $cmd `;
+
+print @lines;
