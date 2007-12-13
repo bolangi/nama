@@ -1,0 +1,2 @@
+cd ~/build/flow/tt2
+vim ~/.bashrc ecmd Flow.p Flow/Config.pm Flow/Grammar.p Flow/Iam.pm Flow/Tkeca_effects.pm

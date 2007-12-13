@@ -1,2 +1,0 @@
-cd ~/ecmd-dev/Audio/Ecasound
-vim ecmd.pl Flow.pm Flow/Config.pm Flow/Grammar.pm Flow/Iam.pm

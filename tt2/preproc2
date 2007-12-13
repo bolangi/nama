@@ -1,0 +1,133 @@
+#!/usr/bin/env perl
+use Template;
+use IO::All;
+use File::Find;
+use strict;
+use Cwd;
+
+use vars qw(
+
+	$build_dir 
+	$dir
+	$exta 
+	$extb 
+	$stub 
+	$input 
+	$output 
+	$template 
+	$special 
+	$dispatcher 
+	$contents
+	$vars
+);
+my $config = {
+	 INCLUDE_PATH => '~/build/flow/tt2',  # or list ref
+     #INTERPOLATE  => 1,               # expand "$var" in plain text
+#	 POST_CHOMP   => 1,               # cleanup whitespace
+#	 PRE_PROCESS  => 'header',        # prefix each template
+	 EVAL_PERL    => 1,               # evaluate Perl code blocks
+	 # ABSOLUTE     => 1,
+};
+
+# create Template object
+my $template = Template->new($config);
+
+my $debug = 1;
+$build_dir = shift;
+$build_dir = $build_dir ? $build_dir : '/home/jroth/build/flow/tt2';
+($exta, $extb) = ( "p" => "pm");
+$dispatcher  = { 
+	Grammar => \&grammar,
+	Flow => \&filter,	
+	''   => sub {},
+	};
+
+&preprocess;# ( $build_dir, $exta, $extb, $dispatcher);
+
+sub preprocess {
+	# my ($build_dir, $exta, $extb, $dispatcher) = @_; # global
+	$debug and print "dir: $build_dir, exta: $exta, extb: $extb, special: ". ref $special, $/;
+	find(\&wanted, $build_dir);
+}
+
+
+sub wanted { 
+	return if grep { $File::Find::name =~ m(/$_/) } 
+		qw(.git .ttree blib lib try t);
+	my $re = qr/(\w+)\.$exta$/;
+	$File::Find::name =~ /$re/ or return;
+	$stub = $1;
+	return unless $stub eq "Flow";
+	my $oldpwd = getcwd;
+	$dir  = $File::Find::dir;
+	chdir $dir;
+	$debug and print $File::Find::name, $/, "pwd: ", getcwd, $/;
+	$debug and print "stub: $stub\n";
+	$input =  "$stub.$exta";
+	#$input =  $File::Find::name;
+	$output = "$stub.$extb";
+
+	# duplicate old STDOUT
+	$debug and print "ref type: ", $dispatcher->{$stub}, $/;
+	
+    open my $oldout, ">&STDOUT"     or die "Can't dup STDOUT: $!";
+
+	# close and open STDOUT
+	
+	close STDOUT;
+	open STDOUT, '>', \$contents or die "Can't open STDOUT: $!";
+    # select STDOUT; $| = 1;	# make unbuffered
+	$debug and print "pwd: ", getcwd, $/;
+	
+	# process input template, substituting variables
+	$template->process($input, &{ $dispatcher->{$stub} } )
+		 || die $template->error();
+
+	# return STDOUT to previous status
+	
+	close STDOUT;
+    open STDOUT, ">&", $oldout or die "Can't dup \$oldout: $!";
+    open my $oldout, ">&STDOUT"     or die "Can't dup STDOUT: $!";
+
+	# print to $output
+	
+	$contents > io("$dir/$output"); # IO::All
+
+	chdir $oldpwd;
+	
+}
+
+sub filter {};
+
+sub grammar {
+
+	$debug and print "grammar replace\n";
+
+	my $list = io('commands')->all;
+
+	my $body = io('grammar_body')->all;
+	$body =~ s/::/Audio::Ecasound::Flow::/g;
+
+	my (@abbrevs, @stubs, @commands);
+
+	map{
+
+		my @parts = my @all_parts = split " ", $_;
+		my $full = shift @parts;
+		my @short = @parts;
+		push @abbrevs,	"_$full: " . join (" | " , @all_parts);
+		push @stubs,   	"$full: _$full {}";
+		push @commands,	"command: $full";
+
+	} split "\n", $list;
+
+	my $command_headers = join "\n", @commands, @abbrevs, @stubs ;
+
+	{ 
+		commands 	 => $command_headers,
+		grammar_body => $body,
+	};
+	
+}
+__END__
+

@@ -1,14 +1,15 @@
+#!/usr/bin/env perl
 package Audio::Ecasound::Flow;
 
 use 5.008;
 use strict;
 use warnings;
 
+__END__
 our $VERSION = '0.01';
-
 ## Imported modules
 
-use lib '/home/jroth/flow/build/lib'; # no trailing slash
+use lib '/home/jroth/build/flow/lib'; # no trailing slash
 
 use Carp;
 use IO::All;
@@ -25,16 +26,24 @@ use Data::YAML::Reader;
 
 ######## Definitions ###########
 
+use subs qw(
+[% PERL %]
+
+require "list_subs.pl";
+
+[% END %]
+);
+
 [% INSERT declarations %]
 
 [% INSERT definitions  %]
 
-######## End Definitions ########
+### Pull in other code
 
-use Audio::Ecasound::Flow::Config; 	# Global configuration file
-use Audio::Ecasound::Flow::Grammar;	# Command line grammar
-use Audio::Ecasound::Flow::Iam;    	# IAM command support
-use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
+require Audio::Ecasound::Flow::Config; 	# Global configuration file
+require Audio::Ecasound::Flow::Grammar;	# Command line grammar
+require Audio::Ecasound::Flow::Iam;    	# IAM command support
+require Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 
 =comment
 
@@ -83,7 +92,7 @@ sub prepare {  # actions begin here
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
-	read_config;
+	read_config();
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 

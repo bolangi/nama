@@ -1,0 +1,55 @@
+preprocessing: blocked on capturing STDIO. There is a
+recipe. Why not use it?
+
+Why can't I recognize... because the module must be
+properly registered appending infromation to the
+modules installed lists.
+
+
+$ pwd
+~/build
+
+
+perl -M
+
+Recursively preprocess files, transforming
+for example, grammar.in into grammar.out.
+
+Preprocessing routines are expected to 
+generate _files_ that [% INSERT %] directives
+will pull into the text of grammar.in
+to generate grammar.out.
+
+
+
+A single script
+
+
+use Template::Toolkit::Preprocess::Files;
+
+Process Template::Toolkit directives in files with extension
+'.in' (for example) to produce files with extension '.out'
+
+Use the subroutine &grammar_builder
+to generate files to include in Grammar.cmx .
+
+preprocess Grammar.cmx.
+
+my %special { Grammar => &grammar_builder,}
+
+preprocess qw( ~/build .cmx .cmd), \%special)'
+
+sub grammar_builder { ..... };
+
+
+
+# preprocess all files in all directories below the root
+# directory, transforming extension source code in
+ .cmx  
+# to target in .cmd
+
+
+
+
+
+q(.a) => q(.b),

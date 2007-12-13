@@ -1,0 +1,38 @@
+#!/usr/bin/env perl
+use Template;
+
+# some useful options (see below for full list)
+my $config = {
+	 INCLUDE_PATH => '~/build/flow/tt2',  # or list ref
+#	 INTERPOLATE  => 1,               # expand "$var" in plain text
+#	 POST_CHOMP   => 1,               # cleanup whitespace
+#	 PRE_PROCESS  => 'header',        # prefix each template
+#	 EVAL_PERL    => 1,               # evaluate Perl code blocks
+};
+
+# create Template object
+my $template = Template->new($config);
+$value = 'Foo';
+# define template variables for replacement
+my $vars = {
+person => $value,
+};
+
+
+
+=comment
+	 var1  => $value,
+	 var2  => \%hash,
+	 var3  => \@list,
+	 var4  => \&code,
+	 var5  => $object,
+=cut
+
+# specify input filename, or file handle, text reference, etc.
+my $input = 'Flow.p';
+
+# process input template, substituting variables
+$template->process($input, $vars)
+	 || die $template->error();
+								  
+								  
