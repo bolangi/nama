@@ -23,7 +23,7 @@ use YAML::Tiny;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 
-######## Definitions ###########
+## Definitions ##
 
 use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
 
@@ -31,7 +31,7 @@ use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
 
 [% INSERT definitions %]
 
-######## End Definitions ########
+## Load my modules
 
 use Audio::Ecasound::Flow::Config; 	# Global configuration file
 use Audio::Ecasound::Flow::Grammar;	# Command line grammar
@@ -3568,9 +3568,9 @@ recording and processing by Ecasound
 
 =head1 ABSTRACT
 
-	UAudio::Ecasound interface to the 
+	Builds on the Audio::Ecasound interface to the 
 	Ecasound audio processing engine to facilitate
-	multitrack audio recording by adding:
+	multitrack audio recording. Additions include:
 
 	- Functions for generating chain setups, managing wav
 	files, handling persistent configuration data.

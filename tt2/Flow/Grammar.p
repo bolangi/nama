@@ -34,11 +34,10 @@ $grammar = q(
 
 	} split "\n", $list;
 
-	print join "\n", @commands, @abbrevs, @stubs ;
+	print join "\n", @commands, @abbrevs, @stubs, $body ;
 
 [% END %]
 
-[% INSERT grammar_body %]
 
 );
 
