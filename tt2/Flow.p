@@ -3471,7 +3471,10 @@ sub store_vars {
 sub yaml_out {
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
-	$debug and print "data ref type: ", ref $data_ref, $/;
+	my $type = ref $data_ref;
+	$debug and print "data ref type: $type\n "; 
+	croak "attempting to code wrong data type: $type"
+		if $type !~ /HASH|ARRAY/;
 #	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
 	my $output;
 #    $yw->write( $data_ref, \$output ); # XXX broken
@@ -3495,8 +3498,8 @@ sub arm_mark {
 		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
 	}
 }
-sub colonize { # convert seconds to minutes:seconds
-	my $sec = int( shift );
+sub colonize { # convert seconds to minutes:seconds 
+	my $sec = shift;
 	my $min = int ($sec / 60);
 	$sec = $sec % 60;
 	$sec = "0$sec" if $sec < 10;
