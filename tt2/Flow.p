@@ -86,6 +86,10 @@ sub prepare {  # actions begin here
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
+	# -e re-parse effects data
+	# -s skip reading effects data
+	# default: read .yaml file
+
 	read_config();
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
@@ -106,7 +110,7 @@ sub prepare {  # actions begin here
 
 	new_engine();
 	initialize_oids();
-	prepare_static_effects_data();
+	prepare_static_effects_data() unless $opts{s}; 
 
 }
 
@@ -441,7 +445,7 @@ sub find_wavs {
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	$debug and print "\%versions\n================\n", yaml_out (%versions);
+	$debug and print "\%versions\n================\n", yaml_out (\%versions);
 		delete $state_c{$n}->{targets};
 		$state_c{$n}->{targets} = { %versions };
 
@@ -581,7 +585,7 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => \load_session,
+		-command => \&load_session,
 		);
 	$sn_new->configure( 
 		-text => 'New',
@@ -1902,7 +1906,7 @@ sub write_chains {
 	}
 		
 	# $debug and print "\%state_c\n================\n", yaml_out(\%state_c);
-	# $debug and print "\%state_t\n================\n", yaml_out(\state_t);
+	# $debug and print "\%state_t\n================\n",  yaml_out(\%state_t);
 							
 		
 	## write general options
@@ -1984,7 +1988,7 @@ my $null_id = undef;
 	id		=>	q(m),
 	output	=>	q(multi),
 	type	=>	q(cooked),
-	pre_output	=>	\pre_multi,
+	pre_output	=>	\&pre_multi,
 	default	=> q(off),
 
 }, 
@@ -1998,7 +2002,7 @@ my $null_id = undef;
 	id		=>	q(L),
 	output	=>  q(multi),
 	type	=>  q(cooked),
-	pre_output	=>	\pre_multi,
+	pre_output	=>	\&pre_multi,
 	default	=>  q(off),
 
 	},{
@@ -3468,10 +3472,9 @@ sub yaml_out {
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
 	$debug and print "data ref type: ", ref $data_ref, $/;
-
-
+#	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
 	my $output;
-    $yw->write( $data_ref, \$output );
+#    $yw->write( $data_ref, \$output ); # XXX broken
 	$output;
 }
 sub yaml_in {
@@ -3521,6 +3524,20 @@ sub mark {
 	#	start_clock;
 	}
 }
+
+sub remove_spaces {                                                             
+        my $entry = shift;                                                      
+        # remove leading and trailing spaces                                    
+                                                                                
+        $entry =~ s/^\s*//;                                                     
+        $entry =~ s/\s*$//;                                                     
+                                                                                
+        # convert other spaces to underscores                                   
+                                                                                
+        $entry =~ s/\s+/_/g;                                                    
+        $entry;                                                                 
+}                                                                               
+1;                      
 
 
 format STDOUT_TOP =

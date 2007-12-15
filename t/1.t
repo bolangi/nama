@@ -15,6 +15,7 @@ package Audio::Ecasound::Flow;
 ### Option Processing ###
 use vars qw(%opts $session_name $debug);
 getopts('mceg', \%opts); 
+$opts{e}++;
 $session_name = 'paul_brocante';
 $debug and print "session name: $session_name\n";
 &prepare;

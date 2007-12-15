@@ -1,4 +1,5 @@
 Changes
+lib/Audio/Ecasound/ecmd
 lib/Audio/Ecasound/Flow.pm
 lib/Audio/Ecasound/Flow/Grammar.pm
 lib/Audio/Ecasound/Flow/Config.pm
