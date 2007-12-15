@@ -43,6 +43,7 @@ use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 
 # Preloaded methods go here.
 package UI;
+use Carp;
 our @ISA;
 
 use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
@@ -66,6 +67,7 @@ sub refresh_oids {}
 sub paint_button {}
 
 package UI::Graphical;
+use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "make a window\n";}
@@ -76,10 +78,10 @@ sub clock_configure{ $clock->configure(-text => colonize( 0) );}
 sub manifest { $ew->deiconify() };
 
 sub loop {
-	init_gui; 
-	transport_gui;
-	oid_gui;
-	time_gui;
+	init_gui(); 
+	transport_gui();
+	oid_gui();
+	time_gui();
 	session_init, load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
@@ -158,9 +160,9 @@ sub init_gui {
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
-				return if transport_running;
+				return if transport_running();
 				save_state(join_path(session_dir,$statestore)) 
-					if session_dir;
+					if session_dir();
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
 		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
@@ -234,20 +236,20 @@ sub transport_gui {
 
 	$transport_stop->configure(-text => "Stop",
 	-command => sub { 
-					stop_transport;
+					stop_transport();
 				}
 		);
 	$transport_start->configure(
 		-text => "Start!",
 		-command => sub { 
-		return if transport_running;
+		return if transport_running();
 		if ( really_recording ) {
 			$session_label->configure(-background => 'lightpink') 
 		}
 		else {
 			$session_label->configure(-background => 'lightgreen') 
 		}
-		start_transport;
+		start_transport();
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Generate and connect',
@@ -406,13 +408,13 @@ sub oid_gui {
 
 					# jack is on, turn it off
 				
-					convert_to_alsa;
+					convert_to_alsa();
 					paint_button($toggle_jack, $old_bg);
 					$jack_on = 0;
 				}
 				else {
 
-					convert_to_jack;
+					convert_to_jack();
 					paint_button($toggle_jack, q(lightblue));
 					$jack_on = 1;
 				}
@@ -517,9 +519,9 @@ sub global_version_buttons {
 				-command => sub { 
 					$state_t{2}->{rw} = $::MON; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
-					setup_transport; 
-					connect_transport;
-					refresh;
+					setup_transport(); 
+					connect_transport();
+					refresh();
 					}
 
  					);
@@ -591,19 +593,19 @@ sub track_gui { # nearly 300 lines!
 				-foreground => 'red',
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::REC;
-					refresh;
+					refresh();
 					}
 			],
 			[ 'command' => $::MON,
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::MON;
-					refresh;
+					refresh();
 					}
 			],
 			[ 'command' => $::MUTE, 
 				-command  => sub { 
 					$state_c{$n}->{rw} = $::MUTE;
-					refresh;
+					refresh();
 					}
 			],
 		);
@@ -801,13 +803,14 @@ sub track_gui { # nearly 300 lines!
 	
 	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	refresh;
+	refresh();
 
 	
 }
 1;
 
 package UI::Text;
+use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "hello world!\n"}
@@ -850,6 +853,7 @@ sub loop {
 1;
 
 package Audio::Ecasound::Flow;
+use Carp;
 
 # BROKEN effects data store/retrieve, fixed! still broken
 # BROKEN storing @ladspa_sorted
@@ -862,6 +866,7 @@ package Audio::Ecasound::Flow;
 # Grammar expanded
 
 package UI;
+use Carp;
 
 sub prepare {  # actions begin here
 
@@ -976,7 +981,7 @@ sub load_session {
 	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} this_wav_dir, session_dir;
+		map{create_dir} this_wav_dir, session_dir();
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
@@ -986,23 +991,23 @@ sub load_session {
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
 	read_config();
-	session_init;
+	session_init();
 }
 sub session_init{
 	$debug2 and print "&session_init\n";
-	initialize_session_data;
-	remove_small_wavs; 
+	initialize_session_data();
+	remove_small_wavs(); 
 	## XXX need second argument
 	retrieve_state(join_path(session_dir,$statestore)) unless $opts{m};
 	mix_track, dig_ruins unless scalar @all_chains;
-	global_version_buttons;
+	global_version_buttons();
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
 
 sub initialize_session_data {
 
-	return if transport_running;
+	return if transport_running();
 	my $sf = join_path(session_dir, $chain_setup_file);
 	carp ("missing session file $sf\n") unless -f $sf;
 	$gui and $session_label->configure(
@@ -1042,7 +1047,7 @@ if ($gui) {
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$state_t{active} = 1; 
 }
-	increment_take; 
+	increment_take(); 
 
 take_gui($t);
 
@@ -1075,7 +1080,7 @@ sub create_dir {
 sub add_track {
 	$debug2 and print "&add_track\n";
 	local $debug = 0;
-	return 0 if transport_running;
+	return 0 if transport_running();
 	my $name = shift;
 	# new scoping code!
 	###### old, deprecated  $name and my $track_name = $name; 
@@ -1105,7 +1110,7 @@ sub mix_track {
 	add_track($mixname) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = $::MUTE; 
-	new_take;
+	new_take();
 	$state_t{$t}->{rw} = $::MON;
 }
 sub mix_suffix {
@@ -1116,7 +1121,7 @@ sub restore_track {
 	$debug2 and print "&restore_track\n";
 	my $n = shift;
 	find_wavs($n);
-	track_gui($n), refresh;
+	track_gui($n), refresh();
 }
 sub register_track {
 	$debug2 and print "&register_track\n";
@@ -1146,7 +1151,7 @@ sub dig_ruins {
 
 		# look for wave files
 		
-		my $d = this_wav_dir;
+		my $d = this_wav_dir();
 		opendir WAV , $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
@@ -1206,7 +1211,7 @@ sub remove_small_wavs {
 	# left by a recording chainsetup that is 
 	# connected by not started
 
-	my $a = this_wav_dir;
+	my $a = this_wav_dir();
 	my $cmd = qq(find $a  -name '*.wav' -size 44c);
 	$debug and print $cmd; 
 	my @wavs = split "\n",qx($cmd);
@@ -1218,11 +1223,11 @@ sub remove_small_wavs {
 #
 sub new_take {
 	$debug2 and print "&new_take\n";
-	increment_take;
-	take_gui($t), refresh_t;
+	increment_take();
+	take_gui($t), refresh_t();
 }
 sub increment_take {
-			return if transport_running; 
+			return if transport_running(); 
 					$t++;
 					$state_t{active} = $t;
 					$state_t{$t}->{rw} = $::REC;
@@ -1231,7 +1236,7 @@ sub increment_take {
 }
 sub decrement_take {
 			$debug2 and print "&decrement_take\n";
-			return if transport_running; 
+			return if transport_running(); 
 			return if $t == 1; 
 			# can't proceed if tracks already defined for this take
 			$debug and print ("found chains, aborting"),return 
@@ -1248,12 +1253,12 @@ sub select_take {
 	my ($t, $status) = shift;
 	$status =~ m/REC|MON|MUTE/
 		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
-	return if transport_running;
+	return if transport_running();
 	$state_t{$t}->{rw} = $status; 
 	$state_t{active} = $t; 
-	refresh;
-	setup_transport;
-	connect_transport;
+	refresh();
+	setup_transport();
+	connect_transport();
 }
 sub add_volume_control {
 	my $n = shift;
@@ -1439,10 +1444,10 @@ sub toggle_mute {
 	my $setup = eval_iam("cs-connected");
 	$setup =~ /$session_name/ or return; # only work if connected setup
 	my $n = shift;
-	is_muted;
+	is_muted();
 	eval_iam("c-select $n");
 	eval_iam("c-muting");
-	is_muted;
+	is_muted();
 }
 sub is_muted {
 	my $n = shift;
@@ -1531,7 +1536,7 @@ sub mon_vert {
 	# store %copp
 	# remove effects  and use $ver's set if there are effects for $v
 	$monitor_version = $ver;
-	refresh;
+	refresh();
 }
 ## chain setup generation
 #
@@ -1949,7 +1954,7 @@ sub new_wav_name {
 	my $stub = shift;
 	my $version;
 	if (@record) {  # we are recording an audio input
-		$version = new_version; # even mix track
+		$version = new_version(); # even mix track
 	}
 	else { # we are only mixing
 		$version = $stub eq $mixname  # mix track 
@@ -1957,7 +1962,7 @@ sub new_wav_name {
 					? $monitor_version 
 					: $state_c{1}->{versions}->[-1] + 1
 				)
-			: new_version;
+			: new_version();
 	}
 	join_path(this_wav_dir,	"$stub\_$version.wav");
 }
@@ -2127,18 +2132,18 @@ sub new_engine {
 }
 sub setup_transport {
 	$debug2 and print "&setup_transport\n";
-	collect_chains;
-	make_io_lists;
+	collect_chains();
+	make_io_lists();
 	map{ eliminate_loops($_) } @all_chains;
 	#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 	#print "\%outputs\n================\n", yaml_out(\%outputs);
-	write_chains;
+	write_chains();
 }
 sub connect_transport {
-	load_ecs; 
+	load_ecs(); 
 	carp("Invalid chain setup, cannot arm transport.\n"),return unless eval_iam("cs-is-valid");
-	find_op_offsets; 
-	apply_ops;
+	find_op_offsets(); 
+	apply_ops();
 	eval_iam('cs-connect');
 	carp("Invalid chain setup, cannot arm transport.\n"), return 
 		unless eval_iam("engine-status") eq 'not started' ;
@@ -2150,7 +2155,7 @@ sub connect_transport {
 	eval_iam("cs-set-length $length") unless @record;
 	$gui and $clock->configure(-text => colonize(0));
 	print eval_iam("fs");
-	flash_ready;
+	flash_ready();
 	
 }
 sub start_transport { 
@@ -2158,7 +2163,7 @@ sub start_transport {
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 	eval_iam('start');
 	sleep 1; # time for engine
-	start_clock;
+	start_clock();
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; $e->eci('stop'); $session_label->configure(-background => $old_bg);
@@ -2180,7 +2185,7 @@ sub update_clock {
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
-	start_clock;
+	start_clock();
 }
 sub refresh_clock{
 	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
@@ -2189,13 +2194,13 @@ sub refresh_clock{
 	$clock_id->cancel;
 	$session_label->configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
-		connect_transport unless really_recording; 
+		connect_transport unless really_recording(); 
 	}
 	elsif ($status eq 'finished') {
-		connect_transport unless really_recording; 
+		connect_transport unless really_recording(); 
 	}
 	else { # status: stopped, not started, undefined
-	rec_cleanup if really_recording;
+	rec_cleanup if really_recording();
 	}
 
 }
@@ -2212,21 +2217,21 @@ sub toggle_unit {
 ## recording head positioning
 
 sub to_start { 
-	return if really_recording;
+	return if really_recording();
 	eval_iam(qq(cs-set-position 0));
-	restart_clock;
+	restart_clock();
 }
 sub to_end { 
 	# ten seconds shy of end
-	return if really_recording;
+	return if really_recording();
 	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
 	eval_iam(qq(cs-set-position $end));
-	restart_clock;
+	restart_clock();
 } 
 sub jump {
 	# my $debug = 1;
 	$debug2 and print "&jump\n";
-	return if really_recording;
+	return if really_recording();
 	my $delta = shift;
 	my $here = eval_iam(qq(getpos));
 	$debug and print "delta: $delta\nhere: $here\nunit: $unit\n\n";
@@ -2236,7 +2241,7 @@ sub jump {
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
 	print "$cmd\n";
-	restart_clock;
+	restart_clock();
 }
 ## refresh functions
 
@@ -2245,7 +2250,7 @@ sub refresh_t {
 	my %take_color = (rec  => 'LightPink', 
 					mon => 'AntiqueWhite',
 					mute => $old_bg);
-	collect_chains;
+	collect_chains();
 	my @w = $take_frame->children;
 	for my $t (1..@takes){
 		# skip 0th item, the label
@@ -2319,7 +2324,7 @@ sub refresh_c {
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh { 
- 	refresh_t; 
+ 	refresh_t(); 
 	map{ refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{
@@ -2336,8 +2341,8 @@ sub rec_cleanup {
 	# my $debug = 1;
 	$debug2 and print "&rec_cleanup\n";
 	$debug and print "I was recording!\n";
- 	my @k = really_recording;
-	disconnect_transport;
+ 	my @k = really_recording();
+	disconnect_transport();
 	my $recorded = 0;
  	for my $k (@k) {   
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
@@ -2360,11 +2365,11 @@ sub rec_cleanup {
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			update_master_version_button;
+			update_master_version_button();
 			$state_t{ $state_t{active} }->{rw} = $::MON;
-			setup_transport;
-			connect_transport;
-			refresh;
+			setup_transport();
+			connect_transport();
+			refresh();
 	}
 		
 } 
@@ -2652,7 +2657,7 @@ sub effect_update {
 	# my $debug = 1;
 	# return if rec_status($chain) eq $::MUTE; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
-	return unless transport_running;
+	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
@@ -2784,10 +2789,10 @@ sub prepare_static_effects_data{
 		assign_vars($effects_cache, $effects_data_vars);
 	} else {
 		$debug and print "reading in effects data\n";
-		read_in_effects_data; 
+		read_in_effects_data(); 
 		get_ladspa_hints, 
 		integrate_ladspa_hints, 
-		sort_ladspa_effects;
+		sort_ladspa_effects();
 		store_vars($effects_cache, $effects_data_vars);
 	}
 
@@ -2832,7 +2837,7 @@ sub sort_ladspa_effects {
 }		
 sub read_in_effects_data {
 
-	read_in_tkeca_effects_data ;
+	read_in_tkeca_effects_data();
 
 	# read in other effects data
 	
@@ -3234,7 +3239,7 @@ sub retrieve_state {
 	my $toggle_jack = $widget_o[$#widget_o];
 	convert_to_jack if $jack_on;
 	paint_button($toggle_jack, q(lightblue)) if $jack_on;
-	refresh_oids;
+	refresh_oids();
 
 	# restore mixer settings
 
@@ -3277,7 +3282,7 @@ sub retrieve_state {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	}
-	$did_apply and manifest; # $ew->deiconify();
+	$did_apply and manifest(); # $ew->deiconify();
 
 }
 
@@ -3536,10 +3541,10 @@ sub mark {
 		if ($markers_armed){ arm_mark } # disarm
 	}
 	else{ 
-		return if really_recording;
+		return if really_recording();
 		eval_iam(qq(cs-set-position $marks[$marker]));
-	#	update_clock;
-	#	start_clock;
+	#	update_clock();
+	#	start_clock();
 	}
 }
 
