@@ -9,6 +9,7 @@ our $VERSION = '0.01';
 ## Imported modules
 
 use lib '/home/jroth/build/flow/lib'; # no trailing slash
+use lib '/home/jroth/build/flow/blib/lib/';
 
 use Carp;
 use IO::All;
