@@ -31,6 +31,7 @@ use Data::YAML::Reader;
 
 [% INSERT definitions %]
 
+[% INSERT default.yaml %]
 ## Load my modules
 
 use Audio::Ecasound::Flow::Config; 	# Global configuration file
@@ -924,33 +925,22 @@ sub eval_iam {
 
 sub read_config {
 	$debug2 and print "&read_config\n";
-	local $debug = 0;
-	$config = YAML::Tiny->new;
 
-# overwrite local copy if config.yaml in current session directory
+check session directory for $yamlfile 
 #
 # looks to $session_dir
 
-	my $yaml = $yaml;  
+	my $yamlfile = join_path(session_dir(),$yamlfile);
+	my $custom_yaml;
+	-f $yamlfile and $custom_yaml = io($yaml_file)->all;
+	%cfg = %{  $yr->read( $custom_yaml ? $custom_yaml : $default )  };
 
-	my $yamlfile = join_path(session_dir,$yamlfile);
-	$yaml = io($yamlfile)->all if -f $yamlfile;
-
-	$config = YAML::Tiny->read_string($yaml);
-
-	### replace abbreviations
-
-	ref $config->[0] or croak "not ref!";
-	*cfg = \%{$config->[0]}; # alias
-	#print keys %cfg;
-	#print $config->write_string();
-	*subst = \%{$cfg{abbreviations}}; # alias
 	*devices = \%{ $cfg{devices} }; # %devices is an alias
+	*subst = \%{$cfg{abbreviations}}; # alias
 	#print $config->write_string();
 	# print keys %subst; exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	$debug and print $config->write_string; 
 
 }
 sub walk_tree {

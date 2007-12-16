@@ -35,9 +35,9 @@ our (
 
 	$input_channels,# this many radiobuttons appear
 	                # on the menubutton
-	$config,        # all config information from config.yaml 
+	%cfg,        # all config information from config.yaml 
 					# or Config.pm
-	%devices, 		# alias to data in $config
+	%devices, 		# alias to data in %config
 	%opts,          # command line options (set by command stub)
 	%oid_status,    # state information for the chain templates
 	$clock_id,		# for the Tk event system
@@ -90,7 +90,7 @@ our (
 	@input_chains,	# we sort them in input chains and output chains
 	@output_chains,
 
-	%cfg,			# the config file, as hash (alias to $config->[0])
+	%cfg,			# the config file, as hash
 	$yaml,			# the text form of the config file
 	%subst,			# alias, substitutions for the config file
 	$tkeca_effects_data,	# original tcl code, actually
