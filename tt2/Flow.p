@@ -38,7 +38,6 @@ use Audio::Ecasound::Flow::Grammar;	# Command line grammar
 use Audio::Ecasound::Flow::Iam;    	# IAM command support
 use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 
-
 # CLASS DEFINITIONS
 
 # Preloaded methods go here.
@@ -46,16 +45,9 @@ package UI;
 use Carp;
 our @ISA;
 
-use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
-
 use Object::Tiny qw{dummy};
 sub hello {print "superclass hello\n"};
 
-sub session_label {}
-sub setup_length {}
-sub clock_configure {}
-sub manifest {}
-sub global_version_buttons {}
 sub take_gui {}
 sub track_gui {}
 sub track_gui {}
@@ -65,6 +57,11 @@ sub update_master_version_button {}
 sub paint_button {}
 sub refresh_oids {}
 sub paint_button {}
+sub session_label_configure{}
+sub length_display{}
+sub clock_display {}
+sub manifest {}
+sub global_version_buttons {}
 
 package UI::Graphical;
 use Carp;
@@ -72,10 +69,10 @@ our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "make a window\n";}
 
-sub session_label_configure{ $session_label->configure(@_)}
-sub setup_length{ $setup_length->configure(-text => colonize $length) };
-sub clock_configure{ $clock->configure(-text => colonize( 0) );}
-sub manifest { $ew->deiconify() };
+sub session_label_configure{ session_label_configure(@_)}
+sub length_display{ $setup_length->configure(-text => colonize $length) };
+sub clock_display { $clock->configure(-text => colonize( 0) )}
+sub manifest { $ew->deiconify() }
 
 sub loop {
 	init_gui(); 
@@ -244,10 +241,10 @@ sub transport_gui {
 		-command => sub { 
 		return if transport_running();
 		if ( really_recording ) {
-			$session_label->configure(-background => 'lightpink') 
+			session_label_configure(-background => 'lightpink') 
 		}
 		else {
-			$session_label->configure(-background => 'lightgreen') 
+			session_label_configure(-background => 'lightgreen') 
 		}
 		start_transport();
 				});
@@ -440,9 +437,9 @@ sub flash_ready {
 		} else {  $color = 'lightgreen'; }; # just playback
 
 	$debug and print "flash color: $color\n";
-	$setup_length->configure(-background => $color);
-	$setup_length->after(10000, 
-		sub{ $setup_length->configure(-background => $old_bg) }
+	_display(-background => $color);
+	$->after(10000, 
+		sub{ length_display(-background => $old_bg) }
 	);
 }
 sub take_gui {
@@ -1010,7 +1007,7 @@ sub initialize_session_data {
 	return if transport_running();
 	my $sf = join_path(session_dir, $chain_setup_file);
 	carp ("missing session file $sf\n") unless -f $sf;
-	$gui and $session_label->configure(
+	session_label_configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
 		); 
@@ -2151,9 +2148,9 @@ sub connect_transport {
 	carp("Invalid chain setup, cannot arm transport.\n"), return
 		unless eval_iam("engine-status") eq 'stopped' ;
 	$length = eval_iam('cs-get-length'); 
-	$gui and $setup_length->configure(-text => colonize($length));
+	length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
-	$gui and $clock->configure(-text => colonize(0));
+	clock_display(-text => colonize(0));
 	print eval_iam("fs");
 	flash_ready();
 	
@@ -2166,7 +2163,7 @@ sub start_transport {
 	start_clock();
 }
 sub stop_transport { 
-	$debug2 and print "&stop_transport\n"; $e->eci('stop'); $session_label->configure(-background => $old_bg);
+	$debug2 and print "&stop_transport\n"; $e->eci('stop'); session_label_configure(-background => $old_bg);
 	# what if we are recording
 }
 sub transport_running {
@@ -2181,18 +2178,18 @@ sub start_clock {
 	$clock_id = $clock->repeat(1000, \refresh_clock);
 }
 sub update_clock {
-	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
 	start_clock();
 }
 sub refresh_clock{
-	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
 	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
-	$session_label->configure(-background => $old_bg);
+	session_label_configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
 		connect_transport unless really_recording(); 
 	}
