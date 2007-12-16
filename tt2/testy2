@@ -1,0 +1,22 @@
+use Data::YAML::Writer;
+       my $data = {
+               one => 1,
+               two => 2,
+               three => [ 1, 2, 3 ],
+           };
+           
+           my $yw = Data::YAML::Writer->new;
+           
+           # Write to an array...
+           #$yw->write( $data, \@some_array );
+           
+           # ...an open file handle...
+           #$yw->write( $data, $some_file_handle );
+           
+           # ...a string ...
+          # $yw->write( $data, \$some_string );
+		   #print $some_string;
+
+		   # ... using yaml_out
+#		   print yaml_out( $data );
+

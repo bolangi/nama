@@ -15,14 +15,14 @@ use Carp;
 use IO::All;
 use Cwd;
 use Storable; 
-use Data::Dumper;
+use Data::Dumper();
 use Getopt::Std;
 use Tk;
 use Audio::Ecasound;
 use Parse::RecDescent;
 use YAML::Tiny;
-use Data::YAML::Writer;
-use Data::YAML::Reader;
+use Data::YAML::Writer();
+use Data::YAML::Reader();
 
 ## Definitions ##
 
@@ -31,29 +31,30 @@ use Data::YAML::Reader;
 
 [% INSERT definitions %]
 
-[% INSERT config_yaml %] 
-
-CONFIG
-
-$oids_def= yaml_in ("oids_yaml")
-
 ## Load my modules
 
 use Audio::Ecasound::Flow::Config; 	# Global configuration file
-use Audio::Ecasound::Flow::Grammar;	# Command line grammar
+use Audio::Ecasound::Flow::Grammar();	# Command line grammar
 use Audio::Ecasound::Flow::Iam;    	# IAM command support
 use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
+
 
 # CLASS DEFINITIONS
 
 # Preloaded methods go here.
 package UI;
-use Carp;
 our @ISA;
+
+use subs qw( [% PERL %] require "list_subs.pl"; [% END %]);
 
 use Object::Tiny qw{dummy};
 sub hello {print "superclass hello\n"};
 
+sub session_label {}
+sub setup_length {}
+sub clock_configure {}
+sub manifest {}
+sub global_version_buttons {}
 sub take_gui {}
 sub track_gui {}
 sub track_gui {}
@@ -63,23 +64,16 @@ sub update_master_version_button {}
 sub paint_button {}
 sub refresh_oids {}
 sub paint_button {}
-sub session_label_configure{}
-sub length_display{}
-sub clock_display {}
-sub manifest {}
-sub global_version_buttons {}
-sub destroy_widgets {}
 
 package UI::Graphical;
-use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "make a window\n";}
 
-sub session_label_configure{ session_label_configure(@_)}
-sub length_display{ $setup_length->configure(-text => colonize $length) };
-sub clock_display { $clock->configure(-text => colonize( 0) )}
-sub manifest { $ew->deiconify() }
+sub session_label_configure{ $session_label->configure(@_)}
+sub setup_length{ $setup_length->configure(-text => colonize $length) };
+sub clock_configure{ $clock->configure(-text => colonize( 0) );}
+sub manifest { $ew->deiconify() };
 
 sub loop {
 	init_gui(); 
@@ -99,7 +93,7 @@ sub init_gui {
 
 ### 	Tk root window layout
 
-	$mw = MainWindow->new; 
+	$mw = MainWindow->new(); 
 	$mw->title("Tk Ecmd"); 
 
 	### init effect window
@@ -248,16 +242,16 @@ sub transport_gui {
 		-command => sub { 
 		return if transport_running();
 		if ( really_recording ) {
-			session_label_configure(-background => 'lightpink') 
+			$session_label->configure(-background => 'lightpink') 
 		}
 		else {
-			session_label_configure(-background => 'lightgreen') 
+			$session_label->configure(-background => 'lightgreen') 
 		}
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Generate and connect',
-			-command => sub {setup_transport; connect_transport}
+			-command => sub {setup_transport(); connect_transport()}
 						 );
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
@@ -436,7 +430,7 @@ sub paint_button {
 						-activebackground => $color);
 }
 sub flash_ready {
-	my $color;
+	my $color();
 		if (@record ){
 			$color = 'lightpink'; # live recording
 		} elsif ( really_recording ){  # mixing only
@@ -444,9 +438,9 @@ sub flash_ready {
 		} else {  $color = 'lightgreen'; }; # just playback
 
 	$debug and print "flash color: $color\n";
-	_display(-background => $color);
-	$->after(10000, 
-		sub{ length_display(-background => $old_bg) }
+	$setup_length->configure(-background => $color);
+	$setup_length->after(10000, 
+		sub{ $setup_length->configure(-background => $old_bg) }
 	);
 }
 sub take_gui {
@@ -501,7 +495,7 @@ sub take_gui {
 							   
 }
 sub global_version_buttons {
-#	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
+#	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons(); 
     my @children = $widget_t[1]->children;
 	for (@children) {
 		$_->cget(-value) and $_->destroy;
@@ -569,7 +563,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => sub { 
 							$state_c{$n}->{rw} = $::REC;
-							refresh() }
+							refresh }
 				 		)
 				}
 			}
@@ -801,7 +795,7 @@ sub track_gui { # nearly 300 lines!
 					 $e_bound{ladspa}{d}-1, 
 					 $e_bound{ladspa}{z}, 
 					);
-	my @add_effect;
+	my @add_effect();
 
 	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
@@ -814,7 +808,6 @@ sub track_gui { # nearly 300 lines!
 1;
 
 package UI::Text;
-use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "hello world!\n"}
@@ -857,7 +850,6 @@ sub loop {
 1;
 
 package Audio::Ecasound::Flow;
-use Carp;
 
 # BROKEN effects data store/retrieve, fixed! still broken
 # BROKEN storing @ladspa_sorted
@@ -870,13 +862,12 @@ use Carp;
 # Grammar expanded
 
 package UI;
-use Carp;
 
 sub prepare {  # actions begin here
 
 	$debug2 and print "&prepare\n";
-    $yw = Data::YAML::Writer->new;
-    $yr = Data::YAML::Reader->new;
+    $yw = Data::YAML::Writer->new();
+    $yr = Data::YAML::Reader->new();
 
 	$debug and print ("\%opts\n======\n", yaml_out (\%opts)); ; 
 
@@ -931,20 +922,33 @@ sub eval_iam {
 
 sub read_config {
 	$debug2 and print "&read_config\n";
+	local $debug = 0;
+	$config = YAML::Tiny->new();
 
-# check session directory for $yamlfile 
+# overwrite local copy if config.yaml in current session directory
+#
+# looks to $session_dir
 
-	my $yamlfile = join_path(session_dir(),$yamlfile);
-	my $custom_yaml;
-	-f $yamlfile and $custom_yaml = io($yamlfile)->all;
-	%cfg = %{  $yr->read( project_yaml() or standard_yaml() or $default )  };
+	my $yaml = $yaml;  
 
-	*devices = \%{ $cfg{devices} }; # %devices is an alias
+	my $yamlfile = join_path(session_dir,$yamlfile);
+	$yaml = io($yamlfile)->all if -f $yamlfile;
+
+	$config = YAML::Tiny->read_string($yaml);
+
+	### replace abbreviations
+
+	ref $config->[0] or croak "not ref!";
+	*cfg = \%{$config->[0]}; # alias
+	#print keys %cfg;
+	#print $config->write_string();
 	*subst = \%{$cfg{abbreviations}}; # alias
+	*devices = \%{ $cfg{devices} }; # %devices is an alias
 	#print $config->write_string();
 	# print keys %subst; exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
+	$debug and print $config->write_string; 
 
 }
 sub walk_tree {
@@ -1001,7 +1005,7 @@ sub initialize_session_data {
 	return if transport_running();
 	my $sf = join_path(session_dir, $chain_setup_file);
 	carp ("missing session file $sf\n") unless -f $sf;
-	session_label_configure(
+	$gui and $session_label->configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
 		); 
@@ -1030,9 +1034,15 @@ sub initialize_session_data {
 	@widget_t = ();
 	%widget_e = ();
 
-destroy_widgets();
-
-increment_take(); 
+if ($gui) { 
+	map{ $_->destroy } map{ $_->children } $effect_frame;
+	my @children = $take_frame->children;
+	map{ $_->destroy  } @children[1..$#children];
+	@children = $track_frame->children;
+	map{ $_->destroy  } @children[11..$#children]; # fragile
+	$state_t{active} = 1; 
+}
+	increment_take(); 
 
 take_gui($t);
 
@@ -1054,15 +1064,11 @@ take_gui($t);
 
 	# $is_armed = 0;
 }
-
-sub destroy_widgets {
-
-	map{ $_->destroy } map{ $_->children } $effect_frame;
-	my @children = $take_frame->children;
-	map{ $_->destroy  } @children[1..$#children];
-	@children = $track_frame->children;
-	map{ $_->destroy  } @children[11..$#children]; # fragile
-	$state_t{active} = 1; 
+sub create_dir {
+	my $dir = shift;
+	-d $dir 
+		or mkdir $dir 
+		or croak qq(failed to create directory "$dir": $!);
 }
 ## track and wav file handling
 
@@ -1121,10 +1127,10 @@ sub register_track {
 	$chain{$name} = $i;
 	$state_c{$i}->{rw} = $::REC;
 	$state_c{$i}->{ch_m} = $ch_m;
-	$state_c{$i}->{ch_r} = $ch_r;
+	$state_c{$i}->{ch_r} = $ch_r();
 	$name =~ s/\.wav$//;
 	$state_c{$i}->{file} = $name;
-	# print SESSION join ";", $name, $ch_m, $ch_r;
+	# print SESSION join ";", $name, $ch_m, $ch_r();
 	# print SESSION "\n";
 }
 sub dig_ruins { 
@@ -1453,13 +1459,6 @@ sub is_muted {
 =cut
 ## support functions
 
-sub create_dir {
-	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
-}
-
 sub join_path {
 	no warnings;
 	my @parts = @_;
@@ -1531,7 +1530,7 @@ sub mon_vert {
 	# store @{ $state_c{$ver}{ops} }
 	# store %copp
 	# remove effects  and use $ver's set if there are effects for $v
-	$monitor_version = $ver;
+	$monitor_version = $ver();
 	refresh();
 }
 ## chain setup generation
@@ -1598,7 +1597,7 @@ sub make_io_lists {
 	%outputs = ();      
 	%post_input = ();
 	%pre_output = ();
-	my $rec_status;
+	my $rec_status();
 
 	# set up track independent chains for MIX and STEREO (type: mixed)
 	for my $oid (@oids) {
@@ -1647,7 +1646,7 @@ OID:		for my $oid (@oids) {
 
 		# check track $n against template
 
-			next unless $oid{target} eq 'all' or $oid{target} eq $rec_status; 
+			next unless $oid{target} eq 'all' or $oid{target} eq $rec_status(); 
 
 			# if we've arrived here we will create chains
 			$debug and print "really making chains!\n";
@@ -2055,7 +2054,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
+	post_input	=>	\mono_to_stereo,
 
 	},{
 	
@@ -2083,7 +2082,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
+	post_input	=>	\mono_to_stereo,
 	id		=>  $null_id, 
 
 	},
@@ -2147,9 +2146,9 @@ sub connect_transport {
 	carp("Invalid chain setup, cannot arm transport.\n"), return
 		unless eval_iam("engine-status") eq 'stopped' ;
 	$length = eval_iam('cs-get-length'); 
-	length_display(-text => colonize($length));
+	$gui and $setup_length->configure(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
-	clock_display(-text => colonize(0));
+	$gui and $clock->configure(-text => colonize(0));
 	print eval_iam("fs");
 	flash_ready();
 	
@@ -2162,7 +2161,7 @@ sub start_transport {
 	start_clock();
 }
 sub stop_transport { 
-	$debug2 and print "&stop_transport\n"; $e->eci('stop'); session_label_configure(-background => $old_bg);
+	$debug2 and print "&stop_transport\n"; $e->eci('stop'); $session_label->configure(-background => $old_bg);
 	# what if we are recording
 }
 sub transport_running {
@@ -2177,18 +2176,18 @@ sub start_clock {
 	$clock_id = $clock->repeat(1000, \refresh_clock);
 }
 sub update_clock {
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
 	start_clock();
 }
 sub refresh_clock{
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	$clock->configure(-text => colonize(eval_iam('cs-get-position')));
 	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
-	session_label_configure(-background => $old_bg);
+	$session_label->configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
 		connect_transport unless really_recording(); 
 	}
@@ -2422,6 +2421,7 @@ sub add_effect {
 		defined $display_type or $display_type = $effects[$i]->{display}; # template
 		$debug and print "display type: $display_type\n";
 
+		
 		if (! $gui or $display_type eq q(hidden) ){
 
 			my $frame ;
@@ -2659,7 +2659,7 @@ sub effect_update {
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
 	$param++; # so the value at $p[0] is applied to parameter 1
-	my $controller; 
+	my $controller(); 
 	for my $op (0..scalar @{ $state_c{$chain}->{ops} } - 1) {
 		${ $state_c{$chain}->{ops} } [$op] eq $id and $controller = $op 
 	}
@@ -2795,12 +2795,12 @@ sub prepare_static_effects_data{
 sub extract_effects_data {
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
-		if $lower + @lines - 1 != $upper;
+		if $lower + @lines - 1 != $upper();
 	$debug and print"lower: $lower upper: $upper  separator: $separator\n";
 	#$debug and print "lines: ". join "\n",@lines, "\n";
 	$debug and print "regex: $regex\n";
 	
-	for (my $j = $lower; $j <= $upper; $j++) {
+	for (my $j = $lower(); $j <= $upper(); $j++) {
 		my $line = shift @lines;
 	
 		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
@@ -2983,7 +2983,7 @@ sub get_ladspa_hints{
 	# print "@plugins"; exit;
 	# | perl -ne 'chomp; s/$ENV{LADSPA_PATH}//; system qq(analyseplugin $_)'
 	my $ladspa_sample_rate = 44100; # for sample-rate dependent effect
-	use Data::Dumper;
+	use Data::Dumper();
 
 	my $pluginre = qr/
 	Plugin\ Name: \s+ "([^"]+)" \s+
@@ -3021,7 +3021,7 @@ sub get_ladspa_hints{
 			next if $type eq q(audio);
 			my %p;
 			$p{name} = $name;
-			$p{dir} = $dir;
+			$p{dir} = $dir();
 			$p{hint} = $hint;
 			my ($beg, $end, $default_val, $resolution) = range($name, $range, $default, $hint);
 			$p{begin} = $beg;
@@ -3046,7 +3046,7 @@ sub range {
 	my ($name, $range, $default, $hint) = @_; 
 	my $multiplier = 1;;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
-	my ($beg, $end) = split /\s+to\s+/, $range;
+	my ($beg, $end) = split /\s+to\s+/, $range();
 	# if end is '...' set to $default + 10dB or $default * 10
 	$default =~ s/default\s+//;
 	$end =~ /\.{3}/ and $end = (
@@ -3054,8 +3054,8 @@ sub range {
 					  : $default * 10
 		);
 #	print "1 beg: $beg  end: $end\n";
-	$beg = $beg * $multiplier;
-	$end = $end * $multiplier;
+	$beg = $beg * $multiplier();
+	$end = $end * $multiplier();
 #	print "2 beg: $beg  end: $end\n";
 
 	my $resolution = ($end - $beg) / 100;
@@ -3542,11 +3542,6 @@ sub mark {
 	#	start_clock();
 	}
 }
-sub strip_comments {
-	map{ s/#.*$//mg; } @_;
-	@_
-} 
-#print strip_comments ("$a +~ line of %code # followed by comments"); 
 
 sub remove_spaces {                                                             
         my $entry = shift;                                                      

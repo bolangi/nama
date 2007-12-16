@@ -1,0 +1,160 @@
+use Text::Template::Preprocess;
+use Carp;
+
+my $debug = 1;
+my $write_file = 1;
+my $filename = qw( Grammar.p );
+
+my @delimiters = qw([%  %]);
+my @delimiters = qw([%  %]);
+my $template = Text::Template::Preprocess->new(
+ # $template = Text::Template->new( 
+	 TYPE => 'FILE',  
+	# PREPROCESSOR => sub { $_ },
+#	DELIMITERS => [ @delimiters ],
+	 SOURCE => 'test.p');
+ my $hash = { recipient => 'Abed-Nego',
+			 recipient => qx( /usr/bin/perl -w emit_command_headers  ),
+           friends => [ 'me', 'you' ],
+           enemies => { loathsome => 'Bill Gates',
+                        fearsome => 'Larry Ellison' },
+         };
+
+ $text = $template->fill_in(HASH => $hash);  # Replaces `{$recipient}' with `King'
+ print $text;
+
+__END__
+$hash = { 
+### next version: execute emit_c_h if permissions allow
+			eval qx(cat grammar) or carp("Failed to generate grammar") 
+		}
+# $text = $template->fill_in(HASH => $hash);
+#print $text;
+=cut
+
+$template->fill_in();
+
+sub preprocess {
+
+=comment
+[% grammar %]
+
+Include a file named 'grammar' if it exists.
+
+Create a file 'grammar' by running 'emit-grammar'
+if the latter exists.
+
+Do not run emit-grammar if 'grammar' is newer
+than 'emit-grammar'.
+
+=cut
+
+	my $fragment = $_;
+
+	
+	my ($first, @rest) = split ' ', $fragment;
+	my $generator_script = "emit-$first";
+	# [% grammar %] in a file leads to ' grammar ' as $fragment
+	
+	if (@rest) { # if there is more than one word 
+				# we assume it is embedded perl code. Since
+				# Text::Template expects to execute this code
+				# no processing is needed
+				
+		return;
+	} elsif( -f $first ){ # we have file named 'grammar' 
+
+		$debug and print "found a file to include\n";
+
+	if (! -r $generator_script
+		or 
+			-M $first < -M $generator_script 
+		and 
+			carp "File: '$first' newer than '$generator_script'\n",
+				"Using static data in $first.\n"
+	) {
+
+		my $new_input = "qx(cat $filename);"  ;;#  do later
+
+		$debug and print join "\n", 
+			"Old Input","---------",$_, "New Input","---------",$new_input;
+
+	} elsif( -f $generator_script) { 
+		$debug and print "an execute wrapped inside qx\n";
+		
+		$debug and print "file: $first: generating contents\n";
+
+		# we will generate our output
+
+
+		my $pre = 
+			-x $generator_script 
+				?  q(./)
+				:  q(perl -w );
+		my $new_input = join ' ', "qx(", $pre, $generator_script, ");\n"  ;;
+		
+		}
+		my $file_command = qq(perl -w $generator_script > $first);
+		$debug and print "$command\n";
+
+		$write_file and system $command or croak "failed to execute: '$command'";
+
+		$debug and print join $/,
+		"Old Input","---------",$_, "New Input","---------",$new_input;
+
+		$_ = $new_input;
+
+	}
+
+}
+#  $template = Text::Template->new(TYPE => 'ARRAY', SOURCE => [ ... ] );
+#  $template = Text::Template->new(TYPE => 'FILEHANDLE', SOURCE => $fh );
+#  $template = Text::Template->new(TYPE => 'STRING', SOURCE => '...' );
+ #$template = Text::Template->new(PREPEND => q{use strict;}, ...);
+
+ # Use a different template file syntax:
+# $template = Text::Template->new(DELIMITERS => [$open, $close], ...);
+# 
+#  $recipient = 'King';
+#  $text = $template->fill_in();  # Replaces `{$recipient}' with `King'
+#  print $text;
+# 
+#  $T::recipient = 'Josh';
+#  $text = $template->fill_in(PACKAGE => T);
+
+ # Pass many variables explicitly
+#  $hash = { recipient => 'Abed-Nego',
+#            friends => [ 'me', 'you' ],
+#            enemies => { loathsome => 'Bill Gates',
+#                         fearsome => 'Larry Ellison' },
+#          };
+#  $text = $template->fill_in(HASH => $hash, ...);
+ # $recipient is Abed-Nego,
+ # @friends is ( 'me', 'you' ),
+ # %enemies is ( loathsome => ..., fearsome => ... )
+ # Call &callback in case of programming errors in template
+#  
+#  $text = $template->fill_in(BROKEN => \&callback, BROKEN_ARG => $ref, ...);
+# 
+#  # Evaluate program fragments in Safe compartment with restricted permissions
+#  $text = $template->fill_in(SAFE => $compartment, ...);
+# 
+#  # Print result text instead of returning it
+#  $success = $template->fill_in(OUTPUT => \*FILEHANDLE, ...);
+# 
+#  # Parse template with different template file syntax:
+#  $text = $template->fill_in(DELIMITERS => [$open, $close], ...);
+#  # Note that this is *faster* than using the default delimiters
+# 
+#  # Prepend specified perl code to each fragment before evaluating:
+#  $text = $template->fill_in(PREPEND => q{use strict 'vars';}, ...);
+# 
+#  use Text::Template 'fill_in_string';
+#  $text = fill_in_string( <<EOM, PACKAGE => 'T', ...);
+#  Dear {$recipient},
+#  Pay me at once.
+#         Love, 
+#          G.V.
+#  EOM
+# 
+

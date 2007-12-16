@@ -1,0 +1,175 @@
+use Text::Template::Preprocess;
+use Carp;
+=commment
+use Text::Template::Preprocess;
+
+  $template = Text::Template::Preprocess->new( 
+ # $template = Text::Template->new( 
+	 TYPE => 'FILE',  
+	# PREPROCESSOR => sub { $_ },
+	 SOURCE => 'test.p');
+
+ # Use a different template file syntax:
+ #$template = Text::Template->new(DELIMITERS => [$open, $close], ...);
+ $hash = { recipient => 'Abed-Nego',
+           friends => [ 'me', 'you' ],
+           enemies => { loathsome => 'Bill Gates',
+                        fearsome => 'Larry Ellison' },
+         };
+
+ $text = $template->fill_in(HASH => $hash);  # Replaces `{$recipient}' with `King'
+ print $text;
+
+=cut
+
+# Text::Template->always_prepend(q{use strict 'vars';});
+
+## Definitions ##
+
+my $write_file = 1;
+my $filename = qw( Grammar.p );
+
+my @delimiters = qw([%  %]);
+
+my $template = Text::Template::Preprocess->new(
+	DELIMITERS => [ @delimiters ],
+	PREPROCESSOR => \&preprocess,
+	TYPE => 'FILE',
+	SOURCE => $filename,
+	);
+=comment
+$hash = { 
+			grammar => 
+			qx( perl -w emit_command_headers  )
+### next version: execute emit_c_h if permissions allow
+			eval qx(cat grammar) or carp("Failed to generate grammar") 
+		}
+=cut
+# $text = $template->fill_in(HASH => $hash);
+print $text;
+
+sub preprocess {
+
+=comment
+[% grammar %]
+
+Include a file named 'grammar' if it exists.
+
+Create a file 'grammar' by running 'emit-grammar'
+if the latter exists.
+
+Do not run emit-grammar if 'grammar' is newer
+than 'emit-grammar'.
+
+=cut
+	my $fragment = $_;
+	
+	my ($first, @rest) = split ' ', $fragment;
+	# [% grammar %] in a file leads to ' grammar ' as $fragment
+	
+	if (@rest) { # there is more than one word }
+		# we assume perl code so no preprocessing needed
+		return;
+	} elsif( -f $first ){ # we have file named 'grammar' 
+
+		$debug and print "found a file to include\n";
+
+	if (! -r "emit-$first"
+		or 
+			(-M $first < -M "emit-$first" 
+		and 
+			carp "File: '$first' newer than 'emit-$first'\n",
+				"Using static data in $first.\n"
+	) {
+
+		my $new_input = "qx(cat $filename);"  ;;#  do later
+
+		$debug and print join "\n", 
+			"Old Input","---------",$_, "New Input","---------",$new_input;
+
+	} elsif( -f "emit-$first") { 
+		$debug and print "an execute wrapped inside qx\n";
+		
+		$debug and print "file: $first: generating contents\n";
+
+		# we will generate our output
+
+
+		my $new_input =
+		
+		my $pre = 
+			-x "emit-$first" 
+				?  q(./)
+				:  q(perl -w );
+		my $new_input = join ' ', "qx(", $pre, ");\n"  ;;
+		
+		}
+				
+				emit_command_headers);" ;;# do later 
+				emit_command_headers)  # do later 
+			:  "qx(perl -w emit_command_headers);" ;;# do later 
+		
+		my $file_command = qq(perl -w $emit-$first > $first);
+		$debug and print "$command\n";
+
+		$write_file and system $command or croak "failed to execute: '$command'";
+		) if # do now
+
+		$debug and print join $/,
+		"Old Input","---------",$_, "New Input","---------",$new_input;
+
+		$_ = $new_input;
+
+	}
+
+#  $template = Text::Template->new(TYPE => 'ARRAY', SOURCE => [ ... ] );
+#  $template = Text::Template->new(TYPE => 'FILEHANDLE', SOURCE => $fh );
+#  $template = Text::Template->new(TYPE => 'STRING', SOURCE => '...' );
+ #$template = Text::Template->new(PREPEND => q{use strict;}, ...);
+
+ # Use a different template file syntax:
+# $template = Text::Template->new(DELIMITERS => [$open, $close], ...);
+# 
+#  $recipient = 'King';
+#  $text = $template->fill_in();  # Replaces `{$recipient}' with `King'
+#  print $text;
+# 
+#  $T::recipient = 'Josh';
+#  $text = $template->fill_in(PACKAGE => T);
+
+ # Pass many variables explicitly
+#  $hash = { recipient => 'Abed-Nego',
+#            friends => [ 'me', 'you' ],
+#            enemies => { loathsome => 'Bill Gates',
+#                         fearsome => 'Larry Ellison' },
+#          };
+#  $text = $template->fill_in(HASH => $hash, ...);
+ # $recipient is Abed-Nego,
+ # @friends is ( 'me', 'you' ),
+ # %enemies is ( loathsome => ..., fearsome => ... )
+ # Call &callback in case of programming errors in template
+#  
+#  $text = $template->fill_in(BROKEN => \&callback, BROKEN_ARG => $ref, ...);
+# 
+#  # Evaluate program fragments in Safe compartment with restricted permissions
+#  $text = $template->fill_in(SAFE => $compartment, ...);
+# 
+#  # Print result text instead of returning it
+#  $success = $template->fill_in(OUTPUT => \*FILEHANDLE, ...);
+# 
+#  # Parse template with different template file syntax:
+#  $text = $template->fill_in(DELIMITERS => [$open, $close], ...);
+#  # Note that this is *faster* than using the default delimiters
+# 
+#  # Prepend specified perl code to each fragment before evaluating:
+#  $text = $template->fill_in(PREPEND => q{use strict 'vars';}, ...);
+# 
+#  use Text::Template 'fill_in_string';
+#  $text = fill_in_string( <<EOM, PACKAGE => 'T', ...);
+#  Dear {$recipient},
+#  Pay me at once.
+#         Love, 
+#          G.V.
+#  EOM
+# 
+

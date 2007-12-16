@@ -1,0 +1,183 @@
+use Data::YAML::Writer;
+use Data::YAML::Reader;
+use Carp;
+use IO::All;
+    $yw = Data::YAML::Writer->new;
+    $yr = Data::YAML::Reader->new;
+
+my $null_id = undef;
+@oids = ( {
+
+# Stereo: apply effects to all tracks, whether REC or MON (i.e. live or playback)
+# and route to the stereo output device
+	
+	name	=>  q(stereo),
+#	target	=>  q(all),
+	id		=>  q(Stereo),
+	output	=>  q(stereo),
+	type	=>  q(mixed),
+	default	=>  q(on),
+
+	},{
+
+
+
+# Multi: output 'cooked' monitor channels to side-by-side
+# PCMs starting at the monitor channel assignment in the track menu.
+#  Default to PCMs 1  2.
+
+	name	=>	q(multi), 
+	target	=>	q(mon),  
+	id		=>	q(m),
+	output	=>	q(multi),
+	type	=>	q(cooked),
+	pre_output	=>	q(&pre_multi),
+	default	=> q(off),
+
+}, 
+{
+  
+# Live: apply effects to REC channels route to multichannel sound card
+# as above. 
+
+	name	=>  q(live),
+	target	=>  q(rec),
+	id		=>	q(L),
+	output	=>  q(multi),
+	type	=>  q(cooked),
+	pre_output	=>	q(&pre_multi),
+	default	=>  q(off),
+
+	},{
+
+# Mixdown to file 
+
+	name	=>  q(mix),
+#	target	=>  q(all),
+	id		=>  q(Mix),
+	output	=>  q(file),
+	type	=>  q(mixed),
+	default	=>  q(off),
+
+	},{
+	
+# Mix_setup 
+
+	name	=>  q(mix_setup),
+	target	=>  q(all),
+	id		=>  q(J),  # for 'join'
+	output	=>  $loopa,
+	type	=>  q(cooked),
+	default	=>  q(on),
+	
+	},{
+
+
+# Mon_setup: prepare raw MON tracks for output by converting to stereo
+	
+	name	=>  q(mon_setup), 
+	target	=>  q(mon),
+	id		=>	$null_id,   # bare number chain id
+	input	=>  q(file),
+	output	=>  q(loop),
+	type	=>  q(raw),
+	default	=>  q(on),
+	post_input	=>	q(&mono_to_stereo),
+
+	},{
+	
+# Rec_file: prepare raw REC tracks for writing to disk. REC tracks
+# are written in raw form
+
+	name	=>  q(rec_file), 
+	target	=>  q(rec),
+	id		=>  q(R),   
+	input	=>  q(multi),
+	output	=>  q(file),
+	type	=>  q(raw),
+	default	=>  q(on),
+
+	},{
+
+# Rec_setup: must come last in oids list, convert REC
+# inputs to stereo and output to loop device which will
+# have Vol, Pan and other effects prior to various monitoring
+# outputs and/or to the mixdown file output.
+		
+	name	=>	q(rec_setup), 
+	target	=>	q(rec),
+	input	=>  q(multi),
+	output	=>  q(loop),
+	type	=>  q(raw),
+	default	=>  q(on),
+	post_input	=>	q(&mono_to_stereo),
+	id		=>  $null_id, 
+
+	},
+);
+
+print yaml_out(\@oids);
+exit;
+sub yaml_out {
+	$debug2 and print "&yaml_out\n";
+	my ($data_ref) = shift; 
+	my $type = ref $data_ref;
+	$debug and print "data ref type: $type\n "; 
+#	croak "attempting to code wrong data type: $type" if $type !~ /HASH|ARRAY/;
+#	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+	my $output;
+    $yw->write( $data_ref, \$output ); # XXX broken
+	$output;
+}
+
+sub yaml_in {
+	my $file = shift;
+	my $yaml = io($file)->all;
+	$yr->read( $yaml ); # returns ref
+}
+__END__
+#=== proven for YAML reading/writing
+my $debug3++;
+my $scalar = 'hello';
+my $scalar_ref = \$scalar;
+my $array_ref = [1..5];
+my $hash_ref = { 1, 2, 3, [4, 5]};
+my $code_ref = sub{ print 'helloworld' };
+my $bareword = BAREWORD;
+print join "===========\n",  $/, yaml_out( 
+	$yr->read( 
+		yaml_out($hash_ref
+	) ) ); # returns ref
+$/;
+exit;
+#  $fh 
+my $a = &see_ref($hash_ref);
+#my $a = &see_ref($hash_ref);
+exit;
+sub see_ref {
+my $scalar = shift; # the container is a scalar
+	my $type = ref $scalar;
+#$debug and carp ("C-REF: expected array or hash, \n",
+#"found a scalar containing a : ", ref $scalar , $/);
+$debug3 and print "expected an array or hash, got: $type\n"; 
+$type =~ m/ARRAY|HASH/ and 
+		$debug3 and print ("Yaml::Writer can process type $type", $/,
+		,yaml_out( $scalar ), $/ );
+	
+	$scalar; # return myself to caller
+	}
+
+
+=comment
+my $all = { # scalar_ref => $scalar_ref,  # no, nor scalar scalar_ref, coderef, bareword, 
+			array_ref => $array_ref,
+			hash_ref => $hash_ref,
+			};
+# my $out = yaml_out($hash_ref);
+my $out = yaml_out($all);
+
+print $out;
+#print yaml_out ( yaml_in('./test.yaml') );
+=cut
+
+	

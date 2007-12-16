@@ -1,0 +1,6 @@
+#!/bin/sh
+PWD = `pwd`
+cd ~/build/flow
+preprocess && make
+cd ~/build/flow/lib/Audio/Ecasound
+./e_obj

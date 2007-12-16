@@ -1,0 +1,27 @@
+use Text::Template::Preprocess;
+
+  $template = Text::Template::Preprocess->new( 
+ # $template = Text::Template->new( 
+	 TYPE => 'FILE',  
+	# PREPROCESSOR => sub { $_ },
+	 SOURCE => 'test.p');
+
+ # Use a different template file syntax:
+ #$template = Text::Template->new(DELIMITERS => [$open, $close], ...);
+ $hash = { recipient => 'Abed-Nego',
+           friends => [ 'me', 'you' ],
+           enemies => { loathsome => 'Bill Gates',
+                        fearsome => 'Larry Ellison' },
+         };
+
+ $text = $template->fill_in(HASH => $hash);  # Replaces `{$recipient}' with `King'
+ print $text;
+__END__
+ $T::recipient = 'Josh';
+ $text = $template->fill_in(PACKAGE => T);
+
+ # Pass many variables explicitly
+ $text = $template->fill_in(HASH => $hash, ...);
+ # $recipient is Abed-Nego,
+ # @friends is ( 'me', 'you' ),
+ # %enemies is ( loathsome => ..., fearsome => ... )

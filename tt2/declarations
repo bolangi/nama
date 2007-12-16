@@ -9,7 +9,11 @@ our (
 	### 
 
 
-	$gui,
+	$default,		# the default configuration file
+					# as distinct from custom file
+					# in a project directory, or a 
+					# master in .ecmd root.
+	$gui,			# removed!!!
 	$mixname, 		# 'mix' for the mixer track display
 	$yamlfile, 		# configuration file
 	$yw,			# yaml writer object

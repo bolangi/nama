@@ -1,0 +1,1 @@
+perl -e '$a = "### perl \nsecond line\nthird"; $a =~ /^[^\n]*perl/s and p"match" or print "no match"'
