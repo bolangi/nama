@@ -204,5 +204,8 @@ our (
 	$effects_state,		# same for all chain operators
 	$debug,				# debug level flags for diagnostics
 	$debug2,			# for subroutine names as execute
+	$debug3,			# for reference passing diagnostics
+	 					#    where the &see_ref() call is
+						#    used
 
 );

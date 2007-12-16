@@ -3,9 +3,8 @@ $mixname = qq(mix);
 $yamlfile = qq(config.yaml); # we will look for this
 $effects_cache_file = q(ecmd_effects.yaml);
 
-# set the following to 1 to output debugging info
-$debug  = 1; # detailed debugging info 
-$debug2 = 1; # subroutine names
+# set the following to 1 to outpu
+$debug3 = 1; # reference types
 
 $ladspa_sample_rate = 44100; # for sample-rate dependent effect
 # LIMITATION: sample rate fixed at 44100

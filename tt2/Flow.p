@@ -2056,7 +2056,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\mono_to_stereo,
+	post_input	=>	\&mono_to_stereo,
 
 	},{
 	
@@ -2084,7 +2084,7 @@ my $null_id = undef;
 	output	=>  q(loop),
 	type	=>  q(raw),
 	default	=>  q(on),
-	post_input	=>	\mono_to_stereo,
+	post_input	=>	\&mono_to_stereo,
 	id		=>  $null_id, 
 
 	},
