@@ -34,21 +34,13 @@ use Data::YAML::Reader;
 
 [% INSERT all_vars %]
 
-$globals = <<YAML;
----
-...
-YAML
-
 # we use the following settings if we can't find config files
 
+my $default = <<'FALLBACK_CONFIG'
 
-$my fallback = <<'FALLBACK_CONFIG'
-
-[% INSERT config_yaml %] 
+[% INSERT config %] 
 
 FALLBACK_CONFIG
-
-$default = $globals . 
 
 
 ## Load my modules
@@ -178,7 +170,7 @@ sub init_gui {
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(session_dir,$statestore)) 
+				save_state(join_path(session_dir,$state_store_file)) 
 					if session_dir();
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
@@ -900,7 +892,7 @@ sub prepare {  # actions begin here
 	# -s skip reading effects data
 	# default: read .yaml file
 
-	assign_vars("config_global", @global_vars ); ## XX hardcoded
+	assign_vars(config(), @global_vars, @config_vars );
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
@@ -954,17 +946,15 @@ sub global_config{
 sub session_config {
 	io(join_path( $wav_dir, $ecmd_dir, $session_dir, $config_file ))->all;
 }
-sub config { global_config() or session_config() or $default }
+sub config { session_config() or global_config() or $default }
 
-sub expand_config {
- 	%cfg = %{  $yr->read(config())  };
-	walk_tree(\%cfg);
-	walk_tree(\%cfg); # second pass completes substitutions
 }
 	
 sub read_config {
 	$debug2 and print "&read_config\n";
-	expand_config();
+	%cfg = %{  $yr->read(config())  };
+	walk_tree(\%cfg);
+	walk_tree(\%cfg); # second pass completes substitutions
 	assign_vars( \%cfg, @config_vars); 
 	*subst = \%abbreviations; # alias
 
@@ -1011,7 +1001,7 @@ sub session_init{
 	initialize_session_data();
 	remove_small_wavs(); 
 	## XXX need second argument
-	retrieve_state(join_path(session_dir,$statestore)) unless $opts{m};
+	retrieve_state(join_path(session_dir,$state_store_file)) unless $opts{m};
 	mix_track, dig_ruins unless scalar @all_chains;
 	global_version_buttons();
 }
@@ -1118,7 +1108,7 @@ sub add_track {
 	return 1;
 }
 sub mix_track {
-	# return if $opts{m} or ! -e join_path(session_dir,$statestore);
+	# return if $opts{m} or ! -e # join_path(session_dir,$state_store_file);
 	add_track($mixname) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = $::MUTE; 

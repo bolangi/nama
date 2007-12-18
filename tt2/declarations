@@ -50,7 +50,7 @@ our (
 	
 					# /wav_dir/project_dir/vocal_1.wav
 					# /wav_dir/.flow/project_dir
-	$statestore,	# filename for storing state info
+	$state_store_file,	# filename for storing @persistent_vars
 	$chain_setup_file, # Ecasound uses this 
 
 	$input_channels,# this many radiobuttons appear
