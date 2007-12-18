@@ -2,18 +2,12 @@
 #
 #  intersection of *_vars and our( ) list
 #
-package Audio::Ecasound::Flow;
-
 use 5.008;
 use strict qw(vars);
 use warnings;
+package Audio::Ecasound::Flow;
 
-our $VERSION = '0.01';
-
-## Imported modules
-
-use lib '/home/jroth/build/flow/lib'; # no trailing slash
-use lib '/home/jroth/build/flow/blib/lib/';
+package UI;
 
 use Carp;
 use IO::All;
@@ -27,6 +21,13 @@ use Parse::RecDescent;
 use YAML::Tiny;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
+
+our $VERSION = '0.01';
+
+## Imported modules
+
+use lib '/home/jroth/build/flow/lib'; # no trailing slash
+use lib '/home/jroth/build/flow/blib/lib/';
 
 ## Definitions ##
 
@@ -44,10 +45,6 @@ FALLBACK_CONFIG
 
 ### some file and directory stuff declared as subroutines
 
-sub config_file { "config" }
-sub ecmd_dir { ".ecmd" }
-sub this_wav_dir {join_path($wav_dir, $session_name)}
-sub session_dir  { join_path($wav_dir, &ecmd_dir, $session_name) }
 
 ## Load my modules
 
@@ -176,7 +173,7 @@ sub init_gui {
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(session_dir,$state_store_file)) 
+				save_state(join_path(&session_dir,$state_store_file)) 
 					if session_dir();
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
@@ -882,6 +879,10 @@ use Carp;
 
 package UI;
 use Carp;
+sub config_file { "config" }
+sub ecmd_dir { ".ecmd" }
+sub this_wav_dir {join_path($wav_dir, $session_name)}
+sub session_dir  { $session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
 
 sub prepare {  # actions begin here
 
@@ -934,12 +935,18 @@ sub eval_iam {
 ## configuration file
 
 sub global_config{
-	io(join_path( $wav_dir, &ecmd_dir, &config_file ))->all;
+	my $config = join_path( $wav_dir, &ecmd_dir, &config_file );
+	-f $config and io($config)->all;
 }
 sub session_config {
-	io(join_path( &session_dir, &config_file ))->all;
+	&session_dir or return;
+	my $config = join_path( &session_dir, &config_file );
+	-f $config and io($config)->all;
 }
-sub config { &session_config or &global_config or $default }
+sub config { strip_blank_lines(
+				strip_comments(
+					&session_config or &global_config or $default 
+			 ))}
 
 sub read_config {
 	$debug2 and print "&read_config\n";
@@ -975,7 +982,7 @@ sub load_session {
 	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} this_wav_dir(), session_dir();
+		map{create_dir} &this_wav_dir, &session_dir;
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
@@ -992,7 +999,7 @@ sub session_init{
 	initialize_session_data();
 	remove_small_wavs(); 
 	## XXX need second argument
-	retrieve_state(join_path(session_dir,$state_store_file)) unless $opts{m};
+	retrieve_state(join_path(&session_dir,$state_store_file)) unless $opts{m};
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	global_version_buttons();
 }
@@ -1002,7 +1009,7 @@ sub session_init{
 sub initialize_session_data {
 
 	return if transport_running();
-	my $sf = join_path(session_dir, $chain_setup_file);
+	my $sf = join_path(&session_dir, $chain_setup_file);
 	session_label_configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
@@ -1099,7 +1106,7 @@ sub add_track {
 	return 1;
 }
 sub add_mix_track {
-	# return if $opts{m} or ! -e # join_path(session_dir,$state_store_file);
+	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
 	add_track($mixname) ;
 	# the variable $t magically increments
 	$state_t{$t}->{rw} = $::MUTE; 
@@ -1938,7 +1945,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = join_path(session_dir, $chain_setup_file);
+	my $sf = join_path(&session_dir, $chain_setup_file);
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -2002,7 +2009,7 @@ sub convert_to_alsa { initialize_oids }
 ## transport functions
 
 sub load_ecs {
-		my $session_file = join_path(session_dir , $chain_setup_file);
+		my $session_file = join_path(&session_dir , $chain_setup_file);
 		eval_iam("cs-remove $session_file");
 		eval_iam("cs-load ". $session_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -3415,6 +3422,7 @@ sub mark {
 }
 sub strip_blank_lines {
 	map{ s/\n(\s*\n)+/\n/sg } @_;
+	@_;
 	 
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
-package Audio::Ecasound::Flow;
 use strict;
 use lib '/home/jroth/build/flow/lib';
+use Getopt::Std;
 use Audio::Ecasound::Flow;
 
 ### Option Processing ###
