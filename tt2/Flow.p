@@ -36,26 +36,19 @@ use Data::YAML::Reader;
 
 $globals = <<YAML;
 ---
-mixname: mix
-effects_cache_file: effects_cache
-ladspa_sample_rate: 44100 # for sample-rate dependent effect
-unit: 1 				# fast-forward multiplier default
-statestore: State  # filename to store state
-chain_setup_file: session.ecs
-alias:
-  1: Mixdown
-  2: Tracker
 ...
 YAML
 
 # we use the following settings if we can't find config files
 
-$default = $globals .  <<'FALLBACK_CONFIG'
+
+$my fallback = <<'FALLBACK_CONFIG'
 
 [% INSERT config_yaml %] 
 
 FALLBACK_CONFIG
 
+$default = $globals . 
 
 
 ## Load my modules
@@ -3339,13 +3332,21 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	$source =~ m/.yaml/ and  $ref = yaml_in($source)
+	## check for State # using Data::Dumper
+	$f source and $source eq 'State' and $ref = retrieve($source)
+
+	## check for a filename
+
+	or -f $source and $ref = yaml_in($source)
+ 	
+	## check for a string
 
 	or  $source =~ /^\s*---/s and $ref = $yr->($source)
 
+	## pass a hash_ref to the assigner
+
 	or  ref $source and $ref = $source
 
-	or  $ref = retrieve($source); # using Data::Dumper
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string = 
@@ -3441,7 +3442,12 @@ sub mark {
 	#	start_clock();
 	}
 }
-sub strip_comments {
+sub strip_blank_lines {
+	map{ s/\n(\s*\n)+/\n/sg } @_;
+	 
+}
+
+sub strip_comments { #  
 	map{ s/#.*$//mg; } @_;
 	@_
 } 

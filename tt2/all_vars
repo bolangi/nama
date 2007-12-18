@@ -1,6 +1,5 @@
 @global_vars = qw(
 						$mixname
-						$yamlfile
 						$effects_cache_file
 						$ladspa_sample_rate
 						$statestore

@@ -17,6 +17,7 @@ our (
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
 	
+	$ecasound_globals #  Command line switches XX check
 
 	$default,		# the default configuration file
 					# as distinct from custom file
