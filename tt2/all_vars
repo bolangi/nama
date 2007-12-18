@@ -1,4 +1,13 @@
 @global_vars = qw(
+						$mixname
+						$yamlfile
+						$effects_cache_file
+						$ladspa_sample_rate
+						$statestore
+						$chain_setup_file
+						%alias 			       );
+						
+@config_vars = qw(
 						%abbreviations
 						%devices
 						$ecasound_globals
@@ -7,15 +16,6 @@
 						$mixer_out_format
 						$wav_dir 				);
 						
-@config_vars = qw(
-						
-						$mixname
-						$yamlfile
-						$effects_cache_file
-						$ladspa_sample_rate
-						$statestore
-						$chain_setup_file
-						%alias 			       );
 						
 
 @persistent_vars = qw(
@@ -55,3 +55,5 @@
 						%copp   
 						@marks 	
 						$unit				);
+
+

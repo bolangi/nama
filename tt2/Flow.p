@@ -1,3 +1,7 @@
+# TO DO:
+#
+#  intersection of *_vars and our( ) list
+#
 package Audio::Ecasound::Flow;
 
 use 5.008;
@@ -26,20 +30,36 @@ use Data::YAML::Reader;
 
 ## Definitions ##
 
-
 [% INSERT declarations %]
 
-[% INSERT definitions %]
+[% INSERT all_vars %]
+
+$globals = <<YAML;
+---
+mixname: mix
+effects_cache_file: effects_cache
+ladspa_sample_rate: 44100 # for sample-rate dependent effect
+unit: 1 				# fast-forward multiplier default
+statestore: State  # filename to store state
+chain_setup_file: session.ecs
+alias:
+  1: Mixdown
+  2: Tracker
+...
+YAML
+
+# we use the following settings if we can't find config files
+
+$default = $globals .  <<'FALLBACK_CONFIG'
 
 [% INSERT config_yaml %] 
 
-CONFIG
+FALLBACK_CONFIG
 
-$oids_def= yaml_in ("oids_yaml")
+
 
 ## Load my modules
 
-use Audio::Ecasound::Flow::Config; 	# Global configuration file
 use Audio::Ecasound::Flow::Grammar;	# Command line grammar
 use Audio::Ecasound::Flow::Iam;    	# IAM command support
 use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
@@ -887,7 +907,7 @@ sub prepare {  # actions begin here
 	# -s skip reading effects data
 	# default: read .yaml file
 
-	read_config();
+	assign_vars("config_global", @global_vars ); ## XX hardcoded
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
@@ -929,22 +949,31 @@ sub eval_iam {
 }
 ## configuration file
 
-sub read_config {
-	$debug2 and print "&read_config\n";
+my $config_file = "config";
+my $global_defs = "defs";
 
-# check session directory for $yamlfile 
+sub global_defs {
+	join_path( $wav_dir, $ecmd_dir, $global_defs);
+}
+sub global_config{
+	io(join_path( $wav_dir, $ecmd_dir, $config_file ))->all;
+}
+sub session_config {
+	io(join_path( $wav_dir, $ecmd_dir, $session_dir, $config_file ))->all;
+}
+sub config { global_config() or session_config() or $default }
 
-	my $yamlfile = join_path(session_dir(),$yamlfile);
-	my $custom_yaml;
-	-f $yamlfile and $custom_yaml = io($yamlfile)->all;
-	%cfg = %{  $yr->read( project_yaml() or standard_yaml() or $default )  };
-
-	*devices = \%{ $cfg{devices} }; # %devices is an alias
-	*subst = \%{$cfg{abbreviations}}; # alias
-	#print $config->write_string();
-	# print keys %subst; exit;
+sub expand_config {
+ 	%cfg = %{  $yr->read(config())  };
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
+}
+	
+sub read_config {
+	$debug2 and print "&read_config\n";
+	expand_config();
+	assign_vars( \%cfg, @config_vars); 
+	*subst = \%abbreviations; # alias
 
 }
 sub walk_tree {
@@ -1000,13 +1029,14 @@ sub initialize_session_data {
 
 	return if transport_running();
 	my $sf = join_path(session_dir, $chain_setup_file);
-	carp ("missing session file $sf\n") unless -f $sf;
 	session_label_configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
 		); 
-	$last_version = 0;
 
+	assign_vars($session_init_file, @session_vars);
+
+	$last_version = 0;
 	%track_names = ();
 	%state_c        = ();   #  chain related state
 	%state_t        = ();   # take related state
@@ -1029,13 +1059,6 @@ sub initialize_session_data {
 	%widget_c = ();
 	@widget_t = ();
 	%widget_e = ();
-
-destroy_widgets();
-
-increment_take(); 
-
-take_gui($t);
-
 	%take        = (); # maps chain index to take
 	%chain       = (); # maps track name (filename w/o .wav) to chain
 	#%alias      = ();  # a way of naming takes
@@ -1053,6 +1076,13 @@ take_gui($t);
 	%old_vol = ();
 
 	# $is_armed = 0;
+
+destroy_widgets();
+
+increment_take(); 
+
+take_gui($t);
+
 }
 
 sub destroy_widgets {
@@ -1752,13 +1782,12 @@ sub rec_route {
 	my $n = shift;
 	return if $state_c{$n}->{ch_r} == 1;
 	return if ! defined $state_c{$n}->{ch_r};
-	"-erc:$state_c{$n}->{ch_r},1
-	-f:$config->[0]->{raw_to_disk}->{format}"
+	"-erc:$state_c{$n}->{ch_r},1 -f:$raw_to_disk_format"
 }
 sub route {
 	my ($width, $dest) = @_;
 	return undef if $dest == 1 or $dest == 0;
-	$debug and print "\route: width: $width, destination: $dest\n\n";
+	$debug and print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
@@ -1929,7 +1958,7 @@ sub write_chains {
 	
 	my $ecs_file = "# ecasound chainsetup file\n\n\n";
 	$ecs_file   .= "# general\n\n";
-	$ecs_file   .= $config->[0]->{ecasound_globals};
+	$ecs_file   .= $ecasound_globals;
 	$ecs_file   .= "\n\n\n# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
@@ -1965,131 +1994,20 @@ sub new_wav_name {
 sub output_format {
 	my $stub = shift;
 	$stub eq $session_name or $stub eq $mixname
-		? $config->[0]->{mix_to_disk}->{format}
-		: $config->[0]->{mixer_out}->{format}
+		? $mix_to_disk_format
+		: $mixer_out_format
 }
 ## templates for generating chains
 
 sub initialize_oids {
-
+# XXX
 # my $debug = 1;
 
 # these are templates for building chains
 
 my $null_id = undef;
 
-
-@oids = ( {
-
-# Stereo: apply effects to all tracks, whether REC or MON (i.e. live or playback)
-# and route to the stereo output device
-	
-	name	=>  q(stereo),
-#	target	=>  q(all),
-	id		=>  q(Stereo),
-	output	=>  q(stereo),
-	type	=>  q(mixed),
-	default	=>  q(on),
-
-	},{
-
-
-
-# Multi: output 'cooked' monitor channels to side-by-side
-# PCMs starting at the monitor channel assignment in the track menu.
-#  Default to PCMs 1  2.
-
-	name	=>	q(multi), 
-	target	=>	q(mon),  
-	id		=>	q(m),
-	output	=>	q(multi),
-	type	=>	q(cooked),
-	pre_output	=>	\&pre_multi,
-	default	=> q(off),
-
-}, 
-{
-  
-# Live: apply effects to REC channels route to multichannel sound card
-# as above. 
-
-	name	=>  q(live),
-	target	=>  q(rec),
-	id		=>	q(L),
-	output	=>  q(multi),
-	type	=>  q(cooked),
-	pre_output	=>	\&pre_multi,
-	default	=>  q(off),
-
-	},{
-
-# Mixdown to file 
-
-	name	=>  q(mix),
-#	target	=>  q(all),
-	id		=>  q(Mix),
-	output	=>  q(file),
-	type	=>  q(mixed),
-	default	=>  q(off),
-
-	},{
-	
-# Mix_setup 
-
-	name	=>  q(mix_setup),
-	target	=>  q(all),
-	id		=>  q(J),  # for 'join'
-	output	=>  $loopa,
-	type	=>  q(cooked),
-	default	=>  q(on),
-	
-	},{
-
-
-# Mon_setup: prepare raw MON tracks for output by converting to stereo
-	
-	name	=>  q(mon_setup), 
-	target	=>  q(mon),
-	id		=>	$null_id,   # bare number chain id
-	input	=>  q(file),
-	output	=>  q(loop),
-	type	=>  q(raw),
-	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
-
-	},{
-	
-# Rec_file: prepare raw REC tracks for writing to disk. REC tracks
-# are written in raw form
-
-	name	=>  q(rec_file), 
-	target	=>  q(rec),
-	id		=>  q(R),   
-	input	=>  q(multi),
-	output	=>  q(file),
-	type	=>  q(raw),
-	default	=>  q(on),
-
-	},{
-
-# Rec_setup: must come last in oids list, convert REC
-# inputs to stereo and output to loop device which will
-# have Vol, Pan and other effects prior to various monitoring
-# outputs and/or to the mixdown file output.
-		
-	name	=>	q(rec_setup), 
-	target	=>	q(rec),
-	input	=>  q(multi),
-	output	=>  q(loop),
-	type	=>  q(raw),
-	default	=>  q(on),
-	post_input	=>	\&mono_to_stereo,
-	id		=>  $null_id, 
-
-	},
-);
-
-	$debug and print "rec_setup $oids[-1]->{input}\n";
+$debug and print "rec_setup $oids[-1]->{input}\n";
 
 	# oid settings
 	
@@ -2765,12 +2683,9 @@ sub apply_op {
 ## static effects data
 
 
-$effects_data_vars = <<'VARS';
-@effects		
-%effect_i	
-@ladspa_sorted
-%effects_ladspa
-VARS
+
+# @ladspa_sorted # XXX
+
 sub prepare_static_effects_data{
 
 
@@ -2781,14 +2696,14 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $opts{e}){ 
 		$debug and print "looking for effects cache: $effects_cache\n";
-		assign_vars($effects_cache, $effects_data_vars);
+		assign_vars($effects_cache, @effects_static_vars);
 	} else {
 		$debug and print "reading in effects data\n";
 		read_in_effects_data(); 
 		get_ladspa_hints, 
 		integrate_ladspa_hints, 
 		sort_ladspa_effects();
-		store_vars($effects_cache, $effects_data_vars);
+		store_vars($effects_cache, $effects_static_vars);
 	}
 
 }
@@ -3151,28 +3066,6 @@ Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, inte
 =cut
 ## persistent state support
 
-$persistent_vars = <<'PERSISTENT';
-$monitor_version
-$last_version 
-%track_names 	
-%state_c 		
-%state_t 		
-%cops 			
-$cop_id 		
-%copp 			
-@all_chains 	
-$i 				
-$t 				
-%take 			
-@takes 			
-%chain 			
-@marks			
-$unit			
-%oid_status		
-%old_vol		
-$jack_on		
-PERSISTENT
-
 sub save_state {
 	$debug2 and print "&save_state\n";
 	my $file = shift;
@@ -3212,10 +3105,10 @@ sub retrieve_state {
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
 		$debug and print qq($yamlfile: YAML file found\n), return;
-		$ref = assign_vars($yamlfile, $persistent_vars);
+		$ref = assign_vars($yamlfile, @persistent_vars);
 	} elsif (-f $file) {
 		$debug and print qq($file: 'Storable' file found\n), return;
-		$ref = assign_vars($file, $persistent_vars);
+		$ref = assign_vars($file, @persistent_vars);
 	} else {
 		$debug and 
 		carp("no state files found, neither $file, nor $yamlfile\n");
@@ -3281,14 +3174,14 @@ sub retrieve_state {
 
 }
 
-$effects_state = <<'VARS';
-%state_c_ops
-%cops    
-$cop_id     
-%copp   
-@marks 	
-$unit
-VARS
+$effects_state = qw( 
+
+				%state_c_ops
+				%cops    
+				$cop_id     
+				%copp   
+				@marks 	
+				$unit    );
 
 sub save_effects {
 	$debug2 and print "&save_effects\n";
@@ -3329,12 +3222,12 @@ sub retrieve_effects {
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
 	my %current_cops = %cops; # XXX why bother
-	my %current_copp = %copp; # XXX why bother
-	assign_vars($file, $effects_state);
+	my %current_copp = %copp; # similar name!!!!
+	assign_vars($file, @effects_dynamic_vars);
 	my %old_copp = %copp;  # XXX why bother
 	my %old_cops = %cops; 
 	%cops = %current_cops;
-	%copp = %current_copp;
+	%copp = %current_copp; ## similar name!!
 
 
 	print "\%state_c_ops\n ", yaml_out( \%state_c_ops), "\n\n";
@@ -3438,27 +3331,33 @@ sub assign_vars {
 	# returns a $ref containing the retrieved data structure
 	# TODO, simplify: use full var name, including sigils.
 	$debug2 and print "&assign_vars\n";
-	my ($file, $var_list) = @_;
-	$debug and print "file: $file\n";
-	# TODO
-	my @vars = split /\s+/, $var_list;
+	my ($source, @vars) = @_;
+	$debug and print "file: $source\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
-	$debug and carp("no file found\n"), return 0 unless -f $file;
-	$file =~ m/.yaml/ 
-		and  $ref = yaml_in($file)
-		or  $ref = retrieve($file);
+	$debug and carp("no file found\n"), return 0 unless -f $source;
+
+### figure out what to do with input
+
+	$source =~ m/.yaml/ and  $ref = yaml_in($source)
+
+	or  $source =~ /^\s*---/s and $ref = $yr->($source)
+
+	or  ref $source and $ref = $source
+
+	or  $ref = retrieve($source); # using Data::Dumper
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string = $_
-						. q( = )
-						. $sigil
-						. q({ $ref->{)
-						. $identifier
-						. q(} } if defined $ref->{)
-						. $identifier
-						. qq(};) ;
-	#	print $eval_string;
+		 my $eval_string = 
+		  $_ 
+		. q( = )
+		. $sigil
+		. q( { $ref->{ )
+		. $identifier
+		. q( } } if defined $ref->{ )
+		. $identifier
+		. q( }; ) ;
+
 		eval $eval_string or carp "failed to eval $eval_string: $!\n";
 	} @vars;
 	$ref;
@@ -3665,4 +3564,3 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself. 
 
 =cut
-grammar replace

@@ -1,19 +1,3 @@
-
-use constant (REC => 'rec',
-			  MON => 'mon',
-			  MUTE => 'mute');
-
-
-our (
-	### 
-
-	@global_vars,    # set before loading any sessions
-	@persistent_vars, # a set of variables we save
-					  	# as one big config file
-	@effects_static_vars,	# the list of which variables to store and retrieve
-	@effects_dynamic_vars,		# same for all chain operators
-	@config_vars,
-
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
 	
@@ -223,5 +207,4 @@ our (
 	$debug3,			# for reference passing diagnostics
 	 					#    where the &see_ref() call is
 						#    used
-
-);
+						#

@@ -20,11 +20,8 @@ devices:
     input_format: cd-stereo
     output_format: cd-stereo
 ecasound_globals: "-B auto"
-mix-to-disk:
-  format: cd-stereo
-mixer_out:
-  format: cd-stereo
-raw-to-disk:
-  format: cd-mono
+mix-to-disk_format: cd-stereo
+mixer_out_format: cd-stereo
+raw-to-disk_format: cd-mono
 wav_dir: /media/sessions
 ...

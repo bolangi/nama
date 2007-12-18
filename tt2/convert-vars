@@ -1,18 +1,67 @@
+my @types = qw( 
+	@global_vars
+	@persistent_vars
+	@effects_static_vars
+	@effects_dynamic_vars
+	@config_vars
+);
+my $vars = &vars;
 
-use constant (REC => 'rec',
-			  MON => 'mon',
-			  MUTE => 'mute');
+# print $vars; exit;
+#my @comments = split/[$%@]\w+,/, $vars;
+my @comments = split/[\$\%\@]\w+,/, $vars;
+my @labels = $vars =~ /([\$\%\@]\w+)/g ;
+print "found ", scalar @labels, " labels\n";
+#print join "", @comments;
 
+map{    
+	my @want = eval $_;
+	#print join $/, "type: $_", @want, '';
+	print "type: $_\n";
+	map{  
+		my $i = $_;
+		$wanted{$labels[$i]}++, print $labels[$i], $/
+			if grep { $labels[$i] eq $_ } @want
+	} 
+#	sort { $labels[$a] cmp $labels[$b] }
+	(0..$#labels)
 
-our (
-	### 
+} @types;
+print "type: unwanted\n", join $/, grep{ ! $wanted{$_} } @labels;
+=comment
+@types;
+	my @want = eval $_;
+	#my $l = "%state_c";
+	map{
+		my $l = $labels[$_];
+		print $l if  grep { $l eq $_ } @want;
+	} 0..$#labels;
+map{    
+	my @want = eval $_;
+	map {my $i = $_;
+		print "inner loop\n"; # $labels[$i], $comments[$i]  
+		#	if grep{$labels[$i] eq $want[$_] } (0..$#want);
+		#if $labels[$i] eq '%state_c';
+	} (0..$#labels);
+} @types;
 
-	@global_vars,    # set before loading any sessions
-	@persistent_vars, # a set of variables we save
-					  	# as one big config file
-	@effects_static_vars,	# the list of which variables to store and retrieve
-	@effects_dynamic_vars,		# same for all chain operators
-	@config_vars,
+=cut
+=comment
+	map{ print $labels[$_], $comments[$_] }(0..$#labels);
+
+for my $t( @types ){ # @global_vars, @config_vars, etc.
+		if grep{ my $i = $_; 
+	print $labels[$_], $comments[$_] 
+		if grep{$labels[$i] eq $want[$_] } (0..$#want);
+	}
+}
+print $labels[$i], $comments[$i] if grep{ $labels[i] eq $_ } @a
+@labels
+=cut
+				
+	
+sub vars { 
+	<<'VARS'
 
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
@@ -223,5 +272,66 @@ our (
 	$debug3,			# for reference passing diagnostics
 	 					#    where the &see_ref() call is
 						#    used
+						#
+VARS
+}
+BEGIN {
 
-);
+@global_vars = qw(
+						$mixname
+						$yamlfile
+						$effects_cache_file
+						$ladspa_sample_rate
+						$statestore
+						$chain_setup_file
+						%alias 			       );
+						
+@config_vars = qw(
+						%abbreviations
+						%devices
+						$ecasound_globals
+						$mix-to-disk_format
+						$raw-to-disk_format
+						$mixer_out_format
+						$wav_dir 				);
+						
+						
+
+@persistent_vars = qw(
+
+						$monitor_version
+						$last_version 
+						%track_names 	
+						%state_c 		
+						%state_t 		
+						%cops 			
+						$cop_id 		
+						%copp 			
+						@all_chains 	
+						$i 				
+						$t 				
+						%take 			
+						@takes 			
+						%chain 			
+						@marks			
+						$unit			
+						%oid_status		
+						%old_vol		
+						$jack_on 			);
+					 
+@effects_static_vars = qw(
+
+						@effects		
+						%effect_i	
+						@sorted_ladspa
+						%effects_ladspa		 );
+
+@effects_dynamic_vars = qw(
+
+						%state_c_ops
+						%cops    
+						$cop_id     
+						%copp   
+						@marks 	
+						$unit				);
+}

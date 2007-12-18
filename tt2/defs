@@ -1,0 +1,11 @@
+---
+mixname: mix
+effects_cache_file: effects_cache
+ladspa_sample_rate: 44100 # for sample-rate dependent effect
+unit: 1 				# fast-forward multiplier default
+statestore: State  # filename to store state
+chain_setup_file: session.ecs
+alias:
+  1: Mixdown
+  2: Tracker
+...
