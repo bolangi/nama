@@ -33,4 +33,5 @@ chain_setup_file: session.ecs
 alias:
   1: Mixdown
   2: Tracker
-...
+tk_input_channels: 10
+use_monitor_version_for_mixdown: true 

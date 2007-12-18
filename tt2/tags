@@ -5,27 +5,3 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.6	//
 Yes	Flow.p	/^Has activate() Function: Yes$/;"	f
-abbreviations	Flow/Config.pm	/^abbreviations:$/;"	l
-application	Flow/Config.pm	/^application: ecmd$/;"	l
-devices	Flow/Config.pm	/^devices:$/;"	l
-ecasound_globals	Flow/Config.pm	/^ecasound_globals: -B auto$/;"	l
-ecasound_id	Flow/Config.pm	/^        ecasound_id:   alsaplugin,0,0$/;"	l
-ecasound_id	Flow/Config.pm	/^        ecasound_id:   alsaplugin,1,0$/;"	l
-ecasound_id	Flow/Config.pm	/^        ecasound_id:   jack_alsa$/;"	l
-ecmd_home	Flow/Config.pm	/^ecmd_home: \/home\/jroth\/ecmd$/;"	l
-format	Flow/Config.pm	/^    format:        cd-mono$/;"	l
-format	Flow/Config.pm	/^    format:        cd-stereo $/;"	l
-format	Flow/Config.pm	/^    format:        cd-stereo$/;"	l
-frequency	Flow/Config.pm	/^    frequency: 44100$/;"	l
-input_format	Flow/Config.pm	/^        input_format:  32-12 $/;"	l
-input_format	Flow/Config.pm	/^        input_format:  32-12$/;"	l
-input_format	Flow/Config.pm	/^        input_format:  cd-stereo$/;"	l
-jack	Flow/Config.pm	/^    jack: $/;"	l
-mixer_out	Flow/Config.pm	/^mixer_out: $/;"	l
-multi	Flow/Config.pm	/^    multi: $/;"	l
-output_format	Flow/Config.pm	/^        output_format: 32-10$/;"	l
-output_format	Flow/Config.pm	/^        output_format: cd-stereo$/;"	l
-replace_abbreviations	Flow/Iam.pm	/^sub replace_abbreviations{  # replace abbreviations$/;"	s
-stereo	Flow/Config.pm	/^    stereo: $/;"	l
-tk_input_channels	Flow/Config.pm	/^tk_input_channels: 10  # fixed value for Tk widget$/;"	l
-wave_directory	Flow/Config.pm	/^wave_directory:   \/media\/sessions$/;"	l

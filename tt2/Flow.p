@@ -32,16 +32,22 @@ use Data::YAML::Reader;
 
 [% INSERT declarations %]
 
-[% INSERT all_vars %]
+[% INSERT variable_groups %]
 
 # we use the following settings if we can't find config files
 
-my $default = <<'FALLBACK_CONFIG'
+$default = <<'FALLBACK_CONFIG';
 
 [% INSERT config %] 
 
 FALLBACK_CONFIG
 
+### some file and directory stuff declared as subroutines
+
+sub config_file { "config" }
+sub ecmd_dir { ".ecmd" }
+sub this_wav_dir {join_path($wav_dir, $session_name)}
+sub session_dir  { join_path($wav_dir, &ecmd_dir, $session_name) }
 
 ## Load my modules
 
@@ -79,7 +85,7 @@ package UI::Graphical;
 use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
-sub hello {print "make a window\n";}
+# sub hello {print "make a window\n";}
 
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
@@ -91,7 +97,7 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	session_init, load_session({create => $opts{c}}) if $session_name;
+	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
 
@@ -262,23 +268,23 @@ sub transport_gui {
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Generate and connect',
-			-command => sub {setup_transport; connect_transport}
+			-command => sub {&setup_transport; &connect_transport}
 						 );
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
-			-command => \setup_transport,
+			-command => \&setup_transport,
 						 );
 	$transport_connect->configure(
 			-text => 'Connect chain setup',
-			-command => \connect_transport,
+			-command => \&connect_transport,
 						 );
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
-			-command => sub { disconnect_transport },
+			-command => \&disconnect_transport,
 						);
 	$transport_new->configure(
 			-text => 'New Engine',
-			-command => \new_engine,
+			-command => \&new_engine,
 						 );
 }
 sub time_gui {
@@ -567,7 +573,7 @@ sub track_gui { # nearly 300 lines!
 					-tearoff => 0,
 				);
 			if ( $n != 1 ) { # for all but Mixdown track MIX
-				for my $v (1..$input_channels) {
+				for my $v (1..$tk_input_channels) {
 					$ch_r->radiobutton(
 						-label => $v,
 						-variable => \$state_c{$n}->{ch_r},
@@ -824,7 +830,7 @@ our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {print "hello world!\n"}
 sub loop {
-	session_init, load_session({create => $opts{c}}) if $session_name;
+	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -880,6 +886,7 @@ use Carp;
 sub prepare {  # actions begin here
 
 	$debug2 and print "&prepare\n";
+
     $yw = Data::YAML::Writer->new;
     $yr = Data::YAML::Reader->new;
 
@@ -890,21 +897,15 @@ sub prepare {  # actions begin here
 
 	# -e re-parse effects data
 	# -s skip reading effects data
-	# default: read .yaml file
 
-	assign_vars(config(), @global_vars, @config_vars );
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
-	## Aliases
+	read_config();
 
-	*wav_dir = \$cfg{wave_directory};
+	$opts{d} and $wav_dir = $opts{d};
 
 	-d $wav_dir or croak("$wav_dir not found");
-
-	*input_channels = \$cfg{input_channels};  # fixed value for Tk widget
-	*use_monitor_version_for_mixdown = 
-		\$cfg{use_monitor_version_for_mixdown};
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -912,12 +913,10 @@ sub prepare {  # actions begin here
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{s}; 
-
 }
-
-1;
-
-
+=comment
+=cut
+#sub prepare { print "hello preparer!!" }
 	
 sub eval_iam {
 	my $debug = 1;
@@ -934,28 +933,20 @@ sub eval_iam {
 }
 ## configuration file
 
-my $config_file = "config";
-my $global_defs = "defs";
-
-sub global_defs {
-	join_path( $wav_dir, $ecmd_dir, $global_defs);
-}
 sub global_config{
-	io(join_path( $wav_dir, $ecmd_dir, $config_file ))->all;
+	io(join_path( $wav_dir, &ecmd_dir, &config_file ))->all;
 }
 sub session_config {
-	io(join_path( $wav_dir, $ecmd_dir, $session_dir, $config_file ))->all;
+	io(join_path( &session_dir, &config_file ))->all;
 }
-sub config { session_config() or global_config() or $default }
+sub config { &session_config or &global_config or $default }
 
-}
-	
 sub read_config {
 	$debug2 and print "&read_config\n";
 	%cfg = %{  $yr->read(config())  };
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	assign_vars( \%cfg, @config_vars); 
+	assign_vars( \%cfg, @global_vars, @config_vars); 
 	*subst = \%abbreviations; # alias
 
 }
@@ -984,7 +975,7 @@ sub load_session {
 	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} this_wav_dir, session_dir();
+		map{create_dir} this_wav_dir(), session_dir();
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
@@ -1002,7 +993,7 @@ sub session_init{
 	remove_small_wavs(); 
 	## XXX need second argument
 	retrieve_state(join_path(session_dir,$state_store_file)) unless $opts{m};
-	mix_track, dig_ruins unless scalar @all_chains;
+	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	global_version_buttons();
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
@@ -1017,7 +1008,7 @@ sub initialize_session_data {
 		-background => 'lightyellow',
 		); 
 
-	assign_vars($session_init_file, @session_vars);
+	# assign_vars($session_init_file, @session_vars);
 
 	$last_version = 0;
 	%track_names = ();
@@ -1107,7 +1098,7 @@ sub add_track {
 	track_gui($i);
 	return 1;
 }
-sub mix_track {
+sub add_mix_track {
 	# return if $opts{m} or ! -e # join_path(session_dir,$state_store_file);
 	add_track($mixname) ;
 	# the variable $t magically increments
@@ -1483,11 +1474,6 @@ sub join_path {
 	use warnings;
 }
 
-sub this_wav_dir {join_path($wav_dir, $session_name);}
-
-sub session_dir  { 
-	join_path($wav_dir, ".ecmd", $session_name);
-}
 sub wav_off {
 	my $wav = shift;
 	$wav =~ s/\.wav\s*$//i;
@@ -2091,13 +2077,13 @@ sub refresh_clock{
 	$clock_id->cancel;
 	session_label_configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
-		connect_transport unless really_recording(); 
+		&connect_transport unless &really_recording; 
 	}
 	elsif ($status eq 'finished') {
-		connect_transport unless really_recording(); 
+		&connect_transport unless &really_recording; 
 	}
 	else { # status: stopped, not started, undefined
-	rec_cleanup if really_recording();
+	&rec_cleanup if &really_recording();
 	}
 
 }
@@ -2683,10 +2669,10 @@ sub prepare_static_effects_data{
 	} else {
 		$debug and print "reading in effects data\n";
 		read_in_effects_data(); 
-		get_ladspa_hints, 
-		integrate_ladspa_hints, 
+		get_ladspa_hints();
+		integrate_ladspa_hints();
 		sort_ladspa_effects();
-		store_vars($effects_cache, $effects_static_vars);
+		store_vars($effects_cache, @effects_static_vars);
 	}
 
 }
@@ -3063,7 +3049,7 @@ sub save_state {
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
 
-	store_vars($file, $persistent_vars);
+	store_vars($file, @persistent_vars);
 
 # store alsa settings
 
@@ -3157,14 +3143,6 @@ sub retrieve_state {
 
 }
 
-$effects_state = qw( 
-
-				%state_c_ops
-				%cops    
-				$cop_id     
-				%copp   
-				@marks 	
-				$unit    );
 
 sub save_effects {
 	$debug2 and print "&save_effects\n";
@@ -3190,7 +3168,7 @@ sub save_effects {
 
 	# map {remove_op} @{ $state_c{$_}->{ops} }
 
-	store_vars($file, $effects_state);
+	store_vars($file, @effects_dynamic_vars);
 }
 
 =comment
@@ -3310,20 +3288,23 @@ sub retrieve_effects {
 
 }
 sub assign_vars {
-	# assigns vars in $var_list to values from $file
+	# assigns vars in @var_list to values from $source
+	# $source can be a :
+	#      - filename or
+	#      - string containing YAML data
+	#      - reference to a hash array containing assignments
+	#
 	# returns a $ref containing the retrieved data structure
-	# TODO, simplify: use full var name, including sigils.
 	$debug2 and print "&assign_vars\n";
 	my ($source, @vars) = @_;
 	$debug and print "file: $source\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
-	$debug and carp("no file found\n"), return 0 unless -f $source;
 
 ### figure out what to do with input
 
 	## check for State # using Data::Dumper
-	$f source and $source eq 'State' and $ref = retrieve($source)
+	-f $source and $source eq 'State' and $ref = retrieve($source)
 
 	## check for a filename
 
@@ -3335,7 +3316,7 @@ sub assign_vars {
 
 	## pass a hash_ref to the assigner
 
-	or  ref $source and $ref = $source
+	or  ref $source and $ref = $source;
 
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 

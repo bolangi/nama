@@ -7,17 +7,18 @@ use constant (REC => 'rec',
 our (
 	### 
 
-	@global_vars,    # set before loading any sessions
 	@persistent_vars, # a set of variables we save
 					  	# as one big config file
 	@effects_static_vars,	# the list of which variables to store and retrieve
 	@effects_dynamic_vars,		# same for all chain operators
-	@config_vars,
+	@global_vars,    # contained in config file
+	@config_vars,    # contained in config file
+	%abbreviations, # for replacements in config files
 
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
 	
-	$ecasound_globals #  Command line switches XX check
+	$ecasound_globals, #  Command line switches XX check
 
 	$default,		# the default configuration file
 					# as distinct from custom file
@@ -31,7 +32,6 @@ our (
 	$mixer_out_format,
 	
 	$mixname, 		# 'mix' for the mixer track display
-	$yamlfile, 		# configuration file
 	$yw,			# yaml writer object
 	$yr,			# yaml writer object
 	%state_c_ops, 	# intermediate copy for storage/retrieval
@@ -45,7 +45,7 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
-	$wav_dir, 		# each session will get a directory here
+	$wav_dir,	# each session will get a directory here
 	                # and one .ecmd directory, also with 
 	
 					# /wav_dir/project_dir/vocal_1.wav
@@ -53,11 +53,11 @@ our (
 	$state_store_file,	# filename for storing @persistent_vars
 	$chain_setup_file, # Ecasound uses this 
 
-	$input_channels,# this many radiobuttons appear
+	$tk_input_channels,# this many radiobuttons appear
 	                # on the menubutton
-	%cfg,        # all config information from config.yaml 
+	%cfg,        # 'config' information as hash
 					# or Config.pm
-	%devices, 		# alias to data in %config
+	%devices, 		# alias to data in %cfg
 	%opts,          # command line options (set by command stub)
 	%oid_status,    # state information for the chain templates
 	$clock_id,		# for the Tk event system
@@ -110,8 +110,6 @@ our (
 	@input_chains,	# we sort them in input chains and output chains
 	@output_chains,
 
-	%cfg,			# the config file, as hash
-	$yaml,			# the text form of the config file
 	%subst,			# alias, substitutions for the config file
 	$tkeca_effects_data,	# original tcl code, actually
 
