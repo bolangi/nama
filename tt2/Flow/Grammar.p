@@ -1,6 +1,6 @@
 ##  Grammar.p, source for Grammar.pm
 
-package Audio::Ecasound::Flow;
+package Audio::Ecasound::Flow::UI;
 
 ### COMMAND LINE PARSER 
 
@@ -18,7 +18,7 @@ $grammar = q(
 	use IO::All;
 
 	my $body = io('grammar_body')->all;
-	$body =~ s/::/Audio::Ecasound::Flow::/g;
+	$body =~ s/::/Audio::Ecasound::Flow::UI/g;
 
 	my $list = io('commands')->all;
 	my (@abbrevs, @stubs, @commands);

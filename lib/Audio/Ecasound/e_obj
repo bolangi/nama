@@ -11,7 +11,7 @@ $session_name = shift;
 $debug and print "session name: $session_name\n";
 $opts{g}++; # we still need this
 $opts{s}++; # don't load static effects data
-my $ui = UI::Graphical->new;
+my $ui = Audio::Ecasound::Flow::UI::Graphical->new;
 $ui->prepare;
 #$ui->loop;
 #&prepare;

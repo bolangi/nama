@@ -1,4 +1,4 @@
-package Audio::Ecasound::Flow;
+package Audio::Ecasound::Flow::UI;
 $tkeca_effects_data = <<'EFFECTS';
 ea|Volume|1|Level %|0|600|100|0
 epp|Pan|1|Level %|0|100|50|0

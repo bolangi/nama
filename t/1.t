@@ -5,7 +5,7 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 BEGIN { use_ok('Audio::Ecasound::Flow') };
 
 #########################
@@ -27,14 +27,14 @@ $debug and print "session name: $session_name\n";
 #sub hello {print "superclass hello\n"};
 #sub hello {print "make a window\n";}
 #sub hello {print "hello world!\n"}
-my $ui = Audio::Ecasound::Flow::UI->new;
-is ($ui->hello, "superclass hello", " UI->hello");
-my $tui = Audio::Ecasound::UI::Flow::Textual->new;
-is ($tui->hello, "hello world!", " UI::Text->hello");
-my $gui = UI::Graphical->new;
-is ($gui->hello, "make a window", " UI::Graphical->hello");
-ok ($ui->prepare);
-ok ($ui->loop);
+my $gui = Audio::Ecasound::Flow::UI::Graphical->new;
+is ($gui->hello, "make a window", " ::UI::Graphical->hello");
+#my $gui2 = Audio::Ecasound::Flow::UI->new("tk");
+#is ($gui2->hello, "make a window", " ::UI::Graphical->hello");
+#my $tui = Audio::Ecasound::Flow::UI::Text->new;
+#is ($tui->hello, "hello world!", " ::UI::Text->hello");
+#ok ($ui->prepare);
+#ok ($ui->loop);
 
 #$ui->loop;
 #&prepare;
@@ -42,8 +42,8 @@ ok ($ui->loop);
 
 
 
-ok(1);
-ok(1);
+#ok(1);
+#ok(1);
 
 =comment
 ok(my $ui = UI->new, 'UI new');

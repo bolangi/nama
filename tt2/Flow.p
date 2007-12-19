@@ -5,9 +5,8 @@
 use 5.008;
 use strict qw(vars);
 use warnings;
-package Audio::Ecasound::Flow;
 
-package UI;
+package Audio::Ecasound::Flow::UI;
 
 use Carp;
 use IO::All;
@@ -38,9 +37,7 @@ use lib '/home/jroth/build/flow/blib/lib/';
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';
-
 [% INSERT config %] 
-
 FALLBACK_CONFIG
 
 ### some file and directory stuff declared as subroutines
@@ -55,11 +52,25 @@ use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 # CLASS DEFINITIONS
 
 # Preloaded methods go here.
-package UI;
+package Audio::Ecasound::Flow::UI;
 use Carp;
-our @ISA;
+our @ISA; # superclass, has no ancestor
 
-use Object::Tiny qw{dummy};
+use Object::Tiny qw{mode};
+
+sub new { my $class = shift; 
+			my $mode = shift; # Text or Graphical
+			lc $mode eq 'tk' 
+		or	lc $mode eq 'gui'
+		or  lc $mode eq 'graphic'
+		or  lc $mode eq 'graphical'
+		and return bless { @_ },
+			Audio::Ecasound::Flow::UI::Graphical 
+		or  lc $mode eq 'text'
+		and return bless { @_ },
+			Audio::Ecasound::Flow::UI::Text
+}
+
 
 sub hello {my $h = "superclass hello"; print ($h); $h ;}
 
@@ -79,9 +90,9 @@ sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
 
-package UI::Graphical;
+package Audio::Ecasound::Flow::UI::Graphical;
 use Carp;
-our @ISA = 'UI';
+our @ISA = 'Audio::Ecasound::Flow::UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {my $h = "make a window"; print ($h); $h ;}
 
@@ -822,9 +833,9 @@ sub track_gui { # nearly 300 lines!
 }
 1;
 
-package UI::Text;
+package Audio::Ecasound::Flow::UI::Text;
 use Carp;
-our @ISA = 'UI';
+our @ISA = 'Audio::Ecasound::Flow::UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {my $h = "hello world!"; print ($h); $h ;}
 sub loop {
@@ -865,9 +876,6 @@ sub loop {
 
 1;
 
-package Audio::Ecasound::Flow;
-use Carp;
-
 # BROKEN effects data store/retrieve, fixed! still broken
 # BROKEN storing @ladspa_sorted
 # BROKEN state recall in text mode 
@@ -878,7 +886,7 @@ use Carp;
 # and wipes out config information.
 # Grammar expanded
 
-package UI;
+package Audio::Ecasound::Flow::UI;
 use Carp;
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
@@ -897,17 +905,13 @@ sub prepare {  # actions begin here
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
-	# -e re-parse effects data
-	# -s skip reading effects data
-
-
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
-
-	read_config();
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or croak("$wav_dir not found");
+	read_config();
+
+	-d $wav_dir or carp("$wav_dir not found, invoke using -d option or patching it into the \$default config file\n. I think there must be a method call for it, too!");
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -3469,18 +3473,18 @@ __END__
 
 =head1 NAME
 
-Audio::Ecasound::Flow - Perl extensions for multitrack audio
+Audio::Ecasound::Flow::UI - Perl extensions for multitrack audio
 recording and processing by Ecasound
 
 =head1 SYNOPSIS
 
   use Audio::Ecasound::Flow;
 
-  my $ui = Audio::Ecasound::Flow::GUI->new("Tk");
+  my $ui = Audio::Ecasound::Flow::UI->new("tk");
 
 		or
 
-  my $ui = Audio::Ecasound::Flow::GUI->new("text");
+  my $ui = Audio::Ecasound::Flow::UI->new("text");
 
 	my %options = ( 
 
