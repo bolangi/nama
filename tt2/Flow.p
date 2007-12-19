@@ -3420,6 +3420,9 @@ sub mark {
 	#	start_clock();
 	}
 }
+
+sub strip_all{ blank_lines( strip_comments(@_) ) }
+
 sub strip_blank_lines {
 	map{ s/\n(\s*\n)+/\n/sg } @_;
 	@_;
