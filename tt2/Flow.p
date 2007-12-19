@@ -60,7 +60,8 @@ use Carp;
 our @ISA;
 
 use Object::Tiny qw{dummy};
-sub hello {print "superclass hello\n"};
+
+sub hello {my $h = "superclass hello"; print ($h); $h ;}
 
 sub take_gui {}
 sub track_gui {}
@@ -82,7 +83,7 @@ package UI::Graphical;
 use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
-# sub hello {print "make a window\n";}
+sub hello {my $h = "make a window"; print ($h); $h ;}
 
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
@@ -825,7 +826,7 @@ package UI::Text;
 use Carp;
 our @ISA = 'UI';
 sub new { my $class = shift; return bless { @_ }, $class; }
-sub hello {print "hello world!\n"}
+sub hello {my $h = "hello world!"; print ($h); $h ;}
 sub loop {
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
@@ -913,7 +914,8 @@ sub prepare {  # actions begin here
 
 	new_engine();
 	initialize_oids();
-	prepare_static_effects_data() unless $opts{s}; 
+	prepare_static_effects_data() unless $opts{e}; 
+	"ok";
 }
 =comment
 =cut
@@ -2670,7 +2672,7 @@ sub prepare_static_effects_data{
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
-	if (-f $effects_cache and ! $opts{e}){ 
+	if (-f $effects_cache){ 
 		$debug and print "looking for effects cache: $effects_cache\n";
 		assign_vars($effects_cache, @effects_static_vars);
 	} else {

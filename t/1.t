@@ -10,16 +10,37 @@ BEGIN { use_ok('Audio::Ecasound::Flow') };
 
 #########################
 
-package Audio::Ecasound::Flow;
+use Getopt::Std;
 
 ### Option Processing ###
 use vars qw(%opts $session_name $debug);
-getopts('mceg', \%opts); 
-$opts{e}++;
-$session_name = 'paul_brocante';
+@ARGV=qw(-g -m -e paul_brocante);
+getopts('mcegsd', \%opts); 
+# d: wav_dir
+# c: create session
+# g: gui mode
+# m: don't load state info
+# e: don't load static effects data
+$session_name = shift;
 $debug and print "session name: $session_name\n";
-&prepare;
-&loopg;
+
+#sub hello {print "superclass hello\n"};
+#sub hello {print "make a window\n";}
+#sub hello {print "hello world!\n"}
+my $ui = Audio::Ecasound::Flow::UI->new;
+is ($ui->hello, "superclass hello", " UI->hello");
+my $tui = Audio::Ecasound::UI::Flow::Textual->new;
+is ($tui->hello, "hello world!", " UI::Text->hello");
+my $gui = UI::Graphical->new;
+is ($gui->hello, "make a window", " UI::Graphical->hello");
+ok ($ui->prepare);
+ok ($ui->loop);
+
+#$ui->loop;
+#&prepare;
+#&loopg;
+
+
 
 ok(1);
 ok(1);
