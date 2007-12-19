@@ -1,7 +1,3 @@
-# TO DO:
-#
-#  intersection of *_vars and our( ) list
-#
 use 5.008;
 use strict qw(vars);
 use warnings;
@@ -949,18 +945,25 @@ sub session_config {
 	my $config = join_path( &session_dir, &config_file );
 	-f $config and io($config)->all;
 }
-sub config { strip_blank_lines(
-				strip_comments(
+sub config { #strip_blank_lines(
+			#	strip_comments(
 					&session_config or &global_config or $default 
-			 ))}
+			# ))
+			 
+			 }
 
 sub read_config {
 	$debug2 and print "&read_config\n";
+	#print &config; exit;
 	%cfg = %{  $yr->read(config())  };
+	#print yaml_out( $cfg{abbreviations}); exit;
+	*subst = \%{ $cfg{abbreviations} }; # alias
+	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
+	#print yaml_out( \%cfg ); exit;
+	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_vars( \%cfg, @global_vars, @config_vars); 
-	*subst = \%abbreviations; # alias
 
 }
 sub walk_tree {
@@ -3376,7 +3379,7 @@ sub yaml_out {
 		if $type !~ /HASH|ARRAY/;
 #	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
 	my $output;
-#    $yw->write( $data_ref, \$output ); # XXX broken
+    $yw->write( $data_ref, \$output ); 
 	$output;
 }
 sub yaml_in {

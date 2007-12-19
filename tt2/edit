@@ -1,3 +1,3 @@
 cd ~/build/flow/tt2
-vim ~/.bashrc ~/build/flow/lib/Audio/Ecasound/e_obj2 Flow.p Flow/Grammar.p testy
+vim ~/.bashrc Flow.p Flow/Grammar.p ../t/1.t config
 

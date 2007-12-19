@@ -5,7 +5,8 @@
 
 # change 'tests => 1' to 'tests => last_test_to_print';
 
-use Test::More tests => 1;
+use Test::More qw(no_plan);
+# tests => 3;
 BEGIN { use_ok('Audio::Ecasound::Flow') };
 
 #########################
@@ -14,7 +15,7 @@ use Getopt::Std;
 
 ### Option Processing ###
 use vars qw(%opts $session_name $debug);
-@ARGV=qw(-g -m -e paul_brocante);
+@ARGV = qw(-g -m -e paul_brocante);
 getopts('mcegsd', \%opts); 
 # d: wav_dir
 # c: create session
@@ -27,10 +28,16 @@ $debug and print "session name: $session_name\n";
 #sub hello {print "superclass hello\n"};
 #sub hello {print "make a window\n";}
 #sub hello {print "hello world!\n"}
-my $gui = Audio::Ecasound::Flow::UI::Graphical->new;
-is ($gui->hello, "make a window", " ::UI::Graphical->hello");
-#my $gui2 = Audio::Ecasound::Flow::UI->new("tk");
-#is ($gui2->hello, "make a window", " ::UI::Graphical->hello");
+my $gui = Audio::Ecasound::Flow::UI::Graphical->new();
+is( defined $gui,  1,  'new() returned something' );
+is( $gui->isa('Audio::Ecasound::Flow::UI'),1,    "  and it's the right class" );
+$gui->prepare; 
+$gui->loop;
+#is( defined $gui, 1,  'new() returned something' );
+#is( $gui->isa('Audio::Ecasound::Flow::UI'), 1,"  and it's the right class" );
+#is ($gui->hello, "make a window", " ::UI::Graphical->hello");
+my $gui2 = Audio::Ecasound::Flow::UI->new("tk");
+is ($gui2->hello, "make a window", " ::UI::Graphical->hello");
 #my $tui = Audio::Ecasound::Flow::UI::Text->new;
 #is ($tui->hello, "hello world!", " ::UI::Text->hello");
 #ok ($ui->prepare);
