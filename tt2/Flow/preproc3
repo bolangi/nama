@@ -1,0 +1,92 @@
+#!/usr/bin/env perl
+use Text::Template;
+use Getopt::Std;
+use IO::All;
+use File::Find;
+use strict;
+use Cwd;
+
+my(
+	$build_dir, 
+	$exta ,
+	$extb ,
+	$stub ,
+	$template ,
+	$contents,
+	$input,
+	$output,
+	$filename,
+	);
+
+
+my $filename = shift;
+# create Template object
+my $template = Text::Template->new(
+	TYPE => 'FILE',
+	SOURCE => $filename,
+	DELIMITERS => [ qw( [% %] ) ],
+);
+my $hash = {name => 'goblin' };
+my $text = $template->fill_in(HASH=>$hash);
+print $text;
+
+__END__
+
+my $debug = 1;
+unshift @ARGV, '/home/jroth/build/flow/tt2';
+$build_dir = shift;
+($exta, $extb) = ( "p" => "pm");
+&preprocess;# ( $build_dir, $exta, $extb, $dispatcher);
+
+sub preprocess {
+	# my ($build_dir, $exta, $extb, $dispatcher) = @_; # global
+	$debug and print "dir: $build_dir, exta: $exta, extb: $extb, $/;
+	find(\&wanted, $build_dir);
+}
+
+
+sub wanted { 
+	return if grep { $File::Find::name =~ m(/$_/) } 
+		map{"/$_/"}qw(.git .ttree blib lib try t);
+	my $re = qr/(\w+)\.$exta$/;
+	$File::Find::name =~ /$re/ or return;
+	$stub = $1;
+	#return unless $stub eq "Flow";
+	$debug and print $File::Find::name, $/; 
+	$debug and print "stub: $stub\n";
+	my $input =  "$stub.$exta";
+	#$input =  $File::Find::name;
+	my $output = "$stub.$extb";
+}
+sub grammar {
+
+	$debug and print "grammar replace\n";
+
+	my $list = io('commands')->all;
+
+	my $body = io('grammar_body')->all;
+	$body =~ s/::/Audio::Ecasound::Flow::/g;
+
+	my (@abbrevs, @stubs, @commands);
+
+	map{
+
+		my @parts = my @all_parts = split " ", $_;
+		my $full = shift @parts;
+		my @short = @parts;
+		push @abbrevs,	"_$full: " . join (" | " , @all_parts);
+		push @stubs,   	"$full: _$full {}";
+		push @commands,	"command: $full";
+
+	} split "\n", $list;
+
+	my $command_headers = join "\n", @commands, @abbrevs, @stubs ;
+
+	{ 
+		commands 	 => $command_headers,
+		grammar_body => $body,
+	};
+	
+}
+__END__
+

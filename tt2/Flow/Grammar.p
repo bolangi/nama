@@ -13,7 +13,7 @@ $RD_HINT = 1;
 
 $grammar = q(
 
-[% PERL %]
+[% 
 
 	use IO::All;
 
@@ -34,9 +34,9 @@ $grammar = q(
 
 	} split "\n", $list;
 
-	print join "\n", @commands, @abbrevs, @stubs, $body ;
+	join "\n", @commands, @abbrevs, @stubs, $body ;
 
-[% END %]
+%]
 
 
 );
