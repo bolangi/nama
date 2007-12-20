@@ -1,19 +1,20 @@
 #!/usr/bin/env perl
-use strict;
 use lib '/home/jroth/build/flow/lib';
 use Getopt::Std;
 use Audio::Ecasound::Flow;
 
+package Audio::Ecasound::Flow::UI;
+$debug =1;
+$debug2 =1;
 ### Option Processing ###
 use vars qw(%opts $session_name $debug);
-getopts('mcegs', \%opts); 
+@ARGV = qw(-g -m -e paul_brocante);
+getopts('mcdeg', \%opts); 
 $session_name = shift;
 $debug and print "session name: $session_name\n";
-$opts{g}++; # we still need this
-$opts{s}++; # don't load static effects data
 my $ui = Audio::Ecasound::Flow::UI::Graphical->new();
 $ui->prepare;
-#$ui->loop;
+$ui->loop;
 #&prepare;
 #&loopg;
 

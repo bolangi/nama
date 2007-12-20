@@ -25,6 +25,7 @@ our (
 					# in a project directory, or a 
 					# master in .ecmd root.
 					
+	$oids,			# serialized (YAML) form of @oids
 	$gui,			# still here!
 
 	$raw_to_disk_format,

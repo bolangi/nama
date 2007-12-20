@@ -21,9 +21,9 @@ devices:
     input_format: cd-stereo
     output_format: cd-stereo
 ecasound_globals: "-B auto"
-mix-to-disk_format: cd-stereo
+mix_to_disk_format: cd-stereo
 mixer_out_format: cd-stereo
-raw-to-disk_format: cd-mono
+raw_to_disk_format: cd-mono
 mixname: mix
 ladspa_sample_rate: frequency
 unit: 1 				

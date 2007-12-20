@@ -36,8 +36,10 @@ $default = <<'FALLBACK_CONFIG';
 [% INSERT config %] 
 FALLBACK_CONFIG
 
-### some file and directory stuff declared as subroutines
-
+# the following template are used to generate chain setups.
+$oids = <<'TEMPLATES';
+[% INSERT templates %]
+TEMPLATES
 
 ## Load my modules
 
@@ -49,10 +51,9 @@ use Audio::Ecasound::Flow::Tkeca_effects; # Some effects data
 
 # Preloaded methods go here.
 package Audio::Ecasound::Flow::UI;
-use Carp;
 our @ISA; # superclass, has no ancestor
-
 use Object::Tiny qw{mode};
+use Carp;
 
 sub new { my $class = shift; 
 			my $mode = shift; # Text or Graphical
@@ -102,6 +103,8 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
+	print &config; exit;
+	shello();
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
@@ -293,6 +296,7 @@ sub transport_gui {
 						 );
 }
 sub time_gui {
+	$debug2 and print "&time_gui\n";
 
 	my $time_label = $clock_frame->Label(
 		-text => 'TIME', 
@@ -827,7 +831,6 @@ sub track_gui { # nearly 300 lines!
 
 	
 }
-1;
 
 package Audio::Ecasound::Flow::UI::Text;
 use Carp;
@@ -870,19 +873,8 @@ sub loop {
 	}
 }
 
-1;
-
-# BROKEN effects data store/retrieve, fixed! still broken
-# BROKEN storing @ladspa_sorted
-# BROKEN state recall in text mode 
-# BROKEN gui mode... fixed!  broken
-#
-# BROKEN constants fixed! yes
-# BROKEN load session loads after dig_ruins,
-# and wipes out config information.
-# Grammar expanded
-
 package Audio::Ecasound::Flow::UI;
+our @ISA = '';
 use Carp;
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
@@ -912,10 +904,9 @@ sub prepare {  # actions begin here
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
 
-	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e}; 
-	"ok";
+	new_engine();
 }
 =comment
 =cut
@@ -964,6 +955,7 @@ sub read_config {
 	#print yaml_out( \%cfg ); exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_vars( \%cfg, @global_vars, @config_vars); 
+	$mixname eq 'mix' or die" bad mixname: $mixname";
 
 }
 sub walk_tree {
@@ -975,7 +967,7 @@ sub walk_tree {
 sub substitute{
 	my ($parent, $key)  = @_;
 	my $val = $parent->{$key};
-	$debug and print qq(key: $key val: $val\n);
+	#$debug and print qq(key: $key val: $val\n);
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
@@ -1985,12 +1977,15 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_oids {
-# XXX
+
+
+@oids = @{ $yr->read($oids) };
+
 # my $debug = 1;
 
 # these are templates for building chains
 
-my $null_id = undef;
+#my $null_id = undef;
 
 $debug and print "rec_setup $oids[-1]->{input}\n";
 
@@ -3332,21 +3327,24 @@ sub assign_vars {
 
 	## pass a hash_ref to the assigner
 
-	or  ref $source and $ref = $source;
+	or ref $source and $ref = $source;
 
+#print join $/, "VARIABLES", @vars, '';
+croak "expected hash" if ref $ref =~ /HASH/;
+#exit;
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string = 
-		  $_ 
-		. q( = )
-		. $sigil
-		. q( { $ref->{ )
-		. $identifier
-		. q( } } if defined $ref->{ )
-		. $identifier
-		. q( }; ) ;
-
-		eval $eval_string or carp "failed to eval $eval_string: $!\n";
+		 my $eval = $_;
+		$eval .= q( = );
+		$eval .= $sigil . q({ ) if $sigil ne '$';
+		$eval .= q($ref->{ );
+		$eval .= $identifier;
+		$eval .= q( } );
+		$eval .= qw(} ) if $sigil ne '$';
+		$eval .= q(if defined $ref->{ );
+		$eval .= $identifier;
+		$eval .= q( }; ) ;
+		eval $eval or carp "failed to eval $eval: $!\n";
 	} @vars;
 	$ref;
 }
