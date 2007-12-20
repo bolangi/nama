@@ -1,4 +1,0 @@
-	my $time_label = $clock_frame->Label(
-	$clock = $clock_frame->Label(
-	my $length_label = $clock_frame->Label(
-	$setup_length = $clock_frame->Label(
