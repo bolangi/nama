@@ -16,11 +16,15 @@ my(
 	$input,
 	$output,
 	$filename,
+	$new_root,
 	);
 
 my $debug = 1;
 #unshift @ARGV, '/home/jroth/build/flow';
 $build_dir = shift;
+my $r = shift;
+my $new_root = $r ? $r : "UI";
+
 ($exta, $extb) = ( "p" => "pm");
 
 #my @args = @ARGV[1..$#ARGV];
@@ -42,7 +46,6 @@ sub process {
 	);
 	my $hash = {name => 'goblin' };
 	my $text = $template->fill_in(HASH=>$hash);
-	my $new_root = "UI";
 	my $rooted_text = &bestow_module_root($new_root,$text);
 	
 

@@ -23,33 +23,32 @@ map { print "input ", $i++,": ", $_, $/;
 
 
 sub subst {
-
 	my $text = shift;
 	# Substitution 1: symbols containing a sigil
 
-		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/g;
+		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/mg;
 
 	# Substitution 2: package declarations (two steps)
 
-		$text =~ s/^(\s*package\s*)(::)/$1$new_root$2/g;
-		$text =~ s/^(\s*package.*)(::)(\s*;)/$1$3/g;
+		$text =~ s/^(\s*package\s*)(::)/$1$new_root$2/mg;
+		$text =~ s/^(\s*package.*)(::)(\s*;)/$1$3/mg;
 
 	# Substitution 3: @ISA (presumes 'our')
 
 		#/^(\s*our\s+\@ISA.*\W)(::)(\W)/ and print "match 3.1"; #$1$new_root::$3/g;
-		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/g;
-		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/g;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/mg;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg;
 
 	# Substitution 4: method calls ::->
 
-		$text =~ s/(\W|^)(::->)/$1$new_root->/g;
+		$text =~ s/(\W|^)(::->)/$1$new_root->/mg;
 	  
 	# Substitution 5: method calls ::Graphical->refresh;
  							 	#  ::Text->loop;
 	
-		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/g;
+		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/mg;
 	
-	
+
 
 $text;
 }

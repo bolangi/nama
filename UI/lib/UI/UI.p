@@ -14,9 +14,9 @@ sub hello {print "hello world!\n";}
 my $ui = ::->new;
 $ui->hello;
 
-__END__
 my $tui = ::Text->new;
 $tui->hello;
 
 my $gui = ::Graphical->new;
 $gui->hello;
+__END__
