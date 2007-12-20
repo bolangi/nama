@@ -1,0 +1,55 @@
+my $new_root = 'UI';
+my @corpa = split $/,<<'PKG';
+package ::;
+package :: ;
+package ::Text;
+package ::Text ;
+package Audio::Ecasound;
+$::RD::DATA 
+ ::Text->loop;
+::Text->loop;
+::->prepare ;
+ ::->prepare ;
+(::->start);
+our  @ISA = "::";
+our  @ISA = " :: ";
+our  @ISA = ":: ";
+our  @ISA = " ::";
+our  @ISA = " ::Text";
+PKG
+my $i;
+map { print "input ", $i++,": ", $_, $/;
+	  print "output"," : ", &subst($_), $/, $/;} @corpa;
+
+
+sub subst {
+
+	my $text = shift;
+	# Substitution 1: symbols containing a sigil
+
+		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/g;
+
+	# Substitution 2: package declarations (two steps)
+
+		$text =~ s/^(\s*package\s*)(::)/$1$new_root$2/g;
+		$text =~ s/^(\s*package.*)(::)(\s*;)/$1$3/g;
+
+	# Substitution 3: @ISA (presumes 'our')
+
+		#/^(\s*our\s+\@ISA.*\W)(::)(\W)/ and print "match 3.1"; #$1$new_root::$3/g;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/g;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/g;
+
+	# Substitution 4: method calls ::->
+
+		$text =~ s/(\W|^)(::->)/$1$new_root->/g;
+	  
+	# Substitution 5: method calls ::Graphical->refresh;
+ 							 	#  ::Text->loop;
+	
+		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/g;
+	
+	
+
+$text;
+}

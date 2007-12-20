@@ -1,0 +1,147 @@
+#!/usr/bin/env perl
+use Text::Template;
+use Getopt::Std;
+use IO::All;
+use File::Find;
+use strict;
+use Cwd;
+
+my(
+	$build_dir, 
+	$exta ,
+	$extb ,
+	$stub ,
+	$template ,
+	$contents,
+	$input,
+	$output,
+	$filename,
+	);
+
+my $debug = 1;
+#unshift @ARGV, '/home/jroth/build/flow';
+$build_dir = shift;
+($exta, $extb) = ( "p" => "pm");
+
+#my @args = @ARGV[1..$#ARGV];
+#&process( qw(Flow.p Flow.p.out));
+&find_and_process($build_dir, $exta, $extb); 
+
+sub process {
+	my ($file_in, $file_out) = @_;
+	$debug and print "dir: ", getcwd, ", in: $file_in, out: $file_out\n";
+	#return;
+
+	#I'll assume I'm in the correct directory
+
+	# create Template object
+	my $template = Text::Template->new(
+		TYPE => 'FILE',
+		SOURCE => $file_in,
+		DELIMITERS => [ qw( [% %] ) ],
+	);
+	my $hash = {name => 'goblin' };
+	my $text = $template->fill_in(HASH=>$hash);
+	my $new_root = "UI";
+	my $rooted_text = &bestow_module_root($new_root,$text);
+	
+
+# we are going to standardize on using :: as the 
+# root package name, so that coding will be
+# separate from the final place in the hierarchy.
+# ::Text, ::Graphical->new will be translated
+# by the preprocessor substitutions below,
+# performed __after__ all the fragments have
+# been substituted.
+
+	if ( $file_out ) { $rooted_text > io($file_out); }
+	else { print $rooted_text }
+}
+sub bestow_module_root {
+	my ($new_root, $text) = @_;
+
+	# Substitution 1: symbols containing a sigil
+
+		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/mg;
+
+	# Substitution 2: package declarations (two steps)
+
+		$text =~ s/^(\s*package\s*)(::)/$1$new_root$2/mg;
+		$text =~ s/^(\s*package.*)(::)(\s*;)/$1$3/mg;
+
+	# Substitution 3: @ISA (presumes 'our')
+
+		#/^(\s*our\s+\@ISA.*\W)(::)(\W)/ and print "match 3.1"; #$1$new_root::$3/g;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/mg;
+		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg;
+
+	# Substitution 4: method calls ::->
+
+		$text =~ s/(\W|^)(::->)/$1$new_root->/mg;
+	  
+	# Substitution 5: method calls ::Graphical->refresh;
+ 							 	#  ::Text->loop;
+	
+		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/mg;
+	
+$text;
+}
+
+
+sub find_and_process {
+	my ($build_dir, $exta, $extb) = @_; # already defined
+	$debug and print "dir: $build_dir, exta: $exta, extb: $extb", $/;
+	find(\&wanted, $build_dir);
+}
+
+
+sub wanted { 
+	return if grep { $File::Find::name =~ m(/$_/) } 
+		map{"/$_/"}qw(.git .ttree blib lib try t);
+	my $re = qr/(\w+)\.$exta$/;
+	$File::Find::name =~ /$re/ or return;
+	$stub = $1;
+	#return unless $stub eq "Flow";
+	$debug and print $File::Find::name, $/; 
+	$debug and print "stub: $stub\n";
+	$debug and print "cwd: ", getcwd, $/;
+	my $input =  "$stub.$exta";
+	my $output = "$stub.$extb";
+
+	## now to process
+	
+	&process($input, $output);
+	
+}
+sub grammar {
+
+	$debug and print "grammar replace\n";
+
+	my $list = io('commands')->all;
+
+	my $body = io('grammar_body')->all;
+	$body =~ s/::/Audio::Ecasound::Flow::/g;
+
+	my (@abbrevs, @stubs, @commands);
+
+	map{
+
+		my @parts = my @all_parts = split " ", $_;
+		my $full = shift @parts;
+		my @short = @parts;
+		push @abbrevs,	"_$full: " . join (" | " , @all_parts);
+		push @stubs,   	"$full: _$full {}";
+		push @commands,	"command: $full";
+
+	} split "\n", $list;
+
+	my $command_headers = join "\n", @commands, @abbrevs, @stubs ;
+
+	{ 
+		commands 	 => $command_headers,
+		grammar_body => $body,
+	};
+	
+}
+__END__
+

@@ -1,0 +1,29 @@
+package UI;
+our @ISA;
+use Object::Tiny qw(dummy);
+sub hello {print "superclass hello\n"};
+
+package UI::Graphical;
+our @ISA = 'UI';
+sub hello {print "make a window\n";}
+
+package UI::Text;
+our @ISA = 'UI';
+sub hello {print "hello world!\n"}
+
+my $ui=UI->new;
+$ui->hello;
+$ui=UI::Graphical->new;
+$ui->hello;
+$ui->how;
+
+$ui=UI::Text->new;
+$ui->hello;
+$ui->how;
+
+bless $ui, UI;
+$ui->hello;
+$ui->how;
+package UI;
+
+sub how {print "how are you?"}
