@@ -24,8 +24,8 @@ $build_dir = shift;
 ($exta, $extb) = ( "p" => "pm");
 
 #my @args = @ARGV[1..$#ARGV];
-&process( qw(Flow.p Flow.p.out));
-#&find_and_process($build_dir, $exta, $extb); 
+#&process( qw(Flow.p Flow.p.out));
+&find_and_process($build_dir, $exta, $extb); 
 
 sub process {
 	my ($file_in, $file_out) = @_;

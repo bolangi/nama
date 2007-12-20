@@ -1,0 +1,6 @@
+Revision history for Perl extension Audio::Ecasound::Flow.
+
+0.01  Sat Dec  8 11:46:57 2007
+	- original version; created by h2xs 1.22 with options
+		-AXc -n Audio::Ecasound::Flow
+

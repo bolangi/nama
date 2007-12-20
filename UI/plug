@@ -1,0 +1,101 @@
+Hi Eca-Tamers and Eca-Lovers,
+
+I have continued to work on providing high-level functions
+for Ecasound.
+
+First of all, I'd like to comment how much my working habits
+have transformed by using a CMS. I saw Linus' then Randal
+Schwartz's  talks on Git at Google. They easily convinced
+me how neat it is.
+
+These new abilities have completely blown my mind, changed
+my attitude to experimentation, leaving me free to explore
+safely in various speculative ways, and then easily
+reconcile, merge, and otherwise manage the different
+changesets that develop along the way.
+
+Git is not only easy to use. It is so fast that I've decided
+to use it to manage the state information for all of the
+setups that the software will generate. This will be
+easy, because the state information will be serialized
+as text (YAML) allowing the changesets to be stored
+as for diffs of source code, which is what Git does.
+
+Now about introducing OO constructs.
+
+Although I've used OO toolkits such as Tk, I'd written
+programs up to now in straight procedural style. I hit a
+limit when I began contemplating a choice of user interface
+modes. There are probably thirty locations in my code (about
+4k lines) that would need a conditional expression such as:
+
+	refresh_track_display if $gui.
+
+So I am introducing my first class hierarchy. 
+
+Procedural code is killed by sprouting conditionals.  Object
+code can handle the distinction with these simple (if
+scruffily perlish) declarations.
+
+	package UI;
+	use Object::Tiny qw(dummy);
+	sub hello {print "superclass hello\n"};
+
+	package UI::Graphical;
+	our @ISA = 'UI';
+	sub hello {print "make a window\n";}
+	1;
+	package UI::Text;
+	our @ISA = 'UI';
+	sub hello {print "hello world!\n"}
+
+Then I can test it:
+
+	my $tui = UI::Text->new;
+
+	$tui->hello;
+
+	my $gui = UI::Graphical->new;
+
+	$gui->hello;
+
+	my $ui = UI->new;
+
+	$ui->hello;
+
+The user will do something like this to start the program,
+
+my $ui = UI->new("Graphical")->loop;
+
+I will be separating my subroutines into base class and
+derived classes, add in some stubs for example, sub refresh
+{}; in the UI class for the Text class to inherit.
+
+All the really orderly code procedural code doesn't need any
+objects. It is the messy places that need them, and classes
+elegantly solve this problem of handling special cases.
+
+Another big advance from me is building the program as a
+Perl module. This morning I got my first test to pass.
+
+I'm still learning how makefiles work.
+
+I've avoided the C preprocessor and similar, using Perl's
+Template Toolkit to help me rearrange the source code using 
+something like 
+
+	[% INCLUDE grammar_body %]
+
+to break out that part of my code.
+
+It is all very elegant.
+
+For the command line grammar, I'm using Parse::RecDescent,
+with Template Toolkit to generate some of the repetitive
+sections of the grammar code.
+
+I have to say it is exhiliarating to have all these heavy
+weight computer-science tools available to me.
+
+Regards to all.
+
