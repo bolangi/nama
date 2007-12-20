@@ -1,5 +1,5 @@
 use Carp;
-our @ISA = 'Audio::Ecasound::Flow::UI';
+our @ISA = '::';
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub hello {my $h = "hello world!"; print ($h); $h ;}
 sub loop {

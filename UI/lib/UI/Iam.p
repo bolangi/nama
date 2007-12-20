@@ -1,4 +1,4 @@
-package ::UI;
+package ::;
 
 use vars qw(%iam_cmd);
 my %replace = qw(

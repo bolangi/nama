@@ -2,7 +2,10 @@ use 5.008;
 use strict qw(vars);
 use warnings;
 
-package ::UI;
+use lib "~/build/flow/UI";
+use lib "~/build/flow/UI/lib";
+use lib "~/build/flow/UI/lib/UI";
+package ::;
 
 use Carp;
 use IO::All;
@@ -43,7 +46,7 @@ TEMPLATES
 
 ##  Grammar.p, source for Grammar.pm
 
-package ::UI;
+package ::;
 
 ### COMMAND LINE PARSER 
 
@@ -66,14 +69,13 @@ $grammar = q(
 
 ## Load my modules
 
-use ::Grammar;	# Command line grammar
 use ::Iam;    	# IAM command support
 use ::Tkeca_effects; # Some effects data
 
 # CLASS DEFINITIONS
 
 # Preloaded methods go here.
-package ::UI;
+package ::;
 our @ISA; # superclass, has no ancestor
 use Object::Tiny qw{mode};
 use Carp;
@@ -85,10 +87,10 @@ sub new { my $class = shift;
 		or  lc $mode eq 'graphic'
 		or  lc $mode eq 'graphical'
 		and return bless { @_ },
-			::UI::Graphical 
+			::Graphical 
 		or  lc $mode eq 'text'
 		and return bless { @_ },
-			::UI::Text
+			::Text
 }
 
 =cut
@@ -113,17 +115,17 @@ sub destroy_widgets {}
 
 ## The following methods belong to the ancestor UI class. 
 
-package ::UI;
+package ::;
 
 [% qx(cat ./UI_methods.pl ) %]
 
 ## The following methods belong to the Graphical interface class
 
-package ::UI::Graphical;
+package ::Graphical;
 
 [% qx(cat ./Graphical_methods.pl ) %]
 
-package ::UI::Text;
+package ::Text;
 
 ## The following methods belong to the Text interface class
 
@@ -135,18 +137,18 @@ __END__
 
 =head1 NAME
 
-::UI - Perl extensions for multitrack audio
+:: - Perl extensions for multitrack audio
 recording and processing by Ecasound
 
 =head1 SYNOPSIS
 
   use Audio::Ecasound::Flow;
 
-  my $ui = ::UI->new("tk");
+  my $ui = ::->new("tk");
 
 		or
 
-  my $ui = ::UI->new("text");
+  my $ui = ::->new("text");
 
 	my %options = ( 
 

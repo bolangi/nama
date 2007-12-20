@@ -3,11 +3,11 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 #
-use lib 't/lib';
+use lib 'lib';
 my $module_name = 'UI';
 my $module = $module_name;
 my ($dir, $name);
-($name = $module)   =~ s/.*::(\w+)/$1.pm/;
+($name = $module)   =~ s/.*?(::)?(\w+)/$2.pm/;
 ($dir = $module)    =~ s/(.*)::(\w+)/$1/;
 ($dir_slash = $dir) =~ s(::)(/)g;
 $dir 				=~ s/::/-/g;

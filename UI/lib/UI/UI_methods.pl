@@ -1,5 +1,4 @@
-
-package Audio::Ecasound::Flow::UI;
+package ::;
 use Carp;
 
 sub config_file { "config" }
