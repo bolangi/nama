@@ -1,7 +1,4 @@
-use Carp;
-our @ISA = '::';
-sub new { my $class = shift; return bless { @_ }, $class; }
-sub hello {my $h = "make a window"; print ($h); $h ;}
+#sub new { my $class = shift; return bless { @_ }, $class; }
 
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };

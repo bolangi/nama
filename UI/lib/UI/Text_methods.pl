@@ -1,7 +1,4 @@
-use Carp;
-our @ISA = '::';
-sub new { my $class = shift; return bless { @_ }, $class; }
-sub hello {my $h = "hello world!"; print ($h); $h ;}
+#sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;

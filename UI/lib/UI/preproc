@@ -86,6 +86,12 @@ sub bestow_module_root {
  							 	#  ::Text->loop;
 	
 		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/mg;
+
+	# Substitution 6: use ::Module;
+	
+		$text =~ s/^(\s*use\s+)(::)(\W)/$1$new_root$3/mg;
+		$text =~
+		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 	
 $text;
 }

@@ -16,6 +16,10 @@ our  @ISA = " :: ";
 our  @ISA = ":: ";
 our  @ISA = " ::";
 our  @ISA = " ::Text";
+use ::Text;
+use ::Text::Very::Unusual;
+ use  ::;
+
 PKG
 my $i;
 map { print "input ", $i++,": ", $_, $/;
@@ -39,16 +43,20 @@ sub subst {
 		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/mg;
 		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg;
 
-	# Substitution 4: method calls ::->
+	# Substitution 4: method calls 1) ::->
 
 		$text =~ s/(\W|^)(::->)/$1$new_root->/mg;
 	  
-	# Substitution 5: method calls ::Graphical->refresh;
+	# Substitution 5: method calls 2) ::Graphical->refresh;
  							 	#  ::Text->loop;
 	
 		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/mg;
-	
 
+	# Substitution 6: use ::Module;
+	
+		$text =~ s/^(\s*use\s+)(::)(\W)/$1$new_root$3/mg;
+		$text =~
+		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
 $text;
 }

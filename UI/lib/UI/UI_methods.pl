@@ -29,9 +29,9 @@ sub prepare {  # actions begin here
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
 
+	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e}; 
-	new_engine();
 }
 =comment
 =cut
