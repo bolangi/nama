@@ -10,8 +10,6 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	print &config; exit;
-	shello();
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }

@@ -673,9 +673,8 @@ sub prepare {  # actions begin here
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e}; 
+	1;	
 }
-=comment
-=cut
 #sub prepare { print "hello preparer!!" }
 	
 sub eval_iam {
@@ -3241,8 +3240,6 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	print &config; exit;
-	shello();
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }

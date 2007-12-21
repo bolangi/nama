@@ -32,9 +32,8 @@ sub prepare {  # actions begin here
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e}; 
+	1;	
 }
-=comment
-=cut
 #sub prepare { print "hello preparer!!" }
 	
 sub eval_iam {
@@ -1103,8 +1102,12 @@ sub output_format {
 
 sub initialize_oids {
 
-
 @oids = @{ $yr->read($oids) };
+
+map  { $_->{pre_output} = \&{ $_ } }
+grep { $_->{pre_output} =~ /&/} @oids; 
+map  { $_->{post_input} = \&{ $_ } }
+grep { $_->{post_input} =~ /&/} @oids; 
 
 # my $debug = 1;
 
