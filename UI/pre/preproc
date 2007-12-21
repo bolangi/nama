@@ -7,29 +7,38 @@ use strict;
 use Cwd;
 
 my(
-	$build_dir, 
+	%opts,
+	$source_dir,
+	$target_dir,
+	$new_root,
+	$file,
 	$exta ,
 	$extb ,
 	$stub ,
 	$template ,
-	$contents,
-	$input,
-	$output,
 	$filename,
-	$new_root,
 	);
 
 my $debug = 1;
-#unshift @ARGV, '/home/jroth/build/flow';
-$build_dir = shift;
-my $r = shift;
-my $new_root = $r ? $r : "UI";
+getopts('s:t:f:r:a:b:', \%opts);
+$source_dir = $opts{s} ? $opts{s} : $ENV{UI}. "/pre";
+$new_root = $opts{r} ? $opts{r} : 'UI';
+$target_dir = $opts{t} ? $opts{t} : "$ENV{UI}/lib/UI";
+$exta = $opts{a} ? $opts{a} :  "p";
+$extb = $opts{b} ? $opts{b} :  "pm";
+$file = $opts{f};
 
-($exta, $extb) = ( "p" => "pm");
-
-#my @args = @ARGV[1..$#ARGV];
-#&process( qw(Flow.p Flow.p.out));
-&find_and_process($build_dir, $exta, $extb); 
+$debug and print <<PRINT;
+source dir:   $source_dir
+target dir:   $target_dir
+module root:  $new_root
+exta:         $exta
+extb:         $extb
+file:         $file
+PRINT
+die "no source directory: $source_dir" unless -d $source_dir;
+die "no target directory: $target_dir" unless -d $source_dir;
+&find_and_process($source_dir, $target_dir, $exta, $extb); 
 
 sub process {
 	my ($file_in, $file_out) = @_;
@@ -98,9 +107,8 @@ $text;
 
 
 sub find_and_process {
-	my ($build_dir, $exta, $extb) = @_; # already defined
-	$debug and print "dir: $build_dir, exta: $exta, extb: $extb", $/;
-	find(\&wanted, $build_dir);
+	my ($source_dir, $target_dir, $exta, $extb) = @_; 
+	find(\&wanted, $source_dir);
 }
 
 
@@ -115,7 +123,7 @@ sub wanted {
 	$debug and print "stub: $stub\n";
 	$debug and print "cwd: ", getcwd, $/;
 	my $input =  "$stub.$exta";
-	my $output = "$stub.$extb";
+	my $output = "$target_dir/$stub.$extb";
 
 	## now to process
 	

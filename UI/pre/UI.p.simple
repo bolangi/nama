@@ -1,0 +1,42 @@
+package ::;
+our @ISA;
+use Object::Tiny qw(mode);
+sub hello {print "superclass hello\n"};
+=comment
+sub new { my $class = shift; 
+			my $mode = shift; # Text or Graphical
+			lc $mode eq 'tk' 
+		or	lc $mode eq 'gui'
+		or  lc $mode eq 'graphic'
+		or  lc $mode eq 'graphical'
+		and return bless { @_ },
+			::Graphical 
+		or  lc $mode eq 'text'
+		and return bless { @_ },
+			::Text
+}
+
+=cut
+
+package ::Graphical;
+our @ISA = '::';
+sub hello {print "make a window\n";}
+
+package ::Text;
+our @ISA = '::';
+sub hello {print "hello world!\n";}
+
+my $ui = ::->new;
+$ui->hello;
+
+my $tui = ::Text->new;
+$tui->hello;
+
+my $gui = ::Graphical->new;
+$gui->hello;
+
+package ::;
+sub how { print "how are you?" }
+
+$gui->how;
+__END__

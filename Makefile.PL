@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 #
 use lib 'lib';
-my $module = 'UI';
+my $module = 'Audio::Ecasound::Flow';
 my ($dir, $name);
 ($name = $module)   =~ s/.*::(\w+)/$1.pm/;
 ($dir = $module)    =~ s/(.*)::(\w+)/$1/;

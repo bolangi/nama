@@ -4,13 +4,16 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 #
 use lib 'lib';
-my $module_name = 'UI';
-my $module = $module_name;
+my $module = 'UI';
 my ($dir, $name);
-($name = $module)   =~ s/.*?(::)?(\w+)/$2.pm/;
-($dir = $module)    =~ s/(.*)::(\w+)/$1/;
+($name = $module)   =~ s/(\w+::)*(\w+)/$2.pm/;
+($dir = $module)    =~ s/(.+)(::)(\w+)/$1/;
+#$dir =~ s/::$//;
 ($dir_slash = $dir) =~ s(::)(/)g;
+#$dir =~ s(::)(/)g;
+#$dir =~ s(/$)(/)g;
 $dir 				=~ s/::/-/g;
+#print "dir: $dir, dir_slash: $dir_slash, name: $name"; exit;
 
 my $from = "lib/$dir_slash/$name";
 
