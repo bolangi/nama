@@ -95,6 +95,7 @@ sub destroy_widgets {}
 package ::Graphical;
 our @ISA = '::';
 use Carp;
+use Tk;
 sub hello {"make a window";}
 
 [% qx(cat ./Graphical_methods.pl ) %]

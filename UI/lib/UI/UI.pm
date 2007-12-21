@@ -3221,6 +3221,7 @@ sub remove_spaces {
 package UI::Graphical;
 our @ISA = 'UI';
 use Carp;
+use Tk;
 sub hello {"make a window";}
 
 sub session_label_configure{ session_label_configure(@_)}
