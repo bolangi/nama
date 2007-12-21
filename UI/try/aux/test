@@ -1,0 +1,60 @@
+my @vars = 
+grep{ s/^\s+//; s/(\S+).*$/$1/; !/^\s*$/} split "\n",
+		q( 	$ecasound
+				$grammar
+				@ecmd_commands
+				%ecmd_commands 
+				$ecmd_home
+				$wav_dir 
+			 	$input_channels
+				$config
+			 	%devices
+				%opts
+			 	%oid_status
+				$clock_id
+				$use_monitor_version_for_mixdown
+			 	$select_track
+				@format_fields 
+				$session
+				$session_name 
+				$session_dir  
+				$this_wav_dir 
+				$mix_dir
+				$cop_id
+				$i
+				$t
+				%state_c
+				%state_t
+				$statestore
+				$chain_setup_file
+				@monitor
+				@record 
+				@mute
+				%track_names 
+				@effects		
+				%effect_i	
+				@ladspa_sorted
+				%effects_ladspa
+				$e
+				$last_version
+				$monitor_version
+				%cops 			
+				%copp 		
+				%e_bound
+				@marks 
+				$unit	
+				$markers_armed 
+				%old_vol   
+				$length   
+				$jack_on 
+
+				@all_chains
+				@input_chains
+				@output_chains
+
+				%take
+				@takes
+				%alias
+				%chain
+); 
+print join $/, @vars;

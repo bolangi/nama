@@ -1,0 +1,45 @@
+#!/usr/bin/env perl
+
+package UI;
+
+use Object::Tiny qw(dummy);
+
+sub hello {print "superclass hello\n"};
+
+sub create{
+	my $mode = shift; # Text or Graphical
+	croak unless $mode eq q(Text) or $mode eq q(Graphical);
+	my $class = "UI::$mode";
+	&debug and print "creating class: $class\n";
+	my $self = $$class->new;
+	return $self;
+}
+
+package UI::Graphical;
+
+@ISA = 'UI';
+
+sub hello {print "make a window\n";}
+
+package UI::Text;
+
+@ISA = 'UI';
+
+sub hello {print "hello world!\n";}
+
+my $tui = UI::Text->new;
+
+$tui->hello;
+
+my $gui = UI::Graphical->new;
+
+$gui->hello;
+
+my $ui = UI->new;
+
+$ui->hello;
+
+my $hui = UI->create("Text");
+$hui->hello;
+
+

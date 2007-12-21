@@ -1,0 +1,18 @@
+file: text-req
+-
+use strict;
+require "use_vars.pl";
+hello;
+print $a;
+---
+file: use_vars.pl
+-
+use vars qw(a);
+---
+$ perl -w test-req
+'a' is not a valid variable name at use_vars.pl line 1
+BEGIN failed--compilation aborted at use_vars.pl line 1.
+Compilation failed in require at test-req line 2.
+
+
+
