@@ -1,0 +1,1 @@
+ perl -ne 'chomp; print "sub $_ { UI:\:$_\() }", $/' UI_subs 
