@@ -1,3 +1,0 @@
-cd ~/build/flow/tt2
-vim ~/.bashrc Flow.p Flow/Grammar.p ../t/1.t config
-

@@ -1,5 +1,0 @@
-sub strip_comments {
-	map{ s/#.*$//mg; } @_;
-	@_
-} 
-print strip_comments ("$a +~ line of %code # followed by comments"); 
