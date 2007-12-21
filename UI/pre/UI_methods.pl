@@ -1104,16 +1104,13 @@ sub initialize_oids {
 
 @oids = @{ $yr->read($oids) };
 
-map  { $_->{pre_output} = \&{ $_ } }
-grep { $_->{pre_output} =~ /&/} @oids; 
-map  { $_->{post_input} = \&{ $_ } }
-grep { $_->{post_input} =~ /&/} @oids; 
-
 # my $debug = 1;
 
 # these are templates for building chains
 
-#my $null_id = undef;
+map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
+map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
+
 
 $debug and print "rec_setup $oids[-1]->{input}\n";
 
