@@ -16,6 +16,8 @@ $dir 				=~ s/::/-/g;
 #print "dir: $dir, dir_slash: $dir_slash, name: $name"; exit;
 
 my $from = "lib/$dir_slash/$name";
+print "from: $from\n";
+#my $from = $name;
 
 WriteMakefile(
     'NAME'		=> $name,

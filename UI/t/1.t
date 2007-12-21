@@ -7,7 +7,12 @@
 
 use Test::More qw(no_plan);
 # tests => 3;
-BEGIN { use_ok('Audio::Ecasound::Flow') };
+
+## Grab at anything nearby
+
+use lib qw(.. . lib lib/UI);
+
+BEGIN { use_ok('UI') };
 
 #########################
 
@@ -28,12 +33,16 @@ $debug and print "session name: $session_name\n";
 #sub hello {print "superclass hello\n"};
 #sub hello {print "make a window\n";}
 #sub hello {print "hello world!\n"}
-my $gui = UI::Graphical->new();
-is( defined $gui,  1,  'new() returned something' );
-is( $gui->isa('UI'),1,    "  and it's the right class" );
-$gui->prepare; 
+my $gui = UI::Graphical->new;
+diag("there's what HE did wrong");
+#is( "three", "four", 'new() returned something' );
+diag("here's what went wrong");
+is(defined $gui, 1, "Test instantiation" );
+is( $gui->isa('UI'),1, "Test parent class affiliation" );
+#$gui->prepare; 
+__END__
 $gui->loop;
-#is( defined $gui, 1,  'new() returned something' );
+#is( defined $gui, 6,  'new() returned something' );
 #is( $gui->isa('UI'), 1,"  and it's the right class" );
 #is ($gui->hello, "make a window", " ::UI::Graphical->hello");
 my $gui2 = UI->new("tk");

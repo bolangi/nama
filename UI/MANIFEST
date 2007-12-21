@@ -1,7 +1,7 @@
 Changes
-lib/UI/UI.pm
-lib/UI/Iam.pm
-lib/UI/Tkeca_effects.pm
+UI.pm
+Iam.pm
+Tkeca_effects.pm
 Makefile.PL
 MANIFEST
 README
