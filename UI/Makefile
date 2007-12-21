@@ -167,7 +167,8 @@ PERL_ARCHIVE =
 
 PERL_ARCHIVE_AFTER = 
 
-TO_INST_PM = lib/UI/Iam.pm \
+TO_INST_PM = lib/UI/1.t \
+	lib/UI/Iam.pm \
 	lib/UI/Tkeca_effects.pm \
 	lib/UI/UI.pm
 
@@ -176,7 +177,9 @@ PM_TO_BLIB = lib/UI/UI.pm \
 	lib/UI/Tkeca_effects.pm \
 	blib/lib/UI/Tkeca_effects.pm \
 	lib/UI/Iam.pm \
-	blib/lib/UI/Iam.pm
+	blib/lib/UI/Iam.pm \
+	lib/UI/1.t \
+	blib/lib/UI/1.t
 
 
 # --- MakeMaker tool_autosplit section:
@@ -430,6 +433,7 @@ realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
 	rm -rf $(DISTVNAME)
 	rm -f  blib/lib/UI/UI.pm blib/lib/UI/Tkeca_effects.pm blib/lib/UI/Iam.pm
+	rm -f blib/lib/UI/1.t
 	rm -rf Makefile Makefile.old
 
 
@@ -680,7 +684,7 @@ ppd:
 
 pm_to_blib: $(TO_INST_PM)
 	@$(PERLRUNINST) "-MExtUtils::Install" \
-	-e "pm_to_blib({qw{lib/UI/UI.pm blib/lib/UI/UI.pm lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm lib/UI/Iam.pm blib/lib/UI/Iam.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	-e "pm_to_blib({qw{lib/UI/UI.pm blib/lib/UI/UI.pm lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm lib/UI/Iam.pm blib/lib/UI/Iam.pm lib/UI/1.t blib/lib/UI/1.t}},'$(INST_LIB)/auto','$(PM_FILTER)')"
 	@$(TOUCH) $@
 
 # --- MakeMaker selfdocument section:

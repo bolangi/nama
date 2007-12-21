@@ -96,6 +96,11 @@ sub hello {"make a window";}
 
 [% qx(cat ./Graphical_methods.pl ) %]
 
+## We also need stubs for procedural access to subs
+## in the UI class.
+
+[% qx(cat ./UI_stubs.pl) %]
+
 ## The following methods belong to the Text interface class
 
 package ::Text;
@@ -105,22 +110,10 @@ sub hello {"hello world!";}
 
 [% qx(cat ./Text_methods.pl ) %]
 
+## We also need stubs for procedural access to subs
+## in the UI class.
 
-my $ui = ::->new;
-print $ui->hello, $/;
-
-my $tui = ::Text->new;
-print $tui->hello, $/;
-
-my $gui = ::Graphical->new;
-print $gui->hello, $/;
-
-package ::;
-sub how { "how are you?" }
-
-print $gui->how, $/;
-$gui->prepare;
-#$gui->loop;
+[% qx(cat ./UI_stubs.pl) %]
 
 
 1;
