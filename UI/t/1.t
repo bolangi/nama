@@ -39,9 +39,9 @@ diag("there's what HE did wrong");
 diag("here's what went wrong");
 is(defined $gui, 1, "Test instantiation" );
 is( $gui->isa('UI'),1, "Test parent class affiliation" );
-#$gui->prepare; 
-__END__
+$gui->prepare; 
 $gui->loop;
+__END__
 #is( defined $gui, 6,  'new() returned something' );
 #is( $gui->isa('UI'), 1,"  and it's the right class" );
 #is ($gui->hello, "make a window", " ::UI::Graphical->hello");
