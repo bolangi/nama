@@ -29,6 +29,9 @@ our $VERSION = '0.01';
 
 [% qx(cat ./var_types.pl) %]
 
+$debug2 = 1;
+$debug = 1;
+
 ## Load my modules
 
 use ::Iam;    	# IAM command support

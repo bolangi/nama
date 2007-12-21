@@ -74,7 +74,7 @@ sub bestow_module_root {
 
 	# Substitution 1: symbols containing a sigil
 
-		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/mg;
+		$text =~ s/([\%\$\@\&])(::)/$1$new_root$2/mg;
 
 	# Substitution 2: package declarations (two steps)
 

@@ -1,0 +1,10 @@
+#!/bin/sh
+UI_MAKE=~/build/flow/UI
+UI_PREPROCESS=$UI_BUILD/UI/pre
+UI_PRETEST=$UI_MAKE/lib/UI
+cd $UI_PREPROCESS
+preproc . 
+cd $UI_MAKE
+make
+cd $UI_PRETEST
+./text

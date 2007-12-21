@@ -318,6 +318,9 @@ our (
 
 
 
+$debug2 = 1;
+$debug = 1;
+
 ## Load my modules
 
 use UI::Iam;    	# IAM command support
@@ -475,33 +478,33 @@ command: start
 command: stop
 command: show_marks
 command: rename_mark
-_mon: mon
-_m: m
-_r: r
-_rec: rec
-_off: off | z
-_vol: vol | v
-_pan: pan | p
-_version: version | n
-_loop: loop
-_save_session: save_session | keep | k
-_new_session: new_session | new
-_load_session: load_session | load
-_add_track: add_track | add
-_generate_setup: generate_setup | setup
-_list_marks: list_marks | l
-_show_setup: show_setup | show
-_show_effects: show_effects | sfx
-_ecasound_start: ecasound_start | T
-_ecasound_stop: ecasound_stop | S
-_add_effect: add_effect | fx
-_remove_effect: remove_effect | rfx
-_renew_engine: renew_engine | renew
-_mark: mark | k
-_start: start | t
-_stop: stop | st
-_show_marks: show_marks | sm
-_rename_mark: rename_mark | rn
+_mon: 'mon'
+_m: 'm'
+_r: 'r'
+_rec: 'rec'
+_off: 'off' | 'z'
+_vol: 'vol' | 'v'
+_pan: 'pan' | 'p'
+_version: 'version' | 'n'
+_loop: 'loop'
+_save_session: 'save_session' | 'keep' | 'k'
+_new_session: 'new_session' | 'new'
+_load_session: 'load_session' | 'load'
+_add_track: 'add_track' | 'add'
+_generate_setup: 'generate_setup' | 'setup'
+_list_marks: 'list_marks' | 'l'
+_show_setup: 'show_setup' | 'show'
+_show_effects: 'show_effects' | 'sfx'
+_ecasound_start: 'ecasound_start' | 'T'
+_ecasound_stop: 'ecasound_stop' | 'S'
+_add_effect: 'add_effect' | 'fx'
+_remove_effect: 'remove_effect' | 'rfx'
+_renew_engine: 'renew_engine' | 'renew'
+_mark: 'mark' | 'k'
+_start: 'start' | 't'
+_stop: 'stop' | 'st'
+_show_marks: 'show_marks' | 'sm'
+_rename_mark: 'rename_mark' | 'rn'
 mon: _mon {}
 m: _m {}
 r: _r {}
@@ -561,7 +564,7 @@ setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
 list_marks: _list_marks {}
 
 show_setup: _show_setup { 	
-	map { 	push @::format_fields,  
+	map { 	push @UI::format_fields,  
 			$_,
 			$UI::state_c{$_}->{active},
 			$UI::state_c{$_}->{file},
@@ -672,10 +675,9 @@ sub prepare {  # actions begin here
 
 	new_engine();
 	initialize_oids();
-	prepare_static_effects_data() unless $opts{e}; 
+	prepare_static_effects_data() unless $opts{e};
+	1;	
 }
-=comment
-=cut
 #sub prepare { print "hello preparer!!" }
 	
 sub eval_iam {
@@ -833,15 +835,6 @@ take_gui($t);
 
 }
 
-sub destroy_widgets {
-
-	map{ $_->destroy } map{ $_->children } $effect_frame;
-	my @children = $take_frame->children;
-	map{ $_->destroy  } @children[1..$#children];
-	@children = $track_frame->children;
-	map{ $_->destroy  } @children[11..$#children]; # fragile
-	$state_t{active} = 1; 
-}
 ## track and wav file handling
 
 sub add_track {
@@ -1743,7 +1736,7 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_oids {
-
+	$debug2 and print "&initialize_oids\n";
 
 @oids = @{ $yr->read($oids) };
 
@@ -1751,7 +1744,9 @@ sub initialize_oids {
 
 # these are templates for building chains
 
-#my $null_id = undef;
+map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
+map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
+
 
 $debug and print "rec_setup $oids[-1]->{input}\n";
 
@@ -2433,6 +2428,7 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
+	$debug2 and print "&prepare_static_effects_data\n";
 
 
 	my $effects_cache = join_path($wav_dir, $effects_cache_file);
@@ -2698,9 +2694,7 @@ sub get_ladspa_hints{
 		$effects_ladspa {$plugin_label}->{display} = 'scale';
 	}
 
-	#print "@params\n";
-	#print yaml_out \%params;
-	$debug and print yaml_out (\%effects_ladspa); 
+	$debug and print yaml_out(\%effects_ladspa); 
 }
 no warnings;
 sub range {
@@ -3229,8 +3223,6 @@ our @ISA = 'UI';
 use Carp;
 sub hello {"make a window";}
 
-#sub new { my $class = shift; return bless { @_ }, $class; }
-
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
@@ -3241,14 +3233,22 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	print &config; exit;
-	shello();
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
 
 
 ## gui handling
+#
+sub destroy_widgets {
+
+	map{ $_->destroy } map{ $_->children } $effect_frame;
+	my @children = $take_frame->children;
+	map{ $_->destroy  } @children[1..$#children];
+	@children = $track_frame->children;
+	map{ $_->destroy  } @children[11..$#children]; # fragile
+	$state_t{active} = 1; 
+}
 
 sub init_gui {
 
@@ -3258,6 +3258,7 @@ sub init_gui {
 
 	$mw = MainWindow->new; 
 	$mw->title("Tk Ecmd"); 
+	$mw->deiconify;
 
 	### init effect window
 
@@ -4146,7 +4147,7 @@ Chain Ver File            Setting Status Rec_ch Mon_ch
 .
 format STDOUT =
 @<<  @<<  @<<<<<<<<<<<<<<<  @<<<   @<<<   @<<    @<< ~~
-splice @::format_fields, 0, 7
+splice @UI::format_fields, 0, 7
 
 .
 	

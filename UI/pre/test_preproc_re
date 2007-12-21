@@ -5,6 +5,8 @@ package :: ;
 package ::Text;
 package ::Text ;
 package Audio::Ecasound;
+@::RD::bigarray =
+ @::RD::bigarray =
 $::RD::DATA 
  ::Text->loop;
 ::Text->loop;
@@ -30,7 +32,7 @@ sub subst {
 	my $text = shift;
 	# Substitution 1: symbols containing a sigil
 
-		$text =~ s/([\%\$\%\&])(::)/$1$new_root$2/mg;
+		$text =~ s/([\%\$\@\&])(::)/$1$new_root$2/mg;
 
 	# Substitution 2: package declarations (two steps)
 

@@ -1,5 +1,3 @@
-#sub new { my $class = shift; return bless { @_ }, $class; }
-
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
@@ -16,6 +14,16 @@ sub loop {
 
 
 ## gui handling
+#
+sub destroy_widgets {
+
+	map{ $_->destroy } map{ $_->children } $effect_frame;
+	my @children = $take_frame->children;
+	map{ $_->destroy  } @children[1..$#children];
+	@children = $track_frame->children;
+	map{ $_->destroy  } @children[11..$#children]; # fragile
+	$state_t{active} = 1; 
+}
 
 sub init_gui {
 
@@ -25,6 +33,7 @@ sub init_gui {
 
 	$mw = MainWindow->new; 
 	$mw->title("Tk Ecmd"); 
+	$mw->deiconify;
 
 	### init effect window
 

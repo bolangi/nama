@@ -31,7 +31,7 @@ sub prepare {  # actions begin here
 
 	new_engine();
 	initialize_oids();
-	prepare_static_effects_data() unless $opts{e}; 
+	prepare_static_effects_data() unless $opts{e};
 	1;	
 }
 #sub prepare { print "hello preparer!!" }
@@ -191,15 +191,6 @@ take_gui($t);
 
 }
 
-sub destroy_widgets {
-
-	map{ $_->destroy } map{ $_->children } $effect_frame;
-	my @children = $take_frame->children;
-	map{ $_->destroy  } @children[1..$#children];
-	@children = $track_frame->children;
-	map{ $_->destroy  } @children[11..$#children]; # fragile
-	$state_t{active} = 1; 
-}
 ## track and wav file handling
 
 sub add_track {
@@ -1101,6 +1092,7 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_oids {
+	$debug2 and print "&initialize_oids\n";
 
 @oids = @{ $yr->read($oids) };
 
@@ -1792,6 +1784,7 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
+	$debug2 and print "&prepare_static_effects_data\n";
 
 
 	my $effects_cache = join_path($wav_dir, $effects_cache_file);
@@ -2057,9 +2050,7 @@ sub get_ladspa_hints{
 		$effects_ladspa {$plugin_label}->{display} = 'scale';
 	}
 
-	#print "@params\n";
-	#print yaml_out \%params;
-	$debug and print yaml_out (\%effects_ladspa); 
+	$debug and print yaml_out(\%effects_ladspa); 
 }
 no warnings;
 sub range {

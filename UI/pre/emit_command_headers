@@ -31,10 +31,11 @@ COMMANDS
 
 map{
 
+	chomp;
 	my @parts = my @all_parts = split " ", $_;
 	my $full = shift @parts;
 	my @short = @parts;
-	push @abbrevs,	"_$full: " . join (" | " , @all_parts);
+	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
 	push @stubs,   	"$full: _$full {}";
 	push @commands,	"command: $full";
 
