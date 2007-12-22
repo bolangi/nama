@@ -1,20 +1,30 @@
 package UI;
+my $root_class = 'UI';
 our @ISA;
+use Carp;
 use Object::Tiny qw(mode);
 sub hello {print "superclass hello\n"};
 sub how {print "how are you?", $/}
-sub new {
-             my $class = shift;
-             return bless { @_ }, $class;
-         }
-
+#sub class{ $root_class }
 sub set {
+
 	my $self = shift;
+ 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 	my %new_vals = @_;
 	my %filter;
 	map{$filter{$_}++} keys %{ $self };
-	map{ $self->{$_} = $new_vals{$_} if $filter{$_} } keys %new_vals;
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
+		or carp "illegal key: $_ for object of type ", ref $self,$/;
+	} keys %new_vals;
 }
+sub new {
+             my $class = shift;
+			 croak "odd number of arguments ",join "\n--\n" ,@_
+			   if @_ % 2;
+			 my %h = ( @_ );
+             return bless { @_ },
+			  $h{mode} ? "$root_class\::" . $h{mode} : $class;
+         }
 
 package UI::Graphical;
 our @ISA = 'UI';
@@ -24,8 +34,11 @@ package UI::Text;
 our @ISA = 'UI';
 sub hello {print "hello world!\n"}
 
-my $ui=UI->new;
+my $ui=UI->new(mode => 'Graphical');;
 $ui->hello;
+bless $ui, UI;
+$ui->hello;
+exit;
 $ui=UI::Graphical->new;
 $ui->hello;
 $ui->how;
@@ -34,7 +47,6 @@ $ui=UI::Text->new;
 $ui->hello;
 $ui->how;
 
-bless $ui, UI;
 $ui->hello;
 $ui->how;
 package UI;
@@ -78,11 +90,28 @@ new branch called object
 first test out that code for set! 
 
 
+====
+
+# Before `make install' is performed this script should be runnable with
+# `make test'. After `make install' it should work as `perl 1.t'
+
+#########################
+
+# change 'tests => 1' to 'tests => last_test_to_print';
+
+use Test::More qw(no_plan);
+# tests => 3;
+
+## Grab at anything nearby
+
+use lib qw(.. . lib lib/UI);
+
+BEGIN { use_ok('UI') };
 
 
-
-
-
-	
-	
-
+diag("there's what HE did wrong");
+#is( "three", "four", 'new() returned something' );
+diag("here's what went wrong");
+ok ($ui->prepare);
+is(defined $gui, 1, "Test instantiation" );
+is( $gui->isa('UI'),1, "Test parent class affiliation" );
