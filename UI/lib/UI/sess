@@ -1,0 +1,25 @@
+#!/usr/bin/env perl
+#use Test::More qw(no_plan);
+use lib qw(.. .); 
+use UI;
+$UI::wav_dir = '/media/sessions';
+$UI::session_name = 'paul_brocante';
+=comment
+my $s = UI::Session->new(name => 'paul_brocante');
+is(defined $s, 1, "Session instantiation" ); 
+is( $s->isa('UI::Session'),1, "Parent class for ". ref $s);
+is( $s->session_dir , '/media/sessions/.ecmd/paul_brocante', "Directory shows");
+=cut
+my $wav = UI::Wav->new( n => 5, head => 'sax');
+print "n: ", $wav->n;
+print join $/, %{ $wav->targets} or die;
+print join $/, @{ $wav->versions} or die;
+print join ".".$/, %{ UI::Wav::targets("sax")} or die;
+#is(defined $wav, 1, "Session instantiation" ); 
+#is( $wav->isa('UI::Wav'),1, "Parent class for ". ref $s);
+#diag( print join $/, %{ $wav->targets });
+
+
+
+__END__
+

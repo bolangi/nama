@@ -1,12 +1,13 @@
+#!/usr/bin/env perl
 use IO::All;
-$debug = 1;
+#$debug = 1;
 my $source = shift;
 my @lines = io($source)->slurp;
 $debug and print "lines: ". scalar @lines, $/;
 my $sub_re = qr/^sub\s+(\w+)/;
 @subs = map{ /$sub_re/; $1 } grep {/$sub_re/} @lines;
 $debug and print "subs:". scalar @subs, $/; 
-$debug and print join $/, @subs;
+print join $/, @subs;
 #my $text = join '', @lines;
 #map {$text =~ s/(\s$_)\s*;/$1();/gx } @subs;
 #print $text;

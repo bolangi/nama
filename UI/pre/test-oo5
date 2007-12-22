@@ -1,11 +1,12 @@
-package UI;
-my $root_class = 'UI';
-our @ISA;
+__END__
+
+
+package Wav;
+use Object::Tiny qw(head active n);
 use Carp;
-use Object::Tiny qw(mode);
-sub hello {"superclass hello\n"};
-sub how {"how are you?", $/}
-#sub class{ $root_class }
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 bless {@_}, $class }
 sub set {
 
 	my $self = shift;
@@ -17,43 +18,7 @@ sub set {
 		or carp "illegal key: $_ for object of type ", ref $self,$/;
 	} keys %new_vals;
 }
-sub new {
-             my $class = shift;
-			 my %h = ( @_ );
-			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-             return bless { @_ },
-			  $class eq $root_class  && $h{mode} 
-					? "$root_class\::" . $h{mode} 
-					: $class;
-         }
-package Wav;
-our @ISA='UI';
-use Object::Tiny qw(head active n);
-use Carp;
-sub new { my $class = shift; 
- 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-		 bless {@_}, $class }
 
-sub get_versions {
-	my ($dir, $basename, $sep, $ext) = @_;
-
-	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
-	$debug and print "reading directory: $dir\n\n";
-	my %versions = ();
-	for my $candidate ( readdir WD ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
-	}
-	$debug and print "get_version: " , yaml_out(\%versions);
-	closedir WD;
-	%versions;
-}
 
 sub targets {
 	my $head = shift; 
@@ -97,22 +62,6 @@ no warnings;
 	### or should I give the active version
 use warnings;
 }
-sub last_version { 
-	## for each track or tracks in take
-=comment
-
-$track->last_version;
-$take->last_version
-$session->last_version
-	
-			$last_version = $this_last if $this_last > $last_version ;
-
-=cut
-}
-
-sub new_version {
-	last_version() + 1;
-}
 sub remove_small_wavs {
 	$debug2 and print "&remove_small_wavs\n";
 	# left by a recording chainsetup that is 
@@ -126,7 +75,28 @@ sub remove_small_wavs {
 	map { print ($_, "\n") if -s == 44 } @wavs; 
 	map { unlink $_ if -s == 44 } @wavs; 
 }
+sub get_versions {
+	my ($dir, $basename, $sep, $ext) = @_;
 
+	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
+	opendir WD, $dir or carp ("can't read directory $dir: $!");
+	$debug and print "reading directory: $dir\n\n";
+	my %versions = ();
+	for my $candidate ( readdir WD ) {
+		$debug and print "candidate: $candidate\n\n";
+		$candidate =~ m/^ ( $basename 
+		   ($sep (\d+))? 
+		   \.$ext )
+		   $/x or next;
+		$debug and print "match: $1,  num: $3\n\n";
+		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+	}
+	$debug and print "get_version: " , yaml_out(\%versions);
+	closedir WD;
+	%versions;
+}
+
+__END__
 =comment
 my $wav = Wav->new( head => vocal);
 
@@ -145,25 +115,24 @@ returns targets
 
 =cut
 =comment
+TODO
+sub last_version { 
+	## for each track or tracks in take
+
+$track->last_version;
+$take->last_version
+$session->last_version
+	
+			$last_version = $this_last if $this_last > $last_version ;
+
+}
+sub new_version {
+	last_version() + 1;
+}
+=cut
+
+=comment
 # untested, i don't think i need it.
-package Session;
-our @ISA='UI';
-use Object::Tiny qw(name);
-sub session_dir{
-sub create_dir {
-	my $dir = shift;
-	-d $dir and carp "refuse to make directory $dir, it exists already"
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
-}
-sub new { my $class = shift; 
-	my %vals = @_;
-	$vals{name} or carp "invoked without values" and return;
-	my $name = remove_spaces( $vals{name} );
-	$vals{create_dir} and create_dir($name);
-	$vals{name} = $name;
-	return bless { % }, $class; }
-}
 =cut	
 	
 

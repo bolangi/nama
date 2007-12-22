@@ -323,6 +323,126 @@ our (
 $debug2 = 1;
 $debug = 1;
 
+## prevents bareword sub calls some_sub; from failing
+use subs qw(
+
+new
+wav_dir
+config_file
+ecmd_dir
+this_wav_dir
+session_dir
+prepare
+eval_iam
+global_config
+session_config
+config
+read_config
+walk_tree
+substitute
+load_session
+session_init
+initialize_session_data
+add_track
+add_mix_track
+mix_suffix
+restore_track
+register_track
+dig_ruins
+find_wavs
+remove_small_wavs
+new_take
+increment_take
+decrement_take
+select_take
+add_volume_control
+add_pan_control
+create_dir
+join_path
+wav_off
+selected_version
+set_active_version
+new_version
+get_versions
+mon_vert
+collect_chains
+rec_status
+really_recording
+make_io_lists
+rec_route
+route
+hash_push
+eliminate_loops
+write_chains
+new_wav_name
+output_format
+initialize_oids
+mono_to_stereo
+pre_multi
+convert_to_jack
+convert_to_alsa
+load_ecs
+new_engine
+setup_transport
+connect_transport
+start_transport
+stop_transport
+transport_running
+disconnect_transport
+start_clock
+update_clock
+restart_clock
+refresh_clock
+toggle_unit
+to_start
+to_end
+jump
+refresh_t
+refresh_c
+refresh
+refresh_oids
+rec_cleanup
+update_version_button
+update_master_version_button
+add_effect
+remove_effect
+remove_op
+cop_add
+cop_init
+effect_update
+find_op_offsets
+apply_ops
+apply_op
+prepare_static_effects_data
+extract_effects_data
+sort_ladspa_effects
+read_in_effects_data
+read_in_tkeca_effects_data
+get_ladspa_hints
+range
+integrate_ladspa_hints
+d2
+dn
+round
+save_state
+retrieve_state
+save_effects
+r
+r5
+retrieve_effects
+assign_vars
+store_vars
+yaml_out
+yaml_in
+arm_mark
+colonize
+mark
+strip_all
+strip_blank_lines
+strip_comments
+remove_spaces
+
+);
 ## Load my modules
 
 use UI::Iam;    	# IAM command support
@@ -623,26 +743,9 @@ dd: /\d+/
 
 );
 
-## Stub routines for root class
+## The following methods belong to the root class
 
 sub hello {"superclass hello"}
-
-sub take_gui {}
-sub track_gui {}
-sub refresh {}
-sub flash_ready {}
-sub update_master_version_button {}
-sub paint_button {}
-sub refresh_oids {}
-sub paint_button {}
-sub session_label_configure{}
-sub length_display{}
-sub clock_display {}
-sub manifest {}
-sub global_version_buttons {}
-sub destroy_widgets {}
-
-## The following methods belong to the root class
 
 package UI;
 use Carp;
@@ -654,10 +757,26 @@ use Carp;
 # 'object is actually represented by a pair of directories.
 # in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
+my $root_class = 'UI';
+sub new {
+
+	# only argument is mode: Text or Graphical
+	
+             my $class = shift;
+			 my %h = ( @_ );
+			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+             return bless { @_ },
+			  $class eq $root_class  && $h{mode} 
+					? "$root_class\::" . $h{mode} 
+					: $class;
+}
+
+sub wav_dir { $wav_dir };
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path($wav_dir, $session_name) }
 sub session_dir  {$session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
+
 
 sub prepare {  # actions begin here
 
@@ -949,7 +1068,7 @@ sub find_wavs {
 	$debug and 
 	print "getting versions for chain $n, state_c{$n}->{file}\n";
 		my %versions =  get_versions (
-			this_wav_dir,
+			this_wav_dir(),
 			$state_c{$n}->{file},
 			'_', 'wav' )  ;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
@@ -1839,7 +1958,7 @@ sub rec_cleanup {
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				find_wavs($n);
-				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1];
+				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]; # XXX
 				update_version_button($n, $v);
 			$recorded++;
 			}
@@ -3052,6 +3171,23 @@ sub remove_spaces {
 }                                                                               
 
 
+## no-op graphic methods to inherit by Text
+
+sub take_gui {}
+sub track_gui {}
+sub refresh {}
+sub flash_ready {}
+sub update_master_version_button {}
+sub paint_button {}
+sub refresh_oids {}
+sub paint_button {}
+sub session_label_configure{}
+sub length_display{}
+sub clock_display {}
+sub manifest {}
+sub global_version_buttons {}
+sub destroy_widgets {}
+
 ## The following methods belong to the Graphical interface class
 
 package UI::Graphical;
@@ -3995,6 +4131,8 @@ sub is_muted {
 ## We also need stubs for procedural access to subs
 ## in the UI class.
 
+sub new { UI::new() }
+sub wav_dir { UI::wav_dir() }
 sub config_file { UI::config_file() }
 sub ecmd_dir { UI::ecmd_dir() }
 sub this_wav_dir { UI::this_wav_dir() }
@@ -4010,7 +4148,6 @@ sub substitute { UI::substitute() }
 sub load_session { UI::load_session() }
 sub session_init { UI::session_init() }
 sub initialize_session_data { UI::initialize_session_data() }
-sub destroy_widgets { UI::destroy_widgets() }
 sub add_track { UI::add_track() }
 sub add_mix_track { UI::add_mix_track() }
 sub mix_suffix { UI::mix_suffix() }
@@ -4025,12 +4162,6 @@ sub decrement_take { UI::decrement_take() }
 sub select_take { UI::select_take() }
 sub add_volume_control { UI::add_volume_control() }
 sub add_pan_control { UI::add_pan_control() }
-sub effect_button { UI::effect_button() }
-sub make_scale { UI::make_scale() }
-sub is_soloing { UI::is_soloing() }
-sub toggle_muting { UI::toggle_muting() }
-sub toggle_mute { UI::toggle_mute() }
-sub is_muted { UI::is_muted() }
 sub create_dir { UI::create_dir() }
 sub join_path { UI::join_path() }
 sub wav_off { UI::wav_off() }
@@ -4177,6 +4308,8 @@ splice @UI::format_fields, 0, 7
 ## We also need stubs for procedural access to subs
 ## in the UI class.
 
+sub new { UI::new() }
+sub wav_dir { UI::wav_dir() }
 sub config_file { UI::config_file() }
 sub ecmd_dir { UI::ecmd_dir() }
 sub this_wav_dir { UI::this_wav_dir() }
@@ -4192,7 +4325,6 @@ sub substitute { UI::substitute() }
 sub load_session { UI::load_session() }
 sub session_init { UI::session_init() }
 sub initialize_session_data { UI::initialize_session_data() }
-sub destroy_widgets { UI::destroy_widgets() }
 sub add_track { UI::add_track() }
 sub add_mix_track { UI::add_mix_track() }
 sub mix_suffix { UI::mix_suffix() }
@@ -4207,12 +4339,6 @@ sub decrement_take { UI::decrement_take() }
 sub select_take { UI::select_take() }
 sub add_volume_control { UI::add_volume_control() }
 sub add_pan_control { UI::add_pan_control() }
-sub effect_button { UI::effect_button() }
-sub make_scale { UI::make_scale() }
-sub is_soloing { UI::is_soloing() }
-sub toggle_muting { UI::toggle_muting() }
-sub toggle_mute { UI::toggle_mute() }
-sub is_muted { UI::is_muted() }
 sub create_dir { UI::create_dir() }
 sub join_path { UI::join_path() }
 sub wav_off { UI::wav_off() }
@@ -4299,6 +4425,158 @@ sub strip_comments { UI::strip_comments() }
 sub remove_spaces { UI::remove_spaces() }
 
 
+## The following methods belong to the Session class
+
+#my $s = Session->new(name => 'paul_brocante');
+# print $s->session_dir;
+
+package UI::Session;
+our @ISA='UI';
+use Carp;
+use Object::Tiny qw(name);
+sub hello {"i'm a session"}
+sub new { 
+	my $class = shift; 
+	my %vals = @_;
+	$vals{name} or carp "invoked without values" and return;
+	my $name = $vals{name};
+	remove_spaces( $vals{name} );
+	$vals{name} = $name;
+	$vals{create_dir} and create_dir($name) and delete $vals{create_dir};
+	return bless { %vals }, $class;
+}
+sub set {
+	my $self = shift;
+ 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
+		or carp "illegal key: $_ for object of type ", ref $self,$/
+	} keys %new_vals;
+}
+
+## aliases 
+
+sub wav_dir {UI::wav_dir() }
+sub ecmd_dir { UI::ecmd_dir() }
+sub this_wav_dir { UI::this_wav_dir() }
+sub session_dir { UI::session_dir() }
+sub remove_spaces { UI::remove_spaces() }
+
+package UI::Wav;
+our @ISA='UI';
+use Object::Tiny qw(head active n);
+my @fields = qw(head active n);
+my %fields;
+map{$fields{$_} = undef} @fields;
+use Carp;
+sub this_wav_dir { UI::this_wav_dir() }
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 return bless {%fields, @_}, $class }
+
+sub _get_versions {
+	my ($dir, $basename, $sep, $ext) = @_;
+
+	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
+	opendir WD, $dir or carp ("can't read directory $dir: $!");
+	$debug and print "reading directory: $dir\n\n";
+	my %versions = ();
+	for my $candidate ( readdir WD ) {
+		$debug and print "candidate: $candidate\n\n";
+		$candidate =~ m/^ ( $basename 
+		   ($sep (\d+))? 
+		   \.$ext )
+		   $/x or next;
+		$debug and print "match: $1,  num: $3\n\n";
+		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+	}
+	$debug and print "get_version: " , yaml_out(\%versions);
+	closedir WD;
+	%versions;
+}
+
+sub targets {
+	local $debug = 1;
+	my $wav = shift; 
+#	my $head = $wav->head;
+ 	my $head =  ref $wav ? $wav->head : $wav;
+		
+	$debug2 and print "&targets\n";
+	local $debug = 0;
+	$debug and ($t = this_wav_dir()), print 
+"this_wav_dir: $t
+head:         ", $head, $/;
+		my %versions =  _get_versions(
+			this_wav_dir(),
+			$head,
+			'_', 'wav' )  ;
+		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
+			delete $versions{bare};
+		}
+	$debug and print "\%versions\n================\n", yaml_out(\%versions);
+	\%versions;
+}
+sub versions { 
+	my $wav = shift;
+# 	my $head =  (ref $wav =~ /Wav/  
+# 		? $wav->name
+# 		: $wav);
+	[ sort { $a <=> $b } keys %{ $wav->targets} ]; }
+
+sub this_last { 
+	my $wav = shift;
+	pop @{ $wav->versions} }
+
+sub _selected_version {
+	# return track-specific version if selected,
+	# otherwise return global version selection
+	# but only if this version exists
+	my $wav = shift;
+no warnings;
+	my $version = 
+		$wav->active 
+		? $wav->active 
+		: &monitor_version ;
+	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
+	### or should I give the active version
+use warnings;
+}
+=comment
+sub last_version { 
+	## for each track or tracks in take
+
+$track->last_version;
+$take->last_version
+$session->last_version
+	
+			$last_version = $this_last if $this_last > $last_version ;
+
+}
+
+sub new_version {
+	last_version() + 1;
+}
+=cut
+
+=comment
+my $wav = Wav->new( head => vocal);
+
+$wav->versions;
+$wav->head  # vocal
+$wav->n     # 3 i.e. track 3
+$wav->active
+$wav->targets
+$wav->full_path
+
+returns numbers
+
+$wav->targets
+
+returns targets
+
+=cut
 
 1;
 __END__

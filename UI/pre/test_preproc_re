@@ -21,7 +21,9 @@ our  @ISA = " ::Text";
 use ::Text;
 use ::Text::Very::Unusual;
  use  ::;
-
+isa '::';
+::Module
+ ::Module
 PKG
 my $i;
 map { print "input ", $i++,": ", $_, $/;
@@ -59,6 +61,13 @@ sub subst {
 		$text =~ s/^(\s*use\s+)(::)(\W)/$1$new_root$3/mg;
 		$text =~
 		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
+
+
+	# Substitution 7: lone '::'
+		$text =~ s/'::'/'$new_root'/g;
+
+	# Substitution 8: bare class
+		$text =~ s/(^|\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
 $text;
 }

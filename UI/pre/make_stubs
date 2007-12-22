@@ -1,1 +1,2 @@
- perl -ne 'chomp; print "sub $_ { UI:\:$_\() }", $/' UI_subs 
+#!/bin/sh
+./list_subs UI_methods.pl |perl -ne 'chomp; print "sub $_ { UI:\:$_\() }", $/' 

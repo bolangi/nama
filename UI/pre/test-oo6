@@ -1,0 +1,14 @@
+package Wav;
+use Carp;
+our @ISA;
+use Object::Tiny qw(head active n);
+my @fields = qw(head active n);
+my %fields;
+map{$fields{$_} = undef} @fields;
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 return bless {%fields, @_}, $class }
+my $w = Wav->new(head=>'sax', n => 6);
+print $w->head, $/;
+print $w->n;
+

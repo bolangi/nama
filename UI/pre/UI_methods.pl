@@ -8,10 +8,26 @@ use Carp;
 # 'object is actually represented by a pair of directories.
 # in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
+my $root_class = '::';
+sub new {
+
+	# only argument is mode: Text or Graphical
+	
+             my $class = shift;
+			 my %h = ( @_ );
+			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+             return bless { @_ },
+			  $class eq $root_class  && $h{mode} 
+					? "$root_class\::" . $h{mode} 
+					: $class;
+}
+
+sub wav_dir { $wav_dir };
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path($wav_dir, $session_name) }
 sub session_dir  {$session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
+
 
 sub prepare {  # actions begin here
 
@@ -303,7 +319,7 @@ sub find_wavs {
 	$debug and 
 	print "getting versions for chain $n, state_c{$n}->{file}\n";
 		my %versions =  get_versions (
-			this_wav_dir,
+			this_wav_dir(),
 			$state_c{$n}->{file},
 			'_', 'wav' )  ;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
@@ -1193,7 +1209,7 @@ sub rec_cleanup {
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				find_wavs($n);
-				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1];
+				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]; # XXX
 				update_version_button($n, $v);
 			$recorded++;
 			}

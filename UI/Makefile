@@ -169,12 +169,14 @@ PERL_ARCHIVE_AFTER =
 
 TO_INST_PM = lib/UI/1.t \
 	lib/UI/Iam.pm \
+	lib/UI/Session.pm \
 	lib/UI/Tkeca_effects.pm \
 	lib/UI/UI.pm \
 	lib/UI/UI.pm.mod \
 	lib/UI/ecmd \
 	lib/UI/gui \
 	lib/UI/gui.0 \
+	lib/UI/sess \
 	lib/UI/text
 
 PM_TO_BLIB = lib/UI/text \
@@ -189,8 +191,12 @@ PM_TO_BLIB = lib/UI/text \
 	blib/lib/UI/Tkeca_effects.pm \
 	lib/UI/Iam.pm \
 	blib/lib/UI/Iam.pm \
+	lib/UI/sess \
+	blib/lib/UI/sess \
 	lib/UI/gui.0 \
 	blib/lib/UI/gui.0 \
+	lib/UI/Session.pm \
+	blib/lib/UI/Session.pm \
 	lib/UI/UI.pm.mod \
 	blib/lib/UI/UI.pm.mod \
 	lib/UI/1.t \
@@ -448,8 +454,8 @@ realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
 	rm -rf $(DISTVNAME)
 	rm -f  blib/lib/UI/text blib/lib/UI/ecmd blib/lib/UI/gui blib/lib/UI/UI.pm
-	rm -f blib/lib/UI/Tkeca_effects.pm blib/lib/UI/Iam.pm blib/lib/UI/gui.0
-	rm -f blib/lib/UI/UI.pm.mod blib/lib/UI/1.t
+	rm -f blib/lib/UI/Tkeca_effects.pm blib/lib/UI/Iam.pm blib/lib/UI/sess
+	rm -f blib/lib/UI/gui.0 blib/lib/UI/Session.pm blib/lib/UI/UI.pm.mod blib/lib/UI/1.t
 	rm -rf Makefile Makefile.old
 
 
@@ -702,7 +708,7 @@ pm_to_blib: $(TO_INST_PM)
 	@$(PERLRUNINST) "-MExtUtils::Install" \
 	-e "pm_to_blib({qw{lib/UI/text blib/lib/UI/text lib/UI/ecmd blib/lib/UI/ecmd lib/UI/gui blib/lib/UI/gui lib/UI/UI.pm blib/lib/UI/UI.pm lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm lib/UI/Iam.pm blib/lib/UI/Iam.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
 	@$(PERLRUNINST) "-MExtUtils::Install" \
-	-e "pm_to_blib({qw{lib/UI/gui.0 blib/lib/UI/gui.0 lib/UI/UI.pm.mod blib/lib/UI/UI.pm.mod lib/UI/1.t blib/lib/UI/1.t}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	-e "pm_to_blib({qw{lib/UI/sess blib/lib/UI/sess lib/UI/gui.0 blib/lib/UI/gui.0 lib/UI/UI.pm.mod blib/lib/UI/UI.pm.mod lib/UI/Session.pm blib/lib/UI/Session.pm lib/UI/1.t blib/lib/UI/1.t}},'$(INST_LIB)/auto','$(PM_FILTER)')"
 	@$(TOUCH) $@
 
 # --- MakeMaker selfdocument section:

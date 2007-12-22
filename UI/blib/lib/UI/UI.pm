@@ -323,6 +323,124 @@ our (
 $debug2 = 1;
 $debug = 1;
 
+use subs qw(
+
+new
+config_file
+ecmd_dir
+this_wav_dir
+session_dir
+prepare
+eval_iam
+global_config
+session_config
+config
+read_config
+walk_tree
+substitute
+load_session
+session_init
+initialize_session_data
+add_track
+add_mix_track
+mix_suffix
+restore_track
+register_track
+dig_ruins
+find_wavs
+remove_small_wavs
+new_take
+increment_take
+decrement_take
+select_take
+add_volume_control
+add_pan_control
+create_dir
+join_path
+wav_off
+selected_version
+set_active_version
+new_version
+get_versions
+mon_vert
+collect_chains
+rec_status
+really_recording
+make_io_lists
+rec_route
+route
+hash_push
+eliminate_loops
+write_chains
+new_wav_name
+output_format
+initialize_oids
+mono_to_stereo
+pre_multi
+convert_to_jack
+convert_to_alsa
+load_ecs
+new_engine
+setup_transport
+connect_transport
+start_transport
+stop_transport
+transport_running
+disconnect_transport
+start_clock
+update_clock
+restart_clock
+refresh_clock
+toggle_unit
+to_start
+to_end
+jump
+refresh_t
+refresh_c
+refresh
+refresh_oids
+rec_cleanup
+update_version_button
+update_master_version_button
+add_effect
+remove_effect
+remove_op
+cop_add
+cop_init
+effect_update
+find_op_offsets
+apply_ops
+apply_op
+prepare_static_effects_data
+extract_effects_data
+sort_ladspa_effects
+read_in_effects_data
+read_in_tkeca_effects_data
+get_ladspa_hints
+range
+integrate_ladspa_hints
+d2
+dn
+round
+save_state
+retrieve_state
+save_effects
+r
+r5
+retrieve_effects
+assign_vars
+store_vars
+yaml_out
+yaml_in
+arm_mark
+colonize
+mark
+strip_all
+strip_blank_lines
+strip_comments
+remove_spaces
+
+);
 ## Load my modules
 
 use UI::Iam;    	# IAM command support
@@ -623,26 +741,9 @@ dd: /\d+/
 
 );
 
-## Stub routines for root class
+## The following methods belong to the root class
 
 sub hello {"superclass hello"}
-
-sub take_gui {}
-sub track_gui {}
-sub refresh {}
-sub flash_ready {}
-sub update_master_version_button {}
-sub paint_button {}
-sub refresh_oids {}
-sub paint_button {}
-sub session_label_configure{}
-sub length_display{}
-sub clock_display {}
-sub manifest {}
-sub global_version_buttons {}
-sub destroy_widgets {}
-
-## The following methods belong to the root class
 
 package UI;
 use Carp;
@@ -653,6 +754,20 @@ use Carp;
 # of only a name. But how would that help? Each
 # 'object is actually represented by a pair of directories.
 # in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
+
+sub new {
+
+	# only argument is mode: Text or Graphical
+	
+             my $class = shift;
+			 my %h = ( @_ );
+			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+             return bless { @_ },
+			  $class eq $root_class  && $h{mode} 
+					? "$root_class\::" . $h{mode} 
+					: $class;
+}
+
 
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
@@ -949,7 +1064,7 @@ sub find_wavs {
 	$debug and 
 	print "getting versions for chain $n, state_c{$n}->{file}\n";
 		my %versions =  get_versions (
-			this_wav_dir,
+			this_wav_dir(),
 			$state_c{$n}->{file},
 			'_', 'wav' )  ;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
@@ -1839,7 +1954,7 @@ sub rec_cleanup {
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				find_wavs($n);
-				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1];
+				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]; # XXX
 				update_version_button($n, $v);
 			$recorded++;
 			}
@@ -3052,6 +3167,23 @@ sub remove_spaces {
 }                                                                               
 
 
+## no-op graphic methods to inherit by Text
+
+sub take_gui {}
+sub track_gui {}
+sub refresh {}
+sub flash_ready {}
+sub update_master_version_button {}
+sub paint_button {}
+sub refresh_oids {}
+sub paint_button {}
+sub session_label_configure{}
+sub length_display{}
+sub clock_display {}
+sub manifest {}
+sub global_version_buttons {}
+sub destroy_widgets {}
+
 ## The following methods belong to the Graphical interface class
 
 package UI::Graphical;
@@ -3995,127 +4127,7 @@ sub is_muted {
 ## We also need stubs for procedural access to subs
 ## in the UI class.
 
-sub config_file { UI::config_file() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub prepare { UI::prepare() }
-sub eval_iam { UI::eval_iam() }
-sub global_config { UI::global_config() }
-sub session_config { UI::session_config() }
-sub config { UI::config() }
-sub read_config { UI::read_config() }
-sub walk_tree { UI::walk_tree() }
-sub substitute { UI::substitute() }
-sub load_session { UI::load_session() }
-sub session_init { UI::session_init() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub destroy_widgets { UI::destroy_widgets() }
-sub add_track { UI::add_track() }
-sub add_mix_track { UI::add_mix_track() }
-sub mix_suffix { UI::mix_suffix() }
-sub restore_track { UI::restore_track() }
-sub register_track { UI::register_track() }
-sub dig_ruins { UI::dig_ruins() }
-sub find_wavs { UI::find_wavs() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub new_take { UI::new_take() }
-sub increment_take { UI::increment_take() }
-sub decrement_take { UI::decrement_take() }
-sub select_take { UI::select_take() }
-sub add_volume_control { UI::add_volume_control() }
-sub add_pan_control { UI::add_pan_control() }
-sub effect_button { UI::effect_button() }
-sub make_scale { UI::make_scale() }
-sub is_soloing { UI::is_soloing() }
-sub toggle_muting { UI::toggle_muting() }
-sub toggle_mute { UI::toggle_mute() }
-sub is_muted { UI::is_muted() }
-sub create_dir { UI::create_dir() }
-sub join_path { UI::join_path() }
-sub wav_off { UI::wav_off() }
-sub selected_version { UI::selected_version() }
-sub set_active_version { UI::set_active_version() }
-sub new_version { UI::new_version() }
-sub get_versions { UI::get_versions() }
-sub mon_vert { UI::mon_vert() }
-sub collect_chains { UI::collect_chains() }
-sub rec_status { UI::rec_status() }
-sub really_recording { UI::really_recording() }
-sub make_io_lists { UI::make_io_lists() }
-sub rec_route { UI::rec_route() }
-sub route { UI::route() }
-sub hash_push { UI::hash_push() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub write_chains { UI::write_chains() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub initialize_oids { UI::initialize_oids() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub pre_multi { UI::pre_multi() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub load_ecs { UI::load_ecs() }
-sub new_engine { UI::new_engine() }
-sub setup_transport { UI::setup_transport() }
-sub connect_transport { UI::connect_transport() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub transport_running { UI::transport_running() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
-sub toggle_unit { UI::toggle_unit() }
-sub to_start { UI::to_start() }
-sub to_end { UI::to_end() }
-sub jump { UI::jump() }
-sub refresh_t { UI::refresh_t() }
-sub refresh_c { UI::refresh_c() }
-sub refresh { UI::refresh() }
-sub refresh_oids { UI::refresh_oids() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub update_version_button { UI::update_version_button() }
-sub update_master_version_button { UI::update_master_version_button() }
-sub add_effect { UI::add_effect() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
-sub cop_add { UI::cop_add() }
-sub cop_init { UI::cop_init() }
-sub effect_update { UI::effect_update() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub apply_ops { UI::apply_ops() }
-sub apply_op { UI::apply_op() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub range { UI::range() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
-sub d2 { UI::d2() }
-sub dn { UI::dn() }
-sub round { UI::round() }
-sub save_state { UI::save_state() }
-sub retrieve_state { UI::retrieve_state() }
-sub save_effects { UI::save_effects() }
-sub r { UI::r() }
-sub r5 { UI::r5() }
-sub retrieve_effects { UI::retrieve_effects() }
-sub assign_vars { UI::assign_vars() }
-sub store_vars { UI::store_vars() }
-sub yaml_out { UI::yaml_out() }
-sub yaml_in { UI::yaml_in() }
-sub arm_mark { UI::arm_mark() }
-sub colonize { UI::colonize() }
-sub mark { UI::mark() }
-sub strip_all { UI::strip_all() }
-sub strip_blank_lines { UI::strip_blank_lines() }
-sub strip_comments { UI::strip_comments() }
-sub remove_spaces { UI::remove_spaces() }
-
+# [-% qx(./make_stubs) %-]
 
 ## The following methods belong to the Text interface class
 
@@ -4177,128 +4189,148 @@ splice @UI::format_fields, 0, 7
 ## We also need stubs for procedural access to subs
 ## in the UI class.
 
-sub config_file { UI::config_file() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub prepare { UI::prepare() }
-sub eval_iam { UI::eval_iam() }
-sub global_config { UI::global_config() }
-sub session_config { UI::session_config() }
-sub config { UI::config() }
-sub read_config { UI::read_config() }
-sub walk_tree { UI::walk_tree() }
-sub substitute { UI::substitute() }
-sub load_session { UI::load_session() }
-sub session_init { UI::session_init() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub destroy_widgets { UI::destroy_widgets() }
-sub add_track { UI::add_track() }
-sub add_mix_track { UI::add_mix_track() }
-sub mix_suffix { UI::mix_suffix() }
-sub restore_track { UI::restore_track() }
-sub register_track { UI::register_track() }
-sub dig_ruins { UI::dig_ruins() }
-sub find_wavs { UI::find_wavs() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub new_take { UI::new_take() }
-sub increment_take { UI::increment_take() }
-sub decrement_take { UI::decrement_take() }
-sub select_take { UI::select_take() }
-sub add_volume_control { UI::add_volume_control() }
-sub add_pan_control { UI::add_pan_control() }
-sub effect_button { UI::effect_button() }
-sub make_scale { UI::make_scale() }
-sub is_soloing { UI::is_soloing() }
-sub toggle_muting { UI::toggle_muting() }
-sub toggle_mute { UI::toggle_mute() }
-sub is_muted { UI::is_muted() }
-sub create_dir { UI::create_dir() }
-sub join_path { UI::join_path() }
-sub wav_off { UI::wav_off() }
-sub selected_version { UI::selected_version() }
-sub set_active_version { UI::set_active_version() }
-sub new_version { UI::new_version() }
-sub get_versions { UI::get_versions() }
-sub mon_vert { UI::mon_vert() }
-sub collect_chains { UI::collect_chains() }
-sub rec_status { UI::rec_status() }
-sub really_recording { UI::really_recording() }
-sub make_io_lists { UI::make_io_lists() }
-sub rec_route { UI::rec_route() }
-sub route { UI::route() }
-sub hash_push { UI::hash_push() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub write_chains { UI::write_chains() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub initialize_oids { UI::initialize_oids() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub pre_multi { UI::pre_multi() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub load_ecs { UI::load_ecs() }
-sub new_engine { UI::new_engine() }
-sub setup_transport { UI::setup_transport() }
-sub connect_transport { UI::connect_transport() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub transport_running { UI::transport_running() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
-sub toggle_unit { UI::toggle_unit() }
-sub to_start { UI::to_start() }
-sub to_end { UI::to_end() }
-sub jump { UI::jump() }
-sub refresh_t { UI::refresh_t() }
-sub refresh_c { UI::refresh_c() }
-sub refresh { UI::refresh() }
-sub refresh_oids { UI::refresh_oids() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub update_version_button { UI::update_version_button() }
-sub update_master_version_button { UI::update_master_version_button() }
-sub add_effect { UI::add_effect() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
-sub cop_add { UI::cop_add() }
-sub cop_init { UI::cop_init() }
-sub effect_update { UI::effect_update() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub apply_ops { UI::apply_ops() }
-sub apply_op { UI::apply_op() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub range { UI::range() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
-sub d2 { UI::d2() }
-sub dn { UI::dn() }
-sub round { UI::round() }
-sub save_state { UI::save_state() }
-sub retrieve_state { UI::retrieve_state() }
-sub save_effects { UI::save_effects() }
-sub r { UI::r() }
-sub r5 { UI::r5() }
-sub retrieve_effects { UI::retrieve_effects() }
-sub assign_vars { UI::assign_vars() }
-sub store_vars { UI::store_vars() }
-sub yaml_out { UI::yaml_out() }
-sub yaml_in { UI::yaml_in() }
-sub arm_mark { UI::arm_mark() }
-sub colonize { UI::colonize() }
-sub mark { UI::mark() }
-sub strip_all { UI::strip_all() }
-sub strip_blank_lines { UI::strip_blank_lines() }
-sub strip_comments { UI::strip_comments() }
-sub remove_spaces { UI::remove_spaces() }
+# [-% qx(./make_stubs) %-]
 
+## The following methods belong to the Session class
 
+#my $s = Session->new(name => 'paul_brocante');
+# print $s->session_dir;
+
+package UI::Session;
+our @ISA='UI';
+use Carp;
+use Object::Tiny qw(name);
+sub hello {"i'm a session"}
+sub session_dir{
+	my $self = shift;
+	join_path( this_wav_dir(), $self->name)
+}
+sub new { 
+	my $class = shift; 
+	my %vals = @_;
+	$vals{name} or carp "invoked without values" and return;
+	my $name = $vals{name};
+	remove_spaces( $vals{name} );
+	$vals{name} = $name;
+	$vals{create_dir} and create_dir($name) and delete $vals{create_dir};
+	return bless { %vals }, $class;
+}
+sub set {
+	my $self = shift;
+ 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
+		or carp "illegal key: $_ for object of type ", ref $self,$/
+	} keys %new_vals;
+}
+
+# [-% qx(./make_stubs) %-]
+
+package Wav;
+our @ISA='UI';
+use Object::Tiny qw(head active n);
+use Carp;
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 bless {@_}, $class }
+
+sub _get_versions {
+	my ($dir, $basename, $sep, $ext) = @_;
+
+	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
+	opendir WD, $dir or carp ("can't read directory $dir: $!");
+	$debug and print "reading directory: $dir\n\n";
+	my %versions = ();
+	for my $candidate ( readdir WD ) {
+		$debug and print "candidate: $candidate\n\n";
+		$candidate =~ m/^ ( $basename 
+		   ($sep (\d+))? 
+		   \.$ext )
+		   $/x or next;
+		$debug and print "match: $1,  num: $3\n\n";
+		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+	}
+	$debug and print "get_version: " , yaml_out(\%versions);
+	closedir WD;
+	%versions;
+}
+
+sub targets {
+	my $head = shift; 
+	$debug2 and print "&targets\n";
+	local $debug = 0;
+	
+	# GET VERSIONS 
+	#  Assign bare (unversioned) file as version 1 
+	
+	$debug and 
+	print "getting versions for chain $n, $head\n";
+		my %versions =  _get_versions(
+			this_wav_dir(),
+			$head,
+			'_', 'wav' )  ;
+		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
+			delete $versions{bare};
+		}
+	$debug and print "\%versions\n================\n", yaml_out(\%versions);
+	%versions;
+}
+sub versions { 
+	my $wav = shift;
+	[ sort { $a <=> $b } keys %{$wav->targets} ];
+	}
+sub this_last { pop @{ $wav->versions} }
+
+sub _selected_version {
+	# return track-specific version if selected,
+	# otherwise return global version selection
+	# but only if this version exists
+	my $wav = shift;
+no warnings;
+	my $version = 
+		$wav->active 
+		? $wav->active 
+		: &monitor_version ;
+	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
+	### or should I give the active version
+use warnings;
+}
+=comment
+sub last_version { 
+	## for each track or tracks in take
+
+$track->last_version;
+$take->last_version
+$session->last_version
+	
+			$last_version = $this_last if $this_last > $last_version ;
+
+}
+
+sub new_version {
+	last_version() + 1;
+}
+=cut
+
+=comment
+my $wav = Wav->new( head => vocal);
+
+$wav->versions;
+$wav->head  # vocal
+$wav->n     # 3 i.e. track 3
+$wav->active
+$wav->targets
+$wav->full_path
+
+returns numbers
+
+$wav->targets
+
+returns targets
+
+=cut
 
 1;
 __END__

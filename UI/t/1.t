@@ -37,10 +37,14 @@ my $gui = UI::Graphical->new;
 diag("there's what HE did wrong");
 #is( "three", "four", 'new() returned something' );
 diag("here's what went wrong");
-is(defined $gui, 1, "Test instantiation" );
-is( $gui->isa('UI'),1, "Test parent class affiliation" );
-$gui->prepare; 
-$gui->loop;
+is(defined $gui, 1, "UI instantiation" );
+is( $gui->isa('UI'),1, "Parent class for ". ref $gui);
+my $s = Session->new(name => 'paul_brocante');
+is(defined $s, 1, "Session instantiation" );
+is( $s->isa('UI'),1, "Parent class for ". ref $gui);
+diag( $s->session_dir );
+#$gui->prepare; 
+#$gui->loop;
 __END__
 #is( defined $gui, 6,  'new() returned something' );
 #is( $gui->isa('UI'), 1,"  and it's the right class" );

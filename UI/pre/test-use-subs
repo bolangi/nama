@@ -1,0 +1,4 @@
+use subs qw(hello);
+sub hello { print "hellow orld"}
+package a;
+&hello;
