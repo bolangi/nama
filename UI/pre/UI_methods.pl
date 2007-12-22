@@ -8,20 +8,37 @@ use Carp;
 # 'object is actually represented by a pair of directories.
 # in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
+=comment
+sub new { my $class = shift; return bless {@_}, $class }
+ 		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+
+=cut
 my $root_class = '::';
-sub new {
-
-	# only argument is mode: Text or Graphical
-	
-             my $class = shift;
-			 my %h = ( @_ );
-			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-             return bless { @_ },
-			  $class eq $root_class  && $h{mode} 
-					? "$root_class\::" . $h{mode} 
-					: $class;
+my @gui = qw(tk gui graphic graphical);
+my @text = qw(text txt);
+sub new { my $class = shift;
+            my $mode = lc shift; # Text or Graphical
+            $mode eq 'tk'
+        or  $mode eq 'gui'
+        or  $mode eq 'graphic'
+        or  $mode eq 'graphical'
+        and return bless { @_ },
+            ::Graphical
+        or  $mode eq 'text'
+        and return bless { @_ },
+            ::Text
 }
+=comment
 
+	my $class = shift;
+	my $text = "$root_class\::Text";
+	my $graphic = "$root_class\::Graphical";
+	shift; return bless {@_}, $graphic 
+		if $class eq $root_class and grep {lc $_[0] eq $_} @gui ;
+	shift; return bless {@_}, $text
+		if $class eq $root_class and grep {lc $_[0] eq $_} @text;
+	return bless {@_}, $root_class
+=cut
 sub wav_dir { $wav_dir };
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }

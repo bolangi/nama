@@ -1,3 +1,11 @@
+
+=comment
+## this sub is unused, unaccessible
+
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 return bless {%fields, @_}, $class }
+=cut
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}

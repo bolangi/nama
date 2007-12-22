@@ -28,21 +28,33 @@ getopts('mcegsd', \%opts);
 # m: don't load state info
 # e: don't load static effects data
 $session_name = shift;
-$debug and print "session name: $session_name\n";
+diag("session name: $session_name\n");
+my $ui = UI->new('tk');;
+is(defined $ui, 1, "UI instantiation" );
+is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 
-#sub hello {print "superclass hello\n"};
-#sub hello {print "make a window\n";}
-#sub hello {print "hello world!\n"}
-my $gui = UI::Graphical->new;
-diag("there's what HE did wrong");
-#is( "three", "four", 'new() returned something' );
-diag("here's what went wrong");
-is(defined $gui, 1, "UI instantiation" );
-is( $gui->isa('UI'),1, "Parent class for ". ref $gui);
-my $s = Session->new(name => 'paul_brocante');
+__END__
+diag "using UI::Graphical->new";
+my $ui = UI::Graphical->new;
+is(defined $ui, 1, "UI instantiation" );
+is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
+diag "UI->new(mode => 'Text')";
+$ui = '';
+$ui = UI->new(mode =>'Text');;
+is(defined $ui, 1, "UI instantiation" );
+is( $ui->isa('UI::Text'),1, "Parent class for ". ref $ui);
+
+
+
+
+__END__
+my $s = UI::Session->new(name => 'paul_brocante');
 is(defined $s, 1, "Session instantiation" );
-is( $s->isa('UI'),1, "Parent class for ". ref $gui);
-diag( $s->session_dir );
+is( $s->isa('UI::Session'),1, "Parent class for ". ref $s);
+$nom = 'paul_brocante';
+$UI::wav_dir = '/media/sessions';
+$UI::session_name = $nom;
+is( $s->session_dir , '/media/sessions/.ecmd/paul_brocante', "Directory shows");
 #$gui->prepare; 
 #$gui->loop;
 __END__
