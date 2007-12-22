@@ -29,21 +29,24 @@ getopts('mcegsd', \%opts);
 # e: don't load static effects data
 $session_name = shift;
 diag("session name: $session_name\n");
-my $ui = UI->new('tk');;
-is(defined $ui, 1, "UI instantiation" );
-is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 
-__END__
 diag "using UI::Graphical->new";
 my $ui = UI::Graphical->new;
 is(defined $ui, 1, "UI instantiation" );
 is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
-diag "UI->new(mode => 'Text')";
 $ui = '';
-$ui = UI->new(mode =>'Text');;
+$ui = UI->new('tk');;
 is(defined $ui, 1, "UI instantiation" );
-is( $ui->isa('UI::Text'),1, "Parent class for ". ref $ui);
+is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
+$ui = '';
+$ui = UI->new('tk');;
+is(defined $ui, 1, "UI instantiation" );
+is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 
+__END__
+my $ui = UI->new('tk');;
+is(defined $ui, 1, "UI instantiation" );
+is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 
 
 

@@ -757,12 +757,18 @@ use Carp;
 # of only a name. But how would that help? Each
 # 'object is actually represented by a pair of directories.
 # in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
-
-=comment
 sub new { my $class = shift; return bless {@_}, $class }
  		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 
-=cut
+=comment
+	my $class = shift;
+	my $text = "$root_class\::Text";
+	my $graphic = "$root_class\::Graphical";
+	shift; return bless {@_}, $graphic 
+		if $class eq $root_class and grep {lc $_[0] eq $_} @gui ;
+	shift; return bless {@_}, $text
+		if $class eq $root_class and grep {lc $_[0] eq $_} @text;
+	return bless {@_}, $root_class
 my $root_class = 'UI';
 my @gui = qw(tk gui graphic graphical);
 my @text = qw(text txt);
@@ -778,16 +784,6 @@ sub new { my $class = shift;
         and return bless { @_ },
             UI::Text
 }
-=comment
-
-	my $class = shift;
-	my $text = "$root_class\::Text";
-	my $graphic = "$root_class\::Graphical";
-	shift; return bless {@_}, $graphic 
-		if $class eq $root_class and grep {lc $_[0] eq $_} @gui ;
-	shift; return bless {@_}, $text
-		if $class eq $root_class and grep {lc $_[0] eq $_} @text;
-	return bless {@_}, $root_class
 =cut
 sub wav_dir { $wav_dir };
 sub config_file { "config" }
@@ -3333,13 +3329,8 @@ sub remove_spaces { UI::remove_spaces() }
 
 sub hello {"make a window";}
 
-=comment
-## this sub is unused, unaccessible
-
-sub new { my $class = shift; 
- 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-		 return bless {%fields, @_}, $class }
-=cut
+# croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+sub new { my $class = shift; return bless {@_}, $class }
 sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
@@ -4400,7 +4391,7 @@ sub remove_spaces { UI::remove_spaces() }
 
 ## Some of these, notably new, will be overwritten
 ## by definitions that follow
-#sub new { my $class = shift; return bless { @_ }, $class; }
+sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
