@@ -1,0 +1,2 @@
+rw$ grep 'state_c{$n}' UI_methods.pl | perl -ne '/{(\w+)}/ and $key{$1}++; END{pnt join " ", keys %key}'
+targets vol ops active file pan versions ch_r ch_m offset rw

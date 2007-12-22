@@ -118,7 +118,9 @@ our (
 	%effect_i,		# an index
 	@ladspa_sorted, # ld
 	%effects_ladspa,# an index
-	$e,				# a counter for partitioning the effects into groups
+	$e,				# the name of the variable holding
+					# the Ecasound engine object.
+					
 	$last_version,  # to know where the next recording should start
 	$monitor_version,# which global version we are currently using
 	%e_bound,		# for displaying hundreds of effects in groups
@@ -302,7 +304,7 @@ our (
 
 						@effects		
 						%effect_i	
-						@sorted_ladspa
+						@ladspa_sorted
 						%effects_ladspa		 );
 
 @effects_dynamic_vars = qw(
@@ -358,7 +360,7 @@ raw_to_disk_format: cd-mono
 mixname: mix
 ladspa_sample_rate: frequency
 unit: 1 				
-effects_cache_file: effects_cache
+effects_cache_file: effects_cache.yaml
 state_store_file: State 
 chain_setup_file: session.ecs
 alias:
@@ -645,10 +647,17 @@ sub destroy_widgets {}
 package UI;
 use Carp;
 
+# Once we have set $session_name, everything starts
+# happening. Conversely, nothing can happen without
+# a session_name. We coudl have session objects, consisting
+# of only a name. But how would that help? Each
+# 'object is actually represented by a pair of directories.
+# in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
+
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
-sub this_wav_dir {join_path($wav_dir, $session_name)}
-sub session_dir  { $session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
+sub this_wav_dir {$session_name and join_path($wav_dir, $session_name) }
+sub session_dir  {$session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
 
 sub prepare {  # actions begin here
 
@@ -657,18 +666,18 @@ sub prepare {  # actions begin here
     $yw = Data::YAML::Writer->new;
     $yr = Data::YAML::Reader->new;
 
-	$debug and print ("\%opts\n======\n", yaml_out (\%opts)); ; 
+	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
 	$opts{g} and $gui = 1;
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
+	read_config(); # my first attempt
+
 	$opts{d} and $wav_dir = $opts{d};
 
-	read_config();
-
-	-d $wav_dir or carp("$wav_dir not found, invoke using -d option or patching it into the \$default config file\n. I think there must be a method call for it, too!");
+	-d $wav_dir or carp("wav_dir: '$wav_dir' not found, invoke using -d option ");
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -681,7 +690,6 @@ sub prepare {  # actions begin here
 #sub prepare { print "hello preparer!!" }
 	
 sub eval_iam {
-	my $debug = 1;
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -743,12 +751,15 @@ sub substitute{
 
 sub load_session {
 	my $hash = shift;
-	$debug = 1;
 	$debug2 and print "&load_session\n";
 	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
+	return unless $hash->{name} or $session;
+
+	# we could be called from Tk with variable $session _or_
+	# called with a hash with 'name' and 'create' fields.
+	
 	$session = remove_spaces($session); # internal spaces to underscores
 	$session_name = $hash->{name} ? $hash->{name} : $session;
-	print ("session name required\n"), return if !  $session_name;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
 		map{create_dir} &this_wav_dir, &session_dir;
@@ -767,7 +778,6 @@ sub session_init{
 	$debug2 and print "&session_init\n";
 	initialize_session_data();
 	remove_small_wavs(); 
-	## XXX need second argument
 	retrieve_state(join_path(&session_dir,$state_store_file)) unless $opts{m};
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	global_version_buttons();
@@ -945,7 +955,7 @@ sub find_wavs {
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	$debug and print "\%versions\n================\n", yaml_out (\%versions);
+	$debug and print "\%versions\n================\n", yaml_out(\%versions);
 		delete $state_c{$n}->{targets};
 		$state_c{$n}->{targets} = { %versions };
 
@@ -1042,186 +1052,6 @@ sub add_pan_control {
 	
 	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
 }
-sub effect_button {
-	$debug2 and print "&effect_button\n";
-	my ($n, $label, $start, $end) = @_;
-	$debug and print "chain $n label $label start $start end $end\n";
-	my @items;
-	my $widget;
-	my @indices = ($start..$end);
-	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
-		@indices = ();
-		@indices = @ladspa_sorted[$start..$end];
-		#	print "length sorted indices list: ".scalar @indices. "\n";
-#	print join " ", @indices;
-	}
-		
-		for my $j (@indices) { 
-=comment
-	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
-		print "adding effect: $effects[$j]->{name}\n";
-		}
-=cut
-		push @items, 				
-			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
-				-command  => sub { 
-					 add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
-					$ew->deiconify; # display effects window
-					} 
-			];
-	}
-	$widget = $track_frame->Menubutton(
-		-text => $label,
-		-tearoff =>0,
-		-menuitems => [@items],
-	);
-	$widget;
-}
-sub make_scale {
-	# my $debug = 1;
-	$debug2 and print "&make_scale\n";
-	my $ref = shift;
-	my %p = %{$ref};
-=comment
-	%p contains following:
-	cop_id   => operator id, to access dynamic effect params in %copp
-	parent => parent widget, i.e. the frame
-	p_num      => parameter number, starting at 0
-	length       => length widget # optional 
-=cut
-	my $id = $p{cop_id};
-	my $n = $cops{$id}->{chain};
-	my $code = $cops{$id}->{type};
-	my $p  = $p{p_num};
-	my $i  = $effect_i{$code};
-
-	$debug and print "id: $id code: $code\n";
-	
-
-	# check display format, may be text-field or hidden,
-
-	$debug and  print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
-	my $display_type = $cops{$id}->{display};
-	defined $display_type or $display_type = $effects[$i]->{display};
-	$debug and print "display type: $display_type\n";
-	return if $display_type eq q(hidden);
-
-
-	$debug and print "to: ", $effects[$i]->{params}->[$p]->{end}, "\n";
-	$debug and print "p: $p code: $code\n";
-
-	# set display type to individually specified value if it exists
-	# otherwise to the default for the controller class
-
-
-	
-	if 	($display_type eq q(scale) ) { 
-
-		# return scale type controller widgets
-		my $frame = ${ $p{parent} }->Frame;
-			
-
-		#return ${ $p{parent} }->Scale(
-		
-		my $log_display;
-		
-		my $controller = $frame->Scale(
-			-variable => \$copp{$id}->[$p],
-			-orient => 'horizontal',
-			-from   =>   $effects[$i]->{params}->[$p]->{begin},
-			-to   =>     $effects[$i]->{params}->[$p]->{end},
-			-resolution => ($effects[$i]->{params}->[$p]->{resolution} 
-				?  $effects[$i]->{params}->[$p]->{resolution}
-				: abs($effects[$i]->{params}->[$p]->{end} - 
-					$effects[$i]->{params}->[$p]->{begin} ) > 30 
-						? 1 
-						: abs($effects[$i]->{params}->[$p]->{end} - 
-							$effects[$i]->{params}->[$p]->{begin} ) / 100),
-		  -width => 12,
-		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) }
-		  );
-
-		# auxiliary field for logarithmic display
-		no warnings;	
-		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
-			my $log_display = $frame->Label(
-				-text => exp $effects[$i]->{params}->[$p]->{default},
-				-width => 5,
-				);
-			$controller->configure(
-		  		-command => sub { 
-					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
-					$log_display->configure(
-						-text => $effects[$i]->{params}->[$p]->{name} =~ /hz/i
-							? int exp $copp{$id}->[$p]
-							: dn(exp $copp{$id}->[$p], 1)
-						);
-					}
-				);
-		$log_display->grid($controller);
-		}
-		else { $controller->grid; }
-
-		return $frame;
-		use warnings;
-
-	}	
-
-	elsif ($display_type eq q(field) ){ 
-
-	 	# then return field type controller widget
-
-		return ${ $p{parent} }->Entry(
-			-textvariable =>\$copp{$id}->[$p],
-			-width => 6,
-	#		-command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) },
-			# doesn't work with Entry widget
-			);	
-
-	}
-	else { croak "missing or unexpected display type: $display_type" }
-
-}
-=comment
-sub is_soloing {
-	my $n = shift;	
-	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
-}
-sub toggle_muting {
-	my ($widget, $n) = @_;
-	toggle_mute($n);
-	if (is_muted($n)){
-		$widget->configure(-background => 'brown');
-		$widget->configure(-activebackground => 'brown');
-	} 
-	else {
-		$widget->configure(-background => $old_bg);
-		$widget->configure(-activebackground => $old_bg);
-	}
-}
-sub toggle_mute {
-	my $setup = eval_iam("cs-connected");
-	$setup =~ /$session_name/ or return; # only work if connected setup
-	my $n = shift;
-	is_muted();
-	eval_iam("c-select $n");
-	eval_iam("c-muting");
-	is_muted();
-}
-sub is_muted {
-	my $n = shift;
-		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
-		# print "CS: $cs\n";
-		my $status = $cs =~ /muted/;
-		print ( $status 
-			? "track $n: muted\n"
-			: "track $n: not muted\n"
-
-		);
-		$status;
-}
-=cut
 ## support functions
 
 sub create_dir {
@@ -2430,17 +2260,18 @@ sub apply_op {
 sub prepare_static_effects_data{
 	$debug2 and print "&prepare_static_effects_data\n";
 
-
 	my $effects_cache = join_path($wav_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
+	$debug and print "looking for effects cache: $effects_cache\n";
 	if (-f $effects_cache){ 
-		$debug and print "looking for effects cache: $effects_cache\n";
+		$debug and print "found it!\n";
 		assign_vars($effects_cache, @effects_static_vars);
 	} else {
-		$debug and print "reading in effects data\n";
+		local $debug = 0;
+		$debug and print "reading in effects data, please wait...\n";
 		read_in_effects_data(); 
 		get_ladspa_hints();
 		integrate_ladspa_hints();
@@ -2477,6 +2308,7 @@ sub extract_effects_data {
 	}
 }
 sub sort_ladspa_effects {
+	local $debug = 1;
 	$debug2 and print "&sort_ladspa_effects\n";
 #	print yaml_out(\%e_bound); 
 	my $aa = $e_bound{ladspa}{a};
@@ -2485,10 +2317,11 @@ sub sort_ladspa_effects {
 	map{push @ladspa_sorted, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
 	splice @ladspa_sorted, $aa, 0,
 		 sort { $effects[$a]->{name} cmp $effects[$b]->{name} } ($aa .. $zz) ;
-#		print "length: ". scalar @ladspa_sorted, "\n";
+	$debug and print "sorted array length: ". scalar @ladspa_sorted, "\n";
 }		
 sub read_in_effects_data {
 
+	$debug = 0;
 	read_in_tkeca_effects_data();
 
 	# read in other effects data
@@ -2615,7 +2448,7 @@ sub read_in_tkeca_effects_data {
 				my %p;
 				#print join " / ",splice (@row, 0,5), "\n";
 				@p{ qw(name begin end default resolution) }  =  splice @row, 0, 5;
-				# print "\%p\n======\n", yaml_out (\%p);
+				# print "\%p\n======\n", yaml_out(\%p);
 				push @{$effects[$i]->{params}}, \%p;
 
 			}
@@ -2844,10 +2677,10 @@ sub retrieve_state {
 	my $yamlfile = "$file.yaml" ;
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
-		$debug and print qq($yamlfile: YAML file found\n), return;
+		$debug and print qq($yamlfile: YAML file found\n);
 		$ref = assign_vars($yamlfile, @persistent_vars);
 	} elsif (-f $file) {
-		$debug and print qq($file: 'Storable' file found\n), return;
+		$debug and print qq($file: 'Storable' file found\n);
 		$ref = assign_vars($file, @persistent_vars);
 	} else {
 		$debug and 
@@ -3089,6 +2922,7 @@ sub assign_vars {
 
 	or ref $source and $ref = $source;
 
+$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
 #print join $/, "VARIABLES", @vars, '';
 croak "expected hash" if ref $ref =~ /HASH/;
 #exit;
@@ -3109,18 +2943,20 @@ croak "expected hash" if ref $ref =~ /HASH/;
 	$ref;
 }
 sub store_vars {
+	local $debug = 1;
 	# now we will only store in YAML
 	$debug2 and print "&store_vars\n";
-	my ($file, $var_list) = @_;
+	my ($file, @vars) = @_;
 	$file .= '.yaml' unless $file =~ /\.yaml$/;
+	$debug and print "vars: @vars\n";
 	$debug and print "file: $file\n";
-	my @vars = split "\n", $var_list;
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string =  q($state{)
 							. $identifier
 							. q(} = \\) # double backslash needed
 							. $_;
+	$debug and print "attempted to eval $eval_string\n";
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD
@@ -3228,6 +3064,7 @@ sub session_label_configure{ session_label_configure(@_)}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
 sub manifest { $ew->deiconify() }
+
 
 sub loop {
 	init_gui(); 
@@ -3971,6 +3808,188 @@ sub track_gui { # nearly 300 lines!
 
 	
 }
+
+sub effect_button {
+	$debug2 and print "&effect_button\n";
+	my ($n, $label, $start, $end) = @_;
+	$debug and print "chain $n label $label start $start end $end\n";
+	my @items;
+	my $widget;
+	my @indices = ($start..$end);
+	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
+		@indices = ();
+		@indices = @ladspa_sorted[$start..$end];
+		#	print "length sorted indices list: ".scalar @indices. "\n";
+#	print join " ", @indices;
+	}
+		
+		for my $j (@indices) { 
+=comment
+	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
+		print "adding effect: $effects[$j]->{name}\n";
+		}
+=cut
+		push @items, 				
+			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
+				-command  => sub { 
+					 add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
+					$ew->deiconify; # display effects window
+					} 
+			];
+	}
+	$widget = $track_frame->Menubutton(
+		-text => $label,
+		-tearoff =>0,
+		-menuitems => [@items],
+	);
+	$widget;
+}
+
+sub make_scale {
+	# my $debug = 1;
+	$debug2 and print "&make_scale\n";
+	my $ref = shift;
+	my %p = %{$ref};
+=comment
+	%p contains following:
+	cop_id   => operator id, to access dynamic effect params in %copp
+	parent => parent widget, i.e. the frame
+	p_num      => parameter number, starting at 0
+	length       => length widget # optional 
+=cut
+	my $id = $p{cop_id};
+	my $n = $cops{$id}->{chain};
+	my $code = $cops{$id}->{type};
+	my $p  = $p{p_num};
+	my $i  = $effect_i{$code};
+
+	$debug and print "id: $id code: $code\n";
+	
+
+	# check display format, may be text-field or hidden,
+
+	$debug and  print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
+	my $display_type = $cops{$id}->{display};
+	defined $display_type or $display_type = $effects[$i]->{display};
+	$debug and print "display type: $display_type\n";
+	return if $display_type eq q(hidden);
+
+
+	$debug and print "to: ", $effects[$i]->{params}->[$p]->{end}, "\n";
+	$debug and print "p: $p code: $code\n";
+
+	# set display type to individually specified value if it exists
+	# otherwise to the default for the controller class
+
+
+	
+	if 	($display_type eq q(scale) ) { 
+
+		# return scale type controller widgets
+		my $frame = ${ $p{parent} }->Frame;
+			
+
+		#return ${ $p{parent} }->Scale(
+		
+		my $log_display;
+		
+		my $controller = $frame->Scale(
+			-variable => \$copp{$id}->[$p],
+			-orient => 'horizontal',
+			-from   =>   $effects[$i]->{params}->[$p]->{begin},
+			-to   =>     $effects[$i]->{params}->[$p]->{end},
+			-resolution => ($effects[$i]->{params}->[$p]->{resolution} 
+				?  $effects[$i]->{params}->[$p]->{resolution}
+				: abs($effects[$i]->{params}->[$p]->{end} - 
+					$effects[$i]->{params}->[$p]->{begin} ) > 30 
+						? 1 
+						: abs($effects[$i]->{params}->[$p]->{end} - 
+							$effects[$i]->{params}->[$p]->{begin} ) / 100),
+		  -width => 12,
+		  -length => $p{length} ? $p{length} : 100,
+		  -command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) }
+		  );
+
+		# auxiliary field for logarithmic display
+		no warnings;	
+		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
+			my $log_display = $frame->Label(
+				-text => exp $effects[$i]->{params}->[$p]->{default},
+				-width => 5,
+				);
+			$controller->configure(
+		  		-command => sub { 
+					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
+					$log_display->configure(
+						-text => $effects[$i]->{params}->[$p]->{name} =~ /hz/i
+							? int exp $copp{$id}->[$p]
+							: dn(exp $copp{$id}->[$p], 1)
+						);
+					}
+				);
+		$log_display->grid($controller);
+		}
+		else { $controller->grid; }
+
+		return $frame;
+		use warnings;
+
+	}	
+
+	elsif ($display_type eq q(field) ){ 
+
+	 	# then return field type controller widget
+
+		return ${ $p{parent} }->Entry(
+			-textvariable =>\$copp{$id}->[$p],
+			-width => 6,
+	#		-command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) },
+			# doesn't work with Entry widget
+			);	
+
+	}
+	else { croak "missing or unexpected display type: $display_type" }
+
+}
+=comment
+sub is_soloing {
+	my $n = shift;	
+	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
+}
+sub toggle_muting {
+	my ($widget, $n) = @_;
+	toggle_mute($n);
+	if (is_muted($n)){
+		$widget->configure(-background => 'brown');
+		$widget->configure(-activebackground => 'brown');
+	} 
+	else {
+		$widget->configure(-background => $old_bg);
+		$widget->configure(-activebackground => $old_bg);
+	}
+}
+sub toggle_mute {
+	my $setup = eval_iam("cs-connected");
+	$setup =~ /$session_name/ or return; # only work if connected setup
+	my $n = shift;
+	is_muted();
+	eval_iam("c-select $n");
+	eval_iam("c-muting");
+	is_muted();
+}
+sub is_muted {
+	my $n = shift;
+		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
+		# print "CS: $cs\n";
+		my $status = $cs =~ /muted/;
+		print ( $status 
+			? "track $n: muted\n"
+			: "track $n: not muted\n"
+
+		);
+		$status;
+}
+=cut
 
 
 ## We also need stubs for procedural access to subs

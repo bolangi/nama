@@ -46,7 +46,7 @@
 
 						@effects		
 						%effect_i	
-						@sorted_ladspa
+						@ladspa_sorted
 						%effects_ladspa		 );
 
 @effects_dynamic_vars = qw(

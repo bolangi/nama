@@ -1,0 +1,102 @@
+The grammar does not seem to get control of the input lines.
+Maybe falling through the conditional.
+
+Once again, move all to P::R? Grammar? Why not?
+Then you'll get rid of all the conditionals.
+
+That is your program, anyway, to get rid of conditionals.
+TODO, get rid of that thing you so loved, build and tested.
+
+On the Graphical side, I have a typical error, probably
+caused by odd or missing number of elements, a kind of
+error that I remember spending many ours debugging.
+
+Neither is that daunting, yet I have the urge to plunge
+into the unknown, I could make a new branch, spend an hour
+in it. But first would come the usage
+
+
+package Track;
+our @ISA;
+use Object::Tiny qw(
+
+	targets 
+	vol 
+	ops 
+	active 
+	file 
+	pan 
+	versions 
+	ch_r 
+	ch_m 
+	offset 
+	rw
+);
+
+=comment
+
+	targets # matches version number to filenemae
+			# redirection for backing.wav to 
+			# show up as version 1 (usually backing_1.wav) 
+	vol     # my volume effect, EFFECT_ID
+	pan 	# my pan effect EFFECT_ID
+	ops 	# a list of my effects EFFECT_IDs
+	active 	# selected WAV file version
+	file	# filename root, i.e. vocal in vocal_5.wav
+			# the 'name' of the track
+	versions# integers representing a wav file 1 -> sax_1.wav
+	ch_r    # channel for recording to
+	ch_m    # channel for playing back
+	offset  # no idea!
+	rw 		# whether status is REC MON OR MUTE
+
+I would want to break that down to smaller objects
+
+Wav objects
+	
+	sax 6 -> sax_6.wav
+
+
+$state_c{$n}->{offset}
+
+package Wav
+
+
+my $wav = Wav->new( head => vocal);
+
+$wav->versions;
+$wav->head  # vocal
+$wav->i     # 3 i.e. track 3
+
+returns numbers
+
+$wav->targets
+
+returns targets
+
+$wav->full_path
+
+new branch called object
+
+first test out that code for set! 
+
+
+
+
+
+
+
+sub set {
+	my $self = shift;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} } keys %new_vals;
+}
+	
+	
+
+
+I also need, well, want to fix the @sorted_ladspa problem.
+That is related to yaml round tripping. could it be the 
+size of the array? Impossible. So look at the code. 

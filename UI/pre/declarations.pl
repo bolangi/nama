@@ -91,7 +91,9 @@ our (
 	%effect_i,		# an index
 	@ladspa_sorted, # ld
 	%effects_ladspa,# an index
-	$e,				# a counter for partitioning the effects into groups
+	$e,				# the name of the variable holding
+					# the Ecasound engine object.
+					
 	$last_version,  # to know where the next recording should start
 	$monitor_version,# which global version we are currently using
 	%e_bound,		# for displaying hundreds of effects in groups

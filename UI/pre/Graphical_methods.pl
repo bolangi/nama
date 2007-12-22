@@ -3,6 +3,7 @@ sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
 sub manifest { $ew->deiconify() }
 
+
 sub loop {
 	init_gui(); 
 	transport_gui();
@@ -745,3 +746,185 @@ sub track_gui { # nearly 300 lines!
 
 	
 }
+
+sub effect_button {
+	$debug2 and print "&effect_button\n";
+	my ($n, $label, $start, $end) = @_;
+	$debug and print "chain $n label $label start $start end $end\n";
+	my @items;
+	my $widget;
+	my @indices = ($start..$end);
+	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
+		@indices = ();
+		@indices = @ladspa_sorted[$start..$end];
+		#	print "length sorted indices list: ".scalar @indices. "\n";
+#	print join " ", @indices;
+	}
+		
+		for my $j (@indices) { 
+=comment
+	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
+		print "adding effect: $effects[$j]->{name}\n";
+		}
+=cut
+		push @items, 				
+			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
+				-command  => sub { 
+					 add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
+					$ew->deiconify; # display effects window
+					} 
+			];
+	}
+	$widget = $track_frame->Menubutton(
+		-text => $label,
+		-tearoff =>0,
+		-menuitems => [@items],
+	);
+	$widget;
+}
+
+sub make_scale {
+	# my $debug = 1;
+	$debug2 and print "&make_scale\n";
+	my $ref = shift;
+	my %p = %{$ref};
+=comment
+	%p contains following:
+	cop_id   => operator id, to access dynamic effect params in %copp
+	parent => parent widget, i.e. the frame
+	p_num      => parameter number, starting at 0
+	length       => length widget # optional 
+=cut
+	my $id = $p{cop_id};
+	my $n = $cops{$id}->{chain};
+	my $code = $cops{$id}->{type};
+	my $p  = $p{p_num};
+	my $i  = $effect_i{$code};
+
+	$debug and print "id: $id code: $code\n";
+	
+
+	# check display format, may be text-field or hidden,
+
+	$debug and  print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
+	my $display_type = $cops{$id}->{display};
+	defined $display_type or $display_type = $effects[$i]->{display};
+	$debug and print "display type: $display_type\n";
+	return if $display_type eq q(hidden);
+
+
+	$debug and print "to: ", $effects[$i]->{params}->[$p]->{end}, "\n";
+	$debug and print "p: $p code: $code\n";
+
+	# set display type to individually specified value if it exists
+	# otherwise to the default for the controller class
+
+
+	
+	if 	($display_type eq q(scale) ) { 
+
+		# return scale type controller widgets
+		my $frame = ${ $p{parent} }->Frame;
+			
+
+		#return ${ $p{parent} }->Scale(
+		
+		my $log_display;
+		
+		my $controller = $frame->Scale(
+			-variable => \$copp{$id}->[$p],
+			-orient => 'horizontal',
+			-from   =>   $effects[$i]->{params}->[$p]->{begin},
+			-to   =>     $effects[$i]->{params}->[$p]->{end},
+			-resolution => ($effects[$i]->{params}->[$p]->{resolution} 
+				?  $effects[$i]->{params}->[$p]->{resolution}
+				: abs($effects[$i]->{params}->[$p]->{end} - 
+					$effects[$i]->{params}->[$p]->{begin} ) > 30 
+						? 1 
+						: abs($effects[$i]->{params}->[$p]->{end} - 
+							$effects[$i]->{params}->[$p]->{begin} ) / 100),
+		  -width => 12,
+		  -length => $p{length} ? $p{length} : 100,
+		  -command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) }
+		  );
+
+		# auxiliary field for logarithmic display
+		no warnings;	
+		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
+			my $log_display = $frame->Label(
+				-text => exp $effects[$i]->{params}->[$p]->{default},
+				-width => 5,
+				);
+			$controller->configure(
+		  		-command => sub { 
+					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
+					$log_display->configure(
+						-text => $effects[$i]->{params}->[$p]->{name} =~ /hz/i
+							? int exp $copp{$id}->[$p]
+							: dn(exp $copp{$id}->[$p], 1)
+						);
+					}
+				);
+		$log_display->grid($controller);
+		}
+		else { $controller->grid; }
+
+		return $frame;
+		use warnings;
+
+	}	
+
+	elsif ($display_type eq q(field) ){ 
+
+	 	# then return field type controller widget
+
+		return ${ $p{parent} }->Entry(
+			-textvariable =>\$copp{$id}->[$p],
+			-width => 6,
+	#		-command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) },
+			# doesn't work with Entry widget
+			);	
+
+	}
+	else { croak "missing or unexpected display type: $display_type" }
+
+}
+=comment
+sub is_soloing {
+	my $n = shift;	
+	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
+}
+sub toggle_muting {
+	my ($widget, $n) = @_;
+	toggle_mute($n);
+	if (is_muted($n)){
+		$widget->configure(-background => 'brown');
+		$widget->configure(-activebackground => 'brown');
+	} 
+	else {
+		$widget->configure(-background => $old_bg);
+		$widget->configure(-activebackground => $old_bg);
+	}
+}
+sub toggle_mute {
+	my $setup = eval_iam("cs-connected");
+	$setup =~ /$session_name/ or return; # only work if connected setup
+	my $n = shift;
+	is_muted();
+	eval_iam("c-select $n");
+	eval_iam("c-muting");
+	is_muted();
+}
+sub is_muted {
+	my $n = shift;
+		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
+		# print "CS: $cs\n";
+		my $status = $cs =~ /muted/;
+		print ( $status 
+			? "track $n: muted\n"
+			: "track $n: not muted\n"
+
+		);
+		$status;
+}
+=cut
