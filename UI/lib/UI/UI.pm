@@ -432,9 +432,6 @@ save_effects
 r
 r5
 retrieve_effects
-store_vars
-yaml_out
-yaml_in
 arm_mark
 colonize
 mark
@@ -3044,45 +3041,6 @@ sub retrieve_effects {
 	# $ew->deiconify or $ew->iconify;
 
 }
-sub store_vars {
-	local $debug = 1;
-	# now we will only store in YAML
-	$debug2 and print "&store_vars\n";
-	my ($file, @vars) = @_;
-	$file .= '.yaml' unless $file =~ /\.yaml$/;
-	$debug and print "vars: @vars\n";
-	$debug and print "file: $file\n";
-	my %state;
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string =  q($state{)
-							. $identifier
-							. q(} = \\) # double backslash needed
-							. $_;
-	$debug and print "attempted to eval $eval_string\n";
-	eval($eval_string) or print "failed to eval $eval_string: $!\n";
-	} @vars;
-	# my $result1 = store \%state, $file; # OLD METHOD
-	my $yamlout = yaml_out(\%state);
-	$yamlout > io $file;
-
-}
-sub yaml_out {
-	$debug2 and print "&yaml_out\n";
-	my ($data_ref) = shift; 
-	my $type = ref $data_ref;
-	$debug and print "data ref type: $type\n "; 
-	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
-	croak "attempting to code wrong data type: $type"
-		if $type !~ /HASH|ARRAY/;
-	my $output;
-    $yw->write( $data_ref, \$output ); 
-	$output;
-}
-sub yaml_in {
-	my $file = shift;
-	my $yaml = io($file)->all;
-	$yr->read( $yaml ); # returns ref
-}
 
 	
 
@@ -3291,6 +3249,45 @@ sub assign_vars {
 }
 
 
+sub store_vars {
+	local $debug = 1;
+	# now we will only store in YAML
+	$debug2 and print "&store_vars\n";
+	my ($file, @vars) = @_;
+	$file .= '.yaml' unless $file =~ /\.yaml$/;
+	$debug and print "vars: @vars\n";
+	$debug and print "file: $file\n";
+	my %state;
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string =  q($state{)
+							. $identifier
+							. q(} = \\) # double backslash needed
+							. $_;
+	$debug and print "attempted to eval $eval_string\n";
+	eval($eval_string) or print "failed to eval $eval_string: $!\n";
+	} @vars;
+	# my $result1 = store \%state, $file; # OLD METHOD
+	my $yamlout = yaml_out(\%state);
+	$yamlout > io $file;
+
+}
+sub yaml_out {
+	$debug2 and print "&yaml_out\n";
+	my ($data_ref) = shift; 
+	my $type = ref $data_ref;
+	$debug and print "data ref type: $type\n "; 
+	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+	croak "attempting to code wrong data type: $type"
+		if $type !~ /HASH|ARRAY/;
+	my $output;
+    $yw->write( $data_ref, \$output ); 
+	$output;
+}
+sub yaml_in {
+	my $file = shift;
+	my $yaml = io($file)->all;
+	$yr->read( $yaml ); # returns ref
+}
 
 
 ## no-op graphic methods to inherit by Text
@@ -3420,9 +3417,6 @@ sub save_effects { UI::save_effects() }
 sub r { UI::r() }
 sub r5 { UI::r5() }
 sub retrieve_effects { UI::retrieve_effects() }
-sub store_vars { UI::store_vars() }
-sub yaml_out { UI::yaml_out() }
-sub yaml_in { UI::yaml_in() }
 sub arm_mark { UI::arm_mark() }
 sub colonize { UI::colonize() }
 sub mark { UI::mark() }
@@ -4483,9 +4477,6 @@ sub save_effects { UI::save_effects() }
 sub r { UI::r() }
 sub r5 { UI::r5() }
 sub retrieve_effects { UI::retrieve_effects() }
-sub store_vars { UI::store_vars() }
-sub yaml_out { UI::yaml_out() }
-sub yaml_in { UI::yaml_in() }
 sub arm_mark { UI::arm_mark() }
 sub colonize { UI::colonize() }
 sub mark { UI::mark() }
