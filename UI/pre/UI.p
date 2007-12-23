@@ -1,5 +1,5 @@
 use 5.008;
-use strict qw(vars);
+use strict qw(vars subs);
 use warnings;
 use lib "$ENV{HOME}/build/flow/UI/lib"; 
 

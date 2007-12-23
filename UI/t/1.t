@@ -35,13 +35,16 @@ my $ui = UI::Graphical->new;
 is(defined $ui, 1, "UI instantiation" );
 is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 $ui = '';
-$ui = UI->new('tk');;
+diag "using UI::Text->new";
+$ui = UI::Text->new;
 is(defined $ui, 1, "UI instantiation" );
-is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
+is( $ui->isa('UI::Text'),1, "Parent class for ". ref $ui);
 $ui = '';
+=comment
 $ui = UI->new('tk');;
 is(defined $ui, 1, "UI instantiation" );
 is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
+=cut
 
 __END__
 my $ui = UI->new('tk');;

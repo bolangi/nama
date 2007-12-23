@@ -1,49 +1,38 @@
 package ::;
 use Carp;
-
-# Once we have set $session_name, everything starts
-# happening. Conversely, nothing can happen without
-# a session_name. We coudl have session objects, consisting
-# of only a name. But how would that help? Each
-# 'object is actually represented by a pair of directories.
-# in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
+=comment
+TODO remove wav_dir from config file. 
+or store session files in ~/.ecmd
+or make it .ecmdrc! simple is better.
+.ecmd
+.ecmdrc = config.yaml
+=cut
 sub new { my $class = shift; return bless {@_}, $class }
  		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-
 =comment
-	my $class = shift;
-	my $text = "$root_class\::Text";
-	my $graphic = "$root_class\::Graphical";
-	shift; return bless {@_}, $graphic 
-		if $class eq $root_class and grep {lc $_[0] eq $_} @gui ;
-	shift; return bless {@_}, $text
-		if $class eq $root_class and grep {lc $_[0] eq $_} @text;
-	return bless {@_}, $root_class
-my $root_class = '::';
-my @gui = qw(tk gui graphic graphical);
-my @text = qw(text txt);
+my $root_class = '::'; 
 sub new { my $class = shift;
-            my $mode = lc shift; # Text or Graphical
-            $mode eq 'tk'
-        or  $mode eq 'gui'
-        or  $mode eq 'graphic'
-        or  $mode eq 'graphical'
-        and return bless { @_ },
-            ::Graphical
-        or  $mode eq 'text'
-        and return bless { @_ },
-            ::Text
+	my %h = ( @_ );
+
+	if (@_ % 2){
+		return bless { @_ },
+		$class eq $root_class  && $h{mode} 
+			? "$root_class\::" . $h{mode} 
+			: $class;
+
+	} else { return bless {@_}, $class } 
 }
+
 =cut
-sub wav_dir { $wav_dir };
 sub config_file { "config" }
 sub ecmd_dir { ".ecmd" }
-sub this_wav_dir {$session_name and join_path($wav_dir, $session_name) }
-sub session_dir  {$session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
+sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
+sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name) }
 
 
-sub prepare {  # actions begin here
+sub prepare {  # a few actions begin
 
+	local $debug = 0;
 	$debug2 and print "&prepare\n";
 
     $yw = Data::YAML::Writer->new;
@@ -52,15 +41,25 @@ sub prepare {  # actions begin here
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
+
 	$opts{g} and $gui = 1;
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
-	read_config(); # my first attempt
+	## now i should read .ecmdrc
+	## should have .ecmd holding files.
+	
+	## but for me, i am really really happy to read my 
+	# internal ones. 
+	
+	read_config(); # sets $wav_dir
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or carp("wav_dir: '$wav_dir' not found, invoke using -d option ");
+	-d $wav_dir or croak
+
+	("wav_dir: '$wav_dir' not found, invoke using -d option ");
+
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -68,10 +67,20 @@ sub prepare {  # actions begin here
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
+	# $debug and print yaml_out( \@oids );
+	# in order to do this I would need to
+	# adapt &walk to take a coderef
+	# and apply to leaves, to replace CODE in a
+	# leaf by some dummy text. But there is
+	# no need for it now.
+	
+	$debug and print "wav_dir: ", wav_dir(), $/;
+	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
+	$debug and print "session_dir: ", &session_dir , $/;
 	1;	
 }
-#sub prepare { print "hello preparer!!" }
-	
+sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
+
 sub eval_iam {
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
@@ -87,7 +96,7 @@ sub eval_iam {
 ## configuration file
 
 sub global_config{
-	my $config = join_path( $wav_dir, &ecmd_dir, &config_file );
+	my $config = join_path( &wav_dir, &ecmd_dir, &config_file );
 	-f $config and io($config)->all;
 }
 sub session_config {
@@ -956,9 +965,15 @@ sub initialize_oids {
 # my $debug = 1;
 
 # these are templates for building chains
-
-map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
-map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
+map {	
+	my $name = $_;
+	map{ 		defined $_->{$name} 
+					and $_->{$name} =~ /(&)(.+)/ 
+					and $_->{$name} = \&$2 
+	} @oids; 
+} qw( post_input pre_output);
+#map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
+#map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
 
 
 $debug and print "rec_setup $oids[-1]->{input}\n";
@@ -1643,7 +1658,7 @@ sub apply_op {
 sub prepare_static_effects_data{
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path($wav_dir, $effects_cache_file);
+	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
@@ -2352,9 +2367,9 @@ sub yaml_out {
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
 	$debug and print "data ref type: $type\n "; 
+	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
 	croak "attempting to code wrong data type: $type"
 		if $type !~ /HASH|ARRAY/;
-#	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
 	my $output;
     $yw->write( $data_ref, \$output ); 
 	$output;
