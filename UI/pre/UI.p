@@ -126,7 +126,9 @@ sub hello {"hello world!";}
 ## by definitions that follow
 [% qx(cat ./Text_methods.pl ) %]
 
+## The following methods belong to the Session and Wav classes
 
+[% qx(cat ./Session_Wav.pl ) %]
 
 1;
 __END__

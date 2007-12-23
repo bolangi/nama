@@ -1,5 +1,13 @@
-
+## TODO
 =comment
+I have to get my Wav test environment back:
+	
+	UI.p including Session_Wav.pl with stubs
+
+	2_Wav.t including tests for Wavs. 
+
+
+
 Once we have set $session_name, everything starts
 happening. Conversely, nothing can happen without
 a session_name. We coudl have session objects, consisting
@@ -40,6 +48,28 @@ sub set {
 		or carp "illegal key: $_ for object of type ", ref $self,$/
 	} keys %new_vals;
 }
+sub explode {  
+# will not work for unversioned  vocal.wav
+	my $wav = shift;
+	map{  UI::Wav->new(head => $_) 
+
+		} map{ s/.wav$//i; $_} 
+
+			@{ [ values %{ $wav->targets } ] }
+}
+
+# package Track
+# usage: Track->new( WAV = [$vocal->explode] );
+# usage: Track->new( WAV = $vocal );
+# $vocal is a Wav,
+
+# following for objects to polymorph in taking 
+# arrays or array refs.
+sub deref_ {
+	my $ref = shift;
+	@_ = @{ $ref } if ref $_[0] =~ /ARRAY/;
+}
+
 
 ## aliases 
 
