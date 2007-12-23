@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl5.6.1 -w
+#!/usr/local/bin/perl5.8.8 -w
 #!/usr/bin/env perl
 use Carp;
 =comment

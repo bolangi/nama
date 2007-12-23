@@ -7,7 +7,8 @@
 						$chain_setup_file
 						%alias 			   
 						$tk_input_channels
-						$use_monitor_version_for_mixdown );
+						$use_monitor_version_for_mixdown 
+						$unit								);
 						
 @config_vars = qw(
 						%abbreviations

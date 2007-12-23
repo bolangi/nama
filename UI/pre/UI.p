@@ -79,6 +79,10 @@ sub hello {"superclass hello"}
 
 [% qx(cat ./UI_methods.pl ) %]
 
+## The following routines handle serializing data
+
+[% qx(cat ./Assign.pl ) %]
+
 ## no-op graphic methods to inherit by Text
 
 sub take_gui {}
@@ -125,6 +129,7 @@ sub hello {"hello world!";}
 ## Some of these, notably new, will be overwritten
 ## by definitions that follow
 [% qx(cat ./Text_methods.pl ) %]
+
 
 ## The following methods belong to the Session and Wav classes
 
