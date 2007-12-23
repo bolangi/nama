@@ -1,0 +1,211 @@
+#!/usr/local/bin/perl5.6.1 -w
+#!/usr/bin/env perl
+use Carp;
+use Storable;
+&init;
+=comment
+my $h = { a => {b => 'c'} };
+walk($h);
+exit;
+=cut
+use Data::Dumper;
+use Data::YAML::Reader;
+use Data::YAML::Writer;
+my $yr = Data::YAML::Reader->new;
+my $yw = Data::YAML::Writer->new;
+
+my @files = qw(
+/media/sessions/.ecmd/State
+/media/sessions/.ecmd/atsuko-d/State
+/media/sessions/.ecmd/atsuko-e/State
+/media/sessions/.ecmd/malone/State
+/media/sessions/.ecmd/paul_a/State
+/media/sessions/.ecmd/paul_brocante/State
+/media/sessions/.ecmd/ryan_taisho_b/State
+/media/sessions/.ecmd/self-test/State
+);
+map{ my $r = retrieve($_) ;
+	print "found: ", ref $r, $/;
+	assign( $r, @persistent_vars);
+	#print join $/, keys %{$r->{state_c}}
+	exit;
+	} @files;
+
+sub walk {
+	my $self = shift;
+	ref $self =~ /HASH/ and print ("HASH\n") and walk_hash($self)
+		or ref $self =~ /ARRAY/and print ("ARRAY\n") and walk_array($val)
+		or ! ref $self and print "val: $self\n";
+}
+	
+sub walk_array { map{ walk $_ } @{ $_[0] } }
+sub walk_hash {
+	my $hash = shift;
+	map {print $_, $/  } keys %{ $hash };
+	#walk ($hash->{$_})
+}
+
+sub assign_vars {
+	local $debug = 1;
+	# assigns vars in @var_list to values from $source
+	# $source can be a :
+	#      - filename or
+	#      - string containing YAML data
+	#      - reference to a hash array containing assignments
+	#
+	# returns a $ref containing the retrieved data structure
+	$debug2 and print "&assign_vars\n";
+	my ($source, @vars) = @_;
+	$debug and print "file: $source\n";
+	$debug and print "variable list: @vars\n";
+	my $ref;
+
+### figure out what to do with input
+
+	-f $source and $source eq 'State' 
+		and $debug and print ("found sourcefile: $source\n")
+		and $ref = retrieve($source) # Storable
+
+	## check for a filename
+
+	or -f $source and $source =~ /.yaml$/ 
+		and $ref = yaml_in($source)
+ 	
+	## check for a string
+
+	or  $source =~ /^\s*---/s 
+		and $ref = $yr->($source)
+
+	## pass a hash_ref to the assigner
+
+	or ref $source 
+		and $ref = $source;
+
+}
+sub assign{
+	my ($ref, @vars) = @_;
+	my @keys =  keys %{ $ref };
+	my %keys ;
+	@keys{ @keys } = 1..scalar @keys;
+#$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
+#$debug and print join $/, "VARIABLES", @vars, '';
+croak "expected hash" if ref $ref !~ /HASH/;
+	map{  
+		my $eval;
+		my $key = $_;
+		my ($full) = grep { /.$key$/ } @persistent_vars;
+		#my ($full ) = grep{ /(\w+)/ and ($key eq $1) }  
+		print "full: $full\n";;
+		my ($sigil, $identifier) = $full =~ /(.)(\w+)/;
+		#print "sigil: $sigil\n";
+		$eval .= $full;
+		$eval .= q( = );
+		if ($sigil eq '$') {
+			my $val;
+			if ($ref->{$identifier}) {
+				$val = ${ $ref->{$identifier}  };
+				$val =~ /[\d.]+/ or $val = qq("$val");
+			} 
+			else { $val = "undef" };
+			$eval .=  $val;
+			
+			#$ref->{$identifier} =~ /\w+/ 
+						#? qq("$ref->{$identifier}")
+
+						#: qq($ref->{$identifier});
+		}
+		else {
+			$eval .= qq($sigil\{);
+			$eval .= q($ref->{ );
+			$eval .= qq("$identifier");
+			$eval .= q( } );
+			$eval .= q( } );
+			#$eval .= q(if defined $ref->{ );
+			#$eval .= $identifier;
+			#$eval .= q( }; ) ;
+		}
+			#print $eval, $/, $/;
+			eval $eval or carp "failed to eval $eval: $!\n";
+	} @keys
+}
+sub yaml_out {
+	$debug2 and print "&yaml_out\n";
+	my ($data_ref) = shift; 
+	my $type = ref $data_ref;
+	$debug and print "data ref type: $type\n "; 
+	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+	croak "attempting to code wrong data type: $type"
+		if $type !~ /HASH|ARRAY/;
+	my $output;
+    $yw->write( $data_ref, \$output ); 
+	$output;
+}
+sub yaml_in {
+	my $file = shift;
+	my $yaml = io($file)->all;
+	$yr->read( $yaml ); # returns ref
+}
+
+sub init{
+
+@global_vars = qw(
+						$mixname
+						$effects_cache_file
+						$ladspa_sample_rate
+						$state_store_file
+						$chain_setup_file
+						%alias 			   
+						$tk_input_channels
+						$use_monitor_version_for_mixdown );
+						
+@config_vars = qw(
+						%abbreviations
+						%devices
+						$ecasound_globals
+						$mix_to_disk_format
+						$raw_to_disk_format
+						$mixer_out_format
+						$wav_dir 				);
+						
+						
+
+@persistent_vars = qw(
+
+						$monitor_version
+						$last_version 
+						%track_names 	
+						%state_c 		
+						%state_t 		
+						%cops 			
+						$cop_id 		
+						%copp 			
+						@all_chains 	
+						$i 				
+						$t 				
+						%take 			
+						@takes 			
+						%chain 			
+						@marks			
+						$unit			
+						%oid_status		
+						%old_vol		
+						$jack_on 			);
+					 
+@effects_static_vars = qw(
+
+						@effects		
+						%effect_i	
+						@ladspa_sorted
+						%effects_ladspa		 );
+
+@effects_dynamic_vars = qw(
+
+						%state_c_ops
+						%cops    
+						$cop_id     
+						%copp   
+						@marks 	
+						$unit				);
+
+
+}

@@ -2822,6 +2822,8 @@ sub retrieve_state {
 	
 	$debug2 and print "&retrieve_state\n";
 	my ($file)  = shift; # assuming $file will never have .yaml
+
+=comment
 	my $yamlfile = "$file.yaml" ;
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
@@ -2835,6 +2837,9 @@ sub retrieve_state {
 		carp("no state files found, neither $file, nor $yamlfile\n");
 		return;
 	}
+=cut
+
+	my $ref = assign_vars($file, @persistent_vars);
 
 	# variables successfully assigned
 
@@ -3040,6 +3045,7 @@ sub retrieve_effects {
 
 }
 sub assign_vars {
+	local $debug = 1;
 	# assigns vars in @var_list to values from $source
 	# $source can be a :
 	#      - filename or
@@ -3055,25 +3061,28 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	## check for State # using Data::Dumper
-	-f $source and $source eq 'State' and $ref = retrieve($source)
+	-f $source and $source eq 'State' 
+		and $debug and print ("found sourcefile: $source\n")
+		and $ref = retrieve($source) # Storable
 
 	## check for a filename
 
-	or -f $source and $ref = yaml_in($source)
+	or -f $source and $source =~ /.yaml$/ 
+		and $ref = yaml_in($source)
  	
 	## check for a string
 
-	or  $source =~ /^\s*---/s and $ref = $yr->($source)
+	or  $source =~ /^\s*---/s 
+		and $ref = $yr->($source)
 
 	## pass a hash_ref to the assigner
 
-	or ref $source and $ref = $source;
+	or ref $source 
+		and $ref = $source;
 
 $debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
-#print join $/, "VARIABLES", @vars, '';
-croak "expected hash" if ref $ref =~ /HASH/;
-#exit;
+$debug and print join $/, "VARIABLES", @vars, '';
+croak "expected hash" if ref $ref !~ /HASH/;
 ##
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval = $_;
