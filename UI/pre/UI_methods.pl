@@ -2295,6 +2295,8 @@ sub retrieve_effects {
 
 }
 sub assign_vars {
+	my ($source, @vars) = @_;
+	$debug2 and print "&assign_vars\n";
 	local $debug = 1;
 	# assigns vars in @var_list to values from $source
 	# $source can be a :
@@ -2303,8 +2305,6 @@ sub assign_vars {
 	#      - reference to a hash array containing assignments
 	#
 	# returns a $ref containing the retrieved data structure
-	$debug2 and print "&assign_vars\n";
-	my ($source, @vars) = @_;
 	$debug and print "file: $source\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
@@ -2329,25 +2329,54 @@ sub assign_vars {
 
 	or ref $source 
 		and $ref = $source;
+	assign($ref, @vars);
 
-$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
-$debug and print join $/, "VARIABLES", @vars, '';
+}
+sub assign{
+	my ($ref, @vars) = @_;
+	my @keys =  keys %{ $ref };
+	my %keys ;
+	@keys{ @keys } = 1..scalar @keys;
+#$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
+#$debug and print join $/, "VARIABLES", @vars, '';
 croak "expected hash" if ref $ref !~ /HASH/;
-##
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval = $_;
+	map{  
+		my $eval;
+		my $key = $_;
+		my ($full) = grep { /.$key$/ } @persistent_vars;
+		#my ($full ) = grep{ /(\w+)/ and ($key eq $1) }  
+		print "full: $full\n";;
+		my ($sigil, $identifier) = $full =~ /(.)(\w+)/;
+		#print "sigil: $sigil\n";
+		$eval .= $full;
 		$eval .= q( = );
-		$eval .= $sigil . q({ ) if $sigil ne '$';
-		$eval .= q($ref->{ );
-		$eval .= $identifier;
-		$eval .= q( } );
-		$eval .= qw(} ) if $sigil ne '$';
-		$eval .= q(if defined $ref->{ );
-		$eval .= $identifier;
-		$eval .= q( }; ) ;
-		eval $eval or carp "failed to eval $eval: $!\n";
-	} @vars;
-	$ref;
+		if ($sigil eq '$') {
+			my $val;
+			if ($ref->{$identifier}) {
+				$val = ${ $ref->{$identifier}  };
+				$val =~ /[\d.]+/ or $val = qq("$val");
+			} 
+			else { $val = "undef" };
+			$eval .=  $val;
+			
+			#$ref->{$identifier} =~ /\w+/ 
+						#? qq("$ref->{$identifier}")
+
+						#: qq($ref->{$identifier});
+		}
+		else {
+			$eval .= qq($sigil\{);
+			$eval .= q($ref->{ );
+			$eval .= qq("$identifier");
+			$eval .= q( } );
+			$eval .= q( } );
+			#$eval .= q(if defined $ref->{ );
+			#$eval .= $identifier;
+			#$eval .= q( }; ) ;
+		}
+			#print $eval, $/, $/;
+			eval $eval or carp "failed to eval $eval: $!\n";
+	} @keys
 }
 sub store_vars {
 	local $debug = 1;

@@ -1,14 +1,28 @@
 #!/usr/local/bin/perl5.6.1 -w
 #!/usr/bin/env perl
 use Carp;
+=comment
+my $struct = { 
+	foo => 2, 
+	name => 'John', 
+	face => [1,5,7,12],
+	dict => {fruit => 'melon'}
+};	
+
+my @var_list = qw( $foo @face $name %dict);
+assign($struct, @var_list);
+
+use Test::More qw(no_plan);
+is( $foo, 2, "Scalar number assignment");
+is( $name, 'John', "Scalar string assignment");
+my $sum;
+map{ $sum += $_ } @{ $face };
+is ($sum, 25, "Array assignment");
+is( $dict->{fruit}, 'melon', "Hash assignment");
+
+=cut
 use Storable;
 &init;
-=comment
-my $h = { a => {b => 'c'} };
-walk($h);
-exit;
-=cut
-use Data::Dumper;
 use Data::YAML::Reader;
 use Data::YAML::Writer;
 my $yr = Data::YAML::Reader->new;
@@ -27,25 +41,22 @@ my @files = qw(
 map{ my $r = retrieve($_) ;
 	print "found: ", ref $r, $/;
 	assign( $r, @persistent_vars);
-	#print join $/, keys %{$r->{state_c}}
+	#print join $/, keys %{$r->{state_c}};
+	#print join $/, keys %state_c;
+	#
+	print yaml_out(\%state_c);
 	exit;
 	} @files;
 
-sub walk {
-	my $self = shift;
-	ref $self =~ /HASH/ and print ("HASH\n") and walk_hash($self)
-		or ref $self =~ /ARRAY/and print ("ARRAY\n") and walk_array($val)
-		or ! ref $self and print "val: $self\n";
-}
-	
-sub walk_array { map{ walk $_ } @{ $_[0] } }
-sub walk_hash {
-	my $hash = shift;
-	map {print $_, $/  } keys %{ $hash };
-	#walk ($hash->{$_})
-}
+=comment
+	assign( $r, @persistent_vars);
+	#print join $/, keys %{$r->{state_c}};
+	print join $/, keys %state_c;
 
+=cut
 sub assign_vars {
+	my ($source, @vars) = @_;
+	$debug2 and print "&assign_vars\n";
 	local $debug = 1;
 	# assigns vars in @var_list to values from $source
 	# $source can be a :
@@ -54,8 +65,6 @@ sub assign_vars {
 	#      - reference to a hash array containing assignments
 	#
 	# returns a $ref containing the retrieved data structure
-	$debug2 and print "&assign_vars\n";
-	my ($source, @vars) = @_;
 	$debug and print "file: $source\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
@@ -63,33 +72,41 @@ sub assign_vars {
 ### figure out what to do with input
 
 	-f $source and $source eq 'State' 
-		and $debug and print ("found sourcefile: $source\n")
+		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
 
 	## check for a filename
 
 	or -f $source and $source =~ /.yaml$/ 
+		and $debug and print "found a yaml file: $source\n"
 		and $ref = yaml_in($source)
  	
 	## check for a string
 
 	or  $source =~ /^\s*---/s 
+		and $debug and print "found yaml as text\n"
 		and $ref = $yr->($source)
 
 	## pass a hash_ref to the assigner
 
 	or ref $source 
+		and $debug and print "found a reference\n"
 		and $ref = $source;
 
+
+	assign($ref, @vars);
+
 }
+
+
 sub assign{
 	my ($ref, @vars) = @_;
+	croak "expected hash" if ref $ref !~ /HASH/;
 	my @keys =  keys %{ $ref };
 	my %keys ;
 	@keys{ @keys } = 1..scalar @keys;
-#$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
-#$debug and print join $/, "VARIABLES", @vars, '';
-croak "expected hash" if ref $ref !~ /HASH/;
+	$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
+	#$debug and print join $/, "VARIABLES", @vars, '';
 	map{  
 		my $eval;
 		my $key = $_;
@@ -124,10 +141,33 @@ croak "expected hash" if ref $ref !~ /HASH/;
 			#$eval .= $identifier;
 			#$eval .= q( }; ) ;
 		}
-			#print $eval, $/, $/;
+			$debug and print $eval, $/, $/;
 			eval $eval or carp "failed to eval $eval: $!\n";
 	} @keys
 }
+sub store_vars {
+	local $debug = 1;
+	# now we will only store in YAML
+	$debug2 and print "&store_vars\n";
+	my ($file, @vars) = @_;
+	$file .= '.yaml' unless $file =~ /\.yaml$/;
+	$debug and print "vars: @vars\n";
+	$debug and print "file: $file\n";
+	my %state; # will carry all the info to the serializer
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string =  q($state{)
+							. $identifier
+							. q(} = \\) # double backslash needed
+							. $_;
+	$debug and print "attempted to eval $eval_string\n";
+	eval($eval_string) or print "failed to eval $eval_string: $!\n";
+	} @vars;
+	# my $result1 = store \%state, $file; # OLD METHOD
+	yaml_out(\%state);
+}
+
+#	$yamlout > io $file;
+
 sub yaml_out {
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
