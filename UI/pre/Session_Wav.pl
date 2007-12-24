@@ -1,4 +1,12 @@
-## TODO
+#
+#  Session is probably to be abandoned.
+#
+#  Wav can be substituted into calls for {versions} and
+#  {targets} 
+#
+#
+#
+#
 =comment
 I have to get my Wav test environment back:
 	
@@ -15,6 +23,21 @@ of only a name. But how would that help? Each
 object is actually represented by a pair of directories.
 in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
+my $ui = UI::Graphical->new;
+
+my $session = $ui->project(name => "paul_brocante");
+my $session = $ui->project(name => "paul_brocante", create => 1);
+$session->retain("my slider activity");
+$session->perform("my slider activity");
+$session->start;
+$session->everything_that_UI_does
+
+consequence: have to rewrite all the UI (especially GUI) 
+procedural code to do $session->start instead of &start,
+for what? To be able to pass around session objects??
+
+Definitely not necessary.
+
 =cut
 
 
@@ -28,20 +51,17 @@ our @ISA='::';
 use Carp;
 use Object::Tiny qw(name);
 sub hello {"i'm a session"}
-=comment
-	$session = remove_spaces($session); # internal spaces to underscores
-	$session_name = $hash->{name} ? $hash->{name} : $session;
-	$hash->{create} and 
-		print ("Creating directories....\n"),
-=cut
 sub new { 
 	my $class = shift; 
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
 	my $name = remove_spaces( $vals{name} );
 	$vals{name} = $name;
-	$session_name=$name; # dependence on global variable $session_name
-							 
+	if (-d join_path(&wav_dir, $name)
+			or $vals{create_dir} ){
+
+		$session_name=$name; # dependence on global variable $session_name
+	}
 	if ($vals{create_dir}){
 		map{create_dir($_)} &this_wav_dir, &session_dir;
 		delete $vals{create_dir};
@@ -91,14 +111,6 @@ sub deref_ {
 	@_ = @{ $ref } if ref $_[0] =~ /ARRAY/;
 }
 
-
-## aliases 
-
-sub wav_dir {UI::wav_dir() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub remove_spaces { UI::remove_spaces() }
 
 package ::Wav;
 our @ISA='UI';

@@ -16,7 +16,7 @@ use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 use lib qw(. ..);
-use ::Assign qw(:all);
+# use ::Assign qw(:all);  # something wrong with this
 
 print remove_spaces("bulwinkle is a...");
 
@@ -85,7 +85,7 @@ sub hello {"superclass hello"}
 
 ## The following routines handle serializing data
 
-[% qx(cat ./Assign.pl ) %]
+[% qx(cat ./Assign.pl ) %]  
 
 ## no-op graphic methods to inherit by Text
 

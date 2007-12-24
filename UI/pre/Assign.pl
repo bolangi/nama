@@ -1,4 +1,5 @@
-package UI;
+=comment
+package ::;
 
 # unless i know the calling package name, how do I know
 # what the eval should be?
@@ -50,7 +51,6 @@ my $yw = Data::YAML::Writer->new;
 my $yr = Data::YAML::Reader->new;
 $debug = 1;
 $debug2 = 1;
-=comment
 my $text = <<HERE;
 a line # with a comment
 
@@ -297,48 +297,3 @@ sub remove_spaces {
         $entry;                                                                 
 }                                                                               
 1;
-
-
-__END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Assign - Perl extensions for persistent variables and utility functions
-
-=head1 SYNOPSIS
-
-		assign_vars( $hash_ref, @variable_list)
-		store_vars( $hash_ref, $file)??
-		yaml_out( $hash_ref )
-		yaml_in( $string )
-		create_dir( $path )
-		join_path( $dir1, $subdir, $subsubdir)
-		wav_off( "sax_3.wav")
-		strip_all
-		strip_blank_lines
-		strip_comments
-		remove_spaces
-
-
-  use Assign;
-
-=head1 ABSTRACT
-
-=head1 DESCRIPTION
-
-=head2 EXPORT
-
-None by default.
-
-=head1 SEE ALSO
-
-=head1 AUTHOR
-
-Joel Roth, E<lt>jroth@pobox.comE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2007 by Joel Roth
-
-=cut

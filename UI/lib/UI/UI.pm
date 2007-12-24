@@ -16,7 +16,7 @@ use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 use lib qw(. ..);
-use UI::Assign qw(:all);
+# use UI::Assign qw(:all);  # something wrong with this
 
 print remove_spaces("bulwinkle is a...");
 
@@ -363,9 +363,6 @@ decrement_take
 select_take
 add_volume_control
 add_pan_control
-create_dir
-join_path
-wav_off
 selected_version
 set_active_version
 new_version
@@ -867,7 +864,7 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out( \%cfg ); exit;
+	print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_vars( \%cfg, @global_vars, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
@@ -1191,30 +1188,6 @@ sub add_pan_control {
 				});
 	
 	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
-}
-## support functions
-
-sub create_dir {
-	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
-}
-
-sub join_path {
-	no warnings;
-	my @parts = @_;
-	my $path = join '/', @parts;
-	$path =~ s(/{2,})(/)g;
-	$debug and print "path: $path\n";
-	$path;
-	use warnings;
-}
-
-sub wav_off {
-	my $wav = shift;
-	$wav =~ s/\.wav\s*$//i;
-	$wav;
 }
 ## version functions
 
@@ -2412,9 +2385,8 @@ sub prepare_static_effects_data{
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
-	$debug and print "looking for effects cache: $effects_cache\n";
-	if (-f $effects_cache){ 
-		$debug and print "found it!\n";
+	if (-f $effects_cache and ! $opts{s}){  
+		$debug and print "found effects cache: $effects_cache\n";
 		assign_vars($effects_cache, @effects_static_vars);
 	} else {
 		local $debug = 0;
@@ -3091,7 +3063,70 @@ sub mark {
 ## The following routines handle serializing data
 
 =comment
-## testing never passed
+package UI;
+
+# unless i know the calling package name, how do I know
+# what the eval should be?
+use 5.008;
+use strict;
+use warnings;
+
+require Exporter;
+
+our @ISA = qw(Exporter);
+
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
+
+# This allows declaration	use Assign ':all';
+# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
+# will save memory.
+our %EXPORT_TAGS = ( 'all' => [ qw(
+
+		assign_vars
+		store_vars
+		yaml_out
+		yaml_in
+		create_dir
+		join_path
+		wav_off
+		strip_all
+		strip_blank_lines
+		strip_comments
+		remove_spaces
+
+	
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = qw(
+	
+);
+
+our $VERSION = '0.01';
+
+use Carp;
+use Data::YAML::Reader;
+use Data::YAML::Writer;
+use vars qw($debug $debug2);
+my $yw = Data::YAML::Writer->new;
+my $yr = Data::YAML::Reader->new;
+$debug = 1;
+$debug2 = 1;
+my $text = <<HERE;
+a line # with a comment
+
+
+
+blank lines above # another comment 
+yaml_out: what i never expected
+HERE
+#print &strip_comments($text);
+#print &strip_blank_lines($text);
+#print &strip_all($text);
+use vars qw( $foo @face $name %dict);
 my $struct = { 
 	foo => 2, 
 	name => 'John', 
@@ -3100,7 +3135,13 @@ my $struct = {
 };	
 
 my @var_list = qw( $foo @face $name %dict);
+
 assign($struct, @var_list);
+print yaml_out(\%dict);
+#for (@var_list) { !/\$/ and print yaml_out( eval "\\$_") }
+exit;
+
+## testing never passed
 
 use Test::More qw(no_plan);
 is( $foo, 2, "Scalar number assignment");
@@ -3131,7 +3172,10 @@ map{ my $r = retrieve($_) ;
 	} @files;
 ----
 =cut
-use Carp;
+
+
+
+
 sub assign{
 	local $debug = 1;
 	$debug2 and print "&assign\n";
@@ -3176,7 +3220,7 @@ sub assign{
 			$eval .= q( } );
 		}
 		$debug and print $eval, $/, $/;
-		eval $eval or $val and carp "failed to eval $eval: $!\n";
+		eval($eval) or carp "failed to eval $eval: $!\n";
 	} @keys
 }
 
@@ -3197,7 +3241,7 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	-f $source and $source eq 'State' 
+	$source eq 'State' and -f $source 
 		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
 
@@ -3211,7 +3255,7 @@ sub assign_vars {
 
 	or  $source =~ /^\s*---/s 
 		and $debug and print "found yaml as text\n"
-		and $ref = $yr->($source)
+		and $ref = $yr->read($source)
 
 	## pass a hash_ref to the assigner
 
@@ -3268,9 +3312,11 @@ sub yaml_in {
 
 sub create_dir {
 	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
+	-e $dir and 
+		(carp "create_dir: '$dir' already exists, skipping...\n"), 
+		return;
+	mkdir $dir
+	or carp qq(failed to create directory "$dir": $!\n);
 }
 
 sub join_path {
@@ -3289,6 +3335,33 @@ sub wav_off {
 	$wav;
 }
 
+sub strip_all{ strip_blank_lines( strip_comments(@_) ) }
+
+sub strip_blank_lines {
+	map{ s/\n(\s*\n)+/\n/sg } @_;
+	@_;
+	 
+}
+
+sub strip_comments { #  
+	map{ s/#.*$//mg; } @_;
+	@_
+} 
+
+sub remove_spaces {                                                             
+        my $entry = shift;                                                      
+        # remove leading and trailing spaces                                    
+                                                                                
+        $entry =~ s/^\s*//;                                                     
+        $entry =~ s/\s*$//;                                                     
+                                                                                
+        # convert other spaces to underscores                                   
+                                                                                
+        $entry =~ s/\s+/_/g;                                                    
+        $entry;                                                                 
+}                                                                               
+1;
+  
 
 ## no-op graphic methods to inherit by Text
 
@@ -3344,9 +3417,6 @@ sub decrement_take { UI::decrement_take() }
 sub select_take { UI::select_take() }
 sub add_volume_control { UI::add_volume_control() }
 sub add_pan_control { UI::add_pan_control() }
-sub create_dir { UI::create_dir() }
-sub join_path { UI::join_path() }
-sub wav_off { UI::wav_off() }
 sub selected_version { UI::selected_version() }
 sub set_active_version { UI::set_active_version() }
 sub new_version { UI::new_version() }
@@ -4400,9 +4470,6 @@ sub decrement_take { UI::decrement_take() }
 sub select_take { UI::select_take() }
 sub add_volume_control { UI::add_volume_control() }
 sub add_pan_control { UI::add_pan_control() }
-sub create_dir { UI::create_dir() }
-sub join_path { UI::join_path() }
-sub wav_off { UI::wav_off() }
 sub selected_version { UI::selected_version() }
 sub set_active_version { UI::set_active_version() }
 sub new_version { UI::new_version() }
@@ -4533,7 +4600,15 @@ splice @UI::format_fields, 0, 7
 
 ## The following methods belong to the Session and Wav classes
 
-## TODO
+#
+#  Session is probably to be abandoned.
+#
+#  Wav can be substituted into calls for {versions} and
+#  {targets} 
+#
+#
+#
+#
 =comment
 I have to get my Wav test environment back:
 	
@@ -4550,6 +4625,21 @@ of only a name. But how would that help? Each
 object is actually represented by a pair of directories.
 in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
+my $ui = UI::Graphical->new;
+
+my $session = $ui->project(name => "paul_brocante");
+my $session = $ui->project(name => "paul_brocante", create => 1);
+$session->retain("my slider activity");
+$session->perform("my slider activity");
+$session->start;
+$session->everything_that_UI_does
+
+consequence: have to rewrite all the UI (especially GUI) 
+procedural code to do $session->start instead of &start,
+for what? To be able to pass around session objects??
+
+Definitely not necessary.
+
 =cut
 
 
@@ -4563,20 +4653,17 @@ our @ISA='UI';
 use Carp;
 use Object::Tiny qw(name);
 sub hello {"i'm a session"}
-=comment
-	$session = remove_spaces($session); # internal spaces to underscores
-	$session_name = $hash->{name} ? $hash->{name} : $session;
-	$hash->{create} and 
-		print ("Creating directories....\n"),
-=cut
 sub new { 
 	my $class = shift; 
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
 	my $name = remove_spaces( $vals{name} );
 	$vals{name} = $name;
-	$session_name=$name; # dependence on global variable $session_name
-							 
+	if (-d join_path(&wav_dir, $name)
+			or $vals{create_dir} ){
+
+		$session_name=$name; # dependence on global variable $session_name
+	}
 	if ($vals{create_dir}){
 		map{create_dir($_)} &this_wav_dir, &session_dir;
 		delete $vals{create_dir};
@@ -4626,14 +4713,6 @@ sub deref_ {
 	@_ = @{ $ref } if ref $_[0] =~ /ARRAY/;
 }
 
-
-## aliases 
-
-sub wav_dir {UI::wav_dir() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub remove_spaces { UI::remove_spaces() }
 
 package UI::Wav;
 our @ISA='UI';

@@ -120,7 +120,7 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out( \%cfg ); exit;
+	print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_vars( \%cfg, @global_vars, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
@@ -444,30 +444,6 @@ sub add_pan_control {
 				});
 	
 	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
-}
-## support functions
-
-sub create_dir {
-	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
-}
-
-sub join_path {
-	no warnings;
-	my @parts = @_;
-	my $path = join '/', @parts;
-	$path =~ s(/{2,})(/)g;
-	$debug and print "path: $path\n";
-	$path;
-	use warnings;
-}
-
-sub wav_off {
-	my $wav = shift;
-	$wav =~ s/\.wav\s*$//i;
-	$wav;
 }
 ## version functions
 
@@ -1665,9 +1641,8 @@ sub prepare_static_effects_data{
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
-	$debug and print "looking for effects cache: $effects_cache\n";
-	if (-f $effects_cache){ 
-		$debug and print "found it!\n";
+	if (-f $effects_cache and ! $opts{s}){  
+		$debug and print "found effects cache: $effects_cache\n";
 		assign_vars($effects_cache, @effects_static_vars);
 	} else {
 		local $debug = 0;

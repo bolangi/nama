@@ -1,5 +1,7 @@
-package ::Assign;
+package ::;
 
+# unless i know the calling package name, how do I know
+# what the eval should be?
 use 5.008;
 use strict;
 use warnings;
@@ -154,7 +156,7 @@ sub assign{
 			$eval .= q( } );
 		}
 		$debug and print $eval, $/, $/;
-		eval $eval or $val and carp "failed to eval $eval: $!\n";
+		eval($eval) or carp "failed to eval $eval: $!\n";
 	} @keys
 }
 
@@ -175,7 +177,7 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	-f $source and $source eq 'State' 
+	$source eq 'State' and -f $source 
 		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
 
@@ -189,7 +191,7 @@ sub assign_vars {
 
 	or  $source =~ /^\s*---/s 
 		and $debug and print "found yaml as text\n"
-		and $ref = $yr->($source)
+		and $ref = $yr->read($source)
 
 	## pass a hash_ref to the assigner
 
@@ -295,6 +297,8 @@ sub remove_spaces {
         $entry;                                                                 
 }                                                                               
 1;
+
+
 __END__
 # Below is stub documentation for your module. You'd better edit it!
 
