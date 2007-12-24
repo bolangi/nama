@@ -15,6 +15,10 @@ use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
+use lib qw(. ..);
+use ::Assign qw(:all);
+
+print remove_spaces("bulwinkle is a...");
 
 ## Class and Object definition, root class
 

@@ -15,6 +15,10 @@ use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
+use lib qw(. ..);
+use UI::Assign qw(:all);
+
+print remove_spaces("bulwinkle is a...");
 
 ## Class and Object definition, root class
 
@@ -435,10 +439,6 @@ retrieve_effects
 arm_mark
 colonize
 mark
-strip_all
-strip_blank_lines
-strip_comments
-remove_spaces
 
 );
 ## Load my modules
@@ -771,7 +771,7 @@ sub new { my $class = shift;
 }
 
 =cut
-sub config_file { "config" }
+sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
 sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name) }
@@ -902,7 +902,7 @@ sub load_session {
 	$session_name = $hash->{name} ? $hash->{name} : $session;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} &this_wav_dir, &session_dir;
+		map{create_dir($_)} &this_wav_dir, &session_dir;
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
@@ -1206,7 +1206,7 @@ sub join_path {
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
-	$debug and print "Path: $path\n";
+	$debug and print "path: $path\n";
 	$path;
 	use warnings;
 }
@@ -3086,32 +3086,6 @@ sub mark {
 	}
 }
 
-sub strip_all{ blank_lines( strip_comments(@_) ) }
-
-sub strip_blank_lines {
-	map{ s/\n(\s*\n)+/\n/sg } @_;
-	@_;
-	 
-}
-
-sub strip_comments { #  
-	map{ s/#.*$//mg; } @_;
-	@_
-} 
-#print strip_comments ("$a +~ line of %code # followed by comments"); 
-
-sub remove_spaces {                                                             
-        my $entry = shift;                                                      
-        # remove leading and trailing spaces                                    
-                                                                                
-        $entry =~ s/^\s*//;                                                     
-        $entry =~ s/\s*$//;                                                     
-                                                                                
-        # convert other spaces to underscores                                   
-                                                                                
-        $entry =~ s/\s+/_/g;                                                    
-        $entry;                                                                 
-}                                                                               
 
 
 ## The following routines handle serializing data
@@ -3290,6 +3264,30 @@ sub yaml_in {
 	my $yaml = io($file)->all;
 	$yr->read( $yaml ); # returns ref
 }
+## support functions
+
+sub create_dir {
+	my $dir = shift;
+	-d $dir 
+		or mkdir $dir 
+		or croak qq(failed to create directory "$dir": $!);
+}
+
+sub join_path {
+	no warnings;
+	my @parts = @_;
+	my $path = join '/', @parts;
+	$path =~ s(/{2,})(/)g;
+	$debug and print "path: $path\n";
+	$path;
+	use warnings;
+}
+
+sub wav_off {
+	my $wav = shift;
+	$wav =~ s/\.wav\s*$//i;
+	$wav;
+}
 
 
 ## no-op graphic methods to inherit by Text
@@ -3422,10 +3420,6 @@ sub retrieve_effects { UI::retrieve_effects() }
 sub arm_mark { UI::arm_mark() }
 sub colonize { UI::colonize() }
 sub mark { UI::mark() }
-sub strip_all { UI::strip_all() }
-sub strip_blank_lines { UI::strip_blank_lines() }
-sub strip_comments { UI::strip_comments() }
-sub remove_spaces { UI::remove_spaces() }
 
 
 ## The following methods belong to the Graphical interface class
@@ -4482,10 +4476,6 @@ sub retrieve_effects { UI::retrieve_effects() }
 sub arm_mark { UI::arm_mark() }
 sub colonize { UI::colonize() }
 sub mark { UI::mark() }
-sub strip_all { UI::strip_all() }
-sub strip_blank_lines { UI::strip_blank_lines() }
-sub strip_comments { UI::strip_comments() }
-sub remove_spaces { UI::remove_spaces() }
 
 
 ## Some of these, notably new, will be overwritten
@@ -4573,16 +4563,37 @@ our @ISA='UI';
 use Carp;
 use Object::Tiny qw(name);
 sub hello {"i'm a session"}
+=comment
+	$session = remove_spaces($session); # internal spaces to underscores
+	$session_name = $hash->{name} ? $hash->{name} : $session;
+	$hash->{create} and 
+		print ("Creating directories....\n"),
+=cut
 sub new { 
 	my $class = shift; 
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
-	my $name = $vals{name};
-	remove_spaces( $vals{name} );
+	my $name = remove_spaces( $vals{name} );
 	$vals{name} = $name;
-	$vals{create_dir} and create_dir($name) and delete $vals{create_dir};
+	$session_name=$name; # dependence on global variable $session_name
+							 
+	if ($vals{create_dir}){
+		map{create_dir($_)} &this_wav_dir, &session_dir;
+		delete $vals{create_dir};
+	}
 	return bless { %vals }, $class;
 }
+
+sub session_dir { 
+	my $self = shift;
+	join_path( &ecmd_home, $self->name);
+}
+sub this_wav_dir {
+	my $self = shift;
+	join_path( &wav_dir, $self->name);
+}
+
+
 sub set {
 	my $self = shift;
  	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;

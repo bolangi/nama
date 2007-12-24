@@ -39,12 +39,13 @@ sub new {
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
 	my $name = remove_spaces( $vals{name} );
-	$vals{name} = join_path($name;
+	$vals{name} = $name;
+	$session_name=$name; # dependence on global variable $session_name
+							 
 	if ($vals{create_dir}){
-		my 
-		map{create_dir} &this_wav_dir, &session_dir;
-		-e $name
-		create_dir($name) and delete $vals{create_dir};
+		map{create_dir($_)} &this_wav_dir, &session_dir;
+		delete $vals{create_dir};
+	}
 	return bless { %vals }, $class;
 }
 

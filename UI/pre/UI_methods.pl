@@ -24,7 +24,7 @@ sub new { my $class = shift;
 }
 
 =cut
-sub config_file { "config" }
+sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
 sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name) }
@@ -155,7 +155,7 @@ sub load_session {
 	$session_name = $hash->{name} ? $hash->{name} : $session;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} &this_wav_dir, &session_dir;
+		map{create_dir($_)} &this_wav_dir, &session_dir;
 =comment 
 	# OPEN EDITOR TODO
 	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
@@ -2339,29 +2339,3 @@ sub mark {
 	}
 }
 
-sub strip_all{ blank_lines( strip_comments(@_) ) }
-
-sub strip_blank_lines {
-	map{ s/\n(\s*\n)+/\n/sg } @_;
-	@_;
-	 
-}
-
-sub strip_comments { #  
-	map{ s/#.*$//mg; } @_;
-	@_
-} 
-#print strip_comments ("$a +~ line of %code # followed by comments"); 
-
-sub remove_spaces {                                                             
-        my $entry = shift;                                                      
-        # remove leading and trailing spaces                                    
-                                                                                
-        $entry =~ s/^\s*//;                                                     
-        $entry =~ s/\s*$//;                                                     
-                                                                                
-        # convert other spaces to underscores                                   
-                                                                                
-        $entry =~ s/\s+/_/g;                                                    
-        $entry;                                                                 
-}                                                                               

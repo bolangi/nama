@@ -1,4 +1,4 @@
-package Assign;
+package ::Assign;
 
 use 5.008;
 use strict;
@@ -246,9 +246,11 @@ sub yaml_in {
 
 sub create_dir {
 	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
+	-e $dir and 
+		(carp "create_dir: '$dir' already exists, skipping...\n"), 
+		return;
+	mkdir $dir
+	or carp qq(failed to create directory "$dir": $!\n);
 }
 
 sub join_path {
