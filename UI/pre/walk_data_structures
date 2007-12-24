@@ -1,0 +1,22 @@
+
+## Walk Data Structures (not working yet)
+#
+=comment
+my $h = { a => {b => 'c'} };
+walk($h);
+exit;
+=cut
+sub walk {
+	my $self = shift;
+	ref $self =~ /HASH/ and print ("HASH\n") and walk_hash($self)
+		or ref $self =~ /ARRAY/and print ("ARRAY\n") and walk_array($val)
+		or ! ref $self and print "val: $self\n";
+}
+	
+sub walk_array { map{ walk $_ } @{ $_[0] } }
+sub walk_hash {
+	my $hash = shift;
+	map {print $_, $/  } keys %{ $hash };
+	#walk ($hash->{$_})
+}
+

@@ -1,0 +1,49 @@
+package Perform;
+
+retain take1
+perform Big Steve at the Console
+lp list_performances
+lo list_operators
+lt list_tracks
+lb list_buses
+lg list_groups
+lj list_projects
+
+
+gb git-branches
+gc git-commit
+chk git-checkout
+
+sub retain {
+	my $name = shift;
+	(print "performance $name already exists"), return if -d $name
+	mkdir $name
+	save_persistent_vars
+	append actions to file actions every ten seconds
+}
+
+sub perform {
+	my $name = shift;
+	! $name and $name = $current_performance;
+	chdir $name;
+
+
+package Perform;
+our @ISA = ''
+use Object::Tiny qw(project);
+
+
+
+
+
+	
+
+my $p;
+ sub perform {
+ 	# with no argument is the same as start.
+	#
+	my $name = shift;
+	$name = "take_$take_i" if ! $name;
+	save state to file
+	no input and &start_transport if everything ok
+

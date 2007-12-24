@@ -24,6 +24,8 @@ use ::Text::Very::Unusual;
 isa '::';
 ::Module
  ::Module
+q(::);
+	"::"
 PKG
 my $i;
 map { print "input ", $i++,": ", $_, $/;
@@ -63,8 +65,13 @@ sub subst {
 		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
 
-	# Substitution 7: lone '::'
-		$text =~ s/'::'/'$new_root'/g;
+
+	# Substitution 7: lone '::' and friends
+		$text =~ s/(['"(])  # an open
+					(::)	# a :: (class root)
+					(['")])/$1$new_root$3'/gx;
+
+
 
 	# Substitution 8: bare class
 		$text =~ s/(^|\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 

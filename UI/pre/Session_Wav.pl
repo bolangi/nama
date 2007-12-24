@@ -28,16 +28,36 @@ our @ISA='::';
 use Carp;
 use Object::Tiny qw(name);
 sub hello {"i'm a session"}
+=comment
+	$session = remove_spaces($session); # internal spaces to underscores
+	$session_name = $hash->{name} ? $hash->{name} : $session;
+	$hash->{create} and 
+		print ("Creating directories....\n"),
+=cut
 sub new { 
 	my $class = shift; 
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
-	my $name = $vals{name};
-	remove_spaces( $vals{name} );
-	$vals{name} = $name;
-	$vals{create_dir} and create_dir($name) and delete $vals{create_dir};
+	my $name = remove_spaces( $vals{name} );
+	$vals{name} = join_path($name;
+	if ($vals{create_dir}){
+		my 
+		map{create_dir} &this_wav_dir, &session_dir;
+		-e $name
+		create_dir($name) and delete $vals{create_dir};
 	return bless { %vals }, $class;
 }
+
+sub session_dir { 
+	my $self = shift;
+	join_path( &ecmd_home, $self->name);
+}
+sub this_wav_dir {
+	my $self = shift;
+	join_path( &wav_dir, $self->name);
+}
+
+
 sub set {
 	my $self = shift;
  	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;

@@ -1,5 +1,66 @@
+package Assign;
+
+use 5.008;
+use strict;
+use warnings;
+
+require Exporter;
+
+our @ISA = qw(Exporter);
+
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
+
+# This allows declaration	use Assign ':all';
+# If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
+# will save memory.
+our %EXPORT_TAGS = ( 'all' => [ qw(
+
+		assign_vars
+		store_vars
+		yaml_out
+		yaml_in
+		create_dir
+		join_path
+		wav_off
+		strip_all
+		strip_blank_lines
+		strip_comments
+		remove_spaces
+
+	
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = qw(
+	
+);
+
+our $VERSION = '0.01';
+
+use Carp;
+use Data::YAML::Reader;
+use Data::YAML::Writer;
+use vars qw($debug $debug2);
+my $yw = Data::YAML::Writer->new;
+my $yr = Data::YAML::Reader->new;
+$debug = 1;
+$debug2 = 1;
 =comment
-## testing never passed
+my $text = <<HERE;
+a line # with a comment
+
+
+
+blank lines above # another comment 
+yaml_out: what i never expected
+HERE
+#print &strip_comments($text);
+#print &strip_blank_lines($text);
+#print &strip_all($text);
+use vars qw( $foo @face $name %dict);
 my $struct = { 
 	foo => 2, 
 	name => 'John', 
@@ -8,7 +69,13 @@ my $struct = {
 };	
 
 my @var_list = qw( $foo @face $name %dict);
+
 assign($struct, @var_list);
+print yaml_out(\%dict);
+#for (@var_list) { !/\$/ and print yaml_out( eval "\\$_") }
+exit;
+
+## testing never passed
 
 use Test::More qw(no_plan);
 is( $foo, 2, "Scalar number assignment");
@@ -39,7 +106,10 @@ map{ my $r = retrieve($_) ;
 	} @files;
 ----
 =cut
-use Carp;
+
+
+
+
 sub assign{
 	local $debug = 1;
 	$debug2 and print "&assign\n";
@@ -196,3 +266,73 @@ sub wav_off {
 	$wav =~ s/\.wav\s*$//i;
 	$wav;
 }
+
+sub strip_all{ strip_blank_lines( strip_comments(@_) ) }
+
+sub strip_blank_lines {
+	map{ s/\n(\s*\n)+/\n/sg } @_;
+	@_;
+	 
+}
+
+sub strip_comments { #  
+	map{ s/#.*$//mg; } @_;
+	@_
+} 
+
+sub remove_spaces {                                                             
+        my $entry = shift;                                                      
+        # remove leading and trailing spaces                                    
+                                                                                
+        $entry =~ s/^\s*//;                                                     
+        $entry =~ s/\s*$//;                                                     
+                                                                                
+        # convert other spaces to underscores                                   
+                                                                                
+        $entry =~ s/\s+/_/g;                                                    
+        $entry;                                                                 
+}                                                                               
+1;
+__END__
+# Below is stub documentation for your module. You'd better edit it!
+
+=head1 NAME
+
+Assign - Perl extensions for persistent variables and utility functions
+
+=head1 SYNOPSIS
+
+		assign_vars( $hash_ref, @variable_list)
+		store_vars( $hash_ref, $file)??
+		yaml_out( $hash_ref )
+		yaml_in( $string )
+		create_dir( $path )
+		join_path( $dir1, $subdir, $subsubdir)
+		wav_off( "sax_3.wav")
+		strip_all
+		strip_blank_lines
+		strip_comments
+		remove_spaces
+
+
+  use Assign;
+
+=head1 ABSTRACT
+
+=head1 DESCRIPTION
+
+=head2 EXPORT
+
+None by default.
+
+=head1 SEE ALSO
+
+=head1 AUTHOR
+
+Joel Roth, E<lt>jroth@pobox.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2007 by Joel Roth
+
+=cut

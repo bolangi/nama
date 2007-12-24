@@ -127,6 +127,7 @@ sub read_config {
 
 }
 sub walk_tree {
+	$debug2 and print "&walk_tree\n";
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 
@@ -458,7 +459,7 @@ sub join_path {
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
-	$debug and print "Path: $path\n";
+	$debug and print "path: $path\n";
 	$path;
 	use warnings;
 }
@@ -1656,6 +1657,7 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
+	local $debug = 1;
 	$debug2 and print "&prepare_static_effects_data\n";
 
 	my $effects_cache = join_path(&wav_dir, $effects_cache_file);

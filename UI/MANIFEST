@@ -1,6 +1,7 @@
 Changes
 UI.pm
 Iam.pm
+Assign.pm
 Tkeca_effects.pm
 Makefile.PL
 MANIFEST
