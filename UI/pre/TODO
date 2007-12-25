@@ -1,3 +1,54 @@
+
+Tue Dec 25 04:18:13 JST 2007
+
+Subroutine problems
+
+$gui->prepare;
+$gui->loop;
+
+In &loop; routines like length_display. Method Inherintance
+only works in method calls on $gui. Inside the loop a
+call to length_display() will execute whatever 
+sub is in the current package. 
+
+To for the text loop, set the package to UI::Text;
+all the sub calls will pick up the no-op stubs in UI::Text
+for the graphic routine.
+
+For the rest, the mass sub aliasing will work fine.
+For variables, the 'our' declaration saves me.
+
+my $ui = UI->new("text");
+my $ui = UI::Text->new(); # better
+$ui->prepare;
+$ui->loop; 
+
+---
+everywhere i had 
+
+	refresh() if $gui;
+
+to get polymorphism I need
+
+	$ui->refresh;
+
+	$ui->clock_display;
+
+sub prepare {
+	my $mode = shift;
+	$mode =~ /text/i and $mode = 'Text';
+	$mode =~ /graphic|tk/i and $mode = 'Graphical';
+	$ui = UI->new($mode); # $ui is global
+	
+}
+	then throughout program code. those
+	routines that need polymorphism get
+	called with an ->
+
+
+
+
+-----
 The grammar does not seem to get control of the input lines.
 Maybe falling through the conditional.
 
