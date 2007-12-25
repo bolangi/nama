@@ -136,19 +136,35 @@ sub assign{
 		my ($sigil, $identifier) = ($sigil{$key}, $key);
 		$eval .= $full;
 		$eval .= q( = );
+
 		my $val;
+
 		if ($sigil eq '$') { # scalar assignment
 
-			if ($ref->{$identifier}) {
-				$val = $ref->{$identifier};
-				$val =~ /^[\.\d]+$/ or $val = qq("$val");
-				ref $val and croak "didn't expect reference: ",ref $val, $/;
-			} 
-			else { $val = q(undef) };
+			# extract value
 
-			$eval .=  $val;
+			if ($ref->{$identifier}) { #  if we have something,
+
+ 				# take it
+				
+				$val = $ref->{$identifier};
+
+				# dereference it if needed
+				
+				ref $val eq q(SCALAR) and $val = $$val; 
+														
+				# quoting for non-numerical
+				
+				$val = qq("$val") 
+					unless  $val =~ /^[\d\.,+-e]+$/ 
+					or 		ref $val;
+		
+			} else { $val = q(undef) }; # or set as undefined
+
+			$eval .=  $val;  # append to assignment
 
 		} else { # array, hash assignment
+
 			$eval .= qq($sigil\{);
 			$eval .= q($ref->{ );
 			$eval .= qq("$identifier");
@@ -219,7 +235,7 @@ sub store_vars {
 							. $identifier
 							. q(} = \\) # double backslash needed
 							. $_;
-	$debug and print "attempted to eval $eval_string\n";
+	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
 	# my $result1 = store \%state, $file; # OLD METHOD

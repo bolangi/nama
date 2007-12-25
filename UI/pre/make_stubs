@@ -1,2 +1,2 @@
 #!/bin/sh
-./list_subs UI_methods.pl | perl -ne 'chomp; next if $_ eq "new"; print "sub $_ { UI:\:$_\() }", $/' 
+./list_subs $1 | perl -ne 'chomp; next if $_ eq "new"; print "sub $_ { UI:\:$_\() }", $/' 

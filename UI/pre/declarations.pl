@@ -6,6 +6,7 @@ use constant (REC => 'rec',
 
 our (
 	### 
+	$ui, # object providing class behavior for graphic/text functions
 
 	@persistent_vars, # a set of variables we save
 					  	# as one big config file

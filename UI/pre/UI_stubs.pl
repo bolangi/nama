@@ -3,6 +3,7 @@ sub ecmd_dir { UI::ecmd_dir() }
 sub this_wav_dir { UI::this_wav_dir() }
 sub session_dir { UI::session_dir() }
 sub prepare { UI::prepare() }
+sub wav_dir { UI::wav_dir() }
 sub eval_iam { UI::eval_iam() }
 sub global_config { UI::global_config() }
 sub session_config { UI::session_config() }
@@ -13,7 +14,6 @@ sub substitute { UI::substitute() }
 sub load_session { UI::load_session() }
 sub session_init { UI::session_init() }
 sub initialize_session_data { UI::initialize_session_data() }
-sub destroy_widgets { UI::destroy_widgets() }
 sub add_track { UI::add_track() }
 sub add_mix_track { UI::add_mix_track() }
 sub mix_suffix { UI::mix_suffix() }
@@ -28,15 +28,6 @@ sub decrement_take { UI::decrement_take() }
 sub select_take { UI::select_take() }
 sub add_volume_control { UI::add_volume_control() }
 sub add_pan_control { UI::add_pan_control() }
-sub effect_button { UI::effect_button() }
-sub make_scale { UI::make_scale() }
-sub is_soloing { UI::is_soloing() }
-sub toggle_muting { UI::toggle_muting() }
-sub toggle_mute { UI::toggle_mute() }
-sub is_muted { UI::is_muted() }
-sub create_dir { UI::create_dir() }
-sub join_path { UI::join_path() }
-sub wav_off { UI::wav_off() }
 sub selected_version { UI::selected_version() }
 sub set_active_version { UI::set_active_version() }
 sub new_version { UI::new_version() }
@@ -77,7 +68,6 @@ sub jump { UI::jump() }
 sub refresh_t { UI::refresh_t() }
 sub refresh_c { UI::refresh_c() }
 sub refresh { UI::refresh() }
-sub refresh_oids { UI::refresh_oids() }
 sub rec_cleanup { UI::rec_cleanup() }
 sub update_version_button { UI::update_version_button() }
 sub update_master_version_button { UI::update_master_version_button() }
@@ -107,14 +97,6 @@ sub save_effects { UI::save_effects() }
 sub r { UI::r() }
 sub r5 { UI::r5() }
 sub retrieve_effects { UI::retrieve_effects() }
-sub assign_vars { UI::assign_vars() }
-sub store_vars { UI::store_vars() }
-sub yaml_out { UI::yaml_out() }
-sub yaml_in { UI::yaml_in() }
 sub arm_mark { UI::arm_mark() }
 sub colonize { UI::colonize() }
 sub mark { UI::mark() }
-sub strip_all { UI::strip_all() }
-sub strip_blank_lines { UI::strip_blank_lines() }
-sub strip_comments { UI::strip_comments() }
-sub remove_spaces { UI::remove_spaces() }

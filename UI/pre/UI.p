@@ -39,7 +39,7 @@ $debug = 1;
 ## prevents bareword sub calls some_sub; from failing
 use subs qw(
 
-[% qx(./list_subs UI_methods.pl) %]
+[% qx(./list_subs Core_subs.pl) %]
 
 );
 ## Load my modules
@@ -81,7 +81,29 @@ $grammar = q(
 
 sub hello {"superclass hello"}
 
-[% qx(cat ./UI_methods.pl ) %]
+sub new { my $class = shift; return bless {@_}, $class }
+ 		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+=comment
+my $root_class = '::'; 
+sub new { 
+	my $class = shift;
+	if (@_ % 2 and $class eq $root_class){
+		my %h = ( @_ );
+		my $mode = $h{mode};
+		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
+		$mode =~ /text|txt/i       and $mode = 'Text';
+		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
+		return bless { @_ }, "$root_class\::" . $mode;
+	} 
+	return bless {@_}, $class;
+}
+sub usage { <<USAGE; }
+Usage:    UI->new(mode => "text")
+       or UI->new(mode => "tk")
+USAGE
+
+=cut
+[% qx(cat ./Core_subs.pl ) %]
 
 ## The following routines handle serializing data
 
@@ -110,8 +132,9 @@ use Carp;
 use Tk;
 
 ## We need stubs for procedural access to subs in the anscestor
+## excluding those for ui functions
 
-[% qx(./make_stubs) %]
+[% qx(./filter_core_stubs) %]
 
 ## The following methods belong to the Graphical interface class
 
@@ -126,9 +149,10 @@ our @ISA = '::';
 use Carp;
 sub hello {"hello world!";}
 
-## We also need stubs for procedural access to subs
-## in the UI class.
-[% qx(./make_stubs) %]
+## We need stubs for procedural access to Core subs in the anscestor
+## excluding those for ui functions
+
+[% qx(./filter_core_stubs) %]
 
 ## Some of these, notably new, will be overwritten
 ## by definitions that follow

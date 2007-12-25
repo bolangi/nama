@@ -37,6 +37,7 @@ use constant (REC => 'rec',
 
 our (
 	### 
+	$ui, # object providing class behavior for graphic/text functions
 
 	@persistent_vars, # a set of variables we save
 					  	# as one big config file
@@ -331,8 +332,6 @@ $debug = 1;
 ## prevents bareword sub calls some_sub; from failing
 use subs qw(
 
-new
-new
 config_file
 ecmd_dir
 this_wav_dir
@@ -400,10 +399,6 @@ toggle_unit
 to_start
 to_end
 jump
-refresh_t
-refresh_c
-refresh
-refresh_oids
 rec_cleanup
 update_version_button
 update_master_version_button
@@ -742,39 +737,38 @@ dd: /\d+/
 
 sub hello {"superclass hello"}
 
-package UI;
-use Carp;
 =comment
-TODO remove wav_dir from config file. 
-or store session files in ~/.ecmd
-or make it .ecmdrc! simple is better.
-.ecmd
-.ecmdrc = config.yaml
-=cut
 sub new { my $class = shift; return bless {@_}, $class }
  		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-=comment
-my $root_class = 'UI'; 
-sub new { my $class = shift;
-	my %h = ( @_ );
-
-	if (@_ % 2){
-		return bless { @_ },
-		$class eq $root_class  && $h{mode} 
-			? "$root_class\::" . $h{mode} 
-			: $class;
-
-	} else { return bless {@_}, $class } 
-}
-
 =cut
+my $root_class = 'UI'; 
+sub new { 
+	my $class = shift;
+	if (@_ % 2 and $class eq $root_class){
+		my %h = ( @_ );
+		my $mode = $h{mode};
+		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
+		$mode =~ /text|txt/i       and $mode = 'Text';
+		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
+		return bless { @_ }, "$root_class\::" . $mode;
+	} 
+	return bless {@_}, $class;
+}
+sub usage { <<USAGE; }
+Usage:    UI->new(mode => "text")
+       or UI->new(mode => "tk")
+USAGE
+
+package UI;
+use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
 sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name) }
 
 
-sub prepare {  # a few actions begin
+sub prepare {  # actions begin
+
 
 	local $debug = 0;
 	$debug2 and print "&prepare\n";
@@ -917,7 +911,7 @@ sub session_init{
 	remove_small_wavs(); 
 	retrieve_state(join_path(&session_dir,$state_store_file)) unless $opts{m};
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
-	global_version_buttons();
+	$ui->global_version_buttons();
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
@@ -926,7 +920,7 @@ sub initialize_session_data {
 
 	return if transport_running();
 	my $sf = join_path(&session_dir, $chain_setup_file);
-	session_label_configure(
+	$ui->session_label_configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
 		); 
@@ -974,11 +968,11 @@ sub initialize_session_data {
 
 	# $is_armed = 0;
 
-destroy_widgets();
+$ui->destroy_widgets();
 
 increment_take(); 
 
-take_gui($t);
+$ui->take_gui($t);
 
 }
 
@@ -1009,7 +1003,7 @@ sub add_track {
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = $UI::REC if ! defined $state_c{$i}->{rw};
-	track_gui($i);
+	$ui->track_gui($i);
 	return 1;
 }
 sub add_mix_track {
@@ -1028,7 +1022,7 @@ sub restore_track {
 	$debug2 and print "&restore_track\n";
 	my $n = shift;
 	find_wavs($n);
-	track_gui($n), refresh();
+	track_gui($n), $ui->refresh();
 }
 sub register_track {
 	$debug2 and print "&register_track\n";
@@ -1755,11 +1749,11 @@ sub connect_transport {
 	carp("Invalid chain setup, cannot arm transport.\n"), return
 		unless eval_iam("engine-status") eq 'stopped' ;
 	$length = eval_iam('cs-get-length'); 
-	length_display(-text => colonize($length));
+	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
-	clock_display(-text => colonize(0));
+	$ui->clock_display(-text => colonize(0));
 	print eval_iam("fs");
-	flash_ready();
+	$ui->flash_ready();
 	
 }
 sub start_transport { 
@@ -1847,98 +1841,6 @@ sub jump {
 	print "$cmd\n";
 	restart_clock();
 }
-## refresh functions
-
-sub refresh_t {
-	$debug2 and print "&refresh_t\n";
-	my %take_color = (rec  => 'LightPink', 
-					mon => 'AntiqueWhite',
-					mute => $old_bg);
-	collect_chains();
-	my @w = $take_frame->children;
-	for my $t (1..@takes){
-		# skip 0th item, the label
-		my $status;
-		#  rec if @record entry for this take
-		if ( grep{$take{$_}==$t}@record ) { 
-			$debug and print "t-rec $t\n";	
-			$status = $UI::REC } 
-		# 	mon if @monitor entry
-		elsif ( grep{$take{$_}==$t}@monitor )
-			{ 
-			$debug and print "t-mon $t\n";	
-			$status = $UI::MON }
-
-		else  { $status = $UI::MUTE;
-			$debug and print "t-mute $t\n";	
-		
-		}
-
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
-		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
-	$debug and print "take_frame child: $t\n";
-
-		$w[$t]->configure(-background => $take_color{$status});
-	}
-}
-sub refresh_c {
-
-	my $n = shift;
-	$debug2 and print "&refresh_c\n";
-	
-		my $rec_status = rec_status($n);
-#	$debug and print "track: $n rec_status: $rec_status\n";
-
-		return unless $widget_c{$n}; # obsolete ??
-		$widget_c{$n}->{rw}->configure(-text => $rec_status);
-	
-	if ($rec_status eq $UI::REC) {
-		$debug and print "REC! \n";
-
-		$widget_c{$n}->{name}->configure(-background => 'lightpink');
-		$widget_c{$n}->{name}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
-		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(-text => new_version);
-
-	}
-	elsif ( $rec_status eq $UI::MON ) {
-		$debug and print "MON! \n";
-
-		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
-		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
-		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
-		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-
-		}
-	elsif ( $rec_status eq $UI::MUTE ) {
-		$debug and print "MUTE! \n";
-		 $widget_c{$n}->{name}->configure(-background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
-		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-		}  
-		else { carp "\$rec_status contains something unknown: $rec_status";}
-}
-sub refresh { 
- 	refresh_t(); 
-	map{ refresh_c($_) } @all_chains ;
-}
-sub refresh_oids{
-	map{ $widget_o{$_}->configure( # uses hash
-			-background => 
-				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
-			-activebackground => 
-				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
-			) } keys %widget_o;
-}
 ## post-recording functions
 
 sub rec_cleanup {
@@ -1969,7 +1871,7 @@ sub rec_cleanup {
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			update_master_version_button();
+			$ui->update_master_version_button();
 			$state_t{ $state_t{active} }->{rw} = $UI::MON;
 			setup_transport();
 			connect_transport();
@@ -2767,7 +2669,7 @@ sub save_state {
 	
 	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
-	#	 paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 $ui->$ui->paint_button($widget_c{$_}{mute}, q(brown) );
 		}
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
@@ -2867,7 +2769,7 @@ sub retrieve_state {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	}
-	$did_apply and manifest(); # $ew->deiconify();
+	$did_apply and $ui->manifest(); # $ew->deiconify();
 
 }
 
@@ -3386,6 +3288,7 @@ use Carp;
 use Tk;
 
 ## We need stubs for procedural access to subs in the anscestor
+## excluding those for ui functions
 
 sub config_file { UI::config_file() }
 sub ecmd_dir { UI::ecmd_dir() }
@@ -3454,10 +3357,6 @@ sub toggle_unit { UI::toggle_unit() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
 sub jump { UI::jump() }
-sub refresh_t { UI::refresh_t() }
-sub refresh_c { UI::refresh_c() }
-sub refresh { UI::refresh() }
-sub refresh_oids { UI::refresh_oids() }
 sub rec_cleanup { UI::rec_cleanup() }
 sub update_version_button { UI::update_version_button() }
 sub update_master_version_button { UI::update_master_version_button() }
@@ -4389,6 +4288,99 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
+
+## refresh functions
+
+sub refresh_t {
+	$debug2 and print "&refresh_t\n";
+	my %take_color = (rec  => 'LightPink', 
+					mon => 'AntiqueWhite',
+					mute => $old_bg);
+	collect_chains();
+	my @w = $take_frame->children;
+	for my $t (1..@takes){
+		# skip 0th item, the label
+		my $status;
+		#  rec if @record entry for this take
+		if ( grep{$take{$_}==$t}@record ) { 
+			$debug and print "t-rec $t\n";	
+			$status = $UI::REC } 
+		# 	mon if @monitor entry
+		elsif ( grep{$take{$_}==$t}@monitor )
+			{ 
+			$debug and print "t-mon $t\n";	
+			$status = $UI::MON }
+
+		else  { $status = $UI::MUTE;
+			$debug and print "t-mute $t\n";	
+		
+		}
+
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
+		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
+	$debug and print "take_frame child: $t\n";
+
+		$w[$t]->configure(-background => $take_color{$status});
+	}
+}
+sub refresh_c {
+
+	my $n = shift;
+	$debug2 and print "&refresh_c\n";
+	
+		my $rec_status = rec_status($n);
+#	$debug and print "track: $n rec_status: $rec_status\n";
+
+		return unless $widget_c{$n}; # obsolete ??
+		$widget_c{$n}->{rw}->configure(-text => $rec_status);
+	
+	if ($rec_status eq $UI::REC) {
+		$debug and print "REC! \n";
+
+		$widget_c{$n}->{name}->configure(-background => 'lightpink');
+		$widget_c{$n}->{name}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
+		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
+		$widget_c{$n}->{version}->configure(-text => new_version);
+
+	}
+	elsif ( $rec_status eq $UI::MON ) {
+		$debug and print "MON! \n";
+
+		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
+		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
+		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
+		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+
+		}
+	elsif ( $rec_status eq $UI::MUTE ) {
+		$debug and print "MUTE! \n";
+		 $widget_c{$n}->{name}->configure(-background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
+		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+		}  
+		else { carp "\$rec_status contains something unknown: $rec_status";}
+}
+sub refresh { 
+ 	refresh_t(); 
+	map{ refresh_c($_) } @all_chains ;
+}
+sub refresh_oids{
+	map{ $widget_o{$_}->configure( # uses hash
+			-background => 
+				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
+			-activebackground => 
+				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
+			) } keys %widget_o;
+}
 =comment
 sub is_soloing {
 	my $n = shift;	
@@ -4438,8 +4430,9 @@ our @ISA = 'UI';
 use Carp;
 sub hello {"hello world!";}
 
-## We also need stubs for procedural access to subs
-## in the UI class.
+## We need stubs for procedural access to Core subs in the anscestor
+## excluding those for ui functions
+
 sub config_file { UI::config_file() }
 sub ecmd_dir { UI::ecmd_dir() }
 sub this_wav_dir { UI::this_wav_dir() }
@@ -4507,10 +4500,6 @@ sub toggle_unit { UI::toggle_unit() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
 sub jump { UI::jump() }
-sub refresh_t { UI::refresh_t() }
-sub refresh_c { UI::refresh_c() }
-sub refresh { UI::refresh() }
-sub refresh_oids { UI::refresh_oids() }
 sub rec_cleanup { UI::rec_cleanup() }
 sub update_version_button { UI::update_version_button() }
 sub update_master_version_button { UI::update_master_version_button() }
