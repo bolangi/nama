@@ -110,6 +110,7 @@ map{ my $r = retrieve($_) ;
 =cut
 
 
+use Carp;
 
 
 sub assign{
