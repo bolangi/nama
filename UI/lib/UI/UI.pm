@@ -392,10 +392,6 @@ start_transport
 stop_transport
 transport_running
 disconnect_transport
-start_clock
-update_clock
-restart_clock
-refresh_clock
 toggle_unit
 to_start
 to_end
@@ -771,7 +767,7 @@ sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name
 sub prepare {  # actions begin
 
 
-	local $debug = 0;
+	local $debug = 1;
 	$debug2 and print "&prepare\n";
 
     $yw = Data::YAML::Writer->new;
@@ -806,16 +802,10 @@ sub prepare {  # actions begin
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
-	# $debug and print yaml_out( \@oids );
-	# in order to do this I would need to
-	# adapt &walk to take a coderef
-	# and apply to leaves, to replace CODE in a
-	# leaf by some dummy text. But there is
-	# no need for it now.
 	
 	$debug and print "wav_dir: ", wav_dir(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
-	$debug and print "session_dir: ", &session_dir , $/;
+	$debug and print "session_dir: ", session_dir() , $/;
 	1;	
 }
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
@@ -1774,35 +1764,6 @@ sub transport_running {
 }
 sub disconnect_transport { eval_iam('cs-disconnect') }
 
-## clock and gui refresh functions
-
-sub start_clock {
-	$clock_id = $clock->repeat(1000, \refresh_clock);
-}
-sub update_clock {
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
-}
-sub restart_clock {
-	eval q($clock_id->cancel);
-	start_clock();
-}
-sub refresh_clock{
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
-	my $status = eval_iam('engine-status');
-	return if $status eq 'running' ;
-	$clock_id->cancel;
-	session_label_configure(-background => $old_bg);
-	if ($status eq 'error') { new_engine();
-		&connect_transport unless &really_recording; 
-	}
-	elsif ($status eq 'finished') {
-		&connect_transport unless &really_recording; 
-	}
-	else { # status: stopped, not started, undefined
-	&rec_cleanup if &really_recording();
-	}
-
-}
 sub toggle_unit {
 	if ($unit == 1){
 		$unit = 60;
@@ -3061,10 +3022,6 @@ sub start_transport { UI::start_transport() }
 sub stop_transport { UI::stop_transport() }
 sub transport_running { UI::transport_running() }
 sub disconnect_transport { UI::disconnect_transport() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
 sub toggle_unit { UI::toggle_unit() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
@@ -3106,7 +3063,8 @@ sub mark { UI::mark() }
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
-
+package UI::Graphical;
+use Tk;
 # croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 sub new { my $class = shift; return bless {@_}, $class }
 sub session_label_configure{ session_label_configure(@_)}
@@ -4001,98 +3959,6 @@ sub make_scale {
 
 }
 
-## refresh functions
-
-sub refresh_t {
-	$debug2 and print "&refresh_t\n";
-	my %take_color = (rec  => 'LightPink', 
-					mon => 'AntiqueWhite',
-					mute => $old_bg);
-	collect_chains();
-	my @w = $take_frame->children;
-	for my $t (1..@takes){
-		# skip 0th item, the label
-		my $status;
-		#  rec if @record entry for this take
-		if ( grep{$take{$_}==$t}@record ) { 
-			$debug and print "t-rec $t\n";	
-			$status = $UI::REC } 
-		# 	mon if @monitor entry
-		elsif ( grep{$take{$_}==$t}@monitor )
-			{ 
-			$debug and print "t-mon $t\n";	
-			$status = $UI::MON }
-
-		else  { $status = $UI::MUTE;
-			$debug and print "t-mute $t\n";	
-		
-		}
-
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
-		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
-	$debug and print "take_frame child: $t\n";
-
-		$w[$t]->configure(-background => $take_color{$status});
-	}
-}
-sub refresh_c {
-
-	my $n = shift;
-	$debug2 and print "&refresh_c\n";
-	
-		my $rec_status = rec_status($n);
-#	$debug and print "track: $n rec_status: $rec_status\n";
-
-		return unless $widget_c{$n}; # obsolete ??
-		$widget_c{$n}->{rw}->configure(-text => $rec_status);
-	
-	if ($rec_status eq $UI::REC) {
-		$debug and print "REC! \n";
-
-		$widget_c{$n}->{name}->configure(-background => 'lightpink');
-		$widget_c{$n}->{name}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
-		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(-text => new_version);
-
-	}
-	elsif ( $rec_status eq $UI::MON ) {
-		$debug and print "MON! \n";
-
-		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
-		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
-		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
-		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-
-		}
-	elsif ( $rec_status eq $UI::MUTE ) {
-		$debug and print "MUTE! \n";
-		 $widget_c{$n}->{name}->configure(-background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
-		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-		}  
-		else { carp "\$rec_status contains something unknown: $rec_status";}
-}
-sub refresh { 
- 	refresh_t(); 
-	map{ refresh_c($_) } @all_chains ;
-}
-sub refresh_oids{
-	map{ $widget_o{$_}->configure( # uses hash
-			-background => 
-				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
-			-activebackground => 
-				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
-			) } keys %widget_o;
-}
 =comment
 sub is_soloing {
 	my $n = shift;	
@@ -4132,6 +3998,7 @@ sub is_muted {
 		$status;
 }
 =cut
+### end
 
 
 
@@ -4204,10 +4071,6 @@ sub start_transport { UI::start_transport() }
 sub stop_transport { UI::stop_transport() }
 sub transport_running { UI::transport_running() }
 sub disconnect_transport { UI::disconnect_transport() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
 sub toggle_unit { UI::toggle_unit() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
