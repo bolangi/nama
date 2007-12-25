@@ -15,6 +15,7 @@ use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
+use UI::Assign qw(:all);
 use lib qw(. ..);
 # use ::Assign qw(:all);  # something wrong with this
 
@@ -107,7 +108,7 @@ USAGE
 
 ## The following routines handle serializing data
 
-[% qx(cat ./Assign.pl ) %]  
+# [-% qx(cat ./Assign.pl ) %-]  
 
 ## no-op graphic methods to inherit by Text
 

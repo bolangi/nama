@@ -1,10 +1,8 @@
-package UI;
-
-# unless i know the calling package name, how do I know
-# what the eval should be?
+package UI::Assign;
 use 5.008;
 use strict;
 use warnings;
+use IO::All;
 
 require Exporter;
 
@@ -17,8 +15,11 @@ our @ISA = qw(Exporter);
 # This allows declaration	use Assign ':all';
 # If you do not need this, moving things directly into @EXPORT or @EXPORT_OK
 # will save memory.
+#
 our %EXPORT_TAGS = ( 'all' => [ qw(
-
+		
+		serial
+		assign
 		assign_vars
 		store_vars
 		yaml_out
@@ -50,72 +51,27 @@ my $yw = Data::YAML::Writer->new;
 my $yr = Data::YAML::Reader->new;
 $debug = 1;
 $debug2 = 1;
-=comment
-my $text = <<HERE;
-a line # with a comment
 
+use Carp;
 
-
-blank lines above # another comment 
-yaml_out: what i never expected
-HERE
-#print &strip_comments($text);
-#print &strip_blank_lines($text);
-#print &strip_all($text);
-use vars qw( $foo @face $name %dict);
-my $struct = { 
-	foo => 2, 
-	name => 'John', 
-	face => [1,5,7,12],
-	dict => {fruit => 'melon'}
-};	
-
-my @var_list = qw( $foo @face $name %dict);
-
-assign($struct, @var_list);
-print yaml_out(\%dict);
-#for (@var_list) { !/\$/ and print yaml_out( eval "\\$_") }
-exit;
-
-## testing never passed
-
-use Test::More qw(no_plan);
-is( $foo, 2, "Scalar number assignment");
-is( $name, 'John', "Scalar string assignment");
-my $sum;
-map{ $sum += $_ } @{ $face };
-is ($sum, 25, "Array assignment");
-is( $dict->{fruit}, 'melon', "Hash assignment");
-----
-my @files = qw(
-/media/sessions/.ecmd/State
-/media/sessions/.ecmd/atsuko-d/State
-/media/sessions/.ecmd/atsuko-e/State
-/media/sessions/.ecmd/malone/State
-/media/sessions/.ecmd/paul_a/State
-/media/sessions/.ecmd/paul_brocante/State
-/media/sessions/.ecmd/ryan_taisho_b/State
-/media/sessions/.ecmd/self-test/State
-);
-map{ my $r = retrieve($_) ;
-	print "found: ", ref $r, $/;
-	assign( $r, @persistent_vars);
-	#print join $/, keys %{$r->{state_c}};
-	#print join $/, keys %state_c;
-	#
-	print yaml_out(\%state_c);
-	exit;
-	} @files;
-----
-=cut
-
-
-
-
-sub assign{
-	local $debug = 1;
+sub assign {
+	
 	$debug2 and print "&assign\n";
-	my ($ref, @vars) = @_;
+	
+	my %h = @_;
+	my $class;
+	croak "didn't expect scalar here" if ref $h{DATA} eq 'SCALAR';
+	croak "didn't expect code here" if ref $h{DATA} eq 'CODE';
+
+	if ( ref $h{DATA} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
+		# we guess object
+		$class = ref $h{DATA}; 
+		$debug and print "I found a class: $class, I think...\n";
+	} 
+	$class = $h{CLASS} if $h{CLASS};
+ 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
+	my @vars = @{ $h{VARS} };
+	my $ref = $h{DATA};
 	my %sigil;
 	map{ 
 		my ($s, $identifier) = /(.)(\w+)/;
@@ -129,26 +85,44 @@ sub assign{
 	map{  
 		my $eval;
 		my $key = $_;
+		my $full_class_path = 
+			$sigil{$key} . $class . $key;
 		$sigil{$key} or croak 
 			"didn't find a match for $key in ", join " ", @vars, $/;
-		my $full = $sigil{$key}.$key;
-		print "full: $full\n";;
+		$debug and print "full_class_path: $full_class_path\n";;
+		#$debug and print "full: $full\n";;
 		my ($sigil, $identifier) = ($sigil{$key}, $key);
-		$eval .= $full;
+		$eval .= $full_class_path;
 		$eval .= q( = );
+
 		my $val;
+
 		if ($sigil eq '$') { # scalar assignment
 
-			if ($ref->{$identifier}) {
-				$val = $ref->{$identifier};
-				$val =~ /^[\.\d]+$/ or $val = qq("$val");
-				ref $val and croak "didn't expect reference: ",ref $val, $/;
-			} 
-			else { $val = q(undef) };
+			# extract value
 
-			$eval .=  $val;
+			if ($ref->{$identifier}) { #  if we have something,
+
+ 				# take it
+				
+				$val = $ref->{$identifier};
+
+				# dereference it if needed
+				
+				ref $val eq q(SCALAR) and $val = $$val; 
+														
+				# quoting for non-numerical
+				
+				$val = qq("$val") 
+					unless  $val =~ /^[\d\.,+-e]+$/ 
+					or 		ref $val;
+		
+			} else { $val = q(undef) }; # or set as undefined
+
+			$eval .=  $val;  # append to assignment
 
 		} else { # array, hash assignment
+
 			$eval .= qq($sigil\{);
 			$eval .= q($ref->{ );
 			$eval .= qq("$identifier");
@@ -156,8 +130,9 @@ sub assign{
 			$eval .= q( } );
 		}
 		$debug and print $eval, $/, $/;
-		eval($eval) or carp "failed to eval $eval: $!\n";
-	} @keys
+		eval($eval) or carp "failed to eval $eval: $@\n";
+	} @keys;
+	1;
 }
 
 sub assign_vars {
@@ -200,16 +175,21 @@ sub assign_vars {
 		and $ref = $source;
 
 
-	assign($ref, @vars);
+	assign(DATA => $ref, VARS => \@vars, CLASS => 'UI'); # XX HARDCODED
+	1;	
 
 }
 
-
 sub store_vars {
 	local $debug = 1;
-	# now we will only store in YAML
 	$debug2 and print "&store_vars\n";
-	my ($file, @vars) = @_;
+	my %h = @_;
+	my $class = $h{CLASS};
+	my $file  = $h{FILE};
+ 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
+	my @vars = @{ $h{VARS} };
+	my %sigil;
+	# now we will only store in yaml
 	$file .= '.yaml' unless $file =~ /\.yaml$/;
 	$debug and print "vars: @vars\n";
 	$debug and print "file: $file\n";
@@ -218,15 +198,45 @@ sub store_vars {
 		 my $eval_string =  q($state{)
 							. $identifier
 							. q(} = \\) # double backslash needed
-							. $_;
-	$debug and print "attempted to eval $eval_string\n";
+							. $sigil
+							. $class
+							. $identifier;
+	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
-	# my $result1 = store \%state, $file; # OLD METHOD
+	# my $result1 = store \%state, $file; # old method
 	my $yamlout = yaml_out(\%state);
 	$yamlout > io $file;
 
 }
+sub serial {
+	my %h = @_;
+	my @vars = @{ $h{VARS} };
+	my $class = $h{CLASS} if $h{CLASS};
+ 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
+	# now we will only store in yaml
+	$debug2 and print "&serial\n";
+	my %state;
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string =  q($state{)
+							. $identifier
+							. q(})
+							. q( = )
+							. ($sigil ne q($) ? q(\\) : q() ) 
+							. $sigil
+							. $class
+							. $identifier;
+	$debug and print "attempting to eval $eval_string\n";
+	eval($eval_string) or print "failed to eval $eval_string: $!\n";
+	} @vars;
+	# my $result1 = store \%state, $file; # old method
+	yaml_out(\%state);
+
+
+}
+
+print "reacCHED here";
+
 sub yaml_out {
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
@@ -298,47 +308,3 @@ sub remove_spaces {
 }                                                                               
 1;
 
-
-__END__
-# Below is stub documentation for your module. You'd better edit it!
-
-=head1 NAME
-
-Assign - Perl extensions for persistent variables and utility functions
-
-=head1 SYNOPSIS
-
-		assign_vars( $hash_ref, @variable_list)
-		store_vars( $hash_ref, $file)??
-		yaml_out( $hash_ref )
-		yaml_in( $string )
-		create_dir( $path )
-		join_path( $dir1, $subdir, $subsubdir)
-		wav_off( "sax_3.wav")
-		strip_all
-		strip_blank_lines
-		strip_comments
-		remove_spaces
-
-
-  use Assign;
-
-=head1 ABSTRACT
-
-=head1 DESCRIPTION
-
-=head2 EXPORT
-
-None by default.
-
-=head1 SEE ALSO
-
-=head1 AUTHOR
-
-Joel Roth, E<lt>jroth@pobox.comE<gt>
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2007 by Joel Roth
-
-=cut
