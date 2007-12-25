@@ -3,11 +3,11 @@ use strict qw(vars subs);
 use warnings;
 use lib "$ENV{HOME}/build/flow/UI/lib"; 
 
-package UI;
+package UI;  ## core routines
 
 use Carp;
 use Cwd;
-use Tk;
+# use Tk;
 use IO::All;
 use Storable; 
 use Getopt::Std;
@@ -22,8 +22,8 @@ use lib qw(. ..);
 print remove_spaces("bulwinkle is a...");
 
 ## Class and Object definition, root class
-
-our @ISA;
+# for package 'UI'
+our @ISA; # no anscestors
 use Object::Tiny qw(mode);
 
 our $VERSION = '0.01';
@@ -393,6 +393,10 @@ stop_transport
 transport_running
 disconnect_transport
 toggle_unit
+start_clock
+update_clock
+restart_clock
+refresh_clock
 to_start
 to_end
 jump
@@ -756,7 +760,6 @@ Usage:    UI->new(mode => "text")
 USAGE
 
 =cut
-package UI;
 use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
@@ -1044,7 +1047,7 @@ sub dig_ruins {
 		# look for wave files
 		
 		my $d = this_wav_dir();
-		opendir WAV , $d or carp "couldn't open $d: $!";
+		opendir WAV, $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
 		
@@ -1774,6 +1777,35 @@ sub toggle_unit {
 
 	}
 }
+## clock and clock-refresh functions ##
+
+sub start_clock {
+	$clock_id = $clock->repeat(1000, \refresh_clock);
+}
+sub update_clock {
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
+}
+sub restart_clock {
+	eval q($clock_id->cancel);
+	start_clock();
+}
+sub refresh_clock{
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	my $status = eval_iam('engine-status');
+	return if $status eq 'running' ;
+	$clock_id->cancel;
+	session_label_configure(-background => $old_bg);
+	if ($status eq 'error') { new_engine();
+		&connect_transport unless &really_recording; 
+	}
+	elsif ($status eq 'finished') {
+		&connect_transport unless &really_recording; 
+	}
+	else { # status: stopped, not started, undefined
+	&rec_cleanup if &really_recording();
+	}
+
+}
 ## recording head positioning
 
 sub to_start { 
@@ -1894,7 +1926,7 @@ sub add_effect {
 		defined $display_type or $display_type = $effects[$i]->{display}; # template
 		$debug and print "display type: $display_type\n";
 
-		if (! $gui or $display_type eq q(hidden) ){
+		if (! $gui or $display_type eq q(hidden) ){ # XX
 
 			my $frame ;
 			if ( ! $parent_id ){ # independent effect
@@ -2798,18 +2830,7 @@ sub retrieve_effects {
 	print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
 #	return;
 
-	
-	# restore time marker labels
-	
-	map{ $time_marks[$_]->configure( 
-		-text => $marks[$_]
-			?  colonize($marks[$_])
-			:  $_,
-		-background => $marks[$_]
-			?  $old_bg
-			: q(lightblue),
-		)
-	} 1..$#time_marks;
+	restore_time_marker_labels();
 
 	# remove effects except vol and pan, in which case, update vals
 
@@ -2934,10 +2955,6 @@ sub mark {
 
 
 
-## The following routines handle serializing data
-
-# [-% qx(cat ./Assign.pl ) %-]  
-
 ## no-op graphic methods to inherit by Text
 
 sub take_gui {}
@@ -2954,8 +2971,9 @@ sub clock_display {}
 sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
+sub restore_time_marker_labels {}
 
-package UI::Graphical;
+package UI::Graphical;  ## gui routines
 our @ISA = 'UI';
 use Carp;
 use Tk;
@@ -3023,6 +3041,10 @@ sub stop_transport { UI::stop_transport() }
 sub transport_running { UI::transport_running() }
 sub disconnect_transport { UI::disconnect_transport() }
 sub toggle_unit { UI::toggle_unit() }
+sub start_clock { UI::start_clock() }
+sub update_clock { UI::update_clock() }
+sub restart_clock { UI::restart_clock() }
+sub refresh_clock { UI::refresh_clock() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
 sub jump { UI::jump() }
@@ -3063,8 +3085,6 @@ sub mark { UI::mark() }
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
-package UI::Graphical;
-use Tk;
 # croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 sub new { my $class = shift; return bless {@_}, $class }
 sub session_label_configure{ session_label_configure(@_)}
@@ -3228,6 +3248,7 @@ sub init_gui {
 		
 }
 sub transport_gui {
+	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
 		-text => 'TRANSPORT',
@@ -4001,6 +4022,122 @@ sub is_muted {
 ### end
 
 
+## refresh functions
+
+package UI::Graphical;
+use Tk;
+
+
+sub refresh_t { # buses
+	$debug2 and print "&refresh_t\n";
+	my %take_color = (rec  => 'LightPink', 
+					mon => 'AntiqueWhite',
+					mute => $old_bg);
+	collect_chains();
+	my @w = $take_frame->children;
+	for my $t (1..@takes){
+		# skip 0th item, the label
+		my $status;
+		#  rec if @record entry for this take
+		if ( grep{$take{$_}==$t}@record ) { 
+			$debug and print "t-rec $t\n";	
+			$status = $UI::REC } 
+		# 	mon if @monitor entry
+		elsif ( grep{$take{$_}==$t}@monitor )
+			{ 
+			$debug and print "t-mon $t\n";	
+			$status = $UI::MON }
+
+		else  { $status = $UI::MUTE;
+			$debug and print "t-mute $t\n";	
+		
+		}
+
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
+		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
+	$debug and print "take_frame child: $t\n";
+
+		$w[$t]->configure(-background => $take_color{$status});
+	}
+}
+sub refresh_c { # tracks
+
+	my $n = shift;
+	$debug2 and print "&refresh_c\n";
+	
+		my $rec_status = rec_status($n);
+#	$debug and print "track: $n rec_status: $rec_status\n";
+
+		return unless $widget_c{$n}; # obsolete ??
+		$widget_c{$n}->{rw}->configure(-text => $rec_status);
+	
+	if ($rec_status eq $UI::REC) {
+		$debug and print "REC! \n";
+
+		$widget_c{$n}->{name}->configure(-background => 'lightpink');
+		$widget_c{$n}->{name}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
+		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
+		$widget_c{$n}->{version}->configure(-text => new_version);
+
+	}
+	elsif ( $rec_status eq $UI::MON ) {
+		$debug and print "MON! \n";
+
+		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
+		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
+		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
+		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+
+		}
+	elsif ( $rec_status eq $UI::MUTE ) {
+		$debug and print "MUTE! \n";
+		 $widget_c{$n}->{name}->configure(-background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
+		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+		}  
+		else { carp "\$rec_status contains something unknown: $rec_status";}
+}
+sub refresh {  
+ 	refresh_t(); 
+	map{ refresh_c($_) } @all_chains ;
+}
+sub refresh_oids{ # OUTPUT buttons
+	map{ $widget_o{$_}->configure( # uses hash
+			-background => 
+				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
+			-activebackground => 
+				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
+			) } keys %widget_o;
+}
+
+sub restore_time_marker_labels {
+	
+	# restore time marker labels
+	
+	map{ $time_marks[$_]->configure( 
+		-text => $marks[$_]
+			?  colonize($marks[$_])
+			:  $_,
+		-background => $marks[$_]
+			?  $old_bg
+			: q(lightblue),
+		)
+	} 1..$#time_marks;
+
+ }
+
+
+### end
+
 
 ## The following methods belong to the Text interface class
 
@@ -4072,6 +4209,10 @@ sub stop_transport { UI::stop_transport() }
 sub transport_running { UI::transport_running() }
 sub disconnect_transport { UI::disconnect_transport() }
 sub toggle_unit { UI::toggle_unit() }
+sub start_clock { UI::start_clock() }
+sub update_clock { UI::update_clock() }
+sub restart_clock { UI::restart_clock() }
+sub refresh_clock { UI::refresh_clock() }
 sub to_start { UI::to_start() }
 sub to_end { UI::to_end() }
 sub jump { UI::jump() }
@@ -4164,232 +4305,8 @@ splice @UI::format_fields, 0, 7
 
 ## The following methods belong to the Session and Wav classes
 
-#
-#  Session is probably to be abandoned.
-#
-#  Wav can be substituted into calls for {versions} and
-#  {targets} 
-#
-#
-#
-#
-=comment
-I have to get my Wav test environment back:
-	
-	UI.p including Session_Wav.pl with stubs
-
-	2_Wav.t including tests for Wavs. 
-
-
-
-Once we have set $session_name, everything starts
-happening. Conversely, nothing can happen without
-a session_name. We coudl have session objects, consisting
-of only a name. But how would that help? Each
-object is actually represented by a pair of directories.
-in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
-
-my $ui = UI::Graphical->new;
-
-my $session = $ui->project(name => "paul_brocante");
-my $session = $ui->project(name => "paul_brocante", create => 1);
-$session->retain("my slider activity");
-$session->perform("my slider activity");
-$session->start;
-$session->everything_that_UI_does
-
-consequence: have to rewrite all the UI (especially GUI) 
-procedural code to do $session->start instead of &start,
-for what? To be able to pass around session objects??
-
-Definitely not necessary.
-
-=cut
-
-
-## The following methods belong to the Session class
-
-#my $s = Session->new(name => 'paul_brocante');
-# print $s->session_dir;
-
-package UI::Session;
-our @ISA='UI';
-use Carp;
-use Object::Tiny qw(name);
-sub hello {"i'm a session"}
-sub new { 
-	my $class = shift; 
-	my %vals = @_;
-	$vals{name} or carp "invoked without values" and return;
-	my $name = remove_spaces( $vals{name} );
-	$vals{name} = $name;
-	if (-d join_path(&wav_dir, $name)
-			or $vals{create_dir} ){
-
-		$session_name=$name; # dependence on global variable $session_name
-	}
-	if ($vals{create_dir}){
-		map{create_dir($_)} &this_wav_dir, &session_dir;
-		delete $vals{create_dir};
-	}
-	return bless { %vals }, $class;
-}
-
-sub session_dir { 
-	my $self = shift;
-	join_path( &ecmd_home, $self->name);
-}
-sub this_wav_dir {
-	my $self = shift;
-	join_path( &wav_dir, $self->name);
-}
-
-
-sub set {
-	my $self = shift;
- 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-	my %new_vals = @_;
-	my %filter;
-	map{$filter{$_}++} keys %{ $self };
-	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
-		or carp "illegal key: $_ for object of type ", ref $self,$/
-	} keys %new_vals;
-}
-sub explode {  
-# will not work for unversioned  vocal.wav
-	my $wav = shift;
-	map{  UI::Wav->new(head => $_) 
-
-		} map{ s/.wav$//i; $_} 
-
-			@{ [ values %{ $wav->targets } ] }
-}
-
-# package Track
-# usage: Track->new( WAV = [$vocal->explode] );
-# usage: Track->new( WAV = $vocal );
-# $vocal is a Wav,
-
-# following for objects to polymorph in taking 
-# arrays or array refs.
-sub deref_ {
-	my $ref = shift;
-	@_ = @{ $ref } if ref $_[0] =~ /ARRAY/;
-}
-
-
-package UI::Wav;
-our @ISA='UI';
-use Object::Tiny qw(head active n);
-my @fields = qw(head active n);
-my %fields;
-map{$fields{$_} = undef} @fields;
-use Carp;
-sub this_wav_dir { UI::this_wav_dir() }
-sub new { my $class = shift; 
- 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-		 return bless {%fields, @_}, $class }
-
-sub _get_versions {
-	my ($dir, $basename, $sep, $ext) = @_;
-
-	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
-	$debug and print "reading directory: $dir\n\n";
-	my %versions = ();
-	for my $candidate ( readdir WD ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
-	}
-	$debug and print "get_version: " , yaml_out(\%versions);
-	closedir WD;
-	%versions;
-}
-
-sub targets {# takes a Wav object or a string (filename head)
-	local $debug = 1;
-	my $wav = shift; 
- 	my $head =  ref $wav ? $wav->head : $wav;
-	$debug2 and print "&targets\n";
-	local $debug = 0;
-	$debug and ($t = this_wav_dir()), print 
-"this_wav_dir: $t
-head:         ", $head, $/;
-		my %versions =  _get_versions(
-			this_wav_dir(),
-			$head,
-			'_', 'wav' )  ;
-		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
-			delete $versions{bare};
-		}
-	$debug and print "\%versions\n================\n", yaml_out(\%versions);
-	\%versions;
-}
-sub versions {  # takes a Wav object or a string (filename head)
-	my $wav = shift;
-	if (ref $wav){ [ sort { $a <=> $b } keys %{ $wav->targets} ] } 
-	else 		 { [ sort { $a <=> $b } keys %{ targets($wav)} ] }
-}
-
-sub this_last { 
-	my $wav = shift;
-	pop @{ $wav->versions} }
-
-sub _selected_version {
-	# return track-specific version if selected,
-	# otherwise return global version selection
-	# but only if this version exists
-	my $wav = shift;
-no warnings;
-	my $version = 
-		$wav->active 
-		? $wav->active 
-		: &monitor_version ;
-	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
-	### or should I give the active version
-use warnings;
-}
-=comment
-sub last_version { 
-	## for each track or tracks in take
-
-$track->last_version;
-$take->last_version
-$session->last_version
-	
-			$last_version = $this_last if $this_last > $last_version ;
-
-}
-
-sub new_version {
-	last_version() + 1;
-}
-=cut
-
-=comment
-my $wav = Wav->new( head => vocal);
-
-$wav->versions;
-$wav->head  # vocal
-$wav->n     # 3 i.e. track 3
-$wav->active
-$wav->targets
-$wav->full_path
-
-returns numbers
-
-$wav->targets
-
-returns targets
-
-=cut
-
-
+## currently unused
+# [-% qx(cat ./Session_Wav.pl ) %-]
 
 1;
 __END__

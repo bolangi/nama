@@ -1,4 +1,3 @@
-package ::;
 use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
@@ -286,7 +285,7 @@ sub dig_ruins {
 		# look for wave files
 		
 		my $d = this_wav_dir();
-		opendir WAV , $d or carp "couldn't open $d: $!";
+		opendir WAV, $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
 		
@@ -1016,6 +1015,35 @@ sub toggle_unit {
 
 	}
 }
+## clock and clock-refresh functions ##
+
+sub start_clock {
+	$clock_id = $clock->repeat(1000, \refresh_clock);
+}
+sub update_clock {
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
+}
+sub restart_clock {
+	eval q($clock_id->cancel);
+	start_clock();
+}
+sub refresh_clock{
+	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	my $status = eval_iam('engine-status');
+	return if $status eq 'running' ;
+	$clock_id->cancel;
+	session_label_configure(-background => $old_bg);
+	if ($status eq 'error') { new_engine();
+		&connect_transport unless &really_recording; 
+	}
+	elsif ($status eq 'finished') {
+		&connect_transport unless &really_recording; 
+	}
+	else { # status: stopped, not started, undefined
+	&rec_cleanup if &really_recording();
+	}
+
+}
 ## recording head positioning
 
 sub to_start { 
@@ -1136,7 +1164,7 @@ sub add_effect {
 		defined $display_type or $display_type = $effects[$i]->{display}; # template
 		$debug and print "display type: $display_type\n";
 
-		if (! $gui or $display_type eq q(hidden) ){
+		if (! $gui or $display_type eq q(hidden) ){ # XX
 
 			my $frame ;
 			if ( ! $parent_id ){ # independent effect
@@ -2040,18 +2068,7 @@ sub retrieve_effects {
 	print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
 #	return;
 
-	
-	# restore time marker labels
-	
-	map{ $time_marks[$_]->configure( 
-		-text => $marks[$_]
-			?  colonize($marks[$_])
-			:  $_,
-		-background => $marks[$_]
-			?  $old_bg
-			: q(lightblue),
-		)
-	} 1..$#time_marks;
+	restore_time_marker_labels();
 
 	# remove effects except vol and pan, in which case, update vals
 

@@ -1,5 +1,3 @@
-package ::Graphical;
-use Tk;
 # croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 sub new { my $class = shift; return bless {@_}, $class }
 sub session_label_configure{ session_label_configure(@_)}
@@ -163,6 +161,7 @@ sub init_gui {
 		
 }
 sub transport_gui {
+	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
 		-text => 'TRANSPORT',

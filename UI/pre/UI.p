@@ -3,11 +3,11 @@ use strict qw(vars subs);
 use warnings;
 use lib "$ENV{HOME}/build/flow/UI/lib"; 
 
-package ::;
+package ::;  ## core routines
 
 use Carp;
 use Cwd;
-use Tk;
+# use Tk;
 use IO::All;
 use Storable; 
 use Getopt::Std;
@@ -22,8 +22,8 @@ use lib qw(. ..);
 print remove_spaces("bulwinkle is a...");
 
 ## Class and Object definition, root class
-
-our @ISA;
+# for package '::'
+our @ISA; # no anscestors
 use Object::Tiny qw(mode);
 
 our $VERSION = '0.01';
@@ -106,10 +106,6 @@ USAGE
 =cut
 [% qx(cat ./Core_subs.pl ) %]
 
-## The following routines handle serializing data
-
-# [-% qx(cat ./Assign.pl ) %-]  
-
 ## no-op graphic methods to inherit by Text
 
 sub take_gui {}
@@ -126,8 +122,9 @@ sub clock_display {}
 sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
+sub restore_time_marker_labels {}
 
-package ::Graphical;
+package ::Graphical;  ## gui routines
 our @ISA = '::';
 use Carp;
 use Tk;
@@ -142,6 +139,7 @@ use Tk;
 sub hello {"make a window";}
 [% qx(cat ./Graphical_methods.pl ) %]
 
+[% qx(cat ./Refresh_subs.pl ) %]
 
 ## The following methods belong to the Text interface class
 
@@ -162,7 +160,8 @@ sub hello {"hello world!";}
 
 ## The following methods belong to the Session and Wav classes
 
-[% qx(cat ./Session_Wav.pl ) %]
+## currently unused
+# [-% qx(cat ./Session_Wav.pl ) %-]
 
 1;
 __END__

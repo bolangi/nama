@@ -1,36 +1,8 @@
 ## refresh functions
+
 package ::Graphical;
 use Tk;
 
-## clock and refresh functions
-
-sub start_clock {
-	$clock_id = $clock->repeat(1000, \refresh_clock);
-}
-sub update_clock {
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
-}
-sub restart_clock {
-	eval q($clock_id->cancel);
-	start_clock();
-}
-sub refresh_clock{
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
-	my $status = eval_iam('engine-status');
-	return if $status eq 'running' ;
-	$clock_id->cancel;
-	session_label_configure(-background => $old_bg);
-	if ($status eq 'error') { new_engine();
-		&connect_transport unless &really_recording; 
-	}
-	elsif ($status eq 'finished') {
-		&connect_transport unless &really_recording; 
-	}
-	else { # status: stopped, not started, undefined
-	&rec_cleanup if &really_recording();
-	}
-
-}
 
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
@@ -122,4 +94,22 @@ sub refresh_oids{ # OUTPUT buttons
 				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
 			) } keys %widget_o;
 }
+
+sub restore_time_marker_labels {
+	
+	# restore time marker labels
+	
+	map{ $time_marks[$_]->configure( 
+		-text => $marks[$_]
+			?  colonize($marks[$_])
+			:  $_,
+		-background => $marks[$_]
+			?  $old_bg
+			: q(lightblue),
+		)
+	} 1..$#time_marks;
+
+ }
+
+
 ### end
