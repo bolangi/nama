@@ -11,7 +11,7 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	session_init(), load_session({create => $opts{c}}) if $session_name;
+	#session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
 
