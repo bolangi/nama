@@ -1,0 +1,26 @@
+#!/usr/bin/env perl
+use lib qw(.. .); 
+package UI; ## correct variable namespace
+use UI;
+use Getopt::Std;
+#use vars qw(%opts $session $debug);
+my $debug = 1;
+### Option Processing ###
+push @ARGV, qw(-g -s -d /media/sessions paul_brocante);
+getopts('mcegsd:', \%opts); 
+#print join $/, (%opts);
+# d: wav_dir
+# c: create session
+# g: gui mode
+# m: don't load state info
+# e: don't load static effects data
+# s: don't load static effects data cache
+$session = shift;
+$debug and print "session name: $session\n";
+$session and $session_name = $session;
+my $mode = 'tk';
+#$ui = UI->new(mode => "Graphical");
+$ui = UI::Graphical->new;
+$ui->prepare; 
+$ui->loop;
+__END__

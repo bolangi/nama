@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+use UI;
+use Getopt::Std;
+package UI;
+
+### Option Processing ###
+use vars qw(%opts $session_name $debug);
+@ARGV = qw(-m -e paul_brocante);
+getopts('mcegsd', \%opts); 
+# d: wav_dir
+# c: create session
+# g: gui mode
+# m: don't load state info
+# e: don't load static effects data
+$session_name = shift;
+$debug and print "session name: $session_name\n";
+my $gui = UI::Text->new;
+$gui->prepare; 
+$gui->loop;
+__END__
+
