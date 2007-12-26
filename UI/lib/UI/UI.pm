@@ -226,7 +226,7 @@ our (
 	$transport_stop,
 
 	$iam,    # unused
-	$old_bg, # old background
+	$old_bg, # initial background color.
 
 
 	$loopa,  # loopback nodes 
@@ -333,105 +333,105 @@ $debug = 1;
 ## prevents bareword sub calls some_sub; from failing
 use subs qw(
 
-config_file
-ecmd_dir
-this_wav_dir
-session_dir
-prepare
-wav_dir
-eval_iam
-global_config
-session_config
-config
-read_config
-walk_tree
-substitute
-load_session
-session_init
-initialize_session_data
-add_track
-add_mix_track
-mix_suffix
-restore_track
-register_track
-dig_ruins
-find_wavs
-remove_small_wavs
-new_take
-increment_take
-decrement_take
-select_take
-add_volume_control
-add_pan_control
-selected_version
-set_active_version
-new_version
-get_versions
-mon_vert
-collect_chains
-rec_status
-really_recording
-make_io_lists
-rec_route
-route
-hash_push
-eliminate_loops
-write_chains
-new_wav_name
-output_format
-initialize_oids
-mono_to_stereo
-pre_multi
-convert_to_jack
-convert_to_alsa
-load_ecs
-new_engine
-setup_transport
-connect_transport
-start_transport
-stop_transport
-transport_running
-disconnect_transport
-toggle_unit
-start_clock
-update_clock
-restart_clock
-refresh_clock
-to_start
-to_end
-jump
-rec_cleanup
-update_version_button
-update_master_version_button
 add_effect
-remove_effect
-remove_op
+add_mix_track
+add_pan_control
+add_track
+add_volume_control
+apply_op
+apply_ops
+arm_mark
+collect_chains
+colonize
+config
+config_file
+connect_transport
+convert_to_alsa
+convert_to_jack
 cop_add
 cop_init
-effect_update
-find_op_offsets
-apply_ops
-apply_op
-prepare_static_effects_data
-extract_effects_data
-sort_ladspa_effects
-read_in_effects_data
-read_in_tkeca_effects_data
-get_ladspa_hints
-range
-integrate_ladspa_hints
 d2
+decrement_take
+dig_ruins
+disconnect_transport
 dn
-round
-save_state
-retrieve_state
-save_effects
+ecmd_dir
+effect_update
+eliminate_loops
+eval_iam
+extract_effects_data
+find_op_offsets
+find_wavs
+get_ladspa_hints
+get_versions
+global_config
+hash_push
+increment_take
+initialize_oids
+initialize_session_data
+integrate_ladspa_hints
+jump
+load_ecs
+load_session
+make_io_lists
+mark
+mix_suffix
+mon_vert
+mono_to_stereo
+new_engine
+new_take
+new_version
+new_wav_name
+output_format
+pre_multi
+prepare
+prepare_static_effects_data
 r
 r5
+range
+read_config
+read_in_effects_data
+read_in_tkeca_effects_data
+really_recording
+rec_cleanup
+rec_route
+rec_status
+refresh_clock
+register_track
+remove_effect
+remove_op
+remove_small_wavs
+restart_clock
+restore_track
 retrieve_effects
-arm_mark
-colonize
-mark
+retrieve_state
+round
+route
+save_effects
+save_state
+select_take
+selected_version
+session_config
+session_dir
+session_init
+set_active_version
+setup_transport
+sort_ladspa_effects
+start_clock
+start_transport
+stop_transport
+substitute
+this_wav_dir
+to_end
+to_start
+toggle_unit
+transport_running
+update_clock
+update_master_version_button
+update_version_button
+walk_tree
+wav_dir
+write_chains
 
 );
 ## Load my modules
@@ -987,7 +987,7 @@ sub add_track {
 		return 0;
 	}
 	$track_name = remove_spaces($track_name);
-	$state_t{$t}->{rw} = $UI::REC;
+	$state_t{$t}->{rw} = "REC";
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
 	register_track($i, $track_name, $ch_r, $ch_m);
@@ -996,7 +996,7 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = $UI::REC if ! defined $state_c{$i}->{rw};
+	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
 	$ui->track_gui($i);
 	return 1;
 }
@@ -1004,9 +1004,9 @@ sub add_mix_track {
 	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
 	add_track($mixname) ;
 	# the variable $t magically increments
-	$state_t{$t}->{rw} = $UI::MUTE; 
+	$state_t{$t}->{rw} = "MUTE"; 
 	new_take();
-	$state_t{$t}->{rw} = $UI::MON;
+	$state_t{$t}->{rw} = "MON";
 }
 sub mix_suffix {
 	my $stub = shift;
@@ -1025,7 +1025,7 @@ sub register_track {
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
 	$chain{$name} = $i;
-	$state_c{$i}->{rw} = $UI::REC;
+	$state_c{$i}->{rw} = "REC";
 	$state_c{$i}->{ch_m} = $ch_m;
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
@@ -1125,7 +1125,7 @@ sub increment_take {
 			return if transport_running(); 
 					$t++;
 					$state_t{active} = $t;
-					$state_t{$t}->{rw} = $UI::REC;
+					$state_t{$t}->{rw} = "REC";
 					push @takes, $t;
 					# print SESSION "take $t\n";
 }
@@ -1240,8 +1240,8 @@ sub collect_chains {
 	
 	for my $n (@all_chains) {
 	$debug and print "rec_status $n: ", rec_status($n), "\n";
-		push (@monitor, $n) if rec_status($n) eq $UI::MON; 
-		push (@record, $n) if rec_status($n) eq $UI::REC;
+		push (@monitor, $n) if rec_status($n) eq "MON"; 
+		push (@record, $n) if rec_status($n) eq "REC";
 	}
 
 	$debug and print "monitor chains:  @monitor\n\n";
@@ -1261,23 +1261,23 @@ sub rec_status {
 no warnings;
 my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
 use warnings;
-    return $UI::MUTE if $state_c{$n}->{rw} eq $UI::MON and ! $file_exists;
-	return $UI::MUTE if $state_c{$n}->{rw} eq $UI::MUTE;
-	return $UI::MUTE if $state_t{$take{$n}}->{rw} eq $UI::MUTE;
+    return "MUTE" if $state_c{$n}->{rw} eq $UI::MON and ! $file_exists;
+	return "MUTE" if $state_c{$n}->{rw} eq $UI::MUTE;
+	return "MUTE" if $state_t{$take{$n}}->{rw} eq $UI::MUTE;
 	if ($take{$n} == $state_t{active} ) {
 
-		if ($state_t{$take{$n}}->{rw} eq $UI::REC) {
+		if ($state_t{$take{$n}}->{rw} eq "REC") {
 
 			
-			if ($state_c{$n}->{rw} eq $UI::REC){
-				return $UI::REC if $state_c{$n}->{ch_r};
-				return $UI::MON if $file_exists;
-				return $UI::MUTE;
+			if ($state_c{$n}->{rw} eq "REC"){
+				return "REC" if $state_c{$n}->{ch_r};
+				return "MON" if $file_exists;
+				return "MUTE";
 			}
 		}
 	}
-	return $UI::MON if selected_version($n);
-	return $UI::MUTE;
+	return "MON" if selected_version($n);
+	return "MUTE";
 }
 sub really_recording {  # returns filename stubs
 
@@ -1314,7 +1314,7 @@ sub make_io_lists {
 	for my $n (@all_chains) {
 		$debug and print "chain $n: begin\n";
 		$rec_status = rec_status($n);
-		next if $rec_status eq $UI::MUTE;
+		next if $rec_status eq "MUTE";
 
 OID:		for my $oid (@oids) {
 
@@ -1534,7 +1534,7 @@ sub write_chains {
 	# but when playing back a mix, we want mixchain to be 
 	# something else
 	
-	my $mixchain = rec_status(1) eq $UI::MON
+	my $mixchain = rec_status(1) eq "MON"
 						? $mixchain_aux
 						: $mixchain;
 
@@ -1866,7 +1866,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			$ui->update_master_version_button();
-			$state_t{ $state_t{active} }->{rw} = $UI::MON;
+			$state_t{ $state_t{active} }->{rw} = "MON";
 			setup_transport();
 			connect_transport();
 			refresh();
@@ -1883,7 +1883,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless rec_status($n) eq $UI::REC }
+				unless rec_status($n) eq "REC" }
 					);
 }
 sub update_master_version_button {
@@ -2154,7 +2154,7 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	# my $debug = 1;
-	# return if rec_status($chain) eq $UI::MUTE; 
+	# return if rec_status($chain) eq "MUTE"; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
@@ -2224,7 +2224,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if rec_status($n) eq $UI::MUTE and $n != 1; #MIX
+ 		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {
@@ -2982,105 +2982,105 @@ use UI::Assign qw(:all);
 ## We need stubs for procedural access to subs in the anscestor
 ## excluding those for ui functions
 
-sub config_file { UI::config_file() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub prepare { UI::prepare() }
-sub wav_dir { UI::wav_dir() }
-sub eval_iam { UI::eval_iam() }
-sub global_config { UI::global_config() }
-sub session_config { UI::session_config() }
-sub config { UI::config() }
-sub read_config { UI::read_config() }
-sub walk_tree { UI::walk_tree() }
-sub substitute { UI::substitute() }
-sub load_session { UI::load_session() }
-sub session_init { UI::session_init() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub add_track { UI::add_track() }
-sub add_mix_track { UI::add_mix_track() }
-sub mix_suffix { UI::mix_suffix() }
-sub restore_track { UI::restore_track() }
-sub register_track { UI::register_track() }
-sub dig_ruins { UI::dig_ruins() }
-sub find_wavs { UI::find_wavs() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub new_take { UI::new_take() }
-sub increment_take { UI::increment_take() }
-sub decrement_take { UI::decrement_take() }
-sub select_take { UI::select_take() }
-sub add_volume_control { UI::add_volume_control() }
-sub add_pan_control { UI::add_pan_control() }
-sub selected_version { UI::selected_version() }
-sub set_active_version { UI::set_active_version() }
-sub new_version { UI::new_version() }
-sub get_versions { UI::get_versions() }
-sub mon_vert { UI::mon_vert() }
-sub collect_chains { UI::collect_chains() }
-sub rec_status { UI::rec_status() }
-sub really_recording { UI::really_recording() }
-sub make_io_lists { UI::make_io_lists() }
-sub rec_route { UI::rec_route() }
-sub route { UI::route() }
-sub hash_push { UI::hash_push() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub write_chains { UI::write_chains() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub initialize_oids { UI::initialize_oids() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub pre_multi { UI::pre_multi() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub load_ecs { UI::load_ecs() }
-sub new_engine { UI::new_engine() }
-sub setup_transport { UI::setup_transport() }
-sub connect_transport { UI::connect_transport() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub transport_running { UI::transport_running() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub toggle_unit { UI::toggle_unit() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
-sub to_start { UI::to_start() }
-sub to_end { UI::to_end() }
-sub jump { UI::jump() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub update_version_button { UI::update_version_button() }
-sub update_master_version_button { UI::update_master_version_button() }
 sub add_effect { UI::add_effect() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
+sub add_mix_track { UI::add_mix_track() }
+sub add_pan_control { UI::add_pan_control() }
+sub add_track { UI::add_track() }
+sub add_volume_control { UI::add_volume_control() }
+sub apply_op { UI::apply_op() }
+sub apply_ops { UI::apply_ops() }
+sub arm_mark { UI::arm_mark() }
+sub collect_chains { UI::collect_chains() }
+sub colonize { UI::colonize() }
+sub config { UI::config() }
+sub config_file { UI::config_file() }
+sub connect_transport { UI::connect_transport() }
+sub convert_to_alsa { UI::convert_to_alsa() }
+sub convert_to_jack { UI::convert_to_jack() }
 sub cop_add { UI::cop_add() }
 sub cop_init { UI::cop_init() }
-sub effect_update { UI::effect_update() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub apply_ops { UI::apply_ops() }
-sub apply_op { UI::apply_op() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub range { UI::range() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
 sub d2 { UI::d2() }
+sub decrement_take { UI::decrement_take() }
+sub dig_ruins { UI::dig_ruins() }
+sub disconnect_transport { UI::disconnect_transport() }
 sub dn { UI::dn() }
-sub round { UI::round() }
-sub save_state { UI::save_state() }
-sub retrieve_state { UI::retrieve_state() }
-sub save_effects { UI::save_effects() }
+sub ecmd_dir { UI::ecmd_dir() }
+sub effect_update { UI::effect_update() }
+sub eliminate_loops { UI::eliminate_loops() }
+sub eval_iam { UI::eval_iam() }
+sub extract_effects_data { UI::extract_effects_data() }
+sub find_op_offsets { UI::find_op_offsets() }
+sub find_wavs { UI::find_wavs() }
+sub get_ladspa_hints { UI::get_ladspa_hints() }
+sub get_versions { UI::get_versions() }
+sub global_config { UI::global_config() }
+sub hash_push { UI::hash_push() }
+sub increment_take { UI::increment_take() }
+sub initialize_oids { UI::initialize_oids() }
+sub initialize_session_data { UI::initialize_session_data() }
+sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
+sub jump { UI::jump() }
+sub load_ecs { UI::load_ecs() }
+sub load_session { UI::load_session() }
+sub make_io_lists { UI::make_io_lists() }
+sub mark { UI::mark() }
+sub mix_suffix { UI::mix_suffix() }
+sub mon_vert { UI::mon_vert() }
+sub mono_to_stereo { UI::mono_to_stereo() }
+sub new_engine { UI::new_engine() }
+sub new_take { UI::new_take() }
+sub new_version { UI::new_version() }
+sub new_wav_name { UI::new_wav_name() }
+sub output_format { UI::output_format() }
+sub pre_multi { UI::pre_multi() }
+sub prepare { UI::prepare() }
+sub prepare_static_effects_data { UI::prepare_static_effects_data() }
 sub r { UI::r() }
 sub r5 { UI::r5() }
+sub range { UI::range() }
+sub read_config { UI::read_config() }
+sub read_in_effects_data { UI::read_in_effects_data() }
+sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
+sub really_recording { UI::really_recording() }
+sub rec_cleanup { UI::rec_cleanup() }
+sub rec_route { UI::rec_route() }
+sub rec_status { UI::rec_status() }
+sub refresh_clock { UI::refresh_clock() }
+sub register_track { UI::register_track() }
+sub remove_effect { UI::remove_effect() }
+sub remove_op { UI::remove_op() }
+sub remove_small_wavs { UI::remove_small_wavs() }
+sub restart_clock { UI::restart_clock() }
+sub restore_track { UI::restore_track() }
 sub retrieve_effects { UI::retrieve_effects() }
-sub arm_mark { UI::arm_mark() }
-sub colonize { UI::colonize() }
-sub mark { UI::mark() }
+sub retrieve_state { UI::retrieve_state() }
+sub round { UI::round() }
+sub route { UI::route() }
+sub save_effects { UI::save_effects() }
+sub save_state { UI::save_state() }
+sub select_take { UI::select_take() }
+sub selected_version { UI::selected_version() }
+sub session_config { UI::session_config() }
+sub session_dir { UI::session_dir() }
+sub session_init { UI::session_init() }
+sub set_active_version { UI::set_active_version() }
+sub setup_transport { UI::setup_transport() }
+sub sort_ladspa_effects { UI::sort_ladspa_effects() }
+sub start_clock { UI::start_clock() }
+sub start_transport { UI::start_transport() }
+sub stop_transport { UI::stop_transport() }
+sub substitute { UI::substitute() }
+sub this_wav_dir { UI::this_wav_dir() }
+sub to_end { UI::to_end() }
+sub to_start { UI::to_start() }
+sub toggle_unit { UI::toggle_unit() }
+sub transport_running { UI::transport_running() }
+sub update_clock { UI::update_clock() }
+sub update_master_version_button { UI::update_master_version_button() }
+sub update_version_button { UI::update_version_button() }
+sub walk_tree { UI::walk_tree() }
+sub wav_dir { UI::wav_dir() }
+sub write_chains { UI::write_chains() }
 
 
 ## The following methods belong to the Graphical interface class
@@ -3547,7 +3547,7 @@ sub global_version_buttons {
 				-variable => \$monitor_version,
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = $UI::MON; ### HARDCODED SECOND TAKE; MIX
+					$state_t{2}->{rw} = "MON"; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
 					setup_transport(); 
 					connect_transport();
@@ -3578,7 +3578,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> selected_version($n) ) 
-	#		unless rec_status($n) eq $UI::REC
+	#		unless rec_status($n) eq "REC"
 			}
 					);
 	}
@@ -3594,7 +3594,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_r},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $UI::REC;
+							$state_c{$n}->{rw} = "REC";
 							refresh() }
 				 		)
 				}
@@ -3609,7 +3609,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_m},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $UI::MON;
+							$state_c{$n}->{rw} = "MON";
 							refresh_c($n) }
 				 		)
 				}
@@ -3619,28 +3619,28 @@ sub track_gui { # nearly 300 lines!
 	);
 
 	my @items = (
-			[ 'command' => $UI::REC,
+			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::REC;
+					$state_c{$n}->{rw} = "REC";
 					refresh();
 					}
 			],
-			[ 'command' => $UI::MON,
+			[ 'command' => "MON",
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::MON;
+					$state_c{$n}->{rw} = "MON";
 					refresh();
 					}
 			],
-			[ 'command' => $UI::MUTE, 
+			[ 'command' => "MUTE", 
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::MUTE;
+					$state_c{$n}->{rw} = "MUTE";
 					refresh();
 					}
 			],
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$state_c{$n}->{rw} = $UI::MON if $n == 1;          # MIX
+	$state_c{$n}->{rw} = "MON" if $n == 1;          # MIX
 
  
    ## XXX general code mixed with GUI code
@@ -3662,7 +3662,7 @@ sub track_gui { # nearly 300 lines!
 
 
 	 $debug and do {my %q = %p; delete $q{parent}; print
-	 "x=============\n%p\n",yaml_out(\%q)};
+	 "=============\n%p\n",yaml_out(\%q)};
 
 	$vol = make_scale ( \%p );
 	# Mute
@@ -3692,62 +3692,6 @@ sub track_gui { # nearly 300 lines!
 			}	
 	  );
 
-=comment
-	
-	# Solo
-
-	$solo = $track_frame->Button;
-	my @muted;
-	$solo->configure( -command => sub {
-
-		# do nothing if mix track
-		
-		return if $n == 1; MIX
-
-		# do nothing if setup not connected
-		
-		return if ! grep{/$session_name/} eval_iam(q(cs-connected));
-
-		# do nothing if someone else is soloing;
-		
-		return if grep{ is_soloing($_) } grep {$_ != $n} @all_chains; # but some may
-		                                                               # not be in
-																	   # chain
-																	   # setup
-
-		# restore prior mute settings if I had been soloing
-		
-		if (is_soloing($n) ) {
-		
-			$solo->configure(-foreground => $old_bg );
-			$solo->configure(-activeforeground => $old_bg );
-
-			map{ toggle_mute($_) if $muted[$_] != is_muted($_) } 
-				grep{$_ != 1} @all_chains; # MIX
-		}
-
-		# otherwise save muted status for each track and mute all
-		
-		else {
-			map{ $mute($_) = is_muted($_) } grep{$_ != 1} @all_chains; # MIX
-
-			map{ toggle_mute($_) } 
-			grep {! is_muted($_) } 
-			grep {$_ != $n} 
-			grep {$_ != 1} 
-			@all_chains;
-
-			is_muted($n) and toggle_mute($n);
-			
-			$solo->configure(-foreground => q(yellow) );
-			$solo->configure(-activeforeground => q(yellow) );
-
-			
-		}
-	});
-
-
-=cut
 
 	# Unity
 
@@ -4031,9 +3975,9 @@ use Tk;
 
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
-	my %take_color = (rec  => 'LightPink', 
-					mon => 'AntiqueWhite',
-					mute => $old_bg);
+	my %take_color = (REC  => 'LightPink', 
+					MON => 'AntiqueWhite',
+					MUTE => $old_bg);
 	collect_chains();
 	my @w = $take_frame->children;
 	for my $t (1..@takes){
@@ -4042,19 +3986,19 @@ sub refresh_t { # buses
 		#  rec if @record entry for this take
 		if ( grep{$take{$_}==$t}@record ) { 
 			$debug and print "t-rec $t\n";	
-			$status = $UI::REC } 
+			$status = "REC" } 
 		# 	mon if @monitor entry
 		elsif ( grep{$take{$_}==$t}@monitor )
 			{ 
 			$debug and print "t-mon $t\n";	
-			$status = $UI::MON }
+			$status = "MON" }
 
-		else  { $status = $UI::MUTE;
+		else  { $status = "MUTE";
 			$debug and print "t-mute $t\n";	
 		
 		}
 
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 	$debug and print "take_frame child: $t\n";
 
@@ -4072,7 +4016,7 @@ sub refresh_c { # tracks
 		return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 	
-	if ($rec_status eq $UI::REC) {
+	if ($rec_status eq "REC") {
 		$debug and print "REC! \n";
 
 		$widget_c{$n}->{name}->configure(-background => 'lightpink');
@@ -4084,7 +4028,7 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{version}->configure(-text => new_version);
 
 	}
-	elsif ( $rec_status eq $UI::MON ) {
+	elsif ( $rec_status eq "MON" ) {
 		$debug and print "MON! \n";
 
 		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
@@ -4096,7 +4040,7 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{version}->configure(-text => selected_version($n));
 
 		}
-	elsif ( $rec_status eq $UI::MUTE ) {
+	elsif ( $rec_status eq "MUTE" ) {
 		$debug and print "MUTE! \n";
 		 $widget_c{$n}->{name}->configure(-background => $old_bg);
 		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
@@ -4151,105 +4095,105 @@ sub hello {"hello world!";}
 ## We need stubs for procedural access to Core subs in the anscestor
 ## excluding those for ui functions
 
-sub config_file { UI::config_file() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub session_dir { UI::session_dir() }
-sub prepare { UI::prepare() }
-sub wav_dir { UI::wav_dir() }
-sub eval_iam { UI::eval_iam() }
-sub global_config { UI::global_config() }
-sub session_config { UI::session_config() }
-sub config { UI::config() }
-sub read_config { UI::read_config() }
-sub walk_tree { UI::walk_tree() }
-sub substitute { UI::substitute() }
-sub load_session { UI::load_session() }
-sub session_init { UI::session_init() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub add_track { UI::add_track() }
-sub add_mix_track { UI::add_mix_track() }
-sub mix_suffix { UI::mix_suffix() }
-sub restore_track { UI::restore_track() }
-sub register_track { UI::register_track() }
-sub dig_ruins { UI::dig_ruins() }
-sub find_wavs { UI::find_wavs() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub new_take { UI::new_take() }
-sub increment_take { UI::increment_take() }
-sub decrement_take { UI::decrement_take() }
-sub select_take { UI::select_take() }
-sub add_volume_control { UI::add_volume_control() }
-sub add_pan_control { UI::add_pan_control() }
-sub selected_version { UI::selected_version() }
-sub set_active_version { UI::set_active_version() }
-sub new_version { UI::new_version() }
-sub get_versions { UI::get_versions() }
-sub mon_vert { UI::mon_vert() }
-sub collect_chains { UI::collect_chains() }
-sub rec_status { UI::rec_status() }
-sub really_recording { UI::really_recording() }
-sub make_io_lists { UI::make_io_lists() }
-sub rec_route { UI::rec_route() }
-sub route { UI::route() }
-sub hash_push { UI::hash_push() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub write_chains { UI::write_chains() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub initialize_oids { UI::initialize_oids() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub pre_multi { UI::pre_multi() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub load_ecs { UI::load_ecs() }
-sub new_engine { UI::new_engine() }
-sub setup_transport { UI::setup_transport() }
-sub connect_transport { UI::connect_transport() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub transport_running { UI::transport_running() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub toggle_unit { UI::toggle_unit() }
-sub start_clock { UI::start_clock() }
-sub update_clock { UI::update_clock() }
-sub restart_clock { UI::restart_clock() }
-sub refresh_clock { UI::refresh_clock() }
-sub to_start { UI::to_start() }
-sub to_end { UI::to_end() }
-sub jump { UI::jump() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub update_version_button { UI::update_version_button() }
-sub update_master_version_button { UI::update_master_version_button() }
 sub add_effect { UI::add_effect() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
+sub add_mix_track { UI::add_mix_track() }
+sub add_pan_control { UI::add_pan_control() }
+sub add_track { UI::add_track() }
+sub add_volume_control { UI::add_volume_control() }
+sub apply_op { UI::apply_op() }
+sub apply_ops { UI::apply_ops() }
+sub arm_mark { UI::arm_mark() }
+sub collect_chains { UI::collect_chains() }
+sub colonize { UI::colonize() }
+sub config { UI::config() }
+sub config_file { UI::config_file() }
+sub connect_transport { UI::connect_transport() }
+sub convert_to_alsa { UI::convert_to_alsa() }
+sub convert_to_jack { UI::convert_to_jack() }
 sub cop_add { UI::cop_add() }
 sub cop_init { UI::cop_init() }
-sub effect_update { UI::effect_update() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub apply_ops { UI::apply_ops() }
-sub apply_op { UI::apply_op() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub range { UI::range() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
 sub d2 { UI::d2() }
+sub decrement_take { UI::decrement_take() }
+sub dig_ruins { UI::dig_ruins() }
+sub disconnect_transport { UI::disconnect_transport() }
 sub dn { UI::dn() }
-sub round { UI::round() }
-sub save_state { UI::save_state() }
-sub retrieve_state { UI::retrieve_state() }
-sub save_effects { UI::save_effects() }
+sub ecmd_dir { UI::ecmd_dir() }
+sub effect_update { UI::effect_update() }
+sub eliminate_loops { UI::eliminate_loops() }
+sub eval_iam { UI::eval_iam() }
+sub extract_effects_data { UI::extract_effects_data() }
+sub find_op_offsets { UI::find_op_offsets() }
+sub find_wavs { UI::find_wavs() }
+sub get_ladspa_hints { UI::get_ladspa_hints() }
+sub get_versions { UI::get_versions() }
+sub global_config { UI::global_config() }
+sub hash_push { UI::hash_push() }
+sub increment_take { UI::increment_take() }
+sub initialize_oids { UI::initialize_oids() }
+sub initialize_session_data { UI::initialize_session_data() }
+sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
+sub jump { UI::jump() }
+sub load_ecs { UI::load_ecs() }
+sub load_session { UI::load_session() }
+sub make_io_lists { UI::make_io_lists() }
+sub mark { UI::mark() }
+sub mix_suffix { UI::mix_suffix() }
+sub mon_vert { UI::mon_vert() }
+sub mono_to_stereo { UI::mono_to_stereo() }
+sub new_engine { UI::new_engine() }
+sub new_take { UI::new_take() }
+sub new_version { UI::new_version() }
+sub new_wav_name { UI::new_wav_name() }
+sub output_format { UI::output_format() }
+sub pre_multi { UI::pre_multi() }
+sub prepare { UI::prepare() }
+sub prepare_static_effects_data { UI::prepare_static_effects_data() }
 sub r { UI::r() }
 sub r5 { UI::r5() }
+sub range { UI::range() }
+sub read_config { UI::read_config() }
+sub read_in_effects_data { UI::read_in_effects_data() }
+sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
+sub really_recording { UI::really_recording() }
+sub rec_cleanup { UI::rec_cleanup() }
+sub rec_route { UI::rec_route() }
+sub rec_status { UI::rec_status() }
+sub refresh_clock { UI::refresh_clock() }
+sub register_track { UI::register_track() }
+sub remove_effect { UI::remove_effect() }
+sub remove_op { UI::remove_op() }
+sub remove_small_wavs { UI::remove_small_wavs() }
+sub restart_clock { UI::restart_clock() }
+sub restore_track { UI::restore_track() }
 sub retrieve_effects { UI::retrieve_effects() }
-sub arm_mark { UI::arm_mark() }
-sub colonize { UI::colonize() }
-sub mark { UI::mark() }
+sub retrieve_state { UI::retrieve_state() }
+sub round { UI::round() }
+sub route { UI::route() }
+sub save_effects { UI::save_effects() }
+sub save_state { UI::save_state() }
+sub select_take { UI::select_take() }
+sub selected_version { UI::selected_version() }
+sub session_config { UI::session_config() }
+sub session_dir { UI::session_dir() }
+sub session_init { UI::session_init() }
+sub set_active_version { UI::set_active_version() }
+sub setup_transport { UI::setup_transport() }
+sub sort_ladspa_effects { UI::sort_ladspa_effects() }
+sub start_clock { UI::start_clock() }
+sub start_transport { UI::start_transport() }
+sub stop_transport { UI::stop_transport() }
+sub substitute { UI::substitute() }
+sub this_wav_dir { UI::this_wav_dir() }
+sub to_end { UI::to_end() }
+sub to_start { UI::to_start() }
+sub toggle_unit { UI::toggle_unit() }
+sub transport_running { UI::transport_running() }
+sub update_clock { UI::update_clock() }
+sub update_master_version_button { UI::update_master_version_button() }
+sub update_version_button { UI::update_version_button() }
+sub walk_tree { UI::walk_tree() }
+sub wav_dir { UI::wav_dir() }
+sub write_chains { UI::write_chains() }
 
 
 ## Some of these, notably new, will be overwritten

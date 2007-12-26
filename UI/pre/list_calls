@@ -1,0 +1,39 @@
+#!/usr/bin/env perl
+my $target = shift;
+my @all_files = `cat CODE_MANIFEST`;
+my @all = qx(./list_subs `cat CODE_MANIFEST`);
+print "found ", scalar @all, " subroutines in total\n";
+my @seek = grep{ $_ ne $target } map{ chomp; $_ } @all_files;
+#print "@seek"; exit;
+@all = qx(./list_subs @seek);
+my @mine = qx(./list_subs $target);
+print "of these, I'm searching for calls to", scalar @all, " external\n";
+print "subroutines which will need to be imported.\n";
+print "the total minus ", scalar @mine, "subs in $target.\n";
+
+print "\nlisting sub calls in $target\n\n";
+my $text = qx(cat ./$target);
+#print $text; exit;
+my %found;
+map { 
+
+		my $current_sub = $_;
+		my $re = qr{
+				(?<!sub ) # not following sub 
+		
+				& # ampersand 
+				? # optional
+				$_ # iterator var (sub name)
+
+				\s* # possibly spaces then
+				\(? # open parenthesis
+
+			}x;
+		while ($text =~ /($re)/g and push @{ $found{$_} }, $1 ) {}
+
+	} @all;
+
+#print join $/, sort map{ @{ $found{$_} } } keys %found;
+print "---------\n";
+print join $/, map{ chomp; $_ } sort keys %found;
+

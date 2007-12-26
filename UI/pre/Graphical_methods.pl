@@ -459,7 +459,7 @@ sub global_version_buttons {
 				-variable => \$monitor_version,
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = $::MON; ### HARDCODED SECOND TAKE; MIX
+					$state_t{2}->{rw} = "MON"; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
 					setup_transport(); 
 					connect_transport();
@@ -490,7 +490,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> selected_version($n) ) 
-	#		unless rec_status($n) eq $::REC
+	#		unless rec_status($n) eq "REC"
 			}
 					);
 	}
@@ -506,7 +506,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_r},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $::REC;
+							$state_c{$n}->{rw} = "REC";
 							refresh() }
 				 		)
 				}
@@ -521,7 +521,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_m},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $::MON;
+							$state_c{$n}->{rw} = "MON";
 							refresh_c($n) }
 				 		)
 				}
@@ -531,28 +531,28 @@ sub track_gui { # nearly 300 lines!
 	);
 
 	my @items = (
-			[ 'command' => $::REC,
+			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					$state_c{$n}->{rw} = $::REC;
+					$state_c{$n}->{rw} = "REC";
 					refresh();
 					}
 			],
-			[ 'command' => $::MON,
+			[ 'command' => "MON",
 				-command  => sub { 
-					$state_c{$n}->{rw} = $::MON;
+					$state_c{$n}->{rw} = "MON";
 					refresh();
 					}
 			],
-			[ 'command' => $::MUTE, 
+			[ 'command' => "MUTE", 
 				-command  => sub { 
-					$state_c{$n}->{rw} = $::MUTE;
+					$state_c{$n}->{rw} = "MUTE";
 					refresh();
 					}
 			],
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$state_c{$n}->{rw} = $::MON if $n == 1;          # MIX
+	$state_c{$n}->{rw} = "MON" if $n == 1;          # MIX
 
  
    ## XXX general code mixed with GUI code

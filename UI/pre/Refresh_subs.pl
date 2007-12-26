@@ -6,9 +6,9 @@ use Tk;
 
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
-	my %take_color = (rec  => 'LightPink', 
-					mon => 'AntiqueWhite',
-					mute => $old_bg);
+	my %take_color = (REC  => 'LightPink', 
+					MON => 'AntiqueWhite',
+					MUTE => $old_bg);
 	collect_chains();
 	my @w = $take_frame->children;
 	for my $t (1..@takes){
@@ -17,19 +17,19 @@ sub refresh_t { # buses
 		#  rec if @record entry for this take
 		if ( grep{$take{$_}==$t}@record ) { 
 			$debug and print "t-rec $t\n";	
-			$status = $::REC } 
+			$status = "REC" } 
 		# 	mon if @monitor entry
 		elsif ( grep{$take{$_}==$t}@monitor )
 			{ 
 			$debug and print "t-mon $t\n";	
-			$status = $::MON }
+			$status = "MON" }
 
-		else  { $status = $::MUTE;
+		else  { $status = "MUTE";
 			$debug and print "t-mute $t\n";	
 		
 		}
 
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 	$debug and print "take_frame child: $t\n";
 
@@ -47,7 +47,7 @@ sub refresh_c { # tracks
 		return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 	
-	if ($rec_status eq $::REC) {
+	if ($rec_status eq "REC") {
 		$debug and print "REC! \n";
 
 		$widget_c{$n}->{name}->configure(-background => 'lightpink');
@@ -59,7 +59,7 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{version}->configure(-text => new_version);
 
 	}
-	elsif ( $rec_status eq $::MON ) {
+	elsif ( $rec_status eq "MON" ) {
 		$debug and print "MON! \n";
 
 		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
@@ -71,7 +71,7 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{version}->configure(-text => selected_version($n));
 
 		}
-	elsif ( $rec_status eq $::MUTE ) {
+	elsif ( $rec_status eq "MUTE" ) {
 		$debug and print "MUTE! \n";
 		 $widget_c{$n}->{name}->configure(-background => $old_bg);
 		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 

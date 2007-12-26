@@ -225,7 +225,7 @@ sub add_track {
 		return 0;
 	}
 	$track_name = remove_spaces($track_name);
-	$state_t{$t}->{rw} = $::REC;
+	$state_t{$t}->{rw} = "REC";
 	$track_names{$track_name}++;
 	$i++; # global variable track counter
 	register_track($i, $track_name, $ch_r, $ch_m);
@@ -234,7 +234,7 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = $::REC if ! defined $state_c{$i}->{rw};
+	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
 	$ui->track_gui($i);
 	return 1;
 }
@@ -242,9 +242,9 @@ sub add_mix_track {
 	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
 	add_track($mixname) ;
 	# the variable $t magically increments
-	$state_t{$t}->{rw} = $::MUTE; 
+	$state_t{$t}->{rw} = "MUTE"; 
 	new_take();
-	$state_t{$t}->{rw} = $::MON;
+	$state_t{$t}->{rw} = "MON";
 }
 sub mix_suffix {
 	my $stub = shift;
@@ -263,7 +263,7 @@ sub register_track {
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
 	$chain{$name} = $i;
-	$state_c{$i}->{rw} = $::REC;
+	$state_c{$i}->{rw} = "REC";
 	$state_c{$i}->{ch_m} = $ch_m;
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
@@ -363,7 +363,7 @@ sub increment_take {
 			return if transport_running(); 
 					$t++;
 					$state_t{active} = $t;
-					$state_t{$t}->{rw} = $::REC;
+					$state_t{$t}->{rw} = "REC";
 					push @takes, $t;
 					# print SESSION "take $t\n";
 }
@@ -478,8 +478,8 @@ sub collect_chains {
 	
 	for my $n (@all_chains) {
 	$debug and print "rec_status $n: ", rec_status($n), "\n";
-		push (@monitor, $n) if rec_status($n) eq $::MON; 
-		push (@record, $n) if rec_status($n) eq $::REC;
+		push (@monitor, $n) if rec_status($n) eq "MON"; 
+		push (@record, $n) if rec_status($n) eq "REC";
 	}
 
 	$debug and print "monitor chains:  @monitor\n\n";
@@ -499,23 +499,23 @@ sub rec_status {
 no warnings;
 my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
 use warnings;
-    return $::MUTE if $state_c{$n}->{rw} eq $::MON and ! $file_exists;
-	return $::MUTE if $state_c{$n}->{rw} eq $::MUTE;
-	return $::MUTE if $state_t{$take{$n}}->{rw} eq $::MUTE;
+    return "MUTE" if $state_c{$n}->{rw} eq $::MON and ! $file_exists;
+	return "MUTE" if $state_c{$n}->{rw} eq $::MUTE;
+	return "MUTE" if $state_t{$take{$n}}->{rw} eq $::MUTE;
 	if ($take{$n} == $state_t{active} ) {
 
-		if ($state_t{$take{$n}}->{rw} eq $::REC) {
+		if ($state_t{$take{$n}}->{rw} eq "REC") {
 
 			
-			if ($state_c{$n}->{rw} eq $::REC){
-				return $::REC if $state_c{$n}->{ch_r};
-				return $::MON if $file_exists;
-				return $::MUTE;
+			if ($state_c{$n}->{rw} eq "REC"){
+				return "REC" if $state_c{$n}->{ch_r};
+				return "MON" if $file_exists;
+				return "MUTE";
 			}
 		}
 	}
-	return $::MON if selected_version($n);
-	return $::MUTE;
+	return "MON" if selected_version($n);
+	return "MUTE";
 }
 sub really_recording {  # returns filename stubs
 
@@ -552,7 +552,7 @@ sub make_io_lists {
 	for my $n (@all_chains) {
 		$debug and print "chain $n: begin\n";
 		$rec_status = rec_status($n);
-		next if $rec_status eq $::MUTE;
+		next if $rec_status eq "MUTE";
 
 OID:		for my $oid (@oids) {
 
@@ -772,7 +772,7 @@ sub write_chains {
 	# but when playing back a mix, we want mixchain to be 
 	# something else
 	
-	my $mixchain = rec_status(1) eq $::MON
+	my $mixchain = rec_status(1) eq "MON"
 						? $mixchain_aux
 						: $mixchain;
 
@@ -1104,7 +1104,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			$ui->update_master_version_button();
-			$state_t{ $state_t{active} }->{rw} = $::MON;
+			$state_t{ $state_t{active} }->{rw} = "MON";
 			setup_transport();
 			connect_transport();
 			refresh();
@@ -1121,7 +1121,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless rec_status($n) eq $::REC }
+				unless rec_status($n) eq "REC" }
 					);
 }
 sub update_master_version_button {
@@ -1392,7 +1392,7 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	# my $debug = 1;
-	# return if rec_status($chain) eq $::MUTE; 
+	# return if rec_status($chain) eq "MUTE"; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
@@ -1462,7 +1462,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if rec_status($n) eq $::MUTE and $n != 1; #MIX
+ 		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {
