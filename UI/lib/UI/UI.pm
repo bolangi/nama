@@ -1780,7 +1780,7 @@ sub toggle_unit {
 ## clock and clock-refresh functions ##
 
 sub start_clock {
-	$clock_id = $clock->repeat(1000, \refresh_clock);
+	$clock_id = $clock->repeat(1000, \&refresh_clock);
 }
 sub update_clock {
 	clock_display(-text => colonize(eval_iam('cs-get-position')));
@@ -2977,6 +2977,7 @@ package UI::Graphical;  ## gui routines
 our @ISA = 'UI';
 use Carp;
 use Tk;
+use UI::Assign qw(:all);
 
 ## We need stubs for procedural access to subs in the anscestor
 ## excluding those for ui functions
@@ -3087,7 +3088,7 @@ sub mark { UI::mark() }
 sub hello {"make a window";}
 # croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 sub new { my $class = shift; return bless {@_}, $class }
-sub session_label_configure{ session_label_configure(@_)}
+sub session_label_configure{ $session_label->configure( -text => $_[0])}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
 sub manifest { $ew->deiconify() }
@@ -3098,8 +3099,8 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
+	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
-	#session_init(), load_session({create => $opts{c}}) if $session_name;
 }
 
 
@@ -3210,7 +3211,7 @@ sub init_gui {
 	$build_new_take->configure( 
 			-text => 'New Group',
 			-command =>
-			\new_take, # used for mixdown
+			\&new_take, # used for mixdown
 
 			
 			);
@@ -3347,11 +3348,11 @@ sub time_gui {
 		}  @minuses ;
 	my $beg = $fast_frame->Button(
 			-text => 'Beg',
-			-command => \to_start,
+			-command => \&to_start,
 			);
 	my $end = $fast_frame->Button(
 			-text => 'End',
-			-command => \to_end,
+			-command => \&to_end,
 			);
 
 	$time_step = $fast_frame->Button( 
@@ -3361,7 +3362,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \toggle_unit);
+	$time_step->configure (-command => \&toggle_unit);
 
 	# Marks
 	
@@ -3369,7 +3370,7 @@ sub time_gui {
 	push @label_and_arm, $mark_label;	
 	push @label_and_arm, $mark_frame->Button(
 		-text => 'Set',
-		-command => sub { arm_mark },
+		-command => \&arm_mark,
 	);
 	my $marks = 18; # number of marker buttons
 	my @m = (1..$marks);
@@ -3485,12 +3486,12 @@ sub take_gui {
 				-tearoff =>0,
 			)->pack(-side => 'left');
 		push @widget_t, $name;
-	$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
+	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
 		$name->AddItems([
-			'command' => $UI::REC,
+			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
 				no strict qw(vars);
@@ -3502,7 +3503,7 @@ sub take_gui {
 		}
 
 		$name->AddItems([
-			'command' => $UI::MON,
+			'command' => 'MON',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -3512,7 +3513,7 @@ sub take_gui {
 				}
 			]);
 		$name->AddItems([
-			'command' => $UI::MUTE,
+			'command' => 'OFF',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -3521,7 +3522,7 @@ sub take_gui {
 				select_take($my_t, qq(MUTE)); 
 				}
 
-		]);
+			]);
 
 							   
 }
@@ -4144,6 +4145,7 @@ sub restore_time_marker_labels {
 package UI::Text;
 our @ISA = 'UI';
 use Carp;
+use UI::Assign qw(:all);
 sub hello {"hello world!";}
 
 ## We need stubs for procedural access to Core subs in the anscestor

@@ -128,6 +128,7 @@ package ::Graphical;  ## gui routines
 our @ISA = '::';
 use Carp;
 use Tk;
+use ::Assign qw(:all);
 
 ## We need stubs for procedural access to subs in the anscestor
 ## excluding those for ui functions
@@ -146,6 +147,7 @@ sub hello {"make a window";}
 package ::Text;
 our @ISA = '::';
 use Carp;
+use ::Assign qw(:all);
 sub hello {"hello world!";}
 
 ## We need stubs for procedural access to Core subs in the anscestor

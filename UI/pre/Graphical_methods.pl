@@ -1,6 +1,6 @@
 # croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 sub new { my $class = shift; return bless {@_}, $class }
-sub session_label_configure{ session_label_configure(@_)}
+sub session_label_configure{ $session_label->configure( -text => $_[0])}
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 sub clock_display { $clock->configure(-text => colonize( 0) )}
 sub manifest { $ew->deiconify() }
@@ -11,7 +11,7 @@ sub loop {
 	transport_gui();
 	oid_gui();
 	time_gui();
-	#session_init(), load_session({create => $opts{c}}) if $session_name;
+	session_init(), load_session({create => $opts{c}}) if $session_name;
 	MainLoop;
 }
 
@@ -123,7 +123,7 @@ sub init_gui {
 	$build_new_take->configure( 
 			-text => 'New Group',
 			-command =>
-			\new_take, # used for mixdown
+			\&new_take, # used for mixdown
 
 			
 			);
@@ -260,11 +260,11 @@ sub time_gui {
 		}  @minuses ;
 	my $beg = $fast_frame->Button(
 			-text => 'Beg',
-			-command => \to_start,
+			-command => \&to_start,
 			);
 	my $end = $fast_frame->Button(
 			-text => 'End',
-			-command => \to_end,
+			-command => \&to_end,
 			);
 
 	$time_step = $fast_frame->Button( 
@@ -274,7 +274,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \toggle_unit);
+	$time_step->configure (-command => \&toggle_unit);
 
 	# Marks
 	
@@ -282,7 +282,7 @@ sub time_gui {
 	push @label_and_arm, $mark_label;	
 	push @label_and_arm, $mark_frame->Button(
 		-text => 'Set',
-		-command => sub { arm_mark },
+		-command => \&arm_mark,
 	);
 	my $marks = 18; # number of marker buttons
 	my @m = (1..$marks);
@@ -398,12 +398,12 @@ sub take_gui {
 				-tearoff =>0,
 			)->pack(-side => 'left');
 		push @widget_t, $name;
-	$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
+	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
 		$name->AddItems([
-			'command' => $::REC,
+			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
 				no strict qw(vars);
@@ -415,7 +415,7 @@ sub take_gui {
 		}
 
 		$name->AddItems([
-			'command' => $::MON,
+			'command' => 'MON',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -425,7 +425,7 @@ sub take_gui {
 				}
 			]);
 		$name->AddItems([
-			'command' => $::MUTE,
+			'command' => 'OFF',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -434,7 +434,7 @@ sub take_gui {
 				select_take($my_t, qq(MUTE)); 
 				}
 
-		]);
+			]);
 
 							   
 }
@@ -574,7 +574,7 @@ sub track_gui { # nearly 300 lines!
 
 
 	 $debug and do {my %q = %p; delete $q{parent}; print
-	 "x=============\n%p\n",yaml_out(\%q)};
+	 "=============\n%p\n",yaml_out(\%q)};
 
 	$vol = make_scale ( \%p );
 	# Mute
@@ -604,62 +604,6 @@ sub track_gui { # nearly 300 lines!
 			}	
 	  );
 
-=comment
-	
-	# Solo
-
-	$solo = $track_frame->Button;
-	my @muted;
-	$solo->configure( -command => sub {
-
-		# do nothing if mix track
-		
-		return if $n == 1; MIX
-
-		# do nothing if setup not connected
-		
-		return if ! grep{/$session_name/} eval_iam(q(cs-connected));
-
-		# do nothing if someone else is soloing;
-		
-		return if grep{ is_soloing($_) } grep {$_ != $n} @all_chains; # but some may
-		                                                               # not be in
-																	   # chain
-																	   # setup
-
-		# restore prior mute settings if I had been soloing
-		
-		if (is_soloing($n) ) {
-		
-			$solo->configure(-foreground => $old_bg );
-			$solo->configure(-activeforeground => $old_bg );
-
-			map{ toggle_mute($_) if $muted[$_] != is_muted($_) } 
-				grep{$_ != 1} @all_chains; # MIX
-		}
-
-		# otherwise save muted status for each track and mute all
-		
-		else {
-			map{ $mute($_) = is_muted($_) } grep{$_ != 1} @all_chains; # MIX
-
-			map{ toggle_mute($_) } 
-			grep {! is_muted($_) } 
-			grep {$_ != $n} 
-			grep {$_ != 1} 
-			@all_chains;
-
-			is_muted($n) and toggle_mute($n);
-			
-			$solo->configure(-foreground => q(yellow) );
-			$solo->configure(-activeforeground => q(yellow) );
-
-			
-		}
-	});
-
-
-=cut
 
 	# Unity
 

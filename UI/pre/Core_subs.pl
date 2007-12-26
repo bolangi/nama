@@ -1018,7 +1018,7 @@ sub toggle_unit {
 ## clock and clock-refresh functions ##
 
 sub start_clock {
-	$clock_id = $clock->repeat(1000, \refresh_clock);
+	$clock_id = $clock->repeat(1000, \&refresh_clock);
 }
 sub update_clock {
 	clock_display(-text => colonize(eval_iam('cs-get-position')));

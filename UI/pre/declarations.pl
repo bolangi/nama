@@ -194,7 +194,7 @@ our (
 	$transport_stop,
 
 	$iam,    # unused
-	$old_bg, # old background
+	$old_bg, # initial background color.
 
 
 	$loopa,  # loopback nodes 
