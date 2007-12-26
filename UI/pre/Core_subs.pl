@@ -1,4 +1,3 @@
-use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
@@ -2190,4 +2189,4 @@ sub mark {
 	#	start_clock();
 	}
 }
-
+### end

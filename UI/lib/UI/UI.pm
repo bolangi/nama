@@ -1,34 +1,25 @@
+package UI;
 use 5.008;
-use strict qw(vars subs);
+use strict;
 use warnings;
+our $VERSION = '0.01';
 use lib "$ENV{HOME}/build/flow/UI/lib"; 
-
-package UI;  ## core routines
-
+use lib qw(. ..);
+use IO::All;
 use Carp;
 use Cwd;
-# use Tk;
-use IO::All;
+use Tk;
 use Storable; 
 use Getopt::Std;
 use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
-use UI::Assign qw(:all);
-use lib qw(. ..);
-# use UI::Assign qw(:all);  # something wrong with this
-
-print remove_spaces("bulwinkle is a...");
-
-## Class and Object definition, root class
-# for package 'UI'
-our @ISA; # no anscestors
-use Object::Tiny qw(mode);
-
-our $VERSION = '0.01';
 
 ## Definitions ##
+
+# 'our' declaration: all packages in the file will see the following
+# variables. 
 
 
 use constant (REC => 'rec',
@@ -260,8 +251,7 @@ our (
 						#    used
 
 );
-
-
+ 
 
 @global_vars = qw(
 						$mixname
@@ -330,437 +320,23 @@ our (
 $debug2 = 1;
 $debug = 1;
 
-## prevents bareword sub calls some_sub; from failing
-use subs qw(
-
-add_effect
-add_mix_track
-add_pan_control
-add_track
-add_volume_control
-apply_op
-apply_ops
-arm_mark
-collect_chains
-colonize
-config
-config_file
-connect_transport
-convert_to_alsa
-convert_to_jack
-cop_add
-cop_init
-d2
-decrement_take
-dig_ruins
-disconnect_transport
-dn
-ecmd_dir
-effect_update
-eliminate_loops
-eval_iam
-extract_effects_data
-find_op_offsets
-find_wavs
-get_ladspa_hints
-get_versions
-global_config
-hash_push
-increment_take
-initialize_oids
-initialize_session_data
-integrate_ladspa_hints
-jump
-load_ecs
-load_session
-make_io_lists
-mark
-mix_suffix
-mon_vert
-mono_to_stereo
-new_engine
-new_take
-new_version
-new_wav_name
-output_format
-pre_multi
-prepare
-prepare_static_effects_data
-r
-r5
-range
-read_config
-read_in_effects_data
-read_in_tkeca_effects_data
-really_recording
-rec_cleanup
-rec_route
-rec_status
-refresh_clock
-register_track
-remove_effect
-remove_op
-remove_small_wavs
-restart_clock
-restore_track
-retrieve_effects
-retrieve_state
-round
-route
-save_effects
-save_state
-select_take
-selected_version
-session_config
-session_dir
-session_init
-set_active_version
-setup_transport
-sort_ladspa_effects
-start_clock
-start_transport
-stop_transport
-substitute
-this_wav_dir
-to_end
-to_start
-toggle_unit
-transport_running
-update_clock
-update_master_version_button
-update_version_button
-walk_tree
-wav_dir
-write_chains
-
-);
 ## Load my modules
 
-use UI::Iam;    	# IAM command support
-use UI::Tkeca_effects; # Some effects data
+use UI::Assign qw(:all);
+use UI::Iam;    
+use UI::Tkeca_effects; 
 
-# we use the following settings if we can't find config files
+## Class and Object definitions for package 'UI'
 
-$default = <<'FALLBACK_CONFIG';
----
-wav_dir: /media/sessions
-abbreviations:
-  24-mono: s24_le,1,frequency
-  32-10: s32_le,10,frequency
-  32-12: s32_le,12,frequency
-  cd-mono: s16_le,1,44100
-  cd-stereo: s16_le,2,44100,i
-  frequency: 44100
-devices:
-  jack:
-    ecasound_id: jack_alsa
-    input_format: 32-12
-    output_format: 32-10
-  multi:
-    ecasound_id: alsaplugin,1,0
-    input_format: 32-12
-    output_format: 32-10
-  stereo:
-    ecasound_id: alsaplugin,0,0
-    input_format: cd-stereo
-    output_format: cd-stereo
-ecasound_globals: "-B auto"
-mix_to_disk_format: cd-stereo
-mixer_out_format: cd-stereo
-raw_to_disk_format: cd-mono
-mixname: mix
-ladspa_sample_rate: frequency
-unit: 1 				
-effects_cache_file: effects_cache.yaml
-state_store_file: State 
-chain_setup_file: session.ecs
-alias:
-  1: Mixdown
-  2: Tracker
-tk_input_channels: 10
-use_monitor_version_for_mixdown: true 
-...
-
-FALLBACK_CONFIG
-
-# the following template are used to generate chain setups.
-$oids = <<'TEMPLATES';
----
--
-  default: on
-  id: Stereo
-  name: stereo
-  output: stereo
-  type: mixed
--
-  default: off
-  id: m
-  name: multi
-  output: multi
-  pre_output: &pre_multi
-  target: mon
-  type: cooked
--
-  default: off
-  id: L
-  name: live
-  output: multi
-  pre_output: &pre_multi
-  target: rec
-  type: cooked
--
-  default: off
-  id: Mix
-  name: mix
-  output: file
-  type: mixed
--
-  default: on
-  id: J
-  name: mix_setup
-  output: ~
-  target: all
-  type: cooked
--
-  default: on
-  id: ~
-  input: file
-  name: mon_setup
-  output: loop
-  post_input: &mono_to_stereo
-  target: mon
-  type: raw
--
-  default: on
-  id: R
-  input: multi
-  name: rec_file
-  output: file
-  target: rec
-  type: raw
--
-  default: on
-  id: ~
-  input: multi
-  name: rec_setup
-  output: loop
-  post_input: &mono_to_stereo
-  target: rec
-  type: raw
-...
-
-TEMPLATES
-
-##  Grammar.p, source for Grammar.pm
-
-### COMMAND LINE PARSER 
-
-$debug2 and print "Reading grammar\n";
-
-$UI::AUTOSTUB = 1;
-$UI::RD_HINT = 1;
-
-# rec command changes active take
-
-$grammar = q(
-
-command: mon
-command: m
-command: r
-command: rec
-command: off
-command: vol
-command: pan
-command: version
-command: loop
-command: save_session
-command: new_session
-command: load_session
-command: add_track
-command: generate_setup
-command: list_marks
-command: show_setup
-command: show_effects
-command: ecasound_start
-command: ecasound_stop
-command: add_effect
-command: remove_effect
-command: renew_engine
-command: mark
-command: start
-command: stop
-command: show_marks
-command: rename_mark
-_mon: 'mon'
-_m: 'm'
-_r: 'r'
-_rec: 'rec'
-_off: 'off' | 'z'
-_vol: 'vol' | 'v'
-_pan: 'pan' | 'p'
-_version: 'version' | 'n'
-_loop: 'loop'
-_save_session: 'save_session' | 'keep' | 'k'
-_new_session: 'new_session' | 'new'
-_load_session: 'load_session' | 'load'
-_add_track: 'add_track' | 'add'
-_generate_setup: 'generate_setup' | 'setup'
-_list_marks: 'list_marks' | 'l'
-_show_setup: 'show_setup' | 'show'
-_show_effects: 'show_effects' | 'sfx'
-_ecasound_start: 'ecasound_start' | 'T'
-_ecasound_stop: 'ecasound_stop' | 'S'
-_add_effect: 'add_effect' | 'fx'
-_remove_effect: 'remove_effect' | 'rfx'
-_renew_engine: 'renew_engine' | 'renew'
-_mark: 'mark' | 'k'
-_start: 'start' | 't'
-_stop: 'stop' | 'st'
-_show_marks: 'show_marks' | 'sm'
-_rename_mark: 'rename_mark' | 'rn'
-mon: _mon {}
-m: _m {}
-r: _r {}
-rec: _rec {}
-off: _off {}
-vol: _vol {}
-pan: _pan {}
-version: _version {}
-loop: _loop {}
-save_session: _save_session {}
-new_session: _new_session {}
-load_session: _load_session {}
-add_track: _add_track {}
-generate_setup: _generate_setup {}
-list_marks: _list_marks {}
-show_setup: _show_setup {}
-show_effects: _show_effects {}
-ecasound_start: _ecasound_start {}
-ecasound_stop: _ecasound_stop {}
-add_effect: _add_effect {}
-remove_effect: _remove_effect {}
-renew_engine: _renew_engine {}
-mark: _mark {}
-start: _start {}
-stop: _stop {}
-show_marks: _show_marks {}
-rename_mark: _rename_mark {}
-
-new_session: _new_session name {
-	$UI::session = $item{name};
-	&UI::new_session;
-	1;
-}
-
-load_session: _load_session name {
-	$UI::session = $item{name};
-	&UI::load_session unless $UI::session_name eq $item{name};
-	1;
-}
-
-add_track: _add_track wav channel(s?) { 
-	if ($UI::track_names{$item{wav}} ){
-		print "Track name already in use.\n";
-	} else {
-		&UI::add_track($item{wav}) ;
-		my %ch = ( @{$item{channel}} );	
-		$ch{r} and $UI::state_c{$UI::i}->{ch_r} = $UI::ch{r};
-		$ch{m} and $UI::state_c{$UI::i}->{ch_m} = $UI::ch{m};
-		
-	}
-	1;
-}
-
-generate_setup: _generate_setup {}
-setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
-
-list_marks: _list_marks {}
-
-show_setup: _show_setup { 	
-	map { 	push @UI::format_fields,  
-			$_,
-			$UI::state_c{$_}->{active},
-			$UI::state_c{$_}->{file},
-			$UI::state_c{$_}->{rw},
-			&UI::rec_status($_),
-			$UI::state_c{$_}->{ch_r},
-			$UI::state_c{$_}->{ch_m},
-
-		} sort keys %UI::state_c;
-		
-	write; # using format at end of file Flow.pm
-				1;
-}
-
-name: /\w+/
-
-wav: name
-
-
-mix: 'mix' {1}
-
-norm: 'norm' {1}
-
-exit: 'exit' { &UI::save_state($UI::statestore); exit; }
-
-
-channel: r | m
-
-r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
-m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
-
-
-rec: 'rec' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
-}
-mon: 'mon' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
-}
-mute: 'mute' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
-}
-
-mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mon); }
-
-mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mute); }
-
-rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = q(rec); }
-
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-
-
-);
+our @ISA; # no anscestors
+use Object::Tiny qw(mode);
 
 ## The following methods belong to the root class
 
 sub hello {"superclass hello"}
 
 sub new { my $class = shift; return bless {@_}, $class }
- 		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-=comment
-my $root_class = 'UI'; 
-sub new { 
-	my $class = shift;
-	if (@_ % 2 and $class eq $root_class){
-		my %h = ( @_ );
-		my $mode = $h{mode};
-		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
-		$mode =~ /text|txt/i       and $mode = 'Text';
-		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
-		return bless { @_ }, "$root_class\::" . $mode;
-	} 
-	return bless {@_}, $class;
-}
-sub usage { <<USAGE; }
-Usage:    UI->new(mode => "text")
-       or UI->new(mode => "tk")
-USAGE
 
-=cut
-use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
@@ -2952,160 +2528,19 @@ sub mark {
 	#	start_clock();
 	}
 }
-
-
-
-## no-op graphic methods to inherit by Text
-
-sub take_gui {}
-sub track_gui {}
-sub refresh {}
-sub flash_ready {}
-sub update_master_version_button {}
-sub paint_button {}
-sub refresh_oids {}
-sub paint_button {}
-sub session_label_configure{}
-sub length_display{}
-sub clock_display {}
-sub manifest {}
-sub global_version_buttons {}
-sub destroy_widgets {}
-sub restore_time_marker_labels {}
-
-package UI::Graphical;  ## gui routines
-our @ISA = 'UI';
-use Carp;
-use Tk;
-use UI::Assign qw(:all);
-
-## We need stubs for procedural access to subs in the anscestor
-## excluding those for ui functions
-
-sub add_effect { UI::add_effect() }
-sub add_mix_track { UI::add_mix_track() }
-sub add_pan_control { UI::add_pan_control() }
-sub add_track { UI::add_track() }
-sub add_volume_control { UI::add_volume_control() }
-sub apply_op { UI::apply_op() }
-sub apply_ops { UI::apply_ops() }
-sub arm_mark { UI::arm_mark() }
-sub collect_chains { UI::collect_chains() }
-sub colonize { UI::colonize() }
-sub config { UI::config() }
-sub config_file { UI::config_file() }
-sub connect_transport { UI::connect_transport() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub cop_add { UI::cop_add() }
-sub cop_init { UI::cop_init() }
-sub d2 { UI::d2() }
-sub decrement_take { UI::decrement_take() }
-sub dig_ruins { UI::dig_ruins() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub dn { UI::dn() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub effect_update { UI::effect_update() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub eval_iam { UI::eval_iam() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub find_wavs { UI::find_wavs() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub get_versions { UI::get_versions() }
-sub global_config { UI::global_config() }
-sub hash_push { UI::hash_push() }
-sub increment_take { UI::increment_take() }
-sub initialize_oids { UI::initialize_oids() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
-sub jump { UI::jump() }
-sub load_ecs { UI::load_ecs() }
-sub load_session { UI::load_session() }
-sub make_io_lists { UI::make_io_lists() }
-sub mark { UI::mark() }
-sub mix_suffix { UI::mix_suffix() }
-sub mon_vert { UI::mon_vert() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub new_engine { UI::new_engine() }
-sub new_take { UI::new_take() }
-sub new_version { UI::new_version() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub pre_multi { UI::pre_multi() }
-sub prepare { UI::prepare() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub r { UI::r() }
-sub r5 { UI::r5() }
-sub range { UI::range() }
-sub read_config { UI::read_config() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub really_recording { UI::really_recording() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub rec_route { UI::rec_route() }
-sub rec_status { UI::rec_status() }
-sub refresh_clock { UI::refresh_clock() }
-sub register_track { UI::register_track() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub restart_clock { UI::restart_clock() }
-sub restore_track { UI::restore_track() }
-sub retrieve_effects { UI::retrieve_effects() }
-sub retrieve_state { UI::retrieve_state() }
-sub round { UI::round() }
-sub route { UI::route() }
-sub save_effects { UI::save_effects() }
-sub save_state { UI::save_state() }
-sub select_take { UI::select_take() }
-sub selected_version { UI::selected_version() }
-sub session_config { UI::session_config() }
-sub session_dir { UI::session_dir() }
-sub session_init { UI::session_init() }
-sub set_active_version { UI::set_active_version() }
-sub setup_transport { UI::setup_transport() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub start_clock { UI::start_clock() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub substitute { UI::substitute() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub to_end { UI::to_end() }
-sub to_start { UI::to_start() }
-sub toggle_unit { UI::toggle_unit() }
-sub transport_running { UI::transport_running() }
-sub update_clock { UI::update_clock() }
-sub update_master_version_button { UI::update_master_version_button() }
-sub update_version_button { UI::update_version_button() }
-sub walk_tree { UI::walk_tree() }
-sub wav_dir { UI::wav_dir() }
-sub write_chains { UI::write_chains() }
-
-
-## The following methods belong to the Graphical interface class
-
-sub hello {"make a window";}
-# croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-sub new { my $class = shift; return bless {@_}, $class }
-sub session_label_configure{ $session_label->configure( -text => $_[0])}
-sub length_display{ $setup_length->configure(-text => colonize $length) };
-sub clock_display { $clock->configure(-text => colonize( 0) )}
-sub manifest { $ew->deiconify() }
-
-
-sub loop {
-	init_gui(); 
-	transport_gui();
-	oid_gui();
-	time_gui();
-	session_init(), load_session({create => $opts{c}}) if $session_name;
-	MainLoop;
-}
+### end
 
 
 ## gui handling
-#
+
+sub session_label_configure{ $session_label->configure( -text => $_[0])}
+
+sub length_display{ $setup_length->configure(-text => colonize $length) };
+
+sub clock_display { $clock->configure(-text => colonize( 0) )}
+
+sub manifest { $ew->deiconify() }
+
 sub destroy_widgets {
 
 	map{ $_->destroy } map{ $_->children } $effect_frame;
@@ -3969,10 +3404,6 @@ sub is_muted {
 
 ## refresh functions
 
-package UI::Graphical;
-use Tk;
-
-
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
 	my %take_color = (REC  => 'LightPink', 
@@ -4084,122 +3515,80 @@ sub restore_time_marker_labels {
 ### end
 
 
+print remove_spaces("bulwinkle is a...");
+
+=comment
+my $root_class = 'UI'; 
+sub new { 
+	my $class = shift;
+	if (@_ % 2 and $class eq $root_class){
+		my %h = ( @_ );
+		my $mode = $h{mode};
+		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
+		$mode =~ /text|txt/i       and $mode = 'Text';
+		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
+		return bless { @_ }, "$root_class\::" . $mode;
+	} 
+	return bless {@_}, $class;
+}
+sub usage { <<USAGE; }
+Usage:    UI->new(mode => "text")
+       or UI->new(mode => "tk")
+USAGE
+
+=cut
+
+
+package UI::Graphical;  ## gui routines
+our @ISA = 'UI';
+#use Tk;
+#use UI::Assign qw(:all);
+
+## The following methods belong to the Graphical interface class
+
+sub hello {"make a window";}
+sub new { my $class = shift; return bless {@_}, $class }
+sub loop {
+	package UI;
+	init_gui(); 
+	transport_gui();
+	oid_gui();
+	time_gui();
+	session_init(), UI::load_session({create => $opts{c}}) if $session_name;
+	MainLoop;
+}
+
 ## The following methods belong to the Text interface class
 
 package UI::Text;
 our @ISA = 'UI';
 use Carp;
-use UI::Assign qw(:all);
 sub hello {"hello world!";}
 
-## We need stubs for procedural access to Core subs in the anscestor
-## excluding those for ui functions
+## no-op graphic methods 
 
-sub add_effect { UI::add_effect() }
-sub add_mix_track { UI::add_mix_track() }
-sub add_pan_control { UI::add_pan_control() }
-sub add_track { UI::add_track() }
-sub add_volume_control { UI::add_volume_control() }
-sub apply_op { UI::apply_op() }
-sub apply_ops { UI::apply_ops() }
-sub arm_mark { UI::arm_mark() }
-sub collect_chains { UI::collect_chains() }
-sub colonize { UI::colonize() }
-sub config { UI::config() }
-sub config_file { UI::config_file() }
-sub connect_transport { UI::connect_transport() }
-sub convert_to_alsa { UI::convert_to_alsa() }
-sub convert_to_jack { UI::convert_to_jack() }
-sub cop_add { UI::cop_add() }
-sub cop_init { UI::cop_init() }
-sub d2 { UI::d2() }
-sub decrement_take { UI::decrement_take() }
-sub dig_ruins { UI::dig_ruins() }
-sub disconnect_transport { UI::disconnect_transport() }
-sub dn { UI::dn() }
-sub ecmd_dir { UI::ecmd_dir() }
-sub effect_update { UI::effect_update() }
-sub eliminate_loops { UI::eliminate_loops() }
-sub eval_iam { UI::eval_iam() }
-sub extract_effects_data { UI::extract_effects_data() }
-sub find_op_offsets { UI::find_op_offsets() }
-sub find_wavs { UI::find_wavs() }
-sub get_ladspa_hints { UI::get_ladspa_hints() }
-sub get_versions { UI::get_versions() }
-sub global_config { UI::global_config() }
-sub hash_push { UI::hash_push() }
-sub increment_take { UI::increment_take() }
-sub initialize_oids { UI::initialize_oids() }
-sub initialize_session_data { UI::initialize_session_data() }
-sub integrate_ladspa_hints { UI::integrate_ladspa_hints() }
-sub jump { UI::jump() }
-sub load_ecs { UI::load_ecs() }
-sub load_session { UI::load_session() }
-sub make_io_lists { UI::make_io_lists() }
-sub mark { UI::mark() }
-sub mix_suffix { UI::mix_suffix() }
-sub mon_vert { UI::mon_vert() }
-sub mono_to_stereo { UI::mono_to_stereo() }
-sub new_engine { UI::new_engine() }
-sub new_take { UI::new_take() }
-sub new_version { UI::new_version() }
-sub new_wav_name { UI::new_wav_name() }
-sub output_format { UI::output_format() }
-sub pre_multi { UI::pre_multi() }
-sub prepare { UI::prepare() }
-sub prepare_static_effects_data { UI::prepare_static_effects_data() }
-sub r { UI::r() }
-sub r5 { UI::r5() }
-sub range { UI::range() }
-sub read_config { UI::read_config() }
-sub read_in_effects_data { UI::read_in_effects_data() }
-sub read_in_tkeca_effects_data { UI::read_in_tkeca_effects_data() }
-sub really_recording { UI::really_recording() }
-sub rec_cleanup { UI::rec_cleanup() }
-sub rec_route { UI::rec_route() }
-sub rec_status { UI::rec_status() }
-sub refresh_clock { UI::refresh_clock() }
-sub register_track { UI::register_track() }
-sub remove_effect { UI::remove_effect() }
-sub remove_op { UI::remove_op() }
-sub remove_small_wavs { UI::remove_small_wavs() }
-sub restart_clock { UI::restart_clock() }
-sub restore_track { UI::restore_track() }
-sub retrieve_effects { UI::retrieve_effects() }
-sub retrieve_state { UI::retrieve_state() }
-sub round { UI::round() }
-sub route { UI::route() }
-sub save_effects { UI::save_effects() }
-sub save_state { UI::save_state() }
-sub select_take { UI::select_take() }
-sub selected_version { UI::selected_version() }
-sub session_config { UI::session_config() }
-sub session_dir { UI::session_dir() }
-sub session_init { UI::session_init() }
-sub set_active_version { UI::set_active_version() }
-sub setup_transport { UI::setup_transport() }
-sub sort_ladspa_effects { UI::sort_ladspa_effects() }
-sub start_clock { UI::start_clock() }
-sub start_transport { UI::start_transport() }
-sub stop_transport { UI::stop_transport() }
-sub substitute { UI::substitute() }
-sub this_wav_dir { UI::this_wav_dir() }
-sub to_end { UI::to_end() }
-sub to_start { UI::to_start() }
-sub toggle_unit { UI::toggle_unit() }
-sub transport_running { UI::transport_running() }
-sub update_clock { UI::update_clock() }
-sub update_master_version_button { UI::update_master_version_button() }
-sub update_version_button { UI::update_version_button() }
-sub walk_tree { UI::walk_tree() }
-sub wav_dir { UI::wav_dir() }
-sub write_chains { UI::write_chains() }
+sub take_gui {}
+sub track_gui {}
+sub refresh {}
+sub flash_ready {}
+sub update_master_version_button {}
+sub paint_button {}
+sub refresh_oids {}
+sub paint_button {}
+sub session_label_configure{}
+sub length_display{}
+sub clock_display {}
+sub manifest {}
+sub global_version_buttons {}
+sub destroy_widgets {}
+sub restore_time_marker_labels {}
 
-
-## Some of these, notably new, will be overwritten
+## Some of these, may be overwritten
 ## by definitions that follow
+
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
+	package UI;
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
@@ -4248,15 +3637,306 @@ splice @UI::format_fields, 0, 7
 1;
 
 
+package UI;
 
-## The following methods belong to the Session and Wav classes
+##  Grammar.p, source for Grammar.pm
 
-## currently unused
-# [-% qx(cat ./Session_Wav.pl ) %-]
+### COMMAND LINE PARSER 
+
+$debug2 and print "Reading grammar\n";
+
+$UI::AUTOSTUB = 1;
+$UI::RD_HINT = 1;
+
+# rec command changes active take
+
+$grammar = q(
+
+command: mon
+command: m
+command: r
+command: rec
+command: off
+command: vol
+command: pan
+command: version
+command: loop
+command: save_session
+command: new_session
+command: load_session
+command: add_track
+command: generate_setup
+command: list_marks
+command: show_setup
+command: show_effects
+command: ecasound_start
+command: ecasound_stop
+command: add_effect
+command: remove_effect
+command: renew_engine
+command: mark
+command: start
+command: stop
+command: show_marks
+command: rename_mark
+_mon: 'mon'
+_m: 'm'
+_r: 'r'
+_rec: 'rec'
+_off: 'off' | 'z'
+_vol: 'vol' | 'v'
+_pan: 'pan' | 'p'
+_version: 'version' | 'n'
+_loop: 'loop'
+_save_session: 'save_session' | 'keep' | 'k'
+_new_session: 'new_session' | 'new'
+_load_session: 'load_session' | 'load'
+_add_track: 'add_track' | 'add'
+_generate_setup: 'generate_setup' | 'setup'
+_list_marks: 'list_marks' | 'l'
+_show_setup: 'show_setup' | 'show'
+_show_effects: 'show_effects' | 'sfx'
+_ecasound_start: 'ecasound_start' | 'T'
+_ecasound_stop: 'ecasound_stop' | 'S'
+_add_effect: 'add_effect' | 'fx'
+_remove_effect: 'remove_effect' | 'rfx'
+_renew_engine: 'renew_engine' | 'renew'
+_mark: 'mark' | 'k'
+_start: 'start' | 't'
+_stop: 'stop' | 'st'
+_show_marks: 'show_marks' | 'sm'
+_rename_mark: 'rename_mark' | 'rn'
+mon: _mon {}
+m: _m {}
+r: _r {}
+rec: _rec {}
+off: _off {}
+vol: _vol {}
+pan: _pan {}
+version: _version {}
+loop: _loop {}
+save_session: _save_session {}
+new_session: _new_session {}
+load_session: _load_session {}
+add_track: _add_track {}
+generate_setup: _generate_setup {}
+list_marks: _list_marks {}
+show_setup: _show_setup {}
+show_effects: _show_effects {}
+ecasound_start: _ecasound_start {}
+ecasound_stop: _ecasound_stop {}
+add_effect: _add_effect {}
+remove_effect: _remove_effect {}
+renew_engine: _renew_engine {}
+mark: _mark {}
+start: _start {}
+stop: _stop {}
+show_marks: _show_marks {}
+rename_mark: _rename_mark {}
+
+new_session: _new_session name {
+	$UI::session = $item{name};
+	&UI::new_session;
+	1;
+}
+
+load_session: _load_session name {
+	$UI::session = $item{name};
+	&UI::load_session unless $UI::session_name eq $item{name};
+	1;
+}
+
+add_track: _add_track wav channel(s?) { 
+	if ($UI::track_names{$item{wav}} ){
+		print "Track name already in use.\n";
+	} else {
+		&UI::add_track($item{wav}) ;
+		my %ch = ( @{$item{channel}} );	
+		$ch{r} and $UI::state_c{$UI::i}->{ch_r} = $UI::ch{r};
+		$ch{m} and $UI::state_c{$UI::i}->{ch_m} = $UI::ch{m};
+		
+	}
+	1;
+}
+
+generate_setup: _generate_setup {}
+setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
+
+list_marks: _list_marks {}
+
+show_setup: _show_setup { 	
+	map { 	push @UI::format_fields,  
+			$_,
+			$UI::state_c{$_}->{active},
+			$UI::state_c{$_}->{file},
+			$UI::state_c{$_}->{rw},
+			&UI::rec_status($_),
+			$UI::state_c{$_}->{ch_r},
+			$UI::state_c{$_}->{ch_m},
+
+		} sort keys %UI::state_c;
+		
+	write; # using format at end of file Flow.pm
+				1;
+}
+
+name: /\w+/
+
+wav: name
+
+
+mix: 'mix' {1}
+
+norm: 'norm' {1}
+
+exit: 'exit' { &UI::save_state($UI::statestore); exit; }
+
+
+channel: r | m
+
+r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
+m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
+
+
+rec: 'rec' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
+}
+mon: 'mon' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
+}
+mute: 'mute' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
+}
+
+mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mon); }
+
+mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mute); }
+
+rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = q(rec); }
+
+last: ('last' | '$' ) 
+
+dd: /\d+/
+
+
+
+);
+
+# we use the following settings if we can't find config files
+
+$default = <<'FALLBACK_CONFIG';
+---
+wav_dir: /media/sessions
+abbreviations:
+  24-mono: s24_le,1,frequency
+  32-10: s32_le,10,frequency
+  32-12: s32_le,12,frequency
+  cd-mono: s16_le,1,44100
+  cd-stereo: s16_le,2,44100,i
+  frequency: 44100
+devices:
+  jack:
+    ecasound_id: jack_alsa
+    input_format: 32-12
+    output_format: 32-10
+  multi:
+    ecasound_id: alsaplugin,1,0
+    input_format: 32-12
+    output_format: 32-10
+  stereo:
+    ecasound_id: alsaplugin,0,0
+    input_format: cd-stereo
+    output_format: cd-stereo
+ecasound_globals: "-B auto"
+mix_to_disk_format: cd-stereo
+mixer_out_format: cd-stereo
+raw_to_disk_format: cd-mono
+mixname: mix
+ladspa_sample_rate: frequency
+unit: 1 				
+effects_cache_file: effects_cache.yaml
+state_store_file: State 
+chain_setup_file: session.ecs
+alias:
+  1: Mixdown
+  2: Tracker
+tk_input_channels: 10
+use_monitor_version_for_mixdown: true 
+...
+
+FALLBACK_CONFIG
+
+# the following template are used to generate chain setups.
+$oids = <<'TEMPLATES';
+---
+-
+  default: on
+  id: Stereo
+  name: stereo
+  output: stereo
+  type: mixed
+-
+  default: off
+  id: m
+  name: multi
+  output: multi
+  pre_output: &pre_multi
+  target: mon
+  type: cooked
+-
+  default: off
+  id: L
+  name: live
+  output: multi
+  pre_output: &pre_multi
+  target: rec
+  type: cooked
+-
+  default: off
+  id: Mix
+  name: mix
+  output: file
+  type: mixed
+-
+  default: on
+  id: J
+  name: mix_setup
+  output: ~
+  target: all
+  type: cooked
+-
+  default: on
+  id: ~
+  input: file
+  name: mon_setup
+  output: loop
+  post_input: &mono_to_stereo
+  target: mon
+  type: raw
+-
+  default: on
+  id: R
+  input: multi
+  name: rec_file
+  output: file
+  target: rec
+  type: raw
+-
+  default: on
+  id: ~
+  input: multi
+  name: rec_setup
+  output: loop
+  post_input: &mono_to_stereo
+  target: rec
+  type: raw
+...
+
+TEMPLATES
+
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
@@ -4265,7 +3945,7 @@ recording and processing by Ecasound
 
 =head1 SYNOPSIS
 
-  use Audio::Ecasound::Flow;
+  use UI;
 
   my $ui = UI->new("tk");
 

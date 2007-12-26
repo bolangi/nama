@@ -1,89 +1,57 @@
+package ::;
 use 5.008;
-use strict qw(vars subs);
+use strict;
 use warnings;
+our $VERSION = '0.01';
 use lib "$ENV{HOME}/build/flow/UI/lib"; 
-
-package ::;  ## core routines
-
+use lib qw(. ..);
+use IO::All;
 use Carp;
 use Cwd;
-# use Tk;
-use IO::All;
+use Tk;
 use Storable; 
 use Getopt::Std;
 use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
-use UI::Assign qw(:all);
-use lib qw(. ..);
-# use ::Assign qw(:all);  # something wrong with this
-
-print remove_spaces("bulwinkle is a...");
-
-## Class and Object definition, root class
-# for package '::'
-our @ISA; # no anscestors
-use Object::Tiny qw(mode);
-
-our $VERSION = '0.01';
 
 ## Definitions ##
 
-[% qx(cat ./declarations.pl) %]
+# 'our' declaration: all packages in the file will see the following
+# variables. 
 
+[% qx(cat ./declarations.pl) %] 
 [% qx(cat ./var_types.pl) %]
 
 $debug2 = 1;
 $debug = 1;
 
-## prevents bareword sub calls some_sub; from failing
-use subs qw(
-
-[% qx(./list_subs Core_subs.pl) %]
-
-);
 ## Load my modules
 
-use ::Iam;    	# IAM command support
-use ::Tkeca_effects; # Some effects data
+use ::Assign qw(:all);
+use ::Iam;    
+use ::Tkeca_effects; 
 
-# we use the following settings if we can't find config files
+## Class and Object definitions for package '::'
 
-$default = <<'FALLBACK_CONFIG';
-[% qx(cat ./config.yaml) %]
-FALLBACK_CONFIG
-
-# the following template are used to generate chain setups.
-$oids = <<'TEMPLATES';
-[% qx(cat ./chain_templates.yaml) %]
-TEMPLATES
-
-##  Grammar.p, source for Grammar.pm
-
-### COMMAND LINE PARSER 
-
-$debug2 and print "Reading grammar\n";
-
-$::AUTOSTUB = 1;
-$::RD_HINT = 1;
-
-# rec command changes active take
-
-$grammar = q(
-
-[% qx(./emit_command_headers) %]
-
-[% qx(cat ./grammar_body.pl) %]
-
-);
+our @ISA; # no anscestors
+use Object::Tiny qw(mode);
 
 ## The following methods belong to the root class
 
 sub hello {"superclass hello"}
 
 sub new { my $class = shift; return bless {@_}, $class }
- 		#croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+
+[% qx(cat ./Core_subs.pl ) %]
+
+[% qx(cat ./Graphical_subs.pl ) %]
+
+[% qx(cat ./Refresh_subs.pl ) %]
+
+print remove_spaces("bulwinkle is a...");
+
 =comment
 my $root_class = '::'; 
 sub new { 
@@ -104,9 +72,35 @@ Usage:    UI->new(mode => "text")
 USAGE
 
 =cut
-[% qx(cat ./Core_subs.pl ) %]
 
-## no-op graphic methods to inherit by Text
+
+package ::Graphical;  ## gui routines
+our @ISA = '::';
+#use Tk;
+#use ::Assign qw(:all);
+
+## The following methods belong to the Graphical interface class
+
+sub hello {"make a window";}
+sub new { my $class = shift; return bless {@_}, $class }
+sub loop {
+	package ::;
+	init_gui(); 
+	transport_gui();
+	oid_gui();
+	time_gui();
+	session_init(), ::load_session({create => $opts{c}}) if $session_name;
+	MainLoop;
+}
+
+## The following methods belong to the Text interface class
+
+package ::Text;
+our @ISA = '::';
+use Carp;
+sub hello {"hello world!";}
+
+## no-op graphic methods 
 
 sub take_gui {}
 sub track_gui {}
@@ -124,50 +118,46 @@ sub global_version_buttons {}
 sub destroy_widgets {}
 sub restore_time_marker_labels {}
 
-package ::Graphical;  ## gui routines
-our @ISA = '::';
-use Carp;
-use Tk;
-use ::Assign qw(:all);
-
-## We need stubs for procedural access to subs in the anscestor
-## excluding those for ui functions
-
-[% qx(./filter_core_stubs) %]
-
-## The following methods belong to the Graphical interface class
-
-sub hello {"make a window";}
-[% qx(cat ./Graphical_methods.pl ) %]
-
-[% qx(cat ./Refresh_subs.pl ) %]
-
-## The following methods belong to the Text interface class
-
-package ::Text;
-our @ISA = '::';
-use Carp;
-use ::Assign qw(:all);
-sub hello {"hello world!";}
-
-## We need stubs for procedural access to Core subs in the anscestor
-## excluding those for ui functions
-
-[% qx(./filter_core_stubs) %]
-
-## Some of these, notably new, will be overwritten
+## Some of these, may be overwritten
 ## by definitions that follow
+
 [% qx(cat ./Text_methods.pl ) %]
 
+package ::;
 
-## The following methods belong to the Session and Wav classes
+##  Grammar.p, source for Grammar.pm
 
-## currently unused
-# [-% qx(cat ./Session_Wav.pl ) %-]
+### COMMAND LINE PARSER 
+
+$debug2 and print "Reading grammar\n";
+
+$::AUTOSTUB = 1;
+$::RD_HINT = 1;
+
+# rec command changes active take
+
+$grammar = q(
+
+[% qx(./emit_command_headers) %]
+
+[% qx(cat ./grammar_body.pl) %]
+
+);
+
+# we use the following settings if we can't find config files
+
+$default = <<'FALLBACK_CONFIG';
+[% qx(cat ./config.yaml) %]
+FALLBACK_CONFIG
+
+# the following template are used to generate chain setups.
+$oids = <<'TEMPLATES';
+[% qx(cat ./chain_templates.yaml) %]
+TEMPLATES
+
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
@@ -176,7 +166,7 @@ recording and processing by Ecasound
 
 =head1 SYNOPSIS
 
-  use Audio::Ecasound::Flow;
+  use ::;
 
   my $ui = ::->new("tk");
 

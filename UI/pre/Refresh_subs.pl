@@ -1,9 +1,5 @@
 ## refresh functions
 
-package ::Graphical;
-use Tk;
-
-
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
 	my %take_color = (REC  => 'LightPink', 

@@ -1,5 +1,6 @@
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
+	package ::;
 	session_init(), load_session({create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
