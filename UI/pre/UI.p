@@ -107,6 +107,10 @@ sub hello {"hello world!";}
 
 ## no-op graphic methods 
 
+# those that take parameters will break!!!
+# because object and procedural access get
+# different parameter lists ($self being included);
+
 sub take_gui {}
 sub track_gui {}
 sub refresh {}
@@ -114,7 +118,6 @@ sub flash_ready {}
 sub update_master_version_button {}
 sub paint_button {}
 sub refresh_oids {}
-sub paint_button {}
 sub session_label_configure{}
 sub length_display{}
 sub clock_display {}
@@ -122,6 +125,7 @@ sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
 sub restore_time_marker_labels {}
+sub show_unit{};
 
 ## Some of these, may be overwritten
 ## by definitions that follow

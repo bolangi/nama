@@ -1,3 +1,21 @@
+oids will receive an additional field: 'file'.
+No. 'target' will be allowed to contain a filename head.
+No maybe we want a file to be joined categorically
+
+ type eq cooked -and- rec_status eq 'MON' and file_name 'sax'
+
+ or do we assume no such magic needed and just allow
+ 'target' to contain filename 
+
+
+replace &refresh_clock and other subs
+needed to use Tk event loop in Text side.
+
+Fix subs that use method invocations
+and procedural invocations __ with parameters.
+The parameterless case is easy.
+
+They are listed in file 'broken_by_object_syntax'
 
 Tue Dec 25 04:18:13 JST 2007
 =comment

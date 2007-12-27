@@ -264,7 +264,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \&toggle_unit);
+	$time_step->configure (-command => sub { &toggle_unit; &show_unit });
 
 	# Marks
 	
@@ -378,7 +378,6 @@ sub flash_ready {
 	);
 }
 sub take_gui {  
-#	my $t = shift;
 
 	$debug2 and print "&take_gui\n";
 		my $tname = $alias{$t} ? $alias{$t} : $t;
@@ -458,8 +457,8 @@ sub global_version_buttons {
  					);
  	}
 }
-sub track_gui { # nearly 200 lines! 
-	my $n =  $i; # follow the global index $i unless
+sub track_gui { 
+	my $n =  $i; # follow the global index $i
 
 	# my $j is effect index
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -701,6 +700,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
+	local $debug = $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -842,44 +842,49 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
-
-=comment
-sub is_soloing {
-	my $n = shift;	
-	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
-}
-sub toggle_muting {
-	my ($widget, $n) = @_;
-	toggle_mute($n);
-	if (is_muted($n)){
-		$widget->configure(-background => 'brown');
-		$widget->configure(-activebackground => 'brown');
-	} 
-	else {
-		$widget->configure(-background => $old_bg);
-		$widget->configure(-activebackground => $old_bg);
+sub arm_mark { 
+	if ($markers_armed) {
+		$markers_armed = 0;
+		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
+	}
+	else{
+		$markers_armed = 1;
+		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
 	}
 }
-sub toggle_mute {
-	my $setup = eval_iam("cs-connected");
-	$setup =~ /$session_name/ or return; # only work if connected setup
-	my $n = shift;
-	is_muted();
-	eval_iam("c-select $n");
-	eval_iam("c-muting");
-	is_muted();
+sub colonize { # convert seconds to minutes:seconds 
+	my $sec = shift;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	qq($min:$sec);
 }
-sub is_muted {
-	my $n = shift;
-		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
-		# print "CS: $cs\n";
-		my $status = $cs =~ /muted/;
-		print ( $status 
-			? "track $n: muted\n"
-			: "track $n: not muted\n"
+sub mark {
 
+	my $marker = shift;
+	# print "my marker is $_\n";
+	# record without arming if marker undefined
+	if ($markers_armed or ! $marks[$marker]){  
+		my $here = eval_iam("cs-get-position");
+		return if ! $here;
+		$marks[$marker] = $here;
+		my $widget = $time_marks[$marker];
+		$widget->configure( 
+			-text => colonize($here),
+			-background => $old_bg,
 		);
-		$status;
+		if ($markers_armed){ arm_mark() } # disarm
+	}
+	else{ 
+		return if really_recording();
+		eval_iam(qq(cs-set-position $marks[$marker]));
+	#	update_clock();
+	#	start_clock();
+	}
 }
-=cut
+
+sub update_clock { # XXX
+	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
+}
+
 ### end

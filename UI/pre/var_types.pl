@@ -47,8 +47,10 @@
 
 						@effects		
 						%effect_i	
+						%e_bound
 						@ladspa_sorted
 						%effects_ladspa		 );
+
 
 @effects_dynamic_vars = qw(
 

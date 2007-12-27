@@ -301,8 +301,10 @@ our (
 
 						@effects		
 						%effect_i	
+						%e_bound
 						@ladspa_sorted
 						%effects_ladspa		 );
+
 
 @effects_dynamic_vars = qw(
 
@@ -546,7 +548,7 @@ $ui->destroy_widgets();
 
 increment_take();  # to 1
 
-$ui->take_gui($t);
+$ui->take_gui;
 
 }
 ## track and wav file handling
@@ -838,9 +840,9 @@ sub rec_status {
 no warnings;
 my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
 use warnings;
-    return "MUTE" if $state_c{$n}->{rw} eq $UI::MON and ! $file_exists;
-	return "MUTE" if $state_c{$n}->{rw} eq $UI::MUTE;
-	return "MUTE" if $state_t{$take{$n}}->{rw} eq $UI::MUTE;
+    return "MUTE" if $state_c{$n}->{rw} eq "MON" and ! $file_exists;
+	return "MUTE" if $state_c{$n}->{rw} eq "MUTE";
+	return "MUTE" if $state_t{$take{$n}}->{rw} eq "MUTE";
 	if ($take{$n} == $state_t{active} ) {
 
 		if ($state_t{$take{$n}}->{rw} eq "REC") {
@@ -863,7 +865,7 @@ sub really_recording {  # returns filename stubs
 	keys %{$outputs{file}}; # includes mixdown
 }
 sub make_io_lists {
-	local $debug = $debug3;
+	#local $debug = $debug3;
 	$debug2 and print "&make_io_lists\n";
 	@input_chains = @output_chains = ();
 
@@ -1014,7 +1016,7 @@ OID:		for my $oid (@oids) {
 # 		} @chain_ids;
 # 	}
 
-	$debug and print "\@oids\n================\n", yaml_out(\@oids);
+	#$debug and print "\@oids\n================\n", yaml_out(\@oids);
 	$debug and print "\%post_input\n================\n", yaml_out(\%post_input);
 	$debug and print "\%pre_output\n================\n", yaml_out(\%pre_output);
 	$debug and print "\%inputs\n================\n", yaml_out(\%inputs);
@@ -1333,7 +1335,8 @@ sub start_transport {
 	start_clock();
 }
 sub stop_transport { 
-	$debug2 and print "&stop_transport\n"; $e->eci('stop'); session_label_configure(-background => $old_bg);
+	$debug2 and print "&stop_transport\n"; $e->eci('stop');
+	$ui->session_label_configure(-background => $old_bg);
 	# what if we are recording
 }
 sub transport_running {
@@ -1342,34 +1345,32 @@ sub transport_running {
 }
 sub disconnect_transport { eval_iam('cs-disconnect') }
 
+
 sub toggle_unit {
 	if ($unit == 1){
 		$unit = 60;
-		$time_step->configure(-text => 'Min');
-	} else{
-		$unit = 1;
-		$time_step->configure(-text => 'Sec');
-
-	}
+		
+	} else{ $unit = 1; }
 }
+sub show_unit { $time_step->configure(
+	-text => ($unit == 1 ? 'Sec' : 'Min') 
+)}
 ## clock and clock-refresh functions ##
+#
 
 sub start_clock {
 	$clock_id = $clock->repeat(1000, \&refresh_clock);
-}
-sub update_clock {
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
 	start_clock();
 }
 sub refresh_clock{
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	update_clock();
 	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
-	session_label_configure(-background => $old_bg);
+	$ui->session_label_configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
 		&connect_transport unless &really_recording; 
 	}
@@ -2212,7 +2213,7 @@ sub save_state {
 	
 	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
-	#	 $ui->$ui->paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
 		}
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
@@ -2261,7 +2262,7 @@ sub retrieve_state_storable {
 	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
 	
 	my $toggle_jack = $widget_o[$#widget_o];
-	&convert_to_jack, &paint_button($toggle_jack, q(lightblue) ) if $jack_on;
+	&convert_to_jack, $ui->paint_button($toggle_jack, q(lightblue) ) if $jack_on;
 
 	$ui->refresh_oids;
 
@@ -2272,16 +2273,20 @@ sub retrieve_state_storable {
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 
 	# restore time marker labels
-	
+
+	$ui->restore_time_marker_labels();
+
+=comment
 	map{ $time_marks[$_]->configure( 
 		-text => &colonize($marks[$_]),
 		-background => $old_bg,
 	)} 
 	grep{ $marks[$_] }1..$#time_marks;
+=cut
 
 	# restore take and track guis
 	
-	for my $t (@takes) { next if $t == 1; $ui->take_gui($t) }; #
+	for my $t (@takes) { next if $t == 1; $ui->take_gui }; #
 	# Why skip first????? XXXX first in &initialize_session
 	my $did_apply = 0;
 	$last_version = 0; 
@@ -2345,7 +2350,7 @@ sub retrieve_state {
 
 	my $toggle_jack = $widget_o[$#widget_o];
 	convert_to_jack if $jack_on;
-	paint_button($toggle_jack, q(lightblue)) if $jack_on;
+	$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
 	$ui->refresh_oids();
 
 	# restore mixer settings
@@ -2354,18 +2359,22 @@ sub retrieve_state {
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 
 	# restore time marker labels
+
+	$ui->restore_time_marker_labels();
+=comment
 	
 	map{ $time_marks[$_]->configure( 
 		-text => colonize($marks[$_]),
 		-background => $old_bg,
 	)} 
 	grep{ $marks[$_] }1..$#time_marks;
+=cut
 
 	# restore take and track guis
 	
 	for my $t (@takes) { 
 		next if $t == 1; 
-		$ui->take_gui($t);
+		$ui->take_gui;
 	}; #
 	my $did_apply = 0;
 	$last_version = 0; 
@@ -2403,7 +2412,7 @@ sub save_effects {
 	my %muted;
 	
 	map  {$copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
-		  paint_button($widget_c{$_}{mute}, $old_bg ) }
+		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	@all_chains;
 
@@ -2532,45 +2541,6 @@ sub retrieve_effects {
 
 	
 
-sub arm_mark { 
-	if ($markers_armed) {
-		$markers_armed = 0;
-		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
-	}
-	else{
-		$markers_armed = 1;
-		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
-	}
-}
-sub colonize { # convert seconds to minutes:seconds 
-	my $sec = shift;
-	my $min = int ($sec / 60);
-	$sec = $sec % 60;
-	$sec = "0$sec" if $sec < 10;
-	qq($min:$sec);
-}
-sub mark {
-	my $marker = shift;
-	# print "my marker is $_\n";
-	# record without arming if marker undefined
-	if ($markers_armed or ! $marks[$marker]){  
-		my $here = eval_iam("cs-get-position");
-		return if ! $here;
-		$marks[$marker] = $here;
-		my $widget = $time_marks[$marker];
-		$widget->configure(
-			-text => colonize($here),
-			-background => $old_bg,
-		);
-		if ($markers_armed){ arm_mark } # disarm
-	}
-	else{ 
-		return if really_recording();
-		eval_iam(qq(cs-set-position $marks[$marker]));
-	#	update_clock();
-	#	start_clock();
-	}
-}
 ### end
 
 
@@ -2840,7 +2810,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \&toggle_unit);
+	$time_step->configure (-command => sub { &toggle_unit; &show_unit });
 
 	# Marks
 	
@@ -2954,7 +2924,6 @@ sub flash_ready {
 	);
 }
 sub take_gui {  
-#	my $t = shift;
 
 	$debug2 and print "&take_gui\n";
 		my $tname = $alias{$t} ? $alias{$t} : $t;
@@ -3034,8 +3003,8 @@ sub global_version_buttons {
  					);
  	}
 }
-sub track_gui { # nearly 200 lines! 
-	my $n =  $i; # follow the global index $i unless
+sub track_gui { 
+	my $n =  $i; # follow the global index $i
 
 	# my $j is effect index
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -3277,6 +3246,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
+	local $debug = $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -3418,46 +3388,51 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
-
-=comment
-sub is_soloing {
-	my $n = shift;	
-	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
-}
-sub toggle_muting {
-	my ($widget, $n) = @_;
-	toggle_mute($n);
-	if (is_muted($n)){
-		$widget->configure(-background => 'brown');
-		$widget->configure(-activebackground => 'brown');
-	} 
-	else {
-		$widget->configure(-background => $old_bg);
-		$widget->configure(-activebackground => $old_bg);
+sub arm_mark { 
+	if ($markers_armed) {
+		$markers_armed = 0;
+		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
+	}
+	else{
+		$markers_armed = 1;
+		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
 	}
 }
-sub toggle_mute {
-	my $setup = eval_iam("cs-connected");
-	$setup =~ /$session_name/ or return; # only work if connected setup
-	my $n = shift;
-	is_muted();
-	eval_iam("c-select $n");
-	eval_iam("c-muting");
-	is_muted();
+sub colonize { # convert seconds to minutes:seconds 
+	my $sec = shift;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	qq($min:$sec);
 }
-sub is_muted {
-	my $n = shift;
-		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
-		# print "CS: $cs\n";
-		my $status = $cs =~ /muted/;
-		print ( $status 
-			? "track $n: muted\n"
-			: "track $n: not muted\n"
+sub mark {
 
+	my $marker = shift;
+	# print "my marker is $_\n";
+	# record without arming if marker undefined
+	if ($markers_armed or ! $marks[$marker]){  
+		my $here = eval_iam("cs-get-position");
+		return if ! $here;
+		$marks[$marker] = $here;
+		my $widget = $time_marks[$marker];
+		$widget->configure( 
+			-text => colonize($here),
+			-background => $old_bg,
 		);
-		$status;
+		if ($markers_armed){ arm_mark() } # disarm
+	}
+	else{ 
+		return if really_recording();
+		eval_iam(qq(cs-set-position $marks[$marker]));
+	#	update_clock();
+	#	start_clock();
+	}
 }
-=cut
+
+sub update_clock { # XXX
+	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
+}
+
 ### end
 
 
@@ -3629,6 +3604,10 @@ sub hello {"hello world!";}
 
 ## no-op graphic methods 
 
+# those that take parameters will break!!!
+# because object and procedural access get
+# different parameter lists ($self being included);
+
 sub take_gui {}
 sub track_gui {}
 sub refresh {}
@@ -3636,7 +3615,6 @@ sub flash_ready {}
 sub update_master_version_button {}
 sub paint_button {}
 sub refresh_oids {}
-sub paint_button {}
 sub session_label_configure{}
 sub length_display{}
 sub clock_display {}
@@ -3644,6 +3622,7 @@ sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
 sub restore_time_marker_labels {}
+sub show_unit{};
 
 ## Some of these, may be overwritten
 ## by definitions that follow
