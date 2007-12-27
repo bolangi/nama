@@ -354,7 +354,7 @@ sub remove_small_wavs {
 sub new_take {
 	$debug2 and print "&new_take\n";
 	increment_take();
-	$ui->take_gui, $ui->refresh_t();
+	$ui->take_gui; $ui->refresh_t();
 }
 sub increment_take {
 	$debug2 and print "&increment_take\n";

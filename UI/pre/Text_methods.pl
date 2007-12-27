@@ -1,7 +1,7 @@
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	package ::;
-	session_init(), load_session({create => $opts{c}}) if $session_name;
+	load_session({name => $session_name, create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -31,7 +31,9 @@ sub loop {
 		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
-		} else { print "Unknown command\n";}
+		} else {
+			$parser->command($user_input) or print ("Returned false\n");
+		}
 
 	}
 }

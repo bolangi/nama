@@ -697,7 +697,7 @@ sub remove_small_wavs {
 sub new_take {
 	$debug2 and print "&new_take\n";
 	increment_take();
-	$ui->take_gui, $ui->refresh_t();
+	$ui->take_gui; $ui->refresh_t();
 }
 sub increment_take {
 	$debug2 and print "&increment_take\n";
@@ -3517,8 +3517,8 @@ sub refresh_c { # tracks
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh {  
- 	refresh_t(); 
-	map{ refresh_c($_) } @all_chains ;
+ 	$ui->refresh_t(); 
+	map{ $ui->refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{ # OUTPUT buttons
 	map{ $widget_o{$_}->configure( # uses hash
@@ -3611,6 +3611,8 @@ sub hello {"hello world!";}
 sub take_gui {}
 sub track_gui {}
 sub refresh {}
+sub refresh_t {}
+sub refresh_c {}
 sub flash_ready {}
 sub update_master_version_button {}
 sub paint_button {}
@@ -3630,7 +3632,7 @@ sub show_unit{};
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	package UI;
-	session_init(), load_session({create => $opts{c}}) if $session_name;
+	load_session({name => $session_name, create => $opts{c}}) if $session_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -3660,7 +3662,9 @@ sub loop {
 		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
-		} else { print "Unknown command\n";}
+		} else {
+			$parser->command($user_input) or print ("Returned false\n");
+		}
 
 	}
 }

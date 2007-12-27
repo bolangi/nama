@@ -79,8 +79,8 @@ sub refresh_c { # tracks
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh {  
- 	refresh_t(); 
-	map{ refresh_c($_) } @all_chains ;
+ 	$ui->refresh_t(); 
+	map{ $ui->refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{ # OUTPUT buttons
 	map{ $widget_o{$_}->configure( # uses hash
