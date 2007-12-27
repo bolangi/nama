@@ -2,7 +2,11 @@ package UI::Assign;
 use 5.008;
 use strict;
 use warnings;
+use Carp;
 use IO::All;
+use Data::YAML::Reader;
+use Data::YAML::Writer;
+use Storable;
 
 require Exporter;
 
@@ -43,18 +47,20 @@ our @EXPORT = qw(
 
 our $VERSION = '0.01';
 
-use Carp;
-use Data::YAML::Reader;
-use Data::YAML::Writer;
-use vars qw($debug $debug2);
+package UI;
+#use vars($debug, $debug2, $debug3);
+our ($debug, $debug2, $debug3);
+package UI::Assign;
 my $yw = Data::YAML::Writer->new;
 my $yr = Data::YAML::Reader->new;
-$debug = 1;
+$debug = 0;
 $debug2 = 1;
+$debug3 = 0;
 
 use Carp;
 
 sub assign {
+	local $debug = $debug3;
 	
 	$debug2 and print "&assign\n";
 	
@@ -110,12 +116,12 @@ sub assign {
 				# dereference it if needed
 				
 				ref $val eq q(SCALAR) and $val = $$val; 
+				ref $val eq q(SCALAR) and $val = $$val; 
 														
 				# quoting for non-numerical
 				
-				$val = qq("$val") 
-					unless  $val =~ /^[\d\.,+-e]+$/ 
-					or 		ref $val;
+				$val = qq("$val") unless  $val =~ /^[\d.,+-e]+$/ 
+					#or 		ref $val;
 		
 			} else { $val = q(undef) }; # or set as undefined
 
@@ -152,7 +158,7 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	$source eq 'State' and -f $source 
+	$source !~ /.yaml$/i and -f $source 
 		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
 
@@ -189,8 +195,6 @@ sub store_vars {
  	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
 	my @vars = @{ $h{VARS} };
 	my %sigil;
-	# now we will only store in yaml
-	$file .= '.yaml' unless $file =~ /\.yaml$/;
 	$debug and print "vars: @vars\n";
 	$debug and print "file: $file\n";
 	my %state;
@@ -204,9 +208,13 @@ sub store_vars {
 	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or print "failed to eval $eval_string: $!\n";
 	} @vars;
-	# my $result1 = store \%state, $file; # old method
-	my $yamlout = yaml_out(\%state);
-	$yamlout > io $file;
+	if ($h{STORABLE}) {
+		my $result1 = store \%state, $file; # old method
+	} else {
+		$file .= '.yaml' unless $file =~ /\.yaml$/;
+		my $yamlout = yaml_out(\%state);
+		$yamlout > io $file;
+	}
 
 }
 sub serial {

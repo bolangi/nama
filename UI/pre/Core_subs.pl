@@ -1,3 +1,4 @@
+use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
@@ -7,7 +8,6 @@ sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name
 sub prepare {  # actions begin
 
 
-	local $debug = 1;
 	$debug2 and print "&prepare\n";
 
     $yw = Data::YAML::Writer->new;
@@ -134,13 +134,13 @@ sub load_session {
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
 	read_config();
-	session_init();
-}
-sub session_init{
-	$debug2 and print "&session_init\n";
 	initialize_session_data();
 	remove_small_wavs(); 
-	retrieve_state(join_path(&session_dir,$state_store_file)) unless $opts{m};
+	print "reached here!!!\n";
+	retrieve_state_storable(join_path(&session_dir,$state_store_file)) ;
+		#unless $opts{m} or $state_store_file =~ /.yaml$/;
+	#retrieve_state (join_path(&session_dir,$state_store_file)) 
+		#unless $opts{m} or $state_store_file !~ /.yaml$/;
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 }
@@ -148,9 +148,9 @@ sub session_init{
 # for $n = 1, And take index 1.
 
 sub initialize_session_data {
+	$debug2 and print "&initialize_session_data\n";
 
 	return if transport_running();
-	my $sf = join_path(&session_dir, $chain_setup_file);
 	$ui->session_label_configure(
 		-text => uc $session_name, 
 		-background => 'lightyellow',
@@ -169,23 +169,25 @@ sub initialize_session_data {
 							# and others
 	%old_vol = ();
 
+	%take        = (); # the group a chain belongs to # by chain_id
+	%chain       = (); # the chain_id corresponding to a track name
+	#%alias      = ();  # a way of naming takes
+
 	@takes       = ();  
 	@record		= ();
 	@monitor	= ();
+	@mute = (); 
 	@all_chains  = (); # indices of all chains
 	@input_chains = ();
 	@output_chains = ();
+
 	$i           = 0;  # chain counter
 	$t           = 0;  # take counter
 
 	%widget_c = ();
 	@widget_t = ();
 	%widget_e = ();
-	%take        = (); # maps chain index to take
-	%chain       = (); # maps track name (filename w/o .wav) to chain
-	#%alias      = ();  # a way of naming takes
 	
-	@mute = (); 
 
 	# time related
 	
@@ -201,48 +203,42 @@ sub initialize_session_data {
 
 $ui->destroy_widgets();
 
-increment_take(); 
+increment_take();  # to 1
 
 $ui->take_gui($t);
 
 }
-
 ## track and wav file handling
 
 sub add_track {
 	$debug2 and print "&add_track\n";
-	local $debug = 0;
 	return 0 if transport_running();
 	my $name = shift;
-	# new scoping code!
-	###### old, deprecated  $name and my $track_name = $name; 
-	# otherwise we use $trackname from previous scope
 	
-	local $track_name = $name if $name;
 	if ($track_names{$track_name}){
 		$debug and carp ("Track name in use\n");
 		return 0;
 	}
-	$track_name = remove_spaces($track_name);
-	$state_t{$t}->{rw} = "REC";
-	$track_names{$track_name}++;
+	$state_t{$t}->{rw} = "REC"; # enable recording for the group
+	$track_names{$name}++;
 	$i++; # global variable track counter
-	register_track($i, $track_name, $ch_r, $ch_m);
+	register_track($i, $name, $ch_r, $ch_m);
 	find_wavs($i);
 	#set_active_version($i) if ! defined $state_c{$i}->{active};
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
-	$ui->track_gui($i);
+ print yaml_out(\%state_c);
+	$ui->track_gui;
+# print yaml_out(\%state_c);
 	return 1;
 }
 sub add_mix_track {
 	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
 	add_track($mixname) ;
-	# the variable $t magically increments
 	$state_t{$t}->{rw} = "MUTE"; 
-	new_take();
+	new_take(); # $t increments
 	$state_t{$t}->{rw} = "MON";
 }
 sub mix_suffix {
@@ -253,11 +249,17 @@ sub restore_track {
 	$debug2 and print "&restore_track\n";
 	my $n = shift;
 	find_wavs($n);
-	track_gui($n), $ui->refresh();
+	$ui->track_gui($n), $ui->refresh();
 }
 sub register_track {
 	$debug2 and print "&register_track\n";
 	my ($i, $name, $ch_r, $ch_m) = @_;
+	$debug and print <<VARS;
+i          : $i
+name       : $name
+Rec channel: $ch_r
+Mon channel: $ch_m
+VARS
   	push @all_chains, $i;
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
@@ -267,12 +269,9 @@ sub register_track {
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
 	$state_c{$i}->{file} = $name;
-	# print SESSION join ";", $name, $ch_m, $ch_r;
-	# print SESSION "\n";
 }
 sub dig_ruins { 
 
-	local $debug = 0;
 	# only if there are no tracks , 
 	# we exclude the mixchain
 	#
@@ -300,7 +299,6 @@ sub find_wavs {
 
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
-	local $debug = 0;
 	$debug and print "track: $n\n";
 	$debug and print "this_wav dir: ", this_wav_dir,": $n\n";
 
@@ -351,20 +349,21 @@ sub remove_small_wavs {
 	map { print ($_, "\n") if -s == 44 } @wavs; 
 	map { unlink $_ if -s == 44 } @wavs; 
 }
-## track group handling (referred to as 'take')
+## track group handling
 #
 sub new_take {
 	$debug2 and print "&new_take\n";
 	increment_take();
-	take_gui($t), refresh_t();
+	$ui->take_gui, $ui->refresh_t();
 }
 sub increment_take {
+	$debug2 and print "&increment_take\n";
 			return if transport_running(); 
 					$t++;
 					$state_t{active} = $t;
 					$state_t{$t}->{rw} = "REC";
 					push @takes, $t;
-					# print SESSION "take $t\n";
+	$debug and print "take $t\n";
 }
 sub decrement_take {
 			$debug2 and print "&decrement_take\n";
@@ -382,13 +381,13 @@ sub decrement_take {
 			
 }
 sub select_take {
-	my ($t, $status) = shift;
+	my ($t, $status) = @_; 
 	$status =~ m/REC|MON|MUTE/
 		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
 	return if transport_running();
 	$state_t{$t}->{rw} = $status; 
 	$state_t{active} = $t; 
-	refresh();
+	$ui->refresh();
 	setup_transport();
 	connect_transport();
 }
@@ -466,7 +465,7 @@ sub mon_vert {
 	# store %copp
 	# remove effects  and use $ver's set if there are effects for $v
 	$monitor_version = $ver;
-	refresh();
+	$ui->refresh();
 }
 ## chain setup generation
 #
@@ -523,8 +522,8 @@ sub really_recording {  # returns filename stubs
 	keys %{$outputs{file}}; # includes mixdown
 }
 sub make_io_lists {
+	local $debug = $debug3;
 	$debug2 and print "&make_io_lists\n";
-	# my $debug = 1;
 	@input_chains = @output_chains = ();
 
 	%inputs = (); # chain fragments
@@ -706,7 +705,6 @@ sub hash_push {
 	push @{ $hash_ref->{$key} }, @vals;
 }
 sub eliminate_loops {
-	# my $debug = 1;
 	my $n = shift;
 	return unless defined $inputs{cooked}->{$n} and scalar @{$inputs{cooked}->{$n}} == 1;
 	# get customer's id from cooked list and remove it from the list
@@ -762,7 +760,6 @@ intermediate->chain_id->"chain operators and routing, etc."
 
 =cut
 sub write_chains {
-	# my $debug = 1;
 	$debug2 and print "&write_chains\n";
 
 	# the mixchain is usually '1', so that effects applied to 
@@ -904,11 +901,11 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_oids {
+	local $debug = $debug3;
 	$debug2 and print "&initialize_oids\n";
 
 @oids = @{ $yr->read($oids) };
 
-# my $debug = 1;
 
 # these are templates for building chains
 map {	
@@ -1058,7 +1055,6 @@ sub to_end {
 	restart_clock();
 } 
 sub jump {
-	# my $debug = 1;
 	$debug2 and print "&jump\n";
 	return if really_recording();
 	my $delta = shift;
@@ -1075,7 +1071,6 @@ sub jump {
 ## post-recording functions
 
 sub rec_cleanup {
-	# my $debug = 1;
 	$debug2 and print "&rec_cleanup\n";
 	$debug and print "I was recording!\n";
  	my @k = really_recording();
@@ -1106,32 +1101,10 @@ sub rec_cleanup {
 			$state_t{ $state_t{active} }->{rw} = "MON";
 			setup_transport();
 			connect_transport();
-			refresh();
+			$ui->refresh();
 	}
 		
 } 
-sub update_version_button {
-	my ($n, $v) = @_;
-	croak "no version provided \n" if not $v;
-	my $w = $widget_c{$n}->{version};
-					$w->radiobutton(
-						-label => $v,
-						-variable => \$state_c{$n}->{active},
-						-value => $v,
-						-command => 
-		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless rec_status($n) eq "REC" }
-					);
-}
-sub update_master_version_button {
-				$widget_t[0]->radiobutton(
-						-label => $last_version,
-						-variable => \$monitor_version,
-						-value => $last_version,
-						-command => sub { mon_vert(eval $last_version) }
-					);
-}
-
 ## effect functions
 
 sub add_effect {
@@ -1238,7 +1211,6 @@ sub add_effect {
 	apply_op($id) if eval_iam("cs-is-valid");
 }
 sub remove_effect {
-	# my $debug = 1;
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -1277,7 +1249,6 @@ sub remove_effect {
 }
 sub remove_op {
 
-	# my $debug = 1;
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	if ( $cops{$id}->{belongs_to}) { 
@@ -1300,7 +1271,6 @@ sub remove_op {
 	delete $copp{$id};
 }
 sub cop_add {
-	# my $debug = 1;
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code		= $p{type};
@@ -1350,13 +1320,15 @@ sub cop_add {
 }
 
 sub cop_init {
+	local $debug = $debug3;
+	$debug2 and print "&cop_init\n";
 	my %p = %{shift()};
 	my $id = $p{cop_id};
 	my $parent_id = $p{parent_id};
 	my $vals_ref  = $p{vals_ref};
-
-	$debug2 and print "&cop_init\n";
+	local $debug = $debug3;
 	$debug and print "cop__id: $id\n";
+
 
 	# initialize default settings unless we have them
 	my @vals;
@@ -1390,7 +1362,6 @@ sub cop_init {
 sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
-	# my $debug = 1;
 	# return if rec_status($chain) eq "MUTE"; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless transport_running();
@@ -1438,7 +1409,6 @@ sub find_op_offsets {
 =cut
 
 
-	# my $debug = 1;
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
 		my @op_offsets = split "\n",eval_iam("cs");
@@ -1458,7 +1428,6 @@ sub find_op_offsets {
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	$debug2 and print "&apply_ops\n";
-	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
  		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
@@ -1471,7 +1440,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 	}
 }
 sub apply_op {
-	# my $debug = 1;
 	$debug2 and print "&apply_op\n";
 	my $id = shift;
 	$debug and print "id: $id\n";
@@ -1510,7 +1478,7 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
-	local $debug = 1;
+	local $debug = $debug3;
 	$debug2 and print "&prepare_static_effects_data\n";
 
 	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
@@ -1531,7 +1499,8 @@ sub prepare_static_effects_data{
 		store_vars(
 			FILE => $effects_cache, 
 			VARS => \@effects_static_vars,
-			CLASS => 'UI' );
+			CLASS => '::',
+			STORABLE => 1 );
 	}
 
 }
@@ -1563,7 +1532,6 @@ sub extract_effects_data {
 	}
 }
 sub sort_ladspa_effects {
-	local $debug = 1;
 	$debug2 and print "&sort_ladspa_effects\n";
 #	print yaml_out(\%e_bound); 
 	my $aa = $e_bound{ladspa}{a};
@@ -1925,6 +1893,80 @@ sub save_state {
 	@all_chains;
 
 }
+sub retrieve_state_storable {
+	$debug2 and print "&retrieve_state_storable\n";
+	my %oid_status_temp;
+	my $file = shift;
+	-e $file or warn ("file: $file not found\n"),return 0;
+	my $hash_ref = retrieve($file);
+	$monitor_version= ${ $hash_ref->{monitor_version} } if defined $hash_ref->{monitor_version} ;
+	$last_version =   ${ $hash_ref->{last_version} } if defined $hash_ref->{last_version} ;
+	%track_names 	= %{ $hash_ref->{track_names} } if defined $hash_ref->{track_names} ;
+	%state_c 		= %{ $hash_ref->{state_c} } if defined $hash_ref->{state_c} ;
+	%state_t 		= %{ $hash_ref->{state_t} } if defined $hash_ref->{state_t} ;
+	%cops 			= %{ $hash_ref->{cops} } if defined $hash_ref->{cops} ;
+	$cop_id 		= ${ $hash_ref->{cop_id} } if defined $hash_ref->{cop_id} ;
+	%copp 			= %{ $hash_ref->{copp} } if defined $hash_ref->{copp} ;
+	@all_chains 	= @{ $hash_ref->{all_chains} } if defined $hash_ref->{all_chains} ;
+	$i 				= ${ $hash_ref->{i} } if defined $hash_ref->{i} ;
+	$t 				= ${ $hash_ref->{t} } if defined $hash_ref->{t} ;
+	%take 			= %{ $hash_ref->{take} } if defined $hash_ref->{take} ;
+	@takes 			= @{ $hash_ref->{takes} } if defined $hash_ref->{takes} ;
+	%chain 			= %{ $hash_ref->{chain} } if defined $hash_ref->{chain} ;
+	@marks			= @{ $hash_ref->{marks} } if defined $hash_ref->{marks} ;	
+	$unit			= ${ $hash_ref->{unit} } if defined $hash_ref->{unit} ;	
+	%oid_status		= %{ $hash_ref->{oid_status} } if defined $hash_ref->{oid_status} ;	
+	%old_vol		= %{ $hash_ref->{old_vol} } if defined $hash_ref->{old_vol} ;	
+	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
+	
+	my $toggle_jack = $widget_o[$#widget_o];
+	&convert_to_jack, &paint_button($toggle_jack, q(lightblue) ) if $jack_on;
+
+	$ui->refresh_oids;
+
+
+	# restore mixer settings
+
+	my $result = system "sudo alsactl -f $file.alsa restore";
+	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
+
+	# restore time marker labels
+	
+	map{ $time_marks[$_]->configure( 
+		-text => &colonize($marks[$_]),
+		-background => $old_bg,
+	)} 
+	grep{ $marks[$_] }1..$#time_marks;
+
+	# restore take and track guis
+	
+	for my $t (@takes) { next if $t == 1; $ui->take_gui($t) }; #
+	# Why skip first????? XXXX first in &initialize_session
+	my $did_apply = 0;
+	$last_version = 0; 
+	for my $n (@all_chains) { 
+		$debug and print "restoring track: $n\n";
+		&restore_track($n) ;
+		for my $id (@{$state_c{$n}->{ops}}){
+			$did_apply++ 
+				unless $id eq $state_c{$n}->{vol}
+					or $id eq $state_c{$n}->{pan};
+
+			
+			&add_effect({
+						chain => $cops{$id}->{chain},
+						type => $cops{$id}->{type},
+						cop_id => $id,
+						parent_id => $cops{$id}->{belongs_to},
+						});
+
+		# TODO if parent has a parent, i am a parameter controller controlling
+		# a parameter controller, and therefore need the -kx switch
+		}
+	}
+	$did_apply and $ew->deiconify();
+
+}
 =comment
 =cut
 sub retrieve_state {
@@ -1963,7 +2005,7 @@ sub retrieve_state {
 	my $toggle_jack = $widget_o[$#widget_o];
 	convert_to_jack if $jack_on;
 	paint_button($toggle_jack, q(lightblue)) if $jack_on;
-	refresh_oids();
+	$ui->refresh_oids();
 
 	# restore mixer settings
 
@@ -1982,7 +2024,7 @@ sub retrieve_state {
 	
 	for my $t (@takes) { 
 		next if $t == 1; 
-		take_gui($t);
+		$ui->take_gui($t);
 	}; #
 	my $did_apply = 0;
 	$last_version = 0; 
@@ -2050,7 +2092,6 @@ sub r {
 sub r5 { r("eff5") };
 =cut
 sub retrieve_effects {
-	#my $debug = 1;
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
 	my %current_cops = %cops; # XXX why bother

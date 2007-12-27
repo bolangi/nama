@@ -21,9 +21,9 @@ my(
 
 my $debug = 1;
 getopts('s:t:f:r:a:b:', \%opts);
-$source_dir = $opts{s} ? $opts{s} : $ENV{UI}. "/pre";
+$source_dir = $opts{s} ? $opts{s} : $ENV{PD};
 $new_root = $opts{r} ? $opts{r} : 'UI';
-$target_dir = $opts{t} ? $opts{t} : "$ENV{UI}/lib/UI";
+$target_dir = $opts{t} ? $opts{t} : $ENV{TD};
 $exta = $opts{a} ? $opts{a} :  "p";
 $extb = $opts{b} ? $opts{b} :  "pm";
 $file = $opts{f};

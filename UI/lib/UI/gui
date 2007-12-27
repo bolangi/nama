@@ -6,7 +6,7 @@ use Getopt::Std;
 #use vars qw(%opts $session $debug);
 my $debug = 1;
 ### Option Processing ###
-push @ARGV, qw(-g -s -d /media/sessions paul_brocante);
+push @ARGV, qw(-g -d /media/sessions test-abc);
 getopts('mcegsd:', \%opts); 
 #print join $/, (%opts);
 # d: wav_dir

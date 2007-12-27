@@ -1,6 +1,7 @@
 ## gui handling
+use Carp;
 
-sub session_label_configure{ $session_label->configure( -text => $_[0])}
+sub session_label_configure{ $session_label->configure( -text => $session_name)}
 
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 
@@ -106,7 +107,7 @@ sub init_gui {
 
 	$build_track_add->configure( 
 			-text => 'Add',
-			-command => sub { add_track($track_name) }
+			-command => sub { add_track(remove_spaces($track_name)) }
 	);
 
 =comment TAKE
@@ -117,10 +118,9 @@ sub init_gui {
 
 			
 			);
-=cut
 
 			
-
+=cut
 	my @labels = 
 		qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
 	my @widgets;
@@ -377,9 +377,8 @@ sub flash_ready {
 		sub{ length_display(-background => $old_bg) }
 	);
 }
-sub take_gui {
-	my $t = shift;
-	#my $debug = 1;
+sub take_gui {  
+#	my $t = shift;
 
 	$debug2 and print "&take_gui\n";
 		my $tname = $alias{$t} ? $alias{$t} : $t;
@@ -415,7 +414,7 @@ sub take_gui {
 				}
 			]);
 		$name->AddItems([
-			'command' => 'OFF',
+			'command' => 'MUTE',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -459,14 +458,15 @@ sub global_version_buttons {
  					);
  	}
 }
-sub track_gui { # nearly 300 lines! 
+sub track_gui { # nearly 200 lines! 
+	my $n =  $i; # follow the global index $i unless
 
-	my $n = shift; # chain index is lexicalized, will remain static in callbacks
-					# my $j is effect index
+	# my $j is effect index
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
 	$debug2 and print "&track_gui\n";
-	my $stub = $state_c{$n}->{active};
+	my $stub = " ";
+	$stub .= $state_c{$n}->{active};
 	$name = $track_frame->Label(
 			-text => $state_c{$n}->{file},
 			-justify => 'left');
@@ -569,11 +569,6 @@ sub track_gui { # nearly 300 lines!
 	$vol = make_scale ( \%p );
 	# Mute
 
-=comment
-	$mute = $track_frame->Button;
-	
-	$mute->configure( -command => sub { toggle_muting($mute, $n) });
-=cut;
 	$mute = $track_frame->Button(
 	  		-command => sub { 
 				if ($copp{$vol_id}->[0]) {  # non-zero volume
@@ -620,9 +615,7 @@ sub track_gui { # nearly 300 lines!
 			cop_id => $pan_id,
 			p_num		=> $p_num,
 			);
-	 $debug and do {my %q = %p; 
-		 delete $q{parent}; 
-	 	 print "x=============\n%p\n",yaml_out(\%q)};
+	# $debug and do { my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) };
 	$pan = make_scale ( \%q );
 
 	# Center
@@ -641,7 +634,7 @@ sub track_gui { # nearly 300 lines!
 
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
+	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
 	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 	# parents are the independent effects
@@ -683,6 +676,29 @@ sub track_gui { # nearly 300 lines!
 
 	
 }
+
+sub update_version_button {
+	my ($n, $v) = @_;
+	carp ("no version provided \n") if ! $v;
+	my $w = $widget_c{$n}->{version};
+					$w->radiobutton(
+						-label => $v,
+						-variable => \$state_c{$n}->{active},
+						-value => $v,
+						-command => 
+		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
+				unless rec_status($n) eq "REC" }
+					);
+}
+sub update_master_version_button {
+				$widget_t[0]->radiobutton(
+						-label => $last_version,
+						-variable => \$monitor_version,
+						-value => $last_version,
+						-command => sub { mon_vert(eval $last_version) }
+					);
+}
+
 
 sub effect_button {
 	$debug2 and print "&effect_button\n";

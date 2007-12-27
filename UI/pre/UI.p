@@ -24,6 +24,7 @@ use Data::YAML::Reader;
 [% qx(cat ./declarations.pl) %] 
 [% qx(cat ./var_types.pl) %]
 
+$debug3 = 0; # qualified routines get local $debug = $debug 3;
 $debug2 = 1;
 $debug = 1;
 
@@ -33,6 +34,7 @@ use ::Assign qw(:all);
 use ::Iam;    
 use ::Tkeca_effects; 
 
+print remove_spaces("bulwinkle is a...");
 ## Class and Object definitions for package '::'
 
 our @ISA; # no anscestors
@@ -50,7 +52,6 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Refresh_subs.pl ) %]
 
-print remove_spaces("bulwinkle is a...");
 
 =comment
 my $root_class = '::'; 
@@ -85,11 +86,15 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
 	package ::;
-	init_gui(); 
-	transport_gui();
-	oid_gui();
-	time_gui();
-	session_init(), ::load_session({create => $opts{c}}) if $session_name;
+	init_gui; # the main window, effect window hidden
+	transport_gui;
+	oid_gui;
+	time_gui;
+	new_take;
+	new_take;
+	::load_session(
+		{create => $opts{c},
+		 name   => $session_name}) if $session_name;
 	MainLoop;
 }
 
