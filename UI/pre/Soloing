@@ -12,7 +12,7 @@
 
 		# do nothing if setup not connected
 		
-		return if ! grep{/$session_name/} eval_iam(q(cs-connected));
+		return if ! grep{/$project_name/} eval_iam(q(cs-connected));
 
 		# do nothing if someone else is soloing;
 		

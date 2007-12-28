@@ -1,12 +1,12 @@
-new_session: _new_session name {
-	$::session = $item{name};
-	&::new_session;
+new_project: _new_project name {
+	$::project = $item{name};
+	&::new_project;
 	1;
 }
 
-load_session: _load_session name {
-	$::session = $item{name};
-	&::load_session unless $::session_name eq $item{name};
+load_project: _load_project name {
+	$::project = $item{name};
+	&::load_project unless $::project_name eq $item{name};
 	1;
 }
 

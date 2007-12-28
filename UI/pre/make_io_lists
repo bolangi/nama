@@ -105,7 +105,7 @@ OID:		for my $oid (@oids) {
 			$debug and print "oid output: $oid{output}\n";
 			$debug and print "oid type: $oid{type}\n";
 
-			# check per-session setting for output oids
+			# check per-project setting for output oids
 
 			next if ! $oid_status{ $oid{name} };
 

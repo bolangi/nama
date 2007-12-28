@@ -167,40 +167,115 @@ PERL_ARCHIVE =
 
 PERL_ARCHIVE_AFTER = 
 
-TO_INST_PM = lib/UI/1.t \
+TO_INST_PM = lib/UI/02_assign.t \
+	lib/UI/02_assign.t.bak \
+	lib/UI/Assign.pm \
+	lib/UI/Assign.pm.bak \
+	lib/UI/Core.pm \
+	lib/UI/Core.pm.bak \
 	lib/UI/Iam.pm \
+	lib/UI/Iam.pm.bak \
 	lib/UI/Session.pm \
+	lib/UI/Session.pm.bak \
 	lib/UI/Tkeca_effects.pm \
+	lib/UI/Tkeca_effects.pm.bak \
 	lib/UI/UI.pm \
-	lib/UI/UI.pm.mod \
+	lib/UI/UI.pm.bak \
+	lib/UI/broken_by_object_syntax \
+	lib/UI/broken_by_object_syntax.bak \
 	lib/UI/ecmd \
+	lib/UI/ecmd.bak \
+	lib/UI/gu \
+	lib/UI/gu.bak \
 	lib/UI/gui \
 	lib/UI/gui.0 \
+	lib/UI/gui.0.bak \
+	lib/UI/gui.bak \
 	lib/UI/sess \
-	lib/UI/text
+	lib/UI/sess.bak \
+	lib/UI/test-storable \
+	lib/UI/test-storable.bak \
+	lib/UI/test-use \
+	lib/UI/test-use.bak \
+	lib/UI/text \
+	lib/UI/text.bak \
+	lib/UI/tx \
+	lib/UI/tx.bak \
+	lib/UI/txt \
+	lib/UI/txt.bak
 
-PM_TO_BLIB = lib/UI/text \
-	blib/lib/UI/text \
-	lib/UI/ecmd \
-	blib/lib/UI/ecmd \
-	lib/UI/gui \
-	blib/lib/UI/gui \
-	lib/UI/UI.pm \
-	blib/lib/UI/UI.pm \
-	lib/UI/Tkeca_effects.pm \
-	blib/lib/UI/Tkeca_effects.pm \
-	lib/UI/Iam.pm \
-	blib/lib/UI/Iam.pm \
+PM_TO_BLIB = lib/UI/text.bak \
+	blib/lib/UI/text.bak \
+	lib/UI/tx.bak \
+	blib/lib/UI/tx.bak \
+	lib/UI/ecmd.bak \
+	blib/lib/UI/ecmd.bak \
+	lib/UI/02_assign.t.bak \
+	blib/lib/UI/02_assign.t.bak \
+	lib/UI/Core.pm.bak \
+	blib/lib/UI/Core.pm.bak \
+	lib/UI/test-use \
+	blib/lib/UI/test-use \
 	lib/UI/sess \
 	blib/lib/UI/sess \
 	lib/UI/gui.0 \
 	blib/lib/UI/gui.0 \
+	lib/UI/test-use.bak \
+	blib/lib/UI/test-use.bak \
+	lib/UI/gui \
+	blib/lib/UI/gui \
+	lib/UI/Assign.pm.bak \
+	blib/lib/UI/Assign.pm.bak \
+	lib/UI/gu.bak \
+	blib/lib/UI/gu.bak \
+	lib/UI/broken_by_object_syntax.bak \
+	blib/lib/UI/broken_by_object_syntax.bak \
+	lib/UI/gui.bak \
+	blib/lib/UI/gui.bak \
+	lib/UI/txt \
+	blib/lib/UI/txt \
+	lib/UI/txt.bak \
+	blib/lib/UI/txt.bak \
+	lib/UI/test-storable \
+	blib/lib/UI/test-storable \
+	lib/UI/text \
+	blib/lib/UI/text \
+	lib/UI/ecmd \
+	blib/lib/UI/ecmd \
+	lib/UI/Core.pm \
+	blib/lib/UI/Core.pm \
+	lib/UI/UI.pm \
+	blib/lib/UI/UI.pm \
+	lib/UI/Tkeca_effects.pm.bak \
+	blib/lib/UI/Tkeca_effects.pm.bak \
+	lib/UI/02_assign.t \
+	blib/lib/UI/02_assign.t \
 	lib/UI/Session.pm \
 	blib/lib/UI/Session.pm \
-	lib/UI/UI.pm.mod \
-	blib/lib/UI/UI.pm.mod \
-	lib/UI/1.t \
-	blib/lib/UI/1.t
+	lib/UI/broken_by_object_syntax \
+	blib/lib/UI/broken_by_object_syntax \
+	lib/UI/test-storable.bak \
+	blib/lib/UI/test-storable.bak \
+	lib/UI/Assign.pm \
+	blib/lib/UI/Assign.pm \
+	lib/UI/gui.0.bak \
+	blib/lib/UI/gui.0.bak \
+	lib/UI/UI.pm.bak \
+	blib/lib/UI/UI.pm.bak \
+	lib/UI/gu \
+	blib/lib/UI/gu \
+	lib/UI/tx \
+	blib/lib/UI/tx \
+	lib/UI/sess.bak \
+	blib/lib/UI/sess.bak \
+	lib/UI/Tkeca_effects.pm \
+	blib/lib/UI/Tkeca_effects.pm \
+	lib/UI/Session.pm.bak \
+	blib/lib/UI/Session.pm.bak \
+	lib/UI/Iam.pm \
+	blib/lib/UI/Iam.pm \
+	lib/UI/Iam.pm.bak \
+	blib/lib/UI/Iam.pm.bak
 
 
 # --- MakeMaker tool_autosplit section:
@@ -453,9 +528,18 @@ clean ::
 realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
 	rm -rf $(DISTVNAME)
-	rm -f  blib/lib/UI/text blib/lib/UI/ecmd blib/lib/UI/gui blib/lib/UI/UI.pm
-	rm -f blib/lib/UI/Tkeca_effects.pm blib/lib/UI/Iam.pm blib/lib/UI/sess
-	rm -f blib/lib/UI/gui.0 blib/lib/UI/Session.pm blib/lib/UI/UI.pm.mod blib/lib/UI/1.t
+	rm -f  blib/lib/UI/text.bak blib/lib/UI/tx.bak blib/lib/UI/ecmd.bak
+	rm -f blib/lib/UI/02_assign.t.bak blib/lib/UI/Core.pm.bak blib/lib/UI/test-use
+	rm -f blib/lib/UI/sess blib/lib/UI/gui.0 blib/lib/UI/test-use.bak blib/lib/UI/gui
+	rm -f blib/lib/UI/Assign.pm.bak blib/lib/UI/gu.bak
+	rm -f blib/lib/UI/broken_by_object_syntax.bak blib/lib/UI/gui.bak blib/lib/UI/txt
+	rm -f blib/lib/UI/txt.bak blib/lib/UI/test-storable blib/lib/UI/text blib/lib/UI/ecmd
+	rm -f blib/lib/UI/Core.pm blib/lib/UI/UI.pm blib/lib/UI/Tkeca_effects.pm.bak
+	rm -f blib/lib/UI/02_assign.t blib/lib/UI/Session.pm
+	rm -f blib/lib/UI/broken_by_object_syntax blib/lib/UI/test-storable.bak
+	rm -f blib/lib/UI/Assign.pm blib/lib/UI/gui.0.bak blib/lib/UI/UI.pm.bak blib/lib/UI/gu
+	rm -f blib/lib/UI/tx blib/lib/UI/sess.bak blib/lib/UI/Tkeca_effects.pm
+	rm -f blib/lib/UI/Session.pm.bak blib/lib/UI/Iam.pm blib/lib/UI/Iam.pm.bak
 	rm -rf Makefile Makefile.old
 
 
@@ -706,9 +790,21 @@ ppd:
 
 pm_to_blib: $(TO_INST_PM)
 	@$(PERLRUNINST) "-MExtUtils::Install" \
-	-e "pm_to_blib({qw{lib/UI/text blib/lib/UI/text lib/UI/ecmd blib/lib/UI/ecmd lib/UI/gui blib/lib/UI/gui lib/UI/UI.pm blib/lib/UI/UI.pm lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm lib/UI/Iam.pm blib/lib/UI/Iam.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	-e "pm_to_blib({qw{lib/UI/text.bak blib/lib/UI/text.bak lib/UI/02_assign.t.bak blib/lib/UI/02_assign.t.bak lib/UI/ecmd.bak blib/lib/UI/ecmd.bak lib/UI/tx.bak blib/lib/UI/tx.bak lib/UI/Core.pm.bak blib/lib/UI/Core.pm.bak}},'$(INST_LIB)/auto','$(PM_FILTER)')"
 	@$(PERLRUNINST) "-MExtUtils::Install" \
-	-e "pm_to_blib({qw{lib/UI/sess blib/lib/UI/sess lib/UI/gui.0 blib/lib/UI/gui.0 lib/UI/UI.pm.mod blib/lib/UI/UI.pm.mod lib/UI/Session.pm blib/lib/UI/Session.pm lib/UI/1.t blib/lib/UI/1.t}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	-e "pm_to_blib({qw{lib/UI/test-use blib/lib/UI/test-use lib/UI/sess blib/lib/UI/sess lib/UI/gui.0 blib/lib/UI/gui.0 lib/UI/test-use.bak blib/lib/UI/test-use.bak lib/UI/gui blib/lib/UI/gui}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/Assign.pm.bak blib/lib/UI/Assign.pm.bak lib/UI/gu.bak blib/lib/UI/gu.bak lib/UI/broken_by_object_syntax.bak blib/lib/UI/broken_by_object_syntax.bak lib/UI/gui.bak blib/lib/UI/gui.bak}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/txt blib/lib/UI/txt lib/UI/txt.bak blib/lib/UI/txt.bak lib/UI/test-storable blib/lib/UI/test-storable lib/UI/text blib/lib/UI/text lib/UI/ecmd blib/lib/UI/ecmd lib/UI/Core.pm blib/lib/UI/Core.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/UI.pm blib/lib/UI/UI.pm lib/UI/Tkeca_effects.pm.bak blib/lib/UI/Tkeca_effects.pm.bak lib/UI/02_assign.t blib/lib/UI/02_assign.t lib/UI/Session.pm blib/lib/UI/Session.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/broken_by_object_syntax blib/lib/UI/broken_by_object_syntax lib/UI/test-storable.bak blib/lib/UI/test-storable.bak lib/UI/Assign.pm blib/lib/UI/Assign.pm lib/UI/gui.0.bak blib/lib/UI/gui.0.bak}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/UI.pm.bak blib/lib/UI/UI.pm.bak lib/UI/gu blib/lib/UI/gu lib/UI/tx blib/lib/UI/tx lib/UI/sess.bak blib/lib/UI/sess.bak lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm}},'$(INST_LIB)/auto','$(PM_FILTER)')"
+	@$(PERLRUNINST) "-MExtUtils::Install" \
+	-e "pm_to_blib({qw{lib/UI/Session.pm.bak blib/lib/UI/Session.pm.bak lib/UI/Iam.pm blib/lib/UI/Iam.pm lib/UI/Iam.pm.bak blib/lib/UI/Iam.pm.bak}},'$(INST_LIB)/auto','$(PM_FILTER)')"
 	@$(TOUCH) $@
 
 # --- MakeMaker selfdocument section:

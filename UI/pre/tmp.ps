@@ -756,17 +756,17 @@ llx lly 12 add translate
 /x0 x v get 4.431713 add sx cw mul add store
 /y0 y v get bfs th add sub store
 x0 y0 moveto
-0 T (new_session: _new_session name {) p n
-0 T () S 8 T ($::session = $item{name};) N
-0 T () S 8 T (&::new_session;) N
+0 T (new_project: _new_project name {) p n
+0 T () S 8 T ($::project = $item{name};) N
+0 T () S 8 T (&::new_project;) N
 0 T () S 8 T (1;) N
 (5) # (}) N
 0 T () N
-0 T (load_session: _load_session name {) N
-0 T () S 8 T ($::session = $item{name};) N
-0 T () S 8 T (&::load_session ) S
+0 T (load_project: _load_project name {) N
+0 T () S 8 T ($::project = $item{name};) N
+0 T () S 8 T (&::load_project ) S
 (unless) K
-( $::session_name ) p
+( $::project_name ) p
 (eq) K
 ( $item{name};) p n
 (10) # () S 8 T (1;) N

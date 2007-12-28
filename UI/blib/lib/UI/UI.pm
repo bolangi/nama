@@ -1,14 +1,14 @@
-use 5.008;
-use strict qw(vars);
-use warnings;
-use lib "$ENV{HOME}/build/flow/UI/lib"; 
-
 package UI;
-
+use 5.008;
+use strict;
+use warnings;
+our $VERSION = '0.01';
+use lib "$ENV{HOME}/build/flow/UI/lib"; 
+use lib qw(. ..);
+use IO::All;
 use Carp;
 use Cwd;
 use Tk;
-use IO::All;
 use Storable; 
 use Getopt::Std;
 use Audio::Ecasound;
@@ -16,14 +16,10 @@ use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 
-## Class and Object definition, root class
-
-our @ISA;
-use Object::Tiny qw(mode);
-
-our $VERSION = '0.01';
-
 ## Definitions ##
+
+# 'our' declaration: all packages in the file will see the following
+# variables. 
 
 
 use constant (REC => 'rec',
@@ -33,6 +29,7 @@ use constant (REC => 'rec',
 
 our (
 	### 
+	$ui, # object providing class behavior for graphic/text functions
 
 	@persistent_vars, # a set of variables we save
 					  	# as one big config file
@@ -73,7 +70,7 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
-	$wav_dir,	# each session will get a directory here
+	$wav_dir,	# each project will get a directory here
 	                # and one .ecmd directory, also with 
 	
 					# /wav_dir/project_dir/vocal_1.wav
@@ -94,8 +91,8 @@ our (
 	$select_track,	 # the currently active track -- for Text UI
 	@format_fields, # data for replies to text commands
 
-	$session,		# Tk types session name here
-	$session_name,	# Official session name
+	$project,		# Tk types project name here
+	$project_name,	# Official project name
 	$i, 			# index for incrementing track numbers
 	$t,				# index for incrementing track groups
 	%state_c,		# data for Track object, except effects
@@ -110,7 +107,7 @@ our (
 
 	$cop_id, 		# chain operator id, that how we create, 
 					# store, find them, adjust them, and destroy them,
-					# per track or per session?
+					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	%track_names,	# to know if they are taken
@@ -180,10 +177,10 @@ our (
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time
 
-	$session_label,	# project name
+	$project_label,	# project name
 	$take_label,	# bus name
 
-	$sn_label,		# session load/save/quit	
+	$sn_label,		# project load/save/quit	
 	$sn_text,
 	$sn_load,
 	$sn_load_nostate,
@@ -220,7 +217,7 @@ our (
 	$transport_stop,
 
 	$iam,    # unused
-	$old_bg, # old background
+	$old_bg, # initial background color.
 
 
 	$loopa,  # loopback nodes 
@@ -254,8 +251,7 @@ our (
 						#    used
 
 );
-
-
+ 
 
 @global_vars = qw(
 						$mixname
@@ -265,7 +261,8 @@ our (
 						$chain_setup_file
 						%alias 			   
 						$tk_input_channels
-						$use_monitor_version_for_mixdown );
+						$use_monitor_version_for_mixdown 
+						$unit								);
 						
 @config_vars = qw(
 						%abbreviations
@@ -304,8 +301,10 @@ our (
 
 						@effects		
 						%effect_i	
+						%e_bound
 						@ladspa_sorted
 						%effects_ladspa		 );
+
 
 @effects_dynamic_vars = qw(
 
@@ -320,461 +319,37 @@ our (
 
 
 
+$debug3 = 0; # qualified routines get local $debug = $debug 3;
 $debug2 = 1;
 $debug = 1;
 
-use subs qw(
-
-new
-config_file
-ecmd_dir
-this_wav_dir
-session_dir
-prepare
-eval_iam
-global_config
-session_config
-config
-read_config
-walk_tree
-substitute
-load_session
-session_init
-initialize_session_data
-add_track
-add_mix_track
-mix_suffix
-restore_track
-register_track
-dig_ruins
-find_wavs
-remove_small_wavs
-new_take
-increment_take
-decrement_take
-select_take
-add_volume_control
-add_pan_control
-create_dir
-join_path
-wav_off
-selected_version
-set_active_version
-new_version
-get_versions
-mon_vert
-collect_chains
-rec_status
-really_recording
-make_io_lists
-rec_route
-route
-hash_push
-eliminate_loops
-write_chains
-new_wav_name
-output_format
-initialize_oids
-mono_to_stereo
-pre_multi
-convert_to_jack
-convert_to_alsa
-load_ecs
-new_engine
-setup_transport
-connect_transport
-start_transport
-stop_transport
-transport_running
-disconnect_transport
-start_clock
-update_clock
-restart_clock
-refresh_clock
-toggle_unit
-to_start
-to_end
-jump
-refresh_t
-refresh_c
-refresh
-refresh_oids
-rec_cleanup
-update_version_button
-update_master_version_button
-add_effect
-remove_effect
-remove_op
-cop_add
-cop_init
-effect_update
-find_op_offsets
-apply_ops
-apply_op
-prepare_static_effects_data
-extract_effects_data
-sort_ladspa_effects
-read_in_effects_data
-read_in_tkeca_effects_data
-get_ladspa_hints
-range
-integrate_ladspa_hints
-d2
-dn
-round
-save_state
-retrieve_state
-save_effects
-r
-r5
-retrieve_effects
-assign_vars
-store_vars
-yaml_out
-yaml_in
-arm_mark
-colonize
-mark
-strip_all
-strip_blank_lines
-strip_comments
-remove_spaces
-
-);
 ## Load my modules
 
-use UI::Iam;    	# IAM command support
-use UI::Tkeca_effects; # Some effects data
+use UI::Assign qw(:all);
+use UI::Iam;    
+use UI::Tkeca_effects; 
 
-# we use the following settings if we can't find config files
+print remove_spaces("bulwinkle is a...");
+## Class and Object definitions for package 'UI'
 
-$default = <<'FALLBACK_CONFIG';
----
-wav_dir: /media/sessions
-abbreviations:
-  24-mono: s24_le,1,frequency
-  32-10: s32_le,10,frequency
-  32-12: s32_le,12,frequency
-  cd-mono: s16_le,1,44100
-  cd-stereo: s16_le,2,44100,i
-  frequency: 44100
-devices:
-  jack:
-    ecasound_id: jack_alsa
-    input_format: 32-12
-    output_format: 32-10
-  multi:
-    ecasound_id: alsaplugin,1,0
-    input_format: 32-12
-    output_format: 32-10
-  stereo:
-    ecasound_id: alsaplugin,0,0
-    input_format: cd-stereo
-    output_format: cd-stereo
-ecasound_globals: "-B auto"
-mix_to_disk_format: cd-stereo
-mixer_out_format: cd-stereo
-raw_to_disk_format: cd-mono
-mixname: mix
-ladspa_sample_rate: frequency
-unit: 1 				
-effects_cache_file: effects_cache.yaml
-state_store_file: State 
-chain_setup_file: session.ecs
-alias:
-  1: Mixdown
-  2: Tracker
-tk_input_channels: 10
-use_monitor_version_for_mixdown: true 
-...
-
-FALLBACK_CONFIG
-
-# the following template are used to generate chain setups.
-$oids = <<'TEMPLATES';
----
--
-  default: on
-  id: Stereo
-  name: stereo
-  output: stereo
-  type: mixed
--
-  default: off
-  id: m
-  name: multi
-  output: multi
-  pre_output: &pre_multi
-  target: mon
-  type: cooked
--
-  default: off
-  id: L
-  name: live
-  output: multi
-  pre_output: &pre_multi
-  target: rec
-  type: cooked
--
-  default: off
-  id: Mix
-  name: mix
-  output: file
-  type: mixed
--
-  default: on
-  id: J
-  name: mix_setup
-  output: ~
-  target: all
-  type: cooked
--
-  default: on
-  id: ~
-  input: file
-  name: mon_setup
-  output: loop
-  post_input: &mono_to_stereo
-  target: mon
-  type: raw
--
-  default: on
-  id: R
-  input: multi
-  name: rec_file
-  output: file
-  target: rec
-  type: raw
--
-  default: on
-  id: ~
-  input: multi
-  name: rec_setup
-  output: loop
-  post_input: &mono_to_stereo
-  target: rec
-  type: raw
-...
-
-TEMPLATES
-
-##  Grammar.p, source for Grammar.pm
-
-### COMMAND LINE PARSER 
-
-$debug2 and print "Reading grammar\n";
-
-$UI::AUTOSTUB = 1;
-$UI::RD_HINT = 1;
-
-# rec command changes active take
-
-$grammar = q(
-
-command: mon
-command: m
-command: r
-command: rec
-command: off
-command: vol
-command: pan
-command: version
-command: loop
-command: save_session
-command: new_session
-command: load_session
-command: add_track
-command: generate_setup
-command: list_marks
-command: show_setup
-command: show_effects
-command: ecasound_start
-command: ecasound_stop
-command: add_effect
-command: remove_effect
-command: renew_engine
-command: mark
-command: start
-command: stop
-command: show_marks
-command: rename_mark
-_mon: 'mon'
-_m: 'm'
-_r: 'r'
-_rec: 'rec'
-_off: 'off' | 'z'
-_vol: 'vol' | 'v'
-_pan: 'pan' | 'p'
-_version: 'version' | 'n'
-_loop: 'loop'
-_save_session: 'save_session' | 'keep' | 'k'
-_new_session: 'new_session' | 'new'
-_load_session: 'load_session' | 'load'
-_add_track: 'add_track' | 'add'
-_generate_setup: 'generate_setup' | 'setup'
-_list_marks: 'list_marks' | 'l'
-_show_setup: 'show_setup' | 'show'
-_show_effects: 'show_effects' | 'sfx'
-_ecasound_start: 'ecasound_start' | 'T'
-_ecasound_stop: 'ecasound_stop' | 'S'
-_add_effect: 'add_effect' | 'fx'
-_remove_effect: 'remove_effect' | 'rfx'
-_renew_engine: 'renew_engine' | 'renew'
-_mark: 'mark' | 'k'
-_start: 'start' | 't'
-_stop: 'stop' | 'st'
-_show_marks: 'show_marks' | 'sm'
-_rename_mark: 'rename_mark' | 'rn'
-mon: _mon {}
-m: _m {}
-r: _r {}
-rec: _rec {}
-off: _off {}
-vol: _vol {}
-pan: _pan {}
-version: _version {}
-loop: _loop {}
-save_session: _save_session {}
-new_session: _new_session {}
-load_session: _load_session {}
-add_track: _add_track {}
-generate_setup: _generate_setup {}
-list_marks: _list_marks {}
-show_setup: _show_setup {}
-show_effects: _show_effects {}
-ecasound_start: _ecasound_start {}
-ecasound_stop: _ecasound_stop {}
-add_effect: _add_effect {}
-remove_effect: _remove_effect {}
-renew_engine: _renew_engine {}
-mark: _mark {}
-start: _start {}
-stop: _stop {}
-show_marks: _show_marks {}
-rename_mark: _rename_mark {}
-
-new_session: _new_session name {
-	$UI::session = $item{name};
-	&UI::new_session;
-	1;
-}
-
-load_session: _load_session name {
-	$UI::session = $item{name};
-	&UI::load_session unless $UI::session_name eq $item{name};
-	1;
-}
-
-add_track: _add_track wav channel(s?) { 
-	if ($UI::track_names{$item{wav}} ){
-		print "Track name already in use.\n";
-	} else {
-		&UI::add_track($item{wav}) ;
-		my %ch = ( @{$item{channel}} );	
-		$ch{r} and $UI::state_c{$UI::i}->{ch_r} = $UI::ch{r};
-		$ch{m} and $UI::state_c{$UI::i}->{ch_m} = $UI::ch{m};
-		
-	}
-	1;
-}
-
-generate_setup: _generate_setup {}
-setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
-
-list_marks: _list_marks {}
-
-show_setup: _show_setup { 	
-	map { 	push @UI::format_fields,  
-			$_,
-			$UI::state_c{$_}->{active},
-			$UI::state_c{$_}->{file},
-			$UI::state_c{$_}->{rw},
-			&UI::rec_status($_),
-			$UI::state_c{$_}->{ch_r},
-			$UI::state_c{$_}->{ch_m},
-
-		} sort keys %UI::state_c;
-		
-	write; # using format at end of file Flow.pm
-				1;
-}
-
-name: /\w+/
-
-wav: name
-
-
-mix: 'mix' {1}
-
-norm: 'norm' {1}
-
-exit: 'exit' { &UI::save_state($UI::statestore); exit; }
-
-
-channel: r | m
-
-r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
-m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
-
-
-rec: 'rec' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
-}
-mon: 'mon' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
-}
-mute: 'mute' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
-}
-
-mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mon); }
-
-mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mute); }
-
-rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = q(rec); }
-
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-
-
-);
+our @ISA; # no anscestors
+use Object::Tiny qw(mode);
 
 ## The following methods belong to the root class
 
 sub hello {"superclass hello"}
 
-package UI;
+sub new { my $class = shift; return bless {@_}, $class }
+
 use Carp;
-
-# Once we have set $session_name, everything starts
-# happening. Conversely, nothing can happen without
-# a session_name. We coudl have session objects, consisting
-# of only a name. But how would that help? Each
-# 'object is actually represented by a pair of directories.
-# in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
-
-sub new {
-
-	# only argument is mode: Text or Graphical
-	
-             my $class = shift;
-			 my %h = ( @_ );
-			croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-             return bless { @_ },
-			  $class eq $root_class  && $h{mode} 
-					? "$root_class\::" . $h{mode} 
-					: $class;
-}
-
-
-sub config_file { "config" }
+sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
-sub this_wav_dir {$session_name and join_path($wav_dir, $session_name) }
-sub session_dir  {$session_name and join_path($wav_dir, &ecmd_dir, $session_name) }
+sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
+sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name) }
 
-sub prepare {  # actions begin here
+
+sub prepare {  # actions begin
+
 
 	$debug2 and print "&prepare\n";
 
@@ -784,15 +359,25 @@ sub prepare {  # actions begin here
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
+
 	$opts{g} and $gui = 1;
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
-	read_config(); # my first attempt
+	## now i should read .ecmdrc
+	## should have .ecmd holding files.
+	
+	## but for me, i am really really happy to read my 
+	# internal ones. 
+	
+	read_config(); # sets $wav_dir
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or carp("wav_dir: '$wav_dir' not found, invoke using -d option ");
+	-d $wav_dir or croak
+
+	("wav_dir: '$wav_dir' not found, invoke using -d option ");
+
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -800,10 +385,14 @@ sub prepare {  # actions begin here
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
+	
+	$debug and print "wav_dir: ", wav_dir(), $/;
+	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
+	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
 }
-#sub prepare { print "hello preparer!!" }
-	
+sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
+
 sub eval_iam {
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
@@ -819,17 +408,17 @@ sub eval_iam {
 ## configuration file
 
 sub global_config{
-	my $config = join_path( $wav_dir, &ecmd_dir, &config_file );
+	my $config = join_path( &wav_dir, &ecmd_dir, &config_file );
 	-f $config and io($config)->all;
 }
-sub session_config {
-	&session_dir or return;
-	my $config = join_path( &session_dir, &config_file );
+sub project_config {
+	&project_dir or return;
+	my $config = join_path( &project_dir, &config_file );
 	-f $config and io($config)->all;
 }
 sub config { #strip_blank_lines(
 			#	strip_comments(
-					&session_config or &global_config or $default 
+					&project_config or &global_config or $default 
 			# ))
 			 
 			 }
@@ -843,13 +432,14 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out( \%cfg ); exit;
+	print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_vars( \%cfg, @global_vars, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
 
 }
 sub walk_tree {
+	$debug2 and print "&walk_tree\n";
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 
@@ -862,54 +452,54 @@ sub substitute{
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
-## session handling
+## project handling
 
-sub load_session {
+sub load_project {
 	my $hash = shift;
-	$debug2 and print "&load_session\n";
-	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
-	return unless $hash->{name} or $session;
+	$debug2 and print "&load_project\n";
+	$debug and print "\$project: $project name: $hash->{name} create: $hash->{create}\n";
+	return unless $hash->{name} or $project;
 
-	# we could be called from Tk with variable $session _or_
+	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
 	
-	$session = remove_spaces($session); # internal spaces to underscores
-	$session_name = $hash->{name} ? $hash->{name} : $session;
+	$project = remove_spaces($project); # internal spaces to underscores
+	$project_name = $hash->{name} ? $hash->{name} : $project;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir} &this_wav_dir, &session_dir;
+		map{create_dir($_)} &this_wav_dir, &project_dir;
 =comment 
 	# OPEN EDITOR TODO
-	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
+	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
 	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
 	print PARAMS $configuration;
 	close PARAMS;
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
 	read_config();
-	session_init();
-}
-sub session_init{
-	$debug2 and print "&session_init\n";
-	initialize_session_data();
+	initialize_project_data();
 	remove_small_wavs(); 
-	retrieve_state(join_path(&session_dir,$state_store_file)) unless $opts{m};
+	print "reached here!!!\n";
+	retrieve_state_storable(join_path(&project_dir,$state_store_file)) ;
+		#unless $opts{m} or $state_store_file =~ /.yaml$/;
+	#retrieve_state (join_path(&project_dir,$state_store_file)) 
+		#unless $opts{m} or $state_store_file !~ /.yaml$/;
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
-	global_version_buttons();
+	$ui->global_version_buttons();
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
 
-sub initialize_session_data {
+sub initialize_project_data {
+	$debug2 and print "&initialize_project_data\n";
 
 	return if transport_running();
-	my $sf = join_path(&session_dir, $chain_setup_file);
-	session_label_configure(
-		-text => uc $session_name, 
+	$ui->project_label_configure(
+		-text => uc $project_name, 
 		-background => 'lightyellow',
 		); 
 
-	# assign_vars($session_init_file, @session_vars);
+	# assign_vars($project_init_file, @project_vars);
 
 	$last_version = 0;
 	%track_names = ();
@@ -922,23 +512,25 @@ sub initialize_session_data {
 							# and others
 	%old_vol = ();
 
+	%take        = (); # the group a chain belongs to # by chain_id
+	%chain       = (); # the chain_id corresponding to a track name
+	#%alias      = ();  # a way of naming takes
+
 	@takes       = ();  
 	@record		= ();
 	@monitor	= ();
+	@mute = (); 
 	@all_chains  = (); # indices of all chains
 	@input_chains = ();
 	@output_chains = ();
+
 	$i           = 0;  # chain counter
 	$t           = 0;  # take counter
 
 	%widget_c = ();
 	@widget_t = ();
 	%widget_e = ();
-	%take        = (); # maps chain index to take
-	%chain       = (); # maps track name (filename w/o .wav) to chain
-	#%alias      = ();  # a way of naming takes
 	
-	@mute = (); 
 
 	# time related
 	
@@ -952,51 +544,45 @@ sub initialize_session_data {
 
 	# $is_armed = 0;
 
-destroy_widgets();
+$ui->destroy_widgets();
 
-increment_take(); 
+increment_take();  # to 1
 
-take_gui($t);
+$ui->take_gui;
 
 }
-
 ## track and wav file handling
 
 sub add_track {
 	$debug2 and print "&add_track\n";
-	local $debug = 0;
 	return 0 if transport_running();
 	my $name = shift;
-	# new scoping code!
-	###### old, deprecated  $name and my $track_name = $name; 
-	# otherwise we use $trackname from previous scope
 	
-	local $track_name = $name if $name;
 	if ($track_names{$track_name}){
 		$debug and carp ("Track name in use\n");
 		return 0;
 	}
-	$track_name = remove_spaces($track_name);
-	$state_t{$t}->{rw} = $UI::REC;
-	$track_names{$track_name}++;
+	$state_t{$t}->{rw} = "REC"; # enable recording for the group
+	$track_names{$name}++;
 	$i++; # global variable track counter
-	register_track($i, $track_name, $ch_r, $ch_m);
+	register_track($i, $name, $ch_r, $ch_m);
 	find_wavs($i);
 	#set_active_version($i) if ! defined $state_c{$i}->{active};
 	$track_name = $ch_m = $ch_r = undef;
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = $UI::REC if ! defined $state_c{$i}->{rw};
-	track_gui($i);
+	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
+ print yaml_out(\%state_c);
+	$ui->track_gui;
+# print yaml_out(\%state_c);
 	return 1;
 }
 sub add_mix_track {
-	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
+	# return if $opts{m} or ! -e # join_path(&project_dir,$state_store_file);
 	add_track($mixname) ;
-	# the variable $t magically increments
-	$state_t{$t}->{rw} = $UI::MUTE; 
-	new_take();
-	$state_t{$t}->{rw} = $UI::MON;
+	$state_t{$t}->{rw} = "MUTE"; 
+	new_take(); # $t increments
+	$state_t{$t}->{rw} = "MON";
 }
 sub mix_suffix {
 	my $stub = shift;
@@ -1006,38 +592,41 @@ sub restore_track {
 	$debug2 and print "&restore_track\n";
 	my $n = shift;
 	find_wavs($n);
-	track_gui($n), refresh();
+	$ui->track_gui($n), $ui->refresh();
 }
 sub register_track {
 	$debug2 and print "&register_track\n";
 	my ($i, $name, $ch_r, $ch_m) = @_;
+	$debug and print <<VARS;
+i          : $i
+name       : $name
+Rec channel: $ch_r
+Mon channel: $ch_m
+VARS
   	push @all_chains, $i;
   	# print "ALL chains: @all_chains\n";
 	$take{$i} = $t;
 	$chain{$name} = $i;
-	$state_c{$i}->{rw} = $UI::REC;
+	$state_c{$i}->{rw} = "REC";
 	$state_c{$i}->{ch_m} = $ch_m;
 	$state_c{$i}->{ch_r} = $ch_r;
 	$name =~ s/\.wav$//;
 	$state_c{$i}->{file} = $name;
-	# print SESSION join ";", $name, $ch_m, $ch_r;
-	# print SESSION "\n";
 }
 sub dig_ruins { 
 
-	local $debug = 0;
 	# only if there are no tracks , 
 	# we exclude the mixchain
 	#
 	
 	$debug2 and print "&dig_ruins";
 
-	if ( ! grep { $_ ne $mixchain and $_ ne $session_name} keys %state_c ) {  # there are no tracks yet
+	if ( ! grep { $_ ne $mixchain and $_ ne $project_name} keys %state_c ) {  # there are no tracks yet
 
 		# look for wave files
 		
 		my $d = this_wav_dir();
-		opendir WAV , $d or carp "couldn't open $d: $!";
+		opendir WAV, $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
 		
@@ -1053,7 +642,6 @@ sub find_wavs {
 
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
-	local $debug = 0;
 	$debug and print "track: $n\n";
 	$debug and print "this_wav dir: ", this_wav_dir,": $n\n";
 
@@ -1104,20 +692,21 @@ sub remove_small_wavs {
 	map { print ($_, "\n") if -s == 44 } @wavs; 
 	map { unlink $_ if -s == 44 } @wavs; 
 }
-## track group handling (referred to as 'take')
+## track group handling
 #
 sub new_take {
 	$debug2 and print "&new_take\n";
 	increment_take();
-	take_gui($t), refresh_t();
+	$ui->take_gui; $ui->refresh_t();
 }
 sub increment_take {
+	$debug2 and print "&increment_take\n";
 			return if transport_running(); 
 					$t++;
 					$state_t{active} = $t;
-					$state_t{$t}->{rw} = $UI::REC;
+					$state_t{$t}->{rw} = "REC";
 					push @takes, $t;
-					# print SESSION "take $t\n";
+	$debug and print "take $t\n";
 }
 sub decrement_take {
 			$debug2 and print "&decrement_take\n";
@@ -1135,13 +724,13 @@ sub decrement_take {
 			
 }
 sub select_take {
-	my ($t, $status) = shift;
+	my ($t, $status) = @_; 
 	$status =~ m/REC|MON|MUTE/
 		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
 	return if transport_running();
 	$state_t{$t}->{rw} = $status; 
 	$state_t{active} = $t; 
-	refresh();
+	$ui->refresh();
 	setup_transport();
 	connect_transport();
 }
@@ -1166,30 +755,6 @@ sub add_pan_control {
 				});
 	
 	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
-}
-## support functions
-
-sub create_dir {
-	my $dir = shift;
-	-d $dir 
-		or mkdir $dir 
-		or croak qq(failed to create directory "$dir": $!);
-}
-
-sub join_path {
-	no warnings;
-	my @parts = @_;
-	my $path = join '/', @parts;
-	$path =~ s(/{2,})(/)g;
-	$debug and print "Path: $path\n";
-	$path;
-	use warnings;
-}
-
-sub wav_off {
-	my $wav = shift;
-	$wav =~ s/\.wav\s*$//i;
-	$wav;
 }
 ## version functions
 
@@ -1243,7 +808,7 @@ sub mon_vert {
 	# store %copp
 	# remove effects  and use $ver's set if there are effects for $v
 	$monitor_version = $ver;
-	refresh();
+	$ui->refresh();
 }
 ## chain setup generation
 #
@@ -1254,8 +819,8 @@ sub collect_chains {
 	
 	for my $n (@all_chains) {
 	$debug and print "rec_status $n: ", rec_status($n), "\n";
-		push (@monitor, $n) if rec_status($n) eq $UI::MON; 
-		push (@record, $n) if rec_status($n) eq $UI::REC;
+		push (@monitor, $n) if rec_status($n) eq "MON"; 
+		push (@record, $n) if rec_status($n) eq "REC";
 	}
 
 	$debug and print "monitor chains:  @monitor\n\n";
@@ -1275,23 +840,23 @@ sub rec_status {
 no warnings;
 my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
 use warnings;
-    return $UI::MUTE if $state_c{$n}->{rw} eq $UI::MON and ! $file_exists;
-	return $UI::MUTE if $state_c{$n}->{rw} eq $UI::MUTE;
-	return $UI::MUTE if $state_t{$take{$n}}->{rw} eq $UI::MUTE;
+    return "MUTE" if $state_c{$n}->{rw} eq "MON" and ! $file_exists;
+	return "MUTE" if $state_c{$n}->{rw} eq "MUTE";
+	return "MUTE" if $state_t{$take{$n}}->{rw} eq "MUTE";
 	if ($take{$n} == $state_t{active} ) {
 
-		if ($state_t{$take{$n}}->{rw} eq $UI::REC) {
+		if ($state_t{$take{$n}}->{rw} eq "REC") {
 
 			
-			if ($state_c{$n}->{rw} eq $UI::REC){
-				return $UI::REC if $state_c{$n}->{ch_r};
-				return $UI::MON if $file_exists;
-				return $UI::MUTE;
+			if ($state_c{$n}->{rw} eq "REC"){
+				return "REC" if $state_c{$n}->{ch_r};
+				return "MON" if $file_exists;
+				return "MUTE";
 			}
 		}
 	}
-	return $UI::MON if selected_version($n);
-	return $UI::MUTE;
+	return "MON" if selected_version($n);
+	return "MUTE";
 }
 sub really_recording {  # returns filename stubs
 
@@ -1300,8 +865,8 @@ sub really_recording {  # returns filename stubs
 	keys %{$outputs{file}}; # includes mixdown
 }
 sub make_io_lists {
+	#local $debug = $debug3;
 	$debug2 and print "&make_io_lists\n";
-	# my $debug = 1;
 	@input_chains = @output_chains = ();
 
 	%inputs = (); # chain fragments
@@ -1328,7 +893,7 @@ sub make_io_lists {
 	for my $n (@all_chains) {
 		$debug and print "chain $n: begin\n";
 		$rec_status = rec_status($n);
-		next if $rec_status eq $UI::MUTE;
+		next if $rec_status eq "MUTE";
 
 OID:		for my $oid (@oids) {
 
@@ -1352,7 +917,7 @@ OID:		for my $oid (@oids) {
 			$debug and print "oid output: $oid{output}\n";
 			$debug and print "oid type: $oid{type}\n";
 
-			# check per-session setting for output oids
+			# check per-project setting for output oids
 
 			next if ! $oid_status{ $oid{name} };
 
@@ -1451,7 +1016,7 @@ OID:		for my $oid (@oids) {
 # 		} @chain_ids;
 # 	}
 
-	$debug and print "\@oids\n================\n", yaml_out(\@oids);
+	#$debug and print "\@oids\n================\n", yaml_out(\@oids);
 	$debug and print "\%post_input\n================\n", yaml_out(\%post_input);
 	$debug and print "\%pre_output\n================\n", yaml_out(\%pre_output);
 	$debug and print "\%inputs\n================\n", yaml_out(\%inputs);
@@ -1483,7 +1048,6 @@ sub hash_push {
 	push @{ $hash_ref->{$key} }, @vals;
 }
 sub eliminate_loops {
-	# my $debug = 1;
 	my $n = shift;
 	return unless defined $inputs{cooked}->{$n} and scalar @{$inputs{cooked}->{$n}} == 1;
 	# get customer's id from cooked list and remove it from the list
@@ -1539,16 +1103,15 @@ intermediate->chain_id->"chain operators and routing, etc."
 
 =cut
 sub write_chains {
-	# my $debug = 1;
 	$debug2 and print "&write_chains\n";
 
 	# the mixchain is usually '1', so that effects applied to 
-	# track 1 (session_name) affect the mix.
+	# track 1 (project_name) affect the mix.
 	#
 	# but when playing back a mix, we want mixchain to be 
 	# something else
 	
-	my $mixchain = rec_status(1) eq $UI::MON
+	my $mixchain = rec_status(1) eq "MON"
 						? $mixchain_aux
 						: $mixchain;
 
@@ -1650,7 +1213,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = join_path(&session_dir, $chain_setup_file);
+	my $sf = join_path(&project_dir, $chain_setup_file);
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -1674,23 +1237,29 @@ sub new_wav_name {
 }
 sub output_format {
 	my $stub = shift;
-	$stub eq $session_name or $stub eq $mixname
+	$stub eq $project_name or $stub eq $mixname
 		? $mix_to_disk_format
 		: $mixer_out_format
 }
 ## templates for generating chains
 
 sub initialize_oids {
+	local $debug = $debug3;
 	$debug2 and print "&initialize_oids\n";
 
 @oids = @{ $yr->read($oids) };
 
-# my $debug = 1;
 
 # these are templates for building chains
-
-map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
-map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
+map {	
+	my $name = $_;
+	map{ 		defined $_->{$name} 
+					and $_->{$name} =~ /(&)(.+)/ 
+					and $_->{$name} = \&$2 
+	} @oids; 
+} qw( post_input pre_output);
+#map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
+#map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
 
 
 $debug and print "rec_setup $oids[-1]->{input}\n";
@@ -1719,9 +1288,9 @@ sub convert_to_alsa { initialize_oids }
 ## transport functions
 
 sub load_ecs {
-		my $session_file = join_path(&session_dir , $chain_setup_file);
-		eval_iam("cs-remove $session_file");
-		eval_iam("cs-load ". $session_file);
+		my $project_file = join_path(&project_dir , $chain_setup_file);
+		eval_iam("cs-remove $project_file");
+		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
@@ -1751,11 +1320,11 @@ sub connect_transport {
 	carp("Invalid chain setup, cannot arm transport.\n"), return
 		unless eval_iam("engine-status") eq 'stopped' ;
 	$length = eval_iam('cs-get-length'); 
-	length_display(-text => colonize($length));
+	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
-	clock_display(-text => colonize(0));
+	$ui->clock_display(-text => colonize(0));
 	print eval_iam("fs");
-	flash_ready();
+	$ui->flash_ready();
 	
 }
 sub start_transport { 
@@ -1766,7 +1335,8 @@ sub start_transport {
 	start_clock();
 }
 sub stop_transport { 
-	$debug2 and print "&stop_transport\n"; $e->eci('stop'); session_label_configure(-background => $old_bg);
+	$debug2 and print "&stop_transport\n"; $e->eci('stop');
+	$ui->project_label_configure(-background => $old_bg);
 	# what if we are recording
 }
 sub transport_running {
@@ -1775,24 +1345,32 @@ sub transport_running {
 }
 sub disconnect_transport { eval_iam('cs-disconnect') }
 
-## clock and gui refresh functions
+
+sub toggle_unit {
+	if ($unit == 1){
+		$unit = 60;
+		
+	} else{ $unit = 1; }
+}
+sub show_unit { $time_step->configure(
+	-text => ($unit == 1 ? 'Sec' : 'Min') 
+)}
+## clock and clock-refresh functions ##
+#
 
 sub start_clock {
-	$clock_id = $clock->repeat(1000, \refresh_clock);
-}
-sub update_clock {
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	$clock_id = $clock->repeat(1000, \&refresh_clock);
 }
 sub restart_clock {
 	eval q($clock_id->cancel);
 	start_clock();
 }
 sub refresh_clock{
-	clock_display(-text => colonize(eval_iam('cs-get-position')));
+	update_clock();
 	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
-	session_label_configure(-background => $old_bg);
+	$ui->project_label_configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
 		&connect_transport unless &really_recording; 
 	}
@@ -1803,16 +1381,6 @@ sub refresh_clock{
 	&rec_cleanup if &really_recording();
 	}
 
-}
-sub toggle_unit {
-	if ($unit == 1){
-		$unit = 60;
-		$time_step->configure(-text => 'Min');
-	} else{
-		$unit = 1;
-		$time_step->configure(-text => 'Sec');
-
-	}
 }
 ## recording head positioning
 
@@ -1829,7 +1397,6 @@ sub to_end {
 	restart_clock();
 } 
 sub jump {
-	# my $debug = 1;
 	$debug2 and print "&jump\n";
 	return if really_recording();
 	my $delta = shift;
@@ -1843,102 +1410,9 @@ sub jump {
 	print "$cmd\n";
 	restart_clock();
 }
-## refresh functions
-
-sub refresh_t {
-	$debug2 and print "&refresh_t\n";
-	my %take_color = (rec  => 'LightPink', 
-					mon => 'AntiqueWhite',
-					mute => $old_bg);
-	collect_chains();
-	my @w = $take_frame->children;
-	for my $t (1..@takes){
-		# skip 0th item, the label
-		my $status;
-		#  rec if @record entry for this take
-		if ( grep{$take{$_}==$t}@record ) { 
-			$debug and print "t-rec $t\n";	
-			$status = $UI::REC } 
-		# 	mon if @monitor entry
-		elsif ( grep{$take{$_}==$t}@monitor )
-			{ 
-			$debug and print "t-mon $t\n";	
-			$status = $UI::MON }
-
-		else  { $status = $UI::MUTE;
-			$debug and print "t-mute $t\n";	
-		
-		}
-
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/;
-		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
-	$debug and print "take_frame child: $t\n";
-
-		$w[$t]->configure(-background => $take_color{$status});
-	}
-}
-sub refresh_c {
-
-	my $n = shift;
-	$debug2 and print "&refresh_c\n";
-	
-		my $rec_status = rec_status($n);
-#	$debug and print "track: $n rec_status: $rec_status\n";
-
-		return unless $widget_c{$n}; # obsolete ??
-		$widget_c{$n}->{rw}->configure(-text => $rec_status);
-	
-	if ($rec_status eq $UI::REC) {
-		$debug and print "REC! \n";
-
-		$widget_c{$n}->{name}->configure(-background => 'lightpink');
-		$widget_c{$n}->{name}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
-		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
-		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(-text => new_version);
-
-	}
-	elsif ( $rec_status eq $UI::MON ) {
-		$debug and print "MON! \n";
-
-		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
-		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
-		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
-		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-
-		}
-	elsif ( $rec_status eq $UI::MUTE ) {
-		$debug and print "MUTE! \n";
-		 $widget_c{$n}->{name}->configure(-background => $old_bg);
-		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
-		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
-		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
-		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
-		}  
-		else { carp "\$rec_status contains something unknown: $rec_status";}
-}
-sub refresh { 
- 	refresh_t(); 
-	map{ refresh_c($_) } @all_chains ;
-}
-sub refresh_oids{
-	map{ $widget_o{$_}->configure( # uses hash
-			-background => 
-				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
-			-activebackground => 
-				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
-			) } keys %widget_o;
-}
 ## post-recording functions
 
 sub rec_cleanup {
-	# my $debug = 1;
 	$debug2 and print "&rec_cleanup\n";
 	$debug and print "I was recording!\n";
  	my @k = really_recording();
@@ -1961,40 +1435,18 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
-	my $mixed = scalar ( grep{ $_ eq $session_name or $_ eq $mixname} @k );
+	my $mixed = scalar ( grep{ $_ eq $project_name or $_ eq $mixname} @k );
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			update_master_version_button();
-			$state_t{ $state_t{active} }->{rw} = $UI::MON;
+			$ui->update_master_version_button();
+			$state_t{ $state_t{active} }->{rw} = "MON";
 			setup_transport();
 			connect_transport();
-			refresh();
+			$ui->refresh();
 	}
 		
 } 
-sub update_version_button {
-	my ($n, $v) = @_;
-	croak "no version provided \n" if not $v;
-	my $w = $widget_c{$n}->{version};
-					$w->radiobutton(
-						-label => $v,
-						-variable => \$state_c{$n}->{active},
-						-value => $v,
-						-command => 
-		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless rec_status($n) eq $UI::REC }
-					);
-}
-sub update_master_version_button {
-				$widget_t[0]->radiobutton(
-						-label => $last_version,
-						-variable => \$monitor_version,
-						-value => $last_version,
-						-command => sub { mon_vert(eval $last_version) }
-					);
-}
-
 ## effect functions
 
 sub add_effect {
@@ -2026,7 +1478,7 @@ sub add_effect {
 		defined $display_type or $display_type = $effects[$i]->{display}; # template
 		$debug and print "display type: $display_type\n";
 
-		if (! $gui or $display_type eq q(hidden) ){
+		if (! $gui or $display_type eq q(hidden) ){ # XX
 
 			my $frame ;
 			if ( ! $parent_id ){ # independent effect
@@ -2101,7 +1553,6 @@ sub add_effect {
 	apply_op($id) if eval_iam("cs-is-valid");
 }
 sub remove_effect {
-	# my $debug = 1;
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -2140,7 +1591,6 @@ sub remove_effect {
 }
 sub remove_op {
 
-	# my $debug = 1;
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	if ( $cops{$id}->{belongs_to}) { 
@@ -2163,7 +1613,6 @@ sub remove_op {
 	delete $copp{$id};
 }
 sub cop_add {
-	# my $debug = 1;
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code		= $p{type};
@@ -2213,13 +1662,15 @@ sub cop_add {
 }
 
 sub cop_init {
+	local $debug = $debug3;
+	$debug2 and print "&cop_init\n";
 	my %p = %{shift()};
 	my $id = $p{cop_id};
 	my $parent_id = $p{parent_id};
 	my $vals_ref  = $p{vals_ref};
-
-	$debug2 and print "&cop_init\n";
+	local $debug = $debug3;
 	$debug and print "cop__id: $id\n";
+
 
 	# initialize default settings unless we have them
 	my @vals;
@@ -2253,8 +1704,7 @@ sub cop_init {
 sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
-	# my $debug = 1;
-	# return if rec_status($chain) eq $UI::MUTE; 
+	# return if rec_status($chain) eq "MUTE"; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
@@ -2301,7 +1751,6 @@ sub find_op_offsets {
 =cut
 
 
-	# my $debug = 1;
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
 		my @op_offsets = split "\n",eval_iam("cs");
@@ -2321,10 +1770,9 @@ sub find_op_offsets {
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	$debug2 and print "&apply_ops\n";
-	# my $debug = 1;
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if rec_status($n) eq $UI::MUTE and $n != 1; #MIX
+ 		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {
@@ -2334,7 +1782,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 	}
 }
 sub apply_op {
-	# my $debug = 1;
 	$debug2 and print "&apply_op\n";
 	my $id = shift;
 	$debug and print "id: $id\n";
@@ -2373,16 +1820,16 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
+	local $debug = $debug3;
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path($wav_dir, $effects_cache_file);
+	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
-	$debug and print "looking for effects cache: $effects_cache\n";
-	if (-f $effects_cache){ 
-		$debug and print "found it!\n";
+	if (-f $effects_cache and ! $opts{s}){  
+		$debug and print "found effects cache: $effects_cache\n";
 		assign_vars($effects_cache, @effects_static_vars);
 	} else {
 		local $debug = 0;
@@ -2391,7 +1838,11 @@ sub prepare_static_effects_data{
 		get_ladspa_hints();
 		integrate_ladspa_hints();
 		sort_ladspa_effects();
-		store_vars($effects_cache, @effects_static_vars);
+		store_vars(
+			FILE => $effects_cache, 
+			VARS => \@effects_static_vars,
+			CLASS => 'UI',
+			STORABLE => 1 );
 	}
 
 }
@@ -2423,7 +1874,6 @@ sub extract_effects_data {
 	}
 }
 sub sort_ladspa_effects {
-	local $debug = 1;
 	$debug2 and print "&sort_ladspa_effects\n";
 #	print yaml_out(\%e_bound); 
 	my $aa = $e_bound{ladspa}{a};
@@ -2763,12 +2213,15 @@ sub save_state {
 	
 	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
-	#	 paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
 		}
 	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
 	@all_chains;
 
-	store_vars($file, @persistent_vars);
+	store_vars(
+		FILE => $file, 
+		VARS => \@persistent_vars,
+		CLASS => 'UI');
 
 # store alsa settings
 
@@ -2782,6 +2235,84 @@ sub save_state {
 	@all_chains;
 
 }
+sub retrieve_state_storable {
+	$debug2 and print "&retrieve_state_storable\n";
+	my %oid_status_temp;
+	my $file = shift;
+	-e $file or warn ("file: $file not found\n"),return 0;
+	my $hash_ref = retrieve($file);
+	$monitor_version= ${ $hash_ref->{monitor_version} } if defined $hash_ref->{monitor_version} ;
+	$last_version =   ${ $hash_ref->{last_version} } if defined $hash_ref->{last_version} ;
+	%track_names 	= %{ $hash_ref->{track_names} } if defined $hash_ref->{track_names} ;
+	%state_c 		= %{ $hash_ref->{state_c} } if defined $hash_ref->{state_c} ;
+	%state_t 		= %{ $hash_ref->{state_t} } if defined $hash_ref->{state_t} ;
+	%cops 			= %{ $hash_ref->{cops} } if defined $hash_ref->{cops} ;
+	$cop_id 		= ${ $hash_ref->{cop_id} } if defined $hash_ref->{cop_id} ;
+	%copp 			= %{ $hash_ref->{copp} } if defined $hash_ref->{copp} ;
+	@all_chains 	= @{ $hash_ref->{all_chains} } if defined $hash_ref->{all_chains} ;
+	$i 				= ${ $hash_ref->{i} } if defined $hash_ref->{i} ;
+	$t 				= ${ $hash_ref->{t} } if defined $hash_ref->{t} ;
+	%take 			= %{ $hash_ref->{take} } if defined $hash_ref->{take} ;
+	@takes 			= @{ $hash_ref->{takes} } if defined $hash_ref->{takes} ;
+	%chain 			= %{ $hash_ref->{chain} } if defined $hash_ref->{chain} ;
+	@marks			= @{ $hash_ref->{marks} } if defined $hash_ref->{marks} ;	
+	$unit			= ${ $hash_ref->{unit} } if defined $hash_ref->{unit} ;	
+	%oid_status		= %{ $hash_ref->{oid_status} } if defined $hash_ref->{oid_status} ;	
+	%old_vol		= %{ $hash_ref->{old_vol} } if defined $hash_ref->{old_vol} ;	
+	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
+	
+	my $toggle_jack = $widget_o[$#widget_o];
+	&convert_to_jack, $ui->paint_button($toggle_jack, q(lightblue) ) if $jack_on;
+
+	$ui->refresh_oids;
+
+
+	# restore mixer settings
+
+	my $result = system "sudo alsactl -f $file.alsa restore";
+	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
+
+	# restore time marker labels
+
+	$ui->restore_time_marker_labels();
+
+=comment
+	map{ $time_marks[$_]->configure( 
+		-text => &colonize($marks[$_]),
+		-background => $old_bg,
+	)} 
+	grep{ $marks[$_] }1..$#time_marks;
+=cut
+
+	# restore take and track guis
+	
+	for my $t (@takes) { next if $t == 1; $ui->take_gui }; #
+	# Why skip first????? XXXX first in &initialize_project
+	my $did_apply = 0;
+	$last_version = 0; 
+	for my $n (@all_chains) { 
+		$debug and print "restoring track: $n\n";
+		&restore_track($n) ;
+		for my $id (@{$state_c{$n}->{ops}}){
+			$did_apply++ 
+				unless $id eq $state_c{$n}->{vol}
+					or $id eq $state_c{$n}->{pan};
+
+			
+			&add_effect({
+						chain => $cops{$id}->{chain},
+						type => $cops{$id}->{type},
+						cop_id => $id,
+						parent_id => $cops{$id}->{belongs_to},
+						});
+
+		# TODO if parent has a parent, i am a parameter controller controlling
+		# a parameter controller, and therefore need the -kx switch
+		}
+	}
+	$did_apply and $ew->deiconify();
+
+}
 =comment
 =cut
 sub retrieve_state {
@@ -2789,6 +2320,8 @@ sub retrieve_state {
 	
 	$debug2 and print "&retrieve_state\n";
 	my ($file)  = shift; # assuming $file will never have .yaml
+
+=comment
 	my $yamlfile = "$file.yaml" ;
 	my $ref; # to receive yaml data
 	if (-f $yamlfile) {
@@ -2802,6 +2335,9 @@ sub retrieve_state {
 		carp("no state files found, neither $file, nor $yamlfile\n");
 		return;
 	}
+=cut
+
+	my $ref = assign_vars($file, @persistent_vars);
 
 	# variables successfully assigned
 
@@ -2814,8 +2350,8 @@ sub retrieve_state {
 
 	my $toggle_jack = $widget_o[$#widget_o];
 	convert_to_jack if $jack_on;
-	paint_button($toggle_jack, q(lightblue)) if $jack_on;
-	refresh_oids();
+	$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
+	$ui->refresh_oids();
 
 	# restore mixer settings
 
@@ -2823,18 +2359,22 @@ sub retrieve_state {
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 
 	# restore time marker labels
+
+	$ui->restore_time_marker_labels();
+=comment
 	
 	map{ $time_marks[$_]->configure( 
 		-text => colonize($marks[$_]),
 		-background => $old_bg,
 	)} 
 	grep{ $marks[$_] }1..$#time_marks;
+=cut
 
 	# restore take and track guis
 	
 	for my $t (@takes) { 
 		next if $t == 1; 
-		take_gui($t);
+		$ui->take_gui;
 	}; #
 	my $did_apply = 0;
 	$last_version = 0; 
@@ -2858,7 +2398,7 @@ sub retrieve_state {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	}
-	$did_apply and manifest(); # $ew->deiconify();
+	$did_apply and $ui->manifest(); # $ew->deiconify();
 
 }
 
@@ -2872,7 +2412,7 @@ sub save_effects {
 	my %muted;
 	
 	map  {$copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
-		  paint_button($widget_c{$_}{mute}, $old_bg ) }
+		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	@all_chains;
 
@@ -2887,7 +2427,11 @@ sub save_effects {
 
 	# map {remove_op} @{ $state_c{$_}->{ops} }
 
-	store_vars($file, @effects_dynamic_vars);
+	store_vars(
+		FILE => $file, 
+		VARS => \@effects_dynamic_vars,
+		CLASS => 'UI');
+
 }
 
 =comment
@@ -2898,7 +2442,6 @@ sub r {
 sub r5 { r("eff5") };
 =cut
 sub retrieve_effects {
-	#my $debug = 1;
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
 	my %current_cops = %cops; # XXX why bother
@@ -2915,18 +2458,7 @@ sub retrieve_effects {
 	print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
 #	return;
 
-	
-	# restore time marker labels
-	
-	map{ $time_marks[$_]->configure( 
-		-text => $marks[$_]
-			?  colonize($marks[$_])
-			:  $_,
-		-background => $marks[$_]
-			?  $old_bg
-			: q(lightblue),
-		)
-	} 1..$#time_marks;
+	restore_time_marker_labels();
 
 	# remove effects except vol and pan, in which case, update vals
 
@@ -3006,210 +2538,23 @@ sub retrieve_effects {
 	# $ew->deiconify or $ew->iconify;
 
 }
-sub assign_vars {
-	# assigns vars in @var_list to values from $source
-	# $source can be a :
-	#      - filename or
-	#      - string containing YAML data
-	#      - reference to a hash array containing assignments
-	#
-	# returns a $ref containing the retrieved data structure
-	$debug2 and print "&assign_vars\n";
-	my ($source, @vars) = @_;
-	$debug and print "file: $source\n";
-	$debug and print "variable list: @vars\n";
-	my $ref;
-
-### figure out what to do with input
-
-	## check for State # using Data::Dumper
-	-f $source and $source eq 'State' and $ref = retrieve($source)
-
-	## check for a filename
-
-	or -f $source and $ref = yaml_in($source)
- 	
-	## check for a string
-
-	or  $source =~ /^\s*---/s and $ref = $yr->($source)
-
-	## pass a hash_ref to the assigner
-
-	or ref $source and $ref = $source;
-
-$debug and print  join $/,"found references: ", "---",keys %{ $ref },"---";
-#print join $/, "VARIABLES", @vars, '';
-croak "expected hash" if ref $ref =~ /HASH/;
-#exit;
-##
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval = $_;
-		$eval .= q( = );
-		$eval .= $sigil . q({ ) if $sigil ne '$';
-		$eval .= q($ref->{ );
-		$eval .= $identifier;
-		$eval .= q( } );
-		$eval .= qw(} ) if $sigil ne '$';
-		$eval .= q(if defined $ref->{ );
-		$eval .= $identifier;
-		$eval .= q( }; ) ;
-		eval $eval or carp "failed to eval $eval: $!\n";
-	} @vars;
-	$ref;
-}
-sub store_vars {
-	local $debug = 1;
-	# now we will only store in YAML
-	$debug2 and print "&store_vars\n";
-	my ($file, @vars) = @_;
-	$file .= '.yaml' unless $file =~ /\.yaml$/;
-	$debug and print "vars: @vars\n";
-	$debug and print "file: $file\n";
-	my %state;
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string =  q($state{)
-							. $identifier
-							. q(} = \\) # double backslash needed
-							. $_;
-	$debug and print "attempted to eval $eval_string\n";
-	eval($eval_string) or print "failed to eval $eval_string: $!\n";
-	} @vars;
-	# my $result1 = store \%state, $file; # OLD METHOD
-	my $yamlout = yaml_out(\%state);
-	$yamlout > io $file;
-
-}
-sub yaml_out {
-	$debug2 and print "&yaml_out\n";
-	my ($data_ref) = shift; 
-	my $type = ref $data_ref;
-	$debug and print "data ref type: $type\n "; 
-	croak "attempting to code wrong data type: $type"
-		if $type !~ /HASH|ARRAY/;
-#	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
-	my $output;
-    $yw->write( $data_ref, \$output ); 
-	$output;
-}
-sub yaml_in {
-	my $file = shift;
-	my $yaml = io($file)->all;
-	$yr->read( $yaml ); # returns ref
-}
 
 	
 
-sub arm_mark { 
-	if ($markers_armed) {
-		$markers_armed = 0;
-		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
-	}
-	else{
-		$markers_armed = 1;
-		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
-	}
-}
-sub colonize { # convert seconds to minutes:seconds 
-	my $sec = shift;
-	my $min = int ($sec / 60);
-	$sec = $sec % 60;
-	$sec = "0$sec" if $sec < 10;
-	qq($min:$sec);
-}
-sub mark {
-	my $marker = shift;
-	# print "my marker is $_\n";
-	# record without arming if marker undefined
-	if ($markers_armed or ! $marks[$marker]){  
-		my $here = eval_iam("cs-get-position");
-		return if ! $here;
-		$marks[$marker] = $here;
-		my $widget = $time_marks[$marker];
-		$widget->configure(
-			-text => colonize($here),
-			-background => $old_bg,
-		);
-		if ($markers_armed){ arm_mark } # disarm
-	}
-	else{ 
-		return if really_recording();
-		eval_iam(qq(cs-set-position $marks[$marker]));
-	#	update_clock();
-	#	start_clock();
-	}
-}
-
-sub strip_all{ blank_lines( strip_comments(@_) ) }
-
-sub strip_blank_lines {
-	map{ s/\n(\s*\n)+/\n/sg } @_;
-	@_;
-	 
-}
-
-sub strip_comments { #  
-	map{ s/#.*$//mg; } @_;
-	@_
-} 
-#print strip_comments ("$a +~ line of %code # followed by comments"); 
-
-sub remove_spaces {                                                             
-        my $entry = shift;                                                      
-        # remove leading and trailing spaces                                    
-                                                                                
-        $entry =~ s/^\s*//;                                                     
-        $entry =~ s/\s*$//;                                                     
-                                                                                
-        # convert other spaces to underscores                                   
-                                                                                
-        $entry =~ s/\s+/_/g;                                                    
-        $entry;                                                                 
-}                                                                               
-
-
-## no-op graphic methods to inherit by Text
-
-sub take_gui {}
-sub track_gui {}
-sub refresh {}
-sub flash_ready {}
-sub update_master_version_button {}
-sub paint_button {}
-sub refresh_oids {}
-sub paint_button {}
-sub session_label_configure{}
-sub length_display{}
-sub clock_display {}
-sub manifest {}
-sub global_version_buttons {}
-sub destroy_widgets {}
-
-## The following methods belong to the Graphical interface class
-
-package UI::Graphical;
-our @ISA = 'UI';
-use Carp;
-use Tk;
-sub hello {"make a window";}
-
-sub session_label_configure{ session_label_configure(@_)}
-sub length_display{ $setup_length->configure(-text => colonize $length) };
-sub clock_display { $clock->configure(-text => colonize( 0) )}
-sub manifest { $ew->deiconify() }
-
-
-sub loop {
-	init_gui(); 
-	transport_gui();
-	oid_gui();
-	time_gui();
-	session_init(), load_session({create => $opts{c}}) if $session_name;
-	MainLoop;
-}
+### end
 
 
 ## gui handling
-#
+use Carp;
+
+sub project_label_configure{ $project_label->configure( -text => $project_name)}
+
+sub length_display{ $setup_length->configure(-text => colonize $length) };
+
+sub clock_display { $clock->configure(-text => colonize( 0) )}
+
+sub manifest { $ew->deiconify() }
+
 sub destroy_widgets {
 
 	map{ $_->destroy } map{ $_->children } $effect_frame;
@@ -3249,8 +2594,8 @@ sub init_gui {
 	my $id = $canvas->createWindow(30,30, -window => $effect_frame,
 											-anchor => 'nw');
 
-	$session_label = $mw->Label->pack(-fill => 'both');
-	$old_bg = $session_label->cget('-background');
+	$project_label = $mw->Label->pack(-fill => 'both');
+	$old_bg = $project_label->cget('-background');
 	$time_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -3267,8 +2612,8 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Enter session name:")->pack(-side => 'left');
-	$sn_text = $load_frame->Entry(-textvariable => \$session, -width => 45)->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
+	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 45)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 #	$sn_load_nostate = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -3284,17 +2629,17 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => \&load_session,
+		-command => \&load_project,
 		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { load_session({create => 1}) },
+		-command => sub { load_project({create => 1}) },
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(&session_dir,$state_store_file)) 
-					if session_dir();
+				save_state(join_path(&project_dir,$state_store_file)) 
+					if project_dir();
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
 		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
@@ -3308,21 +2653,20 @@ sub init_gui {
 
 	$build_track_add->configure( 
 			-text => 'Add',
-			-command => sub { add_track($track_name) }
+			-command => sub { add_track(remove_spaces($track_name)) }
 	);
 
 =comment TAKE
 	$build_new_take->configure( 
 			-text => 'New Group',
 			-command =>
-			\new_take, # used for mixdown
+			\&new_take, # used for mixdown
 
 			
 			);
-=cut
 
 			
-
+=cut
 	my @labels = 
 		qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
 	my @widgets;
@@ -3353,6 +2697,7 @@ sub init_gui {
 		
 }
 sub transport_gui {
+	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
 		-text => 'TRANSPORT',
@@ -3376,10 +2721,10 @@ sub transport_gui {
 		-command => sub { 
 		return if transport_running();
 		if ( really_recording ) {
-			session_label_configure(-background => 'lightpink') 
+			project_label_configure(-background => 'lightpink') 
 		}
 		else {
-			session_label_configure(-background => 'lightgreen') 
+			project_label_configure(-background => 'lightgreen') 
 		}
 		start_transport();
 				});
@@ -3451,11 +2796,11 @@ sub time_gui {
 		}  @minuses ;
 	my $beg = $fast_frame->Button(
 			-text => 'Beg',
-			-command => \to_start,
+			-command => \&to_start,
 			);
 	my $end = $fast_frame->Button(
 			-text => 'End',
-			-command => \to_end,
+			-command => \&to_end,
 			);
 
 	$time_step = $fast_frame->Button( 
@@ -3465,7 +2810,7 @@ sub time_gui {
 			$w->pack(-side => 'left')
 		}
 
-	$time_step->configure (-command => \toggle_unit);
+	$time_step->configure (-command => sub { &toggle_unit; &show_unit });
 
 	# Marks
 	
@@ -3473,7 +2818,7 @@ sub time_gui {
 	push @label_and_arm, $mark_label;	
 	push @label_and_arm, $mark_frame->Button(
 		-text => 'Set',
-		-command => sub { arm_mark },
+		-command => \&arm_mark,
 	);
 	my $marks = 18; # number of marker buttons
 	my @m = (1..$marks);
@@ -3578,9 +2923,7 @@ sub flash_ready {
 		sub{ length_display(-background => $old_bg) }
 	);
 }
-sub take_gui {
-	my $t = shift;
-	#my $debug = 1;
+sub take_gui {  
 
 	$debug2 and print "&take_gui\n";
 		my $tname = $alias{$t} ? $alias{$t} : $t;
@@ -3589,12 +2932,12 @@ sub take_gui {
 				-tearoff =>0,
 			)->pack(-side => 'left');
 		push @widget_t, $name;
-	$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
+	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
 		
 		if ($t != 1) { # do not add REC command for Mixdown group MIX
 
 		$name->AddItems([
-			'command' => $UI::REC,
+			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
 				no strict qw(vars);
@@ -3606,7 +2949,7 @@ sub take_gui {
 		}
 
 		$name->AddItems([
-			'command' => $UI::MON,
+			'command' => 'MON',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -3616,7 +2959,7 @@ sub take_gui {
 				}
 			]);
 		$name->AddItems([
-			'command' => $UI::MUTE,
+			'command' => 'MUTE',
 			-background => $old_bg,
 			-command => sub {
 				no strict qw(vars);
@@ -3625,7 +2968,7 @@ sub take_gui {
 				select_take($my_t, qq(MUTE)); 
 				}
 
-		]);
+			]);
 
 							   
 }
@@ -3650,7 +2993,7 @@ sub global_version_buttons {
 				-variable => \$monitor_version,
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = $UI::MON; ### HARDCODED SECOND TAKE; MIX
+					$state_t{2}->{rw} = "MON"; ### HARDCODED SECOND TAKE; MIX
 					mon_vert($v);  # select this version
 					setup_transport(); 
 					connect_transport();
@@ -3660,14 +3003,15 @@ sub global_version_buttons {
  					);
  	}
 }
-sub track_gui { # nearly 300 lines! 
+sub track_gui { 
+	my $n =  $i; # follow the global index $i
 
-	my $n = shift; # chain index is lexicalized, will remain static in callbacks
-					# my $j is effect index
+	# my $j is effect index
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
 	$debug2 and print "&track_gui\n";
-	my $stub = $state_c{$n}->{active};
+	my $stub = " ";
+	$stub .= $state_c{$n}->{active};
 	$name = $track_frame->Label(
 			-text => $state_c{$n}->{file},
 			-justify => 'left');
@@ -3681,7 +3025,7 @@ sub track_gui { # nearly 300 lines!
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> selected_version($n) ) 
-	#		unless rec_status($n) eq $UI::REC
+	#		unless rec_status($n) eq "REC"
 			}
 					);
 	}
@@ -3697,7 +3041,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_r},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $UI::REC;
+							$state_c{$n}->{rw} = "REC";
 							refresh() }
 				 		)
 				}
@@ -3712,7 +3056,7 @@ sub track_gui { # nearly 300 lines!
 						-variable => \$state_c{$n}->{ch_m},
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = $UI::MON;
+							$state_c{$n}->{rw} = "MON";
 							refresh_c($n) }
 				 		)
 				}
@@ -3722,28 +3066,28 @@ sub track_gui { # nearly 300 lines!
 	);
 
 	my @items = (
-			[ 'command' => $UI::REC,
+			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::REC;
+					$state_c{$n}->{rw} = "REC";
 					refresh();
 					}
 			],
-			[ 'command' => $UI::MON,
+			[ 'command' => "MON",
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::MON;
+					$state_c{$n}->{rw} = "MON";
 					refresh();
 					}
 			],
-			[ 'command' => $UI::MUTE, 
+			[ 'command' => "MUTE", 
 				-command  => sub { 
-					$state_c{$n}->{rw} = $UI::MUTE;
+					$state_c{$n}->{rw} = "MUTE";
 					refresh();
 					}
 			],
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$state_c{$n}->{rw} = $UI::MON if $n == 1;          # MIX
+	$state_c{$n}->{rw} = "MON" if $n == 1;          # MIX
 
  
    ## XXX general code mixed with GUI code
@@ -3765,16 +3109,11 @@ sub track_gui { # nearly 300 lines!
 
 
 	 $debug and do {my %q = %p; delete $q{parent}; print
-	 "x=============\n%p\n",yaml_out(\%q)};
+	 "=============\n%p\n",yaml_out(\%q)};
 
 	$vol = make_scale ( \%p );
 	# Mute
 
-=comment
-	$mute = $track_frame->Button;
-	
-	$mute->configure( -command => sub { toggle_muting($mute, $n) });
-=cut;
 	$mute = $track_frame->Button(
 	  		-command => sub { 
 				if ($copp{$vol_id}->[0]) {  # non-zero volume
@@ -3795,62 +3134,6 @@ sub track_gui { # nearly 300 lines!
 			}	
 	  );
 
-=comment
-	
-	# Solo
-
-	$solo = $track_frame->Button;
-	my @muted;
-	$solo->configure( -command => sub {
-
-		# do nothing if mix track
-		
-		return if $n == 1; MIX
-
-		# do nothing if setup not connected
-		
-		return if ! grep{/$session_name/} eval_iam(q(cs-connected));
-
-		# do nothing if someone else is soloing;
-		
-		return if grep{ is_soloing($_) } grep {$_ != $n} @all_chains; # but some may
-		                                                               # not be in
-																	   # chain
-																	   # setup
-
-		# restore prior mute settings if I had been soloing
-		
-		if (is_soloing($n) ) {
-		
-			$solo->configure(-foreground => $old_bg );
-			$solo->configure(-activeforeground => $old_bg );
-
-			map{ toggle_mute($_) if $muted[$_] != is_muted($_) } 
-				grep{$_ != 1} @all_chains; # MIX
-		}
-
-		# otherwise save muted status for each track and mute all
-		
-		else {
-			map{ $mute($_) = is_muted($_) } grep{$_ != 1} @all_chains; # MIX
-
-			map{ toggle_mute($_) } 
-			grep {! is_muted($_) } 
-			grep {$_ != $n} 
-			grep {$_ != 1} 
-			@all_chains;
-
-			is_muted($n) and toggle_mute($n);
-			
-			$solo->configure(-foreground => q(yellow) );
-			$solo->configure(-activeforeground => q(yellow) );
-
-			
-		}
-	});
-
-
-=cut
 
 	# Unity
 
@@ -3877,9 +3160,7 @@ sub track_gui { # nearly 300 lines!
 			cop_id => $pan_id,
 			p_num		=> $p_num,
 			);
-	 $debug and do {my %q = %p; 
-		 delete $q{parent}; 
-	 	 print "x=============\n%p\n",yaml_out(\%q)};
+	# $debug and do { my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) };
 	$pan = make_scale ( \%q );
 
 	# Center
@@ -3898,7 +3179,7 @@ sub track_gui { # nearly 300 lines!
 
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
+	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
 	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 	# parents are the independent effects
@@ -3941,7 +3222,31 @@ sub track_gui { # nearly 300 lines!
 	
 }
 
+sub update_version_button {
+	my ($n, $v) = @_;
+	carp ("no version provided \n") if ! $v;
+	my $w = $widget_c{$n}->{version};
+					$w->radiobutton(
+						-label => $v,
+						-variable => \$state_c{$n}->{active},
+						-value => $v,
+						-command => 
+		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
+				unless rec_status($n) eq "REC" }
+					);
+}
+sub update_master_version_button {
+				$widget_t[0]->radiobutton(
+						-label => $last_version,
+						-variable => \$monitor_version,
+						-value => $last_version,
+						-command => sub { mon_vert(eval $last_version) }
+					);
+}
+
+
 sub effect_button {
+	local $debug = $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -4083,51 +3388,212 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
-=comment
-sub is_soloing {
-	my $n = shift;	
-	$widget_c{$n}{solo}->cget('-foreground') eq q(yellow)
-}
-sub toggle_muting {
-	my ($widget, $n) = @_;
-	toggle_mute($n);
-	if (is_muted($n)){
-		$widget->configure(-background => 'brown');
-		$widget->configure(-activebackground => 'brown');
-	} 
-	else {
-		$widget->configure(-background => $old_bg);
-		$widget->configure(-activebackground => $old_bg);
+sub arm_mark { 
+	if ($markers_armed) {
+		$markers_armed = 0;
+		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
+	}
+	else{
+		$markers_armed = 1;
+		map{$_->configure( -background => 'lightblue') } @time_marks[1..$#time_marks] ;
 	}
 }
-sub toggle_mute {
-	my $setup = eval_iam("cs-connected");
-	$setup =~ /$session_name/ or return; # only work if connected setup
-	my $n = shift;
-	is_muted();
-	eval_iam("c-select $n");
-	eval_iam("c-muting");
-	is_muted();
+sub colonize { # convert seconds to minutes:seconds 
+	my $sec = shift;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	qq($min:$sec);
 }
-sub is_muted {
-	my $n = shift;
-		my ($cs) = grep{/Chain "$n"/} split "\n", eval_iam("cs");
-		# print "CS: $cs\n";
-		my $status = $cs =~ /muted/;
-		print ( $status 
-			? "track $n: muted\n"
-			: "track $n: not muted\n"
+sub mark {
 
+	my $marker = shift;
+	# print "my marker is $_\n";
+	# record without arming if marker undefined
+	if ($markers_armed or ! $marks[$marker]){  
+		my $here = eval_iam("cs-get-position");
+		return if ! $here;
+		$marks[$marker] = $here;
+		my $widget = $time_marks[$marker];
+		$widget->configure( 
+			-text => colonize($here),
+			-background => $old_bg,
 		);
-		$status;
+		if ($markers_armed){ arm_mark() } # disarm
+	}
+	else{ 
+		return if really_recording();
+		eval_iam(qq(cs-set-position $marks[$marker]));
+	#	update_clock();
+	#	start_clock();
+	}
 }
+
+sub update_clock { # XXX
+	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
+}
+
+### end
+
+
+## refresh functions
+
+sub refresh_t { # buses
+	$debug2 and print "&refresh_t\n";
+	my %take_color = (REC  => 'LightPink', 
+					MON => 'AntiqueWhite',
+					MUTE => $old_bg);
+	collect_chains();
+	my @w = $take_frame->children;
+	for my $t (1..@takes){
+		# skip 0th item, the label
+		my $status;
+		#  rec if @record entry for this take
+		if ( grep{$take{$_}==$t}@record ) { 
+			$debug and print "t-rec $t\n";	
+			$status = "REC" } 
+		# 	mon if @monitor entry
+		elsif ( grep{$take{$_}==$t}@monitor )
+			{ 
+			$debug and print "t-mon $t\n";	
+			$status = "MON" }
+
+		else  { $status = "MUTE";
+			$debug and print "t-mute $t\n";	
+		
+		}
+
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
+		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
+	$debug and print "take_frame child: $t\n";
+
+		$w[$t]->configure(-background => $take_color{$status});
+	}
+}
+sub refresh_c { # tracks
+
+	my $n = shift;
+	$debug2 and print "&refresh_c\n";
+	
+		my $rec_status = rec_status($n);
+#	$debug and print "track: $n rec_status: $rec_status\n";
+
+		return unless $widget_c{$n}; # obsolete ??
+		$widget_c{$n}->{rw}->configure(-text => $rec_status);
+	
+	if ($rec_status eq "REC") {
+		$debug and print "REC! \n";
+
+		$widget_c{$n}->{name}->configure(-background => 'lightpink');
+		$widget_c{$n}->{name}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_r}->configure(-background => 'LightPink');
+		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
+		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
+		$widget_c{$n}->{version}->configure(-text => new_version);
+
+	}
+	elsif ( $rec_status eq "MON" ) {
+		$debug and print "MON! \n";
+
+		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
+		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
+		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
+		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+
+		}
+	elsif ( $rec_status eq "MUTE" ) {
+		$debug and print "MUTE! \n";
+		 $widget_c{$n}->{name}->configure(-background => $old_bg);
+		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
+		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
+		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
+		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
+		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+		}  
+		else { carp "\$rec_status contains something unknown: $rec_status";}
+}
+sub refresh {  
+ 	$ui->refresh_t(); 
+	map{ $ui->refresh_c($_) } @all_chains ;
+}
+sub refresh_oids{ # OUTPUT buttons
+	map{ $widget_o{$_}->configure( # uses hash
+			-background => 
+				$oid_status{$_} ?  'AntiqueWhite' : $old_bg,
+			-activebackground => 
+				$oid_status{$_} ? 'AntiqueWhite' : $old_bg
+			) } keys %widget_o;
+}
+
+sub restore_time_marker_labels {
+	
+	# restore time marker labels
+	
+	map{ $time_marks[$_]->configure( 
+		-text => $marks[$_]
+			?  colonize($marks[$_])
+			:  $_,
+		-background => $marks[$_]
+			?  $old_bg
+			: q(lightblue),
+		)
+	} 1..$#time_marks;
+
+ }
+
+
+### end
+
+
+
+=comment
+my $root_class = 'UI'; 
+sub new { 
+	my $class = shift;
+	if (@_ % 2 and $class eq $root_class){
+		my %h = ( @_ );
+		my $mode = $h{mode};
+		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
+		$mode =~ /text|txt/i       and $mode = 'Text';
+		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
+		return bless { @_ }, "$root_class\::" . $mode;
+	} 
+	return bless {@_}, $class;
+}
+sub usage { <<USAGE; }
+Usage:    UI->new(mode => "text")
+       or UI->new(mode => "tk")
+USAGE
+
 =cut
 
 
-## We also need stubs for procedural access to subs
-## in the UI class.
+package UI::Graphical;  ## gui routines
+our @ISA = 'UI';
+#use Tk;
+#use UI::Assign qw(:all);
 
-# [-% qx(./make_stubs) %-]
+## The following methods belong to the Graphical interface class
+
+sub hello {"make a window";}
+sub new { my $class = shift; return bless {@_}, $class }
+sub loop {
+	package UI;
+	init_gui; # the main window, effect window hidden
+	transport_gui;
+	oid_gui;
+	time_gui;
+	new_take;
+	new_take;
+	UI::load_project(
+		{create => $opts{c},
+		 name   => $project_name}) if $project_name;
+	MainLoop;
+}
 
 ## The following methods belong to the Text interface class
 
@@ -4136,9 +3602,37 @@ our @ISA = 'UI';
 use Carp;
 sub hello {"hello world!";}
 
-#sub new { my $class = shift; return bless { @_ }, $class; }
+## no-op graphic methods 
+
+# those that take parameters will break!!!
+# because object and procedural access get
+# different parameter lists ($self being included);
+
+sub take_gui {}
+sub track_gui {}
+sub refresh {}
+sub refresh_t {}
+sub refresh_c {}
+sub flash_ready {}
+sub update_master_version_button {}
+sub paint_button {}
+sub refresh_oids {}
+sub project_label_configure{}
+sub length_display{}
+sub clock_display {}
+sub manifest {}
+sub global_version_buttons {}
+sub destroy_widgets {}
+sub restore_time_marker_labels {}
+sub show_unit{};
+
+## Some of these, may be overwritten
+## by definitions that follow
+
+sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-	session_init(), load_session({create => $opts{c}}) if $session_name;
+	package UI;
+	load_project({name => $project_name, create => $opts{c}}) if $project_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
@@ -4168,7 +3662,9 @@ sub loop {
 		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
-		} else { print "Unknown command\n";}
+		} else {
+			$parser->command($user_input) or print ("Returned false\n");
+		}
 
 	}
 }
@@ -4186,155 +3682,306 @@ splice @UI::format_fields, 0, 7
 1;
 
 
-## We also need stubs for procedural access to subs
-## in the UI class.
+package UI;
 
-# [-% qx(./make_stubs) %-]
+##  Grammar.p, source for Grammar.pm
 
-## The following methods belong to the Session class
+### COMMAND LINE PARSER 
 
-#my $s = Session->new(name => 'paul_brocante');
-# print $s->session_dir;
+$debug2 and print "Reading grammar\n";
 
-package UI::Session;
-our @ISA='UI';
-use Carp;
-use Object::Tiny qw(name);
-sub hello {"i'm a session"}
-sub session_dir{
-	my $self = shift;
-	join_path( this_wav_dir(), $self->name)
+$UI::AUTOSTUB = 1;
+$UI::RD_HINT = 1;
+
+# rec command changes active take
+
+$grammar = q(
+
+command: mon
+command: m
+command: r
+command: rec
+command: off
+command: vol
+command: pan
+command: version
+command: loop
+command: save_project
+command: new_project
+command: load_project
+command: add_track
+command: generate_setup
+command: list_marks
+command: show_setup
+command: show_effects
+command: ecasound_start
+command: ecasound_stop
+command: add_effect
+command: remove_effect
+command: renew_engine
+command: mark
+command: start
+command: stop
+command: show_marks
+command: rename_mark
+_mon: 'mon'
+_m: 'm'
+_r: 'r'
+_rec: 'rec'
+_off: 'off' | 'z'
+_vol: 'vol' | 'v'
+_pan: 'pan' | 'p'
+_version: 'version' | 'n'
+_loop: 'loop'
+_save_project: 'save_project' | 'keep' | 'k'
+_new_project: 'new_project' | 'new'
+_load_project: 'load_project' | 'load'
+_add_track: 'add_track' | 'add'
+_generate_setup: 'generate_setup' | 'setup'
+_list_marks: 'list_marks' | 'l'
+_show_setup: 'show_setup' | 'show'
+_show_effects: 'show_effects' | 'sfx'
+_ecasound_start: 'ecasound_start' | 'T'
+_ecasound_stop: 'ecasound_stop' | 'S'
+_add_effect: 'add_effect' | 'fx'
+_remove_effect: 'remove_effect' | 'rfx'
+_renew_engine: 'renew_engine' | 'renew'
+_mark: 'mark' | 'k'
+_start: 'start' | 't'
+_stop: 'stop' | 'st'
+_show_marks: 'show_marks' | 'sm'
+_rename_mark: 'rename_mark' | 'rn'
+mon: _mon {}
+m: _m {}
+r: _r {}
+rec: _rec {}
+off: _off {}
+vol: _vol {}
+pan: _pan {}
+version: _version {}
+loop: _loop {}
+save_project: _save_project {}
+new_project: _new_project {}
+load_project: _load_project {}
+add_track: _add_track {}
+generate_setup: _generate_setup {}
+list_marks: _list_marks {}
+show_setup: _show_setup {}
+show_effects: _show_effects {}
+ecasound_start: _ecasound_start {}
+ecasound_stop: _ecasound_stop {}
+add_effect: _add_effect {}
+remove_effect: _remove_effect {}
+renew_engine: _renew_engine {}
+mark: _mark {}
+start: _start {}
+stop: _stop {}
+show_marks: _show_marks {}
+rename_mark: _rename_mark {}
+
+new_project: _new_project name {
+	$UI::project = $item{name};
+	&UI::new_project;
+	1;
 }
-sub new { 
-	my $class = shift; 
-	my %vals = @_;
-	$vals{name} or carp "invoked without values" and return;
-	my $name = $vals{name};
-	remove_spaces( $vals{name} );
-	$vals{name} = $name;
-	$vals{create_dir} and create_dir($name) and delete $vals{create_dir};
-	return bless { %vals }, $class;
-}
-sub set {
-	my $self = shift;
- 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-	my %new_vals = @_;
-	my %filter;
-	map{$filter{$_}++} keys %{ $self };
-	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
-		or carp "illegal key: $_ for object of type ", ref $self,$/
-	} keys %new_vals;
+
+load_project: _load_project name {
+	$UI::project = $item{name};
+	&UI::load_project unless $UI::project_name eq $item{name};
+	1;
 }
 
-# [-% qx(./make_stubs) %-]
-
-package Wav;
-our @ISA='UI';
-use Object::Tiny qw(head active n);
-use Carp;
-sub new { my $class = shift; 
- 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-		 bless {@_}, $class }
-
-sub _get_versions {
-	my ($dir, $basename, $sep, $ext) = @_;
-
-	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
-	$debug and print "reading directory: $dir\n\n";
-	my %versions = ();
-	for my $candidate ( readdir WD ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+add_track: _add_track wav channel(s?) { 
+	if ($UI::track_names{$item{wav}} ){
+		print "Track name already in use.\n";
+	} else {
+		&UI::add_track($item{wav}) ;
+		my %ch = ( @{$item{channel}} );	
+		$ch{r} and $UI::state_c{$UI::i}->{ch_r} = $UI::ch{r};
+		$ch{m} and $UI::state_c{$UI::i}->{ch_m} = $UI::ch{m};
+		
 	}
-	$debug and print "get_version: " , yaml_out(\%versions);
-	closedir WD;
-	%versions;
+	1;
 }
 
-sub targets {
-	my $head = shift; 
-	$debug2 and print "&targets\n";
-	local $debug = 0;
-	
-	# GET VERSIONS 
-	#  Assign bare (unversioned) file as version 1 
-	
-	$debug and 
-	print "getting versions for chain $n, $head\n";
-		my %versions =  _get_versions(
-			this_wav_dir(),
-			$head,
-			'_', 'wav' )  ;
-		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
-			delete $versions{bare};
-		}
-	$debug and print "\%versions\n================\n", yaml_out(\%versions);
-	%versions;
-}
-sub versions { 
-	my $wav = shift;
-	[ sort { $a <=> $b } keys %{$wav->targets} ];
-	}
-sub this_last { pop @{ $wav->versions} }
+generate_setup: _generate_setup {}
+setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
 
-sub _selected_version {
-	# return track-specific version if selected,
-	# otherwise return global version selection
-	# but only if this version exists
-	my $wav = shift;
-no warnings;
-	my $version = 
-		$wav->active 
-		? $wav->active 
-		: &monitor_version ;
-	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
-	### or should I give the active version
-use warnings;
-}
-=comment
-sub last_version { 
-	## for each track or tracks in take
+list_marks: _list_marks {}
 
-$track->last_version;
-$take->last_version
-$session->last_version
-	
-			$last_version = $this_last if $this_last > $last_version ;
+show_setup: _show_setup { 	
+	map { 	push @UI::format_fields,  
+			$_,
+			$UI::state_c{$_}->{active},
+			$UI::state_c{$_}->{file},
+			$UI::state_c{$_}->{rw},
+			&UI::rec_status($_),
+			$UI::state_c{$_}->{ch_r},
+			$UI::state_c{$_}->{ch_m},
 
+		} sort keys %UI::state_c;
+		
+	write; # using format at end of file Flow.pm
+				1;
 }
 
-sub new_version {
-	last_version() + 1;
+name: /\w+/
+
+wav: name
+
+
+mix: 'mix' {1}
+
+norm: 'norm' {1}
+
+exit: 'exit' { &UI::save_state($UI::statestore); exit; }
+
+
+channel: r | m
+
+r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
+m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
+
+
+rec: 'rec' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
 }
-=cut
+mon: 'mon' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
+}
+mute: 'mute' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
+}
 
-=comment
-my $wav = Wav->new( head => vocal);
+mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mon); }
 
-$wav->versions;
-$wav->head  # vocal
-$wav->n     # 3 i.e. track 3
-$wav->active
-$wav->targets
-$wav->full_path
+mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mute); }
 
-returns numbers
+rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = q(rec); }
 
-$wav->targets
+last: ('last' | '$' ) 
 
-returns targets
+dd: /\d+/
 
-=cut
+
+
+);
+
+# we use the following settings if we can't find config files
+
+$default = <<'FALLBACK_CONFIG';
+---
+wav_dir: /media/projects
+abbreviations:
+  24-mono: s24_le,1,frequency
+  32-10: s32_le,10,frequency
+  32-12: s32_le,12,frequency
+  cd-mono: s16_le,1,44100
+  cd-stereo: s16_le,2,44100,i
+  frequency: 44100
+devices:
+  jack:
+    ecasound_id: jack_alsa
+    input_format: 32-12
+    output_format: 32-10
+  multi:
+    ecasound_id: alsaplugin,1,0
+    input_format: 32-12
+    output_format: 32-10
+  stereo:
+    ecasound_id: alsaplugin,0,0
+    input_format: cd-stereo
+    output_format: cd-stereo
+ecasound_globals: "-B auto"
+mix_to_disk_format: cd-stereo
+mixer_out_format: cd-stereo
+raw_to_disk_format: cd-mono
+mixname: mix
+ladspa_sample_rate: frequency
+unit: 1 				
+effects_cache_file: effects_cache.storable
+state_store_file: State 
+chain_setup_file: project.ecs
+alias:
+  1: Mixdown
+  2: Tracker
+tk_input_channels: 10
+use_monitor_version_for_mixdown: true 
+...
+
+FALLBACK_CONFIG
+
+# the following template are used to generate chain setups.
+$oids = <<'TEMPLATES';
+---
+-
+  default: on
+  id: Stereo
+  name: stereo
+  output: stereo
+  type: mixed
+-
+  default: off
+  id: m
+  name: multi
+  output: multi
+  pre_output: &pre_multi
+  target: mon
+  type: cooked
+-
+  default: off
+  id: L
+  name: live
+  output: multi
+  pre_output: &pre_multi
+  target: rec
+  type: cooked
+-
+  default: off
+  id: Mix
+  name: mix
+  output: file
+  type: mixed
+-
+  default: on
+  id: J
+  name: mix_setup
+  output: ~
+  target: all
+  type: cooked
+-
+  default: on
+  id: ~
+  input: file
+  name: mon_setup
+  output: loop
+  post_input: &mono_to_stereo
+  target: mon
+  type: raw
+-
+  default: on
+  id: R
+  input: multi
+  name: rec_file
+  output: file
+  target: rec
+  type: raw
+-
+  default: on
+  id: ~
+  input: multi
+  name: rec_setup
+  output: loop
+  post_input: &mono_to_stereo
+  target: rec
+  type: raw
+...
+
+TEMPLATES
+
 
 1;
 __END__
-# Below is stub documentation for your module. You'd better edit it!
 
 =head1 NAME
 
@@ -4343,7 +3990,7 @@ recording and processing by Ecasound
 
 =head1 SYNOPSIS
 
-  use Audio::Ecasound::Flow;
+  use UI;
 
   my $ui = UI->new("tk");
 
@@ -4353,7 +4000,7 @@ recording and processing by Ecasound
 
 	my %options = ( 
 
-			session => 'Night at Carnegie',
+			project => 'Night at Carnegie',
 			create => 1,
 			effects => 'force-reload',
 			track_state   => 'ignore',     

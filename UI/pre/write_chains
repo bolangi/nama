@@ -16,7 +16,7 @@ sub write_chains {
 	$debug2 and print "&write_chains\n";
 
 	# the mixchain is usually '1', so that effects applied to 
-	# track 1 (session_name) affect the mix.
+	# track 1 (project_name) affect the mix.
 	#
 	# but when playing back a mix, we want mixchain to be 
 	# something else
@@ -123,7 +123,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = join_path(&session_dir, $chain_setup_file);
+	my $sf = join_path(&project_dir, $chain_setup_file);
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;

@@ -14,16 +14,16 @@ BEGIN { use_ok('Audio::Ecasound::Flow') };
 use Getopt::Std;
 
 ### Option Processing ###
-use vars qw(%opts $session_name $debug);
+use vars qw(%opts $project_name $debug);
 @ARGV = qw(-g -m -e paul_brocante);
 getopts('mcegsd', \%opts); 
 # d: wav_dir
-# c: create session
+# c: create project
 # g: gui mode
 # m: don't load state info
 # e: don't load static effects data
-$session_name = shift;
-$debug and print "session name: $session_name\n";
+$project_name = shift;
+$debug and print "project name: $project_name\n";
 
 #sub hello {print "superclass hello\n"};
 #sub hello {print "make a window\n";}

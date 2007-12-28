@@ -47,7 +47,7 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
-	$wav_dir,	# each session will get a directory here
+	$wav_dir,	# each project will get a directory here
 	                # and one .ecmd directory, also with 
 	
 					# /wav_dir/project_dir/vocal_1.wav
@@ -68,8 +68,8 @@ our (
 	$select_track,	 # the currently active track -- for Text UI
 	@format_fields, # data for replies to text commands
 
-	$session,		# Tk types session name here
-	$session_name,	# Official session name
+	$project,		# Tk types project name here
+	$project_name,	# Official project name
 	$i, 			# index for incrementing track numbers
 	$t,				# index for incrementing track groups
 	%state_c,		# data for Track object, except effects
@@ -84,7 +84,7 @@ our (
 
 	$cop_id, 		# chain operator id, that how we create, 
 					# store, find them, adjust them, and destroy them,
-					# per track or per session?
+					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	%track_names,	# to know if they are taken
@@ -154,10 +154,10 @@ our (
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time
 
-	$session_label,	# project name
+	$project_label,	# project name
 	$take_label,	# bus name
 
-	$sn_label,		# session load/save/quit	
+	$sn_label,		# project load/save/quit	
 	$sn_text,
 	$sn_load,
 	$sn_load_nostate,

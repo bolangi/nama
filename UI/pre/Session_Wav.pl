@@ -1,5 +1,5 @@
 #
-#  Session is probably to be abandoned.
+#  Project is probably to be abandoned.
 #
 #  Wav can be substituted into calls for {versions} and
 #  {targets} 
@@ -10,47 +10,47 @@
 =comment
 I have to get my Wav test environment back:
 	
-	UI.p including Session_Wav.pl with stubs
+	UI.p including Project_Wav.pl with stubs
 
 	2_Wav.t including tests for Wavs. 
 
 
 
-Once we have set $session_name, everything starts
+Once we have set $project_name, everything starts
 happening. Conversely, nothing can happen without
-a session_name. We coudl have session objects, consisting
+a project_name. We coudl have project objects, consisting
 of only a name. But how would that help? Each
 object is actually represented by a pair of directories.
 in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
 
 my $ui = UI::Graphical->new;
 
-my $session = $ui->project(name => "paul_brocante");
-my $session = $ui->project(name => "paul_brocante", create => 1);
-$session->retain("my slider activity");
-$session->perform("my slider activity");
-$session->start;
-$session->everything_that_UI_does
+my $project = $ui->project(name => "paul_brocante");
+my $project = $ui->project(name => "paul_brocante", create => 1);
+$project->retain("my slider activity");
+$project->perform("my slider activity");
+$project->start;
+$project->everything_that_UI_does
 
 consequence: have to rewrite all the UI (especially GUI) 
-procedural code to do $session->start instead of &start,
-for what? To be able to pass around session objects??
+procedural code to do $project->start instead of &start,
+for what? To be able to pass around project objects??
 
 Definitely not necessary.
 
 =cut
 
 
-## The following methods belong to the Session class
+## The following methods belong to the Project class
 
-#my $s = Session->new(name => 'paul_brocante');
-# print $s->session_dir;
+#my $s = Project->new(name => 'paul_brocante');
+# print $s->project_dir;
 
-package ::Session;
+package ::Project;
 our @ISA='::';
 use Carp;
 use Object::Tiny qw(name);
-sub hello {"i'm a session"}
+sub hello {"i'm a project"}
 sub new { 
 	my $class = shift; 
 	my %vals = @_;
@@ -60,16 +60,16 @@ sub new {
 	if (-d join_path(&wav_dir, $name)
 			or $vals{create_dir} ){
 
-		$session_name=$name; # dependence on global variable $session_name
+		$project_name=$name; # dependence on global variable $project_name
 	}
 	if ($vals{create_dir}){
-		map{create_dir($_)} &this_wav_dir, &session_dir;
+		map{create_dir($_)} &this_wav_dir, &project_dir;
 		delete $vals{create_dir};
 	}
 	return bless { %vals }, $class;
 }
 
-sub session_dir { 
+sub project_dir { 
 	my $self = shift;
 	join_path( &ecmd_home, $self->name);
 }
@@ -194,7 +194,7 @@ sub last_version {
 
 $track->last_version;
 $take->last_version
-$session->last_version
+$project->last_version
 	
 			$last_version = $this_last if $this_last > $last_version ;
 

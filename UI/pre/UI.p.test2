@@ -11,7 +11,7 @@ package ::Text;
 our @ISA = '::';
 sub hello {print "hello world!\n";}
 
-package ::Session;
+package ::Project;
 our @ISA = '::';
 use Object::Tiny qw(name);
 

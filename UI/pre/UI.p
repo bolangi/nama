@@ -92,9 +92,9 @@ sub loop {
 	time_gui;
 	new_take;
 	new_take;
-	::load_session(
+	::load_project(
 		{create => $opts{c},
-		 name   => $session_name}) if $session_name;
+		 name   => $project_name}) if $project_name;
 	MainLoop;
 }
 
@@ -120,7 +120,7 @@ sub flash_ready {}
 sub update_master_version_button {}
 sub paint_button {}
 sub refresh_oids {}
-sub session_label_configure{}
+sub project_label_configure{}
 sub length_display{}
 sub clock_display {}
 sub manifest {}
@@ -187,7 +187,7 @@ recording and processing by Ecasound
 
 	my %options = ( 
 
-			session => 'Night at Carnegie',
+			project => 'Night at Carnegie',
 			create => 1,
 			effects => 'force-reload',
 			track_state   => 'ignore',     

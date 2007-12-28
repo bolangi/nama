@@ -121,7 +121,7 @@ sub last_version {
 
 $track->last_version;
 $take->last_version
-$session->last_version
+$project->last_version
 	
 			$last_version = $this_last if $this_last > $last_version ;
 

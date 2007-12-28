@@ -3,7 +3,7 @@ use warnings;
 use Storable;
 use lib $ENV{TD};
 use Assign qw(:all);
-$ref = retrieve("/media/sessions/.ecmd/paul_brocante/State");
+$ref = retrieve("/media/projects/.ecmd/paul_brocante/State");
 @keys = keys %{ $ref };
 print join " ", "Keys: ",@keys;
 map{

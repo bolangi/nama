@@ -4,20 +4,20 @@ use lib qw(.. .);
 package UI;
 use UI;
 use Getopt::Std;
-#use vars qw(%opts $session $debug);
+#use vars qw(%opts $project $debug);
 my $debug = 1;
 ### Option Processing ###
-push @ARGV, qw(-g -e -d /media/sessions paul_brocante);
+push @ARGV, qw(-g -e -d /media/projects paul_brocante);
 getopts('mcegsd:', \%opts); 
 #print join $/, (%opts);
 # d: wav_dir
-# c: create session
+# c: create project
 # g: gui mode
 # m: don't load state info
 # e: don't load static effects data
-$session = shift;
-$debug and print "session name: $session\n";
-$session and $session_name = $session;
+$project = shift;
+$debug and print "project name: $project\n";
+$project and $project_name = $project;
 my $ui = UI::Text->new;
 $ui->prepare; 
 $ui->loop;

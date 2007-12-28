@@ -1,7 +1,7 @@
 ## gui handling
 use Carp;
 
-sub session_label_configure{ $session_label->configure( -text => $session_name)}
+sub project_label_configure{ $project_label->configure( -text => $project_name)}
 
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 
@@ -48,8 +48,8 @@ sub init_gui {
 	my $id = $canvas->createWindow(30,30, -window => $effect_frame,
 											-anchor => 'nw');
 
-	$session_label = $mw->Label->pack(-fill => 'both');
-	$old_bg = $session_label->cget('-background');
+	$project_label = $mw->Label->pack(-fill => 'both');
+	$old_bg = $project_label->cget('-background');
 	$time_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -66,8 +66,8 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Enter session name:")->pack(-side => 'left');
-	$sn_text = $load_frame->Entry(-textvariable => \$session, -width => 45)->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
+	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 45)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 #	$sn_load_nostate = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -83,17 +83,17 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => \&load_session,
+		-command => \&load_project,
 		);
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { load_session({create => 1}) },
+		-command => sub { load_project({create => 1}) },
 		);
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(&session_dir,$state_store_file)) 
-					if session_dir();
+				save_state(join_path(&project_dir,$state_store_file)) 
+					if project_dir();
 		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
 		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
 		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
@@ -175,10 +175,10 @@ sub transport_gui {
 		-command => sub { 
 		return if transport_running();
 		if ( really_recording ) {
-			session_label_configure(-background => 'lightpink') 
+			project_label_configure(-background => 'lightpink') 
 		}
 		else {
-			session_label_configure(-background => 'lightgreen') 
+			project_label_configure(-background => 'lightgreen') 
 		}
 		start_transport();
 				});

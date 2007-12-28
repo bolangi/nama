@@ -9,9 +9,9 @@ vol				v
 pan				p
 version 		n
 loop 
-save_session    keep k
-new_session		new    
-load_session	load   
+save_project    keep k
+new_project		new    
+load_project	load   
 add_track		add    
 generate_setup	setup  
 list_marks		l      

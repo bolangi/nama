@@ -19,16 +19,16 @@ BEGIN { use_ok('UI') };
 use Getopt::Std;
 
 ### Option Processing ###
-use vars qw(%opts $session_name $debug);
+use vars qw(%opts $project_name $debug);
 @ARGV = qw(-g -m -e paul_brocante);
 getopts('mcegsd', \%opts); 
 # d: wav_dir
-# c: create session
+# c: create project
 # g: gui mode
 # m: don't load state info
 # e: don't load static effects data
-$session_name = shift;
-diag("session name: $session_name\n");
+$project_name = shift;
+diag("project name: $project_name\n");
 
 diag "using UI::Graphical->new";
 my $ui = UI::Graphical->new;
@@ -54,13 +54,13 @@ is( $ui->isa('UI::Graphical'),1, "Parent class for ". ref $ui);
 
 
 __END__
-my $s = UI::Session->new(name => 'paul_brocante');
-is(defined $s, 1, "Session instantiation" );
-is( $s->isa('UI::Session'),1, "Parent class for ". ref $s);
+my $s = UI::Project->new(name => 'paul_brocante');
+is(defined $s, 1, "Project instantiation" );
+is( $s->isa('UI::Project'),1, "Parent class for ". ref $s);
 $nom = 'paul_brocante';
-$UI::wav_dir = '/media/sessions';
-$UI::session_name = $nom;
-is( $s->session_dir , '/media/sessions/.ecmd/paul_brocante', "Directory shows");
+$UI::wav_dir = '/media/projects';
+$UI::project_name = $nom;
+is( $s->project_dir , '/media/projects/.ecmd/paul_brocante', "Directory shows");
 #$gui->prepare; 
 #$gui->loop;
 __END__

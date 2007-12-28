@@ -20,7 +20,7 @@ They are listed in file 'broken_by_object_syntax'
 Tue Dec 25 04:18:13 JST 2007
 =comment
 TODO remove wav_dir from config file. 
-or store session files in ~/.ecmd
+or store project files in ~/.ecmd
 or make it .ecmdrc! simple is better.
 .ecmd
 .ecmdrc = config.yaml

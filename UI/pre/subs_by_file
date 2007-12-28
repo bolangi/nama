@@ -56,11 +56,11 @@ global_config
 hash_push
 increment_take
 initialize_oids
-initialize_session_data
+initialize_project_data
 integrate_ladspa_hints
 jump
 load_ecs
-load_session
+load_project
 make_io_lists
 mark
 mix_suffix
@@ -99,9 +99,9 @@ save_effects
 save_state
 select_take
 selected_version
-session_config
-session_dir
-session_init
+project_config
+project_dir
+project_init
 set_active_version
 setup_transport
 sort_ladspa_effects
@@ -138,7 +138,7 @@ manifest
 new
 oid_gui
 paint_button
-session_label_configure
+project_label_configure
 take_gui
 time_gui
 toggle_mute
@@ -154,7 +154,7 @@ refresh_oids
 refresh_t
 restore_time_marker_labels
 
-Subroutines in Session_Wav.pl:
+Subroutines in Project_Wav.pl:
 
 _get_versions
 _selected_version
@@ -165,7 +165,7 @@ last_version
 new
 new
 new_version
-session_dir
+project_dir
 set
 targets
 this_last
@@ -215,11 +215,11 @@ global_config
 hash_push
 increment_take
 initialize_oids
-initialize_session_data
+initialize_project_data
 integrate_ladspa_hints
 jump
 load_ecs
-load_session
+load_project
 make_io_lists
 mark
 mix_suffix
@@ -261,9 +261,9 @@ save_effects
 save_state
 select_take
 selected_version
-session_config
-session_dir
-session_init
+project_config
+project_dir
+project_init
 set_active_version
 setup_transport
 sort_ladspa_effects

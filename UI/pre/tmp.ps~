@@ -774,7 +774,7 @@ x0 y0 moveto
 0 T () S 8 T ($debug2 and print "&write_chains\\n";) N
 0 T () N
 0 T () S 8 T (# the mixchain is usually '1', so that effects applied to ) N
-0 T () S 8 T (# track 1 \(session_name\) affect the mix.) N
+0 T () S 8 T (# track 1 \(project_name\) affect the mix.) N
 (20) # () S 8 T (#) N
 0 T () S 8 T (# but when playing back a mix, we want mixchain to be ) N
 0 T () S 8 T (# something else) N
@@ -910,7 +910,7 @@ x0 y0 moveto
 0 T () S 8 T ($ecs_file   .= join "\\n", sort @output_chains, "\\n";) N
 0 T () S 8 T () N
 (125) # () S 8 T ($debug and print "ECS:\\n",$ecs_file;) N
-0 T () S 8 T (my $sf = join_path\(&session_dir, $chain_setup_file\);) N
+0 T () S 8 T (my $sf = join_path\(&project_dir, $chain_setup_file\);) N
 0 T () S 8 T (open ECS, ">$sf" or croak "can't open file $sf:  $!\\n";) N
 0 T () S 8 T (print ECS $ecs_file;) N
 0 T () S 8 T (close ECS;) N

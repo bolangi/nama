@@ -6,4 +6,5 @@ Tkeca_effects.pm
 Makefile.PL
 MANIFEST
 README
-t/1.t
+t/01_test.t
+t/02_assign.t

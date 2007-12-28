@@ -29,7 +29,7 @@ ladspa_sample_rate: frequency
 unit: 1 				
 effects_cache_file: effects_cache.storable
 state_store_file: State 
-chain_setup_file: session.ecs
+chain_setup_file: project.ecs
 alias:
   1: Mixdown
   2: Tracker

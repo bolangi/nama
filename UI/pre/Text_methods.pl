@@ -1,7 +1,7 @@
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	package ::;
-	load_session({name => $session_name, create => $opts{c}}) if $session_name;
+	load_project({name => $project_name, create => $opts{c}}) if $project_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";

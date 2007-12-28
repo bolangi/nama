@@ -1,4 +1,4 @@
-what is the difference between project and session?
+what is the difference between project and project?
 
 a project is currently a pair of directories in .ecmd and $wav_dir
 
@@ -20,12 +20,12 @@ it might be possible to reproduce operations such as
 adding tracks. Of course, that is the scripting language!
 
 
-A session
+A project
 
 
 
 
-the upshot of this is that i can rename session to project
+the upshot of this is that i can rename project to project
 via pie afer checking if increment take fixes the latest
 thing.
 

@@ -7,9 +7,9 @@ command: vol
 command: pan
 command: version
 command: loop
-command: save_session
-command: new_session
-command: load_session
+command: save_project
+command: new_project
+command: load_project
 command: add_track
 command: generate_setup
 command: list_marks
@@ -34,9 +34,9 @@ _vol: 'vol' | 'v'
 _pan: 'pan' | 'p'
 _version: 'version' | 'n'
 _loop: 'loop'
-_save_session: 'save_session' | 'keep' | 'k'
-_new_session: 'new_session' | 'new'
-_load_session: 'load_session' | 'load'
+_save_project: 'save_project' | 'keep' | 'k'
+_new_project: 'new_project' | 'new'
+_load_project: 'load_project' | 'load'
 _add_track: 'add_track' | 'add'
 _generate_setup: 'generate_setup' | 'setup'
 _list_marks: 'list_marks' | 'l'
@@ -61,9 +61,9 @@ vol: _vol {}
 pan: _pan {}
 version: _version {}
 loop: _loop {}
-save_session: _save_session {}
-new_session: _new_session {}
-load_session: _load_session {}
+save_project: _save_project {}
+new_project: _new_project {}
+load_project: _load_project {}
 add_track: _add_track {}
 generate_setup: _generate_setup {}
 list_marks: _list_marks {}

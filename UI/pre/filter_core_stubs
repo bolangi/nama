@@ -14,7 +14,7 @@ update_master_version_button
 paint_button 
 refresh_oids 
 paint_button 
-session_label_configure
+project_label_configure
 length_display
 clock_display 
 manifest 

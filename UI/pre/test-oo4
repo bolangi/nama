@@ -103,7 +103,7 @@ sub last_version {
 
 $track->last_version;
 $take->last_version
-$session->last_version
+$project->last_version
 	
 			$last_version = $this_last if $this_last > $last_version ;
 
@@ -146,10 +146,10 @@ returns targets
 =cut
 =comment
 # untested, i don't think i need it.
-package Session;
+package Project;
 our @ISA='UI';
 use Object::Tiny qw(name);
-sub session_dir{
+sub project_dir{
 sub create_dir {
 	my $dir = shift;
 	-d $dir and carp "refuse to make directory $dir, it exists already"

@@ -1,8 +1,8 @@
 use Carp;
 sub config_file { "config.yaml" }
 sub ecmd_dir { ".ecmd" }
-sub this_wav_dir {$session_name and join_path(&wav_dir, $session_name) }
-sub session_dir  {$session_name and join_path(&wav_dir, &ecmd_dir, $session_name) }
+sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
+sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name) }
 
 
 sub prepare {  # actions begin
@@ -45,7 +45,7 @@ sub prepare {  # actions begin
 	
 	$debug and print "wav_dir: ", wav_dir(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
-	$debug and print "session_dir: ", session_dir() , $/;
+	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
 }
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
@@ -68,14 +68,14 @@ sub global_config{
 	my $config = join_path( &wav_dir, &ecmd_dir, &config_file );
 	-f $config and io($config)->all;
 }
-sub session_config {
-	&session_dir or return;
-	my $config = join_path( &session_dir, &config_file );
+sub project_config {
+	&project_dir or return;
+	my $config = join_path( &project_dir, &config_file );
 	-f $config and io($config)->all;
 }
 sub config { #strip_blank_lines(
 			#	strip_comments(
-					&session_config or &global_config or $default 
+					&project_config or &global_config or $default 
 			# ))
 			 
 			 }
@@ -109,37 +109,37 @@ sub substitute{
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
-## session handling
+## project handling
 
-sub load_session {
+sub load_project {
 	my $hash = shift;
-	$debug2 and print "&load_session\n";
-	$debug and print "\$session: $session name: $hash->{name} create: $hash->{create}\n";
-	return unless $hash->{name} or $session;
+	$debug2 and print "&load_project\n";
+	$debug and print "\$project: $project name: $hash->{name} create: $hash->{create}\n";
+	return unless $hash->{name} or $project;
 
-	# we could be called from Tk with variable $session _or_
+	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
 	
-	$session = remove_spaces($session); # internal spaces to underscores
-	$session_name = $hash->{name} ? $hash->{name} : $session;
+	$project = remove_spaces($project); # internal spaces to underscores
+	$project_name = $hash->{name} ? $hash->{name} : $project;
 	$hash->{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir($_)} &this_wav_dir, &session_dir;
+		map{create_dir($_)} &this_wav_dir, &project_dir;
 =comment 
 	# OPEN EDITOR TODO
-	my $new_file = join_path ($ecmd_home, $session_name, $parameters);
+	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
 	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
 	print PARAMS $configuration;
 	close PARAMS;
 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 =cut
 	read_config();
-	initialize_session_data();
+	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
-	retrieve_state_storable(join_path(&session_dir,$state_store_file)) ;
+	retrieve_state_storable(join_path(&project_dir,$state_store_file)) ;
 		#unless $opts{m} or $state_store_file =~ /.yaml$/;
-	#retrieve_state (join_path(&session_dir,$state_store_file)) 
+	#retrieve_state (join_path(&project_dir,$state_store_file)) 
 		#unless $opts{m} or $state_store_file !~ /.yaml$/;
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
@@ -147,16 +147,16 @@ sub load_session {
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
 
-sub initialize_session_data {
-	$debug2 and print "&initialize_session_data\n";
+sub initialize_project_data {
+	$debug2 and print "&initialize_project_data\n";
 
 	return if transport_running();
-	$ui->session_label_configure(
-		-text => uc $session_name, 
+	$ui->project_label_configure(
+		-text => uc $project_name, 
 		-background => 'lightyellow',
 		); 
 
-	# assign_vars($session_init_file, @session_vars);
+	# assign_vars($project_init_file, @project_vars);
 
 	$last_version = 0;
 	%track_names = ();
@@ -235,7 +235,7 @@ sub add_track {
 	return 1;
 }
 sub add_mix_track {
-	# return if $opts{m} or ! -e # join_path(&session_dir,$state_store_file);
+	# return if $opts{m} or ! -e # join_path(&project_dir,$state_store_file);
 	add_track($mixname) ;
 	$state_t{$t}->{rw} = "MUTE"; 
 	new_take(); # $t increments
@@ -278,7 +278,7 @@ sub dig_ruins {
 	
 	$debug2 and print "&dig_ruins";
 
-	if ( ! grep { $_ ne $mixchain and $_ ne $session_name} keys %state_c ) {  # there are no tracks yet
+	if ( ! grep { $_ ne $mixchain and $_ ne $project_name} keys %state_c ) {  # there are no tracks yet
 
 		# look for wave files
 		
@@ -574,7 +574,7 @@ OID:		for my $oid (@oids) {
 			$debug and print "oid output: $oid{output}\n";
 			$debug and print "oid type: $oid{type}\n";
 
-			# check per-session setting for output oids
+			# check per-project setting for output oids
 
 			next if ! $oid_status{ $oid{name} };
 
@@ -763,7 +763,7 @@ sub write_chains {
 	$debug2 and print "&write_chains\n";
 
 	# the mixchain is usually '1', so that effects applied to 
-	# track 1 (session_name) affect the mix.
+	# track 1 (project_name) affect the mix.
 	#
 	# but when playing back a mix, we want mixchain to be 
 	# something else
@@ -870,7 +870,7 @@ sub write_chains {
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = join_path(&session_dir, $chain_setup_file);
+	my $sf = join_path(&project_dir, $chain_setup_file);
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
@@ -894,7 +894,7 @@ sub new_wav_name {
 }
 sub output_format {
 	my $stub = shift;
-	$stub eq $session_name or $stub eq $mixname
+	$stub eq $project_name or $stub eq $mixname
 		? $mix_to_disk_format
 		: $mixer_out_format
 }
@@ -945,9 +945,9 @@ sub convert_to_alsa { initialize_oids }
 ## transport functions
 
 sub load_ecs {
-		my $session_file = join_path(&session_dir , $chain_setup_file);
-		eval_iam("cs-remove $session_file");
-		eval_iam("cs-load ". $session_file);
+		my $project_file = join_path(&project_dir , $chain_setup_file);
+		eval_iam("cs-remove $project_file");
+		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
@@ -993,7 +993,7 @@ sub start_transport {
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; $e->eci('stop');
-	$ui->session_label_configure(-background => $old_bg);
+	$ui->project_label_configure(-background => $old_bg);
 	# what if we are recording
 }
 sub transport_running {
@@ -1027,7 +1027,7 @@ sub refresh_clock{
 	my $status = eval_iam('engine-status');
 	return if $status eq 'running' ;
 	$clock_id->cancel;
-	$ui->session_label_configure(-background => $old_bg);
+	$ui->project_label_configure(-background => $old_bg);
 	if ($status eq 'error') { new_engine();
 		&connect_transport unless &really_recording; 
 	}
@@ -1092,7 +1092,7 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
-	my $mixed = scalar ( grep{ $_ eq $session_name or $_ eq $mixname} @k );
+	my $mixed = scalar ( grep{ $_ eq $project_name or $_ eq $mixname} @k );
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
@@ -1944,7 +1944,7 @@ sub retrieve_state_storable {
 	# restore take and track guis
 	
 	for my $t (@takes) { next if $t == 1; $ui->take_gui }; #
-	# Why skip first????? XXXX first in &initialize_session
+	# Why skip first????? XXXX first in &initialize_project
 	my $did_apply = 0;
 	$last_version = 0; 
 	for my $n (@all_chains) { 
