@@ -1,0 +1,14 @@
+my @files = qx(ls);
+print @files;
+map{
+		chomp;
+		$a = qx(cat $_);
+		my $i;
+		while ( $a =~ m(\\\w.{80})g ) {
+		$i++;	
+		print $1, $/
+		}
+		print "file: $_\n" if $i;
+
+}
+@files

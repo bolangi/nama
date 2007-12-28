@@ -1,0 +1,4 @@
+#!/usr/bin/env perl
+my @all = qx( ./list_subs `cat CODE_MANIFEST` );
+print @all;
+

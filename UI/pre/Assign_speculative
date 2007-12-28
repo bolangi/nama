@@ -1,0 +1,150 @@
+sub assign_no_class {
+	local $debug = 0;
+	$debug2 and print "&assign\n";
+	my ($ref, @vars) = @_;
+	my %sigil;
+	map{ 
+		my ($s, $identifier) = /(.)(\w+)/;
+		$sigil{$identifier} = $s;
+	} @vars;
+	#print yaml_out(\%sigil); exit;
+	#print join " ", "Variables:\n", @vars, $/ ;
+	croak "expected hash" if ref $ref !~ /HASH/;
+	my @keys =  keys %{ $ref };
+	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+	map{  
+		my $eval;
+		my $key = $_;
+		$sigil{$key} or croak 
+			"didn't find a match for $key in ", join " ", @vars, $/;
+		my $full = $sigil{$key}.$key;
+		$debug and print "full: $full\n";;
+		my ($sigil, $identifier) = ($sigil{$key}, $key);
+		$eval .= $full;
+		$eval .= q( = );
+
+		my $val;
+
+		if ($sigil eq '$') { # scalar assignment
+
+			# extract value
+
+			if ($ref->{$identifier}) { #  if we have something,
+
+ 				# take it
+				
+				$val = $ref->{$identifier};
+
+				# dereference it if needed
+				
+				ref $val eq q(SCALAR) and $val = $$val; 
+														
+				# quoting for non-numerical
+				
+				$val = qq("$val") 
+					unless  $val =~ /^[\d\.,+-e]+$/ 
+					or 		ref $val;
+		
+			} else { $val = q(undef) }; # or set as undefined
+
+			$eval .=  $val;  # append to assignment
+
+		} else { # array, hash assignment
+
+			$eval .= qq($sigil\{);
+			$eval .= q($ref->{ );
+			$eval .= qq("$identifier");
+			$eval .= q( } );
+			$eval .= q( } );
+		}
+		$debug and print $eval, $/, $/;
+		eval($eval) or carp "failed to eval $eval: $!\n";
+	} @keys;
+	1;
+}
+
+=comment
+
+## buggy new versions of assign (assign_sigil) and store_vars (serialize)
+sub serialize { # list of vars, output as string 
+	local $debug = 1;
+	# now we will only store in YAML
+	$debug2 and print "&store_vars\n";
+	my @vars = @_;
+	$debug and print "vars: @vars\n";
+	my %state;
+	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
+		 my $eval_string =  q($state{)
+							. q(')
+							. $_
+							. q(')
+							. q(} = )
+							. ($sigil ne q($) ? q(\\) : q() ) 
+							# backslash if not scalar
+							# double backslash needed for eval
+							. $_;
+	$debug and print "attempting to eval $eval_string\n";
+	eval($eval_string) or print "failed to eval $eval_string: $@\n";
+	} @vars;
+	# my $result1 = store \%state, $file; # OLD METHOD
+	my $yamlout = yaml_out(\%state);
+	$yamlout;
+
+}
+
+sub assign_sigil { ### seems to work, goes with buggy &serializer above
+	local $debug = 1;
+	$debug2 and print "&assign_sigil\n";
+	my ($ref, @vars) = @_;
+	my @keys =  keys %{ $ref };
+	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+	map{  
+		my $eval;
+		my $var_name  = $_;
+		my ($sigil) = $var_name =~ /^([\%\@\$])/;
+		my $full = $var_name;
+		print "full: $full\n";;
+		$eval .= $full;
+		$eval .= q( = );
+		
+
+		my $val;
+
+		if ($sigil eq '$') { # scalar assignment
+
+			# extract value
+
+			if ($ref->{$_}) { #  if we have something,
+
+ 				# take it
+				
+				$val = $ref->{$_};
+
+				# dereference it if needed
+				
+				ref $val eq q(SCALAR) and $val = $$val; 
+														
+				# quoting for non-numerical
+				
+				$val = qq("$val") 
+					unless  $val =~ /^[\d\.,+-e]+$/ 
+					or 		ref $val;
+		
+			} else { $val = q(undef) }; # or set as undefined
+
+			$eval .=  $val;  # append to assignment
+
+		} else { # array, hash assignment
+
+			$eval .= qq($sigil\{);
+			$eval .= q($ref->{ );
+			$eval .= qq(q($full));
+			$eval .= q( } );
+			$eval .= q( } );
+		}
+		$debug and print $eval, $/, $/;
+		#eval($eval) or carp "failed to eval $eval: $!\n";
+	}
+	 @keys
+}
+=cut

@@ -1,0 +1,29 @@
+#!/usr/bin/env perl 
+use warnings;
+@stubs = split $/, qx(perl ./make_stubs ./Core_subs.pl);
+#print @stubs; exit;
+my @exclude = qw(
+take_gui 
+track_gui 
+refresh 
+refresh_t
+refresh_c
+refresh_oids
+flash_ready 
+update_master_version_button 
+paint_button 
+refresh_oids 
+paint_button 
+session_label_configure
+length_display
+clock_display 
+manifest 
+global_version_buttons 
+destroy_widgets 
+);
+map{  my $sub = $_; 
+		print $_, $/
+			if !grep{ $sub eq $_ } @exclude;
+		
+		
+		} @stubs;

@@ -1,0 +1,22 @@
+my @short_subs = qw(
+
+ar
+d2
+dn
+er
+eset
+id2
+idn
+ir
+ldn
+or
+r
+r5
+tr
+);
+
+for ( @short_subs ){
+	
+	system "grep ^sub $_ *";
+
+}

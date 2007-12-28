@@ -1,0 +1,12 @@
+#!/usr/bin/env perl
+use warnings;
+use Storable;
+use lib $ENV{TD};
+use Assign qw(:all);
+$ref = retrieve("/media/sessions/.ecmd/paul_brocante/State");
+@keys = keys %{ $ref };
+print join " ", "Keys: ",@keys;
+map{
+	print "$_: ", ref $ref->{$_}, $/;
+} @keys;
+print serial( $ref );

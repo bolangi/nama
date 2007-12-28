@@ -1,0 +1,11 @@
+---
+dict:
+  fruit: melon
+face:
+  - 1
+  - 5
+  - 7
+  - 12
+foo: 2
+name: John
+...

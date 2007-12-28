@@ -1,0 +1,214 @@
+
+sub collect_chains {
+	$debug2 and print "&collect\n";
+	@monitor = @record = ();
+
+	
+	for my $n (@all_chains) {
+	$debug and print "rec_status $n: ", rec_status($n), "\n";
+		push (@monitor, $n) if rec_status($n) eq "MON"; 
+		push (@record, $n) if rec_status($n) eq "REC";
+	}
+
+	$debug and print "monitor chains:  @monitor\n\n";
+	$debug and print "record chains:  @record\n\n";
+	$debug and print "this take: $state_t{active}\n\n";
+		
+}
+sub rec_status {
+
+# VERSION: replace state_c{$n}->{active} by  selected_version($n)
+	my $n = shift;
+	$debug2 and print "&rec_status\n";
+	no warnings;
+	$debug and print "chain $n: active: selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
+	use warnings;
+
+no warnings;
+my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
+use warnings;
+    return "MUTE" if $state_c{$n}->{rw} eq $::MON and ! $file_exists;
+	return "MUTE" if $state_c{$n}->{rw} eq $::MUTE;
+	return "MUTE" if $state_t{$take{$n}}->{rw} eq $::MUTE;
+	if ($take{$n} == $state_t{active} ) {
+
+		if ($state_t{$take{$n}}->{rw} eq "REC") {
+
+			
+			if ($state_c{$n}->{rw} eq "REC"){
+				return "REC" if $state_c{$n}->{ch_r};
+				return "MON" if $file_exists;
+				return "MUTE";
+			}
+		}
+	}
+	return "MON" if selected_version($n);
+	return "MUTE";
+}
+sub really_recording {  # returns filename stubs
+
+#	scalar @record  # doesn't include mixdown track
+	print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
+	keys %{$outputs{file}}; # includes mixdown
+}
+
+sub make_io_lists {
+	#local $debug = $debug3;
+	$debug2 and print "&make_io_lists\n";
+	@input_chains = @output_chains = ();
+
+	%inputs = (); # chain fragments
+	$inputs{mixed} = [];
+	%outputs = ();      
+	%post_input = ();
+	%pre_output = ();
+	my $rec_status;
+
+	# set up track independent chains for MIX and STEREO (type: mixed)
+	for my $oid (@oids) {
+		my %oid = %{$oid};
+		next unless $oid{type} eq 'mixed' and $oid_status{ $oid{name} };
+			push @{ $inputs{mixed} }, $oid{id};
+		if ($oid{output} eq 'file') {
+			$outputs{file}->{ $mixname } = [ $oid{id} ] ;
+		} else { # assume device
+			defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
+			push @{ $outputs{$oid{output}} }, $oid{id}
+		#	hash_push( \%outputs, $oid{output}, $oid{id});
+		}
+	}
+
+	for my $n (@all_chains) {
+		$debug and print "chain $n: begin\n";
+		$rec_status = rec_status($n);
+		next if $rec_status eq "MUTE";
+
+OID:		for my $oid (@oids) {
+
+			# rec_setup comes last so that
+			# we can check inputs{cooked}->$n to
+			# see if it is needed.
+
+			my %oid = %{$oid};
+			
+			next if $oid{type} eq 'mixed'; # already done
+			next if $oid{name} eq 'rec_setup' and ! $inputs{cooked}->{$n};
+			next if $oid{name} eq 'mix_setup' and ! @{ $inputs{mixed} };
+
+			no warnings;
+			my $chain_id = $oid{id}. $n; 
+			use warnings;
+			$debug and print "chain_id: $chain_id\n";
+			$debug and print "oid name: $oid{name}\n";
+			$debug and print "oid target: $oid{target}\n";
+			$debug and print "oid input: $oid{input}\n";
+			$debug and print "oid output: $oid{output}\n";
+			$debug and print "oid type: $oid{type}\n";
+
+			# check per-session setting for output oids
+
+			next if ! $oid_status{ $oid{name} };
+
+		# check track $n against template
+
+			next unless $oid{target} eq 'all' or $oid{target} eq $rec_status; 
+
+			# if we've arrived here we will create chains
+			$debug and print "really making chains!\n";
+
+ #######     INPUTS
+
+			if ($oid{type} eq 'raw')  {  #  only mon_setup, rec_setup and rec_file
+			$debug and print "oid type is raw!\n";
+				if ($oid{input} eq 'file') { # only mon_setup
+					$debug and print "oid input is file!\n";
+					defined $inputs{file}->{ $state_c{$n}->{file} } 
+						or  $inputs{file}->{ $state_c{$n}->{file} } = [];
+					push @{ $inputs{file}->{ $state_c{$n}->{file} } }, $chain_id;
+				}
+				else {   # we presume it is a device
+
+					$debug and print "we presume it is a device\n";
+					defined $inputs{$oid{input}}
+						or  $inputs{$oid{input}} = [];
+					push @{ $inputs{$oid{input}} }, $chain_id;
+
+					#   if status is 'rec' every raw customer gets
+					#   rec_setup's post_input string
+
+				$post_input{$chain_id} .= rec_route($n) if $rec_status eq 'rec';
+
+				}
+		}
+		elsif ($oid{type} eq 'cooked') {    
+			$debug and print "hmmm... cooked!\n";
+			defined $inputs{cooked}->{$n} or $inputs{cooked}->{$n} = [];
+			push @{ $inputs{cooked}->{$n} }, $chain_id;
+		}
+		else { croak "$oid{name}: neither input defined nor type 'cooked'"; }
+
+ #######     OUTPUTS
+
+		if( defined $oid{output}) {
+			if ($oid{output} eq 'file') {
+				$debug and print "output is 'file'\n";
+
+				defined $outputs{file}->{ $state_c{$n}->{file} } 
+					or  $outputs{file}->{ $state_c{$n}->{file} } = [];
+				push @{ $outputs{file}->{ $state_c{$n}->{file} } }, $chain_id;
+			}
+			elsif ($oid{output} eq 'loop') { # only rec_setup and mon_setup
+				my $loop_id = "loop,$n";
+				$debug and print "output is 'loop'\n";
+				$outputs{ $loop_id } = [ $chain_id ]; 
+			}
+			elsif ($oid{output} eq $loopa ) { # only mix_setup
+				$debug and print "output is 'mix_loop'\n";
+				defined $outputs{ $loopa } 
+					or $outputs{ $loopa } = [];
+				push @{ $outputs{ $loopa } } , $chain_id; 
+			}
+			else  { 
+
+				$debug and print "presume output is a device\n";
+				defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
+				push @{ $outputs{$oid{output}} }, $chain_id;
+
+
+			}
+			# add intermediate processing
+		} # fi
+		my ($post_input, $pre_output);
+		$post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
+		$pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
+		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
+		$pre_output{$chain_id} .= $pre_output if defined $pre_output;
+		$post_input{$chain_id} .= $post_input 
+			if defined $post_input and $chain_id ne '1'; # MIX
+
+			# TODO no channel copy for stereo input files
+            # such as version 1 backing.wav
+			
+		} # next oid
+
+
+	}     # next $n
+
+	# add signal multiplier
+# 
+# 	for my $dev (grep{$_ ne 'file'} keys %outputs){
+# 		my @chain_ids = @{$outputs{$dev}};
+# 		 map{
+# 		 	$pre_output{$_} .=  " -ea:" . 100 * scalar @chain_ids 
+# 				unless @chain_ids < 2
+# 		} @chain_ids;
+# 	}
+
+	$debug and print "\@oids\n================\n", yaml_out(\@oids);
+	$debug and print "\%post_input\n================\n", yaml_out(\%post_input);
+	$debug and print "\%pre_output\n================\n", yaml_out(\%pre_output);
+	$debug and print "\%inputs\n================\n", yaml_out(\%inputs);
+	$debug and print "\%outputs\n================\n", yaml_out(\%outputs);
+
+
+}
