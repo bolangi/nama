@@ -5,18 +5,19 @@ sub loop {
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
-	$::OUT = $term->OUT || \*STDOUT;
+	$OUT = $term->OUT || \*STDOUT;
 	my $user_input;
 	use vars qw($parser %iam_cmd);
  	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 	$debug = 1;
 	while (1) {
 		
-		($user_input) = $term->readline($prompt) ;
+		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
 		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+=comment
 		if ($cmd eq 'eval') {
 			eval $predicate;
 			print "\n";
@@ -32,8 +33,10 @@ sub loop {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
 		} else {
-			$parser->command($user_input) or print ("Returned false\n");
-		}
+=cut
+			print "input: $user_input\n";
+			$parser->command($user_input) and print("Succeeded\n") or print ("Returned false\n");
+#		}
 
 	}
 }

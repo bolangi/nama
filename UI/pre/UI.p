@@ -151,7 +151,7 @@ $grammar = q(
 
 [% qx(./emit_command_headers) %]
 
-[% qx(cat ./grammar_body.pl) %]
+[% qx(./strip_comments  ./grammar_body.pl) %]
 
 );
 

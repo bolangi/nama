@@ -1,27 +1,55 @@
-mon
-m
-r
+help			h 
+
+## set group parameters 
+
+record_group   record R
+monitor_group  monitor M
+mixdown
+mixplay
+
+## set track parameters
+
 rec
-off				z
+mon					
+mute			z off
+
+monitor_channel m
+record_channel  r
+
+set_version		version	n
+
 vol				v
+cut				c
+unity			cc
 pan				p
-version 		n
+pan_right		pr
+pan_left		pl
+pan_back		pb
+
 loop 
-save_project    keep k
-new_project		new    
+
+save_project    keep k save
+new_project		create   
 load_project	load   
-add_track		add    
-generate_setup	setup  
-list_marks		l      
+add_track		new
+generate_setup	generate gen
+generate_and_connect_setup setup
+connect_setup   connect
+disconnect_setup disconnect
+
 show_setup 		show   
 show_effects	sfx    
+
 ecasound_start	T      
 ecasound_stop	S      
-add_effect		fx     
-remove_effect	rfx    
+add_effect		add fx     
+remove_effect	rem rfx    
 renew_engine	renew  
 mark			k   
 start			t   
 stop			st   
 show_marks		sm  
+list_marks		l      
 rename_mark		rn  
+next_mark		mf nm fm
+previous_mark	mb pm bm

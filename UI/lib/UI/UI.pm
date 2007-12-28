@@ -249,6 +249,8 @@ our (
 	$debug3,			# for reference passing diagnostics
 	 					#    where the &see_ref() call is
 						#    used
+						
+	$OUT,				# filehandle for Text mode print
 
 );
  
@@ -3636,18 +3638,19 @@ sub loop {
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
-	$UI::OUT = $term->OUT || \*STDOUT;
+	$OUT = $term->OUT || \*STDOUT;
 	my $user_input;
 	use vars qw($parser %iam_cmd);
  	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 	$debug = 1;
 	while (1) {
 		
-		($user_input) = $term->readline($prompt) ;
+		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
 		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+=comment
 		if ($cmd eq 'eval') {
 			eval $predicate;
 			print "\n";
@@ -3663,8 +3666,10 @@ sub loop {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
 		} else {
-			$parser->command($user_input) or print ("Returned false\n");
-		}
+=cut
+			print "input: $user_input\n";
+			$parser->command($user_input) and print("Succeeded\n") or print ("Returned false\n");
+#		}
 
 	}
 }
@@ -3697,21 +3702,33 @@ $UI::RD_HINT = 1;
 
 $grammar = q(
 
-command: mon
-command: m
-command: r
+command: help
+command: record_group
+command: monitor_group
+command: mixdown
+command: mixplay
 command: rec
-command: off
+command: mon
+command: mute
+command: monitor_channel
+command: record_channel
+command: set_version
 command: vol
+command: cut
+command: unity
 command: pan
-command: version
+command: pan_right
+command: pan_left
+command: pan_back
 command: loop
 command: save_project
 command: new_project
 command: load_project
 command: add_track
 command: generate_setup
-command: list_marks
+command: generate_and_connect_setup
+command: connect_setup
+command: disconnect_setup
 command: show_setup
 command: show_effects
 command: ecasound_start
@@ -3723,49 +3740,79 @@ command: mark
 command: start
 command: stop
 command: show_marks
+command: list_marks
 command: rename_mark
-_mon: 'mon'
-_m: 'm'
-_r: 'r'
+command: next_mark
+command: previous_mark
+_help: 'help' | 'h'
+_record_group: 'record_group' | 'record' | 'R'
+_monitor_group: 'monitor_group' | 'monitor' | 'M'
+_mixdown: 'mixdown'
+_mixplay: 'mixplay'
 _rec: 'rec'
-_off: 'off' | 'z'
+_mon: 'mon'
+_mute: 'mute' | 'z' | 'off'
+_monitor_channel: 'monitor_channel' | 'm'
+_record_channel: 'record_channel' | 'r'
+_set_version: 'set_version' | 'version' | 'n'
 _vol: 'vol' | 'v'
+_cut: 'cut' | 'c'
+_unity: 'unity' | 'cc'
 _pan: 'pan' | 'p'
-_version: 'version' | 'n'
+_pan_right: 'pan_right' | 'pr'
+_pan_left: 'pan_left' | 'pl'
+_pan_back: 'pan_back' | 'pb'
 _loop: 'loop'
-_save_project: 'save_project' | 'keep' | 'k'
-_new_project: 'new_project' | 'new'
+_save_project: 'save_project' | 'keep' | 'k' | 'save'
+_new_project: 'new_project' | 'create'
 _load_project: 'load_project' | 'load'
-_add_track: 'add_track' | 'add'
-_generate_setup: 'generate_setup' | 'setup'
-_list_marks: 'list_marks' | 'l'
+_add_track: 'add_track' | 'new'
+_generate_setup: 'generate_setup' | 'generate' | 'gen'
+_generate_and_connect_setup: 'generate_and_connect_setup' | 'setup'
+_connect_setup: 'connect_setup' | 'connect'
+_disconnect_setup: 'disconnect_setup' | 'disconnect'
 _show_setup: 'show_setup' | 'show'
 _show_effects: 'show_effects' | 'sfx'
 _ecasound_start: 'ecasound_start' | 'T'
 _ecasound_stop: 'ecasound_stop' | 'S'
-_add_effect: 'add_effect' | 'fx'
-_remove_effect: 'remove_effect' | 'rfx'
+_add_effect: 'add_effect' | 'add' | 'fx'
+_remove_effect: 'remove_effect' | 'rem' | 'rfx'
 _renew_engine: 'renew_engine' | 'renew'
 _mark: 'mark' | 'k'
 _start: 'start' | 't'
 _stop: 'stop' | 'st'
 _show_marks: 'show_marks' | 'sm'
+_list_marks: 'list_marks' | 'l'
 _rename_mark: 'rename_mark' | 'rn'
-mon: _mon {}
-m: _m {}
-r: _r {}
+_next_mark: 'next_mark' | 'mf' | 'nm' | 'fm'
+_previous_mark: 'previous_mark' | 'mb' | 'pm' | 'bm'
+help: _help {}
+record_group: _record_group {}
+monitor_group: _monitor_group {}
+mixdown: _mixdown {}
+mixplay: _mixplay {}
 rec: _rec {}
-off: _off {}
+mon: _mon {}
+mute: _mute {}
+monitor_channel: _monitor_channel {}
+record_channel: _record_channel {}
+set_version: _set_version {}
 vol: _vol {}
+cut: _cut {}
+unity: _unity {}
 pan: _pan {}
-version: _version {}
+pan_right: _pan_right {}
+pan_left: _pan_left {}
+pan_back: _pan_back {}
 loop: _loop {}
 save_project: _save_project {}
 new_project: _new_project {}
 load_project: _load_project {}
 add_track: _add_track {}
 generate_setup: _generate_setup {}
-list_marks: _list_marks {}
+generate_and_connect_setup: _generate_and_connect_setup {}
+connect_setup: _connect_setup {}
+disconnect_setup: _disconnect_setup {}
 show_setup: _show_setup {}
 show_effects: _show_effects {}
 ecasound_start: _ecasound_start {}
@@ -3777,92 +3824,12 @@ mark: _mark {}
 start: _start {}
 stop: _stop {}
 show_marks: _show_marks {}
-rename_mark: _rename_mark {}
-
-new_project: _new_project name {
-	$UI::project = $item{name};
-	&UI::new_project;
-	1;
-}
-
-load_project: _load_project name {
-	$UI::project = $item{name};
-	&UI::load_project unless $UI::project_name eq $item{name};
-	1;
-}
-
-add_track: _add_track wav channel(s?) { 
-	if ($UI::track_names{$item{wav}} ){
-		print "Track name already in use.\n";
-	} else {
-		&UI::add_track($item{wav}) ;
-		my %ch = ( @{$item{channel}} );	
-		$ch{r} and $UI::state_c{$UI::i}->{ch_r} = $UI::ch{r};
-		$ch{m} and $UI::state_c{$UI::i}->{ch_m} = $UI::ch{m};
-		
-	}
-	1;
-}
-
-generate_setup: _generate_setup {}
-setup: 'setup'{ &UI::setup_transport and &UI::connect_transport; 1}
-
 list_marks: _list_marks {}
+rename_mark: _rename_mark {}
+next_mark: _next_mark {}
+previous_mark: _previous_mark {}
 
-show_setup: _show_setup { 	
-	map { 	push @UI::format_fields,  
-			$_,
-			$UI::state_c{$_}->{active},
-			$UI::state_c{$_}->{file},
-			$UI::state_c{$_}->{rw},
-			&UI::rec_status($_),
-			$UI::state_c{$_}->{ch_r},
-			$UI::state_c{$_}->{ch_m},
-
-		} sort keys %UI::state_c;
-		
-	write; # using format at end of file Flow.pm
-				1;
-}
-
-name: /\w+/
-
-wav: name
-
-
-mix: 'mix' {1}
-
-norm: 'norm' {1}
-
-exit: 'exit' { &UI::save_state($UI::statestore); exit; }
-
-
-channel: r | m
-
-r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
-m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
-
-
-rec: 'rec' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
-}
-mon: 'mon' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
-}
-mute: 'mute' wav(s?) { 
-	map{$UI::state_c{$UI::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
-}
-
-mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mon); }
-
-mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = q(mute); }
-
-rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = q(rec); }
-
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
+help: /^h$/ { print $UI::OUT "hello_from your command line gramar\n"; 1 }
 
 
 );
@@ -3871,7 +3838,7 @@ dd: /\d+/
 
 $default = <<'FALLBACK_CONFIG';
 ---
-wav_dir: /media/projects
+wav_dir: /media/sessions
 abbreviations:
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency

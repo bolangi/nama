@@ -226,5 +226,7 @@ our (
 	$debug3,			# for reference passing diagnostics
 	 					#    where the &see_ref() call is
 						#    used
+						
+	$OUT,				# filehandle for Text mode print
 
 );

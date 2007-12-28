@@ -1,30 +1,37 @@
+help: 'h' { print "hello_from your command line gramar\n" }
+
 new_project: _new_project name {
-	$::project = $item{name};
-	&::new_project;
+	::load_project( 
+		name => ::remove_spaces($item{name}),
+		create => 1,
+	);
+
 	1;
 }
 
 load_project: _load_project name {
-	$::project = $item{name};
-	&::load_project unless $::project_name eq $item{name};
+	::load_project( name => ::remove_spaces($item{name}) );
 	1;
 }
 
 add_track: _add_track wav channel(s?) { 
-	if ($::track_names{$item{wav}} ){
+	if ($::track_names{$item{wav}} ){ 
 		print "Track name already in use.\n";
-	} else {
-		&::add_track($item{wav}) ;
-		my %ch = ( @{$item{channel}} );	
-		$ch{r} and $::state_c{$::i}->{ch_r} = $::ch{r};
-		$ch{m} and $::state_c{$::i}->{ch_m} = $::ch{m};
-		
-	}
+
+	} else { ::add_track($item{wav})  }
 	1;
 }
 
-generate_setup: _generate_setup {}
-setup: 'setup'{ &::setup_transport and &::connect_transport; 1}
+generate_setup: _generate_setup { ::setup_transport(); 1 }
+
+generate_and_connect_setup: _generate_and_connect_setup { 
+	::setup_transport() and ::connect_transport(); 1 }
+
+connect_setup: _connect_setup { ::connect_transport(); 1 }
+
+disconnect_setup: _disconnect_setup { ::disconnect_transport(); 1 }
+
+save_setup: _save_setup { ::save_state($::state_store_file); 1 }
 
 list_marks: _list_marks {}
 
@@ -40,20 +47,24 @@ show_setup: _show_setup {
 
 		} sort keys %::state_c;
 		
-	write; # using format at end of file Flow.pm
-				1;
+	write; # using format at end of file UI.pm
+	1;
 }
 
 name: /\w+/
 
-wav: name
-
+wav: name { $::select_track = $item{name} }
 
 mix: 'mix' {1}
 
 norm: 'norm' {1}
 
-exit: 'exit' { &::save_state($::statestore); exit; }
+record: 'record' {} # set to Tracker-Record 
+monitor: 
+mixdown:
+mixplay: 
+
+exit: 'exit' { ::save_state($::state_store_file); exit; }
 
 
 channel: r | m
@@ -63,20 +74,21 @@ m: 'm' dd  { $::state_c{$::chain{$::select_track}}->{ch_m} = $item{dd} }
 
 
 rec: 'rec' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(rec)} @{$item{wav}} 
+	map{$::state_c{$::chain{$::select_track}}->{rw} = "REC"} @{$item{wav}} 
 }
 mon: 'mon' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(mon)} @{$item{wav}} 
+	map{$::state_c{$::chain{$::select_track}}->{rw} = "MON"} @{$item{wav}} 
 }
 mute: 'mute' wav(s?) { 
-	map{$::state_c{$::chain{$_}}->{rw} = q(mute)} @{$item{wav}}  
+	map{$::state_c{$::chain{$::select_track}}->{rw} = "MUTE"} @{$item{wav}}  
 }
 
-mon: 'mon' {$::state_c{$::chain{$::select_track}} = q(mon); }
+mute: 'mute' {$::state_c{$::chain{$::select_track}} = "MUTE"; }
 
-mute: 'mute' {$::state_c{$::chain{$::select_track}} = q(mute); }
+mon: 'mon' {$::state_c{$::chain{$::select_track}} = "MON"; }
 
-rec: 'rec' {$::state_c{$::chain{$::select_track}} = q(rec); }
+rec: 'rec' {$::state_c{$::chain{$::select_track}} = "REC"; }
+
 
 last: ('last' | '$' ) 
 
