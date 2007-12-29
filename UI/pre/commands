@@ -1,55 +1,44 @@
-help			h  
-
-## set group parameters 
-
-record_group   record R
-monitor_group  monitor M
-mixdown
-mixplay
-
-## set track parameters
-
-rec
-mon					
-mute			z off
-
-monitor_channel m
-record_channel  r
-
-set_version		version	n
-
-vol				v
-cut				c
-unity			cc
-pan				p
-pan_right		pr
-pan_left		pl
-pan_back		pb
-
-loop 
-
-save_project    keep k save
-new_project		create   
-load_project	load   
-add_track		new
-generate_setup	generate gen
-generate_and_connect_setup setup
-connect_setup   connect
+connect_setup connect con
+cut c
 disconnect_setup disconnect
-
-show_setup 		show   
-show_effects	sfx    
-
-ecasound_start	T      
-ecasound_stop	S      
-add_effect		add fx     
-remove_effect	rem rfx    
-renew_engine	renew  
-mark			k   
-start			t   
-stop			st   
-show_marks		sm  
-list_marks		l      
-rename_mark		rn  
-next_mark		mf nm fm
-previous_mark	mb pm bm
+ecasound_start T
+ecasound_stop S
+generate_and_connect_setup setup
+generate_setup generate gen
+help h
+list_all_templates lat
+list_marks lm
+list_templates lt
+load_project load
+loop 
+mark k
+mark_loop ml
+mixdown mxd
+mixplay mxp
+mon 
+monitor_channel m
+monitor_group monitor M
+mute z off
+name_mark nm
+new_project create
+new_track new
+next_mark mf nm fm
+pan p
+pan_back pb
+pan_left pl
+pan_right pr
+previous_mark mb pm bm
+rec 
+record_channel r
+record_group record R
+renew_engine renew
+save_project keep k save
+set_version version n
+show_all_templates sat
+show_effects sfx
+show_setup show
+show_templates oids
+start t
+stop st
+unity cc
+vol v

@@ -245,6 +245,7 @@ sub serial {
 }
 
 sub yaml_out {
+	local $debug = 0;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
@@ -257,8 +258,8 @@ sub yaml_out {
 	$output;
 }
 sub yaml_in {
-	local $debug = 1;
-	$debug2 and print "&yaml_in\n";
+	local $debug = 0;
+	# $debug2 and print "&yaml_in\n";
 	my $file = shift;
 	my $yaml; 
 	if ($file !~ /\n/) {

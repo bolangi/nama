@@ -3703,132 +3703,138 @@ $UI::RD_HINT = 1;
 
 $grammar = q(
 
-command: help
+command: list_marks
 command: record_group
+command: show_effects
+command: generate_setup
+command: loop
+command: mark
+command: save_project
+command: show_templates
+command: show_all_templates
+command: unity
+command: load_project
+command: new_project
+command: previous_mark
+command: pan_left
+command: monitor_channel
 command: monitor_group
 command: mixdown
-command: mixplay
-command: rec
-command: mon
-command: mute
-command: monitor_channel
-command: record_channel
-command: set_version
-command: vol
-command: cut
-command: unity
-command: pan
-command: pan_right
-command: pan_left
-command: pan_back
-command: loop
-command: save_project
-command: new_project
-command: load_project
-command: add_track
-command: generate_setup
-command: generate_and_connect_setup
-command: connect_setup
-command: disconnect_setup
-command: show_setup
-command: show_effects
-command: ecasound_start
-command: ecasound_stop
-command: add_effect
-command: remove_effect
-command: renew_engine
-command: mark
 command: start
-command: stop
-command: show_marks
-command: list_marks
-command: rename_mark
 command: next_mark
-command: previous_mark
-_help: 'help' | 'h'
+command: disconnect_setup
+command: pan
+command: name_mark
+command: list_all_templates
+command: mixplay
+command: cut
+command: pan_right
+command: help
+command: mon
+command: record_channel
+command: list_templates
+command: generate_and_connect_setup
+command: ecasound_start
+command: vol
+command: set_version
+command: stop
+command: mark_loop
+command: mute
+command: renew_engine
+command: rec
+command: pan_back
+command: new_track
+command: show_setup
+command: connect_setup
+command: ecasound_stop
+_list_marks: 'list_marks' | 'lm'
 _record_group: 'record_group' | 'record' | 'R'
-_monitor_group: 'monitor_group' | 'monitor' | 'M'
-_mixdown: 'mixdown'
-_mixplay: 'mixplay'
-_rec: 'rec'
-_mon: 'mon'
-_mute: 'mute' | 'z' | 'off'
-_monitor_channel: 'monitor_channel' | 'm'
-_record_channel: 'record_channel' | 'r'
-_set_version: 'set_version' | 'version' | 'n'
-_vol: 'vol' | 'v'
-_cut: 'cut' | 'c'
-_unity: 'unity' | 'cc'
-_pan: 'pan' | 'p'
-_pan_right: 'pan_right' | 'pr'
-_pan_left: 'pan_left' | 'pl'
-_pan_back: 'pan_back' | 'pb'
-_loop: 'loop'
-_save_project: 'save_project' | 'keep' | 'k' | 'save'
-_new_project: 'new_project' | 'create'
-_load_project: 'load_project' | 'load'
-_add_track: 'add_track' | 'new'
-_generate_setup: 'generate_setup' | 'generate' | 'gen'
-_generate_and_connect_setup: 'generate_and_connect_setup' | 'setup'
-_connect_setup: 'connect_setup' | 'connect'
-_disconnect_setup: 'disconnect_setup' | 'disconnect'
-_show_setup: 'show_setup' | 'show'
 _show_effects: 'show_effects' | 'sfx'
-_ecasound_start: 'ecasound_start' | 'T'
-_ecasound_stop: 'ecasound_stop' | 'S'
-_add_effect: 'add_effect' | 'add' | 'fx'
-_remove_effect: 'remove_effect' | 'rem' | 'rfx'
-_renew_engine: 'renew_engine' | 'renew'
+_generate_setup: 'generate_setup' | 'generate' | 'gen'
+_loop: 'loop'
 _mark: 'mark' | 'k'
-_start: 'start' | 't'
-_stop: 'stop' | 'st'
-_show_marks: 'show_marks' | 'sm'
-_list_marks: 'list_marks' | 'l'
-_rename_mark: 'rename_mark' | 'rn'
-_next_mark: 'next_mark' | 'mf' | 'nm' | 'fm'
+_save_project: 'save_project' | 'keep' | 'k' | 'save'
+_show_templates: 'show_templates' | 'oids'
+_show_all_templates: 'show_all_templates' | 'sat'
+_unity: 'unity' | 'cc'
+_load_project: 'load_project' | 'load'
+_new_project: 'new_project' | 'create'
 _previous_mark: 'previous_mark' | 'mb' | 'pm' | 'bm'
-help: _help {}
-record_group: _record_group {}
-monitor_group: _monitor_group {}
-mixdown: _mixdown {}
-mixplay: _mixplay {}
-rec: _rec {}
-mon: _mon {}
-mute: _mute {}
-monitor_channel: _monitor_channel {}
-record_channel: _record_channel {}
-set_version: _set_version {}
-vol: _vol {}
-cut: _cut {}
-unity: _unity {}
-pan: _pan {}
-pan_right: _pan_right {}
-pan_left: _pan_left {}
-pan_back: _pan_back {}
-loop: _loop {}
-save_project: _save_project {}
-new_project: _new_project {}
-load_project: _load_project {}
-add_track: _add_track {}
-generate_setup: _generate_setup {}
-generate_and_connect_setup: _generate_and_connect_setup {}
-connect_setup: _connect_setup {}
-disconnect_setup: _disconnect_setup {}
-show_setup: _show_setup {}
-show_effects: _show_effects {}
-ecasound_start: _ecasound_start {}
-ecasound_stop: _ecasound_stop {}
-add_effect: _add_effect {}
-remove_effect: _remove_effect {}
-renew_engine: _renew_engine {}
-mark: _mark {}
-start: _start {}
-stop: _stop {}
-show_marks: _show_marks {}
-list_marks: _list_marks {}
-rename_mark: _rename_mark {}
-next_mark: _next_mark {}
-previous_mark: _previous_mark {}
+_pan_left: 'pan_left' | 'pl'
+_monitor_channel: 'monitor_channel' | 'm'
+_monitor_group: 'monitor_group' | 'monitor' | 'M'
+_mixdown: 'mixdown' | 'mxd'
+_start: 'start' | 't'
+_next_mark: 'next_mark' | 'mf' | 'nm' | 'fm'
+_disconnect_setup: 'disconnect_setup' | 'disconnect'
+_pan: 'pan' | 'p'
+_name_mark: 'name_mark' | 'nm'
+_list_all_templates: 'list_all_templates' | 'lat'
+_mixplay: 'mixplay' | 'mxp'
+_cut: 'cut' | 'c'
+_pan_right: 'pan_right' | 'pr'
+_help: 'help' | 'h'
+_mon: 'mon'
+_record_channel: 'record_channel' | 'r'
+_list_templates: 'list_templates' | 'lt'
+_generate_and_connect_setup: 'generate_and_connect_setup' | 'setup'
+_ecasound_start: 'ecasound_start' | 'T'
+_vol: 'vol' | 'v'
+_set_version: 'set_version' | 'version' | 'n'
+_stop: 'stop' | 'st'
+_mark_loop: 'mark_loop' | 'ml'
+_mute: 'mute' | 'z' | 'off'
+_renew_engine: 'renew_engine' | 'renew'
+_rec: 'rec'
+_pan_back: 'pan_back' | 'pb'
+_new_track: 'new_track' | 'new'
+_show_setup: 'show_setup' | 'show'
+_connect_setup: 'connect_setup' | 'connect' | 'con'
+_ecasound_stop: 'ecasound_stop' | 'S'
+list_marks: _list_marks { 1 }
+record_group: _record_group { 1 }
+show_effects: _show_effects { 1 }
+generate_setup: _generate_setup { 1 }
+loop: _loop { 1 }
+mark: _mark { 1 }
+save_project: _save_project { 1 }
+show_templates: _show_templates { 1 }
+show_all_templates: _show_all_templates { 1 }
+unity: _unity { 1 }
+load_project: _load_project { 1 }
+new_project: _new_project { 1 }
+previous_mark: _previous_mark { 1 }
+pan_left: _pan_left { 1 }
+monitor_channel: _monitor_channel { 1 }
+monitor_group: _monitor_group { 1 }
+mixdown: _mixdown { 1 }
+start: _start { 1 }
+next_mark: _next_mark { 1 }
+disconnect_setup: _disconnect_setup { 1 }
+pan: _pan { 1 }
+name_mark: _name_mark { 1 }
+list_all_templates: _list_all_templates { 1 }
+mixplay: _mixplay { 1 }
+cut: _cut { 1 }
+pan_right: _pan_right { 1 }
+help: _help { 1 }
+mon: _mon { 1 }
+record_channel: _record_channel { 1 }
+list_templates: _list_templates { 1 }
+generate_and_connect_setup: _generate_and_connect_setup { 1 }
+ecasound_start: _ecasound_start { 1 }
+vol: _vol { 1 }
+set_version: _set_version { 1 }
+stop: _stop { 1 }
+mark_loop: _mark_loop { 1 }
+mute: _mute { 1 }
+renew_engine: _renew_engine { 1 }
+rec: _rec { 1 }
+pan_back: _pan_back { 1 }
+new_track: _new_track { 1 }
+show_setup: _show_setup { 1 }
+connect_setup: _connect_setup { 1 }
+ecasound_stop: _ecasound_stop { 1 }
 
 help: 'h' { print "hello_from your command line gramar\n" }
 

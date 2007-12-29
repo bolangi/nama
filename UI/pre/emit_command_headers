@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
-my $list = qx(./strip_all ./commands);
+#my $list = qx(./strip_all ./commands);
+my $list = qx(./emit_commands);
 map{
 
 	chomp;
@@ -7,7 +8,7 @@ map{
 	my $full = shift @parts;
 	my @short = @parts;
 	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
-	push @stubs,   	"$full: _$full {}";
+	push @stubs,   	"$full: _$full { 1 }";
 	push @commands,	"command: $full";
 
 } split "\n", $list;
