@@ -251,6 +251,7 @@ our (
 						#    used
 						
 	$OUT,				# filehandle for Text mode print
+	$commands,	# ref created from commands.plus
 
 );
  
@@ -3829,7 +3830,102 @@ rename_mark: _rename_mark {}
 next_mark: _next_mark {}
 previous_mark: _previous_mark {}
 
-help: /^h$/ { print $UI::OUT "hello_from your command line gramar\n"; 1 }
+help: 'h' { print "hello_from your command line gramar\n" }
+
+new_project: _new_project name {
+	UI::load_project( 
+		name => UI::remove_spaces($item{name}),
+		create => 1,
+	);
+
+	1;
+}
+
+load_project: _load_project name {
+	UI::load_project( name => UI::remove_spaces($item{name}) );
+	1;
+}
+
+add_track: _add_track wav channel(s?) { 
+	if ($UI::track_names{$item{wav}} ){ 
+		print "Track name already in use.\n";
+
+	} else { UI::add_track($item{wav})  }
+	1;
+}
+
+generate_setup: _generate_setup { UI::setup_transport(); 1 }
+
+generate_and_connect_setup: _generate_and_connect_setup { 
+	UI::setup_transport() and UI::connect_transport(); 1 }
+
+connect_setup: _connect_setup { UI::connect_transport(); 1 }
+
+disconnect_setup: _disconnect_setup { UI::disconnect_transport(); 1 }
+
+save_setup: _save_setup { UI::save_state($UI::state_store_file); 1 }
+
+list_marks: _list_marks {}
+
+show_setup: _show_setup { 	
+	map { 	push @UI::format_fields,  
+			$_,
+			$UI::state_c{$_}->{active},
+			$UI::state_c{$_}->{file},
+			$UI::state_c{$_}->{rw},
+			&UI::rec_status($_),
+			$UI::state_c{$_}->{ch_r},
+			$UI::state_c{$_}->{ch_m},
+
+		} sort keys %UI::state_c;
+		
+	write; 
+	1;
+}
+
+name: /\w+/
+
+wav: name { $UI::select_track = $item{name} }
+
+mix: 'mix' {1}
+
+norm: 'norm' {1}
+
+record: 'record' {} 
+monitor: 
+mixdown:
+mixplay: 
+
+exit: 'exit' { UI::save_state($UI::state_store_file); exit; }
+
+
+channel: r | m
+
+r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
+m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
+
+
+rec: 'rec' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "REC"} @{$item{wav}} 
+}
+mon: 'mon' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "MON"} @{$item{wav}} 
+}
+mute: 'mute' wav(s?) { 
+	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "MUTE"} @{$item{wav}}  
+}
+
+mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = "MUTE"; }
+
+mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = "MON"; }
+
+rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = "REC"; }
+
+
+last: ('last' | '$' ) 
+
+dd: /\d+/
+
 
 
 );

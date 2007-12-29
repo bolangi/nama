@@ -35,6 +35,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		strip_blank_lines
 		strip_comments
 		remove_spaces
+		yamlify_commands
 
 	
 ) ] );
@@ -243,8 +244,6 @@ sub serial {
 
 }
 
-print "reacCHED here";
-
 sub yaml_out {
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
@@ -258,10 +257,31 @@ sub yaml_out {
 	$output;
 }
 sub yaml_in {
+	local $debug = 1;
+	$debug2 and print "&yaml_in\n";
 	my $file = shift;
-	my $yaml = io($file)->all;
+	my $yaml; 
+	if ($file !~ /\n/) {
+		$debug and print "assuming yaml filename input\n";
+		$yaml = io($file)->all;
+	} else { 
+		$debug and print "assuming yaml text input\n";
+		$yaml = $file;
+	}
 	$yr->read( $yaml ); # returns ref
 }
+sub yamlify_commands {
+	my @in = @_;
+	@in = map{ 	s/\t{2}/\t\t\t/ ; 
+			s/^\t(?!\t)/\t-\n\t\t/;
+			s/\t/  /g;
+			s/\s+$/\n/g;
+			$_;
+		} @in;
+		@in;
+
+}
+
 ## support functions
 
 sub create_dir {

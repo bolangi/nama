@@ -228,5 +228,6 @@ our (
 						#    used
 						
 	$OUT,				# filehandle for Text mode print
+	$commands,	# ref created from commands.plus
 
 );

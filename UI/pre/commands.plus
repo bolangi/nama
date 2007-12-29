@@ -175,7 +175,7 @@ mark:
 	mark_loop:
 		what: Loop playback between nearest marks
 		short: ml 
-	sig: ()
+		sig: ()
 	name_mark:
 		short: nm
 		what: Give a name to a mark

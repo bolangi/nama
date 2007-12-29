@@ -1,0 +1,15 @@
+#!/usr/local/bin/perl -w
+use lib "$ENV{TD}/..";
+use UI::Assign qw(:all);
+$in = qx(./yamlify ./commands.plus);
+my $ref = yaml_in( $in); 
+#print yaml_out $ref;
+# exit;
+my $output;
+map{ my $key = $_;
+		print "key: $key\n";
+		map{ print keys %{$_}, $/}  @{ $ref->{$key} }
+
+
+		} keys %{ $ref };
+
