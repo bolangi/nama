@@ -28,6 +28,14 @@ $debug3 = 0; # qualified routines get local $debug = $debug 3;
 $debug2 = 1;
 $debug = 1;
 
+## The names of two helper loopback devices:
+
+$loopa = 'loop,111';
+$loopb = 'loop,222';
+
+$mixchain = 1; 
+$mixchain_aux = 'MixDown'; # used for playing back mixes
+                              # when chain 1 is active
 ## Load my modules
 
 use ::Assign qw(:all);
@@ -155,7 +163,9 @@ $grammar = q(
 
 );
 
+
 # we use the following settings if we can't find config files
+
 
 $default = <<'FALLBACK_CONFIG';
 [% qx(cat ./config.yaml) %]

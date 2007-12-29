@@ -1,11 +1,15 @@
 ## gui handling
 use Carp;
 
-sub project_label_configure{ $project_label->configure( -text => $project_name)}
+sub project_label_configure{ 
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	$project_label->configure( @_ ) }
 
 sub length_display{ $setup_length->configure(-text => colonize $length) };
 
-sub clock_display { $clock->configure(-text => colonize( 0) )}
+sub clock_display { 
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	$clock->configure( @_ )}
 
 sub manifest { $ew->deiconify() }
 
@@ -359,6 +363,7 @@ sub oid_gui {
 	
 }
 sub paint_button {
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	my ($button, $color) = @_;
 	$button->configure(-background => $color,
 						-activebackground => $color);
@@ -428,10 +433,12 @@ sub take_gui {
 }
 sub global_version_buttons {
 #	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
-    my @children = $widget_t[1]->children;
-	for (@children) {
-		$_->cget(-value) and $_->destroy;
-	}; # should remove menubuttons
+	if (defined $widget_t[1]) {
+		my @children = $widget_t[1]->children;
+		for (@children) {
+			$_->cget(-value) and $_->destroy;
+		}; # should remove menubuttons
+	}
 		
 	@global_version_buttons = ();
 	$debug and print "making global version buttons range:", join ' ',1..$last_version, " \n";
@@ -458,12 +465,14 @@ sub global_version_buttons {
  	}
 }
 sub track_gui { 
-	my $n =  $i; # follow the global index $i
+	$debug2 and print "&track_gui\n";
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	my $n = shift;
+	print "found index: $n\n";
 
 	# my $j is effect index
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
-	$debug2 and print "&track_gui\n";
 	my $stub = " ";
 	$stub .= $state_c{$n}->{active};
 	$name = $track_frame->Label(
@@ -677,6 +686,7 @@ sub track_gui {
 }
 
 sub update_version_button {
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
 	my $w = $widget_c{$n}->{version};
@@ -883,7 +893,7 @@ sub mark {
 	}
 }
 
-sub update_clock { # XXX
+sub update_clock { 
 	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
 }
 

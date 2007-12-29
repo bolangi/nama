@@ -1,3 +1,28 @@
+
+
+
+Sat Dec 29 18:24:02 JST 2007
+
+I am getting an object in subs that
+
+	my $n = shift;
+
+one solution: my $n = $i; # global variable
+because for most, 
+
+Okay, we can do for all, breaking find_wavs, 
+and rec_status
+
+Find_wavs we can fix by using our new version.
+
+
+
+Or try to find the call that passes the object!!
+
+And replace 
+
+
+--------
 oids will receive an additional field: 'file'.
 No. 'target' will be allowed to contain a filename head.
 No maybe we want a file to be joined categorically

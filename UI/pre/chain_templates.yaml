@@ -11,7 +11,7 @@
   name: multi
   output: multi
   pre_output: &pre_multi
-  target: mon
+  target: MON
   type: cooked
 -
   default: off
@@ -19,7 +19,7 @@
   name: live
   output: multi
   pre_output: &pre_multi
-  target: rec
+  target: REC
   type: cooked
 -
   default: off
@@ -29,19 +29,12 @@
   type: mixed
 -
   default: on
-  id: J
-  name: mix_setup
-  output: ~
-  target: all
-  type: cooked
--
-  default: on
   id: ~
   input: file
   name: mon_setup
   output: loop
   post_input: &mono_to_stereo
-  target: mon
+  target: MON
   type: raw
 -
   default: on
@@ -49,8 +42,15 @@
   input: multi
   name: rec_file
   output: file
-  target: rec
+  target: REC
   type: raw
+-
+  default: on
+  id: J
+  name: mix_setup
+  output: loop,111
+  target: all
+  type: cooked
 -
   default: on
   id: ~
@@ -58,6 +58,6 @@
   name: rec_setup
   output: loop
   post_input: &mono_to_stereo
-  target: rec
+  target: REC
   type: raw
 ...

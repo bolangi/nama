@@ -33,12 +33,15 @@ sub refresh_t { # buses
 	}
 }
 sub refresh_c { # tracks
-
+	local $debug = 1;
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";
 	
+	$debug and print "track: $n\n"; # rec_status: $rec_status\n";
 		my $rec_status = rec_status($n);
-#	$debug and print "track: $n rec_status: $rec_status\n";
+	$debug and print "track: $n rec_status: $rec_status\n";
+		$debug and print "arrived here\n";
 
 		return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);

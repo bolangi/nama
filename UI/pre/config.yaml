@@ -13,11 +13,11 @@ devices:
     input_format: 32-12
     output_format: 32-10
   multi:
-    ecasound_id: alsaplugin,1,0
+    ecasound_id: alsa,ice1712
     input_format: 32-12
     output_format: 32-10
   stereo:
-    ecasound_id: alsaplugin,0,0
+    ecasound_id: alsa,default
     input_format: cd-stereo
     output_format: cd-stereo
 ecasound_globals: "-B auto"
@@ -30,9 +30,9 @@ unit: 1
 effects_cache_file: effects_cache.storable
 state_store_file: State 
 chain_setup_file: project.ecs
+tk_input_channels: 10
+use_monitor_version_for_mixdown: true 
 alias:
   1: Mixdown
   2: Tracker
-tk_input_channels: 10
-use_monitor_version_for_mixdown: true 
 ...

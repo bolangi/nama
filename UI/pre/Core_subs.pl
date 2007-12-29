@@ -4,7 +4,12 @@ sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
 sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name) }
 
+sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 
+sub discard_object {
+	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	@_;
+}
 sub prepare {  # actions begin
 
 
@@ -137,9 +142,10 @@ sub load_project {
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
-	retrieve_state_storable(join_path(&project_dir,$state_store_file)) ;
-		#unless $opts{m} or $state_store_file =~ /.yaml$/;
-	#retrieve_state (join_path(&project_dir,$state_store_file)) 
+	retrieve_state_storable(join_path(&project_dir,$state_store_file)) 
+		unless $opts{m} or $state_store_file =~ /.yaml$/;
+	retrieve_state (join_path(&project_dir,$state_store_file)) 
+	if $state_store_file =~ /.yaml$/ and ! $opts{m} ;
 		#unless $opts{m} or $state_store_file !~ /.yaml$/;
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
@@ -211,9 +217,11 @@ $ui->take_gui;
 ## track and wav file handling
 
 sub add_track {
+	shift @_ if ref $_[0] =~ /UI/; # discard_object
 	$debug2 and print "&add_track\n";
 	return 0 if transport_running();
 	my $name = shift;
+	$debug and print "name: $name\n";
 	
 	if ($track_names{$track_name}){
 		$debug and carp ("Track name in use\n");
@@ -229,13 +237,12 @@ sub add_track {
 
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
- print yaml_out(\%state_c);
-	$ui->track_gui;
-# print yaml_out(\%state_c);
+	$ui->track_gui($i);
+	print "Added new track!\n",yaml_out(\%state_c);
 	return 1;
 }
 sub add_mix_track {
-	# return if $opts{m} or ! -e # join_path(&project_dir,$state_store_file);
+	return if $opts{m}; # or ! -e join_path(&project_dir,$state_store_file);
 	add_track($mixname) ;
 	$state_t{$t}->{rw} = "MUTE"; 
 	new_take(); # $t increments
@@ -247,11 +254,13 @@ sub mix_suffix {
 }
 sub restore_track {
 	$debug2 and print "&restore_track\n";
+	shift @_ if ref $_[0] =~ /UI/; # discard_object
 	my $n = shift;
 	find_wavs($n);
 	$ui->track_gui($n), $ui->refresh();
 }
 sub register_track {
+	shift @_ if ref $_[0] =~ /UI/; # discard_object
 	$debug2 and print "&register_track\n";
 	my ($i, $name, $ch_r, $ch_m) = @_;
 	$debug and print <<VARS;
@@ -295,8 +304,7 @@ sub dig_ruins {
 	}
 }
 sub find_wavs {
-
-
+	shift @_ if ref $_[0] =~ /UI/; # discard_object
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
 	$debug and print "track: $n\n";
@@ -328,9 +336,9 @@ no warnings;
 use warnings;
 # VERSION	
 		# set last version active if the current active version is missing
-		#$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]
-		#	unless grep{ $state_c{$n}->{active} == $_ }
-		#		@{$state_c{$n}->{versions}};
+		$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]
+			unless grep{ $state_c{$n}->{active} == $_ }
+				@{$state_c{$n}->{versions}};
 
 	
 	$debug and print "\$last_version: $last_version\n";
@@ -486,10 +494,9 @@ sub collect_chains {
 		
 }
 sub rec_status {
-
-# VERSION: replace state_c{$n}->{active} by  selected_version($n)
 	my $n = shift;
 	$debug2 and print "&rec_status\n";
+	$debug and print "found object: ", ref $n, $/ if ref $n;
 	no warnings;
 	$debug and print "chain $n: active: selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
 	use warnings;
@@ -536,9 +543,9 @@ sub make_io_lists {
 	# set up track independent chains for MIX and STEREO (type: mixed)
 	for my $oid (@oids) {
 		my %oid = %{$oid};
-		next unless $oid{type} eq 'mixed' and $oid_status{ $oid{name} };
+		next unless lc $oid{type} eq 'mixed' and $oid_status{ $oid{name} };
 			push @{ $inputs{mixed} }, $oid{id};
-		if ($oid{output} eq 'file') {
+		if (lc $oid{output} eq 'file') {
 			$outputs{file}->{ $mixname } = [ $oid{id} ] ;
 		} else { # assume device
 			defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
@@ -567,6 +574,11 @@ OID:		for my $oid (@oids) {
 			no warnings;
 			my $chain_id = $oid{id}. $n; 
 			use warnings;
+
+			# check per-project setting for output oids
+
+			next if ! $oid_status{ $oid{name} };
+			$debug and print "Active oid match candidate found...\n";
 			$debug and print "chain_id: $chain_id\n";
 			$debug and print "oid name: $oid{name}\n";
 			$debug and print "oid target: $oid{target}\n";
@@ -574,13 +586,9 @@ OID:		for my $oid (@oids) {
 			$debug and print "oid output: $oid{output}\n";
 			$debug and print "oid type: $oid{type}\n";
 
-			# check per-project setting for output oids
-
-			next if ! $oid_status{ $oid{name} };
-
 		# check track $n against template
 
-			next unless $oid{target} eq 'all' or $oid{target} eq $rec_status; 
+			next unless $oid{target} eq 'all' or lc $oid{target} eq lc $rec_status; 
 
 			# if we've arrived here we will create chains
 			$debug and print "really making chains!\n";
@@ -605,7 +613,7 @@ OID:		for my $oid (@oids) {
 					#   if status is 'rec' every raw customer gets
 					#   rec_setup's post_input string
 
-				$post_input{$chain_id} .= rec_route($n) if $rec_status eq 'rec';
+				$post_input{$chain_id} .= rec_route($n) if lc $rec_status eq 'rec';
 
 				}
 		}
@@ -960,7 +968,7 @@ sub setup_transport {
 	$debug2 and print "&setup_transport\n";
 	collect_chains();
 	make_io_lists();
-	map{ eliminate_loops($_) } @all_chains;
+	#map{ eliminate_loops($_) } @all_chains;
 	#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 	#print "\%outputs\n================\n", yaml_out(\%outputs);
 	write_chains();
