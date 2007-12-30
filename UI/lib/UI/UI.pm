@@ -3846,10 +3846,11 @@ $UI::RD_HINT = 1;
 $grammar = q(
 
 command: fail
-help: _help /\s*$/ { print "hello_from your command line gramar\n"; 1 }
-fail: 'f' { print "your command line gramar will get a zero\n"; 0 }
+end: /\s*$/
+help: _help end { print "hello_from your command line gramar\n"; 1 }
+fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
-new_project: _new_project name {
+new_project: _new_project name end {
 	UI::load_project( 
 		name => UI::remove_spaces($item{name}),
 		create => 1,
@@ -3858,12 +3859,12 @@ new_project: _new_project name {
 	1;
 }
 
-load_project: _load_project name {
+load_project: _load_project name end {
 	UI::load_project( name => UI::remove_spaces($item{name}) );
 	1;
 }
 
-add_track: _add_track wav channel(s?) { 
+add_track: _add_track wav channel(s?) end { 
 	if ($UI::track_names{$item{wav}} ){ 
 		print "Track name already in use.\n";
 
@@ -3871,20 +3872,20 @@ add_track: _add_track wav channel(s?) {
 	1;
 }
 
-generate_setup: _generate_setup { UI::setup_transport(); 1 }
+generate_setup: _generate_setup end { UI::setup_transport(); 1 }
 
-generate_and_connect_setup: _generate_and_connect_setup { 
+generate_and_connect_setup: _generate_and_connect_setup end { 
 	UI::setup_transport() and UI::connect_transport(); 1 }
 
-connect_setup: _connect_setup { UI::connect_transport(); 1 }
+connect_setup: _connect_setup end { UI::connect_transport(); 1 }
 
-disconnect_setup: _disconnect_setup { UI::disconnect_transport(); 1 }
+disconnect_setup: _disconnect_setup end { UI::disconnect_transport(); 1 }
 
-save_setup: _save_setup { UI::save_state($UI::state_store_file); 1 }
+save_setup: _save_setup end { UI::save_state($UI::state_store_file); 1 }
 
-list_marks: _list_marks {}
+list_marks: _list_marks end {}
 
-show_setup: _show_setup { 	
+show_setup: _show_setup end { 	
 	map { 	push @UI::format_fields,  
 			$_,
 			$UI::state_c{$_}->{active},
@@ -3904,13 +3905,13 @@ name: /\w+/
 
 wav: name { $UI::select_track = $item{name} }
 
-mix: 'mix' {1}
+mix: 'mix' end {1}
 
-norm: 'norm' {1}
+norm: 'norm' end {1}
 
-record: 'record' {} 
+record: 'record' end {} 
 
-exit: 'exit' { UI::save_state($UI::state_store_file); exit; }
+exit: 'exit' end { UI::save_state($UI::state_store_file); exit; }
 
 
 channel: r | m
@@ -3919,21 +3920,21 @@ r: 'r' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_r} = $item{dd} }
 m: 'm' dd  { $UI::state_c{$UI::chain{$UI::select_track}}->{ch_m} = $item{dd} }
 
 
-rec: 'rec' wav(s?) { 
+rec: 'rec' wav(s?) end { 
 	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "REC"} @{$item{wav}} 
 }
-mon: 'mon' wav(s?) { 
+mon: 'mon' wav(s?) end { 
 	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "MON"} @{$item{wav}} 
 }
-mute: 'mute' wav(s?) { 
+mute: 'mute' wav(s?) end { 
 	map{$UI::state_c{$UI::chain{$UI::select_track}}->{rw} = "MUTE"} @{$item{wav}}  
 }
 
-mute: 'mute' {$UI::state_c{$UI::chain{$UI::select_track}} = "MUTE"; }
+mute: 'mute' end {$UI::state_c{$UI::chain{$UI::select_track}} = "MUTE"; }
 
-mon: 'mon' {$UI::state_c{$UI::chain{$UI::select_track}} = "MON"; }
+mon: 'mon' end {$UI::state_c{$UI::chain{$UI::select_track}} = "MON"; }
 
-rec: 'rec' {$UI::state_c{$UI::chain{$UI::select_track}} = "REC"; }
+rec: 'rec' end {$UI::state_c{$UI::chain{$UI::select_track}} = "REC"; }
 
 
 last: ('last' | '$' ) 
@@ -4030,50 +4031,50 @@ _start: 'start' | 't'
 _stop: 'stop' | 'st'
 _unity: 'unity' | 'cc'
 _vol: 'vol' | 'v'
-connect_setup: _connect_setup /\s*$/ { 1 }
-cut: _cut /\s*$/ { 1 }
-disconnect_setup: _disconnect_setup /\s*$/ { 1 }
-ecasound_start: _ecasound_start /\s*$/ { 1 }
-ecasound_stop: _ecasound_stop /\s*$/ { 1 }
-generate_and_connect_setup: _generate_and_connect_setup /\s*$/ { 1 }
-generate_setup: _generate_setup /\s*$/ { 1 }
-help: _help /\s*$/ { 1 }
-list_all_templates: _list_all_templates /\s*$/ { 1 }
-list_marks: _list_marks /\s*$/ { 1 }
-list_templates: _list_templates /\s*$/ { 1 }
-load_project: _load_project  { 1 }
-loop: _loop /\s*$/ { 1 }
-mark: _mark  { 1 }
-mark_loop: _mark_loop /\s*$/ { 1 }
-mixdown: _mixdown /\s*$/ { 1 }
-mixplay: _mixplay /\s*$/ { 1 }
-mon: _mon /\s*$/ { 1 }
-monitor_channel: _monitor_channel  { 1 }
-monitor_group: _monitor_group /\s*$/ { 1 }
-mute: _mute /\s*$/ { 1 }
-name_mark: _name_mark  { 1 }
-new_project: _new_project  { 1 }
-new_track: _new_track  { 1 }
-next_mark: _next_mark /\s*$/ { 1 }
-pan: _pan  { 1 }
-pan_back: _pan_back /\s*$/ { 1 }
-pan_left: _pan_left /\s*$/ { 1 }
-pan_right: _pan_right /\s*$/ { 1 }
-previous_mark: _previous_mark /\s*$/ { 1 }
-rec: _rec /\s*$/ { 1 }
-record_channel: _record_channel  { 1 }
-record_group: _record_group /\s*$/ { 1 }
-renew_engine: _renew_engine /\s*$/ { 1 }
-save_project: _save_project  { 1 }
-set_version: _set_version  { 1 }
-show_all_templates: _show_all_templates /\s*$/ { 1 }
-show_effects: _show_effects  { 1 }
-show_setup: _show_setup /\s*$/ { 1 }
-show_templates: _show_templates  { 1 }
-start: _start /\s*$/ { 1 }
-stop: _stop /\s*$/ { 1 }
-unity: _unity /\s*$/ { 1 }
-vol: _vol  { 1 }
+connect_setup: _connect_setup end { 1 }
+cut: _cut end { 1 }
+disconnect_setup: _disconnect_setup end { 1 }
+ecasound_start: _ecasound_start end { 1 }
+ecasound_stop: _ecasound_stop end { 1 }
+generate_and_connect_setup: _generate_and_connect_setup end { 1 }
+generate_setup: _generate_setup end { 1 }
+help: _help end { 1 }
+list_all_templates: _list_all_templates end { 1 }
+list_marks: _list_marks end { 1 }
+list_templates: _list_templates end { 1 }
+load_project: _load_project end { 1 }
+loop: _loop end { 1 }
+mark: _mark end { 1 }
+mark_loop: _mark_loop end { 1 }
+mixdown: _mixdown end { 1 }
+mixplay: _mixplay end { 1 }
+mon: _mon end { 1 }
+monitor_channel: _monitor_channel end { 1 }
+monitor_group: _monitor_group end { 1 }
+mute: _mute end { 1 }
+name_mark: _name_mark end { 1 }
+new_project: _new_project end { 1 }
+new_track: _new_track end { 1 }
+next_mark: _next_mark end { 1 }
+pan: _pan end { 1 }
+pan_back: _pan_back end { 1 }
+pan_left: _pan_left end { 1 }
+pan_right: _pan_right end { 1 }
+previous_mark: _previous_mark end { 1 }
+rec: _rec end { 1 }
+record_channel: _record_channel end { 1 }
+record_group: _record_group end { 1 }
+renew_engine: _renew_engine end { 1 }
+save_project: _save_project end { 1 }
+set_version: _set_version end { 1 }
+show_all_templates: _show_all_templates end { 1 }
+show_effects: _show_effects end { 1 }
+show_setup: _show_setup end { 1 }
+show_templates: _show_templates end { 1 }
+start: _start end { 1 }
+stop: _stop end { 1 }
+unity: _unity end { 1 }
+vol: _vol end { 1 }
 );
 # we use the following settings if we can't find config files
 

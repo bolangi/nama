@@ -36,10 +36,12 @@ map { my $func = $_;
 	my @all_parts = @parts;
 	my $full = shift @parts;
 	my @short = @parts;
-	my $end_anchor = $output->{$func}->{sig} =~ /\(\)/ 
+=comment
+	my $end_anchor = 1 # $output->{$func}->{sig} =~ /\(\)/ 
 						? q(/\s*$/)
 						: q();
-
+=cut
+	my $end_anchor = "end";
 	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
 	push @stubs,   	"$full: _$full $end_anchor { 1 }";
 	push @commands,	"command: $full";
