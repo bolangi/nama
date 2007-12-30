@@ -68,6 +68,8 @@ our (
 					# libraries
 
 	$grammar, 		# filled by Grammar.pm
+	$parser,		# for the objected created by Parse::RecDescent
+	%iam_cmd,		# 
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
 	$wav_dir,	# each project will get a directory here
@@ -3766,16 +3768,47 @@ sub remove_effect_gui {};
 ## Some of these, may be overwritten
 ## by definitions that follow
 
+use Carp;
+#&loop;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
+package UI;
+load_project({name => $project_name, create => $opts{c}}) if $project_name;
+$grammar = q(
+
+command: help
+help: 'h' { print "hello_from your command line gramar\n"; 1 }
+fail: 'f' { print "your command line gramar will get a zero\n"; 0 }
+
+
+);
+use Parse::RecDescent;
+use Term::ReadLine;
+my $term = new Term::ReadLine 'Ecmd';
+my $prompt = "Enter command: ";
+$OUT = $term->OUT || \*STDOUT;
+my $user_input;
+$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+$debug = 1;
+	while (1) {
+		my ($user_input) = $term->readline($prompt) ;
+		$user_input =~ /^\s*$/ and next;
+		$term->addhistory($user_input) ;
+		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
+		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+		$parser->command($user_input) 
+			and print("Succeeded\n") 
+			or  print("Returned false\n");
+	}
+}
+=comment
+sub loop {
 	package UI;
-	load_project({name => $project_name, create => $opts{c}}) if $project_name;
 	use Term::ReadLine;
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
 	$OUT = $term->OUT || \*STDOUT;
 	my $user_input;
-	use vars qw($parser %iam_cmd);
  	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 	$debug = 1;
 	while (1) {
@@ -3785,6 +3818,7 @@ sub loop {
 		$term->addhistory($user_input) ;
 		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+=cut
 =comment
 		if ($cmd eq 'eval') {
 			eval $predicate;
@@ -3801,13 +3835,13 @@ sub loop {
 			$debug and print "Found Ecmd command\n";
 			$parser->command($user_input) or print ("Parse failed\n");
 		} else {
-=cut
 			print "input: $user_input\n";
 			$parser->command($user_input) and print("Succeeded\n") or print ("Returned false\n");
 #		}
 
 	}
 }
+=cut
 
 format STDOUT_TOP =
 Chain Ver File            Setting Status Rec_ch Mon_ch 
