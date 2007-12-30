@@ -5,9 +5,11 @@ sub project_label_configure{
 	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	$project_label->configure( @_ ) }
 
-sub length_display{ $setup_length->configure(-text => colonize $length) };
+sub length_display{ 
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	$setup_length->configure(@_)};
 
-sub clock_display { 
+sub clock_config { 
 	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	$clock->configure( @_ )}
 
@@ -372,13 +374,13 @@ sub flash_ready {
 	my $color;
 		if (@record ){
 			$color = 'lightpink'; # live recording
-		} elsif ( really_recording ){  # mixing only
+		} elsif ( &really_recording ){  # mixing only
 			$color = 'yellow';
 		} else {  $color = 'lightgreen'; }; # just playback
 
 	$debug and print "flash color: $color\n";
-	_display(-background => $color);
-	$->after(10000, 
+	length_display(-background => $color);
+	$clock->after(10000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -888,13 +890,14 @@ sub mark {
 	else{ 
 		return if really_recording();
 		eval_iam(qq(cs-set-position $marks[$marker]));
+		sleep 1;
 	#	update_clock();
 	#	start_clock();
 	}
 }
 
 sub update_clock { 
-	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
+	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
 
 ### end

@@ -1,7 +1,15 @@
+Sun Dec 30 02:14:53 JST 2007
 
+Today the clock refresh is broken,
+clicking a mark, the gui thinks
+the engine has stopped. Perhaps
+it gets a momentary strange signal
+from the engine.
 
 
 Sat Dec 29 18:24:02 JST 2007
+
+Solved!!
 
 I am getting an object in subs that
 
@@ -17,9 +25,9 @@ Find_wavs we can fix by using our new version.
 
 
 
-Or try to find the call that passes the object!!
+**** Or try to find the call that passes the object!!
 
-And replace 
+And throw away that object.
 
 
 --------

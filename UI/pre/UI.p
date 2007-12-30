@@ -103,6 +103,8 @@ sub loop {
 	::load_project(
 		{create => $opts{c},
 		 name   => $project_name}) if $project_name;
+	setup_transport; 
+	connect_transport;
 	MainLoop;
 }
 

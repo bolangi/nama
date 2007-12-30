@@ -503,6 +503,7 @@ sub load_project {
 		#unless $opts{m} or $state_store_file !~ /.yaml$/;
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
+
 }
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
@@ -592,7 +593,7 @@ sub add_track {
 	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
 	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
 	$ui->track_gui($i);
-	print "Added new track!\n",yaml_out(\%state_c);
+	$debug and print "Added new track!\n",yaml_out(\%state_c);
 	return 1;
 }
 sub add_mix_track {
@@ -1120,6 +1121,42 @@ outputs--->device->{$name}[chain_id1, chain_id2,...]
 
 intermediate->chain_id->"chain operators and routing, etc."
 
+The general principle is equivalent to:
+
+inputs
+  |----->raw---->device-->$devname-->[ chain_id, chain_id,... ]
+  |----->raw---->file---->$filename->[ chain_id, chain_id,... ]
+  |----->cooked--->$n---->$loop_id-->[ chain_id, chain_id,... ]
+  |----->mixed---->$n---->$loop_id-->[ chain_id, chain_id,... ]
+  |_____>bus1----->$n---->$loop_id-->[ chain_id, chain_id,... ]
+
+outputs
+  |------------->device-->$devname-->[ chain_id, chain_id,... ]
+  |------------->file---->$filename->[ chain_id, chain_id,... ]
+  |_____________>loop---->$loop_id-->[ chain_id, chain_id,... ]
+
+The future:
+
+What is a bus? A group of Tracks and a set of Oids
+
+Let's let oids can target tracks group, that's what
+we are doing with the 'type' field anyway.
+
+Mixer/Tracker/Somebus
+
+Oids provide their own routines for:
+	
+	rec_file
+	mon_file
+	rec_device
+	mon_device
+
+or generalized: 
+
+	$bus->(rec/mon/track_n)->&code
+
+Bus may be a busname, like Mixer/Tracker (
+
 =cut
 sub write_chains {
 	$debug2 and print "&write_chains\n";
@@ -1341,7 +1378,7 @@ sub connect_transport {
 	$length = eval_iam('cs-get-length'); 
 	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
-	$ui->clock_display(-text => colonize(0));
+	$ui->clock_config(-text => colonize(0));
 	print eval_iam("fs");
 	$ui->flash_ready();
 	
@@ -1362,7 +1399,9 @@ sub transport_running {
 #	$debug2 and print "&transport_running\n";
 	 $e->eci('engine-status') eq 'running' ;
 }
-sub disconnect_transport { eval_iam('cs-disconnect') }
+sub disconnect_transport {
+	return if transport_running();
+	eval_iam('cs-disconnect') }
 
 
 sub toggle_unit {
@@ -2570,9 +2609,11 @@ sub project_label_configure{
 	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	$project_label->configure( @_ ) }
 
-sub length_display{ $setup_length->configure(-text => colonize $length) };
+sub length_display{ 
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	$setup_length->configure(@_)};
 
-sub clock_display { 
+sub clock_config { 
 	shift @_ if (ref $_[0]) =~ /UI/; # discard object
 	$clock->configure( @_ )}
 
@@ -2937,13 +2978,13 @@ sub flash_ready {
 	my $color;
 		if (@record ){
 			$color = 'lightpink'; # live recording
-		} elsif ( really_recording ){  # mixing only
+		} elsif ( &really_recording ){  # mixing only
 			$color = 'yellow';
 		} else {  $color = 'lightgreen'; }; # just playback
 
 	$debug and print "flash color: $color\n";
-	_display(-background => $color);
-	$->after(10000, 
+	length_display(-background => $color);
+	$clock->after(10000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -3453,13 +3494,14 @@ sub mark {
 	else{ 
 		return if really_recording();
 		eval_iam(qq(cs-set-position $marks[$marker]));
+		sleep 1;
 	#	update_clock();
 	#	start_clock();
 	}
 }
 
 sub update_clock { 
-	$ui->clock_display(-text => colonize(eval_iam('cs-get-position')));
+	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
 
 ### end
@@ -3624,6 +3666,8 @@ sub loop {
 	UI::load_project(
 		{create => $opts{c},
 		 name   => $project_name}) if $project_name;
+	setup_transport; 
+	connect_transport;
 	MainLoop;
 }
 
