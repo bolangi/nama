@@ -1,16 +1,16 @@
-## gui handling
+# gui handling
 use Carp;
 
 sub project_label_configure{ 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$project_label->configure( @_ ) }
 
 sub length_display{ 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$setup_length->configure(@_)};
 
 sub clock_config { 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$clock->configure( @_ )}
 
 sub manifest { $ew->deiconify() }
@@ -39,7 +39,8 @@ sub init_gui {
 
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
-	$ew->withdraw;
+	$ew->deiconify; 
+	#$ew->withdraw;
 
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -81,9 +82,9 @@ sub init_gui {
 
 	$build_track_label = $add_frame->Label(-text => "Track")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "REC")->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Rec CH")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
-	$build_track_mon_label = $add_frame->Label(-text => "MON")->pack(-side => 'left');
+	$build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	$build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
 	$build_track_add = $add_frame->Button->pack(-side => 'left');;
 
@@ -98,15 +99,9 @@ sub init_gui {
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(&project_dir,$state_store_file)) 
-					if project_dir();
-		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
-		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
-		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
-		$debug2 and print "\%cops\n================\n", &yaml_out(\%cops);
-		$debug2 and print "\%pre_output\n================\n", &yaml_out(\%pre_output); 
-		$debug2 and print "\%post_input\n================\n", &yaml_out(\%post_input);
-		exit;
+		#save_state(join_path(&project_dir,$state_store_file)) if project_dir();
+		$debug and dump_status( @status_vars );
+		#exit;
 				 }
 				);
 
@@ -166,8 +161,8 @@ sub transport_gui {
 	$transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
 	$transport_start = $transport_frame->Button->pack(-side => 'left');
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
-	$transport_setup = $transport_frame->Button->pack(-side => 'left');;
-	$transport_connect = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_new = $transport_frame->Button->pack(-side => 'left');;
 
@@ -189,9 +184,10 @@ sub transport_gui {
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
-			-text => 'Generate and connect',
+			-text => 'Arm',
 			-command => sub {&setup_transport; &connect_transport}
 						 );
+=comment
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
 			-command => \&setup_transport,
@@ -200,6 +196,7 @@ sub transport_gui {
 			-text => 'Connect chain setup',
 			-command => \&connect_transport,
 						 );
+=cut
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
 			-command => \&disconnect_transport,
@@ -280,7 +277,7 @@ sub time_gui {
 		-text => 'Set',
 		-command => \&arm_mark,
 	);
-	my $marks = 18; # number of marker buttons
+	my $marks = 20; # number of marker buttons
 	my @m = (1..$marks);
 	my $label = qw(A);
 	map { push @time_marks, $mark_frame->Button( 
@@ -365,7 +362,7 @@ sub oid_gui {
 	
 }
 sub paint_button {
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my ($button, $color) = @_;
 	$button->configure(-background => $color,
 						-activebackground => $color);
@@ -468,7 +465,7 @@ sub global_version_buttons {
 }
 sub track_gui { 
 	$debug2 and print "&track_gui\n";
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my $n = shift;
 	print "found index: $n\n";
 
@@ -645,20 +642,24 @@ sub track_gui {
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
 	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
-	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+	my $independent_effects_frame 
+		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
-	# parents are the independent effects
 
-	my $children = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+	my $controllers_frame 
+		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 	
+	# parents are the independent effects
 	# children are controllers for various paramters
 
-	$widget_c{$n}->{parents} = $parents;   # parents belong here
+	$widget_c{$n}->{parents} = $independent_effects_frame;
 
-	$widget_c{$n}->{children} = $children; # children go here
+	$widget_c{$n}->{children} = $controllers_frame;
 	
-	$parents->Label(-text => (uc $stub) )->pack(-side => 'left');
+	$independent_effects_frame
+		->Label(-text => uc $state_c{$n}->{file} )->pack(-side => 'left');
 
+	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
 	my @starts =   ( $e_bound{tkeca}{a}, 
 					 $e_bound{preset}{a}, 
@@ -688,7 +689,7 @@ sub track_gui {
 }
 
 sub update_version_button {
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
 	my $w = $widget_c{$n}->{version};
@@ -712,7 +713,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
-	local $debug = $debug3;
+	local $debug = 1; # $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -722,8 +723,8 @@ sub effect_button {
 	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
 		@indices = ();
 		@indices = @ladspa_sorted[$start..$end];
-		#	print "length sorted indices list: ".scalar @indices. "\n";
-#	print join " ", @indices;
+		$debug and print "length sorted indices list: ".scalar @indices. "\n";
+	$debug and print "Indices: @indices\n";
 	}
 		
 		for my $j (@indices) { 

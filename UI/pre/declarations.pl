@@ -14,6 +14,7 @@ our (
 	@effects_dynamic_vars,		# same for all chain operators
 	@global_vars,    # contained in config file
 	@config_vars,    # contained in config file
+	@status_vars,    # we will dump them for diagnostic use
 	%abbreviations, # for replacements in config files
 
 	$globals,		# yaml assignments for @global_vars
@@ -27,7 +28,6 @@ our (
 					# master in .ecmd root.
 					
 	$oids,			# serialized (YAML) form of @oids
-	$gui,			# still here!
 
 	$raw_to_disk_format,
 	$mix_to_disk_format,

@@ -63,3 +63,15 @@
 
 
 
+@status_vars = qw(
+
+						%state_c
+						%state_t
+						%copp
+						%cops
+						%post_input
+						%pre_output   
+						%inputs
+						%outputs      );
+
+

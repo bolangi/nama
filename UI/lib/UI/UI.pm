@@ -37,6 +37,7 @@ our (
 	@effects_dynamic_vars,		# same for all chain operators
 	@global_vars,    # contained in config file
 	@config_vars,    # contained in config file
+	@status_vars,    # we will dump them for diagnostic use
 	%abbreviations, # for replacements in config files
 
 	$globals,		# yaml assignments for @global_vars
@@ -50,7 +51,6 @@ our (
 					# master in .ecmd root.
 					
 	$oids,			# serialized (YAML) form of @oids
-	$gui,			# still here!
 
 	$raw_to_disk_format,
 	$mix_to_disk_format,
@@ -256,6 +256,7 @@ our (
 );
  
 
+
 @global_vars = qw(
 						$mixname
 						$effects_cache_file
@@ -320,6 +321,18 @@ our (
 
 
 
+@status_vars = qw(
+
+						%state_c
+						%state_t
+						%copp
+						%cops
+						%post_input
+						%pre_output   
+						%inputs
+						%outputs      );
+
+
 
 
 $debug3 = 0; # qualified routines get local $debug = $debug 3;
@@ -333,7 +346,18 @@ $loopb = 'loop,222';
 
 $mixchain = 1; 
 $mixchain_aux = 'MixDown'; # used for playing back mixes
-                              # when chain 1 is active
+                           # when chain 1 is active
+
+$mixname = 'mix';
+$unit = 1;
+$effects_cache_file = 'effects_cache.storable';
+$state_store_file = 'State';
+$chain_setup_file = 'project.ecs';
+$tk_input_channels = 10;
+$use_monitor_version_for_mixdown = 1;
+%alias = (1 => 'Mixdown', 2 => 'Tracker');
+$ladspa_sample_rate = 44100; # temporary setting
+
 ## Load my modules
 
 use UI::Assign qw(:all);
@@ -361,7 +385,7 @@ sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 
 sub discard_object {
-	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	shift @_ if (ref $_[0]) =~ /UI/; # discard_object
 	@_;
 }
 sub prepare {  # actions begin
@@ -375,8 +399,6 @@ sub prepare {  # actions begin
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 	my $create = $opts{c} ? 1 : 0;
-
-	$opts{g} and $gui = 1;
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
@@ -450,10 +472,24 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
-	assign_vars( \%cfg, @global_vars, @config_vars); 
+	assign_vars( \%cfg, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
 
 }
+sub ds {
+	dump_status( @_ );
+}
+sub dump_status {
+				my @status_vars = @_;
+				map{
+				
+					#my $identifier = ( /[\%\$\@](\w+)/ );
+					#print #	"=" x 20, qq(\n), 
+					print		qq($_\n), 
+							yaml_out( eval "\\$_"  );
+					} @status_vars;
+}
+
 sub walk_tree {
 	$debug2 and print "&walk_tree\n";
 	my $ref = shift;
@@ -572,13 +608,11 @@ $ui->take_gui;
 ## track and wav file handling
 
 sub add_track {
-	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	return 0 if transport_running();
 	my $name = shift;
-	$debug and print "name: $name\n";
-	
-	if ($track_names{$track_name}){
+	if ($track_names{$name}){
 		$debug and carp ("Track name in use\n");
 		return 0;
 	}
@@ -594,7 +628,6 @@ sub add_track {
 	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
 	$ui->track_gui($i);
 	$debug and print "Added new track!\n",yaml_out(\%state_c);
-	return 1;
 }
 sub add_mix_track {
 	return if $opts{m}; # or ! -e join_path(&project_dir,$state_store_file);
@@ -609,13 +642,13 @@ sub mix_suffix {
 }
 sub restore_track {
 	$debug2 and print "&restore_track\n";
-	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	@_ = discard_object(@_);
 	my $n = shift;
 	find_wavs($n);
 	$ui->track_gui($n), $ui->refresh();
 }
 sub register_track {
-	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	@_ = discard_object(@_);
 	$debug2 and print "&register_track\n";
 	my ($i, $name, $ch_r, $ch_m) = @_;
 	$debug and print <<VARS;
@@ -654,12 +687,13 @@ sub dig_ruins {
 		my @wavs = grep{s/(_\d+)?\.wav//i} readdir WAV;
 
 		$debug and print "tracks found: @wavs\n";
+
 		map{add_track($_)}@wavs;
 
 	}
 }
 sub find_wavs {
-	shift @_ if ref $_[0] =~ /UI/; # discard_object
+	@_ = discard_object(@_);
 	my $n = shift; 
 	$debug2 and print "&find_wavs\n";
 	$debug and print "track: $n\n";
@@ -1506,7 +1540,6 @@ sub rec_cleanup {
 		
 } 
 ## effect functions
-
 sub add_effect {
 	
 	$debug2 and print "&add_effect\n";
@@ -1524,7 +1557,24 @@ sub add_effect {
 			   								# already created in add_track
 
 	$id = cop_add(\%p); 
+	my %pp = ( %p, cop_id => $id); # replace chainop id
+	add_effect_gui(\%pp);
+	apply_op($id) if eval_iam("cs-is-valid");
 
+}
+
+sub add_effect_gui {
+		$debug2 and print "&add_effect_gui\n";
+		@_ = discard_object(@_);
+		my %p 			= %{shift()};
+		my $n 			= $p{chain};
+		my $code 			= $p{type};
+		my $parent_id = $p{parent_id};  
+		my $id		= $p{cop_id};   # initiates restore
+		my $parameter		= $p{parameter}; 
+		my $i = $effect_i{$code};
+
+		$debug and print yaml_out(\%p);
 
 		$debug and print "cop_id: $id, parent_id: $parent_id\n";
 		# $id is determined by cop_add, which will return the
@@ -1536,81 +1586,81 @@ sub add_effect {
 		defined $display_type or $display_type = $effects[$i]->{display}; # template
 		$debug and print "display type: $display_type\n";
 
-		if (! $gui or $display_type eq q(hidden) ){ # XX
+		return if $display_type eq q(hidden);
 
-			my $frame ;
-			if ( ! $parent_id ){ # independent effect
-				$frame = $widget_c{$n}->{parents}->Frame->pack(
-					-side => 'left', 
-					-anchor => 'nw',)
-			} else {                 # controller
-				$frame = $widget_c{$n}->{children}->Frame->pack(
-					-side => 'top', 
-					-anchor => 'nw')
-			}
-
-			no warnings;
-			$widget_e{$id} = $frame; 
-			# we need a separate frame so title can be long
-
-			# here add menu items for Add Controller, and Remove
-
-			my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
-				->{name};
-			$parentage and $parentage .=  " - ";
-			$debug and print "parentage: $parentage\n";
-			my $eff = $frame->Menubutton(
-				-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-			use warnings;
-
-			$eff->AddItems([
-				'command' => "Remove",
-				-command => sub {remove_effect($id) }
-			]);
-			$eff->grid();
-			my @labels;
-			my @sliders;
-
-			# make widgets
-
-			for my $p (0..$effects[$i]->{count} - 1 ) {
-			my @items;
-			#$debug and print "p_first: $p_first, p_last: $p_last\n";
-			for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-				push @items, 				
-					[ 'command' => $effects[$j]->{name},
-						-command => sub { add_effect ({
-								parent_id => $id,
-								chain => $n,
-								parameter  => $p,
-								type => $effects[$j]->{code} } )  }
-					];
-
-			}
-			push @labels, $frame->Menubutton(
-					-text => $effects[$i]->{params}->[$p]->{name},
-					-menuitems => [@items],
-					-tearoff => 0,
-			);
-				$debug and print "parameter name: ",
-					$effects[$i]->{params}->[$p]->{name},"\n";
-				my $v =  # for argument vector 
-				{	parent => \$frame,
-					cop_id => $id, 
-					p_num  => $p,
-				};
-				push @sliders,make_scale($v);
-			}
-
-			if (@sliders) {
-
-				$sliders[0]->grid(@sliders[1..$#sliders]);
-				 $labels[0]->grid(@labels[1..$#labels]);
-			}
+		my $frame ;
+		if ( ! $parent_id ){ # independent effect
+			$frame = $widget_c{$n}->{parents}->Frame->pack(
+				-side => 'left', 
+				-anchor => 'nw',)
+		} else {                 # controller
+			$frame = $widget_c{$n}->{children}->Frame->pack(
+				-side => 'top', 
+				-anchor => 'nw')
 		}
-	apply_op($id) if eval_iam("cs-is-valid");
+
+		no warnings;
+		$widget_e{$id} = $frame; 
+		# we need a separate frame so title can be long
+
+		# here add menu items for Add Controller, and Remove
+
+		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
+			->{name};
+		$parentage and $parentage .=  " - ";
+		$debug and print "parentage: $parentage\n";
+		my $eff = $frame->Menubutton(
+			-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
+		use warnings;
+
+		$eff->AddItems([
+			'command' => "Remove",
+			-command => sub { remove_effect($id) }
+		]);
+		$eff->grid();
+		my @labels;
+		my @sliders;
+
+		# make widgets
+
+		for my $p (0..$effects[$i]->{count} - 1 ) {
+		my @items;
+		#$debug and print "p_first: $p_first, p_last: $p_last\n";
+		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
+			push @items, 				
+				[ 'command' => $effects[$j]->{name},
+					-command => sub { add_effect ({
+							parent_id => $id,
+							chain => $n,
+							parameter  => $p,
+							type => $effects[$j]->{code} } )  }
+				];
+
+		}
+		push @labels, $frame->Menubutton(
+				-text => $effects[$i]->{params}->[$p]->{name},
+				-menuitems => [@items],
+				-tearoff => 0,
+		);
+			$debug and print "parameter name: ",
+				$effects[$i]->{params}->[$p]->{name},"\n";
+			my $v =  # for argument vector 
+			{	parent => \$frame,
+				cop_id => $id, 
+				p_num  => $p,
+			};
+			push @sliders,make_scale($v);
+		}
+
+		if (@sliders) {
+
+			$sliders[0]->grid(@sliders[1..$#sliders]);
+			 $labels[0]->grid(@labels[1..$#labels]);
+		}
 }
+
 sub remove_effect {
+	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -1631,13 +1681,20 @@ sub remove_effect {
 	# recursively remove children
 	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
 		
+	# parameter controllers are not separate ops
 	map{remove_effect($_)}@{ $cops{$id}->{owns} };
 
-	# parameter controllers are not separate ops
 	
-	remove_op($id) unless $cops{$id}->{belongs_to};
-
 	# remove my own cop_id from the stack
+	remove_op($id), $ui->remove_effect_gui($id) unless $cops{$id}->{belongs_to};
+
+}
+sub remove_effect_gui {
+	@_ = discard_object(@_);
+	$debug2 and print "&remove_effect_gui\n";
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+	$debug and print "id: $id, chain: $n\n";
 
 	$state_c{$n}->{ops} = 
 		[ grep{ $_ ne $id} @{ $state_c{ $cops{$id}->{chain} }->{ops} } ];
@@ -1647,6 +1704,7 @@ sub remove_effect {
 	delete $widget_e{$id}; 
 
 }
+
 sub remove_op {
 
 	my $id = shift;
@@ -2602,19 +2660,19 @@ sub retrieve_effects {
 ### end
 
 
-## gui handling
+# gui handling
 use Carp;
 
 sub project_label_configure{ 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$project_label->configure( @_ ) }
 
 sub length_display{ 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$setup_length->configure(@_)};
 
 sub clock_config { 
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	$clock->configure( @_ )}
 
 sub manifest { $ew->deiconify() }
@@ -2643,7 +2701,8 @@ sub init_gui {
 
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
-	$ew->withdraw;
+	$ew->deiconify; 
+	#$ew->withdraw;
 
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -2685,9 +2744,9 @@ sub init_gui {
 
 	$build_track_label = $add_frame->Label(-text => "Track")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "REC")->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Rec CH")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
-	$build_track_mon_label = $add_frame->Label(-text => "MON")->pack(-side => 'left');
+	$build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	$build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
 	$build_track_add = $add_frame->Button->pack(-side => 'left');;
 
@@ -2702,15 +2761,9 @@ sub init_gui {
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-				save_state(join_path(&project_dir,$state_store_file)) 
-					if project_dir();
-		$debug2 and print "\%state_c\n================\n", &yaml_out(\%state_c);
-		$debug2 and print "\%state_t\n================\n", &yaml_out(\%state_t);
-		$debug2 and print "\%copp\n================\n", &yaml_out(\%copp);
-		$debug2 and print "\%cops\n================\n", &yaml_out(\%cops);
-		$debug2 and print "\%pre_output\n================\n", &yaml_out(\%pre_output); 
-		$debug2 and print "\%post_input\n================\n", &yaml_out(\%post_input);
-		exit;
+		#save_state(join_path(&project_dir,$state_store_file)) if project_dir();
+		$debug and dump_status( @status_vars );
+		#exit;
 				 }
 				);
 
@@ -2770,8 +2823,8 @@ sub transport_gui {
 	$transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
 	$transport_start = $transport_frame->Button->pack(-side => 'left');
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
-	$transport_setup = $transport_frame->Button->pack(-side => 'left');;
-	$transport_connect = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_new = $transport_frame->Button->pack(-side => 'left');;
 
@@ -2793,9 +2846,10 @@ sub transport_gui {
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
-			-text => 'Generate and connect',
+			-text => 'Arm',
 			-command => sub {&setup_transport; &connect_transport}
 						 );
+=comment
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
 			-command => \&setup_transport,
@@ -2804,6 +2858,7 @@ sub transport_gui {
 			-text => 'Connect chain setup',
 			-command => \&connect_transport,
 						 );
+=cut
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
 			-command => \&disconnect_transport,
@@ -2884,7 +2939,7 @@ sub time_gui {
 		-text => 'Set',
 		-command => \&arm_mark,
 	);
-	my $marks = 18; # number of marker buttons
+	my $marks = 20; # number of marker buttons
 	my @m = (1..$marks);
 	my $label = qw(A);
 	map { push @time_marks, $mark_frame->Button( 
@@ -2969,7 +3024,7 @@ sub oid_gui {
 	
 }
 sub paint_button {
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my ($button, $color) = @_;
 	$button->configure(-background => $color,
 						-activebackground => $color);
@@ -3072,7 +3127,7 @@ sub global_version_buttons {
 }
 sub track_gui { 
 	$debug2 and print "&track_gui\n";
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my $n = shift;
 	print "found index: $n\n";
 
@@ -3249,20 +3304,24 @@ sub track_gui {
 	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
 	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
-	my $parents = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+	my $independent_effects_frame 
+		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 
-	# parents are the independent effects
 
-	my $children = ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+	my $controllers_frame 
+		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
 	
+	# parents are the independent effects
 	# children are controllers for various paramters
 
-	$widget_c{$n}->{parents} = $parents;   # parents belong here
+	$widget_c{$n}->{parents} = $independent_effects_frame;
 
-	$widget_c{$n}->{children} = $children; # children go here
+	$widget_c{$n}->{children} = $controllers_frame;
 	
-	$parents->Label(-text => (uc $stub) )->pack(-side => 'left');
+	$independent_effects_frame
+		->Label(-text => uc $state_c{$n}->{file} )->pack(-side => 'left');
 
+	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
 	my @starts =   ( $e_bound{tkeca}{a}, 
 					 $e_bound{preset}{a}, 
@@ -3292,7 +3351,7 @@ sub track_gui {
 }
 
 sub update_version_button {
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	@_ = discard_object(@_);
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
 	my $w = $widget_c{$n}->{version};
@@ -3316,7 +3375,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
-	local $debug = $debug3;
+	local $debug = 1; # $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -3326,8 +3385,8 @@ sub effect_button {
 	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
 		@indices = ();
 		@indices = @ladspa_sorted[$start..$end];
-		#	print "length sorted indices list: ".scalar @indices. "\n";
-#	print join " ", @indices;
+		$debug and print "length sorted indices list: ".scalar @indices. "\n";
+	$debug and print "Indices: @indices\n";
 	}
 		
 		for my $j (@indices) { 
@@ -3663,7 +3722,7 @@ sub loop {
 	time_gui;
 	new_take;
 	new_take;
-	UI::load_project(
+	load_project(
 		{create => $opts{c},
 		 name   => $project_name}) if $project_name;
 	setup_transport; 
@@ -3700,7 +3759,9 @@ sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
 sub restore_time_marker_labels {}
-sub show_unit{};
+sub show_unit {};
+sub add_effect_gui {};
+sub remove_effect_gui {};
 
 ## Some of these, may be overwritten
 ## by definitions that follow
@@ -3776,8 +3837,8 @@ $UI::RD_HINT = 1;
 
 $grammar = q(
 
-command: list_marks
 command: record_group
+command: list_marks
 command: show_effects
 command: generate_setup
 command: loop
@@ -3791,27 +3852,27 @@ command: new_project
 command: previous_mark
 command: pan_left
 command: monitor_channel
-command: monitor_group
 command: mixdown
-command: start
+command: monitor_group
 command: next_mark
+command: start
 command: disconnect_setup
 command: pan
 command: name_mark
 command: list_all_templates
 command: mixplay
 command: cut
-command: pan_right
 command: help
 command: mon
-command: record_channel
+command: pan_right
 command: list_templates
+command: record_channel
 command: generate_and_connect_setup
 command: ecasound_start
-command: vol
 command: set_version
-command: stop
+command: vol
 command: mark_loop
+command: stop
 command: mute
 command: renew_engine
 command: rec
@@ -3820,8 +3881,8 @@ command: new_track
 command: show_setup
 command: connect_setup
 command: ecasound_stop
-_list_marks: 'list_marks' | 'lm'
 _record_group: 'record_group' | 'record' | 'R'
+_list_marks: 'list_marks' | 'lm'
 _show_effects: 'show_effects' | 'sfx'
 _generate_setup: 'generate_setup' | 'generate' | 'gen'
 _loop: 'loop'
@@ -3835,27 +3896,27 @@ _new_project: 'new_project' | 'create'
 _previous_mark: 'previous_mark' | 'mb' | 'pm' | 'bm'
 _pan_left: 'pan_left' | 'pl'
 _monitor_channel: 'monitor_channel' | 'm'
-_monitor_group: 'monitor_group' | 'monitor' | 'M'
 _mixdown: 'mixdown' | 'mxd'
-_start: 'start' | 't'
+_monitor_group: 'monitor_group' | 'monitor' | 'M'
 _next_mark: 'next_mark' | 'mf' | 'nm' | 'fm'
+_start: 'start' | 't'
 _disconnect_setup: 'disconnect_setup' | 'disconnect'
 _pan: 'pan' | 'p'
 _name_mark: 'name_mark' | 'nm'
 _list_all_templates: 'list_all_templates' | 'lat'
 _mixplay: 'mixplay' | 'mxp'
 _cut: 'cut' | 'c'
-_pan_right: 'pan_right' | 'pr'
 _help: 'help' | 'h'
 _mon: 'mon'
-_record_channel: 'record_channel' | 'r'
+_pan_right: 'pan_right' | 'pr'
 _list_templates: 'list_templates' | 'lt'
+_record_channel: 'record_channel' | 'r'
 _generate_and_connect_setup: 'generate_and_connect_setup' | 'setup'
 _ecasound_start: 'ecasound_start' | 'T'
-_vol: 'vol' | 'v'
 _set_version: 'set_version' | 'version' | 'n'
-_stop: 'stop' | 'st'
+_vol: 'vol' | 'v'
 _mark_loop: 'mark_loop' | 'ml'
+_stop: 'stop' | 'st'
 _mute: 'mute' | 'z' | 'off'
 _renew_engine: 'renew_engine' | 'renew'
 _rec: 'rec'
@@ -3864,8 +3925,8 @@ _new_track: 'new_track' | 'new'
 _show_setup: 'show_setup' | 'show'
 _connect_setup: 'connect_setup' | 'connect' | 'con'
 _ecasound_stop: 'ecasound_stop' | 'S'
-list_marks: _list_marks { 1 }
 record_group: _record_group { 1 }
+list_marks: _list_marks { 1 }
 show_effects: _show_effects { 1 }
 generate_setup: _generate_setup { 1 }
 loop: _loop { 1 }
@@ -3879,27 +3940,27 @@ new_project: _new_project { 1 }
 previous_mark: _previous_mark { 1 }
 pan_left: _pan_left { 1 }
 monitor_channel: _monitor_channel { 1 }
-monitor_group: _monitor_group { 1 }
 mixdown: _mixdown { 1 }
-start: _start { 1 }
+monitor_group: _monitor_group { 1 }
 next_mark: _next_mark { 1 }
+start: _start { 1 }
 disconnect_setup: _disconnect_setup { 1 }
 pan: _pan { 1 }
 name_mark: _name_mark { 1 }
 list_all_templates: _list_all_templates { 1 }
 mixplay: _mixplay { 1 }
 cut: _cut { 1 }
-pan_right: _pan_right { 1 }
 help: _help { 1 }
 mon: _mon { 1 }
-record_channel: _record_channel { 1 }
+pan_right: _pan_right { 1 }
 list_templates: _list_templates { 1 }
+record_channel: _record_channel { 1 }
 generate_and_connect_setup: _generate_and_connect_setup { 1 }
 ecasound_start: _ecasound_start { 1 }
-vol: _vol { 1 }
 set_version: _set_version { 1 }
-stop: _stop { 1 }
+vol: _vol { 1 }
 mark_loop: _mark_loop { 1 }
+stop: _stop { 1 }
 mute: _mute { 1 }
 renew_engine: _renew_engine { 1 }
 rec: _rec { 1 }
@@ -4040,17 +4101,6 @@ ecasound_globals: "-B auto"
 mix_to_disk_format: cd-stereo
 mixer_out_format: cd-stereo
 raw_to_disk_format: cd-mono
-mixname: mix
-ladspa_sample_rate: frequency
-unit: 1 				
-effects_cache_file: effects_cache.storable
-state_store_file: State 
-chain_setup_file: project.ecs
-tk_input_channels: 10
-use_monitor_version_for_mixdown: true 
-alias:
-  1: Mixdown
-  2: Tracker
 ...
 
 FALLBACK_CONFIG

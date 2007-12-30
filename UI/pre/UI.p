@@ -22,6 +22,7 @@ use Data::YAML::Reader;
 # variables. 
 
 [% qx(cat ./declarations.pl) %] 
+
 [% qx(cat ./var_types.pl) %]
 
 $debug3 = 0; # qualified routines get local $debug = $debug 3;
@@ -35,7 +36,18 @@ $loopb = 'loop,222';
 
 $mixchain = 1; 
 $mixchain_aux = 'MixDown'; # used for playing back mixes
-                              # when chain 1 is active
+                           # when chain 1 is active
+
+$mixname = 'mix';
+$unit = 1;
+$effects_cache_file = 'effects_cache.storable';
+$state_store_file = 'State';
+$chain_setup_file = 'project.ecs';
+$tk_input_channels = 10;
+$use_monitor_version_for_mixdown = 1;
+%alias = (1 => 'Mixdown', 2 => 'Tracker');
+$ladspa_sample_rate = 44100; # temporary setting
+
 ## Load my modules
 
 use ::Assign qw(:all);
@@ -100,7 +112,7 @@ sub loop {
 	time_gui;
 	new_take;
 	new_take;
-	::load_project(
+	load_project(
 		{create => $opts{c},
 		 name   => $project_name}) if $project_name;
 	setup_transport; 
@@ -137,7 +149,9 @@ sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
 sub restore_time_marker_labels {}
-sub show_unit{};
+sub show_unit {};
+sub add_effect_gui {};
+sub remove_effect_gui {};
 
 ## Some of these, may be overwritten
 ## by definitions that follow
@@ -170,7 +184,7 @@ $grammar = q(
 
 
 $default = <<'FALLBACK_CONFIG';
-[% qx(cat ./config.yaml) %]
+[% qx(cat ./config.yml) %]
 FALLBACK_CONFIG
 
 # the following template are used to generate chain setups.
