@@ -1,0 +1,2 @@
+#!/usr/bin/perl -p 
+s/#([^!].*|$)//gm; # pound followed by newline or something not bang
