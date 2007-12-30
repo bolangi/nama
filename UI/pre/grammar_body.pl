@@ -1,4 +1,6 @@
-help: 'h' { print "hello_from your command line gramar\n" }
+command: fail
+help: _help /\s*$/ { print "hello_from your command line gramar\n"; 1 }
+fail: 'f' { print "your command line gramar will get a zero\n"; 0 }
 
 new_project: _new_project name {
 	::load_project( 
@@ -60,9 +62,6 @@ mix: 'mix' {1}
 norm: 'norm' {1}
 
 record: 'record' {} # set to Tracker-Record 
-monitor: 
-mixdown:
-mixplay: 
 
 exit: 'exit' { ::save_state($::state_store_file); exit; }
 

@@ -1,17 +1,52 @@
-#!/usr/bin/env perl
-#my $list = qx(./strip_all ./commands);
-my $list = qx(./emit_commands);
-map{
+#!/usr/local/bin/perl -w
+$debug = 0;
+use lib "$ENV{TD}/..";
+use UI::Assign qw(:all);
+$in = qx(./yamlify ./commands.yml.tab);
+my $ref = yaml_in( $in); 
+#print yaml_out $ref;
+# exit;
+my $output;
+map{ my $key = $_;
+	$debug and print "key: $key\n";
+	map {  #print $_, $/;
+		my $func = $_;	 # reference to a hash
+		#print "function: " , keys %{$func}, $/;
+		my ($function) = keys %{$func};
+		$debug and print "function: " , $function, $/;
+		$debug and print "found: " , ref $func->{$function}, $/;
+		#print keys %{ $func->{$function} }, $/;
+		$output->{$function} = $func->{$function};
 
-	chomp;
-	my @parts = my @all_parts = split " ", $_;
+=comment
+		print keys 
+=cut
+		
+	}  @{ $ref->{$key} } # ordered array
+			
+
+} keys %{ $ref };
+
+$debug and print join $/, "Output hash keys", keys %{ $output };
+
+map { my $func = $_; 
+	#print join (" ", keys %{ $output->{$func}}  ), $/;
+	#print $output->{$func}->{short} , $/;
+	my @parts = ($func, split " ", $output->{$func}->{short});
+	my @all_parts = @parts;
 	my $full = shift @parts;
 	my @short = @parts;
-	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
-	push @stubs,   	"$full: _$full { 1 }";
-	push @commands,	"command: $full";
+	my $end_anchor = $output->{$func}->{sig} =~ /\(\)/ 
+						? q(/\s*$/)
+						: q();
 
-} split "\n", $list;
+	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
+	push @stubs,   	"$full: _$full $end_anchor { 1 }";
+	push @commands,	"command: $full";
+} sort keys %{ $output };
+
+		#print "found2: " , ref $func->{function}->{short};
+		#print join " ", $function, $func->{function}->{short}, $/;
+
 
 print join "\n", @commands, @abbrevs, @stubs ;
-__END__

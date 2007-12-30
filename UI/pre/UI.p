@@ -173,15 +173,11 @@ $::RD_HINT = 1;
 
 $grammar = q(
 
-[% qx(./emit_command_headers) %]
-
 [% qx(./strip_comments  ./grammar_body.pl) %]
 
+[% qx(./emit_command_headers) %]
 );
-
-
 # we use the following settings if we can't find config files
-
 
 $default = <<'FALLBACK_CONFIG';
 [% qx(cat ./config.yml) %]

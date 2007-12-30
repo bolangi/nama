@@ -46,7 +46,7 @@ our (
 
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
-	%iam_cmd,		# 
+	%iam_cmd,		# for identifying IAM commands in user input
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
 	$wav_dir,	# each project will get a directory here
