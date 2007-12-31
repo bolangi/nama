@@ -6,7 +6,7 @@ sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name
 
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 sub status_vars {
-	serialize CLASS => '::', VARS => \@status_vars;
+	serialize -class => '::', -vars => \@status_vars;
 }
 
 sub discard_object {
@@ -849,7 +849,7 @@ sub write_chains {
 		}
 
 	
-	##### SETTING FILES AS INPUTS (used by mon_setup)
+	##### SETTING -fileS AS INPUTS (used by mon_setup)
 
 	for my $file (keys %{ $inputs{file} } ) {
 		$debug and print "monitor input file: $file\n";
@@ -862,7 +862,7 @@ sub write_chains {
 					         $state_c{$n}->{targets}->{selected_version($n)}),
 	   );
  	}
-	##### SETTING FILES AS OUTPUTS (used by rec_file and mix)
+	##### SETTING -fileS AS OUTPUTS (used by rec_file and mix)
 
 	for my $file ( keys %{ $outputs{file} } ){
 		my $n = $chain{$file};
@@ -1566,9 +1566,9 @@ sub prepare_static_effects_data{
 		integrate_ladspa_hints();
 		sort_ladspa_effects();
 		store_vars(
-			FILE => $effects_cache, 
-			VARS => \@effects_static_vars,
-			CLASS => '::',
+			-file => $effects_cache, 
+			-vars => \@effects_static_vars,
+			-class => '::',
 			STORABLE => 1 );
 	}
 
@@ -1950,9 +1950,9 @@ sub save_state {
 	print "filename: $file\n";
 
 	serialize(
-		FILE => $file, 
-		VARS => \@persistent_vars,
-		CLASS => '::',
+		-file => $file, 
+		-vars => \@persistent_vars,
+		-class => '::',
 #		STORABLE => 1	
 		);
 
@@ -1972,8 +1972,8 @@ sub assign_var {
 	my ($source, @vars) = @_;
 	assign_vars(
 				SOURCE => $source,
-				VARS   => \@vars,
-				CLASS => '::');
+				-vars   => \@vars,
+				-class => '::');
 }
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
@@ -2074,9 +2074,9 @@ sub save_effects {
 	# map {remove_op} @{ $state_c{$_}->{ops} }
 
 	store_vars(
-		FILE => $file, 
-		VARS => \@effects_dynamic_vars,
-		CLASS => '::');
+		-file => $file, 
+		-vars => \@effects_dynamic_vars,
+		-class => '::');
 
 }
 

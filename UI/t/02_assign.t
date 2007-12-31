@@ -42,11 +42,11 @@ for my $c (@test_classes) {
 		face => [1,5,7,12],
 		dict => {fruit => 'melon'}
 	};	
-	assign (DATA => $struct, CLASS => $c, VARS => \@var_list);
+	assign (-data => $struct, -class => $c, -vars => \@var_list);
 	#assign($struct, @var_list);
 		#print yaml_out(\%dict); 
 		#print yaml_out($struct);
-		my $serialized = serialize( CLASS => $c, VARS => \@var_list);  
+		my $serialized = serialize( -class => $c, -vars => \@var_list);  
 		# store_vars output as string
 
 	my $expected = <<WANT;

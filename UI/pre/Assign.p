@@ -67,18 +67,18 @@ sub assign {
 	
 	my %h = @_;
 	my $class;
-	croak "didn't expect scalar here" if ref $h{DATA} eq 'SCALAR';
-	croak "didn't expect code here" if ref $h{DATA} eq 'CODE';
+	croak "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
+	croak "didn't expect code here" if ref $h{-data} eq 'CODE';
 
-	if ( ref $h{DATA} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
+	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
-		$class = ref $h{DATA}; 
+		$class = ref $h{-data}; 
 		$debug and print "I found a class: $class, I think...\n";
 	} 
-	$class = $h{CLASS} if $h{CLASS};
+	$class = $h{-class} if $h{-class};
  	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
-	my @vars = @{ $h{VARS} };
-	my $ref = $h{DATA};
+	my @vars = @{ $h{-vars} };
+	my $ref = $h{-data};
 	my %sigil;
 	map{ 
 		my ($s, $identifier) = /(.)(\w+)/;
@@ -147,8 +147,8 @@ sub assign_vars {
 	local $debug = 1;
 	my %h = @_;
 	my $source = $h{SOURCE};
-	my @vars = @{ $h{VARS} };
-	my $class = $h{CLASS};
+	my @vars = @{ $h{-vars} };
+	my $class = $h{-class};
 	# assigns vars in @var_list to values from $source
 	# $source can be a :
 	#      - filename or
@@ -156,7 +156,7 @@ sub assign_vars {
 	#      - reference to a hash array containing assignments
 	#
 	# returns a $ref containing the retrieved data structure
-	$debug and print "source: ", ref $source or $source, "\n";
+	$debug and print "source: ", (ref $source) || $source, "\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
 
@@ -185,7 +185,7 @@ sub assign_vars {
 		and $ref = $source;
 
 
-	assign(DATA => $ref, VARS => \@vars, CLASS => $class);
+	assign(-data => $ref, -vars => \@vars, -class => $class);
 	1;	
 
 }
@@ -194,9 +194,9 @@ sub serialize {
 	$debug2 and print "&serialize\n";
 	local $debug = 1;
 	my %h = @_;
-	my @vars = @{ $h{VARS} };
-	my $class = $h{CLASS};
-	my $file  = $h{FILE};
+	my @vars = @{ $h{-vars} };
+	my $class = $h{-class};
+	my $file  = $h{-file};
  	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
@@ -214,7 +214,7 @@ sub serialize {
 		"eval returned zero or failed ($!\n)";
 	} @vars;
 	# my $result1 = store \%state, $file; # old method
-	if ( $h{FILE} ) {
+	if ( $h{-file} ) {
 
 		if ($h{STORABLE}) {
 			my $result1 = store \%state, $file; # old method

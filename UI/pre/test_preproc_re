@@ -7,7 +7,7 @@ package ::Text ;
 package Audio::Ecasound;
 @::RD::bigarray =
  @::RD::bigarray =
-$::RD::DATA 
+$::RD::-data 
  ::Text->loop;
 ::Text->loop;
 ::->prepare ;
