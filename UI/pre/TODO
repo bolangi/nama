@@ -1,3 +1,53 @@
+I would like to provide a object toolkit that
+could be used by someone interesting in developing
+a larger subset of DAW facilities based on 
+Ecasound.
+
+I also wanted to create something like
+a tape recorder like thing that would get down
+a lot of material and never break.
+
+So nothing waits on getting down track after
+track... you don't have to even provide a name.
+
+Writing a routine that writes Ecasound's language
+I've spent a lot of time with chain setups.
+I find them a bit like finding odd } or { of ' or "
+in bits of my code.
+
+So I can for my next project, decide how rec-status
+and make_io_lists would work in a world of objects.
+
+In make_io_lists, each object would tell make io lists
+what to do:
+
+	now i have 'if $oid{output} eq mixdown ' { setup mixtrack }'
+	now i have 'if $oid{output} eq busspec ' { setup mixtrack }'
+	I convert that to 
+	have 'if oid->add chains'
+	output eq mix' { setup mixtrack }'
+
+	that is each oid gets its own routines for
+	make_io_lists.
+
+	So that what was so big and complicated now gets
+	simplified. We will simply embed the subroutines
+	and refer to them by evaling the field in the 
+	$oid hash. 
+
+
+
+
+
+
+Mon Dec 31 03:16:47 JST 2007
+
+- Save state
+
+- Remove child controller in GUI mode
+
+- Text mode conditional loop
+
 Sun Dec 30 02:14:53 JST 2007
 
 Today the clock refresh is broken,

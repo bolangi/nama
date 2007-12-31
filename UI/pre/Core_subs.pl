@@ -1959,7 +1959,9 @@ sub save_state {
 	store_vars(
 		FILE => $file, 
 		VARS => \@persistent_vars,
-		CLASS => '::');
+		CLASS => '::',
+		STORABLE => 1	
+		);
 
 # store alsa settings
 

@@ -16,14 +16,8 @@ $debug = 1;
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
-		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
+		my ($cmd, $predicate) = ($user_input =~ /([\.-\w]+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
-		$parser->command($user_input) 
-			and print("Succeeded\n") 
-			or  print("Returned false\n");
-	}
-}
-=comment
 		if ($cmd eq 'eval') {
 			eval $predicate;
 			print "\n";
@@ -35,17 +29,13 @@ $debug = 1;
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found IAM command\n";
 			eval_iam($user_input) ;
-		} elsif ( grep { $cmd eq $_ } @ecmd_commands ) {
-			$debug and print "Found Ecmd command\n";
-			$parser->command($user_input) or print ("Parse failed\n");
 		} else {
-			print "input: $user_input\n";
-			$parser->command($user_input) and print("Succeeded\n") or print ("Returned false\n");
-#		}
+			$parser->command($user_input) 
+				and print("Succeeded\n") or print ("Returned false\n");
 
+		}
 	}
 }
-=cut
 
 format STDOUT_TOP =
 Chain Ver File            Setting Status Rec_ch Mon_ch 
