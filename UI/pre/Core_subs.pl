@@ -15,6 +15,7 @@ sub discard_object {
 }
 sub prepare {  # actions begin
 
+	local $debug = $debug3;
 
 	$debug2 and print "&prepare\n";
 
@@ -89,6 +90,7 @@ sub config { #strip_blank_lines(
 
 sub read_config {
 	$debug2 and print "&read_config\n";
+	local $debug = $debug3;
 	#print &config; exit;
 	%cfg = %{  $yr->read(config())  };
 	#print yaml_out( $cfg{abbreviations}); exit;
@@ -145,7 +147,7 @@ sub load_project {
 	remove_small_wavs(); 
 	print "reached here!!!\n";
 	retrieve_state($state_store_file) unless $opts{m} ;
-
+	$debug and print "found ", scalar @all_chains, "chains\n";
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 
@@ -1864,7 +1866,6 @@ sub integrate_ladspa_hints {
 		$effects[$i]->{params} = $effects_ladspa{$_}->{params};
 		$effects[$i]->{display} = $effects_ladspa{$_}->{display};
 	} keys %effects_ladspa;
-=comment
 
 my %L;
 my %M;
@@ -1878,17 +1879,14 @@ for my $k (keys %L) {
 for my $k (keys %M) {
 	$L{$k} or print "$k not found in ladspa listing\n";
 }
-exit;
 
 
-print join "\n", sort keys %effects_ladspa;
-print '-' x 60, "\n";
-print join "\n", grep {/el:/} sort keys %effect_i;
+$debug and print join "\n", sort keys %effects_ladspa;
+$debug and print '-' x 60, "\n";
+$debug and print join "\n", grep {/el:/} sort keys %effect_i;
 
 #print yaml_out \@effects; exit;
-exit;
 
-=cut
 }
 sub d2 {
 	my $n = shift;
