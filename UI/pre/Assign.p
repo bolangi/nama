@@ -144,9 +144,9 @@ sub assign {
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
-	local $debug = $debug3;
+	local $debug = 1;# $debug3;
 	my %h = @_;
-	my $source = $h{SOURCE};
+	my $source = $h{-source};
 	my @vars = @{ $h{-vars} };
 	my $class = $h{-class};
 	# assigns vars in @var_list to values from $source
@@ -216,7 +216,7 @@ sub serialize {
 	# my $result1 = store \%state, $file; # old method
 	if ( $h{-file} ) {
 
-		if ($h{STORABLE}) {
+		if ($h{-storable}) {
 			my $result1 = store \%state, $file; # old method
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;

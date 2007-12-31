@@ -1567,11 +1567,11 @@ sub prepare_static_effects_data{
 		get_ladspa_hints();
 		integrate_ladspa_hints();
 		sort_ladspa_effects();
-		store_vars(
+		serialize (
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
 			-class => '::',
-			STORABLE => 1 );
+			-storable => 1 );
 	}
 
 }
@@ -1969,7 +1969,7 @@ sub save_state {
 sub assign_var {
 	my ($source, @vars) = @_;
 	assign_vars(
-				SOURCE => $source,
+				-source => $source,
 				-vars   => \@vars,
 				-class => '::');
 }
