@@ -1,2 +1,3 @@
-vim UI.p Core_subs.pl Assign.p Graphical_subs.pl /home/jroth/build/flow/UI/lib/UI/UI.pm $TD/gui
+vim UI.p Core_subs.pl Assign.p Graphical_subs.pl
+/home/jroth/build/flow/UI/lib/UI/UI.pm $TD/gui ~/.bashrc
 

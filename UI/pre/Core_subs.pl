@@ -1,8 +1,9 @@
 use Carp;
+sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { "config.yml" }
-sub ecmd_dir { ".ecmd" }
+sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
 sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
-sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name) }
+sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name) }
 
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 sub status_vars {
@@ -55,7 +56,6 @@ sub prepare {  # actions begin
 	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
 }
-sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 
 sub eval_iam {
 	local $debug = $debug3;
@@ -73,7 +73,7 @@ sub eval_iam {
 ## configuration file
 
 sub global_config{
-	my $config = join_path( &wav_dir, &ecmd_dir, &config_file );
+	my $config = join_path( &ecmd_dir, &config_file );
 	-f $config and io($config)->all;
 }
 sub project_config {
@@ -81,12 +81,7 @@ sub project_config {
 	my $config = join_path( &project_dir, &config_file );
 	-f $config and io($config)->all;
 }
-sub config { #strip_blank_lines(
-			#	strip_comments(
-					&project_config or &global_config or $default 
-			# ))
-			 
-			 }
+sub config { strip_all( &project_config or &global_config or $default) }
 
 sub read_config {
 	$debug2 and print "&read_config\n";
@@ -1552,7 +1547,7 @@ sub prepare_static_effects_data{
 	local $debug = $debug3;
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
+	my $effects_cache = join_path(&ecmd_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
@@ -1942,7 +1937,7 @@ sub save_state {
 		} grep { $old_vol{$_} } @all_chains;
 
  # old vol level has been stored, thus is muted
-	$file = $file ? $file : $state_store_file;
+	$file |= $state_store_file;
 	$file = join_path(&project_dir, $file);
 		$debug and 1;
 	print "filename: $file\n";
@@ -1951,7 +1946,7 @@ sub save_state {
 		-file => $file, 
 		-vars => \@persistent_vars,
 		-class => '::',
-#		STORABLE => 1	
+		-storable => 1,
 		);
 
 # store alsa settings
@@ -1984,7 +1979,7 @@ sub retrieve_state {
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 	assign_var( $file, @persistent_vars );
-	print status_vars; exit;
+	#print status_vars; exit;
 
 =comment
 	$debug and print ref $ref->{marks};

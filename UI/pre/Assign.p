@@ -61,11 +61,11 @@ $debug3 = 0;
 use Carp;
 
 sub assign {
-	local $debug = $debug3;
+	local $debug = 0;# $debug3;
 	
 	$debug2 and print "&assign\n";
 	
-	my %h = @_;
+	my %h = @_; # parameters appear in %h
 	my $class;
 	croak "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
 	croak "didn't expect code here" if ref $h{-data} eq 'CODE';
@@ -75,10 +75,21 @@ sub assign {
 		$class = ref $h{-data}; 
 		$debug and print "I found a class: $class, I think...\n";
 	} 
-	$class = $h{-class} if $h{-class};
- 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
+	$class = $h{-class};
+ 	$class .= "\:\:" unless $class =~ /\:\:/;; # backslashes protect
+	# i can't see any reason why we should append this.
+												#from preprocessor
 	my @vars = @{ $h{-vars} };
 	my $ref = $h{-data};
+	my $type = ref $ref;
+	$debug and print <<ASSIGN;
+	data type: $type
+	data: $ref
+	class: $class
+	vars: @vars
+ASSIGN
+	#$debug and print yaml_out($ref);
+
 	my %sigil;
 	map{ 
 		my ($s, $identifier) = /(.)(\w+)/;
