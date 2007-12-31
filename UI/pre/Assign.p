@@ -22,7 +22,7 @@ our @ISA = qw(Exporter);
 #
 our %EXPORT_TAGS = ( 'all' => [ qw(
 		
-		serial
+		serialize
 		assign
 		assign_vars
 		store_vars
@@ -121,7 +121,7 @@ sub assign {
 														
 				# quoting for non-numerical
 				
-				$val = qq("$val") unless  $val =~ /^[\d.,+-e]+$/ 
+				$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
 					#or 		ref $val;
 		
 			} else { $val = q(undef) }; # or set as undefined
@@ -143,9 +143,12 @@ sub assign {
 }
 
 sub assign_vars {
-	my ($source, @vars) = @_;
 	$debug2 and print "&assign_vars\n";
 	local $debug = 1;
+	my %h = @_;
+	my $source = $h{SOURCE};
+	my @vars = @{ $h{VARS} };
+	my $class = $h{CLASS};
 	# assigns vars in @var_list to values from $source
 	# $source can be a :
 	#      - filename or
@@ -153,19 +156,19 @@ sub assign_vars {
 	#      - reference to a hash array containing assignments
 	#
 	# returns a $ref containing the retrieved data structure
-	$debug and print "file: $source\n";
+	$debug and print "source: ", ref $source or $source, "\n";
 	$debug and print "variable list: @vars\n";
 	my $ref;
 
 ### figure out what to do with input
 
-	$source !~ /.yaml$/i and -f $source 
+	$source !~ /.yml$/i and -f $source 
 		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
 
 	## check for a filename
 
-	or -f $source and $source =~ /.yaml$/ 
+	or -f $source and $source =~ /.yml$/ 
 		and $debug and print "found a yaml file: $source\n"
 		and $ref = yaml_in($source)
  	
@@ -182,49 +185,20 @@ sub assign_vars {
 		and $ref = $source;
 
 
-	assign(DATA => $ref, VARS => \@vars, CLASS => '::'); # XX HARDCODED
+	assign(DATA => $ref, VARS => \@vars, CLASS => $class);
 	1;	
 
 }
 
-sub store_vars {
+sub serialize {
+	$debug2 and print "&serialize\n";
 	local $debug = 1;
-	$debug2 and print "&store_vars\n";
 	my %h = @_;
+	my @vars = @{ $h{VARS} };
 	my $class = $h{CLASS};
 	my $file  = $h{FILE};
  	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
-	my @vars = @{ $h{VARS} };
-	my %sigil;
-	$debug and print "vars: @vars\n";
-	$debug and print "file: $file\n";
-	my %state;
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string =  q($state{)
-							. $identifier
-							. q(} = \\) # double backslash needed
-							. $sigil
-							. $class
-							. $identifier;
-	$debug and print "attempting to eval $eval_string\n";
-	eval($eval_string) or print "failed to eval $eval_string: $!\n";
-	} @vars;
-	if ($h{STORABLE}) {
-		my $result1 = store \%state, $file; # old method
-	} else {
-		$file .= '.yaml' unless $file =~ /\.yaml$/;
-		my $yamlout = yaml_out(\%state);
-		$yamlout > io $file;
-	}
-
-}
-sub serial {
-	my %h = @_;
-	my @vars = @{ $h{VARS} };
-	my $class = $h{CLASS} if $h{CLASS};
- 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
-	# now we will only store in yaml
-	$debug2 and print "&serial\n";
+	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
 		 my $eval_string =  q($state{)
@@ -236,11 +210,21 @@ sub serial {
 							. $class
 							. $identifier;
 	$debug and print "attempting to eval $eval_string\n";
-	eval($eval_string) or print "failed to eval $eval_string: $!\n";
+	eval($eval_string) or $debug  and print 
+		"eval returned zero or failed ($!\n)";
 	} @vars;
 	# my $result1 = store \%state, $file; # old method
-	yaml_out(\%state);
+	if ( $h{FILE} ) {
 
+		if ($h{STORABLE}) {
+			my $result1 = store \%state, $file; # old method
+		} else {
+			$file .= '.yml' unless $file =~ /\.yml$/;
+			my $yaml = yaml_out(\%state);
+			$yaml > io($file);
+			$debug and print $yaml;
+		}
+	} else { yaml_out(\%state) }
 
 }
 

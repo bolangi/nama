@@ -1,10 +1,13 @@
 use Carp;
-sub config_file { "config.yaml" }
+sub config_file { "config.yml" }
 sub ecmd_dir { ".ecmd" }
 sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
 sub project_dir  {$project_name and join_path(&wav_dir, &ecmd_dir, $project_name) }
 
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
+sub status_vars {
+	serialize CLASS => '::', VARS => \@status_vars;
+}
 
 sub discard_object {
 	shift @_ if (ref $_[0]) =~ /UI/; # discard_object
@@ -54,6 +57,7 @@ sub prepare {  # actions begin
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 
 sub eval_iam {
+	local $debug = $debug3;
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -94,26 +98,12 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
-	assign_vars( \%cfg, @config_vars); 
+	assign_var( \%cfg, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
 
 }
-sub ds {
-	dump_status( @_ );
-}
-sub dump_status {
-				my @status_vars = @_;
-				map{
-				
-					#my $identifier = ( /[\%\$\@](\w+)/ );
-					#print #	"=" x 20, qq(\n), 
-					print		qq($_\n), 
-							yaml_out( eval "\\$_"  );
-					} @status_vars;
-}
-
 sub walk_tree {
-	$debug2 and print "&walk_tree\n";
+	#$debug2 and print "&walk_tree\n";
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 
@@ -154,11 +144,8 @@ sub load_project {
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
-	retrieve_state_storable(join_path(&project_dir,$state_store_file)) 
-		unless $opts{m} or $state_store_file =~ /.yaml$/;
-	retrieve_state (join_path(&project_dir,$state_store_file)) 
-	if $state_store_file =~ /.yaml$/ and ! $opts{m} ;
-		#unless $opts{m} or $state_store_file !~ /.yaml$/;
+	retrieve_state($state_store_file) unless $opts{m} ;
+
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 
@@ -175,7 +162,7 @@ sub initialize_project_data {
 		-background => 'lightyellow',
 		); 
 
-	# assign_vars($project_init_file, @project_vars);
+	# assign_var($project_init_file, @project_vars);
 
 	$last_version = 0;
 	%track_names = ();
@@ -506,6 +493,7 @@ sub collect_chains {
 }
 sub rec_status {
 	my $n = shift;
+	local $debug = $debug3;
 	$debug2 and print "&rec_status\n";
 	$debug and print "found object: ", ref $n, $/ if ref $n;
 	no warnings;
@@ -513,7 +501,8 @@ sub rec_status {
 	use warnings;
 
 no warnings;
-my $file_exists = -f join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
+my $file = join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
+my $file_exists = -f $file;
 use warnings;
     return "MUTE" if $state_c{$n}->{rw} eq "MON" and ! $file_exists;
 	return "MUTE" if $state_c{$n}->{rw} eq "MUTE";
@@ -525,7 +514,7 @@ use warnings;
 			
 			if ($state_c{$n}->{rw} eq "REC"){
 				return "REC" if $state_c{$n}->{ch_r};
-				return "MON" if $file_exists;
+				return "MON" if $file_exists; #or carp "file not found;
 				return "MUTE";
 			}
 		}
@@ -1568,7 +1557,7 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $opts{s}){  
 		$debug and print "found effects cache: $effects_cache\n";
-		assign_vars($effects_cache, @effects_static_vars);
+		assign_var($effects_cache, @effects_static_vars);
 	} else {
 		local $debug = 0;
 		$debug and print "reading in effects data, please wait...\n";
@@ -1952,15 +1941,19 @@ sub save_state {
 	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
 	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
-		}
-	grep { $old_vol{$_} }  # old vol level has been stored, thus is muted
-	@all_chains;
+		} grep { $old_vol{$_} } @all_chains;
 
-	store_vars(
+ # old vol level has been stored, thus is muted
+	$file = $file ? $file : $state_store_file;
+	$file = join_path(&project_dir, $file);
+		$debug and 1;
+	print "filename: $file\n";
+
+	serialize(
 		FILE => $file, 
 		VARS => \@persistent_vars,
 		CLASS => '::',
-		STORABLE => 1	
+#		STORABLE => 1	
 		);
 
 # store alsa settings
@@ -1975,114 +1968,27 @@ sub save_state {
 	@all_chains;
 
 }
-sub retrieve_state_storable {
-	$debug2 and print "&retrieve_state_storable\n";
-	my %oid_status_temp;
-	my $file = shift;
-	-e $file or warn ("file: $file not found\n"),return 0;
-	my $hash_ref = retrieve($file);
-	$monitor_version= ${ $hash_ref->{monitor_version} } if defined $hash_ref->{monitor_version} ;
-	$last_version =   ${ $hash_ref->{last_version} } if defined $hash_ref->{last_version} ;
-	%track_names 	= %{ $hash_ref->{track_names} } if defined $hash_ref->{track_names} ;
-	%state_c 		= %{ $hash_ref->{state_c} } if defined $hash_ref->{state_c} ;
-	%state_t 		= %{ $hash_ref->{state_t} } if defined $hash_ref->{state_t} ;
-	%cops 			= %{ $hash_ref->{cops} } if defined $hash_ref->{cops} ;
-	$cop_id 		= ${ $hash_ref->{cop_id} } if defined $hash_ref->{cop_id} ;
-	%copp 			= %{ $hash_ref->{copp} } if defined $hash_ref->{copp} ;
-	@all_chains 	= @{ $hash_ref->{all_chains} } if defined $hash_ref->{all_chains} ;
-	$i 				= ${ $hash_ref->{i} } if defined $hash_ref->{i} ;
-	$t 				= ${ $hash_ref->{t} } if defined $hash_ref->{t} ;
-	%take 			= %{ $hash_ref->{take} } if defined $hash_ref->{take} ;
-	@takes 			= @{ $hash_ref->{takes} } if defined $hash_ref->{takes} ;
-	%chain 			= %{ $hash_ref->{chain} } if defined $hash_ref->{chain} ;
-	@marks			= @{ $hash_ref->{marks} } if defined $hash_ref->{marks} ;	
-	$unit			= ${ $hash_ref->{unit} } if defined $hash_ref->{unit} ;	
-	%oid_status		= %{ $hash_ref->{oid_status} } if defined $hash_ref->{oid_status} ;	
-	%old_vol		= %{ $hash_ref->{old_vol} } if defined $hash_ref->{old_vol} ;	
-	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
-	
-	my $toggle_jack = $widget_o[$#widget_o];
-	&convert_to_jack, $ui->paint_button($toggle_jack, q(lightblue) ) if $jack_on;
-
-	$ui->refresh_oids;
-
-
-	# restore mixer settings
-
-	my $result = system "sudo alsactl -f $file.alsa restore";
-	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
-
-	# restore time marker labels
-
-	$ui->restore_time_marker_labels();
-
-=comment
-	map{ $time_marks[$_]->configure( 
-		-text => &colonize($marks[$_]),
-		-background => $old_bg,
-	)} 
-	grep{ $marks[$_] }1..$#time_marks;
-=cut
-
-	# restore take and track guis
-	
-	for my $t (@takes) { next if $t == 1; $ui->take_gui }; #
-	# Why skip first????? XXXX first in &initialize_project
-	my $did_apply = 0;
-	$last_version = 0; 
-	for my $n (@all_chains) { 
-		$debug and print "restoring track: $n\n";
-		&restore_track($n) ;
-		for my $id (@{$state_c{$n}->{ops}}){
-			$did_apply++ 
-				unless $id eq $state_c{$n}->{vol}
-					or $id eq $state_c{$n}->{pan};
-
-			
-			&add_effect({
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
-						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
-						});
-
-		# TODO if parent has a parent, i am a parameter controller controlling
-		# a parameter controller, and therefore need the -kx switch
-		}
-	}
-	$did_apply and $ew->deiconify();
-
+sub assign_var {
+	my ($source, @vars) = @_;
+	assign_vars(
+				SOURCE => $source,
+				VARS   => \@vars,
+				CLASS => '::');
 }
-=comment
-=cut
 sub retrieve_state {
-	# look for yaml if not look for standard
-	
 	$debug2 and print "&retrieve_state\n";
-	my ($file)  = shift; # assuming $file will never have .yaml
+	my $file = shift;
+	$file |= $state_store_file;
+	$file = join_path(project_dir(), $file);
+	my $yamlfile = $file;
+	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
+	$file = $yamlfile if -f $yamlfile;
+	! -f $file and carp("file not found: $file\n"), return;
+	$debug and print "using file: $file";
+	assign_var( $file, @persistent_vars );
+	print status_vars; exit;
 
 =comment
-	my $yamlfile = "$file.yaml" ;
-	my $ref; # to receive yaml data
-	if (-f $yamlfile) {
-		$debug and print qq($yamlfile: YAML file found\n);
-		$ref = assign_vars($yamlfile, @persistent_vars);
-	} elsif (-f $file) {
-		$debug and print qq($file: 'Storable' file found\n);
-		$ref = assign_vars($file, @persistent_vars);
-	} else {
-		$debug and 
-		carp("no state files found, neither $file, nor $yamlfile\n");
-		return;
-	}
-=cut
-
-	my $ref = assign_vars($file, @persistent_vars);
-
-	# variables successfully assigned
-
-=comment
-	$debug and print join " ", keys %{ $ref };
 	$debug and print ref $ref->{marks};
 	 @marks = @{ $ref->{marks} };
 	 print "array size ", scalar @marks;

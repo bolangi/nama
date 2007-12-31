@@ -46,7 +46,7 @@ for my $c (@test_classes) {
 	#assign($struct, @var_list);
 		#print yaml_out(\%dict); 
 		#print yaml_out($struct);
-		my $serialized = serial( CLASS => $c, VARS => \@var_list);  
+		my $serialized = serialize( CLASS => $c, VARS => \@var_list);  
 		# store_vars output as string
 
 	my $expected = <<WANT;

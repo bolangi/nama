@@ -232,4 +232,9 @@ our (
 	$OUT,				# filehandle for Text mode print
 	$commands,	# ref created from commands.plus
 
+	$save_id, # text variable
+	$sn_save_text,# text entry widget
+	$sn_save,	# button to save settings
+	$sn_dump,  # button to dump status
+
 );

@@ -47,6 +47,7 @@ $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1;
 %alias = (1 => 'Mixdown', 2 => 'Tracker');
 $ladspa_sample_rate = 44100; # temporary setting
+$jack_on = 0;
 
 ## Load my modules
 
@@ -185,7 +186,7 @@ FALLBACK_CONFIG
 
 # the following template are used to generate chain setups.
 $oids = <<'TEMPLATES';
-[% qx(cat ./chain_templates.yaml) %]
+[% qx(cat ./chain_templates.yml) %]
 TEMPLATES
 
 

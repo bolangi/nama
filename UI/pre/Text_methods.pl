@@ -16,7 +16,7 @@ $debug = 1;
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
-		my ($cmd, $predicate) = ($user_input =~ /([\.-\w]+)(.*)/);
+		my ($cmd, $predicate) = ($user_input =~ /([\w\.\-]+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
 		if ($cmd eq 'eval') {
 			eval $predicate;

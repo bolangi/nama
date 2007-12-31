@@ -79,6 +79,12 @@ sub init_gui {
 #	$sn_load_nostate = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
+	$sn_save = $load_frame->Button->pack(-side => 'left');
+	$sn_save_text = $load_frame->Entry(
+									-textvariable => \$save_id,
+									-width => 15
+									)->pack(-side => 'left');
+	$sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(-text => "Track")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
@@ -96,12 +102,16 @@ sub init_gui {
 		-text => 'New',
 		-command => sub { load_project({create => 1}) },
 		);
+	$sn_save->configure(
+		-text => 'Save settings',
+		-command => sub {save_state $save_id });
+	$sn_dump->configure(
+		-text => q(Dump state),
+		-command => sub{ print &status_vars });
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
-		#save_state(join_path(&project_dir,$state_store_file)) if project_dir();
-		$debug and dump_status( @status_vars );
-		#exit;
+				exit;
 				 }
 				);
 
@@ -713,7 +723,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
-	local $debug = 1; # $debug3;
+	local $debug = $debug3;
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
