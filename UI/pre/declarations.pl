@@ -235,6 +235,7 @@ our (
 	$save_id, # text variable
 	$sn_save_text,# text entry widget
 	$sn_save,	# button to save settings
+	$sn_recall,	# button to recall settings
 	$sn_dump,  # button to dump status
 
 );

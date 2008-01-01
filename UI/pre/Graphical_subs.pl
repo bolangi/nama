@@ -80,7 +80,9 @@ sub init_gui {
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
 	$sn_save = $load_frame->Button->pack(-side => 'left');
-	$sn_save_text = $load_frame->Entry(
+	$sn_recall = $load_frame->Button->pack(-side => 'left');
+	$save_id = "";
+	my $sn_save_text = $load_frame->Entry(
 									-textvariable => \$save_id,
 									-width => 15
 									)->pack(-side => 'left');
@@ -96,15 +98,19 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => \&load_project,
-		);
+		-command => sub{ load_project });
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { load_project({create => 1}) },
-		);
+		-command => sub { load_project -create => 1});
 	$sn_save->configure(
 		-text => 'Save settings',
-		-command => sub {save_state $save_id });
+		-command => #sub { print "save_id: $save_id\n" });
+		 sub {save_state($save_id) });
+	$sn_recall->configure(
+		-text => 'Recall settings',
+ 		-command => sub {load_project -name => $project_name, 
+ 										-settings => $save_id },
+				);
 	$sn_dump->configure(
 		-text => q(Dump state),
 		-command => sub{ print &status_vars });

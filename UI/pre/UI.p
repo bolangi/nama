@@ -114,8 +114,8 @@ sub loop {
 	new_take;
 	new_take;
 	load_project(
-		{create => $opts{c},
-		 name   => $project_name}) if $project_name;
+		-create => $opts{c},
+		-name   => $project_name) if $project_name;
 	setup_transport; 
 	connect_transport;
 	MainLoop;

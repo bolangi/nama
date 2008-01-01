@@ -93,7 +93,7 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	print yaml_out( \%cfg ); #exit;
+	#print yaml_out( \%cfg ); #exit;
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_var( \%cfg, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
@@ -116,17 +116,17 @@ sub substitute{
 ## project handling
 
 sub load_project {
-	my $hash = shift;
+	my %h = @_;
 	$debug2 and print "&load_project\n";
-	$debug and print "\$project: $project name: $hash->{name} create: $hash->{create}\n";
-	return unless $hash->{name} or $project;
+	$debug and print "\$project: $project name: $h{-name} create: $h{-create}\n";
+	return unless $h{-name} or $project;
 
 	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
 	
-	$project = remove_spaces($project); # internal spaces to underscores
-	$project_name = $hash->{name} ? $hash->{name} : $project;
-	$hash->{create} and 
+	my $project = remove_spaces($project); # internal spaces to underscores
+	$project_name = $h{-name} ? $h{-name} : $project;
+	$h{-create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &this_wav_dir, &project_dir;
 =comment 
@@ -141,7 +141,7 @@ sub load_project {
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
-	retrieve_state($state_store_file) unless $opts{m} ;
+	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
 	$debug and print "found ", scalar @all_chains, "chains\n";
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
@@ -1937,7 +1937,7 @@ sub save_state {
 		} grep { $old_vol{$_} } @all_chains;
 
  # old vol level has been stored, thus is muted
-	$file |= $state_store_file;
+	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
 		$debug and 1;
 	print "filename: $file\n";
@@ -1971,7 +1971,7 @@ sub assign_var {
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
 	my $file = shift;
-	$file |= $state_store_file;
+	$file = $file ? $file : $state_store_file;
 	$file = join_path(project_dir(), $file);
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
