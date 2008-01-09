@@ -2,6 +2,7 @@
 
 sub refresh_t { # buses
 	$debug2 and print "&refresh_t\n";
+	local $debug = $debug3;
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
 					MUTE => $old_bg);

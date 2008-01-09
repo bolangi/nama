@@ -155,7 +155,7 @@ ASSIGN
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
-	local $debug = 1;# $debug3;
+	local $debug = $debug3;
 	my %h = @_;
 	my $source = $h{-source};
 	my @vars = @{ $h{-vars} };

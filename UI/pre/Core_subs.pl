@@ -14,7 +14,7 @@ sub discard_object {
 	shift @_ if (ref $_[0]) =~ /UI/; # discard_object
 	@_;
 }
-sub prepare {  # actions begin
+sub prepare {  
 
 	local $debug = $debug3;
 
@@ -50,7 +50,9 @@ sub prepare {  # actions begin
 	new_engine();
 	initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
-	
+	#print "keys effect_i: ", join " ", keys %effect_i;
+	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
+	#die "no keys";	
 	$debug and print "wav_dir: ", wav_dir(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
@@ -474,6 +476,7 @@ sub mon_vert {
 #
 sub collect_chains {
 	$debug2 and print "&collect\n";
+	local $debug = $debug3;
 	@monitor = @record = ();
 
 	
@@ -1493,6 +1496,7 @@ sub find_op_offsets {
 		}
 }
 sub apply_ops {  # in addition to operators in .ecs file
+	local $debug = $debug3;
 	$debug2 and print "&apply_ops\n";
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
@@ -1507,6 +1511,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
+	local $debug = $debug3;
 	my $id = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};
