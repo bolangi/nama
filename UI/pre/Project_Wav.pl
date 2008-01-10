@@ -1,27 +1,23 @@
-#
-#  Project is probably to be abandoned.
-#
-#  Wav can be substituted into calls for {versions} and
-#  {targets} 
-#
-#
-#
-#
 =comment
-I have to get my Wav test environment back:
-	
-	UI.p including Project_Wav.pl with stubs
-
-	2_Wav.t including tests for Wavs. 
-
-
-
-Once we have set $project_name, everything starts
-happening. Conversely, nothing can happen without
-a project_name. We coudl have project objects, consisting
-of only a name. But how would that help? Each
-object is actually represented by a pair of directories.
+Each project is currently represented by a pair of directories.
 in wav_dir/my_gig and in wav_dir/.ecmd/my_gig
+
+Wav gets its directories from subs in UI,
+why inherit all that other stuff? It doesn't matter, 
+Wav is fairly simple
+
+Project also inherits from UI, to get these
+key subs. 
+
+Project, in contrast with Wav, needs all those procedures,
+so that $my_gig->start_transport would be possible.
+
+$paul_brocante->start_transport;
+
+We set $project name for the 
+Once we have set $project_name, everything starts
+happening.
+
 
 my $ui = UI::Graphical->new;
 
@@ -51,8 +47,8 @@ our @ISA='::';
 use Carp;
 use Object::Tiny qw(name);
 sub hello {"i'm a project"}
-sub new { 
-	my $class = shift; 
+sub project { 
+	my $ui = shift; 
 	my %vals = @_;
 	$vals{name} or carp "invoked without values" and return;
 	my $name = remove_spaces( $vals{name} );
@@ -68,14 +64,120 @@ sub new {
 	}
 	return bless { %vals }, $class;
 }
+sub load_project { $ui->project(@_) }
+
+sub project { # object method
+	my $ui = shift; 
+	my %h = @_;
+	$debug2 and print "&new (load_project)\n";
+	$debug and print "project name: $h{-name} create: $h{-create}\n";
+	carp ("project name required\n"), return unless $h{-name};
+	my $old_project = $project_name;
+	$project_name = $h{-name};
+	if ( ! -d project_dir) {
+		$debug and print "directory: ", project_dir, "not found\n";
+		if ( $h{-create} ){ 
+			$debug and print join " ", 
+				"Creating directories:", this_wav_dir, project_dir, $/;
+			create_dir(this_wav_dir, project_dir);
+		} else { 
+			print "non existent directory: ", project_dir, $/;
+			$project_name = $old_project_name;
+			return;
+		}
+	}
+
+	
+=comment 
+	# OPEN EDITOR TODO
+	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
+	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
+	print PARAMS $configuration;
+	close PARAMS;
+	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
+=cut
+	read_config;
+	initialize_project_data;
+	remove_small_wavs; 
+	print "reached here!!!\n";
+	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
+	$debug and print "found ", scalar @all_chains, "chains\n";
+	add_mix_track, dig_ruins unless scalar @all_chains;
+	$ui->global_version_buttons;
+
+}
+#The mix track will always be track index 1 i.e. $state_c{$n}
+# for $n = 1, And take index 1.
+
+sub initialize_project_data {
+	$debug2 and print "&initialize_project_data\n";
+
+	return if transport_running();
+	$ui->project_label_configure(
+		-text => uc $project_name, 
+		-background => 'lightyellow',
+		); 
+
+	# assign_var($project_init_file, @project_vars);
+
+	$last_version = 0;
+	%track_names = ();
+	%state_c        = ();   #  chain related state
+	%state_t        = ();   # take related state
+	%cops        = ();   
+	$cop_id           = "A"; # autoincrement
+	%copp           = ();    # chain operator parameters, dynamic
+	                        # indexed by {$id}->[$param_no]
+							# and others
+	%old_vol = ();
+
+	%take        = (); # the group a chain belongs to # by chain_id
+	%chain       = (); # the chain_id corresponding to a track name
+	#%alias      = ();  # a way of naming takes
+
+	@takes       = ();  
+	@record		= ();
+	@monitor	= ();
+	@mute = (); 
+	@all_chains  = (); # indices of all chains
+	@input_chains = ();
+	@output_chains = ();
+
+	$i           = 0;  # chain counter
+	$t           = 0;  # take counter
+
+	%widget_c = ();
+	@widget_t = ();
+	%widget_e = ();
+	
+
+	# time related
+	
+	$markers_armed = 0;
+	@marks = ();
+
+	
+	# volume settings
+	
+	%old_vol = ();
+
+	# $is_armed = 0;
+
+$ui->destroy_widgets();
+
+increment_take();  # to 1
+
+$ui->take_gui;
+
+}
 
 sub project_dir { 
-	my $self = shift;
-	join_path( &ecmd_home, $self->name);
+	my $project = shift;
+	join_path( ecmd_dir, $project->name);
 }
 sub this_wav_dir {
-	my $self = shift;
-	join_path( &wav_dir, $self->name);
+	my $project = shift;
+	join_path( wav_dir, $project->name);
 }
 
 
@@ -111,115 +213,4 @@ sub deref_ {
 	@_ = @{ $ref } if ref $_[0] =~ /ARRAY/;
 }
 
-
-package ::Wav;
-our @ISA='UI';
-use Object::Tiny qw(head active n);
-my @fields = qw(head active n);
-my %fields;
-map{$fields{$_} = undef} @fields;
-use Carp;
-sub this_wav_dir { UI::this_wav_dir() }
-sub new { my $class = shift; 
- 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-		 return bless {%fields, @_}, $class }
-
-sub _get_versions {
-	my ($dir, $basename, $sep, $ext) = @_;
-
-	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
-	$debug and print "reading directory: $dir\n\n";
-	my %versions = ();
-	for my $candidate ( readdir WD ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
-	}
-	$debug and print "get_version: " , yaml_out(\%versions);
-	closedir WD;
-	%versions;
-}
-
-sub targets {# takes a Wav object or a string (filename head)
-	local $debug = 1;
-	my $wav = shift; 
- 	my $head =  ref $wav ? $wav->head : $wav;
-	$debug2 and print "&targets\n";
-	local $debug = 0;
-	$debug and ($t = this_wav_dir()), print 
-"this_wav_dir: $t
-head:         ", $head, $/;
-		my %versions =  _get_versions(
-			this_wav_dir(),
-			$head,
-			'_', 'wav' )  ;
-		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
-			delete $versions{bare};
-		}
-	$debug and print "\%versions\n================\n", yaml_out(\%versions);
-	\%versions;
-}
-sub versions {  # takes a Wav object or a string (filename head)
-	my $wav = shift;
-	if (ref $wav){ [ sort { $a <=> $b } keys %{ $wav->targets} ] } 
-	else 		 { [ sort { $a <=> $b } keys %{ targets($wav)} ] }
-}
-
-sub this_last { 
-	my $wav = shift;
-	pop @{ $wav->versions} }
-
-sub _selected_version {
-	# return track-specific version if selected,
-	# otherwise return global version selection
-	# but only if this version exists
-	my $wav = shift;
-no warnings;
-	my $version = 
-		$wav->active 
-		? $wav->active 
-		: &monitor_version ;
-	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
-	### or should I give the active version
-use warnings;
-}
-=comment
-sub last_version { 
-	## for each track or tracks in take
-
-$track->last_version;
-$take->last_version
-$project->last_version
-	
-			$last_version = $this_last if $this_last > $last_version ;
-
-}
-
-sub new_version {
-	last_version() + 1;
-}
-=cut
-
-=comment
-my $wav = Wav->new( head => vocal);
-
-$wav->versions;
-$wav->head  # vocal
-$wav->n     # 3 i.e. track 3
-$wav->active
-$wav->targets
-$wav->full_path
-
-returns numbers
-
-$wav->targets
-
-returns targets
-
-=cut
 

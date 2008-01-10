@@ -175,21 +175,38 @@ into the unknown, I could make a new branch, spend an hour
 in it. But first would come the usage
 
 
+package Project/UI
+
+	name: 
+	busses:  Tracker, Mix, Master
+
+package Bus;
+
+	tracks: sax, vocal, piano
+	name:	Tracker / Mix / Master 
+	rw
+	templates: rec_setup, mon_setup, etc.
+
+
 package Track;
 our @ISA;
 use Object::Tiny qw(
 
-	targets 
-	vol 
-	ops 
-	active 
-	file 
+	targets  # wav method
+	active  # wav method
+	file    # wav method
+	versions  # wav method
+
+	vol  
 	pan 
-	versions 
+	ops 
+	offset  # calculated
+
 	ch_r 
 	ch_m 
-	offset 
 	rw
+
+	n  # track number
 );
 
 =comment

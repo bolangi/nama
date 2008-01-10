@@ -282,12 +282,12 @@ sub yamlify_commands {
 ## support functions
 
 sub create_dir {
-	my $dir = shift;
-	-e $dir and 
-		(carp "create_dir: '$dir' already exists, skipping...\n"), 
-		return;
-	mkdir $dir
-	or carp qq(failed to create directory "$dir": $!\n);
+	my @dirs = @_;
+	map{ my $dir = $_;
+		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
+			or mkdir $dir
+			or carp qq(failed to create directory "$dir": $!\n);
+		} @dirs;
 }
 
 sub join_path {

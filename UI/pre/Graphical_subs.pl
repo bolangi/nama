@@ -98,10 +98,12 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => sub{ load_project });
+		-command => sub{ load_project(-name => remove_spaces $project_name)});
 	$sn_new->configure( 
 		-text => 'New',
-		-command => sub { load_project -create => 1});
+		-command => sub{ load_project(
+							-name => remove_spaces($project_name),
+							-create => 1)});
 	$sn_save->configure(
 		-text => 'Save settings',
 		-command => #sub { print "save_id: $save_id\n" });

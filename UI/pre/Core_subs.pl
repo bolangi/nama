@@ -1,9 +1,9 @@
 use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { "config.yml" }
-sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
-sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
-sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name) }
+sub ecmd_dir { join_path(wav_dir, ".ecmd") }
+sub this_wav_dir {$project_name and join_path(wav_dir, $project_name) }
+sub project_dir  {$project_name and join_path(ecmd_dir, $project_name) }
 
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 sub status_vars {
@@ -116,7 +116,41 @@ sub substitute{
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 ## project handling
+=comment
+sub load_project { project(@_) }
 
+sub project { # object method
+#	my $ui = shift; 
+	my %h = @_;
+	$debug2 and print "&load_project\n";
+	$debug and print "project name: $h{-name} create: $h{-create}\n";
+	carp ("project name required\n"), return unless $h{-name};
+	my $old_project = $project_name;
+	$project_name = $h{-name};
+	if ( ! -d project_dir) {
+		$debug and print "directory not found: ", project_dir, $/;
+		if ( $h{-create} ){ 
+			$debug and print join " ", 
+				"creating directories:", this_wav_dir, project_dir, $/;
+			create_dir(this_wav_dir, project_dir);
+		} else { 
+			print "project: ", project_dir, $/;
+			$project_name = $old_project;
+			return;
+		}
+	}
+	read_config;
+	initialize_project_data;
+	remove_small_wavs; 
+	print "reached here!!!\n";
+	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
+	$debug and print "found ", scalar @all_chains, "chains\n";
+	add_mix_track, dig_ruins unless scalar @all_chains;
+	$ui->global_version_buttons;
+
+}
+
+=cut
 sub load_project {
 	my %h = @_;
 	$debug2 and print "&load_project\n";
@@ -131,14 +165,14 @@ sub load_project {
 	$h{-create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &this_wav_dir, &project_dir;
-=comment 
-	# OPEN EDITOR TODO
-	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
-	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
-	print PARAMS $configuration;
-	close PARAMS;
-	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
-=cut
+# =comment 
+# 	# OPEN EDITOR TODO
+# 	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
+# 	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
+# 	print PARAMS $configuration;
+# 	close PARAMS;
+# 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
+# =cut
 	read_config();
 	initialize_project_data();
 	remove_small_wavs(); 
@@ -757,7 +791,7 @@ sub eliminate_loops {
 inputs---->{device_name}->[chain_id1, chain_id2,... ]
            {file}->$state_c{$n}->{file} }->[chain_id1, chain_id2]
 	       {cooked}->$n->[chain_ida chain_idb,...      ]
-	       {mixed}->$n->[chain_ida chain_idb,...      ]
+	       {mixed}->[chain_ida chain_idb,...      ]
 
 
 outputs--->device->{$name}[chain_id1, chain_id2,...]
@@ -774,6 +808,26 @@ inputs
   |----->cooked--->$n---->$loop_id-->[ chain_id, chain_id,... ]
   |----->mixed---->$n---->$loop_id-->[ chain_id, chain_id,... ]
   |_____>bus1----->$n---->$loop_id-->[ chain_id, chain_id,... ]
+
+inputs
+  |----->device-->$devname-->[ chain_id, chain_id,... ]
+  |----->file---->$filename->[ chain_id, chain_id,... ]
+  |----->bus1---->loop_id------>[ chain_id list ]
+  |----->cooked--->loop_id------->[ chain_id, chain_id,... ]
+  |----->mixed---->loop_id---------->[ chain_id, chain_id,... ]
+  |_____>bus1----->----------------->[ chain_id, chain_id,... ]
+
+
+
+kinds of busses:
+
+N tracks
+
+
+1 sax   REC
+2 vocal REC
+3 piano MON
+
 
 outputs
   |------------->device-->$devname-->[ chain_id, chain_id,... ]
@@ -817,6 +871,8 @@ sub write_chains {
 						: $mixchain;
 
 	### SETTING DEVICES AS INPUTS (used by i.e. rec_setup)
+	#
+	# for my $dev (keys %{ $inputs->{devices} }
 
 	for my $dev (grep{
 				$_ ne 'file' and $_ ne 'cooked' and $_ ne 'mixed'
@@ -831,10 +887,19 @@ sub write_chains {
 
 	for my $n (@all_chains){
 		next unless defined $inputs{cooked}->{$n} and @{ $inputs{cooked}->{$n} };
+		# for my $n ( keys %inputs{cooked} ){}
 		push  @input_chains, 
 		join " ", 
 			"-a:" . (join ",", @{ $inputs{cooked}->{$n} }),
 			"-i:loop,$n"
+
+		# for my $loop ( keys %inputs{cooked} ){} 
+		#push  @input_chains, 
+		#join " ", 
+		#	"-a:" . (join ",", @{ $inputs{cooked}->{$loop} }),
+		#	"-i:$loop";
+
+		
 	}
 	### SETTING MIXLOOPS AS INPUTS (used by any @oids wanting mixdown signals)
 
@@ -847,14 +912,27 @@ sub write_chains {
 			push @output_chains, "-a:$mixchain -o:$loopb";
 
 		}
+=comment
+		if (@{ $inputs{mixed} }) {
+		for my $loop ( keys %{ inputs{mixed} ){
+			push  @input_chains, 
+			join " ", 
+				"-a:" . (join ",", @{ $inputs{mixed}->{$loop}  }),
+				"-i:$loopb";
+			push @input_chains, "-a:$mixchain -i:$loopa";
+			push @output_chains, "-a:$mixchain -o:$loopb";
+
+		}
+=cut
 
 	
-	##### SETTING -fileS AS INPUTS (used by mon_setup)
+	##### SETTING FILES AS INPUTS (used by mon_setup)
 
 	for my $file (keys %{ $inputs{file} } ) {
 		$debug and print "monitor input file: $file\n";
 		my $chain_ids = join ",",@{ $inputs{file}->{$file} };
 		my ($n) = ($chain_ids =~ m/(\d+)/);
+		#my $n = $chain{$file};
 		$debug and print "track number: $n\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
@@ -862,7 +940,7 @@ sub write_chains {
 					         $state_c{$n}->{targets}->{selected_version($n)}),
 	   );
  	}
-	##### SETTING -fileS AS OUTPUTS (used by rec_file and mix)
+	##### SETTING FILES AS OUTPUTS (used by rec_file and mix)
 
 	for my $file ( keys %{ $outputs{file} } ){
 		my $n = $chain{$file};
