@@ -181,16 +181,6 @@ sub this_wav_dir {
 }
 
 
-sub set {
-	my $self = shift;
- 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-	my %new_vals = @_;
-	my %filter;
-	map{$filter{$_}++} keys %{ $self };
-	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
-		or carp "illegal key: $_ for object of type ", ref $self,$/
-	} keys %new_vals;
-}
 sub explode {  
 # will not work for unversioned  vocal.wav
 	my $wav = shift;

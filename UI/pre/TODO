@@ -180,34 +180,59 @@ package Project/UI
 	name: 
 	busses:  Tracker, Mix, Master
 
-package Bus;
+package ::Bus;
 
+use Object::Tiny qw(	name
+						groups
+						tracks );
+
+=comment
 	tracks: sax, vocal, piano
 	name:	Tracker / Mix / Master 
 	rw
 	templates: rec_setup, mon_setup, etc.
+=cut
 
 
-package Track;
-our @ISA;
-use Object::Tiny qw(
+package ::Rule;
+use Object::Tiny qw( 	name
+						chain_id
 
-	targets  # wav method
-	active  # wav method
-	file    # wav method
-	versions  # wav method
+						output_type
+						output_name
+						input_type
+						input_name
 
-	vol  
-	pan 
-	ops 
-	offset  # calculated
+						target
+						depends_on
 
-	ch_r 
-	ch_m 
-	rw
+						post_input
+						pre_output );
+						
 
-	n  # track number
-);
+package ::Track;
+our @ISA = '::Wav';
+use Object::Tiny qw( 	name
+						active
+						dir
+
+						vol  
+						pan 
+						ops 
+						offset 
+
+						ch_r 
+						ch_m 
+						rw
+
+						n 
+						group );
+package ::Group;
+use Object::Tiny qw( 	name
+						tracks
+						rw
+						version );
+
 
 =comment
 

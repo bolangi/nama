@@ -67,13 +67,13 @@ sub assign {
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
-	croak "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
-	croak "didn't expect code here" if ref $h{-data} eq 'CODE';
+	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
+	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
 
 	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
 		$class = ref $h{-data}; 
-		$debug and print "I found a class: $class, I think...\n";
+		$debug and print "I found an object of class $class...\n";
 	} 
 	$class = $h{-class};
  	$class .= "\:\:" unless $class =~ /\:\:/;; # backslashes protect

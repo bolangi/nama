@@ -1,3 +1,4 @@
+#!/usr/bin/perl -w
 my $new_root = 'UI';
 my @corpa = split $/,<<'PKG';
 package ::;
@@ -26,6 +27,9 @@ isa '::';
  ::Module
 q(::);
 	"::"
+ '::Module'
+'::Module'
+   alsdkjfaldksjf asdlfkjasdklfjaskdlf '::Module';
 PKG
 my $i;
 map { print "input ", $i++,": ", $_, $/;
@@ -74,7 +78,8 @@ sub subst {
 
 
 	# Substitution 8: bare class
-		$text =~ s/(^|\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
+		#$text =~ s/(^|\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
+		$text =~ s/(^|[\s'])(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
 $text;
 }

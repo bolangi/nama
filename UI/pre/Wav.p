@@ -4,10 +4,7 @@ use warnings;
 #no warnings qw(uninitialized);
 our @ISA; # no ancestors
 use Carp;
-# sub new { my $class = shift; 
-#  		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
-# 		 return bless {%fields, @_}, $class }
-# 
+
 sub get_versions {
 	my $wav = shift;
 	my $basename = $wav->name;
@@ -54,22 +51,28 @@ sub versions {  # takes a Wav object or a string (filename)
 	else 		 { [ sort { $a <=> $b } keys %{ targets($wav)} ] }
 }
 
-sub this_last { 
+sub last { 
 	my $wav = shift;
 	pop @{ $wav->versions} }
 
+
+=comment
+
+# not the responsibility of Wav
+sub monitor_version {}
 sub selected_version {
 	# return track-specific version if selected,
 	# otherwise return global version selection
 	# but only if this version exists
 	my $wav = shift;
-	my $version = 
-		$wav->active 
-		? $wav->active 
-		: &monitor_version ;
-	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
+	$wav->active 
+		? $wav->active  				# my own setting
+		: ${ $wav->targets }->{ $::monitor_version } # group setting if I can
+			? ${ $wav->targets }->{ $::monitor_version } 
+			: $wav->last;                          # my latest version
 	### or should I give the active version
 }
+=cut
 =comment
 sub last_version { 
 	## for each track or tracks in take
