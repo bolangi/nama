@@ -1,86 +1,69 @@
-
+our ($debug);
+$debug = 1;
 package ::Bus;
-use Object::Tiny qw(	name
+our @ISA;
+use ::Object qw(	name
 						groups
 						tracks 
 						rules
 						
 						);
 
-my $track_bus = ::Bus->new(
-	name => 'Tracker',
-	groups => ['Tracker'],
-	tracks => [],
-	rules  => [],
-);
+{
+my $dummy_track = ::Track->new(n => 999);
 
-my $master_fader  = ::Bus->new(
-	name => 'Master',
-	groups => ['Master'],
-	rules  => [ @rules{qw(stereo)} ],
-);
+sub apply {
+	my $bus = shift;
+	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
+	my @tracks;
+	push @tracks, map{ @{$_} } $bus->tracks, map{$_->tracks} @{ $bus->groups };
+	map{ my $rule = $_;
+		my @tracks = @tracks;
+		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
+			map{ my $track = $_;
+				my $n = $track->n;
+				print "track ", $track->name, "index: ", $n;
+				push @{ $UI::inputs { $rule->input_type  }
+								->{ $rule->input_object  } },
+									&{ $rule->chain_id }($n);
+				push @{ $UI::outputs{ $rule->output_type }
+								->{ $rule->output_object } },
+									&{ $rule->chain_id }($n);
+			} @tracks;
+	} @{ $bus->rules }; 
+}
+
+}
+
+
 	
-
-
-=comment
-	tracks: sax, vocal, piano
-	name:	Tracker / Mix / Master 
-	rw
-	templates: rec_setup, mon_setup, etc.
-=cut
-
-
 package ::Rule;
-use Object::Tiny qw( 	name
+use ::Object qw( 	name
 						chain_id
 
 						target 
 						depends_on
 
 						output_type
-						output_name
+						output_object
 
 						input_type
-						input_name
+						input_object
 
 						post_input
-						pre_output );
+						pre_output 
+						
+						default ); # on or off
+
 						
 #target: REC | MON | chain_id | all | none
 
-my $stereo = ::Rule->new(
-	name			=> 'stereo',
-	chain_id		=> sub{ 'Stereo' },
 
-	target			=> 'none',
-	depends_on		=> sub{},
-
-	input_type 		=> 'mixed',
-	input_object	=> $loopb, 
-
-	output_type		=> 'device',
-	output_object	=> 'stereo',
-
-	default			=> 'on',
-
-);
-
-my %rules;
-
-$rules{ $stereo->name } = $stereo;
-
-
-=comment
-	push @{ $inputs { $oid->input_type  }->{ $oid->input_object  } },
-		&{ $oid{chain_id} }($n);
-	push @{ $outputs{ $oid->output_type }->{ $oid->output_object } },
-		&{ $oid{chain_id} }($n);
-
-=cut
 package ::Track;
+use ::Wav;
 our @ISA = '::Wav';
 {my $n = 0; # index
-use Object::Tiny qw( 	name
+use ::Object qw( 	name
 						dir
 						active
 
@@ -101,7 +84,8 @@ sub new {
 	# croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	# (carp "name missing or already in use: $vals{name}\n"), return 
 	# if ! $vals{name} or $track_names{$vals{name}}
-	$n++;
+	my $n = $vals{n} ? $vals{n} : ++$n; 
+
 	return bless { 	name 	=> "Audio $n", # default name
 					group	=> 'Tracker',  # default 
 					rw   	=> 'REC', 
@@ -112,8 +96,10 @@ sub new {
 
 }
 package ::Group;
-use Object::Tiny qw( 	name
+use ::Object qw( 	name
 						tracks
 						rw
 						version );
 
+1;
+__END__

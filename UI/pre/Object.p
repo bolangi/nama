@@ -1,7 +1,8 @@
 package ::Object;
 use Carp;
+use ::Assign qw(yaml_out); 
 
- use strict; # Enable during dev and testing
+#use strict; # Enable during dev and testing
 BEGIN {
 	require 5.004;
 	$::Object::VERSION = '1.04';
@@ -43,7 +44,7 @@ sub set {
 }
 sub dump {
 	my $self = shift;
-	bless $self, 'HASH';
+	bless $self, 'HASH'; # yippee, easy magic
 	print yaml_out $self;
 	yaml_out $self;
 }
@@ -77,4 +78,4 @@ __END__
 
 =head1 DESCRIPTION
 
-type man Object::Tiny
+type man ::Object
