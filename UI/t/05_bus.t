@@ -2,15 +2,14 @@ use lib qw(. ..);
 use UI::Track;
 use UI::Assign qw(yaml_out);
 
-
-my $stereo = UI::Rule->new(
-	name			=> 'stereo',
-	chain_id		=> sub{ 'Stereo' },
+my $mixer_out = UI::Rule->new(
+	name			=> 'mixer_out', 
+	chain_id		=> 'Mixer_out',
 
 	target			=> 'none',
 	depends_on		=> sub{},
 
-	input_type 		=> 'mixed',
+	input_type 		=> 'mixed', # bus name
 	input_object	=> 'loop,222', # $loopb 
 
 	output_type		=> 'device',
@@ -28,14 +27,9 @@ my $track_bus = UI::Bus->new(
 
 my $master_fader  = UI::Bus->new(
 	name => 'Master',
-	rules  => [ $stereo ],
+	rules  => [ $mixer_out ],
 );
 
 $master_fader->apply;
 print yaml_out( \%UI::inputs);
 print yaml_out( \%UI::outputs);
-
-
-my %rules;
-
-$rules{ $stereo->name } = $stereo;

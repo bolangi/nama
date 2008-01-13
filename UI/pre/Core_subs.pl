@@ -788,191 +788,94 @@ sub eliminate_loops {
 
 }
 =comment    
-inputs---->{device_name}->[chain_id1, chain_id2,... ]
-           {file}->$state_c{$n}->{file} }->[chain_id1, chain_id2]
-	       {cooked}->$n->[chain_ida chain_idb,...      ]
-	       {mixed}->[chain_ida chain_idb,...      ]
 
-
-outputs--->device->{$name}[chain_id1, chain_id2,...]
-        |_>file->{ $file }->[chain_id1, chain_id2]
-		|->loop_id->[ chain_id ]
-
-intermediate->chain_id->"chain operators and routing, etc."
-
-The general principle is equivalent to:
-
-inputs
-  |----->raw---->device-->$devname-->[ chain_id, chain_id,... ]
-  |----->raw---->file---->$filename->[ chain_id, chain_id,... ]
-  |----->cooked--->$n---->$loop_id-->[ chain_id, chain_id,... ]
-  |----->mixed---->$n---->$loop_id-->[ chain_id, chain_id,... ]
-  |_____>bus1----->$n---->$loop_id-->[ chain_id, chain_id,... ]
-
-inputs
+%inputs
   |----->device-->$devname-->[ chain_id, chain_id,... ]
   |----->file---->$filename->[ chain_id, chain_id,... ]
-  |----->bus1---->loop_id------>[ chain_id list ]
-  |----->cooked--->loop_id------->[ chain_id, chain_id,... ]
-  |----->mixed---->loop_id---------->[ chain_id, chain_id,... ]
-  |_____>bus1----->----------------->[ chain_id, chain_id,... ]
+  |----->bus1---->loop_id--->[ chain_id, chain_id,... ]
+  |----->cooked-->loop_id--->[ chain_id, chain_id,... ]
+  |_____>mixed___>loop_id___>[ chain_id, chain_id,... ]
 
+%outputs
+  |----->device-->$devname-->[ chain_id, chain_id,... ]
+  |----->file---->$key**---->[ chain_id, chain_id,... ]
+  |----->bus1---->loop_id--->[ chain_id, chain_id,... ]
+  |----->cooked-->loop_id--->[ chain_id, chain_id,... ]
+  |_____>mixed___>loop_id___>[ chain_id, chain_id,... ]
 
-
-kinds of busses:
-
-N tracks
-
-
-1 sax   REC
-2 vocal REC
-3 piano MON
-
-
-outputs
-  |------------->device-->$devname-->[ chain_id, chain_id,... ]
-  |------------->file---->$filename->[ chain_id, chain_id,... ]
-  |_____________>loop---->$loop_id-->[ chain_id, chain_id,... ]
-
-The future:
-
-What is a bus? A group of Tracks and a set of Oids
-
-Let's let oids can target tracks group, that's what
-we are doing with the 'type' field anyway.
-
-Mixer/Tracker/Somebus
-
-Oids provide their own routines for:
-	
-	rec_file
-	mon_file
-	rec_device
-	mon_device
-
-or generalized: 
-
-	$bus->(rec/mon/track_n)->&code
-
-Bus may be a busname, like Mixer/Tracker (
+  ** consists of full path to the file ($filename) followed
+  by a space, followed the output format specification.
 
 =cut
 sub write_chains {
 	$debug2 and print "&write_chains\n";
 
-	# the mixchain is usually '1', so that effects applied to 
-	# track 1 (project_name) affect the mix.
+
+	# $bus->apply;
+	# $mixer->apply;
+	# $ui->write_chains
+
+	# we can assume that %inputs and %outputs will have the
+	# same lowest-level keys
 	#
-	# but when playing back a mix, we want mixchain to be 
-	# something else
+	my @buses = grep { $_ ne 'file' and $_ ne 'device' } keys %inputs;
 	
-	my $mixchain = rec_status(1) eq "MON"
-						? $mixchain_aux
-						: $mixchain;
+	### Setting devices as inputs (used by i.e. rec_setup)
+	
+	for my $dev (keys %{ $inputs{devices} } ){
 
-	### SETTING DEVICES AS INPUTS (used by i.e. rec_setup)
-	#
-	# for my $dev (keys %{ $inputs->{devices} }
-
-	for my $dev (grep{
-				$_ ne 'file' and $_ ne 'cooked' and $_ ne 'mixed'
-			} keys %inputs ){
 		$debug and print "dev: $dev\n";
 		push  @input_chains, 
 		join " ", "-a:" . (join ",", @{ $inputs{$dev} }),
 			"-f:" .  $devices{$dev}->{input_format},
 			"-i:" .  $devices{$dev}->{ecasound_id}, 
 	}
-	### SETTING LOOPS AS INPUTS (used by any @oids wanting processed signals)
 
-	for my $n (@all_chains){
-		next unless defined $inputs{cooked}->{$n} and @{ $inputs{cooked}->{$n} };
-		# for my $n ( keys %inputs{cooked} ){}
-		push  @input_chains, 
-		join " ", 
-			"-a:" . (join ",", @{ $inputs{cooked}->{$n} }),
-			"-i:loop,$n"
-
-		# for my $loop ( keys %inputs{cooked} ){} 
-		#push  @input_chains, 
-		#join " ", 
-		#	"-a:" . (join ",", @{ $inputs{cooked}->{$loop} }),
-		#	"-i:$loop";
-
-		
+	#####  Setting devices as outputs
+	#
+	for my $dev ( keys %{ $outputs{devices} }){
+			push @output_chains, join " ",
+				"-a:" . (join "," , @{ $outputs{devices}->{$dev} }),
+				"-f:" . $devices{$dev}->{output_format},
+				"-o:". $devices{$dev}->{ecasound_id};
 	}
-	### SETTING MIXLOOPS AS INPUTS (used by any @oids wanting mixdown signals)
 
-		if (defined $inputs{mixed} and @{ $inputs{mixed} }) {
+	### Setting loops as inputs 
+
+	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
+		for my $loop ( keys %{ $inputs{$bus} }){
 			push  @input_chains, 
 			join " ", 
-				"-a:" . (join ",", @{ $inputs{mixed} }),
-				"-i:$loopb";
-			push @input_chains, "-a:$mixchain -i:$loopa";
-			push @output_chains, "-a:$mixchain -o:$loopb";
-
+				"-a:" . (join ",", @{ $inputs{$bus}->{$loop} }),
+				"-i:$loop";
 		}
-=comment
-		if (@{ $inputs{mixed} }) {
-		for my $loop ( keys %{ inputs{mixed} ){
-			push  @input_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $inputs{mixed}->{$loop}  }),
-				"-i:$loopb";
-			push @input_chains, "-a:$mixchain -i:$loopa";
-			push @output_chains, "-a:$mixchain -o:$loopb";
+	}
+	##### Setting files as inputs (used by mon_setup)
 
-		}
-=cut
-
-	
-	##### SETTING FILES AS INPUTS (used by mon_setup)
-
-	for my $file (keys %{ $inputs{file} } ) {
+	for my $full_path (keys %{ $inputs{file} } ) {
 		$debug and print "monitor input file: $file\n";
-		my $chain_ids = join ",",@{ $inputs{file}->{$file} };
-		my ($n) = ($chain_ids =~ m/(\d+)/);
-		#my $n = $chain{$file};
-		$debug and print "track number: $n\n";
+		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:" .  join_path(this_wav_dir, 
-					         $state_c{$n}->{targets}->{selected_version($n)}),
+			 		"-i:".$full_path,
+
 	   );
  	}
-	##### SETTING FILES AS OUTPUTS (used by rec_file and mix)
+	##### Setting files as outputs (used by rec_file and mix)
 
-	for my $file ( keys %{ $outputs{file} } ){
-		my $n = $chain{$file};
-		$debug and print "chain: $n, record output file: $file\n";
-		$debug and print "file1: $state_c{$n}->{file}\n";
-		my $chain_ids = join ",",@{ $outputs{file}->{$file} }; # expect one
+	for my $key ( keys %{ $outputs{file} } ){
+		my ($full_path, $format) = split " ", $key;
+		$debug and print "chain: $n, record output file: $name\n";
+		my $chain_ids = join ",",@{ $outputs{file}->{$key} };
 		
 		push @output_chains, join ( " ",
 			 "-a:".$chain_ids,
-			 "-f:".output_format($file),
-			 "-o:". new_wav_name( $file ),
+			 "-f:".$format,
+			 "-o:".$full_path,
 		 );
 			 
 	}
 
-	#####  SETTING DEVICES AS OUTPUTS  (includes loop devices)
-	for my $dev ( grep{!/file/ and !/loop/} keys %outputs ){
-			push @output_chains, join " ",
-				"-a:" . (join "," , @{ $outputs{$dev} }),
-				"-f:" . $devices{$dev}->{output_format},
-				"-o:". $devices{$dev}->{ecasound_id};
-
-		
-	}
-	for my $dev ( grep{/loop/} keys %outputs ){
-			push @output_chains, join " ",
-				"-a:" . (join "," , @{ $outputs{$dev} }),
-				"-o:". $dev; # in this case key is the same as device name
-
-		
-	}
-		
 	# $debug and print "\%state_c\n================\n", yaml_out(\%state_c);
 	# $debug and print "\%state_t\n================\n",  yaml_out(\%state_t);
 							
@@ -1476,8 +1379,6 @@ sub cop_init {
 	local $debug = $debug3;
 	$debug and print "cop__id: $id\n";
 
-
-	# initialize default settings unless we have them
 	my @vals;
 	if (ref $vals_ref) {
 	# untested
