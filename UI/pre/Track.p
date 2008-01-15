@@ -27,17 +27,20 @@ sub apply {
 	map{ my $rule = $_;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
-		map{ my $track = $_;
-			my $n = $track->n;
-			print "track ", $track->name, "index: ", $n;
+		map{ my $track = $_; # 
+			my $n = $$track->n;
+			print "track ", $$track->name, "index: ", $n;
 			push @{ $UI::inputs{ 
-						$rule->input_type }->{
-						$rule->input_object}
+						deref_code($rule->input_type, $track) }->{
+						deref_code($rule->input_object, $track) }
 				}, deref_code($rule->chain_id, $track) 
 						if defined $rule->input_type;
 			push @{ $UI::outputs{
-						$rule->output_type }->{ 
-						deref_code($rule->output_object, $track) }
+						deref_code( $rule->output_type, $track)  }->{ 
+						deref_code( $rule->output_object, $track) }
+
+					# i could rewrite this to be
+					# $track->deref_code(  $rule->output_object )
 			}, deref_code($rule->chain_id, $track) 
 				if defined $rule->output_type;
 		} @tracks;
@@ -48,11 +51,12 @@ sub apply {
 
 	
 package ::Rule;
+use Carp;
 use ::Object qw( 	name
 						chain_id
 
 						target 
-						depends_on
+						am_needed	
 
 						output_type
 						output_object
@@ -76,9 +80,14 @@ use ::Object qw( 	name
 
 
 package ::Track;
+use Carp;
 use ::Wav;
 our @ISA = '::Wav';
-{my $n = 0; # index
+{my $n = 0; 	# incrementing numeric key
+my @by_index;	# return ref to Track by numeric key
+my %by_name;	# return ref to Track by name
+my %track_names; 
+
 use ::Object qw( 	name
 						dir
 						active
@@ -95,38 +104,160 @@ use ::Object qw( 	name
 						n 
 						group );
 sub new {
+	# returns a reference to an object that is indexed by
+	# name and by an assigned index
+	#
+	# The indexing is bypassed and an object returned 
+	# if an index n is supplied as  a parameter
+	
 	my $class = shift;
 	my %vals = @_;
-	# croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	# (carp "name missing or already in use: $vals{name}\n"), return 
-	# if ! $vals{name} or $track_names{$vals{name}}
+	carp "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	(carp "name already in use: $vals{name}\n"), return 
+		 if $track_names{$vals{name}}; # null name returns false
+	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
-
-	return bless { 	name 	=> "Audio $n", # default name
+	my $object = bless { 	name 	=> "Audio_$n", # default name
 					group	=> 'Tracker',  # default 
 					rw   	=> 'REC', 
 					n    	=> $n,
 					@_ 			}, $class;
+
+	$track_names{$vals{name}}++;
+	if ( $add_index ) {
+		$by_index[$n] = \$object;
+		$by_name{ $object->name } = \$object;
+	}
+	\$object;
+	
 }
-			
+sub full_path {
+	my $track = ${shift()}; # copy! 
+	join_path 
+		$track->dir ? $track->dir : "." , 
+			$track->name . "_" .  $track->overall_version
+}
+
+=comment
+sub overall_version { 
+	my $track = ${shift()}; # copy! 
+	if ( $track->rec_status eq 'REC' ){ $last_version + 1 }
+	elsif ( $track->rec_status eq 'MON'){ 
+	my $version = $track->active
+		? $track->active 
+		: ${ ::Group::by_name $track->group };
+	(grep {$_ == $version } @{$track->versions}}) ? $version : undef;
+	
+
+sub selected_version {
+	# return track-specific version if selected,
+	# otherwise return global version selection
+	# but only if this version exists
+	my $n = shift;
+no warnings;
+
+use warnings;
+}
+sub set_active_version {
+	my $n = shift;
+	$debug and print "chain $n: versions: @{$state_c{$n}->{versions}}\n";    
+		$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1] 
+			if $state_c{$n}->{versions};    
+		$debug and print "active version, chain $n: $state_c{$n}->{active}\n\n";
+}
+sub new_version {
+	$last_version + 1;
+}
+sub mon_vert {
+	my $ver = shift;
+	return if $ver == $monitor_version;
+	# store @{ $state_c{$ver}{ops} }
+	# store %copp
+	# remove effects  and use $ver's set if there are effects for $v
+	$monitor_version = $ver;
+	$ui->refresh();
+}
+=cut
+
+
+# The following are not object methods. 
+
+sub is {
+	my $id = shift;
+	$id =~ /^\d+$/ 
+		and $::Track::by_index[$id]
+		or  $::Track::by_name{$id}
+}
+
+#${ Track::is 1 }->set( rw => 'MUTE');
+#${ Track::is "sax" }->rw;
+
+sub all_tracks { @by_index[1..scalar @by_index] }
+
 
 }
+
+=comment
+
+my $existing_tracks = ${ $track->group }->tracks;
+
+=cut
 package ::Group;
+use Carp;
+our @ISA;
+{ 
+my @by_index;
+my %by_name;
+my %group_names;
+my $n; 
+
 use ::Object qw( 	name
-						tracks
-						rw
-						version );
+					tracks
+					rw
+					version 
+					n	
+					);
+
+sub new {
+
+	# returns a reference to an object that is indexed by
+	# name and by an assigned index
+	#
+	# The indexing is bypassed and an object returned 
+	# if an index is given
+	
+	my $class = shift;
+	my %vals = @_;
+	carp "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	(carp "name already in use: $vals{name}\n"), return 
+		 if $group_names{$vals{name}};
+	$group_names{$vals{name}}++;
+	my $skip_index = $vals{n};
+	my $n = $vals{n} ? $vals{n} : ++$n; 
+	my $object = bless { 	
+		name 	=> "Group $n", # default name
+		rw   	=> 'REC', 
+		n => $n,
+		@_ 			}, $class;
+	return $object if $skip_index;
+	$by_index[$n] = \$object;
+	$by_name{ $object->name } = \$object;
+	\$object;
+}
+
+sub all_groups { @by_index[1..@by_index] }
 
 1;
 
+}
 
 __END__
-my $mixer_out = UI::Rule->new(
+my $mixer_out = UI::Rule->new( #  this is the master fader
 	name			=> 'mixer_out', 
 	chain_id		=> 'Mixer_out',
 
 	target			=> 'none',
-	depends_on		=> sub{},
+	am_needed		=> sub{ keys $inputs{mixed} },
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> 'loop,222', # $loopb 
@@ -143,14 +274,16 @@ my $mixdown = UI::Rule->new(
 	name			=> 'mixdown', 
 	chain_id		=> 'Mixdown',
 	target			=> 'all', # default
-	depends_on		=> sub{},
+	am_needed => sub{ 
+		keys $outputs{mixed} or $debug 
+			and print("no customers for mixed, skipping mixdown"), 0}, 
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> 'loop,222', # $loopb 
 
 	output_type		=> 'file',
 	output_object   => sub {
-		my $track = shift; 
+		my $track = ${shift()}; 
 		join " ", $track->full_path, $mix_to_disk_format},
 
 	#apply_inputs	=> sub{ },  
@@ -163,12 +296,12 @@ my $mix_setup = Rule->new(
 	name			=>  'mix_setup',
 	chain_id		=>  sub { my $track = shift, "J". $track->n },
 	target			=>  'all',
-	output_object	=>  'loop,111',
+	input_type		=>  'cooked',
+	input_object	=>  sub { my $track = shift, "loop," .  $track->n }
+	output_object	=>  'loop,111', # $loopa
 	output_type		=>  'cooked',
 	default			=>  'on',
-	depends_on 		=>  sub{ %{ $inputs{mixed} } },
-		map{ push @{ $inputs{cooked}->{$n} }, $chain_id
-		push @{ $outputs{ $loopa } } , $chain_id; 
+	am_needed 		=>  sub{ %{ $inputs{mixed} } },
 	
 
 
@@ -176,11 +309,11 @@ my $mon_setup = Rule->new(
 	
 	name			=>  'mon_setup', 
 	target			=>  'MON',
-	chain_id 		=>	sub{ my $track = shift; $track->n },
+	chain_id 		=>	sub{ my $track = ${shift()}; $track->n },
 	input_type		=>  'file',
-	input_object	=>  sub{ my $track = shift; $track->full_path },
-	output_type		=>  'cooked,
-	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+	input_object	=>  sub{ my $track = ${shift()}; $track->full_path },
+	output_type		=>  'cooked',
+	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
 	default			=>  'on',
 	post_input		=>	\&mono_to_stereo,
 );
@@ -189,12 +322,12 @@ my $rec_file = Rule->new(
 
 	name		=>  'rec_file', 
 	target		=>  'REC',
-	chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
+	chain_id	=>  sub{ my $track = ${shift()}; 'R'. $track->n },   
 	input_type	=>  'device',
 	input_object=>  'multi',
 	output_type	=>  'file',
 	output_object   => sub {
-		my $track = shift; 
+		my $track = ${shift()}; 
 		join " ", $track->full_path, $raw_to_disk_format},
 	default		=>  'on',
 }
@@ -207,15 +340,15 @@ my $rec_file = Rule->new(
 my $rec_setup = Rule->new(
 
 	name			=>	'rec_setup', 
-	chain_id		=>  sub{ my $track = shift; $track->n },   
+	chain_id		=>  sub{ my $track = ${shift()}; $track->n },   
 	target			=>	'REC',
 	input_type		=>  'device',
 	input_object	=>  'multi',
 	output_type		=>  'cooked',
-	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
 	post_input			=>	\&mono_to_stereo,
 	default			=>  'on',
-	depends_on 		=> @{ $inputs{cooked}->{"loop," .  $track->n} },
+	am_needed 		=> @{ $inputs{cooked}->{"loop," .  $track->n} },
 )
 
 
