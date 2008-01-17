@@ -48,7 +48,7 @@ sub prepare {
 	# Tie mixdown version suffix to global monitor version 
 
 	new_engine();
-	initialize_oids();
+	#initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -926,139 +926,7 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_rules {
-
-my $mixer_out = UI::Rule->new( #  this is the master fader
-	name			=> 'mixer_out', 
-	chain_id		=> 'Mixer_out',
-
-	target			=> 'none',
-	am_needed		=> sub{ %{ $UI::inputs{mixed} } or $debug 
-			and print("no customers for mixed, skipping\n"), 0},
-
-	input_type 		=> 'mixed', # bus name
-	input_object	=> 'loop,222', # $loopb 
-
-	output_type		=> 'device',
-	output_object	=> 'stereo',
-
-	default			=> 'on',
-
-);
-
-my $mixdown = UI::Rule->new(
-
-	name			=> 'mixdown', 
-	chain_id		=> 'Mixdown',
-	target			=> 'all', # default
-	am_needed => sub{ 
-		%{ $UI::outputs{mixed} } or $debug 
-			and print("no customers for mixed, skipping mixdown\n"), 0}, 
-
-	input_type 		=> 'mixed', # bus name
-	input_object	=> 'loop,222', # $loopb 
-
-	output_type		=> 'file',
-	output_object   => sub {
-		my $track = ${shift()}; 
-		join " ", $track->full_path, $mix_to_disk_format},
-
-	#apply_inputs	=> sub{ },  
-	#apply_outputs	=> sub{ },  
-
-	default			=> 'off',
-);
-my $mix_setup = UI::Rule->new(
-
-	name			=>  'mix_setup',
-	chain_id		=>  sub { my $track = shift; "J". $track->n },
-	target			=>  'all',
-	input_type		=>  'cooked',
-	input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-	output_object	=>  'loop,111', # $loopa
-	output_type		=>  'cooked',
-	default			=>  'on',
-	am_needed 		=>  sub{ %{ $UI::inputs{mixed} } },
-	
-);
-
-
-my $mon_setup = UI::Rule->new(
-	
-	name			=>  'mon_setup', 
-	target			=>  'MON',
-	chain_id 		=>	sub{ my $track = ${shift()}; $track->n },
-	input_type		=>  'file',
-	input_object	=>  sub{ my $track = ${shift()}; $track->full_path },
-	output_type		=>  'cooked',
-	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
-	default			=>  'on',
-	post_input		=>	\&mono_to_stereo,
-);
-	
-my $rec_file = UI::Rule->new(
-
-	name		=>  'rec_file', 
-	target		=>  'REC',
-	chain_id	=>  sub{ my $track = ${shift()}; 'R'. $track->n },   
-	input_type	=>  'device',
-	input_object=>  'multi',
-	output_type	=>  'file',
-	output_object   => sub {
-		my $track = ${shift()}; 
-		join " ", $track->full_path, $raw_to_disk_format},
-	default		=>  'on',
-);
-
-# Rec_setup: must come last in oids list, convert REC
-# inputs to stereo and output to loop device which will
-# have Vol, Pan and other effects prior to various monitoring
-# outputs and/or to the mixdown file output.
-		
-my $rec_setup = UI::Rule->new(
-
-	name			=>	'rec_setup', 
-	chain_id		=>  sub{ my $track = ${shift()}; $track->n },   
-	target			=>	'REC',
-	input_type		=>  'device',
-	input_object	=>  'multi',
-	output_type		=>  'cooked',
-	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
-	post_input			=>	\&mono_to_stereo,
-	default			=>  'on',
-	am_needed 		=> sub { my $track = $shift{()}; 
-							@{ $UI::inputs{cooked}->{"loop," .  $track->n} } },
-);
-
-
-=comment
-
-# Multi: output 'cooked' monitor channels to side-by-side
-# PCMs starting at the monitor channel assignment in the track menu.
-#  Default to PCMs 1 & 2.
-
-	name	=>	q(multi), 
-	target	=>	q(mon),  
-	id		=>	q(m),
-	output	=>	q(multi),
-	type	=>	q(cooked),
-	pre_output	=>	\&pre_multi,
-	default	=> q(off),
-
-# Live: apply effects to REC channels route to multichannel sound card
-# as above. 
-
-	name	=>  q(live),
-	target	=>  q(rec),
-	id		=>	q(L),
-	output	=>  q(multi),
-	type	=>  q(cooked),
-	pre_output	=>	\&pre_multi,
-	default	=>  q(off),
-
-	push @{ $UI::inputs{cooked}->{$n} }, $chain_id if $rec_status eq 'REC'
-	push @{ $UI::outputs{$oid{output}} }, $chain_id;
-
-=cut
+ }
 sub initialize_oids {
 	local $debug = $debug3;
 	$debug2 and print "&initialize_oids\n";

@@ -44,8 +44,9 @@ sub set {
 }
 sub dump {
 	my $self = shift;
+	my $class = ref $self;
 	bless $self, 'HASH'; # yippee, easy magic
-	print yaml_out $self;
+	print "class: $class\n", yaml_out $self;
 	yaml_out $self;
 }
 

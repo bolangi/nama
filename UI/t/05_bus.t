@@ -26,10 +26,17 @@ TRACKER
 
 is ($tracker->dump, $td, "Tracker bus");
 
+$UI::mix_to_disk_format = "mix-format";
+$UI::raw_to_disk_format = "raw-format";
+print"----x--\n";
+#print join " ", map{ my $rule = $$_; print ref $rule, $/; $rule->name} UI::Rule::all_rules(); exit;
+
 my $master_fader  = UI::Bus->new(
 	name => 'Master_Bus',
-	rules  => [ $mixer_out ],
+	rules  => [ qw(mixer_out) ],
 );
+
+#$master_fader->dump; exit;
 
 my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
@@ -38,40 +45,21 @@ my $tracker  = UI::Bus->new(
 	rules  => [],
 );
 
-my $master_g = UI::Group->new( name => 'Master'); 
-#print keys %UI::Group::by_name; 
-#exit;
-#print (map{ref $$_} values %UI::Group::by_name);  exit;
+#my $master_g = UI::Group->new( name => 'Master'); 
 my $master = UI::Track->new( group => 'Master', name => 'Master' );
-#print keys %UI::Track::by_name; 
-#print (map{ref $$_} values %UI::Track::by_name);  exit;
-#print "-------\n";
-#print keys %UI::Group::by_name; 
-#exit;
-#print "-------\n";
-#my $ref = $UI::Group::by_name{Master};
-#print ref $ref; 
-#print ref $$ref; 
-#print "-------\n";
-#$ref = $UI::Group::by_index[1];
-#print ref $ref; 
-#print ref $$ref; 
-#print "-------\n";
-#exit;
-#print keys %UI::Group::by_name; 
-#$$master_g->set( tracks => [qw( Test )] );
-#exit;
-#$$master_g->dump; exit;
-${$UI::Group::by_name{Master}}->dump; exit;
-#$$master_g->dump; exit;
-my $mix_g = UI::Group->new( name => 'Mixer');
+#${$UI::Group::by_name{Master}}->dump; exit;
 my $mix = UI::Track->new( group => 'Mixer', name => 'Mixes'); 
-my $tracker = UI::Group->new( name => 'Tracker' );
+#${$UI::Group::by_name{Mixer}}->dump; exit;
 my $sax = UI::Track->new( name => 'sax' );
+#print @{ ${  $UI::Group::by_name{Tracker} }->tracks }; exit;
+#print ref $tracker; exit;
+#${$tracker}->dump; exit;
 my $piano  = UI::Track->new( name => 'piano' );
-
 #print join " ", @{ ${$UI::Group::by_name{Tracker}}->tracks }; exit;
-print ref ${$UI::Group::by_name{Tracker}}; exit;
+#my $tracker = $UI::Group::by_name{Tracker}; 
+#print "--------\n";
+#$$tracker->dump; exit;
+#print ref ${$UI::Group::by_name{Tracker}}; exit;
 my $track_diag = <<TRACK;
 ---
 group: Tracker
@@ -98,6 +86,8 @@ MIXDIAG
 
 $master_fader->apply;
 
+1;
+__END__
 is( yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs),
 	$mix_diag, "Master Fader setup");
 
@@ -108,7 +98,6 @@ $tracker  = UI::Bus->new(
 	rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );
 
-__END__
 
 at the moment, Track and Group new methods return
 references to objects.
