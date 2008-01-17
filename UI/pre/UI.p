@@ -60,7 +60,7 @@ print remove_spaces("bulwinkle is a...");
 ## Class and Object definitions for package '::'
 
 our @ISA; # no anscestors
-use Object::Tiny qw(mode);
+use ::Object qw(mode);
 
 ## The following methods belong to the root class
 

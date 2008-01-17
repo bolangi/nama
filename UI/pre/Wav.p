@@ -1,8 +1,8 @@
 package ::Wav;
-use Object::Tiny qw(name active dir);
+our @ISA; 
+use ::Object qw(name active dir);
 use warnings;
 #no warnings qw(uninitialized);
-our @ISA; # no ancestors
 use Carp;
 
 sub get_versions {
