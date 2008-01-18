@@ -20,7 +20,11 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	return bless { tracks => [], groups => [], @_ }, $class; 
+	return bless { 
+		tracks => [], 
+		groups => [], 
+		rules  => [],
+		@_ }, $class; 
 }
 
 sub deref_code {
@@ -33,14 +37,20 @@ sub deref_code {
 sub apply {
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
-	my @tracks;
+	my @tracks; # refs to objects
 	print "bus tracks: ", join " ", @{$bus->tracks}, $/;
 	print "bus groups: ", join " ", @{$bus->groups}, $/;
 	print "bus rules: ", join " ", @{$bus->rules}, $/;
-	push @tracks, map{ @{$_} } $bus->tracks, map{$_->tracks} @{ $bus->groups };
-	print "tracks:: @tracks\n";
+	my @track_names = 
+		@{ $bus->tracks }, 
+			map{ @{ ${ $::Group::by_name{$_} }->tracks }  } @{ $bus->groups };
+	#print "tracks: ", join " ", map{ $$_->name } @tracks";
+	print "tracks: @track_names\n";
+	push @tracks, map{ ::Track::is $_  }  @track_names; 
 
-	map{ my $rule = $$::Rule::by_name{$_};
+	map{ my $rule_name = $_;
+	print "rule: $rule_name\n";
+		my $rule = ${$::Rule::by_name{$_}} ;
 		print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
@@ -50,14 +60,11 @@ sub apply {
 			push @{ $UI::inputs{ 
 						deref_code($rule->input_type, $track) }->{
 						deref_code($rule->input_object, $track) }
-				}, deref_code($rule->chain_id, $track) 
+			}, 	deref_code($rule->chain_id, $track) 
 						if defined $rule->input_type;
 			push @{ $UI::outputs{
 						deref_code( $rule->output_type, $track)  }->{ 
 						deref_code( $rule->output_object, $track) }
-
-					# i could rewrite this to be
-					# $track->deref_code(  $rule->output_object )
 			}, deref_code($rule->chain_id, $track) 
 				if defined $rule->output_type;
 		} @tracks;
@@ -115,7 +122,9 @@ sub new {
 		 if $group_names{$vals{name}}; # null name returns false
 	#my $n = $vals{n} ? $vals{n} : ++$n; 
 	$n++;
-	my $object = bless { 	name 	=> "Rule $n", # default name
+	my $object = bless { 	
+		name 	=> "Rule $n", # default name
+		target  => 'all',     # default target
 					@_ 			}, $class;
 
 	$group_names{$vals{name}}++;
@@ -137,6 +146,8 @@ sub dump{
 }
 
 package ::Track;
+use Exporter qw(import);
+our @EXPORT_OK = qw(track);
 use Carp;
 use vars qw(%by_name @by_index);
 use ::Wav;
@@ -207,6 +218,23 @@ sub full_path {
 		$track->dir ? $track->dir : "." , 
 			$track->name . "_" .  $track->overall_version
 }
+sub rec_status {
+	my $track = ${shift()};
+	return 'MUTE' if 
+		group($track->group, "rw") eq 'MUTE'
+		or $track->rw eq 'MUTE'
+		or $track->rw eq 'MON' and ! $track->full_path;
+	if( 	
+		$track->rw eq 'REC'
+		# and	group($track->group, "rw") eq 'REC'
+		# and $track->group eq $::Group::active
+		) {
+
+		return 'REC' if $track->ch_r;
+		return 'MON' if $track->full_path;
+		return 'MUTE';
+	}
+}
 
 
 # The following are not object methods. 
@@ -221,14 +249,23 @@ sub is {
 #${ Track::is 1 }->set( rw => 'MUTE');
 #${ Track::is "sax" }->rw;
 
-sub all_tracks { @by_index[1..scalar @by_index] }
+sub all_tracks { @by_index[1..scalar @by_index - 1] }
 
 
 }
+sub track {
+	my ($id, $method, @vals) = @_;
+	print "command: ", qq( ${ ::Track::is(\$id) }->$method(\@vals) );
+	eval qq( ${ ::Track::is(\$id) }->$method(\@vals) );
+}
+
+# track $n, qw( set rw REC); 
+# track $n, qw( rw ); 
+	
 
 package ::Group;
 use Carp;
-use vars qw(%by_name @by_index);
+use vars qw(%by_name @by_index $active);
 our @ISA;
 { 
 my $n = 0; 
@@ -272,7 +309,7 @@ sub new {
 	\$object;
 }
 
-sub all_groups { @by_index[1..@by_index] }
+sub all_groups { @by_index[1..@by_index - 1] }
 
 package ::Op;
 our @ISA;
