@@ -43,7 +43,6 @@ my $master_fader  = UI::Bus->new(
 	rules  => [ qw(mixer_out) ],
 );
 
-#$master_fader->dump; exit;
 
 my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
@@ -60,22 +59,12 @@ my $mix = UI::Track->new( group => 'Mixer', name => 'Mixes');
 
 my $sax = UI::Track->new( name => 'sax' );
 
-#print ref $tracker; exit;
-#${$tracker}->dump; exit;
 
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-#print track(qw(piano rw)); exit;
-is (  (&track qw(piano name)), 'piano', "Exported track function 1" );
-is ( (&track qw(piano rw)), 'REC', "Exported track function 2" );
-
+is (  (&track qw(piano name)), 'piano', "Aliased track function" );
+is ( (&group qw(Tracker rw)), 'REC', "Aliased group function" );
 is ($$piano->rec_status , 'REC', "Rec_status function"); 
-
-# print join " ", @{ ${$UI::Group::by_name{Tracker}}->tracks }; exit;
-#my $tracker = $UI::Group::by_name{Tracker}; 
-#print "--------\n";
-#$$tracker->dump; exit;
-#print ref ${$UI::Group::by_name{Tracker}}; exit;
 
 my $track_diag = <<TRACK;
 ---
@@ -101,28 +90,11 @@ device:
 ...
 MIXDIAG
 
-#$master_fader->dump; exit;
-#print @{ $master_fader->rules} ; exit;
-
+#  Temporarily disabled till we fix Tracker apply
 $master_fader->apply;
 
 is( yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs),
-	$mix_diag, "Master Fader setup");
+$mix_diag, "Master Fader setup");
 
-$tracker  = UI::Bus->new(
-	name => 'Tracker_Bus',
-	groups => ['Tracker'],
-	tracks => [],
-	rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
-);
-
-
-print group( qw( Tracker tracks) ); exit;
-
-$tracker->apply;
-
-print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
-
-1;
 __END__
 

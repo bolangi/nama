@@ -35,6 +35,8 @@ sub deref_code {
 }
 		
 sub apply {
+	
+	#print join " ", map{ ref $$_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
 	my @tracks; # refs to objects
@@ -51,8 +53,10 @@ sub apply {
 	push @tracks, map{ ::Track::is $_  }  @track_names; 
 
 	map{ my $rule_name = $_;
-	print "rule: $rule_name\n";
-		my $rule = $$::Rule::by_name{$_} ;
+		print "apply rule name: $rule_name\n"; 
+		my $rule = $::Rule::by_name{$_};
+		$rule = $$rule;
+		print "object type: ", ref $rule, $/;
 		#print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
@@ -264,10 +268,10 @@ sub all_tracks { @by_index[1..scalar @by_index - 1] }
 }
 sub track {
 	my ($id, $method, @vals) = @_;
-	print "track: id: $id, method: $method\n";
+	# print "track: id: $id, method: $method\n";
 	#my $command = q( ${ ::Track::id($id) }->{$method}(@vals) );
 	my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
-	print $command, $/;
+	#print $command, $/;
 	eval $command;
 	#qq( ${ ::Track::is(\$id) }->$method(\@vals) );
 }
@@ -335,14 +339,12 @@ sub all_groups { @by_index[1..@by_index - 1] }
 
 sub group {
 	my ($id, $method, @vals) = @_;
-	print "group:: id: $id, method: $method\n";
+	#print "group:: id: $id, method: $method\n";
 	#my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
 	my $command = q( ${ $::Group::by_name{$id} }->) . $method . q{(@vals)};
-	print $command, $/;
+	#print $command, $/;
 	eval $command;
 }
-1;
-__END__
 
 package ::Op;
 our @ISA;
@@ -459,6 +461,7 @@ my $rec_setup = UI::Rule->new(
 	customers 		=> sub { my $track = ${shift()}; 
 							@{ $UI::inputs{cooked}->{"loop," .  $track->n} } },
 );
+
 
 
 =comment
