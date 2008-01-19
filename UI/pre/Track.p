@@ -43,14 +43,16 @@ sub apply {
 	print "bus rules: ", join " ", @{$bus->rules}, $/;
 	my @track_names = 
 		@{ $bus->tracks }, 
-			map{ @{ ${ $::Group::by_name{$_} }->tracks }  } @{ $bus->groups };
+		map{ print "group: $_\n";
+		
+		@{ ${ $::Group::by_name{$_} }->tracks }  } @{ $bus->groups };
 	#print "tracks: ", join " ", map{ $$_->name } @tracks";
-	print "tracks: @track_names\n";
+	print "track names: @track_names\n";
 	push @tracks, map{ ::Track::is $_  }  @track_names; 
 
 	map{ my $rule_name = $_;
 	print "rule: $rule_name\n";
-		my $rule = ${$::Rule::by_name{$_}} ;
+		my $rule = $$::Rule::by_name{$_} ;
 		#print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
@@ -146,9 +148,9 @@ sub dump{
 }
 
 package ::Track;
-use Exporter qw(import);
+#use Exporter qw(import);
+#our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
-our @EXPORT_OK = qw(track);
 use Carp;
 use vars qw(%by_name @by_index);
 use ::Wav;
@@ -206,10 +208,10 @@ sub new {
 	# create group if necessary
 	
 	defined $group or $group = ::Group->new( name => $object->group );
-
+	my @existing = $$group->tracks ;
 	#print "group type: ", ref $$group, $/;
 	#$::Group::by_name{ $object->group } = \$object;
-	$$group->set( tracks => [ @{ $$group->tracks }, $object->name ]);
+	$$group->set( tracks => [ @existing, $object->name ]);
 	\$object;
 	
 }
@@ -273,16 +275,15 @@ sub track {
 # track $n, qw( set rw REC); 
 # track $n, qw( rw ); 
 	
-
+#use lib qw(.. .);
 package ::Group;
-use Exporter qw(import);
-our @EXPORT_OK =qw(group);
-
+#use Exporter qw(import);
+#our @EXPORT_OK =qw(group);
 use Carp;
 use vars qw(%by_name @by_index $active);
 our @ISA;
 { 
-$active = 'Tracker'; # REC-enabled
+#$active = 'Tracker'; # REC-enabled
 my $n = 0; 
 @by_index = ();
 %by_name = ();
@@ -323,6 +324,12 @@ sub new {
 	$by_name{ $object->name } = \$object;
 	\$object;
 }
+}
+
+sub tracks {
+	my $group = shift;
+	map{ $$_->name } grep{ $$_->group eq $group->name } ::Track::all_tracks;
+}
 
 sub all_groups { @by_index[1..@by_index - 1] }
 
@@ -334,6 +341,8 @@ sub group {
 	print $command, $/;
 	eval $command;
 }
+1;
+__END__
 
 package ::Op;
 our @ISA;
@@ -483,7 +492,5 @@ my $rec_setup = UI::Rule->new(
 =cut
 
 1;
-
-}
 
 __END__

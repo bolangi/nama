@@ -42,11 +42,17 @@ sub set {
 			or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }
-sub dump {
+sub serial  {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # yippee, easy magic
 	print "class: $class\n", yaml_out $self;
+	yaml_out $self;
+}
+sub dump {
+	my $self = shift;
+	my $class = ref $self;
+	bless $self, 'HASH'; # easy magic
 	yaml_out $self;
 }
 

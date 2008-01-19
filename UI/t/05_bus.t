@@ -1,11 +1,16 @@
 use Test::More qw(no_plan);
+use strict;
 use Carp;
 use lib qw(. ..);
 #use aliased 'UI::Track';
 use_ok( 'UI::Track' );
 use UI::Assign qw(yaml_out);
 
-use UI::Track qw(track);
+#use UI::Group qw(group);
+
+*group = \&UI::Group::group;
+*track = \&UI::Track::track;
+
 
 # $mixer_out->dump;
 # Don't know how to encode CODE at ../UI/Assign.pm line 253
@@ -61,8 +66,8 @@ my $sax = UI::Track->new( name => 'sax' );
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
 #print track(qw(piano rw)); exit;
-is (  (track qw(piano name)), 'piano', "Exported track function 1" );
-is ( (track qw(piano rw)), 'REC', "Exported track function 2" );
+is (  (&track qw(piano name)), 'piano', "Exported track function 1" );
+is ( (&track qw(piano rw)), 'REC', "Exported track function 2" );
 
 is ($$piano->rec_status , 'REC', "Rec_status function"); 
 
@@ -110,6 +115,9 @@ $tracker  = UI::Bus->new(
 	tracks => [],
 	rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );
+
+
+print group( qw( Tracker tracks) ); exit;
 
 $tracker->apply;
 
