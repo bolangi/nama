@@ -51,7 +51,7 @@ sub apply {
 	map{ my $rule_name = $_;
 	print "rule: $rule_name\n";
 		my $rule = ${$::Rule::by_name{$_}} ;
-		print "rule is type: ", ref $rule, $/;
+		#print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
 		map{ my $track = $_; # 
@@ -128,8 +128,8 @@ sub new {
 					@_ 			}, $class;
 
 	$group_names{$vals{name}}++;
-	print "previous rule count: ", scalar @by_index, $/;
-	print "n: $n, name: ", $object->name, $/;
+	#print "previous rule count: ", scalar @by_index, $/;
+	#print "n: $n, name: ", $object->name, $/;
 	$by_index[$n] = \$object;
 	$by_name{ $object->name } = \$object;
 	\$object;
@@ -147,6 +147,7 @@ sub dump{
 
 package ::Track;
 use Exporter qw(import);
+use ::Assign qw(join_path);
 our @EXPORT_OK = qw(track);
 use Carp;
 use vars qw(%by_name @by_index);
@@ -213,21 +214,27 @@ sub new {
 	
 }
 sub full_path {
-	my $track = ${shift()}; # copy! 
-	join_path 
+	my $track = shift; 
+	join_path(
 		$track->dir ? $track->dir : "." , 
 			$track->name . "_" .  $track->overall_version
+	)	
 }
+
+sub overall_version { 123 };
+
 sub rec_status {
-	my $track = ${shift()};
+	#print "REC status"; return "REC";
+	my $track = shift;
+	#print "rec_status: ref ", ref $track, $/;
 	return 'MUTE' if 
-		group($track->group, "rw") eq 'MUTE'
+		::Group::group($track->group, "rw") eq 'MUTE'
 		or $track->rw eq 'MUTE'
 		or $track->rw eq 'MON' and ! $track->full_path;
 	if( 	
 		$track->rw eq 'REC'
-		# and	group($track->group, "rw") eq 'REC'
-		# and $track->group eq $::Group::active
+		 and	::Group::group($track->group, "rw") eq 'REC'
+#		 and $track->group eq $::Group::active
 		) {
 
 		return 'REC' if $track->ch_r;
@@ -239,7 +246,7 @@ sub rec_status {
 
 # The following are not object methods. 
 
-sub is {
+sub id {
 	my $id = shift;
 	$id =~ /^\d+$/ 
 		and $::Track::by_index[$id]
@@ -255,8 +262,12 @@ sub all_tracks { @by_index[1..scalar @by_index - 1] }
 }
 sub track {
 	my ($id, $method, @vals) = @_;
-	print "command: ", qq( ${ ::Track::is(\$id) }->$method(\@vals) );
-	eval qq( ${ ::Track::is(\$id) }->$method(\@vals) );
+	print "track: id: $id, method: $method\n";
+	#my $command = q( ${ ::Track::id($id) }->{$method}(@vals) );
+	my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
+	print $command, $/;
+	eval $command;
+	#qq( ${ ::Track::is(\$id) }->$method(\@vals) );
 }
 
 # track $n, qw( set rw REC); 
@@ -264,10 +275,14 @@ sub track {
 	
 
 package ::Group;
+use Exporter qw(import);
+our @EXPORT_OK =qw(group);
+
 use Carp;
 use vars qw(%by_name @by_index $active);
 our @ISA;
 { 
+$active = 'Tracker'; # REC-enabled
 my $n = 0; 
 @by_index = ();
 %by_name = ();
@@ -310,6 +325,15 @@ sub new {
 }
 
 sub all_groups { @by_index[1..@by_index - 1] }
+
+sub group {
+	my ($id, $method, @vals) = @_;
+	print "group:: id: $id, method: $method\n";
+	#my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
+	my $command = q( ${ $::Group::by_name{$id} }->) . $method . q{(@vals)};
+	print $command, $/;
+	eval $command;
+}
 
 package ::Op;
 our @ISA;
