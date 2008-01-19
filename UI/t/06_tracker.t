@@ -19,7 +19,8 @@ my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
 	groups => ['Tracker'],
 	tracks => [],
-	rules  => [ qw( mix_setup mon_setup) ],
+	rules  => [ qw( rec_setup) ],
+	#rules  => [ qw( mix_setup mon_setup rec_setup rec_file) ],
 	#rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );
 
@@ -38,11 +39,28 @@ my $mix = UI::Track->new( group => 'Mixer', name => 'Mixes');
 
 my $sax = UI::Track->new( name => 'sax' );
 
+# print join " ", "sax versions", @{$sax->versions}, $/; exit;
+
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-#$master_fader->apply;
+print "last sax: " , $sax->last, $/;
 
-#print &group( qw(Tracker tracks) ); exit;
+my $group = $UI::Group::by_name{$sax->group};
+
+print "group name: ", $group->name, $/;
+
+print "tracker last: " , $group->last, $/;
+exit;
+
+
+# print "last tracker: " , group('Tracker','last'), $/;
+#print &group( qw(Tracker last) ); exit; # no!!
+# it's broken by the testing for fields somwhere,
+# no that affects set
+exit;
+
+$master_fader->apply;
+
 
 # test deref_code
 

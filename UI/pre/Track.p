@@ -76,17 +76,23 @@ sub apply {
 			my $key1 = deref_code($rule->input_type, $track);
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
-			print "input key1: $key1, key2: $key2, chain_id: $chain_id\n";
-			push @{ $UI::inputs{ $key1 }->{ $key2 } }, 
-					$chain_id 
-					if defined $rule->input_type;
+			my $rec_status = $track->rec_status;
+			print "chain_id: $chain_id, status: $rec_status, input key1: $key1, key2: $key2\n";
+			if ( 1 # deref_code($rule->customers, $track)
+						# and $track->rec_status ne 'MUTE'
+						#
+						)  {
 
-			$key1 = deref_code($rule->output_type, $track);
-			$key2 = deref_code($rule->output_object, $track) ;
-			print "output key1: $key1, key2: $key2, chain_id: $chain_id\n";
-			push @{ $UI::outputs{ $key1 }->{ $key2 } }, 
-					$chain_id 
-					if defined $rule->output_type;
+				defined $rule->input_type and
+					push @{ $UI::inputs{ $key1 }->{ $key2 } }, $chain_id ;
+
+				$key1 = deref_code($rule->output_type, $track);
+				$key2 = deref_code($rule->output_object, $track) ;
+			print "chain_id: $chain_id, status: $rec_status, output key1: $key1, key2: $key2\n";
+
+				defined $rule->output_type and
+					push @{ $UI::outputs{ $key1 }->{ $key2 } }, $chain_id;
+			}
 
 		} @tracks;
 	} @{ $bus->rules }; 
@@ -146,7 +152,7 @@ sub new {
 	my $object = bless { 	
 		name 	=> "Rule $n", # default name
 		target  => 'all',     # default target
-					@_ 			}, $class;
+					@_,  			}, $class;
 
 	$rule_names{$vals{name}}++;
 	#print "previous rule count: ", scalar @by_index, $/;
@@ -210,6 +216,7 @@ sub new {
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 	name 	=> "Audio_$n", # default name
 					group	=> 'Tracker',  # default 
+					dir     => '.',
 					rw   	=> 'REC', 
 					n    	=> $n,
 					@_ 			}, $class;
@@ -236,11 +243,41 @@ sub full_path {
 	my $track = shift; 
 	join_path(
 		$track->dir ? $track->dir : "." , 
-			$track->name . "_" .  $track->overall_version
+			$track->name . "_" .  $track->overall_version . '.wav'
 	)	
 }
 
-sub overall_version { 123 };
+sub last {
+	my $group = shift;
+	print join " ", 'searching tracks:', $group->tracks, $/;
+	my $max = 0;
+	map{ 
+		my $track = $_;
+		print "track: ", $track->name, "\n";
+		my $last = $track->last;
+		$max = $last if $last > $max;
+	}	map { $by_name{$_} } $group->tracks;
+}
+
+sub overall_version {	
+	my $track = shift;
+	my $group = $::Group::by_name{ $track->group };
+
+	if ( $track->rec_status eq 'REC'){
+
+		$group->last_version + 1
+
+	} elsif ( $track->rec_status eq 'MON'){
+
+		my $version;
+		$version = $track->active if $track->active 
+			and grep {$track->active == $_ } @{$track->versions};
+		$version = $group->version if $group->version
+			and grep {$group->version  == $_ } @{$track->versions};
+		$version;
+	} else { print "no suitable version found\n" }
+}
+	
 
 sub rec_status {
 	#print "REC status"; return "REC";
@@ -339,7 +376,11 @@ sub new {
 }
 }
 
-sub tracks { # returns names of tracks in group
+sub tracks { # returns list of tracks in group 
+
+	# note this contrasts with $track->versions, which is 
+	# a array reference.
+
 	my $group = shift;
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all_tracks;
 }
@@ -374,8 +415,7 @@ my $mixer_out = UI::Rule->new( #  this is the master fader
 	chain_id		=> 'Mixer_out',
 
 	target			=> 'none',
-	customers		=> sub{ %{ $UI::inputs{mixed} } or $debug 
-			and print("no customers for mixed, skipping\n"), 0},
+	customers		=> sub{ defined $UI::inputs{mixed}  or $debug and print("no customers for mixed, skipping\n"), 0},
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> 'loop,222', # $loopb 
@@ -419,7 +459,7 @@ my $mix_setup = UI::Rule->new(
 	output_object	=>  'loop,111', # $loopa
 	output_type		=>  'cooked',
 	status			=>  1,
-	customers 		=>  sub{ %{ $UI::inputs{mixed} } },
+	customers 		=>  sub{ defined $UI::inputs{mixed} },
 	
 );
 
@@ -468,7 +508,7 @@ my $rec_setup = UI::Rule->new(
 	post_input			=>	\&mono_to_stereo,
 	status			=>  1,
 	customers 		=> sub { my $track = shift; 
-							@{ $UI::inputs{cooked}->{"loop," .  $track->n} } },
+							defined $UI::inputs{cooked}->{"loop," .  $track->n} } ,
 );
 
 

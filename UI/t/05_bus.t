@@ -68,6 +68,7 @@ is ($piano->rec_status , 'REC', "Rec_status function");
 
 my $track_diag = <<TRACK;
 ---
+dir: .
 group: Tracker
 n: 3
 name: sax
@@ -76,6 +77,9 @@ rw: REC
 TRACK
 
 is( $sax->dump, $track_diag, "Track object instantiation and serialization");
+
+my $mixer_out = $UI::Rule::by_name{mixer_out};
+$mixer_out->set( customers => 1);  
 
 my $mix_diag = <<MIXDIAG;
 ---
