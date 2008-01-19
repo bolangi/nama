@@ -19,7 +19,8 @@ my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
 	groups => ['Tracker'],
 	tracks => [],
-	rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
+	rules  => [ qw( mix_setup mon_setup) ],
+	#rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );
 
 $UI::mix_to_disk_format = "mix-format";
@@ -39,10 +40,14 @@ my $sax = UI::Track->new( name => 'sax' );
 
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-$master_fader->apply;
+#$master_fader->apply;
 
 #print &group( qw(Tracker tracks) ); exit;
 
+# test deref_code
+
+my $code = sub { my $track = shift; $track->name  };
+is ( UI::Bus::deref_code($code, $sax), 'sax', "Deref_code function");
 
 #map{ ::Group::group( $_,  'tracks') } 
 #print $tracker->dump; 

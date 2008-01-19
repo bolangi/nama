@@ -29,10 +29,21 @@ sub new {
 
 sub deref_code {
 	my ($value, $track) = @_;
-	ref $value =~ /CODE/ 
-		?  &$value($track)
-		:  $value
+	my $type = ref $value ? ref $value : "scalar";
+	my $tracktype = ref $track;
+	print "found type: $type, tracktype: $tracktype, value: $value\n";
+	if ( $type  =~ /CODE/){
+		 print "code found\n";
+		$value = &$value($track);
+		 print "value: $value\n";
+		 $value;
+	} else {
+		print "value found: $value\n"; 
+		$value }
 }
+#$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
+# foo: 3$ 
+
 		
 sub apply {
 	
@@ -372,7 +383,7 @@ my $mixer_out = UI::Rule->new( #  this is the master fader
 	output_type		=> 'device',
 	output_object	=> 'stereo',
 
-	status			=> 'on',
+	status			=> 1,
 
 );
 
@@ -407,7 +418,7 @@ my $mix_setup = UI::Rule->new(
 	input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 	output_object	=>  'loop,111', # $loopa
 	output_type		=>  'cooked',
-	status			=>  'on',
+	status			=>  1,
 	customers 		=>  sub{ %{ $UI::inputs{mixed} } },
 	
 );
@@ -417,12 +428,12 @@ my $mon_setup = UI::Rule->new(
 	
 	name			=>  'mon_setup', 
 	target			=>  'MON',
-	chain_id 		=>	sub{ my $track = ${shift()}; $track->n },
+	chain_id 		=>	sub{ my $track = shift; $track->n },
 	input_type		=>  'file',
-	input_object	=>  sub{ my $track = ${shift()}; $track->full_path },
+	input_object	=>  sub{ my $track = shift; $track->full_path },
 	output_type		=>  'cooked',
-	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
-	status			=>  'on',
+	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+	status			=>  1,
 	post_input		=>	\&mono_to_stereo,
 );
 	
@@ -430,14 +441,14 @@ my $rec_file = UI::Rule->new(
 
 	name		=>  'rec_file', 
 	target		=>  'REC',
-	chain_id	=>  sub{ my $track = ${shift()}; 'R'. $track->n },   
+	chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
 	input_type	=>  'device',
 	input_object=>  'multi',
 	output_type	=>  'file',
 	output_object   => sub {
-		my $track = ${shift()}; 
+		my $track = shift; 
 		join " ", $track->full_path, $::raw_to_disk_format},
-	status		=>  'on',
+	status		=>  1,
 );
 
 # Rec_setup: must come last in oids list, convert REC
@@ -448,15 +459,15 @@ my $rec_file = UI::Rule->new(
 my $rec_setup = UI::Rule->new(
 
 	name			=>	'rec_setup', 
-	chain_id		=>  sub{ my $track = ${shift()}; $track->n },   
+	chain_id		=>  sub{ my $track = shift; $track->n },   
 	target			=>	'REC',
 	input_type		=>  'device',
 	input_object	=>  'multi',
 	output_type		=>  'cooked',
-	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
+	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 	post_input			=>	\&mono_to_stereo,
-	status			=>  'on',
-	customers 		=> sub { my $track = ${shift()}; 
+	status			=>  1,
+	customers 		=> sub { my $track = shift; 
 							@{ $UI::inputs{cooked}->{"loop," .  $track->n} } },
 );
 
