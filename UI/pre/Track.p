@@ -31,14 +31,14 @@ sub deref_code {
 	my ($value, $track) = @_;
 	my $type = ref $value ? ref $value : "scalar";
 	my $tracktype = ref $track;
-	print "found type: $type, tracktype: $tracktype, value: $value\n";
+	# print "found type: $type, tracktype: $tracktype, value: $value\n";
 	if ( $type  =~ /CODE/){
 		 print "code found\n";
 		$value = &$value($track);
-		 print "value: $value\n";
+		 #print "value: $value\n";
 		 $value;
 	} else {
-		print "value found: $value\n"; 
+		#print "value found: $value\n"; 
 		$value }
 }
 #$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
@@ -66,7 +66,7 @@ sub apply {
 		print "apply rule name: $rule_name\n"; 
 		my $rule = $::Rule::by_name{$_};
 		$rule = $rule;
-		print "object type: ", ref $rule, $/;
+		#print "object type: ", ref $rule, $/;
 		#print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
@@ -254,29 +254,39 @@ sub last_version {
 	my $max = 0;
 	map{ 
 		my $track = $_;
-		print "track: ", $track->name, "\n";
 		my $last = $track->last;
+		print "track: ", $track->name, ", last: $last\n";
+
 		$max = $last if $last > $max;
+
 	}	map { $by_name{$_} } $group->tracks;
+	$max;
 }
 
 sub overall_version {	
 	my $track = shift;
-	my $group = $::Group::by_name{ $track->group };
+	my $last = $track->last_version;
 
-	if ( $track->rec_status eq 'REC'){
+	++$last;
+}
+=comment
+	if ( 1 
+	
+	# $track->rec_status eq 'REC'
+	){
 
-		$group->last_version + 1
 
 	} elsif ( $track->rec_status eq 'MON'){
 
 		my $version;
-		$version = $track->active if $track->active 
+		return ($version = $track->active) if $track->active 
 			and grep {$track->active == $_ } @{$track->versions};
-		$version = $group->version if $group->version
+
+		return ($version = $group->version) if $group->version
 			and grep {$group->version  == $_ } @{$track->versions};
-		$version;
+
 	} else { print "no suitable version found\n" }
+=cut
 }
 	
 
@@ -316,7 +326,6 @@ sub id {
 sub all_tracks { @by_index[1..scalar @by_index - 1] }
 
 
-}
 sub track {
 	my ($id, $method, @vals) = @_;
 	my $track =  ::Track::id($id);

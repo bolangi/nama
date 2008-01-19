@@ -8,12 +8,8 @@ use UI::Assign qw(yaml_out);
 
 #use UI::Group qw(group);
 
-*group = \&UI::Group::group;
-*track = \&UI::Track::track;
-
-
-# $mixer_out->dump;
-# Don't know how to encode CODE at ../UI/Assign.pm line 253
+*group = \&UI::Group::group; # no longer necessary
+*track = \&UI::Track::track; # 
 
 my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
@@ -47,6 +43,9 @@ is ($piano->last, 1, "piano last");
 
 is ( $sax->last, 4, "\$track->last_version");
 
+print "piano last version: ", $piano->last_version, $/;
+
+print "overall: ", $piano->overall_version, $/; exit;
 my $group = $UI::Group::by_name{$sax->group};
 
 print "group name: ", $group->name, $/;
@@ -64,7 +63,6 @@ print "tracks: ", $group->tracks , $/;
 # no that affects set
 
 $master_fader->apply;
-
 
 # test deref_code
 
