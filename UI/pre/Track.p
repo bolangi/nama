@@ -247,8 +247,9 @@ sub full_path {
 	)	
 }
 
-sub last {
-	my $group = shift;
+sub last_version {
+	my $track = shift;
+	my $group = $::Group::by_name{$track->group}; 
 	print join " ", 'searching tracks:', $group->tracks, $/;
 	my $max = 0;
 	map{ 
@@ -384,6 +385,32 @@ sub tracks { # returns list of tracks in group
 	my $group = shift;
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all_tracks;
 }
+
+=comment
+
+# neither of these work, result is 2 should be 4 !!
+
+sub last_version { 
+	my $group = shift;
+	my @tracks = $group->tracks;
+	my $track_name = pop @tracks;
+	my $track = $::Track::by_name{$track_name};
+	$track->last_version;
+}
+
+sub last_version {
+	my $group = shift;
+	print join " ", 'searching tracks:', $group->tracks, $/;
+	my $max = 0;
+	map{ 
+		my $track = $_;
+		print "track: ", $track->name, "\n";
+		my $last = $track->last;
+		$max = $last if $last > $max;
+	}	map { $::Track::by_name{$_} } $group->tracks;
+}
+
+=cut
 
 sub all_groups { @by_index[1..@by_index - 1] }
 

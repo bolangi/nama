@@ -39,25 +39,29 @@ my $mix = UI::Track->new( group => 'Mixer', name => 'Mixes');
 
 my $sax = UI::Track->new( name => 'sax' );
 
-# print join " ", "sax versions", @{$sax->versions}, $/; exit;
+is ( "@{$sax->versions}", "1 2 4", "Version checking (redundant?) ");
 
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-print "last sax: " , $sax->last, $/;
+is ($piano->last, 1, "piano last");
+
+is ( $sax->last, 4, "\$track->last_version");
 
 my $group = $UI::Group::by_name{$sax->group};
 
 print "group name: ", $group->name, $/;
 
-print "tracker last: " , $group->last, $/;
-exit;
+#print keys %UI::Track::by_name; exit;
 
+map{ print $_->dump } map { $UI::Track::by_name{$_} } ($group->tracks); 
+
+print "tracks: ", $group->tracks , $/;
+#is ( $group->last_version, 4, "\$group->last_version");
 
 # print "last tracker: " , group('Tracker','last'), $/;
 #print &group( qw(Tracker last) ); exit; # no!!
 # it's broken by the testing for fields somwhere,
 # no that affects set
-exit;
 
 $master_fader->apply;
 
@@ -71,6 +75,7 @@ is ( UI::Bus::deref_code($code, $sax), 'sax', "Deref_code function");
 #print $tracker->dump; 
 $tracker->apply;
 
+exit;
 
 print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
 print map{ UI::Group::group( $_,  'tracks') }("Tracker");
