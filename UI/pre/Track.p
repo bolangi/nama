@@ -30,13 +30,13 @@ sub new {
 sub deref_code {
 	my ($value, $track) = @_;
 	ref $value =~ /CODE/ 
-		?  &$value($$track)
+		?  &$value($track)
 		:  $value
 }
 		
 sub apply {
 	
-	#print join " ", map{ ref $$_ } values %::Rule::by_name; exit;
+	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
 	my @tracks; # refs to objects
@@ -47,21 +47,21 @@ sub apply {
 		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups }; print $/;
 	my @track_names = (@{ $bus->tracks }, 
 		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups });
-	#print "tracks: ", join " ", map{ $$_->name } @tracks";
+	#print "tracks: ", join " ", map{ $_->name } @tracks";
 	print "track names: @track_names\n";
 	push @tracks, map{ ::Track::id $_  }  @track_names; 
 
 	map{ my $rule_name = $_;
 		print "apply rule name: $rule_name\n"; 
 		my $rule = $::Rule::by_name{$_};
-		$rule = $$rule;
+		$rule = $rule;
 		print "object type: ", ref $rule, $/;
 		#print "rule is type: ", ref $rule, $/;
 		my @tracks = @tracks;
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
 		map{ my $track = $_; # 
-			my $n = $$track->n;
-			$debug and print "track ", $$track->name, " index: $n\n";
+			my $n = $track->n;
+			$debug and print "track ", $track->name, " index: $n\n";
 			my $key1 = deref_code($rule->input_type, $track);
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
@@ -140,9 +140,9 @@ sub new {
 	$rule_names{$vals{name}}++;
 	#print "previous rule count: ", scalar @by_index, $/;
 	#print "n: $n, name: ", $object->name, $/;
-	$by_index[$n] = \$object;
-	$by_name{ $object->name } = \$object;
-	\$object;
+	$by_index[$n] = $object;
+	$by_name{ $object->name } = $object;
+	$object;
 	
 }
 
@@ -206,8 +206,8 @@ sub new {
 	#print "object class: $class, object type: ", ref $object, $/;
 	$track_names{$vals{name}}++;
 	if ( $add_index ) {
-		$by_index[$n] = \$object;
-		$by_name{ $object->name } = \$object;
+		$by_index[$n] = $object;
+		$by_name{ $object->name } = $object;
 		
 	}
 	# add the track to the corresponding Groups list
@@ -216,11 +216,9 @@ sub new {
 	# create group if necessary
 	
 	defined $group or $group = ::Group->new( name => $object->group );
-	my @existing = $$group->tracks ;
-	#print "group type: ", ref $$group, $/;
-	#$::Group::by_name{ $object->group } = \$object;
-	$$group->set( tracks => [ @existing, $object->name ]);
-	\$object;
+	my @existing = $group->tracks ;
+	$group->set( tracks => [ @existing, $object->name ]);
+	$object;
 	
 }
 sub full_path {
@@ -272,8 +270,9 @@ sub all_tracks { @by_index[1..scalar @by_index - 1] }
 }
 sub track {
 	my ($id, $method, @vals) = @_;
+	my $track =  ::Track::id($id);
 	# print "track: id: $id, method: $method\n";
-	my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
+	my $command = qq(\$track->$method(\@vals));
 	#print $command, $/;
 	eval $command;
 }
@@ -323,24 +322,24 @@ sub new {
 		@_ 			}, $class;
 	#return $object if $skip_index;
 	#print "object type: ", ref $object, $/;
-	$by_index[$n] = \$object;
-	$by_name{ $object->name } = \$object;
-	\$object;
+	$by_index[$n] = $object;
+	$by_name{ $object->name } = $object;
+	$object;
 }
 }
 
 sub tracks { # returns names of tracks in group
 	my $group = shift;
-	map{ $$_->name } grep{ $$_->group eq $group->name } ::Track::all_tracks;
+	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all_tracks;
 }
 
 sub all_groups { @by_index[1..@by_index - 1] }
 
 sub group {
 	my ($id, $method, @vals) = @_;
+	my $group =  $::Group::by_name{$id};
 	#print "group:: id: $id, method: $method\n";
-	#my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
-	my $command = q( ${ $::Group::by_name{$id} }->) . $method . q{(@vals)};
+	my $command = qq(\$group->$method(\@vals));
 	#print $command, $/;
 	eval $command;
 }

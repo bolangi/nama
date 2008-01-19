@@ -36,7 +36,7 @@ is ($tracker->dump, $td, "Tracker bus");
 
 $UI::mix_to_disk_format = "mix-format";
 $UI::raw_to_disk_format = "raw-format";
-print join (" ", map{ my $rule = $$_; $rule->name} UI::Rule::all_rules() ), $/;
+print join (" ", map{ my $rule = $_; $rule->name} UI::Rule::all_rules() ), $/;
 
 my $master_fader  = UI::Bus->new(
 	name => 'Master_Bus',
@@ -64,7 +64,7 @@ my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
 is (  (&track qw(piano name)), 'piano', "Aliased track function" );
 is ( (&group qw(Tracker rw)), 'REC', "Aliased group function" );
-is ($$piano->rec_status , 'REC', "Rec_status function"); 
+is ($piano->rec_status , 'REC', "Rec_status function"); 
 
 my $track_diag = <<TRACK;
 ---
@@ -75,7 +75,7 @@ rw: REC
 ...
 TRACK
 
-is( $$sax->dump, $track_diag, "Track object instantiation and serialization");
+is( $sax->dump, $track_diag, "Track object instantiation and serialization");
 
 my $mix_diag = <<MIXDIAG;
 ---
