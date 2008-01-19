@@ -24,7 +24,7 @@ my $tracker  = UI::Bus->new(
 
 $UI::mix_to_disk_format = "mix-format";
 $UI::raw_to_disk_format = "raw-format";
-print join (" ", map{ my $rule = $$_; $rule->name} UI::Rule::all_rules() ), $/;
+print join (" ", map{ $_->name} UI::Rule::all_rules() ), $/;
 
 my $master_fader  = UI::Bus->new(
 	name => 'Master_Bus',
