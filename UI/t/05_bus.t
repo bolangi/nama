@@ -112,6 +112,7 @@ $tracker  = UI::Bus->new(
 );
 
 $tracker->apply;
+
 print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
 
 1;

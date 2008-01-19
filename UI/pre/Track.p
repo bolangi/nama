@@ -81,12 +81,12 @@ use vars qw(%by_name @by_index);
 my $n = 0;
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
-my %group_names; 
+my %rule_names; 
 use ::Object qw( 	name
 						chain_id
 
 						target 
-						am_needed	
+					 	customers		
 
 						output_type
 						output_object
@@ -101,7 +101,7 @@ use ::Object qw( 	name
 						apply_inputs
 						apply_output
 						
-						default ); # on or off
+						status ); # on or off
 
 # chain_id, depends_on, apply_inputs and apply_outputs are
 # code refs.
@@ -119,7 +119,7 @@ sub new {
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak "rule name already in use: $vals{name}\n"
-		 if $group_names{$vals{name}}; # null name returns false
+		 if $rule_names{$vals{name}}; # null name returns false
 	#my $n = $vals{n} ? $vals{n} : ++$n; 
 	$n++;
 	my $object = bless { 	
@@ -127,7 +127,7 @@ sub new {
 		target  => 'all',     # default target
 					@_ 			}, $class;
 
-	$group_names{$vals{name}}++;
+	$rule_names{$vals{name}}++;
 	#print "previous rule count: ", scalar @by_index, $/;
 	#print "n: $n, name: ", $object->name, $/;
 	$by_index[$n] = \$object;
@@ -354,7 +354,7 @@ my $mixer_out = UI::Rule->new( #  this is the master fader
 	chain_id		=> 'Mixer_out',
 
 	target			=> 'none',
-	am_needed		=> sub{ %{ $UI::inputs{mixed} } or $debug 
+	customers		=> sub{ %{ $UI::inputs{mixed} } or $debug 
 			and print("no customers for mixed, skipping\n"), 0},
 
 	input_type 		=> 'mixed', # bus name
@@ -363,7 +363,7 @@ my $mixer_out = UI::Rule->new( #  this is the master fader
 	output_type		=> 'device',
 	output_object	=> 'stereo',
 
-	default			=> 'on',
+	status			=> 'on',
 
 );
 
@@ -372,7 +372,7 @@ my $mixdown = UI::Rule->new(
 	name			=> 'mixdown', 
 	chain_id		=> 'Mixdown',
 	target			=> 'all', # default
-	am_needed => sub{ 
+	customers => sub{ 
 		%{ $UI::outputs{mixed} } or $debug 
 			and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
@@ -387,7 +387,7 @@ my $mixdown = UI::Rule->new(
 	#apply_inputs	=> sub{ },  
 	#apply_outputs	=> sub{ },  
 
-	default			=> 'off',
+	status			=> 'off',
 );
 my $mix_setup = UI::Rule->new(
 
@@ -398,8 +398,8 @@ my $mix_setup = UI::Rule->new(
 	input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 	output_object	=>  'loop,111', # $loopa
 	output_type		=>  'cooked',
-	default			=>  'on',
-	am_needed 		=>  sub{ %{ $UI::inputs{mixed} } },
+	status			=>  'on',
+	customers 		=>  sub{ %{ $UI::inputs{mixed} } },
 	
 );
 
@@ -413,7 +413,7 @@ my $mon_setup = UI::Rule->new(
 	input_object	=>  sub{ my $track = ${shift()}; $track->full_path },
 	output_type		=>  'cooked',
 	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
-	default			=>  'on',
+	status			=>  'on',
 	post_input		=>	\&mono_to_stereo,
 );
 	
@@ -428,7 +428,7 @@ my $rec_file = UI::Rule->new(
 	output_object   => sub {
 		my $track = ${shift()}; 
 		join " ", $track->full_path, $::raw_to_disk_format},
-	default		=>  'on',
+	status		=>  'on',
 );
 
 # Rec_setup: must come last in oids list, convert REC
@@ -446,8 +446,8 @@ my $rec_setup = UI::Rule->new(
 	output_type		=>  'cooked',
 	output_object	=>  sub{ my $track = ${shift()}; "loop," .  $track->n },
 	post_input			=>	\&mono_to_stereo,
-	default			=>  'on',
-	am_needed 		=> sub { my $track = ${shift()}; 
+	status			=>  'on',
+	customers 		=> sub { my $track = ${shift()}; 
 							@{ $UI::inputs{cooked}->{"loop," .  $track->n} } },
 );
 
@@ -464,7 +464,7 @@ my $rec_setup = UI::Rule->new(
 	output	=>	q(multi),
 	type	=>	q(cooked),
 	pre_output	=>	\&pre_multi,
-	default	=> q(off),
+	status	=> q(off),
 
 # Live: apply effects to REC channels route to multichannel sound card
 # as above. 
@@ -475,7 +475,7 @@ my $rec_setup = UI::Rule->new(
 	output	=>  q(multi),
 	type	=>  q(cooked),
 	pre_output	=>	\&pre_multi,
-	default	=>  q(off),
+	status	=>  q(off),
 
 	push @{ $UI::inputs{cooked}->{$n} }, $chain_id if $rec_status eq 'REC'
 	push @{ $UI::outputs{$oid{output}} }, $chain_id;
