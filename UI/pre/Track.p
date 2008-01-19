@@ -43,14 +43,13 @@ sub apply {
 	print "bus tracks: ", join " ", @{$bus->tracks}, $/;
 	print "bus groups: ", join " ", @{$bus->groups}, $/;
 	print "bus rules: ", join " ", @{$bus->rules}, $/;
-	my @track_names = 
-		@{ $bus->tracks }, 
-		map{ print "group: $_\n";
-		
-		@{ ${ $::Group::by_name{$_} }->tracks }  } @{ $bus->groups };
+	print "bus group tracks: ", join " ", 
+		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups }; print $/;
+	my @track_names = (@{ $bus->tracks }, 
+		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups });
 	#print "tracks: ", join " ", map{ $$_->name } @tracks";
 	print "track names: @track_names\n";
-	push @tracks, map{ ::Track::is $_  }  @track_names; 
+	push @tracks, map{ ::Track::id $_  }  @track_names; 
 
 	map{ my $rule_name = $_;
 		print "apply rule name: $rule_name\n"; 
@@ -63,16 +62,21 @@ sub apply {
 		map{ my $track = $_; # 
 			my $n = $$track->n;
 			$debug and print "track ", $$track->name, " index: $n\n";
-			push @{ $UI::inputs{ 
-						deref_code($rule->input_type, $track) }->{
-						deref_code($rule->input_object, $track) }
-			}, 	deref_code($rule->chain_id, $track) 
-						if defined $rule->input_type;
-			push @{ $UI::outputs{
-						deref_code( $rule->output_type, $track)  }->{ 
-						deref_code( $rule->output_object, $track) }
-			}, deref_code($rule->chain_id, $track) 
-				if defined $rule->output_type;
+			my $key1 = deref_code($rule->input_type, $track);
+			my $key2 = deref_code($rule->input_object, $track) ;
+			my $chain_id = deref_code($rule->chain_id, $track) ;
+			print "input key1: $key1, key2: $key2, chain_id: $chain_id\n";
+			push @{ $UI::inputs{ $key1 }->{ $key2 } }, 
+					$chain_id 
+					if defined $rule->input_type;
+
+			$key1 = deref_code($rule->output_type, $track);
+			$key2 = deref_code($rule->output_object, $track) ;
+			print "output key1: $key1, key2: $key2, chain_id: $chain_id\n";
+			push @{ $UI::outputs{ $key1 }->{ $key2 } }, 
+					$chain_id 
+					if defined $rule->output_type;
+
 		} @tracks;
 	} @{ $bus->rules }; 
 }
@@ -259,8 +263,8 @@ sub id {
 		or  $::Track::by_name{$id}
 }
 
-#${ Track::is 1 }->set( rw => 'MUTE');
-#${ Track::is "sax" }->rw;
+#${ Track::id 1 }->set( rw => 'MUTE');
+#${ Track::id "sax" }->rw;
 
 sub all_tracks { @by_index[1..scalar @by_index - 1] }
 
@@ -269,16 +273,11 @@ sub all_tracks { @by_index[1..scalar @by_index - 1] }
 sub track {
 	my ($id, $method, @vals) = @_;
 	# print "track: id: $id, method: $method\n";
-	#my $command = q( ${ ::Track::id($id) }->{$method}(@vals) );
 	my $command = q( ${ ) .  qq( ::Track::id("$id") }->$method(\@vals) );
 	#print $command, $/;
 	eval $command;
-	#qq( ${ ::Track::is(\$id) }->$method(\@vals) );
 }
 
-# track $n, qw( set rw REC); 
-# track $n, qw( rw ); 
-	
 #use lib qw(.. .);
 package ::Group;
 #use Exporter qw(import);
@@ -330,7 +329,7 @@ sub new {
 }
 }
 
-sub tracks {
+sub tracks { # returns names of tracks in group
 	my $group = shift;
 	map{ $$_->name } grep{ $$_->group eq $group->name } ::Track::all_tracks;
 }

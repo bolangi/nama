@@ -39,36 +39,20 @@ my $sax = UI::Track->new( name => 'sax' );
 
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-#  Temporarily disabled till we fix Tracker apply
-#$master_fader->apply;
+$master_fader->apply;
 
-#is( yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs),
-#$mix_diag, "Master Fader setup");
-
-print "----x\n";
-&group( qw(Tracker rw) );
-#print &group( qw( Tracker tracks) );
-#print &group qw(Tracker tracks);# exit;
-print "----x\n"; exit;
+#print &group( qw(Tracker tracks) ); exit;
 
 
+#map{ ::Group::group( $_,  'tracks') } 
+#print $tracker->dump; 
 $tracker->apply;
 
+
 print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
+print map{ UI::Group::group( $_,  'tracks') }("Tracker");
 
 1;
 
-print "----x\n";
-&group( qw(Tracker rw) );
-#print &group( qw( Tracker tracks) );
-#print &group qw(Tracker tracks);# exit;
-print "----x\n"; exit;
-
-
-$tracker->apply;
-
-print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
-
-1;
 __END__
 
