@@ -1,0 +1,167 @@
+package UI;
+use Carp;
+
+##  Grammar.p, source for Grammar.pm
+
+### COMMAND LINE PARSER 
+
+$debug2 and print "Reading grammar\n";
+
+$UI::AUTOSTUB = 1;
+$UI::RD_HINT = 1;
+
+# rec command changes active take
+
+$grammar = q(
+
+
+command: help
+help: 'h' { print "hello_from your command line gramar\n"; 1 }
+
+
+);
+use Parse::RecDescent;
+use Term::ReadLine;
+my $term = new Term::ReadLine 'Ecmd';
+my $prompt = "Enter command: ";
+my $OUT = $term->OUT || \*STDOUT;
+my $user_input;
+$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+$debug = 1;
+	while (1) {
+		my ($user_input) = $term->readline($prompt) ;
+		$user_input =~ /^\s*$/ and next;
+		$term->addhistory($user_input) ;
+		my ($cmd, $predicate) = ($user_input =~ /(\w+)(.*)/);
+		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+		print "input: $user_input\n";
+		$parser->command($user_input) 
+			and print("Succeeded\n") 
+			or  print("Returned false\n");
+	}
+__END__
+command: record_group
+command: monitor_group
+command: mixdown
+command: mixplay
+command: rec
+command: mon
+command: mute
+command: monitor_channel
+command: record_channel
+command: set_version
+command: vol
+command: cut
+command: unity
+command: pan
+command: pan_right
+command: pan_left
+command: pan_back
+command: loop
+command: save_project
+command: new_project
+command: load_project
+command: add_track
+command: generate_setup
+command: generate_and_connect_setup
+command: connect_setup
+command: disconnect_setup
+command: show_setup
+command: show_effects
+command: ecasound_start
+command: ecasound_stop
+command: add_effect
+command: remove_effect
+command: renew_engine
+command: mark
+command: start
+command: stop
+command: show_marks
+command: list_marks
+command: rename_mark
+command: next_mark
+command: previous_mark
+_help: 'help' | 'h'
+_record_group: 'record_group' | 'record' | 'R'
+_monitor_group: 'monitor_group' | 'monitor' | 'M'
+_mixdown: 'mixdown'
+_mixplay: 'mixplay'
+_rec: 'rec'
+_mon: 'mon'
+_mute: 'mute' | 'z' | 'off'
+_monitor_channel: 'monitor_channel' | 'm'
+_record_channel: 'record_channel' | 'r'
+_set_version: 'set_version' | 'version' | 'n'
+_vol: 'vol' | 'v'
+_cut: 'cut' | 'c'
+_unity: 'unity' | 'cc'
+_pan: 'pan' | 'p'
+_pan_right: 'pan_right' | 'pr'
+_pan_left: 'pan_left' | 'pl'
+_pan_back: 'pan_back' | 'pb'
+_loop: 'loop'
+_save_project: 'save_project' | 'keep' | 'k' | 'save'
+_new_project: 'new_project' | 'create'
+_load_project: 'load_project' | 'load'
+_add_track: 'add_track' | 'new'
+_generate_setup: 'generate_setup' | 'generate' | 'gen'
+_generate_and_connect_setup: 'generate_and_connect_setup' | 'setup'
+_connect_setup: 'connect_setup' | 'connect'
+_disconnect_setup: 'disconnect_setup' | 'disconnect'
+_show_setup: 'show_setup' | 'show'
+_show_effects: 'show_effects' | 'sfx'
+_ecasound_start: 'ecasound_start' | 'T'
+_ecasound_stop: 'ecasound_stop' | 'S'
+_add_effect: 'add_effect' | 'add' | 'fx'
+_remove_effect: 'remove_effect' | 'rem' | 'rfx'
+_renew_engine: 'renew_engine' | 'renew'
+_mark: 'mark' | 'k'
+_start: 'start' | 't'
+_stop: 'stop' | 'st'
+_show_marks: 'show_marks' | 'sm'
+_list_marks: 'list_marks' | 'l'
+_rename_mark: 'rename_mark' | 'rn'
+_next_mark: 'next_mark' | 'mf' | 'nm' | 'fm'
+_previous_mark: 'previous_mark' | 'mb' | 'pm' | 'bm'
+help: _help {}
+record_group: _record_group {}
+monitor_group: _monitor_group {}
+mixdown: _mixdown {}
+mixplay: _mixplay {}
+rec: _rec {}
+mon: _mon {}
+mute: _mute {}
+monitor_channel: _monitor_channel {}
+record_channel: _record_channel {}
+set_version: _set_version {}
+vol: _vol {}
+cut: _cut {}
+unity: _unity {}
+pan: _pan {}
+pan_right: _pan_right {}
+pan_left: _pan_left {}
+pan_back: _pan_back {}
+loop: _loop {}
+save_project: _save_project {}
+new_project: _new_project {}
+load_project: _load_project {}
+add_track: _add_track {}
+generate_setup: _generate_setup {}
+generate_and_connect_setup: _generate_and_connect_setup {}
+connect_setup: _connect_setup {}
+disconnect_setup: _disconnect_setup {}
+show_setup: _show_setup {}
+show_effects: _show_effects {}
+ecasound_start: _ecasound_start {}
+ecasound_stop: _ecasound_stop {}
+add_effect: _add_effect {}
+remove_effect: _remove_effect {}
+renew_engine: _renew_engine {}
+mark: _mark {}
+start: _start {}
+stop: _stop {}
+show_marks: _show_marks {}
+list_marks: _list_marks {}
+rename_mark: _rename_mark {}
+next_mark: _next_mark {}
+previous_mark: _previous_mark {}

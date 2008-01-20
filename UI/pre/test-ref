@@ -1,0 +1,19 @@
+package A;
+%all; 
+sub new { 
+		my $class = shift;
+		my $object = bless {a => 'hello' }, $class;
+		print "object type: ", ref $object, $/;
+		$all{a} = \$object;
+		return \$object;
+		
+
+}
+package main;
+$a = A->new;
+
+print ref ${ $A::all{a} };
+
+exit;
+print $$a->{a};
+sub a { my $a = shift; print "|", $a->{a} , "|"}

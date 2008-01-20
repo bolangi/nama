@@ -1,0 +1,1 @@
+ perl -e 'package BB; sub hello{ print "hi" } my $a = \$b; $b = bless {}, "BB"B print $$a->hello'

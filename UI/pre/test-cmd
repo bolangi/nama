@@ -1,0 +1,11 @@
+#!/usr/local/bin/perl -w
+use lib "$ENV{TD}/..";
+use UI::Assign qw(:all);
+my $struct = { a => [1, 2, {me => 'tarzan'}, 4] };
+my $yaml = yaml_out ($struct);
+#print $yaml; exit;
+my $ref = yaml_in "commands.pst";
+#my $ref = yaml_in $yaml;
+#my $ref = yaml_in qx(cat psv);
+print &yaml_out($ref);
+
