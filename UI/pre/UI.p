@@ -74,28 +74,12 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Refresh_subs.pl ) %]
 
+## The following code loads the object core of the system 
+## and initiates the chain templates (rules)
 
-=comment
-my $root_class = '::'; 
-sub new { 
-	my $class = shift;
-	if (@_ % 2 and $class eq $root_class){
-		my %h = ( @_ );
-		my $mode = $h{mode};
-		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
-		$mode =~ /text|txt/i       and $mode = 'Text';
-		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
-		return bless { @_ }, "$root_class\::" . $mode;
-	} 
-	return bless {@_}, $class;
-}
-sub usage { <<USAGE; }
-Usage:    UI->new(mode => "text")
-       or UI->new(mode => "tk")
-USAGE
+use ::Track;
 
-=cut
-
+[% qx(cat ./Rules.pl ) %]
 
 package ::Graphical;  ## gui routines
 our @ISA = '::';
