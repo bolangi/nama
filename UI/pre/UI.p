@@ -77,9 +77,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 ## The following code loads the object core of the system 
 ## and initiates the chain templates (rules)
 
-use ::Track;
-
-[% qx(cat ./Rules.pl ) %]
+use ::Track;   
 
 package ::Graphical;  ## gui routines
 our @ISA = '::';

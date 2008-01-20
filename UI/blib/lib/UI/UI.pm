@@ -390,12 +390,22 @@ use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { "config.yml" }
 sub ecmd_dir { join_path(wav_dir, ".ecmd") }
-sub this_wav_dir {$project_name and join_path(wav_dir, $project_name) }
-sub project_dir  {$project_name and join_path(ecmd_dir, $project_name) }
+sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
+								or wav_dir
+}
+sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
+								or wav_dir
+
+}
+#sub this_wav_dir {$project_name and join_path(wav_dir, $project_name) }
+#sub project_dir  {$project_name and join_path(ecmd_dir, $project_name) }
 
 sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 sub status_vars {
 	serialize -class => 'UI', -vars => \@status_vars;
+}
+sub config_vars {
+	serialize -class => 'UI', -vars => \@config_vars;
 }
 
 sub discard_object {
@@ -424,6 +434,8 @@ sub prepare {
 	# internal ones. 
 	
 	read_config(); # sets $wav_dir
+	#print "raw to disk format: $raw_to_disk_format\n";
+	#print config_vars(); exit;
 
 	$opts{d} and $wav_dir = $opts{d};
 
@@ -436,7 +448,7 @@ sub prepare {
 	# Tie mixdown version suffix to global monitor version 
 
 	new_engine();
-	initialize_oids();
+	#initialize_oids();
 	prepare_static_effects_data() unless $opts{e};
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -480,13 +492,16 @@ sub read_config {
 	%cfg = %{  $yr->read(config())  };
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
+#	*devices = \%{ $cfg{devices} }; # alias
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out( \%cfg ); #exit;
+	#print yaml_out( \%cfg ); die "HEREEE";
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_var( \%cfg, @config_vars); 
 	$mixname eq 'mix' or die" bad mixname: $mixname";
+	#print "mixname: $mixname\n"; exit;
+	#print yaml_out( \%devices ); die "HEREEE";
 
 }
 sub walk_tree {
@@ -504,41 +519,7 @@ sub substitute{
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 ## project handling
-=comment
-sub load_project { project(@_) }
 
-sub project { # object method
-#	my $ui = shift; 
-	my %h = @_;
-	$debug2 and print "&load_project\n";
-	$debug and print "project name: $h{-name} create: $h{-create}\n";
-	carp ("project name required\n"), return unless $h{-name};
-	my $old_project = $project_name;
-	$project_name = $h{-name};
-	if ( ! -d project_dir) {
-		$debug and print "directory not found: ", project_dir, $/;
-		if ( $h{-create} ){ 
-			$debug and print join " ", 
-				"creating directories:", this_wav_dir, project_dir, $/;
-			create_dir(this_wav_dir, project_dir);
-		} else { 
-			print "project: ", project_dir, $/;
-			$project_name = $old_project;
-			return;
-		}
-	}
-	read_config;
-	initialize_project_data;
-	remove_small_wavs; 
-	print "reached here!!!\n";
-	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
-	$debug and print "found ", scalar @all_chains, "chains\n";
-	add_mix_track, dig_ruins unless scalar @all_chains;
-	$ui->global_version_buttons;
-
-}
-
-=cut
 sub load_project {
 	my %h = @_;
 	$debug2 and print "&load_project\n";
@@ -659,17 +640,6 @@ sub add_track {
 	$ui->track_gui($i);
 	$debug and print "Added new track!\n",yaml_out(\%state_c);
 }
-sub add_mix_track {
-	return if $opts{m}; # or ! -e join_path(&project_dir,$state_store_file);
-	add_track($mixname) ;
-	$state_t{$t}->{rw} = "MUTE"; 
-	new_take(); # $t increments
-	$state_t{$t}->{rw} = "MON";
-}
-sub mix_suffix {
-	my $stub = shift;
-	$stub eq $mixname ? ' (mix)' : ''
-}
 sub restore_track {
 	$debug2 and print "&restore_track\n";
 	@_ = discard_object(@_);
@@ -677,26 +647,7 @@ sub restore_track {
 	find_wavs($n);
 	$ui->track_gui($n), $ui->refresh();
 }
-sub register_track {
-	@_ = discard_object(@_);
-	$debug2 and print "&register_track\n";
-	my ($i, $name, $ch_r, $ch_m) = @_;
-	$debug and print <<VARS;
-i          : $i
-name       : $name
-Rec channel: $ch_r
-Mon channel: $ch_m
-VARS
-  	push @all_chains, $i;
-  	# print "ALL chains: @all_chains\n";
-	$take{$i} = $t;
-	$chain{$name} = $i;
-	$state_c{$i}->{rw} = "REC";
-	$state_c{$i}->{ch_m} = $ch_m;
-	$state_c{$i}->{ch_r} = $ch_r;
-	$name =~ s/\.wav$//;
-	$state_c{$i}->{file} = $name;
-}
+
 sub dig_ruins { 
 
 	# only if there are no tracks , 
@@ -722,47 +673,7 @@ sub dig_ruins {
 
 	}
 }
-sub find_wavs {
-	@_ = discard_object(@_);
-	my $n = shift; 
-	$debug2 and print "&find_wavs\n";
-	$debug and print "track: $n\n";
-	$debug and print "this_wav dir: ", this_wav_dir,": $n\n";
 
-	
-	# GET VERSIONS 
-	#  Assign bare (unversioned) file as version 1 
-	
-	$debug and 
-	print "getting versions for chain $n, state_c{$n}->{file}\n";
-		my %versions =  get_versions (
-			this_wav_dir(),
-			$state_c{$n}->{file},
-			'_', 'wav' )  ;
-		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
-			delete $versions{bare};
-		}
-	$debug and print "\%versions\n================\n", yaml_out(\%versions);
-		delete $state_c{$n}->{targets};
-		$state_c{$n}->{targets} = { %versions };
-
-		 $state_c{$n}->{versions} = [ sort { $a <=> $b } 
-		 	keys %{$state_c{$n}->{targets}} ];
-		$debug and print join " ", "versions: ",@ {$state_c{$n}->{versions}} , "\n\n";
-		my $this_last = $state_c{$n}->{versions}->[-1];
-no warnings;
-		$last_version = $this_last if $this_last > $last_version ;
-use warnings;
-# VERSION	
-		# set last version active if the current active version is missing
-		$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]
-			unless grep{ $state_c{$n}->{active} == $_ }
-				@{$state_c{$n}->{versions}};
-
-	
-	$debug and print "\$last_version: $last_version\n";
-
-}
 sub remove_small_wavs {
 	$debug2 and print "&remove_small_wavs\n";
 	# left by a recording chainsetup that is 
@@ -776,48 +687,7 @@ sub remove_small_wavs {
 	map { print ($_, "\n") if -s == 44 } @wavs; 
 	map { unlink $_ if -s == 44 } @wavs; 
 }
-## track group handling
-#
-sub new_take {
-	$debug2 and print "&new_take\n";
-	increment_take();
-	$ui->take_gui; $ui->refresh_t();
-}
-sub increment_take {
-	$debug2 and print "&increment_take\n";
-			return if transport_running(); 
-					$t++;
-					$state_t{active} = $t;
-					$state_t{$t}->{rw} = "REC";
-					push @takes, $t;
-	$debug and print "take $t\n";
-}
-sub decrement_take {
-			$debug2 and print "&decrement_take\n";
-			return if transport_running(); 
-			return if $t == 1; 
-			# can't proceed if tracks already defined for this take
-			$debug and print ("found chains, aborting"),return 
-				if grep{$take{$_}==$t} @all_chains;
-			pop @takes;
-			$t--;
-			$state_t{active} = $t;
-			# print SESSION "CANCEL take $t\n";
-			my @candidate = $take_frame->children;
-			$candidate[-1]->destroy;
-			
-}
-sub select_take {
-	my ($t, $status) = @_; 
-	$status =~ m/REC|MON|MUTE/
-		or croak "illegal status: $status, expected one of REC|MON|MUTE\n";
-	return if transport_running();
-	$state_t{$t}->{rw} = $status; 
-	$state_t{active} = $t; 
-	$ui->refresh();
-	setup_transport();
-	connect_transport();
-}
+
 sub add_volume_control {
 	my $n = shift;
 	
@@ -842,19 +712,6 @@ sub add_pan_control {
 }
 ## version functions
 
-sub selected_version {
-	# return track-specific version if selected,
-	# otherwise return global version selection
-	# but only if this version exists
-	my $n = shift;
-no warnings;
-	my $version = $state_c{$n}->{active} 
-		? $state_c{$n}->{active} 
-		: $monitor_version ;
-	(grep {$_ == $version } @{$state_c{$n}->{versions}}) ? $version : undef;
-
-use warnings;
-}
 sub set_active_version {
 	my $n = shift;
 	$debug and print "chain $n: versions: @{$state_c{$n}->{versions}}\n";    
@@ -862,29 +719,7 @@ sub set_active_version {
 			if $state_c{$n}->{versions};    
 		$debug and print "active version, chain $n: $state_c{$n}->{active}\n\n";
 }
-sub new_version {
-	$last_version + 1;
-}
-sub get_versions {
-	my ($dir, $basename, $sep, $ext) = @_;
 
-	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
-	$debug and print "reading directory: $dir\n\n";
-	my %versions = ();
-	for my $candidate ( readdir WD ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
-	}
-	$debug and print "get_version: " , yaml_out(\%versions);
-	closedir WD;
-	%versions;
-}
 sub mon_vert {
 	my $ver = shift;
 	return if $ver == $monitor_version;
@@ -895,286 +730,25 @@ sub mon_vert {
 	$ui->refresh();
 }
 ## chain setup generation
-#
-sub collect_chains {
-	$debug2 and print "&collect\n";
-	local $debug = $debug3;
-	@monitor = @record = ();
 
-	
-	for my $n (@all_chains) {
-	$debug and print "rec_status $n: ", rec_status($n), "\n";
-		push (@monitor, $n) if rec_status($n) eq "MON"; 
-		push (@record, $n) if rec_status($n) eq "REC";
-	}
-
-	$debug and print "monitor chains:  @monitor\n\n";
-	$debug and print "record chains:  @record\n\n";
-	$debug and print "this take: $state_t{active}\n\n";
-		
-}
-sub rec_status {
-	my $n = shift;
-	local $debug = $debug3;
-	$debug2 and print "&rec_status\n";
-	$debug and print "found object: ", ref $n, $/ if ref $n;
-	no warnings;
-	$debug and print "chain $n: active: selected_version($n) trw: $state_t{$take{$n}}->{rw} crw: $state_c{$n}->{rw}\n";
-	use warnings;
-
-no warnings;
-my $file = join_path(this_wav_dir ,  $state_c{$n}->{targets}->{selected_version($n)});
-my $file_exists = -f $file;
-use warnings;
-    return "MUTE" if $state_c{$n}->{rw} eq "MON" and ! $file_exists;
-	return "MUTE" if $state_c{$n}->{rw} eq "MUTE";
-	return "MUTE" if $state_t{$take{$n}}->{rw} eq "MUTE";
-	if ($take{$n} == $state_t{active} ) {
-
-		if ($state_t{$take{$n}}->{rw} eq "REC") {
-
-			
-			if ($state_c{$n}->{rw} eq "REC"){
-				return "REC" if $state_c{$n}->{ch_r};
-				return "MON" if $file_exists; #or carp "file not found;
-				return "MUTE";
-			}
-		}
-	}
-	return "MON" if selected_version($n);
-	return "MUTE";
-}
 sub really_recording {  # returns filename stubs
 
 #	scalar @record  # doesn't include mixdown track
 	print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
 	keys %{$outputs{file}}; # includes mixdown
 }
-sub make_io_lists {
-	#local $debug = $debug3;
-	$debug2 and print "&make_io_lists\n";
-	@input_chains = @output_chains = ();
 
-	%inputs = (); # chain fragments
-	$inputs{mixed} = [];
-	%outputs = ();      
-	%post_input = ();
-	%pre_output = ();
-	my $rec_status;
+=comment
 
-	# set up track independent chains for MIX and STEREO (type: mixed)
-	for my $oid (@oids) {
-		my %oid = %{$oid};
-		next unless lc $oid{type} eq 'mixed' and $oid_status{ $oid{name} };
-			push @{ $inputs{mixed} }, $oid{id};
-		if (lc $oid{output} eq 'file') {
-			$outputs{file}->{ $mixname } = [ $oid{id} ] ;
-		} else { # assume device
-			defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
-			push @{ $outputs{$oid{output}} }, $oid{id}
-		#	hash_push( \%outputs, $oid{output}, $oid{id});
-		}
-	}
-
-	for my $n (@all_chains) {
-		$debug and print "chain $n: begin\n";
-		$rec_status = rec_status($n);
-		next if $rec_status eq "MUTE";
-
-OID:		for my $oid (@oids) {
-
-			# rec_setup comes last so that
-			# we can check inputs{cooked}->$n to
-			# see if it is needed.
-
-			my %oid = %{$oid};
-			
-			next if $oid{type} eq 'mixed'; # already done
-			next if $oid{name} eq 'rec_setup' and ! $inputs{cooked}->{$n};
-			next if $oid{name} eq 'mix_setup' and ! @{ $inputs{mixed} };
-
-			no warnings;
-			my $chain_id = $oid{id}. $n; 
-			use warnings;
-
-			# check per-project setting for output oids
-
-			next if ! $oid_status{ $oid{name} };
-			$debug and print "Active oid match candidate found...\n";
-			$debug and print "chain_id: $chain_id\n";
-			$debug and print "oid name: $oid{name}\n";
-			$debug and print "oid target: $oid{target}\n";
-			$debug and print "oid input: $oid{input}\n";
-			$debug and print "oid output: $oid{output}\n";
-			$debug and print "oid type: $oid{type}\n";
-
-		# check track $n against template
-
-			next unless $oid{target} eq 'all' or lc $oid{target} eq lc $rec_status; 
-
-			# if we've arrived here we will create chains
-			$debug and print "really making chains!\n";
-
- #######     INPUTS
-
-			if ($oid{type} eq 'raw')  {  #  only mon_setup, rec_setup and rec_file
-			$debug and print "oid type is raw!\n";
-				if ($oid{input} eq 'file') { # only mon_setup
-					$debug and print "oid input is file!\n";
-					defined $inputs{file}->{ $state_c{$n}->{file} } 
-						or  $inputs{file}->{ $state_c{$n}->{file} } = [];
-					push @{ $inputs{file}->{ $state_c{$n}->{file} } }, $chain_id;
-				}
-				else {   # we presume it is a device
-
-					$debug and print "we presume it is a device\n";
-					defined $inputs{$oid{input}}
-						or  $inputs{$oid{input}} = [];
-					push @{ $inputs{$oid{input}} }, $chain_id;
-
-					#   if status is 'rec' every raw customer gets
-					#   rec_setup's post_input string
-
-				$post_input{$chain_id} .= rec_route($n) if lc $rec_status eq 'rec';
-
-				}
-		}
-		elsif ($oid{type} eq 'cooked') {    
-			$debug and print "hmmm... cooked!\n";
-			defined $inputs{cooked}->{$n} or $inputs{cooked}->{$n} = [];
-			push @{ $inputs{cooked}->{$n} }, $chain_id;
-		}
-		else { croak "$oid{name}: neither input defined nor type 'cooked'"; }
-
- #######     OUTPUTS
-
-		if( defined $oid{output}) {
-			if ($oid{output} eq 'file') {
-				$debug and print "output is 'file'\n";
-
-				defined $outputs{file}->{ $state_c{$n}->{file} } 
-					or  $outputs{file}->{ $state_c{$n}->{file} } = [];
-				push @{ $outputs{file}->{ $state_c{$n}->{file} } }, $chain_id;
-			}
-			elsif ($oid{output} eq 'loop') { # only rec_setup and mon_setup
-				my $loop_id = "loop,$n";
-				$debug and print "output is 'loop'\n";
-				$outputs{ $loop_id } = [ $chain_id ]; 
-			}
-			elsif ($oid{output} eq $loopa ) { # only mix_setup
-				$debug and print "output is 'mix_loop'\n";
-				defined $outputs{ $loopa } 
-					or $outputs{ $loopa } = [];
-				push @{ $outputs{ $loopa } } , $chain_id; 
-			}
-			else  { 
-
-				$debug and print "presume output is a device\n";
-				defined $outputs{$oid{output}} or $outputs{$oid{output}} = [];
-				push @{ $outputs{$oid{output}} }, $chain_id;
-
-
-			}
-			# add intermediate processing
-		} # fi
-		my ($post_input, $pre_output);
-		$post_input = &{$oid{post_input}}($n) if defined $oid{post_input};
-		$pre_output = &{$oid{pre_output}}($n) if defined $oid{pre_output};
-		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
-		$pre_output{$chain_id} .= $pre_output if defined $pre_output;
-		$post_input{$chain_id} .= $post_input 
-			if defined $post_input and $chain_id ne '1'; # MIX
 
 			# TODO no channel copy for stereo input files
             # such as version 1 backing.wav
+
+			# n.b. no signal multiplier needed with current Ecasound
 			
-		} # next oid
+=cut
 
 
-	}     # next $n
-
-	# add signal multiplier
-# 
-# 	for my $dev (grep{$_ ne 'file'} keys %outputs){
-# 		my @chain_ids = @{$outputs{$dev}};
-# 		 map{
-# 		 	$pre_output{$_} .=  " -ea:" . 100 * scalar @chain_ids 
-# 				unless @chain_ids < 2
-# 		} @chain_ids;
-# 	}
-
-	#$debug and print "\@oids\n================\n", yaml_out(\@oids);
-	$debug and print "\%post_input\n================\n", yaml_out(\%post_input);
-	$debug and print "\%pre_output\n================\n", yaml_out(\%pre_output);
-	$debug and print "\%inputs\n================\n", yaml_out(\%inputs);
-	$debug and print "\%outputs\n================\n", yaml_out(\%outputs);
-
-
-}
-sub rec_route {
-	my $n = shift;
-	return if $state_c{$n}->{ch_r} == 1;
-	return if ! defined $state_c{$n}->{ch_r};
-	"-erc:$state_c{$n}->{ch_r},1 -f:$raw_to_disk_format"
-}
-sub route {
-	my ($width, $dest) = @_;
-	return undef if $dest == 1 or $dest == 0;
-	$debug and print "route: width: $width, destination: $dest\n\n";
-	my $offset = $dest - 1;
-	my $map ;
-	for my $c ( map{$width - $_ + 1} 1..$width ) {
-		$map .= " -erc:$c," . ( $c + $offset);
-		$map .= " -eac:0,"  . $c;
-	}
-	$map;
-}
-sub hash_push {
-	my ($hash_ref, $key, @vals) = @_;
-	$hash_ref->{$key} = [] if ! defined $hash_ref->{$key};
-	push @{ $hash_ref->{$key} }, @vals;
-}
-sub eliminate_loops {
-	my $n = shift;
-	return unless defined $inputs{cooked}->{$n} and scalar @{$inputs{cooked}->{$n}} == 1;
-	# get customer's id from cooked list and remove it from the list
-
-	my $cooked_id = pop @{ $inputs{cooked}->{$n} }; 
-
-	# add chain $n to the list of the customer's output device 
-	
-	no warnings;
-	my ($oid) = grep{ $cooked_id =~ /$_->{id}/ } @oids;
-	use warnings;
-	my %oid = %{$oid};
-	defined $outputs{ $oid{output} } or $outputs{ $oid{output}} = [];
-	push @{ $outputs{ $oid{output} } }, $n;
-
-	
-
-	# remove chain $n as source for the loop
-
-	my $loop_id = "loop,$n";
-	delete $outputs{$loop_id}; 
-	
-	# remove customers that use loop as input
-
-	delete $inputs{$loop_id}; 
-
-	# remove cooked customer from his output device list
-
-	@{ $outputs{$oid{output}} } = grep{$_ ne $cooked_id} @{ $outputs{$oid->{output}} };
-
-	# transfer any intermediate processing to numeric chain,
-	# deleting the source.
-	no warnings;
-	$post_input{$n} .= $post_input{$cooked_id};
-	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	use warnings;
-	delete $post_input{$cooked_id};
-	delete $pre_output{$cooked_id};
-
-}
 =comment    
 
 %inputs
@@ -1198,7 +772,6 @@ sub eliminate_loops {
 sub write_chains {
 	$debug2 and print "&write_chains\n";
 
-
 	# $bus->apply;
 	# $mixer->apply;
 	# $ui->write_chains
@@ -1210,24 +783,22 @@ sub write_chains {
 	
 	### Setting devices as inputs (used by i.e. rec_setup)
 	
-	for my $dev (keys %{ $inputs{devices} } ){
+	for my $dev (keys %{ $inputs{device} } ){
 
 		$debug and print "dev: $dev\n";
 		push  @input_chains, 
-		join " ", "-a:" . (join ",", @{ $inputs{$dev} }),
+		join " ", "-a:" . (join ",", @{ $inputs{device}->{$dev} }),
 			"-f:" .  $devices{$dev}->{input_format},
 			"-i:" .  $devices{$dev}->{ecasound_id}, 
 	}
-
 	#####  Setting devices as outputs
 	#
-	for my $dev ( keys %{ $outputs{devices} }){
+	for my $dev ( keys %{ $outputs{device} }){
 			push @output_chains, join " ",
-				"-a:" . (join "," , @{ $outputs{devices}->{$dev} }),
+				"-a:" . (join "," , @{ $outputs{device}->{$dev} }),
 				"-f:" . $devices{$dev}->{output_format},
 				"-o:". $devices{$dev}->{ecasound_id};
 	}
-
 	### Setting loops as inputs 
 
 	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
@@ -1238,10 +809,20 @@ sub write_chains {
 				"-i:$loop";
 		}
 	}
+	### Setting loops as outputs 
+
+	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
+		for my $loop ( keys %{ $outputs{$bus} }){
+			push  @output_chains, 
+			join " ", 
+				"-a:" . (join ",", @{ $outputs{$bus}->{$loop} }),
+				"-o:$loop";
+		}
+	}
 	##### Setting files as inputs (used by mon_setup)
 
 	for my $full_path (keys %{ $inputs{file} } ) {
-		$debug and print "monitor input file: $file\n";
+		$debug and print "monitor input file: $full_path\n";
 		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
@@ -1253,7 +834,7 @@ sub write_chains {
 
 	for my $key ( keys %{ $outputs{file} } ){
 		my ($full_path, $format) = split " ", $key;
-		$debug and print "chain: $n, record output file: $name\n";
+		$debug and print "record output file: $full_path\n";
 		my $chain_ids = join ",",@{ $outputs{file}->{$key} };
 		
 		push @output_chains, join ( " ",
@@ -1261,6 +842,7 @@ sub write_chains {
 			 "-f:".$format,
 			 "-o:".$full_path,
 		 );
+			 
 			 
 	}
 
@@ -1313,6 +895,8 @@ sub output_format {
 }
 ## templates for generating chains
 
+sub initialize_rules {
+ }
 sub initialize_oids {
 	local $debug = $debug3;
 	$debug2 and print "&initialize_oids\n";
@@ -1938,7 +1522,7 @@ sub prepare_static_effects_data{
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
 			-class => 'UI',
-			-storable => 1 );
+			-storable => 1 ) unless $wav_dir eq '.';
 	}
 
 }
@@ -3596,28 +3180,10 @@ sub restore_time_marker_labels {
 ### end
 
 
+## The following code loads the object core of the system 
+## and initiates the chain templates (rules)
 
-=comment
-my $root_class = 'UI'; 
-sub new { 
-	my $class = shift;
-	if (@_ % 2 and $class eq $root_class){
-		my %h = ( @_ );
-		my $mode = $h{mode};
-		$mode =~ /text|txt|graphic|tk|gui/i or croak &usage;
-		$mode =~ /text|txt/i       and $mode = 'Text';
-		$mode =~ /graphic|tk|gui/i and $mode = 'Graphical';
-		return bless { @_ }, "$root_class\::" . $mode;
-	} 
-	return bless {@_}, $class;
-}
-sub usage { <<USAGE; }
-Usage:    UI->new(mode => "text")
-       or UI->new(mode => "tk")
-USAGE
-
-=cut
-
+use UI::Track;   
 
 package UI::Graphical;  ## gui routines
 our @ISA = 'UI';
@@ -3982,7 +3548,7 @@ vol: _vol end { 1 }
 
 $default = <<'FALLBACK_CONFIG';
 ---
-wav_dir: /media/sessions
+wav_dir: \.
 abbreviations:
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency

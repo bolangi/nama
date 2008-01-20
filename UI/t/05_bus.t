@@ -6,10 +6,6 @@ use lib qw(. ..);
 use_ok( 'UI::Track' );
 use UI::Assign qw(yaml_out);
 
-#use UI::Group qw(group);
-
-*group = \&UI::Group::group;
-*track = \&UI::Track::track;
 
 
 # $mixer_out->dump;

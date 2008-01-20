@@ -159,7 +159,6 @@ O_FILES  =
 H_FILES  = 
 MAN1PODS = 
 MAN3PODS = lib/UI/Object.pm \
-	lib/UI/Object2.pm \
 	lib/UI/UI.pm
 
 # Where is the Config information that we are using/depend on
@@ -187,44 +186,68 @@ TO_INST_PM = lib/UI/01_test.t \
 	lib/UI/03_wav.t \
 	lib/UI/04_Object.t \
 	lib/UI/05_bus.t \
+	lib/UI/06_tracker.t \
+	lib/UI/07_write_chains.t \
 	lib/UI/Assign.pm \
+	lib/UI/Group.pm \
 	lib/UI/Iam.pm \
 	lib/UI/Object.pm \
-	lib/UI/Object2.pm \
+	lib/UI/Rules.pl \
 	lib/UI/Tkeca_effects.pm \
 	lib/UI/Track.pm \
 	lib/UI/UI.pm \
 	lib/UI/Wav.pm \
+	lib/UI/piano.wav \
+	lib/UI/project.ecs \
+	lib/UI/sax_1.wav \
+	lib/UI/sax_2.wav \
+	lib/UI/sax_4.wav \
 	lib/UI/ui
 
 PM_TO_BLIB = lib/UI/03_wav.t \
 	blib/lib/UI/03_wav.t \
-	lib/UI/Track.pm \
-	blib/lib/UI/Track.pm \
-	lib/UI/Assign.pm \
-	blib/lib/UI/Assign.pm \
 	lib/UI/Wav.pm \
 	blib/lib/UI/Wav.pm \
 	lib/UI/05_bus.t \
 	blib/lib/UI/05_bus.t \
 	lib/UI/UI.pm \
 	blib/lib/UI/UI.pm \
-	lib/UI/Object.pm \
-	blib/lib/UI/Object.pm \
 	lib/UI/02_assign.t \
 	blib/lib/UI/02_assign.t \
-	lib/UI/Tkeca_effects.pm \
-	blib/lib/UI/Tkeca_effects.pm \
-	lib/UI/Object2.pm \
-	blib/lib/UI/Object2.pm \
 	lib/UI/04_Object.t \
 	blib/lib/UI/04_Object.t \
-	lib/UI/Iam.pm \
-	blib/lib/UI/Iam.pm \
+	lib/UI/sax_2.wav \
+	blib/lib/UI/sax_2.wav \
+	lib/UI/Rules.pl \
+	blib/lib/UI/Rules.pl \
+	lib/UI/06_tracker.t \
+	blib/lib/UI/06_tracker.t \
+	lib/UI/01_test.t \
+	blib/lib/UI/01_test.t \
+	lib/UI/Assign.pm \
+	blib/lib/UI/Assign.pm \
+	lib/UI/Track.pm \
+	blib/lib/UI/Track.pm \
+	lib/UI/piano.wav \
+	blib/lib/UI/piano.wav \
+	lib/UI/07_write_chains.t \
+	blib/lib/UI/07_write_chains.t \
+	lib/UI/sax_1.wav \
+	blib/lib/UI/sax_1.wav \
+	lib/UI/sax_4.wav \
+	blib/lib/UI/sax_4.wav \
+	lib/UI/Tkeca_effects.pm \
+	blib/lib/UI/Tkeca_effects.pm \
+	lib/UI/Object.pm \
+	blib/lib/UI/Object.pm \
 	lib/UI/ui \
 	blib/lib/UI/ui \
-	lib/UI/01_test.t \
-	blib/lib/UI/01_test.t
+	lib/UI/Iam.pm \
+	blib/lib/UI/Iam.pm \
+	lib/UI/Group.pm \
+	blib/lib/UI/Group.pm \
+	lib/UI/project.ecs \
+	blib/lib/UI/project.ecs
 
 
 # --- MakeMaker platform_constants section:
@@ -445,12 +468,10 @@ POD2MAN = $(POD2MAN_EXE)
 
 manifypods : pure_all  \
 	lib/UI/UI.pm \
-	lib/UI/Object.pm \
-	lib/UI/Object2.pm
+	lib/UI/Object.pm
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
 	  lib/UI/UI.pm $(INST_MAN3DIR)/UI::UI.$(MAN3EXT) \
-	  lib/UI/Object.pm $(INST_MAN3DIR)/UI::Object.$(MAN3EXT) \
-	  lib/UI/Object2.pm $(INST_MAN3DIR)/UI::Object2.$(MAN3EXT) 
+	  lib/UI/Object.pm $(INST_MAN3DIR)/UI::Object.$(MAN3EXT) 
 
 
 
@@ -841,19 +862,27 @@ ppd :
 pm_to_blib : $(TO_INST_PM)
 	$(NOECHO) $(ABSPERLRUN) -MExtUtils::Install -e 'pm_to_blib({@ARGV}, '\''$(INST_LIB)/auto'\'', '\''$(PM_FILTER)'\'')' -- \
 	  lib/UI/03_wav.t blib/lib/UI/03_wav.t \
-	  lib/UI/Track.pm blib/lib/UI/Track.pm \
-	  lib/UI/Assign.pm blib/lib/UI/Assign.pm \
 	  lib/UI/Wav.pm blib/lib/UI/Wav.pm \
 	  lib/UI/05_bus.t blib/lib/UI/05_bus.t \
 	  lib/UI/UI.pm blib/lib/UI/UI.pm \
-	  lib/UI/Object.pm blib/lib/UI/Object.pm \
 	  lib/UI/02_assign.t blib/lib/UI/02_assign.t \
-	  lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm \
-	  lib/UI/Object2.pm blib/lib/UI/Object2.pm \
 	  lib/UI/04_Object.t blib/lib/UI/04_Object.t \
-	  lib/UI/Iam.pm blib/lib/UI/Iam.pm \
+	  lib/UI/sax_2.wav blib/lib/UI/sax_2.wav \
+	  lib/UI/Rules.pl blib/lib/UI/Rules.pl \
+	  lib/UI/06_tracker.t blib/lib/UI/06_tracker.t \
+	  lib/UI/01_test.t blib/lib/UI/01_test.t \
+	  lib/UI/Assign.pm blib/lib/UI/Assign.pm \
+	  lib/UI/Track.pm blib/lib/UI/Track.pm \
+	  lib/UI/piano.wav blib/lib/UI/piano.wav \
+	  lib/UI/07_write_chains.t blib/lib/UI/07_write_chains.t \
+	  lib/UI/sax_1.wav blib/lib/UI/sax_1.wav \
+	  lib/UI/sax_4.wav blib/lib/UI/sax_4.wav \
+	  lib/UI/Tkeca_effects.pm blib/lib/UI/Tkeca_effects.pm \
+	  lib/UI/Object.pm blib/lib/UI/Object.pm \
 	  lib/UI/ui blib/lib/UI/ui \
-	  lib/UI/01_test.t blib/lib/UI/01_test.t 
+	  lib/UI/Iam.pm blib/lib/UI/Iam.pm \
+	  lib/UI/Group.pm blib/lib/UI/Group.pm \
+	  lib/UI/project.ecs blib/lib/UI/project.ecs 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
 
