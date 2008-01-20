@@ -61,7 +61,7 @@ $debug3 = 0;
 use Carp;
 
 sub assign {
-	local $debug = 0;# $debug3;
+	local $debug = 1;# $debug3;
 	
 	$debug2 and print "&assign\n";
 	
@@ -69,6 +69,7 @@ sub assign {
 	my $class;
 	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
 	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
+	print "data: $h{-data}, ", ref $h{-data}, $/;
 
 	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
@@ -76,7 +77,8 @@ sub assign {
 		$debug and print "I found an object of class $class...\n";
 	} 
 	$class = $h{-class};
- 	$class .= "\:\:" unless $class =~ /\:\:/;; # backslashes protect
+	print "class: $h{-class}\n";
+ 	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect
 	# i can't see any reason why we should append this.
 												#from preprocessor
 	my @vars = @{ $h{-vars} };
@@ -155,7 +157,7 @@ ASSIGN
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
-	local $debug = $debug3;
+	local $debug = 1; #$debug3;
 	my %h = @_;
 	my $source = $h{-source};
 	my @vars = @{ $h{-vars} };
@@ -174,26 +176,26 @@ sub assign_vars {
 ### figure out what to do with input
 
 	$source !~ /.yml$/i and -f $source 
-		and $debug and print ("found Storable file: $source\n")
 		and $ref = retrieve($source) # Storable
+		#and $debug and print ("found Storable file: $source\n")
 
 	## check for a filename
 
 	or -f $source and $source =~ /.yml$/ 
-		and $debug and print "found a yaml file: $source\n"
 		and $ref = yaml_in($source)
+		#and $debug and print "found a yaml file: $source\n"
  	
 	## check for a string
 
 	or  $source =~ /^\s*---/s 
-		and $debug and print "found yaml as text\n"
 		and $ref = $yr->read($source)
+		#and $debug and print "found yaml as text\n"
 
 	## pass a hash_ref to the assigner
 
 	or ref $source 
-		and $debug and print "found a reference\n"
 		and $ref = $source;
+		#and $debug and print "found a reference\n"
 
 
 	assign(-data => $ref, -vars => \@vars, -class => $class);

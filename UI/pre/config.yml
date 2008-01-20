@@ -1,5 +1,5 @@
 ---
-wav_dir: /media/sessions
+wav_dir: \.
 abbreviations:
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency

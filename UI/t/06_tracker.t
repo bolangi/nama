@@ -6,6 +6,8 @@ use lib qw(. ..);
 use_ok( 'UI::Track' );
 use UI::Assign qw(yaml_out);
 
+# *UI::inputs = \%UI::Coreinputs; 
+
 #use UI::Group qw(group);
 
 
@@ -63,7 +65,42 @@ is ( UI::Bus::deref_code($code, $sax), 'sax', "Deref_code function");
 
 $tracker->apply;
 
-print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
+
+
+my $nice_output = <<NICE;
+---
+cooked:
+  loop,4:
+    - J4
+device:
+  multi:
+    - 4
+    - R4
+mixed:
+  loop,222:
+    - Mixer_out
+...
+---
+cooked:
+  loop,111:
+    - J4
+  loop,4:
+    - 4
+device:
+  stereo:
+    - Mixer_out
+file:
+  "./piano_5.wav raw-format":
+    - R4
+...
+NICE
+
+is ( yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs), $nice_output, "Apply bus rules to generate chains");
+
+
+#print  yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
+
+
 
 1;
 

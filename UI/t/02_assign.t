@@ -24,7 +24,7 @@ use UI::Assign qw(:all);
 
 diag ("TESTING $0\n");
 
-my @test_classes = qw( :: main:: ::main main);
+my @test_classes = qw( :: main:: main);
 for my $c (@test_classes) {
 	diag ("testing for class $c");
 

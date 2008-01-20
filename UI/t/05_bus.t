@@ -51,7 +51,7 @@ my $tracker  = UI::Bus->new(
 	rules  => [],
 );
 
-#my $master_g = UI::Group->new( name => 'Master'); 
+#my $master_g = UI::Group->new( name => 'Master');  # automatic
 
 my $master = UI::Track->new( group => 'Master', name => 'Master' );
 
@@ -62,8 +62,6 @@ my $sax = UI::Track->new( name => 'sax' );
 
 my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
-# is (  (&track qw(piano name)), 'piano', "Aliased track function" );
-# is ( (&group qw(Tracker rw)), 'REC', "Aliased group function" );
 is ($piano->rec_status , 'REC', "Rec_status function"); 
 
 my $track_diag = <<TRACK;

@@ -2,6 +2,9 @@ use lib qw(.. .); # for testing
 use strict;
 our ($debug);
 $debug = 1;
+
+# ------------  Bus --------------------
+
 package ::Bus;
 use Carp;
 our @ISA;
@@ -31,15 +34,15 @@ sub deref_code {
 	my ($value, $track) = @_;
 	my $type = ref $value ? ref $value : "scalar";
 	my $tracktype = ref $track;
-	print "found type: $type, value: $value\n";
+	#print "found type: $type, value: $value\n";
 	#print "found type: $type, tracktype: $tracktype, value: $value\n";
 	if ( $type  =~ /CODE/){
-		 print "code found\n";
+		 #print "code found\n";
 		$value = &$value($track);
-		 print "code value: $value\n";
+		 #print "code value: $value\n";
 		 $value;
 	} else {
-		print "value found: $value\n"; 
+		#print "value found: $value\n"; 
 		$value }
 }
 #$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
@@ -83,7 +86,7 @@ sub apply {
 			my $rec_status = $track->rec_status;
 			my $condition_met = deref_code($rule->condition, $track);
 
-			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, input key1: $key1, key2: $key2\n";
+			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
 			if ( 
 				$track->rec_status ne 'MUTE' 
 					and $rule->status
@@ -94,14 +97,24 @@ sub apply {
 						)  {
 
 				defined $rule->input_type and
-					push @{ $UI::inputs{ $key1 }->{ $key2 } }, $chain_id ;
+					push @{ $::inputs{ $key1 }->{ $key2 } }, $chain_id ;
 
 				$key1 = deref_code($rule->output_type, $track);
 				$key2 = deref_code($rule->output_object, $track) ;
-			print "chain_id: $chain_id, status: $rec_status, output key1: $key1, key2: $key2\n";
+			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
 
 				defined $rule->output_type and
-					push @{ $UI::outputs{ $key1 }->{ $key2 } }, $chain_id;
+					push @{ $::outputs{ $key1 }->{ $key2 } }, $chain_id;
+			# add intermediate processing
+		
+		my ($post_input, $pre_output);
+		$post_input = deref_code($rule->post_input, $track->n) 
+			if defined $rule->post_input;
+		$pre_output = deref_code($rule->pre_output, $track->n) 
+			if defined $rule->pre_output;
+		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
+		$::post_input{$chain_id} .= $post_input if defined $post_input;
+		$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
 			}
 
 		} @tracks;
@@ -110,6 +123,7 @@ sub apply {
 
 }
 
+# ------------  Rule  --------------------
 	
 package ::Rule;
 use Carp;
@@ -182,6 +196,8 @@ sub dump{
 	my $rule = shift;
 	print "rule: ", $rule->name, $/;
 }
+
+# ---------- Track -----------
 
 package ::Track;
 #use Exporter qw(import);
@@ -264,12 +280,12 @@ sub full_path {
 sub very_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
-	print join " ", 'searching tracks:', $group->tracks, $/;
+	#print join " ", 'searching tracks:', $group->tracks, $/;
 	my $max = 0;
 	map{ 
 		my $track = $_;
 		my $last = $track->last;
-		print "track: ", $track->name, ", last: $last\n";
+		#print "track: ", $track->name, ", last: $last\n";
 
 		$max = $last if $last > $max;
 
@@ -282,7 +298,7 @@ sub current {
 	# my %vals = @_; # 
 	my $group = $::Group::by_name{$track->group};
 	my $last = $track->very_last;
-	print "last found is $last\n"; 
+	#print "last found is $last\n"; 
 	if 		($track->rec_status eq 'REC' ){ return ++$last; }
 	elsif ( $track->rec_status eq 'MON'){
 		return $track->active if $track->active 
@@ -329,29 +345,12 @@ sub rec_status {
 # The following are not object methods. 
 
 sub all_tracks { @by_index[1..scalar @by_index - 1] }
-=comment
 
-sub id { 
-	my $id = shift;
-	$id =~ /^\d+$/ 
-		and $::Track::by_index[$id]
-		or  $::Track::by_name{$id}
-}
-
-
-
-
-sub track {
-	my ($id, $method, @vals) = @_;
-	my $track =  ::Track::id($id);
-	# print "track: id: $id, method: $method\n";
-	my $command = qq(\$track->$method(\@vals));
-	#print $command, $/;
-	eval $command;
-}
-=cut
 
 #use lib qw(.. .);
+
+# ---------- Group -----------
+
 package ::Group;
 #use Exporter qw(import);
 #our @EXPORT_OK =qw(group);
@@ -447,6 +446,8 @@ sub group {
 	#print $command, $/;
 	eval $command;
 }
+ 
+# ---------- Op -----------
 
 package ::Op;
 our @ISA;
@@ -461,6 +462,9 @@ use ::Object qw(	op_id
 					);
 
 
+# ---------- UI -----------
+
+package ::;
 
 my $mixer_out = ::Rule->new( #  this is the master fader
 	name			=> 'mixer_out', 
@@ -561,7 +565,9 @@ my $rec_setup = ::Rule->new(
 	post_input			=>	\&mono_to_stereo,
 	status			=>  1,
 	condition 		=> sub { my $track = shift; 
-							defined $::inputs{cooked}->{"loop," .  $track->n} } ,
+							return "satisfied" if defined
+							$::inputs{cooked}->{"loop," . $track->n}; 
+							0 } ,
 );
 
 
