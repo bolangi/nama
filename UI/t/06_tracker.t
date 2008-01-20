@@ -13,7 +13,7 @@ my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
 	groups => ['Tracker'],
 	tracks => [],
-	rules  => [ qw( mix_setup rec_setup mon_setup) ],
+	rules  => [ qw( mix_file mix_setup rec_setup mon_setup rec_file) ],
 	#rules  => [ qw( mix_setup mon_setup rec_setup rec_file) ],
 	#rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );

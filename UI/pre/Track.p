@@ -81,15 +81,15 @@ sub apply {
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
 			my $rec_status = $track->rec_status;
-			my $apply_status = deref_code($rule->condition, $track);
+			my $condition_met = deref_code($rule->condition, $track);
 
-			print "chain_id: $chain_id, rec_status: $rec_status, apply_status: $apply_status, input key1: $key1, key2: $key2\n";
+			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, input key1: $key1, key2: $key2\n";
 			if ( 
 				$track->rec_status ne 'MUTE' 
+					and $rule->status
 					and ( 		$rule->target =~ /all|none/
 							or  $rule->target eq $track->rec_status)
-					and $apply_status
-					and $rule->status
+					and $condition_met
 						
 						)  {
 
@@ -282,7 +282,8 @@ sub current {
 	# my %vals = @_; # 
 	my $group = $::Group::by_name{$track->group};
 	my $last = $track->very_last;
-	if 		($track->rec_status eq 'REC' ){ ++$last; }
+	print "last found is $last\n"; 
+	if 		($track->rec_status eq 'REC' ){ return ++$last; }
 	elsif ( $track->rec_status eq 'MON'){
 		return $track->active if $track->active 
 			and grep {$track->active == $_ } @{$track->versions};
@@ -327,17 +328,17 @@ sub rec_status {
 
 # The following are not object methods. 
 
-sub id {
+sub all_tracks { @by_index[1..scalar @by_index - 1] }
+=comment
+
+sub id { 
 	my $id = shift;
 	$id =~ /^\d+$/ 
 		and $::Track::by_index[$id]
 		or  $::Track::by_name{$id}
 }
 
-#${ Track::id 1 }->set( rw => 'MUTE');
-#${ Track::id "sax" }->rw;
 
-sub all_tracks { @by_index[1..scalar @by_index - 1] }
 
 
 sub track {
@@ -348,6 +349,7 @@ sub track {
 	#print $command, $/;
 	eval $command;
 }
+=cut
 
 #use lib qw(.. .);
 package ::Group;
@@ -478,13 +480,13 @@ my $mixer_out = ::Rule->new( #  this is the master fader
 
 );
 
-my $mixdown = ::Rule->new(
+my $mix_down = ::Rule->new(
 
-	name			=> 'mixdown', 
+	name			=> 'mix_file', 
 	chain_id		=> 'Mixdown',
 	target			=> 'all', # default
 	condition => sub{ 
-		%{ $::outputs{mixed} } or $debug 
+		defined $::outputs{mixed} or $debug 
 			and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
 	input_type 		=> 'mixed', # bus name
@@ -492,7 +494,7 @@ my $mixdown = ::Rule->new(
 
 	output_type		=> 'file',
 	output_object   => sub {
-		my $track = ${shift()}; 
+		my $track = shift; 
 		join " ", $track->full_path, $::mix_to_disk_format},
 
 	#apply_inputs	=> sub{ },  
