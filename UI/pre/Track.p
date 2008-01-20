@@ -31,14 +31,15 @@ sub deref_code {
 	my ($value, $track) = @_;
 	my $type = ref $value ? ref $value : "scalar";
 	my $tracktype = ref $track;
-	# print "found type: $type, tracktype: $tracktype, value: $value\n";
+	print "found type: $type, value: $value\n";
+	#print "found type: $type, tracktype: $tracktype, value: $value\n";
 	if ( $type  =~ /CODE/){
 		 print "code found\n";
 		$value = &$value($track);
-		 #print "value: $value\n";
+		 print "code value: $value\n";
 		 $value;
 	} else {
-		#print "value found: $value\n"; 
+		print "value found: $value\n"; 
 		$value }
 }
 #$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
@@ -50,26 +51,29 @@ sub apply {
 	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
-	my @tracks; # refs to objects
-	print "bus tracks: ", join " ", @{$bus->tracks}, $/;
-	print "bus groups: ", join " ", @{$bus->groups}, $/;
-	print "bus rules: ", join " ", @{$bus->rules}, $/;
-	print "bus group tracks: ", join " ", 
-		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups }; print $/;
-	my @track_names = (@{ $bus->tracks }, 
-		map{ ::Group::group( $_,  'tracks') } @{ $bus->groups });
-	#print "tracks: ", join " ", map{ $_->name } @tracks";
-	print "track names: @track_names\n";
-	push @tracks, map{ ::Track::id $_  }  @track_names; 
+	print "bus name: ", $bus->name, $/;
+	print "groups: ", join " ", @{$bus->groups}, $/;
+	print "rules: ", join " ", @{$bus->rules}, $/;
+	my @track_names = (@{$bus->tracks}, 
+
+		map{ my $group = $::Group::by_name{$_}; 
+			print "group: ", $group->name, $/;
+			print "includes: ", $group->tracks, $/;
+			$group->tracks 
+								}  @{ $bus->groups }
+
+	);
+	print "tracks: ", join " ", @track_names;
+	my @tracks = map{ $::Track::by_name{$_} } @track_names; 
 
 	map{ my $rule_name = $_;
 		print "apply rule name: $rule_name\n"; 
 		my $rule = $::Rule::by_name{$_};
-		$rule = $rule;
-		#print "object type: ", ref $rule, $/;
 		#print "rule is type: ", ref $rule, $/;
-		my @tracks = @tracks;
+		print "condition: ", $rule->condition, $/;
+		# we ensure that mix_out executes without tracks
 		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
+
 		map{ my $track = $_; # 
 			my $n = $track->n;
 			$debug and print "track ", $track->name, " index: $n\n";
@@ -77,10 +81,16 @@ sub apply {
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
 			my $rec_status = $track->rec_status;
-			print "chain_id: $chain_id, status: $rec_status, input key1: $key1, key2: $key2\n";
-			if ( 1 # deref_code($rule->customers, $track)
-						# and $track->rec_status ne 'MUTE'
-						#
+			my $apply_status = deref_code($rule->condition, $track);
+
+			print "chain_id: $chain_id, rec_status: $rec_status, apply_status: $apply_status, input key1: $key1, key2: $key2\n";
+			if ( 
+				$track->rec_status ne 'MUTE' 
+					and ( 		$rule->target =~ /all|none/
+							or  $rule->target eq $track->rec_status)
+					and $apply_status
+					and $rule->status
+						
 						)  {
 
 				defined $rule->input_type and
@@ -113,7 +123,7 @@ use ::Object qw( 	name
 						chain_id
 
 						target 
-					 	customers		
+					 	condition		
 
 						output_type
 						output_object
@@ -152,6 +162,7 @@ sub new {
 	my $object = bless { 	
 		name 	=> "Rule $n", # default name
 		target  => 'all',     # default target
+		condition => 1, 	# apply by default
 					@_,  			}, $class;
 
 	$rule_names{$vals{name}}++;
@@ -239,15 +250,18 @@ sub new {
 	$object;
 	
 }
+
+} # for private variables
+
 sub full_path {
 	my $track = shift; 
 	join_path(
 		$track->dir ? $track->dir : "." , 
-			$track->name . "_" .  $track->overall_version . '.wav'
+			$track->name . "_" .  $track->current . '.wav'
 	)	
 }
 
-sub last_version {
+sub very_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
 	print join " ", 'searching tracks:', $group->tracks, $/;
@@ -263,50 +277,50 @@ sub last_version {
 	$max;
 }
 
-sub overall_version {	
+sub current {	
 	my $track = shift;
-	my $last = $track->last_version;
-
-	++$last;
-}
-=comment
-	if ( 1 
-	
-	# $track->rec_status eq 'REC'
-	){
-
-
-	} elsif ( $track->rec_status eq 'MON'){
-
-		my $version;
-		return ($version = $track->active) if $track->active 
+	# my %vals = @_; # 
+	my $group = $::Group::by_name{$track->group};
+	my $last = $track->very_last;
+	if 		($track->rec_status eq 'REC' ){ ++$last; }
+	elsif ( $track->rec_status eq 'MON'){
+		return $track->active if $track->active 
 			and grep {$track->active == $_ } @{$track->versions};
 
-		return ($version = $group->version) if $group->version
+		return $group->version if $group->version
 			and grep {$group->version  == $_ } @{$track->versions};
 
-	} else { print "no suitable version found\n" }
-=cut
+		return $track->last if $track->last
+									and ! $track->active
+									and ! $group->version
+	}
+	print "track ", $track->name, ": no current version found\n" ;
+	return undef;
 }
 	
 
 sub rec_status {
-	#print "REC status"; return "REC";
 	my $track = shift;
-	#print "rec_status: ref ", ref $track, $/;
+	my $group = $::Group::by_name{$track->group};
+	return 'REC' if ! defined $group 
+					or $group->name ne 'Tracker' ; 
+					
+					# mix_out will be REC
+		
 	return 'MUTE' if 
-		::Group::group($track->group, "rw") eq 'MUTE'
+		$group->rw eq 'MUTE'
 		or $track->rw eq 'MUTE'
 		or $track->rw eq 'MON' and ! $track->full_path;
 	if( 	
 		$track->rw eq 'REC'
-		 and	::Group::group($track->group, "rw") eq 'REC'
-#		 and $track->group eq $::Group::active
+		 and $group->rw eq 'REC'
 		) {
 
 		return 'REC' if $track->ch_r;
-		return 'MON' if $track->full_path;
 		return 'MUTE';
+	}
+	else { return 'MON' if $track->full_path;
+			return 'MUTE';	
 	}
 }
 
@@ -446,12 +460,13 @@ use ::Object qw(	op_id
 
 
 
-my $mixer_out = UI::Rule->new( #  this is the master fader
+my $mixer_out = ::Rule->new( #  this is the master fader
 	name			=> 'mixer_out', 
 	chain_id		=> 'Mixer_out',
 
 	target			=> 'none',
-	customers		=> sub{ defined $UI::inputs{mixed}  or $debug and print("no customers for mixed, skipping\n"), 0},
+	
+	# sub{ defined $::inputs{mixed}  or $debug and print("no customers for mixed, skipping\n"), 0},
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> 'loop,222', # $loopb 
@@ -463,13 +478,13 @@ my $mixer_out = UI::Rule->new( #  this is the master fader
 
 );
 
-my $mixdown = UI::Rule->new(
+my $mixdown = ::Rule->new(
 
 	name			=> 'mixdown', 
 	chain_id		=> 'Mixdown',
 	target			=> 'all', # default
-	customers => sub{ 
-		%{ $UI::outputs{mixed} } or $debug 
+	condition => sub{ 
+		%{ $::outputs{mixed} } or $debug 
 			and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
 	input_type 		=> 'mixed', # bus name
@@ -485,7 +500,7 @@ my $mixdown = UI::Rule->new(
 
 	status			=> 'off',
 );
-my $mix_setup = UI::Rule->new(
+my $mix_setup = ::Rule->new(
 
 	name			=>  'mix_setup',
 	chain_id		=>  sub { my $track = shift; "J". $track->n },
@@ -495,12 +510,12 @@ my $mix_setup = UI::Rule->new(
 	output_object	=>  'loop,111', # $loopa
 	output_type		=>  'cooked',
 	status			=>  1,
-	customers 		=>  sub{ defined $UI::inputs{mixed} },
+	condition 		=>  sub{ defined $::inputs{mixed} },
 	
 );
 
 
-my $mon_setup = UI::Rule->new(
+my $mon_setup = ::Rule->new(
 	
 	name			=>  'mon_setup', 
 	target			=>  'MON',
@@ -513,7 +528,7 @@ my $mon_setup = UI::Rule->new(
 	post_input		=>	\&mono_to_stereo,
 );
 	
-my $rec_file = UI::Rule->new(
+my $rec_file = ::Rule->new(
 
 	name		=>  'rec_file', 
 	target		=>  'REC',
@@ -532,7 +547,7 @@ my $rec_file = UI::Rule->new(
 # have Vol, Pan and other effects prior to various monitoring
 # outputs and/or to the mixdown file output.
 		
-my $rec_setup = UI::Rule->new(
+my $rec_setup = ::Rule->new(
 
 	name			=>	'rec_setup', 
 	chain_id		=>  sub{ my $track = shift; $track->n },   
@@ -543,8 +558,8 @@ my $rec_setup = UI::Rule->new(
 	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 	post_input			=>	\&mono_to_stereo,
 	status			=>  1,
-	customers 		=> sub { my $track = shift; 
-							defined $UI::inputs{cooked}->{"loop," .  $track->n} } ,
+	condition 		=> sub { my $track = shift; 
+							defined $::inputs{cooked}->{"loop," .  $track->n} } ,
 );
 
 
@@ -574,8 +589,8 @@ my $rec_setup = UI::Rule->new(
 	pre_output	=>	\&pre_multi,
 	status	=>  q(off),
 
-	push @{ $UI::inputs{cooked}->{$n} }, $chain_id if $rec_status eq 'REC'
-	push @{ $UI::outputs{$oid{output}} }, $chain_id;
+	push @{ $::inputs{cooked}->{$n} }, $chain_id if $rec_status eq 'REC'
+	push @{ $::outputs{$oid{output}} }, $chain_id;
 
 =cut
 

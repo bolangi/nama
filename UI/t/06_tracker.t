@@ -8,14 +8,12 @@ use UI::Assign qw(yaml_out);
 
 #use UI::Group qw(group);
 
-*group = \&UI::Group::group; # no longer necessary
-*track = \&UI::Track::track; # 
 
 my $tracker  = UI::Bus->new(
 	name => 'Tracker_Bus',
 	groups => ['Tracker'],
 	tracks => [],
-	rules  => [ qw( rec_setup) ],
+	rules  => [ qw( mix_setup rec_setup mon_setup) ],
 	#rules  => [ qw( mix_setup mon_setup rec_setup rec_file) ],
 	#rules  => [ qw( mix_setup mon_setup  rec_file rec_setup) ],
 );
@@ -41,11 +39,10 @@ my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
 
 is ($piano->last, 1, "piano last");
 
-is ( $sax->last, 4, "\$track->last_version");
+is ( $sax->last, 4, "\$track->last");
 
-print "piano last version: ", $piano->last_version, $/;
+is ( $piano->very_last, 4, "\$track->very_last (2)");
 
-print "overall: ", $piano->overall_version, $/; exit;
 my $group = $UI::Group::by_name{$sax->group};
 
 print "group name: ", $group->name, $/;
@@ -55,13 +52,6 @@ print "group name: ", $group->name, $/;
 map{ print $_->dump } map { $UI::Track::by_name{$_} } ($group->tracks); 
 
 print "tracks: ", $group->tracks , $/;
-#is ( $group->last_version, 4, "\$group->last_version");
-
-# print "last tracker: " , group('Tracker','last'), $/;
-#print &group( qw(Tracker last) ); exit; # no!!
-# it's broken by the testing for fields somwhere,
-# no that affects set
-
 $master_fader->apply;
 
 # test deref_code
@@ -69,14 +59,11 @@ $master_fader->apply;
 my $code = sub { my $track = shift; $track->name  };
 is ( UI::Bus::deref_code($code, $sax), 'sax', "Deref_code function");
 
-#map{ ::Group::group( $_,  'tracks') } 
 #print $tracker->dump; 
+
 $tracker->apply;
 
-exit;
-
 print yaml_out( \%UI::inputs ). yaml_out(\%UI::outputs);
-print map{ UI::Group::group( $_,  'tracks') }("Tracker");
 
 1;
 

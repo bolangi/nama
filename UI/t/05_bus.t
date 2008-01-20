@@ -79,7 +79,7 @@ TRACK
 is( $sax->dump, $track_diag, "Track object instantiation and serialization");
 
 my $mixer_out = $UI::Rule::by_name{mixer_out};
-$mixer_out->set( customers => 1);  
+$mixer_out->set( condition => 1);  
 
 my $mix_diag = <<MIXDIAG;
 ---
