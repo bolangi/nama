@@ -6,6 +6,27 @@ use lib qw(. ..);
 use_ok( 'UI::Track' );
 use UI::Assign qw(yaml_out);
 
+use UI::Track;
+use UI::Bus;
+
+my $mixer_out = UI::Rule->new( #  this is the master fader
+	name			=> 'mixer_out', 
+	chain_id		=> 'Mixer_out',
+
+	target			=> 'none',
+
+# condition =>	
+	# sub{ defined $inputs{mixed}  or $debug and print("no customers for mixed, skipping\n"), 0},
+
+	input_type 		=> 'mixed', # bus name
+	input_object	=> 'loop,222', 
+
+	output_type		=> 'device',
+	output_object	=> 'stereo',
+
+	status			=> 1,
+
+);
 
 
 # $mixer_out->dump;

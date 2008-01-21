@@ -238,4 +238,13 @@ our (
 	$sn_recall,	# button to recall settings
 	$sn_dump,  # button to dump status
 
+	# new object core
+	
+	$tracker,  # group
+	$tracker_bus, # corresponding bus
+	$master,   #  group
+	$master_bus, 
+	$mixer, # group
+	$mixer_bus
+
 );

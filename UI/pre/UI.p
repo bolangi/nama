@@ -26,6 +26,18 @@ use Data::YAML::Reader;
 
 [% qx(cat ./var_types.pl) %]
 
+# aliases for concise access
+
+*tn = \%::Track::by_name;
+*ti = \@::Track::by_index;
+
+# $ti[3]->rw
+
+# instances needed for yaml_out and yaml_in
+
+$yw = Data::YAML::Writer->new; 
+$yr = Data::YAML::Reader->new;
+
 $debug3 = 0; # qualified routines get local $debug = $debug 3;
 $debug2 = 1;
 $debug = 1;
@@ -55,8 +67,15 @@ $jack_on = 0;
 use ::Assign qw(:all);
 use ::Iam;    
 use ::Tkeca_effects; 
+use ::Track;
+use ::Bus;    
+
+## Load bus rules
+
+[% qx(cat ./Rules.pl ) %]
 
 print remove_spaces("bulwinkle is a...");
+
 ## Class and Object definitions for package '::'
 
 our @ISA; # no anscestors
@@ -97,8 +116,8 @@ sub loop {
 	new_take;
 	new_take;
 	load_project(
-		-create => $opts{c},
-		-name   => $project_name) if $project_name;
+		create => $opts{c},
+		name   => $project_name) if $project_name;
 	setup_transport; 
 	connect_transport;
 	MainLoop;

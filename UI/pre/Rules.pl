@@ -2,9 +2,10 @@ my $mixer_out = ::Rule->new( #  this is the master fader
 	name			=> 'mixer_out', 
 	chain_id		=> 'Mixer_out',
 
-	target			=> 'none',
-	
-	# sub{ defined $inputs{mixed}  or $debug and print("no customers for mixed, skipping\n"), 0},
+	target			=> 'all',
+
+# condition =>	sub{ defined $inputs{mixed}  
+# 	or $debug and print("no customers for mixed, skipping\n"), 0},
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> $loopb, 
@@ -20,10 +21,10 @@ my $mix_down = ::Rule->new(
 
 	name			=> 'mix_file', 
 	chain_id		=> 'Mixdown',
-	target			=> 'all', # default
-	condition => sub{ 
-		defined $outputs{mixed} or $debug 
-			and print("no customers for mixed, skipping mixdown\n"), 0}, 
+	target			=> 'all', 
+	
+	# sub{ defined $outputs{mixed} or $debug 
+	#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
 	input_type 		=> 'mixed', # bus name
 	input_object	=> $loopb,
@@ -99,34 +100,87 @@ my $rec_setup = ::Rule->new(
 	status			=>  1,
 );
 
+my $multi = ::Rule->new(
 
+	name			=>  'multi', 
+	target			=>  'MON',
+	chain_id 		=>	sub{ my $track = shift; "M".$track->n },
+	input_type		=>  'file',
+	input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
+	output_type		=>  'device',
+	output_object	=>  'multi',
+	pre_output		=>	\&pre_multi,
+	status			=>  1,
+);
 
 =comment
-
-# Multi: output 'cooked' monitor channels to side-by-side
-# PCMs starting at the monitor channel assignment in the track menu.
-#  Default to PCMs 1 & 2.
-
-	name	=>	q(multi), 
-	target	=>	q(mon),  
-	id		=>	q(m),
-	output	=>	q(multi),
-	type	=>	q(cooked),
-	pre_output	=>	\&pre_multi,
-	status	=> 0,
-
 # Live: apply effects to REC channels route to multichannel sound card
 # as above. 
 
-	name	=>  q(live),
-	target	=>  q(rec),
-	id		=>	q(L),
-	output	=>  q(multi),
-	type	=>  q(cooked),
-	pre_output	=>	\&pre_multi,
-	status	=>  0,
-
-	push @{ $inputs{cooked}->{$n} }, $chain_id if $rec_status eq 'REC'
-	push @{ $outputs{$oid{output}} }, $chain_id;
 
 =cut
+sub eliminate_loops {
+	my $n = shift;
+	return unless defined $inputs{cooked}->{$n} and scalar @{$inputs{cooked}->{$n}} == 1;
+	# get customer's id from cooked list and remove it from the list
+
+	my $cooked_id = pop @{ $inputs{cooked}->{$n} }; 
+
+	# add chain $n to the list of the customer's output device 
+	
+	no warnings;
+	my ($oid) = grep{ $cooked_id =~ /$_->{id}/ } @oids;
+	use warnings;
+	my %oid = %{$oid};
+	defined $outputs{ $oid{output} } or $outputs{ $oid{output}} = [];
+	push @{ $outputs{ $oid{output} } }, $n;
+
+	
+
+	# remove chain $n as source for the loop
+
+	my $loop_id = "loop,$n";
+	delete $outputs{$loop_id}; 
+	
+	# remove customers that use loop as input
+
+	delete $inputs{$loop_id}; 
+
+	# remove cooked customer from his output device list
+
+	@{ $outputs{$oid{output}} } = grep{$_ ne $cooked_id} @{ $outputs{$oid->{output}} };
+
+	# transfer any intermediate processing to numeric chain,
+	# deleting the source.
+	no warnings;
+	$post_input{$n} .= $post_input{$cooked_id};
+	$pre_output{$n} .= $pre_output{$cooked_id}; 
+	use warnings;
+	delete $post_input{$cooked_id};
+	delete $pre_output{$cooked_id};
+
+}
+
+# the definitions above refer to the following subroutines
+
+sub mono_to_stereo { " -erc:1,2 " }
+
+sub pre_multi {
+	#$debug2 and print "&pre_multi\n";
+	my $track = shift;
+	return if ! defined $track->ch_m or $track->ch_m == 1;
+	route(2,$track->ch_m); # stereo signal
+}
+
+sub route {
+	my ($width, $dest) = @_;
+	return undef if $dest == 1 or $dest == 0;
+	$debug and print "route: width: $width, destination: $dest\n\n";
+	my $offset = $dest - 1;
+	my $map ;
+	for my $c ( map{$width - $_ + 1} 1..$width ) {
+		$map .= " -erc:$c," . ( $c + $offset);
+		$map .= " -eac:0,"  . $c;
+	}
+	$map;
+}

@@ -1,8 +1,5 @@
-*tn = \%::Track::by_name;
 #sub byn{ my $key = shift; $byn{$key} }
 
-*ti = \@::Track::by_index;
-# $ti[3]->rw
 use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { "config.yml" }
@@ -31,18 +28,28 @@ sub discard_object {
 }
 sub prepare {  
 
-	local $debug = $debug3;
-
 	$debug2 and print "&prepare\n";
+	my $debug = 1;
 
-    $yw = Data::YAML::Writer->new;
-    $yr = Data::YAML::Reader->new;
+	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+	new_engine();
+
+	### Option Processing ###
+	push @ARGV, qw( -e  );
+	#push @ARGV, qw(-d /media/sessions test-abc  );
+	getopts('mcegsd:', \%opts); 
+	#print join $/, (%opts);
+	# d: wav_dir
+	# c: create project
+	# g: gui mode
+	# m: don't load state info
+	# e: don't load static effects data
+	# s: don't load static effects data cache
+	$project_name = shift;
+	$debug and print "project name: $project_name\n";
 
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
-	my $create = $opts{c} ? 1 : 0;
-
-	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 
 	## now i should read .ecmdrc
 	## should have .ecmd holding files.
@@ -64,17 +71,57 @@ sub prepare {
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
 
-	new_engine();
+	# init our buses
+	
+	$tracker_bus  = UI::Bus->new(
+		name => 'Tracker_Bus',
+		groups => ['Tracker'],
+		tracks => [],
+		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
+	);
+
+	print join (" ", map{ $_->name} UI::Rule::all_rules() ), $/;
+
+	$master_bus  = UI::Bus->new(
+		name => 'Master_Bus',
+		rules  => [ qw(mixer_out mix_file ) ],
+		groups => ['Mixer'],
+	);
+=comment
+	$mixer_bus  = UI::Bus->new(
+		name => 'Master_Bus',
+		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
+	);
+=cut
+
+	$tracker = UI::Group->new( name => 'Tracker');
+	$mixer   = UI::Group->new( name => 'Mixer');
+
 	initialize_rules();
 	prepare_static_effects_data() unless $opts{e};
+
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
+	
+	# UI object for interface polymorphism
+	
+	$ui = $opts{g} ?  UI::Graphical->new : UI::Text->new;
+	
+
+
+	load_project( name => $project_name, create => $opts{c});
+
+	# if there is no project name, we still init using pwd
+
 	$debug and print "wav_dir: ", wav_dir(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
 }
+
+
+
 
 sub eval_iam {
 	local $debug = $debug3;
@@ -140,15 +187,15 @@ sub substitute{
 sub load_project {
 	my %h = @_;
 	$debug2 and print "&load_project\n";
-	$debug and print "\$project: $project name: $h{-name} create: $h{-create}\n";
-	return unless $h{-name} or $project;
+	# return unless $h{name} or $project;
 
 	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
 	
 	my $project = remove_spaces($project); # internal spaces to underscores
-	$project_name = $h{-name} ? $h{-name} : $project;
-	$h{-create} and 
+	$project_name = $h{name} ? $h{name} : $project;
+	$debug and print "project name: $project_name create: $h{create}\n";
+	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &this_wav_dir, &project_dir;
 # =comment 
@@ -227,14 +274,25 @@ sub initialize_project_data {
 
 	# $is_armed = 0;
 
-$ui->destroy_widgets();
+	$ui->destroy_widgets();
 
-$ui->take_gui;
+	$ui->take_gui;
+
+	use ::Track; #  re init code
+
+	my $master = UI::Track->new( group => 'Master', name => 'Master' );
+
+	my $mix = UI::Track->new( group => 'Mixer', name => 'mix'); 
+
+	my $group = $::Group::by_name{Mixer};
+
 
 }
 ## track and wav file handling
 
 sub add_track {
+
+
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	return if transport_running();
@@ -244,6 +302,8 @@ sub add_track {
 		ch_r => $ch_r,
 		ch_m => $ch_m,
 	);
+	# $ch_r and $ch_m are public variables set by GUI
+	
 	my $group = $::Group::by_name{$track->group};
 	$group->set(rw => 'REC');
 	$track_name = $ch_m = $ch_r = undef;
@@ -251,6 +311,7 @@ sub add_track {
 	$ui->track_gui($track->n);
 	collect_chains();
 	$debug and print "Added new track!\n", $track->dump;
+	$track;
 }
 sub restore_track {
 	$debug2 and print "&restore_track\n";
@@ -343,12 +404,6 @@ sub mon_vert {
 }
 ## chain setup generation
 
-sub really_recording {  # returns filename stubs
-
-#	scalar @record  # doesn't include mixdown track
-	print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
-	keys %{$outputs{file}}; # includes mixdown
-}
 
 =comment
 
@@ -391,15 +446,18 @@ sub collect_chains {
 	local $debug = $debug3;
 	@all_chains = @monitor = @record = ();
 
-	@all_chains = 3..scalar @::Track::by_index - 1;
-
+	#
+	# 1: master fader
+	# 2: mix track
+	# 
 	# all the tracks in the Tracker group
 	
-	for my $n (@all_chains) {
-	$debug and print "rec_status $n: ", rec_status($n), "\n";
-		push (@monitor, $n) if rec_status($n) eq "MON"; 
-		push (@record, $n) if rec_status($n) eq "REC";
-	}
+	@all_chains = 3..scalar @::Track::by_index - 1;
+	
+	@record = 	map{ $_->n} 
+				grep{ $_->rec_status eq 'REC'}
+				map{ $::Track::by_name{$_}}
+				$tracker->tracks;
 
 	$debug and print "monitor chains:  @monitor\n\n";
 	$debug and print "record chains:  @record\n\n";
@@ -528,15 +586,6 @@ sub initialize_rules {
 	$debug and print yaml_out(\%oid_status); 
 
 }
-sub mono_to_stereo { " -erc:1,2 " }
-
-sub pre_multi {
-	$debug2 and print "&pre_multi\n";
-	my $n = shift;
-	$debug and print "track: $n\n";
-	return if ! defined $state_c{$n}->{ch_m} or $state_c{$n}{ch_m} == 1;
-	route(2,$state_c{$n}->{ch_m}); # stereo signal
-}
 sub convert_to_jack {
 	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
 	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	
@@ -552,6 +601,8 @@ sub load_ecs {
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
+#	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+	print "ecasound name: $ecasound\n";
 	system qq(killall $ecasound);
 	sleep 1;
 	system qq(killall -9 $ecasound);
