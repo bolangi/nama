@@ -284,9 +284,6 @@ sub initialize_project_data {
 
 	my $mix = UI::Track->new( group => 'Mixer', name => 'mix'); 
 
-	my $group = $::Group::by_name{Mixer};
-
-
 }
 ## track and wav file handling
 

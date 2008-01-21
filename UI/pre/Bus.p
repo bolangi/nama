@@ -61,10 +61,10 @@ sub apply {
 	my @track_names = (@{$bus->tracks}, 
 
 		map{ print "group name: $_\n";
-			print join " ", "keys:", keys( %::Group::by_name), $/;
+			#print join " ", "keys:", keys( %::Group::by_name), $/;
 			my $group = $::Group::by_name{$_}; 
-			print "group validated: ", $group->name, $/;
-			print "includes: ", $group->tracks, $/;
+			#print "group validated: ", $group->name, $/;
+			#print "includes: ", $group->tracks, $/;
 			$group->tracks 
 								}  @{ $bus->groups }
 
@@ -75,10 +75,8 @@ sub apply {
 	map{ my $rule_name = $_;
 		print "apply rule name: $rule_name\n"; 
 		my $rule = $::Rule::by_name{$_};
-		print "rule is type: ", ref $rule, $/;
+		#print "rule is type: ", ref $rule, $/;
 		print "condition: ", $rule->condition, $/;
-		# we ensure that mix_out executes without tracks
-#		@tracks = ($dummy_track) if ! @tracks and $rule->target eq 'none';
 
 		map{ my $track = $_; # 
 			my $n = $track->n;
