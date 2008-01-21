@@ -101,11 +101,18 @@ sub very_last {
 sub current {	
 	my $track = shift;
 	# my %vals = @_; # 
-	my $group = $::Group::by_name{$track->group};
 	my $last = $track->very_last;
 	#print "last found is $last\n"; 
 	if 		($track->rec_status eq 'REC' ){ return ++$last; }
-	elsif ( $track->rec_status eq 'MON'){
+	elsif ( $track->rec_status eq 'MON'){ $track->monitor_version }
+	
+	print "track ", $track->name, ": no current version found\n" ;
+	return undef;
+}
+
+sub monitor_version {
+	my $track = shift;
+	my $group = $::Group::by_name{$track->group};
 		return $track->active if $track->active 
 			and grep {$track->active == $_ } @{$track->versions};
 
@@ -115,24 +122,21 @@ sub current {
 		return $track->last if $track->last
 									and ! $track->active
 									and ! $group->version
-	}
-	print "track ", $track->name, ": no current version found\n" ;
-	return undef;
 }
 	
 
 sub rec_status {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group};
-	return 'REC' if ! defined $group 
-					or $group->name ne 'Tracker' ; 
-					
-					# mix_out will be REC
+	return 'REC' if $group->name ne 'Tracker' and $group->rw eq 'REC'; 
+
+					# Mixer group will ignore ch_r status
 		
 	return 'MUTE' if 
 		$group->rw eq 'MUTE'
 		or $track->rw eq 'MUTE'
-		or $track->rw eq 'MON' and ! $track->full_path;
+		or $track->rw eq 'MON' and  $track->monitor_version;
+		# ! $track->full_path;
 	if( 	
 		$track->rw eq 'REC'
 		 and $group->rw eq 'REC'
