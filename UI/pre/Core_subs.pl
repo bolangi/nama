@@ -1,3 +1,8 @@
+*tn = \%::Track::by_name;
+#sub byn{ my $key = shift; $byn{$key} }
+
+*ti = \@::Track::by_index;
+# $ti[3]->rw
 use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { "config.yml" }
@@ -60,7 +65,7 @@ sub prepare {
 	# Tie mixdown version suffix to global monitor version 
 
 	new_engine();
-	#initialize_oids();
+	initialize_rules();
 	prepare_static_effects_data() unless $opts{e};
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -158,14 +163,22 @@ sub load_project {
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
+
+=comment 
+
+XXX retrieve statue
+
+
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
 	$debug and print "found ", scalar @all_chains, "chains\n";
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 
-}
 #The mix track will always be track index 1 i.e. $state_c{$n}
 # for $n = 1, And take index 1.
+=cut
+
+}
 
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
@@ -178,8 +191,6 @@ sub initialize_project_data {
 
 	# assign_var($project_init_file, @project_vars);
 
-	$last_version = 0;
-	%track_names = ();
 	%state_c        = ();   #  chain related state
 	%state_t        = ();   # take related state
 	%cops        = ();   
@@ -189,20 +200,15 @@ sub initialize_project_data {
 							# and others
 	%old_vol = ();
 
-	%take        = (); # the group a chain belongs to # by chain_id
 	%chain       = (); # the chain_id corresponding to a track name
-	#%alias      = ();  # a way of naming takes
 
-	@takes       = ();  
-	@record		= ();
+	@record		= (); # used by some functions
 	@monitor	= ();
 	@mute = (); 
+
 	@all_chains  = (); # indices of all chains
 	@input_chains = ();
 	@output_chains = ();
-
-	$i           = 0;  # chain counter
-	$t           = 0;  # take counter
 
 	%widget_c = ();
 	@widget_t = ();
@@ -223,8 +229,6 @@ sub initialize_project_data {
 
 $ui->destroy_widgets();
 
-increment_take();  # to 1
-
 $ui->take_gui;
 
 }
@@ -233,24 +237,20 @@ $ui->take_gui;
 sub add_track {
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
-	return 0 if transport_running();
+	return if transport_running();
 	my $name = shift;
-	if ($track_names{$name}){
-		$debug and carp ("Track name in use\n");
-		return 0;
-	}
-	$state_t{$t}->{rw} = "REC"; # enable recording for the group
-	$track_names{$name}++;
-	$i++; # global variable track counter
-	register_track($i, $name, $ch_r, $ch_m);
-	find_wavs($i);
-	#set_active_version($i) if ! defined $state_c{$i}->{active};
+	my $track = ::Track->new(
+		name => $name,
+		ch_r => $ch_r,
+		ch_m => $ch_m,
+	);
+	my $group = $::Group::by_name{$track->group};
+	$group->set(rw => 'REC');
 	$track_name = $ch_m = $ch_r = undef;
 
-	$state_c{$i}->{ops} = [] if ! defined $state_c{$i}->{ops};
-	$state_c{$i}->{rw} = "REC" if ! defined $state_c{$i}->{rw};
-	$ui->track_gui($i);
-	$debug and print "Added new track!\n",yaml_out(\%state_c);
+	$ui->track_gui($track->n);
+	collect_chains();
+	$debug and print "Added new track!\n", $track->dump;
 }
 sub restore_track {
 	$debug2 and print "&restore_track\n";
@@ -381,6 +381,39 @@ sub really_recording {  # returns filename stubs
   by a space, followed the output format specification.
 
 =cut
+
+sub collect_chains { 
+
+	# @all_chains and @record are for the benefit
+	# of older code
+	
+	$debug2 and print "&collect\n";
+	local $debug = $debug3;
+	@all_chains = @monitor = @record = ();
+
+	@all_chains = 3..scalar @::Track::by_index - 1;
+
+	# all the tracks in the Tracker group
+	
+	for my $n (@all_chains) {
+	$debug and print "rec_status $n: ", rec_status($n), "\n";
+		push (@monitor, $n) if rec_status($n) eq "MON"; 
+		push (@record, $n) if rec_status($n) eq "REC";
+	}
+
+	$debug and print "monitor chains:  @monitor\n\n";
+	$debug and print "record chains:  @record\n\n";
+	$debug and print "this take: $state_t{active}\n\n";
+		
+}
+
+sub really_recording {  # returns filename stubs
+
+#	scalar @record  # doesn't include mixdown track
+	print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
+	keys %{$outputs{file}}; # includes mixdown
+}
+
 sub write_chains {
 	$debug2 and print "&write_chains\n";
 
@@ -458,22 +491,18 @@ sub write_chains {
 			 
 	}
 
-	# $debug and print "\%state_c\n================\n", yaml_out(\%state_c);
-	# $debug and print "\%state_t\n================\n",  yaml_out(\%state_t);
-							
-		
 	## write general options
 	
-	my $ecs_file = "# ecasound chainsetup file\n\n\n";
+	my $ecs_file = "# ecasound chainsetup file\n\n";
 	$ecs_file   .= "# general\n\n";
-	$ecs_file   .= $ecasound_globals;
-	$ecs_file   .= "\n\n\n# audio inputs\n\n";
+	$ecs_file   .= "$ecasound_globals\n\n";
+	$ecs_file   .= "# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
 	$ecs_file   .= join "\n", sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
 	$ecs_file   .= "\n\n# pre-output processing\n\n";
 	$ecs_file   .= join "\n", sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
-	$ecs_file   .= "\n\n# audio outputs\n\n";
+	$ecs_file   .= "\n\n# audio outputs";
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
 	$debug and print "ECS:\n",$ecs_file;
@@ -481,23 +510,6 @@ sub write_chains {
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
-}
-sub new_wav_name {
-	# used to name output file
-	my $stub = shift;
-	my $version;
-	if (@record) {  # we are recording an audio input
-		$version = new_version(); # even mix track
-	}
-	else { # we are only mixing
-		$version = $stub eq $mixname  # mix track 
-			? ($use_monitor_version_for_mixdown 
-					? $monitor_version 
-					: $state_c{1}->{versions}->[-1] + 1
-				)
-			: new_version();
-	}
-	join_path(this_wav_dir,	"$stub\_$version.wav");
 }
 sub output_format {
 	my $stub = shift;
@@ -508,31 +520,11 @@ sub output_format {
 ## templates for generating chains
 
 sub initialize_rules {
- }
-sub initialize_oids {
-	local $debug = $debug3;
-	$debug2 and print "&initialize_oids\n";
+	$debug2 and print "&initialize_rules\n";
+	local $debug = 1;
 
-@oids = @{ $yr->read($oids) };
-
-
-# these are templates for building chains
-map {	
-	my $name = $_;
-	map{ 		defined $_->{$name} 
-					and $_->{$name} =~ /(&)(.+)/ 
-					and $_->{$name} = \&$2 
-	} @oids; 
-} qw( post_input pre_output);
-#map{ $_->{post_input} =~ /(&)(.+)/ and $_->{post_input} = \&{ $2 } } @oids; 
-#map{ $_->{pre_output} =~ /(&)(.+)/ and $_->{pre_output} = \&{ $2 } } @oids; 
-
-
-$debug and print "rec_setup $oids[-1]->{input}\n";
-
-	# oid settings
-	
-	map{ $oid_status{$_->{name}} = $_->{default} eq 'on' ? 1 : 0 } @oids;
+	map{ $oid_status{$_->{name}} = $_->{default} eq 'on' ? 1 : 0 }
+	::Rule::all_rules();
 	$debug and print yaml_out(\%oid_status); 
 
 }
@@ -568,7 +560,6 @@ sub new_engine {
 sub setup_transport {
 	$debug2 and print "&setup_transport\n";
 	collect_chains();
-	make_io_lists();
 	#map{ eliminate_loops($_) } @all_chains;
 	#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 	#print "\%outputs\n================\n", yaml_out(\%outputs);

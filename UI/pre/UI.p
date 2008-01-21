@@ -167,12 +167,6 @@ $default = <<'FALLBACK_CONFIG';
 [% qx(cat ./config.yml) %]
 FALLBACK_CONFIG
 
-# the following template are used to generate chain setups.
-$oids = <<'TEMPLATES';
-[% qx(cat ./chain_templates.yml) %]
-TEMPLATES
-
-
 1;
 __END__
 
