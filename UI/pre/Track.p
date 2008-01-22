@@ -104,32 +104,30 @@ sub current {
 	my $last = $track->very_last;
 	#print "last found is $last\n"; 
 	if 		($track->rec_status eq 'REC' ){ return ++$last; }
-	elsif ( $track->rec_status eq 'MON'){ $track->monitor_version }
+	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version }
 	
 	print "track ", $track->name, ": no current version found\n" ;
 	return undef;
 }
 
 sub monitor_version {
-	return 89;
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group};
-		print ($track->active), return $track->active if $track->active 
-			and grep {$track->active == $_ } @{$track->versions};
-
-		print ($group->version), return $group->version if $group->version
-			and grep {$group->version  == $_ } @{$track->versions};
-
-		print ($track->last), return $track->last if $track->last
-									and ! $track->active
-									and ! $group->version
+	my $version; 
+	if ( $track->active 
+			and grep {$track->active == $_ } @{$track->versions}) 
+		{ $version = $track->active }
+	elsif (	$group->version
+			and grep {$group->version  == $_ } @{$track->versions})
+		{ $version = $group->version }
+	elsif (	$track->last and ! $track->active and ! $group->version )
+		{ $version = $track->last }
+	else { carp "no version to monitor!\n" }
+	print "monitor version: $version\n";
+	$version;
 }
 
-#my $done; 
-
 sub rec_status {
-	#$done++;
-	#croak if $done > 20;
 	my $track = shift;
 	print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};

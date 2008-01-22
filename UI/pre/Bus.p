@@ -109,9 +109,9 @@ sub apply {
 			# add intermediate processing
 		
 		my ($post_input, $pre_output);
-		$post_input = deref_code($rule->post_input, $track->n) 
+		$post_input = deref_code($rule->post_input, $track) 
 			if defined $rule->post_input;
-		$pre_output = deref_code($rule->pre_output, $track->n) 
+		$pre_output = deref_code($rule->pre_output, $track) 
 			if defined $rule->pre_output;
 		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 		$::post_input{$chain_id} .= $post_input if defined $post_input;

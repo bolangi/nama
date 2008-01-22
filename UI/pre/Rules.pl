@@ -60,7 +60,7 @@ my $mon_setup = ::Rule->new(
 	input_object	=>  sub{ my $track = shift; $track->full_path },
 	output_type		=>  'cooked',
 	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-	post_input		=>	\&mono_to_stereo,
+	post_input		=>	sub{ my $track = shift; mono_to_stereo($track)},
 	status			=>  1,
 );
 	
@@ -92,7 +92,9 @@ my $rec_setup = ::Rule->new(
 	input_object	=>  'multi',
 	output_type		=>  'cooked',
 	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-	post_input			=>	\&mono_to_stereo,
+	post_input			=>	sub{ my $track = shift;
+									mono_to_stereo($track) .
+									rec_route($track)},
 	condition 		=> sub { my $track = shift; 
 							return "satisfied" if defined
 							$inputs{cooked}->{"loop," . $track->n}; 
@@ -163,7 +165,14 @@ sub eliminate_loops {
 
 # the definitions above refer to the following subroutines
 
-sub mono_to_stereo { " -erc:1,2 " }
+sub mono_to_stereo { 
+	my $track = shift;
+	my $cmd = "file " .  $track->full_path;
+	return if qx(which file)
+		and -e $track->full_path
+		and qx($cmd) =~ /stereo/i;
+	" -erc:1,2 "
+}
 
 sub pre_multi {
 	#$debug2 and print "&pre_multi\n";
@@ -172,10 +181,15 @@ sub pre_multi {
 	route(2,$track->ch_m); # stereo signal
 }
 
-sub route {
+sub rec_route {
+	my $track = shift;
+	return if $track->ch_r == 1 or ! $track->ch_r;
+	"-erc:" . $track->ch_r. ",1"; #  -f:$rec_format ";
+}
+sub mon_route {
 	my ($width, $dest) = @_;
 	return undef if $dest == 1 or $dest == 0;
-	$debug and print "route: width: $width, destination: $dest\n\n";
+	print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
