@@ -154,6 +154,40 @@ sub rec_status {
 	}
 }
 
+# the following methods are for channel routing
+
+sub mono_to_stereo { 
+	my $track = shift;
+	my $cmd = "file " .  $track->full_path;
+	return if qx(which file)
+		and -e $track->full_path
+		and qx($cmd) =~ /stereo/i;
+	" -erc:1,2 "
+}
+sub pre_multi {
+	#$debug2 and print "&pre_multi\n";
+	my $track = shift;
+	return if ! defined $track->ch_m or $track->ch_m == 1;
+	route(2,$track->ch_m); # stereo signal
+}
+
+sub rec_route {
+	my $track = shift;
+	return if $track->ch_r == 1 or ! $track->ch_r;
+	"-erc:" . $track->ch_r. ",1"; #  -f:$rec_format ";
+}
+sub route {
+	my ($width, $dest) = @_;
+	return undef if $dest == 1 or $dest == 0;
+	print "route: width: $width, destination: $dest\n\n";
+	my $offset = $dest - 1;
+	my $map ;
+	for my $c ( map{$width - $_ + 1} 1..$width ) {
+		$map .= " -erc:$c," . ( $c + $offset);
+		$map .= " -eac:0,"  . $c;
+	}
+	$map;
+}
 
 # The following are not object methods. 
 
