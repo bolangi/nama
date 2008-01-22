@@ -14,7 +14,6 @@ sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
 #sub this_wav_dir {$project_name and join_path(wav_dir, $project_name) }
 #sub project_dir  {$project_name and join_path(ecmd_dir, $project_name) }
 
-sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
 sub status_vars {
 	serialize -class => '::', -vars => \@status_vars;
 }
@@ -238,7 +237,6 @@ sub initialize_project_data {
 
 	# assign_var($project_init_file, @project_vars);
 
-	%state_c        = ();   #  chain related state
 	%cops        = ();   
 	$cop_id           = "A"; # autoincrement
 	%copp           = ();    # chain operator parameters, dynamic
@@ -317,15 +315,11 @@ sub restore_track {
 sub dig_ruins { 
 
 	# only if there are no tracks , 
-	# we exclude the mixchain
-	#
 	
 	$debug2 and print "&dig_ruins";
-	return;
+	return if $tracker->tracks;
 
-#	if ( ! grep { $_ ne $mixchain and $_ ne $project_name} keys %state_c ) {  # there are no tracks yet
-
-		# look for wave files
+	# look for wave files
 		
 		my $d = this_wav_dir();
 		opendir WAV, $d or carp "couldn't open $d: $!";
@@ -930,7 +924,7 @@ sub remove_op {
 	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
 		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id; # XXX
+			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id; 
 		};
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
@@ -983,10 +977,10 @@ sub cop_add {
  		my $end = scalar @{ $ti[$n]->ops } - 1 ; 
  		for my $i (0..$end){
  			splice ( @{$ti[$n]->ops}, $i+1, 0, $cop_id ), last
- 				if $ti[$n]->ops->[$i] eq $parent_id # XXX
+ 				if $ti[$n]->ops->[$i] eq $parent_id 
  		}
 	}
-	else { push @{$ti[$n]->ops }, $cop_id; } # XXX
+	else { push @{$ti[$n]->ops }, $cop_id; } 
 
 	$cop_id++; # return value then increment
 }
@@ -1031,7 +1025,7 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
-	#return if ! defined $ti[$chain]->offset; # MIX XXX
+	return if ! defined $ti[$chain]->offset; # MIX XXX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
 
