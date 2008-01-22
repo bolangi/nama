@@ -22,7 +22,7 @@ $debug = 1;
 			eval $predicate;
 			print "\n";
 			$@ and print "Perl command failed: $@\n";
-		} elsif ($track_names{$cmd}) { 
+		} elsif ($tn{$cmd}) { 
 			$debug and print "Track name: $cmd\n";
 			$select_track = $cmd; 
 			$parser->command($predicate) or print ("Returned false\n");

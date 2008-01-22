@@ -18,7 +18,7 @@ load_project: _load_project name end {
 }
 
 add_track: _add_track wav channel(s?) end { 
-	if ($::track_names{$item{wav}} ){ 
+	if ($::tn{$item{wav}} ){ 
 		print "Track name already in use.\n";
 
 	} else { ::add_track($item{wav})  }
@@ -40,15 +40,15 @@ list_marks: _list_marks end {}
 
 show_setup: _show_setup end { 	
 	map { 	push @::format_fields,  
-			$_,
-			$::state_c{$_}->{active},
-			$::state_c{$_}->{file},
-			$::state_c{$_}->{rw},
-			&::rec_status($_),
-			$::state_c{$_}->{ch_r},
-			$::state_c{$_}->{ch_m},
+			$_->n,
+			$_->active,
+			$_->name,
+			$_->rw,
+			$_->rec_status,
+			$_->ch_r,
+			$_->ch_m,
 
-		} sort keys %::state_c;
+		} ::Track::all_tracks;
 		
 	write; # using format at end of file UI.pm
 	1;
@@ -69,25 +69,24 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 channel: r | m
 
-r: 'r' dd  { $::state_c{$::chain{$::select_track}}->{ch_r} = $item{dd} }
-m: 'm' dd  { $::state_c{$::chain{$::select_track}}->{ch_m} = $item{dd} }
+r: 'r' dd  { $ti[$::select_track]->set(ch_r => $item{dd}) }
+m: 'm' dd  { $ti[$::select_track]->set(ch_m => $item{dd}) }
 
 
 rec: 'rec' wav(s?) end { 
-	map{$::state_c{$::chain{$::select_track}}->{rw} = "REC"} @{$item{wav}} 
+	map{$ti[$::select_track]->set(rw => 'REC')} @{$item{wav}} 
 }
 mon: 'mon' wav(s?) end { 
-	map{$::state_c{$::chain{$::select_track}}->{rw} = "MON"} @{$item{wav}} 
+	map{$ti[$::select_track]->set(rw => 'MON')} @{$item{wav}} 
 }
 mute: 'mute' wav(s?) end { 
-	map{$::state_c{$::chain{$::select_track}}->{rw} = "MUTE"} @{$item{wav}}  
+	map{$ti[$::select_track]->set(rw => 'MUTE')} @{$item{wav}} 
 }
 
-mute: 'mute' end {$::state_c{$::chain{$::select_track}} = "MUTE"; }
+mute: 'mute' end {$ti[$::select_track]->set(rw => 'MUTE'); }
+rec: 'rec' end {$ti[$::select_track]->set(rw => 'REC'); }
+mon: 'mon' end {$ti[$::select_track]->set(rw => 'MON'); }
 
-mon: 'mon' end {$::state_c{$::chain{$::select_track}} = "MON"; }
-
-rec: 'rec' end {$::state_c{$::chain{$::select_track}} = "REC"; }
 
 
 last: ('last' | '$' ) 
