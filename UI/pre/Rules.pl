@@ -36,6 +36,21 @@ my $mix_down = ::Rule->new(
 
 	status			=> 1,
 );
+
+my $mix_link = ::Rule->new(
+
+	name			=>  'mix_link',
+	chain_id		=>  'Mix_link',
+	target			=>  'all',
+	input_type		=>  'mixed',
+	input_object	=>  $loopa,
+	output_type		=>  'mixed',
+	output_object	=>  $loopb,
+	#condition 		=>  1,
+	status			=>  1,
+	
+);
+
 my $mix_setup = ::Rule->new(
 
 	name			=>  'mix_setup',
@@ -49,6 +64,7 @@ my $mix_setup = ::Rule->new(
 	status			=>  1,
 	
 );
+
 
 
 my $mon_setup = ::Rule->new(
@@ -93,8 +109,9 @@ my $rec_setup = ::Rule->new(
 	output_type		=>  'cooked',
 	output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 	post_input			=>	sub{ my $track = shift;
-									$track->mono_to_stereo .
-									$track->rec_route},
+									$track->rec_route .
+									$track->mono_to_stereo 
+									},
 	condition 		=> sub { my $track = shift; 
 							return "satisfied" if defined
 							$inputs{cooked}->{"loop," . $track->n}; 

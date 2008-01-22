@@ -84,7 +84,7 @@ sub prepare {
 
 	$master_bus  = UI::Bus->new(
 		name => 'Master_Bus',
-		rules  => [ qw(mixer_out mix_file ) ],
+		rules  => [ qw(mix_link mixer_out mix_file ) ],
 		groups => ['Mixer'],
 	);
 =comment
