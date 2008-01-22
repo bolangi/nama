@@ -288,7 +288,6 @@ sub initialize_project_data {
 
 sub add_track {
 
-
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	return if transport_running();
@@ -307,13 +306,11 @@ sub add_track {
 	$ui->track_gui($track->n);
 	collect_chains();
 	$debug and print "Added new track!\n", $track->dump;
-	$track;
 }
 sub restore_track {
 	$debug2 and print "&restore_track\n";
 	@_ = discard_object(@_);
 	my $n = shift;
-	find_wavs($n);
 	$ui->track_gui($n), $ui->refresh();
 }
 
@@ -394,11 +391,7 @@ sub set_active_version {
 
 sub mon_vert {
 	my $ver = shift;
-	return if $ver == $monitor_version;
-	# store @{ $state_c{$ver}{ops} }
-	# store %copp
-	# remove effects  and use $ver's set if there are effects for $v
-	$monitor_version = $ver;
+	$tracker->set(version => $ver);
 	$ui->refresh();
 }
 ## chain setup generation

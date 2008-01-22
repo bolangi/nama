@@ -22,7 +22,7 @@ sub destroy_widgets {
 	map{ $_->destroy  } @children[1..$#children];
 	@children = $track_frame->children;
 	map{ $_->destroy  } @children[11..$#children]; # fragile
-	$state_t{active} = 1; 
+	$state_t{active} = 1;  # XXX
 }
 
 sub init_gui {
@@ -461,7 +461,7 @@ sub global_version_buttons {
 	$debug and print "making global version buttons range:", join ' ',1..$last_version, " \n";
  	for my $v (undef, 1..$last_version) {
 		no warnings;
-		next unless grep{  grep{ $v == $_ } @{ $state_c{$_}->{versions} } }
+		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->{versions} } }
 			grep{ $_ != 1 } @all_chains; # MIX 
 		use warnings;
  		push @global_version_buttons,
@@ -472,6 +472,7 @@ sub global_version_buttons {
 				-value => $v,
 				-command => sub { 
 					$state_t{2}->{rw} = "MON"; ### HARDCODED SECOND TAKE; MIX
+					# XXX
 					mon_vert($v);  # select this version
 					setup_transport(); 
 					connect_transport();
@@ -491,17 +492,17 @@ sub track_gui {
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
 	my $stub = " ";
-	$stub .= $state_c{$n}->{active};
+	$stub .= $ti[$n]->active;
 	$name = $track_frame->Label(
-			-text => $state_c{$n}->{file},
+			-text => $ti[$n]->name,
 			-justify => 'left');
 	$version = $track_frame->Menubutton( 
 					-text => $stub,
 					-tearoff => 0);
-	for my $v (undef, @{$state_c{$n}->{versions}}) {
+	for my $v (undef, @{$ti[$n]->versions}) {
 					$version->radiobutton(
 						-label => ($v ? $v: ''),
-						-variable => \$state_c{$n}->{active},
+						-variable => \$ti[$n]->active,
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> selected_version($n) ) 
@@ -511,37 +512,37 @@ sub track_gui {
 	}
 
 	$ch_r = $track_frame->Menubutton(
-					-textvariable => \$state_c{$n}->{ch_r},
+					-textvariable => \$ti[$n]->ch_r,
 					-tearoff => 0,
 				);
 			if ( $n != 1 ) { # for all but Mixdown track MIX
 				for my $v (1..$tk_input_channels) {
 					$ch_r->radiobutton(
 						-label => $v,
-						-variable => \$state_c{$n}->{ch_r},
+						-variable => \$ti[$n]->ch_r, # XXX
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = "REC";
+							$ti[$n]->set(rw => 'REC');
 							refresh() }
 				 		)
 				}
 			}
 	$ch_m = $track_frame->Menubutton(
-					-textvariable => \$state_c{$n}->{ch_m},
+					-textvariable => \$ti[$n]->ch_m, # XXX
 					-tearoff => 0,
 				);
 				for my $v (1..10) {
 					$ch_m->radiobutton(
 						-label => $v,
-						-variable => \$state_c{$n}->{ch_m},
+						-variable => \$ti[$n]->ch_m, # XXX
 						-value => $v,
 						-command => sub { 
-							$state_c{$n}->{rw} = "MON";
+							$ti[$n]->set(rw  => "MON");
 							refresh_c($n) }
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
-		-text => $state_c{$n}->{rw},
+		-text => $ti[$n]->rw,
 		-tearoff => 0,
 	);
 
@@ -549,25 +550,25 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					$state_c{$n}->{rw} = "REC";
+					$ti[$n]->set(rw => "REC");
 					refresh();
 					}
 			],
 			[ 'command' => "MON",
 				-command  => sub { 
-					$state_c{$n}->{rw} = "MON";
+					$ti[$n]->set(rw => "MON");
 					refresh();
 					}
 			],
 			[ 'command' => "MUTE", 
 				-command  => sub { 
-					$state_c{$n}->{rw} = "MUTE";
+					$ti[$n]->set(rw => "MUTE");
 					refresh();
 					}
 			],
 		);
 	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$state_c{$n}->{rw} = "MON" if $n == 1;          # MIX
+	$ti[$n]->set(rw => "MON") if $n == 1;          # MIX XXX
 
  
    ## XXX general code mixed with GUI code
@@ -675,7 +676,7 @@ sub track_gui {
 	$widget_c{$n}->{children} = $controllers_frame;
 	
 	$independent_effects_frame
-		->Label(-text => uc $state_c{$n}->{file} )->pack(-side => 'left');
+		->Label(-text => uc $ti[$n]->name )->pack(-side => 'left');
 
 	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
@@ -713,7 +714,7 @@ sub update_version_button {
 	my $w = $widget_c{$n}->{version};
 					$w->radiobutton(
 						-label => $v,
-						-variable => \$state_c{$n}->{active},
+						-variable => \$ti[$n]->active,
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
