@@ -111,22 +111,27 @@ sub current {
 }
 
 sub monitor_version {
+	return 89;
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group};
-		return $track->active if $track->active 
+		print ($track->active), return $track->active if $track->active 
 			and grep {$track->active == $_ } @{$track->versions};
 
-		return $group->version if $group->version
+		print ($group->version), return $group->version if $group->version
 			and grep {$group->version  == $_ } @{$track->versions};
 
-		return $track->last if $track->last
+		print ($track->last), return $track->last if $track->last
 									and ! $track->active
 									and ! $group->version
 }
-	
+
+#my $done; 
 
 sub rec_status {
+	#$done++;
+	#croak if $done > 20;
 	my $track = shift;
+	print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
 	return 'REC' if $group->name ne 'Tracker' and $group->rw eq 'REC'; 
 
@@ -135,8 +140,9 @@ sub rec_status {
 	return 'MUTE' if 
 		$group->rw eq 'MUTE'
 		or $track->rw eq 'MUTE'
-		or $track->rw eq 'MON' and  $track->monitor_version;
+		or $track->rw eq 'MON' and ! $track->monitor_version;
 		# ! $track->full_path;
+		;
 	if( 	
 		$track->rw eq 'REC'
 		 and $group->rw eq 'REC'
@@ -145,7 +151,7 @@ sub rec_status {
 		return 'REC' if $track->ch_r;
 		return 'MUTE';
 	}
-	else { return 'MON' if $track->full_path;
+	else { return 'MON' if $track->monitor_version;
 			return 'MUTE';	
 	}
 }
