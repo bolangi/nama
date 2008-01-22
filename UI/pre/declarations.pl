@@ -245,6 +245,9 @@ our (
 	$master,   #  group
 	$master_bus, 
 	$mixer, # group
-	$mixer_bus
+	$mixer_bus,
+
+	@ti, # track by index (alias @::Track::by_index)
+	%tn, # track by name  (alias %::Track::by_name)
 
 );

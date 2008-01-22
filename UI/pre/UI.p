@@ -26,12 +26,6 @@ use Data::YAML::Reader;
 
 [% qx(cat ./var_types.pl) %]
 
-# aliases for concise access
-
-*tn = \%::Track::by_name;
-*ti = \@::Track::by_index;
-
-# $ti[3]->rw
 
 # instances needed for yaml_out and yaml_in
 
@@ -70,6 +64,12 @@ use ::Tkeca_effects;
 use ::Track;
 use ::Bus;    
 
+# aliases for concise access
+
+*tn = \%::Track::by_name;
+*ti = \@::Track::by_index;
+
+# $ti[3]->rw
 ## Load bus rules
 
 [% qx(cat ./Rules.pl ) %]

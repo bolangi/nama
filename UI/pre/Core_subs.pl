@@ -221,7 +221,7 @@ XXX retrieve statue
 	add_mix_track(), dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 
-#The mix track will always be track index 1 i.e. $state_c{$n}
+#The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
 =cut
 
@@ -325,8 +325,9 @@ sub dig_ruins {
 	#
 	
 	$debug2 and print "&dig_ruins";
+	return;
 
-	if ( ! grep { $_ ne $mixchain and $_ ne $project_name} keys %state_c ) {  # there are no tracks yet
+#	if ( ! grep { $_ ne $mixchain and $_ ne $project_name} keys %state_c ) {  # there are no tracks yet
 
 		# look for wave files
 		
@@ -341,7 +342,7 @@ sub dig_ruins {
 
 		map{add_track($_)}@wavs;
 
-	}
+#	}
 }
 
 sub remove_small_wavs {
@@ -364,10 +365,10 @@ sub add_volume_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'ea',
-				cop_id => $state_c{$n}->{vol}, # often undefined
+				cop_id => $ti[$n]->vol, # often undefined
 				});
 	
-	$state_c{$n}->{vol} = $vol_id;  # save the id for next time
+	$ti[$n]->vol = $vol_id;  # save the id for next time
 }
 sub add_pan_control {
 	my $n = shift;
@@ -375,19 +376,19 @@ sub add_pan_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'epp',
-				cop_id => $state_c{$n}->{pan}, # often undefined
+				cop_id => $ti[$n]->pan, # often undefined
 				});
 	
-	$state_c{$n}->{pan} = $vol_id;  # save the id for next time
+	$ti[$n]->pan = $vol_id;  # save the id for next time
 }
 ## version functions
 
 sub set_active_version {
 	my $n = shift;
-	$debug and print "chain $n: versions: @{$state_c{$n}->{versions}}\n";    
-		$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1] 
-			if $state_c{$n}->{versions};    
-		$debug and print "active version, chain $n: $state_c{$n}->{active}\n\n";
+	$debug and print "chain $n: versions: @{$ti[$n]->versions}\n";    
+		$ti[$n]->active = $ti[$n]->versions->[-1] 
+			if $ti[$n]->versions;    
+		$debug and print "active version, chain $n: $ti[$n]->active\n\n";
 }
 
 sub mon_vert {
@@ -735,7 +736,7 @@ sub rec_cleanup {
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				find_wavs($n);
-				$state_c{$n}->{active} = $state_c{$n}->{versions}->[-1]; # XXX
+				$ti[$n]->active = $ti[$n]->versions->[-1]; # XXX
 				update_version_button($n, $v);
 			$recorded++;
 			}
@@ -767,8 +768,8 @@ sub add_effect {
 	my $parameter		= $p{parameter}; 
 	my $i = $effect_i{$code};
 
-	return if $id eq $state_c{$n}->{vol} or
-	          $id eq $state_c{$n}->{pan};   # skip these effects 
+	return if $id eq $ti[$n]->vol or
+	          $id eq $ti[$n]->pan;   # skip these effects 
 			   								# already created in add_track
 
 	$id = cop_add(\%p); 
@@ -911,8 +912,8 @@ sub remove_effect_gui {
 	my $n = $cops{$id}->{chain};
 	$debug and print "id: $id, chain: $n\n";
 
-	$state_c{$n}->{ops} = 
-		[ grep{ $_ ne $id} @{ $state_c{ $cops{$id}->{chain} }->{ops} } ];
+	$ti[$n]->ops =  # XXX
+		[ grep{ $_ ne $id} @{ $ti[ $cops{$id}->{chain} ]->ops } ];
 	$debug and print "i have widgets for these ids: ", join " ",keys %widget_e, "\n";
 	$debug and print "preparing to destroy: $id\n";
 	$widget_e{$id}->destroy();
@@ -928,15 +929,15 @@ sub remove_op {
 		return;
 	}
 	my $index; 
-	$debug and print "ops list for chain $n: @{$state_c{$n}->{ops}}\n";
+	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
-		for my $pos ( 0.. scalar @{ $state_c{$n}->{ops} } - 1  ) {
-			($index = $pos), last if $state_c{$n}->{ops}->[$pos] eq $id;
+		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
+			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id;
 		};
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
 	 eval_iam ("c-select $n");
-	eval_iam ("cop-select ". ($state_c{$n}->{offset} + $index));
+	eval_iam ("cop-select ". ($ti[$n]->offset + $index));
 	eval_iam ("cop-remove");
 	$debug and eval_iam ("cs");
 
@@ -981,13 +982,13 @@ sub cop_add {
 		$copp{$cop_id}->[0] = $parameter + 1; # set fx-param to the parameter number.
  		# find position of parent and insert child immediately afterwards
 
- 		my $end = scalar @{ $state_c{$n}->{ops} } - 1 ; 
+ 		my $end = scalar @{ $ti[$n]->ops } - 1 ; 
  		for my $i (0..$end){
- 			splice ( @{$state_c{$n}->{ops}}, $i+1, 0, $cop_id ), last
- 				if $state_c{$n}->{ops}->[$i] eq $parent_id
+ 			splice ( @{$ti[$n]->ops}, $i+1, 0, $cop_id ), last
+ 				if $ti[$n]->ops->[$i] eq $parent_id
  		}
 	}
-	else { push @{$state_c{$n}->{ops} }, $cop_id; }
+	else { push @{$ti[$n]->ops }, $cop_id; }
 
 	$cop_id++; # return value then increment
 }
@@ -1034,7 +1035,7 @@ sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	# return if rec_status($chain) eq "MUTE"; 
-	return if ! defined $state_c{$chain}->{offset}; # MIX
+	return if ! defined $ti[$chain]->offset; # MIX XXX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
 
@@ -1043,12 +1044,12 @@ sub effect_update {
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
 	$param++; # so the value at $p[0] is applied to parameter 1
 	my $controller; 
-	for my $op (0..scalar @{ $state_c{$chain}->{ops} } - 1) {
-		${ $state_c{$chain}->{ops} } [$op] eq $id and $controller = $op 
+	for my $op (0..scalar @{ $ti[$chain]->ops } - 1) {
+		${ $ti[$chain]->ops } [$op] eq $id and $controller = $op 
 	}
-	$debug and print "cop_id $id corresponds to track: $chain, controller: $controller, offset: $state_c{$chain}->{offset}\n";
+	$debug and print "cop_id $id corresponds to track: $chain, controller: $controller, offset: $ti[$chain]->offset\n";
 	eval_iam ("c-select $chain");
-	eval_iam ("cop-select ". ($state_c{$chain}->{offset} + $controller));
+	eval_iam ("cop-select ". ($ti[$chain]->offset + $controller));
 	eval_iam ("copp-select $param");
 	eval_iam ("copp-set $val");
 }
@@ -1093,7 +1094,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$state_c{$chain_id}->{offset} = ($quotes/2 - 1) + 1; 
+			$ti[$chain_id]->offset = ($quotes/2 - 1) + 1; 
 
 		}
 }
@@ -1101,11 +1102,11 @@ sub apply_ops {  # in addition to operators in .ecs file
 	local $debug = $debug3;
 	$debug2 and print "&apply_ops\n";
 	for my $n (@all_chains) {
-	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
+	$debug and print "chain: $n, offset: $ti[$n]->offset\n";
  		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
-		next if ! defined $state_c{$n}->{offset}; # for MIX
- 		next if ! $state_c{$n}->{offset} ;
-		for my $id ( @{ $state_c{$n}->{ops} } ) {
+		next if ! defined $ti[$n]->offset; # for MIX
+ 		next if ! $ti[$n]->offset ;
+		for my $id ( @{ $ti[$n]->ops } ) {
 		#	next if $cops{$id}->{belongs_to}; 
 		apply_op($id);
 		}
@@ -1538,7 +1539,7 @@ sub save_state {
 	#
 	my %muted;
 	
-	map{ $copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
+	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
 		 $muted{$_}++;
 	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
 		} grep { $old_vol{$_} } @all_chains;
@@ -1563,7 +1564,7 @@ sub save_state {
 
 	# now remute
 	
-	map{ $copp{ $state_c{$_}{vol} }->[0] = 0} 
+	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
 	grep { $muted{$_}} 
 	@all_chains;
 
@@ -1627,10 +1628,10 @@ sub retrieve_state {
 	for my $n (@all_chains) { 
 		$debug and print "restoring track: $n\n";
 		restore_track($n) ;
-		for my $id (@{$state_c{$n}->{ops}}){
+		for my $id (@{$ti[$n]->ops}){
 			$did_apply++ 
-				unless $id eq $state_c{$n}->{vol}
-					or $id eq $state_c{$n}->{pan};
+				unless $id eq $ti[$n]->vol
+					or $id eq $ti[$n]->pan;
 
 			
 			add_effect({
@@ -1657,7 +1658,7 @@ sub save_effects {
 	#
 	my %muted;
 	
-	map  {$copp{ $state_c{$_}{vol} }->[0] = $old_vol{$_} ;
+	map  {$copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
 		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	@all_chains;
@@ -1669,9 +1670,9 @@ sub save_effects {
 	# I will follow for now 12/6/07
 	
 	%state_c_ops = ();
-	map{ 	$state_c_ops{$_} = $state_c{$_}->{ops} } @all_chains;
+	map{ 	$state_c_ops{$_} = $ti[$_]->ops } @all_chains;
 
-	# map {remove_op} @{ $state_c{$_}->{ops} }
+	# map {remove_op} @{ $ti[$_]->ops }
 
 	store_vars(
 		-file => $file, 
@@ -1711,14 +1712,14 @@ sub retrieve_effects {
 	map{ 	
 	
 		$debug and print "found chain $_: ", join " ",
-		@{ $state_c{$_}->{ops} }, "\n";
+		@{ $ti[$_]->ops }, "\n";
 
 		my $n = $_;
 		map {	my $id = $_; 
 				$debug and print "checking chain $n, id $id: ";
 				
-				if (	$state_c{$n}->{vol} eq $id or
-						$state_c{$n}->{pan} eq $id  ){
+				if (	$ti[$n]->vol eq $id or
+						$ti[$n]->pan eq $id  ){
 
 					# do nothing
 				$debug and print "is vol/pan\n";
@@ -1731,14 +1732,14 @@ sub retrieve_effects {
 					remove_op($id)
 			}
 
-		} @{ $state_c{$_}->{ops} }
+		} @{ $ti[$_]->ops }
 	} @all_chains;
 			
 	return;
 
 	# restore ops list
 	
-	map{ $state_c{$_}->{ops} = $state_c_ops{$_} } @all_chains;
+	map{ $ti[$_]->ops = $state_c_ops{$_} } @all_chains;
 
 	# restore ops->chain mapping
 	
@@ -1747,14 +1748,14 @@ sub retrieve_effects {
 	# add the correct copp entry for each id except vol/pan
 	map{ my $n = $_;
 			map {	my $id = $_; 
-				if (	$state_c{$n}->{vol} eq $id or
-						$state_c{$n}->{pan} eq $id  ){
+				if (	$ti[$n]->vol eq $id or
+						$ti[$n]->pan eq $id  ){
 
 					$copp{$id}->[0] = $old_copp{$id}->[0];
 				}
 				else {  $copp{$id} = $old_copp{$id} }
 
-			} @{ $state_c{$_}->{ops} }
+			} @{ $ti[$_]->ops }
 		} @all_chains;
 
 	# apply ops
@@ -1762,10 +1763,10 @@ sub retrieve_effects {
 	my $did_apply = 0;
 
 	for my $n (@all_chains) { 
-		for my $id (@{$state_c{$n}->{ops}}){
+		for my $id (@{$ti[$n]->ops}){
 			$did_apply++ 
-				unless $id eq $state_c{$n}->{vol}
-					or $id eq $state_c{$n}->{pan};
+				unless $id eq $ti[$n]->vol
+					or $id eq $ti[$n]->pan;
 
 			
 			add_effect({  
