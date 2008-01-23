@@ -1,3 +1,6 @@
+
+# i'm a comment!
+
 command: fail
 end: /\s*$/
 help: _help end { print "hello_from your command line gramar\n"; 1 }
@@ -69,24 +72,23 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 channel: r | m
 
-r: 'r' dd  { $ti[$::select_track]->set(ch_r => $item{dd}) }
-m: 'm' dd  { $ti[$::select_track]->set(ch_m => $item{dd}) }
+r: 'r' dd  { $::ti[$::select_track]->set(ch_r => $item{dd}) }
+m: 'm' dd  { $::ti[$::select_track]->set(ch_m => $item{dd}) }
 
 
 rec: 'rec' wav(s?) end { 
-	map{$ti[$::select_track]->set(rw => 'REC')} @{$item{wav}} 
+	map{$::ti[$::select_track]->set(rw => 'REC')} @{$item{wav}} 
 }
 mon: 'mon' wav(s?) end { 
-	map{$ti[$::select_track]->set(rw => 'MON')} @{$item{wav}} 
+	map{$::ti[$::select_track]->set(rw => 'MON')} @{$item{wav}} 
 }
 mute: 'mute' wav(s?) end { 
-	map{$ti[$::select_track]->set(rw => 'MUTE')} @{$item{wav}} 
+	map{$::ti[$::select_track]->set(rw => 'MUTE')} @{$item{wav}} 
 }
 
-mute: 'mute' end {$ti[$::select_track]->set(rw => 'MUTE'); }
-rec: 'rec' end {$ti[$::select_track]->set(rw => 'REC'); }
-mon: 'mon' end {$ti[$::select_track]->set(rw => 'MON'); }
-
+mute: 'mute' end {$::ti[$::select_track]->set(rw => 'MUTE'); }
+rec: 'rec' end {$::ti[$::select_track]->set(rw => 'REC'); }
+mon: 'mon' end {$::ti[$::select_track]->set(rw => 'MON'); }
 
 
 last: ('last' | '$' ) 

@@ -9,10 +9,7 @@ sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
 }
 sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
 								or wav_dir
-
 }
-#sub this_wav_dir {$project_name and join_path(wav_dir, $project_name) }
-#sub project_dir  {$project_name and join_path(ecmd_dir, $project_name) }
 
 sub status_vars {
 	serialize -class => '::', -vars => \@status_vars;
@@ -106,8 +103,6 @@ sub prepare {
 	# UI object for interface polymorphism
 	
 	$ui = $opts{g} ?  UI::Graphical->new : UI::Text->new;
-	
-
 
 	load_project( name => $project_name, create => $opts{c});
 
@@ -139,7 +134,10 @@ sub eval_iam {
 
 sub global_config{
 	my $config = join_path( &ecmd_dir, &config_file );
-	-f $config and io($config)->all;
+	-f $config and return( io($config)->all );
+	$config = join_path( $ENV{HOME}, $config);
+	-f $config and io($config)->all ;
+	
 }
 sub project_config {
 	&project_dir or return;
@@ -295,7 +293,10 @@ sub add_track {
 		ch_r => $ch_r,
 		ch_m => $ch_m,
 	);
+
 	# $ch_r and $ch_m are public variables set by GUI
+	# Okay, so we will do that for the grammar, to
+	# $::chr = 
 	
 	my $group = $::Group::by_name{$track->group};
 	$group->set(rw => 'REC');

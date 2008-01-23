@@ -468,12 +468,10 @@ sub global_version_buttons {
 			$widget_t[1]->radiobutton(
 				###  HARDCODED, second take widget
 				-label => ($v ? $v : ''),
-				-variable => \$monitor_version, # XXX
+				# -variable => \$monitor_version, # XXX
 				-value => $v,
 				-command => sub { 
-					$state_t{2}->{rw} = "MON"; ### HARDCODED SECOND TAKE; MIX
-					# XXX
-					mon_vert($v);  # select this version
+					$tracker->set(version => $v); 
 					setup_transport(); 
 					connect_transport();
 					refresh();
@@ -502,11 +500,11 @@ sub track_gui {
 	for my $v (undef, @{$ti[$n]->versions}) {
 					$version->radiobutton(
 						-label => ($v ? $v: ''),
-						-variable => \$ti[$n]->active, # XXX
+						# -variable => \$ti[$n]->active, # XXX
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> selected_version($n) ) 
-	#		unless rec_status($n) eq "REC"
+			unless $ti[$n]->rec_status eq "REC"
 			}
 					);
 	}
@@ -519,7 +517,7 @@ sub track_gui {
 				for my $v (1..$tk_input_channels) {
 					$ch_r->radiobutton(
 						-label => $v,
-				#		-variable => \$ti[$n]->ch_r, # XXX
+						# -variable => \$ti[$n]->ch_r, # XXX
 						-value => $v,
 						-command => sub { 
 							$ti[$n]->set(rw => 'REC');
@@ -718,7 +716,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
-				unless rec_status($n) eq "REC" }
+				unless $ti[$n]->rec_status eq "REC" }
 					);
 }
 sub update_master_version_button {

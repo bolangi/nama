@@ -1,6 +1,6 @@
 ---
 wav_dir: \.
-abbreviations:
+abbreviations: 
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency
   32-12: s32_le,12,frequency
@@ -16,7 +16,7 @@ devices:
     ecasound_id: alsa,ice1712
     input_format: 32-12
     output_format: 32-10
-  stereo:
+  consumer:
     ecasound_id: alsa,default
     input_format: cd-stereo
     output_format: cd-stereo
