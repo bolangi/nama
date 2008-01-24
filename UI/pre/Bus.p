@@ -195,6 +195,10 @@ sub dump{
 	print "rule: ", $rule->name, $/;
 }
 
+### subclass
 
+package ::MixBus;
+our @ISA = '::Bus';
+sub apply {} ; ## TODO 
 
 1;
