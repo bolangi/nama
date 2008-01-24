@@ -207,7 +207,7 @@ sub load_project {
 # 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 # =cut
 	read_config();
-	initialize_rules();
+	recreate_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
@@ -228,7 +228,7 @@ XXX retrieve statue
 
 }
 
-sub initialize_rules {
+sub recreate_rules {
 
 package ::Rule;
 	$n = 0;
@@ -1254,7 +1254,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( offset => $quotes/2);  
+			$ti[$chain_id]->set( offset => $quotes/2);   # XXX
 
 		}
 }

@@ -40,7 +40,7 @@ sub refresh_c { # tracks
 	$debug2 and print "&refresh_c\n";
 	
 	$debug and print "track: $n\n"; # rec_status: $rec_status\n";
-		my $rec_status = rec_status($n);
+		my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 		$debug and print "arrived here\n";
 
