@@ -46,7 +46,6 @@ my $mix_link = ::Rule->new(
 	input_object	=>  $loopa,
 	output_type		=>  'mixed',
 	output_object	=>  $loopb,
-	#condition 		=>  1,
 	status			=>  1,
 	
 );

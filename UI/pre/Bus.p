@@ -128,12 +128,11 @@ sub apply {
 	
 package ::Rule;
 use Carp;
-use vars qw(%by_name @by_index);
-{ 
-my $n = 0;
+use vars qw($n %by_name @by_index %rule_names);
+$n = 0;
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
-my %rule_names; 
+%rule_names = (); 
 use ::Object qw( 	name
 						chain_id
 
@@ -169,7 +168,6 @@ sub new {
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak "rule name already in use: $vals{name}\n"
 		 if $rule_names{$vals{name}}; # null name returns false
-	#my $n = $vals{n} ? $vals{n} : ++$n; 
 	$n++;
 	my $object = bless { 	
 		name 	=> "Rule $n", # default name
@@ -187,8 +185,6 @@ sub new {
 }
 
 sub all_rules { @by_index[1..scalar @by_index - 1] }
-
-}
 
 sub dump{
 	my $rule = shift;

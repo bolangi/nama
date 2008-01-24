@@ -72,9 +72,6 @@ use ::Bus;
 *ti = \@::Track::by_index;
 
 # $ti[3]->rw
-## Load bus rules
-
-[% qx(cat ./Rules.pl ) %]
 
 print remove_spaces("bulwinkle is a...");
 
