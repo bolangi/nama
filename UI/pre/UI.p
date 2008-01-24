@@ -41,6 +41,8 @@ $debug = 1;
 $loopa = 'loop,111';
 $loopb = 'loop,222';
 
+$wav_dir = '.'; # current directory default
+
 $mixchain = 1; 
 $mixchain_aux = 'MixDown'; # used for playing back mixes
                            # when chain 1 is active
@@ -109,17 +111,9 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
 	package ::;
-	init_gui; # the main window, effect window hidden
 	transport_gui;
 	oid_gui;
 	time_gui;
-	new_take;
-	new_take;
-	load_project(
-		create => $opts{c},
-		name   => $project_name) if $project_name;
-	setup_transport; 
-	connect_transport;
 	MainLoop;
 }
 
@@ -183,7 +177,7 @@ $grammar = q(
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';
-[% qx(cat ./config.yml) %]
+[% qx(cat ./ecmdrc) %]
 FALLBACK_CONFIG
 
 1;

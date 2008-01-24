@@ -313,12 +313,15 @@ sub strip_all{ strip_blank_lines( strip_comments(@_) ) }
 
 sub strip_blank_lines {
 	map{ s/\n(\s*\n)+/\n/sg } @_;
+	map{ s/^\n//sg } @_;
 	@_;
 	 
 }
 
 sub strip_comments { #  
 	map{ s/#.*$//mg; } @_;
+	map{ s/\s+$//mg; } @_;
+
 	@_
 } 
 

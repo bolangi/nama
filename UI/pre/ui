@@ -1,25 +1,7 @@
 #!/usr/local/bin/perl5.8.0
-#!/usr/local/bin/perl5.8.0
 use lib qw(.. .); 
 package UI; ## correct variable namespace
 use UI;
-use Getopt::Std;
-#use vars qw(%opts $project $debug);
-my $debug = 1;
-### Option Processing ###
-push @ARGV, qw(-d /media/sessions test-abc);
-getopts('mcegsd:', \%opts); 
-#print join $/, (%opts);
-# d: wav_dir
-# c: create project
-# g: gui mode
-# m: don't load state info
-# e: don't load static effects data
-# s: don't load static effects data cache
-$project = shift;
-$debug and print "project name: $project\n";
-$project and $project_name = $project;
-$ui = $opts{g} ?  UI::Graphical->new : UI::Text->new;
-$ui->prepare; 
+prepare; 
 $ui->loop;
 __END__

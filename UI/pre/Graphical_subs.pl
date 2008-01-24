@@ -29,6 +29,8 @@ sub init_gui {
 
 	$debug2 and print "&init_gui\n";
 
+	@_ = discard_object(@_);
+
 ### 	Tk root window layout
 
 	$mw = MainWindow->new; 

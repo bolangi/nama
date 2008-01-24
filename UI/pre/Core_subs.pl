@@ -2,7 +2,7 @@
 
 use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
-sub config_file { "config.yml" }
+sub config_file { ".ecmdrc" }
 sub ecmd_dir { join_path(wav_dir, ".ecmd") }
 sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
 								or wav_dir
@@ -59,10 +59,7 @@ sub prepare {
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or croak
-
-	("wav_dir: '$wav_dir' not found, invoke using -d option ");
-
+	-d $wav_dir or warn "wave directory not found, using current directory\n";
 
 	# TODO
 	# Tie mixdown version suffix to global monitor version 
@@ -104,6 +101,8 @@ sub prepare {
 	
 	$ui = $opts{g} ?  UI::Graphical->new : UI::Text->new;
 
+	$ui->init_gui;
+
 	load_project( name => $project_name, create => $opts{c});
 
 	# if there is no project name, we still init using pwd
@@ -133,18 +132,23 @@ sub eval_iam {
 ## configuration file
 
 sub global_config{
-	my $config = join_path( &ecmd_dir, &config_file );
-	-f $config and return( io($config)->all );
-	$config = join_path( $ENV{HOME}, $config);
-	-f $config and io($config)->all ;
-	
+	map{ 
+			my $config = join_path($_, config_file());
+			print "config: $config\n";
+			if( -f $config ){ 
+				my $yml = io($config)->all ;
+				return $yml;
+			}
+		} ( project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir or '.') ;
 }
-sub project_config {
-	&project_dir or return;
-	my $config = join_path( &project_dir, &config_file );
-	-f $config and io($config)->all;
+sub config { 
+	my $yml = global_config() or $default;
+	strip_comments( $yml );
+	strip_blank_lines( $yml );
+	$yml = join "\n", "---", $yml, "...";
+	#print "config file: $yml";   exit;
+	$yml
 }
-sub config { strip_all( &project_config or &global_config or $default) }
 
 sub read_config {
 	$debug2 and print "&read_config\n";
@@ -160,8 +164,7 @@ sub read_config {
 	#print yaml_out( \%cfg ); die "HEREEE";
 	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_var( \%cfg, @config_vars); 
-	$mixname eq 'mix' or die" bad mixname: $mixname";
-	#print "mixname: $mixname\n"; exit;
+	$wav_dir or $wav_dir = '.';
 	#print yaml_out( \%devices ); die "HEREEE";
 
 }
@@ -1095,7 +1098,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	local $debug = $debug3;
 	$debug2 and print "&apply_ops\n";
 	for my $n (@all_chains) {
-	$debug and print "chain: $n, offset: $ti[$n]->offset\n";
+	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "MUTE" and $n != 1; #MIX XXX
 		next if ! defined $ti[$n]->offset; # for MIX
  		next if ! $ti[$n]->offset ;

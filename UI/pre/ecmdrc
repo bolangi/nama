@@ -1,0 +1,60 @@
+# 
+# 
+# 		Configuration file for Audio::Ecasound::UI 
+#
+#
+# 		Notes: 
+#
+#		- The format is YAMLish, preprocessed to allow comments.
+#
+#		- Indents are each two spaces
+#		
+#		- A value _must_ be supplied for each field
+
+# audio device selection (see devices, below)
+
+mixer_out_device: consumer
+record_device: multi
+
+# where we will write our wav files
+
+wav_dir: 0 # defaults to current directory 
+
+# globals we want for our chain setups
+
+ecasound_globals: "-B auto"
+
+# audio formats (see abbreviations, below)
+
+mixer_out_format: cd-stereo
+mix_to_disk_format: cd-stereo
+raw_to_disk_format: cd-mono
+
+# audio devices 
+
+#  indents _are_ signficant in the lines below
+
+devices: 
+  jack:
+    ecasound_id: jack_alsa
+    input_format: 32-12
+    output_format: 32-10
+  multi:
+    ecasound_id: alsa,ice1712
+    input_format: 32-12
+    output_format: 32-10
+  consumer:
+    ecasound_id: alsa,default
+    input_format: cd-stereo
+    output_format: cd-stereo
+
+# you may use arbitrary abbreviations, even in the
+# abbreviations section
+
+abbreviations:  
+  24-mono: s24_le,1,frequency
+  32-10: s32_le,10,frequency
+  32-12: s32_le,12,frequency
+  cd-mono: s16_le,1,44100
+  cd-stereo: s16_le,2,44100,i
+  frequency: 44100

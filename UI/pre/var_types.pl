@@ -17,7 +17,9 @@
 						$mix_to_disk_format
 						$raw_to_disk_format
 						$mixer_out_format
-						$wav_dir 				);
+						$mixer_out_device
+						$wav_dir 	
+						$record_device			);
 						
 						
 
