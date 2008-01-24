@@ -107,6 +107,10 @@ ASSIGN
 		my $key = $_;
 		my $full_class_path = 
 			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
+
+			# use the supplied class unless the variable name
+			# contains a class-denoting :\:
+			
 		$sigil{$key} or croak 
 			"didn't find a match for $key in ", join " ", @vars, $/;
 		$debug and print "full_class_path: $full_class_path\n";;

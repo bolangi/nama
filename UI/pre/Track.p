@@ -10,13 +10,13 @@ package ::Track;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use Carp;
-use vars qw(%by_name @by_index);
+use vars qw($n %by_name @by_index %track_names);
 use ::Wav;
 our @ISA = '::Wav';
-{my $n = 0; 	# incrementing numeric key
+$n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
-my %track_names; 
+%track_names = (); 
 
 use ::Object qw( 	name
 						dir
@@ -92,8 +92,6 @@ sub new {
 	$object;
 	
 }
-
-} # for private variables
 
 sub full_path {
 	my $track = shift; 
@@ -223,11 +221,11 @@ package ::Group;
 #use Exporter qw(import);
 #our @EXPORT_OK =qw(group);
 use Carp;
-use vars qw(%by_name @by_index $active);
+use vars qw(%by_name @by_index $n);
 our @ISA;
 { 
 #$active = 'Tracker'; # REC-enabled
-my $n = 0; 
+$n = 0; 
 @by_index = ();
 %by_name = ();
 
