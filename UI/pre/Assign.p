@@ -106,7 +106,7 @@ ASSIGN
 		my $eval;
 		my $key = $_;
 		my $full_class_path = 
-			$sigil{$key} . $class . $key;
+			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
 		$sigil{$key} or croak 
 			"didn't find a match for $key in ", join " ", @vars, $/;
 		$debug and print "full_class_path: $full_class_path\n";;

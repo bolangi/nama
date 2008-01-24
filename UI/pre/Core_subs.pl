@@ -1217,17 +1217,35 @@ sub sort_ladspa_effects {
 sub read_in_effects_data {
 
 	$debug = 0;
+	$debug2 and print "&read_in_effects_data\n";
 	read_in_tkeca_effects_data();
 
 	# read in other effects data
 	
-	my @ladspa = grep {! /^\w*$/ } split "\n", eval_iam("ladspa-register");
+	my $lr = eval_iam("ladspa-register");
+
+	#print $lr; 
+	
+	my @ladspa =  split "\n", $lr;
+
+	
+	#$lr > io("lr");
+	#split /\n+/, 
+	
+	# grep {! /^\w*$/ } 
 	
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
 
 	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
+
+
+#	print eval_iam("ladspa-register");
+	
+	print "found ", scalar @lad, " LADSPA effects\n";
+	print "found ", scalar @preset, " presets\n";
+	print "found ", scalar @ctrl, " controllers\n";
 
 	# index boundaries we need to make effects list and menus
 
