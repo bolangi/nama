@@ -32,7 +32,13 @@ use ::Object qw( 	name
 						offset 
 
 						n 
-						group );
+						group 
+
+						delay
+						duration
+						
+						
+						);
 sub new {
 	# returns a reference to an object that is indexed by
 	# name and by an assigned index
@@ -47,11 +53,26 @@ sub new {
 		 if $track_names{$vals{name}}; # null name returns false
 	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
-	my $object = bless { 	name 	=> "Audio_$n", # default name
-					group	=> 'Tracker',  # default 
+	my $object = bless { 
+
+
+		## 		defaults ##
+
+					name 	=> "Audio_$n", 
+					group	=> 'Tracker', 
 					dir     => '.',
 					rw   	=> 'REC', 
 					n    	=> $n,
+					ops     => [],
+					active	=> undef,
+					ch_r 	=> undef,
+					ch_m 	=> undef,
+					vol  	=> undef,
+					pan 	=> undef,
+					offset 	=> 0,    # used for interface with Ecasound
+					delay	=> undef, # when we start the playback
+					duration => undef, # how long we play back
+
 					@_ 			}, $class;
 
 	#print "object class: $class, object type: ", ref $object, $/;
