@@ -359,21 +359,23 @@ sub add_volume_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'ea',
-				cop_id => $ti[$n]->vol, # often undefined
+				# cop_id => $ti[$n]->vol, # often undefined
 				});
 	
 	$ti[$n]->set(vol => $vol_id);  # save the id for next time
+	$vol_id;
 }
 sub add_pan_control {
 	my $n = shift;
 	
-	my $vol_id = cop_add({
+	my $pan_id = cop_add({
 				chain => $n, 
 				type => 'epp',
-				cop_id => $ti[$n]->pan, # often undefined
+				# cop_id => $ti[$n]->pan, # often undefined
 				});
 	
-	$ti[$n]->set(pan => $vol_id);  # save the id for next time
+	$ti[$n]->set(pan => $pan_id);  # save the id for next time
+	$pan_id;
 }
 ## version functions
 
@@ -951,6 +953,14 @@ sub cop_add {
 	my $i       = $effect_i{$code};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
 	$debug2 and print "&cop_add\n";
+print <<PP;
+n:          $n
+code:       $code
+parent_id:  $parent_id
+cop_id:     $id
+effect_i:   $i
+parameter:  $parameter
+PP
 
 	return $id if $id; # do nothing if cop_id has been issued
 
@@ -964,7 +974,8 @@ sub cop_add {
 					  display => $effects[$i]->{display},
 					  owns => [] };
 
- 	cop_init ( { %p, cop_id => $cop_id} );
+	$p{cop_id} = $cop_id;
+ 	cop_init ( \%p );
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -994,7 +1005,8 @@ sub cop_add {
 sub cop_init {
 	local $debug = $debug3;
 	$debug2 and print "&cop_init\n";
-	my %p = %{shift()};
+	my $p = shift;
+	my %p = %$p;
 	my $id = $p{cop_id};
 	my $parent_id = $p{parent_id};
 	my $vals_ref  = $p{vals_ref};

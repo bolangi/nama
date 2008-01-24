@@ -766,7 +766,7 @@ sub effect_button {
 }
 
 sub make_scale {
-	# my $debug = 1;
+	local $debug = 1;
 	$debug2 and print "&make_scale\n";
 	my $ref = shift;
 	my %p = %{$ref};
