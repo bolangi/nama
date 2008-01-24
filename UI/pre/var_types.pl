@@ -25,20 +25,9 @@
 
 @persistent_vars = qw(
 
-						$monitor_version
-						$last_version 
-						%track_names 	
-						%state_c 		
-						%state_t 		
 						%cops 			
 						$cop_id 		
 						%copp 			
-						@all_chains 	
-						$i 				
-						$t 				
-						%take 			
-						@takes 			
-						%chain 			
 						@marks			
 						$unit			
 						%oid_status		
@@ -48,12 +37,12 @@
 						$::Track::n
 						%::Track::by_name
 						@::Track::by_index
+						%::Track::track_names
 
-						
-						
-						
-						
-						
+						$::Group::n
+						%::Group::by_name
+						@::Group::by_index
+
 						);
 					 
 @effects_static_vars = qw(
