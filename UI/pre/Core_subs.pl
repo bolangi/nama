@@ -31,7 +31,7 @@ sub prepare {
 	new_engine();
 
 	### Option Processing ###
-	push @ARGV, qw( -e  );
+	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
 	getopts('mcegsd:', \%opts); 
 	#print join $/, (%opts);
@@ -569,9 +569,11 @@ sub output_format {
 sub initialize_rules {
 	$debug2 and print "&initialize_rules\n";
 	local $debug = 1;
+	my @rules =	::Rule::all_rules();
+	print "found ", scalar @rules, " rules\n"; 
 
-	map{ $oid_status{$_->{name}} = $_->{default} eq 'on' ? 1 : 0 }
-	::Rule::all_rules();
+	map{ $oid_status{$_->name} = $_->status;
+	} @rules;
 	$debug and print yaml_out(\%oid_status); 
 
 }

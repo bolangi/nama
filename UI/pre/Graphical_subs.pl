@@ -324,34 +324,31 @@ sub oid_gui {
 	$debug2 and print "&oid_gui\n";
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
-	for my $oid ( @oids ){
-		# print "gui oid name: $oid->{name} status: $oid_status{$oid->{name}}\n";
-		next if $oid->{name} =~ m/setup/;
-		push @oid_name, $oid->{name};
+	for my $rule ( ::Rule::all_rules ){
+		my $name = $rule->name;
+		my $status = $rule->status;
+		# print "gui oid name: $name status: $status\n";
+		next if $name =~ m/setup/;
+		push @oid_name, $name;
 		
 		my $oid_button = $oid_frame->Button( 
-			-text => ucfirst $oid->{name},
+			-text => ucfirst $name,
 			-background => 
-				$oid_status{$oid->{name}} ?  'AntiqueWhite' : $old_bg,
+				$status ?  'AntiqueWhite' : $old_bg,
 			-activebackground => 
-				$oid_status{$oid->{name}} ? 'AntiqueWhite' : $old_bg
+				$status ? 'AntiqueWhite' : $old_bg
 		);
-		push @widget_o, $oid_button;
-		$widget_o{$oid->{name}} = $oid_button;
-	}
-	for my $i (0..$#widget_o) {
-		$widget_o[$i]->configure(
+		$oid_button->configure(
 			-command => sub { 
-		print "but oid name: $oid_name[$i] status: $oid_status{$oid_name[$i]}\n";
-				$oid_status{$oid_name[$i]} = !  $oid_status{$oid_name[$i]};
-		print "but oid name: $oid_name[$i] status: $oid_status{$oid_name[$i]}\n";
-				$widget_o[$i]->configure( -background => 
-					$oid_status{$oid_name[$i]} ?  'AntiqueWhite' : $old_bg ,
+				$rule->set(status => ! $rule->status);
+				$oid_button->configure( -background => 
+					$rule->status ?  'AntiqueWhite' : $old_bg ,
 			-activebackground => 
-					$oid_status{$oid_name[$i]} ? 'AntiqueWhite' : $old_bg
+					$rule->status ? 'AntiqueWhite' : $old_bg
 					
 					);
 			});
+		push @widget_o, $oid_button;
 	}
 	my $toggle_jack = $oid_frame->Button;
 	
