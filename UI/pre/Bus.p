@@ -16,10 +16,6 @@ use ::Object qw(	name
 						
 						);
 
-{
-#my $dummy_track_g = ::Track->new(name => 'dummy');
-#my $dummy_track = ::Track->new(n => 999, group => 'dummy');
-
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -121,8 +117,23 @@ sub apply {
 		} @tracks;
 	} @{ $bus->rules }; 
 }
+=comment
 
-}
+package ::MasterBus; # subclass
+our @ISA = '::Bus';
+use ::Object qw(	name
+						groups
+						tracks 
+						rules
+						
+						);
+sub apply {
+	$tn{Tracker}->set( rw = 'MON');
+
+=cut
+
+
+
 
 # ------------  Rule  --------------------
 	

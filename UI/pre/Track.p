@@ -163,9 +163,9 @@ sub rec_status {
 		 and $group->rw eq 'REC'
 		) {
 
-		return 'REC' if $track->ch_r;
-		return 'MON' if $track->monitor_version;
-		return 'MUTE';
+		return 'REC'; # if $track->ch_r;
+		#return 'MON' if $track->monitor_version;
+		#return 'MUTE';
 	}
 	else { return 'MON' if $track->monitor_version;
 			return 'MUTE';	

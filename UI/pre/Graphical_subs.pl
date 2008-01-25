@@ -204,7 +204,7 @@ sub transport_gui {
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Arm',
-			-command => sub {&setup_transport; &connect_transport}
+			-command => sub {&setup_transport and &connect_transport}
 						 );
 =comment
 	$transport_setup->configure(
@@ -327,7 +327,7 @@ sub oid_gui {
 		my $name = $rule->name;
 		my $status = $rule->status;
 		# print "gui oid name: $name status: $status\n";
-		next if $name =~ m/setup/;
+		next if $name =~ m/setup|mix_link|mix_file/;
 		push @oid_name, $name;
 		
 		my $oid_button = $oid_frame->Button( 
@@ -469,8 +469,7 @@ sub global_version_buttons {
 				-value => $v,
 				-command => sub { 
 					$tracker->set(version => $v); 
-					setup_transport(); 
-					connect_transport();
+					setup_transport() and connect_transport();
 					refresh();
 					}
 
@@ -544,25 +543,24 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
+					#if ( $ti[$n]->name eq 'mix'){
+					#	$::Rule::by_name{mix_file}->set(status => 1);
+					#}
 					$ti[$n]->set(rw => "REC");
 					refresh_c($n);
-					}
-			],
+			}],
 			[ 'command' => "MON",
 				-command  => sub { 
 					$ti[$n]->set(rw => "MON");
 					refresh();
-					}
-			],
+			}],
 			[ 'command' => "MUTE", 
 				-command  => sub { 
 					$ti[$n]->set(rw => "MUTE");
 					refresh_c($n);
-					}
-			],
+			}],
 		);
 	map{$rw->AddItems($_)} @items; 
-	#$ti[$n]->set(rw => "MON") if $n == 1;          # MIX 
 
  
    ## XXX general code mixed with GUI code
