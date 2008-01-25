@@ -46,6 +46,8 @@ sub refresh_c { # tracks
 
 		return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
+		 $widget_c{$n}->{ch_r}->configure( -text => $ti[$n]->ch_r);
+		 $widget_c{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
 	
 	if ($rec_status eq "REC") {
 		$debug and print "REC! \n";
@@ -56,7 +58,8 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
 		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(-text => new_version);
+		$widget_c{$n}->{version}->configure(
+			-text => $ti[$n]->current);
 
 	}
 	elsif ( $rec_status eq "MON" ) {
@@ -68,7 +71,7 @@ sub refresh_c { # tracks
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
 		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
 		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+		$widget_c{$n}->{version}->configure(-text => $ti[$n]->current);
 
 		}
 	elsif ( $rec_status eq "MUTE" ) {
@@ -78,12 +81,13 @@ sub refresh_c { # tracks
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
 		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(-text => selected_version($n));
+		$widget_c{$n}->{version}->configure(
+			-text => $ti[$n]->current);
 		}  
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh {  
- 	$ui->refresh_t(); 
+ 	# $ui->refresh_t(); 
 	map{ $ui->refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{ # OUTPUT buttons

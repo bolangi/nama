@@ -441,6 +441,7 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	return if transport_running();
 	my $name = shift;
+	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
 		ch_r => $ch_r,
@@ -1178,10 +1179,10 @@ sub cop_init {
 		# CONTROLLER
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
-		#for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
+		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
 		# XXX support controller-type operators
 		
-		for my $p (0..$effects[$i]->{count} - 1) {
+		# for my $p (0..$effects[$i]->{count} - 1) {
 			my $default = $effects[$i]->{params}->[$p]->{default};
 			push @vals, $default;
 		}

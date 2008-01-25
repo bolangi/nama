@@ -502,14 +502,14 @@ sub track_gui {
 						# -variable => \$ti[$n]->active, # XXX
 						-value => $v,
 						-command => 
-		sub { $version->configure(-text=> selected_version($n) ) 
+		sub { $version->configure(-text=> $ti[$n]->current ) 
 			unless $ti[$n]->rec_status eq "REC"
 			}
 					);
 	}
 
 	$ch_r = $track_frame->Menubutton(
-					-textvariable => \$ti[$n]->ch_r, # XXX
+			#		-textvariable => \$ti[$n]->ch_r, # XXX
 					-tearoff => 0,
 				);
 			if ( $n != 1 ) { # for all but Mixdown track MIX
@@ -520,7 +520,8 @@ sub track_gui {
 						-value => $v,
 						-command => sub { 
 							$ti[$n]->set(rw => 'REC');
-							refresh() }
+							$ti[$n]->set(ch_r  => $v);
+							refresh_c($n) }
 				 		)
 				}
 			}
@@ -535,6 +536,7 @@ sub track_gui {
 						-value => $v,
 						-command => sub { 
 							$ti[$n]->set(rw  => "MON");
+							$ti[$n]->set(ch_m  => $v);
 							refresh_c($n) }
 				 		)
 				}
@@ -699,7 +701,7 @@ sub track_gui {
 	
 	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	refresh();
+	refresh_c($n);
 
 	
 }
