@@ -90,7 +90,6 @@ sub prepare {
 	$tracker = UI::Group->new( name => 'Tracker');
 	$mixer   = UI::Group->new( name => 'Mixer');
 
-	initialize_rules();
 	prepare_static_effects_data() unless $opts{e};
 
 	#print "keys effect_i: ", join " ", keys %effect_i;
@@ -369,14 +368,15 @@ my $multi = ::Rule->new(
 	pre_output		=>	sub{ my $track = shift; $track->pre_multi},
 	status			=>  1,
 );
-}
 
 =comment
 # Live: apply effects to REC channels route to multichannel sound card
 # as above. 
-
-
+#
 =cut
+
+}
+
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
 
@@ -428,7 +428,7 @@ sub initialize_project_data {
 
 	use ::Track; #  re init code
 
-	my $master = UI::Track->new( group => 'Master', name => 'Master' );
+	my $master = UI::MasterTrack->new( group => 'Master', name => 'Master' );
 
 	$ui->track_gui( $master->n );
 
@@ -722,17 +722,6 @@ sub output_format {
 }
 ## templates for generating chains
 
-sub initialize_rules {
-	$debug2 and print "&initialize_rules\n";
-	local $debug = 1;
-	my @rules =	::Rule::all_rules();
-	print "found ", scalar @rules, " rules\n"; 
-
-	map{ $oid_status{$_->name} = $_->status;
-	} @rules;
-	$debug and print yaml_out(\%oid_status); 
-
-}
 sub convert_to_jack {
 	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
 	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	

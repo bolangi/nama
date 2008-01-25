@@ -139,7 +139,7 @@ sub monitor_version {
 	elsif (	$group->version
 			and grep {$group->version  == $_ } @{$track->versions})
 		{ $version = $group->version }
-	elsif (	$track->last and ! $track->active and ! $group->version )
+	elsif (	$track->last) #  and ! $track->active and ! $group->version )
 		{ $version = $track->last }
 	else { carp "no version to monitor!\n" }
 	print "monitor version: $version\n";
@@ -150,9 +150,7 @@ sub rec_status {
 	my $track = shift;
 	print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
-	return 'REC' if $group->name ne 'Tracker' and $group->rw eq 'REC'; 
 
-					# Mixer group will ignore ch_r status
 		
 	return 'MUTE' if 
 		$group->rw eq 'MUTE'
@@ -166,6 +164,7 @@ sub rec_status {
 		) {
 
 		return 'REC' if $track->ch_r;
+		return 'MON' if $track->monitor_version;
 		return 'MUTE';
 	}
 	else { return 'MON' if $track->monitor_version;
@@ -212,8 +211,48 @@ sub route {
 
 sub all_tracks { @by_index[1..scalar @by_index - 1] }
 
+# subclass
 
-#use lib qw(.. .);
+package ::MasterTrack;
+our @ISA = '::Track';
+use ::Object qw( 	name
+						dir
+						active
+
+						ch_r 
+						ch_m 
+						rw
+
+						vol  
+						pan 
+						ops 
+						offset 
+
+						n 
+						group 
+
+						delay
+						duration
+						
+						
+						);
+
+sub rec_status{
+
+	my $track = shift;
+	return 'MUTE' if $track->rw eq 'MUTE';
+	return 'MON';
+
+}
+
+sub ch_r {
+	my $track = shift;
+	return '';
+}
+
+	
+
+
 
 # ---------- Group -----------
 

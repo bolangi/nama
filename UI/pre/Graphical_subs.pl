@@ -494,10 +494,12 @@ sub track_gui {
 	$version = $track_frame->Menubutton( 
 					-text => $stub,
 					-tearoff => 0);
-	for my $v (undef, @{$ti[$n]->versions}) {
+	my @versions = '';
+	push @versions, @{$ti[$n]->versions} if @{$ti[$n]->versions};
+	for my $v (@versions) {
 					$version->radiobutton(
-						-label => ($v ? $v: ''),
-						-value => $v,
+						-label => $v,
+						# -value => $v,
 						-command => 
 		sub { $version->configure(-text=> $ti[$n]->current ) 
 			unless $ti[$n]->rec_status eq "REC"
@@ -543,7 +545,7 @@ sub track_gui {
 				-foreground => 'red',
 				-command  => sub { 
 					$ti[$n]->set(rw => "REC");
-					refresh();
+					refresh_c($n);
 					}
 			],
 			[ 'command' => "MON",
@@ -555,12 +557,12 @@ sub track_gui {
 			[ 'command' => "MUTE", 
 				-command  => sub { 
 					$ti[$n]->set(rw => "MUTE");
-					refresh();
+					refresh_c($n);
 					}
 			],
 		);
-	#map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	#$ti[$n]->set(rw => "MON") if $n == 1;          # MIX XXX
+	map{$rw->AddItems($_)} @items; 
+	#$ti[$n]->set(rw => "MON") if $n == 1;          # MIX 
 
  
    ## XXX general code mixed with GUI code

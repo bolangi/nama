@@ -42,16 +42,14 @@ sub refresh_c { # tracks
 	$debug and print "track: $n\n"; # rec_status: $rec_status\n";
 		my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
-		$debug and print "arrived here\n";
 
-		return unless $widget_c{$n}; # obsolete ??
+	#	return unless $widget_c{$n}; # obsolete ??
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 		 $widget_c{$n}->{ch_r}->configure( -text => $ti[$n]->ch_r);
 		 $widget_c{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
-		 $widget_c{$n}->{rw}->configure( -text => $ti[$n]->rw);
+		$widget_c{$n}->{version}->configure( -text => $ti[$n]->current);
 	
 	if ($rec_status eq "REC") {
-		$debug and print "REC! \n";
 
 		$widget_c{$n}->{name}->configure(-background => 'lightpink');
 		$widget_c{$n}->{name}->configure(-foreground => 'Black');
@@ -59,12 +57,9 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{ch_r}->configure(-foreground => 'Black');
 		$widget_c{$n}->{ch_m}->configure( -background => $old_bg);
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-		$widget_c{$n}->{version}->configure(
-			-text => $ti[$n]->current);
 
 	}
 	elsif ( $rec_status eq "MON" ) {
-		$debug and print "MON! \n";
 
 		 $widget_c{$n}->{name}->configure(-background => 'AntiqueWhite');
 		 $widget_c{$n}->{name}->configure(-foreground => 'Black');
@@ -72,18 +67,14 @@ sub refresh_c { # tracks
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'DarkGray');
 		 $widget_c{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
 		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
-		$widget_c{$n}->{version}->configure(-text => $ti[$n]->current);
 
 		}
 	elsif ( $rec_status eq "MUTE" ) {
-		$debug and print "MUTE! \n";
 		 $widget_c{$n}->{name}->configure(-background => $old_bg);
 		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');
 		 $widget_c{$n}->{ch_m}->configure( -background => $old_bg); 
 		$widget_c{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$widget_c{$n}->{version}->configure(
-			-text => $ti[$n]->current);
 		}  
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
