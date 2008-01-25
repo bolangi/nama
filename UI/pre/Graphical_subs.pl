@@ -543,19 +543,25 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					#if ( $ti[$n]->name eq 'mix'){
-					#	$::Rule::by_name{mix_file}->set(status => 1);
-					#}
+					if ( $ti[$n]->name eq 'mix'){
+						$::Rule::by_name{mix_file}->set(status => 1);
+					}
 					$ti[$n]->set(rw => "REC");
 					refresh_c($n);
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
+					if ( $ti[$n]->name eq 'mix'){
+						$::Rule::by_name{mix_file}->set(status => 0);
+					}
 					$ti[$n]->set(rw => "MON");
 					refresh();
 			}],
 			[ 'command' => "MUTE", 
 				-command  => sub { 
+					if ( $ti[$n]->name eq 'mix'){
+						$::Rule::by_name{mix_file}->set(status => 0);
+					}
 					$ti[$n]->set(rw => "MUTE");
 					refresh_c($n);
 			}],
