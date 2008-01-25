@@ -48,6 +48,7 @@ sub refresh_c { # tracks
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 		 $widget_c{$n}->{ch_r}->configure( -text => $ti[$n]->ch_r);
 		 $widget_c{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
+		 $widget_c{$n}->{rw}->configure( -text => $ti[$n]->rw);
 	
 	if ($rec_status eq "REC") {
 		$debug and print "REC! \n";
@@ -88,6 +89,7 @@ sub refresh_c { # tracks
 }
 sub refresh {  
  	# $ui->refresh_t(); 
+	collect_chains;
 	map{ $ui->refresh_c($_) } @all_chains ;
 }
 sub refresh_oids{ # OUTPUT buttons

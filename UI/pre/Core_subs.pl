@@ -219,7 +219,7 @@ XXX retrieve statue
 
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
-	add_mix_track(), dig_ruins() unless scalar @all_chains;
+	dig_ruins() unless scalar @all_chains;
 	$ui->global_version_buttons();
 
 #The mix track will always be track index 1 i.e. $ti[$n]
@@ -430,8 +430,11 @@ sub initialize_project_data {
 
 	my $master = UI::Track->new( group => 'Master', name => 'Master' );
 
+	$ui->track_gui( $master->n );
+
 	my $mix = UI::Track->new( group => 'Mixer', name => 'mix'); 
 
+	$ui->track_gui( $mix->n );
 }
 ## track and wav file handling
 

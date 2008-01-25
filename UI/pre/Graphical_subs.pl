@@ -22,7 +22,6 @@ sub destroy_widgets {
 	map{ $_->destroy  } @children[1..$#children];
 	@children = $track_frame->children;
 	map{ $_->destroy  } @children[11..$#children]; # fragile
-	$state_t{active} = 1;  # XXX
 }
 
 sub init_gui {
@@ -467,7 +466,6 @@ sub global_version_buttons {
 			$widget_t[1]->radiobutton(
 				###  HARDCODED, second take widget
 				-label => ($v ? $v : ''),
-				# -variable => \$monitor_version, # XXX
 				-value => $v,
 				-command => sub { 
 					$tracker->set(version => $v); 
@@ -499,7 +497,6 @@ sub track_gui {
 	for my $v (undef, @{$ti[$n]->versions}) {
 					$version->radiobutton(
 						-label => ($v ? $v: ''),
-						# -variable => \$ti[$n]->active, # XXX
 						-value => $v,
 						-command => 
 		sub { $version->configure(-text=> $ti[$n]->current ) 
@@ -509,14 +506,12 @@ sub track_gui {
 	}
 
 	$ch_r = $track_frame->Menubutton(
-			#		-textvariable => \$ti[$n]->ch_r, # XXX
 					-tearoff => 0,
 				);
-			if ( $n != 1 ) { # for all but Mixdown track MIX
+	#		if ( $n != 1 ) { # for all but Mixdown track MIX
 				for my $v (1..$tk_input_channels) {
 					$ch_r->radiobutton(
 						-label => $v,
-						# -variable => \$ti[$n]->ch_r, # XXX
 						-value => $v,
 						-command => sub { 
 							$ti[$n]->set(rw => 'REC');
@@ -524,15 +519,13 @@ sub track_gui {
 							refresh_c($n) }
 				 		)
 				}
-			}
+	#		}
 	$ch_m = $track_frame->Menubutton(
-			#		-textvariable => \$ti[$n]->ch_m, # XXX
 					-tearoff => 0,
 				);
 				for my $v (1..10) {
 					$ch_m->radiobutton(
 						-label => $v,
-			#			-variable => \$ti[$n]->ch_m, # XXX
 						-value => $v,
 						-command => sub { 
 							$ti[$n]->set(rw  => "MON");
@@ -566,8 +559,8 @@ sub track_gui {
 					}
 			],
 		);
-	map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
-	$ti[$n]->set(rw => "MON") if $n == 1;          # MIX XXX
+	#map{$rw->AddItems($_) unless $n == 1} @items; # MIX CONDITIONAL
+	#$ti[$n]->set(rw => "MON") if $n == 1;          # MIX XXX
 
  
    ## XXX general code mixed with GUI code
@@ -713,7 +706,6 @@ sub update_version_button {
 	my $w = $widget_c{$n}->{version};
 					$w->radiobutton(
 						-label => $v,
-						# -variable => \$ti[$n]->active, # XXX
 						-value => $v,
 						-command => 
 		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
@@ -723,7 +715,6 @@ sub update_version_button {
 sub update_master_version_button {
 				$widget_t[0]->radiobutton(
 						-label => $last_version,
-					#	-variable => \$monitor_version, # #	XXX
 						-value => $last_version,
 						-command => sub { mon_vert(eval $last_version) }
 					);
