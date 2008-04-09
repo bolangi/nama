@@ -250,6 +250,44 @@ sub ch_r {
 	return '';
 }
 
+# subclass
+
+package ::MixTrack;
+our @ISA = '::Track';
+use ::Object qw( 	name
+						dir
+						active
+
+						ch_r 
+						ch_m 
+						rw
+
+						vol  
+						pan 
+						ops 
+						offset 
+
+						n 
+						group 
+
+						delay
+						duration
+						
+						
+						);
+
+sub rec_status{
+
+	my $track = shift;
+	$track->rw;
+
+}
+
+sub ch_r {
+	my $track = shift;
+	return '';
+}
+
 	
 
 

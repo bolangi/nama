@@ -297,7 +297,7 @@ sub initialize_rules {
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loopa,
 		output_type		=>  'cooked',
-		condition 		=>  sub{ defined $inputs{mixed} },
+		# condition 		=>  sub{ defined $inputs{mixed} },
 		status			=>  1,
 		
 	);
@@ -432,7 +432,7 @@ sub initialize_project_data {
 
 	$ui->track_gui( $master->n );
 
-	my $mix = UI::Track->new( 
+	my $mix = UI::MixTrack->new( 
 		group => 'Mixer', 
 		name => 'mix', 
 		rw => 'MON'); 
