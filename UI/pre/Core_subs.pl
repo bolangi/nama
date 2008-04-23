@@ -16,7 +16,7 @@ sub discard_object {
 sub prepare {  
 
 	$debug2 and print "&prepare\n";
-	my $debug = 1;
+	local $debug = 1;
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	new_engine();
@@ -121,31 +121,32 @@ sub eval_iam {
 
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { ".ecmdrc" }
-sub ecmd_dir { join_path(
-						wav_dir and (wav_dir ne '.') 
-							? (wav_dir, ".ecmd") 
-							:  '.' ) }
-sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
+sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
+sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name)
 }
-sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
+sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name)
 }
 
 sub global_config{
+my $c = 0;
 	map{ 
-			my $config = join_path($_, config_file());
-			print "config: $config\n";
-			if( -f $config ){ 
-				my $yml = io($config)->all ;
-				return $yml;
+print $/,++$c,$/;
+			if (-d $_) {
+				my $config = join_path($_, config_file());
+				print "config: $config\n";
+				if( -f $config ){ 
+					my $yml = io($config)->all ;
+					return $yml;
+				}
 			}
-		} ( project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir or '.') ;
+		} ( project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir, '.') ;
 }
 sub config { 
 	my $global = global_config();
 	my $yml = length $global > 5 ? $global : $default;
 	strip_comments( $yml );
 	strip_blank_lines( $yml );
-	$yml = join "\n", "---", $yml, "...";
+	$yml !~ /^---/ and $yml = join "\n", "---", $yml, "...";
 	#print "config file: $yml";   exit;
 	$yml
 }
@@ -519,6 +520,7 @@ sub add_track {
 	my $name = shift;
 	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
+		dir => &this_wav_dir,
 		name => $name,
 		ch_r => $ch_r,
 		ch_m => $ch_m,

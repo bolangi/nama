@@ -434,6 +434,7 @@ sub group_gui {
 
 }
 sub global_version_buttons {
+	local $debug = 1;
 	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
 	if (defined $widget_t[1]) {
 		my @children = $widget_t[1]->children;
@@ -444,7 +445,11 @@ sub global_version_buttons {
 		
 	@global_version_buttons = ();
 	$debug and print "making global version buttons range:", join ' ',1..$ti[3]->very_last, " \n";
- 	for my $v (undef, 1..$ti[3]->very_last) { # assumes one user track XX
+ 	for my $v (undef, 1..$ti[3]->very_last) { 
+
+	# the highest version number of all tracks in the
+	# $tracker group
+	
 		no warnings;
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
 			grep{ $_ > 2 } @all_chains; # excludes master (1), mix (2)
@@ -503,8 +508,10 @@ sub track_gui {
 						-label => $v,
 						# -value => $v,
 						-command => 
-		sub { $version->configure(-text=> $ti[$n]->current_version ) 
-			unless $ti[$n]->rec_status eq "REC"
+		sub { 
+			$ti[$n]->set( active => $v );
+			return if $ti[$n]->rec_status eq "REC";
+			$version->configure( -text=> $ti[$n]->current_version ) 
 			}
 					);
 	}
