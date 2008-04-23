@@ -77,18 +77,18 @@ sub new {
 
 	#print "object class: $class, object type: ", ref $object, $/;
 	$track_names{$vals{name}}++;
-	if ( $add_index ) {
-		$by_index[$n] = $object;
-		$by_name{ $object->name } = $object;
-		
-	}
-	my $group = $::Group::by_name{ $object->group }; 
+	$by_index[$n] = $object;
+	$by_name{ $object->name } = $object;
+	
+	::add_volume_control($n);
+	::add_pan_control($n);
+
+	#my $group = $::Group::by_name{ $object->group }; 
 
 	# create group if necessary
-	
-	defined $group or $group = ::Group->new( name => $object->group );
-	my @existing = $group->tracks ;
-	$group->set( tracks => [ @existing, $object->name ]);
+	#defined $group or $group = ::Group->new( name => $object->group );
+	#my @existing = $group->tracks ;
+	#$group->set( tracks => [ @existing, $object->name ]);
 	$object;
 	
 }
@@ -96,11 +96,9 @@ sub new {
 sub full_path {
 	my $track = shift; 
 	join_path(
-		$track->dir ? $track->dir : "." , 
-			$track->name . "_" .  $track->current . '.wav'
+		$track->dir ? $track->dir : "." , $track->current 
 	)	
 }
-
 sub very_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
@@ -119,14 +117,23 @@ sub very_last {
 
 sub current {	
 	my $track = shift;
-	# my %vals = @_; # 
 	my $last = $track->very_last;
 	#print "last found is $last\n"; 
-	if 		($track->rec_status eq 'REC' ){ return ++$last; }
-	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version }
-	
-	print "track ", $track->name, ": no current version found\n" ;
-	return undef;
+	if 	($track->rec_status eq 'REC'){ 
+		return $track->name . '_' . ++$last . '.wav'}
+	elsif ( $track->rec_status eq 'MON'){ 
+		return $track->targets->{ $track->monitor_version } 
+	} else {
+		print "track ", $track->name, ": no current version found\n" ;
+		return undef;
+	}
+}
+sub current_version {	
+	my $track = shift;
+	my $last = $track->very_last;
+	if 	($track->rec_status eq 'REC'){ return ++$last}
+	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version } 
+	else { return undef }
 }
 
 sub monitor_version {
@@ -209,11 +216,11 @@ sub route {
 
 # The following are not object methods. 
 
-sub all_tracks { @by_index[1..scalar @by_index - 1] }
+sub all { @by_index[1..scalar @by_index - 1] }
 
 # subclass
 
-package ::MasterTrack;
+package ::SimpleTrack;
 our @ISA = '::Track';
 use ::Object qw( 	name
 						dir
@@ -240,8 +247,7 @@ use ::Object qw( 	name
 sub rec_status{
 
 	my $track = shift;
-	return 'MUTE' if $track->rw eq 'MUTE';
-	return 'MON';
+	$track->rw;
 
 }
 
@@ -250,6 +256,7 @@ sub ch_r {
 	return '';
 }
 
+=comment
 # subclass
 
 package ::MixTrack;
@@ -288,6 +295,8 @@ sub ch_r {
 	return '';
 }
 
+
+=cut
 	
 
 
@@ -300,8 +309,6 @@ package ::Group;
 use Carp;
 use vars qw(%by_name @by_index $n);
 our @ISA;
-{ 
-#$active = 'Tracker'; # REC-enabled
 $n = 0; 
 @by_index = ();
 %by_name = ();
@@ -341,7 +348,6 @@ sub new {
 	$by_name{ $object->name } = $object;
 	$object;
 }
-}
 
 sub tracks { # returns list of tracks in group 
 
@@ -349,12 +355,17 @@ sub tracks { # returns list of tracks in group
 	# a array reference.
 
 	my $group = shift;
-	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all_tracks;
+	print "ttype: ", ref $group, $/;
+	my @all = ::Track::all;
+	map {print "type: ", ref $_, $/} ::Track::all; 
+	print "all, length: ", scalar @all, $/;
+	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
 
 
-sub all_groups { @by_index[1..@by_index - 1] }
+sub all { @by_index[1..scalar @by_index - 1] }
 
+=comment
 sub group {
 	my ($id, $method, @vals) = @_;
 	my $group =  $::Group::by_name{$id};
@@ -363,6 +374,7 @@ sub group {
 	#print $command, $/;
 	eval $command;
 }
+=cut
  
 # ---------- Op -----------
 

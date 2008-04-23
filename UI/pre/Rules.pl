@@ -2,7 +2,7 @@ my $mixer_out = ::Rule->new( #  this is the master fader
 	name			=> 'mixer_out', 
 	chain_id		=> 'Mixer_out',
 
-	target			=> 'all',
+	target			=> 'none',
 
 # condition =>	sub{ defined $inputs{mixed}  
 # 	or $debug and print("no customers for mixed, skipping\n"), 0},
@@ -21,7 +21,7 @@ my $mix_down = ::Rule->new(
 
 	name			=> 'mix_file', 
 	chain_id		=> 'Mixdown',
-	target			=> 'all', 
+	target			=> 'none', 
 	
 	# sub{ defined $outputs{mixed} or $debug 
 	#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
@@ -34,14 +34,14 @@ my $mix_down = ::Rule->new(
 		my $track = shift; 
 		join " ", $track->full_path, $mix_to_disk_format},
 
-	status			=> 1,
+	status			=> 0,
 );
 
 my $mix_link = ::Rule->new(
 
 	name			=>  'mix_link',
 	chain_id		=>  'Mix_link',
-	target			=>  'all',
+	target			=>  'none',
 	input_type		=>  'mixed',
 	input_object	=>  $loopa,
 	output_type		=>  'mixed',

@@ -3,7 +3,10 @@
 use Carp;
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { ".ecmdrc" }
-sub ecmd_dir { join_path(wav_dir, ".ecmd") }
+sub ecmd_dir { join_path(
+						wav_dir and (wav_dir ne '.') 
+							? (wav_dir, ".ecmd") 
+							:  wav_dir ) }
 sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
 								or wav_dir
 }
@@ -19,7 +22,7 @@ sub config_vars {
 }
 
 sub discard_object {
-	shift @_ if (ref $_[0]) =~ /UI/; # discard_object
+	shift @_ if (ref $_[0]) =~ /UI/; # discard_object # XXX
 	@_;
 }
 sub prepare {  
@@ -66,29 +69,26 @@ sub prepare {
 
 	# init our buses
 	
-	$tracker_bus  = UI::Bus->new(
+	$tracker_bus  = ::Bus->new(
 		name => 'Tracker_Bus',
-		groups => ['Tracker'],
+		groups => [qw(Tracker)],
 		tracks => [],
 		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
 	);
 
 	print join (" ", map{ $_->name} UI::Rule::all_rules() ), $/;
 
-	$master_bus  = UI::Bus->new(
+	$master_bus  = ::Bus->new(
 		name => 'Master_Bus',
-		rules  => [ qw(mix_link mixer_out mix_file ) ],
-		groups => ['Mixer'],
+		rules  => [ qw(mixer_out mix_link) ],
+		groups => ['Master'],
 	);
-=comment
-	$mixer_bus  = UI::Bus->new(
-		name => 'Master_Bus',
-		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
+	$mixer_bus  = ::Bus->new(
+		name => 'Mixer_Bus',
+		groups => [qw(Mixer) ],
+		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
 	);
-=cut
 
-	$tracker = UI::Group->new( name => 'Tracker');
-	$mixer   = UI::Group->new( name => 'Mixer');
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -211,15 +211,12 @@ sub load_project {
 	remove_small_wavs(); 
 	print "reached here!!!\n";
 
-=comment 
-
-XXX retrieve statue
-
 
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
+	$ui->global_version_buttons(); # should be called after recording 
+=comment 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
 	dig_ruins() unless scalar @all_chains;
-	$ui->global_version_buttons();
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
@@ -236,11 +233,11 @@ sub initialize_rules {
 		%rule_names = (); 
 	package ::;
 
-	my $mixer_out = ::Rule->new( #  this is the master fader
+	my $mixer_out = ::Rule->new( #  this is the master output
 		name			=> 'mixer_out', 
-		chain_id		=> 1, # HARDCODED! 
+		chain_id		=> 'MixerOut', 
 
-		target			=> 'all',
+		target			=> 'MON',
 
 	# condition =>	sub{ defined $inputs{mixed}  
 	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
@@ -258,8 +255,8 @@ sub initialize_rules {
 	my $mix_down = ::Rule->new(
 
 		name			=> 'mix_file', 
-		chain_id		=> 'Mixdown',
-		target			=> 'all', 
+		chain_id		=> 'MixDown',
+		target			=> 'REC', 
 		
 		# sub{ defined $outputs{mixed} or $debug 
 		#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
@@ -280,6 +277,7 @@ sub initialize_rules {
 		name			=>  'mix_link',
 		chain_id		=>  sub{ my $track = shift; $track->n },
 		target			=>  'all',
+		condition =>	sub{ defined $inputs{mixed}->{$loopb} },
 		input_type		=>  'mixed',
 		input_object	=>  $loopa,
 		output_type		=>  'mixed',
@@ -293,6 +291,20 @@ sub initialize_rules {
 		name			=>  'mix_setup',
 		chain_id		=>  sub { my $track = shift; "J". $track->n },
 		target			=>  'all',
+		input_type		=>  'cooked',
+		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
+		output_object	=>  $loopa,
+		output_type		=>  'cooked',
+		condition 		=>  sub{ defined $inputs{mixed}->{$loopb} },
+		status			=>  1,
+		
+	);
+
+	my $mix_setup_mon = ::Rule->new(
+
+		name			=>  'mix_setup_mon',
+		chain_id		=>  sub { my $track = shift; "K". $track->n },
+		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loopa,
@@ -314,6 +326,10 @@ sub initialize_rules {
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
+		condition 		=> sub { my $track = shift; 
+								return "satisfied" if defined
+								$inputs{cooked}->{"loop," . $track->n}; 
+								0 } ,
 		status			=>  1,
 	);
 		
@@ -381,6 +397,7 @@ sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
 
 	return if transport_running();
+	$ui->destroy_widgets();
 	$ui->project_label_configure(
 		-text => uc $project_name, 
 		-background => 'lightyellow',
@@ -421,23 +438,75 @@ sub initialize_project_data {
 	%old_vol = ();
 
 	# $is_armed = 0;
+	
+	$::Group::n = 0; 
+	@::Group::by_index = ();
+	%::Group::by_name = ();
 
-	$ui->destroy_widgets();
+	$::Track::n = 0; 	# incrementing numeric key
+	@::Track::by_index = ();	# return ref to Track by numeric key
+	%::Track::by_name = ();	# return ref to Track by name
+	%::Track::track_names = (); 
 
-	$ui->take_gui;
+	$master = ::Group->new(name => 'Master');
+	$mixer =  ::Group->new(name => 'Mixer');
+	$tracker = ::Group->new(name => 'Tracker');
 
-	use ::Track; #  re init code
+	$ui->group_gui("Tracker");
 
-	my $master = UI::MasterTrack->new( group => 'Master', name => 'Master' );
+	print yaml_out( \%::Track::track_names );
 
-	$ui->track_gui( $master->n );
+	my $master = ::SimpleTrack->new( 
+		group => 'Master', 
+		name => 'Master',
+		rw => 'MON',);
 
-	my $mix = UI::MixTrack->new( 
+	my @rw_items = (
+			[ 'command' => "MON",
+				-command  => sub { 
+						$ti[$master->n]->set(rw => "MON");
+						refresh_c($master->n);
+			}],
+			[ 'command' => "MUTE", 
+				-command  => sub { 
+						$ti[$master->n]->set(rw => "MUTE");
+						refresh_c($master->n);
+			}],
+		);
+	$ui->track_gui( $master->n, @rw_items );
+
+	my $mix = ::Track->new( 
 		group => 'Mixer', 
 		name => 'mix', 
 		rw => 'MON'); 
 
-	$ui->track_gui( $mix->n );
+	map { print "type::: ", ref $_, $/} ::Track::all; 
+=comment
+	@rw_items = (
+			[ 'command' => "REC",
+				-foreground => 'red',
+				-command  => sub { 
+						$::Rule::by_name{mix_file}->set(status => 1);
+						$ti[$mix->n]->set(rw => "REC");
+						refresh_c($mix->n);
+			}],
+			[ 'command' => "MON",
+				-command  => sub { 
+						$::Rule::by_name{mix_file}->set(status => 0);
+						$ti[$mix->n]->set(rw => "MON");
+						refresh_c($mix->n);
+			}],
+			[ 'command' => "MUTE", 
+				-command  => sub { 
+						$::Rule::by_name{mix_file}->set(status => 0);
+						$ti[$mix->n]->set(rw => "MUTE");
+						refresh_c($mix->n);
+			}],
+		);
+=cut
+@rw_items = ();
+
+	$ui->track_gui( $mix->n, @rw_items );
 }
 ## track and wav file handling
 
@@ -516,7 +585,7 @@ sub add_volume_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'ea',
-				# cop_id => $ti[$n]->vol, # often undefined
+				cop_id => $ti[$n]->vol, # often undefined
 				});
 	
 	$ti[$n]->set(vol => $vol_id);  # save the id for next time
@@ -528,7 +597,7 @@ sub add_pan_control {
 	my $pan_id = cop_add({
 				chain => $n, 
 				type => 'epp',
-				# cop_id => $ti[$n]->pan, # often undefined
+				cop_id => $ti[$n]->pan, # often undefined
 				});
 	
 	$ti[$n]->set(pan => $pan_id);  # save the id for next time
@@ -753,12 +822,15 @@ sub setup_transport { # create chain setup
 	%inputs = %outputs 
 			= %post_input = %pre_output 
 			= @input_chains = @output_chains = ();
-	my @tracks = ::Track::all_tracks;
+	my @tracks = ::Track::all;
 	shift @tracks; # drop Master
-	my $have_signal = grep{ $_ -> rec_status ne 'MUTE'} @tracks;
+	my $have_signal = join " ", map{$_->name} 
+								grep{ $_ -> rec_status ne 'MUTE'} 
+								@tracks;
 	print "have signal: $have_signal\n";
 	if ($have_signal) {
-		$master_bus->apply;
+		$mixer_bus->apply; # mix_file
+		$master_bus->apply; # mix_out, mix_link
 		$tracker_bus->apply;
 		#map{ eliminate_loops($_) } @all_chains;
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
@@ -1055,7 +1127,7 @@ sub remove_effect {
 
 	
 	# remove my own cop_id from the stack
-	remove_op($id), $ui->remove_effect_gui($id) unless $cops{$id}->{belongs_to};
+	$ui->remove_effect_gui($id), remove_op($id)  unless $cops{$id}->{belongs_to};
 
 }
 sub remove_effect_gui { 
@@ -1246,7 +1318,8 @@ sub find_op_offsets {
 
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
-		my @op_offsets = split "\n",eval_iam("cs");
+		#my @op_offsets = split "\n",eval_iam("cs");
+		my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
 		shift @op_offsets; # remove comment line
 		$debug and print join "\n\n",@op_offsets; 
 		for my $output (@op_offsets){
@@ -1337,7 +1410,7 @@ sub prepare_static_effects_data{
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
 			-class => '::',
-			-storable => 1 ) unless $wav_dir eq '.';
+			-storable => 1 ); #  unless $wav_dir eq '.';
 	}
 
 }
@@ -1731,12 +1804,19 @@ sub save_state {
 		$debug and 1;
 	print "filename: $file\n";
 
+#map{ print "type: ", ref $_, $/; } ::Track::all; exit;
+my %class;
+map{ $class{$_->n} = ref $_ } ::Track::all;
+map{ bless $_, 'HASH' } ::Track::all;
+
 	serialize(
 		-file => $file, 
 		-vars => \@persistent_vars,
 		-class => '::',
-		-storable => 1,
+	#	-storable => 1,
 		);
+
+map{ bless $_, $class{$_->{n}} } ::Track::all;
 
 # store alsa settings
 
@@ -1768,7 +1848,47 @@ sub retrieve_state {
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 	assign_var( $file, @persistent_vars );
-	#print status_vars; exit;
+	#my @group_by_index = @::Group::by_index;
+	#@::Group::by_index = ();
+	#shift @group_by_index; # remove first (null) entry
+	#map{ ::Group->new( %{ $_ } ) } @group_by_index;
+	my @track_by_index = @::Track::by_index;
+	@::Track::by_index = ();
+	@track_by_index = @track_by_index[3..$#track_by_index]; 
+	my $in;
+	map{ print "index: ", $in++, " type: ", ref $_,
+	"content: ", yaml_out( $_), $/;} @track_by_index; 
+	# remove first (null) entry, master and mix tracks
+	my $did_apply = 0;
+	map{ 
+		my %h = %$_;
+		print "old n: $h{n}\n";
+		print "h: ", join " ", %h, $/;
+		delete $h{n};
+		my @hh = %h; print "size: ", scalar @hh, $/;
+		my $track = ::Track->new( %h ) ;
+		my $n = $track->n;
+		print "new n: $n\n";
+		$debug and print "restoring track: $n\n";
+		$ui->track_gui($n); # applies vol and pan operators
+		for my $id (@{$ti[$n]->ops}){
+			$did_apply++ 
+				unless $id eq $ti[$n]->vol
+					or $id eq $ti[$n]->pan;
+			
+			add_effect({
+						chain => $cops{$id}->{chain},
+						type => $cops{$id}->{type},
+						cop_id => $id,
+						parent_id => $cops{$id}->{belongs_to},
+						});
+
+		# TODO if parent has a parent, i am a parameter controller controlling
+		# a parameter controller, and therefore need the -kx switch
+		}
+	} @track_by_index;
+	$did_apply and $ui->manifest(); # $ew->deiconify();
+
 
 =comment
 	$debug and print ref $ref->{marks};
@@ -1797,38 +1917,21 @@ sub retrieve_state {
 	)} 
 	grep{ $marks[$_] }1..$#time_marks;
 =cut
+=comment
 
-	# restore take and track guis
-	
+
+
 	for my $t (@takes) { 
 		next if $t == 1; 
 		$ui->take_gui;
 	}; #
-	my $did_apply = 0;
-	$last_version = 0; 
-	for my $n (@all_chains) { 
-		$debug and print "restoring track: $n\n";
-		restore_track($n) ;
-		for my $id (@{$ti[$n]->ops}){
-			$did_apply++ 
-				unless $id eq $ti[$n]->vol
-					or $id eq $ti[$n]->pan;
+=cut
 
-			
-			add_effect({
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
-						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
-						});
+} 
 
-		# TODO if parent has a parent, i am a parameter controller controlling
-		# a parameter controller, and therefore need the -kx switch
-		}
-	}
-	$did_apply and $ui->manifest(); # $ew->deiconify();
 
-}
+
+
 
 
 sub save_effects {

@@ -61,7 +61,7 @@ $debug3 = 0;
 use Carp;
 
 sub assign {
-	local $debug = $debug3;
+	local $debug = 1; # $debug3;
 	
 	$debug2 and print "&assign\n";
 	
@@ -94,7 +94,7 @@ ASSIGN
 
 	my %sigil;
 	map{ 
-		my ($s, $identifier) = /(.)(\w+)/;
+		my ($s, $identifier) = /(.)([\w:]+)/;
 		$sigil{$identifier} = $s;
 	} @vars;
 	#print yaml_out(\%sigil); exit;
@@ -105,16 +105,20 @@ ASSIGN
 	map{  
 		my $eval;
 		my $key = $_;
+		chomp $key;
 		my $full_class_path = 
 			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
 
 			# use the supplied class unless the variable name
 			# contains a class-denoting :\:
 			
+		$debug and print <<DEBUG;
+key:             $key
+full_class_path: $full_class_path
+sigil{key}:      $sigil{$key}
+DEBUG
 		$sigil{$key} or croak 
 			"didn't find a match for $key in ", join " ", @vars, $/;
-		$debug and print "full_class_path: $full_class_path\n";;
-		#$debug and print "full: $full\n";;
 		my ($sigil, $identifier) = ($sigil{$key}, $key);
 		$eval .= $full_class_path;
 		$eval .= q( = );
@@ -217,14 +221,14 @@ sub serialize {
  	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
-	map{ my ($sigil, $identifier) = /(.)(\w+)/; 
-		 my $eval_string =  q($state{)
+	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 
+		 my $eval_string =  q($state{')
 							. $identifier
-							. q(})
+							. q('})
 							. q( = )
 							. ($sigil ne q($) ? q(\\) : q() ) 
 							. $sigil
-							. $class
+							. ($identifier =~ /:/ ? '' : $class)
 							. $identifier;
 	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or $debug  and print 

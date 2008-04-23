@@ -18,9 +18,9 @@ sub manifest { $ew->deiconify() }
 sub destroy_widgets {
 
 	map{ $_->destroy } map{ $_->children } $effect_frame;
-	my @children = $take_frame->children;
-	map{ $_->destroy  } @children[1..$#children];
-	@children = $track_frame->children;
+	#my @children = $take_frame->children;
+	#map{ $_->destroy  } @children[1..$#children];
+	my @children = $track_frame->children;
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 }
 
@@ -41,7 +41,7 @@ sub init_gui {
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
 	$ew->deiconify; 
-	#$ew->withdraw;
+	$ew->withdraw;
 
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -327,7 +327,7 @@ sub oid_gui {
 		my $name = $rule->name;
 		my $status = $rule->status;
 		# print "gui oid name: $name status: $status\n";
-		next if $name =~ m/setup|mix_link|mix_file/;
+		next if $name =~ m/setup|mix_|mixer/;
 		push @oid_name, $name;
 		
 		my $oid_button = $oid_frame->Button( 
@@ -397,57 +397,44 @@ sub flash_ready {
 		sub{ length_display(-background => $old_bg) }
 	);
 }
-sub take_gui {  
-
+sub group_gui {  
+	@_ = discard_object(@_);
+	my $name = shift;
+	my $group = $::Group::by_name{$name};
 	$debug2 and print "&take_gui\n";
-		my $tname = $alias{$t} ? $alias{$t} : $t;
-		my $name = $take_frame->Menubutton(
-				-text => ucfirst $tname,
+		my $group_rw = $take_frame->Menubutton(
+				-text => $name,
 				-tearoff =>0,
 			)->pack(-side => 'left');
-		push @widget_t, $name;
+		push @widget_t, $group_rw;
 	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
 		
-		if ($t != 1) { # do not add REC command for Mixdown group MIX
-
-		$name->AddItems([
+		$group_rw->AddItems([
 			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
-				no strict qw(vars);
-				defined $my_t or my $my_t = $t;
-				use strict qw(vars);
-				select_take ($my_t, qq(REC) );
+				$group->set(rw => 'REC');
+				refresh();
 				}
-			]);
-		}
-
-		$name->AddItems([
+			],[
 			'command' => 'MON',
 			-background => $old_bg,
-			-command => sub {
-				no strict qw(vars);
-				defined $my_t or my $my_t = $t;
-				use strict qw(vars);
-				select_take($my_t, qq(MON)); 
+			-command => sub { 
+				$group->set(rw => 'MON');
+				refresh();
 				}
-			]);
-		$name->AddItems([
+			],[
 			'command' => 'MUTE',
 			-background => $old_bg,
-			-command => sub {
-				no strict qw(vars);
-				defined $my_t or my $my_t = $t;
-				use strict qw(vars);
-				select_take($my_t, qq(MUTE)); 
+			-command => sub { 
+				$group->set(rw => 'MUTE');
+				refresh();
 				}
+			],);
 
-			]);
-
-							   
 }
 sub global_version_buttons {
-#	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
+	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
 	if (defined $widget_t[1]) {
 		my @children = $widget_t[1]->children;
 		for (@children) {
@@ -456,11 +443,11 @@ sub global_version_buttons {
 	}
 		
 	@global_version_buttons = ();
-	$debug and print "making global version buttons range:", join ' ',1..$last_version, " \n";
- 	for my $v (undef, 1..$last_version) {
+	$debug and print "making global version buttons range:", join ' ',1..$ti[3]->very_last, " \n";
+ 	for my $v (undef, 1..$ti[3]->very_last) { # assumes one user track XX
 		no warnings;
-		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->{versions} } }
-			grep{ $_ != 1 } @all_chains; # MIX 
+		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
+			grep{ $_ > 2 } @all_chains; # excludes master (1), mix (2)
 		use warnings;
  		push @global_version_buttons,
 			$widget_t[1]->radiobutton(
@@ -481,8 +468,24 @@ sub track_gui {
 	@_ = discard_object(@_);
 	my $n = shift;
 	print "found index: $n\n";
-
-	# my $j is effect index
+	my @rw_items = @_ ? @_ : (
+			[ 'command' => "REC",
+				-foreground => 'red',
+				-command  => sub { 
+					$ti[$n]->set(rw => "REC");
+					refresh_c($n);
+			}],
+			[ 'command' => "MON",
+				-command  => sub { 
+					$ti[$n]->set(rw => "MON");
+					refresh_c($n);
+			}],
+			[ 'command' => "MUTE", 
+				-command  => sub { 
+					$ti[$n]->set(rw => "MUTE");
+					refresh_c($n);
+			}],
+		);
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	my $this_take = $t; 
 	my $stub = " ";
@@ -500,7 +503,7 @@ sub track_gui {
 						-label => $v,
 						# -value => $v,
 						-command => 
-		sub { $version->configure(-text=> $ti[$n]->current ) 
+		sub { $version->configure(-text=> $ti[$n]->current_version ) 
 			unless $ti[$n]->rec_status eq "REC"
 			}
 					);
@@ -538,43 +541,13 @@ sub track_gui {
 		-text => $ti[$n]->rw,
 		-tearoff => 0,
 	);
-
-	my @items = (
-			[ 'command' => "REC",
-				-foreground => 'red',
-				-command  => sub { 
-					if ( $ti[$n]->name eq 'mix'){
-						$::Rule::by_name{mix_file}->set(status => 1);
-					}
-					$ti[$n]->set(rw => "REC");
-					refresh_c($n);
-			}],
-			[ 'command' => "MON",
-				-command  => sub { 
-					if ( $ti[$n]->name eq 'mix'){
-						$::Rule::by_name{mix_file}->set(status => 0);
-					}
-					$ti[$n]->set(rw => "MON");
-					refresh();
-			}],
-			[ 'command' => "MUTE", 
-				-command  => sub { 
-					if ( $ti[$n]->name eq 'mix'){
-						$::Rule::by_name{mix_file}->set(status => 0);
-					}
-					$ti[$n]->set(rw => "MUTE");
-					refresh_c($n);
-			}],
-		);
-	map{$rw->AddItems($_)} @items; 
+	map{$rw->AddItems($_)} @rw_items; 
 
  
-   ## XXX general code mixed with GUI code
-
 	# Volume
 
 	my $p_num = 0; # needed when using parameter controllers
-	my $vol_id = add_volume_control($n);
+	my $vol_id = $ti[$n]->vol;
 
 
 	$debug and print "vol cop_id: $vol_id\n";
@@ -625,11 +598,8 @@ sub track_gui {
 
 	  
 	# Pan
-	# effects code mixed with GUI code XXX
-	# run on initializing the track gui
-
 	
-	my $pan_id = add_pan_control($n);
+	my $pan_id = $ti[$n]->pan;
 	
 	$debug and print "pan cop_id: $pan_id\n";
 	$p_num = 0;           # first parameter
@@ -701,8 +671,6 @@ sub track_gui {
 	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
 	refresh_c($n);
-
-	
 }
 
 sub update_version_button {
@@ -720,9 +688,11 @@ sub update_version_button {
 }
 sub update_master_version_button {
 				$widget_t[0]->radiobutton(
-						-label => $last_version,
-						-value => $last_version,
-						-command => sub { mon_vert(eval $last_version) }
+						-label => $ti[3]->last_version, 
+						-value => $ti[3]->last_version,
+						-command => sub {
+						$::Group::by_name{Tracker}->set(version
+						=> $ti[3]->last_version)}
 					);
 }
 

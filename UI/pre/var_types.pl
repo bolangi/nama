@@ -34,14 +34,7 @@
 						%old_vol		
 						$jack_on 
 						
-						$::Track::n
-						%::Track::by_name
 						@::Track::by_index
-						%::Track::track_names
-
-						$::Group::n
-						%::Group::by_name
-						@::Group::by_index
 
 						);
 					 

@@ -21,10 +21,7 @@ load_project: _load_project name end {
 }
 
 add_track: _add_track wav channel(s?) end { 
-	if ($::tn{$item{wav}} ){ 
-		print "Track name already in use.\n";
-
-	} else { ::add_track($item{wav})  }
+	::add_track($item{wav}); 
 	1;
 }
 
@@ -51,7 +48,7 @@ show_setup: _show_setup end {
 			$_->ch_r,
 			$_->ch_m,
 
-		} ::Track::all_tracks;
+		} ::Track::all;
 		
 	write; # using format at end of file UI.pm
 	1;

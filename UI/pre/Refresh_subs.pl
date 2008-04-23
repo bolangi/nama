@@ -6,25 +6,26 @@ sub refresh_t { # buses
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
 					MUTE => $old_bg);
-	collect_chains();
 	my @w = $take_frame->children;
-	for my $t (1..@takes){
+	for my $t (1..scalar @w - 1){
 		# skip 0th item, the label
 		my $status;
-		#  rec if @record entry for this take
-		if ( grep{$take{$_}==$t}@record ) { 
-			$debug and print "t-rec $t\n";	
-			$status = "REC" } 
-		# 	mon if @monitor entry
-		elsif ( grep{$take{$_}==$t}@monitor )
-			{ 
-			$debug and print "t-mon $t\n";	
-			$status = "MON" }
+		if ( 	grep{ $_->rec_status eq 'REC'} 
+				map{ $tn{$_} }
+				$::Group::by_name{Tracker}->tracks ){
 
-		else  { $status = "MUTE";
-			$debug and print "t-mute $t\n";	
+			$status = 'REC'
+
+		}elsif(	grep{ $_->rec_status eq 'MON'} 
+				map{ $tn{$_} }
+				$::Group::by_name{Tracker}->tracks ){
+
+			$status = 'MON'
+
+		}else{ 
 		
-		}
+			$status = 'MUTE' }
+
 
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
@@ -35,7 +36,7 @@ sub refresh_t { # buses
 }
 sub refresh_c { # tracks
 	local $debug = 1;
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object
+	shift @_ if (ref $_[0]) =~ /UI/; # discard object XXX
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";
 	
@@ -43,11 +44,11 @@ sub refresh_c { # tracks
 		my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
-	#	return unless $widget_c{$n}; # obsolete ??
+	#	return unless $widget_c{$n}; # hidden track
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
 		 $widget_c{$n}->{ch_r}->configure( -text => $ti[$n]->ch_r);
 		 $widget_c{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
-		$widget_c{$n}->{version}->configure( -text => $ti[$n]->current);
+		$widget_c{$n}->{version}->configure(-text => $ti[$n]->current_version);
 	
 	if ($rec_status eq "REC") {
 

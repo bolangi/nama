@@ -13,7 +13,7 @@
 
 # audio device selection (see devices, below)
 
-mixer_out_device: consumer
+mixer_out_device: multi
 record_device: multi
 
 # where we will write our wav files
