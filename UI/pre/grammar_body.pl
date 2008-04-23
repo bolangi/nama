@@ -4,6 +4,7 @@
 command: fail
 end: /\s*$/
 help: _help end { print "hello_from your command line gramar\n"; 1 }
+help: _help number end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
 new_project: _new_project name end {

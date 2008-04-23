@@ -1,18 +1,6 @@
 #sub byn{ my $key = shift; $byn{$key} }
 
 use Carp;
-sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
-sub config_file { ".ecmdrc" }
-sub ecmd_dir { join_path(
-						wav_dir and (wav_dir ne '.') 
-							? (wav_dir, ".ecmd") 
-							:  wav_dir ) }
-sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
-								or wav_dir
-}
-sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
-								or wav_dir
-}
 
 sub status_vars {
 	serialize -class => '::', -vars => \@status_vars;
@@ -102,7 +90,8 @@ sub prepare {
 
 	$ui->init_gui;
 
-	load_project( name => $project_name, create => $opts{c});
+	load_project( name => $project_name, create => $opts{c}) 
+	  if $project_name;
 
 	# if there is no project name, we still init using pwd
 
@@ -130,6 +119,17 @@ sub eval_iam {
 }
 ## configuration file
 
+sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
+sub config_file { ".ecmdrc" }
+sub ecmd_dir { join_path(
+						wav_dir and (wav_dir ne '.') 
+							? (wav_dir, ".ecmd") 
+							:  '.' ) }
+sub this_wav_dir {$project_name and join_path(wav_dir, $project_name)
+}
+sub project_dir  {$project_name and join_path(ecmd_dir, $project_name)
+}
+
 sub global_config{
 	map{ 
 			my $config = join_path($_, config_file());
@@ -141,7 +141,8 @@ sub global_config{
 		} ( project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir or '.') ;
 }
 sub config { 
-	my $yml = global_config() or $default;
+	my $global = global_config();
+	my $yml = length $global > 5 ? $global : $default;
 	strip_comments( $yml );
 	strip_blank_lines( $yml );
 	$yml = join "\n", "---", $yml, "...";
@@ -162,8 +163,10 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	#print yaml_out( \%cfg ); die "HEREEE";
 	#print ("doing nothing") if $a eq $b eq $c; exit;
+	my $wav_dir_old = $wav_dir;
 	assign_var( \%cfg, @config_vars); 
-	$wav_dir or $wav_dir = '.';
+	$wav_dir = $wav_dir_old unless $wav_dir;
+	#or $wav_dir = '.';
 	#print yaml_out( \%devices ); die "HEREEE";
 
 }
@@ -214,13 +217,11 @@ sub load_project {
 
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
 	$ui->global_version_buttons(); # should be called after recording 
-=comment 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
 	dig_ruins() unless scalar @all_chains;
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
-=cut
 
 }
 
@@ -543,6 +544,7 @@ sub restore_track {
 }
 
 sub dig_ruins { 
+	local $debug = 1;
 
 	# only if there are no tracks , 
 	
@@ -557,6 +559,11 @@ sub dig_ruins {
 		# remove version numbers
 		
 		my @wavs = grep{s/(_\d+)?\.wav//i} readdir WAV;
+
+		my %wavs;
+		
+		map{ $wavs{$_}++ } @wavs;
+		@wavs = keys %wavs;
 
 		$debug and print "tracks found: @wavs\n";
 
