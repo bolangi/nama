@@ -127,7 +127,7 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
-sub take_gui {}
+sub group_gui {}
 sub track_gui {}
 sub refresh {}
 sub refresh_t {}

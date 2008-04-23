@@ -401,7 +401,7 @@ sub group_gui {
 	@_ = discard_object(@_);
 	my $name = shift;
 	my $group = $::Group::by_name{$name};
-	$debug2 and print "&take_gui\n";
+	$debug2 and print "&group_gui\n";
 		my $group_rw = $take_frame->Menubutton(
 				-text => $name,
 				-tearoff =>0,

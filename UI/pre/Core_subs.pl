@@ -32,7 +32,7 @@ sub prepare {
 	# m: don't load state info
 	# e: don't load static effects data
 	# s: don't load static effects data cache
-	$project_name = shift;
+	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
@@ -90,6 +90,7 @@ sub prepare {
 
 	$ui->init_gui;
 
+	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
 
@@ -128,6 +129,8 @@ sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name)
 }
 
 sub global_config{
+my @search_path = (project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir, '.');
+
 my $c = 0;
 	map{ 
 print $/,++$c,$/;
@@ -139,23 +142,20 @@ print $/,++$c,$/;
 					return $yml;
 				}
 			}
-		} ( project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir, '.') ;
-}
-sub config { 
-	my $global = global_config();
-	my $yml = length $global > 5 ? $global : $default;
-	strip_comments( $yml );
-	strip_blank_lines( $yml );
-	$yml !~ /^---/ and $yml = join "\n", "---", $yml, "...";
-	#print "config file: $yml";   exit;
-	$yml
+		} ( @search_path) 
 }
 
 sub read_config {
 	$debug2 and print "&read_config\n";
 	local $debug = $debug3;
 	#print &config; exit;
-	%cfg = %{  $yr->read(config())  };
+	my $global = global_config();
+	#print "global: ", $global, $/;
+	my $yml = length $global > 100 ? $global : $default;
+	strip_comments( $yml );
+	strip_blank_lines( $yml );
+	$yml !~ /^---/ and $yml = join "\n", "---", $yml, "...";
+	%cfg = %{  $yr->read($yml)  };
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
 #	*devices = \%{ $cfg{devices} }; # alias
@@ -169,6 +169,7 @@ sub read_config {
 	$wav_dir = $wav_dir_old unless $wav_dir;
 	#or $wav_dir = '.';
 	#print yaml_out( \%devices ); die "HEREEE";
+	print "config file: $yml";
 
 }
 sub walk_tree {
@@ -196,7 +197,8 @@ sub load_project {
 	# called with a hash with 'name' and 'create' fields.
 	
 	my $project = remove_spaces($project); # internal spaces to underscores
-	$project_name = $h{name} ? $h{name} : $project;
+	$project_name = $h{name} if $h{name};
+	$project_name = $project if $project;
 	$debug and print "project name: $project_name create: $h{create}\n";
 	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
@@ -209,7 +211,7 @@ sub load_project {
 # 	close PARAMS;
 # 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 # =cut
-	read_config();
+	read_config(&project_dir);
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
@@ -217,9 +219,10 @@ sub load_project {
 
 
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
+	print "all chains: " , scalar @all_chains, $/;
+	dig_ruins();
 	$ui->global_version_buttons(); # should be called after recording 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
-	dig_ruins() unless scalar @all_chains;
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
@@ -454,7 +457,7 @@ sub initialize_project_data {
 	$mixer =  ::Group->new(name => 'Mixer');
 	$tracker = ::Group->new(name => 'Tracker');
 
-	$ui->group_gui("Tracker");
+	&group_gui('Tracker');
 
 	print yaml_out( \%::Track::track_names );
 
@@ -1932,7 +1935,7 @@ sub retrieve_state {
 
 	for my $t (@takes) { 
 		next if $t == 1; 
-		$ui->take_gui;
+		$ui->group_gui;
 	}; #
 =cut
 
