@@ -72,18 +72,6 @@ sub selected_version {
 			: $wav->last;                          # my latest version
 	### or should I give the active version
 }
-=cut
-=comment
-sub last_version { 
-	## for each track or tracks in take
-
-$track->last_version;
-$take->last_version
-$project->last_version
-	
-			$last_version = $this_last if $this_last > $last_version ;
-
-}
 
 sub new_version {
 	last_version() + 1;

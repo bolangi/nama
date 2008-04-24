@@ -143,6 +143,8 @@ our (
 	## collected widgets (i may need to destroy them)
 
 	@widget_t, # widgets for displaying track groups (busses!)
+	$tracker_group_widget, # widget for tracker group
+							# replacing @widget_t
 	%widget_c, # for chains (tracks)
 	%widget_e, # for effects
 	@widget_o, # for templates (oids) 

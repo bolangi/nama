@@ -45,15 +45,14 @@ sub prepare {
 	# internal ones. 
 	
 	read_config(); # sets $wav_dir
+
 	#print "raw to disk format: $raw_to_disk_format\n";
 	#print config_vars(); exit;
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or warn "wave directory not found, using current directory\n";
-
-	# TODO
-	# Tie mixdown version suffix to global monitor version 
+	-d $wav_dir or ($wav_dir = '.') 
+				and carp "wave directory not found, using current directory\n" ;
 
 	# init our buses
 	
@@ -164,10 +163,7 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	#print yaml_out( \%cfg ); die "HEREEE";
 	#print ("doing nothing") if $a eq $b eq $c; exit;
-	my $wav_dir_old = $wav_dir;
 	assign_var( \%cfg, @config_vars); 
-	$wav_dir = $wav_dir_old unless $wav_dir;
-	#or $wav_dir = '.';
 	#print yaml_out( \%devices ); die "HEREEE";
 	print "config file: $yml";
 
@@ -211,17 +207,19 @@ sub load_project {
 # 	close PARAMS;
 # 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 # =cut
-	read_config(&project_dir);
+	my $wav_dir_inherited = $wav_dir;
+	read_config(); #sets wav_dir
+	$wav_dir = $wav_dir_inherited unless $wav_dir and $wav_dir ne '.' ;
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
 	print "reached here!!!\n";
 
-
 	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
 	print "all chains: " , scalar @all_chains, $/;
 	dig_ruins();
-	$ui->global_version_buttons(); # should be called after recording 
+	$tracker_group_widget = $ui->group_gui('Tracker');
+	$ui->global_version_buttons(); 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
 
 #The mix track will always be track index 1 i.e. $ti[$n]
@@ -457,7 +455,6 @@ sub initialize_project_data {
 	$mixer =  ::Group->new(name => 'Mixer');
 	$tracker = ::Group->new(name => 'Tracker');
 
-	&group_gui('Tracker');
 
 	print yaml_out( \%::Track::track_names );
 

@@ -99,7 +99,7 @@ sub full_path {
 		$track->dir ? $track->dir : "." , $track->current 
 	)	
 }
-sub very_last {
+sub group_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
 	#print join " ", 'searching tracks:', $group->tracks, $/;
@@ -117,7 +117,7 @@ sub very_last {
 
 sub current {	
 	my $track = shift;
-	my $last = $track->very_last;
+	my $last = $track->group_last;
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
@@ -130,7 +130,7 @@ sub current {
 }
 sub current_version {	
 	my $track = shift;
-	my $last = $track->very_last;
+	my $last = $track->group_last;
 	if 	($track->rec_status eq 'REC'){ return ++$last}
 	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version } 
 	else { return undef }

@@ -21,6 +21,7 @@ sub destroy_widgets {
 	#my @children = $take_frame->children;
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
+	$tracker_group_widget->destroy if $tracker_group_widget;
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 }
 
@@ -431,21 +432,23 @@ sub group_gui {
 				refresh();
 				}
 			],);
+$group_rw
 
 }
 sub global_version_buttons {
 	local $debug = 1;
-	( map{ $_->destroy } @global_version_buttons ) if @global_version_buttons; 
-	if (defined $widget_t[1]) {
-		my @children = $widget_t[1]->children;
+	if (defined $tracker_group_widget) {
+		my @children = $tracker_group_widget->children;
 		for (@children) {
 			$_->cget(-value) and $_->destroy;
-		}; # should remove menubuttons
+		}; # remove menubuttons
 	}
 		
-	@global_version_buttons = ();
-	$debug and print "making global version buttons range:", join ' ',1..$ti[3]->very_last, " \n";
- 	for my $v (undef, 1..$ti[3]->very_last) { 
+	$debug and print "making global version buttons range:",
+
+	join ' ',1..$ti[-1]->group_last, " \n";
+
+ 	for my $v (undef, 1..$ti[-1]->group_last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group
@@ -454,9 +457,8 @@ sub global_version_buttons {
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
 			grep{ $_ > 2 } @all_chains; # excludes master (1), mix (2)
 		use warnings;
- 		push @global_version_buttons,
-			$widget_t[1]->radiobutton(
-				###  HARDCODED, second take widget
+			$tracker_group_widget->radiobutton( 
+
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
@@ -693,15 +695,17 @@ sub update_version_button {
 				unless $ti[$n]->rec_status eq "REC" }
 					);
 }
+=comment
 sub update_master_version_button {
-				$widget_t[0]->radiobutton(
-						-label => $ti[3]->last_version, 
+				$tracker_group_widget->radiobutton( 
+						-label => $ti[1]->last, 
 						-value => $ti[3]->last_version,
 						-command => sub {
 						$::Group::by_name{Tracker}->set(version
 						=> $ti[3]->last_version)}
 					);
 }
+=cut
 
 
 sub effect_button {
