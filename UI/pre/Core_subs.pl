@@ -829,15 +829,18 @@ sub setup_transport { # create chain setup
 	$debug2 and print "&setup_transport\n";
 	collect_chains();
 	%inputs = %outputs 
-			= %post_input = %pre_output 
-			= @input_chains = @output_chains = ();
+			= %post_input 
+			= %pre_output 
+			= @input_chains 
+			= @output_chains 
+			= ();
 	my @tracks = ::Track::all;
 	shift @tracks; # drop Master
-	my $have_signal = join " ", map{$_->name} 
+	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'MUTE'} 
 								@tracks;
-	print "have signal: $have_signal\n";
-	if ($have_signal) {
+	print "have source: $have_source\n";
+	if ($have_source) {
 		$mixer_bus->apply; # mix_file
 		$master_bus->apply; # mix_out, mix_link
 		$tracker_bus->apply;
@@ -1346,11 +1349,12 @@ sub find_op_offsets {
 sub apply_ops {  # in addition to operators in .ecs file
 	local $debug = $debug3;
 	$debug2 and print "&apply_ops\n";
-	for my $n (@all_chains) {
+	for my $n (1..$#UI::Track::by_index) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
- 		next if $ti[$n]->rec_status eq "MUTE" and $n != 1; #MIX XXX
-		next if ! defined $ti[$n]->offset; # for MIX
- 		next if ! $ti[$n]->offset ;
+ 		next if $ti[$n]->rec_status eq "MUTE" ;
+		next if $n == 2; # no volume control for mix track
+		#next if ! defined $ti[$n]->offset; # for MIX
+ 		#next if ! $ti[$n]->offset ;
 		for my $id ( @{ $ti[$n]->ops } ) {
 		#	next if $cops{$id}->{belongs_to}; 
 		apply_op($id);
