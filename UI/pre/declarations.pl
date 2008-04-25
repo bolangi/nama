@@ -242,12 +242,14 @@ our (
 
 	# new object core
 	
-	$tracker,  # group
-	$tracker_bus, # corresponding bus
-	$master,   #  group
+	$tracker_bus, 
+	$tracker, # tracker_group
 	$master_bus, 
-	$mixer, # group
-	$mixer_bus,
+	$master, # master_group
+	$master_track,
+	$mixdown_bus,
+	$mixdown,  # group
+	$mixdown_track,
 
 	@ti, # track by index (alias @::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)

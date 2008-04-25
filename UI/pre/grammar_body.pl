@@ -20,6 +20,9 @@ load_project: _load_project name end {
 	::load_project( name => ::remove_spaces($item{name}) );
 	1;
 }
+save_project: _save_project name(?) end { 
+	::save_state( $item{name} ); 
+	1;}
 
 add_track: _add_track wav channel(s?) end { 
 	::add_track($item{wav}); 
@@ -35,9 +38,12 @@ connect_setup: _connect_setup end { ::connect_transport(); 1 }
 
 disconnect_setup: _disconnect_setup end { ::disconnect_transport(); 1 }
 
-save_setup: _save_setup end { ::save_state($::state_store_file); 1 }
+renew_engine: _renew_engine end { ::new_engine(); 1  }
 
-list_marks: _list_marks end {}
+start: _start end { ::start_transport(); 1}
+stop: _stop end { ::stop_transport(); 1}
+
+list_marks: _list_marks end {'TODO' }
 
 show_setup: _show_setup end { 	
 	map { 	push @::format_fields,  
@@ -55,6 +61,11 @@ show_setup: _show_setup end {
 	1;
 }
 
+record_group: _record_group end { $::tracker->set( rw => 'REC') }
+monitor_group: _monitor_group end { $::tracker->set( rw => 'MON') }
+mute_group: _mute_group end { $::tracker->set(rw => 'MUTE') }
+
+mixdown: _mixdown end { $::mix}
 name: /\w+/
 
 wav: name { $::select_track = $item{name} }

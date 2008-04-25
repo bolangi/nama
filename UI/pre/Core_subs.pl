@@ -51,7 +51,7 @@ sub prepare {
 
 	$opts{d} and $wav_dir = $opts{d};
 
-	-d $wav_dir or ($wav_dir = '.') 
+	-d $wav_dir or ($wav_dir == '.') 
 				and carp "wave directory not found, using current directory\n" ;
 
 	# init our buses
@@ -70,9 +70,9 @@ sub prepare {
 		rules  => [ qw(mixer_out mix_link) ],
 		groups => ['Master'],
 	);
-	$mixer_bus  = ::Bus->new(
-		name => 'Mixer_Bus',
-		groups => [qw(Mixer) ],
+	$mixdown_bus  = ::Bus->new(
+		name => 'Mixdown_Bus',
+		groups => [qw(Mixdown) ],
 		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
 	);
 
@@ -215,9 +215,10 @@ sub load_project {
 	remove_small_wavs(); 
 	print "reached here!!!\n";
 
-	retrieve_state( $h{-settings} ? $h{-settings} : $state_store_file) unless $opts{m} ;
+	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	print "all chains: " , scalar @all_chains, $/;
-	dig_ruins();
+	my @all = ::Track::all;
+	dig_ruins() unless @all > 2;
 	$tracker_group_widget = $ui->group_gui('Tracker');
 	$ui->global_version_buttons(); 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
@@ -452,15 +453,15 @@ sub initialize_project_data {
 	%::Track::track_names = (); 
 
 	$master = ::Group->new(name => 'Master');
-	$mixer =  ::Group->new(name => 'Mixer');
+	$mixdown =  ::Group->new(name => 'Mixdown');
 	$tracker = ::Group->new(name => 'Tracker');
 
 
 	print yaml_out( \%::Track::track_names );
 
-	my $master = ::SimpleTrack->new( 
+	$master_track = ::SimpleTrack->new( 
 		group => 'Master', 
-		name => 'Master',
+		name => 'MASTER',
 		rw => 'MON',);
 
 	my @rw_items = (
@@ -477,38 +478,15 @@ sub initialize_project_data {
 		);
 	$ui->track_gui( $master->n, @rw_items );
 
-	my $mix = ::Track->new( 
+	$mixdown_track = ::Track->new( 
 		group => 'Mixer', 
-		name => 'mix', 
+		name => 'MIXDOWN', 
 		rw => 'MON'); 
 
 	map { print "type::: ", ref $_, $/} ::Track::all; 
-=comment
-	@rw_items = (
-			[ 'command' => "REC",
-				-foreground => 'red',
-				-command  => sub { 
-						$::Rule::by_name{mix_file}->set(status => 1);
-						$ti[$mix->n]->set(rw => "REC");
-						refresh_c($mix->n);
-			}],
-			[ 'command' => "MON",
-				-command  => sub { 
-						$::Rule::by_name{mix_file}->set(status => 0);
-						$ti[$mix->n]->set(rw => "MON");
-						refresh_c($mix->n);
-			}],
-			[ 'command' => "MUTE", 
-				-command  => sub { 
-						$::Rule::by_name{mix_file}->set(status => 0);
-						$ti[$mix->n]->set(rw => "MUTE");
-						refresh_c($mix->n);
-			}],
-		);
-=cut
 @rw_items = ();
 
-	$ui->track_gui( $mix->n, @rw_items );
+$ui->track_gui( $mixdown_track->n); 
 }
 ## track and wav file handling
 
@@ -841,7 +819,7 @@ sub setup_transport { # create chain setup
 								@tracks;
 	print "have source: $have_source\n";
 	if ($have_source) {
-		$mixer_bus->apply; # mix_file
+		$mixdown_bus->apply; # mix_file
 		$master_bus->apply; # mix_out, mix_link
 		$tracker_bus->apply;
 		#map{ eliminate_loops($_) } @all_chains;
@@ -1277,10 +1255,11 @@ sub cop_init {
 	}
 }
 sub effect_update {
+local $debug = 1;
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
-	return if ! defined $ti[$chain]->offset; # MIX XXX
+	#return if ! defined $ti[$chain]->offset; # MIX XXX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
 
@@ -1352,7 +1331,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	for my $n (1..$#UI::Track::by_index) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "MUTE" ;
-		next if $n == 2; # no volume control for mix track
+		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $ti[$n]->offset; # for MIX
  		#next if ! $ti[$n]->offset ;
 		for my $id ( @{ $ti[$n]->ops } ) {
@@ -1363,7 +1342,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
-	local $debug = $debug3;
+	local $debug = 1;
 	my $id = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};

@@ -109,11 +109,11 @@ renew_engine:
   sig: ()
   what: re-initializes the audio processing engine
 start:
-  short: t	 
+  short: T	 
   sig: ()
   what: Start transport
 stop:
-  short: st	 
+  short: S	 
   sig: ()
   what: Stop transport
 ecasound_start:
