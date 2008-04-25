@@ -61,11 +61,18 @@ show_setup: _show_setup end {
 	1;
 }
 
-record_group: _record_group end { $::tracker->set( rw => 'REC') }
-monitor_group: _monitor_group end { $::tracker->set( rw => 'MON') }
-mute_group: _mute_group end { $::tracker->set(rw => 'MUTE') }
+tracker_rec: _tracker_rec end { $::tracker->set( rw => 'REC') }
+tracker_mon: _tracker_mon end  { $::tracker->set( rw => 'MON') }
+tracker_mute: _tracker_mute end { $::tracker->set(rw => 'MUTE') }
 
-mixdown: _mixdown end { $::mix}
+mixdown: _mixdown end { $::mixdown_track->set(rw => 'REC')}
+mixplay: _mixplay end { $::mixdown_track->set(rw => 'MON');
+						$::tracker->set(rw => 'MUTE');
+}
+mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'MUTE');
+						$::tracker->set(rw => 'MON')}
+
+
 name: /\w+/
 
 wav: name { $::select_track = $item{name} }

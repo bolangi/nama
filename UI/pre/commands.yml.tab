@@ -3,13 +3,17 @@ help:
   short: h
   what: List this menu (S?)
   sig: () 
-record_group:
-  short: record R
-  what: Set record mode
+tracker_rec:
+  short: trec R
+  what: Set Tracker group record mode
   sig: ()
-monitor_group:
-  short: monitor M 
-  what: Set monitor mode (map all REC-status tracks to MON)
+tracker_mon:
+  short: tmon M 
+  what: Set Tracker group monitor mode 
+  sig: () 
+tracker_mute:
+  short: tmute MM 
+  what: Set Tracker group mute mode
   sig: () 
 mixdown:
   short: mxd
@@ -18,6 +22,10 @@ mixdown:
 mixplay:
   short: mxp
   what: Play mix from file (sets mix group to MON, tracker group to MUTE)
+  sig: ()
+mixoff:
+  short: norm mxo
+  what: Set normal mode (Mixdown to MUTE, Tracker to MON)
   sig: ()
 add_track:
   short: new add

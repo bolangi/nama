@@ -1256,7 +1256,7 @@ sub cop_init {
 	}
 }
 sub effect_update {
-local $debug = 1;
+	local $debug = 1;
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
@@ -1267,14 +1267,15 @@ local $debug = 1;
 	# update Ecasound's copy of the parameter
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
-	$param++; # so the value at $p[0] is applied to parameter 1
 	my $controller; 
 	for my $op (0..scalar @{ $ti[$chain]->ops } - 1) {
-		$ti[$chain]->ops->[$op] eq $id and $controller = $op 
+		$ti[$chain]->ops->[$op] eq $id and $controller = $op;
 	}
+	$param++; # so the value at $p[0] is applied to parameter 1
+	$controller++; # translates 0th to chain-operator 1
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $controller, offset: ",
-	$ti[$chain]->offset, $/;
+	$ti[$chain]->offset, " param: $param, value: $val$/";
 	eval_iam ("c-select $chain");
 	eval_iam ("cop-select ". ($ti[$chain]->offset + $controller));
 	eval_iam ("copp-select $param");
@@ -1308,6 +1309,7 @@ sub find_op_offsets {
 =cut
 
 
+	local $debug = 1;
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
 		#my @op_offsets = split "\n",eval_iam("cs");
@@ -1322,7 +1324,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( offset => $quotes/2);   # XXX
+			$ti[$chain_id]->set( offset => $quotes/2 - 1);   # XXX
 
 		}
 }
