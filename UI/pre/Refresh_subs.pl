@@ -1,6 +1,6 @@
 ## refresh functions
 
-sub refresh_t { # buses
+sub refresh_t { # groups 
 	$debug2 and print "&refresh_t\n";
 	local $debug = $debug3;
 	my %take_color = (REC  => 'LightPink', 
@@ -80,7 +80,7 @@ sub refresh_c { # tracks
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh {  
- 	# $ui->refresh_t(); 
+ 	$ui->refresh_t(); 
 	collect_chains;
 	map{ $ui->refresh_c($_) } @all_chains ;
 }

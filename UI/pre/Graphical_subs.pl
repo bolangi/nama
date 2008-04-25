@@ -328,7 +328,7 @@ sub oid_gui {
 		my $name = $rule->name;
 		my $status = $rule->status;
 		# print "gui oid name: $name status: $status\n";
-		next if $name =~ m/setup|mix_|mixer/;
+		next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
 		push @oid_name, $name;
 		
 		my $oid_button = $oid_frame->Button( 

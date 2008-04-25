@@ -222,6 +222,7 @@ sub load_project {
 	$tracker_group_widget = $ui->group_gui('Tracker');
 	$ui->global_version_buttons(); 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
+	$ui->refresh_t;
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
@@ -454,14 +455,14 @@ sub initialize_project_data {
 
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown');
-	$tracker = ::Group->new(name => 'Tracker');
+	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
 
 
 	print yaml_out( \%::Track::track_names );
 
 	$master_track = ::SimpleTrack->new( 
 		group => 'Master', 
-		name => 'MASTER',
+		name => 'Master',
 		rw => 'MON',);
 
 	my @rw_items = (
@@ -479,8 +480,8 @@ sub initialize_project_data {
 	$ui->track_gui( $master->n, @rw_items );
 
 	$mixdown_track = ::Track->new( 
-		group => 'Mixer', 
-		name => 'MIXDOWN', 
+		group => 'Mixdown', 
+		name => 'Mixdown', 
 		rw => 'MON'); 
 
 	map { print "type::: ", ref $_, $/} ::Track::all; 
