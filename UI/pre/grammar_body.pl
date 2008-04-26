@@ -42,6 +42,8 @@ connect_setup: _connect_setup end { ::connect_transport(); 1 }
 
 disconnect_setup: _disconnect_setup end { ::disconnect_transport(); 1 }
 
+## we reach here
+
 renew_engine: _renew_engine end { ::new_engine(); 1  }
 
 start: _start end { ::start_transport(); 1}
@@ -77,9 +79,6 @@ mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'MUTE');
 						$::tracker->set(rw => 'MON')}
 
 
-name: /\w+/
-
-wav: name { $::select_track = $item{name} }
 
 mix: 'mix' end {1}
 
@@ -92,26 +91,20 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 channel: r | m
 
-r: 'r' dd  { $::ti[$::select_track]->set(ch_r => $item{dd}) }
-m: 'm' dd  { $::ti[$::select_track]->set(ch_m => $item{dd}) }
+r: 'r' dd  { $::select_track->set(ch_r => $item{dd}) }
+m: 'm' dd  { $::select_track->set(ch_m => $item{dd}) }
 
 
-rec: 'rec' wav(s?) end { 
-	map{$::ti[$::select_track]->set(rw => 'REC')} @{$item{wav}} 
-}
-mon: 'mon' wav(s?) end { 
-	map{$::ti[$::select_track]->set(rw => 'MON')} @{$item{wav}} 
-}
-mute: 'mute' wav(s?) end { 
-	map{$::ti[$::select_track]->set(rw => 'MUTE')} @{$item{wav}} 
-}
-
-mute: 'mute' end {$::ti[$::select_track]->set(rw => 'MUTE'); }
-rec: 'rec' end {$::ti[$::select_track]->set(rw => 'REC'); }
-mon: 'mon' end {$::ti[$::select_track]->set(rw => 'MON'); }
+mute: 'mute' end {$::select_track->set(rw => 'MUTE'); }
+rec: 'rec' end {$::select_track->set(rw => 'REC'); }
+mon: 'mon' end {$::select_track->set(rw => 'MON'); }
 
 
 last: ('last' | '$' ) 
 
 dd: /\d+/
 
+name: /\w+/
+
+
+wav: name { $::select_track = $::tn{$item{name}} if $::tn{$item{name}}  }

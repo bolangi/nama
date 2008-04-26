@@ -63,7 +63,7 @@ sub prepare {
 		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
 	);
 
-	print join (" ", map{ $_->name} UI::Rule::all_rules() ), $/;
+	print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
 
 	$master_bus  = ::Bus->new(
 		name => 'Master_Bus',

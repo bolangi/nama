@@ -16,7 +16,7 @@ $debug = 1;
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
-		my ($cmd, $predicate) = ($user_input =~ /([\w\.\-]+)(.*)/);
+		my ($cmd, $predicate) = ($user_input =~ /(\S+)(.*)/);
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
 		if ($cmd eq 'eval') {
 			eval $predicate;
@@ -24,7 +24,8 @@ $debug = 1;
 			$@ and print "Perl command failed: $@\n";
 		} elsif ($tn{$cmd}) { 
 			$debug and print "Track name: $cmd\n";
-			$select_track = $cmd; 
+			$select_track = $tn{$cmd};
+			print "selected: $cmd\n";
 			$parser->command($predicate) or print ("Returned false\n");
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found IAM command\n";
