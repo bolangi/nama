@@ -36,7 +36,7 @@ sub refresh_t { # groups
 }
 sub refresh_c { # tracks
 	local $debug = 1;
-	shift @_ if (ref $_[0]) =~ /UI/; # discard object XXX
+	@_ = discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";
 	
