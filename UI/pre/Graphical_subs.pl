@@ -812,7 +812,10 @@ sub make_scale {
 
 		# auxiliary field for logarithmic display
 		no warnings;	
-		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/) {
+		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/ )
+		#	or $code eq 'ea') 
+		
+			{
 			my $log_display = $frame->Label(
 				-text => exp $effects[$i]->{params}->[$p]->{default},
 				-width => 5,
@@ -821,7 +824,8 @@ sub make_scale {
 		  		-command => sub { 
 					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
 					$log_display->configure(
-						-text => $effects[$i]->{params}->[$p]->{name} =~ /hz/i
+						-text => 
+						$effects[$i]->{params}->[$p]->{name} =~ /hz/i
 							? int exp $copp{$id}->[$p]
 							: dn(exp $copp{$id}->[$p], 1)
 						);

@@ -42,14 +42,14 @@ mute:
   short: z off
   what: Set track status to MUTE (remove from chain setup)
   sig: ()
-monitor_channel:
-  short: m
-  what: Set track monitor (i.e. output) channel number
+m:
+  short: monitor_channel
+  what: Set track output channel number
   sig: N
-record_channel:
-  short: r
-  what: Set track record (i.e. input) channel number
-set_version:
+r:
+  short: record_channel
+  what: Set track input channel number
+select_version:
   short: version n
   what: Set track version number for monitoring
   sig: N
@@ -81,7 +81,7 @@ pan_back:
   short: pb
   what: Restore track pan setting before pl, pr, or pc commands
   sig: ()
-save_project:
+save_state:
   short: keep k save
   what: Save project settings to disk
   sig: S? 

@@ -12,20 +12,24 @@ new_project: _new_project name end {
 		name => ::remove_spaces($item{name}),
 		create => 1,
 	);
+	print "created project: $::project_name\n";
 
-	1;
+1;
 }
 
 load_project: _load_project name end {
 	::load_project( name => ::remove_spaces($item{name}) );
 	1;
+	print "loaded project: $::project_name\n";
 }
-save_project: _save_project name(?) end { 
+save_state: _save_state name(?) end { 
 	::save_state( $item{name} ); 
+	print "saved state as $item{name}\n";
 	1;}
 
 add_track: _add_track wav channel(s?) end { 
 	::add_track($item{wav}); 
+	print "added track $item{wav}\n";
 	1;
 }
 
