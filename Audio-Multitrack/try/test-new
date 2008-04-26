@@ -1,0 +1,9 @@
+use lib qw(/home/jroth/build/flow/UI/lib);
+use UI;
+my $ui = UI->new;
+$ui->hello;
+$ui = UI::Graphical->new;
+$ui->hello;
+$ui = UI::Text->new;
+$ui->hello;
+

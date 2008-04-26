@@ -1,0 +1,200 @@
+THANK GOT I didn't have to do this!!!
+
+Thanks to 'our'!! and the perl team
+
+
+#!/usr/local/bin/perl -w
+
+{
+local $/ = undef;
+my $globals = <DATA>;
+map{s/.//; $globals{$_}++} split "\n",$globals;
+}
+#my $a = '$gui';
+#$a =~ /([\%\@\$])(\w+)/ and print "match!";
+#die;
+$text = <<'TEST';
+my $var = 'abc';
+$::Var = 'def';
+$VAR = 'hij';
+TEST
+
+use IO::All;
+my $source = shift;
+my $text = io($source)->all;
+
+foreach my $id(keys %globals){
+	$text =~ s/(?<!my |ur )([\$\%\@])($id)/$1::$id/g;
+}
+print $text;
+=comment
+		my ($sigil, $id) = ($1, $2);
+		# $text =~ s/(?<!::)$id/::$id/g if globals{$id} or $sigil eq '&';
+		$text =~ s/$id/::$id/g if globals{$id} or $sigil eq '&';
+		print $text;
+	}
+}
+#/([\$\%\@&])($id)/$1::$id/g;
+
+while (<DATA>){
+/^\s*$/ and next;
+/([\$\%\@])(\w+)/ or die "illegal variable name: $_";
+my ($sigil, $id) = ($1, $2);
+#print "found $sigil $id\n";
+
+=cut
+
+__DATA__
+$gui
+$mixname
+$yamlfile
+%state_c_ops
+$effects_cache_file
+$mw 
+$ew
+$canvas
+
+$ecasound
+$grammar
+@ecmd_commands
+%ecmd_commands 
+$ecmd_home
+$wav_dir 
+$input_channels
+$config
+%devices
+%opts
+%oid_status
+$clock_id
+$use_monitor_version_for_mixdown
+$select_track
+@format_fields 
+$session
+$session_name 
+$mix_dir
+$cop_id
+$i
+$t
+%state_c
+%state_t
+$statestore
+$chain_setup_file
+@monitor
+@record 
+@mute
+%track_names 
+@effects		
+%effect_i	
+@ladspa_sorted
+%effects_ladspa
+$e
+$last_version
+$monitor_version
+%cops 			
+%copp 		
+%e_bound
+@marks 
+$unit	
+$markers_armed 
+%old_vol   
+$length   
+$jack_on 
+
+@all_chains
+@input_chains
+@output_chains
+
+%take
+@takes
+%alias
+%chain
+
+%subst
+%cfg
+$tkeca_effects_data
+$yaml
+
+$load_frame
+$add_frame
+$take_frame
+$time_frame
+$clock_frame
+$oid_frame
+$track_frame
+$effect_frame
+$iam_frame
+$perl_eval_frame
+$transport_frame
+
+@widget_t
+%widget_c
+%widget_e
+@widget_o
+%widget_o
+
+@global_version_buttons
+@time_marks
+$time_step 
+$clock     
+$setup_length 
+
+$session_label
+$take_label
+
+$sn_label
+$sn_text 
+$sn_load 
+$sn_load_nostate 
+$sn_new
+$sn_quit
+$iam_label
+$iam_text
+$iam_execute
+$iam_error
+$build_track_label
+$build_track_text
+$build_track_add 
+$build_track_rec_label 
+$build_track_rec_text
+$build_track_mon_label 
+$build_track_mon_text 
+$build_new_take
+$transport_label
+$transport_setup_and_connect
+$transport_setup
+$transport_connect
+$transport_disconnect
+$transport_new
+$transport_start
+$transport_stop
+
+$tkcmd
+$iam
+$old_bg
+
+
+$loopa
+$loopb
+$mixchain
+$mixchain_aux
+
+@oids
+%inputs
+%outputs
+%post_input
+%pre_output
+
+$ladspa_sample_rate
+$statestore
+$chain_setup_file
+
+$track_name
+$ch_r
+$ch_m 
+
+$effects_data_vars
+%L
+%M
+$persistent_vars
+$effects_state
+VARS

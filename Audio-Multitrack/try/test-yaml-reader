@@ -1,0 +1,10 @@
+#!perl
+use Data::YAML::Reader;
+$yr = Data::YAML::Reader->new;
+my $file = 'effects_cache.yaml';
+my $yaml = qx(cat ./$file);
+my $ref = $yr->read( $yaml ); 
+my @manual_search = $yaml =~ /(^\w+):/gm;
+print "keys expected: ", join( " ", @manual_search), $/;
+print "keys found:    ", join( " ", keys %{ $ref }), $/;
+exit;

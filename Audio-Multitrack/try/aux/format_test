@@ -1,0 +1,24 @@
+
+format STDOUT_TOP =
+Chain Ver File            Setting Status Rec_ch Mon_ch 
+=====================================================
+.
+format STDOUT =
+@<<  @<<  @<<<<<<<<<<<<    @<<    @<<   @<<   @<< ~~
+splice @::format_fields, 0, 8
+
+.
+
+@::format_fields = (1..14);
+write;
+
+__END__
+format STDOUT_TOP =
+Date    Paid To                          For                        Amount  Code
+------  -------------------------------  -----------------------  --------- ----
+
+.
+format STDOUT =
+@<<<<<  @<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  @<<<<<<<<<<<<<<<<<<<<<<  @>>>>>>>>>  @>
+@fields
+.

@@ -1,0 +1,34 @@
+#!/usr/bin/env perl
+use warnings;
+use Storable;
+use lib qw(. .. ../..);
+use UI::Assign qw(:all);
+$ref = retrieve("/media/projects/.ecmd/paul_brocante/State");
+@keys = keys %{ $ref };
+print join " ", "Keys: ",@keys;
+map{
+	print "$_: ", ref $ref->{$_}, $/;
+} @keys;
+@persistent_vars = qw(
+
+						$monitor_version
+						$last_version 
+						%track_names 	
+						%state_c 		
+						%state_t 		
+						%cops 			
+						$cop_id 		
+						%copp 			
+						@all_chains 	
+						$i 				
+						$t 				
+						%take 			
+						@takes 			
+						%chain 			
+						@marks			
+						$unit			
+						%oid_status		
+						%old_vol		
+						$jack_on 			);
+					 
+print yaml_out( $ref ); 

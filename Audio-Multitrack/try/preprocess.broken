@@ -1,0 +1,101 @@
+use IO::All;
+use Carp;
+
+$debug = 1;
+my @steps;
+push @steps, ['Flow',  
+				['.vars' , \&vars ], 
+				['.subs', \&subs], 
+	#			['.defs', sub{} ],
+			];
+#push @steps, [qw(Grammar )];
+
+for my $arr_ref(@steps) {
+	my @a = @{ $arr_ref };
+	my $file = shift @a;
+	my $in = "$file.ppc";
+	my $female = io($in)->all;
+	$debug and print "$file\n";
+	#$debug and print $female;
+
+	print "length \@a: ", scalar @a, $/; 
+	while (my $ref = shift @a){
+		print "ref is type: ", ref $ref, $/;
+		print "length: ", scalar @{ $ref }, $/;
+		print "ref[0]: $ref->[0], ref[1]: $ref->[1]\n";
+		&preprocess($file, $ref->[0], $ref->[1]);
+	}
+	$female > io "$file.pm";
+}
+
+	
+	
+&preprocess( @{ pop @steps });
+sub preprocess {
+	$debug and print "Preprocessing\n";
+	my ($file, $ext, $code) = @_; # $file: Flow for Flow.pm
+	$debug and print "file: $file, extension: $ext, code: ", ref $code, $/;
+	$male = io ("$file$ext")->all  or carp "$file$ext: failed to read\n";
+	my $matcher = include_regex("$file$ext");
+	my $replacement = $code ? $code->($male) : $male;
+	 
+	#$debug and print "male: $male, female: $female\n";
+
+
+	$female =~ s/$matcher/$replacement/;
+
+}
+
+
+sub include_regex {
+		my $file = shift; 
+		qr/^ # begining of line
+			\# hash
+			\s* # zero or more space
+			include
+			\s+		
+			$file
+			\b # boundary
+			/x; # extended regex
+}
+
+sub vars { my $in = shift; "use vars qw($in);\n"}
+
+sub subs { my $in = shift; "use subs qw($in);\n"}
+
+sub grammar_fragment {
+
+	my @shortcuts = qw(
+
+	new    new_session
+	load   load_session
+	add    add_track
+	setup  generate_setup
+	l      list_marks
+	show   show_setup 
+	sfx    show_effects
+	T      ecasound_start
+	S      ecasound_stop
+	fx     add_effect
+	rfx    remove_effect
+	renew  renew_engine
+	k   mark
+	t   start
+	s   stop
+	sm  show_marks
+	rn  rename_mark
+	);
+
+	my $command;
+	my $stanza;
+	my ($long, $short);
+	while( @shortcuts) {
+		$short = shift @shortcuts;
+		$long = shift @shortcuts;
+		$stanza .= "_$long: '$short' | '$long'\n";
+		$stanza .= "$long: _$long {}\n\n";
+		$command .= "command: $long\n";
+	}
+	# print $command.$stanza if $debug;
+	$command . $stanza;
+}

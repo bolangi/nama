@@ -1,0 +1,43 @@
+package UI;
+our @ISA;
+use Object::Tiny qw(dummy);
+sub hello {print "superclass hello\n"};
+
+package UI::Graphical;
+our @ISA = 'UI';
+sub hello {print "make a window\n";}
+
+package UI::Text;
+our @ISA = 'UI';
+sub hello {print "hello world!\n"}
+
+my $ui=UI->new;
+$ui->hello;
+$ui=UI::Graphical->new;
+$ui->hello;
+$ui->how;
+
+$ui=UI::Text->new;
+$ui->hello;
+$ui->how;
+
+bless $ui, UI;
+$ui->hello;
+$ui->how;
+package UI;
+
+sub how {print "how are you?"}
+
+__END__
+sub new { my $class = shift; 
+			my $mode = shift; # Text or Graphical
+			lc $mode eq 'tk' 
+		or	lc $mode eq 'gui'
+		or  lc $mode eq 'graphic'
+		or  lc $mode eq 'graphical'
+		and return bless { @_ },
+			::Graphical 
+		or  lc $mode eq 'text'
+		and return bless { @_ },
+			::Text
+}

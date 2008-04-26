@@ -1,0 +1,245 @@
+__END__
+
+
+package Wav;
+use Object::Tiny qw(head active n);
+use Carp;
+sub new { my $class = shift; 
+ 		croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+		 bless {@_}, $class }
+sub set {
+
+	my $self = shift;
+ 	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} 
+		or carp "illegal key: $_ for object of type ", ref $self,$/;
+	} keys %new_vals;
+}
+
+
+sub targets {
+	my $head = shift; 
+	$debug2 and print "&find_wavs\n";
+	local $debug = 0;
+	$debug and print "track: $n\n";
+
+	
+	# GET VERSIONS 
+	#  Assign bare (unversioned) file as version 1 
+	
+	$debug and 
+	print "getting versions for chain $n, $head\n";
+		my %versions =  get_versions(
+			this_wav_dir(),
+			$head,
+			'_', 'wav' )  ;
+		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
+			delete $versions{bare};
+		}
+	$debug and print "\%versions\n================\n", yaml_out(\%versions);
+	%versions;
+}
+sub versions { 
+	my $wav = shift;
+	[ sort { $a <=> $b } keys %{$wav->targets} ];
+	}
+sub this_last { pop @{ $wav->versions} }
+
+sub selected_version {
+	# return track-specific version if selected,
+	# otherwise return global version selection
+	# but only if this version exists
+	my $wav = shift;
+no warnings;
+	my $version = 
+		$wav->active 
+		? $wav->active 
+		: &monitor_version ;
+	(grep {$_ == $version } @{ $wav->versions} ) ? $version : undef;
+	### or should I give the active version
+use warnings;
+}
+sub remove_small_wavs {
+	$debug2 and print "&remove_small_wavs\n";
+	# left by a recording chainsetup that is 
+	# connected by not started
+
+	my $a = this_wav_dir();
+	my $cmd = qq(find $a  -name '*.wav' -size 44c);
+	$debug and print $cmd; 
+	my @wavs = split "\n",qx($cmd);
+	#map {system qq(ls -l $_ ) } @wavs; exit;
+	map { print ($_, "\n") if -s == 44 } @wavs; 
+	map { unlink $_ if -s == 44 } @wavs; 
+}
+sub get_versions {
+	my ($dir, $basename, $sep, $ext) = @_;
+
+	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
+	opendir WD, $dir or carp ("can't read directory $dir: $!");
+	$debug and print "reading directory: $dir\n\n";
+	my %versions = ();
+	for my $candidate ( readdir WD ) {
+		$debug and print "candidate: $candidate\n\n";
+		$candidate =~ m/^ ( $basename 
+		   ($sep (\d+))? 
+		   \.$ext )
+		   $/x or next;
+		$debug and print "match: $1,  num: $3\n\n";
+		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+	}
+	$debug and print "get_version: " , yaml_out(\%versions);
+	closedir WD;
+	%versions;
+}
+
+__END__
+=comment
+my $wav = Wav->new( head => vocal);
+
+$wav->versions;
+$wav->head  # vocal
+$wav->n     # 3 i.e. track 3
+$wav->active
+$wav->targets
+$wav->full_path
+
+returns numbers
+
+$wav->targets
+
+returns targets
+
+=cut
+=comment
+TODO
+sub last_version { 
+	## for each track or tracks in take
+
+$track->last_version;
+$take->last_version
+$project->last_version
+	
+			$last_version = $this_last if $this_last > $last_version ;
+
+}
+sub new_version {
+	last_version() + 1;
+}
+=cut
+
+=comment
+# untested, i don't think i need it.
+=cut	
+	
+
+
+package UI::Graphical;
+our @ISA = 'UI';
+sub hello {"make a window\n";}
+
+package UI::Text;
+our @ISA = 'UI';
+sub hello {"hello world!\n"}
+
+
+######## Testing
+
+use Test::More qw(no_plan);
+# tests => 3;
+
+## Grab at anything nearby
+
+use lib qw(.. . lib lib/UI);
+
+# BEGIN { use_ok('UI') };
+
+my $wav = Wav->new(head => 'sax');
+is( $wav->isa('Wav'),1, "Test parent class affiliation" );
+
+#diag("there's what HE did wrong");
+#is( "three", "four", 'new() returned something' );
+#diag("here's what went wrong");
+#ok ($ui->prepare);
+#is(defined $gui, 1, "Test instantiation" );
+#is( $gui->isa('UI'),1, "Test parent class affiliation" );
+=comment
+my $ui=UI->new(mode => 'Graphical');;
+print $ui->hello, $/;
+bless $ui, UI;
+print $ui->hello, $/;
+exit;
+$ui=UI::Graphical->new;
+$ui->hello;
+$ui->how;
+
+$ui=UI::Text->new;
+$ui->hello;
+$ui->how;
+
+$ui->hello;
+$ui->how;
+package UI;
+=cut
+
+__END__
+sub new { my $class = shift; 
+			my $mode = shift; # Text or Graphical
+}
+
+
+$state_c{$n}->{offset}
+
+
+new branch called object
+
+first test out that code for set! 
+
+=== new
+
+sub new {
+             my $class = shift;
+			my @gabbr = qw(tk gui graphic graphical);
+			my @tabbr = qw(text txt);
+			my $mode = lc $_[0];
+			@_ % 2 and # we may have a single argument
+			(grep{$mode eq $_ } @gabbr )
+				and return bless { @_ },"$root_class\::Graphical"
+			or (grep{$mode eq $_ } @tabbr )
+				and return bless { @_ }, "$root_class\::Text"
+			or croak "odd number of arguments ",join "\n--\n" ,@_;
+			 my %h = ( @_ );
+             return bless { @_ },
+			  $class eq $root_class  && $h{mode} 
+					? "$root_class\::" . $h{mode} 
+					: $class;
+         }
+
+====
+
+# Before `make install' is performed this script should be runnable with
+# `make test'. After `make install' it should work as `perl 1.t'
+
+#########################
+
+# change 'tests => 1' to 'tests => last_test_to_print';
+
+use Test::More qw(no_plan);
+# tests => 3;
+
+## Grab at anything nearby
+
+use lib qw(.. . lib lib/UI);
+
+BEGIN { use_ok('UI') };
+
+
+diag("there's what HE did wrong");
+#is( "three", "four", 'new() returned something' );
+diag("here's what went wrong");
+ok ($ui->prepare);
+is(defined $gui, 1, "Test instantiation" );
+is( $gui->isa('UI'),1, "Test parent class affiliation" );

@@ -1,0 +1,279 @@
+
+
+Tue Jan  1 04:45:23 JST 2008
+
+Retrieiving state. The vol settings
+are not done right with my simple
+fix of suppressing track creation.
+
+Easiest to just destroy
+and create whole gui, i.e. make load project
+take a set of settings as well as a project
+name.
+
+Otherwise, things feel more snick-snick again.
+
+
+
+---
+I would like to provide a object toolkit that
+could be used by someone interesting in developing
+a larger subset of DAW facilities based on 
+Ecasound.
+
+I also wanted to create something like
+a tape recorder like thing that would get down
+a lot of material and never break.
+
+So nothing waits on getting down track after
+track... you don't have to even provide a name.
+
+Writing a routine that writes Ecasound's language
+I've spent a lot of time with chain setups.
+I find them a bit like finding odd } or { of ' or "
+in bits of my code.
+
+So I can for my next project, decide how rec-status
+and make_io_lists would work in a world of objects.
+
+In make_io_lists, each object would tell make io lists
+what to do:
+
+	now i have 'if $oid{output} eq mixdown ' { setup mixtrack }'
+	now i have 'if $oid{output} eq busspec ' { setup mixtrack }'
+	I convert that to 
+	have 'if oid->add chains'
+	output eq mix' { setup mixtrack }'
+
+	that is each oid gets its own routines for
+	make_io_lists.
+
+	So that what was so big and complicated now gets
+	simplified. We will simply embed the subroutines
+	and refer to them by evaling the field in the 
+	$oid hash. 
+
+
+
+
+
+
+Mon Dec 31 03:16:47 JST 2007
+
+- Save state
+
+- Remove child controller in GUI mode
+
+- Text mode conditional loop
+
+Sun Dec 30 02:14:53 JST 2007
+
+Today the clock refresh is broken,
+clicking a mark, the gui thinks
+the engine has stopped. Perhaps
+it gets a momentary strange signal
+from the engine.
+
+
+Sat Dec 29 18:24:02 JST 2007
+
+Solved!!
+
+I am getting an object in subs that
+
+	my $n = shift;
+
+one solution: my $n = $i; # global variable
+because for most, 
+
+Okay, we can do for all, breaking find_wavs, 
+and rec_status
+
+Find_wavs we can fix by using our new version.
+
+
+
+**** Or try to find the call that passes the object!!
+
+And throw away that object.
+
+
+--------
+oids will receive an additional field: 'file'.
+No. 'target' will be allowed to contain a filename head.
+No maybe we want a file to be joined categorically
+
+ type eq cooked -and- rec_status eq 'MON' and file_name 'sax'
+
+ or do we assume no such magic needed and just allow
+ 'target' to contain filename 
+
+
+replace &refresh_clock and other subs
+needed to use Tk event loop in Text side.
+
+Fix subs that use method invocations
+and procedural invocations __ with parameters.
+The parameterless case is easy.
+
+They are listed in file 'broken_by_object_syntax'
+
+Tue Dec 25 04:18:13 JST 2007
+=comment
+TODO remove wav_dir from config file. 
+or store project files in ~/.ecmd
+or make it .ecmdrc! simple is better.
+.ecmd
+.ecmdrc = config.yaml
+=cut
+
+Subroutine problems
+
+$gui->prepare;
+$gui->loop;
+
+In &loop; routines like length_display. Method Inherintance
+only works in method calls on $gui. Inside the loop a
+call to length_display() will execute whatever 
+sub is in the current package. 
+
+To for the text loop, set the package to UI::Text;
+all the sub calls will pick up the no-op stubs in UI::Text
+for the graphic routine.
+
+For the rest, the mass sub aliasing will work fine.
+For variables, the 'our' declaration saves me.
+
+my $ui = UI->new("text");
+my $ui = UI::Text->new(); # better
+$ui->prepare;
+$ui->loop; 
+
+---
+everywhere i had 
+
+	refresh() if $gui;
+
+to get polymorphism I need
+
+	$ui->refresh;
+
+	$ui->clock_display;
+
+sub prepare {
+	my $mode = shift;
+	$mode =~ /text/i and $mode = 'Text';
+	$mode =~ /graphic|tk/i and $mode = 'Graphical';
+	$ui = UI->new($mode); # $ui is global
+	
+}
+	then throughout program code. those
+	routines that need polymorphism get
+	called with an ->
+
+
+
+
+-----
+The grammar does not seem to get control of the input lines.
+Maybe falling through the conditional.
+
+Once again, move all to P::R? Grammar? Why not?
+Then you'll get rid of all the conditionals.
+
+That is your program, anyway, to get rid of conditionals.
+TODO, get rid of that thing you so loved, build and tested.
+
+On the Graphical side, I have a typical error, probably
+caused by odd or missing number of elements, a kind of
+error that I remember spending many ours debugging.
+
+Neither is that daunting, yet I have the urge to plunge
+into the unknown, I could make a new branch, spend an hour
+in it. But first would come the usage
+
+
+package Track;
+our @ISA;
+use Object::Tiny qw(
+
+	targets 
+	vol 
+	ops 
+	active 
+	file 
+	pan 
+	versions 
+	ch_r 
+	ch_m 
+	offset 
+	rw
+);
+
+=comment
+
+	targets # matches version number to filenemae
+			# redirection for backing.wav to 
+			# show up as version 1 (usually backing_1.wav) 
+	vol     # my volume effect, EFFECT_ID
+	pan 	# my pan effect EFFECT_ID
+	ops 	# a list of my effects EFFECT_IDs
+	active 	# selected WAV file version
+	file	# filename root, i.e. vocal in vocal_5.wav
+			# the 'name' of the track
+	versions# integers representing a wav file 1 -> sax_1.wav
+	ch_r    # channel for recording to
+	ch_m    # channel for playing back
+	offset  # no idea!
+	rw 		# whether status is REC MON OR MUTE
+
+I would want to break that down to smaller objects
+
+Wav objects
+	
+	sax 6 -> sax_6.wav
+
+
+$state_c{$n}->{offset}
+
+package Wav
+
+
+my $wav = Wav->new( head => vocal);
+
+$wav->versions;
+$wav->head  # vocal
+$wav->i     # 3 i.e. track 3
+
+returns numbers
+
+$wav->targets
+
+returns targets
+
+$wav->full_path
+
+new branch called object
+
+first test out that code for set! 
+
+
+
+
+
+
+
+sub set {
+	my $self = shift;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} if $filter{$_} } keys %new_vals;
+}
+	
+	
+
+
+I also need, well, want to fix the @sorted_ladspa problem.
+That is related to yaml round tripping. could it be the 
+size of the array? Impossible. So look at the code. 

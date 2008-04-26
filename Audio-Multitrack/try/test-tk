@@ -1,0 +1,13 @@
+# use Tk;
+#  $mw = MainWindow->new;
+#     $mw->title("Tk Ecmd");
+#     $mw->deiconify;
+#!/usr/local/bin/perl
+use Tk;
+# Main Window
+my $mw = new MainWindow;
+my $label = $mw -> Label(-text=>"Hello World") -> pack();
+my $button = $mw -> Button(-text => "Quit", 
+		-command => sub { exit })
+	-> pack();
+MainLoop;

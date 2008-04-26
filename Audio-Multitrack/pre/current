@@ -1,0 +1,125 @@
+CODE_MANIFEST:Assign.p
+edit:vim UI.p Core_subs.pl Assign.p Graphical_subs.pl /home/jroth/build/flow/UI/lib/UI/UI.pm $TD/gui ~/.bashrc
+group:Assign.p:my $yw = Data::YAML::Writer->new;
+group:Assign.p:my $yr = Data::YAML::Reader->new;
+group:Assign.p:	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
+group:Assign.p:	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
+group:Assign.p:	print "data: $h{-data}, ", ref $h{-data}, $/;
+group:Assign.p:	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
+group:Assign.p:		$class = ref $h{-data}; 
+group:Assign.p:	$class = $h{-class};
+group:Assign.p:	print "class: $h{-class}\n";
+group:Assign.p:	my @vars = @{ $h{-vars} };
+group:Assign.p:	my $ref = $h{-data};
+group:Assign.p:	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+group:Assign.p:			# contains a class-denoting :\:
+group:Assign.p:			if ($ref->{$identifier}) { #  if we have something,
+group:Assign.p:				$val = $ref->{$identifier};
+group:Assign.p:				# quoting for non-numerical
+group:Assign.p:				$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
+group:Assign.p:			$eval .= q($ref->{ );
+group:Assign.p:	my $source = $h{-source};
+group:Assign.p:	my @vars = @{ $h{-vars} };
+group:Assign.p:	my $class = $h{-class};
+group:Assign.p:	#      - filename or
+group:Assign.p:	#      - string containing YAML data
+group:Assign.p:	#      - reference to a hash array containing assignments
+group:Assign.p:	$source !~ /.yml$/i and -f $source 
+group:Assign.p:	or -f $source and $source =~ /.yml$/ 
+group:Assign.p:	or  $source =~ /^\s*---/s 
+group:Assign.p:		and $ref = $yr->read($source)
+group:Assign.p:	assign(-data => $ref, -vars => \@vars, -class => $class);
+group:Assign.p:	my @vars = @{ $h{-vars} };
+group:Assign.p:	my $class = $h{-class};
+group:Assign.p:	my $file  = $h{-file};
+group:Assign.p:	if ( $h{-file} ) {
+group:Assign.p:		if ($h{-storable}) {
+group:Assign.p:	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+group:Assign.p:    $yw->write( $data_ref, \$output ); 
+group:Assign.p:		$yaml = io($file)->all;
+group:Assign.p:	$yr->read( $yaml ); # returns ref
+group:Assign.p:			s/^\t(?!\t)/\t-\n\t\t/;
+group:Assign.p:		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
+group:Assign.pm.doc:Assign - Perl extensions for persistent variables and utility functions
+tracks:Assign.p:my $yw = Data::YAML::Writer->new;
+tracks:Assign.p:my $yr = Data::YAML::Reader->new;
+tracks:Assign.p:	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
+tracks:Assign.p:	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
+tracks:Assign.p:	print "data: $h{-data}, ", ref $h{-data}, $/;
+tracks:Assign.p:	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
+tracks:Assign.p:		$class = ref $h{-data}; 
+tracks:Assign.p:	$class = $h{-class};
+tracks:Assign.p:	print "class: $h{-class}\n";
+tracks:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:Assign.p:	my $ref = $h{-data};
+tracks:Assign.p:	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+tracks:Assign.p:			# contains a class-denoting :\:
+tracks:Assign.p:			if ($ref->{$identifier}) { #  if we have something,
+tracks:Assign.p:				$val = $ref->{$identifier};
+tracks:Assign.p:				# quoting for non-numerical
+tracks:Assign.p:				$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
+tracks:Assign.p:			$eval .= q($ref->{ );
+tracks:Assign.p:	my $source = $h{-source};
+tracks:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:Assign.p:	my $class = $h{-class};
+tracks:Assign.p:	#      - filename or
+tracks:Assign.p:	#      - string containing YAML data
+tracks:Assign.p:	#      - reference to a hash array containing assignments
+tracks:Assign.p:	$source !~ /.yml$/i and -f $source 
+tracks:Assign.p:	or -f $source and $source =~ /.yml$/ 
+tracks:Assign.p:	or  $source =~ /^\s*---/s 
+tracks:Assign.p:		and $ref = $yr->read($source)
+tracks:Assign.p:	assign(-data => $ref, -vars => \@vars, -class => $class);
+tracks:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:Assign.p:	my $class = $h{-class};
+tracks:Assign.p:	my $file  = $h{-file};
+tracks:Assign.p:	if ( $h{-file} ) {
+tracks:Assign.p:		if ($h{-storable}) {
+tracks:Assign.p:	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+tracks:Assign.p:    $yw->write( $data_ref, \$output ); 
+tracks:Assign.p:		$yaml = io($file)->all;
+tracks:Assign.p:	$yr->read( $yaml ); # returns ref
+tracks:Assign.p:			s/^\t(?!\t)/\t-\n\t\t/;
+tracks:Assign.p:		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
+tracks:Assign.pm.doc:Assign - Perl extensions for persistent variables and utility functions
+tracks:group:Assign.p:my $yw = Data::YAML::Writer->new;
+tracks:group:Assign.p:my $yr = Data::YAML::Reader->new;
+tracks:group:Assign.p:	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
+tracks:group:Assign.p:	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
+tracks:group:Assign.p:	print "data: $h{-data}, ", ref $h{-data}, $/;
+tracks:group:Assign.p:	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
+tracks:group:Assign.p:		$class = ref $h{-data}; 
+tracks:group:Assign.p:	$class = $h{-class};
+tracks:group:Assign.p:	print "class: $h{-class}\n";
+tracks:group:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:group:Assign.p:	my $ref = $h{-data};
+tracks:group:Assign.p:	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+tracks:group:Assign.p:			# contains a class-denoting :\:
+tracks:group:Assign.p:			if ($ref->{$identifier}) { #  if we have something,
+tracks:group:Assign.p:				$val = $ref->{$identifier};
+tracks:group:Assign.p:				# quoting for non-numerical
+tracks:group:Assign.p:				$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
+tracks:group:Assign.p:			$eval .= q($ref->{ );
+tracks:group:Assign.p:	my $source = $h{-source};
+tracks:group:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:group:Assign.p:	my $class = $h{-class};
+tracks:group:Assign.p:	#      - filename or
+tracks:group:Assign.p:	#      - string containing YAML data
+tracks:group:Assign.p:	#      - reference to a hash array containing assignments
+tracks:group:Assign.p:	$source !~ /.yml$/i and -f $source 
+tracks:group:Assign.p:	or -f $source and $source =~ /.yml$/ 
+tracks:group:Assign.p:	or  $source =~ /^\s*---/s 
+tracks:group:Assign.p:		and $ref = $yr->read($source)
+tracks:group:Assign.p:	assign(-data => $ref, -vars => \@vars, -class => $class);
+tracks:group:Assign.p:	my @vars = @{ $h{-vars} };
+tracks:group:Assign.p:	my $class = $h{-class};
+tracks:group:Assign.p:	my $file  = $h{-file};
+tracks:group:Assign.p:	if ( $h{-file} ) {
+tracks:group:Assign.p:		if ($h{-storable}) {
+tracks:group:Assign.p:	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
+tracks:group:Assign.p:    $yw->write( $data_ref, \$output ); 
+tracks:group:Assign.p:		$yaml = io($file)->all;
+tracks:group:Assign.p:	$yr->read( $yaml ); # returns ref
+tracks:group:Assign.p:			s/^\t(?!\t)/\t-\n\t\t/;
+tracks:group:Assign.p:		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
+tracks:group:Assign.pm.doc:Assign - Perl extensions for persistent variables and utility functions

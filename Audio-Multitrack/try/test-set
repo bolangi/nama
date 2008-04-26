@@ -1,0 +1,17 @@
+my $self = {mode => 'Text'};
+print $self->{mode}, $/;
+&set( $self, "mode", 'Graphal' );
+print $self->{mode}, $/;
+print $self->{ode}, $/;
+print keys %{$self};
+sub set {
+	my $self = shift;
+	my %new_vals = @_;
+	my %filter;
+	map{$filter{$_}++} keys %{ $self };
+	map{ $self->{$_} = $new_vals{$_} 
+
+	if $filter{$_} 
+
+	} keys %new_vals;
+}

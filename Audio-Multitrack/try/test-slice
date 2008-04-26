@@ -1,0 +1,4 @@
+my @a = (0..5); 
+my @b = @a[1..5];
+print scalar @a, $/;
+print scalar @b;

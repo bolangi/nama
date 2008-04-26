@@ -1,0 +1,39 @@
+
+=comment
+
+TODO 
+re-enable effects
+
+want to merge this
+
+find
+list
+add guitar rec 1
+add vocal rec 2
+del guitar guitar
+del 1 
+
+mix
+guitar 2
+
+vol 36
+pan 50
+
+guitar vol 36
+mix vol 600
+
+mon guitar
+guitar mon 
+guitar rec
+
+rec guitar
+r gui
+m vo
+v 36
+p 50
+
+
+t s h (start stop help) iam
+
+
+=cut

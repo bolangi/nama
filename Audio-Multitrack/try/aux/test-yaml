@@ -1,0 +1,21 @@
+
+#!/usr/local/bin/perl -w
+use YAML::Tiny;
+
+my $yaml = <<YAML;
+YAML
+
+my $y = YAML::Tiny->new;
+$y = YAML::Tiny->read_string($yaml);
+my $z;
+print $y->write_string();
+#print keys %{$y->[0] };
+exit;
+#$y->[0]->{property}="ecmd";
+
+__END__
+__END__
+my $s;
+$y->write_string($s);
+print $s;
+

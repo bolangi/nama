@@ -1,0 +1,130 @@
+Global
+
+sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
+sub config_file { "config.yml" }
+sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
+sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name) }
+sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name) }
+
+sub sc { print join $/, "STATE_C", yaml_out( \%state_c); }
+sub status_vars {
+sub discard_object {
+sub prepare {  # actions begin
+sub eval_iam {
+
+sub global_config{
+sub project_config {
+sub config { strip_all( &project_config or &global_config or $default) }
+
+sub read_config {
+sub walk_tree {
+sub substitute{
+
+sub initialize_oids {
+
+Project
+
+sub load_project {
+sub initialize_project_data {
+sub add_track {
+sub add_mix_track {
+sub mix_suffix {
+sub restore_track {
+sub register_track {
+sub dig_ruins { 
+
+Wav
+
+sub find_wavs {
+sub remove_small_wavs {
+
+Group
+
+sub new_take {
+sub increment_take {
+sub decrement_take {
+sub select_take {
+
+Track
+
+sub add_volume_control {
+sub add_pan_control {
+sub selected_version {
+sub set_active_version {
+sub new_version {
+sub get_versions {
+
+
+
+sub mon_vert {
+sub new_wav_name {
+sub output_format {
+
+sub really_recording {  # returns filename stubs
+sub rec_status {
+
+
+sub collect_chains {
+sub make_io_lists {
+sub eliminate_loops {
+sub write_chains {
+
+sub rec_cleanup {
+
+sub rec_route {
+sub route {
+sub hash_push {
+sub mono_to_stereo { " -erc:1,2 " }
+sub pre_multi {
+sub convert_to_jack {
+sub convert_to_alsa { initialize_oids }
+
+sub load_ecs {
+sub new_engine { 
+sub setup_transport {
+sub connect_transport {
+sub start_transport { 
+sub stop_transport { 
+sub transport_running {
+sub disconnect_transport {
+
+sub toggle_unit {
+sub show_unit { $time_step->configure(
+sub start_clock {
+sub restart_clock {
+sub refresh_clock{
+sub to_start { 
+sub to_end { 
+sub jump {
+
+sub add_effect {
+sub add_effect_gui {
+sub remove_effect {
+sub remove_effect_gui {
+sub remove_op {
+sub cop_add {
+sub cop_init {
+sub effect_update {
+sub find_op_offsets {
+sub apply_ops {  # in addition to operators in .ecs file
+sub apply_op {
+
+sub prepare_static_effects_data{
+sub extract_effects_data {
+sub sort_ladspa_effects {
+sub read_in_effects_data {
+sub read_in_tkeca_effects_data {
+sub get_ladspa_hints{
+sub range {
+sub integrate_ladspa_hints {
+sub d2 {
+sub dn {
+sub round {
+
+sub save_state {
+sub assign_var {
+sub retrieve_state {
+sub save_effects {
+sub r {
+sub r5 { r("eff5") };
+sub retrieve_effects {

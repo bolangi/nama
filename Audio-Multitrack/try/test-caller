@@ -1,0 +1,19 @@
+package A;
+
+$a = 3;
+
+#sub pc {print caller}
+package B;
+our @ISA='A';
+$b = bless {};
+
+package Candnotwhowhereto;
+
+#$B::b->pc;
+
+print ref $B::b;
+
+
+
+
+

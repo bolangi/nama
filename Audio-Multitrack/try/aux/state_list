@@ -1,0 +1,25 @@
+my $list = <<'PERSISTENT';
+$monitor_version
+$last_version 
+%track_names 	
+%state_c 		
+%state_t 		
+%cops 			
+$cop_id 		
+%copp 			
+@all_chains 	
+$i 				
+$t 				
+%take 			
+@takes 			
+%chain 			
+@marks			
+$unit			
+%oid_status		
+%old_vol		
+$jack_on		
+PERSISTENT
+
+my @persistent_vars = split "\n", $list;
+print scalar @persistent_vars;
+

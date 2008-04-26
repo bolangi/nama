@@ -1,0 +1,17 @@
+   use Data::YAML::Writer;
+
+           my $data = {
+               one => 1,
+               two => 2,
+               three => [ 1, 2, 3 ],
+           };
+
+           my $yw = Data::YAML::Writer->new;
+
+@a = qw(good morning to you);;
+
+@b = qw(a hay stack); # 
+           # Write to an array...
+           $yw->write( $data, \$a);
+
+print $a;

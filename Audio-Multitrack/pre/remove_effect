@@ -1,0 +1,69 @@
+sub remove_effect {
+	@_ = discard_object(@_);
+	$debug2 and print "&remove_effect\n";
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+		
+	$debug and print "ready to remove cop_id: $id\n";
+
+	# if i belong to someone remove their ownership of me
+
+	if ( my $parent = $cops{$id}->{belongs_to} ) {
+	$debug and print "parent $parent owns list: ", join " ",
+		@{ $cops{$parent}->{owns} }, "\n";
+
+		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+		@{ $cops{$parent}->{owns} } ; 
+	$debug and print "parent $parent new owns list: ", join " ",
+	}
+
+	# recursively remove children
+	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
+		
+	# parameter controllers are not separate ops
+	map{remove_effect($_)}@{ $cops{$id}->{owns} };
+
+	
+	# remove my own cop_id from the stack
+	remove_op($id), $ui->remove_effect_gui($id) unless $cops{$id}->{belongs_to};
+
+}
+sub remove_effect_gui { 
+	@_ = discard_object(@_);
+	$debug2 and print "&remove_effect_gui\n";
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+	$debug and print "id: $id, chain: $n\n";
+
+	$ti[$n]->set(ops =>  
+		[ grep{ $_ ne $id} @{ $ti[ $cops{$id}->{chain} ]->ops } ]);
+	$debug and print "i have widgets for these ids: ", join " ",keys %widget_e, "\n";
+	$debug and print "preparing to destroy: $id\n";
+	$widget_e{$id}->destroy();
+	delete $widget_e{$id}; 
+
+}
+
+sub remove_op {
+
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+	if ( $cops{$id}->{belongs_to}) { 
+		return;
+	}
+	my $index; 
+	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
+	$debug and print "operator id to remove: $id\n";
+		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
+			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id; 
+		};
+	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
+	$debug and eval_iam ("cs");
+	 eval_iam ("c-select $n");
+	eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+	eval_iam ("cop-remove");
+	$debug and eval_iam ("cs");
+
+	delete $cops{$id};
+	delete $copp{$id};
+}

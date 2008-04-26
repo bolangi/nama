@@ -1,0 +1,11 @@
+package Boo;
+use Object::Tiny qw(abc def ghi);
+print "reached here";
+
+my $a = Boo->new(abc => 3);
+#print $a->{abc};
+$a->set(abc => 4);
+#print $a->abc;
+
+#print join $/, keys %_is_field;
+

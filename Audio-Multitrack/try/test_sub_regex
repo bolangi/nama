@@ -1,0 +1,28 @@
+# validated 
+Wed Dec 26 21:35:10 JST 2007
+
+my $new_root = 'UI';
+my @corpa = split $/,<<'PKG';
+&scooby;
+ &scooby;
+  &scooby ;
+scooby
+ scooby
+  scooby()
+scooby();
+PKG
+my $i;
+map { print "input ", $i++,": ", $_, $/;
+
+		my $re = qr{
+		
+				& # ampersand 
+				? # optional
+				$_ # iterator var (sub name)
+
+				\s* # possibly spaces then
+				\(? # open parenthesis
+
+}x;
+	  print "output"," : ", (/($re)/ and $1), $/;} @corpa;
+

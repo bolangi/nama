@@ -1,0 +1,74 @@
+# subclass
+
+package ::MasterTrack;
+our @ISA = '::Track';
+use ::Object qw( ...  );
+
+sub rec_status{
+
+	my $track = shift;
+	return 'MUTE' if $track->rw eq 'MUTE';
+	return 'MON';
+
+}
+
+sub ch_r {
+	my $track = shift;
+	return '';
+}
+
+# subclass
+
+package ::MixTrack;
+our @ISA = '::Track';
+use ::Object qw( ...);
+
+sub rec_status{
+
+	my $track = shift;
+	$track->rw;
+
+}
+
+sub ch_r {
+	my $track = shift;
+	return '';
+}
+
+	
+sub rec_cleanup { # XXXX
+	$debug2 and print "&rec_cleanup\n";
+	$debug and print "I was recording!\n";
+ 	my @k = really_recording();
+	disconnect_transport();
+	my $recorded = 0;
+ 	for my $k (@k) {    # XXX
+ 		my ($n) = $outputs{file}{$k}[-1] =~ m/_(\d+)/; 
+ 		my $test_wav = new_wav_name($k);
+		$debug and print "new wave name for $k: ", new_wav_name($k), "\n";
+ 		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); # #01 regex error, fixed
+		$debug and print "n: $n\nv: $v\n";
+		$debug and print "testing for $test_wav\n";
+		if (-e $test_wav) {
+			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
+				find_wavs($n);
+				$ti[$n]->active = $ti[$n]->versions->[-1]; # XXX
+				update_version_button($n, $v);
+			$recorded++;
+			}
+			else { unlink $test_wav }
+		}
+	}
+	my $mixed = scalar ( grep{ $_ eq $project_name or $_ eq $mixname} @k );
+	
+	$debug and print "recorded: $recorded mixed: $mixed\n";
+	if ( ($recorded -  $mixed) >= 1) {
+			# i.e. there are first time recorded tracks
+			$ui->update_master_version_button();
+			$tracker->set( rw => 'MON');
+			setup_transport();
+			connect_transport();
+			$ui->refresh();
+	}
+		
+} 

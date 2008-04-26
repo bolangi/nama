@@ -1,0 +1,78 @@
+sub retrieve_state_storable {
+	$debug2 and print "&retrieve_state_storable\n";
+	my %oid_status_temp;
+	my $file = shift;
+	-e $file or warn ("file: $file not found\n"),return 0;
+	my $hash_ref = retrieve($file);
+	$monitor_version= ${ $hash_ref->{monitor_version} } if defined $hash_ref->{monitor_version} ;
+	$last_version =   ${ $hash_ref->{last_version} } if defined $hash_ref->{last_version} ;
+	%track_names 	= %{ $hash_ref->{track_names} } if defined $hash_ref->{track_names} ;
+	%state_c 		= %{ $hash_ref->{state_c} } if defined $hash_ref->{state_c} ;
+	%state_t 		= %{ $hash_ref->{state_t} } if defined $hash_ref->{state_t} ;
+	%cops 			= %{ $hash_ref->{cops} } if defined $hash_ref->{cops} ;
+	$cop_id 		= ${ $hash_ref->{cop_id} } if defined $hash_ref->{cop_id} ;
+	%copp 			= %{ $hash_ref->{copp} } if defined $hash_ref->{copp} ;
+	@all_chains 	= @{ $hash_ref->{all_chains} } if defined $hash_ref->{all_chains} ;
+	$i 				= ${ $hash_ref->{i} } if defined $hash_ref->{i} ;
+	$t 				= ${ $hash_ref->{t} } if defined $hash_ref->{t} ;
+	%take 			= %{ $hash_ref->{take} } if defined $hash_ref->{take} ;
+	@takes 			= @{ $hash_ref->{takes} } if defined $hash_ref->{takes} ;
+	%chain 			= %{ $hash_ref->{chain} } if defined $hash_ref->{chain} ;
+	@marks			= @{ $hash_ref->{marks} } if defined $hash_ref->{marks} ;	
+	$unit			= ${ $hash_ref->{unit} } if defined $hash_ref->{unit} ;	
+	%oid_status		= %{ $hash_ref->{oid_status} } if defined $hash_ref->{oid_status} ;	
+	%old_vol		= %{ $hash_ref->{old_vol} } if defined $hash_ref->{old_vol} ;	
+	$jack_on		= ${ $hash_ref->{jack_on} }	if defined $hash_ref->{jack_on};
+	
+	my $toggle_jack = $widget_o[$#widget_o];
+	&convert_to_jack, $ui->paint_button($toggle_jack, q(lightblue) ) if $jack_on;
+
+	$ui->refresh_oids;
+
+
+	# restore mixer settings
+
+	my $result = system "sudo alsactl -f $file.alsa restore";
+	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
+
+	# restore time marker labels
+
+	$ui->restore_time_marker_labels();
+
+=comment
+	map{ $time_marks[$_]->configure( 
+		-text => &colonize($marks[$_]),
+		-background => $old_bg,
+	)} 
+	grep{ $marks[$_] }1..$#time_marks;
+=cut
+
+	# restore take and track guis
+	
+	for my $t (@takes) { next if $t == 1; $ui->take_gui }; #
+	# Why skip first????? XXXX first in &initialize_project
+	my $did_apply = 0;
+	$last_version = 0; 
+	for my $n (@all_chains) { 
+		$debug and print "restoring track: $n\n";
+		&restore_track($n) ;
+		for my $id (@{$state_c{$n}->{ops}}){
+			$did_apply++ 
+				unless $id eq $state_c{$n}->{vol}
+					or $id eq $state_c{$n}->{pan};
+
+			
+			&add_effect({
+						chain => $cops{$id}->{chain},
+						type => $cops{$id}->{type},
+						cop_id => $id,
+						parent_id => $cops{$id}->{belongs_to},
+						});
+
+		# TODO if parent has a parent, i am a parameter controller controlling
+		# a parameter controller, and therefore need the -kx switch
+		}
+	}
+	$did_apply and $ew->deiconify();
+
+}

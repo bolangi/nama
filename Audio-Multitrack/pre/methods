@@ -1,0 +1,22 @@
+package ::Bus;
+sub new {
+sub deref_code {
+sub apply {
+package ::Rule;
+sub new {
+sub all_rules { @by_index[1..scalar @by_index - 1] }
+sub dump{
+package ::Track;
+sub new {
+sub full_path {
+sub overall_version { 123 };
+sub rec_status {
+sub id {
+sub all_tracks { @by_index[1..scalar @by_index - 1] }
+sub track {
+package ::Group;
+sub new {
+sub tracks {
+sub all_groups { @by_index[1..@by_index - 1] }
+sub group {
+package ::Op;

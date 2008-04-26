@@ -1,0 +1,62 @@
+what is the difference between project and project?
+
+a project is currently a pair of directories in .ecmd and $wav_dir
+
+a project contains the current state of the
+	- the saved state as files in project_dir
+	- working files, if any from a previous run
+	- runs, take1.run
+
+Project->new( name => paul_brocante )
+Project->load( name => paul_brocante )
+
+
+
+a performance is all actions (update effects) during
+an engine run. what other actions might we want to record?
+
+If I recorded the run of subroutines and their parameters,
+it might be possible to reproduce operations such as 
+adding tracks. Of course, that is the scripting language!
+
+
+A project
+
+
+
+
+the upshot of this is that i can rename project to project
+via pie afer checking if increment take fixes the latest
+thing.
+
+
+
+
+
+if i am willing to eval code, i can save the contents of 
+oid to storage. 
+#!/usr/bin/env perl
+#use Test::More qw(no_plan);
+use lib qw(.. .); 
+use UI;
+$UI::wav_dir = '/media/projects';
+$UI::project_name = 'paul_brocante';
+=comment
+my $s = UI::Project->new(name => 'paul_brocante');
+is(defined $s, 1, "Project instantiation" ); 
+is( $s->isa('UI::Project'),1, "Parent class for ". ref $s);
+is( $s->project_dir , '/media/projects/.ecmd/paul_brocante', "Directory shows");
+=cut
+my $wav = UI::Wav->new( n => 5, head => 'sax');
+print "n: ", $wav->n;
+print join $/, %{ $wav->targets} or die;
+print join $/, @{ $wav->versions} or die;
+print join ".".$/, %{ UI::Wav::targets("sax")} or die;
+#is(defined $wav, 1, "Project instantiation" ); 
+#is( $wav->isa('UI::Wav'),1, "Parent class for ". ref $s);
+#diag( print join $/, %{ $wav->targets });
+
+
+
+__END__
+

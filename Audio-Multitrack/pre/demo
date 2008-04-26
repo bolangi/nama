@@ -1,0 +1,23 @@
+my $tracker  = UI::Bus->new(
+	name => 'Tracker_Bus',
+	groups => ['Tracker'],
+	tracks => [],
+	rules  => [ qw( mix_file mix_setup rec_setup mon_setup rec_file) ],
+);
+
+my $master_fader  = UI::Bus->new(
+	name => 'Master_Bus',
+	rules  => [ qw(mixer_out) ],
+);
+
+my $master = UI::Track->new( group => 'Master', name => 'Master' );
+
+my $mix = UI::Track->new( group => 'Mixer', name => 'Mixes'); 
+
+my $sax = UI::Track->new( name => 'sax' );
+
+my $piano  = UI::Track->new( name => 'piano', ch_r => 2 );
+
+$master_fader->apply;
+$tracker->apply;
+

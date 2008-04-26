@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+use lib qw(. ..);
+use Assign qw(:all);
+
+print remove_spaces("bulwinkle is a...");
