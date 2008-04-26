@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
 $debug = 1;
-use lib "/home/jroth/build/flow/UI/lib";;
-use UI::Assign qw(:all);
+use lib "/home/jroth/build/flow/Audio-Multitrack/lib";;
+use Audio::Multitrack::Assign qw(:all);
 $in = qx(cat ./commands.yml.tab);
 my $ref = yaml_in( $in); 
 #print yaml_out $ref;

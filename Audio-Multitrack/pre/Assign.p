@@ -218,7 +218,7 @@ sub serialize {
 	my @vars = @{ $h{-vars} };
 	my $class = $h{-class};
 	my $file  = $h{-file};
- 	$class .= "\:\:" unless $class =~ /\:\:/;; # protecting from preprocessor!
+ 	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect from preprocessor!
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 

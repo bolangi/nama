@@ -1331,7 +1331,8 @@ sub find_op_offsets {
 sub apply_ops {  # in addition to operators in .ecs file
 	local $debug = $debug3;
 	$debug2 and print "&apply_ops\n";
-	for my $n (1..$#UI::Track::by_index) {
+	my $last = scalar @::Track::index - 1;
+	for my $n (1..$last) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "MUTE" ;
 		#next if $n == 2; # no volume control for mix track
@@ -1849,14 +1850,15 @@ sub retrieve_state {
 	#map{ ::Group->new( %{ $_ } ) } @group_by_index;
 	my @track_by_index = @::Track::by_index;
 	@::Track::by_index = ();
+	# remove first (null) entry, master and mix tracks
 	@track_by_index = @track_by_index[3..$#track_by_index]; 
-	my $in;
+	my $in = 3;
+	map { print $_->dump } @track_by_index; exit;
 	map{ print "index: ", $in++, " type: ", ref $_,
 	"content: ", yaml_out( $_), $/;} @track_by_index; 
-	# remove first (null) entry, master and mix tracks
 	my $did_apply = 0;
 	map{ 
-		my %h = %$_;
+		my %h = @_;
 		print "old n: $h{n}\n";
 		print "h: ", join " ", %h, $/;
 		delete $h{n};
