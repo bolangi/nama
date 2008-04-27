@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl5.8.0
-use lib "$ENV{MD}/lib"; 
+use lib "/home/jroth/build/flow/Audio-Multitrack/lib"; 
 use Audio::Multitrack;
 package Audio::Multitrack;
 mainloop();

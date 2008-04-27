@@ -863,6 +863,7 @@ sub start_transport {
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; $e->eci('stop');
 	$ui->project_label_configure(-background => $old_bg);
+	eval qq($clock_id->cancel);
 	# what if we are recording
 }
 sub transport_running {
@@ -886,29 +887,27 @@ sub show_unit { $time_step->configure(
 ## clock and clock-refresh functions ##
 #
 
+sub update_clock { 
+	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+}
 sub start_clock {
+	eval qq($clock_id->cancel);
 	$clock_id = $clock->repeat(1000, \&refresh_clock);
 }
 sub restart_clock {
-	eval q($clock_id->cancel);
 	start_clock();
 }
 sub refresh_clock{
+	local $debug = 1;
 	update_clock();
 	my $status = eval_iam('engine-status');
-	return if $status eq 'running' ;
-	$clock_id->cancel;
-	$ui->project_label_configure(-background => $old_bg);
+	$debug and print "engine status: $status\n";
 	if ($status eq 'error') { new_engine();
-		&connect_transport unless &really_recording; 
+		&really_recording and &rec_cleanup or &connect_transport
 	}
 	elsif ($status eq 'finished') {
-		&connect_transport unless &really_recording; 
+		&really_recording and &rec_cleanup or &connect_transport
 	}
-	else { # status: stopped, not started, undefined
-	&rec_cleanup if &really_recording();
-	}
-
 }
 ## recording head positioning
 
@@ -936,7 +935,8 @@ sub jump {
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
 	print "$cmd\n";
-	restart_clock();
+	sleep 1;
+ restart_clock();
 }
 ## post-recording functions
 
@@ -1191,7 +1191,7 @@ PP
 	$cops{$cop_id} = {chain => $n, 
 					  type => $code,
 					  display => $effects[$i]->{display},
-					  owns => [] };
+					  owns => [] }; # DEBUGGIN TEST
 
 	$p{cop_id} = $cop_id;
  	cop_init ( \%p );
@@ -1788,10 +1788,20 @@ Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, inte
 sub save_state {
 	$debug2 and print "&save_state\n";
 	my $file = shift;
+
+	# remove nulls in %cops 
+	delete $cops{''};
+	#print join $/, keys %cops;
+	my $i; 
+	map{ 
+		my $found; 
+		$found = "yes" if @{$cops{$_}->{owns}};
+		$cops{$_}->{owns} = '~' unless $found;
+	} keys %cops;
+
 	# restore muted volume levels
 	#
 	my %muted;
-	
 	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
 		 $muted{$_}++;
 	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
@@ -1828,6 +1838,9 @@ map{ bless $_, $class{$_->{n}} } ::Track::all;
 	grep { $muted{$_}} 
 	@all_chains;
 
+	# restore %cops
+	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
+
 }
 sub assign_var {
 	my ($source, @vars) = @_;
@@ -1847,6 +1860,7 @@ sub retrieve_state {
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 
+
 	# the upcoming assign @::Track::by_index creates HASHES, not Tracks 
 	# and wants to clobber the existing objects
 	#
@@ -1857,8 +1871,15 @@ sub retrieve_state {
 	my @track_objects = @::Track::by_index;
 	assign_var( $file, @persistent_vars );
 	my @track_hashes      = @::Track::by_index; 
+
 	# replace master, mixdown 
 	@::Track::by_index[1,2] = @track_objects[1,2]; 
+
+
+	# correct 'owns' null to empty array
+	# this is a problem with my YAML implementation
+	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
+
 	$debug and map{print $_->dump} @::Track::by_index[1,2];
 	# remove first (null) entry, master and mix tracks
 	@track_hashes = @track_hashes[3..$#track_hashes]; 
