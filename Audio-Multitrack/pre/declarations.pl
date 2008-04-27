@@ -101,6 +101,7 @@ our (
 	$monitor_version,# which global version we are currently using
 	%e_bound,		# for displaying hundreds of effects in groups
 	@marks,			# where we want to come back tto
+	%marks, 		# new implementation 
 	$unit,			# multiples of seconds or minutes
 	$markers_armed, # two states forth the markers
 	%old_vol,		# a copy of volume settings, for muting
@@ -139,6 +140,7 @@ our (
 	$iam_frame,
 	$perl_eval_frame,
 	$transport_frame,
+	$mark_frame,
 
 	## collected widgets (i may need to destroy them)
 
@@ -154,6 +156,7 @@ our (
 						  	#	all tracks
 	@time_marks,	# how different from @marks?
 					# one is widgets one is the data
+	%time_marks, 	# new implementation
 	$time_step,
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time

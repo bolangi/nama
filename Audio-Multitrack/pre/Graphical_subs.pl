@@ -249,7 +249,7 @@ sub time_gui {
 		$w->pack(-side => 'left');	
 	}
 
-	my $mark_frame = $time_frame->Frame->pack(
+	$mark_frame = $time_frame->Frame->pack(
 		-side => 'bottom', 
 		-fill => 'both');
 	my $fast_frame = $time_frame->Frame->pack(
@@ -291,35 +291,40 @@ sub time_gui {
 
 	# Marks
 	
-	my @label_and_arm;
-	push @label_and_arm, $mark_label;	
-	push @label_and_arm, $mark_frame->Button(
-		-text => 'Set',
-		-command => \&arm_mark,
-	);
-	my $marks = 20; # number of marker buttons
-	my @m = (1..$marks);
-	my $label = qw(A);
-	map { push @time_marks, $mark_frame->Button( 
-		-text => $_,
-		-command => sub { mark(eval $_)},
-		-background => $marks[$_] ? $old_bg : 'lightblue',
-		) } @m;
-	# map { $time_marks[$_]->configure( -command => sub { # mark($_)} ) } @m[1..$#m];
-	for my $m (@m) {
-		$time_marks[$m]->configure( -command => sub { mark($m)} )
-			unless ! defined $time_marks[$m];
+	my $drop_mark = $mark_frame->Button(
+		-text => 'Drop mark',
+		-background => $old_bg,
+		-command => \&drop_mark,
+	)->pack(-side => 'left');	
 		
-		;
-	}
-	#$time_marks[3]->configure( -background => 'orange' );
-#	 map { $time_marks[$_]->configure(-background => 'orange')} @m;
- 	for my $w (@label_and_arm, @time_marks){
- 		$w->pack(-side => 'left')
- 	}
-#	$time_marks[0]->grid(@time_marks[@m]);
-
+	my $arm_mark = $mark_frame->Button(
+				-text => 'Arm',
+				-command => \&arm_mark_toggle,
+	)->pack(-side => 'left');	
 }
+sub drop_mark {
+		my $here = eval_iam("cs-get-position");
+		return if $marks{$here}; 
+		$marks{$here} = $mark_frame->Button( 
+			-text => colonize($here),
+			-background => $old_bg,
+			-command => sub { mark($here) },
+		) ->pack(-side => 'left');
+}
+sub mark {
+	my $pos = shift; # gives me widget
+	if ($markers_armed){
+			drop_mark();
+			$marks{$pos}->destroy;
+			delete $marks{$pos};
+		    arm_mark_toggle; # disarm
+	}
+	else{ 
+
+		eval_iam(qq(cs-set-position $pos));
+	}
+}
+
 sub oid_gui {
 	$debug2 and print "&oid_gui\n";
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
@@ -855,7 +860,7 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
-sub arm_mark { 
+sub arm_mark_toggle { 
 	if ($markers_armed) {
 		$markers_armed = 0;
 		map{$time_marks[$_]->configure( -background => $old_bg) unless ! $marks[$_] } 1..$#time_marks ;
@@ -872,31 +877,6 @@ sub colonize { # convert seconds to minutes:seconds
 	$sec = "0$sec" if $sec < 10;
 	qq($min:$sec);
 }
-sub mark {
-
-	my $marker = shift;
-	# print "my marker is $_\n";
-	# record without arming if marker undefined
-	if ($markers_armed or ! $marks[$marker]){  
-		my $here = eval_iam("cs-get-position");
-		return if ! $here;
-		$marks[$marker] = $here;
-		my $widget = $time_marks[$marker];
-		$widget->configure( 
-			-text => colonize($here),
-			-background => $old_bg,
-		);
-		if ($markers_armed){ arm_mark() } # disarm
-	}
-	else{ 
-		return if really_recording();
-		eval_iam(qq(cs-set-position $marks[$marker]));
-		sleep 1;
-	#	update_clock();
-	#	start_clock();
-	}
-}
-
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
