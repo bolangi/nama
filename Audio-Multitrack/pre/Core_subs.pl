@@ -909,7 +909,9 @@ sub refresh_clock{
 	update_clock();
 	$clock_id = $clock->after(1000, \&refresh_clock) if $maybe_running; 
 	my $status = eval_iam('engine-status');
-	$debug and print "engine status: $status\n";
+	$debug and 
+		print colonize(eval_iam('getpos')),  
+		"  engine status: $status\n";
 	if ($status eq 'error') { new_engine();
 		&really_recording and &rec_cleanup or &connect_transport
 	}
@@ -1876,16 +1878,18 @@ sub retrieve_state {
 	# to skip tracks 1 and 2, for the Master and Mixdown
 	# tracks.  
 	#
-	my @track_objects = @::Track::by_index;
+	my @live_tracks = @::Track::by_index;
 	assign_var( $file, @persistent_vars );
 	my @track_hashes      = @::Track::by_index; 
 
 	# replace master, mixdown 
-	@::Track::by_index[1,2] = @track_objects[1,2]; 
+	@::Track::by_index[1,2] = @live_tracks[1,2]; 
+	# replace from track 3 to the end with the empty list
+	splice @::Track::by_index, 3, scalar @::Track::by_index - 3, ();
+	$debug and print join " ", 
+		(map{ ref $_, $/ } @::Track::by_index), $/;
 
-
-	# correct 'owns' null to empty array
-	# this is a problem with my YAML implementation
+	# correct 'owns' null (from YAML) to empty array []
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
 
 	$debug and map{print $_->dump} @::Track::by_index[1,2];
