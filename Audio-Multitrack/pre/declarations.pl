@@ -260,4 +260,7 @@ our (
 	$mixer_out_device, # where to send stereo output
 	$record_device,    # where to get our signals
 
+	$maybe_running,    # after Start before Stop
+	                   # used to control events
+
 );

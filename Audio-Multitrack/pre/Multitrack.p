@@ -49,7 +49,7 @@ $mixname = 'mix';
 $unit = 1;
 $effects_cache_file = 'effects_cache.storable';
 $state_store_file = 'State';
-$chain_setup_file = 'project.ecs';
+$chain_setup_file = 'Routing.ecs';
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1;
 %alias = (1 => 'Mixdown', 2 => 'Tracker');
