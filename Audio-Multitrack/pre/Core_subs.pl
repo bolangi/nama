@@ -220,8 +220,7 @@ sub load_project {
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	print "all chains: " , scalar @all_chains, $/;
-	my @all = ::Track::all;
-	dig_ruins() unless @all > 2;
+	dig_ruins() unless @tracks_data > 2;
 	$tracker_group_widget = $ui->group_gui('Tracker');
 	$ui->global_version_buttons(); 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
@@ -1826,11 +1825,11 @@ sub save_state {
 # prepare tracks for storage
 
 @tracks_data = ();
-map { push @tracks_data, $_->hashref } @::Track::by_index[3..$#::Track::by_index];
+map { push @tracks_data, $_->hashref } ::Tracks::all;
 print "found ", scalar @tracks_data, "tracks\n";
 
 @groups_data = ();
-map { push @groups_data, $_->hashref } @::Group::by_index[1..$#::Group::by_index];
+map { push @groups_data, $_->hashref } ::Group::all;
 
 	serialize(
 		-file => $file, 
@@ -1886,6 +1885,16 @@ sub retrieve_state {
 			$::Group::by_index[$g->{n}]->set($_ => $g->{$_})
 			} keys %{$g};
 	} @groups_data;
+
+	#  set Master and Mixdown parmeters
+	
+	map {my $t = $_; 
+		map{
+			$::Track::by_index[$t->{n}]->set($_ => $t->{$_})
+			} keys %{$t};
+	} @tracks_data[0,1];
+
+	@tracks_data = @tracks_data[2..$#tracks_data];
 
 	# create user tracks
 	
