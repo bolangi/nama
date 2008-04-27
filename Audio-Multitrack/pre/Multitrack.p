@@ -3,7 +3,7 @@ use 5.008;
 use strict;
 no strict qw(subs);
 use warnings;
-our $VERSION = '0.01';
+our $VERSION = '0.92';
 use IO::All;
 use Carp;
 use Cwd;

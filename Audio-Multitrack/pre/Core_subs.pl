@@ -1,7 +1,10 @@
-#sub byn{ my $key = shift; $byn{$key} }
-
 use Carp;
 
+
+sub mainloop { 
+	prepare(); 
+	$ui->loop;
+}
 sub status_vars {
 	serialize -class => '::', -vars => \@status_vars;
 }
@@ -10,7 +13,7 @@ sub config_vars {
 }
 
 sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Multitrack/; # discard_object # XXX
+	shift @_ if (ref $_[0]) =~ /Multitrack/;  # HARDCODED
 	@_;
 }
 sub prepare {  
@@ -1844,6 +1847,8 @@ sub retrieve_state {
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 	assign_var( $file, @persistent_vars );
+
+	# after assign @::Track::by_index is HASHES, not Tracks 
 	#my @group_by_index = @::Group::by_index;
 	#@::Group::by_index = ();
 	#shift @group_by_index; # remove first (null) entry
