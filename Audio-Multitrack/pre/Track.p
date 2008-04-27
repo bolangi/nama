@@ -49,7 +49,7 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	croak  "track name already in use: $vals{name}\n"
+	carp  "track name already in use: $vals{name}\n"
 		 if $track_names{$vals{name}}; # null name returns false
 	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
@@ -314,7 +314,6 @@ $n = 0;
 %by_name = ();
 
 use ::Object qw( 	name
-					tracks
 					rw
 					version 
 					n	
@@ -338,7 +337,6 @@ sub new {
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 	
 		name 	=> "Group $n", # default name
-		tracks => [],
 		rw   	=> 'REC', 
 		n => $n,
 		@_ 			}, $class;

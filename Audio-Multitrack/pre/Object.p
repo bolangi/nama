@@ -57,6 +57,18 @@ sub dump {
 	bless $self, $class; # restore
 	return $output;
 }
+sub hashref {
+	my $self = shift;
+	my $class = ref $self;
+	bless $self, 'HASH'; # easy magic
+	#print yaml_out $self; return;
+	my %guts = %{ $self };
+	#print join " ", %guts; return;
+	#my @keys = keys %guts;
+	#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
+	bless $self, $class; # restore
+	return \%guts;
+}
 
 1;
 

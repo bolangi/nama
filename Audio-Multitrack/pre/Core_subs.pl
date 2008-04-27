@@ -460,7 +460,6 @@ sub initialize_project_data {
 	$mixdown =  ::Group->new(name => 'Mixdown');
 	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
 
-
 	print yaml_out( \%::Track::track_names );
 
 	$master_track = ::SimpleTrack->new( 
@@ -1821,12 +1820,17 @@ sub save_state {
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
 		$debug and 1;
-	print "filename: $file\n";
+	print "filename base: $file\n";
 
-#map{ print "type: ", ref $_, $/; } ::Track::all; exit;
-my %class;
-map{ $class{$_->n} = ref $_ } ::Track::all;
-map{ bless $_, 'HASH' } ::Track::all;
+
+# prepare tracks for storage
+
+@tracks_data = ();
+map { push @tracks_data, $_->hashref } @::Track::by_index[3..$#::Track::by_index];
+print "found ", scalar @tracks_data, "tracks\n";
+
+@groups_data = ();
+map { push @groups_data, $_->hashref } @::Group::by_index[1..$#::Group::by_index];
 
 	serialize(
 		-file => $file, 
@@ -1835,7 +1839,6 @@ map{ bless $_, 'HASH' } ::Track::all;
 	#	-storable => 1,
 		);
 
-map{ bless $_, $class{$_->{n}} } ::Track::all;
 
 # store alsa settings
 
@@ -1870,34 +1873,22 @@ sub retrieve_state {
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 
-
-	# the upcoming assign @::Track::by_index creates HASHES, not Tracks 
-	# and wants to clobber the existing objects
-	#
-	# we use these to recreate missing tracks. note we have
-	# to skip tracks 1 and 2, for the Master and Mixdown
-	# tracks.  
-	#
-	my @live_tracks = @::Track::by_index;
 	assign_var( $file, @persistent_vars );
-	my @track_hashes      = @::Track::by_index; 
 
-	# replace master, mixdown 
-	@::Track::by_index[1,2] = @live_tracks[1,2]; 
-	# replace from track 3 to the end with the empty list
-	splice @::Track::by_index, 3, scalar @::Track::by_index - 3, ();
-	$debug and print join " ", 
-		(map{ ref $_, $/ } @::Track::by_index), $/;
-
-	# correct 'owns' null (from YAML) to empty array []
+	# %cops: correct 'owns' null (from YAML) to empty array []
+	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
 
-	$debug and map{print $_->dump} @::Track::by_index[1,2];
-	# remove first (null) entry, master and mix tracks
-	@track_hashes = @track_hashes[3..$#track_hashes]; 
-	$debug and print yaml_out \@track_hashes; 
-	#map{ print "index: ", $in++, " type: ", ref $_,
-	#"content: ", yaml_out( $_), $/;} @track_hashes; 
+	#  set group parameters
+
+	map {my $g = $_; 
+		map{
+			$::Group::by_index[$g->{n}]->set($_ => $g->{$_})
+			} keys %{$g};
+	} @groups_data;
+
+	# create user tracks
+	
 	my $did_apply = 0;
 	map{ 
 		my %h = %$_; 
@@ -1925,8 +1916,11 @@ sub retrieve_state {
 		# TODO if parent has a parent, i am a parameter controller controlling
 		# a parameter controller, and therefore need the -kx switch
 		}
-	} @track_hashes;
+	} @tracks_data;
 	$did_apply and $ui->manifest();  $ew->deiconify();
+	$debug and print join " ", 
+		(map{ ref $_, $/ } @::Track::by_index), $/;
+
 
 
 =comment

@@ -27,9 +27,11 @@ save_state: _save_state name(?) end {
 	print "saved state as $item{name}\n";
 	1;}
 
-add_track: _add_track wav channel(s?) end { 
-	::add_track($item{wav}); 
-	print "added track $item{wav}\n";
+add_track: _add_track name channel(s?) end { 
+	carp ("track name already in use: $item{name}\n"),
+		return if $::Track::track_names{$item{name}}; 
+	::add_track($item{name}); 
+	print "added track $item{name}\n";
 	1;
 }
 
@@ -91,9 +93,16 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 channel: r | m
 
-r: 'r' dd  { $::select_track->set(ch_r => $item{dd}) }
-m: 'm' dd  { $::select_track->set(ch_m => $item{dd}) }
-
+r: 'r' dd  {	ref $::select_track =~ /Audio/ and  
+				$::select_track->set(ch_r => $item{dd}) ;
+				$::ch_r = $item{dd};
+				
+				}
+m: 'm' dd  {	ref $::select_track =~ /Audio/ and  
+				$::select_track->set(ch_m => $item{dd}) ;
+				$::ch_m = $item{dd};
+				
+				}
 
 mute: 'mute' end {$::select_track->set(rw => 'MUTE'); }
 rec: 'rec' end {$::select_track->set(rw => 'REC'); }

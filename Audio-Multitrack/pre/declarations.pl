@@ -257,6 +257,9 @@ our (
 	@ti, # track by index (alias @::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
 
+	@tracks_data, # staging for saving
+	@groups_data, # 
+
 	$mixer_out_device, # where to send stereo output
 	$record_device,    # where to get our signals
 
