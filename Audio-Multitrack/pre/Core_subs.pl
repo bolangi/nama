@@ -1846,24 +1846,28 @@ sub retrieve_state {
 	$file = $yamlfile if -f $yamlfile;
 	! -f $file and carp("file not found: $file\n"), return;
 	$debug and print "using file: $file";
-	assign_var( $file, @persistent_vars );
 
-	# after assign @::Track::by_index is HASHES, not Tracks 
-	#my @group_by_index = @::Group::by_index;
-	#@::Group::by_index = ();
-	#shift @group_by_index; # remove first (null) entry
-	#map{ ::Group->new( %{ $_ } ) } @group_by_index;
-	my @track_by_index = @::Track::by_index;
-	@::Track::by_index = ();
+	# the upcoming assign @::Track::by_index creates HASHES, not Tracks 
+	# and wants to clobber the existing objects
+	#
+	# we use these to recreate missing tracks. note we have
+	# to skip tracks 1 and 2, for the Master and Mixdown
+	# tracks.  
+	#
+	my @track_objects = @::Track::by_index;
+	assign_var( $file, @persistent_vars );
+	my @track_hashes      = @::Track::by_index; 
+	# replace master, mixdown 
+	@::Track::by_index[1,2] = @track_objects[1,2]; 
+	$debug and map{print $_->dump} @::Track::by_index[1,2];
 	# remove first (null) entry, master and mix tracks
-	@track_by_index = @track_by_index[3..$#track_by_index]; 
-	my $in = 3;
-	map { print $_->dump } @track_by_index; exit;
-	map{ print "index: ", $in++, " type: ", ref $_,
-	"content: ", yaml_out( $_), $/;} @track_by_index; 
+	@track_hashes = @track_hashes[3..$#track_hashes]; 
+	$debug and print yaml_out \@track_hashes; 
+	#map{ print "index: ", $in++, " type: ", ref $_,
+	#"content: ", yaml_out( $_), $/;} @track_hashes; 
 	my $did_apply = 0;
 	map{ 
-		my %h = @_;
+		my %h = %$_; 
 		print "old n: $h{n}\n";
 		print "h: ", join " ", %h, $/;
 		delete $h{n};
@@ -1888,8 +1892,8 @@ sub retrieve_state {
 		# TODO if parent has a parent, i am a parameter controller controlling
 		# a parameter controller, and therefore need the -kx switch
 		}
-	} @track_by_index;
-	$did_apply and $ui->manifest(); # $ew->deiconify();
+	} @track_hashes;
+	$did_apply and $ui->manifest();  $ew->deiconify();
 
 
 =comment
