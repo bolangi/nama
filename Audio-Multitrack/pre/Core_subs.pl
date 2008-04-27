@@ -1878,7 +1878,7 @@ sub retrieve_state {
 
 	# correct 'owns' null to empty array
 	# this is a problem with my YAML implementation
-	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
+	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
 
 	$debug and map{print $_->dump} @::Track::by_index[1,2];
 	# remove first (null) entry, master and mix tracks

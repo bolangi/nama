@@ -12,13 +12,13 @@ sub refresh_t { # groups
 		my $status;
 		if ( 	grep{ $_->rec_status eq 'REC'} 
 				map{ $tn{$_} }
-				$::Group::by_name{Tracker}->tracks ){
+				$tracker->tracks ){
 
 			$status = 'REC'
 
 		}elsif(	grep{ $_->rec_status eq 'MON'} 
 				map{ $tn{$_} }
-				$::Group::by_name{Tracker}->tracks ){
+				$tracker->tracks ){
 
 			$status = 'MON'
 
@@ -40,8 +40,7 @@ sub refresh_c { # tracks
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";
 	
-	$debug and print "track: $n\n"; # rec_status: $rec_status\n";
-		my $rec_status = $ti[$n]->rec_status;
+	my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
 	#	return unless $widget_c{$n}; # hidden track
