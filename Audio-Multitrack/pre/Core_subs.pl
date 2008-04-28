@@ -239,11 +239,9 @@ sub load_project {
 	print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
-	print "all chains: " , scalar @all_chains, $/;
 	dig_ruins() unless $#::Track::by_index > 2;
 	$tracker_group_widget = $ui->group_gui('Tracker');
 	$ui->global_version_buttons(); 
-	$debug and print "found ", scalar @all_chains, "chains\n"; 
 	$ui->refresh_t;
 
 #The mix track will always be track index 1 i.e. $ti[$n]

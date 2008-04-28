@@ -43,6 +43,11 @@ add_track: _add_track name channel(s?) end {
 	print "added track $item{name}\n";
 	1;
 }
+# add_track: _add_track name(s) end { 
+#  	map { ::add_track $_ } @{ $item{name} };
+#  	1;
+#  }
+ 
 
 generate_setup: _generate_setup end { ::setup_transport(); 1 }
 
@@ -144,3 +149,46 @@ name: /\w+/
 
 
 wav: name { $::select_track = $::tn{$item{name}} if $::tn{$item{name}}  }
+
+set_version: _set_version dd end { $::select_track->set(active => $item{dd})}
+ 
+vol: _vol dd end { $::copp{ $::select_track->vol }->[0] = $item{dd} } 
+vol: _vol '+' dd end { $::copp{ $::select_track->vol }->[0] += $item{dd} } 
+vol: _vol '-' dd end { $::copp{ $::select_track->vol }->[0] -= $item{dd} } 
+
+cut: _cut end { $::copp{ $::select_track->vol }->[0] = 0 }
+
+unity: _unity end { $::copp{ $::select_track->vol }->[0] = 100 }
+
+pan: _pan dd end { $::copp{ $::select_track->pan }->[0] = $item{dd} } 
+pan: _pan '+' dd end { $::copp{ $::select_track->pan }->[0] += $item{dd} } 
+pan: _pan '-' dd end { $::copp{ $::select_track->pan }->[0] -= $item{dd} } 
+ 
+pan_right: _pan_right   end { $::copp{ $::select_track->pan }->[0] = 100 }
+pan_left:  _pan_left    end { $::copp{ $::select_track->pan }->[0] = 0   }
+pan_center: _pan_center end { $::copp{ $::select_track->pan }->[0] = 50   }
+pan_back:  _pan_back end {}
+
+mark: _mark end { }
+
+next_mark: _next_mark end {}
+
+previous_mark: _previous_mark end {}
+
+mark_loop: _mark_loop end {}
+
+name_mark: _name_mark end {}
+
+list_marks: _list_marks end {}
+
+show_effects: _show_effects end {}
+
+add_effect: _add_effect fx end { }
+
+fx: /\S+/ # non-space characters
+
+group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
+
+list_versions: _list_versions end { 
+	print join " ", @{$::select_track->versions}, $/;
+}

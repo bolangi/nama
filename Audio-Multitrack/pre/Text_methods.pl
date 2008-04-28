@@ -16,25 +16,34 @@ $debug = 1;
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
 		$term->addhistory($user_input) ;
-		my ($cmd, $predicate) = ($user_input =~ /(\S+)(.*)/);
-		$debug and print "cmd: $cmd \npredicate: $predicate\n";
-		if ($cmd eq 'eval') {
-			eval $predicate;
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-		} elsif ($tn{$cmd}) { 
-			$debug and print "Track name: $cmd\n";
-			$select_track = $tn{$cmd};
-			print "selected: $cmd\n";
-			$parser->read($predicate) or print ("Returned false\n");
-		} elsif ($iam_cmd{$cmd}){
-			$debug and print "Found IAM command\n";
-			eval_iam($user_input) ;
-		} else {
-			$parser->command($user_input) 
-				and print("Succeeded\n") or print ("Returned false\n");
+		my @user_input = split /\s*;\s*/, $user_input;
+		map {
+			my $user_input = $_;
+			my ($cmd, $predicate) = ($user_input =~ /(\S+)(.*)/);
+			$debug and print "cmd: $cmd \npredicate: $predicate\n";
+			if ($cmd eq 'eval') {
+				eval $predicate;
+				print "\n";
+				$@ and print "Perl command failed: $@\n";
+			} elsif ($tn{$cmd}) { 
+				$debug and print "Track name: $cmd\n";
+				$select_track = $tn{$cmd};
+				print "selected: $cmd\n";
+				$parser->read($predicate) or print ("Returned false\n");
+			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
+				$debug and print "Track name: ", $ti[$cmd]->name, "\n";
+				$select_track = $ti[$cmd];
+				print "selected: $cmd\n";
+				$parser->read($predicate) or print ("Returned false\n");
+			} elsif ($iam_cmd{$cmd}){
+				$debug and print "Found IAM command\n";
+				eval_iam($user_input) ;
+			} else {
+				$parser->command($user_input) 
+					and print("Succeeded\n") or print ("Returned false\n");
+			}
 
-		}
+		} @user_input;
 	}
 }
 sub show_tracks {

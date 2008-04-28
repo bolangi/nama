@@ -5,15 +5,15 @@ help:
   parameters: none 
 tracker_rec:
   short: trec R
-  what: stringet Tracker group record mode
+  what: Tracker group record mode
   parameters: none
 tracker_mon:
   short: tmon M 
-  what: stringet Tracker group monitor mode 
+  what: Tracker group monitor mode 
   parameters: none 
 tracker_mute:
   short: tmute MM 
-  what: stringet Tracker group mute mode
+  what: Tracker group mute mode
   parameters: none 
 mixdown:
   short: mxd
@@ -25,7 +25,7 @@ mixplay:
   parameters: none
 mixoff:
   short: norm mxo
-  what: stringet normal mode (Mixdown to MUTE, Tracker to MOnumber)
+  what: normal mode (Mixdown to MUTE, Tracker to MOnumber)
   parameters: none
 add_track:
   short: new add
@@ -33,29 +33,36 @@ add_track:
   example: new sax r2 m2
   parameters: string 'r' number 'm' N
 rec:
-  what: stringet track status to REC
+  what: track status to REC
   parameters: none
 mon:
-  what: stringet track status to MOnumber
+  what: track status to MOnumber
   parameters: none 
 mute:
   short: z off
-  what: stringet track status to MUTE (remove from chain setup)
+  what: track status to MUTE (remove from chain setup)
   parameters: none
 m:
   short: monitor_channel
-  what: stringet track output channel number
+  what: track output channel number
   parameters: number
 r:
   short: record_channel
-  what: stringet track input channel number
-select_version:
+  what: track input channel number
+set_version:
   short: version n
-  what: stringet track version number for monitoring
+  what: track version number for monitoring
   parameters: number
+group_version:
+  short: gn
+  what: Set group version
+list_versions:
+  short: ln 
+  what: List versions available for current track
+  parameters: none
 vol:
   short: v
-  what: stringet track volume
+  what: track volume
   parameters: number
 cut:
   short: c
@@ -63,11 +70,11 @@ cut:
   parameters: none
 unity:
   short: cc
-  what: stringet unity track volume
+  what: unity track volume
   parameters: none
 pan:
   short: p	
-  what: stringet track pan position
+  what: track pan position
   parameters: number
 pan_right:
   short: pr
@@ -77,13 +84,17 @@ pan_left:
   short: pl
   what: Pan track fully left 
   parameters: none
+pan_center:
+  short: pc
+  what: Pan center
+  parameters: none
 pan_back:
   short: pb
   what: Restore track pan setting before pl, pr, or pc commands
   parameters: none
 save_state:
   short: keep k save
-  what: stringave project settings to disk
+  what: Save project settings to disk
   parameters: optional string 
 get_state:
   short: get
@@ -97,7 +108,7 @@ load_project:
   what: Load an existing project
   parameters: string
 loop:
-  what: stringet transport loop mode
+  what: transport loop mode
   parameters: none
 generate_setup:
   short: generate gen
@@ -122,19 +133,11 @@ renew_engine:
 start:
   short: T	 
   parameters: none
-  what: stringtart transport
+  what: Start transport
 stop:
   short: string	 
   parameters: none
-  what: stringtop transport
-ecasound_start:
-  what: stringtart transport directly (Ecasound start command)
-  short: T			
-  parameters: none
-ecasound_stop:
-  what: stringtop transport directly (Ecasound stop command)
-  short: string			
-  parameters: none
+  what: Stop transport
 show_setup:
   short: show	 
   parameters: none
@@ -144,12 +147,16 @@ show_track:
   parameters: optional string, optional number
   what: show track status
 show_effects:
-  what: stringhow effects status
+  what: show effects status
   short: sfx		
-  parameters: optional string
+  parameters: none
+add_effect:
+  what: add effect to selected track
+  short: afx
+  parameters: string
 show_templates:
   short: oids
-  what: stringhow details of active templates
+  what: Show details of active templates
   parameters: optional string 
 list_templates:
   short: lt
@@ -158,7 +165,7 @@ list_templates:
 show_all_templates:
   parameters: none
   short: sat
-  what: stringhows details of all templates
+  what: Shows details of all templates
 list_all_templates:
   parameters: none
   short: lat
