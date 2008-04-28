@@ -16,6 +16,36 @@ sub discard_object {
 	@_;
 }
 
+sub first_run {
+	if ( ! -e $wav_dir ) {
+		print "Project directory $wav_dir not found.\n";
+		print "Would you like to create it? [Y] ";
+		my $reply = <STDIN>;
+		chomp $reply;
+		$reply = lc $reply;
+		if ($reply ne q(n) ){
+			create_dir $wav_dir;
+			print ".... Done!\n\n";
+		} 
+	}
+
+		my $config = join_path($ENV{HOME}, ".ecmdrc");
+	if ( ! -e $config) {
+		print "Configuration file $config not found.\n";
+		print "Would you like to create it? [Y] ";
+		my $reply = <STDIN>;
+		chomp $reply;
+		$reply = lc $reply;
+		if ($reply ne q(n)  ){
+			$default =~ s/wav_dir:.*$/wav_dir: $ENV{HOME}\/ecmd/m;
+			$default > io( $config );
+			print ".... Done!\n\nPlease edit this file and restart program\n";
+		}
+		exit;
+	}
+}
+	
+
 	
 sub prepare {  
 
@@ -42,15 +72,19 @@ sub prepare {
 
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
-	read_config(); # sets $wav_dir
+	read_config(); 
 
-	$opts{d} and $wav_dir = $opts{d};
+	print "wav_dir: $wav_dir\n";
+	$wav_dir = $opts{d} if $opts{d};
+	print "wav_dir: $wav_dir\n";
+	$wav_dir = join_path($ENV{HOME}, "ecmd" ) unless $wav_dir; 
+	print "wav_dir: $wav_dir\n";
 
+	print "&wav_dir: ", &wav_dir, $/;
+	print "&project_dir: ", &project_dir, $/;
+
+	first_run();
 	
-
-	-d $wav_dir or ($wav_dir == '.') 
-				and carp "wave directory not found, using current directory\n" ;
-
 	# init our buses
 	
 	$tracker_bus  = ::Bus->new(
@@ -118,15 +152,14 @@ sub eval_iam {
 
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
 sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
-sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
-sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name)
-}
-sub project_dir  {$project_name and join_path(&ecmd_dir, $project_name)
+sub this_wav_dir {$project_name and join_path(&wav_dir,
+$project_name, q(.wav) ) }
+sub project_dir  {$project_name and join_path(&wav_dir, $project_name)
 }
 
 sub global_config{
-my @search_path = (project_dir(), ecmd_dir(), $ENV{HOME}, $wav_dir, '.');
-
+print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};
+my @search_path = (project_dir(), $ENV{HOME}, wav_dir() );
 my $c = 0;
 	map{ 
 print $/,++$c,$/;
@@ -144,10 +177,8 @@ print $/,++$c,$/;
 sub read_config {
 	$debug2 and print "&read_config\n";
 	local $debug = $debug3;
-	#print &config; exit;
-	my $global = global_config();
-	#print "global: ", $global, $/;
-	my $yml = length $global > 100 ? $global : $default;
+	my $config = shift;
+	my $yml = length $config > 100 ? $config : $default;
 	strip_comments( $yml );
 	strip_blank_lines( $yml );
 	$yml !~ /^---/ and $yml = join "\n", "---", $yml, "...";
@@ -158,10 +189,7 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out( \%cfg ); die "HEREEE";
-	#print ("doing nothing") if $a eq $b eq $c; exit;
 	assign_var( \%cfg, @config_vars); 
-	#print yaml_out( \%devices ); die "HEREEE";
 	print "config file: $yml";
 
 }
@@ -204,9 +232,7 @@ sub load_project {
 # 	close PARAMS;
 # 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
 # =cut
-	my $wav_dir_inherited = $wav_dir;
-	read_config(); #sets wav_dir
-	$wav_dir = $wav_dir_inherited unless $wav_dir and $wav_dir ne '.' ;
+	read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
@@ -1390,7 +1416,7 @@ sub prepare_static_effects_data{
 	local $debug = $debug3;
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path(&ecmd_dir, $effects_cache_file);
+	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache

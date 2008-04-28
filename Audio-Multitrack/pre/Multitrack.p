@@ -48,7 +48,7 @@ $mixchain_aux = 'MixDown'; # used for playing back mixes
 
 $mixname = 'mix';
 $unit = 1;
-$effects_cache_file = 'effects_cache.storable';
+$effects_cache_file = '.effects_cache';
 $state_store_file = 'State';
 $chain_setup_file = 'Routing.ecs';
 $tk_input_channels = 10;

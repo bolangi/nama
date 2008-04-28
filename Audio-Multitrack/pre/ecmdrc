@@ -16,9 +16,9 @@
 mixer_out_device: consumer
 record_device: consumer 
 
-# where we will write our wav files
+# where we will write our project files
 
-wav_dir: 0 # defaults to current directory 
+wav_dir: ~ # nothing for now
 
 # globals we want for our chain setups
 

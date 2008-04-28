@@ -323,7 +323,7 @@ sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
 		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
-			or mkdir $dir
+			or system qq( mkdir -p $dir)
 			or carp qq(failed to create directory "$dir": $!\n);
 		} @dirs;
 }
