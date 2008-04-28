@@ -41,16 +41,17 @@ sub show_tracks {
 	my @tracks = @_;
 	map { 	push @::format_fields,  
 			$_->n,
-			$_->current_version,
+			$_->current_version || 0,
 			$_->name,
 			$_->rw,
 			$_->rec_status,
-			$_->ch_r,
-			$_->ch_m,
+			$_->ch_r || 1,
+			$_->ch_m || 1;
 
 		} @tracks;
 		
 	write; # using format at end of file UI.pm
+	$- = 0; # $FORMAT_LINES_LEFT
 	1;
 }
 

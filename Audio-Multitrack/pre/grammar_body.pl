@@ -60,18 +60,8 @@ stop: _stop end { ::stop_transport(); 1}
 list_marks: _list_marks end {'TODO' }
 
 show_setup: _show_setup end { 	
-	map { 	push @::format_fields,  
-			$_->n,
-			$_->active,
-			$_->name,
-			$_->rw,
-			$_->rec_status,
-			$_->ch_r,
-			$_->ch_m,
 
-		} ::Track::all;
-		
-	write; # using format at end of file UI.pm
+	::Text::show_tracks ( ::Track::all );
 	1;
 }
 
