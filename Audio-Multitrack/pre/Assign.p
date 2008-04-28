@@ -79,7 +79,6 @@ sub assign {
 	$class = $h{-class};
 	print "class: $h{-class}\n";
  	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect
-	# i can't see any reason why we should append this.
 												#from preprocessor
 	my @vars = @{ $h{-vars} };
 	my $ref = $h{-data};
@@ -110,7 +109,7 @@ ASSIGN
 			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
 
 			# use the supplied class unless the variable name
-			# contains a class-denoting :\:
+			# contains \:\:
 			
 		$debug and print <<DEBUG;
 key:             $key
@@ -223,11 +222,24 @@ sub serialize {
 	my %state;
 	my $tilde = q('~');
 	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 
+
+
+
+# for  YAML::Reader/Writer
+#
+#  all scalars must contain values, not references
+
 		my $value =  ($sigil ne q($) ? q(\\) : q() ) 
+
 							. $sigil
 							. ($identifier =~ /:/ ? '' : $class)
 							. $identifier;
-		if ( ! $h{-storable} ){ # i.e. we are saving as YAML
+
+# more YAML adjustments 
+#
+# restore will break if a null field is not converted to '~'
+
+		if ( ! $h{-storable} ){ 
 			if ( $sigil eq q($) ){
 				my $val = eval( $value );
 				$value = $val ? $value : $tilde ;

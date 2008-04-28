@@ -1,6 +1,5 @@
 use Carp;
 
-
 sub mainloop { 
 	prepare(); 
 	$ui->loop;
@@ -16,6 +15,8 @@ sub discard_object {
 	shift @_ if (ref $_[0]) =~ /Multitrack/;  # HARDCODED
 	@_;
 }
+
+	
 sub prepare {  
 
 	$debug2 and print "&prepare\n";
@@ -48,9 +49,6 @@ sub prepare {
 	# internal ones. 
 	
 	read_config(); # sets $wav_dir
-
-	#print "raw to disk format: $raw_to_disk_format\n";
-	#print config_vars(); exit;
 
 	$opts{d} and $wav_dir = $opts{d};
 
