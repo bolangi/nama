@@ -28,10 +28,11 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('mcegsd:', \%opts); 
+	getopts('mcegsd:f:', \%opts); 
 	#print join $/, (%opts);
 	# d: wav_dir
 	# c: create project
+	# f: configuration file
 	# g: gui mode
 	# m: don't load state info
 	# e: don't load static effects data
@@ -41,16 +42,11 @@ sub prepare {
 
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
-
-	## now i should read .ecmdrc
-	## should have .ecmd holding files.
-	
-	## but for me, i am really really happy to read my 
-	# internal ones. 
-	
 	read_config(); # sets $wav_dir
 
 	$opts{d} and $wav_dir = $opts{d};
+
+	
 
 	-d $wav_dir or ($wav_dir == '.') 
 				and carp "wave directory not found, using current directory\n" ;
@@ -121,7 +117,7 @@ sub eval_iam {
 ## configuration file
 
 sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
-sub config_file { ".ecmdrc" }
+sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
 sub ecmd_dir { join_path(&wav_dir, ".ecmd") }
 sub this_wav_dir {$project_name and join_path(&wav_dir, $project_name)
 }
