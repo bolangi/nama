@@ -26,7 +26,7 @@ $debug = 1;
 			$debug and print "Track name: $cmd\n";
 			$select_track = $tn{$cmd};
 			print "selected: $cmd\n";
-			$parser->command($predicate) or print ("Returned false\n");
+			$parser->read($predicate) or print ("Returned false\n");
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found IAM command\n";
 			eval_iam($user_input) ;
@@ -36,6 +36,22 @@ $debug = 1;
 
 		}
 	}
+}
+sub show_tracks {
+	my @tracks = @_;
+	map { 	push @::format_fields,  
+			$_->n,
+			$_->current_version,
+			$_->name,
+			$_->rw,
+			$_->rec_status,
+			$_->ch_r,
+			$_->ch_m,
+
+		} @tracks;
+		
+	write; # using format at end of file UI.pm
+	1;
 }
 
 format STDOUT_TOP =

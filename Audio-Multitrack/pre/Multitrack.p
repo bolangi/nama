@@ -3,6 +3,7 @@ use 5.008;
 use strict;
 no strict qw(subs);
 use warnings;
+no warnings qw(uninitialized);
 our $VERSION = '0.92';
 use IO::All;
 use Carp;

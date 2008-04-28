@@ -1824,7 +1824,8 @@ sub save_state {
 
 # prepare tracks for storage
 
-@tracks_data = ();
+@tracks_data = (); # zero based, iterate over these to restore
+
 map { push @tracks_data, $_->hashref } ::Tracks::all;
 print "found ", scalar @tracks_data, "tracks\n";
 
