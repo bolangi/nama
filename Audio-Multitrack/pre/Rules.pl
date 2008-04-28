@@ -146,9 +146,7 @@ sub eliminate_loops {
 
 	# add chain $n to the list of the customer's output device 
 	
-	no warnings;
 	my ($oid) = grep{ $cooked_id =~ /$_->{id}/ } @oids;
-	use warnings;
 	my %oid = %{$oid};
 	defined $outputs{ $oid{output} } or $outputs{ $oid{output}} = [];
 	push @{ $outputs{ $oid{output} } }, $n;
@@ -170,10 +168,8 @@ sub eliminate_loops {
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
-	no warnings;
 	$post_input{$n} .= $post_input{$cooked_id};
 	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	use warnings;
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 

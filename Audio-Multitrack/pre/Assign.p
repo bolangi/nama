@@ -221,15 +221,31 @@ sub serialize {
  	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect from preprocessor!
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
+	my $tilde = q('~');
 	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 
+		my $value =  ($sigil ne q($) ? q(\\) : q() ) 
+							. $sigil
+							. ($identifier =~ /:/ ? '' : $class)
+							. $identifier;
+		if ( ! $h{-storable} ){ # i.e. we are saving as YAML
+			if ( $sigil eq q($) ){
+				my $val = eval( $value );
+				$value = $val ? $value : $tilde ;
+			} elsif ($sigil eq q(@) ) {
+				my $val = eval( $value );
+				$value = scalar @{ $val } ? $value : $tilde;
+			} elsif ($sigil eq q(%) ){
+				my $val = eval( $value );
+				my %val = %$val;
+				$value = %val ? $value : $tilde; 
+			}
+		}
+			
 		 my $eval_string =  q($state{')
 							. $identifier
 							. q('})
 							. q( = )
-							. ($sigil ne q($) ? q(\\) : q() ) 
-							. $sigil
-							. ($identifier =~ /:/ ? '' : $class)
-							. $identifier;
+							. $value;
 	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or $debug  and print 
 		"eval returned zero or failed ($!\n)";

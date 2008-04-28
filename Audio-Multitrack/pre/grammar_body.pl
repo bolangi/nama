@@ -29,9 +29,12 @@ save_state: _save_state name(?) end {
 	print "saved state as $item{name}\n";
 	1;}
 get_state: _get_state name(?) end {
-	::retrieve_state( $item{name} );
-	print "retrieving $item{name}\n";
-	}
+ 	::load_project( 
+ 		name => $::project_name,
+ 		settings => $item{name}
+ 		);
+ #	print "set state:  $item{name}\n";
+ 	}
 
 add_track: _add_track name channel(s?) end { 
 	carp ("track name already in use: $item{name}\n"),

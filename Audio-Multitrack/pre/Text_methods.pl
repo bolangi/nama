@@ -41,28 +41,27 @@ sub show_tracks {
 	my @tracks = @_;
 	map { 	push @::format_fields,  
 			$_->n,
-			$_->current_version || 0,
 			$_->name,
 			$_->rw,
 			$_->rec_status,
-			$_->ch_r || 1,
-			$_->ch_m || 1;
+			$_->current_version,
+			$_->ch_r,
+			$_->ch_m;
 
 		} @tracks;
 		
 	write; # using format at end of file UI.pm
-	$- = 0; # $FORMAT_LINES_LEFT
+	$- = 0; # $FORMAT_LINES_LEFT # force header on next output
 	1;
 }
 
 format STDOUT_TOP =
-Chain Ver File            Setting Status Rec_ch Mon_ch 
-=====================================================
+Chain  Track name        Setting Status Version Rec_ch Mon_ch 
+=============================================================
 .
 format STDOUT =
-@<<  @<<  @<<<<<<<<<<<<<<<  @<<<   @<<<   @<<    @<< ~~
+@>>    @<<<<<<<<<<<<<<<    @<<<   @<<<    @>>    @>>    @>> ~~
 splice @::format_fields, 0, 7
-
 .
 	
 1;

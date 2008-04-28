@@ -220,7 +220,7 @@ sub load_project {
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	print "all chains: " , scalar @all_chains, $/;
-	dig_ruins() unless @tracks_data > 2;
+	dig_ruins() unless $#::Track::by_index > 2;
 	$tracker_group_widget = $ui->group_gui('Tracker');
 	$ui->global_version_buttons(); 
 	$debug and print "found ", scalar @all_chains, "chains\n"; 
@@ -1042,7 +1042,6 @@ sub add_effect_gui {
 				-anchor => 'nw')
 		}
 
-		no warnings;
 		$widget_e{$id} = $frame; 
 		# we need a separate frame so title can be long
 
@@ -1054,7 +1053,6 @@ sub add_effect_gui {
 		$debug and print "parentage: $parentage\n";
 		my $eff = $frame->Menubutton(
 			-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-		use warnings;
 
 		$eff->AddItems([
 			'command' => "Remove",
@@ -1562,9 +1560,7 @@ sub read_in_effects_data {
 
 
 	for my $i (0..$#effects){
-		no warnings;
 		 $effect_i{ $effects[$i]->{code} } = $i; 
-		 use warnings;
 		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
 	}
 
@@ -1687,7 +1683,6 @@ sub get_ladspa_hints{
 
 	$debug and print yaml_out(\%effects_ladspa); 
 }
-no warnings;
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
 	my $multiplier = 1;;
@@ -1722,7 +1717,6 @@ sub range {
 	($beg, $end, $default, $resolution)
 
 }
-use warnings;
 sub integrate_ladspa_hints {
 	map{ 
 		my $i = $effect_i{$_};
@@ -1826,11 +1820,11 @@ sub save_state {
 
 @tracks_data = (); # zero based, iterate over these to restore
 
-map { push @tracks_data, $_->hashref } ::Tracks::all;
+map { push @tracks_data, $_->hashref } ::Track::all();
 print "found ", scalar @tracks_data, "tracks\n";
 
 @groups_data = ();
-map { push @groups_data, $_->hashref } ::Group::all;
+map { push @groups_data, $_->hashref } ::Group::all();
 
 	serialize(
 		-file => $file, 
@@ -1875,6 +1869,8 @@ sub retrieve_state {
 
 	assign_var( $file, @persistent_vars );
 
+	print "     TRACKS: ", scalar @tracks_data, $/;
+
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
@@ -1895,7 +1891,11 @@ sub retrieve_state {
 			} keys %{$t};
 	} @tracks_data[0,1];
 
-	@tracks_data = @tracks_data[2..$#tracks_data];
+	splice @tracks_data, 0, 2;
+	print "user trackb: ", scalar @tracks_data, $/;
+
+
+
 
 	# create user tracks
 	

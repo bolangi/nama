@@ -100,20 +100,20 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => sub{ load_project(-name => remove_spaces $project_name)});
+		-command => sub{ load_project(name => remove_spaces $project_name)});
 	$sn_new->configure( 
 		-text => 'New',
 		-command => sub{ load_project(
-							-name => remove_spaces($project_name),
-							-create => 1)});
+							name => remove_spaces($project_name),
+							create => 1)});
 	$sn_save->configure(
 		-text => 'Save settings',
 		-command => #sub { print "save_id: $save_id\n" });
 		 sub {save_state($save_id) });
 	$sn_recall->configure(
 		-text => 'Recall settings',
- 		-command => sub {load_project -name => $project_name, 
- 										-settings => $save_id },
+ 		-command => sub {load_project (name => $project_name, 
+ 										settings => $save_id)},
 				);
 	$sn_dump->configure(
 		-text => q(Dump state),
@@ -458,10 +458,8 @@ sub global_version_buttons {
 	# the highest version number of all tracks in the
 	# $tracker group
 	
-		no warnings;
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
 			grep{ $_ > 2 } @all_chains; # excludes master (1), mix (2)
-		use warnings;
 			$tracker_group_widget->radiobutton( 
 
 				-label => ($v ? $v : ''),
@@ -816,7 +814,6 @@ sub make_scale {
 		  );
 
 		# auxiliary field for logarithmic display
-		no warnings;	
 		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/ )
 		#	or $code eq 'ea') 
 		
@@ -841,7 +838,6 @@ sub make_scale {
 		else { $controller->grid; }
 
 		return $frame;
-		use warnings;
 
 	}	
 
