@@ -1,0 +1,190 @@
+---
+help:
+  short: h
+  what: List this menu (optional string)
+  parameters: none 
+tracker_rec:
+  short: trec R
+  what: stringet Tracker group record mode
+  parameters: none
+tracker_mon:
+  short: tmon M 
+  what: stringet Tracker group monitor mode 
+  parameters: none 
+tracker_mute:
+  short: tmute MM 
+  what: stringet Tracker group mute mode
+  parameters: none 
+mixdown:
+  short: mxd
+  what: Mix to file 
+  parameters: none
+mixplay:
+  short: mxp
+  what: Play mix from file (sets mix group to MOnumber, tracker group to MUTE)
+  parameters: none
+mixoff:
+  short: norm mxo
+  what: stringet normal mode (Mixdown to MUTE, Tracker to MOnumber)
+  parameters: none
+add_track:
+  short: new add
+  what: Create a new track
+  example: new sax r2 m2
+  parameters: string 'r' number 'm' N
+rec:
+  what: stringet track status to REC
+  parameters: none
+mon:
+  what: stringet track status to MOnumber
+  parameters: none 
+mute:
+  short: z off
+  what: stringet track status to MUTE (remove from chain setup)
+  parameters: none
+m:
+  short: monitor_channel
+  what: stringet track output channel number
+  parameters: number
+r:
+  short: record_channel
+  what: stringet track input channel number
+select_version:
+  short: version n
+  what: stringet track version number for monitoring
+  parameters: number
+vol:
+  short: v
+  what: stringet track volume
+  parameters: number
+cut:
+  short: c
+  what: Mute track playback volume
+  parameters: none
+unity:
+  short: cc
+  what: stringet unity track volume
+  parameters: none
+pan:
+  short: p	
+  what: stringet track pan position
+  parameters: number
+pan_right:
+  short: pr
+  what: Pan track fully right
+  parameters: none
+pan_left:
+  short: pl
+  what: Pan track fully left 
+  parameters: none
+pan_back:
+  short: pb
+  what: Restore track pan setting before pl, pr, or pc commands
+  parameters: none
+save_state:
+  short: keep k save
+  what: stringave project settings to disk
+  parameters: optional string 
+get_state:
+  short: get
+  what: Retrieve project settings
+new_project:
+  short: create	 
+  what: Create a new project directory tree
+  parameters: string
+load_project:
+  short: load	 
+  what: Load an existing project
+  parameters: string
+loop:
+  what: stringet transport loop mode
+  parameters: none
+generate_setup:
+  short: generate gen
+  what: Generate chain setup for audio processing engine
+  parameters: none
+generate_and_connect_setup:
+  short: setup
+  what: Generate and connect chain setup
+  parameters: none
+connect_setup:
+  short: connect con
+  what: Connect chain setup
+  parameters: none
+disconnect_setup:
+  short: disconnect
+  what: Disconnect chain setup
+  parameters: none
+renew_engine:
+  short: renew	
+  parameters: none
+  what: re-initializes the audio processing engine
+start:
+  short: T	 
+  parameters: none
+  what: stringtart transport
+stop:
+  short: string	 
+  parameters: none
+  what: stringtop transport
+ecasound_start:
+  what: stringtart transport directly (Ecasound start command)
+  short: T			
+  parameters: none
+ecasound_stop:
+  what: stringtop transport directly (Ecasound stop command)
+  short: string			
+  parameters: none
+show_setup:
+  short: show	 
+  parameters: none
+  what: show status of all tracks
+show_track:
+  short: sh
+  parameters: optional string, optional number
+  what: show track status
+show_effects:
+  what: stringhow effects status
+  short: sfx		
+  parameters: optional string
+show_templates:
+  short: oids
+  what: stringhow details of active templates
+  parameters: optional string 
+list_templates:
+  short: lt
+  what: Lists active templates
+  parameters: none
+show_all_templates:
+  parameters: none
+  short: sat
+  what: stringhows details of all templates
+list_all_templates:
+  parameters: none
+  short: lat
+  what: Lists all available templates
+list_marks:
+  short: lm
+  what: List all marks
+  parameters: none
+mark:
+  what: Mark current head position
+  short: k	 
+  parameters: optional string
+next_mark:
+  short: mf nm fm
+  what: Move playback head to next mark
+  parameters: none
+previous_mark:
+  short: mb pm bm
+  what: Move playback head to previous mark
+  parameters: none
+mark_loop:
+  what: Loop playback between nearest marks
+  short: ml 
+  parameters: none
+name_mark:
+  short: nm
+  what: Give a name to a mark
+  parameters: string
+...
