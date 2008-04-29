@@ -204,8 +204,10 @@ sub substitute{
 ## project handling
 
 sub load_project {
+	local $debug = 1;
 	my %h = @_;
 	$debug2 and print "&load_project\n";
+	print yaml_out \%h;
 	# return unless $h{name} or $project;
 
 	# we could be called from Tk with variable $project _or_
@@ -218,14 +220,6 @@ sub load_project {
 	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &this_wav_dir, &project_dir;
-# =comment 
-# 	# OPEN EDITOR TODO
-# 	my $new_file = join_path ($ecmd_home, $project_name, $parameters);
-# 	open PARAMS, ">$new_file" or carp "couldn't open $new_file for write: $!\n";
-# 	print PARAMS $configuration;
-# 	close PARAMS;
-# 	system "$ENV{EDITOR} $new_file" if $ENV{EDITOR};
-# =cut
 	read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
@@ -1904,7 +1898,7 @@ sub retrieve_state {
 
 	assign_var( $file, @persistent_vars );
 
-	print yaml_out \@groups_data; 
+	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 

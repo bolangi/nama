@@ -32,7 +32,7 @@ $yw = Data::YAML::Writer->new;
 $yr = Data::YAML::Reader->new;
 
 $debug2 = 1; # subroutine names
-$debug = 1;
+$debug = 0;
 
 ## The names of two helper loopback devices:
 
