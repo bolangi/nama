@@ -178,6 +178,10 @@ mark:
   what: Mark current head position
   short: k	 
   parameters: optional string
+remove_mark:
+  what: Remove mark at current head position
+  short: rm
+  parameters: optional number
 next_mark:
   short: mf nm fm
   what: Move playback head to next mark

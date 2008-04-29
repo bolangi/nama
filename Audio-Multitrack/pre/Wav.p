@@ -30,13 +30,13 @@ sub get_versions {
 }
 
 sub targets {# takes a Wav object or basename
-	local $debug = 1;
+	
 	my $wav = shift; 
  	#my $name=  ref $wav ? $wav->name: $wav;
  	my $name =  $wav->name;
 	my $dir = $wav->dir;
 	$debug2 and print "&targets\n";
-	local $debug = 0;
+	
 	$debug and print "this_wav_dir: $dir, name: $name\n";
 		my %versions =  $wav->get_versions;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 

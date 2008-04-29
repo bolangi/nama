@@ -2,7 +2,7 @@
 
 sub refresh_t { # groups 
 	$debug2 and print "&refresh_t\n";
-	local $debug = $debug3;
+	
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
 					MUTE => $old_bg);
@@ -35,7 +35,7 @@ sub refresh_t { # groups
 	}
 }
 sub refresh_c { # tracks
-	local $debug = 1;
+	
 	@_ = discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_c\n";

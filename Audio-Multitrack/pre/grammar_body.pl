@@ -65,7 +65,6 @@ renew_engine: _renew_engine end { ::new_engine(); 1  }
 start: _start end { ::start_transport(); 1}
 stop: _stop end { ::stop_transport(); 1}
 
-list_marks: _list_marks end {'TODO' }
 
 show_setup: _show_setup end { 	
 
@@ -168,6 +167,10 @@ pan_right: _pan_right   end { $::copp{ $::select_track->pan }->[0] = 100 }
 pan_left:  _pan_left    end { $::copp{ $::select_track->pan }->[0] = 0   }
 pan_center: _pan_center end { $::copp{ $::select_track->pan }->[0] = 50   }
 pan_back:  _pan_back end {}
+
+list_marks: _list_marks end {'TODO' }
+
+remove_mark: _remove_mark end {'TODO' }
 
 mark: _mark end { }
 

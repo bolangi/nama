@@ -2,6 +2,7 @@ package ::Assign;
 use 5.008;
 use strict;
 use warnings;
+no warnings q(uninitialized);
 use Carp;
 use IO::All;
 use Data::YAML::Reader;
@@ -49,19 +50,15 @@ our @EXPORT = qw(
 our $VERSION = '0.01';
 
 package ::;
-#use vars($debug, $debug2, $debug3);
 our ($debug, $debug2, $debug3);
 package ::Assign;
 my $yw = Data::YAML::Writer->new;
 my $yr = Data::YAML::Reader->new;
-$debug = 0;
-$debug2 = 1;
-$debug3 = 0;
 
 use Carp;
 
 sub assign {
-	local $debug = 1; # $debug3;
+	
 	
 	$debug2 and print "&assign\n";
 	
@@ -69,7 +66,7 @@ sub assign {
 	my $class;
 	carp "didn't expect scalar here" if ref $h{-data} eq 'SCALAR';
 	carp "didn't expect code here" if ref $h{-data} eq 'CODE';
-	print "data: $h{-data}, ", ref $h{-data}, $/;
+	# print "data: $h{-data}, ", ref $h{-data}, $/;
 
 	if ( ref $h{-data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
@@ -77,7 +74,6 @@ sub assign {
 		$debug and print "I found an object of class $class...\n";
 	} 
 	$class = $h{-class};
-	print "class: $h{-class}\n";
  	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect
 												#from preprocessor
 	my @vars = @{ $h{-vars} };
@@ -164,7 +160,7 @@ DEBUG
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
-	local $debug = $debug3;
+	
 	my %h = @_;
 	my $source = $h{-source};
 	my @vars = @{ $h{-vars} };
@@ -212,7 +208,7 @@ sub assign_vars {
 
 sub serialize {
 	$debug2 and print "&serialize\n";
-	local $debug = 1;
+	
 	my %h = @_;
 	my @vars = @{ $h{-vars} };
 	my $class = $h{-class};
@@ -278,7 +274,7 @@ sub serialize {
 }
 
 sub yaml_out {
-	local $debug = 0;
+	
 	local $debug2 = 0;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
@@ -292,7 +288,7 @@ sub yaml_out {
 	$output;
 }
 sub yaml_in {
-	local $debug = 0;
+	
 	# $debug2 and print "&yaml_in\n";
 	my $file = shift;
 	my $yaml; 
@@ -329,14 +325,12 @@ sub create_dir {
 }
 
 sub join_path {
-	local $debug = 0;
-	no warnings;
+	
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
 	$debug and print "path: $path\n";
 	$path;
-	use warnings;
 }
 
 sub wav_off {

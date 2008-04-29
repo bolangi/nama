@@ -25,7 +25,7 @@ sub first_run {
 		$reply = lc $reply;
 		if ($reply ne q(n) ){
 			create_dir $wav_dir;
-			print ".... Done!\n\n";
+			print "\n... Done!\n\n";
 		} 
 	}
 
@@ -39,7 +39,7 @@ sub first_run {
 		if ($reply ne q(n)  ){
 			$default =~ s/wav_dir:.*$/wav_dir: $ENV{HOME}\/ecmd/m;
 			$default > io( $config );
-			print ".... Done!\n\nPlease edit this file and restart program\n";
+			print "\n.... Done!\n\nPlease edit this file and restart program\n";
 		}
 		exit;
 	}
@@ -50,7 +50,7 @@ sub first_run {
 sub prepare {  
 
 	$debug2 and print "&prepare\n";
-	local $debug = 1;
+	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	new_engine();
@@ -74,14 +74,8 @@ sub prepare {
 
 	read_config(); 
 
-	print "wav_dir: $wav_dir\n";
 	$wav_dir = $opts{d} if $opts{d};
-	print "wav_dir: $wav_dir\n";
 	$wav_dir = join_path($ENV{HOME}, "ecmd" ) unless $wav_dir; 
-	print "wav_dir: $wav_dir\n";
-
-	print "&wav_dir: ", &wav_dir, $/;
-	print "&project_dir: ", &project_dir, $/;
 
 	first_run();
 	
@@ -94,7 +88,7 @@ sub prepare {
 		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
 	);
 
-	print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
+	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
 
 	$master_bus  = ::Bus->new(
 		name => 'Master_Bus',
@@ -120,7 +114,7 @@ sub prepare {
 
 	$ui->init_gui;
 
-	print "project_name: $project_name\n";
+	#print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
 
@@ -136,7 +130,7 @@ sub prepare {
 
 
 sub eval_iam {
-	local $debug = $debug3;
+	
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -162,10 +156,10 @@ print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} 
 my @search_path = (project_dir(), $ENV{HOME}, wav_dir() );
 my $c = 0;
 	map{ 
-print $/,++$c,$/;
+#print $/,++$c,$/;
 			if (-d $_) {
 				my $config = join_path($_, config_file());
-				print "config: $config\n";
+				#print "config: $config\n";
 				if( -f $config ){ 
 					my $yml = io($config)->all ;
 					return $yml;
@@ -176,7 +170,7 @@ print $/,++$c,$/;
 
 sub read_config {
 	$debug2 and print "&read_config\n";
-	local $debug = $debug3;
+	
 	my $config = shift;
 	my $yml = length $config > 100 ? $config : $default;
 	strip_comments( $yml );
@@ -190,7 +184,7 @@ sub read_config {
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign_var( \%cfg, @config_vars); 
-	print "config file: $yml";
+	#print "config file: $yml";
 
 }
 sub walk_tree {
@@ -236,7 +230,7 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
-	print "reached here!!!\n";
+	#print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	dig_ruins() unless $#::Track::by_index > 2;
@@ -477,7 +471,7 @@ sub initialize_project_data {
 	$mixdown =  ::Group->new(name => 'Mixdown');
 	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
 
-	print yaml_out( \%::Track::track_names );
+	#print yaml_out( \%::Track::track_names );
 
 	$master_track = ::SimpleTrack->new( 
 		group => 'Master', 
@@ -503,7 +497,7 @@ sub initialize_project_data {
 		name => 'Mixdown', 
 		rw => 'MON'); 
 
-	map { print "type::: ", ref $_, $/} ::Track::all; 
+	#map { print "type::: ", ref $_, $/} ::Track::all; 
 @rw_items = ();
 
 $ui->track_gui( $mixdown_track->n); 
@@ -516,7 +510,7 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	return if transport_running();
 	my $name = shift;
-	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	#print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		dir => &this_wav_dir,
 		name => $name,
@@ -544,7 +538,7 @@ sub restore_track {
 }
 
 sub dig_ruins { 
-	local $debug = 1;
+	
 
 	# only if there are no tracks , 
 	
@@ -582,7 +576,7 @@ sub remove_small_wavs {
 	$debug and print $cmd; 
 	my @wavs = split "\n",qx($cmd);
 	#map {system qq(ls -l $_ ) } @wavs; exit;
-	map { print ($_, "\n") if -s == 44 } @wavs; 
+	#map { print ($_, "\n") if -s == 44 } @wavs; 
 	map { unlink $_ if -s == 44 } @wavs; 
 }
 
@@ -668,7 +662,7 @@ sub collect_chains {
 	# of older code
 	
 	$debug2 and print "&collect\n";
-	local $debug = $debug3;
+	
 	@all_chains = @monitor = @record = ();
 
 	#
@@ -692,7 +686,7 @@ sub collect_chains {
 sub really_recording {  # returns filename stubs
 
 #	scalar @record  
-	print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
+	#print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
 	keys %{$outputs{file}}; # includes mixdown
 }
 
@@ -817,7 +811,7 @@ sub load_ecs {
 }
 sub new_engine { 
 #	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
-	print "ecasound name: $ecasound\n";
+	#print "ecasound name: $ecasound\n";
 	system qq(killall $ecasound);
 	sleep 1;
 	system qq(killall -9 $ecasound);
@@ -837,7 +831,7 @@ sub setup_transport { # create chain setup
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'MUTE'} 
 								@tracks;
-	print "have source: $have_source\n";
+	#print "have source: $have_source\n";
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
 		$master_bus->apply; # mix_out, mix_link
@@ -847,7 +841,7 @@ sub setup_transport { # create chain setup
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
 		return 1;
-	} else { print "no REC or MON signal to process\n";
+	} else { print "Mixdown not possible, no inputs\n";
 	return 0};
 }
 sub connect_transport {
@@ -865,7 +859,7 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-	print eval_iam("fs");
+	#print eval_iam("fs");
 	$ui->flash_ready();
 	
 }
@@ -907,6 +901,28 @@ sub toggle_unit {
 sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
+sub drop_mark {
+		my $here = eval_iam("cs-get-position");
+		return if $marks{$here}; 
+		$marks{$here} = $mark_frame->Button( 
+			-text => colonize($here),
+			-background => $old_bg,
+			-command => sub { mark($here) },
+		) ->pack(-side => 'left');
+}
+sub mark {
+	my $pos = shift; 
+	my $here = eval_iam("cs-get-position");
+	if ($markers_armed and $pos == $here){
+			$marks{$pos}->destroy;
+			delete $marks{$pos};
+		    arm_mark_toggle; # disarm
+	}
+	else{ 
+
+		eval_iam(qq(cs-set-position $pos));
+	}
+}
 ## clock and clock-refresh functions ##
 #
 
@@ -921,7 +937,7 @@ sub restart_clock {
 	start_clock();
 }
 sub refresh_clock{
-	local $debug = 1;
+	
 	update_clock();
 	$clock_id = $clock->after(1000, \&refresh_clock) if $maybe_running; 
 	my $status = eval_iam('engine-status');
@@ -960,7 +976,7 @@ sub jump {
 	# eval_iam("setpos $new_pos");
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
-	print "$cmd\n";
+	# print "$cmd\n";
 	sleep 1;
  restart_clock();
 }
@@ -1196,7 +1212,7 @@ sub cop_add {
 	my $i       = $effect_i{$code};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
 	$debug2 and print "&cop_add\n";
-print <<PP;
+$debug and print <<PP;
 n:          $n
 code:       $code
 parent_id:  $parent_id
@@ -1246,14 +1262,14 @@ PP
 }
 
 sub cop_init {
-	local $debug = $debug3;
+	
 	$debug2 and print "&cop_init\n";
 	my $p = shift;
 	my %p = %$p;
 	my $id = $p{cop_id};
 	my $parent_id = $p{parent_id};
 	my $vals_ref  = $p{vals_ref};
-	local $debug = $debug3;
+	
 	$debug and print "cop__id: $id\n";
 
 	my @vals;
@@ -1283,7 +1299,7 @@ sub cop_init {
 	}
 }
 sub effect_update {
-	local $debug = 1;
+	
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
@@ -1336,7 +1352,7 @@ sub find_op_offsets {
 =cut
 
 
-	local $debug = 1;
+	
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
 		#my @op_offsets = split "\n",eval_iam("cs");
@@ -1346,7 +1362,7 @@ sub find_op_offsets {
 		for my $output (@op_offsets){
 			my $chain_id;
 			($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
-			print "chain_id: $chain_id\n";
+			# print "chain_id: $chain_id\n";
 			next if $chain_id =~ m/\D/; # skip id's containing non-digits
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
@@ -1356,7 +1372,7 @@ sub find_op_offsets {
 		}
 }
 sub apply_ops {  # in addition to operators in .ecs file
-	local $debug = $debug3;
+	
 	$debug2 and print "&apply_ops\n";
 	my $last = scalar @::Track::index - 1;
 	for my $n (1..$last) {
@@ -1373,7 +1389,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
-	local $debug = 1;
+	
 	my $id = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};
@@ -1411,7 +1427,7 @@ sub apply_op {
 # @ladspa_sorted # XXX
 
 sub prepare_static_effects_data{
-	local $debug = $debug3;
+	
 	$debug2 and print "&prepare_static_effects_data\n";
 
 	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
@@ -1423,7 +1439,7 @@ sub prepare_static_effects_data{
 		$debug and print "found effects cache: $effects_cache\n";
 		assign_var($effects_cache, @effects_static_vars);
 	} else {
-		local $debug = 0;
+		
 		$debug and print "reading in effects data, please wait...\n";
 		read_in_effects_data(); 
 		get_ladspa_hints();
@@ -1504,9 +1520,9 @@ sub read_in_effects_data {
 
 #	print eval_iam("ladspa-register");
 	
-	print "found ", scalar @lad, " LADSPA effects\n";
-	print "found ", scalar @preset, " presets\n";
-	print "found ", scalar @ctrl, " controllers\n";
+	$debug and print "found ", scalar @lad, " LADSPA effects\n";
+	$debug and print "found ", scalar @preset, " presets\n";
+	$debug and print "found ", scalar @ctrl, " controllers\n";
 
 	# index boundaries we need to make effects list and menus
 
@@ -1738,7 +1754,8 @@ sub range {
 sub integrate_ladspa_hints {
 	map{ 
 		my $i = $effect_i{$_};
-		print ("$_ not found\n"), next unless $i;
+		# print ("$_ not found\n"), 
+		next unless $i;
 		$effects[$i]->{params} = $effects_ladspa{$_}->{params};
 		$effects[$i]->{display} = $effects_ladspa{$_}->{display};
 	} keys %effects_ladspa;
@@ -1750,10 +1767,10 @@ map { $L{$_}++ } keys %effects_ladspa;
 map { $M{$_}++ } grep {/el:/} keys %effect_i;
 
 for my $k (keys %L) {
-	$M{$k} or print "$k not found in ecasound listing\n";
+	$M{$k} or $debug and print "$k not found in ecasound listing\n";
 }
 for my $k (keys %M) {
-	$L{$k} or print "$k not found in ladspa listing\n";
+	$L{$k} or $debug and print "$k not found in ladspa listing\n";
 }
 
 
@@ -1831,7 +1848,7 @@ sub save_state {
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
 		$debug and 1;
-	print "filename base: $file\n";
+	# print "filename base: $file\n";
 
 
 # prepare tracks for storage
@@ -1839,7 +1856,7 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 map { push @tracks_data, $_->hashref } ::Track::all();
-print "found ", scalar @tracks_data, "tracks\n";
+# print "found ", scalar @tracks_data, "tracks\n";
 
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
@@ -1887,8 +1904,6 @@ sub retrieve_state {
 
 	assign_var( $file, @persistent_vars );
 
-	print "     TRACKS: ", scalar @tracks_data, $/;
-
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
@@ -1910,23 +1925,19 @@ sub retrieve_state {
 	} @tracks_data[0,1];
 
 	splice @tracks_data, 0, 2;
-	print "user trackb: ", scalar @tracks_data, $/;
-
-
-
 
 	# create user tracks
 	
 	my $did_apply = 0;
 	map{ 
 		my %h = %$_; 
-		print "old n: $h{n}\n";
-		print "h: ", join " ", %h, $/;
+		#print "old n: $h{n}\n";
+		#print "h: ", join " ", %h, $/;
 		delete $h{n};
-		my @hh = %h; print "size: ", scalar @hh, $/;
+		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
 		my $n = $track->n;
-		print "new n: $n\n";
+		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
 		$ui->track_gui($n); # applies vol and pan operators
 		for my $id (@{$ti[$n]->ops}){
@@ -2045,9 +2056,9 @@ sub retrieve_effects {
 	%copp = %current_copp; ## similar name!!
 
 
-	print "\%state_c_ops\n ", yaml_out( \%state_c_ops), "\n\n";
-	print "\%old_cops\n ", yaml_out( \%old_cops), "\n\n";
-	print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
+	#print "\%state_c_ops\n ", yaml_out( \%state_c_ops), "\n\n";
+	#print "\%old_cops\n ", yaml_out( \%old_cops), "\n\n";
+	#print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
 #	return;
 
 	restore_time_marker_labels();
@@ -2125,7 +2136,7 @@ sub retrieve_effects {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	}
-	$did_apply and print "########## applied\n\n";
+	# $did_apply and print "########## applied\n\n";
 	
 	# $ew->deiconify or $ew->iconify;
 

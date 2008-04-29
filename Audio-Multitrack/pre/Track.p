@@ -125,7 +125,7 @@ sub current {
 	elsif ( $track->rec_status eq 'MON'){ 
 		return $track->targets->{ $track->monitor_version } 
 	} else {
-		print "track ", $track->name, ": no current version found\n" ;
+		print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }
@@ -150,13 +150,13 @@ sub monitor_version {
 	elsif (	$track->last) #  and ! $track->active and ! $group->version )
 		{ $version = $track->last }
 	else { carp "no version to monitor!\n" }
-	print "monitor version: $version\n";
+	# print "monitor version: $version\n";
 	$version;
 }
 
 sub rec_status {
 	my $track = shift;
-	print "rec status track: ", $track->name, $/;
+	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
 
 		
@@ -205,7 +205,7 @@ sub rec_route {
 sub route {
 	my ($width, $dest) = @_;
 	return undef if $dest == 1 or $dest == 0;
-	print "route: width: $width, destination: $dest\n\n";
+	# print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
@@ -354,27 +354,14 @@ sub tracks { # returns list of tracks in group
 	# a array reference.
 
 	my $group = shift;
-	print "ttype: ", ref $group, $/;
 	my @all = ::Track::all;
-	map {print "type: ", ref $_, $/} ::Track::all; 
-	print "all, length: ", scalar @all, $/;
+	# map {print "type: ", ref $_, $/} ::Track::all; 
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
 
 
 sub all { @by_index[1..scalar @by_index - 1] }
 
-=comment
-sub group {
-	my ($id, $method, @vals) = @_;
-	my $group =  $::Group::by_name{$id};
-	#print "group:: id: $id, method: $method\n";
-	my $command = qq(\$group->$method(\@vals));
-	#print $command, $/;
-	eval $command;
-}
-=cut
- 
 # ---------- Op -----------
 
 package ::Op;
@@ -389,6 +376,57 @@ use ::Object qw(	op_id
 					
 					);
 
+
+1;
+
+# ----------- Mark ------------
+package ::Mark;
+use Carp;
+our @ISA;
+use vars qw($n %by_name @by_index %used_names);
+use ::Object qw( n
+				 name 
+                 time
+				 active
+				 loop_point
+				 );
+$n = 0; 	# incrementing numeric key
+@by_index = ();	# return ref to Mark by numeric key
+%by_name = ();	# return ref to Mark by name
+%used_names = (); 
+
+sub new {
+	# returns a reference to an object that is indexed by
+	# name and by an assigned index
+	#
+	# The indexing is bypassed and an object returned 
+	# if an index n is supplied as  a parameter
+	
+	my $class = shift;
+	my %vals = @_;
+	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	carp "name already in use: $vals{name}\n"
+		 if $used_names{$vals{name}}; # null name returns false
+	my $add_index = ! $vals{n};
+	my $n = $vals{n} ? $vals{n} : ++$n; 
+	my $object = bless { 
+
+		## 		defaults ##
+
+					n    	=> $n,
+					active  => 1,
+					use_for_looping => 0,
+
+					@_ 			}, $class;
+
+	#print "object class: $class, object type: ", ref $object, $/;
+	$used_names{$vals{name}}++;
+	$by_index[$n] = $object;
+	$by_name{ $object->name } = $object;
+	
+	$object;
+	
+}
 
 1;
 

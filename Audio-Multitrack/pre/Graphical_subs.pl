@@ -302,28 +302,6 @@ sub time_gui {
 				-command => \&arm_mark_toggle,
 	)->pack(-side => 'left');	
 }
-sub drop_mark {
-		my $here = eval_iam("cs-get-position");
-		return if $marks{$here}; 
-		$marks{$here} = $mark_frame->Button( 
-			-text => colonize($here),
-			-background => $old_bg,
-			-command => sub { mark($here) },
-		) ->pack(-side => 'left');
-}
-sub mark {
-	my $pos = shift; # gives me widget
-	if ($markers_armed){
-			drop_mark();
-			$marks{$pos}->destroy;
-			delete $marks{$pos};
-		    arm_mark_toggle; # disarm
-	}
-	else{ 
-
-		eval_iam(qq(cs-set-position $pos));
-	}
-}
 
 sub oid_gui {
 	$debug2 and print "&oid_gui\n";
@@ -441,7 +419,7 @@ $group_rw
 
 }
 sub global_version_buttons {
-	local $debug = 1;
+	
 	if (defined $tracker_group_widget) {
 		my @children = $tracker_group_widget->children;
 		for (@children) {
@@ -712,7 +690,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
-	local $debug = $debug3;
+	
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
@@ -749,7 +727,7 @@ sub effect_button {
 }
 
 sub make_scale {
-	local $debug = 1;
+	
 	$debug2 and print "&make_scale\n";
 	my $ref = shift;
 	my %p = %{$ref};
