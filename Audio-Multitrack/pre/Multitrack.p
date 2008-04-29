@@ -137,6 +137,7 @@ sub refresh_oids {}
 sub project_label_configure{}
 sub length_display{}
 sub clock_display {}
+sub clock_config {}
 sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}

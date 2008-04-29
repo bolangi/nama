@@ -810,9 +810,9 @@ sub load_ecs {
 sub new_engine { 
 #	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	#print "ecasound name: $ecasound\n";
-	system qq(killall $ecasound);
-	sleep 1;
-	system qq(killall -9 $ecasound);
+#	system qq(killall $ecasound);
+#	sleep 1;
+#	system qq(killall -9 $ecasound);
 	$e = Audio::Ecasound->new();
 }
 sub setup_transport { # create chain setup
@@ -1301,6 +1301,7 @@ sub cop_init {
 }
 sub effect_update {
 	
+	local $debug = 1;
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
