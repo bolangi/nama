@@ -907,7 +907,7 @@ sub drop_mark {
 sub mark {
 	my $pos = shift; 
 	my $here = eval_iam("cs-get-position");
-	if ($markers_armed and $pos == $here){
+	if ($markers_armed and abs( $pos - $here) < 0.005){
 			$marks{$pos}->destroy;
 			delete $marks{$pos};
 		    arm_mark_toggle; # disarm
@@ -960,6 +960,8 @@ sub to_end {
 	restart_clock();
 } 
 sub jump {
+	my $running = eval_iam("engine-status") eq 'running' ?  1 : 0;
+	eval_iam "stop"; #  if $running;
 	$debug2 and print "&jump\n";
 	return if really_recording();
 	my $delta = shift;
@@ -971,6 +973,7 @@ sub jump {
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
 	# print "$cmd\n";
+	eval_iam "start" if $running;
 	sleep 1;
  restart_clock();
 }
