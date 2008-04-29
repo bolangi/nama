@@ -11,7 +11,6 @@ my $prompt = "Enter command: ";
 $OUT = $term->OUT || \*STDOUT;
 my $user_input;
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-$debug = 1;
 	while (1) {
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;

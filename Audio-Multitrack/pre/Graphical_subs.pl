@@ -690,7 +690,7 @@ sub update_master_version_button {
 
 
 sub effect_button {
-	
+	local $debug = 0;	
 	$debug2 and print "&effect_button\n";
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";

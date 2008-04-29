@@ -31,8 +31,8 @@ use Data::YAML::Reader;
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 0; # subroutine names
-$debug = 0;
+$debug2 = 1; # subroutine names
+$debug = 1;
 
 ## The names of two helper loopback devices:
 

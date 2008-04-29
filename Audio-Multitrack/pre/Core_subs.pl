@@ -1904,6 +1904,7 @@ sub retrieve_state {
 
 	assign_var( $file, @persistent_vars );
 
+	print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
@@ -1956,6 +1957,8 @@ sub retrieve_state {
 		# a parameter controller, and therefore need the -kx switch
 		}
 	} @tracks_data;
+	#print "\n---\n", $tracker->dump;  
+	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
 	$did_apply and $ui->manifest();  $ew->deiconify();
 	$debug and print join " ", 
 		(map{ ref $_, $/ } @::Track::by_index), $/;
