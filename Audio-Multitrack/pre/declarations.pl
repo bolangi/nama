@@ -111,10 +111,7 @@ our (
 	$last_version,  # to know where the next recording should start
 	$monitor_version,# which global version we are currently using
 	%e_bound,		# for displaying hundreds of effects in groups
-	@marks,			# where we want to come back tto
-	%marks, 		# new implementation 
 	$unit,			# multiples of seconds or minutes
-	$markers_armed, # two states forth the markers
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
 	$jack_on,		# whether we use device jack_alsa
@@ -162,13 +159,13 @@ our (
 	%widget_e, # for effects
 	@widget_o, # for templates (oids) 
 	%widget_o, # 
+	%widget_m, # marks
 
 	@global_version_buttons, # to set the same version for
 						  	#	all tracks
-	@time_marks,	# how different from @marks?
-					# one is widgets one is the data
-	%time_marks, 	# new implementation
-	$mark_remove,   # button 
+	%marks, 		# that actual times
+	$mark_remove,   # a button that sets the next variable
+	$markers_armed, # to remove a mark
 	$time_step,
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time

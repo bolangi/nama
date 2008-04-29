@@ -505,30 +505,33 @@ sub track_gui {
 					);
 	}
 
+	# skip the rest of the widgets for the mixdown track
+	
+# if ( $n != 2 ){
+
+
 	$ch_r = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
-	#		if ( $n != 1 ) { # for all but Mixdown track MIX
-				for my $v (1..$tk_input_channels) {
-					$ch_r->radiobutton(
-						-label => $v,
-						-value => $v,
-						-command => sub { 
-							$ti[$n]->set(rw => 'REC');
-							$ti[$n]->set(ch_r  => $v);
-							refresh_c($n) }
-				 		)
-				}
-	#		}
+	for my $v ("",1..$tk_input_channels) {
+		$ch_r->radiobutton(
+			-label => $v,
+			-value => $v,
+			-command => sub { 
+			#	$ti[$n]->set(rw => 'REC');
+				$ti[$n]->set(ch_r  => $v);
+				refresh_c($n) }
+			)
+	}
 	$ch_m = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
-				for my $v (1..10) {
+				for my $v ("",1..10) {
 					$ch_m->radiobutton(
 						-label => $v,
 						-value => $v,
 						-command => sub { 
-							$ti[$n]->set(rw  => "MON");
+			#				$ti[$n]->set(rw  => "MON");
 							$ti[$n]->set(ch_m  => $v);
 							refresh_c($n) }
 				 		)
@@ -544,6 +547,8 @@ sub track_gui {
 
 	my $p_num = 0; # needed when using parameter controllers
 	my $vol_id = $ti[$n]->vol;
+
+	local $debug = 1;
 
 
 	$debug and print "vol cop_id: $vol_id\n";
@@ -667,6 +672,16 @@ sub track_gui {
 	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
 	refresh_c($n);
+
+=comment
+	} else { # Mixdown track
+#	#my @filler = map{ "x" } 1..14;
+	$name->grid($version, $rw);
+#	$version, $rw);
+
+	refresh_c($n);
+	}
+=cut
 }
 
 sub update_version_button {
@@ -849,6 +864,27 @@ sub arm_mark_toggle {
 		$markers_armed = 1;
 		$mark_remove->configure( -background => 'yellow');
 	}
+}
+sub marker {
+	@_ = discard_object( @_);
+	my $pos = shift;
+	print $pos, " ", int $pos, $/;
+		$widget_m{$pos} = $mark_frame->Button( 
+			-text => colonize(int ($pos) ),
+			-background => $old_bg,
+			-command => sub { mark($pos) },
+		) ->pack(-side => 'left');
+}
+
+sub restore_time_marks {
+	my @times =  sort keys %marks;
+	%marks = (); # reset
+	map{ drop_mark $_ } @times;
+}
+sub destroy_marker {
+	@_ = discard_object( @_);
+	my $pos = shift;
+	$widget_m{$pos}->destroy; 
 }
 sub colonize { # convert seconds to minutes:seconds 
 	my $sec = shift;

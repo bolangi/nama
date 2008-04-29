@@ -447,8 +447,7 @@ sub initialize_project_data {
 	# time related
 	
 	$markers_armed = 0;
-	@marks = ();
-
+	%marks = ();
 	
 	# volume settings
 	
@@ -471,34 +470,19 @@ sub initialize_project_data {
 
 	#print yaml_out( \%::Track::track_names );
 
+
+# create magic tracks, we will create their GUI later, after retrieve
+
 	$master_track = ::SimpleTrack->new( 
 		group => 'Master', 
 		name => 'Master',
 		rw => 'MON',);
-
-	my @rw_items = (
-			[ 'command' => "MON",
-				-command  => sub { 
-						$ti[$master->n]->set(rw => "MON");
-						refresh_c($master->n);
-			}],
-			[ 'command' => "MUTE", 
-				-command  => sub { 
-						$ti[$master->n]->set(rw => "MUTE");
-						refresh_c($master->n);
-			}],
-		);
-	$ui->track_gui( $master->n, @rw_items );
 
 	$mixdown_track = ::Track->new( 
 		group => 'Mixdown', 
 		name => 'Mixdown', 
 		rw => 'MON'); 
 
-	#map { print "type::: ", ref $_, $/} ::Track::all; 
-@rw_items = ();
-
-$ui->track_gui( $mixdown_track->n); 
 }
 ## track and wav file handling
 
@@ -517,7 +501,7 @@ sub add_track {
 	);
 
 	# $ch_r and $ch_m are public variables set by GUI
-	# Okay, so we will do that for the grammar, to
+	# Okay, so we will do that for the grammar, too
 	# $::chr = 
 	
 	my $group = $::Group::by_name{$track->group};
@@ -810,11 +794,11 @@ sub load_ecs {
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
-#	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	#print "ecasound name: $ecasound\n";
-#	system qq(killall $ecasound);
-#	sleep 1;
-#	system qq(killall -9 $ecasound);
+	system qq(killall $ecasound);
+	sleep 1;
+	system qq(killall -9 $ecasound);
 	$e = Audio::Ecasound->new();
 }
 sub setup_transport { # create chain setup
@@ -902,19 +886,17 @@ sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
 sub drop_mark {
-		my $here = eval_iam("cs-get-position");
-		return if $marks{$here}; 
-		$marks{$here} = $mark_frame->Button( 
-			-text => colonize($here),
-			-background => $old_bg,
-			-command => sub { mark($here) },
-		) ->pack(-side => 'left');
+		my $pos = shift; # for restore, otherwise
+		$pos = $pos ? $pos : eval_iam("cs-get-position");
+		return if $marks{$pos}; 
+		$marks{$pos}++; # sufficient  for text mode
+		$ui->marker($pos); # for GUI
 }
 sub mark {
 	my $pos = shift; 
 	my $here = eval_iam("cs-get-position");
 	if ($markers_armed and abs( $pos - $here) < 0.005){
-			$marks{$pos}->destroy;
+			$ui->destroy_marker($pos);
 			delete $marks{$pos};
 		    arm_mark_toggle(); # disarm
 	}
@@ -1830,13 +1812,13 @@ Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, inte
 ## persistent state support
 
 sub save_state {
+
 	$debug2 and print "&save_state\n";
 	my $file = shift;
 
 	# remove nulls in %cops 
 	delete $cops{''};
-	#print join $/, keys %cops;
-	my $i; 
+
 	map{ 
 		my $found; 
 		$found = "yes" if @{$cops{$_}->{owns}};
@@ -1857,7 +1839,12 @@ sub save_state {
 		$debug and 1;
 	# print "filename base: $file\n";
 
-
+    # sort marks
+	
+	my @marks = sort keys %marks;
+	%marks = ();
+	map{ $marks{$_}++ } @marks;
+	
 # prepare tracks for storage
 
 @tracks_data = (); # zero based, iterate over these to restore
@@ -1934,6 +1921,25 @@ sub retrieve_state {
 
 	splice @tracks_data, 0, 2;
 
+	#  now create the widgets
+	
+
+	my @rw_items = (
+			[ 'command' => "MON",
+				-command  => sub { 
+						$ti[$master->n]->set(rw => "MON");
+						refresh_c($master->n);
+			}],
+			[ 'command' => "MUTE", 
+				-command  => sub { 
+						$ti[$master_track->n]->set(rw => "MUTE");
+						refresh_c($master->n);
+			}],
+		);
+	$ui->track_gui( $master_track->n, @rw_items );
+
+	$ui->track_gui( $mixdown_track->n); 
+
 	# create user tracks
 	
 	my $did_apply = 0;
@@ -1972,12 +1978,6 @@ sub retrieve_state {
 
 
 
-=comment
-	$debug and print ref $ref->{marks};
-	 @marks = @{ $ref->{marks} };
-	 print "array size ", scalar @marks;
-=cut
-
 	my $toggle_jack = $widget_o[$#widget_o];
 	convert_to_jack if $jack_on;
 	$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
@@ -1988,26 +1988,7 @@ sub retrieve_state {
 	my $result = system "sudo alsactl -f $file.alsa restore";
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 
-	# restore time marker labels
-
-	$ui->restore_time_marker_labels();
-=comment
-	
-	map{ $time_marks[$_]->configure( 
-		-text => colonize($marks[$_]),
-		-background => $old_bg,
-	)} 
-	grep{ $marks[$_] }1..$#time_marks;
-=cut
-=comment
-
-
-
-	for my $t (@takes) { 
-		next if $t == 1; 
-		$ui->group_gui;
-	}; #
-=cut
+	$ui->restore_time_marks();
 
 } 
 

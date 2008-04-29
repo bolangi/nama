@@ -92,21 +92,4 @@ sub refresh_oids{ # OUTPUT buttons
 			) } keys %widget_o;
 }
 
-sub restore_time_marker_labels {
-	
-	# restore time marker labels
-	
-	map{ $time_marks[$_]->configure( 
-		-text => $marks[$_]
-			?  colonize($marks[$_])
-			:  $_,
-		-background => $marks[$_]
-			?  $old_bg
-			: q(lightblue),
-		)
-	} 1..$#time_marks;
-
- }
-
-
 ### end

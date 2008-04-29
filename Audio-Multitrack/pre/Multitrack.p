@@ -141,10 +141,12 @@ sub clock_config {}
 sub manifest {}
 sub global_version_buttons {}
 sub destroy_widgets {}
-sub restore_time_marker_labels {}
+sub destroy_marker {}
+sub restore_time_marks {}
 sub show_unit {};
 sub add_effect_gui {};
 sub remove_effect_gui {};
+sub marker {};
 
 ## Some of these, may be overwritten
 ## by definitions that follow

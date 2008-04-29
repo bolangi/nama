@@ -28,7 +28,7 @@
 						%cops 			
 						$cop_id 		
 						%copp 			
-						@marks			
+						%marks			
 						$unit			
 						%oid_status		
 						%old_vol		
