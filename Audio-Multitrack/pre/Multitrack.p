@@ -105,10 +105,6 @@ our @ISA = '::';
 sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
-	package ::;
-	transport_gui;
-	oid_gui;
-	time_gui;
 	MainLoop;
 }
 
@@ -125,6 +121,10 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
+sub init_gui {}
+sub oid_gui {}
+sub transport_gui {}
+sub time_gui {}
 sub group_gui {}
 sub track_gui {}
 sub refresh {}

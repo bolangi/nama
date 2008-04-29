@@ -149,6 +149,7 @@ our (
 	$perl_eval_frame,
 	$transport_frame,
 	$mark_frame,
+	$fast_frame, # fast_forward, rewind, etc.
 
 	## collected widgets (i may need to destroy them)
 
