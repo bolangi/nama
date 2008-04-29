@@ -22,7 +22,7 @@ sub destroy_widgets {
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
 	# leave field labels (first row)
-	map{ $_->destroy  } @children; # [11..$#children]; # fragile
+	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$tracker_group_widget->destroy if $tracker_group_widget;
 }
 

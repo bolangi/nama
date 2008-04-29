@@ -802,7 +802,9 @@ sub convert_to_alsa { initialize_oids }
 ## transport functions
 
 sub load_ecs {
+		local $debug = 1;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
+		eval_iam("cs-disconnect");
 		eval_iam("cs-remove $project_file");
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -1375,8 +1377,10 @@ sub find_op_offsets {
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	
+	local $debug = 1;
 	$debug2 and print "&apply_ops\n";
-	my $last = scalar @::Track::index - 1;
+	my $last = scalar @::Track::by_index - 1;
+	print "looping over 1 to $last\n";
 	for my $n (1..$last) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "MUTE" ;
@@ -1391,6 +1395,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
+	local $debug = 1;
 	
 	my $id = shift;
 	$debug and print "id: $id\n";
