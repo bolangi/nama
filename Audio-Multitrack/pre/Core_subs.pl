@@ -228,7 +228,11 @@ sub load_project {
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	dig_ruins() unless $#::Track::by_index > 2;
+
 	$tracker_group_widget = $ui->group_gui('Tracker');
+
+	# possible null if Text mode
+	
 	$ui->global_version_buttons(); 
 	$ui->refresh_t;
 
@@ -431,7 +435,7 @@ sub initialize_project_data {
 	@monitor	= ();
 	@mute = (); 
 
-	@all_chains  = (); # indices of all chains
+	@all_chains  = (); # indices of all chains # deprecated
 	@input_chains = ();
 	@output_chains = ();
 

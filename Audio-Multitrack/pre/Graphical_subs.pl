@@ -21,8 +21,9 @@ sub destroy_widgets {
 	#my @children = $take_frame->children;
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
+	# leave field labels (first row)
+	map{ $_->destroy  } @children; # [11..$#children]; # fragile
 	$tracker_group_widget->destroy if $tracker_group_widget;
-	map{ $_->destroy  } @children[11..$#children]; # fragile
 }
 
 sub init_gui {
@@ -420,6 +421,7 @@ $group_rw
 }
 sub global_version_buttons {
 	
+	local $debug = 1;
 	if (defined $tracker_group_widget) {
 		my @children = $tracker_group_widget->children;
 		for (@children) {
@@ -436,8 +438,12 @@ sub global_version_buttons {
 	# the highest version number of all tracks in the
 	# $tracker group
 	
+	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
+	
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
-			grep{ $_ > 2 } @all_chains; # excludes master (1), mix (2)
+			@user_track_indices;
+		
+			# scalar grep{ $-> > 2 } @all_chains; # excludes master (1), mix (2)
 			$tracker_group_widget->radiobutton( 
 
 				-label => ($v ? $v : ''),
