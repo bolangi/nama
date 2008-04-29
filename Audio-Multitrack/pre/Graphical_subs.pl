@@ -35,6 +35,8 @@ sub init_gui {
 ### 	Tk root window layout
 
 	$mw = MainWindow->new; 
+	#my $mw = tkinit();
+	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Tk Ecmd"); 
 	$mw->deiconify;
 
@@ -61,6 +63,12 @@ sub init_gui {
 	$project_label = $mw->Label->pack(-fill => 'both');
 	$old_bg = $project_label->cget('-background');
 	$time_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	$mark_frame = $time_frame->Frame->pack(
+		-side => 'bottom', 
+		-fill => 'both');
+	$fast_frame = $time_frame->Frame->pack(
+		-side => 'bottom', 
+		-fill => 'both');
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -77,7 +85,7 @@ sub init_gui {
 
 
 	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
-	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 45)->pack(-side => 'left');
+	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 #	$sn_load_nostate = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -153,7 +161,7 @@ sub init_gui {
 	$iam_label = $iam_frame->Label(-text => "IAM Command")
 		->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
-		-textvariable => \$iam, -width => 65)
+		-textvariable => \$iam, -width => 45)
 		->pack(-side => 'left');;
 	$iam_execute = $iam_frame->Button(
 			-text => 'Execute',
@@ -164,7 +172,7 @@ sub init_gui {
 		-text => "Perl Command")
 		->pack(-side => 'left');;
 	my $perl_eval_text = $perl_eval_frame->Entry(
-		-textvariable => \$perl_eval, -width => 65)
+		-textvariable => \$perl_eval, -width => 45)
 		->pack(-side => 'left');;
 	my $perl_eval_execute = $perl_eval_frame->Button(
 			-text => 'Execute',
@@ -173,6 +181,7 @@ sub init_gui {
 		
 }
 sub transport_gui {
+	@_ = discard_object(@_);
 	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
@@ -228,6 +237,7 @@ sub transport_gui {
 						 );
 }
 sub time_gui {
+	@_ = discard_object(@_);
 	$debug2 and print "&time_gui\n";
 
 	my $time_label = $clock_frame->Label(
@@ -259,7 +269,6 @@ sub time_gui {
 	# jump
 
 	my $jump_label = $fast_frame->Label(-text => q(JUMP), -width => 12);
-	my $mark_label = $mark_frame->Label(-text => q(MARK), -width => 12);
 	my @pluses = (1, 5, 10, 30, 60);
 	my @minuses = map{ - $_ } reverse @pluses;
 	my @fw = map{ my $d = $_; $fast_frame->Button(
@@ -292,20 +301,27 @@ sub time_gui {
 
 	# Marks
 	
+	my $mark_label = $mark_frame->Label(
+		-text => q(MARK), 
+		-width => 12,
+		)->pack(-side => 'left');
+		
 	my $drop_mark = $mark_frame->Button(
-		-text => 'Drop mark',
+		-text => 'Place',
 		-background => $old_bg,
 		-command => \&drop_mark,
-	)->pack(-side => 'left');	
+		)->pack(-side => 'left');	
 		
 	$mark_remove = $mark_frame->Button(
-				-text => 'Remove',
+		-text => 'Remove',
+		-command => \&arm_mark_toggle,
 	)->pack(-side => 'left');	
-	$mark_remove->configure(-command => \&arm_mark_toggle );
+
 }
 
 sub oid_gui {
 	$debug2 and print "&oid_gui\n";
+	@_ = discard_object(@_);
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
 	for my $rule ( ::Rule::all_rules ){
@@ -873,7 +889,7 @@ sub marker {
 			-text => colonize(int ($pos) ),
 			-background => $old_bg,
 			-command => sub { mark($pos) },
-		) ->pack(-side => 'left');
+		)->pack(-side => 'left');
 }
 
 sub restore_time_marks {
