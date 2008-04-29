@@ -910,7 +910,7 @@ sub mark {
 	if ($markers_armed and abs( $pos - $here) < 0.005){
 			$marks{$pos}->destroy;
 			delete $marks{$pos};
-		    arm_mark_toggle; # disarm
+		    arm_mark_toggle(); # disarm
 	}
 	else{ 
 

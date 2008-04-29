@@ -297,10 +297,10 @@ sub time_gui {
 		-command => \&drop_mark,
 	)->pack(-side => 'left');	
 		
-	my $arm_mark = $mark_frame->Button(
+	$mark_remove = $mark_frame->Button(
 				-text => 'Remove',
 	)->pack(-side => 'left');	
-	$arm_mark->configure(-command => sub{ arm_mark_toggle( $arm_mark )});
+	$mark_remove->configure(-command => \&arm_mark_toggle );
 }
 
 sub oid_gui {
@@ -835,14 +835,13 @@ sub make_scale {
 
 }
 sub arm_mark_toggle { 
-	my $button = shift;
 	if ($markers_armed) {
 		$markers_armed = 0;
-		$button->configure( -background => $old_bg);
+		$mark_remove->configure( -background => $old_bg);
 	}
 	else{
 		$markers_armed = 1;
-		$button->configure( -background => 'yellow');
+		$mark_remove->configure( -background => 'yellow');
 	}
 }
 sub colonize { # convert seconds to minutes:seconds 

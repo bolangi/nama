@@ -155,7 +155,7 @@ our (
 
 	## collected widgets (i may need to destroy them)
 
-	@widget_t, # widgets for displaying track groups (busses!)
+	@widget_t, # widgets for displaying track groups
 	$tracker_group_widget, # widget for tracker group
 							# replacing @widget_t
 	%widget_c, # for chains (tracks)
@@ -168,6 +168,7 @@ our (
 	@time_marks,	# how different from @marks?
 					# one is widgets one is the data
 	%time_marks, 	# new implementation
+	$mark_remove,   # button 
 	$time_step,
 	$clock, 		# displays clock
 	$setup_length,  # displays runing time
