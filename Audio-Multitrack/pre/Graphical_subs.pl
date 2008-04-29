@@ -21,12 +21,9 @@ sub destroy_widgets {
 	#my @children = $take_frame->children;
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
-
 	# leave field labels (first row)
-	map{ $_->destroy  } @children[11..$#children]; 
-	
+	map{ $_->destroy  } @children[11..$#children]; # fragile
 	$tracker_group_widget->destroy if $tracker_group_widget;
-	map{ $_->destroy  } values %widget_m if %widget_m;
 }
 
 sub init_gui {
@@ -74,13 +71,8 @@ sub init_gui {
 	$add_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$perl_eval_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$iam_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$mark_frame = $time_frame->Frame->pack(
-		-side => 'bottom', 
-		-fill => 'both');
-	$fast_frame = $time_frame->Frame->pack(
-		-side => 'bottom', 
-		-fill => 'both');
 	$load_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+#	my $blank = $mw->Label->pack(-side => 'left');
 
 
 
@@ -181,7 +173,6 @@ sub init_gui {
 		
 }
 sub transport_gui {
-	@_ = discard_object(@_);
 	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
@@ -191,8 +182,8 @@ sub transport_gui {
 	$transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
 	$transport_start = $transport_frame->Button->pack(-side => 'left');
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
-	$transport_setup = $transport_frame->Button->pack(-side => 'left');;
-	$transport_connect = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
 	$transport_new = $transport_frame->Button->pack(-side => 'left');;
 
@@ -217,6 +208,7 @@ sub transport_gui {
 			-text => 'Arm',
 			-command => sub {&setup_transport and &connect_transport}
 						 );
+=comment
 	$transport_setup->configure(
 			-text => 'Generate chain setup',
 			-command => \&setup_transport,
@@ -225,6 +217,7 @@ sub transport_gui {
 			-text => 'Connect chain setup',
 			-command => \&connect_transport,
 						 );
+=cut
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
 			-command => \&disconnect_transport,
@@ -235,7 +228,6 @@ sub transport_gui {
 						 );
 }
 sub time_gui {
-	@_ = discard_object(@_);
 	$debug2 and print "&time_gui\n";
 
 	my $time_label = $clock_frame->Label(
@@ -258,10 +250,16 @@ sub time_gui {
 		$w->pack(-side => 'left');	
 	}
 
+	$mark_frame = $time_frame->Frame->pack(
+		-side => 'bottom', 
+		-fill => 'both');
+	my $fast_frame = $time_frame->Frame->pack(
+		-side => 'bottom', 
+		-fill => 'both');
 	# jump
 
 	my $jump_label = $fast_frame->Label(-text => q(JUMP), -width => 12);
-	my $mark_label = $mark_frame->Label(-text => q(MARK), -width => 12)->pack(-side => left);;
+	my $mark_label = $mark_frame->Label(-text => q(MARK), -width => 12);
 	my @pluses = (1, 5, 10, 30, 60);
 	my @minuses = map{ - $_ } reverse @pluses;
 	my @fw = map{ my $d = $_; $fast_frame->Button(
@@ -302,13 +300,12 @@ sub time_gui {
 		
 	$mark_remove = $mark_frame->Button(
 				-text => 'Remove',
-				-command => \&arm_mark_toggle, 
 	)->pack(-side => 'left');	
+	$mark_remove->configure(-command => \&arm_mark_toggle );
 }
 
 sub oid_gui {
 	$debug2 and print "&oid_gui\n";
-	@_ = discard_object(@_);
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
 	for my $rule ( ::Rule::all_rules ){
@@ -872,7 +869,6 @@ sub marker {
 	@_ = discard_object( @_);
 	my $pos = shift;
 	print $pos, " ", int $pos, $/;
-	print "mark frame: ", ref $mark_frame, $/;
 		$widget_m{$pos} = $mark_frame->Button( 
 			-text => colonize(int ($pos) ),
 			-background => $old_bg,

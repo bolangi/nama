@@ -113,9 +113,6 @@ sub prepare {
 	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
 
 	$ui->init_gui;
-	$ui->transport_gui;
-	$ui->oid_gui;
-	$ui->time_gui;
 
 	#print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
@@ -891,8 +888,7 @@ sub show_unit { $time_step->configure(
 sub drop_mark {
 		my $pos = shift; # for restore, otherwise
 		$pos = $pos ? $pos : eval_iam("cs-get-position");
-		print "setting mark, position $pos\n";
-		#return if $marks{$pos}; 
+		return if $marks{$pos}; 
 		$marks{$pos}++; # sufficient  for text mode
 		$ui->marker($pos); # for GUI
 }
