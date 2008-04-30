@@ -893,9 +893,11 @@ sub marker {
 }
 
 sub restore_time_marks {
+	@_ = discard_object( @_);
 	my @times =  sort keys %marks;
 	%marks = (); # reset
 	map{ drop_mark $_ } @times;
+	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
 sub destroy_marker {
 	@_ = discard_object( @_);
@@ -912,5 +914,7 @@ sub colonize { # convert seconds to minutes:seconds
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
+
+	
 
 ### end
