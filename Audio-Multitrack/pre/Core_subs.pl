@@ -479,7 +479,8 @@ sub initialize_project_data {
 	$master_track = ::SimpleTrack->new( 
 		group => 'Master', 
 		name => 'Master',
-		rw => 'MON',);
+		rw => 'MON',); # no dir, we won't record tracks
+
 
 	$mixdown_track = ::Track->new( 
 		group => 'Mixdown', 
@@ -497,7 +498,6 @@ sub add_track {
 	my $name = shift;
 	#print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
-		dir => &this_wav_dir,
 		name => $name,
 		ch_r => $ch_r,
 		ch_m => $ch_m,
@@ -545,6 +545,8 @@ sub dig_ruins {
 		@wavs = keys %wavs;
 
 		$debug and print "tracks found: @wavs\n";
+	 
+		create_master_and_mix_tracks();
 
 		map{add_track($_)}@wavs;
 
@@ -951,11 +953,11 @@ sub to_end {
 	restart_clock();
 } 
 sub jump {
-	my $running = eval_iam("engine-status") eq 'running' ?  1 : 0;
-	eval_iam "stop"; #  if $running;
-	$debug2 and print "&jump\n";
 	return if really_recording();
 	my $delta = shift;
+#	my $running = eval_iam("engine-status") eq 'running' ?  1 : 0;
+#	eval_iam "stop"; #  if $running;
+	$debug2 and print "&jump\n";
 	my $here = eval_iam(qq(getpos));
 	$debug and print "delta: $delta\nhere: $here\nunit: $unit\n\n";
 	my $new_pos = $here + $delta * $unit;
@@ -964,9 +966,9 @@ sub jump {
 	my $cmd = "setpos $new_pos";
 	$e->eci("setpos $new_pos");
 	# print "$cmd\n";
-	eval_iam "start" if $running;
+	# eval_iam "start" if $running;
 	sleep 1;
- restart_clock();
+ # restart_clock();
 }
 ## post-recording functions
 
@@ -1926,22 +1928,8 @@ sub retrieve_state {
 
 	#  now create the widgets
 	
+create_master_and_mix_tracks();
 
-	my @rw_items = (
-			[ 'command' => "MON",
-				-command  => sub { 
-						$ti[$master->n]->set(rw => "MON");
-						refresh_c($master->n);
-			}],
-			[ 'command' => "MUTE", 
-				-command  => sub { 
-						$ti[$master_track->n]->set(rw => "MUTE");
-						refresh_c($master->n);
-			}],
-		);
-	$ui->track_gui( $master_track->n, @rw_items );
-
-	$ui->track_gui( $mixdown_track->n); 
 
 	# create user tracks
 	
@@ -1994,10 +1982,26 @@ sub retrieve_state {
 	$ui->restore_time_marks();
 
 } 
+sub create_master_and_mix_tracks {
 
 
+	my @rw_items = (
+			[ 'command' => "MON",
+				-command  => sub { 
+						$tn{Master}->set(rw => "MON");
+						refresh_c($master_track->n);
+			}],
+			[ 'command' => "MUTE", 
+				-command  => sub { 
+						$tn{Master}->set(rw => "MUTE");
+						refresh_c($master_track->n);
+			}],
+		);
+	$ui->track_gui( $master_track->n, @rw_items );
 
+	$ui->track_gui( $mixdown_track->n); 
 
+}
 
 
 sub save_effects {

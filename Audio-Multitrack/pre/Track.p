@@ -19,7 +19,6 @@ $n = 0; 	# incrementing numeric key
 %track_names = (); 
 
 use ::Object qw( 	name
-						dir
 						active
 
 						ch_r 
@@ -60,7 +59,6 @@ sub new {
 
 					name 	=> "Audio_$n", 
 					group	=> 'Tracker', 
-					dir     => '.',
 					rw   	=> 'REC', 
 					n    	=> $n,
 					ops     => [],
@@ -94,12 +92,10 @@ sub new {
 	
 }
 
-sub full_path {
-	my $track = shift; 
-	join_path(
-		$track->dir ? $track->dir : "." , $track->current 
-	)	
-}
+sub dir { ::this_wav_dir() } # replaces dir field
+
+sub full_path { my $track = shift; join_path $track->dir , $track->current }
+
 sub group_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
