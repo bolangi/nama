@@ -113,6 +113,9 @@ sub prepare {
 	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
 
 	$ui->init_gui;
+	$ui->transport_gui;
+	#$ui->oid_gui;
+	$ui->time_gui;
 
 	#print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 

@@ -106,9 +106,6 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
 	package ::;
-	$ui->transport_gui;
-	$ui->oid_gui;
-	$ui->time_gui;
 	MainLoop;
 }
 
