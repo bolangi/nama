@@ -152,7 +152,8 @@ sub init_gui {
 			
 =cut
 	my @labels = 
-		qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
+		qw(Track Version Status Input Volume Cut Unity Pan Center Effects);
+		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
@@ -529,7 +530,11 @@ sub track_gui {
 	$ch_r = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
-	for my $v ("",1..$tk_input_channels) {
+	my @range;
+	push @range, "";
+	push @range, 1..$tk_input_channels if $n > 2;
+	
+	for my $v (@range) {
 		$ch_r->radiobutton(
 			-label => $v,
 			-value => $v,
@@ -685,8 +690,9 @@ sub track_gui {
 
 	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
-	$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
+	#$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
+	$name->grid($version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
 	refresh_c($n);
 
 =comment

@@ -85,7 +85,7 @@ sub prepare {
 		name => 'Tracker_Bus',
 		groups => [qw(Tracker)],
 		tracks => [],
-		rules  => [ qw( mix_setup rec_setup mon_setup rec_file) ],
+		rules  => [ qw( mix_setup rec_setup mon_setup multi rec_file) ],
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
@@ -361,7 +361,7 @@ sub initialize_rules {
 		target		=>  'REC',
 		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
 		input_type	=>  'device',
-		input_object=>  'multi',
+		input_object=>  $record_device,
 		output_type	=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -380,7 +380,7 @@ sub initialize_rules {
 		chain_id		=>  sub{ my $track = shift; $track->n },   
 		target			=>	'REC',
 		input_type		=>  'device',
-		input_object	=>  'multi',
+		input_object	=>  $record_device,
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -394,17 +394,27 @@ sub initialize_rules {
 		status			=>  1,
 	);
 
-	my $multi = ::Rule->new(
+	# route cooked signals to multichannel device in the 
+	# case that monitor_channel is specified
+	#
+	# thus we could apply guitar effects for output
+	# to a PA mixing board
+	#
+	# seems ready... just need to turn on status!
+	
+	my $multi  = ::Rule->new(  
 
 		name			=>  'multi', 
-		target			=>  'MON',
+		target			=>  'REC',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
-		input_type		=>  'file',
+		input_type		=>  'device', # raw
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
 		output_type		=>  'device',
 		output_object	=>  'multi',
 		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
-		status			=>  1,
+		condition 		=> sub { my $track = shift; 
+								return "satisfied" if $track->ch_m; } ,
+		status			=>  0,
 	);
 
 =comment
@@ -810,7 +820,7 @@ sub new_engine {
 }
 sub setup_transport { # create chain setup
 	$debug2 and print "&setup_transport\n";
-	collect_chains();
+	collect_chains();  # fragile, obsolete, deprecated, still needed 
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
@@ -826,6 +836,10 @@ sub setup_transport { # create chain setup
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
 		$master_bus->apply; # mix_out, mix_link
+
+		## we want to apply 'multi' only to tracks with
+		### with mon_ch defined, and $multi_enable on
+		
 		$tracker_bus->apply;
 		#map{ eliminate_loops($_) } @all_chains;
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
@@ -930,17 +944,16 @@ sub refresh_clock{
 	update_clock();
 	$clock_id = $clock->after(1000, \&refresh_clock) if $maybe_running; 
 	my $status = eval_iam('engine-status');
-	$debug and 
-		print colonize(eval_iam('getpos')),  
-		"  engine status: $status\n";
-	if ($status eq 'error') { new_engine();
-		&really_recording and &rec_cleanup or &connect_transport
-	}
-	elsif ($status eq 'finished') {
-		&really_recording and &rec_cleanup or &connect_transport
+	$debug 
+	   and print colonize(eval_iam('getpos')),  "  engine status: $status\n";
+	
+	new_engine() if $status eq 'error';
+	if (! &transport_running){
+		&really_recording and rec_cleanup() or connect_transport();
 	}
 }
-## recording head positioning
+
+## jump recording head position
 
 sub to_start { 
 	return if really_recording();
