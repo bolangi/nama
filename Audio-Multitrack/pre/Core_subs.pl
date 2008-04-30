@@ -64,7 +64,7 @@ sub prepare {
 	# c: create project
 	# f: configuration file
 	# g: gui mode
-	# m: don't load state info
+	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
 	$project_name = shift @ARGV;
@@ -230,6 +230,8 @@ sub load_project {
 	#print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	$opts{m} = 0; # allow future recall settings
+	
 	dig_ruins() unless $#::Track::by_index > 2;
 
 	$tracker_group_widget = $ui->group_gui('Tracker');
@@ -1291,11 +1293,12 @@ sub cop_init {
 sub effect_update {
 	
 	local $debug = 1;
+	return unless transport_running(); 
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
-	#return if ! defined $ti[$chain]->offset; # MIX XXX
-	return unless transport_running();
+	return if $ti[$chain]->name eq 'Mixdown' and 
+			  $ti[$chain]->rec_status eq 'REC';
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
@@ -1928,12 +1931,13 @@ sub retrieve_state {
 
 	#  now create the widgets
 	
-create_master_and_mix_tracks();
+	create_master_and_mix_tracks();
 
 
 	# create user tracks
 	
 	my $did_apply = 0;
+
 	map{ 
 		my %h = %$_; 
 		#print "old n: $h{n}\n";
@@ -1963,15 +1967,15 @@ create_master_and_mix_tracks();
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
-	$did_apply and $ui->manifest();  $ew->deiconify();
+	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } @::Track::by_index), $/;
 
 
 
-	my $toggle_jack = $widget_o[$#widget_o];
-	convert_to_jack if $jack_on;
-	$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
+	#my $toggle_jack = $widget_o[$#widget_o]; # JACK
+	#convert_to_jack if $jack_on;
+	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
 	$ui->refresh_oids();
 
 	# restore mixer settings
