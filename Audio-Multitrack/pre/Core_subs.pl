@@ -524,14 +524,8 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$ui->track_gui($track->n);
-	collect_chains();
+	#collect_chains();
 	$debug and print "Added new track!\n", $track->dump;
-}
-sub restore_track {
-	$debug2 and print "&restore_track\n";
-	@_ = discard_object(@_);
-	my $n = shift;
-	$ui->track_gui($n), $ui->refresh();
 }
 
 sub dig_ruins { 
@@ -820,7 +814,7 @@ sub new_engine {
 }
 sub setup_transport { # create chain setup
 	$debug2 and print "&setup_transport\n";
-	collect_chains();  # fragile, obsolete, deprecated, still needed 
+	#collect_chains();  # fragile, obsolete, deprecated, still needed 
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
@@ -1041,103 +1035,9 @@ sub add_effect {
 
 	$id = cop_add(\%p); 
 	my %pp = ( %p, cop_id => $id); # replace chainop id
-	add_effect_gui(\%pp);
+	$ui->add_effect_gui(\%pp);
 	apply_op($id) if eval_iam("cs-is-valid");
 
-}
-
-sub add_effect_gui {
-		$debug2 and print "&add_effect_gui\n";
-		@_ = discard_object(@_);
-		my %p 			= %{shift()};
-		my $n 			= $p{chain};
-		my $code 			= $p{type};
-		my $parent_id = $p{parent_id};  
-		my $id		= $p{cop_id};   # initiates restore
-		my $parameter		= $p{parameter}; 
-		my $i = $effect_i{$code};
-
-		$debug and print yaml_out(\%p);
-
-		$debug and print "cop_id: $id, parent_id: $parent_id\n";
-		# $id is determined by cop_add, which will return the
-		# existing cop_id if supplied
-
-		# check display format, may be 'scale' 'field' or 'hidden'
-		
-		my $display_type = $cops{$id}->{display}; # individual setting
-		defined $display_type or $display_type = $effects[$i]->{display}; # template
-		$debug and print "display type: $display_type\n";
-
-		return if $display_type eq q(hidden);
-
-		my $frame ;
-		if ( ! $parent_id ){ # independent effect
-			$frame = $widget_c{$n}->{parents}->Frame->pack(
-				-side => 'left', 
-				-anchor => 'nw',)
-		} else {                 # controller
-			$frame = $widget_c{$n}->{children}->Frame->pack(
-				-side => 'top', 
-				-anchor => 'nw')
-		}
-
-		$widget_e{$id} = $frame; 
-		# we need a separate frame so title can be long
-
-		# here add menu items for Add Controller, and Remove
-
-		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
-			->{name};
-		$parentage and $parentage .=  " - ";
-		$debug and print "parentage: $parentage\n";
-		my $eff = $frame->Menubutton(
-			-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-
-		$eff->AddItems([
-			'command' => "Remove",
-			-command => sub { remove_effect($id) }
-		]);
-		$eff->grid();
-		my @labels;
-		my @sliders;
-
-		# make widgets
-
-		for my $p (0..$effects[$i]->{count} - 1 ) {
-		my @items;
-		#$debug and print "p_first: $p_first, p_last: $p_last\n";
-		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-			push @items, 				
-				[ 'command' => $effects[$j]->{name},
-					-command => sub { add_effect ({
-							parent_id => $id,
-							chain => $n,
-							parameter  => $p,
-							type => $effects[$j]->{code} } )  }
-				];
-
-		}
-		push @labels, $frame->Menubutton(
-				-text => $effects[$i]->{params}->[$p]->{name},
-				-menuitems => [@items],
-				-tearoff => 0,
-		);
-			$debug and print "parameter name: ",
-				$effects[$i]->{params}->[$p]->{name},"\n";
-			my $v =  # for argument vector 
-			{	parent => \$frame,
-				cop_id => $id, 
-				p_num  => $p,
-			};
-			push @sliders,make_scale($v);
-		}
-
-		if (@sliders) {
-
-			$sliders[0]->grid(@sliders[1..$#sliders]);
-			 $labels[0]->grid(@labels[1..$#labels]);
-		}
 }
 
 sub remove_effect {
