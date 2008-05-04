@@ -1023,6 +1023,7 @@ sub rec_cleanup {
 } 
 ## effect functions
 sub add_effect {
+	local $debug = 1;
 	
 	$debug2 and print "&add_effect\n";
 	
@@ -1305,8 +1306,12 @@ sub cop_init {
 }
 sub effect_update {
 	
+	# why not use this routine to update %copp values as
+	# well?
+	
 	local $debug = 1;
-	return unless transport_running(); 
+	my $es = eval_iam "engine-status";
+	return if $es !~ /not started|stopped|running/;
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
