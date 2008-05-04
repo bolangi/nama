@@ -524,7 +524,7 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$ui->track_gui($track->n);
-	#collect_chains();
+	# collect_chains();
 	$debug and print "Added new track!\n", $track->dump;
 }
 
