@@ -72,7 +72,10 @@ show_setup: _show_setup end {
 	1;
 }
 
-show_track: _show_track end { ::Text::show_tracks($::select_track) }
+show_track: _show_track end {
+	::Text::show_tracks($::select_track);
+	print join " ", ref $::select_track->versions;
+}
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
 }

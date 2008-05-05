@@ -53,9 +53,9 @@ sub show_tracks {
 			$_->name,
 			$_->rw,
 			$_->rec_status,
-			$_->current_version || 'none',
 			$_->ch_r || 1,
-			$_->ch_m || 1;
+			$_->current_version || 'none',
+			(join " ", @{$_->versions}),
 
 		} @tracks;
 		
@@ -67,12 +67,12 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Chain  Track name        Setting Status Version Rec_ch Mon_ch 
-=============================================================
+Chain  Track name     Setting  Status  Input  Active  Versions   
+==========================================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<<<<<<<    @<<<   @<<<    @>>>   @>>    @>> ~~
-splice @::format_fields, 0, 7
+@>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>    @<<<<<<<<<<<<<<<<<<< ~~
+splice @::format_fields, 0, 6
 .
 	
 1;

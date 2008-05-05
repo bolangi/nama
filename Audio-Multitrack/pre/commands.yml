@@ -4,11 +4,11 @@ help:
   what: List this menu (optional string)
   parameters: none 
 tracker_rec:
-  short: trec R
+  short: grec R
   what: Tracker group record mode
   parameters: none
 tracker_mon:
-  short: tmon M 
+  short: gmon M 
   what: Tracker group monitor mode 
   parameters: none 
 tracker_mute:
