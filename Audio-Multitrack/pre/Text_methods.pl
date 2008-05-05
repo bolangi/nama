@@ -71,8 +71,8 @@ Chain  Track name     Setting  Status  Input  Active  Versions
 ==========================================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>    @<<<<<<<<<<<<<<<<<<< ~~
-splice @::format_fields, 0, 6
+@>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>>   @<<<<<<<<<<<<<<<<<<< ~~
+splice @::format_fields, 0, 7
 .
 	
 1;

@@ -74,7 +74,6 @@ show_setup: _show_setup end {
 
 show_track: _show_track end {
 	::Text::show_tracks($::select_track);
-	print join " ", ref $::select_track->versions;
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -156,7 +155,7 @@ set_version: _set_version dd end { $::select_track->set(active => $item{dd})}
  
 # update_effect ($chain, $id, $param, $val) = @_;
 vol: _vol dd end { $::copp{ $::select_track->vol }->[0] = $item{dd}; 
-				   update_effect( $::select_track->n,
+				   ::effect_update( $::select_track->n,
 								  $::select_track->vol, #  the effect id
 								  1,
 								  $item{dd}); 
