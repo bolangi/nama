@@ -124,9 +124,8 @@ our (
 
 	## collected widgets (i may need to destroy them)
 
-	@widget_t, # widgets for displaying track groups
-	$tracker_group_widget, # widget for tracker group
-							# replacing @widget_t
+	@widget_t, # widgets for displaying track groups, unused
+	$tracker_group_widget, # widget for tracker group, replaces @widget_t
 	%widget_c, # for chains (tracks)
 	%widget_e, # for effects
 	@widget_o, # for templates (oids) 
@@ -135,12 +134,12 @@ our (
 
 	@global_version_buttons, # to set the same version for
 						  	#	all tracks
-	%marks, 		# that actual times
-	$mark_remove,   # a button that sets the next variable
-	$markers_armed, # to remove a mark
-	$time_step,
+	%marks, 		# the actual times
+	$markers_armed, # set true to enable removing a mark
+	$mark_remove,   # a button that sets $markers_armed
+	$time_step,     # widget shows jump multiplier unit (seconds or minutes)
 	$clock, 		# displays clock
-	$setup_length,  # displays runing time
+	$setup_length,  # displays setup running time
 
 	$project_label,	# project name
 	$take_label,	# bus name
@@ -148,15 +147,15 @@ our (
 	$sn_label,		# project load/save/quit	
 	$sn_text,
 	$sn_load,
-	$sn_load_nostate,
 	$sn_new,
 	$sn_quit,
 
 	### A separate box for entering IAM (and other) commands
 	$iam_label,
 	$iam_text,
+	$iam, # variable for text entry
 	$iam_execute,
-	$iam_error,
+	$iam_error, # unused
 
 	# add track gui
 	#
@@ -174,14 +173,13 @@ our (
 	
 	$transport_label,
 	$transport_setup_and_connect,
-	$transport_setup,
-	$transport_connect,
+	$transport_setup, # unused
+	$transport_connect, # unused
 	$transport_disconnect,
 	$transport_new,
 	$transport_start,
 	$transport_stop,
 
-	$iam,    # unused
 	$old_bg, # initial background color.
 
 
@@ -202,19 +200,17 @@ our (
 
 	$track_name,	# received from Tk text input form
 	$ch_r,			# this too, recording channel assignment
-	$ch_m,			# monitoring channel assignment
+	$ch_m,			# monitoring channel assignment, unused
 
 
 	%L,	# for effects
 	%M,
 	$debug,				# debug level flags for diagnostics
 	$debug2,			# for subroutine names as execute
-	$debug3,			# for reference passing diagnostics
-	 					#    where the &see_ref() call is
-						#    used
+	$debug3,			# deprecated
 						
 	$OUT,				# filehandle for Text mode print
-	$commands,	# ref created from commands.plus
+	$commands,	# ref created from commands.yml
 
 	$save_id, # text variable
 	$sn_save_text,# text entry widget
@@ -240,9 +236,6 @@ our (
 	@groups_data, # 
 
 	$mixer_out_device, # where to send stereo output
-	$record_device,    # where to get our signals
-
-	$maybe_running,    # after Start before Stop
-	                   # used to control events
+	$record_device,    # where to get our inputs
 
 );

@@ -183,7 +183,6 @@ sub init_gui {
 	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
 	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
-#	$sn_load_nostate = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
 	$sn_save = $load_frame->Button->pack(-side => 'left');
@@ -515,6 +514,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'REC');
 				refresh();
+				setup_transport();
+				connect_transport();
 				}
 			],[
 			'command' => 'MON',
@@ -522,6 +523,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MON');
 				refresh();
+				setup_transport();
+				connect_transport();
 				}
 			],[
 			'command' => 'MUTE',
@@ -529,6 +532,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MUTE');
 				refresh();
+				setup_transport();
+				connect_transport();
 				}
 			],);
 $group_rw
