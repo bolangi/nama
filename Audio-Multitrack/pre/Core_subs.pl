@@ -866,15 +866,14 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 	eval_iam('start');
-	$maybe_running = 1;
-	#sleep 1; # time for engine
+	sleep 1; # time for engine
 	start_clock();
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
-	$maybe_running = 0;
+	# $maybe_running = 0;
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
 # 	sleep 1;
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
@@ -936,7 +935,7 @@ sub restart_clock {
 sub refresh_clock{
 	
 	update_clock();
-	$clock_id = $clock->after(1000, \&refresh_clock) if $maybe_running; 
+	$clock_id = $clock->after(1000, \&refresh_clock) if transport_running();
 	my $status = eval_iam('engine-status');
 	$debug 
 	   and print colonize(eval_iam('getpos')),  "  engine status: $status\n";
