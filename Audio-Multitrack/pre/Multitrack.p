@@ -42,10 +42,9 @@ $loopb = 'loop,222';
 $unit = 1;
 $effects_cache_file = '.effects_cache';
 $state_store_file = 'State';
-$chain_setup_file = 'Routing.ecs';
+$chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
-$use_monitor_version_for_mixdown = 1;
-%alias = (1 => 'Mixdown', 2 => 'Tracker');
+$use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
 $jack_on = 0;
 

@@ -53,25 +53,26 @@ our (
 	$tk_input_channels,# this many radiobuttons appear
 	                # on the menubutton
 	%cfg,        # 'config' information as hash
-					# or Config.pm
 	%devices, 		# alias to data in %cfg
-	%opts,          # command line options (set by command stub)
+	%opts,          # command line options
 	%oid_status,    # state information for the chain templates
-	$clock_id,		# for the Tk event system
+	$clock_id,		# used in GUI for the Tk event system
+					# ->cancel method not reliable
+					# for 'repeat' events, so converted to
+					# 'after' events
 	$use_monitor_version_for_mixdown, # sync mixdown version numbers
-	              	# to selected track versions 
-	$select_track,	 # the currently active track -- for Text UI
+	              	# to selected track versions , not
+					# implemented
+	$select_track,	 # the currently active track -- 
+					 # used by Text UI only at present
 	@format_fields, # data for replies to text commands
 
-	$project,		# Tk types project name here
-	$project_name,	# Official project name
-	$i, 			# index for incrementing track numbers
-	$t,				# index for incrementing track groups
+	$project,		# variable for GUI text input
+	$project_name,	# current project name
 	%state_c,		# data for Track object, except effects
 	%state_t,		# data for track groups (takes)
 	%take,			# which group a track number belongs to 
 	@takes,			# we collect them here
-	%alias,			# key: name value: take number
 	%chain,
 
 

@@ -4,7 +4,6 @@
 						$ladspa_sample_rate
 						$state_store_file
 						$chain_setup_file
-						%alias 			   
 						$tk_input_channels
 						$use_monitor_version_for_mixdown 
 						$unit								);
