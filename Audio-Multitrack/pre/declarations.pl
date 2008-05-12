@@ -70,11 +70,6 @@ our (
 	$project,		# variable for GUI text input
 	$project_name,	# current project name
 	%state_c,		# data for Track object, except effects
-	%state_t,		# data for track groups (takes)
-	%take,			# which group a track number belongs to 
-	@takes,			# we collect them here
-	%chain,
-
 
 	### for effects
 
