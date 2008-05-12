@@ -1,1 +1,0 @@
-help: { print $::OUT "hello_from your command line gramar\n"; 1 }

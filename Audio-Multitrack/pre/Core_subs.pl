@@ -287,6 +287,12 @@ sub initialize_rules {
 		input_object	=> $loopb,
 
 		output_type		=> 'file',
+
+
+		# - a hackish conditional way to include the mixdown format
+		# - seems to work
+		# - it would be better to add another output type
+
 		output_object   => sub {
 			my $track = shift; 
 			join " ", $track->full_path, $mix_to_disk_format},
@@ -779,12 +785,6 @@ sub write_chains {
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
-}
-sub output_format {
-	my $stub = shift;
-	$stub eq $project_name or $stub eq $mixname
-		? $mix_to_disk_format
-		: $mixer_out_format
 }
 ## templates for generating chains
 

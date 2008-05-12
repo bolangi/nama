@@ -16,13 +16,8 @@ our (
 	
 	$ecasound_globals, #  Command line switches XX check
 
-	$default,		# the default configuration file
-					# as distinct from custom file
-					# in a project directory, or a 
-					# master in .ecmd root.
+	$default,		# the internal default configuration file, as string
 					
-	$oids,			# serialized (YAML) form of @oids
-
 	$raw_to_disk_format,
 	$mix_to_disk_format,
 	$mixer_out_format,
