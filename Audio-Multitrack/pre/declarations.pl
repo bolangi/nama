@@ -23,14 +23,12 @@ our (
 	$mixer_out_format,
 	
 	$yw,			# yaml writer object
-	$yr,			# yaml writer object
+	$yr,			# yaml reader object
 	%state_c_ops, 	# intermediate copy for storage/retrieval
 	$effects_cache_file, # where we keep info on Ecasound
 					# and LADSPA effects, presets, etc.
 	
-	$ecasound, 		# the name to invoke, but I don't think
-					# we invoke by name, that's why i have these
-					# libraries
+	$ecasound, 		# the name to invoke when we want to kill ecasound
 
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
