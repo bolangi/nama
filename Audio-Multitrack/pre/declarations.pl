@@ -38,17 +38,13 @@ our (
 	$wav_dir,	# each project will get a directory here
 	                # and one .ecmd directory, also with 
 	
-					# /wav_dir/project_dir/vocal_1.wav
-					# /wav_dir/.flow/project_dir
 					#
 					# $ENV{HOME}/.ecmdrc
 					# $ENV{HOME}/ecmd/paul_brocante
 					# $ENV{HOME}/ecmd/paul_brocante/.wav/vocal_1.wav
 					# $ENV{HOME}/ecmd/paul_brocante/Store.yml
-					# $ENV{HOME}/ecmd/.cache
-					# $ENV{HOME}/ecmd/ 
-					#
-					#  ecmd_dir / project_name / .wav /
+					# $ENV{HOME}/ecmd/.effects_cache
+					# $ENV{HOME}/ecmd/paul_brocante/.ecmdrc 
 
 					 #this_wav_dir = 
 	$state_store_file,	# filename for storing @persistent_vars

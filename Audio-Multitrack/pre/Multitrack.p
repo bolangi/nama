@@ -39,8 +39,6 @@ $debug = 0;
 $loopa = 'loop,111';
 $loopb = 'loop,222';
 
-$wav_dir = '.'; # current directory default
-
 $unit = 1;
 $effects_cache_file = '.effects_cache';
 $state_store_file = 'State';
