@@ -492,7 +492,8 @@ sub flash_ready {
 
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
-	$clock->after(20000, 
+	$clock_id->cancel if (ref $clock_id) =~ /Tk/;
+	$clock_id = $clock->after(10000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
