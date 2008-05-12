@@ -1028,6 +1028,7 @@ sub add_effect {
 	my $id		= $p{cop_id};   # initiates restore
 	my $parameter		= $p{parameter}; 
 	my $i = $effect_i{$code};
+	my $values = $p{values};
 
 	return if $id eq $ti[$n]->vol or
 	          $id eq $ti[$n]->pan;   # skip these effects 
@@ -1116,6 +1117,7 @@ sub cop_add {
 	my $parent_id = $p{parent_id};  
 	my $id		= $p{cop_id};   # causes restore behavior when present
 	my $i       = $effect_i{$code};
+	my @values = @{ $p{values} } if $p{values};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
 	$debug2 and print "&cop_add\n";
 $debug and print <<PP;
@@ -1163,6 +1165,10 @@ PP
  		}
 	}
 	else { push @{$ti[$n]->ops }, $cop_id; } 
+
+	# set values if present
+	
+	$copp{$cop_id} = \@values if @values; # needed for text mode
 
 	$cop_id++; # return value then increment
 }

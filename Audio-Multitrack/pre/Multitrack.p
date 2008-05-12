@@ -206,34 +206,81 @@ recording and processing by Ecasound
 	
 
 
-=head1 ABSTRACT
+=head1 NAME
 
-	Builds on the Audio::Ecasound interface to the 
-	Ecasound audio processing engine to facilitate
-	multitrack audio recording. Additions include:
+Audio::Multitrack - User interfaces for multitrack audio
+recording, mixing and effects processing with the Ecasound
+audio processing engine.
 
-	- Functions for generating chain setups, managing wav
-	files, handling persistent configuration data.
+=head1 SYNOPSIS
 
-	- Useful text-mode and Tk user interfaces
-
-	- A foundation for high-level abstractions such 
-	  as track, group, effect, mark, etc.
-
-	Hash data structures representing system state are
-	serialized to YAML and written to file. 
-	The Git version control system cheaply provides 
-	infrastructure for switching among various parameter
-	sets. 
-
+use Audio::Multitrack;
+Audio::Multitrack::mainloop();
 
 =head1 DESCRIPTION
 
-Stub documentation for Audio::Ecasound::Flow, created by h2xs. It looks like the
-author of the extension was negligent enough to leave the stub
-unedited.
+Audio::Multitrack provides class libraries for managing
+tracks and buses.  The user interfaces are configured to
+provide a single mixer bus with per-track
+volume/pan/effects, a master fader, and a mixdown track.
+Settings are persistent, stored as YAML files.
 
-Blah blah blah.
+On the first run the program creates $HOME/.ecmdrc, the
+configuration file and project directory $HOME/ecmd. 
+WAV files and parameter settings for each project are stored
+in directories under $HOME/ecmd. 
+
+You will need to edit .ecmdrc to suit your audio
+configuration.
+
+There are two types of commands. Chain setup related
+commands take effect before audio processing begins.
+
+For example, the REC/MON/MUTE status for each track
+is used to decide whether a given track will be
+included in the Ecasound processing chain, and whether
+audio for that track will be recorded or played back.
+
+Realtime commands such as volume and pan levels,
+and transport controls such as fast-forward
+take effect while the engine is connected. 
+
+=head1 Tk GUI
+
+Audio::Multitrack will automatically incorporate locally
+available LADSPA plugins provided you have the listplugins
+program installed.  
+
+The Tk interface will provide linear/log sliders for most
+plugins. Text-entry widgets are used to enter parameters for
+plugins when hints are not available.
+
+=head1 TRACKS
+
+Multiple WAV
+files can be recorded for each track. These
+are identified by version number, which can
+be specified for each track.
+
+Each track, including the Master and Mixdown have
+their own REC/MON/MUTE setting. 
+and displays its own REC/MON/MUTE status.
+
+There is also a global REC/MON/MUTE 
+and global version setting that apply to all
+tracks except Master and Mixdown.
+Global MON setting forces all user tracks 
+to MON state, and is entered automatically 
+after a recording.
+
+Global MUTE setting excludes all user tracks
+from the chain setup, useful when playing back
+files recorded through the Mixdown function.
+
+A track with no recorded WAV files that is set to 
+MON will show MUTE status.
+
+
 
 =head2 EXPORT
 

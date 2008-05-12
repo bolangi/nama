@@ -194,9 +194,16 @@ list_marks: _list_marks end {}
 
 show_effects: _show_effects end {}
 
-add_effect: _add_effect fx end { }
+add_effect: _add_effect '-' name ':' dd(s? /,/)  end { 
+	my %p = (
+		chain => $::select_track->n,
+		values => @{$item{dd}},
+		type => $item{name},
+		);
+	::add_effect( \%p );
+}
 
-fx: /\S+/ # non-space characters
+fx: '-' name ':' parameter(s? /,/)  
 
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 

@@ -147,29 +147,17 @@ show_track:
   parameters: optional string, optional number
   what: show track status
 show_effects:
-  what: show effects status
-  short: sfx		
+  what: show effects (chain operators) on selected track
+  short: fxs	
   parameters: none
 add_effect:
   what: add effect to selected track
-  short: afx
-  parameters: string
-show_templates:
-  short: oids
-  what: Show details of active templates
-  parameters: optional string 
-list_templates:
-  short: lt
-  what: Lists active templates
-  parameters: none
-show_all_templates:
-  parameters: none
-  short: sat
-  what: Shows details of all templates
-list_all_templates:
-  parameters: none
-  short: lat
-  what: Lists all available templates
+  short: fxa 
+  parameters: ecasound operator string ( -<code>:<param1>,<param2>,...<paramn> )
+remove_effect:
+  what: remove chain operator(s) from selected track
+  short: fxr
+  parameters: string (cop id<s>)
 list_marks:
   short: lm
   what: List all marks
@@ -189,10 +177,6 @@ next_mark:
 previous_mark:
   short: mb pm bm
   what: Move playback head to previous mark
-  parameters: none
-mark_loop:
-  what: Loop playback between nearest marks
-  short: ml 
   parameters: none
 name_mark:
   short: nm
