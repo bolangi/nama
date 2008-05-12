@@ -22,7 +22,6 @@ our (
 	$mix_to_disk_format,
 	$mixer_out_format,
 	
-	$mixname, 		# 'mix' for the mixer track display
 	$yw,			# yaml writer object
 	$yr,			# yaml writer object
 	%state_c_ops, 	# intermediate copy for storage/retrieval
@@ -205,8 +204,6 @@ our (
 
 	$loopa,  # loopback nodes 
 	$loopb,  
-	$mixchain, # name of my mix track: 'mix'
-	$mixchain_aux, # an extra node due to name conflict
 
 	@oids,	# output templates, are applied to the
 			# chains collected previously

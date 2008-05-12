@@ -41,11 +41,6 @@ $loopb = 'loop,222';
 
 $wav_dir = '.'; # current directory default
 
-$mixchain = 1; 
-$mixchain_aux = 'MixDown'; # used for playing back mixes
-                           # when chain 1 is active
-
-$mixname = 'mix';
 $unit = 1;
 $effects_cache_file = '.effects_cache';
 $state_store_file = 'State';

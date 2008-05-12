@@ -1,6 +1,5 @@
 
 @global_vars = qw(
-						$mixname
 						$effects_cache_file
 						$ladspa_sample_rate
 						$state_store_file
