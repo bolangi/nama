@@ -1,9 +1,3 @@
-
-use constant (REC => 'rec',
-			  MON => 'mon',
-			  MUTE => 'mute');
-
-
 our (
 	### 
 	$ui, # object providing class behavior for graphic/text functions
