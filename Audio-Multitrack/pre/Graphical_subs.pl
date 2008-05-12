@@ -483,15 +483,16 @@ sub paint_button {
 }
 sub flash_ready {
 	my $color;
-		if (@record ){
+		if ( user_rec_tracks()  ){
 			$color = 'lightpink'; # live recording
-		} elsif ( &really_recording ){  # mixing only
+		} elsif ( &really_recording ){  # mixdown only 
 			$color = 'yellow';
-		} else {  $color = 'lightgreen'; }; # just playback
+		} elsif ( user_mon_tracks() ){  
+			$color = 'lightgreen'; }; # just playback
 
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
-	$clock->after(10000, 
+	$clock->after(20000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -594,7 +595,6 @@ sub track_gui {
 			}],
 		);
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
-	my $this_take = $t; 
 	my $stub = " ";
 	$stub .= $ti[$n]->active;
 	$name = $track_frame->Label(

@@ -69,7 +69,7 @@ our (
 
 	$project,		# variable for GUI text input
 	$project_name,	# current project name
-	%state_c,		# data for Track object, except effects
+	%state_c,		# for backwards compatilility
 
 	### for effects
 
@@ -78,7 +78,6 @@ our (
 					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
-	%track_names,	# to know if they are taken
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index
 	@ladspa_sorted, # ld
@@ -86,22 +85,16 @@ our (
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
 					
-	$last_version,  # to know where the next recording should start
-	$monitor_version,# which global version we are currently using
 	%e_bound,		# for displaying hundreds of effects in groups
-	$unit,			# multiples of seconds or minutes
+	$unit,			# jump multiplier, 1 or 60 seconds
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
-	$jack_on,		# whether we use device jack_alsa
+	$jack_on,		# whether we use device jack_alsa, currently unused 
+					# signals to replace regular output device with
+					# jack_alsa
 
-## for &make_io_lists
-#
-	@monitor,		# tracks that will playback
-	@record,		# tracks thatwill record
-	@mute,			# tracks we'll exclude from chain setup
-	@all_chains,	# all that will be a part of our setup
-	@input_chains,	# we sort them in input chains and output chains
-	@output_chains,
+	@input_chains,	# list of input chain segments 
+	@output_chains, # list of output chain segments
 
 	%subst,			# alias, substitutions for the config file
 	$tkeca_effects_data,	# original tcl code, actually

@@ -450,13 +450,6 @@ sub initialize_project_data {
 							# and others
 	%old_vol = ();
 
-	%chain       = (); # the chain_id corresponding to a track name
-
-	@record		= (); # used by some functions
-	@monitor	= ();
-	@mute = (); 
-
-	@all_chains  = (); # indices of all chains # deprecated
 	@input_chains = ();
 	@output_chains = ();
 
@@ -530,7 +523,6 @@ sub add_track {
 	$track_name = $ch_m = $ch_r = undef;
 
 	$ui->track_gui($track->n);
-	# collect_chains();
 	$debug and print "Added new track!\n", $track->dump;
 }
 
@@ -655,31 +647,28 @@ sub mon_vert {
 
 =cut
 
-sub collect_chains { 
+sub all_chains {
+	my @active_tracks = grep { $_->rec_status ne q(MUTE) } ::Track::all() 
+		if ::Track::all();
+	map{ $_->n} @active_tracks if @active_tracks;
+}
 
-	# @all_chains and @record are for the benefit
-	# of older code
-	
-	$debug2 and print "&collect\n";
-	
-	@all_chains = @monitor = @record = ();
+sub user_rec_tracks {
+	my @user_tracks = ::Track::all();
+	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
+	return unless @user_tracks;
+	my @user_rec_tracks = grep { $_->rec_status eq 'REC' } @user_tracks;
+	return unless @user_rec_tracks;
+	map{ $_->n } @user_rec_tracks;
+}
+sub user_mon_tracks {
+	my @user_tracks = ::Track::all();
+	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
+	return unless @user_tracks;
+	my @user_mon_tracks = grep { $_->rec_status eq 'MON' } @user_tracks;
+	return unless @user_mon_tracks;
+	map{ $_->n } @user_mon_tracks;
 
-	#
-	# 1: master fader
-	# 2: mix track
-	# 
-	# all the tracks in the Tracker group
-	
-	@all_chains = 1..scalar @::Track::by_index - 1;
-	
-	@record = 	map{ $_->n}  ## $tracker only
-				grep{ $_->rec_status eq 'REC'}
-				map{ $::Track::by_name{$_}}
-				$tracker->tracks;
-
-	$debug and print "monitor chains:  @monitor\n\n";
-	$debug and print "record chains:  @record\n\n";
-		
 }
 
 sub really_recording {  # returns filename stubs
@@ -814,7 +803,6 @@ sub new_engine {
 }
 sub setup_transport { # create chain setup
 	$debug2 and print "&setup_transport\n";
-	#collect_chains();  # fragile, obsolete, deprecated, still needed 
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
@@ -823,9 +811,13 @@ sub setup_transport { # create chain setup
 			= ();
 	my @tracks = ::Track::all;
 	shift @tracks; # drop Master
+
+	
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'MUTE'} 
 								@tracks;
+	# BUG: doesn't detect case of trying to mixdown with no
+	# playback tracks
 	#print "have source: $have_source\n";
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
@@ -835,7 +827,7 @@ sub setup_transport { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		#map{ eliminate_loops($_) } @all_chains;
+		#map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
@@ -843,6 +835,7 @@ sub setup_transport { # create chain setup
 	} else { print "Mixdown not possible, no inputs\n";
 	return 0};
 }
+
 sub connect_transport {
 	load_ecs(); 
 	carp("Invalid chain setup, cannot arm transport.\n"),return unless eval_iam("cs-is-valid");
@@ -856,7 +849,7 @@ sub connect_transport {
 		unless eval_iam("engine-status") eq 'stopped' ;
 	$length = eval_iam('cs-get-length'); 
 	$ui->length_display(-text => colonize($length));
-	eval_iam("cs-set-length $length") unless @record;
+	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
 	$ui->flash_ready();
@@ -1762,7 +1755,9 @@ sub save_state {
 	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
 		 $muted{$_}++;
 	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
-		} grep { $old_vol{$_} } @all_chains;
+		} grep { $old_vol{$_} } all_chains();
+	# TODO: old_vol should be incorporated into Track object
+	# not separate variable
 
  # old vol level has been stored, thus is muted
 	$file = $file ? $file : $state_store_file;
@@ -1803,7 +1798,7 @@ map { push @groups_data, $_->hashref } ::Group::all();
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
 	grep { $muted{$_}} 
-	@all_chains;
+	all_chains();
 
 	# restore %cops
 	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
@@ -1942,7 +1937,7 @@ sub save_effects {
 	map  {$copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
 		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
-	@all_chains;
+	all_chains();
 
 	# we need the ops list for each track
 	#
@@ -1951,7 +1946,7 @@ sub save_effects {
 	# I will follow for now 12/6/07
 	
 	%state_c_ops = ();
-	map{ 	$state_c_ops{$_} = $ti[$_]->ops } @all_chains;
+	map{ 	$state_c_ops{$_} = $ti[$_]->ops } all_chains();
 
 	# map {remove_op} @{ $ti[$_]->ops }
 
@@ -2014,13 +2009,13 @@ sub retrieve_effects {
 			}
 
 		} @{ $ti[$_]->ops }
-	} @all_chains;
+	} all_chains();
 			
 	return;
 
 	# restore ops list
 	
-	map{ $ti[$_]->set(ops => $state_c_ops{$_}) } @all_chains;
+	map{ $ti[$_]->set(ops => $state_c_ops{$_}) } all_chains();
 
 	# restore ops->chain mapping
 	
@@ -2037,13 +2032,13 @@ sub retrieve_effects {
 				else {  $copp{$id} = $old_copp{$id} }
 
 			} @{ $ti[$_]->ops }
-		} @all_chains;
+		} all_chains();
 
 	# apply ops
 	
 	my $did_apply = 0;
 
-	for my $n (@all_chains) { 
+	for my $n (all_chains() ) { 
 		for my $id (@{$ti[$n]->ops}){
 			$did_apply++ 
 				unless $id eq $ti[$n]->vol

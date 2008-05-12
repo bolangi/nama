@@ -80,8 +80,7 @@ sub refresh_c { # tracks
 }
 sub refresh {  
  	$ui->refresh_t(); 
-	collect_chains;
-	map{ $ui->refresh_c($_) } @all_chains ;
+	map{ $ui->refresh_c($_) } map{$_->n} ::Track::all();
 }
 sub refresh_oids{ # OUTPUT buttons
 	map{ $widget_o{$_}->configure( # uses hash
