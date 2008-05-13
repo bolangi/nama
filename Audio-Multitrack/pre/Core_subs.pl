@@ -513,6 +513,8 @@ sub add_track {
 		ch_r => $ch_r,
 		ch_m => $ch_m,
 	);
+	return if ! $track; 
+	print "ref new track: ", ref $track; 
 
 	# $ch_r and $ch_m are public variables set by GUI
 	# Okay, so we will do that for the grammar, too

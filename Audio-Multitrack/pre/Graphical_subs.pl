@@ -196,10 +196,10 @@ sub init_gui {
 
 	$build_track_label = $add_frame->Label(-text => "Track")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "Rec CH")->pack(-side => 'left');
-	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
-	$build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
-	$build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
+	# $build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
+	# $build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
+	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
+	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
 	$build_track_add = $add_frame->Button->pack(-side => 'left');;
 
 	$sn_load->configure(
@@ -492,7 +492,7 @@ sub flash_ready {
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
 	$clock_id->cancel if (ref $clock_id) =~ /Tk/;
-	$clock_id = $clock->after(10000, 
+	$clock_id = $clock->after(5000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -514,8 +514,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'REC');
 				refresh();
-				setup_transport();
-				connect_transport();
+				#setup_transport();
+				#connect_transport();
 				}
 			],[
 			'command' => 'MON',
@@ -523,8 +523,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MON');
 				refresh();
-				setup_transport();
-				connect_transport();
+				#setup_transport();
+				#connect_transport();
 				}
 			],[
 			'command' => 'MUTE',
@@ -532,8 +532,8 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MUTE');
 				refresh();
-				setup_transport();
-				connect_transport();
+				#setup_transport();
+				#connect_transport();
 				}
 			],);
 $group_rw

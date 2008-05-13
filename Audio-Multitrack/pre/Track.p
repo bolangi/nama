@@ -16,7 +16,7 @@ our @ISA = '::Wav';
 $n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
-%track_names = (); 
+my %track_names = (); 
 
 use ::Object qw( 	name
 						active
@@ -48,7 +48,7 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	carp  "track name already in use: $vals{name}\n"
+	carp  ("track name already in use: $vals{name}\n"), return
 		 if $track_names{$vals{name}}; # null name returns false
 	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 

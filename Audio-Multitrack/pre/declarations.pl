@@ -199,6 +199,7 @@ our (
 	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
 
 	$track_name,	# received from Tk text input form
+	%track_names,   # belongs in Track.pm
 	$ch_r,			# this too, recording channel assignment
 	$ch_m,			# monitoring channel assignment, unused
 
