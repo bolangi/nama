@@ -16,8 +16,6 @@ our @ISA = '::Wav';
 $n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
-my %track_names = (); 
-
 use ::Object qw( 	name
 						active
 
@@ -75,6 +73,7 @@ sub new {
 
 	#print "object class: $class, object type: ", ref $object, $/;
 	$track_names{$vals{name}}++;
+	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index[$n] = $object;
 	$by_name{ $object->name } = $object;
 	

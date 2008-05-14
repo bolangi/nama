@@ -232,7 +232,9 @@ sub init_gui {
 
 	$build_track_add->configure( 
 			-text => 'Add',
-			-command => sub { add_track(remove_spaces($track_name)) }
+			-command => sub { 
+					return if $track_name =~ /^\s*$/;	
+			add_track(remove_spaces($track_name)) }
 	);
 
 =comment TAKE
