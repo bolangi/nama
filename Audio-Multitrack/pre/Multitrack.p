@@ -16,6 +16,7 @@ use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 use File::Find::Rule;
+use File::Spec::Link;
 
 ## Definitions ##
 

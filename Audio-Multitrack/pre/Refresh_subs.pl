@@ -79,6 +79,7 @@ sub refresh_c { # tracks
 		else { carp "\$rec_status contains something unknown: $rec_status";}
 }
 sub refresh {  
+	remove_small_wavs();
  	$ui->refresh_t(); 
 	map{ $ui->refresh_c($_) } map{$_->n} ::Track::all();
 }

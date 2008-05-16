@@ -170,7 +170,9 @@ sub init_gui {
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$take_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$take_label = $take_frame->Menubutton(-text => "Group",-tearoff => 0,)->pack(-side => 'left');
+	$take_label = $take_frame->Menubutton(-text => "GROUP",
+										-tearoff => 0,
+										-width => 12)->pack(-side => 'left');
 		
 	$add_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$perl_eval_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -194,7 +196,7 @@ sub init_gui {
 									)->pack(-side => 'left');
 	$sn_dump = $load_frame->Button->pack(-side => 'left');
 
-	$build_track_label = $add_frame->Label(-text => "Track")->pack(-side => 'left');
+	$build_track_label = $add_frame->Label(-text => "TRACK", -width => 12)->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
 	# $build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
 	# $build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
@@ -300,7 +302,7 @@ sub transport_gui {
 				}
 		);
 	$transport_start->configure(
-		-text => "Start!",
+		-text => "Start",
 		-command => sub { 
 		return if transport_running();
 		if ( really_recording ) {
@@ -312,7 +314,7 @@ sub transport_gui {
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
-			-text => 'Arm',
+			-text => 'Arm Setup',
 			-command => sub {&setup_transport and &connect_transport}
 						 );
 =comment
@@ -494,7 +496,7 @@ sub flash_ready {
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
 	$clock_id->cancel if (ref $clock_id) =~ /Tk/;
-	$clock_id = $clock->after(5000, 
+	$clock_id = $clock->after(3000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -516,8 +518,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'REC');
 				refresh();
-				#setup_transport();
-				#connect_transport();
+				setup_transport() and connect_transport()
 				}
 			],[
 			'command' => 'MON',
@@ -525,8 +526,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MON');
 				refresh();
-				#setup_transport();
-				#connect_transport();
+				setup_transport() and connect_transport()
 				}
 			],[
 			'command' => 'MUTE',
@@ -534,8 +534,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MUTE');
 				refresh();
-				#setup_transport();
-				#connect_transport();
+				setup_transport() and connect_transport()
 				}
 			],);
 $group_rw
@@ -589,6 +588,7 @@ sub track_gui {
 				-foreground => 'red',
 				-command  => sub { 
 					$ti[$n]->set(rw => "REC");
+					
 					refresh_c($n);
 			}],
 			[ 'command' => "MON",

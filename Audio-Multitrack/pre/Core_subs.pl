@@ -75,7 +75,8 @@ sub prepare {
 	read_config(); 
 
 	$wav_dir = $opts{d} if $opts{d};
-	$wav_dir = join_path($ENV{HOME}, "ecmd" ) unless $wav_dir; 
+	$wav_dir = join_path($ENV{HOME}, "ecmd" )  unless $wav_dir ;
+	$wav_dir = File::Spec::Link->resolve_all( $wav_dir ); # resolve links
 
 	first_run();
 	
@@ -808,6 +809,7 @@ sub new_engine {
 	$e = Audio::Ecasound->new();
 }
 sub setup_transport { # create chain setup
+	remove_small_wavs();
 	$debug2 and print "&setup_transport\n";
 	%inputs = %outputs 
 			= %post_input 
