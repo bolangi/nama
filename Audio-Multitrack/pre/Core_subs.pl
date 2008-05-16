@@ -560,17 +560,21 @@ sub dig_ruins {
 }
 
 sub remove_small_wavs {
-	$debug2 and print "&remove_small_wavs\n";
-	# left by a recording chainsetup that is 
+
+	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 
-	my $a = this_wav_dir();
-	my $cmd = qq(find $a  -name '*.wav' -size 44c);
-	$debug and print $cmd; 
-	my @wavs = split "\n",qx($cmd);
-	#map {system qq(ls -l $_ ) } @wavs; exit;
-	#map { print ($_, "\n") if -s == 44 } @wavs; 
-	map { unlink $_ if -s == 44 } @wavs; 
+	local $debug = 1;
+	$debug2 and print "&remove_small_wavs\n";
+	
+         my @wavs = File::Find::Rule ->name( '*.wav' )
+                                        ->file()
+                                        ->size(44)
+                                        ->extras( { follow => 1} )
+                                     ->in( this_wav_dir() );
+    $debug and print join $/, @wavs;
+
+	map { unlink $_ } @wavs; 
 }
 
 sub add_volume_control {
@@ -1407,7 +1411,7 @@ sub sort_ladspa_effects {
 }		
 sub read_in_effects_data {
 
-	$debug = 0;
+	local $debug = 0;
 	$debug2 and print "&read_in_effects_data\n";
 	read_in_tkeca_effects_data();
 

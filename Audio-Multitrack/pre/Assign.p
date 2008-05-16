@@ -57,8 +57,10 @@ my $yr = Data::YAML::Reader->new;
 
 use Carp;
 
+
 sub assign {
 	
+	local $debug = 0;
 	
 	$debug2 and print "&assign\n";
 	
@@ -160,6 +162,7 @@ DEBUG
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
+	local $debug = 0;
 	
 	my %h = @_;
 	my $source = $h{-source};
@@ -207,6 +210,7 @@ sub assign_vars {
 }
 
 sub serialize {
+	local $debug = 0;
 	$debug2 and print "&serialize\n";
 	
 	my %h = @_;
@@ -275,6 +279,7 @@ sub serialize {
 
 sub yaml_out {
 	
+	local $debug = 0;
 	local $debug2 = 0;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
@@ -290,6 +295,7 @@ sub yaml_out {
 sub yaml_in {
 	
 	# $debug2 and print "&yaml_in\n";
+	local $debug = 0;
 	my $file = shift;
 	my $yaml; 
 	if ($file !~ /\n/) {
@@ -302,6 +308,7 @@ sub yaml_in {
 	$yr->read( $yaml ); # returns ref
 }
 sub yamlify_commands {
+	local $debug = 0;
 	my @in = @_;
 	@in = map{ 	s/\t{2}/\t\t\t/ ; 
 			s/^\t(?!\t)/\t-\n\t\t/;
@@ -316,6 +323,7 @@ sub yamlify_commands {
 ## support functions
 
 sub create_dir {
+	local $debug = 0;
 	my @dirs = @_;
 	map{ my $dir = $_;
 		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
@@ -325,6 +333,7 @@ sub create_dir {
 }
 
 sub join_path {
+	local $debug = 0;
 	
 	my @parts = @_;
 	my $path = join '/', @parts;

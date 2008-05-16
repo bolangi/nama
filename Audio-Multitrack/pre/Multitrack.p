@@ -15,6 +15,7 @@ use Audio::Ecasound;
 use Parse::RecDescent;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
+use File::Find::Rule;
 
 ## Definitions ##
 
