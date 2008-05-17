@@ -23,7 +23,7 @@ sub first_run {
 		my $reply = <STDIN>;
 		chomp $reply;
 		$reply = lc $reply;
-		if ($reply ne q(n) ){
+		if ($reply !~ /n/i)
 			create_dir $wav_dir;
 			print "\n... Done!\n\n";
 		} 
@@ -35,8 +35,7 @@ sub first_run {
 		print "Would you like to create it? [Y] ";
 		my $reply = <STDIN>;
 		chomp $reply;
-		$reply = lc $reply;
-		if ($reply ne q(n)  ){
+		if ($reply !~ /n/i)
 			$default =~ s/wav_dir:.*$/wav_dir: $ENV{HOME}\/ecmd/m;
 			$default > io( $config );
 			print "\n.... Done!\n\nPlease edit this file and restart program\n";
@@ -60,13 +59,14 @@ sub prepare {
 	#push @ARGV, qw(-d /media/sessions test-abc  );
 	getopts('mcegsd:f:', \%opts); 
 	#print join $/, (%opts);
-	# d: wav_dir
+	# d: ecmd project dir
 	# c: create project
 	# f: configuration file
 	# g: gui mode
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
+	# t: text mode
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
@@ -74,6 +74,7 @@ sub prepare {
 
 	read_config(); 
 
+	# wav_dir should be called ecmd_dir 
 	$wav_dir = $opts{d} if $opts{d};
 	$wav_dir = join_path($ENV{HOME}, "ecmd" )  unless $wav_dir ;
 	$wav_dir = File::Spec::Link->resolve_all( $wav_dir ); # resolve links
@@ -111,7 +112,7 @@ sub prepare {
 	
 	# UI object for interface polymorphism
 	
-	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
+	$ui = ! $opts{t} ?  ::Graphical->new : ::Text->new;
 
 	$ui->init_gui;
 	$ui->transport_gui;

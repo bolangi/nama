@@ -23,6 +23,7 @@ WriteMakefile(
     'NAME'		=> $name,
     'VERSION_FROM'	=> $from, # finds $VERSION
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
+	EXE_FILES    => [qw(scripts/ecmd)],
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => $from, # retrieve abstract from module
        AUTHOR     => 'Joel Roth <jroth@joelz@pobox.com>') : ()),

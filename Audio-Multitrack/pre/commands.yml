@@ -54,7 +54,7 @@ set_version:
   what: track version number for monitoring
   parameters: number
 group_version:
-  short: gn
+  short: gn gver gv
   what: Set group version
 list_versions:
   short: ln 
@@ -135,7 +135,7 @@ start:
   parameters: none
   what: Start transport
 stop:
-  short: string	 
+  short: ST 
   parameters: none
   what: Stop transport
 show_setup:

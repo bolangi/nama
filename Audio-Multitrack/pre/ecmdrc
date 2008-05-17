@@ -10,15 +10,18 @@
 #		- Indents are each two spaces
 #		
 #		- A value _must_ be supplied for each field
+#
+#		- The special symbol '~' converts to null
 
 # audio device selection (see devices, below)
 
 mixer_out_device: consumer
+
 record_device: consumer 
 
 # where we will write our project files
 
-wav_dir: ~ # nothing for now
+wav_dir: ~ # null in default file
 
 # globals we want for our chain setups
 
@@ -32,10 +35,10 @@ raw_to_disk_format: cd-mono
 
 # audio devices 
 
-#  indents _are_ signficant in the lines below
+#  indents are signficant in the lines below
 
 devices: 
-  jack:
+  jack: 
     ecasound_id: jack_alsa
     input_format: 32-12
     output_format: 32-10
@@ -44,7 +47,7 @@ devices:
     input_format: 32-12
     output_format: 32-10
   consumer:
-    ecasound_id: alsa,default
+    ecasound_id: /dev/dsp
     input_format: cd-stereo
     output_format: cd-stereo
 

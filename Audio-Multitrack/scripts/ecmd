@@ -1,0 +1,3 @@
+#!/usr/bin/env perl
+use Audio::Multitrack;
+Audio::Multitrack::mainloop();
