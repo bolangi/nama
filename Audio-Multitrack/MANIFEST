@@ -2,15 +2,7 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/01_test.t
-t/02_assign.t
-t/03_wav.t
-t/04_Object.t
-t/05_bus.t
-t/06_tracker.t
-t/07_write_chains.t
-t/09_bus.t
-t/10_group.t
+scripts/ecmd
 lib/Audio/Multitrack.pm
 lib/Audio/Multitrack/Assign.pm
 lib/Audio/Multitrack/Iam.pm
@@ -19,3 +11,7 @@ lib/Audio/Multitrack/Bus.pm
 lib/Audio/Multitrack/Track.pm
 lib/Audio/Multitrack/Wav.pm
 lib/Audio/Multitrack/Object.pm
+t/01_load.t
+t/02_assign.t
+t/03_wav.t
+t/04_object.t
