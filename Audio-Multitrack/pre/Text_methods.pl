@@ -2,15 +2,13 @@ use Carp;
 #&loop;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-package ::;
-load_project({name => $project_name, create => $opts{c}}) if $project_name;
-use Parse::RecDescent;
-use Term::ReadLine;
-my $term = new Term::ReadLine 'Ecmd';
-my $prompt = "Enter command: ";
-$OUT = $term->OUT || \*STDOUT;
-my $user_input;
-$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+	local $debug = 1;
+	package ::;
+	load_project({name => $project_name, create => $opts{c}}) if $project_name;
+	my $term = new Term::ReadLine 'Ecmd';
+	my $prompt = "Enter command: ";
+	$OUT = $term->OUT || \*STDOUT;
+	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 	while (1) {
 		my ($user_input) = $term->readline($prompt) ;
 		$user_input =~ /^\s*$/ and next;
@@ -21,25 +19,24 @@ $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 			my ($cmd, $predicate) = ($user_input =~ /(\S+)(.*)/);
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 			if ($cmd eq 'eval') {
+				$debug and print "Evaluating perl code\n";
 				eval $predicate;
 				print "\n";
 				$@ and print "Perl command failed: $@\n";
 			} elsif ($tn{$cmd}) { 
-				$debug and print "Track name: $cmd\n";
+				$debug and print qq(Selecting track "$cmd"\n);
 				$select_track = $tn{$cmd};
-				print "selected: $cmd\n";
-				$parser->read($predicate) or print ("Returned false\n");
+				$predicate !~ /^\s*$/ and $parser->read($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-				$debug and print "Track name: ", $ti[$cmd]->name, "\n";
+				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
 				$select_track = $ti[$cmd];
-				print "selected: $cmd\n";
-				$parser->read($predicate) or print ("Returned false\n");
+				$predicate !~ /^\s*$/ and $parser->read($predicate);
 			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found IAM command\n";
-				print eval_iam($user_input) ;
+				$debug and print "Found Iam command\n";
+				print eval_iam($user_input), $/ ;
 			} else {
+				$debug and print "Passing to parser\n";
 				$parser->command($user_input) 
-					and print("Succeeded\n") or print ("Returned false\n");
 			}
 
 		} @user_input;

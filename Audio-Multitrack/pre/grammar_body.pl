@@ -156,12 +156,22 @@ set_version: _set_version dd end { $::select_track->set(active => $item{dd})}
 # update_effect ($chain, $id, $param, $val) = @_;
 vol: _vol dd end { $::copp{ $::select_track->vol }->[0] = $item{dd}; 
 				   ::effect_update( $::select_track->n,
-								  $::select_track->vol, #  the effect id
-								  1,
+								  $::select_track->vol, # cop_id, i.e. A
+								  0, # ecasound chain operator parameter 1
 								  $item{dd}); 
 } 
-vol: _vol '+' dd end { $::copp{ $::select_track->vol }->[0] += $item{dd} } 
-vol: _vol '-' dd end { $::copp{ $::select_track->vol }->[0] -= $item{dd} } 
+vol: _vol '+' dd end { $::copp{ $::select_track->vol }->[0] += $item{dd};
+				   ::effect_update( $::select_track->n,
+								  $::select_track->vol, # cop_id, i.e. A
+								  0, # ecasound chain operator parameter 1
+								  $item{dd}); 
+} 
+vol: _vol '-' dd end { $::copp{ $::select_track->vol }->[0] -= $item{dd} ;
+				   ::effect_update( $::select_track->n,
+								  $::select_track->vol, # cop_id, i.e. A
+								  0, # ecasound chain operator parameter 1
+								  $item{dd}); 
+} 
 
 cut: _cut end { $::copp{ $::select_track->vol }->[0] = 0 }
 

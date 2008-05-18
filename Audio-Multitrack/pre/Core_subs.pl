@@ -135,7 +135,7 @@ sub prepare {
 
 
 sub eval_iam {
-	
+	local $debug = 0;	
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";

@@ -13,6 +13,7 @@ use Storable;
 use Getopt::Std;
 use Audio::Ecasound;
 use Parse::RecDescent;
+use Term::ReadLine;
 use Data::YAML::Writer;
 use Data::YAML::Reader;
 use File::Find::Rule;
