@@ -79,7 +79,7 @@ our (
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	@effects,		# static effects information (parameters, hints, etc.)
-	%effect_i,		# an index
+	%effect_i,		# an index 
 	@ladspa_sorted, # ld
 	%effects_ladspa,# an index
 	$e,				# the name of the variable holding

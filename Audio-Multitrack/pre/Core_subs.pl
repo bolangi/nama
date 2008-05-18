@@ -1210,6 +1210,17 @@ sub cop_init {
 		$debug and print "copid: $id defaults: @vals \n";
 	}
 }
+
+sub sync_effect_param {
+	my ($id, $param) = @_;
+
+	effect_update( $cops{$id}{chain}, 
+					$id, 
+					$param, 
+					$copp{$id}[$param]	 );
+}
+	
+	
 sub effect_update {
 	
 	# why not use this routine to update %copp values as
@@ -1218,7 +1229,9 @@ sub effect_update {
 	local $debug = 1;
 	my $es = eval_iam "engine-status";
 	return if $es !~ /not started|stopped|running/;
+
 	my ($chain, $id, $param, $val) = @_;
+
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "MUTE"; 
 	return if $ti[$chain]->name eq 'Mixdown' and 

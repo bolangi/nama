@@ -21,6 +21,8 @@ new_project: _new_project name end {
 
 load_project: _load_project name end {
 	::load_project( name => ::remove_spaces($item{name}) );
+	::setup_transport() and ::connect_transport();
+
 	1;
 	print "loaded project: $::project_name\n";
 }
@@ -153,37 +155,46 @@ wav: name { $::select_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
 set_version: _set_version dd end { $::select_track->set(active => $item{dd})}
  
-# update_effect ($chain, $id, $param, $val) = @_;
 vol: _vol dd end { $::copp{ $::select_track->vol }->[0] = $item{dd}; 
-				   ::effect_update( $::select_track->n,
-								  $::select_track->vol, # cop_id, i.e. A
-								  0, # ecasound chain operator parameter 1
-								  $item{dd}); 
+				::sync_effect_param( $::select_track->vol, 0);
 } 
 vol: _vol '+' dd end { $::copp{ $::select_track->vol }->[0] += $item{dd};
-				   ::effect_update( $::select_track->n,
-								  $::select_track->vol, # cop_id, i.e. A
-								  0, # ecasound chain operator parameter 1
-								  $item{dd}); 
+				::sync_effect_param( $::select_track->vol, 0);
 } 
 vol: _vol '-' dd end { $::copp{ $::select_track->vol }->[0] -= $item{dd} ;
-				   ::effect_update( $::select_track->n,
-								  $::select_track->vol, # cop_id, i.e. A
-								  0, # ecasound chain operator parameter 1
-								  $item{dd}); 
+				::sync_effect_param( $::select_track->vol, 0);
 } 
+vol: _vol end { print $::copp{$::select_track->vol}[0], $/ }
 
-cut: _cut end { $::copp{ $::select_track->vol }->[0] = 0 }
+cut: _cut end { $::copp{ $::select_track->vol }->[0] = 0;
+				::sync_effect_param( $::select_track->vol, 0);
+}
 
-unity: _unity end { $::copp{ $::select_track->vol }->[0] = 100 }
+unity: _unity end { $::copp{ $::select_track->vol }->[0] = 100;
+				::sync_effect_param( $::select_track->vol, 0);
+}
 
-pan: _pan dd end { $::copp{ $::select_track->pan }->[0] = $item{dd} } 
-pan: _pan '+' dd end { $::copp{ $::select_track->pan }->[0] += $item{dd} } 
-pan: _pan '-' dd end { $::copp{ $::select_track->pan }->[0] -= $item{dd} } 
+pan: _pan dd end { $::copp{ $::select_track->pan }->[0] = $item{dd};
+				::sync_effect_param( $::select_track->pan, 0);
+
+} 
+pan: _pan '+' dd end { $::copp{ $::select_track->pan }->[0] += $item{dd} ;
+				::sync_effect_param( $::select_track->pan, 0);
+} 
+pan: _pan '-' dd end { $::copp{ $::select_track->pan }->[0] -= $item{dd} ;
+				::sync_effect_param( $::select_track->pan, 0);
+} 
+pan: _pan end { print $::copp{$::select_track->pan}[0], $/ }
  
-pan_right: _pan_right   end { $::copp{ $::select_track->pan }->[0] = 100 }
-pan_left:  _pan_left    end { $::copp{ $::select_track->pan }->[0] = 0   }
-pan_center: _pan_center end { $::copp{ $::select_track->pan }->[0] = 50   }
+pan_right: _pan_right   end { $::copp{ $::select_track->pan }->[0] = 100;
+				::sync_effect_param( $::select_track->pan, 0);
+}
+pan_left:  _pan_left    end { $::copp{ $::select_track->pan }->[0] = 0; 
+				::sync_effect_param( $::select_track->pan, 0);
+}
+pan_center: _pan_center end { $::copp{ $::select_track->pan }->[0] = 50   ;
+				::sync_effect_param( $::select_track->pan, 0);
+}
 pan_back:  _pan_back end {}
 
 list_marks: _list_marks end {'TODO' }
