@@ -8,7 +8,7 @@ sub loop {
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
 	$OUT = $term->OUT || \*STDOUT;
-	#$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 	# prepare help and autocomplete
 	#
@@ -45,7 +45,7 @@ sub command_process {
 				$predicate !~ /^\s*$/ and $parser->read($predicate);
 			} elsif ($iam_cmd{$cmd}){
 				$debug and print "Found Iam command\n";
-				print eval_iam($user_input), $/ ;
+				print ::eval_iam($user_input), $/ ;
 			} else {
 				$debug and print "Passing to parser\n";
 				$parser->command($user_input) 
