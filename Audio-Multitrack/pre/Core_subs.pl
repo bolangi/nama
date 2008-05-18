@@ -23,7 +23,7 @@ sub first_run {
 		my $reply = <STDIN>;
 		chomp $reply;
 		$reply = lc $reply;
-		if ($reply !~ /n/i)
+		if ($reply !~ /n/i) {
 			create_dir $wav_dir;
 			print "\n... Done!\n\n";
 		} 
@@ -35,7 +35,7 @@ sub first_run {
 		print "Would you like to create it? [Y] ";
 		my $reply = <STDIN>;
 		chomp $reply;
-		if ($reply !~ /n/i)
+		if ($reply !~ /n/i){
 			$default =~ s/wav_dir:.*$/wav_dir: $ENV{HOME}\/ecmd/m;
 			$default > io( $config );
 			print "\n.... Done!\n\nPlease edit this file and restart program\n";
@@ -57,12 +57,12 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('mcegsd:f:', \%opts); 
+	getopts('mcegsdt:f:', \%opts); 
 	#print join $/, (%opts);
 	# d: ecmd project dir
 	# c: create project
 	# f: configuration file
-	# g: gui mode
+	# g: gui mode # default
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
@@ -232,7 +232,7 @@ sub load_project {
 	#print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
-	$opts{m} = 0; # allow future recall settings
+	$opts{m} = 0; # enable 
 	
 	dig_ruins() unless $#::Track::by_index > 2;
 

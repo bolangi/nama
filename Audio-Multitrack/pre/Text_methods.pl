@@ -36,7 +36,7 @@ $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 				$parser->read($predicate) or print ("Returned false\n");
 			} elsif ($iam_cmd{$cmd}){
 				$debug and print "Found IAM command\n";
-				eval_iam($user_input) ;
+				print eval_iam($user_input) ;
 			} else {
 				$parser->command($user_input) 
 					and print("Succeeded\n") or print ("Returned false\n");

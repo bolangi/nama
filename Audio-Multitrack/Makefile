@@ -12,6 +12,7 @@
 
 #     ABSTRACT_FROM => q[lib/Audio/Multitrack.pm]
 #     AUTHOR => q[Joel Roth <jroth@joelz@pobox.com>]
+#     EXE_FILES => [q[scripts/ecmd]]
 #     NAME => q[Multitrack.pm]
 #     PREREQ_PM => {  }
 #     VERSION_FROM => q[lib/Audio/Multitrack.pm]
@@ -55,11 +56,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = Multitrack.pm
 NAME_SYM = Multitrack_pm
-VERSION = 0.01
+VERSION = 0.92
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_01
+VERSION_SYM = 0_92
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.01
+XS_VERSION = 0.92
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -272,7 +273,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Multitrack.pm
-DISTVNAME = Multitrack.pm-0.01
+DISTVNAME = Multitrack.pm-0.92
 
 
 # --- MakeMaker macro section:
@@ -439,6 +440,22 @@ manifypods : pure_all  \
 
 # --- MakeMaker installbin section:
 
+EXE_FILES = scripts/ecmd
+
+pure_all :: $(INST_SCRIPT)/ecmd
+	$(NOECHO) $(NOOP)
+
+realclean ::
+	$(RM_F) \
+	  $(INST_SCRIPT)/ecmd 
+
+$(INST_SCRIPT)/ecmd : scripts/ecmd $(FIRST_MAKEFILE) $(INST_SCRIPT)$(DFSEP).exists $(INST_BIN)$(DFSEP).exists
+	$(NOECHO) $(RM_F) $(INST_SCRIPT)/ecmd
+	$(CP) scripts/ecmd $(INST_SCRIPT)/ecmd
+	$(FIXIN) $(INST_SCRIPT)/ecmd
+	-$(NOECHO) $(CHMOD) $(PERM_RWX) $(INST_SCRIPT)/ecmd
+
+
 
 # --- MakeMaker subdirs section:
 
@@ -495,7 +512,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                Multitrack.pm' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:             0.01' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:             0.92' >> META_new.yml
 	$(NOECHO) $(ECHO) 'abstract:            ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:              ' >> META_new.yml
@@ -796,7 +813,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,01,0,0">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,92,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT></ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Joel Roth &lt;jroth@joelz@pobox.com&gt;</AUTHOR>' >> $(DISTNAME).ppd
