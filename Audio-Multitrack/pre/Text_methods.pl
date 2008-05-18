@@ -94,6 +94,8 @@ sub catch_run { #
   print "foudn $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
+sub catch_help {
+
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
 	local $debug = 1;
@@ -104,15 +106,25 @@ sub create_help_subs {
 	#map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
 	
 	map{ 
+			my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
+			$debug and print "evalcode: $run_code\n";
+			#eval $run_code;
+			$debug and $@ and print "create_sub eval error: $@\n";
+			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) }; !;
+			$debug and print "evalcode: $help_code\n";
+			eval $help_code;
+			$debug and $@ and print "create_sub eval error: $@\n";
 			my $smry_code = qq!sub smry_$_ { q($commands{$_}{what}) }; !;
 			$debug and print "evalcode: $smry_code\n";
 			eval $smry_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
-			$debug and print "evalcode: $run_code\n";
-			eval $run_code;
-			$debug and $@ and print "create_sub eval error: $@\n";
 =comment
+
+			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
+			$debug and print "evalcode: $alias_code\n";
+			eval $alias_code;
+			$debug and $@ and print "create_sub eval error: $@\n";
+
 			my $comp_code = qq!sub comp_$_ { catch_run( \@_) }; !;
 			$debug and print "evalcode: $run_code\n";
 			$debug and $@ and print "create_sub eval error: $@\n";

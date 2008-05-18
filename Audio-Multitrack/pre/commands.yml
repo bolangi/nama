@@ -1,8 +1,4 @@
 ---
-help:
-  short: h
-  what: List this menu (optional string)
-  parameters: none
 tracker_rec:
   short: grec R
   what: group REC mode, rec-enable user tracks
