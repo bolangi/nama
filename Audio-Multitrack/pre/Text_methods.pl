@@ -3,6 +3,7 @@ use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	local $debug = 1;
+	::Text::OuterShell::create_help_subs();
 	package ::;
 	load_project({name => $project_name, create => $opts{c}}) if $project_name;
 	my $term = new Term::ReadLine 'Ecmd';
@@ -10,8 +11,7 @@ sub loop {
 	$OUT = $term->OUT || \*STDOUT;
 	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
-	# prepare help and autocomplete
-	#
+
  #	use ::Text::OuterShell; # not needed, class is present in this file
 	  my $shell = ::Text::OuterShell->new;
 
@@ -83,10 +83,11 @@ format STDOUT =
 splice @::format_fields, 0, 7
 .
 	
+# prepare help and autocomplete
 
 package ::Text::OuterShell;
 use base qw(Term::Shell); 
-create_help_subs();
+#create_help_subs();
 sub catch_run { # 
   my ($o, $cmd, @args) = @_;
   my $original_command_line = join " ", $cmd, @args;
@@ -94,6 +95,33 @@ sub catch_run { #
   ::Text::command_process( $original_command_line );
 }
 sub create_help_subs {
+	$debug2 and print "create_help_subs\n";
+	local $debug = 1;
+	my %commands = %{ ::yaml_in( $::commands_yml) };
+
+	$debug and print ::yaml_out \%commands;
+	
+	#map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+	
+	map{ 
+			my $smry_code = qq!sub smry_$_ { q($commands{$_}{what}) }; !;
+			$debug and print "evalcode: $smry_code\n";
+			eval $smry_code;
+			$debug and $@ and print "create_sub eval error: $@\n";
+			my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
+			$debug and print "evalcode: $run_code\n";
+			eval $run_code;
+			$debug and $@ and print "create_sub eval error: $@\n";
+=comment
+			my $comp_code = qq!sub comp_$_ { catch_run( \@_) }; !;
+			$debug and print "evalcode: $run_code\n";
+			$debug and $@ and print "create_sub eval error: $@\n";
+=cut
+		}
+
+	grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+	
+
 }
 	
 

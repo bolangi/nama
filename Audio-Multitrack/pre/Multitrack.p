@@ -146,11 +146,13 @@ sub marker {};
 
 package ::;
 
-##  Grammar.p, source for Grammar.pm
-
 ### COMMAND LINE PARSER 
 
 $debug2 and print "Reading grammar\n";
+
+$commands_yml = <<'YML';
+[% qx(./strip_comments  ./commands.yml) %]
+YML
 
 $::AUTOSTUB = 1;
 $::RD_HINT = 1;

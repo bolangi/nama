@@ -212,6 +212,7 @@ our (
 						
 	$OUT,				# filehandle for Text mode print
 	$commands,	# ref created from commands.yml
+	$commands_yml, # the string form of commands.yml
 
 	$save_id, # text variable
 	$sn_save_text,# text entry widget
