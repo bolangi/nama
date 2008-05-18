@@ -2,75 +2,75 @@
 help:
   short: h
   what: List this menu (optional string)
-  parameters: none 
+  parameters: none
 tracker_rec:
   short: grec R
-  what: Tracker group record mode
+  what: group REC mode, rec-enable user tracks
   parameters: none
 tracker_mon:
-  short: gmon M 
-  what: Tracker group monitor mode 
-  parameters: none 
+  short: gmon M
+  what: group MON mode, rec-disable user tracks
+  parameters: none
 tracker_mute:
-  short: tmute MM 
-  what: Tracker group mute mode
-  parameters: none 
+  short: tmute MM
+  what: group MUTE mode, exclude user tracks from chain setup
+  parameters: none
 mixdown:
   short: mxd
-  what: Mix to file 
+  what: enable mixdown on future engine runs
   parameters: none
 mixplay:
   short: mxp
-  what: Play mix from file (sets mix group to MOnumber, tracker group to MUTE)
+  what: Play back mixdown file (mutes user tracks)
   parameters: none
 mixoff:
   short: norm mxo
-  what: normal mode (Mixdown to MUTE, Tracker to MOnumber)
+  what: normal mode (exclude mixdown tracks from chain setup)
   parameters: none
 add_track:
   short: new add
-  what: Create a new track
-  example: new sax r2 m2
+  what: create a new track
+  example: new sax r2
   parameters: string 'r' number 'm' N
 rec:
-  what: track status to REC
+  what: set track to REC
   parameters: none
 mon:
-  what: track status to MOnumber
-  parameters: none 
+  what: set track to MON
+  parameters: none
 mute:
   short: z off
-  what: track status to MUTE (remove from chain setup)
+  what: set track MUTE (exclude from chain setup)
   parameters: none
 m:
   short: monitor_channel
-  what: track output channel number
+  what: set track output channel number
   parameters: number
 r:
   short: record_channel
-  what: track input channel number
+  what: set track input channel number
 set_version:
   short: version n
-  what: track version number for monitoring
+  what: set track version number for monitoring (overrides group version setting)
   parameters: number
 group_version:
   short: gn gver gv
-  what: Set group version
+  what: set group version for monitoring (overridden by track-version settings)
 list_versions:
-  short: ln 
-  what: List versions available for current track
+  short: ln
+  what: list versions available for current track
   parameters: none
 vol:
   short: v
-  what: track volume
+  what: get/set track volume
   parameters: number
 cut:
   short: c
-  what: Mute track playback volume
+  what: cut (zero) track playback volume
   parameters: none
 unity:
   short: cc
-  what: unity track volume
+  what: set unity (100) track volume
   parameters: none
 pan:
   short: p	
@@ -78,68 +78,60 @@ pan:
   parameters: number
 pan_right:
   short: pr
-  what: Pan track fully right
+  what: pan track fully right
   parameters: none
 pan_left:
   short: pl
-  what: Pan track fully left 
+  what: pan track fully left
   parameters: none
 pan_center:
   short: pc
-  what: Pan center
+  what: set pan center
   parameters: none
 pan_back:
   short: pb
-  what: Restore track pan setting before pl, pr, or pc commands
+  what: restore track pan setting before pl, pr, or pc commands
   parameters: none
 save_state:
   short: keep k save
-  what: Save project settings to disk
-  parameters: optional string 
+  what: save project settings to disk (optional settings name)
+  parameters: optional string
 get_state:
-  short: get
-  what: Retrieve project settings
+  short: get restore retrieve
+  what: retrieve project settings
 new_project:
-  short: create	 
-  what: Create a new project directory tree
+  short: create	
+  what: create a new project directory tree
   parameters: string
 load_project:
-  short: load	 
-  what: Load an existing project
+  short: load	
+  what: load an existing project
   parameters: string
 loop:
-  what: transport loop mode
+  what: set transport loop mode
   parameters: none
 generate_setup:
   short: generate gen
-  what: Generate chain setup for audio processing engine
+  what: generate chain setup for audio processing
   parameters: none
 generate_and_connect_setup:
   short: setup
-  what: Generate and connect chain setup
+  what: generate and connect chain setup
   parameters: none
 connect_setup:
   short: connect con
-  what: Connect chain setup
+  what: connect chain setup
   parameters: none
 disconnect_setup:
   short: disconnect
-  what: Disconnect chain setup
+  what: disconnect chain setup
   parameters: none
 renew_engine:
-  short: renew	
+  short: renew
   parameters: none
-  what: re-initializes the audio processing engine
-start:
-  short: T	 
-  parameters: none
-  what: Start transport
-stop:
-  short: ST 
-  parameters: none
-  what: Stop transport
+  what: re-initializes the audio processing engine, usually crashing
 show_setup:
-  short: show	 
+  short: show	
   parameters: none
   what: show status of all tracks
 show_track:
@@ -152,7 +144,7 @@ show_effects:
   parameters: none
 add_effect:
   what: add effect to selected track
-  short: fxa 
+  short: fxa
   parameters: ecasound operator string ( -<code>:<param1>,<param2>,...<paramn> )
 remove_effect:
   what: remove chain operator(s) from selected track
@@ -164,7 +156,7 @@ list_marks:
   parameters: none
 mark:
   what: Mark current head position
-  short: k	 
+  short: k	
   parameters: optional string
 remove_mark:
   what: Remove mark at current head position
