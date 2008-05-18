@@ -8,13 +8,17 @@ sub loop {
 	my $term = new Term::ReadLine 'Ecmd';
 	my $prompt = "Enter command: ";
 	$OUT = $term->OUT || \*STDOUT;
-	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+	#$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 	# prepare help and autocomplete
-	
-	
+	#
+ #	use ::Text::OuterShell; # not needed, class is present in this file
+	  my $shell = ::Text::OuterShell->new;
+
+          $shell->cmdloop;
 }
 
+	
 sub command_process {
 
 		my ($user_input) = shift;
@@ -80,12 +84,13 @@ splice @::format_fields, 0, 7
 .
 	
 
-package ::Text::OutmostShell;
+package ::Text::OuterShell;
 use base qw(Term::Shell); 
 create_help_subs();
 sub catch_run { # 
   my ($o, $cmd, @args) = @_;
   my $original_command_line = join " ", $cmd, @args;
+  print "foudn $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
 sub create_help_subs {
