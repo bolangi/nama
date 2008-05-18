@@ -9,10 +9,18 @@ sub loop {
 	my $prompt = "Enter command: ";
 	$OUT = $term->OUT || \*STDOUT;
 	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-	while (1) {
-		my ($user_input) = $term->readline($prompt) ;
-		$user_input =~ /^\s*$/ and next;
-		$term->addhistory($user_input) ;
+
+	# prepare help and autocomplete
+	
+	
+}
+
+sub command_process {
+
+		my ($user_input) = shift;
+		# my ($user_input) = $term->readline($prompt) ; # old way
+		return if $user_input =~ /^\s*$/;
+		# $term->addhistory($user_input) ; # this is done # for us too
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
 			my $user_input = $_;
@@ -40,7 +48,6 @@ sub loop {
 			}
 
 		} @user_input;
-	}
 }
 sub show_tracks {
 	no warnings;
@@ -72,4 +79,26 @@ format STDOUT =
 splice @::format_fields, 0, 7
 .
 	
-1;
+
+package ::Text::OutmostShell;
+use base qw(Term::Shell); 
+create_help_subs();
+sub catch_run { # 
+  my ($o, $cmd, @args) = @_;
+  my $original_command_line = join " ", $cmd, @args;
+  ::Text::command_process( $original_command_line );
+}
+sub create_help_subs {
+}
+	
+
+=comment
+sub run_command1  { print "command 1!\n"; }
+sub comp_com { shift; print "hello auto complete", @_ }
+sub smry_command1 { "what does command1 do?" }
+sub help_command1 {
+<<'END';
+Help on 'command1', whatever that may be...
+END
+=cut
+

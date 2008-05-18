@@ -49,6 +49,7 @@ sub first_run {
 sub prepare {  
 
 	$debug2 and print "&prepare\n";
+	local $debug = 1;
 	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
@@ -57,7 +58,7 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('mcegsdt:f:', \%opts); 
+	getopts('mcegsdtf:', \%opts); 
 	#print join $/, (%opts);
 	# d: ecmd project dir
 	# c: create project
@@ -77,7 +78,6 @@ sub prepare {
 	# wav_dir should be called ecmd_dir 
 	$wav_dir = $opts{d} if $opts{d};
 	$wav_dir = join_path($ENV{HOME}, "ecmd" )  unless $wav_dir ;
-	$wav_dir = File::Spec::Link->resolve_all( $wav_dir ); # resolve links
 
 	first_run();
 	
@@ -119,7 +119,7 @@ sub prepare {
 	#$ui->oid_gui;
 	$ui->time_gui;
 
-	#print "project_name: $project_name\n";
+	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
 
@@ -149,11 +149,13 @@ sub eval_iam {
 }
 ## configuration file
 
-sub wav_dir { $wav_dir };  # we agree to hereinafter use &wav_dir
+sub wav_dir { File::Spec::Link->resolve_all( $wav_dir ); }
+
 sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
-sub this_wav_dir {$project_name and join_path(&wav_dir,
-$project_name, q(.wav) ) }
-sub project_dir  {$project_name and join_path(&wav_dir, $project_name)
+sub this_wav_dir {
+	$project_name and join_path( wav_dir(), $project_name, q(.wav) ) 
+}
+sub project_dir  {$project_name and join_path( wav_dir(), $project_name)
 }
 
 sub global_config{
@@ -569,7 +571,9 @@ sub remove_small_wavs {
 	local $debug = 1;
 	$debug2 and print "&remove_small_wavs\n";
 	
-         my @wavs = File::Find::Rule ->name( '*.wav' )
+
+	$debug and print "this wav dir: ", this_wav_dir(), $/;
+         my @wavs = File::Find::Rule ->name( qr/\.wav$/i )
                                         ->file()
                                         ->size(44)
                                         ->extras( { follow => 1} )

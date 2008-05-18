@@ -333,7 +333,7 @@ sub create_dir {
 }
 
 sub join_path {
-	local $debug = 0;
+	local $debug = 1;
 	
 	my @parts = @_;
 	my $path = join '/', @parts;

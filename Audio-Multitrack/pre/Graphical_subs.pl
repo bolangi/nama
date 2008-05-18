@@ -206,7 +206,9 @@ sub init_gui {
 
 	$sn_load->configure(
 		-text => 'Load',
-		-command => sub{ load_project(name => remove_spaces $project_name)});
+		-command => sub{ load_project(
+			name => remove_spaces $project_name),
+			});
 	$sn_new->configure( 
 		-text => 'New',
 		-command => sub{ load_project(
