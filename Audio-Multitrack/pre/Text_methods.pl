@@ -94,7 +94,7 @@ sub catch_run { #
   print "foudn $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
-sub catch_help {
+sub catch_help { print "catched help @_"}
 
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
@@ -118,13 +118,13 @@ sub create_help_subs {
 			$debug and print "evalcode: $smry_code\n";
 			eval $smry_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-=comment
 
 			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
 			$debug and print "evalcode: $alias_code\n";
 			eval $alias_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
 
+=comment
 			my $comp_code = qq!sub comp_$_ { catch_run( \@_) }; !;
 			$debug and print "evalcode: $run_code\n";
 			$debug and $@ and print "create_sub eval error: $@\n";
