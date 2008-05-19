@@ -202,7 +202,6 @@ recording and processing by Ecasound
 
 	
 
-
 =head1 NAME
 
 Audio::Multitrack - User interfaces for multitrack audio
