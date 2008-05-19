@@ -126,27 +126,10 @@ sub create_help_subs {
 			$debug and print "evalcode: $alias_code\n";
 			eval $alias_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-=comment
-			map { 
-				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_); catch_run( \@_) }; !;
-				$debug and print "evalcode: $run_code\n";
-				eval $run_code;
-				$debug and $@ and print "create_sub eval error: $@\n";
-			} split " ", $commands{$_}{short} ;
-=cut
 
 		}
 
 	grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
-=comment
-	map{  	
-				s/-/_/g;
-				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_);  catch_run( \@_) }; !;
-				$debug and print "evalcode: $run_code\n";
-				eval $run_code;
-				$debug and $@ and print "create_sub eval error: $@\n";
-		} keys %iam_cmd;
-=cut
 
 }
 	
