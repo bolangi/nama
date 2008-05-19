@@ -6,9 +6,9 @@ sub loop {
 	::Text::OuterShell::create_help_subs();
 	package ::;
 	load_project({name => $project_name, create => $opts{c}}) if $project_name;
-	my $term = new Term::ReadLine 'Ecmd';
-	my $prompt = "Enter command: ";
-	$OUT = $term->OUT || \*STDOUT;
+#	my $term = new Term::ReadLine 'Ecmd';
+#	my $prompt = "Enter command: ";
+#	$OUT = $term->OUT || \*STDOUT;
 	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 
@@ -91,11 +91,20 @@ use base qw(Term::Shell);
 sub catch_run { # 
   my ($o, $cmd, @args) = @_;
   my $original_command_line = join " ", $cmd, @args;
-  print "foudn $original_command_line\n";
+  print "foudn $0 $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
 sub catch_help { print "catched help @_"}
+sub run_command1  { print "command 1!\n"; }
+sub comp_com { shift; print "hello auto complete", @_ }
+sub smry_command1 { "what does command1 do?" }
+sub help_command1 {
+<<'END';
+Help on 'command1', whatever that may be...
+END
+}
 
+sub run_command2 { print "command 2!\n"; }
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
 	local $debug = 1;
@@ -106,7 +115,7 @@ sub create_help_subs {
 	#map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
 	
 	map{ 
-			my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
+			my $run_code = qq!sub run_$_ { splice \@_,1,0,  q($_); catch_run( \@_) }; !;
 			$debug and print "evalcode: $run_code\n";
 			eval $run_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
