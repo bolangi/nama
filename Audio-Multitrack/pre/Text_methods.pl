@@ -192,6 +192,11 @@ Ecasound-IAM commands:
 
 Ecmd commands (additional help available by typing 'help <command>')
 
+  -- Unsupported in text mode  --
+
+    additional effects (chain operators)
+	marks
+    
   -- General --
 
     help          - prints this screen, or help on 'command'
