@@ -25,6 +25,8 @@ use ::Object qw( 	name
 
 						vol  
 						pan 
+						old_vol_level
+						old_pan_level
 						ops 
 						offset 
 

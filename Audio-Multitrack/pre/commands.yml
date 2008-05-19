@@ -2,31 +2,37 @@
 tracker_rec:
   short: grec R
   what: group REC mode, rec-enable user tracks
+  smry: group REC mode
   parameters: none
 tracker_mon:
   short: gmon M
   what: group MON mode, rec-disable user tracks
+  smry: group MON mode
   parameters: none
 tracker_mute:
   short: tmute MM
   what: group MUTE mode, exclude user tracks from chain setup
+  smry: group MUTE mode
   parameters: none
 mixdown:
   short: mxd
-  what: enable mixdown on future engine runs
+  what: enable mixdown on subsequent engine runs
+  smry: enable mixdown
   parameters: none
 mixplay:
   short: mxp
-  what: Play back mixdown file (mutes user tracks)
+  what: Play back mixdown file, i.e. mute user tracks
+  smry: Play mix
   parameters: none
 mixoff:
   short: norm mxo
-  what: normal mode (exclude mixdown tracks from chain setup)
+  what: normal mode, i.e. exclude mixdown tracks from chain setup
+  smry: mix off
   parameters: none
 add_track:
   short: new add
-  what: create a new track
-  example: new sax r2
+  what: create a new track, " new sax r2 " will record track sax from input 2
+  smry: create a new track
   parameters: string 'r' number 'm' N
 rec:
   what: set track to REC
@@ -37,10 +43,11 @@ mon:
 mute:
   short: z off
   what: set track MUTE (exclude from chain setup)
+  smry: set track MUTE 
   parameters: none
 m:
   short: monitor_channel
-  what: set track output channel number
+  what: set track output channel number # not currently supported
   parameters: number
 r:
   short: record_channel
@@ -48,29 +55,39 @@ r:
 set_version:
   short: version n
   what: set track version number for monitoring (overrides group version setting)
+  smry: select track version
   parameters: number
 group_version:
   short: gn gver gv
   what: set group version for monitoring (overridden by track-version settings)
+  smry: select group version
 list_versions:
   short: ln
-  what: list versions available for current track
+  what: list versions, current track
+  smry: list versions
   parameters: none
 vol:
   short: v
-  what: get/set track volume
+  what: get/set track volume, current track
+  smry: get/set track volume
   parameters: number
+up:
+  what: restore volume of current track to previous, i.e. un-cut level
+  smry: restore volume
 cut:
   short: c
-  what: cut (zero) track playback volume
+  what: cut, i.e. set-to-zero the current track's playback volume
+  smry: cut track volume
   parameters: none
 unity:
   short: cc
-  what: set unity (100) track volume
+  what: set unity, i.e. 100 volume, current track
+  smry: unity volume
   parameters: none
 pan:
   short: p	
-  what: track pan position
+  what: get/set pan position, current track
+  smry: get/set pan position
   parameters: number
 pan_right:
   short: pr
@@ -86,7 +103,8 @@ pan_center:
   parameters: none
 pan_back:
   short: pb
-  what: restore track pan setting before pl, pr, or pc commands
+  what: restore pan setting prior to pl, pr, or pc commands
+  smry: restore pan
   parameters: none
 save_state:
   short: keep k save

@@ -112,23 +112,21 @@ sub create_help_subs {
 			$debug and print "evalcode: $run_code\n";
 			eval $run_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $help_code = qq!sub help_$_ { q($commands{$_}{what}).$/ }; !;
+			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };\n!;
 			$debug and print "evalcode: $help_code\n";
 			eval $help_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $smry_code = 
-						  qq!sub smry_$_ { q( $commands{$_}{what} !;
-
-			$smry_code .= qq! ($commands{$_}{short})) }; ! 
-
+			my $smry_text = 
+			$commands{$_}{smry} ? $commands{$_}{smry} : $commands{$_}{what};
+			$smry_text .= qq! ($commands{$_}{short}) ! 
 					if $commands{$_}{short};
 
-
+			my $smry_code = qq!sub smry_$_ { q( $smry_text ) }; !; 
 			$debug and print "evalcode: $smry_code\n";
 			eval $smry_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
 
-			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}}); !;
+			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
 			$debug and print "evalcode: $alias_code\n";
 			eval $alias_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
