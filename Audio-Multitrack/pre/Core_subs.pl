@@ -214,7 +214,7 @@ sub load_project {
 	local $debug = 0;
 	my %h = @_;
 	$debug2 and print "&load_project\n";
-	print yaml_out \%h;
+	$debug and print yaml_out \%h;
 	# return unless $h{name} or $project;
 
 	# we could be called from Tk with variable $project _or_

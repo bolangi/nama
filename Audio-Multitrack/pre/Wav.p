@@ -2,7 +2,7 @@ package ::Wav;
 our @ISA; 
 use ::Object qw(name active dir);
 use warnings;
-#no warnings qw(uninitialized);
+no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {

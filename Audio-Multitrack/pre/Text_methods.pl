@@ -4,7 +4,7 @@ sub loop {
 	local $debug = 0;
 	::Text::OuterShell::create_help_subs();
 	package ::;
-	load_project({name => $project_name, create => $opts{c}}) if $project_name;
+	load_project(name => $project_name, create => $opts{c}) if $project_name;
 #	my $term = new Term::ReadLine 'Ecmd';
 #	my $prompt = "Enter command: ";
 #	$OUT = $term->OUT || \*STDOUT;
@@ -92,7 +92,7 @@ use base qw(Term::Shell);
 sub catch_run { # 
   my ($o, $cmd, @args) = @_;
   my $original_command_line = join " ", $cmd, @args;
-  print "foudn $0 $original_command_line\n";
+  #print "foudn $0 $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
 sub catch_help {
@@ -190,7 +190,7 @@ Ecasound-IAM commands:
     ctrl-status - Controller status
     aio-status, fs - Audio input/output status
 
-Ecmd commands:
+Ecmd commands (additional help available by typing 'help <command>')
 
   -- General --
 
