@@ -86,7 +86,7 @@ sub new {
 	#defined $group or $group = ::Group->new( name => $object->group );
 	#my @existing = $group->tracks ;
 	#$group->set( tracks => [ @existing, $object->name ]);
-	$::select_track = $object;
+	$::this_track = $object;
 	$object;
 	
 }
