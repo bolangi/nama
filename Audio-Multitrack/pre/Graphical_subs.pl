@@ -241,17 +241,6 @@ sub init_gui {
 			add_track(remove_spaces($track_name)) }
 	);
 
-=comment TAKE
-	$build_new_take->configure( 
-			-text => 'New Group',
-			-command =>
-			\&new_take, # used for mixdown
-
-			
-			);
-
-			
-=cut
 	my @labels = 
 		qw(Track Version Status Input Volume Cut Unity Pan Center Effects);
 		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
@@ -319,16 +308,6 @@ sub transport_gui {
 			-text => 'Arm Setup',
 			-command => sub {&setup_transport and &connect_transport}
 						 );
-=comment
-	$transport_setup->configure(
-			-text => 'Generate chain setup',
-			-command => \&setup_transport,
-						 );
-	$transport_connect->configure(
-			-text => 'Connect chain setup',
-			-command => \&connect_transport,
-						 );
-=cut
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
 			-command => \&disconnect_transport,
@@ -801,15 +780,6 @@ sub track_gui {
 	$name->grid($version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
 	refresh_c($n);
 
-=comment
-	} else { # Mixdown track
-#	#my @filler = map{ "x" } 1..14;
-	$name->grid($version, $rw);
-#	$version, $rw);
-
-	refresh_c($n);
-	}
-=cut
 }
 
 sub update_version_button {
@@ -825,18 +795,6 @@ sub update_version_button {
 				unless $ti[$n]->rec_status eq "REC" }
 					);
 }
-=comment
-sub update_master_version_button {
-				$tracker_group_widget->radiobutton( 
-						-label => $ti[1]->last, 
-						-value => $ti[3]->last_version,
-						-command => sub {
-						$::Group::by_name{Tracker}->set(version
-						=> $ti[3]->last_version)}
-					);
-}
-=cut
-
 
 sub effect_button {
 	local $debug = 0;	
@@ -854,11 +812,6 @@ sub effect_button {
 	}
 		
 		for my $j (@indices) { 
-=comment
-	if ($start >= $e_bound{ladspa}{a} and $start <= $e_bound{ladspa}{z}){
-		print "adding effect: $effects[$j]->{name}\n";
-		}
-=cut
 		push @items, 				
 			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
 				-command  => sub { 
@@ -880,13 +833,11 @@ sub make_scale {
 	$debug2 and print "&make_scale\n";
 	my $ref = shift;
 	my %p = %{$ref};
-=comment
-	%p contains following:
-	cop_id   => operator id, to access dynamic effect params in %copp
-	parent => parent widget, i.e. the frame
-	p_num      => parameter number, starting at 0
-	length       => length widget # optional 
-=cut
+# 	%p contains following:
+# 	cop_id   => operator id, to access dynamic effect params in %copp
+# 	parent => parent widget, i.e. the frame
+# 	p_num      => parameter number, starting at 0
+# 	length       => length widget # optional 
 	my $id = $p{cop_id};
 	my $n = $cops{$id}->{chain};
 	my $code = $cops{$id}->{type};

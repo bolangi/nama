@@ -176,70 +176,77 @@ __END__
 
 =head1 NAME
 
-:: - Perl extensions for multitrack audio
-recording and processing by Ecasound
+B<Audio::Multitrack> - Perl extensions for multitrack audio processing
+
+B<ecmd> - multitrack recording/mixing application
 
 =head1 SYNOPSIS
 
-  use ::;
+B<ecmd> I<options> I<project_name>
 
-  my $ui = ::->new("tk");
+=head1 OPTIONS
 
-		or
+=over 12
 
-  my $ui = ::->new("text");
+=item B<-d> I<ecmd_dir>
 
-	my %options = ( 
+Use I<ecmd_dir> as ecmd top-level project directory (default $HOME/ecmd )
 
-			project => 'Night at Carnegie',
-			create => 1,
-			effects => 'force-reload',
-			track_state   => 'ignore',     
-			effect_state   => 'ignore',     
-			) ;
+=item B<-m>
 
-	$ui->main(%options);
+Suppress loading of saved state
 
-	
+=item B<-g>
 
-=head1 NAME
+Graphical user interface (default)
 
-Audio::Multitrack - User interfaces for multitrack audio
-recording, mixing and effects processing with the Ecasound
-audio processing engine.
+=item B<-t>
 
-=head1 SYNOPSIS
+Text interface
 
-use Audio::Multitrack;
-Audio::Multitrack::mainloop();
+=item B<-f> I<config_file>
+
+Use I<config_file> instead of default $HOME/.ecmdrc
+
+=back
 
 =head1 DESCRIPTION
 
-Audio::Multitrack provides class libraries for managing
-tracks and buses.  The user interfaces are configured to
-provide a single mixer bus with per-track
-volume/pan/effects, a master fader, and a mixdown track.
-Settings are persistent, stored as YAML files.
+B<Audio::Multitrack> provides class libraries for managing
+tracks and buses.  
+
+B<Ecmd> is an end-user application with text and graphical
+interfaces. It is configured with a single mixer bus with
+per-track volume/pan/effects, a master fader, and a mixdown
+track.
+
+There are two types of commands. 
+
+B<Static commands> influence the chain setup that will be
+used for audio processing.
+
+For example, the REC/MON/OFF setting for each track helps
+decide whether a given track will be included in the next
+Ecasound chain setup, and whether audio for that track will
+be recorded or played back.
+
+B<Dynamic commands> operate in realtime, affecting
+volume, pan, and playback head position while the engine is
+running. 
 
 On the first run the program creates $HOME/.ecmdrc, the
-configuration file and project directory $HOME/ecmd. 
-WAV files and parameter settings for each project are stored
-in directories under $HOME/ecmd. 
+configuration file and project directory $HOME/ecmd.  WAV
+files and parameter settings for each project are stored in
+directories under $HOME/ecmd.  You probably want to edit the
+default .ecmdrc to suit your audio configuration.
 
-You will need to edit .ecmdrc to suit your audio
-configuration.
+Project state can be stored/retrieved. The storage format is
+user-friendly YAML.
 
-There are two types of commands. Chain setup related
-commands take effect before audio processing begins.
-
-For example, the REC/MON/OFF status for each track
-is used to decide whether a given track will be
-included in the Ecasound processing chain, and whether
-audio for that track will be recorded or played back.
-
-Realtime commands such as volume and pan levels,
-and transport controls such as fast-forward
-take effect while the engine is connected. 
+To be certain your chain setup loads correctly, you may need
+to regenerate the setup using the Arm button in the GUI or
+the I<arm> command under the text interface.  This is
+usually the last operation before pressing the start button.
 
 =head1 Tk GUI
 
@@ -253,57 +260,45 @@ plugins when hints are not available.
 
 =head1 TRACKS
 
-Multiple WAV
-files can be recorded for each track. These
-are identified by version number, which can
-be specified for each track.
+Multiple WAV files can be recorded for each track. These are
+identified by version number, which can be specified for
+each track.
 
-Each track, including the Master and Mixdown have
-their own REC/MON/OFF setting. 
-and displays its own REC/MON/OFF status.
+Each track, including the Master and Mixdown have their own
+REC/MON/OFF setting and displays its own REC/MON/OFF
+status.
 
-There is also a global REC/MON/OFF 
-and global version setting that apply to all
-tracks except Master and Mixdown.
-Global MON setting forces all user tracks 
-to MON state, and is entered automatically 
-after a recording.
+There is also a global REC/MON/OFF and global version
+setting that apply to all user tracks (i.e. all but Master
+and Mixdown.) Global MON setting forces all user tracks to
+MON state, and is entered automatically after a recording.
 
-Global OFF setting excludes all user tracks
-from the chain setup, useful when playing back
-files recorded through the Mixdown function.
+Global OFF setting excludes all user tracks from the chain
+setup, useful when playing back files recorded through the
+Mixdown function.
 
-A track with no recorded WAV files that is set to 
-MON will show OFF status.
+A track with no recorded WAV files that is set to MON will
+show OFF status.
 
-
-
-=head2 EXPORT
+=head1 EXPORT
 
 None by default.
 
+=head1 DEPENDENCIES
 
+The Ecasound audio processing libraries are required
+to use this software, and need to be installed separately.
+See http://www.eca.cx/ecasound/ .
 
-=head1 SEE ALSO
-
-Mention other useful documentation such as the documentation of
-related modules or operating system documentation (such as man pages
-in UNIX), or any relevant external documentation such as RFCs or
-standards.
-
-If you have a mailing list set up for your module, mention it here.
-
-If you have a web site set up for your module, mention it here.
+LADSPA libraries and plugins are strongly recommended.
+See http://ladspa.org/ .
 
 =head1 AUTHOR
 
-Joel Roth, E<lt>jroth@dsl-verizon.netE<gt>
+Joel Roth, E<lt>joelz@pobox.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
 Copyright 2007 by Joel Roth
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
-
-__END__
+This library is licensed under GPL version 2.

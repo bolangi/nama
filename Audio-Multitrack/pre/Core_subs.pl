@@ -427,11 +427,6 @@ sub initialize_rules {
 		status			=>  0,
 	);
 
-=comment
-# Live: apply effects to REC channels route to multichannel sound card
-# as above. 
-#
-=cut
 
 }
 
@@ -609,15 +604,6 @@ sub add_pan_control {
 }
 ## version functions
 
-=comment
-sub set_active_version {
-	my $n = shift;
-	$debug and print "chain $n: versions: @{$ti[$n]->versions}\n";    
-		$ti[$n]->active = $ti[$n]->versions->[-1]  # XXX
-			if $ti[$n]->versions;    
-		$debug and print "active version, chain $n: $ti[$n]->active\n\n";
-}
-=cut
 
 sub mon_vert {
 	my $ver = shift;
@@ -626,38 +612,6 @@ sub mon_vert {
 }
 ## chain setup generation
 
-
-=comment
-
-
-			# TODO no channel copy for stereo input files
-            # such as version 1 backing.wav
-
-			# n.b. no signal multiplier needed with current Ecasound
-			
-=cut
-
-
-=comment    
-
-%inputs
-  |----->device-->$devname-->[ chain_id, chain_id,... ]
-  |----->file---->$filename->[ chain_id, chain_id,... ]
-  |----->bus1---->loop_id--->[ chain_id, chain_id,... ]
-  |----->cooked-->loop_id--->[ chain_id, chain_id,... ]
-  |_____>mixed___>loop_id___>[ chain_id, chain_id,... ]
-
-%outputs
-  |----->device-->$devname-->[ chain_id, chain_id,... ]
-  |----->file---->$key**---->[ chain_id, chain_id,... ]
-  |----->bus1---->loop_id--->[ chain_id, chain_id,... ]
-  |----->cooked-->loop_id--->[ chain_id, chain_id,... ]
-  |_____>mixed___>loop_id___>[ chain_id, chain_id,... ]
-
-  ** consists of full path to the file ($filename) followed
-  by a space, followed the output format specification.
-
-=cut
 
 sub all_chains {
 	my @active_tracks = grep { $_->rec_status ne q(OFF) } ::Track::all() 
@@ -1261,32 +1215,6 @@ sub effect_update {
 }
 sub find_op_offsets {
 
-=comment
-	Op offsets are needed to calculate the index to an effect (chain operator).
-	If reverb is added and it is the first user-added effect, the offset will
-	typically include an operator for routing (which will appear in the chain
-	setup file) plus operators for volume and pan, which are provided for each
-	track.
-
-	find_op_offsets reads the output of the cs command to determine
-	the number of chain operators from the setup file, then adds 
-	two for the volume and pan operators, to give the index offset
-	for the first user effect.
-
-	Here is the relevant line from the 'cs' command output:
-
-		Chain "1" [selected] "Channel copy"
-			
-	we will count the quotes, divide by two, and subtract one (for the chain id)
-	to get offset. Then we add two for volume and pan. Finally, we will
-	add 1, since perl arrays (used to represent chain operators) are indexed
-	starting at 0, whereas ecasound indexes operators starting at 1.
-
-	In this example, the first user effect will have an index of 4, which
-	will also be the offset needed for our start-at-zero array. 
-=cut
-
-
 	
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
@@ -1736,28 +1664,6 @@ sub round {
 }
 	
 
-=comment
-
- ls $LADSPA_PATH | perl -ne 'chomp; s/$ENV{LADSPA_PATH}//; system qq(analyseplugin $_)'
-
-my $ds = q(
-Plugin Name: "LS Filter"
-Plugin Label: "lsFilter"
-Plugin Unique ID: 1908
-Maker: "Steve Harris <steve@plugin.org.uk>"
-Copyright: "GPL"
-Must Run Real-Time: No
-Has activate() Function: Yes
-Has deativate() Function: No
-Has run_adding() Function: Yes
-Environment: Normal or Hard Real-Time
-Ports:  "Filter type (0=LP, 1=BP, 2=HP)" input, control, 0 to 2, default 0, integer
-        "Cutoff frequency (Hz)" input, control, 0.002*srate to 0.5*srate, default 0.0316228*srate, logarithmic
-        "Resonance" input, control, 0 to 1, default 0
-        "Input" input, audio
-        "Output" output, audio
-);
-=cut
 ## persistent state support
 
 sub save_state {
@@ -1982,13 +1888,6 @@ sub save_effects {
 
 }
 
-=comment
-sub r {
-	retrieve_effects(shift);
-}
-
-sub r5 { r("eff5") };
-=cut
 sub retrieve_effects {
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;

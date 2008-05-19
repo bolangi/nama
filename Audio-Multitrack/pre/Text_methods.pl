@@ -148,32 +148,30 @@ END
     }
     else {
 	print "Type 'help command' for more detailed help on a command.\n";
-=comment
-	my (%cmds, %docs);
-	my %done;
-	my %handlers;
-	for my $h (keys %{$o->{handlers}}) {
-	    next unless length($h);
-	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(run smry help);
-	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
-	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
-	    my $help = exists $o->{handlers}{$h}{help}
-		? (exists $o->{handlers}{$h}{smry}
-		    ? " "
-		    : "")
-		: "";
-	    $dest->{"    $h"} = "$smry$help";
-	}
-	my @t;
-	push @t, "  Commands:\n" if %cmds;
-	push @t, scalar $o->format_pairs(
-	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
-	);
-	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
-	push @t, scalar $o->format_pairs(
-	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
-	);
-=cut
+# 	my (%cmds, %docs);
+# 	my %done;
+# 	my %handlers;
+# 	for my $h (keys %{$o->{handlers}}) {
+# 	    next unless length($h);
+# 	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(run smry help);
+# 	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
+# 	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
+# 	    my $help = exists $o->{handlers}{$h}{help}
+# 		? (exists $o->{handlers}{$h}{smry}
+# 		    ? " "
+# 		    : "")
+# 		: "";
+# 	    $dest->{"    $h"} = "$smry$help";
+# 	}
+# 	my @t;
+# 	push @t, "  Commands:\n" if %cmds;
+# 	push @t, scalar $o->format_pairs(
+# 	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
+# 	);
+# 	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
+# 	push @t, scalar $o->format_pairs(
+# 	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
+# 	);
 my $help_screen = <<HELP;
 Ecasound-IAM commands:
 
@@ -260,61 +258,6 @@ HELP
 }
 
 
-=comment
-sub run_help {
-    my $o = shift;
-    my $cmd = shift;
-    if ($cmd) {
-	my $txt = $o->help($cmd, @_);
-	if ($o->{command}{help}{found}) {
-	    $o->page($txt.$/)
-	}
-	else {
-	    my @c = sort $o->possible_actions($cmd, 'help');
-	    if (@c and $o->{API}{match_uniq}) {
-		local $" = "\n\t";
-		print <<END;
-Ambiguous help topic '$cmd': possible help topics:
-	@c
-END
-	    }
-	    else {
-		print <<END;
-Unknown help topic '$cmd'; type 'help' for a list of help topics.
-END
-	    }
-	}
-    }
-    else {
-	print "Type 'help command' for more detailed help on a command.\n";
-	my (%cmds, %docs);
-	my %done;
-	my %handlers;
-	for my $h (keys %{$o->{handlers}}) {
-	    next unless length($h);
-	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(smry help);
-	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
-	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
-	    my $help = exists $o->{handlers}{$h}{help}
-		? (exists $o->{handlers}{$h}{smry}
-		    ? "   "
-		    : " * ")
-		: "   ";
-	    $dest->{"    $h"} = "$smry$help";
-	}
-	my @t;
-	push @t, "  Commands:\n" if %cmds;
-	push @t, scalar $o->format_pairs(
-	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
-	);
-	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
-	push @t, scalar $o->format_pairs(
-	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
-	);
-	$o->page(join '', @t);
-    }
-}
-=cut
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
 	local $debug = 0;
@@ -354,14 +297,3 @@ sub create_help_subs {
 
 }
 	
-
-=comment
-sub run_command1  { print "command 1!\n"; }
-sub comp_com { shift; print "hello auto complete", @_ }
-sub smry_command1 { "what does command1 do?" }
-sub help_command1 {
-<<'END';
-Help on 'command1', whatever that may be...
-END
-=cut
-
