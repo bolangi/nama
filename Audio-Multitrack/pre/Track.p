@@ -1,7 +1,7 @@
 use lib qw(.. .); # for testing
 use strict;
 our ($debug);
-$debug = 1;
+local $debug = 0;
 
 # ---------- Track -----------
 
@@ -157,9 +157,9 @@ sub rec_status {
 	my $group = $::Group::by_name{$track->group};
 
 		
-	return 'MUTE' if 
-		$group->rw eq 'MUTE'
-		or $track->rw eq 'MUTE'
+	return 'OFF' if 
+		$group->rw eq 'OFF'
+		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version;
 		# ! $track->full_path;
 		;
@@ -170,10 +170,10 @@ sub rec_status {
 
 		return 'REC'; # if $track->ch_r;
 		#return 'MON' if $track->monitor_version;
-		#return 'MUTE';
+		#return 'OFF';
 	}
 	else { return 'MON' if $track->monitor_version;
-			return 'MUTE';	
+			return 'OFF';	
 	}
 }
 

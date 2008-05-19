@@ -1,18 +1,18 @@
 ---
-tracker_rec:
+group_rec:
   short: grec R
-  what: group REC mode, rec-enable user tracks
+  what: group REC mode, i.e. rec-enable user tracks
   smry: group REC mode
   parameters: none
-tracker_mon:
+group_mon:
   short: gmon M
-  what: group MON mode, rec-disable user tracks
+  what: group MON mode, i.e. rec-disable user tracks
   smry: group MON mode
   parameters: none
-tracker_mute:
-  short: tmute MM
-  what: group MUTE mode, exclude user tracks from chain setup
-  smry: group MUTE mode
+group_off:
+  short: goff MM
+  what: group OFF mode, exclude all user tracks from chain setup
+  smry: group OFF mode
   parameters: none
 mixdown:
   short: mxd
@@ -21,7 +21,7 @@ mixdown:
   parameters: none
 mixplay:
   short: mxp
-  what: Play back mixdown file, i.e. mute user tracks
+  what: Play back mixdown file, with user tracks OFF
   smry: Play mix
   parameters: none
 mixoff:
@@ -40,14 +40,14 @@ rec:
 mon:
   what: set track to MON
   parameters: none
-mute:
-  short: z off
-  what: set track MUTE (exclude from chain setup)
-  smry: set track MUTE 
+off:
+  short: z
+  what: set track OFF (exclude from chain setup)
+  smry: set track OFF 
   parameters: none
 m:
   short: monitor_channel
-  what: set track output channel number # not currently supported
+  what: set track output channel number
   parameters: number
 r:
   short: record_channel
@@ -72,12 +72,12 @@ vol:
   smry: get/set track volume
   parameters: number
 up:
-  what: restore volume of current track to previous, i.e. un-cut level
-  smry: restore volume
-cut:
-  short: c
-  what: cut, i.e. set-to-zero the current track's playback volume
-  smry: cut track volume
+  what: restore volume of current track to previous, i.e. un-cut level 
+  smry: restore volume # TODO
+mute:
+  short: c cut
+  what: set playback volume to zero, current track
+  smry: mute volume
   parameters: none
 unity:
   short: cc
@@ -108,7 +108,7 @@ pan_back:
   parameters: none
 save_state:
   short: keep k save
-  what: save project settings to disk (optional settings name)
+  what: save project settings to disk, optional name
   parameters: optional string
 get_state:
   short: get restore retrieve
@@ -121,33 +121,30 @@ load_project:
   short: load	
   what: load an existing project
   parameters: string
-loop:
-  what: set transport loop mode
-  parameters: none
-generate_setup:
-  short: generate gen
+generate:
+  short: gen
   what: generate chain setup for audio processing
   parameters: none
-generate_and_connect_setup:
-  short: setup
+setup:
+  short: arm generate_and_connect
   what: generate and connect chain setup
   parameters: none
-connect_setup:
-  short: connect con
+connect:
+  short: con
   what: connect chain setup
   parameters: none
-disconnect_setup:
-  short: disconnect
+disconnect:
   what: disconnect chain setup
   parameters: none
 renew_engine:
   short: renew
-  parameters: none
+  smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
 show_setup:
-  short: show	
+  short: show
   parameters: none
   what: show status of all tracks
+  smry: show setup
 show_track:
   short: sh
   parameters: optional string, optional number

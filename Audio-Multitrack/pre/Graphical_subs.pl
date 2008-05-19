@@ -531,10 +531,10 @@ sub group_gui {
 				setup_transport() and connect_transport()
 				}
 			],[
-			'command' => 'MUTE',
+			'command' => 'OFF',
 			-background => $old_bg,
 			-command => sub { 
-				$group->set(rw => 'MUTE');
+				$group->set(rw => 'OFF');
 				refresh();
 				setup_transport() and connect_transport()
 				}
@@ -544,7 +544,7 @@ $group_rw
 }
 sub global_version_buttons {
 	
-	local $debug = 1;
+	local $debug = 0;
 	if (defined $tracker_group_widget) {
 		my @children = $tracker_group_widget->children;
 		for (@children) {
@@ -598,9 +598,9 @@ sub track_gui {
 					$ti[$n]->set(rw => "MON");
 					refresh_c($n);
 			}],
-			[ 'command' => "MUTE", 
+			[ 'command' => "OFF", 
 				-command  => sub { 
-					$ti[$n]->set(rw => "MUTE");
+					$ti[$n]->set(rw => "OFF");
 					refresh_c($n);
 			}],
 		);
@@ -675,7 +675,7 @@ sub track_gui {
 	my $p_num = 0; # needed when using parameter controllers
 	my $vol_id = $ti[$n]->vol;
 
-	local $debug = 1;
+	local $debug = 0;
 
 
 	$debug and print "vol cop_id: $vol_id\n";

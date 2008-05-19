@@ -49,7 +49,7 @@ sub first_run {
 sub prepare {  
 
 	$debug2 and print "&prepare\n";
-	local $debug = 1;
+	local $debug = 0;
 	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
@@ -211,7 +211,7 @@ sub substitute{
 ## project handling
 
 sub load_project {
-	local $debug = 1;
+	local $debug = 0;
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	print yaml_out \%h;
@@ -568,7 +568,7 @@ sub remove_small_wavs {
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 
-	local $debug = 1;
+	local $debug = 0;
 	$debug2 and print "&remove_small_wavs\n";
 	
 
@@ -660,7 +660,7 @@ sub mon_vert {
 =cut
 
 sub all_chains {
-	my @active_tracks = grep { $_->rec_status ne q(MUTE) } ::Track::all() 
+	my @active_tracks = grep { $_->rec_status ne q(OFF) } ::Track::all() 
 		if ::Track::all();
 	map{ $_->n} @active_tracks if @active_tracks;
 }
@@ -798,7 +798,7 @@ sub convert_to_alsa { initialize_oids }
 ## transport functions
 
 sub load_ecs {
-		local $debug = 1;
+		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect");
 		eval_iam("cs-remove $project_file");
@@ -827,7 +827,7 @@ sub setup_transport { # create chain setup
 
 	
 	my $have_source = join " ", map{$_->name} 
-								grep{ $_ -> rec_status ne 'MUTE'} 
+								grep{ $_ -> rec_status ne 'OFF'} 
 								@tracks;
 	# BUG: doesn't detect case of trying to mixdown with no
 	# playback tracks
@@ -1021,7 +1021,7 @@ sub rec_cleanup {
 } 
 ## effect functions
 sub add_effect {
-	local $debug = 1;
+	local $debug = 0;
 	
 	$debug2 and print "&add_effect\n";
 	
@@ -1230,14 +1230,14 @@ sub effect_update {
 	# why not use this routine to update %copp values as
 	# well?
 	
-	local $debug = 1;
+	local $debug = 0;
 	my $es = eval_iam "engine-status";
 	return if $es !~ /not started|stopped|running/;
 
 	my ($chain, $id, $param, $val) = @_;
 
 	$debug2 and print "&effect_update\n";
-	return if $ti[$chain]->rec_status eq "MUTE"; 
+	return if $ti[$chain]->rec_status eq "OFF"; 
 	return if $ti[$chain]->name eq 'Mixdown' and 
 			  $ti[$chain]->rec_status eq 'REC';
  	$debug and print join " ", @_, "\n";	
@@ -1308,13 +1308,13 @@ sub find_op_offsets {
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	
-	local $debug = 1;
+	local $debug = 0;
 	$debug2 and print "&apply_ops\n";
 	my $last = scalar @::Track::by_index - 1;
 	print "looping over 1 to $last\n";
 	for my $n (1..$last) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
- 		next if $ti[$n]->rec_status eq "MUTE" ;
+ 		next if $ti[$n]->rec_status eq "OFF" ;
 		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $ti[$n]->offset; # for MIX
  		#next if ! $ti[$n]->offset ;
@@ -1326,7 +1326,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
-	local $debug = 1;
+	local $debug = 0;
 	
 	my $id = shift;
 	$debug and print "id: $id\n";
@@ -1938,9 +1938,9 @@ sub create_master_and_mix_tracks {
 						$tn{Master}->set(rw => "MON");
 						refresh_c($master_track->n);
 			}],
-			[ 'command' => "MUTE", 
+			[ 'command' => "OFF", 
 				-command  => sub { 
-						$tn{Master}->set(rw => "MUTE");
+						$tn{Master}->set(rw => "OFF");
 						refresh_c($master_track->n);
 			}],
 		);

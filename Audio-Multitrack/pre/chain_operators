@@ -111,7 +111,7 @@ sub cop_init {
 sub effect_update {
 	my ($chain, $id, $param, $val) = @_;
 	$debug2 and print "&effect_update\n";
-	# return if rec_status($chain) eq "MUTE"; 
+	# return if rec_status($chain) eq "OFF"; 
 	return if ! defined $state_c{$chain}->{offset}; # MIX
 	return unless transport_running();
  	$debug and print join " ", @_, "\n";	
@@ -180,7 +180,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	$debug2 and print "&apply_ops\n";
 	for my $n (@all_chains) {
 	$debug and print "chain: $n, offset: $state_c{$n}->{offset}\n";
- 		next if rec_status($n) eq "MUTE" and $n != 1; #MIX
+ 		next if rec_status($n) eq "OFF" and $n != 1; #MIX
 		next if ! defined $state_c{$n}->{offset}; # for MIX
  		next if ! $state_c{$n}->{offset} ;
 		for my $id ( @{ $state_c{$n}->{ops} } ) {

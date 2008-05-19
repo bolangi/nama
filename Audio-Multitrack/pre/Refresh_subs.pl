@@ -5,7 +5,7 @@ sub refresh_t { # groups
 	
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
-					MUTE => $old_bg);
+					OFF => $old_bg);
 	my @w = $take_frame->children;
 	for my $t (1..scalar @w - 1){
 		# skip 0th item, the label
@@ -24,7 +24,7 @@ sub refresh_t { # groups
 
 		}else{ 
 		
-			$status = 'MUTE' }
+			$status = 'OFF' }
 
 
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
@@ -69,7 +69,7 @@ sub refresh_c { # tracks
 		 $widget_c{$n}->{ch_m}->configure( -foreground => 'Black');
 
 		}
-	elsif ( $rec_status eq "MUTE" ) {
+	elsif ( $rec_status eq "OFF" ) {
 		 $widget_c{$n}->{name}->configure(-background => $old_bg);
 		 $widget_c{$n}->{ch_r}->configure( -background => $old_bg); 
 		 $widget_c{$n}->{ch_r}->configure( -foreground => 'Gray');

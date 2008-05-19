@@ -68,7 +68,7 @@ sub apply {
 
 			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
 			if ( 
-				$track->rec_status ne 'MUTE' 
+				$track->rec_status ne 'OFF' 
 					and $rule->status
 					and ( 		$rule->target =~ /all|none/
 							or  $rule->target eq $track->rec_status)

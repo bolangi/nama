@@ -54,14 +54,14 @@ add_track: _add_track name channel(s?) end {
 #  }
  
 
-generate_setup: _generate_setup end { ::setup_transport(); 1 }
+generate: _generate end { ::setup_transport(); 1 }
 
-generate_and_connect_setup: _generate_and_connect_setup end { 
+setup: _setup end { 
 	::setup_transport() and ::connect_transport(); 1 }
 
-connect_setup: _connect_setup end { ::connect_transport(); 1 }
+connect: _connect end { ::connect_transport(); 1 }
 
-disconnect_setup: _disconnect_setup end { ::disconnect_transport(); 1 }
+disconnect: _disconnect end { ::disconnect_transport(); 1 }
 
 ## we reach here
 
@@ -107,15 +107,15 @@ show_track: _show_track dd end {
 # 	1;
 #}
 
-tracker_rec: _tracker_rec end { $::tracker->set( rw => 'REC') }
-tracker_mon: _tracker_mon end  { $::tracker->set( rw => 'MON') }
-tracker_mute: _tracker_mute end { $::tracker->set(rw => 'MUTE') }
+group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
+group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }
+group_off: _group_mute end { $::tracker->set(rw => 'OFF') }
 
 mixdown: _mixdown end { $::mixdown_track->set(rw => 'REC')}
 mixplay: _mixplay end { $::mixdown_track->set(rw => 'MON');
-						$::tracker->set(rw => 'MUTE');
+						$::tracker->set(rw => 'OFF');
 }
-mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'MUTE');
+mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'OFF');
 						$::tracker->set(rw => 'MON')}
 
 
@@ -142,7 +142,7 @@ m: 'm' dd  {	ref $::select_track =~ /Audio/ and
 				
 				}
 
-mute: 'mute' end {$::select_track->set(rw => 'MUTE'); }
+off: 'off' end {$::select_track->set(rw => 'OFF'); }
 rec: 'rec' end {$::select_track->set(rw => 'REC'); }
 mon: 'mon' end {$::select_track->set(rw => 'MON'); }
 

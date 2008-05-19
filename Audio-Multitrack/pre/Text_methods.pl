@@ -1,8 +1,7 @@
 use Carp;
-#&loop;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-	local $debug = 1;
+	local $debug = 0;
 	::Text::OuterShell::create_help_subs();
 	package ::;
 	load_project({name => $project_name, create => $opts{c}}) if $project_name;
@@ -96,12 +95,147 @@ sub catch_run { #
   print "foudn $0 $original_command_line\n";
   ::Text::command_process( $original_command_line );
 }
-sub catch_help { print "catched help @_"}
+sub catch_help {
+  my ($o, $cmd, @args) = @_;
+  local $debug = 0;
+  $debug and print "cmd: $cmd\n";
+  #my $main_name = 
+  #
+  print grep{ $_ eq $cmd } join " ", 
+  my $main_name;
+  CMD: for my $k ( keys %commands ){
+  	for my $alias ( $k, split " ",$commands{$k}{short} ){
+		if ($cmd eq $alias){
+			$main_name = $k;
+			last CMD;
+		}
+	}
+  }
+  $debug and print "main_name: $main_name\n";
+			
+	my $txt = $o->help($main_name, @_);
+	if ($o->{command}{help}{found}) {
+	    $o->page("$txt\n")
+	}
+}
 
+
+#my $print "catched help @_"}
+sub prompt_str { 'Enter command: ' }
+sub run_help {
+    my $o = shift;
+    my $cmd = shift;
+    if ($cmd) {
+	my $txt = $o->help($cmd, @_);
+	if ($o->{command}{help}{found}) {
+	    $o->page("$txt\n")
+	}
+	else {
+	    my @c = sort $o->possible_actions($cmd, 'help');
+	    if (@c and $o->{API}{match_uniq}) {
+		local $" = "\n\t";
+		print <<END;
+Ambiguous help topic '$cmd': possible help topics:
+	@c
+END
+	    }
+	    else {
+		print <<END;
+Unknown help topic '$cmd'; type 'help' for a list of help topics.
+END
+	    }
+	}
+    }
+    else {
+	print "Type 'help command' for more detailed help on a command.\n";
+	my (%cmds, %docs);
+	my %done;
+	my %handlers;
+	for my $h (keys %{$o->{handlers}}) {
+	    next unless length($h);
+	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(run smry help);
+	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
+	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
+	    my $help = exists $o->{handlers}{$h}{help}
+		? (exists $o->{handlers}{$h}{smry}
+		    ? " "
+		    : "")
+		: "";
+	    $dest->{"    $h"} = "$smry$help";
+	}
+	my @t;
+	push @t, "  Commands:\n" if %cmds;
+	push @t, scalar $o->format_pairs(
+	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
+	);
+	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
+	push @t, scalar $o->format_pairs(
+	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
+	);
+	$o->page(join '', @t);
+    }
+}
+
+
+=comment
+sub run_help {
+    my $o = shift;
+    my $cmd = shift;
+    if ($cmd) {
+	my $txt = $o->help($cmd, @_);
+	if ($o->{command}{help}{found}) {
+	    $o->page($txt.$/)
+	}
+	else {
+	    my @c = sort $o->possible_actions($cmd, 'help');
+	    if (@c and $o->{API}{match_uniq}) {
+		local $" = "\n\t";
+		print <<END;
+Ambiguous help topic '$cmd': possible help topics:
+	@c
+END
+	    }
+	    else {
+		print <<END;
+Unknown help topic '$cmd'; type 'help' for a list of help topics.
+END
+	    }
+	}
+    }
+    else {
+	print "Type 'help command' for more detailed help on a command.\n";
+	my (%cmds, %docs);
+	my %done;
+	my %handlers;
+	for my $h (keys %{$o->{handlers}}) {
+	    next unless length($h);
+	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(smry help);
+	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
+	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
+	    my $help = exists $o->{handlers}{$h}{help}
+		? (exists $o->{handlers}{$h}{smry}
+		    ? "   "
+		    : " * ")
+		: "   ";
+	    $dest->{"    $h"} = "$smry$help";
+	}
+	my @t;
+	push @t, "  Commands:\n" if %cmds;
+	push @t, scalar $o->format_pairs(
+	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
+	);
+	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
+	push @t, scalar $o->format_pairs(
+	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
+	);
+	$o->page(join '', @t);
+    }
+}
+=cut
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
-	local $debug = 1;
-	my %commands = %{ ::yaml_in( $::commands_yml) };
+	local $debug = 0;
+	%commands = %{ ::yaml_in( $::commands_yml) };
 
 	$debug and print ::yaml_out \%commands;
 	
@@ -112,7 +246,7 @@ sub create_help_subs {
 			$debug and print "evalcode: $run_code\n";
 			eval $run_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };\n!;
+			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };!;
 			$debug and print "evalcode: $help_code\n";
 			eval $help_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
@@ -128,7 +262,7 @@ sub create_help_subs {
 
 			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
 			$debug and print "evalcode: $alias_code\n";
-			eval $alias_code;
+			#eval $alias_code;# noisy in docs
 			$debug and $@ and print "create_sub eval error: $@\n";
 
 		}

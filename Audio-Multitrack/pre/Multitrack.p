@@ -34,8 +34,8 @@ use File::Spec::Link;
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
-$debug = 0;
+$debug2 = 0; # subroutine names
+$debug = 0; # debug statements
 
 ## The names of two helper loopback devices:
 
@@ -233,7 +233,7 @@ configuration.
 There are two types of commands. Chain setup related
 commands take effect before audio processing begins.
 
-For example, the REC/MON/MUTE status for each track
+For example, the REC/MON/OFF status for each track
 is used to decide whether a given track will be
 included in the Ecasound processing chain, and whether
 audio for that track will be recorded or played back.
@@ -260,22 +260,22 @@ are identified by version number, which can
 be specified for each track.
 
 Each track, including the Master and Mixdown have
-their own REC/MON/MUTE setting. 
-and displays its own REC/MON/MUTE status.
+their own REC/MON/OFF setting. 
+and displays its own REC/MON/OFF status.
 
-There is also a global REC/MON/MUTE 
+There is also a global REC/MON/OFF 
 and global version setting that apply to all
 tracks except Master and Mixdown.
 Global MON setting forces all user tracks 
 to MON state, and is entered automatically 
 after a recording.
 
-Global MUTE setting excludes all user tracks
+Global OFF setting excludes all user tracks
 from the chain setup, useful when playing back
 files recorded through the Mixdown function.
 
 A track with no recorded WAV files that is set to 
-MON will show MUTE status.
+MON will show OFF status.
 
 
 
