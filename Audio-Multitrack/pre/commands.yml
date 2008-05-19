@@ -25,7 +25,7 @@ mixplay:
   smry: Play mix
   parameters: none
 mixoff:
-  short: norm mxo
+  short: norm mxo normal
   what: normal mode, i.e. exclude mixdown tracks from chain setup
   smry: mix off
   parameters: none

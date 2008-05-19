@@ -16,7 +16,6 @@ new_project: _new_project name end {
 	);
 	print "created project: $::project_name\n";
 
-1;
 }
 
 load_project: _load_project name end {
@@ -26,13 +25,12 @@ load_project: _load_project name end {
 	::load_project( name => ::remove_spaces($item{name}) );
 	::setup_transport() and ::connect_transport();
 
-	1;
 	print "loaded project: $::project_name\n";
 }
 save_state: _save_state name(?) end { 
 	::save_state( $item{name} ); 
 	print "saved state as $item{name}\n";
-	1;}
+	}
 get_state: _get_state name(?) end {
  	::load_project( 
  		name => $::project_name,
@@ -46,7 +44,6 @@ add_track: _add_track name channel(s?) end {
 		return if $::Track::track_names{$item{name}}; 
 	::add_track($item{name}); 
 	print "added track $item{name}\n";
-	1;
 }
 # add_track: _add_track name(s) end { 
 #  	map { ::add_track $_ } @{ $item{name} };
@@ -74,7 +71,6 @@ stop: _stop end { ::stop_transport(); 1}
 show_setup: _show_setup end { 	
 
 	::Text::show_tracks ( ::Track::all );
-	1;
 }
 
 show_track: _show_track end {
@@ -131,14 +127,15 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 channel: r | m
 
-r: 'r' dd  {	ref $::select_track =~ /Audio/ and  
-				$::select_track->set(ch_r => $item{dd}) ;
+r: 'r' dd  {	
+				$::select_track->set(ch_r => $item{dd});
 				$::ch_r = $item{dd};
 				
 				}
-m: 'm' dd  {	ref $::select_track =~ /Audio/ and  
+m: 'm' dd  {	
 				$::select_track->set(ch_m => $item{dd}) ;
 				$::ch_m = $item{dd};
+				print "Output switched to channel $::ch_m\n";
 				
 				}
 

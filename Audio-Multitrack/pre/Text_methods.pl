@@ -148,6 +148,7 @@ END
     }
     else {
 	print "Type 'help command' for more detailed help on a command.\n";
+=comment
 	my (%cmds, %docs);
 	my %done;
 	my %handlers;
@@ -172,7 +173,84 @@ END
 	push @t, scalar $o->format_pairs(
 	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
 	);
-	$o->page(join '', @t);
+=cut
+my $help_screen = <<HELP;
+Ecasound-IAM commands:
+
+    start, t - Processing is started 
+    stop, s - Stops processing
+    rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
+    forward <time-in-seconds>, fw <time-in-seconds> - Forward
+    setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
+    engine-launch - Initialize and start engine
+    engine-status - Engine status
+    cs-status, st - Chainsetup status
+    c-status, cs - Chain status
+    cop-status, es - Chain operator status
+    ctrl-status - Controller status
+    aio-status, fs - Audio input/output status
+
+Ecmd commands:
+
+  -- General --
+
+    help          - prints this screen, or help on 'command'
+    exit          - exits the program
+
+  -- Project -- 
+
+    load_project, load  -  load an existing project 
+    new_project, create   -  create a new project directory tree 
+    get_state, get, retrieve <state_file>    -  retrieve project settings 
+    save_state, keep, k, save    -  save project settings to disk, optional name    
+  -- Setup --
+
+    setup, arm -  generate and connect chain setup    
+    show_setup, show    -  show setup    
+    show_track, sh    -  show track setup 
+
+  -- Track -- 
+
+    add, new  -  create a new track 
+    set_version, version, n   -  select current track version    
+
+  - rw_status
+
+    rec           -  set track to REC  
+    mon           -  set track to MON
+    off, z           -  set track OFF
+
+  - vol/pan 
+
+    pan, p           -  get/set pan position
+	pan_back, pb      -  restore pan    
+    pan_center, pc    -  set pan center    
+    pan_left, pl      -  pan track fully left    
+    pan_right, pr     -  pan track fully right    
+    unity, cc         -  unity volume    
+    vol, v           -  get/set track volume    
+    mute, c, cut          -  mute volume 
+
+  - channel assignments
+
+    r,record_channel        -   set track input channel number    
+    m, monitor_channel      -  set current track output channel 
+
+  -- Group control --
+
+    group_rec, grec, R     -  group REC mode 
+    group_mon, gmon, M     -  group MON mode 
+    group_off, goff, MM     -  group OFF mode 
+    group_version, gn, gver, gv -  select group version 
+
+  -- Mixdown --
+
+    mixdown, mxd       -  enable mixdown 
+    mixoff, norm, normal, mxo  -  mix off 
+    mixplay, mxp       -  Play mix 
+
+HELP
+	$o->page($help_screen);
     }
 }
 
