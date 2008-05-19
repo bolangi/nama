@@ -116,7 +116,8 @@ sub create_help_subs {
 			$debug and print "evalcode: $help_code\n";
 			eval $help_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $smry_code = qq!sub smry_$_ { q($commands{$_}{what}) }; !;
+			my $smry_code = 
+	qq!sub smry_$_ { q( $commands{$_}{what}($commands{$_}{short})) }; !;
 			$debug and print "evalcode: $smry_code\n";
 			eval $smry_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
@@ -125,18 +126,19 @@ sub create_help_subs {
 			$debug and print "evalcode: $alias_code\n";
 			eval $alias_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			
+=comment
 			map { 
 				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_); catch_run( \@_) }; !;
 				$debug and print "evalcode: $run_code\n";
 				eval $run_code;
 				$debug and $@ and print "create_sub eval error: $@\n";
 			} split " ", $commands{$_}{short} ;
+=cut
 
 		}
 
 	grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
-
+=comment
 	map{  	
 				s/-/_/g;
 				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_);  catch_run( \@_) }; !;
@@ -144,6 +146,7 @@ sub create_help_subs {
 				eval $run_code;
 				$debug and $@ and print "create_sub eval error: $@\n";
 		} keys %iam_cmd;
+=cut
 
 }
 	
