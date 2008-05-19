@@ -41,7 +41,6 @@ start
 stop
 run
 debug
-help
 engine-status
 engine-launch
 engine-halt
