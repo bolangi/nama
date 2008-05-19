@@ -21,6 +21,7 @@ sub loop {
 	
 sub command_process {
 
+package ::;
 		my ($user_input) = shift;
 		# my ($user_input) = $term->readline($prompt) ; # old way
 		return if $user_input =~ /^\s*$/;
@@ -53,6 +54,7 @@ sub command_process {
 
 		} @user_input;
 }
+package ::Text;
 sub show_tracks {
 	no warnings;
 	my @tracks = @_;
@@ -95,16 +97,7 @@ sub catch_run { #
   ::Text::command_process( $original_command_line );
 }
 sub catch_help { print "catched help @_"}
-sub run_command1  { print "command 1!\n"; }
-sub comp_com { shift; print "hello auto complete", @_ }
-sub smry_command1 { "what does command1 do?" }
-sub help_command1 {
-<<'END';
-Help on 'command1', whatever that may be...
-END
-}
 
-sub run_command2 { print "command 2!\n"; }
 sub create_help_subs {
 	$debug2 and print "create_help_subs\n";
 	local $debug = 1;
@@ -119,7 +112,7 @@ sub create_help_subs {
 			$debug and print "evalcode: $run_code\n";
 			eval $run_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
-			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) }; !;
+			my $help_code = qq!sub help_$_ { q($commands{$_}{what}).$/ }; !;
 			$debug and print "evalcode: $help_code\n";
 			eval $help_code;
 			$debug and $@ and print "create_sub eval error: $@\n";
@@ -134,7 +127,7 @@ sub create_help_subs {
 			$debug and $@ and print "create_sub eval error: $@\n";
 			
 			map { 
-				my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
+				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_); catch_run( \@_) }; !;
 				$debug and print "evalcode: $run_code\n";
 				eval $run_code;
 				$debug and $@ and print "create_sub eval error: $@\n";
@@ -146,7 +139,7 @@ sub create_help_subs {
 
 	map{  	
 				s/-/_/g;
-				my $run_code = qq!sub run_$_ { catch_run( \@_) }; !;
+				my $run_code = qq!sub run_$_ {splice \@_,1,0,  q($_);  catch_run( \@_) }; !;
 				$debug and print "evalcode: $run_code\n";
 				eval $run_code;
 				$debug and $@ and print "create_sub eval error: $@\n";
