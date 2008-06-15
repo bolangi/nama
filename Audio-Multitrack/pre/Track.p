@@ -50,8 +50,21 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	carp  ("track name already in use: $vals{name}\n"), return
-		 if $track_names{$vals{name}}; # null name returns false
+	print "test 1\n";
+	if ($by_name{$vals{name}}){
+	print "test 2\n";
+			my $track = $by_name{$vals{name}};
+			print $track->name, " hide: ", $track->hide, $/;
+			if ($track->hide) {
+				$track->set(hide => 0);
+				return $track;
+
+			} else {
+				carp  ("track name already in use: $vals{name}\n"), return
+		 #if $track_names{$vals{name}}; # null name returns false
+
+		}
+	}
 	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 

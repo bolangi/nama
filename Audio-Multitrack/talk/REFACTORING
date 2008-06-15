@@ -124,3 +124,19 @@ Assuming I can get this how much is there
 to do?
 
 
+I spend a while adding a remove_track command.
+each Track object gets a 'hide' attribute.
+
+When Track->hide is true, the track ui vanishes
+and track settings are excluded from the 
+chain setup in the OFF conditional in rec_status.
+
+Look where I have to make changes: 
+text methods
+graphic methods
+
+Track should have bimorphic methods for both
+in one place, i.e. belonging to the object
+rather than a system for manipulating the objects.
+
+

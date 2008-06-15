@@ -40,8 +40,8 @@ get_state: _get_state name(?) end {
  	}
 
 add_track: _add_track name channel(s?) end { 
-	carp ("track name already in use: $item{name}\n"),
-		return if $::Track::track_names{$item{name}}; 
+	#carp ("track name already in use: $item{name}\n"),
+	#	return if $::Track::track_names{$item{name}}; 
 	::add_track($item{name}); 
 	print "added track $item{name}\n";
 }
