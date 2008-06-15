@@ -35,7 +35,9 @@ use ::Object qw( 	name
 
 						delay
 						duration
-						
+
+						hide
+
 						
 						);
 sub new {
@@ -67,9 +69,13 @@ sub new {
 					ch_m 	=> undef,
 					vol  	=> undef,
 					pan 	=> undef,
+
+					# for .ewf support
 					offset 	=> 0,    # used for interface with Ecasound
 					delay	=> undef, # when we start the playback
 					duration => undef, # how long we play back
+
+					hide     => undef, # for 'Remove Track' function
 
 					@_ 			}, $class;
 
@@ -160,7 +166,8 @@ sub rec_status {
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->rw eq 'MON' and ! $track->monitor_version;
+		or $track->rw eq 'MON' and ! $track->monitor_version
+		or $track->hide;
 		# ! $track->full_path;
 		;
 	if( 	

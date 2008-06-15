@@ -50,6 +50,8 @@ add_track: _add_track name channel(s?) end {
 #  	1;
 #  }
  
+remove_track: _remove_track name end {
+	$::tn{ $item{name} }->set(hide => 1); }
 
 generate: _generate end { ::setup_transport(); 1 }
 
@@ -215,7 +217,7 @@ list_marks: _list_marks end {}
 
 show_effects: _show_effects end {}
 
-add_effect: _add_effect '-' name ':' dd(s? /,/)  end { 
+add_effect: _add_effect name /[: ]/ dd(s? /[, ]/)  end { 
 	my %p = (
 		chain => $::select_track->n,
 		values => @{$item{dd}},

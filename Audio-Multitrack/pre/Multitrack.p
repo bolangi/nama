@@ -258,6 +258,11 @@ The Tk interface will provide linear/log sliders for most
 plugins. Text-entry widgets are used to enter parameters for
 plugins when hints are not available.
 
+=head1 Text UI
+
+Type B<help> for a list of commands, B<help command> for
+help with I<command>. 
+
 =head1 TRACKS
 
 Multiple WAV files can be recorded for each track. These are
@@ -280,6 +285,15 @@ Mixdown function.
 A track with no recorded WAV files that is set to MON will
 show OFF status.
 
+=head1 BUGS
+
+No text-mode commands yet for adding effects (chain
+operators) and setting marks.
+
+No remove-track command.
+
+Default GUI volume sliders are not log scaled.
+
 =head1 EXPORT
 
 None by default.
@@ -292,6 +306,14 @@ See http://www.eca.cx/ecasound/ .
 
 LADSPA libraries and plugins are strongly recommended.
 See http://ladspa.org/ .
+
+=head1 AVAILABILITY
+
+CPAN, for the distribution.
+
+Pull source code using this command: 
+
+	git clone git://github.com/bolangi/ecmd.git
 
 =head1 AUTHOR
 

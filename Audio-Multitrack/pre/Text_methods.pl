@@ -66,7 +66,7 @@ sub show_tracks {
 			$_->current_version || 'none',
 			(join " ", @{$_->versions}),
 
-		} @tracks;
+		} grep{ ! $_-> hide} @tracks;
 		
 	write; # using format at end of file UI.pm
 	$- = 0; # $FORMAT_LINES_LEFT # force header on next output

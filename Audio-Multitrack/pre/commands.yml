@@ -10,7 +10,7 @@ group_mon:
   smry: group MON mode
   parameters: none
 group_off:
-  short: goff MM
+  short: goff Z 
   what: group OFF mode, exclude all user tracks from chain setup
   smry: group OFF mode
   parameters: none
@@ -184,5 +184,9 @@ previous_mark:
 name_mark:
   short: nm
   what: Give a name to a mark
+  parameters: string
+remove_track:
+  short:
+  what: Make track go away
   parameters: string
 ...
