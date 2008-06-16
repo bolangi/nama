@@ -9,7 +9,7 @@ help: _help end { print "hello_from your command line gramar\n"; 1 }
 help: _help dd end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
-new_project: _new_project name end {
+create_project: _create_project name end {
 	::load_project( 
 		name => ::remove_spaces($item{name}),
 		create => 1,
@@ -77,6 +77,36 @@ show_setup: _show_setup end {
 
 show_track: _show_track end {
 	::Text::show_tracks($::select_track);
+# 	print "Versions: ", join " ", @{$::select_track->versions}, $/;
+ 	map { 
+ 		my $op_id = $_;
+ 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
+ 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
+ 		 my @pnames =@{$::effects[ $i ]->{params}};
+			map{ print join " ", 
+			 	$pnames[$_]->{name}, 
+				$::copp{$op_id}->[$_],'' 
+		 	} (0..scalar @pnames - 1);
+		 print $/;
+		#  print ::yaml_out( \@pnames );
+		#print scalar @pnames;
+		#print $pnames[0]->{name};
+		#print map{ 
+		#print $_, $/;
+			#join " ", $pnames[$_]->{name}, $_,
+	# $::copp{$op_id}->[$_], 
+		#$/ 
+		
+		#}
+			  ;
+ 		#map { 
+		# print $pnames[$_]->{name}, " ",  , 
+		# print ref $pnames[$_] , 
+ 		# 	$/
+		 #	print $_, " ";
+		#	} 0 .. scalar @pnames - 1;
+ 
+ 	 } @{ $::select_track->ops };
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -217,12 +247,15 @@ list_marks: _list_marks end {}
 
 show_effects: _show_effects end {}
 
-add_effect: _add_effect name /[: ]/ dd(s? /[, ]/)  end { 
+#add_effect: _add_effect name /[:, ]/ dd(s? /[, ]/)  end { 
+add_effect: _add_effect name dd(s?)  end { 
 	my %p = (
 		chain => $::select_track->n,
-		values => @{$item{dd}},
+		values => $item{dd},
 		type => $item{name},
 		);
+		print "adding effect\n";
+		#print (::yaml_out(\%p));
 	::add_effect( \%p );
 }
 

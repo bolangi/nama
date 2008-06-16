@@ -202,36 +202,38 @@ Ecmd commands (additional help available by typing 'help <command>')
 
   -- Project -- 
 
-    load_project, load  -  load an existing project 
-    new_project, create   -  create a new project directory tree 
-    get_state, get, retrieve <state_file>    -  retrieve project settings 
-    save_state, keep, k, save    -  save project settings to disk, optional name    
+    load_project, load         -  load an existing project 
+    create_project, create     -  create a new project directory tree 
+    get_state, get, retrieve <state_file>    
+	                           -  retrieve project settings 
+    save_state, keep, k, save  -  save project settings to disk, optional name    
   -- Setup --
 
-    setup, arm -  generate and connect chain setup    
-    show_setup, show    -  show setup    
-    show_track, sh    -  show track setup 
+    setup, arm              -  generate and connect chain setup    
+    show_setup, show        -  show setup    
 
   -- Track -- 
 
-    add, new  -  create a new track 
-    set_version, version, n   -  select current track version    
+    show_track, sh          -  show track setup 
+    add                     -  create a new track 
+    set_version, version, n -  select current track version    
+
 
   - rw_status
 
-    rec           -  set track to REC  
-    mon           -  set track to MON
-    off, z           -  set track OFF
+    rec                     -  set track to REC  
+    mon                     -  set track to MON
+    off, z                  -  set track OFF (omit from setup)
 
   - vol/pan 
 
-    pan, p           -  get/set pan position
-	pan_back, pb      -  restore pan    
-    pan_center, pc    -  set pan center    
-    pan_left, pl      -  pan track fully left    
-    pan_right, pr     -  pan track fully right    
-    unity, cc         -  unity volume    
-    vol, v           -  get/set track volume    
+    pan, p               -  get/set pan position
+	pan_back, pb         -  restore pan    
+    pan_center, pc       -  set pan center    
+    pan_left, pl         -  pan track fully left    
+    pan_right, pr        -  pan track fully right    
+    unity, cc            -  unity volume    
+    vol, v               -  get/set track volume    
     mute, c, cut          -  mute volume 
 
   - channel assignments
@@ -239,18 +241,27 @@ Ecmd commands (additional help available by typing 'help <command>')
     r,record_channel        -   set track input channel number    
     m, monitor_channel      -  set current track output channel 
 
+  - effects 
+
+  	fxa, add_effect       - add an effect to the current track
+
+	   synopsis: fxa ea 600         - amplify current track signal by 600%
+	   also:     fxa,ea,600 
+	  
+
+
   -- Group control --
 
-    group_rec, grec, R     -  group REC mode 
-    group_mon, gmon, M     -  group MON mode 
+    group_rec, grec, R      -  group REC mode 
+    group_mon, gmon, M      -  group MON mode 
     group_off, goff, MM     -  group OFF mode 
     group_version, gn, gver, gv -  select group version 
 
   -- Mixdown --
 
-    mixdown, mxd       -  enable mixdown 
+    mixdown, mxd               -  enable mixdown 
     mixoff, norm, normal, mxo  -  mix off 
-    mixplay, mxp       -  Play mix 
+    mixplay, mxp               -  play mix 
 
 HELP
 	$o->page($help_screen);

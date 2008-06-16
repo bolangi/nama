@@ -30,10 +30,10 @@ mixoff:
   smry: mix off
   parameters: none
 add_track:
-  short: new add
-  what: create a new track, " new sax r2 " will record track sax from input 2
+  short: add
+  what: create a new track, " add sax r2 " will record track sax from input 2
   smry: create a new track
-  parameters: string 'r' number 'm' N
+  parameters: string 'r' number 'm' number
 rec:
   what: set track to REC
   parameters: none
@@ -113,7 +113,7 @@ save_state:
 get_state:
   short: get restore retrieve
   what: retrieve project settings
-new_project:
+create_project:
   short: create	
   what: create a new project directory tree
   parameters: string
