@@ -249,9 +249,15 @@ show_effects: _show_effects end {}
 
 #add_effect: _add_effect name /[:, ]/ dd(s? /[, ]/)  end { 
 add_effect: _add_effect name dd(s?)  end { 
+#print join $/, keys %item;
+#print "itemdd:", $item{"dd(s?)"} , ":\n";
+#print "itemdd2:", $item{"dd"} , ":\n";
+#print "ref:", ref $item{dd} , ":\n";
+
+print "code: ", $item{name}, $/;
 	my %p = (
 		chain => $::select_track->n,
-		values => $item{dd},
+		values => $item{"dd(s?)"},
 		type => $item{name},
 		);
 		print "adding effect\n";
