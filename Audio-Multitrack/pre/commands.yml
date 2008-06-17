@@ -158,7 +158,9 @@ add_effect:
   short: fxa afx
   parameters: code param1 param2,... paramn
 modify_effect:
-  what: modify an effect parameter (takes one-based integer parameter number
+  what: modify an effect parameter
+  parameters: integer parameter index, float parameter value
+  smry: modify an effect parameter e.g. "modify_effect 2 200" means set the second parameter to 200
   short: fxm mfx
 remove_effect:
   what: remove chain operator(s) from selected track

@@ -1181,6 +1181,13 @@ sub sync_effect_param {
 					$param, 
 					$copp{$id}[$param]	 );
 }
+
+sub effect_update_copp_set {
+	# will superseded effect_update for most places
+	my ($chain, $id, $param, $val) = @_;
+	effect_update( @_ );
+	$copp{$id}->[$param] = $val;
+}
 	
 	
 sub effect_update {
@@ -1193,6 +1200,9 @@ sub effect_update {
 	return if $es !~ /not started|stopped|running/;
 
 	my ($chain, $id, $param, $val) = @_;
+
+	# $param gets incremented, therefore is zero-based. 
+	# if I check i will find %copp is  zero-based
 
 	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "OFF"; 

@@ -256,7 +256,8 @@ remove_effect: _remove_effect op_id(s) end {
 
 }
 op_id: /[A-Z]+/
-	
+
+
 add_effect: _add_effect name dd(s?)  end { 
 print join $/, keys %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
@@ -274,6 +275,25 @@ print "code: ", $item{name}, $/;
 	::add_effect( \%p );
 }
 
+modify_effect: _modify_effect op_id parameter value end {
+
+# it seems really old to be sending the chain number , but that
+# is where the order comes, from the array in the 'ops'
+# field of the Track objects. 
+
+	::effect_update_copp_set( 
+		$::cops{ $item{op_id} }->{chain}, 
+		$item{op_id}, 
+		--$item{parameter},  # user gets one-based indexing
+		$item{value}); 
+
+}
+op_id: /[A-Z]+/
+
+parameter: /\d+/
+
+value: /[\d\.eE+-]+/ # 1.5e-6
+	
 fx: '-' name ':' parameter(s? /,/)  
 
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
