@@ -196,6 +196,15 @@ sub rec_status {
 			return 'OFF';	
 	}
 }
+# the following methods handle effects
+sub remove_effect {
+	my $track = shift;
+	my @ids = @_;
+	$track->set(ops => [ grep { my $existing = $_; 
+									! grep { $existing eq $_
+									} @ids }  
+							@{$track->ops} ]);
+}
 
 # the following methods are for channel routing
 
@@ -258,6 +267,8 @@ use ::Object qw( 	name
 
 						delay
 						duration
+
+						hide
 						
 						
 						);

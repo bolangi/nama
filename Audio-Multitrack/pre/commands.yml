@@ -148,19 +148,24 @@ show_setup:
 show_track:
   short: sh
   parameters: optional string, optional number
-  what: show track status
+  what: show track status, including effects
 show_effects:
   what: show effects (chain operators) on selected track
   short: fxs	
   parameters: none
 add_effect:
   what: add effect to selected track
-  short: fxa
-  parameters: ecasound operator string ( -<code>:<param1>,<param2>,...<paramn> )
+  short: fxa afx
+  parameters: code param1 param2,... paramn
+modify_effect:
+  what: modify an effect parameter (takes one-based integer parameter number
+  short: fxm mfx
 remove_effect:
   what: remove chain operator(s) from selected track
-  short: fxr
+  short: fxr rfx
   parameters: string (cop id<s>)
+helpx:
+  what: hellow world
 list_marks:
   short: lm
   what: List all marks

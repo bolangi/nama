@@ -1000,10 +1000,13 @@ sub add_effect {
 }
 
 sub remove_effect {
+	# TODO fold into object code for Track
+	local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
+	$ti[$n]->remove_effect( $id );
 		
 	$debug and print "ready to remove cop_id: $id\n";
 
@@ -1027,7 +1030,8 @@ sub remove_effect {
 	
 	# remove my own cop_id from the stack
 	$ui->remove_effect_gui($id), remove_op($id)  unless $cops{$id}->{belongs_to};
-
+	
+			
 }
 sub remove_effect_gui { 
 	@_ = discard_object(@_);

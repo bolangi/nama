@@ -49,18 +49,15 @@ will recording (red), mixing only (yellow) or playback only
 (green). 
 
 
-LIMITATIONS
+BUGS AND LIMITATIONS
 
 Need to ARM the system before pressing start to ensure
 up-to-date setup. 
-
 
 Some controls have no effect during engine running.
 
 Adding and removing chain operators while the engine is
 running may cause the engine to stop.
-
-Text mode can't add operators at all. 
 
 COPYRIGHT AND LICENCE
 

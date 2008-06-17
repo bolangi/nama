@@ -1,11 +1,11 @@
 # i'm a comment!
-
+asdf: 'asdf' { print "hello"}
 read: command(s)
 command: fail
 end: /\s*$/ 
 #end: /\s*;\s*/ 
 end: ';' 
-help: _help end { print "hello_from your command line gramar\n"; 1 }
+helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
 help: _help dd end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
@@ -248,8 +248,17 @@ list_marks: _list_marks end {}
 show_effects: _show_effects end {}
 
 #add_effect: _add_effect name /[:, ]/ dd(s? /[, ]/)  end { 
+remove_effect: _remove_effect op_id(s) end {
+	#print join $/, @{ $item{"op_id(s)"} }; 
+	map{ print "removing op_id: $_\n"; ::remove_effect( $_ )
+	} grep { $_ }  @{ $item{"op_id(s)"}} ;
+	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
+
+}
+op_id: /[A-Z]+/
+	
 add_effect: _add_effect name dd(s?)  end { 
-#print join $/, keys %item;
+print join $/, keys %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
 #print "ref:", ref $item{dd} , ":\n";
