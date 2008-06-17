@@ -28,13 +28,13 @@ use ::Object qw( 	name
 						old_vol_level
 						old_pan_level
 						ops 
-						op_offset 
+						offset 
 
 						n 
 						group 
 
 						
-					    offset	
+						delay
 						start_position
 						length
 						looping

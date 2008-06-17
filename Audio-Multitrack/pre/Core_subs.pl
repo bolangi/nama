@@ -1065,7 +1065,7 @@ sub remove_op {
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
 	 eval_iam ("c-select $n");
-	eval_iam ("cop-select ". ($ti[$n]->op_offset + $index));
+	eval_iam ("cop-select ". ($ti[$n]->offset + $index));
 	eval_iam ("cop-remove");
 	$debug and eval_iam ("cs");
 
@@ -1221,9 +1221,9 @@ sub effect_update {
 	$controller++; # translates 0th to chain-operator 1
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $controller, offset: ",
-	$ti[$chain]->op_offset, " param: $param, value: $val$/";
+	$ti[$chain]->offset, " param: $param, value: $val$/";
 	eval_iam ("c-select $chain");
-	eval_iam ("cop-select ". ($ti[$chain]->op_offset + $controller));
+	eval_iam ("cop-select ". ($ti[$chain]->offset + $controller));
 	eval_iam ("copp-select $param");
 	eval_iam ("copp-set $val");
 }
@@ -1244,7 +1244,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( op_offset => $quotes/2 - 1);   # XXX
+			$ti[$chain_id]->set( offset => $quotes/2 - 1);   # XXX
 
 		}
 }
@@ -1255,11 +1255,11 @@ sub apply_ops {  # in addition to operators in .ecs file
 	my $last = scalar @::Track::by_index - 1;
 	print "looping over 1 to $last\n";
 	for my $n (1..$last) {
-	$debug and print "chain: $n, offset: ", $ti[$n]->op_offset, "\n";
+	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "OFF" ;
 		#next if $n == 2; # no volume control for mix track
-		#next if ! defined $ti[$n]->op_offset; # for MIX
- 		#next if ! $ti[$n]->op_offset ;
+		#next if ! defined $ti[$n]->offset; # for MIX
+ 		#next if ! $ti[$n]->offset ;
 		for my $id ( @{ $ti[$n]->ops } ) {
 		#	next if $cops{$id}->{belongs_to}; 
 		apply_op($id);
