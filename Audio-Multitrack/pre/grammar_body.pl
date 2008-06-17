@@ -258,7 +258,7 @@ remove_effect: _remove_effect op_id(s) end {
 op_id: /[A-Z]+/
 
 
-add_effect: _add_effect name dd(s?)  end { 
+add_effect: _add_effect name value(s?)  end { 
 print join $/, keys %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
@@ -267,7 +267,7 @@ print join $/, keys %item;
 print "code: ", $item{name}, $/;
 	my %p = (
 		chain => $::select_track->n,
-		values => $item{"dd(s?)"},
+		values => $item{"value(s?)"},
 		type => $item{name},
 		);
 		print "adding effect\n";
@@ -292,10 +292,8 @@ op_id: /[A-Z]+/
 
 parameter: /\d+/
 
-value: /[\d\.eE+-]+/ # 1.5e-6
+value: /[\d\.eE+-]+/ # -1.5e-6
 	
-fx: '-' name ':' parameter(s? /,/)  
-
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 list_versions: _list_versions end { 

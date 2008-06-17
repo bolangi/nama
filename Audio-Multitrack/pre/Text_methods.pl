@@ -215,9 +215,11 @@ Ecmd commands (additional help available by typing 'help <command>')
   -- Track -- 
 
     show_track, sh          -  show track setup 
-    add                     -  create a new track 
-    set_version, version, n -  select current track version    
+    add_track, add          -  create a new track 
 
+  - version
+
+    set_version, version, n -  select current track version    
 
   - rw_status
 
