@@ -193,7 +193,7 @@ Ecmd commands (additional help available by typing 'help <command>')
   -- Unsupported in text mode  --
 
     additional effects (chain operators)
-	marks
+    marks
     
   -- General --
 
@@ -205,7 +205,7 @@ Ecmd commands (additional help available by typing 'help <command>')
     load_project, load         -  load an existing project 
     create_project, create     -  create a new project directory tree 
     get_state, get, retrieve <state_file>    
-	                           -  retrieve project settings 
+                               -  retrieve project settings 
     save_state, keep, k, save  -  save project settings to disk, optional name    
   -- Setup --
 
@@ -230,7 +230,7 @@ Ecmd commands (additional help available by typing 'help <command>')
   - vol/pan 
 
     pan, p               -  get/set pan position
-	pan_back, pb         -  restore pan    
+    pan_back, pb         -  restore pan    
     pan_center, pc       -  set pan center    
     pan_left, pl         -  pan track fully left    
     pan_right, pr        -  pan track fully right    
@@ -245,12 +245,10 @@ Ecmd commands (additional help available by typing 'help <command>')
 
   - effects 
 
-  	fxa, add_effect       - add an effect to the current track
-
-	   synopsis: fxa ea 600         - amplify current track signal by 600%
-	   also:     fxa,ea,600 
-	  
-
+    add_effect,    fxa, afx    - add an effect to the current track
+    modify_effect, fxm, mfx    - set an effect parameter to a new value
+    delta_effect,  fxd, dfx    - increment/decrement effect parameter
+    remove_effect, fxr, rfx    - remove an effect
 
   -- Group control --
 

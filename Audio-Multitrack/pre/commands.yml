@@ -157,15 +157,22 @@ add_effect:
   what: add effect to selected track
   short: fxa afx
   parameters: code param1 param2,... paramn
+  example: fxa ea 600 (amplify current track signal by 600%)
 modify_effect:
   what: modify an effect parameter
-  parameters: integer parameter index, float parameter value
-  smry: modify an effect parameter e.g. "modify_effect 2 200" means set the second parameter to 200
+  parameters: parameter,  value, optional sign
   short: fxm mfx
+  example: fxm V 1 1000 (set effect V, parameter 1 to 1000)
+delta_effect:
+  what: increment or decrement effect parameter
+  short: dfx fxd
+  parameters: op_id parameter sign value
+  example: fxd V 1 -10 (reduce effect V, parameter 1 by 10)
 remove_effect:
   what: remove chain operator(s) from selected track
   short: fxr rfx
   parameters: string (cop id<s>)
+  example: fxr V (remove effect V)
 helpx:
   what: hellow world
 list_marks:

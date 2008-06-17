@@ -247,7 +247,6 @@ list_marks: _list_marks end {}
 
 show_effects: _show_effects end {}
 
-#add_effect: _add_effect name /[:, ]/ dd(s? /[, ]/)  end { 
 remove_effect: _remove_effect op_id(s) end {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	map{ print "removing op_id: $_\n"; ::remove_effect( $_ )
@@ -275,19 +274,44 @@ print "code: ", $item{name}, $/;
 	::add_effect( \%p );
 }
 
-modify_effect: _modify_effect op_id parameter value end {
-
-# it seems really old to be sending the chain number , but that
-# is where the order comes, from the array in the 'ops'
-# field of the Track objects. 
+delta_effect: _delta_effect op_id parameter sign value {
+		$item{parameter}--; # user's one-based indexing to our zero-base
+		my $new_value = 
+ 			eval (join " ",
+ 				$::copp{$item{op_id}}->[$item{parameter}], 
+ 				$item{sign},
+ 				$item{value});
 
 	::effect_update_copp_set( 
 		$::cops{ $item{op_id} }->{chain}, 
 		$item{op_id}, 
-		--$item{parameter},  # user gets one-based indexing
-		$item{value}); 
+		$item{parameter}, 
+		$new_value);
 
 }
+	
+modify_effect: _modify_effect op_id parameter value sign(?) end {
+
+		$item{parameter}--; # user's one-based indexing to our zero-base
+
+		my $new_value = $item{value}; 
+
+		if ($item{"sign(?)"}) {
+			$new_value = 
+ 			eval (join " ",
+ 				$::copp{$item{op_id}}->[$item{parameter}], 
+ 				@{$item{"sign(?)"}},
+ 				$item{value});
+		}
+			
+	::effect_update_copp_set( 
+		$::cops{ $item{op_id} }->{chain}, 
+		$item{op_id}, 
+		$item{parameter}, 
+		$new_value);
+
+}
+sign: /[+-]/
 op_id: /[A-Z]+/
 
 parameter: /\d+/
