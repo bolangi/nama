@@ -145,12 +145,52 @@ sub current {
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
-		return $track->targets->{ $track->monitor_version } 
+		my $filename = $track->targets->{ $track->monitor_version } ;
+		return $filename 
+		  unless $track->delay or $track->length or $track->start_position ;
+
+		# .ewf parameters are used, so we need to write file
+
+		# first, filename in chain setup must point to .ewf file instead of .wav
+		
+		$filename =~ s/\.wav$/.ewf/;
+
+		# second, we need to write ewf file
+		#
+		$track->write_ewf;
+		return $filename;
 	} else {
 		print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }
+sub full_wav_path { my $track = shift; join_path $track->dir , $track->current_wav }
+sub current_wav {	
+	my $track = shift;
+	my $last = $track->group_last;
+	#print "last found is $last\n"; 
+	if 	($track->rec_status eq 'REC'){ 
+		return $track->name . '_' . ++$last . '.wav'}
+	elsif ( $track->rec_status eq 'MON'){ 
+		my $filename = $track->targets->{ $track->monitor_version } ;
+		return $filename;
+	} else {
+		print "track ", $track->name, ": no current version\n" ;
+		return undef;
+	}
+}
+sub write_ewf {
+	my $track = shift;
+	carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
+	my @ewf;
+	push @ewf, join " = ", "source", $track->full_wav_path;
+	map{ push @ewf, join " = ", $_, eval qq(\$track->$_) }
+	grep{ eval qq(\$track->$_)} qw(delay start_position length);
+	print join $/, @ewf;
+	join $/, @ewf > io($track->full_path) 
+		unless $track->full_path =~ /\.wav$/i # don't overwrite .wav file!  
+}
+
 sub current_version {	
 	my $track = shift;
 	my $last = $track->group_last;
