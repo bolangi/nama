@@ -7,7 +7,7 @@ sub add_effect_gui {
 		@_ = discard_object(@_);
 		my %p 			= %{shift()};
 		my $n 			= $p{chain};
-		my $code 			= $p{type};
+		my $code 			= $p{code};
 		my $parent_id = $p{parent_id};  
 		my $id		= $p{cop_id};   # initiates restore
 		my $parameter		= $p{parameter}; 
@@ -43,7 +43,7 @@ sub add_effect_gui {
 
 		# here add menu items for Add Controller, and Remove
 
-		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
+		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{code}} ]
 			->{name};
 		$parentage and $parentage .=  " - ";
 		$debug and print "parentage: $parentage\n";
@@ -840,7 +840,7 @@ sub make_scale {
 # 	length       => length widget # optional 
 	my $id = $p{cop_id};
 	my $n = $cops{$id}->{chain};
-	my $code = $cops{$id}->{type};
+	my $code = $cops{$id}->{code};
 	my $p  = $p{p_num};
 	my $i  = $effect_i{$code};
 

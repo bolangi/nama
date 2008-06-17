@@ -981,7 +981,7 @@ sub add_effect {
 	
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
-	my $code 			= $p{type};
+	my $code 			= $p{code};
 	my $parent_id = $p{parent_id};  
 	my $id		= $p{cop_id};   # initiates restore
 	my $parameter		= $p{parameter}; 
@@ -1075,7 +1075,7 @@ sub remove_op {
 sub cop_add {
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
-	my $code		= $p{type};
+	my $code		= $p{code};
 	my $parent_id = $p{parent_id};  
 	my $id		= $p{cop_id};   # causes restore behavior when present
 	my $i       = $effect_i{$code};
@@ -1156,7 +1156,7 @@ sub cop_init {
 	} 
 	else { 
 		$debug and print "no settings found, loading defaults if present\n";
-		my $i = $effect_i{ $cops{$id}->{type} };
+		my $i = $effect_i{ $cops{$id}->{code} };
 		
 		# CONTROLLER
 		# don't initialize first parameter if operator has a parent
@@ -1272,8 +1272,8 @@ sub apply_op {
 	
 	my $id = shift;
 	$debug and print "id: $id\n";
-	my $code = $cops{$id}->{type};
-	$debug and print "chain: $cops{$id}->{chain} type: $cops{$id}->{type}, code: $code\n";
+	my $code = $cops{$id}->{code};
+	$debug and print "chain: $cops{$id}->{chain} type: $cops{$id}->{code}, code: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
@@ -1822,7 +1822,7 @@ sub retrieve_state {
 			
 			add_effect({
 						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
+						type => $cops{$id}->{code},
 						cop_id => $id,
 						parent_id => $cops{$id}->{belongs_to},
 						});
@@ -1988,7 +1988,7 @@ sub retrieve_effects {
 			
 			add_effect({  
 						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
+						type => $cops{$id}->{code},
 						cop_id => $id,
 						parent_id => $cops{$id}->{belongs_to},
 						});
