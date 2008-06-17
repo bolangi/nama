@@ -1784,10 +1784,14 @@ sub retrieve_state {
 
 	#  set Master and Mixdown parmeters
 	
+
+
 	map {my $t = $_; 
+			my %track = %{$t};
 		map{
-			$::Track::by_index[$t->{n}]->set($_ => $t->{$_})
-			} keys %{$t};
+
+			$Audio::Multitrack::Track::by_index[$t->{n}]->set($_ => $t->{$_})
+			} keys %track;
 	} @tracks_data[0,1];
 
 	splice @tracks_data, 0, 2;
@@ -1795,7 +1799,6 @@ sub retrieve_state {
 	#  now create the widgets
 	
 	create_master_and_mix_tracks();
-
 
 	# create user tracks
 	

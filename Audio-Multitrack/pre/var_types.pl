@@ -33,6 +33,10 @@
 						$jack_on 
 						@tracks_data
 						@groups_data
+						$this_track
+						$this_op
+						$loop
+						$length
 
 						);
 					 

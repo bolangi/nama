@@ -33,8 +33,11 @@ use ::Object qw( 	name
 						n 
 						group 
 
+						
 						delay
-						duration
+						start_position
+						length
+						looping
 
 						hide
 
@@ -84,9 +87,12 @@ sub new {
 					pan 	=> undef,
 
 					# for .ewf support
-					offset 	=> 0,    # used for interface with Ecasound
-					delay	=> undef, # when we start the playback
-					duration => undef, # how long we play back
+					
+					delay	=> undef, # after how long we start playback
+					                  # the term 'offset' is used already
+					start_position => undef, # where we start playback from
+					length => undef, # how long we play back
+					looping => undef, # do we repeat our sound sample
 
 					hide     => undef, # for 'Remove Track' function
 
@@ -266,7 +272,9 @@ use ::Object qw( 	name
 						group 
 
 						delay
-						duration
+						start_position
+						length
+						looping
 
 						hide
 						
@@ -307,8 +315,11 @@ use ::Object qw( 	name
 						group 
 
 						delay
-						duration
-						
+						start_position
+					 	length
+						looping
+
+						hide
 						
 						);
 

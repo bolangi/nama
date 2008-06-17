@@ -65,6 +65,10 @@ our (
 					# implemented
 	$select_track,	 # the currently active track -- 
 					 # used by Text UI only at present
+	$this_op,      # currently selected effect
+	$loop, 	       # cs-loop 
+	$length,       # cs-set-length
+
 	@format_fields, # data for replies to text commands
 
 	$project,		# variable for GUI text input
