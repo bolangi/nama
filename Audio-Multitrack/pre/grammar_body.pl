@@ -92,7 +92,7 @@ show_track: _show_track end {
 # 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
  	map { 
  		my $op_id = $_;
- 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{code} };
+ 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
  		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
  		 my @pnames =@{$::effects[ $i ]->{params}};
 			map{ print join " ", 
