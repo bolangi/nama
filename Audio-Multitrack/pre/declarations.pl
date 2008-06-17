@@ -63,7 +63,7 @@ our (
 	$use_monitor_version_for_mixdown, # sync mixdown version numbers
 	              	# to selected track versions , not
 					# implemented
-	$select_track,	 # the currently active track -- 
+	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
 	$this_op,      # currently selected effect
 	$loop, 	       # cs-loop 

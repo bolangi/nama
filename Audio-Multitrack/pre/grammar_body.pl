@@ -45,10 +45,22 @@ add_track: _add_track name channel(s?) end {
 	::add_track($item{name}); 
 	print "added track $item{name}\n";
 }
+
 # add_track: _add_track name(s) end { 
 #  	map { ::add_track $_ } @{ $item{name} };
 #  	1;
 #  }
+
+set_track: _set_track key someval end {
+	 $::this_track->set( $item{key}, $item{someval} );
+}
+dump_track: _dump_track { $::this_track->dumpp }
+
+dump_group: _dump_group { $::tracker->dumpp }
+
+key: /\w+/
+
+someval: /[\w.+-]+/
  
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
@@ -76,8 +88,8 @@ show_setup: _show_setup end {
 }
 
 show_track: _show_track end {
-	::Text::show_tracks($::select_track);
-# 	print "Versions: ", join " ", @{$::select_track->versions}, $/;
+	::Text::show_tracks($::this_track);
+# 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
  	map { 
  		my $op_id = $_;
  		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
@@ -106,7 +118,7 @@ show_track: _show_track end {
 		 #	print $_, " ";
 		#	} 0 .. scalar @pnames - 1;
  
- 	 } @{ $::select_track->ops };
+ 	 } @{ $::this_track->ops };
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -129,7 +141,7 @@ show_track: _show_track dd end {
 # 			($_->ch_r or 1),
 # 			($_->ch_m or 1),
 # 
-# 		} ($::tn{$item{name}} or $::ti[item{dd}] or $::select_track;
+# 		} ($::tn{$item{name}} or $::ti[item{dd}] or $::this_track;
 # 		
 # 	write; # using format at end of file UI.pm
 # 	1;
@@ -160,20 +172,20 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 channel: r | m
 
 r: 'r' dd  {	
-				$::select_track->set(ch_r => $item{dd});
+				$::this_track->set(ch_r => $item{dd});
 				$::ch_r = $item{dd};
 				
 				}
 m: 'm' dd  {	
-				$::select_track->set(ch_m => $item{dd}) ;
+				$::this_track->set(ch_m => $item{dd}) ;
 				$::ch_m = $item{dd};
 				print "Output switched to channel $::ch_m\n";
 				
 				}
 
-off: 'off' end {$::select_track->set(rw => 'OFF'); }
-rec: 'rec' end {$::select_track->set(rw => 'REC'); }
-mon: 'mon' end {$::select_track->set(rw => 'MON'); }
+off: 'off' end {$::this_track->set(rw => 'OFF'); }
+rec: 'rec' end {$::this_track->set(rw => 'REC'); }
+mon: 'mon' end {$::this_track->set(rw => 'MON'); }
 
 
 last: ('last' | '$' ) 
@@ -183,49 +195,49 @@ dd: /\d+/
 name: /\w+/
 
 
-wav: name { $::select_track = $::tn{$item{name}} if $::tn{$item{name}}  }
+wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
-set_version: _set_version dd end { $::select_track->set(active => $item{dd})}
+set_version: _set_version dd end { $::this_track->set(active => $item{dd})}
  
-vol: _vol dd end { $::copp{ $::select_track->vol }->[0] = $item{dd}; 
-				::sync_effect_param( $::select_track->vol, 0);
+vol: _vol dd end { $::copp{ $::this_track->vol }->[0] = $item{dd}; 
+				::sync_effect_param( $::this_track->vol, 0);
 } 
-vol: _vol '+' dd end { $::copp{ $::select_track->vol }->[0] += $item{dd};
-				::sync_effect_param( $::select_track->vol, 0);
+vol: _vol '+' dd end { $::copp{ $::this_track->vol }->[0] += $item{dd};
+				::sync_effect_param( $::this_track->vol, 0);
 } 
-vol: _vol '-' dd end { $::copp{ $::select_track->vol }->[0] -= $item{dd} ;
-				::sync_effect_param( $::select_track->vol, 0);
+vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
+				::sync_effect_param( $::this_track->vol, 0);
 } 
-vol: _vol end { print $::copp{$::select_track->vol}[0], $/ }
+vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-cut: _cut end { $::copp{ $::select_track->vol }->[0] = 0;
-				::sync_effect_param( $::select_track->vol, 0);
+cut: _cut end { $::copp{ $::this_track->vol }->[0] = 0;
+				::sync_effect_param( $::this_track->vol, 0);
 }
 
-unity: _unity end { $::copp{ $::select_track->vol }->[0] = 100;
-				::sync_effect_param( $::select_track->vol, 0);
+unity: _unity end { $::copp{ $::this_track->vol }->[0] = 100;
+				::sync_effect_param( $::this_track->vol, 0);
 }
 
-pan: _pan dd end { $::copp{ $::select_track->pan }->[0] = $item{dd};
-				::sync_effect_param( $::select_track->pan, 0);
+pan: _pan dd end { $::copp{ $::this_track->pan }->[0] = $item{dd};
+				::sync_effect_param( $::this_track->pan, 0);
 
 } 
-pan: _pan '+' dd end { $::copp{ $::select_track->pan }->[0] += $item{dd} ;
-				::sync_effect_param( $::select_track->pan, 0);
+pan: _pan '+' dd end { $::copp{ $::this_track->pan }->[0] += $item{dd} ;
+				::sync_effect_param( $::this_track->pan, 0);
 } 
-pan: _pan '-' dd end { $::copp{ $::select_track->pan }->[0] -= $item{dd} ;
-				::sync_effect_param( $::select_track->pan, 0);
+pan: _pan '-' dd end { $::copp{ $::this_track->pan }->[0] -= $item{dd} ;
+				::sync_effect_param( $::this_track->pan, 0);
 } 
-pan: _pan end { print $::copp{$::select_track->pan}[0], $/ }
+pan: _pan end { print $::copp{$::this_track->pan}[0], $/ }
  
-pan_right: _pan_right   end { $::copp{ $::select_track->pan }->[0] = 100;
-				::sync_effect_param( $::select_track->pan, 0);
+pan_right: _pan_right   end { $::copp{ $::this_track->pan }->[0] = 100;
+				::sync_effect_param( $::this_track->pan, 0);
 }
-pan_left:  _pan_left    end { $::copp{ $::select_track->pan }->[0] = 0; 
-				::sync_effect_param( $::select_track->pan, 0);
+pan_left:  _pan_left    end { $::copp{ $::this_track->pan }->[0] = 0; 
+				::sync_effect_param( $::this_track->pan, 0);
 }
-pan_center: _pan_center end { $::copp{ $::select_track->pan }->[0] = 50   ;
-				::sync_effect_param( $::select_track->pan, 0);
+pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
+				::sync_effect_param( $::this_track->pan, 0);
 }
 pan_back:  _pan_back end {}
 
@@ -265,7 +277,7 @@ print join $/, keys %item;
 
 print "code: ", $item{name}, $/;
 	my %p = (
-		chain => $::select_track->n,
+		chain => $::this_track->n,
 		values => $item{"value(s?)"},
 		type => $item{name},
 		);
@@ -320,6 +332,7 @@ value: /[\d\.eE+-]+/ # -1.5e-6
 	
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
+
 list_versions: _list_versions end { 
-	print join " ", @{$::select_track->versions}, $/;
+	print join " ", @{$::this_track->versions}, $/;
 }

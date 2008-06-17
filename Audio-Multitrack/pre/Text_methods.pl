@@ -37,11 +37,11 @@ package ::;
 				$@ and print "Perl command failed: $@\n";
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
-				$select_track = $tn{$cmd};
+				$this_track = $tn{$cmd};
 				$predicate !~ /^\s*$/ and $parser->read($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
 				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-				$select_track = $ti[$cmd];
+				$this_track = $ti[$cmd];
 				$predicate !~ /^\s*$/ and $parser->read($predicate);
 			} elsif ($iam_cmd{$cmd}){
 				$debug and print "Found Iam command\n";

@@ -34,6 +34,15 @@ add_track:
   what: create a new track, " add sax r2 " will record track sax from input 2
   smry: create a new track
   parameters: string 'r' number 'm' number
+set_track:
+  what: (programmers only) directly set values in current track object $this_track
+  example: set hide 1
+dump_track:
+  what: dump current track data to screen (YAML format)
+  short: dump
+dump_group:
+  what: dump the settings of the mixer bus for user tracks 
+  short: dumpg
 rec:
   what: set track to REC
   parameters: none
