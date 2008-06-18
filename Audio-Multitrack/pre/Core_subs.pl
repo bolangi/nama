@@ -757,7 +757,7 @@ sub convert_to_jack {
 	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
 	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	
 }
-sub convert_to_alsa { initialize_oids }
+#sub convert_to_alsa { initialize_oids() }
 
 ## transport functions
 
