@@ -133,7 +133,6 @@ my $multi = ::Rule->new(
 
 # Live: apply effects to REC channels route to multichannel sound card
 # as above. 
-=comment
 sub eliminate_loops {
 	# given track
 	my $n = shift;
@@ -144,9 +143,12 @@ sub eliminate_loops {
 
 	my $cooked_id = pop @{ $inputs{cooked}->{$loop_id} }; 
 
-	# add chain $n to the list of the customer's output device 
+	# i.e. J2
+
+	# add chain $n to the list of the customer's (rule's) output device 
 	
-	my $rule  = grep{ $cooked_id =~ /$_->chain_id/ } all_rules; # 
+	#my $rule  = grep{ $cooked_id =~ /$_->chain_id/ } ::Rule::all_rules();  
+	my $rule = $mix_setup; 
 	defined $outputs{device}->{$rule->output_object} 
 	  or $outputs{device}->{$rule->output_object} = [];
 	push @{ $outputs{device}->{$rule->output_object} }, $n;
@@ -154,7 +156,6 @@ sub eliminate_loops {
 
 	# remove chain $n as source for the loop
 
-	my $loop_id = "loop,$n";
 	delete $outputs{cooked}->{$loop_id}; 
 	
 	# remove customers that use loop as input
@@ -163,8 +164,8 @@ sub eliminate_loops {
 
 	# remove cooked customer from his output device list
 
-	@{ $outputs{device}->{$rule->output_object} } = grep{$_
-	ne $cooked_id} @{ $outputs{device}->{$rule->output_object} };
+	@{ $outputs{device}->{$rule->output_object} } = 
+		grep{$_ ne $cooked_id} @{ $outputs{device}->{$rule->output_object} };
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
@@ -173,5 +174,4 @@ sub eliminate_loops {
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 }
-=cut
 
