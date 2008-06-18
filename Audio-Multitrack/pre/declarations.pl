@@ -245,4 +245,16 @@ our (
 	$mixer_out_device, # where to send stereo output
 	$record_device,    # where to get our inputs
 
+	# rules
+	
+	$mixer_out,
+	$mix_down,
+	$mix_link,
+	$mix_setup,
+	$mix_setup_mon,
+	$mon_setup,
+	$rec_file,
+	$rec_setup,
+	$multi,
+
 );

@@ -262,7 +262,7 @@ sub initialize_rules {
 		%rule_names = (); 
 	package ::;
 
-	my $mixer_out = ::Rule->new( #  this is the master output
+	$mixer_out = ::Rule->new( #  this is the master output
 		name			=> 'mixer_out', 
 		chain_id		=> 'MixerOut', 
 
@@ -281,7 +281,7 @@ sub initialize_rules {
 
 	);
 
-	my $mix_down = ::Rule->new(
+	$mix_down = ::Rule->new(
 
 		name			=> 'mix_file', 
 		chain_id		=> 'MixDown',
@@ -307,7 +307,7 @@ sub initialize_rules {
 		status			=> 1,
 	);
 
-	my $mix_link = ::Rule->new(
+	$mix_link = ::Rule->new(
 
 		name			=>  'mix_link',
 		chain_id		=>  sub{ my $track = shift; $track->n },
@@ -321,7 +321,7 @@ sub initialize_rules {
 		
 	);
 
-	my $mix_setup = ::Rule->new(
+	$mix_setup = ::Rule->new(
 
 		name			=>  'mix_setup',
 		chain_id		=>  sub { my $track = shift; "J". $track->n },
@@ -335,7 +335,7 @@ sub initialize_rules {
 		
 	);
 
-	my $mix_setup_mon = ::Rule->new(
+	$mix_setup_mon = ::Rule->new(
 
 		name			=>  'mix_setup_mon',
 		chain_id		=>  sub { my $track = shift; "K". $track->n },
@@ -351,7 +351,7 @@ sub initialize_rules {
 
 
 
-	my $mon_setup = ::Rule->new(
+	$mon_setup = ::Rule->new(
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
@@ -368,7 +368,7 @@ sub initialize_rules {
 		status			=>  1,
 	);
 		
-	my $rec_file = ::Rule->new(
+	$rec_file = ::Rule->new(
 
 		name		=>  'rec_file', 
 		target		=>  'REC',
@@ -387,7 +387,7 @@ sub initialize_rules {
 	# have Vol, Pan and other effects prior to various monitoring
 	# outputs and/or to the mixdown file output.
 			
-	my $rec_setup = ::Rule->new(
+    $rec_setup = ::Rule->new(
 
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ my $track = shift; $track->n },   
@@ -415,7 +415,7 @@ sub initialize_rules {
 	#
 	# seems ready... just need to turn on status!
 	
-	my $multi  = ::Rule->new(  
+	$multi  = ::Rule->new(  
 
 		name			=>  'multi', 
 		target			=>  'REC',
@@ -431,6 +431,54 @@ sub initialize_rules {
 	);
 
 
+}
+
+sub eliminate_loops {
+	# given track
+	my $n = shift;
+	my $loop_id = "loop,$n";
+	return unless defined $inputs{cooked}->{$loop_id} 
+		and scalar @{$inputs{cooked}->{$loop_id}} == 1;
+	# get customer's id from cooked list and remove it from the list
+
+	my $cooked_id = pop @{ $inputs{cooked}->{$loop_id} }; 
+
+	# i.e. J3
+
+	# add chain $n to the list of the customer's (rule's) output device 
+	
+	#my $rule  = grep{ $cooked_id =~ /$_->chain_id/ } ::Rule::all_rules();  
+	my $rule = $mix_setup; 
+	defined $outputs{cooked}->{$rule->output_object} 
+	  or $outputs{cooked}->{$rule->output_object} = [];
+	push @{ $outputs{cooked}->{$rule->output_object} }, $n;
+
+
+	# remove chain $n as source for the loop
+
+	delete $outputs{cooked}->{$loop_id}; 
+	
+	# remove customers that use loop as input
+
+	delete $inputs{cooked}->{$loop_id}; 
+
+	# remove cooked customer from his output device list
+	print "customers of output device ",
+		$rule->output_object, join " ", @{
+			$outputs{cooked}->{$rule->output_object} };
+	@{ $outputs{cooked}->{$rule->output_object} } = 
+		grep{$_ ne $cooked_id} @{ $outputs{cooked}->{$rule->output_object} };
+	print $/,"customers of output device ",
+		$rule->output_object, join " ", @{
+			$outputs{cooked}->{$rule->output_object} };
+			print $/;
+
+	# transfer any intermediate processing to numeric chain,
+	# deleting the source.
+	$post_input{$n} .= $post_input{$cooked_id};
+	$pre_output{$n} .= $pre_output{$cooked_id}; 
+	delete $post_input{$cooked_id};
+	delete $pre_output{$cooked_id};
 }
 
 sub initialize_project_data {
@@ -804,7 +852,7 @@ sub setup_transport { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		#map{ eliminate_loops($_) } all_chains();
+		 map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
