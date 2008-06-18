@@ -8,7 +8,8 @@ use Carp;
 sub get_versions {
 	my $wav = shift; # Expects a Track object here
 	my $basename = $wav->name;
-	my $dir = $wav->dir; # indirectly this_wav_dir
+	my $dir = ::this_wav_dir();
+	# $wav->dir; # indirectly this_wav_dir
 	my ($sep, $ext) = qw( _ wav );
 
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";

@@ -153,7 +153,10 @@ sub wav_dir { File::Spec::Link->resolve_all( $wav_dir ); }
 
 sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
 sub this_wav_dir {
-	$project_name and join_path( wav_dir(), $project_name, q(.wav) ) 
+	$project_name and
+	File::Spec::Link->resolve_all(
+		join_path( wav_dir(), $project_name, q(.wav) )  
+	);
 }
 sub project_dir  {$project_name and join_path( wav_dir(), $project_name)
 }
@@ -745,8 +748,9 @@ sub write_chains {
 
 	# write .ewf files
 	#
-	map{ $_->write_ews  } all_chains();
+	map{ $_->write_ewf  } ::Track::all();
 	
+}
 ## templates for generating chains
 
 sub convert_to_jack {

@@ -10,6 +10,7 @@ package ::Track;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use Carp;
+use IO::All;
 use vars qw($n %by_name @by_index %track_names);
 use ::Wav;
 our @ISA = '::Wav';
@@ -138,13 +139,14 @@ sub group_last {
 	$max;
 }
 
-sub current {	
+sub current {	 # depends on ewf status
 	my $track = shift;
 	my $last = $track->group_last;
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
+
 	# here comes the logic that enables .ewf support, 
 	# using conditional $track->delay or $track->length or $track->start_position ;
 	# to decide whether to rewrite file name from .wav to .ewf
@@ -165,8 +167,13 @@ sub current {
 		return undef;
 	}
 }
-sub full_wav_path { my $track = shift; join_path $track->dir , $track->current_wav }
-sub current_wav {	
+
+sub full_wav_path {  # independent of ewf status
+	my $track = shift; 
+	join_path $track->dir , $track->current_wav
+}
+
+sub current_wav {	# independent of ewf status
 	my $track = shift;
 	my $last = $track->group_last;
 	#print "last found is $last\n"; 
@@ -180,29 +187,31 @@ sub current_wav {
 		return undef;
 	}
 }
-=comment
 sub write_ewf {
-	$::debug2 and print "&write_ewf\n";
+	#$::debug2 and 
+	print "&write_ewf\n";
 	my $track = shift;
 	my $wav = $track->full_wav_path;
 	my $ewf = $wav;
 	$ewf =~ s/\.wav$/.ewf/;
+	print "wav: $wav\n";
+	print "ewf: $ewf\n";
+
 	my $maybe_ewf = $track->full_path; 
 	$wav eq $maybe_ewf and unlink( $ewf), return; # we're not needed
-
-	#carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
+	$ewf = File::Spec::Link->resolve_all( $ewf );
+	carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
 
 	my @lines;
 	push @lines, join " = ", "source", $track->full_wav_path;
 	map{ push @lines, join " = ", $_, eval qq(\$track->$_) }
 	grep{ eval qq(\$track->$_)} qw(delay start_position length);
-	my $content = print join $/, @lines;
+	my $content = join $/, @lines;
 	print $content, $/;
 	$content > io($ewf) ;
 	return $content;
 }
 
-=cut
 sub current_version {	
 	my $track = shift;
 	my $last = $track->group_last;
