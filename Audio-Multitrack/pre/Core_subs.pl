@@ -843,6 +843,7 @@ sub stop_transport {
 	$debug2 and print "&stop_transport\n"; 
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
+	rec_cleanup();
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
 # 	sleep 1;
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 

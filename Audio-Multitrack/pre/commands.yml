@@ -212,4 +212,10 @@ remove_track:
   short:
   what: Make track go away
   parameters: string
+stop:
+  short: s
+  what: stop transport
+start:
+  short: t
+  what: start transport
 ...

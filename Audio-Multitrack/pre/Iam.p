@@ -2,29 +2,6 @@ package ::;
 
 use vars qw(%iam_cmd);
 
-=comment
-
-# unused 
-
-my %replace = qw(
-	
-	st cs-status
-	cs c-status
-	es cop-status
-	fs aio-status
-	fw cs-forward
-	rw cs-rewind
-	forward cs-forward
-	rewind cs-rewind
-
-);
-
-sub replace_abbreviations{  # replace abbreviations
-	my $a = shift;
-	$replace{$a} ? $replace{$a} : $a
-} 
-
-=cut
 
 map { $iam_cmd{$_}++ } split "\n", <<CMD;
 forward
@@ -35,10 +12,7 @@ es
 fs
 fw
 rw
-t
 st
-start
-stop
 run
 debug
 engine-status
