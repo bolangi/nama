@@ -697,6 +697,7 @@ sub write_chains {
 	##### Setting files as inputs (used by mon_setup)
 
 	for my $full_path (keys %{ $inputs{file} } ) {
+		
 		$debug and print "monitor input file: $full_path\n";
 		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
 		push @input_chains, join ( " ",
@@ -740,7 +741,12 @@ sub write_chains {
 	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
 	print ECS $ecs_file;
 	close ECS;
-}
+
+
+	# write .ewf files
+	#
+	map{ $_->write_ews  } all_chains();
+	
 ## templates for generating chains
 
 sub convert_to_jack {

@@ -145,19 +145,20 @@ sub current {
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
+	# here comes the logic that enables .ewf support, 
+	# using conditional $track->delay or $track->length or $track->start_position ;
+	# to decide whether to rewrite file name from .wav to .ewf
+	
 		my $filename = $track->targets->{ $track->monitor_version } ;
-		return $filename 
+		return $filename  # setup directly refers to .wav file
 		  unless $track->delay or $track->length or $track->start_position ;
 
-		# .ewf parameters are used, so we need to write file
+		  # setup uses .ewf parameters, expects .ewf file to
+		  # be written
 
-		# first, filename in chain setup must point to .ewf file instead of .wav
+		#filename in chain setup now point to .ewf file instead of .wav
 		
 		$filename =~ s/\.wav$/.ewf/;
-
-		# second, we need to write ewf file
-		#
-		$track->write_ewf;
 		return $filename;
 	} else {
 		print "track ", $track->name, ": no current version\n" ;
@@ -179,18 +180,29 @@ sub current_wav {
 		return undef;
 	}
 }
+=comment
 sub write_ewf {
+	$::debug2 and print "&write_ewf\n";
 	my $track = shift;
-	carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
-	my @ewf;
-	push @ewf, join " = ", "source", $track->full_wav_path;
-	map{ push @ewf, join " = ", $_, eval qq(\$track->$_) }
+	my $wav = $track->full_wav_path;
+	my $ewf = $wav;
+	$ewf =~ s/\.wav$/.ewf/;
+	my $maybe_ewf = $track->full_path; 
+	$wav eq $maybe_ewf and unlink( $ewf), return; # we're not needed
+
+	#carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
+
+	my @lines;
+	push @lines, join " = ", "source", $track->full_wav_path;
+	map{ push @lines, join " = ", $_, eval qq(\$track->$_) }
 	grep{ eval qq(\$track->$_)} qw(delay start_position length);
-	print join $/, @ewf;
-	join $/, @ewf > io($track->full_path) 
-		unless $track->full_path =~ /\.wav$/i # don't overwrite .wav file!  
+	my $content = print join $/, @lines;
+	print $content, $/;
+	$content > io($ewf) ;
+	return $content;
 }
 
+=cut
 sub current_version {	
 	my $track = shift;
 	my $last = $track->group_last;
