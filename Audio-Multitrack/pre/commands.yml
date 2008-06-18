@@ -218,4 +218,8 @@ stop:
 start:
   short: t
   what: start transport
+T:
+  what: ecasound start
+S:
+  what: ecasound stop
 ...

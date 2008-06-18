@@ -82,6 +82,8 @@ start: _start end { ::start_transport(); 1}
 stop: _stop end { ::stop_transport();
 1}
 
+S: _S end { ::eval_iam("stop") }
+T: _T end { ::eval_iam("start") }
 
 show_setup: _show_setup end { 	
 
