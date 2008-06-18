@@ -59,6 +59,9 @@ Some controls have no effect during engine running.
 Adding and removing chain operators while the engine is
 running may cause the engine to stop.
 
+It is sometimes necessary to issue the connect chainsetup
+command twice for the engine to be happy. 
+
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2007 Joel Roth

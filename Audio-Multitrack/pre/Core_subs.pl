@@ -18,6 +18,42 @@ sub discard_object {
 
 sub first_run {
 	if ( ! -e $wav_dir ) {
+	my $missing;
+		my @a = `which analyseplugin`;
+		@a or warn ( <<LADWARN
+LADSPA helper program 'analyseplugin' not found
+in $ENV{PATH},  your shell's list of executable 
+directories. You will probably have more fun with the LADSPA
+libraries and executables installed. http://ladspa.org
+LADWARN
+) and  sleep 2 and $missing++;
+		my @b = `which ecasound`;
+		@b or warn ( <<LADWARN
+LADSPA helper program 'ecasound' not found
+in $ENV{PATH},  your shell's list of executable 
+directories. This suite depends on the Ecasound
+libraries for all audio processing! The 'ecasound'
+executable is also important to have.
+It is sometimes helpful to load a chainsetup
+produced by Audio::Multitrack for testing purposes,
+for example running in a project directory
+the command
+
+  $ ecasound -c -s Setup.ecs
+ 
+LADWARN
+) and  sleep 2 and $missing++;
+
+		$missing and 
+		print "You lack $missing main parts of this suite.
+		Do you want to continue? [N] ";
+		my $reply = <STDIN>;
+		chomp $reply;
+		print ("Goodbye.\n"), exit unless $reply =~ /y/i;
+		$reply =~ 
+
+
+
 		print "Project directory $wav_dir not found.\n";
 		print "Would you like to create it? [Y] ";
 		my $reply = <STDIN>;
@@ -479,6 +515,9 @@ sub eliminate_loops {
 	$pre_output{$n} .= $pre_output{$cooked_id}; 
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
+
+	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
+	
 }
 
 sub initialize_project_data {
@@ -1584,6 +1623,7 @@ sub read_in_tkeca_effects_data {
 }
 sub get_ladspa_hints{
 	$debug2 and print "&get_ladspa_hints\n";
+	$ENV{LADSPA_PATH} or local $ENV{LADSPA_PATH}='/usr/lib/ladspa';
 	my @dirs =  split ':', $ENV{LADSPA_PATH};
 	my $data = '';
 	for my $dir (@dirs) {
