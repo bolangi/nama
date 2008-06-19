@@ -188,14 +188,13 @@ sub current_wav {	# independent of ewf status
 	}
 }
 sub write_ewf {
-	#$::debug2 and 
-	print "&write_ewf\n";
+	$::debug2 and print "&write_ewf\n";
 	my $track = shift;
 	my $wav = $track->full_wav_path;
 	my $ewf = $wav;
 	$ewf =~ s/\.wav$/.ewf/;
-	print "wav: $wav\n";
-	print "ewf: $ewf\n";
+	#print "wav: $wav\n";
+	#print "ewf: $ewf\n";
 
 	my $maybe_ewf = $track->full_path; 
 	$wav eq $maybe_ewf and unlink( $ewf), return; # we're not needed
@@ -207,7 +206,7 @@ sub write_ewf {
 	map{ push @lines, join " = ", $_, eval qq(\$track->$_) }
 	grep{ eval qq(\$track->$_)} qw(delay start_position length);
 	my $content = join $/, @lines;
-	print $content, $/;
+	#print $content, $/;
 	$content > io($ewf) ;
 	return $content;
 }

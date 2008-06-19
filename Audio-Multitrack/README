@@ -62,6 +62,9 @@ running may cause the engine to stop.
 It is sometimes necessary to issue the connect chainsetup
 command twice for the engine to be happy. 
 
+Do not Set Master track to REC. This interferes with 
+generating the chain setup. Use only MON or OFF modes.
+
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2007 Joel Roth
