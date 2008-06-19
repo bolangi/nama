@@ -518,6 +518,27 @@ sub eliminate_loops {
 
 	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
 	
+	if ($inputs{mixed}{$loopb} and scalar
+	@{$inputs{mixed}{$loopb}} == 1 ){
+
+		print "i have a loop to eliminate \n";
+
+		# The output device we assume will be chains MixerOut or
+		# MixDown
+
+		   scalar @{ $outputs{device}{$mixer_out_device} } and
+			map{ s/MixerOut/1/ } @{ $outputs{device}{$mixer_out_device} };
+		my @keys = 	keys %{ $outputs{file} } ;
+		map{ $outputs{file}{$_} 
+				and scalar @{ $outputs{file}{$_}  }
+				and map{s/MixDown/1/  } @{ $outputs{file}{$_} }
+				} @keys;
+
+		delete $outputs{mixed}{$loopb};
+		delete $inputs{mixed}{$loopb};
+
+	}
+	
 }
 
 sub initialize_project_data {
