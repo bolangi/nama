@@ -499,15 +499,17 @@ sub eliminate_loops {
 	delete $inputs{cooked}->{$loop_id}; 
 
 	# remove cooked customer from his output device list
-	print "customers of output device ",
-		$rule->output_object, join " ", @{
-			$outputs{cooked}->{$rule->output_object} };
+	# print "customers of output device ",
+	#	$rule->output_object, join " ", @{
+	#		$outputs{cooked}->{$rule->output_object} };
+	#
 	@{ $outputs{cooked}->{$rule->output_object} } = 
 		grep{$_ ne $cooked_id} @{ $outputs{cooked}->{$rule->output_object} };
-	print $/,"customers of output device ",
-		$rule->output_object, join " ", @{
-			$outputs{cooked}->{$rule->output_object} };
-			print $/;
+
+	#print $/,"customers of output device ",
+	#	$rule->output_object, join " ", @{
+	#		$outputs{cooked}->{$rule->output_object} };
+	#		print $/;
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
@@ -518,24 +520,37 @@ sub eliminate_loops {
 
 	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
 	
-	if ($inputs{mixed}{$loopb} and scalar
-	@{$inputs{mixed}{$loopb}} == 1 ){
+	
+	my $ref = ref $inputs{mixed}{$loopb};
+	print "ref: $ref\n";
+
+	if (    $ref =~ /ARRAY/ and 
+			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
 		print "i have a loop to eliminate \n";
 
 		# The output device we assume will be chains MixerOut or
 		# MixDown
 
-		   scalar @{ $outputs{device}{$mixer_out_device} } and
-			map{ s/MixerOut/1/ } @{ $outputs{device}{$mixer_out_device} };
-		my @keys = 	keys %{ $outputs{file} } ;
-		map{ $outputs{file}{$_} 
-				and scalar @{ $outputs{file}{$_}  }
-				and map{s/MixDown/1/  } @{ $outputs{file}{$_} }
-				} @keys;
+		$ref = ref  $outputs{device}{$mixer_out_device} ;
 
+		 if ( $ref =~ /ARRAY/ ){
+		 	print "found array\n";
+			map{ s/MixerOut/1/ } @{ $outputs{device}{$mixer_out_device} };
+		}
 		delete $outputs{mixed}{$loopb};
 		delete $inputs{mixed}{$loopb};
+
+		$ref = ref  $outputs{file};
+		if ( $ref =~ /HASH/ ){
+
+			my @keys = 	keys %{ $outputs{file} } ;
+			map{ $ref = ref $outputs{file}{$_};
+				  $ref =~ /ARRAY/
+					and scalar @{ $outputs{file}{$_}  }
+					and map{s/MixDown/1/  } @{ $outputs{file}{$_} }
+					} @keys;
+		}
 
 	}
 	

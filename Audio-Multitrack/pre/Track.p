@@ -54,9 +54,9 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	print "test 1\n";
+	#print "test 1\n";
 	if ($by_name{$vals{name}}){
-	print "test 2\n";
+	#print "test 2\n";
 			my $track = $by_name{$vals{name}};
 			print $track->name, " hide: ", $track->hide, $/;
 			if ($track->hide) {
