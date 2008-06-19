@@ -34,13 +34,6 @@ in $ENV{PATH},  your shell's list of executable
 directories. This suite depends on the Ecasound
 libraries for all audio processing! The 'ecasound'
 executable is also important to have.
-It is sometimes helpful to load a chainsetup
-produced by Audio::Multitrack for testing purposes,
-for example running in a project directory
-the command
-
-  $ ecasound -c -s Setup.ecs
- 
 LADWARN
 ) and  sleep 2 and $missing++;
 

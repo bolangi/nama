@@ -216,7 +216,7 @@ B<Audio::Multitrack> provides class libraries for managing
 tracks and buses.  
 
 B<Ecmd> is an end-user application with text and graphical
-interfaces. It is configured with a single mixer bus with
+interfaces. It is configured as a single mixer bus with
 per-track volume/pan/effects, a master fader, and a mixdown
 track.
 
@@ -225,10 +225,10 @@ There are two types of commands.
 B<Static commands> influence the chain setup that will be
 used for audio processing.
 
-For example, the REC/MON/OFF setting for each track helps
-decide whether a given track will be included in the next
-Ecasound chain setup, and whether audio for that track will
-be recorded or played back.
+For example, the REC/MON/OFF setting for each track and each
+group controls whether a given track will be included in the
+next Ecasound chain setup, and whether audio for that track
+will be recorded or played back.
 
 B<Dynamic commands> operate in realtime, affecting
 volume, pan, and playback head position while the engine is
@@ -240,7 +240,8 @@ files and parameter settings for each project are stored in
 directories under $HOME/ecmd.  You probably want to edit the
 default .ecmdrc to suit your audio configuration.
 
-Project state can be stored/retrieved. The storage format is
+Project state can be stored/retrieved. Inspect the State.yml
+file in the project directory. The storage format is
 user-friendly YAML.
 
 To be certain your chain setup loads correctly, you may need
@@ -248,35 +249,42 @@ to regenerate the setup using the Arm button in the GUI or
 the I<arm> command under the text interface.  This is
 usually the last operation before pressing the start button.
 
-=head1 Tk GUI
+=head1 LADSPA
 
 Audio::Multitrack will automatically incorporate locally
-available LADSPA plugins provided you have the listplugins
-program installed.  
+available LADSPA plugins provided you have the 'analyseplugin'
+program (part of LADSPA) installed.  
 
-The Tk interface will provide linear/log sliders for most
+=head1 Tk GUI
+
+Invoked using the -g switch on the ecmd command line, 
+the Tk interface will provide linear/log sliders for most
 plugins. Text-entry widgets are used to enter parameters for
 plugins when hints are not available.
 
 =head1 Text UI
 
-Type B<help> for a list of commands, B<help command> for
+Invoked using the -t switch on the ecmd command line, 
+The command line interpreter includes history and tab
+completion of command names.
+Type B<help> for a command summary, B<help command> for
 help with I<command>. 
 
 =head1 TRACKS
 
 Multiple WAV files can be recorded for each track. These are
-identified by version number, which can be specified for
-each track.
+identified by version number, which can be specified
+for each track.
 
-Each track, including the Master and Mixdown have their own
-REC/MON/OFF setting and displays its own REC/MON/OFF
+Each track, including the Master and Mixdown, also have their own
+REC/MON/OFF setting and displays their own REC/MON/OFF
 status.
 
 There is also a global REC/MON/OFF and global version
 setting that apply to all user tracks (i.e. all but Master
-and Mixdown.) Global MON setting forces all user tracks to
-MON state, and is entered automatically after a recording.
+and Mixdown.) Global MON setting forces all REC user tracks 
+to MON state, and is entered automatically after a
+recording.
 
 Global OFF setting excludes all user tracks from the chain
 setup, useful when playing back files recorded through the
@@ -287,10 +295,9 @@ show OFF status.
 
 =head1 BUGS
 
-No text-mode commands yet for adding effects (chain
-operators) and setting marks.
+No text-mode commands for setting marks.
 
-No remove-track command.
+No GUI remove-track command.
 
 Default GUI volume sliders are not log scaled.
 
