@@ -16,7 +16,7 @@
 						$raw_to_disk_format
 						$mixer_out_format
 						$mixer_out_device
-						$wav_dir 	
+						$project_root 	
 						$record_device			);
 						
 						

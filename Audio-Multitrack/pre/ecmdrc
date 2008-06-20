@@ -1,37 +1,38 @@
 #
 #
-# 		Configuration file for Audio::Multitrack
+#         Configuration file for Audio::Multitrack
 
-#       Quickstart: edit the wav_dir line below:
+#         Notes: 
 
-wav_dir: ~ # null in default file
+#         - This configuration file is distinct from
+#           Ecasound's configuration file .ecasoundrc . 
+#           In most instances the latter is not required.
 
-# 		Notes: 
+#        - The format of this file is YAMLish, preprocessed to allow
+#           comments.
 #
-#		- The format is YAMLish, preprocessed to allow
-# 		  comments.
+#        - Indents are two spaces
 #
-#		- Indents are two spaces
+#        - A value _must_ be supplied for each 'leaf' field
+#          such as 'mixer_out_device'
 #
-#		- A value _must_ be supplied for each 'leaf' field
-#		  such as 'wav_dir'.
+#        - A value must _not_ be supplied for nodes, i.e.
+#          'device', whose value is to be the entire indented
+#          data structure that follows.
 #
-#		- A value must _not_ be supplied for nodes, i.e.
-#		  'device', whose value is to be the entire indented
-#		  data structure that follows.
+#        - The special symbol '~' represents a null value
 #
-#		- The special symbol '~' represents a null value
+#        - Check the 'devices' and 'abbreviations' section at
+#          the end of this file to understand the values that
+#          appear below. 'consumer' for example, is defined as
+#          /dev/dsp.
 #
-#		- Check the 'devices' and 'abbreviations' section at
-#		  the end of this file to understand the values that
-#		  appear below. 'consumer' for example, is defined as
-#		  /dev/dsp.
 
+project_root: ~ # null in default file
 
 mixer_out_device: consumer
 
 record_device: consumer
-
 
 # globals for our chain setups
 

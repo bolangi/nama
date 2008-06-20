@@ -35,7 +35,7 @@ our (
 	%iam_cmd,		# for identifying IAM commands in user input
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
-	$wav_dir,	# each project will get a directory here
+	$project_root,	# each project will get a directory here
 	                # and one .ecmd directory, also with 
 	
 					#

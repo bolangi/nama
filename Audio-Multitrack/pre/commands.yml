@@ -134,8 +134,8 @@ generate:
   short: gen
   what: generate chain setup for audio processing
   parameters: none
-setup:
-  short: arm generate_and_connect
+arm:
+  short: generate_and_connect
   what: generate and connect chain setup
   parameters: none
 connect:

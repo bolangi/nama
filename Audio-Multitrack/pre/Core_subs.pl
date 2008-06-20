@@ -17,7 +17,10 @@ sub discard_object {
 }
 
 sub first_run {
-	if ( ! -e $wav_dir ) {
+	if ( ! -e $project_root ) {
+
+# check for missing components
+
 	my $missing;
 		my @a = `which analyseplugin`;
 		@a or warn ( <<LADWARN
@@ -32,28 +35,34 @@ LADWARN
 LADSPA helper program 'ecasound' not found
 in $ENV{PATH},  your shell's list of executable 
 directories. This suite depends on the Ecasound
-libraries for all audio processing! The 'ecasound'
-executable is also important to have.
+libraries and executables for all audio processing! 
 LADWARN
 ) and  sleep 2 and $missing++;
 
+if ( $missing ) {
+print "You lack $missing main parts of this suite.  
+Do you want to continue? [N] ";
 		$missing and 
-		print "You lack $missing main parts of this suite.
-		Do you want to continue? [N] ";
 		my $reply = <STDIN>;
 		chomp $reply;
 		print ("Goodbye.\n"), exit unless $reply =~ /y/i;
-		$reply =~ 
+}
+print <<HELLO;
 
+Aloha. Welcome to Ecmd and Ecasound. 
 
+Ecmd places all sound and control files under the
+project root directory, which by default is $project_root.
 
-		print "Project directory $wav_dir not found.\n";
-		print "Would you like to create it? [Y] ";
+The project root can be specified using the -d command line option, 
+and in the configuration file .ecmdrc . 
+
+Would you like to create project root directory $project_root ? [Y] 
+HELLO
 		my $reply = <STDIN>;
-		chomp $reply;
 		$reply = lc $reply;
 		if ($reply !~ /n/i) {
-			create_dir $wav_dir;
+			create_dir $project_root;
 			print "\n... Done!\n\n";
 		} 
 	}
@@ -65,9 +74,9 @@ LADWARN
 		my $reply = <STDIN>;
 		chomp $reply;
 		if ($reply !~ /n/i){
-			$default =~ s/wav_dir:.*$/wav_dir: $ENV{HOME}\/ecmd/m;
+			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/ecmd/m;
 			$default > io( $config );
-			print "\n.... Done!\n\nPlease edit this file and restart program\n";
+			print "\n.... Done!\n\nPlease edit $config and restart Ecmd.\n";
 		}
 		exit;
 	}
@@ -89,7 +98,7 @@ sub prepare {
 	#push @ARGV, qw(-d /media/sessions test-abc  );
 	getopts('mcegsdtf:', \%opts); 
 	#print join $/, (%opts);
-	# d: ecmd project dir
+	# d: ecmd root dir
 	# c: create project
 	# f: configuration file
 	# g: gui mode # default
@@ -102,11 +111,12 @@ sub prepare {
 
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
-	read_config(); 
 
-	# wav_dir should be called ecmd_dir 
-	$wav_dir = $opts{d} if $opts{d};
-	$wav_dir = join_path($ENV{HOME}, "ecmd" )  unless $wav_dir ;
+	read_config();  # from .ecmdrc if we have one
+
+	$project_root = $opts{d} if $opts{d}; # priority to command line option
+
+	$project_root or $project_root = join_path($ENV{HOME}, "ecmd" );
 
 	first_run();
 	
@@ -178,7 +188,7 @@ sub eval_iam {
 }
 ## configuration file
 
-sub wav_dir { File::Spec::Link->resolve_all( $wav_dir ); }
+sub wav_dir { File::Spec::Link->resolve_all( $project_root ); }
 
 sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
 sub this_wav_dir {
@@ -1464,7 +1474,7 @@ sub prepare_static_effects_data{
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
 			-class => '::',
-			-storable => 1 ); #  unless $wav_dir eq '.';
+			-storable => 1 ); #  unless $project_root eq '.';
 	}
 
 }

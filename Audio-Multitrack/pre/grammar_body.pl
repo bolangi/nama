@@ -67,7 +67,7 @@ remove_track: _remove_track name end {
 
 generate: _generate end { ::setup_transport(); 1 }
 
-setup: _setup end { 
+arm: _arm end { 
 	::setup_transport() and ::connect_transport(); 1 }
 
 connect: _connect end { ::connect_transport(); 1 }

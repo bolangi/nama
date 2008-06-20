@@ -42,6 +42,8 @@ $debug = 0; # debug statements
 $loopa = 'loop,111';
 $loopb = 'loop,222';
 
+
+# other initializations
 $unit = 1;
 $effects_cache_file = '.effects_cache';
 $state_store_file = 'State';
@@ -49,7 +51,8 @@ $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
-$jack_on = 0;
+$jack_on = 0; # you should configure jack as device directly in .ecmdrc
+$project_root = join_path( $ENV{HOME}, "ecmd");
 
 ## Load my modules
 
@@ -100,8 +103,8 @@ our @ISA = '::';
 sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
-	package ::;
-	MainLoop;
+    package ::;
+    MainLoop;
 }
 
 ## The following methods belong to the Text interface class
@@ -300,21 +303,22 @@ show OFF status.
 
 =head1 DIRECTORY STRUCTURE
 
-$wav_dir is the directory where your project files,
-including WAV files you record, will go. $wav_dir
+$project_root is the directory where your project files,
+including WAV files you record, will go. $project_root
 is defined in the first non-comment line of 
 your .ecmdrc file.
 
 File or directory                Explanation
 --------------------------------------------------------------------------
-$HOME/.ecmdrc                    Ecmd configuration file
+$HOME/.ecmdrc                         Ecmd configuration file
 
-$wav_dir/project_name/.wav       WAV files we record will be stored here
+$project_root/project_name/.wav       WAV files we record will be stored here
 
-$wav_dir/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
+$project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
 
-$wav_dir/project_name/State.yml  Default save file for project parameters
+$project_root/project_name/State.yml  Default save file for project parameters
 
+$project_root/project_name/.ecmdrc    Project-specific configuration
 =head1 BUGS
 
 No text-mode commands for setting marks.
@@ -357,7 +361,7 @@ CPAN, for the distribution.
 
 Pull source code using this command: 
 
-	git clone git://github.com/bolangi/ecmd.git
+    git clone git://github.com/bolangi/ecmd.git
 
 =head1 AUTHOR
 

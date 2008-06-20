@@ -27,7 +27,7 @@ sub refresh_t { # groups
 			$status = 'OFF' }
 
 
-	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|mute/i;
+	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|off/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 	$debug and print "take_frame child: $t\n";
 
