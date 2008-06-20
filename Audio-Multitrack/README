@@ -12,7 +12,7 @@ Ecmd's graphic interface is a recorder/mixer with two panels
 based on the Tk widget set.  
 
 Ecmd's command-line interface has history, autocompletion and
-help functions.  Ecasound IAM commands are passed through to
+help functions.  Ecasound IAM commands pass directly to
 the audio-processing engine.
 
 INSTALLATION
@@ -49,14 +49,12 @@ http://ecasound.seul.org/ecasound/ or as precompiled
 binary packages for your Un*x distribution.
 
 Your Audio::Multitrack system will be more capable if you
-have LADSPA plugins installed along with the LADSPA utility
+have LADSPA plugins installed. You will also need the LADSPA utility
 program 'analyseplugin'.
-
 
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2007 Joel Roth
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself. 
-
+This library is free software. It is licensed for use under
+the terms of the Gnu Public License version 2.
