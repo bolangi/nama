@@ -262,11 +262,16 @@ the Tk interface will provide linear/log sliders for most
 plugins. Text-entry widgets are used to enter parameters for
 plugins when hints are not available.
 
+The GUI time display color indicates whether the upcoming
+operation will recording (red), mixing only (yellow) or
+playback only (green).  
+
 =head1 Text UI
 
 Invoked using the -t switch on the ecmd command line, 
 The command line interpreter includes history and tab
 completion of command names.
+
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 
 
@@ -293,6 +298,23 @@ Mixdown function.
 A track with no recorded WAV files that is set to MON will
 show OFF status.
 
+=head1 DIRECTORY STRUCTURE
+
+$wav_dir is the directory where your project files,
+including WAV files you record, will go. $wav_dir
+is defined in the first non-comment line of 
+your .ecmdrc file.
+
+File or directory                Explanation
+--------------------------------------------------------------------------
+$HOME/.ecmdrc                    Ecmd configuration file
+
+$wav_dir/project_name/.wav       WAV files we record will be stored here
+
+$wav_dir/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
+
+$wav_dir/project_name/State.yml  Default save file for project parameters
+
 =head1 BUGS
 
 No text-mode commands for setting marks.
@@ -305,6 +327,20 @@ Default GUI volume sliders are not log scaled.
 
 None by default.
 
+=head1 BUGS AND LIMITATIONS
+
+Some controls have no effect while audio processing engine
+is running.
+
+Adding and removing chain operators while the engine is
+running may cause the engine to stop.
+
+It is sometimes necessary to issue the connect chainsetup
+command twice for the engine to be happy. 
+
+Do not Set Master track to REC. This interferes with 
+generating the chain setup. Use only MON or OFF modes.
+
 =head1 DEPENDENCIES
 
 The Ecasound audio processing libraries are required
@@ -312,7 +348,8 @@ to use this software, and need to be installed separately.
 See http://www.eca.cx/ecasound/ .
 
 LADSPA libraries and plugins are strongly recommended.
-See http://ladspa.org/ .
+See http://ladspa.org/ . The 'analyseplugin'
+utility program is needed to make best use of LADSPA.
 
 =head1 AVAILABILITY
 

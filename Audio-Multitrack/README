@@ -1,15 +1,19 @@
-Audio/Ecasound/Flow version 0.01
+Audio::Multitrack version 0.93
 ================================
 
-Ecasound Flow assists multitrack recording
-by adding high-level functionality to the Ecasound
-audio processing engine.
+Audio::Multitrack assists multitrack, multibus recording by
+adding concepts of track and bus to the Ecasound audio
+processing engine. 
 
-Currently two interfaces are supported: a recorder/mixer GUI
-based on the Tk widget set, and a command-line interface for
-console users.
+The distribution includes Ecmd, a multitrack recording and
+mixing application. 
 
-For screenshots, see http://ecmdr.infogami.com/ 
+Ecmd's graphic interface is a recorder/mixer with two panels
+based on the Tk widget set.  
+
+Ecmd's command-line interface has history, autocompletion and
+help functions.  Ecasound IAM commands are passed through to
+the audio-processing engine.
 
 INSTALLATION
 
@@ -44,26 +48,10 @@ installed on your system. Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled
 binary packages for your Un*x distribution.
 
-The GUI time display color indicates whether the operation
-will recording (red), mixing only (yellow) or playback only
-(green). 
+Your Audio::Multitrack system will be more capable if you
+have LADSPA plugins installed along with the LADSPA utility
+program 'analyseplugin'.
 
-
-BUGS AND LIMITATIONS
-
-Need to ARM the system before pressing start to ensure
-up-to-date setup. 
-
-Some controls have no effect during engine running.
-
-Adding and removing chain operators while the engine is
-running may cause the engine to stop.
-
-It is sometimes necessary to issue the connect chainsetup
-command twice for the engine to be happy. 
-
-Do not Set Master track to REC. This interferes with 
-generating the chain setup. Use only MON or OFF modes.
 
 COPYRIGHT AND LICENCE
 

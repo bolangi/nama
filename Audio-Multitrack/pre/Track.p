@@ -130,7 +130,8 @@ sub group_last {
 	my $max = 0;
 	map{ 
 		my $track = $_;
-		my $last = $track->last;
+		my $last;
+		$last = $track->last ? $track->last : 0;
 		#print "track: ", $track->name, ", last: $last\n";
 
 		$max = $last if $last > $max;

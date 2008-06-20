@@ -19,7 +19,7 @@ my(
 	$filename,
 	);
 
-my $debug = 1;
+my $debug = 0;
 getopts('s:t:f:r:a:b:', \%opts);
 $source_dir = $opts{s} ? $opts{s} : $ENV{PD};
 $new_root = $opts{r} ? $opts{r} : 'UI';

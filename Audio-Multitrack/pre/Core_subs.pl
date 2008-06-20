@@ -211,10 +211,18 @@ sub read_config {
 	$debug2 and print "&read_config\n";
 	
 	my $config = shift;
+	#print "config: $config";;
 	my $yml = length $config > 100 ? $config : $default;
-	strip_comments( $yml );
-	strip_blank_lines( $yml );
-	$yml !~ /^---/ and $yml = join "\n", "---", $yml, "...";
+	#print "yml1: $yml";
+	strip_all( $yml );
+	#print "yml2: $yml";
+	if ($yml !~ /^---/){
+		$yml =~ s/^\n+//s;
+		$yml =~ s/\n+$//s;
+		$yml = join "\n", "---", $yml, "...";
+	}
+#	print "yml3: $yml";
+	eval ('$yr->read($yml)') or croak( "Can't read YAML code: $@");
 	%cfg = %{  $yr->read($yml)  };
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
@@ -515,12 +523,12 @@ sub eliminate_loops {
 	
 	
 	my $ref = ref $inputs{mixed}{$loopb};
-	print "ref: $ref\n";
+	#print "ref: $ref\n";
 
 	if (    $ref =~ /ARRAY/ and 
 			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
-		print "i have a loop to eliminate \n";
+		#print "i have a loop to eliminate \n";
 
 		# The output device we assume will be chains MixerOut or
 		# MixDown
@@ -528,7 +536,7 @@ sub eliminate_loops {
 		$ref = ref  $outputs{device}{$mixer_out_device} ;
 
 		 if ( $ref =~ /ARRAY/ ){
-		 	print "found array\n";
+	#	 	print "found array\n";
 			map{ s/MixerOut/1/ } @{ $outputs{device}{$mixer_out_device} };
 		}
 		delete $outputs{mixed}{$loopb};
@@ -1128,7 +1136,7 @@ sub add_effect {
 
 sub remove_effect {
 	# TODO fold into object code for Track
-	local $debug = 1;
+	#local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;

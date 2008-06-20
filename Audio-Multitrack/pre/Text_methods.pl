@@ -32,7 +32,7 @@ package ::;
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 			if ($cmd eq 'eval') {
 				$debug and print "Evaluating perl code\n";
-				eval $predicate;
+				print eval $predicate;
 				print "\n";
 				$@ and print "Perl command failed: $@\n";
 			} elsif ($tn{$cmd}) { 

@@ -34,12 +34,12 @@ sub apply {
 	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
-	print "bus name: ", $bus->name, $/;
-	print "groups: ", join " ", @{$bus->groups}, $/;
-	print "rules: ", join " ", @{$bus->rules}, $/;
+	$debug and print "bus name: ", $bus->name, $/;
+	$debug and print "groups: ", join " ", @{$bus->groups}, $/;
+	$debug and print "rules: ", join " ", @{$bus->rules}, $/;
 	my @track_names = (@{$bus->tracks}, 
 
-		map{ print "group name: $_\n";
+		map{ $debug and print "group name: $_\n";
 			#print join " ", "keys:", keys( %::Group::by_name), $/;
 			my $group = $::Group::by_name{$_}; 
 			#print "group validated: ", $group->name, $/;
@@ -48,14 +48,14 @@ sub apply {
 								}  @{ $bus->groups }
 
 	);
-	print "tracks: ", join " ", @track_names, $/;
+	$debug and print "tracks: ", join " ", @track_names, $/;
 	my @tracks = map{ $::Track::by_name{$_} } @track_names; 
 
 	map{ my $rule_name = $_;
-		print "apply rule name: $rule_name\n"; 
+		$debug and print "apply rule name: $rule_name\n"; 
 		my $rule = $::Rule::by_name{$_};
 		#print "rule is type: ", ref $rule, $/;
-		print "condition: ", $rule->condition, $/;
+		$debug and print "condition: ", $rule->condition, $/;
 
 		map{ my $track = $_; # 
 			my $n = $track->n;
@@ -66,7 +66,7 @@ sub apply {
 			my $rec_status = $track->rec_status;
 			my $condition_met = deref_code($rule->condition, $track);
 
-			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
+			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
 			if ( 
 				$track->rec_status ne 'OFF' 
 					and $rule->status
@@ -81,7 +81,7 @@ sub apply {
 
 				$key1 = deref_code($rule->output_type, $track);
 				$key2 = deref_code($rule->output_object, $track) ;
-			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
+			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
 
 				defined $rule->output_type and
 					push @{ $::outputs{ $key1 }->{ $key2 } }, $chain_id;
@@ -109,12 +109,12 @@ sub deref_code {
 	#print "found type: $type, value: $value\n";
 	#print "found type: $type, tracktype: $tracktype, value: $value\n";
 	if ( $type  =~ /CODE/){
-		 #print "code found\n";
+		 $debug and print "code found\n";
 		$value = &$value($track);
-		 print "code value: $value\n";
+		 $debug and print "code value: $value\n";
 		 $value;
 	} else {
-		print "scalar value: $value\n"; 
+		$debug and print "scalar value: $value\n"; 
 		$value }
 }
 #$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
@@ -143,7 +143,7 @@ sub apply {
 			my $rec_status = $track->rec_status;
 			my $condition_met = ::Bus::deref_code($rule->condition);
 
-			print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
+			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
 			if(	$condition_met and $rule->status and $rule->target =~ /all|none/ )  {
 
 				defined $rule->input_type and
@@ -151,7 +151,7 @@ sub apply {
 
 				$key1 = ::Bus::deref_code($rule->output_type);
 				$key2 = ::Bus::deref_code($rule->output_object) ;
-				print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
+				$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
 
 				defined $rule->output_type and
 					push @{ $::outputs{ $key1 }->{ $key2 } }, $chain_id;

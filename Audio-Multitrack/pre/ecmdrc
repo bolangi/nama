@@ -1,33 +1,43 @@
-# 
-# 
-# 		Configuration file for Audio::Ecasound::UI 
 #
 #
-# 		Notes: 
-#
-#		- The format is YAMLish, preprocessed to allow comments.
-#
-#		- Indents are each two spaces
-#		
-#		- A value _must_ be supplied for each field
-#
-#		- The special symbol '~' converts to null
+# 		Configuration file for Audio::Multitrack
 
-# audio device selection (see devices, below)
-
-mixer_out_device: consumer
-
-record_device: consumer 
-
-# where we will write our project files
+#       Quickstart: edit the wav_dir line below:
 
 wav_dir: ~ # null in default file
 
-# globals we want for our chain setups
+# 		Notes: 
+#
+#		- The format is YAMLish, preprocessed to allow
+# 		  comments.
+#
+#		- Indents are two spaces
+#
+#		- A value _must_ be supplied for each 'leaf' field
+#		  such as 'wav_dir'.
+#
+#		- A value must _not_ be supplied for nodes, i.e.
+#		  'device', whose value is to be the entire indented
+#		  data structure that follows.
+#
+#		- The special symbol '~' represents a null value
+#
+#		- Check the 'devices' and 'abbreviations' section at
+#		  the end of this file to understand the values that
+#		  appear below. 'consumer' for example, is defined as
+#		  /dev/dsp.
+
+
+mixer_out_device: consumer
+
+record_device: consumer
+
+
+# globals for our chain setups
 
 ecasound_globals: "-B auto"
 
-# audio formats (see abbreviations, below)
+# audio formats 
 
 mixer_out_format: cd-stereo
 mix_to_disk_format: cd-stereo
@@ -35,7 +45,7 @@ raw_to_disk_format: cd-mono
 
 # audio devices 
 
-#  indents are signficant in the lines below
+# indents _are_ significant in the lines below
 
 devices: 
   jack: 
@@ -51,8 +61,7 @@ devices:
     input_format: cd-stereo
     output_format: cd-stereo
 
-# you may use arbitrary abbreviations, even in the
-# abbreviations section
+# you may create arbitrary abbreviations
 
 abbreviations:  
   24-mono: s24_le,1,frequency

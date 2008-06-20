@@ -8,9 +8,9 @@ BEGIN {
 my $wav = Audio::Multitrack::Wav->new( qw(	name  	track01.cdda 
 							dir   	/media/sessions/test-abc
 							)) ;
-#is ($wav->name, 'track01.cdda', "name assignment");
-#is ($wav->dir, '/media/sessions/test-abc', "directory assignment");
-#is (shift @{$wav->versions}, 1, "locating .wav files");
+is ($wav->name, 'track01.cdda', "name assignment");
+is ($wav->dir, '/media/sessions/test-abc', "directory assignment");
+is (shift @{$wav->versions}, 1, "locating .wav files");
 #%{$wav->targets};
 1;
 __END__
