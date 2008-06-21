@@ -30,15 +30,15 @@
 						$unit			
 						%oid_status		
 						%old_vol		
+						$this_op
 						$jack_on 
 						@tracks_data
 						@groups_data
-						$this_track
-						$this_op
 						$loop
 						$length
 
 						);
+						# $this_track
 					 
 @effects_static_vars = qw(
 

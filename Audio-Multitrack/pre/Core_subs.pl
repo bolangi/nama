@@ -1863,8 +1863,8 @@ sub save_state {
  # old vol level has been stored, thus is muted
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
-		$debug and 1;
 	# print "filename base: $file\n";
+	print "saving state as $file\n";
 
     # sort marks
 	

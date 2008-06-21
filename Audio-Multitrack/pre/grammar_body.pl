@@ -29,7 +29,6 @@ load_project: _load_project name end {
 }
 save_state: _save_state name(?) end { 
 	::save_state( $item{name} ); 
-	print "saved state as $item{name}\n";
 	}
 get_state: _get_state name(?) end {
  	::load_project( 

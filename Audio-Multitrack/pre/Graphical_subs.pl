@@ -258,10 +258,12 @@ sub init_gui {
 		->pack(-side => 'left');;
 	$iam_execute = $iam_frame->Button(
 			-text => 'Execute',
-			-command => sub { print $iam; 
-			::Text::command_process($iam) }
+			-command => sub { print $iam; ::Text::command_process( $iam ) }
+			
 		)->pack(-side => 'left');;
 
+			#join  " ",
+			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
 		
 }
 sub transport_gui {
