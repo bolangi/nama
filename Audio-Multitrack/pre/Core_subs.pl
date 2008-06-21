@@ -650,8 +650,8 @@ sub add_track {
 	#print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
-		ch_r => $ch_r,
-		ch_m => $ch_m,
+		ch_r => eval '$ch_r',
+		ch_m => eval '$ch_m',
 	);
 	return if ! $track; 
 	print "ref new track: ", ref $track; 

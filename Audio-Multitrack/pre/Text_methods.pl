@@ -50,9 +50,10 @@ package ::;
 			} else {
 				$debug and print "Passing to parser\n", 
 				$_, $/;
-				print 1, ref $parser, $/;
-				print 2, ref $::parser, $/;
-				$::parser->command($_) 
+				#print 1, ref $parser, $/;
+				#print 2, ref $::parser, $/;
+				# both print
+				$parser->command($_) 
 			}	
 
 		} @user_input;
