@@ -198,8 +198,8 @@ sub init_gui {
 
 	$build_track_label = $add_frame->Label(-text => "TRACK", -width => 12)->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	# $build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
-	# $build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
+	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
 	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
 	$build_track_add = $add_frame->Button->pack(-side => 'left');;
@@ -210,7 +210,7 @@ sub init_gui {
 			name => remove_spaces $project_name),
 			});
 	$sn_new->configure( 
-		-text => 'New',
+		-text => 'Create',
 		-command => sub{ load_project(
 							name => remove_spaces($project_name),
 							create => 1)});
@@ -593,7 +593,11 @@ sub track_gui {
 					-text => $stub,
 					-tearoff => 0);
 	my @versions = '';
-	push @versions, @{$ti[$n]->versions} if @{$ti[$n]->versions};
+	#push @versions, @{$ti[$n]->versions} if @{$ti[$n]->versions};
+	my $ref = ref $ti[$n]->versions ;
+		$ref =~ /ARRAY/ and 
+		push (@versions, @{$ti[$n]->versions}) or
+		croak "chain $n, found unexpectedly $ref\n";;
 	for my $v (@versions) {
 					$version->radiobutton(
 						-label => $v,

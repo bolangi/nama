@@ -323,12 +323,12 @@ sub yamlify_commands {
 ## support functions
 
 sub create_dir {
-	local $debug = 0;
+	local $debug = 1;
 	my @dirs = @_;
 	map{ my $dir = $_;
+	$debug and print "creating [ $dir ]\n";
 		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
 			or system qq( mkdir -p $dir)
-			or carp qq(failed to create directory "$dir": $!\n);
 		} @dirs;
 }
 

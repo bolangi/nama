@@ -28,13 +28,16 @@ package ::;
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
 			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /(\S+)(.*)/);
+			my ($cmd, $predicate) = ($user_input =~ /([!\S]+)(.*)/);
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 			if ($cmd eq 'eval') {
 				$debug and print "Evaluating perl code\n";
 				print eval $predicate;
 				print "\n";
 				$@ and print "Perl command failed: $@\n";
+			} elsif ($cmd eq '!') {
+				$debug and print "Evaluating shell commands!\n";
+				system $predicate;
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};

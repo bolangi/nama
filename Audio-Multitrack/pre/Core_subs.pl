@@ -62,7 +62,7 @@ HELLO
 		my $reply = <STDIN>;
 		$reply = lc $reply;
 		if ($reply !~ /n/i) {
-			create_dir $project_root;
+			create_dir( $project_root);
 			print "\n... Done!\n\n";
 		} 
 	}
@@ -276,10 +276,14 @@ sub load_project {
 	$debug and print "project name: $project_name create: $h{create}\n";
 	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
-		map{create_dir($_)} &this_wav_dir, &project_dir;
+		map{create_dir($_)} &project_dir, &this_wav_dir ;
+	print "here\n";
 	read_config( global_config() ); 
+	print "here 2\n";
 	initialize_rules();
+	print "here 3\n";
 	initialize_project_data();
+	print "here 4\n";
 	remove_small_wavs(); 
 	#print "reached here!!!\n";
 
@@ -1342,6 +1346,7 @@ sub effect_update {
 	
 	local $debug = 0;
 	my $es = eval_iam "engine-status";
+	$debug and print "engine: status: $es\n";
 	return if $es !~ /not started|stopped|running/;
 
 	my ($chain, $id, $param, $val) = @_;
@@ -1442,7 +1447,10 @@ sub apply_op {
 		unless $cops{$id}->{belongs_to}; # avoid reset
 	eval_iam ($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
-	map{apply_op($_)} @{ $cops{$id}->{owns} };
+	#map{apply_op($_)} @{ $cops{$id}->{owns} };
+	#map{apply_op($_)} @{ map{print( $_, ref $_); $_ } $cops{$id}->{owns} };
+	map{apply_op($_)} @{ ( map{print( $_, ref $_); $_ } $cops{$id}->{owns}) };
+	#map{apply_op($_)} @{ map{print $_, ref $_ [] if /\~/; $_ } $cops{$id}->{owns} };
 
 }
 ## static effects data
@@ -1745,8 +1753,10 @@ sub get_ladspa_hints{
 }
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
+	local $debug = 1;
 	my $multiplier = 1;;
-	$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
+	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
+	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
 	my ($beg, $end) = split /\s+to\s+/, $range;
 	# if end is '...' set to $default + 10dB or $default * 10
 	$default =~ s/default\s+//;
@@ -1754,10 +1764,10 @@ sub range {
 		$default == 0 ? 10  # '0' is probably 0db, so 0+10db
 					  : $default * 10
 		);
-#	print "1 beg: $beg  end: $end\n";
+	$debug and print "1 beg: $beg  end: $end\n";
 	$beg = $beg * $multiplier;
 	$end = $end * $multiplier;
-#	print "2 beg: $beg  end: $end\n";
+	$debug and print "2 beg: $beg  end: $end\n";
 
 	my $resolution = ($end - $beg) / 100;
 	if    ($hint =~ /integer/ ) { $resolution = 1; }

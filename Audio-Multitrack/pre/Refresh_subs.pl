@@ -45,7 +45,8 @@ sub refresh_c { # tracks
 
 	#	return unless $widget_c{$n}; # hidden track
 		$widget_c{$n}->{rw}->configure(-text => $rec_status);
-		 $widget_c{$n}->{ch_r}->configure( -text => $ti[$n]->ch_r);
+		 $widget_c{$n}->{ch_r}->configure( -text =>
+		 $ti[$n]->ch_r || 1);
 		 $widget_c{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
 		$widget_c{$n}->{version}->configure(-text => $ti[$n]->current_version);
 	

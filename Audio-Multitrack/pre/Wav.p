@@ -7,9 +7,11 @@ use Carp;
 
 sub get_versions {
 	my $wav = shift; # Expects a Track object here
+	local $debug = 1;
 	my $basename = $wav->name;
 	my $dir = ::this_wav_dir();
-	# $wav->dir; # indirectly this_wav_dir
+	$debug and print "this_wav_dir: $dir\n";
+	$debug and print '$wav->dir', $wav->dir; # indirectly this_wav_dir
 	my ($sep, $ext) = qw( _ wav );
 
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
@@ -25,7 +27,7 @@ sub get_versions {
 		$debug and print "match: $1,  num: $3\n\n";
 		$versions{ $3 ? $3 : 'bare' } =  $1 ;
 	}
-	$debug and print "get_version: " , yaml_out(\%versions);
+	$debug and print "get_version: " , ::yaml_out(\%versions);
 	closedir WD;
 	%versions;
 }
