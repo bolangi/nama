@@ -248,27 +248,20 @@ sub init_gui {
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
+#  Hijacked iam entry for unified command processing
 	
-	$iam_label = $iam_frame->Label(-text => "IAM Command")
-		->pack(-side => 'left');;
+	$iam_label = $iam_frame->Label(
+	-text => "Command:  <Ecmd> | <Ecasound-IAM> | ! <shell> | eval <perl> "
+		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)
 		->pack(-side => 'left');;
 	$iam_execute = $iam_frame->Button(
 			-text => 'Execute',
-			-command => sub { print eval_iam($iam), "\n" }
+			-command => sub { print $iam; 
+			::Text::command_process($iam) }
 		)->pack(-side => 'left');;
-	my $perl_eval;
-	my $perl_eval_label = $perl_eval_frame->Label(
-		-text => "Perl Command")
-		->pack(-side => 'left');;
-	my $perl_eval_text = $perl_eval_frame->Entry(
-		-textvariable => \$perl_eval, -width => 45)
-		->pack(-side => 'left');;
-	my $perl_eval_execute = $perl_eval_frame->Button(
-			-text => 'Execute',
-			-command => sub { eval $perl_eval  }
-		)->pack(-side => 'left');;
+
 		
 }
 sub transport_gui {

@@ -8,7 +8,6 @@ sub loop {
 #	my $term = new Term::ReadLine 'Ecmd';
 #	my $prompt = "Enter command: ";
 #	$OUT = $term->OUT || \*STDOUT;
-	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 
  #	use ::Text::OuterShell; # not needed, class is present in this file
@@ -22,8 +21,10 @@ sub command_process {
 
 package ::;
 		my ($user_input) = shift;
+		local $debug = 1;
 		# my ($user_input) = $term->readline($prompt) ; # old way
 		return if $user_input =~ /^\s*$/;
+		$debug and print "user input: $user_input\n";
 		# $term->addhistory($user_input) ; # this is done # for us too
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
@@ -41,18 +42,18 @@ package ::;
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
-				$predicate !~ /^\s*$/ and $parser->read($predicate);
+				$predicate !~ /^\s*$/ and $::parser->read($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
 				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
 				$this_track = $ti[$cmd];
-				$predicate !~ /^\s*$/ and $parser->read($predicate);
-			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found Iam command\n";
-				print ::eval_iam($user_input), $/ ;
+				$predicate !~ /^\s*$/ and $::parser->read($predicate);
 			} else {
-				$debug and print "Passing to parser\n";
-				$parser->command($user_input) 
-			}
+				$debug and print "Passing to parser\n", 
+				$_, $/;
+				print 1, ref $parser, $/;
+				print 2, ref $::parser, $/;
+				$::parser->command($_) 
+			}	
 
 		} @user_input;
 }

@@ -279,7 +279,7 @@ sub serialize {
 
 sub yaml_out {
 	
-	local $debug = 0;
+	local $debug = 1;
 	local $debug2 = 0;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
@@ -289,7 +289,7 @@ sub yaml_out {
 	croak "attempting to code wrong data type: $type"
 		if $type !~ /HASH|ARRAY/;
 	my $output;
-    $yw->write( $data_ref, \$output ); 
+    $yw->write( $data_ref, \$output ) if $type =~ /HASH|ARRAY/;
 	$output;
 }
 sub yaml_in {

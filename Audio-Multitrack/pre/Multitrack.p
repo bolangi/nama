@@ -170,6 +170,8 @@ $grammar = q(
 );
 # we use the following settings if we can't find config files
 
+$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+
 $default = <<'FALLBACK_CONFIG';
 [% qx(cat ./ecmdrc) %]
 FALLBACK_CONFIG
