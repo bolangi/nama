@@ -154,6 +154,9 @@ show_setup:
   parameters: none
   what: show status of all tracks
   smry: show setup
+show_chain_setup:
+  short: setup
+  what: show current Ecasound chain setup
 show_track:
   short: sh
   parameters: optional string, optional number

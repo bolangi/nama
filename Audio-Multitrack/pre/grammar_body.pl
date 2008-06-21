@@ -90,6 +90,12 @@ show_setup: _show_setup end {
 	::Text::show_tracks ( ::Track::all );
 }
 
+show_chain_setup: _show_chain_setup {
+	#my $chain_setup;
+	#::io(join_path($project_dir, $chain_setup_file) ) > $chain_setup; 
+	#print $chain_setup;
+}
+
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
 # 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
@@ -339,3 +345,5 @@ group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, $/;
 }
+
+
