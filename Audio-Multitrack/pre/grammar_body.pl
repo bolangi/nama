@@ -182,6 +182,7 @@ channel: r | m
 r: 'r' dd  {	
 				$::this_track->set(ch_r => $item{dd});
 				$::ch_r = $item{dd};
+				print "setting $::ch_r to $item{dd}\n";
 				
 				}
 m: 'm' dd  {	
