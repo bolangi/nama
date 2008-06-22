@@ -916,9 +916,9 @@ sub new_engine {
 	system qq(killall -9 $ecasound);
 	$e = Audio::Ecasound->new();
 }
-sub setup_transport { # create chain setup
+sub generate_setup { # create chain setup
 	remove_small_wavs();
-	$debug2 and print "&setup_transport\n";
+	$debug2 and print "&generate_setup\n";
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
@@ -1118,7 +1118,7 @@ sub rec_cleanup {
 			# i.e. there are first time recorded tracks
 			$ui->update_master_version_button();
 			$tracker->set( rw => 'MON');
-			setup_transport() and connect_transport();
+			generate_setup() and connect_transport();
 			$ui->refresh();
 	}
 		

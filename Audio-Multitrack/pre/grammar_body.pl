@@ -1,6 +1,6 @@
 # i'm a comment!
 asdf: 'asdf' { print "hello"}
-read: command(s)
+#read: command(s)
 command: fail
 end: /\s*$/ 
 #end: /\s*;\s*/ 
@@ -23,7 +23,7 @@ load_project: _load_project name end {
 	print ("Project $untested does not exist\n"), return
 	unless -d ::join_path ::wav_dir(), $untested; 
 	::load_project( name => ::remove_spaces($item{name}) );
-	::setup_transport() and ::connect_transport();
+	::generate_setup() and ::connect_transport();
 
 	print "loaded project: $::project_name\n";
 }
@@ -63,10 +63,10 @@ someval: /[\w.+-]+/
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
 
-generate: _generate end { ::setup_transport(); 1 }
+generate: _generate end { ::generate_setup(); 1 }
 
 arm: _arm end { 
-	::setup_transport() and ::connect_transport(); 1 }
+	::generate_setup() and ::connect_transport(); 1 }
 
 connect: _connect end { ::connect_transport(); 1 }
 
@@ -89,9 +89,9 @@ show_setup: _show_setup end {
 }
 
 show_chain_setup: _show_chain_setup {
-	#my $chain_setup;
-	#::io(join_path($project_dir, $chain_setup_file) ) > $chain_setup; 
-	#print $chain_setup;
+	my $chain_setup;
+	::io(join_path(::project_dir(), $::chain_setup_file) ) > $chain_setup; 
+	print $chain_setup;
 }
 
 show_track: _show_track end {
@@ -153,6 +153,9 @@ show_track: _show_track dd end {
 # 	write; # using format at end of file UI.pm
 # 	1;
 #}
+
+#show_setup: _show_setup end { 
+#		::io(::join_path(::project_dir(),  ) > $contents;
 
 group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
 group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }

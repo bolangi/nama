@@ -188,12 +188,12 @@ sub init_gui {
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
 	$sn_save = $load_frame->Button->pack(-side => 'left');
-	$sn_recall = $load_frame->Button->pack(-side => 'left');
 	$save_id = "";
 	my $sn_save_text = $load_frame->Entry(
 									-textvariable => \$save_id,
 									-width => 15
 									)->pack(-side => 'left');
+	$sn_recall = $load_frame->Button->pack(-side => 'left');
 	$sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(-text => "TRACK", -width => 12)->pack(-side => 'left');
@@ -300,8 +300,8 @@ sub transport_gui {
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
-			-text => 'Arm Setup',
-			-command => sub {&setup_transport and &connect_transport}
+			-text => 'Arm',
+			-command => sub {&generate_setup and &connect_transport}
 						 );
 	$transport_disconnect->configure(
 			-text => 'Disconnect setup',
@@ -494,7 +494,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'REC');
 				refresh();
-				setup_transport() and connect_transport()
+				generate_setup() and connect_transport()
 				}
 			],[
 			'command' => 'MON',
@@ -502,7 +502,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'MON');
 				refresh();
-				setup_transport() and connect_transport()
+				generate_setup() and connect_transport()
 				}
 			],[
 			'command' => 'OFF',
@@ -510,7 +510,7 @@ sub group_gui {
 			-command => sub { 
 				$group->set(rw => 'OFF');
 				refresh();
-				setup_transport() and connect_transport()
+				generate_setup() and connect_transport()
 				}
 			],);
 $group_rw
@@ -547,7 +547,7 @@ sub global_version_buttons {
 				-value => $v,
 				-command => sub { 
 					$tracker->set(version => $v); 
-					setup_transport() and connect_transport();
+					generate_setup() and connect_transport();
 					refresh();
 					}
 

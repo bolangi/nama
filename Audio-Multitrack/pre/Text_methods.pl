@@ -2,7 +2,6 @@ use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
 	local $debug = 0;
-	::Text::OuterShell::create_help_subs();
 	package ::;
 	load_project(name => $project_name, create => $opts{c}) if $project_name;
 #	my $term = new Term::ReadLine 'Ecmd';
@@ -14,6 +13,7 @@ sub loop {
 	  my $shell = ::Text::OuterShell->new;
 
           $shell->cmdloop;
+#$term->tkRunning(1);
 }
 
 	
@@ -29,7 +29,7 @@ package ::;
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
 			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([!-\S]+)(.*)/);
+			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 			if ($cmd eq 'eval') {
 				$debug and print "Evaluating perl code\n";

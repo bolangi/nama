@@ -31,9 +31,9 @@ mixoff:
   parameters: none
 add_track:
   short: add
-  what: create a new track, " add sax r2 " will record track sax from input 2
+  what: create a new track, "add sax; r2" will record track sax from input 2
   smry: create a new track
-  parameters: string 'r' number 'm' number
+  parameters: string 
 set_track:
   what: (programmers only) directly set values in current track object $this_track
   example: set hide 1
@@ -145,15 +145,13 @@ connect:
 disconnect:
   what: disconnect chain setup
   parameters: none
+showsetup:
+  what: print Setup.ecs to STDOUT
+  short: shs
 renew_engine:
   short: renew
   smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
-show_setup:
-  short: show
-  parameters: none
-  what: show status of all tracks
-  smry: show setup
 show_chain_setup:
   short: setup
   what: show current Ecasound chain setup
