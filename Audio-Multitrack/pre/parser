@@ -4,38 +4,47 @@ help => sub { print "hello_from your command line gramar\n"; 1 } ,
 fail => sub { print "your command line gramar will get a zero\n"; 0 } ,
 
 create_project => sub { 
+	my @args = split " ", $predicate;
+	my $name = shift;
 	load_project( 
-		name => remove_spaces($item{name}),
+		name => remove_spaces($name),
 		create => 1,
 	);
 	print "created project: $project_name\n";
 
 },
 
+);
+__END__
 load_project => sub { 
-	my $untested = remove_spaces($item{name});
+	my @args = split " ", $predicate;
+	my $name = shift;
+	my $untested = remove_spaces($name);
 	print ("Project $untested does not exist\n"), return
 	unless -d join_path wav_dir(), $untested; 
-	load_project( name => remove_spaces($item{name}) );
+	load_project( name => remove_spaces($name) );
 	generate_setup() and connect_transport();
 
 	print "loaded project: $project_name\n";
 },
 save_state => sub { 
-	save_state( $item{name} ); 
-	}
+	my @args = split " ", $predicate;
+	my $name = shift;
+	save_state( $name ); 
+	},
 get_state => sub { 
+	my @args = split " ", $predicate;
+	my $settings_file = shift @args;
  	load_project( 
  		name => $project_name,
- 		settings => $item{name}
+ 		settings => $settings_file,
  		),
- #	print "set state:  $item{name}\n";
+ 	print "set state: $settings_file\n";
  	},
-
 add_track => sub { 
 	# print "adding: ", yaml_out( $item{'channels(s?)'} ), $/;
-	add_track($item{name}); 
-	#print "added track $item{name}\n";
+	add_track($name); 
+	#print "added track $name\n";
 }
 
 set_track => sub { 
@@ -44,7 +53,6 @@ set_track => sub {
 dump_track => sub { $this_track->dumpp } ,
 dump_group => sub { $tracker->dumpp } ,
 );
-__END__
 
 =comment
 key: /\w+/
@@ -53,7 +61,7 @@ someval: /[\w.+-]+/
  
 =cut
 remove_track => sub { 
-	$tn{ $item{name} }->set(hide => 1), },
+	$tn{ $name }->set(hide => 1), },
 generate => sub { generate_setup() },
 
 arm => sub { 
@@ -71,6 +79,8 @@ stop => sub { stop_transport()},
 S => sub { eval_iam("stop") } ,
 T => sub { eval_iam("start") },
 
+);
+__END__
 show_setup => sub { 	
 
 	::Text::show_tracks ( Trackall );
@@ -98,7 +108,7 @@ show_track => sub {
  	 } @{ $this_track->ops };
 },
 show_track => sub { 
- 	::Text::show_tracks( $tn{$item{name}} ) if $tn{$item{name}}
+ 	::Text::show_tracks( $tn{$name} ) if $tn{$name}
 },
 show_track => sub {  
 	::Text::show_tracks( $ti[$item{dd}] ) if $ti[$item{dd}]
@@ -152,7 +162,7 @@ mon => sub {$this_track->set(rw => 'MON'); },
 #name: /\w+/
 
 
-#wav: name { $this_track = $tn{$item{name}} if $tn{$item{name}}  }
+#wav: name { $this_track = $tn{$name} if $tn{$name}  }
 
 set_version => sub { $this_track->set(active =>
 $item{dd})},
@@ -230,11 +240,11 @@ remove_effect => sub {
 add_effect => sub { 
 print join $/, keys %item;
 
-print "code: ", $item{name}, $/;
+print "code: ", $name, $/;
 	my %p = (
 		chain => $this_track->n,
 		values => $item{"value(s?)"},
-		type => $item{name},
+		type => $name,
 		);
 		print "adding effect\n";
 		#print (yaml_out(\%p));

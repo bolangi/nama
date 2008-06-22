@@ -33,6 +33,9 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
 	%parser,        # new dispatcher to replace Parse::RecDescent
+	$user_input,    # for command line
+	$cmd,           # first item on command line
+	$predicate,     # remaining items on command line
 	%iam_cmd,		# for identifying IAM commands in user input
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well

@@ -29,7 +29,7 @@ package ::;
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
 			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+			($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 
 		# set current track (effect, parameter) specified by prefix
@@ -73,7 +73,8 @@ package ::;
 				$debug and print "Passing to parser\n", 
 				$_, $/;
 				if ($parser{$cmd}){ 
-					ref $parser{$cmd} =~ /CODE/ or croak 
+					print $parser{$cmd},$/;
+					ref $parser{$cmd} !~ /CODE/ and croak 
 				        "expected CODE ref, got: ", ref $parser{$cmd}, $/;
 					&{ $parser{$cmd} }( $predicate )
 					} else { print "unknown command: $cmd\n";
