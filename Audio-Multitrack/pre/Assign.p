@@ -32,6 +32,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		create_dir
 		join_path
 		wav_off
+		strip_END
 		strip_all
 		strip_blank_lines
 		strip_comments
@@ -352,9 +353,16 @@ sub wav_off {
 
 sub strip_all{ strip_trailing_spaces(strip_blank_lines( strip_comments(@_))) }
 
+sub strip_END { 
+	my $a = shift;
+	$a =~ s/__END__.*$//s;
+	$a;
+}
+
 sub strip_trailing_spaces {
-	map {s/\s+$//} @_;
-	@_;
+	my @a = @_;
+	map {s/\s+$//} @a;
+	@a;
 }
 sub strip_blank_lines {
 	map{ s/\n(\s*\n)+/\n/sg } @_;
