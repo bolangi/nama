@@ -1,6 +1,6 @@
 # i'm a comment!
 asdf: 'asdf' { print "hello"}
-#read: command(s)
+read: command(s)
 command: fail
 end: /\s*$/ 
 #end: /\s*;\s*/ 
@@ -107,24 +107,6 @@ show_track: _show_track end {
 				$::copp{$op_id}->[$_],'' 
 		 	} (0..scalar @pnames - 1);
 		 print $/;
-		#  print ::yaml_out( \@pnames );
-		#print scalar @pnames;
-		#print $pnames[0]->{name};
-		#print map{ 
-		#print $_, $/;
-			#join " ", $pnames[$_]->{name}, $_,
-	# $::copp{$op_id}->[$_], 
-		#$/ 
-		
-		#}
-			  ;
- 		#map { 
-		# print $pnames[$_]->{name}, " ",  , 
-		# print ref $pnames[$_] , 
- 		# 	$/
-		 #	print $_, " ";
-		#	} 0 .. scalar @pnames - 1;
- 
  	 } @{ $::this_track->ops };
 }
 show_track: _show_track name end { 
@@ -134,28 +116,6 @@ show_track: _show_track dd end {
 	::Text::show_tracks( $::ti[$item{dd}] ) if $::ti[$item{dd}]
 }
 	
-	# print "name: $item{name}\nnumber: $item{dd}\n";
-# print ("unknown track\n"), return 
-# 		if $item{dd}   and ! $::ti[$item{dd}]
-# 		or $item{name} and ! $::tn{$item{name}};
-# 
-# 	map { 	push @::format_fields,  
-# 			$_->n,
-# 			$_->active,
-# 			$_->name,
-# 			$_->rw,
-# 			$_->rec_status,
-# 			($_->ch_r or 1),
-# 			($_->ch_m or 1),
-# 
-# 		} ($::tn{$item{name}} or $::ti[item{dd}] or $::this_track;
-# 		
-# 	write; # using format at end of file UI.pm
-# 	1;
-#}
-
-#show_setup: _show_setup end { 
-#		::io(::join_path(::project_dir(),  ) > $contents;
 
 group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
 group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }
@@ -280,11 +240,8 @@ remove_effect: _remove_effect op_id(s) end {
 op_id: /[A-Z]+/
 
 
-add_effect: _add_effect '-'(?) name /[\s:,]+/ value(s?  /[\s:,]+/)  end { 
+add_effect: _add_effect name value(s?)  end { 
 print join $/, keys %item;
-#print "itemdd:", $item{"dd(s?)"} , ":\n";
-#print "itemdd2:", $item{"dd"} , ":\n";
-#print "ref:", ref $item{dd} , ":\n";
 
 print "code: ", $item{name}, $/;
 	my %p = (
