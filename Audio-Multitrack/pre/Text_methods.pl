@@ -7,13 +7,13 @@ sub loop {
 #	my $term = new Term::ReadLine 'Ecmd';
 #	my $prompt = "Enter command: ";
 #	$OUT = $term->OUT || \*STDOUT;
+#$term->tkRunning(1);
 
 
  #	use ::Text::OuterShell; # not needed, class is present in this file
 	  my $shell = ::Text::OuterShell->new;
 
           $shell->cmdloop;
-#$term->tkRunning(1);
 }
 
 	

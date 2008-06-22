@@ -104,7 +104,11 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
-    MainLoop;
+    #MainLoop;
+	my $shell = ::Text::OuterShell->new;
+	my $term = $shell->term();
+	$term->tkRunning(1);
+	$shell->cmdloop;
 }
 
 ## The following methods belong to the Text interface class
