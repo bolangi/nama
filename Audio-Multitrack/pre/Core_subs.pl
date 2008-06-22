@@ -647,12 +647,13 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	return if transport_running();
 	my $name = shift;
-	#print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
-		ch_r => eval '$ch_r',
-		ch_m => eval '$ch_m',
+		ch_r => $ch_r,
+		ch_m => $ch_m,
 	);
+	$this_track = $track;
 	return if ! $track; 
 	print "ref new track: ", ref $track; 
 
@@ -1447,10 +1448,11 @@ sub apply_op {
 		unless $cops{$id}->{belongs_to}; # avoid reset
 	eval_iam ($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
-	#map{apply_op($_)} @{ $cops{$id}->{owns} };
-	#map{apply_op($_)} @{ map{print( $_, ref $_); $_ } $cops{$id}->{owns} };
-	map{apply_op($_)} @{ ( map{print( $_, ref $_); $_ } $cops{$id}->{owns}) };
-	#map{apply_op($_)} @{ map{print $_, ref $_ [] if /\~/; $_ } $cops{$id}->{owns} };
+	my $ref = ref $cops{$id}->{owns} ;
+	$ref =~ /ARRAY/ or croak "expected array";
+	my @owns = @{ $cops{$id}->{owns} };
+	$debug and print "owns: @owns\n";  
+	map{apply_op($_)} @owns;
 
 }
 ## static effects data

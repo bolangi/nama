@@ -29,7 +29,7 @@ package ::;
 		my @user_input = split /\s*;\s*/, $user_input;
 		map {
 			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([!\S]+)(.*)/);
+			my ($cmd, $predicate) = ($user_input =~ /([!-\S]+)(.*)/);
 			$debug and print "cmd: $cmd \npredicate: $predicate\n";
 			if ($cmd eq 'eval') {
 				$debug and print "Evaluating perl code\n";
@@ -47,6 +47,9 @@ package ::;
 				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
 				$this_track = $ti[$cmd];
 				$predicate !~ /^\s*$/ and $::parser->read($predicate);
+			} elsif ($iam_cmd{$cmd}){
+				$debug and print "Found Iam command\n";
+				print ::eval_iam($user_input), $/ ;
 			} else {
 				$debug and print "Passing to parser\n", 
 				$_, $/;

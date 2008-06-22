@@ -38,11 +38,10 @@ get_state: _get_state name(?) end {
  #	print "set state:  $item{name}\n";
  	}
 
-add_track: _add_track name channel(s?) end { 
-	#carp ("track name already in use: $item{name}\n"),
-	#	return if $::Track::track_names{$item{name}}; 
+add_track: _add_track channel(s?) name end { 
+	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
 	::add_track($item{name}); 
-	print "added track $item{name}\n";
+	#print "added track $item{name}\n";
 }
 
 # add_track: _add_track name(s) end { 
@@ -278,7 +277,7 @@ remove_effect: _remove_effect op_id(s) end {
 op_id: /[A-Z]+/
 
 
-add_effect: _add_effect name value(s?)  end { 
+add_effect: _add_effect '-'(?) name /[\s:,]+/ value(s?  /[\s:,]+/)  end { 
 print join $/, keys %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
