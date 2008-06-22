@@ -166,15 +166,7 @@ $::RD_HINT = 1;
 
 # rec command changes active take
 
-#my $grammar_body =  q(
-#[% qx(./strip_comments  ./grammar_body.pl) %]
-#);
-
-# my $grammar_body = strip_END( $grammar_body);
-
-#$grammar = $grammar_body . q(
-
-$grammar = q( 
+$grammar = q(
 
 [% qx(./strip_comments  ./grammar_body.pl) %]
 
