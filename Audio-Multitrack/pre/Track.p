@@ -232,7 +232,7 @@ sub monitor_version {
 		{ $version = $group->version }
 	elsif (	$track->last) #  and ! $track->active and ! $group->version )
 		{ $version = $track->last }
-	else { carp "no version to monitor!\n" }
+	else { } # carp "no version to monitor!\n" 
 	# print "monitor version: $version\n";
 	$version;
 }

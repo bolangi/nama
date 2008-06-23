@@ -155,7 +155,8 @@ DEBUG
 			$eval .= q( } );
 		}
 		$debug and print $eval, $/, $/;
-		eval($eval) or carp "failed to eval $eval: $@\n";
+		eval($eval);
+		$debug and $@ and carp "failed to eval $eval: $@\n";
 	} @keys;
 	1;
 }

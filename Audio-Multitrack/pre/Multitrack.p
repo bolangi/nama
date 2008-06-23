@@ -2,8 +2,9 @@ package ::;
 use 5.008;
 use strict;
 no strict qw(subs);
-use warnings;
-no warnings qw(uninitialized);
+#use warnings;
+#no warnings qw(uninitialized);
+no warnings;
 our $VERSION = '0.92';
 use IO::All;
 use Carp;
@@ -34,7 +35,7 @@ use File::Spec::Link;
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
+$debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of two helper loopback devices:

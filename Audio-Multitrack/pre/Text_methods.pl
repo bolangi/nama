@@ -21,7 +21,7 @@ sub command_process {
 
 package ::;
 		my ($user_input) = shift;
-		local $debug = 1;
+		#local $debug = 1;
 		# my ($user_input) = $term->readline($prompt) ; # old way
 		return if $user_input =~ /^\s*$/;
 		$debug and print "user input: $user_input\n";
@@ -60,6 +60,7 @@ package ::;
 			}	
 
 		} @user_input;
+		$ui->refresh; # in case we have a graphic environment
 }
 package ::Text;
 sub show_tracks {

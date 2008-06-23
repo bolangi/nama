@@ -277,13 +277,9 @@ sub load_project {
 	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
-	print "here\n";
 	read_config( global_config() ); 
-	print "here 2\n";
 	initialize_rules();
-	print "here 3\n";
 	initialize_project_data();
-	print "here 4\n";
 	remove_small_wavs(); 
 	#print "reached here!!!\n";
 

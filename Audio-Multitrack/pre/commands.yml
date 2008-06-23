@@ -145,15 +145,15 @@ connect:
 disconnect:
   what: disconnect chain setup
   parameters: none
-showsetup:
-  what: print Setup.ecs to STDOUT
-  short: shs
 renew_engine:
   short: renew
   smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
-  short: setup
+  short: chain 
+  what: show current Ecasound chain setup
+show_setup:
+  short: show
   what: show current Ecasound chain setup
 show_track:
   short: sh

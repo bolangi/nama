@@ -1,12 +1,22 @@
-# i'm a comment!
+# regex contraining of values
+key: /\w+/
+someval: /[\w.+-]+/
+sign: /[+-]/
+op_id: /[A-Z]+/
+parameter: /\d+/
+value: /[\d\.eE+-]+/ # -1.5e-6
+last: ('last' | '$' ) 
+dd: /\d+/
+name: /\w+/
+	
 asdf: 'asdf' { print "hello"}
 #read: command(s)
 command: fail
 end: /\s*$/ 
 #end: /\s*;\s*/ 
 end: ';' 
-helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
 help: _help dd end { print "hello_from your command line gramar\n"; 1 }
+helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
 create_project: _create_project name end {
@@ -38,16 +48,12 @@ get_state: _get_state name(?) end {
  #	print "set state:  $item{name}\n";
  	}
 
-add_track: _add_track channel(s?) name end { 
+add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
 	::add_track($item{name}); 
 	#print "added track $item{name}\n";
 }
 
-# add_track: _add_track name(s) end { 
-#  	map { ::add_track $_ } @{ $item{name} };
-#  	1;
-#  }
 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
@@ -56,9 +62,6 @@ dump_track: _dump_track { $::this_track->dumpp }
 
 dump_group: _dump_group { $::tracker->dumpp }
 
-key: /\w+/
-
-someval: /[\w.+-]+/
  
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
@@ -72,7 +75,6 @@ connect: _connect end { ::connect_transport(); 1 }
 
 disconnect: _disconnect end { ::disconnect_transport(); 1 }
 
-## we reach here
 
 renew_engine: _renew_engine end { ::new_engine(); 1  }
 
@@ -107,23 +109,6 @@ show_track: _show_track end {
 				$::copp{$op_id}->[$_],'' 
 		 	} (0..scalar @pnames - 1);
 		 print $/;
-		#  print ::yaml_out( \@pnames );
-		#print scalar @pnames;
-		#print $pnames[0]->{name};
-		#print map{ 
-		#print $_, $/;
-			#join " ", $pnames[$_]->{name}, $_,
-	# $::copp{$op_id}->[$_], 
-		#$/ 
-		
-		#}
-			  ;
- 		#map { 
-		# print $pnames[$_]->{name}, " ",  , 
-		# print ref $pnames[$_] , 
- 		# 	$/
-		 #	print $_, " ";
-		#	} 0 .. scalar @pnames - 1;
  
  	 } @{ $::this_track->ops };
 }
@@ -134,26 +119,6 @@ show_track: _show_track dd end {
 	::Text::show_tracks( $::ti[$item{dd}] ) if $::ti[$item{dd}]
 }
 	
-	# print "name: $item{name}\nnumber: $item{dd}\n";
-# print ("unknown track\n"), return 
-# 		if $item{dd}   and ! $::ti[$item{dd}]
-# 		or $item{name} and ! $::tn{$item{name}};
-# 
-# 	map { 	push @::format_fields,  
-# 			$_->n,
-# 			$_->active,
-# 			$_->name,
-# 			$_->rw,
-# 			$_->rec_status,
-# 			($_->ch_r or 1),
-# 			($_->ch_m or 1),
-# 
-# 		} ($::tn{$item{name}} or $::ti[item{dd}] or $::this_track;
-# 		
-# 	write; # using format at end of file UI.pm
-# 	1;
-#}
-
 #show_setup: _show_setup end { 
 #		::io(::join_path(::project_dir(),  ) > $contents;
 
@@ -179,7 +144,6 @@ record: 'record' end {} # set to Tracker-Record
 exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 
-channel: r | m
 
 r: 'r' dd  {	
 				$::this_track->set(ch_r => $item{dd});
@@ -199,15 +163,11 @@ rec: 'rec' end {$::this_track->set(rw => 'REC'); }
 mon: 'mon' end {$::this_track->set(rw => 'MON'); }
 
 
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-name: /\w+/
 
 
 wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
+## we reach here
 set_version: _set_version dd end { $::this_track->set(active => $item{dd})}
  
 vol: _vol dd end { $::copp{ $::this_track->vol }->[0] = $item{dd}; 
@@ -268,6 +228,7 @@ name_mark: _name_mark end {}
 
 list_marks: _list_marks end {}
 
+# okay to here
 show_effects: _show_effects end {}
 
 remove_effect: _remove_effect op_id(s) end {
@@ -277,10 +238,9 @@ remove_effect: _remove_effect op_id(s) end {
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 
 }
-op_id: /[A-Z]+/
 
 
-add_effect: _add_effect '-'(?) name /[\s:,]+/ value(s?  /[\s:,]+/)  end { 
+add_effect: _add_effect name value(s?)  end { 
 print join $/, keys %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
@@ -334,13 +294,6 @@ modify_effect: _modify_effect op_id parameter value sign(?) end {
 		$new_value);
 
 }
-sign: /[+-]/
-op_id: /[A-Z]+/
-
-parameter: /\d+/
-
-value: /[\d\.eE+-]+/ # -1.5e-6
-	
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 
