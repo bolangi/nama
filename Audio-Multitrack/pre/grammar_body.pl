@@ -85,15 +85,15 @@ stop: _stop end { ::stop_transport();
 S: _S end { ::eval_iam("stop") }
 T: _T end { ::eval_iam("start") }
 
-show_setup: _show_setup end { 	
+show_tracks: _show_tracks end { 	
 
 	::Text::show_tracks ( ::Track::all );
 }
 
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
-	::io(join_path(::project_dir(), $::chain_setup_file) ) > $chain_setup; 
-	print $chain_setup;
+	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
+	print $chain_setup, $/, $/;
 }
 
 show_track: _show_track end {

@@ -150,10 +150,10 @@ renew_engine:
   smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
-  short: chain 
+  short: chains setup shs
   what: show current Ecasound chain setup
-show_setup:
-  short: show
+show_tracks:
+  short: show tracks
   what: show current Ecasound chain setup
 show_track:
   short: sh
