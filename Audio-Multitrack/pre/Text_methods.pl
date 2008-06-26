@@ -1,87 +1,87 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-	local $debug = 0;
-	package ::;
-	load_project(name => $project_name, create => $opts{c}) if $project_name;
-#	my $term = new Term::ReadLine 'Ecmd';
-#	my $prompt = "Enter command: ";
-#	$OUT = $term->OUT || \*STDOUT;
+    local $debug = 0;
+    package ::;
+    load_project(name => $project_name, create => $opts{c}) if $project_name;
+#    my $term = new Term::ReadLine 'Ecmd';
+#    my $prompt = "Enter command: ";
+#    $OUT = $term->OUT || \*STDOUT;
 #$term->tkRunning(1);
 
 
- #	use ::Text::OuterShell; # not needed, class is present in this file
-	  my $shell = ::Text::OuterShell->new;
+ #    use ::Text::OuterShell; # not needed, class is present in this file
+      my $shell = ::Text::OuterShell->new;
 
           $shell->cmdloop;
 }
 
-	
+    
 sub command_process {
 
 package ::;
-		my ($user_input) = shift;
-		#local $debug = 1;
-		# my ($user_input) = $term->readline($prompt) ; # old way
-		return if $user_input =~ /^\s*$/;
-		$debug and print "user input: $user_input\n";
-		# $term->addhistory($user_input) ; # this is done # for us too
-		my @user_input = split /\s*;\s*/, $user_input;
-		map {
-			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			$debug and print "cmd: $cmd \npredicate: $predicate\n";
-			if ($cmd eq 'eval') {
-				$debug and print "Evaluating perl code\n";
-				print eval $predicate;
-				print "\n";
-				$@ and print "Perl command failed: $@\n";
-			} elsif ($cmd eq '!') {
-				$debug and print "Evaluating shell commands!\n";
-				system $predicate;
-			} elsif ($tn{$cmd}) { 
-				$debug and print qq(Selecting track "$cmd"\n);
-				$this_track = $tn{$cmd};
-				$predicate !~ /^\s*$/ and $::parser->command($predicate);
-			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-				$this_track = $ti[$cmd];
-				$predicate !~ /^\s*$/ and $::parser->command($predicate);
-			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found Iam command\n";
-				print ::eval_iam($user_input), $/ ;
-			} else {
-				$debug and print "Passing to parser\n", 
-				$_, $/;
-				#print 1, ref $parser, $/;
-				#print 2, ref $::parser, $/;
-				# both print
-				$parser->command($_) 
-			}	
+        my ($user_input) = shift;
+        #local $debug = 1;
+        # my ($user_input) = $term->readline($prompt) ; # old way
+        return if $user_input =~ /^\s*$/;
+        $debug and print "user input: $user_input\n";
+        # $term->addhistory($user_input) ; # this is done # for us too
+        my @user_input = split /\s*;\s*/, $user_input;
+        map {
+            my $user_input = $_;
+            my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+            $debug and print "cmd: $cmd \npredicate: $predicate\n";
+            if ($cmd eq 'eval') {
+                $debug and print "Evaluating perl code\n";
+                print eval $predicate;
+                print "\n";
+                $@ and print "Perl command failed: $@\n";
+            } elsif ($cmd eq '!') {
+                $debug and print "Evaluating shell commands!\n";
+                system $predicate;
+            } elsif ($tn{$cmd}) { 
+                $debug and print qq(Selecting track "$cmd"\n);
+                $this_track = $tn{$cmd};
+                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+            } elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
+                $debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
+                $this_track = $ti[$cmd];
+                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+            } elsif ($iam_cmd{$cmd}){
+                $debug and print "Found Iam command\n";
+                print ::eval_iam($user_input), $/ ;
+            } else {
+                $debug and print "Passing to parser\n", 
+                $_, $/;
+                #print 1, ref $parser, $/;
+                #print 2, ref $::parser, $/;
+                # both print
+                $parser->command($_) 
+            }    
 
-		} @user_input;
-		$ui->refresh; # in case we have a graphic environment
+        } @user_input;
+        $ui->refresh; # in case we have a graphic environment
 }
 package ::Text;
 sub show_tracks {
-	no warnings;
-	my @tracks = @_;
-	map { 	push @::format_fields,  
-			$_->n,
-			$_->name,
-			$_->rw,
-			$_->rec_status,
-			$_->ch_r || 1,
-			$_->current_version || 'none',
-			(join " ", @{$_->versions}),
+    no warnings;
+    my @tracks = @_;
+    map {     push @::format_fields,  
+            $_->n,
+            $_->name,
+            $_->rw,
+            $_->rec_status,
+            $_->ch_r || 1,
+            $_->current_version || 'none',
+            (join " ", @{$_->versions}),
 
-		} grep{ ! $_-> hide} @tracks;
-		
-	write; # using format at end of file UI.pm
-	$- = 0; # $FORMAT_LINES_LEFT # force header on next output
-	1;
-	use warnings;
-	no warnings q(uninitialized);
+        } grep{ ! $_-> hide} @tracks;
+        
+    write; # using format at end of file UI.pm
+    $- = 0; # $FORMAT_LINES_LEFT # force header on next output
+    1;
+    use warnings;
+    no warnings q(uninitialized);
 }
 
 format STDOUT_TOP =
@@ -92,7 +92,7 @@ format STDOUT =
 @>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>>   @<<<<<<<<<<<<<<<<<<< ~~
 splice @::format_fields, 0, 7
 .
-	
+    
 # prepare help and autocomplete
 
 package ::Text::OuterShell;
@@ -113,19 +113,19 @@ sub catch_help {
   print grep{ $_ eq $cmd } join " ", 
   my $main_name;
   CMD: for my $k ( keys %commands ){
-  	for my $alias ( $k, split " ",$commands{$k}{short} ){
-		if ($cmd eq $alias){
-			$main_name = $k;
-			last CMD;
-		}
-	}
+      for my $alias ( $k, split " ",$commands{$k}{short} ){
+        if ($cmd eq $alias){
+            $main_name = $k;
+            last CMD;
+        }
+    }
   }
   $debug and print "main_name: $main_name\n";
-			
-	my $txt = $o->help($main_name, @_);
-	if ($o->{command}{help}{found}) {
-	    $o->page("$txt\n")
-	}
+            
+    my $txt = $o->help($main_name, @_);
+    if ($o->{command}{help}{found}) {
+        $o->page("$txt\n")
+    }
 }
 
 
@@ -135,91 +135,60 @@ sub run_help {
     my $o = shift;
     my $cmd = shift;
     if ($cmd) {
-	my $txt = $o->help($cmd, @_);
-	if ($o->{command}{help}{found}) {
-	    $o->page("$txt\n")
-	}
-	else {
-	    my @c = sort $o->possible_actions($cmd, 'help');
-	    if (@c and $o->{API}{match_uniq}) {
-		local $" = "\n\t";
-		print <<END;
-Ambiguous help topic '$cmd': possible help topics:
-	@c
-END
-	    }
-	    else {
-		print <<END;
-Unknown help topic '$cmd'; type 'help' for a list of help topics.
-END
-	    }
-	}
+    my $txt = $o->help($cmd, @_);
+    if ($o->{command}{help}{found}) {
+        $o->page("$txt\n")
     }
     else {
-	print "Type 'help command' for more detailed help on a command.\n";
-# 	my (%cmds, %docs);
-# 	my %done;
-# 	my %handlers;
-# 	for my $h (keys %{$o->{handlers}}) {
-# 	    next unless length($h);
-# 	    next unless grep{defined$o->{handlers}{$h}{$_}} qw(run smry help);
-# 	    my $dest = exists $o->{handlers}{$h}{run} ? \%cmds : \%docs;
-# 	    my $smry = do { my $x = $o->summary($h); $x ? $x : "" };
-# 	    my $help = exists $o->{handlers}{$h}{help}
-# 		? (exists $o->{handlers}{$h}{smry}
-# 		    ? " "
-# 		    : "")
-# 		: "";
-# 	    $dest->{"    $h"} = "$smry$help";
-# 	}
-# 	my @t;
-# 	push @t, "  Commands:\n" if %cmds;
-# 	push @t, scalar $o->format_pairs(
-# 	    [sort keys %cmds], [map {$cmds{$_}} sort keys %cmds], ' - ', 1
-# 	);
-# 	push @t, "  Extra Help Topics: (not commands)\n" if %docs;
-# 	push @t, scalar $o->format_pairs(
-# 	    [sort keys %docs], [map {$docs{$_}} sort keys %docs], ' - ', 1
-# 	);
+        my @c = sort $o->possible_actions($cmd, 'help');
+        if (@c and $o->{API}{match_uniq}) {
+        local $" = "\n\t";
+        print <<END;
+Ambiguous help topic '$cmd': possible help topics:
+    @c
+END
+        }
+        else {
+        print <<END;
+Unknown help topic '$cmd'; type 'help' for a list of help topics.
+END
+        }
+    }
+    }
+    else {
+    print "Type 'help command' for more detailed help on a command.\n";
 my $help_screen = <<HELP;
-Ecasound-IAM commands:
-
-    start, t - Processing is started 
-    stop, s - Stops processing
-    rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
-    forward <time-in-seconds>, fw <time-in-seconds> - Forward
-    setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
-    engine-launch - Initialize and start engine
-    engine-status - Engine status
-    cs-status, st - Chainsetup status
-    c-status, cs - Chain status
-    cop-status, es - Chain operator status
-    ctrl-status - Controller status
-    aio-status, fs - Audio input/output status
-
 Ecmd commands (additional help available by typing 'help <command>')
 
-  -- Unsupported in text mode  --
+-- Transport
 
-    additional effects (chain operators)
-    marks
-    
-  -- General --
+   start, t - Processing is started 
+   stop, s - Stops processing
+   rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
+   forward <time-in-seconds>, fw <time-in-seconds> - Forward
+   setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
 
-    help          - prints this screen, or help on 'command'
-    exit          - exits the program
+-- General --
+
+    help <command>  - prints this screen, or help on 'command'
+    exit           - exits the program
 
   -- Project -- 
 
-    load_project, load         -  load an existing project 
-    create_project, create     -  create a new project directory tree 
+    load_project, load <name>       -  load an existing project 
+    create_project, create <name>   -  create a new project directory tree 
     get_state, get, retrieve <state_file>    
-                               -  retrieve project settings 
-    save_state, keep, k, save  -  save project settings to disk, optional name    
+                                    -  retrieve settings, optional name
+    save_state, keep, save <state_file> 
+                                    -  save project settings to disk, optional name    
   -- Setup --
 
     setup, arm              -  generate and connect chain setup    
+    generate, gen           - generate chain setup
+    connect, con            - connect chain setup
     show_setup, show        -  show setup    
+    show_chain_setup, chains - show Ecasound chain setup file
+    show_io, showio          - show input and output chain fragments
 
   -- Track -- 
 
@@ -249,8 +218,8 @@ Ecmd commands (additional help available by typing 'help <command>')
 
   - channel assignments
 
-    r,record_channel        -   set track input channel number    
-    m, monitor_channel      -  set current track output channel 
+    r,record_channel        -   set input channel number, current track
+    m, monitor_channel      -  set output channel, current track
 
   - effects 
 
@@ -272,48 +241,59 @@ Ecmd commands (additional help available by typing 'help <command>')
     mixoff, norm, normal, mxo  -  mix off 
     mixplay, mxp               -  play mix 
 
+Ecasound-IAM commands:
+
+    engine-launch - Initialize and start engine
+    engine-status - Engine status
+    cs-status, st - Chainsetup status
+    c-status, cs - Chain status
+    cop-status, es - Chain operator status
+    ctrl-status - Controller status
+    aio-status, fs - Audio input/output status
+
+
 HELP
-	$o->page($help_screen);
+    $o->page($help_screen);
     }
 }
 
 
 sub create_help_subs {
-	$debug2 and print "create_help_subs\n";
-	local $debug = 0;
-	%commands = %{ ::yaml_in( $::commands_yml) };
+    $debug2 and print "create_help_subs\n";
+    local $debug = 0;
+    %commands = %{ ::yaml_in( $::commands_yml) };
 
-	$debug and print ::yaml_out \%commands;
-	
-	#map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
-	
-	map{ 
-			my $run_code = qq!sub run_$_ { splice \@_,1,0,  q($_); catch_run( \@_) }; !;
-			$debug and print "evalcode: $run_code\n";
-			eval $run_code;
-			$debug and $@ and print "create_sub eval error: $@\n";
-			my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };!;
-			$debug and print "evalcode: $help_code\n";
-			eval $help_code;
-			$debug and $@ and print "create_sub eval error: $@\n";
-			my $smry_text = 
-			$commands{$_}{smry} ? $commands{$_}{smry} : $commands{$_}{what};
-			$smry_text .= qq! ($commands{$_}{short}) ! 
-					if $commands{$_}{short};
+    $debug and print ::yaml_out \%commands;
+    
+    #map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+    
+    map{ 
+            my $run_code = qq!sub run_$_ { splice \@_,1,0,  q($_); catch_run( \@_) }; !;
+            $debug and print "evalcode: $run_code\n";
+            eval $run_code;
+            $debug and $@ and print "create_sub eval error: $@\n";
+            my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };!;
+            $debug and print "evalcode: $help_code\n";
+            eval $help_code;
+            $debug and $@ and print "create_sub eval error: $@\n";
+            my $smry_text = 
+            $commands{$_}{smry} ? $commands{$_}{smry} : $commands{$_}{what};
+            $smry_text .= qq! ($commands{$_}{short}) ! 
+                    if $commands{$_}{short};
 
-			my $smry_code = qq!sub smry_$_ { q( $smry_text ) }; !; 
-			$debug and print "evalcode: $smry_code\n";
-			eval $smry_code;
-			$debug and $@ and print "create_sub eval error: $@\n";
+            my $smry_code = qq!sub smry_$_ { q( $smry_text ) }; !; 
+            $debug and print "evalcode: $smry_code\n";
+            eval $smry_code;
+            $debug and $@ and print "create_sub eval error: $@\n";
 
-			my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
-			$debug and print "evalcode: $alias_code\n";
-			#eval $alias_code;# noisy in docs
-			$debug and $@ and print "create_sub eval error: $@\n";
+            my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
+            $debug and print "evalcode: $alias_code\n";
+            #eval $alias_code;# noisy in docs
+            $debug and $@ and print "create_sub eval error: $@\n";
 
-		}
+        }
 
-	grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+    grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
 
 }
-	
+    
