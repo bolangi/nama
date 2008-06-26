@@ -164,7 +164,7 @@ sub current {	 # depends on ewf status
 		$filename =~ s/\.wav$/.ewf/;
 		return $filename;
 	} else {
-		print "track ", $track->name, ": no current version\n" ;
+		$debug and print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }
