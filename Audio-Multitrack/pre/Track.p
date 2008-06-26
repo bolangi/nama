@@ -184,7 +184,7 @@ sub current_wav {	# independent of ewf status
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		return $filename;
 	} else {
-		print "track ", $track->name, ": no current version\n" ;
+		# print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }

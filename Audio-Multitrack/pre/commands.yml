@@ -152,6 +152,9 @@ renew_engine:
 show_chain_setup:
   short: chains setup shs
   what: show current Ecasound chain setup
+show_io:
+  short: showio
+  what: show chain input and output fragments
 show_tracks:
   short: show tracks
   what: show current Ecasound chain setup

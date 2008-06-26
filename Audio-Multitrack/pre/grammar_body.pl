@@ -96,6 +96,9 @@ show_chain_setup: _show_chain_setup {
 	print $chain_setup, $/, $/;
 }
 
+show_io: _show_io { print ::yaml_out( \%::inputs ),
+::yaml_out( \%::outputs ); }
+
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
 # 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
