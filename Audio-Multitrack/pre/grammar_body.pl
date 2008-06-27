@@ -14,7 +14,7 @@ command: fail
 end: /\s*$/ 
 end: ';' 
 help: _help end { print $::helptext }
-help: _help name end { print ::Text::help($item{name}) }
+help: _help name end { ::Text::help($item{name}) }
 # iterate over commands yml
 # find right command, print helptext
 #	print $::helptext  }

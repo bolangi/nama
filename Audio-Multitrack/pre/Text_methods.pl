@@ -1,7 +1,6 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-	local $debug = 1;
     #local $debug = 0;
     package ::;
     load_project(name => $project_name, create => $opts{c}) if $project_name;
@@ -14,6 +13,7 @@ sub loop {
 	next if $user_input =~ /^\s*$/;
      $term->addhistory($user_input) ;
 	::Text::command_process( $user_input );
+	#print "here we are\n";
  #    use ::Text::OuterShell; # not needed, class is present in this file
 #      my $shell = ::Text::OuterShell->new;
 
@@ -41,6 +41,7 @@ package ::;
             } elsif ($cmd eq '!') {
                 $debug and print "Evaluating shell commands!\n";
                 system $predicate;
+                print "\n";
             } elsif ($tn{$cmd}) { 
                 $debug and print qq(Selecting track "$cmd"\n);
                 $this_track = $tn{$cmd};
@@ -97,14 +98,17 @@ splice @::format_fields, 0, 7
 
 sub helpline {
 	my $cmd = shift;
-	$commands{$cmd}->{smry} 
+	my $text =  ( $commands{$cmd}->{smry} 
 		?  $commands{$cmd}->{smry} 
-		: $commands{$cmd}->{what} 
+		: $commands{$cmd}->{what} );
+	
+	print( $/, ucfirst $text, $/);
+	
 }
 sub help { 
 	my $name = shift;
-	print "seeking help for argument: $name\n";
-	print helpline($name);
+	#print "seeking help for argument: $name\n";
+	helpline($name);
 =comment
 	chomp $name;
 	map{  my $cmd = $_ ;
