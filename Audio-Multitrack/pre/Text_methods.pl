@@ -111,11 +111,10 @@ sub help {
 	#print "seeking help for argument: $name\n";
 	$commands{$name} and helpline($name), return;
 	map{  my $cmd = $_ ;
+		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
 	      helpline($cmd), return 
-		  print "commands short: ", $commands{$cmd}->{short}, $/
 		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
 	} keys %commands
-=cut
 }
 
 
