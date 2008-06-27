@@ -105,11 +105,15 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
-    #MainLoop;
-	my $shell = ::Text::OuterShell->new;
-	my $term = $shell->term();
-	$term->tkRunning(1);
-	$shell->cmdloop;
+    MainLoop;
+# the following gives a shell in the terminal
+# window simultaneous with the Tk user
+# interface windows
+#
+# 	my $shell = ::Text::OuterShell->new;
+# 	my $term = $shell->term();
+# 	$term->tkRunning(1);
+# 	$shell->cmdloop;
 }
 
 ## The following methods belong to the Text interface class
@@ -174,7 +178,7 @@ $grammar = q(
 [% qx(./emit_command_headers) %]
 );
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-::Text::OuterShell::create_help_subs();
+# ::Text::OuterShell::create_help_subs();
 
 # we use the following settings if we can't find config files
 

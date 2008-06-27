@@ -1,19 +1,24 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-    local $debug = 0;
+	local $debug = 1;
+    #local $debug = 0;
     package ::;
     load_project(name => $project_name, create => $opts{c}) if $project_name;
-#    my $term = new Term::ReadLine 'Ecmd';
-#    my $prompt = "Enter command: ";
-#    $OUT = $term->OUT || \*STDOUT;
-#$term->tkRunning(1);
-
-
+    my $term = new Term::ReadLine 'Ecmd';
+    my $prompt = "Enter command: ";
+    $OUT = $term->OUT || \*STDOUT;
+	#$term->tkRunning(1);
+	while (1) {
+    my ($user_input) = $term->readline($prompt) ;
+	next if $user_input =~ /^\s*$/;
+     $term->addhistory($user_input) ;
+	::Text::command_process( $user_input );
  #    use ::Text::OuterShell; # not needed, class is present in this file
-      my $shell = ::Text::OuterShell->new;
+#      my $shell = ::Text::OuterShell->new;
 
-          $shell->cmdloop;
+          # $shell->cmdloop;
+	}
 }
 
     
@@ -21,11 +26,8 @@ sub command_process {
 
 package ::;
         my ($user_input) = shift;
-        #local $debug = 1;
-        # my ($user_input) = $term->readline($prompt) ; # old way
         return if $user_input =~ /^\s*$/;
         $debug and print "user input: $user_input\n";
-        # $term->addhistory($user_input) ; # this is done # for us too
         my @user_input = split /\s*;\s*/, $user_input;
         map {
             my $user_input = $_;
@@ -92,7 +94,8 @@ format STDOUT =
 @>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>>   @<<<<<<<<<<<<<<<<<<< ~~
 splice @::format_fields, 0, 7
 .
-    
+
+=comment
 # prepare help and autocomplete
 
 package ::Text::OuterShell;
@@ -296,4 +299,5 @@ sub create_help_subs {
     grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
 
 }
+=cut
     
