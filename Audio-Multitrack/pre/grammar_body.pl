@@ -22,7 +22,7 @@ help: _help name end {
 	print $::helptext  }
 helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
-
+exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end {
 	::load_project( 
 		name => ::remove_spaces($item{name}),

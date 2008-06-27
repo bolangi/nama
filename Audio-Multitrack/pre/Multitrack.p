@@ -179,6 +179,11 @@ $grammar = q(
 );
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 # ::Text::OuterShell::create_help_subs();
+#
+
+$helptext = q(
+[% qx(cat ./help.txt) %]
+);
 
 # we use the following settings if we can't find config files
 
