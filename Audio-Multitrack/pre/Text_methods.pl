@@ -107,13 +107,13 @@ sub helpline {
 }
 sub help { 
 	my $name = shift;
-	#print "seeking help for argument: $name\n";
-	helpline($name);
-=comment
 	chomp $name;
+	#print "seeking help for argument: $name\n";
+	$commands{$name} and helpline($name), return;
 	map{  my $cmd = $_ ;
-	      $name eq $cmd or (grep { $name eq $_  } split " ", $commands{$cmd}->{short}     )
-		  and return($commands{$cmd}->{smry} ?  $commands{$cmd}->{smry} : $commands{$cmd}->{what}) 
+	      helpline($cmd), return 
+		  print "commands short: ", $commands{$cmd}->{short}, $/
+		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
 	} keys %commands
 =cut
 }
