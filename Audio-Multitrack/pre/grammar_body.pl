@@ -15,7 +15,11 @@ command: fail
 end: /\s*$/ 
 #end: /\s*;\s*/ 
 end: ';' 
-help: _help dd end { print "hello_from your command line gramar\n"; 1 }
+help: _help end { print $::helptext  }
+help: _help name end { 
+	# iterate over commands yml
+	# find right command, print helptext
+	print $::helptext  }
 helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
 fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
 
