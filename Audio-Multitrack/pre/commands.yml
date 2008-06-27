@@ -213,7 +213,6 @@ name_mark:
   what: Give a name to a mark
   parameters: string
 remove_track:
-  short:
   what: Make track go away
   parameters: string
 stop:

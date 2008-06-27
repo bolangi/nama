@@ -260,12 +260,12 @@ HELP
 
 sub create_help_subs {
     $debug2 and print "create_help_subs\n";
-    local $debug = 0;
+    local $debug = 1;
     %commands = %{ ::yaml_in( $::commands_yml) };
 
     $debug and print ::yaml_out \%commands;
     
-    #map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+    map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
     
     map{ 
             my $run_code = qq!sub run_$_ { splice \@_,1,0,  q($_); catch_run( \@_) }; !;
@@ -288,7 +288,7 @@ sub create_help_subs {
 
             my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
             $debug and print "evalcode: $alias_code\n";
-            #eval $alias_code;# noisy in docs
+            eval $alias_code;# noisy in docs
             $debug and $@ and print "create_sub eval error: $@\n";
 
         }
