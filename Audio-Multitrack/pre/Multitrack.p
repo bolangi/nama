@@ -166,6 +166,8 @@ $commands_yml = <<'YML';
 [% qx(./strip_comments  ./commands.yml) %]
 YML
 
+%commands = %{ ::yaml_in( $::commands_yml) };
+
 $::AUTOSTUB = 1;
 $::RD_HINT = 1;
 

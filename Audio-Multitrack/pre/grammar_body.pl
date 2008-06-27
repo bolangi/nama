@@ -10,18 +10,16 @@ dd: /\d+/
 name: /\w+/
 	
 asdf: 'asdf' { print "hello"}
-#read: command(s)
 command: fail
 end: /\s*$/ 
-#end: /\s*;\s*/ 
 end: ';' 
-help: _help end { print $::helptext  }
-help: _help name end { 
-	# iterate over commands yml
-	# find right command, print helptext
-	print $::helptext  }
-helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
-fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
+help: _help end { print $::helptext }
+help: _help name end { print ::Text::help($item{name}) }
+# iterate over commands yml
+# find right command, print helptext
+#	print $::helptext  }
+helpx: 'helpx' end { print "hello_from your command line gramar\n"; }
+fail: 'f' end { print "your command line gramar will get a zero\n"; }
 exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end {
 	::load_project( 
@@ -70,21 +68,20 @@ dump_group: _dump_group { $::tracker->dumpp }
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
 
-generate: _generate end { ::generate_setup(); 1 }
+generate: _generate end { ::generate_setup(); }
 
 arm: _arm end { 
-	::generate_setup() and ::connect_transport(); 1 }
+	::generate_setup() and ::connect_transport(); }
 
-connect: _connect end { ::connect_transport(); 1 }
+connect: _connect end { ::connect_transport(); }
 
-disconnect: _disconnect end { ::disconnect_transport(); 1 }
+disconnect: _disconnect end { ::disconnect_transport(); }
 
 
-renew_engine: _renew_engine end { ::new_engine(); 1  }
+renew_engine: _renew_engine end { ::new_engine(); }
 
-start: _start end { ::start_transport(); 1}
-stop: _stop end { ::stop_transport();
-1}
+start: _start end { ::start_transport(); }
+stop: _stop end { ::stop_transport(); }
 
 S: _S end { ::eval_iam("stop") }
 T: _T end { ::eval_iam("start") }

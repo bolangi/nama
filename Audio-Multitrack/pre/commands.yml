@@ -1,4 +1,7 @@
 ---
+help:
+  short: h
+  what: display general help screen, or description of specific command
 exit:
   short: quit
   what: exit program, saving settings

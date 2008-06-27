@@ -95,6 +95,26 @@ format STDOUT =
 splice @::format_fields, 0, 7
 .
 
+sub helpline {
+	my $cmd = shift;
+	$commands{$cmd}->{smry} 
+		?  $commands{$cmd}->{smry} 
+		: $commands{$cmd}->{what} 
+}
+sub help { 
+	my $name = shift;
+	print "seeking help for argument: $name\n";
+	print helpline($name);
+=comment
+	chomp $name;
+	map{  my $cmd = $_ ;
+	      $name eq $cmd or (grep { $name eq $_  } split " ", $commands{$cmd}->{short}     )
+		  and return($commands{$cmd}->{smry} ?  $commands{$cmd}->{smry} : $commands{$cmd}->{what}) 
+	} keys %commands
+=cut
+}
+
+
 =comment
 # prepare help and autocomplete
 
