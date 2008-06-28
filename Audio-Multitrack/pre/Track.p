@@ -314,7 +314,7 @@ sub all { @by_index[1..scalar @by_index - 1] }
 
 # subclass
 
-package ::SimpleTrack;
+package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
 use ::Object qw( 	name
 						dir
@@ -345,7 +345,8 @@ use ::Object qw( 	name
 sub rec_status{
 
 	my $track = shift;
-	$track->rw;
+	return 'MON' unless $track->rw eq 'OFF';
+	'OFF';
 
 }
 
