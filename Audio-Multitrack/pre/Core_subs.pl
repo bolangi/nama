@@ -385,7 +385,7 @@ sub initialize_rules {
 	$mix_setup_mon = ::Rule->new(
 
 		name			=>  'mix_setup_mon',
-		chain_id		=>  sub { my $track = shift; "J". $track->n },
+		chain_id		=>  sub { my $track = shift; "K". $track->n },
 		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
