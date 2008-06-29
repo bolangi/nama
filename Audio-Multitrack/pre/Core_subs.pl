@@ -974,6 +974,7 @@ sub start_transport {
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 	eval_iam('start');
 	sleep 1; # time for engine
+	print "engine status: ", eval_iam("engine-status"), $/;
 	start_clock();
 }
 sub stop_transport { 
@@ -1089,15 +1090,17 @@ sub jump {
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
+	return if transport_running();
 	local $debug = 1;
  	my @k = really_recording();
 	$debug and print "I was recording!\n", join $/, @k;
-	disconnect_transport();
 	my $recorded = 0;
  	for my $k (@k) {    
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
 		print "k: $k, n: $n\n";
- 		my $test_wav = $ti[$n]->full_path;
+		my $file = $k;
+		$file =~ s/ .*$//;
+ 		my $test_wav = $file;
 		$debug and print "track: $n, file: $test_wav\n";
  		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); 
 		$debug and print "n: $n\nv: $v\n";
@@ -1922,7 +1925,7 @@ sub retrieve_state {
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
 	$file = $yamlfile if -f $yamlfile;
-	! -f $file and carp("file not found: $file\n"), return;
+	! -f $file and print ("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 
 	assign_var( $file, @persistent_vars );
