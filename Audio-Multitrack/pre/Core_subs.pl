@@ -411,12 +411,6 @@ sub initialize_rules {
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=> 1,
-=comment
-		sub { my $track = shift; 
-								return "satisfied" if defined
-								$inputs{cooked}->{"loop," . $track->n}; 
-								0 } ,
-=cut
 		status			=>  1,
 	);
 		
