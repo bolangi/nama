@@ -139,7 +139,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
+		rules  => [ qw(mon_setup mix_setup  mix_file ) ],
 	);
 
 
@@ -402,9 +402,7 @@ sub initialize_rules {
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
-		chain_id 		=>	sub{ 
-								# $debug and print 
-								my $track = shift; $track->n },
+		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=>  'cooked',
@@ -537,7 +535,7 @@ sub eliminate_loops {
 	if (    $ref =~ /ARRAY/ and 
 			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
-		#print "i have a loop to eliminate \n";
+		print "i have a loop to eliminate \n";
 
 		# The output device we assume will be chains MixerOut or
 		# MixDown
