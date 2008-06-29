@@ -402,16 +402,21 @@ sub initialize_rules {
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ 
+								# $debug and print 
+								my $track = shift; $track->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> sub { my $track = shift; 
+		condition 		=> 1,
+=comment
+		sub { my $track = shift; 
 								return "satisfied" if defined
 								$inputs{cooked}->{"loop," . $track->n}; 
 								0 } ,
+=cut
 		status			=>  1,
 	);
 		
@@ -940,7 +945,7 @@ sub generate_setup { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		 map{ eliminate_loops($_) } all_chains();
+		# map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
