@@ -139,7 +139,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mon_setup mix_setup  mix_file ) ],
+		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
 	);
 
 
@@ -385,13 +385,14 @@ sub initialize_rules {
 	$mix_setup_mon = ::Rule->new(
 
 		name			=>  'mix_setup_mon',
-		chain_id		=>  sub { my $track = shift; "K". $track->n },
+		chain_id		=>  sub { my $track = shift; "J". $track->n },
 		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loopa,
 		output_type		=>  'cooked',
 		# condition 		=>  sub{ defined $inputs{mixed} },
+		condition        => 1,
 		status			=>  1,
 		
 	);
@@ -937,7 +938,7 @@ sub generate_setup { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		# map{ eliminate_loops($_) } all_chains();
+		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
