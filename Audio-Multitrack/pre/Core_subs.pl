@@ -779,7 +779,7 @@ sub really_recording {  # returns filename stubs
 
 #	scalar @record  
 	#print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
-	keys %{$outputs{file}}; # includes mixdown
+	map{ s/ .*$//; $_} keys %{$outputs{file}}; # includes mixdown
 }
 
 sub write_chains {
