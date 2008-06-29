@@ -42,10 +42,17 @@ load_project: _load_project name end {
 save_state: _save_state name(?) end { 
 	::save_state( $item{name} ); 
 	}
-get_state: _get_state name(?) end {
+get_state: _get_state /\s+/ name end {
  	::load_project( 
  		name => $::project_name,
  		settings => $item{name}
+ 		);
+ #	print "set state:  $item{name}\n";
+ 	}
+get_state: _get_state end {
+	print "get without parameter\n";
+ 	::load_project( 
+ 		name => $::project_name,
  		);
  #	print "set state:  $item{name}\n";
  	}
