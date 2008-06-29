@@ -1107,7 +1107,7 @@ sub rec_cleanup {
 		$debug and print "testing for $test_wav\n";
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
-				$ti[$n]->set(active => $ti[$n]->last); 
+				#$ti[$n]->set(active => $ti[$n]->last); 
 				update_version_button($n, $v);
 			$recorded++;
 			}
