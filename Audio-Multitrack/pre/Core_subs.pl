@@ -643,7 +643,7 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	return if transport_running();
 	my $name = shift;
-	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
 		ch_r => $ch_r,
@@ -775,11 +775,12 @@ sub user_mon_tracks {
 
 }
 
-sub really_recording {  # returns filename stubs
+sub really_recording {  # returns $output{file} entries
 
 #	scalar @record  
 	#print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
-	map{ s/ .*$//; $_} keys %{$outputs{file}}; # includes mixdown
+# 	map{ s/ .*$//; $_}  # unneeded
+	keys %{$outputs{file}}; # strings include format strings mixdown
 }
 
 sub write_chains {
@@ -964,6 +965,7 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
+	print "engine status: ", eval_iam("engine-status"), $/;
 	$ui->flash_ready();
 	
 }
@@ -1087,12 +1089,14 @@ sub jump {
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
-	$debug and print "I was recording!\n";
+	local $debug = 1;
  	my @k = really_recording();
+	$debug and print "I was recording!\n", join $/, @k;
 	disconnect_transport();
 	my $recorded = 0;
  	for my $k (@k) {    
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
+		print "k: $k, n: $n\n";
  		my $test_wav = $ti[$n]->full_path;
 		$debug and print "track: $n, file: $test_wav\n";
  		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); 
