@@ -39,10 +39,12 @@ load_project: _load_project name end {
 
 	print "loaded project: $::project_name\n";
 }
-save_state: _save_state name(?) end { 
+save_state: _save_state name end { 
 	::save_state( $item{name} ); 
 	}
-get_state: _get_state /\s+/ name end {
+save_state: _save_state end { ::save_state() }
+get_state: _get_state name end {
+	# print "get with parameter: $item{name}\n";
  	::load_project( 
  		name => $::project_name,
  		settings => $item{name}
@@ -50,7 +52,7 @@ get_state: _get_state /\s+/ name end {
  #	print "set state:  $item{name}\n";
  	}
 get_state: _get_state end {
-	print "get without parameter\n";
+	# print "get without parameter\n";
  	::load_project( 
  		name => $::project_name,
  		);
@@ -143,12 +145,6 @@ mixplay: _mixplay end { $::mixdown_track->set(rw => 'MON');
 }
 mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'OFF');
 						$::tracker->set(rw => 'MON')}
-
-
-
-mix: 'mix' end {1}
-
-norm: 'norm' end {1}
 
 record: 'record' end {} # set to Tracker-Record 
 
