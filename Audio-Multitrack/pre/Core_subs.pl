@@ -1040,8 +1040,24 @@ sub next_mark {
 	my $here = eval_iam("cs-get-position");
 	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
 	for my $i ( 0..$#marks ){
-		$marks[$i]->time > $here 
-			and eval_iam("setpos " .  $marks[$i+$jumps]->time), return;
+		if ($marks[$i]->time > $here){
+			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			$this_mark = $marks[$i];
+			return;
+		}
+	}
+}
+sub previous_mark {
+	my $jumps = shift;
+	$jumps and $jumps--;
+	my $here = eval_iam("cs-get-position");
+	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	for my $i ( reverse 0..$#marks ){
+		if ($marks[$i]->time < $here ){
+			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			$this_mark = $marks[$i];
+			return;
+		}
 	}
 }
 	
@@ -1907,7 +1923,7 @@ map { push @tracks_data, $_->hashref } ::Track::all();
 # prepare marks data for storage (new Mark objects)
 
 @marks_data = ();
-map { push @marks, $_->hashref } ::Mark::all();
+map { push @marks_data, $_->hashref } ::Mark::all();
 
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();

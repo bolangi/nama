@@ -222,14 +222,14 @@ pan_back:  _pan_back end {}
 list_marks: _list_marks end {'TODO' }
 
 remove_mark: _remove_mark end { 
-	$::this_mark->remove if (ref $::this_mark) =~ /Mark/;
+	$::this_mark->remove if ref $::this_mark =~ /Mark/;
 }
 
 mark: _mark end { ::mark_here() }
 
-next_mark: _next_mark end { ::next_mark }
+next_mark: _next_mark end { ::next_mark() }
 
-previous_mark: _previous_mark end { ::previous_mark }
+previous_mark: _previous_mark end { ::previous_mark() }
 
 mark_loop: _mark_loop end {}
 
