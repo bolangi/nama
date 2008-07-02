@@ -247,9 +247,9 @@ There are two types of commands.
 B<Static commands> influence the chain setup that will be
 used for audio processing.
 
-For example, the REC/MON/OFF setting for each track and each
-group controls whether a given track will be included in the
-next Ecasound chain setup, and whether audio for that track
+For example, the REC/MON/OFF status for a track and 
+its associated group controls whether that track will be included in the
+next Ecasound chain setup, and whether the audio stream 
 will be recorded or played back.
 
 B<Dynamic commands> operate in realtime, affecting
@@ -275,24 +275,26 @@ usually the last operation before pressing the start button.
 
 Audio::Multitrack will automatically incorporate locally
 available LADSPA plugins provided you have the 'analyseplugin'
-program (part of LADSPA) installed.  
+program (part of LADSPA client libraries) installed.  
 
 =head1 Tk GUI
 
 Invoked using the -g switch on the ecmd command line, 
-the Tk interface will provide linear/log sliders for most
-plugins. Text-entry widgets are used to enter parameters for
-plugins when hints are not available.
+the Tk interface provides two panels for record/mix
+and effects. Linear/log sliders are automatically used for most
+plugins. For other plugins, text-entry widgets are used to
+enter parameters. 
 
 The GUI time display color indicates whether the upcoming
-operation will recording (red), mixing only (yellow) or
+operation will include recording (red), mixing only (yellow) or
 playback only (green).  
 
 =head1 Text UI
 
 Invoked using the -t switch on the ecmd command line, 
-The command line interpreter includes history and tab
-completion of command names.
+The command line interpreter includes history. 
+Tab completion of command names has been disabled
+due to problems with the library. 
 
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 
@@ -300,22 +302,34 @@ help with I<command>.
 =head1 TRACKS
 
 Multiple WAV files can be recorded for each track. These are
-identified by version number, which can be specified
-for each track.
+identified by version number. Version number increment
+automatically.  Identical version numbers indicate WAV files
+recorded at the same time. The order of version numbers
+follows the time sequence of the recordings.
 
-Each track, including the Master and Mixdown, also have their own
-REC/MON/OFF setting and displays their own REC/MON/OFF
-status.
+Each track, including the Master and Mixdown, has its own
+REC/MON/OFF setting and displays its own REC/MON/OFF
+status. The Master track has only MON/OFF status. Setting REC
+status for the Mixdown track is the same as issuing
+the 'mixdown' command.
 
-There is also a global REC/MON/OFF and global version
-setting that apply to all user tracks (i.e. all but Master
-and Mixdown.) Global MON setting forces all REC user tracks 
-to MON state, and is entered automatically after a
-recording.
+Master and Mixdown tracks can behave differently from 
+user-created tracks because they belong to different
+groups. 
 
-Global OFF setting excludes all user tracks from the chain
-setup, useful when playing back files recorded through the
-Mixdown function.
+All user-created tracks belong to the Tracker group.
+There is a global REC/MON/OFF and version
+setting that apply to all these tracks.
+
+Tracker group MON setting (text command 'group_monitor')
+forces all user tracks with a REC setting to MON status.
+Tracker group MON setting triggers automatically after a
+successful recording.
+
+Tracker group OFF setting (text 'group_off') excludes all user
+tracks from the chain setup. Can be useful when playing back files
+recorded through the Mixdown function. The
+text 'mixplay' command sets the Tracker group to OFF.
 
 A track with no recorded WAV files that is set to MON will
 show OFF status.
@@ -346,23 +360,24 @@ No GUI remove-track command.
 
 Default GUI volume sliders are not log scaled.
 
-=head1 EXPORT
-
-None by default.
-
-=head1 BUGS AND LIMITATIONS
-
 Some controls have no effect while audio processing engine
 is running.
 
 Adding and removing chain operators while the engine is
 running may cause the engine to stop.
 
-It is sometimes necessary to issue the connect chainsetup
-command twice for the engine to be happy. 
+A spurious error message from Ecasound may appear
+on first connecting a chain setup.
 
-Do not Set Master track to REC. This interferes with 
-generating the chain setup. Use only MON or OFF modes.
+The post-recording cleanup routine currently deletes
+newly recorded soundfiles under 44100 bytes in size. 
+
+=head1 EXPORT
+
+None by default.
+
+=head1 BUGS AND LIMITATIONS
+
 
 =head1 DEPENDENCIES
 

@@ -223,7 +223,7 @@ list_marks: _list_marks end {'TODO' }
 
 remove_mark: _remove_mark end {'TODO' }
 
-mark: _mark end { }
+mark: _mark end { ::drop_mark()}
 
 next_mark: _next_mark end {}
 
