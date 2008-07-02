@@ -1,7 +1,7 @@
 #!/bin/sh
 preproc -r Audio::Multitrack 
 mv $TD/Multitrack.pm $TD/..
-preproc  -s ~/build/flow/Audio-Multitrack/pret \
+preproc  -s ~/build/flow/Audio-Multitrack/pre \
          -t ~/build/flow/Audio-Multitrack/t    \
 		 -r Audio::Multitrack \
 		 -a t \
