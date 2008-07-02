@@ -439,7 +439,7 @@ package ::Mark;
 use Carp;
 our @ISA;
 use vars qw($n %by_name @all  %used_names);
-use ::Object qw( n
+use ::Object qw( 
 				 name 
                  time
 				 active
@@ -459,23 +459,24 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	carp "name already in use: $vals{name}\n"
+	croak  "name already in use: $vals{name}\n"
 		 if $used_names{$vals{name}}; # null name returns false
-	my $n = $vals{n} ? $vals{n} : $n++; 
 	my $object = bless { 
 
 		## 		defaults ##
 
-					n    	=> $n,
 					active  => 1,
 					use_for_looping => 0,
 
 					@_ 			}, $class;
 
 	#print "object class: $class, object type: ", ref $object, $/;
-	$used_names{$vals{name}}++;
-	$by_index[$n] = $object;
-	$by_name{ $object->name } = $object;
+	if ($object->name) {
+		$used_names{$vals{name}}++;
+		$by_name{ $object->name } = $object;
+	}
+	push @all, $object;
+	$object->name and 
 	$::this_mark = $object;
 	
 	$object;
@@ -490,8 +491,14 @@ sub jump_here {
 
 sub DESTROY {
 	my $mark = shift;
-	splice @by_index, 
+	@all = grep { $_->time != $mark->time } @all;
+	if ( $mark->name ) {
+		delete $by_name{$mark->name};
+		delete $used_names{$mark->name};
+	}
 
+
+}
 
 
 
