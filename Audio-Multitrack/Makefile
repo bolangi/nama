@@ -159,7 +159,8 @@ C_FILES  =
 O_FILES  = 
 H_FILES  = 
 MAN1PODS = 
-MAN3PODS = lib/Audio/Multitrack.pm \
+MAN3PODS = Multitrack.pm \
+	lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Object.pm
 
 # Where is the Config information that we are using/depend on
@@ -182,10 +183,12 @@ PERL_ARCHIVE       =
 PERL_ARCHIVE_AFTER = 
 
 
-TO_INST_PM = lib/Audio/Multitrack.pm \
+TO_INST_PM = Multitrack.pm \
+	lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Assign.pm \
 	lib/Audio/Multitrack/Bus.pm \
 	lib/Audio/Multitrack/Iam.pm \
+	lib/Audio/Multitrack/Mark.pm \
 	lib/Audio/Multitrack/Object.pm \
 	lib/Audio/Multitrack/Tkeca_effects.pm \
 	lib/Audio/Multitrack/Track.pm \
@@ -197,14 +200,18 @@ PM_TO_BLIB = lib/Audio/Multitrack/Tkeca_effects.pm \
 	blib/lib/Audio/Multitrack/Bus.pm \
 	lib/Audio/Multitrack/Track.pm \
 	blib/lib/Audio/Multitrack/Track.pm \
+	Multitrack.pm \
+	$(INST_LIB)/Multitrack.pm \
+	lib/Audio/Multitrack/Mark.pm \
+	blib/lib/Audio/Multitrack/Mark.pm \
+	lib/Audio/Multitrack/Object.pm \
+	blib/lib/Audio/Multitrack/Object.pm \
 	lib/Audio/Multitrack.pm \
 	blib/lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Wav.pm \
 	blib/lib/Audio/Multitrack/Wav.pm \
 	lib/Audio/Multitrack/Iam.pm \
 	blib/lib/Audio/Multitrack/Iam.pm \
-	lib/Audio/Multitrack/Object.pm \
-	blib/lib/Audio/Multitrack/Object.pm \
 	lib/Audio/Multitrack/Assign.pm \
 	blib/lib/Audio/Multitrack/Assign.pm
 
@@ -426,9 +433,11 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
+	Multitrack.pm \
 	lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Object.pm
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
+	  Multitrack.pm $(INST_MAN3DIR)/Multitrack.$(MAN3EXT) \
 	  lib/Audio/Multitrack.pm $(INST_MAN3DIR)/Audio::Multitrack.$(MAN3EXT) \
 	  lib/Audio/Multitrack/Object.pm $(INST_MAN3DIR)/Audio::Multitrack::Object.$(MAN3EXT) 
 
@@ -832,10 +841,12 @@ pm_to_blib : $(TO_INST_PM)
 	  lib/Audio/Multitrack/Tkeca_effects.pm blib/lib/Audio/Multitrack/Tkeca_effects.pm \
 	  lib/Audio/Multitrack/Bus.pm blib/lib/Audio/Multitrack/Bus.pm \
 	  lib/Audio/Multitrack/Track.pm blib/lib/Audio/Multitrack/Track.pm \
+	  Multitrack.pm $(INST_LIB)/Multitrack.pm \
+	  lib/Audio/Multitrack/Mark.pm blib/lib/Audio/Multitrack/Mark.pm \
+	  lib/Audio/Multitrack/Object.pm blib/lib/Audio/Multitrack/Object.pm \
 	  lib/Audio/Multitrack.pm blib/lib/Audio/Multitrack.pm \
 	  lib/Audio/Multitrack/Wav.pm blib/lib/Audio/Multitrack/Wav.pm \
 	  lib/Audio/Multitrack/Iam.pm blib/lib/Audio/Multitrack/Iam.pm \
-	  lib/Audio/Multitrack/Object.pm blib/lib/Audio/Multitrack/Object.pm \
 	  lib/Audio/Multitrack/Assign.pm blib/lib/Audio/Multitrack/Assign.pm 
 	$(NOECHO) $(TOUCH) pm_to_blib
 
