@@ -199,24 +199,24 @@ list_marks:
   what: List all marks
   parameters: none
 mark:
-  what: Mark current head position
+  what: Mark current head position, becomes current mark
   short: k	
   parameters: optional string
 remove_mark:
-  what: Remove mark at current head position
+  what: Remove current mark 
   short: rm
   parameters: optional number
 next_mark:
-  short: mf nm fm
+  short: nm
   what: Move playback head to next mark
   parameters: none
 previous_mark:
-  short: mb pm bm
+  short: pm
   what: Move playback head to previous mark
   parameters: none
 name_mark:
-  short: nm
-  what: Give a name to a mark
+  short: nom 
+  what: Give a name to the current mark
   parameters: string
 remove_track:
   what: Make track go away

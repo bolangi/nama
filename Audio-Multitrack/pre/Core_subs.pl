@@ -1005,6 +1005,8 @@ sub toggle_unit {
 sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
+
+# GUI routines
 sub drop_mark {
 		my $pos = shift; # for restore, otherwise
 		$pos = $pos ? $pos : eval_iam("cs-get-position");
@@ -1025,6 +1027,25 @@ sub mark {
 		eval_iam(qq(cs-set-position $pos));
 	}
 }
+
+# TEXT routines
+
+sub mark_here {
+	my $here = eval_iam("cs-get-position");
+	::Mark->new( time => $here );
+}
+sub next_mark {
+	my $jumps = shift;
+	$jumps and $jumps--;
+	my $here = eval_iam("cs-get-position");
+	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	for my $i ( 0..$#marks ){
+		$marks[$i]->time > $here 
+			and eval_iam("setpos " .  $marks[$i+$jumps]->time), return;
+	}
+}
+	
+
 ## clock and clock-refresh functions ##
 #
 
