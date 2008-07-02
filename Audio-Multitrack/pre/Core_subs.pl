@@ -1894,10 +1894,11 @@ map { push @groups_data, $_->hashref } ::Group::all();
 
 
 # store alsa settings
+=comment
 
 	my $result2 = system "alsactl -f $file.alsa store";
 	$debug and print "alsactl store result: ", $result2 >>8, "\n";
-
+=cut
 	# now remute
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
@@ -2003,11 +2004,11 @@ sub retrieve_state {
 	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
 	$ui->refresh_oids();
 
-	# restore mixer settings
-
+	# restore Alsa mixer settings
+=comment
 	my $result = system "sudo alsactl -f $file.alsa restore";
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
-
+=cut
 	$ui->restore_time_marks();
 
 } 

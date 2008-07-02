@@ -352,7 +352,8 @@ $project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
 $project_root/project_name/State.yml  Default save file for project parameters
 
 $project_root/project_name/.ecmdrc    Project-specific configuration
-=head1 BUGS
+
+=head1 BUGS AND LIMITATIONS
 
 No text-mode commands for setting marks.
 
@@ -372,11 +373,12 @@ on first connecting a chain setup.
 The post-recording cleanup routine currently deletes
 newly recorded soundfiles under 44100 bytes in size. 
 
+Alsa settings save and restore function is currently disabled.
+
 =head1 EXPORT
 
 None by default.
 
-=head1 BUGS AND LIMITATIONS
 
 
 =head1 DEPENDENCIES

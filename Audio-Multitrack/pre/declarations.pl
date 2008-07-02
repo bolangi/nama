@@ -67,6 +67,7 @@ our (
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
 	$this_op,      # currently selected effect
+	$this_mark,    # current mark
 	$loop, 	       # cs-loop 
 	$length,       # cs-set-length
 

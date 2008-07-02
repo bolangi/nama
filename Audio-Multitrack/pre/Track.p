@@ -69,7 +69,6 @@ sub new {
 
 		}
 	}
-	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 
 
@@ -439,15 +438,14 @@ use ::Object qw(	op_id
 package ::Mark;
 use Carp;
 our @ISA;
-use vars qw($n %by_name @by_index %used_names);
+use vars qw($n %by_name @all  %used_names);
 use ::Object qw( n
 				 name 
                  time
 				 active
 				 loop_point
 				 );
-$n = 0; 	# incrementing numeric key
-@by_index = ();	# return ref to Mark by numeric key
+@all = ();	
 %by_name = ();	# return ref to Mark by name
 %used_names = (); 
 
@@ -463,8 +461,7 @@ sub new {
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	carp "name already in use: $vals{name}\n"
 		 if $used_names{$vals{name}}; # null name returns false
-	my $add_index = ! $vals{n};
-	my $n = $vals{n} ? $vals{n} : ++$n; 
+	my $n = $vals{n} ? $vals{n} : $n++; 
 	my $object = bless { 
 
 		## 		defaults ##
@@ -479,10 +476,24 @@ sub new {
 	$used_names{$vals{name}}++;
 	$by_index[$n] = $object;
 	$by_name{ $object->name } = $object;
+	$::this_mark = $object;
 	
 	$object;
 	
 }
+
+sub jump_here {
+	my $mark = shift;
+	eval_iam( "setpos " , $mark->time);
+	$::this_mark = $mark;
+}
+
+sub DESTROY {
+	my $mark = shift;
+	splice @by_index, 
+
+
+
 
 1;
 
