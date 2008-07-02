@@ -1901,7 +1901,13 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 map { push @tracks_data, $_->hashref } ::Track::all();
+
 # print "found ", scalar @tracks_data, "tracks\n";
+
+# prepare marks data for storage (new Mark objects)
+
+@marks_data = ();
+map { push @marks, $_->hashref } ::Mark::all();
 
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
@@ -1977,9 +1983,7 @@ sub retrieve_state {
 
 	splice @tracks_data, 0, 2;
 
-	#  now create the widgets
-	
-	create_master_and_mix_tracks();
+	create_master_and_mix_tracks(); # their GUI only
 
 	# create user tracks
 	
@@ -1995,7 +1999,8 @@ sub retrieve_state {
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
-		$ui->track_gui($n); # applies vol and pan operators
+		$ui->track_gui($n); 
+		
 		for my $id (@{$ti[$n]->ops}){
 			$did_apply++ 
 				unless $id eq $ti[$n]->vol
@@ -2031,6 +2036,13 @@ sub retrieve_state {
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 =cut
 	$ui->restore_time_marks();
+
+	# text mode marks 
+		
+	map{ 
+		my %h = %$_; 
+		my $mark = ::Mark->new( %h ) ;
+	} @marks_data;
 
 } 
 sub create_master_and_mix_tracks {

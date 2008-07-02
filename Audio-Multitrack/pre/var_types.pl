@@ -34,6 +34,7 @@
 						$jack_on 
 						@tracks_data
 						@groups_data
+						@marks_data
 						$loop
 						$length
 

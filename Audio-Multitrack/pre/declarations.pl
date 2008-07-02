@@ -243,6 +243,7 @@ our (
 
 	@tracks_data, # staging for saving
 	@groups_data, # 
+	@marks_data, # 
 
 	$mixer_out_device, # where to send stereo output
 	$record_device,    # where to get our inputs
