@@ -987,9 +987,9 @@ sub start_transport {
 
 	eval_iam('start');
 	$event_id{loop} = $new_event->after(5000, sub{ print "delayed hello\n" });
+    $ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;
-	start_clock(); # XXX needed by Graphical Engine
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
@@ -1091,7 +1091,7 @@ sub start_clock {
 	$clock_id = $new_event->after(1000, \&refresh_clock);
 }
 sub restart_clock {
-	start_clock();
+	$ui->start_clock();
 }
 sub refresh_clock{
 	

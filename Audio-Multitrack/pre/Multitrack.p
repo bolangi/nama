@@ -130,6 +130,7 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
+sub start_clock {}
 sub group_gui {}
 sub track_gui {}
 sub refresh {}
