@@ -1,3 +1,49 @@
+# regex contraining of values
+key: /\w+/
+someval: /[\w.+-]+/
+sign: /[+-]/
+op_id: /[A-Z]+/
+parameter: /\d+/
+value: /[\d\.eE+-]+/ # -1.5e-6
+last: ('last' | '$' ) 
+dd: /\d+/
+name: /\w+/
+	
+asdf: 'asdf' { print "hello"}
+command: fail
+end: /\s*$/ 
+end: ';' 
+help: _help end { print $::helptext }
+help: _help name end { ::Text::help($item{name}) }
+# iterate over commands yml
+# find right command, print helptext
+#	print $::helptext  }
+helpx: 'helpx' end { print "hello_from your command line gramar\n"; }
+fail: 'f' end { print "your command line gramar will get a zero\n"; }
+exit: _exit end { ::save_state(); exit }
+create_project: _create_project name end {
+	::load_project( 
+		name => ::remove_spaces($item{name}),
+		create => 1,
+	);
+	print "created project: $::project_name\n";
+
+}
+
+load_project: _load_project name end {
+	my $untested = ::remove_spaces($item{name});
+	print ("Project $untested does not exist\n"), return
+	unless -d ::join_path ::wav_dir(), $untested; 
+	::load_project( name => ::remove_spaces($item{name}) );
+	::generate_setup() and ::connect_transport();
+
+	print "loaded project: $::project_name\n";
+}
+save_state: _save_state name end { 
+	::save_state( $item{name} ); 
+	}
+save_state: _save_state end { ::save_state() }
+
 getpos: _getpos end { print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
 
 get_state: _get_state name end {
@@ -7,14 +53,14 @@ get_state: _get_state name end {
  		settings => $item{name}
  		);
  #	print "set state:  $item{name}\n";
-}
+ 	}
 get_state: _get_state end {
 	# print "get without parameter\n";
  	::load_project( 
  		name => $::project_name,
  		);
  #	print "set state:  $item{name}\n";
-}
+ 	}
 
 add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
