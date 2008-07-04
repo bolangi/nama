@@ -8,6 +8,9 @@ exit:
 getpos:
   short: gp
   what: get current playhead position (seconds)
+setpos:
+  short: sp
+  what: set current playhead position (seconds)
 group_rec:
   short: grec R
   what: group REC mode, i.e. rec-enable user tracks

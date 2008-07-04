@@ -59,9 +59,10 @@ get_state: _get_state end {
  		);
  #	print "set state:  $item{name}\n";
  	}
-getpos: _getpos end #{print "spiffy\n"}
-{  print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
+getpos: _getpos end {  
+	print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
 
+setpos: _setpos someval end { ::eval_iam("setpos ".$item{someval}) }
 add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
 	::add_track($item{name}); 
