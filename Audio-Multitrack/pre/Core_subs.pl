@@ -1043,7 +1043,7 @@ sub next_mark {
 	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
-			print "here: $here, future time: ",
+			$debug and print "here: $here, future time: ",
 			$marks[$i]->time, $/;
 			eval_iam("setpos " .  $marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];

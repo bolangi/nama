@@ -234,9 +234,14 @@ mark_loop: _mark_loop end {}
 name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
 list_marks: _list_marks end { 
-	map{ print( $_->time, " ", $_->name, $/)  } 
+	my $i = 0;
+	map{ print( $_->time == $::this_mark->time ? q(*) : q() ,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
+}
+to_mark: _to_mark dd end {
+	my @marks = ::Mark::all();
+	$marks[$item{dd}]->jump_here;
 }
 
 to_mark: _to_mark name end { 
