@@ -981,10 +981,15 @@ sub connect_transport {
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
+	# we are going to create an event that will loop
+	#
+	#
+
 	eval_iam('start');
+	$event_id{loop} = $new_event->after(5000, sub{ print "delayed hello\n" });
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;
-	start_clock();
+	start_clock(); # XXX needed by Graphical Engine
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
@@ -1083,7 +1088,7 @@ sub update_clock {
 }
 sub start_clock {
 	#eval qq($clock_id->cancel);
-	$clock_id = $clock->after(1000, \&refresh_clock);
+	$clock_id = $new_event->after(1000, \&refresh_clock);
 }
 sub restart_clock {
 	start_clock();
@@ -1091,7 +1096,7 @@ sub restart_clock {
 sub refresh_clock{
 	
 	update_clock();
-	$clock_id = $clock->after(1000, \&refresh_clock) if transport_running();
+	$clock_id = $new_event->after(1000, \&refresh_clock) if transport_running();
 	my $status = eval_iam('engine-status');
 	$debug 
 	   and print colonize(eval_iam('getpos')),  "  engine status: $status\n";
@@ -1141,6 +1146,7 @@ sub rec_cleanup {
 	return if transport_running();
 	local $debug = 1;
  	my @k = really_recording();
+	return unless @k;
 	$debug and print "I was recording!\n", join $/, @k;
 	my $recorded = 0;
  	for my $k (@k) {    
