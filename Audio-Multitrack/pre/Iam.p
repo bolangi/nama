@@ -15,6 +15,7 @@ rw
 st
 run
 debug
+setpos
 engine-status
 engine-launch
 engine-halt
