@@ -35,7 +35,8 @@
 						@tracks_data
 						@groups_data
 						@marks_data
-						$loop
+						$loop_enable
+						@loop_endpoints
 						$length
 
 						);

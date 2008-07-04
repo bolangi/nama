@@ -237,6 +237,10 @@ stop:
 start:
   short: t
   what: start transport
+loop_enable:
+  short: loop
+  what: playback will loop between marks
+  parameters: start_mark end_mark
 T:
   what: ecasound start
 S:

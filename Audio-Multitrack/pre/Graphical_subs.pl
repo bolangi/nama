@@ -130,7 +130,7 @@ sub init_gui {
 
 ### 	Tk root window layout
 
-	$mw = MainWindow->new; 
+
 	#my $mw = tkinit();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Tk Ecmd"); 

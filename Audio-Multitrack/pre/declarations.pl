@@ -57,19 +57,12 @@ our (
 	%devices, 		# alias to data in %cfg
 	%opts,          # command line options
 	%oid_status,    # state information for the chain templates
-	$clock_id,		# used in GUI for the Tk event system
-					# ->cancel method not reliable
-					# for 'repeat' events, so converted to
-					# 'after' events
 	$use_monitor_version_for_mixdown, # sync mixdown version numbers
 	              	# to selected track versions , not
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
 	$this_op,      # currently selected effect
-	$this_mark,    # current mark
-	$loop, 	       # cs-loop 
-	$length,       # cs-set-length
 
 	@format_fields, # data for replies to text commands
 
@@ -259,5 +252,19 @@ our (
 	$rec_file,
 	$rec_setup,
 	$multi,
+
+   # marks and playback looping
+   
+	$clock_id,		# used in GUI for the Tk event system
+					# ->cancel method not reliable
+					# for 'repeat' events, so converted to
+					# 'after' events
+	%event_id,    # events will store themselves with a unique key they provide
+	# $event_id{loop} = $loop_event, # Tk events for
+	$new_event,   # the Tk widget
+	$this_mark,    # current mark
+	@loop_endpoints, # they define the loop
+	$loop_enable, # whether we automatically loop
+	$length,       # cs-set-length
 
 );

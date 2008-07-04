@@ -153,10 +153,17 @@ sub prepare {
 	
 	$ui = ! $opts{t} ?  ::Graphical->new : ::Text->new;
 
+	# Tk main window
+ 	$mw = MainWindow->new;  
+	$new_event = $mw->Label();
+
 	$ui->init_gui;
 	$ui->transport_gui;
 	#$ui->oid_gui;
 	$ui->time_gui;
+
+	#
+    # $event{loop}	
 
 	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 

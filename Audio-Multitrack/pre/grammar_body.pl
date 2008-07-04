@@ -233,7 +233,14 @@ next_mark: _next_mark end { ::next_mark() }
 
 previous_mark: _previous_mark end { ::previous_mark() }
 
-mark_loop: _mark_loop end {}
+loop_enable: _loop_enable someval(s) end {
+	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
+	print join $/, @new_endpoints;
+	$::loop_enable = 1;
+	# assume indexes
+}
+	
+
 
 name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
