@@ -129,7 +129,7 @@ save_state:
   what: save project settings to disk, optional name
   parameters: optional string
 get_state:
-  short: get restore retrieve
+  short: recall restore retrieve
   what: retrieve project settings
 create_project:
   short: create	

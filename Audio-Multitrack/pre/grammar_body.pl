@@ -35,7 +35,6 @@ load_project: _load_project name end {
 	print ("Project $untested does not exist\n"), return
 	unless -d ::join_path ::wav_dir(), $untested; 
 	::load_project( name => ::remove_spaces($item{name}) );
-	::generate_setup() and ::connect_transport();
 
 	print "loaded project: $::project_name\n";
 }
@@ -44,7 +43,6 @@ save_state: _save_state name end {
 	}
 save_state: _save_state end { ::save_state() }
 
-getpos: _getpos end { print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
 
 get_state: _get_state name end {
 	# print "get with parameter: $item{name}\n";
@@ -61,6 +59,8 @@ get_state: _get_state end {
  		);
  #	print "set state:  $item{name}\n";
  	}
+getpos: _getpos end #{print "spiffy\n"}
+{  print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
 
 add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
