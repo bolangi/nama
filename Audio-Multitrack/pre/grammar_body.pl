@@ -235,10 +235,11 @@ name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
 list_marks: _list_marks end { 
 	my $i = 0;
-	map{ print( $_->time == $::this_mark->time ? q(*) : q() ,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
+	map{ print( $_->time == $::this_mark->time ? q(*) : q()
+	,join " ", $i++, sprintf("%.1f", $_->time)."s", $_->name, $/)  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
-	print "now at ", ::d2( ::eval_iam "getpos"), $/;
+	print "now at ", sprintf("%.1f", ::eval_iam "getpos")  . "s", $/;
 }
 to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();
