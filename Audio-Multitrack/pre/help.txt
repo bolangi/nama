@@ -1,0 +1,84 @@
+Main Help Scren
+
+  help <command> -  help with <command>
+
+-- Transport --
+
+   start, t - Start processing
+   stop, s - Stop processing
+   rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
+   forward <time-in-seconds>, fw <time-in-seconds> - Forward
+   setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
+
+
+  -- Project -- 
+
+    load_project, load       <name>          -  load an existing project 
+    create_project, create   <name>          -  create a new project directory tree 
+    get_state, get, retrieve <state_file>    -  retrieve settings, optional name
+    save_state, keep, save   <state_file>    -  save project settings to disk, optional name    
+    exit, quit                               - exit program, saving state if possible 
+
+  -- Setup --
+
+    setup, arm              -  generate and connect chain setup    
+    generate, gen           - generate chain setup
+    connect, con            - connect chain setup
+    show_setup, show        -  show setup    
+    show_chain_setup, chains - show Ecasound chain setup file contents
+
+  -- Track -- 
+  
+  Most of the Track related commands operate on the 'current
+  track'. To cut volume for a track called 'sax',  you enter
+  'sax mute' or even 'sax; mute' You can also specify a 
+  current track by number,  i.e.  '4 mute'.
+
+    show_track, sh          -  show track setup 
+    add_track, add          -  create a new track 
+
+  - version
+
+    set_version, version, n -  select current track version    
+
+  - rw_status
+
+    rec                     -  set track to REC  
+    mon                     -  set track to MON
+    off, z                  -  set track OFF (omit from setup)
+
+  - vol/pan 
+
+    pan, p               -  get/set pan position
+    pan_back, pb         -  restore pan    
+    pan_center, pc       -  set pan center    
+    pan_left, pl         -  pan track fully left    
+    pan_right, pr        -  pan track fully right    
+    unity, cc            -  unity volume    
+    vol, v               -  get/set track volume    
+    mute, c, cut          -  mute volume 
+
+  - channel assignments
+
+    r,record_channel        -   set input channel number, current track
+    m, monitor_channel      -  set output channel, current track
+
+  - effects 
+
+    add_effect,    fxa, afx    - add an effect to the current track
+    modify_effect, fxm, mfx    - set an effect parameter to a new value
+    delta_effect,  fxd, dfx    - increment/decrement effect parameter
+    remove_effect, fxr, rfx    - remove an effect
+
+  -- Group control --
+
+    group_rec, grec, R      -  group REC mode 
+    group_mon, gmon, M      -  group MON mode 
+    group_off, goff, MM     -  group OFF mode 
+    group_version, gn, gver, gv -  select group version 
+
+  -- Mixdown --
+
+    mixdown, mxd               -  enable mixdown 
+    mixoff, norm, normal, mxo  -  disable mixdown 
+    mixplay, mxp               -  playback a recorded mix 
