@@ -5,9 +5,9 @@ sub loop {
     package ::;
     load_project(name => $project_name, create => $opts{c}) if $project_name;
     my $term = new Term::ReadLine 'Ecmd';
+	$term->tkRunning(1);
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
-	#$term->tkRunning(1);
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
 	next if $user_input =~ /^\s*$/;
