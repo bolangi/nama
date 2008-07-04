@@ -238,6 +238,7 @@ list_marks: _list_marks end {
 	map{ print( $_->time == $::this_mark->time ? q(*) : q() ,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
+	print "now at ", ::d2( ::eval_iam "getpos"), $/;
 }
 to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();
