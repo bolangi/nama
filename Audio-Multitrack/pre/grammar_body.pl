@@ -241,8 +241,8 @@ list_marks: _list_marks end {
 
 to_mark: _to_mark name end { 
 	my $mark = $::Mark::by_name{$item{name}};
-	defined $mark or return;
-	eval_iam("setpos ", $mark->time);
+	$mark->jump_here if defined $mark;
+#	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 }
 
 # okay to here
