@@ -18,6 +18,7 @@ debug
 engine-status
 engine-launch
 engine-halt
+setpos
 cs-add
 cs-remove
 cs-list
