@@ -38,7 +38,6 @@ cs-set-position
 cs-set-position-samples
 cs-get-position
 cs-getpos
-getpos
 get-position
 cs-get-position-samples
 cs-get-length

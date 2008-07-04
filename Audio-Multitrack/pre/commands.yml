@@ -5,6 +5,9 @@ help:
 exit:
   short: quit
   what: exit program, saving settings
+getpos:
+  short: gp
+  what: get current playhead position (seconds)
 group_rec:
   short: grec R
   what: group REC mode, i.e. rec-enable user tracks

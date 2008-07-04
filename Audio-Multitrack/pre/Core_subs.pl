@@ -294,9 +294,11 @@ sub load_project {
 	
 	$ui->global_version_buttons(); 
 	$ui->refresh_t;
+	generate_setup() and connect_transport();
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
+ 1;
 
 }
 
@@ -929,7 +931,7 @@ sub generate_setup { # create chain setup
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'OFF'} 
 								@tracks;
-	# BUG: doesn't detect case of trying to mixdown with no
+	# TODO:  detect case of trying to mixdown with no
 	# playback tracks
 	#print "have source: $have_source\n";
 	if ($have_source) {
@@ -945,7 +947,7 @@ sub generate_setup { # create chain setup
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
 		return 1;
-	} else { print "Mixdown not possible, no inputs\n";
+	} else { print "Mixdown not possible without inputs\n";
 	return 0};
 }
 

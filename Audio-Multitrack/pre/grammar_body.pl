@@ -43,6 +43,9 @@ save_state: _save_state name end {
 	::save_state( $item{name} ); 
 	}
 save_state: _save_state end { ::save_state() }
+
+getpos: _getpos end { print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
+
 get_state: _get_state name end {
 	# print "get with parameter: $item{name}\n";
  	::load_project( 
@@ -218,6 +221,7 @@ pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
 				::sync_effect_param( $::this_track->pan, 0);
 }
 pan_back:  _pan_back end {}
+
 
 remove_mark: _remove_mark end { 
 	$::this_mark->remove if ref $::this_mark =~ /Mark/;
