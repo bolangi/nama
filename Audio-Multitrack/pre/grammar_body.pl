@@ -219,8 +219,6 @@ pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
 }
 pan_back:  _pan_back end {}
 
-list_marks: _list_marks end {'TODO' }
-
 remove_mark: _remove_mark end { 
 	$::this_mark->remove if ref $::this_mark =~ /Mark/;
 }
@@ -233,9 +231,19 @@ previous_mark: _previous_mark end { ::previous_mark() }
 
 mark_loop: _mark_loop end {}
 
-name_mark: _name_mark end {}
+name_mark: _name_mark name end {$::this_mark->set(name => $item{name}) }
 
-list_marks: _list_marks end {}
+list_marks: _list_marks end { 
+	map{ print( $_->time, " ", $_->name, $/)  } 
+		  #sort { $a->time <=> $b->time } 
+		  @::Mark::all;
+}
+
+to_mark: _to_mark name end { 
+	my $mark = $::Mark::by_name{$item{name}};
+	defined $mark or return;
+	eval_iam("setpos ", $mark->time);
+}
 
 # okay to here
 show_effects: _show_effects end {}

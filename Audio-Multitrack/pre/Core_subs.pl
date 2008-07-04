@@ -597,6 +597,8 @@ sub initialize_project_data {
 	$markers_armed = 0;
 	%marks = ();
 	
+	# new Marks
+ 	map{ $_->remove} ::Mark::all;
 	# volume settings
 	
 	%old_vol = ();
@@ -2063,7 +2065,7 @@ sub retrieve_state {
 	} @marks_data;
 
 } 
-sub create_master_and_mix_tracks {
+sub create_master_and_mix_tracks { # GUI widgets
 
 
 	my @rw_items = (

@@ -198,13 +198,17 @@ list_marks:
   short: lm
   what: List all marks
   parameters: none
+to_mark:
+  short: tom
+  what: move playhead to named mark
+  parameters: string
 mark:
   what: Mark current head position, becomes current mark
   short: k	
-  parameters: optional string
+  parameters: none
 remove_mark:
   what: Remove current mark 
-  short: rm
+  short: rmm
   parameters: optional number
 next_mark:
   short: nm
@@ -219,7 +223,7 @@ name_mark:
   what: Give a name to the current mark
   parameters: string
 remove_track:
-  what: Make track go away
+  what: Make track go away (actually hide and disable)
   parameters: string
 stop:
   short: s
