@@ -209,7 +209,7 @@ mark:
 remove_mark:
   what: Remove current mark 
   short: rmm
-  parameters: optional number
+  parameters: none
 next_mark:
   short: nm
   what: Move playback head to next mark

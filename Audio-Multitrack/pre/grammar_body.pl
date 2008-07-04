@@ -231,7 +231,7 @@ previous_mark: _previous_mark end { ::previous_mark() }
 
 mark_loop: _mark_loop end {}
 
-name_mark: _name_mark name end {$::this_mark->set(name => $item{name}) }
+name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
 list_marks: _list_marks end { 
 	map{ print( $_->time, " ", $_->name, $/)  } 
