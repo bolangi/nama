@@ -1019,15 +1019,16 @@ sub start_heartbeat {
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				print join " ", "engine-status: $status",
-				colonize(int $here), $/; 
+					colonize(int $here), $/; 
 				schedule_wraparound();
+				update_clock();
 
 				});
 
 }
 
 sub schedule_wraparound {
-	local $debug = 1;
+	#local $debug = 1;
 	my $here   = eval_iam("getpos");
 	my $end    = ::Mark::loop_end()->time;
 	my $start  = ::Mark::loop_start()->time;
@@ -1160,6 +1161,7 @@ sub previous_mark {
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
+=comment
 sub start_clock {
 	#eval qq($clock_id->cancel);
 	$clock_id = $new_event->after(1000, \&refresh_clock);
@@ -1180,6 +1182,7 @@ sub refresh_clock{
 		&really_recording and rec_cleanup() or connect_transport();
 	}
 }
+=cut
 
 ## jump recording head position
 
