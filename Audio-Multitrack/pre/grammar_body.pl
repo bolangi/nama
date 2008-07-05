@@ -224,7 +224,8 @@ pan_back:  _pan_back end {}
 
 
 remove_mark: _remove_mark end { 
-	$::this_mark->remove if ref $::this_mark =~ /Mark/;
+	return unless (ref $::this_mark) =~ /Mark/;
+	$::this_mark->remove;
 }
 
 mark: _mark end { ::mark_here() }

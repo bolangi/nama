@@ -100,7 +100,8 @@ sub mark_object {
 	} else {
 		$mark = $::Mark::by_name{$tag};
 	}
-	$mark->jump_here if defined $mark; 
+	#$mark->jump_here if defined $mark; 
+	$mark;
 }
 
 	

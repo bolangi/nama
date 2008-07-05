@@ -981,29 +981,74 @@ sub connect_transport {
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
-	# we are going to create an event that will loop
+	#
+	# we are going to have a heartbeat function.
+	# It will wakeup every three seconds
+	# will do several jobs, one is to calculate
+	# the time till the replay, then if that
+	# time is less than 6s, the wraparound will be
+	# scheduled.
+	#
+	# if the stop button is pressed, we cancel
 	#
 	#
+	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
+	#if twice (or 3x in a row) not running status, 
 
 	if ( $loop_enable) {
 		my $start  = ::Mark::loop_start()->time;
+		print "starting at ", d2($start), $/;
+		eval_iam('start');
 		eval_iam("setpos ". $start);
 		#$event_id{lop} = $new_event->after(5000, sub{ print "delayed hello\n" });
+	} else {
+		print "starting at ", colonize(int eval_iam "getpos"), $/;
+		eval_iam('start');
 	}
-	eval_iam('start');
-	prepare_looping() if $loop_enable;
+
+	start_heartbeat();
 
     $ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;
 }
+sub start_heartbeat {
+	$event_id{heartbeat} = $new_event->repeat( 3000,
+				sub { 
+				
+				my $here   = eval_iam("getpos");
+				my $status = eval_iam q(engine-status);
+				print join " ", "engine-status: $status",
+				colonize(int $here), $/; 
+				schedule_wraparound();
+
+				});
+
+}
+
+sub schedule_wraparound {
+	local $debug = 1;
+	my $here   = eval_iam("getpos");
+	my $end    = ::Mark::loop_end()->time;
+	my $start  = ::Mark::loop_start()->time;
+	my $diff = $end - $here;
+	debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	if ( $diff < 0 ){ # go at once
+		eval_iam("setpos ".$start);
+	} elsif ( $diff < 6 ) { #schedule the move
+	$event_id{wraparound} = $new_event->after( 
+		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } );
+	}
+}
+
+	
 sub prepare_looping {
 	# print "looping enabled\n";
 	my $here   = eval_iam q(getpos), 
 	my $end    = ::Mark::loop_end()->time;
 	my $start  = ::Mark::loop_start()->time;
 	my $diff = $end - $here;
-	print "here: $here, start: $start, end: $end, diff: $diff\n";
+	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){
 		eval_iam("setpos ".$start);
 		sleep 1;
@@ -1021,7 +1066,7 @@ sub prepare_looping {
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
-	$new_event->afterCancel($event_id{loop});
+	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
