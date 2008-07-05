@@ -995,17 +995,8 @@ sub start_transport {
 	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
 	#if twice (or 3x in a row) not running status, 
 
-	if ( $loop_enable) {
-		my $start  = ::Mark::loop_start()->time;
-		print "starting at ", d2($start), $/;
-		eval_iam('start');
-		eval_iam("setpos ". $start);
-		#$event_id{lop} = $new_event->after(5000, sub{ print "delayed hello\n" });
-	} else {
-		print "starting at ", colonize(int eval_iam "getpos"), $/;
-		eval_iam('start');
-	}
-
+	print "starting at ", colonize(int eval_iam "getpos"), $/;
+	eval_iam('start');
 	start_heartbeat();
 
     $ui->start_clock(); 
@@ -1161,28 +1152,6 @@ sub previous_mark {
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
-=comment
-sub start_clock {
-	#eval qq($clock_id->cancel);
-	$clock_id = $new_event->after(1000, \&refresh_clock);
-}
-sub restart_clock {
-	$ui->start_clock();
-}
-sub refresh_clock{
-	
-	update_clock();
-	$clock_id = $new_event->after(1000, \&refresh_clock) if transport_running();
-	my $status = eval_iam('engine-status');
-	$debug 
-	   and print colonize(eval_iam('getpos')),  "  engine status: $status\n";
-	
-	new_engine() if $status eq 'error';
-	if (! &transport_running){
-		&really_recording and rec_cleanup() or connect_transport();
-	}
-}
-=cut
 
 ## jump recording head position
 

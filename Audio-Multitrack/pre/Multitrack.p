@@ -357,23 +357,17 @@ $project_root/project_name/.ecmdrc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
-No text-mode commands for setting marks.
-
 No GUI remove-track command.
 
 Default GUI volume sliders are not log scaled.
 
-Some controls have no effect while audio processing engine
-is running.
-
 Adding and removing chain operators while the engine is
 running may cause the engine to stop.
 
-A spurious error message from Ecasound may appear
-on first connecting a chain setup.
-
 The post-recording cleanup routine currently deletes
 newly recorded soundfiles under 44100 bytes in size. 
+
+Looping behavior may not be reliable for loops under 6 seconds
 
 Alsa settings save and restore function is currently disabled.
 
