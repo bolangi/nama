@@ -986,7 +986,15 @@ sub start_transport {
 	#
 
 	eval_iam('start');
-	$event_id{loop} = $new_event->after(5000, sub{ print "delayed hello\n" });
+	$event_id{lop} = $new_event->after(5000, sub{ print "delayed hello\n" });
+	if ( $loop_enable ){
+	$event_id{loop} =  $new_event->after( 
+			::Mark::loop_end()->time - eval_iam q(getpos), 
+	    sub { ::Mark::loop_start()->jump_here  }
+		);
+		#  setup loop event
+		#   will need to cancel on transport stop
+	}
     $ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;

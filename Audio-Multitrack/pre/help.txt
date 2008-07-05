@@ -9,6 +9,17 @@ Main Help Scren
    rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
    forward <time-in-seconds>, fw <time-in-seconds> - Forward
    setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
+   getpos, gp               - Gets the current position 
+
+   loop_enable, loop [mark, mark...]  - loop over marks
+
+-- Marks
+   list_marks, lm - list marks showing index, time, name
+   next_mark, nm  - jump to next mark 
+   previous_mark, pm  - jump to previous mark 
+   name_mark, nom     - give a name to current mark 
+   to_mark, tom       - jump to a mark by name or index
+
 
 
   -- Project -- 
