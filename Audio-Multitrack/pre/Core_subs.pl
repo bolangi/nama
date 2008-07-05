@@ -985,22 +985,43 @@ sub start_transport {
 	#
 	#
 
-	eval_iam('start');
-	$event_id{lop} = $new_event->after(5000, sub{ print "delayed hello\n" });
-	if ( $loop_enable ){
-	$event_id{loop} =  $new_event->after( 
-			::Mark::loop_end()->time - eval_iam q(getpos), 
-	    sub { ::Mark::loop_start()->jump_here  }
-		);
-		#  setup loop event
-		#   will need to cancel on transport stop
+	if ( $loop_enable) {
+		my $start  = ::Mark::loop_start()->time;
+		eval_iam("setpos ". $start);
+		#$event_id{lop} = $new_event->after(5000, sub{ print "delayed hello\n" });
 	}
+	eval_iam('start');
+	prepare_looping() if $loop_enable;
+
     $ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;
 }
+sub prepare_looping {
+	# print "looping enabled\n";
+	my $here   = eval_iam q(getpos), 
+	my $end    = ::Mark::loop_end()->time;
+	my $start  = ::Mark::loop_start()->time;
+	my $diff = $end - $here;
+	print "here: $here, start: $start, end: $end, diff: $diff\n";
+	if ( $diff < 0 ){
+		eval_iam("setpos ".$start);
+		sleep 1;
+		prepare_looping();
+	} else {
+		$event_id{loop} =  $new_event->after(
+			int($diff * 1000), sub {
+				eval_iam("setpos ".$start) ;
+				sleep 1;
+				prepare_looping();
+			}
+		);
+	}
+		#   will need to cancel on transport stop
+}
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
+	$new_event->afterCancel($event_id{loop});
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
