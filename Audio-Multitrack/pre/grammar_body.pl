@@ -237,11 +237,13 @@ loop_enable: _loop_enable someval(s) end {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
 	print join $/, @new_endpoints;
 	$::loop_enable = 1;
-	# assume indexes
+	@::loop_endpoints = (@new_endpoints, @::loop_endpoints); 
+	@::loop_endpoints = @::loop_endpoints[0,1];
+}
+loop_disable: _loop_disable end {
+	$::loop_enable = 0;
 }
 	
-
-
 name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
 list_marks: _list_marks end { 

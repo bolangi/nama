@@ -11,7 +11,8 @@ Main Help Scren
    setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
    getpos, gp               - Gets the current position 
 
-   loop_enable, loop [mark, mark...]  - loop over marks
+   loop_enable, loop [mark, mark]   - loop over marks
+   loop_disable, noloop, nl           - disable looping
 
 -- Marks
    list_marks, lm - list marks showing index, time, name

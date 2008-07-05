@@ -241,6 +241,9 @@ loop_enable:
   short: loop
   what: playback will loop between marks
   parameters: start_mark end_mark
+loop_disable:
+  short: noloop nl
+  what: disable automatic looping
 T:
   what: ecasound start
 S:
