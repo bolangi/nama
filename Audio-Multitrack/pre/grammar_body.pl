@@ -228,7 +228,7 @@ remove_mark: _remove_mark end {
 	$::this_mark->remove;
 }
 
-mark: _mark end { ::mark_here() }
+mark: _mark end { $::ui->marker( ::mark_here() )  }
 
 next_mark: _next_mark end { ::next_mark() }
 
