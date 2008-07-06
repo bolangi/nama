@@ -250,10 +250,27 @@ name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 list_marks: _list_marks end { 
 	my $i = 0;
 	map{ print( $_->time == $::this_mark->time ? q(*) : q()
-	,join " ", $i++, sprintf("%.1f", $_->time)."s", $_->name, $/)  } 
+	,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
-	print "now at ", sprintf("%.1f", ::eval_iam "getpos")  . "s", $/;
+	my $start = my $end = "undefined";
+	if ( ::Mark::loop_start() ){
+		$start = 
+		::Mark::loop_start()->name ? 
+			::Mark::loop_start()->name  : 
+			d1( ::Mark::loop_start()->time  ) ;
+ 	}
+	if (::Mark::loop_end() ){
+		$end = 
+		::Mark::loop_end()->name ? 
+			::Mark::loop_end()->name  : 
+			d1( ::Mark::loop_end()->time  ) ;
+ 	}
+	if ($::loop_enable){
+		print "looping from $start to $end\n";
+	}
+	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
+
 }
 to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();

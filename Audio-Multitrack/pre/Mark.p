@@ -42,9 +42,13 @@ sub new {
 
 sub set_name {
 	my $mark = shift;
+	carp("you attempted to futz $mark, which is not a Mark\n"),
+		return unless (ref $mark) =~ /Mark/;
 	my $name = shift;
 	print "name: $name\n";
-	if ( defined $by_name{ $name } ){ }
+	if ( defined $by_name{ $name } ){
+	carp "you attempted to assign to name already in use\n";
+	}
 	else {
 		$mark->set(name => $name);
 		$used_names{$name}++;
@@ -54,11 +58,15 @@ sub set_name {
 
 sub jump_here {
 	my $mark = shift;
+	carp("you attempted to futz $mark, which is not a Mark\n"),
+		return unless (ref $mark) =~ /Mark/;
 	::eval_iam( "setpos " . $mark->time);
 	$::this_mark = $mark;
 }
 sub remove {
 	my $mark = shift;
+	carp("you attempted to futz $mark, which is not a Mark\n"),
+		return unless (ref $mark) =~ /Mark/;
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 		delete $used_names{$mark->name};
@@ -70,10 +78,14 @@ sub remove {
 }
 sub next { 
 	my $mark = shift;
+	carp("you attempted to futz $mark, which is not a Mark\n"),
+		return unless (ref $mark) =~ /Mark/;
 	::next_mark();
 }
 sub previous {
 	my $mark = shift; 
+	carp("you attempted to futz $mark, which is not a Mark\n"),
+		return unless (ref $mark) =~ /Mark/;
 	::previous_mark();
 }
 
@@ -83,12 +95,12 @@ sub all { sort { $a->time <=> $b->time }@all }
 
 sub loop_start { 
 	my @points =sort { $a->time <=> $b->time } 
-		map{ mark_object($_)} @::loop_endpoints[0,1];
+	grep{ $_ } 	map{ mark_object($_)} @::loop_endpoints[0,1];
 	$points[0];
 }
 sub loop_end {
 	my @points =sort { $a->time <=> $b->time } 
-		map{ mark_object($_)} @::loop_endpoints[0,1];
+		grep{ $_ } map{ mark_object($_)} @::loop_endpoints[0,1];
 	$points[1];
 }
 sub mark_object {
@@ -100,8 +112,7 @@ sub mark_object {
 	} else {
 		$mark = $::Mark::by_name{$tag};
 	}
-	#$mark->jump_here if defined $mark; 
-	$mark;
+	$mark if defined $mark; 
 }
 
 	

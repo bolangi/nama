@@ -1922,6 +1922,10 @@ $debug and print join "\n", grep {/el:/} sort keys %effect_i;
 #print yaml_out \@effects; exit;
 
 }
+sub d1 {
+	my $n = shift;
+	sprintf("%.2f", $n)
+}
 sub d2 {
 	my $n = shift;
 	sprintf("%.2f", $n)

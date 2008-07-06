@@ -25,6 +25,8 @@ use ::Text::Very::Unusual;
 isa '::';
 ::Module
  ::Module
+(::Module
+ (::Module
 q(::);
 	"::"
  '::Module'
@@ -81,7 +83,7 @@ sub subst {
 
 	# Substitution 8: bare class
 		#$text =~ s/(^|\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
-		$text =~ s/(^|[\s'])(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
+		$text =~ s/(^|[\s'(])(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
 $text;
 }
