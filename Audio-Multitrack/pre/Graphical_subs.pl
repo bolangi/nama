@@ -944,21 +944,21 @@ sub arm_mark_toggle {
 	}
 }
 sub marker {
-	@_ = discard_object( @_);
-	my $pos = shift;
-	print $pos, " ", int $pos, $/;
+	@_ = discard_object( @_); # UI
+	my $mark = shift; # Mark
+	my $pos = $mark->time;
+	#print $pos, " ", int $pos, $/;
 		$widget_m{$pos} = $mark_frame->Button( 
-			-text => colonize(int ($pos) ),
+			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $old_bg,
-			-command => sub { mark($pos) },
+			-command => sub { mark($mark) },
 		)->pack(-side => 'left');
 }
 
 sub restore_time_marks {
 	@_ = discard_object( @_);
-	my @times =  sort keys %marks;
-	%marks = (); # reset
-	map{ drop_mark $_ } @times;
+	::Mark::all() and 
+		map{ $ui->marker($_) } map{ $_->time } ::Mark::all() ;
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
 sub destroy_marker {

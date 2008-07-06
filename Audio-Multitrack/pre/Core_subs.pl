@@ -1096,18 +1096,16 @@ sub show_unit { $time_step->configure(
 
 # GUI routines
 sub drop_mark {
-		my $pos = shift; # for restore, otherwise
-		$pos = $pos ? $pos : eval_iam("cs-get-position");
-		return if $marks{$pos}; 
-		$marks{$pos}++; # sufficient  for text mode
-		$ui->marker($pos); # for GUI
+		my $mark = mark_here();
+		$ui->marker($mark); # for GUI
 }
 sub mark {
-	my $pos = shift; 
+	my $mark = shift;
+	my $pos = $mark->time;
 	my $here = eval_iam("cs-get-position");
-	if ($markers_armed and abs( $pos - $here) < 0.005){
+	if ($markers_armed and abs( $pos - $here) < 0.001){
 			$ui->destroy_marker($pos);
-			delete $marks{$pos};
+			$mark->remove;
 		    arm_mark_toggle(); # disarm
 	}
 	else{ 
@@ -2126,7 +2124,6 @@ sub retrieve_state {
 	my $result = system "sudo alsactl -f $file.alsa restore";
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
 =cut
-	$ui->restore_time_marks();
 
 	# text mode marks 
 		
@@ -2134,6 +2131,7 @@ sub retrieve_state {
 		my %h = %$_; 
 		my $mark = ::Mark->new( %h ) ;
 	} @marks_data;
+	$ui->restore_time_marks();
 
 } 
 sub create_master_and_mix_tracks { # GUI widgets

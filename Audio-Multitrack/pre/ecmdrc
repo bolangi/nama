@@ -36,7 +36,7 @@ record_device: consumer
 
 # globals for our chain setups
 
-ecasound_globals: "-B auto -z:mixmode,sum -z:psr"
+ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 # audio formats 
 
