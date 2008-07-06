@@ -1029,7 +1029,11 @@ sub schedule_wraparound {
 		eval_iam("setpos ".$start);
 	} elsif ( $diff < 6 ) { #schedule the move
 	$event_id{wraparound} = $new_event->after( 
-		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } );
+		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
+		
+		unless $event_id{wraparound};
+		
+		;
 	}
 }
 
