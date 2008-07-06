@@ -1010,7 +1010,7 @@ sub start_heartbeat {
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
-					if $status eq q(finished);
+					if $status eq q(finished) or $status eq q(error);
 				print join " ", "engine-status: $status",
 					colonize(int $here), $/; 
 				schedule_wraparound() if $loop_enable;
