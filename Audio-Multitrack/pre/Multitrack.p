@@ -106,7 +106,17 @@ sub hello {"make a window";}
 sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
-    MainLoop;
+    #MainLoop;
+    my $term = new Term::ReadLine 'Ecmd';
+	$term->tkRunning(1);
+    my $prompt = "Enter command: ";
+    $OUT = $term->OUT || \*STDOUT;
+	while (1) {
+    my ($user_input) = $term->readline($prompt) ;
+	next if $user_input =~ /^\s*$/;
+     $term->addhistory($user_input) ;
+	::Text::command_process( $user_input );
+	}
 # the following gives a shell in the terminal
 # window simultaneous with the Tk user
 # interface windows
