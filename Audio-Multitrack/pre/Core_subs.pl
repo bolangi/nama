@@ -2108,7 +2108,7 @@ sub retrieve_state {
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
-	$did_apply and $ui->manifest;
+	# $did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } @::Track::by_index), $/;
 

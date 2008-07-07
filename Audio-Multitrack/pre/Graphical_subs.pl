@@ -134,13 +134,13 @@ sub init_gui {
 	#my $mw = tkinit();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Tk Ecmd"); 
-	$mw->deiconify;
+	#$mw->deiconify;
 
 	### init effect window
 
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
-	$ew->deiconify; 
+	#$ew->deiconify; 
 	$ew->withdraw;
 
 	$canvas = $ew->Scrolled('Canvas')->pack;
@@ -815,7 +815,7 @@ sub effect_button {
 			[ 'command' => "$effects[$j]->{count} $effects[$j]->{name}" ,
 				-command  => sub { 
 					 add_effect( {chain => $n, type => $effects[$j]->{code} } ); 
-					$ew->deiconify; # display effects window
+					#$ew->deiconify; # display effects window
 					} 
 			];
 	}
