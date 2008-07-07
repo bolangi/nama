@@ -120,6 +120,7 @@ sub destroy_widgets {
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[10..$#children]; # fragile
 	$tracker_group_widget->destroy if $tracker_group_widget;
+	%widget_m and map{ $_->destroy } values %widget_m;
 }
 
 sub init_gui {
@@ -946,6 +947,7 @@ sub arm_mark_toggle {
 sub marker {
 	@_ = discard_object( @_); # UI
 	my $mark = shift; # Mark
+	#print "mark is ", ref $mark, $/;
 	my $pos = $mark->time;
 	#print $pos, " ", int $pos, $/;
 		$widget_m{$pos} = $mark_frame->Button( 
@@ -957,8 +959,9 @@ sub marker {
 
 sub restore_time_marks {
 	@_ = discard_object( @_);
-	::Mark::all() and 
-		map{ $ui->marker($_) } map{ $_->time } ::Mark::all() ;
+	map {$_->dumpp} ::Mark::all(); 
+#	::Mark::all() and 
+	map{ $ui->marker($_) } ::Mark::all() ; 
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
 sub destroy_marker {
