@@ -114,7 +114,7 @@ show_io: _show_io { print ::yaml_out( \%::inputs ),
 
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
-# 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+
  	map { 
  		my $op_id = $_;
  		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
@@ -127,6 +127,7 @@ show_track: _show_track end {
 		 print $/;
  
  	 } @{ $::this_track->ops };
+ 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}

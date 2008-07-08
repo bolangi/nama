@@ -76,7 +76,7 @@ sub show_tracks {
             $_->rec_status,
             $_->ch_r || 1,
             $_->current_version || 'none',
-            (join " ", @{$_->versions}),
+            #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
         
@@ -88,12 +88,12 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Chain  Track name     Setting  Status  Input  Active  Versions   
-==========================================================================
+Chain  Track       Setting  Status  Input  Active 
+==================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<<<<   @<<<     @<<<   @>>     @>>>   @<<<<<<<<<<<<<<<<<<< ~~
-splice @::format_fields, 0, 7
+@>>    @<<<<<<<<<    @<<<    @<<<    @>>    @>>>   ~~
+splice @::format_fields, 0, 6
 .
 
 sub helpline {
