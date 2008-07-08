@@ -58,13 +58,13 @@ sub new {
 	if ($by_name{$vals{name}}){
 	#print "test 2\n";
 			my $track = $by_name{$vals{name}};
-			print $track->name, " hide: ", $track->hide, $/;
+			# print $track->name, " hide: ", $track->hide, $/;
 			if ($track->hide) {
 				$track->set(hide => 0);
 				return $track;
 
 			} else {
-				carp  ("track name already in use: $vals{name}\n"), return
+		$debug and carp  ("track name already in use: $vals{name}\n"), return
 		 #if $track_names{$vals{name}}; # null name returns false
 
 		}
@@ -295,6 +295,7 @@ sub pre_multi {
 
 sub rec_route {
 	my $track = shift;
+	return if ! $track->ch_r;
 	return if $track->ch_r == 1 or ! $track->ch_r;
 	"-erc:" . $track->ch_r. ",1"; #  -f:$rec_format ";
 }
