@@ -91,7 +91,8 @@ disconnect: _disconnect end { ::disconnect_transport(); }
 
 
 renew_engine: _renew_engine end { ::new_engine(); }
-engine_status: _engine_status end { print ::eval_iam q(engine-status) }
+engine_status: _engine_status end { print(::eval_iam
+q(engine-status));print $/ }
 
 start: _start end { ::start_transport(); }
 stop: _stop end { ::stop_transport(); }

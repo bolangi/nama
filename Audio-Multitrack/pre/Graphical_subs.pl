@@ -959,7 +959,7 @@ sub marker {
 
 sub restore_time_marks {
 	@_ = discard_object( @_);
-	map {$_->dumpp} ::Mark::all(); 
+# 	map {$_->dumpp} ::Mark::all(); 
 #	::Mark::all() and 
 	map{ $ui->marker($_) } ::Mark::all() ; 
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )

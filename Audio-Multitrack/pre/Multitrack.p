@@ -197,6 +197,7 @@ open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 close STDERR;
 open STDERR, ">&SAVERR";
+#select STDOUT; $| = 1;
 # ::Text::OuterShell::create_help_subs();
 #
 
