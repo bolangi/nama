@@ -1,7 +1,6 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
-    #local $debug = 0;
     package ::;
     load_project(name => $project_name, create => $opts{c}) if $project_name;
     my $term = new Term::ReadLine 'Ecmd';
@@ -132,7 +131,6 @@ sub catch_run { #
 }
 sub catch_help {
   my ($o, $cmd, @args) = @_;
-  local $debug = 0;
   $debug and print "cmd: $cmd\n";
   #my $main_name = 
   #
@@ -193,7 +191,6 @@ HELP
 
 sub create_help_subs {
     $debug2 and print "create_help_subs\n";
-    local $debug = 1;
     %commands = %{ ::yaml_in( $::commands_yml) };
 
     $debug and print ::yaml_out \%commands;

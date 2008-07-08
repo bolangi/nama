@@ -269,6 +269,7 @@ sub substitute{
 
 sub load_project {
 	local $debug = 0;
+	carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
@@ -1021,7 +1022,6 @@ sub start_heartbeat {
 }
 
 sub schedule_wraparound {
-	#local $debug = 1;
 	my $here   = eval_iam("getpos");
 	my $end    = ::Mark::loop_end()->time;
 	my $start  = ::Mark::loop_start()->time;
@@ -1195,7 +1195,6 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	return if transport_running();
-	local $debug = 1;
  	my @k = really_recording();
 	$debug and print "found files: " , join $/, @k;
 	return unless @k;
@@ -1263,7 +1262,6 @@ sub add_effect {
 
 sub remove_effect {
 	# TODO fold into object code for Track
-	#local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -1867,7 +1865,6 @@ sub get_ladspa_hints{
 }
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
-	local $debug = 1;
 	my $multiplier = 1;;
 	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
