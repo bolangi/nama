@@ -1067,7 +1067,7 @@ sub stop_transport {
 	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
-	#rec_cleanup();
+	rec_cleanup();
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
 # 	sleep 1;
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
@@ -1212,13 +1212,13 @@ sub rec_cleanup {
 		if (-e $test_wav) {
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				#$ti[$n]->set(active => $ti[$n]->last); 
-				update_version_button($n, $v);
+				$ui->update_version_button($n, $v);
 			$recorded++;
 			}
 			else { unlink $test_wav }
 		}
 	}
-	my $mixed = scalar ( grep{ /\bmix*.wav/} @k );
+	my $mixed = scalar ( grep{ /\bmix*.wav/i} @k );
 	
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {

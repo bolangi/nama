@@ -148,6 +148,7 @@ sub refresh_t {}
 sub refresh_c {}
 sub flash_ready {}
 sub update_master_version_button {}
+sub update_version_button {}
 sub paint_button {}
 sub refresh_oids {}
 sub project_label_configure{}
