@@ -2,7 +2,7 @@ use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 sub loop {
     package ::;
-    load_project(name => $project_name, create => $opts{c}) if $project_name;
+    #load_project(name => $project_name, create => $opts{c}) if $project_name;
     my $term = new Term::ReadLine 'Ecmd';
 	$term->tkRunning(1);
     my $prompt = "Enter command: ";
