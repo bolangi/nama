@@ -157,6 +157,9 @@ connect:
 disconnect:
   what: disconnect chain setup
   parameters: none
+engine_status:
+  what: ecasound audio processing engine status
+  short: egs
 renew_engine:
   short: renew
   smry: crashes program

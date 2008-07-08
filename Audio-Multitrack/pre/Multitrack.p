@@ -35,7 +35,7 @@ use File::Spec::Link;
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
+$debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of two helper loopback devices:
@@ -192,7 +192,11 @@ $grammar = q(
 
 [% qx(./emit_command_headers) %]
 );
+open SAVERR, ">&STDERR";
+open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+close STDERR;
+open STDERR, ">&SAVERR";
 # ::Text::OuterShell::create_help_subs();
 #
 

@@ -151,7 +151,9 @@ sub current {	 # depends on ewf status
 	# using conditional $track->delay or $track->length or $track->start_position ;
 	# to decide whether to rewrite file name from .wav to .ewf
 	
+		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
+		use warnings;
 		return $filename  # setup directly refers to .wav file
 		  unless $track->delay or $track->length or $track->start_position ;
 
@@ -180,7 +182,9 @@ sub current_wav {	# independent of ewf status
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
+		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
+		use warnings;
 		return $filename;
 	} else {
 		# print "track ", $track->name, ": no current version\n" ;

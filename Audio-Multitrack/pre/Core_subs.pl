@@ -269,7 +269,7 @@ sub substitute{
 
 sub load_project {
 	local $debug = 0;
-	carp "load project: I'm being called from somewhere!\n";
+	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
@@ -546,7 +546,7 @@ sub eliminate_loops {
 	if (    $ref =~ /ARRAY/ and 
 			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
-		print "i have a loop to eliminate \n";
+		$debug and print "i have a loop to eliminate \n";
 
 		# The output device we assume will be chains MixerOut or
 		# MixDown
@@ -910,7 +910,7 @@ sub convert_to_jack {
 sub load_ecs {
 		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
-		eval_iam("cs-disconnect");
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove $project_file");
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -1082,7 +1082,8 @@ sub transport_running {
 }
 sub disconnect_transport {
 	return if transport_running();
-	eval_iam('cs-disconnect') }
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
+}
 
 
 sub toggle_unit {
