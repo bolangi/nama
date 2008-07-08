@@ -999,7 +999,7 @@ sub start_transport {
 	eval_iam('start');
 	start_heartbeat();
 
-    $ui->start_clock(); 
+    #$ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine status: ", eval_iam("engine-status"), $/;
 }
@@ -1013,7 +1013,7 @@ sub start_heartbeat {
 					if $status eq q(finished) or $status eq q(error);
 				print join " ", "engine-status: $status",
 					colonize(int $here), $/; 
-				schedule_wraparound() if $loop_enable;
+				schedule_wraparound() if $loop_enable and !  really_recording();
 				update_clock();
 
 				});
@@ -1026,7 +1026,7 @@ sub schedule_wraparound {
 	my $end    = ::Mark::loop_end()->time;
 	my $start  = ::Mark::loop_start()->time;
 	my $diff = $end - $here;
-	debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
 		eval_iam("setpos ".$start);
 	} elsif ( $diff < 6 ) { #schedule the move
@@ -1067,7 +1067,7 @@ sub stop_transport {
 	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
-	rec_cleanup();
+	#rec_cleanup();
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
 # 	sleep 1;
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
@@ -2108,7 +2108,7 @@ sub retrieve_state {
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
-	# $did_apply and $ui->manifest;
+	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } @::Track::by_index), $/;
 
@@ -2281,7 +2281,7 @@ sub retrieve_effects {
 	}
 	# $did_apply and print "########## applied\n\n";
 	
-	# $ew->deiconify or $ew->iconify;
+	$ew->deiconify or $ew->iconify;
 
 }
 

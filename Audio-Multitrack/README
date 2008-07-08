@@ -11,7 +11,7 @@ mixing application.
 Ecmd's graphic interface is a recorder/mixer with two panels
 based on the Tk widget set.  
 
-Ecmd's command-line interface has history, autocompletion and
+Ecmd's command-line interface has history, and
 help functions.  Ecasound IAM commands pass directly to
 the audio-processing engine.
 
@@ -50,7 +50,7 @@ binary packages for your Un*x distribution.
 
 Your Audio::Multitrack system will be more capable if you
 have LADSPA plugins installed. You will also need the LADSPA utility
-program 'analyseplugin'.
+program 'analyseplugin'. See http://ladspa.org .
 
 COPYRIGHT AND LICENCE
 
