@@ -1424,7 +1424,7 @@ sub cop_init {
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
 		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		# XXX support controller-type operators
+		#TODO  support controller-type operators
 		
 		# for my $p (0..$effects[$i]->{count} - 1) {
 			my $default = $effects[$i]->{params}->[$p]->{default};
@@ -1507,7 +1507,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( offset => $quotes/2 - 1);   # XXX
+			$ti[$chain_id]->set( offset => $quotes/2 - 1);  
 
 		}
 }
@@ -1571,7 +1571,7 @@ sub apply_op {
 
 
 
-# @ladspa_sorted # XXX
+# @ladspa_sorted # 
 
 sub prepare_static_effects_data{
 	
@@ -2195,10 +2195,10 @@ sub save_effects {
 sub retrieve_effects {
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
-	my %current_cops = %cops; # XXX why bother
-	my %current_copp = %copp; # similar name!!!!
+	my %current_cops = %cops; # 
+	my %current_copp = %copp; # 
 	assign_vars($file, @effects_dynamic_vars);
-	my %old_copp = %copp;  # XXX why bother
+	my %old_copp = %copp;  # 
 	my %old_cops = %cops; 
 	%cops = %current_cops;
 	%copp = %current_copp; ## similar name!!
