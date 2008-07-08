@@ -1064,6 +1064,7 @@ sub prepare_looping {
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
+	print "stopping.\n";
 	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
@@ -1196,8 +1197,9 @@ sub rec_cleanup {
 	return if transport_running();
 	local $debug = 1;
  	my @k = really_recording();
+	$debug and print "found files: " , join $/, @k;
 	return unless @k;
-	$debug and print "I was recording!\n", join $/, @k;
+	print "I was recording!\n";
 	my $recorded = 0;
  	for my $k (@k) {    
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
@@ -1210,7 +1212,9 @@ sub rec_cleanup {
 		$debug and print "n: $n\nv: $v\n";
 		$debug and print "testing for $test_wav\n";
 		if (-e $test_wav) {
+			$debug and print "exists. ";
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
+				$debug and print "bigger than a breadbox.  \n";
 				#$ti[$n]->set(active => $ti[$n]->last); 
 				$ui->update_version_button($n, $v);
 			$recorded++;
@@ -1223,7 +1227,8 @@ sub rec_cleanup {
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			$ui->update_master_version_button();
+			#$ui->update_master_version_button();
+			$ui->global_version_buttons(); # recreate
 			$tracker->set( rw => 'MON');
 			generate_setup() and connect_transport();
 			$ui->refresh();
