@@ -33,7 +33,7 @@ create_project: _create_project name end {
 load_project: _load_project name end {
 	my $untested = ::remove_spaces($item{name});
 	print ("Project $untested does not exist\n"), return
-	unless -d ::join_path ::wav_dir(), $untested; 
+	unless -d ::join_path ::project_root(), $untested; 
 	::load_project( name => ::remove_spaces($item{name}) );
 
 	print "loaded project: $::project_name\n";

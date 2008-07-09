@@ -23,22 +23,30 @@ sub first_run {
 
 	my $missing;
 		my @a = `which analyseplugin`;
-		@a or warn ( <<LADWARN
+		@a or warn ( <<WARN
 LADSPA helper program 'analyseplugin' not found
-in $ENV{PATH},  your shell's list of executable 
+in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
 libraries and executables installed. http://ladspa.org
-LADWARN
+WARN
 ) and  sleep 2 and $missing++;
 		my @b = `which ecasound`;
-		@b or warn ( <<LADWARN
-LADSPA helper program 'ecasound' not found
-in $ENV{PATH},  your shell's list of executable 
+		@b or warn ( <<WARN
+Ecasound executable program 'ecasound' not found
+in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
 libraries and executables for all audio processing! 
-LADWARN
+WARN
 ) and  sleep 2 and $missing++;
 
+my @c = `which file`;
+		@c or warn ( <<WARN
+BSD utility program 'file' not found
+in $ENV{PATH}, your shell's list of executable 
+directories. This program is currently required
+to be able to play back mixes in stereo.
+WARN
+) and sleep 2;
 if ( $missing ) {
 print "You lack $missing main parts of this suite.  
 Do you want to continue? [N] ";
@@ -171,7 +179,7 @@ sub prepare {
 
 	# if there is no project name, we still init using pwd
 
-	$debug and print "wav_dir: ", wav_dir(), $/;
+	$debug and print "project_root: ", project_root(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
@@ -195,21 +203,21 @@ sub eval_iam {
 }
 ## configuration file
 
-sub wav_dir { File::Spec::Link->resolve_all( $project_root ); }
+sub project_root { File::Spec::Link->resolve_all( $project_root ); }
 
 sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
 sub this_wav_dir {
 	$project_name and
 	File::Spec::Link->resolve_all(
-		join_path( wav_dir(), $project_name, q(.wav) )  
+		join_path( project_root(), $project_name, q(.wav) )  
 	);
 }
-sub project_dir  {$project_name and join_path( wav_dir(), $project_name)
+sub project_dir  {$project_name and join_path( project_root(), $project_name)
 }
 
 sub global_config{
 print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};
-my @search_path = (project_dir(), $ENV{HOME}, wav_dir() );
+my @search_path = (project_dir(), $ENV{HOME}, project_root() );
 my $c = 0;
 	map{ 
 #print $/,++$c,$/;
@@ -1575,7 +1583,7 @@ sub prepare_static_effects_data{
 	
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path(&wav_dir, $effects_cache_file);
+	my $effects_cache = join_path(&project_root, $effects_cache_file);
 
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
