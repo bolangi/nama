@@ -44,24 +44,32 @@ Use I<config_file> instead of default $HOME/.ecmdrc
 B<Audio::Multitrack> provides class libraries for managing
 tracks and buses.  
 
-B<Ecmd> is an end-user application with text and graphical
-interfaces. It is configured as a single mixer bus with
-per-track volume/pan/effects, a master fader, and a mixdown
-track.
+B<Ecmd> is a recorder/mixer application with text and
+graphical interfaces. It is configured as a single mixer bus
+with per-track volume/pan/effects, a master fader, and a
+mixdown track.
 
 There are two types of commands. 
 
-B<Static commands> influence the chain setup that will be
-used for audio processing.
+B<Static commands> control the chain setup that will be
+used for audio processing. They are generally used
+while the audio processing engine is I<not> running.
 
-For example, the REC/MON/OFF status for a track and 
-its associated group controls whether that track will be included in the
-next Ecasound chain setup, and whether the audio stream 
-will be recorded or played back.
+For example, the REC/MON/OFF status for a track and its
+associated group controls whether that track will be
+included in the next Ecasound chain setup, and whether the
+audio stream will be recorded or played back.
+
+After issuing static commands, use the the I<arm> command
+(or GUI button) to generate a chain setup file and connect
+it to the audio processing engine.  This is usually the last
+operation before pressing the start button.
 
 B<Dynamic commands> operate in realtime, affecting
 volume, pan, and playback head position while the engine is
-running. 
+running. Effects parameters you can adjust at any time.
+Playback position can only be adjusted after the chain
+setup is connected.
 
 On the first run the program creates $HOME/.ecmdrc, the
 configuration file and project directory $HOME/ecmd.  WAV
@@ -69,14 +77,13 @@ files and parameter settings for each project are stored in
 directories under $HOME/ecmd.  You probably want to edit the
 default .ecmdrc to suit your audio configuration.
 
-Project state can be stored/retrieved. Inspect the State.yml
-file in the project directory. The storage format is
-user-friendly YAML.
+Project state can be stored/retrieved. These data are stored
+in the State.yml file in the project directory. The storage
+format is user-friendly YAML.
 
 To be certain your chain setup loads correctly, you may need
 to regenerate the setup using the Arm button in the GUI or
-the I<arm> command under the text interface.  This is
-usually the last operation before pressing the start button.
+the I<arm> command under the text interface.  
 
 =head1 LADSPA
 
@@ -100,8 +107,6 @@ playback only (green).
 
 Invoked using the -t switch on the ecmd command line, 
 The command line interpreter includes history. 
-Tab completion of command names has been disabled
-due to problems with the library. 
 
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 
@@ -109,12 +114,12 @@ help with I<command>.
 =head1 TRACKS
 
 Multiple WAV files can be recorded for each track. These are
-identified by version number. Version number increment
-automatically.  Identical version numbers indicate WAV files
-recorded at the same time. The order of version numbers
+identified by version number. Identical version numbers indicate WAV files
+recorded at the same time. Version number increments
+automatically so that the order of version numbers
 follows the time sequence of the recordings.
 
-Each track, including the Master and Mixdown, has its own
+Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF
 status. The Master track has only MON/OFF status. Setting REC
 status for the Mixdown track is the same as issuing
@@ -125,12 +130,12 @@ user-created tracks because they belong to different
 groups. 
 
 All user-created tracks belong to the Tracker group.
-There is a global REC/MON/OFF and version
-setting that apply to all these tracks.
+The Tracker group has REC/MON/OFF and version
+settings that apply to all user tracks.
 
 Tracker group MON setting (text command 'group_monitor')
 forces all user tracks with a REC setting to MON status.
-Tracker group MON setting triggers automatically after a
+Tracker group MON mode triggers automatically after a
 successful recording.
 
 Tracker group OFF setting (text 'group_off') excludes all user
@@ -180,13 +185,13 @@ Alsa settings save and restore function is currently disabled.
 
 None by default.
 
-
-
 =head1 DEPENDENCIES
 
 The Ecasound audio processing libraries are required
 to use this software, and need to be installed separately.
 See http://www.eca.cx/ecasound/ .
+
+The BSD 'file' program is used to detect stereo WAV files.
 
 LADSPA libraries and plugins are strongly recommended.
 See http://ladspa.org/ . The 'analyseplugin'
