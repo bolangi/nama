@@ -194,7 +194,7 @@ vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-cut: _cut end { $::copp{ $::this_track->vol }->[0] = 0;
+mute: _mute end { $::copp{ $::this_track->vol }->[0] = 0;
 				::sync_effect_param( $::this_track->vol, 0);
 }
 

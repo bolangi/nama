@@ -1512,10 +1512,9 @@ sub find_op_offsets {
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	
-	local $debug = 0;
 	$debug2 and print "&apply_ops\n";
 	my $last = scalar @::Track::by_index - 1;
-	print "looping over 1 to $last\n";
+	$debug and print "looping over 1 to $last\n";
 	for my $n (1..$last) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "OFF" ;

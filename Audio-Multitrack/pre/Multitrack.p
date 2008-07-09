@@ -71,7 +71,7 @@ use ::Mark;
 
 # $ti[3]->rw
 
-print remove_spaces("bulwinkle is a...");
+# print remove_spaces("bulwinkle is a...");
 
 ## Class and Object definitions for package '::'
 

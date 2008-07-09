@@ -15,8 +15,8 @@ Main Help Scren
    loop_disable, noloop, nl           - disable looping
 
 -- Marks
-   list_marks, lm - list marks showing index, time, name
-   next_mark, nm  - jump to next mark 
+   list_marks, lm     - list marks showing index, time, name
+   next_mark, nm      - jump to next mark 
    previous_mark, pm  - jump to previous mark 
    name_mark, nom     - give a name to current mark 
    to_mark, tom       - jump to a mark by name or index
@@ -27,26 +27,29 @@ Main Help Scren
 
     load_project, load       <name>          -  load an existing project 
     create_project, create   <name>          -  create a new project directory tree 
-    get_state, get, retrieve <state_file>    -  retrieve settings, optional name
+    get_state, recall, retrieve, restory <state_file>    -  retrieve settings, optional name
     save_state, keep, save   <state_file>    -  save project settings to disk, optional name    
     exit, quit                               - exit program, saving state if possible 
 
   -- Setup --
 
-    setup, arm              -  generate and connect chain setup    
-    generate, gen           - generate chain setup
-    connect, con            - connect chain setup
-    show_setup, show        -  show setup    
+    setup, arm               -  generate and connect chain setup    
+    generate, gen            - generate chain setup
+    connect, con             - connect chain setup
+    show_setup, show         -  show status, all tracks
     show_chain_setup, chains - show Ecasound chain setup file contents
 
   -- Track -- 
   
+    show_track, sh           -  show status of current track,
+	                            including effects and versions
+	example: sax show_track
+
   Most of the Track related commands operate on the 'current
   track'. To cut volume for a track called 'sax',  you enter
   'sax mute' or even 'sax; mute' You can also specify a 
   current track by number,  i.e.  '4 mute'.
 
-    show_track, sh          -  show track setup 
     add_track, add          -  create a new track 
 
   - version

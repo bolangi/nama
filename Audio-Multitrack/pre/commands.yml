@@ -209,8 +209,8 @@ list_marks:
   parameters: none
 to_mark:
   short: tom
-  what: move playhead to named mark
-  parameters: string
+  what: move playhead to named mark or mark index
+  parameters: string or integer
 mark:
   what: Mark current head position, becomes current mark
   short: k	
@@ -232,7 +232,7 @@ name_mark:
   what: Give a name to the current mark
   parameters: string
 remove_track:
-  what: Make track go away (actually hide and disable)
+  what: Make track go away (non destructive)
   parameters: string
 stop:
   short: s
@@ -248,7 +248,7 @@ loop_disable:
   short: noloop nl
   what: disable automatic looping
 T:
-  what: ecasound start
+  what: ecasound-only start
 S:
-  what: ecasound stop
+  what: ecasound-only stop
 ...
