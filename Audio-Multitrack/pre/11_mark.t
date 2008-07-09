@@ -3,15 +3,12 @@ use strict;
 
 BEGIN { 
 	diag ("TESTING $0\n");
-	use_ok('::Wav') ;
+	use_ok('::Mark') ;
 }
-my $wav = ::Wav->new( qw(	name  	track01.cdda 
-							dir   	/media/sessions/test-abc
-							)) ;
-is ($wav->name, 'track01.cdda', "name assignment");
-is ($wav->dir, '/media/sessions/test-abc', "directory assignment");
-is (shift @{$wav->versions}, 1, "locating .wav files");
-#%{$wav->targets};
+my $mark  = ::Mark->new( name => 'thebeginning');
+
+is(  ref $mark , '::Mark', "Object creation");
+
 1;
 __END__
 

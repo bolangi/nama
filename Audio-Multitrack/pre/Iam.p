@@ -18,6 +18,7 @@ debug
 engine-status
 engine-launch
 engine-halt
+setpos
 cs-add
 cs-remove
 cs-list
@@ -38,7 +39,6 @@ cs-set-position
 cs-set-position-samples
 cs-get-position
 cs-getpos
-getpos
 get-position
 cs-get-position-samples
 cs-get-length

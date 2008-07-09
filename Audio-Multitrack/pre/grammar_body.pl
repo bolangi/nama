@@ -1,14 +1,30 @@
-# i'm a comment!
+# regex contraining of values
+key: /\w+/
+someval: /[\w.+-]+/
+sign: /[+-]/
+op_id: /[A-Z]+/
+parameter: /\d+/
+value: /[\d\.eE+-]+/ # -1.5e-6
+last: ('last' | '$' ) 
+dd: /\d+/
+name: /\w+/
+	
 asdf: 'asdf' { print "hello"}
+<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
 read: command(s)
+=======
+>>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 command: fail
 end: /\s*$/ 
-#end: /\s*;\s*/ 
 end: ';' 
-helpx: 'helpx' end { print "hello_from your command line gramar\n"; 1 }
-help: _help dd end { print "hello_from your command line gramar\n"; 1 }
-fail: 'f' end { print "your command line gramar will get a zero\n"; 0 }
-
+help: _help end { print $::helptext }
+help: _help name end { ::Text::help($item{name}) }
+# iterate over commands yml
+# find right command, print helptext
+#	print $::helptext  }
+helpx: 'helpx' end { print "hello_from your command line gramar\n"; }
+fail: 'f' end { print "your command line gramar will get a zero\n"; }
+exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end {
 	::load_project( 
 		name => ::remove_spaces($item{name}),
@@ -23,31 +39,39 @@ load_project: _load_project name end {
 	print ("Project $untested does not exist\n"), return
 	unless -d ::join_path ::wav_dir(), $untested; 
 	::load_project( name => ::remove_spaces($item{name}) );
-	::generate_setup() and ::connect_transport();
 
 	print "loaded project: $::project_name\n";
 }
-save_state: _save_state name(?) end { 
+save_state: _save_state name end { 
 	::save_state( $item{name} ); 
 	}
-get_state: _get_state name(?) end {
+save_state: _save_state end { ::save_state() }
+
+
+get_state: _get_state name end {
+	# print "get with parameter: $item{name}\n";
  	::load_project( 
  		name => $::project_name,
  		settings => $item{name}
  		);
  #	print "set state:  $item{name}\n";
  	}
+get_state: _get_state end {
+	# print "get without parameter\n";
+ 	::load_project( 
+ 		name => $::project_name,
+ 		);
+ #	print "set state:  $item{name}\n";
+ 	}
+getpos: _getpos end {  
+	print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
 
-add_track: _add_track channel(s?) name end { 
+add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
 	::add_track($item{name}); 
 	#print "added track $item{name}\n";
 }
 
-# add_track: _add_track name(s) end { 
-#  	map { ::add_track $_ } @{ $item{name} };
-#  	1;
-#  }
 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
@@ -56,47 +80,47 @@ dump_track: _dump_track { $::this_track->dumpp }
 
 dump_group: _dump_group { $::tracker->dumpp }
 
-key: /\w+/
-
-someval: /[\w.+-]+/
  
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
 
-generate: _generate end { ::generate_setup(); 1 }
+generate: _generate end { ::generate_setup(); }
 
 arm: _arm end { 
-	::generate_setup() and ::connect_transport(); 1 }
+	::generate_setup() and ::connect_transport(); }
 
-connect: _connect end { ::connect_transport(); 1 }
+connect: _connect end { ::connect_transport(); }
 
-disconnect: _disconnect end { ::disconnect_transport(); 1 }
+disconnect: _disconnect end { ::disconnect_transport(); }
 
-## we reach here
 
-renew_engine: _renew_engine end { ::new_engine(); 1  }
+renew_engine: _renew_engine end { ::new_engine(); }
+engine_status: _engine_status end { print(::eval_iam
+q(engine-status));print $/ }
 
-start: _start end { ::start_transport(); 1}
-stop: _stop end { ::stop_transport();
-1}
+start: _start end { ::start_transport(); }
+stop: _stop end { ::stop_transport(); }
 
 S: _S end { ::eval_iam("stop") }
 T: _T end { ::eval_iam("start") }
 
-show_setup: _show_setup end { 	
+show_tracks: _show_tracks end { 	
 
 	::Text::show_tracks ( ::Track::all );
 }
 
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
-	::io(join_path(::project_dir(), $::chain_setup_file) ) > $chain_setup; 
-	print $chain_setup;
+	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
+	print $chain_setup, $/, $/;
 }
+
+show_io: _show_io { print ::yaml_out( \%::inputs ),
+::yaml_out( \%::outputs ); }
 
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
-# 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+
  	map { 
  		my $op_id = $_;
  		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
@@ -107,7 +131,12 @@ show_track: _show_track end {
 				$::copp{$op_id}->[$_],'' 
 		 	} (0..scalar @pnames - 1);
 		 print $/;
+<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
+=======
+ 
+>>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
  	 } @{ $::this_track->ops };
+ 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -116,6 +145,11 @@ show_track: _show_track dd end {
 	::Text::show_tracks( $::ti[$item{dd}] ) if $::ti[$item{dd}]
 }
 	
+<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
+=======
+#show_setup: _show_setup end { 
+#		::io(::join_path(::project_dir(),  ) > $contents;
+>>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
 group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
 group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }
@@ -128,18 +162,11 @@ mixplay: _mixplay end { $::mixdown_track->set(rw => 'MON');
 mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'OFF');
 						$::tracker->set(rw => 'MON')}
 
-
-
-mix: 'mix' end {1}
-
-norm: 'norm' end {1}
-
 record: 'record' end {} # set to Tracker-Record 
 
 exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 
-channel: r | m
 
 r: 'r' dd  {	
 				$::this_track->set(ch_r => $item{dd});
@@ -159,15 +186,11 @@ rec: 'rec' end {$::this_track->set(rw => 'REC'); }
 mon: 'mon' end {$::this_track->set(rw => 'MON'); }
 
 
-last: ('last' | '$' ) 
-
-dd: /\d+/
-
-name: /\w+/
 
 
 wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
+## we reach here
 set_version: _set_version dd end { $::this_track->set(active => $item{dd})}
  
 vol: _vol dd end { $::copp{ $::this_track->vol }->[0] = $item{dd}; 
@@ -181,7 +204,7 @@ vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-cut: _cut end { $::copp{ $::this_track->vol }->[0] = 0;
+mute: _mute end { $::copp{ $::this_track->vol }->[0] = 0;
 				::sync_effect_param( $::this_track->vol, 0);
 }
 
@@ -212,22 +235,68 @@ pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
 }
 pan_back:  _pan_back end {}
 
-list_marks: _list_marks end {'TODO' }
 
-remove_mark: _remove_mark end {'TODO' }
+remove_mark: _remove_mark end { 
+	return unless (ref $::this_mark) =~ /Mark/;
+	$::this_mark->remove;
+}
 
-mark: _mark end { }
+mark: _mark end { $::ui->marker( ::mark_here() )  }
 
-next_mark: _next_mark end {}
+next_mark: _next_mark end { ::next_mark() }
 
-previous_mark: _previous_mark end {}
+previous_mark: _previous_mark end { ::previous_mark() }
 
-mark_loop: _mark_loop end {}
+loop_enable: _loop_enable someval(s) end {
+	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
+	print join $/, @new_endpoints;
+	$::loop_enable = 1;
+	@::loop_endpoints = (@new_endpoints, @::loop_endpoints); 
+	@::loop_endpoints = @::loop_endpoints[0,1];
+}
+loop_disable: _loop_disable end {
+	$::loop_enable = 0;
+}
+	
+name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
 
-name_mark: _name_mark end {}
+list_marks: _list_marks end { 
+	my $i = 0;
+	map{ print( $_->time == $::this_mark->time ? q(*) : q()
+	,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
+		  #sort { $a->time <=> $b->time } 
+		  @::Mark::all;
+	my $start = my $end = "undefined";
+	if ( ::Mark::loop_start() ){
+		$start = 
+		::Mark::loop_start()->name ? 
+			::Mark::loop_start()->name  : 
+			d1( ::Mark::loop_start()->time  ) ;
+ 	}
+	if (::Mark::loop_end() ){
+		$end = 
+		::Mark::loop_end()->name ? 
+			::Mark::loop_end()->name  : 
+			d1( ::Mark::loop_end()->time  ) ;
+ 	}
+	if ($::loop_enable){
+		print "looping from $start to $end\n";
+	}
+	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
 
-list_marks: _list_marks end {}
+}
+to_mark: _to_mark dd end {
+	my @marks = ::Mark::all();
+	$marks[$item{dd}]->jump_here;
+}
 
+to_mark: _to_mark name end { 
+	my $mark = $::Mark::by_name{$item{name}};
+	$mark->jump_here if defined $mark;
+#	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
+}
+
+# okay to here
 show_effects: _show_effects end {}
 
 remove_effect: _remove_effect op_id(s) end {
@@ -237,7 +306,6 @@ remove_effect: _remove_effect op_id(s) end {
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 
 }
-op_id: /[A-Z]+/
 
 
 add_effect: _add_effect name value(s?)  end { 
@@ -291,13 +359,6 @@ modify_effect: _modify_effect op_id parameter value sign(?) end {
 		$new_value);
 
 }
-sign: /[+-]/
-op_id: /[A-Z]+/
-
-parameter: /\d+/
-
-value: /[\d\.eE+-]+/ # -1.5e-6
-	
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 

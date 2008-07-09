@@ -3,9 +3,9 @@ use strict;
 
 BEGIN { 
 	diag ("TESTING $0\n");
-	use_ok('Audio::Multitrack::Wav') ;
+	use_ok('::Wav') ;
 }
-my $wav = Audio::Multitrack::Wav->new( qw(	name  	track01.cdda 
+my $wav = ::Wav->new( qw(	name  	track01.cdda 
 							dir   	/media/sessions/test-abc
 							)) ;
 is ($wav->name, 'track01.cdda', "name assignment");

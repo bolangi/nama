@@ -153,10 +153,17 @@ sub prepare {
 	
 	$ui = ! $opts{t} ?  ::Graphical->new : ::Text->new;
 
+	# Tk main window
+ 	$mw = MainWindow->new;  
+	$new_event = $mw->Label();
+
 	$ui->init_gui;
 	$ui->transport_gui;
 	#$ui->oid_gui;
 	$ui->time_gui;
+
+	#
+    # $event{loop}	
 
 	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
@@ -262,6 +269,7 @@ sub substitute{
 
 sub load_project {
 	local $debug = 0;
+	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
@@ -277,13 +285,9 @@ sub load_project {
 	$project_name and $h{create} and 
 		print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
-	print "here\n";
 	read_config( global_config() ); 
-	print "here 2\n";
 	initialize_rules();
-	print "here 3\n";
 	initialize_project_data();
-	print "here 4\n";
 	remove_small_wavs(); 
 	#print "reached here!!!\n";
 
@@ -298,9 +302,11 @@ sub load_project {
 	
 	$ui->global_version_buttons(); 
 	$ui->refresh_t;
+	generate_setup() and connect_transport();
 
 #The mix track will always be track index 1 i.e. $ti[$n]
 # for $n = 1, And take index 1.
+ 1;
 
 }
 
@@ -396,6 +402,7 @@ sub initialize_rules {
 		output_object	=>  $loopa,
 		output_type		=>  'cooked',
 		# condition 		=>  sub{ defined $inputs{mixed} },
+		condition        => 1,
 		status			=>  1,
 		
 	);
@@ -412,10 +419,7 @@ sub initialize_rules {
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> sub { my $track = shift; 
-								return "satisfied" if defined
-								$inputs{cooked}->{"loop," . $track->n}; 
-								0 } ,
+		condition 		=> 1,
 		status			=>  1,
 	);
 		
@@ -542,7 +546,7 @@ sub eliminate_loops {
 	if (    $ref =~ /ARRAY/ and 
 			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
-		#print "i have a loop to eliminate \n";
+		$debug and print "i have a loop to eliminate \n";
 
 		# The output device we assume will be chains MixerOut or
 		# MixDown
@@ -603,6 +607,8 @@ sub initialize_project_data {
 	$markers_armed = 0;
 	%marks = ();
 	
+	# new Marks
+ 	map{ $_->remove} ::Mark::all;
 	# volume settings
 	
 	%old_vol = ();
@@ -647,7 +653,7 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	return if transport_running();
 	my $name = shift;
-	print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
 		ch_r => $ch_r,
@@ -655,7 +661,7 @@ sub add_track {
 	);
 	$this_track = $track;
 	return if ! $track; 
-	print "ref new track: ", ref $track; 
+	$debug and print "ref new track: ", ref $track; 
 
 	# $ch_r and $ch_m are public variables set by GUI
 	# Okay, so we will do that for the grammar, too
@@ -779,11 +785,12 @@ sub user_mon_tracks {
 
 }
 
-sub really_recording {  # returns filename stubs
+sub really_recording {  # returns $output{file} entries
 
 #	scalar @record  
 	#print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
-	keys %{$outputs{file}}; # includes mixdown
+# 	map{ s/ .*$//; $_}  # unneeded
+	keys %{$outputs{file}}; # strings include format strings mixdown
 }
 
 sub write_chains {
@@ -903,7 +910,7 @@ sub convert_to_jack {
 sub load_ecs {
 		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
-		eval_iam("cs-disconnect");
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove $project_file");
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
@@ -932,7 +939,7 @@ sub generate_setup { # create chain setup
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'OFF'} 
 								@tracks;
-	# BUG: doesn't detect case of trying to mixdown with no
+	# TODO:  detect case of trying to mixdown with no
 	# playback tracks
 	#print "have source: $have_source\n";
 	if ($have_source) {
@@ -943,12 +950,12 @@ sub generate_setup { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		 map{ eliminate_loops($_) } all_chains();
+		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
 		return 1;
-	} else { print "Mixdown not possible, no inputs\n";
+	} else { print "Mixdown not possible without inputs\n";
 	return 0};
 }
 
@@ -968,18 +975,97 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
+	print "engine status: ", eval_iam("engine-status"), $/;
 	$ui->flash_ready();
 	
 }
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
+	#
+	# we are going to have a heartbeat function.
+	# It will wakeup every three seconds
+	# will do several jobs, one is to calculate
+	# the time till the replay, then if that
+	# time is less than 6s, the wraparound will be
+	# scheduled.
+	#
+	# if the stop button is pressed, we cancel
+	#
+	#
+	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
+	#if twice (or 3x in a row) not running status, 
+
+	print "starting at ", colonize(int eval_iam "getpos"), $/;
 	eval_iam('start');
+	start_heartbeat();
+
+    #$ui->start_clock(); 
 	sleep 1; # time for engine
-	start_clock();
+	print "engine status: ", eval_iam("engine-status"), $/;
+}
+sub start_heartbeat {
+	$event_id{heartbeat} = $new_event->repeat( 3000,
+				sub { 
+				
+				my $here   = eval_iam("getpos");
+				my $status = eval_iam q(engine-status);
+				$new_event->afterCancel($event_id{heartbeat})
+					if $status eq q(finished) or $status eq q(error);
+				print join " ", "engine-status: $status",
+					colonize(int $here), $/; 
+				schedule_wraparound() if $loop_enable and !  really_recording();
+				update_clock();
+
+				});
+
+}
+
+sub schedule_wraparound {
+	my $here   = eval_iam("getpos");
+	my $end    = ::Mark::loop_end()->time;
+	my $start  = ::Mark::loop_start()->time;
+	my $diff = $end - $here;
+	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	if ( $diff < 0 ){ # go at once
+		eval_iam("setpos ".$start);
+	} elsif ( $diff < 6 ) { #schedule the move
+	$event_id{wraparound} = $new_event->after( 
+		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
+		
+		unless $event_id{wraparound};
+		
+		;
+	}
+}
+
+	
+sub prepare_looping {
+	# print "looping enabled\n";
+	my $here   = eval_iam q(getpos), 
+	my $end    = ::Mark::loop_end()->time;
+	my $start  = ::Mark::loop_start()->time;
+	my $diff = $end - $here;
+	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	if ( $diff < 0 ){
+		eval_iam("setpos ".$start);
+		sleep 1;
+		prepare_looping();
+	} else {
+		$event_id{loop} =  $new_event->after(
+			int($diff * 1000), sub {
+				eval_iam("setpos ".$start) ;
+				sleep 1;
+				prepare_looping();
+			}
+		);
+	}
+		#   will need to cancel on transport stop
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
+	print "stopping.\n";
+	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
@@ -996,7 +1082,8 @@ sub transport_running {
 }
 sub disconnect_transport {
 	return if transport_running();
-	eval_iam('cs-disconnect') }
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
+}
 
 
 sub toggle_unit {
@@ -1008,19 +1095,19 @@ sub toggle_unit {
 sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
+
+# GUI routines
 sub drop_mark {
-		my $pos = shift; # for restore, otherwise
-		$pos = $pos ? $pos : eval_iam("cs-get-position");
-		return if $marks{$pos}; 
-		$marks{$pos}++; # sufficient  for text mode
-		$ui->marker($pos); # for GUI
+		my $mark = mark_here();
+		$ui->marker($mark); # for GUI
 }
 sub mark {
-	my $pos = shift; 
+	my $mark = shift;
+	my $pos = $mark->time;
 	my $here = eval_iam("cs-get-position");
-	if ($markers_armed and abs( $pos - $here) < 0.005){
+	if ($markers_armed and abs( $pos - $here) < 0.001){
 			$ui->destroy_marker($pos);
-			delete $marks{$pos};
+			$mark->remove;
 		    arm_mark_toggle(); # disarm
 	}
 	else{ 
@@ -1028,31 +1115,48 @@ sub mark {
 		eval_iam(qq(cs-set-position $pos));
 	}
 }
+
+# TEXT routines
+
+sub mark_here {
+	my $here = eval_iam("cs-get-position");
+	::Mark->new( time => $here );
+}
+sub next_mark {
+	my $jumps = shift;
+	$jumps and $jumps--;
+	my $here = eval_iam("cs-get-position");
+	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	for my $i ( 0..$#marks ){
+		if ($marks[$i]->time - $here > 0.001 ){
+			$debug and print "here: $here, future time: ",
+			$marks[$i]->time, $/;
+			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			$this_mark = $marks[$i];
+			return;
+		}
+	}
+}
+sub previous_mark {
+	my $jumps = shift;
+	$jumps and $jumps--;
+	my $here = eval_iam("cs-get-position");
+	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	for my $i ( reverse 0..$#marks ){
+		if ($marks[$i]->time < $here ){
+			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			$this_mark = $marks[$i];
+			return;
+		}
+	}
+}
+	
+
 ## clock and clock-refresh functions ##
 #
 
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-}
-sub start_clock {
-	#eval qq($clock_id->cancel);
-	$clock_id = $clock->after(1000, \&refresh_clock);
-}
-sub restart_clock {
-	start_clock();
-}
-sub refresh_clock{
-	
-	update_clock();
-	$clock_id = $clock->after(1000, \&refresh_clock) if transport_running();
-	my $status = eval_iam('engine-status');
-	$debug 
-	   and print colonize(eval_iam('getpos')),  "  engine status: $status\n";
-	
-	new_engine() if $status eq 'error';
-	if (! &transport_running){
-		&really_recording and rec_cleanup() or connect_transport();
-	}
 }
 
 ## jump recording head position
@@ -1091,32 +1195,40 @@ sub jump {
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
-	$debug and print "I was recording!\n";
+	return if transport_running();
  	my @k = really_recording();
-	disconnect_transport();
+	$debug and print "found files: " , join $/, @k;
+	return unless @k;
+	print "I was recording!\n";
 	my $recorded = 0;
  	for my $k (@k) {    
  		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
- 		my $test_wav = $ti[$n]->full_path;
+		print "k: $k, n: $n\n";
+		my $file = $k;
+		$file =~ s/ .*$//;
+ 		my $test_wav = $file;
 		$debug and print "track: $n, file: $test_wav\n";
  		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); 
 		$debug and print "n: $n\nv: $v\n";
 		$debug and print "testing for $test_wav\n";
 		if (-e $test_wav) {
+			$debug and print "exists. ";
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
-				$ti[$n]->set(active => $ti[$n]->last); 
-				update_version_button($n, $v);
+				$debug and print "bigger than a breadbox.  \n";
+				#$ti[$n]->set(active => $ti[$n]->last); 
+				$ui->update_version_button($n, $v);
 			$recorded++;
 			}
 			else { unlink $test_wav }
 		}
 	}
-	my $mixed = scalar ( grep{ /\bmix*.wav/} @k );
+	my $mixed = scalar ( grep{ /\bmix*.wav/i} @k );
 	
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			$ui->update_master_version_button();
+			#$ui->update_master_version_button();
+			$ui->global_version_buttons(); # recreate
 			$tracker->set( rw => 'MON');
 			generate_setup() and connect_transport();
 			$ui->refresh();
@@ -1151,7 +1263,6 @@ sub add_effect {
 
 sub remove_effect {
 	# TODO fold into object code for Track
-	#local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -1312,7 +1423,7 @@ sub cop_init {
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
 		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		# XXX support controller-type operators
+		#TODO  support controller-type operators
 		
 		# for my $p (0..$effects[$i]->{count} - 1) {
 			my $default = $effects[$i]->{params}->[$p]->{default};
@@ -1395,16 +1506,15 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( offset => $quotes/2 - 1);   # XXX
+			$ti[$chain_id]->set( offset => $quotes/2 - 1);  
 
 		}
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	
-	local $debug = 0;
 	$debug2 and print "&apply_ops\n";
 	my $last = scalar @::Track::by_index - 1;
-	print "looping over 1 to $last\n";
+	$debug and print "looping over 1 to $last\n";
 	for my $n (1..$last) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "OFF" ;
@@ -1459,7 +1569,7 @@ sub apply_op {
 
 
 
-# @ladspa_sorted # XXX
+# @ladspa_sorted # 
 
 sub prepare_static_effects_data{
 	
@@ -1755,7 +1865,6 @@ sub get_ladspa_hints{
 }
 sub range {
 	my ($name, $range, $default, $hint) = @_; 
-	local $debug = 1;
 	my $multiplier = 1;;
 	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
@@ -1819,6 +1928,10 @@ $debug and print join "\n", grep {/el:/} sort keys %effect_i;
 #print yaml_out \@effects; exit;
 
 }
+sub d1 {
+	my $n = shift;
+	sprintf("%.2f", $n)
+}
 sub d2 {
 	my $n = shift;
 	sprintf("%.2f", $n)
@@ -1879,7 +1992,13 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 map { push @tracks_data, $_->hashref } ::Track::all();
+
 # print "found ", scalar @tracks_data, "tracks\n";
+
+# prepare marks data for storage (new Mark objects)
+
+@marks_data = ();
+map { push @marks_data, $_->hashref } ::Mark::all();
 
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
@@ -1893,10 +2012,11 @@ map { push @groups_data, $_->hashref } ::Group::all();
 
 
 # store alsa settings
+=comment
 
 	my $result2 = system "alsactl -f $file.alsa store";
 	$debug and print "alsactl store result: ", $result2 >>8, "\n";
-
+=cut
 	# now remute
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
@@ -1922,7 +2042,7 @@ sub retrieve_state {
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
 	$file = $yamlfile if -f $yamlfile;
-	! -f $file and carp("file not found: $file\n"), return;
+	! -f $file and print ("file not found: $file\n"), return;
 	$debug and print "using file: $file";
 
 	assign_var( $file, @persistent_vars );
@@ -1954,9 +2074,7 @@ sub retrieve_state {
 
 	splice @tracks_data, 0, 2;
 
-	#  now create the widgets
-	
-	create_master_and_mix_tracks();
+	create_master_and_mix_tracks(); # their GUI only
 
 	# create user tracks
 	
@@ -1972,7 +2090,8 @@ sub retrieve_state {
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
-		$ui->track_gui($n); # applies vol and pan operators
+		$ui->track_gui($n); 
+		
 		for my $id (@{$ti[$n]->ops}){
 			$did_apply++ 
 				unless $id eq $ti[$n]->vol
@@ -2002,15 +2121,22 @@ sub retrieve_state {
 	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
 	$ui->refresh_oids();
 
-	# restore mixer settings
-
+	# restore Alsa mixer settings
+=comment
 	my $result = system "sudo alsactl -f $file.alsa restore";
 	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
+=cut
 
+	# text mode marks 
+		
+	map{ 
+		my %h = %$_; 
+		my $mark = ::Mark->new( %h ) ;
+	} @marks_data;
 	$ui->restore_time_marks();
 
 } 
-sub create_master_and_mix_tracks {
+sub create_master_and_mix_tracks { # GUI widgets
 
 
 	my @rw_items = (
@@ -2066,10 +2192,10 @@ sub save_effects {
 sub retrieve_effects {
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
-	my %current_cops = %cops; # XXX why bother
-	my %current_copp = %copp; # similar name!!!!
+	my %current_cops = %cops; # 
+	my %current_copp = %copp; # 
 	assign_vars($file, @effects_dynamic_vars);
-	my %old_copp = %copp;  # XXX why bother
+	my %old_copp = %copp;  # 
 	my %old_cops = %cops; 
 	%cops = %current_cops;
 	%copp = %current_copp; ## similar name!!
@@ -2157,7 +2283,7 @@ sub retrieve_effects {
 	}
 	# $did_apply and print "########## applied\n\n";
 	
-	# $ew->deiconify or $ew->iconify;
+	$ew->deiconify or $ew->iconify;
 
 }
 

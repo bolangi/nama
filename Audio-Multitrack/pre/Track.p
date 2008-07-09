@@ -58,18 +58,17 @@ sub new {
 	if ($by_name{$vals{name}}){
 	#print "test 2\n";
 			my $track = $by_name{$vals{name}};
-			print $track->name, " hide: ", $track->hide, $/;
+			# print $track->name, " hide: ", $track->hide, $/;
 			if ($track->hide) {
 				$track->set(hide => 0);
 				return $track;
 
 			} else {
-				carp  ("track name already in use: $vals{name}\n"), return
+		$debug and carp  ("track name already in use: $vals{name}\n"), return
 		 #if $track_names{$vals{name}}; # null name returns false
 
 		}
 	}
-	my $add_index = ! $vals{n};
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 
 
@@ -152,7 +151,9 @@ sub current {	 # depends on ewf status
 	# using conditional $track->delay or $track->length or $track->start_position ;
 	# to decide whether to rewrite file name from .wav to .ewf
 	
+		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
+		use warnings;
 		return $filename  # setup directly refers to .wav file
 		  unless $track->delay or $track->length or $track->start_position ;
 
@@ -164,7 +165,7 @@ sub current {	 # depends on ewf status
 		$filename =~ s/\.wav$/.ewf/;
 		return $filename;
 	} else {
-		print "track ", $track->name, ": no current version\n" ;
+		$debug and print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }
@@ -181,10 +182,12 @@ sub current_wav {	# independent of ewf status
 	if 	($track->rec_status eq 'REC'){ 
 		return $track->name . '_' . ++$last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
+		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
+		use warnings;
 		return $filename;
 	} else {
-		print "track ", $track->name, ": no current version\n" ;
+		# print "track ", $track->name, ": no current version\n" ;
 		return undef;
 	}
 }
@@ -232,7 +235,7 @@ sub monitor_version {
 		{ $version = $group->version }
 	elsif (	$track->last) #  and ! $track->active and ! $group->version )
 		{ $version = $track->last }
-	else { carp "no version to monitor!\n" }
+	else { } # carp "no version to monitor!\n" 
 	# print "monitor version: $version\n";
 	$version;
 }
@@ -292,6 +295,7 @@ sub pre_multi {
 
 sub rec_route {
 	my $track = shift;
+	return if ! $track->ch_r;
 	return if $track->ch_r == 1 or ! $track->ch_r;
 	"-erc:" . $track->ch_r. ",1"; #  -f:$rec_format ";
 }
@@ -314,7 +318,7 @@ sub all { @by_index[1..scalar @by_index - 1] }
 
 # subclass
 
-package ::SimpleTrack;
+package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
 use ::Object qw( 	name
 						dir
@@ -345,7 +349,8 @@ use ::Object qw( 	name
 sub rec_status{
 
 	my $track = shift;
-	$track->rw;
+	return 'MON' unless $track->rw eq 'OFF';
+	'OFF';
 
 }
 
@@ -354,51 +359,6 @@ sub ch_r {
 	return '';
 }
 
-=comment
-# subclass
-
-package ::MixTrack;
-our @ISA = '::Track';
-use ::Object qw( 	name
-						dir
-						active
-
-						ch_r 
-						ch_m 
-						rw
-
-						vol  
-						pan 
-						ops 
-						offset 
-
-						n 
-						group 
-
-						delay
-						start_position
-					 	length
-						looping
-
-						hide
-						
-						);
-
-sub rec_status{
-
-	my $track = shift;
-	$track->rw;
-
-}
-
-sub ch_r {
-	my $track = shift;
-	return '';
-}
-
-
-=cut
-	
 
 
 
@@ -476,57 +436,6 @@ use ::Object qw(	op_id
 					
 					);
 
-
-1;
-
-# ----------- Mark ------------
-package ::Mark;
-use Carp;
-our @ISA;
-use vars qw($n %by_name @by_index %used_names);
-use ::Object qw( n
-				 name 
-                 time
-				 active
-				 loop_point
-				 );
-$n = 0; 	# incrementing numeric key
-@by_index = ();	# return ref to Mark by numeric key
-%by_name = ();	# return ref to Mark by name
-%used_names = (); 
-
-sub new {
-	# returns a reference to an object that is indexed by
-	# name and by an assigned index
-	#
-	# The indexing is bypassed and an object returned 
-	# if an index n is supplied as  a parameter
-	
-	my $class = shift;
-	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	carp "name already in use: $vals{name}\n"
-		 if $used_names{$vals{name}}; # null name returns false
-	my $add_index = ! $vals{n};
-	my $n = $vals{n} ? $vals{n} : ++$n; 
-	my $object = bless { 
-
-		## 		defaults ##
-
-					n    	=> $n,
-					active  => 1,
-					use_for_looping => 0,
-
-					@_ 			}, $class;
-
-	#print "object class: $class, object type: ", ref $object, $/;
-	$used_names{$vals{name}}++;
-	$by_index[$n] = $object;
-	$by_name{ $object->name } = $object;
-	
-	$object;
-	
-}
 
 1;
 

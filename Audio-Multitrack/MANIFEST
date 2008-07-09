@@ -11,7 +11,9 @@ lib/Audio/Multitrack/Bus.pm
 lib/Audio/Multitrack/Track.pm
 lib/Audio/Multitrack/Wav.pm
 lib/Audio/Multitrack/Object.pm
+lib/Audio/Multitrack/Mark.pm
 t/01_load.t
 t/02_assign.t
 t/03_wav.t
 t/04_object.t
+t/11_mark.t

@@ -1,4 +1,16 @@
 ---
+help:
+  short: h
+  what: display general help screen, or description of specific command
+exit:
+  short: quit
+  what: exit program, saving settings
+getpos:
+  short: gp
+  what: get current playhead position (seconds)
+setpos:
+  short: sp
+  what: set current playhead position (seconds)
 group_rec:
   short: grec R
   what: group REC mode, i.e. rec-enable user tracks
@@ -120,7 +132,7 @@ save_state:
   what: save project settings to disk, optional name
   parameters: optional string
 get_state:
-  short: get restore retrieve
+  short: recall restore retrieve
   what: retrieve project settings
 create_project:
   short: create	
@@ -145,15 +157,21 @@ connect:
 disconnect:
   what: disconnect chain setup
   parameters: none
-showsetup:
-  what: print Setup.ecs to STDOUT
-  short: shs
+engine_status:
+  what: ecasound audio processing engine status
+  short: egs
 renew_engine:
   short: renew
   smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
-  short: setup
+  short: chains setup shs
+  what: show current Ecasound chain setup
+show_io:
+  short: showio
+  what: show chain input and output fragments
+show_tracks:
+  short: show tracks
   what: show current Ecasound chain setup
 show_track:
   short: sh
@@ -189,29 +207,32 @@ list_marks:
   short: lm
   what: List all marks
   parameters: none
+to_mark:
+  short: tom
+  what: move playhead to named mark or mark index
+  parameters: string or integer
 mark:
-  what: Mark current head position
+  what: Mark current head position, becomes current mark
   short: k	
-  parameters: optional string
+  parameters: none
 remove_mark:
-  what: Remove mark at current head position
-  short: rm
-  parameters: optional number
+  what: Remove current mark 
+  short: rmm
+  parameters: none
 next_mark:
-  short: mf nm fm
+  short: nm
   what: Move playback head to next mark
   parameters: none
 previous_mark:
-  short: mb pm bm
+  short: pm
   what: Move playback head to previous mark
   parameters: none
 name_mark:
-  short: nm
-  what: Give a name to a mark
+  short: nom 
+  what: Give a name to the current mark
   parameters: string
 remove_track:
-  short:
-  what: Make track go away
+  what: Make track go away (non destructive)
   parameters: string
 stop:
   short: s
@@ -219,8 +240,15 @@ stop:
 start:
   short: t
   what: start transport
+loop_enable:
+  short: loop
+  what: playback will loop between marks
+  parameters: start_mark end_mark
+loop_disable:
+  short: noloop nl
+  what: disable automatic looping
 T:
-  what: ecasound start
+  what: ecasound-only start
 S:
-  what: ecasound stop
+  what: ecasound-only stop
 ...

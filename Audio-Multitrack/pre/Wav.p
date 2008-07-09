@@ -7,7 +7,6 @@ use Carp;
 
 sub get_versions {
 	my $wav = shift; # Expects a Track object here
-	local $debug = 1;
 	my $basename = $wav->name;
 	my $dir = ::this_wav_dir();
 	$debug and print "this_wav_dir: $dir\n";
