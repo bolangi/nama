@@ -78,7 +78,11 @@ Main Help Scren
     r,record_channel        -   set input channel number, current track
     m, monitor_channel      -  set output channel, current track
 
-  - effects 
+  -- Effects --
+
+    ladspa-register, lr        - list LADSPA effects
+	preset-register, pr        - list Ecasound presets
+	control-register, cr       - list Ecasound controllers
 
     add_effect,    fxa, afx    - add an effect to the current track
     modify_effect, fxm, mfx    - set an effect parameter to a new value

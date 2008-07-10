@@ -359,4 +359,7 @@ list_versions: _list_versions end {
 	print join " ", @{$::this_track->versions}, $/;
 }
 
+ladspa_register: _ladspa_register end { print ::eval_iam("ladspa-register") }
+preset_register: _preset_register end { print ::eval_iam("preset-register") }
+ctrl_register: _ctrl_register end { print ::eval_iam("ctrl-register") }
 

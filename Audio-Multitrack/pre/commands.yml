@@ -251,4 +251,13 @@ T:
   what: ecasound-only start
 S:
   what: ecasound-only stop
+ctrl_register:
+  what: list Ecasound controllers
+  short: crg
+preset_register:
+  what: list Ecasound presets 
+  short: prg
+ladspa_register:
+  what: list LADSPA plugins
+  short: lrg
 ...
