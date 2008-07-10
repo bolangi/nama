@@ -10,7 +10,10 @@ sub loop {
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
 	next if $user_input =~ /^\s*$/;
-     $term->addhistory($user_input) ;
+	#print "previous: '$previous_text_command' current: '$user_input'\n";
+    $term->addhistory($user_input) 
+	 	unless $user_input eq $previous_text_command;
+ 	$previous_text_command = $user_input;
 	::Text::command_process( $user_input );
 	#print "here we are\n";
  #    use ::Text::OuterShell; # not needed, class is present in this file

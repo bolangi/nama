@@ -1537,7 +1537,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
-	local $debug = 0;
 	
 	my $id = shift;
 	$debug and print "id: $id\n";
@@ -1602,9 +1601,29 @@ sub prepare_static_effects_data{
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
 			-class => '::',
-			-storable => 1 ); #  unless $project_root eq '.';
+			-storable => 1 );
 	}
 
+	prepare_effect_index();
+}
+sub prepare_effect_index {
+	%effect_j = ();
+=comment
+	my @ecasound_effects = qw(
+		ev evp ezf eS ea eac eaw eal ec eca enm ei epp
+		ezx eemb eemp eemt ef1 ef3 ef4 efa efb efc efh efi
+		efl efr efs erc erm etc etd ete etf etl etm etp etr);
+	map { $effect_j{$_} = $_ } @ecasound_effects;
+=cut
+	map{ 
+		my $code = $_;
+		my ($short) = $code =~ /:(\w+)/;
+		if ( $short ) { 
+			if ($effect_j{$short}) { warn "name collision: $_\n" }
+			else { $effect_j{$short} = $code }
+		}else{ $effect_j{$code} = $code };
+	} keys %effect_i;
+	print yaml_out \%effect_j;
 }
 sub extract_effects_data {
 	my ($lower, $upper, $regex, $separator, @lines) = @_;

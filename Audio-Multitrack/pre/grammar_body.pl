@@ -7,7 +7,7 @@ parameter: /\d+/
 value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
-name: /\w+/
+name: /[\w:]+/
 	
 asdf: 'asdf' { print "hello"}
 command: fail
@@ -299,16 +299,20 @@ remove_effect: _remove_effect op_id(s) end {
 
 
 add_effect: _add_effect name value(s?)  end { 
-print join $/, keys %item;
+#print join $/, %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
 #print "ref:", ref $item{dd} , ":\n";
 
-print "code: ", $item{name}, $/;
+my $code = $item{name};
+if ( $::effect_i{$code} ) {} # do nothing
+elsif ( $::effect_j{$code} ) { $code = $::effect_j{$code} }
+else { warn "effect code not found: $code\n"; return }
+print "code: ", $code, $/;
 	my %p = (
 		chain => $::this_track->n,
 		values => $item{"value(s?)"},
-		type => $item{name},
+		type => $code,
 		);
 		print "adding effect\n";
 		#print (::yaml_out(\%p));

@@ -78,7 +78,9 @@ our (
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	@effects,		# static effects information (parameters, hints, etc.)
-	%effect_i,		# an index 
+	%effect_i,		# an index , pn:amp -> effect number
+	%effect_j,      # an index , amp -> effect number
+
 	@ladspa_sorted, # ld
 	%effects_ladspa,# an index
 	$e,				# the name of the variable holding
@@ -267,4 +269,5 @@ our (
 	$loop_enable, # whether we automatically loop
 	$length,       # cs-set-length
 
+   $previous_text_command, # i want to know if i'm repeating
 );
