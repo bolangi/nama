@@ -62,7 +62,8 @@ our (
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
-	$this_op,      # currently selected effect
+	$this_op,      # currently selected effect # future
+	$this_mark,    # current mark  # for future
 
 	@format_fields, # data for replies to text commands
 

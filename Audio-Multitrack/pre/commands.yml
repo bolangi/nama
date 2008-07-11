@@ -104,8 +104,10 @@ mute:
   what: set playback volume to zero, current track
   smry: mute volume
   parameters: none
+unmute:
+  short: cc uncut
+  what: restore volume level before mute
 unity:
-  short: cc
   what: set unity, i.e. 100 volume, current track
   smry: unity volume
   parameters: none
@@ -191,10 +193,11 @@ show_effects:
   short: fxs	
   parameters: none
 add_effect:
-  what: add effect to selected track
+  what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
   short: fxa afx
+  smry: add effect
   parameters: code param1 param2,... paramn
-  example: fxa ea 600 (amplify current track signal by 600%)
+  example: fxa amp 6 (LADSPA Simple amp 6dB gain),\n         fxa var_dali (preset var_dali),\n         fxa pn:var_tape_stretched (explicit el: or pn: prefix optional)\n
 modify_effect:
   what: modify an effect parameter
   parameters: effect_id, parameter, optional_sign, value

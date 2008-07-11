@@ -122,8 +122,10 @@ sub helpline {
 	my $text =  $commands{$cmd}->{what}. $/;
 	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
 			if $commands{$cmd}->{parameters};	
-	$text .=  "example: ". $commands{$cmd}->{example} . $/  
-			if $commands{$cmd}->{example};	
+	$text .=  "example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
+			if $commands{$cmd}->{example};
+	$text .=  "aliases:  $cmd ". $commands{$cmd}->{short} . $/
+			if $commands{$cmd}->{short};	
 	print( $/, ucfirst $text, $/);
 	
 }

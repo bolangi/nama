@@ -149,22 +149,19 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 r: 'r' dd  {	
 				$::this_track->set(ch_r => $item{dd});
 				$::ch_r = $item{dd};
-				print "setting $::ch_r to $item{dd}\n";
+				print "Input switched to channel $::ch_r.\n";
 				
 				}
 m: 'm' dd  {	
 				$::this_track->set(ch_m => $item{dd}) ;
 				$::ch_m = $item{dd};
-				print "Output switched to channel $::ch_m\n";
+				print "Output switched to channel $::ch_m.\n";
 				
 				}
 
 off: 'off' end {$::this_track->set(rw => 'OFF'); }
 rec: 'rec' end {$::this_track->set(rw => 'REC'); }
 mon: 'mon' end {$::this_track->set(rw => 'MON'); }
-
-
-
 
 wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
@@ -182,9 +179,21 @@ vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-mute: _mute end { $::copp{ $::this_track->vol }->[0] = 0;
-				::sync_effect_param( $::this_track->vol, 0);
+mute: _mute end {
+
+	$::this_track->set(old_vol_level => $::copp{$::this_track->vol}[0])
+		if ( $::copp{$::this_track->vol}[0]);  # non-zero volume
+	$::copp{ $::this_track->vol }->[0] = 0;
+	::sync_effect_param( $::this_track->vol, 0);
 }
+unmute: _unmute end {
+	return if $::copp{$::this_track->vol}[0]; # if we are not muted
+	return if ! $::this_track->old_vol_level;
+	$::copp{$::this_track->vol}[0] = $::this_track->old_vol_level;
+	$::this_track->set(old_vol_level => 0);
+	::sync_effect_param( $::this_track->vol, 0);
+}
+
 
 unity: _unity end { $::copp{ $::this_track->vol }->[0] = 100;
 				::sync_effect_param( $::this_track->vol, 0);
