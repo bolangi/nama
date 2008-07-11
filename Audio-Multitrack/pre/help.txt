@@ -1,18 +1,19 @@
 Main Help Scren
 
   help <command> -  help with <command>
+  help <
 
 -- Transport --
 
-   start, t - Start processing
-   stop, s - Stop processing
-   rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
-   forward <time-in-seconds>, fw <time-in-seconds> - Forward
-   setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
-   getpos, gp               - Gets the current position 
+   start, t    - Start processing
+   stop, s     - Stop processing
+   rewind, rw  - Rewind  some number of seconds, i.e. rw 15
+   forward, fw - Forward some number of seconds, i.e. fw 75
+   setpos, sp  - Sets the current position, i.e. setpos 49.2
+   getpos, gp  - Gets the current position 
 
-   loop_enable, loop [mark, mark]   - loop over marks
-   loop_disable, noloop, nl           - disable looping
+   loop_enable, loop        - loop over marks, i.e. loop start finish
+   loop_disable, noloop, nl -  disable looping
 
 -- Marks
 
@@ -21,8 +22,6 @@ Main Help Scren
    previous_mark, pm  - jump to previous mark 
    name_mark, nom     - give a name to current mark 
    to_mark, tom       - jump to a mark by name or index
-
-
 
   -- Project -- 
 
@@ -42,11 +41,13 @@ Main Help Scren
 
   -- Track -- 
   
-    add_track, add           -  create a new track 
+    add_track, add           -  create a new track, 
+                                "add sax; r3" (record sax
+								from input 3) 
 
     show_track, sh           -  show status of current track,
 	                            including effects and versions
-	example: sax show_track
+								"sax; sh"
 
   Most of the Track related commands operate on the 'current
   track'. To cut volume for a track called 'sax',  you enter
@@ -85,8 +86,7 @@ Main Help Scren
 
     ladspa-register, lrg        - list LADSPA effects
     preset-register, prg        - list Ecasound presets
-    control-register, crg       - list Ecasound controllers
-
+    ctrl-register, crg          - list Ecasound controllers # nearly supported
     add_effect,    fxa, afx    - add an effect to the current track
     modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
     remove_effect, fxr, rfx    - remove an effect

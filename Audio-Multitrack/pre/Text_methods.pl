@@ -138,7 +138,14 @@ sub help {
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
 	      helpline($cmd), return 
 		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
-	} keys %commands
+	} keys %commands;
+	# e.g. help tap_reverb
+	if ( $effects_ladspa{"el:$name"}) {
+	print "$name is the code for the following LADSPA effect:\n";
+	#print yaml_out( $effects_ladspa{"el:$name"});
+    print qx(analyseplugin $name);
+	}
+	
 }
 
 
