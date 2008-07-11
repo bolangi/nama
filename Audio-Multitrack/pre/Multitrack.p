@@ -5,7 +5,7 @@ no strict qw(subs);
 use warnings;
 no warnings qw(uninitialized);
 no warnings;
-our $VERSION = '0.92';
+our $VERSION = '0.95';
 use IO::All;
 use Carp;
 use Cwd;
@@ -117,9 +117,7 @@ sub loop {
      $term->addhistory($user_input) ;
 	::Text::command_process( $user_input );
 	}
-# the following gives a shell in the terminal
-# window simultaneous with the Tk user
-# interface windows
+#   Term::Shell version
 #
 # 	my $shell = ::Text::OuterShell->new;
 # 	my $term = $shell->term();
@@ -220,7 +218,7 @@ B<Audio::Multitrack> - Perl extensions for multitrack audio processing
 
 B<ecmd> - multitrack recording/mixing application
 
-Type 'man ecmd' for details. 
+Type 'man ecmd' for details on usage and licensing.
 
 No further documentation is provided regarding
 Audio::Multitrack and its subordinate modules.
