@@ -90,7 +90,7 @@ setup is connected.
 On the first run the program creates $HOME/.ecmdrc, the
 configuration file and project directory $HOME/ecmd.  WAV
 files and parameter settings for each project are stored in
-directories under $HOME/ecmd.  You probably want to edit the
+.wav directories under $HOME/ecmd.  You probably want to edit the
 default .ecmdrc to suit your audio configuration.
 
 Project state can be stored/retrieved. These data are stored
@@ -119,10 +119,14 @@ The GUI time display color indicates whether the upcoming
 operation will include recording (red), mixing only (yellow) or
 playback only (green).  
 
+Even in GUI mode the text command prompt appears in the
+terminal window, and text commands may be issued at any
+time.
+
 =head1 Text UI
 
-Invoked using the -t switch on the ecmd command line, 
-The command line interpreter includes history. 
+The command line interpreter starts by default
+or by using the B<-t> option when invoking ecmd.
 
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 
@@ -162,6 +166,42 @@ text 'mixplay' command sets the Tracker group to OFF.
 A track with no recorded WAV files that is set to MON will
 show OFF status.
 
+
+=head1 SAMPLE SESSION
+
+Here is a typical sequence of commands to record tracks
+with Ecmd:
+
+create marys_little_helper       # new project
+add guitar; r1                   # record track 'guitar' from input 1
+add piano; r2                    # record track 'piano' from input 2
+add drums; r3                    # record track 'drums' from input 3
+arm
+start
+(perform song)
+stop
+show                             # new versions of guitar, piano and drums
+                                 # appear
+arm; start                       # review recording
+
+group_record                     # rec-enable group
+guitar mon; piano mon; drums mon # set three tracks to monitor mode
+add vocals; r2                   # record track 'vocals' from input 2
+arm
+start
+(perform vocals)
+stop
+
+arm; start                       # review recording
+
+(adjust effects)
+
+mixdown; show                    # set mixdown mode, show results
+arm; start                       # record mixdown track
+stop
+mixplay                          # mixdown playback mode
+arm; start                       # review completed mix
+
 =head1 DIRECTORY STRUCTURE
 
 $project_root is the directory where your project files,
@@ -169,16 +209,12 @@ including WAV files you record, will go. $project_root
 is defined in the first non-comment line of 
 your .ecmdrc file.
 
-File or directory                Explanation
+File or directory                     Explanation
 --------------------------------------------------------------------------
 $HOME/.ecmdrc                         Ecmd configuration file
-
 $project_root/project_name/.wav       WAV files we record will be stored here
-
 $project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
-
 $project_root/project_name/State.yml  Default save file for project parameters
-
 $project_root/project_name/.ecmdrc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
@@ -193,9 +229,8 @@ running may cause the engine to stop.
 The post-recording cleanup routine currently deletes
 newly recorded soundfiles under 44100 bytes in size. 
 
-Looping behavior may not be reliable for loops under 6 seconds
-
-Alsa settings save and restore function is currently disabled.
+Looping behavior may not be reliable for loops under 6
+seconds.
 
 =head1 EXPORT
 

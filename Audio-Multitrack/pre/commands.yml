@@ -3,7 +3,7 @@ help:
   short: h
   what: display help for a command, or general help, or of specific command
 exit:
-  short: quit
+  short: quit q
   what: exit program, saving settings
 getpos:
   short: gp

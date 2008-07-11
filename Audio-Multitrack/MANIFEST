@@ -1,6 +1,7 @@
 Changes
 Makefile.PL
 MANIFEST
+COPYING
 README
 scripts/ecmd
 lib/Audio/Multitrack.pm
