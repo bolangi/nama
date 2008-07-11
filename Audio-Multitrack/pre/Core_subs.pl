@@ -984,7 +984,7 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
-	print "engine status: ", eval_iam("engine-status"), $/;
+	print "engine ", eval_iam("engine-status"), $/;
 	$ui->flash_ready();
 	
 }
@@ -1011,7 +1011,7 @@ sub start_transport {
 
     #$ui->start_clock(); 
 	sleep 1; # time for engine
-	print "engine status: ", eval_iam("engine-status"), $/;
+	print "engine ", eval_iam("engine-status"), $/;
 }
 sub start_heartbeat {
 	$event_id{heartbeat} = $new_event->repeat( 3000,

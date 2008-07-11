@@ -144,8 +144,9 @@ create_project:
   parameters: string
 load_project:
   short: load	
-  what: load an existing project
-  parameters: string
+  what: load an existing project, or recall from last save
+  smry: load project settings
+  parameters: project_name
   example: load pauls_gig
 generate:
   short: gen
@@ -169,7 +170,7 @@ engine_status:
   short: egs
 renew_engine:
   short: renew
-  smry: crashes program
+  smry: crashes
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
   short: chains setup
@@ -214,10 +215,12 @@ list_marks:
 to_mark:
   short: tom
   what: move playhead to named mark or mark index
+  smry: playhead to mark
   parameters: string or integer
   example: tom start (go to mark named 'start')
 mark:
   what: Mark current head position, becomes current mark
+  smry: mark current position
   short: k	
   parameters: none
 remove_mark:
