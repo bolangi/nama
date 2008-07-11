@@ -1623,7 +1623,7 @@ sub prepare_effect_index {
 			else { $effect_j{$short} = $code }
 		}else{ $effect_j{$code} = $code };
 	} keys %effect_i;
-	print yaml_out \%effect_j;
+	#print yaml_out \%effect_j;
 }
 sub extract_effects_data {
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
