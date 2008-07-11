@@ -44,6 +44,12 @@ use ::Object qw( 	name
 
 						
 						);
+
+# Note that ->vol return the effect_id 
+# ->old_volume_level is the level saved before muting
+# ->old_pan_level is the level saved before pan full right/left
+# commands
+
 sub new {
 	# returns a reference to an object that is indexed by
 	# name and by an assigned index

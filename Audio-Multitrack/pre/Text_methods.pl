@@ -1,5 +1,24 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
+
+sub show_versions {
+ 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+}
+
+sub show_effects {
+ 	map { 
+ 		my $op_id = $_;
+ 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
+ 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
+ 		 my @pnames =@{$::effects[ $i ]->{params}};
+			map{ print join " ", 
+			 	$pnames[$_]->{name}, 
+				$::copp{$op_id}->[$_],'' 
+		 	} (0..scalar @pnames - 1);
+		 print $/;
+ 
+ 	 } @{ $::this_track->ops };
+}
 sub loop {
     package ::;
     #load_project(name => $project_name, create => $opts{c}) if $project_name;
@@ -100,10 +119,11 @@ splice @::format_fields, 0, 6
 
 sub helpline {
 	my $cmd = shift;
-	my $text =  ( $commands{$cmd}->{smry} 
-		?  $commands{$cmd}->{smry} 
-		: $commands{$cmd}->{what} );
-	
+	my $text =  $commands{$cmd}->{what}. $/;
+	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
+			if $commands{$cmd}->{parameters};	
+	$text .=  "example: ". $commands{$cmd}->{example} . $/  
+			if $commands{$cmd}->{example};	
 	print( $/, ucfirst $text, $/);
 	
 }

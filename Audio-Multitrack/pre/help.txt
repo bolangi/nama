@@ -71,7 +71,7 @@ Main Help Scren
     pan_right, pr        -  pan track fully right    
     unity, cc            -  unity volume    
     vol, v               -  get/set track volume    
-    mute, c, cut          -  mute volume 
+    mute, c, cut         -  mute volume 
 
   - channel assignments
 
@@ -80,9 +80,9 @@ Main Help Scren
 
   -- Effects --
 
-    ladspa-register, lr        - list LADSPA effects
-	preset-register, pr        - list Ecasound presets
-	control-register, cr       - list Ecasound controllers
+    ladspa-register, lrg        - list LADSPA effects
+	preset-register, prg        - list Ecasound presets
+	control-register, crg       - list Ecasound controllers
 
     add_effect,    fxa, afx    - add an effect to the current track
     modify_effect, fxm, mfx    - set an effect parameter to a new value
@@ -99,5 +99,5 @@ Main Help Scren
   -- Mixdown --
 
     mixdown, mxd               -  enable mixdown 
-    mixoff, norm, normal, mxo  -  disable mixdown 
+    mixoff, mxo, normal, norm  -  disable mixdown 
     mixplay, mxp               -  playback a recorded mix 

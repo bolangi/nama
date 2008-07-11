@@ -108,7 +108,7 @@ show_tracks: _show_tracks end {
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
 	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
-	print $chain_setup, $/, $/;
+	print $chain_setup, $/;
 }
 
 show_io: _show_io { print ::yaml_out( \%::inputs ),
@@ -116,20 +116,8 @@ show_io: _show_io { print ::yaml_out( \%::inputs ),
 
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
-
- 	map { 
- 		my $op_id = $_;
- 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
- 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
- 		 my @pnames =@{$::effects[ $i ]->{params}};
-			map{ print join " ", 
-			 	$pnames[$_]->{name}, 
-				$::copp{$op_id}->[$_],'' 
-		 	} (0..scalar @pnames - 1);
-		 print $/;
- 
- 	 } @{ $::this_track->ops };
- 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+	::Text::show_effects();
+	::Text::show_versions();
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -203,29 +191,37 @@ unity: _unity end { $::copp{ $::this_track->vol }->[0] = 100;
 }
 
 pan: _pan dd end { $::copp{ $::this_track->pan }->[0] = $item{dd};
+	my $current = $::copp{ $::this_track->pan }->[0];
+	$::this_track->set(old_pan_level => $current);
 				::sync_effect_param( $::this_track->pan, 0);
 
 } 
 pan: _pan '+' dd end { $::copp{ $::this_track->pan }->[0] += $item{dd} ;
+	my $current = $::copp{ $::this_track->pan }->[0];
+	$::this_track->set(old_pan_level => $current);
 				::sync_effect_param( $::this_track->pan, 0);
 } 
 pan: _pan '-' dd end { $::copp{ $::this_track->pan }->[0] -= $item{dd} ;
+	my $current = $::copp{ $::this_track->pan }->[0];
+	$::this_track->set(old_pan_level => $current);
 				::sync_effect_param( $::this_track->pan, 0);
 } 
 pan: _pan end { print $::copp{$::this_track->pan}[0], $/ }
- 
-pan_right: _pan_right   end { $::copp{ $::this_track->pan }->[0] = 100;
+
+pan_right: _pan_right   end { 
+	$::copp{ $::this_track->pan }->[0] = 100;
 				::sync_effect_param( $::this_track->pan, 0);
 }
-pan_left:  _pan_left    end { $::copp{ $::this_track->pan }->[0] = 0; 
+pan_left:  _pan_left end { $::copp{ $::this_track->pan }->[0] = 0; 
 				::sync_effect_param( $::this_track->pan, 0);
 }
 pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
 				::sync_effect_param( $::this_track->pan, 0);
 }
-pan_back:  _pan_back end {}
+pan_back:  _pan_back end {
+	$::copp{ $::this_track->pan }->[0] = $::this_track->old_pan_level;
 
-
+}
 remove_mark: _remove_mark end { 
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
@@ -286,7 +282,6 @@ to_mark: _to_mark name end {
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 }
 
-# okay to here
 show_effects: _show_effects end {}
 
 remove_effect: _remove_effect op_id(s) end {
@@ -319,23 +314,7 @@ print "code: ", $code, $/;
 	::add_effect( \%p );
 }
 
-delta_effect: _delta_effect op_id parameter sign value {
-		$item{parameter}--; # user's one-based indexing to our zero-base
-		my $new_value = 
- 			eval (join " ",
- 				$::copp{$item{op_id}}->[$item{parameter}], 
- 				$item{sign},
- 				$item{value});
-
-	::effect_update_copp_set( 
-		$::cops{ $item{op_id} }->{chain}, 
-		$item{op_id}, 
-		$item{parameter}, 
-		$new_value);
-
-}
-	
-modify_effect: _modify_effect op_id parameter value sign(?) end {
+modify_effect: _modify_effect op_id parameter sign(?) value end {
 
 		#print join $/, %item, $/;
 		$item{parameter}--; # user's one-based indexing to our zero-base
@@ -357,6 +336,10 @@ modify_effect: _modify_effect op_id parameter value sign(?) end {
 		$new_value);
 
 }
+group_version: _group_version end { 
+	use warnings;
+	no warnings qw(uninitialized);
+	print $::tracker->version, $/ }
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 

@@ -1,7 +1,7 @@
 ---
 help:
   short: h
-  what: display general help screen, or description of specific command
+  what: display help for a command, or general help, or of specific command
 exit:
   short: quit
   what: exit program, saving settings
@@ -13,13 +13,11 @@ setpos:
   what: set current playhead position (seconds)
 group_rec:
   short: grec R
-  what: group REC mode, i.e. rec-enable user tracks
-  smry: group REC mode
+  what: rec-enable user tracks
   parameters: none
 group_mon:
   short: gmon M
-  what: group MON mode, i.e. rec-disable user tracks
-  smry: group MON mode
+  what: rec-disable user tracks
   parameters: none
 group_off:
   short: goff Z 
@@ -34,29 +32,32 @@ mixdown:
 mixplay:
   short: mxp
   what: Play back mixdown file, with user tracks OFF
-  smry: Play mix
+  smry: Playback mix
   parameters: none
 mixoff:
   short: norm mxo normal
-  what: normal mode, i.e. exclude mixdown tracks from chain setup
+  what: normal mode, i.e. Mixdown group OFF, user tracks MON
   smry: mix off
   parameters: none
 add_track:
   short: add
-  what: create a new track, "add sax; r2" will record track sax from input 2
-  smry: create a new track
+  what: create a new track
+  example: add sax; r2  (record track sax from input 2)
   parameters: string 
 set_track:
-  what: (programmers only) directly set values in current track object $this_track
+  what: directly set values in current track (dangerous!)
+  smry: set object fields
   example: set hide 1
 dump_track:
   what: dump current track data to screen (YAML format)
   short: dump
+  smry: dump track data
 dump_group:
-  what: dump the settings of the mixer bus for user tracks 
+  what: dump the settings of the group for user tracks 
   short: dumpg
+  smry: dump group settings
 rec:
-  what: set track to REC
+  what: rec enable 
   parameters: none
 mon:
   what: set track to MON
@@ -69,23 +70,26 @@ off:
 m:
   short: monitor_channel
   what: set track output channel number
+  smry: set track output channel
   parameters: number
 r:
   short: record_channel
   what: set track input channel number
+  smry: set track input channel 
 set_version:
-  short: version n
+  short: version n ver
   what: set track version number for monitoring (overrides group version setting)
   smry: select track version
   parameters: number
+  example: sax; version 5; sh
 group_version:
   short: gn gver gv
   what: set group version for monitoring (overridden by track-version settings)
-  smry: select group version
+  smry: get/set group version
 list_versions:
-  short: ln
-  what: list versions, current track
-  smry: list versions
+  short: lver lv
+  what: list version numbers of current track
+  smry: list track versions
   parameters: none
 vol:
   short: v
@@ -137,11 +141,13 @@ get_state:
 create_project:
   short: create	
   what: create a new project directory tree
+  example: create pauls_gig
   parameters: string
 load_project:
   short: load	
   what: load an existing project
   parameters: string
+  example: load pauls_gig
 generate:
   short: gen
   what: generate chain setup for audio processing
@@ -155,30 +161,33 @@ connect:
   what: connect chain setup
   parameters: none
 disconnect:
+  short: dcon
   what: disconnect chain setup
   parameters: none
 engine_status:
   what: ecasound audio processing engine status
+  smry: engine status info
   short: egs
 renew_engine:
   short: renew
   smry: crashes program
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
-  short: chains setup shs
+  short: chains setup
   what: show current Ecasound chain setup
+  smry: show chain setup
 show_io:
   short: showio
   what: show chain input and output fragments
+  smry: show chain fragments
 show_tracks:
   short: show tracks
-  what: show current Ecasound chain setup
+  what: show track status
 show_track:
   short: sh
-  parameters: optional string, optional number
-  what: show track status, including effects
+  what: show track status, effects, versions
 show_effects:
-  what: show effects (chain operators) on selected track
+  what: show effects on current track
   short: fxs	
   parameters: none
 add_effect:
@@ -188,18 +197,13 @@ add_effect:
   example: fxa ea 600 (amplify current track signal by 600%)
 modify_effect:
   what: modify an effect parameter
-  parameters: parameter,  value, optional sign
+  parameters: effect_id, parameter, optional_sign, value
   short: fxm mfx
-  example: fxm V 1 1000 (set effect V, parameter 1 to 1000)
-delta_effect:
-  what: increment or decrement effect parameter
-  short: dfx fxd
-  parameters: op_id parameter sign value
-  example: fxd V 1 -10 (reduce effect V, parameter 1 by 10)
+  example: fxm V 1 1000 (set to 1000), fxm V 1 -10 (reduce by 10) 
 remove_effect:
-  what: remove chain operator(s) from selected track
+  what: remove effects from selected track
   short: fxr rfx
-  parameters: string (cop id<s>)
+  parameters: effect_id1, effect_id2,...
   example: fxr V (remove effect V)
 helpx:
   what: hellow world
@@ -211,6 +215,7 @@ to_mark:
   short: tom
   what: move playhead to named mark or mark index
   parameters: string or integer
+  example: tom start (go to mark named 'start')
 mark:
   what: Mark current head position, becomes current mark
   short: k	
@@ -219,6 +224,7 @@ remove_mark:
   what: Remove current mark 
   short: rmm
   parameters: none
+  example: rmm (removes current mark)
 next_mark:
   short: nm
   what: Move playback head to next mark
@@ -231,9 +237,11 @@ name_mark:
   short: nom 
   what: Give a name to the current mark
   parameters: string
+  example: nom start
 remove_track:
   what: Make track go away (non destructive)
   parameters: string
+  example: remove_track sax
 stop:
   short: s
   what: stop transport
@@ -244,6 +252,7 @@ loop_enable:
   short: loop
   what: playback will loop between marks
   parameters: start_mark end_mark
+  example: loop mark_a mark_b
 loop_disable:
   short: noloop nl
   what: disable automatic looping
