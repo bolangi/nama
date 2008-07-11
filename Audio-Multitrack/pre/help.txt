@@ -41,12 +41,11 @@ Main Help Scren
 
   -- Track -- 
   
-    add_track, add           -  create a new track, 
-                                "add sax; r3" (record sax
-								from input 3) 
+    add_track, add           -  create a new track, "add sax; r3"
+	                            (record sax from input 3) 
 
     show_track, sh           -  show status of current track,
-	                            including effects and versions
+	                            including effects and versions, 
 								"sax; sh"
 
   Most of the Track related commands operate on the 'current
@@ -75,7 +74,7 @@ Main Help Scren
     unity                -  unity volume    
     vol, v               -  get/set track volume    
     mute, c, cut         -  mute volume 
-	unmute, uncut, cc    -  restore muted volume
+    unmute, uncut, cc    -  restore muted volume
 
   - channel assignments
 
