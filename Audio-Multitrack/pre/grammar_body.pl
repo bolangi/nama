@@ -291,7 +291,7 @@ show_effects: _show_effects end {}
 
 remove_effect: _remove_effect op_id(s) end {
 	#print join $/, @{ $item{"op_id(s)"} }; 
-	map{ print "removing op_id: $_\n"; ::remove_effect( $_ )
+	map{ print "removing effect id: $_\n"; ::remove_effect( $_ )
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 
@@ -337,11 +337,12 @@ delta_effect: _delta_effect op_id parameter sign value {
 	
 modify_effect: _modify_effect op_id parameter value sign(?) end {
 
+		#print join $/, %item, $/;
 		$item{parameter}--; # user's one-based indexing to our zero-base
 
 		my $new_value = $item{value}; 
 
-		if ($item{"sign(?)"}) {
+		if ($item{"sign(?)"} and @{ $item{"sign(?)"} }) {
 			$new_value = 
  			eval (join " ",
  				$::copp{$item{op_id}}->[$item{parameter}], 
