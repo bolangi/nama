@@ -285,8 +285,8 @@ sub yaml_out {
 	croak "attempting to code wrong data type: $type"
 		if $type !~ /HASH|ARRAY/;
 	my $output;
-	print join $/, keys %$data_ref, $/;
-	print "about to write YAML as string\n";
+	$debug and print join $/, keys %$data_ref, $/;
+	$debug and print "about to write YAML as string\n";
     $yw->write( $data_ref, \$output ) if $type =~ /HASH|ARRAY/;
 	$output;
 }

@@ -104,16 +104,17 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('mcegsdtf:', \%opts); 
+	getopts('amcegsdtf:', \%opts); 
 	#print join $/, (%opts);
-	# d: ecmd root dir
+	# a: save and reload ALSA state using alsactl
+	# d: project root dir
 	# c: create project
 	# f: configuration file
-	# g: gui mode # default
+	# g: gui mode 
+	# t: text mode (default)
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
-	# t: text mode
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
@@ -2039,11 +2040,13 @@ map { push @groups_data, $_->hashref } ::Group::all();
 
 
 # store alsa settings
-=comment
 
-	my $result2 = system "alsactl -f $file.alsa store";
-	$debug and print "alsactl store result: ", $result2 >>8, "\n";
-=cut
+	if ( $opts{a} ) {
+		my $file = $file;
+		$file =~ s/\.yml$//;
+		print "storing ALSA settings\n";
+		print qx(alsactl -f $file.alsa store);
+	}
 	# now remute
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
@@ -2149,10 +2152,12 @@ sub retrieve_state {
 	$ui->refresh_oids();
 
 	# restore Alsa mixer settings
-=comment
-	my $result = system "sudo alsactl -f $file.alsa restore";
-	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
-=cut
+	if ( $opts{a} ) {
+		my $file = $file;
+		$file =~ s/\.yml$//;
+		print "restoring project ALSA settings\n";
+		print qx(alsactl -f $file.alsa restore);
+	}
 
 	# text mode marks 
 		

@@ -21,10 +21,6 @@ B<ecmd> I<options> I<project_name>
 
 Use I<project_root_dir> as ecmd top-level project directory (default $HOME/ecmd )
 
-=item B<-m>
-
-Suppress loading of saved state
-
 =item B<-g>
 
 Graphical user interface (default)
@@ -35,7 +31,27 @@ Text interface
 
 =item B<-f> I<config_file>
 
-Use I<config_file> instead of default $HOME/.ecmdrc
+Use I<config_file> instead of default .ecmdrc
+
+=item B<-c>
+
+Create the project named after all options
+
+=item B<-a>
+
+Save and reload ALSA state using alsactl
+
+=item B<-m>
+
+Suppress loading of saved state
+
+=item B<-e>
+
+Don't load static effects data
+
+=item B<-s>
+
+Don't load static effects data cache
 
 =back
 
