@@ -272,4 +272,7 @@ preset_register:
 ladspa_register:
   what: list LADSPA plugins
   short: lrg
+project_name:
+  what: show current project name
+  short: project pn
 ...

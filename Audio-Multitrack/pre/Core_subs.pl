@@ -615,9 +615,14 @@ sub initialize_project_data {
 	
 	$markers_armed = 0;
 	%marks = ();
-	
+
 	# new Marks
- 	map{ $_->remove} ::Mark::all;
+	# print "original marks\n";
+	#print join $/, map{ $_->time} ::Mark::all();
+ 	map{ $_->remove} ::Mark::all();
+	@marks_data = ();
+	#print "remaining marks\n";
+	#print join $/, map{ $_->time} ::Mark::all();
 	# volume settings
 	
 	%old_vol = ();
@@ -984,7 +989,23 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
-	print "engine ", eval_iam("engine-status"), $/;
+	my $start  = ::Mark::loop_start()->time if ::Mark::loop_start();
+	my $end    = ::Mark::loop_end()->time   if ::Mark::loop_end();
+	if ($loop_enable and $start and $end){
+		print "looping from ", d1($start), 
+			($start > 120 
+				? " (" . colonize( $start ) . ") "  
+				: " " ),
+						"to ", d1($end),
+			($end > 120 
+				? " (".colonize( $end ). ") " 
+				: " " ),
+				$/;
+	}
+	print "setup length is ", d1($length), " (" , colonize($length), ")",$/;
+	print "now at ", colonize( eval_iam( "getpos" )), $/;
+	print "engine is ", eval_iam("engine-status"), $/;
+	 
 	$ui->flash_ready();
 	
 }
@@ -1005,13 +1026,13 @@ sub start_transport {
 	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
 	#if twice (or 3x in a row) not running status, 
 
-	print "starting at ", colonize(int eval_iam "getpos"), $/;
+	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
 	start_heartbeat();
 
     #$ui->start_clock(); 
 	sleep 1; # time for engine
-	print "engine ", eval_iam("engine-status"), $/;
+	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub start_heartbeat {
 	$event_id{heartbeat} = $new_event->repeat( 3000,
@@ -1021,8 +1042,7 @@ sub start_heartbeat {
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
 					if $status eq q(finished) or $status eq q(error);
-				print join " ", "engine-status: $status",
-					colonize(int $here), $/; 
+				print join " ", "engine is $status", colonize($here), $/;
 				schedule_wraparound() if $loop_enable and !  really_recording();
 				update_clock();
 
@@ -1073,9 +1093,9 @@ sub prepare_looping {
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
-	print "stopping.\n";
 	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
+	print "engine is ", eval_iam("engine-status"), $/;
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
 # 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
@@ -1467,7 +1487,7 @@ sub effect_update {
 	
 	local $debug = 0;
 	my $es = eval_iam "engine-status";
-	$debug and print "engine: status: $es\n";
+	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
 
 	my ($chain, $id, $param, $val) = @_;
@@ -1958,7 +1978,7 @@ $debug and print join "\n", grep {/el:/} sort keys %effect_i;
 }
 sub d1 {
 	my $n = shift;
-	sprintf("%.2f", $n)
+	sprintf("%.1f", $n)
 }
 sub d2 {
 	my $n = shift;
@@ -2155,7 +2175,7 @@ sub retrieve_state {
 	if ( $opts{a} ) {
 		my $file = $file;
 		$file =~ s/\.yml$//;
-		print "restoring project ALSA settings\n";
+		print "restoring ALSA settings\n";
 		print qx(alsactl -f $file.alsa restore);
 	}
 

@@ -65,7 +65,8 @@ sub jump_here {
 }
 sub remove {
 	my $mark = shift;
-	carp("you attempted to futz $mark, which is not a Mark\n"),
+	carp("you attempted to futz $mark, which is [", ref
+	$mark, " ] not a Mark\n"),
 		return unless (ref $mark) =~ /Mark/;
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};

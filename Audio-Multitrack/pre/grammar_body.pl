@@ -8,7 +8,6 @@ value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+/
-	
 asdf: 'asdf' { print "hello"}
 command: fail
 end: /\s*$/ 
@@ -60,7 +59,10 @@ get_state: _get_state end {
  #	print "set state:  $item{name}\n";
  	}
 getpos: _getpos end {  
-	print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
+	print ::d1( ::eval_iam q(getpos) ), $/; }
+setpos: _setpos value end {
+	::eval_iam("setpos $item{value}");
+}
 
 add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
@@ -274,9 +276,6 @@ list_marks: _list_marks end {
 			::Mark::loop_end()->name  : 
 			d1( ::Mark::loop_end()->time  ) ;
  	}
-	if ($::loop_enable){
-		print "looping from $start to $end\n";
-	}
 	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
 
 }
@@ -359,4 +358,4 @@ list_versions: _list_versions end {
 ladspa_register: _ladspa_register end { print ::eval_iam("ladspa-register") }
 preset_register: _preset_register end { print ::eval_iam("preset-register") }
 ctrl_register: _ctrl_register end { print ::eval_iam("ctrl-register") }
-
+project_name: _project_name end { print "project name: ", $::project_name, $/ }

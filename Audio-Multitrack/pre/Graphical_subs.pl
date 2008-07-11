@@ -971,10 +971,13 @@ sub destroy_marker {
 }
 sub colonize { # convert seconds to minutes:seconds 
 	my $sec = shift;
+	my $hours = int ($sec / 3600);
+	$sec = $sec % 3600;
 	my $min = int ($sec / 60);
 	$sec = $sec % 60;
 	$sec = "0$sec" if $sec < 10;
-	qq($min:$sec);
+	$min = "0$min" if $min < 10 and $hours;
+	($hours ? "$hours:" : "") . qq($min:$sec);
 }
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
