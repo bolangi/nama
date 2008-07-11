@@ -15,6 +15,7 @@ Main Help Scren
    loop_disable, noloop, nl           - disable looping
 
 -- Marks
+
    list_marks, lm     - list marks showing index, time, name
    next_mark, nm      - jump to next mark 
    previous_mark, pm  - jump to previous mark 
@@ -25,36 +26,37 @@ Main Help Scren
 
   -- Project -- 
 
-    load_project, load       <name>          -  load an existing project 
-    create_project, create   <name>          -  create a new project directory tree 
-    get_state, recall, retrieve, restory <state_file>    -  retrieve settings, optional name
-    save_state, keep, save   <state_file>    -  save project settings to disk, optional name    
-    exit, quit                               - exit program, saving state if possible 
+    load_project, load       -  load an existing project 
+    create_project, create   -  create a new project directory tree 
+    get_state, recall, retrieve, restore  - retrieve saved settings
+    save_state, keep, save   - save project settings to disk
+    exit, quit               - exit program, saving state if possible 
 
   -- Setup --
 
-    setup, arm               -  generate and connect chain setup    
-    generate, gen            - generate chain setup
-    connect, con             - connect chain setup
-    show_setup, show         -  show status, all tracks
-    show_chain_setup, chains - show Ecasound chain setup file contents
+    setup, arm                - generate and connect chain setup    
+    generate, gen             - generate chain setup
+    connect, con              - connect chain setup
+    show_setup, show          - show status, all tracks
+    show_chain_setup, chains  - show Ecasound chain setup file contents
 
   -- Track -- 
   
+    add_track, add           -  create a new track 
+
     show_track, sh           -  show status of current track,
 	                            including effects and versions
 	example: sax show_track
 
   Most of the Track related commands operate on the 'current
   track'. To cut volume for a track called 'sax',  you enter
-  'sax mute' or even 'sax; mute' You can also specify a 
+  'sax mute' or even 'sax; mute'. The first part of the
+  command sets a new current track. You can also specify a 
   current track by number,  i.e.  '4 mute'.
-
-    add_track, add          -  create a new track 
 
   - version
 
-    set_version, version, n -  select current track version    
+    set_version, version, ver, n  -  select current track version    
 
   - rw_status
 
@@ -65,28 +67,28 @@ Main Help Scren
   - vol/pan 
 
     pan, p               -  get/set pan position
-    pan_back, pb         -  restore pan    
+    pan_back, pb         -  restore pan after pr/pl/pc  
     pan_center, pc       -  set pan center    
     pan_left, pl         -  pan track fully left    
     pan_right, pr        -  pan track fully right    
-    unity, cc            -  unity volume    
+    unity                -  unity volume    
     vol, v               -  get/set track volume    
     mute, c, cut         -  mute volume 
+	unmute, uncut, cc    -  restore muted volume
 
   - channel assignments
 
-    r,record_channel        -   set input channel number, current track
-    m, monitor_channel      -  set output channel, current track
+    r, record_channel       -  set input channel number, current track
+    m, monitor_channel      -  set output channel number, current track
 
   -- Effects --
 
     ladspa-register, lrg        - list LADSPA effects
-	preset-register, prg        - list Ecasound presets
-	control-register, crg       - list Ecasound controllers
+    preset-register, prg        - list Ecasound presets
+    control-register, crg       - list Ecasound controllers
 
     add_effect,    fxa, afx    - add an effect to the current track
-    modify_effect, fxm, mfx    - set an effect parameter to a new value
-    delta_effect,  fxd, dfx    - increment/decrement effect parameter
+    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
     remove_effect, fxr, rfx    - remove an effect
 
   -- Group control --
@@ -94,7 +96,7 @@ Main Help Scren
     group_rec, grec, R      -  group REC mode 
     group_mon, gmon, M      -  group MON mode 
     group_off, goff, MM     -  group OFF mode 
-    group_version, gn, gver, gv -  select group version 
+    group_version, gver, gv -  select group version 
 
   -- Mixdown --
 

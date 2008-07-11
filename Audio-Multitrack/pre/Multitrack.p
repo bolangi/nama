@@ -221,6 +221,5 @@ B<Audio::Multitrack> - Perl extensions for multitrack audio processing
 B<ecmd> - multitrack recording/mixing application
 
 Type 'man ecmd' for further documentation. Audio::Multitrack
-and its subordinate modules have no separate documentation
-at the moment. 
+and its subordinate modules have no documentation.
 
