@@ -96,9 +96,6 @@ vol:
   what: get/set track volume, current track
   smry: get/set track volume
   parameters: number
-up:
-  what: restore volume of current track to previous, i.e. un-cut level 
-  smry: restore volume # TODO
 mute:
   short: c cut
   what: set playback volume to zero, current track
