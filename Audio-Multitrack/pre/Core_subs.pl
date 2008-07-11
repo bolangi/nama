@@ -160,7 +160,7 @@ sub prepare {
 	
 	# UI object for interface polymorphism
 	
-	$ui = ! $opts{t} ?  ::Graphical->new : ::Text->new;
+	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
 
 	# Tk main window
  	$mw = MainWindow->new;  

@@ -23,11 +23,11 @@ Use I<project_root_dir> as ecmd top-level project directory (default $HOME/ecmd 
 
 =item B<-g>
 
-Graphical user interface (default)
+Graphical user interface
 
 =item B<-t>
 
-Text interface
+Text user interface (default)
 
 =item B<-f> I<config_file>
 
@@ -107,7 +107,7 @@ Audio::Multitrack will automatically incorporate locally
 available LADSPA plugins provided you have the 'analyseplugin'
 program (part of LADSPA client libraries) installed.  
 
-=head1 Tk GUI
+=head1 Tk GRAPHICAL UI 
 
 Invoked using the -g switch on the ecmd command line, 
 the Tk interface provides two panels for record/mix
@@ -123,10 +123,33 @@ Even in GUI mode the text command prompt appears in the
 terminal window, and text commands may be issued at any
 time.
 
-=head1 Text UI
+=head1 TEXT UI
 
 The command line interpreter starts by default
 or by using the B<-t> option when invoking ecmd.
+
+B<Enter command:>
+
+Ecmd and Ecasound-IAM commands can be entered
+directly.
+
+Perl code should be preceded by "eval ".
+
+Shell code should be preceded by "!".
+
+Commands on the same line should be separated by semicolons
+(';'). 
+
+Note that if an 'eval' or '!' appears at the beginning of a
+command, the entire line will be give to the corresponding
+interpreter.
+
+In other situations, the lines are split on semicolons and
+each part is executed appropriately as Ecmd, Ecasound, perl
+code or shell commands.
+
+You can access history using up-arrow/down-arrow
+(Ctrl-P/Ctrl-N on Mac). 
 
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 

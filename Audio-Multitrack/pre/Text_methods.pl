@@ -49,6 +49,20 @@ package ::;
         my ($user_input) = shift;
         return if $user_input =~ /^\s*$/;
         $debug and print "user input: $user_input\n";
+		my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+		if ($cmd eq 'eval') {
+                $debug and print "Evaluating perl code\n";
+                print eval $predicate;
+                print "\n";
+                $@ and print "Perl command failed: $@\n";
+		}
+		elsif ( $cmd eq '!' ) {
+                $debug and print "Evaluating shell commands!\n";
+                system $predicate;
+                print "\n";
+		} else {
+
+
         my @user_input = split /\s*;\s*/, $user_input;
         map {
             my $user_input = $_;
@@ -82,8 +96,8 @@ package ::;
                 # both print
                 $parser->command($_) 
             }    
-
         } @user_input;
+		}
         $ui->refresh; # in case we have a graphic environment
 }
 package ::Text;
