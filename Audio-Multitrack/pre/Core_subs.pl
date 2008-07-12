@@ -986,10 +986,16 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
+	transport_status();
+	$ui->flash_ready();
 	#print eval_iam("fs");
+	
+}
+
+sub transport_status {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
-	print "start: $start, end: $end, loop_enable: $loop_enable\n";
+	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
 	if ($loop_enable and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
 		print "looping from ", d1($start), 
@@ -1005,9 +1011,6 @@ sub connect_transport {
 	print "setup length is ", d1($length), " (" , colonize($length), ")",$/;
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
 	print "engine is ", eval_iam("engine-status"), $/;
-	 
-	$ui->flash_ready();
-	
 }
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
@@ -1190,10 +1193,6 @@ sub previous_mark {
 
 ## clock and clock-refresh functions ##
 #
-
-sub update_clock { 
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-}
 
 ## jump recording head position
 

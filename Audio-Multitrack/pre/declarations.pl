@@ -268,7 +268,6 @@ our (
 	$this_mark,    # current mark
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
-	$length,       # cs-set-length
 
    $previous_text_command, # i want to know if i'm repeating
 );

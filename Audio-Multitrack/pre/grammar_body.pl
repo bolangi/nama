@@ -233,10 +233,22 @@ pan_back:  _pan_back end {
 	$::copp{ $::this_track->pan }->[0] = $::this_track->old_pan_level;
 
 }
+remove_mark: _remove_mark dd end {
+	my @marks = ::Mark::all();
+	$marks[$item{dd}]->remove if defined $marks[$item{dd}];
+}
+
+remove_mark: _remove_mark name end { 
+	my $mark = $::Mark::by_name{$item{name}};
+	$mark->remove if defined $mark;
+#	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
+}
+	
 remove_mark: _remove_mark end { 
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 }
+	
 
 mark: _mark end { $::ui->marker( ::mark_here() )  }
 

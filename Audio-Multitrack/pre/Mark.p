@@ -97,7 +97,7 @@ sub all { sort { $a->time <=> $b->time }@all }
 sub loop_start { 
 	my @points = sort { $a <=> $b } 
 	grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
-	print "points @points\n";
+	#print "points @points\n";
 	$points[0];
 }
 sub loop_end {
@@ -107,20 +107,20 @@ sub loop_end {
 }
 sub mark_time {
 	my $tag = shift;
-	print "tag: $tag\n";
+	#print "tag: $tag\n";
 	my $mark;
 	if ($tag =~ /\./) { # we assume raw time if decimal
-		print "mark time: ", $tag, $/;
+		#print "mark time: ", $tag, $/;
 		return $tag;
 	} elsif ($tag =~ /^\d+$/){
-		print "mark index found\n";
+		#print "mark index found\n";
 		$mark = $::Mark::all[$tag];
 	} else {
-		print "mark name found\n";
+		#print "mark name found\n";
 		$mark = $::Mark::by_name{$tag};
 	}
 	return undef if ! defined $mark;
-	print "mark time: ", $mark->time, $/;
+	#print "mark time: ", $mark->time, $/;
 	return $mark->time;
 		
 }
