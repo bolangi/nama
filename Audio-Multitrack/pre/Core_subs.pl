@@ -953,8 +953,6 @@ sub generate_setup { # create chain setup
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'OFF'} 
 								@tracks;
-	# TODO:  detect case of trying to mixdown with no
-	# playback tracks
 	#print "have source: $have_source\n";
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
@@ -1300,7 +1298,6 @@ sub add_effect {
 }
 
 sub remove_effect {
-	# TODO fold into object code for Track
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -2031,6 +2028,8 @@ sub save_state {
 		} grep { $old_vol{$_} } all_chains();
 	# TODO: old_vol should be incorporated into Track object
 	# not separate variable
+	#
+	# (done for Text mode)
 
  # old vol level has been stored, thus is muted
 	$file = $file ? $file : $state_store_file;
