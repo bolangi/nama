@@ -989,9 +989,11 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	#print eval_iam("fs");
-	my $start  = ::Mark::loop_start()->time if ::Mark::loop_start();
-	my $end    = ::Mark::loop_end()->time   if ::Mark::loop_end();
+	my $start  = ::Mark::loop_start();
+	my $end    = ::Mark::loop_end();
+	print "start: $start, end: $end, loop_enable: $loop_enable\n";
 	if ($loop_enable and $start and $end){
+		#if (! $end){  $end = $start; $start = 0}
 		print "looping from ", d1($start), 
 			($start > 120 
 				? " (" . colonize( $start ) . ") "  
@@ -1043,7 +1045,14 @@ sub start_heartbeat {
 				$new_event->afterCancel($event_id{heartbeat})
 					if $status eq q(finished) or $status eq q(error);
 				print join " ", "engine is $status", colonize($here), $/;
-				schedule_wraparound() if $loop_enable and !  really_recording();
+				my ($start, $end);
+				$start  = ::Mark::loop_start();
+				$end    = ::Mark::loop_end();
+				schedule_wraparound() 
+					if $loop_enable 
+					and defined $start 
+					and defined $end 
+					and !  really_recording();
 				update_clock();
 
 				});
@@ -1052,8 +1061,8 @@ sub start_heartbeat {
 
 sub schedule_wraparound {
 	my $here   = eval_iam("getpos");
-	my $end    = ::Mark::loop_end()->time;
-	my $start  = ::Mark::loop_start()->time;
+	my $start  = ::Mark::loop_start();
+	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
@@ -1072,8 +1081,8 @@ sub schedule_wraparound {
 sub prepare_looping {
 	# print "looping enabled\n";
 	my $here   = eval_iam q(getpos), 
-	my $end    = ::Mark::loop_end()->time;
-	my $start  = ::Mark::loop_start()->time;
+	my $end    = ::Mark::loop_end();
+	my $start  = ::Mark::loop_start();
 	my $diff = $end - $here;
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){

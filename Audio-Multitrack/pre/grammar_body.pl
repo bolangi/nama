@@ -246,7 +246,7 @@ previous_mark: _previous_mark end { ::previous_mark() }
 
 loop_enable: _loop_enable someval(s) end {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
-	print join $/, @new_endpoints;
+	#print join $/, @new_endpoints;
 	$::loop_enable = 1;
 	@::loop_endpoints = (@new_endpoints, @::loop_endpoints); 
 	@::loop_endpoints = @::loop_endpoints[0,1];
@@ -264,18 +264,6 @@ list_marks: _list_marks end {
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";
-	if ( ::Mark::loop_start() ){
-		$start = 
-		::Mark::loop_start()->name ? 
-			::Mark::loop_start()->name  : 
-			d1( ::Mark::loop_start()->time  ) ;
- 	}
-	if (::Mark::loop_end() ){
-		$end = 
-		::Mark::loop_end()->name ? 
-			::Mark::loop_end()->name  : 
-			d1( ::Mark::loop_end()->time  ) ;
- 	}
 	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
 
 }

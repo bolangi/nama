@@ -95,25 +95,34 @@ sub previous {
 sub all { sort { $a->time <=> $b->time }@all }
 
 sub loop_start { 
-	my @points =sort { $a->time <=> $b->time } 
-	grep{ $_ } 	map{ mark_object($_)} @::loop_endpoints[0,1];
+	my @points = sort { $a <=> $b } 
+	grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
+	print "points @points\n";
 	$points[0];
 }
 sub loop_end {
-	my @points =sort { $a->time <=> $b->time } 
-		grep{ $_ } map{ mark_object($_)} @::loop_endpoints[0,1];
+	my @points =sort { $a <=> $b } 
+		grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
 	$points[1];
 }
-sub mark_object {
+sub mark_time {
 	my $tag = shift;
-	my @marks = ::Mark::all();
+	print "tag: $tag\n";
 	my $mark;
-	if ($tag =~ /\d+/){
-		$mark = $marks[$tag];
+	if ($tag =~ /\./) { # we assume raw time if decimal
+		print "mark time: ", $tag, $/;
+		return $tag;
+	} elsif ($tag =~ /^\d+$/){
+		print "mark index found\n";
+		$mark = $::Mark::all[$tag];
 	} else {
+		print "mark name found\n";
 		$mark = $::Mark::by_name{$tag};
 	}
-	$mark if defined $mark; 
+	return undef if ! defined $mark;
+	print "mark time: ", $mark->time, $/;
+	return $mark->time;
+		
 }
 
 	

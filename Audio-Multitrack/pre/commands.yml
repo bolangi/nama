@@ -254,8 +254,8 @@ start:
 loop_enable:
   short: loop
   what: playback will loop between marks
-  parameters: start_mark end_mark
-  example: loop mark_a mark_b
+  parameters: start end 
+  example: loop a b (loop between marks 'a' and 'b'),\n         loop 1 3 (loop between marks 1 and 3),\n         loop 13.6 69.0 (loop between times, decimal required) 
 loop_disable:
   short: noloop nl
   what: disable automatic looping
