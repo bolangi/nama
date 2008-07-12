@@ -56,11 +56,11 @@ DIRFILESEP = /
 DFSEP = $(DIRFILESEP)
 NAME = Multitrack.pm
 NAME_SYM = Multitrack_pm
-VERSION = 0.92
+VERSION = 0.95
 VERSION_MACRO = VERSION
-VERSION_SYM = 0_92
+VERSION_SYM = 0_95
 DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
-XS_VERSION = 0.92
+XS_VERSION = 0.95
 XS_VERSION_MACRO = XS_VERSION
 XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
 INST_ARCHLIB = blib/arch
@@ -158,7 +158,7 @@ XS_FILES =
 C_FILES  = 
 O_FILES  = 
 H_FILES  = 
-MAN1PODS = 
+MAN1PODS = scripts/ecmd
 MAN3PODS = Multitrack.pm \
 	lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Object.pm
@@ -280,7 +280,7 @@ RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
 DIST_CP = best
 DIST_DEFAULT = tardist
 DISTNAME = Multitrack.pm
-DISTVNAME = Multitrack.pm-0.92
+DISTVNAME = Multitrack.pm-0.95
 
 
 # --- MakeMaker macro section:
@@ -433,9 +433,12 @@ POD2MAN = $(POD2MAN_EXE)
 
 
 manifypods : pure_all  \
+	scripts/ecmd \
 	Multitrack.pm \
 	lib/Audio/Multitrack.pm \
 	lib/Audio/Multitrack/Object.pm
+	$(NOECHO) $(POD2MAN) --section=1 --perm_rw=$(PERM_RW) \
+	  scripts/ecmd $(INST_MAN1DIR)/ecmd.$(MAN1EXT) 
 	$(NOECHO) $(POD2MAN) --section=3 --perm_rw=$(PERM_RW) \
 	  Multitrack.pm $(INST_MAN3DIR)/Multitrack.$(MAN3EXT) \
 	  lib/Audio/Multitrack.pm $(INST_MAN3DIR)/Audio::Multitrack.$(MAN3EXT) \
@@ -521,7 +524,7 @@ metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	$(NOECHO) $(ECHO) '--- #YAML:1.0' > META_new.yml
 	$(NOECHO) $(ECHO) 'name:                Multitrack.pm' >> META_new.yml
-	$(NOECHO) $(ECHO) 'version:             0.92' >> META_new.yml
+	$(NOECHO) $(ECHO) 'version:             0.95' >> META_new.yml
 	$(NOECHO) $(ECHO) 'abstract:            ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'license:             ~' >> META_new.yml
 	$(NOECHO) $(ECHO) 'author:              ' >> META_new.yml
@@ -822,7 +825,7 @@ testdb_static :: testdb_dynamic
 # --- MakeMaker ppd section:
 # Creates a PPD (Perl Package Description) for a binary distribution.
 ppd :
-	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,92,0,0">' > $(DISTNAME).ppd
+	$(NOECHO) $(ECHO) '<SOFTPKG NAME="$(DISTNAME)" VERSION="0,95,0,0">' > $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <TITLE>$(DISTNAME)</TITLE>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <ABSTRACT></ABSTRACT>' >> $(DISTNAME).ppd
 	$(NOECHO) $(ECHO) '    <AUTHOR>Joel Roth &lt;jroth@joelz@pobox.com&gt;</AUTHOR>' >> $(DISTNAME).ppd
