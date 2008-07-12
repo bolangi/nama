@@ -1,19 +1,20 @@
-Audio::Multitrack version 0.93
+Audio::Multitrack version 0.95
 ================================
 
-Audio::Multitrack assists multitrack, multibus recording by
-adding concepts of track and bus to the Ecasound audio
-processing engine. 
+Audio::Multitrack implements concepts of track and bus,
+provides user interfaces and other infrastructure 
+needed to conveniently use Ecasound for multitrack recording
+purposes.
 
 The distribution includes Ecmd, a multitrack recording and
 mixing application. 
 
 Ecmd's graphic interface is a recorder/mixer with two panels
-based on the Tk widget set.  
+based on the Tk widget set. 
 
-Ecmd's command-line interface has history, and
-help functions.  Ecasound IAM commands pass directly to
-the audio-processing engine.
+Ecmd's command-line interface executes its own commands,
+Ecasound commands, perl code, and shell commands. It
+includes history and help functions. 
 
 INSTALLATION
 
@@ -48,9 +49,13 @@ installed on your system. Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled
 binary packages for your Un*x distribution.
 
-Your Audio::Multitrack system will be more capable if you
-have LADSPA plugins installed. You will also need the LADSPA utility
-program 'analyseplugin'. See http://ladspa.org .
+Audio::Multitrack will be more capable with have LADSPA
+plugins installed. In that case, the LADSPA utility program
+'analyseplugin' should also be installed in a directory in
+your execution PATH.  See http://ladspa.org .
+
+You also need to have the BSD utility program 'file'
+present.
 
 COPYRIGHT AND LICENCE
 
