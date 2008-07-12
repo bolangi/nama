@@ -1008,7 +1008,9 @@ sub transport_status {
 				: " " ),
 				$/;
 	}
-	print "setup length is ", d1($length), " (" , colonize($length), ")",$/;
+	print "setup length is ", d1($length), 
+		($length > 120	?  " (" . colonize($length). ")" : "" )
+		,$/;
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
 	print "engine is ", eval_iam("engine-status"), $/;
 }

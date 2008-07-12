@@ -6,7 +6,6 @@ use warnings;
 no warnings qw(uninitialized);
 no warnings;
 our $VERSION = '0.95';
-use IO::All;
 use Carp;
 use Cwd;
 use Tk;
@@ -19,6 +18,7 @@ use Data::YAML::Writer;
 use Data::YAML::Reader;
 use File::Find::Rule;
 use File::Spec::Link;
+use IO::All;
 
 ## Definitions ##
 

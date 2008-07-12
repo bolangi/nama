@@ -242,18 +242,15 @@ $project_root/project_name/.ecmdrc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
-No GUI remove-track command.
+No GUI remove-track command is provided.
 
 Default GUI volume sliders are not log scaled.
 
-Adding and removing chain operators while the engine is
-running may cause the engine to stop.
+Erratic behavior may result from adding or removing effects
+while the engine is running. 
 
 The post-recording cleanup routine currently deletes
 newly recorded soundfiles under 44100 bytes in size. 
-
-Looping behavior may not be reliable for loops under 6
-seconds.
 
 =head1 EXPORT
 
@@ -261,15 +258,34 @@ None by default.
 
 =head1 DEPENDENCIES
 
-The Ecasound audio processing libraries are required
-to use this software, and need to be installed separately.
-See http://www.eca.cx/ecasound/ .
+This module requires that you have installed these Perl modules:
 
-The BSD 'file' program is used to detect stereo WAV files.
+	Carp
+	Data::YAML
+	IO::All
+	Cwd
+	Storable 
+	Data::Dumper
+	Getopt::Std
+	Tk
+	Audio::Ecasound
+	Parse::RecDescent
+	YAML::Tiny
+	Data::YAML
+	File::Find::Rule
+	File::Spec::Link
 
-LADSPA libraries and plugins are strongly recommended.
-See http://ladspa.org/ . The 'analyseplugin'
-utility program is needed to make best use of LADSPA.
+The Ecasound audio processing libraries must also be
+installed.  Ecasound may be obtained from
+http://ecasound.seul.org/ecasound/ or as precompiled binary
+packages for your Un*x distribution.
+
+LADSPA libraries and plugins are strongly recommended.  In
+that case, the LADSPA utility program 'analyseplugin' must
+also be installed in a directory in your execution PATH.  See
+http://ladspa.org .
+
+'file', a BSD utility program, is also needed.
 
 =head1 AVAILABILITY
 
