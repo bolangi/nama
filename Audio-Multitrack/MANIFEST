@@ -3,6 +3,7 @@ Makefile.PL
 MANIFEST
 COPYING
 README
+install_needed_perl_modules.sh
 scripts/ecmd
 lib/Audio/Multitrack.pm
 lib/Audio/Multitrack/Assign.pm
