@@ -1,11 +1,11 @@
 package ::;
+our $VERSION = '0.95';
 use 5.008;
 use strict;
 no strict qw(subs);
 use warnings;
 no warnings qw(uninitialized);
 no warnings;
-our $VERSION = '0.95';
 use Carp;
 use Cwd;
 use Tk;

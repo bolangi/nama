@@ -1,6 +1,7 @@
 
 # ----------- Mark ------------
 package ::Mark;
+our $VERSION = 1.0;
 use Carp;
 our @ISA;
 use vars qw($n %by_name @all  %used_names);

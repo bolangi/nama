@@ -1,4 +1,5 @@
 package ::;
+our $VERSION = 1.0;
 
 use vars qw(%iam_cmd);
 

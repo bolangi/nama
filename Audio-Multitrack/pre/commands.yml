@@ -224,10 +224,10 @@ mark:
   short: k	
   parameters: none
 remove_mark:
-  what: Remove current mark 
+  what: Remove mark 
   short: rmm
-  parameters: none
-  example: rmm (removes current mark)
+  parameters: mark name, mark index or none (for current mark) 
+  example: rmm start (remove mark named 'start')
 next_mark:
   short: nm
   what: Move playback head to next mark

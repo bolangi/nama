@@ -1,11 +1,10 @@
-use lib qw(.. .); # for testing
-use strict;
-our ($debug);
-local $debug = 0;
 
 # ---------- Track -----------
-
+use strict;
 package ::Track;
+our $VERSION = 1.0;
+our ($debug);
+local $debug = 0;
 #use Exporter qw(import);
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
@@ -371,6 +370,7 @@ sub ch_r {
 # ---------- Group -----------
 
 package ::Group;
+our $VERSION = 1.0;
 #use Exporter qw(import);
 #our @EXPORT_OK =qw(group);
 use Carp;
@@ -431,6 +431,7 @@ sub all { @by_index[1..scalar @by_index - 1] }
 # ---------- Op -----------
 
 package ::Op;
+our $VERSION = 0.5;
 our @ISA;
 use ::Object qw(	op_id 
 					chain_id 

@@ -1,12 +1,11 @@
-use lib qw(.. .); # for testing
-use strict;
-our ($debug);
-$debug = 0;
 
 # ------------  Bus --------------------
 
-
 package ::Bus;
+our $VERSION = 1.0;
+use strict;
+our ($debug);
+$debug = 0;
 use Carp;
 our @ISA;
 use ::Object qw(	name

@@ -1,4 +1,5 @@
 package ::Assign;
+our $VERSION = 1.0;
 use 5.008;
 use strict;
 use warnings;
@@ -47,7 +48,6 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.01';
 
 package ::;
 our ($debug, $debug2, $debug3);
