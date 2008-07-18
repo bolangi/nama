@@ -37,8 +37,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		strip_blank_lines
 		strip_comments
 		remove_spaces
-		yamlify_commands
-
 	
 ) ] );
 
@@ -303,17 +301,6 @@ sub yaml_in {
 		$yaml = $file;
 	}
 	$yr->read( $yaml ); # returns ref
-}
-sub yamlify_commands {
-	my @in = @_;
-	@in = map{ 	s/\t{2}/\t\t\t/ ; 
-			s/^\t(?!\t)/\t-\n\t\t/;
-			s/\t/  /g;
-			s/\s+$/\n/g;
-			$_;
-		} @in;
-		@in;
-
 }
 
 ## support functions
