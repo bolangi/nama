@@ -202,6 +202,7 @@ open STDERR, ">&SAVERR";
 $helptext = q(
 [% qx(cat ./help.txt) %]
 );
+
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';

@@ -1,17 +1,9 @@
 ---
 help:
   short: h
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  what: display general help screen, or description of specific command
-=======
   what: display help for a command, or general help, or of specific command
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 exit:
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  short: quit
-=======
   short: quit q
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   what: exit program, saving settings
 getpos:
   short: gp
@@ -174,27 +166,14 @@ disconnect:
   parameters: none
 engine_status:
   what: ecasound audio processing engine status
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-=======
   smry: engine status info
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: egs
 renew_engine:
   short: renew
   smry: crashes
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  short: chains setup shs
-  what: show current Ecasound chain setup
-show_io:
-  short: showio
-  what: show chain input and output fragments
-show_tracks:
-  short: show tracks
-=======
   short: chains setup
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   what: show current Ecasound chain setup
   smry: show chain setup
 show_io:
@@ -236,36 +215,19 @@ list_marks:
 to_mark:
   short: tom
   what: move playhead to named mark or mark index
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-=======
   smry: playhead to mark
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   parameters: string or integer
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-=======
   example: tom start (go to mark named 'start')
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 mark:
   what: Mark current head position, becomes current mark
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-=======
   smry: mark current position
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: k	
   parameters: none
 remove_mark:
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  what: Remove current mark 
-=======
   what: Remove mark 
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: rmm
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  parameters: none
-=======
   parameters: mark name, mark index or none (for current mark) 
   example: rmm start (remove mark named 'start')
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 next_mark:
   short: nm
   what: Move playback head to next mark
@@ -292,12 +254,8 @@ start:
 loop_enable:
   short: loop
   what: playback will loop between marks
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-  parameters: start_mark end_mark
-=======
   parameters: start end 
   example: loop a b (loop between marks 'a' and 'b'),\n         loop 1 3 (loop between marks 1 and 3),\n         loop 13.6 69.0 (loop between times, decimal required) 
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 loop_disable:
   short: noloop nl
   what: disable automatic looping
@@ -305,8 +263,6 @@ T:
   what: ecasound-only start
 S:
   what: ecasound-only stop
-<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
-=======
 ctrl_register:
   what: list Ecasound controllers
   short: crg
@@ -319,5 +275,4 @@ ladspa_register:
 project_name:
   what: show current project name
   short: project pn
->>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 ...

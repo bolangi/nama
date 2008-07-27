@@ -33,10 +33,6 @@ our (
 
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
-	%parser,        # new dispatcher to replace Parse::RecDescent
-	$user_input,    # for command line
-	$cmd,           # first item on command line
-	$predicate,     # remaining items on command line
 	%iam_cmd,		# for identifying IAM commands in user input
 	@ecmd_commands,# array of commands my functions provide
 	%ecmd_commands,# as hash as well
@@ -66,12 +62,8 @@ our (
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
-<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
-	$this_op,      # currently selected effect
-=======
 	$this_op,      # currently selected effect # future
 	$this_mark,    # current mark  # for future
->>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 
 	@format_fields, # data for replies to text commands
 
@@ -276,13 +268,6 @@ our (
 	$this_mark,    # current mark
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
-<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
-	$length,       # cs-set-length
-=======
->>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 
-<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
-=======
    $previous_text_command, # i want to know if i'm repeating
->>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 );

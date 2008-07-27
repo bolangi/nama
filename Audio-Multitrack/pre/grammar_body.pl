@@ -7,20 +7,8 @@ parameter: /\d+/
 value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-name: /\w+/
-	
-=======
 name: /[\w:]+/
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 asdf: 'asdf' { print "hello"}
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-read: command(s)
-=======
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
-=======
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 command: fail
 end: /\s*$/ 
 end: ';' 
@@ -71,14 +59,10 @@ get_state: _get_state end {
  #	print "set state:  $item{name}\n";
  	}
 getpos: _getpos end {  
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-	print sprintf("%.1f", ::eval_iam q(getpos) )."s", $/; }
-=======
 	print ::d1( ::eval_iam q(getpos) ), $/; }
 setpos: _setpos value end {
 	::eval_iam("setpos $item{value}");
 }
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
 add_track: _add_track name end { 
 	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
@@ -126,11 +110,7 @@ show_tracks: _show_tracks end {
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
 	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-	print $chain_setup, $/, $/;
-=======
 	print $chain_setup, $/;
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 }
 
 show_io: _show_io { print ::yaml_out( \%::inputs ),
@@ -138,28 +118,8 @@ show_io: _show_io { print ::yaml_out( \%::inputs ),
 
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-
- 	map { 
- 		my $op_id = $_;
- 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
- 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
- 		 my @pnames =@{$::effects[ $i ]->{params}};
-			map{ print join " ", 
-			 	$pnames[$_]->{name}, 
-				$::copp{$op_id}->[$_],'' 
-		 	} (0..scalar @pnames - 1);
-		 print $/;
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
- 
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
- 	 } @{ $::this_track->ops };
- 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
-=======
 	::Text::show_effects();
 	::Text::show_versions();
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -168,14 +128,8 @@ show_track: _show_track dd end {
 	::Text::show_tracks( $::ti[$item{dd}] ) if $::ti[$item{dd}]
 }
 	
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
-=======
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 #show_setup: _show_setup end { 
 #		::io(::join_path(::project_dir(),  ) > $contents;
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
 group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
 group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }
@@ -211,12 +165,6 @@ off: 'off' end {$::this_track->set(rw => 'OFF'); }
 rec: 'rec' end {$::this_track->set(rw => 'REC'); }
 mon: 'mon' end {$::this_track->set(rw => 'MON'); }
 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-
-
-
-=======
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
 ## we reach here
@@ -233,10 +181,6 @@ vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-mute: _mute end { $::copp{ $::this_track->vol }->[0] = 0;
-				::sync_effect_param( $::this_track->vol, 0);
-=======
 mute: _mute end {
 
 	$::this_track->set(old_vol_level => $::copp{$::this_track->vol}[0])
@@ -250,7 +194,6 @@ unmute: _unmute end {
 	$::copp{$::this_track->vol}[0] = $::this_track->old_vol_level;
 	$::this_track->set(old_vol_level => 0);
 	::sync_effect_param( $::this_track->vol, 0);
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 }
 
 
@@ -289,32 +232,23 @@ pan_center: _pan_center end { $::copp{ $::this_track->pan }->[0] = 50   ;
 pan_back:  _pan_back end {
 	$::copp{ $::this_track->pan }->[0] = $::this_track->old_pan_level;
 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
 }
 remove_mark: _remove_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];
 }
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
 remove_mark: _remove_mark name end { 
 	my $mark = $::Mark::by_name{$item{name}};
 	$mark->remove if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 }
 	
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 remove_mark: _remove_mark end { 
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 }
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
 	
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
 mark: _mark end { $::ui->marker( ::mark_here() )  }
 
@@ -324,11 +258,7 @@ previous_mark: _previous_mark end { ::previous_mark() }
 
 loop_enable: _loop_enable someval(s) end {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-	print join $/, @new_endpoints;
-=======
 	#print join $/, @new_endpoints;
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 	$::loop_enable = 1;
 	@::loop_endpoints = (@new_endpoints, @::loop_endpoints); 
 	@::loop_endpoints = @::loop_endpoints[0,1];
@@ -338,7 +268,6 @@ loop_disable: _loop_disable end {
 }
 	
 name_mark: _name_mark name end {$::this_mark->set_name( $item{name}) }
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
 
 list_marks: _list_marks end { 
 	my $i = 0;
@@ -347,58 +276,20 @@ list_marks: _list_marks end {
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";
-	if ( ::Mark::loop_start() ){
-		$start = 
-		::Mark::loop_start()->name ? 
-			::Mark::loop_start()->name  : 
-			d1( ::Mark::loop_start()->time  ) ;
- 	}
-	if (::Mark::loop_end() ){
-		$end = 
-		::Mark::loop_end()->name ? 
-			::Mark::loop_end()->name  : 
-			d1( ::Mark::loop_end()->time  ) ;
- 	}
-	if ($::loop_enable){
-		print "looping from $start to $end\n";
-	}
 	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
-=======
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-}
-to_mark: _to_mark dd end {
-	my @marks = ::Mark::all();
-	$marks[$item{dd}]->jump_here;
-}
-=======
-list_marks: _list_marks end { 
-	my $i = 0;
-	map{ print( $_->time == $::this_mark->time ? q(*) : q()
-	,join " ", $i++, sprintf("%.1f", $_->time), $_->name, $/)  } 
-		  #sort { $a->time <=> $b->time } 
-		  @::Mark::all;
-	my $start = my $end = "undefined";
-	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), $/;
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
-
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
 }
 to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->jump_here;
 }
 
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 to_mark: _to_mark name end { 
 	my $mark = $::Mark::by_name{$item{name}};
 	$mark->jump_here if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 }
 
-# okay to here
 show_effects: _show_effects end {}
 
 remove_effect: _remove_effect op_id(s) end {
@@ -411,14 +302,10 @@ remove_effect: _remove_effect op_id(s) end {
 
 
 add_effect: _add_effect name value(s?)  end { 
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-print join $/, keys %item;
-=======
 #print join $/, %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";
 #print "itemdd2:", $item{"dd"} , ":\n";
 #print "ref:", ref $item{dd} , ":\n";
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 
 my $code = $item{name};
 if ( $::effect_i{$code} ) {} # do nothing
@@ -457,13 +344,10 @@ modify_effect: _modify_effect op_id parameter sign(?) value end {
 		$new_value);
 
 }
-<<<<<<< HEAD:Audio-Multitrack/pre/grammar_body.pl
-=======
 group_version: _group_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
 	print $::tracker->version, $/ }
->>>>>>> v_95:Audio-Multitrack/pre/grammar_body.pl
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 

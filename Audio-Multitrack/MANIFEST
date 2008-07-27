@@ -14,10 +14,6 @@ lib/Audio/Multitrack/Track.pm
 lib/Audio/Multitrack/Wav.pm
 lib/Audio/Multitrack/Object.pm
 lib/Audio/Multitrack/Mark.pm
-<<<<<<< HEAD:Audio-Multitrack/MANIFEST
-t/01_load.t
-=======
->>>>>>> v_95:Audio-Multitrack/MANIFEST
 t/02_assign.t
 t/03_wav.t
 t/04_object.t

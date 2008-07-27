@@ -166,10 +166,6 @@ sub prepare {
  	$mw = MainWindow->new;  
 	$new_event = $mw->Label();
 
-	# Tk main window
- 	$mw = MainWindow->new;  
-	$new_event = $mw->Label();
-
 	$ui->init_gui;
 	$ui->transport_gui;
 	#$ui->oid_gui;
@@ -619,22 +615,14 @@ sub initialize_project_data {
 	
 	$markers_armed = 0;
 	%marks = ();
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	
-=======
 
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	# new Marks
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
- 	map{ $_->remove} ::Mark::all;
-=======
 	# print "original marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
  	map{ $_->remove} ::Mark::all();
 	@marks_data = ();
 	#print "remaining marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	# volume settings
 	
 	%old_vol = ();
@@ -965,11 +953,6 @@ sub generate_setup { # create chain setup
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'OFF'} 
 								@tracks;
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	# TODO:  detect case of trying to mixdown with no
-	# playback tracks
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	#print "have source: $have_source\n";
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
@@ -1003,12 +986,7 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	#print eval_iam("fs");
-	print "engine status: ", eval_iam("engine-status"), $/;
-=======
 	transport_status();
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	$ui->flash_ready();
 	#print eval_iam("fs");
 	
@@ -1053,21 +1031,13 @@ sub start_transport {
 	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
 	#if twice (or 3x in a row) not running status, 
 
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	print "starting at ", colonize(int eval_iam "getpos"), $/;
-=======
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	eval_iam('start');
 	start_heartbeat();
 
     #$ui->start_clock(); 
 	sleep 1; # time for engine
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	print "engine status: ", eval_iam("engine-status"), $/;
-=======
 	print "engine is ", eval_iam("engine-status"), $/;
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 }
 sub start_heartbeat {
 	$event_id{heartbeat} = $new_event->repeat( 3000,
@@ -1076,12 +1046,6 @@ sub start_heartbeat {
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-					if $status eq q(finished) or $status eq q(error);
-				print join " ", "engine-status: $status",
-					colonize(int $here), $/; 
-				schedule_wraparound() if $loop_enable and !  really_recording();
-=======
 					#if $status =~ /finished|error|stopped/;
 					if $status =~ /finished|error/;
 				print join " ", "engine is $status", colonize($here), $/;
@@ -1093,7 +1057,6 @@ sub start_heartbeat {
 					and defined $start 
 					and defined $end 
 					and !  really_recording();
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 				update_clock();
 
 				});
@@ -1102,13 +1065,8 @@ sub start_heartbeat {
 
 sub schedule_wraparound {
 	my $here   = eval_iam("getpos");
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	my $end    = ::Mark::loop_end()->time;
-	my $start  = ::Mark::loop_start()->time;
-=======
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	my $diff = $end - $here;
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
@@ -1127,13 +1085,8 @@ sub schedule_wraparound {
 sub prepare_looping {
 	# print "looping enabled\n";
 	my $here   = eval_iam q(getpos), 
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	my $end    = ::Mark::loop_end()->time;
-	my $start  = ::Mark::loop_start()->time;
-=======
 	my $end    = ::Mark::loop_end();
 	my $start  = ::Mark::loop_start();
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	my $diff = $end - $here;
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){
@@ -1153,10 +1106,6 @@ sub prepare_looping {
 }
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	print "stopping.\n";
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
 	eval_iam('stop');	
 	print "engine is ", eval_iam("engine-status"), $/;
@@ -1185,24 +1134,15 @@ sub show_unit { $time_step->configure(
 
 # GUI routines
 sub drop_mark {
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-		my $mark = mark_here();
-=======
 	my $here = eval_iam("cs-get-position");
 	return if grep { $_->time == $here } ::Mark::all();
 	my $mark = ::Mark->new( time => $here );
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 		$ui->marker($mark); # for GUI
 }
 sub mark {
 	my $mark = shift;
 	my $pos = $mark->time;
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	my $here = eval_iam("cs-get-position");
-	if ($markers_armed and abs( $pos - $here) < 0.001){
-=======
 	if ($markers_armed){ 
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 			$ui->destroy_marker($pos);
 			$mark->remove;
 		    arm_mark_toggle(); # disarm
@@ -1215,14 +1155,7 @@ sub mark {
 
 # TEXT routines
 
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-sub mark_here {
-	my $here = eval_iam("cs-get-position");
-	::Mark->new( time => $here );
-}
-=======
 
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 sub next_mark {
 	my $jumps = shift;
 	$jumps and $jumps--;
@@ -1237,7 +1170,6 @@ sub next_mark {
 			return;
 		}
 	}
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
 }
 sub previous_mark {
 	my $jumps = shift;
@@ -1251,31 +1183,6 @@ sub previous_mark {
 			return;
 		}
 	}
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
-}
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	
-
-## clock and clock-refresh functions ##
-#
-
-sub update_clock { 
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-=======
-sub previous_mark {
-	my $jumps = shift;
-	$jumps and $jumps--;
-	my $here = eval_iam("cs-get-position");
-	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
-	for my $i ( reverse 0..$#marks ){
-		if ($marks[$i]->time < $here ){
-			eval_iam("setpos " .  $marks[$i+$jumps]->time);
-			$this_mark = $marks[$i];
-			return;
-		}
-	}
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 }
 	
 
@@ -1385,10 +1292,6 @@ sub add_effect {
 }
 
 sub remove_effect {
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	# TODO fold into object code for Track
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -2075,11 +1978,7 @@ $debug and print join "\n", grep {/el:/} sort keys %effect_i;
 }
 sub d1 {
 	my $n = shift;
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	sprintf("%.2f", $n)
-=======
 	sprintf("%.1f", $n)
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 }
 sub d2 {
 	my $n = shift;
@@ -2163,20 +2062,13 @@ map { push @groups_data, $_->hashref } ::Group::all();
 
 
 # store alsa settings
-=comment
 
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-	my $result2 = system "alsactl -f $file.alsa store";
-	$debug and print "alsactl store result: ", $result2 >>8, "\n";
-=cut
-=======
 	if ( $opts{a} ) {
 		my $file = $file;
 		$file =~ s/\.yml$//;
 		print "storing ALSA settings\n";
 		print qx(alsactl -f $file.alsa store);
 	}
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 	# now remute
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
@@ -2282,19 +2174,12 @@ sub retrieve_state {
 	$ui->refresh_oids();
 
 	# restore Alsa mixer settings
-<<<<<<< HEAD:Audio-Multitrack/pre/Core_subs.pl
-=comment
-	my $result = system "sudo alsactl -f $file.alsa restore";
-	$debug and print "alsactl restore result: " , $result >> 8 , "\n";
-=cut
-=======
 	if ( $opts{a} ) {
 		my $file = $file;
 		$file =~ s/\.yml$//;
 		print "restoring ALSA settings\n";
 		print qx(alsactl -f $file.alsa restore);
 	}
->>>>>>> v_95:Audio-Multitrack/pre/Core_subs.pl
 
 	# text mode marks 
 		

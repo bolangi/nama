@@ -1,7 +1,5 @@
 use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-=======
 
 sub show_versions {
  	print "Versions: ", join " ", @{$::this_track->versions}, $/;
@@ -21,7 +19,6 @@ sub show_effects {
  
  	 } @{ $::this_track->ops };
 }
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
 sub loop {
     package ::;
     #load_project(name => $project_name, create => $opts{c}) if $project_name;
@@ -32,14 +29,10 @@ sub loop {
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
 	next if $user_input =~ /^\s*$/;
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-     $term->addhistory($user_input) ;
-=======
 	#print "previous: '$previous_text_command' current: '$user_input'\n";
     $term->addhistory($user_input) 
 	 	unless $user_input eq $previous_text_command;
  	$previous_text_command = $user_input;
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
 	::Text::command_process( $user_input );
 	#print "here we are\n";
  #    use ::Text::OuterShell; # not needed, class is present in this file
@@ -53,27 +46,9 @@ sub loop {
 sub command_process {
 
 package ::;
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-		my ($user_input) = shift;
-		local $debug = 1;
-		# my ($user_input) = $term->readline($prompt) ; # old way
-		return if $user_input =~ /^\s*$/;
-		$debug and print "user input: $user_input\n";
-		# $term->addhistory($user_input) ; # this is done # for us too
-		my @user_input = split /\s*;\s*/, $user_input;
-		map {
-			my $user_input = $_;
-			($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			$debug and print "cmd: $cmd \npredicate: $predicate\n";
-=======
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
         my ($user_input) = shift;
         return if $user_input =~ /^\s*$/;
         $debug and print "user input: $user_input\n";
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-=======
 		my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
 		if ($cmd eq 'eval') {
                 $debug and print "Evaluating perl code\n";
@@ -88,7 +63,6 @@ package ::;
 		} else {
 
 
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
         my @user_input = split /\s*;\s*/, $user_input;
         map {
             my $user_input = $_;
@@ -122,75 +96,9 @@ package ::;
                 # both print
                 $parser->command($_) 
             }    
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
-
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-		# set current track (effect, parameter) specified by prefix
-		
-			if ($tn{$cmd}) { 
-				$debug and print qq(Selecting track "$cmd"\n);
-				$this_track = $tn{$cmd};
-				$user_input = $predicate;
-				($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-				$this_track = $ti[$cmd];
-				$user_input = $predicate;
-				($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			} 
-
-
-		# try to execute what comes next
-		#
-		#
-		#      perl code, prefixed by 'eval'
-		
-			if ($cmd eq 'eval') {
-				$debug and print "Evaluating perl code\n";
-				print eval $predicate;
-				print "\n";
-				$@ and print "Perl command failed: $@\n";
-
-	    #     shell code, prefixed by '!'
-		
-			} elsif ($cmd eq '!') {
-				$debug and print "Evaluating shell commands!\n";
-				system $predicate;
-
-	    #     IAM command, no prefix needed	
-			
-			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found Iam command\n";
-				print ::eval_iam($user_input), $/ ;
-			} else {
-				$debug and print "Passing to parser\n", 
-				$_, $/;
-				if ($parser{$cmd}){ 
-					print $parser{$cmd},$/;
-					ref $parser{$cmd} !~ /CODE/ and croak 
-				        "expected CODE ref, got: ", ref $parser{$cmd}, $/;
-					&{ $parser{$cmd} }( $predicate )
-					} else { print "unknown command: $cmd\n";
-				}
-				
-				
-			}	
-
-		} @user_input;
-=======
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
         } @user_input;
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-=======
 		}
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
         $ui->refresh; # in case we have a graphic environment
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
 }
 package ::Text;
 sub show_tracks {
@@ -225,12 +133,6 @@ splice @::format_fields, 0, 6
 
 sub helpline {
 	my $cmd = shift;
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-	my $text =  ( $commands{$cmd}->{smry} 
-		?  $commands{$cmd}->{smry} 
-		: $commands{$cmd}->{what} );
-	
-=======
 	my $text =  $commands{$cmd}->{what}. $/;
 	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
 			if $commands{$cmd}->{parameters};	
@@ -238,7 +140,6 @@ sub helpline {
 			if $commands{$cmd}->{example};
 	$text .=  "aliases:  $cmd ". $commands{$cmd}->{short} . $/
 			if $commands{$cmd}->{short};	
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
 	print( $/, ucfirst $text, $/);
 	
 }
@@ -251,9 +152,6 @@ sub help {
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
 	      helpline($cmd), return 
 		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
-<<<<<<< HEAD:Audio-Multitrack/pre/Text_methods.pl
-	} keys %commands
-=======
 	} keys %commands;
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {
@@ -262,7 +160,6 @@ sub help {
     print qx(analyseplugin $name);
 	}
 	
->>>>>>> v_95:Audio-Multitrack/pre/Text_methods.pl
 }
 
 

@@ -302,20 +302,6 @@ sub yaml_in {
 	}
 	$yr->read( $yaml ); # returns ref
 }
-<<<<<<< HEAD:Audio-Multitrack/pre/Assign.p
-sub yamlify_commands {
-	my @in = @_;
-	@in = map{ 	s/\t{2}/\t\t\t/ ; 
-			s/^\t(?!\t)/\t-\n\t\t/;
-			s/\t/  /g;
-			s/\s+$/\n/g;
-			$_;
-		} @in;
-		@in;
-
-}
-=======
->>>>>>> v_95:Audio-Multitrack/pre/Assign.p
 
 ## support functions
 

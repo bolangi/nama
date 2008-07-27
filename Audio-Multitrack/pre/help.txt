@@ -43,6 +43,7 @@ Main Help Scren
   
    add_track, add            -  create a new track, "add sax; r3"
                                 (record sax from input 3) 
+
    show_track, sh            -  show status of current track,
                                 including effects and versions, 
                                 "sax; sh"

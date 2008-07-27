@@ -1,10 +1,7 @@
 
 # ----------- Mark ------------
 package ::Mark;
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-=======
 our $VERSION = 1.0;
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 use Carp;
 our @ISA;
 use vars qw($n %by_name @all  %used_names);
@@ -23,10 +20,7 @@ sub new {
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak  "name already in use: $vals{name}\n"
 		 if $used_names{$vals{name}}; # null name returns false
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-=======
 	
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	my $object = bless { 
 
 		## 		defaults ##
@@ -73,12 +67,8 @@ sub jump_here {
 }
 sub remove {
 	my $mark = shift;
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	carp("you attempted to futz $mark, which is not a Mark\n"),
-=======
 	carp("you attempted to futz $mark, which is [", ref
 	$mark, " ] not a Mark\n"),
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 		return unless (ref $mark) =~ /Mark/;
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
@@ -107,65 +97,35 @@ sub previous {
 sub all { sort { $a->time <=> $b->time }@all }
 
 sub loop_start { 
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	my @points =sort { $a->time <=> $b->time } 
-	grep{ $_ } 	map{ mark_object($_)} @::loop_endpoints[0,1];
-=======
 	my @points = sort { $a <=> $b } 
 	grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
 	#print "points @points\n";
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	$points[0];
 }
 sub loop_end {
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	my @points =sort { $a->time <=> $b->time } 
-		grep{ $_ } map{ mark_object($_)} @::loop_endpoints[0,1];
-=======
 	my @points =sort { $a <=> $b } 
 		grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	$points[1];
 }
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-sub mark_object {
-=======
 sub mark_time {
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	my $tag = shift;
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	my @marks = ::Mark::all();
-=======
 	$tag or $tag = '';
 	#print "tag: $tag\n";
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	my $mark;
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	if ($tag =~ /\d+/){
-		$mark = $marks[$tag];
-=======
 	if ($tag =~ /\./) { # we assume raw time if decimal
 		#print "mark time: ", $tag, $/;
 		return $tag;
 	} elsif ($tag =~ /^\d+$/){
 		#print "mark index found\n";
 		$mark = $::Mark::all[$tag];
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 	} else {
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-=======
 		#print "mark name found\n";
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 		$mark = $::Mark::by_name{$tag};
 	}
-<<<<<<< HEAD:Audio-Multitrack/pre/Mark.p
-	$mark if defined $mark; 
-=======
 	return undef if ! defined $mark;
 	#print "mark time: ", $mark->time, $/;
 	return $mark->time;
 		
->>>>>>> v_95:Audio-Multitrack/pre/Mark.p
 }
 
 	
