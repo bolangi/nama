@@ -183,7 +183,7 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Project name:")->pack(-side => 'left');
 	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -252,7 +252,7 @@ sub init_gui {
 #  Hijacked iam entry for unified command processing
 	
 	$iam_label = $iam_frame->Label(
-	-text => "Command:  <Ecmd> | <Ecasound-IAM> | ! <shell> | eval <perl> "
+	-text => "Command:  "
 		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)

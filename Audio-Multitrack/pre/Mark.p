@@ -108,6 +108,7 @@ sub loop_end {
 }
 sub mark_time {
 	my $tag = shift;
+	$tag or $tag = '';
 	#print "tag: $tag\n";
 	my $mark;
 	if ($tag =~ /\./) { # we assume raw time if decimal
