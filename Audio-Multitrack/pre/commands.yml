@@ -1,9 +1,17 @@
 ---
 help:
   short: h
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   what: display general help screen, or description of specific command
+=======
+  what: display help for a command, or general help, or of specific command
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 exit:
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   short: quit
+=======
+  short: quit q
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   what: exit program, saving settings
 getpos:
   short: gp
@@ -13,13 +21,11 @@ setpos:
   what: set current playhead position (seconds)
 group_rec:
   short: grec R
-  what: group REC mode, i.e. rec-enable user tracks
-  smry: group REC mode
+  what: rec-enable user tracks
   parameters: none
 group_mon:
   short: gmon M
-  what: group MON mode, i.e. rec-disable user tracks
-  smry: group MON mode
+  what: rec-disable user tracks
   parameters: none
 group_off:
   short: goff Z 
@@ -34,29 +40,32 @@ mixdown:
 mixplay:
   short: mxp
   what: Play back mixdown file, with user tracks OFF
-  smry: Play mix
+  smry: Playback mix
   parameters: none
 mixoff:
   short: norm mxo normal
-  what: normal mode, i.e. exclude mixdown tracks from chain setup
+  what: normal mode, i.e. Mixdown group OFF, user tracks MON
   smry: mix off
   parameters: none
 add_track:
   short: add
-  what: create a new track, "add sax; r2" will record track sax from input 2
-  smry: create a new track
+  what: create a new track
+  example: add sax; r2  (record track sax from input 2)
   parameters: string 
 set_track:
-  what: (programmers only) directly set values in current track object $this_track
+  what: directly set values in current track (dangerous!)
+  smry: set object fields
   example: set hide 1
 dump_track:
   what: dump current track data to screen (YAML format)
   short: dump
+  smry: dump track data
 dump_group:
-  what: dump the settings of the mixer bus for user tracks 
+  what: dump the settings of the group for user tracks 
   short: dumpg
+  smry: dump group settings
 rec:
-  what: set track to REC
+  what: rec enable 
   parameters: none
 mon:
   what: set track to MON
@@ -69,39 +78,41 @@ off:
 m:
   short: monitor_channel
   what: set track output channel number
+  smry: set track output channel
   parameters: number
 r:
   short: record_channel
   what: set track input channel number
+  smry: set track input channel 
 set_version:
-  short: version n
+  short: version n ver
   what: set track version number for monitoring (overrides group version setting)
   smry: select track version
   parameters: number
+  example: sax; version 5; sh
 group_version:
   short: gn gver gv
   what: set group version for monitoring (overridden by track-version settings)
-  smry: select group version
+  smry: get/set group version
 list_versions:
-  short: ln
-  what: list versions, current track
-  smry: list versions
+  short: lver lv
+  what: list version numbers of current track
+  smry: list track versions
   parameters: none
 vol:
   short: v
   what: get/set track volume, current track
   smry: get/set track volume
   parameters: number
-up:
-  what: restore volume of current track to previous, i.e. un-cut level 
-  smry: restore volume # TODO
 mute:
   short: c cut
   what: set playback volume to zero, current track
   smry: mute volume
   parameters: none
+unmute:
+  short: cc uncut
+  what: restore volume level before mute
 unity:
-  short: cc
   what: set unity, i.e. 100 volume, current track
   smry: unity volume
   parameters: none
@@ -137,11 +148,14 @@ get_state:
 create_project:
   short: create	
   what: create a new project directory tree
+  example: create pauls_gig
   parameters: string
 load_project:
   short: load	
-  what: load an existing project
-  parameters: string
+  what: load an existing project, or recall from last save
+  smry: load project settings
+  parameters: project_name
+  example: load pauls_gig
 generate:
   short: gen
   what: generate chain setup for audio processing
@@ -155,16 +169,22 @@ connect:
   what: connect chain setup
   parameters: none
 disconnect:
+  short: dcon
   what: disconnect chain setup
   parameters: none
 engine_status:
   what: ecasound audio processing engine status
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
+=======
+  smry: engine status info
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: egs
 renew_engine:
   short: renew
-  smry: crashes program
+  smry: crashes
   what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   short: chains setup shs
   what: show current Ecasound chain setup
 show_io:
@@ -172,34 +192,40 @@ show_io:
   what: show chain input and output fragments
 show_tracks:
   short: show tracks
+=======
+  short: chains setup
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   what: show current Ecasound chain setup
+  smry: show chain setup
+show_io:
+  short: showio
+  what: show chain input and output fragments
+  smry: show chain fragments
+show_tracks:
+  short: show tracks
+  what: show track status
 show_track:
   short: sh
-  parameters: optional string, optional number
-  what: show track status, including effects
+  what: show track status, effects, versions
 show_effects:
-  what: show effects (chain operators) on selected track
+  what: show effects on current track
   short: fxs	
   parameters: none
 add_effect:
-  what: add effect to selected track
+  what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
   short: fxa afx
+  smry: add effect
   parameters: code param1 param2,... paramn
-  example: fxa ea 600 (amplify current track signal by 600%)
+  example: fxa amp 6 (LADSPA Simple amp 6dB gain),\n         fxa var_dali (preset var_dali),\n         fxa pn:var_tape_stretched (explicit el: or pn: prefix optional)\n
 modify_effect:
   what: modify an effect parameter
-  parameters: parameter,  value, optional sign
+  parameters: effect_id, parameter, optional_sign, value
   short: fxm mfx
-  example: fxm V 1 1000 (set effect V, parameter 1 to 1000)
-delta_effect:
-  what: increment or decrement effect parameter
-  short: dfx fxd
-  parameters: op_id parameter sign value
-  example: fxd V 1 -10 (reduce effect V, parameter 1 by 10)
+  example: fxm V 1 1000 (set to 1000), fxm V 1 -10 (reduce by 10) 
 remove_effect:
-  what: remove chain operator(s) from selected track
+  what: remove effects from selected track
   short: fxr rfx
-  parameters: string (cop id<s>)
+  parameters: effect_id1, effect_id2,...
   example: fxr V (remove effect V)
 helpx:
   what: hellow world
@@ -210,15 +236,36 @@ list_marks:
 to_mark:
   short: tom
   what: move playhead to named mark or mark index
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
+=======
+  smry: playhead to mark
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   parameters: string or integer
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
+=======
+  example: tom start (go to mark named 'start')
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 mark:
   what: Mark current head position, becomes current mark
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
+=======
+  smry: mark current position
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: k	
   parameters: none
 remove_mark:
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   what: Remove current mark 
+=======
+  what: Remove mark 
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
   short: rmm
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   parameters: none
+=======
+  parameters: mark name, mark index or none (for current mark) 
+  example: rmm start (remove mark named 'start')
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 next_mark:
   short: nm
   what: Move playback head to next mark
@@ -231,9 +278,11 @@ name_mark:
   short: nom 
   what: Give a name to the current mark
   parameters: string
+  example: nom start
 remove_track:
   what: Make track go away (non destructive)
   parameters: string
+  example: remove_track sax
 stop:
   short: s
   what: stop transport
@@ -243,7 +292,12 @@ start:
 loop_enable:
   short: loop
   what: playback will loop between marks
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
   parameters: start_mark end_mark
+=======
+  parameters: start end 
+  example: loop a b (loop between marks 'a' and 'b'),\n         loop 1 3 (loop between marks 1 and 3),\n         loop 13.6 69.0 (loop between times, decimal required) 
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 loop_disable:
   short: noloop nl
   what: disable automatic looping
@@ -251,4 +305,19 @@ T:
   what: ecasound-only start
 S:
   what: ecasound-only stop
+<<<<<<< HEAD:Audio-Multitrack/pre/commands.yml
+=======
+ctrl_register:
+  what: list Ecasound controllers
+  short: crg
+preset_register:
+  what: list Ecasound presets 
+  short: prg
+ladspa_register:
+  what: list LADSPA plugins
+  short: lrg
+project_name:
+  what: show current project name
+  short: project pn
+>>>>>>> v_95:Audio-Multitrack/pre/commands.yml
 ...

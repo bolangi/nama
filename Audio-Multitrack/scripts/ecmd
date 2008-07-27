@@ -21,21 +21,56 @@ B<ecmd> I<options> I<project_name>
 
 Use I<project_root_dir> as ecmd top-level project directory (default $HOME/ecmd )
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 =item B<-m>
 
 Suppress loading of saved state
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 =item B<-g>
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Graphical user interface (default)
+=======
+Graphical user interface
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 =item B<-t>
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Text interface
+=======
+Text user interface (default)
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 =item B<-f> I<config_file>
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Use I<config_file> instead of default $HOME/.ecmdrc
+=======
+Use I<config_file> instead of default .ecmdrc
+
+=item B<-c>
+
+Create the project named after all options
+
+=item B<-a>
+
+Save and reload ALSA state using alsactl
+
+=item B<-m>
+
+Suppress loading of saved state
+
+=item B<-e>
+
+Don't load static effects data
+
+=item B<-s>
+
+Don't load static effects data cache
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 =back
 
@@ -74,7 +109,11 @@ setup is connected.
 On the first run the program creates $HOME/.ecmdrc, the
 configuration file and project directory $HOME/ecmd.  WAV
 files and parameter settings for each project are stored in
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 directories under $HOME/ecmd.  You probably want to edit the
+=======
+.wav directories under $HOME/ecmd.  You probably want to edit the
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 default .ecmdrc to suit your audio configuration.
 
 Project state can be stored/retrieved. These data are stored
@@ -91,7 +130,11 @@ Audio::Multitrack will automatically incorporate locally
 available LADSPA plugins provided you have the 'analyseplugin'
 program (part of LADSPA client libraries) installed.  
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 =head1 Tk GUI
+=======
+=head1 Tk GRAPHICAL UI 
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 Invoked using the -g switch on the ecmd command line, 
 the Tk interface provides two panels for record/mix
@@ -103,10 +146,46 @@ The GUI time display color indicates whether the upcoming
 operation will include recording (red), mixing only (yellow) or
 playback only (green).  
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 =head1 Text UI
+=======
+Even in GUI mode the text command prompt appears in the
+terminal window, and text commands may be issued at any
+time.
 
+=head1 TEXT UI
+
+The command line interpreter starts by default
+or by using the B<-t> option when invoking ecmd.
+
+B<Enter command:>
+
+Ecmd and Ecasound-IAM commands can be entered
+directly.
+
+Perl code should be preceded by "eval ".
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
+
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Invoked using the -t switch on the ecmd command line, 
 The command line interpreter includes history. 
+=======
+Shell code should be preceded by "!".
+
+Commands on the same line should be separated by semicolons
+(';'). 
+
+Note that if an 'eval' or '!' appears at the beginning of a
+command, the entire line will be give to the corresponding
+interpreter.
+
+In other situations, the lines are split on semicolons and
+each part is executed appropriately as Ecmd, Ecasound, perl
+code or shell commands.
+
+You can access history using up-arrow/down-arrow
+(Ctrl-P/Ctrl-N on Mac). 
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 Type B<help> for a command summary, B<help command> for
 help with I<command>. 
@@ -146,6 +225,45 @@ text 'mixplay' command sets the Tracker group to OFF.
 A track with no recorded WAV files that is set to MON will
 show OFF status.
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
+=======
+
+=head1 SAMPLE SESSION
+
+Here is a typical sequence of commands to record tracks
+with Ecmd:
+
+create marys_little_helper       # new project
+add guitar; r1                   # record track 'guitar' from input 1
+add piano; r2                    # record track 'piano' from input 2
+add drums; r3                    # record track 'drums' from input 3
+arm
+start
+(perform song)
+stop
+show                             # new versions of guitar, piano and drums
+                                 # appear
+arm; start                       # review recording
+
+group_record                     # rec-enable group
+guitar mon; piano mon; drums mon # set three tracks to monitor mode
+add vocals; r2                   # record track 'vocals' from input 2
+arm
+start
+(perform vocals)
+stop
+
+arm; start                       # review recording
+
+(adjust effects)
+
+mixdown; show                    # set mixdown mode, show results
+arm; start                       # record mixdown track
+stop
+mixplay                          # mixdown playback mode
+arm; start                       # review completed mix
+
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 =head1 DIRECTORY STRUCTURE
 
 $project_root is the directory where your project files,
@@ -153,40 +271,69 @@ including WAV files you record, will go. $project_root
 is defined in the first non-comment line of 
 your .ecmdrc file.
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 File or directory                Explanation
+=======
+File or directory                     Explanation
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 --------------------------------------------------------------------------
 $HOME/.ecmdrc                         Ecmd configuration file
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 $project_root/project_name/.wav       WAV files we record will be stored here
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 $project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 $project_root/project_name/State.yml  Default save file for project parameters
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 $project_root/project_name/.ecmdrc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 No GUI remove-track command.
+=======
+No GUI remove-track command is provided.
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 Default GUI volume sliders are not log scaled.
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Adding and removing chain operators while the engine is
 running may cause the engine to stop.
+=======
+Erratic behavior may result from adding or removing effects
+while the engine is running. 
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 The post-recording cleanup routine currently deletes
 newly recorded soundfiles under 44100 bytes in size. 
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 Looping behavior may not be reliable for loops under 6 seconds
 
 Alsa settings save and restore function is currently disabled.
 
+=======
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 =head1 EXPORT
 
 None by default.
 
 =head1 DEPENDENCIES
 
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 The Ecasound audio processing libraries are required
 to use this software, and need to be installed separately.
 See http://www.eca.cx/ecasound/ .
@@ -196,6 +343,36 @@ The BSD 'file' program is used to detect stereo WAV files.
 LADSPA libraries and plugins are strongly recommended.
 See http://ladspa.org/ . The 'analyseplugin'
 utility program is needed to make best use of LADSPA.
+=======
+This module requires that you have installed these Perl modules:
+
+	Carp
+	Data::YAML
+	IO::All
+	Cwd
+	Storable 
+	Data::Dumper
+	Getopt::Std
+	Tk
+	Audio::Ecasound
+	Parse::RecDescent
+	YAML::Tiny
+	Data::YAML
+	File::Find::Rule
+	File::Spec::Link
+
+The Ecasound audio processing libraries must also be
+installed.  Ecasound may be obtained from
+http://ecasound.seul.org/ecasound/ or as precompiled binary
+packages for your Un*x distribution.
+
+LADSPA libraries and plugins are strongly recommended.  In
+that case, the LADSPA utility program 'analyseplugin' must
+also be installed in a directory in your execution PATH.  See
+http://ladspa.org .
+
+'file', a BSD utility program, is also needed.
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd
 
 =head1 AVAILABILITY
 
@@ -214,4 +391,9 @@ Joel Roth, E<lt>joelz@pobox.comE<gt>
 Copyright 2007 by Joel Roth
 
 This library is licensed under GPL version 2.
+<<<<<<< HEAD:Audio-Multitrack/scripts/ecmd
 
+=======
+See the file COPYING (included in the
+distribution) for terms and conditions.
+>>>>>>> v_95:Audio-Multitrack/scripts/ecmd

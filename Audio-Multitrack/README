@@ -1,19 +1,26 @@
-Audio::Multitrack version 0.93
+Audio::Multitrack version 0.95
 ================================
 
-Audio::Multitrack assists multitrack, multibus recording by
-adding concepts of track and bus to the Ecasound audio
-processing engine. 
+Audio::Multitrack implements concepts of track and bus,
+provides user interfaces and other infrastructure 
+needed to conveniently use Ecasound for multitrack recording
+purposes.
 
 The distribution includes Ecmd, a multitrack recording and
 mixing application. 
 
 Ecmd's graphic interface is a recorder/mixer with two panels
-based on the Tk widget set.  
+based on the Tk widget set. 
 
+<<<<<<< HEAD:Audio-Multitrack/README
 Ecmd's command-line interface has history, and
 help functions.  Ecasound IAM commands pass directly to
 the audio-processing engine.
+=======
+Ecmd's command-line interface executes its own commands,
+Ecasound commands, perl code, and shell commands. It
+includes history and help functions. 
+>>>>>>> v_95:Audio-Multitrack/README
 
 INSTALLATION
 
@@ -29,11 +36,8 @@ DEPENDENCIES
 This module requires that you have installed these Perl modules:
 
 	Carp
-	Data::YAML
-	IO::All
 	Cwd
 	Storable 
-	Data::Dumper
 	Getopt::Std
 	Tk
 	Audio::Ecasound
@@ -42,19 +46,33 @@ This module requires that you have installed these Perl modules:
 	Data::YAML
 	File::Find::Rule
 	File::Spec::Link
+	IO::All
+
+These can all be installed by running the included script
+install_needed_perl_modules.sh.
 
 The Ecasound audio processing libraries must also be
-installed on your system. Ecasound may be obtained from
-http://ecasound.seul.org/ecasound/ or as precompiled
-binary packages for your Un*x distribution.
+installed. Ecasound may be obtained from
+http://ecasound.seul.org/ecasound/ or as precompiled binary
+packages for your Un*x distribution.
 
+LADSPA libraries and plugins are strongly recommended. To
+fully use LADSPA the utility program 'analyseplugin' must
+also be installed in a directory in your execution PATH.  See
+http://ladspa.org .
+
+<<<<<<< HEAD:Audio-Multitrack/README
 Your Audio::Multitrack system will be more capable if you
 have LADSPA plugins installed. You will also need the LADSPA utility
 program 'analyseplugin'. See http://ladspa.org .
+=======
+'file', a BSD utility program, is also needed. We use it 
+detect stereo WAV files.
+>>>>>>> v_95:Audio-Multitrack/README
 
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2007 Joel Roth
 
-This library is free software. It is licensed for use under
-the terms of the Gnu Public License version 2.
+This library is licensed for use under the terms of the 
+Gnu Public License version 2.

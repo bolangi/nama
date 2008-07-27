@@ -66,7 +66,12 @@ our (
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
+<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
 	$this_op,      # currently selected effect
+=======
+	$this_op,      # currently selected effect # future
+	$this_mark,    # current mark  # for future
+>>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 
 	@format_fields, # data for replies to text commands
 
@@ -82,7 +87,9 @@ our (
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	@effects,		# static effects information (parameters, hints, etc.)
-	%effect_i,		# an index 
+	%effect_i,		# an index , pn:amp -> effect number
+	%effect_j,      # an index , amp -> effect number
+
 	@ladspa_sorted, # ld
 	%effects_ladspa,# an index
 	$e,				# the name of the variable holding
@@ -269,6 +276,13 @@ our (
 	$this_mark,    # current mark
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
+<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
 	$length,       # cs-set-length
+=======
+>>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 
+<<<<<<< HEAD:Audio-Multitrack/pre/declarations.pl
+=======
+   $previous_text_command, # i want to know if i'm repeating
+>>>>>>> v_95:Audio-Multitrack/pre/declarations.pl
 );

@@ -1,99 +1,103 @@
 Main Help Scren
 
-  help <command> -  help with <command>
+  help <command>      - help with <command>
+  help                - this screen
 
 -- Transport --
 
-   start, t - Start processing
-   stop, s - Stop processing
-   rewind <time-in-seconds>, rw <time-in-seconds> - Rewind
-   forward <time-in-seconds>, fw <time-in-seconds> - Forward
-   setpos <time-in-seconds> - Sets the current position to <time-in-seconds> 
-   getpos, gp               - Gets the current position 
+   start, t           - Start processing
+   stop, s            - Stop processing
+   rewind, rw         - Rewind  some number of seconds, i.e. rw 15
+   forward, fw        - Forward some number of seconds, i.e. fw 75
+   setpos, sp         - Sets the current position, i.e. setpos 49.2
+   getpos, gp         - Gets the current position 
 
-   loop_enable, loop [mark, mark]   - loop over marks
-   loop_disable, noloop, nl           - disable looping
+   loop_enable, loop  - loop over marks, i.e. loop start finish
+   loop_disable, noloop, nl -  disable looping
 
--- Marks
+-- Marks --
+
    list_marks, lm     - list marks showing index, time, name
    next_mark, nm      - jump to next mark 
    previous_mark, pm  - jump to previous mark 
    name_mark, nom     - give a name to current mark 
    to_mark, tom       - jump to a mark by name or index
 
+-- Project -- 
 
+   load_project, load        - load an existing project 
+   create_project, create    - create a new project directory tree 
+   get_state, recall, retrieve, restore  - retrieve saved settings
+   save_state, keep, save    - save project settings to disk
+   exit, quit                - exit program, saving state if possible 
 
-  -- Project -- 
+-- Setup --
 
-    load_project, load       <name>          -  load an existing project 
-    create_project, create   <name>          -  create a new project directory tree 
-    get_state, recall, retrieve, restory <state_file>    -  retrieve settings, optional name
-    save_state, keep, save   <state_file>    -  save project settings to disk, optional name    
-    exit, quit                               - exit program, saving state if possible 
+   setup, arm                - generate and connect chain setup    
+   generate, gen             - generate chain setup
+   connect, con              - connect chain setup
+   show_setup, show          - show status, all tracks
+   show_chain_setup, chains  - show Ecasound chain setup file contents
 
-  -- Setup --
-
-    setup, arm               -  generate and connect chain setup    
-    generate, gen            - generate chain setup
-    connect, con             - connect chain setup
-    show_setup, show         -  show status, all tracks
-    show_chain_setup, chains - show Ecasound chain setup file contents
-
-  -- Track -- 
+-- Track -- 
   
-    show_track, sh           -  show status of current track,
-	                            including effects and versions
-	example: sax show_track
+   add_track, add            -  create a new track, "add sax; r3"
+                                (record sax from input 3) 
+   show_track, sh            -  show status of current track,
+                                including effects and versions, 
+                                "sax; sh"
 
-  Most of the Track related commands operate on the 'current
-  track'. To cut volume for a track called 'sax',  you enter
-  'sax mute' or even 'sax; mute' You can also specify a 
-  current track by number,  i.e.  '4 mute'.
+   Most of the Track related commands operate on the 'current
+   track'. To cut volume for a track called 'sax',  you enter
+   'sax mute' or even 'sax; mute'. The first part of the
+   command sets a new current track. You can also specify a
+   current track by number,  i.e.  '4 mute'.
 
-    add_track, add          -  create a new track 
+ - version
 
-  - version
+   set_version, version, ver, n  -  select current track version    
 
-    set_version, version, n -  select current track version    
+ - rw_status
 
-  - rw_status
+   rec                     -  set track to REC  
+   mon                     -  set track to MON
+   off, z                  -  set track OFF (omit from setup)
 
-    rec                     -  set track to REC  
-    mon                     -  set track to MON
-    off, z                  -  set track OFF (omit from setup)
+ - vol/pan 
 
-  - vol/pan 
+   pan, p                  -  get/set pan position
+   pan_back, pb            -  restore pan after pr/pl/pc  
+   pan_center, pc          -  set pan center    
+   pan_left, pl            -  pan track fully left    
+   pan_right, pr           -  pan track fully right    
+   unity                   -  unity volume    
+   vol, v                  -  get/set track volume    
+   mute, c, cut            -  mute volume 
+   unmute, uncut, cc       -  restore muted volume
 
-    pan, p               -  get/set pan position
-    pan_back, pb         -  restore pan    
-    pan_center, pc       -  set pan center    
-    pan_left, pl         -  pan track fully left    
-    pan_right, pr        -  pan track fully right    
-    unity, cc            -  unity volume    
-    vol, v               -  get/set track volume    
-    mute, c, cut          -  mute volume 
+ - channel assignments
 
-  - channel assignments
+   r, record_channel       -  set input channel number, current track
+   m, monitor_channel      -  set output channel number, current track
 
-    r,record_channel        -   set input channel number, current track
-    m, monitor_channel      -  set output channel, current track
+-- Effects --
 
-  - effects 
+   ladspa-register, lrg       - list LADSPA effects
+   preset-register, prg       - list Ecasound presets
+   ctrl-register, crg         - list Ecasound controllers 
+   add_effect,    fxa, afx    - add an effect to the current track
+   modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
+   remove_effect, fxr, rfx    - remove an effect
 
-    add_effect,    fxa, afx    - add an effect to the current track
-    modify_effect, fxm, mfx    - set an effect parameter to a new value
-    delta_effect,  fxd, dfx    - increment/decrement effect parameter
-    remove_effect, fxr, rfx    - remove an effect
+-- Group control --
 
-  -- Group control --
+   group_rec, grec, R         - group REC mode 
+   group_mon, gmon, M         - group MON mode 
+   group_off, goff, MM        - group OFF mode 
+   group_version, gver, gv    - select group version 
 
-    group_rec, grec, R      -  group REC mode 
-    group_mon, gmon, M      -  group MON mode 
-    group_off, goff, MM     -  group OFF mode 
-    group_version, gn, gver, gv -  select group version 
+-- Mixdown --
 
-  -- Mixdown --
-
-    mixdown, mxd               -  enable mixdown 
-    mixoff, norm, normal, mxo  -  disable mixdown 
-    mixplay, mxp               -  playback a recorded mix 
+   mixdown, mxd                - enable mixdown 
+   mixoff, mxo, normal, norm   - disable mixdown 
+   mixplay, mxp                - playback a recorded mix 

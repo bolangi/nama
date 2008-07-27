@@ -29,9 +29,9 @@ WriteMakefile(
        AUTHOR     => 'Joel Roth <jroth@joelz@pobox.com>') : ()),
 	'dist' => { COMPRESS=>"gzip", 
 			   SUFFIX=>"gz", 
-				   PREOP=>('rm -f README; '.
-						   "pod2text -80 < $name > README; ".
-						   "cp -f README $dir-\$(VERSION); "
-						  ),
+# 				   PREOP=>('rm -f README; '.
+# 						   "pod2text -80 < $name > README; ".
+# 						   "cp -f README $dir-\$(VERSION); "
+#						  ),
 				 },
 );

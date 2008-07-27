@@ -1,12 +1,11 @@
 package ::;
+our $VERSION = '0.95';
 use 5.008;
 use strict;
 no strict qw(subs);
-#use warnings;
-#no warnings qw(uninitialized);
+use warnings;
+no warnings qw(uninitialized);
 no warnings;
-our $VERSION = '0.92';
-use IO::All;
 use Carp;
 use Cwd;
 use Tk;
@@ -19,6 +18,7 @@ use Data::YAML::Writer;
 use Data::YAML::Reader;
 use File::Find::Rule;
 use File::Spec::Link;
+use IO::All;
 
 ## Definitions ##
 
@@ -117,9 +117,7 @@ sub loop {
      $term->addhistory($user_input) ;
 	::Text::command_process( $user_input );
 	}
-# the following gives a shell in the terminal
-# window simultaneous with the Tk user
-# interface windows
+#   Term::Shell version
 #
 # 	my $shell = ::Text::OuterShell->new;
 # 	my $term = $shell->term();
@@ -192,12 +190,6 @@ $grammar = q(
 
 [% qx(./emit_command_headers) %]
 );
-<<<<<<< HEAD:Audio-Multitrack/pre/Multitrack.p
-#$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-::Text::OuterShell::create_help_subs();
-%parser = ( 
-[% qx(./strip_comments ./parser.pl ) %]
-=======
 open SAVERR, ">&STDERR";
 open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
@@ -209,12 +201,7 @@ open STDERR, ">&SAVERR";
 
 $helptext = q(
 [% qx(cat ./help.txt) %]
->>>>>>> v_95:Audio-Multitrack/pre/Multitrack.p
 );
-<<<<<<< HEAD:Audio-Multitrack/pre/Multitrack.p
-=======
-
->>>>>>> v_95:Audio-Multitrack/pre/Multitrack.p
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';
@@ -230,7 +217,7 @@ B<Audio::Multitrack> - Perl extensions for multitrack audio processing
 
 B<ecmd> - multitrack recording/mixing application
 
-Type 'man ecmd' for further documentation. Audio::Multitrack
-and its subordinate modules have no separate documentation
-at the moment. 
+Type 'man ecmd' for details on usage and licensing.
 
+No further documentation is provided regarding
+Audio::Multitrack and its subordinate modules.

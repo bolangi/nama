@@ -183,7 +183,7 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Enter project name:")->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Project name:")->pack(-side => 'left');
 	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -197,9 +197,10 @@ sub init_gui {
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
 	$sn_dump = $load_frame->Button->pack(-side => 'left');
 
-	$build_track_label = $add_frame->Label(-text => "TRACK", -width => 12)->pack(-side => 'left');
+	$build_track_label = $add_frame->Label(
+		-text => "     TRACK  Name:", -width => 16)->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Input:")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
 	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
@@ -243,16 +244,16 @@ sub init_gui {
 	);
 
 	my @labels = 
-		qw(Track Version Status Input Volume Cut Unity Pan Center Effects);
+		qw(Track Version Status Input Volume Mute Unity Pan Center Effects);
 		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
-#  Hijacked iam entry for unified command processing
+#  unified command processing by command_process 
 	
 	$iam_label = $iam_frame->Label(
-	-text => "Command:  <Ecmd> | <Ecasound-IAM> | ! <shell> | eval <perl> "
+	-text => "Command:  "
 		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)
@@ -971,10 +972,13 @@ sub destroy_marker {
 }
 sub colonize { # convert seconds to minutes:seconds 
 	my $sec = shift;
+	my $hours = int ($sec / 3600);
+	$sec = $sec % 3600;
 	my $min = int ($sec / 60);
 	$sec = $sec % 60;
 	$sec = "0$sec" if $sec < 10;
-	qq($min:$sec);
+	$min = "0$min" if $min < 10 and $hours;
+	($hours ? "$hours:" : "") . qq($min:$sec);
 }
 sub update_clock { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));

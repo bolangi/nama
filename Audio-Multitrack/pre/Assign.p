@@ -1,4 +1,5 @@
 package ::Assign;
+our $VERSION = 1.0;
 use 5.008;
 use strict;
 use warnings;
@@ -36,8 +37,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		strip_blank_lines
 		strip_comments
 		remove_spaces
-		yamlify_commands
-
 	
 ) ] );
 
@@ -47,7 +46,6 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.01';
 
 package ::;
 our ($debug, $debug2, $debug3);
@@ -285,8 +283,8 @@ sub yaml_out {
 	croak "attempting to code wrong data type: $type"
 		if $type !~ /HASH|ARRAY/;
 	my $output;
-	print join $/, keys %$data_ref, $/;
-	print "about to write YAML as string\n";
+	$debug and print join $/, keys %$data_ref, $/;
+	$debug and print "about to write YAML as string\n";
     $yw->write( $data_ref, \$output ) if $type =~ /HASH|ARRAY/;
 	$output;
 }
@@ -304,6 +302,7 @@ sub yaml_in {
 	}
 	$yr->read( $yaml ); # returns ref
 }
+<<<<<<< HEAD:Audio-Multitrack/pre/Assign.p
 sub yamlify_commands {
 	my @in = @_;
 	@in = map{ 	s/\t{2}/\t\t\t/ ; 
@@ -315,6 +314,8 @@ sub yamlify_commands {
 		@in;
 
 }
+=======
+>>>>>>> v_95:Audio-Multitrack/pre/Assign.p
 
 ## support functions
 

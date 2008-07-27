@@ -1,7 +1,9 @@
 Changes
 Makefile.PL
 MANIFEST
+COPYING
 README
+install_needed_perl_modules.sh
 scripts/ecmd
 lib/Audio/Multitrack.pm
 lib/Audio/Multitrack/Assign.pm
@@ -12,7 +14,10 @@ lib/Audio/Multitrack/Track.pm
 lib/Audio/Multitrack/Wav.pm
 lib/Audio/Multitrack/Object.pm
 lib/Audio/Multitrack/Mark.pm
+<<<<<<< HEAD:Audio-Multitrack/MANIFEST
 t/01_load.t
+=======
+>>>>>>> v_95:Audio-Multitrack/MANIFEST
 t/02_assign.t
 t/03_wav.t
 t/04_object.t
