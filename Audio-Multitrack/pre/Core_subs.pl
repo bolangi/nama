@@ -1046,7 +1046,7 @@ sub start_heartbeat {
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
-					if $status eq q(finished) or $status eq q(error);
+					if $status =~ /finished|error|stopped/;
 				print join " ", "engine is $status", colonize($here), $/;
 				my ($start, $end);
 				$start  = ::Mark::loop_start();
@@ -1110,12 +1110,6 @@ sub stop_transport {
 	print "engine is ", eval_iam("engine-status"), $/;
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
-# 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
-# 	sleep 1;
-# 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
-# 	sleep 1;
-# 	$clock_id->cancel; # if (ref $clock_id =~ /Tk::after/); 
-	# what if we are recording
 }
 sub transport_running {
 #	$debug2 and print "&transport_running\n";
