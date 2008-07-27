@@ -197,9 +197,10 @@ sub init_gui {
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
 	$sn_dump = $load_frame->Button->pack(-side => 'left');
 
-	$build_track_label = $add_frame->Label(-text => "TRACK", -width => 12)->pack(-side => 'left');
+	$build_track_label = $add_frame->Label(
+		-text => "     TRACK  Name:", -width => 16)->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "Input")->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Input:")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
 	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
