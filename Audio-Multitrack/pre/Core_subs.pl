@@ -1139,14 +1139,15 @@ sub show_unit { $time_step->configure(
 
 # GUI routines
 sub drop_mark {
-		my $mark = mark_here();
+	my $here = eval_iam("cs-get-position");
+	return if grep { $_->time == $here } ::Mark::all();
+	my $mark = ::Mark->new( time => $here );
 		$ui->marker($mark); # for GUI
 }
 sub mark {
 	my $mark = shift;
 	my $pos = $mark->time;
-	my $here = eval_iam("cs-get-position");
-	if ($markers_armed and abs( $pos - $here) < 0.001){
+	if ($markers_armed){ 
 			$ui->destroy_marker($pos);
 			$mark->remove;
 		    arm_mark_toggle(); # disarm
@@ -1159,10 +1160,7 @@ sub mark {
 
 # TEXT routines
 
-sub mark_here {
-	my $here = eval_iam("cs-get-position");
-	::Mark->new( time => $here );
-}
+
 sub next_mark {
 	my $jumps = shift;
 	$jumps and $jumps--;

@@ -20,6 +20,7 @@ sub new {
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak  "name already in use: $vals{name}\n"
 		 if $used_names{$vals{name}}; # null name returns false
+	
 	my $object = bless { 
 
 		## 		defaults ##
