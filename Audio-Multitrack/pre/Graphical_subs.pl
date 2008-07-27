@@ -243,13 +243,13 @@ sub init_gui {
 	);
 
 	my @labels = 
-		qw(Track Version Status Input Volume Cut Unity Pan Center Effects);
+		qw(Track Version Status Input Volume Mute Unity Pan Center Effects);
 		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
-#  Hijacked iam entry for unified command processing
+#  unified command processing by command_process 
 	
 	$iam_label = $iam_frame->Label(
 	-text => "Command:  "
