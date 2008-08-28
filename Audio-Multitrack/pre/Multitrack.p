@@ -52,8 +52,8 @@ $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
-$jack_on = 0; # you should configure jack as device directly in .ecmdrc
-$project_root = join_path( $ENV{HOME}, "ecmd");
+$jack_on = 0; # you should configure jack as device directly in .namarc
+$project_root = join_path( $ENV{HOME}, "nama");
 
 ## Load my modules
 
@@ -107,7 +107,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
     #MainLoop;
-    my $term = new Term::ReadLine 'Ecmd';
+    my $term = new Term::ReadLine 'Nama';
 	$term->tkRunning(1);
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
@@ -206,7 +206,7 @@ $helptext = q(
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';
-[% qx(cat ./ecmdrc) %]
+[% qx(cat ./namarc) %]
 FALLBACK_CONFIG
 
 1;
@@ -216,9 +216,9 @@ __END__
 
 B<Audio::Multitrack> - Perl extensions for multitrack audio processing
 
-B<ecmd> - multitrack recording/mixing application
+B<nama> - multitrack recording/mixing application
 
-Type 'man ecmd' for details on usage and licensing.
+Type 'man nama' for details on usage and licensing.
 
 No further documentation is provided regarding
 Audio::Multitrack and its subordinate modules.

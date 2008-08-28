@@ -34,18 +34,18 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
 	%iam_cmd,		# for identifying IAM commands in user input
-	@ecmd_commands,# array of commands my functions provide
-	%ecmd_commands,# as hash as well
+	@nama_commands,# array of commands my functions provide
+	%nama_commands,# as hash as well
 	$project_root,	# each project will get a directory here
-	                # and one .ecmd directory, also with 
+	                # and one .nama directory, also with 
 	
 					#
-					# $ENV{HOME}/.ecmdrc
-					# $ENV{HOME}/ecmd/paul_brocante
-					# $ENV{HOME}/ecmd/paul_brocante/.wav/vocal_1.wav
-					# $ENV{HOME}/ecmd/paul_brocante/Store.yml
-					# $ENV{HOME}/ecmd/.effects_cache
-					# $ENV{HOME}/ecmd/paul_brocante/.ecmdrc 
+					# $ENV{HOME}/.namarc
+					# $ENV{HOME}/nama/paul_brocante
+					# $ENV{HOME}/nama/paul_brocante/.wav/vocal_1.wav
+					# $ENV{HOME}/nama/paul_brocante/Store.yml
+					# $ENV{HOME}/nama/.effects_cache
+					# $ENV{HOME}/nama/paul_brocante/.namarc 
 
 					 #this_wav_dir = 
 	$state_store_file,	# filename for storing @persistent_vars

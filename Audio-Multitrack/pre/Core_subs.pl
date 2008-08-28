@@ -57,13 +57,13 @@ Do you want to continue? [N] ";
 }
 print <<HELLO;
 
-Aloha. Welcome to Ecmd and Ecasound. 
+Aloha. Welcome to Nama and Ecasound. 
 
-Ecmd places all sound and control files under the
+Nama places all sound and control files under the
 project root directory, which by default is $project_root.
 
 The project root can be specified using the -d command line option, 
-and in the configuration file .ecmdrc . 
+and in the configuration file .namarc . 
 
 Would you like to create project root directory $project_root ? [Y] 
 HELLO
@@ -75,16 +75,16 @@ HELLO
 		} 
 	}
 
-		my $config = join_path($ENV{HOME}, ".ecmdrc");
+		my $config = join_path($ENV{HOME}, ".namarc");
 	if ( ! -e $config) {
 		print "Configuration file $config not found.\n";
 		print "Would you like to create it? [Y] ";
 		my $reply = <STDIN>;
 		chomp $reply;
 		if ($reply !~ /n/i){
-			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/ecmd/m;
+			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/nama/m;
 			$default > io( $config );
-			print "\n.... Done!\n\nPlease edit $config and restart Ecmd.\n";
+			print "\n.... Done!\n\nPlease edit $config and restart Nama.\n";
 		}
 		exit;
 	}
@@ -121,11 +121,11 @@ sub prepare {
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 
-	read_config();  # from .ecmdrc if we have one
+	read_config();  # from .namarc if we have one
 
 	$project_root = $opts{d} if $opts{d}; # priority to command line option
 
-	$project_root or $project_root = join_path($ENV{HOME}, "ecmd" );
+	$project_root or $project_root = join_path($ENV{HOME}, "nama" );
 
 	first_run();
 	
@@ -206,7 +206,7 @@ sub eval_iam {
 
 sub project_root { File::Spec::Link->resolve_all( $project_root ); }
 
-sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
+sub config_file { $opts{f} ? $opts{f} : ".namarc" }
 sub this_wav_dir {
 	$project_name and
 	File::Spec::Link->resolve_all(
