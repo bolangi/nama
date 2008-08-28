@@ -4,7 +4,7 @@ MANIFEST
 COPYING
 README
 install_needed_perl_modules.sh
-scripts/ecmd
+scripts/nama
 lib/Audio/Multitrack.pm
 lib/Audio/Multitrack/Assign.pm
 lib/Audio/Multitrack/Iam.pm
