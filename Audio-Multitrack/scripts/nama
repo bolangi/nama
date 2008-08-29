@@ -7,11 +7,11 @@ __END__
 
 B<Audio::Multitrack> - Perl extensions for multitrack audio processing
 
-B<ecmd> - Multitrack recording/mixing application
+B<nama> - Multitrack recording/mixing application
 
 =head1 SYNOPSIS
 
-B<ecmd> I<options> I<project_name>
+B<nama> I<options> I<project_name>
 
 =head1 OPTIONS
 
@@ -19,7 +19,7 @@ B<ecmd> I<options> I<project_name>
 
 =item B<-d> I<project_root_dir>
 
-Use I<project_root_dir> as ecmd top-level project directory (default $HOME/ecmd )
+Use I<project_root_dir> as nama top-level project directory (default $HOME/nama)
 
 =item B<-g>
 
@@ -31,7 +31,7 @@ Text user interface (default)
 
 =item B<-f> I<config_file>
 
-Use I<config_file> instead of default .ecmdrc
+Use I<config_file> instead of default .namarc
 
 =item B<-c>
 
@@ -60,7 +60,7 @@ Don't load static effects data cache
 B<Audio::Multitrack> provides class libraries for managing
 tracks and buses.  
 
-B<Ecmd> is a recorder/mixer application with text and
+B<Nama> is a recorder/mixer application with text and
 graphical interfaces. It is configured as a single mixer bus
 with per-track volume/pan/effects, a master fader, and a
 mixdown track.
@@ -87,11 +87,11 @@ running. Effects parameters you can adjust at any time.
 Playback position can only be adjusted after the chain
 setup is connected.
 
-On the first run the program creates $HOME/.ecmdrc, the
-configuration file and project directory $HOME/ecmd.  WAV
+On the first run the program creates $HOME/.namarc, the
+configuration file and project directory $HOME/nama.  WAV
 files and parameter settings for each project are stored in
-.wav directories under $HOME/ecmd.  You probably want to edit the
-default .ecmdrc to suit your audio configuration.
+.wav directories under $HOME/nama.  You probably want to edit the
+default .namarc to suit your audio configuration.
 
 Project state can be stored/retrieved. These data are stored
 in the State.yml file in the project directory. The storage
@@ -109,7 +109,7 @@ program (part of LADSPA client libraries) installed.
 
 =head1 Tk GRAPHICAL UI 
 
-Invoked using the -g switch on the ecmd command line, 
+Invoked using the -g switch on the nama command line, 
 the Tk interface provides two panels for record/mix
 and effects. Linear/log sliders are automatically used for most
 plugins. For other plugins, text-entry widgets are used to
@@ -126,11 +126,11 @@ time.
 =head1 TEXT UI
 
 The command line interpreter starts by default
-or by using the B<-t> option when invoking ecmd.
+or by using the B<-t> option when invoking nama.
 
 B<Enter command:>
 
-Ecmd and Ecasound-IAM commands can be entered
+Nama and Ecasound-IAM commands can be entered
 directly.
 
 Perl code should be preceded by "eval ".
@@ -145,7 +145,7 @@ command, the entire line will be give to the corresponding
 interpreter.
 
 In other situations, the lines are split on semicolons and
-each part is executed appropriately as Ecmd, Ecasound, perl
+each part is executed appropriately as Nama, Ecasound, perl
 code or shell commands.
 
 You can access history using up-arrow/down-arrow
@@ -193,7 +193,7 @@ show OFF status.
 =head1 SAMPLE SESSION
 
 Here is a typical sequence of commands to record tracks
-with Ecmd:
+with Nama:
 
 create marys_little_helper       # new project
 add guitar; r1                   # record track 'guitar' from input 1
@@ -230,15 +230,15 @@ arm; start                       # review completed mix
 $project_root is the directory where your project files,
 including WAV files you record, will go. $project_root
 is defined in the first non-comment line of 
-your .ecmdrc file.
+your .namarc file.
 
 File or directory                     Explanation
 --------------------------------------------------------------------------
-$HOME/.ecmdrc                         Ecmd configuration file
+$HOME/.namarc                         Nama configuration file
 $project_root/project_name/.wav       WAV files we record will be stored here
 $project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
 $project_root/project_name/State.yml  Default save file for project parameters
-$project_root/project_name/.ecmdrc    Project-specific configuration
+$project_root/project_name/.namarc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
@@ -293,7 +293,7 @@ CPAN, for the distribution.
 
 Pull source code using this command: 
 
-    git clone git://github.com/bolangi/ecmd.git
+    git clone git://github.com/bolangi/nama.git
 
 =head1 AUTHOR
 
