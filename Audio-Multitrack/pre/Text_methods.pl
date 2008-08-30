@@ -23,6 +23,7 @@ sub loop {
     package ::;
     #load_project(name => $project_name, create => $opts{c}) if $project_name;
     my $term = new Term::ReadLine 'Nama';
+	$mw->iconify;
 	$term->tkRunning(1);
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;

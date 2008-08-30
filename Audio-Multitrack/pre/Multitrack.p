@@ -35,7 +35,7 @@ use IO::All;
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 0; # subroutine names
+$debug2 = 1; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of two helper loopback devices:
@@ -138,9 +138,13 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
+sub start_heartbeat {}
 sub start_clock {}
+sub init_gui {}
+sub transport_gui {}
 sub group_gui {}
 sub track_gui {}
+sub time_gui {}
 sub refresh {}
 sub refresh_t {}
 sub refresh_c {}

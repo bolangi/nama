@@ -8,6 +8,7 @@ value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+/
+modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 asdf: 'asdf' { print "hello"}
 command: fail
 end: /\s*$/ 
@@ -107,6 +108,15 @@ show_tracks: _show_tracks end {
 	::Text::show_tracks ( ::Track::all );
 }
 
+
+modifiers: _modifiers modifier(s) end {
+ 	 $::this_track->set(modifiers => (join q(,),
+	 @{$item{"modifier(s)"}}, q() ))
+}
+
+modifiers: _modifiers end { print $::this_track->modifiers, $/; }
+	
+	
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
 	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 

@@ -16,6 +16,10 @@ our @ISA = '::Wav';
 $n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
 %by_name = ();	# return ref to Track by name
+
+# attributes offset, loop, delay for entire setup
+# attribute  modifiers
+# new attribute will be 
 use ::Object qw( 	name
 						active
 
@@ -40,6 +44,7 @@ use ::Object qw( 	name
 						looping
 
 						hide
+						modifiers
 
 						
 						);
@@ -91,7 +96,8 @@ sub new {
 					vol  	=> undef,
 					pan 	=> undef,
 
-					# for .ewf support
+					modifiers => undef, # start, reverse, audioloop, playat
+
 					
 					delay	=> undef, # after how long we start playback
 					                  # the term 'offset' is used already
@@ -347,6 +353,8 @@ use ::Object qw( 	name
 						looping
 
 						hide
+
+						modifiers
 						
 						
 						);

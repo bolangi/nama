@@ -186,6 +186,9 @@ show_tracks:
 show_track:
   short: sh
   what: show track status, effects, versions
+modifiers:
+  short: mod mods
+  what: set/show track modifiers 
 show_effects:
   what: show effects on current track
   short: fxs	

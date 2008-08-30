@@ -168,11 +168,7 @@ sub prepare {
 
 	$ui->init_gui;
 	$ui->transport_gui;
-	#$ui->oid_gui;
 	$ui->time_gui;
-
-	#
-    # $event{loop}	
 
 	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
@@ -298,7 +294,7 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
-	#print "reached here!!!\n";
+	print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
@@ -696,6 +692,7 @@ sub dig_ruins {
 	
 	$debug2 and print "&dig_ruins";
 	return if $tracker->tracks;
+	$debug and print "looking for WAV files\n";
 
 	# look for wave files
 		
@@ -863,11 +860,11 @@ sub write_chains {
 		
 		$debug and print "monitor input file: $full_path\n";
 		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
+		my ($chain) = $chain_ids =~ m/(\d+)/;
+		$debug and print "input chain: $chain\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:".$full_path,
-
-	   );
+			 		"-i:".  $::ti[$chain]->modifiers .  $full_path);
  	}
 	##### Setting files as outputs (used by rec_file and mix)
 
@@ -1033,7 +1030,7 @@ sub start_transport {
 
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
-	start_heartbeat();
+	$ui->start_heartbeat();
 
     #$ui->start_clock(); 
 	sleep 1; # time for engine
@@ -1194,14 +1191,12 @@ sub previous_mark {
 sub to_start { 
 	return if really_recording();
 	eval_iam(qq(cs-set-position 0));
-	restart_clock();
 }
 sub to_end { 
 	# ten seconds shy of end
 	return if really_recording();
 	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
 	eval_iam(qq(cs-set-position $end));
-	restart_clock();
 } 
 sub jump {
 	return if really_recording();
@@ -1219,7 +1214,6 @@ sub jump {
 	# print "$cmd\n";
 	# eval_iam "start" if $running;
 	sleep 1;
- # restart_clock();
 }
 ## post-recording functions
 
@@ -2191,6 +2185,7 @@ sub retrieve_state {
 
 } 
 sub create_master_and_mix_tracks { # GUI widgets
+	$debug2 and print "&create_master_and_mix_tracks\n";
 
 
 	my @rw_items = (
