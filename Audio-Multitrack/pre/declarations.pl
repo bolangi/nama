@@ -112,7 +112,7 @@ our (
 
 	$load_frame,
 	$add_frame,
-	$take_frame,
+	$group_frame,
 	$time_frame,
 	$clock_frame,
 	$oid_frame,
@@ -144,7 +144,7 @@ our (
 	$setup_length,  # displays setup running time
 
 	$project_label,	# project name
-	$take_label,	# bus name
+	$group_label,	# bus name
 
 	$sn_label,		# project load/save/quit	
 	$sn_text,

@@ -973,7 +973,7 @@ sub generate_setup { # create chain setup
 
 sub connect_transport {
 	load_ecs(); 
-	carp("Invalid chain setup, cannot arm transport.\n"),return unless eval_iam("cs-is-valid");
+	print("Invalid chain setup, engine not ready.\n"),return unless eval_iam("cs-is-valid");
 	find_op_offsets(); 
 	apply_ops();
 	eval_iam('cs-connect');

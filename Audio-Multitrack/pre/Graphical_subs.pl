@@ -114,7 +114,7 @@ sub manifest { $ew->deiconify() }
 sub destroy_widgets {
 
 	map{ $_->destroy } map{ $_->children } $effect_frame;
-	#my @children = $take_frame->children;
+	#my @children = $group_frame->children;
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
 	# leave field labels (first row)
@@ -169,11 +169,11 @@ sub init_gui {
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$take_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$take_label = $take_frame->Menubutton(-text => "GROUP",
-										-tearoff => 0,
-										-width => 12)->pack(-side => 'left');
+ 	$group_label = $group_frame->Menubutton(-text => "GROUP",
+ 										-tearoff => 0,
+ 										-width => 11)->pack(-side => 'left');
 		
 	$add_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$perl_eval_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -183,7 +183,7 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Project name:")->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Project name: ")->pack(-side => 'left');
 	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -198,7 +198,7 @@ sub init_gui {
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
-		-text => "      Name:  ")->pack(-side => 'left');
+		-text => "          Name: ")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
 	$build_track_rec_label = $add_frame->Label(-text => "Input channel:")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
@@ -253,7 +253,7 @@ sub init_gui {
 #  unified command processing by command_process 
 	
 	$iam_label = $iam_frame->Label(
-	-text => "Command:  "
+	-text => "    Command: "
 		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)
@@ -481,9 +481,9 @@ sub flash_ready {
 sub group_gui {  
 	@_ = discard_object(@_);
 	my $name = shift;
-	my $group = $::Group::by_name{$name};
+	my $group = $::Group::by_name{$name}; 
 	$debug2 and print "&group_gui\n";
-		my $group_rw = $take_frame->Menubutton(
+		my $group_rw = $group_frame->Menubutton(
 				-text => $name,
 				-tearoff =>0,
 			)->pack(-side => 'left');
