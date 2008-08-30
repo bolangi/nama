@@ -187,11 +187,15 @@ show_track:
   short: sh
   what: show track status, effects, versions
 modifiers:
-  short: mod mods
+  short: mods mod 
   what: set/show track modifiers 
+  example: modifiers select 5 15.2 reverse playat 78.2 audioloop
+nomodifiers:
+  short: nomods nomod
+  what: remove modifiers from current track
 show_effects:
   what: show effects on current track
-  short: fxs
+  short: fxs sfx
   parameters: none
 add_effect:
   what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
@@ -240,10 +244,10 @@ previous_mark:
   what: Move playback head to previous mark
   parameters: none
 name_mark:
-  short: nom 
+  short: nmk
   what: Give a name to the current mark
   parameters: string
-  example: nom start
+  example: nmk start
 remove_track:
   what: Make track go away (non destructive)
   parameters: string

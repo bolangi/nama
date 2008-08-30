@@ -195,10 +195,10 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
-	$sn_dump = $load_frame->Button->pack(-side => 'left');
+	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
-		-text => "     NEW TRACK  Name:")->pack(-side => 'left');
+		-text => "      Name:  ")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
 	$build_track_rec_label = $add_frame->Label(-text => "Input channel:")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
@@ -225,9 +225,9 @@ sub init_gui {
  		-command => sub {load_project (name => $project_name, 
  										settings => $save_id)},
 				);
-	$sn_dump->configure(
-		-text => q(Dump state),
-		-command => sub{ print &status_vars });
+# 	$sn_dump->configure(
+# 		-text => q(Dump state),
+# 		-command => sub{ print &status_vars });
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
@@ -237,7 +237,7 @@ sub init_gui {
 
 
 	$build_track_add->configure( 
-			-text => 'Add',
+			-text => 'Add New Track',
 			-command => sub { 
 					return if $track_name =~ /^\s*$/;	
 			add_track(remove_spaces($track_name)) }
@@ -281,8 +281,8 @@ sub transport_gui {
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
 	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
 	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
-	$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
-	$transport_new = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
+	# $transport_new = $transport_frame->Button->pack(-side => 'left');;
 
 	$transport_stop->configure(-text => "Stop",
 	-command => sub { 
@@ -305,14 +305,14 @@ sub transport_gui {
 			-text => 'Arm',
 			-command => sub {&generate_setup and &connect_transport}
 						 );
-	$transport_disconnect->configure(
-			-text => 'Disconnect setup',
-			-command => \&disconnect_transport,
-						);
-	$transport_new->configure(
-			-text => 'New Engine',
-			-command => \&new_engine,
-						 );
+# 	$transport_disconnect->configure(
+# 			-text => 'Disconnect setup',
+# 			-command => \&disconnect_transport,
+# 						);
+# 	$transport_new->configure(
+# 			-text => 'New Engine',
+# 			-command => \&new_engine,
+# 						 );
 }
 sub time_gui {
 	@_ = discard_object(@_);

@@ -9,6 +9,7 @@ last: ('last' | '$' )
 dd: /\d+/
 name: /[\w:]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
+nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 asdf: 'asdf' { print "hello"}
 command: fail
 end: /\s*$/ 

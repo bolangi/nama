@@ -967,7 +967,7 @@ sub generate_setup { # create chain setup
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
 		return 1;
-	} else { print "Mixdown not possible without inputs\n";
+	} else { print "No inputs found!\n";
 	return 0};
 }
 
