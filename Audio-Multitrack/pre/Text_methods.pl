@@ -2,13 +2,13 @@ use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 
 sub show_versions {
- 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+ 	print "All versions: ", join " ", @{$::this_track->versions}, $/;
 }
 
 sub show_effects {
  	map { 
  		my $op_id = $_;
- 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
+ 		 my $i = $::effect_i{ $::cops{ $op_id }->{type} };
  		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
  		 my @pnames =@{$::effects[ $i ]->{params}};
 			map{ print join " ", 
@@ -19,12 +19,19 @@ sub show_effects {
  
  	 } @{ $::this_track->ops };
 }
+sub show_modifiers {
+	print "Modifiers: ",$::this_track->modifiers, $/;
+}
 sub loop {
     package ::;
     #load_project(name => $project_name, create => $opts{c}) if $project_name;
     my $term = new Term::ReadLine 'Nama';
-	$mw->iconify;
-	$term->tkRunning(1);
+	
+# 	No TK events in text-only mode
+
+	# $mw->iconify;         
+	# $term->tkRunning(1);
+	
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
@@ -124,11 +131,11 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Chain  Track       Setting  Status  Input  Active 
+Chain  Track       Setting  Status  Input  Version 
 ==================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<    @<<<    @<<<    @>>    @>>>   ~~
+@>>    @<<<<<<<<<    @<<<    @<<<    @>>     @>>>   ~~
 splice @::format_fields, 0, 6
 .
 

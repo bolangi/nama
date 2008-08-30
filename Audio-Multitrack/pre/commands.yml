@@ -45,7 +45,7 @@ add_track:
   example: add sax; r2  (record track sax from input 2)
   parameters: string 
 set_track:
-  what: directly set values in current track (dangerous!)
+  what: directly set values in current track (use with care!)
   smry: set object fields
   example: set hide 1
 dump_track:
@@ -191,7 +191,7 @@ modifiers:
   what: set/show track modifiers 
 show_effects:
   what: show effects on current track
-  short: fxs	
+  short: fxs
   parameters: none
 add_effect:
   what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track

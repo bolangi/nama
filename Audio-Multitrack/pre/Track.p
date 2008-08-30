@@ -96,7 +96,7 @@ sub new {
 					vol  	=> undef,
 					pan 	=> undef,
 
-					modifiers => undef, # start, reverse, audioloop, playat
+					modifiers => q(), # start, reverse, audioloop, playat
 
 					
 					delay	=> undef, # after how long we start playback

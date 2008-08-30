@@ -130,6 +130,7 @@ show_track: _show_track end {
 	::Text::show_tracks($::this_track);
 	::Text::show_effects();
 	::Text::show_versions();
+	::Text::show_modifiers();
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}

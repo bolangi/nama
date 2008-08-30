@@ -26,10 +26,11 @@ Main Help Scren
 -- Project -- 
 
    load_project, load        - load an existing project 
+   project_name, pn          - show the current project name
    create_project, create    - create a new project directory tree 
    get_state, recall, retrieve, restore  - retrieve saved settings
    save_state, keep, save    - save project settings to disk
-   exit, quit                - exit program, saving state if possible 
+   exit, quit                - exit program, saving state 
 
 -- Setup --
 

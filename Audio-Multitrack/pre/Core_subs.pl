@@ -160,7 +160,10 @@ sub prepare {
 	
 	# UI object for interface polymorphism
 	
-	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
+	$ui = $opts{t} ? ::Text->new 
+				   : ::Graphical->new ;
+
+	# default to graphic mode with events
 
 	# Tk main window
  	$mw = MainWindow->new;  
@@ -1032,7 +1035,6 @@ sub start_transport {
 	eval_iam('start');
 	$ui->start_heartbeat();
 
-    #$ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }

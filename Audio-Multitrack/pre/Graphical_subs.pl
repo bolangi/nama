@@ -984,6 +984,7 @@ sub update_clock {
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
 
-	
+sub start_heartbeat { ::start_heartbeat() }
+
 
 ### end
