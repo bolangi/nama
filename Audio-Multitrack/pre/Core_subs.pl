@@ -304,11 +304,11 @@ sub load_project {
 	
 	dig_ruins() unless $#::Track::by_index > 2;
 
-	$tracker_group_widget = $ui->group_gui('Tracker');
+	$ui->group_gui('Tracker');
 
 	# possible null if Text mode
 	
-	$ui->global_version_buttons(); 
+#	$ui->global_version_buttons(); 
 	$ui->refresh_t;
 	generate_setup() and connect_transport();
 

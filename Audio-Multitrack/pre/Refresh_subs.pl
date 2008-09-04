@@ -1,14 +1,13 @@
 ## refresh functions
 
-sub refresh_t { # groups 
+sub refresh_t { # tracker group 
 	$debug2 and print "&refresh_t\n";
 	
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
 					OFF => $old_bg);
-	my @w = $group_frame->children;
-	for my $t (1..scalar @w - 1){
-		# skip 0th item, the label
+	
+	
 		my $status;
 		if ( 	grep{ $_->rec_status eq 'REC'} 
 				map{ $tn{$_} }
@@ -29,10 +28,9 @@ sub refresh_t { # groups
 
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|off/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
-	$debug and print "group_frame child: $t\n";
 
-		$w[$t]->configure(-background => $take_color{$status});
-	}
+	$tracker_group_widget->configure(-background => $take_color{$status})
+		if $tracker_group_widget;
 }
 sub refresh_c { # tracks
 	

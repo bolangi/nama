@@ -128,6 +128,8 @@ our (
 
 	@widget_t, # widgets for displaying track groups, unused
 	$tracker_group_widget, # widget for tracker group, replaces @widget_t
+	$group_rw, # 
+	$group_version, # 
 	%widget_c, # for chains (tracks)
 	%widget_e, # for effects
 	@widget_o, # for templates (oids) 

@@ -121,6 +121,7 @@ sub destroy_widgets {
 	map{ $_->destroy  } @children[10..$#children]; # fragile
 	$tracker_group_widget->destroy if $tracker_group_widget;
 	%widget_m and map{ $_->destroy } values %widget_m;
+	#@widget_t and map { $_->destroy } @widget_t;
 }
 
 sub init_gui {
@@ -169,11 +170,11 @@ sub init_gui {
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
- 	$group_label = $group_frame->Menubutton(-text => "GROUP",
- 										-tearoff => 0,
- 										-width => 11)->pack(-side => 'left');
+ 	#$group_label = $group_frame->Menubutton(-text => "GROUP",
+ #										-tearoff => 0,
+ #										-width => 13)->pack(-side => 'left');
 		
 	$add_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$perl_eval_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -480,15 +481,15 @@ sub flash_ready {
 }
 sub group_gui {  
 	@_ = discard_object(@_);
-	my $name = shift;
-	my $group = $::Group::by_name{$name}; 
-	$debug2 and print "&group_gui\n";
-		my $group_rw = $group_frame->Menubutton(
-				-text => $name,
-				-tearoff =>0,
-			)->pack(-side => 'left');
-		push @widget_t, $group_rw;
-	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
+	my $group = $tracker; 
+	my $label;
+	$label = 	$track_frame->Label(-text => q(GROUP) );
+	$group_version = $track_frame->Menubutton();
+	$group_rw = 		$track_frame->Menubutton();
+	global_version_buttons( $group_version );
+
+	push @widget_t, $label, $group_version, $group_rw;
+
 		
 		$group_rw->AddItems([
 			'command' => 'REC',
@@ -514,23 +515,16 @@ sub group_gui {
 				refresh();
 				generate_setup() and connect_transport()
 				}
-			],);
-$group_rw
+			]);
+			$label->grid($group_version, $group_rw);
 
 }
 sub global_version_buttons {
-	
 	local $debug = 0;
-	if (defined $tracker_group_widget) {
-		my @children = $tracker_group_widget->children;
-		for (@children) {
-			$_->cget(-value) and $_->destroy;
-		}; # remove menubuttons
-	}
+	my $version = shift; # widget
 		
 	$debug and print "making global version buttons range:",
-
-	join ' ',1..$ti[-1]->group_last, " \n";
+		join ' ',1..$ti[-1]->group_last, " \n";
 
  	for my $v (undef, 1..$ti[-1]->group_last) { 
 
@@ -542,13 +536,14 @@ sub global_version_buttons {
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
 			@user_track_indices;
 		
-			# scalar grep{ $-> > 2 } @all_chains; # excludes master (1), mix (2)
-			$tracker_group_widget->radiobutton( 
+
+			$version->radiobutton( 
 
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
 					$tracker->set(version => $v); 
+					$version->configure(-text => $v);
 					generate_setup() and connect_transport();
 					refresh();
 					}
