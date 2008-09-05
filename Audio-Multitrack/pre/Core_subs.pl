@@ -304,11 +304,10 @@ sub load_project {
 	
 	dig_ruins() unless $#::Track::by_index > 2;
 
-	$ui->group_gui('Tracker');
 
 	# possible null if Text mode
 	
-#	$ui->global_version_buttons(); 
+	$ui->global_version_buttons(); 
 	$ui->refresh_t;
 	generate_setup() and connect_transport();
 
@@ -2206,6 +2205,7 @@ sub create_master_and_mix_tracks { # GUI widgets
 
 	$ui->track_gui( $mixdown_track->n); 
 
+	$ui->group_gui('Tracker');
 }
 
 

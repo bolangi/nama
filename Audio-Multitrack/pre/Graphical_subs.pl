@@ -483,9 +483,9 @@ sub group_gui {
 	@_ = discard_object(@_);
 	my $group = $tracker; 
 	my $label;
-	$label = 	$track_frame->Label(-text => q(GROUP) );
-	$group_version = $track_frame->Menubutton();
-	$group_rw = 		$track_frame->Menubutton();
+	$label = 	$track_frame->Label(-text => "ALL" );
+	$group_version = $track_frame->Menubutton(-tearoff => 0);
+	$group_rw = 		$track_frame->Menubutton(-tearoff => 0);
 	global_version_buttons( $group_version );
 
 	push @widget_t, $label, $group_version, $group_rw;
@@ -521,12 +521,12 @@ sub group_gui {
 }
 sub global_version_buttons {
 	local $debug = 0;
-	my $version = shift; # widget
+	my $version = $group_version;
 		
 	$debug and print "making global version buttons range:",
 		join ' ',1..$ti[-1]->group_last, " \n";
 
- 	for my $v (undef, 1..$ti[-1]->group_last) { 
+ 	for my $v (0..$ti[-1]->group_last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group
