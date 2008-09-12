@@ -117,8 +117,8 @@ sub show_tracks {
             $_->name,
             $_->rw,
             $_->rec_status,
-            $_->ch_r || 1,
-            $_->current_version || 'none',
+            $_->rec_status eq 'REC' ? $_->ch_r : '',
+            $_->current_version || '',
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
