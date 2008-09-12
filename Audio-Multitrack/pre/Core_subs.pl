@@ -308,7 +308,7 @@ sub load_project {
 	# possible null if Text mode
 	
 	$ui->global_version_buttons(); 
-	$ui->refresh_t;
+	$ui->refresh_group;
 	generate_setup() and connect_transport();
 
 #The mix track will always be track index 1 i.e. $ti[$n]

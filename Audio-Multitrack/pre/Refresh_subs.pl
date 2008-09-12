@@ -1,7 +1,7 @@
 ## refresh functions
 
-sub refresh_t { # tracker group 
-	$debug2 and print "&refresh_t\n";
+sub refresh_group { # tracker group 
+	$debug2 and print "&refresh_group\n";
 	
 	my %take_color = (REC  => 'LightPink', 
 					MON => 'AntiqueWhite',
@@ -79,7 +79,7 @@ sub refresh_c { # tracks
 }
 sub refresh {  
 	remove_small_wavs();
- 	$ui->refresh_t(); 
+ 	$ui->refresh_group(); 
 	map{ $ui->refresh_c($_) } map{$_->n} ::Track::all();
 }
 sub refresh_oids{ # OUTPUT buttons

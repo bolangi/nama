@@ -146,7 +146,7 @@ sub group_gui {}
 sub track_gui {}
 sub time_gui {}
 sub refresh {}
-sub refresh_t {}
+sub refresh_group {}
 sub refresh_c {}
 sub flash_ready {}
 sub update_master_version_button {}
