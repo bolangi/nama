@@ -126,15 +126,13 @@ our (
 
 	## collected widgets (i may need to destroy them)
 
-	@widget_t, # widgets for displaying track groups, unused
-	$tracker_group_widget, # widget for tracker group, replaces @widget_t
 	$group_rw, # 
 	$group_version, # 
-	%widget_c, # for chains (tracks)
-	%widget_e, # for effects
+	%track_widget, # for chains (tracks)
+	%effects_widget, # for effects
 	@widget_o, # for templates (oids) 
 	%widget_o, # 
-	%widget_m, # marks
+	%mark_widget, # marks
 
 	@global_version_buttons, # to set the same version for
 						  	#	all tracks

@@ -29,16 +29,16 @@ sub add_effect_gui {
 
 		my $frame ;
 		if ( ! $parent_id ){ # independent effect
-			$frame = $widget_c{$n}->{parents}->Frame->pack(
+			$frame = $track_widget{$n}->{parents}->Frame->pack(
 				-side => 'left', 
 				-anchor => 'nw',)
 		} else {                 # controller
-			$frame = $widget_c{$n}->{children}->Frame->pack(
+			$frame = $track_widget{$n}->{children}->Frame->pack(
 				-side => 'top', 
 				-anchor => 'nw')
 		}
 
-		$widget_e{$id} = $frame; 
+		$effects_widget{$id} = $frame; 
 		# we need a separate frame so title can be long
 
 		# here add menu items for Add Controller, and Remove
@@ -119,9 +119,7 @@ sub destroy_widgets {
 	my @children = $track_frame->children;
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[10..$#children]; # fragile
-	$tracker_group_widget->destroy if $tracker_group_widget;
-	%widget_m and map{ $_->destroy } values %widget_m;
-	#@widget_t and map { $_->destroy } @widget_t;
+	%mark_widget and map{ $_->destroy } values %mark_widget;
 }
 
 sub init_gui {
@@ -483,12 +481,11 @@ sub group_gui {
 	@_ = discard_object(@_);
 	my $group = $tracker; 
 	my $label;
-	$label = 	$track_frame->Label(-text => "ALL" );
+	$label = 	$track_frame->Label(-text => "Group" );
 	$group_version = $track_frame->Menubutton(-tearoff => 0);
-	$group_rw = 		$track_frame->Menubutton(-tearoff => 0,
-												 -text => $group->rw);
+	$group_rw = $track_frame->Menubutton( -text    => $group->rw,
+										  -tearoff => 0);
 
-	push @widget_t, $label, $group_version, $group_rw;
 
 		
 		$group_rw->AddItems([
@@ -520,11 +517,13 @@ sub group_gui {
 				}
 			]);
 			$label->grid($group_version, $group_rw);
+			$ui->global_version_buttons;
 
 }
 sub global_version_buttons {
 	local $debug = 0;
 	my $version = $group_version;
+	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
 		join ' ',1..$ti[-1]->group_last, " \n";
@@ -578,17 +577,20 @@ sub track_gui {
 				-command  => sub { 
 					$ti[$n]->set(rw => "REC");
 					
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
 					$ti[$n]->set(rw => "MON");
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 					$ti[$n]->set(rw => "OFF");
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 		);
 	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -638,7 +640,7 @@ sub track_gui {
 			-command => sub { 
 			#	$ti[$n]->set(rw => 'REC');
 				$ti[$n]->set(ch_r  => $v);
-				refresh_c($n) }
+				refresh_track($n) }
 			)
 	}
 	$ch_m = $track_frame->Menubutton(
@@ -651,7 +653,7 @@ sub track_gui {
 						-command => sub { 
 			#				$ti[$n]->set(rw  => "MON");
 							$ti[$n]->set(ch_m  => $v);
-							refresh_c($n) }
+							refresh_track($n) }
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
@@ -742,25 +744,25 @@ sub track_gui {
 	
 	my $effects = $effect_frame->Frame->pack(-fill => 'both');;
 
-	# effects, held by widget_c->n->effects is the frame for
+	# effects, held by track_widget->n->effects is the frame for
 	# all effects of the track
 
-	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
+	@{ $track_widget{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
+	#$debug and print "=============\n\%track_widget\n",yaml_out(\%track_widget);
 	my $independent_effects_frame 
-		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ${ $track_widget{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 
 	my $controllers_frame 
-		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ${ $track_widget{$n}->{effects} }->Frame->pack(-fill => 'x');
 	
 	# parents are the independent effects
 	# children are controllers for various paramters
 
-	$widget_c{$n}->{parents} = $independent_effects_frame;
+	$track_widget{$n}->{parents} = $independent_effects_frame;
 
-	$widget_c{$n}->{children} = $controllers_frame;
+	$track_widget{$n}->{children} = $controllers_frame;
 	
 	$independent_effects_frame
 		->Label(-text => uc $ti[$n]->name )->pack(-side => 'left');
@@ -790,7 +792,7 @@ sub track_gui {
 	#$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
 	$name->grid($version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
-	refresh_c($n);
+	refresh_track($n);
 
 }
 
@@ -798,12 +800,12 @@ sub update_version_button {
 	@_ = discard_object(@_);
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
-	my $w = $widget_c{$n}->{version};
+	my $w = $track_widget{$n}->{version};
 					$w->radiobutton(
 						-label => $v,
 						-value => $v,
 						-command => 
-		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
+		sub { $track_widget{$n}->{version}->configure(-text=>$v) 
 				unless $ti[$n]->rec_status eq "REC" }
 					);
 }
@@ -962,7 +964,7 @@ sub marker {
 	#print "mark is ", ref $mark, $/;
 	my $pos = $mark->time;
 	#print $pos, " ", int $pos, $/;
-		$widget_m{$pos} = $mark_frame->Button( 
+		$mark_widget{$pos} = $mark_frame->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $old_bg,
 			-command => sub { mark($mark) },
@@ -979,7 +981,7 @@ sub restore_time_marks {
 sub destroy_marker {
 	@_ = discard_object( @_);
 	my $pos = shift;
-	$widget_m{$pos}->destroy; 
+	$mark_widget{$pos}->destroy; 
 }
 sub colonize { # convert seconds to minutes:seconds 
 	my $sec = shift;

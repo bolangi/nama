@@ -604,9 +604,8 @@ sub initialize_project_data {
 	@input_chains = ();
 	@output_chains = ();
 
-	%widget_c = ();
-	@widget_t = ();
-	%widget_e = ();
+	%track_widget = ();
+	%effects_widget = ();
 	
 
 	# time related
@@ -1327,10 +1326,10 @@ sub remove_effect_gui {
 
 	$ti[$n]->set(ops =>  
 		[ grep{ $_ ne $id} @{ $ti[ $cops{$id}->{chain} ]->ops } ]);
-	$debug and print "i have widgets for these ids: ", join " ",keys %widget_e, "\n";
+	$debug and print "i have widgets for these ids: ", join " ",keys %effects_widget, "\n";
 	$debug and print "preparing to destroy: $id\n";
-	$widget_e{$id}->destroy();
-	delete $widget_e{$id}; 
+	$effects_widget{$id}->destroy();
+	delete $effects_widget{$id}; 
 
 }
 
@@ -2013,7 +2012,7 @@ sub save_state {
 	my %muted;
 	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
 		 $muted{$_}++;
-	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 $ui->paint_button($track_widget{$_}{mute}, q(brown) );
 		} grep { $old_vol{$_} } all_chains();
 	# TODO: old_vol should be incorporated into Track object
 	# not separate variable
@@ -2193,12 +2192,12 @@ sub create_master_and_mix_tracks { # GUI widgets
 			[ 'command' => "MON",
 				-command  => sub { 
 						$tn{Master}->set(rw => "MON");
-						refresh_c($master_track->n);
+						refresh_track($master_track->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						$tn{Master}->set(rw => "OFF");
-						refresh_c($master_track->n);
+						refresh_track($master_track->n);
 			}],
 		);
 	$ui->track_gui( $master_track->n, @rw_items );
@@ -2218,7 +2217,7 @@ sub save_effects {
 	my %muted;
 	
 	map  {$copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
-		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
+		  $ui->paint_button($track_widget{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	all_chains();
 
