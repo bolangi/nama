@@ -59,7 +59,7 @@ sub refresh_track {
 		$track_widget{$n}->{rw}->configure(-text => $rec_status);
 		 $track_widget{$n}->{ch_r}->configure( -text =>
 		 $ti[$n]->ch_r || 1);
-		 $track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
+		 #$track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
 		$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
 	
 	if ($rec_status eq "REC") {
@@ -70,8 +70,8 @@ sub refresh_track {
 		$track_widget{$n}->{ch_r}->configure(-foreground => 'Black');
 		$track_widget{$n}->{rw}->configure(-background => 'LightPink');
 		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
-		$track_widget{$n}->{ch_m}->configure( -background => $old_bg);
-		$track_widget{$n}->{ch_m}->configure( -foreground => 'DarkGray');
+		#$track_widget{$n}->{ch_m}->configure( -background => $old_bg);
+		#$track_widget{$n}->{ch_m}->configure( -foreground => 'DarkGray');
 
 	}
 	elsif ( $rec_status eq "MON" ) {
@@ -79,9 +79,9 @@ sub refresh_track {
 		 $track_widget{$n}->{name}->configure(-background => 'AntiqueWhite');
 		 $track_widget{$n}->{name}->configure(-foreground => 'Black');
 		 $track_widget{$n}->{ch_r}->configure( -background => $old_bg);
-		 $track_widget{$n}->{ch_r}->configure( -foreground => 'DarkGray');
-		 $track_widget{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
-		 $track_widget{$n}->{ch_m}->configure( -foreground => 'Black');
+		 $track_widget{$n}->{ch_r}->configure( -foreground => $old_bg);
+		# $track_widget{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
+		# $track_widget{$n}->{ch_m}->configure( -foreground => 'Black');
 		$track_widget{$n}->{rw}->configure(-background => 'AntiqueWhite');
 		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
 
@@ -89,9 +89,9 @@ sub refresh_track {
 	elsif ( $rec_status eq "OFF" ) {
 		 $track_widget{$n}->{name}->configure(-background => $old_bg);
 		 $track_widget{$n}->{ch_r}->configure( -background => $old_bg); 
-		 $track_widget{$n}->{ch_r}->configure( -foreground => 'Gray');
-		 $track_widget{$n}->{ch_m}->configure( -background => $old_bg); 
-		$track_widget{$n}->{ch_m}->configure( -foreground => 'Gray');
+		 $track_widget{$n}->{ch_r}->configure( -foreground => $old_bg);
+		 #$track_widget{$n}->{ch_m}->configure( -background => $old_bg); 
+		# $track_widget{$n}->{ch_m}->configure( -foreground => 'Gray');
 		$track_widget{$n}->{rw}->configure(-background => $old_bg);
 		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
 		}  

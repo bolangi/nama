@@ -2200,6 +2200,7 @@ sub create_master_and_mix_tracks { # GUI widgets
 						refresh_track($master_track->n);
 			}],
 		);
+
 	$ui->track_gui( $master_track->n, @rw_items );
 
 	$ui->track_gui( $mixdown_track->n); 

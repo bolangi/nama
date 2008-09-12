@@ -243,8 +243,7 @@ sub init_gui {
 	);
 
 	my @labels = 
-		qw(Track Version Status Input Volume Mute Unity Pan Center Effects);
-		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
+		qw(Track Name Version Status Input Volume Mute Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
@@ -481,6 +480,7 @@ sub group_gui {
 	@_ = discard_object(@_);
 	my $group = $tracker; 
 	my $label;
+	my $dummy = $track_frame->Label(-text => ' '); 
 	$label = 	$track_frame->Label(-text => "Group" );
 	$group_version = $track_frame->Menubutton(-tearoff => 0);
 	$group_rw = $track_frame->Menubutton( -text    => $group->rw,
@@ -516,7 +516,7 @@ sub group_gui {
 				generate_setup() and connect_transport()
 				}
 			]);
-			$label->grid($group_version, $group_rw);
+			$dummy->grid($label, $group_version, $group_rw);
 			$ui->global_version_buttons;
 
 }
@@ -593,7 +593,9 @@ sub track_gui {
 					refresh_group();
 			}],
 		);
-	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
+	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
+	$number = $track_frame->Label(-text => $n,
+									-justify => 'left');
 	my $stub = " ";
 	$stub .= $ti[$n]->active;
 	$name = $track_frame->Label(
@@ -791,7 +793,7 @@ sub track_gui {
 	
 	#$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	$name->grid($version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
+	$number->grid($name, $version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
 	refresh_track($n);
 
 }
