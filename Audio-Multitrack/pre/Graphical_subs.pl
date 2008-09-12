@@ -485,8 +485,8 @@ sub group_gui {
 	my $label;
 	$label = 	$track_frame->Label(-text => "ALL" );
 	$group_version = $track_frame->Menubutton(-tearoff => 0);
-	$group_rw = 		$track_frame->Menubutton(-tearoff => 0);
-	global_version_buttons( $group_version );
+	$group_rw = 		$track_frame->Menubutton(-tearoff => 0,
+												 -text => $group->rw);
 
 	push @widget_t, $label, $group_version, $group_rw;
 
@@ -496,6 +496,7 @@ sub group_gui {
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'REC');
+				$group_rw->configure(-text => 'REC');
 				refresh();
 				generate_setup() and connect_transport()
 				}
@@ -504,6 +505,7 @@ sub group_gui {
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'MON');
+				$group_rw->configure(-text => 'MON');
 				refresh();
 				generate_setup() and connect_transport()
 				}
@@ -512,6 +514,7 @@ sub group_gui {
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'OFF');
+				$group_rw->configure(-text => 'OFF');
 				refresh();
 				generate_setup() and connect_transport()
 				}
@@ -526,7 +529,20 @@ sub global_version_buttons {
 	$debug and print "making global version buttons range:",
 		join ' ',1..$ti[-1]->group_last, " \n";
 
- 	for my $v (0..$ti[-1]->group_last) { 
+			$version->radiobutton( 
+
+				-label => (''),
+				-value => 0,
+				-command => sub { 
+					$tracker->set(version => 0); 
+					$version->configure(-text => " ");
+					generate_setup() and connect_transport();
+					refresh();
+					}
+
+ 					);
+
+ 	for my $v (1..$ti[-1]->group_last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group

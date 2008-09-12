@@ -29,8 +29,8 @@ sub refresh_t { # tracker group
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|off/i;
 		$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 
-	$tracker_group_widget->configure(-background => $take_color{$status})
-		if $tracker_group_widget;
+	$group_rw->configure(-background => $take_color{$status})
+		if $group_rw;
 }
 sub refresh_c { # tracks
 	
