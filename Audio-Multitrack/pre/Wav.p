@@ -8,7 +8,6 @@ no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
-	local $debug = 1;
 	my $wav = shift; # Expects a Track object here
 	my $basename = $wav->name;
 	my $dir = ::this_wav_dir();
@@ -37,7 +36,6 @@ sub get_versions {
 
 sub targets {# takes a Wav object 
 	
-	local $debug = 1;
 	my $wav = shift; 
  	#my $name=  ref $wav ? $wav->name: $wav;
  	my $name =  $wav->name;

@@ -142,7 +142,7 @@ sub group_last {
 		my $track = $_;
 		my $last;
 		$last = $track->last ? $track->last : 0;
-		print "track: ", $track->name, ", last: $last\n";
+		#print "track: ", $track->name, ", last: $last\n";
 
 		$max = $last if $last > $max;
 
@@ -230,7 +230,7 @@ sub current_version {
 	my $track = shift;
 	my $last = $track->group_last;
 	my $status = $track->rec_status;
-	print "last: $last status: $status\n";
+	#print "last: $last status: $status\n";
 	if 	($track->rec_status eq 'REC'){ return ++$last}
 	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version } 
 	else { return undef }
