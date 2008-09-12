@@ -3,10 +3,12 @@ our $VERSION = 1.0;
 our @ISA; 
 use ::Object qw(name active dir);
 use warnings;
+use ::Assign qw(:all);
 no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
+	local $debug = 1;
 	my $wav = shift; # Expects a Track object here
 	my $basename = $wav->name;
 	my $dir = ::this_wav_dir();
@@ -24,6 +26,7 @@ sub get_versions {
 		   ($sep (\d+))? 
 		   \.$ext )
 		   $/x or next;
+		next if -s join_path($dir, $candidate) == 44;
 		$debug and print "match: $1,  num: $3\n\n";
 		$versions{ $3 ? $3 : 'bare' } =  $1 ;
 	}
@@ -32,8 +35,9 @@ sub get_versions {
 	%versions;
 }
 
-sub targets {# takes a Wav object or basename
+sub targets {# takes a Wav object 
 	
+	local $debug = 1;
 	my $wav = shift; 
  	#my $name=  ref $wav ? $wav->name: $wav;
  	my $name =  $wav->name;
@@ -50,8 +54,7 @@ sub targets {# takes a Wav object or basename
 }
 sub versions {  # takes a Wav object or a string (filename)
 	my $wav = shift;
-	if (ref $wav){ [ sort { $a <=> $b } keys %{ $wav->targets} ] } 
-	else 		 { [ sort { $a <=> $b } keys %{ targets($wav)} ] }
+	[ sort { $a <=> $b } keys %{ $wav->targets} ]  
 }
 
 sub last { 

@@ -51,7 +51,6 @@ sub refresh_track {
 	@_ = discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_track\n";
-	local $debug = 1;
 	
 	my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";

@@ -131,7 +131,7 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Chain  Track       Setting  Status  Input  Version 
+Track  Name        Setting  Status  Input  Version 
 ==================================================
 .
 format STDOUT =
