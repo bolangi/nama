@@ -157,12 +157,14 @@ sub help {
 	chomp $name;
 	#print "seeking help for argument: $name\n";
 	#$topics{$name} and helptopic($name), return;
-	$commands{$name} and helpline($name), return;
+	my %helped = (); 
+	#$commands{$name} and helpline($name);
 	map{  my $cmd = $_ ;
-		helpline($cmd) if $cmd =~ /$name/;
+		helpline($cmd) and $helped{$cmd}++ if $cmd =~ /$name/;
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
 	      helpline($cmd) 
 		  	if grep { /$name/ } split " ", $commands{$cmd}->{short} 
+				and ! $helped{$cmd};
 	} keys %commands;
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {

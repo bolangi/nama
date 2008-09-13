@@ -246,11 +246,10 @@ No GUI remove-track command is provided.
 
 Default GUI volume sliders are not log scaled.
 
-Erratic behavior may result from adding or removing effects
-while the engine is running. 
-
-The post-recording cleanup routine currently deletes
+The post-recording cleanup routine deletes
 newly recorded soundfiles under 44100 bytes in size. 
+
+Parameter controllers support is not complete
 
 =head1 EXPORT
 

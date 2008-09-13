@@ -1288,6 +1288,7 @@ sub add_effect {
 }
 
 sub remove_effect {
+	local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -1302,8 +1303,9 @@ sub remove_effect {
 	$debug and print "parent $parent owns list: ", join " ",
 		@{ $cops{$parent}->{owns} }, "\n";
 
-		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+	@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
 		@{ $cops{$parent}->{owns} } ; 
+	$cops{$id}->{belongs_to} = undef;
 	$debug and print "parent $parent new owns list: ", join " ",
 	}
 
