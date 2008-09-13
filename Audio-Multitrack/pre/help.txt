@@ -1,27 +1,10 @@
-Main Help Scren
+Welcome to Nama Help
 
-  help <command>      - help with <command>
-  help                - this screen
+-- Help -- 
 
--- Transport --
-
-   start, t           - Start processing
-   stop, s            - Stop processing
-   rewind, rw         - Rewind  some number of seconds, i.e. rw 15
-   forward, fw        - Forward some number of seconds, i.e. fw 75
-   setpos, sp         - Sets the current position, i.e. setpos 49.2
-   getpos, gp         - Gets the current position 
-
-   loop_enable, loop  - loop over marks, i.e. loop start finish
-   loop_disable, noloop, nl -  disable looping
-
--- Marks --
-
-   list_marks, lm     - list marks showing index, time, name
-   next_mark, nm      - jump to next mark 
-   previous_mark, pm  - jump to previous mark 
-   name_mark, nom     - give a name to current mark 
-   to_mark, tom       - jump to a mark by name or index
+   help <command>          - show help for <command>
+   help <fragment>         - show help for commands matching /<fragment>/
+   help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
 
 -- Project -- 
 
@@ -45,6 +28,9 @@ Main Help Scren
    add_track, add            -  create a new track, "add sax; r3"
                                 (record sax from input 3) 
 
+   show_tracks, show, tracks -  show status of all tracks
+                                and group settings
+
    show_track, sh            -  show status of current track,
                                 including effects and versions, 
                                 "sax; sh"
@@ -57,7 +43,7 @@ Main Help Scren
 
  - version
 
-   set_version, version, ver, n  -  select current track version    
+   set_version, version, ver, n  -  set current track version    
 
  - rw_status
 
@@ -90,6 +76,26 @@ Main Help Scren
    nomod, nomods, 
    nomodifiers             - remove all modifiers from current track
 
+-- Transport --
+
+   start, t           - Start processing
+   stop, s            - Stop processing
+   rewind, rw         - Rewind  some number of seconds, i.e. rw 15
+   forward, fw        - Forward some number of seconds, i.e. fw 75
+   setpos, sp         - Sets the current position, i.e. setpos 49.2
+   getpos, gp         - Gets the current position 
+
+   loop_enable, loop  - loop over marks, i.e. loop start finish
+   loop_disable, noloop, nl -  disable looping
+
+-- Marks --
+
+   list_marks, lm     - list marks showing index, time, name
+   next_mark, nm      - jump to next mark 
+   previous_mark, pm  - jump to previous mark 
+   name_mark, nom     - give a name to current mark 
+   to_mark, tom       - jump to a mark by name or index
+
 -- Effects --
 
    ladspa-register, lrg       - list LADSPA effects
@@ -104,8 +110,7 @@ Main Help Scren
    group_rec, grec, R         - group REC mode 
    group_mon, gmon, M         - group MON mode 
    group_off, goff, MM        - group OFF mode 
-   group_version, gver, gv    - select group version 
-   dump_group, dumpg          - dump group status info
+   group_version, gver, gv    - select default group version 
 
 -- Mixdown --
 

@@ -141,13 +141,14 @@ splice @::format_fields, 0, 6
 
 sub helpline {
 	my $cmd = shift;
-	my $text =  $commands{$cmd}->{what}. $/;
+	my $text = "Command: $cmd\n";
+	$text .=  "Shortcuts: $commands{$cmd}->{short}\n"
+			if $commands{$cmd}->{short};	
+	$text .=  $commands{$cmd}->{what}. $/;
 	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
 			if $commands{$cmd}->{parameters};	
 	$text .=  "example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
 			if $commands{$cmd}->{example};
-	$text .=  "aliases:  $cmd ". $commands{$cmd}->{short} . $/
-			if $commands{$cmd}->{short};	
 	print( $/, ucfirst $text, $/);
 	
 }
@@ -155,11 +156,13 @@ sub help {
 	my $name = shift;
 	chomp $name;
 	#print "seeking help for argument: $name\n";
+	#$topics{$name} and helptopic($name), return;
 	$commands{$name} and helpline($name), return;
 	map{  my $cmd = $_ ;
+		helpline($cmd) if $cmd =~ /$name/;
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
-	      helpline($cmd), return 
-		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
+	      helpline($cmd) 
+		  	if grep { /$name/ } split " ", $commands{$cmd}->{short} 
 	} keys %commands;
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {

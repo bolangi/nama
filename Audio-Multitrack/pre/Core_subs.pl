@@ -99,7 +99,8 @@ sub prepare {
 	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
-	new_engine();
+	$e = Audio::Ecasound->new();
+	#new_engine();
 
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
@@ -971,7 +972,8 @@ sub generate_setup { # create chain setup
 
 sub connect_transport {
 	load_ecs(); 
-	print("Invalid chain setup, engine not ready.\n"),return unless eval_iam("cs-is-valid");
+	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
+		or print("Invalid chain setup, engine not ready.\n"),return;
 	find_op_offsets(); 
 	apply_ops();
 	eval_iam('cs-connect');
