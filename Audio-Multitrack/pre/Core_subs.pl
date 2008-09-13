@@ -2118,7 +2118,7 @@ sub retrieve_state {
 			my %track = %{$t};
 		map{
 
-			$Audio::Multitrack::Track::by_index[$t->{n}]->set($_ => $t->{$_})
+			$::Track::by_index[$t->{n}]->set($_ => $t->{$_})
 			} keys %track;
 	} @tracks_data[0,1];
 
