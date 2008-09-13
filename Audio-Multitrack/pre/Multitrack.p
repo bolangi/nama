@@ -207,6 +207,8 @@ $helptext = q(
 [% qx(cat ./help.txt) %]
 );
 
+[% qx(cat ./help_topic.pl) %]
+
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';

@@ -1,6 +1,9 @@
 our (
 	### 
 	$helptext, 		# used for the help function
+	@help_topic,    # array of help categories
+	%help_topic,    # help text indexed by topic
+
 	$ui, # object providing class behavior for graphic/text functions
 
 	@persistent_vars, # a set of variables we save
