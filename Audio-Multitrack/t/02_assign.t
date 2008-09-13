@@ -1,9 +1,9 @@
 use Test::More qw(no_plan);
 use strict;
 
-BEGIN { use_ok('Audio::Multitrack::Assign') };
+BEGIN { use_ok('Audio::Ecasound::Multitrack::Assign') };
 
-use Audio::Multitrack::Assign qw(:all);
+use Audio::Ecasound::Multitrack::Assign qw(:all);
 # `make test'. After `make install' it should work as `perl 1.t'
 
 diag ("TESTING $0\n");
