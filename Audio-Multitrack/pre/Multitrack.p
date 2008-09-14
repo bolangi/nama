@@ -29,7 +29,6 @@ use IO::All;
 
 [% qx(cat ./var_types.pl) %]
 
-
 # instances needed for yaml_out and yaml_in
 
 $yw = Data::YAML::Writer->new; 
@@ -42,7 +41,6 @@ $debug = 0; # debug statements
 
 $loopa = 'loop,111';
 $loopb = 'loop,222';
-
 
 # other initializations
 $unit = 1;

@@ -109,7 +109,8 @@ show_tracks: _show_tracks end {
 	::Text::show_tracks ( ::Track::all );
 	use warnings; 
 	no warnings qw(uninitialized); 
-	print $/, " " x 7, "Group", " " x 9, $::tracker->rw, " " x 24 , $::tracker->version, $/;
+	print $/, "Group control", " " x 8, 
+	  $::tracker->rw, " " x 24 , $::tracker->version, $/;
 }
 
 
