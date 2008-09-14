@@ -1330,6 +1330,14 @@ sub remove_effect_gui {
 
 }
 
+
+sub effect_index {
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
+			return $pos if $ti[$n]->ops->[$pos] eq $id; 
+		};
+}
 sub remove_op {
 
 	my $id = shift;
@@ -1337,12 +1345,9 @@ sub remove_op {
 	if ( $cops{$id}->{belongs_to}) { 
 		return;
 	}
-	my $index; 
+	my $index = effect_index $id;
 	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
-		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id; 
-		};
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
 	 eval_iam ("c-select $n");
@@ -1354,6 +1359,7 @@ sub remove_op {
 	delete $copp{$id};
 }
 sub cop_add {
+	local $debug = 1;
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code		= $p{type};
@@ -1385,7 +1391,7 @@ PP
 					  owns => [] }; # DEBUGGIN TEST
 
 	$p{cop_id} = $cop_id;
- 	cop_init ( \%p );
+ 	cop_init( \%p );
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -1429,7 +1435,6 @@ sub cop_init {
 
 	my @vals;
 	if (ref $vals_ref) {
-	# untested
 		@vals = @{ $vals_ref };
 		$debug and print ("values supplied\n");
 		@{ $copp{$id} } = @vals;
@@ -1439,11 +1444,10 @@ sub cop_init {
 		$debug and print "no settings found, loading defaults if present\n";
 		my $i = $effect_i{ $cops{$id}->{type} };
 		
-		# CONTROLLER
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
+		
 		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		#TODO  support controller-type operators
 		
 			my $default = $effects[$i]->{params}->[$p]->{default};
 			push @vals, $default;
@@ -1541,7 +1545,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 		#next if ! defined $ti[$n]->offset; # for MIX
  		#next if ! $ti[$n]->offset ;
 		for my $id ( @{ $ti[$n]->ops } ) {
-		#	next if $cops{$id}->{belongs_to}; 
 		apply_op($id);
 		}
 	}
@@ -1552,6 +1555,7 @@ sub apply_op {
 	my $id = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};
+	my $dad = $cops{$id}->{belongs_to};
 	$debug and print "chain: $cops{$id}->{chain} type: $cops{$id}->{type}, code: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
@@ -1562,18 +1566,22 @@ sub apply_op {
 
 	# we start to build iam command
 
+	my $add = $dad ? "ctrl-add " : "cop-add "; 
 	
-	my $add = "cop-add "; 
 	$add .= $code . join ",", @vals;
 
 	# if my parent has a parent then we need to append the -kx  operator
 
-	my $dad = $cops{$id}->{belongs_to};
 	$add .= " -kx" if $cops{$dad}->{belongs_to};
 	$debug and print "operator:  ", $add, "\n";
 
-	eval_iam ("c-select $cops{$id}->{chain}") 
-		unless $cops{$id}->{belongs_to}; # avoid reset
+	eval_iam ("c-select $cops{$id}->{chain}") ;
+
+	if ( $dad ) {
+		eval_iam ("cop-select "
+			. ($ti[$cops{$dad}->{chain}]->offset + effect_index $dad));
+	}
+
 	eval_iam ($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
 	my $ref = ref $cops{$id}->{owns} ;
