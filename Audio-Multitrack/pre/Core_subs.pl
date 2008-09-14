@@ -1281,7 +1281,6 @@ sub add_effect {
 }
 
 sub remove_effect {
-	local $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -1359,7 +1358,6 @@ sub remove_op {
 	delete $copp{$id};
 }
 sub cop_add {
-	local $debug = 1;
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code		= $p{type};
