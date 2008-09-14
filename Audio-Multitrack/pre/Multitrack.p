@@ -203,10 +203,6 @@ open STDERR, ">&SAVERR";
 # ::Text::OuterShell::create_help_subs();
 #
 
-$helptext = q(
-[% qx(cat ./help.txt) %]
-);
-
 [% qx(cat ./help_topic.pl) %]
 
 # we use the following settings if we can't find config files

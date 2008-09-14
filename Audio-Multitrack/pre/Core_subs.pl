@@ -910,13 +910,6 @@ sub write_chains {
 	map{ $_->write_ewf  } ::Track::all();
 	
 }
-## templates for generating chains
-
-sub convert_to_jack {
-	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
-	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	
-}
-#sub convert_to_alsa { initialize_oids() }
 
 ## transport functions
 
@@ -1452,7 +1445,6 @@ sub cop_init {
 		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
 		#TODO  support controller-type operators
 		
-		# for my $p (0..$effects[$i]->{count} - 1) {
 			my $default = $effects[$i]->{params}->[$p]->{default};
 			push @vals, $default;
 		}

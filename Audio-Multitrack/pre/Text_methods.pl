@@ -152,13 +152,24 @@ sub helpline {
 	print( $/, ucfirst $text, $/);
 	
 }
+sub helptopic {
+	my $index = shift;
+	$index =~ /^\d+$/ and $index = $help_topic[$index];
+	print "\n-- ", ucfirst $index, " --\n\n";
+	print $help_topic{$index};
+	print $/;
+}
+
 sub help { 
 	my $name = shift;
 	chomp $name;
 	#print "seeking help for argument: $name\n";
-	#$topics{$name} and helptopic($name), return;
+	$help_topic{$name} and helptopic($name), return;
+	$name == 10 and (map{ helptopic $_ } @help_topic), return;
+	$name =~ /^\d+$/ and helptopic($name), return;
+
+	$commands{$name} and helpline($name), return;
 	my %helped = (); 
-	#$commands{$name} and helpline($name);
 	map{  my $cmd = $_ ;
 		helpline($cmd) and $helped{$cmd}++ if $cmd =~ /$name/;
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),

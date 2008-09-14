@@ -14,7 +14,7 @@ asdf: 'asdf' { print "hello"}
 command: fail
 end: /\s*$/ 
 end: ';' 
-help: _help end { print $::helptext }
+help: _help end { print $::help_screen }
 help: _help name end { ::Text::help($item{name}) }
 # iterate over commands yml
 # find right command, print helptext

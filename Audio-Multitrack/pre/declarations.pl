@@ -1,6 +1,6 @@
 our (
 	### 
-	$helptext, 		# used for the help function
+	$help_screen, 		# 
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic
 

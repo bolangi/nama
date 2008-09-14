@@ -1,14 +1,15 @@
-@help_topic = qw(
-					prompt 
+@help_topic = ( undef, qw(   
 					project
+					track
 				    chain_setup
 					transport
-					track
 					marks
 					effects
 					group
 					mixdown
-				);
+					prompt 
+
+				) ) ;
 
 %help_topic = (
 
@@ -32,6 +33,7 @@ chain_setup => <<SETUP,
    setup, arm                - generate and connect chain setup    
    generate, gen             - generate chain setup
    connect, con              - connect chain setup
+   disconnect, dcon          - disconnect chain setup
    show_setup, show          - show status, all tracks
    show_chain_setup, chains  - print .ecs file to STDOUT
 SETUP
@@ -131,12 +133,41 @@ mixdown => <<MIXDOWN,
 MIXDOWN
 
 prompt => <<PROMPT,
-   <nama_command>              - execute <nama_command>
-   <ecasound_command>          - pass <ecasound_command> to Ecasound
-   ! <shell_expression>        - pass <shell_expression> to shell
-   eval <perl_code>            - evaluate <perl_code> printing the 
-                                 result on STDOUT
+   At the command prompt, you can enter several types
+   of commands:
+
+   Type                        Example
+   ------------------------------------------------------------
+   Nama commands               load somesong
+   Ecasound commands           cs-is-valid
+   Shell expressions           ! ls
+   Perl code                   eval 2*3     # no need for 'print'
+
 PROMPT
 	
 );
-print values %help_topic;
+# print values %help_topic;
+
+$help_screen = <<HELP;
+
+Welcome to Nama help
+
+The help command can take several arguments.
+
+help <command>          - show help for <command>
+help <fragment>         - show help for all commands matching /<fragment>/
+help <topic_number>     - list commands under topic <topic_number>
+
+help is available for the following topics:
+
+1  Project
+2  Track
+3  Chain setup
+4  Transport
+5  Marks
+6  Effects
+7  Group control
+8  Mixdown
+9  Command prompt 
+10 All
+HELP
