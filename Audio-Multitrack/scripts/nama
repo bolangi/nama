@@ -31,15 +31,15 @@ Text user interface (default)
 
 =item B<-f> I<config_file>
 
-Use I<config_file> instead of default .namarc
+Use I<config_file> instead of default F<.namarc>
 
 =item B<-c>
 
-Create the project named after all options
+Create the named project
 
 =item B<-a>
 
-Save and reload ALSA state using alsactl
+Save and reload ALSA mixer state using alsactl
 
 =item B<-m>
 

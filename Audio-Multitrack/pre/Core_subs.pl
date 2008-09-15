@@ -108,11 +108,11 @@ sub prepare {
 	getopts('amcegsdtf:', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
-	# d: project root dir
+	# d: set project root dir
 	# c: create project
-	# f: configuration file
-	# g: gui mode 
-	# t: text mode (default)
+	# f: specify configuration file
+	# g: gui mode (default)
+	# t: text mode 
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache

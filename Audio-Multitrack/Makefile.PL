@@ -20,7 +20,7 @@ print "from: $from\n";
 #my $from = $name;
 
 WriteMakefile(
-    'NAME'		=> $name,
+    'NAME'		=> q(Audio-Ecasound-Multitrack), 
     'VERSION_FROM'	=> $from, # finds $VERSION
     'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
 	EXE_FILES    => [qw(scripts/nama)],
@@ -29,9 +29,5 @@ WriteMakefile(
        AUTHOR     => 'Joel Roth <jroth@joelz@pobox.com>') : ()),
 	'dist' => { COMPRESS=>"gzip", 
 			   SUFFIX=>"gz", 
-# 				   PREOP=>('rm -f README; '.
-# 						   "pod2text -80 < $name > README; ".
-# 						   "cp -f README $dir-\$(VERSION); "
-#						  ),
 				 },
 );

@@ -97,6 +97,3 @@ __END__
   
   print "bar is " . $object->bar . "\n";
 
-=head1 DESCRIPTION
-
-type man ::Object
