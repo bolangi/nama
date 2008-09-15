@@ -215,8 +215,19 @@ __END__
 
 =head1 NAME
 
-B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
+B<Audio::Ecasound::Multitrack> - Perl libraries for multitrack audio processing
+using the Ecasound signal-processing engine.
 
-B<nama> - multitrack recording/mixing application
+B<Nama> - Multitrack recorder and mixer application
 
-Type 'man nama' for details on usage and licensing.
+Type I<man nama> for details on usage and licensing.
+
+=head1 ABSTRACT
+
+These libraries supplement the broad abilities of Ecasound
+with concepts of track and bus, mixer configuration, and
+default signal routing. The B<Nama> user application aims to provide
+a comfortable environment for multitrack recording.  Text
+and Tk GUI interfaces are provided. Configuration data and
+project settings are stored in easily legible YAML formatted
+files. 
