@@ -192,6 +192,8 @@ $grammar = q(
 
 [% qx(./emit_command_headers) %]
 );
+
+# we redirect STDERR to shut up noisy Parse::RecDescent
 open SAVERR, ">&STDERR";
 open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
@@ -199,7 +201,6 @@ close STDERR;
 open STDERR, ">&SAVERR";
 #select STDOUT; $| = 1;
 # ::Text::OuterShell::create_help_subs();
-#
 
 [% qx(cat ./help_topic.pl) %]
 
@@ -214,11 +215,8 @@ __END__
 
 =head1 NAME
 
-B<Audio::Multitrack> - Perl extensions for multitrack audio processing
+B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
 
 B<nama> - multitrack recording/mixing application
 
 Type 'man nama' for details on usage and licensing.
-
-No further documentation is provided regarding
-Audio::Multitrack and its subordinate modules.
