@@ -316,7 +316,27 @@ remove_effect: _remove_effect op_id(s) end {
 
 }
 
-
+add_ctrl: _add_ctrl parent name value(s?) end {
+print "add_ctrl\n";
+print join $/, keys %item; 
+my $code = $item{name};
+my $parent = $item{parent};
+print "code: $code, parent: $parent\n";
+if ( $::effect_i{$code} ) {} # do nothing
+elsif ( $::effect_j{$code} ) { $code = $::effect_j{$code} }
+else { warn "effect code not found: $code\n"; return }
+print "code: ", $code, $/;
+  	my %p = (
+  		chain => $::this_track->n,
+  		parent_id => $parent,
+  	    values => $item{"value(s?)"},
+  		type => $code,
+  		);
+  		print "adding effect\n";
+  		print (::yaml_out(\%p));
+  	::add_effect( \%p );
+}
+parent: op_id
 add_effect: _add_effect name value(s?)  end { 
 #print join $/, %item;
 #print "itemdd:", $item{"dd(s?)"} , ":\n";

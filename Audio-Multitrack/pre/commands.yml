@@ -243,6 +243,11 @@ show_effects:
   what: show effects on current track
   short: fxs sfx
   parameters: none
+add_ctrl:
+  type: effect
+  what: add a controller to an operator
+  parameters: parent_id effect_code param1 param2... paramn
+  short: acl
 add_effect:
   type: effect
   what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
