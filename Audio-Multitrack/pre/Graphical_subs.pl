@@ -997,7 +997,7 @@ sub colonize { # convert seconds to minutes:seconds
 }
 
 
-sub start_heartbeat { ::start_heartbeat() }
+#sub start_heartbeat { ::start_heartbeat() }
 
 
 ### end

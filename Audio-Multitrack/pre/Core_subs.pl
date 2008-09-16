@@ -729,6 +729,7 @@ sub remove_small_wavs {
 	
 
 	$debug and print "this wav dir: ", this_wav_dir(), $/;
+	return unless this_wav_dir();
          my @wavs = File::Find::Rule ->name( qr/\.wav$/i )
                                         ->file()
                                         ->size(44)
@@ -1028,18 +1029,16 @@ sub start_transport {
 	eval_iam('start');
 	sleep 1;
 	#$ui->start_heartbeat();
-	start_heartbeat();
+	#start_heartbeat();
 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub start_heartbeat {
-	print "event widget: ", ref $new_event, $/;
+	#print "event widget: ", ref $new_event, $/;
 	$event_id{heartbeat} = $new_event->repeat( 
-		3000, sub { print qq(bo BOOM boo BOOM\n) } 
-	);
-	print "event_id: " , ref $event_id{heartbeat}, $/;
-=comment
+		3000, sub { 
+		
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
@@ -1056,12 +1055,13 @@ sub start_heartbeat {
 					and !  really_recording();
 
 				# update time display
+				#
 				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 
 
-				});
 
-=cut
+		});
+
 }
 
 sub schedule_wraparound {
