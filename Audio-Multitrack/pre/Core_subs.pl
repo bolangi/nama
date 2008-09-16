@@ -1376,6 +1376,7 @@ sub cop_add {
 	my $i       = $effect_i{$code};
 	my @values = @{ $p{values} } if $p{values};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
+	                                  # zero based
 	$debug2 and print "&cop_add\n";
 $debug and print <<PP;
 n:          $n
@@ -1412,7 +1413,12 @@ PP
 		$cops{$cop_id}->{belongs_to} = $parent_id;
 		$debug and print join " ", "my attributes again:", (keys %{ $cops{$cop_id} }), "\n";
 		$debug and print "parameter: $parameter\n";
-		$copp{$cop_id}->[0] = $parameter + 1; # set fx-param to the parameter number.
+
+		# set fx-param to the parameter number, which one
+		# above the zero-based array offset that $parameter represents
+		
+		$copp{$cop_id}->[0] = $parameter + 1; 
+		
  		# find position of parent and insert child immediately afterwards
 
  		my $end = scalar @{ $ti[$n]->ops } - 1 ; 

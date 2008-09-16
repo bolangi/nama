@@ -325,7 +325,6 @@ modify_effect: _modify_effect op_id parameter sign(?) value end {
 
 		#print join $/, %item, $/;
 		$item{parameter}--; # user's one-based indexing to our zero-base
-
 		my $new_value = $item{value}; 
 
 		if ($item{"sign(?)"} and @{ $item{"sign(?)"} }) {

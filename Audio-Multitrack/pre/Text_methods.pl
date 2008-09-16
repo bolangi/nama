@@ -328,7 +328,7 @@ sub t_add_ctrl {
 	else { warn "effect code not found: $code\n"; return }
 	print "code: ", $code, $/;
 		my %p = (
-				chain => $this_track->n,
+				chain => $cops{$parent}->{chain},
 				parent_id => $parent,
 				values => $values,
 				type => $code,
