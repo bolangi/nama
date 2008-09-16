@@ -1293,6 +1293,7 @@ sub remove_effect {
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
+	return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
 	$ti[$n]->remove_effect( $id );
 		

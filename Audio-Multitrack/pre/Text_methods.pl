@@ -297,4 +297,58 @@ sub create_help_subs {
 
 }
 =cut
+
+package ::;
+
+sub t_load_project {
+	my $name = shift;
+	my $untested = remove_spaces($name);
+	print ("Project $untested does not exist\n"), return
+		unless -d join_path project_root(), $untested; 
+	load_project( name => remove_spaces($name) );
+
+	print "loaded project: $project_name\n";
+}
     
+sub t_create_project {
+	my $name = shift;
+	load_project( 
+		name => remove_spaces($name),
+		create => 1,
+	);
+	print "created project: $project_name\n";
+
+}
+sub t_add_ctrl {
+	my ($parent, $code, $values) = @_;
+	print "code: $code, parent: $parent\n";
+	$values and print "values: ", join " ", @{$values};
+	if ( $effect_i{$code} ) {} # do nothing
+	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
+	else { warn "effect code not found: $code\n"; return }
+	print "code: ", $code, $/;
+		my %p = (
+				chain => $this_track->n,
+				parent_id => $parent,
+				values => $values,
+				type => $code,
+			);
+			print "adding effect\n";
+			# print (yaml_out(\%p));
+		add_effect( \%p );
+}
+sub t_add_effect {
+	my ($code, $values)  = @_;
+	if ( $effect_i{$code} ) {} # do nothing
+	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
+	else { warn "effect code not found: $code\n"; return }
+	print "code: ", $code, $/;
+		my %p = (
+			chain => $this_track->n,
+			values => $values,
+			type => $code,
+			);
+			print "adding effect\n";
+			#print (yaml_out(\%p));
+		add_effect( \%p );
+}
