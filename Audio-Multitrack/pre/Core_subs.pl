@@ -1035,6 +1035,8 @@ sub start_heartbeat {
 	$event_id{heartbeat} = $new_event->repeat( 3000,
 				sub { 
 				
+				print "bo BOOM boo BOOM\n";
+=comment
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
 				$new_event->afterCancel($event_id{heartbeat})
@@ -1049,7 +1051,11 @@ sub start_heartbeat {
 					and defined $start 
 					and defined $end 
 					and !  really_recording();
-				update_clock();
+
+				# update time display
+				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+=cut
+
 
 				});
 

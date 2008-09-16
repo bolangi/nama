@@ -995,9 +995,7 @@ sub colonize { # convert seconds to minutes:seconds
 	$min = "0$min" if $min < 10 and $hours;
 	($hours ? "$hours:" : "") . qq($min:$sec);
 }
-sub update_clock { 
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-}
+
 
 sub start_heartbeat { ::start_heartbeat() }
 
