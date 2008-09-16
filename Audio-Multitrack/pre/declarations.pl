@@ -1,5 +1,16 @@
 our (
-	### 
+
+    # 'our' means these variables will be accessible, without
+	# package qualifiers, to all packages inhabiting 
+	# the same file.
+	#
+	# this allows us to bring our variables from 
+    # procedural core into ::Graphical and ::Text
+	# packages. 
+	
+	# it didn't work out to be as helpful as i'd like
+	# because the grammar requires package path anyway
+
 	$help_screen, 		# 
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic

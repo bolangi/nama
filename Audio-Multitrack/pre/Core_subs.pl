@@ -1026,16 +1026,19 @@ sub start_transport {
 
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
-	$ui->start_heartbeat();
+	sleep 1;
+	#$ui->start_heartbeat();
+	start_heartbeat();
 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub start_heartbeat {
-	$event_id{heartbeat} = $new_event->repeat( 3000,
-				sub { 
-				
-				print "bo BOOM boo BOOM\n";
+	print "event widget: ", ref $new_event, $/;
+	$event_id{heartbeat} = $new_event->repeat( 
+		3000, sub { print qq(bo BOOM boo BOOM\n) } 
+	);
+	print "event_id: " , ref $event_id{heartbeat}, $/;
 =comment
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
@@ -1054,11 +1057,11 @@ sub start_heartbeat {
 
 				# update time display
 				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-=cut
 
 
 				});
 
+=cut
 }
 
 sub schedule_wraparound {

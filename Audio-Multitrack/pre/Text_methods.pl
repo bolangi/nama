@@ -8,19 +8,19 @@ sub show_versions {
 sub show_effects {
  	map { 
  		my $op_id = $_;
- 		 my $i = $::effect_i{ $::cops{ $op_id }->{type} };
- 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
- 		 my @pnames =@{$::effects[ $i ]->{params}};
+ 		 my $i = $effect_i{ $cops{ $op_id }->{type} };
+ 		 print $op_id, ": " , $effects[ $i ]->{name},  " ";
+ 		 my @pnames =@{$effects[ $i ]->{params}};
 			map{ print join " ", 
 			 	$pnames[$_]->{name}, 
-				$::copp{$op_id}->[$_],'' 
+				$copp{$op_id}->[$_],'' 
 		 	} (0..scalar @pnames - 1);
 		 print $/;
  
- 	 } @{ $::this_track->ops };
+ 	 } @{ $this_track->ops };
 }
 sub show_modifiers {
-	print "Modifiers: ",$::this_track->modifiers, $/;
+	print "Modifiers: ",$this_track->modifiers, $/;
 }
 sub loop {
     package ::;
