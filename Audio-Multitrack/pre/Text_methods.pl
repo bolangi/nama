@@ -88,14 +88,14 @@ package ::;
             } elsif ($tn{$cmd}) { 
                 $debug and print qq(Selecting track "$cmd"\n);
                 $this_track = $tn{$cmd};
-                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+                $predicate !~ /^\s*$/ and $parser->command($predicate);
             } elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
                 $debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
                 $this_track = $ti[$cmd];
-                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+                $predicate !~ /^\s*$/ and $parser->command($predicate);
             } elsif ($iam_cmd{$cmd}){
                 $debug and print "Found Iam command\n";
-                print ::eval_iam($user_input), $/ ;
+                print eval_iam($user_input), $/ ;
             } else {
                 $debug and print "Passing to parser\n", 
                 $_, $/;
@@ -112,7 +112,7 @@ package ::Text;
 sub show_tracks {
     no warnings;
     my @tracks = @_;
-    map {     push @::format_fields,  
+    map {     push @format_fields,  
             $_->n,
             $_->name,
             $_->rw,
@@ -136,7 +136,7 @@ Track  Name        Setting  Status  Input  Version
 .
 format STDOUT =
 @>>    @<<<<<<<<<    @<<<    @<<<    @>>     @>>>   ~~
-splice @::format_fields, 0, 6
+splice @format_fields, 0, 6
 .
 
 sub helpline {
