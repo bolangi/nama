@@ -136,7 +136,7 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
-#sub start_heartbeat {}
+sub start_heartbeat {}
 sub start_clock {}
 sub init_gui {}
 sub transport_gui {}

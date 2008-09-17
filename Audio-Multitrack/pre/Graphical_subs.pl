@@ -997,7 +997,34 @@ sub colonize { # convert seconds to minutes:seconds
 }
 
 
-#sub start_heartbeat { ::start_heartbeat() }
+sub start_heartbeat {
+	#print "event widget: ", ref $new_event, $/;
+	$event_id{heartbeat} = $new_event->repeat( 
+		3000, sub { 
+		
+				my $here   = eval_iam("getpos");
+				my $status = eval_iam q(engine-status);
+				$new_event->afterCancel($event_id{heartbeat})
+					#if $status =~ /finished|error|stopped/;
+					if $status =~ /finished|error/;
+				print join " ", "engine is $status", colonize($here), $/;
+				my ($start, $end);
+				$start  = ::Mark::loop_start();
+				$end    = ::Mark::loop_end();
+				schedule_wraparound() 
+					if $loop_enable 
+					and defined $start 
+					and defined $end 
+					and !  really_recording();
 
+				# update time display
+				#
+				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+
+
+
+		});
+
+}
 
 ### end

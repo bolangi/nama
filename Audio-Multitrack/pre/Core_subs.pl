@@ -1028,41 +1028,13 @@ sub start_transport {
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
 	sleep 1;
-	#$ui->start_heartbeat();
+	$ui->start_heartbeat();
 	#start_heartbeat();
 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }
-sub start_heartbeat {
-	#print "event widget: ", ref $new_event, $/;
-	$event_id{heartbeat} = $new_event->repeat( 
-		3000, sub { 
-		
-				my $here   = eval_iam("getpos");
-				my $status = eval_iam q(engine-status);
-				$new_event->afterCancel($event_id{heartbeat})
-					#if $status =~ /finished|error|stopped/;
-					if $status =~ /finished|error/;
-				print join " ", "engine is $status", colonize($here), $/;
-				my ($start, $end);
-				$start  = ::Mark::loop_start();
-				$end    = ::Mark::loop_end();
-				schedule_wraparound() 
-					if $loop_enable 
-					and defined $start 
-					and defined $end 
-					and !  really_recording();
 
-				# update time display
-				#
-				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-
-
-
-		});
-
-}
 
 sub schedule_wraparound {
 	my $here   = eval_iam("getpos");
