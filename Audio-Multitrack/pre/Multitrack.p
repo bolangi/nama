@@ -115,12 +115,6 @@ sub loop {
      $term->addhistory($user_input) ;
 	::Text::command_process( $user_input );
 	}
-#   Term::Shell version
-#
-# 	my $shell = ::Text::OuterShell->new;
-# 	my $term = $shell->term();
-# 	$term->tkRunning(1);
-# 	$shell->cmdloop;
 }
 
 ## The following methods belong to the Text interface class
