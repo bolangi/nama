@@ -280,6 +280,9 @@ newly recorded soundfiles under 44100 bytes in size.
 other commands. Many commands will crash the system
 if issued without a project loaded.
 
+- To be able to run entirely without Tk and without X
+  you will need to delete the line containing 'use Tk' 
+  from Multitrack.pm.
 
 =head1 EXPORT
 
