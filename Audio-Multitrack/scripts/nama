@@ -264,12 +264,17 @@ $project_root/project_name/.namarc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
-No GUI remove-track command is provided.
+Several commands are available through the command
+prompt only.
 
-Default GUI volume sliders are not log scaled.
+Default GUI volume sliders are linear scaled.
 
 The post-recording cleanup routine deletes
 newly recorded soundfiles under 44100 bytes in size. 
+
+A project should be loaded or created before issuing
+other commands. Many commands will crash the system
+if issued without a project loaded.
 
 =head1 EXPORT
 
@@ -282,11 +287,8 @@ following Perl modules. These modules can be downloaded
 automagically if B<Audio::Ecasound::Multitrack>
 is installed from CPAN. 
 
-	Carp
 	Data::YAML
 	IO::All
-	Cwd
-	Storable 
 	Data::Dumper
 	Getopt::Std
 	Tk
@@ -320,7 +322,7 @@ Pull source code using this command:
 
 =head1 AUTHOR
 
-Joel Roth, E<lt>joelz a.t pobox d.o.t comE<gt>
+Joel Roth, E<lt>joelz@pobox.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

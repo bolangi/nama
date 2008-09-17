@@ -918,7 +918,7 @@ sub load_ecs {
 		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam("cs-remove $project_file");
+		eval_iam "cs-remove" if eval_iam "cs-selected";
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
