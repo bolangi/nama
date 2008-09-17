@@ -93,6 +93,7 @@ HELLO
 
 	
 sub prepare {  
+	
 
 	$debug2 and print "&prepare\n";
 	local $debug = 0;
@@ -165,6 +166,7 @@ sub prepare {
 				   : ::Graphical->new ;
 
 	# default to graphic mode with events
+	# with full text mode as well
 
 	# Tk main window
  	$mw = MainWindow->new;  

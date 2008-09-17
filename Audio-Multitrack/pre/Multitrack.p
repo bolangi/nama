@@ -22,6 +22,18 @@ use IO::All;
 
 ## Definitions ##
 
+print <<BANNER;
+
+     /////////////////////////////////////////////////////////////////////
+    //                               ///   /
+   // Nama multitrack recorder //      Audio processing by Ecasound    /
+  /
+ /       (c) 2007 Joel Roth                      ////               //
+/////////////////////////////////////////////////////////////////////
+
+
+BANNER
+
 # 'our' declaration: all packages in the file will see the following
 # variables. 
 
