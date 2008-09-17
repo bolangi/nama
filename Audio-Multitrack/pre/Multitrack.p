@@ -25,7 +25,7 @@ use IO::All;
 print <<BANNER;
 
      /////////////////////////////////////////////////////////////////////
-    //                               ///   /
+    //                              ///     
    // Nama multitrack recorder //      Audio processing by Ecasound    /
   /
  /       (c) 2007 Joel Roth                      ////               //

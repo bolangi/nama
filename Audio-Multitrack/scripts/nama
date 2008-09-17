@@ -221,7 +221,9 @@ add piano; r2                    # record track 'piano' from input 2
 add drums; r3                    # record track 'drums' from input 3
 arm                              # generate chain setup and connect engine
 start
-(perform backing music)
+
+(perform music)
+
 stop
 show                             # new versions of guitar, piano and drums
                                  # appear
@@ -264,17 +266,20 @@ $project_root/project_name/.namarc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
-Several commands are available through the command
-prompt only.
+- Text-only mode (initiated with the -t option) currently
+lacks the loop function available in the default mode. This
+is because events are provided through the Tk graphic
+toolkit, which requires X. 
 
-Default GUI volume sliders are linear scaled.
+- Default GUI volume sliders are linear scaled.
 
-The post-recording cleanup routine deletes
+- The post-recording cleanup routine deletes
 newly recorded soundfiles under 44100 bytes in size. 
 
-A project should be loaded or created before issuing
+- A project should be loaded or created before issuing
 other commands. Many commands will crash the system
 if issued without a project loaded.
+
 
 =head1 EXPORT
 

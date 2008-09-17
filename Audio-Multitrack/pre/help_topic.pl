@@ -18,6 +18,7 @@ help => <<HELP,
    help <fragment>         - show help for commands matching /<fragment>/
    help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
    help <topic_number>     - list commands under <topic_number> 
+   help <topic_name>       - list commands under <topic_name> (lower case)
 HELP
 
 project => <<PROJECT,

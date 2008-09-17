@@ -206,7 +206,7 @@ sub eval_iam {
 }
 ## configuration file
 
-sub project_root { File::Spec::Link->resolve_all( $project_root ); }
+sub project_root { File::Spec::Link->resolve_all($project_root)};
 
 sub config_file { $opts{f} ? $opts{f} : ".namarc" }
 sub this_wav_dir {
@@ -300,7 +300,6 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
-	print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
