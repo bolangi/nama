@@ -1,6 +1,20 @@
 our (
-	### 
-	$helptext, 		# used for the help function
+
+    # 'our' means these variables will be accessible, without
+	# package qualifiers, to all packages inhabiting 
+	# the same file.
+	#
+	# this allows us to bring our variables from 
+    # procedural core into ::Graphical and ::Text
+	# packages. 
+	
+	# it didn't work out to be as helpful as i'd like
+	# because the grammar requires package path anyway
+
+	$help_screen, 		# 
+	@help_topic,    # array of help categories
+	%help_topic,    # help text indexed by topic
+
 	$ui, # object providing class behavior for graphic/text functions
 
 	@persistent_vars, # a set of variables we save
@@ -34,18 +48,18 @@ our (
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
 	%iam_cmd,		# for identifying IAM commands in user input
-	@ecmd_commands,# array of commands my functions provide
-	%ecmd_commands,# as hash as well
+	@nama_commands,# array of commands my functions provide
+	%nama_commands,# as hash as well
 	$project_root,	# each project will get a directory here
-	                # and one .ecmd directory, also with 
+	                # and one .nama directory, also with 
 	
 					#
-					# $ENV{HOME}/.ecmdrc
-					# $ENV{HOME}/ecmd/paul_brocante
-					# $ENV{HOME}/ecmd/paul_brocante/.wav/vocal_1.wav
-					# $ENV{HOME}/ecmd/paul_brocante/Store.yml
-					# $ENV{HOME}/ecmd/.effects_cache
-					# $ENV{HOME}/ecmd/paul_brocante/.ecmdrc 
+					# $ENV{HOME}/.namarc
+					# $ENV{HOME}/nama/paul_brocante
+					# $ENV{HOME}/nama/paul_brocante/.wav/vocal_1.wav
+					# $ENV{HOME}/nama/paul_brocante/Store.yml
+					# $ENV{HOME}/nama/.effects_cache
+					# $ENV{HOME}/nama/paul_brocante/.namarc 
 
 					 #this_wav_dir = 
 	$state_store_file,	# filename for storing @persistent_vars
@@ -112,7 +126,7 @@ our (
 
 	$load_frame,
 	$add_frame,
-	$take_frame,
+	$group_frame,
 	$time_frame,
 	$clock_frame,
 	$oid_frame,
@@ -126,13 +140,13 @@ our (
 
 	## collected widgets (i may need to destroy them)
 
-	@widget_t, # widgets for displaying track groups, unused
-	$tracker_group_widget, # widget for tracker group, replaces @widget_t
-	%widget_c, # for chains (tracks)
-	%widget_e, # for effects
+	$group_rw, # 
+	$group_version, # 
+	%track_widget, # for chains (tracks)
+	%effects_widget, # for effects
 	@widget_o, # for templates (oids) 
 	%widget_o, # 
-	%widget_m, # marks
+	%mark_widget, # marks
 
 	@global_version_buttons, # to set the same version for
 						  	#	all tracks
@@ -144,7 +158,7 @@ our (
 	$setup_length,  # displays setup running time
 
 	$project_label,	# project name
-	$take_label,	# bus name
+	$group_label,	# bus name
 
 	$sn_label,		# project load/save/quit	
 	$sn_text,
@@ -243,6 +257,7 @@ our (
 
 	$mixer_out_device, # where to send stereo output
 	$record_device,    # where to get our inputs
+
 
 	# rules
 	

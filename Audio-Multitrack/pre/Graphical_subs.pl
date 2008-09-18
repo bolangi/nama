@@ -29,16 +29,16 @@ sub add_effect_gui {
 
 		my $frame ;
 		if ( ! $parent_id ){ # independent effect
-			$frame = $widget_c{$n}->{parents}->Frame->pack(
+			$frame = $track_widget{$n}->{parents}->Frame->pack(
 				-side => 'left', 
 				-anchor => 'nw',)
 		} else {                 # controller
-			$frame = $widget_c{$n}->{children}->Frame->pack(
+			$frame = $track_widget{$n}->{children}->Frame->pack(
 				-side => 'top', 
 				-anchor => 'nw')
 		}
 
-		$widget_e{$id} = $frame; 
+		$effects_widget{$id} = $frame; 
 		# we need a separate frame so title can be long
 
 		# here add menu items for Add Controller, and Remove
@@ -114,13 +114,12 @@ sub manifest { $ew->deiconify() }
 sub destroy_widgets {
 
 	map{ $_->destroy } map{ $_->children } $effect_frame;
-	#my @children = $take_frame->children;
+	#my @children = $group_frame->children;
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[10..$#children]; # fragile
-	$tracker_group_widget->destroy if $tracker_group_widget;
-	%widget_m and map{ $_->destroy } values %widget_m;
+	%mark_widget and map{ $_->destroy } values %mark_widget;
 }
 
 sub init_gui {
@@ -134,7 +133,7 @@ sub init_gui {
 
 	#my $mw = tkinit();
 	$mw->optionAdd('*font', 'Helvetica 12');
-	$mw->title("Tk Ecmd"); 
+	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
 
 	### init effect window
@@ -169,11 +168,11 @@ sub init_gui {
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$take_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$take_label = $take_frame->Menubutton(-text => "GROUP",
-										-tearoff => 0,
-										-width => 12)->pack(-side => 'left');
+ 	#$group_label = $group_frame->Menubutton(-text => "GROUP",
+ #										-tearoff => 0,
+ #										-width => 13)->pack(-side => 'left');
 		
 	$add_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$perl_eval_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -183,7 +182,7 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Project name:")->pack(-side => 'left');
+	$sn_label = $load_frame->Label(-text => "Project name: ")->pack(-side => 'left');
 	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
@@ -195,12 +194,12 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
-	$sn_dump = $load_frame->Button->pack(-side => 'left');
+	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
-		-text => "     TRACK  Name:", -width => 16)->pack(-side => 'left');
+		-text => "          Name: ")->pack(-side => 'left');
 	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "Input:")->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(-text => "Input channel:")->pack(-side => 'left');
 	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
 	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
 	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
@@ -225,9 +224,9 @@ sub init_gui {
  		-command => sub {load_project (name => $project_name, 
  										settings => $save_id)},
 				);
-	$sn_dump->configure(
-		-text => q(Dump state),
-		-command => sub{ print &status_vars });
+# 	$sn_dump->configure(
+# 		-text => q(Dump state),
+# 		-command => sub{ print &status_vars });
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
@@ -237,15 +236,14 @@ sub init_gui {
 
 
 	$build_track_add->configure( 
-			-text => 'Add',
+			-text => 'Add New Track',
 			-command => sub { 
 					return if $track_name =~ /^\s*$/;	
 			add_track(remove_spaces($track_name)) }
 	);
 
 	my @labels = 
-		qw(Track Version Status Input Volume Mute Unity Pan Center Effects);
-		#qw(Track Version Status Rec Mon Volume Cut Unity Pan Center Effects);
+		qw(Track Name Version Status Input Volume Mute Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
@@ -253,7 +251,7 @@ sub init_gui {
 #  unified command processing by command_process 
 	
 	$iam_label = $iam_frame->Label(
-	-text => "Command:  "
+	-text => "    Command: "
 		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)
@@ -281,8 +279,8 @@ sub transport_gui {
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
 	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
 	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
-	$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
-	$transport_new = $transport_frame->Button->pack(-side => 'left');;
+	#$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
+	# $transport_new = $transport_frame->Button->pack(-side => 'left');;
 
 	$transport_stop->configure(-text => "Stop",
 	-command => sub { 
@@ -305,14 +303,14 @@ sub transport_gui {
 			-text => 'Arm',
 			-command => sub {&generate_setup and &connect_transport}
 						 );
-	$transport_disconnect->configure(
-			-text => 'Disconnect setup',
-			-command => \&disconnect_transport,
-						);
-	$transport_new->configure(
-			-text => 'New Engine',
-			-command => \&new_engine,
-						 );
+# 	$transport_disconnect->configure(
+# 			-text => 'Disconnect setup',
+# 			-command => \&disconnect_transport,
+# 						);
+# 	$transport_new->configure(
+# 			-text => 'New Engine',
+# 			-command => \&new_engine,
+# 						 );
 }
 sub time_gui {
 	@_ = discard_object(@_);
@@ -480,21 +478,22 @@ sub flash_ready {
 }
 sub group_gui {  
 	@_ = discard_object(@_);
-	my $name = shift;
-	my $group = $::Group::by_name{$name};
-	$debug2 and print "&group_gui\n";
-		my $group_rw = $take_frame->Menubutton(
-				-text => $name,
-				-tearoff =>0,
-			)->pack(-side => 'left');
-		push @widget_t, $group_rw;
-	#$debug and print "=============\n\@widget_t\n",yaml_out(\@widget_t);
+	my $group = $tracker; 
+	my $label;
+	my $dummy = $track_frame->Label(-text => ' '); 
+	$label = 	$track_frame->Label(-text => "Group" );
+	$group_version = $track_frame->Menubutton(-tearoff => 0);
+	$group_rw = $track_frame->Menubutton( -text    => $group->rw,
+										  -tearoff => 0);
+
+
 		
 		$group_rw->AddItems([
 			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'REC');
+				$group_rw->configure(-text => 'REC');
 				refresh();
 				generate_setup() and connect_transport()
 				}
@@ -503,6 +502,7 @@ sub group_gui {
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'MON');
+				$group_rw->configure(-text => 'MON');
 				refresh();
 				generate_setup() and connect_transport()
 				}
@@ -511,28 +511,37 @@ sub group_gui {
 			-background => $old_bg,
 			-command => sub { 
 				$group->set(rw => 'OFF');
+				$group_rw->configure(-text => 'OFF');
 				refresh();
 				generate_setup() and connect_transport()
 				}
-			],);
-$group_rw
+			]);
+			$dummy->grid($label, $group_version, $group_rw);
+			$ui->global_version_buttons;
 
 }
 sub global_version_buttons {
-	
 	local $debug = 0;
-	if (defined $tracker_group_widget) {
-		my @children = $tracker_group_widget->children;
-		for (@children) {
-			$_->cget(-value) and $_->destroy;
-		}; # remove menubuttons
-	}
+	my $version = $group_version;
+	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
+		join ' ',1..$ti[-1]->group_last, " \n";
 
-	join ' ',1..$ti[-1]->group_last, " \n";
+			$version->radiobutton( 
 
- 	for my $v (undef, 1..$ti[-1]->group_last) { 
+				-label => (''),
+				-value => 0,
+				-command => sub { 
+					$tracker->set(version => 0); 
+					$version->configure(-text => " ");
+					generate_setup() and connect_transport();
+					refresh();
+					}
+
+ 					);
+
+ 	for my $v (1..$ti[-1]->group_last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group
@@ -542,13 +551,14 @@ sub global_version_buttons {
 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
 			@user_track_indices;
 		
-			# scalar grep{ $-> > 2 } @all_chains; # excludes master (1), mix (2)
-			$tracker_group_widget->radiobutton( 
+
+			$version->radiobutton( 
 
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
 					$tracker->set(version => $v); 
+					$version->configure(-text => $v);
 					generate_setup() and connect_transport();
 					refresh();
 					}
@@ -567,20 +577,25 @@ sub track_gui {
 				-command  => sub { 
 					$ti[$n]->set(rw => "REC");
 					
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
 					$ti[$n]->set(rw => "MON");
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 					$ti[$n]->set(rw => "OFF");
-					refresh_c($n);
+					refresh_track($n);
+					refresh_group();
 			}],
 		);
-	my ($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
+	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
+	$number = $track_frame->Label(-text => $n,
+									-justify => 'left');
 	my $stub = " ";
 	$stub .= $ti[$n]->active;
 	$name = $track_frame->Label(
@@ -627,7 +642,7 @@ sub track_gui {
 			-command => sub { 
 			#	$ti[$n]->set(rw => 'REC');
 				$ti[$n]->set(ch_r  => $v);
-				refresh_c($n) }
+				refresh_track($n) }
 			)
 	}
 	$ch_m = $track_frame->Menubutton(
@@ -640,7 +655,7 @@ sub track_gui {
 						-command => sub { 
 			#				$ti[$n]->set(rw  => "MON");
 							$ti[$n]->set(ch_m  => $v);
-							refresh_c($n) }
+							refresh_track($n) }
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
@@ -731,25 +746,25 @@ sub track_gui {
 	
 	my $effects = $effect_frame->Frame->pack(-fill => 'both');;
 
-	# effects, held by widget_c->n->effects is the frame for
+	# effects, held by track_widget->n->effects is the frame for
 	# all effects of the track
 
-	@{ $widget_c{$n} }{qw(name version rw ch_r ch_m mute effects)} 
+	@{ $track_widget{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	#$debug and print "=============\n\%widget_c\n",yaml_out(\%widget_c);
+	#$debug and print "=============\n\%track_widget\n",yaml_out(\%track_widget);
 	my $independent_effects_frame 
-		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ${ $track_widget{$n}->{effects} }->Frame->pack(-fill => 'x');
 
 
 	my $controllers_frame 
-		= ${ $widget_c{$n}->{effects} }->Frame->pack(-fill => 'x');
+		= ${ $track_widget{$n}->{effects} }->Frame->pack(-fill => 'x');
 	
 	# parents are the independent effects
 	# children are controllers for various paramters
 
-	$widget_c{$n}->{parents} = $independent_effects_frame;
+	$track_widget{$n}->{parents} = $independent_effects_frame;
 
-	$widget_c{$n}->{children} = $controllers_frame;
+	$track_widget{$n}->{children} = $controllers_frame;
 	
 	$independent_effects_frame
 		->Label(-text => uc $ti[$n]->name )->pack(-side => 'left');
@@ -778,8 +793,8 @@ sub track_gui {
 	
 	#$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	$name->grid($version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
-	refresh_c($n);
+	$number->grid($name, $version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
+	refresh_track($n);
 
 }
 
@@ -787,12 +802,12 @@ sub update_version_button {
 	@_ = discard_object(@_);
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
-	my $w = $widget_c{$n}->{version};
+	my $w = $track_widget{$n}->{version};
 					$w->radiobutton(
 						-label => $v,
 						-value => $v,
 						-command => 
-		sub { $widget_c{$n}->{version}->configure(-text=>$v) 
+		sub { $track_widget{$n}->{version}->configure(-text=>$v) 
 				unless $ti[$n]->rec_status eq "REC" }
 					);
 }
@@ -951,7 +966,7 @@ sub marker {
 	#print "mark is ", ref $mark, $/;
 	my $pos = $mark->time;
 	#print $pos, " ", int $pos, $/;
-		$widget_m{$pos} = $mark_frame->Button( 
+		$mark_widget{$pos} = $mark_frame->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $old_bg,
 			-command => sub { mark($mark) },
@@ -968,7 +983,7 @@ sub restore_time_marks {
 sub destroy_marker {
 	@_ = discard_object( @_);
 	my $pos = shift;
-	$widget_m{$pos}->destroy; 
+	$mark_widget{$pos}->destroy; 
 }
 sub colonize { # convert seconds to minutes:seconds 
 	my $sec = shift;
@@ -980,10 +995,36 @@ sub colonize { # convert seconds to minutes:seconds
 	$min = "0$min" if $min < 10 and $hours;
 	($hours ? "$hours:" : "") . qq($min:$sec);
 }
-sub update_clock { 
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-}
 
-	
+
+sub start_heartbeat {
+	#print "event widget: ", ref $new_event, $/;
+	$event_id{heartbeat} = $new_event->repeat( 
+		3000, sub { 
+		
+				my $here   = eval_iam("getpos");
+				my $status = eval_iam q(engine-status);
+				$new_event->afterCancel($event_id{heartbeat})
+					#if $status =~ /finished|error|stopped/;
+					if $status =~ /finished|error/;
+				print join " ", "engine is $status", colonize($here), $/;
+				my ($start, $end);
+				$start  = ::Mark::loop_start();
+				$end    = ::Mark::loop_end();
+				schedule_wraparound() 
+					if $loop_enable 
+					and defined $start 
+					and defined $end 
+					and !  really_recording();
+
+				# update time display
+				#
+				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+
+
+
+		});
+
+}
 
 ### end

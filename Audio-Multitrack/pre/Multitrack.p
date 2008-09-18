@@ -22,13 +22,24 @@ use IO::All;
 
 ## Definitions ##
 
+print <<BANNER;
+
+     /////////////////////////////////////////////////////////////////////
+    //                              ///     
+   // Nama multitrack recorder //      Audio processing by Ecasound    /
+  /
+ /       (c) 2008 Joel Roth                      ////               //
+/////////////////////////////////////////////////////////////////////
+
+
+BANNER
+
 # 'our' declaration: all packages in the file will see the following
 # variables. 
 
 [% qx(cat ./declarations.pl) %] 
 
 [% qx(cat ./var_types.pl) %]
-
 
 # instances needed for yaml_out and yaml_in
 
@@ -43,7 +54,6 @@ $debug = 0; # debug statements
 $loopa = 'loop,111';
 $loopb = 'loop,222';
 
-
 # other initializations
 $unit = 1;
 $effects_cache_file = '.effects_cache';
@@ -52,8 +62,8 @@ $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
-$jack_on = 0; # you should configure jack as device directly in .ecmdrc
-$project_root = join_path( $ENV{HOME}, "ecmd");
+$jack_on = 0; # you should configure jack as device directly in .namarc
+$project_root = join_path( $ENV{HOME}, "nama");
 
 ## Load my modules
 
@@ -107,7 +117,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
     #MainLoop;
-    my $term = new Term::ReadLine 'Ecmd';
+    my $term = new Term::ReadLine 'Nama';
 	$term->tkRunning(1);
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
@@ -117,12 +127,6 @@ sub loop {
      $term->addhistory($user_input) ;
 	::Text::command_process( $user_input );
 	}
-#   Term::Shell version
-#
-# 	my $shell = ::Text::OuterShell->new;
-# 	my $term = $shell->term();
-# 	$term->tkRunning(1);
-# 	$shell->cmdloop;
 }
 
 ## The following methods belong to the Text interface class
@@ -138,12 +142,16 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
+sub start_heartbeat {}
 sub start_clock {}
+sub init_gui {}
+sub transport_gui {}
 sub group_gui {}
 sub track_gui {}
+sub time_gui {}
 sub refresh {}
-sub refresh_t {}
-sub refresh_c {}
+sub refresh_group {}
+sub refresh_track {}
 sub flash_ready {}
 sub update_master_version_button {}
 sub update_version_button {}
@@ -190,6 +198,8 @@ $grammar = q(
 
 [% qx(./emit_command_headers) %]
 );
+
+# we redirect STDERR to shut up noisy Parse::RecDescent
 open SAVERR, ">&STDERR";
 open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
@@ -197,16 +207,13 @@ close STDERR;
 open STDERR, ">&SAVERR";
 #select STDOUT; $| = 1;
 # ::Text::OuterShell::create_help_subs();
-#
 
-$helptext = q(
-[% qx(cat ./help.txt) %]
-);
+[% qx(cat ./help_topic.pl) %]
 
 # we use the following settings if we can't find config files
 
 $default = <<'FALLBACK_CONFIG';
-[% qx(cat ./ecmdrc) %]
+[% qx(cat ./namarc) %]
 FALLBACK_CONFIG
 
 1;
@@ -214,11 +221,19 @@ __END__
 
 =head1 NAME
 
-B<Audio::Multitrack> - Perl extensions for multitrack audio processing
+B<Audio::Ecasound::Multitrack> - Perl libraries for multitrack audio processing
+using the Ecasound signal-processing engine.
 
-B<ecmd> - multitrack recording/mixing application
+B<Nama> - Multitrack recorder and mixer application
 
-Type 'man ecmd' for details on usage and licensing.
+Type I<man nama> for details on usage and licensing.
 
-No further documentation is provided regarding
-Audio::Multitrack and its subordinate modules.
+=head1 ABSTRACT
+
+These libraries supplement the broad abilities of Ecasound
+with concepts of track and bus, mixer configuration, and
+default signal routing. The B<Nama> user application aims to provide
+a comfortable environment for multitrack recording.  Text
+and Tk GUI interfaces are provided. Configuration data and
+project settings are stored in easily legible YAML formatted
+files. 

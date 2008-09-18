@@ -1,8 +1,11 @@
 #!/bin/sh
-preproc -r Audio::Multitrack 
-mv $TD/Multitrack.pm $TD/..
+TD=~/build/flow/Audio-Multitrack/lib/Audio/Ecasound/Multitrack 
+preproc -r Audio::Ecasound::Multitrack \
+		-s ~/build/flow/Audio-Multitrack/pre \
+		-t $TD
+mv $TD/Multitrack.pm $TD/../Multitrack.pm 
 preproc  -s ~/build/flow/Audio-Multitrack/pre \
          -t ~/build/flow/Audio-Multitrack/t    \
-		 -r Audio::Multitrack \
+		 -r Audio::Ecasound::Multitrack \
 		 -a t \
 		 -b t

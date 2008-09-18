@@ -57,13 +57,13 @@ Do you want to continue? [N] ";
 }
 print <<HELLO;
 
-Aloha. Welcome to Ecmd and Ecasound. 
+Aloha. Welcome to Nama and Ecasound. 
 
-Ecmd places all sound and control files under the
+Nama places all sound and control files under the
 project root directory, which by default is $project_root.
 
 The project root can be specified using the -d command line option, 
-and in the configuration file .ecmdrc . 
+and in the configuration file .namarc . 
 
 Would you like to create project root directory $project_root ? [Y] 
 HELLO
@@ -75,16 +75,16 @@ HELLO
 		} 
 	}
 
-		my $config = join_path($ENV{HOME}, ".ecmdrc");
+		my $config = join_path($ENV{HOME}, ".namarc");
 	if ( ! -e $config) {
 		print "Configuration file $config not found.\n";
 		print "Would you like to create it? [Y] ";
 		my $reply = <STDIN>;
 		chomp $reply;
 		if ($reply !~ /n/i){
-			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/ecmd/m;
+			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/nama/m;
 			$default > io( $config );
-			print "\n.... Done!\n\nPlease edit $config and restart Ecmd.\n";
+			print "\n.... Done!\n\nPlease edit $config and restart Nama.\n";
 		}
 		exit;
 	}
@@ -93,13 +93,15 @@ HELLO
 
 	
 sub prepare {  
+	
 
 	$debug2 and print "&prepare\n";
 	local $debug = 0;
 	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
-	new_engine();
+	$e = Audio::Ecasound->new();
+	#new_engine();
 
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
@@ -107,11 +109,11 @@ sub prepare {
 	getopts('amcegsdtf:', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
-	# d: project root dir
+	# d: set project root dir
 	# c: create project
-	# f: configuration file
-	# g: gui mode 
-	# t: text mode (default)
+	# f: specify configuration file
+	# g: gui mode (default)
+	# t: text mode 
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
@@ -121,11 +123,11 @@ sub prepare {
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 
-	read_config();  # from .ecmdrc if we have one
+	read_config();  # from .namarc if we have one
 
 	$project_root = $opts{d} if $opts{d}; # priority to command line option
 
-	$project_root or $project_root = join_path($ENV{HOME}, "ecmd" );
+	$project_root or $project_root = join_path($ENV{HOME}, "nama" );
 
 	first_run();
 	
@@ -160,7 +162,11 @@ sub prepare {
 	
 	# UI object for interface polymorphism
 	
-	$ui = $opts{g} ?  ::Graphical->new : ::Text->new;
+	$ui = $opts{t} ? ::Text->new 
+				   : ::Graphical->new ;
+
+	# default to graphic mode with events
+	# with full text mode as well
 
 	# Tk main window
  	$mw = MainWindow->new;  
@@ -168,11 +174,7 @@ sub prepare {
 
 	$ui->init_gui;
 	$ui->transport_gui;
-	#$ui->oid_gui;
 	$ui->time_gui;
-
-	#
-    # $event{loop}	
 
 	print "project_name: $project_name\n";
 	load_project( name => $project_name, create => $opts{c}) 
@@ -204,9 +206,9 @@ sub eval_iam {
 }
 ## configuration file
 
-sub project_root { File::Spec::Link->resolve_all( $project_root ); }
+sub project_root { File::Spec::Link->resolve_all($project_root)};
 
-sub config_file { $opts{f} ? $opts{f} : ".ecmdrc" }
+sub config_file { $opts{f} ? $opts{f} : ".namarc" }
 sub this_wav_dir {
 	$project_name and
 	File::Spec::Link->resolve_all(
@@ -298,19 +300,17 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
-	#print "reached here!!!\n";
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
 	
 	dig_ruins() unless $#::Track::by_index > 2;
 
-	$tracker_group_widget = $ui->group_gui('Tracker');
 
 	# possible null if Text mode
 	
 	$ui->global_version_buttons(); 
-	$ui->refresh_t;
+	$ui->refresh_group;
 	generate_setup() and connect_transport();
 
 #The mix track will always be track index 1 i.e. $ti[$n]
@@ -606,9 +606,8 @@ sub initialize_project_data {
 	@input_chains = ();
 	@output_chains = ();
 
-	%widget_c = ();
-	@widget_t = ();
-	%widget_e = ();
+	%track_widget = ();
+	%effects_widget = ();
 	
 
 	# time related
@@ -696,6 +695,7 @@ sub dig_ruins {
 	
 	$debug2 and print "&dig_ruins";
 	return if $tracker->tracks;
+	$debug and print "looking for WAV files\n";
 
 	# look for wave files
 		
@@ -730,6 +730,7 @@ sub remove_small_wavs {
 	
 
 	$debug and print "this wav dir: ", this_wav_dir(), $/;
+	return unless this_wav_dir();
          my @wavs = File::Find::Rule ->name( qr/\.wav$/i )
                                         ->file()
                                         ->size(44)
@@ -863,11 +864,11 @@ sub write_chains {
 		
 		$debug and print "monitor input file: $full_path\n";
 		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
+		my ($chain) = $chain_ids =~ m/(\d+)/;
+		$debug and print "input chain: $chain\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:".$full_path,
-
-	   );
+			 		"-i:".  $::ti[$chain]->modifiers .  $full_path);
  	}
 	##### Setting files as outputs (used by rec_file and mix)
 
@@ -911,13 +912,6 @@ sub write_chains {
 	map{ $_->write_ewf  } ::Track::all();
 	
 }
-## templates for generating chains
-
-sub convert_to_jack {
-	map{ $_->{input} = q(jack)} grep{ $_->{name} =~ /rec_/ } @oids;	
-	map{ $_->{output} = q(jack)} grep{ $_->{name} =~ /live|multi|stereo/ } @oids;	
-}
-#sub convert_to_alsa { initialize_oids() }
 
 ## transport functions
 
@@ -925,7 +919,7 @@ sub load_ecs {
 		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam("cs-remove $project_file");
+		eval_iam "cs-remove" if eval_iam "cs-selected";
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
@@ -967,13 +961,14 @@ sub generate_setup { # create chain setup
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
 		return 1;
-	} else { print "Mixdown not possible without inputs\n";
+	} else { print "No inputs found!\n";
 	return 0};
 }
 
 sub connect_transport {
 	load_ecs(); 
-	carp("Invalid chain setup, cannot arm transport.\n"),return unless eval_iam("cs-is-valid");
+	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
+		or print("Invalid chain setup, engine not ready.\n"),return;
 	find_op_offsets(); 
 	apply_ops();
 	eval_iam('cs-connect');
@@ -1033,35 +1028,14 @@ sub start_transport {
 
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
-	start_heartbeat();
+	sleep 1;
+	$ui->start_heartbeat();
+	#start_heartbeat();
 
-    #$ui->start_clock(); 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }
-sub start_heartbeat {
-	$event_id{heartbeat} = $new_event->repeat( 3000,
-				sub { 
-				
-				my $here   = eval_iam("getpos");
-				my $status = eval_iam q(engine-status);
-				$new_event->afterCancel($event_id{heartbeat})
-					#if $status =~ /finished|error|stopped/;
-					if $status =~ /finished|error/;
-				print join " ", "engine is $status", colonize($here), $/;
-				my ($start, $end);
-				$start  = ::Mark::loop_start();
-				$end    = ::Mark::loop_end();
-				schedule_wraparound() 
-					if $loop_enable 
-					and defined $start 
-					and defined $end 
-					and !  really_recording();
-				update_clock();
 
-				});
-
-}
 
 sub schedule_wraparound {
 	my $here   = eval_iam("getpos");
@@ -1194,14 +1168,12 @@ sub previous_mark {
 sub to_start { 
 	return if really_recording();
 	eval_iam(qq(cs-set-position 0));
-	restart_clock();
 }
 sub to_end { 
 	# ten seconds shy of end
 	return if really_recording();
 	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
 	eval_iam(qq(cs-set-position $end));
-	restart_clock();
 } 
 sub jump {
 	return if really_recording();
@@ -1219,7 +1191,6 @@ sub jump {
 	# print "$cmd\n";
 	# eval_iam "start" if $running;
 	sleep 1;
- # restart_clock();
 }
 ## post-recording functions
 
@@ -1295,6 +1266,7 @@ sub remove_effect {
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
+	return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
 	$ti[$n]->remove_effect( $id );
 		
@@ -1306,8 +1278,9 @@ sub remove_effect {
 	$debug and print "parent $parent owns list: ", join " ",
 		@{ $cops{$parent}->{owns} }, "\n";
 
-		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+	@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
 		@{ $cops{$parent}->{owns} } ; 
+	$cops{$id}->{belongs_to} = undef;
 	$debug and print "parent $parent new owns list: ", join " ",
 	}
 
@@ -1332,13 +1305,21 @@ sub remove_effect_gui {
 
 	$ti[$n]->set(ops =>  
 		[ grep{ $_ ne $id} @{ $ti[ $cops{$id}->{chain} ]->ops } ]);
-	$debug and print "i have widgets for these ids: ", join " ",keys %widget_e, "\n";
+	$debug and print "i have widgets for these ids: ", join " ",keys %effects_widget, "\n";
 	$debug and print "preparing to destroy: $id\n";
-	$widget_e{$id}->destroy();
-	delete $widget_e{$id}; 
+	$effects_widget{$id}->destroy();
+	delete $effects_widget{$id}; 
 
 }
 
+
+sub effect_index {
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
+			return $pos if $ti[$n]->ops->[$pos] eq $id; 
+		};
+}
 sub remove_op {
 
 	my $id = shift;
@@ -1346,12 +1327,9 @@ sub remove_op {
 	if ( $cops{$id}->{belongs_to}) { 
 		return;
 	}
-	my $index; 
+	my $index = effect_index $id;
 	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
-		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			($index = $pos), last if $ti[$n]->ops->[$pos] eq $id; 
-		};
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
 	 eval_iam ("c-select $n");
@@ -1371,6 +1349,7 @@ sub cop_add {
 	my $i       = $effect_i{$code};
 	my @values = @{ $p{values} } if $p{values};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
+	                                  # zero based
 	$debug2 and print "&cop_add\n";
 $debug and print <<PP;
 n:          $n
@@ -1394,7 +1373,7 @@ PP
 					  owns => [] }; # DEBUGGIN TEST
 
 	$p{cop_id} = $cop_id;
- 	cop_init ( \%p );
+ 	cop_init( \%p );
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -1407,7 +1386,12 @@ PP
 		$cops{$cop_id}->{belongs_to} = $parent_id;
 		$debug and print join " ", "my attributes again:", (keys %{ $cops{$cop_id} }), "\n";
 		$debug and print "parameter: $parameter\n";
-		$copp{$cop_id}->[0] = $parameter + 1; # set fx-param to the parameter number.
+
+		# set fx-param to the parameter number, which one
+		# above the zero-based array offset that $parameter represents
+		
+		$copp{$cop_id}->[0] = $parameter + 1; 
+		
  		# find position of parent and insert child immediately afterwards
 
  		my $end = scalar @{ $ti[$n]->ops } - 1 ; 
@@ -1438,7 +1422,6 @@ sub cop_init {
 
 	my @vals;
 	if (ref $vals_ref) {
-	# untested
 		@vals = @{ $vals_ref };
 		$debug and print ("values supplied\n");
 		@{ $copp{$id} } = @vals;
@@ -1448,13 +1431,11 @@ sub cop_init {
 		$debug and print "no settings found, loading defaults if present\n";
 		my $i = $effect_i{ $cops{$id}->{type} };
 		
-		# CONTROLLER
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
-		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		#TODO  support controller-type operators
 		
-		# for my $p (0..$effects[$i]->{count} - 1) {
+		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
+		
 			my $default = $effects[$i]->{params}->[$p]->{default};
 			push @vals, $default;
 		}
@@ -1551,7 +1532,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 		#next if ! defined $ti[$n]->offset; # for MIX
  		#next if ! $ti[$n]->offset ;
 		for my $id ( @{ $ti[$n]->ops } ) {
-		#	next if $cops{$id}->{belongs_to}; 
 		apply_op($id);
 		}
 	}
@@ -1562,6 +1542,7 @@ sub apply_op {
 	my $id = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};
+	my $dad = $cops{$id}->{belongs_to};
 	$debug and print "chain: $cops{$id}->{chain} type: $cops{$id}->{type}, code: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
@@ -1572,18 +1553,22 @@ sub apply_op {
 
 	# we start to build iam command
 
+	my $add = $dad ? "ctrl-add " : "cop-add "; 
 	
-	my $add = "cop-add "; 
 	$add .= $code . join ",", @vals;
 
 	# if my parent has a parent then we need to append the -kx  operator
 
-	my $dad = $cops{$id}->{belongs_to};
 	$add .= " -kx" if $cops{$dad}->{belongs_to};
 	$debug and print "operator:  ", $add, "\n";
 
-	eval_iam ("c-select $cops{$id}->{chain}") 
-		unless $cops{$id}->{belongs_to}; # avoid reset
+	eval_iam ("c-select $cops{$id}->{chain}") ;
+
+	if ( $dad ) {
+		eval_iam ("cop-select "
+			. ($ti[$cops{$dad}->{chain}]->offset + effect_index $dad));
+	}
+
 	eval_iam ($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
 	my $ref = ref $cops{$id}->{owns} ;
@@ -2018,7 +2003,7 @@ sub save_state {
 	my %muted;
 	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
 		 $muted{$_}++;
-	#	 $ui->paint_button($widget_c{$_}{mute}, q(brown) );
+	#	 $ui->paint_button($track_widget{$_}{mute}, q(brown) );
 		} grep { $old_vol{$_} } all_chains();
 	# TODO: old_vol should be incorporated into Track object
 	# not separate variable
@@ -2120,7 +2105,7 @@ sub retrieve_state {
 			my %track = %{$t};
 		map{
 
-			$Audio::Multitrack::Track::by_index[$t->{n}]->set($_ => $t->{$_})
+			$::Track::by_index[$t->{n}]->set($_ => $t->{$_})
 			} keys %track;
 	} @tracks_data[0,1];
 
@@ -2191,24 +2176,27 @@ sub retrieve_state {
 
 } 
 sub create_master_and_mix_tracks { # GUI widgets
+	$debug2 and print "&create_master_and_mix_tracks\n";
 
 
 	my @rw_items = (
 			[ 'command' => "MON",
 				-command  => sub { 
 						$tn{Master}->set(rw => "MON");
-						refresh_c($master_track->n);
+						refresh_track($master_track->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						$tn{Master}->set(rw => "OFF");
-						refresh_c($master_track->n);
+						refresh_track($master_track->n);
 			}],
 		);
+
 	$ui->track_gui( $master_track->n, @rw_items );
 
 	$ui->track_gui( $mixdown_track->n); 
 
+	$ui->group_gui('Tracker');
 }
 
 
@@ -2221,7 +2209,7 @@ sub save_effects {
 	my %muted;
 	
 	map  {$copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
-		  $ui->paint_button($widget_c{$_}{mute}, $old_bg ) }
+		  $ui->paint_button($track_widget{$_}{mute}, $old_bg ) }
 	grep { $old_vol{$_} }  # old vol level stored and muted
 	all_chains();
 

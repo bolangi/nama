@@ -2,28 +2,36 @@ use Carp;
 sub new { my $class = shift; return bless { @_ }, $class; }
 
 sub show_versions {
- 	print "Versions: ", join " ", @{$::this_track->versions}, $/;
+ 	print "All versions: ", join " ", @{$::this_track->versions}, $/;
 }
 
 sub show_effects {
  	map { 
  		my $op_id = $_;
- 		 my $i = 	$::effect_i{ $::cops{ $op_id }->{type} };
- 		 print $op_id, ": " , $::effects[ $i ]->{name},  " ";
- 		 my @pnames =@{$::effects[ $i ]->{params}};
+ 		 my $i = $effect_i{ $cops{ $op_id }->{type} };
+ 		 print $op_id, ": " , $effects[ $i ]->{name},  " ";
+ 		 my @pnames =@{$effects[ $i ]->{params}};
 			map{ print join " ", 
 			 	$pnames[$_]->{name}, 
-				$::copp{$op_id}->[$_],'' 
+				$copp{$op_id}->[$_],'' 
 		 	} (0..scalar @pnames - 1);
 		 print $/;
  
- 	 } @{ $::this_track->ops };
+ 	 } @{ $this_track->ops };
+}
+sub show_modifiers {
+	print "Modifiers: ",$this_track->modifiers, $/;
 }
 sub loop {
     package ::;
     #load_project(name => $project_name, create => $opts{c}) if $project_name;
-    my $term = new Term::ReadLine 'Ecmd';
-	$term->tkRunning(1);
+    my $term = new Term::ReadLine 'Nama';
+	
+# 	No TK events in text-only mode
+
+	# $mw->iconify;         
+	# $term->tkRunning(1);
+	
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
@@ -80,14 +88,14 @@ package ::;
             } elsif ($tn{$cmd}) { 
                 $debug and print qq(Selecting track "$cmd"\n);
                 $this_track = $tn{$cmd};
-                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+                $predicate !~ /^\s*$/ and $parser->command($predicate);
             } elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
                 $debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
                 $this_track = $ti[$cmd];
-                $predicate !~ /^\s*$/ and $::parser->command($predicate);
+                $predicate !~ /^\s*$/ and $parser->command($predicate);
             } elsif ($iam_cmd{$cmd}){
                 $debug and print "Found Iam command\n";
-                print ::eval_iam($user_input), $/ ;
+                print eval_iam($user_input), $/ ;
             } else {
                 $debug and print "Passing to parser\n", 
                 $_, $/;
@@ -104,13 +112,13 @@ package ::Text;
 sub show_tracks {
     no warnings;
     my @tracks = @_;
-    map {     push @::format_fields,  
+    map {     push @format_fields,  
             $_->n,
             $_->name,
             $_->rw,
             $_->rec_status,
-            $_->ch_r || 1,
-            $_->current_version || 'none',
+            $_->rec_status eq 'REC' ? $_->ch_r : '',
+            $_->current_version || '',
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
@@ -123,35 +131,51 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Chain  Track       Setting  Status  Input  Active 
+Track  Name        Setting  Status  Input  Version 
 ==================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<    @<<<    @<<<    @>>    @>>>   ~~
-splice @::format_fields, 0, 6
+@>>    @<<<<<<<<<    @<<<    @<<<    @>>     @>>>   ~~
+splice @format_fields, 0, 6
 .
 
 sub helpline {
 	my $cmd = shift;
-	my $text =  $commands{$cmd}->{what}. $/;
+	my $text = "Command: $cmd\n";
+	$text .=  "Shortcuts: $commands{$cmd}->{short}\n"
+			if $commands{$cmd}->{short};	
+	$text .=  $commands{$cmd}->{what}. $/;
 	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
 			if $commands{$cmd}->{parameters};	
 	$text .=  "example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
 			if $commands{$cmd}->{example};
-	$text .=  "aliases:  $cmd ". $commands{$cmd}->{short} . $/
-			if $commands{$cmd}->{short};	
 	print( $/, ucfirst $text, $/);
 	
 }
+sub helptopic {
+	my $index = shift;
+	$index =~ /^\d+$/ and $index = $help_topic[$index];
+	print "\n-- ", ucfirst $index, " --\n\n";
+	print $help_topic{$index};
+	print $/;
+}
+
 sub help { 
 	my $name = shift;
 	chomp $name;
 	#print "seeking help for argument: $name\n";
+	$help_topic{$name} and helptopic($name), return;
+	$name == 10 and (map{ helptopic $_ } @help_topic), return;
+	$name =~ /^\d+$/ and helptopic($name), return;
+
 	$commands{$name} and helpline($name), return;
+	my %helped = (); 
 	map{  my $cmd = $_ ;
+		helpline($cmd) and $helped{$cmd}++ if $cmd =~ /$name/;
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
-	      helpline($cmd), return 
-		  	if grep { $name eq $_  } split " ", $commands{$cmd}->{short} 
+	      helpline($cmd) 
+		  	if grep { /$name/ } split " ", $commands{$cmd}->{short} 
+				and ! $helped{$cmd};
 	} keys %commands;
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {
@@ -163,114 +187,57 @@ sub help {
 }
 
 
-=comment
-# prepare help and autocomplete
+package ::;
 
-package ::Text::OuterShell;
-use base qw(Term::Shell); 
-#create_help_subs();
-sub catch_run { # 
-  my ($o, $cmd, @args) = @_;
-  my $original_command_line = join " ", $cmd, @args;
-  #print "foudn $0 $original_command_line\n";
-  ::Text::command_process( $original_command_line );
+sub t_load_project {
+	my $name = shift;
+	my $untested = remove_spaces($name);
+	print ("Project $untested does not exist\n"), return
+		unless -d join_path project_root(), $untested; 
+	load_project( name => remove_spaces($name) );
+
+	print "loaded project: $project_name\n";
 }
-sub catch_help {
-  my ($o, $cmd, @args) = @_;
-  $debug and print "cmd: $cmd\n";
-  #my $main_name = 
-  #
-  print grep{ $_ eq $cmd } join " ", 
-  my $main_name;
-  CMD: for my $k ( keys %commands ){
-      for my $alias ( $k, split " ",$commands{$k}{short} ){
-        if ($cmd eq $alias){
-            $main_name = $k;
-            last CMD;
-        }
-    }
-  }
-  $debug and print "main_name: $main_name\n";
-            
-    my $txt = $o->help($main_name, @_);
-    if ($o->{command}{help}{found}) {
-        $o->page("$txt\n")
-    }
-}
-
-
-#my $print "catched help @_"}
-sub prompt_str { 'Enter command: ' }
-sub run_help {
-    my $o = shift;
-    my $cmd = shift;
-    if ($cmd) {
-    my $txt = $o->help($cmd, @_);
-    if ($o->{command}{help}{found}) {
-        $o->page("$txt\n")
-    }
-    else {
-        my @c = sort $o->possible_actions($cmd, 'help');
-        if (@c and $o->{API}{match_uniq}) {
-        local $" = "\n\t";
-        print <<END;
-Ambiguous help topic '$cmd': possible help topics:
-    @c
-END
-        }
-        else {
-        print <<END;
-Unknown help topic '$cmd'; type 'help' for a list of help topics.
-END
-        }
-    }
-    }
-    else {
-    print "Type 'help command' for more detailed help on a command.\n";
-my $help_screen = <<HELP;
-Help Screen Goes here
-HELP
-    $o->page($help_screen);
-    }
-}
-
-
-sub create_help_subs {
-    $debug2 and print "create_help_subs\n";
-    %commands = %{ ::yaml_in( $::commands_yml) };
-
-    $debug and print ::yaml_out \%commands;
     
-    map{ print $_, $/} grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
-    
-    map{ 
-            my $run_code = qq!sub run_$_ { splice \@_,1,0,  q($_); catch_run( \@_) }; !;
-            $debug and print "evalcode: $run_code\n";
-            eval $run_code;
-            $debug and $@ and print "create_sub eval error: $@\n";
-            my $help_code = qq!sub help_$_ { q($commands{$_}{what}) };!;
-            $debug and print "evalcode: $help_code\n";
-            eval $help_code;
-            $debug and $@ and print "create_sub eval error: $@\n";
-            my $smry_text = 
-            $commands{$_}{smry} ? $commands{$_}{smry} : $commands{$_}{what};
-            $smry_text .= qq! ($commands{$_}{short}) ! 
-                    if $commands{$_}{short};
-
-            my $smry_code = qq!sub smry_$_ { q( $smry_text ) }; !; 
-            $debug and print "evalcode: $smry_code\n";
-            eval $smry_code;
-            $debug and $@ and print "create_sub eval error: $@\n";
-
-            my $alias_code = qq!sub alias_$_ { qw($commands{$_}{short}) }; !;
-            $debug and print "evalcode: $alias_code\n";
-            eval $alias_code;# noisy in docs
-            $debug and $@ and print "create_sub eval error: $@\n";
-
-        }
-
-    grep{ $_ !~ /mark/ and $_ !~ /effect/ } keys %commands;
+sub t_create_project {
+	my $name = shift;
+	load_project( 
+		name => remove_spaces($name),
+		create => 1,
+	);
+	print "created project: $project_name\n";
 
 }
-=cut
-    
+sub t_add_ctrl {
+	my ($parent, $code, $values) = @_;
+	print "code: $code, parent: $parent\n";
+	$values and print "values: ", join " ", @{$values};
+	if ( $effect_i{$code} ) {} # do nothing
+	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
+	else { warn "effect code not found: $code\n"; return }
+	print "code: ", $code, $/;
+		my %p = (
+				chain => $cops{$parent}->{chain},
+				parent_id => $parent,
+				values => $values,
+				type => $code,
+			);
+			print "adding effect\n";
+			# print (yaml_out(\%p));
+		add_effect( \%p );
+}
+sub t_add_effect {
+	my ($code, $values)  = @_;
+	if ( $effect_i{$code} ) {} # do nothing
+	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
+	else { warn "effect code not found: $code\n"; return }
+	print "code: ", $code, $/;
+		my %p = (
+			chain => $this_track->n,
+			values => $values,
+			type => $code,
+			);
+			print "adding effect\n";
+			#print (yaml_out(\%p));
+		add_effect( \%p );
+}

@@ -8,11 +8,13 @@ value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+/
+modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
+nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 asdf: 'asdf' { print "hello"}
 command: fail
 end: /\s*$/ 
 end: ';' 
-help: _help end { print $::helptext }
+help: _help end { print $::help_screen }
 help: _help name end { ::Text::help($item{name}) }
 # iterate over commands yml
 # find right command, print helptext
@@ -21,21 +23,11 @@ helpx: 'helpx' end { print "hello_from your command line gramar\n"; }
 fail: 'f' end { print "your command line gramar will get a zero\n"; }
 exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end {
-	::load_project( 
-		name => ::remove_spaces($item{name}),
-		create => 1,
-	);
-	print "created project: $::project_name\n";
-
+	::t_create_project $item{name}
 }
 
 load_project: _load_project name end {
-	my $untested = ::remove_spaces($item{name});
-	print ("Project $untested does not exist\n"), return
-	unless -d ::join_path ::project_root(), $untested; 
-	::load_project( name => ::remove_spaces($item{name}) );
-
-	print "loaded project: $::project_name\n";
+	::t_load_project( $item{name} )
 }
 save_state: _save_state name end { 
 	::save_state( $item{name} ); 
@@ -105,8 +97,21 @@ T: _T end { ::eval_iam("start") }
 show_tracks: _show_tracks end { 	
 
 	::Text::show_tracks ( ::Track::all );
+	use warnings; 
+	no warnings qw(uninitialized); 
+	print $/, "Group control", " " x 8, 
+	  $::tracker->rw, " " x 24 , $::tracker->version, $/;
 }
 
+
+modifiers: _modifiers modifier(s) end {
+ 	 $::this_track->set(modifiers => (join q(,),
+	 @{$item{"modifier(s)"}}, q() ))
+}
+
+modifiers: _modifiers end { print $::this_track->modifiers, $/; }
+	
+	
 show_chain_setup: _show_chain_setup {
 	my $chain_setup;
 	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
@@ -120,6 +125,7 @@ show_track: _show_track end {
 	::Text::show_tracks($::this_track);
 	::Text::show_effects();
 	::Text::show_versions();
+	::Text::show_modifiers();
 }
 show_track: _show_track name end { 
  	::Text::show_tracks( $::tn{$item{name}} ) if $::tn{$item{name}}
@@ -300,33 +306,25 @@ remove_effect: _remove_effect op_id(s) end {
 
 }
 
-
+add_ctrl: _add_ctrl parent name value(s?) end {
+	my $code = $item{name};
+	my $parent = $item{parent};
+	my $values = $item{"value(s?)"};
+	#print "values: " , ref $values, $/;
+	#print join ", ", @{$values} if $values;
+	::t_add_ctrl $parent, $code, $values;
+}
+parent: op_id
 add_effect: _add_effect name value(s?)  end { 
-#print join $/, %item;
-#print "itemdd:", $item{"dd(s?)"} , ":\n";
-#print "itemdd2:", $item{"dd"} , ":\n";
-#print "ref:", ref $item{dd} , ":\n";
-
-my $code = $item{name};
-if ( $::effect_i{$code} ) {} # do nothing
-elsif ( $::effect_j{$code} ) { $code = $::effect_j{$code} }
-else { warn "effect code not found: $code\n"; return }
-print "code: ", $code, $/;
-	my %p = (
-		chain => $::this_track->n,
-		values => $item{"value(s?)"},
-		type => $code,
-		);
-		print "adding effect\n";
-		#print (::yaml_out(\%p));
-	::add_effect( \%p );
+	my $code = $item{name};
+	my $values = $item{"value(s?)"};
+	::t_add_effect $code, $values;
 }
 
 modify_effect: _modify_effect op_id parameter sign(?) value end {
 
 		#print join $/, %item, $/;
 		$item{parameter}--; # user's one-based indexing to our zero-base
-
 		my $new_value = $item{value}; 
 
 		if ($item{"sign(?)"} and @{ $item{"sign(?)"} }) {

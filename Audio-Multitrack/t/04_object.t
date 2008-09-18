@@ -4,13 +4,13 @@ use strict;
 
 BEGIN { 
 	diag ("TESTING $0\n");
-	use_ok('Audio::Multitrack::Object') ;
+	use_ok('Audio::Ecasound::Multitrack::Object') ;
 }
 
 diag "testing trivial class Apple";
 package Apple;
 our @ISA; 
-use Audio::Multitrack::Object qw(color);
+use Audio::Ecasound::Multitrack::Object qw(color);
 
 package main;
 

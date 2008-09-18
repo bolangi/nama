@@ -1,207 +1,268 @@
 ---
 help:
   short: h
-  what: display help for a command, or general help, or of specific command
+  what: display help 
+  parameters: topic or command name 
+  type: general
 exit:
   short: quit q
   what: exit program, saving settings
+  type: general
 getpos:
+  type: transport
   short: gp
   what: get current playhead position (seconds)
+  parameters: none
 setpos:
   short: sp
   what: set current playhead position (seconds)
+  example: setpos 65 (set play position to 65 seconds from start)
+  type: transport
 group_rec:
+  type: group
   short: grec R
   what: rec-enable user tracks
   parameters: none
 group_mon:
+  type: group
   short: gmon M
   what: rec-disable user tracks
   parameters: none
 group_off:
+  type: group
   short: goff Z 
   what: group OFF mode, exclude all user tracks from chain setup
   smry: group OFF mode
   parameters: none
 mixdown:
+  type: mix
   short: mxd
   what: enable mixdown on subsequent engine runs
   smry: enable mixdown
   parameters: none
 mixplay:
+  type: mix
   short: mxp
   what: Play back mixdown file, with user tracks OFF
   smry: Playback mix
   parameters: none
 mixoff:
+  type: mix
   short: norm mxo normal
   what: normal mode, i.e. Mixdown group OFF, user tracks MON
   smry: mix off
   parameters: none
 add_track:
+  type: track
   short: add
   what: create a new track
   example: add sax; r2  (record track sax from input 2)
   parameters: string 
 set_track:
-  what: directly set values in current track (dangerous!)
+  type: track
+  what: directly set values in current track (use with care!)
   smry: set object fields
-  example: set hide 1
+  example: set ch_m 5   (direct monitor output for current track to channel 5)
 dump_track:
+  type: track
   what: dump current track data to screen (YAML format)
   short: dump
   smry: dump track data
 dump_group:
+  type: group
   what: dump the settings of the group for user tracks 
   short: dumpg
   smry: dump group settings
 rec:
+  type: track
   what: rec enable 
   parameters: none
 mon:
+  type: track
   what: set track to MON
   parameters: none
 off:
+  type: track
   short: z
   what: set track OFF (exclude from chain setup)
   smry: set track OFF 
   parameters: none
-m:
-  short: monitor_channel
+monitor_channel:
+  type: track
+  short: m
   what: set track output channel number
   smry: set track output channel
   parameters: number
-r:
-  short: record_channel
+record_channel:
+  type: track
+  short: r
   what: set track input channel number
   smry: set track input channel 
 set_version:
+  type: track
   short: version n ver
   what: set track version number for monitoring (overrides group version setting)
   smry: select track version
   parameters: number
   example: sax; version 5; sh
 group_version:
+  type: group 
   short: gn gver gv
   what: set group version for monitoring (overridden by track-version settings)
   smry: get/set group version
 list_versions:
+  type: track
   short: lver lv
   what: list version numbers of current track
   smry: list track versions
   parameters: none
 vol:
+  type: track
   short: v
   what: get/set track volume, current track
   smry: get/set track volume
   parameters: number
 mute:
+  type: track
   short: c cut
   what: set playback volume to zero, current track
   smry: mute volume
   parameters: none
 unmute:
+  type: track
   short: cc uncut
   what: restore volume level before mute
 unity:
+  type: track
   what: set unity, i.e. 100 volume, current track
   smry: unity volume
   parameters: none
 pan:
+  type: track
   short: p	
   what: get/set pan position, current track
   smry: get/set pan position
   parameters: number
 pan_right:
+  type: track
   short: pr
   what: pan track fully right
   parameters: none
 pan_left:
+  type: track
   short: pl
   what: pan track fully left
   parameters: none
 pan_center:
+  type: track
   short: pc
   what: set pan center
   parameters: none
 pan_back:
+  type: track
   short: pb
   what: restore pan setting prior to pl, pr, or pc commands
   smry: restore pan
   parameters: none
 save_state:
+  type: project
   short: keep k save
   what: save project settings to disk, optional name
   parameters: optional string
 get_state:
+  type: project
   short: recall restore retrieve
   what: retrieve project settings
 create_project:
+  type: project
   short: create	
   what: create a new project directory tree
   example: create pauls_gig
   parameters: string
 load_project:
+  type: project
   short: load	
   what: load an existing project, or recall from last save
   smry: load project settings
   parameters: project_name
   example: load pauls_gig
 generate:
+  type: setup
   short: gen
   what: generate chain setup for audio processing
   parameters: none
 arm:
+  type: setup
   short: generate_and_connect
   what: generate and connect chain setup
   parameters: none
 connect:
+  type: setup
   short: con
   what: connect chain setup
   parameters: none
 disconnect:
+  type: setup
   short: dcon
   what: disconnect chain setup
   parameters: none
 engine_status:
+  type: setup
   what: ecasound audio processing engine status
   smry: engine status info
   short: egs
-renew_engine:
-  short: renew
-  smry: crashes
-  what: re-initializes the audio processing engine, usually crashing
 show_chain_setup:
+  type: setup
   short: chains setup
   what: show current Ecasound chain setup
   smry: show chain setup
 show_io:
+  type: setup
   short: showio
   what: show chain input and output fragments
   smry: show chain fragments
 show_tracks:
+  type: setup
   short: show tracks
   what: show track status
 show_track:
+  type: track
   short: sh
   what: show track status, effects, versions
+modifiers:
+  type: track
+  short: mods mod 
+  what: set/show track modifiers 
+  example: modifiers select 5 15.2 reverse playat 78.2 audioloop
+nomodifiers:
+  type: track
+  short: nomods nomod
+  what: remove modifiers from current track
 show_effects:
+  type: effect
   what: show effects on current track
-  short: fxs	
+  short: fxs sfx
   parameters: none
+add_ctrl:
+  type: effect
+  what: add a controller to an operator
+  parameters: parent_id effect_code param1 param2... paramn
+  short: acl
 add_effect:
+  type: effect
   what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
   short: fxa afx
   smry: add effect
   parameters: code param1 param2,... paramn
   example: fxa amp 6 (LADSPA Simple amp 6dB gain),\n         fxa var_dali (preset var_dali),\n         fxa pn:var_tape_stretched (explicit el: or pn: prefix optional)\n
 modify_effect:
+  type: effect
   what: modify an effect parameter
   parameters: effect_id, parameter, optional_sign, value
   short: fxm mfx
   example: fxm V 1 1000 (set to 1000), fxm V 1 -10 (reduce by 10) 
 remove_effect:
+  type: effect
   what: remove effects from selected track
   short: fxr rfx
   parameters: effect_id1, effect_id2,...
@@ -209,70 +270,88 @@ remove_effect:
 helpx:
   what: hellow world
 list_marks:
+  type: mark
   short: lm
   what: List all marks
   parameters: none
 to_mark:
+  type: mark
   short: tom
   what: move playhead to named mark or mark index
   smry: playhead to mark
   parameters: string or integer
   example: tom start (go to mark named 'start')
 mark:
+  type: mark
   what: Mark current head position, becomes current mark
   smry: mark current position
   short: k	
   parameters: none
 remove_mark:
+  type: mark
   what: Remove mark 
   short: rmm
   parameters: mark name, mark index or none (for current mark) 
   example: rmm start (remove mark named 'start')
 next_mark:
+  type: mark
   short: nm
   what: Move playback head to next mark
   parameters: none
 previous_mark:
+  type: mark
   short: pm
   what: Move playback head to previous mark
   parameters: none
 name_mark:
-  short: nom 
+  type: mark
+  short: nmk
   what: Give a name to the current mark
   parameters: string
-  example: nom start
+  example: nmk start
 remove_track:
+  type: mark
   what: Make track go away (non destructive)
   parameters: string
   example: remove_track sax
 stop:
+  type: transport
   short: s
   what: stop transport
 start:
+  type: transport
   short: t
   what: start transport
 loop_enable:
+  type: transport
   short: loop
   what: playback will loop between marks
   parameters: start end 
   example: loop a b (loop between marks 'a' and 'b'),\n         loop 1 3 (loop between marks 1 and 3),\n         loop 13.6 69.0 (loop between times, decimal required) 
 loop_disable:
+  type: transport
   short: noloop nl
   what: disable automatic looping
 T:
+  type: transport
   what: ecasound-only start
 S:
+  type: transport
   what: ecasound-only stop
 ctrl_register:
+  type: effect
   what: list Ecasound controllers
   short: crg
 preset_register:
+  type: effect
   what: list Ecasound presets 
   short: prg
 ladspa_register:
+  type: effect
   what: list LADSPA plugins
   short: lrg
 project_name:
+  type: project
   what: show current project name
   short: project pn
 ...
