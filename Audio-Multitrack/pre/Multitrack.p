@@ -28,7 +28,7 @@ print <<BANNER;
     //                              ///     
    // Nama multitrack recorder //      Audio processing by Ecasound    /
   /
- /       (c) 2007 Joel Roth                      ////               //
+ /       (c) 2008 Joel Roth                      ////               //
 /////////////////////////////////////////////////////////////////////
 
 
