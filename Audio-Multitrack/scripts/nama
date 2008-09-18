@@ -103,24 +103,22 @@ the I<arm> command under the text interface.
 =head1 FIRST RUN
 
 On the first run the program prompts the user for permission
-to create the configuration file, which defaults to
-$HOME/.namarc and a recording projects directory, $HOME/nama
-by default.  You should then edit .namarc to suit your audio
+to create the configuration file, usually $HOME/.namarc, and
+a recording projects directory, which is $HOME/nama by
+default.  You should then edit .namarc to suit your audio
 configuration.
 
 =head1 PERSISTENCE
 
 Project state can be stored/retrieved. These data are stored
-by default in the State.yml file in the project directory.
-Because the storage format is YAML, the file can be
-inspected.
+by default in the State.yml file in the project directory
+in easily readable YAML format.
 
 =head1 LADSPA
 
 B<Nama> will automatically detect locally available
 LADSPA plugins provided you have the B<listplugins> and
-B<analyseplugin> programs which are part of LADSPA client
-libraries.
+B<analyseplugin> programs which are part of LADSPA SDK.
 
 =head1 Tk GRAPHICAL UI 
 
@@ -174,6 +172,9 @@ help with I<command>.
 
 =head1 TRACKS
 
+Each track has a descriptive name (i.e. vocal) and an
+integer track-number assigned when the track is created.
+
 Multiple WAV files can be recorded for each track. These are
 identified by version number. Identical version numbers indicate WAV files
 recorded at the same time. Version number increments
@@ -187,7 +188,7 @@ status for the Mixdown track has the same effect as issuing
 the B<mixdown> command.
 
 Master and Mixdown tracks can behave differently from 
-user-created tracks because they belong to different
+user-created tracks because they belong to a different
 group than user tracks.
 
 All user-created tracks belong to the Tracker group.
@@ -212,8 +213,10 @@ show OFF status.
 
 =head1 SAMPLE SESSION
 
-Here is a typical sequence of text commands to record tracks
-with Nama.
+Here is a typical sequence of text commands to:
+- record instrumental parts
+- separately record a vocalist
+- mix down the result to a stereo tract
 
 create marys_little_helper       # new project
 add guitar; r1                   # record track 'guitar' from input 1
@@ -235,7 +238,9 @@ guitar mon; piano mon; drums mon # set three tracks to monitor mode
 add vocals; r2                   # record track 'vocals' from input 2
 arm
 start
+
 (perform vocals)
+
 stop
 
 group_monitor                    # set group MON
@@ -326,7 +331,7 @@ CPAN, for the distribution.
 
 Pull source code using this command: 
 
-    git clone git://github.com/bolangi/nama.git
+git clone git://github.com/bolangi/nama.git
 
 =head1 AUTHOR
 
