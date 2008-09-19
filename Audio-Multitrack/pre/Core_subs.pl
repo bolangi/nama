@@ -1106,14 +1106,21 @@ sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
 
-# GUI routines
 sub drop_mark {
+	$debug2 and print "drop_mark()\n";
+	my $name = shift;
 	my $here = eval_iam("cs-get-position");
-	return if grep { $_->time == $here } ::Mark::all();
-	my $mark = ::Mark->new( time => $here );
+
+	print("mark exists already\n"), return 
+		if grep { $_->time == $here } ::Mark::all();
+
+	my $mark = ::Mark->new( time => $here, 
+							name => $name);
+
 		$ui->marker($mark); # for GUI
 }
 sub mark {
+	$debug2 and print "mark()\n";
 	my $mark = shift;
 	my $pos = $mark->time;
 	if ($markers_armed){ 

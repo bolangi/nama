@@ -256,7 +256,8 @@ remove_mark: _remove_mark end {
 }
 	
 
-mark: _mark end { $::ui->marker( ::mark_here() )  }
+mark: _mark name end { ::drop_mark $item{name}  }
+mark: _mark end {  ::drop_mark()  }
 
 next_mark: _next_mark end { ::next_mark() }
 
