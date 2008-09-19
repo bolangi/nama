@@ -1,6 +1,4 @@
-Revision history for Perl extension Audio::Ecasound::UI.
+Revision history for Perl extension Audio::Ecasound::Multitrack
 
-0.01  Sat Apr 26 14:13:27 2008
-	- original version; created by h2xs 1.23 with options
-		-AXc -n Audio::Ecasound::UI -b 5.6.1
-
+0.95  Thurs Sep 18 2008 - uploaded to CPAN
+0.96  Thurs Sep 18 2008 - replaces previous, dated version

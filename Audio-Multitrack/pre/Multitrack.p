@@ -1,5 +1,5 @@
 package ::;
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 use 5.008;
 use strict;
 no strict qw(subs);
