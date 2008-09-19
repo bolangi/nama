@@ -283,7 +283,8 @@ to_mark:
   example: tom start (go to mark named 'start')
 mark:
   type: mark
-  what: Mark current head position, becomes current mark
+  what: Mark current head position 
+  parameter: name (optional)
   smry: mark current position
   short: k	
   parameters: none
