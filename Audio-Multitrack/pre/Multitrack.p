@@ -230,10 +230,9 @@ Type I<man nama> for details on usage and licensing.
 
 =head1 ABSTRACT
 
-These libraries supplement the broad abilities of Ecasound
-with concepts of track and bus, mixer configuration, and
-default signal routing. The B<Nama> user application aims to provide
-a comfortable environment for multitrack recording.  Text
-and Tk GUI interfaces are provided. Configuration data and
-project settings are stored in easily legible YAML formatted
-files. 
+The libraries implement classes for track and bus and
+their signal routing. The B<Nama> recorder-mixer
+application generates chain setups and issues
+commands to the Ecasound audio processing engine.
+Configuration data and project settings are stored in YAML
+formatted text files. 
