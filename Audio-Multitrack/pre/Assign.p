@@ -6,6 +6,7 @@ use warnings;
 no warnings q(uninitialized);
 use Carp;
 use IO::All;
+use Data::YAML;
 use Data::YAML::Reader;
 use Data::YAML::Writer;
 use Storable;

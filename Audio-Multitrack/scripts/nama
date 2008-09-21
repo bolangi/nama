@@ -64,7 +64,7 @@ recording runs of the Ecasound audio-processing engine.
 B<Nama> is a recorder/mixer application that configures
 Ecasound as a single mixer bus.  Vol/pan/effects are
 provided on all tracks and on the main output and mixdown
-buses.  A group REC-enable button and group default-version
+output.  A group REC-enable button and group default-version
 setting make it possible to record and manage a group of songs.
 
 B<Nama> provides both command-line and GUI interfaces.
@@ -272,7 +272,7 @@ $project_root/project_name/.namarc    Project-specific configuration
 =head1 BUGS AND LIMITATIONS
 
 - Text-only mode (initiated with the -t option) currently
-lacks the loop function available in the default mode. This
+lacks the loop-enable function available in the default mode. This
 is because events are provided through the Tk graphic
 toolkit, which requires X. 
 
