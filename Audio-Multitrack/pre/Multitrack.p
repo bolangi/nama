@@ -1,5 +1,4 @@
 package ::;
-our $VERSION = '0.96';
 use 5.008;
 use strict;
 no strict qw(subs);
@@ -235,3 +234,5 @@ application generates chain setups and issues
 commands to the Ecasound audio processing engine.
 Configuration data and project settings are stored in YAML
 formatted text files. 
+
+

@@ -1,33 +1,24 @@
-use 5.008;
-use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-#
-use lib 'lib';
-my $module = 'Audio::Ecasound::Multitrack';
-my ($dir, $name);
-($name = $module)   =~ s/(\w+::)*(\w+)/$2.pm/;
-($dir = $module)    =~ s/(.+)(::)(\w+)/$1/;
-#$dir =~ s/::$//;
-($dir_slash = $dir) =~ s(::)(/)g;
-#$dir =~ s(::)(/)g;
-#$dir =~ s(/$)(/)g;
-$dir 				=~ s/::/-/g;
-#print "dir: $dir, dir_slash: $dir_slash, name: $name"; exit;
+use inc::Module::Install;
 
-my $from = "lib/$dir_slash/$name";
-print "from: $from\n";
-#my $from = $name;
+         # Define metadata
+         name           'Audio-Ecasound-Multitrack';
+         all_from       'scripts/nama';
 
-WriteMakefile(
-    'NAME'		=> q(Audio-Ecasound-Multitrack), 
-    'VERSION_FROM'	=> $from, # finds $VERSION
-    'PREREQ_PM'		=> {}, # e.g., Module::Name => 1.1
-	EXE_FILES    => [qw(scripts/nama)],
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => $from, # retrieve abstract from module
-       AUTHOR     => 'Joel Roth <jroth@joelz@pobox.com>') : ()),
-	'dist' => { COMPRESS=>"gzip", 
-			   SUFFIX=>"gz", 
-				 },
-);
+         # Specific dependencies
+		
+requires
+		Tk => 0,
+		IO::All => 0,
+		Carp => 0,
+		Cwd => 0,
+		Storable => 0,
+		Getopt::Std => 0,
+		Audio::Ecasound => 0,
+		Parse::RecDescent => 0,
+		Term::ReadLine => 0,
+		Data::YAML => 0,
+		File::Find::Rule => 0,
+		File::Spec::Link => 0,
+		;
+
+         WriteAll;

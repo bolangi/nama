@@ -1,6 +1,7 @@
 #!/usr/bin/env perl
-use Audio::Multitrack;
-Audio::Multitrack::mainloop();
+our $VERSION = '0.96';
+use Audio::Ecasound::Multitrack;
+Audio::Ecasound::Multitrack::mainloop();
 
 __END__
 =head1 NAME
