@@ -1,5 +1,4 @@
 package ::;
-use 5.008;
 use strict;
 no strict qw(subs);
 use warnings;
@@ -20,17 +19,6 @@ use IO::All;
 
 ## Definitions ##
 
-print <<BANNER;
-
-     /////////////////////////////////////////////////////////////////////
-    //                              ///     
-   // Nama multitrack recorder //      Audio processing by Ecasound    /
-  /
- /       (c) 2008 Joel Roth                      ////               //
-/////////////////////////////////////////////////////////////////////
-
-
-BANNER
 
 # 'our' declaration: all packages in the file will see the following
 # variables. 
