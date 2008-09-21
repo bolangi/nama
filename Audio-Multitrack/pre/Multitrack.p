@@ -214,13 +214,3 @@ B<Nama> - Multitrack recorder and mixer application
 
 Type I<man nama> for details on usage and licensing.
 
-=head1 ABSTRACT
-
-The libraries implement classes for track and bus and
-their signal routing. The B<Nama> recorder-mixer
-application generates chain setups and issues
-commands to the Ecasound audio processing engine.
-Configuration data and project settings are stored in YAML
-formatted text files. 
-
-

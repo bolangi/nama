@@ -2,3 +2,5 @@ Revision history for Perl extension Audio::Ecasound::Multitrack
 
 0.95  Thurs Sep 18 2008 - uploaded to CPAN
 0.96  Thurs Sep 18 2008 - replaces previous, dated version
+0.97  Fri Sep 18 2008   - glaring errors fixed 
+                        - replace Ext::MakeMaker with Module::Install

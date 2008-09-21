@@ -4,7 +4,7 @@ our $VERSION = '0.97';
 print <<BANNER;
 
      /////////////////////////////////////////////////////////////////////
-    //                                                                  /
+    //                                        / /   /     ///           /
    // Nama multitrack recorder v. $VERSION                                 /
   /                                    Audio processing by Ecasound 
  /       (c) 2008 Joel Roth                      ////               //
@@ -357,3 +357,14 @@ Copyright 2007 by Joel Roth
 This library is licensed under GPL version 2.  See the file
 COPYING (included in the distribution) for terms and
 conditions.
+
+=head1 ABSTRACT
+
+Classes for track and bus and their signal routing. 
+
+Recorder-mixer application generates chain setups and issues
+commands to the Ecasound audio processing engine.
+
+Configuration data and project settings are stored in YAML
+formatted text files. 
+

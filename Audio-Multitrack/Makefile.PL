@@ -3,6 +3,7 @@ use inc::Module::Install;
          # Define metadata
          name           'Audio-Ecasound-Multitrack';
          all_from       'scripts/nama';
+		 install_script 'scripts/nama'; 
 
          # Specific dependencies
 		
