@@ -1,24 +1,11 @@
 #!/usr/bin/env perl
-use 5.008;
-our $VERSION = '0.97';
-print <<BANNER;
-
-     /////////////////////////////////////////////////////////////////////
-    //                                        / /   /     ///           /
-   // Nama multitrack recorder v. $VERSION                                 /
-  /                                    Audio processing by Ecasound 
- /       (c) 2008 Joel Roth                      ////               //
-/////////////////////////////////////////////////////////////////////
-
-
-BANNER
 use Audio::Ecasound::Multitrack;
 Audio::Ecasound::Multitrack::mainloop();
 
 __END__
 =head1 NAME
 
-B<Audio::Multitrack> - Perl extensions for multitrack audio processing
+B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
 
 B<nama> - Multitrack recording/mixing application
 
