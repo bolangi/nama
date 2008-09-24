@@ -8,6 +8,7 @@ value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+/
+name2: /[\w-]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 asdf: 'asdf' { print "hello"}
@@ -15,7 +16,7 @@ command: fail
 end: /\s*$/ 
 end: ';' 
 help: _help end { print $::help_screen }
-help: _help name end { ::Text::help($item{name}) }
+help: _help name2  { ::Text::help($item{name2}) }
 # iterate over commands yml
 # find right command, print helptext
 #	print $::helptext  }

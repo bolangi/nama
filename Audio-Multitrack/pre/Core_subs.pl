@@ -1279,9 +1279,14 @@ sub remove_effect {
 		
 	$debug and print "ready to remove cop_id: $id\n";
 
-	# if i belong to someone remove their ownership of me
+	my $parent = $cops{$id}->{belongs_to} ;
 
-	if ( my $parent = $cops{$id}->{belongs_to} ) {
+	if ( $parent ) {
+
+	# if i belong to someone, i am a controller.
+	
+	# i remove their ownership of me
+
 	$debug and print "parent $parent owns list: ", join " ",
 		@{ $cops{$parent}->{owns} }, "\n";
 
@@ -1294,13 +1299,14 @@ sub remove_effect {
 	# recursively remove children
 	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
 		
-	# parameter controllers are not separate ops
 	map{remove_effect($_)}@{ $cops{$id}->{owns} };
 
 	
-	# remove my own cop_id from the stack
-	$ui->remove_effect_gui($id), remove_op($id)  unless $cops{$id}->{belongs_to};
-	
+	$ui->remove_effect_gui($id);
+
+    	
+	if ($parent) { remove_ctrl $id }
+	else {remove_op $id}
 			
 }
 sub remove_effect_gui { 
@@ -1347,6 +1353,7 @@ sub remove_op {
 	delete $cops{$id};
 	delete $copp{$id};
 }
+sub remove_ctrl { print "remove ctrl placeholder\n" }
 sub cop_add {
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};

@@ -164,6 +164,10 @@ sub help {
 	my $name = shift;
 	chomp $name;
 	#print "seeking help for argument: $name\n";
+	$iam_cmd{$name} and print <<IAM;
+
+$name is an Ecasound command.  See 'man ecasound-iam'.
+IAM
 	$help_topic{$name} and helptopic($name), return;
 	$name == 10 and (map{ helptopic $_ } @help_topic), return;
 	$name =~ /^\d+$/ and helptopic($name), return;
@@ -171,7 +175,9 @@ sub help {
 	$commands{$name} and helpline($name), return;
 	my %helped = (); 
 	map{  my $cmd = $_ ;
-		helpline($cmd) and $helped{$cmd}++ if $cmd =~ /$name/;
+		
+		helpline($cmd), $helped{$cmd}++ if $cmd =~ /$name/;
+
 		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
 	      helpline($cmd) 
 		  	if grep { /$name/ } split " ", $commands{$cmd}->{short} 
