@@ -1284,7 +1284,7 @@ sub remove_effect {
 	if ( $parent ) {
 
 	# if i belong to someone, i am a controller.
-	
+	#
 	# i remove their ownership of me
 
 	$debug and print "parent $parent owns list: ", join " ",
@@ -1337,23 +1337,48 @@ sub remove_op {
 
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
-	if ( $cops{$id}->{belongs_to}) { 
-		return;
-	}
+	my $index = effect_index $id;
+	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
+	$debug and print "operator id to remove: $id\n";
+	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
+		$debug and eval_iam ("cs");
+		 eval_iam ("c-select $n");
+		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+		eval_iam ("cop-remove");
+		$debug and eval_iam ("cs");
+
+	eval_iam qq(c-select $n);
+	eval_iam ("ctrl-remove " . ctrl_index($id) );
+
+	delete $cops{$id};
+	delete $copp{$id};
+}
+
+remove_ctrl {
+
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
 	my $index = effect_index $id;
 	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 	$debug and eval_iam ("cs");
-	 eval_iam ("c-select $n");
-	eval_iam ("cop-select ". ($ti[$n]->offset + $index));
-	eval_iam ("cop-remove");
-	$debug and eval_iam ("cs");
+	eval_iam qq(c-select $n);
+	eval_iam ("ctrl-remove " . ctrl_index($n, $id) );
 
 	delete $cops{$id};
 	delete $copp{$id};
 }
-sub remove_ctrl { print "remove ctrl placeholder\n" }
+
+
+sub ctrl_index { 
+	my ($chain, $id) = @_;
+	my $i = 0;
+	map{ ++$i if $cops{$_}->{belongs_to}  ;
+	     return $i if $_ eq $id;
+	} @{ $ti[$chain]->ops }
+
+}
 sub cop_add {
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
