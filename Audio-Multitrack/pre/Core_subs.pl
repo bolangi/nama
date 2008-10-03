@@ -1370,7 +1370,6 @@ remove_ctrl {
 	delete $copp{$id};
 }
 
-
 sub ctrl_index { 
 	my ($chain, $id) = @_;
 	my $i = 0;
