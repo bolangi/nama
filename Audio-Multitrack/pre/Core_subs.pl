@@ -96,12 +96,13 @@ sub prepare {
 	
 
 	$debug2 and print "&prepare\n";
-	local $debug = 0;
 	
 
 	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	$e = Audio::Ecasound->new();
 	#new_engine();
+	
+	$debug and print "started Ecasound\n";
 
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
@@ -125,6 +126,7 @@ sub prepare {
 
 	read_config();  # from .namarc if we have one
 
+	$debug and print "reading config file\n";
 	$project_root = $opts{d} if $opts{d}; # priority to command line option
 
 	$project_root or $project_root = join_path($ENV{HOME}, "nama" );
