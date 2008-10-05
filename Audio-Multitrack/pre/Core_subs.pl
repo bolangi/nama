@@ -1354,7 +1354,7 @@ sub remove_op {
 	delete $copp{$id};
 }
 
-remove_ctrl {
+sub remove_ctrl {
 
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -1369,7 +1369,6 @@ remove_ctrl {
 	delete $cops{$id};
 	delete $copp{$id};
 }
-
 
 sub ctrl_index { 
 	my ($chain, $id) = @_;
