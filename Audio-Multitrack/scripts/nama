@@ -259,22 +259,41 @@ $project_root/project_name/.namarc    Project-specific configuration
 
 =head1 BUGS AND LIMITATIONS
 
-- A project should be loaded or created before issuing other
-  commands. Many commands will crash the system if issued
-  without a project loaded.
+=over 12
 
-- The loop_enable command is available only in the default mode.
-  Timer events are currently handled through the Tk graphic toolkit,
-  which requires X.
+=item *  
 
-- GUI volume sliders are linear scaled.
+A project should be loaded or created before issuing other
+commands. Many commands will crash the system if issued
+without a project loaded.
 
-- The post-recording cleanup routine deletes
-  newly recorded soundfiles under 44100 bytes in size. 
+=item *
 
-- To be able to run entirely without Tk and without X
-  you will need to delete the line containing 'use Tk' 
-  from Multitrack.pm.
+The command parser tokenizes the command string "hadd" into
+"h" "add", i.e. help on commands containing "add".
+
+=item *
+
+The loop_enable command is available only in the default
+mode.  Timer events are currently handled through the Tk
+graphic toolkit, which requires X.
+
+=item *
+
+GUI volume sliders are linear scaled.
+
+=item *
+
+The post-recording cleanup routine deletes newly recorded
+soundfiles under 44100 bytes in size. 
+
+=item *
+
+To be able to run entirely without Tk and without X you will
+need to delete the line containing 'use Tk' from
+Multitrack.pm.
+
+=back
 
 =head1 EXPORT
 
@@ -294,15 +313,15 @@ This module requires the following Perl modules.
 	File::Find::Rule
 	File::Spec::Link
 
-The Ecasound audio processing libraries must also be
+The Ecasound audio processing libraries must be
 installed.  Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled binary
 packages for your Un*x distribution.
 
-LADSPA plugins are also recommended.  In that case, the
-LADSPA utility programs B<listplugins> and B<analyseplugin>
-must also be installed in a directory in your execution
-PATH. See http://ladspa.org .
+To be able to use GUI sliders to control LADSPA plugin
+parameters, the LADSPA utility program B<analyseplugin> must
+be installed in a directory in your execution path.  See
+http://ladspa.org .
 
 B<file>, a BSD utility program, is also needed. It is most likely
 already provided with your operating system.
