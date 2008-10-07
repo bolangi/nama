@@ -551,37 +551,19 @@ sub eliminate_loops {
 
 	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
 	
-	
 	my $ref = ref $inputs{mixed}{$loopb};
-	#print "ref: $ref\n";
 
 	if (    $ref =~ /ARRAY/ and 
 			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
 
 		$debug and print "i have a loop to eliminate \n";
+		my $customer_id = ${$inputs{mixed}{$loopb}}[0];
+		$debug and print "customer chain: $customer_id\n";
 
-		# The output device we assume will be chains MixerOut or
-		# MixDown
-
-		$ref = ref  $outputs{device}{$mixer_out_device} ;
-
-		 if ( $ref =~ /ARRAY/ ){
-	#	 	print "found array\n";
-			map{ s/MixerOut/1/ } @{ $outputs{device}{$mixer_out_device} };
-		}
 		delete $outputs{mixed}{$loopb};
 		delete $inputs{mixed}{$loopb};
 
-		$ref = ref  $outputs{file};
-		if ( $ref =~ /HASH/ ){
-
-			my @keys = 	keys %{ $outputs{file} } ;
-			map{ $ref = ref $outputs{file}{$_};
-				  $ref =~ /ARRAY/
-					and scalar @{ $outputs{file}{$_}  }
-					and map{s/MixDown/1/  } @{ $outputs{file}{$_} }
-					} @keys;
-		}
+	$inputs{mixed}{$loopa} = [ $customer_id ];
 
 	}
 	
@@ -959,7 +941,7 @@ sub generate_setup { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		#map{ eliminate_loops($_) } all_chains();
+		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
