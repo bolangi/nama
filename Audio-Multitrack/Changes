@@ -1,6 +1,7 @@
 Revision history for Perl extension Audio::Ecasound::Multitrack
 
-0.95  Thurs Sep 18 2008 - uploaded to CPAN
-0.96  Thurs Sep 18 2008 - correct branch
-0.97  Fri Sep 18 2008   - Error in package path fixed
+0.95  Thurs Sep 18 2008 - upload to CPAN
+0.96  Thurs Sep 18 2008 - upload correct branch to CPAN
+0.97  Fri Sep 18 2008   - fix package path error
                         - replace Ext::MakeMaker with Module::Install
+0.973 Tue Oct 7, 2008   - restore independence of mixdown and monitor faders
