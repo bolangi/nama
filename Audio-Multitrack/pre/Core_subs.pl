@@ -332,7 +332,7 @@ sub initialize_rules {
 
 	$mixer_out = ::Rule->new( #  this is the master output
 		name			=> 'mixer_out', 
-		chain_id		=> 'MixerOut', 
+		chain_id		=> 1, # MixerOut
 
 		target			=> 'MON',
 
@@ -352,7 +352,7 @@ sub initialize_rules {
 	$mix_down = ::Rule->new(
 
 		name			=> 'mix_file', 
-		chain_id		=> 'MixDown',
+		chain_id		=> 2, # MixDown
 		target			=> 'REC', 
 		
 		# sub{ defined $outputs{mixed} or $debug 
@@ -378,7 +378,8 @@ sub initialize_rules {
 	$mix_link = ::Rule->new(
 
 		name			=>  'mix_link',
-		chain_id		=>  sub{ my $track = shift; $track->n },
+		chain_id		=>  'MixLink',
+		#chain_id		=>  sub{ my $track = shift; $track->n },
 		target			=>  'all',
 		condition =>	sub{ defined $inputs{mixed}->{$loopb} },
 		input_type		=>  'mixed',
@@ -958,7 +959,7 @@ sub generate_setup { # create chain setup
 		### with mon_ch defined, and $multi_enable on
 		
 		$tracker_bus->apply;
-		# map{ eliminate_loops($_) } all_chains();
+		#map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 		write_chains();
