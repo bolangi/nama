@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl -w
 $debug = 0;
 use Data::YAML::Reader;
+use IO::All;
 my $yr = Data::YAML::Reader->new;
 $in = qx(cat ./commands.yml);
 my $ref = yaml_in( $in); 
