@@ -191,37 +191,6 @@ OFF.
 A track with no recorded WAV files that is set to MON will
 show OFF status.
 
-
-=head1 DIRECTORY STRUCTURE
-
-$project_root is the directory where your project files,
-including WAV files you record, will go. $project_root
-is defined in F<.namarc>.
-
-=over 12
-
-=item F<$HOME/.namarc>
-
-Nama configuration file
-
-=item F<$project_root/project_name/.wav>
-
-WAV files will be stored here
-
-=item F<$project_root/project_name/Setup.ecs>
-
-Ecasound chainsetup, dynamically generated
-
-=item F<$project_root/project_name/State.yml>
-
-Default save file for project parameters
-
-=item F<$project_root/project_name/.namarc>
-
-Project-specific configuration
-
-=back 
-
 =head1 BUGS AND LIMITATIONS
 
 A project should be loaded or created before issuing other
@@ -288,7 +257,7 @@ Joel Roth, E<lt>joelz@pobox.comE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2007 by Joel Roth
+Copyright 2007, 2008 by Joel Roth
 
 This library is licensed under GPL version 2.  See the file
 COPYING (included in the distribution) for terms and
@@ -296,5 +265,5 @@ conditions.
 
 =head1 ABSTRACT
 
-Classes and user interfaces for multitrack recording with
-the Ecasound audio processing engine
+Classes, data structures and user interfaces for multitrack
+recording with the Ecasound audio processing engine

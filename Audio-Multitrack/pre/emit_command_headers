@@ -1,7 +1,7 @@
 #!/usr/local/bin/perl -w
-$debug = 1;
-use lib "/home/jroth/build/flow/Audio-Multitrack/lib";;
-use Audio::Multitrack::Assign qw(:all);
+$debug = 0;
+use Data::YAML::Reader;
+my $yr = Data::YAML::Reader->new;
 $in = qx(cat ./commands.yml);
 my $ref = yaml_in( $in); 
 #print yaml_out $ref;
@@ -17,3 +17,16 @@ map { my $func = $_;
 	push @commands,	"command: $full";
 } sort keys %{ $ref };
 print join "\n", @commands, @abbrevs, @stubs ;
+sub yaml_in {
+	# $debug2 and print "&yaml_in\n";
+	my $file = shift;
+	my $yaml; 
+	if ($file !~ /\n/) {
+		$debug and print "assuming yaml filename input\n";
+		$yaml = io($file)->all;
+	} else { 
+		$debug and print "assuming yaml text input\n";
+		$yaml = $file;
+	}
+	$yr->read( $yaml ); # returns ref
+}
