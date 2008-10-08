@@ -7,7 +7,7 @@ __END__
 
 B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
 
-B<nama> - Multitrack recording/mixing application
+B<Nama> - Multitrack recording/mixing application
 
 =head1 SYNOPSIS
 
@@ -64,38 +64,42 @@ runs of the Ecasound audio-processing engine.
 B<Nama> is a recorder/mixer application that configures
 Ecasound as a single mixer bus.
 
-In its default mode B<Nama> provides a Tk GUI interface,
-with a command line interface running simultaneously in the
-terminal window.
+By default, B<Nama> starts up the Tk GUI interface.
+The command line interface runs simultaneously in the
+terminal.
 
 =head1 STATIC AND DYNAMIC COMMANDS
 
-It may be helpful to observe commands or actions for audio
+It may be helpful to observe that our commands for audio
 processing fall into two categories:
 
-Some commands control the Ecasound chain setup that will be
-used for audio processing. 
+=head2 STATIC COMMANDS
 
-For example, setting the REC/MON/OFF status of a track
-or bus determines whether it will be included next time
-the transport is armed, and whether the audio stream
-will be recorded to a file or played back from an existing
-file. 
+Some commands control the chain setup that will be used to
+configure Ecasound for audio processing.  I refer to them as
+I<static commands>.  Static commands have no effect while
+the engine is running, come into play only the next time the
+transport is armed.
 
-This is the first part: you set up tracks to your liking.
-Then you issue the I<arm> command to configure and connect
-the Ecasound engine.
+For example, setting the REC/MON/OFF status of a track or
+bus determines whether it will be included next time the
+transport is armed, and whether the corresponding audio
+stream will be recorded to a file or played back from an
+existing file. 
 
-Other commands influence the audio processing engine as it
-runs, for example volume and pan controls, and any changes
-to the position of the playback head.
+
+=head2 DYNAMIC COMMANDS
+
+Once the transport is running, another subset of commands
+controls the audio processing engine, for example adjusting
+effect parameters or repositioning the playback head.
 
 =head1 FIRST RUN
 
 On the first run the program prompts the user for permission
 to create the configuration file, usually F<$HOME/.namarc>, and
 a recording projects directory, F<$HOME/nama> by
-default.  You should then edit .namarc to suit your audio
+default.  You should then edit F<.namarc> to suit your audio
 configuration.
 
 =head1 PERSISTENCE
@@ -103,12 +107,6 @@ configuration.
 Project state can be stored/retrieved. These data are stored
 by default in the F<State.yml> file in the project
 directory.
-
-=head1 LADSPA
-
-B<Nama> will automatically detect locally available
-LADSPA plugins provided you have the B<listplugins> and
-B<analyseplugin> programs which are part of LADSPA SDK.
 
 =head1 Tk GRAPHICAL UI 
 
@@ -130,7 +128,7 @@ time.
 
 =head1 TEXT UI
 
-Press the I<Enter> key to get the following command prompt.
+Press the I<Enter> key if necessary to get the following command prompt.
 
 =over 12
 
@@ -140,23 +138,20 @@ B<Enter command:>
 
 You can now enter commands.  Nama and Ecasound
 commands may be entered directly. You may also enter Perl
-code preceded by "eval" or shell code preceded by "!".
+code preceded by C<eval> or shell code preceded by C<!>.
 
 Multiple commands on a single line are allowed if delimited
-by semicolons.
+by semicolons. Usually the lines are split on semicolons and
+the parts are executed sequentially, however if the line
+begins with C<eval> or C<!> the entire line will be given to
+the corresponding interpreter.
 
-Note that if an "eval" or "!" appears at the beginning of a
-command, the entire line will be give to the corresponding
-interpreter.
-
-In other situations, the lines are split on semicolons and
-the parts are executed sequentially.
-
-You can access history using up-arrow/down-arrow
+You can access command history using up-arrow/down-arrow
 (Ctrl-P/Ctrl-N on Mac). 
 
-Type B<help> for general help, B<help command> for
-help with I<command>. 
+Type C<help> for general help, C<help command> for help with
+C<command>, C<help foo> for help with commands containing
+the string C<foo>. 
 
 =head1 TRACKS
 
@@ -197,103 +192,57 @@ A track with no recorded WAV files that is set to MON will
 show OFF status.
 
 
-=head1 SAMPLE SESSION
-
-Here is a typical sequence of text commands to:
-
-- record instrumental parts
-- separately record a vocalist
-- mix down all to a stereo tract
-
-create marys_little_helper       # new project
-add guitar; r1                   # record track 'guitar' from input 1
-add piano; r2                    # record track 'piano' from input 2
-add drums; r3                    # record track 'drums' from input 3
-arm                              # generate chain setup and connect engine
-start
-
-(perform)
-
-stop
-show                             # new versions of guitar, piano and drums appear
-group_monitor                    # set group MON
-arm; start                       # review recording
-
-group_record                     # rec-enable group
-guitar mon; piano mon; drums mon # set three tracks to monitor mode
-add vocals; r2                   # record track 'vocals' from input 2
-arm
-start
-
-(perform vocals)
-
-stop
-
-group_monitor                    # set group MON
-arm; start                       # review recording
-
-(adjust effects)
-
-mixdown; show                    # set mixdown mode, show to confirm
-arm; start                       # record mixdown track
-
-(engine runs)
-
-mixplay                          # mixdown playback mode
-arm; start                       # review completed mix
-
 =head1 DIRECTORY STRUCTURE
 
 $project_root is the directory where your project files,
 including WAV files you record, will go. $project_root
-is defined in the first non-comment line of 
-your .namarc file.
-
-File or directory                     Explanation
---------------------------------------------------------------------------
-$HOME/.namarc                         Nama configuration file
-$project_root/project_name/.wav       WAV files we record will be stored here
-$project_root/project_name/Setup.ecs  Ecasound chainsetup, dynamically generated
-$project_root/project_name/State.yml  Default save file for project parameters
-$project_root/project_name/.namarc    Project-specific configuration
-
-=head1 BUGS AND LIMITATIONS
+is defined in F<.namarc>.
 
 =over 12
 
-=item *  
+=item F<$HOME/.namarc>
+
+Nama configuration file
+
+=item F<$project_root/project_name/.wav>
+
+WAV files will be stored here
+
+=item F<$project_root/project_name/Setup.ecs>
+
+Ecasound chainsetup, dynamically generated
+
+=item F<$project_root/project_name/State.yml>
+
+Default save file for project parameters
+
+=item F<$project_root/project_name/.namarc>
+
+Project-specific configuration
+
+=back 
+
+=head1 BUGS AND LIMITATIONS
 
 A project should be loaded or created before issuing other
 commands. Many commands will crash the system if issued
 without a project loaded.
 
-=item *
-
 The command parser tokenizes the command string "hadd" into
 "h" "add", i.e. help on commands containing "add".
-
-=item *
 
 The loop_enable command is available only in the default
 mode.  Timer events are currently handled through the Tk
 graphic toolkit, which requires X.
 
-=item *
-
 GUI volume sliders are linear scaled.
-
-=item *
 
 The post-recording cleanup routine deletes newly recorded
 soundfiles under 44100 bytes in size. 
 
-=item *
-
 To be able to run entirely without Tk and without X you will
 need to delete the line containing 'use Tk' from
 Multitrack.pm.
-
-=back
 
 =head1 EXPORT
 
@@ -313,18 +262,17 @@ This module requires the following Perl modules.
 	File::Find::Rule
 	File::Spec::Link
 
-The Ecasound audio processing libraries must be
-installed.  Ecasound may be obtained from
-http://ecasound.seul.org/ecasound/ or as precompiled binary
-packages for your Un*x distribution.
+B<Ecasound audio processing libraries>. Ecasound may be
+obtained from http://ecasound.seul.org/ecasound/ or as
+precompiled binary packages for your Un*x distribution.
 
-To be able to use GUI sliders to control LADSPA plugin
-parameters, the LADSPA utility program B<analyseplugin> must
-be installed in a directory in your execution path.  See
-http://ladspa.org .
+B<Analyseplugin>. To be able to use GUI sliders to control LADSPA plugin
+parameters, B<analyseplugin>
+(from the LADSPA SDK) must be installed in a directory in
+your execution path.  See http://ladspa.org.
 
-B<file>, a BSD utility program, is also needed. It is most likely
-already provided with your operating system.
+B<File>. a BSD utility program, provided with most unixlike 
+operating systems.
 
 =head1 AVAILABILITY
 
@@ -332,7 +280,7 @@ CPAN, for the distribution.
 
 Pull source code using this command: 
 
-git clone git://github.com/bolangi/nama.git
+C<git clone git://github.com/bolangi/nama.git>
 
 =head1 AUTHOR
 
