@@ -173,6 +173,10 @@ get_state:
   type: project
   short: recall restore retrieve
   what: retrieve project settings
+list_projects:
+  type: project
+  short: listp
+  what: list project directory
 create_project:
   type: project
   short: create	

@@ -1004,8 +1004,8 @@ sub start_heartbeat {
 		
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
+				#print "status: $status\n";
 				$new_event->afterCancel($event_id{heartbeat})
-					#if $status =~ /finished|error|stopped/;
 					if $status =~ /finished|error/;
 				print join " ", "engine is $status", colonize($here), $/;
 				my ($start, $end);

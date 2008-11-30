@@ -27,6 +27,8 @@ create_project: _create_project name end {
 	::t_create_project $item{name}
 }
 
+list_projects: _list_projects end { ::list_projects() }
+
 load_project: _load_project name end {
 	::t_load_project( $item{name} )
 }

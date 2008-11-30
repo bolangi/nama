@@ -71,6 +71,7 @@ HELLO
 		$reply = lc $reply;
 		if ($reply !~ /n/i) {
 			create_dir( $project_root);
+			create_dir( join_path $project_root, "untitled");
 			print "\n... Done!\n\n";
 		} 
 	}
@@ -179,6 +180,11 @@ sub prepare {
 	$ui->time_gui;
 
 	print "project_name: $project_name\n";
+	if (! $project_name ){
+		$project_name = "untitled";
+		$opts{c}++; 
+	}
+	
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
 
@@ -280,13 +286,18 @@ sub substitute{
 }
 ## project handling
 
+sub list_projects {
+	my $cmd = "ls ". project_root();
+	print system $cmd;
+}
+		
 sub load_project {
 	local $debug = 0;
 	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
-	# return unless $h{name} or $project;
+	list_projects() unless $h{name} or $project;
 
 	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
@@ -1332,7 +1343,7 @@ sub remove_op {
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 		$debug and eval_iam ("cs");
 		my $cmd = "c-select $n";
-		print "cmd: $cmd$/";
+		#print "cmd: $cmd$/";
 		eval_iam ($cmd);
 		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
 		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
