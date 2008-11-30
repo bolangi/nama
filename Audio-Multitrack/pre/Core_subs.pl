@@ -1260,16 +1260,22 @@ sub remove_effect {
 	my $id = shift;
 	return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
-	$ti[$n]->remove_effect( $id );
 		
-	$debug and print "ready to remove cop_id: $id\n";
+	$debug and print "ready to remove chain operator _ $id _ from track _ $n _\n";
+	$ui->remove_effect_gui($id);
+	remove_op($id);
+	delete $cops{$id};
+	delete $copp{$id};
+	$ti[$n]->remove_effect( $id );
 
+## following code for controllers comment out
+=comment
 	my $parent = $cops{$id}->{belongs_to} ;
 
 	if ( $parent ) {
 
 	# if i belong to someone, i am a controller.
-	#
+	
 	# i remove their ownership of me
 
 	$debug and print "parent $parent owns list: ", join " ",
@@ -1286,12 +1292,11 @@ sub remove_effect {
 		
 	map{remove_effect($_)}@{ $cops{$id}->{owns} };
 
-	
-	$ui->remove_effect_gui($id);
-
     	
 	if ($parent) { remove_ctrl $id }
-	else {remove_op $id}
+	else {remove_op($id)}
+=cut
+
 			
 }
 sub remove_effect_gui { 
@@ -1301,8 +1306,6 @@ sub remove_effect_gui {
 	my $n = $cops{$id}->{chain};
 	$debug and print "id: $id, chain: $n\n";
 
-	$ti[$n]->set(ops =>  
-		[ grep{ $_ ne $id} @{ $ti[ $cops{$id}->{chain} ]->ops } ]);
 	$debug and print "i have widgets for these ids: ", join " ",keys %effects_widget, "\n";
 	$debug and print "preparing to destroy: $id\n";
 	$effects_widget{$id}->destroy();
@@ -1314,29 +1317,29 @@ sub remove_effect_gui {
 sub effect_index {
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
+	$debug and print "id: $id n: $n \n",join $/,@{ $ti[$n]->ops }, $/;
 		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			return $pos if $ti[$n]->ops->[$pos] eq $id; 
+			return $pos + 1 if $ti[$n]->ops->[$pos] eq $id; 
 		};
 }
 sub remove_op {
 
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
-	my $index = effect_index $id;
+	my $index = effect_index( $id );
 	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 	$debug and print "operator id to remove: $id\n";
 	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 		$debug and eval_iam ("cs");
-		 eval_iam ("c-select $n");
+		my $cmd = "c-select $n";
+		print "cmd: $cmd$/";
+		eval_iam ($cmd);
+		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
 		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+		#print "selected operator: ", eval_iam("cop-selected"), $/;
 		eval_iam ("cop-remove");
 		$debug and eval_iam ("cs");
 
-	eval_iam qq(c-select $n);
-	eval_iam ("ctrl-remove " . ctrl_index($id) );
-
-	delete $cops{$id};
-	delete $copp{$id};
 }
 
 sub remove_ctrl {

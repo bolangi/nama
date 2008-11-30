@@ -16,7 +16,8 @@ sub get_versions {
 	my ($sep, $ext) = qw( _ wav );
 
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
-	opendir WD, $dir or carp ("can't read directory $dir: $!");
+	$dir =  File::Spec::Link->resolve_all( $dir );
+	opendir(WD,$dir) or carp ("can't read directory $dir: $!");
 	$debug and print "reading directory: $dir\n\n";
 	my %versions = ();
 	for my $candidate ( readdir WD ) {

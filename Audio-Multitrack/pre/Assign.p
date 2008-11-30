@@ -320,7 +320,7 @@ sub join_path {
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
-	$debug and print "path: $path\n";
+	#$debug and print "path: $path\n";
 	$path;
 }
 
