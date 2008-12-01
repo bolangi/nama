@@ -297,7 +297,7 @@ sub load_project {
 	my %h = @_;
 	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
-	list_projects() unless $h{name} or $project;
+	print ("no project name.. doing nothing.\n"),return unless $h{name} or $project;
 
 	# we could be called from Tk with variable $project _or_
 	# called with a hash with 'name' and 'create' fields.
@@ -317,6 +317,7 @@ sub load_project {
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
 	
+	#print "Track_by_index: ", $#::Track::by_index, $/;
 	dig_ruins() unless $#::Track::by_index > 2;
 
 
@@ -326,8 +327,9 @@ sub load_project {
 	$ui->refresh_group;
 	generate_setup() and connect_transport();
 
-#The mix track will always be track index 1 i.e. $ti[$n]
-# for $n = 1, And take index 1.
+#The mixed signal is always output at track index 1 i.e. 
+# The corresponding object is found by $ti[$n]
+# for $n = 1. 
  1;
 
 }

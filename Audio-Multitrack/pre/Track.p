@@ -246,8 +246,8 @@ sub monitor_version {
 	elsif (	$group->version
 			and grep {$group->version  == $_ } @{$track->versions})
 		{ $version = $group->version }
-	elsif (	$track->last) #  and ! $track->active and ! $group->version )
-		{ $version = $track->last }
+#	elsif (	$track->last) #  and ! $track->active and ! $group->version )
+#		{ $version = $track->last }
 	else { } # carp "no version to monitor!\n" 
 	# print "monitor version: $version\n";
 	$version;
