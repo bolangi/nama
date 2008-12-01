@@ -456,4 +456,9 @@ use ::Object qw(	op_id
 
 1;
 
+# We will treat operators and controllers both as Op
+# objects. Subclassing so controller has special
+# add_op  and remove_op functions. 
+# 
+
 __END__
