@@ -1,0 +1,9 @@
+blib/*
+MANIFEST.bak
+MANIFEST.SKIP
+Makefile
+Makefile.old
+broken_tests/*
+pre/*
+try/*
+talk/*
