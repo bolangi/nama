@@ -310,7 +310,8 @@ sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
 	$debug and print "creating [ $dir ]\n";
-		-e $dir and (carp "create_dir: '$dir' already exists, skipping...\n") 
+		-e $dir 
+#and (carp "create_dir: '$dir' already exists, skipping...\n") 
 			or system qq( mkdir -p $dir)
 		} @dirs;
 }

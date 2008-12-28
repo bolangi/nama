@@ -18,7 +18,8 @@ our $VERSION = '0.973';
 
 use Carp;
 use Cwd;
-use Tk;
+require Tk;
+import Tk;
 use Storable; 
 use Getopt::Std;
 use Audio::Ecasound;
