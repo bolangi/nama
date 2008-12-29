@@ -277,12 +277,12 @@ our (
 					# ->cancel method not reliable
 					# for 'repeat' events, so converted to
 					# 'after' events
-	%event_id,    # events will store themselves with a unique key they provide
-	# $event_id{loop} = $loop_event, # Tk events for
-	$new_event,   # the Tk widget
+	%event_id,    # events will store themselves with a key
+	$set_event,   # the Tk dummy widget used to set events
 	$this_mark,    # current mark
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
 
    $previous_text_command, # i want to know if i'm repeating
+	$term, 			# Term::ReadLine object
 );

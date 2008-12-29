@@ -230,6 +230,9 @@ This module requires the following Perl modules.
 	Data::YAML
 	File::Find::Rule
 	File::Spec::Link
+	Term::ReadLine::GNU
+	Term::ReadLine
+	Event
 
 B<Ecasound audio processing libraries>. Ecasound may be
 obtained from http://ecasound.seul.org/ecasound/ or as

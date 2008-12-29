@@ -9,7 +9,7 @@ no warnings;
 
 BEGIN{ 
 
-our $VERSION = '0.973';
+our $VERSION = '0.975';
 
 [% qx(cat ./banner.pl) %]
 
@@ -18,8 +18,6 @@ our $VERSION = '0.973';
 
 use Carp;
 use Cwd;
-require Tk;
-import Tk;
 use Storable; 
 use Getopt::Std;
 use Audio::Ecasound;
@@ -106,8 +104,6 @@ use ::Track;
 
 package ::Graphical;  ## gui routines
 our @ISA = '::';
-#use Tk;
-#use ::Assign qw(:all);
 
 ## The following methods belong to the Graphical interface class
 
@@ -116,7 +112,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
     #MainLoop;
-    my $term = new Term::ReadLine 'Nama';
+    my $term = new Term::ReadLine 'Ecaound/Nama';
 	$term->tkRunning(1);
     my $prompt = "Enter command: ";
     $OUT = $term->OUT || \*STDOUT;
@@ -141,8 +137,6 @@ sub hello {"hello world!";}
 # because object and procedural access get
 # different parameter lists ($self being included);
 
-sub start_heartbeat {}
-sub start_clock {}
 sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
@@ -204,8 +198,6 @@ open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 close STDERR;
 open STDERR, ">&SAVERR";
-#select STDOUT; $| = 1;
-# ::Text::OuterShell::create_help_subs();
 
 [% qx(cat ./help_topic.pl) %]
 

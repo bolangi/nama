@@ -132,7 +132,7 @@ sub init_gui {
 
 	# Tk main window
  	$mw = MainWindow->new;  
-	$new_event = $mw->Label();
+	$set_event = $mw->Label();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
@@ -986,46 +986,18 @@ sub destroy_marker {
 	my $pos = shift;
 	$mark_widget{$pos}->destroy; 
 }
-sub colonize { # convert seconds to minutes:seconds 
-	my $sec = shift;
-	my $hours = int ($sec / 3600);
-	$sec = $sec % 3600;
-	my $min = int ($sec / 60);
-	$sec = $sec % 60;
-	$sec = "0$sec" if $sec < 10;
-	$min = "0$min" if $min < 10 and $hours;
-	($hours ? "$hours:" : "") . qq($min:$sec);
+
+sub wraparound {
+	my ($diff, $start) = @_;
+	$event_id{tk_wraparound}->cancel() if (ref $clock_id) =~ /Tk/; 
+	$event_id{tk_wraparound} = $set_event->after( 
+		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
 }
 
-
 sub start_heartbeat {
-	#print "event widget: ", ref $new_event, $/;
-	$event_id{heartbeat} = $new_event->repeat( 
-		3000, sub { 
-		
-				my $here   = eval_iam("getpos");
-				my $status = eval_iam q(engine-status);
-				#print "status: $status\n";
-				$new_event->afterCancel($event_id{heartbeat})
-					if $status =~ /finished|error/;
-				print join " ", "engine is $status", colonize($here), $/;
-				my ($start, $end);
-				$start  = ::Mark::loop_start();
-				$end    = ::Mark::loop_end();
-				schedule_wraparound() 
-					if $loop_enable 
-					and defined $start 
-					and defined $end 
-					and !  really_recording();
-
-				# update time display
-				#
-				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-
-
-
-		});
-
+}
+sub stop_heartbeat {
+	map{ $set_event->afterCancel($event_id{$_})} qw(tk_heartbeat tk_wraparound);
 }
 
 ### end

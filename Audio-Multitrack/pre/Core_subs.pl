@@ -119,6 +119,15 @@ sub prepare {
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
+	if ($opts{t}) {
+		require Time::HiRes;
+		import  Time::HiRes;
+		require Event;
+		import  Event;
+	} else {
+		require Tk;
+		import Tk;
+	}
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
@@ -209,6 +218,17 @@ sub eval_iam {
 	$e->errmsg('');
 	$result;
 }
+sub colonize { # convert seconds to hours:minutes:seconds 
+	my $sec = shift;
+	my $hours = int ($sec / 3600);
+	$sec = $sec % 3600;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	$min = "0$min" if $min < 10 and $hours;
+	($hours ? "$hours:" : "") . qq($min:$sec);
+}
+
 ## configuration file
 
 sub project_root { File::Spec::Link->resolve_all($project_root)};
@@ -304,7 +324,7 @@ sub load_project {
 	$project_name = $project if $project;
 	$debug and print "project name: $project_name create: $h{create}\n";
 	$project_name and $h{create} and 
-		print ("Creating directories....\n"),
+		#print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
 	read_config( global_config() ); 
 	initialize_rules();
@@ -1007,30 +1027,37 @@ sub transport_status {
 sub start_transport { 
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
-	#
-	# we are going to have a heartbeat function.
-	# It will wakeup every three seconds
-	# will do several jobs, one is to calculate
-	# the time till the replay, then if that
-	# time is less than 6s, the wraparound will be
-	# scheduled.
-	#
-	# if the stop button is pressed, we cancel
-	#
-	#
-	#carp "transport appears stuck: ",eval_iam("engine-status"),$/;
-	#if twice (or 3x in a row) not running status, 
 
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
 	eval_iam('start');
 	sleep 1;
 	$ui->start_heartbeat();
-	#start_heartbeat();
 
 	sleep 1; # time for engine
 	print "engine is ", eval_iam("engine-status"), $/;
 }
+sub heartbeat {
+		
+				my $here   = eval_iam("getpos");
+				my $status = eval_iam q(engine-status);
+				$ui->stop_heartbeat
+					#if $status =~ /finished|error|stopped/;
+					if $status =~ /finished|error/;
+				print join " ", $status, colonize($here), $/;
+				my ($start, $end);
+				$start  = ::Mark::loop_start();
+				$end    = ::Mark::loop_end();
+				$ui->schedule_wraparound() 
+					if $loop_enable 
+					and defined $start 
+					and defined $end 
+					and ! really_recording();
 
+				# update time display
+				#
+				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+
+}
 
 sub schedule_wraparound {
 	my $here   = eval_iam("getpos");
@@ -1040,42 +1067,17 @@ sub schedule_wraparound {
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
 		eval_iam("setpos ".$start);
-	} elsif ( $diff < 6 ) { #schedule the move
-	$event_id{wraparound} = $new_event->after( 
-		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
-		
-		unless $event_id{wraparound};
+		$ui->cancel_wraparound();
+	} elsif ( $diff < 3 ) { #schedule the move
+	$ui->wrapround($diff);
 		
 		;
 	}
 }
 
-	
-sub prepare_looping {
-	# print "looping enabled\n";
-	my $here   = eval_iam q(getpos), 
-	my $end    = ::Mark::loop_end();
-	my $start  = ::Mark::loop_start();
-	my $diff = $end - $here;
-	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
-	if ( $diff < 0 ){
-		eval_iam("setpos ".$start);
-		sleep 1;
-		prepare_looping();
-	} else {
-		$event_id{loop} =  $new_event->after(
-			int($diff * 1000), sub {
-				eval_iam("setpos ".$start) ;
-				sleep 1;
-				prepare_looping();
-			}
-		);
-	}
-		#   will need to cancel on transport stop
-}
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
-	map{ $new_event->afterCancel($event_id{$_})} qw(heartbeat wraparound);
+	$ui->stop_heartbeat();
 	eval_iam('stop');	
 	print "engine is ", eval_iam("engine-status"), $/;
 	$ui->project_label_configure(-background => $old_bg);
@@ -2115,10 +2117,10 @@ sub retrieve_state {
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
 	$file = $yamlfile if -f $yamlfile;
-	! -f $file and print ("file not found: $file\n"), return;
-	$debug and print "using file: $file";
+	! -f $file and (print "file not found: $file\n"), return;
+	$debug and print "using file: $file\n";
 
-	assign_var( $file, @persistent_vars );
+	assign_var($file, @persistent_vars );
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []

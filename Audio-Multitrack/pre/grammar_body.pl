@@ -103,7 +103,7 @@ show_tracks: _show_tracks end {
 	use warnings; 
 	no warnings qw(uninitialized); 
 	print $/, "Group control", " " x 8, 
-	  $::tracker->rw, " " x 24 , $::tracker->version, $/;
+	  $::tracker->rw, " " x 24 , $::tracker->version, $/, $/;
 }
 
 
