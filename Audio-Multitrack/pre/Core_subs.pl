@@ -168,12 +168,9 @@ sub prepare {
 	$ui = $opts{t} ? ::Text->new 
 				   : ::Graphical->new ;
 
-	# default to graphic mode with events
-	# with full text mode as well
-
-	# Tk main window
- 	$mw = MainWindow->new;  
-	$new_event = $mw->Label();
+	# default to graphic mode  (Tk events and event loop)
+	# text mode (Event event loop)
+	
 
 	$ui->init_gui;
 	$ui->transport_gui;

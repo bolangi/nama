@@ -130,8 +130,9 @@ sub init_gui {
 
 ### 	Tk root window layout
 
-
-	#my $mw = tkinit();
+	# Tk main window
+ 	$mw = MainWindow->new;  
+	$new_event = $mw->Label();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
