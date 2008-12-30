@@ -34,6 +34,9 @@ q(::);
    alsdkjfaldksjf asdlfkjasdklfjaskdlf '::Module';
 $#::Track::by_index;
  $#::Track::by_index;
+*::Module{SUB}
+ *::Module{SUB}
+
 PKG
 my $i;
 map { print "input ", $i++,": ", $_, $/;
@@ -72,6 +75,8 @@ sub subst {
 		$text =~
 		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
+	# Substitution 6.1 *::Module{SUB}
+		$text =~ s/\*::(\w)/*$new_root\::$1/mg;
 
 
 	# Substitution 7: lone '::' and friends

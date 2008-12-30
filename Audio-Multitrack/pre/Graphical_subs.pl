@@ -472,8 +472,8 @@ sub flash_ready {
 
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
-	$clock_id->cancel if (ref $clock_id) =~ /Tk/;
-	$clock_id = $clock->after(3000, 
+	$event_id{tk_flash_ready}->cancel() if defined $event_id{tk_flash_ready};
+	$event_id{tk_flash_ready} = $set_event->after(3000, 
 		sub{ length_display(-background => $old_bg) }
 	);
 }
@@ -988,16 +988,26 @@ sub destroy_marker {
 }
 
 sub wraparound {
+	@_ = ::discard_object @_;
 	my ($diff, $start) = @_;
-	$event_id{tk_wraparound}->cancel() if (ref $clock_id) =~ /Tk/; 
+	cancel_wraparound();
 	$event_id{tk_wraparound} = $set_event->after( 
 		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
 }
+sub cancel_wraparound { tk_event_cancel("tk_wraparound") }
 
 sub start_heartbeat {
+	#print ref $set_event; 
+	$event_id{tk_heartbeat} = $set_event->repeat( 
+		3000, \&::heartbeat);
+		# 3000, *::heartbeat{SUB}); # equivalent to above
 }
-sub stop_heartbeat {
-	map{ $set_event->afterCancel($event_id{$_})} qw(tk_heartbeat tk_wraparound);
+sub stop_heartbeat { tk_event_cancel( qw(tk_heartbeat tk_wraparound)) }
+
+sub tk_event_cancel {
+	@_ = ::discard_object @_;
+	map{ (ref $event_id{$_}) =~ /Tk/ and $set_event->afterCancel($event_id{$_}) 
+	} @_;
 }
 
 ### end

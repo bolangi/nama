@@ -1037,6 +1037,7 @@ sub start_transport {
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub heartbeat {
+			#	print "heartbeat fired\n";
 		
 				my $here   = eval_iam("getpos");
 				my $status = eval_iam q(engine-status);
@@ -1060,6 +1061,7 @@ sub heartbeat {
 }
 
 sub schedule_wraparound {
+	#local $debug = 1;
 	my $here   = eval_iam("getpos");
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
@@ -1069,7 +1071,7 @@ sub schedule_wraparound {
 		eval_iam("setpos ".$start);
 		$ui->cancel_wraparound();
 	} elsif ( $diff < 3 ) { #schedule the move
-	$ui->wrapround($diff);
+	$ui->wraparound($diff, $start);
 		
 		;
 	}

@@ -53,29 +53,32 @@ sub loop {
 	    desc   => 'heartbeat',               # description;
 	    prio   => 5,                         # low priority;
 		interval => 3,
-	    cb     => \&heartbeat,               # callback;
+	    cb     => \&::heartbeat,               # callback;
 	);
 	Event::loop();
 
 }
 sub wraparound {
+	@_ = ::discard_object @_;
 	my ($diff, $start) = @_;
+	#print "diff: $diff, start: $start\n";
 	$event_id{Event_wraparound}->cancel()
 		if defined $event_id{Event_wraparound};
 	$event_id{Event_wraparound} = Event->timer(
 	desc   => 'wraparound',               # description;
 	after  => $diff,
-	cb     => sub{ eval_iam("setpos " . $start) }, # callback;
+	cb     => sub{ ::eval_iam("setpos " . $start) }, # callback;
    );
 
-# package :: scope ends here
 }
 
 
 sub start_heartbeat {$event_id{Event_heartbeat}->start() }
+
 sub stop_heartbeat {$event_id{Event_heartbeat}->stop() }
+
 sub cancel_wraparound {
-	$event_id{Event_wraparound}->cancel();
+	$event_id{Event_wraparound}->cancel() if defined $event_id{Event_wraparound}
 }
 
 sub process_line {
