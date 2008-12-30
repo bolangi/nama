@@ -115,12 +115,15 @@ functionality on two panels, one for general control,
 the second for effects. 
 
 Logarithmic sliders are provided automatically for effects
-with hinting. Otherwise text-entry widgets are used.
+with hinting. Text-entry widgets are used to 
+enter parameters for effects where hinting is not
+available.
 
 After issuing the B<arm> or B<connect> commands, the GUI
 time display changes color to indicate whether the upcoming operation
 will include live recording (red), mixdown only (yellow) or
-playback only (green).  
+playback only (green).  Live recording and mixdown can 
+take place simultaneously.
 
 The text command prompt appears in the terminal window
 during GUI operation. Text commands may be issued at any
@@ -146,8 +149,7 @@ the parts are executed sequentially, however if the line
 begins with C<eval> or C<!> the entire line will be given to
 the corresponding interpreter.
 
-You can access command history using up-arrow/down-arrow
-(Ctrl-P/Ctrl-N on Mac). 
+You can access command history using up-arrow/down-arrow.
 
 Type C<help> for general help, C<help command> for help with
 C<command>, C<help foo> for help with commands containing
@@ -165,13 +167,17 @@ automatically so that the order of version numbers
 follows the time sequence of the recordings.
 
 Each track, including Master and Mixdown, has its own
-REC/MON/OFF setting and displays its own REC/MON/OFF
-status. The Master bus has only MON/OFF status. Setting REC
-status for the Mixdown bus has the same effect as issuing
-the B<mixdown> command.
+REC/MON/OFF setting and displays its own REC/MON/OFF status.
+The Master bus has only MON/OFF status. Setting REC status
+for the Mixdown bus has the same effect as issuing the
+B<mixdown> command. As with other engine operations, a start
+command must be issued for mixdown to commence.
 
 All user tracks belong to the Tracker group, which has
-a group REC/MON/OFF setting and a default version setting.
+a group REC/MON/OFF setting and a default version setting
+that advances automatically so that the default will
+be to play back the most recent set of multitrack
+recordings all together.
 
 Setting the group to MON (text command B<group_monitor>)
 forces user tracks with a REC setting to MON status if
@@ -179,7 +185,8 @@ a WAV file is available to play, or OFF status if no
 audio stream is available. 
 
 The group MON mode triggers automatically after a recording
-that leaves files longer than a second.
+that leaves files longer than a second. (Shorter
+files are automatically deleted.)
 
 The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
@@ -193,58 +200,20 @@ show OFF status.
 
 =head1 BUGS AND LIMITATIONS
 
-A project should be loaded or created before issuing other
-commands. Many commands will crash the system if issued
-without a project loaded.
-
 The command parser tokenizes the command string "hadd" into
 "h" "add", i.e. help on commands containing "add".
 
-The loop_enable command is available only in the default
-mode.  Timer events are currently handled through the Tk
-graphic toolkit, which requires X.
+The B<loop_enable> command must be issued as a text
+command. 
 
 GUI volume sliders are linear scaled.
 
 The post-recording cleanup routine deletes newly recorded
 soundfiles under 44100 bytes in size. 
 
-To be able to run entirely without Tk and without X you will
-need to delete the line containing 'use Tk' from
-Multitrack.pm.
-
 =head1 EXPORT
 
 None by default.
-
-=head1 DEPENDENCIES
-
-This module requires the following Perl modules. 
-
-	Data::YAML
-	IO::All
-	Getopt::Std
-	Tk
-	Audio::Ecasound
-	Parse::RecDescent
-	Data::YAML
-	File::Find::Rule
-	File::Spec::Link
-	Term::ReadLine::GNU
-	Term::ReadLine
-	Event
-
-B<Ecasound audio processing libraries>. Ecasound may be
-obtained from http://ecasound.seul.org/ecasound/ or as
-precompiled binary packages for your Un*x distribution.
-
-B<Analyseplugin>. To be able to use GUI sliders to control LADSPA plugin
-parameters, B<analyseplugin>
-(from the LADSPA SDK) must be installed in a directory in
-your execution path.  See http://ladspa.org.
-
-B<File>. a BSD utility program, provided with most unixlike 
-operating systems.
 
 =head1 AVAILABILITY
 
@@ -258,15 +227,6 @@ C<git clone git://github.com/bolangi/nama.git>
 
 Joel Roth, E<lt>joelz@pobox.comE<gt>
 
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 2007, 2008 by Joel Roth
-
-This library is licensed under GPL version 2.  See the file
-COPYING (included in the distribution) for terms and
-conditions.
-
 =head1 ABSTRACT
 
-Classes, data structures and user interfaces for multitrack
-recording with the Ecasound audio processing engine
+Lightweight multitrack recorder/mixer 
