@@ -1029,6 +1029,7 @@ sub start_transport {
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
 	print "starting at ", colonize(int (eval_iam "getpos")), $/;
+	schedule_wraparound();
 	eval_iam('start');
 	sleep 1;
 	$ui->start_heartbeat();

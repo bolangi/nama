@@ -184,9 +184,8 @@ forces user tracks with a REC setting to MON status if
 a WAV file is available to play, or OFF status if no
 audio stream is available. 
 
-The group MON mode triggers automatically after a recording
-that leaves files longer than a second. (Shorter
-files are automatically deleted.)
+The group MON mode triggers automatically after 
+recording has created new WAV files.
 
 The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
@@ -204,12 +203,10 @@ The command parser tokenizes the command string "hadd" into
 "h" "add", i.e. help on commands containing "add".
 
 The B<loop_enable> command must be issued as a text
-command. 
+command. Looping is not reliable over intervals less
+than 3 seconds. 
 
 GUI volume sliders are linear scaled.
-
-The post-recording cleanup routine deletes newly recorded
-soundfiles under 44100 bytes in size. 
 
 =head1 EXPORT
 
