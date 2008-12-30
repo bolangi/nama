@@ -5,3 +5,4 @@ Revision history for Perl extension Audio::Ecasound::Multitrack
 0.97  Fri Sep 18 2008   - fix package path error
                         - replace Ext::MakeMaker with Module::Install
 0.973 Tue Oct 7, 2008   - restore independence of mixdown and monitor faders
+0.975 Mon Dec 29, 2008  - Chainsetup looping in both console and GUI modes

@@ -199,14 +199,11 @@ show OFF status.
 
 =head1 BUGS AND LIMITATIONS
 
-The command parser tokenizes the command string "hadd" into
-"h" "add", i.e. help on commands containing "add".
-
-The B<loop_enable> command must be issued as a text
-command. Looping is not reliable over intervals less
-than 3 seconds. 
+B<loop_enable> must be issued as a text command.
 
 GUI volume sliders are linear scaled.
+
+Fails with a Segfault under kernel compiled for amd64.
 
 =head1 EXPORT
 
@@ -223,6 +220,20 @@ C<git clone git://github.com/bolangi/nama.git>
 =head1 AUTHOR
 
 Joel Roth, E<lt>joelz@pobox.comE<gt>
+
+Copyright (C) 2007 Joel Roth
+
+=head1 LICENCE
+
+This software is licensed for use under the terms of the GNU
+Public License version 2. The text of this license is
+provided in the file COPYING that is included in this
+distribution.
+
+This software is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
 =head1 ABSTRACT
 
