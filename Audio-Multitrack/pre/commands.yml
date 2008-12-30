@@ -337,6 +337,10 @@ loop_disable:
   type: transport
   short: noloop nl
   what: disable automatic looping
+loop_show:
+  type: transport
+  short: ls
+  what: show loop status and endpoints (TODO)
 T:
   type: transport
   what: ecasound-only start
@@ -359,4 +363,27 @@ project_name:
   type: project
   what: show current project name
   short: project pn
+capture_control_inputs
+  type: perform
+  what: record realtime parameter changes during engine run (TODO)
+  short: capture cap
+  parameters: MIDI port(s) to monitor (place in config file?)
+erase_capture
+  type: perform
+  what: erase recorded controller inputs (TODO)
+  short: erase
+  parameters: optional range, as decimal times in seconds, or mark names 
+perform_on
+  type: perform
+  what: playback recorded controller inputs
+  short: perform perf
+perform_off
+  type: perform
+  what: don't playback recorded controller inputs
+  short: nope
+bind_midi
+  type: perform
+  parameters: chain_op_id controller_number parameter multiplier offset (log)
+  what: bind a midi controller to a chain operator parameter
+  short: bind
 ...
