@@ -177,8 +177,8 @@ sub prepare {
 	$ui = $opts{t} ? ::Text->new 
 				   : ::Graphical->new ;
 
-	# default to graphic mode  (Tk events and event loop)
-	# text mode (Event event loop)
+	# default to graphic mode  (Tk event loop)
+	# text mode (Event.pm event loop)
 	
 
 	$ui->init_gui;
@@ -193,8 +193,6 @@ sub prepare {
 	
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
-
-	# if there is no project name, we still init using pwd
 
 	$debug and print "project_root: ", project_root(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
@@ -309,9 +307,10 @@ sub list_projects {
 }
 		
 sub load_project {
-	#$debug2 = $debug = 1;
+	my $debug2 = 1;
+	my $debug = 1;
 	$debug2 and print "&load_project\n";
-	#carp "load project: I'm being called from somewhere!\n";
+	carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug and print yaml_out \%h;
 	print ("no project name.. doing nothing.\n"),return unless $h{name} or $project;
@@ -2027,8 +2026,12 @@ sub round {
 ## persistent state support
 
 sub save_state {
-
 	$debug2 and print "&save_state\n";
+
+	# do nothing if only Master and Mixdown
+	
+	return if scalar @::Track::by_index == 3; 
+
 	my $file = shift;
 
 	# remove nulls in %cops 
@@ -2056,7 +2059,7 @@ sub save_state {
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
 	# print "filename base: $file\n";
-	print "Saving state as $file.yml\n";
+	print "\nSaving state as $file.yml\n";
 
     # sort marks
 	

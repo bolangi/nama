@@ -21,9 +21,12 @@ requires
 		Audio::Ecasound => 0,
 		Parse::RecDescent => 0,
 		Term::ReadLine => 0,
+		Term::ReadLine::GNU => 0,
 		Data::YAML => 0,
 		File::Find::Rule => 0,
 		File::Spec::Link => 0,
+		Time::HiRes => 0,
+		Event => 0,
 		;
 
          WriteAll;

@@ -231,10 +231,10 @@ sub init_gui {
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
+				save_state($save_id);
+				print "Exiting...\n";		
 				exit;
-				 }
-				);
-
+				 });
 
 	$build_track_add->configure( 
 			-text => 'Add New Track',
