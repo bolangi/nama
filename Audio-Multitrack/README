@@ -45,6 +45,7 @@ This module requires that you have installed these Perl modules:
 	IO::All
 	Term::Readline
 	Term::Readline::Gnu
+	Time::HiRes
 
 The Ecasound audio processing libraries must be
 installed. Ecasound may be obtained from
@@ -56,9 +57,20 @@ scaling hints.  It is available at:
 
 http://www.ladspa.org/ladspa_sdk/download.html  
 
-In particular the the utility program 'analyseplugin' must be
+In particular the utility program 'analyseplugin' must be
 installed in a directory in your execution PATH.  
 
 'file', a BSD utility program that detects file formats must
 be installed for Nama to correctly identify stereo files.
 
+=head1 LICENSE
+
+This software is licensed for use under the terms of the GNU
+Public License version 2. The text of this license is
+provided in the file COPYING that is included in this
+distribution.
+
+This software is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.

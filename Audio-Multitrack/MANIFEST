@@ -1,5 +1,5 @@
+README
 Changes
-COPYING
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -17,12 +17,13 @@ lib/Audio/Ecasound/Multitrack/Object.pm
 lib/Audio/Ecasound/Multitrack/Tkeca_effects.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
-Makefile.PL
-MANIFEST
-META.yml
-README
 scripts/nama
 t/02_assign.t
 t/03_wav.t
 t/04_object.t
 t/11_mark.t
+Makefile.PL
+MANIFEST
+META.yml
+COPYING
+LICENSE

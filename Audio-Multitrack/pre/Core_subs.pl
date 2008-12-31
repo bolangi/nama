@@ -307,10 +307,8 @@ sub list_projects {
 }
 		
 sub load_project {
-	my $debug2 = 1;
-	my $debug = 1;
 	$debug2 and print "&load_project\n";
-	carp "load project: I'm being called from somewhere!\n";
+	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug and print yaml_out \%h;
 	print ("no project name.. doing nothing.\n"),return unless $h{name} or $project;
