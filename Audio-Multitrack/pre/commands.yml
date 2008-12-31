@@ -363,27 +363,28 @@ project_name:
   type: project
   what: show current project name
   short: project pn
-capture_control_inputs
+midi_inputs:
   type: perform
-  what: record realtime parameter changes during engine run (TODO)
-  short: capture cap
-  parameters: MIDI port(s) to monitor (place in config file?)
-erase_capture
+  what: use MIDI messages to control parameters
+  short: midi
+  parameters: on/off/capture  
+erase_capture:
   type: perform
-  what: erase recorded controller inputs (TODO)
   short: erase
-  parameters: optional range, as decimal times in seconds, or mark names 
-perform_on
+  what: erase recorded controller inputs
+  parameters: optional range, as decimal times in seconds, or mark names or indices 
+perform:
   type: perform
   what: playback recorded controller inputs
   short: perform perf
-perform_off
+  parameters: on/off
+bind_midi:
   type: perform
-  what: don't playback recorded controller inputs
-  short: nope
-bind_midi
-  type: perform
-  parameters: chain_op_id controller_number parameter multiplier offset (log)
+  parameters: midi_port midi_controller chain_op_id parameter multiplier offset (log)
   what: bind a midi controller to a chain operator parameter
   short: bind
+bind_off:
+  type: perform
+  what: remove MIDI binding
+  parameters: midi_port midi_controller
 ...

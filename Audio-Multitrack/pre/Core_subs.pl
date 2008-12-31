@@ -1976,9 +1976,10 @@ sub integrate_ladspa_hints {
 	map{ 
 		my $i = $effect_i{$_};
 		# print ("$_ not found\n"), 
-		next unless $i;
-		$effects[$i]->{params} = $effects_ladspa{$_}->{params};
-		$effects[$i]->{display} = $effects_ladspa{$_}->{display};
+		if ($i) {
+			$effects[$i]->{params} = $effects_ladspa{$_}->{params};
+			$effects[$i]->{display} = $effects_ladspa{$_}->{display};
+		}
 	} keys %effects_ladspa;
 
 my %L;
@@ -2272,6 +2273,8 @@ sub save_effects {
 
 }
 
+=comment unused
+
 sub retrieve_effects {
 	$debug2 and print "&retrieve_effects\n";
 	my $file = shift;
@@ -2370,6 +2373,6 @@ sub retrieve_effects {
 
 }
 
-	
-
+=cut
+sub process_control_inputs { }
 ### end

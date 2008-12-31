@@ -285,4 +285,6 @@ our (
 
    $previous_text_command, # i want to know if i'm repeating
 	$term, 			# Term::ReadLine object
+	$controller_ports, # where we listen for MIDI messages
+    $midi_inputs,  # on/off/capture
 );

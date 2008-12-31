@@ -55,6 +55,25 @@ sub loop {
 		interval => 3,
 	    cb     => \&::heartbeat,               # callback;
 	);
+	if ( $midi_inputs =~ /on|capture/ ){
+		my $command = "aseqdump ";
+		$command .= "-p $controller_ports" if $controller_ports;
+		open MIDI, "$command |" or die "can't fork $command: $!";
+		$event_id{sequencer} = Event->io(
+			desc   => 'read ALSA sequencer events',
+			fd     => \*MIDI,                    # handle;
+			poll   => 'r',	                     # watch for incoming chars
+			cb     => \&::process_control_inputs, # callback;
+			repeat => 1,                         # keep alive after event;
+		 );
+		$event_id{sequencer_error} = Event->io(
+			desc   => 'read ALSA sequencer events',
+			fd     => \*MIDI,                    # handle;
+			poll   => 'e',	                     # watch for exception
+			cb     => sub { die "sequencer pipe read failed" }, # callback;
+		 );
+	
+	}
 	Event::loop();
 
 }
