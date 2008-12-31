@@ -185,11 +185,11 @@ sub prepare {
 	$ui->transport_gui;
 	$ui->time_gui;
 
-	print "project_name: $project_name\n";
 	if (! $project_name ){
 		$project_name = "untitled";
 		$opts{c}++; 
 	}
+	print "project_name: $project_name\n";
 	
 	load_project( name => $project_name, create => $opts{c}) 
 	  if $project_name;
@@ -309,10 +309,10 @@ sub list_projects {
 }
 		
 sub load_project {
-	local $debug = 0;
+	#$debug2 = $debug = 1;
+	$debug2 and print "&load_project\n";
 	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
-	$debug2 and print "&load_project\n";
 	$debug and print yaml_out \%h;
 	print ("no project name.. doing nothing.\n"),return unless $h{name} or $project;
 
@@ -2056,7 +2056,7 @@ sub save_state {
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file);
 	# print "filename base: $file\n";
-	print "saving state as $file\n";
+	print "Saving state as $file.yml\n";
 
     # sort marks
 	
@@ -2121,7 +2121,7 @@ sub retrieve_state {
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
 	$file = $yamlfile if -f $yamlfile;
-	! -f $file and (print "file not found: $file\n"), return;
+	! -f $file and (print "file not found: $file.yml\n"), return;
 	$debug and print "using file: $file\n";
 
 	assign_var($file, @persistent_vars );
