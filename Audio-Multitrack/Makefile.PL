@@ -4,7 +4,7 @@ use inc::Module::Install;
          name                'Audio-Ecasound-Multitrack';
 		 version_from        'lib/Audio/Ecasound/Multitrack.pm';
 		 perl_version_from   'lib/Audio/Ecasound/Multitrack.pm';
-		 abstract_from       'scripts/nama';
+		 abstract_from        'lib/Audio/Ecasound/Multitrack.pm';
 		 install_script      'scripts/nama'; 
 		 author_from         'scripts/nama';
 		 license_from        'README';

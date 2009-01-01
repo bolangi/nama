@@ -368,11 +368,12 @@ sub rec_status{
 	'OFF';
 
 }
-
+no warnings;
 sub ch_r {
 	my $track = shift;
 	return '';
 }
+use warnings;
 
 
 
