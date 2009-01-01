@@ -119,12 +119,11 @@ sub prepare {
 	# m: don't load state info on initial startup
 	# e: don't load static effects data
 	# s: don't load static effects data cache
-	if ($opts{t}) {
-		require Time::HiRes;
-		import  Time::HiRes;
-		require Event;
-		import  Event;
-	} else {
+	
+	# load Tk only in graphic mode
+	
+	if ($opts{t}) {}
+	else { 
 		require Tk;
 		import Tk;
 	}

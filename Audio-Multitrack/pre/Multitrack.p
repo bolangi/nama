@@ -17,7 +17,6 @@ our $VERSION = '0.976';
 
 }
 
-use Tk;
 use Carp;
 use Cwd;
 use Storable; 
@@ -31,6 +30,7 @@ use File::Spec::Link;
 use IO::All;
 use Time::HiRes; 
 use Event;
+# use Tk    # loaded conditionally in GUI mode
 
 ## Definitions ##
 
