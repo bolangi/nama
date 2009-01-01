@@ -157,13 +157,13 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 
 
-r: 'r' dd  {	
+record_channel: 'r' dd  {	
 				$::this_track->set(ch_r => $item{dd});
 				$::ch_r = $item{dd};
 				print "Input switched to channel $::ch_r.\n";
 				
 				}
-m: 'm' dd  {	
+monitor_channel: 'm' dd  {	
 				$::this_track->set(ch_m => $item{dd}) ;
 				$::ch_m = $item{dd};
 				print "Output switched to channel $::ch_m.\n";

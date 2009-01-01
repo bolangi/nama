@@ -1,5 +1,3 @@
-
-
 package ::;
 use 5.008;
 use strict;
@@ -12,6 +10,7 @@ no warnings;
 BEGIN{ 
 
 our $VERSION = '0.976';
+our $ABSTRACT = 'Lightweight multitrack recorder/mixer';
 
 [% qx(cat ./banner.pl) %]
 
