@@ -1334,7 +1334,32 @@ sub all {
 	
 }
 
+sub show_chain_setup {
+	my $setup = join_path( project_dir(), $chain_setup_file);
+	if ( $use_pager ) {
+		system qq($ENV{PAGER} $setup);
+	} else {
+		my $chain_setup;
+		io( $setup ) > $chain_setup; 
+		print $chain_setup, $/;
+	}
+}
+sub pager {
+	my @output = @_;
+	if ( $use_pager ) {
+		my $fh = File::Temp->new();
+		my $fname = $fh->filename;
+		print $fh @output;
+		system qq($ENV{PAGER} $fname);
+	} else {
+		print @output;
+	}
+}
 
+sub show_io {
+	my $output = yaml_out( \%inputs ), yaml_out( \%outputs ); 
+	pager( $output );
+}
 ## following code for controllers comment out
 =comment
 	my $parent = $cops{$id}->{belongs_to} ;

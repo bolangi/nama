@@ -18,7 +18,8 @@
 						$mixer_out_device
 						$project_root 	
 						$record_device	
- 						$controller_ports    );
+ 						$controller_ports
+						$use_pager    );
 						
 						
 

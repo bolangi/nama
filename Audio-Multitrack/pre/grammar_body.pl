@@ -116,13 +116,11 @@ modifiers: _modifiers end { print $::this_track->modifiers, $/; }
 	
 	
 show_chain_setup: _show_chain_setup {
-	my $chain_setup;
-	::io( ::join_path( ::project_dir(), $::chain_setup_file) ) > $chain_setup; 
-	print $chain_setup, $/;
+	::show_chain_setup();
 }
 
-show_io: _show_io { print ::yaml_out( \%::inputs ),
-::yaml_out( \%::outputs ); }
+show_io: _show_io { ::show_io() }
+
 
 show_track: _show_track end {
 	::Text::show_tracks($::this_track);

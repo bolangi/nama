@@ -71,3 +71,11 @@ abbreviations:
   cd-mono: s16_le,1,44100
   cd-stereo: s16_le,2,44100,i
   frequency: 44100
+
+# should I use a pager to display lengthy text outputs?
+
+use_pager: 1
+
+# MIDI ports to watch for controller inputs (not yet implemented)
+
+controller_ports: ~

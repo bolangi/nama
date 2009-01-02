@@ -14,6 +14,7 @@ our (
 	$help_screen, 		# 
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic
+	$use_pager,     # display lengthy output data using pager
 
 	$ui, # object providing class behavior for graphic/text functions
 
