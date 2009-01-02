@@ -1346,7 +1346,9 @@ sub show_chain_setup {
 }
 sub pager {
 	my @output = @_;
-	if ( $use_pager ) {
+	my $lines;
+	map{ $lines += $_ =~ tr(\n)(\n) } @output;
+	if ( $use_pager and $lines > 24) { # $ENV{LINES} is empty!!
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
 		print $fh @output;
