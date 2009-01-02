@@ -190,21 +190,12 @@ vol: _vol '-' dd end { $::copp{ $::this_track->vol }->[0] -= $item{dd} ;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], $/ }
 
-mute: _mute end {
+mute: _mute end { ::mute() }
 
-	$::this_track->set(old_vol_level => $::copp{$::this_track->vol}[0])
-		if ( $::copp{$::this_track->vol}[0]);  # non-zero volume
-	$::copp{ $::this_track->vol }->[0] = 0;
-	::sync_effect_param( $::this_track->vol, 0);
-}
-unmute: _unmute end {
-	return if $::copp{$::this_track->vol}[0]; # if we are not muted
-	return if ! $::this_track->old_vol_level;
-	$::copp{$::this_track->vol}[0] = $::this_track->old_vol_level;
-	$::this_track->set(old_vol_level => 0);
-	::sync_effect_param( $::this_track->vol, 0);
-}
+unmute: _unmute end { ::unmute() }
+solo: _solo end { ::solo() }
 
+all: _all end { ::all()  }
 
 unity: _unity end { $::copp{ $::this_track->vol }->[0] = 100;
 				::sync_effect_param( $::this_track->vol, 0);

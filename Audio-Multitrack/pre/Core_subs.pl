@@ -1279,6 +1279,62 @@ sub remove_effect {
 	delete $copp{$id};
 	$ti[$n]->remove_effect( $id );
 
+sub mute {
+	return if $this_track->old_vol_level();
+	$this_track->set(old_vol_level => $copp{$this_track->vol}[0])
+		if ( $copp{$this_track->vol}[0]);  # non-zero volume
+	$copp{ $this_track->vol }->[0] = 0;
+	sync_effect_param( $this_track->vol, 0);
+}
+sub unmute {
+	return if $copp{$this_track->vol}[0]; # if we are not muted
+	return if ! $this_track->old_vol_level;
+	$copp{$this_track->vol}[0] = $this_track->old_vol_level;
+	$this_track->set(old_vol_level => 0);
+	sync_effect_param( $this_track->vol, 0);
+}
+sub solo {
+	my $current_track = $this_track;
+	if ($soloing) { all() }
+
+	# get list of already muted tracks if I haven't done so already
+	
+	if ( ! @already_muted ){
+	print "none muted\n";
+		@already_muted = grep{ $_->old_vol_level} 
+                         map{ $tn{$_} } 
+						 $tracker->tracks;
+	print join " ", "muted", map{$_->name} @already_muted;
+	}
+
+	# mute all tracks
+	map { $this_track = $tn{$_}; mute() } $tracker->tracks;
+
+    $this_track = $current_track;
+    unmute();
+	$soloing = 1;
+}
+
+sub all {
+	
+	my $current_track = $this_track;
+	# unmute all tracks
+	map { $this_track = $tn{$_}; unmute() } $tracker->tracks;
+
+	# re-mute previously muted tracks
+	if (@already_muted){
+		map { $this_track = $_; mute() } @already_muted;
+	}
+
+	# remove listing of muted tracks
+	
+	@already_muted = ();
+	$this_track = $current_track;
+	$soloing = 0;
+	
+}
+
+
 ## following code for controllers comment out
 =comment
 	my $parent = $cops{$id}->{belongs_to} ;

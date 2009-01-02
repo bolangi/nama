@@ -137,6 +137,15 @@ unity:
   what: set unity, i.e. 100 volume, current track
   smry: unity volume
   parameters: none
+solo:
+  type: track
+  what: mute all but current track
+  parameters: none
+all:
+  type: track
+  what: restore all muted tracks
+  parameters: none
+  short: nosolo
 pan:
   type: track
   short: p	

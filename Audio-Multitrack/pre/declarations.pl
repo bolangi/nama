@@ -287,4 +287,9 @@ our (
 	$term, 			# Term::ReadLine object
 	$controller_ports, # where we listen for MIDI messages
     $midi_inputs,  # on/off/capture
+
+	@already_muted, # for soloing list of Track objects that are 
+                    # muted before we begin
+    $soloing,       # one user track is on, all others are muted
+
 );

@@ -425,10 +425,7 @@ sub new {
 	$object;
 }
 
-sub tracks { # returns list of tracks in group 
-
-	# note this contrasts with $track->versions, which is 
-	# a array reference.
+sub tracks { # returns list of track names in group 
 
 	my $group = shift;
 	my @all = ::Track::all;
@@ -436,6 +433,8 @@ sub tracks { # returns list of tracks in group
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
 
+
+# all groups
 
 sub all { @by_index[1..scalar @by_index - 1] }
 
