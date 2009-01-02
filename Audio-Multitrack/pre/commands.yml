@@ -76,7 +76,7 @@ dump_group:
 dump_all:
   type: diagnostics
   what: dump all internal state (save_state dumped to screen) 
-  short: dumpa
+  short: dumpall dumpa
 rec:
   type: track
   what: rec enable 
