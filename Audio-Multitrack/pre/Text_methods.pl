@@ -213,15 +213,16 @@ sub helpline {
 			if $commands{$cmd}->{parameters};	
 	$text .=  "example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
 			if $commands{$cmd}->{example};
-	print( $/, ucfirst $text, $/);
+	($/, ucfirst $text, $/);
 	
 }
 sub helptopic {
 	my $index = shift;
 	$index =~ /^\d+$/ and $index = $help_topic[$index];
-	print "\n-- ", ucfirst $index, " --\n\n";
-	print $help_topic{$index};
-	print $/;
+	my @output;
+	push @output, "\n-- ", ucfirst $index, " --\n\n";
+	push @output, $help_topic{$index}, $/;
+	@output;
 }
 
 sub help { 
@@ -232,27 +233,36 @@ sub help {
 
 $name is an Ecasound command.  See 'man ecasound-iam'.
 IAM
-	$help_topic{$name} and helptopic($name), return;
-	$name == 10 and (map{ helptopic $_ } @help_topic), return;
-	$name =~ /^\d+$/ and helptopic($name), return;
-
-	$commands{$name} and helpline($name), return;
-	my %helped = (); 
-	map{  my $cmd = $_ ;
-		
-		helpline($cmd), $helped{$cmd}++ if $cmd =~ /$name/;
-
-		  # print ("commands short: ", $commands{$cmd}->{short}, $/),
-	      helpline($cmd) 
-		  	if grep { /$name/ } split " ", $commands{$cmd}->{short} 
-				and ! $helped{$cmd};
-	} keys %commands;
+	my @output;
+	if ( $help_topic{$name}){
+		@output = helptopic($name);
+	} elsif ($name == 10){
+		@output = map{ helptopic $_ } @help_topic;
+	} elsif ( $name =~ /^\d+$/ ){
+		@output = helptopic($name)
+	} elsif ( $commands{$name}){
+		@output = helpline($name)
+	} else {
+		my %helped = (); 
+		map{  
+			my $cmd = $_ ;
+			if ($cmd =~ /$name/){
+				push( @output, helpline($cmd));
+				$helped{$cmd}++ ;
+			}
+			if ( grep{ /$name/ } split " ", $commands{$cmd}->{short} 
+					and ! $helped{$cmd}){
+				push @output, helpline($cmd) 
+			}
+		} keys %commands;
+	}
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {
-	print "$name is the code for the following LADSPA effect:\n";
+	push @output, "$name is the code for the following LADSPA effect:\n",
 	#print yaml_out( $effects_ladspa{"el:$name"});
-    print qx(analyseplugin $name);
+    	print qx(analyseplugin $name);
 	}
+	::pager(@output);
 	
 }
 

@@ -69,9 +69,9 @@ add_track: _add_track name end {
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
 }
-dump_track: _dump_track { $::this_track->dumpp }
+dump_track: _dump_track { ::pager($::this_track->dumpp) }
 
-dump_group: _dump_group { $::tracker->dumpp }
+dump_group: _dump_group { ::pager($::tracker->dumpp) }
 
  
 remove_track: _remove_track name end {
