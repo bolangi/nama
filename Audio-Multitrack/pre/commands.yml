@@ -64,15 +64,19 @@ set_track:
   smry: set object fields
   example: set ch_m 5   (direct monitor output for current track to channel 5)
 dump_track:
-  type: track
+  type: diagnostics
   what: dump current track data to screen (YAML format)
   short: dump
   smry: dump track data
 dump_group:
-  type: group
+  type: diagnostics 
   what: dump the settings of the group for user tracks 
   short: dumpg
   smry: dump group settings
+dump_all:
+  type: diagnostics
+  what: dump all internal state (save_state dumped to screen) 
+  short: dumpa
 rec:
   type: track
   what: rec enable 

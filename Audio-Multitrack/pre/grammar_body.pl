@@ -73,7 +73,8 @@ dump_track: _dump_track { ::pager($::this_track->dumpp) }
 
 dump_group: _dump_group { ::pager($::tracker->dumpp) }
 
- 
+dump_all: _dump_all { ::dump_all() }
+
 remove_track: _remove_track name end {
 	$::tn{ $item{name} }->set(hide => 1); }
 
@@ -115,9 +116,7 @@ modifiers: _modifiers modifier(s) end {
 modifiers: _modifiers end { print $::this_track->modifiers, $/; }
 	
 	
-show_chain_setup: _show_chain_setup {
-	::show_chain_setup();
-}
+show_chain_setup: _show_chain_setup { ::show_chain_setup(); }
 
 show_io: _show_io { ::show_io() }
 

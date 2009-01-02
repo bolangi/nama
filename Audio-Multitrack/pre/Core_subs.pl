@@ -1278,7 +1278,7 @@ sub remove_effect {
 	delete $cops{$id};
 	delete $copp{$id};
 	$ti[$n]->remove_effect( $id );
-
+}
 sub mute {
 	return if $this_track->old_vol_level();
 	$this_track->set(old_vol_level => $copp{$this_track->vol}[0])
@@ -1346,24 +1346,41 @@ sub show_chain_setup {
 }
 sub pager {
 	my @output = @_;
-	my $lines;
-	map{ $lines += $_ =~ tr(\n)(\n) } @output;
-	if ( $use_pager and $lines > 24) { # $ENV{LINES} is empty!!
+	my $line_count;
+	my ($lines, $columns) = split " ",qx(stty size);
+	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
+	if ( $use_pager and $line_count > 24) { 
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
 		print $fh @output;
-		system qq($ENV{PAGER} $fname);
+		file_pager($fname);
 	} else {
 		print @output;
 	}
 }
+sub file_pager {
+	my $fname = shift;
+	if (! -e $fname or ! -r $fname ){
+		carp "file not found or not readable: $fname\n" ;
+		return;
+    }
+	system qq($ENV{PAGER} $fname);
+}
+sub dump_all {
+	my $tmp = ".dump_all.yml";
+	my $fname = join_path( project_root(), $tmp);
+	save_state($fname);
+	file_pager($fname);
+}
+
 
 sub show_io {
 	my $output = yaml_out( \%inputs ), yaml_out( \%outputs ); 
 	pager( $output );
 }
-## following code for controllers comment out
 =comment
+	
+## following code for controllers comment out
 	my $parent = $cops{$id}->{belongs_to} ;
 
 	if ( $parent ) {
@@ -1389,10 +1406,10 @@ sub show_io {
     	
 	if ($parent) { remove_ctrl $id }
 	else {remove_op($id)}
-=cut
 
 			
 }
+=cut
 sub remove_effect_gui { 
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect_gui\n";
@@ -1574,7 +1591,7 @@ sub sync_effect_param {
 }
 
 sub effect_update_copp_set {
-	# will superseded effect_update for most places
+
 	my ($chain, $id, $param, $val) = @_;
 	effect_update( @_ );
 	$copp{$id}->[$param] = $val;
@@ -2136,8 +2153,9 @@ sub save_state {
 	# (done for Text mode)
 
  # old vol level has been stored, thus is muted
+ 	
 	$file = $file ? $file : $state_store_file;
-	$file = join_path(&project_dir, $file);
+	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	# print "filename base: $file\n";
 	print "\nSaving state as $file.yml\n";
 
