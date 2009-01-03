@@ -323,7 +323,7 @@ sub rec_route {
 	my $track = shift;
 	
 	# no need to route a jack client
-	return if $track->ch_r =~ /[a-zA-Z]/;
+	return if $track->jack_source;
 
 	# no need to route a signal at channel 1
 	return if ! $track->ch_r or $track->ch_r == 1; 
