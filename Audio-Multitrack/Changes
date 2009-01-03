@@ -9,3 +9,4 @@ Revision history for Perl extension Audio::Ecasound::Multitrack
 0.976 Wed Dec 31, 2008  - fix segfault on retrieve_state with no user tracks 
                         - fix next inside map error in integrate_ladspa_hints
                         - package cleanup
+0.977 Wed Jan 1, 2009   - fix pod

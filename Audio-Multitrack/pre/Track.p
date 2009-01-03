@@ -77,8 +77,8 @@ sub new {
 				return $track;
 
 			} else {
-		$debug and carp  ("track name already in use: $vals{name}\n"), return
-		 #if $track_names{$vals{name}}; # null name returns false
+		carp  ("track name already in use: $vals{name}\n"), return
+		 if $track_names{$vals{name}}; 
 
 		}
 	}
@@ -336,6 +336,9 @@ sub rec_route {
 	
 }
 sub route {
+
+	# routes signals 1,2,3,...$width to $dest + 0, $dest + 1, $dest + 2,... 
+	
 	my ($width, $dest) = @_;
 	return undef if $dest == 1 or $dest == 0;
 	# print "route: width: $width, destination: $dest\n\n";

@@ -1407,7 +1407,6 @@ sub show_chain_setup {
 sub pager {
 	my @output = @_;
 	my $line_count;
-	my ($lines, $columns) = split " ",qx(stty size);
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if ( $use_pager and $line_count > 24) { 
 		my $fh = File::Temp->new();
@@ -1438,38 +1437,35 @@ sub show_io {
 	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
 	pager( $output );
 }
-=comment
-	
+
 ## following code for controllers comment out
-	my $parent = $cops{$id}->{belongs_to} ;
+# 
+# 	my $parent = $cops{$id}->{belongs_to} ;
+# 
+# 	if ( $parent ) {
+# 
+# 	# if i belong to someone, i am a controller.
+# 	
+# 	# i remove their ownership of me
+# 
+# 	$debug and print "parent $parent owns list: ", join " ",
+# 		@{ $cops{$parent}->{owns} }, "\n";
+# 
+# 	@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+# 		@{ $cops{$parent}->{owns} } ; 
+# 	$cops{$id}->{belongs_to} = undef;
+# 	$debug and print "parent $parent new owns list: ", join " ",
+# 	}
+# 
+# 	# recursively remove children
+# 	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
+# 		
+# 	map{remove_effect($_)}@{ $cops{$id}->{owns} };
+# 
+#     	
+# 	if ($parent) { remove_ctrl $id }
+# 	else {remove_op($id)}
 
-	if ( $parent ) {
-
-	# if i belong to someone, i am a controller.
-	
-	# i remove their ownership of me
-
-	$debug and print "parent $parent owns list: ", join " ",
-		@{ $cops{$parent}->{owns} }, "\n";
-
-	@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
-		@{ $cops{$parent}->{owns} } ; 
-	$cops{$id}->{belongs_to} = undef;
-	$debug and print "parent $parent new owns list: ", join " ",
-	}
-
-	# recursively remove children
-	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
-		
-	map{remove_effect($_)}@{ $cops{$id}->{owns} };
-
-    	
-	if ($parent) { remove_ctrl $id }
-	else {remove_op($id)}
-
-			
-}
-=cut
 sub remove_effect_gui { 
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect_gui\n";
@@ -1811,13 +1807,13 @@ sub prepare_static_effects_data{
 }
 sub prepare_effect_index {
 	%effect_j = ();
-=comment
-	my @ecasound_effects = qw(
-		ev evp ezf eS ea eac eaw eal ec eca enm ei epp
-		ezx eemb eemp eemt ef1 ef3 ef4 efa efb efc efh efi
-		efl efr efs erc erm etc etd ete etf etl etm etp etr);
-	map { $effect_j{$_} = $_ } @ecasound_effects;
-=cut
+# =comment
+# 	my @ecasound_effects = qw(
+# 		ev evp ezf eS ea eac eaw eal ec eca enm ei epp
+# 		ezx eemb eemp eemt ef1 ef3 ef4 efa efb efc efh efi
+# 		efl efr efs erc erm etc etd ete etf etl etm etp etr);
+# 	map { $effect_j{$_} = $_ } @ecasound_effects;
+# =cut
 	map{ 
 		my $code = $_;
 		my ($short) = $code =~ /:(\w+)/;
@@ -2434,106 +2430,5 @@ sub save_effects {
 
 }
 
-=comment unused
-
-sub retrieve_effects {
-	$debug2 and print "&retrieve_effects\n";
-	my $file = shift;
-	my %current_cops = %cops; # 
-	my %current_copp = %copp; # 
-	assign_vars($file, @effects_dynamic_vars);
-	my %old_copp = %copp;  # 
-	my %old_cops = %cops; 
-	%cops = %current_cops;
-	%copp = %current_copp; ## similar name!!
-
-
-	#print "\%state_c_ops\n ", yaml_out( \%state_c_ops), "\n\n";
-	#print "\%old_cops\n ", yaml_out( \%old_cops), "\n\n";
-	#print "\%old_copp\n ", yaml_out( \%old_copp), "\n\n";
-#	return;
-
-	restore_time_marker_labels();
-
-	# remove effects except vol and pan, in which case, update vals
-
-	map{ 	
-	
-		$debug and print "found chain $_: ", join " ",
-		@{ $ti[$_]->ops }, "\n";
-
-		my $n = $_;
-		map {	my $id = $_; 
-				$debug and print "checking chain $n, id $id: ";
-				
-				if (	$ti[$n]->vol eq $id or
-						$ti[$n]->pan eq $id  ){
-
-					# do nothing
-				$debug and print "is vol/pan\n";
-
-				}
-				else {
-					
-					$debug and print "is something else\n";
-					remove_effect($id) ;
-					remove_op($id)
-			}
-
-		} @{ $ti[$_]->ops }
-	} all_chains();
-			
-	return;
-
-	# restore ops list
-	
-	map{ $ti[$_]->set(ops => $state_c_ops{$_}) } all_chains();
-
-	# restore ops->chain mapping
-	
-	%cops = %old_copp;
-
-	# add the correct copp entry for each id except vol/pan
-	map{ my $n = $_;
-			map {	my $id = $_; 
-				if (	$ti[$n]->vol eq $id or
-						$ti[$n]->pan eq $id  ){
-
-					$copp{$id}->[0] = $old_copp{$id}->[0];
-				}
-				else {  $copp{$id} = $old_copp{$id} }
-
-			} @{ $ti[$_]->ops }
-		} all_chains();
-
-	# apply ops
-	
-	my $did_apply = 0;
-
-	for my $n (all_chains() ) { 
-		for my $id (@{$ti[$n]->ops}){
-			$did_apply++ 
-				unless $id eq $ti[$n]->vol
-					or $id eq $ti[$n]->pan;
-
-			
-			add_effect({  
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
-						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
-						});
-
-		# TODO if parent has a parent, i am a parameter controller controlling
-		# a parameter controller, and therefore need the -kx switch
-		}
-	}
-	# $did_apply and print "########## applied\n\n";
-	
-	$ew->deiconify or $ew->iconify;
-
-}
-
-=cut
 sub process_control_inputs { }
 ### end
