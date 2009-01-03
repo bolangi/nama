@@ -891,7 +891,7 @@ WARN
 			push  @input_chains, 
 				"-a:"
 				. join(",",@chain_ids)
-				. " -i:jack,$dev -f:$format";
+				. " -i:jack_auto,$dev -f:$format";
 		}
 		
 	}
