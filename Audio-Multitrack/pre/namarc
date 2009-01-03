@@ -49,10 +49,14 @@ raw_to_disk_format: cd-mono
 # indents _are_ significant in the lines below
 
 devices: 
-  jack: 
+  jack_alsa: 
     ecasound_id: jack_alsa
-    input_format: 32-12
-    output_format: 32-10
+    input_format: f32-12
+    output_format: f32-10
+  jack:
+    ecasound_id: jack
+    input_format: f32_le,N,frequency
+    output_format: f32_le,N,frequency
   multi:
     ecasound_id: alsa,ice1712
     input_format: 32-12
@@ -68,6 +72,8 @@ abbreviations:
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency
   32-12: s32_le,12,frequency
+  f32-10: f32_le,10,frequency
+  f32-12: f32_le,12,frequency
   cd-mono: s16_le,1,44100
   cd-stereo: s16_le,2,44100,i
   frequency: 44100

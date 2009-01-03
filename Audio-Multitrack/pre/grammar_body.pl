@@ -154,18 +154,37 @@ exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
 
 
-record_channel: 'r' dd  {	
-				$::this_track->set(ch_r => $item{dd});
-				$::ch_r = $item{dd};
-				print "Input switched to channel $::ch_r.\n";
-				
-				}
-monitor_channel: 'm' dd  {	
-				$::this_track->set(ch_m => $item{dd}) ;
-				$::ch_m = $item{dd};
-				print "Output switched to channel $::ch_m.\n";
-				
-				}
+record_channel: _record_channel dd {	
+	$::this_track->set(ch_r => $item{dd}) ;
+	$::ch_r = $item{dd};
+	print "Input switched to channel $::ch_r.\n";
+}
+monitor_channel: _monitor_channel dd  {	
+	$::this_track->set(ch_m => $item{dd}) ;
+	$::ch_m = $item{dd};
+	print "Output switched to channel $::ch_m.\n";
+}
+jack_source: _jack_source name { 
+	my $source = $item{name};
+	my $name = $::this_track->name;
+	$::this_track->set(jack_source => $source);
+	print qq(Setting JACK client "$source" as source for current track.\n);
+}
+jack_source: _jack_source {
+	my $source = $::this_track->jack_source;
+	my $name  = $::this_track->name;
+	print qq(JACK client "$source" is the source for track "$name".\n);
+}
+nojack: _nojack {
+	my $source = $::this_track->jack_source;
+	my $name = $::this_track->name;
+	$::this_track->set(jack_source => q());
+	print "Input switched to soundcard channel ", $::this_track->input,
+	"\n";
+}
+
+stereo: _stereo { $::this_track->set(ch_count => 2) }
+mono:   _mono   { $::this_track->set(ch_count => 1) }
 
 off: 'off' end {$::this_track->set(rw => 'OFF'); }
 rec: 'rec' end {$::this_track->set(rw => 'REC'); }

@@ -20,11 +20,13 @@ $n = 0; 	# incrementing numeric key
 # attributes offset, loop, delay for entire setup
 # attribute  modifiers
 # new attribute will be 
-use ::Object qw( 	name
+use ::Object qw( 		name
 						active
 
 						ch_r 
 						ch_m 
+						ch_count
+						
 						rw
 
 						vol  
@@ -46,6 +48,7 @@ use ::Object qw( 	name
 						hide
 						modifiers
 
+						jack_source
 						
 						);
 
@@ -93,6 +96,7 @@ sub new {
 					active	=> undef,
 					ch_r 	=> undef,
 					ch_m 	=> undef,
+					ch_count => 1,
 					vol  	=> undef,
 					pan 	=> undef,
 
@@ -129,6 +133,10 @@ sub new {
 	
 }
 
+sub input {
+	my $track = shift;
+	$track->ch_r ? $track->ch_r : 1
+}
 sub dir { ::this_wav_dir() } # replaces dir field
 
 sub full_path { my $track = shift; join_path $track->dir , $track->current }
@@ -294,10 +302,14 @@ sub remove_effect {
 sub mono_to_stereo { 
 	my $track = shift;
 	my $cmd = "file " .  $track->full_path;
-	return if qx(which file)
-		and -e $track->full_path
-		and qx($cmd) =~ /stereo/i;
-	" -erc:1,2 "
+	if ( 	$track->ch_count == 2
+		    or  -e $track->full_path
+				and qx(which file)
+				and qx($cmd) =~ /stereo/i ){ 
+		return "" 
+	} elsif ( $track->ch_count == 1 ){
+		return " -erc:1,2 " 
+	} else { carp "Track ".$track->name.": Unexpected channel count\n"; }
 }
 sub pre_multi {
 	#$debug2 and print "&pre_multi\n";
@@ -307,10 +319,21 @@ sub pre_multi {
 }
 
 sub rec_route {
+	no warnings qw(uninitialized);
 	my $track = shift;
-	return if ! $track->ch_r;
-	return if $track->ch_r == 1 or ! $track->ch_r;
-	"-erc:" . $track->ch_r. ",1"; #  -f:$rec_format ";
+	
+	# no need to route a jack client
+	return if $track->ch_r =~ /[a-zA-Z]/;
+
+	# no need to route a signal at channel 1
+	return if ! $track->ch_r or $track->ch_r == 1; 
+	
+	my $route = "-erc:" . $track->ch_r . ",1"; 
+	if ( $track->ch_count == 2){
+		$route .= " -erc:" . ($track->ch_r + 1) . ",2";
+	}
+	return $route;
+	
 }
 sub route {
 	my ($width, $dest) = @_;
@@ -424,6 +447,7 @@ sub new {
 	$by_name{ $object->name } = $object;
 	$object;
 }
+
 
 sub tracks { # returns list of track names in group 
 

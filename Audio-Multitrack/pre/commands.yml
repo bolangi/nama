@@ -100,8 +100,23 @@ monitor_channel:
 record_channel:
   type: track
   short: r
-  what: set track input channel number
+  what: set track input channel
   smry: set track input channel 
+jack_source:
+  type: track
+  what: set JACK client as source for track
+  short: jack
+  parameters: client_name (returns client name with no parameter)
+nojack:
+  type: track
+  what: disable jack client, setting soundcard as source for track
+  short: nj sound_card sc
+stereo:
+  type: track
+  what: record two channels for current track
+mono:
+  type: track
+  what: record one channel for current track
 set_version:
   type: track
   short: version n ver
