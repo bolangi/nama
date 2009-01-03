@@ -17,41 +17,28 @@ end: /\s*$/
 end: ';' 
 help: _help end { print $::help_screen }
 help: _help name2  { ::Text::help($item{name2}) }
-# iterate over commands yml
-# find right command, print helptext
-#	print $::helptext  }
-helpx: 'helpx' end { print "hello_from your command line gramar\n"; }
-fail: 'f' end { print "your command line gramar will get a zero\n"; }
 exit: _exit end { ::save_state(); exit }
-create_project: _create_project name end {
-	::t_create_project $item{name}
-}
+create_project: _create_project name end { ::t_create_project $item{name} }
 
 list_projects: _list_projects end { ::list_projects() }
 
 load_project: _load_project name end {
 	::t_load_project( $item{name} )
 }
-save_state: _save_state name end { 
-	::save_state( $item{name} ); 
-	}
+save_state: _save_state name end { ::save_state( $item{name} ); }
 save_state: _save_state end { ::save_state() }
 
 
 get_state: _get_state name end {
-	# print "get with parameter: $item{name}\n";
  	::load_project( 
  		name => $::project_name,
  		settings => $item{name}
  		);
- #	print "set state:  $item{name}\n";
  	}
 get_state: _get_state end {
-	# print "get without parameter\n";
  	::load_project( 
  		name => $::project_name,
  		);
- #	print "set state:  $item{name}\n";
  	}
 getpos: _getpos end {  
 	print ::d1( ::eval_iam q(getpos) ), $/; }
@@ -59,12 +46,7 @@ setpos: _setpos value end {
 	::eval_iam("setpos $item{value}");
 }
 
-add_track: _add_track name end { 
-	# print "adding: ", ::yaml_out( $item{'channels(s?)'} ), $/;
-	::add_track($item{name}); 
-	#print "added track $item{name}\n";
-}
-
+add_track: _add_track name end { ::add_track($item{name}); }
 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
@@ -87,7 +69,6 @@ connect: _connect end { ::connect_transport(); }
 
 disconnect: _disconnect end { ::disconnect_transport(); }
 
-
 renew_engine: _renew_engine end { ::new_engine(); }
 engine_status: _engine_status end { print(::eval_iam
 q(engine-status));print $/ }
@@ -95,8 +76,8 @@ q(engine-status));print $/ }
 start: _start end { ::start_transport(); }
 stop: _stop end { ::stop_transport(); }
 
-S: _S end { ::eval_iam("stop") }
-T: _T end { ::eval_iam("start") }
+ecasound_start: _ecasound_start end { ::eval_iam("stop") }
+ecasound_stop: _ecasound_stop  end { ::eval_iam("start") }
 
 show_tracks: _show_tracks end { 	
 
@@ -114,7 +95,6 @@ modifiers: _modifiers modifier(s) end {
 }
 
 modifiers: _modifiers end { print $::this_track->modifiers, $/; }
-	
 	
 show_chain_setup: _show_chain_setup { ::show_chain_setup(); }
 
@@ -182,6 +162,10 @@ nojack: _nojack {
 	print "Input switched to soundcard channel ", $::this_track->input,
 	"\n";
 }
+jack_on: _jack_on { $::jack_enable = 1; print "Using JACK.\n" }
+
+jack_off: _jack_off { $::jack_enable = 1; print "Disabling JACK functions.\n" }
+
 
 stereo: _stereo { $::this_track->set(ch_count => 2) }
 mono:   _mono   { $::this_track->set(ch_count => 1) }
@@ -357,8 +341,8 @@ group_version: _group_version end {
 	use warnings;
 	no warnings qw(uninitialized);
 	print $::tracker->version, $/ }
-group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
+group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, $/;

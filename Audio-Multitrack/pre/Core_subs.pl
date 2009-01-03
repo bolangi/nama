@@ -369,7 +369,9 @@ sub initialize_rules {
 		input_object	=> $loopb, 
 
 		output_type		=> 'device',
-		output_object	=> $mixer_out_device,
+		output_object	=> sub { $jack_enable 
+									? $mixer_out_device_jack
+									: $mixer_out_device },
 
 		status			=> 1,
 
@@ -468,7 +470,7 @@ sub initialize_rules {
 		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
 		input_type	=>  'device',
 		input_object	=>  sub { my $track = shift;
-								$track->jack_source
+									($jack_enable and $track->jack_source)
 									? $track->jack_source
 									: $record_device },
 		output_type	=>  'file',
@@ -495,7 +497,7 @@ sub initialize_rules {
 		target			=>	'REC',
 		input_type		=>  'device',
 		input_object	=>  sub {   my $track = shift;
-									$track->jack_source
+									($jack_enable and $track->jack_source)
 										? $track->jack_source
 										: $record_device },
 		output_type		=>  'cooked',
@@ -851,10 +853,10 @@ sub write_chains {
 
 		$debug and print "dev: $dev\n";
 		my @chain_ids = @{ $inputs{device}->{$dev} };
-		print "found ids: @chain_ids\n";
+		#print "found ids: @chain_ids\n";
 
 		# case 1: if $dev appears in config file %devices listing
-		#         we assume $dev is a sound card
+		#         we treat $dev is a sound card
 		
 		if ( $devices{$dev} ){
 			push  @input_chains, 
@@ -863,24 +865,8 @@ sub write_chains {
 				"-i:" .  $devices{$dev}->{ecasound_id}, 
 		} else {
 
-		# case 2: $dev is probably a JACK client
+		# case 2: we treat $dev as a JACK client
 
-=comment
-		
-			if ( ! qx(pgrep jackd) ){
-				print <<"WARN";
-JACK server not found!!  
-
-For the Ecasound engine to run, you must do one of the following: 
-
-   1. Set track to 'nojack' 
-
-   2. Start the JACK server
-
-WARN
-			}
-=cut
-				
 			$chain_ids[0] =~ /(\d+)/;
 			my $n = $1;
 			print "found chain id: $n\n";
@@ -1043,11 +1029,17 @@ sub connect_transport {
 	find_op_offsets(); 
 	apply_ops();
 	eval_iam('cs-connect');
-	carp("Invalid chain setup, cannot arm transport.\n"), return 
-		unless eval_iam("engine-status") eq 'not started' ;
+	my $status = eval_iam("engine-status");
+	if ($status ne 'not started'){
+		print("Invalid chain setup, cannot connect engine.\n");
+		return;
+	}
 	eval_iam('engine-launch');
-	carp("Invalid chain setup, cannot arm transport.\n"), return
-		unless eval_iam("engine-status") eq 'stopped' ;
+	$status = eval_iam("engine-status");
+	if ($status ne 'stopped'){
+		print "Failed to launch engine. Engine status: $status\n";
+		return;
+	}
 	$length = eval_iam('cs-get-length'); 
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
@@ -2353,8 +2345,8 @@ sub retrieve_state {
 
 
 	#my $toggle_jack = $widget_o[$#widget_o]; # JACK
-	#convert_to_jack if $jack_on;
-	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_on;
+	#convert_to_jack if $jack_enable;
+	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_enable;
 	$ui->refresh_oids();
 
 	# restore Alsa mixer settings

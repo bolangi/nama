@@ -40,6 +40,7 @@
 						$loop_enable
 						@loop_endpoints
 						$length
+						$jack_enable
 
 						);
 						# $this_track

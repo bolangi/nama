@@ -64,7 +64,7 @@ $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
-$jack_on = 0; # you should configure jack as device directly in .namarc
+$jack_enable = 0; # you should configure jack as device directly in .namarc
 $project_root = join_path( $ENV{HOME}, "nama");
 
 ## Load my modules

@@ -13,14 +13,14 @@
 #
 #        - Indents are two spaces
 #
-#        - A value _must_ be supplied for each 'leaf' field
-#          such as 'mixer_out_device'
+#        - A value _must_ be supplied for each 'leaf' field.
+#          For example "use_pager: 1"
+#
+#        - Use the tilde symbol '~' to represent a null value
 #
 #        - A value must _not_ be supplied for nodes, i.e.
-#          'device', whose value is to be the entire indented
+#          'device:'. The value for 'device' is the entire indented
 #          data structure that follows.
-#
-#        - The special symbol '~' represents a null value
 #
 #        - Check the 'devices' and 'abbreviations' section at
 #          the end of this file to understand the values that
@@ -28,11 +28,13 @@
 #          /dev/dsp.
 #
 
-project_root: ~ # null in default file
+project_root: ~                  # replaced during first run
 
-mixer_out_device: consumer
+mixer_out_device: consumer       # default mixer out target
 
-record_device: consumer
+mixer_out_device_jack: jack_alsa # default mixer out target for JACK
+
+record_device: consumer          # default soundcard for input
 
 # globals for our chain setups
 
@@ -66,6 +68,18 @@ devices:
     input_format: cd-stereo
     output_format: cd-stereo
 
+# use JACK by default
+
+jack_enable: 0
+
+# use $PAGER to display lengthy text outputs?
+
+use_pager: 1
+
+# MIDI ports to watch for controller inputs (not yet implemented)
+
+controller_ports: ~
+
 # you may create arbitrary abbreviations
 
 abbreviations:  
@@ -78,10 +92,4 @@ abbreviations:
   cd-stereo: s16_le,2,44100,i
   frequency: 44100
 
-# should I use a pager to display lengthy text outputs?
-
-use_pager: 1
-
-# MIDI ports to watch for controller inputs (not yet implemented)
-
-controller_ports: ~
+# end

@@ -439,13 +439,13 @@ sub oid_gui {
 				
 					convert_to_alsa();
 					paint_button($toggle_jack, $old_bg);
-					$jack_on = 0;
+					$jack_enable = 0;
 				}
 				else {
 
 					convert_to_jack();
 					paint_button($toggle_jack, q(lightblue));
-					$jack_on = 1;
+					$jack_enable = 1;
 				}
 			}
 		);

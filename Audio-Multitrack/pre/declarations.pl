@@ -106,9 +106,8 @@ our (
 	$unit,			# jump multiplier, 1 or 60 seconds
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
-	$jack_on,		# whether we use device jack_alsa, currently unused 
-					# signals to replace regular output device with
-					# jack_alsa
+	$jack_enable,	# use JACK mixer out target and enable JACK client 
+ 					# connections
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
@@ -256,7 +255,8 @@ our (
 	@groups_data, # 
 	@marks_data, # 
 
-	$mixer_out_device, # where to send stereo output
+	$mixer_out_device,       # where to send stereo output
+	$mixer_out_device_jack,  # JACK target for stereo output
 	$record_device,    # where to get our inputs
 
 
