@@ -13,6 +13,7 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 end: /[;\s]*$/ 
 help: _help end { print $::help_screen }
+help: _help 'yml' end { ::pager($::commands_yml)}
 help: _help name2  { ::Text::help($item{name2}) }
 exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end { ::t_create_project $item{name} }
