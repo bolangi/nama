@@ -17,7 +17,7 @@ lib/Audio/Ecasound/Multitrack/Object.pm
 lib/Audio/Ecasound/Multitrack/Tkeca_effects.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
-scripts/nama
+script/nama
 t/02_assign.t
 t/03_wav.t
 t/04_object.t

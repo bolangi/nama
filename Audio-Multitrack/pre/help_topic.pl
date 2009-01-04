@@ -19,6 +19,7 @@ help => <<HELP,
    help <ladspa_id>        - invoke analyseplugin for info on a LADSPA id
    help <topic_number>     - list commands under <topic_number> 
    help <topic_name>       - list commands under <topic_name> (lower case)
+   help yml                - browse command source file
 HELP
 
 project => <<PROJECT,
@@ -48,6 +49,21 @@ track => <<TRACK,
    show_track, sh            -  show status of current track,
                                 including effects and versions, 
                                 "sax; sh"
+
+   solo                      -  mute all tracks but current track
+
+   nosolo                    -  return to pre-solo status
+
+   stereo                    -  set track width to 2 channels
+
+   mono                      -  set track width to 1 channel
+
+   source, src, ti, r        -  set track source to JACK client
+                                name or to sound card track number 
+								(9 for channels 9,10 if stereo) 
+
+                             -  with no arguments returns
+                                current signal source
 
    Most of the Track related commands operate on the 'current
    track'. To cut volume for a track called 'sax',  you enter
@@ -101,6 +117,8 @@ transport => <<TRANSPORT,
 
    loop_enable, loop  - loop over marks, i.e. loop start finish
    loop_disable, noloop, nl -  disable looping
+   jack               - Use JACK for I/O
+   nojack             - Disable JACK support 
 TRANSPORT
 
 marks => <<MARKS,
@@ -154,11 +172,12 @@ $help_screen = <<HELP;
 
 Welcome to Nama help
 
-The help command can take several arguments.
+The help command ('help', 'h') can take several arguments.
 
 help <command>          - show help for <command>
 help <fragment>         - show help for all commands matching /<fragment>/
-help <topic_number>     - list commands under topic <topic_number>
+help <topic_number>     - list commands under topic <topic_number> below
+help yml                - browse the YAML command source (authoritative)
 
 help is available for the following topics:
 

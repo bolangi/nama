@@ -142,12 +142,13 @@ sub command_process {
 		$debug and print "cmd: $cmd \npredicate: $predicate\n";
 		if ($cmd eq 'eval') {
 			$debug and print "Evaluating perl code\n";
-			print eval $predicate;
+			pager( eval $predicate);
 			print "\n";
 			$@ and print "Perl command failed: $@\n";
 		} elsif ($cmd eq '!') {
 			$debug and print "Evaluating shell commands!\n";
-			system $predicate;
+			my $output = qx( $predicate );
+			#pager($output); # TODO
 			print "\n";
 		} elsif ($tn{$cmd}) { 
 			$debug and print qq(Selecting track "$cmd"\n);
@@ -159,7 +160,8 @@ sub command_process {
 			$predicate !~ /^\s*$/ and $parser->command($predicate);
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found Iam command\n";
-			print eval_iam($user_input), $/ ;
+			my $result = eval_iam($user_input);
+			#pager( $result );  
 		} else {
 			$debug and print "Passing to parser\n", 
 			$_, $/;

@@ -1,12 +1,15 @@
-Revision history for Perl extension Audio::Ecasound::Multitrack
+Selected revision history for Perl extension Audio::Ecasound::Multitrack
 
 0.95  Thurs Sep 18 2008 - upload to CPAN
-0.96  Thurs Sep 18 2008 - upload correct branch to CPAN
-0.97  Fri Sep 18 2008   - fix package path error
-                        - replace Ext::MakeMaker with Module::Install
-0.973 Tue Oct 7, 2008   - restore independence of mixdown and monitor faders
-0.975 Mon Dec 29, 2008  - Chainsetup looping in both console and GUI modes
-0.976 Wed Dec 31, 2008  - fix segfault on retrieve_state with no user tracks 
-                        - fix next inside map error in integrate_ladspa_hints
-                        - package cleanup
-0.977 Wed Jan 1, 2009   - fix pod
+0.97  Fri Sep 18 2008   - replace Ext::MakeMaker with Module::Install
+0.975 Mon Dec 29, 2008  - new event sytem supports chainsetup looping 
+                          in both console and GUI modes
+0.978 Sat Jan 4, 2009   - much improved JACK support
+                        - jack/nojack commands enable/disable JACK 
+                        - source command sets track input to
+                          either JACK client name or soundcard channel number
+                        - jack_auto used to automatically
+                          link Ecasound to specified clients
+                        - stereo/mono commands to set track width 
+                        - solo/nosolo commands for selective listening 
+                        - long text output displays in pager

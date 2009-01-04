@@ -32,12 +32,11 @@ project_root: ~                  # replaced during first run
                                  # This folder contains all 
                                  # project directories.
 
+# device selections
+
 mixer_out_device: consumer       # default mixer out target
-
 mixer_out_device_jack: jack_alsa # default mixer out target for JACK
-
 record_device: consumer          # default soundcard for input
-
 record_device_jack: jack_alsa    # default input soundcard for JACK
 
 # global variables for our chain setups
@@ -47,9 +46,7 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 # audio formats 
 
 mixer_out_format: cd-stereo      # wrong for JACK, but Ecasound fixes this
-
 mix_to_disk_format: cd-stereo
-
 raw_to_disk_format: s16_le,N,frequency
 
 # audio devices 
@@ -59,8 +56,8 @@ raw_to_disk_format: s16_le,N,frequency
 devices: 
   jack_alsa: 
     ecasound_id: jack_alsa
-    input_format: f32-12          # 12-channel ice1712
-    output_format: f32-10         # 10-channel ice1712
+    input_format: jack12
+    output_format: jack10
   jack:
     ecasound_id: jack
     input_format: f32_le,N,frequency
@@ -70,7 +67,7 @@ devices:
     input_format: 32-12
     output_format: 32-10
   consumer:
-    ecasound_id: /dev/dsp
+    ecasound_id: alsa,default   # alsa,hw:0 /dev/dsp
     input_format: cd-stereo
     output_format: cd-stereo
 
@@ -92,8 +89,8 @@ abbreviations:
   24-mono: s24_le,1,frequency
   32-10: s32_le,10,frequency
   32-12: s32_le,12,frequency
-  f32-10: f32_le,10,frequency
-  f32-12: f32_le,12,frequency
+  jack10: f32_le,10,frequency
+  jack12: f32_le,12,frequency
   cd-mono: s16_le,1,44100
   cd-stereo: s16_le,2,44100,i
   frequency: 44100
