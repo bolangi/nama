@@ -36,6 +36,8 @@ mixer_out_device_jack: jack_alsa # default mixer out target for JACK
 
 record_device: consumer          # default soundcard for input
 
+record_device_jack: jack_alsa
+
 # globals for our chain setups
 
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "

@@ -16,10 +16,14 @@
 						$raw_to_disk_format
 						$mixer_out_format
 						$mixer_out_device
-						$project_root 	
+						$mixer_out_device_jack
 						$record_device	
+						$record_device_jack
+						$project_root 	
  						$controller_ports
+						$jack_enable
 						$use_pager    );
+
 						
 						
 
@@ -41,9 +45,9 @@
 						@loop_endpoints
 						$length
 						$jack_enable
+						$mixer_out_device_jack
 
 						);
-						# $this_track
 					 
 @effects_static_vars = qw(
 
