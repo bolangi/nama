@@ -387,31 +387,35 @@ sub all { @by_index[1..scalar @by_index - 1] }
 
 package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
-use ::Object qw( 	name
-						dir
+use ::Object qw( 		name
 						active
 
 						ch_r 
 						ch_m 
+						ch_count
+						
 						rw
 
 						vol  
 						pan 
+						old_vol_level
+						old_pan_level
 						ops 
 						offset 
 
 						n 
 						group 
 
+						
 						delay
 						start_position
 						length
 						looping
 
 						hide
-
 						modifiers
-						
+
+						jack_source
 						
 						);
 
