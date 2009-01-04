@@ -1,0 +1,224 @@
+#!/usr/bin/env perl
+use Audio::Ecasound::Multitrack;
+Audio::Ecasound::Multitrack::mainloop();
+
+=head1 NAME
+
+B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
+
+B<Nama> - Lightweight multitrack recorder/mixer
+
+=head1 SYNOPSIS
+
+B<nama> I<options> I<project_name>
+
+=head1 OPTIONS
+
+=over 12
+
+=item B<-d> F<project_root>
+
+Use F<project_root> as Nama's top-level directory. Default: $HOME/nama
+
+=item B<-g>
+
+Graphical mode, with text interface in terminal window
+
+=item B<-t>
+
+Text-only mode
+
+=item B<-f> F<config_file>
+
+Use F<config_file> instead of default F<.namarc>
+
+=item B<-c>
+
+Create the named project
+
+=item B<-a>
+
+Save and reload ALSA mixer state using alsactl
+
+=item B<-m>
+
+Suppress loading of saved state
+
+=item B<-e>
+
+Don't load static effects data
+
+=item B<-s>
+
+Don't load static effects data cache
+
+=back
+
+=head1 DESCRIPTION
+
+B<Audio::Ecasound::Multitrack> provides class libraries for
+tracks and buses, and a track oriented user interface for managing 
+runs of the Ecasound audio-processing engine.
+
+B<Nama> is a recorder/mixer application that configures
+Ecasound as a single mixer bus.
+
+By default, B<Nama> starts up the Tk GUI interface.
+The command line interface runs simultaneously in the
+terminal.
+
+=head1 STATIC AND DYNAMIC COMMANDS
+
+It may be helpful to observe that our commands for audio
+processing fall into two categories:
+
+=head2 STATIC COMMANDS
+
+Some commands control the chain setup that will be used to
+configure Ecasound for audio processing.  I refer to them as
+I<static commands>.  Static commands have no effect while
+the engine is running, come into play only the next time the
+transport is armed.
+
+For example, setting the REC/MON/OFF status of a track or
+bus determines whether it will be included next time the
+transport is armed, and whether the corresponding audio
+stream will be recorded to a file or played back from an
+existing file. 
+
+
+=head2 DYNAMIC COMMANDS
+
+Once the transport is running, another subset of commands
+controls the audio processing engine, for example adjusting
+effect parameters or repositioning the playback head.
+
+=head1 FIRST RUN
+
+On the first run the program prompts the user for permission
+to create the configuration file, usually F<$HOME/.namarc>, and
+a recording projects directory, F<$HOME/nama> by
+default.  You should then edit F<.namarc> to suit your audio
+configuration.
+
+=head1 PERSISTENCE
+
+Project state can be stored/retrieved. These data are stored
+by default in the F<State.yml> file in the project
+directory.
+
+=head1 Tk GRAPHICAL UI 
+
+Invoked by default, the Tk interface provides all
+functionality on two panels, one for general control,
+the second for effects. 
+
+Logarithmic sliders are provided automatically for effects
+with hinting. Text-entry widgets are used to 
+enter parameters for effects where hinting is not
+available.
+
+After issuing the B<arm> or B<connect> commands, the GUI
+time display changes color to indicate whether the upcoming operation
+will include live recording (red), mixdown only (yellow) or
+playback only (green).  Live recording and mixdown can 
+take place simultaneously.
+
+The text command prompt appears in the terminal window
+during GUI operation. Text commands may be issued at any
+time.
+
+=head1 TEXT UI
+
+Press the I<Enter> key if necessary to get the following command prompt.
+
+=over 12
+
+B<Enter command:>
+
+=back
+
+You can now enter commands.  Nama and Ecasound
+commands may be entered directly. You may also enter Perl
+code preceded by C<eval> or shell code preceded by C<!>.
+
+Multiple commands on a single line are allowed if delimited
+by semicolons. Usually the lines are split on semicolons and
+the parts are executed sequentially, however if the line
+begins with C<eval> or C<!> the entire line will be given to
+the corresponding interpreter.
+
+You can access command history using up-arrow/down-arrow.
+
+Type C<help> for general help, C<help command> for help with
+C<command>, C<help foo> for help with commands containing
+the string C<foo>. 
+
+=head1 TRACKS
+
+Each track has a descriptive name (i.e. vocal) and an
+integer track-number assigned when the track is created.
+
+Multiple WAV files can be recorded for each track. These are
+identified by version number. Identical version numbers indicate WAV files
+recorded at the same time. Version number increments
+automatically so that the order of version numbers
+follows the time sequence of the recordings.
+
+Each track, including Master and Mixdown, has its own
+REC/MON/OFF setting and displays its own REC/MON/OFF status.
+The Master bus has only MON/OFF status. Setting REC status
+for the Mixdown bus has the same effect as issuing the
+B<mixdown> command. As with other engine operations, a start
+command must be issued for mixdown to commence.
+
+All user tracks belong to the Tracker group, which has
+a group REC/MON/OFF setting and a default version setting
+that advances automatically so that the default will
+be to play back the most recent set of multitrack
+recordings all together.
+
+Setting the group to MON (text command B<group_monitor>)
+forces user tracks with a REC setting to MON status if
+a WAV file is available to play, or OFF status if no
+audio stream is available. 
+
+The group MON mode triggers automatically after 
+recording has created new WAV files.
+
+The group OFF setting (text command B<group_off>)
+excludes all user tracks from the chain setup, and is
+typically used when playing back mixdown tracks.  The
+B<mixplay> command sets the Mixdown group
+to MON and the Tracker group to
+OFF.
+
+A track with no recorded WAV files that is set to MON will
+show OFF status.
+
+=head1 BUGS AND LIMITATIONS
+
+B<loop_enable> must be issued as a text command.
+
+GUI volume sliders are linear scaled.
+
+Fails with a Segfault under kernel compiled for amd64.
+
+=head1 EXPORT
+
+None by default.
+
+=head1 AVAILABILITY
+
+CPAN, for the distribution.
+
+Pull source code using this command: 
+
+C<git clone git://github.com/bolangi/nama.git>
+
+=head1 AUTHOR
+
+Joel Roth, E<lt>joelz@pobox.comE<gt>
+
+Copyright (C) 2007 Joel Roth
+
