@@ -37,7 +37,6 @@
 						%oid_status		
 						%old_vol		
 						$this_op
-						$jack_on 
 						@tracks_data
 						@groups_data
 						@marks_data

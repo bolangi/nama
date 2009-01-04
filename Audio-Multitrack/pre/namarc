@@ -29,6 +29,8 @@
 #
 
 project_root: ~                  # replaced during first run
+                                 # This folder contains all 
+                                 # project directories.
 
 mixer_out_device: consumer       # default mixer out target
 
@@ -36,17 +38,19 @@ mixer_out_device_jack: jack_alsa # default mixer out target for JACK
 
 record_device: consumer          # default soundcard for input
 
-record_device_jack: jack_alsa
+record_device_jack: jack_alsa    # default input soundcard for JACK
 
-# globals for our chain setups
+# global variables for our chain setups
 
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 # audio formats 
 
-mixer_out_format: cd-stereo
+mixer_out_format: cd-stereo      # wrong for JACK, but Ecasound fixes this
+
 mix_to_disk_format: cd-stereo
-raw_to_disk_format: cd-mono
+
+raw_to_disk_format: s16_le,N,frequency
 
 # audio devices 
 
@@ -55,8 +59,8 @@ raw_to_disk_format: cd-mono
 devices: 
   jack_alsa: 
     ecasound_id: jack_alsa
-    input_format: f32-12
-    output_format: f32-10
+    input_format: f32-12          # 12-channel ice1712
+    output_format: f32-10         # 10-channel ice1712
   jack:
     ecasound_id: jack
     input_format: f32_le,N,frequency

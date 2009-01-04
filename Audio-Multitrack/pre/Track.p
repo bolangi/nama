@@ -111,6 +111,7 @@ sub new {
 					looping => undef, # do we repeat our sound sample
 
 					hide     => undef, # for 'Remove Track' function
+					signal_select => q(soundcard),
 
 					@_ 			}, $class;
 

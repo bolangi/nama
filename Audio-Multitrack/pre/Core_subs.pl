@@ -2175,7 +2175,10 @@ sub save_state {
 
 	# do nothing if only Master and Mixdown
 	
-	return if scalar @::Track::by_index == 3; 
+	if (scalar @::Track::by_index == 3 ){
+		print "No user tracks, skipping...\n";
+		return;
+	}
 
 	my $file = shift;
 
