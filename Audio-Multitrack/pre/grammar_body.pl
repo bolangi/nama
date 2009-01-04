@@ -11,10 +11,7 @@ name: /[\w:]+/
 name2: /[\w-]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
-asdf: 'asdf' { print "hello"}
-command: fail
-end: /\s*$/ 
-end: ';' 
+end: /[;\s]*$/ 
 help: _help end { print $::help_screen }
 help: _help name2  { ::Text::help($item{name2}) }
 exit: _exit end { ::save_state(); exit }
@@ -144,27 +141,12 @@ monitor_channel: _monitor_channel dd  {
 	$::ch_m = $item{dd};
 	print "Output switched to channel $::ch_m.\n";
 }
-jack_source: _jack_source name { 
-	my $source = $item{name};
-	my $name = $::this_track->name;
-	$::this_track->set(jack_source => $source);
-	print qq(Setting JACK client "$source" as source for current track.\n);
-}
-jack_source: _jack_source {
-	my $source = $::this_track->jack_source;
-	my $name  = $::this_track->name;
-	print qq(JACK client "$source" is the source for track "$name".\n);
-}
-nojack: _nojack {
-	my $source = $::this_track->jack_source;
-	my $name = $::this_track->name;
-	$::this_track->set(jack_source => q());
-	print "Input switched to soundcard channel ", $::this_track->input,
-	"\n";
-}
-jack_on: _jack_on { $::jack_enable = 1; print "Using JACK.\n" }
+source: _source name { $::this_track->source($item{name})  }
+source: _source { $::this_track->source }
 
-jack_off: _jack_off { $::jack_enable = 1; print "Disabling JACK functions.\n" }
+jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
+
+nojack: _nojack { $::jack_enable = 1; print "Disabling JACK functions.\n" }
 
 
 stereo: _stereo { $::this_track->set(ch_count => 2) }

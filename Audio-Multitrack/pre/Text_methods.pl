@@ -31,7 +31,7 @@ sub loop {
 	# we are using Event's handlers and event loop
 
 	package ::;
-	my $prompt = "Enter command: ";
+    my $prompt = "nama ('h' for help)> ";
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$term->callback_handler_install($prompt, \&::Text::process_line);

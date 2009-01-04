@@ -19,9 +19,8 @@ start:
 loop_enable:
   type: transport
   short: loop
-  what: playback will loop between marks
-  parameters: start end 
-  example: loop a b (loop between marks 'a' and 'b'),\n         loop 1 3 (loop between marks 1 and 3),\n         loop 13.6 69.0 (loop between times, decimal required) 
+  what: playback will loop between two points
+  parameters: start end (mark names/indices, or decimal seconds 1.5 125.0)
 loop_disable:
   type: transport
   short: noloop nl
@@ -103,21 +102,17 @@ record_channel:
   short: r
   what: set track input channel
   smry: set track input channel 
-jack_source:
+source:
   type: track
-  what: set JACK client as track input
-  short: jack
-  parameters: client_name (returns client name with no parameter)
-nojack:
-  type: track
-  what: use soundcard input to track
-  short: nj sound_card sc
-jack_on:
+  what: set track source
+  short: src from
+  parameters: jack_client | channel_number | card | c
+jack:
   type: general
   short: jackon jon
-  what: allow track inputs from JACK clients, use JACK mixer output 
-jack_off:
-  short: jackoff joff
+  what: Set mixer output to JACK device, tracks may use JACK signal inputs
+nojack:
+  short: nj jackoff joff
   type: general
   what: disable JACK functions
 stereo:

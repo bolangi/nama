@@ -137,6 +137,34 @@ sub input {
 	my $track = shift;
 	$track->ch_r ? $track->ch_r : 1
 }
+
+sub source {
+	my $track = shift;
+	my $source = shift;
+
+	if ( ! $source ){
+		if ( $::jack_enable and $track->jack_source ){
+			return $track->jack_source 
+		} else { return $track->input }
+
+	} elsif ( $source eq "card" or $source = "c"){
+		$track->set(jack_source => q());
+		print "Input switched to soundcard channel ", $track->input, "\n";
+
+	} elsif ( $source !~ /\D/ and $source =~ /(\d+)/ ){ 
+		$track->set(jack_source => q());
+		$track->set(ch_r => $1);
+		print "Input switched to soundcard channel ", $track->input, "\n";
+
+	} elsif ( $source =~ /\D/){
+		$track->set(jack_source => $source);
+		print qq(JACK input set to client "$source".\n);
+		if ( ! $::jack_enable ){
+			print "But JACK is not enabled.\n";
+		}
+	}
+	$track->source;
+}
 sub dir { ::this_wav_dir() } # replaces dir field
 
 sub full_path { my $track = shift; join_path $track->dir , $track->current }

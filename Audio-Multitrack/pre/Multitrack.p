@@ -119,7 +119,7 @@ sub loop {
     #MainLoop;
     my $term = new Term::ReadLine 'Ecaound/Nama';
 	$term->tkRunning(1);
-    my $prompt = "Enter command: ";
+    my $prompt = "nama ('h' for help)> ";
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
@@ -186,8 +186,10 @@ YML
 %commands = %{ ::yaml_in( $::commands_yml) };
 
 $::AUTOSTUB = 1;
-$::RD_HINT = 1;
-
+$::RD_TRACE = 1;
+$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
+$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
+$::RD_HINT   = 1; # Give out hints to help fix problems.
 # rec command changes active take
 
 $grammar = q(
