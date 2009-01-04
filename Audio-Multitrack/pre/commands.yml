@@ -106,7 +106,7 @@ source:
   type: track
   what: set track source
   short: src from
-  parameters: jack_client | channel_number | card | c
+  parameters: JACK client name or soundcard channel number 
 jack:
   type: general
   short: jackon jon

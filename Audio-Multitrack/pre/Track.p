@@ -49,6 +49,7 @@ use ::Object qw( 		name
 						modifiers
 
 						jack_source
+						signal_select
 						
 						);
 
@@ -138,33 +139,42 @@ sub input {
 	$track->ch_r ? $track->ch_r : 1
 }
 
+sub input_object {
+	my $source = shift; # string
+	$source =~ /\D/ 
+		? qq(JACK client "$source")
+		: qq(soundcard channel $source);
+}
+	
+# 	  elsif ( $source eq 'card' or $source eq 'c' ){
+# 		$track->set(signal_select => 'soundcard');
+# 		$track->input;
 sub source {
-	my $track = shift;
-	my $source = shift;
+	my ($track, $source) = @_;
 
 	if ( ! $source ){
-		if ( $::jack_enable and $track->jack_source ){
-			return $track->jack_source 
-		} else { return $track->input }
-
-	} elsif ( $source eq "card" or $source = "c"){
-		$track->set(jack_source => q());
-		print "Input switched to soundcard channel ", $track->input, "\n";
-
-	} elsif ( $source !~ /\D/ and $source =~ /(\d+)/ ){ 
-		$track->set(jack_source => q());
-		$track->set(ch_r => $1);
-		print "Input switched to soundcard channel ", $track->input, "\n";
-
-	} elsif ( $source =~ /\D/){
-		$track->set(jack_source => $source);
-		print qq(JACK input set to client "$source".\n);
-		if ( ! $::jack_enable ){
-			print "But JACK is not enabled.\n";
+		if ( $::jack_enable
+				and $track->jack_source 
+				and $track->signal_select eq 'jack'){
+			$track->jack_source 
+		} else { 
+			$track->input 
 		}
+	} elsif ( $source =~ m(\D) ){
+		if ( $::jack_enable ){
+			$track->set(jack_source => $source);
+			$track->set(signal_select => "jack");
+			$track->jack_source
+		} else {
+			print "Type 'jack' to enable JACK before connecting a client\n";
+			$track->input;
+		} 
+	} else {  # must be numerical
+		$track->set(ch_r => $source);
+		$track->set(signal_select =>'soundcard');
+		$track->input;
 	}
-	$track->source;
-}
+} 
 sub dir { ::this_wav_dir() } # replaces dir field
 
 sub full_path { my $track = shift; join_path $track->dir , $track->current }
@@ -416,6 +426,7 @@ use ::Object qw( 		name
 						modifiers
 
 						jack_source
+						signal_select
 						
 						);
 

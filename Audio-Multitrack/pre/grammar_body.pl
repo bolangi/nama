@@ -141,12 +141,25 @@ monitor_channel: _monitor_channel dd  {
 	$::ch_m = $item{dd};
 	print "Output switched to channel $::ch_m.\n";
 }
-source: _source name { $::this_track->source($item{name})  }
-source: _source { $::this_track->source }
+source: _source name {
+	my $old_source = $::this_track->source;
+	my $new_source = $::this_track->source($item{name});
+	my $object = ::Track::input_object( $new_source );
+	if ( $old_source  eq $new_source ){
+		print $::this_track->name, ": input unchanged, $object\n";
+	} else {
+		print $::this_track->name, ": input set to $object\n";
+	}
+}
+source: _source end { 
+	my $source = $::this_track->source;
+	my $object = ::Track::input_object( $source );
+	print $::this_track->name, ": input from $object.\n";
+}
 
 jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
 
-nojack: _nojack { $::jack_enable = 1; print "Disabling JACK functions.\n" }
+nojack: _nojack { $::jack_enable = 1; print "JACK support disabled.\n" }
 
 
 stereo: _stereo { $::this_track->set(ch_count => 2) }
