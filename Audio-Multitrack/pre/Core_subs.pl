@@ -1398,9 +1398,10 @@ sub show_chain_setup {
 }
 sub pager {
 	my @output = @_;
-	my $line_count;
+	my ($screen_lines, $columns) = split " ", qx(stty size);
+	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
-	if ( $use_pager and $line_count > 24) { 
+	if ( $use_pager and $line_count > $screen_lines ) { 
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
 		print $fh @output;
