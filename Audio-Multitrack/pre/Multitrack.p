@@ -200,6 +200,9 @@ $grammar = q(
 );
 
 # we redirect STDERR to shut up noisy Parse::RecDescent
+# but don't see "Bad grammar!" message when P::RD fails
+# to process the grammar
+
 open SAVERR, ">&STDERR";
 open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
