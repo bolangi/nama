@@ -34,10 +34,11 @@ project_root: ~                  # replaced during first run
 
 # device selections
 
+# ALSA/OSS devices (JACK is handled differently)
+
 mixer_out_device: consumer       # default mixer out target
-mixer_out_device_jack: jack_alsa # default mixer out target for JACK
+mixer_out_format: cd-stereo      
 record_device: consumer          # default soundcard for input
-record_device_jack: jack_alsa    # default input soundcard for JACK
 
 # global variables for our chain setups
 
@@ -47,21 +48,16 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 mixer_out_format: cd-stereo      # wrong for JACK, but Ecasound fixes this
 mix_to_disk_format: cd-stereo
-raw_to_disk_format: s16_le,N,frequency
+raw_to_disk_format: 16,N,frequency
 
 # audio devices 
 
 # indents _are_ significant in the lines below
 
 devices: 
-  jack_alsa: 
-    ecasound_id: jack_alsa
-    input_format: jack12
-    output_format: jack10
-  jack:
-    ecasound_id: jack
-    input_format: f32_le,N,frequency
-    output_format: f32_le,N,frequency
+
+# ALSA/OSS
+
   multi:
     ecasound_id: alsa,ice1712
     input_format: 32-12
@@ -70,6 +66,18 @@ devices:
     ecasound_id: alsa,default   # alsa,hw:0 /dev/dsp
     input_format: cd-stereo
     output_format: cd-stereo
+
+# JACK
+
+  jack_alsa: 
+    ecasound_id: jack_alsa
+    input_format: jack12
+    output_format: jack10
+
+  jack:
+    ecasound_id: jack
+    input_format: 32,N,frequency
+    output_format: 32,N,frequency
 
 # use JACK by default
 

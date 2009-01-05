@@ -258,6 +258,7 @@ our (
 	$mixer_out_device,       # where to send stereo output
 	$mixer_out_device_jack,  # JACK target for stereo output
 	$record_device,    # where to get our inputs
+	$record_device_jack,    # where to get our inputs
 
 
 	# rules
