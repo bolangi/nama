@@ -49,9 +49,9 @@ add_track: _add_track name end { ::add_track($item{name}); }
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
 }
-dump_track: _dump_track { ::pager($::this_track->dumpp) }
+dump_track: _dump_track { ::pager($::this_track->dump) }
 
-dump_group: _dump_group { ::pager($::tracker->dumpp) }
+dump_group: _dump_group { ::pager($::tracker->dump) }
 
 dump_all: _dump_all { ::dump_all() }
 
@@ -160,7 +160,7 @@ source: _source end {
 
 jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
 
-nojack: _nojack { $::jack_enable = 1; print "JACK support disabled.\n" }
+nojack: _nojack { $::jack_enable = 0; print "JACK support disabled.\n" }
 
 
 stereo: _stereo { $::this_track->set(ch_count => 2) }

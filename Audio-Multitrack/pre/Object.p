@@ -46,7 +46,9 @@ sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	print "class: $class\n", yaml_out $self;
+	my $output = yaml_out $self;
+	print "Object class: $class\n";
+	print $output, "\n";
 	bless $self, $class; # restore
 }
 sub dump {

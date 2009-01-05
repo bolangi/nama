@@ -16,79 +16,84 @@ sub discard_object {
 	@_;
 }
 
+
+
 sub first_run {
-	if ( ! -e $project_root ) {
+my $config = config_file();
+$config = "$ENV{HOME}/$config" unless -e $config;
+$debug and print "config: $config\n";
+if ( ! -e $config and ! -l $config  ) {
 
 # check for missing components
 
-	my $missing;
-		my @a = `which analyseplugin`;
-		@a or warn ( <<WARN
+my $missing;
+my @a = `which analyseplugin`;
+@a or warn ( <<WARN
 LADSPA helper program 'analyseplugin' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
 libraries and executables installed. http://ladspa.org
 WARN
-) and  sleep 2 and $missing++;
-		my @b = `which ecasound`;
-		@b or warn ( <<WARN
+) and  sleep 1 and $missing++;
+my @b = `which ecasound`;
+@b or warn ( <<WARN
 Ecasound executable program 'ecasound' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
 libraries and executables for all audio processing! 
 WARN
-) and  sleep 2 and $missing++;
+) and  sleep 1 and $missing++;
 
 my @c = `which file`;
-		@c or warn ( <<WARN
+@c or warn ( <<WARN
 BSD utility program 'file' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This program is currently required
 to be able to play back mixes in stereo.
 WARN
-) and sleep 2;
+) and sleep 1;
 if ( $missing ) {
 print "You lack $missing main parts of this suite.  
 Do you want to continue? [N] ";
-		$missing and 
-		my $reply = <STDIN>;
-		chomp $reply;
-		print ("Goodbye.\n"), exit unless $reply =~ /y/i;
+$missing and 
+my $reply = <STDIN>;
+chomp $reply;
+print ("Goodbye.\n"), exit unless $reply =~ /y/i;
 }
 print <<HELLO;
 
-Aloha. Welcome to Nama and Ecasound. 
+Aloha. Welcome to Nama and Ecasound.
+
+HELLO
+usleep 800_000 ;
+print "Configuration file $config not found.
+
+May I create it for you? [yes] ";
+my $reply = <STDIN>;
+chomp $reply;
+if ($reply !~ /n/i){
+usleep 800_000 ;
+print <<PROJECT_ROOT;
 
 Nama places all sound and control files under the
-project root directory, which by default is $project_root.
+project root directory, by default $ENV{HOME}/nama.
 
-The project root can be specified using the -d command line option, 
-and in the configuration file .namarc . 
-
-Would you like to create project root directory $project_root ? [Y] 
-HELLO
-		my $reply = <STDIN>;
-		$reply = lc $reply;
-		if ($reply !~ /n/i) {
-			create_dir( $project_root);
-			create_dir( join_path $project_root, "untitled");
-			print "\n... Done!\n\n";
-		} 
-	}
-
-		my $config = join_path($ENV{HOME}, ".namarc");
-	if ( ! -e $config) {
-		print "Configuration file $config not found.\n";
-		print "Would you like to create it? [Y] ";
-		my $reply = <STDIN>;
-		chomp $reply;
-		if ($reply !~ /n/i){
-			$default =~ s/project_root.*$/project_root: $ENV{HOME}\/nama/m;
-			$default > io( $config );
-			print "\n.... Done!\n\nPlease edit $config and restart Nama.\n";
-		}
-		exit;
-	}
+PROJECT_ROOT
+print "Would you like to create it? [yes] ";
+my $reply = <STDIN>;
+chomp $reply;
+if ($reply !~ /n/i){
+	$default =~ s/project_root.*$/project_root: $ENV{HOME}\/nama/m;
+	create_dir( $project_root);
+	create_dir( join_path $project_root, "untitled");
+} 
+$default > io( $config );
+usleep 800_000 ;
+print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
+}
+print "Exiting.\n"; 
+exit;	
+}
 }
 	
 
@@ -469,10 +474,7 @@ sub initialize_rules {
 		target		=>  'REC',
 		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
 		input_type	=>  'device',
-		input_object	=>  sub { my $track = shift;
-									($jack_enable and $track->jack_source)
-									? $track->jack_source
-									: $record_device },
+		input_object	=> \&record_device, 
 		output_type	=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -496,10 +498,7 @@ sub initialize_rules {
 		chain_id		=>  sub{ my $track = shift; $track->n },   
 		target			=>	'REC',
 		input_type		=>  'device',
-		input_object	=>  sub {   my $track = shift;
-									($jack_enable and $track->jack_source)
-										? $track->jack_source
-										: $record_device },
+		input_object	=>  \&record_device, 
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -537,6 +536,16 @@ sub initialize_rules {
 	);
 
 
+}
+
+sub record_device { 
+	my $track = shift;
+	if ($jack_enable){
+		$track->jack_source
+			?  $track->jack_source
+			:  $record_device_jack
+	} else { 
+		$record_device }
 }
 
 sub eliminate_loops {
@@ -1387,9 +1396,11 @@ sub all {
 }
 
 sub show_chain_setup {
+	$debug2 and print "&show_chain_setup\n";
 	my $setup = join_path( project_dir(), $chain_setup_file);
 	if ( $use_pager ) {
-		system qq($ENV{PAGER} $setup);
+		my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
+		system qq($pager $setup);
 	} else {
 		my $chain_setup;
 		io( $setup ) > $chain_setup; 
@@ -1397,6 +1408,7 @@ sub show_chain_setup {
 	}
 }
 sub pager {
+	$debug2 and print "&pager\n";
 	my @output = @_;
 	my ($screen_lines, $columns) = split " ", qx(stty size);
 	my $line_count = 0;
@@ -1411,6 +1423,7 @@ sub pager {
 	}
 }
 sub file_pager {
+	$debug2 and print "&file_pager\n";
 	my $fname = shift;
 	if (! -e $fname or ! -r $fname ){
 		carp "file not found or not readable: $fname\n" ;

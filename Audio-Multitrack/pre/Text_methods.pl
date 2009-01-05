@@ -260,12 +260,10 @@ IAM
 	}
 	# e.g. help tap_reverb
 	if ( $effects_ladspa{"el:$name"}) {
-	push @output, "$name is the code for the following LADSPA effect:\n",
-	#print yaml_out( $effects_ladspa{"el:$name"});
-    	print qx(analyseplugin $name);
+ 		push @output, "$name is the code for the following LADSPA effect:\n";
+    	push @output, qx(analyseplugin $name);
 	}
-	::pager(@output);
-	
+	::pager( @output ); 
 }
 
 # are these subroutines so different from what's in Core_subs.pl?

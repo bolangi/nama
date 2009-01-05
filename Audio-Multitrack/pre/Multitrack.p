@@ -29,9 +29,12 @@ use File::Spec::Link;
 use File::Spec::Unix;
 use File::Temp;
 use IO::All;
-use Time::HiRes; 
+use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep 
+                    clock_gettime clock_getres clock_nanosleep clock stat );
 use Event;
 # use Tk    # loaded conditionally in GUI mode
+
+$| = 1;     # flush STDOUT buffer on every write
 
 ## Definitions ##
 
