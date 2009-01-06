@@ -48,13 +48,13 @@ controller_ports: ~
 # you may create arbitrary abbreviations
 
 abbreviations:  
-  24-mono: s24_le,1,frequency
-  32-10: s32_le,10,frequency
-  32-12: s32_le,12,frequency
-  jack10: f32_le,10,frequency
-  jack12: f32_le,12,frequency
-  cd-mono: s16_le,1,44100
-  cd-stereo: s16_le,2,44100,i
+  24-mono: 24,1,frequency
+  32-10: 32,10,frequency
+  32-12: 32,12,frequency
+  jack10: 32,10,frequency
+  jack12: 32,12,frequency
+  cd-mono: 16,1,44100
+  cd-stereo: 16,2,44100,i
   frequency: 44100
 
 # end

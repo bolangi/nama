@@ -347,7 +347,7 @@ sub mono_to_stereo {
 				and qx($cmd) =~ /stereo/i ){ 
 		return "" 
 	} elsif ( $track->ch_count == 1 ){
-		return " -erc:1,2 " 
+		return " -chcopy:1,2 " 
 	} else { carp "Track ".$track->name.": Unexpected channel count\n"; }
 }
 sub pre_multi {
@@ -367,9 +367,9 @@ sub rec_route {
 	# no need to route a signal at channel 1
 	return if ! $track->ch_r or $track->ch_r == 1; 
 	
-	my $route = "-erc:" . $track->ch_r . ",1"; 
+	my $route = "-chmove:" . $track->ch_r . ",1"; 
 	if ( $track->ch_count == 2){
-		$route .= " -erc:" . ($track->ch_r + 1) . ",2";
+		$route .= " -chmove:" . ($track->ch_r + 1) . ",2";
 	}
 	return $route;
 	
@@ -384,8 +384,8 @@ sub route {
 	my $offset = $dest - 1;
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
-		$map .= " -erc:$c," . ( $c + $offset);
-		$map .= " -eac:0,"  . $c;
+		$map .= " -chmove:$c," . ( $c + $offset);
+		#$map .= " -eac:0,"  . $c;
 	}
 	$map;
 }
