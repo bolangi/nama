@@ -161,7 +161,7 @@ sub command_process {
 		} elsif ($iam_cmd{$cmd}){
 			$debug and print "Found Iam command\n";
 			my $result = eval_iam($user_input);
-			#pager( $result );  
+			pager( $result );  
 		} else {
 			$debug and print "Passing to parser\n", 
 			$_, $/;
