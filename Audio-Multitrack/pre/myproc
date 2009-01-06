@@ -1,5 +1,6 @@
 #!/bin/sh
-TD=~/build/flow/Audio-Multitrack/lib/Audio/Ecasound/Multitrack 
+TD=../lib/Audio/Ecasound/Multitrack 
+PD=.
 preproc -r Audio::Ecasound::Multitrack \
 		-s ~/build/flow/Audio-Multitrack/pre \
 		-t $TD

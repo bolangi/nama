@@ -9,7 +9,7 @@ no warnings;
 
 BEGIN{ 
 
-our $VERSION = '0.978';
+our $VERSION = '0.98';
 our $ABSTRACT = 'Lightweight multitrack recorder/mixer';
 
 [% qx(cat ./banner.pl) %]
@@ -29,9 +29,10 @@ use File::Spec::Link;
 use File::Spec::Unix;
 use File::Temp;
 use IO::All;
+use Event;
 use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep 
                     clock_gettime clock_getres clock_nanosleep clock stat );
-use Event;
+
 # use Tk    # loaded conditionally in GUI mode
 
 $| = 1;     # flush STDOUT buffer on every write
@@ -226,8 +227,6 @@ __END__
 
 =head1 NAME
 
-=head1 NAME
-
 B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
 
 B<Nama> - Lightweight multitrack recorder/mixer
@@ -242,13 +241,12 @@ B<Audio::Ecasound::Multitrack> provides class libraries for
 tracks and buses, and a track oriented user interface for managing 
 runs of the Ecasound audio-processing engine.
 
-B<Nama> is a recorder/mixer application that configures
-Ecasound as a single mixer bus.
+B<Nama> is a lightweight recorder/mixer application that
+configures Ecasound as a single mixer bus.
 
-By default, B<Nama> starts up the Tk GUI interface.
-The command line interface runs simultaneously in the
-terminal. The B<-t> option provides text interface for
-console users, and does not require the Tk libraries.
+By default, Nama starts up a GUI interface with a command
+line interface running in the terminal window. The B<-t>
+option provides a text-only interface for console users.
 
 =head1 OPTIONS
 
@@ -258,17 +256,17 @@ console users, and does not require the Tk libraries.
 
 Use F<project_root> as Nama's top-level directory. Default: $HOME/nama
 
+=item B<-f> F<config_file>
+
+Use F<config_file> instead of default F<.namarc>
+
 =item B<-g>
 
-Graphical mode, with text interface in terminal window
+GUI/text mode (default)
 
 =item B<-t>
 
 Text-only mode
-
-=item B<-f> F<config_file>
-
-Use F<config_file> instead of default F<.namarc>
 
 =item B<-c>
 
@@ -280,74 +278,83 @@ Save and reload ALSA mixer state using alsactl
 
 =item B<-m>
 
-Suppress loading of saved state
+Don't load saved state
 
-=item B<-e>
+=item B<-r>
 
-Don't load static effects data
-
-=item B<-s>
-
-Don't load static effects data cache
+Regenerate effects data cache
 
 =back
 
-=head1 STATIC AND DYNAMIC COMMANDS
+=head1 CONTROLLING ECASOUND
 
-It may be helpful to observe that our commands for audio
-processing fall into two categories:
+Ecasound is configured through use of I<chain setups>.
+Chain setups are central to controlling Ecasound.  
+Nama generates appropriate chain setups for 
+recording, playback, and mixing covering a 
+large portion of Ecasound's functionality.
+
+Commands for audio processing with Nama/Ecasound fall into
+two categories: I<static commands> that influence the chain
+setup and I<dynamic commands> that influence the realtime
+behavior of the audio processing engine.
 
 =head2 STATIC COMMANDS
 
-Some commands control the chain setup that will be used to
-configure Ecasound for audio processing.  I refer to them as
-I<static commands>.  Static commands have no effect while
-the engine is running, come into play only the next time the
-transport is armed.
-
-For example, setting the REC/MON/OFF status of a track or
-bus determines whether it will be included next time the
+Setting the REC/MON/OFF status of a track by the
+C<rec>/C<mon>/C<off> commands, for example,
+determine whether that track will be included next time the
 transport is armed, and whether the corresponding audio
 stream will be recorded to a file or played back from an
-existing file. 
+existing file. Other static commands include C<loop_enable>
+C<jack>/C<nojack>, and C<stereo>/C<mono>. 
 
+=head2 CONFIGURING THE ENGINE
+
+The C<generate> command creates a new chain setup. C<connect> configures
+the engine using the most recently created setup. 
+C<arm> is equivalent to C<generate> followed by
+C<connect>. Issuing C<arm> just prior to starting the engine
+ensures that any changes you've made by issuing static
+commands are reflected in the next processing run.
 
 =head2 DYNAMIC COMMANDS
 
-Once the transport is running, another subset of commands
-controls the audio processing engine, for example adjusting
-effect parameters or repositioning the playback head.
+Once a chain setup is loaded, another subset of commands
+controls the audio processing engine. Commonly used
+I<dynamic commands> include C<start> and C<stop>;  C<forward>,
+C<rewind> and C<setpos> commands for repositioning the playback
+head; and C<vol> and C<pan> for adjusting effect parameters.
+Effect parameters may be adjusted at any time. Effects may
+be added  audio processing, however the additional latency
+will cause an audible click.
 
-=head1 FIRST RUN
+=head1 DIAGNOSTICS
 
-On the first run the program prompts the user for permission
-to create the configuration file, usually F<$HOME/.namarc>, and
-a recording projects directory, F<$HOME/nama> by
-default.  You should then edit F<.namarc> to suit your audio
-configuration.
-
-=head1 PERSISTENCE
-
-Project state can be stored/retrieved. These data are stored
-by default in the F<State.yml> file in the project
-directory.
+Once generated by C<generate> or C<arm> commands, the chain
+setup may be inspected with the C<chains> command.  The
+C<showio> command displays the data structure used to
+generate the chain setup. C<dump> displays data
+for the current track. C<dumpall> shows the state
+of most program objects and variables (identical
+to the F<State.yml> file created by the C<save>
+command.)
 
 =head1 Tk GRAPHICAL UI 
 
 Invoked by default, the Tk interface provides all
-functionality on two panels, one for general control,
-the second for effects. 
+functionality on two panels, one for general control, the
+second for effects. 
 
 Logarithmic sliders are provided automatically for effects
-with hinting. Text-entry widgets are used to 
-enter parameters for effects where hinting is not
-available.
+with hinting. Text-entry widgets are used to enter
+parameters for effects where hinting is not available.
 
 After issuing the B<arm> or B<connect> commands, the GUI
-time display changes color to indicate whether the upcoming operation
-will include live recording (red), mixdown only (yellow) or
-playback only (green).  Live recording and mixdown can 
-take place simultaneously.
+time display changes color to indicate whether the upcoming
+operation will include live recording (red), mixdown only
+(yellow) or playback only (green).  Live recording and
+mixdown can take place simultaneously.
 
 The text command prompt appears in the terminal window
 during GUI operation. Text commands may be issued at any
@@ -363,9 +370,8 @@ B<nama ('h' for help)E<gt>>
 
 =back
 
-You can now enter commands.  Nama and Ecasound
-commands may be entered directly. You may also enter Perl
-code preceded by C<eval> or shell code preceded by C<!>.
+You can enter Nama and Ecasound commands directly, Perl code
+preceded by C<eval> or shell code preceded by C<!>.
 
 Multiple commands on a single line are allowed if delimited
 by semicolons. Usually the lines are split on semicolons and
@@ -381,56 +387,98 @@ the string C<foo>.
 
 =head1 TRACKS
 
+Ecasound deals with audio processing at
+the level of devices, files, and signal-processing
+chains. Nama implements tracks to provide a
+level of control and convenience comparable to 
+many digital audio workstations.
+
 Each track has a descriptive name (i.e. vocal) and an
 integer track-number assigned when the track is created.
 
+=head2 VERSION NUMBER
+
 Multiple WAV files can be recorded for each track. These are
-identified by version number. Identical version numbers indicate WAV files
-recorded at the same time. Version number increments
-automatically so that the order of version numbers
-follows the time sequence of the recordings.
+identified by a version number that increments with each
+recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
+files recorded at the same time have the same version
+numbers. 
+
+Version numbers for playback can be selected at the group
+and track level. By setting the group version number to 5,
+you can play back the fifth take of a song, or perhaps the
+fifth song of a live recording session. 
+
+The track's version setting, if present, overrides 
+the group setting. Setting the track version to zero
+restores control of the version number to the default
+group setting.
+
+=head2 REC/MON/OFF
+
+REC/MON/OFF status is used to generate the chain setup
+for an audio processing run.
 
 Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF status.
-The Master bus has only MON/OFF status. Setting REC status
-for the Mixdown bus has the same effect as issuing the
-B<mixdown> command. As with other engine operations, a start
-command must be issued for mixdown to commence.
+The Tracker group, which includes all user tracks, also has
+REC, MON and OFF settings. These provides a convenient way
+to control the behavior of all user tracks.
 
-All user tracks belong to the Tracker group, which has
-a group REC/MON/OFF setting and a default version setting
-that advances automatically so that the default will
-be to play back the most recent set of multitrack
-recordings all together.
+As the name suggests, I<REC> status indicates that a track
+is ready to record a WAV file. You need to set both track and
+group to REC to source an audio stream from JACK or the
+soundcard.
 
-Setting the group to MON (text command B<group_monitor>)
-forces user tracks with a REC setting to MON status if
-a WAV file is available to play, or OFF status if no
-audio stream is available. 
+I<MON> status indicates an audio stream available from disk.
+It requires a MON setting for the track or group as well as
+the presence of file with the selected version number.
 
-The group MON mode triggers automatically after 
-recording has created new WAV files.
+I<OFF> status means that no audio is available for the track
+from any source.  A track with no recorded WAV files 
+will show OFF status, even if set to MON.
+
+An OFF setting for the track or group always results in OFF
+status. A track with OFF status will be excluded from the
+chain setup. (This setting is distinct from the action of
+the C<mute> command, which sets the volume of the track to
+zero.)
+
+All user tracks belong to the Tracker group, which has a
+group REC/MON/OFF setting and a default version setting for
+the entire group.
+ 
+Setting the group to MON (C<group_monitor> or C<gmon>)
+forces user tracks with a REC setting to MON status if a WAV
+file is available to play, or OFF status if no audio stream
+is available. 
+
+The group MON mode triggers automatically after a recording
+has created new WAV files.
 
 The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
 typically used when playing back mixdown tracks.  The
 B<mixplay> command sets the Mixdown group
-to MON and the Tracker group to
-OFF.
+to MON and the Tracker group to OFF.
 
-A track with no recorded WAV files that is set to MON will
-show OFF status.
+The Master bus has only MON/OFF status. Setting REC status
+for the Mixdown bus has the same effect as issuing the
+B<mixdown> command. (A C<start> command must be issued for
+mixdown to commence.)
 
 =head1 BUGS AND LIMITATIONS
 
-Several important functions including loop_enable and 
-everything JACK-related are available only through 
+Some functions including C<loop_enable> C<solo>/C<all>,
+C<jack>/C<nojack>, C<stereo>/C<mono> are available only as
 text commands. 
 
-setpos commands result in an long engine delay when 
-JACK is used.
+Ecasound parameter controllers may be applied through
+Ecasound-IAM commands, but are not supported by Nama and the
+settings are not stored by the C<save> command.
 
-GUI volume sliders are linear scaled.
+The GUI interface appears able to apply controllers, however
+these settings have no effect.
 
 =head1 EXPORT
 
@@ -443,6 +491,8 @@ CPAN, for the distribution.
 Pull source code using this command: 
 
 C<git clone git://github.com/bolangi/nama.git>
+
+Build instructions are contained in the F<README> file.
 
 =head1 AUTHOR
 

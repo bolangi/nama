@@ -1,5 +1,4 @@
-Audio::Ecasound::Multitrack
-===========================
+=head1 Audio::Ecasound::Multitrack
 
 Audio::Ecasound::Multitrack provides classes for tracks and
 buses, a template system for signal routing and other
@@ -18,7 +17,7 @@ includes history and help functions.
 'Nama' is Japanese for 'live', describing live performances,
 raw fish and draft beer.
 
-INSTALLATION
+=head1 INSTALLATION
 
 To install this module type the following:
 
@@ -27,9 +26,9 @@ To install this module type the following:
    make test
    make install
 
-DEPENDENCIES
+=head1 DEPENDENCIES
 
-This module requires that you have installed these Perl modules:
+=head2 Perl Modules
 
 	Carp
 	Cwd
@@ -46,6 +45,9 @@ This module requires that you have installed these Perl modules:
 	Term::Readline
 	Term::Readline::Gnu
 	Time::HiRes
+	Text::Template (for building from sources)
+
+=head2 Libraries
 
 The Ecasound audio processing libraries must be
 installed. Ecasound may be obtained from
@@ -62,6 +64,29 @@ installed in a directory in your execution PATH.
 
 'file', a BSD utility program that detects file formats must
 be installed for Nama to correctly identify stereo files.
+
+=head1 BUILD INSTRUCTIONS
+
+It is much easier to browse the sources prior to build. 
+Functionality is separated into a number of files,
+and the long module prefix "Audio::Ecasound::Multitrack" is
+shortened to "::".
+
+*.pm files for the distribution are created from source
+files *.p and *.pl and a few other files by executing the
+F<./myproc> script.
+
+For typical build and test type the following in the F<pre>
+directory.
+
+	./myproc; ./ui
+
+To see the names of the files and scripts used to build the
+modules type:
+
+	grep '\[%' *  # finds directives for including files
+
+	ls *.p        
 
 =head1 LICENSE
 

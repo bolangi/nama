@@ -1,6 +1,5 @@
 Selected revision history for Perl extension Audio::Ecasound::Multitrack
 
-0.95  Thurs Sep 18 2008 - upload to CPAN
 0.97  Fri Sep 18 2008   - replace Ext::MakeMaker with Module::Install
 0.975 Mon Dec 29, 2008  - new event sytem supports chainsetup looping 
                           in both console and GUI modes
@@ -8,8 +7,9 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                         - jack/nojack commands enable/disable JACK 
                         - source command sets track input to
                           either JACK client name or soundcard channel number
-                        - jack_auto used to automatically
-                          link Ecasound to specified clients
+                        - automatic connection to JACK clients
                         - stereo/mono commands to set track width 
-                        - solo/nosolo commands for selective listening 
+                        - solo/all commands for selective listening 
                         - long text output displays in pager
+0.98  Mon Jan 6, 2009   - rewritten man pages
+                        - README contains source build instructions

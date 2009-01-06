@@ -113,7 +113,7 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('amcegsdtf:', \%opts); 
+	getopts('amcegstrd:f:', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
 	# d: set project root dir
@@ -122,16 +122,17 @@ sub prepare {
 	# g: gui mode (default)
 	# t: text mode 
 	# m: don't load state info on initial startup
-	# e: don't load static effects data
-	# s: don't load static effects data cache
+	# r: regenerate effects data cache
+	# e: don't load static effects data (for debugging)
+	# s: don't load static effects data cache (for debugging)
 	
 	# load Tk only in graphic mode
-	
 	if ($opts{t}) {}
 	else { 
 		require Tk;
 		import Tk;
 	}
+
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
@@ -1789,6 +1790,11 @@ sub prepare_static_effects_data{
 
 	my $effects_cache = join_path(&project_root, $effects_cache_file);
 
+	if ($opts{r}){ 
+
+		unlink $effects_cache;
+		print "Regenerating effects data cache\n";
+	}
 	# TODO re-read effects data if ladspa or user presets are
 	# newer than cache
 
@@ -2368,7 +2374,7 @@ sub retrieve_state {
 
 	# restore Alsa mixer settings
 	if ( $opts{a} ) {
-		my $file = $file;
+		my $file = $file; 
 		$file =~ s/\.yml$//;
 		print "restoring ALSA settings\n";
 		print qx(alsactl -f $file.alsa restore);

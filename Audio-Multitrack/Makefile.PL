@@ -5,8 +5,8 @@ use inc::Module::Install;
 		 version_from        'lib/Audio/Ecasound/Multitrack.pm';
 		 perl_version_from   'lib/Audio/Ecasound/Multitrack.pm';
 		 abstract_from        'lib/Audio/Ecasound/Multitrack.pm';
-		 install_script      'scripts/nama'; 
-		 author_from         'scripts/nama';
+		 install_script      'script/nama'; 
+		 author_from         'script/nama';
 		 license_from        'README';
 
          # Specific dependencies
