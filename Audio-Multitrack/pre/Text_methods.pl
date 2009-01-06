@@ -124,13 +124,16 @@ sub command_process {
 	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
 	if ($cmd eq 'eval') {
 			$debug and print "Evaluating perl code\n";
-			print eval $predicate;
+			pager( eval $predicate );
 			print "\n";
 			$@ and print "Perl command failed: $@\n";
 	}
 	elsif ( $cmd eq '!' ) {
 			$debug and print "Evaluating shell commands!\n";
-			system $predicate;
+			#system $predicate;
+			my $output = qx( $predicate );
+			#print "length: ", length $output, $/;
+			pager($output); 
 			print "\n";
 	} else {
 
@@ -148,7 +151,8 @@ sub command_process {
 		} elsif ($cmd eq '!') {
 			$debug and print "Evaluating shell commands!\n";
 			my $output = qx( $predicate );
-			#pager($output); # TODO
+			#print "length: ", length $output, $/;
+			pager($output); 
 			print "\n";
 		} elsif ($tn{$cmd}) { 
 			$debug and print qq(Selecting track "$cmd"\n);
