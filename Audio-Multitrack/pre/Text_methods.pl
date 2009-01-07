@@ -224,7 +224,7 @@ sub helpline {
 }
 sub helptopic {
 	my $index = shift;
-	$index =~ /^\d+$/ and $index = $help_topic[$index];
+	$index =~ /^(\d+)$/ and $index = $help_topic[$index];
 	my @output;
 	push @output, "\n-- ", ucfirst $index, " --\n\n";
 	push @output, $help_topic{$index}, $/;
@@ -244,7 +244,7 @@ IAM
 		@output = helptopic($name);
 	} elsif ($name == 10){
 		@output = map{ helptopic $_ } @help_topic;
-	} elsif ( $name =~ /^\d+$/ ){
+	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)
 	} elsif ( $commands{$name}){
 		@output = helpline($name)
@@ -262,12 +262,38 @@ IAM
 			}
 		} keys %commands;
 	}
-	# e.g. help tap_reverb
+	# e.g. help tap_reverb  
+	#      help 2142
 	if ( $effects_ladspa{"el:$name"}) {
  		push @output, "$name is the code for the following LADSPA effect:\n";
     	push @output, qx(analyseplugin $name);
+
+	} elsif ( my $file = $effects_ladspa_file{$name}) {
+ 		push @output, "$name is the unique id for the following LADSPA effect:\n";
+    	push @output, qx(analyseplugin $file);
+	} 
+=comment
+else {
+		my $lcname = lc $name;
+		my @matches = grep{ /$lcname/ } keys %effect_i;
+		if ( @matches ){
+			push @output, <<EFFECT;
+Effects matching "$name" were found. The "pn:" prefix 
+indicates an Ecasound preset. The "el:" prefix indicates
+a LADSPA plugin. No prefix indicates an Ecasound chain
+operator.
+
+EFFECT
+			for (@matches) {
+
+			}	
+				
+		}
 	}
+=cut
+		
 	::pager( @output ); 
+	
 }
 
 # are these subroutines so different from what's in Core_subs.pl?

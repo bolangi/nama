@@ -173,6 +173,8 @@ sub prepare {
 
 	prepare_static_effects_data() unless $opts{e};
 
+	#prepare_effects_help();
+
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
@@ -1778,11 +1780,17 @@ sub apply_op {
 	map{apply_op($_)} @owns;
 
 }
-## static effects data
 
-
-
-# @ladspa_sorted # 
+sub prepare_effects_help {
+	my @lrg = split "\n",eval_iam("ladspa-register");
+	my @prg = map{s/^.*? -//; $_ .= "\n" }
+				split "\n",eval_iam("preset-register");
+	my @lrg_one_line = map{ if (/el:/){s/^\s+/ /; s/'//g; $_ .="\n" }
+							else { s/^\S+\s//; s/\s+$/ /;}
+							$_;
+ 						} @lrg;
+	#print @lrg, @prg; exit;
+}
 
 sub prepare_static_effects_data{
 	
@@ -2045,8 +2053,9 @@ sub get_ladspa_hints{
 	# use these regexes to snarf data
 	
 	my $pluginre = qr/
-	Plugin\ Name: \s+ "([^"]+)" \s+
-	Plugin\ Label:\s+ "([^"]+)" \s+
+	Plugin\ Name:       \s+ "([^"]+)" \s+
+	Plugin\ Label:      \s+ "([^"]+)" \s+
+	Plugin\ Unique\ ID: \s+ (\d+)     \s+
 	[^\x00]+(?=Ports) 		# swallow maximum up to Ports
 	Ports: \s+ ([^\x00]+) 	# swallow all
 	/x;
@@ -2062,10 +2071,11 @@ sub get_ladspa_hints{
 	for my $file (@plugins){
 		my @stanzas = split "\n\n", qx(analyseplugin $file);
 		for my $stanza (@stanzas) {
-			$stanza =~ /$pluginre/ 
+
+			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
+			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
 
-			my ($plugin_name, $plugin_label, $ports) = ($1, $2, $3);
 			#print "$1\n$2\n$3"; exit;
 
 			my @lines = split "\n",$ports;
@@ -2095,9 +2105,12 @@ sub get_ladspa_hints{
 			}
 
 			$plugin_label = "el:" . $plugin_label;
-			$effects_ladspa {$plugin_label}->{params} = [ @params ];
-			$effects_ladspa {$plugin_label}->{count} = scalar @params;
-			$effects_ladspa {$plugin_label}->{display} = 'scale';
+			$effects_ladspa_file{$plugin_unique_id} = $file;
+			$effects_ladspa{$plugin_label}->{name}  = $plugin_name;
+			$effects_ladspa{$plugin_label}->{id}    = $plugin_unique_id;
+			$effects_ladspa{$plugin_label}->{params} = [ @params ];
+			$effects_ladspa{$plugin_label}->{count} = scalar @params;
+			$effects_ladspa{$plugin_label}->{display} = 'scale';
 		}	#	pager( join "\n======\n", @stanzas);
 		#last if ++$i > 10;
 	}
