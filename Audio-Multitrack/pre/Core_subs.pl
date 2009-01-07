@@ -5,10 +5,10 @@ sub mainloop {
 	$ui->loop;
 }
 sub status_vars {
-	serialize -class => '::', -vars => \@status_vars;
+	serialize( -class => '::', -vars => \@status_vars);
 }
 sub config_vars {
-	serialize -class => '::', -vars => \@config_vars;
+	serialize( -class => '::', -vars => \@config_vars);
 }
 
 sub discard_object {
@@ -2031,22 +2031,19 @@ sub get_ladspa_hints{
 	$ENV{LADSPA_PATH} or local $ENV{LADSPA_PATH}='/usr/lib/ladspa';
 	my @dirs =  split ':', $ENV{LADSPA_PATH};
 	my $data = '';
+	my %seen = ();
+	my @plugins;
 	for my $dir (@dirs) {
 		opendir DIR, $dir or carp qq(can't open LADSPA dir "$dir" for read: $!\n);
-		my @plugins = grep{ /\.so$/ } readdir DIR;
-		$data .= join "", map { `analyseplugin $_` } @plugins;
+	
+		push @plugins,  
+			grep{ /\.so$/ and ! $seen{$_} and ++$seen{$_}} readdir DIR;
 		closedir DIR;
-	}
-	# print $data; exit;
-	my @plugin_stanzas = split "\n\n\n", $data;
-	# print scalar @plugin_stanzas; exit;
-	# print $data;
+	};
+	#pager join $/, @plugins;
 
-	# print "@plugins"; exit;
-	# | perl -ne 'chomp; s/$ENV{LADSPA_PATH}//; system qq(analyseplugin $_)'
-	my $ladspa_sample_rate = 44100; # for sample-rate dependent effect
-	use Data::Dumper;
-
+	# use these regexes to snarf data
+	
 	my $pluginre = qr/
 	Plugin\ Name: \s+ "([^"]+)" \s+
 	Plugin\ Label:\s+ "([^"]+)" \s+
@@ -2059,44 +2056,50 @@ sub get_ladspa_hints{
 	\s+
 	(.+)        # rest
 	/x;
+		
+	my $i;
 
+	for my $file (@plugins){
+		my @stanzas = split "\n\n", qx(analyseplugin $file);
+		for my $stanza (@stanzas) {
+			$stanza =~ /$pluginre/ 
+				or carp "*** couldn't match plugin stanza $stanza ***";
 
+			my ($plugin_name, $plugin_label, $ports) = ($1, $2, $3);
+			#print "$1\n$2\n$3"; exit;
 
-	for my $stanza (@plugin_stanzas) {
+			my @lines = split "\n",$ports;
+		#	print join "\n",@lines; exit;
+			my @params;  # data
 
-		$stanza =~ /$pluginre/ or carp "*** couldn't match plugin stanza $stanza ***";
+			my @names;
+			for my $p (@lines) {
+				next if $p =~ /^\s*$/;
+				$p =~ /$paramre/;
+				my ($name, $rest) = ($1, $2);
+				my ($dir, $type, $range, $default, $hint) = 
+					split /\s*,\s*/ , $rest, 5;
+				#print join "|",$dir, $type, $range, $default, $hint;
+				next if $type eq q(audio);
+				my %p;
+				$p{name} = $name;
+				$p{dir} = $dir;
+				$p{hint} = $hint;
+				my ($beg, $end, $default_val, $resolution) 
+					= range($name, $range, $default, $hint);
+				$p{begin} = $beg;
+				$p{end} = $end;
+				$p{default} = $default_val;
+				$p{resolution} = $resolution;
+				push @params, { %p };
+			}
 
-		my ($plugin_name, $plugin_label, $ports) = ($1, $2, $3);
-		#print "$1\n$2\n$3"; exit;
-
-		 my @lines = split "\n",$ports;
-	#	print join "\n",@lines; exit;
-		my @params;  # data
-
-		my @names;
-		for my $p (@lines) {
-			next if $p =~ /^\s*$/;
-			$p =~ /$paramre/;
-			my ($name, $rest) = ($1, $2);
-			my ($dir, $type, $range, $default, $hint) = split /\s*,\s*/ , $rest, 5;
-			#print join "|",$dir, $type, $range, $default, $hint;
-			next if $type eq q(audio);
-			my %p;
-			$p{name} = $name;
-			$p{dir} = $dir;
-			$p{hint} = $hint;
-			my ($beg, $end, $default_val, $resolution) = range($name, $range, $default, $hint);
-			$p{begin} = $beg;
-			$p{end} = $end;
-			$p{default} = $default_val;
-			$p{resolution} = $resolution;
-			push @params, { %p };
-		}
-
-		$plugin_label = "el:" . $plugin_label;
-		$effects_ladspa {$plugin_label}->{params} = [ @params ];
-		$effects_ladspa {$plugin_label}->{count} = scalar @params;
-		$effects_ladspa {$plugin_label}->{display} = 'scale';
+			$plugin_label = "el:" . $plugin_label;
+			$effects_ladspa {$plugin_label}->{params} = [ @params ];
+			$effects_ladspa {$plugin_label}->{count} = scalar @params;
+			$effects_ladspa {$plugin_label}->{display} = 'scale';
+		}	#	pager( join "\n======\n", @stanzas);
+		#last if ++$i > 10;
 	}
 
 	$debug and print yaml_out(\%effects_ladspa); 
