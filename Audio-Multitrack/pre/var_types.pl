@@ -54,6 +54,8 @@
 						@ladspa_sorted
 						%effects_ladspa	
 						%effects_ladspa_file
+						%ladspa_unique_id
+						%effects_help
 						);
 					
 

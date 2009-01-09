@@ -9,16 +9,20 @@ last: ('last' | '$' )
 dd: /\d+/
 name: /[\w:]+/
 name2: /[\w-]+/
+name3: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 end: /[;\s]*$/ 
 help: _help end { print $::help_screen }
 help: _help 'yml' end { ::pager($::commands_yml)}
-help: _help name2  { ::Text::help($item{name2}) }
+help: _help /\s+/ name2  { ::Text::help($item{name2}) }
+help_ladspa: _help_ladspa name end { ::Text::help_ladspa($item{name}) }
+find_effect: _find_effect name3(s) { ::Text::find_effect(@{$item{"name3(s)"}})}
 exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end { ::t_create_project $item{name} }
 
 list_projects: _list_projects end { ::list_projects() }
+list_plugin: _list_plugin name end { ::list_plugin() }
 
 load_project: _load_project name end {
 	::t_load_project( $item{name} )

@@ -4,6 +4,11 @@ help:
   what: display help 
   parameters: topic or command name 
   type: general
+list_plugin:
+  short: lp
+  what: output of analyseplugin
+  parameter: LADSPA plugin name or unique id
+  type: general
 exit:
   short: quit q
   what: exit program, saving settings
@@ -297,11 +302,11 @@ add_ctrl:
   short: acl
 add_effect:
   type: effect
-  what: add effect (Ecasound, Ecasound preset or LADSPA) to selected track
+  what: add effect to current track
   short: fxa afx
   smry: add effect
-  parameters: code param1 param2,... paramn
-  example: fxa amp 6 (LADSPA Simple amp 6dB gain),\n         fxa var_dali (preset var_dali),\n         fxa pn:var_tape_stretched (explicit el: or pn: prefix optional)\n
+  parameters: effect_label param1 param2,... paramn
+  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa pn:var_dali (preset var_dali)
 modify_effect:
   type: effect
   what: modify an effect parameter
@@ -314,6 +319,16 @@ remove_effect:
   short: fxr rfx
   parameters: effect_id1, effect_id2,...
   example: fxr V (remove effect V)
+help_ladspa:
+  type: help
+  short: ladspa hl
+  parameters: label | unique_id
+  what: display analyseplugin output
+find_effect:
+  type: help
+  short: ffx fxf
+  what: display one-line help for effects matching search strings
+  parameters: string1, string2,...
 ctrl_register:
   type: effect
   what: list Ecasound controllers

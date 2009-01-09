@@ -15,6 +15,7 @@ our (
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic
 	$use_pager,     # display lengthy output data using pager
+	$text,          # Text::Format object
 
 	$ui, # object providing class behavior for graphic/text functions
 
@@ -96,13 +97,16 @@ our (
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index , pn:amp -> effect number
 	%effect_j,      # an index , amp -> effect number
-	%effect_help,   # pn:amp => Ecasound effect info line
+	%effects_help,   # pn:amp => Ecasound effect info line
 	                # el:tap_reverb => Unique ID + Ecasound info line
 
+	%ladspa_help,   # Unique ID => analyseplugin output
 	@ladspa_sorted, # ld
-	%effects_ladspa, # data from analyseplugin 
+	%effects_ladspa, # parsed data from analyseplugin 
 	%effects_ladspa_file, 
 					# get plugin filename from Plugin Unique ID
+	%ladspa_unique_id, 
+					# get plugin unique id from plugin label
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
 					

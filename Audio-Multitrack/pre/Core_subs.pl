@@ -173,7 +173,6 @@ sub prepare {
 
 	prepare_static_effects_data() unless $opts{e};
 
-	#prepare_effects_help();
 
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -312,6 +311,7 @@ sub list_projects {
 	my $cmd = "ls ". project_root();
 	print system $cmd;
 }
+sub list_plugins {}
 		
 sub load_project {
 	$debug2 and print "&load_project\n";
@@ -1416,7 +1416,7 @@ sub pager {
 	my ($screen_lines, $columns) = split " ", qx(stty size);
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
-	if ( $use_pager and $line_count > $screen_lines ) { 
+	if ( $use_pager and $line_count > $screen_lines - 2) { 
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
 		print $fh @output;
@@ -1782,14 +1782,41 @@ sub apply_op {
 }
 
 sub prepare_effects_help {
-	my @lrg = split "\n",eval_iam("ladspa-register");
-	my @prg = map{s/^.*? -//; $_ .= "\n" }
-				split "\n",eval_iam("preset-register");
-	my @lrg_one_line = map{ if (/el:/){s/^\s+/ /; s/'//g; $_ .="\n" }
-							else { s/^\S+\s//; s/\s+$/ /;}
-							$_;
- 						} @lrg;
-	#print @lrg, @prg; exit;
+	my @prg = map{	s/^.*? //; 				# remove initial number
+					$_ .= "\n";				# add newline
+					my ($id) = /(pn:\w+)/; 	# find id
+					$effects_help{$id} = $_;  #store help, returning $_
+
+				}  split "\n",eval_iam("preset-register");
+
+	my $label;
+	my @lrg = map{ 
+
+		if (  my ($_label) = /-(el:\w+)/  ){
+				$label = $_label;
+				s/^\s+/ /;				 # trim spaces 
+				s/'//g;     			 # remove apostrophes
+				$_ .="\n";               # add newline
+				$effects_help{$label} = $_;  # store help
+
+		} else { 
+				# replace leading number with LADSPA Unique ID
+				s/^\d+/$ladspa_unique_id{$label}/;
+
+				s/\s+$/ /;  			# remove trailing spaces
+				substr($effects_help{$label},0,0) = $_; # join lines
+				
+		}
+
+	} reverse split "\n",eval_iam("ladspa-register");
+
+
+#my @lines = reverse split "\n",eval_iam("ladspa-register");
+#pager( scalar @lines, $/, join $/,@lines);
+	
+	#my @crg = map{s/^.*? -//; $_ .= "\n" }
+	#			split "\n",eval_iam("control-register");
+	#pager (@lrg, @prg); exit;
 }
 
 sub prepare_static_effects_data{
@@ -1816,6 +1843,7 @@ sub prepare_static_effects_data{
 		get_ladspa_hints();
 		integrate_ladspa_hints();
 		sort_ladspa_effects();
+		prepare_effects_help();
 		serialize (
 			-file => $effects_cache, 
 			-vars => \@effects_static_vars,
@@ -2076,6 +2104,8 @@ sub get_ladspa_hints{
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
 
+			$ladspa_help{$plugin_unique_id} = $stanza;
+
 			#print "$1\n$2\n$3"; exit;
 
 			my @lines = split "\n",$ports;
@@ -2106,6 +2136,7 @@ sub get_ladspa_hints{
 
 			$plugin_label = "el:" . $plugin_label;
 			$effects_ladspa_file{$plugin_unique_id} = $file;
+			$ladspa_unique_id{$plugin_label} = $plugin_unique_id; 
 			$effects_ladspa{$plugin_label}->{name}  = $plugin_name;
 			$effects_ladspa{$plugin_label}->{id}    = $plugin_unique_id;
 			$effects_ladspa{$plugin_label}->{params} = [ @params ];

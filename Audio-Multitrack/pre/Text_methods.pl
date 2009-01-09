@@ -1,4 +1,12 @@
 use Carp;
+use Text::Format;
+$text = new Text::Format {
+	columns 		=> 65,
+	firstIndent 	=> 0,
+	bodyIndent		=> 0,
+	tabstop			=> 4,
+};
+
 sub new { my $class = shift; return bless { @_ }, $class; }
 
 sub show_versions {
@@ -246,57 +254,75 @@ IAM
 		@output = map{ helptopic $_ } @help_topic;
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)
-	} elsif ( $commands{$name}){
+	} elsif ( $commands{$name} ){
 		@output = helpline($name)
 	} else {
 		my %helped = (); 
+		my @help = ();
 		map{  
 			my $cmd = $_ ;
 			if ($cmd =~ /$name/){
-				push( @output, helpline($cmd));
+				push( @help, helpline($cmd));
 				$helped{$cmd}++ ;
 			}
-			if ( grep{ /$name/ } split " ", $commands{$cmd}->{short} 
-					and ! $helped{$cmd}){
-				push @output, helpline($cmd) 
+			if ( ! $helped{$cmd} and
+					grep{ /$name/ } split " ", $commands{$cmd}->{short} ){
+				push @help, helpline($cmd) 
 			}
 		} keys %commands;
-	}
-	# e.g. help tap_reverb  
-	#      help 2142
-	if ( $effects_ladspa{"el:$name"}) {
- 		push @output, "$name is the code for the following LADSPA effect:\n";
-    	push @output, qx(analyseplugin $name);
-
-	} elsif ( my $file = $effects_ladspa_file{$name}) {
- 		push @output, "$name is the unique id for the following LADSPA effect:\n";
-    	push @output, qx(analyseplugin $file);
-	} 
-=comment
-else {
-		my $lcname = lc $name;
-		my @matches = grep{ /$lcname/ } keys %effect_i;
-		if ( @matches ){
-			push @output, <<EFFECT;
-Effects matching "$name" were found. The "pn:" prefix 
-indicates an Ecasound preset. The "el:" prefix indicates
-a LADSPA plugin. No prefix indicates an Ecasound chain
-operator.
-
-EFFECT
-			for (@matches) {
-
-			}	
-				
+		if ( @help ){ push @output, 
+			qq("$name" matches the following commands:\n\n), @help;
 		}
 	}
-=cut
-		
 	::pager( @output ); 
 	
 }
+sub help_ladspa {
+	my $name = shift;
+	print "name: $name\n";
+	# e.g. help tap_reverb  
+	#      help 2142
+	my @output;
+	my $id;
 
-# are these subroutines so different from what's in Core_subs.pl?
+	if ( $name =~  /\D/ ){ # not a number
+		my $label = $name;
+		$label = "el:$label" unless $label =~ /el:/;
+		$id = $ladspa_unique_id{$label} or
+			print("$label: LADSPA plugin not found.\n"), return 
+	}
+	$id = $id ? $id : $name;
+	print("$id: LADSPA plugin not found.\n"), return 
+		if ! $ladspa_help{$id};
+	::pager( $ladspa_help{$id}, "\n\n" );
+}
+
+
+sub find_effect {
+	my @keys = @_;
+	print "keys: @keys\n";
+	my @matches;
+	my @output;
+	map{
+		my $help = $effects_help{$_};
+		#print "$_: $help";
+		my $didnt_match; # we'll notice a failure to match
+		map{ $didnt_match++ if $help !~ /$_/i } @keys;
+		push( @matches, $help) unless $didnt_match;
+	} keys %effects_help;
+	if ( @matches ){
+# 		push @output, <<EFFECT;
+# 
+# Effects matching "@keys" were found. The "pn:" prefix 
+# indicates an Ecasound preset. The "el:" prefix indicates
+# a LADSPA plugin. No prefix indicates an Ecasound chain
+# operator.
+# 
+# EFFECT
+	push @output, $text->paragraphs(@matches), "\n";
+	} else { push @output, "No matching effects.\n\n" }
+	::pager(@output);
+}
 
 package ::;
 
