@@ -97,16 +97,16 @@ our (
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index , pn:amp -> effect number
 	%effect_j,      # an index , amp -> effect number
-	%effects_help,   # pn:amp => Ecasound effect info line
-	                # el:tap_reverb => Unique ID + Ecasound info line
+	%effects_help,  # one line per effect, for text search
 
-	%ladspa_help,   # Unique ID => analyseplugin output
 	@ladspa_sorted, # ld
 	%effects_ladspa, # parsed data from analyseplugin 
 	%effects_ladspa_file, 
 					# get plugin filename from Plugin Unique ID
 	%ladspa_unique_id, 
 					# get plugin unique id from plugin label
+	%ladspa_label,  # get plugin label from unique id
+	%ladspa_help,   # plugin_label => analyseplugin output
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
 					

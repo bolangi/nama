@@ -319,14 +319,14 @@ remove_effect:
   short: fxr rfx
   parameters: effect_id1, effect_id2,...
   example: fxr V (remove effect V)
-help_ladspa:
+help_effect:
   type: help
-  short: ladspa hl
+  short: hfx fxh hf he
   parameters: label | unique_id
-  what: display analyseplugin output
+  what: display analyseplugin output or one-line preset help
 find_effect:
   type: help
-  short: ffx fxf
+  short: ffx fxf ff fe
   what: display one-line help for effects matching search strings
   parameters: string1, string2,...
 ctrl_register:

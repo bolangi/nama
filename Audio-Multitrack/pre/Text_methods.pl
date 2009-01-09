@@ -277,37 +277,48 @@ IAM
 	::pager( @output ); 
 	
 }
-sub help_ladspa {
-	my $name = shift;
-	print "name: $name\n";
-	# e.g. help tap_reverb  
+sub help_effect {
+	my $input = shift;
+	print "input: $input\n";
+	# e.g. help tap_reverb    
 	#      help 2142
-	my @output;
-	my $id;
+	#      help var_chipmunk # preset
 
-	if ( $name =~  /\D/ ){ # not a number
-		my $label = $name;
-		$label = "el:$label" unless $label =~ /el:/;
-		$id = $ladspa_unique_id{$label} or
-			print("$label: LADSPA plugin not found.\n"), return 
+
+	if ($input !~ /\D/){ # all digits
+		$input = $ladspa_label{$input}
+			or print("$input: effect not found.\n\n"), return;
 	}
-	$id = $id ? $id : $name;
-	print("$id: LADSPA plugin not found.\n"), return 
-		if ! $ladspa_help{$id};
-	::pager( $ladspa_help{$id}, "\n\n" );
+	$input =~ s/el://; # we'll add them again later
+	$input =~ s/pn://;
+
+	my $label = $effect_j{$input} 		# adds pn: el: if necessary
+		or print("$input: effect not found.\n\n"), return;
+	if ($label =~ /pn:/) {
+		print $effects_help{$label};
+	}
+	elsif ( $label =~ /el:/) {
+	
+	my @output = $ladspa_help{$label};
+	print "label: $label\n";
+	::pager( @output );
+	#print $ladspa_help{$label};
+	} else { 
+	print "$label: Ecasound effect. Type 'man ecasound' for details.\n";
+	}
 }
 
 
 sub find_effect {
 	my @keys = @_;
-	print "keys: @keys\n";
+	#print "keys: @keys\n";
 	my @matches;
 	my @output;
 	map{
 		my $help = $effects_help{$_};
 		#print "$_: $help";
 		my $didnt_match; # we'll notice a failure to match
-		map{ $didnt_match++ if $help !~ /$_/i } @keys;
+		map{ $didnt_match++ if $help !~ /\Q$_\E/i } @keys;
 		push( @matches, $help) unless $didnt_match;
 	} keys %effects_help;
 	if ( @matches ){
@@ -365,6 +376,14 @@ sub t_add_ctrl {
 }
 sub t_add_effect {
 	my ($code, $values)  = @_;
+
+	# allow use of LADSPA unique ID
+	
+    if ($code !~ /\D/){ # i.e. $code is all digits
+		$code = $ladspa_label{$code} 
+			or carp("$code: LADSPA plugin not found.  Aborting.\n"), return;
+	}
+		
 	if ( $effect_i{$code} ) {} # do nothing
 	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
 	else { warn "effect code not found: $code\n"; return }

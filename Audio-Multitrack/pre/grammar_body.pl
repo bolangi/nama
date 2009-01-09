@@ -16,7 +16,7 @@ end: /[;\s]*$/
 help: _help end { print $::help_screen }
 help: _help 'yml' end { ::pager($::commands_yml)}
 help: _help /\s+/ name2  { ::Text::help($item{name2}) }
-help_ladspa: _help_ladspa name end { ::Text::help_ladspa($item{name}) }
+help_effect: _help_effect name end { ::Text::help_effect($item{name}) }
 find_effect: _find_effect name3(s) { ::Text::find_effect(@{$item{"name3(s)"}})}
 exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end { ::t_create_project $item{name} }

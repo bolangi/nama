@@ -1312,6 +1312,7 @@ sub add_effect {
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code 			= $p{type};
+
 	my $parent_id = $p{parent_id};  
 	my $id		= $p{cop_id};   # initiates restore
 	my $parameter		= $p{parameter}; 
@@ -1424,6 +1425,7 @@ sub pager {
 	} else {
 		print @output;
 	}
+	print "\n\n";
 }
 sub file_pager {
 	$debug2 and print "&file_pager\n";
@@ -1785,6 +1787,7 @@ sub prepare_effects_help {
 	my @prg = map{	s/^.*? //; 				# remove initial number
 					$_ .= "\n";				# add newline
 					my ($id) = /(pn:\w+)/; 	# find id
+					s/,/, /g;				# to help line breaks
 					$effects_help{$id} = $_;  #store help, returning $_
 
 				}  split "\n",eval_iam("preset-register");
@@ -1805,6 +1808,7 @@ sub prepare_effects_help {
 
 				s/\s+$/ /;  			# remove trailing spaces
 				substr($effects_help{$label},0,0) = $_; # join lines
+				$effects_help{$label} =~ s/,/, /g; # 
 				
 		}
 
@@ -2104,7 +2108,6 @@ sub get_ladspa_hints{
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
 
-			$ladspa_help{$plugin_unique_id} = $stanza;
 
 			#print "$1\n$2\n$3"; exit;
 
@@ -2135,8 +2138,10 @@ sub get_ladspa_hints{
 			}
 
 			$plugin_label = "el:" . $plugin_label;
+			$ladspa_help{$plugin_label} = $stanza;
 			$effects_ladspa_file{$plugin_unique_id} = $file;
 			$ladspa_unique_id{$plugin_label} = $plugin_unique_id; 
+			$ladspa_label{$plugin_unique_id} = $plugin_label;
 			$effects_ladspa{$plugin_label}->{name}  = $plugin_name;
 			$effects_ladspa{$plugin_label}->{id}    = $plugin_unique_id;
 			$effects_ladspa{$plugin_label}->{params} = [ @params ];

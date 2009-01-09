@@ -50,11 +50,14 @@
 
 						@effects		
 						%effect_i	
+						%effect_j	
 						%e_bound
 						@ladspa_sorted
 						%effects_ladspa	
 						%effects_ladspa_file
 						%ladspa_unique_id
+						%ladspa_label
+						%ladspa_help
 						%effects_help
 						);
 					
