@@ -49,6 +49,7 @@ use ::Object qw( 		name
 						modifiers
 
 						jack_source
+						jack_send
 						signal_select
 						
 						);
@@ -296,8 +297,7 @@ sub monitor_version {
 		{ return $group->version }
 	elsif (	$track->last and ! $track->active and ! $group->version )
 		{ $track->last }
-	else { #print $track->name, ": no version to monitor!\n"; 
-		undef }
+	else { undef }
 }
 
 sub rec_status {
@@ -427,6 +427,7 @@ use ::Object qw( 		name
 						modifiers
 
 						jack_source
+						jack_send
 						signal_select
 						
 						);

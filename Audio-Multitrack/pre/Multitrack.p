@@ -9,7 +9,7 @@ no warnings;
 
 BEGIN{ 
 
-our $VERSION = '0.98';
+our $VERSION = '0.981';
 our $ABSTRACT = 'Lightweight multitrack recorder/mixer';
 
 [% qx(cat ./banner.pl) %]

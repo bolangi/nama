@@ -81,12 +81,18 @@ directory.
 
 	./myproc; ./ui
 
+To complete the installation, return to the top-level directory.
+	
+	perl Makefile.PL
+	make && make test && make install
+
 To see the names of the files and scripts used to build the
 modules type:
 
 	grep '\[%' *  # finds directives for including files
 
 	ls *.p        
+
 
 =head1 LICENSE
 

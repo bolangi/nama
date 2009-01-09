@@ -13,3 +13,8 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                         - long text output displays in pager
 0.98  Mon Jan 6, 2009   - rewritten man pages
                         - README contains source build instructions
+0.981 Thu Jan 9, 2009   - add_effect takes LADSPA unique id as well as label
+                        - find_effect commands search for multiple keywords 
+                        - help_effect provides analyseplugin output for 
+                          one effect
+
