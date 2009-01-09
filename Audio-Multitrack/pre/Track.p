@@ -208,7 +208,9 @@ sub current {	 # depends on ewf status
 	# here comes the logic that enables .ewf support, 
 	# using conditional $track->delay or $track->length or $track->start_position ;
 	# to decide whether to rewrite file name from .wav to .ewf
-	
+
+# ewf is deprecated!
+
 		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		use warnings;
@@ -286,18 +288,16 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group};
-	my $version; 
 	if ( $track->active 
 			and grep {$track->active == $_ } @{$track->versions}) 
-		{ $version = $track->active }
+		{ return $track->active }
 	elsif (	$group->version
 			and grep {$group->version  == $_ } @{$track->versions})
-		{ $version = $group->version }
-#	elsif (	$track->last) #  and ! $track->active and ! $group->version )
-#		{ $version = $track->last }
-	else { } # carp "no version to monitor!\n" 
-	# print "monitor version: $version\n";
-	$version;
+		{ return $group->version }
+	elsif (	$track->last and ! $track->active and ! $group->version )
+		{ $track->last }
+	else { #print $track->name, ": no version to monitor!\n"; 
+		undef }
 }
 
 sub rec_status {
