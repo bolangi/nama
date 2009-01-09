@@ -306,7 +306,7 @@ add_effect:
   short: fxa afx
   smry: add effect
   parameters: effect_label param1 param2,... paramn
-  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa pn:var_dali (preset var_dali)
+  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa pn:var_dali (preset var_dali) Note: no el: or pn: prefix is required
 modify_effect:
   type: effect
   what: modify an effect parameter

@@ -1784,31 +1784,35 @@ sub apply_op {
 }
 
 sub prepare_effects_help {
-	my @prg = map{	s/^.*? //; 				# remove initial number
+
+	# presets
+	map{	s/^.*? //; 				# remove initial number
 					$_ .= "\n";				# add newline
 					my ($id) = /(pn:\w+)/; 	# find id
 					s/,/, /g;				# to help line breaks
-					$effects_help{$id} = $_;  #store help, returning $_
+					push @effects_help,    $_;  #store help
 
 				}  split "\n",eval_iam("preset-register");
 
+	# LADSPA
 	my $label;
-	my @lrg = map{ 
+	map{ 
 
 		if (  my ($_label) = /-(el:\w+)/  ){
 				$label = $_label;
 				s/^\s+/ /;				 # trim spaces 
 				s/'//g;     			 # remove apostrophes
 				$_ .="\n";               # add newline
-				$effects_help{$label} = $_;  # store help
+				push @effects_help, $_;  # store help
 
 		} else { 
 				# replace leading number with LADSPA Unique ID
 				s/^\d+/$ladspa_unique_id{$label}/;
 
 				s/\s+$/ /;  			# remove trailing spaces
-				substr($effects_help{$label},0,0) = $_; # join lines
-				$effects_help{$label} =~ s/,/, /g; # 
+				substr($effects_help[-1],0,0) = $_; # join lines
+				$effects_help[-1] =~ s/,/, /g; # 
+				$effects_help[-1] =~ s/,\s+$//;
 				
 		}
 

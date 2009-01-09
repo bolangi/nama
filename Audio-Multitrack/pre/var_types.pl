@@ -58,7 +58,7 @@
 						%ladspa_unique_id
 						%ladspa_label
 						%ladspa_help
-						%effects_help
+						@effects_help
 						);
 					
 

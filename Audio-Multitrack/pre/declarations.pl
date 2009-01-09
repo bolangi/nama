@@ -97,7 +97,7 @@ our (
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index , pn:amp -> effect number
 	%effect_j,      # an index , amp -> effect number
-	%effects_help,  # one line per effect, for text search
+	@effects_help,  # one line per effect, for text search
 
 	@ladspa_sorted, # ld
 	%effects_ladspa, # parsed data from analyseplugin 

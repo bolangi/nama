@@ -289,22 +289,20 @@ sub help_effect {
 		$input = $ladspa_label{$input}
 			or print("$input: effect not found.\n\n"), return;
 	}
-	$input =~ s/el://; # we'll add them again later
-	$input =~ s/pn://;
-
-	my $label = $effect_j{$input} 		# adds pn: el: if necessary
-		or print("$input: effect not found.\n\n"), return;
-	if ($label =~ /pn:/) {
-		print $effects_help{$label};
+	if ( $effect_i{$input} ) {} # do nothing
+	elsif ( $effect_j{$input} ) { $input = $effect_j{$input} }
+	else { print("$input: effect not found.\n\n"), return }
+	if ($input =~ /pn:/) {
+		print grep{ /$input/  } @effects_help;
 	}
-	elsif ( $label =~ /el:/) {
+	elsif ( $input =~ /el:/) {
 	
-	my @output = $ladspa_help{$label};
-	print "label: $label\n";
+	my @output = $ladspa_help{$input};
+	print "label: $input\n";
 	::pager( @output );
-	#print $ladspa_help{$label};
+	#print $ladspa_help{$input};
 	} else { 
-	print "$label: Ecasound effect. Type 'man ecasound' for details.\n";
+	print "$input: Ecasound effect. Type 'man ecasound' for details.\n";
 	}
 }
 
@@ -312,15 +310,13 @@ sub help_effect {
 sub find_effect {
 	my @keys = @_;
 	#print "keys: @keys\n";
-	my @matches;
-	my @output;
-	map{
-		my $help = $effects_help{$_};
-		#print "$_: $help";
-		my $didnt_match; # we'll notice a failure to match
-		map{ $didnt_match++ if $help !~ /\Q$_\E/i } @keys;
-		push( @matches, $help) unless $didnt_match;
-	} keys %effects_help;
+	#my @output;
+	my @matches = grep{ 
+		my $help = $_; 
+		my $didnt_match;
+		map{ $help =~ /\Q$_\E/i or $didnt_match++ }  @keys;
+		! $didnt_match; # select if no cases of non-matching
+	} @effects_help;
 	if ( @matches ){
 # 		push @output, <<EFFECT;
 # 
@@ -330,9 +326,8 @@ sub find_effect {
 # operator.
 # 
 # EFFECT
-	push @output, $text->paragraphs(@matches), "\n";
-	} else { push @output, "No matching effects.\n\n" }
-	::pager(@output);
+	::pager( $text->paragraphs(@matches) , "\n" );
+	} else { print "No matching effects.\n\n" }
 }
 
 package ::;
