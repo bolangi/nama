@@ -1,5 +1,5 @@
 #!/usr/local/bin/perl -w
-use lib "/home/jroth/build/flow/Audio-Multitrack/lib"; 
+use lib "../lib";
 use Audio::Ecasound::Multitrack;
 package Audio::Ecasound::Multitrack;
 mainloop();

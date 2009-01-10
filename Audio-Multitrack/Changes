@@ -14,9 +14,9 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
 0.98  Mon Jan 6, 2009   - rewritten man pages
                         - README contains source build instructions
 0.981 Thu Jan 9, 2009   - add track fields jack_send and send_select
-                        - add track method/command 'send'.
-                          Similar to 'source'. 
+                        - add track method/command 'send' analagous to 'source'
                         - add_effect takes LADSPA unique id as well as label
-                        - find_effect (fe) searches for multiple keywords
+                        - find_effect (fe) takes multiple keywords
                         - help_effect (he) analyseplugin output for one effect
                           designated by label or unique_id
+						- workaround for longstanding parser bug

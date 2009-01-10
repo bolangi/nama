@@ -1,12 +1,14 @@
 #!/bin/sh
-TD=../lib/Audio/Ecasound/Multitrack 
-PD=.
-preproc -r Audio::Ecasound::Multitrack \
-		-s ~/build/flow/Audio-Multitrack/pre \
-		-t $TD
+MD=..
+TD=$MD/lib/Audio/Ecasound/Multitrack
+./preproc -r Audio::Ecasound::Multitrack \
+		-s $MD/pre \
+		-t $TD \
+		-a p \
+		-b pm 
 mv $TD/Multitrack.pm $TD/../Multitrack.pm 
-preproc  -s ~/build/flow/Audio-Multitrack/pre \
-         -t ~/build/flow/Audio-Multitrack/t    \
+./preproc  -s $MD/pre \
+         -t $MD/t  \
 		 -r Audio::Ecasound::Multitrack \
 		 -a t \
 		 -b t

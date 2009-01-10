@@ -1,5 +1,10 @@
 #!/usr/bin/env perl
-#use lib $ENV{TD};
+# 
+# This script provides templating functions for building
+# a perl module from sources.
+#
+# Run 'myproc' to provide preprocessing for Nama/Audio::Ecasound::Multitrack
+
 use Text::Template;
 use Getopt::Std;
 use IO::All;
@@ -22,11 +27,11 @@ my(
 
 my $debug = 0;
 getopts('s:t:f:r:a:b:', \%opts);
-$source_dir = $opts{s} ? $opts{s} : $ENV{PD};
-$new_root = $opts{r} ? $opts{r} : 'UI';
-$target_dir = $opts{t} ? $opts{t} : $ENV{TD};
-$exta = $opts{a} ? $opts{a} :  "p"; # source extension
-$extb = $opts{b} ? $opts{b} :  "pm";# target extension
+$source_dir = $opts{s};
+$new_root = $opts{r};
+$target_dir = $opts{t};
+$exta = $opts{a};
+$extb = $opts{b};
 $file = $opts{f};
 
 $debug and print <<PRINT;
