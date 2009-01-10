@@ -67,32 +67,62 @@ be installed for Nama to correctly identify stereo files.
 
 =head1 BUILD INSTRUCTIONS
 
-It is much easier to browse the sources prior to build. 
-Functionality is separated into a number of files,
-and the long module prefix "Audio::Ecasound::Multitrack" is
-shortened to "::".
+You may decide to clone the Nama's github repository and
+from source rather than installing from CPAN.  It is much
+easier to browse or hack on Nama this way. Functionality is
+separated into a number of files, and you will see
+C<$::package_var> instead of
+C<$Audio::Ecasound::Multitrack::package_var>.
 
-*.pm files for the distribution are created from source
-files *.p and *.pl and a few other files by executing the
-F<./myproc> script.
+You can get also updates more quickly and can share patches
+with other developers.
 
-For typical build and test type the following in the F<pre>
-directory.
+=head2 Procedure
 
-	./myproc; ./ui
+For typical build and test:
 
-To complete the installation, return to the top-level directory.
-	
+	cd build
+	git-clone git://github.com/bolangi/nama.git
+	cd nama/src
+	./build
+    ./ui
+
+To install the module, do as usual:
+
+    cd ..
 	perl Makefile.PL
-	make && make test && make install
+    make && make test && make install
+    
+=head2 Description 
+
+The F<build> script creates the perl modules for the
+distribution under the F<nama/lib> directory using F<*.p>,
+F<*.pl>, F<*.t> and other files in the F<nama/src> directory.
+
+F<build> looks into the F<*.p> files for lines that look
+like:
+
+    [% somefile.pl %]
+
+This notation is analogous to the C-preprocessor #include
+directive: F<somefile.pl> gets included in the source
+at that point. Some of these include lines are more complicated:
+
+    [% qx(./strip_comments ./grammar_body) %]
+
+Here the preprocessor runs the script F<strip_comments> on
+F<grammar_body>, removing text that would choke the parser
+generator.
+
+F<Build> provides a few parameters to the preprocessing
+script F<preproc>, which uses the Text::Template to perform
+most of the required substitutions.
 
 To see the names of the files and scripts used to build the
 modules type:
 
-	grep '\[%' *  # finds directives for including files
-
 	ls *.p        
-
+	grep '\[%' *  # shows all include directives
 
 =head1 LICENSE
 
