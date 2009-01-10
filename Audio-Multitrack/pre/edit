@@ -1,2 +1,11 @@
-vim Multitrack.p Core_subs.pl Assign.p Graphical_subs.pl $TD/../Multitrack.pm
-
+vim \
+Multitrack.p \
+Core_subs.pl \
+Text_methods.pl \
+grammar_body.pl \
+../lib/Audio/Ecasound/Multitrack.pm \
+declarations.pl \
+var_types.pl \
+Track.p \
+Graphical_subs.pl \
+Refresh_subs.pl \
