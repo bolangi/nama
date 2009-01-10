@@ -40,6 +40,7 @@ sub loop {
 
 	package ::;
     my $prompt = "nama ('h' for help)> ";
+    #my $prompt = "nama> ";
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$term->callback_handler_install($prompt, \&::Text::process_line);
@@ -175,8 +176,8 @@ sub command_process {
 			my $result = eval_iam($user_input);
 			pager( $result );  
 		} else {
-			$debug and print "Passing to parser\n", 
-			$_, $/;
+			if ($cmd eq 'h') { s/h/help/; }
+			$debug and print "Passing to parser\n", $_, $/;
 			#print 1, ref $parser, $/;
 			#print 2, ref $::parser, $/;
 			# both print

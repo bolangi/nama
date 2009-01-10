@@ -528,13 +528,13 @@ sub initialize_rules {
 		name			=>  'multi', 
 		target			=>  'REC',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
-		input_type		=>  'device', # raw
+		input_type		=>  'cooked', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
 		output_type		=>  'device',
 		output_object	=>  'multi',
 		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
 		condition 		=> sub { my $track = shift; 
-								return "satisfied" if $track->ch_m; } ,
+								return "satisfied" if $track->source; } ,
 		status			=>  0,
 	);
 

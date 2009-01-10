@@ -50,7 +50,8 @@ use ::Object qw( 		name
 
 						jack_source
 						jack_send
-						signal_select
+						source_select
+						send_select
 						
 						);
 
@@ -112,7 +113,8 @@ sub new {
 					looping => undef, # do we repeat our sound sample
 
 					hide     => undef, # for 'Remove Track' function
-					signal_select => q(soundcard),
+					source_select => q(soundcard),
+					send_select => undef,
 
 					@_ 			}, $class;
 
@@ -149,7 +151,7 @@ sub input_object {
 }
 	
 # 	  elsif ( $source eq 'card' or $source eq 'c' ){
-# 		$track->set(signal_select => 'soundcard');
+# 		$track->set(source_select => 'soundcard');
 # 		$track->input;
 sub source {
 	my ($track, $source) = @_;
@@ -157,7 +159,7 @@ sub source {
 	if ( ! $source ){
 		if ( $::jack_enable
 				and $track->jack_source 
-				and $track->signal_select eq 'jack'){
+				and $track->source_select eq 'jack'){
 			$track->jack_source 
 		} else { 
 			$track->input 
@@ -165,15 +167,41 @@ sub source {
 	} elsif ( $source =~ m(\D) ){
 		if ( $::jack_enable ){
 			$track->set(jack_source => $source);
-			$track->set(signal_select => "jack");
+			$track->set(source_select => "jack");
 			$track->jack_source
 		} else {
-			print "Type 'jack' to enable JACK before connecting a client\n";
+			print "Type 'jack' before setting a JACK client\n";
 			$track->input;
 		} 
 	} else {  # must be numerical
 		$track->set(ch_r => $source);
-		$track->set(signal_select =>'soundcard');
+		$track->set(source_select =>'soundcard');
+		$track->input;
+	}
+} 
+sub send {
+	my ($track, $send) = @_;
+
+	if ( ! $send ){
+		if ( $::jack_enable
+				and $track->jack_send 
+				and $track->send_select eq 'jack'){
+			$track->jack_send 
+		} else { 
+			$track->input 
+		}
+	} elsif ( $send =~ m(\D) ){
+		if ( $::jack_enable ){
+			$track->set(jack_send => $send);
+			$track->set(send_select => "jack");
+			$track->jack_send
+		} else {
+			print "Type 'jack' before setting a JACK client\n";
+			$track->input;
+		} 
+	} else {  # must be numerical
+		$track->set(ch_m => $send);
+		$track->set(send_select =>'soundcard');
 		$track->input;
 	}
 } 
@@ -428,7 +456,8 @@ use ::Object qw( 		name
 
 						jack_source
 						jack_send
-						signal_select
+						source_select
+						send_select
 						
 						);
 

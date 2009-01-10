@@ -1,6 +1,5 @@
 ---
 help:
-  short: h
   what: display help 
   parameters: topic or command name 
   type: general
@@ -102,6 +101,16 @@ monitor_channel:
   what: set track output channel number
   smry: set track output channel
   parameters: number
+source:
+  type: track
+  what: set track source
+  short: src from r in
+  parameters: JACK client name or soundcard channel number 
+send:
+  type: track
+  what: set auxilary track destination
+  short: to m out aux
+  parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
 source:
   type: track
   what: set track source

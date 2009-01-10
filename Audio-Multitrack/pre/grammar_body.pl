@@ -13,9 +13,6 @@ name3: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); }
 end: /[;\s]*$/ 
-help: _help end { print $::help_screen }
-help: _help 'yml' end { ::pager($::commands_yml)}
-help: _help /\s+/ name2  { ::Text::help($item{name2}) }
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) }
 find_effect: _find_effect name3(s) { ::Text::find_effect(@{$item{"name3(s)"}})}
 exit: _exit end { ::save_state(); exit }
@@ -352,3 +349,6 @@ ladspa_register: _ladspa_register end { ::pager( ::eval_iam("ladspa-register")) 
 preset_register: _preset_register end { ::pager( ::eval_iam("preset-register"))}
 ctrl_register: _ctrl_register end { ::pager( ::eval_iam("ctrl-register"))}
 project_name: _project_name end { print "project name: ", $::project_name, $/ }
+help: _help 'yml' end { ::pager($::commands_yml)}
+help: _help name2  { ::Text::help($item{name2}) }
+help: _help end { print $::help_screen }

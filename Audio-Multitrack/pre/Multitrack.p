@@ -125,6 +125,7 @@ sub loop {
     my $term = new Term::ReadLine 'Ecaound/Nama';
 	$term->tkRunning(1);
     my $prompt = "nama ('h' for help)> ";
+    #my $prompt = "nama> ";
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
