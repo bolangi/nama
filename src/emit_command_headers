@@ -1,4 +1,5 @@
-#!/usr/local/bin/perl -w
+#!/usr/bin/env perl
+use warnings;
 $debug = 0;
 use Data::YAML::Reader;
 use IO::All;

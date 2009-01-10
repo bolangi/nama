@@ -1,2 +1,5 @@
-#!/usr/bin/perl -p 
-s/#([^!].*|$)//gm; # pound followed by newline or something not bang
+#!/usr/bin/env perl 
+use warnings;
+while(<>){ s/#([^!].*|$)//gm; print}
+
+# pound followed by newline or something not bang
