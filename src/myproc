@@ -2,12 +2,12 @@
 MD=..
 TD=$MD/lib/Audio/Ecasound/Multitrack
 ./preproc -r Audio::Ecasound::Multitrack \
-		-s $MD/pre \
+		-s $MD/src \
 		-t $TD \
 		-a p \
 		-b pm 
 mv $TD/Multitrack.pm $TD/../Multitrack.pm 
-./preproc  -s $MD/pre \
+./preproc  -s $MD/src \
          -t $MD/t  \
 		 -r Audio::Ecasound::Multitrack \
 		 -a t \
