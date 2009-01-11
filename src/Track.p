@@ -138,21 +138,18 @@ sub new {
 	
 }
 
-sub input {
+sub input { # channel number
 	my $track = shift;
 	$track->ch_r ? $track->ch_r : 1
 }
 
-sub input_object {
+sub input_object { # for text display
 	my $source = shift; # string
 	$source =~ /\D/ 
 		? qq(JACK client "$source")
 		: qq(soundcard channel $source);
 }
 	
-# 	  elsif ( $source eq 'card' or $source eq 'c' ){
-# 		$track->set(source_select => 'soundcard');
-# 		$track->input;
 sub source {
 	my ($track, $source) = @_;
 
@@ -170,7 +167,7 @@ sub source {
 			$track->set(source_select => "jack");
 			$track->jack_source
 		} else {
-			print "Type 'jack' before setting a JACK client\n";
+			print "You must enable JACK (type 'jack') before setting a JACK client\n";
 			$track->input;
 		} 
 	} else {  # must be numerical
@@ -219,7 +216,7 @@ sub send {
 			$track->set(send_select => "jack");
 			$track->jack_send
 		} else {
-			print "Type 'jack' before setting a JACK client\n";
+			print "You must enable JACK (type 'jack') before setting a JACK client\n";
 			$track->output;
 		} 
 	} else {  # must be numerical
