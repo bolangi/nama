@@ -376,10 +376,8 @@ sub initialize_rules {
 		input_type 		=> 'mixed', # bus name
 		input_object	=> $loopb, 
 
-		output_type		=> 'device',
-		output_object	=> sub { $jack_enable 
-									? $mixer_out_device_jack
-									: $mixer_out_device },
+		output_type		=> sub{ ${output_type_object()}[0] },
+		output_object	=> sub{ ${output_type_object()}[1] },
 
 		status			=> 1,
 
@@ -476,8 +474,8 @@ sub initialize_rules {
 		name		=>  'rec_file', 
 		target		=>  'REC',
 		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
-		input_type	=>  'device',
-		input_object	=> \&record_device, 
+		input_type		=> sub{ ${input_type_object()}[0] },
+		input_object	=> sub{ ${input_type_object()}[1] },
 		output_type	=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -500,8 +498,8 @@ sub initialize_rules {
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ my $track = shift; $track->n },   
 		target			=>	'REC',
-		input_type		=>  'device',
-		input_object	=>  \&record_device, 
+		input_type		=> sub{ ${input_type_object()}[0] },
+		input_object	=> sub{ ${input_type_object()}[1] },
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -536,27 +534,37 @@ $multi  = ::Rule->new(
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
 		input_type		=>  'cooked', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
-		output_type		=>  sub{ my $track = shift; $track->send_output_type},
-		output_object	=>  sub{ my $track = shift; $track->send_output_object},
+		output_type		=>  sub{ my $track = shift;
+								$track->send_output->[0]},
+		output_object	=>  sub{ my $track = shift;
+								 $track->send_output->[1]},
 		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send; } ,
-		status			=>  1,
+		status			=>  0,
 	);
 
 
 }
 
-sub record_device { 
-	my $track = shift;
-	if ($jack_enable){
-		$track->jack_source
-			?  $track->jack_source
-			:  $record_device_jack
+sub jackd_running { qx(pgrep jackd) }
+
+sub input_type_object {
+	if (jackd_running() ){ 
+		[qw(jack system)] 
 	} else { 
-		$record_device }
+	    [ q(device), $record_device  ]
+	}
+}
+sub output_type_object {
+	if (jackd_running() ){ 
+		[qw(jack system)] 
+	} else { 
+	    [ q(device), $mixer_out_device  ]
+	}
 }
 
+	
 sub eliminate_loops {
 	# given track
 	my $n = shift;
@@ -851,7 +859,6 @@ sub really_recording {  # returns $output{file} entries
 }
 
 sub write_chains {
-
 	$debug2 and print "&write_chains\n";
 
 	# $bus->apply;
@@ -881,52 +888,44 @@ sub write_chains {
 			join " ", "-a:" . (join ",", @chain_ids),
 				"-f:" .  $devices{$dev}->{input_format},
 				"-i:" .  $devices{$dev}->{ecasound_id}, 
-		} else {
+		} else { print <<WARN;
+chains @chain_ids: device $dev not found in .namarc.  Skipping.
 
-		# case 2: we treat $dev as a JACK client
+WARN
+		}
+
+	}
+
+	#####  Setting jack clients as inputs
+ 
+	for my $client (keys %{ $inputs{jack} } ){
+
+		my @chain_ids = @{ $inputs{jack}->{$client} };
+		my $format;
+
+		if ( $client eq 'system' ){ # we use the full soundcard width
+
+			$format = signal_format(
+				$devices{jack}->{signal_format},
+				$devices{jack}->{soundcard_input_channels}
+			);
+
+		} else { # we use track width
 
 			$chain_ids[0] =~ /(\d+)/;
-			my $n = $1;
-			print "found chain id: $n\n";
-			my $format = signal_format(
-							$devices{jack}->{input_format},	
-							$ti[$n]->ch_count
-						 );
-			push  @input_chains, 
-				"-a:"
-				. join(",",@chain_ids)
-				. " -i:jack_auto,$dev -f:$format";
+ 			my $n = $1;
+ 			$debug and print "found chain id: $n\n";
+			$format = signal_format(
+						$devices{jack}->{signal_format},	
+						$ti[$n]->ch_count
+			);
 		}
+		push  @input_chains, 
+			"-a:"
+			. join(",",@chain_ids)
+			. " -i:jack_auto,$client -f:$format";
+	}
 		
-	}
-	#####  Setting devices as outputs
-	#
-	for my $dev ( keys %{ $outputs{device} }){
-			push @output_chains, join " ",
-				"-a:" . (join "," , @{ $outputs{device}->{$dev} }),
-				"-f:" . $devices{$dev}->{output_format},
-				"-o:". $devices{$dev}->{ecasound_id};
-	}
-	### Setting loops as inputs 
-
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $inputs{$bus} }){
-			push  @input_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $inputs{$bus}->{$loop} }),
-				"-i:$loop";
-		}
-	}
-	### Setting loops as outputs 
-
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $outputs{$bus} }){
-			push  @output_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $outputs{$bus}->{$loop} }),
-				"-o:$loop";
-		}
-	}
 	##### Setting files as inputs (used by mon_setup)
 
 	for my $full_path (keys %{ $inputs{file} } ) {
@@ -939,6 +938,65 @@ sub write_chains {
 					"-a:".$chain_ids,
 			 		"-i:".  $::ti[$chain]->modifiers .  $full_path);
  	}
+
+	### Setting loops as inputs 
+
+	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
+		for my $loop ( keys %{ $inputs{$bus} }){
+			push  @input_chains, 
+			join " ", 
+				"-a:" . (join ",", @{ $inputs{$bus}->{$loop} }),
+				"-i:$loop";
+		}
+	}
+	#####  Setting devices as outputs
+	#
+	for my $dev ( keys %{ $outputs{device} }){
+			push @output_chains, join " ",
+				"-a:" . (join "," , @{ $outputs{device}->{$dev} }),
+				"-f:" . $devices{$dev}->{output_format},
+				"-o:". $devices{$dev}->{ecasound_id}; }
+
+	#####  Setting jack clients as outputs
+ 
+	for my $client (keys %{ $outputs{jack} } ){
+
+		my @chain_ids = @{ $outputs{jack}->{$client} };
+		my $format;
+
+		if ( $client eq 'system' ){ # we use the full soundcard width
+
+			$format = signal_format(
+				$devices{jack}->{signal_format},
+				$devices{jack}->{soundcard_output_channels}
+			);
+
+		} else { # we use track width
+
+			$chain_ids[0] =~ /(\d+)/;
+ 			my $n = $1;
+ 			$debug and print "found chain id: $n\n";
+			$format = signal_format(
+						$devices{jack}->{signal_format},	
+						$ti[$n]->ch_count
+	 		);
+		}
+		push  @output_chains, 
+			"-a:"
+			. join(",",@chain_ids)
+			. " -o:jack_auto,$client -f:$format";
+	}
+		
+	### Setting loops as outputs 
+
+	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
+		for my $loop ( keys %{ $outputs{$bus} }){
+			push  @output_chains, 
+			join " ", 
+				"-a:" . (join ",", @{ $outputs{$bus}->{$loop} }),
+				"-o:$loop";
+		}
+	}
 	##### Setting files as outputs (used by rec_file and mix)
 
 	for my $key ( keys %{ $outputs{file} } ){
@@ -1143,7 +1201,6 @@ sub schedule_wraparound {
 		;
 	}
 }
-
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();

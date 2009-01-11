@@ -69,8 +69,6 @@ $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
 $project_root = join_path( $ENV{HOME}, "nama");
-$record_device_jack = 'jack_alsa';    # default input soundcard for JACK
-$mixer_out_device_jack = 'jack_alsa'; # default mixer out target for JACK
 
 ## Load my modules
 

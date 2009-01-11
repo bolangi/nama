@@ -1,8 +1,39 @@
 project_root: /otherroot/home/jroth/nama
 
+# indents _are_ significant (use spaces, no tabs)
+
+# define abbreviations
+
+abbreviations:  
+  24-mono: s24_le,1,frequency
+  24-stereo: s24_le,2,frequency,i
+  cd-mono: s16_le,1,44100
+  cd-stereo: s16_le,2,44100,i
+  frequency: 44100
+
+# define audio devices
+
+devices: 
+  jack:
+    soundcard_input_channels: 12
+    soundcard_output_channels: 10
+    signal_format: f32_le,N,frequency
+  consumer:
+    ecasound_id: alsa,default
+    input_format: cd-stereo
+    output_format: cd-stereo
+  multi:
+    ecasound_id: alsa,ice1712
+    input_format: s32_le,12,frequency
+    output_format: s32_le,10,frequency
+
+# ALSA device assignments and formats
+
 record_device: consumer          # for ALSA/OSS
 mixer_out_device: consumer       # for ALSA/OSS
 mixer_out_format: cd-stereo      # for ALSA/OSS
+
+# audio file formats
 
 mix_to_disk_format: cd-stereo
 raw_to_disk_format: 16,N,frequency
@@ -10,32 +41,6 @@ raw_to_disk_format: 16,N,frequency
 # globals for our chain setups
 
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
-
-# audio devices 
-
-# indents _are_ significant in the lines below
-
-devices: 
-  jack_alsa: 
-    ecasound_id: jack_alsa
-    input_format: f32_le,12,frequency
-    output_format: f32_le,10,frequency
-  jack:
-    ecasound_id: jack
-    input_format: s32_le,N,frequency
-    output_format: s32_le,N,frequency
-  multi:
-    ecasound_id: alsa,ice1712
-    input_format: s32_le,12,frequency
-    output_format: s32_le,10,frequency
-  consumer:
-    ecasound_id: alsa,default
-    input_format: cd-stereo
-    output_format: cd-stereo
-
-# use JACK by default
-
-jack_enable: 0
 
 # use $PAGER to display lengthy text outputs?
 
@@ -45,14 +50,4 @@ use_pager: 1
 
 controller_ports: ~
 
-# you may create arbitrary abbreviations
-
-abbreviations:  
-  24-mono: s24_le,1,frequency
-  24-stereo: s24_le,2,frequency,i
-  cd-mono: s16_le,1,44100
-  cd-stereo: s16_le,2,44100,i
-  frequency: 44100
-
 # end
-

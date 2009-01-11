@@ -116,6 +116,7 @@ our (
 	$length,		# maximum duration of the recording/playback if known
 	$jack_enable,	# use JACK mixer out target and enable JACK client 
  					# connections
+ 	$jack_system,   # jack soundcard device
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments

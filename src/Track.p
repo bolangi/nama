@@ -149,12 +149,29 @@ sub input_object { # for text display
 		? qq(JACK client "$source")
 		: qq(soundcard channel $source);
 }
+
+# sub source_object {  # for io lists / chain setup
+# 	my $track = shift;
+# 	if ($track->jack_source
+# 		and $track->source_select eq 'jack'){
+# 		if ( ::jack_running() ){ 
+# 			$track->jack_source
+# 		} else {
+# 			print $track->name, ": source is JACK client, but jackd is not running. Skipping.\n";
+# 			'skipping'
+# 		}
+# 	} else
+# 			?  $track->jack_source
+# 			:  ::record_device()
+# 	} else {   ::record_device() }
+# }
+# 
 	
 sub source {
 	my ($track, $source) = @_;
 
 	if ( ! $source ){
-		if ( $::jack_enable
+		if ( ::jackd_running()
 				and $track->jack_source 
 				and $track->source_select eq 'jack'){
 			$track->jack_source 
@@ -162,12 +179,12 @@ sub source {
 			$track->input 
 		}
 	} elsif ( $source =~ m(\D) ){
-		if ( $::jack_enable ){
+		if ( ::jackd_running() ){
 			$track->set(jack_source => $source);
 			$track->set(source_select => "jack");
 			$track->jack_source
 		} else {
-			print "You must enable JACK (type 'jack') before setting a JACK client\n";
+			print "JACK server not running.\n";
 			$track->input;
 		} 
 	} else {  # must be numerical
@@ -176,14 +193,11 @@ sub source {
 		$track->input;
 	}
 } 
-sub output { # channel number
-	my $track = shift;
-	$track->ch_m ? $track->ch_m : 1
-}
 
 sub output_object {   # text for user display
 	my $track = shift;
 	my $send = $track->send;
+	return unless $send;
 	$send =~ /\D/ 
 		? qq(JACK client "$send")
 		: qq(soundcard channel $send);
@@ -196,55 +210,86 @@ sub set_send {
 	if ( $old_send  eq $new_send ){
 		print $track->name, ": send unchanged, $object\n";
 	} else {
-		print $track->name, ": auxiliary send set to $object\n";
+		print $track->name, ": auxiliary output to $object\n";
 	}
 }
+sub aux_output {
+	my $track = shift;
+	$track->ch_m > 2 ? $track->ch_m : undef
+}
+
 sub send {
 	my ($track, $send) = @_;
 
 	if ( ! $send ){
-		if ( $::jack_enable
+		if ( ::jackd_running()
 				and $track->jack_send 
 				and $track->send_select eq 'jack'){
 			$track->jack_send 
 		} else { 
-			$track->output 
+			$track->aux_output
 		}
 	} elsif ( $send =~ m(\D) ){
-		if ( $::jack_enable ){
+		if ( ::jackd_running() ){
 			$track->set(jack_send => $send);
 			$track->set(send_select => "jack");
 			$track->jack_send
 		} else {
-			print "You must enable JACK (type 'jack') before setting a JACK client\n";
-			$track->output;
+print q(: auxilary send to JACK client specified, but jackd is not running.
+Skipping.
+);
+			$track->aux_output;
 		} 
 	} else {  # must be numerical
-		$track->set(ch_m => $send);
-		$track->set(send_select =>'soundcard');
-		$track->output;
+		if ( $send > 2){ 
+
+			$track->set(ch_m => $send);
+			$track->set(send_select =>'soundcard');
+		} else { 
+		print "All sends must go to soundcard channel 3 or higher. Skipping.\n";
+		}
+		$track->aux_output;
 	}
 } 
 
-sub send_output_type {  # for io lists / chain setup
+sub send_output {  # for io lists / chain setup
 
+					# assumes $track->send exists
+					
 	my $track = shift;
-	if ( $track->send !~ /\D/)  # source is all digits
-		{'device'}
-	else {'jack_client' }
+	if ( $track->send_select eq 'soundcard' ){ 
+		['device', ::playback_device() ]
+	} elsif ( $track->send_select eq 'jack' ) {
+		if ( ::jackd_running() ){
+			['jack', $track->send]
+		} else {
+			print $track->name, 
+q(: auxilary send to JACK client specified, but jackd is not running.
+Skipping.
+);
+			[qw(skip skip)]; 
+		}
+	} else { 
+				q(: unexpected send_select value: "), 
+				$track->send_select, qq("\n);
+			[qw(skip skip)]; 
+	}
 }
 
-sub send_output_object { # for io lists / chain setup
+sub source_output { # for io lists / chain setup
 	my $track = shift;
-	if ( $track->send !~ /\D/)  # source is all digits
-		{$::record_device}
-	else {$track->send }
+	if ( $track->source_select eq 'soundcard' ){ 
+		['device', $::record_device]
+	} else {
+		['jack',   $track->send]
+	}
 }
 
 sub pre_multi {
 	#$debug2 and print "&pre_multi\n";
 	my $track = shift;
-	return if $track->send =~ /\D/; # routing only for soundcard output
+	return q() if $track->source_select eq 'jack'
+			or $track->output == 1;
 	route(2,$track->ch_m); # stereo signal
 }
 sub dir { ::this_wav_dir() } # replaces dir field

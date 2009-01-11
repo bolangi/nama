@@ -161,9 +161,12 @@ source: _source end {
 send: _send name { $::this_track->set_send($item{name}) }
 
 send: _send end { 
-	my $send = $::this_track->send;
-	my $object = ::Track::input_object( $send );
-	print $::this_track->name, ": input from $object.\n";
+	if ( ! $::this_track->send){
+		print $::this_track->name, ": no auxilary output.\n";
+		return;
+	}
+	my $object = $::this_track->output_object;
+	print $::this_track->name, ": auxilary output to $object.\n";
 }
 
 jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
