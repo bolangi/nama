@@ -179,6 +179,29 @@ sub source {
 		$track->input;
 	}
 } 
+sub output { # channel number
+	my $track = shift;
+	$track->ch_m ? $track->ch_m : 1
+}
+
+sub output_object {   # text for user display
+	my $track = shift;
+	my $send = $track->send;
+	$send =~ /\D/ 
+		? qq(JACK client "$send")
+		: qq(soundcard channel $send);
+}
+sub set_send {
+	my ($track, $output) = @_;
+	my $old_send = $track->send;
+	my $new_send = $track->send($output);
+	my $object = $track->output_object;
+	if ( $old_send  eq $new_send ){
+		print $track->name, ": send unchanged, $object\n";
+	} else {
+		print $track->name, ": auxiliary send set to $object\n";
+	}
+}
 sub send {
 	my ($track, $send) = @_;
 
@@ -188,7 +211,7 @@ sub send {
 				and $track->send_select eq 'jack'){
 			$track->jack_send 
 		} else { 
-			$track->input 
+			$track->output 
 		}
 	} elsif ( $send =~ m(\D) ){
 		if ( $::jack_enable ){
@@ -197,14 +220,36 @@ sub send {
 			$track->jack_send
 		} else {
 			print "Type 'jack' before setting a JACK client\n";
-			$track->input;
+			$track->output;
 		} 
 	} else {  # must be numerical
 		$track->set(ch_m => $send);
 		$track->set(send_select =>'soundcard');
-		$track->input;
+		$track->output;
 	}
 } 
+
+sub send_output_type {  # for io lists / chain setup
+
+	my $track = shift;
+	if ( $track->send !~ /\D/)  # source is all digits
+		{'device'}
+	else {'jack_client' }
+}
+
+sub send_output_object { # for io lists / chain setup
+	my $track = shift;
+	if ( $track->send !~ /\D/)  # source is all digits
+		{$::record_device}
+	else {$track->send }
+}
+
+sub pre_multi {
+	#$debug2 and print "&pre_multi\n";
+	my $track = shift;
+	return if $track->send =~ /\D/; # routing only for soundcard output
+	route(2,$track->ch_m); # stereo signal
+}
 sub dir { ::this_wav_dir() } # replaces dir field
 
 sub full_path { my $track = shift; join_path $track->dir , $track->current }
@@ -377,12 +422,6 @@ sub mono_to_stereo {
 	} elsif ( $track->ch_count == 1 ){
 		return " -chcopy:1,2 " 
 	} else { carp "Track ".$track->name.": Unexpected channel count\n"; }
-}
-sub pre_multi {
-	#$debug2 and print "&pre_multi\n";
-	my $track = shift;
-	return if ! defined $track->ch_m or $track->ch_m == 1;
-	route(2,$track->ch_m); # stereo signal
 }
 
 sub rec_route {

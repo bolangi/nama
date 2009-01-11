@@ -158,6 +158,13 @@ source: _source end {
 	my $object = ::Track::input_object( $source );
 	print $::this_track->name, ": input from $object.\n";
 }
+send: _send name { $::this_track->set_send($item{name}) }
+
+send: _send end { 
+	my $send = $::this_track->send;
+	my $object = ::Track::input_object( $send );
+	print $::this_track->name, ": input from $object.\n";
+}
 
 jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
 

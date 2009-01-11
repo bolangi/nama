@@ -522,20 +522,26 @@ sub initialize_rules {
 	# to a PA mixing board
 	#
 	# seems ready... just need to turn on status!
+
+# the following two subs are utility functions for multi
+# assume $track->send returns nonzero, non null
+# applies to $track->send only
+
+
 	
-	$multi  = ::Rule->new(  
+$multi  = ::Rule->new(  
 
 		name			=>  'multi', 
 		target			=>  'REC',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
 		input_type		=>  'cooked', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
-		output_type		=>  'device',
-		output_object	=>  'multi',
+		output_type		=>  sub{ my $track = shift; $track->send_output_type},
+		output_object	=>  sub{ my $track = shift; $track->send_output_object},
 		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
 		condition 		=> sub { my $track = shift; 
-								return "satisfied" if $track->source; } ,
-		status			=>  0,
+								return "satisfied" if $track->send; } ,
+		status			=>  1,
 	);
 
 
