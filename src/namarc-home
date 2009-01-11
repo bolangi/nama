@@ -18,16 +18,16 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 devices: 
   jack_alsa: 
     ecasound_id: jack_alsa
-    input_format: jack12
-    output_format: jack10
+    input_format: f32_le,12,frequency
+    output_format: f32_le,10,frequency
   jack:
     ecasound_id: jack
-    input_format: 32,N,frequency
-    output_format: 32,N,frequency
+    input_format: s32_le,N,frequency
+    output_format: s32_le,N,frequency
   multi:
     ecasound_id: alsa,ice1712
-    input_format: 32-12
-    output_format: 32-10
+    input_format: s32_le,12,frequency
+    output_format: s32_le,10,frequency
   consumer:
     ecasound_id: alsa,default
     input_format: cd-stereo
@@ -48,13 +48,10 @@ controller_ports: ~
 # you may create arbitrary abbreviations
 
 abbreviations:  
-  24-mono: 24,1,frequency
-  32-10: 32,10,frequency
-  32-12: 32,12,frequency
-  jack10: 32,10,frequency
-  jack12: 32,12,frequency
-  cd-mono: 16,1,44100
-  cd-stereo: 16,2,44100,i
+  24-mono: s24_le,1,frequency
+  24-stereo: s24_le,2,frequency,i
+  cd-mono: s16_le,1,44100
+  cd-stereo: s16_le,2,44100,i
   frequency: 44100
 
 # end
