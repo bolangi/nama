@@ -150,23 +150,6 @@ sub input_object { # for text display
 		: qq(soundcard channel $source);
 }
 
-# sub source_object {  # for io lists / chain setup
-# 	my $track = shift;
-# 	if ($track->jack_source
-# 		and $track->source_select eq 'jack'){
-# 		if ( ::jack_running() ){ 
-# 			$track->jack_source
-# 		} else {
-# 			print $track->name, ": source is JACK client, but jackd is not running. Skipping.\n";
-# 			'skipping'
-# 		}
-# 	} else
-# 			?  $track->jack_source
-# 			:  ::record_device()
-# 	} else {   ::record_device() }
-# }
-# 
-	
 sub source {
 	my ($track, $source) = @_;
 
@@ -258,7 +241,11 @@ sub send_output {  # for io lists / chain setup
 					
 	my $track = shift;
 	if ( $track->send_select eq 'soundcard' ){ 
-		['device', ::playback_device() ]
+		if (::jackd_running() ){
+			[qw(jack system)]
+		} else {
+			['device', $::mixer_out_device ]
+		}
 	} elsif ( $track->send_select eq 'jack' ) {
 		if ( ::jackd_running() ){
 			['jack', $track->send]
@@ -276,21 +263,30 @@ Skipping.
 	}
 }
 
-sub source_output { # for io lists / chain setup
+sub source_input { # for io lists / chain setup
 	my $track = shift;
 	if ( $track->source_select eq 'soundcard' ){ 
-		['device', $::record_device]
-	} else {
-		['jack',   $track->send]
+		::input_type_object()
+	}
+	elsif ( $track->source_select eq 'jack' ){
+		if (::jackd_running() ){
+			['jack', $track->source ]
+		} else { 
+			print $track->name, ": no JACK client found\n";
+			[qw(lost lost)]
+		}
+    } else { 
+			print $track->name, ": missing source_select: \"",
+					$track->source_select, qq("\n);
 	}
 }
+
 
 sub pre_multi {
 	#$debug2 and print "&pre_multi\n";
 	my $track = shift;
-	return q() if $track->source_select eq 'jack'
-			or $track->output == 1;
-	route(2,$track->ch_m); # stereo signal
+	return q() if $track->send_select eq 'jack' or ! $track->aux_output;
+	route(2,$track->aux_output); # stereo signal
 }
 sub dir { ::this_wav_dir() } # replaces dir field
 
@@ -471,7 +467,7 @@ sub rec_route {
 	my $track = shift;
 	
 	# no need to route a jack client
-	return if $track->jack_source;
+	return if $track->source_select eq 'jack';
 
 	# no need to route a signal at channel 1
 	return if ! $track->ch_r or $track->ch_r == 1; 

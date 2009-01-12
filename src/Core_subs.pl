@@ -474,8 +474,10 @@ sub initialize_rules {
 		name		=>  'rec_file', 
 		target		=>  'REC',
 		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> sub{ ${input_type_object()}[0] },
-		input_object	=> sub{ ${input_type_object()}[1] },
+		input_type		=> sub{ my $track = shift;
+								${$track->source_input}[0] },
+		input_object		=> sub{ my $track = shift;
+								${$track->source_input}[1] },
 		output_type	=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -498,8 +500,10 @@ sub initialize_rules {
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ my $track = shift; $track->n },   
 		target			=>	'REC',
-		input_type		=> sub{ ${input_type_object()}[0] },
-		input_object	=> sub{ ${input_type_object()}[1] },
+		input_type		=> sub{ my $track = shift;
+								${$track->source_input}[0] },
+		input_object	=> sub{ my $track = shift;
+								${$track->source_input}[1] },
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -541,7 +545,7 @@ $multi  = ::Rule->new(
 		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send; } ,
-		status			=>  0,
+		status			=>  1,
 	);
 
 
@@ -868,7 +872,7 @@ sub write_chains {
 	# we can assume that %inputs and %outputs will have the
 	# same lowest-level keys
 	#
-	my @buses = grep { $_ ne 'file' and $_ ne 'device' } keys %inputs;
+	my @buses = grep { $_ !~ /file|device|jack/ } keys %inputs;
 	
 	### Setting devices as inputs 
 
