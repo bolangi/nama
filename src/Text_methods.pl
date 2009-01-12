@@ -194,10 +194,13 @@ sub show_tracks {
     map {     push @format_fields,  
             $_->n,
             $_->name,
+            $_->current_version || '',
             $_->rw,
             $_->rec_status,
-            $_->rec_status eq 'REC' ? $_->ch_r : '',
-            $_->current_version || '',
+            $_->name =~ /Master|Mixdown/ ? q() : 
+				$_->rec_status eq 'REC' ? $_->source : '',
+			$_->name =~ /Master|Mixdown/ ? q() : 
+				$_->rec_status ne 'OFF' ? $_->send : '',
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
@@ -210,12 +213,12 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Track  Name        Setting  Status  Input  Version 
-==================================================
+Track  Name        Ver. Setting  Status   Source     Send
+=============================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<    @<<<    @<<<    @>>     @>>>   ~~
-splice @format_fields, 0, 6
+@>>    @<<<<<<<<<  @|||   @<<     @<<    @|||||||  @|||||||||  ~~
+splice @format_fields, 0, 7
 .
 
 sub helpline {
