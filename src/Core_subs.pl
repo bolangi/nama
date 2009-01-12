@@ -2274,7 +2274,7 @@ sub range {
 		$beg = round ( log $beg );
 		$end = round ( log $end );
 		$resolution = ($end - $beg) / 100;
-		$default = round (log $default);
+		$default = $default ? round (log $default) : $default;
 	}
 	
 	$resolution = d2( $resolution + 0.002) if $resolution < 1  and $resolution > 0.01;
