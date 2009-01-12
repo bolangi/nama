@@ -256,6 +256,8 @@ our (
 	$mixdown_bus,
 	$mixdown,  # group
 	$mixdown_track,
+	$null_bus,
+    $null, # group
 
 	@ti, # track by index (alias @::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
@@ -281,6 +283,7 @@ our (
 	$rec_file,
 	$rec_setup,
 	$multi,
+	$null_setup,
 
    # marks and playback looping
    

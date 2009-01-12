@@ -169,6 +169,11 @@ sub prepare {
 		groups => [qw(Mixdown) ],
 		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
 	);
+	$null_bus = ::Bus->new(
+		name => 'Null_Bus',
+		groups => [qw(null) ],
+		rules => [qw(null_setup)],
+	);
 
 
 	prepare_static_effects_data() unless $opts{e};
@@ -548,6 +553,24 @@ $multi  = ::Rule->new(
 		status			=>  1,
 	);
 
+	$null_setup = Audio::Ecasound::Multitrack::Rule->new(
+		
+		name			=>  'null_setup', 
+		target			=>  'all',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
+		input_type		=>  'device',
+		input_object	=>  'null',
+		output_type		=>  'cooked',
+		output_object	=>  $loopa,
+		condition 		=>  sub{ defined $inputs{mixed}->{$loopb} },
+		status			=>  1,
+# 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
+		condition 		=> 1,
+		status			=>  1,
+	);
+		
+
 
 }
 
@@ -694,6 +717,7 @@ sub initialize_project_data {
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown');
 	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
+	$null    = ::Group->new(name => 'null');
 
 	#print yaml_out( \%::Track::track_names );
 
@@ -890,7 +914,9 @@ sub write_chains {
 		if ( $devices{$dev} ){
 			push  @input_chains, 
 			join " ", "-a:" . (join ",", @chain_ids),
-				"-f:" .  $devices{$dev}->{input_format},
+			$devices{$dev}->{input_format} 
+				? "-f:" .  $devices{$dev}->{input_format}
+				: q(),
 				"-i:" .  $devices{$dev}->{ecasound_id}, 
 		} else { print <<WARN;
 chains @chain_ids: device $dev not found in .namarc.  Skipping.
@@ -1088,11 +1114,8 @@ sub generate_setup { # create chain setup
 	if ($have_source) {
 		$mixdown_bus->apply; # mix_file
 		$master_bus->apply; # mix_out, mix_link
-
-		## we want to apply 'multi' only to tracks with
-		### with mon_ch defined, and $multi_enable on
-		
 		$tracker_bus->apply;
+		$null_bus->apply;
 		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);

@@ -30,6 +30,7 @@ sub new {
 		
 sub apply {
 	
+	#local $debug = 1;
 	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
@@ -39,10 +40,10 @@ sub apply {
 	my @track_names = (@{$bus->tracks}, 
 
 		map{ $debug and print "group name: $_\n";
-			#print join " ", "keys:", keys( %::Group::by_name), $/;
+			$debug and print join " ", "keys:", keys( %::Group::by_name), $/;
 			my $group = $::Group::by_name{$_}; 
-			#print "group validated: ", $group->name, $/;
-			#print "includes: ", $group->tracks, $/;
+			$debug and print "group validated: ", $group->name, $/;
+			$debug and print "includes: ", $group->tracks, $/;
 			$group->tracks 
 								}  @{ $bus->groups }
 
