@@ -542,7 +542,7 @@ $multi  = ::Rule->new(
 								$track->send_output->[0]},
 		output_object	=>  sub{ my $track = shift;
 								 $track->send_output->[1]},
-		pre_output		=>	sub{ my $track = shift; $track->pre_multi},
+		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send; } ,
 		status			=>  1,

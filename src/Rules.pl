@@ -127,7 +127,7 @@ my $multi = ::Rule->new(
 	input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
 	output_type		=>  'device',
 	output_object	=>  'multi',
-	pre_output		=>	sub{ my $track = shift; $track->pre_multi},
+	pre_output		=>	sub{ my $track = shift; $track->pre_send},
 	status			=>  1,
 );
 

@@ -393,3 +393,25 @@ sub t_add_effect {
 			#print (yaml_out(\%p));
 		add_effect( \%p );
 }
+package ::Text;
+sub group_rec { 
+	print "Setting group REC-enable. You may record user tracks.\n";
+	$tracker->set( rw => 'REC'); }
+sub group_mon { 
+	print "Setting group MON mode. No recording on user tracks.\n";
+	$tracker->set( rw => 'MON');}
+sub group_off {
+	print "Setting group OFF mode. All user tracks disabled.\n";
+	$tracker->set(rw => 'OFF'); } 
+
+sub mixdown {
+	print "Enabling mixdown to file.\n";
+	$mixdown_track->set(rw => 'REC'); }
+sub mixplay { 
+	print "Setting mixdown playback mode.\n";
+	$mixdown_track->set(rw => 'MON');
+	$tracker->set(rw => 'OFF');}
+sub mixoff { 
+	print "Leaving mixdown mode.\n";
+	$mixdown_track->set(rw => 'OFF');
+	$tracker->set(rw => 'MON')}

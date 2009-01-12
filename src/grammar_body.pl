@@ -116,33 +116,16 @@ show_track: _show_track dd end {
 #show_setup: _show_setup end { 
 #		::io(::join_path(::project_dir(),  ) > $contents;
 
-group_rec: _group_rec end { $::tracker->set( rw => 'REC') }
-group_mon: _group_mon end  { $::tracker->set( rw => 'MON') }
-group_off: _group_mute end { $::tracker->set(rw => 'OFF') }
+group_rec: _group_rec end { ::Text::group_rec() }
+group_mon: _group_mon end  { ::Text::group_mon() }
+group_off: _group_off end { ::Text::group_off() }
 
-mixdown: _mixdown end { $::mixdown_track->set(rw => 'REC')}
-mixplay: _mixplay end { $::mixdown_track->set(rw => 'MON');
-						$::tracker->set(rw => 'OFF');
-}
-mixoff:  _mixoff  end { $::mixdown_track->set(rw => 'OFF');
-						$::tracker->set(rw => 'MON')}
-
-record: 'record' end {} # set to Tracker-Record 
+mixdown: _mixdown end { ::Text::mixdown()}
+mixplay: _mixplay end { ::Text::mixplay() }
+mixoff:  _mixoff  end { ::Text::mixoff() }
 
 exit: 'exit' end { ::save_state($::state_store_file); exit; }
 
-
-
-# record_channel: _record_channel dd {	
-# 	$::this_track->set(ch_r => $item{dd}) ;
-# 	$::ch_r = $item{dd};
-# 	print "Input switched to channel $::ch_r.\n";
-# }
-monitor_channel: _monitor_channel dd  {	
-	$::this_track->set(ch_m => $item{dd}) ;
-	$::ch_m = $item{dd};
-	print "Output switched to channel $::ch_m.\n";
-}
 source: _source name {
 	my $old_source = $::this_track->source;
 	my $new_source = $::this_track->source($item{name});
@@ -169,17 +152,12 @@ send: _send end {
 	print $::this_track->name, ": auxilary output to $object.\n";
 }
 
-jack: _jack { $::jack_enable = 1; print "Using JACK.\n" }
-
-nojack: _nojack { $::jack_enable = 0; print "JACK support disabled.\n" }
-
-
 stereo: _stereo { $::this_track->set(ch_count => 2) }
 mono:   _mono   { $::this_track->set(ch_count => 1) }
 
-off: 'off' end {$::this_track->set(rw => 'OFF'); }
-rec: 'rec' end {$::this_track->set(rw => 'REC'); }
-mon: 'mon' end {$::this_track->set(rw => 'MON'); }
+off: 'off' end {$::this_track->set_off() }
+rec: 'rec' end { $::this_track->set_rec() }
+mon: 'mon' end {$::this_track->set_mon() }
 
 wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
 
