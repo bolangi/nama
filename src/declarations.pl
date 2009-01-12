@@ -114,8 +114,6 @@ our (
 	$unit,			# jump multiplier, 1 or 60 seconds
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
-	$jack_enable,	# use JACK mixer out target and enable JACK client 
- 					# connections
  	$jack_system,   # jack soundcard device
 
 	@input_chains,	# list of input chain segments 
@@ -305,5 +303,7 @@ our (
 	@already_muted, # for soloing list of Track objects that are 
                     # muted before we begin
     $soloing,       # one user track is on, all others are muted
+
+	%bunch,			# user collections of tracks
 
 );

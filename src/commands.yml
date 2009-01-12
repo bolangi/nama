@@ -72,9 +72,9 @@ mixoff:
 add_track:
   type: track
   short: add new
-  what: create a new track
-  example: add sax; r2  (record track sax from input 2)
-  parameters: string 
+  what: create one or more new tracks
+  example: add sax violin tuba
+  parameters: name1 name2 name3...
 set_track:
   short: set
   type: track
@@ -158,6 +158,11 @@ group_off:
   what: group OFF mode, exclude all user tracks from chain setup
   smry: group OFF mode
   parameters: none
+bunch:
+  type: group
+  short: bn
+  what: define a group of tracks | list one bunch | list bunch names
+  parameters: group_name track1 track2 track3...
 list_versions:
   type: track
   short: lver lv

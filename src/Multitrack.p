@@ -184,7 +184,7 @@ package ::;
 $debug2 and print "Reading grammar\n";
 
 $commands_yml = <<'YML';
-[% qx(./strip_comments  ./commands.yml) %]
+[% qx(./strip_all  ./commands.yml) %]
 YML
 
 %commands = %{ ::yaml_in( $::commands_yml) };
@@ -198,7 +198,7 @@ $::RD_HINT   = 1; # Give out hints to help fix problems.
 
 $grammar = q(
 
-[% qx(./strip_comments  ./grammar_body.pl) %]
+[% qx(./strip_all  ./grammar_body.pl) %]
 
 [% qx(./emit_command_headers) %]
 );

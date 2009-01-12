@@ -45,7 +45,7 @@ setpos: _setpos value end {
 	::eval_iam("setpos $item{value}");
 }
 
-add_track: _add_track name end { ::add_track($item{name}); }
+add_track: _add_track name(s) end { ::add_track(@{$item{'name(s)'}}); }
 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} );
@@ -328,6 +328,8 @@ group_version: _group_version end {
 	print $::tracker->version, $/ }
 
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
+
+bunch: _bunch name(s?) { ::bunch( @{$item{'name(s?)'}} ) }
 
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, $/;

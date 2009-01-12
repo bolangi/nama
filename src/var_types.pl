@@ -19,7 +19,6 @@
 						$record_device	
 						$project_root 	
  						$controller_ports
-						$jack_enable
 						$use_pager    );
 
 						
@@ -41,9 +40,7 @@
 						$loop_enable
 						@loop_endpoints
 						$length
-						$jack_enable
-						$mixer_out_device_jack
-
+						%bunch
 						);
 					 
 @effects_static_vars = qw(

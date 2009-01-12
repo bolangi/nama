@@ -396,65 +396,6 @@ sub time_gui {
 
 }
 
-sub oid_gui {
-	$debug2 and print "&oid_gui\n";
-	@_ = discard_object(@_);
-	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
-	my @oid_name;
-	for my $rule ( ::Rule::all_rules ){
-		my $name = $rule->name;
-		my $status = $rule->status;
-		# print "gui oid name: $name status: $status\n";
-		next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
-		push @oid_name, $name;
-		
-		my $oid_button = $oid_frame->Button( 
-			-text => ucfirst $name,
-			-background => 
-				$status ?  'AntiqueWhite' : $old_bg,
-			-activebackground => 
-				$status ? 'AntiqueWhite' : $old_bg
-		);
-		$oid_button->configure(
-			-command => sub { 
-				$rule->set(status => ! $rule->status);
-				$oid_button->configure( -background => 
-					$rule->status ?  'AntiqueWhite' : $old_bg ,
-			-activebackground => 
-					$rule->status ? 'AntiqueWhite' : $old_bg
-					
-					);
-			});
-		push @widget_o, $oid_button;
-	}
-	my $toggle_jack = $oid_frame->Button;
-	
-	$toggle_jack->configure(
-		-text => q(Jack ON/OFF),
-		-command => sub {
-			my $color = $toggle_jack->cget( -background );
-				if ($color eq q(lightblue) ){
-
-					# jack is on, turn it off
-				
-					convert_to_alsa();
-					paint_button($toggle_jack, $old_bg);
-					$jack_enable = 0;
-				}
-				else {
-
-					convert_to_jack();
-					paint_button($toggle_jack, q(lightblue));
-					$jack_enable = 1;
-				}
-			}
-		);
-	push @widget_o, $toggle_jack; # since no one else uses this array
-				
-		
-	map { $_ -> pack(-side => 'left') } ($outputs, @widget_o);
-	
-}
 sub paint_button {
 	@_ = discard_object(@_);
 	my ($button, $color) = @_;

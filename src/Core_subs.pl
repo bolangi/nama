@@ -743,27 +743,30 @@ sub add_track {
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	return if transport_running();
-	my $name = shift;
-	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
-	my $track = ::Track->new(
-		name => $name,
-		ch_r => $ch_r,
-		ch_m => $ch_m,
-	);
-	$this_track = $track;
-	return if ! $track; 
-	$debug and print "ref new track: ", ref $track; 
+	my @names = @_;
+	for my $name (@names){
+		my $name = shift;
+		$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+		my $track = ::Track->new(
+			name => $name,
+			ch_r => $ch_r,
+			ch_m => $ch_m,
+		);
+		$this_track = $track;
+		return if ! $track; 
+		$debug and print "ref new track: ", ref $track; 
 
-	# $ch_r and $ch_m are public variables set by GUI
-	# Okay, so we will do that for the grammar, too
-	# $::chr = 
-	
-	my $group = $::Group::by_name{$track->group};
-	$group->set(rw => 'REC');
-	$track_name = $ch_m = $ch_r = undef;
+		# $ch_r and $ch_m are public variables set by GUI
+		# Okay, so we will do that for the grammar, too
+		# $::chr = 
+		
+		my $group = $::Group::by_name{$track->group};
+		$group->set(rw => 'REC');
+		$track_name = $ch_m = $ch_r = undef;
 
-	$ui->track_gui($track->n);
-	$debug and print "Added new track!\n", $track->dump;
+		$ui->track_gui($track->n);
+		$debug and print "Added new track!\n", $track->dump;
+	}
 }
 
 sub dig_ruins { 
@@ -2513,9 +2516,6 @@ sub retrieve_state {
 
 
 
-	#my $toggle_jack = $widget_o[$#widget_o]; # JACK
-	#convert_to_jack if $jack_enable;
-	#$ui->paint_button($toggle_jack, q(lightblue)) if $jack_enable;
 	$ui->refresh_oids();
 
 	# restore Alsa mixer settings
@@ -2592,4 +2592,21 @@ sub save_effects {
 }
 
 sub process_control_inputs { }
+
+sub bunch {
+	my ($bunchname, @tracks) = @_;
+	if (! $bunchname){
+		pager(yaml_out \%bunch);
+	} elsif (! @tracks){
+		$bunch{$bunchname} 
+			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
+			or  print "bunch $bunchname: does not exist.\n";
+	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti[$_]} @tracks){
+		print "@mispelled: mispelled track(s), skipping.\n";
+	} else {
+	$bunch{$bunchname} = [ @tracks ];
+	}
+}
+
+	
 ### end

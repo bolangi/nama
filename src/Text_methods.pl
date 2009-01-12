@@ -125,13 +125,27 @@ sub process_line {
 
 
 sub command_process {
-
 	package ::;
 	my ($user_input) = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
 	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-	if ($cmd eq 'eval') {
+	if ($cmd eq 'for' 
+			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
+		print "b: $bunchy d: $do\n";
+		my @tracks;
+		if ($bunchy =~ /\S \S/ or $tn{$bunchy} or $ti[$bunchy]){
+			print "multiple tracks found\n";
+			@tracks = split " ", $bunchy;
+			print "t: @tracks\n";
+		} else { @tracks = @{$bunch{$bunchy}};
+			print "tt: @tracks\n";
+ 		}
+		print "ttt: @tracks\n";
+		for my $t(@tracks) {
+			::Text::command_process("$t; $do");
+		}
+	} elsif ($cmd eq 'eval') {
 			$debug and print "Evaluating perl code\n";
 			pager( eval $predicate );
 			print "\n";
