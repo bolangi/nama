@@ -447,7 +447,7 @@ sub send_output {  # for io lists / chain setup
 		if (::jackd_running() ){
 			[qw(jack system)]
 		} else {
-			['device', $::mixer_out_device ]
+			['device', $::playback_device ]
 		}
 	} elsif ( $track->send_select eq 'jack' ) {
 		if ( ::jackd_running() ){

@@ -594,7 +594,7 @@ sub output_type_object {
 	if (jackd_running() ){ 
 		[qw(jack system)] 
 	} else { 
-	    [ q(device), $mixer_out_device  ]
+	    [ q(device), $playback_device  ]
 	}
 }
 

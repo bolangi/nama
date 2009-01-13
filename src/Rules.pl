@@ -11,7 +11,7 @@ my $mixer_out = ::Rule->new( #  this is the master fader
 	input_object	=> $loopb, 
 
 	output_type		=> 'device',
-	output_object	=> $mixer_out_device,
+	output_object	=> $playback_device,
 
 	status			=> 1,
 

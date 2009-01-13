@@ -32,7 +32,7 @@ devices:
 # ALSA device assignments and formats
 
 record_device: consumer          # for ALSA/OSS
-mixer_out_device: consumer       # for ALSA/OSS
+playback_device: consumer       # for ALSA/OSS
 mixer_out_format: cd-stereo      # for ALSA/OSS
 
 # audio file formats
@@ -47,6 +47,8 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 # use $PAGER to display lengthy text outputs?
 
 use_pager: 1
+
+use_placeholders: 1
 
 # MIDI ports to watch for controller inputs (not yet implemented)
 

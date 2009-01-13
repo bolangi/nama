@@ -15,6 +15,7 @@ our (
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic
 	$use_pager,     # display lengthy output data using pager
+	$use_placeholders,  # use placeholders in show_track output
 	$text,          # Text::Format object
 
 	$ui, # object providing class behavior for graphic/text functions
@@ -264,8 +265,8 @@ our (
 	@groups_data, # 
 	@marks_data, # 
 
-	$mixer_out_device,       # where to send stereo output
-	$mixer_out_device_jack,  # JACK target for stereo output
+	$playback_device,       # where to send stereo output
+	$playback_device_jack,  # JACK target for stereo output
 	$record_device,    # where to get our inputs
 	$record_device_jack,    # where to get our inputs
 

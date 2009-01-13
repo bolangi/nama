@@ -201,19 +201,23 @@ sub command_process {
 	$ui->refresh; # in case we have a graphic environment
 	# package :: scope ends here
 }
+
+sub placeholder { $use_placeholders ? q(--) : q() }
 sub show_tracks {
     no warnings;
     my @tracks = @_;
     map {     push @format_fields,  
             $_->n,
             $_->name,
-            $_->current_version || '',
+            $_->current_version || placeholder(),
             $_->rw,
             $_->rec_status,
-            $_->name =~ /Master|Mixdown/ ? q() : 
-				$_->rec_status eq 'REC' ? $_->source : '',
-			$_->name =~ /Master|Mixdown/ ? q() : 
-				$_->rec_status ne 'OFF' ? $_->send : '',
+            $_->name =~ /Master|Mixdown/ ? placeholder() : 
+				$_->rec_status eq 'REC' ? $_->source : placeholder(),
+			$_->name =~ /Master|Mixdown/ ? placeholder() : 
+				$_->rec_status ne 'OFF' 
+					? ($_->send ? $_->send : placeholder())
+					: placeholder(),
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
