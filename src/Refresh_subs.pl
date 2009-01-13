@@ -10,6 +10,7 @@ sub set_widget_color {
 					OFF => $old_bg);
 
 	$widget->configure( -background => $rw_background{$status} );
+	$widget->configure( -foreground => $rw_foreground{$status} );
 }
 
 
@@ -48,6 +49,7 @@ $debug and print "group status: $status\n";
 }
 sub refresh_track {
 	
+	#my $debug = 1;
 	@_ = discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_track\n";
@@ -55,47 +57,38 @@ sub refresh_track {
 	my $rec_status = $ti[$n]->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
-	#	return unless $track_widget{$n}; # hidden track
-		$track_widget{$n}->{rw}->configure(-text => $rec_status);
-		 $track_widget{$n}->{ch_r}->configure( -text => $ti[$n]->source);
-		 $track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->send);
-		$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
+	#return unless $track_widget{$n}; # hidden track
 	
-	if ($rec_status eq "REC") {
+	# set the text for displayed fields
 
-		$track_widget{$n}->{name}->configure(-background => 'lightpink');
-		$track_widget{$n}->{name}->configure(-foreground => 'Black');
-		$track_widget{$n}->{ch_r}->configure(-background => 'LightPink');
-		$track_widget{$n}->{ch_r}->configure(-foreground => 'Black');
-		$track_widget{$n}->{rw}->configure(-background => 'LightPink');
-		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
-		#$track_widget{$n}->{ch_m}->configure( -background => $old_bg);
-		#$track_widget{$n}->{ch_m}->configure( -foreground => 'DarkGray');
-
-	}
-	elsif ( $rec_status eq "MON" ) {
-
-		 $track_widget{$n}->{name}->configure(-background => 'AntiqueWhite');
-		 $track_widget{$n}->{name}->configure(-foreground => 'Black');
-		 $track_widget{$n}->{ch_r}->configure( -background => $old_bg);
-		 $track_widget{$n}->{ch_r}->configure( -foreground => $old_bg);
-		# $track_widget{$n}->{ch_m}->configure( -background => 'AntiqueWhite');
-		# $track_widget{$n}->{ch_m}->configure( -foreground => 'Black');
-		$track_widget{$n}->{rw}->configure(-background => 'AntiqueWhite');
-		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
-
-		}
-	elsif ( $rec_status eq "OFF" ) {
-		 $track_widget{$n}->{name}->configure(-background => $old_bg);
-		 $track_widget{$n}->{ch_r}->configure( -background => $old_bg); 
-		 $track_widget{$n}->{ch_r}->configure( -foreground => $old_bg);
-		 #$track_widget{$n}->{ch_m}->configure( -background => $old_bg); 
-		# $track_widget{$n}->{ch_m}->configure( -foreground => 'Gray');
-		$track_widget{$n}->{rw}->configure(-background => $old_bg);
-		$track_widget{$n}->{rw}->configure(-foreground => 'Black');
-		}  
-		else { carp "\$rec_status contains something unknown: $rec_status";}
+	$track_widget{$n}->{rw}->configure(-text => $rec_status);
+	$track_widget{$n}->{ch_r}->configure( -text => 
+			$n > 2 
+				?  $ti[$n]->source
+				:  q() );
+	$track_widget{$n}->{ch_m}->configure( -text => 
+			$n > 2 
+				?  $ti[$n]->send
+				:  q() );
+	$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
+	
+	map{ set_widget_color( 	$track_widget{$n}->{$_}, 
+							$rec_status)
+	} qw(name rw );
+	
+	set_widget_color( 	$track_widget{$n}->{ch_r},
+							$rec_status eq 'REC'
+								? 'MON'
+								: 'OFF');
+	
+	set_widget_color( $track_widget{$n}->{ch_m},
+							$rec_status eq 'OFF' 
+								? 'OFF'
+								: $ti[$n]->send 
+									? 'MON'
+									: 'OFF');
 }
+
 sub refresh {  
 	remove_small_wavs();
  	$ui->refresh_group(); 

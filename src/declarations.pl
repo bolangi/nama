@@ -224,8 +224,8 @@ our (
 
 	$track_name,	# received from Tk text input form
 	%track_names,   # belongs in Track.pm
-	$ch_r,			# this too, recording channel assignment
-	$ch_m,			# monitoring channel assignment, unused
+	$ch_r,			# recording channel assignment
+	$ch_m,			# monitoring channel assignment
 
 
 	%L,	# for effects

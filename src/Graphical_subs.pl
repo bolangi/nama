@@ -571,11 +571,6 @@ sub track_gui {
 					);
 	}
 
-	# skip the rest of the widgets for the mixdown track
-	
-# if ( $n != 2 ){
-
-
 	$ch_r = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
@@ -604,7 +599,7 @@ sub track_gui {
 						-command => sub { 
 							return if eval_iam("engine-status") eq 'running';
 			#				$ti[$n]->set(rw  => "MON");
-							$ti[$n]->set(ch_m  => $v);
+							$ti[$n]->send($v);
 							refresh_track($n) }
 				 		)
 				}
