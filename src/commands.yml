@@ -3,11 +3,6 @@ help:
   what: display help 
   parameters: topic or command name 
   type: general
-list_plugin:
-  short: lp
-  what: output of analyseplugin
-  parameter: LADSPA plugin name or unique id
-  type: general
 exit:
   short: quit q
   what: exit program, saving settings
@@ -122,18 +117,13 @@ monitor_channel:
 source:
   type: track
   what: set track source
-  short: src from r in
+  short: src from
   parameters: JACK client name or soundcard channel number 
 send:
   type: track
   what: set auxilary track destination
   short: out aux
   parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
-source:
-  type: track
-  what: set track source
-  short: src from r in
-  parameters: JACK client name or soundcard channel number 
 jack:
   type: general
   short: jackon jon

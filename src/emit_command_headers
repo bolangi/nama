@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 use warnings;
+no warnings "uninitialized";
 $debug = 0;
 use Data::YAML::Reader;
 use IO::All;

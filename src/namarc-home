@@ -44,14 +44,4 @@ raw_to_disk_format: 16,N,frequency
 
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
-# use $PAGER to display lengthy text outputs?
-
-use_pager: 1
-
-use_placeholders: 1
-
-# MIDI ports to watch for controller inputs (not yet implemented)
-
-controller_ports: ~
-
 # end
