@@ -19,7 +19,6 @@ exit: _exit end { ::save_state(); exit }
 create_project: _create_project name end { ::Text::t_create_project $item{name} }
 
 list_projects: _list_projects end { ::list_projects() }
-list_plugin: _list_plugin name end { ::list_plugin() }
 
 load_project: _load_project name end {
 	::Text::t_load_project $item{name} 
@@ -165,9 +164,6 @@ off: 'off' end {$::this_track->set_off() }
 rec: 'rec' end { $::this_track->set_rec() }
 mon: 'mon' end {$::this_track->set_mon() }
 
-wav: name { $::this_track = $::tn{$item{name}} if $::tn{$item{name}}  }
-
-## we reach here
 set_version: _set_version dd end { $::this_track->set(active => $item{dd})}
  
 vol: _vol dd end { $::copp{ $::this_track->vol }->[0] = $item{dd}; 
@@ -292,14 +288,14 @@ remove_effect: _remove_effect op_id(s) end {
 
 }
 
-add_ctrl: _add_ctrl parent name value(s?) end {
-	my $code = $item{name};
-	my $parent = $item{parent};
-	my $values = $item{"value(s?)"};
-	#print "values: " , ref $values, $/;
-	#print join ", ", @{$values} if $values;
-	::Text::t_add_ctrl $parent, $code, $values;
-}
+# add_ctrl: _add_ctrl parent name value(s?) end {
+# 	my $code = $item{name};
+# 	my $parent = $item{parent};
+# 	my $values = $item{"value(s?)"};
+# 	#print "values: " , ref $values, $/;
+# 	#print join ", ", @{$values} if $values;
+# 	::Text::t_add_ctrl $parent, $code, $values;
+# }
 parent: op_id
 add_effect: _add_effect name value(s?)  end { 
 	my $code = $item{name};

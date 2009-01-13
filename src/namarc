@@ -1,8 +1,8 @@
 #
 #
-#         Configuration file for Audio::Multitrack
+#         Nama Configuration file
 
-#         Notes: 
+#         Notes
 
 #         - This configuration file is distinct from
 #           Ecasound's configuration file .ecasoundrc . 
@@ -12,25 +12,26 @@
 #           comments.
 #
 #        - A value _must_ be supplied for each 'leaf' field.
-#          For example "use_pager: 1"
+#          For example "mixer_out_format: cd-stereo"
 #
 #        - A value must _not_ be supplied for nodes, i.e.
 #          'device:'. The value for 'device' is the entire indented
-#          data structure in subsequent lines.
+#          data structure that follows in subsequent lines.
 #
 #        - Indents are significant, two spaces indent for
 #          each new level of branching
 #
 #        - Use the tilde symbol '~' to represent a null value
 #
-#
+
+# project root directory
+
+# all project directories (or their symlinks) will live here
 
 project_root: ~                  # replaced during first run
-                                 # This folder contains all 
-                                 # project directories.
 
 
-# define abbreviations list
+# define abbreviations
 
 abbreviations:  
   24-mono: s24_le,1,frequency
@@ -71,18 +72,5 @@ raw_to_disk_format: s16_le,N,frequency
 # globals for our chain setups
 
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
-
-# use $PAGER to display lengthy text outputs?
-
-use_pager: 1
-
-# Show placeholders for empty fields in text show_track listing
-
-use_placeholders: 1
-
-# MIDI ports to watch for controller inputs (not yet implemented)
-
-controller_ports: ~
-
 
 # end

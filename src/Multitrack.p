@@ -71,6 +71,8 @@ $ladspa_sample_rate = 44100; # temporary setting
 $project_root = join_path( $ENV{HOME}, "nama");
 $seek_delay = 100_000; # microseconds
 $prompt = "nama ('h' for help)> ";
+$use_pager = 1;
+$use_placeholders = 1;
 
 ## Load my modules
 
