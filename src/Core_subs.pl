@@ -202,6 +202,7 @@ sub prepare {
 	
 
 	$ui->init_gui;
+	$ui->oid_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
 

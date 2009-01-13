@@ -18,9 +18,7 @@
 						$playback_device
 						$capture_device	
 						$project_root 	
- 						$controller_ports
-						$use_placeholders
-						$use_pager    );
+						);
 
 						
 						

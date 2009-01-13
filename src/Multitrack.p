@@ -154,6 +154,7 @@ sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
 sub track_gui {}
+sub oid_gui {}
 sub create_master_and_mix_tracks {}
 sub time_gui {}
 sub refresh {}

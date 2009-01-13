@@ -331,14 +331,6 @@ sub transport_gui {
 			-text => 'Arm',
 			-command => sub {&generate_setup and &connect_transport}
 						 );
-# 	$transport_disconnect->configure(
-# 			-text => 'Disconnect setup',
-# 			-command => \&disconnect_transport,
-# 						);
-# 	$transport_new->configure(
-# 			-text => 'New Engine',
-# 			-command => \&new_engine,
-# 						 );
 }
 sub time_gui {
 	@_ = discard_object(@_);
@@ -423,6 +415,43 @@ sub time_gui {
 
 }
 
+
+sub oid_gui {
+#	$debug2 and 
+print "&oid_gui\n";
+	@_ = discard_object(@_);
+	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
+	my @oid_name;
+	for my $rule ( ::Rule::all_rules ){
+		my $name = $rule->name;
+		my $status = $rule->status;
+		print "gui oid name: $name status: $status\n";
+		#next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
+		push @oid_name, $name;
+		
+		my $oid_button = $oid_frame->Button( 
+			-text => ucfirst $name,
+			-background => 
+				$status ?  'AntiqueWhite' : $old_bg,
+			-activebackground => 
+				$status ? 'AntiqueWhite' : $old_bg
+		);
+		$oid_button->configure(
+			-command => sub { 
+				$rule->set(status => ! $rule->status);
+				$oid_button->configure( -background => 
+					$rule->status ?  'AntiqueWhite' : $old_bg ,
+			-activebackground => 
+					$rule->status ? 'AntiqueWhite' : $old_bg
+					
+					);
+			});
+		push @widget_o, $oid_button;
+	}
+		
+	map { $_ -> pack(-side => 'left') } ($outputs, @widget_o);
+	
+}
 sub paint_button {
 	@_ = discard_object(@_);
 	my ($button, $color) = @_;

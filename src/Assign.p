@@ -112,7 +112,10 @@ key:             $key
 full_class_path: $full_class_path
 sigil{key}:      $sigil{$key}
 DEBUG
-		$debug and $sigil{$key} or carp "didn't find a match for $key in ", join " ", @vars, $/;
+		if ($debug){
+		 $sigil{$key} 
+		or carp "didn't find a match for $key in ", join " ", @vars, $/;
+		}
 		my ($sigil, $identifier) = ($sigil{$key}, $key);
 		$eval .= $full_class_path;
 		$eval .= q( = );
