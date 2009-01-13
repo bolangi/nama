@@ -7,7 +7,7 @@ parameter: /\d+/
 value: /[\d\.eE+-]+/ # -1.5e-6
 last: ('last' | '$' ) 
 dd: /\d+/
-name: /[\w:]+/
+name: /[\w:]+\/?/
 name2: /[\w-]+/
 name3: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value

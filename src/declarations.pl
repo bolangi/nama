@@ -237,6 +237,7 @@ our (
 	$OUT,				# filehandle for Text mode print
 	#$commands,	# ref created from commands.yml
 	%commands,	# created from commands.yml
+	%dispatch,  # replacement for existing parser
 	$commands_yml, # the string form of commands.yml
 
 	$save_id, # text variable

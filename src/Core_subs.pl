@@ -186,6 +186,8 @@ sub prepare {
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
+	prepare_command_dispatch(); 
+
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
@@ -1877,6 +1879,30 @@ sub apply_op {
 	map{apply_op($_)} @owns;
 
 }
+
+sub prepare_command_dispatch {
+	map{ 
+		if (my $subtext = $commands{$_}->{sub}){ # to_start
+			my @short = split " ", $commands{$_}->{short};
+			my @keys = $_;
+			push @keys, @short if @short;
+			map { $dispatch{$_} = eval qq(sub{ $subtext() }) } @keys;
+		}
+	} keys %commands;
+# regex languge
+#
+my $key = qr/\w+/;
+my $someval = qr/[\w.+-]+/;
+my $sign = qr/[+-]/;
+my $op_id = qr/[A-Z]+/;
+my $parameter = qr/\d+/;
+my $value = qr/[\d\.eE+-]+/; # -1.5e-6
+my $dd = qr/\d+/;
+my $name = qr/[\w:]+/;
+my $name2 = qr/[\w-]+/;
+my $name3 = qr/\S+/;
+}
+	
 
 sub prepare_effects_help {
 

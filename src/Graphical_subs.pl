@@ -118,7 +118,7 @@ sub destroy_widgets {
 	#map{ $_->destroy  } @children[1..$#children];
 	my @children = $track_frame->children;
 	# leave field labels (first row)
-	map{ $_->destroy  } @children[10..$#children]; # fragile
+	map{ $_->destroy  } @children[11..$#children]; # fragile
 	%mark_widget and map{ $_->destroy } values %mark_widget;
 }
 
@@ -244,7 +244,7 @@ sub init_gui {
 	);
 
 	my @labels = 
-		qw(Track Name Version Status Input Volume Mute Unity Pan Center Effects);
+		qw(Track Name Version Status Source Send Volume Mute Unity Pan Center Effects);
 	my @widgets;
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
@@ -741,9 +741,7 @@ sub track_gui {
 
 	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
-	#$name->grid($version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
-
-	$number->grid($name, $version, $rw, $ch_r, $vol, $mute, $unity, $pan, $center, @add_effect);
+	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 	refresh_track($n);
 
 }

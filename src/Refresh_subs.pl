@@ -57,9 +57,8 @@ sub refresh_track {
 
 	#	return unless $track_widget{$n}; # hidden track
 		$track_widget{$n}->{rw}->configure(-text => $rec_status);
-		 $track_widget{$n}->{ch_r}->configure( -text =>
-		 $ti[$n]->ch_r || 1);
-		 #$track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->ch_m);
+		 $track_widget{$n}->{ch_r}->configure( -text => $ti[$n]->source);
+		 $track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->send);
 		$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
 	
 	if ($rec_status eq "REC") {

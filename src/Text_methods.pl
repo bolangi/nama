@@ -230,7 +230,7 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Track  Name        Ver. Setting  Status   Source     Send
+Track  Name        Ver. Setting  Status   Source      Send
 =============================================================
 .
 format STDOUT =
@@ -355,10 +355,12 @@ sub find_effect {
 sub t_load_project {
 	package ::;
 	my $name = shift;
-	my $untested = remove_spaces($name);
-	print ("Project $untested does not exist\n"), return
-		unless -d join_path project_root(), $untested; 
-	load_project( name => remove_spaces($name) );
+	print "input name: $name\n";
+	my $name = remove_spaces($name);
+	$name =~ s(/$)(); # remove trailing slash
+	print ("Project $name does not exist\n"), return
+		unless -d join_path project_root(), $name; 
+	load_project( name => $name );
 
 	print "loaded project: $project_name\n";
 }
