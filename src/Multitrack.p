@@ -69,6 +69,8 @@ $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $ladspa_sample_rate = 44100; # temporary setting
 $project_root = join_path( $ENV{HOME}, "nama");
+$seek_delay = 100_000; # microseconds
+$prompt = "nama ('h' for help)> ";
 
 ## Load my modules
 
@@ -120,10 +122,10 @@ sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
     #MainLoop;
-    my $term = new Term::ReadLine 'Ecaound/Nama';
+    $term = new Term::ReadLine("Ecasound/Nama");
+	my $attribs = $term->Attribs;
+	$attribs->{attempted_completion_function} = \&::Text::complete;
 	$term->tkRunning(1);
-    my $prompt = "nama ('h' for help)> ";
-    #my $prompt = "nama> ";
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
@@ -150,6 +152,7 @@ sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
 sub track_gui {}
+sub create_master_and_mix_tracks {}
 sub time_gui {}
 sub refresh {}
 sub refresh_group {}

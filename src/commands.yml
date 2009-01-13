@@ -43,6 +43,24 @@ setpos:
   what: set current playhead position (seconds)
   example: setpos 65 (set play position to 65 seconds from start)
   type: transport
+forward:
+  short: fw
+  what: move transport position forward
+  parameters: seconds
+  type: transport
+rewind:
+  short: rw
+  what: move transport position backward
+  parameters: seconds
+  type: transport
+beg:
+  what: set playback head to start
+  type: transport
+  sub: to_start
+end:
+  what: set playback head to end minus 10 seconds 
+  type: transport
+  sub: to_end
 ecasound_start:
   type: transport
   short: T
@@ -109,7 +127,7 @@ source:
 send:
   type: track
   what: set auxilary track destination
-  short: to m out aux
+  short: out aux
   parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
 source:
   type: track

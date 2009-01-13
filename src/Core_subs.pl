@@ -183,8 +183,8 @@ sub prepare {
 	prepare_static_effects_data() unless $opts{e};
 
 	::Text::load_keywords(); # for autocompletion
-	#chdir $project_root # for filename autocompletion
-	#	or warn "$project_root: chdir failed: $!\n";
+	chdir $project_root # for filename autocompletion
+		or warn "$project_root: chdir failed: $!\n";
 
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -222,7 +222,7 @@ sub prepare {
 
 
 sub eval_iam {
-	local $debug = 0;	
+	#my $debug = 1;	
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -801,7 +801,7 @@ sub dig_ruins {
 
 		$debug and print "tracks found: @wavs\n";
 	 
-		create_master_and_mix_tracks();
+		$ui->create_master_and_mix_tracks();
 
 		map{add_track($_)}@wavs;
 
@@ -1206,7 +1206,7 @@ sub heartbeat {
 				$ui->stop_heartbeat
 					#if $status =~ /finished|error|stopped/;
 					if $status =~ /finished|error/;
-				print join " ", $status, colonize($here), $/;
+				#print join " ", $status, colonize($here), $/;
 				my ($start, $end);
 				$start  = ::Mark::loop_start();
 				$end    = ::Mark::loop_end();
@@ -1290,7 +1290,7 @@ sub mark {
 	}
 	else{ 
 
-		eval_iam(qq(cs-set-position $pos));
+		set_position($pos);
 	}
 }
 
@@ -1334,30 +1334,25 @@ sub previous_mark {
 
 sub to_start { 
 	return if really_recording();
-	eval_iam(qq(cs-set-position 0));
+	set_position( 0 );
 }
 sub to_end { 
 	# ten seconds shy of end
 	return if really_recording();
 	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
-	eval_iam(qq(cs-set-position $end));
+	set_position( $end);
 } 
 sub jump {
+	my $debug = 1;
 	return if really_recording();
 	my $delta = shift;
-#	my $running = eval_iam("engine-status") eq 'running' ?  1 : 0;
-#	eval_iam "stop"; #  if $running;
 	$debug2 and print "&jump\n";
-	my $here = eval_iam(qq(getpos));
+	my $here = eval_iam('getpos');
 	$debug and print "delta: $delta\nhere: $here\nunit: $unit\n\n";
 	my $new_pos = $here + $delta * $unit;
 	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
-	# eval_iam("setpos $new_pos");
-	my $cmd = "setpos $new_pos";
-	$e->eci("setpos $new_pos");
-	# print "$cmd\n";
-	# eval_iam "start" if $running;
-	sleep 1;
+	set_position( $new_pos );
+	usleep 100_000;
 }
 ## post-recording functions
 
@@ -2481,7 +2476,7 @@ sub retrieve_state {
 
 	splice @tracks_data, 0, 2;
 
-	create_master_and_mix_tracks(); # their GUI only
+	$ui->create_master_and_mix_tracks(); 
 
 	# create user tracks
 	
@@ -2542,30 +2537,6 @@ sub retrieve_state {
 	$ui->restore_time_marks();
 
 } 
-sub create_master_and_mix_tracks { # GUI widgets
-	$debug2 and print "&create_master_and_mix_tracks\n";
-
-
-	my @rw_items = (
-			[ 'command' => "MON",
-				-command  => sub { 
-						$tn{Master}->set(rw => "MON");
-						refresh_track($master_track->n);
-			}],
-			[ 'command' => "OFF", 
-				-command  => sub { 
-						$tn{Master}->set(rw => "OFF");
-						refresh_track($master_track->n);
-			}],
-		);
-
-	$ui->track_gui( $master_track->n, @rw_items );
-
-	$ui->track_gui( $mixdown_track->n); 
-
-	$ui->group_gui('Tracker');
-}
-
 
 sub save_effects {
 	$debug2 and print "&save_effects\n";
@@ -2600,5 +2571,28 @@ sub save_effects {
 
 sub process_control_inputs { }
 
+sub set_position {
+	my $seconds = shift;
+	my $am_running = ( eval_iam('engine-status') eq 'running');
+	return if really_recording();
+	my $jack = jackd_running();
+	#print "jack: $jack\n";
+	$am_running and $jack and eval_iam('stop');
+	eval_iam("setpos $seconds");
+	$am_running and $jack and usleep($seek_delay), eval_iam('start');
+	$ui->clock_config(-text => colonize($seconds));
+}
+
+sub forward {
+	my $delta = shift;
+	my $here = eval_iam('getpos');
+	my $new = $here + $delta;
+	set_position( $new );
+}
+
+sub rewind {
+	my $delta = shift;
+	forward( -$delta );
+}
 	
 ### end

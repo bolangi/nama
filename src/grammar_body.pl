@@ -42,7 +42,13 @@ get_state: _get_state end {
 getpos: _getpos end {  
 	print ::d1( ::eval_iam q(getpos) ), $/; }
 setpos: _setpos value end {
-	::eval_iam("setpos $item{value}");
+	::set_position($item{value});
+}
+forward: _forward value {
+	::forward( $item{value} )
+}
+rewind: _rewind value {
+	::rewind( $item{value} )
 }
 
 add_track: _add_track name(s) end { ::add_track(@{$item{'name(s)'}}); }

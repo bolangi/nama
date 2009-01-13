@@ -306,5 +306,8 @@ our (
 
 	%bunch,			# user collections of tracks
 	@keywords,      # for autocompletion
+	$seek_delay,    # allow microseconds for transport seek
+                    # (used with JACK only)
+    $prompt,        # for text mode
 
 );

@@ -5,21 +5,16 @@ use vars qw(%iam_cmd);
 
 
 map { $iam_cmd{$_}++ } split "\n", <<CMD;
-forward
-rewind
 st
 cs
 es
 fs
-fw
-rw
 st
 run
 debug
 engine-status
 engine-launch
 engine-halt
-setpos
 cs-add
 cs-remove
 cs-list

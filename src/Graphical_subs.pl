@@ -434,6 +434,7 @@ sub group_gui {
 			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
+				return if eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'REC');
 				$group_rw->configure(-text => 'REC');
 				refresh();
@@ -443,6 +444,7 @@ sub group_gui {
 			'command' => 'MON',
 			-background => $old_bg,
 			-command => sub { 
+				return if eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'MON');
 				$group_rw->configure(-text => 'MON');
 				refresh();
@@ -452,6 +454,7 @@ sub group_gui {
 			'command' => 'OFF',
 			-background => $old_bg,
 			-command => sub { 
+				return if eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'OFF');
 				$group_rw->configure(-text => 'OFF');
 				refresh();
@@ -517,6 +520,7 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
+					return if eval_iam("engine-status") eq 'running';
 					$ti[$n]->set(rw => "REC");
 					
 					refresh_track($n);
@@ -524,12 +528,14 @@ sub track_gui {
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
+					return if eval_iam("engine-status") eq 'running';
 					$ti[$n]->set(rw => "MON");
 					refresh_track($n);
 					refresh_group();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
+					return if eval_iam("engine-status") eq 'running';
 					$ti[$n]->set(rw => "OFF");
 					refresh_track($n);
 					refresh_group();
@@ -582,6 +588,7 @@ sub track_gui {
 			-label => $v,
 			-value => $v,
 			-command => sub { 
+				return if eval_iam("engine-status") eq 'running';
 			#	$ti[$n]->set(rw => 'REC');
 				$ti[$n]->set(ch_r  => $v);
 				refresh_track($n) }
@@ -595,6 +602,7 @@ sub track_gui {
 						-label => $v,
 						-value => $v,
 						-command => sub { 
+							return if eval_iam("engine-status") eq 'running';
 			#				$ti[$n]->set(rw  => "MON");
 							$ti[$n]->set(ch_m  => $v);
 							refresh_track($n) }
@@ -739,6 +747,32 @@ sub track_gui {
 	refresh_track($n);
 
 }
+sub create_master_and_mix_tracks { 
+	$debug2 and print "&create_master_and_mix_tracks\n";
+
+
+	my @rw_items = (
+			[ 'command' => "MON",
+				-command  => sub { 
+						return if eval_iam("engine-status") eq 'running';
+						$tn{Master}->set(rw => "MON");
+						refresh_track($master_track->n);
+			}],
+			[ 'command' => "OFF", 
+				-command  => sub { 
+						return if eval_iam("engine-status") eq 'running';
+						$tn{Master}->set(rw => "OFF");
+						refresh_track($master_track->n);
+			}],
+		);
+
+	track_gui( $master_track->n, @rw_items );
+
+	track_gui( $mixdown_track->n); 
+
+	group_gui('Tracker');
+}
+
 
 sub update_version_button {
 	@_ = discard_object(@_);
@@ -933,7 +967,7 @@ sub wraparound {
 	my ($diff, $start) = @_;
 	cancel_wraparound();
 	$event_id{tk_wraparound} = $set_event->after( 
-		int( $diff*1000 ), sub{ eval_iam("setpos " . $start) } )
+		int( $diff*1000 ), sub{ ::set_position( $start) } )
 }
 sub cancel_wraparound { tk_event_cancel("tk_wraparound") }
 

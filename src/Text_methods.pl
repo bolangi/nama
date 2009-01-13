@@ -39,8 +39,6 @@ sub loop {
 	# we are using Event's handlers and event loop
 
 	package ::;
-    my $prompt = "nama ('h' for help)> ";
-    #my $prompt = "nama> ";
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&::Text::complete;
@@ -96,7 +94,7 @@ sub wraparound {
 	$event_id{Event_wraparound} = Event->timer(
 	desc   => 'wraparound',               # description;
 	after  => $diff,
-	cb     => sub{ ::eval_iam("setpos " . $start) }, # callback;
+	cb     => sub{ ::set_position($start) }, # callback;
    );
 
 }
@@ -351,6 +349,7 @@ sub find_effect {
 
 
 sub t_load_project {
+	package ::;
 	my $name = shift;
 	my $untested = remove_spaces($name);
 	print ("Project $untested does not exist\n"), return
@@ -361,15 +360,17 @@ sub t_load_project {
 }
     
 sub t_create_project {
+	package ::;
 	my $name = shift;
 	load_project( 
-		name => remove_spaces($name),
+		name => ::remove_spaces($name),
 		create => 1,
 	);
 	print "created project: $project_name\n";
 
 }
 sub t_add_ctrl {
+	package ::;
 	my ($parent, $code, $values) = @_;
 	print "code: $code, parent: $parent\n";
 	$values and print "values: ", join " ", @{$values};
@@ -388,6 +389,7 @@ sub t_add_ctrl {
 		add_effect( \%p );
 }
 sub t_add_effect {
+	package ::;
 	my ($code, $values)  = @_;
 
 	# allow use of LADSPA unique ID
@@ -434,9 +436,10 @@ sub mixoff {
 	$tracker->set(rw => 'MON')}
 
 sub bunch {
+	package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
-		pager(::yaml_out \%bunch);
+		pager(yaml_out \%bunch);
 	} elsif (! @tracks){
 		$bunch{$bunchname} 
 			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
