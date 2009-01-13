@@ -43,6 +43,7 @@ sub loop {
     #my $prompt = "nama> ";
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
+	$attribs->{attempted_completion_function} = \&::Text::complete;
 	$term->callback_handler_install($prompt, \&::Text::process_line);
 
 	# store output buffer in a scalar (for print)
@@ -348,7 +349,6 @@ sub find_effect {
 	} else { print "No matching effects.\n\n" }
 }
 
-package ::;
 
 sub t_load_project {
 	my $name = shift;
@@ -432,3 +432,49 @@ sub mixoff {
 	print "Leaving mixdown mode.\n";
 	$mixdown_track->set(rw => 'OFF');
 	$tracker->set(rw => 'MON')}
+
+sub bunch {
+	my ($bunchname, @tracks) = @_;
+	if (! $bunchname){
+		pager(::yaml_out \%bunch);
+	} elsif (! @tracks){
+		$bunch{$bunchname} 
+			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
+			or  print "bunch $bunchname: does not exist.\n";
+	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti[$_]} @tracks){
+		print "@mispelled: mispelled track(s), skipping.\n";
+	} else {
+	$bunch{$bunchname} = [ @tracks ];
+	}
+}
+sub load_keywords {
+
+@keywords = keys %commands;
+push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
+push @keywords, keys %iam_cmd;
+push @keywords, keys %effect_j;
+}
+
+sub complete {
+    my ($text, $line, $start, $end) = @_;
+    return $term->completion_matches($text,\&keyword);
+};
+
+{
+    my $i;
+    sub keyword {
+        my ($text, $state) = @_;
+        return unless $text;
+        if($state) {
+            $i++;
+        }
+        else { # first call
+            $i = 0;
+        }
+        for (; $i<=$#keywords; $i++) {
+            return $keywords[$i] if $keywords[$i] =~ /^\Q$text/;
+        };
+        return undef;
+    }
+};
+

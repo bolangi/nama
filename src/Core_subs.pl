@@ -78,8 +78,12 @@ print <<PROJECT_ROOT;
 Nama places all sound and control files under the
 project root directory, by default $ENV{HOME}/nama.
 
+You can create this directory yourself, and set
+the project_root variable in .namarc, or on the
+command line using the -d option.
+
 PROJECT_ROOT
-print "Would you like to create it? [yes] ";
+print "Would you like to create $ENV{HOME}/nama? [yes] ";
 my $reply = <STDIN>;
 chomp $reply;
 if ($reply !~ /n/i){
@@ -178,6 +182,9 @@ sub prepare {
 
 	prepare_static_effects_data() unless $opts{e};
 
+	::Text::load_keywords(); # for autocompletion
+	#chdir $project_root # for filename autocompletion
+	#	or warn "$project_root: chdir failed: $!\n";
 
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -2592,21 +2599,6 @@ sub save_effects {
 }
 
 sub process_control_inputs { }
-
-sub bunch {
-	my ($bunchname, @tracks) = @_;
-	if (! $bunchname){
-		pager(yaml_out \%bunch);
-	} elsif (! @tracks){
-		$bunch{$bunchname} 
-			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
-			or  print "bunch $bunchname: does not exist.\n";
-	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti[$_]} @tracks){
-		print "@mispelled: mispelled track(s), skipping.\n";
-	} else {
-	$bunch{$bunchname} = [ @tracks ];
-	}
-}
 
 	
 ### end

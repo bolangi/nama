@@ -16,13 +16,13 @@ end: /[;\s]*$/
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) }
 find_effect: _find_effect name3(s) { ::Text::find_effect(@{$item{"name3(s)"}})}
 exit: _exit end { ::save_state(); exit }
-create_project: _create_project name end { ::t_create_project $item{name} }
+create_project: _create_project name end { ::Text::t_create_project $item{name} }
 
 list_projects: _list_projects end { ::list_projects() }
 list_plugin: _list_plugin name end { ::list_plugin() }
 
 load_project: _load_project name end {
-	::t_load_project( $item{name} )
+	::Text::t_load_project $item{name} 
 }
 save_state: _save_state name end { ::save_state( $item{name} ); }
 save_state: _save_state end { ::save_state() }
@@ -292,13 +292,13 @@ add_ctrl: _add_ctrl parent name value(s?) end {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	::t_add_ctrl $parent, $code, $values;
+	::Text::t_add_ctrl $parent, $code, $values;
 }
 parent: op_id
 add_effect: _add_effect name value(s?)  end { 
 	my $code = $item{name};
 	my $values = $item{"value(s?)"};
-	::t_add_effect $code, $values;
+	::Text::t_add_effect $code, $values;
 }
 
 modify_effect: _modify_effect op_id parameter sign(?) value end {
@@ -329,7 +329,7 @@ group_version: _group_version end {
 
 group_version: _group_version dd end { $::tracker->set( version => $item{dd} )}
 
-bunch: _bunch name(s?) { ::bunch( @{$item{'name(s?)'}} ) }
+bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}} ) }
 
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, $/;

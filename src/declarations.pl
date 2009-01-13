@@ -305,5 +305,6 @@ our (
     $soloing,       # one user track is on, all others are muted
 
 	%bunch,			# user collections of tracks
+	@keywords,      # for autocompletion
 
 );
