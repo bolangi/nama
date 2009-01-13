@@ -31,7 +31,7 @@ devices:
 
 # ALSA device assignments and formats
 
-record_device: consumer          # for ALSA/OSS
+capture_device: consumer          # for ALSA/OSS
 playback_device: consumer       # for ALSA/OSS
 mixer_out_format: cd-stereo      # for ALSA/OSS
 

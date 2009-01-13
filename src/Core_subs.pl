@@ -587,7 +587,7 @@ sub input_type_object {
 	if (jackd_running() ){ 
 		[qw(jack system)] 
 	} else { 
-	    [ q(device), $record_device  ]
+	    [ q(device), $capture_device  ]
 	}
 }
 sub output_type_object {

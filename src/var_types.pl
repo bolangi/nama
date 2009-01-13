@@ -16,7 +16,7 @@
 						$raw_to_disk_format
 						$mixer_out_format
 						$playback_device
-						$record_device	
+						$capture_device	
 						$project_root 	
  						$controller_ports
 						$use_placeholders

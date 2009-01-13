@@ -267,8 +267,8 @@ our (
 
 	$playback_device,       # where to send stereo output
 	$playback_device_jack,  # JACK target for stereo output
-	$record_device,    # where to get our inputs
-	$record_device_jack,    # where to get our inputs
+	$capture_device,    # where to get our inputs
+	$capture_device_jack,    # where to get our inputs
 
 
 	# rules
