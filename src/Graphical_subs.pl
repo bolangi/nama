@@ -183,13 +183,18 @@ sub init_gui {
 
 
 
-	$sn_label = $load_frame->Label(-text => "Project name: ")->pack(-side => 'left');
-	$sn_text = $load_frame->Entry(-textvariable => \$project, -width => 25)->pack(-side => 'left');
+	$sn_label = $load_frame->Label(
+		-text => "    Project name: "
+	)->pack(-side => 'left');
+	$sn_text = $load_frame->Entry(
+		-textvariable => \$project,
+		-width => 25
+	)->pack(-side => 'left');
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
 	$sn_save = $load_frame->Button->pack(-side => 'left');
-	$save_id = "";
+	$save_id = "State";
 	my $sn_save_text = $load_frame->Entry(
 									-textvariable => \$save_id,
 									-width => 15
@@ -198,13 +203,28 @@ sub init_gui {
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
-		-text => "          Name: ")->pack(-side => 'left');
-	$build_track_text = $add_frame->Entry(-textvariable => \$track_name, -width => 12)->pack(-side => 'left');
-	$build_track_rec_label = $add_frame->Label(-text => "Input channel:")->pack(-side => 'left');
-	$build_track_rec_text = $add_frame->Entry(-textvariable => \$ch_r, -width => 2)->pack(-side => 'left');
-	# $build_track_mon_label = $add_frame->Label(-text => "Mon CH")->pack(-side => 'left');
-	# $build_track_mon_text = $add_frame->Entry(-textvariable => \$ch_m, -width => 2)->pack(-side => 'left');
-	$build_track_add = $add_frame->Button->pack(-side => 'left');;
+		-text => "New track name: ")->pack(-side => 'left');
+	$build_track_text = $add_frame->Entry(
+		-textvariable => \$track_name, 
+		-width => 12
+	)->pack(-side => 'left');
+# 	$build_track_mon_label = $add_frame->Label(
+# 		-text => "Aux send: (channel/client):",
+# 		-width => 18
+# 	)->pack(-side => 'left');
+# 	$build_track_mon_text = $add_frame->Entry(
+# 		-textvariable => \$ch_m, 
+# 		-width => 10
+# 	)->pack(-side => 'left');
+	$build_track_rec_label = $add_frame->Label(
+		-text => "Input channel or client:"
+	)->pack(-side => 'left');
+	$build_track_rec_text = $add_frame->Entry(
+		-textvariable => \$ch_r, 
+		-width => 10
+	)->pack(-side => 'left');
+	$build_track_add_mono = $add_frame->Button->pack(-side => 'left');;
+	$build_track_add_stereo  = $add_frame->Button->pack(-side => 'left');;
 
 	$sn_load->configure(
 		-text => 'Load',
@@ -236,12 +256,19 @@ sub init_gui {
 				exit;
 				 });
 
-	$build_track_add->configure( 
-			-text => 'Add New Track',
+	$build_track_add_mono->configure( 
+			-text => 'Add Mono Track',
 			-command => sub { 
 					return if $track_name =~ /^\s*$/;	
 			add_track(remove_spaces($track_name)) }
 	);
+	$build_track_add_stereo->configure( 
+			-text => 'Add Stereo Track',
+			-command => sub { 
+								return if $track_name =~ /^\s*$/;	
+								add_track(remove_spaces($track_name));
+								::Text::command_process('stereo');
+	});
 
 	my @labels = 
 		qw(Track Name Version Status Source Send Volume Mute Unity Pan Center Effects);
@@ -252,14 +279,14 @@ sub init_gui {
 #  unified command processing by command_process 
 	
 	$iam_label = $iam_frame->Label(
-	-text => "    Command: "
+	-text => "         Command: "
 		)->pack(-side => 'left');;
 	$iam_text = $iam_frame->Entry( 
 		-textvariable => \$iam, -width => 45)
 		->pack(-side => 'left');;
 	$iam_execute = $iam_frame->Button(
 			-text => 'Execute',
-			-command => sub { print $iam; ::Text::command_process( $iam ) }
+			-command => sub { ::Text::command_process( $iam ) }
 			
 		)->pack(-side => 'left');;
 

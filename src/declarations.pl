@@ -185,7 +185,8 @@ our (
 	#
 	$build_track_label,
 	$build_track_text,
-	$build_track_add,
+	$build_track_add_mono,
+	$build_track_add_stereo,
 	$build_track_rec_label,
 	$build_track_rec_text,
 	$build_track_mon_label,

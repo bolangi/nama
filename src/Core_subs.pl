@@ -758,17 +758,13 @@ sub add_track {
 		$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 		my $track = ::Track->new(
 			name => $name,
-			ch_r => $ch_r,
-			ch_m => $ch_m,
 		);
 		$this_track = $track;
 		return if ! $track; 
 		$debug and print "ref new track: ", ref $track; 
+		$track->source($ch_r) if $ch_r;
+#		$track->send($ch_m) if $ch_m;
 
-		# $ch_r and $ch_m are public variables set by GUI
-		# Okay, so we will do that for the grammar, too
-		# $::chr = 
-		
 		my $group = $::Group::by_name{$track->group};
 		$group->set(rw => 'REC');
 		$track_name = $ch_m = $ch_r = undef;
@@ -1531,13 +1527,15 @@ sub file_pager {
 		carp "file not found or not readable: $fname\n" ;
 		return;
     }
-	system qq($ENV{PAGER} $fname);
+	my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
+	my $cmd = qq($pager $fname); 
+	system $cmd;
 }
 sub dump_all {
-	my $tmp = ".dump_all.yml";
+	my $tmp = ".dump_all";
 	my $fname = join_path( project_root(), $tmp);
 	save_state($fname);
-	file_pager($fname);
+	file_pager("$fname.yml");
 }
 
 
