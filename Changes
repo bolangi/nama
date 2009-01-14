@@ -20,3 +20,12 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                         - help_effect (he) analyseplugin output for one effect
                           designated by label or unique_id
 						- workaround for longstanding parser bug
+0.99 Tue Jan 13, 2009   - auto JACK detection
+                        - send command: aux send to channel
+                          or JACK client
+                        - fw/rw/setpos work as expected with JACK
+                        - autocompletion for text commands
+                        - fix longstanding parser error
+                        - preview mode runs w/o writing WAV files
+                          (available via GUI button)
+

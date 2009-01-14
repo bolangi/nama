@@ -1409,7 +1409,7 @@ sub add_effect {
 
 	my $parent_id = $p{parent_id};  
 	my $id		= $p{cop_id};   # initiates restore
-	my $parameter		= $p{parameter}; 
+	my $parameter		= $p{parameter};  # for controllers
 	my $i = $effect_i{$code};
 	my $values = $p{values};
 
@@ -1425,153 +1425,56 @@ sub add_effect {
 }
 
 sub remove_effect {
+	my $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
 		
-	$debug and print "ready to remove chain operator _ $id _ from track _ $n _\n";
+	my $parent = $cops{$id}->{belongs_to} ;
+
+	$debug and print "ready to remove ".
+		( $parent ? q(controller) : q(chain operator) )
+ 		. qq( "$id" from track "$n"\n);
+
 	$ui->remove_effect_gui($id);
-	remove_op($id);
-	delete $cops{$id};
-	delete $copp{$id};
-	$ti[$n]->remove_effect( $id );
-}
-sub mute {
-	return if $this_track->old_vol_level();
-	$this_track->set(old_vol_level => $copp{$this_track->vol}[0])
-		if ( $copp{$this_track->vol}[0]);  # non-zero volume
-	$copp{ $this_track->vol }->[0] = 0;
-	sync_effect_param( $this_track->vol, 0);
-}
-sub unmute {
-	return if $copp{$this_track->vol}[0]; # if we are not muted
-	return if ! $this_track->old_vol_level;
-	$copp{$this_track->vol}[0] = $this_track->old_vol_level;
-	$this_track->set(old_vol_level => 0);
-	sync_effect_param( $this_track->vol, 0);
-}
-sub solo {
-	my $current_track = $this_track;
-	if ($soloing) { all() }
 
-	# get list of already muted tracks if I haven't done so already
-	
-	if ( ! @already_muted ){
-	print "none muted\n";
-		@already_muted = grep{ $_->old_vol_level} 
-                         map{ $tn{$_} } 
-						 $tracker->tracks;
-	print join " ", "muted", map{$_->name} @already_muted;
-	}
+		# recursively remove children
+		$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
+		map{remove_effect($_)}@{ $cops{$id}->{owns} } 
+			if defined $cops{$id}->{owns};
+;
 
-	# mute all tracks
-	map { $this_track = $tn{$_}; mute() } $tracker->tracks;
+	if ( ! $parent ) { # i am a chain operator, have no parent
+		remove_op($id);
+		delete $cops{$id};
+		delete $copp{$id}; # different c o p p vs. c o p s
 
-    $this_track = $current_track;
-    unmute();
-	$soloing = 1;
-}
+	 	# remove id from track object
+	 	# doesn't handle children
 
-sub all {
-	
-	my $current_track = $this_track;
-	# unmute all tracks
-	map { $this_track = $tn{$_}; unmute() } $tracker->tracks;
+		$ti[$n]->remove_effect( $id ); 
 
-	# re-mute previously muted tracks
-	if (@already_muted){
-		map { $this_track = $_; mute() } @already_muted;
-	}
 
-	# remove listing of muted tracks
-	
-	@already_muted = ();
-	$this_track = $current_track;
-	$soloing = 0;
-	
-}
+	} else {  # i am a controller
 
-sub show_chain_setup {
-	$debug2 and print "&show_chain_setup\n";
-	my $setup = join_path( project_dir(), $chain_setup_file);
-	if ( $use_pager ) {
-		my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
-		system qq($pager $setup);
-	} else {
-		my $chain_setup;
-		io( $setup ) > $chain_setup; 
-		print $chain_setup, $/;
+		# i remove their ownership of me
+# 
+# 		$debug and print "parent $parent owns list: ", join " ",
+# 			@{ $cops{$parent}->{owns} }, "\n";
+# 
+# 		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+# 			@{ $cops{$parent}->{owns} } ; 
+# 		$cops{$id}->{belongs_to} = undef;
+# 		$debug and print "parent $parent new owns list: ", join " ",
+# 			
+# 		if ($parent) { remove_ctrl $id }
+# 		else {remove_op($id)}
 	}
 }
-sub pager {
-	$debug2 and print "&pager\n";
-	my @output = @_;
-	my ($screen_lines, $columns) = split " ", qx(stty size);
-	my $line_count = 0;
-	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
-	if ( $use_pager and $line_count > $screen_lines - 2) { 
-		my $fh = File::Temp->new();
-		my $fname = $fh->filename;
-		print $fh @output;
-		file_pager($fname);
-	} else {
-		print @output;
-	}
-	print "\n\n";
-}
-sub file_pager {
-	$debug2 and print "&file_pager\n";
-	my $fname = shift;
-	if (! -e $fname or ! -r $fname ){
-		carp "file not found or not readable: $fname\n" ;
-		return;
-    }
-	my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
-	my $cmd = qq($pager $fname); 
-	system $cmd;
-}
-sub dump_all {
-	my $tmp = ".dump_all";
-	my $fname = join_path( project_root(), $tmp);
-	save_state($fname);
-	file_pager("$fname.yml");
-}
 
 
-sub show_io {
-	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
-	pager( $output );
-}
-
-## following code for controllers comment out
-# 
-# 	my $parent = $cops{$id}->{belongs_to} ;
-# 
-# 	if ( $parent ) {
-# 
-# 	# if i belong to someone, i am a controller.
-# 	
-# 	# i remove their ownership of me
-# 
-# 	$debug and print "parent $parent owns list: ", join " ",
-# 		@{ $cops{$parent}->{owns} }, "\n";
-# 
-# 	@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
-# 		@{ $cops{$parent}->{owns} } ; 
-# 	$cops{$id}->{belongs_to} = undef;
-# 	$debug and print "parent $parent new owns list: ", join " ",
-# 	}
-# 
-# 	# recursively remove children
-# 	$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
-# 		
-# 	map{remove_effect($_)}@{ $cops{$id}->{owns} };
-# 
-#     	
-# 	if ($parent) { remove_ctrl $id }
-# 	else {remove_op($id)}
 
 sub remove_effect_gui { 
 	@_ = discard_object(@_);
@@ -2644,6 +2547,112 @@ sub forward {
 sub rewind {
 	my $delta = shift;
 	forward( -$delta );
+}
+sub mute {
+	return if $this_track->old_vol_level();
+	$this_track->set(old_vol_level => $copp{$this_track->vol}[0])
+		if ( $copp{$this_track->vol}[0]);  # non-zero volume
+	$copp{ $this_track->vol }->[0] = 0;
+	sync_effect_param( $this_track->vol, 0);
+}
+sub unmute {
+	return if $copp{$this_track->vol}[0]; # if we are not muted
+	return if ! $this_track->old_vol_level;
+	$copp{$this_track->vol}[0] = $this_track->old_vol_level;
+	$this_track->set(old_vol_level => 0);
+	sync_effect_param( $this_track->vol, 0);
+}
+sub solo {
+	my $current_track = $this_track;
+	if ($soloing) { all() }
+
+	# get list of already muted tracks if I haven't done so already
+	
+	if ( ! @already_muted ){
+	print "none muted\n";
+		@already_muted = grep{ $_->old_vol_level} 
+                         map{ $tn{$_} } 
+						 $tracker->tracks;
+	print join " ", "muted", map{$_->name} @already_muted;
+	}
+
+	# mute all tracks
+	map { $this_track = $tn{$_}; mute() } $tracker->tracks;
+
+    $this_track = $current_track;
+    unmute();
+	$soloing = 1;
+}
+
+sub all {
+	
+	my $current_track = $this_track;
+	# unmute all tracks
+	map { $this_track = $tn{$_}; unmute() } $tracker->tracks;
+
+	# re-mute previously muted tracks
+	if (@already_muted){
+		map { $this_track = $_; mute() } @already_muted;
+	}
+
+	# remove listing of muted tracks
+	
+	@already_muted = ();
+	$this_track = $current_track;
+	$soloing = 0;
+	
+}
+
+sub show_chain_setup {
+	$debug2 and print "&show_chain_setup\n";
+	my $setup = join_path( project_dir(), $chain_setup_file);
+	if ( $use_pager ) {
+		my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
+		system qq($pager $setup);
+	} else {
+		my $chain_setup;
+		io( $setup ) > $chain_setup; 
+		print $chain_setup, $/;
+	}
+}
+sub pager {
+	$debug2 and print "&pager\n";
+	my @output = @_;
+	my ($screen_lines, $columns) = split " ", qx(stty size);
+	my $line_count = 0;
+	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
+	if ( $use_pager and $line_count > $screen_lines - 2) { 
+		my $fh = File::Temp->new();
+		my $fname = $fh->filename;
+		print $fh @output;
+		file_pager($fname);
+	} else {
+		print @output;
+	}
+	print "\n\n";
+}
+sub file_pager {
+	$debug2 and print "&file_pager\n";
+	my $fname = shift;
+	if (! -e $fname or ! -r $fname ){
+		carp "file not found or not readable: $fname\n" ;
+		return;
+    }
+	my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
+	my $cmd = qq($pager $fname); 
+	system $cmd;
+}
+sub dump_all {
+	my $tmp = ".dump_all";
+	my $fname = join_path( project_root(), $tmp);
+	save_state($fname);
+	file_pager("$fname.yml");
+}
+
+
+sub show_io {
+	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
+	pager( $output );
 }
 	
 ### end
