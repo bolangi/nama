@@ -40,15 +40,23 @@ chain_setup => <<SETUP,
    show_chain_setup, chains  - print .ecs file to STDOUT
 SETUP
 track => <<TRACK,
-   add_track, add            -  create a new track, "add sax; r3"
-                                (record sax from input 3) 
+   Most of the Track related commands operate on the 'current
+   track'. To cut volume for a track called 'sax',  you enter
+   'sax mute' or 'sax; mute'. The first part of the
+   command sets a new current track. You can also specify a
+   current track by number,  i.e.  '4 mute'.
+
+   add_track, add            -  create one or more new tracks
+                                "add sax; r3" (record sax from input 3) 
+                                "add piano; r synth" (record
+                                piano from JACK client "synth") 
 
    show_tracks, show, tracks -  show status of all tracks
                                 and group settings
 
    show_track, sh            -  show status of current track,
-                                including effects and versions, 
-                                "sax; sh"
+                                including effects, versions, 
+								modifiers,  "sax; sh"
 
    solo                      -  mute all tracks but current track
 
@@ -65,11 +73,9 @@ track => <<TRACK,
                              -  with no arguments returns
                                 current signal source
 
-   Most of the Track related commands operate on the 'current
-   track'. To cut volume for a track called 'sax',  you enter
-   'sax mute' or even 'sax; mute'. The first part of the
-   command sets a new current track. You can also specify a
-   current track by number,  i.e.  '4 mute'.
+   send, out, aux            -  create an auxiliary send, argument 
+								can be channel number or JACK client name
+
 
  - version
 
@@ -135,8 +141,8 @@ effects => <<EFFECTS,
    ladspa-register, lrg       - list LADSPA effects
    preset-register, prg       - list Ecasound presets
    ctrl-register, crg         - list Ecasound controllers 
+								(no nama support for controllers)
    add_effect,    fxa, afx    - add an effect to the current track
-   add_ctrl,      acl         - add a controller to an operator
    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
    remove_effect, fxr, rfx    - remove an effect or controller
 EFFECTS
