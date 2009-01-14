@@ -189,7 +189,6 @@ sub command_process {
 			my $result = eval_iam($user_input);
 			pager( $result );  
 		} else {
-			if ($cmd eq 'h') { s/h/help/; }
 			$debug and print "Passing to parser\n", $_, $/;
 			#print 1, ref $parser, $/;
 			#print 2, ref $::parser, $/;

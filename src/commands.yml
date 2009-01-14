@@ -1,6 +1,7 @@
 ---
 help:
   what: display help 
+  short: h
   parameters: topic or command name 
   type: general
 exit:
@@ -117,7 +118,7 @@ monitor_channel:
 source:
   type: track
   what: set track source
-  short: src from
+  short: src from in r
   parameters: JACK client name or soundcard channel number 
 send:
   type: track

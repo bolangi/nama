@@ -15,7 +15,7 @@ map { my $func = $_;
 	my $full = shift @parts;
 	my @short = @parts;
 	my $end_anchor = "end";
-	push @abbrevs,	"_$full: '" . join ("' | '" , @all_parts). "'";
+	push @abbrevs,	"_$full: " . join(" | " , add_break(@all_parts))  ;
 	push @stubs,   	"$full: _$full $end_anchor { 1 }";
 	push @commands,	"command: $full";
 } sort keys %{ $ref };
@@ -33,3 +33,4 @@ sub yaml_in {
 	}
 	$yr->read( $yaml ); # returns ref
 }
+sub add_break { map{ qq(/$_\\b/) } @_ }
