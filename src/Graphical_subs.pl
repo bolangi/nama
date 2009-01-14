@@ -63,17 +63,17 @@ sub add_effect_gui {
 		for my $p (0..$effects[$i]->{count} - 1 ) {
 		my @items;
 		#$debug and print "p_first: $p_first, p_last: $p_last\n";
-		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-			push @items, 				
-				[ 'command' => $effects[$j]->{name},
-					-command => sub { add_effect ({
-							parent_id => $id,
-							chain => $n,
-							parameter  => $p,
-							type => $effects[$j]->{code} } )  }
-				];
-
-		}
+# 		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
+# 			push @items, 				
+# 				[ 'command' => $effects[$j]->{name},
+# 					-command => sub { add_effect ({
+# 							parent_id => $id,
+# 							chain => $n,
+# 							parameter  => $p,
+# 							type => $effects[$j]->{code} } )  }
+# 				];
+# 
+# 		}
 		push @labels, $frame->Menubutton(
 				-text => $effects[$i]->{params}->[$p]->{name},
 				-menuitems => [@items],
@@ -417,20 +417,22 @@ sub time_gui {
 
 
 sub oid_gui {
-#	$debug2 and 
-print "&oid_gui\n";
+	$debug2 and print "&oid_gui\n";
 	@_ = discard_object(@_);
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
 	for my $rule ( ::Rule::all_rules ){
 		my $name = $rule->name;
+		next unless $name eq 'rec_file'; # REC_FILE only!!!
 		my $status = $rule->status;
-		print "gui oid name: $name status: $status\n";
+		#print "gui oid name: $name status: $status\n";
 		#next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
 		push @oid_name, $name;
 		
 		my $oid_button = $oid_frame->Button( 
-			-text => ucfirst $name,
+			# -text => ucfirst $name,
+## REC_FILE SPECIFIC
+			-text => "Record WAV enabled",
 			-background => 
 				$status ?  'AntiqueWhite' : $old_bg,
 			-activebackground => 
@@ -439,12 +441,17 @@ print "&oid_gui\n";
 		$oid_button->configure(
 			-command => sub { 
 				$rule->set(status => ! $rule->status);
-				$oid_button->configure( -background => 
-					$rule->status ?  'AntiqueWhite' : $old_bg ,
+				$oid_button->configure( 
+			-background => 
+					$rule->status ? 'AntiqueWhite' : 'Yellow' ,
 			-activebackground => 
-					$rule->status ? 'AntiqueWhite' : $old_bg
+					$rule->status ? 'AntiqueWhite' : 'Yellow' ,
+## REC_FILE SPECIFIC
+			-text => 
+					$rule->status ? 'Record WAV enabled' : 'PREVIEW MODE: Record WAV DISABLED'
 					
 					);
+			generate_setup() and connect_transport()
 			});
 		push @widget_o, $oid_button;
 	}
@@ -479,7 +486,12 @@ sub group_gui {
 	my $group = $tracker; 
 	my $label;
 	my $dummy = $track_frame->Label(-text => ' '); 
-	$label = 	$track_frame->Label(-text => "Group" );
+	$label = 	$track_frame->Label(
+			-text => "G R O U P",
+			-foreground => 'White',
+			-background => 'DarkGray',
+
+ );
 	$group_version = $track_frame->Menubutton(-tearoff => 0);
 	$group_rw = $track_frame->Menubutton( -text    => $group->rw,
 										  -tearoff => 0);
