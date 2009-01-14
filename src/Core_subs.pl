@@ -1448,11 +1448,8 @@ sub remove_effect {
 
 	if ( ! $parent ) { # i am a chain operator, have no parent
 		remove_op($id);
-		delete $cops{$id};
-		delete $copp{$id}; # different c o p p vs. c o p s
 
 	 	# remove id from track object
-	 	# doesn't handle children
 
 		$ti[$n]->remove_effect( $id ); 
 
@@ -1460,18 +1457,22 @@ sub remove_effect {
 	} else {  # i am a controller
 
 		# i remove their ownership of me
-# 
-# 		$debug and print "parent $parent owns list: ", join " ",
-# 			@{ $cops{$parent}->{owns} }, "\n";
-# 
-# 		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
-# 			@{ $cops{$parent}->{owns} } ; 
-# 		$cops{$id}->{belongs_to} = undef;
-# 		$debug and print "parent $parent new owns list: ", join " ",
-# 			
-# 		if ($parent) { remove_ctrl $id }
-# 		else {remove_op($id)}
+
+		$debug and print "parent $parent owns list: ", join " ",
+			@{ $cops{$parent}->{owns} }, "\n";
+
+		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+			@{ $cops{$parent}->{owns} } ; 
+		$cops{$id}->{belongs_to} = undef;
+		$debug and print "parent $parent new owns list: ", join " ",
+			@{ $cops{$parent}->{owns} } ,$/;
+
+	# remove the controller
+ 			
+ 		remove_op($id);
 	}
+	delete $cops{$id}; # remove entry from chain operator list
+	delete $copp{$id}; # remove entry from chain operator parameters list
 }
 
 
@@ -1491,7 +1492,7 @@ sub remove_effect_gui {
 }
 
 
-sub effect_index {
+sub effect_index { # returns Ecasound chain operator index
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	$debug and print "id: $id n: $n \n",join $/,@{ $ti[$n]->ops }, $/;
@@ -1501,13 +1502,56 @@ sub effect_index {
 }
 sub remove_op {
 
+	my $debug = 1;
+	$debug2 and print "&remove_op\n";
+	return unless eval_iam('cs-is-valid');
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
-	my $index = effect_index( $id );
-	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
-	$debug and print "operator id to remove: $id\n";
-	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
-		$debug and eval_iam ("cs");
+	my $index;
+	my $parent = $cops{$id}->{belongs_to}; 
+
+
+	# select chain
+	
+	my $cmd = "c-select $n";
+	#print "cmd: $cmd$/";
+	eval_iam ($cmd);
+	print "selected chain: ", eval_iam("c-selected"), $/; 
+
+	# deal separately with controllers and chain operators
+
+	if ( !  $parent ){ # chain operator
+	
+		$index = effect_index( $id );
+		$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
+		$debug and print "operator id to remove: $id\n";
+		$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
+		$debug and print eval_iam ("cs");
+		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+		$debug and print "selected operator: ", eval_iam("cop-selected"), $/;
+		eval_iam ("cop-remove");
+		$debug and print eval_iam ("cs");
+
+	} else { # controller
+
+		# if parent has a parent, we need _that_ parent
+
+		if ($parent and my $root_parent = $cops{$parent}->{belongs_to}){
+			$debug and print "found uber parent $root_parent\n";
+			$parent = $root_parent
+		}
+
+		my $ctrl_index = ctrl_index( $parent, $id);
+		$debug and print"parent: $parent, id: $id, ctrl_index: $ctrl_index\n";
+		my $parent_op_index = effect_index( $parent );
+
+		$debug and print eval_iam ("cs");
+		eval_iam ("cop-select ". ($ti[$n]->offset + $parent_op_index));
+		$debug and print "selected operator: ", eval_iam("cop-selected"), $/;
+		eval_iam ("ctrl-select $ctrl_index");
+		eval_iam ("ctrl-remove");
+		$debug and print eval_iam ("cs");
+		$index = ctrl_index( $id );
 		my $cmd = "c-select $n";
 		#print "cmd: $cmd$/";
 		eval_iam ($cmd);
@@ -1517,30 +1561,31 @@ sub remove_op {
 		eval_iam ("cop-remove");
 		$debug and eval_iam ("cs");
 
+	}
 }
 
-sub remove_ctrl {
 
-	my $id = shift;
-	my $n = $cops{$id}->{chain};
-	my $index = effect_index $id;
-	$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
-	$debug and print "operator id to remove: $id\n";
-	$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
-	$debug and eval_iam ("cs");
-	eval_iam qq(c-select $n);
-	eval_iam ("ctrl-remove " . ctrl_index($n, $id) );
-
-	delete $cops{$id};
-	delete $copp{$id};
-}
+# Track sax effects: A B C GG HH II D E F
+# GG HH and II are controllers applied to chain operator C
+# 
+# to remove controller HH:
+#
+# for Ecasound, chain op index = 3, 
+#               ctrl index     = 2
+#                              = effect_index HH - effect_index C 
+#               
+#
+# for Nama, chain op array index 2, 
+#           ctrl arrray index = chain op array index + ctrl_index
+#                             = effect index - 1 + ctrl_index 
+#
 
 sub ctrl_index { 
-	my ($chain, $id) = @_;
-	my $i = 0;
-	map{ ++$i if $cops{$_}->{belongs_to}  ;
-	     return $i if $_ eq $id;
-	} @{ $ti[$chain]->ops }
+	my ($parent, $id) = @_;
+	# $parent must be the root parent
+	
+	effect_index($id) - effect_index($parent);
+	
 
 }
 sub cop_add {
