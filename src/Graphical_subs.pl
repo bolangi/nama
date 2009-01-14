@@ -451,7 +451,22 @@ sub oid_gui {
 					$rule->status ? 'Record WAV enabled' : 'PREVIEW MODE: Record WAV DISABLED'
 					
 					);
-			generate_setup() and connect_transport()
+
+			if ( $rule->status) { # rec_file enabled
+
+				# stop engine if running, then arm
+				# user must start manually
+
+				stop_transport();
+				generate_setup() and connect_transport();
+
+			
+			} else { # preview mode start transport
+
+				generate_setup() and connect_transport();
+				start_transport();
+			}
+
 			});
 		push @widget_o, $oid_button;
 	}
