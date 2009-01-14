@@ -118,12 +118,12 @@ monitor_channel:
 source:
   type: track
   what: set track source
-  short: src from in r
+  short: src r
   parameters: JACK client name or soundcard channel number 
 send:
   type: track
   what: set auxilary track destination
-  short: out aux
+  short: out aux m
   parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
 jack:
   type: general

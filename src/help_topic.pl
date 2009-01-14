@@ -1,15 +1,15 @@
 @help_topic = ( undef, qw(   
-					project
-					track
-				    chain_setup
-					transport
-					marks
-					effects
-					group
-					mixdown
-					prompt 
+                    project
+                    track
+                    chain_setup
+                    transport
+                    marks
+                    effects
+                    group
+                    mixdown
+                    prompt 
 
-				) ) ;
+                ) ) ;
 
 %help_topic = (
 
@@ -52,15 +52,15 @@ track => <<TRACK,
 
    solo                      -  mute all tracks but current track
 
-   nosolo                    -  return to pre-solo status
+   all, nosolo               -  return to pre-solo status
 
    stereo                    -  set track width to 2 channels
 
    mono                      -  set track width to 1 channel
 
-   source, src, ti, r        -  set track source to JACK client
+   source, src, r            -  set track source to JACK client
                                 name or to sound card track number 
-								(9 for channels 9,10 if stereo) 
+                                (9 for channels 9,10 if stereo) 
 
                              -  with no arguments returns
                                 current signal source
@@ -115,10 +115,12 @@ transport => <<TRANSPORT,
    setpos, sp         - Sets the current position, i.e. setpos 49.2
    getpos, gp         - Gets the current position 
 
-   loop_enable, loop  - loop over marks, i.e. loop start finish
+   loop_enable, loop  - loop playback between two points
+                        loop 5.0 200.0 (positions in seconds)
+                        loop start end (mark names)
+                        loop 3 4       (mark numbers)
    loop_disable, noloop, nl -  disable looping
-   jack               - Use JACK for I/O
-   nojack             - Disable JACK support 
+
 TRANSPORT
 
 marks => <<MARKS,
@@ -164,7 +166,7 @@ prompt => <<PROMPT,
    Perl code                   eval 2*3     # no need for 'print'
 
 PROMPT
-	
+    
 );
 # print values %help_topic;
 
