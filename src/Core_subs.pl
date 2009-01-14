@@ -1947,18 +1947,20 @@ sub prepare_effects_help {
 	#pager (@lrg, @prg); exit;
 }
 
+
 sub prepare_static_effects_data{
 	
 	$debug2 and print "&prepare_static_effects_data\n";
 
 	my $effects_cache = join_path(&project_root, $effects_cache_file);
 
-	if ($opts{r}){ 
+	#print "newplugins: ", new_plugins(), $/;
+	if ($opts{r} or new_plugins()){ 
 
 		unlink $effects_cache;
 		print "Regenerating effects data cache\n";
 	}
-	# TODO re-read effects data if ladspa or user presets are
+	# TODO  re-read effects data if user presets are
 	# newer than cache
 
 	if (-f $effects_cache and ! $opts{s}){  
@@ -1980,6 +1982,30 @@ sub prepare_static_effects_data{
 	}
 
 	prepare_effect_index();
+}
+sub new_plugins {
+	my $effects_cache = join_path(&project_root, $effects_cache_file);
+	my $latest;
+	my $latestf;
+	my $path = $ENV{LADSPA_PATH} ? $ENV{LADSPA_PATH} : q(/usr/lib/ladspa);
+	for my $dir ( split ':', $path){
+		opendir DIR, $dir or carp "failed to open directory $dir: $!\n";
+		map{ 
+			my $mod = modified("$dir/$_");
+			($latest = $mod),($latestf = $_) if $mod > $latest;
+			
+			} grep{ /.so$/ } readdir DIR;
+	}
+	closedir DIR;
+	my $effmod = modified ($effects_cache);
+	$latest > $effmod
+}
+
+sub modified {
+	my $filename = shift;
+	#print "file: $filename\n";
+	my @s = stat $filename;
+	$s[9];
 }
 sub prepare_effect_index {
 	%effect_j = ();
