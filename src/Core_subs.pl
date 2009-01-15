@@ -224,7 +224,6 @@ sub prepare {
 
 
 sub eval_iam{
-	my $debug = 1;	
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -580,7 +579,7 @@ $multi  = ::Rule->new(
 	);
 		
 
-	$ui->oid_gui;
+	$ui->preview_button;
 
 }
 
@@ -1133,7 +1132,25 @@ sub generate_setup { # create chain setup
 	} else { print "No inputs found!\n";
 	return 0};
 }
-
+sub arm {
+	if ( $preview ){
+		stop_transport() ;
+		$preview = 0;
+		$rec_file->set(status => 1);
+	}
+	generate_setup() and connect_transport(); 
+}
+sub preview {
+	return if transport_running();
+	print "Starting engine in preview mode, WAV recording DISABLED.\n";
+	$preview = 1;
+	$rec_file->set(status => 0);
+	generate_setup() and connect_transport();
+	start_transport();
+}
+	
+	
+	
 sub connect_transport {
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
@@ -1222,7 +1239,7 @@ sub heartbeat {
 }
 
 sub schedule_wraparound {
-	#local $debug = 1;
+	return unless $loop_enable;
 	my $here   = eval_iam("getpos");
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
@@ -1342,7 +1359,6 @@ sub to_end {
 	set_position( $end);
 } 
 sub jump {
-	my $debug = 1;
 	return if really_recording();
 	my $delta = shift;
 	$debug2 and print "&jump\n";
@@ -1425,7 +1441,6 @@ sub add_effect {
 }
 
 sub remove_effect {
-	my $debug = 1;
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -1518,7 +1533,6 @@ sub ecasound_effect_index {
 
 sub remove_op {
 
-	my $debug = 1;
 	$debug2 and print "&remove_op\n";
 	return unless eval_iam('cs-is-valid');
 	my $id = shift;

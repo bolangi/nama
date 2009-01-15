@@ -52,8 +52,8 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
-$debug = 1; # debug statements
+$debug2 = 0; # subroutine names
+$debug = 0; # debug statements
 
 ## The names of two helper loopback devices:
 
@@ -115,7 +115,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 use ::Track;   
 
 package ::Graphical;  ## gui routines
-our @ISA = '::';
+our @ISA = '::';      ## default to root class
 
 ## The following methods belong to the Graphical interface class
 
@@ -154,7 +154,7 @@ sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
 sub track_gui {}
-sub oid_gui {}
+sub preview_button {}
 sub create_master_and_mix_tracks {}
 sub time_gui {}
 sub refresh {}

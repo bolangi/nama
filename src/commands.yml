@@ -65,6 +65,10 @@ ecasound_stop:
   type: transport
   short: S
   what: ecasound-only stop
+preview:
+  type: transport
+  what: start engine with rec_file disabled (for mic test, etc.)
+  parameters: none
 mixdown:
   type: mix
   short: mxd
@@ -329,7 +333,7 @@ add_effect:
   short: fxa afx
   smry: add effect
   parameters: effect_label param1 param2,... paramn
-  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa pn:var_dali (preset var_dali) Note: no el: or pn: prefix is required
+  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa var_dali (preset var_dali) Note: no el: or pn: prefix is required
 modify_effect:
   type: effect
   what: modify an effect parameter

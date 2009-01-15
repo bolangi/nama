@@ -329,7 +329,7 @@ sub transport_gui {
 				});
 	$transport_setup_and_connect->configure(
 			-text => 'Arm',
-			-command => sub {&generate_setup and &connect_transport}
+			-command => sub {arm()}
 						 );
 }
 sub time_gui {
@@ -416,8 +416,8 @@ sub time_gui {
 }
 
 
-sub oid_gui {
-	$debug2 and print "&oid_gui\n";
+sub preview_button {
+	$debug2 and print "&preview\n";
 	@_ = discard_object(@_);
 	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
@@ -429,42 +429,30 @@ sub oid_gui {
 		#next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
 		push @oid_name, $name;
 		
-		my $oid_button = $oid_frame->Button( 
+		my $oid_button = $transport_frame->Button( 
 			# -text => ucfirst $name,
-## REC_FILE SPECIFIC
-			-text => "Record WAV enabled",
-			-background => 
-				$status ?  'AntiqueWhite' : $old_bg,
-			-activebackground => 
-				$status ? 'AntiqueWhite' : $old_bg
+			-text => "Preview",
+			-background => $old_bg,
+			-activebackground => $old_bg
 		);
 		$oid_button->configure(
 			-command => sub { 
 				$rule->set(status => ! $rule->status);
 				$oid_button->configure( 
 			-background => 
-					$rule->status ? 'AntiqueWhite' : 'Yellow' ,
+					$rule->status ? $old_bg : 'Yellow' ,
 			-activebackground => 
-					$rule->status ? 'AntiqueWhite' : 'Yellow' ,
-## REC_FILE SPECIFIC
+					$rule->status ? $old_bg : 'Yellow' ,
 			-text => 
-					$rule->status ? 'Record WAV enabled' : 'PREVIEW MODE: Record WAV DISABLED'
+					$rule->status ? 'Preview' : 
+'PREVIEW MODE: Record WAV DISABLED. Press again to release.'
 					
 					);
 
-			if ( $rule->status) { # rec_file enabled
-
-				# stop engine if running, then arm
-				# user must start manually
-
-				stop_transport();
-				generate_setup() and connect_transport();
-
-			
-			} else { # preview mode start transport
-
-				generate_setup() and connect_transport();
-				start_transport();
+			if ($rule->status) { # rec_file enabled
+				arm()
+			} else { 
+				preview();
 			}
 
 			});
@@ -491,9 +479,12 @@ sub flash_ready {
 
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
+	project_label_configure(-background => $color) unless $preview;
 	$event_id{tk_flash_ready}->cancel() if defined $event_id{tk_flash_ready};
 	$event_id{tk_flash_ready} = $set_event->after(3000, 
-		sub{ length_display(-background => $old_bg) }
+		sub{ length_display(-background => $old_bg);
+			 project_label_configure(-background => 'antiquewhite') 
+ }
 	);
 }
 sub group_gui {  

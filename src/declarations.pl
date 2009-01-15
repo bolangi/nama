@@ -312,5 +312,6 @@ our (
 	$seek_delay,    # allow microseconds for transport seek
                     # (used with JACK only)
     $prompt,        # for text mode
+	$preview,       # am running engine with rec_file disabled
 
 );

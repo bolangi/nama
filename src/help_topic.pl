@@ -47,16 +47,17 @@ track => <<TRACK,
    current track by number,  i.e.  '4 mute'.
 
    add_track, add            -  create one or more new tracks
-                                "add sax; r3" (record sax from input 3) 
-                                "add piano; r synth" (record
-                                piano from JACK client "synth") 
+                                example: add sax; r3 
+                                    (record sax from input 3) 
+                                example: add piano; r synth
+                                    (record piano from JACK client "synth") 
 
    show_tracks, show, tracks -  show status of all tracks
                                 and group settings
 
    show_track, sh            -  show status of current track,
                                 including effects, versions, 
-								modifiers,  "sax; sh"
+                                modifiers,  "sax; sh"
 
    solo                      -  mute all tracks but current track
 
@@ -74,7 +75,7 @@ track => <<TRACK,
                                 current signal source
 
    send, out, aux            -  create an auxiliary send, argument 
-								can be channel number or JACK client name
+                                can be channel number or JACK client name
 
 
  - version
@@ -118,14 +119,16 @@ transport => <<TRANSPORT,
    stop, s            - Stop processing
    rewind, rw         - Rewind  some number of seconds, i.e. rw 15
    forward, fw        - Forward some number of seconds, i.e. fw 75
-   setpos, sp         - Sets the current position, i.e. setpos 49.2
-   getpos, gp         - Gets the current position 
+   setpos, sp         - Set the playback head position, i.e. setpos 49.2
+   getpos, gp         - Get the current head position 
 
    loop_enable, loop  - loop playback between two points
-                        loop 5.0 200.0 (positions in seconds)
-                        loop start end (mark names)
-                        loop 3 4       (mark numbers)
+                        example: loop 5.0 200.0 (positions in seconds)
+                        example: loop start end (mark names)
+                        example: loop 3 4       (mark numbers)
    loop_disable, noloop, nl -  disable looping
+   preview             - start engine with WAV recording disabled
+                         (for mic check, etc.)
 
 TRANSPORT
 
@@ -138,13 +141,14 @@ marks => <<MARKS,
 MARKS
 
 effects => <<EFFECTS,
+	
    ladspa-register, lrg       - list LADSPA effects
    preset-register, prg       - list Ecasound presets
    ctrl-register, crg         - list Ecasound controllers 
-								(no nama support for controllers)
    add_effect,    fxa, afx    - add an effect to the current track
    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
    remove_effect, fxr, rfx    - remove an effect or controller
+   add_controller, acl        - add an Ecasound controller
 EFFECTS
 
 group => <<GROUP,
@@ -152,6 +156,12 @@ group => <<GROUP,
    group_mon, gmon, M         - group MON mode 
    group_off, goff, MM        - group OFF mode 
    group_version, gver, gv    - select default group version 
+   bunch, bn                  - name a group of tracks
+                                e.g. bunch strings violins cello bass
+   for                        - execute command on several tracks 
+                                or a bunch
+                                example: for strings; vol +10
+                                example: for drumkit congas; mute
 GROUP
 
 mixdown => <<MIXDOWN,
