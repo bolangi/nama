@@ -223,18 +223,18 @@ sub prepare {
 
 
 
-sub eval_iam {
-	#my $debug = 1;	
+sub eval_iam{
+	my $debug = 1;	
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
-	my $result = $e->eci($command);
-	$debug and print "$result\n" unless $command =~ /register/;
+	my (@result) = $e->eci($command);
+	$debug and print "result: @result\n" unless $command =~ /register/;
 	my $errmsg = $e->errmsg();
 	# $errmsg and carp("IAM WARN: ",$errmsg), 
 	# not needed ecasound prints error on STDOUT
 	$e->errmsg('');
-	$result;
+	"@result";
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift;
@@ -1091,7 +1091,7 @@ sub load_ecs {
 		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam "cs-remove" if eval_iam "cs-selected";
+		eval_iam"cs-remove" if eval_iam"cs-selected";
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
@@ -1188,7 +1188,7 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	print "starting at ", colonize(int (eval_iam "getpos")), $/;
+	print "starting at ", colonize(int (eval_iam"getpos")), $/;
 	schedule_wraparound();
 	eval_iam('start');
 	sleep 1;
@@ -1198,26 +1198,26 @@ sub start_transport {
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub heartbeat {
-			#	print "heartbeat fired\n";
-		
-				my $here   = eval_iam("getpos");
-				my $status = eval_iam q(engine-status);
-				$ui->stop_heartbeat
-					#if $status =~ /finished|error|stopped/;
-					if $status =~ /finished|error/;
-				#print join " ", $status, colonize($here), $/;
-				my ($start, $end);
-				$start  = ::Mark::loop_start();
-				$end    = ::Mark::loop_end();
-				$ui->schedule_wraparound() 
-					if $loop_enable 
-					and defined $start 
-					and defined $end 
-					and ! really_recording();
+#	print "heartbeat fired\n";
 
-				# update time display
-				#
-				$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+	my $here   = eval_iam("getpos");
+	my $status = eval_iam('engine-status');
+	$ui->stop_heartbeat
+		#if $status =~ /finished|error|stopped/;
+		if $status =~ /finished|error/;
+	#print join " ", $status, colonize($here), $/;
+	my ($start, $end);
+	$start  = ::Mark::loop_start();
+	$end    = ::Mark::loop_end();
+	$ui->schedule_wraparound() 
+		if $loop_enable 
+		and defined $start 
+		and defined $end 
+		and ! really_recording();
+
+	# update time display
+	#
+	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 
 }
 
@@ -1429,14 +1429,14 @@ sub remove_effect {
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
-	return unless $cops{$id};
+	carp("$id: does not exist, skipping...\n"), return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
 		
 	my $parent = $cops{$id}->{belongs_to} ;
+	print "id: $id, parent: $parent\n";
 
-	$debug and print "ready to remove ".
-		( $parent ? q(controller) : q(chain operator) )
- 		. qq( "$id" from track "$n"\n);
+	my $object = $parent ? q(controller) : q(chain operator); 
+	$debug and print qq(ready to remove $object "$id" from track "$n"\n);
 
 	$ui->remove_effect_gui($id);
 
@@ -1445,18 +1445,22 @@ sub remove_effect {
 		map{remove_effect($_)}@{ $cops{$id}->{owns} } 
 			if defined $cops{$id}->{owns};
 ;
-
-	if ( ! $parent ) { # i am a chain operator, have no parent
-		remove_op($id);
-
 	 	# remove id from track object
 
 		$ti[$n]->remove_effect( $id ); 
 
+	if ( ! $parent ) { # i am a chain operator, have no parent
+		remove_op($id);
+
+
 
 	} else {  # i am a controller
 
-		# i remove their ownership of me
+	# remove the controller
+ 			
+ 		remove_op($id);
+
+	# i remove ownership of deleted controller
 
 		$debug and print "parent $parent owns list: ", join " ",
 			@{ $cops{$parent}->{owns} }, "\n";
@@ -1467,15 +1471,10 @@ sub remove_effect {
 		$debug and print "parent $parent new owns list: ", join " ",
 			@{ $cops{$parent}->{owns} } ,$/;
 
-	# remove the controller
- 			
- 		remove_op($id);
 	}
 	delete $cops{$id}; # remove entry from chain operator list
 	delete $copp{$id}; # remove entry from chain operator parameters list
 }
-
-
 
 sub remove_effect_gui { 
 	@_ = discard_object(@_);
@@ -1491,15 +1490,32 @@ sub remove_effect_gui {
 
 }
 
-
-sub effect_index { # returns Ecasound chain operator index
+sub nama_effect_index { # returns nama chain operator index
+						# does not distinguish op/ctrl
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
-	$debug and print "id: $id n: $n \n",join $/,@{ $ti[$n]->ops }, $/;
+	$debug and print "id: $id n: $n \n";
+	$debug and print join $/,@{ $ti[$n]->ops }, $/;
 		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			return $pos + 1 if $ti[$n]->ops->[$pos] eq $id; 
+			return $pos if $ti[$n]->ops->[$pos] eq $id; 
 		};
 }
+sub ecasound_effect_index { 
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+	my $opcount;  # one-based
+	$debug and print "id: $id n: $n \n",join $/,@{ $ti[$n]->ops }, $/;
+	for my $op (@{ $ti[$n]->ops }) { 
+			# increment only for ops, not controllers
+			next if $cops{$op}->{belongs_to};
+			++$opcount;
+			last if $op eq $id
+	} 
+	$ti[$n]->offset + $opcount;
+}
+
+
+
 sub remove_op {
 
 	my $debug = 1;
@@ -1510,56 +1526,48 @@ sub remove_op {
 	my $index;
 	my $parent = $cops{$id}->{belongs_to}; 
 
-
 	# select chain
 	
 	my $cmd = "c-select $n";
-	#print "cmd: $cmd$/";
-	eval_iam ($cmd);
+	$debug and print "cmd: $cmd$/";
+	eval_iam($cmd);
 	print "selected chain: ", eval_iam("c-selected"), $/; 
 
 	# deal separately with controllers and chain operators
 
 	if ( !  $parent ){ # chain operator
+		$debug and print "no parent, assuming chain operator\n";
 	
-		$index = effect_index( $id );
+		$index = ecasound_effect_index( $id );
 		$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 		$debug and print "operator id to remove: $id\n";
 		$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
-		$debug and print eval_iam ("cs");
-		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+		$debug and print eval_iam("cs");
+		eval_iam("cop-select ". ecasound_effect_index($id) );
 		$debug and print "selected operator: ", eval_iam("cop-selected"), $/;
-		eval_iam ("cop-remove");
-		$debug and print eval_iam ("cs");
+		eval_iam("cop-remove");
+		$debug and print eval_iam("cs");
 
 	} else { # controller
 
-		# if parent has a parent, we need _that_ parent
+		$debug and print "has parent, assuming controller\n";
 
-		if ($parent and my $root_parent = $cops{$parent}->{belongs_to}){
-			$debug and print "found uber parent $root_parent\n";
-			$parent = $root_parent
-		}
-
-		my $ctrl_index = ctrl_index( $parent, $id);
-		$debug and print"parent: $parent, id: $id, ctrl_index: $ctrl_index\n";
-		my $parent_op_index = effect_index( $parent );
-
-		$debug and print eval_iam ("cs");
-		eval_iam ("cop-select ". ($ti[$n]->offset + $parent_op_index));
+		my $ctrl_index = ctrl_index($id);
+		$debug and print eval_iam("cs");
+		eval_iam("cop-select ".  ecasound_effect_index(root_parent($id)));
 		$debug and print "selected operator: ", eval_iam("cop-selected"), $/;
-		eval_iam ("ctrl-select $ctrl_index");
-		eval_iam ("ctrl-remove");
-		$debug and print eval_iam ("cs");
+		eval_iam("ctrl-select $ctrl_index");
+		eval_iam("ctrl-remove");
+		$debug and print eval_iam("cs");
 		$index = ctrl_index( $id );
 		my $cmd = "c-select $n";
 		#print "cmd: $cmd$/";
-		eval_iam ($cmd);
+		eval_iam($cmd);
 		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
-		eval_iam ("cop-select ". ($ti[$n]->offset + $index));
+		eval_iam("cop-select ". ($ti[$n]->offset + $index));
 		#print "selected operator: ", eval_iam("cop-selected"), $/;
-		eval_iam ("cop-remove");
-		$debug and eval_iam ("cs");
+		eval_iam("cop-remove");
+		$debug and eval_iam("cs");
 
 	}
 }
@@ -1572,20 +1580,29 @@ sub remove_op {
 #
 # for Ecasound, chain op index = 3, 
 #               ctrl index     = 2
-#                              = effect_index HH - effect_index C 
+#                              = nama_effect_index HH - nama_effect_index C 
 #               
 #
 # for Nama, chain op array index 2, 
 #           ctrl arrray index = chain op array index + ctrl_index
 #                             = effect index - 1 + ctrl_index 
 #
+#
+
+sub root_parent {
+	my $id = shift;
+	my $parent = $cops{$id}->{belongs_to};
+	carp("$id: has no parent, skipping...\n"),return unless $parent;
+	my $root_parent = $cops{$parent}->{belongs_to};
+	$parent = $root_parent ? $root_parent : $parent;
+	$debug and print "$id: is a controller-controller, root parent: $parent\n";
+	$parent;
+}
 
 sub ctrl_index { 
-	my ($parent, $id) = @_;
-	# $parent must be the root parent
-	
-	effect_index($id) - effect_index($parent);
-	
+	my $id = shift;
+
+	nama_effect_index($id) - nama_effect_index(root_parent($id));
 
 }
 sub cop_add {
@@ -1715,7 +1732,7 @@ sub effect_update {
 	# well?
 	
 	local $debug = 0;
-	my $es = eval_iam "engine-status";
+	my $es = eval_iam"engine-status";
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
 
@@ -1742,10 +1759,10 @@ sub effect_update {
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $controller, offset: ",
 	$ti[$chain]->offset, " param: $param, value: $val$/";
-	eval_iam ("c-select $chain");
-	eval_iam ("cop-select ". ($ti[$chain]->offset + $controller));
-	eval_iam ("copp-select $param");
-	eval_iam ("copp-set $val");
+	eval_iam("c-select $chain");
+	eval_iam("cop-select ". ($ti[$chain]->offset + $controller));
+	eval_iam("copp-select $param");
+	eval_iam("copp-set $val");
 }
 sub find_op_offsets {
 
@@ -1779,6 +1796,8 @@ sub apply_ops {  # in addition to operators in .ecs file
 		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $ti[$n]->offset; # for MIX
  		#next if ! $ti[$n]->offset ;
+
+	# controllers will follow ops, so safe to apply all in order
 		for my $id ( @{ $ti[$n]->ops } ) {
 		apply_op($id);
 		}
@@ -1810,20 +1829,19 @@ sub apply_op {
 	$add .= " -kx" if $cops{$dad}->{belongs_to};
 	$debug and print "operator:  ", $add, "\n";
 
-	eval_iam ("c-select $cops{$id}->{chain}") ;
+	eval_iam("c-select $cops{$id}->{chain}") ;
 
 	if ( $dad ) {
-		eval_iam ("cop-select "
-			. ($ti[$cops{$dad}->{chain}]->offset + effect_index $dad));
+	eval_iam("cop-select " . ecasound_effect_index($dad));
 	}
 
-	eval_iam ($add);
+	eval_iam($add);
 	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
 	my $ref = ref $cops{$id}->{owns} ;
 	$ref =~ /ARRAY/ or croak "expected array";
 	my @owns = @{ $cops{$id}->{owns} };
 	$debug and print "owns: @owns\n";  
-	map{apply_op($_)} @owns;
+	#map{apply_op($_)} @owns;
 
 }
 

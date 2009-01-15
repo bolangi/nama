@@ -288,14 +288,14 @@ remove_effect: _remove_effect op_id(s) end {
 
 }
 
-# add_ctrl: _add_ctrl parent name value(s?) end {
-# 	my $code = $item{name};
-# 	my $parent = $item{parent};
-# 	my $values = $item{"value(s?)"};
-# 	#print "values: " , ref $values, $/;
-# 	#print join ", ", @{$values} if $values;
-# 	::Text::t_add_ctrl $parent, $code, $values;
-# }
+add_ctrl: _add_ctrl parent name value(s?) end {
+	my $code = $item{name};
+	my $parent = $item{parent};
+	my $values = $item{"value(s?)"};
+	#print "values: " , ref $values, $/;
+	#print join ", ", @{$values} if $values;
+	::Text::t_add_ctrl $parent, $code, $values;
+}
 parent: op_id
 add_effect: _add_effect name value(s?)  end { 
 	my $code = $item{name};

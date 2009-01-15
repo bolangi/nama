@@ -63,17 +63,17 @@ sub add_effect_gui {
 		for my $p (0..$effects[$i]->{count} - 1 ) {
 		my @items;
 		#$debug and print "p_first: $p_first, p_last: $p_last\n";
-# 		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-# 			push @items, 				
-# 				[ 'command' => $effects[$j]->{name},
-# 					-command => sub { add_effect ({
-# 							parent_id => $id,
-# 							chain => $n,
-# 							parameter  => $p,
-# 							type => $effects[$j]->{code} } )  }
-# 				];
-# 
-# 		}
+		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
+			push @items, 				
+				[ 'command' => $effects[$j]->{name},
+					-command => sub { add_effect ({
+							parent_id => $id,
+							chain => $n,
+							parameter  => $p,
+							type => $effects[$j]->{code} } )  }
+				];
+
+		}
 		push @labels, $frame->Menubutton(
 				-text => $effects[$i]->{params}->[$p]->{name},
 				-menuitems => [@items],
