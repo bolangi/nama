@@ -30,11 +30,15 @@ To install this module type the following:
 
 =head2 Perl Modules
 
+The following modules are pulled in automatically
+when installing from CPAN by the following command:
+
+	cpan Audio::Ecasound::Multitrack
+	
 	Carp
 	Cwd
 	Storable 
 	Getopt::Std
-	Tk (for GUI users)
 	Event
 	Audio::Ecasound
 	Parse::RecDescent
@@ -45,7 +49,11 @@ To install this module type the following:
 	Term::Readline
 	Term::Readline::Gnu
 	Time::HiRes
-	Text::Template (for building from sources)
+
+You will also need Tk if you want to run Nama in GUI
+mode:
+
+	cpan Tk
 
 =head2 Libraries
 
@@ -81,7 +89,7 @@ with other developers.
 
 For typical build and test:
 
-	cd build
+	cpan Text::Template
 	git-clone git://github.com/bolangi/nama.git
 	cd nama/src
 	./build

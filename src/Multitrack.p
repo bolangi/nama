@@ -283,10 +283,6 @@ Save and reload ALSA mixer state using alsactl
 
 Don't load saved state
 
-=item B<-r>
-
-Regenerate effects data cache
-
 =back
 
 =head1 CONTROLLING ECASOUND
@@ -310,7 +306,7 @@ determine whether that track will be included next time the
 transport is armed, and whether the corresponding audio
 stream will be recorded to a file or played back from an
 existing file. Other static commands include C<loop_enable>
-C<jack>/C<nojack>, and C<stereo>/C<mono>. 
+and C<stereo>/C<mono> which select track width.
 
 =head2 CONFIGURING THE ENGINE
 
@@ -354,10 +350,10 @@ with hinting. Text-entry widgets are used to enter
 parameters for effects where hinting is not available.
 
 After issuing the B<arm> or B<connect> commands, the GUI
-time display changes color to indicate whether the upcoming
-operation will include live recording (red), mixdown only
-(yellow) or playback only (green).  Live recording and
-mixdown can take place simultaneously.
+title bar and time display change color to indicate whether
+the upcoming operation will include live recording (red),
+mixdown only (yellow) or playback only (green).  Live
+recording and mixdown can take place simultaneously.
 
 The text command prompt appears in the terminal window
 during GUI operation. Text commands may be issued at any
@@ -369,7 +365,7 @@ Press the I<Enter> key if necessary to get the following command prompt.
 
 =over 12
 
-B<nama ('h' for help)E<gt>>
+C<nama ('h' for help)E<gt>>
 
 =back
 
@@ -386,7 +382,10 @@ You can access command history using up-arrow/down-arrow.
 
 Type C<help> for general help, C<help command> for help with
 C<command>, C<help foo> for help with commands containing
-the string C<foo>. 
+the string C<foo>. C<help_effect foo bar> lists all 
+plugins/presets/controller containing both I<foo> and
+I<bar>. Tab-completion is provided for Nama commands, Ecasound-iam
+commands, plugin/preset/controller names, and project names.
 
 =head1 TRACKS
 
@@ -472,16 +471,7 @@ mixdown to commence.)
 
 =head1 BUGS AND LIMITATIONS
 
-Some functions including C<loop_enable> C<solo>/C<all>,
-C<jack>/C<nojack>, C<stereo>/C<mono> are available only as
-text commands. 
-
-Ecasound parameter controllers may be applied through
-Ecasound-IAM commands, but are not supported by Nama and the
-settings are not stored by the C<save> command.
-
-The GUI interface appears able to apply controllers, however
-these settings have no effect.
+Several functions are available only through text commands.
 
 =head1 EXPORT
 
@@ -490,6 +480,9 @@ None by default.
 =head1 AVAILABILITY
 
 CPAN, for the distribution.
+
+cpan Tk
+cpan Audio::Ecasound::Multitrack
 
 Pull source code using this command: 
 
