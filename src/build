@@ -1,9 +1,9 @@
 #!/bin/sh
+MD=..
+TD=$MD/lib/Audio/Ecasound/Multitrack
 if [ ! -d $TD ]; then
    mkdir -p $TD;
 fi
-MD=..
-TD=$MD/lib/Audio/Ecasound/Multitrack
 ./preproc -r Audio::Ecasound::Multitrack \
 		-s $MD/src \
 		-t $TD \

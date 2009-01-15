@@ -29,4 +29,6 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                         - preview mode runs w/o writing WAV files
                           (available via GUI button)
                         - full GUI support for Ecasound controllers
+0.991 Wed Jan 14, 2009  - recognize all ecasound-iam commands from 
+                          Ecasound int-cmd-list
 
