@@ -112,6 +112,7 @@ sub prepare {
 	$e = Audio::Ecasound->new();
 	#new_engine();
 	
+	
 	$debug and print "started Ecasound\n";
 
 	### Option Processing ###
@@ -130,7 +131,10 @@ sub prepare {
 	# e: don't load static effects data (for debugging)
 	# s: don't load static effects data cache (for debugging)
 	
+	get_ecasound_iam_keywords();
+
 	# load Tk only in graphic mode
+	
 	if ($opts{t}) {}
 	else { 
 		require Tk;
@@ -1965,19 +1969,22 @@ sub prepare_static_effects_data{
 }
 sub new_plugins {
 	my $effects_cache = join_path(&project_root, $effects_cache_file);
-	my $latest;
-	my $latestf;
 	my $path = $ENV{LADSPA_PATH} ? $ENV{LADSPA_PATH} : q(/usr/lib/ladspa);
+	
+	my @filenames;
 	for my $dir ( split ':', $path){
 		opendir DIR, $dir or carp "failed to open directory $dir: $!\n";
-		map{ 
-			my $mod = modified("$dir/$_");
-			($latest = $mod),($latestf = $_) if $mod > $latest;
-			
-			} grep{ /.so$/ } readdir DIR;
+		push @filenames,  map{"$dir/$_"} grep{ /.so$/ } readdir DIR;
+		closedir DIR;
 	}
-	closedir DIR;
-	my $effmod = modified ($effects_cache);
+	push @filenames, '/usr/local/share/ecasound/effect_presets',
+                 '/usr/share/ecasound/effect_presets',
+                 "$ENV{HOME}/.ecasound/effect_presets";
+	my $effmod = modified($effects_cache);
+	my $latest;
+	map{ my $mod = modified($_);
+		 $latest = $mod if $mod > $latest } @filenames;
+
 	$latest > $effmod
 }
 
@@ -2730,6 +2737,25 @@ sub dump_all {
 sub show_io {
 	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
 	pager( $output );
+}
+sub get_ecasound_iam_keywords {
+
+	my %reserved = map{ $_,1 } qw(  forward
+									fw
+									getpos
+									h
+									help
+									rewind
+									rw
+									s
+									setpos
+									start
+									stop
+									t
+									?	);
+	
+	%iam_cmd = map{$_,1 } 
+				grep{ ! $reserved{$_} } split " ", eval_iam('int-cmd-list');
 }
 	
 ### end
