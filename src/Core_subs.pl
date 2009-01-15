@@ -2746,6 +2746,8 @@ sub get_ecasound_iam_keywords {
 									h
 									help
 									rewind
+									quit
+									q
 									rw
 									s
 									setpos
