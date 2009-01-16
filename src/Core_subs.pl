@@ -138,7 +138,7 @@ sub prepare {
 	if ($opts{t}) {}
 	else { 
 		require Tk;
-		import Tk;
+		Tk->import;
 	}
 
 	$project_name = shift @ARGV;

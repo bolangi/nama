@@ -34,6 +34,11 @@ use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
 
 # use Tk    # loaded conditionally in GUI mode
 
+#use Module::Load;
+#use Module::Load::Conditional;
+#use Tk::FontDialog;
+
+
 $| = 1;     # flush STDOUT buffer on every write
 
 ## Definitions ##

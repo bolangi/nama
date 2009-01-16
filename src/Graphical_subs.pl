@@ -159,7 +159,13 @@ sub init_gui {
 
 	$project_label = $mw->Label->pack(-fill => 'both');
 	$old_bg = $project_label->cget('-background');
-	$time_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	$time_frame = $mw->Frame(
+	#	-borderwidth => 20,
+	#	-relief => 'groove',
+	)->pack(
+		-side => 'bottom', 
+		-fill => 'both',
+	);
 	$mark_frame = $time_frame->Frame->pack(
 		-side => 'bottom', 
 		-fill => 'both');
@@ -167,7 +173,7 @@ sub init_gui {
 		-side => 'bottom', 
 		-fill => 'both');
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	#$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -200,6 +206,10 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
+# 	$sn_configure_colors = $load_frame->Menubutton->pack(
+# 		-side => 'left',
+# 		-tearoff => 0,
+# );
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
@@ -245,6 +255,7 @@ sub init_gui {
  		-command => sub {load_project (name => $project_name, 
  										settings => $save_id)},
 				);
+=comment
 # 	$sn_dump->configure(
 # 		-text => q(Dump state),
 # 		-command => sub{ print &status_vars });
@@ -255,6 +266,65 @@ sub init_gui {
 				print "Exiting...\n";		
 				exit;
 				 });
+	$sn_general_colors->configure(
+		-text => 'Configure colors - General',
+	);
+
+my @color_items = map { 
+
+			[ 'command' => $_,
+				-command  => choosecolor
+	eval qq( 
+
+sub colorchooser { 
+	my ($field, $initialcolor) = @_;
+
+
+my $new_color = $mw->chooseColor(
+							-title => $_,
+							-initialcolor => $mw->cget(-$_)
+							);
+					if ($new_color) {
+						$mw->setPalette( -$_ => $new_color )
+					);
+						
+			}],
+					
+		} @palettefields; 
+
+@palettefields = qw[ 
+foreground
+background
+activeForeground
+activeBackground
+selectForeground
+selectBackground
+selectColor
+highlightColor
+highlightBackground
+disabledForeground
+insertBackground
+troughColor
+];
+
+@namacolors = qw [
+RecForeground
+RecBackground
+MonForeground
+MonBackground
+OffForeground
+OffBackground
+ClockForeground
+ClockBackground
+CaptureFlash
+PlaybackFlash
+MixdownFlash
+]
+
+my @choices = (
+
+	
+=cut
 
 	$build_track_add_mono->configure( 
 			-text => 'Add Mono Track',
@@ -415,11 +485,13 @@ sub time_gui {
 
 }
 
+#  the following is based on previous code for multiple buttons
+#  needs cleanup
 
-sub preview_button {
+sub preview_button { 
 	$debug2 and print "&preview\n";
 	@_ = discard_object(@_);
-	my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
+	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my @oid_name;
 	for my $rule ( ::Rule::all_rules ){
 		my $name = $rule->name;
@@ -459,7 +531,7 @@ sub preview_button {
 		push @widget_o, $oid_button;
 	}
 		
-	map { $_ -> pack(-side => 'left') } ($outputs, @widget_o);
+	map { $_ -> pack(-side => 'left') } (@widget_o);
 	
 }
 sub paint_button {

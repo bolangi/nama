@@ -173,6 +173,7 @@ our (
 	$sn_load,
 	$sn_new,
 	$sn_quit,
+	$sn_configure_colors,
 
 	### A separate box for entering IAM (and other) commands
 	$iam_label,
