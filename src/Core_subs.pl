@@ -183,6 +183,7 @@ sub prepare {
 		rules => [qw(null_setup)],
 	);
 
+	initialize_rules();
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -348,7 +349,6 @@ sub load_project {
 		#print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
 	read_config( global_config() ); 
-	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
 
@@ -583,7 +583,6 @@ $multi  = ::Rule->new(
 	);
 		
 
-	$ui->preview_button;
 
 }
 

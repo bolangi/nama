@@ -331,6 +331,9 @@ sub transport_gui {
 			-text => 'Arm',
 			-command => sub {arm()}
 						 );
+
+preview_button();
+
 }
 sub time_gui {
 	@_ = discard_object(@_);
