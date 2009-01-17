@@ -345,6 +345,10 @@ sub ::colorset {
 					unless $field eq 'background';
 				#print "fields: @fields\n";
 				$mw->setPalette( @fields );
+				initialize_palette();
+				$old_bg = $palette{mw}{background};
+				$old_abg = $palette{mw}{activeBackground};
+				initialize_namapalette();
 			}
  	};
 }
@@ -1203,7 +1207,10 @@ sub initialize_palette {
 						$parent{$p}->cget("-$_");
 				} @palettefields;
 		} @parents;
+	initialize_namapalette();
 
+}
+sub initialize_namapalette {
 	my %rw_foreground = (	REC  => $namapalette{RecForeground},
 						 	MON => $namapalette{MonForeground},
 						 	OFF => $namapalette{OffForeground},

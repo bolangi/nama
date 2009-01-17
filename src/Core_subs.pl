@@ -204,6 +204,7 @@ sub prepare {
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
 
+	#assign_var(qw[ State.yml %palette %namapalette]);
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
