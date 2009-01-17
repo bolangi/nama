@@ -202,8 +202,6 @@ B<loop_enable> must be issued as a text command.
 
 GUI volume sliders are linear scaled.
 
-Fails with a Segfault under kernel compiled for amd64.
-
 =head1 EXPORT
 
 None by default.

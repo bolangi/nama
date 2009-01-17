@@ -214,7 +214,10 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
-	$sn_configure_colors = $load_frame->Menubutton->pack( -side => 'left');
+	$sn_palette = $load_frame->Menubutton(-tearoff => 0)
+		->pack( -side => 'left');
+	$sn_namapalette = $load_frame->Menubutton(-tearoff => 0)
+		->pack( -side => 'left');
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
@@ -264,20 +267,34 @@ sub init_gui {
 		 -command => sub { 
 				return if transport_running();
 				save_state($save_id);
-				print "Exiting...\n";		
+				print "Exiting... \n";		
+				#$term->tkRunning(0);
+				#$ew->destroy;
+				#$mw->destroy;
+				#::Text::command_process('quit');
 				exit;
 				 });
 # 	$sn_dump->configure(
 # 		-text => q(Dump state),
 # 		-command => sub{ print &status_vars });
-	$sn_configure_colors->configure(
-	#	-tearoff => 0,
+	$sn_palette->configure(
 		-text => 'Palette',
+		-relief => 'raised',
+	);
+	$sn_namapalette->configure(
+		-text => 'Nama Palette',
+		-relief => 'raised',
 	);
 
-my @color_items = map { [ 'command' => $_, -command  => colorset($_)]
+my @color_items = map { [ 'command' => $_, 
+							-command  => colorset($_,$mw->cget("-$_") )]
 						} @palettefields;
-$sn_configure_colors->AddItems( @color_items);
+$sn_palette->AddItems( @color_items);
+
+@color_items = map { [ 'command' => $_, 
+						-command  => namaset($_, $namapalette{$_})]
+						} @namafields;
+$sn_namapalette->AddItems( @color_items);
 
 	$build_track_add_mono->configure( 
 			-text => 'Add Mono Track',
@@ -319,8 +336,33 @@ $sn_configure_colors->AddItems( @color_items);
 }
 
 sub ::colorset {
-	my $field = shift;
-	sub { colorchooser($field,$mw->cget("-$field")) };
+	my ($field,$initial) = @_;
+	sub { my $new_color = colorchooser($field,$initial);
+			if( defined $new_color ){
+				#$palettefields{$field} = $new_color;
+				my @fields =  ($field => $new_color);
+				push (@fields, 'background', $mw->cget('-background'))
+					unless $field eq 'background';
+				#print "fields: @fields\n";
+				$mw->setPalette( @fields );
+			}
+ 	};
+}
+
+sub ::namaset {
+	my ($field,$initial) = @_;
+	sub { 	my $color = colorchooser($field,$initial);
+			$namapalette{$field} = $color if $color;
+			$clock->configure(
+				-background => $namapalette{ClockBackground},
+				-foreground => $namapalette{ClockForeground},
+			);
+			$group_label->configure(
+				-background => $namapalette{GroupBackground},
+				-foreground => $namapalette{GroupForeground},
+			)
+	}
+
 }
 
 sub ::colorchooser { 
@@ -333,14 +375,7 @@ sub ::colorchooser {
 							-initialcolor => $initialcolor,
 							);
 	#print "new color: $new_color\n";
-	if( defined $new_color ){
-		#$palettefields{$field} = $new_color;
-		my @fields =  ($field => $new_color);
-		push (@fields, 'background', $mw->cget('-background'))
-			unless $field eq 'background';
-		#print "fields: @fields\n";
-		$mw->setPalette( @fields );
-	}
+	$new_color;
 }
 
 sub transport_gui {
@@ -544,9 +579,8 @@ sub flash_ready {
 sub group_gui {  
 	@_ = discard_object(@_);
 	my $group = $tracker; 
-	my $label;
 	my $dummy = $track_frame->Label(-text => ' '); 
-	$label = 	$track_frame->Label(
+	$group_label = 	$track_frame->Label(
 			-text => "G R O U P",
 			-foreground => $namapalette{GroupForeground},
 			-background => $namapalette{GroupBackground},
@@ -589,7 +623,7 @@ sub group_gui {
 				generate_setup() and connect_transport()
 				}
 			]);
-			$dummy->grid($label, $group_version, $group_rw);
+			$dummy->grid($group_label, $group_version, $group_rw);
 			$ui->global_version_buttons;
 
 }

@@ -151,6 +151,7 @@ our (
 	%parent, # ->{mw} = $mw; # main window
 			 # ->{ew} = $ew; # effects window
 			 # eventually will contain all major frames
+	$group_label, 
 	$group_rw, # 
 	$group_version, # 
 	%track_widget, # for chains (tracks)
@@ -176,7 +177,8 @@ our (
 	$sn_load,
 	$sn_new,
 	$sn_quit,
-	$sn_configure_colors,
+	$sn_palette, # configure colors
+	$sn_namapalette, # configure nama colors
 	@palettefields, # set by setPalette method
 	@namafields,    # field names for color palette used by nama
 	%namapalette,     # nama's indicator colors
