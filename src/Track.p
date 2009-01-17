@@ -407,7 +407,7 @@ sub set_send {
 sub send {
 	my ($track, $send) = @_;
 
-	if ( ! $send ){
+	if ( ! defined $send ){
 		if ( ::jackd_running()
 				and $track->jack_send 
 				and $track->send_select eq 'jack'){
@@ -495,7 +495,7 @@ sub input {
 
 sub aux_output { 
 	my $track = shift;
-	$track->ch_m > 2 ? $track->ch_m : undef
+	$track->ch_m > 2 ? $track->ch_m : undef 
 }
 
 sub input_object { # for text display

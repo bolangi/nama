@@ -181,6 +181,7 @@ sub show_unit {};
 sub add_effect_gui {};
 sub remove_effect_gui {};
 sub marker {};
+sub initialize_palette {};
 ## Some of these, may be overwritten
 ## by definitions that follow
 

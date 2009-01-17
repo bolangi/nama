@@ -2,12 +2,15 @@
 
 sub set_widget_color {
 	my ($widget, $status) = @_;
-	my %rw_foreground = (REC  => 'Black', 
-					MON => 'Black',
-					OFF => 'Black');
-	my %rw_background =  (REC  => 'LightPink', 
-					MON => 'AntiqueWhite',
-					OFF => $old_bg);
+	my %rw_foreground = (	REC  => $namapalette{RecForeground},
+						 	MON => $namapalette{MonForeground},
+						 	OFF => $namapalette{OffForeground},
+						);
+
+	my %rw_background =  (	REC  => $rec,
+							MON  => $mon,
+							OFF  => $off );
+		
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );
@@ -69,7 +72,8 @@ sub refresh_track {
 	$track_widget{$n}->{ch_m}->configure( -text => 
 			$n > 2 
 				?  $ti[$n]->send
-				:  q() );
+				:  q() 
+	);
 	$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
 	
 	map{ set_widget_color( 	$track_widget{$n}->{$_}, 

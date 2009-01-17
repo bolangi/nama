@@ -136,6 +136,7 @@ sub init_gui {
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
+	$parent{mw} = $mw;
 
 	### init effect window
 
@@ -143,6 +144,9 @@ sub init_gui {
 	$ew->title("Effect Window");
 	$ew->deiconify; 
 	$ew->withdraw;
+	$parent{ew} = $ew;
+
+
 
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -159,6 +163,10 @@ sub init_gui {
 
 	$project_label = $mw->Label->pack(-fill => 'both');
 	$old_bg = $project_label->cget('-background');
+	$old_abg = $project_label->cget('-activebackground');
+
+	initialize_palette();
+
 	$time_frame = $mw->Frame(
 	#	-borderwidth => 20,
 	#	-relief => 'groove',
@@ -206,10 +214,7 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$sn_recall = $load_frame->Button->pack(-side => 'left');
-# 	$sn_configure_colors = $load_frame->Menubutton->pack(
-# 		-side => 'left',
-# 		-tearoff => 0,
-# );
+	$sn_configure_colors = $load_frame->Menubutton->pack( -side => 'left');
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
@@ -255,10 +260,6 @@ sub init_gui {
  		-command => sub {load_project (name => $project_name, 
  										settings => $save_id)},
 				);
-=comment
-# 	$sn_dump->configure(
-# 		-text => q(Dump state),
-# 		-command => sub{ print &status_vars });
 	$sn_quit->configure(-text => "Quit",
 		 -command => sub { 
 				return if transport_running();
@@ -266,65 +267,17 @@ sub init_gui {
 				print "Exiting...\n";		
 				exit;
 				 });
-	$sn_general_colors->configure(
-		-text => 'Configure colors - General',
+# 	$sn_dump->configure(
+# 		-text => q(Dump state),
+# 		-command => sub{ print &status_vars });
+	$sn_configure_colors->configure(
+	#	-tearoff => 0,
+		-text => 'Palette',
 	);
 
-my @color_items = map { 
-
-			[ 'command' => $_,
-				-command  => choosecolor
-	eval qq( 
-
-sub colorchooser { 
-	my ($field, $initialcolor) = @_;
-
-
-my $new_color = $mw->chooseColor(
-							-title => $_,
-							-initialcolor => $mw->cget(-$_)
-							);
-					if ($new_color) {
-						$mw->setPalette( -$_ => $new_color )
-					);
-						
-			}],
-					
-		} @palettefields; 
-
-@palettefields = qw[ 
-foreground
-background
-activeForeground
-activeBackground
-selectForeground
-selectBackground
-selectColor
-highlightColor
-highlightBackground
-disabledForeground
-insertBackground
-troughColor
-];
-
-@namacolors = qw [
-RecForeground
-RecBackground
-MonForeground
-MonBackground
-OffForeground
-OffBackground
-ClockForeground
-ClockBackground
-CaptureFlash
-PlaybackFlash
-MixdownFlash
-]
-
-my @choices = (
-
-	
-=cut
+my @color_items = map { [ 'command' => $_, -command  => colorset($_)]
+						} @palettefields;
+$sn_configure_colors->AddItems( @color_items);
 
 	$build_track_add_mono->configure( 
 			-text => 'Add Mono Track',
@@ -364,6 +317,32 @@ my @choices = (
 			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
 		
 }
+
+sub ::colorset {
+	my $field = shift;
+	sub { colorchooser($field,$mw->cget("-$field")) };
+}
+
+sub ::colorchooser { 
+	#print "colorchooser\n";
+	#my $debug = 1;
+	my ($field, $initialcolor) = @_;
+	$debug and print "field: $field, initial color: $initialcolor\n";
+	my $new_color = $mw->chooseColor(
+							-title => $field,
+							-initialcolor => $initialcolor,
+							);
+	#print "new color: $new_color\n";
+	if( defined $new_color ){
+		#$palettefields{$field} = $new_color;
+		my @fields =  ($field => $new_color);
+		push (@fields, 'background', $mw->cget('-background'))
+			unless $field eq 'background';
+		#print "fields: @fields\n";
+		$mw->setPalette( @fields );
+	}
+}
+
 sub transport_gui {
 	@_ = discard_object(@_);
 	$debug2 and print "&transport_gui\n";
@@ -389,12 +368,8 @@ sub transport_gui {
 		-text => "Start",
 		-command => sub { 
 		return if transport_running();
-		if ( really_recording ) {
-			project_label_configure(-background => 'lightpink') 
-		}
-		else {
-			project_label_configure(-background => 'lightgreen') 
-		}
+		my $color = engine_mode_color();
+		project_label_configure(-background => $color);
 		start_transport();
 				});
 	$transport_setup_and_connect->configure(
@@ -409,10 +384,12 @@ sub time_gui {
 	my $time_label = $clock_frame->Label(
 		-text => 'TIME', 
 		-width => 12);
+	#print "bg: $namapalette{ClockBackground}, fg:$namapalette{ClockForeground}\n";
 	$clock = $clock_frame->Label(
 		-text => '0:00', 
 		-width => 8,
-		-background => 'orange',
+		-background => $namapalette{ClockBackground},
+		-foreground => $namapalette{ClockForeground},
 		);
 	my $length_label = $clock_frame->Label(
 		-text => 'LENGTH',
@@ -504,17 +481,17 @@ sub preview_button {
 		my $oid_button = $transport_frame->Button( 
 			# -text => ucfirst $name,
 			-text => "Preview",
-			-background => $old_bg,
-			-activebackground => $old_bg
+ 			-background => $old_bg,
+ 			-activebackground => $old_bg
 		);
 		$oid_button->configure(
 			-command => sub { 
 				$rule->set(status => ! $rule->status);
 				$oid_button->configure( 
 			-background => 
-					$rule->status ? $old_bg : 'Yellow' ,
+					$rule->status ? $old_bg : $namapalette{Preview} ,
 			-activebackground => 
-					$rule->status ? $old_bg : 'Yellow' ,
+					$rule->status ? $old_bg : $namapalette{ActivePreview} ,
 			-text => 
 					$rule->status ? 'Preview' : 
 'PREVIEW MODE: Record WAV DISABLED. Press again to release.'
@@ -540,15 +517,20 @@ sub paint_button {
 	$button->configure(-background => $color,
 						-activebackground => $color);
 }
-sub flash_ready {
-	my $color;
-		if ( user_rec_tracks()  ){
-			$color = 'lightpink'; # live recording
-		} elsif ( &really_recording ){  # mixdown only 
-			$color = 'yellow';
-		} elsif ( user_mon_tracks() ){  
-			$color = 'lightgreen'; }; # just playback
 
+sub engine_mode_color {
+		if ( user_rec_tracks()  ){ 
+				$rec  					# live recording
+		} elsif ( &really_recording ){ 
+				$namapalette{Mixdown}	# mixdown only 
+		} elsif ( user_mon_tracks() ){  
+				$namapalette{Play}; 	# just playback
+		} else { $old_bg } 
+	}
+
+sub flash_ready {
+
+	my $color = engine_mode_color();
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
 	project_label_configure(-background => $color) unless $preview;
@@ -566,8 +548,8 @@ sub group_gui {
 	my $dummy = $track_frame->Label(-text => ' '); 
 	$label = 	$track_frame->Label(
 			-text => "G R O U P",
-			-foreground => 'White',
-			-background => 'DarkGray',
+			-foreground => $namapalette{GroupForeground},
+			-background => $namapalette{GroupBackground},
 
  );
 	$group_version = $track_frame->Menubutton(-tearoff => 0);
@@ -738,7 +720,7 @@ sub track_gui {
 	$ch_m = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
-				for my $v ("",1..10) {
+				for my $v (0,3..10) {
 					$ch_m->radiobutton(
 						-label => $v,
 						-value => $v,
@@ -786,8 +768,8 @@ sub track_gui {
 					$old_vol{$n}=$copp{$vol_id}->[0];
 					$copp{$vol_id}->[0] = 0;
 					effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
-					$mute->configure(-background => 'brown');
-					$mute->configure(-activebackground => 'brown');
+					$mute->configure(-background => $namapalette{Mute});
+					$mute->configure(-activebackground => $namapalette{Mute});
 				}
 				else {
 					$copp{$vol_id}->[0] = $old_vol{$n};
@@ -795,7 +777,7 @@ sub track_gui {
 						$old_vol{$n});
 					$old_vol{$n} = 0;
 					$mute->configure(-background => $old_bg);
-					$mute->configure(-activebackground => $old_bg);
+					$mute->configure(-activebackground => $old_abg);
 				}
 			}	
 	  );
@@ -1072,7 +1054,7 @@ sub arm_mark_toggle {
 	}
 	else{
 		$markers_armed = 1;
-		$mark_remove->configure( -background => 'yellow');
+		$mark_remove->configure( -background => $namapalette{MarkArmed});
 	}
 }
 sub marker {
@@ -1123,5 +1105,110 @@ sub tk_event_cancel {
 	map{ (ref $event_id{$_}) =~ /Tk/ and $set_event->afterCancel($event_id{$_}) 
 	} @_;
 }
+sub initialize_palette {
+
+
+	
+# 	@palettefields, # set by setPalette method
+# 	@namafields,    # field names for color palette used by nama
+# 	%namapalette,     # nama's indicator colors
+# 	%palette,  # overall color scheme
+
+	@palettefields = qw[ 
+		foreground
+		background
+		activeForeground
+		activeBackground
+		selectForeground
+		selectBackground
+		selectColor
+		highlightColor
+		highlightBackground
+		disabledForeground
+		insertBackground
+		troughColor
+	];
+
+	@namafields = qw [
+		RecForeground
+		RecBackground
+		MonForeground
+		MonBackground
+		OffForeground
+		OffBackground
+		ClockForeground
+		ClockBackground
+		Capture
+		Play
+		Mixdown
+		GroupForeground
+		GroupBackground
+		SendForeground
+		SendBackground
+		SourceForeground
+		SourceBackground
+		Mute
+		MarkArmed
+	];
+
+	my @parents = qw[
+		mw
+		ew
+	];
+
+# 		transport
+# 		mark
+# 		jump
+# 		clock
+# 		group
+# 		track
+# 		add
+
+	map{ 	my $p = $_; # parent key
+			map{	$palette{$p}->{$_} =
+						$parent{$p}->cget("-$_");
+				} @palettefields;
+		} @parents;
+
+	my %rw_foreground = (	REC  => $namapalette{RecForeground},
+						 	MON => $namapalette{MonForeground},
+						 	OFF => $namapalette{OffForeground},
+						);
+
+	my %rw_background =  (	REC  => $rec,
+							MON  => $mon,
+							OFF  => $off );
+		
+	%namapalette = ( 
+			'RecForeground' => 'Black',
+			'RecBackground' => 'LightPink',
+			'MonForeground' => 'Black',
+			'MonBackground' => 'AntiqueWhite',
+			'OffForeground' => 'Black',
+			'OffBackground' => $old_bg,
+	);
+
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
+
+
+	%namapalette = ( %namapalette, 
+			'ClockForeground' 	=> 'Red',
+			'ClockBackground' 	=> $old_bg,
+			'Capture' 			=> $rec,
+			'Play' 				=> 'LightGreen',
+			'Mixdown' 			=> 'Yellow',
+			'GroupForeground' 	=> 'Red',
+			'GroupBackground' 	=> $old_bg,
+			'SendForeground' 	=> 'Black',
+			'SendBackground' 	=> $mon,
+			'SourceForeground' 	=> 'Black',
+			'SourceBackground' 	=> $rec,
+			'Mute'				=> 'Brown',
+			'MarkArmed'			=> 'Yellow',
+	)
+}
+
 
 ### end

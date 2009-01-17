@@ -203,7 +203,6 @@ sub prepare {
 
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
-	
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -301,6 +300,7 @@ sub read_config {
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
 #	*devices = \%{ $cfg{devices} }; # alias
+#	assigned by assign_var below
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
