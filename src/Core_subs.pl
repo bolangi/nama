@@ -138,7 +138,7 @@ sub prepare {
 	if ($opts{t}) {}
 	else { 
 		require Tk;
-		import Tk;
+		Tk->import;
 	}
 
 	$project_name = shift @ARGV;
@@ -183,7 +183,6 @@ sub prepare {
 		rules => [qw(null_setup)],
 	);
 
-	initialize_rules();
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -204,7 +203,6 @@ sub prepare {
 
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
-	
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -302,6 +300,7 @@ sub read_config {
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
 #	*devices = \%{ $cfg{devices} }; # alias
+#	assigned by assign_var below
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
@@ -349,6 +348,7 @@ sub load_project {
 		#print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
 	read_config( global_config() ); 
+	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
 
@@ -583,6 +583,7 @@ $multi  = ::Rule->new(
 	);
 		
 
+	$ui->preview_button;
 
 }
 
@@ -2265,7 +2266,7 @@ sub get_ladspa_hints{
 				$p{dir} = $dir;
 				$p{hint} = $hint;
 				my ($beg, $end, $default_val, $resolution) 
-					= range($name, $range, $default, $hint);
+					= range($name, $range, $default, $hint, $plugin_label);
 				$p{begin} = $beg;
 				$p{end} = $end;
 				$p{default} = $default_val;
@@ -2290,7 +2291,7 @@ sub get_ladspa_hints{
 	$debug and print yaml_out(\%effects_ladspa); 
 }
 sub range {
-	my ($name, $range, $default, $hint) = @_; 
+	my ($name, $range, $default, $hint, $plugin_label) = @_; 
 	my $multiplier = 1;;
 	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
@@ -2309,6 +2310,18 @@ sub range {
 	my $resolution = ($end - $beg) / 100;
 	if    ($hint =~ /integer/ ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
+
+		if (! $beg or ! end or ! $default ){
+			print <<WARN;
+$plugin_label: zero value found for settings in logarithmic hinted
+parameter "$name".
+
+	beginnning: $beg
+	end:        $end
+	default:    $default
+WARN
+		}
+
 		$beg = 0.0001 * $multiplier if ! $beg;
 		$beg = round ( log $beg );
 		$end = round ( log $end );
@@ -2380,6 +2393,13 @@ sub round {
 
 sub save_state {
 	$debug2 and print "&save_state\n";
+
+	# first save palette to project_dir/palette.yml
+	
+	serialize (
+		-file => join_path($project_root, $palette_file),
+		-vars => [ qw( %palette %namapalette ) ],
+		-class => '::');
 
 	# do nothing if only Master and Mixdown
 	
