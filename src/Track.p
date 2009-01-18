@@ -401,7 +401,9 @@ sub set_send {
 	if ( $old_send  eq $new_send ){
 		print $track->name, ": send unchanged, $object\n";
 	} else {
-		print $track->name, ": auxiliary output to $object\n";
+		print $track->name, ": auxiliary output to ",
+		($object ? $object : 'off'),
+		"\n";
 	}
 }
 sub send {
@@ -413,9 +415,14 @@ sub send {
 				and $track->send_select eq 'jack'){
 			$track->jack_send 
 		} else { 
-			$track->aux_output
+			$track->send_select eq 'soundcard'
+				?  $track->aux_output
+				:  undef
 		}
-	} elsif ( $send =~ m(\D) ){
+	} elsif (lc $send eq 'off'  or $send == 0) { 
+		$track->set(send_select => 'off');
+		undef;
+	} elsif ( $send =~ m(\D) ){ ## non-digit, indicating jack client name
 		if ( ::jackd_running() ){
 			$track->set(jack_send => $send);
 			$track->set(send_select => "jack");
