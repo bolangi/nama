@@ -183,7 +183,6 @@ sub prepare {
 		rules => [qw(null_setup)],
 	);
 
-	initialize_rules();
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -349,6 +348,7 @@ sub load_project {
 		#print ("Creating directories....\n"),
 		map{create_dir($_)} &project_dir, &this_wav_dir ;
 	read_config( global_config() ); 
+	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
 
@@ -583,6 +583,7 @@ $multi  = ::Rule->new(
 	);
 		
 
+	$ui->preview_button;
 
 }
 
@@ -2310,6 +2311,18 @@ sub range {
 	my $resolution = ($end - $beg) / 100;
 	if    ($hint =~ /integer/ ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
+
+		if (! $beg or ! $end or ! $default ){
+			print <<WARN;
+$plugin_label: zero value found for settings in logarithmic hinted
+parameter "$name".
+
+	beginnning: $beg
+	end:        $end
+	default:    $default
+WARN
+		}
+
 		$beg = 0.0001 * $multiplier if ! $beg;
 		$beg = round ( log $beg );
 		$end = round ( log $end );
@@ -2384,10 +2397,10 @@ sub save_state {
 
 	# first save palette to project_dir/palette.yml
 	
-	serialize (
-		-file => join_path($project_root, $palette_file),
-		-vars => [ qw( %palette %namapalette ) ],
-		-class => '::');
+ 	serialize (
+ 		-file => join_path($project_root, $palette_file),
+ 		-vars => [ qw( %palette %namapalette ) ],
+ 		-class => '::');
 
 	# do nothing if only Master and Mixdown
 	
