@@ -1120,7 +1120,9 @@ sub get_saved_colors {
 	*off = \$namapalette{OffBackground};
 		init_namapalette();
 	}
+	$old_bg = $palette{mw}{background};
 	$old_bg = $project_label->cget('-background') unless $old_bg;
+	$old_abg = $palette{mw}{activeBackground};
 	$old_abg = $project_label->cget('-activebackground') unless $old_abg;
 	print "1palette: \n", yaml_out( \%palette );
 	print "\n1namapalette: \n", yaml_out(\%namapalette);
