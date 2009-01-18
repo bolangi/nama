@@ -2266,7 +2266,7 @@ sub get_ladspa_hints{
 				$p{dir} = $dir;
 				$p{hint} = $hint;
 				my ($beg, $end, $default_val, $resolution) 
-					= range($name, $range, $default, $hint);
+					= range($name, $range, $default, $hint, $plugin_label);
 				$p{begin} = $beg;
 				$p{end} = $end;
 				$p{default} = $default_val;
@@ -2291,7 +2291,7 @@ sub get_ladspa_hints{
 	$debug and print yaml_out(\%effects_ladspa); 
 }
 sub range {
-	my ($name, $range, $default, $hint) = @_; 
+	my ($name, $range, $default, $hint, $plugin_label) = @_; 
 	my $multiplier = 1;;
 	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
