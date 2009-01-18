@@ -590,7 +590,7 @@ sub track_gui {
 	$ch_m = $track_frame->Menubutton(
 					-tearoff => 0,
 				);
-				for my $v (" ",3..10) {
+				for my $v ("off",3..10) {
 					$ch_m->radiobutton(
 						-label => $v,
 						-value => $v,
