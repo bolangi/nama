@@ -67,6 +67,7 @@ $loopb = 'loop,222';
 # other initializations
 $unit = 1;
 $effects_cache_file = '.effects_cache';
+$palette_file = 'palette.yml';
 $state_store_file = 'State';
 $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;

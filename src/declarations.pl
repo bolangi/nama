@@ -186,6 +186,7 @@ our (
 	$rec,      # background color
 	$mon,      # background color
 	$off,      # background color
+	$palette_file, # where to save selections
 
 	### A separate box for entering IAM (and other) commands
 	$iam_label,

@@ -40,8 +40,6 @@
 						@loop_endpoints
 						$length
 						%bunch
-						%palette
-						%namapalette
 						);
 					 
 @effects_static_vars = qw(

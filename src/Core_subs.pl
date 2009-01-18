@@ -204,7 +204,6 @@ sub prepare {
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
 
-	#assign_var(qw[ State.yml %palette %namapalette]);
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
@@ -2382,6 +2381,13 @@ sub round {
 
 sub save_state {
 	$debug2 and print "&save_state\n";
+
+	# first save palette to project_dir/palette.yml
+	
+	serialize (
+		-file => join_path($project_root, $palette_file),
+		-vars => [ qw( %palette %namapalette ) ],
+		-class => '::');
 
 	# do nothing if only Master and Mixdown
 	

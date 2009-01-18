@@ -2,133 +2,16 @@
 #
 use Carp;
 
-sub add_effect_gui {
-		$debug2 and print "&add_effect_gui\n";
-		@_ = discard_object(@_);
-		my %p 			= %{shift()};
-		my $n 			= $p{chain};
-		my $code 			= $p{type};
-		my $parent_id = $p{parent_id};  
-		my $id		= $p{cop_id};   # initiates restore
-		my $parameter		= $p{parameter}; 
-		my $i = $effect_i{$code};
-
-		$debug and print yaml_out(\%p);
-
-		$debug and print "cop_id: $id, parent_id: $parent_id\n";
-		# $id is determined by cop_add, which will return the
-		# existing cop_id if supplied
-
-		# check display format, may be 'scale' 'field' or 'hidden'
-		
-		my $display_type = $cops{$id}->{display}; # individual setting
-		defined $display_type or $display_type = $effects[$i]->{display}; # template
-		$debug and print "display type: $display_type\n";
-
-		return if $display_type eq q(hidden);
-
-		my $frame ;
-		if ( ! $parent_id ){ # independent effect
-			$frame = $track_widget{$n}->{parents}->Frame->pack(
-				-side => 'left', 
-				-anchor => 'nw',)
-		} else {                 # controller
-			$frame = $track_widget{$n}->{children}->Frame->pack(
-				-side => 'top', 
-				-anchor => 'nw')
-		}
-
-		$effects_widget{$id} = $frame; 
-		# we need a separate frame so title can be long
-
-		# here add menu items for Add Controller, and Remove
-
-		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
-			->{name};
-		$parentage and $parentage .=  " - ";
-		$debug and print "parentage: $parentage\n";
-		my $eff = $frame->Menubutton(
-			-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
-
-		$eff->AddItems([
-			'command' => "Remove",
-			-command => sub { remove_effect($id) }
-		]);
-		$eff->grid();
-		my @labels;
-		my @sliders;
-
-		# make widgets
-
-		for my $p (0..$effects[$i]->{count} - 1 ) {
-		my @items;
-		#$debug and print "p_first: $p_first, p_last: $p_last\n";
-		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
-			push @items, 				
-				[ 'command' => $effects[$j]->{name},
-					-command => sub { add_effect ({
-							parent_id => $id,
-							chain => $n,
-							parameter  => $p,
-							type => $effects[$j]->{code} } )  }
-				];
-
-		}
-		push @labels, $frame->Menubutton(
-				-text => $effects[$i]->{params}->[$p]->{name},
-				-menuitems => [@items],
-				-tearoff => 0,
-		);
-			$debug and print "parameter name: ",
-				$effects[$i]->{params}->[$p]->{name},"\n";
-			my $v =  # for argument vector 
-			{	parent => \$frame,
-				cop_id => $id, 
-				p_num  => $p,
-			};
-			push @sliders,make_scale($v);
-		}
-
-		if (@sliders) {
-
-			$sliders[0]->grid(@sliders[1..$#sliders]);
-			 $labels[0]->grid(@labels[1..$#labels]);
-		}
-}
-
-
-sub project_label_configure{ 
-	@_ = discard_object(@_);
-	$project_label->configure( @_ ) }
-
-sub length_display{ 
-	@_ = discard_object(@_);
-	$setup_length->configure(@_)};
-
-sub clock_config { 
-	@_ = discard_object(@_);
-	$clock->configure( @_ )}
-
-sub manifest { $ew->deiconify() }
-
-sub destroy_widgets {
-
-	map{ $_->destroy } map{ $_->children } $effect_frame;
-	#my @children = $group_frame->children;
-	#map{ $_->destroy  } @children[1..$#children];
-	my @children = $track_frame->children;
-	# leave field labels (first row)
-	map{ $_->destroy  } @children[11..$#children]; # fragile
-	%mark_widget and map{ $_->destroy } values %mark_widget;
-}
-
 sub init_gui {
 
 	$debug2 and print "&init_gui\n";
 
 	@_ = discard_object(@_);
 
-### 	Tk root window layout
+	init_palettefields();
+
+
+### 	Tk root window 
 
 	# Tk main window
  	$mw = MainWindow->new;  
@@ -146,8 +29,8 @@ sub init_gui {
 	$ew->withdraw;
 	$parent{ew} = $ew;
 
-
-
+	get_saved_colors();
+	
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
 		scrollregion =>[2,2,10000,2000],
@@ -162,10 +45,6 @@ sub init_gui {
 											-anchor => 'nw');
 
 	$project_label = $mw->Label->pack(-fill => 'both');
-	$old_bg = $project_label->cget('-background');
-	$old_abg = $project_label->cget('-activebackground');
-
-	initialize_palette();
 
 	$time_frame = $mw->Frame(
 	#	-borderwidth => 20,
@@ -333,53 +212,6 @@ $sn_namapalette->AddItems( @color_items);
 			#join  " ",
 			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
 		
-}
-
-sub ::colorset {
-	my ($field,$initial) = @_;
-	sub { my $new_color = colorchooser($field,$initial);
-			if( defined $new_color ){
-				#$palettefields{$field} = $new_color;
-				my @fields =  ($field => $new_color);
-				push (@fields, 'background', $mw->cget('-background'))
-					unless $field eq 'background';
-				#print "fields: @fields\n";
-				$mw->setPalette( @fields );
-				initialize_palette();
-				$old_bg = $palette{mw}{background};
-				$old_abg = $palette{mw}{activeBackground};
-				initialize_namapalette();
-			}
- 	};
-}
-
-sub ::namaset {
-	my ($field,$initial) = @_;
-	sub { 	my $color = colorchooser($field,$initial);
-			$namapalette{$field} = $color if $color;
-			$clock->configure(
-				-background => $namapalette{ClockBackground},
-				-foreground => $namapalette{ClockForeground},
-			);
-			$group_label->configure(
-				-background => $namapalette{GroupBackground},
-				-foreground => $namapalette{GroupForeground},
-			)
-	}
-
-}
-
-sub ::colorchooser { 
-	#print "colorchooser\n";
-	#my $debug = 1;
-	my ($field, $initialcolor) = @_;
-	$debug and print "field: $field, initial color: $initialcolor\n";
-	my $new_color = $mw->chooseColor(
-							-title => $field,
-							-initialcolor => $initialcolor,
-							);
-	#print "new color: $new_color\n";
-	$new_color;
 }
 
 sub transport_gui {
@@ -947,6 +779,126 @@ sub update_version_button {
 					);
 }
 
+sub add_effect_gui {
+		$debug2 and print "&add_effect_gui\n";
+		@_ = discard_object(@_);
+		my %p 			= %{shift()};
+		my $n 			= $p{chain};
+		my $code 			= $p{type};
+		my $parent_id = $p{parent_id};  
+		my $id		= $p{cop_id};   # initiates restore
+		my $parameter		= $p{parameter}; 
+		my $i = $effect_i{$code};
+
+		$debug and print yaml_out(\%p);
+
+		$debug and print "cop_id: $id, parent_id: $parent_id\n";
+		# $id is determined by cop_add, which will return the
+		# existing cop_id if supplied
+
+		# check display format, may be 'scale' 'field' or 'hidden'
+		
+		my $display_type = $cops{$id}->{display}; # individual setting
+		defined $display_type or $display_type = $effects[$i]->{display}; # template
+		$debug and print "display type: $display_type\n";
+
+		return if $display_type eq q(hidden);
+
+		my $frame ;
+		if ( ! $parent_id ){ # independent effect
+			$frame = $track_widget{$n}->{parents}->Frame->pack(
+				-side => 'left', 
+				-anchor => 'nw',)
+		} else {                 # controller
+			$frame = $track_widget{$n}->{children}->Frame->pack(
+				-side => 'top', 
+				-anchor => 'nw')
+		}
+
+		$effects_widget{$id} = $frame; 
+		# we need a separate frame so title can be long
+
+		# here add menu items for Add Controller, and Remove
+
+		my $parentage = $effects[ $effect_i{ $cops{$parent_id}->{type}} ]
+			->{name};
+		$parentage and $parentage .=  " - ";
+		$debug and print "parentage: $parentage\n";
+		my $eff = $frame->Menubutton(
+			-text => $parentage. $effects[$i]->{name}, -tearoff => 0,);
+
+		$eff->AddItems([
+			'command' => "Remove",
+			-command => sub { remove_effect($id) }
+		]);
+		$eff->grid();
+		my @labels;
+		my @sliders;
+
+		# make widgets
+
+		for my $p (0..$effects[$i]->{count} - 1 ) {
+		my @items;
+		#$debug and print "p_first: $p_first, p_last: $p_last\n";
+		for my $j ($e_bound{ctrl}{a}..$e_bound{ctrl}{z}) {   
+			push @items, 				
+				[ 'command' => $effects[$j]->{name},
+					-command => sub { add_effect ({
+							parent_id => $id,
+							chain => $n,
+							parameter  => $p,
+							type => $effects[$j]->{code} } )  }
+				];
+
+		}
+		push @labels, $frame->Menubutton(
+				-text => $effects[$i]->{params}->[$p]->{name},
+				-menuitems => [@items],
+				-tearoff => 0,
+		);
+			$debug and print "parameter name: ",
+				$effects[$i]->{params}->[$p]->{name},"\n";
+			my $v =  # for argument vector 
+			{	parent => \$frame,
+				cop_id => $id, 
+				p_num  => $p,
+			};
+			push @sliders,make_scale($v);
+		}
+
+		if (@sliders) {
+
+			$sliders[0]->grid(@sliders[1..$#sliders]);
+			 $labels[0]->grid(@labels[1..$#labels]);
+		}
+}
+
+
+sub project_label_configure{ 
+	@_ = discard_object(@_);
+	$project_label->configure( @_ ) }
+
+sub length_display{ 
+	@_ = discard_object(@_);
+	$setup_length->configure(@_)};
+
+sub clock_config { 
+	@_ = discard_object(@_);
+	$clock->configure( @_ )}
+
+sub manifest { $ew->deiconify() }
+
+sub destroy_widgets {
+
+	map{ $_->destroy } map{ $_->children } $effect_frame;
+	#my @children = $group_frame->children;
+	#map{ $_->destroy  } @children[1..$#children];
+	my @children = $track_frame->children;
+	# leave field labels (first row)
+	map{ $_->destroy  } @children[11..$#children]; # fragile
+	%mark_widget and map{ $_->destroy } values %mark_widget;
+}
+
 sub effect_button {
 	local $debug = 0;	
 	$debug2 and print "&effect_button\n";
@@ -1143,15 +1095,137 @@ sub tk_event_cancel {
 	map{ (ref $event_id{$_}) =~ /Tk/ and $set_event->afterCancel($event_id{$_}) 
 	} @_;
 }
-sub initialize_palette {
+sub get_saved_colors {
 
+	# aliases
+	
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
+	*old_bg = \$palette{mw}{background};
+	*old_abg = \$palette{mw}{activeBackground};
 
+	my $pal = join_path($project_root, $palette_file);
+	if (-f $pal){
+		print "$pal: found palette file, assigning palettes\n";
+		assign_var( $pal,
+			qw[%palette %namapalette]
+		);
+	} else {
+		print "$pal: no palette file found, using default init\n";
+		init_palette();
+		init_namapalette();
+	}
+	print "1palette: \n", yaml_out( \%palette );
+	print "\n1namapalette: \n", yaml_out(\%namapalette);
+	exit;
+	my %setformat;
+	map{ $setformat{$_} = $palette{mw}{$_} if $palette{mw}{$_}  } 
+		keys %{$palette{mw}};	
+	print "\nsetformat: \n", yaml_out(\%setformat);
+	$mw->setPalette( %setformat );
+}
+sub init_palette {
 	
 # 	@palettefields, # set by setPalette method
 # 	@namafields,    # field names for color palette used by nama
 # 	%namapalette,     # nama's indicator colors
 # 	%palette,  # overall color scheme
 
+	my @parents = qw[
+		mw
+		ew
+	];
+
+# 		transport
+# 		mark
+# 		jump
+# 		clock
+# 		group
+# 		track
+# 		add
+
+	map{ 	my $p = $_; # parent key
+			map{	$palette{$p}->{$_} =
+						$parent{$p}->cget("-$_");
+				} @palettefields;
+		} @parents;
+
+}
+sub init_namapalette {
+		
+	%namapalette = ( 
+			'RecForeground' => 'Black',
+			'RecBackground' => 'LightPink',
+			'MonForeground' => 'Black',
+			'MonBackground' => 'AntiqueWhite',
+			'OffForeground' => 'Black',
+			'OffBackground' => $old_bg,
+	) unless %namapalette; # i.e. not if already loaded
+
+
+	%namapalette = ( %namapalette, 
+			'ClockForeground' 	=> 'Red',
+			'ClockBackground' 	=> $old_bg,
+			'Capture' 			=> $rec,
+			'Play' 				=> 'LightGreen',
+			'Mixdown' 			=> 'Yellow',
+			'GroupForeground' 	=> 'Red',
+			'GroupBackground' 	=> $old_bg,
+			'SendForeground' 	=> 'Black',
+			'SendBackground' 	=> $mon,
+			'SourceForeground' 	=> 'Black',
+			'SourceBackground' 	=> $rec,
+			'Mute'				=> 'Brown',
+			'MarkArmed'			=> 'Yellow',
+	) unless %namapalette; # i.e. not if already loaded
+
+}
+sub ::colorset {
+	my ($field,$initial) = @_;
+	sub { my $new_color = colorchooser($field,$initial);
+			if( defined $new_color ){
+				#$palettefields{$field} = $new_color;
+				my @fields =  ($field => $new_color);
+				push (@fields, 'background', $mw->cget('-background'))
+					unless $field eq 'background';
+				#print "fields: @fields\n";
+				$mw->setPalette( @fields );
+				initialize_palette();
+				initialize_namapalette();
+			}
+ 	};
+}
+
+sub ::namaset {
+	my ($field,$initial) = @_;
+	sub { 	my $color = colorchooser($field,$initial);
+			$namapalette{$field} = $color if $color;
+			$clock->configure(
+				-background => $namapalette{ClockBackground},
+				-foreground => $namapalette{ClockForeground},
+			);
+			$group_label->configure(
+				-background => $namapalette{GroupBackground},
+				-foreground => $namapalette{GroupForeground},
+			)
+	}
+
+}
+
+sub ::colorchooser { 
+	#print "colorchooser\n";
+	#my $debug = 1;
+	my ($field, $initialcolor) = @_;
+	$debug and print "field: $field, initial color: $initialcolor\n";
+	my $new_color = $mw->chooseColor(
+							-title => $field,
+							-initialcolor => $initialcolor,
+							);
+	#print "new color: $new_color\n";
+	$new_color;
+}
+sub init_palettefields {
 	@palettefields = qw[ 
 		foreground
 		background
@@ -1188,68 +1262,8 @@ sub initialize_palette {
 		Mute
 		MarkArmed
 	];
-
-	my @parents = qw[
-		mw
-		ew
-	];
-
-# 		transport
-# 		mark
-# 		jump
-# 		clock
-# 		group
-# 		track
-# 		add
-
-	map{ 	my $p = $_; # parent key
-			map{	$palette{$p}->{$_} =
-						$parent{$p}->cget("-$_");
-				} @palettefields;
-		} @parents;
-	initialize_namapalette();
-
 }
-sub initialize_namapalette {
-	my %rw_foreground = (	REC  => $namapalette{RecForeground},
-						 	MON => $namapalette{MonForeground},
-						 	OFF => $namapalette{OffForeground},
-						);
 
-	my %rw_background =  (	REC  => $rec,
-							MON  => $mon,
-							OFF  => $off );
-		
-	%namapalette = ( 
-			'RecForeground' => 'Black',
-			'RecBackground' => 'LightPink',
-			'MonForeground' => 'Black',
-			'MonBackground' => 'AntiqueWhite',
-			'OffForeground' => 'Black',
-			'OffBackground' => $old_bg,
-	);
-
-	*rec = \$namapalette{RecBackground};
-	*mon = \$namapalette{MonBackground};
-	*off = \$namapalette{OffBackground};
-
-
-	%namapalette = ( %namapalette, 
-			'ClockForeground' 	=> 'Red',
-			'ClockBackground' 	=> $old_bg,
-			'Capture' 			=> $rec,
-			'Play' 				=> 'LightGreen',
-			'Mixdown' 			=> 'Yellow',
-			'GroupForeground' 	=> 'Red',
-			'GroupBackground' 	=> $old_bg,
-			'SendForeground' 	=> 'Black',
-			'SendBackground' 	=> $mon,
-			'SourceForeground' 	=> 'Black',
-			'SourceBackground' 	=> $rec,
-			'Mute'				=> 'Brown',
-			'MarkArmed'			=> 'Yellow',
-	)
-}
 
 
 ### end
