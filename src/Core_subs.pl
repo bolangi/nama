@@ -2311,7 +2311,7 @@ sub range {
 	if    ($hint =~ /integer/ ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
 
-		if (! $beg or ! end or ! $default ){
+		if (! $beg or ! $end or ! $default ){
 			print <<WARN;
 $plugin_label: zero value found for settings in logarithmic hinted
 parameter "$name".
@@ -2396,10 +2396,10 @@ sub save_state {
 
 	# first save palette to project_dir/palette.yml
 	
-	serialize (
-		-file => join_path($project_root, $palette_file),
-		-vars => [ qw( %palette %namapalette ) ],
-		-class => '::');
+# 	serialize (
+# 		-file => join_path($project_root, $palette_file),
+# 		-vars => [ qw( %palette %namapalette ) ],
+# 		-class => '::');
 
 	# do nothing if only Master and Mixdown
 	
