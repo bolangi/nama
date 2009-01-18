@@ -11,6 +11,8 @@ sub set_widget_color {
 							MON  => $mon,
 							OFF  => $off );
 		
+#	print "namapalette:\n",yaml_out( \%namapalette);
+#	print "rec: $rec, mon: $mon, off: $off\n";
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );

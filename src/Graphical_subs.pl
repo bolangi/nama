@@ -322,7 +322,6 @@ sub time_gui {
 		
 	my $drop_mark = $mark_frame->Button(
 		-text => 'Place',
-		-background => $old_bg,
 		-command => \&drop_mark,
 		)->pack(-side => 'left');	
 		
@@ -352,8 +351,6 @@ sub preview_button {
 		my $oid_button = $transport_frame->Button( 
 			# -text => ucfirst $name,
 			-text => "Preview",
- 			-background => $old_bg,
- 			-activebackground => $old_bg
 		);
 		$oid_button->configure(
 			-command => sub { 
@@ -1097,15 +1094,11 @@ sub tk_event_cancel {
 }
 sub get_saved_colors {
 
-
-
 	# aliases
 	
-	*rec = \$namapalette{RecBackground};
-	*mon = \$namapalette{MonBackground};
-	*off = \$namapalette{OffBackground};
 	*old_bg = \$palette{mw}{background};
 	*old_abg = \$palette{mw}{activeBackground};
+
 
 	my $pal = join_path($project_root, $palette_file);
 	if (-f $pal){
@@ -1113,9 +1106,15 @@ sub get_saved_colors {
 		assign_var( $pal,
 			qw[%palette %namapalette]
 		);
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
 	} else {
 		print "$pal: no palette file found, using default init\n";
 		init_palette();
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
 		init_namapalette();
 	}
 	$old_bg = $project_label->cget('-background') unless $old_bg;
@@ -1181,7 +1180,7 @@ sub init_namapalette {
 			'SourceBackground' 	=> $rec,
 			'Mute'				=> 'Brown',
 			'MarkArmed'			=> 'Yellow',
-	) unless %namapalette; # i.e. not if already loaded
+	) unless $namapalette{Play}; # i.e. not if already loaded
 
 }
 sub ::colorset {

@@ -814,8 +814,9 @@ sub remove_small_wavs {
 
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
+	
+	my $debug = 0;
 
-	local $debug = 0;
 	$debug2 and print "&remove_small_wavs\n";
 	
 
