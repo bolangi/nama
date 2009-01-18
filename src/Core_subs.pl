@@ -138,7 +138,7 @@ sub prepare {
 	if ($opts{t}) {}
 	else { 
 		require Tk;
-		import Tk;
+		Tk->import;
 	}
 
 	$project_name = shift @ARGV;
@@ -204,7 +204,6 @@ sub prepare {
 
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
-	
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -302,6 +301,7 @@ sub read_config {
 	#print yaml_out( $cfg{abbreviations}); exit;
 	*subst = \%{ $cfg{abbreviations} }; # alias
 #	*devices = \%{ $cfg{devices} }; # alias
+#	assigned by assign_var below
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
@@ -813,8 +813,9 @@ sub remove_small_wavs {
 
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
+	
+	my $debug = 0;
 
-	local $debug = 0;
 	$debug2 and print "&remove_small_wavs\n";
 	
 
@@ -2265,7 +2266,7 @@ sub get_ladspa_hints{
 				$p{dir} = $dir;
 				$p{hint} = $hint;
 				my ($beg, $end, $default_val, $resolution) 
-					= range($name, $range, $default, $hint);
+					= range($name, $range, $default, $hint, $plugin_label);
 				$p{begin} = $beg;
 				$p{end} = $end;
 				$p{default} = $default_val;
@@ -2290,7 +2291,7 @@ sub get_ladspa_hints{
 	$debug and print yaml_out(\%effects_ladspa); 
 }
 sub range {
-	my ($name, $range, $default, $hint) = @_; 
+	my ($name, $range, $default, $hint, $plugin_label) = @_; 
 	my $multiplier = 1;;
 	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
 	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
@@ -2380,6 +2381,13 @@ sub round {
 
 sub save_state {
 	$debug2 and print "&save_state\n";
+
+	# first save palette to project_dir/palette.yml
+	
+	serialize (
+		-file => join_path($project_root, $palette_file),
+		-vars => [ qw( %palette %namapalette ) ],
+		-class => '::');
 
 	# do nothing if only Master and Mixdown
 	

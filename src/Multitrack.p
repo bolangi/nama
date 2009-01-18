@@ -34,6 +34,11 @@ use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
 
 # use Tk    # loaded conditionally in GUI mode
 
+#use Module::Load;
+#use Module::Load::Conditional;
+#use Tk::FontDialog;
+
+
 $| = 1;     # flush STDOUT buffer on every write
 
 ## Definitions ##
@@ -62,6 +67,7 @@ $loopb = 'loop,222';
 # other initializations
 $unit = 1;
 $effects_cache_file = '.effects_cache';
+$palette_file = 'palette.yml';
 $state_store_file = 'State';
 $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
@@ -176,6 +182,7 @@ sub show_unit {};
 sub add_effect_gui {};
 sub remove_effect_gui {};
 sub marker {};
+sub initialize_palette {};
 ## Some of these, may be overwritten
 ## by definitions that follow
 

@@ -148,6 +148,10 @@ our (
 
 	## collected widgets (i may need to destroy them)
 
+	%parent, # ->{mw} = $mw; # main window
+			 # ->{ew} = $ew; # effects window
+			 # eventually will contain all major frames
+	$group_label, 
 	$group_rw, # 
 	$group_version, # 
 	%track_widget, # for chains (tracks)
@@ -173,6 +177,16 @@ our (
 	$sn_load,
 	$sn_new,
 	$sn_quit,
+	$sn_palette, # configure colors
+	$sn_namapalette, # configure nama colors
+	@palettefields, # set by setPalette method
+	@namafields,    # field names for color palette used by nama
+	%namapalette,     # nama's indicator colors
+	%palette,  # overall color scheme
+	$rec,      # background color
+	$mon,      # background color
+	$off,      # background color
+	$palette_file, # where to save selections
 
 	### A separate box for entering IAM (and other) commands
 	$iam_label,
@@ -206,6 +220,7 @@ our (
 	$transport_stop,
 
 	$old_bg, # initial background color.
+	$old_abg, # initial active background color
 
 
 	$loopa,  # loopback nodes 
