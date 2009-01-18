@@ -29,7 +29,6 @@ sub init_gui {
 	$ew->withdraw;
 	$parent{ew} = $ew;
 
-	get_saved_colors();
 	
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -45,6 +44,7 @@ sub init_gui {
 											-anchor => 'nw');
 
 	$project_label = $mw->Label->pack(-fill => 'both');
+	get_saved_colors();
 
 	$time_frame = $mw->Frame(
 	#	-borderwidth => 20,
@@ -1097,6 +1097,8 @@ sub tk_event_cancel {
 }
 sub get_saved_colors {
 
+
+
 	# aliases
 	
 	*rec = \$namapalette{RecBackground};
@@ -1116,9 +1118,10 @@ sub get_saved_colors {
 		init_palette();
 		init_namapalette();
 	}
+	$old_bg = $project_label->cget('-background') unless $old_bg;
+	$old_abg = $project_label->cget('-activebackground') unless $old_abg;
 	print "1palette: \n", yaml_out( \%palette );
 	print "\n1namapalette: \n", yaml_out(\%namapalette);
-	exit;
 	my %setformat;
 	map{ $setformat{$_} = $palette{mw}{$_} if $palette{mw}{$_}  } 
 		keys %{$palette{mw}};	
@@ -1146,8 +1149,8 @@ sub init_palette {
 # 		add
 
 	map{ 	my $p = $_; # parent key
-			map{	$palette{$p}->{$_} =
-						$parent{$p}->cget("-$_");
+			map{	$palette{$p}->{$_} = $parent{$p}->cget("-$_")
+						if $parent{$p}->cget("-$_") ;
 				} @palettefields;
 		} @parents;
 
@@ -1185,14 +1188,16 @@ sub ::colorset {
 	my ($field,$initial) = @_;
 	sub { my $new_color = colorchooser($field,$initial);
 			if( defined $new_color ){
-				#$palettefields{$field} = $new_color;
+				
+				# install color in palette listing
+				$palette{mw}{$field} = $new_color;
+
+				# set the color
 				my @fields =  ($field => $new_color);
 				push (@fields, 'background', $mw->cget('-background'))
 					unless $field eq 'background';
 				#print "fields: @fields\n";
 				$mw->setPalette( @fields );
-				initialize_palette();
-				initialize_namapalette();
 			}
  	};
 }
@@ -1200,15 +1205,22 @@ sub ::colorset {
 sub ::namaset {
 	my ($field,$initial) = @_;
 	sub { 	my $color = colorchooser($field,$initial);
-			$namapalette{$field} = $color if $color;
-			$clock->configure(
-				-background => $namapalette{ClockBackground},
-				-foreground => $namapalette{ClockForeground},
-			);
-			$group_label->configure(
-				-background => $namapalette{GroupBackground},
-				-foreground => $namapalette{GroupForeground},
-			)
+			if ($color){ 
+				# install color in palette listing
+				$namapalette{$field} = $color;
+
+				# set those objects who are not
+				# handled by refresh
+
+				$clock->configure(
+					-background => $namapalette{ClockBackground},
+					-foreground => $namapalette{ClockForeground},
+				);
+				$group_label->configure(
+					-background => $namapalette{GroupBackground},
+					-foreground => $namapalette{GroupForeground},
+				)
+			}
 	}
 
 }
