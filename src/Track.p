@@ -434,7 +434,7 @@ Skipping.
 			$track->aux_output;
 		} 
 	} else {  # must be numerical
-		if ( $send > 2){ 
+		if ( $send =< 2){ 
 
 			$track->set(ch_m => $send);
 			$track->set(send_select =>'soundcard');
