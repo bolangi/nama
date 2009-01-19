@@ -1124,12 +1124,12 @@ sub get_saved_colors {
 	$old_bg = $project_label->cget('-background') unless $old_bg;
 	$old_abg = $palette{mw}{activeBackground};
 	$old_abg = $project_label->cget('-activebackground') unless $old_abg;
-	print "1palette: \n", yaml_out( \%palette );
-	print "\n1namapalette: \n", yaml_out(\%namapalette);
+	#print "1palette: \n", yaml_out( \%palette );
+	#print "\n1namapalette: \n", yaml_out(\%namapalette);
 	my %setformat;
 	map{ $setformat{$_} = $palette{mw}{$_} if $palette{mw}{$_}  } 
 		keys %{$palette{mw}};	
-	print "\nsetformat: \n", yaml_out(\%setformat);
+	#print "\nsetformat: \n", yaml_out(\%setformat);
 	$mw->setPalette( %setformat );
 }
 sub init_palette {
