@@ -31,4 +31,16 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                         - full GUI support for Ecasound controllers
 0.991 Wed Jan 14, 2009  - recognize all ecasound-iam commands from 
                           Ecasound int-cmd-list
+0.992 Thu Jan 15, 2009  - minor fixes
+0.993 Sun Jan 18, 2009  - GUI now has Preview button.  Connects setup as 
+                          specified without writing files.
+						- GUI has Palette and Nama Palette
+						  buttons for setting colors
+                        - Palette settings are saved
+                        - report if zero value encountered
+                          in log-hinted parameter of LADSPA plugin 
+                        - 'send off' or 'send 0' disable
+                          auxiliary send for current track
+                        - use of Time::HiRes is now
+                          optional, with fallback to sleep
 

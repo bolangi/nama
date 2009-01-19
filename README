@@ -48,12 +48,15 @@ when installing from CPAN by the following command:
 	IO::All
 	Term::Readline
 	Term::Readline::Gnu
-	Time::HiRes
+	Module::Load::Conditional	
 
-You will also need Tk if you want to run Nama in GUI
-mode:
+You will probably want Tk if you plan to run Nama
+in GUI mode and Time::HiRes for access to the Linux
+kernel's high-resolution timer. These modules
+are not pulled in automatically, so you'll
+need to install yourself if you want them.
 
-	cpan Tk
+	cpan Tk Time::HiRes
 
 =head2 Libraries
 
