@@ -28,30 +28,30 @@ if ( ! -e $config and ! -l $config  ) {
 
 my $missing;
 my @a = `which analyseplugin`;
-@a or warn ( <<WARN
+@a or print ( <<WARN
 LADSPA helper program 'analyseplugin' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
 libraries and executables installed. http://ladspa.org
 WARN
-) and  sleep 1 and $missing++;
+) and  sleeper (600_000) and $missing++;
 my @b = `which ecasound`;
-@b or warn ( <<WARN
+@b or print ( <<WARN
 Ecasound executable program 'ecasound' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
 libraries and executables for all audio processing! 
 WARN
-) and  sleep 1 and $missing++;
+) and sleeper (600_000) and $missing++;
 
 my @c = `which file`;
-@c or warn ( <<WARN
+@c or print ( <<WARN
 BSD utility program 'file' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This program is currently required
 to be able to play back mixes in stereo.
 WARN
-) and sleep 1;
+) and sleeper (600_000);
 if ( $missing ) {
 print "You lack $missing main parts of this suite.  
 Do you want to continue? [N] ";
@@ -65,14 +65,14 @@ print <<HELLO;
 Aloha. Welcome to Nama and Ecasound.
 
 HELLO
-usleep 800_000 ;
+sleeper (600_000);
 print "Configuration file $config not found.
 
 May I create it for you? [yes] ";
 my $reply = <STDIN>;
 chomp $reply;
 if ($reply !~ /n/i){
-usleep 800_000 ;
+sleeper(600_000);
 print <<PROJECT_ROOT;
 
 Nama places all sound and control files under the
@@ -92,7 +92,7 @@ if ($reply !~ /n/i){
 	create_dir( join_path $project_root, "untitled");
 } 
 $default > io( $config );
-usleep 800_000 ;
+sleeper(600_000);
 print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
 }
 print "Exiting.\n"; 
@@ -1372,7 +1372,7 @@ sub jump {
 	my $new_pos = $here + $delta * $unit;
 	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
 	set_position( $new_pos );
-	usleep 100_000;
+	sleeper( 100_000 );
 }
 ## post-recording functions
 
@@ -2637,7 +2637,7 @@ sub set_position {
 	#print "jack: $jack\n";
 	$am_running and $jack and eval_iam('stop');
 	eval_iam("setpos $seconds");
-	$am_running and $jack and usleep($seek_delay), eval_iam('start');
+	$am_running and $jack and sleeper($seek_delay), eval_iam('start');
 	$ui->clock_config(-text => colonize($seconds));
 }
 
@@ -2779,5 +2779,6 @@ sub get_ecasound_iam_keywords {
 	%iam_cmd = map{$_,1 } 
 				grep{ ! $reserved{$_} } split " ", eval_iam('int-cmd-list');
 }
+
 	
 ### end

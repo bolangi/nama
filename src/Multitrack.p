@@ -29,8 +29,19 @@ use File::Spec::Unix;
 use File::Temp;
 use IO::All;
 use Event;
-use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep 
-                    clock_gettime clock_getres clock_nanosleep clock stat );
+use Module::Load::Conditional qw(can_load);
+
+sub roundsleep {
+	my $us = shift;
+	my $sec = int( $us/1e6 + 0.5);
+	$sec or $sec++;
+	sleep $sec
+}
+
+if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
+	 { *sleeper = *Time::HiRes::usleep }
+else { *sleeper = *roundsleep }
+	
 
 # use Tk    # loaded conditionally in GUI mode
 
