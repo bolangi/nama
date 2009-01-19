@@ -2,12 +2,9 @@ use inc::Module::Install;
 
          # Define metadata
          name                'Audio-Ecasound-Multitrack';
-		 version_from        'lib/Audio/Ecasound/Multitrack.pm';
-		 perl_version_from   'lib/Audio/Ecasound/Multitrack.pm';
-		 abstract_from        'lib/Audio/Ecasound/Multitrack.pm';
-		 install_script      'script/nama'; 
-		 author_from         'script/nama';
+		 all_from            'lib/Audio/Ecasound/Multitrack.pm';
 		 license_from        'README';
+		 install_script      'script/nama'; 
 
          # Specific dependencies
 		
