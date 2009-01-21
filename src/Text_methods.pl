@@ -1,5 +1,6 @@
 use Carp;
 use Text::Format;
+use ::Assign qw(:all);
 $text = new Text::Format {
 	columns 		=> 65,
 	firstIndent 	=> 0,
@@ -260,6 +261,7 @@ sub find_effect {
 
 
 sub t_load_project {
+	package ::;
 	my $name = shift;
 	print "input name: $name\n";
 	my $name = remove_spaces($name);
@@ -270,8 +272,10 @@ sub t_load_project {
 
 	print "loaded project: $project_name\n";
 }
+
     
 sub t_create_project {
+	package ::;
 	my $name = shift;
 	load_project( 
 		name => remove_spaces($name),
@@ -281,6 +285,7 @@ sub t_create_project {
 
 }
 sub t_add_ctrl {
+	package ::;
 	my ($parent, $code, $values) = @_;
 	print "code: $code, parent: $parent\n";
 	$values and print "values: ", join " ", @{$values};
@@ -299,6 +304,7 @@ sub t_add_ctrl {
 		add_effect( \%p );
 }
 sub t_add_effect {
+	package ::;
 	my ($code, $values)  = @_;
 
 	# allow use of LADSPA unique ID
@@ -333,17 +339,18 @@ sub group_off {
 
 sub mixdown {
 	print "Enabling mixdown to file.\n";
-	$mixdown_track->set(rw => 'REC'); }
+	$mixdown->set(rw => 'REC'); }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
-	$mixdown_track->set(rw => 'MON');
+	$mixdown->set(rw => 'MON');
 	$tracker->set(rw => 'OFF');}
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
-	$mixdown_track->set(rw => 'OFF');
+	$mixdown->set(rw => 'OFF');
 	$tracker->set(rw => 'MON')}
 
 sub bunch {
+	package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
 		pager(yaml_out( \%bunch ));

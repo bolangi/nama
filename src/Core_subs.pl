@@ -2875,7 +2875,8 @@ sub command_process {
 			#print 1, ref $parser, $/;
 			#print 2, ref $::parser, $/;
 			# both print
-			$parser->command($_) 
+			defined $parser->command($_) 
+				or print "Bad command: $_\n";
 		}    
 	} @user_input;
 	}
