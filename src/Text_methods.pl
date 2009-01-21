@@ -38,7 +38,7 @@ sub loop {
 
 	# we are using Event's handlers and event loop
 
-	package ::;
+	#package ::;
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&::Text::complete;
@@ -124,7 +124,7 @@ sub process_line {
 
 
 sub command_process {
-	package ::;
+	#package ::;
 	my ($user_input) = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
@@ -367,7 +367,7 @@ sub t_load_project {
 }
     
 sub t_create_project {
-	package ::;
+	#package ::;
 	my $name = shift;
 	load_project( 
 		name => ::remove_spaces($name),
@@ -377,7 +377,7 @@ sub t_create_project {
 
 }
 sub t_add_ctrl {
-	package ::;
+	#package ::;
 	my ($parent, $code, $values) = @_;
 	print "code: $code, parent: $parent\n";
 	$values and print "values: ", join " ", @{$values};
@@ -396,7 +396,7 @@ sub t_add_ctrl {
 		add_effect( \%p );
 }
 sub t_add_effect {
-	package ::;
+	#package ::;
 	my ($code, $values)  = @_;
 
 	# allow use of LADSPA unique ID
@@ -419,7 +419,7 @@ sub t_add_effect {
 			#print (yaml_out(\%p));
 		add_effect( \%p );
 }
-package ::Text;
+#package ::Text;
 sub group_rec { 
 	print "Setting group REC-enable. You may record user tracks.\n";
 	$tracker->set( rw => 'REC'); }
@@ -443,7 +443,7 @@ sub mixoff {
 	$tracker->set(rw => 'MON')}
 
 sub bunch {
-	package ::;
+	#package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
 		pager(yaml_out \%bunch);
