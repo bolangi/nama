@@ -456,4 +456,10 @@ bind_off:
   type: perform
   what: remove MIDI binding
   parameters: midi_port midi_controller
+normalize:
+  type: track
+  what: apply ecanormalize to current track version
+fixdc:
+  type: track
+  what: apply ecafixdc to current track version
 ...

@@ -542,7 +542,36 @@ sub set_off {
 	print $track->name, ": set to OFF\n";
 }
 
+sub normalize {
+	my $track = shift;
+	if ($track->rec_status ne 'MON'){
+		print $track->name, ": You must set track to MON before normalizing, skipping.\n";
+		return;
+	} 
+	# track version will exist if MON status
+	my $cmd = 'ecanormalize ';
+	$cmd .= $track->full_path;
+	print "executing: $cmd\n";
+	system $cmd;
+}
+sub fixdc {
+	my $track = shift;
+	if ($track->rec_status ne 'MON'){
+		print $track->name, ": You must set track to MON before fixing dc level, skipping.\n";
+		return;
+	} 
+	# track version will exist if MON status
+	my $cmd = 'ecafixdc ';
+	$cmd .= $track->full_path;
+	print "executing: $cmd\n";
+	system $cmd;
+}
+
+	
+	
+
 # subclass
+
 
 package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
