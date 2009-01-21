@@ -1415,6 +1415,11 @@ sub rec_cleanup {
 			$tracker->set( rw => 'MON');
 			generate_setup() and connect_transport();
 			$ui->refresh();
+			print <<REC;
+WAV files were recorded! Setting group to MON mode. 
+Issue 'start' to review your recording.
+
+REC
 	}
 		
 } 
@@ -1750,12 +1755,13 @@ sub effect_update {
 	# why not use this routine to update %copp values as
 	# well?
 	
-	local $debug = 0;
 	my $es = eval_iam"engine-status";
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
 
 	my ($chain, $id, $param, $val) = @_;
+
+	print "chain $chain id $id param $param value $val\n";
 
 	# $param gets incremented, therefore is zero-based. 
 	# if I check i will find %copp is  zero-based
