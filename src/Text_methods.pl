@@ -37,11 +37,12 @@ sub loop {
 	# first setup Term::Readline::GNU
 
 	# we are using Event's handlers and event loop
+	package ::;
 
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
-	$attribs->{attempted_completion_function} = \&::Text::complete;
-	$term->callback_handler_install($prompt, \&::Text::process_line);
+	$attribs->{attempted_completion_function} = \&complete;
+	$term->callback_handler_install($prompt, \&process_line);
 
 	# store output buffer in a scalar (for print)
 	my $outstream=$attribs->{'outstream'};
@@ -60,7 +61,7 @@ sub loop {
 	    desc   => 'heartbeat',               # description;
 	    prio   => 5,                         # low priority;
 		interval => 3,
-	    cb     => \&::heartbeat,               # callback;
+	    cb     => \&heartbeat,               # callback;
 	);
 	if ( $midi_inputs =~ /on|capture/ ){
 		my $command = "aseqdump ";
@@ -70,7 +71,7 @@ sub loop {
 			desc   => 'read ALSA sequencer events',
 			fd     => \*MIDI,                    # handle;
 			poll   => 'r',	                     # watch for incoming chars
-			cb     => \&::process_control_inputs, # callback;
+			cb     => \&process_control_inputs, # callback;
 			repeat => 1,                         # keep alive after event;
 		 );
 		$event_id{sequencer_error} = Event->io(
@@ -107,98 +108,6 @@ sub cancel_wraparound {
 	$event_id{Event_wraparound}->cancel() if defined $event_id{Event_wraparound}
 }
 
-sub process_line {
-  $debug2 and print "&process_line\n";
-  my ($user_input) = @_;
-  $debug and print "user input: $user_input\n";
-
-  if (defined $user_input and $user_input !~ /^\s*$/)
-    {
-    $term->addhistory($user_input) 
-	 	unless $user_input eq $previous_text_command;
- 	$previous_text_command = $user_input;
-	command_process( $user_input );
-    }
-}
-
-
-sub command_process {
-	my ($user_input) = shift;
-	return if $user_input =~ /^\s*$/;
-	$debug and print "user input: $user_input\n";
-	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-	if ($cmd eq 'for' 
-			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
-		print "b: $bunchy d: $do\n";
-		my @tracks;
-		if ($bunchy =~ /\S \S/ or $tn{$bunchy} or $ti[$bunchy]){
-			print "multiple tracks found\n";
-			@tracks = split " ", $bunchy;
-			print "t: @tracks\n";
-		} else { @tracks = @{$bunch{$bunchy}};
-			print "tt: @tracks\n";
- 		}
-		print "ttt: @tracks\n";
-		for my $t(@tracks) {
-			command_process("$t; $do");
-		}
-	} elsif ($cmd eq 'eval') {
-			$debug and print "Evaluating perl code\n";
-			pager( eval $predicate );
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-	}
-	elsif ( $cmd eq '!' ) {
-			$debug and print "Evaluating shell commands!\n";
-			#system $predicate;
-			my $output = qx( $predicate );
-			#print "length: ", length $output, $/;
-			pager($output); 
-			print "\n";
-	} else {
-
-
-	my @user_input = split /\s*;\s*/, $user_input;
-	map {
-		my $user_input = $_;
-		my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-		$debug and print "cmd: $cmd \npredicate: $predicate\n";
-		if ($cmd eq 'eval') {
-			$debug and print "Evaluating perl code\n";
-			pager( eval $predicate);
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-		} elsif ($cmd eq '!') {
-			$debug and print "Evaluating shell commands!\n";
-			my $output = qx( $predicate );
-			#print "length: ", length $output, $/;
-			pager($output); 
-			print "\n";
-		} elsif ($tn{$cmd}) { 
-			$debug and print qq(Selecting track "$cmd"\n);
-			$this_track = $tn{$cmd};
-			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
-			$predicate !~ /^\s*$/ and $parser->command($predicate);
-		} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-			$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-			$this_track = $ti[$cmd];
-			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
-			$predicate !~ /^\s*$/ and $parser->command($predicate);
-		} elsif ($iam_cmd{$cmd}){
-			$debug and print "Found Iam command\n";
-			my $result = eval_iam($user_input);
-			pager( $result );  
-		} else {
-			$debug and print "Passing to parser\n", $_, $/;
-			#print 1, ref $parser, $/;
-			#print 2, ref $::parser, $/;
-			# both print
-			$parser->command($_) 
-		}    
-	} @user_input;
-	}
-	$ui->refresh; # in case we have a graphic environment
-}
 
 sub placeholder { $use_placeholders ? q(--) : q() }
 sub show_tracks {
@@ -448,34 +357,3 @@ sub bunch {
 	$bunch{$bunchname} = [ @tracks ];
 	}
 }
-sub load_keywords {
-
-@keywords = keys %commands;
-push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
-push @keywords, keys %iam_cmd;
-push @keywords, keys %effect_j;
-}
-
-sub complete {
-    my ($text, $line, $start, $end) = @_;
-    return $term->completion_matches($text,\&keyword);
-};
-
-{
-    my $i;
-    sub keyword {
-        my ($text, $state) = @_;
-        return unless $text;
-        if($state) {
-            $i++;
-        }
-        else { # first call
-            $i = 0;
-        }
-        for (; $i<=$#keywords; $i++) {
-            return $keywords[$i] if $keywords[$i] =~ /^\Q$text/;
-        };
-        return undef;
-    }
-};
-

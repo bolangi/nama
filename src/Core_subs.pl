@@ -186,7 +186,7 @@ sub prepare {
 
 	prepare_static_effects_data() unless $opts{e};
 
-	::Text::load_keywords(); # for autocompletion
+	load_keywords(); # for autocompletion
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
@@ -1378,7 +1378,7 @@ sub jump {
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
-	return if transport_running();
+	print("transport still running, can't cleanup"),return if transport_running();
  	my @k = really_recording();
 	$debug and print "found files: " , join $/, @k;
 	return unless @k;
@@ -2785,6 +2785,129 @@ sub get_ecasound_iam_keywords {
 	%iam_cmd = map{$_,1 } 
 				grep{ ! $reserved{$_} } split " ", eval_iam('int-cmd-list');
 }
+
+sub process_line {
+  $debug2 and print "&process_line\n";
+  my ($user_input) = @_;
+  $debug and print "user input: $user_input\n";
+
+  if (defined $user_input and $user_input !~ /^\s*$/)
+    {
+    $term->addhistory($user_input) 
+	 	unless $user_input eq $previous_text_command;
+ 	$previous_text_command = $user_input;
+	command_process( $user_input );
+    }
+}
+
+
+sub command_process {
+	my ($user_input) = shift;
+	return if $user_input =~ /^\s*$/;
+	$debug and print "user input: $user_input\n";
+	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+	if ($cmd eq 'for' 
+			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
+		print "b: $bunchy d: $do\n";
+		my @tracks;
+		if ($bunchy =~ /\S \S/ or $tn{$bunchy} or $ti[$bunchy]){
+			print "multiple tracks found\n";
+			@tracks = split " ", $bunchy;
+			print "t: @tracks\n";
+		} else { @tracks = @{$bunch{$bunchy}};
+			print "tt: @tracks\n";
+ 		}
+		print "ttt: @tracks\n";
+		for my $t(@tracks) {
+			command_process("$t; $do");
+		}
+	} elsif ($cmd eq 'eval') {
+			$debug and print "Evaluating perl code\n";
+			pager( eval $predicate );
+			print "\n";
+			$@ and print "Perl command failed: $@\n";
+	}
+	elsif ( $cmd eq '!' ) {
+			$debug and print "Evaluating shell commands!\n";
+			#system $predicate;
+			my $output = qx( $predicate );
+			#print "length: ", length $output, $/;
+			pager($output); 
+			print "\n";
+	} else {
+
+
+	my @user_input = split /\s*;\s*/, $user_input;
+	map {
+		my $user_input = $_;
+		my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+		$debug and print "cmd: $cmd \npredicate: $predicate\n";
+		if ($cmd eq 'eval') {
+			$debug and print "Evaluating perl code\n";
+			pager( eval $predicate);
+			print "\n";
+			$@ and print "Perl command failed: $@\n";
+		} elsif ($cmd eq '!') {
+			$debug and print "Evaluating shell commands!\n";
+			my $output = qx( $predicate );
+			#print "length: ", length $output, $/;
+			pager($output); 
+			print "\n";
+		} elsif ($tn{$cmd}) { 
+			$debug and print qq(Selecting track "$cmd"\n);
+			$this_track = $tn{$cmd};
+			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
+			$predicate !~ /^\s*$/ and $parser->command($predicate);
+		} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
+			$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
+			$this_track = $ti[$cmd];
+			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
+			$predicate !~ /^\s*$/ and $parser->command($predicate);
+		} elsif ($iam_cmd{$cmd}){
+			$debug and print "Found Iam command\n";
+			my $result = eval_iam($user_input);
+			pager( $result );  
+		} else {
+			$debug and print "Passing to parser\n", $_, $/;
+			#print 1, ref $parser, $/;
+			#print 2, ref $::parser, $/;
+			# both print
+			$parser->command($_) 
+		}    
+	} @user_input;
+	}
+	$ui->refresh; # in case we have a graphic environment
+}
+sub load_keywords {
+
+@keywords = keys %commands;
+push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
+push @keywords, keys %iam_cmd;
+push @keywords, keys %effect_j;
+}
+
+sub complete {
+    my ($text, $line, $start, $end) = @_;
+    return $term->completion_matches($text,\&keyword);
+};
+
+{
+    my $i;
+    sub keyword {
+        my ($text, $state) = @_;
+        return unless $text;
+        if($state) {
+            $i++;
+        }
+        else { # first call
+            $i = 0;
+        }
+        for (; $i<=$#keywords; $i++) {
+            return $keywords[$i] if $keywords[$i] =~ /^\Q$text/;
+        };
+        return undef;
+    }
+};
 
 	
 ### end
