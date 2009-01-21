@@ -1265,6 +1265,7 @@ sub stop_transport {
 	eval_iam('stop');	
 	print "engine is ", eval_iam("engine-status"), $/;
 	$ui->project_label_configure(-background => $old_bg);
+	sleeper(200_000);
 	rec_cleanup();
 }
 sub transport_running {
