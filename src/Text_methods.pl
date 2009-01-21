@@ -10,7 +10,7 @@ $text = new Text::Format {
 sub new { my $class = shift; return bless { @_ }, $class; }
 
 sub show_versions {
- 	print "All versions: ", join " ", @{$::this_track->versions}, $/;
+ 	print "All versions: ", join " ", @{$this_track->versions}, $/;
 }
 
 sub show_effects {
@@ -38,7 +38,6 @@ sub loop {
 
 	# we are using Event's handlers and event loop
 
-	package ::;
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&::Text::complete;
@@ -86,7 +85,7 @@ sub loop {
 
 }
 sub wraparound {
-	@_ = ::discard_object @_;
+	@_ = discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	$event_id{Event_wraparound}->cancel()
@@ -94,7 +93,7 @@ sub wraparound {
 	$event_id{Event_wraparound} = Event->timer(
 	desc   => 'wraparound',               # description;
 	after  => $diff,
-	cb     => sub{ ::set_position($start) }, # callback;
+	cb     => sub{ set_position($start) }, # callback;
    );
 
 }
@@ -124,7 +123,6 @@ sub process_line {
 
 
 sub command_process {
-	package ::;
 	my ($user_input) = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
@@ -142,7 +140,7 @@ sub command_process {
  		}
 		print "ttt: @tracks\n";
 		for my $t(@tracks) {
-			::Text::command_process("$t; $do");
+			command_process("$t; $do");
 		}
 	} elsif ($cmd eq 'eval') {
 			$debug and print "Evaluating perl code\n";
@@ -200,7 +198,6 @@ sub command_process {
 	} @user_input;
 	}
 	$ui->refresh; # in case we have a graphic environment
-	# package :: scope ends here
 }
 
 sub placeholder { $use_placeholders ? q(--) : q() }
@@ -296,7 +293,7 @@ IAM
 			qq("$name" matches the following commands:\n\n), @help;
 		}
 	}
-	::pager( @output ); 
+	pager( @output ); 
 	
 }
 sub help_effect {
@@ -321,7 +318,7 @@ sub help_effect {
 	
 	my @output = $ladspa_help{$input};
 	print "label: $input\n";
-	::pager( @output );
+	pager( @output );
 	#print $ladspa_help{$input};
 	} else { 
 	print "$input: Ecasound effect. Type 'man ecasound' for details.\n";
@@ -348,13 +345,12 @@ sub find_effect {
 # operator.
 # 
 # EFFECT
-	::pager( $text->paragraphs(@matches) , "\n" );
+	pager( $text->paragraphs(@matches) , "\n" );
 	} else { print "No matching effects.\n\n" }
 }
 
 
 sub t_load_project {
-	package ::;
 	my $name = shift;
 	print "input name: $name\n";
 	my $name = remove_spaces($name);
@@ -367,17 +363,15 @@ sub t_load_project {
 }
     
 sub t_create_project {
-	package ::;
 	my $name = shift;
 	load_project( 
-		name => ::remove_spaces($name),
+		name => remove_spaces($name),
 		create => 1,
 	);
 	print "created project: $project_name\n";
 
 }
 sub t_add_ctrl {
-	package ::;
 	my ($parent, $code, $values) = @_;
 	print "code: $code, parent: $parent\n";
 	$values and print "values: ", join " ", @{$values};
@@ -396,7 +390,6 @@ sub t_add_ctrl {
 		add_effect( \%p );
 }
 sub t_add_effect {
-	package ::;
 	my ($code, $values)  = @_;
 
 	# allow use of LADSPA unique ID
@@ -419,7 +412,6 @@ sub t_add_effect {
 			#print (yaml_out(\%p));
 		add_effect( \%p );
 }
-package ::Text;
 sub group_rec { 
 	print "Setting group REC-enable. You may record user tracks.\n";
 	$tracker->set( rw => 'REC'); }
@@ -443,10 +435,9 @@ sub mixoff {
 	$tracker->set(rw => 'MON')}
 
 sub bunch {
-	package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
-		pager(yaml_out \%bunch);
+		pager(yaml_out( \%bunch));
 	} elsif (! @tracks){
 		$bunch{$bunchname} 
 			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
