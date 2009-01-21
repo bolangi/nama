@@ -1399,7 +1399,7 @@ sub rec_cleanup {
 			$debug and print "exists. ";
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				$debug and print "bigger than a breadbox.  \n";
-				#$ti[$n]->set(active => $ti[$n]->last); 
+				$ti[$n]->set(active => undef); 
 				$ui->update_version_button($n, $v);
 			$recorded++;
 			}
@@ -2809,16 +2809,18 @@ sub command_process {
 	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
 	if ($cmd eq 'for' 
 			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
-		print "b: $bunchy d: $do\n";
+		$debug and print "bunch: $bunchy do: $do\n";
 		my @tracks;
 		if ($bunchy =~ /\S \S/ or $tn{$bunchy} or $ti[$bunchy]){
-			print "multiple tracks found\n";
+			$debug and print "multiple tracks found\n";
 			@tracks = split " ", $bunchy;
-			print "t: @tracks\n";
-		} else { @tracks = @{$bunch{$bunchy}};
-			print "tt: @tracks\n";
+			$debug and print "multitracks: @tracks\n";
+		} elsif ( lc $bunchy eq 'all' ){
+			$debug and print "special bunch: all\n";
+			@tracks = $tracker->tracks;
+		} elsif ( @tracks = @{$bunch{$bunchy}}) {
+			$debug and print "bunch tracks: @tracks\n";
  		}
-		print "ttt: @tracks\n";
 		for my $t(@tracks) {
 			command_process("$t; $do");
 		}

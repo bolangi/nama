@@ -238,7 +238,7 @@ sub write_ewf {
 
 sub current_version {	
 	my $track = shift;
-	my $last = $track->group_last;
+	my $last = $track->last;
 	my $status = $track->rec_status;
 	#print "last: $last status: $status\n";
 	if 	($track->rec_status eq 'REC'){ return ++$last}
