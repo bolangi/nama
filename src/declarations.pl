@@ -328,5 +328,6 @@ our (
                     # (used with JACK only)
     $prompt,        # for text mode
 	$preview,       # am running engine with rec_file disabled
+	$use_group_numbering, # same version number for tracks recorded together
 
 );

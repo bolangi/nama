@@ -162,10 +162,10 @@ sub group_last {
 
 sub current {	 # depends on ewf status
 	my $track = shift;
-	my $last = $track->group_last;
+	my $last = $track->current_version;
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
-		return $track->name . '_' . ++$last . '.wav'}
+		return $track->name . '_' . $last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
 
 	# here comes the logic that enables .ewf support, 
@@ -198,10 +198,10 @@ sub full_wav_path {  # independent of ewf status
 
 sub current_wav {	# independent of ewf status
 	my $track = shift;
-	my $last = $track->group_last;
+	my $last = $track->current_version;
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
-		return $track->name . '_' . ++$last . '.wav'}
+		return $track->name . '_' . $last . '.wav'}
 	elsif ( $track->rec_status eq 'MON'){ 
 		no warnings;
 		my $filename = $track->targets->{ $track->monitor_version } ;
@@ -238,9 +238,11 @@ sub write_ewf {
 
 sub current_version {	
 	my $track = shift;
-	my $last = $track->last;
+	my $last = $::use_group_numbering 
+					? $track->group_last
+					: $track->last;
 	my $status = $track->rec_status;
-	#print "last: $last status: $status\n";
+	#$debug and print "last: $last status: $status\n";
 	if 	($track->rec_status eq 'REC'){ return ++$last}
 	elsif ( $track->rec_status eq 'MON'){ return $track->monitor_version } 
 	else { return undef }
@@ -263,7 +265,6 @@ sub monitor_version {
 # 	else { } # carp "no version to monitor!\n" 
 # 	# print "monitor version: $version\n";
 # 	$version;
-#}
 
 sub rec_status {
 	my $track = shift;
@@ -560,7 +561,7 @@ sub fixdc {
 		print $track->name, ": You must set track to MON before fixing dc level, skipping.\n";
 		return;
 	} 
-	# track version will exist if MON status
+
 	my $cmd = 'ecafixdc ';
 	$cmd .= $track->full_path;
 	print "executing: $cmd\n";

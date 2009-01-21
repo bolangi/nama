@@ -18,6 +18,7 @@
 						$playback_device
 						$capture_device	
 						$project_root 	
+						$use_group_numbering
 						);
 
 						
