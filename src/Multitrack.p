@@ -2,7 +2,7 @@ package ::;
 use 5.008;
 use strict;
 use strict qw(refs);
-#use strict qw(subs);
+use strict qw(subs);
 use warnings;
 no warnings qw(uninitialized);
 no warnings;

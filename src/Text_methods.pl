@@ -437,7 +437,7 @@ sub mixoff {
 sub bunch {
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
-		pager(yaml_out( \%bunch));
+		pager(yaml_out( \%bunch ));
 	} elsif (! @tracks){
 		$bunch{$bunchname} 
 			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
