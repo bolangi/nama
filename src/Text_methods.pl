@@ -228,7 +228,7 @@ sub help_effect {
 	
 	my @output = $ladspa_help{$input};
 	print "label: $input\n";
-	pager( @output );
+	::pager( @output );
 	#print $ladspa_help{$input};
 	} else { 
 	print "$input: Ecasound effect. Type 'man ecasound' for details.\n";
@@ -255,7 +255,7 @@ sub find_effect {
 # operator.
 # 
 # EFFECT
-	pager( $text->paragraphs(@matches) , "\n" );
+	::pager( $text->paragraphs(@matches) , "\n" );
 	} else { print "No matching effects.\n\n" }
 }
 
@@ -303,6 +303,31 @@ sub t_add_ctrl {
 			# print (yaml_out(\%p));
 		add_effect( \%p );
 }
+sub t_insert_effect {
+	my ($before, $code, $values) = @_;
+	print ("Cannot (yet) insert effect while engine running\n"), return 
+		if ::engine_running;
+	# and ::really_recording;
+	my $n = $cops{ $before }->{chain} or 
+		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
+		return;
+	# should mute if engine running
+	my $track = $ti[$n];
+	print $track->name, $/;
+	print join " ",@{$track->ops}, $/; 
+	t_add_effect( $code, $values );
+	print join " ",@{$track->ops}, $/; 
+	my $op = pop @{$track->ops};
+	print join " ",@{$track->ops}, $/; 
+	my $offset = 0;
+	for my $id ( @{$track->ops} ){
+		last if $id eq $before;
+		$offset++;
+	}
+	# now reposition the effect
+	splice 	@{$track->ops}, $offset, 0, $op;
+	print join " ",@{$track->ops}, $/; 
+}
 sub t_add_effect {
 	package ::;
 	my ($code, $values)  = @_;
@@ -313,7 +338,6 @@ sub t_add_effect {
 		$code = $ladspa_label{$code} 
 			or carp("$code: LADSPA plugin not found.  Aborting.\n"), return;
 	}
-		
 	if ( $effect_i{$code} ) {} # do nothing
 	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
 	else { warn "effect code not found: $code\n"; return }
@@ -353,7 +377,7 @@ sub bunch {
 	package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
-		pager(yaml_out( \%bunch ));
+		::pager(yaml_out( \%bunch ));
 	} elsif (! @tracks){
 		$bunch{$bunchname} 
 			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 

@@ -335,6 +335,11 @@ add_effect:
   smry: add effect
   parameters: effect_label param1 param2,... paramn
   example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa var_dali (preset var_dali) Note: no el: or pn: prefix is required
+insert_effect:
+  type: effect
+  short: ifx fxi
+  what: place effect before specified effect (engine stopped, prior to arm only)
+  parameters: before_id effect_code param1 param2... paramn
 modify_effect:
   type: effect
   what: modify an effect parameter

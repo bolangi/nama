@@ -146,6 +146,7 @@ effects => <<EFFECTS,
    preset-register, prg       - list Ecasound presets
    ctrl-register, crg         - list Ecasound controllers 
    add_effect,    fxa, afx    - add an effect to the current track
+   insert_effect, ifx, fxi    - insert an effect before another effect
    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
    remove_effect, fxr, rfx    - remove an effect or controller
    add_controller, acl        - add an Ecasound controller

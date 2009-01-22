@@ -588,6 +588,9 @@ $multi  = ::Rule->new(
 }
 
 sub jackd_running { qx(pgrep jackd) }
+sub engine_running {
+	eval_iam("engine-status") eq "running"
+};
 
 sub input_type_object {
 	if (jackd_running() ){ 

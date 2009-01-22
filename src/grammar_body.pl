@@ -264,6 +264,17 @@ add_effect: _add_effect name value(s?)  end {
 	::Text::t_add_effect $code, $values;
 	1;}
 
+insert_effect: _insert_effect before name value(s?) end {
+	my $before = $item{before};
+	my $code = $item{name};
+	my $values = $item{"value(s?)"};
+	#print "values: " , ref $values, $/;
+	print join ", ", @{$values} if $values;
+	::Text::t_insert_effect  $before, $code, $values;
+	1;}
+
+before: op_id
+
 modify_effect: _modify_effect op_id parameter sign(?) value end {
 		#print join $/, %item, $/;
 		$item{parameter}--; # user's one-based indexing to our zero-base
