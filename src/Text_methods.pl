@@ -203,7 +203,7 @@ IAM
 			qq("$name" matches the following commands:\n\n), @help;
 		}
 	}
-	pager( @output ); 
+	::pager( @output ); 
 	
 }
 sub help_effect {
@@ -339,14 +339,14 @@ sub group_off {
 
 sub mixdown {
 	print "Enabling mixdown to file.\n";
-	$mixdown->set(rw => 'REC'); }
+	$mixdown_track->set(rw => 'REC'); }
 sub mixplay { 
-	print "Setting mixdown playback mode.\n";
-	$mixdown->set(rw => 'MON');
+	print "Setting mixdown_track playback mode.\n";
+	$mixdown_track->set(rw => 'MON');
 	$tracker->set(rw => 'OFF');}
 sub mixoff { 
-	print "Leaving mixdown mode.\n";
-	$mixdown->set(rw => 'OFF');
+	print "Leaving mixdown_track mode.\n";
+	$mixdown_track->set(rw => 'OFF');
 	$tracker->set(rw => 'MON')}
 
 sub bunch {

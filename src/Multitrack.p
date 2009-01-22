@@ -148,7 +148,7 @@ sub loop {
     my ($user_input) = $term->readline($prompt) ;
 	next if $user_input =~ /^\s*$/;
      $term->addhistory($user_input) ;
-	::Text::command_process( $user_input );
+	command_process( $user_input );
 	}
 }
 

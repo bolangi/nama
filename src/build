@@ -1,4 +1,6 @@
 #!/bin/sh
+CUR_DIR=`dirname $0`
+cd "$CUR_DIR"
 MD=..
 TD=$MD/lib/Audio/Ecasound/Multitrack
 if [ ! -d $TD ]; then
@@ -15,3 +17,10 @@ mv $TD/Multitrack.pm $TD/../Multitrack.pm
 		 -r Audio::Ecasound::Multitrack \
 		 -a t \
 		 -b t
+cd ..
+perl Makefile.PL
+echo "Now you can go to the nama toplevel directory and type:"
+echo -e "\tmake; make test"
+echo "If you're happy with the result you can do:"
+echo -e "\tmake install"
+echo "****************************************"

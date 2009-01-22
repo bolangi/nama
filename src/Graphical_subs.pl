@@ -422,7 +422,7 @@ sub group_gui {
 			-background => $namapalette{GroupBackground},
 
  );
-	$group_version = $track_frame->Menubutton(-tearoff => 0);
+	$group_version = $track_frame->Label(-text => q() );
 	$group_rw = $track_frame->Menubutton( -text    => $group->rw,
 										  -tearoff => 0);
 
@@ -460,55 +460,55 @@ sub group_gui {
 				}
 			]);
 			$dummy->grid($group_label, $group_version, $group_rw);
-			$ui->global_version_buttons;
+			#$ui->global_version_buttons;
 
 }
-sub global_version_buttons {
-	local $debug = 0;
-	my $version = $group_version;
-	$version and map { $_->destroy } $version->children;
-		
-	$debug and print "making global version buttons range:",
-		join ' ',1..$ti[-1]->group_last, " \n";
-
-			$version->radiobutton( 
-
-				-label => (''),
-				-value => 0,
-				-command => sub { 
-					$tracker->set(version => 0); 
-					$version->configure(-text => " ");
-					generate_setup() and connect_transport();
-					refresh();
-					}
-
- 					);
-
- 	for my $v (1..$ti[-1]->group_last) { 
-
-	# the highest version number of all tracks in the
-	# $tracker group
-	
-	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
-	
-		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
-			@user_track_indices;
-		
-
-			$version->radiobutton( 
-
-				-label => ($v ? $v : ''),
-				-value => $v,
-				-command => sub { 
-					$tracker->set(version => $v); 
-					$version->configure(-text => $v);
-					generate_setup() and connect_transport();
-					refresh();
-					}
-
- 					);
- 	}
-}
+# sub global_version_buttons {
+# 	local $debug = 0;
+# 	my $version = $group_version;
+# 	$version and map { $_->destroy } $version->children;
+# 		
+# 	$debug and print "making global version buttons range:",
+# 		join ' ',1..$ti[-1]->group_last, " \n";
+# 
+# 			$version->radiobutton( 
+# 
+# 				-label => (''),
+# 				-value => 0,
+# 				-command => sub { 
+# 					$tracker->set(version => 0); 
+# 					$version->configure(-text => " ");
+# 					generate_setup() and connect_transport();
+# 					refresh();
+# 					}
+# 
+#  					);
+# 
+#  	for my $v (1..$ti[-1]->group_last) { 
+# 
+# 	# the highest version number of all tracks in the
+# 	# $tracker group
+# 	
+# 	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
+# 	
+# 		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
+# 			@user_track_indices;
+# 		
+# 
+# 			$version->radiobutton( 
+# 
+# 				-label => ($v ? $v : ''),
+# 				-value => $v,
+# 				-command => sub { 
+# 					$tracker->set(version => $v); 
+# 					$version->configure(-text => $v);
+# 					generate_setup() and connect_transport();
+# 					refresh();
+# 					}
+# 
+#  					);
+#  	}
+# }
 sub track_gui { 
 	$debug2 and print "&track_gui\n";
 	@_ = discard_object(@_);
@@ -1115,9 +1115,6 @@ sub get_saved_colors {
 	} else {
 		print "$pal: no palette file found, using default init\n";
 		init_palette();
-	*rec = \$namapalette{RecBackground};
-	*mon = \$namapalette{MonBackground};
-	*off = \$namapalette{OffBackground};
 		init_namapalette();
 	}
 	$old_bg = $palette{mw}{background};
@@ -1170,6 +1167,9 @@ sub init_namapalette {
 			'OffBackground' => $old_bg,
 	) unless %namapalette; # i.e. not if already loaded
 
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
 
 	%namapalette = ( %namapalette, 
 			'ClockForeground' 	=> 'Red',

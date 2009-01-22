@@ -361,7 +361,7 @@ sub load_project {
 
 	# possible null if Text mode
 	
-	$ui->global_version_buttons(); 
+	#$ui->global_version_buttons(); 
 	$ui->refresh_group;
 	generate_setup() and connect_transport();
 
@@ -728,7 +728,7 @@ sub initialize_project_data {
 	%::Track::track_names = (); 
 
 	$master = ::Group->new(name => 'Master');
-	$mixdown =  ::Group->new(name => 'Mixdown');
+	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');
 	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
 
@@ -1762,7 +1762,7 @@ sub effect_update {
 
 	my ($chain, $id, $param, $val) = @_;
 
-	print "chain $chain id $id param $param value $val\n";
+	#print "chain $chain id $id param $param value $val\n";
 
 	# $param gets incremented, therefore is zero-based. 
 	# if I check i will find %copp is  zero-based

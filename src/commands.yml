@@ -38,6 +38,7 @@ setpos:
   short: sp
   what: set current playhead position (seconds)
   example: setpos 65 (set play position to 65 seconds from start)
+  parameters: float (position)
   type: transport
 forward:
   short: fw
@@ -83,8 +84,8 @@ mixplay:
   parameters: none
 mixoff:
   type: mix
-  short: norm mxo normal
-  what: normal mode, i.e. Mixdown group OFF, user tracks MON
+  short: mxo
+  what: Mixdown group OFF, user tracks MON
   smry: mix off
   parameters: none
 add_track:
@@ -458,8 +459,10 @@ bind_off:
   parameters: midi_port midi_controller
 normalize:
   type: track
+  short: norm ecanormalize
   what: apply ecanormalize to current track version
 fixdc:
   type: track
   what: apply ecafixdc to current track version
+  short: ecafixdc
 ...
