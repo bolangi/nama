@@ -87,7 +87,7 @@ sub loop {
 
 }
 sub wraparound {
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	$event_id{Event_wraparound}->cancel()

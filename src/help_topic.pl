@@ -138,6 +138,7 @@ marks => <<MARKS,
    previous_mark, pm  - jump to previous mark 
    name_mark, nom     - give a name to current mark 
    to_mark, tom       - jump to a mark by name or index
+   remove_mark, rmm   - remove current mark
 MARKS
 
 effects => <<EFFECTS,

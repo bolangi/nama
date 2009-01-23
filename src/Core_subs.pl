@@ -2189,7 +2189,7 @@ sub read_in_tkeca_effects_data {
 						split "\n",$tkeca_effects_data; 
 	
 	$e_bound{tkeca}{a}  = 1;
-	$e_bound{tkeca}{z}  = scalar @effects_data;  
+	$e_bound{tkeca}{z}  = scalar @effects_data + 1; # EV HACK
 
 	for my $i (1..@effects_data){
 		my @row = @{ shift @effects_data };
@@ -2212,6 +2212,9 @@ sub read_in_tkeca_effects_data {
 
 			}
 	}
+	my $ev = $e_bound{tkeca}{z};# EV HACK
+	$effect_i{ev} = $ev; # EV HACK
+	$effects[$ev]->{params} = [];
 
 }
 sub get_ladspa_hints{
@@ -2426,7 +2429,7 @@ sub save_state {
 
 	map{ 
 		my $found; 
-		$found = "yes" if @{$cops{$_}->{owns}};
+		$found = "yes" if defined $cops{$_}->{owns};
 		$cops{$_}->{owns} = '~' unless $found;
 	} keys %cops;
 
