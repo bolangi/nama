@@ -2072,13 +2072,9 @@ sub sort_ladspa_effects {
 	$debug and print "sorted array length: ". scalar @ladspa_sorted, "\n";
 }		
 sub read_in_effects_data {
-
-	local $debug = 0;
-	$debug2 and print "&read_in_effects_data\n";
-	#read_in_tkeca_effects_data();
-
-	# read in other effects data
 	
+	$debug2 and print "&read_in_effects_data\n";
+
 	my $lr = eval_iam("ladspa-register");
 
 	#print $lr; 
@@ -2198,52 +2194,6 @@ sub read_in_effects_data {
 	}
 
 	$debug and print "\@effects\n======\n", yaml_out(\@effects); ; 
-}
-sub read_in_tkeca_effects_data {
-
-# Based on GPL code in Tkeca
-
-# controller (effect) data format
-# code|name|number_of_parameters| ( Label|scale_start|scale_end|default|resolution ) x number_of_parameters
-
-# I left the tcl code 'as is' in the following pasted section, using regexes 
-# so future updates from him can be pasted in without editing.
-
-# divide by lines, remove stuff outside quotes, 
-# then make an anonymous array of the fields of each line
-
-	my @effects_data = 	map { [split /\|/, $_ ]  }  
-						map{ s/^.*?"//; s/"\s*$//; $_} 
-						split "\n",$tkeca_effects_data; 
-	
-	$e_bound{tkeca}{a}  = 1;
-	$e_bound{tkeca}{z}  = scalar @effects_data + 1; # EV HACK
-
-	for my $i (1..@effects_data){
-		my @row = @{ shift @effects_data };
-		@{$effects[$i]}{ qw(code name count) } = splice @row, 0, 3;
-
-		# default display format
-
-		$effects[$i]->{display} = qq(scale);
-
-	# maps effect code (i.e. epp) to an index in array holding static effects data
-	#print "effects code: $i stands for ", $effects[$i]->{code}, "\n";
-	#print "count: $effects[$i]->{count}\n";
-
-			for (1..$effects[$i]->{count}){
-				my %p;
-				#print join " / ",splice (@row, 0,5), "\n";
-				@p{ qw(name begin end default resolution) }  =  splice @row, 0, 5;
-				# print "\%p\n======\n", yaml_out(\%p);
-				push @{$effects[$i]->{params}}, \%p;
-
-			}
-	}
-	my $ev = $e_bound{tkeca}{z};# EV HACK
-	$effect_i{ev} = $ev; # EV HACK
-	$effects[$ev]->{params} = [];
-
 }
 
 sub integrate_cop_hints {

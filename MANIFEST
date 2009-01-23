@@ -13,7 +13,6 @@ lib/Audio/Ecasound/Multitrack/Assign.pm
 lib/Audio/Ecasound/Multitrack/Bus.pm
 lib/Audio/Ecasound/Multitrack/Mark.pm
 lib/Audio/Ecasound/Multitrack/Object.pm
-lib/Audio/Ecasound/Multitrack/Tkeca_effects.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
 script/nama
