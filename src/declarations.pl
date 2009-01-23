@@ -255,6 +255,7 @@ our (
 	%commands,	# created from commands.yml
 	%dispatch,  # replacement for existing parser
 	$commands_yml, # the string form of commands.yml
+	$cop_hints_yml, # ecasound effects hinting
 
 	$save_id, # text variable
 	$sn_save_text,# text entry widget

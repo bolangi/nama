@@ -1964,9 +1964,11 @@ sub prepare_static_effects_data{
 	} else {
 		
 		$debug and print "reading in effects data, please wait...\n";
-		read_in_effects_data(); 
-		get_ladspa_hints();
+		read_in_effects_data();  
+		# cop-register, preset-register, ctrl-register, ladspa-register
+		get_ladspa_hints();     
 		integrate_ladspa_hints();
+		integrate_cop_hints();
 		sort_ladspa_effects();
 		prepare_effects_help();
 		serialize (
@@ -2025,6 +2027,7 @@ sub prepare_effect_index {
 	#print yaml_out \%effect_j;
 }
 sub extract_effects_data {
+	my $debug = 1;
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
@@ -2048,7 +2051,10 @@ sub extract_effects_data {
 		$effects[$j]->{count} = scalar @p_names;
 		$effects[$j]->{params} = [];
 		$effects[$j]->{display} = qq(field);
-		map{ push @{$effects[$j]->{params}}, {name => $_} } @p_names;
+		map{ push @{$effects[$j]->{params}}, {name => $_} } @p_names
+			if @p_names;
+
+;
 	}
 }
 sub sort_ladspa_effects {
@@ -2066,7 +2072,7 @@ sub read_in_effects_data {
 
 	local $debug = 0;
 	$debug2 and print "&read_in_effects_data\n";
-	read_in_tkeca_effects_data();
+	#read_in_tkeca_effects_data();
 
 	# read in other effects data
 	
@@ -2075,38 +2081,48 @@ sub read_in_effects_data {
 	#print $lr; 
 	
 	my @ladspa =  split "\n", $lr;
-
-	
-	#$lr > io("lr");
-	#split /\n+/, 
-	
-	# grep {! /^\w*$/ } 
 	
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
 
 	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
+	my @cop = grep {! /^\w*$/ } split "\n", eval_iam("cop-register");
 
+	print join $/, @cop;
 
 #	print eval_iam("ladspa-register");
 	
+	$debug and print "found ", scalar @cop, " Ecasound chain operators\n";
+	$debug and print "found ", scalar @preset, " Ecasound presets\n";
+	$debug and print "found ", scalar @ctrl, " Ecasound controllers\n";
 	$debug and print "found ", scalar @lad, " LADSPA effects\n";
-	$debug and print "found ", scalar @preset, " presets\n";
-	$debug and print "found ", scalar @ctrl, " controllers\n";
 
 	# index boundaries we need to make effects list and menus
-
-	$e_bound{ladspa}{a} = $e_bound{tkeca}{z} + 1;
-	$e_bound{ladspa}{b} = $e_bound{tkeca}{z} + int(@lad/4);
-	$e_bound{ladspa}{c} = $e_bound{tkeca}{z} + 2*int(@lad/4);
-	$e_bound{ladspa}{d} = $e_bound{tkeca}{z} + 3*int(@lad/4);
-	$e_bound{ladspa}{z} = $e_bound{tkeca}{z} + @lad;
+	$e_bound{cop}{a}   = 1;
+	$e_bound{cop}{z}   = @cop; # scalar
+	$e_bound{ladspa}{a} = $e_bound{cop}{z} + 1;
+	$e_bound{ladspa}{b} = $e_bound{cop}{z} + int(@lad/4);
+	$e_bound{ladspa}{c} = $e_bound{cop}{z} + 2*int(@lad/4);
+	$e_bound{ladspa}{d} = $e_bound{cop}{z} + 3*int(@lad/4);
+	$e_bound{ladspa}{z} = $e_bound{cop}{z} + @lad;
 	$e_bound{preset}{a} = $e_bound{ladspa}{z} + 1;
 	$e_bound{preset}{b} = $e_bound{ladspa}{z} + int(@preset/2);
 	$e_bound{preset}{z} = $e_bound{ladspa}{z} + @preset;
 	$e_bound{ctrl}{a}   = $e_bound{preset}{z} + 1;
 	$e_bound{ctrl}{z}   = $e_bound{preset}{z} + @ctrl;
+
+	my $cop_re = qr/
+		^(\d+) # number
+		\.    # dot
+		\s+   # spaces+
+		(\w.+?) # name, starting with word-char,  non-greedy
+		# (\w+) # name
+		,\s*  # comma spaces* 
+		-(\w+)    # cop_id 
+		:?     # maybe colon (if parameters)
+		(.*$)  # rest
+	/x;
 
 	my $preset_re = qr/
 		^(\d+) # number
@@ -2138,6 +2154,15 @@ sub read_in_effects_data {
 		-(k\w+):?    # ktrl_id maybe followed by colon
 		(.*$)        # rest
 	/x;
+
+	extract_effects_data(
+		$e_bound{cop}{a},
+		$e_bound{cop}{z},
+		$cop_re,
+		q(','),
+		@cop,
+	);
+
 
 	extract_effects_data(
 		$e_bound{ladspa}{a},
@@ -2216,6 +2241,16 @@ sub read_in_tkeca_effects_data {
 	$effect_i{ev} = $ev; # EV HACK
 	$effects[$ev]->{params} = [];
 
+}
+
+sub integrate_cop_hints {
+
+	my @cop_hints = @{ yaml_in( $cop_hints_yml ) };
+	for my $hashref ( @cop_hints ){
+		#print "cop hints ref type is: ",ref $hashref, $/;
+		my $code = $hashref->{code};
+		$effects[ $effect_i{ $code } ] = $hashref;
+	}
 }
 sub get_ladspa_hints{
 	$debug2 and print "&get_ladspa_hints\n";
@@ -2312,10 +2347,15 @@ sub range {
 	my ($beg, $end) = split /\s+to\s+/, $range;
 	# if end is '...' set to $default + 10dB or $default * 10
 	$default =~ s/default\s+//;
+	my @default_range = /([\d\.eE+-]+)/g;
+	$default = abs($default_range[1] - $default_range[0])/2
+		if @default_range > 1; # for case: "05 to 100"
 	$end =~ /\.{3}/ and $end = (
 		$default == 0 ? 10  # '0' is probably 0db, so 0+10db
 					  : $default * 10
 		);
+	#$beg = 0.001 * $multiplier if ! $beg;
+	#$end = 0.001 * $multiplier if ! $end;
 	$debug and print "1 beg: $beg  end: $end\n";
 	$beg = $beg * $multiplier;
 	$end = $end * $multiplier;
@@ -2326,7 +2366,7 @@ sub range {
 	elsif ($hint =~ /logarithmic/ ) {
 
 		if (! $beg or ! $end or ! $default ){
-			print <<WARN;
+			$debug and print <<WARN;
 $plugin_label: zero value found for settings in logarithmic hinted
 parameter "$name".
 
@@ -2336,9 +2376,8 @@ parameter "$name".
 WARN
 		}
 
-		$beg = 0.0001 * $multiplier if ! $beg;
-		$beg = round ( log $beg );
-		$end = round ( log $end );
+		$beg = round ( log $beg ) if $beg;
+		$end = round ( log $end ) if $end;
 		$resolution = ($end - $beg) / 100;
 		$default = $default ? round (log $default) : $default;
 	}

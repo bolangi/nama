@@ -14,7 +14,6 @@ name3: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 end: /[;\s]*$/ 
-exit: _exit end { ::save_state(); CORE::exit ; 1}
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
@@ -105,7 +104,7 @@ mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 
-exit: 'exit' end { ::save_state($::state_store_file); exit; 1}
+exit: 'exit' end { ::save_state($::state_store_file); CORE::exit(); 1}
 source: _source name {
 	my $old_source = $::this_track->source;
 	my $new_source = $::this_track->source($item{name});

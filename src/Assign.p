@@ -51,8 +51,9 @@ our @EXPORT = qw(
 package ::;
 our ($debug, $debug2, $debug3);
 package ::Assign;
-my $yw = Data::YAML::Writer->new;
-my $yr = Data::YAML::Reader->new;
+use vars qw($yw $yr);
+$yw = Data::YAML::Writer->new;
+$yr = Data::YAML::Reader->new;
 
 use Carp;
 
@@ -303,7 +304,7 @@ sub yaml_in {
 		$debug and print "assuming yaml text input\n";
 		$yaml = $file;
 	}
-	$yr->read( $yaml ); # returns ref
+	eval q[$yr->read( $yaml )]  or croak "yaml read failed: $@" ; # returns ref
 }
 
 ## support functions

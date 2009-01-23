@@ -209,6 +209,10 @@ $commands_yml = <<'YML';
 [% qx(./strip_all  ./commands.yml) %]
 YML
 
+$cop_hints_yml = <<'YML';
+[% qx(cat ./ecasound_chain_operator_hints.yml) %];
+YML
+
 %commands = %{ ::yaml_in( $::commands_yml) };
 
 $::AUTOSTUB = 1;
