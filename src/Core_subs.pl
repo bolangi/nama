@@ -2910,6 +2910,16 @@ sub complete {
         return undef;
     }
 };
+sub jack_clients {
+	# returns hash
+	my %clients;
+	my $re = qr/([^:]+):([^:]+?)_(\d+)/;
+	map{ my ($name, $direction, $n) = /$re/;
+		#print "name $name, dir $direction, n $n\n";
+		$clients{$name}{$direction} = $n;
+	} split "\n",qx(jack_lsp);
+	%clients;
+}
 
 	
 ### end
