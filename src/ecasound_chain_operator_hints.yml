@@ -1,0 +1,476 @@
+---
+-
+  code: ea
+  count: 1
+  display: scale
+  name: Volume
+  params:
+    -
+      begin: 0
+      default: 100
+      end: 600
+      name: "Level %"
+      resolution: 0
+-
+  code: epp
+  count: 1
+  display: scale
+  name: Pan
+  params:
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Level %"
+      resolution: 0
+-
+  code: eal
+  count: 1
+  display: scale
+  name: Limiter
+  params:
+    -
+      begin: 0
+      default: 100
+      end: 100
+      name: "Limit %"
+      resolution: 0
+-
+  code: ec
+  count: 2
+  display: scale
+  name: Compressor
+  params:
+    -
+      begin: 0
+      default: 1
+      end: 1
+      name: "Compression Rate (Db)"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Threshold %"
+      resolution: 0
+-
+  code: eca
+  count: 4
+  display: scale
+  name: "Advanced Compressor"
+  params:
+    -
+      begin: 0
+      default: 69
+      end: 100
+      name: "Peak Level %"
+      resolution: 0
+    -
+      begin: 0
+      default: 2
+      end: 5
+      name: "Release Time (Seconds)"
+      resolution: 0
+    -
+      begin: 0
+      default: 0.5
+      end: 1
+      name: "Fast Compressor Rate"
+      resolution: 0
+    -
+      begin: 0
+      default: 1
+      end: 1
+      name: "Compressor Rate (Db)"
+      resolution: 0
+-
+  code: enm
+  count: 5
+  display: scale
+  name: "Noise Gate"
+  params:
+    -
+      begin: 0
+      default: 100
+      end: 100
+      name: "Threshold Level %"
+      resolution: 0
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Pre Hold Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Attack Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Post Hold Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Release Time (ms)"
+      resolution: 0
+-
+  code: ef1
+  count: 2
+  display: scale
+  name: "Resonant Bandpass Filter"
+  params:
+    -
+      begin: 0
+      default: 0
+      end: 20000
+      name: "Center Frequency (Hz)"
+      resolution: 0
+    -
+      begin: 0
+      default: 0
+      end: 2000
+      name: "Width (Hz)"
+      resolution: 0
+-
+  code: ef3
+  count: 3
+  display: scale
+  name: "Resonant Lowpass Filter"
+  params:
+    -
+      begin: 0
+      default: 0
+      end: 5000
+      name: "Cutoff Frequency (Hz)"
+      resolution: 0
+    -
+      begin: 0
+      default: 0
+      end: 2
+      name: Resonance
+      resolution: 0
+    -
+      begin: 0
+      default: 0
+      end: 1
+      name: Gain
+      resolution: 0
+-
+  code: efa
+  count: 2
+  display: scale
+  name: "Allpass Filter"
+  params:
+    -
+      begin: 0
+      default: 0
+      end: 10000
+      name: "Delay Samples"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+-
+  code: efb
+  count: 2
+  display: scale
+  name: "Bandpass Filter"
+  params:
+    -
+      begin: 0
+      default: 11000
+      end: 11000
+      name: "Center Frequency (Hz)"
+      resolution: 0
+    -
+      begin: 0
+      default: 22000
+      end: 22000
+      name: "Width (Hz)"
+      resolution: 0
+-
+  code: efh
+  count: 1
+  display: scale
+  name: "Highpass Filter"
+  params:
+    -
+      begin: 10000
+      default: 10000
+      end: 22000
+      name: "Cutoff Frequency (Hz)"
+      resolution: 0
+-
+  code: efl
+  count: 1
+  display: scale
+  name: "Lowpass Filter"
+  params:
+    -
+      begin: 0
+      default: 0
+      end: 10000
+      name: "Cutoff Frequency (Hz)"
+      resolution: 0
+-
+  code: efr
+  count: 2
+  display: scale
+  name: "Bandreject Filter"
+  params:
+    -
+      begin: 0
+      default: 11000
+      end: 11000
+      name: "Center Frequency (Hz)"
+      resolution: 0
+    -
+      begin: 0
+      default: 22000
+      end: 22000
+      name: "Width (Hz)"
+      resolution: 0
+-
+  code: efs
+  count: 2
+  display: scale
+  name: "Resonator Filter"
+  params:
+    -
+      begin: 0
+      default: 11000
+      end: 11000
+      name: "Center Frequency (Hz)"
+      resolution: 0
+    -
+      begin: 0
+      default: 22000
+      end: 22000
+      name: "Width (Hz)"
+      resolution: 0
+-
+  code: etd
+  count: 4
+  display: scale
+  name: Delay
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 0
+      end: 2
+      name: "Surround Mode (Normal, Surround St., Spread)"
+      resolution: 1
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Number of Delays"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Mix %"
+      resolution: 0
+-
+  code: etc
+  count: 4
+  display: scale
+  name: Chorus
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 500
+      end: 10000
+      name: "Variance Time Samples"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "LFO Frequency (Hz)"
+      resolution: 0
+-
+  code: etr
+  count: 3
+  display: scale
+  name: Reverb
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 0
+      end: 1
+      name: "Surround Mode (0=Normal, 1=Surround)"
+      resolution: 1
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+-
+  code: ete
+  count: 3
+  display: scale
+  name: "Advanced Reverb"
+  params:
+    -
+      begin: 0
+      default: 10
+      end: 100
+      name: "Room Size (Meters)"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Wet %"
+      resolution: 0
+-
+  code: etf
+  count: 1
+  display: scale
+  name: "Fake Stereo"
+  params:
+    -
+      begin: 0
+      default: 40
+      end: 500
+      name: "Delay Time (ms)"
+      resolution: 0
+-
+  code: etl
+  count: 4
+  display: scale
+  name: Flanger
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 1000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 200
+      end: 10000
+      name: "Variance Time Samples"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "LFO Frequency (Hz)"
+      resolution: 0
+-
+  code: etm
+  count: 3
+  display: scale
+  name: "Multitap Delay"
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 20
+      end: 100
+      name: "Number of Delays"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Mix %"
+      resolution: 0
+-
+  code: etp
+  count: 4
+  display: scale
+  name: Phaser
+  params:
+    -
+      begin: 0
+      default: 200
+      end: 2000
+      name: "Delay Time (ms)"
+      resolution: 0
+    -
+      begin: 0
+      default: 100
+      end: 10000
+      name: "Variance Time Samples"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "Feedback %"
+      resolution: 0
+    -
+      begin: 0
+      default: 50
+      end: 100
+      name: "LFO Frequency (Hz)"
+      resolution: 0
+-
+  code: pn:metronome
+  count: 1
+  display: scale
+  name: Metronome
+  params:
+    -
+      begin: 30
+      default: 120
+      end: 300
+      name: BPM
+      resolution: 1
+...
