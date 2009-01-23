@@ -154,6 +154,9 @@ sub prepare {
 
 	$project_root or $project_root = join_path($ENV{HOME}, "nama" );
 
+	# capture the sample frequency from .namarc
+	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
+
 	first_run();
 	
 	# init our buses

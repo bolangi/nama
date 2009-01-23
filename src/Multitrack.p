@@ -83,7 +83,6 @@ $state_store_file = 'State';
 $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
-$ladspa_sample_rate = 44100; # temporary setting
 $project_root = join_path( $ENV{HOME}, "nama");
 $seek_delay = 100_000; # microseconds
 $prompt = "nama ('h' for help)> ";
