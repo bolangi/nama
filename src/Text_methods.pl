@@ -87,7 +87,7 @@ sub loop {
 
 }
 sub wraparound {
-	package::;
+	package ::;
 	@_ = discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";

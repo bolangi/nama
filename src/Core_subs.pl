@@ -2923,7 +2923,7 @@ sub jack_clients {
 		#print "name $name, dir $direction, n $n\n";
 		$clients{$name}{$direction} = $n;
 	} split "\n",$jack_lsp;
-	return \%clients; if ! $name; 				# hash ref
+	return \%clients if ! $name; 				# hash ref
 	return $clients{$name} if ! $direction;		# hash ref 
 	return $clients{$name}{$direction}; 		# value
 }
