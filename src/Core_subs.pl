@@ -2911,14 +2911,19 @@ sub complete {
     }
 };
 sub jack_clients {
-	# returns hash
+	my ($name, $direction)  = @_;
 	my %clients;
+	my $jack_lsp = qx(jack_lsp);
+	print $jack_lsp, return undef if 
+		$jack_lsp =~ q(JACK server not running);
 	my $re = qr/([^:]+):([^:]+?)_(\d+)/;
 	map{ my ($name, $direction, $n) = /$re/;
 		#print "name $name, dir $direction, n $n\n";
 		$clients{$name}{$direction} = $n;
-	} split "\n",qx(jack_lsp);
-	%clients;
+	} split "\n",$jack_lsp;
+	return \%clients; if ! $name; 				# hash ref
+	return $clients{$name} if ! $direction;		# hash ref 
+	return $clients{$name}{$direction}; 		# value
 }
 
 	

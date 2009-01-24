@@ -266,17 +266,25 @@ sub monitor_version {
 # 	# print "monitor version: $version\n";
 # 	$version;
 
+sub jack_client {
+	my $track = shift;
+	my ($client) = $track->source =~ /(\w+)/;
+	return $client if $track->source =~ /\D/; 
+}
+	
 sub rec_status {
 	my $track = shift;
 	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
 
-		
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version
-		or $track->hide;
+		or $track->hide
+		or my $client = $track->jack_client
+			and ! ::jack_clients{$client}{capture} 
+			and ! ::jack_clients{$client}{in}
 		# ! $track->full_path;
 		;
 	if( 	
