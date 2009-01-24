@@ -724,6 +724,8 @@ sub initialize_project_data {
 
 	# $is_armed = 0;
 	
+	%bunch = ();	
+	
 	$::Group::n = 0; 
 	@::Group::by_index = ();
 	%::Group::by_name = ();
