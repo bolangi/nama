@@ -271,6 +271,9 @@ sub serialize {
 			my $result1 = store \%state, $file; # old method
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;
+			rmap_array { $_ = q(~) if ! scalar @$_ } \%state;
+			rmap_hash  { $_ = q(~) if ! scalar %$_ } \%state;
+			rmap       { $_ = q(~) if !         $_ } \%state;
 			my $yaml = yaml_out(\%state);
 			$yaml > io($file);
 			$debug and print $yaml;
