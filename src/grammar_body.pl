@@ -138,7 +138,7 @@ off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
 
-set_version: _set_version dd end { $::this_track->set(active => $item{dd}); 1}
+set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
 vol: _vol dd end { 
 	$::copp{ $::this_track->vol }->[0] = $item{dd}; 
 	::sync_effect_param( $::this_track->vol, 0);

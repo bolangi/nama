@@ -282,9 +282,9 @@ sub rec_status {
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version
 		or $track->hide
-# 		or my $client = $track->jack_client
-# 			and ! ::jack_clients{$client}{capture} 
-# 			and ! ::jack_clients{$client}{in}
+ 		or my $client = $track->jack_client
+ 			and ! ::jack_clients{$client}{capture} 
+ 			and ! ::jack_clients{$client}{in}
 		# ! $track->full_path;
 		;
 	if( 	
@@ -393,6 +393,10 @@ sub source { # command for setting, showing track source
 		if ( ::jackd_running() ){
 			$track->set(jack_source => $source);
 			$track->set(source_select => "jack");
+			my $name = $track->name;
+			print <<CLIENT if ! ::jack_clients($source);
+JACK client "$source" is not found, track "$name" is OFF
+CLIENT
 			$track->jack_source
 		} else {
 			print "JACK server not running.\n";
@@ -404,6 +408,17 @@ sub source { # command for setting, showing track source
 		$track->input;
 	}
 } 
+
+sub set_version {
+	my ($track, $n) = @_;
+	my $name = $track->name;
+	if ( grep{ $n == $_ } @{$track->versions} ){
+		print "$name: setting version $n\n";
+		$track->set(active => $n)
+	} else { 
+		print "$name: version $n does not exist, skipping.\n"
+	}
+}
 
 sub set_send {
 	my ($track, $output) = @_;
