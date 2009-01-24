@@ -9,6 +9,7 @@ use IO::All;
 use Data::YAML;
 use Data::YAML::Reader;
 use Data::YAML::Writer;
+use Data::Rmap qw(:all);
 use Storable;
 
 require Exporter;
@@ -238,7 +239,7 @@ sub serialize {
 # more YAML adjustments 
 #
 # restore will break if a null field is not converted to '~'
-
+=comment
 		if ( ! $h{-storable} ){ 
 			if ( $sigil eq q($) ){
 				my $val = eval( $value );
@@ -252,6 +253,7 @@ sub serialize {
 				$value = %val ? $value : $tilde; 
 			}
 		}
+=cut
 			
 		 my $eval_string =  q($state{')
 							. $identifier
@@ -260,7 +262,7 @@ sub serialize {
 							. $value;
 	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or $debug  and print 
-		"eval returned zero or failed ($!\n)";
+		"eval returned zero or failed ($@\n)";
 	} @vars;
 	# my $result1 = store \%state, $file; # old method
 	if ( $h{-file} ) {
@@ -270,7 +272,6 @@ sub serialize {
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;
 			my $yaml = yaml_out(\%state);
-			$yaml =~ s/^    owns:$/    owns: ~/mg;
 			$yaml > io($file);
 			$debug and print $yaml;
 		}
