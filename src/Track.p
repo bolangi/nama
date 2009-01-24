@@ -282,9 +282,9 @@ sub rec_status {
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version
 		or $track->hide
-		or my $client = $track->jack_client
-			and ! ::jack_clients{$client}{capture} 
-			and ! ::jack_clients{$client}{in}
+# 		or my $client = $track->jack_client
+# 			and ! ::jack_clients{$client}{capture} 
+# 			and ! ::jack_clients{$client}{in}
 		# ! $track->full_path;
 		;
 	if( 	
