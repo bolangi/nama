@@ -104,7 +104,7 @@ mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 
-exit: 'exit' end { ::save_state($::state_store_file); CORE::exit(); 1}
+exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
 source: _source name {
 	my $old_source = $::this_track->source;
 	my $new_source = $::this_track->source($item{name});

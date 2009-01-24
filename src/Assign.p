@@ -270,6 +270,7 @@ sub serialize {
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;
 			my $yaml = yaml_out(\%state);
+			$yaml =~ s/^    owns:$/    owns: ~/mg;
 			$yaml > io($file);
 			$debug and print $yaml;
 		}
