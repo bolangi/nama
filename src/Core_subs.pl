@@ -2916,7 +2916,7 @@ sub jack_clients {
 	my ($name, $direction)  = @_;
 	my %clients;
 	my $jack_lsp = qx(jack_lsp);
-	print $jack_lsp, return undef if 
+	print "$jack_lsp\n", return undef if 
 		$jack_lsp =~ q(JACK server not running);
 	my $re = qr/([^:]+):([^:]+?)_(\d+)/;
 	map{ my ($name, $direction, $n) = /$re/;
