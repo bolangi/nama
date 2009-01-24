@@ -276,15 +276,16 @@ sub rec_status {
 	my $track = shift;
 	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
+	my $client = $track->jack_client;
 
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version
 		or $track->hide
- 		or my $client = $track->jack_client
- 			and ! ::jack_clients{$client}{capture} 
- 			and ! ::jack_clients{$client}{in}
+ 		or $client
+ 			and ! ::jack_clients($client,q[capture]) 
+ 			and ! ::jack_clients($client,q[in]);
 		# ! $track->full_path;
 		;
 	if( 	
