@@ -252,19 +252,6 @@ sub monitor_version {
 	my $track = shift;
 	$track->active ? $track->active : $track->last;
 }
-# 	my $group = $::Group::by_name{$track->group};
-# 	my $version; 
-# 	if ( $track->active 
-# 			and grep {$track->active == $_ } @{$track->versions}) 
-# 		{ $version = $track->active }
-# 	elsif (	$group->version
-# 			and grep {$group->version  == $_ } @{$track->versions})
-# 		{ $version = $group->version }
-# #	elsif (	$track->last) #  and ! $track->active and ! $group->version )
-# #		{ $version = $track->last }
-# 	else { } # carp "no version to monitor!\n" 
-# 	# print "monitor version: $version\n";
-# 	$version;
 
 sub jack_client {
 	my $track = shift;
