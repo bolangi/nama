@@ -269,10 +269,10 @@ sub rec_status {
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $track->monitor_version
-		or $track->hide
- 		or $client
- 			and ! ::jack_clients($client,q[capture]) 
- 			and ! ::jack_clients($client,q[in]);
+#		or $track->hide
+#  		or $client
+#  			and ! ::jack_clients($client,q[capture]) 
+#  			and ! ::jack_clients($client,q[in]);
 		# ! $track->full_path;
 		;
 	if( 	
