@@ -410,9 +410,10 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		print "$name: default to latest version\n";
+		print "$name: following latest version\n";
+		$track->set(active => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
-		print "$name: setting version $n\n";
+		print "$name: anchoring version $n\n";
 		$track->set(active => $n)
 	} else { 
 		print "$name: version $n does not exist, skipping.\n"
