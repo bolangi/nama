@@ -382,9 +382,9 @@ sub source { # command for setting, showing track source
 			$track->set(jack_source => $source);
 			$track->set(source_select => "jack");
 			my $name = $track->name;
-			print <<CLIENT if ! ::jack_clients($source);
-JACK client "$source" is not found, track "$name" is OFF
-CLIENT
+# 			print <<CLIENT if ! ::jack_clients($source);
+# JACK client "$source" is not found, track "$name" is OFF
+# CLIENT
 			$track->jack_source
 		} else {
 			print "JACK server not running.\n";
