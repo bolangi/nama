@@ -296,8 +296,10 @@ group_version: _group_version end {
 	use warnings;
 	no warnings qw(uninitialized);
 	print $::tracker->version, "\n" ; 1}
-group_version: _group_version dd end { $::tracker->set(
-version => $item{dd} ); 1}
+group_version: _group_version dd end { 
+	my $n = $item{dd};
+	$n = undef if $n == 0;
+	$::tracker->set( version => $n ); 1}
 bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}

@@ -250,8 +250,17 @@ sub current_version {
 
 sub monitor_version {
 	my $track = shift;
-	$track->active ? $track->active : $track->last;
+	my $group = $::Group::by_name{$track->group};
+	return $track->active if $track->active;
+	return $group->version if $group->version 
+				and grep {$group->version  == $_ } @{$track->versions};
+	return undef if $group->version;
+	$track->last;
 }
+# sub monitor_version {
+# 	my $track = shift;
+# 	$track->active ? $track->active : $track->last;
+# }
 
 sub jack_client {
 	my $track = shift;
@@ -400,7 +409,9 @@ CLIENT
 sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
-	if ( grep{ $n == $_ } @{$track->versions} ){
+	if ($n == 0){
+		print "$name: default to latest version\n";
+	} elsif ( grep{ $n == $_ } @{$track->versions} ){
 		print "$name: setting version $n\n";
 		$track->set(active => $n)
 	} else { 
