@@ -612,6 +612,7 @@ sub output_type_object {
 
 	
 sub eliminate_loops {
+	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
 	my $loop_id = "loop,$n";
@@ -1087,7 +1088,7 @@ WARN
 
 	# write .ewf files
 	#
-	map{ $_->write_ewf  } ::Track::all();
+	#map{ $_->write_ewf  } ::Track::all();
 	
 }
 

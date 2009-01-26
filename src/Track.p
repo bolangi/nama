@@ -8,6 +8,8 @@ local $debug = 0;
 #use Exporter qw(import);
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
+#use Memoize qw(memoize unmemoize);
+#memoize('rec_status');
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names);
@@ -260,15 +262,17 @@ sub jack_client {
 }
 	
 sub rec_status {
+	$::debug2 and print "&rec_status\n";
 	my $track = shift;
+	my $monitor_version = $track->monitor_version;
 	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
-	my $client = $track->jack_client;
+#	my $client = $track->jack_client;
 
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->rw eq 'MON' and ! $track->monitor_version
+		or $track->rw eq 'MON' and ! $monitor_version;
 #		or $track->hide
 #  		or $client
 #  			and ! ::jack_clients($client,q[capture]) 
@@ -281,10 +285,10 @@ sub rec_status {
 		) {
 
 		return 'REC'; # if $track->ch_r;
-		#return 'MON' if $track->monitor_version;
+		#return 'MON' if $monitor_version;
 		#return 'OFF';
 	}
-	else { return 'MON' if $track->monitor_version;
+	else { return 'MON' if $monitor_version;
 			return 'OFF';	
 	}
 }
