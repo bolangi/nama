@@ -1390,8 +1390,12 @@ sub rec_cleanup {
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
  	my @k = really_recording();
-	$debug and print "found files: " , join $/, @k;
+	$debug and print "intended recordings: " , join $/, @k;
 	return unless @k;
+	package ::Wav;
+	unmemoize('candidates');
+	memoize(  'candidates');
+	package ::;
 	print "I was recording!\n";
 	my $recorded = 0;
  	for my $k (@k) {    
