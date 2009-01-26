@@ -88,6 +88,8 @@ $seek_delay = 100_000; # microseconds
 $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
+$jack_running = jack_running(); # to be updated by Event
+
 
 ## Load my modules
 
@@ -142,6 +144,7 @@ sub loop {
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&::Text::complete;
 	$term->tkRunning(1);
+	::Graphical::poll_jack();
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;

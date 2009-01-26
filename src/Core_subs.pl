@@ -590,20 +590,20 @@ $multi  = ::Rule->new(
 
 }
 
-sub jackd_running { qx(pgrep jackd) }
+sub jack_running { qx(pgrep jackd) }
 sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
 
 sub input_type_object {
-	if (jackd_running() ){ 
+	if ($jack_running ){ 
 		[qw(jack system)] 
 	} else { 
 	    [ q(device), $capture_device  ]
 	}
 }
 sub output_type_object {
-	if (jackd_running() ){ 
+	if ($jack_running ){ 
 		[qw(jack system)] 
 	} else { 
 	    [ q(device), $playback_device  ]
@@ -959,7 +959,10 @@ WARN
 
 			$format = signal_format(
 				$devices{jack}->{signal_format},
-				$devices{jack}->{soundcard_input_channels}
+
+				# client's output is our input
+				jack_client($client,q(output)) 
+
 			);
 
 		} else { # we use track width
@@ -1020,7 +1023,9 @@ WARN
 
 			$format = signal_format(
 				$devices{jack}->{signal_format},
-				$devices{jack}->{soundcard_output_channels}
+
+				# client's input is our output
+				jack_client($client,q(input))
 			);
 
 		} else { # we use track width
@@ -2645,7 +2650,7 @@ sub set_position {
 	my $seconds = shift;
 	my $am_running = ( eval_iam('engine-status') eq 'running');
 	return if really_recording();
-	my $jack = jackd_running();
+	my $jack = $jack_running;
 	#print "jack: $jack\n";
 	$am_running and $jack and eval_iam('stop');
 	eval_iam("setpos $seconds");
@@ -2917,21 +2922,40 @@ sub complete {
         return undef;
     }
 };
-sub jack_clients {
-	my ($name, $direction)  = @_;
-	my %clients;
-	my $jack_lsp = qx(jack_lsp);
-	print "$jack_lsp\n", return undef if 
-		$jack_lsp =~ q(JACK server not running);
-	my $re = qr/([^:]+):([^:]+?)_(\d+)/;
-	map{ my ($name, $direction, $n) = /$re/;
-		#print "name $name, dir $direction, n $n\n";
-		$clients{$name}{$direction} = $n;
-	} split "\n",$jack_lsp;
-	return \%clients if ! $name; 				# hash ref
-	return $clients{$name} if ! $direction;		# hash ref 
-	return $clients{$name}{$direction}; 		# value
-}
+sub jack_client {
 
+	# returns true if client and direction exist
+	# returns number of client ports
+	
+	my ($name, $direction)  = @_;
+	# synth:in_1 input
+	# synth input
+	my $j = qx(jack_lsp -Ap);
+
+	# convert to single lines
+
+	$j =~ s/\n\s+/ /sg;
+
+	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
+
+	my %jack;
+
+	map{ 
+		my ($direction) = /properties: (input|output)/;
+		s/properties:.+//;
+		my @ports = /(\w+:\w+ )/g;
+		map { 
+				s/ $//; # remove trailing space
+				$jack{ $_ }{ $direction }++;
+				my ($client, $port) = /(\w+):(\w+)/;
+				$jack{ $client }{ $direction }++;
+
+		 } @ports;
+
+	} split "\n",$j;
+	print yaml_out \%jack;
+
+	$jack{$name}{$direction};
+}
 	
 ### end

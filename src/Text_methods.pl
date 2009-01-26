@@ -32,6 +32,15 @@ sub show_modifiers {
 	print "Modifiers: ",$this_track->modifiers, $/;
 }
 
+sub poll_jack {
+	package ::;
+	$event_id{Event_poll_jack} = Event->timer(
+	    desc   => 'poll_jack',               # description;
+	    prio   => 5,                         # low priority;
+		interval => 5,
+	    cb     => sub{ $jack_running = jack_running() },  # callback;
+	);
+}
 
 sub loop {
 
@@ -39,7 +48,7 @@ sub loop {
 
 	# we are using Event's handlers and event loop
 	package ::;
-
+	::Text::poll_jack();
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;

@@ -44,8 +44,6 @@ abbreviations:
 
 devices: 
   jack:
-    soundcard_input_channels: 12
-    soundcard_output_channels: 10
     signal_format: f32_le,N,frequency
   consumer:
     ecasound_id: alsa,default
