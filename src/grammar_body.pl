@@ -1,7 +1,7 @@
 # regex contraining of values
 key: /\w+/
 someval: /[\w.+-]+/
-sign: /[+-]/
+sign: '+' | '-' | '*' | '/'
 op_id: /[A-Z]+/
 parameter: /\d+/
 #value: /\d+/

@@ -43,4 +43,30 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                           auxiliary send for current track
                         - use of Time::HiRes is now
                           optional, with fallback to sleep
-
+0.994 Mon Jan 19, 2009  - minor fixes
+0.995 Mon Jan 26, 2009  - fix mixdown bug 
+                        - parser reports bad commands
+                        - add normalize, fixdc commands
+                        - add use_group_numbering option
+                        - improved preprocessing script 
+                          (Julien Claassen)
+						- insert effect command
+						- recognize all ecasound chain operators
+						- remove last tkeca code
+						- fixes for get_ladspa_hints
+						  involving logarithmic parameters
+                          with zero for beg/end/default values
+						- fix serialize routine to deal with
+						  null values
+  						- set OFF status for tracks taking
+  						  input from JACK client when no
+						  corresponding JACK port is found
+						- major speedups: cache WAV files 
+						  directory contents, poll for
+						  jackd status.
+						- allow vol * 1.5, vol / 2 in
+						  addition to vol + 20, vol - 30
+						- would be good to generalize 
+						  for all parameters (modify_effect)
+						- many commands now report their
+						  actions
