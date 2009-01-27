@@ -32,12 +32,9 @@ project => <<PROJECT,
 PROJECT
 
 chain_setup => <<SETUP,
-   setup, arm                - generate and connect chain setup    
-   generate, gen             - generate chain setup
-   connect, con              - connect chain setup
-   disconnect, dcon          - disconnect chain setup
+   arm                       - generate and connect chain setup    
    show_setup, show          - show status, all tracks
-   show_chain_setup, chains  - print .ecs file to STDOUT
+   show_chain_setup, chains  - show Ecasound Setup.ecs file
 SETUP
 track => <<TRACK,
    Most of the Track related commands operate on the 'current
@@ -59,26 +56,31 @@ track => <<TRACK,
                                 including effects, versions, 
                                 modifiers,  "sax; sh"
 
-   solo                      -  mute all tracks but current track
-
-   all, nosolo               -  return to pre-solo status
-
    stereo                    -  set track width to 2 channels
 
    mono                      -  set track width to 1 channel
 
-   source, src, r            -  set track source to JACK client
-                                name or to sound card track number 
-                                (9 for channels 9,10 if stereo) 
+   solo                      -  mute all tracks but current track
 
-                             -  with no arguments returns
-                                current signal source
+   all, nosolo               -  return to pre-solo status
 
-   send, out, aux            -  create an auxiliary send, argument 
+ - channel inputs and outputs 
+
+   source, src, r            -  set track source
+
+                                sax r 3 (record from soundcard channel 3) 
+
+                                organ r synth (record from JACK client "synth")
+
+                             -  with no arguments returns current signal source
+
+   send, out, m, aux         -  create an auxiliary send, argument 
                                 can be channel number or JACK client name
 
+                             -  currently one send allowed per track
 
- - version
+                             -  not needed for most setups
+ - version 
 
    set_version, version, ver, n  -  set current track version    
 
@@ -87,7 +89,6 @@ track => <<TRACK,
    rec                     -  set track to REC  
    mon                     -  set track to MON
    off, z                  -  set track OFF (omit from setup)
-
 
  - vol/pan 
 
@@ -98,13 +99,12 @@ track => <<TRACK,
    pan_right, pr           -  pan track fully right    
    unity                   -  unity volume    
    vol, v                  -  get/set track volume    
+                              sax vol + 20 (increase by 20)
+                              sax vol - 20 (reduce by 20)
+                              sax vol * 3  (multiply by 3)
+                              sax vol / 2  (cut by half) 
    mute, c, cut            -  mute volume 
    unmute, uncut, cc       -  restore muted volume
-
- - channel assignments
-
-   r, record_channel       -  set input channel number, current track
-   m, monitor_channel      -  set output channel number, current track
 
  - chain object modifiers
 
@@ -112,24 +112,31 @@ track => <<TRACK,
                              for current track
    nomod, nomods, 
    nomodifiers             - remove all modifiers from current track
+
+ - signal processing
+
+   ecanormalize, normalize - run ecanormalize on current track version
+   ecafixdc, fixdc         - run ecafixdc on current track version
+
 TRACK
 
 transport => <<TRANSPORT,
-   start, t           - Start processing
-   stop, s            - Stop processing
-   rewind, rw         - Rewind  some number of seconds, i.e. rw 15
-   forward, fw        - Forward some number of seconds, i.e. fw 75
-   setpos, sp         - Set the playback head position, i.e. setpos 49.2
-   getpos, gp         - Get the current head position 
+   start, t           -  Start processing
+   stop, s            -  Stop processing
+   rewind, rw         -  Rewind  some number of seconds, i.e. rw 15
+   forward, fw        -  Forward some number of seconds, i.e. fw 75
+   setpos, sp         -  Set the playback head position, i.e. setpos 49.2
+   getpos, gp         -  Get the current head position 
 
-   loop_enable, loop  - loop playback between two points
-                        example: loop 5.0 200.0 (positions in seconds)
-                        example: loop start end (mark names)
-                        example: loop 3 4       (mark numbers)
-   loop_disable, noloop, nl -  disable looping
-   preview             - start engine with WAV recording disabled
+   loop_enable, loop  -  loop playback between two points
+                         example: loop 5.0 200.0 (positions in seconds)
+                         example: loop start end (mark names)
+                         example: loop 3 4       (mark numbers)
+   loop_disable, 
+   noloop, nl         -  disable looping
+
+   preview            -  start engine with WAV recording disabled
                          (for mic check, etc.)
-
 TRANSPORT
 
 marks => <<MARKS,
@@ -142,7 +149,7 @@ marks => <<MARKS,
 MARKS
 
 effects => <<EFFECTS,
-	
+    
    ladspa-register, lrg       - list LADSPA effects
    preset-register, prg       - list Ecasound presets
    ctrl-register, crg         - list Ecasound controllers 
@@ -158,17 +165,23 @@ group => <<GROUP,
    group_mon, gmon, M         - group MON mode 
    group_off, goff, MM        - group OFF mode 
    group_version, gver, gv    - select default group version 
+                              - used for switching among 
+                                several multitrack recordings
    bunch, bn                  - name a group of tracks
                                 e.g. bunch strings violins cello bass
+                                e.g. bunch 3 4 6 7 (track indexes)
    for                        - execute command on several tracks 
                                 or a bunch
                                 example: for strings; vol +10
                                 example: for drumkit congas; mute
+                                example: for all; n 5 (version 5)
+                                example: for 3 5; vol * 1.5
+                
 GROUP
 
 mixdown => <<MIXDOWN,
    mixdown, mxd                - enable mixdown 
-   mixoff, mxo, normal, norm   - disable mixdown 
+   mixoff,  mxo                - disable mixdown 
    mixplay, mxp                - playback a recorded mix 
 MIXDOWN
 

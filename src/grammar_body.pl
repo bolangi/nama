@@ -123,32 +123,44 @@ source: _source end {
 	1;
 }
 send: _send name { $::this_track->set_send($item{name}); 1}
-send: _send end { 
-	if ( ! $::this_track->send){
-		print $::this_track->name, ": no auxilary output.\n";
-		return;
-	}
-	my $object = $::this_track->output_object;
-	print $::this_track->name, ": auxilary output to $object.\n";
-	1;}
-stereo: _stereo { $::this_track->set(ch_count => 2); 1 }
-mono:   _mono   { $::this_track->set(ch_count => 1); 1 }
+send: _send end { $::this_track->set_send(); 1}
+
+# 	if ( ! $::this_track->send){
+# 		print $::this_track->name, ": no auxilary output.\n";
+# 		return;
+# 	}
+# 	my $object = $::this_track->output_object;
+# 	print $::this_track->name, ": sending aux output to $object.\n";
+# 	1;}
+stereo: _stereo { 
+	$::this_track->set(ch_count => 2); 
+	print $::this_track->name, ": setting to stereo\n";
+	1;
+}
+mono: _mono { 
+	$::this_track->set(ch_count => 1); 
+	print $::this_track->name, ": setting to mono\n";
+	1; }
 
 off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
 
 set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
-vol: _vol dd end { 
-	$::copp{ $::this_track->vol }->[0] = $item{dd}; 
+vol: _vol value end { 
+	$::copp{ $::this_track->vol }->[0] = $item{value}; 
 	::sync_effect_param( $::this_track->vol, 0);
 	1;} 
-vol: _vol '+' dd end { 
-	$::copp{ $::this_track->vol }->[0] += $item{dd};
+vol: _vol '+' value end { 
+	$::copp{ $::this_track->vol }->[0] += $item{value};
 	::sync_effect_param( $::this_track->vol, 0);
 	1;} 
-vol: _vol '-' dd end { 
-	$::copp{ $::this_track->vol }->[0] -= $item{dd} ;
+vol: _vol '-' value  end { 
+	$::copp{ $::this_track->vol }->[0] -= $item{value} ;
+	::sync_effect_param( $::this_track->vol, 0);
+	1;} 
+vol: _vol '*' value  end { 
+	$::copp{ $::this_track->vol }->[0] *= $item{value} ;
 	::sync_effect_param( $::this_track->vol, 0);
 	1;} 
 vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}

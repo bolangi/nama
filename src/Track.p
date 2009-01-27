@@ -8,6 +8,8 @@ local $debug = 0;
 #use Exporter qw(import);
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
+#use Memoize qw(memoize unmemoize);
+#memoize('rec_status');
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names);
@@ -264,12 +266,14 @@ sub monitor_version {
 
 sub jack_client {
 	my $track = shift;
-	my ($client) = $track->source =~ /(\w+)/;
-	return $client if $track->source =~ /\D/; 
+	my $client = $track->source;
+	$client if $client =~ /\D/; 
 }
 	
 sub rec_status {
+	$::debug2 and print "&rec_status\n";
 	my $track = shift;
+	my $monitor_version = $track->monitor_version;
 	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
 	my $client = $track->jack_client;
@@ -277,11 +281,10 @@ sub rec_status {
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->rw eq 'MON' and ! $track->monitor_version
-		or $track->hide
- 		or $client
- 			and ! ::jack_clients($client,q[capture]) 
- 			and ! ::jack_clients($client,q[in]);
+		or $track->rw eq 'MON' and ! $monitor_version
+#		or $track->hide
+  		or $client
+  			and ! ::jack_client($client,q(output)) 
 		# ! $track->full_path;
 		;
 	if( 	
@@ -290,10 +293,10 @@ sub rec_status {
 		) {
 
 		return 'REC'; # if $track->ch_r;
-		#return 'MON' if $track->monitor_version;
+		#return 'MON' if $monitor_version;
 		#return 'OFF';
 	}
-	else { return 'MON' if $track->monitor_version;
+	else { return 'MON' if $monitor_version;
 			return 'OFF';	
 	}
 }
@@ -379,7 +382,7 @@ sub source { # command for setting, showing track source
 	my ($track, $source) = @_;
 
 	if ( ! $source ){
-		if ( ::jackd_running()
+		if ( $::jack_running
 				and $track->jack_source 
 				and $track->source_select eq 'jack'){
 			$track->jack_source 
@@ -387,11 +390,11 @@ sub source { # command for setting, showing track source
 			$track->input 
 		}
 	} elsif ( $source =~ m(\D) ){
-		if ( ::jackd_running() ){
+		if ( $::jack_running ){
 			$track->set(jack_source => $source);
 			$track->set(source_select => "jack");
 			my $name = $track->name;
-			print <<CLIENT if ! ::jack_clients($source);
+			print <<CLIENT if ! ::jack_client($source, 'output');
 JACK client "$source" is not found, track "$name" is OFF
 CLIENT
 			$track->jack_source
@@ -426,18 +429,17 @@ sub set_send {
 	my $new_send = $track->send($output);
 	my $object = $track->output_object;
 	if ( $old_send  eq $new_send ){
-		print $track->name, ": send unchanged, $object\n";
+		print $track->name, ": send unchanged, ",
+			( $object ?  $object : 'off'), "\n";
 	} else {
-		print $track->name, ": auxiliary output to ",
-		($object ? $object : 'off'),
-		"\n";
+		print $track->name, ": aux output ",
+		($object ? "to $object" : 'is off.'), "\n";
 	}
 }
 sub send {
 	my ($track, $send) = @_;
-
 	if ( ! defined $send ){
-		if ( ::jackd_running()
+		if ( $::jack_running
 				and $track->jack_send 
 				and $track->send_select eq 'jack'){
 			$track->jack_send 
@@ -446,23 +448,21 @@ sub send {
 				?  $track->aux_output
 				:  undef
 		}
-	} elsif (lc $send eq 'off'  or $send == 0) { 
+	} elsif ( $send eq 'off'  or $send eq '0') { 
 		$track->set(send_select => 'off');
 		undef;
 	} elsif ( $send =~ m(\D) ){ ## non-digit, indicating jack client name
-		if ( ::jackd_running() ){
+		if ( $::jack_running ){
 			$track->set(jack_send => $send);
-			$track->set(send_select => "jack");
+			$track->set(send_select => 'jack');
 			$track->jack_send
 		} else {
-print q(: auxilary send to JACK client specified, but jackd is not running.
-Skipping.
-);
+			print $track->name, 
+			": cannot send to JACK client. jackd is not running\n";
 			$track->aux_output;
 		} 
 	} else {  # must be numerical
-		if ( $send <= 2){ 
-
+		if ( $send > 2){ 
 			$track->set(ch_m => $send);
 			$track->set(send_select =>'soundcard');
 		} else { 
@@ -478,13 +478,13 @@ sub send_output {  # for io lists / chain setup
 					
 	my $track = shift;
 	if ( $track->send_select eq 'soundcard' ){ 
-		if (::jackd_running() ){
+		if ($::jack_running ){
 			[qw(jack system)]
 		} else {
 			['device', $::playback_device ]
 		}
 	} elsif ( $track->send_select eq 'jack' ) {
-		if ( ::jackd_running() ){
+		if ( $::jack_running ){
 			['jack', $track->send]
 		} else {
 			print $track->name, 
@@ -506,7 +506,7 @@ sub source_input { # for io lists / chain setup
 		::input_type_object()
 	}
 	elsif ( $track->source_select eq 'jack' ){
-		if (::jackd_running() ){
+		if ($::jack_running ){
 			['jack', $track->source ]
 		} else { 
 			print $track->name, ": no JACK client found\n";

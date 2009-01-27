@@ -116,6 +116,7 @@ our (
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
  	$jack_system,   # jack soundcard device
+	$jack_running,  # jackd status (pid)
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
