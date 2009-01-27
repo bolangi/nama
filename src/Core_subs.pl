@@ -364,7 +364,7 @@ sub load_project {
 
 	# possible null if Text mode
 	
-	#$ui->global_version_buttons(); 
+	$ui->global_version_buttons(); 
 	$ui->refresh_group;
 	generate_setup() and connect_transport();
 
