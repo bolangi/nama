@@ -417,16 +417,15 @@ sub set_send {
 	my $new_send = $track->send($output);
 	my $object = $track->output_object;
 	if ( $old_send  eq $new_send ){
-		print $track->name, ": send unchanged, $object\n";
+		print $track->name, ": send unchanged, ",
+			( $object ?  $object : 'off'), "\n";
 	} else {
-		print $track->name, ": auxiliary output to ",
-		($object ? $object : 'off'),
-		"\n";
+		print $track->name, ": aux output ",
+		($object ? "to $object" : 'is off.'), "\n";
 	}
 }
 sub send {
 	my ($track, $send) = @_;
-
 	if ( ! defined $send ){
 		if ( $::jack_running
 				and $track->jack_send 
@@ -437,23 +436,21 @@ sub send {
 				?  $track->aux_output
 				:  undef
 		}
-	} elsif (lc $send eq 'off'  or $send == 0) { 
+	} elsif ( $send eq 'off'  or $send eq '0') { 
 		$track->set(send_select => 'off');
 		undef;
 	} elsif ( $send =~ m(\D) ){ ## non-digit, indicating jack client name
 		if ( $::jack_running ){
 			$track->set(jack_send => $send);
-			$track->set(send_select => "jack");
+			$track->set(send_select => 'jack');
 			$track->jack_send
 		} else {
-print q(: auxilary send to JACK client specified, but jackd is not running.
-Skipping.
-);
+			print $track->name, 
+			": cannot send to JACK client. jackd is not running\n";
 			$track->aux_output;
 		} 
 	} else {  # must be numerical
-		if ( $send <= 2){ 
-
+		if ( $send > 2){ 
 			$track->set(ch_m => $send);
 			$track->set(send_select =>'soundcard');
 		} else { 

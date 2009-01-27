@@ -551,10 +551,10 @@ sub initialize_rules {
 
 
 	
-$multi  = ::Rule->new(  
+$multi = ::Rule->new(  
 
 		name			=>  'multi', 
-		target			=>  'REC',
+		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
 		input_type		=>  'cooked', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
@@ -2956,7 +2956,7 @@ sub jack_client {
 		 } @ports;
 
 	} split "\n",$j;
-	print yaml_out \%jack;
+	#print yaml_out \%jack;
 
 	$jack{$name}{$direction};
 }

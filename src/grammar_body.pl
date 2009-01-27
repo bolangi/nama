@@ -123,14 +123,15 @@ source: _source end {
 	1;
 }
 send: _send name { $::this_track->set_send($item{name}); 1}
-send: _send end { 
-	if ( ! $::this_track->send){
-		print $::this_track->name, ": no auxilary output.\n";
-		return;
-	}
-	my $object = $::this_track->output_object;
-	print $::this_track->name, ": auxilary output to $object.\n";
-	1;}
+send: _send end { $::this_track->set_send(); 1}
+
+# 	if ( ! $::this_track->send){
+# 		print $::this_track->name, ": no auxilary output.\n";
+# 		return;
+# 	}
+# 	my $object = $::this_track->output_object;
+# 	print $::this_track->name, ": sending aux output to $object.\n";
+# 	1;}
 stereo: _stereo { $::this_track->set(ch_count => 2); 1 }
 mono:   _mono   { $::this_track->set(ch_count => 1); 1 }
 
