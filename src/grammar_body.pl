@@ -132,8 +132,15 @@ send: _send end { $::this_track->set_send(); 1}
 # 	my $object = $::this_track->output_object;
 # 	print $::this_track->name, ": sending aux output to $object.\n";
 # 	1;}
-stereo: _stereo { $::this_track->set(ch_count => 2); 1 }
-mono:   _mono   { $::this_track->set(ch_count => 1); 1 }
+stereo: _stereo { 
+	$::this_track->set(ch_count => 2); 
+	print $::this_track->name, ": setting to stereo\n";
+	1;
+}
+mono: _mono { 
+	$::this_track->set(ch_count => 1); 
+	print $::this_track->name, ": setting to mono\n";
+	1; }
 
 off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
