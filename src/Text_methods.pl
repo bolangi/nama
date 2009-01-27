@@ -274,12 +274,11 @@ sub t_load_project {
 	package ::;
 	my $name = shift;
 	print "input name: $name\n";
-	my $name = remove_spaces($name);
-	$name =~ s(/$)(); # remove trailing slash
-	print ("Project $name does not exist\n"), return
-		unless -d join_path project_root(), $name; 
-	load_project( name => $name );
-
+	my $newname = remove_spaces($name);
+	$newname =~ s(/$)(); # remove trailing slash
+	print ("Project $newname does not exist\n"), return
+		unless -d join_path project_root(), $newname; 
+	load_project( name => $newname );
 	print "loaded project: $project_name\n";
 }
 

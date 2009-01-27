@@ -171,7 +171,6 @@ our (
 	$setup_length,  # displays setup running time
 
 	$project_label,	# project name
-	$group_label,	# bus name
 
 	$sn_label,		# project load/save/quit	
 	$sn_text,
@@ -311,7 +310,6 @@ our (
 					# 'after' events
 	%event_id,    # events will store themselves with a key
 	$set_event,   # the Tk dummy widget used to set events
-	$this_mark,    # current mark
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
 

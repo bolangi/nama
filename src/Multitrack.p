@@ -1,20 +1,5 @@
 package ::;
 use 5.008;
-use strict;
-use strict qw(refs);
-use strict qw(subs);
-use warnings;
-no warnings qw(uninitialized);
-no warnings;
-
-BEGIN{ 
-
-our $VERSION = '0.995';
-
-[% qx(cat ./banner.pl) %]
-
-}
-
 use Carp;
 use Cwd;
 use Storable; 
@@ -30,6 +15,20 @@ use File::Temp;
 use IO::All;
 use Event;
 use Module::Load::Conditional qw(can_load);
+use strict;
+use strict qw(refs);
+use strict qw(subs);
+use warnings;
+no warnings qw(uninitialized syntax);
+
+BEGIN{ 
+
+our $VERSION = '0.995';
+
+[% qx(cat ./banner.pl) %]
+
+}
+
 
 sub roundsleep {
 	my $us = shift;
