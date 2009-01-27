@@ -354,13 +354,13 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
+	rememoize(); # cache directory contents
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
 	
 	#print "Track_by_index: ", $#::Track::by_index, $/;
 	dig_ruins() unless $#::Track::by_index > 2;
-
 
 	# possible null if Text mode
 	
@@ -1391,16 +1391,19 @@ sub jump {
 }
 ## post-recording functions
 
+sub rememoize {
+	package ::Wav;
+	unmemoize('candidates');
+	memoize(  'candidates');
+}
+
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
  	my @k = really_recording();
 	$debug and print "intended recordings: " , join $/, @k;
 	return unless @k;
-	package ::Wav;
-	unmemoize('candidates');
-	memoize(  'candidates');
-	package ::;
+	rememoize();
 	print "I was recording!\n";
 	my $recorded = 0;
  	for my $k (@k) {    

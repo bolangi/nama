@@ -144,7 +144,7 @@ sub loop {
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&::Text::complete;
 	$term->tkRunning(1);
-	::Graphical::poll_jack();
+	$ui->poll_jack();
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
     my ($user_input) = $term->readline($prompt) ;
