@@ -725,7 +725,7 @@ sub track_gui {
 
 	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
-	my @starts =   ( $e_bound{tkeca}{a}, 
+	my @starts =   ( $e_bound{cop}{a}, 
 					 $e_bound{preset}{a}, 
 					 $e_bound{preset}{b}, 
 					 $e_bound{ladspa}{a}, 
@@ -733,7 +733,7 @@ sub track_gui {
 					 $e_bound{ladspa}{c}, 
 					 $e_bound{ladspa}{d}, 
 					);
-	my @ends   =   ( $e_bound{tkeca}{z}, 
+	my @ends   =   ( $e_bound{cop}{z}, 
 					 $e_bound{preset}{b}, 
 					 $e_bound{preset}{z}, 
 					 $e_bound{ladspa}{b}-1, 
