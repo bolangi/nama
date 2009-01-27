@@ -69,38 +69,38 @@ sleeper (600_000);
 print "Configuration file $config not found.
 
 May I create it for you? [yes] ";
-my $reply = <STDIN>;
-chomp $reply;
-if ($reply !~ /n/i){
-sleeper(600_000);
+my $make_namarc = <STDIN>;
+sleep 1;
 print <<PROJECT_ROOT;
 
 Nama places all sound and control files under the
 project root directory, by default $ENV{HOME}/nama.
-
-You can create this directory yourself, and set
-the project_root variable in .namarc, or on the
-command line using the -d option.
 
 PROJECT_ROOT
 print "Would you like to create $ENV{HOME}/nama? [yes] ";
 my $reply = <STDIN>;
 chomp $reply;
 if ($reply !~ /n/i){
-	$default =~ s/project_root.*$/project_root: $ENV{HOME}\/nama/m;
+	$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
 	create_dir( $project_root);
 	create_dir( join_path $project_root, "untitled");
-} 
+} else {
+	print <<OTHER;
+Please make sure to set the project_root directory in
+.namarc, or on the command line using the -d option.
+
+OTHER
+}
+if ($make_namarc !~ /n/i){
 $default > io( $config );
-sleeper(600_000);
+}
+sleep 1;
 print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
 }
 print "Exiting.\n"; 
 exit;	
 }
-}
 	
-
 	
 sub prepare {  
 	
