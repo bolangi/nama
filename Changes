@@ -66,7 +66,7 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
 						  jackd status.
 						- allow vol * 1.5, vol / 2 in
 						  addition to vol + 20, vol - 30
-						- would be good to generalize 
-						  for all parameters (modify_effect)
+						- similar syntax to change
+						  effect parameters (modify_effect)
 						- many commands now report their
 						  actions
