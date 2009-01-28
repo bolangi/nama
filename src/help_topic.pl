@@ -136,7 +136,15 @@ transport => <<TRANSPORT,
    noloop, nl         -  disable looping
 
    preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.)
+                         (for mic check, etc.) Release with
+                         stop/arm.
+
+   doodle             -  start engine with live inputs only.
+                         Like preview but MON tracks are
+                         excluded, as are REC tracks with
+						 identical sources. Release with
+                         stop/arm.
+                         
 TRANSPORT
 
 marks => <<MARKS,
