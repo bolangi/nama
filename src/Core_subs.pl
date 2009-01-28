@@ -2294,7 +2294,6 @@ sub get_ladspa_hints{
 			#print "$1\n$2\n$3"; exit;
 
 			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
-			@lines = map{ s/toggled/0 to 1/; $_ } @lines;
 		#	print join "\n",@lines; exit;
 			my @params;  # data
 
@@ -2309,8 +2308,12 @@ sub get_ladspa_hints{
 				my ($dir, $type, $range, $default, $hint) = 
 					split /\s*,\s*/ , $rest, 5;
 				#print join( "|",$name, $dir, $type, $range, $default, $hint)
-			#		, $/ if $range =~ /\.{2}/;
+				#	, $/ if $hint =~ /logarithmic/;
 				# next if $type eq q(audio);
+				if ( $range =~ /toggled/i ){
+					$range = q(0 to 1);
+					$hint .= q(toggled);
+				}
 				my %p;
 				$p{name} = $name;
 				$p{dir} = $dir;
@@ -2374,21 +2377,27 @@ sub range {
 # 					  : $default * 10
 # 		);
 	$debug and print "beg: $beg, end: $end, default: $default\n";
-	
+	if ( $name =~ /gain|amplitude/i ){
+		$beg = 0.01 unless $beg;
+		$end = 0.01 unless $end;
+	}
+	if ( $name =~ /gain|amplitude/frequency/i ){
+		$hint .= q( logarithmic ) unless $hint =~ /logarithmic/i;
+	}
 	my $resolution = ($end - $beg) / 100;
-	if    ($hint =~ /integer/ or $end - $beg == 1 ) { $resolution = 1; }
+	if    ($hint =~ /integer|toggled/i ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
 
-		if (! $beg or ! $end or ! $default ){
-			$debug and print <<WARN;
-$plugin_label: zero value found for settings in logarithmic hinted
-parameter "$name".
-
-	beginnning: $beg
-	end:        $end
-	default:    $default
-WARN
-		}
+# 		if (! $beg or ! $end or ! $default ){
+# 			$debug and print <<WARN;
+# $plugin_label: zero value found for settings in logarithmic hinted
+# parameter "$name".
+# 
+# 	beginnning: $beg
+# 	end:        $end
+# 	default:    $default
+# WARN
+# 		}
 
 		$beg = round ( log $beg ) if $beg;
 		$end = round ( log $end ) if $end;
