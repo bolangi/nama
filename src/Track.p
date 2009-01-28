@@ -409,6 +409,23 @@ CLIENT
 	}
 } 
 
+sub set_source { # called from parser 
+	my $track = shift;
+	my $source = shift;
+	if ($source eq 'null'){
+		$track->set(group => 'null');
+		return
+	}
+	my $old_source = $track->source;
+	my $new_source = $track->source($source);
+	my $object = input_object( $new_source );
+	if ( $old_source  eq $new_source ){
+		print $track->name, ": input unchanged, $object\n";
+	} else {
+		print $track->name, ": input set to $object\n";
+	}
+}
+
 sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;

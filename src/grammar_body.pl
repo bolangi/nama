@@ -105,17 +105,7 @@ mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 
 exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
-source: _source name {
-	my $old_source = $::this_track->source;
-	my $new_source = $::this_track->source($item{name});
-	my $object = ::Track::input_object( $new_source );
-	if ( $old_source  eq $new_source ){
-		print $::this_track->name, ": input unchanged, $object\n";
-	} else {
-		print $::this_track->name, ": input set to $object\n";
-	}
-	1;
-}
+source: _source name { $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
 	my $object = ::Track::input_object( $source );
@@ -125,13 +115,6 @@ source: _source end {
 send: _send name { $::this_track->set_send($item{name}); 1}
 send: _send end { $::this_track->set_send(); 1}
 
-# 	if ( ! $::this_track->send){
-# 		print $::this_track->name, ": no auxilary output.\n";
-# 		return;
-# 	}
-# 	my $object = $::this_track->output_object;
-# 	print $::this_track->name, ": sending aux output to $object.\n";
-# 	1;}
 stereo: _stereo { 
 	$::this_track->set(ch_count => 2); 
 	print $::this_track->name, ": setting to stereo\n";

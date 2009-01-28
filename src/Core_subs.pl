@@ -96,9 +96,9 @@ $default > io( $config );
 }
 sleep 1;
 print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
-}
 print "Exiting.\n"; 
 exit;	
+}
 }
 	
 	
@@ -824,8 +824,6 @@ sub remove_small_wavs {
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 	
-	my $debug = 0;
-
 	$debug2 and print "&remove_small_wavs\n";
 	
 
@@ -1106,7 +1104,6 @@ sub signal_format {
 ## transport functions
 
 sub load_ecs {
-		local $debug = 0;
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam"cs-remove" if eval_iam"cs-selected";
@@ -1447,7 +1444,6 @@ REC
 } 
 ## effect functions
 sub add_effect {
-	local $debug = 0;
 	
 	$debug2 and print "&add_effect\n";
 	
@@ -2045,7 +2041,6 @@ sub prepare_effect_index {
 	#print yaml_out \%effect_j;
 }
 sub extract_effects_data {
-	my $debug = 1;
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
@@ -2103,10 +2098,6 @@ sub read_in_effects_data {
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
 	my @cop = grep {! /^\w*$/ } split "\n", eval_iam("cop-register");
 
-	print join $/, @cop;
-
-#	print eval_iam("ladspa-register");
-	
 	$debug and print "found ", scalar @cop, " Ecasound chain operators\n";
 	$debug and print "found ", scalar @preset, " Ecasound presets\n";
 	$debug and print "found ", scalar @ctrl, " Ecasound controllers\n";
@@ -2261,23 +2252,29 @@ sub get_ladspa_hints{
 			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
+			print "plugin label: $plugin_label $plugin_unique_id\n";
 
 
 			#print "$1\n$2\n$3"; exit;
 
-			my @lines = split "\n",$ports;
+			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
+			@lines = map{ s/toggled/0 to 1/; $_ } @lines;
 		#	print join "\n",@lines; exit;
 			my @params;  # data
 
 			my @names;
 			for my $p (@lines) {
 				next if $p =~ /^\s*$/;
+				$p =~ s/\.{3}/10/ if $p =~ /amplitude|gain/i;
+				$p =~ s/\.{3}/60/ if $p =~ /delay|decay/i;
+				$p =~ s(\.{3})($ladspa_sample_rate/2) if $p =~ /frequency/i;
 				$p =~ /$paramre/;
 				my ($name, $rest) = ($1, $2);
 				my ($dir, $type, $range, $default, $hint) = 
 					split /\s*,\s*/ , $rest, 5;
-				#print join "|",$dir, $type, $range, $default, $hint;
-				next if $type eq q(audio);
+				#print join( "|",$name, $dir, $type, $range, $default, $hint)
+			#		, $/ if $range =~ /\.{2}/;
+				# next if $type eq q(audio);
 				my %p;
 				$p{name} = $name;
 				$p{dir} = $dir;
@@ -2307,28 +2304,41 @@ sub get_ladspa_hints{
 
 	$debug and print yaml_out(\%effects_ladspa); 
 }
+
+sub srate_val {
+	my $input = shift;
+	my $val_re = qr/(
+			[+-]? 			# optional sign
+			\d+				# one or more digits
+			(\.\d+)?	 	# optional decimal
+			(e[+-]?\d+)?  	# optional exponent
+	)/ix;					# case insensitive e/E
+	my ($val) = $input =~ /$val_re/; #  or carp "no value found in input: $input\n";
+	$val * ( $input =~ /srate/ ? $ladspa_sample_rate : 1 )
+}
+	
 sub range {
 	my ($name, $range, $default, $hint, $plugin_label) = @_; 
 	my $multiplier = 1;;
-	#$multiplier = $ladspa_sample_rate if $range =~ s/\*srate//g;
-	$multiplier = $ladspa_sample_rate if $range =~ s/\*\s*srate//g;
 	my ($beg, $end) = split /\s+to\s+/, $range;
-	# if end is '...' set to $default + 10dB or $default * 10
-	$default =~ s/default\s+//;
-	my @default_range = /([\d\.eE+-]+)/g;
-	$default = abs($default_range[1] - $default_range[0])/2
-		if @default_range > 1; # for case: "05 to 100"
-	$end =~ /\.{3}/ and $end = (
-		$default == 0 ? 10  # '0' is probably 0db, so 0+10db
-					  : $default * 10
-		);
-	#$beg = 0.001 * $multiplier if ! $beg;
-	#$end = 0.001 * $multiplier if ! $end;
-	$debug and print "1 beg: $beg  end: $end\n";
-	$beg = $beg * $multiplier;
-	$end = $end * $multiplier;
-	$debug and print "2 beg: $beg  end: $end\n";
-
+	$beg = 		srate_val( $beg );
+	$end = 		srate_val( $end );
+	$default = 	srate_val( $default );
+	$default = $default ? $default : $beg;
+# 	$default =~ s/default\s+//;
+# 	my @default_range = $default =~ /$val_re/g;
+# 	print "no default range found: $default\n" if !  @default_range;
+# 	my $d = $default_range[0];
+# 	if ( @default_range > 1 ){  # for case: "05 to 100"
+# 		$default = abs($default_range[1] - $default_range[0])/2
+# 	}
+# 
+# 	$end =~ /\.{3}/ and $end = (
+# 		$default == 0 ? 10  # '0' is probably 0db, so 0+10db
+# 					  : $default * 10
+# 		);
+	$debug and print "beg: $beg, end: $end, default: $default\n";
+	
 	my $resolution = ($end - $beg) / 100;
 	if    ($hint =~ /integer/ ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
@@ -2354,7 +2364,6 @@ WARN
 	$resolution = dn ( $resolution, 3 ) if $resolution < 0.01;
 	$resolution = int ($resolution + 0.1) if $resolution > 1 ;
 	
-	#print "3 beg: $beg  end: $end\n";
 	($beg, $end, $default, $resolution)
 
 }
@@ -2417,10 +2426,7 @@ sub save_state {
 
 	# first save palette to project_dir/palette.yml
 	
- 	serialize (
- 		-file => join_path($project_root, $palette_file),
- 		-vars => [ qw( %palette %namapalette ) ],
- 		-class => '::');
+	$ui->save_palette;
 
 	# do nothing if only Master and Mixdown
 	
