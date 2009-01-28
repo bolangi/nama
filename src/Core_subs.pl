@@ -2102,7 +2102,6 @@ sub extract_effects_data {
 		$effects[$j]->{display} = qq(field);
 		map{ push @{$effects[$j]->{params}}, {name => $_} } @p_names
 			if @p_names;
-
 ;
 	}
 }
@@ -2288,15 +2287,11 @@ sub get_ladspa_hints{
 			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
-			#print "plugin label: $plugin_label $plugin_unique_id\n";
-
-
-			#print "$1\n$2\n$3"; exit;
+			$debug and print "plugin label: $plugin_label $plugin_unique_id\n";
 
 			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
-		#	print join "\n",@lines; exit;
-			my @params;  # data
 
+			my @params;  # data
 			my @names;
 			for my $p (@lines) {
 				next if $p =~ /^\s*$/;
@@ -2307,9 +2302,9 @@ sub get_ladspa_hints{
 				my ($name, $rest) = ($1, $2);
 				my ($dir, $type, $range, $default, $hint) = 
 					split /\s*,\s*/ , $rest, 5;
-				#print join( "|",$name, $dir, $type, $range, $default, $hint)
-				#	, $/ if $hint =~ /logarithmic/;
-				# next if $type eq q(audio);
+				$debug and print join( 
+				"|",$name, $dir, $type, $range, $default, $hint) , $/; 
+				#  if $hint =~ /logarithmic/;
 				if ( $range =~ /toggled/i ){
 					$range = q(0 to 1);
 					$hint .= q(toggled);
@@ -2364,40 +2359,14 @@ sub range {
 	$end = 		srate_val( $end );
 	$default = 	srate_val( $default );
 	$default = $default ? $default : $beg;
-# 	$default =~ s/default\s+//;
-# 	my @default_range = $default =~ /$val_re/g;
-# 	print "no default range found: $default\n" if !  @default_range;
-# 	my $d = $default_range[0];
-# 	if ( @default_range > 1 ){  # for case: "05 to 100"
-# 		$default = abs($default_range[1] - $default_range[0])/2
-# 	}
-# 
-# 	$end =~ /\.{3}/ and $end = (
-# 		$default == 0 ? 10  # '0' is probably 0db, so 0+10db
-# 					  : $default * 10
-# 		);
 	$debug and print "beg: $beg, end: $end, default: $default\n";
 	if ( $name =~ /gain|amplitude/i ){
 		$beg = 0.01 unless $beg;
 		$end = 0.01 unless $end;
 	}
-	if ( $name =~ /gain|amplitude/frequency/i ){
-		$hint .= q( logarithmic ) unless $hint =~ /logarithmic/i;
-	}
 	my $resolution = ($end - $beg) / 100;
 	if    ($hint =~ /integer|toggled/i ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
-
-# 		if (! $beg or ! $end or ! $default ){
-# 			$debug and print <<WARN;
-# $plugin_label: zero value found for settings in logarithmic hinted
-# parameter "$name".
-# 
-# 	beginnning: $beg
-# 	end:        $end
-# 	default:    $default
-# WARN
-# 		}
 
 		$beg = round ( log $beg ) if $beg;
 		$end = round ( log $end ) if $end;
@@ -2418,6 +2387,8 @@ sub integrate_ladspa_hints {
 		# print ("$_ not found\n"), 
 		if ($i) {
 			$effects[$i]->{params} = $effects_ladspa{$_}->{params};
+			# we revise the number of parameters read in from ladspa-register
+			$effects[$i]->{count} = scalar @{$effects_ladspa{$_}->{params}};
 			$effects[$i]->{display} = $effects_ladspa{$_}->{display};
 		}
 	} keys %effects_ladspa;

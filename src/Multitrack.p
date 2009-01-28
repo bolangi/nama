@@ -141,7 +141,7 @@ sub loop {
     #MainLoop;
     $term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
-	$attribs->{attempted_completion_function} = \&::Text::complete;
+	$attribs->{attempted_completion_function} = \&complete;
 	$term->tkRunning(1);
 	$ui->poll_jack();
     $OUT = $term->OUT || \*STDOUT;
