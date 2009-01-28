@@ -305,5 +305,6 @@ preset_register: _preset_register end {
 ctrl_register: _ctrl_register end { 
 	::pager( ::eval_iam("ctrl-register")); 1}
 preview: _preview { ::preview(); 1}
+doodle: _doodle { ::doodle(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}

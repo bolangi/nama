@@ -70,6 +70,9 @@ preview:
   type: transport
   what: start engine with rec_file disabled (for mic test, etc.)
   parameters: none
+doodle:
+  type: transport
+  what: disable mon_setup and rec_file, set unique_inputs_only
 mixdown:
   type: mix
   short: mxd

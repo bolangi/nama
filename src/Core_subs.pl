@@ -1119,14 +1119,35 @@ sub new_engine {
 	$e = Audio::Ecasound->new();
 }
 sub generate_setup { # create chain setup
-	remove_small_wavs();
 	$debug2 and print "&generate_setup\n";
+	remove_small_wavs();
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
 			= @input_chains 
 			= @output_chains 
 			= ();
+	
+
+	# exclude tracks sharing inputs with previous tracks
+	
+	if ( $unique_inputs_only ){
+		my @user = $tracker->tracks; # track names
+		@excluded = ();
+		my %already_used;
+		map{ my $source = $tn{$_}->source; 
+			if( $already_used{$source}  ){
+				push @excluded, $_;
+			}
+			$already_used{$source}++
+		} @user;
+		if ( @excluded ){
+			print "Multiple tracks share same inputs.\n";
+			print "Excluding the following: @excluded\n";
+			map{ $tn{$_}->set(rw => 'OFF') } @excluded;
+		}
+	}
+		
 	my @tracks = ::Track::all;
 	shift @tracks; # drop Master
 
@@ -1151,8 +1172,16 @@ sub generate_setup { # create chain setup
 sub arm {
 	if ( $preview ){
 		stop_transport() ;
+		print "Exiting preview/doodle mode\n" if $preview;
 		$preview = 0;
 		$rec_file->set(status => 1);
+		$mon_setup->set(status => 1);
+		if ( @excluded ){
+			print "Re-enabling the following tracks: @excluded\n";
+			map{ $tn{$_}->set(rw => 'REC') } @excluded;
+		}
+		$unique_inputs_only = 0;
+			
 	}
 	generate_setup() and connect_transport(); 
 }
@@ -1164,9 +1193,16 @@ sub preview {
 	generate_setup() and connect_transport();
 	start_transport();
 }
-	
-	
-	
+sub doodle {
+	return if transport_running();
+	print "Starting engine in doodle mode. Live inputs only.\n";
+	$preview = 1;
+	$rec_file->set(status => 0);
+	$mon_setup->set(status => 0);
+	$unique_inputs_only = 1;
+	generate_setup() and connect_transport();
+	start_transport();
+}
 sub connect_transport {
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
