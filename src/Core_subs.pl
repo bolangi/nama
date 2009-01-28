@@ -2288,7 +2288,7 @@ sub get_ladspa_hints{
 			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
-			print "plugin label: $plugin_label $plugin_unique_id\n";
+			#print "plugin label: $plugin_label $plugin_unique_id\n";
 
 
 			#print "$1\n$2\n$3"; exit;
