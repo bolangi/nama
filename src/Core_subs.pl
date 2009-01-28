@@ -2376,7 +2376,7 @@ sub range {
 	$debug and print "beg: $beg, end: $end, default: $default\n";
 	
 	my $resolution = ($end - $beg) / 100;
-	if    ($hint =~ /integer/ ) { $resolution = 1; }
+	if    ($hint =~ /integer/ or $end - $beg == 1 ) { $resolution = 1; }
 	elsif ($hint =~ /logarithmic/ ) {
 
 		if (! $beg or ! $end or ! $default ){
