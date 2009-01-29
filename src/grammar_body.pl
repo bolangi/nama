@@ -5,7 +5,7 @@ sign: /[\/*-+]/
 op_id: /[A-Z]+/
 parameter: /\d+/
 #value: /\d+/
-value: /[\d\.eE+-]+/
+value: /[\d\.\+\-eE]+/
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+\/?/
@@ -130,22 +130,17 @@ rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
 
 set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
-vol: _vol value end { 
-	$::copp{ $::this_track->vol }->[0] = $item{value}; 
-	::sync_effect_param( $::this_track->vol, 0);
-	1;} 
-vol: _vol '+' value end { 
-	$::copp{ $::this_track->vol }->[0] += $item{value};
-	::sync_effect_param( $::this_track->vol, 0);
-	1;} 
-vol: _vol '-' value  end { 
-	$::copp{ $::this_track->vol }->[0] -= $item{value} ;
-	::sync_effect_param( $::this_track->vol, 0);
-	1;} 
-vol: _vol '*' value  end { 
-	$::copp{ $::this_track->vol }->[0] *= $item{value} ;
-	::sync_effect_param( $::this_track->vol, 0);
-	1;} 
+
+vol: _vol sign(?) value end { 
+	$item{sign} = undef;
+	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
+	::modify_effect 
+		$::this_track->vol,
+		1,
+		$item{sign},
+		$item{value};
+	1;
+} 
 vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 
 mute: _mute end { ::mute(); 1}
@@ -270,23 +265,10 @@ insert_effect: _insert_effect before name value(s?) end {
 before: op_id
 
 modify_effect: _modify_effect op_id parameter sign(?) value end {
-		#print join $/, %item, $/;
-		$item{parameter}--; # user's one-based indexing to our zero-base
-		my $new_value = $item{value}; 
-
-		if ($item{"sign(?)"} and @{ $item{"sign(?)"} }) {
-			$new_value = 
- 			eval (join " ",
- 				$::copp{$item{op_id}}->[$item{parameter}], 
- 				@{$item{"sign(?)"}},
- 				$item{value});
-		}
-	::effect_update_copp_set( 
-		$::cops{ $item{op_id} }->{chain}, 
-		$item{op_id}, 
-		$item{parameter}, 
-		$new_value);
-	1;}
+	$item{sign} = undef;
+	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
+	::modify_effect @item{ qw( op_id parameter sign value) }; 1
+}
 group_version: _group_version end { 
 	use warnings;
 	no warnings qw(uninitialized);

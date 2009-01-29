@@ -1503,6 +1503,25 @@ sub add_effect {
 	apply_op($id) if eval_iam("cs-is-valid");
 
 }
+sub modify_effect {
+	my ($op_id, $parameter, $sign, $value) = @_;
+	#print "id $op_id p: $parameter, sign: $sign value: $value\n";
+		$parameter--; # user's one-based indexing to our zero-base
+		my $new_value = $value; 
+		if ($sign) {
+			$new_value = 
+ 			eval (join " ",
+ 				$copp{$op_id}->[$parameter], 
+ 				$sign,
+ 				$value);
+		}
+	print "id $op_id p: $parameter, sign: $sign value: $value\n";
+	effect_update_copp_set( 
+		$cops{ $op_id }->{chain}, 
+		$op_id, 
+		$parameter, 
+		$new_value);
+}
 
 sub remove_effect {
 	@_ = discard_object(@_);

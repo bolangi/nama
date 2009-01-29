@@ -70,3 +70,4 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
 						  effect parameters (modify_effect)
 						- many commands now report their
 						  actions
+0.9951 Mon Jan 26, 2009  - disable JACK client checking
