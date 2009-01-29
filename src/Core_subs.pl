@@ -1129,22 +1129,23 @@ sub generate_setup { # create chain setup
 			= ();
 	
 
+	# doodle mode
 	# exclude tracks sharing inputs with previous tracks
-	
 	if ( $unique_inputs_only ){
 		my @user = $tracker->tracks; # track names
-		@excluded = ();
+		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source; 
 			if( $already_used{$source}  ){
-				push @excluded, $_;
+				$excluded{$_} = $tn{$_}->rec_status();
 			}
 			$already_used{$source}++
-		} @user;
-		if ( @excluded ){
+		 } @user;
+		if ( keys %excluded ){
 			print "Multiple tracks share same inputs.\n";
-			print "Excluding the following: @excluded\n";
-			map{ $tn{$_}->set(rw => 'OFF') } @excluded;
+			print "Excluding the following tracks: ", 
+				join(" ", keys %excluded), "\n";
+			map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
 		}
 	}
 		
@@ -1176,12 +1177,12 @@ sub arm {
 		$preview = 0;
 		$rec_file->set(status => 1);
 		$mon_setup->set(status => 1);
+		my @excluded = keys %excluded;
 		if ( @excluded ){
 			print "Re-enabling the following tracks: @excluded\n";
-			map{ $tn{$_}->set(rw => 'REC') } @excluded;
+			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
 		}
 		$unique_inputs_only = 0;
-			
 	}
 	generate_setup() and connect_transport(); 
 }

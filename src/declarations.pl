@@ -330,7 +330,7 @@ our (
 	$preview,       # am running engine with rec_file disabled
 	$use_group_numbering, # same version number for tracks recorded together
 	$unique_inputs_only,  # exclude tracks sharing same source
-	@excluded,      # tracks sharing source with other tracks,
+	%excluded,      # tracks sharing source with other tracks,
 	                # after the first
 
 );

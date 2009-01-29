@@ -154,6 +154,9 @@ set_version:
   smry: select track version
   parameters: number
   example: sax; version 5; sh
+destroy_current_wav:
+  type: track
+  what: unlink $track->full_path
 group_rec:
   type: group
   short: grec R
