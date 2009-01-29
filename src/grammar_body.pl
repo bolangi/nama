@@ -1,11 +1,12 @@
 # regex contraining of values
 key: /\w+/
 someval: /[\w.+-]+/
-sign: /[\/*-+]/
+sign: '+' | '-' | '*' | '/'
+value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 op_id: /[A-Z]+/
 parameter: /\d+/
 #value: /\d+/
-value: /[\d\.\+\-eE]+/
+value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+\/?/
@@ -264,9 +265,10 @@ insert_effect: _insert_effect before name value(s?) end {
 
 before: op_id
 
-modify_effect: _modify_effect op_id parameter sign(?) value end {
-	$item{sign} = undef;
-	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
+modify_effect: _modify_effect op_id parameter value end {
+	::modify_effect @item{ qw( op_id parameter value) }; 1
+}
+modify_effect: _modify_effect op_id parameter sign value end {
 	::modify_effect @item{ qw( op_id parameter sign value) }; 1
 }
 group_version: _group_version end { 
