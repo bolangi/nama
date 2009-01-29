@@ -41,6 +41,7 @@
 						@loop_endpoints
 						$length
 						%bunch
+						$memoize
 						);
 					 
 @effects_static_vars = qw(
