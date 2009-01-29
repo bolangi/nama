@@ -477,4 +477,10 @@ fixdc:
   type: track
   what: apply ecafixdc to current track version
   short: ecafixdc
+memoize:
+  type: general
+  what: enable WAV dir cache
+unmemoize:
+  type: general
+  what: disable WAV dir cache
 ...

@@ -7,7 +7,6 @@ use ::Assign qw(:all);
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized);
 use Carp;
-memoize('candidates');
 
 sub get_versions {
 	$::debug2 and print "&get_versions\n";

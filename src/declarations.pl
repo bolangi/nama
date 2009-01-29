@@ -332,5 +332,6 @@ our (
 	$unique_inputs_only,  # exclude tracks sharing same source
 	%excluded,      # tracks sharing source with other tracks,
 	                # after the first
+	$memoize,       # do I cache this_wav_dir?
 
 );

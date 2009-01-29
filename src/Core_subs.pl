@@ -354,7 +354,7 @@ sub load_project {
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
-	rememoize(); # cache directory contents
+	rememoize();
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
@@ -1120,7 +1120,6 @@ sub new_engine {
 }
 sub generate_setup { # create chain setup
 	$debug2 and print "&generate_setup\n";
-	remove_small_wavs();
 	%inputs = %outputs 
 			= %post_input 
 			= %pre_output 
@@ -1426,6 +1425,7 @@ sub jump {
 ## post-recording functions
 
 sub rememoize {
+	return unless $memoize;
 	package ::Wav;
 	unmemoize('candidates');
 	memoize(  'candidates');
@@ -1437,7 +1437,6 @@ sub rec_cleanup {
  	my @k = really_recording();
 	$debug and print "intended recordings: " , join $/, @k;
 	return unless @k;
-	rememoize();
 	print "I was recording!\n";
 	my $recorded = 0;
  	for my $k (@k) {    
@@ -1461,12 +1460,12 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
+	rememoize();
 	my $mixed = scalar ( grep{ /\bmix*.wav/i} @k );
 	
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
-			#$ui->update_master_version_button();
 			$ui->global_version_buttons(); # recreate
 			$tracker->set( rw => 'MON');
 			generate_setup() and connect_transport();

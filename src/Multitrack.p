@@ -88,6 +88,7 @@ $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
 $jack_running = jack_running(); # to be updated by Event
+$memoize = 0;
 
 
 ## Load my modules
@@ -97,6 +98,11 @@ use ::Tkeca_effects;
 use ::Track;
 use ::Bus;    
 use ::Mark;
+use ::Wav;
+
+package ::Wav;
+memoize('candidates') if $::memoize;
+package ::;
 
 # aliases for concise access
 

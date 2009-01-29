@@ -317,4 +317,16 @@ destroy_current_wav: _destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
 	}
+	1;
 }
+memoize: _memoize { 
+	package ::Wav;
+	$::memoize = 1;
+	memoize('candidates'); 1
+}
+unmemoize: _unmemoize {
+	package ::Wav;
+	$::memoize = 0;
+	unmemoize('candidates'); 1
+}
+	

@@ -13,7 +13,6 @@ use ::Assign qw(join_path);
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names);
-use ::Wav;
 our @ISA = '::Wav';
 $n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
