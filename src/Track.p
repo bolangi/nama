@@ -275,23 +275,22 @@ sub rec_status {
 	my $monitor_version = $track->monitor_version;
 	# print "rec status track: ", $track->name, $/;
 	my $group = $::Group::by_name{$track->group};
-	my $client = $track->jack_client;
 
 	return 'OFF' if 
 		$group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $track->rw eq 'MON' and ! $monitor_version
 #		or $track->hide
-#  		or $client
-#  			and ! ::jack_client($client,q(output)) 
 		# ! $track->full_path;
 		;
 	if( 	
 		$track->rw eq 'REC'
 		 and $group->rw eq 'REC'
 		) {
-
 		return 'REC'; # if $track->ch_r;
+		my $client = $track->jack_client;
+  		or $client
+  			and ! ::jack_client($client,q(output)) 
 		#return 'MON' if $monitor_version;
 		#return 'OFF';
 	}
@@ -550,9 +549,11 @@ sub aux_output {
 
 sub input_object { # for text display
 	my $source = shift; # string
-	$source =~ /\D/ 
-		? qq(JACK client "$source")
-		: qq(soundcard channel $source);
+	if ( $source =~ /\D/ ){
+		qq(JACK client "$source")
+	elsif ( $source =~ /\d/ ){
+		qq(soundcard channel $source)
+	} else { '(null)'  }
 }
 
 sub output_object {   # text for user display
