@@ -91,6 +91,12 @@ mixoff:
   what: Mixdown group OFF, user tracks MON
   smry: mix off
   parameters: none
+automix:
+  type: mix
+  what: set track vol levels to normalize mix track, then mixdown
+autofix:
+  type: mix
+  what: fixdc and normalize selected versions of all MON tracks 
 add_track:
   type: track
   short: add new
