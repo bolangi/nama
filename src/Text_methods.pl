@@ -314,6 +314,7 @@ sub t_add_ctrl {
 }
 sub t_insert_effect {
 	my ($before, $code, $values) = @_;
+	my $debug = 1;
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if ::engine_running and ::really_recording;
 
@@ -324,7 +325,8 @@ sub t_insert_effect {
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
 	
-	# should mute if engine running
+	# TODO mute if engine running
+	
 	my $track = $ti[$n];
 	$debug and print $track->name, $/;
 	#$debug and print join " ",@{$track->ops}, $/; 
@@ -342,7 +344,7 @@ sub t_insert_effect {
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	$debug and print "ops to remove and re-apply: @ops\n";
-	if (::eval_iam q(cs-connected) ){  }
+	if (::eval_iam q(cs-connected) ){  
 		map{ ::remove_op $_ } @ops
 	}
 
@@ -358,7 +360,7 @@ sub t_insert_effect {
 	splice 	@{$track->ops}, $offset, 0, $op;
 	$debug and print join " ",@{$track->ops}, $/; 
 
-	if (::eval_iam q(cs-connected) ){  }
+	if (::eval_iam q(cs-connected) ){  
 		map{ ::apply_op $_ } @ops
 	}
 		

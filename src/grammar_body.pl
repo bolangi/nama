@@ -252,9 +252,9 @@ add_effect: _add_effect name value(s?)  end {
 	my $code = $item{name};
 	my $values = $item{"value(s?)"};
 	my $before = $::this_track->vol;
-	::Text::t_insert_effect  $before, $code, $values;
+	::Text::t_insert_effect  $before, $code, $values ;
 # 	::Text::t_add_effect $code, $values;
-# 	1;}
+ 	1;}
 
 insert_effect: _insert_effect before name value(s?) end {
 	my $before = $item{before};
