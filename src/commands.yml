@@ -336,11 +336,15 @@ add_ctrl:
   short: acl
 add_effect:
   type: effect
-  what: add effect to current track
+  what: add effect to current track (placed before volume control)
   short: fxa afx
   smry: add effect
   parameters: effect_label param1 param2,... paramn
   example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa var_dali (preset var_dali) Note: no el: or pn: prefix is required
+append_effect:
+  type: effect
+  what: add effect to the end of current track (mainly legacy use)
+  parameters: effect_label param1 param2,... paramn
 insert_effect:
   type: effect
   short: ifx fxi
