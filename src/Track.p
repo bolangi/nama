@@ -125,8 +125,8 @@ sub new {
 	$by_index[$n] = $object;
 	$by_name{ $object->name } = $object;
 	
-	::add_volume_control($n);
 	::add_pan_control($n);
+	::add_volume_control($n);
 
 	#my $group = $::Group::by_name{ $object->group }; 
 
