@@ -313,28 +313,57 @@ sub t_add_ctrl {
 }
 sub t_insert_effect {
 	my ($before, $code, $values) = @_;
-	print ("Cannot (yet) insert effect while engine running\n"), return 
-		if ::engine_running;
-	# and ::really_recording;
+	my $debug = 1;
+	print ("Cannot insert effect while engine is recording.\n"), return 
+		if ::engine_running and ::really_recording;
+
+	# what about inserting before controller... user should
+	# not do it
+	
 	my $n = $cops{ $before }->{chain} or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
-	# should mute if engine running
+	
+	# TODO mute if engine running
+	
 	my $track = $ti[$n];
-	print $track->name, $/;
-	print join " ",@{$track->ops}, $/; 
-	t_add_effect( $code, $values );
-	print join " ",@{$track->ops}, $/; 
-	my $op = pop @{$track->ops};
-	print join " ",@{$track->ops}, $/; 
+	$debug and print $track->name, $/;
+	#$debug and print join " ",@{$track->ops}, $/; 
+
+	# find offset 
+	
 	my $offset = 0;
 	for my $id ( @{$track->ops} ){
 		last if $id eq $before;
 		$offset++;
 	}
-	# now reposition the effect
+
+	# remove later ops if engine is connected
+	# this will not change the $track->cops list 
+
+	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
+	$debug and print "ops to remove and re-apply: @ops\n";
+	if (::eval_iam q(cs-connected) ){  
+		map{ ::remove_op $_ } @ops
+	}
+
+	t_add_effect( $code, $values );
+
+	$debug and print join " ",@{$track->ops}, $/; 
+
+	my $op = pop @{$track->ops}; 
+	# acts directly on $track, because ->ops returns 
+	# a reference to the array
+
+	# insert the effect id 
 	splice 	@{$track->ops}, $offset, 0, $op;
-	print join " ",@{$track->ops}, $/; 
+	$debug and print join " ",@{$track->ops}, $/; 
+
+	if (::eval_iam q(cs-connected) ){  
+		map{ ::apply_op $_ } @ops
+	}
+		
+		
 }
 sub t_add_effect {
 	package ::;
