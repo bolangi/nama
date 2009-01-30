@@ -263,41 +263,47 @@ sub monitor_version {
 # 	$track->active ? $track->active : $track->last;
 # }
 
-sub jack_client {
-	my $track = shift;
-	my $client = $track->source;
-	$client if $client =~ /\D/; 
-}
-	
 sub rec_status {
 	$::debug2 and print "&rec_status\n";
 	my $track = shift;
 	my $monitor_version = $track->monitor_version;
-	# print "rec status track: ", $track->name, $/;
+	my $source = $track->source;
 	my $group = $::Group::by_name{$track->group};
+	$debug and print "rec status track: ", $track->name, 
+		" group: $group, source: $source, monitor version: $monitor_version\n";
 
-	return 'OFF' if 
-		$group->rw eq 'OFF'
+	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->rw eq 'MON' and ! $monitor_version
-#		or $track->hide
+		or $track->rw eq 'MON' and ! $monitor_version 
+		or $track->hide 
 		# ! $track->full_path;
-		;
-	if( 	
-		$track->rw eq 'REC'
-		 and $group->rw eq 'REC'
-		) {
-		return 'REC'; # if $track->ch_r;
-		my $client = $track->jack_client;
-  		or $client
-  			and ! ::jack_client($client,q(output)) 
-		#return 'MON' if $monitor_version;
-		#return 'OFF';
+		
+	){ 				  'OFF' }
+
+	# When we reach here, $group->rw and $track->rw are REC or MON
+	# so the result will be REC or MON if conditions are met
+
+	# first case, possible REC status
+	
+	elsif (	$track->rw eq 'REC' 
+				and $group->rw eq 'REC') {
+
+		if ( $source =~ /\D/ ){ # jack client
+				::jack_client($source,'output')
+					?  'REC'
+					:  $monitor_version ? 'MON' : 'OFF'
+		} elsif ( $source =~ /\d/ ){ # soundcard channel
+					   'REC'
+		} else { 	   $monitor_version ? 'MON' : 'OFF' }
+			
 	}
-	else { return 'MON' if $monitor_version;
-			return 'OFF';	
+	# second case, possible MON status
+	
+	else { 			$monitor_version ? 'MON' : 'OFF'
+
 	}
 }
+
 # the following methods handle effects
 sub remove_effect {
 	my $track = shift;
@@ -393,7 +399,8 @@ sub source { # command for setting, showing track source
 			$track->set(source_select => "jack");
 			my $name = $track->name;
 			print <<CLIENT if ! ::jack_client($source, 'output');
-JACK client "$source" is not found, track "$name" is OFF
+$name: output port for JACK client "$source" not found. 
+Cannot set "$name" to REC.
 CLIENT
 			$track->jack_source
 		} else {
@@ -551,7 +558,7 @@ sub input_object { # for text display
 	my $source = shift; # string
 	if ( $source =~ /\D/ ){
 		qq(JACK client "$source")
-	elsif ( $source =~ /\d/ ){
+	} elsif ( $source =~ /\d/ ){
 		qq(soundcard channel $source)
 	} else { '(null)'  }
 }
@@ -563,6 +570,25 @@ sub output_object {   # text for user display
 	$send =~ /\D/ 
 		? qq(JACK client "$send")
 		: qq(soundcard channel $send);
+}
+sub client_status {
+	my ($track_status, $client, $direction) = @_;
+	if ($client =~ /\D/){
+		if(::jack_client($client, $direction) and $track_status eq 'REC' )
+			{ $client }
+		else { "[$client]" }
+	} elsif ($client =~ /\d+/ ){ 
+		if ( $track_status eq 'REC'){ $client }
+		else { "[$client]" }
+	} else { q() }
+}
+sub source_status {
+	my $track = shift;
+	client_status($track->rec_status, $track->source, 'output')
+}
+sub send_status {
+	my $track = shift;
+	client_status('REC', $track->send, 'input')
 }
 
 sub set_rec {

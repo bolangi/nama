@@ -121,6 +121,7 @@ sub cancel_wraparound {
 
 
 sub placeholder { $use_placeholders ? q(--) : q() }
+
 sub show_tracks {
     no warnings;
     my @tracks = @_;
@@ -131,11 +132,9 @@ sub show_tracks {
             $_->rw,
             $_->rec_status,
             $_->name =~ /Master|Mixdown/ ? placeholder() : 
-				$_->rec_status eq 'REC' ? $_->source : placeholder(),
+					$_->source_status ? $_->source_status : placeholder(),
 			$_->name =~ /Master|Mixdown/ ? placeholder() : 
-				$_->rec_status ne 'OFF' 
-					? ($_->send ? $_->send : placeholder())
-					: placeholder(),
+					$_->send_status ? $_->send_status : placeholder(),
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
@@ -148,11 +147,11 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Track  Name        Ver. Setting  Status   Source      Send
-=============================================================
+Track  Name        Ver. Setting Status   Source        Send
+=================================================================
 .
 format STDOUT =
-@>>    @<<<<<<<<<  @|||   @<<     @<<    @|||||||  @|||||||||  ~~
+@>>    @<<<<<<<<<  @|||   @<<    @<<  @|||||||||||| @||||||||||||  ~~
 splice @format_fields, 0, 7
 .
 
