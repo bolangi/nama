@@ -178,7 +178,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mon_setup mix_setup_mon  mix_file ) ],
+		rules  => [ qw(mon_setup mix_setup_mon  mix_file mix_ev) ],
 	);
 	$null_bus = ::Bus->new(
 		name => 'Null_Bus',
@@ -430,7 +430,7 @@ sub initialize_rules {
 	);
 	$mix_down_ev = ::Rule->new(
 
-		name			=> 'mix_down_ev', 
+		name			=> 'mix_ev', 
 		chain_id		=> 2, # MixDown
 		target			=> 'all', 
 		
@@ -1517,6 +1517,7 @@ sub add_effect {
 	my %pp = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%pp);
 	apply_op($id) if eval_iam("cs-is-valid");
+	$id;
 
 }
 sub modify_effect {
@@ -1531,7 +1532,7 @@ sub modify_effect {
  				$sign,
  				$value);
 		}
-	print "id $op_id p: $parameter, sign: $sign value: $value\n";
+	$debug and print "id $op_id p: $parameter, sign: $sign value: $value\n";
 	effect_update_copp_set( 
 		$cops{ $op_id }->{chain}, 
 		$op_id, 
@@ -3032,23 +3033,66 @@ sub jack_client {
 
 sub automix {
 
+	my $debug = 1;
 	# add -ev to mixtrack
+	my $ev = add_effect( { chain => $mixdown_track->n, type => 'ev' } );
+	print "ev id: $ev\n";
+
+	# set Mixdown vol to 100
+	modify_effect( $mixdown_track->vol, 1, undef, 100 );	
+
 	# set mixdown mode
+	$mixdown_track->set(rw => 'REC');
+	
 	# turn off mixer output
-	# turn off mixfile
-	# turn on mix_null
-	# for mon; vol /20
-	# arm / start
-	# detect finish
+	$master_track->set(rw => 'OFF');
+
+	# turn off mix_file
+	$mix_down->set(   status => 0);
+
+	# turn on mix_down_ev
+	$mix_down_ev->set(status => 1);
+
+	command_process('arm; start');
+	while( eval_iam('engine-status') ne 'finished'){ sleep 1 }
+
+	# reduce track volume levels  to 10%
+	
+	command_process( 'for mon; vol/10');
+
 	# parse cop status
-	# for mon; vol * multiplier
-	# Master; vol * multipler/20 # keep same audibe output volume
-	# remove -ev
+	my $cs = eval_iam('cop-status');
+	my $cs_re = qr/Chain "2".+?result-max-multiplier ([\.\d]+)/s;
+	my ($multiplier) = $cs =~ /$cs_re/;
+	$debug and print "multiplier: $multiplier\n";
+
+	if ( $multiplier - 1 > 0.01 ){
+
+		# apply multiplier to individual tracks
+
+		command_process( "for mon: vol*$multiplier" );
+
+		# keep same audible output volume
+		
+		my $master_multiplier = $multiplier/10;
+		command_process("Master; vol/$master_multiplier")
+
+	}
+	remove_effect($ev);
+	
 	# turn off mix_null
+	$mix_down_ev->set(status => 0);
+
 	# turn on mix_file
-	# arm / start
-	# detect finish
-	# turn on mixer out
+	$mix_down->set(status => 1);
+
+	# mixdown
+	command_process('arm; start');
+	while( eval_iam('engine-status') ne 'finished'){ sleep 1 }
+
+	# turn on mixer output
+	command_process('mixplay');
+	
 }
 	
 ### end

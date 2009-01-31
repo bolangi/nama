@@ -28,6 +28,8 @@ devices:
     output_format: s32_le,10,frequency
   null:
     ecasound_id: null
+    output_format: cd-stereo
+
 
 # ALSA device assignments and formats
 
