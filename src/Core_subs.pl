@@ -428,6 +428,22 @@ sub initialize_rules {
 
 		status			=> 1,
 	);
+	$mix_down_ev = ::Rule->new(
+
+		name			=> 'mix_down_ev', 
+		chain_id		=> 2, # MixDown
+		target			=> 'all', 
+		
+		input_type 		=> 'mixed', # bus name
+		input_object	=> $loopb,
+
+		output_type		=> 'device',
+
+
+		output_object   => 'null',
+
+		status			=> 1,
+	);
 
 	$mix_link = ::Rule->new(
 
