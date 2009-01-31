@@ -3014,10 +3014,25 @@ sub jack_client {
 	$jack{$name}{$direction};
 }
 
-sub autofix {
-	command_process("for mon; fixdc; normalize")
-}
 sub automix {
+
+	# add -ev to mixtrack
+	# set mixdown mode
+	# turn off mixer output
+	# turn off mixfile
+	# turn on mix_null
+	# for mon; vol /20
+	# arm / start
+	# detect finish
+	# parse cop status
+	# for mon; vol * multiplier
+	# Master; vol * multipler/20 # keep same audibe output volume
+	# remove -ev
+	# turn off mix_null
+	# turn on mix_file
+	# arm / start
+	# detect finish
+	# turn on mixer out
 }
 	
 ### end

@@ -321,4 +321,4 @@ unmemoize: _unmemoize {
 	unmemoize('candidates'); 1
 }
 automix: _automix { ::automix(); 1 }
-autofix: _autofix { ::autofix(); 1 }
+autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
