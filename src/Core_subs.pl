@@ -2865,13 +2865,25 @@ sub command_process {
 			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
 		$debug and print "bunch: $bunchy do: $do\n";
 		my @tracks;
-		if ($bunchy =~ /\S \S/ or $tn{$bunchy} or $ti[$bunchy]){
-			$debug and print "multiple tracks found\n";
-			@tracks = split " ", $bunchy;
-			$debug and print "multitracks: @tracks\n";
-		} elsif ( lc $bunchy eq 'all' ){
+		if ( lc $bunchy eq 'all' ){
 			$debug and print "special bunch: all\n";
 			@tracks = $tracker->tracks;
+		} elsif ( lc $bunchy eq 'rec' ){
+			$debug and print "special bunch: rec\n";
+			@tracks = grep{$tn{$_}->rec_status eq 'REC'} $tracker->tracks;
+		} elsif ( lc $bunchy eq 'mon' ){
+			$debug and print "special bunch: mon\n";
+			@tracks = grep{$tn{$_}->rec_status eq 'MON'} $tracker->tracks;
+		} elsif ( lc $bunchy eq 'off' ){
+			$debug and print "special bunch: off\n";
+			@tracks = grep{$tn{$_}->rec_status eq 'OFF'} $tracker->tracks;
+		} elsif ($bunchy =~ /\s/  # multiple identifiers
+			or $tn{$bunchy} 
+			or $bunchy !~ /\D/ and $ti[$bunchy]){ 
+			$debug and print "multiple tracks found\n";
+			@tracks = grep{ $tn{$_} or ! /\D/ and $ti[$_] }
+				split " ", $bunchy;
+			$debug and print "multitracks: @tracks\n";
 		} elsif ( @tracks = @{$bunch{$bunchy}}) {
 			$debug and print "bunch tracks: @tracks\n";
  		}
@@ -3000,6 +3012,12 @@ sub jack_client {
 	#print yaml_out \%jack;
 
 	$jack{$name}{$direction};
+}
+
+sub autofix {
+	command_process("for mon; fixdc; normalize")
+}
+sub automix {
 }
 	
 ### end

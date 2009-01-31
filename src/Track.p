@@ -8,6 +8,7 @@ local $debug = 0;
 #use Exporter qw(import);
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
+use ::Wav;
 #use Memoize qw(memoize unmemoize);
 #memoize('rec_status');
 use Carp;

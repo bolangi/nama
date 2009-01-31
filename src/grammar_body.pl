@@ -320,4 +320,5 @@ unmemoize: _unmemoize {
 	$::memoize = 0;
 	unmemoize('candidates'); 1
 }
-	
+automix: _automix { ::automix(); 1 }
+autofix: _autofix { ::autofix(); 1 }

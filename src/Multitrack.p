@@ -98,7 +98,6 @@ use ::Tkeca_effects;
 use ::Track;
 use ::Bus;    
 use ::Mark;
-use ::Wav;
 
 package ::Wav;
 memoize('candidates') if $::memoize;
