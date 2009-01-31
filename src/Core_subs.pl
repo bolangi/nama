@@ -207,6 +207,7 @@ sub prepare {
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
 
+	$ui->poll_jack();
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
@@ -442,7 +443,7 @@ sub initialize_rules {
 
 		output_object   => 'null',
 
-		status			=> 1,
+		status			=> 0,
 	);
 
 	$mix_link = ::Rule->new(
@@ -581,7 +582,7 @@ $multi = ::Rule->new(
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send 
-									and $track_send !~ /\D/ # is channel no
+									and $track->send !~ /\D/ # is channel
 									or jack_client($track->send, 'input') } ,
 		status			=>  1,
 	);
