@@ -110,7 +110,11 @@ source: _source name { $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
 	my $object = ::Track::input_object( $source );
-	print $::this_track->name, ": input from $object.\n";
+	if ( $source ) { 
+		print $::this_track->name, ": input from $object.\n";
+	} else {
+		print $::this_track->name, ": REC disabled. No source found.\n";
+	}
 	1;
 }
 send: _send name { $::this_track->set_send($item{name}); 1}

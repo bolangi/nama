@@ -38,7 +38,7 @@ sub poll_jack {
 	    desc   => 'poll_jack',               # description;
 	    prio   => 5,                         # low priority;
 		interval => 5,
-	    cb     => sub{ $jack_running = jack_running() },  # callback;
+	    cb     =>   \&jack_update, # callback;
 	);
 }
 

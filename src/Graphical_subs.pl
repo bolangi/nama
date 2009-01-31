@@ -1102,7 +1102,7 @@ sub start_heartbeat {
 sub poll_jack {
 	package ::;
 	$event_id{tk_poll_jack} = $set_event->repeat( 
-		5000, sub{ $jack_running = jack_running()}
+		5000, \&jack_update
 	);
 }
 sub stop_heartbeat { tk_event_cancel( qw(tk_heartbeat tk_wraparound)) }

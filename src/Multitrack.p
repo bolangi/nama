@@ -87,7 +87,8 @@ $seek_delay = 100_000; # microseconds
 $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
-$jack_running = jack_running(); # to be updated by Event
+
+jack_update(); # to be polled by Event
 $memoize = 0;
 
 

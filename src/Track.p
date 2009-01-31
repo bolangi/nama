@@ -387,26 +387,24 @@ sub source { # command for setting, showing track source
 	my ($track, $source) = @_;
 
 	if ( ! $source ){
-		if ( $::jack_running
-				and $track->jack_source 
-				and $track->source_select eq 'jack'){
-			$track->jack_source 
-		} else { 
+		if ( 	$track->source_select eq 'jack'
+				and $track->jack_source ){
+			$track->jack_source
+		} elsif ( $track->source_select eq 'soundcard') { 
 			$track->input 
-		}
+		} else { undef }
 	} elsif ( $source =~ m(\D) ){
 		if ( $::jack_running ){
-			$track->set(jack_source => $source);
 			$track->set(source_select => "jack");
+			$track->set(jack_source => $source);
 			my $name = $track->name;
 			print <<CLIENT if ! ::jack_client($source, 'output');
 $name: output port for JACK client "$source" not found. 
 Cannot set "$name" to REC.
 CLIENT
-			$track->jack_source
 		} else {
 			print "JACK server not running.\n";
-			$track->input;
+			$track->source;
 		} 
 	} else {  # must be numerical
 		$track->set(ch_r => $source);
@@ -462,15 +460,10 @@ sub set_send {
 sub send {
 	my ($track, $send) = @_;
 	if ( ! defined $send ){
-		if ( $::jack_running
-				and $track->jack_send 
-				and $track->send_select eq 'jack'){
-			$track->jack_send 
-		} else { 
-			$track->send_select eq 'soundcard'
-				?  $track->aux_output
-				:  undef
-		}
+		if ( $track->send_select eq 'jack'
+			 and $track->jack_send  ) { $track->jack_send } 
+		elsif ( $track->send_select eq 'soundcard' ){ $track->aux_output }
+		else { undef }
 	} elsif ( $send eq 'off'  or $send eq '0') { 
 		$track->set(send_select => 'off');
 		undef;
@@ -482,7 +475,7 @@ sub send {
 		} else {
 			print $track->name, 
 			": cannot send to JACK client. jackd is not running\n";
-			$track->aux_output;
+			$track->source;
 		} 
 	} else {  # must be numerical
 		if ( $send > 2){ 
@@ -532,7 +525,7 @@ sub source_input { # for io lists / chain setup
 		if ($::jack_running ){
 			['jack', $track->source ]
 		} else { 
-			print $track->name, ": no JACK client found\n";
+			#print $track->name, ": no JACK client found\n";
 			[qw(lost lost)]
 		}
     } else { 
@@ -561,7 +554,7 @@ sub input_object { # for text display
 		qq(JACK client "$source")
 	} elsif ( $source =~ /\d/ ){
 		qq(soundcard channel $source)
-	} else { '(null)'  }
+	} 
 }
 
 sub output_object {   # text for user display

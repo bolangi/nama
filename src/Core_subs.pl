@@ -580,7 +580,9 @@ $multi = ::Rule->new(
 								 $track->send_output->[1]},
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition 		=> sub { my $track = shift; 
-								return "satisfied" if $track->send; } ,
+								return "satisfied" if $track->send 
+									and $track_send !~ /\D/ # is channel no
+									or jack_client($track->send, 'input') } ,
 		status			=>  1,
 	);
 
@@ -606,7 +608,14 @@ $multi = ::Rule->new(
 
 }
 
-sub jack_running { qx(pgrep jackd) }
+sub jack_running {
+	my @pids = split " ", qx(pgrep jackd);
+	my @jack  = grep{   my $pid;
+						/jackd/ and ! /defunct/
+						and ($pid) = /(\d+)/
+						and grep{ $pid == $_ } @pids 
+				} split "\n", qx(ps ax) ;
+}
 sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
@@ -2942,7 +2951,8 @@ sub command_process {
 		} elsif ($tn{$cmd}) { 
 			$debug and print qq(Selecting track "$cmd"\n);
 			$this_track = $tn{$cmd};
-			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
+			my $c = q(c-select ) . $this_track->n; 
+			eval_iam( $c ) if eval_iam( 'cs-connected' );
 			$predicate !~ /^\s*$/ and $parser->command($predicate);
 		} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
 			$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
@@ -2995,6 +3005,10 @@ sub complete {
         return undef;
     }
 };
+sub jack_update {
+	$jack_running = jack_running();
+	$jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
+}
 sub jack_client {
 
 	# returns true if client and direction exist
@@ -3003,7 +3017,9 @@ sub jack_client {
 	my ($name, $direction)  = @_;
 	# synth:in_1 input
 	# synth input
-	my $j = qx(jack_lsp -Ap);
+	$jack_running or return;
+	my $j = $jack_lsp; 
+	#return if $j =~ /JACK server not running/;
 
 	# convert to single lines
 
