@@ -5,10 +5,10 @@ sub mainloop {
 	$ui->loop;
 }
 sub status_vars {
-	serialize( -class => '::', -vars => \@status_vars);
+	serialize( class => '::', vars => \@status_vars);
 }
 sub config_vars {
-	serialize( -class => '::', -vars => \@config_vars);
+	serialize( class => '::', vars => \@config_vars);
 }
 
 sub discard_object {
@@ -2068,9 +2068,9 @@ sub prepare_static_effects_data{
 		sort_ladspa_effects();
 		prepare_effects_help();
 		serialize (
-			-file => $effects_cache, 
-			-vars => \@effects_static_vars,
-			-class => '::',
+			file => $effects_cache, 
+			vars => \@effects_static_vars,
+			class => '::',
 			-storable => 1 );
 	}
 
@@ -2550,9 +2550,10 @@ map { push @marks_data, $_->hashref } ::Mark::all();
 map { push @groups_data, $_->hashref } ::Group::all();
 
 	serialize(
-		-file => $file, 
-		-vars => \@persistent_vars,
-		-class => '::',
+		file => $file, 
+		type => 'perl',
+		vars => \@persistent_vars,
+		class => '::',
 	#	-storable => 1,
 		);
 
@@ -2581,9 +2582,9 @@ map { push @groups_data, $_->hashref } ::Group::all();
 sub assign_var {
 	my ($source, @vars) = @_;
 	assign_vars(
-				-source => $source,
-				-vars   => \@vars,
-				-class => '::');
+				source => $source,
+				vars   => \@vars,
+				class => '::');
 }
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
@@ -2712,9 +2713,9 @@ sub save_effects {
 	# map {remove_op} @{ $ti[$_]->ops }
 
 	store_vars(
-		-file => $file, 
-		-vars => \@effects_dynamic_vars,
-		-class => '::');
+		file => $file, 
+		vars => \@effects_dynamic_vars,
+		class => '::');
 
 }
 

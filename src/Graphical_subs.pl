@@ -1300,9 +1300,9 @@ sub init_palettefields {
 sub save_palette {
 	package ::;
  	serialize (
- 		-file => join_path($project_root, $palette_file),
- 		-vars => [ qw( %palette %namapalette ) ],
- 		-class => '::')
+ 		file => join_path($project_root, $palette_file),
+ 		vars => [ qw( %palette %namapalette ) ],
+ 		class => '::')
 }
 
 
