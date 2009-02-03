@@ -435,7 +435,7 @@ files recorded at the same time have the same version
 numbers. 
 
 Version numbers for playback can be selected at the group
-and track level. By setting the group version number to 5,
+or track level. By setting the group version number to 5,
 you can play back the fifth take of a song, or perhaps the
 fifth song of a live recording session. 
 
@@ -463,6 +463,8 @@ soundcard.
 I<MON> status indicates an audio stream available from disk.
 It requires a MON setting for the track or group as well as
 the presence of file with the selected version number.
+A track set to REC with no audio stream available with
+default to MON status.
 
 I<OFF> status means that no audio is available for the track
 from any source.  A track with no recorded WAV files 

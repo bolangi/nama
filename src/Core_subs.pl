@@ -207,10 +207,10 @@ sub prepare {
 	# default to graphic mode  (Tk event loop)
 	# text mode (Event.pm event loop)
 
-	$ui->poll_jack();
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
+	$ui->poll_jack();
 
 	if (! $project_name ){
 		$project_name = "untitled";
@@ -2572,6 +2572,9 @@ map { push @groups_data, $_->hashref } ::Group::all();
 	all_chains();
 
 	# restore %cops
+	# 
+	# I don't think I need this.  Data::Rmap should take
+	# care of it.
 	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
 
 }
@@ -2664,7 +2667,7 @@ sub retrieve_state {
 
 
 
-	$ui->refresh_oids();
+	$ui->refresh_oids(); # unused TODO remove
 
 	# restore Alsa mixer settings
 	if ( $opts{a} ) {
@@ -3075,13 +3078,16 @@ sub automix {
 
 	# reduce track volume levels  to 10%
 	
+	command_process('for mon;sh');
+	
 	command_process( 'for mon; vol/10');
 
+	command_process('for mon;sh');
 	# parse cop status
 	my $cs = eval_iam('cop-status');
 	my $cs_re = qr/Chain "2".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;
-	$debug and print "multiplier: $multiplier\n";
+	print "mixdown multiplier: ", $multiplier/10, "\n";
 
 	if ( $multiplier - 1 > 0.01 ){
 
@@ -3089,10 +3095,12 @@ sub automix {
 
 		command_process( "for mon: vol*$multiplier" );
 
+		command_process('for mon;sh');
+
 		# keep same audible output volume
 		
-		my $master_multiplier = $multiplier/10;
-		command_process("Master; vol/$master_multiplier")
+#		my $master_multiplier = $multiplier/10;
+#		command_process("Master; vol/$master_multiplier")
 
 	}
 	remove_effect($ev);
