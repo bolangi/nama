@@ -2509,7 +2509,10 @@ sub save_state {
 	} keys %cops;
 
 	# restore muted volume levels
+
+	# why? leave it all as is
 	#
+	# ------------- cut -----------	
 	my %muted;
 	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
 		 $muted{$_}++;
@@ -2520,7 +2523,9 @@ sub save_state {
 	#
 	# (done for Text mode)
 
- # old vol level has been stored, thus is muted
+	# old vol level has been stored, thus is muted
+	#
+	# -----------------------------
  	
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
@@ -2567,16 +2572,41 @@ map { push @groups_data, $_->hashref } ::Group::all();
 		print qx(alsactl -f $file.alsa store);
 	}
 	# now remute
+	# --------------- cut -------------------
 	
 	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
 	grep { $muted{$_}} 
 	all_chains();
 
+	#-----------------------------------------
+
 	# restore %cops
 	# 
-	# I don't think I need this.  Data::Rmap should take
-	# care of it.
+	# the following is needed for yaml
+	
 	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
+
+	# when I save a structure as yaml
+	# i.e. $cops{A}->{owns} = []
+	#
+	# yaml looks like this:
+	#
+	#  cops:
+	#    A:
+	#      owns:
+	#    B:
+	#
+	# we save it as:
+	#
+	#  cops:
+	#    A:
+	#      owns: ~
+	#    B:
+	#
+	# but during restore, there is no way to know
+	# whether the reference value for key 'owns' 
+	# is SCALAR or HASH or ARRAY.
+	
 
 }
 sub assign_var {

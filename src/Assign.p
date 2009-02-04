@@ -209,6 +209,13 @@ sub assign_vars {
 		$ref = $source;
 	} else { carp "$source: unidentified data source\n"; }
 
+	# restore empty arrays and hashes where needed
+	
+	if ( $source =~ /\.yml$/i or $source =~ /^\s*---/s ){
+
+		rmap {  $_ = [] if /~NULL_ARRAY/;
+				$_ = {} if /~NULL_HASH/   } $ref;
+	}
 
 	assign(data => $ref, 
 			vars => \@vars, 
@@ -269,8 +276,8 @@ sub serialize {
 			$pl > io($file);
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;
-			rmap_array { $_ = q(~) if ! scalar @$_ } \%state;
-			rmap_hash  { $_ = q(~) if ! scalar %$_ } \%state;
+			rmap_array { $_ = q(~NULL_ARRAY) if ! scalar @$_ } \%state;
+			rmap_hash  { $_ = q(~NULL_HASH)  if ! scalar %$_ } \%state;
 			rmap       { $_ = q(~) if !         $_ } \%state;
 			my $yaml = yaml_out(\%state);
 			$yaml > io($file);
