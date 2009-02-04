@@ -23,7 +23,7 @@ no warnings qw(uninitialized syntax);
 
 BEGIN{ 
 
-our $VERSION = '0.9951';
+our $VERSION = '0.996';
 
 [% qx(cat ./banner.pl) %]
 
@@ -53,6 +53,12 @@ $| = 1;     # flush STDOUT buffer on every write
 
 ## Definitions ##
 
+
+use subs qw(
+
+[% qx(./list_subs ./Core_subs.pl) %]
+
+);
 
 # 'our' declaration: all packages in the file will see the following
 # variables. 
@@ -136,6 +142,13 @@ sub new { my $class = shift; return bless {@_}, $class }
 use ::Track;   
 
 package ::Graphical;  ## gui routines
+
+use subs qw(
+
+[% qx(./list_subs ./Graphical_subs.pl ./Refresh_subs.pl) %]
+
+);
+
 our @ISA = '::';      ## default to root class
 
 ## The following methods belong to the Graphical interface class
@@ -163,6 +176,15 @@ sub loop {
 package ::Text;
 our @ISA = '::';
 use Carp;
+
+
+use subs qw(
+
+[% qx(./list_subs ./Text_methods.pl) %]
+
+);
+
+
 sub hello {"hello world!";}
 
 ## no-op graphic methods 
