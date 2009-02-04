@@ -87,7 +87,6 @@ sub init_gui {
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
 	$sn_save = $load_frame->Button->pack(-side => 'left');
-	$save_id = "State";
 	my $sn_save_text = $load_frame->Entry(
 									-textvariable => \$save_id,
 									-width => 15
@@ -644,23 +643,23 @@ sub track_gui {
 	# Mute
 
 	$mute = $track_frame->Button(
-	  		-command => sub { 
-				if ($copp{$vol_id}->[0]) {  # non-zero volume
-					$old_vol{$n}=$copp{$vol_id}->[0];
-					$copp{$vol_id}->[0] = 0;
-					effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
-					$mute->configure(-background => $namapalette{Mute});
-					$mute->configure(-activebackground => $namapalette{Mute});
-				}
-				else {
-					$copp{$vol_id}->[0] = $old_vol{$n};
-					effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
-						$old_vol{$n});
-					$old_vol{$n} = 0;
-					$mute->configure(-background => $old_bg);
-					$mute->configure(-activebackground => $old_abg);
-				}
-			}	
+		-command => sub { 
+			if ($copp{$vol_id}->[0]) {  # non-zero volume
+				$ti[$n]->set(old_vol_level => $copp{$vol_id}->[0]);
+				$copp{$vol_id}->[0] = 0;
+				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
+				$mute->configure(-background => $namapalette{Mute});
+				$mute->configure(-activebackground => $namapalette{Mute});
+			}
+			else {
+				$copp{$vol_id}->[0] = $ti[$n]->old_vol_level;
+				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
+					$old_vol{$n});
+				$ti[$n]->set(old_vol_level => 0);
+				$mute->configure(-background => $old_bg);
+				$mute->configure(-activebackground => $old_abg);
+			}
+		}	
 	  );
 
 	# Unity
@@ -753,7 +752,8 @@ sub paint_mute_buttons {
 			-background 		=> $namapalette{Mute},
 			-activebackground 	=> $namapalette{Mute},
 
-			)} grep { $old_vol{$_} } keys %old_vol; # track numbers
+			)} grep { $ti[$_]->old_vol_level}# muted tracks
+				map { $_->n } ::Track::all;  # track numbers
 }
 
 sub create_master_and_mix_tracks { 

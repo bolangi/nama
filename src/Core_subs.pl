@@ -2071,7 +2071,7 @@ sub prepare_static_effects_data{
 			file => $effects_cache, 
 			vars => \@effects_static_vars,
 			class => '::',
-			-storable => 1 );
+			storable => 1 );
 	}
 
 	prepare_effect_index();
@@ -2488,9 +2488,10 @@ sub save_state {
 
 	# first save palette to project_dir/palette.yml
 	
+	$debug and print "saving palette\n";
 	$ui->save_palette;
 
-	# do nothing if only Master and Mixdown
+	# do nothing more if only Master and Mixdown
 	
 	if (scalar @::Track::by_index == 3 ){
 		print "No user tracks, skipping...\n";
@@ -2500,49 +2501,19 @@ sub save_state {
 	my $file = shift;
 
 	# remove nulls in %cops 
+	
 	delete $cops{''};
 
-	map{ 
-		my $found; 
-		$found = "yes" if defined $cops{$_}->{owns};
-		$cops{$_}->{owns} = '~' unless $found;
-	} keys %cops;
-=comment
-	# restore muted volume levels
-
-	# why? leave it all as is
-	#
-	# ------------- cut -----------	
-	my %muted;
-	map{ $copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ; 
-		 $muted{$_}++;
-	#	 $ui->paint_button($track_widget{$_}{mute}, q(brown) );
-		} grep { $old_vol{$_} } all_chains();
-	# TODO: old_vol should be incorporated into Track object
-	# not separate variable
-	#
-	# (done for Text mode)
-
-	# old vol level has been stored, thus is muted
-	#
-	# -----------------------------
-=cut
- 	
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	# print "filename base: $file\n";
 	print "\nSaving state as $file.yml\n";
 
-    # sort marks
-	
-	my @marks = sort keys %marks;
-	%marks = ();
-	map{ $marks{$_}++ } @marks;
-	
 # prepare tracks for storage
 
 @tracks_data = (); # zero based, iterate over these to restore
 
+$debug and print "copying tracks data\n";
 map { push @tracks_data, $_->hashref } ::Track::all();
 
 # print "found ", scalar @tracks_data, "tracks\n";
@@ -2550,17 +2521,18 @@ map { push @tracks_data, $_->hashref } ::Track::all();
 # prepare marks data for storage (new Mark objects)
 
 @marks_data = ();
+$debug and print "copying marks data\n";
 map { push @marks_data, $_->hashref } ::Mark::all();
 
+$debug and print "copying groups data\n";
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
-
+$debug and print "serializing\n";
 	serialize(
 		file => $file, 
-		type => 'perl',
+		format => 'yaml',
 		vars => \@persistent_vars,
 		class => '::',
-	#	-storable => 1,
 		);
 
 
@@ -2572,49 +2544,7 @@ map { push @groups_data, $_->hashref } ::Group::all();
 		print "storing ALSA settings\n";
 		print qx(alsactl -f $file.alsa store);
 	}
-=comment
-	# now remute
-	# --------------- cut -------------------
-	
-	map{ $copp{ $ti[$_]->vol }->[0] = 0} 
-	grep { $muted{$_}} 
-	all_chains();
 
-	#-----------------------------------------
-=cut
-
-	# restore %cops
-	# 
-	# the following is needed for yaml
-	
-	map{ $cops{$_}->{owns} eq '~' and $cops{$_}->{owns} = [] } keys %cops; 
-
-	# when I save a structure as yaml
-	# i.e. $cops{A}->{owns} = []
-	#
-	# yaml looks like this:
-	#
-	#  cops:
-	#    A:
-	#      owns:
-	#    B:
-	#
-	# we save it as:
-	#
-	#  cops:
-	#    A:
-	#      owns: ~
-	#    B:
-	#
-	# but during restore, there is no way to know
-	# whether the reference value for key 'owns' 
-	# is SCALAR or HASH or ARRAY.
-	
-
-    # okay, this is now fixed by storing [] as ~NULL_ARRAY
-    # and {} as ~NULL_HASH
-    #
-    # so we can remove this code after some time
 
 }
 sub assign_var {
@@ -3126,6 +3056,19 @@ sub automix {
 	# turn on mixer output
 	command_process('mixplay');
 	
+}
+
+sub pan_check {
+	my $new_position = shift;
+	my $current = $copp{ $this_track->pan }->[0];
+	$this_track->set(old_pan_level => $current)
+		unless defined $this_track->old_pan_level;
+	effect_update_copp_set(
+		$this_track->n,		# chain
+		$this_track->pan,	# id
+		0, 					# parameter
+		$new_position,		# value
+	);
 }
 	
 ### end

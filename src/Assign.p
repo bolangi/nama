@@ -114,52 +114,47 @@ key:             $key
 full_class_path: $full_class_path
 sigil{key}:      $sigil{$key}
 DEBUG
-		if ($debug){
-		 $sigil{$key} 
-		or carp "didn't find a match for $key in ", join " ", @vars, $/;
-		}
-		my ($sigil, $identifier) = ($sigil{$key}, $key);
-		$eval .= $full_class_path;
-		$eval .= q( = );
+		if ( ! $sigil{$key} ){
+			$debug and carp 
+			"didn't find a match for $key in ", join " ", @vars, $/;
+		} else {
+			my ($sigil, $identifier) = ($sigil{$key}, $key);
+			$eval .= $full_class_path;
+			$eval .= q( = );
 
-		my $val = $ref->{$identifier};
+			my $val = $ref->{$identifier};
 
-		if ($sigil eq '$') { # scalar assignment
+			if ($sigil eq '$') { # scalar assignment
 
-			# extract value
+				# extract value
 
-			if ($val) { #  if we have something,
+				if ($val) { #  if we have something,
 
-				# dereference it if needed
-				
-				ref $val eq q(SCALAR) and $val = $$val; 
-														
-				# quoting for non-numerical
-				
-				$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
-		
-			} else { $val = q(undef) }; # or set as undefined
+					# dereference it if needed
+					
+					ref $val eq q(SCALAR) and $val = $$val; 
+															
+					# quoting for non-numerical
+					
+					$val = qq("$val") unless  $val =~ /^[\d\.,+\-e]+$/ 
+			
+				} else { $val = q(undef) }; # or set as undefined
 
-			$eval .=  $val;  # append to assignment
+				$eval .=  $val;  # append to assignment
 
-		} else { # array, hash assignment
-				
-			if ( ! defined $val ){
-				if ($sigil eq '@'){    $ref->{$identifier} = [] }
-				elsif ($sigil eq '%'){ $ref->{$identifier} = {} }
-				else {warn "unexpected sigil: $sigil\n"}
+			} else { # array, hash assignment
+					
+
+				$eval .= qq($sigil\{);
+				$eval .= q($ref->{ );
+				$eval .= qq("$identifier");
+				$eval .= q( } );
+				$eval .= q( } );
 			}
-
-
-			$eval .= qq($sigil\{);
-			$eval .= q($ref->{ );
-			$eval .= qq("$identifier");
-			$eval .= q( } );
-			$eval .= q( } );
-		}
-		$debug and print $eval, $/, $/;
-		eval($eval);
-		$debug and $@ and carp "failed to eval $eval: $@\n";
+			$debug and print $eval, $/, $/;
+			eval($eval);
+			$debug and $@ and carp "failed to eval $eval: $@\n";
+		}  # end if sigil{key}
 	} @keys;
 	1;
 }
@@ -226,16 +221,14 @@ sub assign_vars {
 
 sub serialize {
 	$debug2 and print "&serialize\n";
-	
 	my %h = @_;
 	my @vars = @{ $h{vars} };
 	my $class = $h{class};
 	my $file  = $h{file};
-	my $method = $h{type};
+	my $format = $h{format};
  	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect from preprocessor!
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
-	my $tilde = q('~');
 	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 
 
 
@@ -267,20 +260,22 @@ sub serialize {
 	# my $result1 = store \%state, $file; # old method
 	if ( $h{file} ) {
 
-		if ($h{storable} or $h{format} eq 'storable') {
+		if ($h{format} eq 'storable') {
 			my $result1 = store \%state, $file; # old method
-		} 
-		elsif ($h{format} eq 'perl'){
+		} elsif ($h{format} eq 'perl'){
 			$file .= '.pl' unless $file =~ /\.pl$/;
 			my $pl = dump \%state;
 			$pl > io($file);
-		} else {
+		} elsif ($h{format} eq 'yaml'){
 			$file .= '.yml' unless $file =~ /\.yml$/;
 			rmap_array { $_ = q(~NULL_ARRAY) if ! scalar @$_ } \%state;
 			rmap_hash  { $_ = q(~NULL_HASH)  if ! scalar %$_ } \%state;
-			rmap       { $_ = q(~) if !         $_ } \%state;
+			rmap       { $_ = q(~) if ! defined           $_ } \%state;
 			my $yaml = yaml_out(\%state);
 			$yaml > io($file);
+			rmap {  $_ = [] if /~NULL_ARRAY/;
+					$_ = {} if /~NULL_HASH/;
+					$_ = undef if $_ eq '~' } \%state;
 			$debug and print $yaml;
 		}
 	} else { yaml_out(\%state) }

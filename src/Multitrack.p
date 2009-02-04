@@ -91,6 +91,7 @@ $seek_delay = 100_000; # microseconds
 $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
+$save_id = "State";
 
 jack_update(); # to be polled by Event
 $memoize = 0;
@@ -141,12 +142,6 @@ use ::Track;
 
 package ::Graphical;  ## gui routines
 
-use subs qw(
-
-[% qx(./list_subs ./Graphical_subs.pl ./Refresh_subs.pl) %]
-
-);
-
 our @ISA = '::';      ## default to root class
 
 ## The following methods belong to the Graphical interface class
@@ -174,14 +169,6 @@ sub loop {
 package ::Text;
 our @ISA = '::';
 use Carp;
-
-
-use subs qw(
-
-[% qx(./list_subs ./Text_methods.pl) %]
-
-);
-
 
 sub hello {"hello world!";}
 

@@ -312,7 +312,6 @@ sub t_add_ctrl {
 }
 sub t_insert_effect {
 	my ($before, $code, $values) = @_;
-	my $debug = 1;
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if ::engine_running and ::really_recording;
 
