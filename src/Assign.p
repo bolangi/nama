@@ -265,7 +265,7 @@ sub serialize {
 		} 
 		elsif ($h{format} eq 'perl'){
 			$file .= '.pl' unless $file =~ /\.pl$/;
-			my $pl = dump( \%state );
+			my $pl = dump \%state;
 			$pl > io($file);
 		} else {
 			$file .= '.yml' unless $file =~ /\.yml$/;

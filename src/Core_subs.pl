@@ -165,7 +165,7 @@ sub prepare {
 		name => 'Tracker_Bus',
 		groups => [qw(Tracker)],
 		tracks => [],
-		rules  => [ qw( mix_setup rec_setup mon_setup multi rec_file) ],
+		rules  => [ qw( mix_setup rec_setup mon_setup aux_send rec_file) ],
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
@@ -568,9 +568,9 @@ sub initialize_rules {
 
 
 	
-$multi = ::Rule->new(  
+$aux_send = ::Rule->new(  
 
-		name			=>  'multi', 
+		name			=>  'aux_send', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
 		input_type		=>  'cooked', 

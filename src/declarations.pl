@@ -301,7 +301,7 @@ our (
 	$mon_setup,
 	$rec_file,
 	$rec_setup,
-	$multi,
+	$aux_send,
 	$null_setup,
 
    # marks and playback looping
