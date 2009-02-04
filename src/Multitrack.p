@@ -44,8 +44,6 @@ else { *sleeper = *roundsleep }
 
 # use Tk    # loaded conditionally in GUI mode
 
-#use Module::Load;
-#use Module::Load::Conditional;
 #use Tk::FontDialog;
 
 
@@ -223,6 +221,7 @@ sub remove_effect_gui {};
 sub marker {};
 sub initialize_palette {};
 sub save_palette {};
+sub paint_mute_buttons {};
 ## Some of these, may be overwritten
 ## by definitions that follow
 

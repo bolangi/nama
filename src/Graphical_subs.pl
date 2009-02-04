@@ -663,7 +663,6 @@ sub track_gui {
 			}	
 	  );
 
-
 	# Unity
 
 	$unity = $track_frame->Button(
@@ -749,6 +748,14 @@ sub track_gui {
 	refresh_track($n);
 
 }
+sub paint_mute_buttons {
+	map{ $track_widget{$_}{mute}->configure(
+			-background 		=> $namapalette{Mute},
+			-activebackground 	=> $namapalette{Mute},
+
+			)} grep { $old_vol{$_} } keys %old_vol; # track numbers
+}
+
 sub create_master_and_mix_tracks { 
 	$debug2 and print "&create_master_and_mix_tracks\n";
 

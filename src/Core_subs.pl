@@ -2507,7 +2507,7 @@ sub save_state {
 		$found = "yes" if defined $cops{$_}->{owns};
 		$cops{$_}->{owns} = '~' unless $found;
 	} keys %cops;
-
+=comment
 	# restore muted volume levels
 
 	# why? leave it all as is
@@ -2526,6 +2526,7 @@ sub save_state {
 	# old vol level has been stored, thus is muted
 	#
 	# -----------------------------
+=cut
  	
 	$file = $file ? $file : $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
@@ -2571,6 +2572,7 @@ map { push @groups_data, $_->hashref } ::Group::all();
 		print "storing ALSA settings\n";
 		print qx(alsactl -f $file.alsa store);
 	}
+=comment
 	# now remute
 	# --------------- cut -------------------
 	
@@ -2579,6 +2581,7 @@ map { push @groups_data, $_->hashref } ::Group::all();
 	all_chains();
 
 	#-----------------------------------------
+=cut
 
 	# restore %cops
 	# 
@@ -2607,6 +2610,11 @@ map { push @groups_data, $_->hashref } ::Group::all();
 	# whether the reference value for key 'owns' 
 	# is SCALAR or HASH or ARRAY.
 	
+
+    # okay, this is now fixed by storing [] as ~NULL_ARRAY
+    # and {} as ~NULL_HASH
+    #
+    # so we can remove this code after some time
 
 }
 sub assign_var {
@@ -2715,39 +2723,8 @@ sub retrieve_state {
 		my $mark = ::Mark->new( %h ) ;
 	} @marks_data;
 	$ui->restore_time_marks();
-
+	$ui->paint_mute_buttons;
 } 
-
-sub save_effects {
-	$debug2 and print "&save_effects\n";
-	my $file = shift;
-	
-	# restore muted volume levels
-	#
-	my %muted;
-	
-	map  {$copp{ $ti[$_]->vol }->[0] = $old_vol{$_} ;
-		  $ui->paint_button($track_widget{$_}{mute}, $old_bg ) }
-	grep { $old_vol{$_} }  # old vol level stored and muted
-	all_chains();
-
-	# we need the ops list for each track
-	#
-	# i dont see why, do we overwrite the effects section
-	# in one of the init routines?
-	# I will follow for now 12/6/07
-	
-	%state_c_ops = ();
-	map{ 	$state_c_ops{$_} = $ti[$_]->ops } all_chains();
-
-	# map {remove_op} @{ $ti[$_]->ops }
-
-	store_vars(
-		file => $file, 
-		vars => \@effects_dynamic_vars,
-		class => '::');
-
-}
 
 sub process_control_inputs { }
 
