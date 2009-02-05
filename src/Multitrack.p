@@ -16,8 +16,6 @@ use IO::All;
 use Event;
 use Module::Load::Conditional qw(can_load);
 use strict;
-use strict qw(refs);
-use strict qw(subs);
 use warnings;
 no warnings qw(uninitialized syntax);
 
@@ -100,7 +98,6 @@ $memoize = 0;
 ## Load my modules
 
 use ::Assign qw(:all);
-use ::Tkeca_effects; 
 use ::Track;
 use ::Bus;    
 use ::Mark;
@@ -147,7 +144,6 @@ our @ISA = '::';      ## default to root class
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
-sub new { my $class = shift; return bless {@_}, $class }
 sub loop {
     package ::;
     #MainLoop;

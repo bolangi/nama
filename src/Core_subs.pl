@@ -2991,12 +2991,13 @@ sub jack_client {
 
 sub automix {
 
+	use Smart::Comments '###';
 	my $debug = 1;
 	# add -ev to mixtrack
 	my $ev = add_effect( { chain => $mixdown_track->n, type => 'ev' } );
-	print "ev id: $ev\n";
+	### ev id: $ev
 
-	# set Mixdown vol to 100
+	### set Mixdown vol to 100
 	modify_effect( $mixdown_track->vol, 1, undef, 100 );	
 
 	# set mixdown mode
@@ -3011,34 +3012,42 @@ sub automix {
 	# turn on mix_down_ev
 	$mix_down_ev->set(status => 1);
 
-	command_process('arm; start');
-	while( eval_iam('engine-status') ne 'finished'){ sleep 1 }
+	### Status before mixdown:
 
-	# reduce track volume levels  to 10%
-	
-	command_process('for mon;sh');
+	command_process('show');
+
+	### reduce track volume levels  to 10%
 	
 	command_process( 'for mon; vol/10');
 
-	command_process('for mon;sh');
+	command_process('show');
+
+	command_process('arm; chains; start');
+
+	while( eval_iam('engine-status') ne 'finished'){ sleep 5; $ui->refresh }
+
 	# parse cop status
 	my $cs = eval_iam('cop-status');
 	my $cs_re = qr/Chain "2".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;
-	print "mixdown multiplier: ", $multiplier/10, "\n";
+	print $cs;
+
 
 	if ( $multiplier - 1 > 0.01 ){
 
-		# apply multiplier to individual tracks
+		### apply multiplier to individual tracks
 
 		command_process( "for mon: vol*$multiplier" );
 
-		command_process('for mon;sh');
-
 		# keep same audible output volume
 		
-#		my $master_multiplier = $multiplier/10;
-#		command_process("Master; vol/$master_multiplier")
+		my $master_multiplier = $multiplier/10;
+
+
+		### master multiplier: $multiplier/10
+
+		command_process("Master; vol/$master_multiplier")
+
 
 	}
 	remove_effect($ev);
@@ -3049,12 +3058,17 @@ sub automix {
 	# turn on mix_file
 	$mix_down->set(status => 1);
 
-	# mixdown
-	command_process('arm; start');
-	while( eval_iam('engine-status') ne 'finished'){ sleep 1 }
+	### mixdown
+	command_process('show');
+
+	command_process('arm; chains; start');
+
+	while( eval_iam('engine-status') ne 'finished'){ sleep 5; $ui->refresh }
 
 	# turn on mixer output
 	command_process('mixplay');
+
+	no Smart::Comments;
 	
 }
 

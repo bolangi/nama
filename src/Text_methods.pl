@@ -8,8 +8,6 @@ $text = new Text::Format {
 	tabstop			=> 4,
 };
 
-sub new { my $class = shift; return bless { @_ }, $class; }
-
 sub show_versions {
  	print "All versions: ", join " ", @{$this_track->versions}, $/;
 }
