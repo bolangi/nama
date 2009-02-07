@@ -3021,17 +3021,18 @@ sub automix {
 	command_process( 'for mon; vol/10');
 
 	command_process('show');
+	
+	command_process('arm; start');
 
-	command_process('arm; chains; start');
-
-	while( eval_iam('engine-status') ne 'finished'){ sleep 5; $ui->refresh }
+	while( eval_iam('engine-status') ne 'finished'){ 
+		sleep 10; $ui->refresh } ### Progressing...   Done
 
 	# parse cop status
 	my $cs = eval_iam('cop-status');
 	my $cs_re = qr/Chain "2".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;
-	print $cs;
 
+	### multiplier: $multiplier
 
 	if ( $multiplier - 1 > 0.01 ){
 
@@ -3061,9 +3062,10 @@ sub automix {
 	### mixdown
 	command_process('show');
 
-	command_process('arm; chains; start');
+	command_process('arm; start');
 
-	while( eval_iam('engine-status') ne 'finished'){ sleep 5; $ui->refresh }
+	while( eval_iam('engine-status') ne 'finished'){ 
+		sleep 10; $ui->refresh } ### Progressing...   Done
 
 	# turn on mixer output
 	command_process('mixplay');
