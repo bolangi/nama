@@ -2993,7 +2993,6 @@ sub jack_client {
 sub automix {
 
 	# use Smart::Comments '###';
-	my $debug = 1;
 	# add -ev to mixtrack
 	my $ev = add_effect( { chain => $mixdown_track->n, type => 'ev' } );
 	### ev id: $ev
@@ -3023,12 +3022,10 @@ sub automix {
 
 	#command_process('show');
 	
-#	command_process('arm; start');
-	command_process('gen;chains');
-return;
+	command_process('arm; start');
 
 	while( eval_iam('engine-status') ne 'finished'){ 
-		sleep 10; $ui->refresh } ### Progressing...   Done
+		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
 	# parse cop status
 	my $cs = eval_iam('cop-status');
@@ -3068,7 +3065,7 @@ return;
 	command_process('arm; start');
 
 	while( eval_iam('engine-status') ne 'finished'){ 
-		sleep 10; $ui->refresh } ### Progressing...   Done
+		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
 	# turn on mixer output
 	command_process('mixplay');
