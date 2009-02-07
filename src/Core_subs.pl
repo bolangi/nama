@@ -2071,7 +2071,7 @@ sub prepare_static_effects_data{
 			file => $effects_cache, 
 			vars => \@effects_static_vars,
 			class => '::',
-			storable => 1 );
+			format => 'storable');
 	}
 
 	prepare_effect_index();

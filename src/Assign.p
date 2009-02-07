@@ -10,7 +10,7 @@ use Data::YAML;
 use Data::YAML::Reader;
 use Data::YAML::Writer;
 use Data::Rmap qw(:all);
-use Data::Dump qw(dump);
+#use Data::Dump qw(dump);
 use Storable;
 
 require Exporter;
@@ -181,10 +181,10 @@ sub assign_vars {
 ### figure out what to do with input
 
 	if (-f $source){
-		if ( $source =~ /\.yml$/i ){
+		if ( $source =~ /\.yml$/i or $format eq 'yaml'){
 				$debug and print "found a yaml file: $source\n";
 				$ref = yaml_in($source);
-		} elsif ( $source =~ /\.pl$/i ){
+		} elsif ( $source =~ /\.pl$/i or $format eq 'perl'){
 				$debug and print "found a perl file: $source\n";
 				my $code = io($source)->all ;
 				$ref = eval $code or carp "$source: eval failed: $@\n";
@@ -264,8 +264,8 @@ sub serialize {
 			my $result1 = store \%state, $file; # old method
 		} elsif ($h{format} eq 'perl'){
 			$file .= '.pl' unless $file =~ /\.pl$/;
-			my $pl = dump \%state;
-			$pl > io($file);
+			#my $pl = dump \%state;
+			#$pl > io($file);
 		} elsif ($h{format} eq 'yaml'){
 			$file .= '.yml' unless $file =~ /\.yml$/;
 			rmap_array { $_ = q(~NULL_ARRAY) if ! scalar @$_ } \%state;
