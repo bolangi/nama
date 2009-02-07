@@ -126,14 +126,14 @@ sub show_tracks {
             $_->n,
             $_->name,
             $_->current_version || placeholder(),
-			$copp{$_->vol}->[0],
-			$copp{$_->pan}->[0],
             lc $_->rw,
             $_->rec_status,
             $_->name =~ /Master|Mixdown/ ? placeholder() : 
 					$_->source_status ? $_->source_status : placeholder(),
 			$_->name =~ /Master|Mixdown/ ? placeholder() : 
 					$_->send_status ? $_->send_status : placeholder(),
+			$copp{$_->vol}->[0],
+			$copp{$_->pan}->[0],
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
@@ -146,11 +146,11 @@ sub show_tracks {
 }
 
 format STDOUT_TOP =
-Track Name      Ver. Vol  Pan  Setting  Status   Source         Send
-=========================================================================
+Track Name      Ver. Setting  Status   Source           Send        Vol  Pan 
+=============================================================================
 .
 format STDOUT =
-@>>   @<<<<<<<<< @>  @>>  @>>    @<<     @<<  @|||||||||||| @||||||||||||  ~~
+@>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> ~~
 splice @format_fields, 0, 9
 .
 
