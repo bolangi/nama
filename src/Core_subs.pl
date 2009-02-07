@@ -435,7 +435,7 @@ sub initialize_rules {
 		chain_id		=> 2, # MixDown
 		target			=> 'all', 
 		
-		input_type 		=> 'mixed', # bus name
+		input_type 		=> 'mixed',
 		input_object	=> $loopb,
 
 		output_type		=> 'device',
@@ -1031,9 +1031,10 @@ WARN
 	#####  Setting devices as outputs
 	#
 	for my $dev ( keys %{ $outputs{device} }){
+			my $format = $devices{$dev}->{output_format};
 			push @output_chains, join " ",
 				"-a:" . (join "," , @{ $outputs{device}->{$dev} }),
-				"-f:" . $devices{$dev}->{output_format},
+				($format ? "-f:$format" : q() ),
 				"-o:". $devices{$dev}->{ecasound_id}; }
 
 	#####  Setting jack clients as outputs
@@ -2991,7 +2992,7 @@ sub jack_client {
 
 sub automix {
 
-	use Smart::Comments '###';
+	# use Smart::Comments '###';
 	my $debug = 1;
 	# add -ev to mixtrack
 	my $ev = add_effect( { chain => $mixdown_track->n, type => 'ev' } );
@@ -3020,9 +3021,11 @@ sub automix {
 	
 	command_process( 'for mon; vol/10');
 
-	command_process('show');
+	#command_process('show');
 	
-	command_process('arm; start');
+#	command_process('arm; start');
+	command_process('gen;chains');
+return;
 
 	while( eval_iam('engine-status') ne 'finished'){ 
 		sleep 10; $ui->refresh } ### Progressing...   Done
@@ -3070,7 +3073,7 @@ sub automix {
 	# turn on mixer output
 	command_process('mixplay');
 
-	no Smart::Comments;
+	#no Smart::Comments;
 	
 }
 
