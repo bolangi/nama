@@ -50,12 +50,6 @@ $| = 1;     # flush STDOUT buffer on every write
 ## Definitions ##
 
 
-use subs qw(
-
-[% qx(./list_subs ./Core_subs.pl) %]
-
-);
-
 # 'our' declaration: all packages in the file will see the following
 # variables. 
 

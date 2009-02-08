@@ -3038,7 +3038,7 @@ sub automix {
 
 		### apply multiplier to individual tracks
 
-		command_process( "for mon: vol*$multiplier" );
+		command_process( "for mon; vol*$multiplier" );
 
 		# keep same audible output volume
 		
@@ -3070,7 +3070,7 @@ sub automix {
 	# turn on mixer output
 	command_process('mixplay');
 
-	#no Smart::Comments;
+#	no Smart::Comments;
 	
 }
 
