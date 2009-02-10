@@ -139,14 +139,6 @@ send:
   what: set auxilary track destination
   short: out aux m
   parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
-jack:
-  type: general
-  short: jackon jon
-  what: Set mixer output to JACK device, tracks may use JACK signal inputs
-nojack:
-  short: nj jackoff joff
-  type: general
-  what: disable JACK functions
 stereo:
   type: track
   what: record two channels for current track
