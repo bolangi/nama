@@ -1082,7 +1082,7 @@ WARN
 		push  @input_chains, 
 			"-a:"
 			. join(",",@chain_ids)
-			. " -f:$format -i:jack_auto,$client";
+			. " -f:$format -i:jack,$client";
 	}
 		
 	##### Setting files as inputs (used by mon_setup)
@@ -1146,7 +1146,7 @@ WARN
 		push  @output_chains, 
 			"-a:"
 			. join(",",@chain_ids)
-			. " -f:$format -o:jack_auto,$client";
+			. " -f:$format -o:jack,$client";
 	}
 		
 	### Setting loops as outputs 
