@@ -85,6 +85,7 @@ show_track: _show_track end {
 	::Text::show_effects();
 	::Text::show_versions();
 	::Text::show_modifiers();
+	print "Signal width: ", ::width($::this_track->ch_count), "\n";
 	1;}
 show_track: _show_track name end { 
  	::Text::show_tracks( 

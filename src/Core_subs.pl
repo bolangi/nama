@@ -170,6 +170,7 @@ sub prepare {
 						rec_setup_soundcard_jack 
 						mon_setup 
 						aux_send 
+						aux_send_soundcard_jack
 						rec_file
 						rec_file_soundcard_jack) ],
 	);
@@ -637,6 +638,7 @@ sub initialize_rules {
 	
 $aux_send = ::Rule->new(  
 
+
 		name			=>  'aux_send', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
@@ -649,8 +651,28 @@ $aux_send = ::Rule->new(
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send 
+									and jack_client($track->send, 'input') } ,
+		status			=>  1,
+	);
+
+$aux_send_soundcard_jack = ::Rule->new(  
+
+		name			=>  'aux_send_soundcard_jack', 
+		target			=>  'all',
+		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
+		input_type		=>  'cooked', 
+		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
+		output_type		=>  'jack_multi',
+		output_object	=>  sub{ 
+			my $track = shift;
+			my $start = $track->ch_m;
+			my $end   = $start + $track->ch_count - 1;
+			join q(,),q(jack_multi),map{"system:playback_$_"} $start..$end;
+		},
+		condition 		=> sub { my $track = shift; 
+								return "satisfied" if $track->send 
 									and $track->send !~ /\D/ # is channel
-									or jack_client($track->send, 'input') } ,
+		} ,
 		status			=>  1,
 	);
 
@@ -1116,6 +1138,25 @@ WARN
 				"-a:" . (join "," , @{ $outputs{device}->{$dev} }),
 				($format ? "-f:$format" : q() ),
 				"-o:". $devices{$dev}->{ecasound_id}; }
+
+	#####  Setting jack_multi outputs 
+
+	for my $client (keys %{ $outputs{jack_multi} } ){
+
+		my @chain_ids = @{ $outputs{jack_multi}->{$client} };
+		my $format;
+		$chain_ids[0] =~ /(\d+)/;
+		my $n = $1;
+		$format = signal_format(
+			$devices{jack}->{signal_format},	
+			$ti[$n]->ch_count
+			);
+		push  @output_chains, 
+		"-a:" . join(",",@chain_ids) 
+				. " -f:$format" 
+				. " -o:$client";
+	}
+
 
 	#####  Setting jack clients as outputs
  
@@ -3173,5 +3214,13 @@ sub pan_check {
 		$new_position,		# value
 	);
 }
+
+sub width {
+	my $count = shift;
+	return 'mono' if $count == 1;
+	return 'stereo' if $count == 2;
+	return "$count channels";
+}
+
 	
 ### end
