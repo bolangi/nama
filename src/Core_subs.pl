@@ -3038,8 +3038,15 @@ sub jack_client {
 	# returns number of client ports
 	
 	my ($name, $direction)  = @_;
+
 	# synth:in_1 input
 	# synth input
+	
+	my $port;
+	($name, $port) = $name =~ /^([^:]+):?(.*)/;
+
+	# currently we ignore port
+	
 	$jack_running or return;
 	my $j = $jack_lsp; 
 	#return if $j =~ /JACK server not running/;
@@ -3066,7 +3073,7 @@ sub jack_client {
 
 	} split "\n",$j;
 	#print yaml_out \%jack;
-
+	
 	$jack{$name}{$direction};
 }
 
