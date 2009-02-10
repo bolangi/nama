@@ -165,7 +165,13 @@ sub prepare {
 		name => 'Tracker_Bus',
 		groups => [qw(Tracker)],
 		tracks => [],
-		rules  => [ qw( mix_setup rec_setup mon_setup aux_send rec_file) ],
+		rules  => [ qw( mix_setup 
+						rec_setup
+						rec_setup_soundcard_jack 
+						mon_setup 
+						aux_send 
+						rec_file
+						rec_file_soundcard_jack) ],
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
@@ -524,6 +530,36 @@ sub initialize_rules {
 		post_input			=>	sub{ my $track = shift;
 										$track->rec_route 
 										},
+		condition => sub {
+			my $track = shift;
+			return "satisfied" 
+				if ! ($track->source_select eq 'soundcard' and $jack_running)
+		},
+		status		=>  1,
+	);
+	$rec_file_soundcard_jack = ::Rule->new(
+
+		name		=>  'rec_file_soundcard_jack', 
+		target		=>  'REC',
+		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
+		input_type		=> 'jack_multi',
+		input_object	=> sub{ 
+			my $track = shift;
+			my $start = $track->ch_r;
+			my $end   = $start + $track->ch_count - 1;
+			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
+		},
+		output_type	=>  'file',
+		output_object   => sub {
+			my $track = shift; 
+			my $format = signal_format($raw_to_disk_format, $track->ch_count);
+			join " ", $track->full_path, $format
+		},
+		condition 		=> sub { 
+			my $track = shift; 
+			return "satisfied" if $jack_running 
+				and $track->source_select eq 'soundcard'
+		} ,
 		status		=>  1,
 	);
 
@@ -531,6 +567,32 @@ sub initialize_rules {
 	# inputs to stereo and output to loop device which will
 	# have Vol, Pan and other effects prior to various monitoring
 	# outputs and/or to the mixdown file output.
+	
+    $rec_setup_soundcard_jack  = ::Rule->new(
+
+		name			=>	'rec_setup_soundcard_jack', 
+		chain_id		=>  sub{ my $track = shift; $track->n },   
+		target			=>	'REC',
+		input_type		=> 'jack_multi',
+		input_object	=> sub{ 
+			my $track = shift;
+			my $start = $track->ch_r;
+			my $end   = $start + $track->ch_count - 1;
+			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
+		},
+		output_type		=>  'cooked',
+		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+		post_input			=>	sub{ my $track = shift;
+										$track->mono_to_stereo 
+										},
+		condition 		=> sub { 
+			my $track = shift; 
+			return "satisfied" if $jack_running 
+				and $track->source_select eq 'soundcard'
+				and defined $inputs{cooked}->{"loop," . $track->n}; 
+				} ,
+		status			=>  1,
+	);
 			
     $rec_setup = ::Rule->new(
 
@@ -547,10 +609,15 @@ sub initialize_rules {
 										$track->rec_route .
 										$track->mono_to_stereo 
 										},
-		condition 		=> sub { my $track = shift; 
-								return "satisfied" if defined
-								$inputs{cooked}->{"loop," . $track->n}; 
-								} ,
+		condition 		=> sub { 
+
+		# do not use when JACK is running and is soundcard input
+
+			my $track = shift; 
+			return "satisfied" 
+				if ! ($track->source_select eq 'soundcard' and $jack_running)
+					and defined $inputs{cooked}->{"loop," . $track->n}; 
+		},
 		status			=>  1,
 	);
 
@@ -621,14 +688,14 @@ sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
 
-sub input_type_object {
+sub input_type_object { # soundcard input
 	if ($jack_running ){ 
 		[qw(jack system)] 
 	} else { 
 	    [ q(device), $capture_device  ]
 	}
 }
-sub output_type_object {
+sub output_type_object { # soundcard output
 	if ($jack_running ){ 
 		[qw(jack system)] 
 	} else { 
@@ -970,6 +1037,19 @@ chains @chain_ids: device $dev not found in .namarc.  Skipping.
 WARN
 		}
 
+	}
+
+
+	#####  Setting jack_multi inputs
+
+	for my $client (keys %{ $inputs{jack_multi} } ){
+
+		my @chain_ids = @{ $inputs{jack_multi}->{$client} };
+		#my $format;
+		#$chain_ids[0] =~ /(\d+)/;
+		#my $n = $1;
+		push  @input_chains, 
+		"-a:" . join(",",@chain_ids) . " -i:$client";
 	}
 
 	#####  Setting jack clients as inputs

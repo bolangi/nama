@@ -300,7 +300,9 @@ our (
 	$mix_setup_mon,
 	$mon_setup,
 	$rec_file,
+	$rec_file_soundcard_jack,
 	$rec_setup,
+	$rec_setup_soundcard_jack,
 	$aux_send,
 	$null_setup,
 
