@@ -146,12 +146,13 @@ sub prepare {
 	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 
-	read_config();  # from .namarc if we have one
+	read_config(global_config());  # from .namarc if we have one
 
 	$debug and print "reading config file\n";
-	$project_root = $opts{d} if $opts{d}; # priority to command line option
-
-	$project_root = join_path($ENV{HOME}, "nama" ) if not $project_root;
+	if ($opts{d}){
+		print "found command line project_root flag\n";
+		$project_root = $opts{d};
+	}
 
 	# capture the sample frequency from .namarc
 	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
@@ -314,7 +315,8 @@ sub read_config {
 	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	assign_var( \%cfg, @config_vars); 
+	#print yaml_out \%cfg; 
+	assign_var( \%cfg, @config_vars);  ## XXX
 	#print "config file: $yml";
 
 }
@@ -2953,7 +2955,7 @@ sub command_process {
 	my ($user_input) = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
-	my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+	my ($cmd, $predicate) = ($user_input =~ /([\S]+?)\b(.*)/);
 	if ($cmd eq 'for' 
 			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
 		$debug and print "bunch: $bunchy do: $do\n";

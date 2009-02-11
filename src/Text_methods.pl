@@ -187,7 +187,7 @@ IAM
 	my @output;
 	if ( $help_topic{$name}){
 		@output = helptopic($name);
-	} elsif ($name == 10){
+	} elsif ($name !~ /\D/ and $name == 10){
 		@output = map{ helptopic $_ } @help_topic;
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)
@@ -211,7 +211,9 @@ IAM
 			qq("$name" matches the following commands:\n\n), @help;
 		}
 	}
-	::pager( @output ); 
+	if (@output){
+		::pager( @output ); 
+	} else { print "$name: no help found.\n"; }
 	
 }
 sub help_effect {

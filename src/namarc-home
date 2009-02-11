@@ -1,5 +1,4 @@
-project_root: /otherroot/home/jroth/nama
-
+---
 # indents _are_ significant (use spaces, no tabs)
 
 # define abbreviations
@@ -46,5 +45,7 @@ raw_to_disk_format: 16,N,frequency
 ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
+project_root: "/otherroot/home/jroth/nam"
 
 # end
+...

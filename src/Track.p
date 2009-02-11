@@ -320,14 +320,18 @@ sub remove_effect {
 sub mono_to_stereo { 
 	my $track = shift;
 	my $cmd = "file " .  $track->full_path;
-	if ( 	$track->ch_count == 2
+	if ( 	$track->ch_count == 2 and $track->rec_status eq 'REC'
 		    or  -e $track->full_path
 				and qx(which file)
 				and qx($cmd) =~ /stereo/i ){ 
-		return "" 
-	} elsif ( $track->ch_count == 1 ){
+		return q(); 
+	} elsif ( $track->ch_count == 1 and $track->rec_status eq 'REC'
+				or  -e $track->full_path
+				and qx(which file)
+				and qx($cmd) =~ /mono/i ){ 
 		return " -chcopy:1,2 " 
-	} else { carp "Track ".$track->name.": Unexpected channel count\n"; }
+	} else { # do nothing for higher channel counts
+	} # carp "Track ".$track->name.": Unexpected channel count\n"; 
 }
 
 sub rec_route {
