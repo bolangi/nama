@@ -82,8 +82,7 @@ my $reply = <STDIN>;
 chomp $reply;
 if ($reply !~ /n/i){
 	$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
-	create_dir( $project_root);
-	create_dir( join_path $project_root, "untitled");
+	mkpath( join_path($project_root, qw(untitled .wav)) );
 } else {
 	print <<OTHER;
 Please make sure to set the project_root directory in
@@ -152,7 +151,7 @@ sub prepare {
 	$debug and print "reading config file\n";
 	$project_root = $opts{d} if $opts{d}; # priority to command line option
 
-	$project_root or $project_root = join_path($ENV{HOME}, "nama" );
+	$project_root = join_path($ENV{HOME}, "nama" ) if not $project_root;
 
 	# capture the sample frequency from .namarc
 	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
@@ -336,8 +335,12 @@ sub substitute{
 ## project handling
 
 sub list_projects {
-	my $cmd = "ls ". project_root();
-	print system $cmd;
+	print join "\n", sort map{
+			my ($vol, $dir, $lastdir) = File::Spec->splitpath($_); $lastdir
+		} File::Find::Rule  ->directory()
+							->maxdepth(1)
+							->extras( { follow => 1} )
+						 	->in( project_root());
 }
 sub list_plugins {}
 		

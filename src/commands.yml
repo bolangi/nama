@@ -179,8 +179,8 @@ group_off:
 bunch:
   type: group
   short: bn
-  what: define a group of tracks | list one bunch | list bunch names
-  parameters: group_name track1 track2 track3...
+  what: define/list groups of tracks
+  parameters: [group_name [track1] [track2]... ]
 list_versions:
   type: track
   short: lver lv
