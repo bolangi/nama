@@ -550,7 +550,7 @@ sub initialize_rules {
 		input_type		=> 'jack_multi',
 		input_object	=> sub{ 
 			my $track = shift;
-			my $start = $track->ch_r;
+			my $start = $track->input;
 			my $end   = $start + $track->ch_count - 1;
 			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
 		},
@@ -1324,7 +1324,7 @@ sub generate_setup { # create chain setup
 sub arm {
 	if ( $preview ){
 		stop_transport() ;
-		print "Exiting preview/doodle mode\n" if $preview;
+		print "Exiting preview/doodle mode\n";
 		$preview = 0;
 		$rec_file->set(status => 1);
 		$rec_file_soundcard_jack->set(status => 1);
@@ -1351,6 +1351,7 @@ sub doodle {
 	return if transport_running();
 	print "Starting engine in doodle mode. Live inputs only.\n";
 	$preview = 1;
+	command_process('grec');
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
