@@ -299,6 +299,8 @@ doodle: _doodle { ::doodle(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { 
+	my $old_group_status = $::tracker->rw;
+	$::tracker->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
 	print "delete WAV file $wav? [n] ";
 	my $reply = <STDIN>;
@@ -307,6 +309,7 @@ destroy_current_wav: _destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
 	}
+	$::tracker->set(rw => $old_group_status);
 	1;
 }
 memoize: _memoize { 
