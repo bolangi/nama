@@ -6,6 +6,11 @@ TD=$MD/lib/Audio/Ecasound/Multitrack
 if [ ! -d $TD ]; then
    mkdir -p $TD;
 fi
+if [ ! -d $MD/t ]		
+then
+   mkdir $MD/t
+fi
+
 ./preproc -r Audio::Ecasound::Multitrack \
 		-s $MD/src \
 		-t $TD \

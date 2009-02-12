@@ -337,12 +337,13 @@ sub substitute{
 ## project handling
 
 sub list_projects {
-	print join "\n", sort map{
+	my $projects = join "\n", sort map{
 			my ($vol, $dir, $lastdir) = File::Spec->splitpath($_); $lastdir
 		} File::Find::Rule  ->directory()
 							->maxdepth(1)
 							->extras( { follow => 1} )
 						 	->in( project_root());
+	pager($projects);
 }
 sub list_plugins {}
 		
