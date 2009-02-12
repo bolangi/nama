@@ -581,7 +581,7 @@ sub initialize_rules {
 		input_type		=> 'jack_multi',
 		input_object	=> sub{ 
 			my $track = shift;
-			my $start = $track->ch_r;
+			my $start = $track->input;
 			my $end   = $start + $track->ch_count - 1;
 			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
 		},
