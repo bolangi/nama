@@ -1327,6 +1327,7 @@ sub arm {
 		print "Exiting preview/doodle mode\n" if $preview;
 		$preview = 0;
 		$rec_file->set(status => 1);
+		$rec_file_soundcard_jack->set(status => 1);
 		$mon_setup->set(status => 1);
 		my @excluded = keys %excluded;
 		if ( @excluded ){
@@ -1342,6 +1343,7 @@ sub preview {
 	print "Starting engine in preview mode, WAV recording DISABLED.\n";
 	$preview = 1;
 	$rec_file->set(status => 0);
+	$rec_file_soundcard_jack->set(status => 0);
 	generate_setup() and connect_transport();
 	start_transport();
 }
@@ -1350,6 +1352,7 @@ sub doodle {
 	print "Starting engine in doodle mode. Live inputs only.\n";
 	$preview = 1;
 	$rec_file->set(status => 0);
+	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
 	generate_setup() and connect_transport();
