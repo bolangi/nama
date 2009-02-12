@@ -514,7 +514,7 @@ Skipping.
 			[qw(skip skip)]; 
 		}
 	} else { 
-				q(: unexpected send_select value: "), 
+				print q(: unexpected send_select value: "), 
 				$track->send_select, qq("\n);
 			[qw(skip skip)]; 
 	}

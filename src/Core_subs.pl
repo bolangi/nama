@@ -19,6 +19,7 @@ sub discard_object {
 
 
 sub first_run {
+return if $opts{f};
 my $config = config_file();
 $config = "$ENV{HOME}/$config" unless -e $config;
 $debug and print "config: $config\n";
@@ -233,9 +234,6 @@ sub prepare {
 	$debug and print "project_dir: ", project_dir() , $/;
 	1;	
 }
-
-
-
 
 sub eval_iam{
 	$debug2 and print "&eval_iam\n";
@@ -2097,7 +2095,7 @@ sub apply_op {
 	#map{apply_op($_)} @owns;
 
 }
-
+# unused 
 sub prepare_command_dispatch {
 	map{ 
 		if (my $subtext = $commands{$_}->{sub}){ # to_start
