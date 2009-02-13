@@ -164,12 +164,58 @@ use Carp;
 
 sub hello {"hello world!";}
 
-## no-op graphic methods 
+[% qx(cat ./Text_methods.pl ) %]
 
-# those that take parameters will break!!!
-# because object and procedural access get
-# different parameter lists ($self being included);
+package ::;
 
+### COMMAND LINE PARSER 
+
+$debug2 and print "Reading grammar\n";
+
+$commands_yml = <<'YML';
+[% qx(./strip_all  ./commands.yml) %]
+YML
+
+$cop_hints_yml = <<'YML';
+[% qx(cat ./ecasound_chain_operator_hints.yml) %];
+YML
+
+%commands = %{ ::yaml_in( $::commands_yml) };
+
+$::AUTOSTUB = 1;
+$::RD_TRACE = 1;
+$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
+$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
+$::RD_HINT   = 1; # Give out hints to help fix problems.
+
+$grammar = q(
+
+[% qx(./strip_all  ./grammar_body.pl) %]
+
+[% qx(./emit_command_headers) %]
+);
+
+# we redirect STDERR to shut up noisy Parse::RecDescent
+# but don't see "Bad grammar!" message when P::RD fails
+# to process the grammar
+
+#open SAVERR, ">&STDERR";
+#open STDERR, ">/dev/null" or die "couldn't redirect IO";
+$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+#close STDERR;
+#open STDERR, ">&SAVERR";
+
+[% qx(cat ./help_topic.pl) %]
+
+# we use the following settings if we can't find config files
+
+$default = <<'FALLBACK_CONFIG';
+[% qx(cat ./namarc) %]
+FALLBACK_CONFIG
+
+## NO-OP GRAPHIC METHODS 
+
+no warnings;
 sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
@@ -201,58 +247,7 @@ sub marker {};
 sub initialize_palette {};
 sub save_palette {};
 sub paint_mute_buttons {};
-## Some of these, may be overwritten
-## by definitions that follow
-
-[% qx(cat ./Text_methods.pl ) %]
-
-package ::;
-
-### COMMAND LINE PARSER 
-
-$debug2 and print "Reading grammar\n";
-
-$commands_yml = <<'YML';
-[% qx(./strip_all  ./commands.yml) %]
-YML
-
-$cop_hints_yml = <<'YML';
-[% qx(cat ./ecasound_chain_operator_hints.yml) %];
-YML
-
-%commands = %{ ::yaml_in( $::commands_yml) };
-
-$::AUTOSTUB = 1;
-$::RD_TRACE = 1;
-$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
-$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
-$::RD_HINT   = 1; # Give out hints to help fix problems.
-# rec command changes active take
-
-$grammar = q(
-
-[% qx(./strip_all  ./grammar_body.pl) %]
-
-[% qx(./emit_command_headers) %]
-);
-
-# we redirect STDERR to shut up noisy Parse::RecDescent
-# but don't see "Bad grammar!" message when P::RD fails
-# to process the grammar
-
-#open SAVERR, ">&STDERR";
-#open STDERR, ">/dev/null" or die "couldn't redirect IO";
-$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-#close STDERR;
-#open STDERR, ">&SAVERR";
-
-[% qx(cat ./help_topic.pl) %]
-
-# we use the following settings if we can't find config files
-
-$default = <<'FALLBACK_CONFIG';
-[% qx(cat ./namarc) %]
-FALLBACK_CONFIG
+use warnings;
 
 1;
 __END__
