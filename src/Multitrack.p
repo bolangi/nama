@@ -195,15 +195,7 @@ $grammar = q(
 [% qx(./emit_command_headers) %]
 );
 
-# we redirect STDERR to shut up noisy Parse::RecDescent
-# but don't see "Bad grammar!" message when P::RD fails
-# to process the grammar
-
-#open SAVERR, ">&STDERR";
-#open STDERR, ">/dev/null" or die "couldn't redirect IO";
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-#close STDERR;
-#open STDERR, ">&SAVERR";
 
 [% qx(cat ./help_topic.pl) %]
 
