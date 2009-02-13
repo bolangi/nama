@@ -215,7 +215,7 @@ FALLBACK_CONFIG
 
 ## NO-OP GRAPHIC METHODS 
 
-no warnings;
+no warnings qw(redefine);
 sub init_gui {}
 sub transport_gui {}
 sub group_gui {}
@@ -247,7 +247,6 @@ sub marker {};
 sub initialize_palette {};
 sub save_palette {};
 sub paint_mute_buttons {};
-use warnings;
 
 1;
 __END__
