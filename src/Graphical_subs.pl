@@ -1,6 +1,13 @@
 # gui handling
 #
-use Carp;
+## Note on object model
+# 
+# All graphic method are defined in the base class :: .
+# These are overridden in the ::Text class with no-op stubs.
+# 
+# So all the routines in Graphical_methods.pl can consider
+# themselves to be in the base class, with access to all
+# variables and subs that are imported.
 
 sub init_gui {
 
@@ -1090,22 +1097,22 @@ sub destroy_marker {
 }
 
 sub wraparound {
-	@_ = ::discard_object @_;
+	@_ = discard_object @_;
 	my ($diff, $start) = @_;
 	cancel_wraparound();
 	$event_id{tk_wraparound} = $set_event->after( 
-		int( $diff*1000 ), sub{ ::set_position( $start) } )
+		int( $diff*1000 ), sub{ set_position( $start) } )
 }
 sub cancel_wraparound { tk_event_cancel("tk_wraparound") }
 
 sub start_heartbeat {
 	#print ref $set_event; 
 	$event_id{tk_heartbeat} = $set_event->repeat( 
-		3000, \&::heartbeat);
-		# 3000, *::heartbeat{SUB}); # equivalent to above
+		3000, \&heartbeat);
+		# 3000, *heartbeat{SUB}); # equivalent to above
 }
 sub poll_jack {
-	package ::;
+	package ::; # no necessary we are already in base class
 	$event_id{tk_poll_jack} = $set_event->repeat( 
 		5000, \&jack_update
 	);
@@ -1113,7 +1120,7 @@ sub poll_jack {
 sub stop_heartbeat { tk_event_cancel( qw(tk_heartbeat tk_wraparound)) }
 
 sub tk_event_cancel {
-	@_ = ::discard_object @_;
+	@_ = discard_object @_;
 	map{ (ref $event_id{$_}) =~ /Tk/ and $set_event->afterCancel($event_id{$_}) 
 	} @_;
 }
@@ -1210,7 +1217,7 @@ sub init_namapalette {
 	) unless $namapalette{Play}; # i.e. not if already loaded
 
 }
-sub ::colorset {
+sub colorset {
 	my ($field,$initial) = @_;
 	sub { my $new_color = colorchooser($field,$initial);
 			if( defined $new_color ){
@@ -1228,7 +1235,7 @@ sub ::colorset {
  	};
 }
 
-sub ::namaset {
+sub namaset {
 	my ($field,$initial) = @_;
 	sub { 	my $color = colorchooser($field,$initial);
 			if ($color){ 
@@ -1251,7 +1258,7 @@ sub ::namaset {
 
 }
 
-sub ::colorchooser { 
+sub colorchooser { 
 	#print "colorchooser\n";
 	#my $debug = 1;
 	my ($field, $initialcolor) = @_;
@@ -1303,7 +1310,7 @@ sub init_palettefields {
 }
 
 sub save_palette {
-	package ::;
+	package ::; # in base class already
  	serialize (
  		file => join_path($project_root, $palette_file),
  		vars => [ qw( %palette %namapalette ) ],
