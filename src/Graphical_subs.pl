@@ -92,8 +92,8 @@ sub init_gui {
 		->pack( -side => 'left');
 	$sn_namapalette = $load_frame->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
-	$sn_effects_palette = $load_frame->Menubutton(-tearoff => 0)
-		->pack( -side => 'left');
+	#$sn_effects_palette = $load_frame->Menubutton(-tearoff => 0)
+	#	->pack( -side => 'left');
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
@@ -161,10 +161,10 @@ sub init_gui {
 		-text => 'Nama palette',
 		-relief => 'raised',
 	);
-	$sn_effects_palette->configure(
-		-text => 'Effects palette',
-		-relief => 'raised',
-	);
+# 	$sn_effects_palette->configure(
+# 		-text => 'Effects palette',
+# 		-relief => 'raised',
+# 	);
 
 my @color_items = map { [ 'command' => $_, 
 							-command  => colorset('mw', $_ ) ]
@@ -175,11 +175,11 @@ $sn_palette->AddItems( @color_items);
 							-command  => colorset('ew', $_ ) ]
 						} @palettefields;
 
-$sn_effects_palette->AddItems( @color_items);
-
-@color_items = map { [ 'command' => $_, 
-						-command  => namaset($_, $namapalette{$_})]
-						} @namafields;
+# $sn_effects_palette->AddItems( @color_items);
+# 
+# @color_items = map { [ 'command' => $_, 
+# 						-command  => namaset($_, $namapalette{$_})]
+# 						} @namafields;
 $sn_namapalette->AddItems( @color_items);
 
 	$build_track_add_mono->configure( 
