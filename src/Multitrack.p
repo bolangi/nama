@@ -1,3 +1,12 @@
+## Note on object model
+# 
+# All graphic method are defined in the base class :: .
+# These are overridden in the ::Text class with no-op stubs.
+# 
+# So all the routines in Graphical_methods.pl can consider
+# themselves to be in the base class, with access to all
+# variables and subs that are imported.
+
 package ::;
 use 5.008;
 use Carp;

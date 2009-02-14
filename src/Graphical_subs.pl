@@ -1,14 +1,5 @@
 # gui handling
 #
-## Note on object model
-# 
-# All graphic method are defined in the base class :: .
-# These are overridden in the ::Text class with no-op stubs.
-# 
-# So all the routines in Graphical_methods.pl can consider
-# themselves to be in the base class, with access to all
-# variables and subs that are imported.
-
 sub init_gui {
 
 	$debug2 and print "&init_gui\n";
@@ -170,7 +161,7 @@ sub init_gui {
 	);
 
 my @color_items = map { [ 'command' => $_, 
-							-command  => colorset($_,$mw->cget("-$_") )]
+							-command  => colorset('mw', $_ ) ]
 						} @palettefields;
 $sn_palette->AddItems( @color_items);
 
@@ -1218,26 +1209,27 @@ sub init_namapalette {
 
 }
 sub colorset {
-	my ($field,$initial) = @_;
-	sub { my $new_color = colorchooser($field,$initial);
+	my ($widgetid, $field) = @_;
+	my $widget = eval "\$$widgetid";
+	sub { my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
 				
 				# install color in palette listing
-				$palette{mw}{$field} = $new_color;
+				$palette{$widgetid}{$field} = $new_color;
 
 				# set the color
 				my @fields =  ($field => $new_color);
-				push (@fields, 'background', $mw->cget('-background'))
+				push (@fields, 'background', $widget->cget('-background'))
 					unless $field eq 'background';
 				#print "fields: @fields\n";
-				$mw->setPalette( @fields );
+				$widget->setPalette( @fields );
 			}
  	};
 }
 
 sub namaset {
 	my ($field,$initial) = @_;
-	sub { 	my $color = colorchooser($field,$initial);
+	sub { 	my $color = colorchooser($field,$namapalette{$field});
 			if ($color){ 
 				# install color in palette listing
 				$namapalette{$field} = $color;
@@ -1252,7 +1244,8 @@ sub namaset {
 				$group_label->configure(
 					-background => $namapalette{GroupBackground},
 					-foreground => $namapalette{GroupForeground},
-				)
+				);
+				refresh();
 			}
 	}
 
