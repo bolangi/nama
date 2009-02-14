@@ -178,8 +178,9 @@ our (
 	$sn_load,
 	$sn_new,
 	$sn_quit,
-	$sn_palette, # configure colors
-	$sn_namapalette, # configure nama colors
+	$sn_palette, # configure default master window colors
+	$sn_namapalette, # configure nama-specific master-window colors
+	$sn_effects_palette, # configure effects window colors
 	@palettefields, # set by setPalette method
 	@namafields,    # field names for color palette used by nama
 	%namapalette,     # nama's indicator colors

@@ -92,6 +92,8 @@ sub init_gui {
 		->pack( -side => 'left');
 	$sn_namapalette = $load_frame->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
+	$sn_effects_palette = $load_frame->Menubutton(-tearoff => 0)
+		->pack( -side => 'left');
 	# $sn_dump = $load_frame->Button->pack(-side => 'left');
 
 	$build_track_label = $add_frame->Label(
@@ -156,7 +158,11 @@ sub init_gui {
 		-relief => 'raised',
 	);
 	$sn_namapalette->configure(
-		-text => 'Nama Palette',
+		-text => 'Nama palette',
+		-relief => 'raised',
+	);
+	$sn_effects_palette->configure(
+		-text => 'Effects palette',
 		-relief => 'raised',
 	);
 
@@ -164,6 +170,12 @@ my @color_items = map { [ 'command' => $_,
 							-command  => colorset('mw', $_ ) ]
 						} @palettefields;
 $sn_palette->AddItems( @color_items);
+
+@color_items = map { [ 'command' => $_, 
+							-command  => colorset('ew', $_ ) ]
+						} @palettefields;
+
+$sn_effects_palette->AddItems( @color_items);
 
 @color_items = map { [ 'command' => $_, 
 						-command  => namaset($_, $namapalette{$_})]
@@ -1210,8 +1222,10 @@ sub init_namapalette {
 }
 sub colorset {
 	my ($widgetid, $field) = @_;
-	my $widget = eval "\$$widgetid";
-	sub { my $new_color = colorchooser($field,$widget->cget("-$field"));
+	sub { 
+			my $widget = eval "\$$widgetid";
+			print "ancestor: $widgetid\n";
+			my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
 				
 				# install color in palette listing
