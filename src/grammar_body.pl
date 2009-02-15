@@ -58,6 +58,7 @@ remove_track: _remove_track name end {
 	print("$item{name}: unknown track... skipping.\n"), return
 		if ! defined $track;
 	$track->set(hide => 1); 
+	print "removing track ", $track->n, " $item{name}\n";
 	$::ui->remove_track_gui($track->n);
 	1;
 }
