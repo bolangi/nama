@@ -157,6 +157,7 @@ our (
 	$group_rw, # 
 	$group_version, # 
 	%track_widget, # for chains (tracks)
+	%track_widget_remove, # what to destroy by remove_track
 	%effects_widget, # for effects
 	@widget_o, # for templates (oids) 
 	%widget_o, # 
