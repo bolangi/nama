@@ -359,9 +359,18 @@ sub load_project {
 	$project_name = $h{name} if $h{name};
 	$project_name = $project if $project;
 	$debug and print "project name: $project_name create: $h{create}\n";
-	$project_name and $h{create} and 
-		#print ("Creating directories....\n"),
-		map{create_dir($_)} &project_dir, &this_wav_dir ;
+	if ( ! -d join_path( project_dir(), $project_name) ){
+		if ( $h{create} ){
+			map{create_dir($_)} &project_dir, &this_wav_dir ;
+		} else { 
+			print qq(
+Project "$project_name" does not exist. 
+Loading project "untitled".
+);
+			load_project( qw{name untitled create 1} );
+			return;
+		}
+	} 
 	read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
