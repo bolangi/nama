@@ -755,6 +755,13 @@ sub track_gui {
 	refresh_track($n);
 
 }
+
+sub remove_track_gui {
+	@_ = discard_object( @_ );
+	my $n = shift;
+	map { $_->destroy } @{ $track_widget_remove{$n} };
+}
+
 sub paint_mute_buttons {
 	map{ $track_widget{$_}{mute}->configure(
 			-background 		=> $namapalette{Mute},
