@@ -2045,11 +2045,11 @@ sub effect_update {
 	eval_iam("copp-set $val");
 }
 sub fade {
-	print ("need Timer::HiRes to fade\n"), return unless $hires;
 	my ($id, $param, $from, $to, $seconds) = @_;
 
-	# no fade needed unless engine is running
-	if ( ! engine_running() ){
+	# no fade without Timer::HiRes
+	# no fade unless engine is running
+	if ( ! engine_running() or ! $hires ){
 		effect_update_copp_set ( $cops{$id}->{chain}, $id, $param, $to );
 		return;
 	}
