@@ -6,12 +6,14 @@ value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 op_id: /[A-Z]+/
 parameter: /\d+/
 #value: /\d+/
-value: /[\d\.eE+-]+/
+#value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w-]+/
 name3: /\S+/
+path: /(["'])[\w-\. \/]+$1/
+path: /[\w-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 end: /[;\s]*$/ 
@@ -53,14 +55,14 @@ dump_track: _dump_track end { ::pager($::this_track->dump); 1}
 dump_group: _dump_group end { ::pager($::tracker->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
 #remove_track: _remove_track name end { $::tn{ $item{name} }->set(hide => 1); 1}
-remove_track: _remove_track name end { 
-	my $track = $::tn{ $item{name} };
-	print("$item{name}: unknown track... skipping.\n"), return
-		if ! defined $track;
-	$track->set(hide => 1); 
-	#$::ui->remove_track_gui($track->n);
-	1;
-}
+# remove_track: _remove_track name end { 
+# 	my $track = $::tn{ $item{name} };
+# 	print("$item{name}: unknown track... skipping.\n"), return
+# 		if ! defined $track;
+# 	$track->set(hide => 1); 
+# 	#$::ui->remove_track_gui($track->n);
+# 	1;
+# }
 generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
@@ -332,3 +334,10 @@ unmemoize: _unmemoize {
 }
 automix: _automix { ::automix(); 1 }
 autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
+import: _import path frequency end {
+	$::this_track->bring_in( $item{path}, $item{frequency}); 1;
+}
+import: _import path end {
+	$::this_track->bring_in( $item{path}, 'auto'); 1;
+}
+frequency: value

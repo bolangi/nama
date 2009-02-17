@@ -5,7 +5,7 @@ $debug = 0;
 use Data::YAML::Reader;
 use IO::All;
 my $yr = Data::YAML::Reader->new;
-$in = qx(cat ./commands.yml);
+$in = qx(./strip_all  ./commands.yml);
 my $ref = yaml_in( $in); 
 #print yaml_out $ref;
 #exit;

@@ -59,7 +59,7 @@ sub targets {# takes a Wav object
 	$debug and print "\%versions\n================\n", yaml_out(\%versions);
 	\%versions;
 }
-sub versions {  # takes a Wav object or a string (filename)
+sub versions {  
 	$::debug2 and print "&versions\n";
 	my $wav = shift;
 	[ sort { $a <=> $b } keys %{ $wav->targets} ]  

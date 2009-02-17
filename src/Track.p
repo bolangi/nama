@@ -632,9 +632,31 @@ sub fixdc {
 	system $cmd;
 }
 
-	
-	
-
+sub bring_in  {
+	my $track = shift;
+	my ($path, $frequency) = @_;
+	my $version  = ${ $track->versions }[-1] + 1;
+	if ( ! -r $path ){
+		print "$path: non-existent or unreadable file. No action.\n";
+		return;
+	} else {
+		my $type = qx(file $path);
+		my $channels;
+		if ($type =~ /mono/i){
+			$channels = 1;
+		} elsif ($type =~ /stereo/i){
+			$channels = 2;
+		} else {
+			print "$path: unknown channel count. Assuming mono. \n";
+			$channels = 1;
+		}
+	my $format = ::signal_format($::raw_to_disk_format, $channels);
+	my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,$path -o:).
+		join_path(::this_wav_dir(),$track->name."_$version.wav\n");
+	print $cmd;
+	# system $cmd or print "error: $!\n";
+	} 
+}
 # subclass
 
 

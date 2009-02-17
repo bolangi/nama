@@ -26,6 +26,8 @@ use File::Path;
 use IO::All;
 use Event;
 use Module::Load::Conditional qw(can_load);
+# use Timer::HiRes; # loaded conditionally
+# use Tk;           # loaded conditionally
 use strict;
 use warnings;
 no warnings qw(uninitialized syntax);
@@ -39,17 +41,6 @@ our $VERSION = '0.996';
 }
 
 
-sub roundsleep {
-	my $us = shift;
-	my $sec = int( $us/1e6 + 0.5);
-	$sec or $sec++;
-	sleep $sec
-}
-
-if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
-	 { *sleeper = *Time::HiRes::usleep }
-else { *sleeper = *roundsleep }
-	
 
 # use Tk    # loaded conditionally in GUI mode
 
@@ -90,7 +81,7 @@ $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
 $tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $project_root = join_path( $ENV{HOME}, "nama");
-$seek_delay = 100_000; # microseconds
+$seek_delay = 0.1; # seconds
 $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;

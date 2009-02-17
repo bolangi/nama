@@ -1,4 +1,19 @@
-use Carp;
+if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
+	 { *sleeper = *finesleep;
+		$hires++; }
+else { *sleeper = *roundsleep }
+	
+sub finesleep {
+	my $sec = shift;
+	Time::HiRes::usleep($sec * 1e6);
+}
+sub roundsleep {
+	my $sec = shift;
+	$sec = int($sec   + 0.5);
+	$sec or $sec++;
+	sleep $sec
+}
+
 
 sub mainloop { 
 	prepare(); 
@@ -35,7 +50,7 @@ in $ENV{PATH}, your shell's list of executable
 directories. You will probably have more fun with the LADSPA
 libraries and executables installed. http://ladspa.org
 WARN
-) and  sleeper (600_000) and $missing++;
+) and  sleeper (0.6) and $missing++;
 my @b = `which ecasound`;
 @b or print ( <<WARN
 Ecasound executable program 'ecasound' not found
@@ -43,7 +58,7 @@ in $ENV{PATH}, your shell's list of executable
 directories. This suite depends on the Ecasound
 libraries and executables for all audio processing! 
 WARN
-) and sleeper (600_000) and $missing++;
+) and sleeper (0.6) and $missing++;
 
 my @c = `which file`;
 @c or print ( <<WARN
@@ -52,7 +67,7 @@ in $ENV{PATH}, your shell's list of executable
 directories. This program is currently required
 to be able to play back mixes in stereo.
 WARN
-) and sleeper (600_000);
+) and sleeper (0.6);
 if ( $missing ) {
 print "You lack $missing main parts of this suite.  
 Do you want to continue? [N] ";
@@ -66,7 +81,7 @@ print <<HELLO;
 Aloha. Welcome to Nama and Ecasound.
 
 HELLO
-sleeper (600_000);
+sleeper (0.6);
 print "Configuration file $config not found.
 
 May I create it for you? [yes] ";
@@ -359,7 +374,7 @@ sub load_project {
 	$project_name = $h{name} if $h{name};
 	$project_name = $project if $project;
 	$debug and print "project name: $project_name create: $h{create}\n";
-	if ( ! -d join_path( project_dir(), $project_name) ){
+	if ( ! -d join_path( project_root(), $project_name) ){
 		if ( $h{create} ){
 			map{create_dir($_)} &project_dir, &this_wav_dir ;
 		} else { 
@@ -371,6 +386,7 @@ Loading project "untitled".
 			return;
 		}
 	} 
+	chdir project_dir();
 	read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
@@ -1477,7 +1493,7 @@ sub stop_transport {
 	eval_iam('stop');	
 	print "engine is ", eval_iam("engine-status"), $/;
 	$ui->project_label_configure(-background => $old_bg);
-	sleeper(200_000);
+	sleeper(0.6);
 	rec_cleanup();
 }
 sub transport_running {
@@ -1585,7 +1601,7 @@ sub jump {
 	my $new_pos = $here + $delta * $unit;
 	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
 	set_position( $new_pos );
-	sleeper( 100_000 );
+	sleeper( 0.6);
 }
 ## post-recording functions
 
@@ -2028,9 +2044,49 @@ sub effect_update {
 	eval_iam("copp-select $param");
 	eval_iam("copp-set $val");
 }
+sub fade {
+	print ("need Timer::HiRes to fade\n"), return unless $hires;
+	#my %h = @_;
+	my ($id, $param, $from, $to, $seconds) = @_;
+	#@h{ qw( id param from to seconds ) };
+	my $resolution = 20; # number of steps per second
+	my $steps = $seconds * $resolution;
+	my $wink  = 1/$resolution;
+	my $size = ($to - $from)/$steps;
+	$debug and print "id: $id, param: $param (1-based), from: $from, to: $to, seconds: $seconds\n";
+	for (1..$steps){
+		modify_effect( $id, $param, '+', $size);
+		sleeper( $wink );
+	}		
+}
+
+=comment
+
+fade-based mute/unmute
+
+preview/doodle 
+gen; chains
+fade-out 
+stop 
+
+
+connect
+start
+fade-in
+
+--
+how to tell if need to change chain setup
+
+compare live inputs (soundcard inputs, jack clients)
+
+compare monitor tracks / versions
+
+=cut
+
+
+
 sub find_op_offsets {
 
-	
 	$debug2 and print "&find_op_offsets\n";
 	eval_iam('c-select-all');
 		#my @op_offsets = split "\n",eval_iam("cs");

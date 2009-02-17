@@ -103,6 +103,10 @@ add_track:
   what: create one or more new tracks
   example: add sax violin tuba
   parameters: name1 name2 name3...
+import:
+  type: track
+  what: import a .WAV file, resampling if necessary
+  parameters: file [frequency]
 set_track:
   short: set
   type: track
