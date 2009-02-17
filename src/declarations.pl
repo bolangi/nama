@@ -340,5 +340,6 @@ our (
 	                # after the first
 	$memoize,       # do I cache this_wav_dir?
 	$hires,        # do I have Timer::HiRes?
+	$fade_time, 	# duration for fadein(), fadeout()
 
 );

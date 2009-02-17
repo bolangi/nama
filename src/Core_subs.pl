@@ -1688,7 +1688,7 @@ sub add_effect {
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 	#print "id $op_id p: $parameter, sign: $sign value: $value\n";
-		$parameter--; # user's one-based indexing to our zero-base
+
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 
@@ -2046,18 +2046,35 @@ sub effect_update {
 }
 sub fade {
 	print ("need Timer::HiRes to fade\n"), return unless $hires;
-	#my %h = @_;
 	my ($id, $param, $from, $to, $seconds) = @_;
-	#@h{ qw( id param from to seconds ) };
-	my $resolution = 20; # number of steps per second
+
+	# no fade needed unless engine is running
+	if ( ! engine_running() ){
+		effect_update_copp_set ( $cops{$id}->{chain}, $id, $param, $to );
+		return;
+	}
+
+	my $resolution = 40; # number of steps per second
 	my $steps = $seconds * $resolution;
 	my $wink  = 1/$resolution;
 	my $size = ($to - $from)/$steps;
-	$debug and print "id: $id, param: $param (1-based), from: $from, to: $to, seconds: $seconds\n";
+	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
 	for (1..$steps){
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
+}
+
+sub fadein {
+	my ($id, $to) = @_;
+	my $from  = 0;
+	fade( $id, 0, $from, $to, $fade_time );
+}
+sub fadeout {
+	my $id    = shift;
+	my $from  =	$copp{$id}[0];
+	my $to	  = 0;
+	fade( $id, 0, $from, $to, $fade_time );
 }
 
 =comment
@@ -2877,18 +2894,25 @@ sub rewind {
 	forward( -$delta );
 }
 sub mute {
-	return if $this_track->old_vol_level();
-	$this_track->set(old_vol_level => $copp{$this_track->vol}[0])
-		if ( $copp{$this_track->vol}[0]);  # non-zero volume
-	$copp{ $this_track->vol }->[0] = 0;
-	sync_effect_param( $this_track->vol, 0);
+	my $track = shift;
+	# do nothing if already muted
+	return if $track->old_vol_level();
+
+	# mute if non-zero volume
+	if ( $copp{$track->vol}[0]){   
+		$track->set(old_vol_level => $copp{$track->vol}[0]);
+		fadeout( $track->vol );
+	}
 }
 sub unmute {
-	return if $copp{$this_track->vol}[0]; # if we are not muted
-	return if ! $this_track->old_vol_level;
-	$copp{$this_track->vol}[0] = $this_track->old_vol_level;
-	$this_track->set(old_vol_level => 0);
-	sync_effect_param( $this_track->vol, 0);
+	my $track = shift;
+
+	# do nothing if we are not muted
+	return if $copp{$track->vol}[0]; 
+	return if ! $track->old_vol_level;
+
+	fadein( $track->vol, $track->old_vol_level);
+	$track->set(old_vol_level => 0);
 }
 sub solo {
 	my $current_track = $this_track;

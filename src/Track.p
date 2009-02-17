@@ -632,7 +632,7 @@ sub fixdc {
 	system $cmd;
 }
 
-sub bring_in  {
+sub ingest  {
 	my $track = shift;
 	my ($path, $frequency) = @_;
 	my $version  = ${ $track->versions }[-1] + 1;
@@ -653,8 +653,8 @@ sub bring_in  {
 	my $format = ::signal_format($::raw_to_disk_format, $channels);
 	my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,$path -o:).
 		join_path(::this_wav_dir(),$track->name."_$version.wav\n");
-	print $cmd;
-	# system $cmd or print "error: $!\n";
+		print $cmd;
+		system $cmd or print "error: $!\n";
 	} 
 }
 # subclass

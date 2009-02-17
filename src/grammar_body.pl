@@ -152,16 +152,16 @@ vol: _vol sign(?) value end {
 	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
 	::modify_effect 
 		$::this_track->vol,
-		1,
+		0,
 		$item{sign},
 		$item{value};
 	1;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 
-mute: _mute end { ::mute(); 1}
+mute: _mute end { ::mute( $::this_track); 1}
 
-unmute: _unmute end { ::unmute(); 1}
+unmute: _unmute end { ::unmute($::this_track); 1}
 solo: _solo end { ::solo(); 1}
 all: _all end { ::all() ; 1}
 
@@ -282,9 +282,11 @@ insert_effect: _insert_effect before name value(s?) end {
 before: op_id
 
 modify_effect: _modify_effect op_id parameter value end {
+	$item{parameter}--;
 	::modify_effect @item{ qw( op_id parameter value) }; 1
 }
 modify_effect: _modify_effect op_id parameter sign value end {
+	$item{parameter}--;
 	::modify_effect @item{ qw( op_id parameter sign value) }; 1
 }
 group_version: _group_version end { 
@@ -335,9 +337,9 @@ unmemoize: _unmemoize {
 automix: _automix { ::automix(); 1 }
 autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
 import: _import path frequency end {
-	$::this_track->bring_in( $item{path}, $item{frequency}); 1;
+	$::this_track->ingest( $item{path}, $item{frequency}); 1;
 }
 import: _import path end {
-	$::this_track->bring_in( $item{path}, 'auto'); 1;
+	$::this_track->ingest( $item{path}, 'auto'); 1;
 }
 frequency: value
