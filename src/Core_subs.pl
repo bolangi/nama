@@ -1440,8 +1440,10 @@ sub start_transport {
 
 	print "starting at ", colonize(int (eval_iam"getpos")), $/;
 	schedule_wraparound();
+	mute($tn{Master}) unless really_recording();
 	eval_iam('start');
-	sleep 1;
+	sleeper(0.5) unless really_recording();
+	unmute($tn{Master});
 	$ui->start_heartbeat();
 
 	sleep 1; # time for engine
@@ -1490,10 +1492,12 @@ sub schedule_wraparound {
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();
+	mute($tn{Master}) unless really_recording();
 	eval_iam('stop');	
+	sleeper(0.5);
 	print "engine is ", eval_iam("engine-status"), $/;
+	unmute($tn{Master});
 	$ui->project_label_configure(-background => $old_bg);
-	sleeper(0.6);
 	rec_cleanup();
 }
 sub transport_running {
@@ -1727,14 +1731,9 @@ sub remove_effect {
 		map{remove_effect($_)}@{ $cops{$id}->{owns} } 
 			if defined $cops{$id}->{owns};
 ;
-	 	# remove id from track object
-
-		$ti[$n]->remove_effect( $id ); 
 
 	if ( ! $parent ) { # i am a chain operator, have no parent
 		remove_op($id);
-
-
 
 	} else {  # i am a controller
 
@@ -1754,6 +1753,9 @@ sub remove_effect {
 			@{ $cops{$parent}->{owns} } ,$/;
 
 	}
+	# remove id from track object
+
+	$ti[$n]->remove_effect( $id ); 
 	delete $cops{$id}; # remove entry from chain operator list
 	delete $copp{$id}; # remove entry from chain operator parameters list
 }
@@ -1823,11 +1825,11 @@ sub remove_op {
 		$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
 		$debug and print "operator id to remove: $id\n";
 		$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
-		$debug and print eval_iam("cs");
+		$debug and eval_iam("cs");
 		eval_iam("cop-select ". ecasound_effect_index($id) );
 		$debug and print "selected operator: ", eval_iam("cop-selected"), $/;
 		eval_iam("cop-remove");
-		$debug and print eval_iam("cs");
+		$debug and eval_iam("cs");
 
 	} else { # controller
 
@@ -2076,7 +2078,7 @@ sub fade {
 sub fadein {
 	my ($id, $to) = @_;
 	my $from  = 0;
-	fade( $id, 0, $from, $to, $fade_time );
+	fade( $id, 0, $from, $to, $fade_time + 0.2);
 }
 sub fadeout {
 	my $id    = shift;
@@ -2152,6 +2154,7 @@ sub apply_op {
 	$debug2 and print "&apply_op\n";
 	
 	my $id = shift;
+	my $selected = shift;
 	$debug and print "id: $id\n";
 	my $code = $cops{$id}->{type};
 	my $dad = $cops{$id}->{belongs_to};
@@ -2172,9 +2175,10 @@ sub apply_op {
 	# if my parent has a parent then we need to append the -kx  operator
 
 	$add .= " -kx" if $cops{$dad}->{belongs_to};
-	$debug and print "operator:  ", $add, "\n";
+	$debug and print "command:  ", $add, "\n";
 
-	eval_iam("c-select $cops{$id}->{chain}") ;
+	eval_iam("c-select $cops{$id}->{chain}") 
+		if $selected != $cops{$id}->{chain};
 
 	if ( $dad ) {
 	eval_iam("cop-select " . ecasound_effect_index($dad));
@@ -2900,29 +2904,6 @@ sub forward {
 sub rewind {
 	my $delta = shift;
 	forward( -$delta );
-}
-sub mute {
-	my $track = shift;
-	$track or $track = $this_track;
-	# do nothing if already muted
-	return if $track->old_vol_level();
-
-	# mute if non-zero volume
-	if ( $copp{$track->vol}[0]){   
-		$track->set(old_vol_level => $copp{$track->vol}[0]);
-		fadeout( $track->vol );
-	}
-}
-sub unmute {
-	my $track = shift;
-	$track or $track = $this_track;
-
-	# do nothing if we are not muted
-	return if $copp{$track->vol}[0]; 
-	return if ! $track->old_vol_level;
-
-	fadein( $track->vol, $track->old_vol_level);
-	$track->set(old_vol_level => 0);
 }
 sub solo {
 	my $current_track = $this_track;

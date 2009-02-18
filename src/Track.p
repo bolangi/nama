@@ -631,6 +631,31 @@ sub fixdc {
 	print "executing: $cmd\n";
 	system $cmd;
 }
+sub mute {
+	packge ::;
+	my $track = shift;
+	$track or $track = $this_track;
+	# do nothing if already muted
+	return if $track->old_vol_level();
+
+	# mute if non-zero volume
+	if ( $copp{$track->vol}[0]){   
+		$track->set(old_vol_level => $copp{$track->vol}[0]);
+		fadeout( $track->vol );
+	}
+}
+sub unmute {
+	packge ::;
+	my $track = shift;
+	$track or $track = $this_track;
+
+	# do nothing if we are not muted
+	return if $copp{$track->vol}[0]; 
+	return if ! $track->old_vol_level;
+
+	fadein( $track->vol, $track->old_vol_level);
+	$track->set(old_vol_level => 0);
+}
 
 sub ingest  {
 	my $track = shift;

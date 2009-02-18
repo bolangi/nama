@@ -313,14 +313,20 @@ sub t_add_ctrl {
 		add_effect( \%p );
 }
 sub t_insert_effect {
+	package ::;
 	my ($before, $code, $values) = @_;
+	my $running = engine_running();
 	print ("Cannot insert effect while engine is recording.\n"), return 
-		if ::engine_running and ::really_recording;
+		if $running and ::really_recording;
+	print ("Cannot insert effect before controller.\n"), return 
+		if $cops{$before}->{belongs_to};
 
-	# what about inserting before controller... user should
-	# not do it
-	#$ui->stop_heartbeat;
-	
+	if ($running){
+		$ui->stop_heartbeat;
+		mute( $tn{Master} );		
+		eval_iam('stop');
+		sleeper( 0.05);
+	}
 	my $n = $cops{ $before }->{chain} or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
@@ -344,11 +350,12 @@ sub t_insert_effect {
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	$debug and print "ops to remove and re-apply: @ops\n";
-	if (::eval_iam q(cs-connected) ){  
-		map{ ::remove_op $_ } @ops
+	my $connected = eval_iam q(cs-connected);
+	if ( $connected ){  
+		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}
 
-	t_add_effect( $code, $values );
+	::Text::t_add_effect( $code, $values );
 
 	$debug and print join " ",@{$track->ops}, $/; 
 
@@ -360,12 +367,16 @@ sub t_insert_effect {
 	splice 	@{$track->ops}, $offset, 0, $op;
 	$debug and print join " ",@{$track->ops}, $/; 
 
-	if (::eval_iam q(cs-connected) ){  
-		map{ ::apply_op $_ } @ops
+	if ($connected ){  
+		map{ apply_op($_, $n) } @ops;
 	}
 		
-		
-	#$ui->stop_heartbeat;
+	if ($running){
+		eval_iam('start');	
+		sleeper(0.3);
+		unmute($tn{Master});
+		$ui->start_heartbeat;
+	}
 }
 sub t_add_effect {
 	package ::;
