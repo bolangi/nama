@@ -319,6 +319,7 @@ sub t_insert_effect {
 
 	# what about inserting before controller... user should
 	# not do it
+	#$ui->stop_heartbeat;
 	
 	my $n = $cops{ $before }->{chain} or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
@@ -364,6 +365,7 @@ sub t_insert_effect {
 	}
 		
 		
+	#$ui->stop_heartbeat;
 }
 sub t_add_effect {
 	package ::;

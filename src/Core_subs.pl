@@ -1681,7 +1681,9 @@ sub add_effect {
 	$id = cop_add(\%p); 
 	my %pp = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%pp);
+	#mute($ti[$n]);
 	apply_op($id) if eval_iam("cs-is-valid");
+	#unmute($ti[$n]);
 	$id;
 
 }
@@ -2059,10 +2061,16 @@ sub fade {
 	my $wink  = 1/$resolution;
 	my $size = ($to - $from)/$steps;
 	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
-	for (1..$steps){
+	for (1..$steps - 1){
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
+	effect_update_copp_set( 
+		$cops{ $id }->{chain}, 
+		$id, 
+		$param, 
+		$to);
+	
 }
 
 sub fadein {
@@ -2895,6 +2903,7 @@ sub rewind {
 }
 sub mute {
 	my $track = shift;
+	$track or $track = $this_track;
 	# do nothing if already muted
 	return if $track->old_vol_level();
 
@@ -2906,6 +2915,7 @@ sub mute {
 }
 sub unmute {
 	my $track = shift;
+	$track or $track = $this_track;
 
 	# do nothing if we are not muted
 	return if $copp{$track->vol}[0]; 

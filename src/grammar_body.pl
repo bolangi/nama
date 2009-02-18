@@ -283,7 +283,13 @@ before: op_id
 
 modify_effect: _modify_effect op_id parameter value end {
 	$item{parameter}--;
-	::modify_effect @item{ qw( op_id parameter value) }; 1
+	#::modify_effect @item{ qw( op_id parameter value) }; 1
+	::effect_update_copp_set( 
+		$::cops{ $item{op_id} }->{chain}, 
+		$item{op_id}, 
+		$item{parameter},
+		$item{value});
+	1;
 }
 modify_effect: _modify_effect op_id parameter sign value end {
 	$item{parameter}--;
