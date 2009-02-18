@@ -87,7 +87,7 @@ $use_pager = 1;
 $use_placeholders = 1;
 $save_id = "State";
 $fade_time = 0.3;
-$SIG{INT} = sub{ mute{$tn{Master}} if engine_running(); exit };
+#$SIG{INT} = sub{ mute{$tn{Master}} if engine_running(); die "\nAborting.\n" };
 
 jack_update(); # to be polled by Event
 $memoize = 0;

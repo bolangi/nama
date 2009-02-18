@@ -62,6 +62,11 @@ sub loop {
 		cb     => sub{ &{$attribs->{'callback_read_char'}}() }, # callback;
 		repeat => 1,                         # keep alive after event;
 	 );
+#  	$event_id{sigint} = Event->signal(
+#  		desc   => 'Signal handler',           # description;
+#  		signal => $SIG{INT},
+#  		cb     => sub{ die "here" }, # callback;
+#  	 );
 
 	$event_id{Event_heartbeat} = Event->timer(
 		parked => 1, 						# start it later
@@ -315,6 +320,9 @@ sub t_add_ctrl {
 sub t_insert_effect {
 	package ::;
 	my ($before, $code, $values) = @_;
+	print("Effect code not found.\n"), return 
+		if ! $effect_j{$code} and ! $effect_i{$code};
+	exit; "here";
 	my $running = engine_running();
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::really_recording;
@@ -323,7 +331,7 @@ sub t_insert_effect {
 
 	if ($running){
 		$ui->stop_heartbeat;
-		mute( $tn{Master} );		
+		$tn{Master}->mute;		
 		eval_iam('stop');
 		sleeper( 0.05);
 	}
@@ -374,7 +382,7 @@ sub t_insert_effect {
 	if ($running){
 		eval_iam('start');	
 		sleeper(0.3);
-		unmute($tn{Master});
+		$tn{Master}->unmute;
 		$ui->start_heartbeat;
 	}
 }

@@ -1440,10 +1440,10 @@ sub start_transport {
 
 	print "starting at ", colonize(int (eval_iam"getpos")), $/;
 	schedule_wraparound();
-	mute($tn{Master}) unless really_recording();
+	$tn{Master}->mute unless really_recording();
 	eval_iam('start');
 	sleeper(0.5) unless really_recording();
-	unmute($tn{Master});
+	$tn{Master}->unmute;
 	$ui->start_heartbeat();
 
 	sleep 1; # time for engine
@@ -1496,7 +1496,7 @@ sub stop_transport {
 	eval_iam('stop');	
 	sleeper(0.5);
 	print "engine is ", eval_iam("engine-status"), $/;
-	unmute($tn{Master});
+	$tn{Master}->unmute;
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
 }
@@ -2920,10 +2920,10 @@ sub solo {
 	}
 
 	# mute all tracks
-	map { $this_track = $tn{$_}; mute() } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->mute() } $tracker->tracks;
 
     $this_track = $current_track;
-    unmute();
+    $this_track->unmute;
 	$soloing = 1;
 }
 
@@ -2931,11 +2931,11 @@ sub all {
 	
 	my $current_track = $this_track;
 	# unmute all tracks
-	map { $this_track = $tn{$_}; unmute() } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->unmute } $tracker->tracks;
 
 	# re-mute previously muted tracks
 	if (@already_muted){
-		map { $this_track = $_; mute() } @already_muted;
+		map { $_->mute } @already_muted;
 	}
 
 	# remove listing of muted tracks
