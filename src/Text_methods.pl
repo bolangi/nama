@@ -322,7 +322,6 @@ sub t_insert_effect {
 	my ($before, $code, $values) = @_;
 	print("Effect code not found.\n"), return 
 		if ! $effect_j{$code} and ! $effect_i{$code};
-	exit; "here";
 	my $running = engine_running();
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::really_recording;
