@@ -322,6 +322,7 @@ sub t_insert_effect {
 	package ::;
 	my ($before, $code, $values) = @_;
 	$code = effect_code( $code );	
+	$code = effect_code( $code );
 	my $running = engine_running();
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::really_recording;
@@ -388,7 +389,6 @@ sub t_insert_effect {
 sub t_add_effect {
 	package ::;
 	my ($code, $values)  = @_;
-
 	$code = effect_code( $code );	
 	print "code: ", $code, $/;
 		my %p = (
