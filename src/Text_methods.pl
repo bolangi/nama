@@ -320,8 +320,7 @@ sub t_add_ctrl {
 sub t_insert_effect {
 	package ::;
 	my ($before, $code, $values) = @_;
-	print("Effect code not found.\n"), return 
-		if ! $effect_j{$code} and ! $effect_i{$code};
+	$code = effect_code( $code );
 	my $running = engine_running();
 	print ("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::really_recording;
@@ -389,15 +388,7 @@ sub t_add_effect {
 	package ::;
 	my ($code, $values)  = @_;
 
-	# allow use of LADSPA unique ID
-	
-    if ($code !~ /\D/){ # i.e. $code is all digits
-		$code = $ladspa_label{$code} 
-			or carp("$code: LADSPA plugin not found.  Aborting.\n"), return;
-	}
-	if ( $effect_i{$code} ) {} # do nothing
-	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
-	else { warn "effect code not found: $code\n"; return }
+	$code = effect_code( $code );
 	print "code: ", $code, $/;
 		my %p = (
 			chain => $this_track->n,

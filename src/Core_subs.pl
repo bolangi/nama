@@ -3310,5 +3310,19 @@ sub width {
 	return "$count channels";
 }
 
+
+sub effect_code {
+	my $input = shift;
+	my $code;
+    if ($input !~ /\D/){ # i.e. $input is all digits
+		$code = $ladspa_label{$input} 
+			or carp("$input: LADSPA plugin not found.  Aborting.\n"), return;
+	}
+	elsif ( $effect_i{$input} ) { $code = $input } 
+	elsif ( $effect_j{$input} ) { $code = $effect_j{$input} }
+	else { warn "effect code not found: $input\n";}
+	$code;
+}
+	
 	
 ### end
