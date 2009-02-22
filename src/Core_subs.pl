@@ -386,7 +386,7 @@ Loading project "untitled".
 			return;
 		}
 	} 
-	chdir project_dir();
+	#chdir project_dir();
 	read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
@@ -1007,6 +1007,18 @@ sub add_pan_control {
 	$ti[$n]->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
+sub add_latency_compensation {
+	my $n = shift;
+	my $id = cop_add({
+				chain => $n, 
+				type => 'el:artificialLatency',
+				cop_id => $ti[$n]->latency, # often undefined
+				values => [ 0 ],
+				});
+	
+	$ti[$n]->set(latency => $id);  # save the id for next time
+	$id;
+}
 ## version functions
 
 
@@ -1347,20 +1359,7 @@ sub generate_setup { # create chain setup
 	return 0};
 }
 sub arm {
-	if ( $preview ){
-		stop_transport() ;
-		print "Exiting preview/doodle mode\n";
-		$preview = 0;
-		$rec_file->set(status => 1);
-		$rec_file_soundcard_jack->set(status => 1);
-		$mon_setup->set(status => 1);
-		my @excluded = keys %excluded;
-		if ( @excluded ){
-			print "Re-enabling the following tracks: @excluded\n";
-			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
-		}
-		$unique_inputs_only = 0;
-	}
+	exit_preview() if $preview;
 	generate_setup() and connect_transport(); 
 }
 sub preview {
@@ -1383,6 +1382,42 @@ sub doodle {
 	$unique_inputs_only = 1;
 	generate_setup() and connect_transport();
 	start_transport();
+}
+sub exit_preview { # exit preview and doodle modes
+		stop_transport() ;
+		print "Exiting preview/doodle mode\n";
+		$preview = 0;
+		$rec_file->set(status => 1);
+		$rec_file_soundcard_jack->set(status => 1);
+		$mon_setup->set(status => 1);
+		my @excluded = keys %excluded;
+		if ( @excluded ){
+			print "Re-enabling the following tracks: @excluded\n";
+			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
+		}
+		$unique_inputs_only = 0;
+}
+sub adjust_latency {
+	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
+		::Track::all();
+	preview();
+	sleep 2;
+	exit_preview();
+	my $cop_status = eval_iam('cop-status');
+	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/;
+	#my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=(Chain|$))/sg;
+	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
+	my %chains = $cop_status =~ /$chain_re/sg;
+	my %latency;
+	map { my @latencies = $chains{$_} =~ /$latency_re/sg;
+			print "chain $_: latencies @latencies\n";
+		  map{ $latency{$_} += $_ } @latencies;
+		 } grep { $_ > 2 } sort keys %chains;
+	print yaml_out(\%latency);
+	my $max;
+	map { $max = $_ if $_ > $max  } values %latency;
+	map { $copp{$ti[$_]->latency}[0] = $max - $_  if $ti[$_]->latency() 
+			} sort keys %latency;
 }
 sub connect_transport {
 	load_ecs(); 
@@ -1492,7 +1527,7 @@ sub schedule_wraparound {
 sub stop_transport { 
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();
-	mute($tn{Master}) unless really_recording();
+	$tn{Master}->mute unless really_recording();
 	eval_iam('stop');	
 	sleeper(0.5);
 	print "engine is ", eval_iam("engine-status"), $/;
@@ -3310,5 +3345,18 @@ sub width {
 	return "$count channels";
 }
 
+sub effect_code {
+	my $input = shift;
+	my $code;
+    if ($input !~ /\D/){ # i.e. $input is all digits
+		$code = $ladspa_label{$input} 
+			or carp("$input: LADSPA plugin not found.  Aborting.\n"), return;
+	}
+	elsif ( $effect_i{$input} ) { $code = $input } 
+	elsif ( $effect_j{$input} ) { $code = $effect_j{$input} }
+	else { warn "effect code not found: $input\n";}
+	$code;
+}
+	
 	
 ### end
