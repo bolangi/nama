@@ -1401,23 +1401,28 @@ sub adjust_latency {
 	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
 		::Track::all();
 	preview();
-	sleep 2;
 	exit_preview();
 	my $cop_status = eval_iam('cop-status');
-	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/;
-	#my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=(Chain|$))/sg;
+	$debug and print $cop_status;
+	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
 	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
 	my %chains = $cop_status =~ /$chain_re/sg;
+	$debug and print yaml_out(\%chains);
 	my %latency;
-	map { my @latencies = $chains{$_} =~ /$latency_re/sg;
-			print "chain $_: latencies @latencies\n";
-		  map{ $latency{$_} += $_ } @latencies;
+	map { my @latencies = $chains{$_} =~ /$latency_re/g;
+			$debug and print "chain $_: latencies @latencies\n";
+			my $chain = $_;
+		  map{ $latency{$chain} += $_ } @latencies;
 		 } grep { $_ > 2 } sort keys %chains;
-	print yaml_out(\%latency);
+	$debug and print yaml_out(\%latency);
 	my $max;
 	map { $max = $_ if $_ > $max  } values %latency;
-	map { $copp{$ti[$_]->latency}[0] = $max - $_  if $ti[$_]->latency() 
-			} sort keys %latency;
+	$debug and print "max: $max\n";
+	map { my $adjustment = ($max - $latency{$_}) /
+			$cfg{abbreviations}{frequency} * 1000;
+			$debug and print "chain: $_, adjustment: $adjustment\n";
+			effect_update_copp_set( $_, $ti[$_]->latency, 0, $adjustment);
+			} keys %latency;
 }
 sub connect_transport {
 	load_ecs(); 
