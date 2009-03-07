@@ -2,33 +2,31 @@
 help:
   what: display help 
   short: h
-  parameters: topic or command name 
+  parameters: [ n_help_topic_index | s_help_topic_name | s_command_name ]
   type: general
 exit:
   short: quit q
   what: exit program, saving settings
   type: general
+  parameters: none
+memoize:
+  type: general
+  what: enable WAV dir cache
+  parameters: none
+unmemoize:
+  type: general
+  what: disable WAV dir cache
+  parameters: none
 stop:
   type: transport
   short: s
   what: stop transport
+  parameters: none
 start:
   type: transport
   short: t
   what: start transport
-loop_enable:
-  type: transport
-  short: loop
-  what: playback will loop between two points
-  parameters: start end (mark names/indices, or decimal seconds 1.5 125.0)
-loop_disable:
-  type: transport
-  short: noloop nl
-  what: disable automatic looping
-loop_show:
-  type: transport
-  short: ls
-  what: show loop status and endpoints (TODO)
+  parameters: none
 getpos:
   type: transport
   short: gp
@@ -36,129 +34,221 @@ getpos:
   parameters: none
 setpos:
   short: sp
-  what: set current playhead position (seconds)
+  what: set current playhead position
   example: setpos 65 (set play position to 65 seconds from start)
-  parameters: float (position)
+  parameters: f_position_seconds
   type: transport
 forward:
   short: fw
-  what: move transport position forward
-  parameters: seconds
+  what: move playback position forward
+  parameters: f_increment_seconds
   type: transport
 rewind:
   short: rw
   what: move transport position backward
-  parameters: seconds
+  parameters: f_increment_seconds
   type: transport
 beg:
   what: set playback head to start
   type: transport
   sub: to_start
+  parameters: none
 end:
   what: set playback head to end minus 10 seconds 
   type: transport
   sub: to_end
+  parameters: none
 ecasound_start:
   type: transport
   short: T
   what: ecasound-only start
+  parameters: none
 ecasound_stop:
   type: transport
   short: S
   what: ecasound-only stop
+  parameters: none
 preview:
   type: transport
   what: start engine with rec_file disabled (for mic test, etc.)
   parameters: none
 doodle:
   type: transport
-  what: disable mon_setup and rec_file, set unique_inputs_only
+  what: start engine while monitoring REC-enabled inputs
+  parameters: none
 mixdown:
   type: mix
   short: mxd
-  what: enable mixdown on subsequent engine runs
-  smry: enable mixdown
+  what: enable mixdown for subsequent engine runs
   parameters: none
 mixplay:
   type: mix
   short: mxp
-  what: Play back mixdown file, with user tracks OFF
-  smry: Playback mix
+  what: Enable mixdown file playback, setting user tracks to OFF
   parameters: none
 mixoff:
   type: mix
   short: mxo
-  what: Mixdown group OFF, user tracks MON
-  smry: mix off
+  what: Set Mixdown track to OFF, user tracks to MON
   parameters: none
 automix:
   type: mix
-  what: set track vol levels to normalize mix track, then mixdown
+  what: Normalize track vol levels, then mixdown
+  parameters: none
 autofix:
   type: mix
   what: fixdc and normalize selected versions of all MON tracks 
+  parameters: none
 add_track:
   type: track
   short: add new
   what: create one or more new tracks
   example: add sax violin tuba
-  parameters: name1 name2 name3...
+  parameters: s_name1 [ s_name2... ]
 import:
   type: track
   what: import a .WAV file, resampling if necessary
-  parameters: file [frequency]
+  parameters: s_wav_file [n_frequency]
 set_track:
   short: set
   type: track
-  what: directly set values in current track (use with care!)
-  smry: set object fields
-  example: set ch_m 5   (direct monitor output for current track to channel 5)
+  what: directly set current track parameters (use with care!)
+  parameters: s_track_field value
 rec:
   type: track
-  what: rec enable 
+  what: REC-enable current track
   parameters: none
 mon:
   type: track
-  what: set track to MON
+  what: set current track to MON
   parameters: none
 off:
   type: track
   short: z
-  what: set track OFF (exclude from chain setup)
-  smry: set track OFF 
+  what: set current track to OFF (exclude from chain setup)
   parameters: none
-monitor_channel:
-  type: track
-  short: m
-  what: set track output channel number
-  smry: set track output channel
-  parameters: number
+# monitor_channel:
+#   type: track
+#   short: m
+#   what: set track output channel number
+#   parameters: i_channel_number
 source:
   type: track
   what: set track source
   short: src r
-  parameters: JACK client name or soundcard channel number 
+  parameters: s_jack_client_name | i_soundcard_channel
 send:
   type: track
   what: set auxilary track destination
   short: out aux m
-  parameters: JACK client name or soundcard channel number 3 or higher. (Soundcard channels 1 and 2 are reserved for the mixer.)
+  parameters: s_jack_client_name | i_soundcard_channel (3 or above)
 stereo:
   type: track
   what: record two channels for current track
+  parameters: none
 mono:
   type: track
   what: record one channel for current track
+  parameters: none
 set_version:
   type: track
   short: version n ver
   what: set track version number for monitoring (overrides group version setting)
-  smry: select track version
-  parameters: number
+  parameters: i_version_number
   example: sax; version 5; sh
 destroy_current_wav:
   type: track
-  what: unlink $track->full_path
+  what: unlink current track's selected WAV version (use with care!)
+  parameters: none
+list_versions:
+  type: track
+  short: lver lv
+  what: list version numbers of current track
+  parameters: none
+vol:
+  type: track
+  short: v
+  what: set, modify or show current track volume
+  parameters: [ [ + | - | * | / ] f_value ]
+  example: vol * 1.5 (multiply current volume setting by 1.5)
+mute:
+  type: track
+  short: c cut
+  what: mute current track volume
+  parameters: none
+unmute:
+  type: track
+  short: C uncut
+  what: restore previous volume level
+unity:
+  type: track
+  what: set current track volume to unity
+  parameters: none
+solo:
+  type: track
+  what: mute all but current track
+  parameters: none
+all:
+  type: track
+  short: nosolo
+  what: unmute tracks after solo
+  parameters: none
+pan:
+  type: track
+  short: p	
+  what: get/set current track pan position
+  parameters: [ f_value ]
+pan_right:
+  type: track
+  short: pr
+  what: pan current track fully right
+  parameters: none
+pan_left:
+  type: track
+  short: pl
+  what: pan current track fully left
+  parameters: none
+pan_center:
+  type: track
+  short: pc
+  what: set pan center
+  parameters: none
+pan_back:
+  type: track
+  short: pb
+  what: restore current track pan setting prior to pan_left, pan_right or pan_center 
+  parameters: none
+show_tracks:
+  type: track 
+  short: show tracks
+  what: show status of all tracks
+show_track:
+  type: track
+  short: sh
+  what: show current track status
+modifiers:
+  type: track
+  short: mods mod 
+  what: set/show modifiers for current track (man ecasound for details)
+  parameters: [ Audio file sequencing parameters ]
+  example: modifiers select 5 15.2
+nomodifiers:
+  type: track
+  short: nomods nomod
+  what: remove modifiers from current track
+normalize:
+  type: track
+  short: norm ecanormalize
+  what: apply ecanormalize to current track version
+fixdc:
+  type: track
+  what: apply ecafixdc to current track version
+  short: ecafixdc
+# remove_track:
+#   type: track
+#   what: Make track go away (non destructive)
+#   parameters: string
+#   example: remove_track sax
 group_rec:
   type: group
   short: grec R
@@ -184,96 +274,31 @@ bunch:
   type: group
   short: bn
   what: define/list groups of tracks
-  parameters: [group_name [track1] [track2]... ]
-list_versions:
-  type: track
-  short: lver lv
-  what: list version numbers of current track
-  smry: list track versions
-  parameters: none
-vol:
-  type: track
-  short: v
-  what: get/set track volume, current track
-  smry: get/set track volume
-  parameters: number
-mute:
-  type: track
-  short: c cut
-  what: set playback volume to zero, current track
-  smry: mute volume
-  parameters: none
-unmute:
-  type: track
-  short: C uncut
-  what: restore volume level before mute
-unity:
-  type: track
-  what: set unity, i.e. 100 volume, current track
-  smry: unity volume
-  parameters: none
-solo:
-  type: track
-  what: mute all but current track
-  parameters: none
-all:
-  type: track
-  what: restore all muted tracks
-  parameters: none
-  short: nosolo
-pan:
-  type: track
-  short: p	
-  what: get/set pan position, current track
-  smry: get/set pan position
-  parameters: number
-pan_right:
-  type: track
-  short: pr
-  what: pan track fully right
-  parameters: none
-pan_left:
-  type: track
-  short: pl
-  what: pan track fully left
-  parameters: none
-pan_center:
-  type: track
-  short: pc
-  what: set pan center
-  parameters: none
-pan_back:
-  type: track
-  short: pb
-  what: restore pan setting prior to pl, pr, or pc commands
-  smry: restore pan
-  parameters: none
+  parameters: [ group_name [track1] [track2...] ]
 save_state:
   type: project
   short: keep k save
-  what: save project settings to disk, optional name
-  parameters: optional string
+  what: save project settings to disk
+  parameters: [ s_settings_file ] 
 get_state:
   type: project
   short: recall restore retrieve
   what: retrieve project settings
+  parameters: [ s_settings_file ] 
 list_projects:
   type: project
   short: listp
-  what: list project directory
+  what: list projects
 create_project:
   type: project
   short: create	
-  what: create a new project directory tree
-  example: create pauls_gig
-  parameters: string
+  what: create a new project
+  parameters: s_new_project_name
 load_project:
   type: project
   short: load	
-  what: load an existing project, or recall from last save
-  smry: load project settings
-  parameters: project_name
-  example: load pauls_gig
+  what: load an existing project using last saved state
+  parameters: s_project_name
 generate:
   type: setup
   short: gen
@@ -281,7 +306,6 @@ generate:
   parameters: none
 arm:
   type: setup
-  short: generate_and_connect
   what: generate and connect chain setup
   parameters: none
 connect:
@@ -295,37 +319,31 @@ disconnect:
   what: disconnect chain setup
   parameters: none
 engine_status:
-  type: setup
+  type: transport 
   what: ecasound audio processing engine status
   smry: engine status info
   short: egs
+  parameters: none
 show_chain_setup:
   type: setup
-  short: chains setup
+  short: chains
   what: show current Ecasound chain setup
-  smry: show chain setup
-show_io:
-  type: setup
-  short: showio
-  what: show chain input and output fragments
-  smry: show chain fragments
-show_tracks:
-  type: setup
-  short: show tracks
-  what: show track status
-show_track:
-  type: track
-  short: sh
-  what: show track status, effects, versions
-modifiers:
-  type: track
-  short: mods mod 
-  what: set/show track modifiers 
-  example: modifiers select 5 15.2 reverse playat 78.2 audioloop
-nomodifiers:
-  type: track
-  short: nomods nomod
-  what: remove modifiers from current track
+loop_enable:
+  type: setup 
+  short: loop
+  what: playback will loop between two points
+  parameters: start end (using mark names, mark indices, decimal seconds)
+  example: loop_enable 1.5 10.0 (loop between 1.5 and 10.0 seconds) loop_enable 1 5 (loop between mark indices 1 and 5) loop_enable start end (loop between mark ids 'start' and 'end')
+loop_disable:
+  type: setup 
+  short: noloop nl
+  what: disable automatic looping
+  parameters: none
+# loop_show:
+#   type: transport
+#   short: ls
+#   what: show loop status and endpoints (TODO)
+#   parameters: none
 show_effects:
   type: effect
   what: show effects on current track
@@ -334,58 +352,60 @@ show_effects:
 add_ctrl:
   type: effect
   what: add a controller to an operator
-  parameters: parent_id effect_code param1 param2... paramn
+  parameters: s_parent_id string_effect_code [ n_param1 n_param2...]
   short: acl
 add_effect:
   type: effect
   what: add effect to current track (placed before volume control)
   short: fxa afx
   smry: add effect
-  parameters: effect_label param1 param2,... paramn
+  parameters: s_effect_code [ f_param1 f_param2... ]
   example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa var_dali (preset var_dali) Note: no el: or pn: prefix is required
 append_effect:
   type: effect
   what: add effect to the end of current track (mainly legacy use)
-  parameters: effect_label param1 param2,... paramn
+  parameters: s_effect_code [ f_param1 f_param2... ]
 insert_effect:
   type: effect
   short: ifx fxi
   what: place effect before specified effect (engine stopped, prior to arm only)
-  parameters: before_id effect_code param1 param2... paramn
+  parameters: s_insert_before_effect_id s_effect_code [ f_param1 f_param2... ]
 modify_effect:
   type: effect
   what: modify an effect parameter
-  parameters: effect_id, parameter, optional_sign, value
+  parameters: s_effect_id i_parameter [ + | - | * | / ] f_value
   short: fxm mfx
-  example: fxm V 1 1000 (set to 1000), fxm V 1 -10 (reduce by 10) 
+  example: fxm V 1 1000 (set effect_id V, parameter 1 to 1000) fxm V 1 - 10 (reduce effect_id V, parameter 1 by 10) 
 remove_effect:
   type: effect
   what: remove effects from selected track
   short: fxr rfx
-  parameters: effect_id1, effect_id2,...
-  example: fxr V (remove effect V)
+  parameters: effect_id1 [ effect_id2...]
 help_effect:
   type: help
   short: hfx fxh hf he
   parameters: label | unique_id
-  what: display analyseplugin output or one-line preset help
+  what: display analyseplugin output if available or one-line help
 find_effect:
   type: help
   short: ffx fxf ff fe
   what: display one-line help for effects matching search strings
-  parameters: string1, string2,...
+  parameters: s_keyword1 [ s_keyword2... ]
 ctrl_register:
   type: effect
   what: list Ecasound controllers
   short: crg
+  parameters: none
 preset_register:
   type: effect
   what: list Ecasound presets 
   short: prg
+  parameters: none
 ladspa_register:
   type: effect
   what: list LADSPA plugins
   short: lrg
+  parameters: none
 list_marks:
   type: mark
   short: lm
@@ -396,21 +416,18 @@ to_mark:
   short: tom
   what: move playhead to named mark or mark index
   smry: playhead to mark
-  parameters: string or integer
+  parameters: s_mark_id | i_mark_index 
   example: tom start (go to mark named 'start')
 mark:
   type: mark
   short: k
-  what: Mark current head position 
-  parameter: name (optional)
-  smry: mark current position
-  short: k	
-  parameters: none
+  smry: mark current position, optionally assigning name
+  parameters: [ s_mark_id ]
 remove_mark:
   type: mark
-  what: Remove mark 
+  what: Remove mark, default to current mark
   short: rmm
-  parameters: mark name, mark index or none (for current mark) 
+  parameters: [ s_mark_id | i_mark_index ]
   example: rmm start (remove mark named 'start')
 next_mark:
   type: mark
@@ -426,67 +443,55 @@ name_mark:
   type: mark
   short: nmk nom
   what: Give a name to the current mark
-  parameters: string
+  parameters: s_mark_id
   example: nmk start
-# remove_track:
-#   type: mark
-#   what: Make track go away (non destructive)
-#   parameters: string
-#   example: remove_track sax
 project_name:
   type: project
   what: show current project name
   short: project pn
+  parameters: none
 dump_track:
   type: diagnostics
-  what: dump current track data to screen (YAML format)
+  what: dump current track data
   short: dump
-  smry: dump track data
+  parameters: none
 dump_group:
   type: diagnostics 
-  what: dump the settings of the group for user tracks 
+  what: dump group settings for user tracks 
   short: dumpg
-  smry: dump group settings
+  parameters: none
 dump_all:
   type: diagnostics
-  what: dump all internal state
+  what: dump most internal state
   short: dumpall dumpa
-midi_inputs:
-  type: perform
-  what: use MIDI messages to control parameters
-  short: midi
-  parameters: on/off/capture  
-erase_capture:
-  type: perform
-  short: erase
-  what: erase recorded controller inputs
-  parameters: optional range, as decimal times in seconds, or mark names or indices 
-perform:
-  type: perform
-  what: playback recorded controller inputs
-  short: perform perf
-  parameters: on/off
-bind_midi:
-  type: perform
-  parameters: midi_port midi_controller chain_op_id parameter multiplier offset (log)
-  what: bind a midi controller to a chain operator parameter
-  short: bind
-bind_off:
-  type: perform
-  what: remove MIDI binding
-  parameters: midi_port midi_controller
-normalize:
-  type: track
-  short: norm ecanormalize
-  what: apply ecanormalize to current track version
-fixdc:
-  type: track
-  what: apply ecafixdc to current track version
-  short: ecafixdc
-memoize:
-  type: general
-  what: enable WAV dir cache
-unmemoize:
-  type: general
-  what: disable WAV dir cache
+  parameters: none
+show_io:
+  type: diagnostic 
+  short: showio
+  what: show chain inputs and outputs
+  parameters: none
+# midi_inputs:
+#   type: perform
+#   what: use MIDI messages to control parameters
+#   short: midi
+#   parameters: on/off/capture  
+# erase_capture:
+#   type: perform
+#   short: erase
+#   what: erase recorded controller inputs
+#   parameters: optional range, as decimal times in seconds, or mark names or indices 
+# perform:
+#   type: perform
+#   what: playback recorded controller inputs
+#   short: perform perf
+#   parameters: on/off
+# bind_midi:
+#   type: perform
+#   parameters: midi_port midi_controller chain_op_id parameter multiplier offset (log)
+#   what: bind a midi controller to a chain operator parameter
+#   short: bind
+# bind_off:
+#   type: perform
+#   what: remove MIDI binding
+#   parameters: midi_port midi_controller
 ...
