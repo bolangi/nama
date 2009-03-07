@@ -1,17 +1,6 @@
-if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
-	 { *sleeper = *finesleep;
-		$hires++; }
-else { *sleeper = *roundsleep }
-	
-sub finesleep {
-	my $sec = shift;
-	Time::HiRes::usleep($sec * 1e6);
-}
-sub roundsleep {
-	my $sec = shift;
-	$sec = int($sec   + 0.5);
-	$sec or $sec++;
-	sleep $sec
+sub sleeper {
+   my $seconds = shift;
+   select( undef, undef, undef, $seconds );
 }
 
 

@@ -25,8 +25,8 @@ use File::Temp;
 use File::Path;
 use IO::All;
 use Event;
-use Module::Load::Conditional qw(can_load);
-# use Timer::HiRes; # loaded conditionally
+#use Module::Load::Conditional qw(can_load); 
+# use Timer::HiRes; # select
 # use Tk;           # loaded conditionally
 use strict;
 use warnings;
@@ -39,8 +39,6 @@ our $VERSION = '0.996';
 [% qx(cat ./banner.pl) %]
 
 }
-
-
 
 # use Tk    # loaded conditionally in GUI mode
 
