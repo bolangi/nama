@@ -1348,6 +1348,7 @@ sub generate_setup { # create chain setup
 	return 0};
 }
 sub arm {
+	return if transport_running();
 	exit_preview() if $preview;
 	generate_setup() and connect_transport(); 
 }
