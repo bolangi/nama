@@ -2116,31 +2116,6 @@ sub fadeout {
 	fade( $id, 0, $from, $to, $fade_time );
 }
 
-=comment
-
-fade-based mute/unmute
-
-preview/doodle 
-gen; chains
-fade-out 
-stop 
-
-
-connect
-start
-fade-in
-
---
-how to tell if need to change chain setup
-
-compare live inputs (soundcard inputs, jack clients)
-
-compare monitor tracks / versions
-
-=cut
-
-
-
 sub find_op_offsets {
 
 	$debug2 and print "&find_op_offsets\n";

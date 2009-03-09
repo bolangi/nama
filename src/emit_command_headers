@@ -4,22 +4,93 @@ no warnings "uninitialized";
 $debug = 0;
 use Data::YAML::Reader;
 use IO::All;
+
+my $output = shift @ARGV;
+
 my $yr = Data::YAML::Reader->new;
 $in = qx(./strip_all  ./commands.yml);
+
+# preserve order for generating docs
+
+my @keys = $in =~ /^(\w+)/mg;
+my @types = $in =~ /^  type: (\w+)/mg;
+#print "$_\n" for @keys; 
+#print "$_\n" for @types; 
+
+
+# read in data structure
+
 my $ref = yaml_in( $in); 
 #print yaml_out $ref;
-#exit;
-map { my $func = $_; 
-	my @parts = ($func, split " ", $ref->{$func}->{short});
-	my @all_parts = @parts;
-	my $full = shift @parts;
-	my @short = @parts;
-	my $end_anchor = "end";
-	push @abbrevs,	"_$full: " . join(" | " , add_break(@all_parts))  ;
-	push @stubs,   	"$full: _$full $end_anchor { 1 }";
-	push @commands,	"command: $full";
-} sort keys %{ $ref };
-print join "\n", @commands, @abbrevs, @stubs ;
+
+# generate command headers
+
+if ($output eq 'headers'){
+
+	map { my $func = $_; 
+		my @parts = ($func, split " ", $ref->{$func}->{short});
+		my @all_parts = @parts;
+		my $full = shift @parts;
+		my @short = @parts;
+		my $end_anchor = "end";
+		push @abbrevs,	"_$full: " . join(" | " , add_break(@all_parts))  ;
+		push @stubs,   	"$full: _$full $end_anchor { 1 }";
+		push @commands,	"command: $full";
+	} @keys;
+	print join "\n", @commands, @abbrevs, @stubs ;
+
+}
+
+# generate command pod
+
+elsif ($output eq 'pod'){
+	my $previous_type = q();
+
+	map{ 
+
+		# insert new category head if needed
+		
+		my $type = $ref->{$_}->{type};
+
+		if ( $type ne $previous_type ){
+			$previous_type = $type;
+			print "=head2 ", ucfirst $type, " commands\n\n";
+		}
+		my $short = $ref->{$_}->{short};
+		$short = "($short) " if $short;
+		print "=head4 B<$_> $short- ", ucfirst $ref->{$_}->{what}, "\n\n";
+
+		my $param = q();
+		$param = $ref->{$_}->{parameters} 
+			unless $ref->{$_}->{parameters} eq 'none';
+		print "=over 8\n\n";
+		print "C<$_> $param\n\n";
+
+		if (my $example = $ref->{$_}->{example}){
+
+
+			# convert literal \n to double newlines
+			
+			$example =~ s/\\n/\n\n/g;
+
+
+			# add C<> tags to command text
+
+			$example =~ s/^(.+)$/C<$1/mg;
+			$example =~ s/^([^()]+)(\(.*?\)\s*|$)/$1>$2/mg;
+
+			# 
+			#$example =~ s/^([^()]+)/C<$1>/mg;
+
+
+			print "$example\n\n";
+		}
+		print "=back\n\n";
+	} @keys;
+
+} else { die "$0: parameter 'headers' or 'pod' required" }
+
+
 sub yaml_in {
 	# $debug2 and print "&yaml_in\n";
 	my $file = shift;
@@ -34,3 +105,26 @@ sub yaml_in {
 	$yr->read( $yaml ); # returns ref
 }
 sub add_break { map{ qq(/$_\\b/) } @_ }
+__END__
+=head1 Commands
+
+=head2 General
+
+=head3 help
+
+=over 4 
+
+=item effect
+
+display help 
+
+=item abbreviations 
+
+h
+
+=item parameters
+
+[ n_help_topic_index | s_help_topic_name | s_command_name ]
+
+=back
+

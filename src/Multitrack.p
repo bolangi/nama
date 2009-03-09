@@ -227,7 +227,7 @@ $grammar = q(
 
 [% qx(./strip_all  ./grammar_body.pl) %]
 
-[% qx(./emit_command_headers) %]
+[% qx(./emit_command_headers headers) %]
 );
 
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
@@ -484,6 +484,10 @@ The Master bus has only MON/OFF status. Setting REC status
 for the Mixdown bus has the same effect as issuing the
 B<mixdown> command. (A C<start> command must be issued for
 mixdown to commence.)
+
+=head1 TEXT COMMANDS
+
+[% qx(./emit_command_headers pod) %]
 
 =head1 BUGS AND LIMITATIONS
 

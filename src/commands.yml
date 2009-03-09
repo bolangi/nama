@@ -3,20 +3,30 @@ help:
   what: display help 
   short: h
   parameters: [ n_help_topic_index | s_help_topic_name | s_command_name ]
-  type: general
+  type: help 
+help_effect:
+  type: help
+  short: hfx he
+  parameters: s_label | i_unique_id
+  what: display analyseplugin output if available or one-line help
+find_effect:
+  type: help 
+  short: ffx fe
+  what: display one-line help for effects matching search strings
+  parameters: s_keyword1 [ s_keyword2... ]
 exit:
   short: quit q
   what: exit program, saving settings
   type: general
   parameters: none
-memoize:
-  type: general
-  what: enable WAV dir cache
-  parameters: none
-unmemoize:
-  type: general
-  what: disable WAV dir cache
-  parameters: none
+# memoize:
+#   type: general
+#   what: enable WAV dir cache
+#   parameters: none
+# unmemoize:
+#   type: general
+#   what: disable WAV dir cache
+#   parameters: none
 stop:
   type: transport
   short: s
@@ -95,15 +105,11 @@ automix:
   type: mix
   what: Normalize track vol levels, then mixdown
   parameters: none
-autofix:
-  type: mix
-  what: fixdc and normalize selected versions of all MON tracks 
-  parameters: none
 add_track:
   type: track
   short: add new
   what: create one or more new tracks
-  example: add sax violin tuba
+  example: add_track sax violin tuba
   parameters: s_name1 [ s_name2... ]
 import:
   type: track
@@ -244,6 +250,10 @@ fixdc:
   type: track
   what: apply ecafixdc to current track version
   short: ecafixdc
+autofix:
+  type: track 
+  what: fixdc and normalize selected versions of all MON tracks 
+  parameters: none
 # remove_track:
 #   type: track
 #   what: Make track go away (non destructive)
@@ -263,12 +273,10 @@ group_version:
   type: group 
   short: gn gver gv
   what: set group version for monitoring (overridden by track-version settings)
-  smry: get/set group version
 group_off:
   type: group
   short: goff Z 
   what: group OFF mode, exclude all user tracks from chain setup
-  smry: group OFF mode
   parameters: none
 bunch:
   type: group
@@ -299,6 +307,11 @@ load_project:
   short: load	
   what: load an existing project using last saved state
   parameters: s_project_name
+project_name:
+  type: project
+  what: show current project name
+  short: project pn
+  parameters: none
 generate:
   type: setup
   short: gen
@@ -318,12 +331,6 @@ disconnect:
   short: dcon
   what: disconnect chain setup
   parameters: none
-engine_status:
-  type: transport 
-  what: ecasound audio processing engine status
-  smry: engine status info
-  short: egs
-  parameters: none
 show_chain_setup:
   type: setup
   short: chains
@@ -333,7 +340,7 @@ loop_enable:
   short: loop
   what: playback will loop between two points
   parameters: start end (using mark names, mark indices, decimal seconds)
-  example: loop_enable 1.5 10.0 (loop between 1.5 and 10.0 seconds) loop_enable 1 5 (loop between mark indices 1 and 5) loop_enable start end (loop between mark ids 'start' and 'end')
+  example: loop_enable 1.5 10.0 (loop between 1.5 and 10.0 seconds) \nloop_enable 1 5 (loop between mark indices 1 and 5) \nloop_enable start end (loop between mark ids 'start' and 'end')
 loop_disable:
   type: setup 
   short: noloop nl
@@ -358,9 +365,8 @@ add_effect:
   type: effect
   what: add effect to current track (placed before volume control)
   short: fxa afx
-  smry: add effect
   parameters: s_effect_code [ f_param1 f_param2... ]
-  example: fxa amp 6 (LADSPA Simple amp 6dB gain); fxa var_dali (preset var_dali) Note: no el: or pn: prefix is required
+  example: add_effect amp 6 (LADSPA Simple amp 6dB gain)\nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required
 append_effect:
   type: effect
   what: add effect to the end of current track (mainly legacy use)
@@ -375,22 +381,12 @@ modify_effect:
   what: modify an effect parameter
   parameters: s_effect_id i_parameter [ + | - | * | / ] f_value
   short: fxm mfx
-  example: fxm V 1 1000 (set effect_id V, parameter 1 to 1000) fxm V 1 - 10 (reduce effect_id V, parameter 1 by 10) 
+  example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)\nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10) 
 remove_effect:
   type: effect
   what: remove effects from selected track
   short: fxr rfx
   parameters: effect_id1 [ effect_id2...]
-help_effect:
-  type: help
-  short: hfx fxh hf he
-  parameters: label | unique_id
-  what: display analyseplugin output if available or one-line help
-find_effect:
-  type: help
-  short: ffx fxf ff fe
-  what: display one-line help for effects matching search strings
-  parameters: s_keyword1 [ s_keyword2... ]
 ctrl_register:
   type: effect
   what: list Ecasound controllers
@@ -415,20 +411,19 @@ to_mark:
   type: mark
   short: tom
   what: move playhead to named mark or mark index
-  smry: playhead to mark
   parameters: s_mark_id | i_mark_index 
-  example: tom start (go to mark named 'start')
+  example: to_mark start (go to mark named 'start')
 mark:
   type: mark
+  what: drop mark at current playback position
   short: k
-  smry: mark current position, optionally assigning name
   parameters: [ s_mark_id ]
 remove_mark:
   type: mark
   what: Remove mark, default to current mark
   short: rmm
   parameters: [ s_mark_id | i_mark_index ]
-  example: rmm start (remove mark named 'start')
+  example: remove_mark start (remove mark named 'start')
 next_mark:
   type: mark
   short: nm
@@ -444,11 +439,11 @@ name_mark:
   short: nmk nom
   what: Give a name to the current mark
   parameters: s_mark_id
-  example: nmk start
-project_name:
-  type: project
-  what: show current project name
-  short: project pn
+  example: name_mark start
+engine_status:
+  type: diagnostics
+  what: display Ecasound audio processing engine status
+  short: egs
   parameters: none
 dump_track:
   type: diagnostics
@@ -466,7 +461,7 @@ dump_all:
   short: dumpall dumpa
   parameters: none
 show_io:
-  type: diagnostic 
+  type: diagnostics
   short: showio
   what: show chain inputs and outputs
   parameters: none
