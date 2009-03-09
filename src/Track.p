@@ -636,6 +636,7 @@ sub fixdc {
 sub mute {
 	package ::;
 	my $track = shift;
+	my $nofade = shift;
 	$track or $track = $::this_track;
 	# do nothing if already muted
 	return if $track->old_vol_level();
@@ -643,19 +644,28 @@ sub mute {
 	# mute if non-zero volume
 	if ( $::copp{$track->vol}[0]){   
 		$track->set(old_vol_level => $::copp{$track->vol}[0]);
-		::fadeout( $track->vol );
+		if ( $nofade ){ 
+			effect_update_copp_set($track->n, $track->vol, 0, 0  );
+		} else { 
+			fadeout( $track->vol );
+		}
 	}
 }
 sub unmute {
 	package ::;
 	my $track = shift;
+	my $nofade = shift;
 	$track or $track = $::this_track;
 
 	# do nothing if we are not muted
 	return if $::copp{$track->vol}[0]; 
 	return if ! $track->old_vol_level;
 
-	::fadein( $track->vol, $track->old_vol_level);
+	if ( $nofade ){ 
+		effect_update_copp_set($track->n, $track->vol, 0, $track->old_vol_level);
+	} else { 
+		fadein( $track->vol, $track->old_vol_level);
+	}
 	$track->set(old_vol_level => 0);
 }
 

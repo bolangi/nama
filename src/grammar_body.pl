@@ -1,4 +1,3 @@
-# regex contraining of values
 key: /\w+/
 someval: /[\w.+-]+/
 sign: '+' | '-' | '*' | '/'
@@ -15,8 +14,9 @@ name3: /\S+/
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
-nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 end: /[;\s]*$/ 
+
+nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
@@ -47,6 +47,8 @@ forward: _forward value end {
 	::forward( $item{value} ); 1}
 rewind: _rewind value end {
 	::rewind( $item{value} ); 1}
+to_start: _to_start end { ::to_start() }
+to_end: _to_end end { ::to_end() }
 add_track: _add_track name(s) end {
 	::add_track(@{$item{'name(s)'}}); 1}
 set_track: _set_track key someval end {
@@ -67,7 +69,7 @@ generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
 disconnect: _disconnect end { ::disconnect_transport(); 1}
-renew_engine: _renew_engine end { ::new_engine(); 1}
+#renew_engine: _renew_engine end { ::new_engine(); 1}
 engine_status: _engine_status end { 
 	print(::eval_iam q(engine-status)); print "\n" ; 1}
 start: _start end { ::start_transport(); 1}

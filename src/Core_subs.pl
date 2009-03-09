@@ -1,8 +1,20 @@
-sub sleeper {
+if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
+	 { *sleeper = *finesleep;
+		$hires++; }
+else { *sleeper = *select_sleep }
+	
+sub finesleep {
+	my $sec = shift;
+	Time::HiRes::usleep($sec * 1e6);
+}
+sub select_sleep {
    my $seconds = shift;
    select( undef, undef, undef, $seconds );
+# 	my $sec = shift;
+# 	$sec = int($sec   + 0.5);
+# 	$sec or $sec++;
+# 	sleep $sec
 }
-
 
 sub mainloop { 
 	prepare(); 
@@ -997,12 +1009,17 @@ sub add_pan_control {
 	$pan_id;
 }
 sub add_latency_compensation {
+	print('LADSPA L/C/R Delay effect not found.
+Unable to provide latency compensation.
+'), return unless $effect_j{lcrDelay};
 	my $n = shift;
 	my $id = cop_add({
 				chain => $n, 
-				type => 'el:artificialLatency',
-				cop_id => $ti[$n]->latency, # often undefined
-				values => [ 0 ],
+				type => 'el:lcrDelay',
+				cop_id => $ti[$n]->latency, # may be undef
+				values => [ 0,0,0,50,0,0,0,0,0,50,1 ],
+				# We will be adjusting the 
+				# the third parameter, center delay (index  2)
 				});
 	
 	$ti[$n]->set(latency => $id);  # save the id for next time
@@ -1348,8 +1365,8 @@ sub generate_setup { # create chain setup
 	return 0};
 }
 sub arm {
-	return if transport_running();
 	exit_preview() if $preview;
+	adjust_latency();
 	generate_setup() and connect_transport(); 
 }
 sub preview {
@@ -1411,7 +1428,7 @@ sub adjust_latency {
 	map { my $adjustment = ($max - $latency{$_}) /
 			$cfg{abbreviations}{frequency} * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set( $_, $ti[$_]->latency, 0, $adjustment);
+			effect_update_copp_set( $_, $ti[$_]->latency, 2, $adjustment);
 			} keys %latency;
 }
 sub connect_transport {
@@ -1749,7 +1766,7 @@ sub remove_effect {
 	my $n = $cops{$id}->{chain};
 		
 	my $parent = $cops{$id}->{belongs_to} ;
-	print "id: $id, parent: $parent\n";
+	$debug and print "id: $id, parent: $parent\n";
 
 	my $object = $parent ? q(controller) : q(chain operator); 
 	$debug and print qq(ready to remove $object "$id" from track "$n"\n);
@@ -2925,10 +2942,10 @@ sub solo {
 	}
 
 	# mute all tracks
-	map { $this_track = $tn{$_}; $this_track->mute() } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->mute(1) } $tracker->tracks;
 
     $this_track = $current_track;
-    $this_track->unmute;
+    $this_track->unmute(1);
 	$soloing = 1;
 }
 
@@ -2936,11 +2953,11 @@ sub all {
 	
 	my $current_track = $this_track;
 	# unmute all tracks
-	map { $this_track = $tn{$_}; $this_track->unmute } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->unmute(1) } $tracker->tracks;
 
 	# re-mute previously muted tracks
 	if (@already_muted){
-		map { $_->mute } @already_muted;
+		map { $_->mute(1) } @already_muted;
 	}
 
 	# remove listing of muted tracks

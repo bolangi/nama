@@ -58,15 +58,15 @@ rewind:
   what: move transport position backward
   parameters: f_increment_seconds
   type: transport
-beg:
+to_start:
   what: set playback head to start
   type: transport
-  sub: to_start
+  short: beg
   parameters: none
-end:
+to_end:
   what: set playback head to end minus 10 seconds 
+  short: end
   type: transport
-  sub: to_end
   parameters: none
 ecasound_start:
   type: transport
@@ -351,11 +351,6 @@ loop_disable:
 #   short: ls
 #   what: show loop status and endpoints (TODO)
 #   parameters: none
-show_effects:
-  type: effect
-  what: show effects on current track
-  short: fxs sfx
-  parameters: none
 add_ctrl:
   type: effect
   what: add a controller to an operator

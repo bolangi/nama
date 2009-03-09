@@ -1,14 +1,16 @@
 #!/usr/bin/env perl
+use strict;
 use warnings;
 no warnings "uninitialized";
-$debug = 0;
+my $debug = 0;
+my (@commands, @abbrevs);
 use Data::YAML::Reader;
 use IO::All;
 
 my $output = shift @ARGV;
 
 my $yr = Data::YAML::Reader->new;
-$in = qx(./strip_all  ./commands.yml);
+my $in = qx(./strip_all  ./commands.yml);
 
 # preserve order for generating docs
 
@@ -23,6 +25,20 @@ my @types = $in =~ /^  type: (\w+)/mg;
 my $ref = yaml_in( $in); 
 #print yaml_out $ref;
 
+
+=comment testing for missing definitions
+
+my %body;
+my $cmd = q(perl -ne '/^(\w+):/ and print "$1\n"' grammar_body.pl  | uniq);
+map{ $body{$_}++ } split " ", qx($cmd);
+
+map{ $ref->{$_} or print "$_\n" } keys %body;
+print "\n----\n";
+map{ $body{$_} or print "$_\n" } keys %{$ref};
+exit;
+
+=cut
+
 # generate command headers
 
 if ($output eq 'headers'){
@@ -34,10 +50,10 @@ if ($output eq 'headers'){
 		my @short = @parts;
 		my $end_anchor = "end";
 		push @abbrevs,	"_$full: " . join(" | " , add_break(@all_parts))  ;
-		push @stubs,   	"$full: _$full $end_anchor { 1 }";
+		#push @stubs,   	"$full: _$full $end_anchor { 1 }";
 		push @commands,	"command: $full";
 	} @keys;
-	print join "\n", @commands, @abbrevs, @stubs ;
+	print join "\n", @commands, @abbrevs ;
 
 }
 
@@ -105,26 +121,3 @@ sub yaml_in {
 	$yr->read( $yaml ); # returns ref
 }
 sub add_break { map{ qq(/$_\\b/) } @_ }
-__END__
-=head1 Commands
-
-=head2 General
-
-=head3 help
-
-=over 4 
-
-=item effect
-
-display help 
-
-=item abbreviations 
-
-h
-
-=item parameters
-
-[ n_help_topic_index | s_help_topic_name | s_command_name ]
-
-=back
-
