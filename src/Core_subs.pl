@@ -332,6 +332,7 @@ sub read_config {
 	#print yaml_out \%cfg; 
 	assign_var( \%cfg, @config_vars);  ## XXX
 	#print "config file: $yml";
+	$project_root = $opts{d} if $opts{d};
 
 }
 sub walk_tree {

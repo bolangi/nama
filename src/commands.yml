@@ -19,14 +19,14 @@ exit:
   what: exit program, saving settings
   type: general
   parameters: none
-# memoize:
-#   type: general
-#   what: enable WAV dir cache
-#   parameters: none
-# unmemoize:
-#   type: general
-#   what: disable WAV dir cache
-#   parameters: none
+memoize:
+  type: general
+  what: enable WAV dir cache
+  parameters: none
+unmemoize:
+  type: general
+  what: disable WAV dir cache
+  parameters: none
 stop:
   type: transport
   short: s
