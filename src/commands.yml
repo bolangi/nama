@@ -2,18 +2,18 @@
 help:
   what: display help 
   short: h
-  parameters: [ n_help_topic_index | s_help_topic_name | s_command_name ]
+  parameters: [ <i_help_topic_index> | <s_help_topic_name> | <s_command_name> ]
   type: help 
 help_effect:
   type: help
   short: hfx he
-  parameters: s_label | i_unique_id
+  parameters: <s_label> | <i_unique_id>
   what: display analyseplugin output if available or one-line help
 find_effect:
   type: help 
   short: ffx fe
   what: display one-line help for effects matching search strings
-  parameters: s_keyword1 [ s_keyword2... ]
+  parameters: <s_keyword1> [ <s_keyword2>... ]
 exit:
   short: quit q
   what: exit program, saving settings
@@ -46,17 +46,17 @@ setpos:
   short: sp
   what: set current playhead position
   example: setpos 65 (set play position to 65 seconds from start)
-  parameters: f_position_seconds
+  parameters: <f_position_seconds>
   type: transport
 forward:
   short: fw
   what: move playback position forward
-  parameters: f_increment_seconds
+  parameters: <f_increment_seconds>
   type: transport
 rewind:
   short: rw
   what: move transport position backward
-  parameters: f_increment_seconds
+  parameters: <f_increment_seconds>
   type: transport
 to_start:
   what: set playback head to start
@@ -110,16 +110,16 @@ add_track:
   short: add new
   what: create one or more new tracks
   example: add_track sax violin tuba
-  parameters: s_name1 [ s_name2... ]
+  parameters: <s_name1> [ <s_name2>... ]
 import:
   type: track
   what: import a .WAV file, resampling if necessary
-  parameters: s_wav_file [n_frequency]
+  parameters: <s_wav_file> [n_frequency]
 set_track:
   short: set
   type: track
   what: directly set current track parameters (use with care!)
-  parameters: s_track_field value
+  parameters: <s_track_field> value
 rec:
   type: track
   what: REC-enable current track
@@ -137,17 +137,17 @@ off:
 #   type: track
 #   short: m
 #   what: set track output channel number
-#   parameters: i_channel_number
+#   parameters: <i_channel_number>
 source:
   type: track
   what: set track source
   short: src r
-  parameters: s_jack_client_name | i_soundcard_channel
+  parameters: <s_jack_client_name> | <i_soundcard_channel>
 send:
   type: track
   what: set auxilary track destination
   short: out aux m
-  parameters: s_jack_client_name | i_soundcard_channel (3 or above)
+  parameters: <s_jack_client_name> | <i_soundcard_channel> (3 or above)
 stereo:
   type: track
   what: record two channels for current track
@@ -160,7 +160,7 @@ set_version:
   type: track
   short: version n ver
   what: set track version number for monitoring (overrides group version setting)
-  parameters: i_version_number
+  parameters: <i_version_number>
   example: sax; version 5; sh
 destroy_current_wav:
   type: track
@@ -175,7 +175,7 @@ vol:
   type: track
   short: v
   what: set, modify or show current track volume
-  parameters: [ [ + | - | * | / ] f_value ]
+  parameters: [ [ + | - | * | / ] <f_value> ]
   example: vol * 1.5 (multiply current volume setting by 1.5)
 mute:
   type: track
@@ -203,7 +203,7 @@ pan:
   type: track
   short: p	
   what: get/set current track pan position
-  parameters: [ f_value ]
+  parameters: [ <f_value> ]
 pan_right:
   type: track
   short: pr
@@ -282,17 +282,17 @@ bunch:
   type: group
   short: bn
   what: define/list groups of tracks
-  parameters: [ group_name [track1] [track2...] ]
+  parameters: [ <s_group_name> [track1] [track2...] ]
 save_state:
   type: project
   short: keep k save
   what: save project settings to disk
-  parameters: [ s_settings_file ] 
+  parameters: [ <s_settings_file> ] 
 get_state:
   type: project
   short: recall restore retrieve
   what: retrieve project settings
-  parameters: [ s_settings_file ] 
+  parameters: [ <s_settings_file> ] 
 list_projects:
   type: project
   short: listp
@@ -301,12 +301,12 @@ create_project:
   type: project
   short: create	
   what: create a new project
-  parameters: s_new_project_name
+  parameters: <s_new_project_name>
 load_project:
   type: project
   short: load	
   what: load an existing project using last saved state
-  parameters: s_project_name
+  parameters: <s_project_name>
 project_name:
   type: project
   what: show current project name
@@ -338,8 +338,8 @@ show_chain_setup:
 loop_enable:
   type: setup 
   short: loop
-  what: playback will loop between two points
-  parameters: start end (using mark names, mark indices, decimal seconds)
+  what: loop playback between two points
+  parameters: <start> <end> (start, end: mark names, mark indices, decimal seconds)
   example: loop_enable 1.5 10.0 (loop between 1.5 and 10.0 seconds) \nloop_enable 1 5 (loop between mark indices 1 and 5) \nloop_enable start end (loop between mark ids 'start' and 'end')
 loop_disable:
   type: setup 
@@ -354,34 +354,34 @@ loop_disable:
 add_ctrl:
   type: effect
   what: add a controller to an operator
-  parameters: s_parent_id string_effect_code [ n_param1 n_param2...]
+  parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
   short: acl
 add_effect:
   type: effect
   what: add effect to current track (placed before volume control)
   short: fxa afx
-  parameters: s_effect_code [ f_param1 f_param2... ]
+  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: add_effect amp 6 (LADSPA Simple amp 6dB gain)\nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required
 append_effect:
   type: effect
   what: add effect to the end of current track (mainly legacy use)
-  parameters: s_effect_code [ f_param1 f_param2... ]
+  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
   short: ifx fxi
   what: place effect before specified effect (engine stopped, prior to arm only)
-  parameters: s_insert_before_effect_id s_effect_code [ f_param1 f_param2... ]
+  parameters: <s_insert_point_id> <s_effect_code> [ <f_param1> <f_param2>... ]
 modify_effect:
   type: effect
   what: modify an effect parameter
-  parameters: s_effect_id i_parameter [ + | - | * | / ] f_value
+  parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
   short: fxm mfx
   example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)\nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10) 
 remove_effect:
   type: effect
   what: remove effects from selected track
   short: fxr rfx
-  parameters: effect_id1 [ effect_id2...]
+  parameters: <s_effect_id1> [ <s_effect_id2>...]
 ctrl_register:
   type: effect
   what: list Ecasound controllers
@@ -406,18 +406,18 @@ to_mark:
   type: mark
   short: tom
   what: move playhead to named mark or mark index
-  parameters: s_mark_id | i_mark_index 
+  parameters: <s_mark_id> | <i_mark_index> 
   example: to_mark start (go to mark named 'start')
 mark:
   type: mark
   what: drop mark at current playback position
   short: k
-  parameters: [ s_mark_id ]
+  parameters: [ <s_mark_id> ]
 remove_mark:
   type: mark
   what: Remove mark, default to current mark
   short: rmm
-  parameters: [ s_mark_id | i_mark_index ]
+  parameters: [ <s_mark_id> | <i_mark_index> ]
   example: remove_mark start (remove mark named 'start')
 next_mark:
   type: mark
@@ -433,7 +433,7 @@ name_mark:
   type: mark
   short: nmk nom
   what: Give a name to the current mark
-  parameters: s_mark_id
+  parameters: <s_mark_id>
   example: name_mark start
 engine_status:
   type: diagnostics

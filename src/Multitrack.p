@@ -272,7 +272,7 @@ option provides a text-only interface for console users.
 
 =item B<-d> F<project_root>
 
-Use F<project_root> as Nama's top-level directory. Default: $HOME/nama
+Use F<project_root> as Nama's top-level directory.
 
 =item B<-f> F<config_file>
 

@@ -164,10 +164,15 @@ sub helpline {
 	my $text = "Command: $cmd\n";
 	$text .=  "Shortcuts: $commands{$cmd}->{short}\n"
 			if $commands{$cmd}->{short};	
-	$text .=  $commands{$cmd}->{what}. $/;
-	$text .=  "parameters: ". $commands{$cmd}->{parameters} . $/
-			if $commands{$cmd}->{parameters};	
-	$text .=  "example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
+	$text .=  "Description: $commands{$cmd}->{what}\n";
+	$text .=  "Usage: $cmd "; 
+
+	if ( $commands{$cmd}->{parameters} 
+			&& $commands{$cmd}->{parameters} ne 'none' ){
+		$text .=  $commands{$cmd}->{parameters}
+	}
+	$text .= "\n";
+	$text .=  "Example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
 			if $commands{$cmd}->{example};
 	($/, ucfirst $text, $/);
 	
