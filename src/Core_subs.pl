@@ -3345,6 +3345,24 @@ sub effect_code {
 	else { warn "effect code not found: $input\n";}
 	$code;
 }
+
+sub status_snapshot {
+	my $snapshot = "track-status-count-source-send\n";
+
+	map { 
+		my $rw = $_->rec_status;
+		my @status;
+		push @status, $_->name, $rw;
+		push @status, 	$_->current_version, 
+						$_->ch_count, 
+						$_->source,
+						$_->send
+			unless $rw eq 'OFF';
+		$snapshot .= join '-', @status;
+		$snapshot .= "\n";
+	} ::Track::all();
+	$snapshot;
+}
 	
 	
 ### end
