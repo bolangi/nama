@@ -18,6 +18,7 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
+	$old_snapshot = status_snapshot();
 	$ui->loop;
 }
 sub status_vars {
@@ -1373,7 +1374,7 @@ sub arm {
 sub preview {
 	return if transport_running();
 	print "Starting engine in preview mode, WAV recording DISABLED.\n";
-	$preview = 1;
+	$preview = "preview";
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
 	generate_setup() and connect_transport();
@@ -1382,7 +1383,7 @@ sub preview {
 sub doodle {
 	return if transport_running();
 	print "Starting engine in doodle mode. Live inputs only.\n";
-	$preview = 1;
+	$preview = "doodle";
 	command_process('grec');
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
@@ -1391,6 +1392,18 @@ sub doodle {
 	generate_setup() and connect_transport();
 	start_transport();
 }
+sub reconfigure_engine {
+	return unless $preview;
+	$old_snapshot = status_snapshot();
+	if ( $preview eq 'preview' ){
+		my $old_pos = eval_iam('getpos'); 
+		preview();
+		eval_iam("setpos $oldpos");
+	} elsif ( $preview eq 'doodle' ){
+		doodle();
+	} else { die "unexpected preview status: $preview" }
+}
+		
 sub exit_preview { # exit preview and doodle modes
 		stop_transport() ;
 		print "Exiting preview/doodle mode\n";
@@ -3049,10 +3062,15 @@ sub process_line {
 
   if (defined $user_input and $user_input !~ /^\s*$/)
     {
+
+
+	#if $user_input =~ 
+#		/mixdown|mixplay|mixoff|add_track|rec|mon|off|source|send|stereo|mono/
     $term->addhistory($user_input) 
 	 	unless $user_input eq $previous_text_command;
  	$previous_text_command = $user_input;
 	command_process( $user_input );
+	reconfigure_engine() if $preview and $old_snapshot ne status_snapshot();
     }
 }
 

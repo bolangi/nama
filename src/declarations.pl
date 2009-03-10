@@ -341,5 +341,8 @@ our (
 	$memoize,       # do I cache this_wav_dir?
 	$hires,        # do I have Timer::HiRes?
 	$fade_time, 	# duration for fadein(), fadeout()
+	$old_snapshot,  # previous status_snapshot() output
+					# to check if I need to reconfigure engine
+
 
 );
