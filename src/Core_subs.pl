@@ -911,7 +911,7 @@ sub add_track {
 
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
-	return if transport_running();
+	#return if transport_running();
 	my @names = @_;
 	for my $name (@names){
 		my $name = shift;
@@ -926,6 +926,7 @@ sub add_track {
 #		$track->send($ch_m) if $ch_m;
 
 		my $group = $::Group::by_name{$track->group};
+		command_process('for mon; mon') if $preview;
 		$group->set(rw => 'REC');
 		$track_name = $ch_m = $ch_r = undef;
 
@@ -1393,12 +1394,19 @@ sub doodle {
 	start_transport();
 }
 sub reconfigure_engine {
-	return unless $preview;
+
+	# we don't want to disturb recording/mixing
+	return unless $preview; 
+	
+	# only act if change in configuration
+	return unless $old_snapshot ne status_snapshot();
+								
+	eval_iam('stop');
 	$old_snapshot = status_snapshot();
 	if ( $preview eq 'preview' ){
 		my $old_pos = eval_iam('getpos'); 
 		preview();
-		eval_iam("setpos $oldpos");
+		eval_iam("setpos $old_pos");
 	} elsif ( $preview eq 'doodle' ){
 		doodle();
 	} else { die "unexpected preview status: $preview" }
@@ -1556,7 +1564,7 @@ sub stop_transport {
 	$tn{Master}->mute unless really_recording();
 	eval_iam('stop');	
 	sleeper(0.5);
-	print "engine is ", eval_iam("engine-status"), $/;
+	$debug and print "engine is ", eval_iam("engine-status"), $/;
 	$tn{Master}->unmute;
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
@@ -3070,7 +3078,7 @@ sub process_line {
 	 	unless $user_input eq $previous_text_command;
  	$previous_text_command = $user_input;
 	command_process( $user_input );
-	reconfigure_engine() if $preview and $old_snapshot ne status_snapshot();
+	reconfigure_engine();
     }
 }
 
