@@ -47,8 +47,8 @@ forward: _forward value end {
 	::forward( $item{value} ); 1}
 rewind: _rewind value end {
 	::rewind( $item{value} ); 1}
-to_start: _to_start end { ::to_start() }
-to_end: _to_end end { ::to_end() }
+to_start: _to_start end { ::to_start(); 1 }
+to_end: _to_end end { ::to_end(); 1 }
 add_track: _add_track name(s) end {
 	::add_track(@{$item{'name(s)'}}); 1}
 set_track: _set_track key someval end {

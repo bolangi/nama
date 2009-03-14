@@ -925,8 +925,9 @@ sub add_track {
 		$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-		my $group = $::Group::by_name{$track->group};
-		command_process('for mon; mon') if $preview;
+		my $group = $::Group::by_name{$track->group}; # $tracker, shurely
+		#command_process('for mon; mon') if $preview;
+		command_process('for mon; mon') if $preview and $group->rw eq 'MON';
 		$group->set(rw => 'REC');
 		$track_name = $ch_m = $ch_r = undef;
 
@@ -1373,13 +1374,19 @@ sub arm {
 	generate_setup() and connect_transport(); 
 }
 sub preview {
+	my $old_pos = shift;
 	return if transport_running();
-	print "Starting engine in preview mode, WAV recording DISABLED.\n";
+	print "Setting preview mode, WAV recording DISABLED.\n\n";
+	print "Type 'arm' to enable recording.\n";
 	$preview = "preview";
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
-	generate_setup() and connect_transport();
-	start_transport();
+	if ( generate_setup() ){
+		connect_transport();
+		eval_iam("setpos $old_pos") if $old_pos;
+		print "pos: ", eval_iam('getpos'), $/;
+		start_transport();
+	}
 }
 sub doodle {
 	return if transport_running();
@@ -1390,8 +1397,10 @@ sub doodle {
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
-	generate_setup() and connect_transport();
-	start_transport();
+	if ( generate_setup() ){
+		connect_transport();
+		start_transport();
+	}
 }
 sub reconfigure_engine {
 
@@ -1401,12 +1410,11 @@ sub reconfigure_engine {
 	# only act if change in configuration
 	return unless $old_snapshot ne status_snapshot();
 								
-	eval_iam('stop');
+	my $old_pos = eval_iam('getpos'); 
+	stop_transport();
 	$old_snapshot = status_snapshot();
 	if ( $preview eq 'preview' ){
-		my $old_pos = eval_iam('getpos'); 
-		preview();
-		eval_iam("setpos $old_pos");
+		preview($old_pos);
 	} elsif ( $preview eq 'doodle' ){
 		doodle();
 	} else { die "unexpected preview status: $preview" }
@@ -1504,6 +1512,7 @@ sub transport_status {
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub start_transport { 
+	my $no_mute = shift;
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
@@ -1515,7 +1524,7 @@ sub start_transport {
 	$tn{Master}->unmute;
 	$ui->start_heartbeat();
 
-	sleep 1; # time for engine
+	sleep 1; # time for engine to stabilize
 	print "engine is ", eval_iam("engine-status"), $/;
 }
 sub heartbeat {
