@@ -18,7 +18,10 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	$old_snapshot = status_snapshot();
+	#$old_snapshot = status_snapshot();
+	$ui->install_handlers();
+	preview();
+	reconfigure_engine();
 	$ui->loop;
 }
 sub status_vars {
@@ -119,7 +122,7 @@ exit;
 }
 	
 	
-sub prepare {  
+sub prepare {
 	
 
 	$debug2 and print "&prepare\n";
@@ -243,16 +246,15 @@ sub prepare {
 	}
 	print "project_name: $project_name\n";
 	
-	load_project( name => $project_name, create => $opts{c}) 
-	  if $project_name;
 
-	$debug and print "project_root: ", project_root(), $/;
-	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
-	$debug and print "project_dir: ", project_dir() , $/;
+	if ($project_name){
+		load_project( name => $project_name, create => $opts{c}) ;
+	}
 	1;	
 }
 
 sub eval_iam{
+	my $debug = 1;
 	$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -406,11 +408,11 @@ Loading project "untitled".
 	
 	$ui->global_version_buttons(); 
 	$ui->refresh_group;
-	generate_setup() and connect_transport();
 
-#The mixed signal is always output at track index 1 i.e. 
-# The corresponding object is found by $ti[$n]
-# for $n = 1. 
+	$debug and print "project_root: ", project_root(), $/;
+	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
+	$debug and print "project_dir: ", project_dir() , $/;
+
  1;
 
 }
@@ -1335,7 +1337,7 @@ sub generate_setup { # create chain setup
 		my %already_used;
 		map{ my $source = $tn{$_}->source; 
 			if( $already_used{$source}  ){
-				$excluded{$_} = $tn{$_}->rec_status();
+				$excluded{$_} = $tn{$_}->rw;
 			}
 			$already_used{$source}++
 		 } @user;
@@ -1369,71 +1371,94 @@ sub generate_setup { # create chain setup
 	return 0};
 }
 sub arm {
-	exit_preview() if $preview;
+	exit_preview();
 	adjust_latency();
-	generate_setup() and connect_transport(); 
+	if( generate_setup() ){ connect_transport() };
 }
 sub preview {
-	my $old_pos = shift;
-	return if transport_running();
-	print "Setting preview mode, WAV recording DISABLED.\n\n";
-	print "Type 'arm' to enable recording.\n";
+
+	# we need to do nothing if already in 'preview' mode
+	if ( $preview eq 'preview' ){ return }
+
+
+	# make an announcement if we were in rec-enabled mode
+	else { 
+		print "Setting preview mode, WAV recording DISABLED.\n\n";
+		print "Type 'arm' to enable recording.\n";
+	}
+
+	release_doodle_mode() if $preview eq 'doodle';
+
 	$preview = "preview";
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
-	if ( generate_setup() ){
-		connect_transport();
-		eval_iam("setpos $old_pos") if $old_pos;
-		print "pos: ", eval_iam('getpos'), $/;
-		start_transport();
-	}
+
+	# reconfigure_engine will generate setup and start transport
 }
 sub doodle {
-	return if transport_running();
+	return if engine_running() and really_recording();
 	print "Starting engine in doodle mode. Live inputs only.\n";
 	$preview = "doodle";
-	command_process('grec');
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
-	if ( generate_setup() ){
-		connect_transport();
-		start_transport();
-	}
+
+	# reconfigure_engine will generate setup and start transport
 }
 sub reconfigure_engine {
+	$debug2 and print "&reconfigure_engine\n";
 
 	# we don't want to disturb recording/mixing
 	return unless $preview; 
-	
+
 	# only act if change in configuration
 	return unless $old_snapshot ne status_snapshot();
 								
-	my $old_pos = eval_iam('getpos'); 
-	stop_transport();
+	# if engine is running, we will start engine after reconfiguring
+
+	# save playback position
+	my $old_pos = eval_iam('getpos') unless $preview eq 'doodle'; 
+
 	$old_snapshot = status_snapshot();
-	if ( $preview eq 'preview' ){
-		preview($old_pos);
-	} elsif ( $preview eq 'doodle' ){
-		doodle();
-	} else { die "unexpected preview status: $preview" }
+
+	stop_transport() unless really_recording();
+
+	if ( generate_setup() ){
+		connect_transport();
+		eval_iam("setpos $old_pos") if $old_pos;
+		start_transport() unless really_recording();
+	}
 }
 		
 sub exit_preview { # exit preview and doodle modes
-		stop_transport() ;
-		print "Exiting preview/doodle mode\n";
+
+		return unless $preview;
+		stop_transport() if engine_running();
+		$debug and print "Exiting preview/doodle mode\n";
 		$preview = 0;
+		release_doodle_mode();	
+
 		$rec_file->set(status => 1);
 		$rec_file_soundcard_jack->set(status => 1);
+
+}
+
+sub release_doodle_mode {
+		# enable playback from disk
 		$mon_setup->set(status => 1);
+
+		# enable excluded inputs
 		my @excluded = keys %excluded;
 		if ( @excluded ){
-			print "Re-enabling the following tracks: @excluded\n";
+			$debug and print "Re-enabling the following tracks: @excluded\n";
 			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
 		}
+
+		# enable all rec inputs
 		$unique_inputs_only = 0;
 }
+
 sub adjust_latency {
 	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
 		::Track::all();
@@ -1731,13 +1756,14 @@ sub rec_cleanup {
 			# i.e. there are first time recorded tracks
 			$ui->global_version_buttons(); # recreate
 			$tracker->set( rw => 'MON');
-			generate_setup() and connect_transport();
 			$ui->refresh();
 			print <<REC;
-WAV files were recorded! Setting group to MON mode. 
-Issue 'start' to review your recording.
+WAV files were recorded! 
+
+Now reviewing your recording...
 
 REC
+			reconfigure_engine();
 	}
 		
 } 
@@ -3382,7 +3408,8 @@ sub effect_code {
 }
 
 sub status_snapshot {
-	my $snapshot = "track-status-count-source-send\n";
+	my $snapshot = "$project_name\n";
+	$snapshot .= "track-status-count-source-send\n";
 
 	map { 
 		my $rw = $_->rec_status;

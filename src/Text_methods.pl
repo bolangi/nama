@@ -40,12 +40,13 @@ sub poll_jack {
 	);
 }
 
-sub loop {
+sub install_handlers {
 
-	# first setup Term::Readline::GNU
-
-	# we are using Event's handlers and event loop
+	# we are using the Event module's handlers and event loop
+	
 	package ::;
+
+	# setup Term::Readline::GNU
 	$term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
@@ -94,6 +95,9 @@ sub loop {
 		 );
 	
 	}
+}
+sub loop {
+	package ::;
 	Event::loop();
 
 }

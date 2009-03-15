@@ -9,7 +9,7 @@ no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
-	$::debug2 and print "&get_versions\n";
+#	$::debug2 and print "&get_versions\n";
 	my $wav = shift; # Expects a Track object here
 	my $basename = $wav->name;
 	my $dir = ::this_wav_dir();
@@ -49,7 +49,7 @@ sub targets {# takes a Wav object
  	#my $name=  ref $wav ? $wav->name: $wav;
  	my $name =  $wav->name;
 	my $dir = $wav->dir;
-	$::debug2 and print "&targets\n";
+#	$::debug2 and print "&targets\n";
 	
 	$debug and print "this_wav_dir: $dir, name: $name\n";
 		my %versions =  $wav->get_versions;
@@ -60,7 +60,7 @@ sub targets {# takes a Wav object
 	\%versions;
 }
 sub versions {  
-	$::debug2 and print "&versions\n";
+#	$::debug2 and print "&versions\n";
 	my $wav = shift;
 	[ sort { $a <=> $b } keys %{ $wav->targets} ]  
 }

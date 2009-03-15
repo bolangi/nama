@@ -267,7 +267,7 @@ sub monitor_version {
 # }
 
 sub rec_status {
-	$::debug2 and print "&rec_status\n";
+#	$::debug2 and print "&rec_status\n";
 	my $track = shift;
 	my $monitor_version = $track->monitor_version;
 	my $source = $track->source;
@@ -294,17 +294,24 @@ sub rec_status {
 		if ( $source =~ /\D/ ){ # jack client
 				::jack_client($source,'output')
 					?  'REC'
-					:  $monitor_version ? 'MON' : 'OFF'
+					:  maybe_monitor($monitor_version)
 		} elsif ( $source =~ /\d/ ){ # soundcard channel
 					   'REC'
-		} else { 	   $monitor_version ? 'MON' : 'OFF' }
+		} else { 	  maybe_monitor($monitor_version)  }
+		
 			
 	}
 	# second case, possible MON status
 	
-	else { 			$monitor_version ? 'MON' : 'OFF'
+	else { 			maybe_monitor($monitor_version)
 
 	}
+}
+
+sub maybe_monitor {
+	my $monitor_version = shift;
+	return 'MON' if $monitor_version and $::mon_setup->status;
+	return 'OFF';
 }
 
 # the following methods handle effects
@@ -658,7 +665,7 @@ sub unmute {
 	$track or $track = $::this_track;
 
 	# do nothing if we are not muted
-	return if $::copp{$track->vol}[0]; 
+#	return if $::copp{$track->vol}[0]; 
 	return if ! $track->old_vol_level;
 
 	if ( $nofade ){ 
@@ -738,6 +745,7 @@ use ::Object qw( 		name
 
 sub rec_status{
 
+#	$::debug2 and print "&rec_status (SimpleTrack)\n";
 	my $track = shift;
 	return 'MON' unless $track->rw eq 'OFF';
 	'OFF';
