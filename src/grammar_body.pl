@@ -28,8 +28,8 @@ project_name: _project_name end {
 create_project: _create_project name end { 
 	::Text::t_create_project $item{name} ; 1}
 list_projects: _list_projects end { ::list_projects() ; 1}
-load_project: _load_project name end {
-	::Text::t_load_project $item{name} ; 1}
+load_project: _load_project name3 end {
+	::Text::t_load_project $item{name3} ; 1}
 save_state: _save_state name end { ::save_state( $item{name}); 1}
 save_state: _save_state end { ::save_state(); 1}
 get_state: _get_state name end {

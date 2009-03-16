@@ -53,7 +53,7 @@ sub install_handlers {
 	$term->callback_handler_install($prompt, \&process_line);
 
 	# store output buffer in a scalar (for print)
-	my $outstream=$attribs->{'outstream'};
+	my $outstream = $attribs->{'outstream'};
 
 	# install STDIN handler
 	$event_id{stdin} = Event->io(

@@ -1415,7 +1415,7 @@ sub reconfigure_engine {
 	# save playback position
 	
 	my $old_pos;
-	print "preview: $preview\n";
+	#print "preview: $preview\n";
 	my %os = $old_snapshot ? %$old_snapshot : ();
 	my %ss = %$status_snapshot;
 	delete $os{tracks};
@@ -1432,7 +1432,7 @@ sub reconfigure_engine {
 				and $old_snapshot->{global_version} ==
 					$status_snapshot->{global_version};
 =cut
-	print "oldpos: $old_pos\n";
+	#print "oldpos: $old_pos\n";
 
 	stop_transport();
 
@@ -1568,7 +1568,7 @@ sub transport_status {
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
-	print "engine is ", eval_iam("engine-status"), $/;
+	#print "engine is ", eval_iam("engine-status"), $/;
 }
 sub start_transport { 
 	my $no_mute = shift;
@@ -3256,6 +3256,7 @@ push @keywords, keys %effect_j;
 
 sub complete {
     my ($text, $line, $start, $end) = @_;
+#	print join $/, $text, $line, $start, $end, $/;
     return $term->completion_matches($text,\&keyword);
 };
 
