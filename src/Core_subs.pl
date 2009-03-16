@@ -18,8 +18,6 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	#$old_snapshot = status_snapshot();
-	$ui->install_handlers();
 	preview();
 	reconfigure_engine();
 	$ui->loop;
@@ -239,6 +237,7 @@ sub prepare {
 	$ui->transport_gui;
 	$ui->time_gui;
 	$ui->poll_jack();
+	$ui->install_handlers();
 
 	if (! $project_name ){
 		$project_name = "untitled";
@@ -254,8 +253,7 @@ sub prepare {
 }
 
 sub eval_iam{
-	my $debug = 1;
-	$debug2 and print "&eval_iam\n";
+	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
 	my (@result) = $e->eci($command);
@@ -1332,21 +1330,10 @@ sub generate_setup { # create chain setup
 	# doodle mode
 	# exclude tracks sharing inputs with previous tracks
 	if ( $unique_inputs_only ){
-		my @user = $tracker->tracks; # track names
-		%excluded = ();
-		my %already_used;
-		map{ my $source = $tn{$_}->source; 
-			if( $already_used{$source}  ){
-				$excluded{$_} = $tn{$_}->rw;
-			}
-			$already_used{$source}++
-		 } @user;
-		if ( keys %excluded ){
-			print "Multiple tracks share same inputs.\n";
-			print "Excluding the following tracks: ", 
-				join(" ", keys %excluded), "\n";
-			map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
-		}
+		enable_excluded_inputs();
+		exclude_duplicate_inputs();
+		::Text::show_tracks();
+	
 	}
 		
 	my @tracks = ::Track::all;
@@ -1403,6 +1390,7 @@ sub doodle {
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
+	exclude_duplicate_inputs();
 
 	# reconfigure_engine will generate setup and start transport
 }
@@ -1410,25 +1398,51 @@ sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
 	# we don't want to disturb recording/mixing
-	return unless $preview; 
+	return if really_recording();
 
 	# only act if change in configuration
-	return unless $old_snapshot ne status_snapshot();
-								
-	# if engine is running, we will start engine after reconfiguring
+	
+	my $status_snapshot = status_snapshot();
+	
+	#$old_snapshot = {} if ! $old_snapshot;
+	return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
+
+	# if engine is running, 
+	# we will start engine after reconfiguring
+	# if same project and global version
+	# unless in doodle mode
 
 	# save playback position
-	my $old_pos = eval_iam('getpos') unless $preview eq 'doodle'; 
+	
+	my $old_pos;
+	print "preview: $preview\n";
+	my %os = $old_snapshot ? %$old_snapshot : ();
+	my %ss = %$status_snapshot;
+	delete $os{tracks};
+	delete $ss{tracks};
+	#print yaml_out( \%os );
+	#print yaml_out( \%ss );
 
-	$old_snapshot = status_snapshot();
+	$old_pos = eval_iam('getpos') 
+	#		if  ! $preview eq 'doodle'
+		if yaml_out( \%os ) eq yaml_out ( \%ss );
+=comm
+				and $old_snapshot->{project} eq 
+					$status_snapshot->{project}
+				and $old_snapshot->{global_version} ==
+					$status_snapshot->{global_version};
+=cut
+	print "oldpos: $old_pos\n";
 
-	stop_transport() unless really_recording();
+	stop_transport();
 
 	if ( generate_setup() ){
 		connect_transport();
 		eval_iam("setpos $old_pos") if $old_pos;
-		start_transport() unless really_recording();
+		start_transport()
 	}
+
+	$old_snapshot = $status_snapshot;
 }
 		
 sub exit_preview { # exit preview and doodle modes
@@ -1448,15 +1462,35 @@ sub release_doodle_mode {
 		# enable playback from disk
 		$mon_setup->set(status => 1);
 
-		# enable excluded inputs
+		enable_excluded_inputs();
+
+		# enable all rec inputs
+		$unique_inputs_only = 0;
+}
+sub enable_excluded_inputs {
+
 		my @excluded = keys %excluded;
 		if ( @excluded ){
 			$debug and print "Re-enabling the following tracks: @excluded\n";
 			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
 		}
-
-		# enable all rec inputs
-		$unique_inputs_only = 0;
+}
+sub exclude_duplicate_inputs {
+		my @user = $tracker->tracks; # track names
+		%excluded = ();
+		my %already_used;
+		map{ my $source = $tn{$_}->source;
+			 if( $already_used{$source}  ){
+				$excluded{$_} = $tn{$_}->rw;
+			 }
+			 $already_used{$source}++
+		 } grep { $tn{$_}->rec_status eq 'REC' } @user;
+		if ( keys %excluded ){
+			print "Multiple tracks share same inputs.\n";
+			print "Excluding the following tracks: ", 
+				join(" ", keys %excluded), "\n";
+			map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
+		}
 }
 
 sub adjust_latency {
@@ -1596,6 +1630,7 @@ sub stop_transport {
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();
 	$tn{Master}->mute unless really_recording();
+	$tn{Master}->mute if engine_running() and !really_recording();
 	eval_iam('stop');	
 	sleeper(0.5);
 	$debug and print "engine is ", eval_iam("engine-status"), $/;
@@ -2118,6 +2153,7 @@ sub effect_update {
 	# why not use this routine to update %copp values as
 	# well?
 	
+	#$debug2 and print "&effect_update\n";
 	my $es = eval_iam"engine-status";
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
@@ -2129,7 +2165,6 @@ sub effect_update {
 	# $param gets incremented, therefore is zero-based. 
 	# if I check i will find %copp is  zero-based
 
-	$debug2 and print "&effect_update\n";
 	return if $ti[$chain]->rec_status eq "OFF"; 
 	return if $ti[$chain]->name eq 'Mixdown' and 
 			  $ti[$chain]->rec_status eq 'REC';
@@ -3408,23 +3443,24 @@ sub effect_code {
 }
 
 sub status_snapshot {
-	my $snapshot = "$project_name\n";
-	$snapshot .= "track-status-count-source-send\n";
-
+	my %snapshot = ( project 		=> 	$project_name,
+					 global_version =>  $tracker->version,
+#					 global_rw      =>  $tracker->rw,
+ );
+	$snapshot{tracks} = [];
 	map { 
-		my $rw = $_->rec_status;
-		my @status;
-		push @status, $_->name, $rw;
-		push @status, 	$_->current_version, 
-						$_->ch_count, 
-						$_->source,
-						$_->send
-			unless $rw eq 'OFF';
-		$snapshot .= join '-', @status;
-		$snapshot .= "\n";
+		push @{ $snapshot{tracks} }, 
+			{
+				name 			=> $_->name,
+				rec_status 		=> $_->rec_status,
+				channel_count 	=> $_->ch_count,
+				current_version => $_->current_version,
+				send 			=> $_->send,
+				source 			=> $_->source,
+			} unless $_->rec_status eq 'OFF'
+
 	} ::Track::all();
-	$snapshot;
+	\%snapshot
 }
-	
 	
 ### end

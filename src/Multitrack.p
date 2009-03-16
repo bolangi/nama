@@ -62,7 +62,7 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
+$debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of two helper loopback devices:
@@ -86,6 +86,7 @@ $use_placeholders = 1;
 $save_id = "State";
 $fade_time = 0.3;
 #$SIG{INT} = sub{ mute{$tn{Master}} if engine_running(); die "\nAborting.\n" };
+$old_snapshot = {};
 
 jack_update(); # to be polled by Event
 $memoize = 0;
@@ -140,7 +141,7 @@ our @ISA = '::';      ## default to root class
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
-sub install_handlers();
+sub install_handlers{};
 sub loop {
     package ::;
     #MainLoop;
