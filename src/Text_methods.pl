@@ -66,6 +66,7 @@ sub install_handlers {
 					if ( $attribs->{line_buffer} eq " " ){
 						if (engine_running()){ stop_transport() }
 						else { start_transport() }
+						print "engine is ", eval_iam("engine-status"), $/;
 						#&{$attribs->{kill_text}}();
  						$attribs->{line_buffer} = q();
  						$attribs->{point} 		= 0;
