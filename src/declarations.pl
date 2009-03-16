@@ -330,6 +330,7 @@ our (
 
 	%bunch,			# user collections of tracks
 	@keywords,      # for autocompletion
+	$attribs,       # Term::Readline::Gnu object
 	$seek_delay,    # allow microseconds for transport seek
                     # (used with JACK only)
     $prompt,        # for text mode
@@ -343,6 +344,7 @@ our (
 	$fade_time, 	# duration for fadein(), fadeout()
 	$old_snapshot,  # previous status_snapshot() output
 					# to check if I need to reconfigure engine
+	$old_group_rw, # previous $tracker->rw setting
 
 
 );

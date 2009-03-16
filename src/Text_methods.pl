@@ -48,7 +48,7 @@ sub install_handlers {
 
 	# setup Term::Readline::GNU
 	$term = new Term::ReadLine("Ecasound/Nama");
-	my $attribs = $term->Attribs;
+	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$term->callback_handler_install($prompt, \&process_line);
 

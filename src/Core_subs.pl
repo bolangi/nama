@@ -18,7 +18,7 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	doodle();
+	#doodle();
 	reconfigure_engine();
 	$ui->loop;
 }
@@ -243,7 +243,7 @@ sub prepare {
 		$project_name = "untitled";
 		$opts{c}++; 
 	}
-	print "project_name: $project_name\n";
+	print "\nproject_name: $project_name\n";
 	
 
 	if ($project_name){
@@ -1332,7 +1332,6 @@ sub generate_setup { # create chain setup
 	if ( $unique_inputs_only ){
 		enable_excluded_inputs();
 		exclude_duplicate_inputs();
-		::Text::show_tracks();
 	
 	}
 		
@@ -1385,9 +1384,10 @@ sub doodle {
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
-	exclude_duplicate_inputs();
-	command_process('group_rec') if $tracker->rw eq 'MON';
-
+	if ( $tracker->rw ne 'REC'){
+		$old_group_rw = $tracker->rw;
+		command_process('group_rec') 
+	}
 	# reconfigure_engine will generate setup and start transport
 }
 sub reconfigure_engine {
@@ -1451,6 +1451,7 @@ sub reconfigure_engine {
 		}
 	}
 	$old_snapshot = $status_snapshot;
+	# &{$attribs->{redisplay}}();
 }
 
 		
@@ -1468,6 +1469,10 @@ sub exit_preview { # exit preview and doodle modes
 }
 
 sub release_doodle_mode {
+
+		# restore preview group REC/MON/OFF setting
+		$tracker->set(rw => $old_group_rw);		
+
 		# enable playback from disk
 		$mon_setup->set(status => 1);
 
@@ -3212,46 +3217,46 @@ sub command_process {
 	} else {
 
 
-	my @user_input = split /\s*;\s*/, $user_input;
-	map {
-		my $user_input = $_;
-		my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-		$debug and print "cmd: $cmd \npredicate: $predicate\n";
-		if ($cmd eq 'eval') {
-			$debug and print "Evaluating perl code\n";
-			pager( eval $predicate);
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-		} elsif ($cmd eq '!') {
-			$debug and print "Evaluating shell commands!\n";
-			my $output = qx( $predicate );
-			#print "length: ", length $output, $/;
-			pager($output); 
-			print "\n";
-		} elsif ($tn{$cmd}) { 
-			$debug and print qq(Selecting track "$cmd"\n);
-			$this_track = $tn{$cmd};
-			my $c = q(c-select ) . $this_track->n; 
-			eval_iam( $c ) if eval_iam( 'cs-connected' );
-			$predicate !~ /^\s*$/ and $parser->command($predicate);
-		} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-			$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-			$this_track = $ti[$cmd];
-			my $c = q(c-select ) . $this_track->n; eval_iam( $c );
-			$predicate !~ /^\s*$/ and $parser->command($predicate);
-		} elsif ($iam_cmd{$cmd}){
-			$debug and print "Found Iam command\n";
-			my $result = eval_iam($user_input);
-			pager( $result );  
-		} else {
-			$debug and print "Passing to parser\n", $_, $/;
-			#print 1, ref $parser, $/;
-			#print 2, ref $::parser, $/;
-			# both print
-			defined $parser->command($_) 
-				or print "Bad command: $_\n";
-		}    
-	} @user_input;
+		my @user_input = split /\s*;\s*/, $user_input;
+		map {
+			my $user_input = $_;
+			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
+			$debug and print "cmd: $cmd \npredicate: $predicate\n";
+			if ($cmd eq 'eval') {
+				$debug and print "Evaluating perl code\n";
+				pager( eval $predicate);
+				print "\n";
+				$@ and print "Perl command failed: $@\n";
+			} elsif ($cmd eq '!') {
+				$debug and print "Evaluating shell commands!\n";
+				my $output = qx( $predicate );
+				#print "length: ", length $output, $/;
+				pager($output); 
+				print "\n";
+			} elsif ($tn{$cmd}) { 
+				$debug and print qq(Selecting track "$cmd"\n);
+				$this_track = $tn{$cmd};
+				my $c = q(c-select ) . $this_track->n; 
+				eval_iam( $c ) if eval_iam( 'cs-connected' );
+				$predicate !~ /^\s*$/ and $parser->command($predicate);
+			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
+				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
+				$this_track = $ti[$cmd];
+				my $c = q(c-select ) . $this_track->n; eval_iam( $c );
+				$predicate !~ /^\s*$/ and $parser->command($predicate);
+			} elsif ($iam_cmd{$cmd}){
+				$debug and print "Found Iam command\n";
+				my $result = eval_iam($user_input);
+				pager( $result );  
+			} else {
+				$debug and print "Passing to parser\n", $_, $/;
+				#print 1, ref $parser, $/;
+				#print 2, ref $::parser, $/;
+				# both print
+				defined $parser->command($_) 
+					or print "Bad command: $_\n";
+			}    
+		} @user_input;
 	}
 	$ui->refresh; # in case we have a graphic environment
 }
