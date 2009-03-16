@@ -286,7 +286,7 @@ sub find_effect {
 
 sub t_load_project {
 	package ::;
-	stop_transport() unless really_recording();
+	return if really_recording();
 	my $name = shift;
 	print "input name: $name\n";
 	my $newname = remove_spaces($name);
