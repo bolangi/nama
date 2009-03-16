@@ -60,7 +60,19 @@ sub install_handlers {
 		desc   => 'STDIN handler',           # description;
 		fd     => \*STDIN,                   # handle;
 		poll   => 'r',	                   # watch for incoming chars
-		cb     => sub{ &{$attribs->{'callback_read_char'}}() }, # callback;
+		cb     => sub{ 
+
+					&{$attribs->{'callback_read_char'}}();
+					if ( $attribs->{line_buffer} eq " " ){
+						if (engine_running()){ stop_transport() }
+						else { start_transport() }
+						#&{$attribs->{kill_text}}();
+ 						$attribs->{line_buffer} = q();
+ 						$attribs->{point} 		= 0;
+ 						$attribs->{end}   		= 0;
+
+					}
+ 				},
 		repeat => 1,                         # keep alive after event;
 	 );
 #  	$event_id{sigint} = Event->signal(
@@ -286,7 +298,7 @@ sub find_effect {
 
 sub t_load_project {
 	package ::;
-	return if really_recording();
+	return if engine_running() and really_recording();
 	my $name = shift;
 	print "input name: $name\n";
 	my $newname = remove_spaces($name);
@@ -295,6 +307,7 @@ sub t_load_project {
 		unless -d join_path project_root(), $newname; 
 	stop_transport();
 	load_project( name => $newname );
+	doodle();
 	print "loaded project: $project_name\n";
 }
 

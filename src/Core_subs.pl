@@ -18,7 +18,7 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	preview();
+	doodle();
 	reconfigure_engine();
 	$ui->loop;
 }
@@ -1369,10 +1369,6 @@ sub preview {
 
 
 	# make an announcement if we were in rec-enabled mode
-	else { 
-		print "Setting preview mode, WAV recording DISABLED.\n\n";
-		print "Type 'arm' to enable recording.\n";
-	}
 
 	release_doodle_mode() if $preview eq 'doodle';
 
@@ -1384,13 +1380,13 @@ sub preview {
 }
 sub doodle {
 	return if engine_running() and really_recording();
-	print "Starting engine in doodle mode. Live inputs only.\n";
 	$preview = "doodle";
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
 	exclude_duplicate_inputs();
+	command_process('group_rec') if $tracker->rw eq 'MON';
 
 	# reconfigure_engine will generate setup and start transport
 }
@@ -1404,7 +1400,6 @@ sub reconfigure_engine {
 	
 	my $status_snapshot = status_snapshot();
 	
-	#$old_snapshot = {} if ! $old_snapshot;
 	return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
 
 	# if engine is running, 
@@ -1423,9 +1418,9 @@ sub reconfigure_engine {
 	#print yaml_out( \%os );
 	#print yaml_out( \%ss );
 
-	$old_pos = eval_iam('getpos') 
+	#$old_pos = eval_iam('getpos') 
 	#		if  ! $preview eq 'doodle'
-		if yaml_out( \%os ) eq yaml_out ( \%ss );
+	#	if yaml_out( \%os ) eq yaml_out ( \%ss );
 =comm
 				and $old_snapshot->{project} eq 
 					$status_snapshot->{project}
@@ -1434,16 +1429,30 @@ sub reconfigure_engine {
 =cut
 	#print "oldpos: $old_pos\n";
 
-	stop_transport();
+	stop_transport() if engine_running();
 
 	if ( generate_setup() ){
+		command_process('show_tracks');
 		connect_transport();
-		eval_iam("setpos $old_pos") if $old_pos;
-		start_transport()
-	}
+	#	eval_iam("setpos $old_pos") if $old_pos;
 
+		if ( $preview eq 'doodle' ){
+			print "Setting doodle mode.\n";
+			print "Using live inputs only, with no duplicate inputs\n";
+			print "Exit using 'preview' or 'arm' commands.\n";
+			print "Press SPACE to start or stop engine.\n";
+		}
+		elsif ( $preview eq 'preview'){
+			print "Setting preview mode.\n";
+			print "Using both REC and MON inputs.\n";
+			print "WAV recording is DISABLED.\n\n";
+			print "Type 'arm' to enable recording.\n\n";
+			print "Press SPACE to start or stop engine.\n";
+		}
+	}
 	$old_snapshot = $status_snapshot;
 }
+
 		
 sub exit_preview { # exit preview and doodle modes
 
