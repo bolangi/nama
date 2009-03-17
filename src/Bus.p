@@ -37,6 +37,9 @@ sub apply {
 	$debug and print "bus name: ", $bus->name, $/;
 	$debug and print "groups: ", join " ", @{$bus->groups}, $/;
 	$debug and print "rules: ", join " ", @{$bus->rules}, $/;
+
+	# get track names corresponding to this bus
+	
 	my @track_names = (@{$bus->tracks}, 
 
 		map{ $debug and print "group name: $_\n";
