@@ -310,6 +310,7 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project_name\n";
+	doodle();
 }
 
     
@@ -321,6 +322,7 @@ sub t_create_project {
 		create => 1,
 	);
 	print "created project: $project_name\n";
+	doodle();
 
 }
 sub t_add_ctrl {

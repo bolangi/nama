@@ -18,9 +18,9 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	#doodle();
-	reconfigure_engine();
 	$ui->install_handlers();
+	doodle();
+	reconfigure_engine();
 	$ui->loop;
 }
 sub status_vars {
