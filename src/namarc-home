@@ -47,5 +47,5 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
-execute_on_project_load: doodle
+execute_on_load_project: doodle
 # end

@@ -411,6 +411,9 @@ Loading project "untitled".
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
 	#command_process($execute_on_load_project);
+	#error: Can't call method "start" on an undefined value at
+	#  ../lib/Audio/Ecasound/Multitrack.pm line 5659.
+
 	#reconfigure_engine();
 
  1;
@@ -3124,7 +3127,7 @@ sub get_ecasound_iam_keywords {
 	my %reserved = map{ $_,1 } qw(  forward
 									fw
 									getpos
-									h
+									h_
 									help
 									rewind
 									quit
