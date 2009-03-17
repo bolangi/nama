@@ -410,6 +410,8 @@ Loading project "untitled".
 	$debug and print "project_root: ", project_root(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
+	#command_process($execute_on_load_project);
+	#reconfigure_engine();
 
  1;
 
@@ -871,6 +873,10 @@ sub initialize_project_data {
 	%old_vol = ();
 
 	# $is_armed = 0;
+	
+	%excluded = ();
+	$old_snapshot = {};
+	$preview = $initial_user_mode;
 	
 	%bunch = ();	
 	
@@ -1388,6 +1394,7 @@ sub doodle {
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
+	exclude_duplicate_inputs();
 	if ( $tracker->rw ne 'REC'){
 		$old_group_rw = $tracker->rw;
 		command_process('group_rec') 
@@ -1401,13 +1408,14 @@ sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
 	# we don't want to disturb recording/mixing
-	return if really_recording();
+	return if really_recording() and engine_running();
 
 	# only act if change in configuration
 	
 	my $status_snapshot = status_snapshot();
 	
-	return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
+	#print ("no change in setup\n"),
+	 return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
 
 	# if engine is running, 
 	# we will start engine after reconfiguring
@@ -1422,18 +1430,9 @@ sub reconfigure_engine {
 	my %ss = %$status_snapshot;
 	delete $os{tracks};
 	delete $ss{tracks};
-	#print yaml_out( \%os );
-	#print yaml_out( \%ss );
-
 	#$old_pos = eval_iam('getpos') 
 	#		if  ! $preview eq 'doodle'
 	#	if yaml_out( \%os ) eq yaml_out ( \%ss );
-=comm
-				and $old_snapshot->{project} eq 
-					$status_snapshot->{project}
-				and $old_snapshot->{global_version} ==
-					$status_snapshot->{global_version};
-=cut
 	#print "oldpos: $old_pos\n";
 
 	stop_transport() if engine_running();
@@ -1445,6 +1444,7 @@ sub reconfigure_engine {
 
 	}
 	$old_snapshot = $status_snapshot;
+	start_transport() if $preview;
 	#$term->redisplay();
 }
 
@@ -1494,9 +1494,9 @@ sub exclude_duplicate_inputs {
 			 $already_used{$source}++
 		 } grep { $tn{$_}->rec_status eq 'REC' } @user;
 		if ( keys %excluded ){
-			print "Multiple tracks share same inputs.\n";
-			print "Excluding the following tracks: ", 
-				join(" ", keys %excluded), "\n";
+#			print "Multiple tracks share same inputs.\n";
+#			print "Excluding the following tracks: ", 
+#				join(" ", keys %excluded), "\n";
 			map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
 		}
 }
@@ -1590,6 +1590,7 @@ sub start_transport {
 	sleeper(0.5) unless really_recording();
 	$tn{Master}->unmute;
 	$ui->start_heartbeat();
+	print "engine is ", eval_iam("engine-status"), "\n\n"; 
 
 	sleep 1; # time for engine to stabilize
 }
@@ -3141,22 +3142,18 @@ sub get_ecasound_iam_keywords {
 }
 
 sub process_line {
-  $debug2 and print "&process_line\n";
-  my ($user_input) = @_;
-  $debug and print "user input: $user_input\n";
-
-  if (defined $user_input and $user_input !~ /^\s*$/)
-    {
-
-
-	#if $user_input =~ 
-#		/mixdown|mixplay|mixoff|add_track|rec|mon|off|source|send|stereo|mono/
-    $term->addhistory($user_input) 
-	 	unless $user_input eq $previous_text_command;
- 	$previous_text_command = $user_input;
-	command_process( $user_input );
-	reconfigure_engine();
-    }
+	$debug2 and print "&process_line\n";
+	my ($user_input) = @_;
+	$debug and print "user input: $user_input\n";
+	if (defined $user_input and $user_input !~ /^\s*$/) {
+		#if $user_input =~ 
+		#		/mixdown|mixplay|mixoff|add_track|rec|mon|off|source|send|stereo|mono/
+		$term->addhistory($user_input) 
+		unless $user_input eq $previous_text_command;
+		$previous_text_command = $user_input;
+		command_process( $user_input );
+		reconfigure_engine();
+	}
 }
 
 

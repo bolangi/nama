@@ -39,6 +39,7 @@ our (
 	$raw_to_disk_format,
 	$mix_to_disk_format,
 	$mixer_out_format,
+	$initial_user_mode, # preview, doodle, 0, undef
 	
 	$yw,			# yaml writer object
 	$yr,			# yaml reader object

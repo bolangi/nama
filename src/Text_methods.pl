@@ -68,9 +68,10 @@ sub install_handlers {
 						else { start_transport() }
 						print "engine is ", eval_iam("engine-status"), $/;
 						#&{$attribs->{kill_text}}();
- 						$attribs->{line_buffer} = q();
- 						$attribs->{point} 		= 0;
- 						$attribs->{end}   		= 0;
+						#$term->kill_text(1,2);
+  						$attribs->{line_buffer} = q();
+  						$attribs->{point} 		= 0;
+  						$attribs->{end}   		= 0;
 
 					}
  				},
@@ -308,7 +309,6 @@ sub t_load_project {
 		unless -d join_path project_root(), $newname; 
 	stop_transport();
 	load_project( name => $newname );
-	doodle();
 	print "loaded project: $project_name\n";
 }
 
