@@ -1338,7 +1338,7 @@ sub generate_setup { # create chain setup
 	
 	}
 		
-	my @tracks = ::Track::all;
+	my @tracks = ::Track::all();
 	shift @tracks; # drop Master
 
 	
@@ -2970,7 +2970,7 @@ sub retrieve_state {
 		}
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
-	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
+	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } ::Track::all()), $/;
