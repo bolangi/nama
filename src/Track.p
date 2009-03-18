@@ -13,7 +13,7 @@ use ::Wav;
 #memoize('rec_status');
 use Carp;
 use IO::All;
-use vars qw($n %by_name @by_index %track_names);
+use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
 $n = 0; 	# incrementing numeric key
 @by_index = ();	# return ref to Track by numeric key
@@ -127,6 +127,7 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index[$n] = $object;
 	$by_name{ $object->name } = $object;
+	push @all, $object;
 	::add_latency_compensation($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
@@ -391,7 +392,7 @@ sub pre_send {
 
 # The following subroutine is not an object method.
 
-sub all { @by_index[1..scalar @by_index - 1] }
+sub all { @all }
 
 
 ### Commands and their support functions
