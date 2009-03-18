@@ -882,14 +882,9 @@ sub initialize_project_data {
 	
 	%bunch = ();	
 	
-	$::Group::n = 0; 
-	@::Group::by_index = ();
-	%::Group::by_name = ();
+	::Group::initialize();
+	::Track::initialize();
 
-	$::Track::n = 0; 	# incrementing numeric key
-	%::Track::by_index = ();	# return ref to Track by numeric key
-	%::Track::by_name = ();	# return ref to Track by name
-	%::Track::track_names = (); 
 
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');

@@ -15,9 +15,8 @@ use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
-$n = 0; 	# incrementing numeric key
-%by_index = ();	# return ref to Track by numeric key
-%by_name = ();	# return ref to Track by name
+
+initialize();
 
 # attributes offset, loop, delay for entire setup
 # attribute  modifiers
@@ -63,6 +62,13 @@ use ::Object qw( 		name
 # ->old_volume_level is the level saved before muting
 # ->old_pan_level is the level saved before pan full right/left
 # commands
+
+sub initialize {
+	$n = 0; 	# incrementing numeric key
+	%by_index = ();	# return ref to Track by numeric key
+	%by_name = ();	# return ref to Track by name
+	%track_names = (); 
+}
 
 sub new {
 	# returns a reference to an object that is indexed by
@@ -771,15 +777,19 @@ our $VERSION = 1.0;
 use Carp;
 use vars qw(%by_name @by_index $n);
 our @ISA;
-$n = 0; 
-@by_index = ();
-%by_name = ();
+initialize();
 
 use ::Object qw( 	name
 					rw
 					version 
 					n	
 					);
+
+sub initialize {
+	$n = 0; 
+	@by_index = ();
+	%by_name = ();
+}
 
 sub new {
 
