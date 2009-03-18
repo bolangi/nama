@@ -106,9 +106,9 @@ package ::;
 # aliases for concise access
 
 *tn = \%::Track::by_name;
-*ti = \@::Track::by_index;
+*ti = \%::Track::by_index;
 
-# $ti[3]->rw
+# $ti{3}->rw
 
 # print remove_spaces("bulwinkle is a...");
 

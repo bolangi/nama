@@ -399,8 +399,7 @@ Loading project "untitled".
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	$opts{m} = 0; # enable 
 	
-	#print "Track_by_index: ", $#::Track::by_index, $/;
-	dig_ruins() unless $#::Track::by_index > 2;
+	dig_ruins() unless scalar @::Track::all > 2;
 
 	# possible null if Text mode
 	
@@ -888,7 +887,7 @@ sub initialize_project_data {
 	%::Group::by_name = ();
 
 	$::Track::n = 0; 	# incrementing numeric key
-	@::Track::by_index = ();	# return ref to Track by numeric key
+	%::Track::by_index = ();	# return ref to Track by numeric key
 	%::Track::by_name = ();	# return ref to Track by name
 	%::Track::track_names = (); 
 
@@ -2260,9 +2259,7 @@ sub find_op_offsets {
 sub apply_ops {  # in addition to operators in .ecs file
 	
 	$debug2 and print "&apply_ops\n";
-	my $last = scalar @::Track::by_index - 1;
-	$debug and print "looping over 1 to $last\n";
-	for my $n (1..$last) {
+	for my $n ( map{ $_->n } ::Track::all() ) {
 	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
  		next if $ti[$n]->rec_status eq "OFF" ;
 		#next if $n == 2; # no volume control for mix track
@@ -2842,7 +2839,7 @@ sub save_state {
 
 	# do nothing more if only Master and Mixdown
 	
-	if (scalar @::Track::by_index == 3 ){
+	if (scalar @::Track::all == 2 ){
 		print "No user tracks, skipping...\n";
 		return;
 	}
@@ -2937,7 +2934,7 @@ sub retrieve_state {
 			my %track = %{$t};
 		map{
 
-			$::Track::by_index[$t->{n}]->set($_ => $t->{$_})
+			$ti{$t->{n}}->set($_ => $t->{$_})
 			} keys %track;
 	} @tracks_data[0,1];
 
@@ -2981,7 +2978,7 @@ sub retrieve_state {
 	#print "\n---\n", map{$_->dump} ::Track::all;# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
-		(map{ ref $_, $/ } @::Track::by_index), $/;
+		(map{ ref $_, $/ } ::Track::all()), $/;
 
 
 
