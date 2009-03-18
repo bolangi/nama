@@ -1479,6 +1479,7 @@ sub enable_excluded_inputs {
 			$debug and print "Re-enabling the following tracks: @excluded\n";
 			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
 		}
+		%excluded = ();
 }
 sub exclude_duplicate_inputs {
 		my @user = $tracker->tracks; # track names
@@ -1855,7 +1856,7 @@ sub modify_effect {
 		$new_value);
 }
 
-sub remove_effect {
+sub remove_effect { # doesn't touch Track object
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;

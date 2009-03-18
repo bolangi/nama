@@ -322,7 +322,7 @@ sub maybe_monitor {
 }
 
 # the following methods handle effects
-sub remove_effect {
+sub remove_effect { # doesn't touch %cops or %copp data structures 
 	my $track = shift;
 	my @ids = @_;
 	$track->set(ops => [ grep { my $existing = $_; 
@@ -394,6 +394,15 @@ sub pre_send {
 	 
 	return q() if $track->send_select eq 'jack'  or ! $track->aux_output;           
 	route(2,$track->aux_output); # stereo signal
+}
+
+sub remove {
+	my $track = shift;
+#	$::ui->remove_track_gui($track->n); TODO
+	map{ ::remove_effect($_) } @{ $track->ops };
+	delete $by_index{$track->n};
+	delete $by_name{$track->name};
+	@all = grep{ $_->n != $track->n} @all;
 }
 
 # The following subroutine is not an object method.

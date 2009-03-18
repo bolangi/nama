@@ -56,7 +56,7 @@ set_track: _set_track key someval end {
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
 dump_group: _dump_group end { ::pager($::tracker->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
-#remove_track: _remove_track name end { $::tn{ $item{name} }->set(hide => 1); 1}
+remove_track: _remove_track end { $::this_track->remove; 1}
 # remove_track: _remove_track name end { 
 # 	my $track = $::tn{ $item{name} };
 # 	print("$item{name}: unknown track... skipping.\n"), return

@@ -254,11 +254,10 @@ autofix:
   type: track 
   what: fixdc and normalize selected versions of all MON tracks 
   parameters: none
-# remove_track:
-#   type: track
-#   what: Make track go away (non destructive)
-#   parameters: string
-#   example: remove_track sax
+remove_track:
+   type: track
+   what: remove effects, parameters and GUI for current track
+   parameters: none 
 group_rec:
   type: group
   short: grec R
