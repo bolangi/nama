@@ -104,8 +104,8 @@ show_track: _show_track name end {
 	$::tn{$item{name}} ) if $::tn{$item{name}};
 	1;}
 show_track: _show_track dd end {  
-	::Text::show_tracks( $::ti[$item{dd}] ) if
-	$::ti[$item{dd}];
+	::Text::show_tracks( $::ti{$item{dd}} ) if
+	$::ti{$item{dd}};
 	1;}
 	
 #show_setup: _show_setup end { 

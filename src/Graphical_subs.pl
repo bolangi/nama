@@ -485,7 +485,7 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$ti[-1]->group_last, " \n";
+		join ' ',1..$ti{-1}->group_last, " \n";
 
 			$version->radiobutton( 
 
@@ -499,14 +499,14 @@ sub global_version_buttons {
 					}
 			);
 
- 	for my $v (1..$ti[-1]->group_last) { 
+ 	for my $v (1..$ti{-1}->group_last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group
 	
 	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
 	
-		next unless grep{  grep{ $v == $_ } @{ $ti[$_]->versions } }
+		next unless grep{  grep{ $v == $_ } @{ $ti{$_}->versions } }
 			@user_track_indices;
 		
 
@@ -535,7 +535,7 @@ sub track_gui {
 				-foreground => 'red',
 				-command  => sub { 
 					return if eval_iam("engine-status") eq 'running';
-					$ti[$n]->set(rw => "REC");
+					$ti{$n}->set(rw => "REC");
 					
 					refresh_track($n);
 					refresh_group();
@@ -543,14 +543,14 @@ sub track_gui {
 			[ 'command' => "MON",
 				-command  => sub { 
 					return if eval_iam("engine-status") eq 'running';
-					$ti[$n]->set(rw => "MON");
+					$ti{$n}->set(rw => "MON");
 					refresh_track($n);
 					refresh_group();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 					return if eval_iam("engine-status") eq 'running';
-					$ti[$n]->set(rw => "OFF");
+					$ti{$n}->set(rw => "OFF");
 					refresh_track($n);
 					refresh_group();
 			}],
@@ -559,18 +559,18 @@ sub track_gui {
 	$number = $track_frame->Label(-text => $n,
 									-justify => 'left');
 	my $stub = " ";
-	$stub .= $ti[$n]->active;
+	$stub .= $ti{$n}->active;
 	$name = $track_frame->Label(
-			-text => $ti[$n]->name,
+			-text => $ti{$n}->name,
 			-justify => 'left');
 	$version = $track_frame->Menubutton( 
 					-text => $stub,
 					-tearoff => 0);
 	my @versions = '';
-	#push @versions, @{$ti[$n]->versions} if @{$ti[$n]->versions};
-	my $ref = ref $ti[$n]->versions ;
+	#push @versions, @{$ti{$n}->versions} if @{$ti{$n}->versions};
+	my $ref = ref $ti{$n}->versions ;
 		$ref =~ /ARRAY/ and 
-		push (@versions, @{$ti[$n]->versions}) or
+		push (@versions, @{$ti{$n}->versions}) or
 		croak "chain $n, found unexpectedly $ref\n";;
 	my $indicator;
 	for my $v (@versions) {
@@ -580,9 +580,9 @@ sub track_gui {
 						-variable => \$indicator,
 						-command => 
 		sub { 
-			$ti[$n]->set( active => $v );
-			return if $ti[$n]->rec_status eq "REC";
-			$version->configure( -text=> $ti[$n]->current_version ) 
+			$ti{$n}->set( active => $v );
+			return if $ti{$n}->rec_status eq "REC";
+			$version->configure( -text=> $ti{$n}->current_version ) 
 			}
 					);
 	}
@@ -600,8 +600,8 @@ sub track_gui {
 			-value => $v,
 			-command => sub { 
 				return if eval_iam("engine-status") eq 'running';
-			#	$ti[$n]->set(rw => 'REC');
-				$ti[$n]->set(ch_r  => $v);
+			#	$ti{$n}->set(rw => 'REC');
+				$ti{$n}->set(ch_r  => $v);
 				refresh_track($n) }
 			)
 	}
@@ -614,13 +614,13 @@ sub track_gui {
 						-value => $v,
 						-command => sub { 
 							return if eval_iam("engine-status") eq 'running';
-			#				$ti[$n]->set(rw  => "MON");
-							$ti[$n]->send($v);
+			#				$ti{$n}->set(rw  => "MON");
+							$ti{$n}->send($v);
 							refresh_track($n) }
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
-		-text => $ti[$n]->rw,
+		-text => $ti{$n}->rw,
 		-tearoff => 0,
 	);
 	map{$rw->AddItems($_)} @rw_items; 
@@ -629,7 +629,7 @@ sub track_gui {
 	# Volume
 
 	my $p_num = 0; # needed when using parameter controllers
-	my $vol_id = $ti[$n]->vol;
+	my $vol_id = $ti{$n}->vol;
 
 	local $debug = 0;
 
@@ -653,17 +653,17 @@ sub track_gui {
 	$mute = $track_frame->Button(
 		-command => sub { 
 			if ($copp{$vol_id}->[0]) {  # non-zero volume
-				$ti[$n]->set(old_vol_level => $copp{$vol_id}->[0]);
+				$ti{$n}->set(old_vol_level => $copp{$vol_id}->[0]);
 				$copp{$vol_id}->[0] = 0;
 				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
 				$mute->configure(-background => $namapalette{Mute});
 				$mute->configure(-activebackground => $namapalette{Mute});
 			}
 			else {
-				$copp{$vol_id}->[0] = $ti[$n]->old_vol_level;
+				$copp{$vol_id}->[0] = $ti{$n}->old_vol_level;
 				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
 					$old_vol{$n});
-				$ti[$n]->set(old_vol_level => 0);
+				$ti{$n}->set(old_vol_level => 0);
 				$mute->configure(-background => $old_bg);
 				$mute->configure(-activebackground => $old_abg);
 			}
@@ -682,7 +682,7 @@ sub track_gui {
 	  
 	# Pan
 	
-	my $pan_id = $ti[$n]->pan;
+	my $pan_id = $ti{$n}->pan;
 	
 	$debug and print "pan cop_id: $pan_id\n";
 	$p_num = 0;           # first parameter
@@ -727,7 +727,7 @@ sub track_gui {
 	$track_widget{$n}->{children} = $controllers_frame;
 	
 	$independent_effects_frame
-		->Label(-text => uc $ti[$n]->name )->pack(-side => 'left');
+		->Label(-text => uc $ti{$n}->name )->pack(-side => 'left');
 
 	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
@@ -760,7 +760,7 @@ sub paint_mute_buttons {
 			-background 		=> $namapalette{Mute},
 			-activebackground 	=> $namapalette{Mute},
 
-			)} grep { $ti[$_]->old_vol_level}# muted tracks
+			)} grep { $ti{$_}->old_vol_level}# muted tracks
 				map { $_->n } ::Track::all;  # track numbers
 }
 
@@ -801,7 +801,7 @@ sub update_version_button {
 						-value => $v,
 						-command => 
 		sub { $track_widget{$n}->{version}->configure(-text=>$v) 
-				unless $ti[$n]->rec_status eq "REC" }
+				unless $ti{$n}->rec_status eq "REC" }
 					);
 }
 

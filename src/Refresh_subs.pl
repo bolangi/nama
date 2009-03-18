@@ -59,7 +59,7 @@ sub refresh_track {
 	my $n = shift;
 	$debug2 and print "&refresh_track\n";
 	
-	my $rec_status = $ti[$n]->rec_status;
+	my $rec_status = $ti{$n}->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
 	#return unless $track_widget{$n}; # hidden track
@@ -69,10 +69,10 @@ sub refresh_track {
 	$track_widget{$n}->{rw}->configure(-text => $rec_status);
 	$track_widget{$n}->{ch_r}->configure( -text => 
 				$n > 2
-					? $ti[$n]->source
+					? $ti{$n}->source
 					:  q() );
-	$track_widget{$n}->{ch_m}->configure( -text => $ti[$n]->send);
-	$track_widget{$n}->{version}->configure(-text => $ti[$n]->current_version);
+	$track_widget{$n}->{ch_m}->configure( -text => $ti{$n}->send);
+	$track_widget{$n}->{version}->configure(-text => $ti{$n}->current_version);
 	
 	map{ set_widget_color( 	$track_widget{$n}->{$_}, 
 							$rec_status)
@@ -86,7 +86,7 @@ sub refresh_track {
 	set_widget_color( $track_widget{$n}->{ch_m},
 							$rec_status eq 'OFF' 
 								? 'OFF'
-								: $ti[$n]->send 
+								: $ti{$n}->send 
 									? 'MON'
 									: 'OFF');
 }

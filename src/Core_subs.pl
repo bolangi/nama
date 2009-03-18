@@ -1002,10 +1002,10 @@ sub add_volume_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => 'ea',
-				cop_id => $ti[$n]->vol, # often undefined
+				cop_id => $ti{$n}->vol, # often undefined
 				});
 	
-	$ti[$n]->set(vol => $vol_id);  # save the id for next time
+	$ti{$n}->set(vol => $vol_id);  # save the id for next time
 	$vol_id;
 }
 sub add_pan_control {
@@ -1014,10 +1014,10 @@ sub add_pan_control {
 	my $pan_id = cop_add({
 				chain => $n, 
 				type => 'epp',
-				cop_id => $ti[$n]->pan, # often undefined
+				cop_id => $ti{$n}->pan, # often undefined
 				});
 	
-	$ti[$n]->set(pan => $pan_id);  # save the id for next time
+	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
 sub add_latency_compensation {
@@ -1028,13 +1028,13 @@ Unable to provide latency compensation.
 	my $id = cop_add({
 				chain => $n, 
 				type => 'el:lcrDelay',
-				cop_id => $ti[$n]->latency, # may be undef
+				cop_id => $ti{$n}->latency, # may be undef
 				values => [ 0,0,0,50,0,0,0,0,0,50,1 ],
 				# We will be adjusting the 
 				# the third parameter, center delay (index  2)
 				});
 	
-	$ti[$n]->set(latency => $id);  # save the id for next time
+	$ti{$n}->set(latency => $id);  # save the id for next time
 	$id;
 }
 ## version functions
@@ -1157,7 +1157,7 @@ WARN
  			$debug and print "found chain id: $n\n";
 			$format = signal_format(
 						$devices{jack}->{signal_format},	
-						$ti[$n]->ch_count
+						$ti{$n}->ch_count
 			);
 		}
 		push  @input_chains, 
@@ -1176,7 +1176,7 @@ WARN
 		$debug and print "input chain: $chain\n";
 		push @input_chains, join ( " ",
 					"-a:".$chain_ids,
-			 		"-i:".  $::ti[$chain]->modifiers .  $full_path);
+			 		"-i:".  $ti{$chain}->modifiers .  $full_path);
  	}
 
 	### Setting loops as inputs 
@@ -1208,7 +1208,7 @@ WARN
 		my $n = $1;
 		$format = signal_format(
 			$devices{jack}->{signal_format},	
-			$ti[$n]->ch_count
+			$ti{$n}->ch_count
 			);
 		push  @output_chains, 
 		"-a:" . join(",",@chain_ids) 
@@ -1240,7 +1240,7 @@ WARN
  			$debug and print "found chain id: $n\n";
 			$format = signal_format(
 						$devices{jack}->{signal_format},	
-						$ti[$n]->ch_count
+						$ti{$n}->ch_count
 	 		);
 		}
 		push  @output_chains, 
@@ -1527,7 +1527,7 @@ sub adjust_latency {
 	map { my $adjustment = ($max - $latency{$_}) /
 			$cfg{abbreviations}{frequency} * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set( $_, $ti[$_]->latency, 2, $adjustment);
+			effect_update_copp_set( $_, $ti{$_}->latency, 2, $adjustment);
 			} keys %latency;
 }
 sub connect_transport {
@@ -1786,7 +1786,7 @@ sub rec_cleanup {
 			$debug and print "exists. ";
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				$debug and print "bigger than a breadbox.  \n";
-				$ti[$n]->set(active => undef); 
+				$ti{$n}->set(active => undef); 
 				$ui->update_version_button($n, $v);
 			$recorded++;
 			}
@@ -1827,16 +1827,16 @@ sub add_effect {
 	my $i = $effect_i{$code};
 	my $values = $p{values};
 
-	return if $id eq $ti[$n]->vol or
-	          $id eq $ti[$n]->pan;   # skip these effects 
+	return if $id eq $ti{$n}->vol or
+	          $id eq $ti{$n}->pan;   # skip these effects 
 			   								# already created in add_track
 
 	$id = cop_add(\%p); 
 	my %pp = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%pp);
-	#mute($ti[$n]);
+	#mute($ti{$n});
 	apply_op($id) if eval_iam("cs-is-valid");
-	#unmute($ti[$n]);
+	#unmute($ti{$n});
 	$id;
 
 }
@@ -1904,7 +1904,7 @@ sub remove_effect {
 	}
 	# remove id from track object
 
-	$ti[$n]->remove_effect( $id ); 
+	$ti{$n}->remove_effect( $id ); 
 	delete $cops{$id}; # remove entry from chain operator list
 	delete $copp{$id}; # remove entry from chain operator parameters list
 }
@@ -1928,23 +1928,23 @@ sub nama_effect_index { # returns nama chain operator index
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	$debug and print "id: $id n: $n \n";
-	$debug and print join $/,@{ $ti[$n]->ops }, $/;
-		for my $pos ( 0.. scalar @{ $ti[$n]->ops } - 1  ) {
-			return $pos if $ti[$n]->ops->[$pos] eq $id; 
+	$debug and print join $/,@{ $ti{$n}->ops }, $/;
+		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
+			return $pos if $ti{$n}->ops->[$pos] eq $id; 
 		};
 }
 sub ecasound_effect_index { 
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	my $opcount;  # one-based
-	$debug and print "id: $id n: $n \n",join $/,@{ $ti[$n]->ops }, $/;
-	for my $op (@{ $ti[$n]->ops }) { 
+	$debug and print "id: $id n: $n \n",join $/,@{ $ti{$n}->ops }, $/;
+	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
 			next if $cops{$op}->{belongs_to};
 			++$opcount;
 			last if $op eq $id
 	} 
-	$ti[$n]->offset + $opcount;
+	$ti{$n}->offset + $opcount;
 }
 
 
@@ -1971,7 +1971,7 @@ sub remove_op {
 		$debug and print "no parent, assuming chain operator\n";
 	
 		$index = ecasound_effect_index( $id );
-		$debug and print "ops list for chain $n: @{$ti[$n]->ops}\n";
+		$debug and print "ops list for chain $n: @{$ti{$n}->ops}\n";
 		$debug and print "operator id to remove: $id\n";
 		$debug and print "ready to remove from chain $n, operator id $id, index $index\n";
 		$debug and eval_iam("cs");
@@ -1996,7 +1996,7 @@ sub remove_op {
 		#print "cmd: $cmd$/";
 		eval_iam($cmd);
 		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
-		eval_iam("cop-select ". ($ti[$n]->offset + $index));
+		eval_iam("cop-select ". ($ti{$n}->offset + $index));
 		#print "selected operator: ", eval_iam("cop-selected"), $/;
 		eval_iam("cop-remove");
 		$debug and eval_iam("cs");
@@ -2091,13 +2091,13 @@ PP
 		
  		# find position of parent and insert child immediately afterwards
 
- 		my $end = scalar @{ $ti[$n]->ops } - 1 ; 
+ 		my $end = scalar @{ $ti{$n}->ops } - 1 ; 
  		for my $i (0..$end){
- 			splice ( @{$ti[$n]->ops}, $i+1, 0, $cop_id ), last
- 				if $ti[$n]->ops->[$i] eq $parent_id 
+ 			splice ( @{$ti{$n}->ops}, $i+1, 0, $cop_id ), last
+ 				if $ti{$n}->ops->[$i] eq $parent_id 
  		}
 	}
-	else { push @{$ti[$n]->ops }, $cop_id; } 
+	else { push @{$ti{$n}->ops }, $cop_id; } 
 
 	# set values if present
 	
@@ -2175,25 +2175,25 @@ sub effect_update {
 	# $param gets incremented, therefore is zero-based. 
 	# if I check i will find %copp is  zero-based
 
-	return if $ti[$chain]->rec_status eq "OFF"; 
-	return if $ti[$chain]->name eq 'Mixdown' and 
-			  $ti[$chain]->rec_status eq 'REC';
+	return if $ti{$chain}->rec_status eq "OFF"; 
+	return if $ti{$chain}->name eq 'Mixdown' and 
+			  $ti{$chain}->rec_status eq 'REC';
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
 	my $controller; 
-	for my $op (0..scalar @{ $ti[$chain]->ops } - 1) {
-		$ti[$chain]->ops->[$op] eq $id and $controller = $op;
+	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
+		$ti{$chain}->ops->[$op] eq $id and $controller = $op;
 	}
 	$param++; # so the value at $p[0] is applied to parameter 1
 	$controller++; # translates 0th to chain-operator 1
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $controller, offset: ",
-	$ti[$chain]->offset, " param: $param, value: $val$/";
+	$ti{$chain}->offset, " param: $param, value: $val$/";
 	eval_iam("c-select $chain");
-	eval_iam("cop-select ". ($ti[$chain]->offset + $controller));
+	eval_iam("cop-select ". ($ti{$chain}->offset + $controller));
 	eval_iam("copp-select $param");
 	eval_iam("copp-set $val");
 }
@@ -2252,7 +2252,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti[$chain_id]->set( offset => $quotes/2 - 1);  
+			$ti{$chain_id}->set( offset => $quotes/2 - 1);  
 
 		}
 }
@@ -2260,14 +2260,14 @@ sub apply_ops {  # in addition to operators in .ecs file
 	
 	$debug2 and print "&apply_ops\n";
 	for my $n ( map{ $_->n } ::Track::all() ) {
-	$debug and print "chain: $n, offset: ", $ti[$n]->offset, "\n";
- 		next if $ti[$n]->rec_status eq "OFF" ;
+	$debug and print "chain: $n, offset: ", $ti{$n}->offset, "\n";
+ 		next if $ti{$n}->rec_status eq "OFF" ;
 		#next if $n == 2; # no volume control for mix track
-		#next if ! defined $ti[$n]->offset; # for MIX
- 		#next if ! $ti[$n]->offset ;
+		#next if ! defined $ti{$n}->offset; # for MIX
+ 		#next if ! $ti{$n}->offset ;
 
 	# controllers will follow ops, so safe to apply all in order
-		for my $id ( @{ $ti[$n]->ops } ) {
+		for my $id ( @{ $ti{$n}->ops } ) {
 		apply_op($id);
 		}
 	}
@@ -2958,10 +2958,10 @@ sub retrieve_state {
 		$debug and print "restoring track: $n\n";
 		$ui->track_gui($n); 
 		
-		for my $id (@{$ti[$n]->ops}){
+		for my $id (@{$ti{$n}->ops}){
 			$did_apply++ 
-				unless $id eq $ti[$n]->vol
-					or $id eq $ti[$n]->pan;
+				unless $id eq $ti{$n}->vol
+					or $id eq $ti{$n}->pan;
 			
 			add_effect({
 						chain => $cops{$id}->{chain},
@@ -3180,9 +3180,9 @@ sub command_process {
 			@tracks = grep{$tn{$_}->rec_status eq 'OFF'} $tracker->tracks;
 		} elsif ($bunchy =~ /\s/  # multiple identifiers
 			or $tn{$bunchy} 
-			or $bunchy !~ /\D/ and $ti[$bunchy]){ 
+			or $bunchy !~ /\D/ and $ti{$bunchy}){ 
 			$debug and print "multiple tracks found\n";
-			@tracks = grep{ $tn{$_} or ! /\D/ and $ti[$_] }
+			@tracks = grep{ $tn{$_} or ! /\D/ and $ti{$_} }
 				split " ", $bunchy;
 			$debug and print "multitracks: @tracks\n";
 		} elsif ( @tracks = @{$bunch{$bunchy}}) {
@@ -3229,9 +3229,9 @@ sub command_process {
 				my $c = q(c-select ) . $this_track->n; 
 				eval_iam( $c ) if eval_iam( 'cs-connected' );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
-			} elsif ($cmd =~ /^\d+$/ and $ti[$cmd]) { 
-				$debug and print qq(Selecting track ), $ti[$cmd]->name, $/;
-				$this_track = $ti[$cmd];
+			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
+				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
+				$this_track = $ti{$cmd};
 				my $c = q(c-select ) . $this_track->n; eval_iam( $c );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){

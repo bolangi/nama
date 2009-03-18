@@ -368,7 +368,7 @@ sub t_insert_effect {
 	
 	# TODO mute if engine running
 	
-	my $track = $ti[$n];
+	my $track = $ti{$n};
 	$debug and print $track->name, $/;
 	#$debug and print join " ",@{$track->ops}, $/; 
 
@@ -458,7 +458,7 @@ sub bunch {
 		$bunch{$bunchname} 
 			and print "bunch $bunchname: @{$bunch{$bunchname}}\n" 
 			or  print "bunch $bunchname: does not exist.\n";
-	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti[$_]} @tracks){
+	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
 		print "@mispelled: mispelled track(s), skipping.\n";
 	} else {
 	$bunch{$bunchname} = [ @tracks ];
