@@ -14,13 +14,14 @@ sub get_versions {
 
 # support aliasing a track to another track, possibly in
 # another project
-
 	my $basename = $self->alias_to
 		? $self->alias_to
 		: $self->name;
+#	print "basename: $basename\n";
 	my $dir = $self->project 
-		? join_path($::project_root, $self->project, '.wav')
+		? join_path(project_root(), $self->project, '.wav')
 		: ::this_wav_dir();
+#	print "dir: $dir\n";
 	$debug and print "this_wav_dir: $dir\n";
 	$debug and print '$self->dir', $self->dir; # indirectly this_wav_dir
 	my ($sep, $ext) = qw( _ wav );
@@ -42,6 +43,7 @@ sub get_versions {
 sub candidates {
 	my $dir = shift;
 	$dir =  File::Spec::Link->resolve_all( $dir );
+	opendir WD, $dir or die "cannot open $dir: $!";
 	my @candidates = readdir WD;
 	closedir WD;
 	@candidates = grep{ ! (-s join_path($dir, $_) == 44 ) } @candidates;
