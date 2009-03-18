@@ -111,6 +111,11 @@ add_track:
   what: create one or more new tracks
   example: add_track sax violin tuba
   parameters: <s_name1> [ <s_name2>... ]
+alias_track:
+  type: track
+  what: create a read-only track that uses .WAV files from another track
+  parameters: <s_name> <s_alias_to> [ <s_project> ]
+  example: alias_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
 import:
   type: track
   what: import a .WAV file, resampling if necessary

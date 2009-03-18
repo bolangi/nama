@@ -10,11 +10,19 @@ use Carp;
 
 sub get_versions {
 #	$::debug2 and print "&get_versions\n";
-	my $wav = shift; # Expects a Track object here
-	my $basename = $wav->name;
-	my $dir = ::this_wav_dir();
+	my $self = shift; # Expects a Track object here
+
+# support aliasing a track to another track, possibly in
+# another project
+
+	my $basename = $self->alias_to
+		? $self->alias_to
+		: $self->name;
+	my $dir = $self->project 
+		? join_path($::project_root, $self->project, '.wav')
+		: ::this_wav_dir();
 	$debug and print "this_wav_dir: $dir\n";
-	$debug and print '$wav->dir', $wav->dir; # indirectly this_wav_dir
+	$debug and print '$self->dir', $self->dir; # indirectly this_wav_dir
 	my ($sep, $ext) = qw( _ wav );
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
 	my %versions = ();
@@ -34,8 +42,6 @@ sub get_versions {
 sub candidates {
 	my $dir = shift;
 	$dir =  File::Spec::Link->resolve_all( $dir );
-	$debug and print "reading directory: $dir\n\n";
-	opendir(WD,$dir) or carp ("can't read directory $dir: $!");
 	my @candidates = readdir WD;
 	closedir WD;
 	@candidates = grep{ ! (-s join_path($dir, $_) == 44 ) } @candidates;
@@ -45,14 +51,14 @@ sub candidates {
 
 sub targets {# takes a Wav object 
 	
-	my $wav = shift; 
- 	#my $name=  ref $wav ? $wav->name: $wav;
- 	my $name =  $wav->name;
-	my $dir = $wav->dir;
+	my $self = shift; 
+ 	#my $name=  ref $self ? $self->name: $self;
+ 	my $name =  $self->name;
+	#my $dir = $self->dir;
 #	$::debug2 and print "&targets\n";
 	
-	$debug and print "this_wav_dir: $dir, name: $name\n";
-		my %versions =  $wav->get_versions;
+	#$debug and print "this_wav_dir: $dir, name: $name\n";
+		my %versions =  $self->get_versions;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
@@ -61,11 +67,11 @@ sub targets {# takes a Wav object
 }
 sub versions {  
 #	$::debug2 and print "&versions\n";
-	my $wav = shift;
-	[ sort { $a <=> $b } keys %{ $wav->targets} ]  
+	my $self = shift;
+	[ sort { $a <=> $b } keys %{ $self->targets} ]  
 }
 
 sub last { 
-	my $wav = shift;
-	pop @{ $wav->versions} }
+	my $self = shift;
+	pop @{ $self->versions} }
 

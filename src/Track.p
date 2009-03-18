@@ -55,6 +55,9 @@ use ::Object qw( 		name
 						jack_send
 						source_select
 						send_select
+
+						project
+						alias_to
 						
 						);
 
