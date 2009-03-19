@@ -167,19 +167,16 @@ unmute: _unmute end { $::this_track->unmute; 1}
 solo: _solo end { ::solo(); 1}
 all: _all end { ::all() ; 1}
 
+
 unity: _unity end { 
-	$::copp{ $::this_track->vol }->[0] = 100;
-	::sync_effect_param( $::this_track->vol, 0);
+	::effect_update_copp_set( $::this_track->vol, 0, 100);
 	1;}
 
-pan: _pan dd end { $::copp{ $::this_track->pan }->[0] = $item{dd};
-	::sync_effect_param( $::this_track->pan, 0);
+pan: _pan dd end { 
+	::effect_update_copp_set( $::this_track->pan, 0, $item{dd});
 	1;} 
-pan: _pan '+' dd end { $::copp{ $::this_track->pan }->[0] += $item{dd} ;
-	::sync_effect_param( $::this_track->pan, 0);
-	1;} 
-pan: _pan '-' dd end { $::copp{ $::this_track->pan }->[0] -= $item{dd} ;
-	::sync_effect_param( $::this_track->pan, 0);
+pan: _pan sign dd end {
+	::modify_effect( $::this_track->pan, 0, $item{sign}, $item{dd} );
 	1;} 
 pan: _pan end { print $::copp{$::this_track->pan}[0], "\n"; 1}
 pan_right: _pan_right end   { ::pan_check( 100 ); 1}
@@ -287,7 +284,6 @@ before: op_id
 
 modify_effect: _modify_effect op_id parameter value end {
 	$item{parameter}--;
-	#::modify_effect @item{ qw( op_id parameter value) }; 1
 	::effect_update_copp_set( 
 		$item{op_id}, 
 		$item{parameter},
