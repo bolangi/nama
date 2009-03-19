@@ -43,10 +43,10 @@ use ::Object qw( 		name
 						n 
 						group 
 
+						playat
+						region_start	
+						region_end
 						
-						delay
-						start_position
-						length
 						looping
 
 						hide
