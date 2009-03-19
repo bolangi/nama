@@ -2141,14 +2141,6 @@ sub cop_init {
 	}
 }
 
-sub sync_effect_param {
-	my ($id, $param) = @_;
-
-	effect_update(  $id, 
-					$param, 
-					$copp{$id}[$param]	 );
-}
-
 sub effect_update_copp_set {
 
 	my ($id, $param, $val) = @_;
