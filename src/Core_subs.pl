@@ -915,28 +915,49 @@ sub add_track {
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	#return if transport_running();
-	my @names = @_;
-	for my $name (@names){
-		my $name = shift;
-		$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
-		my $track = ::Track->new(
-			name => $name,
-		);
-		$this_track = $track;
-		return if ! $track; 
-		$debug and print "ref new track: ", ref $track; 
-		$track->source($ch_r) if $ch_r;
+	my ($name, $track, $project) = @_;
+	my $target;
+	my @params;
+	if ($track){
+			if ( $project ){
+				my $dir =  join_path(project_root(), $project, '.wav'); 
+				if ( -d $dir ){
+					if ( glob "$dir/$track\_*.wav"){
+						print "Found target WAV files.\n";
+						@params = "
+					
+					}
+					else { print "No WAV files found.  Skipping.\n";
+						   return;
+					}
+				} else { 
+					print("$project: project does not exist.  Skipping.\n");
+					return;
+				}
+			} else {
+		
+				if 		( $tn{$track} ){ $target = $track }
+				elsif	( $ti{$track} ){ $target = $ti{$track}->name }
+				else { }
+			}
+	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	my $track = ::Track->new(
+		name => $name,
+	);
+	$this_track = $track;
+	return if ! $track; 
+	$debug and print "ref new track: ", ref $track; 
+	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-		my $group = $::Group::by_name{$track->group}; # $tracker, shurely
-		#command_process('for mon; mon') if $preview;
-		command_process('for mon; mon') if $preview and $group->rw eq 'MON';
-		$group->set(rw => 'REC');
-		$track_name = $ch_m = $ch_r = undef;
+	my $group = $::Group::by_name{$track->group}; # $tracker, shurely
+	#command_process('for mon; mon') if $preview;
+	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
+	$group->set(rw => 'REC');
+	$track_name = $ch_m = $ch_r = undef;
 
-		$ui->track_gui($track->n);
-		$debug and print "Added new track!\n", $track->dump;
-	}
+	$ui->track_gui($track->n);
+	$debug and print "Added new track!\n", $track->dump;
 }
 
 sub dig_ruins { 

@@ -57,14 +57,15 @@ dump_track: _dump_track end { ::pager($::this_track->dump); 1}
 dump_group: _dump_group end { ::pager($::tracker->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
 remove_track: _remove_track end { $::this_track->remove; 1}
-alias_track: _alias_track name alias_to project(?) {
+alias_track: _alias_track alias track project(?) {
 print 'ref ', ref $item{'project(?)'};
-# 	::add_track(name 	 => $item{name}, 
-#                 alias_to => $item{alias},
+# 	::alias_track(name 	 => $item{name}, 
+#                 alias_to => $item{track},
 # 				project  => $item{'project(?)'});
 }
+alias: name
+track: name
 project: name
-alias_to: name2
 # remove_track: _remove_track name end { 
 # 	my $track = $::tn{ $item{name} };
 # 	print("$item{name}: unknown track... skipping.\n"), return
