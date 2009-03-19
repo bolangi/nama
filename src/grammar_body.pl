@@ -189,7 +189,6 @@ pan_back:  _pan_back end {
 	my $old = $::this_track->old_pan_level;
 	if (defined $old){
 		::effect_update_copp_set(
-			$::this_track->n,	# chain
 			$::this_track->pan,	# id
 			0, 					# parameter
 			$old,				# value
@@ -290,7 +289,6 @@ modify_effect: _modify_effect op_id parameter value end {
 	$item{parameter}--;
 	#::modify_effect @item{ qw( op_id parameter value) }; 1
 	::effect_update_copp_set( 
-		$::cops{ $item{op_id} }->{chain}, 
 		$item{op_id}, 
 		$item{parameter},
 		$item{value});

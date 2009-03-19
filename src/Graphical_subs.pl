@@ -655,14 +655,13 @@ sub track_gui {
 			if ($copp{$vol_id}->[0]) {  # non-zero volume
 				$ti[$n]->set(old_vol_level => $copp{$vol_id}->[0]);
 				$copp{$vol_id}->[0] = 0;
-				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 0);
+				effect_update( $p{cop_id}, $p{p_num}, 0);
 				$mute->configure(-background => $namapalette{Mute});
 				$mute->configure(-activebackground => $namapalette{Mute});
 			}
 			else {
 				$copp{$vol_id}->[0] = $ti[$n]->old_vol_level;
-				effect_update($p{chain}, $p{cop_id}, $p{p_num}, 
-					$old_vol{$n});
+				effect_update($p{cop_id}, $p{p_num}, $old_vol{$n});
 				$ti[$n]->set(old_vol_level => 0);
 				$mute->configure(-background => $old_bg);
 				$mute->configure(-activebackground => $old_abg);
@@ -675,7 +674,7 @@ sub track_gui {
 	$unity = $track_frame->Button(
 	  		-command => sub { 
 				$copp{$vol_id}->[0] = 100;
-	 			effect_update($p{chain}, $p{cop_id}, $p{p_num}, 100);
+	 			effect_update($p{cop_id}, $p{p_num}, 100);
 			}
 	  );
 
@@ -700,7 +699,7 @@ sub track_gui {
 	$center = $track_frame->Button(
 	  	-command => sub { 
 			$copp{$pan_id}->[0] = 50;
-			effect_update($q{chain}, $q{cop_id}, $q{p_num}, 50);
+			effect_update($q{cop_id}, $q{p_num}, 50);
 		}
 	  );
 	
@@ -1017,7 +1016,7 @@ sub make_scale {
 							$effects[$i]->{params}->[$p]->{begin} ) / 100),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) }
+		  -command => sub { effect_update($id, $p, $copp{$id}->[$p]) }
 		  );
 
 		# auxiliary field for logarithmic display
@@ -1031,7 +1030,7 @@ sub make_scale {
 				);
 			$controller->configure(
 		  		-command => sub { 
-					effect_update($n, $id, $p, exp $copp{$id}->[$p]);
+					effect_update($id, $p, exp $copp{$id}->[$p]);
 					$log_display->configure(
 						-text => 
 						$effects[$i]->{params}->[$p]->{name} =~ /hz/i
@@ -1055,7 +1054,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$copp{$id}->[$p],
 			-width => 6,
-	#		-command => sub { effect_update($n, $id, $p, $copp{$id}->[$p]) },
+	#		-command => sub { effect_update($id, $p, $copp{$id}->[$p]) },
 			# doesn't work with Entry widget
 			);	
 

@@ -19,7 +19,7 @@ sub select_sleep {
 sub mainloop { 
 	prepare(); 
 	$ui->install_handlers();
-	doodle();
+	#doodle();
 	reconfigure_engine();
 	$ui->loop;
 }
@@ -1528,7 +1528,7 @@ sub adjust_latency {
 	map { my $adjustment = ($max - $latency{$_}) /
 			$cfg{abbreviations}{frequency} * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set( $_, $ti[$_]->latency, 2, $adjustment);
+			effect_update_copp_set($ti[$_]->latency, 2, $adjustment);
 			} keys %latency;
 }
 sub connect_transport {
@@ -1855,7 +1855,6 @@ sub modify_effect {
 		}
 	$debug and print "id $op_id p: $parameter, sign: $sign value: $value\n";
 	effect_update_copp_set( 
-		$cops{ $op_id }->{chain}, 
 		$op_id, 
 		$parameter, 
 		$new_value);
@@ -2145,15 +2144,14 @@ sub cop_init {
 sub sync_effect_param {
 	my ($id, $param) = @_;
 
-	effect_update( $cops{$id}{chain}, 
-					$id, 
+	effect_update(  $id, 
 					$param, 
 					$copp{$id}[$param]	 );
 }
 
 sub effect_update_copp_set {
 
-	my ($chain, $id, $param, $val) = @_;
+	my ($id, $param, $val) = @_;
 	effect_update( @_ );
 	$copp{$id}->[$param] = $val;
 }
@@ -2169,7 +2167,8 @@ sub effect_update {
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
 
-	my ($chain, $id, $param, $val) = @_;
+	my ($id, $param, $val) = @_;
+	my $chain = $cops{$id}{chain};
 
 	#print "chain $chain id $id param $param value $val\n";
 
@@ -2204,7 +2203,7 @@ sub fade {
 	# no fade without Timer::HiRes
 	# no fade unless engine is running
 	if ( ! engine_running() or ! $hires ){
-		effect_update_copp_set ( $cops{$id}->{chain}, $id, $param, $to );
+		effect_update_copp_set ( $id, $param, $to );
 		return;
 	}
 
@@ -2218,7 +2217,6 @@ sub fade {
 		sleeper( $wink );
 	}		
 	effect_update_copp_set( 
-		$cops{ $id }->{chain}, 
 		$id, 
 		$param, 
 		$to);
@@ -3423,7 +3421,6 @@ sub pan_check {
 	$this_track->set(old_pan_level => $current)
 		unless defined $this_track->old_pan_level;
 	effect_update_copp_set(
-		$this_track->n,		# chain
 		$this_track->pan,	# id
 		0, 					# parameter
 		$new_position,		# value
