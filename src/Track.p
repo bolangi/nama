@@ -185,7 +185,7 @@ sub current {	 # depends on ewf status
 		$filename
 	} else {
 		$debug and print "track ", $track->name, ": no current version\n" ;
-		undef;
+		undef; 
 	}
 }
 
