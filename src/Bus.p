@@ -107,7 +107,7 @@ sub apply {
 
 sub deref_code {
 	my ($value, $track) = @_;
-	my $type = ref $value ? ref $value : "scalar";
+	my $type = ref $value || "scalar";
 	my $tracktype = ref $track;
 	#print "found type: $type, value: $value\n";
 	#print "found type: $type, tracktype: $tracktype, value: $value\n";

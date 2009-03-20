@@ -127,7 +127,7 @@ sub prepare {
 	$debug2 and print "&prepare\n";
 	
 
-	$ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
+	$ecasound  = $ENV{ECASOUND} || q(ecasound);
 	$e = Audio::Ecasound->new();
 	#new_engine();
 	
@@ -2042,7 +2042,7 @@ sub root_parent {
 	my $parent = $cops{$id}->{belongs_to};
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
 	my $root_parent = $cops{$parent}->{belongs_to};
-	$parent = $root_parent ? $root_parent : $parent;
+	$parent = $root_parent || $parent;
 	$debug and print "$id: is a controller-controller, root parent: $parent\n";
 	$parent;
 }
@@ -2431,7 +2431,7 @@ sub prepare_static_effects_data{
 }
 sub new_plugins {
 	my $effects_cache = join_path(&project_root, $effects_cache_file);
-	my $path = $ENV{LADSPA_PATH} ? $ENV{LADSPA_PATH} : q(/usr/lib/ladspa);
+	my $path = $ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
 	
 	my @filenames;
 	for my $dir ( split ':', $path){
@@ -2757,7 +2757,7 @@ sub range {
 	$beg = 		srate_val( $beg );
 	$end = 		srate_val( $end );
 	$default = 	srate_val( $default );
-	$default = $default ? $default : $beg;
+	$default = $default || $beg;
 	$debug and print "beg: $beg, end: $end, default: $default\n";
 	if ( $name =~ /gain|amplitude/i ){
 		$beg = 0.01 unless $beg;
@@ -2857,7 +2857,7 @@ sub save_state {
 	
 	delete $cops{''};
 
-	$file = $file ? $file : $state_store_file;
+	$file = $file || $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	# print "filename base: $file\n";
 	print "\nSaving state as $file.yml\n";
@@ -2910,7 +2910,7 @@ sub assign_var {
 sub retrieve_state {
 	$debug2 and print "&retrieve_state\n";
 	my $file = shift;
-	$file = $file ? $file : $state_store_file;
+	$file = $file || $state_store_file;
 	$file = join_path(project_dir(), $file);
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
@@ -3105,7 +3105,7 @@ sub file_pager {
 		carp "file not found or not readable: $fname\n" ;
 		return;
     }
-	my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
+	my $pager = $ENV{PAGER} || "/usr/bin/less";
 	my $cmd = qq($pager $fname); 
 	system $cmd;
 }

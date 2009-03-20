@@ -165,7 +165,7 @@ sub group_last {
 	map{ 
 		my $track = $_;
 		my $last;
-		$last = $track->last ? $track->last : 0;
+		$last = $track->last || 0;
 		#print "track: ", $track->name, ", last: $last\n";
 
 		$max = $last if $last > $max;
