@@ -57,7 +57,7 @@ use ::Object qw( 		name
 						send_select
 
 						project
-						alias_to
+						target
 						
 						);
 

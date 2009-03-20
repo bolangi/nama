@@ -14,8 +14,8 @@ sub get_versions {
 
 # support aliasing a track to another track, possibly in
 # another project
-	my $basename = $self->alias_to
-		? $self->alias_to
+	my $basename = $self->target
+		? $self->target
 		: $self->name;
 #	print "basename: $basename\n";
 	my $dir = $self->project 
@@ -24,6 +24,11 @@ sub get_versions {
 #	print "dir: $dir\n";
 	$debug and print "this_wav_dir: $dir\n";
 	$debug and print '$self->dir', $self->dir; # indirectly this_wav_dir
+	find_versions($basename, $dir)
+}
+
+sub find_versions {
+	my ($basename, $dir) = @_;
 	my ($sep, $ext) = qw( _ wav );
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
 	my %versions = ();

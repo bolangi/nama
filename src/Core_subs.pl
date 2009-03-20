@@ -910,39 +910,40 @@ sub initialize_project_data {
 }
 ## track and wav file handling
 
+sub add_track_alias_project {
+	my ($name, $track, $project) = @_;
+	my $dir =  join_path(project_root(), $project, '.wav'); 
+	if ( -d $dir ){
+		if ( glob "$dir/$track\_*.wav"){
+			print "Found target WAV files.\n";
+			my @params = (target => $track, project => $project);
+			add_track( $name, @params );
+		} else { print "No WAV files found.  Skipping.\n"; return; }
+	} else { 
+		print("$project: project does not exist.  Skipping.\n");
+		return;
+	}
+}
+
+sub add_track_alias {
+	my ($name, $track) = @_;
+	my $target; 
+	if 		( $tn{$track} ){ $target = $track }
+	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
+	add_track(  $name, target => $target );
+}
+
+
 sub add_track {
 
 	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	#return if transport_running();
-	my ($name, $track, $project) = @_;
-	my $target;
-	my @params;
-	if ($track){
-			if ( $project ){
-				my $dir =  join_path(project_root(), $project, '.wav'); 
-				if ( -d $dir ){
-					if ( glob "$dir/$track\_*.wav"){
-						print "Found target WAV files.\n";
-						@params = "
-					
-					}
-					else { print "No WAV files found.  Skipping.\n";
-						   return;
-					}
-				} else { 
-					print("$project: project does not exist.  Skipping.\n");
-					return;
-				}
-			} else {
-		
-				if 		( $tn{$track} ){ $target = $track }
-				elsif	( $ti{$track} ){ $target = $ti{$track}->name }
-				else { }
-			}
+	my ($name, @params) = @_;
 	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	my $track = ::Track->new(
 		name => $name,
+		@params
 	);
 	$this_track = $track;
 	return if ! $track; 
