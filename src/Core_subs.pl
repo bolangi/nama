@@ -2851,7 +2851,7 @@ sub save_state {
 		return;
 	}
 
-	my $file = shift;
+	my $file = shift; # mysettings
 
 	# remove nulls in %cops 
 	
@@ -2859,8 +2859,9 @@ sub save_state {
 
 	$file = $file || $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
+	$file =~ /\.yml$/ or $file .= '.yml';	
 	# print "filename base: $file\n";
-	print "\nSaving state as $file.yml\n";
+	print "\nSaving state as $file\n";
 
 # prepare tracks for storage
 

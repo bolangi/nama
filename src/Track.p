@@ -87,7 +87,7 @@ sub new {
 	if ($by_name{$vals{name}}){
 	#print "test 2\n";
 			my $track = $by_name{$vals{name}};
-			# print $track->name, " hide: ", $track->hide, $/;
+			# print $track->}ame, " hide: ", $track->hide, $/;
 			if ($track->hide) {
 				$track->set(hide => 0);
 				return $track;
@@ -117,15 +117,9 @@ sub new {
 					pan 	=> undef,
 
 					modifiers => q(), # start, reverse, audioloop, playat
-
 					
-					delay	=> undef, # after how long we start playback
-					                  # the term 'offset' is used already
-					start_position => undef, # where we start playback from
-					length => undef, # how long we play back
 					looping => undef, # do we repeat our sound sample
 
-					hide     => undef, # for 'Remove Track' function
 					source_select => q(soundcard),
 					send_select => undef,
 
@@ -392,12 +386,19 @@ sub remove {
 	@all = grep{ $_->n != $track->n} @all;
 }
 
-# The following subroutine is not an object method.
+# The following two subroutines are not object methods.
 
 sub all { @all }
 
+sub user {
+	map{$_->name} grep{ $_->name ne 'Master' and $_->name ne 'Mixdown' } @all
+}
+	
 
 ### Commands and their support functions
+
+# Around 200 lines of conditional code to allow user to use 'source'
+# and 'send' commands in JACK and ALSA modes.
 
 sub source { # command for setting, showing track source
 	my ($track, $source) = @_;
@@ -823,6 +824,7 @@ sub tracks { # returns list of track names in group
 	# map {print "type: ", ref $_, $/} ::Track::all; 
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
+
 
 
 # all groups
