@@ -954,7 +954,13 @@ sub add_track {
 	my $group = $::Group::by_name{$track->group}; # $tracker, shurely
 	#command_process('for mon; mon') if $preview;
 	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
-	$group->set(rw => 'REC');
+	$group->set(rw => 'REC') unless $track->target; # not if is alias
+
+	# normal tracks default to 'REC'
+	# track aliases default to 'MON'
+	$track->set(rw => $track->target
+					?  'MON'
+					:  'REC') ;
 	$track_name = $ch_m = $ch_r = undef;
 
 	$ui->track_gui($track->n);

@@ -9,33 +9,13 @@ no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
-#	$::debug2 and print "&get_versions\n";
-	my $self = shift; # Expects a Track object here
-
-# support aliasing a track to another track, possibly in
-# another project
-
-# ::add_track_*() routines provide consistency checking
-
-	my $basename = $self->target || $self->name;
-#	print "basename: $basename\n";
-	my $dir = $self->project 
-		? join_path(project_root(), $self->project, '.wav')
-		: ::this_wav_dir();
-#	print "dir: $dir\n";
-	$debug and print "this_wav_dir: $dir\n";
-	$debug and print '$self->dir', $self->dir; # indirectly this_wav_dir
-	find_versions($basename, $dir)
-}
-
-sub find_versions {
-	my ($basename, $dir) = @_;
+	my $self = shift;
 	my ($sep, $ext) = qw( _ wav );
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
 	my %versions = ();
-	for my $candidate ( candidates($dir) ) {
+	for my $candidate ( candidates($self->dir) ) {
 		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
+		$candidate =~ m/^ ( $self->basename 
 		   ($sep (\d+))? 
 		   \.$ext )
 		   $/x or next;
@@ -70,6 +50,8 @@ sub targets {
 	$debug and print "\%versions\n================\n", yaml_out(\%versions);
 	\%versions;
 }
+
+	
 sub versions {  
 #	$::debug2 and print "&versions\n";
 	my $self = shift;

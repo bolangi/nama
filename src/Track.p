@@ -106,7 +106,7 @@ sub new {
 
 					name 	=> "Audio_$n", 
 					group	=> 'Tracker', 
-					rw   	=> 'REC', 
+		#			rw   	=> 'REC', # ::add_track() sets REC if necessary
 					n    	=> $n,
 					ops     => [],
 					active	=> undef,
@@ -147,7 +147,17 @@ sub new {
 }
 
 
-sub dir { ::this_wav_dir() } # replaces dir field
+sub dir {
+	my $self = shift;
+	 $self->project  
+		? join_path(::project_root(), $self->project, '.wav')
+		: ::this_wav_dir();
+}
+
+sub basename {
+	my $self = shift;
+	$self->target || $self->name
+}
 
 sub full_path { my $track = shift; join_path $track->dir , $track->current }
 
@@ -386,6 +396,7 @@ sub remove {
 	@all = grep{ $_->n != $track->n} @all;
 }
 
+
 # The following two subroutines are not object methods.
 
 sub all { @all }
@@ -604,6 +615,16 @@ sub send_status {
 
 sub set_rec {
 	my $track = shift;
+	if (my $t = $track->target){
+		my  $msg  = $track->name;
+			$msg .= qq( is an alias to track "$t");
+			$msg .=  q( in project ") . $track->project . q(") 
+				if $track->project;
+			$msg .= qq(.\n);
+			$msg .= "Can't set a track alias to REC.\n";
+		print $msg;
+		return;
+	}
 	$track->set(rw => 'REC');
 	$track->rec_status eq 'REC'	or print $track->name, 
 		": set to REC, but current status is ", $track->rec_status, "\n";
@@ -731,10 +752,10 @@ use ::Object qw( 		name
 						n 
 						group 
 
+						playat
+						region_start
+						region_end
 						
-						delay
-						start_position
-						length
 						looping
 
 						hide

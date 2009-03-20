@@ -62,7 +62,7 @@ remove_track: _remove_track end {
 	1;
 }
 alias_track: _alias_track name target project end {
-	::add_track_alias($item{name}, $item{target}, $item{project}); 1
+	::add_track_alias_project($item{name}, $item{target}, $item{project}); 1
 }
 alias_track: _alias_track name target end {
 	::add_track_alias($item{name}, $item{target}); 1
