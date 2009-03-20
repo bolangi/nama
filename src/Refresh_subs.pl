@@ -20,7 +20,8 @@ sub set_widget_color {
 
 
 	
-sub refresh_group { # tracker group 
+sub refresh_group { 
+	# tracker group, in this case we want to skip null group
 	$debug2 and print "&refresh_group\n";
 	
 	

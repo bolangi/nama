@@ -967,7 +967,7 @@ sub dig_ruins {
 	# only if there are no tracks , 
 	
 	$debug2 and print "&dig_ruins";
-	return if $tracker->tracks;
+	return if ::Track::user();
 	$debug and print "looking for WAV files\n";
 
 	# look for wave files
@@ -1503,7 +1503,7 @@ sub enable_excluded_inputs {
 		%excluded = ();
 }
 sub exclude_duplicate_inputs {
-		my @user = $tracker->tracks; # track names
+		my @user = ::Track::user(); # track names
 		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source;
@@ -3045,12 +3045,12 @@ sub solo {
 	print "none muted\n";
 		@already_muted = grep{ $_->old_vol_level} 
                          map{ $tn{$_} } 
-						 $tracker->tracks;
+						 ::Track::user();
 	print join " ", "muted", map{$_->name} @already_muted;
 	}
 
 	# mute all tracks
-	map { $this_track = $tn{$_}; $this_track->mute(1) } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->mute(1) } ::Track::user();
 
     $this_track = $current_track;
     $this_track->unmute(1);
@@ -3061,7 +3061,7 @@ sub all {
 	
 	my $current_track = $this_track;
 	# unmute all tracks
-	map { $this_track = $tn{$_}; $this_track->unmute(1) } $tracker->tracks;
+	map { $this_track = $tn{$_}; $this_track->unmute(1) } ::Track::user();
 
 	# re-mute previously muted tracks
 	if (@already_muted){
@@ -3171,16 +3171,16 @@ sub command_process {
 		my @tracks;
 		if ( lc $bunchy eq 'all' ){
 			$debug and print "special bunch: all\n";
-			@tracks = $tracker->tracks;
+			@tracks = ::Track::user();
 		} elsif ( lc $bunchy eq 'rec' ){
 			$debug and print "special bunch: rec\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'REC'} $tracker->tracks;
+			@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
 		} elsif ( lc $bunchy eq 'mon' ){
 			$debug and print "special bunch: mon\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'MON'} $tracker->tracks;
+			@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
 		} elsif ( lc $bunchy eq 'off' ){
 			$debug and print "special bunch: off\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'OFF'} $tracker->tracks;
+			@tracks = grep{$tn{$_}->rec_status eq 'OFF'} ::Track::user();
 		} elsif ($bunchy =~ /\s/  # multiple identifiers
 			or $tn{$bunchy} 
 			or $bunchy !~ /\D/ and $ti{$bunchy}){ 
