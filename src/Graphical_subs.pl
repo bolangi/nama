@@ -528,7 +528,7 @@ sub track_gui {
 	$debug2 and print "&track_gui\n";
 	@_ = discard_object(@_);
 	my $n = shift;
-	return if $ti[$n]->hide;
+	return if $ti{$n}->hide;
 	
 	$debug and print "found index: $n\n";
 	my @rw_items = @_ ? @_ : (
