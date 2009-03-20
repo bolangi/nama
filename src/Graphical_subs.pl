@@ -528,6 +528,7 @@ sub track_gui {
 	$debug2 and print "&track_gui\n";
 	@_ = discard_object(@_);
 	my $n = shift;
+	return if $ti[$n]->hide;
 	
 	$debug and print "found index: $n\n";
 	my @rw_items = @_ ? @_ : (
@@ -747,9 +748,23 @@ sub track_gui {
 	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
+
+	$track_widget_remove{$n} = [
+		$number, $name, $version, $rw, $ch_r, $ch_m, $vol,
+			$mute, $unity, $pan, $center, @add_effect, $effects ];
+
 	refresh_track($n);
 
 }
+
+sub remove_track_gui {
+	load_project( name => $project_name );
+# 	@_ = discard_object( @_ );
+# 	my $n = shift;
+# 	my $m;
+# 	map {print ++$m, ref $_, $/; (ref $_) =~ /Tk/ and $_->destroy  } @{ $track_widget_remove{$n} };
+}
+
 sub paint_mute_buttons {
 	map{ $track_widget{$_}{mute}->configure(
 			-background 		=> $namapalette{Mute},

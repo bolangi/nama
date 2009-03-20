@@ -195,13 +195,14 @@ sub global_version_buttons {}
 sub destroy_widgets {}
 sub destroy_marker {}
 sub restore_time_marks {}
-sub show_unit {};
-sub add_effect_gui {};
-sub remove_effect_gui {};
-sub marker {};
-sub initialize_palette {};
-sub save_palette {};
-sub paint_mute_buttons {};
+sub show_unit {}
+sub add_effect_gui {}
+sub remove_effect_gui {}
+sub marker {}
+sub initialize_palette {}
+sub save_palette {}
+sub paint_mute_buttons {}
+sub remove_track_gui {}
 
 package ::;
 
