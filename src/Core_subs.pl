@@ -1335,7 +1335,6 @@ sub load_ecs {
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
 sub new_engine { 
-	my $ecasound  = $ENV{ECASOUND} ? $ENV{ECASOUND} : q(ecasound);
 	#print "ecasound name: $ecasound\n";
 	system qq(killall $ecasound);
 	sleep 1;
@@ -3079,14 +3078,9 @@ sub all {
 sub show_chain_setup {
 	$debug2 and print "&show_chain_setup\n";
 	my $setup = join_path( project_dir(), $chain_setup_file);
-	if ( $use_pager ) {
-		my $pager = $ENV{PAGER} ? $ENV{PAGER} : "/usr/bin/less";
-		system qq($pager $setup);
-	} else {
-		my $chain_setup;
-		io( $setup ) > $chain_setup; 
-		print $chain_setup, $/;
-	}
+	my $chain_setup;
+	io( $setup ) > $chain_setup; 
+	pager( $chain_setup );
 }
 sub pager {
 	$debug2 and print "&pager\n";
