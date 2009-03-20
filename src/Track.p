@@ -671,7 +671,7 @@ sub mute {
 	if ( $::copp{$track->vol}[0]){   
 		$track->set(old_vol_level => $::copp{$track->vol}[0]);
 		if ( $nofade ){ 
-			effect_update_copp_set($track->n, $track->vol, 0, 0  );
+			effect_update_copp_set( $track->vol, 0, 0  );
 		} else { 
 			fadeout( $track->vol );
 		}
@@ -688,7 +688,7 @@ sub unmute {
 	return if ! $track->old_vol_level;
 
 	if ( $nofade ){ 
-		effect_update_copp_set($track->n, $track->vol, 0, $track->old_vol_level);
+		effect_update_copp_set($track->vol, 0, $track->old_vol_level);
 	} else { 
 		fadein( $track->vol, $track->old_vol_level);
 	}
