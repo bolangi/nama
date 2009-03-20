@@ -114,7 +114,7 @@ add_track:
 alias_track:
   type: track
   what: create a read-only track that uses .WAV files from another track
-  parameters: <s_name> <s_alias_to> [ <s_project> ]
+  parameters: <s_name> <s_target> [ <s_project> ]
   example: alias_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
 import:
   type: track
