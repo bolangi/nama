@@ -85,8 +85,9 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	# ::Text::show_tracks ( ::Track::all );
-	::Text::show_tracks( grep{ ! $_->hide } ::Track::all()  );
+	::Text::show_tracks ( ::Track::all );
+	use warnings; 
+	no warnings qw(uninitialized); 
 	print $/, "Group control", " " x 4, 
 	  sprintf("%2d", $::tracker->version), " " x 2, $::tracker->rw,$/, $/;
 	1;
