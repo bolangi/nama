@@ -14,6 +14,9 @@ sub get_versions {
 
 # support aliasing a track to another track, possibly in
 # another project
+
+# ::add_track_*() routines provide consistency checking
+
 	my $basename = $self->target || $self->name;
 #	print "basename: $basename\n";
 	my $dir = $self->project 
@@ -37,7 +40,7 @@ sub find_versions {
 		   \.$ext )
 		   $/x or next;
 		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 ? $3 : 'bare' } =  $1 ;
+		$versions{ $3 || 'bare' } =  $1 ;
 	}
 	$debug and print "get_version: " , ::yaml_out(\%versions);
 	%versions;
@@ -54,15 +57,12 @@ sub candidates {
 	@candidates;
 }
 
-sub targets {# takes a Wav object 
+sub targets {
 	
 	my $self = shift; 
- 	#my $name=  ref $self ? $self->name: $self;
- 	my $name =  $self->name;
-	#my $dir = $self->dir;
+
 #	$::debug2 and print "&targets\n";
 	
-	#$debug and print "this_wav_dir: $dir, name: $name\n";
 		my %versions =  $self->get_versions;
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
