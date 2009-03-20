@@ -179,29 +179,13 @@ sub current {	 # depends on ewf status
 	my $last = $track->current_version;
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
-		return $track->name . '_' . $last . '.wav'}
-	elsif ( $track->rec_status eq 'MON'){ 
-
-	# here comes the logic that enables .ewf support, 
-	# using conditional $track->delay or $track->length or $track->start_position ;
-	# to decide whether to rewrite file name from .wav to .ewf
-	
-		no warnings;
+		$track->name . '_' . $last . '.wav'
+	} elsif ( $track->rec_status eq 'MON'){ 
 		my $filename = $track->targets->{ $track->monitor_version } ;
-		use warnings;
-		return $filename  # setup directly refers to .wav file
-		  unless $track->delay or $track->length or $track->start_position ;
-
-		  # setup uses .ewf parameters, expects .ewf file to
-		  # be written
-
-		#filename in chain setup now point to .ewf file instead of .wav
-		
-		$filename =~ s/\.wav$/.ewf/;
-		return $filename;
+		$filename
 	} else {
 		$debug and print "track ", $track->name, ": no current version\n" ;
-		return undef;
+		undef;
 	}
 }
 
