@@ -659,8 +659,8 @@ sub track_gui {
 				$mute->configure(-activebackground => $namapalette{Mute});
 			}
 			else {
-				effect_update_copp_set($vol_id, 0,$ti[$n]->old_vol_level);
-				$ti[$n]->set(old_vol_level => 0);
+				effect_update_copp_set($vol_id, 0,$ti{$n}->old_vol_level);
+				$ti{$n}->set(old_vol_level => 0);
 				$mute->configure(-background => $old_bg);
 				$mute->configure(-activebackground => $old_abg);
 			}

@@ -14,9 +14,7 @@ sub get_versions {
 
 # support aliasing a track to another track, possibly in
 # another project
-	my $basename = $self->target
-		? $self->target
-		: $self->name;
+	my $basename = $self->target || $self->name;
 #	print "basename: $basename\n";
 	my $dir = $self->project 
 		? join_path(project_root(), $self->project, '.wav')

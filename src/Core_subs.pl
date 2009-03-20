@@ -1545,7 +1545,7 @@ sub adjust_latency {
 	map { my $adjustment = ($max - $latency{$_}) /
 			$cfg{abbreviations}{frequency} * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set($ti[$_]->latency, 2, $adjustment);
+			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
 			} keys %latency;
 }
 sub connect_transport {
