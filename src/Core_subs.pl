@@ -1503,7 +1503,7 @@ sub enable_excluded_inputs {
 		%excluded = ();
 }
 sub exclude_duplicate_inputs {
-		my @user = ::Track::user(); # track names
+		my @user = $tracker->tracks(); # track names
 		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source;
