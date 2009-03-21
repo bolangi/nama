@@ -726,8 +726,24 @@ sub ingest  {
 		system $cmd or print "error: $!\n";
 	} 
 }
-# subclass
 
+sub playat_output {
+	my $track = shift;
+	if ( $track->playat ){
+		"playat" , ::Mark::mark_time($track->playat)
+	}
+}
+
+sub select_output {
+	my $track = shift;
+	if ( $track->region_start and $track->region_end){
+		my $end = ::Mark::mark_time($track->region_end);
+		my $start = ::Mark::mark_time($track->region_start);
+		my $length = $end - $start;
+		"select", $start, $length
+	}
+}
+# subclass
 
 package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';

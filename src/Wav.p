@@ -11,11 +11,14 @@ use Carp;
 sub get_versions {
 	my $self = shift;
 	my ($sep, $ext) = qw( _ wav );
+	my ($dir, $basename) = ($self->dir, $self->basename);
+	print "dir: ", $self->dir(), $/;
+	print "basename: ", $self->basename(), $/;
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
 	my %versions = ();
-	for my $candidate ( candidates($self->dir) ) {
+	for my $candidate ( candidates($dir) ) {
 		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $self->basename 
+		$candidate =~ m/^ ( $basename 
 		   ($sep (\d+))? 
 		   \.$ext )
 		   $/x or next;

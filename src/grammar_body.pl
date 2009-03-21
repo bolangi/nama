@@ -11,6 +11,7 @@ dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w-+:]+/
 name3: /\S+/
+name4: /[\w-+:\.]+/
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
@@ -69,6 +70,12 @@ alias_track: _alias_track name target end {
 }
 target: name
 project: name
+region: _region beginning ending end { 
+	$this_track->set(region_start => $item{beginning};
+	$this_track->set(region_end => $item{end};
+}
+beginning: name4
+ending: name4
 generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
@@ -111,9 +118,6 @@ show_track: _show_track dd end {
 	::Text::show_tracks( $::ti{$item{dd}} ) if
 	$::ti{$item{dd}};
 	1;}
-	
-#show_setup: _show_setup end { 
-#		::io(::join_path(::project_dir(),  ) > $contents;
 
 group_rec: _group_rec end { ::Text::group_rec(); 1}
 group_mon: _group_mon end  { ::Text::group_mon(); 1}

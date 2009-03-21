@@ -237,6 +237,10 @@ show_track:
   type: track
   short: sh
   what: show current track status
+region:
+  type: track
+  what: get/set region endpoints
+  parameters: ( <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> ) ( <s_end_mark_name> | <i_end_mark_index> | <f_end_seconds> )
 modifiers:
   type: track
   short: mods mod 

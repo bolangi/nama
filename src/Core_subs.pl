@@ -1197,9 +1197,17 @@ WARN
 		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
 		my ($chain) = $chain_ids =~ m/(\d+)/;
 		$debug and print "input chain: $chain\n";
+			my @modifiers;
+			push @modifiers, $ti{$chain}->playat_output
+				if $ti{$chain}->playat_output;
+			push @modifiers, $ti{$chain}->select_output
+				if $ti{$chain}->select_output;
+			push @modifiers, split " ", $ti{$chain}->modifiers
+				if $ti{$chain}->modifiers;
+			push @modifiers, q() if @modifiers; # for trailing comma
 		push @input_chains, join ( " ",
-					"-a:".$chain_ids,
-			 		"-i:".  $ti{$chain}->modifiers .  $full_path);
+					"-a:$chain_ids",
+					"-i:".join(q[,],@modifiers).$full_path);
  	}
 
 	### Setting loops as inputs 
@@ -2930,6 +2938,9 @@ sub retrieve_state {
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
+	# OBSOLETE: I think with changes to Assign.pm this is no longer
+	# necessary
+	
 	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
 
 	#  set group parameters
@@ -3161,7 +3172,7 @@ sub process_line {
 		unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
 		command_process( $user_input );
-		reconfigure_engine();
+#		reconfigure_engine();
 	}
 }
 
