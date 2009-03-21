@@ -97,6 +97,7 @@ our (
 					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
+	%offset,        # used to calculate ecasound effect position
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index , pn:amp -> effect number
 	%effect_j,      # an index , amp -> effect number

@@ -1974,7 +1974,7 @@ sub ecasound_effect_index {
 			++$opcount;
 			last if $op eq $id
 	} 
-	$ti{$n}->offset + $opcount;
+	$offset{$n} + $opcount;
 }
 
 
@@ -2026,7 +2026,7 @@ sub remove_op {
 		#print "cmd: $cmd$/";
 		eval_iam($cmd);
 		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
-		eval_iam("cop-select ". ($ti{$n}->offset + $index));
+		eval_iam("cop-select ". ($offset{$n} + $index));
 		#print "selected operator: ", eval_iam("cop-selected"), $/;
 		eval_iam("cop-remove");
 		$debug and eval_iam("cs");
@@ -2213,9 +2213,9 @@ sub effect_update {
 	$controller++; # translates 0th to chain-operator 1
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $controller, offset: ",
-	$ti{$chain}->offset, " param: $param, value: $val$/";
+	$offset{$chain}, " param: $param, value: $val$/";
 	eval_iam("c-select $chain");
-	eval_iam("cop-select ". ($ti{$chain}->offset + $controller));
+	eval_iam("cop-select ". ($offset{$chain} + $controller));
 	eval_iam("copp-select $param");
 	eval_iam("copp-set $val");
 }
@@ -2273,7 +2273,7 @@ sub find_op_offsets {
 										# i.e. M1
 			my $quotes = $output =~ tr/"//;
 			$debug and print "offset: $quotes in $output\n"; 
-			$ti{$chain_id}->set( offset => $quotes/2 - 1);  
+			$offset{$chain_id} = $quotes/2 - 1;  
 
 		}
 }
@@ -2281,11 +2281,11 @@ sub apply_ops {  # in addition to operators in .ecs file
 	
 	$debug2 and print "&apply_ops\n";
 	for my $n ( map{ $_->n } ::Track::all() ) {
-	$debug and print "chain: $n, offset: ", $ti{$n}->offset, "\n";
+	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
  		next if $ti{$n}->rec_status eq "OFF" ;
 		#next if $n == 2; # no volume control for mix track
-		#next if ! defined $ti{$n}->offset; # for MIX
- 		#next if ! $ti{$n}->offset ;
+		#next if ! defined $offset{$n}; # for MIX
+ 		#next if ! $offset{$n} ;
 
 	# controllers will follow ops, so safe to apply all in order
 		for my $id ( @{ $ti{$n}->ops } ) {

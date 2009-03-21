@@ -71,8 +71,8 @@ alias_track: _alias_track name target end {
 target: name
 project: name
 region: _region beginning ending end { 
-	$this_track->set(region_start => $item{beginning};
-	$this_track->set(region_end => $item{end};
+	$::this_track->set(region_start => $item{beginning});
+	$::this_track->set(region_end => $item{ending});
 }
 beginning: name4
 ending: name4
