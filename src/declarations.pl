@@ -40,6 +40,9 @@ our (
 	$mix_to_disk_format,
 	$mixer_out_format,
 	$execute_on_load_project, # TODO
+	$use_group_numbering, # same version number for tracks recorded together
+    $mastering_effects, # apply on entering mastering mode
+
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
 	$yw,			# yaml writer object
@@ -339,8 +342,9 @@ our (
                     # (used with JACK only)
     $prompt,        # for text mode
 	$preview,       # am running engine with rec_file disabled
-	$use_group_numbering, # same version number for tracks recorded together
 	$unique_inputs_only,  # exclude tracks sharing same source
+
+
 	%excluded,      # tracks sharing source with other tracks,
 	                # after the first
 	$memoize,       # do I cache this_wav_dir?

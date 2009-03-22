@@ -105,6 +105,14 @@ automix:
   type: mix
   what: Normalize track vol levels, then mixdown
   parameters: none
+master_on:
+  type: mix
+  what: Enter master mode, applying effects in namarc field 'mastering_effects'
+  parameters: none
+master_off:
+  type: mix
+  what: Leave master mode, remove mastering effects
+  parameters: none
 add_track:
   type: track
   short: add new

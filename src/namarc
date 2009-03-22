@@ -76,4 +76,12 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
+# commands to execute each time a project is loaded
+
+execute_on_project_load: doodle; start
+
+# effects to apply to mixer output in mastering mode
+
+mastering_effects: ea 100; epp 50; 
+
 # end
