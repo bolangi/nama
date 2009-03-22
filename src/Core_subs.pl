@@ -18,8 +18,9 @@ sub select_sleep {
 
 sub mainloop { 
 	prepare(); 
-	$ui->install_handlers();
+	command_process($execute_on_project_load);
 	reconfigure_engine();
+	$ui->install_handlers();
 	$ui->loop;
 }
 sub status_vars {
@@ -408,11 +409,6 @@ Loading project "untitled".
 	$debug and print "project_root: ", project_root(), $/;
 	$debug and print "this_wav_dir: ", this_wav_dir(), $/;
 	$debug and print "project_dir: ", project_dir() , $/;
-	#command_process($execute_on_load_project);
-	#error: Can't call method "start" on an undefined value at
-	#  ../lib/Audio/Ecasound/Multitrack.pm line 5659.
-
-	#reconfigure_engine();
 
  1;
 
