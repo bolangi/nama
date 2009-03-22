@@ -39,7 +39,7 @@ our (
 	$raw_to_disk_format,
 	$mix_to_disk_format,
 	$mixer_out_format,
-	$execute_on_load_project, # TODO
+	$execute_on_project_load,
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
 	$yw,			# yaml writer object
