@@ -310,7 +310,9 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project_name\n";
-	doodle();
+	::command_process($::execute_on_project_load);
+		
+	
 }
 
     

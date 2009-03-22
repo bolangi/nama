@@ -3172,7 +3172,7 @@ sub process_line {
 		unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
 		command_process( $user_input );
-#		reconfigure_engine();
+		reconfigure_engine();
 	}
 }
 
