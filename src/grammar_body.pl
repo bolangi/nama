@@ -125,6 +125,10 @@ group_off: _group_off end { ::Text::group_off(); 1}
 mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
+automix: _automix { ::automix(); 1 }
+autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
+master_on: _master_on end { ::master_on(); 1 }
+master_off: _master_off end { ::master_off(); 1 }
 
 exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
 source: _source name { $::this_track->set_source( $item{name} ); 1 }
@@ -347,8 +351,6 @@ unmemoize: _unmemoize {
 	$::memoize = 0;
 	unmemoize('candidates'); 1
 }
-automix: _automix { ::automix(); 1 }
-autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
 import: _import path frequency end {
 	$::this_track->ingest( $item{path}, $item{frequency}); 1;
 }

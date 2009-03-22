@@ -19,7 +19,6 @@ sub select_sleep {
 sub mainloop { 
 	prepare(); 
 	$ui->install_handlers();
-	doodle();
 	reconfigure_engine();
 	$ui->loop;
 }
@@ -1865,9 +1864,12 @@ sub add_effect {
 	$id = cop_add(\%p); 
 	my %pp = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%pp);
-	#mute($ti{$n});
-	apply_op($id) if eval_iam("cs-is-valid");
-	#unmute($ti{$n});
+	if( eval_iam("cs-is-valid") ){
+		my $er = engine_running();
+		$ti{$n}->mute if $er;
+		apply_op($id);
+		$ti{$n}->unmute if $er;
+	}
 	$id;
 
 }
@@ -3434,6 +3436,30 @@ sub automix {
 	
 }
 
+sub master_on {
+	# apply effects from .namarc mastering_effects to Master
+	# track
+	#
+	# during mixdown, copy them over to Mixdown track
+	
+	print("Already in mastering mode\n"), return if @mastering_effect_ids;
+	my $old_track = $this_track;
+	$this_track = $tn{Master};
+	my @afx_args = split /\s*;\s*/, $mastering_effects;
+	map{ 	my ($code, @values) = split " ", $_; 
+			push @mastering_effect_ids, 
+			::Text::t_add_effect( $code, \@values) ;
+	}  @afx_args;
+	$this_track = $old_track;
+}
+
+sub master_off {
+	# remove mastering effects from Master track
+	map{ remove_effect($_) } @mastering_effect_ids;
+	# remove all effects from Mixdown track
+	map{ remove_effect($_) } @{ $tn{Mixdown}->ops }
+}
+		
 sub pan_check {
 	my $new_position = shift;
 	my $current = $copp{ $this_track->pan }->[0];

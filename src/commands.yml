@@ -107,11 +107,11 @@ automix:
   parameters: none
 master_on:
   type: mix
-  what: Enter master mode, applying effects in namarc field 'mastering_effects'
+  what: Enter mastering mode. Apply effects in namarc field 'mastering_effects'
   parameters: none
 master_off:
   type: mix
-  what: Leave master mode, remove mastering effects
+  what: Leave mastering mode, remove mastering effects
   parameters: none
 add_track:
   type: track

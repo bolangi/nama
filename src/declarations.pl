@@ -100,7 +100,12 @@ our (
 					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
-	%offset,        # used to calculate ecasound effect position
+
+# auxiliary track information - saving not required
+
+	%offset,        # index by chain, offset for user-visible effects 
+	@mastering_effect_ids,        # effect ids for mastering mode
+
 	@effects,		# static effects information (parameters, hints, etc.)
 	%effect_i,		# an index , pn:amp -> effect number
 	%effect_j,      # an index , amp -> effect number
