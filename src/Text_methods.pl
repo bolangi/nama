@@ -50,7 +50,6 @@ sub install_handlers {
 	$term = new Term::ReadLine("Ecasound/Nama");
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
-	$term->callback_handler_install($prompt, \&process_line);
 
 	# store output buffer in a scalar (for print)
 	my $outstream = $attribs->{'outstream'};
@@ -112,6 +111,7 @@ sub install_handlers {
 }
 sub loop {
 	package ::;
+	$term->callback_handler_install($prompt, \&process_line);
 	Event::loop();
 
 }

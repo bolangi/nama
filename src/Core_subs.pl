@@ -19,8 +19,8 @@ sub select_sleep {
 sub mainloop { 
 	prepare(); 
 	command_process($execute_on_project_load);
-	reconfigure_engine();
 	$ui->install_handlers();
+	reconfigure_engine();
 	$ui->loop;
 }
 sub status_vars {
