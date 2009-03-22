@@ -19,7 +19,7 @@
 						$capture_device	
 						$project_root 	
 						$use_group_numbering
-						$execute_on_load_project
+						$execute_on_project_load
 						$initial_user_mode
 						);
 

@@ -68,6 +68,7 @@ use ::Object qw( 		name
 
 sub initialize {
 	$n = 0; 	# incrementing numeric key
+	@all = ();
 	%by_index = ();	# return ref to Track by numeric key
 	%by_name = ();	# return ref to Track by name
 	%track_names = (); 
