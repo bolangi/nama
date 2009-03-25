@@ -74,18 +74,38 @@ region: _region beginning ending end {
 	$::this_track->set(region_start => $item{beginning});
 	$::this_track->set(region_end => $item{ending});
 }
-noregion: _noregion end {
+remove_region: _remove_region end {
 	$::this_track->set(region_start => undef );
 	$::this_track->set(region_end => undef );
+	print $::this_track->name, ": Region definition removed. Full track will play.\n";
 }
-playat: _playat start_position end {
-	$::this_track->set(playat => $item{start_position});
-	1;
+shift: _shift start_position end {
+	my $pos = $item{start_position};
+	if ( $pos =~ /^\d+\.\d+$/ ){
+		print $::this_track->name, ": Shifting start time to $pos seconds\n";
+		$::this_track->set(playat => $pos);
+		1;
+	}
+	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
+	elsif ( $::Mark::by_name{$pos} ){
+		my $time = ::Mark::mark_time( $pos );
+		print $::this_track->name, 
+			qq(: Shifting start time to mark "$pos", $time seconds\n);
+		$::this_track->set(playat => $time);
+		1;
+	} else { print 
+	"Shift value is neither decimal nor mark name. Skipping.\n";
+	0;
+	}
 }
-noplayat: _noplayat end {
+
+start_position: mark_name | float
+float: /\d+\.\d+/
+mark_name: name
+
+no_shift: _no_shift end {
 	$::this_track->set(playat => undef)
 }
-start_position: name4
 beginning: name4
 ending: name4
 generate: _generate end { ::generate_setup(); 1}
@@ -121,7 +141,7 @@ show_track: _show_track end {
 	::Text::show_versions();
 	::Text::show_modifiers();
 	print "Signal width: ", ::width($::this_track->ch_count), "\n";
-	::Text::show_regions();
+	::Text::show_region();
 	1;}
 show_track: _show_track name end { 
  	::Text::show_tracks( 

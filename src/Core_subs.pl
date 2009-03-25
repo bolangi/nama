@@ -3142,7 +3142,7 @@ sub get_ecasound_iam_keywords {
 	my %reserved = map{ $_,1 } qw(  forward
 									fw
 									getpos
-									h_
+									h
 									help
 									rewind
 									quit
@@ -3176,6 +3176,7 @@ sub process_line {
 
 
 sub command_process {
+	my $debug = 1;
 	my ($user_input) = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
