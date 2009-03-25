@@ -249,6 +249,18 @@ region:
   type: track
   what: get/set region endpoints
   parameters: ( <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> ) ( <s_end_mark_name> | <i_end_mark_index> | <f_end_seconds> )
+noregion:
+  type: track
+  what: cancel region playback
+  parameters: none
+playat:
+  type: track
+  what: set time until play begins for region (if defined) or track 
+  parameters: ( <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> ) 
+noplayat:
+  type: track
+  what: cancel playat value
+  parameters: none
 modifiers:
   type: track
   short: mods mod 

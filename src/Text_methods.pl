@@ -29,6 +29,14 @@ sub show_effects {
 sub show_modifiers {
 	print "Modifiers: ",$this_track->modifiers, $/;
 }
+sub show_region {
+	print "Start position: ",
+		$this_track->playat, $/ if $this_track->playat;
+	print "Region start: ", $this_track->region_start, $/
+		if $this_track->region_start;
+	print "Region end: ", $this_track->region_end, $/
+		if $this_track->region_end;
+}
 
 sub poll_jack {
 	package ::;

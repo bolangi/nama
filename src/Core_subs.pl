@@ -3439,6 +3439,9 @@ sub master_on {
 	# during mixdown, copy them over to Mixdown track
 	
 	print("Already in mastering mode\n"), return if @mastering_effect_ids;
+	print("No 'mastering_effects:' line found in .namarc.  Skipping...\n"), 
+		return unless $mastering_effects;
+	print("Adding mastering effects to Master track.\n");
 	my $old_track = $this_track;
 	$this_track = $tn{Master};
 	my @afx_args = split /\s*;\s*/, $mastering_effects;
@@ -3450,6 +3453,7 @@ sub master_on {
 }
 
 sub master_off {
+	print "Removing mastering effects\n";
 	# remove mastering effects from Master track
 	map{ remove_effect($_) } @mastering_effect_ids;
 	# remove all effects from Mixdown track

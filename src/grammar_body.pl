@@ -74,6 +74,18 @@ region: _region beginning ending end {
 	$::this_track->set(region_start => $item{beginning});
 	$::this_track->set(region_end => $item{ending});
 }
+noregion: _noregion end {
+	$::this_track->set(region_start => undef );
+	$::this_track->set(region_end => undef );
+}
+playat: _playat start_position end {
+	$::this_track->set(playat => $item{start_position});
+	1;
+}
+noplayat: _noplayat end {
+	$::this_track->set(playat => undef)
+}
+start_position: name4
 beginning: name4
 ending: name4
 generate: _generate end { ::generate_setup(); 1}
@@ -109,6 +121,7 @@ show_track: _show_track end {
 	::Text::show_versions();
 	::Text::show_modifiers();
 	print "Signal width: ", ::width($::this_track->ch_count), "\n";
+	::Text::show_regions();
 	1;}
 show_track: _show_track name end { 
  	::Text::show_tracks( 
