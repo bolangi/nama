@@ -20,7 +20,6 @@ use Data::YAML;
 use File::Find::Rule;
 use File::Spec;
 use File::Spec::Link;
-use File::Spec::Unix;
 use File::Temp;
 use File::Path;
 use IO::All;
