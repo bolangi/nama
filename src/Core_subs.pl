@@ -1391,7 +1391,7 @@ sub generate_setup { # create chain setup
 }
 sub arm {
 	exit_preview();
-	adjust_latency();
+	#adjust_latency();
 	if( generate_setup() ){ connect_transport() };
 }
 sub preview {

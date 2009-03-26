@@ -132,7 +132,7 @@ sub new {
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
 	push @all, $object;
-	::add_latency_compensation($n);	
+	#::add_latency_compensation($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
 
