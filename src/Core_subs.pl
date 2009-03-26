@@ -1669,7 +1669,7 @@ sub stop_transport {
 	$tn{Master}->mute if engine_running() and !really_recording();
 	eval_iam('stop');	
 	sleeper(0.5);
-	$debug and print "engine is ", eval_iam("engine-status"), $/;
+	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
 	$tn{Master}->unmute;
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
@@ -3176,8 +3176,7 @@ sub process_line {
 
 
 sub command_process {
-	my $debug = 1;
-	my ($user_input) = shift;
+	my $user_input = shift;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
 	my ($cmd, $predicate) = ($user_input =~ /([\S]+?)\b(.*)/);
