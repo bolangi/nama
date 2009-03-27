@@ -1443,6 +1443,12 @@ sub reconfigure_engine {
 	
 	#print ("no change in setup\n"),
 	 return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
+# 	my %os = %$old_snapshot;
+# 	my %ss = %$status_snapshot;
+# 	#delete $os{tracks};
+# 	#delete $ss{tracks};
+# 	print "old status:\n", yaml_out \%os;
+# 	print "new status:\n", yaml_out \%ss;
 
 	# if engine is running, 
 	# we will start engine after reconfiguring
@@ -1453,10 +1459,7 @@ sub reconfigure_engine {
 	
 	my $old_pos;
 	#print "preview: $preview\n";
-	my %os = $old_snapshot ? %$old_snapshot : ();
-	my %ss = %$status_snapshot;
-	delete $os{tracks};
-	delete $ss{tracks};
+
 	#$old_pos = eval_iam('getpos') 
 	#		if  ! $preview eq 'doodle'
 	#	if yaml_out( \%os ) eq yaml_out ( \%ss );

@@ -463,6 +463,11 @@ name_mark:
   what: Give a name to the current mark
   parameters: <s_mark_id>
   example: name_mark start
+modify_mark:
+  type: mark
+  short: move_mark mm
+  what: change the time setting of current mark
+  parameters: [ + | - ] <f_seconds>
 engine_status:
   type: diagnostics
   what: display Ecasound audio processing engine status

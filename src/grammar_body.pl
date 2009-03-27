@@ -291,8 +291,19 @@ to_mark: _to_mark name end {
 	$mark->jump_here if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
-#show_effects: _show_effects end {; 1}
-
+modify_mark: _modify_mark sign value end {
+	my $newtime = eval($::this_mark->time . $item{sign} . $item{value});
+	$::this_mark->set( time => $newtime );
+	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
+	::eval_iam("setpos $newtime");
+	1;
+	}
+modify_mark: _modify_mark value end {
+	$::this_mark->set( time => $item{value} );
+	print $::this_mark->name, ": set to ", ::d2( $item{value}), "\n";
+	::eval_iam("setpos $item{value}");
+	1;
+	}		
 remove_effect: _remove_effect op_id(s) end {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	$::tn{Master}->mute;
