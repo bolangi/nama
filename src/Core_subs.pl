@@ -3513,6 +3513,11 @@ sub status_snapshot {
 				current_version => $_->current_version,
 				send 			=> $_->send,
 				source 			=> $_->source,
+				shift			=> ::Mark::mark_time($_->playat),
+				region_start    => ::Mark::mark_time($_->region_start),
+				region_end    	=> ::Mark::mark_time($_->region_end),
+
+				
 			} unless $_->rec_status eq 'OFF'
 
 	} ::Track::all();

@@ -90,7 +90,7 @@ remove_region: _remove_region end {
 }
 shift: _shift start_position end {
 	my $pos = $item{start_position};
-	if ( $pos =~ /^\d+\.\d+$/ ){
+	if ( $pos =~ /\d+\.\d+/ ){
 		print $::this_track->name, ": Shifting start time to $pos seconds\n";
 		$::this_track->set(playat => $pos);
 		1;
@@ -109,7 +109,7 @@ shift: _shift start_position end {
 }
 
 start_position: mark_name | float
-float: /\d+\.\d+/
+float: /\d+.\d+/
 mark_name: name
 
 no_shift: _no_shift end {
