@@ -71,13 +71,22 @@ alias_track: _alias_track name target end {
 target: name
 project: name
 region: _region beginning ending end { 
-	$::this_track->set(region_start => $item{beginning});
-	$::this_track->set(region_end => $item{ending});
+	my ($beg, $end) = @item{ qw( beginning ending ) };
+	map{ 
+		print ("$_: mark does not exist. Skipping.\n"), return
+			if ! $::Mark::by_name{$_}
+	} $beg, $end;
+	$::this_track->set(region_start => $beg);
+	$::this_track->set(region_end => $end);
+	::Text::show_region();
+	1;
 }
+region: _region end { ::Text::show_region(); 1 }		
 remove_region: _remove_region end {
 	$::this_track->set(region_start => undef );
 	$::this_track->set(region_end => undef );
 	print $::this_track->name, ": Region definition removed. Full track will play.\n";
+	1;
 }
 shift: _shift start_position end {
 	my $pos = $item{start_position};

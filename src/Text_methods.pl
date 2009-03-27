@@ -30,7 +30,7 @@ sub show_modifiers {
 	print "Modifiers: ",$this_track->modifiers, $/;
 }
 sub show_region {
-	print "Start position: ",
+	print "Start delay: ",
 		$this_track->playat, $/ if $this_track->playat;
 	print "Region start: ", $this_track->region_start, $/
 		if $this_track->region_start;
