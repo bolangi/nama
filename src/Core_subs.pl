@@ -1392,7 +1392,9 @@ sub generate_setup { # create chain setup
 sub arm {
 	exit_preview();
 	#adjust_latency();
-	if( generate_setup() ){ connect_transport() };
+	reconfigure_engine()
+		or print "No change in setup. Engine ready.\n";
+	#if( generate_setup() ){ connect_transport() };
 }
 sub preview {
 
@@ -1435,14 +1437,14 @@ sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
 	# we don't want to disturb recording/mixing
-	return if really_recording() and engine_running();
+	return 1 if really_recording() and engine_running();
 
 	# only act if change in configuration
 	
 	my $status_snapshot = status_snapshot();
 	
 	#print ("no change in setup\n"),
-	 return if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
+	 return 0 if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
 # 	my %os = %$old_snapshot;
 # 	my %ss = %$status_snapshot;
 # 	#delete $os{tracks};
@@ -1476,6 +1478,7 @@ sub reconfigure_engine {
 	$old_snapshot = $status_snapshot;
 	start_transport() if $preview;
 	#$term->redisplay();
+	1;
 }
 
 		
