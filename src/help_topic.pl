@@ -206,6 +206,13 @@ prompt => <<PROMPT,
    Perl code                   eval 2*3     # no need for 'print'
 
 PROMPT
+
+diagnostics => <<DIAGNOSTICS,
+
+empty entry
+
+
+DIAGNOSTICS
     
 );
 # print values %help_topic;
