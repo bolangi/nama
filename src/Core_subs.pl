@@ -1997,7 +1997,7 @@ sub remove_op {
 	my $cmd = "c-select $n";
 	$debug and print "cmd: $cmd$/";
 	eval_iam($cmd);
-	print "selected chain: ", eval_iam("c-selected"), $/; 
+	#print "selected chain: ", eval_iam("c-selected"), $/; 
 
 	# deal separately with controllers and chain operators
 
@@ -3459,11 +3459,14 @@ sub master_on {
 }
 
 sub master_off {
+	print("Not in mastering mode.\n"), return unless
+		@mastering_effect_ids;
 	print "Removing mastering effects\n";
 	# remove mastering effects from Master track
 	map{ remove_effect($_) } @mastering_effect_ids;
 	# remove all effects from Mixdown track
-	map{ remove_effect($_) } @{ $tn{Mixdown}->ops }
+	map{ remove_effect($_) } @{ $tn{Mixdown}->ops };
+	@mastering_effect_ids = ();
 }
 		
 sub pan_check {

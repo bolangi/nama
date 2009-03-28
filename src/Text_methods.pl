@@ -463,12 +463,12 @@ sub copy_master_track_effects {
 
 	# eliminate Mixdown track effects (vol and pan)
 	
-	map{ remove_effect($_) } @{ $tn{Mixdown}->ops };
+	map{ ::remove_effect($_) } @{ $tn{Mixdown}->ops };
 
 	my $old_track = $this_track;
 	$this_track = $tn{Mixdown};
 	
-	map {	add_track( $cops{$_}->type, $copp{$_} );
+	map {	t_add_effect( $cops{$_}->{type}, $copp{$_} );
 	} @{ $tn{Master}->ops };
 	$this_track = $old_track;
 
