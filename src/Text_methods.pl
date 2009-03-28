@@ -222,7 +222,7 @@ IAM
 	my @output;
 	if ( $help_topic{$name}){
 		@output = helptopic($name);
-	} elsif ($name !~ /\D/ and $name == 10){
+	} elsif ($name !~ /\D/ and $name == 0){
 		@output = map{ helptopic $_ } @help_topic;
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)

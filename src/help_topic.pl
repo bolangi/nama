@@ -1,4 +1,4 @@
-@help_topic = ( undef, qw(   
+@help_topic = qw( all
                     project
                     track
                     chain_setup
@@ -8,8 +8,9 @@
                     group
                     mixdown
                     prompt 
+					diagnostics
 
-                ) ) ;
+                ) ;
 
 %help_topic = (
 
@@ -222,6 +223,7 @@ help yml                - browse the YAML command source (authoritative)
 
 help is available for the following topics:
 
+0  All
 1  Project
 2  Track
 3  Chain setup
@@ -231,5 +233,5 @@ help is available for the following topics:
 7  Group control
 8  Mixdown
 9  Command prompt 
-10 All
+10 Diagnostics
 HELP
