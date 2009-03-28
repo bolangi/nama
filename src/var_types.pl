@@ -21,6 +21,7 @@
 						$use_group_numbering
 						$execute_on_project_load
 						$initial_user_mode
+						$mastering_effects
 						);
 
 						
