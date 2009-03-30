@@ -270,6 +270,11 @@ sub rec_status {
 	my $track = shift;
 	my $monitor_version = $track->monitor_version;
 	my $source = $track->source;
+
+	# support doodle mode
+#	return 'REC' if $::preview eq 'doodle' and $source and
+#		grep { $track->name eq $_ } $::tracker->tracks;
+
 	my $group = $::Group::by_name{$track->group};
 	$debug and print "rec status track: ", $track->name, 
 		" group: $group, source: $source, monitor version: $monitor_version\n";

@@ -358,6 +358,7 @@ our (
 	$old_snapshot,  # previous status_snapshot() output
 					# to check if I need to reconfigure engine
 	$old_group_rw, # previous $tracker->rw setting
+	%old_rw,       # previous track rw settings (indexed by track name)
 
 
 );

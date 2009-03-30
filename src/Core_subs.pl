@@ -1363,8 +1363,8 @@ sub generate_setup { # create chain setup
 	# doodle mode
 	# exclude tracks sharing inputs with previous tracks
 	if ( $unique_inputs_only ){
-		enable_excluded_inputs();
-		exclude_duplicate_inputs();
+		#enable_excluded_inputs();
+		#exclude_duplicate_inputs();
 	
 	}
 		
@@ -1390,6 +1390,7 @@ sub generate_setup { # create chain setup
 	return 0};
 }
 sub arm {
+	$debug2 and print "&arm\n";
 	exit_preview();
 	#adjust_latency();
 	reconfigure_engine()
@@ -1397,6 +1398,7 @@ sub arm {
 	#if( generate_setup() ){ connect_transport() };
 }
 sub preview {
+	$debug2 and print "&preview\n";
 
 	# we need to do nothing if already in 'preview' mode
 	if ( $preview eq 'preview' ){ return }
@@ -1417,17 +1419,30 @@ sub preview {
 	# reconfigure_engine will generate setup and start transport
 }
 sub doodle {
+	$debug2 and print "&doodle\n";
 	return if engine_running() and really_recording();
 	$preview = "doodle";
 	$rec_file->set(status => 0);
 	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
+
+	# save rw setting of user tracks not including null group
+	# and set those tracks to REC
+	
+
+
+#	command_process('show');
+	# save user group rw setting
+	
+	$old_group_rw = $tracker->rw;
+	$tracker->set(rw => 'REC');
+	$mixdown->set(rw => 'OFF');
+	
+	# allow only unique inputs
+	
 	exclude_duplicate_inputs();
-	if ( $tracker->rw ne 'REC'){
-		$old_group_rw = $tracker->rw;
-		command_process('group_rec') 
-	}
+
 	# reconfigure_engine will generate setup and start transport
 	print "Setting doodle mode.\n";
 	print "Using live inputs only, with no duplicate inputs\n";
@@ -1484,6 +1499,7 @@ sub reconfigure_engine {
 		
 sub exit_preview { # exit preview and doodle modes
 
+		$debug2 and print "&exit_preview\n";
 		return unless $preview;
 		stop_transport() if engine_running();
 		$debug and print "Exiting preview/doodle mode\n";
@@ -1497,6 +1513,7 @@ sub exit_preview { # exit preview and doodle modes
 
 sub release_doodle_mode {
 
+		$debug2 and print "&release_doodle_mode\n";
 		# restore preview group REC/MON/OFF setting
 		$tracker->set(rw => $old_group_rw);		
 
@@ -1509,15 +1526,33 @@ sub release_doodle_mode {
 		$unique_inputs_only = 0;
 }
 sub enable_excluded_inputs {
+	$debug2 and print "&enable_excluded_inputs\n";
+	return unless %old_rw;
 
-		my @excluded = keys %excluded;
-		if ( @excluded ){
-			$debug and print "Re-enabling the following tracks: @excluded\n";
-			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
-		}
-		%excluded = ();
+	map { $tn{$_}->set(rw => $old_rw{$_}) } $tracker->tracks
+		if $tracker->tracks;
+
+	$tracker->set(rw => $old_group_rw);
+	%old_rw = ();
+
+
+# 		my @excluded = keys %excluded;
+# 		if ( @excluded ){
+# 			$debug and print "Re-enabling the following tracks: @excluded\n";
+# 			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
+# 		}
+# 		%excluded = ();
 }
 sub exclude_duplicate_inputs {
+	$debug2 and print "&exclude_duplicate_inputs\n";
+	print ("already excluded duplicate inputs\n"), return if %old_rw;
+	
+ 	if ( $tracker->tracks){
+ 		map { print "track $_ "; $old_rw{$_} = $tn{$_}->rw;
+ 		  $tn{$_}->set(rw => 'REC');
+ 			print "status: ", $tn{$_}->rw, $/ } $tracker->tracks;
+ 	}
+
 		my @user = $tracker->tracks(); # track names
 		%excluded = ();
 		my %already_used;
@@ -3175,7 +3210,9 @@ sub process_line {
 		$term->addhistory($user_input) 
 		unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
+		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
+		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
 	}
 }
