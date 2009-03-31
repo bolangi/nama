@@ -290,6 +290,16 @@ our (
 	$null_bus,
     $null, # group
 
+	# mastering buses
+	
+	# we will try to simplify buses... just rules
+	# tracks will be supplied to apply() method.
+	
+	$bypass_bus,
+	$stage1_bus,
+	$stage2_bus,
+	$stage3_bus,
+	
 	%ti, # track by index (alias %::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
 
@@ -359,6 +369,7 @@ our (
 					# to check if I need to reconfigure engine
 	$old_group_rw, # previous $tracker->rw setting
 	%old_rw,       # previous track rw settings (indexed by track name)
+	
 
 
 );

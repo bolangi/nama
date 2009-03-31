@@ -207,11 +207,41 @@ sub prepare {
 		groups => [qw(Mixdown) ],
 		rules  => [ qw(mon_setup mix_setup_mon  mix_file mix_ev) ],
 	);
+
+	# for metronome or other tracks using 'null' as source
+	
 	$null_bus = ::Bus->new(
 		name => 'Null_Bus',
 		groups => [qw(null) ],
 		rules => [qw(null_setup)],
 	);
+
+	# Mastering chains
+	
+	# for bypass directly to Master
+	
+	$bypass_bus = ::Bus->new( 
+		name => 'Bypass',
+		rules => [qw(bypass)]);
+
+	# for EQ track
+
+	$stage1_bus = ::Bus->new(
+		name => 'Stage1',
+		rules => ['stage1']);
+
+	# for Low/Med/High tracks
+	
+	$stage2_bus = ::Bus->new(
+		name => 'Stage2',
+		rules => ['stage2']);
+
+
+	# for Final track with boost, limiter
+	
+	$stage3_bus = ::Bus->new(
+		name => 'Stage3',
+		rules => ['stage3']);
 
 
 	prepare_static_effects_data() unless $opts{e};
