@@ -1189,20 +1189,45 @@ WARN
 	for my $full_path (keys %{ $inputs{file} } ) {
 		
 		$debug and print "monitor input file: $full_path\n";
-		my $chain_ids = join ",",@{ $inputs{file}->{$full_path} };
-		my ($chain) = $chain_ids =~ m/(\d+)/;
-		$debug and print "input chain: $chain\n";
-			my @modifiers;
-			push @modifiers, $ti{$chain}->playat_output
-				if $ti{$chain}->playat_output;
-			push @modifiers, $ti{$chain}->select_output
-				if $ti{$chain}->select_output;
-			push @modifiers, split " ", $ti{$chain}->modifiers
-				if $ti{$chain}->modifiers;
-			push @modifiers, q() if @modifiers; # for trailing comma
-		push @input_chains, join ( " ",
-					"-a:$chain_ids",
-					"-i:".join(q[,],@modifiers).$full_path);
+		my @chain_ids = @{ $inputs{file}->{$full_path} };
+
+		my @chain_ids_no_modifiers = ();
+
+		map {
+			my ($chain) = /(\d+)/;
+			my $track = $ti{$chain};
+			if ( $track->playat_output 
+					or $track->select_output
+					or $track->modifiers ){
+
+				#	single chain fragment
+
+				my @modifiers;
+				push @modifiers, $ti{$chain}->playat_output
+					if $ti{$chain}->playat_output;
+				push @modifiers, $ti{$chain}->select_output
+					if $ti{$chain}->select_output;
+				push @modifiers, split " ", $ti{$chain}->modifiers
+					if $ti{$chain}->modifiers;
+
+				push @input_chains, join ( " ",
+						"-a:$_",
+						"-i:".join(q[,],@modifiers,$full_path));
+			} 
+			else {
+
+				# multiple chain fragment
+				
+				push @chain_ids_no_modifiers, $_
+			}
+     	} @chain_ids;
+		if ( @chain_ids_no_modifiers ){ 
+
+			push @input_chains, join ( " ",
+						"-a:".join(q[,],@chain_ids_no_modifiers),
+						"-i:".$full_path);
+		} 
+
  	}
 
 	### Setting loops as inputs 
