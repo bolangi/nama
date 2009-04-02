@@ -8,7 +8,7 @@
                     group
                     mixdown
                     prompt 
-					diagnostics
+                    diagnostics
 
                 ) ;
 
@@ -25,10 +25,13 @@ HELP
 
 project => <<PROJECT,
    load_project, load        - load an existing project 
-   project_name, pn          - show the current project name
+   project_name, name          - show the current project name
    create_project, create    - create a new project directory tree 
+   list_projects, lp         - list all Nama projects
    get_state, recall, retrieve, restore  - retrieve saved settings
    save_state, keep, save    - save project settings to disk
+   memoize                   - enable WAV directory cache (default OFF)
+   unmemoize                 - disable WAV directory cache
    exit, quit                - exit program, saving state 
 PROJECT
 
@@ -36,7 +39,12 @@ chain_setup => <<SETUP,
    arm                       - generate and connect chain setup    
    show_setup, show          - show status, all tracks
    show_chain_setup, chains  - show Ecasound Setup.ecs file
+   generate, gen             - generate chainsetup for audio processing
+      (usually not necessary)
+   connect, con              - connect chainsetup (usually not necessary)
+   disconnect, dcon          - disconnect chainsetup (usually not necessary)
 SETUP
+
 track => <<TRACK,
    Most of the Track related commands operate on the 'current
    track'. To cut volume for a track called 'sax',  you enter
@@ -45,10 +53,19 @@ track => <<TRACK,
    current track by number,  i.e.  '4 mute'.
 
    add_track, add            -  create one or more new tracks
-                                example: add sax; r3 
+                                example: add sax; r 3 
                                     (record sax from input 3) 
                                 example: add piano; r synth
                                     (record piano from JACK client "synth") 
+
+   link_track, link          -  make a new track that uses audiofiles 
+                                from an existing track.
+                                example: link_track new_piano piano
+
+   import_audio, import      - import a WAV file, resampling if necessary
+
+   remove_track, rmt         - remove effects, parameters and GUI for current
+                                track
 
    show_tracks, show, tracks -  show status of all tracks
                                 and group settings
@@ -83,7 +100,9 @@ track => <<TRACK,
                              -  not needed for most setups
  - version 
 
-   set_version, version, ver, n  -  set current track version    
+   set_version, version, ver, n  -  set current track version
+
+   list_version, lver, lv        - list version numbers of current track
 
  - rw_status
 
@@ -116,69 +135,111 @@ track => <<TRACK,
 
  - signal processing
 
-   ecanormalize, normalize - run ecanormalize on current track version
+   ecanormalize, normalize 
+                       norm - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
+    autofix_track, autofix  - fixdc and normalize selected versions of all MON
+                              tracks
+
+ - cutting and time shifting
+
+   region                  - define endpoints of a track region for playback
+   remove_region, rmr      - remove region definition. Entire track plays back
+   shift_track, shift      - set playback delay for track/region
+   unshift_track, unshift  - eliminate playback delay for track/region
+
+ - hazardous commands for advanced/adventurous users
+
+   set_track, set          - directly set current track parameters
+
+   destroy_current_wav     - unlink current track's selected WAV version.
+                             Nama's only destructive command. USE WITH CARE!
 
 TRACK
 
 transport => <<TRANSPORT,
-   start, t           -  Start processing
-   stop, s            -  Stop processing
+   start, t, SPACE    -  Start processing. SPACE must be at beginning of 
+                         command line.
+   stop, s, SPACE     -  Stop processing. SPACE must be at beginning of 
+                         command line.
    rewind, rw         -  Rewind  some number of seconds, i.e. rw 15
    forward, fw        -  Forward some number of seconds, i.e. fw 75
    setpos, sp         -  Set the playback head position, i.e. setpos 49.2
    getpos, gp         -  Get the current head position 
+   to_start, beg      - set playback head to start
+   to_end, end        - set playback head to end
 
    loop_enable, loop  -  loop playback between two points
                          example: loop 5.0 200.0 (positions in seconds)
                          example: loop start end (mark names)
                          example: loop 3 4       (mark numbers)
-   loop_disable, 
-   noloop, nl         -  disable looping
+   loop_disable, noloop, nl
+                      -  disable looping
 
    preview            -  start engine with WAV recording disabled
-                         (for mic check, etc.) Release with
-                         stop/arm.
+                         (for mic check, etc.) Release with 'arm'.
 
-   doodle             -  start engine with live inputs only.
-                         Like preview but MON tracks are
-                         excluded, as are REC tracks with
-						 identical sources. Release with
-                         stop/arm.
+   doodle             -  start engine with all live inputs enabled.
+                         Release with 'preview' or 'arm'.
                          
+   ecasound_start, T  - ecasound-only start (not usually needed)
+
+   ecasound_stop, S   - ecasound-only stop (not usually needed)
+
+
 TRANSPORT
 
 marks => <<MARKS,
+   mark, k            - drop mark at current position, with optional name
    list_marks, lm     - list marks showing index, time, name
    next_mark, nm      - jump to next mark 
    previous_mark, pm  - jump to previous mark 
    name_mark, nom     - give a name to current mark 
    to_mark, tom       - jump to a mark by name or index
    remove_mark, rmm   - remove current mark
+   modify_mark,
+   move_mark, mm      - change the time setting of current mark
 MARKS
 
 effects => <<EFFECTS,
     
-   ladspa-register, lrg       - list LADSPA effects
-   preset-register, prg       - list Ecasound presets
-   ctrl-register, crg         - list Ecasound controllers 
+ - information commands
+
+   ladspa_register, lrg       - list LADSPA effects
+   preset_register, prg       - list Ecasound presets
+   ctrl_register, crg         - list Ecasound controllers 
+   find_effect, fe            - list available effects matching arguments
+                                example: find_effect reverb
+   help_effect, he            - full information about an effect 
+                                example: help_effect 1209 
+                                  (information about LADSPA plugin 1209)
+                                example: help_effect valve
+                                  (information about LADSPA plugin valve)
+
+ - effect manipulation commands
+
    add_effect,    fxa, afx    - add an effect to the current track
    insert_effect, ifx, fxi    - insert an effect before another effect
    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
    remove_effect, fxr, rfx    - remove an effect or controller
-   add_controller, acl        - add an Ecasound controller
+   append_effect              - add effect to the end of current track
+                                effect chain
+   add_controller, acl, cla   - add an Ecasound controller
 EFFECTS
 
 group => <<GROUP,
    group_rec, grec, R         - group REC mode 
    group_mon, gmon, M         - group MON mode 
-   group_off, goff, MM        - group OFF mode 
+   group_off, goff, Z         - group OFF mode 
    group_version, gver, gv    - select default group version 
                               - used for switching among 
                                 several multitrack recordings
    bunch, bn                  - name a group of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
+   list_bunches, lb           - list groups of tracks (bunches)
+   remove_bunches, rb         - remove bunch definitions
+
    for                        - execute command on several tracks 
                                 or a bunch
                                 example: for strings; vol +10
@@ -192,6 +253,10 @@ mixdown => <<MIXDOWN,
    mixdown, mxd                - enable mixdown 
    mixoff,  mxo                - disable mixdown 
    mixplay, mxp                - playback a recorded mix 
+   automix                     - normalize track vol levels, then mixdown
+   master_on, mr               - Enter mastering mode. Apply effects in namarc
+                                  field 'mastering_effects'
+   master_off, mro             - leave mastering mode, remove master effects
 MIXDOWN
 
 prompt => <<PROMPT,
@@ -209,9 +274,12 @@ PROMPT
 
 diagnostics => <<DIAGNOSTICS,
 
-empty entry
-
-
+   dump_all, dumpall, dumpa     - dump most internal state
+   dump_track, dumpt, dump      - dump current track data
+   dump_group, dumpgroup, dumpg - dump group settings for user tracks
+   show_io, showio              - show chain inputs and outputs
+   engine_status, egs           - display ecasound audio processing engine
+                                   status
 DIAGNOSTICS
     
 );

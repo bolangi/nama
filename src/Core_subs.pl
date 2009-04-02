@@ -222,26 +222,29 @@ sub prepare {
 	
 	$bypass_bus = ::Bus->new( 
 		name => 'Bypass',
-		rules => [qw(bypass)]);
+		rules => [qw(bypass)], # Similar to mix_link
+		tracks => ['Bypass']);
 
 	# for EQ track
 
 	$stage1_bus = ::Bus->new(
 		name => 'Stage1',
-		rules => ['stage1']);
+		rules => ['stage1'], # loopa to loop_crossover,120
+		tracks => ['Eq']);
 
 	# for Low/Med/High tracks
 	
 	$stage2_bus = ::Bus->new(
 		name => 'Stage2',
-		rules => ['stage2']);
-
+		rules => ['stage2'], # loop_crossoever,120 to loop_boost, 130
+		tracks => [qw(Low Med High)]);
 
 	# for Final track with boost, limiter
 	
 	$stage3_bus = ::Bus->new(
 		name => 'Stage3',
-		rules => ['stage3']);
+		rules => ['stage3'], #loop_boost,130 to loopb
+		tracks => [qw(Boost)]);
 
 
 	prepare_static_effects_data() unless $opts{e};
