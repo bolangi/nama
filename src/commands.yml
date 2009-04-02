@@ -325,6 +325,11 @@ list_bunches:
   short: lb
   what: list groups of tracks (bunches)
   parameters: none
+remove_bunches:
+  short: rb
+  type: group
+  what: remove alias for group(s) of tracks (bunches)
+  parameters: <s_bunch_name> [<s_bunch_name>...]
 save_state:
   type: project
   short: keep save
