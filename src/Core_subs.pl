@@ -497,6 +497,10 @@ sub initialize_rules {
 
 		status			=> 1,
 	);
+
+# the following rule is used by automix to normalize
+# the track levels.
+
 	$mix_down_ev = ::Rule->new(
 
 		name			=> 'mix_ev', 
@@ -682,19 +686,6 @@ sub initialize_rules {
 		},
 		status			=>  1,
 	);
-
-	# route cooked signals to multichannel device in the 
-	# case that monitor_channel is specified
-	#
-	# thus we could apply guitar effects for output
-	# to a PA mixing board
-	#
-	# seems ready... just need to turn on status!
-
-# the following two subs are utility functions for multi
-# assume $track->send returns nonzero, non null
-# applies to $track->send only
-
 
 	
 $aux_send = ::Rule->new(  
@@ -1436,6 +1427,13 @@ sub generate_setup { # create chain setup
 		$master_bus->apply; # mix_out, mix_link
 		$tracker_bus->apply;
 		$null_bus->apply;
+=comment
+$mixdown_bus->apply($tn{Mixdown});
+$master_bus->apply($tn{Master});
+$tracker_bus->apply($tracker->all());
+$null_bus->apply($null_group->all());
+=cut
+
 		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
