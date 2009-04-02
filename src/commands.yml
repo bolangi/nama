@@ -320,6 +320,11 @@ bunch:
   short: bn
   what: define/list groups of tracks
   parameters: [ <s_group_name> [track1] [track2...] ]
+list_bunches:
+  type: group
+  short: lb
+  what: list groups of tracks (bunches)
+  parameters: none
 save_state:
   type: project
   short: keep save

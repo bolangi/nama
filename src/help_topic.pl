@@ -237,6 +237,8 @@ group => <<GROUP,
    bunch, bn                  - name a group of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
+   list_bunches, lb           - list groups of tracks (bunches)
+
    for                        - execute command on several tracks 
                                 or a bunch
                                 example: for strings; vol +10
