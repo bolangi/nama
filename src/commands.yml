@@ -107,10 +107,12 @@ automix:
   parameters: none
 master_on:
   type: mix
+  short: mr
   what: Enter mastering mode. Apply effects in namarc field 'mastering_effects'
   parameters: none
 master_off:
   type: mix
+  short: mro
   what: Leave mastering mode, remove mastering effects
   parameters: none
 add_track:
@@ -119,13 +121,15 @@ add_track:
   what: create one or more new tracks
   example: add_track sax violin tuba
   parameters: <s_name1> [ <s_name2>... ]
-alias_track:
+link_track:
   type: track
+  short: link
   what: create a read-only track that uses .WAV files from another track
   parameters: <s_name> <s_target> [ <s_project> ]
   example: alias_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
-import:
+import_audio:
   type: track
+  short: import
   what: import a .WAV file, resampling if necessary
   parameters: <s_wav_file> [n_frequency]
 set_track:
@@ -251,14 +255,17 @@ region:
   parameters: start end (times in seconds with decimal, mark names, or mark indices)
 remove_region:
   type: track
+  short: rmr
   what: remove region definition. Entire track plays back. 
   parameters: none
-shift:
+shift_track:
   type: track
+  short: shift
   what: set playback delay for track/region
   parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> 
-no_shift:
+unshift_track:
   type: track
+  short: unshift
   what: cancel playback delay for track/region
   parameters: none
 modifiers:
@@ -279,12 +286,14 @@ fixdc:
   type: track
   what: apply ecafixdc to current track version
   short: ecafixdc
-autofix:
+autofix_track:
   type: track 
+  short: autofix
   what: fixdc and normalize selected versions of all MON tracks 
   parameters: none
 remove_track:
    type: track
+   short: rmt
    what: remove effects, parameters and GUI for current track
    parameters: none 
 group_rec:
@@ -323,7 +332,7 @@ get_state:
   parameters: [ <s_settings_file> ] 
 list_projects:
   type: project
-  short: listp
+  short: lp
   what: list projects
 create_project:
   type: project
@@ -338,7 +347,7 @@ load_project:
 project_name:
   type: project
   what: show current project name
-  short: project pn
+  short: project name
   parameters: none
 generate:
   type: setup
@@ -383,7 +392,7 @@ add_ctrl:
   type: effect
   what: add a controller to an operator
   parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
-  short: acl
+  short: acl cla
 add_effect:
   type: effect
   what: add effect to current track (placed before volume control)
@@ -476,12 +485,12 @@ engine_status:
 dump_track:
   type: diagnostics
   what: dump current track data
-  short: dump
+  short: dumpt dump
   parameters: none
 dump_group:
   type: diagnostics 
   what: dump group settings for user tracks 
-  short: dumpg
+  short: dumpgroup dumpg
   parameters: none
 dump_all:
   type: diagnostics

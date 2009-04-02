@@ -62,10 +62,10 @@ remove_track: _remove_track end {
 	#$::ui->remove_track_gui($track->n);
 	1;
 }
-alias_track: _alias_track name target project end {
+link_track: _link_track name target project end {
 	::add_track_alias_project($item{name}, $item{target}, $item{project}); 1
 }
-alias_track: _alias_track name target end {
+link_track: _link_track name target end {
 	::add_track_alias($item{name}, $item{target}); 1
 }
 target: name
@@ -88,7 +88,7 @@ remove_region: _remove_region end {
 	print $::this_track->name, ": Region definition removed. Full track will play.\n";
 	1;
 }
-shift: _shift start_position end {
+shift_track: _shift_track start_position end {
 	my $pos = $item{start_position};
 	if ( $pos =~ /\d+\.\d+/ ){
 		print $::this_track->name, ": Shifting start time to $pos seconds\n";
@@ -112,7 +112,7 @@ start_position: mark_name | float
 float: /\d+.\d+/
 mark_name: name
 
-no_shift: _no_shift end {
+unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
 }
 beginning: name4
@@ -168,7 +168,7 @@ mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
-autofix: _autofix { ::command_process("for mon; fixdc; normalize"); 1 }
+autofix_track: _autofix_track { ::command_process("for mon; fixdc; normalize"); 1 }
 master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
@@ -404,7 +404,7 @@ unmemoize: _unmemoize {
 	$::memoize = 0;
 	unmemoize('candidates'); 1
 }
-import: _import path frequency end {
+import_audio: _import_audio path frequency end {
 	$::this_track->ingest( $item{path}, $item{frequency}); 1;
 }
 import: _import path end {
