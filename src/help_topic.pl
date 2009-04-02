@@ -238,6 +238,7 @@ group => <<GROUP,
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
    list_bunches, lb           - list groups of tracks (bunches)
+   remove_bunches, rb         - remove bunch definitions
 
    for                        - execute command on several tracks 
                                 or a bunch
