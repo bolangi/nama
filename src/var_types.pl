@@ -55,6 +55,7 @@
 						@loop_endpoints
 						$length
 						%bunch
+						$mastering_mode
 						);
 					 
 # used for effects_cache 

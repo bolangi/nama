@@ -735,7 +735,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		status			=>  1,
 	);
 
-	$null_setup = Audio::Ecasound::Multitrack::Rule->new(
+	$null_setup = ::Rule->new(
 		
 		name			=>  'null_setup', 
 		target			=>  'all',
@@ -751,8 +751,43 @@ $aux_send_soundcard_jack = ::Rule->new(
 		condition 		=> 1,
 		status			=>  1,
 	);
-		
 
+# rules for mastering mode
+
+	$stage1 = ::Rule->new(
+		name			=>  'stage1', 
+		target			=>  'all',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
+		input_type		=>  'mixed',
+		input_object	=>  $loopa,
+		output_type		=>  'mixed',
+		output_object	=>  $loop_crossover,
+		condition 		=>  $mastering_mode,
+		status			=>  1,
+	);
+	$stage2 = ::Rule->new(
+		name			=>  'stage2', 
+		target			=>  'all',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
+		input_type		=>  'mixed',
+		input_object	=>  $loop_crossover,
+		output_type		=>  'mixed',
+		output_object	=>  $loop_boost,
+		condition 		=>  $mastering_mode,
+		status			=>  1,
+	);
+	$stage3 = ::Rule->new(
+		name			=>  'stage3', 
+		target			=>  'all',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
+		input_type		=>  'mixed',
+		input_object	=>  $loop_boost,
+		output_type		=>  'mixed',
+		output_object	=>  $loopb,
+		condition 		=>  $mastering_mode,
+		status			=>  1,
+	);
+	
 	$ui->preview_button;
 
 }

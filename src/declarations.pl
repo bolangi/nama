@@ -340,6 +340,16 @@ our (
 	$aux_send,
 	$aux_send_soundcard_jack,
 	$null_setup,
+	
+	# rules for mastering
+	
+	$stage1,
+	$stage2,
+	$stage3, 
+
+	# mastering mode status
+
+	$mastering_mode,
 
    # marks and playback looping
    
