@@ -64,10 +64,12 @@ $yr = Data::YAML::Reader->new;
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
-## The names of two helper loopback devices:
+## The names of helper loopback devices:
 
 $loopa = 'loop,111';
 $loopb = 'loop,222';
+$loop_crossover = 'loop,120';
+$loop_boost = 'loop,130';
 
 # other initializations
 $unit = 1;

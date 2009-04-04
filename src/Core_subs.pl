@@ -219,6 +219,10 @@ sub prepare {
 	# Mastering chains
 	
 	# for bypass directly to Master
+	#
+	# we may prefer to use ecasound mute/bypass commands
+	# on mastering chains instead of crossfading with this
+	# chain
 	
 	$bypass_bus = ::Bus->new( 
 		name => 'Bypass',
@@ -227,23 +231,23 @@ sub prepare {
 
 	# for EQ track
 
-	$stage1_bus = ::Bus->new(
+	$mastering_stage1_bus = ::Bus->new(
 		name => 'Stage1',
-		rules => ['stage1'], # loopa to loop_crossover,120
+		rules => ['stage1'], # loopa to loop_crossover
 		tracks => ['Eq']);
 
 	# for Low/Med/High tracks
 	
-	$stage2_bus = ::Bus->new(
+	$mastering_stage2_bus = ::Bus->new(
 		name => 'Stage2',
-		rules => ['stage2'], # loop_crossoever,120 to loop_boost, 130
+		rules => ['stage2'], # loop_crossover to loop_boost
 		tracks => [qw(Low Med High)]);
 
 	# for Final track with boost, limiter
 	
-	$stage3_bus = ::Bus->new(
+	$mastering_stage3_bus = ::Bus->new(
 		name => 'Stage3',
-		rules => ['stage3'], #loop_boost,130 to loopb
+		rules => ['stage3'], #loop_boost to loopb
 		tracks => [qw(Boost)]);
 
 

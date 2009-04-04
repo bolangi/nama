@@ -1,4 +1,4 @@
-
+# @global_vars is unused
 @global_vars = qw(
 						$effects_cache_file
 						$ladspa_sample_rate
@@ -8,6 +8,8 @@
 						$use_monitor_version_for_mixdown 
 						$unit								);
 						
+# variables found in namarc
+#
 @config_vars = qw(
 						%abbreviations
 						%devices
@@ -22,11 +24,20 @@
 						$execute_on_project_load
 						$initial_user_mode
 						$mastering_effects
+						$eq 
+						$low_pass
+						$mid_pass
+						$high_pass
+						$compressor
+						$spatialiser
+						$boost
+
 						);
 
 						
 						
-
+# used for saving to State.yml
+#
 @persistent_vars = qw(
 
 						%cops 			
@@ -46,6 +57,8 @@
 						%bunch
 						);
 					 
+# used for effects_cache 
+#
 @effects_static_vars = qw(
 
 						@effects		
@@ -63,6 +76,7 @@
 					
 
 
+# following is unused 
 @effects_dynamic_vars = qw(
 
 						%state_c_ops
@@ -74,6 +88,7 @@
 
 
 
+# unused, but referred to
 @status_vars = qw(
 
 						%state_c

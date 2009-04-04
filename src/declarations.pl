@@ -41,7 +41,16 @@ our (
 	$mixer_out_format,
 	$execute_on_project_load, # Nama text commands 
 	$use_group_numbering, # same version number for tracks recorded together
+
+	# .namarc mastering fields
     $mastering_effects, # apply on entering mastering mode
+	$eq, 
+	$low_pass,
+	$mid_pass,
+	$high_pass,
+	$compressor,
+	$spatialiser,
+	$boost,
 
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
@@ -239,6 +248,8 @@ our (
 
 	$loopa,  # loopback nodes 
 	$loopb,  
+	$loop_crossover,
+	$loop_boost,
 
 	@oids,	# output templates, are applied to the
 			# chains collected previously
@@ -296,9 +307,9 @@ our (
 	# tracks will be supplied to apply() method.
 	
 	$bypass_bus,
-	$stage1_bus,
-	$stage2_bus,
-	$stage3_bus,
+	$mastering_stage1_bus,
+	$mastering_stage2_bus,
+	$mastering_stage3_bus,
 	
 	%ti, # track by index (alias %::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)

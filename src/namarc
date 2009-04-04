@@ -84,4 +84,41 @@ execute_on_project_load: doodle; start
 
 mastering_effects: ea 100; epp 50; 
 
+eq: ea
+
+low_pass: lowpass_iir
+
+mid_pass: bandpass_iir
+
+high_pass: highpass_iir
+
+compressor: sc4
+
+spatialiser: matrixSpatialiser
+
+boost: ea tap_limiter ea
+
 # end
+
+JAMin signal path:
+1) input gain/balance connects to bypass.
+2) bypass connects to eq OR delay
+3) eq connects to crossover
+4a) crossover low connects to compressor 1
+4b) crossover mid connects to compressor 2
+4c) crossover high connects to compressor 3
+5) each of the 3 compressors connects to its own stereo width/balance unit
+6) all of the width/balance units connect to the boost unit
+7) boost unit connects to the limiter
+8) limiter connects to the master volume
+9) master volume connects to output
+10) delay (up at bypass above) connects to output
+
+Ecasound chainsetup reflecting this signal path:
+-a:1 -i in.wav -ea:vol -epp:balance -eli:1970,eq -o loop,eq_out
+-a:2,3,4 -i loop,eq_out
+-a:2 (-eli:1892,bandp | -eli:1891,lowp -eli:1890,hp) -eli:1882,compressor -eli:1422,matrix_spatialiser
+-a:3 (see above for mid)
+-a:4 (see above for high)
+-a:2,3,4 -o loop,crossover
+-a:5 -i loop,crossover -ea:boost -eli:2145,tap_limiter -ea:master_vol -o out.wav
