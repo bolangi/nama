@@ -236,12 +236,12 @@ sub prepare {
 		rules => ['stage1'], # loopa to loop_crossover
 		tracks => ['Eq']);
 
-	# for Low/Med/High tracks
+	# for Low/Mid/High tracks
 	
 	$mastering_stage2_bus = ::Bus->new(
 		name => 'Stage2',
 		rules => ['stage2'], # loop_crossover to loop_boost
-		tracks => [qw(Low Med High)]);
+		tracks => [qw(Low Mid High)]);
 
 	# for Final track with boost, limiter
 	
@@ -3571,6 +3571,92 @@ sub automix {
 }
 
 sub master_on {
+
+	return if $mastering_mode;
+	
+	# set $mastering_mode	
+	
+	$mastering_mode++;
+
+	# create mastering tracks if needed
+	
+	# (no group membership needed)
+
+	if ( ! $tn{Eq} ){  
+	
+		my $old_track = $this_track;
+		add_mastering_tracks();
+		add_mastering_effects();
+		$this_track = $old_track;
+	}
+}
+
+sub add_mastering_tracks {
+
+	my @names = qw(Eq Low Mid High Boost);
+
+	map{ ::SimpleTrack->new(
+			name => $_,
+			rw => 'MON',
+	) } @names;
+
+
+	# remove spurious volume/pan controls
+	
+	# most need neither
+	
+	my @no_vol_or_pan = qw(Eq Low Mid High);
+	map{ 
+		remove_effect($tn{$_}->vol);
+		$tn{$_}->set(vol => undef);
+		remove_effect($tn{$_}->pan);
+		$tn{$_}->set(pan => undef);
+	} @no_vol_or_pan;
+
+	# Boost track keeps vol control (and will get one more)
+	
+	remove_effect( $tn{Boost}->pan );
+	$tn{Boost}->set(pan => undef);
+
+}
+
+sub add_mastering_effects {
+	
+
+	# Eq
+	
+	$this_track = $tn{Eq};
+
+	::Text::t_add_effect( split " ", $eq );
+
+	$this_track = $tn{Low};
+
+	::Text::t_add_effect( split " ", $low_pass);
+	::Text::t_add_effect( split " ", $compressor);
+	::Text::t_add_effect( split " ", $spatialiser);
+
+	$this_track = $tn{Mid};
+
+	::Text::t_add_effect( split " ", $mid_pass);
+	::Text::t_add_effect( split " ", $compressor);
+	::Text::t_add_effect( split " ", $spatialiser);
+
+	$this_track = $tn{High};
+
+	::Text::t_add_effect( split " ", $high_pass);
+	::Text::t_add_effect( split " ", $compressor);
+	::Text::t_add_effect( split " ", $spatialiser);
+
+
+	$this_track = $tn{Boost};
+	
+#	::Text::t_insert_effect( $tn{Boost}->vol, 'ea' );
+	::Text::t_insert_effect( $tn{Boost}->vol, split " ", $limiter );
+ 
+}
+	
+
+=comment
 	# apply effects from .namarc mastering_effects to Master
 	# track
 	#
@@ -3588,9 +3674,12 @@ sub master_on {
 			::Text::t_add_effect( $code, \@values) ;
 	}  @afx_args;
 	$this_track = $old_track;
-}
+=cut
 
 sub master_off {
+	$mastering_mode = 0;
+}
+=comment
 	print("Not in mastering mode.\n"), return unless
 		@mastering_effect_ids;
 	print "Removing mastering effects\n";
@@ -3599,7 +3688,7 @@ sub master_off {
 	# remove all effects from Mixdown track
 	map{ remove_effect($_) } @{ $tn{Mixdown}->ops };
 	@mastering_effect_ids = ();
-}
+=cut
 		
 sub pan_check {
 	my $new_position = shift;

@@ -30,7 +30,7 @@
 						$high_pass
 						$compressor
 						$spatialiser
-						$boost
+						$limiter
 
 						);
 

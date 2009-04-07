@@ -96,7 +96,7 @@ compressor: sc4
 
 spatialiser: matrixSpatialiser
 
-boost: ea tap_limiter ea
+limiter: tap_limiter
 
 # end
 

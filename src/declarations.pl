@@ -50,7 +50,7 @@ our (
 	$high_pass,
 	$compressor,
 	$spatialiser,
-	$boost,
+	$limiter,
 
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
