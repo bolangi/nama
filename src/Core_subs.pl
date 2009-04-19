@@ -3631,24 +3631,31 @@ sub add_mastering_tracks {
 
 sub add_mastering_effects {
 	
-
 	$this_track = $tn{Eq};
+	eval_iam("c-select ". $this_track->n);
+	print $this_track->name, $/;
 
 	::Text::t_add_effect( split " ", $eq );
+	eval_iam("c-select ". $this_track->n);
 
 	$this_track = $tn{Low};
+	print $this_track->name, $/;
 
 	::Text::t_add_effect( split " ", $low_pass);
 	::Text::t_add_effect( split " ", $compressor);
 	::Text::t_add_effect( split " ", $spatialiser);
 
 	$this_track = $tn{Mid};
+	eval_iam("c-select ". $this_track->n);
+	print $this_track->name, $/;
 
 	::Text::t_add_effect( split " ", $mid_pass);
 	::Text::t_add_effect( split " ", $compressor);
 	::Text::t_add_effect( split " ", $spatialiser);
 
 	$this_track = $tn{High};
+	eval_iam("c-select ". $this_track->n);
+	print $this_track->name, $/;
 
 	::Text::t_add_effect( split " ", $high_pass);
 	::Text::t_add_effect( split " ", $compressor);
@@ -3656,6 +3663,8 @@ sub add_mastering_effects {
 
 
 	$this_track = $tn{Boost};
+	eval_iam("c-select ". $this_track->n);
+	print $this_track->name, $/;
 	
 #	::Text::t_insert_effect( $tn{Boost}->vol, 'ea' );
 	::Text::t_insert_effect( $tn{Boost}->vol, split " ", $limiter );
@@ -3663,39 +3672,10 @@ sub add_mastering_effects {
 }
 	
 
-=comment
-	# apply effects from .namarc mastering_effects to Master
-	# track
-	#
-	# during mixdown, copy them over to Mixdown track
-	
-	print("Already in mastering mode\n"), return if @mastering_effect_ids;
-	print("No 'mastering_effects:' line found in .namarc.  Skipping...\n"), 
-		return unless $mastering_effects;
-	print("Adding mastering effects to Master track.\n");
-	my $old_track = $this_track;
-	$this_track = $tn{Master};
-	my @afx_args = split /\s*;\s*/, $mastering_effects;
-	map{ 	my ($code, @values) = split " ", $_; 
-			push @mastering_effect_ids, 
-			::Text::t_add_effect( $code, \@values) ;
-	}  @afx_args;
-	$this_track = $old_track;
-=cut
 
 sub master_off {
 	$mastering_mode = 0;
 }
-=comment
-	print("Not in mastering mode.\n"), return unless
-		@mastering_effect_ids;
-	print "Removing mastering effects\n";
-	# remove mastering effects from Master track
-	map{ remove_effect($_) } @mastering_effect_ids;
-	# remove all effects from Mixdown track
-	map{ remove_effect($_) } @{ $tn{Mixdown}->ops };
-	@mastering_effect_ids = ();
-=cut
 		
 sub pan_check {
 	my $new_position = shift;
