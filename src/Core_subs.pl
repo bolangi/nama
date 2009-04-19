@@ -531,7 +531,8 @@ sub initialize_rules {
 		chain_id		=>  'MixLink',
 		#chain_id		=>  sub{ my $track = shift; $track->n },
 		target			=>  'all',
-		condition =>	sub{ defined $inputs{mixed}->{$loopb} },
+		condition =>	sub{ defined $inputs{mixed}->{$loopb} 
+							 and ! $mastering_mode },
 		input_type		=>  'mixed',
 		input_object	=>  $loopa,
 		output_type		=>  'mixed',
