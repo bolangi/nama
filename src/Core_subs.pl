@@ -2012,6 +2012,8 @@ sub add_effect {
 }
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
+	print("$op_id: effect does not exist\n"), return 
+		unless $cops{$op_id};
 	#print "id $op_id p: $parameter, sign: $sign value: $value\n";
 
 		my $new_value = $value; 
@@ -3591,7 +3593,7 @@ sub master_on {
 	
 		my $old_track = $this_track;
 		add_mastering_tracks();
-		#add_mastering_effects();
+		add_mastering_effects();
 		$this_track = $old_track;
 	}
 }
@@ -3629,8 +3631,6 @@ sub add_mastering_tracks {
 sub add_mastering_effects {
 	
 
-	# Eq
-	
 	$this_track = $tn{Eq};
 
 	::Text::t_add_effect( split " ", $eq );
