@@ -821,6 +821,7 @@ sub output_type_object { # soundcard output
 
 	
 sub eliminate_loops {
+	return if $tn{Eq}; # skip if mastering mode
 	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
