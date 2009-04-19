@@ -9,11 +9,11 @@ parameter: /\d+/
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /[\w:]+\/?/
-name2: /[\w-+:]+/
+name2: /[\w\-+:]+/
 name3: /\S+/
-name4: /[\w-+:\.]+/
+name4: /[\w\-+:\.]+/
 path: /(["'])[\w-\. \/]+$1/
-path: /[\w-\.\/]+/
+path: /[\w\-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 
 
