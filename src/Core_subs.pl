@@ -821,7 +821,7 @@ sub output_type_object { # soundcard output
 
 	
 sub eliminate_loops {
-	return if $tn{Eq}; # skip if mastering mode
+	return if $mastering_mode;
 	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
@@ -3587,7 +3587,7 @@ sub master_on {
 	
 		my $old_track = $this_track;
 		add_mastering_tracks();
-		add_mastering_effects();
+		#add_mastering_effects();
 		$this_track = $old_track;
 	}
 }
@@ -3599,6 +3599,7 @@ sub add_mastering_tracks {
 	map{ ::SimpleTrack->new(
 			name => $_,
 			rw => 'MON',
+			group => 'mastering', # dummy group, not used
 	) } @names;
 
 

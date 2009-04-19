@@ -798,6 +798,9 @@ sub rec_status{
 	'OFF';
 
 }
+sub group_last { 1}
+sub version {1}
+sub monitor_version {1}
 no warnings;
 sub ch_r {
 	my $track = shift;
