@@ -205,7 +205,7 @@ set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
 
 vol: _vol sign(?) value end { 
 	$::this_track->vol or 
-		print( $::$this_track . ": no volume control available\n"), return;
+		print( $::this_track->name . ": no volume control available\n"), return;
 	$item{sign} = undef;
 	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
 	::modify_effect 

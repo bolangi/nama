@@ -47,7 +47,19 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
-execute_on_project_load: doodle 
+execute_on_project_load: eval "hello"
 
-mastering_effects: ea 23
+eq: ea
+
+low_pass: lowpass_iir
+
+mid_pass: bandpass_iir
+
+high_pass: highpass_iir
+
+compressor: sc4
+
+spatialiser: matrixSpatialiser
+
+limiter: tap_limiter
 # end
