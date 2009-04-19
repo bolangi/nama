@@ -762,7 +762,6 @@ $aux_send_soundcard_jack = ::Rule->new(
 		input_object	=>  $loopa,
 		output_type		=>  'mixed',
 		output_object	=>  $loop_crossover,
-		condition 		=>  $mastering_mode,
 		status			=>  1,
 	);
 	$stage2 = ::Rule->new(
@@ -773,7 +772,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		input_object	=>  $loop_crossover,
 		output_type		=>  'mixed',
 		output_object	=>  $loop_boost,
-		condition 		=>  $mastering_mode,
+		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
 	);
 	$stage3 = ::Rule->new(
@@ -784,7 +783,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		input_object	=>  $loop_boost,
 		output_type		=>  'mixed',
 		output_object	=>  $loopb,
-		condition 		=>  $mastering_mode,
+		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
 	);
 	
@@ -1470,6 +1469,11 @@ sub generate_setup { # create chain setup
 		$master_bus->apply; # mix_out, mix_link
 		$tracker_bus->apply;
 		$null_bus->apply;
+		if ($mastering_mode){
+			$mastering_stage1_bus->apply;
+			$mastering_stage2_bus->apply;
+			$mastering_stage3_bus->apply;
+		}
 =comment
 $mixdown_bus->apply($tn{Mixdown});
 $master_bus->apply($tn{Master});
