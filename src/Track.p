@@ -852,9 +852,11 @@ sub rec_status{
 	my $track = shift;
 	$::mastering_mode ? 'MON' :  'OFF';
 }
-sub group_last { 1}
+no warnings;
+sub group_last {1}
 sub version {1}
 sub monitor_version {1}
+use warnings;
 
 
 
