@@ -821,7 +821,6 @@ sub output_type_object { # soundcard output
 
 	
 sub eliminate_loops {
-	return if $mastering_mode;
 	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
@@ -872,6 +871,8 @@ sub eliminate_loops {
 	delete $pre_output{$cooked_id};
 
 	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
+
+	return if $mastering_mode;
 	
 	my $ref = ref $inputs{mixed}{$loopb};
 
@@ -1995,8 +1996,8 @@ sub add_effect {
 	my $i = $effect_i{$code};
 	my $values = $p{values};
 
-	return if $id eq $ti{$n}->vol or
-	          $id eq $ti{$n}->pan;   # skip these effects 
+	return if $id and ($id eq $ti{$n}->vol 
+				or $id eq $ti{$n}->pan);   # skip these effects 
 			   								# already created in add_track
 
 	$id = cop_add(\%p); 
@@ -2210,6 +2211,7 @@ sub ctrl_index {
 
 }
 sub cop_add {
+	$debug2 and print "&cop_add\n";
 	my %p 			= %{shift()};
 	my $n 			= $p{chain};
 	my $code		= $p{type};
@@ -2219,7 +2221,6 @@ sub cop_add {
 	my @values = @{ $p{values} } if $p{values};
 	my $parameter	= $p{parameter};  # needed for parameter controllers
 	                                  # zero based
-	$debug2 and print "&cop_add\n";
 $debug and print <<PP;
 n:          $n
 code:       $code
@@ -3603,7 +3604,7 @@ sub add_mastering_tracks {
 
 	my @names = qw(Eq Low Mid High Boost);
 
-	map{ ::SimpleTrack->new(
+	map{ ::MasteringTrack->new(
 			name => $_,
 			rw => 'MON',
 			group => 'mastering', # dummy group, not used
@@ -3632,45 +3633,34 @@ sub add_mastering_tracks {
 sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
-	eval_iam("c-select ". $this_track->n);
-	print $this_track->name, $/;
 
-	::Text::t_add_effect( split " ", $eq );
-	eval_iam("c-select ". $this_track->n);
+	command_process("append_effect $eq");
 
 	$this_track = $tn{Low};
-	print $this_track->name, $/;
 
-	::Text::t_add_effect( split " ", $low_pass);
-	::Text::t_add_effect( split " ", $compressor);
-	::Text::t_add_effect( split " ", $spatialiser);
+	command_process("append_effect $low_pass");
+	command_process("append_effect $compressor");
+	command_process("append_effect $spatialiser");
 
 	$this_track = $tn{Mid};
-	eval_iam("c-select ". $this_track->n);
-	print $this_track->name, $/;
 
-	::Text::t_add_effect( split " ", $mid_pass);
-	::Text::t_add_effect( split " ", $compressor);
-	::Text::t_add_effect( split " ", $spatialiser);
+	command_process("append_effect $mid_pass");
+	command_process("append_effect $compressor");
+	command_process("append_effect $spatialiser");
 
 	$this_track = $tn{High};
-	eval_iam("c-select ". $this_track->n);
-	print $this_track->name, $/;
 
-	::Text::t_add_effect( split " ", $high_pass);
-	::Text::t_add_effect( split " ", $compressor);
-	::Text::t_add_effect( split " ", $spatialiser);
+	command_process("append_effect $high_pass");
+	command_process("append_effect $compressor");
+	command_process("append_effect $spatialiser");
 
 
 	$this_track = $tn{Boost};
-	eval_iam("c-select ". $this_track->n);
-	print $this_track->name, $/;
 	
-#	::Text::t_insert_effect( $tn{Boost}->vol, 'ea' );
-	::Text::t_insert_effect( $tn{Boost}->vol, split " ", $limiter );
+	command_process("add_effect $limiter"); # insert before vol
  
 }
-	
+
 
 
 sub master_off {

@@ -798,9 +798,6 @@ sub rec_status{
 	'OFF';
 
 }
-sub group_last { 1}
-sub version {1}
-sub monitor_version {1}
 no warnings;
 sub ch_r {
 	my $track = shift;
@@ -808,6 +805,56 @@ sub ch_r {
 }
 use warnings;
 
+package ::MasteringTrack; # used for mastering chains 
+our @ISA = '::SimpleTrack';
+use ::Object qw( 		name
+						active
+
+						ch_r 
+						ch_m 
+						ch_count
+						
+						rw
+
+						vol  
+						pan 
+						latency
+
+						old_vol_level
+						old_pan_level
+						ops 
+						offset 
+
+						n 
+						group 
+
+						playat
+						region_start
+						region_end
+						
+						looping
+
+						hide
+						modifiers
+
+						jack_source
+						jack_send
+						source_select
+						send_select
+						
+						);
+
+sub group_last { }
+sub version {}
+sub monitor_version {}
+sub rec_status{
+
+	my $track = shift;
+	$::mastering_mode ? 'MON' :  'OFF';
+}
+sub group_last { 1}
+sub version {1}
+sub monitor_version {1}
 
 
 

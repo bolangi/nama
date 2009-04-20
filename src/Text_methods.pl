@@ -434,7 +434,7 @@ sub t_add_effect {
 			type => $code,
 			);
 			print "adding effect\n";
-			#print (yaml_out(\%p));
+			$debug and print (yaml_out(\%p));
 		add_effect( \%p );
 }
 sub group_rec { 
