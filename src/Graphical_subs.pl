@@ -485,7 +485,7 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$ti{-1}->group_last, " \n";
+		join ' ',1..$ti{3}->group_last, " \n";
 
 			$version->radiobutton( 
 

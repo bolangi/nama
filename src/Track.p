@@ -166,17 +166,7 @@ sub group_last {
 	my $track = shift;
 	my $group = $::Group::by_name{$track->group}; 
 	#print join " ", 'searching tracks:', $group->tracks, $/;
-	my $max = 0;
-	map{ 
-		my $track = $_;
-		my $last;
-		$last = $track->last || 0;
-		#print "track: ", $track->name, ", last: $last\n";
-
-		$max = $last if $last > $max;
-
-	}	map { $by_name{$_} } $group->tracks;
-	$max;
+	$group->last;
 }
 
 sub current {	 # depends on ewf status
@@ -920,6 +910,20 @@ sub tracks { # returns list of track names in group
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
 
+sub last {
+	my $group = shift;
+	my $max = 0;
+	map{ 
+		my $track = $_;
+		my $last;
+		$last = $track->last || 0;
+		#print "track: ", $track->name, ", last: $last\n";
+
+		$max = $last if $last > $max;
+
+	}	map { $::Track::by_name{$_} } $group->tracks;
+	$max;
+}
 
 
 # all groups
