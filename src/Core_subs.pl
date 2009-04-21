@@ -3585,8 +3585,6 @@ sub master_on {
 	
 		my $old_track = $this_track;
 		add_mastering_tracks();
-		print yaml_out \%cops;
-		print yaml_out \%copp;
 		add_mastering_effects();
 		$this_track = $old_track;
 	}

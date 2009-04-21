@@ -61,7 +61,7 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
+$debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of helper loopback devices:
@@ -493,9 +493,74 @@ mixdown to commence.)
 
 [% qx(./emit_command_headers pod) %]
 
+=head1 ROUTING CONFIGURATION
+
+Nama uses integers for track numbers and the corresponding
+Ecasound chains.
+
+Nama's signal IO is organized at three levels: raw, cooked
+and mixed. 
+
+"Raw" signals provide the inputs to user tracks. Raw signals can
+come from the soundcard, a WAV file, or a JACK client.
+
+"Cooked" signals are the output of user tracks after volume,
+pan and effects processing.
+
+The "mixed" signal is the combined outputs of all user
+tracks. It is delivered to the Master fader, and to the
+Mixdown WAV file during mixdown.
+
+Nama uses intermediate loop devices to provide each level
+of signal to multiple "customers", i.e. other chains using
+that signal as input.
+
+Unneeded loop devices are eliminated in cases where there is
+only one customer for a signal.
+
+Let's examine the signal flow from track 3, the first 
+available user track. Assume the track is named "sax".
+
+=head2 REC status
+
+Sound device ---< 3 >----> loop,3 --< R3 >----> sax_1.wav
+  /JACK client               |
+                             +------< J3 >----> loop,111
+
+=head2 MON status
+
+WAV file -------< 3 >----> loop,3 ----< J3 >----> loop,111
+
+loop,111 --< MixLink >---> loop,222 --< 1/Master >--> Sound device
+                             |
+                             +--------< 2/Mixdown >--> Mixdown_X.wav
+
+=head2 Mastering Mode
+
+In mastering mode, the "MixLink" chain is replaced by a series
+of chains with effects. The effects, and possibly their default
+parameters, are defined in the configuration file F<.namarc>.
+
+                     +--- Low ---> |
+                     |             |
+loop,111 ---  Eq --> +--- Mid ---> |--- Boost --> loop,222
+                     |             |
+                     +--- High --> |
+
+The B<Eq> track provides an equalizer.
+
+The B<Low>, B<Mid> and B<High> tracks each apply a bandpass
+filter, a compressor and a spatialiser.
+
+The B<Boost> track applies gain and a limiter.
+
 =head1 BUGS AND LIMITATIONS
 
-Several functions are available only through text commands.
+Some functions are available only through text commands.
+
+GUI volume and pan controls are provided for all of the
+mastering mode track. Only the volume control for the 
+Boost track is meaningful.
 
 =head1 EXPORT
 
@@ -505,10 +570,13 @@ None by default.
 
 CPAN, for the distribution.
 
-cpan Tk
 cpan Audio::Ecasound::Multitrack
 
-Pull source code using this command: 
+You will also need to install Tk to use the GUI:
+
+cpan Tk
+
+You can pull the source code as follows: 
 
 C<git clone git://github.com/bolangi/nama.git>
 
