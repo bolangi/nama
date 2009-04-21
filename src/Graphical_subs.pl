@@ -485,7 +485,7 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$ti{3}->group_last, " \n";
+		join ' ',1..$tracker->last, " \n";
 
 			$version->radiobutton( 
 
@@ -499,7 +499,7 @@ sub global_version_buttons {
 					}
 			);
 
- 	for my $v (1..$ti{-1}->group_last) { 
+ 	for my $v (1..$tracker->last) { 
 
 	# the highest version number of all tracks in the
 	# $tracker group
@@ -933,6 +933,20 @@ sub destroy_widgets {
 	# leave field labels (first row)
 	map{ $_->destroy  } @children[11..$#children]; # fragile
 	%mark_widget and map{ $_->destroy } values %mark_widget;
+}
+sub remove_effect_gui { 
+	@_ = discard_object(@_);
+	$debug2 and print "&remove_effect_gui\n";
+	my $id = shift;
+	my $n = $cops{$id}->{chain};
+	$debug and print "id: $id, chain: $n\n";
+
+	$debug and print "i have widgets for these ids: ", join " ",keys %effects_widget, "\n";
+	$debug and print "preparing to destroy: $id\n";
+	return unless defined $effects_widget{$id};
+	$effects_widget{$id}->destroy();
+	delete $effects_widget{$id}; 
+
 }
 
 sub effect_button {

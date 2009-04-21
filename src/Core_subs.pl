@@ -2033,7 +2033,7 @@ sub modify_effect {
 		$new_value);
 }
 
-sub remove_effect { # doesn't touch Track object
+sub remove_effect { 
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
@@ -2082,19 +2082,6 @@ sub remove_effect { # doesn't touch Track object
 	delete $copp{$id}; # remove entry from chain operator parameters list
 }
 
-sub remove_effect_gui { 
-	@_ = discard_object(@_);
-	$debug2 and print "&remove_effect_gui\n";
-	my $id = shift;
-	my $n = $cops{$id}->{chain};
-	$debug and print "id: $id, chain: $n\n";
-
-	$debug and print "i have widgets for these ids: ", join " ",keys %effects_widget, "\n";
-	$debug and print "preparing to destroy: $id\n";
-	$effects_widget{$id}->destroy();
-	delete $effects_widget{$id}; 
-
-}
 
 sub nama_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
@@ -2335,7 +2322,10 @@ sub effect_update {
 	my ($id, $param, $val) = @_;
 	my $chain = $cops{$id}{chain};
 
-	#print "chain $chain id $id param $param value $val\n";
+	carp("effect $id: non-existent chain\n"), return
+		unless $chain;
+
+	$debug and print "chain $chain id $id param $param value $val\n";
 
 	# $param gets incremented, therefore is zero-based. 
 	# if I check i will find %copp is  zero-based
@@ -3595,6 +3585,8 @@ sub master_on {
 	
 		my $old_track = $this_track;
 		add_mastering_tracks();
+		print yaml_out \%cops;
+		print yaml_out \%copp;
 		add_mastering_effects();
 		$this_track = $old_track;
 	}
@@ -3604,11 +3596,15 @@ sub add_mastering_tracks {
 
 	my @names = qw(Eq Low Mid High Boost);
 
-	map{ ::MasteringTrack->new(
+	map{ 
+		my $track = ::MasteringTrack->new(
 			name => $_,
 			rw => 'MON',
 			group => 'mastering', # dummy group, not used
-	) } @names;
+		);
+		$ui->track_gui( $track->n );
+
+ } @names;
 
 
 	# remove spurious volume/pan controls
