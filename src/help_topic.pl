@@ -58,9 +58,11 @@ track => <<TRACK,
                                 example: add piano; r synth
                                     (record piano from JACK client "synth") 
 
-   link_track, link          -  make a new track that uses audiofiles 
-                                from an existing track.
+   link_track, link          -  create a new, read-only track that uses audio
+                                files from an existing track. 
+								
                                 example: link_track new_piano piano
+                                example: link_track intro Mixdown my_song_intro 
 
    import_audio, import      - import a WAV file, resampling if necessary
 

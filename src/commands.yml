@@ -124,7 +124,7 @@ add_track:
 link_track:
   type: track
   short: link
-  what: create a read-only track that uses .WAV files from another track
+  what: create a read-only track that uses .WAV files from another track. 
   parameters: <s_name> <s_target> [ <s_project> ]
   example: link_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
 import_audio:
@@ -251,7 +251,7 @@ show_track:
   what: show current track status
 region:
   type: track
-  what: Define endpoints of a track region for playback 
+  what: Define endpoints of a track region for playback. Nama allows one region per track. 
   parameters: start end (times in seconds with decimal, mark names, or mark indices)
 remove_region:
   type: track

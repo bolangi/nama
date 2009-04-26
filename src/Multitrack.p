@@ -33,7 +33,7 @@ no warnings qw(uninitialized syntax);
 
 BEGIN{ 
 
-our $VERSION = '0.996';
+our $VERSION = '0.997';
 
 [% qx(cat ./banner.pl) %]
 
@@ -481,13 +481,29 @@ has created new WAV files.
 The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
 typically used when playing back mixdown tracks.  The
-B<mixplay> command sets the Mixdown group
+B<mixplay> command sets the Mixdown track 
 to MON and the Tracker group to OFF.
 
 The Master bus has only MON/OFF status. Setting REC status
 for the Mixdown bus has the same effect as issuing the
 B<mixdown> command. (A C<start> command must be issued for
 mixdown to commence.)
+
+=head2 REGIONS
+
+The C<region> command allows you to define endpoints
+for a portion of an audio file. Use the C<shift> command
+to specify a delay for starting playback.
+
+Only one region may be specified per track.  Use the
+C<link_track> command to clone a track in order to make use
+of multiple regions or versions of a single track. 
+
+C<link_track> can clone tracks from other projects.
+Thus you could create the sections of a song in 
+separate projects, then assemble them using
+C<link_track> to pull the Mixdown tracks
+into a single project for mastering.
 
 =head1 TEXT COMMANDS
 
@@ -589,6 +605,8 @@ Boost track is meaningful.
 
 You should not use track names Eq, Low, Mid, High or Boost
 if you intend to use the mastering mode.
+
+Positions are currently specified in seconds.
 
 =head1 EXPORT
 
