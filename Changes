@@ -70,4 +70,10 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
 						  effect parameters (modify_effect)
 						- many commands now report their
 						  actions
-0.9951 Mon Jan 26, 2009  - disable JACK client checking
+0.9951 Mon Jan 26, 2009 - disable JACK client checking
+0.997  Sun Apr 26  2009 - add 'region' and 'shift' commands
+                        - add 'link_track' command to allow for
+                          multiple regions and for assembling
+                          WAV files from multiple projects
+                        - add mastering mode, 'master_on',
+                          'master_off' commands

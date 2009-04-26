@@ -505,10 +505,6 @@ separate projects, then assemble them using
 C<link_track> to pull the Mixdown tracks
 into a single project for mastering.
 
-=head1 TEXT COMMANDS
-
-[% qx(./emit_command_headers pod) %]
-
 =head1 ROUTING
 
 Nama identifies tracks by both a name and a number. The
@@ -545,47 +541,54 @@ Let's examine the signal flow from track 3, the first
 available user track. Assume track 3 is named "sax".
 All effects for track 3 are applied to chain 3.
 
-We will separate the signal flow into two parts.
+We will divide the signal flow into track and mixer
+sections.  Parentheses indicate chain identifiers or the
+corresponding track name.
 
-The first half of the flow graph ends at loop,111 ($loopa) 
-which sums all cooked signals.
+All "cooked" signals (i.e. the outputs of each
+user track) terminate at loop,111.
 
-=head2 First half (REC status)
+=head3 Track, REC status
 
-
-Sound device   --+---(3)----> loop,3 ---(J3)----> loop,111
-  /JACK client   |
-                 +---(R3)---> sax_1.wav
+    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,111
+      /JACK client   |
+                     +---(R3)---> sax_1.wav
 
 REC status indicates that the source of the signal
 is the soundcard or JACK client. The input signal will be 
-written directly to a file except in the preview and doodle modes.
-                             
-=head2 First half (MON status)
+written directly to a file except in the preview and doodle 
+modes.
 
-sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,111
 
-=head2 Second half (Mixdown enabled)
+=head3 Track, MON status
 
-In the second half of the flow graph, the mixed signal
-is delivered to an output device through the Master
-chain, which can host additional effects.
+    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,111
 
-loop,111 --(MixLink)---> loop,222 --(1/Master)---> Sound device
-                             |
-                             +------(2/Mixdown)--> Mixdown_1.wav
+=head3 Mixer, with mixdown enabled
 
-=head2 Mastering Mode
+In the second part of the flow graph, the mixed signal is
+delivered to an output device through the Master chain,
+which can host additional effects. The Mixdown track
+can also host effects, however these should be used
+during playback only.
+
+    loop,111 --(MixLink)---> loop,222 --(1/Master)---> Sound device
+                                 |
+                                 +------(2/Mixdown)--> Mixdown_1.wav
+
+=head3 Mastering Mode
 
 In mastering mode, the MixLink chain is replaced by several
-tracks. Effects and default parameters for these tracks 
+tracks.  Effects and default parameters for these tracks 
 may be defined in the configuration file F<.namarc>.
+The intermediate loops devices loop,120 and loop,130
+are not shown.
 
-                     +---(Low)---+ 
-                     |           |
-loop,111 ---  Eq --> +---(Mid)---+--- Boost --> loop,222
-                     |           |
-                     +---(High)--+ 
+                         +---(Low)---+ 
+                         |           |
+    loop,111 ----(Eq)--> +---(Mid)---+---(Boost)--> loop,222
+                         |           |
+                         +---(High)--+ 
 
 The B<Eq> track provides an equalizer.
 
@@ -593,6 +596,11 @@ The B<Low>, B<Mid> and B<High> tracks each apply a bandpass
 filter, a compressor and a spatialiser.
 
 The B<Boost> track applies gain and a limiter.
+
+=head1 TEXT COMMANDS
+
+[% qx(./emit_command_headers pod) %]
+
 
 =head1 BUGS AND LIMITATIONS
 
@@ -606,7 +614,7 @@ Boost track is meaningful.
 You should not use track names Eq, Low, Mid, High or Boost
 if you intend to use the mastering mode.
 
-Positions are currently specified in seconds.
+Positions are currently specified in seconds only.
 
 =head1 EXPORT
 
