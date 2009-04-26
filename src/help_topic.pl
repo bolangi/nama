@@ -254,9 +254,8 @@ mixdown => <<MIXDOWN,
    mixoff,  mxo                - disable mixdown 
    mixplay, mxp                - playback a recorded mix 
    automix                     - normalize track vol levels, then mixdown
-   master_on, mr               - Enter mastering mode. Apply effects in namarc
-                                  field 'mastering_effects'
-   master_off, mro             - leave mastering mode, remove master effects
+   master_on, mr               - enter mastering mode
+   master_off, mro             - leave mastering mode
 MIXDOWN
 
 prompt => <<PROMPT,

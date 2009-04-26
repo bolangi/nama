@@ -493,15 +493,18 @@ mixdown to commence.)
 
 [% qx(./emit_command_headers pod) %]
 
-=head1 ROUTING CONFIGURATION
+=head1 ROUTING
 
-Nama uses integers for track numbers and the corresponding
-Ecasound chains.
+Nama identifies tracks by both a name and a number. The
+track number is used to identify corresponding Ecasound
+signal-processing chains.
 
-Nama's signal IO is organized at three levels: raw, cooked
+=head2 Raw, cooked and mixed signals
+
+Nama's signal flow is organized at three levels: raw, cooked
 and mixed. 
 
-"Raw" signals provide the inputs to user tracks. Raw signals can
+"Raw" signals are the inputs to user tracks. Raw signals can
 come from the soundcard, a WAV file, or a JACK client.
 
 "Cooked" signals are the output of user tracks after volume,
@@ -511,41 +514,62 @@ The "mixed" signal is the combined outputs of all user
 tracks. It is delivered to the Master fader, and to the
 Mixdown WAV file during mixdown.
 
-Nama uses intermediate loop devices to provide each level
-of signal to multiple "customers", i.e. other chains using
-that signal as input.
+=head2 Loop devices
 
-Unneeded loop devices are eliminated in cases where there is
-only one customer for a signal.
+Nama uses Ecasound loop devices to be able to deliver each
+of these signals classes to multiple "customers", i.e.  to
+other chains using that signal as input.
+
+An optimizing pass eliminates loop devices that have 
+only one customer for the signal they provide.
+
+=head2 Flow diagrams
 
 Let's examine the signal flow from track 3, the first 
-available user track. Assume the track is named "sax".
+available user track. Assume track 3 is named "sax".
+All effects for track 3 are applied to chain 3.
 
-=head2 REC status
+We will separate the signal flow into two parts.
 
-Sound device ---< 3 >----> loop,3 --< R3 >----> sax_1.wav
-  /JACK client               |
-                             +------< J3 >----> loop,111
+The first half of the flow graph ends at loop,111 ($loopa) 
+which sums all cooked signals.
 
-=head2 MON status
+=head2 First half (REC status)
 
-WAV file -------< 3 >----> loop,3 ----< J3 >----> loop,111
 
-loop,111 --< MixLink >---> loop,222 --< 1/Master >--> Sound device
+Sound device   --+---(3)----> loop,3 ---(J3)----> loop,111
+  /JACK client   |
+                 +---(R3)---> sax_1.wav
+
+REC status indicates that the source of the signal
+is the soundcard or JACK client. The input signal will be 
+written directly to a file except in the preview and doodle modes.
+                             
+=head2 First half (MON status)
+
+sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,111
+
+=head2 Second half (Mixdown enabled)
+
+In the second half of the flow graph, the mixed signal
+is delivered to an output device through the Master
+chain, which can host additional effects.
+
+loop,111 --(MixLink)---> loop,222 --(1/Master)---> Sound device
                              |
-                             +--------< 2/Mixdown >--> Mixdown_X.wav
+                             +------(2/Mixdown)--> Mixdown_1.wav
 
 =head2 Mastering Mode
 
-In mastering mode, the "MixLink" chain is replaced by a series
-of chains with effects. The effects, and possibly their default
-parameters, are defined in the configuration file F<.namarc>.
+In mastering mode, the MixLink chain is replaced by several
+tracks. Effects and default parameters for these tracks 
+may be defined in the configuration file F<.namarc>.
 
-                     +--- Low ---> |
-                     |             |
-loop,111 ---  Eq --> +--- Mid ---> |--- Boost --> loop,222
-                     |             |
-                     +--- High --> |
+                     +---(Low)---+ 
+                     |           |
+loop,111 ---  Eq --> +---(Mid)---+--- Boost --> loop,222
+                     |           |
+                     +---(High)--+ 
 
 The B<Eq> track provides an equalizer.
 
@@ -556,11 +580,15 @@ The B<Boost> track applies gain and a limiter.
 
 =head1 BUGS AND LIMITATIONS
 
-Some functions are available only through text commands.
+Several of Nama's advanced functions are available only through
+text commands.
 
-GUI volume and pan controls are provided for all of the
-mastering mode track. Only the volume control for the 
+Unneeded GUI volume and pan controls are provided for 
+mastering mode tracks. Only the volume control for the 
 Boost track is meaningful.
+
+You should not use track names Eq, Low, Mid, High or Boost
+if you intend to use the mastering mode.
 
 =head1 EXPORT
 

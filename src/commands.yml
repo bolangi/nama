@@ -108,7 +108,7 @@ automix:
 master_on:
   type: mix
   short: mr
-  what: Enter mastering mode, adding mastering tracks if necessary
+  what: Enter mastering mode. Add tracks Eq, Low, Mid, High and Boost if necessary
   parameters: none
 master_off:
   type: mix
