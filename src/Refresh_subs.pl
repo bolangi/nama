@@ -80,9 +80,10 @@ sub refresh_track {
 	} qw(name rw );
 	
 	set_widget_color( 	$track_widget{$n}->{ch_r},
-							$rec_status eq 'REC'
-								? 'MON'
-								: 'OFF');
+				
+ 							$rec_status eq 'REC'
+ 								? 'REC'
+ 								: 'OFF');
 	
 	set_widget_color( $track_widget{$n}->{ch_m},
 							$rec_status eq 'OFF' 

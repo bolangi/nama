@@ -1539,7 +1539,7 @@ sub doodle {
 	
 	$old_group_rw = $tracker->rw;
 	$tracker->set(rw => 'REC');
-	$mixdown->set(rw => 'OFF');
+	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# allow only unique inputs
 	

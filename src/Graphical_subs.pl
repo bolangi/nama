@@ -172,8 +172,8 @@ my @color_items = map { [ 'command' => $_,
 $sn_palette->AddItems( @color_items);
 
 @color_items = map { [ 'command' => $_, 
-							-command  => colorset('ew', $_ ) ]
-						} @palettefields;
+							-command  => namaset( $_ ) ]
+						} @namafields;
 
 # $sn_effects_palette->AddItems( @color_items);
 # 
@@ -1152,11 +1152,14 @@ sub tk_event_cancel {
 	} @_;
 }
 sub get_saved_colors {
+	$debug2 and print "&get_saved_colors\n";
 
 	# aliases
 	
 	*old_bg = \$palette{mw}{background};
 	*old_abg = \$palette{mw}{activeBackground};
+	$old_bg = '#d915cc1bc3cf' unless $old_bg;
+	#print "pb: $palette{mw}{background}\n";
 
 
 	my $pal = join_path($project_root, $palette_file);
@@ -1173,8 +1176,8 @@ sub get_saved_colors {
 		init_palette();
 		init_namapalette();
 	}
-	$old_bg = $palette{mw}{background};
-	$old_bg = $project_label->cget('-background') unless $old_bg;
+	#$old_bg = $palette{mw}{background};
+	#$old_bg = $project_label->cget('-background') unless $old_bg;
 	$old_abg = $palette{mw}{activeBackground};
 	$old_abg = $project_label->cget('-activebackground') unless $old_abg;
 	#print "1palette: \n", yaml_out( \%palette );
@@ -1186,6 +1189,7 @@ sub get_saved_colors {
 	$mw->setPalette( %setformat );
 }
 sub init_palette {
+	$debug2 and print "&init_palette\n";
 	
 # 	@palettefields, # set by setPalette method
 # 	@namafields,    # field names for color palette used by nama
@@ -1205,6 +1209,9 @@ sub init_palette {
 # 		track
 # 		add
 
+	$old_bg = '#d915cc1bc3cf' unless $old_bg;
+	#print "old_bg: $old_bg\n";
+	$mw->setPalette( $old_bg );
 	map{ 	my $p = $_; # parent key
 			map{	$palette{$p}->{$_} = $parent{$p}->cget("-$_")
 						if $parent{$p}->cget("-$_") ;
@@ -1214,11 +1221,14 @@ sub init_palette {
 }
 sub init_namapalette {
 		
+	$debug2 and print "&init_namapalette\n";
 	%namapalette = ( 
 			'RecForeground' => 'Black',
-			'RecBackground' => 'LightPink',
+			#'RecBackground' => 'LightPink',
+			'RecBackground' => '#f22c92f088d3',
 			'MonForeground' => 'Black',
-			'MonBackground' => 'AntiqueWhite',
+			#'MonBackground' => 'AntiqueWhite',
+			'MonBackground' => '#edd2c18c6ddf',
 			'OffForeground' => 'Black',
 			'OffBackground' => $old_bg,
 	) unless %namapalette; # i.e. not if already loaded
@@ -1234,7 +1244,7 @@ sub init_namapalette {
 			'Play' 				=> 'LightGreen',
 			'Mixdown' 			=> 'Yellow',
 			'GroupForeground' 	=> 'Red',
-			'GroupBackground' 	=> 'AntiqueWhite',
+			'GroupBackground' 	=> $old_bg,
 			'SendForeground' 	=> 'Black',
 			'SendBackground' 	=> $mon,
 			'SourceForeground' 	=> 'Black',
@@ -1248,7 +1258,7 @@ sub colorset {
 	my ($widgetid, $field) = @_;
 	sub { 
 			my $widget = eval "\$$widgetid";
-			print "ancestor: $widgetid\n";
+			#print "ancestor: $widgetid\n";
 			my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
 				
@@ -1266,14 +1276,19 @@ sub colorset {
 }
 
 sub namaset {
-	my ($field,$initial) = @_;
-	sub { 	my $color = colorchooser($field,$namapalette{$field});
+	my ($field) = @_;
+	sub { 	
+			#print "f: $field np: $namapalette{$field}\n";
+			my $color = colorchooser($field,$namapalette{$field});
 			if ($color){ 
 				# install color in palette listing
 				$namapalette{$field} = $color;
 
 				# set those objects who are not
 				# handled by refresh
+	*rec = \$namapalette{RecBackground};
+	*mon = \$namapalette{MonBackground};
+	*off = \$namapalette{OffBackground};
 
 				$clock->configure(
 					-background => $namapalette{ClockBackground},
@@ -1341,9 +1356,10 @@ sub init_palettefields {
 }
 
 sub save_palette {
-	package ::; # in base class already
+	print "saving palettee\n";
  	serialize (
- 		file => join_path($project_root, $palette_file),
+ 		file => join_path(project_root(), $palette_file),
+		format => 'yaml',
  		vars => [ qw( %palette %namapalette ) ],
  		class => '::')
 }
