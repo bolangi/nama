@@ -145,12 +145,12 @@ track => <<TRACK,
 
  - cutting and time shifting
 
-   region                  - define endpoints of a track region for playback
+   region                  - specify a track region using mark names
    remove_region, rmr      - remove region definition. Entire track plays back
    shift_track, shift      - set playback delay for track/region
    unshift_track, unshift  - eliminate playback delay for track/region
 
- - hazardous commands for advanced/adventurous users
+ - hazardous commands for advanced users
 
    set_track, set          - directly set current track parameters
 
@@ -246,7 +246,7 @@ group => <<GROUP,
                                 or a bunch
                                 example: for strings; vol +10
                                 example: for drumkit congas; mute
-                                example: for all; n 5 (version 5)
+                                example: for all; version 5
                                 example: for 3 5; vol * 1.5
                 
 GROUP

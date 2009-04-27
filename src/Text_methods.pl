@@ -160,8 +160,7 @@ sub show_tracks {
             $_->rec_status,
             $_->name =~ /Master|Mixdown/ ? placeholder() : 
 					$_->source_status ? $_->source_status : placeholder(),
-			$_->name =~ /Master|Mixdown/ ? placeholder() : 
-					$_->send_status ? $_->send_status : placeholder(),
+			$_->send_status ? $_->send_status : placeholder(),
 			$copp{$_->vol}->[0],
 			$copp{$_->pan}->[0],
             #(join " ", @{$_->versions}),

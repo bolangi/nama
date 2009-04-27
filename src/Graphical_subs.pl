@@ -1356,7 +1356,6 @@ sub init_palettefields {
 }
 
 sub save_palette {
-	print "saving palettee\n";
  	serialize (
  		file => join_path(project_root(), $palette_file),
 		format => 'yaml',

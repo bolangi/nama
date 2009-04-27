@@ -81,7 +81,8 @@ sub refresh_track {
 	
 	set_widget_color( 	$track_widget{$n}->{ch_r},
 				
- 							$rec_status eq 'REC'
+ 							($rec_status eq 'REC'
+								and $n > 2 )
  								? 'REC'
  								: 'OFF');
 	
