@@ -202,22 +202,23 @@ $sn_namapalette->AddItems( @color_items);
 	map{ push @widgets, $track_frame->Label(-text => $_)  } @labels;
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
-#  unified command processing by command_process 
-	
-	$iam_label = $iam_frame->Label(
-	-text => "         Command: "
-		)->pack(-side => 'left');;
-	$iam_text = $iam_frame->Entry( 
-		-textvariable => \$iam, -width => 45)
-		->pack(-side => 'left');;
-	$iam_execute = $iam_frame->Button(
-			-text => 'Execute',
-			-command => sub { ::Text::command_process( $iam ) }
-			
-		)->pack(-side => 'left');;
 
-			#join  " ",
-			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
+#  unified command processing by command_process 
+# 	
+ 	$iam_label = $iam_frame->Label(
+# 	-text => "         Command: "
+ 		)->pack(-side => 'left');;
+# 	$iam_text = $iam_frame->Entry( 
+# 		-textvariable => \$iam, -width => 45)
+# 		->pack(-side => 'left');;
+# 	$iam_execute = $iam_frame->Button(
+# 			-text => 'Execute',
+# 			-command => sub { ::Text::command_process( $iam ) }
+# 			
+# 		)->pack(-side => 'left');;
+# 
+# 			#join  " ",
+# 			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
 		
 }
 
@@ -229,7 +230,8 @@ sub transport_gui {
 		-text => 'TRANSPORT',
 		-width => 12,
 		)->pack(-side => 'left');;
-	$transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
+	# disable Arm button
+	# $transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
 	$transport_start = $transport_frame->Button->pack(-side => 'left');
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
 	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;

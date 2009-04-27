@@ -150,15 +150,26 @@ sub prepare {
 	# e: don't load static effects data (for debugging)
 	# s: don't load static effects data cache (for debugging)
 	
+	# UI object for interface polymorphism
+	
+
+	if ( $opts{t} ){ 
+		# text mode (Event.pm event loop)
+		$ui = ::Text->new;
+	} else {
+		# default to graphic mode  (Tk event loop)
+		if ( can_load( modules => { 'Tk' => undef } ) ){ 
+			$ui = ::Graphical->new;
+		} else { 
+			print "Module Tk not found. Using Text mode.\n"; 
+			$ui = ::Text->new;
+		}
+	}
+
+
+	
 	get_ecasound_iam_keywords();
 
-	# load Tk only in graphic mode
-	
-	if ($opts{t}) {}
-	else { 
-		require Tk;
-		Tk->import;
-	}
 
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
@@ -263,14 +274,6 @@ sub prepare {
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
 	
-	# UI object for interface polymorphism
-	
-	$ui = $opts{t} ? ::Text->new 
-				   : ::Graphical->new ;
-
-	# default to graphic mode  (Tk event loop)
-	# text mode (Event.pm event loop)
-
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
@@ -788,7 +791,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		status			=>  1,
 	);
 	
-	$ui->preview_button;
+	# $ui->preview_button;
 
 }
 
