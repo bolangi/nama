@@ -578,29 +578,38 @@ during playback only.
 
 =head3 Mastering Mode
 
-In mastering mode, the MixLink chain is replaced by several
-tracks.  Effects and default parameters for these tracks 
-may be defined in the configuration file F<.namarc>.
-The intermediate loops devices loop,120 and loop,130
-are not shown.
+In mastering mode (invoked by C<master_on> and released
+C<master_off>) the MixLink chain is replaced by several
+tracks with mastering-related effects.  
 
-                         +---(Low)---+ 
-                         |           |
-    loop,111 ----(Eq)--> +---(Mid)---+---(Boost)--> loop,222
-                         |           |
-                         +---(High)--+ 
+                              +---(Low)---+ 
+                              |           |
+ loop,111 --(Eq)--> loop,120 -+---(Mid)---+ loop,130 --(Boost)--> loop,222
+                              |           |
+                              +---(High)--+ 
 
-The B<Eq> track provides an equalizer.
+The B<Eq> track hosts an equalizer.
 
 The B<Low>, B<Mid> and B<High> tracks each apply a bandpass
 filter, a compressor and a spatialiser.
 
 The B<Boost> track applies gain and a limiter.
 
+These effects (and optional default parameters) are defined
+in the configuration file F<.namarc>.
+
+=head2 Preview and Doodle Modes
+
+These non-recording modes, invoked by C<preview> and C<doodle> commands
+tweak the routing rules for special purposes.  B<Preview
+mode> simply disables recording of WAV files to disk.  B<Doodle
+mode> disables MON inputs while enabling only one REC track per
+signal source. The C<arm> command releases both preview
+and doodle modes.
+
 =head1 TEXT COMMANDS
 
 [% qx(./emit_command_headers pod) %]
-
 
 =head1 BUGS AND LIMITATIONS
 
