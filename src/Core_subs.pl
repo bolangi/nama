@@ -1575,22 +1575,22 @@ sub reconfigure_engine {
     #  - user or Mixdown track is REC enabled
 	
 	my $old_pos;
-	#print "preview: $preview\n";
 
 	my $will_record = ! $preview 
-						and ( (grep { $_->{rec_status} eq 'REC' } 
-							@{ $status_snapshot->{tracks} })
-						or ( $tn{Mixdown}->rec_status eq 'REC') );
+						&&  grep { $_->{rec_status} eq 'REC' } 
+							@{ $status_snapshot->{tracks} };
 
+	# restore playback position if possible
 
-	$old_pos = eval_iam('getpos') 
-		unless $preview eq 'doodle'
-		 	or  (     $old_snapshot->{project} 
-				ne $status_snapshot->{project} )
-			or  (     $old_snapshot->{global_version} 
-				ne $status_snapshot->{global_version} )
-			or  $will_record;        
+	if (	$preview eq 'doodle'
+		 	or  $old_snapshot->{project} ne $status_snapshot->{project} 
+			or  $old_snapshot->{global_version} 
+					ne $status_snapshot->{global_version} 
+			or  $will_record  ){
 
+		$old_pos = undef;
+
+	} else { $old_pos = eval_iam('getpos') }
 
 	my $was_running = engine_running();
 	stop_transport() if $was_running;
