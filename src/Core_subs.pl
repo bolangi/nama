@@ -1603,6 +1603,7 @@ sub reconfigure_engine {
 	}
 	$old_snapshot = $status_snapshot;
 	start_transport() if $was_running and ! $will_record;
+	$ui->flash_ready;
 	1;
 }
 
