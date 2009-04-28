@@ -1565,39 +1565,44 @@ sub reconfigure_engine {
 	
 	#print ("no change in setup\n"),
 	 return 0 if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
-# 	my %os = %$old_snapshot;
-# 	my %ss = %$status_snapshot;
-# 	#delete $os{tracks};
-# 	#delete $ss{tracks};
-# 	print "old status:\n", yaml_out \%os;
-# 	print "new status:\n", yaml_out \%ss;
 
-	# if engine is running, 
-	# we will start engine after reconfiguring
-	# if same project and global version
-	# unless in doodle mode
 
-	# save playback position
+	# restore playback position unless 
+	
+	#  - doodle mode
+	#  - change in global version
+    #  - change in project
+    #  - user or Mixdown track is REC enabled
 	
 	my $old_pos;
 	#print "preview: $preview\n";
 
-	#$old_pos = eval_iam('getpos') 
-	#		if  ! $preview eq 'doodle'
-	#	if yaml_out( \%os ) eq yaml_out ( \%ss );
-	#print "oldpos: $old_pos\n";
+	my $will_record = ! $preview 
+						and ( (grep { $_->{rec_status} eq 'REC' } 
+							@{ $status_snapshot->{tracks} })
+						or ( $tn{Mixdown}->rec_status eq 'REC') );
 
-	stop_transport() if engine_running();
+
+	$old_pos = eval_iam('getpos') 
+		unless $preview eq 'doodle'
+		 	or  (     $old_snapshot->{project} 
+				ne $status_snapshot->{project} )
+			or  (     $old_snapshot->{global_version} 
+				ne $status_snapshot->{global_version} )
+			or  $will_record;        
+
+
+	my $was_running = engine_running();
+	stop_transport() if $was_running;
 
 	if ( generate_setup() ){
 		command_process('show_tracks');
 		connect_transport();
-	#	eval_iam("setpos $old_pos") if $old_pos;
+		eval_iam("setpos $old_pos") if $old_pos;
 
 	}
 	$old_snapshot = $status_snapshot;
-	start_transport() if $preview;
-	#$term->redisplay();
+	start_transport() if $was_running and ! $will_record;
 	1;
 }
 
