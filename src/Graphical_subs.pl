@@ -454,7 +454,7 @@ sub group_gui {
 				$group->set(rw => 'REC');
 				$group_rw->configure(-text => 'REC');
 				refresh();
-				generate_setup() and connect_transport()
+				reconfigure_engine()
 				}
 			],[
 			'command' => 'MON',
@@ -464,7 +464,7 @@ sub group_gui {
 				$group->set(rw => 'MON');
 				$group_rw->configure(-text => 'MON');
 				refresh();
-				generate_setup() and connect_transport()
+				reconfigure_engine()
 				}
 			],[
 			'command' => 'OFF',
@@ -474,7 +474,7 @@ sub group_gui {
 				$group->set(rw => 'OFF');
 				$group_rw->configure(-text => 'OFF');
 				refresh();
-				generate_setup() and connect_transport()
+				reconfigure_engine()
 				}
 			]);
 			$dummy->grid($group_label, $group_version, $group_rw);
@@ -496,7 +496,7 @@ sub global_version_buttons {
 				-command => sub { 
 					$tracker->set(version => 0); 
 					$version->configure(-text => " ");
-					generate_setup() and connect_transport();
+					reconfigure_engine();
 					refresh();
 					}
 			);
@@ -519,7 +519,7 @@ sub global_version_buttons {
 				-command => sub { 
 					$tracker->set(version => $v); 
 					$version->configure(-text => $v);
-					generate_setup() and connect_transport();
+					reconfigure_engine();
 					refresh();
 					}
 
