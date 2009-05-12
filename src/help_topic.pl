@@ -221,7 +221,7 @@ effects => <<EFFECTS,
  - effect manipulation commands
 
    add_effect,    fxa, afx    - add an effect to the current track
-   insert_effect, ifx, fxi    - insert an effect before another effect
+   insert_effect, fxi, ifx    - insert an effect before another effect
    modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
    remove_effect, fxr, rfx    - remove an effect or controller
    append_effect              - add effect to the end of current track
@@ -269,7 +269,7 @@ prompt => <<PROMPT,
    Nama commands               load somesong
    Ecasound commands           cs-is-valid
    Shell expressions           ! ls
-   Perl code                   eval 2*3     # no need for 'print'
+   Perl code                   eval 2*3     # prints '6'
 
 PROMPT
 
@@ -295,7 +295,7 @@ The help command ('help', 'h') can take several arguments.
 help <command>          - show help for <command>
 help <fragment>         - show help for all commands matching /<fragment>/
 help <topic_number>     - list commands under topic <topic_number> below
-help yml                - browse the YAML command source (authoritative)
+help yml                - browse the YAML command source
 
 help is available for the following topics:
 

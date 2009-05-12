@@ -1479,13 +1479,6 @@ sub generate_setup { # create chain setup
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
-=comment
-$mixdown_bus->apply($tn{Mixdown});
-$master_bus->apply($tn{Master});
-$tracker_bus->apply($tracker->all());
-$null_bus->apply($null_group->all());
-=cut
-
 		map{ eliminate_loops($_) } all_chains();
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);

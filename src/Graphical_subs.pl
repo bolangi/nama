@@ -1226,11 +1226,9 @@ sub init_namapalette {
 	$debug2 and print "&init_namapalette\n";
 	%namapalette = ( 
 			'RecForeground' => 'Black',
-			#'RecBackground' => 'LightPink',
 			'RecBackground' => '#f22c92f088d3',
 			'MonForeground' => 'Black',
-			#'MonBackground' => 'AntiqueWhite',
-			'MonBackground' => '#edd2c18c6ddf',
+			'MonBackground' => '#9ba79cbbcc8a',
 			'OffForeground' => 'Black',
 			'OffBackground' => $old_bg,
 	) unless %namapalette; # i.e. not if already loaded
@@ -1243,16 +1241,16 @@ sub init_namapalette {
 			'ClockForeground' 	=> 'Red',
 			'ClockBackground' 	=> $old_bg,
 			'Capture' 			=> $rec,
-			'Play' 				=> 'LightGreen',
-			'Mixdown' 			=> 'Yellow',
+			'Play' 				=> $mon,
+			'Mixdown' 			=> '#ffddffffbeb7',
 			'GroupForeground' 	=> 'Red',
 			'GroupBackground' 	=> $old_bg,
 			'SendForeground' 	=> 'Black',
 			'SendBackground' 	=> $mon,
 			'SourceForeground' 	=> 'Black',
 			'SourceBackground' 	=> $rec,
-			'Mute'				=> 'Brown',
-			'MarkArmed'			=> 'Yellow',
+			'Mute'				=> '#a5a1a5a1a5a1',
+			'MarkArmed'			=> '#93a9ada1deb7',
 	) unless $namapalette{Play}; # i.e. not if already loaded
 
 }
