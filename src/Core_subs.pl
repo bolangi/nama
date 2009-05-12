@@ -3663,6 +3663,20 @@ sub master_off {
 	$mastering_mode = 0;
 }
 		
+my %volpan = (
+	Eq => {},
+	Low => {},
+	Mid => {},
+	High => {},
+	Boost => {vol => 1},
+);
+
+sub needs_vol_pan {
+	my ($track_name, $type) = @_;
+	return 1 unless $volpan{$track_name};
+	return 1 if $volpan{$track_name}{$type};
+	return 0;
+}
 sub pan_check {
 	my $new_position = shift;
 	my $current = $copp{ $this_track->pan }->[0];

@@ -251,7 +251,7 @@ __END__
 
 B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
 
-B<Nama> - Lightweight multitrack recorder/mixer
+B<Nama> - Lightweight recorder, mixer and mastering system
 
 =head1 SYNOPSIS
 
@@ -259,12 +259,10 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-B<Audio::Ecasound::Multitrack> provides class libraries for
-tracks and buses, and a track oriented user interface for managing 
-runs of the Ecasound audio-processing engine.
-
-B<Nama> is a lightweight recorder/mixer application that
-configures Ecasound as a single mixer bus.
+B<Nama> is a lightweight recorder/mixer application using
+Ecasound in the back end to provide effects processing,
+cut-and-paste, mastering, and other functions typically
+found in digital audio workstations.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>
@@ -613,15 +611,15 @@ and doodle modes.
 
 =head1 BUGS AND LIMITATIONS
 
-Several of Nama's advanced functions are available only through
-text commands.
+Preview and mastering modes, and cut-and-paste functioning
+(regions) are available only through text commands.
 
 Unneeded GUI volume and pan controls are provided for 
 mastering mode tracks. Only the volume control for the 
 Boost track is meaningful.
 
-You should not use track names Eq, Low, Mid, High or Boost
-if you intend to use the mastering mode.
+You should not use the following track names if you intend
+to use the mastering mode: Eq, Low, Mid, High or Boost.
 
 Positions are currently specified in seconds only.
 
