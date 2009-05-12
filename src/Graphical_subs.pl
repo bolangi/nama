@@ -629,78 +629,93 @@ sub track_gui {
 	map{$rw->AddItems($_)} @rw_items; 
 
  
-	# Volume
-
 	my $p_num = 0; # needed when using parameter controllers
-	my $vol_id = $ti{$n}->vol;
+	# Volume
+	
+	if ( need_vol_pan($ti{$n}->name, "vol") ){
 
-	local $debug = 0;
+		my $vol_id = $ti{$n}->vol;
 
-
-	$debug and print "vol cop_id: $vol_id\n";
-	my %p = ( 	parent => \$track_frame,
-			chain  => $n,
-			type => 'ea',
-			cop_id => $vol_id,
-			p_num		=> $p_num,
-			length => 300, 
-			);
+		local $debug = 0;
 
 
-	 $debug and do {my %q = %p; delete $q{parent}; print
-	 "=============\n%p\n",yaml_out(\%q)};
+		$debug and print "vol cop_id: $vol_id\n";
+		my %p = ( 	parent => \$track_frame,
+				chain  => $n,
+				type => 'ea',
+				cop_id => $vol_id,
+				p_num		=> $p_num,
+				length => 300, 
+				);
 
-	$vol = make_scale ( \%p );
-	# Mute
 
-	$mute = $track_frame->Button(
-		-command => sub { 
-			if ($copp{$vol_id}->[0]) {  # non-zero volume
-				$ti{$n}->set(old_vol_level => $copp{$vol_id}->[0]);
-				effect_update_copp_set( $vol_id, 0, 0);
-				$mute->configure(-background => $namapalette{Mute});
-				$mute->configure(-activebackground => $namapalette{Mute});
-			}
-			else {
-				effect_update_copp_set($vol_id, 0,$ti{$n}->old_vol_level);
-				$ti{$n}->set(old_vol_level => 0);
-				$mute->configure(-background => $old_bg);
-				$mute->configure(-activebackground => $old_abg);
-			}
-		}	
-	  );
+		 $debug and do {my %q = %p; delete $q{parent}; print
+		 "=============\n%p\n",yaml_out(\%q)};
 
-	# Unity
+		$vol = make_scale ( \%p );
+		# Mute
 
-	$unity = $track_frame->Button(
-	  		-command => sub { 
-	 			effect_update_copp_set($vol_id, 0, 100);
-			}
-	  );
+		$mute = $track_frame->Button(
+			-command => sub { 
+				if ($copp{$vol_id}->[0]) {  # non-zero volume
+					$ti{$n}->set(old_vol_level => $copp{$vol_id}->[0]);
+					effect_update_copp_set( $vol_id, 0, 0);
+					$mute->configure(-background => $namapalette{Mute});
+					$mute->configure(-activebackground => $namapalette{Mute});
+				}
+				else {
+					effect_update_copp_set($vol_id, 0,$ti{$n}->old_vol_level);
+					$ti{$n}->set(old_vol_level => 0);
+					$mute->configure(-background => $old_bg);
+					$mute->configure(-activebackground => $old_abg);
+				}
+			}	
+		  );
 
+		# Unity
+
+		$unity = $track_frame->Button(
+				-command => sub { 
+					effect_update_copp_set($vol_id, 0, 100);
+				}
+		  );
+	} else {
+
+		$vol = $track_frame->Label;
+		$mute = $track_frame->Label;
+		$unity = $track_frame->Label;
+
+	}
+
+	if ( need_vol_pan($ti{$n}->name, "pan") ){
 	  
-	# Pan
-	
-	my $pan_id = $ti{$n}->pan;
-	
-	$debug and print "pan cop_id: $pan_id\n";
-	$p_num = 0;           # first parameter
-	my %q = ( 	parent => \$track_frame,
-			chain  => $n,
-			type => 'epp',
-			cop_id => $pan_id,
-			p_num		=> $p_num,
-			);
-	# $debug and do { my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) };
-	$pan = make_scale ( \%q );
+		# Pan
+		
+		my $pan_id = $ti{$n}->pan;
+		
+		$debug and print "pan cop_id: $pan_id\n";
+		$p_num = 0;           # first parameter
+		my %q = ( 	parent => \$track_frame,
+				chain  => $n,
+				type => 'epp',
+				cop_id => $pan_id,
+				p_num		=> $p_num,
+				);
+		# $debug and do { my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) };
+		$pan = make_scale ( \%q );
 
-	# Center
+		# Center
 
-	$center = $track_frame->Button(
-	  	-command => sub { 
-			effect_update_copp_set($pan_id, 0, 50);
-		}
-	  );
+		$center = $track_frame->Button(
+			-command => sub { 
+				effect_update_copp_set($pan_id, 0, 50);
+			}
+		  );
+	} else { 
+
+		$pan = $track_frame->Label;
+		$center = $track_frame->Label;
+	}
 	
 	my $effects = $effect_frame->Frame->pack(-fill => 'both');;
 

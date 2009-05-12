@@ -1084,6 +1084,7 @@ sub remove_small_wavs {
 
 sub add_volume_control {
 	my $n = shift;
+	return unless need_vol_pan($ti{$n}->name, "vol");
 	
 	my $vol_id = cop_add({
 				chain => $n, 
@@ -1096,6 +1097,7 @@ sub add_volume_control {
 }
 sub add_pan_control {
 	my $n = shift;
+	return unless need_vol_pan($ti{$n}->name, "pan");
 	
 	my $pan_id = cop_add({
 				chain => $n, 
@@ -3606,24 +3608,6 @@ sub add_mastering_tracks {
 
  } @names;
 
-
-	# remove spurious volume/pan controls
-	
-	# most need neither
-	
-	my @no_vol_or_pan = qw(Eq Low Mid High);
-	map{ 
-		remove_effect($tn{$_}->vol);
-		$tn{$_}->set(vol => undef);
-		remove_effect($tn{$_}->pan);
-		$tn{$_}->set(pan => undef);
-	} @no_vol_or_pan;
-
-	# Boost track keeps vol control (and will get one more)
-	
-	remove_effect( $tn{Boost}->pan );
-	$tn{Boost}->set(pan => undef);
-
 }
 
 sub add_mastering_effects {
@@ -3653,7 +3637,7 @@ sub add_mastering_effects {
 
 	$this_track = $tn{Boost};
 	
-	command_process("add_effect $limiter"); # insert before vol
+	command_process("append_effect $limiter"); # insert after vol
  
 }
 
@@ -3671,7 +3655,7 @@ my %volpan = (
 	Boost => {vol => 1},
 );
 
-sub needs_vol_pan {
+sub need_vol_pan {
 	my ($track_name, $type) = @_;
 	return 1 unless $volpan{$track_name};
 	return 1 if $volpan{$track_name}{$type};

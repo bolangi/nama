@@ -342,14 +342,14 @@ sub t_add_ctrl {
 	if ( $effect_i{$code} ) {} # do nothing
 	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
 	else { warn "effect code not found: $code\n"; return }
-	print "code: ", $code, $/;
+	$debug and print "code: ", $code, $/;
 		my %p = (
 				chain => $cops{$parent}->{chain},
 				parent_id => $parent,
 				values => $values,
 				type => $code,
 			);
-			print "adding effect\n";
+			#print "adding effect\n";
 			# print (yaml_out(\%p));
 		add_effect( \%p );
 }
