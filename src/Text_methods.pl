@@ -426,13 +426,13 @@ sub t_add_effect {
 	package ::;
 	my ($code, $values)  = @_;
 	$code = effect_code( $code );	
-	print "code: ", $code, $/;
+	$debug and print "code: ", $code, $/;
 		my %p = (
 			chain => $this_track->n,
 			values => $values,
 			type => $code,
 			);
-			print "adding effect\n";
+			#print "adding effect\n";
 			$debug and print (yaml_out(\%p));
 		add_effect( \%p );
 }

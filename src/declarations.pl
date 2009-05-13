@@ -391,6 +391,6 @@ our (
 	$old_group_rw, # previous $tracker->rw setting
 	%old_rw,       # previous track rw settings (indexed by track name)
 	
-
+	@mastering_track_names, # reserved for mastering mode
 
 );

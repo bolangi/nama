@@ -3596,7 +3596,6 @@ sub master_on {
 
 sub add_mastering_tracks {
 
-	my @names = qw(Eq Low Mid High Boost);
 
 	map{ 
 		my $track = ::MasteringTrack->new(
@@ -3606,7 +3605,7 @@ sub add_mastering_tracks {
 		);
 		$ui->track_gui( $track->n );
 
- } @names;
+ } @mastering_track_names;
 
 }
 

@@ -87,18 +87,21 @@ sub new {
 	#print "test 1\n";
 	if ($by_name{$vals{name}}){
 	#print "test 2\n";
-			my $track = $by_name{$vals{name}};
-			# print $track->}ame, " hide: ", $track->hide, $/;
-			if ($track->hide) {
-				$track->set(hide => 0);
-				return $track;
+	my $track = $by_name{$vals{name}};
+		# print $track->}ame, " hide: ", $track->hide, $/;
+		if ($track->hide) {
+			$track->set(hide => 0);
+			return $track;
 
-			} else {
-		carp  ("track name already in use: $vals{name}\n"), return
+		} else {
+		print("track name already in use: $vals{name}\n"), return
 		 if $track_names{$vals{name}}; 
-
 		}
 	}
+	print("reserved track name: $vals{name}\n"), return
+	 if  ! $::mastering_mode 
+		and grep{$vals{name} eq $_} @::mastering_track_names ; 
+
 	my $n = $vals{n} ? $vals{n} : ++$n; 
 	my $object = bless { 
 

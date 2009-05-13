@@ -92,6 +92,7 @@ $old_snapshot = {};
 jack_update(); # to be polled by Event
 $memoize = 0;
 
+@mastering_track_names = qw(Eq Low Mid High Boost);
 
 ## Load my modules
 
