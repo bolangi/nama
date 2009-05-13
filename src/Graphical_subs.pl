@@ -531,6 +531,7 @@ sub track_gui {
 					
 					refresh_track($n);
 					refresh_group();
+					reconfigure_engine();
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
@@ -538,6 +539,7 @@ sub track_gui {
 					$ti{$n}->set(rw => "MON");
 					refresh_track($n);
 					refresh_group();
+					reconfigure_engine();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
@@ -545,6 +547,7 @@ sub track_gui {
 					$ti{$n}->set(rw => "OFF");
 					refresh_track($n);
 					refresh_group();
+					reconfigure_engine();
 			}],
 		);
 	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -574,7 +577,8 @@ sub track_gui {
 		sub { 
 			$ti{$n}->set( active => $v );
 			return if $ti{$n}->rec_status eq "REC";
-			$version->configure( -text=> $ti{$n}->current_version ) 
+			$version->configure( -text=> $ti{$n}->current_version );
+			reconfigure_engine();
 			}
 					);
 	}
@@ -608,7 +612,9 @@ sub track_gui {
 							return if eval_iam("engine-status") eq 'running';
 			#				$ti{$n}->set(rw  => "MON");
 							$ti{$n}->send($v);
-							refresh_track($n) }
+							refresh_track($n);
+							reconfigure_engine();
+ 						}
 				 		)
 				}
 	$rw = $track_frame->Menubutton(
