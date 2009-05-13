@@ -257,7 +257,8 @@ sub transport_gui {
 # 			-command => sub {arm()}
 # 						 );
 
-# preview_button();
+#preview_button();
+#mastering_button();
 
 }
 sub time_gui {
@@ -347,50 +348,39 @@ sub time_gui {
 #  the following is based on previous code for multiple buttons
 #  needs cleanup
 
-# sub preview_button { 
-# 	$debug2 and print "&preview\n";
-# 	@_ = discard_object(@_);
-# 	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
-# 	my @oid_name;
-# 	for my $rule ( ::Rule::all_rules ){
-# 		my $name = $rule->name;
-# 		next unless $name eq 'rec_file'; # REC_FILE only!!!
-# 		my $status = $rule->status;
-# 		#print "gui oid name: $name status: $status\n";
-# 		#next if $name =~ m/setup|mix_|mixer|rec_file|multi/i;
-# 		push @oid_name, $name;
-# 		
-# 		my $oid_button = $transport_frame->Button( 
-# 			# -text => ucfirst $name,
-# 			-text => "Preview",
-# 		);
-# 		$oid_button->configure(
-# 			-command => sub { 
-# 				$rule->set(status => ! $rule->status);
-# 				$oid_button->configure( 
-# 			-background => 
-# 					$rule->status ? $old_bg : $namapalette{Preview} ,
-# 			-activebackground => 
-# 					$rule->status ? $old_bg : $namapalette{ActivePreview} ,
-# 			-text => 
-# 					$rule->status ? 'Preview' : 
-# 'PREVIEW MODE: Record WAV DISABLED. Press again to release.'
-# 					
-# 					);
-# 
-# 			if ($rule->status) { # rec_file enabled
-# 				arm()
-# 			} else { 
-# 				preview();
-# 			}
-# 
-# 			});
-# 		push @widget_o, $oid_button;
-# 	}
-# 		
-# 	map { $_ -> pack(-side => 'left') } (@widget_o);
-# 	
-# }
+sub preview_button { 
+	$debug2 and print "&preview\n";
+	@_ = discard_object(@_);
+	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
+	my $rule = $rec_file;
+	my $status = $rule->status;
+	my $oid_button = $transport_frame->Button( );
+	$oid_button->configure(
+		-command => sub { 
+			$rule->set(status => ! $rule->status);
+			$oid_button->configure( 
+		-background => 
+				$rule->status ? $old_bg : $namapalette{Preview} ,
+		-activebackground => 
+				$rule->status ? $old_bg : $namapalette{ActivePreview} ,
+		-text => 
+				$rule->status ? 'Preview' : 'PREVIEW MODE'
+					
+					);
+
+			if ($rule->status) { # rec_file enabled
+				arm()
+			} else { 
+				preview();
+			}
+
+			});
+		push @widget_o, $oid_button;
+	}
+		
+	map { $_ -> pack(-side => 'left') } (@widget_o);
+	
+}
 sub paint_button {
 	@_ = discard_object(@_);
 	my ($button, $color) = @_;
