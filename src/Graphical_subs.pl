@@ -376,7 +376,6 @@ sub preview_button {
 
 			});
 		push @widget_o, $oid_button;
-	}
 		
 	map { $_ -> pack(-side => 'left') } (@widget_o);
 	
