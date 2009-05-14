@@ -412,7 +412,6 @@ sub user {
 
 sub source { # command for setting, showing track source
 	my ($track, $source) = @_;
-
 	if ( ! $source ){
 		if ( 	$track->source_select eq 'jack'
 				and $track->jack_source ){
@@ -605,6 +604,7 @@ sub client_status {
 }
 sub source_status {
 	my $track = shift;
+	return if (ref $track) =~ /MasteringTrack/;
 	client_status($track->rec_status, $track->source, 'output')
 }
 sub send_status {

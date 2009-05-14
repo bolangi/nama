@@ -152,7 +152,11 @@ sub cancel_wraparound {
 }
 
 
-sub placeholder { $use_placeholders ? q(--) : q() }
+sub placeholder { 
+	my $val = shift;
+	return $val if $val;
+	$use_placeholders ? q(--) : q() 
+}
 
 sub show_tracks {
     no warnings;
@@ -160,14 +164,17 @@ sub show_tracks {
     map {     push @format_fields,  
             $_->n,
             $_->name,
-            $_->current_version || placeholder(),
-            lc $_->rw,
+            placeholder( $_->current_version ),
+			(ref $_) =~ /MasteringTrack/ 
+					? placeholder() 
+					: lc $_->rw,
             $_->rec_status,
-            $_->name =~ /Master|Mixdown/ ? placeholder() : 
-					$_->source_status ? $_->source_status : placeholder(),
-			$_->send_status ? $_->send_status : placeholder(),
-			$copp{$_->vol}->[0],
-			$copp{$_->pan}->[0],
+            $_->name =~ /Master|Mixdown/ 
+					? placeholder() 
+					: placeholder($_->source_status),
+			placeholder($_->send_status),
+			placeholder($copp{$_->vol}->[0]),
+			placeholder($copp{$_->pan}->[0]),
             #(join " ", @{$_->versions}),
 
         } grep{ ! $_-> hide} @tracks;
