@@ -35,6 +35,7 @@ our (
 	$ecasound_globals, #  Command line switches XX check
 
 	$default,		# the internal default configuration file, as string
+	$default_palette_yml, # not horriffic is about all I can say
 					
 	$raw_to_disk_format,
 	$mix_to_disk_format,

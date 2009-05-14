@@ -274,6 +274,8 @@ sub prepare {
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
 	
+	initialize_rules(); # needed for transport_gui
+
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
@@ -3057,6 +3059,7 @@ sub assign_var {
 	assign_vars(
 				source => $source,
 				vars   => \@vars,
+		#		format => 'yaml', # breaks, stupid!
 				class => '::');
 }
 sub retrieve_state {

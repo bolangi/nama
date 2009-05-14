@@ -180,7 +180,7 @@ sub assign_vars {
 
 ### figure out what to do with input
 
-	if (-f $source){
+	if ($source !~ /\n/ and -f $source){
 		if ( $source =~ /\.yml$/i or $format eq 'yaml'){
 				$debug and print "found a yaml file: $source\n";
 				$ref = yaml_in($source);

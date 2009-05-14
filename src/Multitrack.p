@@ -201,7 +201,7 @@ sub show_unit {}
 sub add_effect_gui {}
 sub remove_effect_gui {}
 sub marker {}
-sub initialize_palette {}
+sub init_palette {}
 sub save_palette {}
 sub paint_mute_buttons {}
 sub remove_track_gui {}
@@ -244,6 +244,10 @@ $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 $default = <<'FALLBACK_CONFIG';
 [% qx(cat ./namarc) %]
 FALLBACK_CONFIG
+
+$default_palette_yml = <<'PALETTE';
+[% qx(cat ./palette.yml) %]
+PALETTE
 
 1;
 __END__

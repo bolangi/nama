@@ -474,11 +474,11 @@ sub copy_master_track_effects {
 }
 
 sub mixplay { 
-	print "Setting mixdown_track playback mode.\n";
+	print "Setting mixdown playback mode.\n";
 	$mixdown_track->set(rw => 'MON');
 	$tracker->set(rw => 'OFF');}
 sub mixoff { 
-	print "Leaving mixdown_track mode.\n";
+	print "Leaving mixdown mode.\n";
 	$mixdown_track->set(rw => 'OFF');
 	$tracker->set(rw => 'MON')}
 

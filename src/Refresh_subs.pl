@@ -55,7 +55,6 @@ $debug and print "group status: $status\n";
 }
 sub refresh_track {
 	
-	#my $debug = 1;
 	@_ = discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_track\n";

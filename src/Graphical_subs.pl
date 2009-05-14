@@ -4,13 +4,14 @@ sub init_gui {
 
 	$debug2 and print "&init_gui\n";
 
-	init_palettefields();
+	init_palettefields(); # keys only
 
 
 ### 	Tk root window 
 
 	# Tk main window
  	$mw = MainWindow->new;  
+	get_saved_colors();
 	$set_event = $mw->Label();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->title("Ecasound/Nama"); 
@@ -40,7 +41,6 @@ sub init_gui {
 											-anchor => 'nw');
 
 	$project_label = $mw->Label->pack(-fill => 'both');
-	get_saved_colors();
 
 	$time_frame = $mw->Frame(
 	#	-borderwidth => 20,
@@ -56,7 +56,7 @@ sub init_gui {
 		-side => 'bottom', 
 		-fill => 'both');
 	$transport_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	#$oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+	# $oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
@@ -257,7 +257,7 @@ sub transport_gui {
 # 			-command => sub {arm()}
 # 						 );
 
-#preview_button();
+# preview_button();
 #mastering_button();
 
 }
@@ -356,13 +356,14 @@ sub preview_button {
 	my $status = $rule->status;
 	my $oid_button = $transport_frame->Button( );
 	$oid_button->configure(
+		-text => 'Preview',
 		-command => sub { 
 			$rule->set(status => ! $rule->status);
 			$oid_button->configure( 
 		-background => 
 				$rule->status ? $old_bg : $namapalette{Preview} ,
-		-activebackground => 
-				$rule->status ? $old_bg : $namapalette{ActivePreview} ,
+		#-activebackground => 
+		#		$rule->status ? $old_bg : $namapalette{ActivePreview} ,
 		-text => 
 				$rule->status ? 'Preview' : 'PREVIEW MODE'
 					
@@ -403,12 +404,12 @@ sub flash_ready {
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
 	project_label_configure(-background => $color) unless $preview;
-	$event_id{tk_flash_ready}->cancel() if defined $event_id{tk_flash_ready};
-	$event_id{tk_flash_ready} = $set_event->after(3000, 
-		sub{ length_display(-background => $old_bg);
-			 project_label_configure(-background => 'antiquewhite') 
- }
-	);
+# 	$event_id{tk_flash_ready}->cancel() if defined $event_id{tk_flash_ready};
+# 	$event_id{tk_flash_ready} = $set_event->after(3000, 
+# 		sub{ length_display(-background => $off);
+# 			 project_label_configure(-background => $off) 
+# }
+# );
 }
 sub group_gui {  
 	@_ = discard_object(@_);
@@ -560,6 +561,7 @@ sub track_gui {
 			-justify => 'left');
 	$version = $track_frame->Menubutton( 
 					-text => $stub,
+					# -relief => 'sunken',
 					-tearoff => 0);
 	my @versions = '';
 	#push @versions, @{$ti{$n}->versions} if @{$ti{$n}->versions};
@@ -584,6 +586,7 @@ sub track_gui {
 	}
 
 	$ch_r = $track_frame->Menubutton(
+					# -relief => 'groove',
 					-tearoff => 0,
 				);
 	my @range;
@@ -603,6 +606,7 @@ sub track_gui {
 	}
 	$ch_m = $track_frame->Menubutton(
 					-tearoff => 0,
+					# -relief => 'groove',
 				);
 				for my $v ("off",3..10) {
 					$ch_m->radiobutton(
@@ -620,6 +624,7 @@ sub track_gui {
 	$rw = $track_frame->Menubutton(
 		-text => $ti{$n}->rw,
 		-tearoff => 0,
+		# -relief => 'groove',
 	);
 	map{$rw->AddItems($_)} @rw_items; 
 
@@ -656,13 +661,11 @@ sub track_gui {
 					$ti{$n}->set(old_vol_level => $copp{$vol_id}->[0]);
 					effect_update_copp_set( $vol_id, 0, 0);
 					$mute->configure(-background => $namapalette{Mute});
-					$mute->configure(-activebackground => $namapalette{Mute});
 				}
 				else {
 					effect_update_copp_set($vol_id, 0,$ti{$n}->old_vol_level);
 					$ti{$n}->set(old_vol_level => 0);
-					$mute->configure(-background => $old_bg);
-					$mute->configure(-activebackground => $old_abg);
+					$mute->configure(-background => $off);
 				}
 			}	
 		  );
@@ -780,7 +783,6 @@ sub remove_track_gui {
 sub paint_mute_buttons {
 	map{ $track_widget{$_}{mute}->configure(
 			-background 		=> $namapalette{Mute},
-			-activebackground 	=> $namapalette{Mute},
 
 			)} grep { $ti{$_}->old_vol_level}# muted tracks
 				map { $_->n } ::Track::all;  # track numbers
@@ -988,6 +990,7 @@ sub effect_button {
 	$widget = $track_frame->Menubutton(
 		-text => $label,
 		-tearoff =>0,
+		# -relief => 'raised',
 		-menuitems => [@items],
 	);
 	$widget;
@@ -1102,7 +1105,7 @@ sub make_scale {
 sub arm_mark_toggle { 
 	if ($markers_armed) {
 		$markers_armed = 0;
-		$mark_remove->configure( -background => $old_bg);
+		$mark_remove->configure( -background => $off);
 	}
 	else{
 		$markers_armed = 1;
@@ -1117,7 +1120,7 @@ sub marker {
 	#print $pos, " ", int $pos, $/;
 		$mark_widget{$pos} = $mark_frame->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
-			-background => $old_bg,
+			-background => $off,
 			-command => sub { mark($mark) },
 		)->pack(-side => 'left');
 }
@@ -1175,21 +1178,13 @@ sub get_saved_colors {
 
 
 	my $pal = join_path($project_root, $palette_file);
-	if (-f $pal){
-		print "$pal: found palette file, assigning palettes\n";
-		assign_var( $pal,
-			qw[%palette %namapalette]
-		);
+	-f $pal or $pal = $default_palette_yml;
+	assign_var( $pal, qw[%palette %namapalette]);
+	
 	*rec = \$namapalette{RecBackground};
 	*mon = \$namapalette{MonBackground};
 	*off = \$namapalette{OffBackground};
-	} else {
-		print "$pal: no palette file found, using default init\n";
-		init_palette();
-		init_namapalette();
-	}
-	#$old_bg = $palette{mw}{background};
-	#$old_bg = $project_label->cget('-background') unless $old_bg;
+
 	$old_abg = $palette{mw}{activeBackground};
 	$old_abg = $project_label->cget('-activebackground') unless $old_abg;
 	#print "1palette: \n", yaml_out( \%palette );
@@ -1199,70 +1194,6 @@ sub get_saved_colors {
 		keys %{$palette{mw}};	
 	#print "\nsetformat: \n", yaml_out(\%setformat);
 	$mw->setPalette( %setformat );
-}
-sub init_palette {
-	$debug2 and print "&init_palette\n";
-	
-# 	@palettefields, # set by setPalette method
-# 	@namafields,    # field names for color palette used by nama
-# 	%namapalette,     # nama's indicator colors
-# 	%palette,  # overall color scheme
-
-	my @parents = qw[
-		mw
-		ew
-	];
-
-# 		transport
-# 		mark
-# 		jump
-# 		clock
-# 		group
-# 		track
-# 		add
-
-	$old_bg = '#d915cc1bc3cf' unless $old_bg;
-	#print "old_bg: $old_bg\n";
-	$mw->setPalette( $old_bg );
-	map{ 	my $p = $_; # parent key
-			map{	$palette{$p}->{$_} = $parent{$p}->cget("-$_")
-						if $parent{$p}->cget("-$_") ;
-				} @palettefields;
-		} @parents;
-
-}
-sub init_namapalette {
-		
-	$debug2 and print "&init_namapalette\n";
-	%namapalette = ( 
-			'RecForeground' => 'Black',
-			'RecBackground' => '#f22c92f088d3',
-			'MonForeground' => 'Black',
-			'MonBackground' => '#9ba79cbbcc8a',
-			'OffForeground' => 'Black',
-			'OffBackground' => $old_bg,
-	) unless %namapalette; # i.e. not if already loaded
-
-	*rec = \$namapalette{RecBackground};
-	*mon = \$namapalette{MonBackground};
-	*off = \$namapalette{OffBackground};
-
-	%namapalette = ( %namapalette, 
-			'ClockForeground' 	=> 'Red',
-			'ClockBackground' 	=> $old_bg,
-			'Capture' 			=> $rec,
-			'Play' 				=> $mon,
-			'Mixdown' 			=> '#ffddffffbeb7',
-			'GroupForeground' 	=> 'Red',
-			'GroupBackground' 	=> $old_bg,
-			'SendForeground' 	=> 'Black',
-			'SendBackground' 	=> $mon,
-			'SourceForeground' 	=> 'Black',
-			'SourceBackground' 	=> $rec,
-			'Mute'				=> '#a5a1a5a1a5a1',
-			'MarkArmed'			=> '#93a9ada1deb7',
-	) unless $namapalette{Play}; # i.e. not if already loaded
-
 }
 sub colorset {
 	my ($widgetid, $field) = @_;
