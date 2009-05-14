@@ -616,17 +616,16 @@ and doodle modes.
 
 =head1 BUGS AND LIMITATIONS
 
-Preview and mastering modes, and cut-and-paste functioning
-(regions) are available only through text commands.
+Text commands are required to invoke preview and mastering modes, 
+and to define and shift track regions.
 
-Unneeded GUI volume and pan controls are provided for 
-mastering mode tracks. Only the volume control for the 
-Boost track is meaningful.
+Compensation for LADSPA plugin latencies and
+ADC and buffering delays during multitrack recording 
+is not fully implemented.
 
-You should not use the following track names if you intend
-to use the mastering mode: Eq, Low, Mid, High or Boost.
-
-Positions are currently specified in seconds only.
+The main module, Multitrack.pm is made from
+several source files.  Patches should be made 
+against the source files (see below.)
 
 =head1 EXPORT
 
@@ -636,11 +635,11 @@ None by default.
 
 CPAN, for the distribution.
 
-cpan Audio::Ecasound::Multitrack
+C<cpan Audio::Ecasound::Multitrack>
 
-You will also need to install Tk to use the GUI:
+You will need to install Tk to use the GUI.
 
-cpan Tk
+C<cpan Tk>
 
 You can pull the source code as follows: 
 
