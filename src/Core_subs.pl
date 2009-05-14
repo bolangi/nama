@@ -3116,7 +3116,8 @@ sub retrieve_state {
 		my %h = %$_; 
 		#print "old n: $h{n}\n";
 		#print "h: ", join " ", %h, $/;
-		delete $h{n};
+		#delete $h{n};
+		$::Track::n = $h{n} if $h{n};
 		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
 		# set the correct class for mastering tracks
