@@ -16,7 +16,7 @@ our (
 	%help_topic,    # help text indexed by topic
 	$use_pager,     # display lengthy output data using pager
 	$use_placeholders,  # use placeholders in show_track output
-	$text,          # Text::Format object
+	$text_wrap,          # Text::Format object
 
 	$ui, # object providing class behavior for graphic/text functions
 
@@ -301,6 +301,7 @@ our (
 	$mixdown_track,
 	$null_bus,
     $null, # group
+	$mastering, # group
 
 	# mastering buses
 	

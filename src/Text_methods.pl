@@ -1,33 +1,38 @@
 use Carp;
 use Text::Format;
 use ::Assign qw(:all);
-$text = new Text::Format {
-	columns 		=> 65,
+$text_wrap = new Text::Format {
+	columns 		=> 75,
 	firstIndent 	=> 0,
 	bodyIndent		=> 0,
 	tabstop			=> 4,
 };
 
 sub show_versions {
- 	print "All versions: ", join " ", @{$this_track->versions}, $/;
+ 	print "All versions: ", join " ", @{$this_track->versions}, $/
+		if @{$this_track->versions};
 }
 
 sub show_effects {
+	my @lines;
  	map { 
  		my $op_id = $_;
+		my @params;
  		 my $i = $effect_i{ $cops{ $op_id }->{type} };
- 		 print $op_id, ": " , $effects[ $i ]->{name},  " ";
- 		 my @pnames =@{$effects[ $i ]->{params}};
-			map{ print join " ", 
-			 	$pnames[$_]->{name}, 
-				$copp{$op_id}->[$_],'' 
+ 		 push @lines, $op_id. ": " . $effects[ $i ]->{name}.  "\n";
+ 		 my @pnames = @{$effects[ $i ]->{params}};
+			map{ push @lines,
+			 	"    " . $pnames[$_]->{name} . ": ".  $copp{$op_id}->[$_] . "\n";
 		 	} (0..scalar @pnames - 1);
-		 print $/;
+			#push @lines, join("; ", @params) . "\n";
  
  	 } @{ $this_track->ops };
+	print @lines;
+ 	
 }
 sub show_modifiers {
-	print "Modifiers: ",$this_track->modifiers, $/;
+	print "Modifiers: ",$this_track->modifiers, $/
+		if $this_track->modifiers;
 }
 sub show_region {
 	print "Start delay: ",
@@ -299,7 +304,7 @@ sub find_effect {
 # operator.
 # 
 # EFFECT
-	::pager( $text->paragraphs(@matches) , "\n" );
+	::pager( $text_wrap->paragraphs(@matches) , "\n" );
 	} else { print "No matching effects.\n\n" }
 }
 

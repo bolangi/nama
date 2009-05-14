@@ -954,6 +954,7 @@ sub initialize_project_data {
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');
 	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
+	$mastering = ::Group->new(name =>'Mastering');
 	$null    = ::Group->new(name => 'null');
 
 	#print yaml_out( \%::Track::track_names );
@@ -3118,6 +3119,8 @@ sub retrieve_state {
 		delete $h{n};
 		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
+		# set the correct class for mastering tracks
+		bless $track, '::MasteringTrack' if $track->group eq 'Mastering';
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
@@ -3604,7 +3607,7 @@ sub add_mastering_tracks {
 		my $track = ::MasteringTrack->new(
 			name => $_,
 			rw => 'MON',
-			group => 'mastering', # dummy group, not used
+			group => 'mastering', 
 		);
 		$ui->track_gui( $track->n );
 

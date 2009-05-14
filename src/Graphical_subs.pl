@@ -30,8 +30,8 @@ sub init_gui {
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
 		scrollregion =>[2,2,10000,2000],
-		-width => 900,
-		-height => 600,	
+		-width => 1200,
+		-height => 700,	
 		);
 # 		scrollregion =>[2,2,10000,2000],
 # 		-width => 1000,

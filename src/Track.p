@@ -837,18 +837,14 @@ use ::Object qw( 		name
 						
 						);
 
-sub group_last { }
-sub version {}
-sub monitor_version {}
 sub rec_status{
-
 	my $track = shift;
 	$::mastering_mode ? 'MON' :  'OFF';
 }
 no warnings;
-sub group_last {1}
-sub version {1}
-sub monitor_version {1}
+sub group_last {0}
+sub version {0}
+sub monitor_version {0}
 use warnings;
 
 
