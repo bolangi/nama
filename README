@@ -1,18 +1,17 @@
 =head1 Audio::Ecasound::Multitrack
 
-Audio::Ecasound::Multitrack provides classes for tracks and
-buses, a template system for signal routing and other
-infrastructure to manage multitrack recording and mixing
-using the Ecasound audio processing engine.
+This distribution provides B<Nama> an Ecasound-based recorder/mixer
+with many DAW-like functions.
 
-The distribution includes Nama, a recorder-mixer
-application with command-line and graphic interfaces.
+Nama has both graphic and command-line and graphic interfaces.
 
-The graphic interface uses the Tk widget set. 
+The graphic interface uses the Tk widget set, with buttons
+and sliders. However it lacks a graphic display 
+of audio waveforms. 
 
 The command-line interface executes internal commands,
 Ecasound commands, perl code, and shell commands. It
-includes history and help functions. 
+includes history, help, and autocompletion.
 
 'Nama' is Japanese for 'live', describing live performances,
 raw fish and draft beer.
@@ -30,33 +29,11 @@ To install this module type the following:
 
 =head2 Perl Modules
 
-The following modules are pulled in automatically
-when installing from CPAN by the following command:
+Most Perl dependencies are pulled in automatically
+when installing via CPAN. The following will
+meet most users' needs.
 
-	cpan Audio::Ecasound::Multitrack
-	
-	Carp
-	Cwd
-	Storable 
-	Getopt::Std
-	Event
-	Audio::Ecasound
-	Parse::RecDescent
-	Data::YAML
-	File::Find::Rule
-	File::Spec::Link
-	IO::All
-	Term::Readline
-	Term::Readline::Gnu
-	Module::Load::Conditional	
-
-You will probably want Tk if you plan to run Nama
-in GUI mode and Time::HiRes for access to the Linux
-kernel's high-resolution timer. These modules
-are not pulled in automatically, so you'll
-need to install yourself if you want them.
-
-	cpan Tk Time::HiRes
+    cpan Tk Time::HiRes Audio::Ecasound::Multitrack 
 
 =head2 Libraries
 
@@ -75,6 +52,9 @@ installed in a directory in your execution PATH.
 
 'file', a BSD utility program that detects file formats must
 be installed for Nama to correctly identify stereo files.
+
+Nama's mastering mode uses a number of LADSPA plugins.
+These specified in the configuration file .namarc. 
 
 =head1 BUILD INSTRUCTIONS
 

@@ -613,13 +613,17 @@ and doodle modes.
 Text commands are required to invoke preview and mastering modes, 
 and to define and shift track regions.
 
-Compensation for LADSPA plugin latencies and
-ADC and buffering delays during multitrack recording 
-is not fully implemented.
+Compensation for LADSPA plugin latencies and ADC and
+buffering delays during multitrack recording is not fully
+implemented.
 
-The main module, Multitrack.pm is made from
-several source files.  Patches should be made 
-against the source files (see below.)
+The default GUI colors aren't great.
+
+=head1 PATCHES
+
+The main module, Multitrack.pm is a concatenation of
+several source files.  Patches should be made against the
+source files (see below.)
 
 =head1 EXPORT
 
