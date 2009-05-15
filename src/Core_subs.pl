@@ -1496,9 +1496,9 @@ sub arm {
 	$debug2 and print "&arm\n";
 	exit_preview();
 	#adjust_latency();
-	reconfigure_engine()
-		or print "No change in setup. Engine ready.\n";
-	#if( generate_setup() ){ connect_transport() };
+#	reconfigure_engine()
+#		or print "No change in setup. Engine ready.\n";
+	if( generate_setup() ){ connect_transport() };
 }
 sub preview {
 	$debug2 and print "&preview\n";
@@ -3513,6 +3513,7 @@ sub automix {
 
 	# turn off mix_file
 	$mix_down->set(   status => 0);
+	# confusing, $mix_down similar to $mixdown (group)
 
 	# turn on mix_down_ev
 	$mix_down_ev->set(status => 1);
@@ -3558,10 +3559,10 @@ sub automix {
 	}
 	remove_effect($ev);
 	
-	# turn off mix_null
+	### turn off mix_null
 	$mix_down_ev->set(status => 0);
 
-	# turn on mix_file
+	### turn on mix_file
 	$mix_down->set(status => 1);
 
 	### mixdown
@@ -3572,7 +3573,7 @@ sub automix {
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
-	# turn on mixer output
+	### turn on mixer output
 	command_process('mixplay');
 
 #	no Smart::Comments;
