@@ -110,6 +110,7 @@ our (
 					# per track or per project?
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
+	%copp_exp,      # for log-scaled sliders
 
 # auxiliary track information - saving not required
 

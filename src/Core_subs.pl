@@ -1754,7 +1754,8 @@ sub transport_status {
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
-	print "\nPress SPACE to start or stop engine.\n\n";
+	print "\nPress SPACE to start or stop engine.\n\n"
+		unless (ref $ui) =~ /Graphical/;
 }
 sub start_transport { 
 	my $no_mute = shift;
@@ -3310,10 +3311,8 @@ sub process_line {
 	my ($user_input) = @_;
 	$debug and print "user input: $user_input\n";
 	if (defined $user_input and $user_input !~ /^\s*$/) {
-		#if $user_input =~ 
-		#		/mixdown|mixplay|mixoff|add_track|rec|mon|off|source|send|stereo|mono/
 		$term->addhistory($user_input) 
-		unless $user_input eq $previous_text_command;
+			unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
 		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
@@ -3608,7 +3607,7 @@ sub add_mastering_tracks {
 		my $track = ::MasteringTrack->new(
 			name => $_,
 			rw => 'MON',
-			group => 'mastering', 
+			group => 'Mastering', 
 		);
 		$ui->track_gui( $track->n );
 

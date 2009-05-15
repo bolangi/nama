@@ -61,7 +61,7 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 0; # subroutine names
+$debug2 = 1; # subroutine names
 $debug = 0; # debug statements
 
 ## The names of helper loopback devices:
@@ -153,10 +153,8 @@ sub loop {
 	$term->tkRunning(1);
     $OUT = $term->OUT || \*STDOUT;
 	while (1) {
-    my ($user_input) = $term->readline($prompt) ;
-	next if $user_input =~ /^\s*$/;
-     $term->addhistory($user_input) ;
-	command_process( $user_input );
+		my ($user_input) = $term->readline($prompt) ;
+		process_line( $user_input );
 	}
 }
 

@@ -43,6 +43,7 @@
 						%cops 			
 						$cop_id 		
 						%copp 			
+						%copp_exp
 						%marks			
 						$unit			
 						%oid_status		

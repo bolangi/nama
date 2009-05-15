@@ -1026,6 +1026,7 @@ sub make_scale {
 
 	$debug and print "to: ", $effects[$i]->{params}->[$p]->{end}, "\n";
 	$debug and print "p: $p code: $code\n";
+	$debug and print "is_log_scale: ".is_log_scale($i,$p), "\n";
 
 	# set display type to individually specified value if it exists
 	# otherwise to the default for the controller class
@@ -1045,37 +1046,32 @@ sub make_scale {
 		my $controller = $frame->Scale(
 			-variable => \$copp{$id}->[$p],
 			-orient => 'horizontal',
-			-from   =>   $effects[$i]->{params}->[$p]->{begin},
-			-to   =>     $effects[$i]->{params}->[$p]->{end},
-			-resolution => ($effects[$i]->{params}->[$p]->{resolution} 
-				?  $effects[$i]->{params}->[$p]->{resolution}
-				: abs($effects[$i]->{params}->[$p]->{end} - 
-					$effects[$i]->{params}->[$p]->{begin} ) > 30 
-						? 1 
-						: abs($effects[$i]->{params}->[$p]->{end} - 
-							$effects[$i]->{params}->[$p]->{begin} ) / 100),
+			-from   =>  $effects[$i]->{params}->[$p]->{begin},
+			-to     =>  $effects[$i]->{params}->[$p]->{end},
+			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
 		  -command => sub { effect_update($id, $p, $copp{$id}->[$p]) }
 		  );
 
 		# auxiliary field for logarithmic display
-		if ($effects[$i]->{params}->[$p]->{hint} =~ /logarithm/ )
+		if ( is_log_scale($i, $p)  )
 		#	or $code eq 'ea') 
-		
 			{
 			my $log_display = $frame->Label(
 				-text => exp $effects[$i]->{params}->[$p]->{default},
 				-width => 5,
 				);
 			$controller->configure(
+				-variable => \$copp_exp{$id}->[$p],
 		  		-command => sub { 
-					effect_update($id, $p, exp $copp{$id}->[$p]);
+					$copp{$id}->[$p] = exp $copp_exp{$id}->[$p];
+					effect_update($id, $p, $copp{$id}->[$p]);
 					$log_display->configure(
 						-text => 
-						$effects[$i]->{params}->[$p]->{name} =~ /hz/i
-							? int exp $copp{$id}->[$p]
-							: dn(exp $copp{$id}->[$p], 1)
+						$effects[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
+							? int $copp{$id}->[$p]
+							: dn($copp{$id}->[$p], 1)
 						);
 					}
 				);
@@ -1102,6 +1098,21 @@ sub make_scale {
 	else { croak "missing or unexpected display type: $display_type" }
 
 }
+
+sub is_log_scale {
+	my ($i, $p) = @_;
+	$effects[$i]->{params}->[$p]->{hint} =~ /logarithm/ 
+}
+sub resolution {
+	my ($i, $p) = @_;
+	my $res = $effects[$i]->{params}->[$p]->{resolution};
+	return $res if $res;
+	my $end = $effects[$i]->{params}->[$p]->{end};
+	my $beg = $effects[$i]->{params}->[$p]->{begin};
+	return 1 if abs($end - $beg) > 30;
+	return abs($end - $beg)/100
+}
+
 sub arm_mark_toggle { 
 	if ($markers_armed) {
 		$markers_armed = 0;
