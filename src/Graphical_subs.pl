@@ -23,7 +23,7 @@ sub init_gui {
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
 	$ew->deiconify; 
-	$ew->withdraw;
+#	$ew->withdraw;
 	$parent{ew} = $ew;
 
 	

@@ -1,4 +1,8 @@
-=head1 Audio::Ecasound::Multitrack
+=head1 NAME
+
+Nama - Ecasound-based recorder, mixer and mastering system
+
+=head1 About 
 
 This distribution provides B<Nama> an Ecasound-based recorder/mixer
 with many DAW-like functions.
