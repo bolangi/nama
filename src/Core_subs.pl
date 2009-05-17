@@ -268,7 +268,7 @@ sub prepare {
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
-	prepare_command_dispatch(); 
+	# prepare_command_dispatch();  # unused
 
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
@@ -454,6 +454,12 @@ Loading project "untitled".
 
  1;
 
+}
+sub rememoize {
+	return unless $memoize;
+	package ::Wav;
+	unmemoize('candidates');
+	memoize(  'candidates');
 }
 
 sub initialize_rules {
@@ -976,6 +982,9 @@ sub initialize_project_data {
 }
 ## track and wav file handling
 
+# create read-only track pointing at WAV files of specified
+# track name in a different project
+
 sub add_track_alias_project {
 	my ($name, $track, $project) = @_;
 	my $dir =  join_path(project_root(), $project, '.wav'); 
@@ -991,6 +1000,9 @@ sub add_track_alias_project {
 	}
 }
 
+# create read-only track pointing at WAV files of specified
+# name in current project
+
 sub add_track_alias {
 	my ($name, $track) = @_;
 	my $target; 
@@ -999,6 +1011,7 @@ sub add_track_alias {
 	add_track(  $name, target => $target );
 }
 
+# usual track
 
 sub add_track {
 
@@ -1111,6 +1124,10 @@ sub add_pan_control {
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
+
+# not used at present. we are probably going to offset the playat value if
+# necessary
+
 sub add_latency_compensation {
 	print('LADSPA L/C/R Delay effect not found.
 Unable to provide latency compensation.
@@ -1128,14 +1145,7 @@ Unable to provide latency compensation.
 	$ti{$n}->set(latency => $id);  # save the id for next time
 	$id;
 }
-## version functions
 
-
-sub mon_vert {
-	my $ver = shift;
-	$tracker->set(version => $ver);
-	$ui->refresh();
-}
 ## chain setup generation
 
 
@@ -1145,6 +1155,8 @@ sub all_chains {
 	map{ $_->n} @active_tracks if @active_tracks;
 }
 
+# return list of indices of user tracks with REC status
+
 sub user_rec_tracks {
 	my @user_tracks = ::Track::all();
 	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
@@ -1153,6 +1165,9 @@ sub user_rec_tracks {
 	return unless @user_rec_tracks;
 	map{ $_->n } @user_rec_tracks;
 }
+
+# return list of indices of user tracks with REC status
+
 sub user_mon_tracks {
 	my @user_tracks = ::Track::all();
 	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
@@ -1163,24 +1178,80 @@ sub user_mon_tracks {
 
 }
 
-sub really_recording {  # returns $output{file} entries
+# return $output{file} entries
+# - embedded format strings are included
+# - mixdown track is included
 
-#	scalar @record  
-	#print join "\n", "", ,"file recorded:", keys %{$outputs{file}}; # includes mixdown
-# 	map{ s/ .*$//; $_}  # unneeded
-	keys %{$outputs{file}}; # strings include format strings mixdown
+sub really_recording {  
+
+	keys %{$outputs{file}}; 
+}
+
+sub generate_setup { 
+
+# Create data structures representing chain setup.
+# This step precedes write_chains(), i.e. writing Setup.ecs.
+
+	$debug2 and print "&generate_setup\n";
+
+
+	%inputs = %outputs 
+			= %post_input 
+			= %pre_output 
+			= @input_chains 
+			= @output_chains 
+			= ();
+	
+	# we don't want to go further unless there are signals
+	# to process
+	
+	my @tracks = ::Track::all();
+
+	shift @tracks; # drop Master
+
+	my $have_source = join " ", map{$_->name} 
+								grep{ $_ -> rec_status ne 'OFF'} 
+								@tracks;
+
+	#print "have source: $have_source\n";
+
+	if ($have_source) {
+
+		# process buses
+
+		$mixdown_bus->apply; # Rule:  mix_file
+		$master_bus->apply;  # Rules: mix_out, mix_link
+		$tracker_bus->apply;
+		$null_bus->apply;
+		if ($mastering_mode){
+			$mastering_stage1_bus->apply;
+			$mastering_stage2_bus->apply;
+			$mastering_stage3_bus->apply;
+		}
+		map{ eliminate_loops($_) } all_chains();
+
+		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
+		#print "\%outputs\n================\n", yaml_out(\%outputs);
+
+		write_chains();
+		return 1;
+	} else { print "No inputs found!\n";
+	return 0};
 }
 
 sub write_chains {
+
+	# generate Setup.ecs from %inputs and %outputs
+	# by pushing lines onto @inputs and @outputs
+	# and placing intermediate processing in %post_input and %pre_output
+
 	$debug2 and print "&write_chains\n";
 
-	# $bus->apply;
-	# $mixer->apply;
-	# $ui->write_chains
-
-	# we can assume that %inputs and %outputs will have the
-	# same lowest-level keys
+	# we assume that %inputs and %outputs will have the
+	# same lowest-level keys, i.e. 'mixed' and 'cooked'
 	#
+	# @buses is not the right name...
+	
 	my @buses = grep { $_ !~ /file|device|jack/ } keys %inputs;
 	
 	### Setting devices as inputs 
@@ -1193,8 +1264,8 @@ sub write_chains {
 		my @chain_ids = @{ $inputs{device}->{$dev} };
 		#print "found ids: @chain_ids\n";
 
-		# case 1: if $dev appears in config file %devices listing
-		#         we treat $dev is a sound card
+		# we treat $dev as a sound card
+		# if $dev appears in config file %devices listing
 		
 		if ( $devices{$dev} ){
 			push  @input_chains, 
@@ -1328,7 +1399,8 @@ WARN
 
 		my @chain_ids = @{ $outputs{jack_multi}->{$client} };
 		my $format;
-		$chain_ids[0] =~ /(\d+)/;
+		# extract track number to determine channel count
+		$chain_ids[0] =~ /(\d+)/; 
 		my $n = $1;
 		$format = signal_format(
 			$devices{jack}->{signal_format},	
@@ -1419,11 +1491,6 @@ WARN
 	print ECS $ecs_file;
 	close ECS;
 
-
-	# write .ewf files
-	#
-	#map{ $_->write_ewf  } ::Track::all();
-	
 }
 
 sub signal_format {
@@ -1441,71 +1508,26 @@ sub load_ecs {
 		eval_iam("cs-load ". $project_file);
 		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
 }
-sub new_engine { 
-	#print "ecasound name: $ecasound\n";
-	system qq(killall $ecasound);
-	sleep 1;
-	system qq(killall -9 $ecasound);
-	$e = Audio::Ecasound->new();
-}
-sub generate_setup { # create chain setup
-	$debug2 and print "&generate_setup\n";
-	%inputs = %outputs 
-			= %post_input 
-			= %pre_output 
-			= @input_chains 
-			= @output_chains 
-			= ();
-	
-
-	# doodle mode
-	# exclude tracks sharing inputs with previous tracks
-	if ( $unique_inputs_only ){
-		#enable_excluded_inputs();
-		#exclude_duplicate_inputs();
-	
-	}
-		
-	my @tracks = ::Track::all();
-	shift @tracks; # drop Master
-
-	
-	my $have_source = join " ", map{$_->name} 
-								grep{ $_ -> rec_status ne 'OFF'} 
-								@tracks;
-	#print "have source: $have_source\n";
-	if ($have_source) {
-		$mixdown_bus->apply; # mix_file
-		$master_bus->apply; # mix_out, mix_link
-		$tracker_bus->apply;
-		$null_bus->apply;
-		if ($mastering_mode){
-			$mastering_stage1_bus->apply;
-			$mastering_stage2_bus->apply;
-			$mastering_stage3_bus->apply;
-		}
-		map{ eliminate_loops($_) } all_chains();
-		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
-		#print "\%outputs\n================\n", yaml_out(\%outputs);
-		write_chains();
-		return 1;
-	} else { print "No inputs found!\n";
-	return 0};
-}
 sub arm {
+
+	# now that we have reconfigure_engine(), use is limited to 
+	# - exiting preview
+	# - automix	
+	
 	$debug2 and print "&arm\n";
 	exit_preview();
 	#adjust_latency();
-#	reconfigure_engine()
-#		or print "No change in setup. Engine ready.\n";
 	if( generate_setup() ){ connect_transport() };
 }
 sub preview {
+
+	# set preview mode, releasing doodle mode if necessary
+	
 	$debug2 and print "&preview\n";
 
-	# we need to do nothing if already in 'preview' mode
+	# do nothing if already in 'preview' mode
+	
 	if ( $preview eq 'preview' ){ return }
-
 
 	# make an announcement if we were in rec-enabled mode
 
@@ -1519,9 +1541,12 @@ sub preview {
 	print "Using both REC and MON inputs.\n";
 	print "WAV recording is DISABLED.\n\n";
 	print "Type 'arm' to enable recording.\n\n";
-	# reconfigure_engine will generate setup and start transport
+	# reconfigure_engine() will generate setup and start transport
 }
 sub doodle {
+
+	# set doodle mode
+
 	$debug2 and print "&doodle\n";
 	return if engine_running() and really_recording();
 	$preview = "doodle";
@@ -1530,13 +1555,8 @@ sub doodle {
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
 
-	# save rw setting of user tracks not including null group
+	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
-	
-
-
-#	command_process('show');
-	# save user group rw setting
 	
 	$old_group_rw = $tracker->rw;
 	$tracker->set(rw => 'REC');
@@ -1547,6 +1567,7 @@ sub doodle {
 	exclude_duplicate_inputs();
 
 	# reconfigure_engine will generate setup and start transport
+	
 	print "Setting doodle mode.\n";
 	print "Using live inputs only, with no duplicate inputs\n";
 	print "Exit using 'preview' or 'arm' commands.\n";
@@ -1558,12 +1579,11 @@ sub reconfigure_engine {
 	return 1 if really_recording() and engine_running();
 
 	# only act if change in configuration
-	
+
 	my $status_snapshot = status_snapshot();
 	
 	#print ("no change in setup\n"),
 	 return 0 if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
-
 
 	# restore playback position unless 
 	
@@ -1635,6 +1655,7 @@ sub release_doodle_mode {
 		$unique_inputs_only = 0;
 }
 sub enable_excluded_inputs {
+
 	$debug2 and print "&enable_excluded_inputs\n";
 	return unless %old_rw;
 
@@ -1644,15 +1665,9 @@ sub enable_excluded_inputs {
 	$tracker->set(rw => $old_group_rw);
 	%old_rw = ();
 
-
-# 		my @excluded = keys %excluded;
-# 		if ( @excluded ){
-# 			$debug and print "Re-enabling the following tracks: @excluded\n";
-# 			map{ $tn{$_}->set(rw => $excluded{$_}) } @excluded;
-# 		}
-# 		%excluded = ();
 }
 sub exclude_duplicate_inputs {
+
 	$debug2 and print "&exclude_duplicate_inputs\n";
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
@@ -1680,6 +1695,8 @@ sub exclude_duplicate_inputs {
 }
 
 sub adjust_latency {
+
+	$debug2 and print "&adjust_latency\n";
 	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
 		::Track::all();
 	preview();
@@ -1707,6 +1724,7 @@ sub adjust_latency {
 			} keys %latency;
 }
 sub connect_transport {
+	$debug2 and print "&connect_transport\n";
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
 		or print("Invalid chain setup, engine not ready.\n"),return;
@@ -1735,6 +1753,10 @@ sub connect_transport {
 }
 
 sub transport_status {
+
+	# assume transport is stopped
+	# print looping status, setup length, current position
+	
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
@@ -1758,7 +1780,16 @@ sub transport_status {
 		unless (ref $ui) =~ /Graphical/;
 }
 sub start_transport { 
-	my $no_mute = shift;
+
+	# set up looping event if needed
+	# mute unless recording
+	# start
+	# wait 0.5s
+	# unmute
+	# start heartbeat
+	# report engine status
+	# sleep 1s
+
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
@@ -1774,7 +1805,8 @@ sub start_transport {
 	sleep 1; # time for engine to stabilize
 }
 sub heartbeat {
-#	print "heartbeat fired\n";
+
+	#	print "heartbeat fired\n";
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
@@ -1798,6 +1830,7 @@ sub heartbeat {
 }
 
 sub schedule_wraparound {
+
 	return unless $loop_enable;
 	my $here   = eval_iam("getpos");
 	my $start  = ::Mark::loop_start();
@@ -1814,6 +1847,7 @@ sub schedule_wraparound {
 	}
 }
 sub stop_transport { 
+
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();
 	$tn{Master}->mute unless really_recording();
@@ -1834,6 +1868,7 @@ sub disconnect_transport {
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 }
 
+# for GUI transport controls
 
 sub toggle_unit {
 	if ($unit == 1){
@@ -1844,6 +1879,8 @@ sub toggle_unit {
 sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
+
+# Mark routines
 
 sub drop_mark {
 	$debug2 and print "drop_mark()\n";
@@ -1872,9 +1909,6 @@ sub mark {
 		set_position($pos);
 	}
 }
-
-# TEXT routines
-
 
 sub next_mark {
 	my $jumps = shift;
@@ -1906,9 +1940,6 @@ sub previous_mark {
 }
 	
 
-## clock and clock-refresh functions ##
-#
-
 ## jump recording head position
 
 sub to_start { 
@@ -1934,12 +1965,6 @@ sub jump {
 }
 ## post-recording functions
 
-sub rememoize {
-	return unless $memoize;
-	package ::Wav;
-	unmemoize('candidates');
-	memoize(  'candidates');
-}
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
@@ -1989,7 +2014,9 @@ REC
 	}
 		
 } 
+
 ## effect functions
+
 sub add_effect {
 	
 	$debug2 and print "&add_effect\n";
@@ -2201,7 +2228,6 @@ sub root_parent {
 
 sub ctrl_index { 
 	my $id = shift;
-
 	nama_effect_index($id) - nama_effect_index(root_parent($id));
 
 }
@@ -2606,20 +2632,15 @@ sub new_plugins {
 }
 
 sub modified {
+	# timestamp that file was modified
 	my $filename = shift;
 	#print "file: $filename\n";
 	my @s = stat $filename;
 	$s[9];
 }
 sub prepare_effect_index {
+	$debug2 and print "&prepare_effect_index\n";
 	%effect_j = ();
-# =comment
-# 	my @ecasound_effects = qw(
-# 		ev evp ezf eS ea eac eaw eal ec eca enm ei epp
-# 		ezx eemb eemp eemt ef1 ef3 ef4 efa efb efc efh efi
-# 		efl efr efs erc erm etc etd ete etf etl etm etp etr);
-# 	map { $effect_j{$_} = $_ } @ecasound_effects;
-# =cut
 	map{ 
 		my $code = $_;
 		my ($short) = $code =~ /:(\w+)/;
@@ -2631,6 +2652,7 @@ sub prepare_effect_index {
 	#print yaml_out \%effect_j;
 }
 sub extract_effects_data {
+	$debug2 and print "&extract_effects_data\n";
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
@@ -2936,6 +2958,7 @@ sub range {
 
 }
 sub integrate_ladspa_hints {
+	$debug2 and print "&integrate_ladspa_hints\n";
 	map{ 
 		my $i = $effect_i{$_};
 		# print ("$_ not found\n"), 
@@ -3284,6 +3307,9 @@ sub show_io {
 	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
 	pager( $output );
 }
+
+# command line processing routines
+
 sub get_ecasound_iam_keywords {
 
 	my %reserved = map{ $_,1 } qw(  forward
@@ -3446,7 +3472,9 @@ sub complete {
         return undef;
     }
 };
+
 sub jack_update {
+	# cache current JACK status
 	$jack_running = jack_running();
 	$jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
 }
@@ -3651,8 +3679,11 @@ sub add_mastering_effects {
 
 sub master_off {
 	$mastering_mode = 0;
+	# this automatically enables Rule mix_link
 }
 		
+# vol/pan requirements of mastering tracks
+
 my %volpan = (
 	Eq => {},
 	Low => {},
@@ -3679,6 +3710,8 @@ sub pan_check {
 	);
 }
 
+# track width in words
+
 sub width {
 	my $count = shift;
 	return 'mono' if $count == 1;
@@ -3687,6 +3720,18 @@ sub width {
 }
 
 sub effect_code {
+	# get text effect code from user input, which could be
+	# - LADSPA Unique ID (number)
+	# - LADSPA Label (el:something)
+	# - abbreviated LADSPA label (something)
+	# - Ecasound operator (something)
+	# - abbreviated Ecasound preset (something)
+	# - Ecasound preset (pn:something)
+	
+	# there is no interference in these labels at present,
+	# so we offer the convenience of using them without
+	# el: and pn: prefixes.
+	
 	my $input = shift;
 	my $code;
     if ($input !~ /\D/){ # i.e. $input is all digits
@@ -3700,6 +3745,10 @@ sub effect_code {
 }
 
 sub status_snapshot {
+
+	# hashref output for detecting if we need to reconfigure
+	# engine
+	
 	my %snapshot = ( project 		=> 	$project_name,
 					 global_version =>  $tracker->version,
 					 mastering_mode => $mastering_mode,
