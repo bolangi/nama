@@ -2585,8 +2585,6 @@ sub prepare_static_effects_data{
 		unlink $effects_cache;
 		print "Regenerating effects data cache\n";
 	}
-	# TODO  re-read effects data if user presets are
-	# newer than cache
 
 	if (-f $effects_cache and ! $opts{s}){  
 		$debug and print "found effects cache: $effects_cache\n";
@@ -3163,8 +3161,6 @@ sub retrieve_state {
 						parent_id => $cops{$id}->{belongs_to},
 						});
 
-		# TODO if parent has a parent, i am a parameter controller controlling
-		# a parameter controller, and therefore need the -kx switch
 		}
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
@@ -3174,8 +3170,6 @@ sub retrieve_state {
 		(map{ ref $_, $/ } ::Track::all()), $/;
 
 
-
-	$ui->refresh_oids(); # unused TODO remove
 
 	# restore Alsa mixer settings
 	if ( $opts{a} ) {

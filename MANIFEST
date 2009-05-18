@@ -18,6 +18,7 @@ lib/Audio/Ecasound/Multitrack/Tkeca_effects.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
 MANIFEST			This list of files
+Makefile.PL
 META.yml
 README
 script/nama

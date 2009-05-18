@@ -387,8 +387,6 @@ sub t_insert_effect {
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
 	
-	# TODO mute if engine running
-	
 	my $track = $ti{$n};
 	$debug and print $track->name, $/;
 	#$debug and print join " ",@{$track->ops}, $/; 
