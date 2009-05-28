@@ -412,7 +412,7 @@ unmemoize: _unmemoize {
 import_audio: _import_audio path frequency end {
 	$::this_track->ingest( $item{path}, $item{frequency}); 1;
 }
-import: _import path end {
+import: _import_audio path end {
 	$::this_track->ingest( $item{path}, 'auto'); 1;
 }
 frequency: value

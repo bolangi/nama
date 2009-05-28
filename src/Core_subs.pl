@@ -932,7 +932,6 @@ sub initialize_project_data {
 	# time related
 	
 	$markers_armed = 0;
-	%marks = ();
 
 	# new Marks
 	# print "original marks\n";
