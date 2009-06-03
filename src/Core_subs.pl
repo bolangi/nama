@@ -949,6 +949,7 @@ sub initialize_project_data {
 	%excluded = ();
 	$old_snapshot = {};
 	$preview = $initial_user_mode;
+	$mastering_mode = 0;
 	
 	%bunch = ();	
 	
@@ -1218,11 +1219,16 @@ sub generate_setup {
 
 		# process buses
 
+		$debug and print "applying mixdown_bus\n";
 		$mixdown_bus->apply; # Rule:  mix_file
+		$debug and print "applying master_bus bus\n";
 		$master_bus->apply;  # Rules: mix_out, mix_link
+		$debug and print "applying tracker_bus (user tracks)\n";
 		$tracker_bus->apply;
+		$debug and print "applying null_bus\n";
 		$null_bus->apply;
 		if ($mastering_mode){
+			$debug and print "applying mastering buses\n";
 			$mastering_stage1_bus->apply;
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;

@@ -61,8 +61,8 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 0; # subroutine names
-$debug = 0; # debug statements
+$debug2 = 1; # subroutine names
+$debug = 1; # debug statements
 
 ## The names of helper loopback devices:
 
@@ -573,6 +573,9 @@ during playback only.
                                  |
                                  +------(2/Mixdown)--> Mixdown_1.wav
 
+    loop,111 --(MixLink)---> loop,222 --(1/Master)-> loop,333 -> Sound device
+                                                      |
+                                                      +->(2/Mixdown)--> Mixdown_1.wav
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master_on> and released
