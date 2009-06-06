@@ -35,9 +35,9 @@ To install this module type the following:
 
 Most Perl dependencies are pulled in automatically
 when installing via CPAN. The following will
-meet most users' needs.
+install dependencies without prompting.
 
-    cpan Tk Time::HiRes Audio::Ecasound::Multitrack 
+    PERL_MM_USE_DEFAULT=1 cpan Audio::Ecasound::Multitrack 
 
 =head2 Libraries
 

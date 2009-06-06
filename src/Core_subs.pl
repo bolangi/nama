@@ -102,7 +102,7 @@ my $reply = <STDIN>;
 chomp $reply;
 if ($reply !~ /n/i){
 	$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
-	mkpath( join_path($project_root, qw(untitled .wav)) );
+	mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
 } else {
 	print <<OTHER;
 Please make sure to set the project_root directory in
