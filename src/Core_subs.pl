@@ -410,18 +410,11 @@ sub list_plugins {}
 		
 sub load_project {
 	$debug2 and print "&load_project\n";
-	#carp "load project: I'm being called from somewhere!\n";
 	my %h = @_;
 	$debug and print yaml_out \%h;
-	print ("no project name.. doing nothing.\n"),return unless $h{name} or $project;
-
-	# we could be called from Tk with variable $project _or_
-	# called with a hash with 'name' and 'create' fields.
-	
-	my $project = remove_spaces($project); # internal spaces to underscores
+	print ("no project name.. doing nothing.\n"),return 
+		unless $h{name} or $project;
 	$project_name = $h{name} if $h{name};
-	$project_name = $project if $project;
-	$debug and print "project name: $project_name create: $h{create}\n";
 	if ( ! -d join_path( project_root(), $project_name) ){
 		if ( $h{create} ){
 			map{create_dir($_)} &project_dir, &this_wav_dir ;

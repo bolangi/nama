@@ -123,12 +123,12 @@ sub init_gui {
 	$sn_load->configure(
 		-text => 'Load',
 		-command => sub{ load_project(
-			name => remove_spaces $project_name),
+			name => remove_spaces $project),
 			});
 	$sn_new->configure( 
 		-text => 'Create',
 		-command => sub{ load_project(
-							name => remove_spaces($project_name),
+							name => remove_spaces($project),
 							create => 1)});
 	$sn_save->configure(
 		-text => 'Save settings',
