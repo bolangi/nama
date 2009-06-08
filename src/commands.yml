@@ -218,7 +218,7 @@ all:
   parameters: none
 pan:
   type: track
-  short: p	
+  short: p
   what: get/set current track pan position
   parameters: [ <f_value> ]
 pan_right:
@@ -346,12 +346,12 @@ list_projects:
   what: list projects
 create_project:
   type: project
-  short: create	
+  short: create
   what: create a new project
   parameters: <s_new_project_name>
 load_project:
   type: project
-  short: load	
+  short: load
   what: load an existing project using last saved state
   parameters: <s_project_name>
 project_name:

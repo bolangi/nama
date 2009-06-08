@@ -309,6 +309,9 @@ sub yaml_in {
 		$debug and print "assuming yaml text input\n";
 		$yaml = $file;
 	}
+	if ($yaml =~ /\t/){
+		croak "YAML file: $file contains illegal TAB character.";
+	}
 	eval q[$yr->read( $yaml )]  or croak "yaml read failed: $@" ; # returns ref
 }
 
