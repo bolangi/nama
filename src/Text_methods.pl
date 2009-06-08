@@ -328,7 +328,7 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project_name\n";
-	print "hook: $::execute_on_project_load\n";
+	$debug and print "hook: $::execute_on_project_load\n";
 	::command_process($::execute_on_project_load);
 		
 	

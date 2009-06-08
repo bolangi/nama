@@ -3323,6 +3323,7 @@ sub get_ecasound_iam_keywords {
 									t
 									?	);
 	
+	local $debug = 0;
 	%iam_cmd = map{$_,1 } 
 				grep{ ! $reserved{$_} } split " ", eval_iam('int-cmd-list');
 }

@@ -109,11 +109,11 @@ ASSIGN
 			# use the supplied class unless the variable name
 			# contains \:\:
 			
-		$debug and print <<DEBUG;
-key:             $key
-full_class_path: $full_class_path
-sigil{key}:      $sigil{$key}
-DEBUG
+# 		$debug and print <<DEBUG;
+# key:             $key
+# full_class_path: $full_class_path
+# sigil{key}:      $sigil{$key}
+# DEBUG
 		if ( ! $sigil{$key} ){
 			$debug and carp 
 			"didn't find a match for $key in ", join " ", @vars, $/;
@@ -151,7 +151,7 @@ DEBUG
 				$eval .= q( } );
 				$eval .= q( } );
 			}
-			$debug and print $eval, $/, $/;
+			$debug and print $eval, $/; 
 			eval($eval);
 			$debug and $@ and carp "failed to eval $eval: $@\n";
 		}  # end if sigil{key}
