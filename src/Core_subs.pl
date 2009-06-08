@@ -428,7 +428,7 @@ Loading project "untitled".
 		}
 	} 
 	#chdir project_dir();
-	read_config( global_config() ); 
+	# read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
 	remove_small_wavs(); 
