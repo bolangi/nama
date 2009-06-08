@@ -343,7 +343,6 @@ sub t_create_project {
 		create => 1,
 	);
 	print "created project: $project_name\n";
-	doodle();
 
 }
 sub t_add_ctrl {

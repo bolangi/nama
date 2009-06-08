@@ -130,8 +130,8 @@ link_track:
 import_audio:
   type: track
   short: import
-  what: import a WAV file, resampling if necessary
-  parameters: <s_wav_file> [i_frequency]
+  what: import a WAV file to the current track, resampling if necessary
+  parameters: <s_wav_file_path> [i_frequency]
 set_track:
   short: set
   type: track

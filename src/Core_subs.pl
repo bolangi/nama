@@ -129,7 +129,6 @@ sub prepare {
 
 	$ecasound  = $ENV{ECASOUND} || q(ecasound);
 	$e = Audio::Ecasound->new();
-	#new_engine();
 	
 	
 	$debug and print "started Ecasound\n";
@@ -137,7 +136,7 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('amcegstrd:f:', \%opts); 
+	getopts('amcegstrd:f:D', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
 	# d: set project root dir
@@ -149,10 +148,15 @@ sub prepare {
 	# r: regenerate effects data cache
 	# e: don't load static effects data (for debugging)
 	# s: don't load static effects data cache (for debugging)
+	# D: output debugging info
 	
 	# UI object for interface polymorphism
 	
 
+	if ($opts{D}){
+		$debug = 1;
+		$debug2 = 1;
+	}
 	if ( $opts{t} ){ 
 		# text mode (Event.pm event loop)
 		$ui = ::Text->new;
@@ -165,7 +169,6 @@ sub prepare {
 			$ui = ::Text->new;
 		}
 	}
-
 
 	
 	get_ecasound_iam_keywords();
@@ -3098,7 +3101,7 @@ sub retrieve_state {
 	my $yamlfile = $file;
 	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
 	$file = $yamlfile if -f $yamlfile;
-	! -f $file and (print "file not found: $file.yml\n"), return;
+	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
 
 	assign_var($file, @persistent_vars );
