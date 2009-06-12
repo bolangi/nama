@@ -3058,6 +3058,15 @@ map { push @marks_data, $_->hashref } ::Mark::all();
 $debug and print "copying groups data\n";
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
+
+# save history
+
+	my @history = $::term->GetHistory;
+	my %seen;
+	@command_history = ();
+	map { push @command_history, $_ 
+			unless $seen{$_}; $seen{$_}++ } @history;
+
 $debug and print "serializing\n";
 	serialize(
 		file => $file, 
@@ -3102,11 +3111,6 @@ sub retrieve_state {
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
-	# OBSOLETE: I think with changes to Assign.pm this is no longer
-	# necessary
-	
-	map{ $cops{$_}->{owns} or $cops{$_}->{owns} = [] } keys %cops; 
-
 	#  set group parameters
 
 	map {my $g = $_; 
@@ -3188,6 +3192,11 @@ sub retrieve_state {
 	} @marks_data;
 	$ui->restore_time_marks();
 	$ui->paint_mute_buttons;
+
+
+	# restore command history
+	
+	#$term->SetHistory(@command_history);	
 } 
 
 sub process_control_inputs { }
@@ -3259,6 +3268,9 @@ sub all {
 sub show_chain_setup {
 	$debug2 and print "&show_chain_setup\n";
 	my $setup = join_path( project_dir(), $chain_setup_file);
+	print qq(No chain setup available.
+Perhaps you need to create some tracks to record/play.
+), return unless -f $setup;
 	my $chain_setup;
 	io( $setup ) > $chain_setup; 
 	pager( $chain_setup );

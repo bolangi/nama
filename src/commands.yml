@@ -512,6 +512,11 @@ show_io:
   short: showio
   what: show chain inputs and outputs
   parameters: none
+list_history:
+  type: help
+  short: lh
+  what: list command history
+  parameters: none
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

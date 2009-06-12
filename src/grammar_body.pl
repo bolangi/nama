@@ -14,6 +14,7 @@ name3: /\S+/
 name4: /[\w\-+:\.]+/
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w\-\.\/]+/
+path: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 
 
@@ -416,3 +417,8 @@ import: _import_audio path end {
 	$::this_track->ingest( $item{path}, 'auto'); 1;
 }
 frequency: value
+list_history: _list_history end {
+	my @history = $::term->GetHistory;
+	my %seen;
+	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
+}

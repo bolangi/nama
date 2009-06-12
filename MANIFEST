@@ -12,10 +12,8 @@ inc/Module/Install/Fetch.pm
 lib/Audio/Ecasound/Multitrack.pm
 lib/Audio/Ecasound/Multitrack/Assign.pm
 lib/Audio/Ecasound/Multitrack/Bus.pm
-lib/Audio/Ecasound/Multitrack/Iam.pm
 lib/Audio/Ecasound/Multitrack/Mark.pm
 lib/Audio/Ecasound/Multitrack/Object.pm
-lib/Audio/Ecasound/Multitrack/Tkeca_effects.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
 MANIFEST			This list of files
