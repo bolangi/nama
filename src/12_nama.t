@@ -3,6 +3,7 @@ use Test::More qw(no_plan);
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+use Cwd;
 
 BEGIN { use_ok('::') };
 
@@ -36,6 +37,8 @@ push @ARGV, qw(-t);
 # use cwd as project root
 
 push @ARGV, qw(-d .); 
+
+diag(cwd);
 
 prepare();
 

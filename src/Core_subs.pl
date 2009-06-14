@@ -3196,7 +3196,7 @@ sub retrieve_state {
 
 	# restore command history
 	
-	#$term->SetHistory(@command_history);	
+	$term->SetHistory(@command_history);	
 } 
 
 sub process_control_inputs { }

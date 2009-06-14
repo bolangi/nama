@@ -22,7 +22,6 @@ requires
 		IO::All => 0,
 		Module::Load::Conditional => 0,
 		Parse::RecDescent => 0,
-		Storable => 0,
 		Term::ReadLine => 0,
 		Term::ReadLine::Gnu => 0,
 		Text::Format => 0,

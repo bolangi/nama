@@ -67,7 +67,7 @@ track => <<TRACK,
    import_audio, import      - import a WAV file, resampling if necessary
 
    remove_track, rmt         - remove effects, parameters and GUI for current
-                                track
+                               track
 
    show_tracks, show, tracks -  show status of all tracks
                                 and group settings
@@ -137,11 +137,11 @@ track => <<TRACK,
 
  - signal processing
 
-   ecanormalize, normalize 
-                       norm - run ecanormalize on current track version
+   ecanormalize, normalize, norm 
+                           - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
-    autofix_track, autofix  - fixdc and normalize selected versions of all MON
-                              tracks
+   autofix_tracks, autofix - fixdc and normalize selected versions of all MON
+                             tracks
 
  - cutting and time shifting
 

@@ -169,7 +169,7 @@ mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
-autofix_track: _autofix_track { ::command_process("for mon; fixdc; normalize"); 1 }
+autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize"); 1 }
 master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
@@ -413,7 +413,7 @@ unmemoize: _unmemoize {
 import_audio: _import_audio path frequency end {
 	$::this_track->ingest( $item{path}, $item{frequency}); 1;
 }
-import: _import_audio path end {
+import_audio: _import_audio path end {
 	$::this_track->ingest( $item{path}, 'auto'); 1;
 }
 frequency: value

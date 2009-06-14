@@ -94,6 +94,8 @@ $memoize = 0;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 
+$term = new Term::ReadLine("Ecasound/Nama");
+
 ## Load my modules
 
 use ::Assign qw(:all);
@@ -147,7 +149,6 @@ sub install_handlers{};
 sub loop {
     package ::;
     #MainLoop;
-    $term = new Term::ReadLine("Ecasound/Nama");
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$term->tkRunning(1);
@@ -279,13 +280,17 @@ option provides a text-only interface for console users.
 
 Use F<project_root> as Nama's top-level directory.
 
+=item B<-D> 
+
+Output debugging information
+
 =item B<-f> F<config_file>
 
 Use F<config_file> instead of default F<.namarc>
 
 =item B<-g>
 
-GUI/text mode (default)
+GUI mode (default)
 
 =item B<-t>
 
@@ -293,7 +298,7 @@ Text-only mode
 
 =item B<-c>
 
-Create the named project
+Create the specified project if necessary
 
 =item B<-a>
 

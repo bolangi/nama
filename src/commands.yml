@@ -286,7 +286,7 @@ fixdc:
   type: track
   what: apply ecafixdc to current track version
   short: ecafixdc
-autofix_track:
+autofix_tracks:
   type: track 
   short: autofix
   what: fixdc and normalize selected versions of all MON tracks 
