@@ -47,7 +47,7 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
-execute_on_project_load: show
+execute_on_project_load: ~
 
 eq: Parametric1
 

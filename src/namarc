@@ -78,7 +78,7 @@ use_group_numbering: 1
 
 # commands to execute each time a project is loaded
 
-execute_on_project_load: show
+execute_on_project_load: ~
 
 # effects for use in mastering mode
 

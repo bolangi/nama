@@ -3760,7 +3760,9 @@ sub status_snapshot {
 	my %snapshot = ( project 		=> 	$project_name,
 					 global_version =>  $tracker->version,
 					 mastering_mode => $mastering_mode,
+					 preview        => $preview,
 #					 global_rw      =>  $tracker->rw,
+					
  );
 	$snapshot{tracks} = [];
 	map { 
