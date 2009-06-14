@@ -14,7 +14,6 @@ name3: /\S+/
 name4: /[\w\-+:\.]+/
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w\-\.\/]+/
-path: /\S+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 
 
