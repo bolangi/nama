@@ -578,9 +578,9 @@ during playback only.
                                  |
                                  +------(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(MixLink)---> loop,222 --(1/Master)-> loop,333 -> Sound device
-                                                      |
-                                                      +->(2/Mixdown)--> Mixdown_1.wav
+    loop,111 --(1/Master)-> loop,222 -> Sound device
+								  |
+								  +->(2/Mixdown)--> Mixdown_1.wav
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master_on> and released
