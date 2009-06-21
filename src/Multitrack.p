@@ -581,6 +581,28 @@ during playback only.
     loop,111 --(1/Master)-> loop,222 -> Sound device
 								  |
 								  +->(2/Mixdown)--> Mixdown_1.wav
+
+    loop,111 --(1/Master)-> loop,221 <mastering> loop,222 -> Sound device
+												  |
+												  +->(2/Mixdown)--> Mixdown_1.wav
+
+
+In mixdown mode, no effects will be applied on the mixdown
+track, just route to file
+
+In mixplay mode, effects may be applied as normal
+
+In Mastering mode, Master outputs to track Eq
+
+In normal mode, Master outputs to soundcard
+
+In mixdown mode, Master outputs to loop,222
+
+Toggle needed on sound device output
+toggle needed on mixdown 
+
+
+
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master_on> and released
