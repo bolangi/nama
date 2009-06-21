@@ -68,8 +68,9 @@ $debug = 0; # debug statements
 
 $loopa = 'loop,111';
 $loopb = 'loop,222';
-$loop_crossover = 'loop,120';
-$loop_boost = 'loop,130';
+$loop_mastering = 'loop,211';
+$loop_crossover = 'loop,212';
+$loop_boost = 'loop,213';
 
 # other initializations
 $unit = 1;
@@ -589,11 +590,6 @@ during playback only.
 TODO
 
 Master output changes depending on $mastering
-
-revise eliminate_loops():
-
-loop,222 is not needed for sound device only
-or for mixdown_wav output only
 
 In mixdown mode, no effects will be applied on the mixdown
 track, just route to file

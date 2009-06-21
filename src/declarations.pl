@@ -249,6 +249,7 @@ our (
 
 	$loopa,  # loopback nodes 
 	$loopb,  
+	$loop_mastering, 
 	$loop_crossover,
 	$loop_boost,
 

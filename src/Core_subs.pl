@@ -486,8 +486,7 @@ sub initialize_rules {
 		input_object	=> $loopa, 
 
 		output_type		=> 'mixed',
-		output_object	=> $loopb,
-
+		output_object	=> sub{ $mastering_mode ?  $loop_mastering : $loopb},
 		status			=> 1,
 
 	);
@@ -771,7 +770,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'mixed',
-		input_object	=>  $loopa,
+		input_object	=>  $loop_mastering,
 		output_type		=>  'mixed',
 		output_object	=>  $loop_crossover,
 		status			=>  1,
@@ -883,7 +882,7 @@ sub eliminate_loops {
 
 	return if $mastering_mode;
 
-	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
+	# remove $loopb when only one customer for $inputs{mixed}{$loopb}
 
 	my $ref = ref $inputs{mixed}{$loopb};
 
