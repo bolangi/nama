@@ -66,11 +66,11 @@ $debug = 0; # debug statements
 
 ## The names of helper loopback devices:
 
-$loopa = 'loop,111';
-$loopb = 'loop,222';
-$loop_mastering = 'loop,211';
-$loop_crossover = 'loop,212';
-$loop_boost = 'loop,213';
+$loopa = 'loop,mix';
+$loopb = 'loop,output';
+$loop_mastering = 'loop,mastering';
+$loop_crossover = 'loop,crossover';
+$loop_boost = 'loop,boost';
 
 # other initializations
 $unit = 1;
