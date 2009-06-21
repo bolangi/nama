@@ -467,9 +467,15 @@ sub initialize_rules {
 		%rule_names = (); 
 	package ::;
 
+# should we associate rule directly with track on creation?
+
+
+	# Master track
+	# for placing effects on mixed output of user tracks
+	
 	$mixer_out = ::Rule->new( #  this is the master output
 		name			=> 'mixer_out', 
-		chain_id		=> 1, # MixerOut
+		chain_id		=> 1, # Master
 
 		target			=> 'MON',
 
@@ -477,10 +483,10 @@ sub initialize_rules {
 	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
 
 		input_type 		=> 'mixed', # bus name
-		input_object	=> $loopb, 
+		input_object	=> $loopa, 
 
-		output_type		=> sub{ ${output_type_object()}[0] },
-		output_object	=> sub{ ${output_type_object()}[1] },
+		output_type		=> 'mixed',
+		output_object	=> $loopb,
 
 		status			=> 1,
 
@@ -499,7 +505,6 @@ sub initialize_rules {
 		input_object	=> $loopb,
 
 		output_type		=> 'file',
-
 
 		# - a hackish conditional way to include the mixdown format
 		# - seems to work
@@ -532,18 +537,17 @@ sub initialize_rules {
 		status			=> 0,
 	);
 
+
 	$mix_link = ::Rule->new(
 
 		name			=>  'mix_link',
-		chain_id		=>  'MixLink',
-		#chain_id		=>  sub{ my $track = shift; $track->n },
+		chain_id		=>  'MainOut',
 		target			=>  'all',
-		condition =>	sub{ defined $inputs{mixed}->{$loopb} 
-							 and ! $mastering_mode },
+		condition 		=>	1,
 		input_type		=>  'mixed',
-		input_object	=>  $loopa,
-		output_type		=>  'mixed',
-		output_object	=>  $loopb,
+		input_object	=>  $loopb,
+		output_type		=> sub{ ${output_type_object()}[0] },
+		output_object	=> sub{ ${output_type_object()}[1] },
 		status			=>  1,
 		
 	);

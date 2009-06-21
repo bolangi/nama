@@ -582,26 +582,34 @@ during playback only.
 								  |
 								  +->(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(1/Master)-> loop,221 <mastering> loop,222 -> Sound device
-												  |
-												  +->(2/Mixdown)--> Mixdown_1.wav
+    loop,111 --(1/Master)-> loop,221---(mastering)-->loop,222  -> Sound device
+													  |
+													  +->(2/Mixdown)--> Mixdown_1.wa
+
+
+Master output changes depending on $mastering
+
+loop,222 is not needed for sound device only
+or for mixdown_wav output only
 
 
 In mixdown mode, no effects will be applied on the mixdown
 track, just route to file
 
-In mixplay mode, effects may be applied as normal
+In mixplay mode, effects may be applied as normal to Mixdown
+track.
 
-In Mastering mode, Master outputs to track Eq
+In Mastering mode, Master outputs to loop,221 
 
-In normal mode, Master outputs to soundcard
+In normal mode, Master outputs to loop,222, optimized to soundcard
 
 In mixdown mode, Master outputs to loop,222
 
 Toggle needed on sound device output
+
 toggle needed on mixdown 
 
-
+revise normalizing_mixdown automix nmix
 
 =head3 Mastering Mode
 
