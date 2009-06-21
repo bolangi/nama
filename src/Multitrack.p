@@ -586,12 +586,14 @@ during playback only.
 													  |
 													  +->(2/Mixdown)--> Mixdown_1.wa
 
+TODO
 
 Master output changes depending on $mastering
 
+revise eliminate_loops():
+
 loop,222 is not needed for sound device only
 or for mixdown_wav output only
-
 
 In mixdown mode, no effects will be applied on the mixdown
 track, just route to file
@@ -603,7 +605,7 @@ In Mastering mode, Master outputs to loop,221
 
 In normal mode, Master outputs to loop,222, optimized to soundcard
 
-In mixdown mode, Master outputs to loop,222
+In mixdown mode, Master outputs to loop,222, optimized to file 
 
 Toggle needed on sound device output
 

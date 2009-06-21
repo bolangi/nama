@@ -1233,7 +1233,7 @@ sub generate_setup {
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
-		map{ eliminate_loops($_) } all_chains();
+		#map{ eliminate_loops($_) } all_chains();
 
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
