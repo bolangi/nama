@@ -881,10 +881,10 @@ sub eliminate_loops {
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 
+	return if $mastering_mode;
+
 	# remove loopb when only one customer for  $inputs{mixed}{loop,222}
 
-	return if $mastering_mode;
-	
 	my $ref = ref $inputs{mixed}{$loopb};
 
 	if (    $ref =~ /ARRAY/ and 
@@ -1233,7 +1233,7 @@ sub generate_setup {
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
-		#map{ eliminate_loops($_) } all_chains();
+		map{ eliminate_loops($_) } all_chains();
 
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
