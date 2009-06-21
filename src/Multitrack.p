@@ -587,9 +587,11 @@ during playback only.
 													  |
 													  +->(2/Mixdown)--> Mixdown_1.wa
 
-TODO
+In Mastering mode, Master outputs to $loop_mastering
 
-Master output changes depending on $mastering
+In normal mode, Master outputs to $loopb, optimized to soundcard
+
+In mixdown mode, Master outputs to $loopb  optimized to file 
 
 In mixdown mode, no effects will be applied on the mixdown
 track, just route to file
@@ -597,15 +599,9 @@ track, just route to file
 In mixplay mode, effects may be applied as normal to Mixdown
 track.
 
-In Mastering mode, Master outputs to loop,221 
-
-In normal mode, Master outputs to loop,222, optimized to soundcard
-
-In mixdown mode, Master outputs to loop,222, optimized to file 
+TODO
 
 Toggle needed on sound device output
-
-toggle needed on mixdown 
 
 revise normalizing_mixdown automix nmix
 

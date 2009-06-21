@@ -494,7 +494,11 @@ sub initialize_rules {
 	$mix_down = ::Rule->new(
 
 		name			=> 'mix_file', 
-		chain_id		=> 2, # MixDown
+
+	# we change the track index away from the standard 2
+	# for Mixdown to ensure no effects are applied.
+	
+		chain_id		=> 'MixDown',
 		target			=> 'REC', 
 		
 		# sub{ defined $outputs{mixed} or $debug 
@@ -1219,12 +1223,12 @@ sub generate_setup {
 		# process buses
 
 		$debug and print "applying mixdown_bus\n";
-		$mixdown_bus->apply; # Rule:  mix_file
-		$debug and print "applying master_bus bus\n";
-		$master_bus->apply;  # Rules: mix_out, mix_link
+		$mixdown_bus->apply; 
+		$debug and print "applying master_bus\n";
+		$master_bus->apply; 
 		$debug and print "applying tracker_bus (user tracks)\n";
 		$tracker_bus->apply;
-		$debug and print "applying null_bus\n";
+		$debug and print "applying null_bus (user tracks)\n";
 		$null_bus->apply;
 		if ($mastering_mode){
 			$debug and print "applying mastering buses\n";
@@ -3548,7 +3552,7 @@ sub automix {
 	$mixdown_track->set(rw => 'REC');
 	
 	# turn off mixer output
-	$master_track->set(rw => 'OFF');
+#	$master_track->set(rw => 'OFF');
 
 	# turn off mix_file
 	$mix_down->set(   status => 0);
