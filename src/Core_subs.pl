@@ -526,15 +526,13 @@ sub initialize_rules {
 	$mix_down_ev = ::Rule->new(
 
 		name			=> 'mix_ev', 
-		chain_id		=> 2, # MixDown
+		chain_id		=> 1, # Master
 		target			=> 'all', 
 		
 		input_type 		=> 'mixed',
-		input_object	=> $loopb,
+		input_object	=> $loopa,
 
 		output_type		=> 'device',
-
-
 		output_object   => 'null',
 
 		status			=> 0,
@@ -3542,21 +3540,15 @@ sub automix {
 
 	# use Smart::Comments '###';
 	# add -ev to mixtrack
-	my $ev = add_effect( { chain => $mixdown_track->n, type => 'ev' } );
+	my $ev = add_effect( { chain => $master->n, type => 'ev' } );
 	### ev id: $ev
 
-	### set Mixdown vol to 100
-	modify_effect( $mixdown_track->vol, 1, undef, 100 );	
-
-	# set mixdown mode
-	$mixdown_track->set(rw => 'REC');
+	# turn off audio output
 	
-	# turn off mixer output
-#	$master_track->set(rw => 'OFF');
+	$mix_link->set(status => 0);
 
-	# turn off mix_file
+	# turn off mix_file rule
 	$mix_down->set(   status => 0);
-	# confusing, $mix_down similar to $mixdown (group)
 
 	# turn on mix_down_ev
 	$mix_down_ev->set(status => 1);
@@ -3589,26 +3581,28 @@ sub automix {
 
 		command_process( "for mon; vol*$multiplier" );
 
-		# keep same audible output volume
+		# keep same audible output volume: UNUSED
 		
-		my $master_multiplier = $multiplier/10;
+	#	my $master_multiplier = $multiplier/10;
 
 
 		### master multiplier: $multiplier/10
 
-		command_process("Master; vol/$master_multiplier")
+		# command_process("Master; vol/$master_multiplier")
 
 
 	}
 	remove_effect($ev);
 	
-	### turn off mix_null
+	### turn off 
 	$mix_down_ev->set(status => 0);
 
 	### turn on mix_file
 	$mix_down->set(status => 1);
 
 	### mixdown
+	command_process('mixdown');
+
 	command_process('show');
 
 	command_process('arm; start');
@@ -3616,7 +3610,13 @@ sub automix {
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
-	### turn on mixer output
+	### turn on audio output output
+
+	$mix_link->set(status => 1);
+
+
+	### default to playing back Mixdown track
+	
 	command_process('mixplay');
 
 #	no Smart::Comments;

@@ -458,29 +458,8 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$mixdown_track->set(rw => 'REC'); 
-	copy_master_track_effects();
 }
 
-sub copy_master_track_effects {
-
-	# note $tn{Mixdown}->vol and ->pan are inconsistent
-	# after this routine
-	
-	# skip if not in mastering mode
-	return unless @mastering_effect_ids; 
-
-	# eliminate Mixdown track effects (vol and pan)
-	
-	map{ ::remove_effect($_) } @{ $tn{Mixdown}->ops };
-
-	my $old_track = $this_track;
-	$this_track = $tn{Mixdown};
-	
-	map {	t_add_effect( $cops{$_}->{type}, $copp{$_} );
-	} @{ $tn{Master}->ops };
-	$this_track = $old_track;
-
-}
 
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
