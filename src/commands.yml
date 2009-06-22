@@ -150,11 +150,6 @@ off:
   short: z
   what: set current track to OFF (exclude from chain setup)
   parameters: none
-# monitor_channel:
-#   type: track
-#   short: m
-#   what: set track output channel number
-#   parameters: <i_channel_number>
 source:
   type: track
   what: set track source
