@@ -172,6 +172,8 @@ sub group_last {
 	$group->last;
 }
 
+# OBSOLETE!
+#
 sub current {	 # depends on ewf status
 	my $track = shift;
 	my $last = $track->current_version;
