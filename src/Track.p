@@ -426,7 +426,7 @@ sub set_version {
 	}
 }
 
-sub set_send {
+sub set_send { # wrapper
 	my ($track, $output) = @_;
 	my $old_send = $track->send;
 	my $new_send = $track->send($output);
