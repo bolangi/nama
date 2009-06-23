@@ -485,7 +485,7 @@ sub initialize_rules {
 		input_object	=> $loop_mix, 
 
 		output_type		=> 'mixed',
-		output_object	=> sub{ $mastering_mode ?  $loop_mastering : $loop_output},
+		output_object	=> \&mixer_target,
 		status			=> 1,
 
 	);
@@ -576,7 +576,7 @@ sub initialize_rules {
 		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_object	=>  $loop_output,
+		output_object	=>  \&mixer_target,
 		output_type		=>  'cooked',
 		condition        => 1,
 		status			=>  1,
@@ -820,6 +820,9 @@ $aux_send_soundcard_jack = ::Rule->new(
 	);
 	
 }
+
+sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
+
 
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
