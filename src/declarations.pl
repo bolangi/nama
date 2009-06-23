@@ -332,7 +332,7 @@ our (
 	$mixer_out,
 	$mix_down,
 	$mix_down_ev,
-	$mix_link,
+	$main_out,
 	$mix_setup,
 	$mix_setup_mon,
 	$mon_setup,

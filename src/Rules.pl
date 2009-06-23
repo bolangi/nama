@@ -37,9 +37,9 @@ my $mix_down = ::Rule->new(
 	status			=> 0,
 );
 
-my $mix_link = ::Rule->new(
+my $main_out = ::Rule->new(
 
-	name			=>  'mix_link',
+	name			=>  'main_out',
 	chain_id		=>  'Mix_link',
 	target			=>  'none',
 	input_type		=>  'mixed',

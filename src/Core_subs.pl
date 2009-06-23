@@ -213,7 +213,7 @@ sub prepare {
 
 	$master_bus  = ::Bus->new(
 		name => 'Master_Bus',
-		rules  => [ qw(mixer_out mix_link) ],
+		rules  => [ qw(mixer_out main_out) ],
 		groups => ['Master'],
 	);
 	$mixdown_bus  = ::Bus->new(
@@ -240,7 +240,7 @@ sub prepare {
 	
 	$bypass_bus = ::Bus->new( 
 		name => 'Bypass',
-		rules => [qw(bypass)], # Similar to mix_link
+		rules => [qw(bypass)], # Similar to main_out
 		tracks => ['Bypass']);
 
 	# for EQ track
@@ -539,9 +539,9 @@ sub initialize_rules {
 	);
 
 
-	$mix_link = ::Rule->new(
+	$main_out = ::Rule->new(
 
-		name			=>  'mix_link',
+		name			=>  'main_out',
 		chain_id		=>  'MainOut',
 		target			=>  'all',
 		condition 		=>	1,
@@ -3545,7 +3545,7 @@ sub automix {
 
 	# turn off audio output
 	
-	$mix_link->set(status => 0);
+	$main_out->set(status => 0);
 
 	# turn off mix_file rule
 	$mix_down->set(   status => 0);
@@ -3612,7 +3612,7 @@ sub automix {
 
 	### turn on audio output output
 
-	$mix_link->set(status => 1);
+	$main_out->set(status => 1);
 
 
 	### default to playing back Mixdown track
@@ -3694,7 +3694,7 @@ sub add_mastering_effects {
 
 sub master_off {
 	$mastering_mode = 0;
-	# this automatically enables Rule mix_link
+	# this automatically enables Rule main_out
 }
 		
 # vol/pan requirements of mastering tracks
