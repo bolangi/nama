@@ -213,10 +213,6 @@ sub monitor_version {
 	return undef if $group->version;
 	$track->last;
 }
-# sub monitor_version {
-# 	my $track = shift;
-# 	$track->active ? $track->active : $track->last;
-# }
 
 sub rec_status {
 #	$::debug2 and print "&rec_status\n";
