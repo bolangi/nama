@@ -470,10 +470,9 @@ sub initialize_rules {
 # should we associate rule directly with track on creation?
 
 
-	# Master track
-	# for placing effects on mixed output of user tracks
+	# combined outputs of user tracks
 	
-	$mixer_out = ::Rule->new( #  this is the master output
+	$mixer_out = ::Rule->new( #  
 		name			=> 'mixer_out', 
 		chain_id		=> 1, # Master
 
@@ -490,6 +489,8 @@ sub initialize_rules {
 		status			=> 1,
 
 	);
+
+	# routes mixed signal to file
 
 	$mix_down = ::Rule->new(
 
@@ -508,11 +509,6 @@ sub initialize_rules {
 		input_object	=> $loop_output,
 
 		output_type		=> 'file',
-
-		# - a hackish conditional way to include the mixdown format
-		# - seems to work
-		# - it would be better to add another output type
-
 		output_object   => sub {
 			my $track = shift; 
 			join " ", $track->full_path, $mix_to_disk_format},
@@ -538,6 +534,7 @@ sub initialize_rules {
 		status			=> 0,
 	);
 
+	# routes output to JACK or sound card
 
 	$main_out = ::Rule->new(
 
@@ -553,6 +550,9 @@ sub initialize_rules {
 		
 	);
 
+	# routes cooked track output to mixer 
+	# generally optimized away by eliminate_loops()
+	
 	$mix_setup = ::Rule->new(
 
 		name			=>  'mix_setup',
@@ -567,6 +567,8 @@ sub initialize_rules {
 		
 	);
 
+	# for mix track only
+	
 	$mix_setup_mon = ::Rule->new(
 
 		name			=>  'mix_setup_mon',
@@ -576,13 +578,14 @@ sub initialize_rules {
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loop_output,
 		output_type		=>  'cooked',
-		# condition 		=>  sub{ defined $inputs{mixed} },
 		condition        => 1,
 		status			=>  1,
 		
 	);
 
 
+	# chains for inputs from WAV files
+	# these chains receive all track effects
 
 	$mon_setup = ::Rule->new(
 		
@@ -597,6 +600,9 @@ sub initialize_rules {
 		condition 		=> 1,
 		status			=>  1,
 	);
+
+	# records live input to file
+	# without going through track processing
 		
 	$rec_file = ::Rule->new(
 
@@ -623,6 +629,9 @@ sub initialize_rules {
 		},
 		status		=>  1,
 	);
+
+	# as above, for inputs from soundcard via JACK
+	
 	$rec_file_soundcard_jack = ::Rule->new(
 
 		name		=>  'rec_file_soundcard_jack', 
@@ -649,10 +658,10 @@ sub initialize_rules {
 		status		=>  1,
 	);
 
-	# Rec_setup: must come last in oids list, convert REC
-	# inputs to stereo and output to loop device which will
-	# have Vol, Pan and other effects prior to various monitoring
-	# outputs and/or to the mixdown file output.
+	# rec_setup / rec_setup_soundcard_jack
+	
+	# convert live inputs to stereo if necessary
+	# this chain takes all track effects
 	
     $rec_setup_soundcard_jack  = ::Rule->new(
 
@@ -707,6 +716,11 @@ sub initialize_rules {
 		status			=>  1,
 	);
 
+
+# aux_send / aux_send_soundcard_jack
+# 
+# send a 'cooked' signal to a soundcard output channel 
+
 	
 $aux_send = ::Rule->new(  
 
@@ -747,6 +761,11 @@ $aux_send_soundcard_jack = ::Rule->new(
 		} ,
 		status			=>  1,
 	);
+
+# null_setup - for metronome tracks
+#
+# brings input from null device to mixer input
+
 
 	$null_setup = ::Rule->new(
 		
@@ -800,8 +819,6 @@ $aux_send_soundcard_jack = ::Rule->new(
 		status			=>  1,
 	);
 	
-	# $ui->preview_button;
-
 }
 
 sub jack_running {
