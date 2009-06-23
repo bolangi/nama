@@ -64,10 +64,10 @@ $yr = Data::YAML::Reader->new;
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
-## The names of helper loopback devices:
+## The names of helper loop_outputack devices:
 
-$loopa = 'loop,mix';
-$loopb = 'loop,output';
+$loop_mix = 'loop,mix';
+$loop_output = 'loop,output';
 $loop_mastering = 'loop,mastering';
 $loop_crossover = 'loop,crossover';
 $loop_boost = 'loop,boost';
@@ -589,9 +589,9 @@ during playback only.
 
 In Mastering mode, Master outputs to $loop_mastering
 
-In normal mode, Master outputs to $loopb, optimized to soundcard
+In normal mode, Master outputs to $loop_output, optimized to soundcard
 
-In mixdown mode, Master outputs to $loopb  optimized to file 
+In mixdown mode, Master outputs to $loop_output  optimized to file 
 
 In mixdown mode, no effects will be applied on the mixdown
 track, just route to file

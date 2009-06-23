@@ -247,7 +247,7 @@ sub prepare {
 
 	$mastering_stage1_bus = ::Bus->new(
 		name => 'Stage1',
-		rules => ['stage1'], # loopa to loop_crossover
+		rules => ['stage1'], # loop_mix to loop_crossover
 		tracks => ['Eq']);
 
 	# for Low/Mid/High tracks
@@ -261,7 +261,7 @@ sub prepare {
 	
 	$mastering_stage3_bus = ::Bus->new(
 		name => 'Stage3',
-		rules => ['stage3'], #loop_boost to loopb
+		rules => ['stage3'], #loop_boost to loop_output
 		tracks => [qw(Boost)]);
 
 
@@ -483,10 +483,10 @@ sub initialize_rules {
 	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
 
 		input_type 		=> 'mixed', # bus name
-		input_object	=> $loopa, 
+		input_object	=> $loop_mix, 
 
 		output_type		=> 'mixed',
-		output_object	=> sub{ $mastering_mode ?  $loop_mastering : $loopb},
+		output_object	=> sub{ $mastering_mode ?  $loop_mastering : $loop_output},
 		status			=> 1,
 
 	);
@@ -505,7 +505,7 @@ sub initialize_rules {
 		#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
 		input_type 		=> 'mixed', # bus name
-		input_object	=> $loopb,
+		input_object	=> $loop_output,
 
 		output_type		=> 'file',
 
@@ -530,7 +530,7 @@ sub initialize_rules {
 		target			=> 'all', 
 		
 		input_type 		=> 'mixed',
-		input_object	=> $loopa,
+		input_object	=> $loop_mix,
 
 		output_type		=> 'device',
 		output_object   => 'null',
@@ -546,7 +546,7 @@ sub initialize_rules {
 		target			=>  'all',
 		condition 		=>	1,
 		input_type		=>  'mixed',
-		input_object	=>  $loopb,
+		input_object	=>  $loop_output,
 		output_type		=> sub{ ${output_type_object()}[0] },
 		output_object	=> sub{ ${output_type_object()}[1] },
 		status			=>  1,
@@ -560,9 +560,9 @@ sub initialize_rules {
 		target			=>  'all',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_object	=>  $loopa,
+		output_object	=>  $loop_mix,
 		output_type		=>  'cooked',
-		condition 		=>  sub{ defined $inputs{mixed}->{$loopb} },
+		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
 		status			=>  1,
 		
 	);
@@ -574,7 +574,7 @@ sub initialize_rules {
 		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_object	=>  $loopa,
+		output_object	=>  $loop_output,
 		output_type		=>  'cooked',
 		# condition 		=>  sub{ defined $inputs{mixed} },
 		condition        => 1,
@@ -756,8 +756,8 @@ $aux_send_soundcard_jack = ::Rule->new(
 		input_type		=>  'device',
 		input_object	=>  'null',
 		output_type		=>  'cooked',
-		output_object	=>  $loopa,
-		condition 		=>  sub{ defined $inputs{mixed}->{$loopb} },
+		output_object	=>  $loop_mix,
+		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
 		status			=>  1,
 # 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
@@ -795,7 +795,7 @@ $aux_send_soundcard_jack = ::Rule->new(
 		input_type		=>  'mixed',
 		input_object	=>  $loop_boost,
 		output_type		=>  'mixed',
-		output_object	=>  $loopb,
+		output_object	=>  $loop_output,
 		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
 	);
@@ -884,21 +884,21 @@ sub eliminate_loops {
 
 	return if $mastering_mode;
 
-	# remove $loopb when only one customer for $inputs{mixed}{$loopb}
+	# remove $loop_output when only one customer for $inputs{mixed}{$loop_output}
 
-	my $ref = ref $inputs{mixed}{$loopb};
+	my $ref = ref $inputs{mixed}{$loop_output};
 
 	if (    $ref =~ /ARRAY/ and 
-			(scalar @{$inputs{mixed}{$loopb}} == 1) ){
+			(scalar @{$inputs{mixed}{$loop_output}} == 1) ){
 
 		$debug and print "i have a loop to eliminate \n";
-		my $customer_id = ${$inputs{mixed}{$loopb}}[0];
+		my $customer_id = ${$inputs{mixed}{$loop_output}}[0];
 		$debug and print "customer chain: $customer_id\n";
 
-		delete $outputs{mixed}{$loopb};
-		delete $inputs{mixed}{$loopb};
+		delete $outputs{mixed}{$loop_output};
+		delete $inputs{mixed}{$loop_output};
 
-	$inputs{mixed}{$loopa} = [ $customer_id ];
+	$inputs{mixed}{$loop_mix} = [ $customer_id ];
 
 	}
 	

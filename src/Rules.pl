@@ -8,7 +8,7 @@ my $mixer_out = ::Rule->new( #  this is the master fader
 # 	or $debug and print("no customers for mixed, skipping\n"), 0},
 
 	input_type 		=> 'mixed', # bus name
-	input_object	=> $loopb, 
+	input_object	=> $loop_output, 
 
 	output_type		=> 'device',
 	output_object	=> $playback_device,
@@ -27,7 +27,7 @@ my $mix_down = ::Rule->new(
 	#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
 
 	input_type 		=> 'mixed', # bus name
-	input_object	=> $loopb,
+	input_object	=> $loop_output,
 
 	output_type		=> 'file',
 	output_object   => sub {
@@ -43,9 +43,9 @@ my $mix_link = ::Rule->new(
 	chain_id		=>  'Mix_link',
 	target			=>  'none',
 	input_type		=>  'mixed',
-	input_object	=>  $loopa,
+	input_object	=>  $loop_mix,
 	output_type		=>  'mixed',
-	output_object	=>  $loopb,
+	output_object	=>  $loop_output,
 	status			=>  1,
 	
 );
@@ -57,7 +57,7 @@ my $mix_setup = ::Rule->new(
 	target			=>  'all',
 	input_type		=>  'cooked',
 	input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-	output_object	=>  $loopa,
+	output_object	=>  $loop_mix,
 	output_type		=>  'cooked',
 	condition 		=>  sub{ defined $inputs{mixed} },
 	status			=>  1,

@@ -247,8 +247,8 @@ our (
 	$old_abg, # initial active background color
 
 
-	$loopa,  # loopback nodes 
-	$loopb,  
+	$loop_mix,  # loop_outputack nodes 
+	$loop_output,  
 	$loop_mastering, 
 	$loop_crossover,
 	$loop_boost,
