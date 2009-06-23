@@ -163,7 +163,7 @@ sub basename {
 	$self->target || $self->name
 }
 
-sub full_path { my $track = shift; join_path $track->dir , $track->current }
+sub full_path { my $track = shift; join_path $track->dir, $track->current_wav }
 
 sub group_last {
 	my $track = shift;
@@ -172,7 +172,7 @@ sub group_last {
 	$group->last;
 }
 
-sub current {	 # depends on ewf status
+sub current_wav {
 	my $track = shift;
 	my $last = $track->current_version;
 	#print "last found is $last\n"; 
@@ -187,49 +187,9 @@ sub current {	 # depends on ewf status
 	}
 }
 
-sub full_wav_path {  # independent of ewf status
+sub full_wav_path {  
 	my $track = shift; 
-	join_path $track->dir , $track->current_wav
-}
-
-sub current_wav {	# independent of ewf status
-	my $track = shift;
-	my $last = $track->current_version;
-	#print "last found is $last\n"; 
-	if 	($track->rec_status eq 'REC'){ 
-		return $track->name . '_' . $last . '.wav'}
-	elsif ( $track->rec_status eq 'MON'){ 
-		no warnings;
-		my $filename = $track->targets->{ $track->monitor_version } ;
-		use warnings;
-		return $filename;
-	} else {
-		# print "track ", $track->name, ": no current version\n" ;
-		return undef;
-	}
-}
-sub write_ewf {
-	$::debug2 and print "&write_ewf\n";
-	my $track = shift;
-	my $wav = $track->full_wav_path;
-	my $ewf = $wav;
-	$ewf =~ s/\.wav$/.ewf/;
-	#print "wav: $wav\n";
-	#print "ewf: $ewf\n";
-
-	my $maybe_ewf = $track->full_path; 
-	$wav eq $maybe_ewf and unlink( $ewf), return; # we're not needed
-	$ewf = File::Spec::Link->resolve_all( $ewf );
-	carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
-
-	my @lines;
-	push @lines, join " = ", "source", $track->full_wav_path;
-	map{ push @lines, join " = ", $_, eval qq(\$track->$_) }
-	grep{ eval qq(\$track->$_)} qw(delay start_position length);
-	my $content = join $/, @lines;
-	#print $content, $/;
-	$content > io($ewf) ;
-	return $content;
+	join_path $track->dir, $track->current_wav
 }
 
 sub current_version {	
@@ -253,10 +213,6 @@ sub monitor_version {
 	return undef if $group->version;
 	$track->last;
 }
-# sub monitor_version {
-# 	my $track = shift;
-# 	$track->active ? $track->active : $track->last;
-# }
 
 sub rec_status {
 #	$::debug2 and print "&rec_status\n";
@@ -470,7 +426,7 @@ sub set_version {
 	}
 }
 
-sub set_send {
+sub set_send { # wrapper
 	my ($track, $output) = @_;
 	my $old_send = $track->send;
 	my $new_send = $track->send($output);
