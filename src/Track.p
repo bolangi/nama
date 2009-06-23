@@ -163,7 +163,7 @@ sub basename {
 	$self->target || $self->name
 }
 
-sub full_path { my $track = shift; join_path $track->dir , $track->current }
+sub full_path { my $track = shift; join_path $track->dir, $track->current_wav }
 
 sub group_last {
 	my $track = shift;
@@ -172,9 +172,7 @@ sub group_last {
 	$group->last;
 }
 
-# OBSOLETE!
-#
-sub current {	 # depends on ewf status
+sub current_wav {
 	my $track = shift;
 	my $last = $track->current_version;
 	#print "last found is $last\n"; 
@@ -189,27 +187,11 @@ sub current {	 # depends on ewf status
 	}
 }
 
-sub full_wav_path {  # independent of ewf status
+sub full_wav_path {  
 	my $track = shift; 
-	join_path $track->dir , $track->current_wav
+	join_path $track->dir, $track->current_wav
 }
 
-sub current_wav {	# independent of ewf status
-	my $track = shift;
-	my $last = $track->current_version;
-	#print "last found is $last\n"; 
-	if 	($track->rec_status eq 'REC'){ 
-		return $track->name . '_' . $last . '.wav'}
-	elsif ( $track->rec_status eq 'MON'){ 
-		no warnings;
-		my $filename = $track->targets->{ $track->monitor_version } ;
-		use warnings;
-		return $filename;
-	} else {
-		# print "track ", $track->name, ": no current version\n" ;
-		return undef;
-	}
-}
 sub write_ewf {
 	$::debug2 and print "&write_ewf\n";
 	my $track = shift;
