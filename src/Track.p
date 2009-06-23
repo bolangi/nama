@@ -192,30 +192,6 @@ sub full_wav_path {
 	join_path $track->dir, $track->current_wav
 }
 
-sub write_ewf {
-	$::debug2 and print "&write_ewf\n";
-	my $track = shift;
-	my $wav = $track->full_wav_path;
-	my $ewf = $wav;
-	$ewf =~ s/\.wav$/.ewf/;
-	#print "wav: $wav\n";
-	#print "ewf: $ewf\n";
-
-	my $maybe_ewf = $track->full_path; 
-	$wav eq $maybe_ewf and unlink( $ewf), return; # we're not needed
-	$ewf = File::Spec::Link->resolve_all( $ewf );
-	carp("no ewf parameters"), return 0 if !( $track->delay or $track->start_position or $track->length);
-
-	my @lines;
-	push @lines, join " = ", "source", $track->full_wav_path;
-	map{ push @lines, join " = ", $_, eval qq(\$track->$_) }
-	grep{ eval qq(\$track->$_)} qw(delay start_position length);
-	my $content = join $/, @lines;
-	#print $content, $/;
-	$content > io($ewf) ;
-	return $content;
-}
-
 sub current_version {	
 	my $track = shift;
 	my $last = $::use_group_numbering 
