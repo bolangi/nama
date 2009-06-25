@@ -58,6 +58,9 @@ use ::Object qw( 		name
 
 						project
 						target
+
+						rules_skip
+						rules_add
 						
 						);
 
