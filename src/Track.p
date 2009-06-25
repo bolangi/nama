@@ -481,34 +481,6 @@ sub send {
 	}
 } 
 
-sub send_output {  # for io lists / chain setup
-
-					# assumes $track->send exists
-					
-	my $track = shift;
-	if ( $track->send_select eq 'soundcard' ){ 
-		if ($::jack_running ){
-			[qw(jack system)]
-		} else {
-			['device', $::playback_device ]
-		}
-	} elsif ( $track->send_select eq 'jack' ) {
-		if ( $::jack_running ){
-			['jack', $track->send]
-		} else {
-			print $track->name, 
-q(: auxilary send to JACK client specified, but jackd is not running.
-Skipping.
-);
-			[qw(skip skip)]; 
-		}
-	} else { 
-				print q(: unexpected send_select value: "), 
-				$track->send_select, qq("\n);
-			[qw(skip skip)]; 
-	}
-}
-
 # input channel number, may not be used in current setup
 
 sub input {   	

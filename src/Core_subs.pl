@@ -201,12 +201,9 @@ sub prepare {
 		tracks => [],
 		rules  => [ qw( mix_setup 
 						rec_setup
-						rec_setup_soundcard_jack 
 						mon_setup 
 						aux_send 
-						aux_send_soundcard_jack
-						rec_file
-						rec_file_soundcard_jack) ],
+						rec_file) ],
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
@@ -460,11 +457,23 @@ sub rememoize {
 
 sub initialize_rules {
 
-	# make some helper IO objects
+	# first make some helper IO objects
+	#
+	# These objects provide code refs that alter their 
+	# output based on whether JACK is running.
 
 	my $soundcard_input = ::IO->new(
-		type => 	sub { $jack_running ? 'jack'   : 'device' },
-		object => 	sub { $jack_running ? 'system' : $capture_device },
+		type => 	sub { $jack_running ? 'jack_multi'   : 'device' },
+		object => 	sub { 
+						if ($jack_running) {
+							my $track = shift;
+							print "track obj: ". ref $track . $/;
+							my $start = $track->input;
+							my $end   = $start + $track->ch_count - 1;
+							join q(,),q(jack_multi),
+								map{"system:capture_$_"} $start..$end;
+						} else { $capture_device }
+					},
 	);
 
 	my $soundcard_output = ::IO->new(
@@ -476,8 +485,11 @@ sub initialize_rules {
 		type 	=> sub { 
 			my $track = shift;
 			if ( $track->source_select eq 'soundcard' )  
-				{ &{$soundcard_input->type} }
-			elsif ( $track->source_select eq 'jack' ) {
+
+			# regardless of whether JACK is running
+			
+				{ &{$soundcard_input->type}($track) }
+			elsif ( $track->source_select eq 'jack' ) { # JACK client
 				if ( $jack_running ){ 'jack' }
 				else { carp $track->name. ": cannot set source ".$track->source
 					.". JACK not running."; 'lost' }
@@ -486,9 +498,8 @@ sub initialize_rules {
 			}
 		},
 		object  => sub {
-			my $track = shift;
 			if ( $track->source_select eq 'soundcard' )  
-				{ &{$soundcard_input->object} }
+				{ &{$soundcard_input->object($track)} }
 			elsif ( $track->source_select eq 'jack' 
 						and $jack_running )
 				{ $track->source }
@@ -496,13 +507,64 @@ sub initialize_rules {
 
 		}
 	);
-				
-	my $source_output = ::IO->new(
-		type 	=> sub { },
-		object 	=> sub { },
-	);
 
+=comment
+sub send_output {  # for io lists / chain setup
 
+					# assumes $track->send exists
+					
+	my $track = shift;
+	if ( $track->send_select eq 'soundcard' ){ 
+		if ($::jack_running ){
+			[qw(jack system)]
+		} else {
+			['device', $::playback_device ]
+		}
+	} elsif ( $track->send_select eq 'jack' ) {
+		if ( $::jack_running ){
+			['jack', $track->send]
+		} else {
+			print $track->name, 
+q(: auxilary send to JACK client specified, but jackd is not running.
+Skipping.
+);
+			[qw(skip skip)]; 
+		}
+	} else { 
+				print q(: unexpected send_select value: "), 
+				$track->send_select, qq("\n);
+			[qw(skip skip)]; 
+	}
+}
+=cut
+
+	my $send_output = ::IO->new(
+		type => sub {
+					my $track = shift;
+					if ( $track->send_select eq 'soundcard' ){ 
+						$jack_running ? 'jack' : 'device'
+					} elsif ( $track->send_select eq 'jack' ) { # JACK client
+						'jack'
+					} else { carp $track->name . 
+						q(: missing or illegal send_select value: ").
+						$track->send_select . q(")
+					}
+				},
+		object => sub {
+			my $track = shift;
+			if ( $track->send_select eq 'soundcard' ){ 
+				$jack_running ? 'system': $playback_device  
+			} elsif ( $track->send_select eq 'jack' ) { # JACK client
+				if ( $jack_running ){ $track->send }
+				else {
+					carp $track->name . 
+		q(: auxilary send to JACK client specified, but jackd is not running.  Skipping.);
+					'skip'
+				}
+			}
+		}
+);
+			
 
 	package ::Rule;
 		$n = 0;
@@ -525,7 +587,7 @@ sub initialize_rules {
 	# condition =>	sub{ defined $inputs{mixed}  
 	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
 
-		input_type 		=> 'mixed', # bus name
+		input_type 		=> 'mixed', 
 		input_object	=> $loop_mix, 
 
 		output_type		=> 'mixed',
@@ -661,76 +723,15 @@ sub initialize_rules {
 			my $format = signal_format($raw_to_disk_format, $track->ch_count);
 			join " ", $track->full_path, $format
 		},
-		post_input			=>	sub{ my $track = shift;
-										$track->rec_route 
-										},
-		condition => sub {
-			my $track = shift;
-			return "satisfied" 
-				if ! ($track->source_select eq 'soundcard' and $jack_running)
-		},
+		post_input			=>	sub{ my $track = shift; $track->rec_route },
 		status		=>  1,
 	);
 
-	# as above, for inputs from soundcard via JACK
-	
-	$rec_file_soundcard_jack = ::Rule->new(
-
-		name		=>  'rec_file_soundcard_jack', 
-		target		=>  'REC',
-		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> 'jack_multi',
-		input_object	=> sub{ 
-			my $track = shift;
-			my $start = $track->input;
-			my $end   = $start + $track->ch_count - 1;
-			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
-		},
-		output_type	=>  'file',
-		output_object   => sub {
-			my $track = shift; 
-			my $format = signal_format($raw_to_disk_format, $track->ch_count);
-			join " ", $track->full_path, $format
-		},
-		condition 		=> sub { 
-			my $track = shift; 
-			return "satisfied" if $jack_running 
-				and $track->source_select eq 'soundcard'
-		} ,
-		status		=>  1,
-	);
-
-	# rec_setup / rec_setup_soundcard_jack
+	# rec_setup 
 	
 	# convert live inputs to stereo if necessary
 	# this chain takes all track effects
 	
-    $rec_setup_soundcard_jack  = ::Rule->new(
-
-		name			=>	'rec_setup_soundcard_jack', 
-		chain_id		=>  sub{ my $track = shift; $track->n },   
-		target			=>	'REC',
-		input_type		=> 'jack_multi',
-		input_object	=> sub{ 
-			my $track = shift;
-			my $start = $track->input;
-			my $end   = $start + $track->ch_count - 1;
-			join q(,),q(jack_multi),map{"system:capture_$_"} $start..$end;
-		},
-		output_type		=>  'cooked',
-		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-		post_input			=>	sub{ my $track = shift;
-										$track->mono_to_stereo 
-										},
-		condition 		=> sub { 
-			my $track = shift; 
-			return "satisfied" if $jack_running 
-				and $track->source_select eq 'soundcard'
-				and defined $inputs{cooked}->{"loop," . $track->n}; 
-				} ,
-		status			=>  1,
-	);
-			
     $rec_setup = ::Rule->new(
 
 		name			=>	'rec_setup', 
@@ -746,20 +747,17 @@ sub initialize_rules {
 										},
 		condition 		=> sub { 
 
-		# do not use when JACK is running and is soundcard input
-
 			my $track = shift; 
 			return "satisfied" 
-				if ! ($track->source_select eq 'soundcard' and $jack_running)
-					and defined $inputs{cooked}->{"loop," . $track->n}; 
+				unless ! defined $inputs{cooked}->{"loop," . $track->n}; 
 		},
 		status			=>  1,
 	);
 
 
-# aux_send / aux_send_soundcard_jack
+# aux_send 
 # 
-# send a 'cooked' signal to a soundcard output channel 
+# send a 'cooked' signal to a soundcard output channel or JACK client
 
 	
 $aux_send = ::Rule->new(  
@@ -770,35 +768,12 @@ $aux_send = ::Rule->new(
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
 		input_type		=>  'cooked', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
-		output_type		=>  sub{ my $track = shift;
-								$track->send_output->[0]},
-		output_object	=>  sub{ my $track = shift;
-								 $track->send_output->[1]},
+		output_type		=>  $send_output->type,
+		output_object	=>  $send_output->object, 
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition 		=> sub { my $track = shift; 
 								return "satisfied" if $track->send 
 									and jack_client($track->send, 'input') } ,
-		status			=>  1,
-	);
-
-$aux_send_soundcard_jack = ::Rule->new(  
-
-		name			=>  'aux_send_soundcard_jack', 
-		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
-		input_type		=>  'cooked', 
-		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
-		output_type		=>  'jack_multi',
-		output_object	=>  sub{ 
-			my $track = shift;
-			my $start = $track->ch_m;
-			my $end   = $start + $track->ch_count - 1;
-			join q(,),q(jack_multi),map{"system:playback_$_"} $start..$end;
-		},
-		condition 		=> sub { my $track = shift; 
-								return "satisfied" if $track->send 
-									and $track->send !~ /\D/ # is channel
-		} ,
 		status			=>  1,
 	);
 
@@ -1586,7 +1561,6 @@ sub preview {
 
 	$preview = "preview";
 	$rec_file->set(status => 0);
-	$rec_file_soundcard_jack->set(status => 0);
 
 	print "Setting preview mode.\n";
 	print "Using both REC and MON inputs.\n";
@@ -1602,7 +1576,6 @@ sub doodle {
 	return if engine_running() and really_recording();
 	$preview = "doodle";
 	$rec_file->set(status => 0);
-	$rec_file_soundcard_jack->set(status => 0);
 	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
 
@@ -1687,7 +1660,6 @@ sub exit_preview { # exit preview and doodle modes
 		release_doodle_mode();	
 
 		$rec_file->set(status => 1);
-		$rec_file_soundcard_jack->set(status => 1);
 
 }
 
