@@ -722,7 +722,16 @@ sub send_output {
 	}
  };
  			
-
+sub modify_rules_list {
+	my $track = shift;
+	my @rules = @_;
+	my %have;
+	map { $have{$_}++ } @rules;
+	map { push @rules, $_ unless $have{$_} } $track->rules_add;
+	my %skip;
+	map { $skip{$_}++ } $track->rules_skip;
+	grep { ! $skip{$_} } @rules;
+}
 
 # subclass
 
