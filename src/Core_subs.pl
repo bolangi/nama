@@ -460,6 +460,50 @@ sub rememoize {
 
 sub initialize_rules {
 
+	# make some helper IO objects
+
+	my $soundcard_input = ::IO->new(
+		type => 	sub { $jack_running ? 'jack'   : 'device' },
+		object => 	sub { $jack_running ? 'system' : $capture_device },
+	);
+
+	my $soundcard_output = ::IO->new(
+		type => 	sub { $jack_running ? 'jack'   : 'device' },
+		object => 	sub { $jack_running ? 'system' : $playback_device },
+	);
+
+	my $source_input = ::IO->new(
+		type 	=> sub { 
+			my $track = shift;
+			if ( $track->source_select eq 'soundcard' )  
+				{ &{$soundcard_input->type} }
+			elsif ( $track->source_select eq 'jack' ) {
+				if ( $jack_running ){ 'jack' }
+				else { carp $track->name. ": cannot set source ".$track->source
+					.". JACK not running."; 'lost' }
+    		} else { carp $track->name, ": missing source_select: \"",
+					$track->source_select, qq("\n);
+			}
+		},
+		object  => sub {
+			my $track = shift;
+			if ( $track->source_select eq 'soundcard' )  
+				{ &{$soundcard_input->object} }
+			elsif ( $track->source_select eq 'jack' 
+						and $jack_running )
+				{ $track->source }
+			else { 'lost' }
+
+		}
+	);
+				
+	my $source_output = ::IO->new(
+		type 	=> sub { },
+		object 	=> sub { },
+	);
+
+
+
 	package ::Rule;
 		$n = 0;
 		@by_index = ();	# return ref to Track by numeric key
@@ -544,8 +588,8 @@ sub initialize_rules {
 		condition 		=>	1,
 		input_type		=>  'mixed',
 		input_object	=>  $loop_output,
-		output_type		=> sub{ ${output_type_object()}[0] },
-		output_object	=> sub{ ${output_type_object()}[1] },
+		output_type		=> $soundcard_output->type,
+		output_object	=> $soundcard_output->object,
 		status			=>  1,
 		
 	);
@@ -606,14 +650,12 @@ sub initialize_rules {
 		
 	$rec_file = ::Rule->new(
 
-		name		=>  'rec_file', 
-		target		=>  'REC',
-		chain_id	=>  sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> sub{ my $track = shift;
-								${$track->source_input}[0] },
-		input_object		=> sub{ my $track = shift;
-								${$track->source_input}[1] },
-		output_type	=>  'file',
+		name			=> 'rec_file', 
+		target			=> 'REC',
+		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
+		input_type		=> $source_input->type, # code ref
+		input_object	=> $source_input->object, # code ref
+		output_type		=>  'file',
 		output_object   => sub {
 			my $track = shift; 
 			my $format = signal_format($raw_to_disk_format, $track->ch_count);
@@ -694,10 +736,8 @@ sub initialize_rules {
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ my $track = shift; $track->n },   
 		target			=>	'REC',
-		input_type		=> sub{ my $track = shift;
-								${$track->source_input}[0] },
-		input_object	=> sub{ my $track = shift;
-								${$track->source_input}[1] },
+		input_type		=> $source_input->type,  #code ref
+		input_object	=> $source_input->object,# code ref
 		output_type		=>  'cooked',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -835,21 +875,6 @@ sub jack_running {
 sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
-
-sub input_type_object { # soundcard input
-	if ($jack_running ){ 
-		[qw(jack system)] 
-	} else { 
-	    [ q(device), $capture_device  ]
-	}
-}
-sub output_type_object { # soundcard output
-	if ($jack_running ){ 
-		[qw(jack system)] 
-	} else { 
-	    [ q(device), $playback_device  ]
-	}
-}
 
 	
 sub eliminate_loops {

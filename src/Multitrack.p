@@ -103,6 +103,7 @@ use ::Assign qw(:all);
 use ::Track;
 use ::Bus;    
 use ::Mark;
+use ::IO;
 
 package ::Wav;
 memoize('candidates') if $::memoize;

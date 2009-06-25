@@ -509,24 +509,6 @@ Skipping.
 	}
 }
 
-sub source_input { # for io lists / chain setup
-	my $track = shift;
-	if ( $track->source_select eq 'soundcard' ){ 
-		::input_type_object()
-	}
-	elsif ( $track->source_select eq 'jack' ){
-		if ($::jack_running ){
-			['jack', $track->source ]
-		} else { 
-			#print $track->name, ": no JACK client found\n";
-			[qw(lost lost)]
-		}
-    } else { 
-			print $track->name, ": missing source_select: \"",
-					$track->source_select, qq("\n);
-	}
-}
-
 # input channel number, may not be used in current setup
 
 sub input {   	
