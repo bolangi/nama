@@ -461,6 +461,9 @@ sub initialize_rules {
 	#
 	# These objects provide code refs that alter their 
 	# output based on whether JACK is running.
+	#
+	# Basically syntax to the Track methods that run the
+	# necessary conditionals
 
 	my $soundcard_input = ::IO->new(
 
@@ -470,9 +473,9 @@ sub initialize_rules {
 
 	my $soundcard_output = ::IO->new(
 
- 		type => 	sub { $jack_running ? 'jack'   : 'device' },
- 		object => 	sub { $jack_running ? 'system' : $playback_device },
- 	);
+		type => 	sub { my $track = shift; $track->soundcard_output()->[0]}, 
+		object => 	sub { my $track = shift; $track->soundcard_output()->[1]},
+	);
 
 	my $source_input = ::IO->new(
 		type => 	sub { my $track = shift; $track->source_input()->[0]}, 

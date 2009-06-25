@@ -676,6 +676,9 @@ sub soundcard_input {
 			map{"system:capture_$_"} $start..$end]
 	} else { ['device' , $::capture_device] }
 }
+sub soundcard_output {
+ 	$::jack_running ? [qw(jack system)]  : ['device', $::playback_device] 
+}
 sub source_input {
 	my $track = shift;
 
