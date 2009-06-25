@@ -16,6 +16,7 @@ lib/Audio/Ecasound/Multitrack/Mark.pm
 lib/Audio/Ecasound/Multitrack/Object.pm
 lib/Audio/Ecasound/Multitrack/Track.pm
 lib/Audio/Ecasound/Multitrack/Wav.pm
+lib/Audio/Ecasound/Multitrack/IO.pm
 MANIFEST			This list of files
 Makefile.PL
 META.yml
@@ -26,3 +27,4 @@ t/03_wav.t
 t/04_object.t
 t/11_mark.t
 t/12_nama.t
+t/13_io.t
