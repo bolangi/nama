@@ -368,6 +368,9 @@ sub user {
 
 sub source { # command for setting, showing track source
 	my ($track, $source) = @_;
+
+# Case 1: no argument
+
 	if ( ! $source ){
 		if ( 	$track->source_select eq 'jack'
 				and $track->jack_source ){
@@ -375,6 +378,9 @@ sub source { # command for setting, showing track source
 		} elsif ( $track->source_select eq 'soundcard') { 
 			$track->input 
 		} else { undef }
+
+# Case 2: argument contains non-digits - treat as JACK client
+
 	} elsif ( $source =~ m(\D) ){
 		if ( $::jack_running ){
 			$track->set(source_select => "jack");
@@ -388,6 +394,8 @@ CLIENT
 			print "JACK server not running.\n";
 			$track->source;
 		} 
+
+# Case 3: fallthrough, numerical - treat as soundcard channel
 	} else {  # must be numerical
 		$track->set(ch_r => $source);
 		$track->set(source_select =>'soundcard');
@@ -398,6 +406,9 @@ CLIENT
 sub set_source { # called from parser 
 	my $track = shift;
 	my $source = shift;
+
+# Special handling for 'null', used for non-input (i.e. metronome) tracks
+
 	if ($source eq 'null'){
 		$track->set(group => 'null');
 		return
