@@ -54,15 +54,16 @@ sub apply {
 	$debug and print "tracks: ", join " ", @track_names, $/;
 	my @tracks = map{ $::Track::by_name{$_} } @track_names; 
 
-	map{ my $rule_name = $_;
-		$debug and print "apply rule name: $rule_name\n"; 
-		my $rule = $::Rule::by_name{$_};
-		#print "rule is type: ", ref $rule, $/;
-		$debug and print "condition: ", $rule->condition, $/;
+	map{ my $track = $_; # 
+		my $n = $track->n;
+		$debug and print "track ", $track->name, " index: $n\n";
 
-		map{ my $track = $_; # 
-			my $n = $track->n;
-			$debug and print "track ", $track->name, " index: $n\n";
+		map{ my $rule_name = $_;
+			$debug and print "apply rule name: $rule_name\n"; 
+			my $rule = $::Rule::by_name{$_};
+			#print "rule is type: ", ref $rule, $/;
+			$debug and print "condition: ", $rule->condition, $/;
+
 			my $key1 = deref_code($rule->input_type, $track);
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
@@ -100,8 +101,8 @@ sub apply {
 		$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
 			}
 
-		} @tracks;
-	} @{ $bus->rules }; 
+		} @{ $bus->rules };
+	} @tracks; 
 }
 # the following is utility code, not an object method
 
