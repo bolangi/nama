@@ -464,17 +464,8 @@ sub initialize_rules {
 
 	my $soundcard_input = ::IO->new(
 
-		type => 	sub { $jack_running ? 'jack_multi'   : 'device' },
-		object => 	sub { 
-						if ($jack_running) {
-							my $track = shift;
-							print "track obj: ". ref $track . $/;
-							my $start = $track->input;
-							my $end   = $start + $track->ch_count - 1;
-							join q(,),q(jack_multi),
-								map{"system:capture_$_"} $start..$end;
-						} else { $capture_device }
-					},
+		type => 	sub { my $track = shift; $track->soundcard_input()->[0]}, 
+		object => 	sub { my $track = shift; $track->soundcard_input()->[1]},
 	);
 
 	my $soundcard_output = ::IO->new(
@@ -484,69 +475,15 @@ sub initialize_rules {
  	);
 
 	my $source_input = ::IO->new(
-		type 	=> sub { 
-			my $track = shift;
-			if ( $track->source_select eq 'soundcard' )  
-
-			# regardless of whether JACK is running
-			
-				{ &{$soundcard_input->type}($track) }
-			elsif ( $track->source_select eq 'jack' ) { # JACK client
-				if ( $jack_running ){ 'jack' }
-				else { carp $track->name. ": cannot set source ".$track->source
-					.". JACK not running."; 'lost' }
-    		} else { carp $track->name, ": missing source_select: \"",
-					$track->source_select, qq("\n);
-			}
-		},
-		object  => sub {
-			my $track = shift;
-			if ( $track->source_select eq 'soundcard' )  
-				{ &{$soundcard_input->object}($track) }
-			elsif ( $track->source_select eq 'jack' 
-						and $jack_running )
-				{ $track->source }
-			else { 'lost' }
-
-		}
- 	);
+		type => 	sub { my $track = shift; $track->source_input()->[0]}, 
+		object => 	sub { my $track = shift; $track->source_input()->[1]},
+	);
 
 
 	my $send_output = ::IO->new(
-		type => sub {
-					my $track = shift;
-					if ( $track->send_select eq 'soundcard' ){ 
-						$jack_running ? 'jack_multi' : 'device'
-					} elsif ( $track->send_select eq 'jack' ) { # JACK client
-						'jack'
-					} else { carp $track->name . 
-						q(: missing or illegal send_select value: ").
-						$track->send_select . q(")
-					}
-				},
-		object => 	
-
-	sub { 
-		my $track = shift;
-		if ( $track->send_select eq 'soundcard' ){ 
-			if ($jack_running) {
-				print "track obj: ". ref $track . $/;
-				my $start = $track->aux_output;
-				my $end   = $start + 1; # Assume stereo
-				join q(,),q(jack_multi),
-					map{"system:playback_$_"} $start..$end;
-			} else { $playback_device }
-		} elsif ( $track->send_select eq 'jack' ) { # JACK client
-			if ( $jack_running ){ $track->send }
-			else {
-				carp $track->name . 
-				q(: auxilary send to JACK client specified,) .
-				q( but jackd is not running.  Skipping.);
-				'skip'
-			}
-		}
-	}
- );
+		type => 	sub { my $track = shift; $track->send_output()->[0]}, 
+		object => 	sub { my $track = shift; $track->send_output()->[1]},
+	);
  			
 
 	package ::Rule;

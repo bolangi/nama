@@ -363,7 +363,7 @@ sub user {
 
 ### Commands and their support functions
 
-# Around 200 lines of conditional code to allow user to use 'source'
+# The conditional-laced code allows user to use 'source'
 # and 'send' commands in JACK and ALSA modes.
 
 sub source { # command for setting, showing track source
@@ -663,6 +663,61 @@ sub select_output {
 		"select", $start, $length
 	}
 }
+
+# the following subroutines support IO objects
+
+sub soundcard_input {
+	my $track = shift;
+	if ($::jack_running) {
+		print "track obj: ". ref $track . $/;
+		my $start = $track->input;
+		my $end   = $start + $track->ch_count - 1;
+		['jack_multi' , join q(,),q(jack_multi),
+			map{"system:capture_$_"} $start..$end]
+	} else { ['device' , $::capture_device] }
+}
+sub source_input {
+	my $track = shift;
+
+	# regardless of whether JACK is running
+	if ( $track->source_select eq 'soundcard' ){
+		$track->soundcard_input
+	} elsif ( $track->source_select eq 'jack' ) { # JACK client
+		if ( $::jack_running ){ ['jack', $track->source] }
+		else { 	carp $track->name. ": cannot set source ".$track->source
+				.". JACK not running."; 'lost' }
+	} else { carp $track->name, ": missing source_select: \"",
+			$track->source_select, qq("\n); 
+			[qw(skip skip)];
+	}
+}
+
+sub send_output {
+	my $track = shift;
+	if ( $track->send_select eq 'soundcard' ){ 
+		if ($::jack_running) {
+			print "track obj: ". ref $track . $/;
+			my $start = $track->aux_output;
+			my $end   = $start + 1; # Assume stereo
+			['jack_multi', join q(,),q(jack_multi),
+				map{"system:playback_$_"} $start..$end]
+		} else {[ 'device', $::playback_device] }
+	} elsif ( $track->send_select eq 'jack' ) { # JACK client
+		if ($::jack_running){[ 'jack', $track->send] }
+		else { carp $track->name . 
+				q(: auxilary send to JACK client specified,) .
+				q( but jackd is not running.  Skipping.);
+				[qw(skip skip)]
+		}
+	} else { carp $track->name . 
+		q(: missing or illegal send_select value: ").
+		$track->send_select . q(");
+	    [qw(skip skip)];	
+	}
+ };
+ 			
+
+
 # subclass
 
 package ::SimpleTrack; # used for Master track
