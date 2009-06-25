@@ -342,6 +342,7 @@ our (
 	$rec_setup_soundcard_jack,
 	$aux_send,
 	$aux_send_soundcard_jack,
+	$aux_receive,
 	$null_setup,
 	
 	# rules for mastering
