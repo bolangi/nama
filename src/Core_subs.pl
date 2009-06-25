@@ -835,7 +835,9 @@ sub engine_running {
 };
 
 	
-sub eliminate_loops {
+sub eliminate_loops1 {
+	local $debug2 = 1;
+	local $debug  = 1;
 	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
@@ -885,6 +887,10 @@ sub eliminate_loops {
 	delete $post_input{$cooked_id};
 	delete $pre_output{$cooked_id};
 
+	
+}
+sub eliminate_loops2 {
+
 	return if $mastering_mode;
 
 	# remove $loop_output when only one customer for $inputs{mixed}{$loop_output}
@@ -904,7 +910,6 @@ sub eliminate_loops {
 	$inputs{mixed}{$loop_mix} = [ $customer_id ];
 
 	}
-	
 }
 
 sub initialize_project_data {
@@ -1237,7 +1242,8 @@ sub generate_setup {
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
-		map{ eliminate_loops($_) } all_chains();
+		map{ eliminate_loops1($_) } all_chains();
+		eliminate_loops2();
 
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
