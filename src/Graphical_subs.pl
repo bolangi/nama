@@ -14,6 +14,7 @@ sub init_gui {
 	get_saved_colors();
 	$set_event = $mw->Label();
 	$mw->optionAdd('*font', 'Helvetica 12');
+	$mw->optionAdd('*BorderWidth' => 1);
 	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
 	$parent{mw} = $mw;
