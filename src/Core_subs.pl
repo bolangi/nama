@@ -1673,9 +1673,11 @@ sub exclude_duplicate_inputs {
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
  	if ( $tracker->tracks){
- 		map { print "track $_ "; $old_rw{$_} = $tn{$_}->rw;
- 		  $tn{$_}->set(rw => 'REC');
- 			print "status: ", $tn{$_}->rw, $/ } $tracker->tracks;
+ 		map { # print "track $_ "; 
+			$old_rw{$_} = $tn{$_}->rw;
+ 		  	$tn{$_}->set(rw => 'REC');
+ 			# print "status: ", $tn{$_}->rw, $/ 
+ 		} $tracker->tracks;
  	}
 
 		my @user = $tracker->tracks(); # track names
@@ -3609,8 +3611,12 @@ sub automix {
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
-	### turn on mixer output
+	### turn on mix track  output
 	command_process('mixplay');
+	
+	# turn on mixer output
+	$master_track->set(rw => 'MON');
+	
 
 #	no Smart::Comments;
 	
