@@ -108,8 +108,8 @@ shift_track: _shift_track start_position end {
 	}
 }
 
-start_position: mark_name | float
-float: /\d+.\d+/
+start_position:  float | mark_name
+float: /\d+\.\d+/
 mark_name: name
 
 unshift_track: _unshift_track end {
@@ -133,7 +133,7 @@ show_tracks: _show_tracks end {
 	use warnings; 
 	no warnings qw(uninitialized); 
 	print $/, "Group control", " " x 4, 
-	  sprintf("%2d", $::tracker->version), " " x 2, $::tracker->rw,$/, $/;
+	  sprintf("%2d", $::tracker->version), " " x 2, $::tracker->rw,$/,$/;
 	1;
 }
 modifiers: _modifiers modifier(s) end {
