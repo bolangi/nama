@@ -1624,9 +1624,11 @@ sub exclude_duplicate_inputs {
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
  	if ( $tracker->tracks){
- 		map { print "track $_ "; $old_rw{$_} = $tn{$_}->rw;
- 		  $tn{$_}->set(rw => 'REC');
- 			print "status: ", $tn{$_}->rw, $/ } $tracker->tracks;
+ 		map { # print "track $_ "; 
+			$old_rw{$_} = $tn{$_}->rw;
+ 		  	$tn{$_}->set(rw => 'REC');
+ 			# print "status: ", $tn{$_}->rw, $/ 
+ 		} $tracker->tracks;
  	}
 
 		my @user = $tracker->tracks(); # track names
@@ -3560,11 +3562,10 @@ sub automix {
 
 	$main_out->set(status => 1);
 
+	### default to playing back Mixdown track, setting user tracks to OFF
 
-	### default to playing back Mixdown track
-	
 	command_process('mixplay');
-
+	
 #	no Smart::Comments;
 	
 }
