@@ -45,6 +45,22 @@ sub show_region {
 	join "", @lines;
 }
 
+sub show_status {
+	my @fields;
+	push @fields, $tracker->rw eq 'REC' 
+					? "live input allowed" 
+					: "live input disabled";
+	push @fields, "record" if ::really_recording();
+	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
+		map{ $tn{$_} } $tracker->tracks, q(Mixdown);
+	push @fields, "mixdown" 
+		if $tn{Mixdown}->rec_status eq 'REC' and $mix_down->status;
+	push @fields, "doodle" if $preview eq 'doodle';
+	push @fields, "preview" if $preview eq 'preview';
+	push @fields, "master" if $mastering_mode;
+	"[ ". join(", ", @fields) . " ]\n";
+}
+	
 sub poll_jack {
 	package ::;
 	$event_id{Event_poll_jack} = Event->timer(
