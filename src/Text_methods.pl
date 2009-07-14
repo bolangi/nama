@@ -9,7 +9,7 @@ $text_wrap = new Text::Format {
 };
 
 sub show_versions {
- 	print "All versions: ", join " ", @{$this_track->versions}, $/
+ 	"All versions: ". join " ", @{$this_track->versions}, $/
 		if @{$this_track->versions};
 }
 
@@ -27,22 +27,40 @@ sub show_effects {
 			#push @lines, join("; ", @params) . "\n";
  
  	 } @{ $this_track->ops };
-	print @lines;
+	join "", @lines;
  	
 }
 sub show_modifiers {
-	print "Modifiers: ",$this_track->modifiers, $/
+	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
 }
 sub show_region {
-	print "Start delay: ",
+	my @lines;
+	push @lines, "Start delay: ",
 		$this_track->playat, $/ if $this_track->playat;
-	print "Region start: ", $this_track->region_start, $/
+	push @lines, "Region start: ", $this_track->region_start, $/
 		if $this_track->region_start;
-	print "Region end: ", $this_track->region_end, $/
+	push @lines, "Region end: ", $this_track->region_end, $/
 		if $this_track->region_end;
+	join "", @lines;
 }
 
+sub show_status {
+	my @fields;
+	push @fields, $tracker->rw eq 'REC' 
+					? "live input allowed" 
+					: "live input disabled";
+	push @fields, "record" if ::really_recording();
+	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
+		map{ $tn{$_} } $tracker->tracks, q(Mixdown);
+	push @fields, "mixdown" 
+		if $tn{Mixdown}->rec_status eq 'REC' and $mix_down->status;
+	push @fields, "doodle" if $preview eq 'doodle';
+	push @fields, "preview" if $preview eq 'preview';
+	push @fields, "master" if $mastering_mode;
+	"[ ". join(", ", @fields) . " ]\n";
+}
+	
 sub poll_jack {
 	package ::;
 	$event_id{Event_poll_jack} = Event->timer(
@@ -158,10 +176,21 @@ sub placeholder {
 	$use_placeholders ? q(--) : q() 
 }
 
+{
+my $format_top = <<TOP;
+Track Name      Ver. Setting  Status   Source           Send        Vol  Pan 
+=============================================================================
+TOP
+
+my $format_picture = <<PICTURE;
+@>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> 
+PICTURE
+
 sub show_tracks {
     no warnings;
+	$^A = $format_top;
     my @tracks = @_;
-    map {     push @format_fields,  
+    map {   formline $format_picture, 
             $_->n,
             $_->name,
             placeholder( $_->current_version ),
@@ -179,11 +208,17 @@ sub show_tracks {
 
         } grep{ ! $_-> hide} @tracks;
         
-    write; # using format below
-    $- = 0; # $FORMAT_LINES_LEFT # force header on next output
-    1;
-    use warnings;
-    no warnings q(uninitialized);
+    #write; # using format below
+    #$- = 0; # $FORMAT_LINES_LEFT # force header on next output
+	
+    #1;
+    #use warnings;
+    #no warnings q(uninitialized);
+	my $output = $^A;
+	$^A = "";
+	return $output;
+}
+
 }
 
 format STDOUT_TOP =

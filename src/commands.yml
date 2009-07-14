@@ -115,6 +115,14 @@ master_off:
   short: mro
   what: Leave mastering mode
   parameters: none
+main_off:
+  type: general
+  what: turn off main output
+  parameters: none
+main_on:
+  type: general
+  what: turn on main output
+  parameters: none
 add_track:
   type: track
   short: add new
