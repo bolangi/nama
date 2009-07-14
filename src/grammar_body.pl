@@ -423,3 +423,9 @@ list_history: _list_history end {
 	my %seen;
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
+main_off: _main_off end { 
+1;
+} 
+main_on: _main_on end { 
+1;
+} 
