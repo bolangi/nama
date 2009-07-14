@@ -129,11 +129,10 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	::Text::show_tracks ( ::Track::all );
-	use warnings; 
-	no warnings qw(uninitialized); 
-	print $/, "Group control", " " x 4, 
+	my $string = ::Text::show_tracks ( ::Track::all );
+	$string .=  join "", $/, "Group control", " " x 4, 
 	  sprintf("%2d", $::tracker->version), " " x 2, $::tracker->rw,$/,$/;
+	::pager( $string );
 	1;
 }
 modifiers: _modifiers modifier(s) end {
@@ -145,19 +144,20 @@ modifiers: _modifiers end { print $::this_track->modifiers, "\n"; 1}
 show_chain_setup: _show_chain_setup { ::show_chain_setup(); 1}
 show_io: _show_io { ::show_io(); 1}
 show_track: _show_track end {
-	::Text::show_tracks($::this_track);
-	::Text::show_effects();
-	::Text::show_versions();
-	::Text::show_modifiers();
-	print "Signal width: ", ::width($::this_track->ch_count), "\n";
-	::Text::show_region();
+	my $output = ::Text::show_tracks($::this_track);
+	$output .= ::Text::show_effects();
+	$output .= ::Text::show_versions();
+	$output .= ::Text::show_modifiers();
+	$output .= join "", "Signal width: ", ::width($::this_track->ch_count), "\n";
+	$output .= ::Text::show_region();
+	::pager( $output );
 	1;}
 show_track: _show_track name end { 
- 	::Text::show_tracks( 
-	$::tn{$item{name}} ) if $::tn{$item{name}};
+ 	::pager( ::Text::show_tracks( 
+	$::tn{$item{name}} )) if $::tn{$item{name}};
 	1;}
 show_track: _show_track dd end {  
-	::Text::show_tracks( $::ti{$item{dd}} ) if
+	::pager( ::Text::show_tracks( $::ti{$item{dd}} )) if
 	$::ti{$item{dd}};
 	1;}
 
