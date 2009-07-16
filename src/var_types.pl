@@ -14,6 +14,7 @@
 						%abbreviations
 						%devices
 						$ecasound_globals
+						$ecasound_globals_for_mixdown
 						$mix_to_disk_format
 						$raw_to_disk_format
 						$mixer_out_format

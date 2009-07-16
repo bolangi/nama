@@ -493,17 +493,19 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$mixdown_track->set(rw => 'REC'); 
+	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
+		$ecasound_globals_for_mixdown; 
 }
-
-
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$mixdown_track->set(rw => 'MON');
 	$tracker->set(rw => 'OFF');}
+	$ecasound_globals_ecs = $ecasound_globals;
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$mixdown_track->set(rw => 'OFF');
 	$tracker->set(rw => 'MON')}
+	$ecasound_globals_ecs = $ecasound_globals;
 
 sub bunch {
 	package ::;

@@ -32,7 +32,10 @@ our (
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
 	
-	$ecasound_globals, #  Command line switches XX check
+	$ecasound_globals_ecs, # set to one of the following
+	$ecasound_globals,     # .namarc field
+	$ecasound_globals_for_mixdown,  # .namarc field
+
 
 	$default,		# the internal default configuration file, as string
 	$default_palette_yml, # not horriffic is about all I can say

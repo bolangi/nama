@@ -181,6 +181,7 @@ sub prepare {
 
 
 	read_config(global_config());  # from .namarc if we have one
+	$ecasound_globals_ecs = $ecasound_globals;
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
@@ -1430,7 +1431,7 @@ WARN
 	
 	my $ecs_file = "# ecasound chainsetup file\n\n";
 	$ecs_file   .= "# general\n\n";
-	$ecs_file   .= "$ecasound_globals\n\n";
+	$ecs_file   .= "$ecasound_globals_ecs\n\n";
 	$ecs_file   .= "# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
@@ -3490,6 +3491,12 @@ sub automix {
 	# add -ev to mixtrack
 	my $ev = add_effect( { chain => $master->n, type => 'ev' } );
 	### ev id: $ev
+
+	# use Ecasound globals for mixdown 
+	# mixplay() below restores normal values
+	
+	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
+		$ecasound_globals_for_mixdown; 
 
 	# turn off audio output
 	
