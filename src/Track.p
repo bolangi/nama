@@ -685,19 +685,39 @@ sub ingest  {
 sub playat_output {
 	my $track = shift;
 	if ( $track->playat ){
-		"playat" , ::Mark::mark_time($track->playat)
+		"playat" , $track->playat
 	}
 }
 
 sub select_output {
 	my $track = shift;
 	if ( $track->region_start and $track->region_end){
-		my $end = ::Mark::mark_time($track->region_end);
-		my $start = ::Mark::mark_time($track->region_start);
+		my $end = $track->region_ending;
+		my $start = $track->region_start;
 		my $length = $end - $start;
 		"select", $start, $length
 	}
 }
+
+sub region_start {
+	my $track = shift;
+	::Mark::mark_time( $track->{region_start} )
+}
+sub region_ending {
+	my $track = shift;
+	if ( $track->{region_end} eq 'END' ){
+		print $track->full_path, $/;
+		::get_length($track->full_path);
+	} else {
+		::Mark::mark_time( $track->{region_end} )
+	}
+}
+sub playat {
+	my $track = shift;
+	::Mark::mark_time( $track->{playat} )
+}
+
+	
 # subclass
 
 package ::SimpleTrack; # used for Master track

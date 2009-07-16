@@ -11,7 +11,13 @@ dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
-name4: /[\w\-+:\.]+/
+markname: /\w+/ { 
+	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
+		unless $::Mark::by_name{$item[1]};
+	$item[1];
+}
+marktime: /\d+\.\d+/
+#region_default_end: 'END' | ''
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w\-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
@@ -71,14 +77,11 @@ link_track: _link_track name target end {
 target: name
 project: name
 region: _region beginning ending end { 
-	my ($beg, $end) = @item{ qw( beginning ending ) };
-	map{ 
-		print ("$_: mark does not exist. Skipping.\n"), return
-			if ! $::Mark::by_name{$_}
-	} $beg, $end;
-	$::this_track->set(region_start => $beg);
-	$::this_track->set(region_end => $end);
-	::Text::show_region();
+	::set_region( @item{ qw( beginning ending ) } );
+	1;
+}
+region: _region beginning end { 
+	::set_region( $item{beginning}, 'END' );
 	1;
 }
 region: _region end { ::Text::show_region(); 1 }		
@@ -115,8 +118,8 @@ mark_name: name
 unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
 }
-beginning: name4
-ending: name4
+beginning: markname | marktime
+ending: 'END' | markname | marktime 
 generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}

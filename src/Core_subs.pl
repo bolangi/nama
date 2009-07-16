@@ -298,6 +298,7 @@ sub prepare {
 }
 
 sub eval_iam{
+	local $debug = 1;
 	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -3792,9 +3793,9 @@ sub status_snapshot {
 				current_version => $_->current_version,
 				send 			=> $_->send,
 				source 			=> $_->source,
-				shift			=> ::Mark::mark_time($_->playat),
-				region_start    => ::Mark::mark_time($_->region_start),
-				region_end    	=> ::Mark::mark_time($_->region_end),
+				shift			=> $_->playat,
+				region_start    => $_->region_start,
+				region_end    	=> $_->region_ending,
 
 				
 			} unless $_->rec_status eq 'OFF'
@@ -3802,5 +3803,31 @@ sub status_snapshot {
 	} ::Track::all();
 	\%snapshot
 }
+sub set_region {
+	my ($beg, $end) = @_;
+	$::this_track->set(region_start => $beg);
+	$::this_track->set(region_end => $end);
+	::Text::show_region();
+}
+sub get_length {
+	my $path = shift;
+	eval_iam('engine-halt');
+	eval_iam('cs-disconnect');
+	eval_iam('cs-add setup-get-length');
+	print eval_iam('cs-selected');
+	eval_iam('c-add dummy');
+	print eval_iam('c-selected');
+	eval_iam('ai-add ' . $path);
+	eval_iam('ao-add null');
+	eval_iam('cs-connect');
+	eval_iam('engine-launch');
+	eval_iam('ai-select '. $path);
+	print eval_iam('ai-selected');
+	my $length = eval_iam('ai-get-length');
+	print "length: $length\n";
+	$length;
+}
+=comment
+=cut
 	
 ### end
