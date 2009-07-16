@@ -3640,7 +3640,10 @@ sub master_on {
 		add_mastering_tracks();
 		add_mastering_effects();
 		$this_track = $old_track;
-	}
+	} else { unhide_mastering_tracks() }
+
+		
+	
 }
 
 sub add_mastering_tracks {
@@ -3693,8 +3696,17 @@ sub add_mastering_effects {
 
 sub master_off {
 	$mastering_mode = 0;
+	hide_mastering_tracks();
 	# this automatically enables Rule mix_link
 }
+
+sub unhide_mastering_tracks {
+	map{ $tn{$_}->set(hide => 0)} @mastering_track_names;
+}
+
+sub hide_mastering_tracks {
+	map{ $tn{$_}->set(hide => 1)} @mastering_track_names;
+ }
 		
 # vol/pan requirements of mastering tracks
 
