@@ -377,7 +377,7 @@ group_version: _group_version dd end {
 bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
- 	map{ delete $::bunch{$_} } @{$item{'names(s)'}}; 1}
+ 	map{ delete $::bunch{$_} } @{$item{'name(s)'}}; 1}
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register end { 

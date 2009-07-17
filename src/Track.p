@@ -9,7 +9,8 @@ local $debug = 0;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use ::Wav;
-#use Memoize qw(memoize unmemoize);
+use Memoize;
+memoize ('get_length'); # subroutine, not object method
 #memoize('rec_status');
 use Carp;
 use IO::All;
@@ -706,8 +707,7 @@ sub region_start {
 sub region_ending {
 	my $track = shift;
 	if ( $track->{region_end} eq 'END' ){
-		print $track->full_path, $/;
-		::get_length($track->full_path);
+		return get_length($track->full_path);
 	} else {
 		::Mark::mark_time( $track->{region_end} )
 	}
@@ -717,6 +717,33 @@ sub playat {
 	::Mark::mark_time( $track->{playat} )
 }
 
+# subroutine, not object method
+
+sub get_length { 
+	
+	#$debug2 and print "&get_length\n";
+	
+	print "evaluating....\n";
+	carp "my call chain\n";
+	my $path = shift;
+	package ::;
+	$::e = Audio::Ecasound->new;
+	#print "path: $path\n";
+	eval_iam('cs-add gl');
+	#print eval_iam('cs-selected');
+	eval_iam('c-add g');
+	#print eval_iam('c-selected');
+	eval_iam('ai-add ' . $path);
+	eval_iam('ao-add null');
+	eval_iam('cs-connect');
+	eval_iam('engine-launch');
+	eval_iam('ai-select '. $path);
+	#print eval_iam('ai-selected');
+	my $length = eval_iam('ai-get-length');
+	$::e = Audio::Ecasound->new;
+	#print "length: $length\n";
+	$length;
+}
 	
 # subclass
 
