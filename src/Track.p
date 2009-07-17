@@ -723,8 +723,8 @@ sub get_length {
 	
 	#$debug2 and print "&get_length\n";
 	
-	print "evaluating....\n";
-	carp "my call chain\n";
+	#print "evaluating....\n";
+	#carp "my call chain\n";
 	my $path = shift;
 	package ::;
 	$::e = Audio::Ecasound->new;
