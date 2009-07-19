@@ -216,10 +216,22 @@ sub show_tracks {
     #no warnings q(uninitialized);
 	my $output = $^A;
 	$^A = "";
-	return $output;
+	#$output .= show_tracks_extra_info();
+	$output;
 }
 
 }
+
+sub show_tracks_extra_info {
+
+	my $string;
+	$string .= $/. "Global version setting: ".  $::tracker->version. $/
+		if $::tracker->version;
+	$string .=  $/. ::Text::show_status();
+	$string .=  $/;	
+	$string;
+}
+
 
 format STDOUT_TOP =
 Track Name      Ver. Setting  Status   Source           Send        Vol  Pan 

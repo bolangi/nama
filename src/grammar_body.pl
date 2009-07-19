@@ -132,12 +132,7 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	my $string = ::Text::show_tracks ( ::Track::all );
-	$string .= $/. "Global version setting: ".  $::tracker->version. $/
-		if $::tracker->version;
-	$string .=  $/. ::Text::show_status();
-	$string .=  $/;	
-	::pager( $string );
+	::pager( ::Text::show_tracks ( ::Track::all ) );
 	1;
 }
 modifiers: _modifiers modifier(s) end {

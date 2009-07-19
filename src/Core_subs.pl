@@ -1619,7 +1619,8 @@ sub reconfigure_engine {
 	stop_transport() if $was_running;
 
 	if ( generate_setup() ){
-		command_process('show_tracks');
+		print STDOUT ::Text::show_tracks ( ::Track::all ) ;
+		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
 		eval_iam("setpos $old_pos") if $old_pos;
 
