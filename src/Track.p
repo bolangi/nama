@@ -668,7 +668,6 @@ sub select_output {
 	}
 }
 
-<<<<<<< HEAD:src/Track.p
 # the following subroutines support IO objects
 
 sub soundcard_input {
@@ -735,7 +734,6 @@ sub modify_rules_list {
 	grep { ! $skip{$_} } @rules;
 }
 
-=======
 sub region_start {
 	my $track = shift;
 	::Mark::mark_time( $track->{region_start} )
@@ -781,7 +779,6 @@ sub get_length {
 	$length;
 }
 	
->>>>>>> master:src/Track.p
 # subclass
 
 package ::SimpleTrack; # used for Master track
