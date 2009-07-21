@@ -1433,6 +1433,7 @@ WARN
 	$ecs_file   .= $tn{Mixdown}->rec_status eq 'REC' 
 					? $ecasound_globals_for_mixdown
 					: $ecasound_globals;
+	$ecs_file   .= "\n\n";
 	$ecs_file   .= "# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
