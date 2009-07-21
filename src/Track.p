@@ -779,7 +779,6 @@ sub get_length {
 	$length;
 }
 	
->>>>>>> master:src/Track.p
 # subclass
 
 package ::SimpleTrack; # used for Master track
