@@ -3654,13 +3654,9 @@ sub add_mastering_effects {
 
 
 sub master_off {
+
 	$mastering_mode = 0;
-<<<<<<< HEAD:src/Core_subs.pl
-	# this automatically enables Rule main_out
-=======
 	hide_mastering_tracks();
-	# this automatically enables Rule mix_link
->>>>>>> master:src/Core_subs.pl
 }
 
 sub unhide_mastering_tracks {
