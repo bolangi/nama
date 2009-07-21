@@ -400,5 +400,6 @@ our (
 	
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
+	$disable_auto_reconfigure, # for debugging
 
 );

@@ -295,6 +295,7 @@ sub prepare {
 }
 
 sub eval_iam{
+	#local $debug = 1;
 	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -1530,6 +1531,9 @@ sub doodle {
 }
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
+	# sometimes we want to skip for debugging
+	
+	return 0 if $disable_auto_reconfigure;
 
 	# we don't want to disturb recording/mixing
 	return 1 if really_recording() and engine_running();
@@ -1570,7 +1574,8 @@ sub reconfigure_engine {
 	stop_transport() if $was_running;
 
 	if ( generate_setup() ){
-		command_process('show_tracks');
+		print STDOUT ::Text::show_tracks ( ::Track::all ) ;
+		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
 		eval_iam("setpos $old_pos") if $old_pos;
 
@@ -3594,7 +3599,10 @@ sub master_on {
 		add_mastering_tracks();
 		add_mastering_effects();
 		$this_track = $old_track;
-	}
+	} else { unhide_mastering_tracks() }
+
+		
+	
 }
 
 sub add_mastering_tracks {
@@ -3647,8 +3655,21 @@ sub add_mastering_effects {
 
 sub master_off {
 	$mastering_mode = 0;
+<<<<<<< HEAD:src/Core_subs.pl
 	# this automatically enables Rule main_out
+=======
+	hide_mastering_tracks();
+	# this automatically enables Rule mix_link
+>>>>>>> master:src/Core_subs.pl
 }
+
+sub unhide_mastering_tracks {
+	map{ $tn{$_}->set(hide => 0)} @mastering_track_names;
+}
+
+sub hide_mastering_tracks {
+	map{ $tn{$_}->set(hide => 1)} @mastering_track_names;
+ }
 		
 # vol/pan requirements of mastering tracks
 
@@ -3734,15 +3755,21 @@ sub status_snapshot {
 				current_version => $_->current_version,
 				send 			=> $_->send,
 				source 			=> $_->source,
-				shift			=> ::Mark::mark_time($_->playat),
-				region_start    => ::Mark::mark_time($_->region_start),
-				region_end    	=> ::Mark::mark_time($_->region_end),
+				shift			=> $_->playat,
+				region_start    => $_->region_start,
+				region_end    	=> $_->region_ending,
 
 				
 			} unless $_->rec_status eq 'OFF'
 
 	} ::Track::all();
 	\%snapshot
+}
+sub set_region {
+	my ($beg, $end) = @_;
+	$::this_track->set(region_start => $beg);
+	$::this_track->set(region_end => $end);
+	::Text::show_region();
 }
 	
 ### end

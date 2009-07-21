@@ -11,7 +11,13 @@ dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
-name4: /[\w\-+:\.]+/
+markname: /\w+/ { 
+	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
+		unless $::Mark::by_name{$item[1]};
+	$item[1];
+}
+marktime: /\d+\.\d+/
+#region_default_end: 'END' | ''
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w\-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
@@ -71,14 +77,11 @@ link_track: _link_track name target end {
 target: name
 project: name
 region: _region beginning ending end { 
-	my ($beg, $end) = @item{ qw( beginning ending ) };
-	map{ 
-		print ("$_: mark does not exist. Skipping.\n"), return
-			if ! $::Mark::by_name{$_}
-	} $beg, $end;
-	$::this_track->set(region_start => $beg);
-	$::this_track->set(region_end => $end);
-	::Text::show_region();
+	::set_region( @item{ qw( beginning ending ) } );
+	1;
+}
+region: _region beginning end { 
+	::set_region( $item{beginning}, 'END' );
 	1;
 }
 region: _region end { ::Text::show_region(); 1 }		
@@ -115,8 +118,8 @@ mark_name: name
 unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
 }
-beginning: name4
-ending: name4
+beginning: markname | marktime
+ending: 'END' | markname | marktime 
 generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
@@ -129,12 +132,7 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	my $string = ::Text::show_tracks ( ::Track::all );
-	$string .= $/. "Global version setting: ".  $::tracker->version. $/
-		if $::tracker->version;
-	$string .=  $/. ::Text::show_status();
-	$string .=  $/;	
-	::pager( $string );
+	::pager( ::Text::show_tracks ( ::Track::all ) );
 	1;
 }
 modifiers: _modifiers modifier(s) end {
@@ -374,7 +372,7 @@ group_version: _group_version dd end {
 bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
- 	map{ delete $::bunch{$_} } @{$item{'names(s)'}}; 1}
+ 	map{ delete $::bunch{$_} } @{$item{'name(s)'}}; 1}
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register end { 

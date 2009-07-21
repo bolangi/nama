@@ -84,18 +84,37 @@ execute_on_project_load: ~
 
 # effects for use in mastering mode
 
-eq: Parametric1
+eq: Parametric1 1 0 0 40 0.125 0 0 200 0.125 0 0 600 0.125 0 0 3300 0.125 0
 
-low_pass: lowpass_iir
+low_pass: lowpass_iir 120 1
 
-mid_pass: bandpass_iir
+mid_pass: bandpass_iir 420 800 1
 
-high_pass: highpass_iir
+high_pass: highpass_iir 920 1
 
-compressor: sc4
+compressor: sc4 0 3 16 0 1 3.25 0
 
-spatialiser: matrixSpatialiser
+spatialiser: matrixSpatialiser 0
 
-limiter: tap_limiter
+limiter: tap_limiter 0 0
 
 # end
+
+# Julien Claassen's Notes on Mastering effect defaults
+# 
+# The eq: All sections turned off, in case you don't want the
+# EQ after all and when you turn them on, you can easily do
+# them one at a time. 
+# 
+# All bands set to minimum width, so you can hear center
+# you're going to manipulate clearly. You can always extend.
+# But that way - I've discovered - it's more accurate to work.
+# The band frequencies are just a basic selection, based on my
+# usual starting points.
+# 
+# The compressor's turned off, but some default values are set for all other 
+# params.
+# 
+# The spatialiser is set to 0: no effect. Same goes for the
+# limiter. So you can start out clean and slowly work your way
+# from there.
