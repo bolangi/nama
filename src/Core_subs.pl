@@ -777,8 +777,8 @@ sub engine_running {
 
 	
 sub eliminate_loops1 {
-	local $debug2 = 1;
-	local $debug  = 1;
+	#local $debug2 = 1;
+	#local $debug  = 1;
 	$debug2 and print "&eliminate_loops\n";
 	# given track
 	my $n = shift;
