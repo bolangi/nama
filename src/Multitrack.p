@@ -25,6 +25,7 @@ use File::Path;
 use IO::All;
 use Event;
 use Module::Load::Conditional qw(can_load); 
+use autodie qw(:default); 
 # use Timer::HiRes; # select
 # use Tk;           # loaded conditionally
 use strict;

@@ -1008,11 +1008,13 @@ sub dig_ruins {
 	# look for wave files
 		
 		my $d = this_wav_dir();
-		opendir WAV, $d or carp "couldn't open $d: $!";
+		opendir my $wav, $d or carp "couldn't open $d: $!";
 
 		# remove version numbers
 		
-		my @wavs = grep{s/(_\d+)?\.wav//i} readdir WAV;
+		my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
+
+		closedir $wav;
 
 		my %wavs;
 		
@@ -1446,9 +1448,9 @@ WARN
 	
 	$debug and print "ECS:\n",$ecs_file;
 	my $sf = join_path(&project_dir, $chain_setup_file);
-	open ECS, ">$sf" or croak "can't open file $sf:  $!\n";
-	print ECS $ecs_file;
-	close ECS;
+	open my $setup, ">$sf";
+	print $setup $ecs_file;
+	close $setup;
 
 }
 
