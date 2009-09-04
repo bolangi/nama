@@ -118,8 +118,8 @@ mark_name: name
 unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
 }
-beginning: markname | marktime
-ending: 'END' | markname | marktime 
+beginning: marktime | markname
+ending: 'END' | marktime | markname 
 generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
