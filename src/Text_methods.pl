@@ -505,6 +505,7 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$mixdown_track->set(rw => 'REC'); 
+	$main_out->set(status => 0);
 	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
 		$ecasound_globals_for_mixdown; 
 }
@@ -516,6 +517,7 @@ sub mixplay {
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$mixdown_track->set(rw => 'OFF');
+	$main_out->set(status => 0);
 	$tracker->set(rw => 'MON')}
 	$ecasound_globals_ecs = $ecasound_globals;
 

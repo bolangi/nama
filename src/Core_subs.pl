@@ -3738,6 +3738,7 @@ sub status_snapshot {
 					 global_version =>  $tracker->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
+					 main 			=> $main_out->status,
 #					 global_rw      =>  $tracker->rw,
 					
  );
