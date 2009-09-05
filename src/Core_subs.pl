@@ -216,7 +216,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mon_setup mix_setup_mon  mix_file mix_ev) ],
+		rules  => [ qw(mix_setup_mon mix_file mix_ev) ],
 	);
 
 	# for metronome or other tracks using 'null' as source
@@ -605,9 +605,11 @@ sub initialize_rules {
 		chain_id		=>  sub { my $track = shift; "K". $track->n },
 		target			=>  'MON',
 		input_type		=>  'cooked',
-		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_object	=>  \&mixer_target,
-		output_type		=>  'cooked',
+		input_object	=>  sub{ my $track = shift; $track->full_path },
+		output_type		=> $soundcard_output->type,
+		output_object	=> $soundcard_output->object,
+# 		output_type		=>  'mixed',
+# 		output_object	=>  \&mixer_target,
 		condition        => 1,
 		status			=>  1,
 		
@@ -831,8 +833,6 @@ sub eliminate_loops1 {
 	
 }
 sub eliminate_loops2 {
-
-	return if $mastering_mode;
 
 	# remove $loop_output when only one customer for $inputs{mixed}{$loop_output}
 
@@ -1184,7 +1184,9 @@ sub generate_setup {
 			$mastering_stage3_bus->apply;
 		}
 		map{ eliminate_loops1($_) } all_chains();
-		# eliminate_loops2();
+		eliminate_loops2() unless $mastering_mode
+			or useful_Master_effects();
+
 
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
@@ -1193,6 +1195,21 @@ sub generate_setup {
 		return 1;
 	} else { print "No inputs found!\n";
 	return 0};
+}
+
+sub useful_Master_effects {
+
+	# we have effects other than standard vol/pan
+	scalar @{$tn{Master}->ops} > 2 
+
+	or 
+	# pan is not 50
+	$copp{$tn{Master}->pan}->[0] != 50
+
+	or
+	# vol is not 100
+	
+	$copp{$tn{Master}->vol}->[0] != 100
 }
 
 sub write_chains {
