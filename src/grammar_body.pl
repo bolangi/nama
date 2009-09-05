@@ -349,17 +349,19 @@ insert_effect: _insert_effect before name value(s?) end {
 
 before: op_id
 
-modify_effect: _modify_effect op_id parameter value end {
-	$item{parameter}--;
-	::effect_update_copp_set( 
-		$item{op_id}, 
-		$item{parameter},
-		$item{value});
+modify_effect: _modify_effect op_id parameter(s /,/) value end {
+ 	map{ my $parameter = $_;
+ 		 $parameter--;
+ 		 ::effect_update_copp_set( $item{op_id}, $parameter, $item{value});
+ 	} @{$item{"parameter(s)"}};
 	1;
 }
-modify_effect: _modify_effect op_id parameter sign value end {
-	$item{parameter}--;
-	::modify_effect @item{ qw( op_id parameter sign value) }; 1
+modify_effect: _modify_effect op_id parameter(s /,/) sign value end {
+ 	map{ 	my $parameter = $_;
+ 		 	$parameter--;
+			::modify_effect($item{op_id}, $parameter, @item{qw(sign value)}); 
+ 	} @{$item{"parameter(s)"}};
+	1;
 }
 group_version: _group_version end { 
 	use warnings;
