@@ -14,6 +14,7 @@ no_index:
     - inc
     - t
 requires:
+  autodie: 0
   Audio::Ecasound: 0
   Carp: 0
   Cwd: 0
