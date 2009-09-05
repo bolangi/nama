@@ -426,7 +426,7 @@ modify_effect:
   what: modify an effect parameter
   parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
   short: fxm mfx
-  example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)\nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10) 
+  example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)\nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10)\nset multiple effects/parameters: mfx V 1,2,3 + 0.5 mfx V,AC,AD 1,2 3.14
 remove_effect:
   type: effect
   what: remove effects from selected track

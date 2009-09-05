@@ -349,18 +349,22 @@ insert_effect: _insert_effect before name value(s?) end {
 
 before: op_id
 
-modify_effect: _modify_effect op_id parameter(s /,/) value end {
- 	map{ my $parameter = $_;
- 		 $parameter--;
- 		 ::effect_update_copp_set( $item{op_id}, $parameter, $item{value});
- 	} @{$item{"parameter(s)"}};
+modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
+	map{ my $op_id = $_;
+		map{ my $parameter = $_;
+			 $parameter--;
+			 ::effect_update_copp_set( $op_id, $parameter, $item{value});
+		} @{$item{"parameter(s)"}};
+	} @{$item{"op_id(s)"}};
 	1;
 }
-modify_effect: _modify_effect op_id parameter(s /,/) sign value end {
- 	map{ 	my $parameter = $_;
- 		 	$parameter--;
-			::modify_effect($item{op_id}, $parameter, @item{qw(sign value)}); 
- 	} @{$item{"parameter(s)"}};
+modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
+	map{ my $op_id = $_;
+		map{ 	my $parameter = $_;
+				$parameter--;
+				::modify_effect($op_id, $parameter, @item{qw(sign value)}); 
+		} @{$item{"parameter(s)"}};
+	} @{$item{"op_id(s)"}};
 	1;
 }
 group_version: _group_version end { 
