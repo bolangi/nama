@@ -9,21 +9,24 @@ no warnings qw(uninitialized);
 use Carp;
 
 sub get_versions {
+	#local $debug = 1;
 	my $self = shift;
 	my ($sep, $ext) = qw( _ wav );
 	my ($dir, $basename) = ($self->dir, $self->basename);
 #	print "dir: ", $self->dir(), $/;
-#	print "basename: ", $self->basename(), $/;
+	#print "basename: ", $self->basename(), $/;
 	$debug and print "getver: dir $dir basename $basename sep $sep ext $ext\n\n";
 	my %versions = ();
 	for my $candidate ( candidates($dir) ) {
-		$debug and print "candidate: $candidate\n\n";
-		$candidate =~ m/^ ( $basename 
-		   ($sep (\d+))? 
-		   \.$ext )
-		   $/x or next;
-		$debug and print "match: $1,  num: $3\n\n";
-		$versions{ $3 || 'bare' } =  $1 ;
+	#	$debug and print "candidate: $candidate\n\n";
+	
+		my( $match, $dummy, $num) = 
+			( $candidate =~ m/^ ( $basename 
+			   ($sep (\d+))? 
+			   \.$ext ) 
+			  $/x
+			  ); # regex statement
+		if ( $match ) { $versions{ $num || 'bare' } =  $match }
 	}
 	$debug and print "get_version: " , ::yaml_out(\%versions);
 	%versions;
@@ -32,9 +35,9 @@ sub get_versions {
 sub candidates {
 	my $dir = shift;
 	$dir =  File::Spec::Link->resolve_all( $dir );
-	opendir WD, $dir or die "cannot open $dir: $!";
-	my @candidates = readdir WD;
-	closedir WD;
+	opendir my $wavdir, $dir or die "cannot open $dir: $!";
+	my @candidates = readdir $wavdir;
+	closedir $wavdir;
 	@candidates = grep{ ! (-s join_path($dir, $_) == 44 ) } @candidates;
 	#$debug and print join $/, @candidates;
 	@candidates;

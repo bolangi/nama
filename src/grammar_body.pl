@@ -56,8 +56,8 @@ rewind: _rewind value end {
 	::rewind( $item{value} ); 1}
 to_start: _to_start end { ::to_start(); 1 }
 to_end: _to_end end { ::to_end(); 1 }
-add_track: _add_track name(s) end {
-	::add_track(@{$item{'name(s)'}}); 1}
+add_track: _add_track name2(s) end {
+	::add_track(@{$item{'name2(s)'}}); 1}
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
@@ -76,6 +76,7 @@ link_track: _link_track name target end {
 }
 target: name
 project: name
+region: _region end { print( ::Text::show_region() ); 1 }		
 region: _region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
@@ -84,7 +85,6 @@ region: _region beginning end {
 	::set_region( $item{beginning}, 'END' );
 	1;
 }
-region: _region end { ::Text::show_region(); 1 }		
 remove_region: _remove_region end {
 	$::this_track->set(region_start => undef );
 	$::this_track->set(region_end => undef );

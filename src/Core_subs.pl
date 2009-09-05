@@ -1577,7 +1577,7 @@ sub reconfigure_engine {
 		print STDOUT ::Text::show_tracks ( ::Track::all ) ;
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
-		eval_iam("setpos $old_pos") if $old_pos;
+		#eval_iam("setpos $old_pos") if $old_pos; # temp disable
 
 	}
 	$old_snapshot = $status_snapshot;
