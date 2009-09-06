@@ -295,15 +295,10 @@ autofix_tracks:
   what: fixdc and normalize selected versions of all MON tracks 
   parameters: none
 remove_track:
-  type: track
-  short: rmt
-  what: remove effects, parameters and GUI for current track
-  parameters: none 
-toggle_bypass:
-  type: track
-  short: toby
-  what: toggle effect bypass for current track
-  parameters: none  
+   type: track
+   short: rmt
+   what: remove effects, parameters and GUI for current track
+   parameters: none 
 group_rec:
   type: group
   short: grec R
