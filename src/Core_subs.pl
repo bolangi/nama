@@ -3111,7 +3111,7 @@ sub retrieve_state {
 			} keys %track;
 	} @tracks_data[0,1];
 
-	splice @tracks_data, 0, 2;
+	my @master_mix_tracks_data = splice @tracks_data, 0, 2;
 
 	$ui->create_master_and_mix_tracks(); 
 
@@ -3133,20 +3133,8 @@ sub retrieve_state {
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
 		$ui->track_gui($n); 
+		restore_track_effects( $n );
 		
-		for my $id (@{$ti{$n}->ops}){
-			$did_apply++ 
-				unless $id eq $ti{$n}->vol
-					or $id eq $ti{$n}->pan;
-			
-			add_effect({
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
-						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
-						});
-
-		}
 	} @tracks_data;
 	#print "\n---\n", $tracker->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
@@ -3179,6 +3167,22 @@ sub retrieve_state {
 	$term->SetHistory(@command_history);	
 } 
 
+sub restore_track_effects {
+	my $n = shift; # track number
+	for my $id (@{$ti{$n}->ops}){
+		$did_apply++ 
+			unless $id eq $ti{$n}->vol
+				or $id eq $ti{$n}->pan;
+		
+		add_effect({
+					chain => $cops{$id}->{chain},
+					type => $cops{$id}->{type},
+					cop_id => $id,
+					parent_id => $cops{$id}->{belongs_to},
+					});
+
+	}
+}
 sub process_control_inputs { }
 
 sub set_position {
