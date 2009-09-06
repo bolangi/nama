@@ -2052,7 +2052,7 @@ sub modify_effect {
 sub remove_effect { 
 	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
-	my $id = shift;
+	my($id,$remove_op_only) = @_;
 	carp("$id: does not exist, skipping...\n"), return unless $cops{$id};
 	my $n = $cops{$id}->{chain};
 		
@@ -2062,11 +2062,11 @@ sub remove_effect {
 	my $object = $parent ? q(controller) : q(chain operator); 
 	$debug and print qq(ready to remove $object "$id" from track "$n"\n);
 
-	$ui->remove_effect_gui($id);
+	$ui->remove_effect_gui($id) unless $remove_op_only;
 
 		# recursively remove children
 		$debug and print "children found: ", join "|",@{$cops{$id}->{owns}},"\n";
-		map{remove_effect($_)}@{ $cops{$id}->{owns} } 
+		map{remove_effect($_,"remove_op_only")}@{ $cops{$id}->{owns} } 
 			if defined $cops{$id}->{owns};
 ;
 
@@ -2078,24 +2078,29 @@ sub remove_effect {
 	# remove the controller
  			
  		remove_op($id);
+		if( ! $remove_op_only ){
 
-	# i remove ownership of deleted controller
+		# i remove ownership of deleted controller
 
-		$debug and print "parent $parent owns list: ", join " ",
-			@{ $cops{$parent}->{owns} }, "\n";
+			$debug and print "parent $parent owns list: ", join " ",
+				@{ $cops{$parent}->{owns} }, "\n";
 
-		@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
-			@{ $cops{$parent}->{owns} } ; 
-		$cops{$id}->{belongs_to} = undef;
-		$debug and print "parent $parent new owns list: ", join " ",
-			@{ $cops{$parent}->{owns} } ,$/;
+			@{ $cops{$parent}->{owns} }  =  grep{ $_ ne $id}
+				@{ $cops{$parent}->{owns} } ; 
+			$cops{$id}->{belongs_to} = undef;
+			$debug and print "parent $parent new owns list: ", join " ",
+				@{ $cops{$parent}->{owns} } ,$/;
+		}
 
 	}
 	# remove id from track object
+	
+	if( ! $remove_op_only ){
 
-	$ti{$n}->remove_effect( $id ); 
-	delete $cops{$id}; # remove entry from chain operator list
-	delete $copp{$id}; # remove entry from chain operator parameters list
+		$ti{$n}->remove_effect( $id ); 
+		delete $cops{$id}; # remove entry from chain operator list
+		delete $copp{$id}; # remove entry from chain operator parameters list
+	}
 }
 
 
@@ -2431,11 +2436,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 	for my $n ( map{ $_->n } ::Track::all() ) {
 	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
  		next if $ti{$n}->rec_status eq "OFF" ;
-		#next if $n == 2; # no volume control for mix track
-		#next if ! defined $offset{$n}; # for MIX
- 		#next if ! $offset{$n} ;
-
-	# controllers will follow ops, so safe to apply all in order
 		for my $id ( @{ $ti{$n}->ops } ) {
 		apply_op($id);
 		}
@@ -3787,5 +3787,21 @@ sub set_region {
 	$::this_track->set(region_end => $end);
 	::Text::show_region();
 }
+
+sub this_track_effects {
+	grep{ $_ ne $this_track->vol and $_ ne $this_track->pan } 
+					@{ $this_track->ops };
+}
+
+sub toggle_bypass {
+#	if ( this_track has effects ){
+#		if ( chain has effects ){ remove_them() }
+#		else {restore them }
+#	}
+}
+
+
+		
+	
 	
 ### end

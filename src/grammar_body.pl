@@ -435,3 +435,4 @@ main_on: _main_on end {
 	$::main_out->set(status => 1);
 1;
 } 
+toggle_bypass: _toggle_bypass end { ::toggle_bypass(); 1 }
