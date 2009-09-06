@@ -1186,8 +1186,8 @@ sub generate_setup {
 			$mastering_stage3_bus->apply;
 		}
 		map{ eliminate_loops1($_) } all_chains();
-		eliminate_loops2() unless $mastering_mode
-			or useful_Master_effects();
+		#eliminate_loops2() unless $mastering_mode
+		#	or useful_Master_effects();
 
 
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
