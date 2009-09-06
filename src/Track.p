@@ -673,7 +673,7 @@ sub select_output {
 sub soundcard_input {
 	my $track = shift;
 	if ($::jack_running) {
-		#print "track obj: ". ref $track . $/;
+		print "track obj: ". ref $track . $/;
 		my $start = $track->input;
 		my $end   = $start + $track->ch_count - 1;
 		['jack_multi' , join q(,),q(jack_multi),
