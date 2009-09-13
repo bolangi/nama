@@ -1776,10 +1776,10 @@ sub start_transport {
 
 	print "\nstarting at ", colonize(int (eval_iam"getpos")), $/;
 	schedule_wraparound();
-	$tn{Master}->mute unless really_recording();
+	mute();
 	eval_iam('start');
 	sleeper(0.5) unless really_recording();
-	$tn{Master}->unmute;
+	unmute();
 	$ui->start_heartbeat();
 	print "engine is ", eval_iam("engine-status"), "\n\n"; 
 
@@ -1831,15 +1831,15 @@ sub stop_transport {
 
 	$debug2 and print "&stop_transport\n"; 
 	$ui->stop_heartbeat();
-	$tn{Master}->mute unless really_recording();
-	$tn{Master}->mute if engine_running() and !really_recording();
+	mute();
 	eval_iam('stop');	
 	sleeper(0.5);
 	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
-	$tn{Master}->unmute;
+	unmute();
 	$ui->project_label_configure(-background => $old_bg);
 	rec_cleanup();
 }
+
 sub transport_running {
 #	$debug2 and print "&transport_running\n";
 	 eval_iam('engine-status') eq 'running' ;
