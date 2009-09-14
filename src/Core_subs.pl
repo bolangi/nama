@@ -1840,6 +1840,15 @@ sub stop_transport {
 	rec_cleanup();
 }
 
+sub mute {
+	return if $tn{Master}->rw eq 'OFF' or really_recording();
+	$tn{Master}->mute;
+}
+sub unmute {
+	return if $tn{Master}->rw eq 'OFF' or really_recording();
+	$tn{Master}->unmute;
+}
+
 sub transport_running {
 #	$debug2 and print "&transport_running\n";
 	 eval_iam('engine-status') eq 'running' ;

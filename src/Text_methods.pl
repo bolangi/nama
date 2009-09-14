@@ -425,7 +425,7 @@ sub t_insert_effect {
 
 	if ($running){
 		$ui->stop_heartbeat;
-		$tn{Master}->mute;		
+		::mute();
 		eval_iam('stop');
 		sleeper( 0.05);
 	}
@@ -474,7 +474,7 @@ sub t_insert_effect {
 	if ($running){
 		eval_iam('start');	
 		sleeper(0.3);
-		$tn{Master}->unmute;
+		::unmute();
 		$ui->start_heartbeat;
 	}
 }

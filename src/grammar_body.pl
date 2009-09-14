@@ -308,12 +308,12 @@ modify_mark: _modify_mark value end {
 	}		
 remove_effect: _remove_effect op_id(s) end {
 	#print join $/, @{ $item{"op_id(s)"} }; 
-	$::tn{Master}->mute;
+	::mute();
 	map{ print "removing effect id: $_\n"; ::remove_effect( $_ )
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 	::sleeper(0.5);
-	$::tn{Master}->unmute;
+	::unmute();
 	1;}
 
 add_ctrl: _add_ctrl parent name value(s?) end {
