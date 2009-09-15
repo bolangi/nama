@@ -9,11 +9,12 @@
 
 package ::;
 use 5.008;
+use feature ":5.10";
 use Carp;
 use Cwd;
 use Storable; 
 use Getopt::Std;
-use Audio::Ecasound;
+#use Audio::Ecasound;
 use Parse::RecDescent;
 use Term::ReadLine;
 use Data::YAML;
@@ -23,6 +24,7 @@ use File::Spec::Link;
 use File::Temp;
 use File::Path;
 use IO::All;
+use IO::Socket; 
 use Event;
 use Module::Load::Conditional qw(can_load); 
 use autodie qw(:default); 
@@ -118,6 +120,7 @@ package ::;
 # $ti{3}->rw
 
 # print remove_spaces("bulwinkle is a...");
+
 
 ## Class and Object definitions for package '::'
 

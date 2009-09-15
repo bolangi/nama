@@ -128,7 +128,8 @@ sub prepare {
 	
 
 	$ecasound  = $ENV{ECASOUND} || q(ecasound);
-	$e = Audio::Ecasound->new();
+#	$e = Audio::Ecasound->new();
+	init_ecasound_socket(); 
 	
 	
 	$debug and print "started Ecasound\n";
@@ -294,19 +295,68 @@ sub prepare {
 	1;	
 }
 
-sub eval_iam{
-	#local $debug = 1;
-	#$debug2 and print "&eval_iam\n";
-	my $command = shift;
-	$debug and print "iam command: $command\n";
-	my (@result) = $e->eci($command);
-	$debug and print "result: @result\n" unless $command =~ /register/;
-	my $errmsg = $e->errmsg();
-	# $errmsg and carp("IAM WARN: ",$errmsg), 
-	# not needed ecasound prints error on STDOUT
-	$e->errmsg('');
-	"@result";
+sub launch_ecasound {
+	
 }
+{
+my $debug;
+my $sock; 
+sub init_ecasound_socket {
+	$sock = new IO::Socket::INET (
+		PeerAddr => 'localhost', 
+		PeerPort => '2868', 
+		Proto => 'tcp', 
+	); 
+	die "Could not create socket: $!\n" unless $sock; 
+}
+sub eval_iam {
+	my $cmd = shift;
+	$cmd =~ s/\s*$//s; # remove trailing white space
+	$sock->send("$cmd\r\n"); 
+	my $buf;
+	$sock->recv($buf, 65536);
+
+	my ($return_value, $length, $type, $reply) =
+		$buf =~ /(\d+)# digits
+				 \    # space
+				 (\d+)# digits
+				 \    # space
+ 				 ([^\r\n]+) # a line of text, probably one character 
+				\r\n    # newline
+				(.+)  # rest of string
+				/sx;  # s-flag: . matches newline
+
+$debug and say "return value: $return_value
+length: $length
+type: $type
+reply: $reply";
+
+	$return_value == 256 or die "illegal return value" ;
+	$reply =~ s/\s+$//; 
+
+	given($type){
+		when ('e'){ warn $reply }
+		default{ return $reply }
+	}
+
+}
+}
+
+# init_ecasound_socket();
+# print( eval_iam("preset-register"));
+# sub eval_iam{
+# 	#local $debug = 1;
+# 	#$debug2 and print "&eval_iam\n";
+# 	my $command = shift;
+# 	$debug and print "iam command: $command\n";
+# 	my (@result) = $e->eci($command);
+# 	$debug and print "result: @result\n" unless $command =~ /register/;
+# 	my $errmsg = $e->errmsg();
+# 	# $errmsg and carp("IAM WARN: ",$errmsg), 
+# 	# not needed ecasound prints error on STDOUT
+# 	$e->errmsg('');
+# 	"@result";
+# }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift;
 	my $hours = int ($sec / 3600);
@@ -3326,7 +3376,7 @@ sub get_ecasound_iam_keywords {
 	
 	local $debug = 0;
 	%iam_cmd = map{$_,1 } 
-				grep{ ! $reserved{$_} } split " ", eval_iam('int-cmd-list');
+				grep{ ! $reserved{$_} } split ",", eval_iam('int-cmd-list');
 }
 
 sub process_line {
