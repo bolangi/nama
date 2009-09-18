@@ -429,10 +429,26 @@ Loading project "untitled".
 	# read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
+
 	remove_small_wavs(); 
 	rememoize();
 
 	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	if (! $tn{Master}){
+
+		$master_track = ::SimpleTrack->new( 
+			group => 'Master', 
+			name => 'Master',
+			rw => 'MON',); # no dir, we won't record tracks
+
+
+		$mixdown_track = ::Track->new( 
+			group => 'Mixdown', 
+			name => 'Mixdown', 
+			rw => 'MON'); 
+	}
+
+
 	$opts{m} = 0; # enable 
 	
 	dig_ruins() unless scalar @::Track::all > 2;
@@ -916,19 +932,7 @@ sub initialize_project_data {
 	#print yaml_out( \%::Track::track_names );
 
 
-# create magic tracks, we will create their GUI later, after retrieve
-
-	$master_track = ::SimpleTrack->new( 
-		group => 'Master', 
-		name => 'Master',
-		rw => 'MON',); # no dir, we won't record tracks
-
-
-	$mixdown_track = ::Track->new( 
-		group => 'Mixdown', 
-		name => 'Mixdown', 
-		rw => 'MON'); 
-
+    # create master and mixdown
 }
 ## track and wav file handling
 
@@ -1007,27 +1011,26 @@ sub dig_ruins {
 
 	# look for wave files
 		
-		my $d = this_wav_dir();
-		opendir my $wav, $d or carp "couldn't open $d: $!";
+	my $d = this_wav_dir();
+	opendir my $wav, $d or carp "couldn't open $d: $!";
 
-		# remove version numbers
-		
-		my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
+	# remove version numbers
+	
+	my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
 
-		closedir $wav;
+	closedir $wav;
 
-		my %wavs;
-		
-		map{ $wavs{$_}++ } @wavs;
-		@wavs = keys %wavs;
+	my %wavs;
+	
+	map{ $wavs{$_}++ } @wavs;
+	@wavs = keys %wavs;
 
-		$debug and print "tracks found: @wavs\n";
-	 
-		$ui->create_master_and_mix_tracks();
+	$debug and print "tracks found: @wavs\n";
+ 
+	$ui->create_master_and_mix_tracks();
 
-		map{add_track($_)}@wavs;
+	map{add_track($_)}@wavs;
 
-#	}
 }
 
 sub remove_small_wavs {
@@ -3108,31 +3111,12 @@ sub retrieve_state {
 			} keys %{$g};
 	} @groups_data;
 
-	#  set Master and Mixdown parmeters
-	
-
-
-	map {my $t = $_; 
-			my %track = %{$t};
-		map{
-
-			$ti{$t->{n}}->set($_ => $t->{$_})
-			} keys %track;
-	} @tracks_data[0,1];
-
-	splice @tracks_data, 0, 2;
-
-	$ui->create_master_and_mix_tracks(); 
-
 	# create user tracks
 	
 	my $did_apply = 0;
 
 	map{ 
 		my %h = %$_; 
-		#print "old n: $h{n}\n";
-		#print "h: ", join " ", %h, $/;
-		#delete $h{n};
 		$::Track::n = $h{n} if $h{n};
 		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
@@ -3141,7 +3125,18 @@ sub retrieve_state {
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
-		$ui->track_gui($n); 
+	} @tracks_data;
+
+	$ui->create_master_and_mix_tracks();
+	bless $tn{Master}, '::SimpleTrack';  
+
+	map{ 
+		my $n = $_->{n};
+
+		# create gui
+		$ui->track_gui($n) unless $n <= 2;
+
+		# restore effects
 		
 		for my $id (@{$ti{$n}->ops}){
 			$did_apply++ 
@@ -3157,11 +3152,13 @@ sub retrieve_state {
 
 		}
 	} @tracks_data;
+
 	#print "\n---\n", $tracker->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } ::Track::all()), $/;
+
 
 
 

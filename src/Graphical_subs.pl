@@ -798,19 +798,19 @@ sub create_master_and_mix_tracks {
 				-command  => sub { 
 						return if eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "MON");
-						refresh_track($master_track->n);
+						refresh_track($tn{Master}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						return if eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "OFF");
-						refresh_track($master_track->n);
+						refresh_track($tn{Master}->n);
 			}],
 		);
 
-	track_gui( $master_track->n, @rw_items );
+	track_gui( $tn{Master}->n, @rw_items );
 
-	track_gui( $mixdown_track->n); 
+	track_gui( $tn{Mixdown}->n); 
 
 	group_gui('Tracker');
 }
