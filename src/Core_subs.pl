@@ -216,7 +216,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mix_setup_mon mix_file mix_ev) ],
+		rules  => [ qw(mixdown_playback mix_file mix_ev) ],
 	);
 
 	# for metronome or other tracks using 'null' as source
@@ -615,17 +615,15 @@ sub initialize_rules {
 
 	# for mix track only
 	
-	$mix_setup_mon = ::Rule->new(
+	$mixdown_playback = ::Rule->new(
 
-		name			=>  'mix_setup_mon',
+		name			=>  'mixdown_playback',
 		chain_id		=>  sub { my $track = shift; "K". $track->n },
 		target			=>  'MON',
 		input_type		=>  'cooked',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
-# 		output_type		=>  'mixed',
-# 		output_object	=>  \&mixer_target,
 		condition        => 1,
 		status			=>  1,
 		

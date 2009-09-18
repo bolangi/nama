@@ -337,7 +337,7 @@ our (
 	$mix_down_ev,
 	$main_out,
 	$mix_setup,
-	$mix_setup_mon,
+	$mixdown_playback,
 	$mon_setup,
 	$rec_file,
 	$rec_file_soundcard_jack,
