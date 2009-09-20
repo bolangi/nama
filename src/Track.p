@@ -22,50 +22,11 @@ initialize();
 # attributes offset, loop, delay for entire setup
 # attribute  modifiers
 # new attribute will be 
-use ::Object qw( 		name
-						active
+use ::Object qw(
 
-						ch_r 
-						ch_m 
-						ch_count
-						
-						rw
+[% qx(cat ./track_fields) %]
 
-						vol  
-						pan 
-						latency
-
-						old_vol_level
-						old_pan_level
-						ops 
-						offset 
-
-						n 
-						group 
-
-						playat
-						region_start	
-						region_end
-						
-						looping
-
-						hide
-						modifiers
-
-						jack_source
-						jack_send
-						source_select
-						send_select
-
-						project
-						target
-
-						rules_skip
-						rules_add
-						
-						is_slave
-						);
-
+);
 # Note that ->vol return the effect_id 
 # ->old_volume_level is the level saved before muting
 # ->old_pan_level is the level saved before pan full right/left
@@ -212,10 +173,6 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 
-
-	# handle case that I am slaved to another track
-	if ($track->is_slave and my $t = $track->target){ return $::tn{$t}->monitor_version}
-	
 	my $group = $::Group::by_name{$track->group};
 	return $track->active if $track->active;
 	return $group->version if $group->version 
@@ -228,9 +185,6 @@ sub rec_status {
 #	$::debug2 and print "&rec_status\n";
 	my $track = shift;
 	
-	# handle case that I am slaved to another track
-	if ($track->is_slave and my $t = $track->target){ return $::tn{$t}->rec_status }
-
 	my $monitor_version = $track->monitor_version;
 	my $source = $track->source;
 
@@ -799,41 +753,10 @@ sub get_length {
 
 package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
-use ::Object qw( 		name
-						active
+use ::Object qw(
 
-						ch_r 
-						ch_m 
-						ch_count
-						
-						rw
+[% qx(cat ./track_fields) %]
 
-						vol  
-						pan 
-						latency
-
-						old_vol_level
-						old_pan_level
-						ops 
-						offset 
-
-						n 
-						group 
-
-						playat
-						region_start
-						region_end
-						
-						looping
-
-						hide
-						modifiers
-
-						jack_source
-						jack_send
-						source_select
-						send_select
-						
 						);
 
 sub rec_status{
@@ -853,40 +776,9 @@ use warnings;
 
 package ::MasteringTrack; # used for mastering chains 
 our @ISA = '::SimpleTrack';
-use ::Object qw( 		name
-						active
+use ::Object qw( 
 
-						ch_r 
-						ch_m 
-						ch_count
-						
-						rw
-
-						vol  
-						pan 
-						latency
-
-						old_vol_level
-						old_pan_level
-						ops 
-						offset 
-
-						n 
-						group 
-
-						playat
-						region_start
-						region_end
-						
-						looping
-
-						hide
-						modifiers
-
-						jack_source
-						jack_send
-						source_select
-						send_select
+[% qx(cat ./track_fields) %]
 						
 						);
 
