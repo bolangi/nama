@@ -681,7 +681,9 @@ sub soundcard_input {
 	} else { ['device' , $::capture_device] }
 }
 sub soundcard_output {
- 	$::jack_running ? [qw(jack system)]  : ['device', $::alsa_playback_device] 
+ 	$::jack_running 
+		? [qw(jack_client system)]  
+		: ['device', $::alsa_playback_device] 
 }
 sub source_input {
 	my $track = shift;
@@ -690,7 +692,7 @@ sub source_input {
 	if ( $track->source_select eq 'soundcard' ){
 		$track->soundcard_input
 	} elsif ( $track->source_select eq 'jack' ) { # JACK client
-		if ( $::jack_running ){ ['jack', $track->source] }
+		if ( $::jack_running ){ ['jack_client', $track->source] }
 		else { 	carp $track->name. ": cannot set source ".$track->source
 				.". JACK not running."; 'lost' }
 	} else { carp $track->name, ": missing source_select: \"",

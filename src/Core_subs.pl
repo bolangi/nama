@@ -1273,9 +1273,9 @@ WARN
 
 	#####  Setting jack clients as inputs
  
-	for my $client (keys %{ $inputs{jack} } ){
+	for my $client (keys %{ $inputs{jack_client} } ){
 
-		my @chain_ids = @{ $inputs{jack}->{$client} };
+		my @chain_ids = @{ $inputs{jack_client}->{$client} };
 		my $format;
 
 		if ( $client eq 'system' ){ # we use the full soundcard width
@@ -1391,9 +1391,9 @@ WARN
 
 	#####  Setting jack clients as outputs
  
-	for my $client (keys %{ $outputs{jack} } ){
+	for my $client (keys %{ $outputs{jack_client} } ){
 
-		my @chain_ids = @{ $outputs{jack}->{$client} };
+		my @chain_ids = @{ $outputs{jack_client}->{$client} };
 		my $format;
 
 		if ( $client eq 'system' ){ # we use the full soundcard width
