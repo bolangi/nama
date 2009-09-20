@@ -545,7 +545,7 @@ sub initialize_rules {
 		chain_id		=> 'MixDown',
 		target			=> 'REC', 
 		
-		input_type 		=> 'loop', # bus name
+		input_type 		=> 'loop', 
 		input_object	=> $loop_output,
 
 		output_type		=> 'file',
@@ -607,8 +607,6 @@ sub initialize_rules {
 		
 	);
 
-	# for mix track only
-	
 	$mixdown_playback = ::Rule->new(
 
 		name			=>  'mixdown_playback',
@@ -641,8 +639,7 @@ sub initialize_rules {
 		status			=>  1,
 	);
 
-	# records live input to file
-	# without going through track processing
+	# records unprocessed live input to file
 		
 	$rec_file = ::Rule->new(
 
@@ -664,7 +661,7 @@ sub initialize_rules {
 	# rec_setup 
 	
 	# convert live inputs to stereo if necessary
-	# this chain takes all track effects
+	# this chain receives all track effects
 	
     $rec_setup = ::Rule->new(
 
