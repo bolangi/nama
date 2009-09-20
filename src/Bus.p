@@ -252,4 +252,47 @@ package ::MixBus;
 our @ISA = '::Bus';
 sub apply {} ; ## TODO 
 
+### subclass
+
+package ::UserBus;
+use strict;
+use Carp;
+our @ISA = '::Bus';
+use vars qw(@user_buses);
+
+use ::Object qw(	name
+						groups
+						tracks 
+						rules
+
+						destination
+
+						);
+
+# name, init capital e.g. Brass, identical Group name
+# destination: 3, jconv, loop,output
+
+
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	my $self = bless { 
+		tracks => [], 
+		groups => [], 
+		rules  => [],
+		@_ }, $class; 
+	push @user_buses, $self,
+	return $self;
+}
+
+sub all { @user_buses }
+
+1;
+__END__
+
+
+						
+						);
+
 1;
