@@ -325,9 +325,7 @@ our (
 	@marks_data, # 
 
 	$playback_device,       # where to send stereo output
-	$playback_device_jack,  # JACK target for stereo output
 	$capture_device,    # where to get our inputs
-	$capture_device_jack,    # where to get our inputs
 
 
 	# rules
