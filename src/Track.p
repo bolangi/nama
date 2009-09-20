@@ -681,7 +681,7 @@ sub soundcard_input {
 	} else { ['device' , $::capture_device] }
 }
 sub soundcard_output {
- 	$::jack_running ? [qw(jack system)]  : ['device', $::playback_device] 
+ 	$::jack_running ? [qw(jack system)]  : ['device', $::alsa_playback_device] 
 }
 sub source_input {
 	my $track = shift;
@@ -708,7 +708,7 @@ sub send_output {
 			my $end   = $start + 1; # Assume stereo
 			['jack_multi', join q(,),q(jack_multi),
 				map{"system:playback_$_"} $start..$end]
-		} else {[ 'device', $::playback_device] }
+		} else {[ 'device', $::alsa_playback_device] }
 	} elsif ( $track->send_select eq 'jack' ) { # JACK client
 		if ($::jack_running){[ 'jack', $track->send] }
 		else { carp $track->name . 

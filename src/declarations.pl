@@ -324,7 +324,7 @@ our (
 	@groups_data, # 
 	@marks_data, # 
 
-	$playback_device,       # where to send stereo output
+	$alsa_playback_device,       # where to send stereo output
 	$capture_device,    # where to get our inputs
 
 

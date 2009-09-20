@@ -60,7 +60,7 @@ devices:
 # ALSA device assignments and formats
 
 capture_device: consumer          # for ALSA/OSS
-playback_device: consumer        # for ALSA/OSS
+alsa_playback_device: consumer        # for ALSA/OSS
 mixer_out_format: cd-stereo      # for ALSA/OSS
 
 # audio file formats
