@@ -63,6 +63,7 @@ use ::Object qw( 		name
 						rules_skip
 						rules_add
 						
+						is_slave
 						);
 
 # Note that ->vol return the effect_id 
@@ -210,6 +211,11 @@ sub current_version {
 
 sub monitor_version {
 	my $track = shift;
+
+
+	# handle case that I am slaved to another track
+	if ($track->is_slave and my $t = $track->target){ return $::tn{$t}->monitor_version}
+	
 	my $group = $::Group::by_name{$track->group};
 	return $track->active if $track->active;
 	return $group->version if $group->version 
@@ -221,6 +227,10 @@ sub monitor_version {
 sub rec_status {
 #	$::debug2 and print "&rec_status\n";
 	my $track = shift;
+	
+	# handle case that I am slaved to another track
+	if ($track->is_slave and my $t = $track->target){ return $::tn{$t}->rec_status }
+
 	my $monitor_version = $track->monitor_version;
 	my $source = $track->source;
 
@@ -231,6 +241,8 @@ sub rec_status {
 	my $group = $::Group::by_name{$track->group};
 	$debug and print "rec status track: ", $track->name, 
 		" group: $group, source: $source, monitor version: $monitor_version\n";
+
+	# 
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
