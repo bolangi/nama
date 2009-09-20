@@ -520,6 +520,11 @@ list_history:
   short: lh
   what: list command history
   parameters: none
+add_monitor_bus:
+  type: bus
+  short: amb
+  what: add a bus duplicating all user tracks for instrument monitor
+  parameters: <s_name> <destination> all | <tracks_list>
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

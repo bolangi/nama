@@ -435,3 +435,12 @@ main_on: _main_on end {
 	$::main_out->set(status => 1);
 1;
 } 
+add_monitor_bus: _add_monitor_bus bus_name destination {
+	::add_user_bus( $item{bus_name}, $item{destination}, 'all' );
+
+}
+bus_name: /[A-Z]\w+/
+destination: /\d+/ | /loop,\w+/ | name2
+# digits: soundcard channel
+# loop,identifier: loop device
+# name2: track name

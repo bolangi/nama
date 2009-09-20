@@ -105,6 +105,7 @@ use ::Track;
 use ::Bus;    
 use ::Mark;
 use ::IO;
+use ::Userbus;
 
 package ::Wav;
 memoize('candidates') if $::memoize;

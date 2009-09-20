@@ -360,8 +360,10 @@ sub remove {
 
 sub all { @all }
 
+{ my %non_user = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
 sub user {
-	map{$_->name} grep{ $_->name ne 'Master' and $_->name ne 'Mixdown' } @all
+	grep{ ! $non_user{$_} } map{$_->name} @all
+}
 }
 	
 
