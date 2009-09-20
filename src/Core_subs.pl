@@ -524,13 +524,10 @@ sub initialize_rules {
 
 		target			=> 'MON',
 
-	# condition =>	sub{ defined $inputs{mixed}  
-	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
-
-		input_type 		=> 'mixed', 
+		input_type 		=> 'loop', 
 		input_object	=> $loop_mix, 
 
-		output_type		=> 'mixed',
+		output_type		=> 'loop',
 		output_object	=> \&mixer_target,
 		status			=> 1,
 
@@ -548,10 +545,7 @@ sub initialize_rules {
 		chain_id		=> 'MixDown',
 		target			=> 'REC', 
 		
-		# sub{ defined $outputs{mixed} or $debug 
-		#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
-
-		input_type 		=> 'mixed', # bus name
+		input_type 		=> 'loop', # bus name
 		input_object	=> $loop_output,
 
 		output_type		=> 'file',
@@ -571,7 +565,7 @@ sub initialize_rules {
 		chain_id		=> 1, # Master
 		target			=> 'all', 
 		
-		input_type 		=> 'mixed',
+		input_type 		=> 'loop',
 		input_object	=> $loop_mix,
 
 		output_type		=> 'device',
@@ -588,7 +582,7 @@ sub initialize_rules {
 		chain_id		=>  'MainOut',
 		target			=>  'all',
 		condition 		=>	1,
-		input_type		=>  'mixed',
+		input_type		=>  'loop',
 		input_object	=>  $loop_output,
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
@@ -604,11 +598,11 @@ sub initialize_rules {
 		name			=>  'mix_setup',
 		chain_id		=>  sub { my $track = shift; "J". $track->n },
 		target			=>  'all',
-		input_type		=>  'cooked',
+		input_type		=>  'loop',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loop_mix,
-		output_type		=>  'cooked',
-		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
+		output_type		=>  'loop',
+		condition 		=>  sub{ defined $inputs{loop}->{$loop_output} },
 		status			=>  1,
 		
 	);
@@ -620,7 +614,7 @@ sub initialize_rules {
 		name			=>  'mixdown_playback',
 		chain_id		=>  sub { my $track = shift; "K". $track->n },
 		target			=>  'MON',
-		input_type		=>  'cooked',
+		input_type		=>  'loop',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
@@ -640,7 +634,7 @@ sub initialize_rules {
 		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
-		output_type		=>  'cooked',
+		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=> 1,
@@ -679,7 +673,7 @@ sub initialize_rules {
 		target			=>	'REC',
 		input_type		=> $source_input->type,  #code ref
 		input_object	=> $source_input->object,# code ref
-		output_type		=>  'cooked',
+		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
 										$track->rec_route .
@@ -689,7 +683,7 @@ sub initialize_rules {
 
 			my $track = shift; 
 			return "satisfied" 
-				unless ! defined $inputs{cooked}->{"loop," . $track->n}; 
+				unless ! defined $inputs{loop}->{"loop," . $track->n}; 
 		},
 		status			=>  1,
 	);
@@ -697,7 +691,7 @@ sub initialize_rules {
 
 # aux_send 
 # 
-# send a 'cooked' signal to a soundcard output channel or JACK client
+# send a 'loop' signal to a soundcard output channel or JACK client
 
 	
 $aux_send = ::Rule->new(  
@@ -706,7 +700,7 @@ $aux_send = ::Rule->new(
 		name			=>  'aux_send', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
-		input_type		=>  'cooked', 
+		input_type		=>  'loop', 
 		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
 		output_type		=>  $send_output->type,
 		output_object	=>  $send_output->object, 
@@ -729,9 +723,9 @@ $aux_send = ::Rule->new(
 		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'device',
 		input_object	=>  'null',
-		output_type		=>  'cooked',
+		output_type		=>  'loop',
 		output_object	=>  $loop_mix,
-		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
+		condition 		=>  sub{ defined $inputs{loop}->{$loop_output} },
 		status			=>  1,
 # 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
@@ -745,9 +739,9 @@ $aux_send = ::Rule->new(
 		name			=>  'stage1', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		input_type		=>  'loop',
 		input_object	=>  $loop_mastering,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_crossover,
 		status			=>  1,
 	);
@@ -755,9 +749,9 @@ $aux_send = ::Rule->new(
 		name			=>  'stage2', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		input_type		=>  'loop',
 		input_object	=>  $loop_crossover,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_boost,
 		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
@@ -766,9 +760,9 @@ $aux_send = ::Rule->new(
 		name			=>  'stage3', 
 		target			=>  'all',
 		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		input_type		=>  'loop',
 		input_object	=>  $loop_boost,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_output,
 		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
@@ -799,70 +793,69 @@ sub eliminate_loops1 {
 	# given track
 	my $n = shift;
 	my $loop_id = "loop,$n";
-	return unless defined $inputs{cooked}->{$loop_id} 
-		and scalar @{$inputs{cooked}->{$loop_id}} == 1;
-	# get customer's id from cooked list and remove it from the list
+	return unless defined $inputs{loop}->{$loop_id} 
+		and scalar @{$inputs{loop}->{$loop_id}} == 1;
+	# get customer's id from loop list and remove it from the list
 
-	my $cooked_id = pop @{ $inputs{cooked}->{$loop_id} }; 
+	my $chain_id = pop @{ $inputs{loop}->{$loop_id} }; 
 
 	# i.e. J3
 
 	# add chain $n to the list of the customer's (rule's) output device 
 	
-	#my $rule  = grep{ $cooked_id =~ /$_->chain_id/ } ::Rule::all_rules();  
 	my $rule = $mix_setup; 
-	defined $outputs{cooked}->{$rule->output_object} 
-	  or $outputs{cooked}->{$rule->output_object} = [];
-	push @{ $outputs{cooked}->{$rule->output_object} }, $n;
+	defined $outputs{loop}->{$rule->output_object} 
+	  or $outputs{loop}->{$rule->output_object} = [];
+	push @{ $outputs{loop}->{$rule->output_object} }, $n;
 
 
 	# remove chain $n as source for the loop
 
-	delete $outputs{cooked}->{$loop_id}; 
+	delete $outputs{loop}->{$loop_id}; 
 	
 	# remove customers that use loop as input
 
-	delete $inputs{cooked}->{$loop_id}; 
+	delete $inputs{loop}->{$loop_id}; 
 
-	# remove cooked customer from his output device list
+	# remove loop customer from his output device list
 	# print "customers of output device ",
 	#	$rule->output_object, join " ", @{
-	#		$outputs{cooked}->{$rule->output_object} };
+	#		$outputs{loop}->{$rule->output_object} };
 	#
-	@{ $outputs{cooked}->{$rule->output_object} } = 
-		grep{$_ ne $cooked_id} @{ $outputs{cooked}->{$rule->output_object} };
+	@{ $outputs{loop}->{$rule->output_object} } = 
+		grep{$_ ne $chain_id} @{ $outputs{loop}->{$rule->output_object} };
 
 	#print $/,"customers of output device ",
 	#	$rule->output_object, join " ", @{
-	#		$outputs{cooked}->{$rule->output_object} };
+	#		$outputs{loop}->{$rule->output_object} };
 	#		print $/;
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
-	$post_input{$n} .= $post_input{$cooked_id};
-	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	delete $post_input{$cooked_id};
-	delete $pre_output{$cooked_id};
+	$post_input{$n} .= $post_input{$chain_id};
+	$pre_output{$n} .= $pre_output{$chain_id}; 
+	delete $post_input{$chain_id};
+	delete $pre_output{$chain_id};
 
 	
 }
 sub eliminate_loops2 {
 
-	# remove $loop_output when only one customer for $inputs{mixed}{$loop_output}
+	# remove $loop_output when only one customer for $inputs{loop}{$loop_output}
 
-	my $ref = ref $inputs{mixed}{$loop_output};
+	my $ref = ref $inputs{loop}{$loop_output};
 
 	if (    $ref =~ /ARRAY/ and 
-			(scalar @{$inputs{mixed}{$loop_output}} == 1) ){
+			(scalar @{$inputs{loop}{$loop_output}} == 1) ){
 
 		$debug and print "i have a loop to eliminate \n";
-		my $customer_id = ${$inputs{mixed}{$loop_output}}[0];
+		my $customer_id = ${$inputs{loop}{$loop_output}}[0];
 		$debug and print "customer chain: $customer_id\n";
 
-		delete $outputs{mixed}{$loop_output};
-		delete $inputs{mixed}{$loop_output};
+		delete $outputs{loop}{$loop_output};
+		delete $inputs{loop}{$loop_output};
 
-	$inputs{mixed}{$loop_mix} = [ $customer_id ];
+	$inputs{loop}{$loop_mix} = [ $customer_id ];
 
 	}
 }
@@ -1224,7 +1217,7 @@ sub write_chains {
 	$debug2 and print "&write_chains\n";
 
 	# we assume that %inputs and %outputs will have the
-	# same lowest-level keys, i.e. 'mixed' and 'cooked'
+	# same lowest-level keys, i.e. 'loop' and 'loop'
 	#
 	# @buses is not the right name...
 	
@@ -1352,13 +1345,11 @@ WARN
 
 	### Setting loops as inputs 
 
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $inputs{$bus} }){
-			push  @input_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $inputs{$bus}->{$loop} }),
-				"-i:$loop";
-		}
+	for my $loop ( keys %{ $inputs{loop} }){
+		push  @input_chains, 
+		join " ", 
+			"-a:" . (join ",", @{ $inputs{loop}->{$loop} }),
+			"-i:$loop";
 	}
 	#####  Setting devices as outputs
 	#
@@ -1423,13 +1414,11 @@ WARN
 		
 	### Setting loops as outputs 
 
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $outputs{$bus} }){
-			push  @output_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $outputs{$bus}->{$loop} }),
-				"-o:$loop";
-		}
+	for my $loop ( keys %{ $outputs{loop} }){
+		push  @output_chains, 
+		join " ", 
+			"-a:" . (join ",", @{ $outputs{loop}->{$loop} }),
+			"-o:$loop";
 	}
 	##### Setting files as outputs (used by rec_file and mix)
 
