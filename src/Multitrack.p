@@ -516,21 +516,6 @@ Nama identifies tracks by both a name and a number. The
 track number is used to identify corresponding Ecasound
 signal-processing chains.
 
-=head2 Raw, cooked and mixed signals
-
-Nama's signal flow is organized at three levels: raw, cooked
-and mixed. 
-
-"Raw" signals are the inputs to user tracks. Raw signals can
-come from the soundcard, a WAV file, or a JACK client.
-
-"Cooked" signals are the output of user tracks after volume,
-pan and effects processing.
-
-The "mixed" signal is the combined outputs of all user
-tracks. It is delivered to the Master fader, and to the
-Mixdown WAV file during mixdown.
-
 =head2 Loop devices
 
 Nama uses Ecasound loop devices to be able to deliver each
@@ -550,12 +535,12 @@ We will divide the signal flow into track and mixer
 sections.  Parentheses indicate chain identifiers or the
 corresponding track name.
 
-All "cooked" signals (i.e. the outputs of each
-user track) terminate at loop,111.
+The stereo outputs of each
+user track terminate at loop,mix.
 
 =head3 Track, REC status
 
-    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,111
+    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,mix
       /JACK client   |
                      +---(R3)---> sax_1.wav
 
@@ -567,7 +552,7 @@ modes.
 
 =head3 Track, MON status
 
-    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,111
+    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,mix
 
 =head3 Mixer, with mixdown enabled
 
@@ -577,15 +562,15 @@ which can host additional effects. The Mixdown track
 can also host effects, however these should be used
 during playback only.
 
-    loop,111 --(MixLink)---> loop,222 --(1/Master)---> Sound device
+    loop,mix --(MixLink)---> loop,222 --(1/Master)---> Sound device
                                  |
                                  +------(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(1/Master)-> loop,222 -> Sound device
+    loop,mix --(1/Master)-> loop,222 -> Sound device
 								  |
 								  +->(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(1/Master)-> loop,221---(mastering)-->loop,222  -> Sound device
+    loop,mix --(1/Master)-> loop,221---(mastering)-->loop,222  -> Sound device
 													  |
 													  +->(2/Mixdown)--> Mixdown_1.wa
 
@@ -615,7 +600,7 @@ tracks with mastering-related effects.
 
                               +---(Low)---+ 
                               |           |
- loop,111 --(Eq)--> loop,120 -+---(Mid)---+ loop,130 --(Boost)--> loop,222
+ loop,mix --(Eq)--> loop,120 -+---(Mid)---+ loop,130 --(Boost)--> loop,222
                               |           |
                               +---(High)--+ 
 
