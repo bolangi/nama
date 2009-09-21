@@ -345,6 +345,12 @@ our (
 	$aux_send_soundcard_jack,
 	$aux_receive,
 	$null_setup,
+
+	# rules for instrument monitor buses
+	
+	$monitor_bus_mon_setup,
+	$monitor_bus_rec_setup,
+	$monitor_bus_out,
 	
 	# rules for mastering
 	
@@ -399,6 +405,6 @@ our (
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
-					
+
 
 );

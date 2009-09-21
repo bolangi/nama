@@ -704,7 +704,6 @@ $aux_send = ::Rule->new(
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
  		condition 		=> sub { my $track = shift; 
  								return "satisfied" if $track->send},
- 									# and jack_client($track->send, 'input') } ,
 		status			=>  1,
 	);
 
@@ -765,7 +764,70 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 	
+	# rules for instrument monitor buses
+	
+	$monitor_bus_mon_setup = ::Rule->new(
+		
+		name			=>  'monitor_bus_mon_setup', 
+		target			=>  'MON',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
+		input_type		=>  'file',
+		input_object	=>  sub{ my $track = shift; $track->full_path },
+		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
+		condition 		=> 1,
+		status			=>  1,
+	);
+
+	$monitor_bus_rec_setup = ::Rule->new(
+
+		name			=>	'monitor_bus_rec_setup', 
+		chain_id		=>  sub{ my $track = shift; $track->n },   
+		target			=>	'REC',
+		input_type		=> $source_input->type,  #code ref
+		input_object	=> $source_input->object,# code ref
+		post_input			=>	sub{ my $track = shift;
+										$track->rec_route .
+										$track->mono_to_stereo 
+										},
+		condition 		=> 1,
+		status			=>  1,
+	);
+
+	$monitor_bus_out = ::Rule->new(
+
+		name			=>  'monitor_bus_out',
+		chain_id		=>  sub { my $track = shift; $track->n },
+		target			=>  'all',
+		output_type		=> $soundcard_output->type,
+		output_object	=> $soundcard_output->object,
+		condition        => 1,
+		status			=>  1,
+		
+	);
+
 }
+sub send_output {
+	my ( $type, $destination, $channel) = @_;
+	if ( $type eq 'soundcard' ){ 
+		if ($::jack_running) {
+			my $start = $channel;
+			my $end   = $start + 1; # Assume stereo
+			['jack_multi', join q(,),q(jack_multi),
+				map{"system:playback_$_"} $start..$end]
+		} else {[ 'device', $alsa_playback_device] }
+	} elsif ( $type eq 'jack_client' ) { 
+		if ($::jack_running){[ 'jack_client', $destination] }
+		else { carp $destination . 
+				q(: auxilary send to JACK client specified,) .
+				q( but jackd is not running.  Skipping.);
+				[qw(skip skip)]
+		}
+	} else { carp $destination .
+		q(: missing or illegal type value: ").
+		$type. q(");
+	    [qw(skip skip)];	
+	}
+};
 
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
 
@@ -3795,6 +3857,11 @@ sub add_monitor_bus {
 		destination_name => $dest_name,
 	) or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
+
+	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
+							target => $_,
+							group  => $name) 
+   } $main->tracks;
 		
 	# create group
 	# create tracks, copies of all 

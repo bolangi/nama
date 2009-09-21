@@ -641,7 +641,6 @@ sub select_output {
 sub soundcard_input {
 	my $track = shift;
 	if ($::jack_running) {
-		print "track obj: ". ref $track . $/;
 		my $start = $track->input;
 		my $end   = $start + $track->ch_count - 1;
 		['jack_multi' , join q(,),q(jack_multi),
@@ -673,14 +672,13 @@ sub send_output {
 	my $track = shift;
 	if ( $track->send_select eq 'soundcard' ){ 
 		if ($::jack_running) {
-			print "track obj: ". ref $track . $/;
 			my $start = $track->aux_output;
 			my $end   = $start + 1; # Assume stereo
 			['jack_multi', join q(,),q(jack_multi),
 				map{"system:playback_$_"} $start..$end]
 		} else {[ 'device', $::alsa_playback_device] }
 	} elsif ( $track->send_select eq 'jack' ) { # JACK client
-		if ($::jack_running){[ 'jack', $track->send] }
+		if ($::jack_running){[ 'jack_client', $track->send] }
 		else { carp $track->name . 
 				q(: auxilary send to JACK client specified,) .
 				q( but jackd is not running.  Skipping.);
