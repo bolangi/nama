@@ -3021,6 +3021,7 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 $debug and print "copying tracks data\n";
+map { $_->set( class => ref $_ ) } ::Track::all(); # TODO REMOVE
 map { push @tracks_data, $_->hashref } ::Track::all();
 
 # print "found ", scalar @tracks_data, "tracks\n";
@@ -3105,14 +3106,16 @@ sub retrieve_state {
 		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
 		# set the correct class for mastering tracks
-		bless $track, '::MasteringTrack' if $track->group eq 'Mastering';
+		if ( $track->class ){ bless $track, $track->class }
+		else { bless $track, '::MasteringTrack' if $track->group eq 'Mastering'; }
+					# TODO REMOVE
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
 	} @tracks_data;
 
 	$ui->create_master_and_mix_tracks();
-	bless $tn{Master}, '::SimpleTrack';  
+	bless $tn{Master}, '::SimpleTrack';   # TODO REMOVE
 
 	map{ 
 		my $n = $_->{n};
