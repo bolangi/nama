@@ -792,6 +792,13 @@ sub version {0}
 sub monitor_version {0}
 use warnings;
 
+package ::SlaveTrack; # for instrument monitor bus
+our @ISA = '::SimpleTrack';
+use ::Object qw( 
+
+[% qx(cat ./track_fields) %]
+						
+						);
 
 
 # ---------- Group -----------
