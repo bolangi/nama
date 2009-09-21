@@ -21,20 +21,20 @@ sub set_widget_color {
 
 	
 sub refresh_group { 
-	# tracker group, in this case we want to skip null group
+	# main group, in this case we want to skip null group
 	$debug2 and print "&refresh_group\n";
 	
 	
 		my $status;
 		if ( 	grep{ $_->rec_status eq 'REC'} 
 				map{ $tn{$_} }
-				$tracker->tracks ){
+				$main->tracks ){
 
 			$status = 'REC'
 
 		}elsif(	grep{ $_->rec_status eq 'MON'} 
 				map{ $tn{$_} }
-				$tracker->tracks ){
+				$main->tracks ){
 
 			$status = 'MON'
 

@@ -75,7 +75,7 @@ sub new {
 		## 		defaults ##
 
 					name 	=> "Audio_$n", 
-					group	=> 'Tracker', 
+					group	=> 'Main', 
 		#			rw   	=> 'REC', # ::add_track() sets REC if necessary
 					n    	=> $n,
 					ops     => [],
@@ -190,7 +190,7 @@ sub rec_status {
 
 	# support doodle mode
 #	return 'REC' if $::preview eq 'doodle' and $source and
-#		grep { $track->name eq $_ } $::tracker->tracks;
+#		grep { $track->name eq $_ } $::main->tracks;
 
 	my $group = $::Group::by_name{$track->group};
 	$debug and print "rec status track: ", $track->name, 

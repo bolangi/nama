@@ -61,7 +61,7 @@ add_track: _add_track name2(s) end {
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
-dump_group: _dump_group end { ::pager($::tracker->dump); 1}
+dump_group: _dump_group end { ::pager($::main->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
 remove_track: _remove_track end { 
 	$::this_track->remove; 
@@ -370,11 +370,11 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
 group_version: _group_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
-	print $::tracker->version, "\n" ; 1}
+	print $::main->version, "\n" ; 1}
 group_version: _group_version dd end { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
-	$::tracker->set( version => $n ); 1}
+	$::main->set( version => $n ); 1}
 bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
@@ -392,8 +392,8 @@ doodle: _doodle { ::doodle(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { 
-	my $old_group_status = $::tracker->rw;
-	$::tracker->set(rw => 'MON');
+	my $old_group_status = $::main->rw;
+	$::main->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
 	print "delete WAV file $wav? [n] ";
 	my $reply = <STDIN>;
@@ -402,7 +402,7 @@ destroy_current_wav: _destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
 	}
-	$::tracker->set(rw => $old_group_status);
+	$::main->set(rw => $old_group_status);
 	1;
 }
 memoize: _memoize { 

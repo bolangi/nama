@@ -414,7 +414,7 @@ sub flash_ready {
 }
 sub group_gui {  
 	@_ = discard_object(@_);
-	my $group = $tracker; 
+	my $group = $main; 
 	my $dummy = $track_frame->Label(-text => ' '); 
 	$group_label = 	$track_frame->Label(
 			-text => "G R O U P",
@@ -478,24 +478,24 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$tracker->last, " \n";
+		join ' ',1..$main->last, " \n";
 
 			$version->radiobutton( 
 
 				-label => (''),
 				-value => 0,
 				-command => sub { 
-					$tracker->set(version => 0); 
+					$main->set(version => 0); 
 					$version->configure(-text => " ");
 					reconfigure_engine();
 					refresh();
 					}
 			);
 
- 	for my $v (1..$tracker->last) { 
+ 	for my $v (1..$main->last) { 
 
 	# the highest version number of all tracks in the
-	# $tracker group
+	# $main group
 	
 	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
 	
@@ -508,7 +508,7 @@ sub global_version_buttons {
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
-					$tracker->set(version => $v); 
+					$main->set(version => $v); 
 					$version->configure(-text => $v);
 					reconfigure_engine();
 					refresh();
@@ -812,7 +812,7 @@ sub create_master_and_mix_tracks {
 
 	track_gui( $tn{Mixdown}->n); 
 
-	group_gui('Tracker');
+	group_gui('Main');
 }
 
 

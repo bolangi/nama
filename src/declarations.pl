@@ -295,8 +295,8 @@ our (
 
 	# new object core
 	
-	$tracker_bus, 
-	$tracker, # tracker_group
+	$main_bus, 
+	$main, # main_group
 	$master_bus, 
 	$master, # master_group
 	$master_track,
@@ -393,7 +393,7 @@ our (
 	$fade_time, 	# duration for fadein(), fadeout()
 	$old_snapshot,  # previous status_snapshot() output
 					# to check if I need to reconfigure engine
-	$old_group_rw, # previous $tracker->rw setting
+	$old_group_rw, # previous $main->rw setting
 	%old_rw,       # previous track rw settings (indexed by track name)
 	
 	@mastering_track_names, # reserved for mastering mode

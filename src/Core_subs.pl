@@ -195,9 +195,9 @@ sub prepare {
 	
 	# init our buses
 	
-	$tracker_bus  = ::Bus->new(
-		name => 'Tracker_Bus',
-		groups => [qw(Tracker)],
+	$main_bus  = ::Bus->new(
+		name => 'Main_Bus',
+		groups => [qw(Main)],
 		tracks => [],
 		rules  => [ qw( mix_setup 
 						rec_setup
@@ -913,7 +913,7 @@ sub initialize_project_data {
 
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');
-	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
+	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$mastering = ::Group->new(name =>'Mastering');
 	$null    = ::Group->new(name => 'null');
 
@@ -972,7 +972,7 @@ sub add_track {
 	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-	my $group = $::Group::by_name{$track->group}; # $tracker, shurely
+	my $group = $::Group::by_name{$track->group}; # $main, shurely
 	#command_process('for mon; mon') if $preview;
 	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
@@ -1166,8 +1166,8 @@ sub generate_setup {
 		$mixdown_bus->apply; 
 		$debug and print "applying master_bus\n";
 		$master_bus->apply; 
-		$debug and print "applying tracker_bus (user tracks)\n";
-		$tracker_bus->apply;
+		$debug and print "applying main_bus (user tracks)\n";
+		$main_bus->apply;
 		$debug and print "applying null_bus (user tracks)\n";
 		$null_bus->apply;
 		if ($mastering_mode){
@@ -1521,8 +1521,8 @@ sub doodle {
 	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
 	
-	$old_group_rw = $tracker->rw;
-	$tracker->set(rw => 'REC');
+	$old_group_rw = $main->rw;
+	$main->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# allow only unique inputs
@@ -1610,7 +1610,7 @@ sub release_doodle_mode {
 
 		$debug2 and print "&release_doodle_mode\n";
 		# restore preview group REC/MON/OFF setting
-		$tracker->set(rw => $old_group_rw);		
+		$main->set(rw => $old_group_rw);		
 
 		# enable playback from disk
 		$mon_setup->set(status => 1);
@@ -1625,10 +1625,10 @@ sub enable_excluded_inputs {
 	$debug2 and print "&enable_excluded_inputs\n";
 	return unless %old_rw;
 
-	map { $tn{$_}->set(rw => $old_rw{$_}) } $tracker->tracks
-		if $tracker->tracks;
+	map { $tn{$_}->set(rw => $old_rw{$_}) } $main->tracks
+		if $main->tracks;
 
-	$tracker->set(rw => $old_group_rw);
+	$main->set(rw => $old_group_rw);
 	%old_rw = ();
 
 }
@@ -1637,15 +1637,15 @@ sub exclude_duplicate_inputs {
 	$debug2 and print "&exclude_duplicate_inputs\n";
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
- 	if ( $tracker->tracks){
+ 	if ( $main->tracks){
  		map { # print "track $_ "; 
 			$old_rw{$_} = $tn{$_}->rw;
  		  	$tn{$_}->set(rw => 'REC');
  			# print "status: ", $tn{$_}->rw, $/ 
- 		} $tracker->tracks;
+ 		} $main->tracks;
  	}
 
-		my @user = $tracker->tracks(); # track names
+		my @user = $main->tracks(); # track names
 		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source;
@@ -1979,7 +1979,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			$ui->global_version_buttons(); # recreate
-			$tracker->set( rw => 'MON');
+			$main->set( rw => 'MON');
 			$ui->refresh();
 			print <<REC;
 WAV files were recorded! 
@@ -3140,7 +3140,7 @@ sub restore_state {
 		}
 	} @tracks_data;
 
-	#print "\n---\n", $tracker->dump;  
+	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
@@ -3747,11 +3747,11 @@ sub status_snapshot {
 	# engine
 	
 	my %snapshot = ( project 		=> 	$project_name,
-					 global_version =>  $tracker->version,
+					 global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out->status,
-#					 global_rw      =>  $tracker->rw,
+#					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
@@ -3794,9 +3794,10 @@ sub add_monitor_bus {
 		destination_type => $dest_type,
 		destination_name => $dest_name,
 	) or carp("can't create bus!\n"), return;
-	
+	::Group->new( name => $name, rw => 'REC');
+		
 	# create group
-	# create tracks
+	# create tracks, copies of all 
 	# create rule
 	#
 	# save/restore could work like this:
@@ -3810,7 +3811,10 @@ sub dest_type {
 	my $dest = shift;
 	if ($dest !~ /\D/)        { return 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { return 'loop' }
-	else                      {return 'jack_client' }
+	else                      {
+		warn("$dest: jack_client doesn't exist.\n") unless jack_client($dest);
+		return 'jack_client' ;
+	}
 }
 	
 ### end

@@ -446,7 +446,7 @@ for an audio processing run.
 
 Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF status.
-The Tracker group, which includes all user tracks, also has
+The Main group, which includes all user tracks, also has
 REC, MON and OFF settings. These provides a convenient way
 to control the behavior of all user tracks.
 
@@ -471,7 +471,7 @@ chain setup. (This setting is distinct from the action of
 the C<mute> command, which sets the volume of the track to
 zero.)
 
-All user tracks belong to the Tracker group, which has a
+All user tracks belong to the Main group, which has a
 group REC/MON/OFF setting and a default version setting for
 the entire group.
  
@@ -487,7 +487,7 @@ The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
 typically used when playing back mixdown tracks.  The
 B<mixplay> command sets the Mixdown track 
-to MON and the Tracker group to OFF.
+to MON and the Main group to OFF.
 
 The Master bus has only MON/OFF status. Setting REC status
 for the Mixdown bus has the same effect as issuing the
