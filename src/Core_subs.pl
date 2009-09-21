@@ -433,7 +433,7 @@ Loading project "untitled".
 	remove_small_wavs(); 
 	rememoize();
 
-	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	if (! $tn{Master}){
 
 		$master_track = ::SimpleTrack->new( 
@@ -3072,8 +3072,8 @@ sub assign_var {
 		#		format => 'yaml', # breaks, stupid!
 				class => '::');
 }
-sub retrieve_state {
-	$debug2 and print "&retrieve_state\n";
+sub restore_state {
+	$debug2 and print "&restore_state\n";
 	my $file = shift;
 	$file = $file || $state_store_file;
 	$file = join_path(project_dir(), $file);
@@ -3779,6 +3779,38 @@ sub set_region {
 	$::this_track->set(region_start => $beg);
 	$::this_track->set(region_end => $end);
 	::Text::show_region();
+}
+
+sub add_monitor_bus {
+
+	my ($name, $dest_name) = @_;
+	my $dest_type = dest_type( $dest_name );
+	
+	print "name: $name: dest_type: $dest_type dest_name: $dest_name\n";
+
+	#warn("$name: already taken\n"), return if map{$_->name eq $name } or 
+	::UserBus->new( 
+		name => $name, 
+		destination_type => $dest_type,
+		destination_name => $dest_name,
+	) or carp("can't create bus!\n"), return;
+	
+	# create group
+	# create tracks
+	# create rule
+	#
+	# save/restore could work like this:
+	# - save bus info
+	# - recreate bus 
+
+	
+}
+
+sub dest_type { 
+	my $dest = shift;
+	if ($dest !~ /\D/)        { return 'soundcard' } # digits only
+	elsif ($dest =~ /^loop,/) { return 'loop' }
+	else                      {return 'jack_client' }
 }
 	
 ### end

@@ -436,7 +436,7 @@ main_on: _main_on end {
 1;
 } 
 add_monitor_bus: _add_monitor_bus bus_name destination {
-	::add_user_bus( $item{bus_name}, $item{destination}, 'all' );
+	::add_monitor_bus( $item{bus_name}, $item{destination} );
 
 }
 bus_name: /[A-Z]\w+/
