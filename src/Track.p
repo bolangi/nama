@@ -841,15 +841,19 @@ sub new {
 	(carp "group name already in use: $vals{name}\n"), 
 		return ($by_name{$vals{name}}) if $by_name{$vals{name}};
 	#my $skip_index = $vals{n};
-	my $n = $vals{n} ? $vals{n} : ++$n; 
+	my $n_;
+	if ( $vals{n} ){
+		$n_ = $vals{n};
+		$n = $n_ 
+	} else { $n_ = ++$n }; 
 	my $object = bless { 	
 		name 	=> "Group $n", # default name
 		rw   	=> 'REC', 
-		n => $n,
+		n => $n_,
 		@_ 			}, $class;
 	#return $object if $skip_index;
 	#print "object type: ", ref $object, $/;
-	$by_index[$n] = $object;
+	$by_index[$n_] = $object;
 	$by_name{ $object->name } = $object;
 	$object;
 }

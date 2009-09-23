@@ -435,7 +435,7 @@ main_on: _main_on end {
 	$::main_out->set(status => 1);
 1;
 } 
-add_monitor_bus: _add_monitor_bus bus_name destination {
+add_monitor_bus_cooked: _add_monitor_bus_cooked bus_name destination {
 	::add_monitor_bus( $item{bus_name}, $item{destination}, 'cooked' );
 	1;
 

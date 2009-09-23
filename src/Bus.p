@@ -285,7 +285,6 @@ sub new {
 		rules  => [],
 		@_ }, $class; 
 	push @user_buses, $self;
-	print "buses: ", scalar @::UserBus::user_buses, $/;
 	return $self;
 }
 

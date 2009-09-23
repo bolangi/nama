@@ -1267,8 +1267,8 @@ sub generate_setup {
 		map { $_->apply() } ::UserBus::all();
 
 
-		#map{ eliminate_loops1($_) } all_chains();
-		#eliminate_loops2() unless $mastering_mode
+		map{ eliminate_loops1($_) } all_chains();
+		eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
 
@@ -3117,6 +3117,9 @@ map { push @tracks_data, $_->hashref } ::Track::all();
 
 # print "found ", scalar @tracks_data, "tracks\n";
 
+@user_bus_data = (); # 
+map{ push @user_bus_data, $_->hashref } ::UserBus::all();
+
 # prepare marks data for storage (new Mark objects)
 
 @marks_data = ();
@@ -3179,14 +3182,16 @@ sub restore_state {
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
-	#  set group parameters
+	#  destroy and recreate all groups
 
-	map {my $g = $_; 
-		map{
-			$::Group::by_index[$g->{n}]->set($_ => $g->{$_})
-			} keys %{$g};
-	} @groups_data;
+	::Group::initialize();	
+	map { ::Group->new( %{ $_ } ) } @groups_data;  
 
+	# restore user buses, directly, skipping constructor 
+	
+	map{ bless $_, '::UserBus'} @user_bus_data;
+	@::UserBus::user_buses = @user_bus_data;
+	
 	# create user tracks
 	
 	my $did_apply = 0;
@@ -3236,8 +3241,6 @@ sub restore_state {
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } ::Track::all()), $/;
-
-
 
 
 	# restore Alsa mixer settings

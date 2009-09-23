@@ -525,9 +525,9 @@ list_history:
   short: lh
   what: list command history
   parameters: none
-add_monitor_bus:
+add_monitor_bus_cooked:
   type: bus
-  short: amb
+  short: ambc
   what: add a bus duplicating all user tracks for instrument monitor
   parameters: <s_name> <destination>
 add_monitor_bus_raw:
