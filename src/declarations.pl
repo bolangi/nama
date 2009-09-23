@@ -350,6 +350,7 @@ our (
 	
 	$monitor_bus_mon_setup,
 	$monitor_bus_rec_setup,
+	$monitor_bus_cooked_setup,
 	$monitor_bus_out,
 	
 	# rules for mastering

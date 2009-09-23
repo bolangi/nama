@@ -764,7 +764,7 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 	
-	# rules for instrument monitor buses
+	# rules for instrument monitor buses using raw inputs
 	
 	$monitor_bus_mon_setup = ::Rule->new(
 		
@@ -793,17 +793,36 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
+	# rules for instrument monitor buses using cooked signals 
+	
+	#	  based on aux_send, uses Track 'send' field
+	
+	$monitor_bus_cooked_setup = ::Rule->new(
+		
+		name			=>  'monitor_bus_cooked_setup', 
+		target			=>  'all',
+		chain_id		=>  sub{ my $track = shift; $track->n },   
+		input_type		=>  'loop',
+		input_object	=> sub{ my $track = shift; 
+								my $source_track = $tn{$track->target};
+								'loop'.$source_track->n},
+		condition 		=> 1, # sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
+		status			=>  1,
+	);
+
 	$monitor_bus_out = ::Rule->new(
 
 		name			=>  'monitor_bus_out',
 		chain_id		=>  sub { my $track = shift; $track->n },
 		target			=>  'all',
-		output_type		=> $soundcard_output->type,
-		output_object	=> $soundcard_output->object,
+		output_type		=>  $send_output->type,
+		output_object	=>  $send_output->object, 
+		pre_output		=>	sub{ my $track = shift; $track->pre_send},
 		condition        => 1,
 		status			=>  1,
 		
 	);
+
 
 }
 sub send_output {
@@ -1222,7 +1241,7 @@ sub generate_setup {
 
 	if ($have_source) {
 
-		# process buses
+		# process system buses
 
 		$debug and print "applying mixdown_bus\n";
 		$mixdown_bus->apply; 
@@ -1238,6 +1257,13 @@ sub generate_setup {
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
+
+		# process user defined buses
+
+		
+		map { $_->apply() } ::UserBus::all();
+
+
 		map{ eliminate_loops1($_) } all_chains();
 		#eliminate_loops2() unless $mastering_mode
 		#	or useful_Master_effects();
@@ -3847,20 +3873,24 @@ sub add_monitor_bus {
 
 	my ($name, $dest_name) = @_;
 	my $dest_type = dest_type( $dest_name );
+
+	# dest_type: soundcard | jack_client | loop
 	
 	print "name: $name: dest_type: $dest_type dest_name: $dest_name\n";
 
 	#warn("$name: already taken\n"), return if map{$_->name eq $name } or 
 	::UserBus->new( 
 		name => $name, 
-		destination_type => $dest_type,
-		destination_name => $dest_name,
+		groups => [$name],
+		rules => [qw(monitor_bus_cooked_setup monitor_bus_out )],
 	) or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
 
 	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
 							target => $_,
-							group  => $name) 
+							group  => $name,
+							send_select => $dest_type,
+							ch_m => $dest_name)
    } $main->tracks;
 		
 	# create group

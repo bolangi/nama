@@ -265,10 +265,12 @@ use ::Object qw(	name
 						tracks 
 						rules
 
-						destination
 
 						);
 
+# we will put the following information in the Track as an aux_send
+# 						destination_type
+# 						destination_name
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
 

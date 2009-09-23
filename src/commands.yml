@@ -135,6 +135,11 @@ link_track:
   what: create a read-only track that uses .WAV files from another track. 
   parameters: <s_name> <s_target> [ <s_project> ]
   example: link_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
+slave_track:
+  type: track:
+  short: slave
+  what: create a read-only track that gets most of its settings from an existing track, used for instrument monitor buses
+  parameters: name target
 import_audio:
   type: track
   short: import
