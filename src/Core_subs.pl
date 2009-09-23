@@ -3190,7 +3190,7 @@ sub restore_state {
 	# restore user buses, directly, skipping constructor 
 	
 	map{ bless $_, '::UserBus'} @user_bus_data;
-	@::UserBus::user_buses = @user_bus_data;
+	@::UserBus::buses = @user_bus_data;
 	
 	# create user tracks
 	

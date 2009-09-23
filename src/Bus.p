@@ -258,7 +258,7 @@ package ::UserBus;
 use strict;
 use Carp;
 our @ISA = '::Bus';
-use vars qw(@user_buses);
+use vars qw(@buses);
 
 use ::Object qw(	name
 						groups
@@ -284,11 +284,11 @@ sub new {
 		groups => [], 
 		rules  => [],
 		@_ }, $class; 
-	push @user_buses, $self;
+	push @buses, $self;
 	return $self;
 }
 
-sub all { @user_buses }
+sub all { @buses }
 
 1;
 __END__

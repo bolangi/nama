@@ -540,6 +540,11 @@ add_slave_track:
   short: ast
   what: add a slave track to an existing user bus
   parameters: <s_bus_name> <s_target> 
+remove_bus:
+  type: bus
+  short: rb
+  what: remove a bus
+  parameters: <s_bus_name>
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

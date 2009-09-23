@@ -444,7 +444,7 @@ add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination {
 	::add_monitor_bus( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
-add_slave_track: _add_slave_track bus_name target {
+add_slave_track: _add_slave_track bus_name target end {
 	::add_slave_track( $item{bus_name}, $item{target} ); 1;
 }
 bus_name: /[A-Z]\w+/
@@ -452,3 +452,18 @@ destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel
 # loop,identifier: loop device
 # name2: track name
+
+remove_bus: _remove_bus bus_name end {
+	foreach my $i ( 0..(scalar @::UserBus::buses - 1) ){
+ 		if( $::UserBus::buses[$i]->name eq $item{bus_name} ){
+ 			print "removing bus: $item{bus_name}\n";
+ 			splice @::UserBus::buses, $i, 1;
+ 			map{ $::tn{$_}->remove } 
+ 				grep{ (ref $::tn{$_}) =~ /SlaveTrack/ } 
+ 				$::Group::by_name{$item{bus_name}}->tracks;
+ 			last;
+ 		}
+  	}
+	1;
+ 
+}
