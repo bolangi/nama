@@ -805,7 +805,7 @@ $aux_send = ::Rule->new(
 		input_type		=>  'loop',
 		input_object	=> sub{ my $track = shift; 
 								my $source_track = $tn{$track->target};
-								'loop'.$source_track->n},
+								'loop,'.$source_track->n},
 		condition 		=> 1, # sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
 		status			=>  1,
 	);
@@ -1264,7 +1264,7 @@ sub generate_setup {
 		map { $_->apply() } ::UserBus::all();
 
 
-		map{ eliminate_loops1($_) } all_chains();
+		#map{ eliminate_loops1($_) } all_chains();
 		#eliminate_loops2() unless $mastering_mode
 		#	or useful_Master_effects();
 
