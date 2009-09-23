@@ -797,7 +797,11 @@ use ::Object qw(
 [% qx(cat ./track_fields) %]
 						
 						);
-
+sub rec_status {
+	my $track = shift;
+	$::tn{$track->target}->rec_status ne 'OFF' ? 'MON' : 'OFF';
+}
+sub monitor_version { undef }
 
 # ---------- Group -----------
 

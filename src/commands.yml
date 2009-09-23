@@ -529,7 +529,17 @@ add_monitor_bus:
   type: bus
   short: amb
   what: add a bus duplicating all user tracks for instrument monitor
-  parameters: <s_name> <destination> all | <tracks_list>
+  parameters: <s_name> <destination>
+add_monitor_bus_raw:
+  type: bus
+  short: ambr
+  what: add a bus duplicating all raw user tracks for instrument monitor
+  parameters: <s_name> <destination> 
+add_slave_track:
+  type: track
+  short: ast
+  what: add a slave track to an existing user bus
+  parameters: <s_bus_name> <s_target> 
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

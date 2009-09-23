@@ -436,8 +436,16 @@ main_on: _main_on end {
 1;
 } 
 add_monitor_bus: _add_monitor_bus bus_name destination {
-	::add_monitor_bus( $item{bus_name}, $item{destination} );
+	::add_monitor_bus( $item{bus_name}, $item{destination}, 'cooked' );
+	1;
 
+}
+add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination {
+	::add_monitor_bus( $item{bus_name}, $item{destination}, 'raw' );
+	1;
+}
+add_slave_track: _add_slave_track bus_name target {
+	::add_slave_track( $item{bus_name}, $item{target} ); 1;
 }
 bus_name: /[A-Z]\w+/
 destination: /\d+/ | /loop,\w+/ | name2

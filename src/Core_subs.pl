@@ -769,12 +769,15 @@ $aux_send = ::Rule->new(
 	$monitor_bus_mon_setup = ::Rule->new(
 		
 		name			=>  'monitor_bus_mon_setup', 
-		target			=>  'MON',
+		target			=>  'all',  # follow target track MON
 		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
-		input_object	=>  sub{ my $track = shift; $track->full_path },
+		input_object	=>  sub{ $tn{$_[0]->target}->full_path},
+		post_input			=>	sub{ my $track = $tn{$_[0]->target};
+										$track->mono_to_stereo 
+										},
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> 1,
+		condition 		=>  sub{ $tn{$_[0]->target}->rec_status eq 'MON'},
 		status			=>  1,
 	);
 
@@ -782,14 +785,14 @@ $aux_send = ::Rule->new(
 
 		name			=>	'monitor_bus_rec_setup', 
 		chain_id		=>  sub{ my $track = shift; $track->n },   
-		target			=>	'REC',
+		target			=> 'all',	# follow target track REC 
 		input_type		=> $source_input->type,  #code ref
 		input_object	=> $source_input->object,# code ref
-		post_input			=>	sub{ my $track = shift;
+		post_input			=>	sub{ my $track = $tn{$_[0]->target};
 										$track->rec_route .
 										$track->mono_to_stereo 
 										},
-		condition 		=> 1,
+		condition 		=>  sub{ $tn{$_[0]->target}->rec_status eq 'REC'},
 		status			=>  1,
 	);
 
@@ -806,7 +809,7 @@ $aux_send = ::Rule->new(
 		input_object	=> sub{ my $track = shift; 
 								my $source_track = $tn{$track->target};
 								'loop,'.$source_track->n},
-		condition 		=> 1, # sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
+		condition 		=>  sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
 		status			=>  1,
 	);
 
@@ -818,7 +821,7 @@ $aux_send = ::Rule->new(
 		output_type		=>  $send_output->type,
 		output_object	=>  $send_output->object, 
 		pre_output		=>	sub{ my $track = shift; $track->pre_send},
-		condition        => 1,
+		condition        => sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
 		status			=>  1,
 		
 	);
@@ -3871,7 +3874,7 @@ sub set_region {
 
 sub add_monitor_bus {
 
-	my ($name, $dest_name) = @_;
+	my ($name, $dest_name, $bus_type) = @_;
 	my $dest_type = dest_type( $dest_name );
 
 	# dest_type: soundcard | jack_client | loop
@@ -3882,11 +3885,15 @@ sub add_monitor_bus {
 	::UserBus->new( 
 		name => $name, 
 		groups => [$name],
-		rules => [qw(monitor_bus_cooked_setup monitor_bus_out )],
+		rules => ($bus_type eq 'cooked' 
+			?  [qw(monitor_bus_cooked_setup monitor_bus_out )]
+			:  [qw(monitor_bus_rec_setup monitor_bus_mon_setup monitor_bus_out)]
+		),
 	) or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
 
 	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
+							rw => 'MON',
 							target => $_,
 							group  => $name,
 							send_select => $dest_type,
