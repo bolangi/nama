@@ -30,6 +30,13 @@
 					hide
 					modifiers
 
+					source_id
+					source_type
+
+					send_id
+					send_type
+					
+
 					jack_source
 					jack_send
 					source_select
