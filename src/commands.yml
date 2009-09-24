@@ -167,12 +167,12 @@ source:
   type: track
   what: set track source
   short: src r
-  parameters: <s_jack_client_name> | <i_soundcard_channel>
+  parameters: <i_soundcard_channel> | <s_jack_client_name> # |  <s_loop_id>
 send:
   type: track
   what: set auxilary track destination
   short: out aux m
-  parameters: <s_jack_client_name> | <i_soundcard_channel> (3 or above)
+  parameters: <i_soundcard_channel> (3 or above) | <s_jack_client_name>#  |  <s_loop_id>
 stereo:
   type: track
   what: record two channels for current track

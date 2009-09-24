@@ -472,6 +472,7 @@ sub rememoize {
 	memoize(  'candidates');
 }
 
+
 sub initialize_rules {
 
 	# first make some helper IO objects
@@ -581,11 +582,11 @@ sub initialize_rules {
 		name			=>  'main_out',
 		chain_id		=>  'MainOut',
 		target			=>  'all',
-		condition 		=>	1,
 		input_type		=>  'loop',
 		input_object	=>  $loop_output,
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
+		condition 		=>	1,
 		status			=>  1,
 		
 	);
@@ -610,9 +611,9 @@ sub initialize_rules {
 	$mixdown_playback = ::Rule->new(
 
 		name			=>  'mixdown_playback',
-		chain_id		=>  sub { my $track = shift; "K". $track->n },
+		chain_id		=>  2, # Mixdown
 		target			=>  'MON',
-		input_type		=>  'loop',
+		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
@@ -629,7 +630,7 @@ sub initialize_rules {
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=>  'loop',
@@ -646,8 +647,8 @@ sub initialize_rules {
 		name			=> 'rec_file', 
 		target			=> 'REC',
 		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> $source_input->type, # code ref
-		input_object	=> $source_input->object, # code ref
+		input_type		=> sub{ my $track = shift; $track->source_type },
+		input_object	=> sub{ my $track = shift; $track->source_id},
 		output_type		=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -666,10 +667,10 @@ sub initialize_rules {
     $rec_setup = ::Rule->new(
 
 		name			=>	'rec_setup', 
-		chain_id		=>  sub{ my $track = shift; $track->n },   
+		chain_id		=>  sub{ $_[0]->n },   
 		target			=>	'REC',
-		input_type		=> $source_input->type,  #code ref
-		input_object	=> $source_input->object,# code ref
+		input_type		=> sub{ my $track = shift; $track->source_type },
+		input_object	=> sub{ my $track = shift; $track->source_id},
 		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -696,14 +697,13 @@ $aux_send = ::Rule->new(
 
 		name			=>  'aux_send', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
+		chain_id 		=>	sub{ "M".$_[0]->n },
 		input_type		=>  'loop', 
-		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
-		output_type		=>  $send_output->type,
-		output_object	=>  $send_output->object, 
-		pre_output		=>	sub{ my $track = shift; $track->pre_send},
- 		condition 		=> sub { my $track = shift; 
- 								return "satisfied" if $track->send},
+		input_object	=>  sub{ "loop," .  $_[0]->n},
+		output_type		=>  sub{ $_[0]->send_type },
+		output_object	=>  sub{ $_[0]->send_id},
+		pre_output		=>	sub{ $_[0]->pre_send},
+ 		condition 		=> sub { "satisfied" if $_[0]->send_type},
 		status			=>  1,
 	);
 
@@ -716,7 +716,7 @@ $aux_send = ::Rule->new(
 		
 		name			=>  'null_setup', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'device',
 		input_object	=>  'null',
 		output_type		=>  'loop',
@@ -734,7 +734,7 @@ $aux_send = ::Rule->new(
 	$stage1 = ::Rule->new(
 		name			=>  'stage1', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'loop',
 		input_object	=>  $loop_mastering,
 		output_type		=>  'loop',
@@ -744,7 +744,7 @@ $aux_send = ::Rule->new(
 	$stage2 = ::Rule->new(
 		name			=>  'stage2', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'loop',
 		input_object	=>  $loop_crossover,
 		output_type		=>  'loop',
@@ -755,7 +755,7 @@ $aux_send = ::Rule->new(
 	$stage3 = ::Rule->new(
 		name			=>  'stage3', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'loop',
 		input_object	=>  $loop_boost,
 		output_type		=>  'loop',
@@ -770,7 +770,7 @@ $aux_send = ::Rule->new(
 		
 		name			=>  'monitor_bus_mon_setup', 
 		target			=>  'all',  # follow target track MON
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ $tn{$_[0]->target}->full_path},
 		post_input			=>	sub{ my $track = $tn{$_[0]->target};
@@ -784,7 +784,7 @@ $aux_send = ::Rule->new(
 	$monitor_bus_rec_setup = ::Rule->new(
 
 		name			=>	'monitor_bus_rec_setup', 
-		chain_id		=>  sub{ my $track = shift; $track->n },   
+		chain_id		=>  sub{ $_[0]->n },   
 		target			=> 'all',	# follow target track REC 
 		input_type		=> $source_input->type,  #code ref
 		input_object	=> $source_input->object,# code ref
@@ -804,7 +804,7 @@ $aux_send = ::Rule->new(
 		
 		name			=>  'monitor_bus_cooked_setup', 
 		target			=>  'all',
-		chain_id		=>  sub{ my $track = shift; $track->n },   
+		chain_id		=>  sub{ $_[0]->n },   
 		input_type		=>  'loop',
 		input_object	=> sub{ my $track = shift; 
 								my $source_track = $tn{$track->target};
@@ -816,11 +816,11 @@ $aux_send = ::Rule->new(
 	$monitor_bus_out = ::Rule->new(
 
 		name			=>  'monitor_bus_out',
-		chain_id		=>  sub { my $track = shift; $track->n },
+		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
 		output_type		=>  $send_output->type,
 		output_object	=>  $send_output->object, 
-		pre_output		=>	sub{ my $track = shift; $track->pre_send},
+		pre_output		=>	sub{ $_[0]->pre_send},
 		condition        => sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
 		status			=>  1,
 		
@@ -828,28 +828,6 @@ $aux_send = ::Rule->new(
 
 
 }
-sub send_output {
-	my ( $type, $destination, $channel) = @_;
-	if ( $type eq 'soundcard' ){ 
-		if ($::jack_running) {
-			my $start = $channel;
-			my $end   = $start + 1; # Assume stereo
-			['jack_multi', join q(,),q(jack_multi),
-				map{"system:playback_$_"} $start..$end]
-		} else {[ 'device', $alsa_playback_device] }
-	} elsif ( $type eq 'jack_client' ) { 
-		if ($::jack_running){[ 'jack_client', $destination] }
-		else { carp $destination . 
-				q(: auxilary send to JACK client specified,) .
-				q( but jackd is not running.  Skipping.);
-				[qw(skip skip)]
-		}
-	} else { carp $destination .
-		q(: missing or illegal type value: ").
-		$type. q(");
-	    [qw(skip skip)];	
-	}
-};
 
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
 
@@ -3856,8 +3834,8 @@ sub status_snapshot {
 				rec_status 		=> $_->rec_status,
 				channel_count 	=> $_->ch_count,
 				current_version => $_->current_version,
-				send 			=> $_->send,
-				source 			=> $_->source,
+				send 			=> $_->send_id,
+				source 			=> $_->source_id,
 				shift			=> $_->playat,
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
@@ -3918,10 +3896,10 @@ sub dest_type {
 	my $dest = shift;
 	if ($dest !~ /\D/)        { return 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { return 'loop' }
-	else                      {
+	elsif ($dest){  # any string 
 		warn("$dest: jack_client doesn't exist.\n") unless jack_client($dest);
-		return 'jack_client' ;
-	}
+		return 'jack_client' ; }
+	else { undef }
 }
 	
 ### end
