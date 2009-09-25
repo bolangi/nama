@@ -441,10 +441,15 @@ add_monitor_bus_cooked: _add_monitor_bus_cooked bus_name destination {
 	1;
 
 }
-add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination {
+add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination end {
 	::add_monitor_bus( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
+add_user_bus: _add_user_bus bus_name destination(?) end { 
+	my $dest_type = ::dest_type($item{'destination(?)'});
+	::add_user_bus( $item{bus_name}, $dest_type, $item{'destination(?)'});1
+}
+
 slave_track: _slave_track bus_name target end {
 	::add_slave_track( $item{bus_name}, $item{target} ); 1; } bus_name: /[A-Z]\w+/
 destination: /\d+/ | /loop,\w+/ | name2

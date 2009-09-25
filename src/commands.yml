@@ -528,13 +528,17 @@ list_history:
 add_monitor_bus_cooked:
   type: bus
   short: ambc
-  what: add a bus duplicating all user tracks for instrument monitor
+  what: add a monitoring bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
 add_monitor_bus_raw:
   type: bus
   short: ambr
-  what: add a bus duplicating all raw user tracks for instrument monitor
+  what: add a monitoring bus that copies all user tracks' raw signals
   parameters: <s_name> <destination> 
+add_user_bus:
+  type: bus
+  short: aub
+  what: add a bus with arbitrary tracks and destination
 update_monitor_bus:
   type: bus
   short: umb

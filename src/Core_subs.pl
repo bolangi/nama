@@ -700,8 +700,8 @@ $aux_send = ::Rule->new(
 		chain_id 		=>	sub{ "M".$_[0]->n },
 		input_type		=>  'loop', 
 		input_object	=>  sub{ "loop," .  $_[0]->n},
-		output_type		=>  sub{ $_[0]->send_type },
-		output_object	=>  sub{ $_[0]->send_id},
+		output_type		=>  $send_output->type,
+		output_object	=>  $send_output->object,
 		pre_output		=>	sub{ $_[0]->pre_send},
  		condition 		=> sub { "satisfied" if $_[0]->send_type},
 		status			=>  1,
@@ -825,10 +825,23 @@ $aux_send = ::Rule->new(
 		name			=>  'monitor_bus_out',
 		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
-		output_type		=> $soundcard_output->type,
-		output_object	=> $soundcard_output->object,
+		output_type		=> $send_output->type,
+		output_object	=> $send_output->object,
 		pre_output		=>	sub{ $_[0]->pre_send},
 		condition        => sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		status			=>  1,
+		
+	);
+	$user_bus_mix_setup = ::Rule->new(
+
+		name			=>  'user_bus_mix_setup',
+		chain_id		=>  sub { my $track = shift; "J". $track->n },
+		target			=>  'all',
+		input_type		=>  'loop',
+		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
+		output_type		=>  'loop',
+		output_object	=>  sub{ my $track = shift; "loop,".  $track->group },
+		condition 		=>  1, # sub{ defined $inputs{loop}->{$loop_output} },
 		status			=>  1,
 		
 	);
@@ -3878,6 +3891,27 @@ sub set_region {
 	::Text::show_region();
 }
 
+sub add_user_bus {
+	my ($name, $type, $id) = @_;
+	if ($::Group::by_name{$name} or $tn{$name}){
+		say qq(group, bus, or track "$name" already exists. Skipping."), return;
+	}
+	::UserBus->new( 
+		name => $name, 
+		groups => [$name],
+		rules => [qw(rec_setup mon_setup)],
+		destination_type => $type // 'loop',
+		destination_id	 => $id // $name,
+		)
+	or carp("can't create bus!\n"), return;
+	::Group->new( name => $name, rw => 'REC');
+	# create mix track
+	
+	::add_track($name, source_type => 'loop', source_id => "loop,$name");
+	
+	
+}
+	
 sub add_monitor_bus {
 
 	my ($name, $dest_id, $bus_type) = @_;

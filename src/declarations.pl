@@ -353,6 +353,7 @@ our (
 	$monitor_bus_rec_setup,
 	$monitor_bus_cooked_setup,
 	$monitor_bus_out,
+	$user_bus_mix_setup,
 	
 	# rules for mastering
 	
