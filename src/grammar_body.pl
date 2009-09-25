@@ -11,6 +11,7 @@ dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
+name4: /\w+/
 markname: /\w+/ { 
 	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
@@ -173,10 +174,10 @@ master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
 exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
-source: _source name { $::this_track->set_source( $item{name} ); 1 }
+source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
-	my $object = ::Track::input_object( $source );
+	my $object = $::this_track->input_object;
 	if ( $source ) { 
 		print $::this_track->name, ": input from $object.\n";
 	} else {

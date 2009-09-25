@@ -184,7 +184,6 @@ sub monitor_version {
 }
 
 sub rec_status {
-	my $debug = my $debug2 = 1;
 #	$::debug2 and print "&rec_status\n";
 	my $track = shift;
 	
@@ -385,6 +384,60 @@ CLIENT
 	}
 } 
 
+# the following subroutines support IO objects
+
+sub soundcard_input {
+	my $track = shift;
+	if ($::jack_running) {
+		my $start = track->source_id;
+		my $end   = $start + $track->ch_count - 1;
+		['jack_multi' , join q(,),q(jack_multi),
+			map{"system:capture_$_"} $start..$end]
+	} else { ['device' , $::capture_device] }
+}
+sub soundcard_output {
+ 	$::jack_running 
+		? [qw(jack_client system)]  
+		: ['device', $::alsa_playback_device] 
+}
+sub source_input {
+	my $track = shift;
+	given ( $track->source_type ){
+		when ( 'soundcard'  ){ return $track->soundcard_input }
+		when ( 'jack_client'){
+			if ( $::jack_running ){ return ['jack_client', $track->source_id] }
+			else { 	carp($track->name. ": cannot set source ".$track->source_id
+				.". JACK not running."); return [undef, undef] }
+		}
+		when ( 'loop'){ return ['loop',$track->source_id ] } 
+	}
+}
+
+sub send_output {
+	my $track = shift;
+	given ($track->send_type){
+		when ( 'soundcard' ){ 
+			if ($::jack_running) {
+				my $start = $track->send_id; # Assume channel will be 3 or greater
+				my $end   = $start + 1; # Assume stereo
+				return ['jack_multi', join q(,),q(jack_multi),
+					map{"system:playback_$_"} $start..$end]
+			} else {return [ 'device', $::alsa_playback_device] }
+		}
+		when ('jack_client') { 
+			if ($::jack_running){return [ 'jack_client', $track->send_id] }
+			else { carp $track->name . 
+					q(: auxilary send to JACK client specified,) .
+					q( but jackd is not running.  Skipping.);
+					return [qw(undef, undef)];
+			}
+		}
+		when ('loop') { return [ 'loop', $track->send_id ] }
+			
+		carp $track->name, ": missing or illegal send_type: ", 
+			$track->send_type, $/;
+	}
+ };
 
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;
@@ -407,7 +460,7 @@ sub set_source { # called from parser
 
 	my $old_source = $track->source;
 	my $new_source = $track->source($source);
-	my $object = input_object( $new_source );
+	my $object = $track->input_object;
 	if ( $old_source  eq $new_source ){
 		print $track->name, ": input unchanged, $object\n";
 	} else {
@@ -455,7 +508,7 @@ sub input {
 
 sub aux_output { 
 	my $track = shift;
-	$track->ch_m > 2 ? $track->ch_m : undef 
+	$track->send_id > 2 ? $track->send_id : undef 
 }
 
 sub object_as_text {
@@ -463,12 +516,13 @@ sub object_as_text {
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
 	
+	my $output;
 	given ($track->$type_field){
-		when('soundcard')  { print "soundcard channel "}
-		when('jack_client'){ print "JACK client "}
-		when('loop')       { print "loop device "}
+		when('soundcard')  { $output = "soundcard channel "}
+		when('jack_client'){ $output = "JACK client "}
+		when('loop')       { $output = "loop device "}
 	}
-	say $track->$id_field
+	$output .= $track->$id_field
 }
 
 sub input_object { # for text display

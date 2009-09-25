@@ -786,13 +786,21 @@ $aux_send = ::Rule->new(
 		name			=>	'monitor_bus_rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=> 'all',	# follow target track REC 
-		input_type		=> sub{ $source_input->type($tn{$_[0]->target()})},
-		input_object	=> sub{ $source_input->object($tn{$_[0]->target()})},
+		input_type		=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->source_input()->[0]
+							},
+		input_object	=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->source_input()->[1]
+							},
 		post_input		=>	sub{ my $track = $tn{$_[0]->target};
 										$track->rec_route .
 										$track->mono_to_stereo 
 										},
-		condition 		=>  1, # sub{ $tn{$_[0]->target()}->rec_status eq 'REC'},
+		condition 		=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->rec_status eq 'REC'},
 		status			=>  1,
 	);
 
@@ -818,8 +826,8 @@ $aux_send = ::Rule->new(
 		name			=>  'monitor_bus_out',
 		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
-		output_type		=>  sub{ $_[0]->send_type },
-		output_object	=>  sub{ $_[0]->send_id },
+		output_type		=> $soundcard_output->type,
+		output_object	=> $soundcard_output->object,
 		pre_output		=>	sub{ $_[0]->pre_send},
 		condition        => 1, # sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
@@ -827,47 +835,6 @@ $aux_send = ::Rule->new(
 	);
 
 
-}
-sub source_input {
-	my $track = shift;
-	given ( $track->source_type ){
-		when ( 'soundcard'  ){ $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $::jack_running ){ ['jack_client', $track->source_id] }
-			else { 	carp($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); [undef, undef] }
-		}
-		when ( 'loop'){ ['loop',$track->source_id ] } 
-	}
-}
-
-sub source_input { 
-		my ($type, $id, $track_name) = @_; 
-		given ( $type ){
-		when ( 'soundcard'  ){ return $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $jack_running ){ return ['jack_client', $track->source_id] }
-			else { 	carp("$track_name: cannot set source $type $id".
-				". JACK not running."); return [qw(null), $track_name] }
-		}
-		when ( 'loop'){ return ['loop', $id ] } 
-		default {return [qw(null), $track->name]}
-	}
-}
-
-sub soundcard_input {
-	my ($channel, $ch_count) = @_;
-	if ($::jack_running) {
-		my $start = $channel;
-		my $end   = $start + $ch_count - 1;
-		['jack_multi' , join q(,),q(jack_multi),
-			map{"system:capture_$_"} $start..$end]
-	} else { ['device' , $::capture_device] }
-}
-sub soundcard_output {
- 	$::jack_running 
-		? [qw(jack_client system)]  
-		: ['device', $::alsa_playback_device] 
 }
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
 
@@ -1645,7 +1612,7 @@ sub doodle {
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
 sub reconfigure_engine {
-	return; # 
+	return; # DEBUG
 	$debug2 and print "&reconfigure_engine\n";
 	# sometimes we want to skip for debugging
 	
