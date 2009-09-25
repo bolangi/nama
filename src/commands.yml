@@ -126,6 +126,12 @@ main_on:
 add_track:
   type: track
   short: add new
+  what: create a new track
+  example: add_track clarinet group woodwinds
+  parameters: <s_name> [ <s_key1> <s_val1> <s_key2> <s_val2>... ]
+add_tracks:
+  type: track
+  short: add new
   what: create one or more new tracks
   example: add_track sax violin tuba
   parameters: <s_name1> [ <s_name2>... ]

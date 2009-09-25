@@ -59,6 +59,8 @@ to_start: _to_start end { ::to_start(); 1 }
 to_end: _to_end end { ::to_end(); 1 }
 add_track: _add_track name2(s) end {
 	::add_track(@{$item{'name2(s)'}}); 1}
+add_tracks: _add_tracks name2(s) end {
+	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
@@ -446,8 +448,9 @@ add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination end {
 	1;
 }
 add_user_bus: _add_user_bus bus_name destination(?) end { 
-	my $dest_type = ::dest_type($item{'destination(?)'});
-	::add_user_bus( $item{bus_name}, $dest_type, $item{'destination(?)'});1
+	my $dest_id = $item{'destination(?)'}->[0];
+	my $dest_type = $dest_id ?  ::dest_type($dest_id) : undef;
+	::add_user_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
 slave_track: _slave_track bus_name target end {

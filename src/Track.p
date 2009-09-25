@@ -274,6 +274,7 @@ sub rec_route {
 	
 	# no need to route a jack client
 	return if $track->source_type eq 'jack_client';
+	return if $track->source_type eq 'loop';
 
 	# no need to route a signal at channel 1
 	return if ! $track->source_id or $track->source_id == 1; 
@@ -537,13 +538,18 @@ sub output_object {   # text for user display
 }
 sub client_status {
 	my ($track_status, $client, $direction) = @_;
-	if ($client =~ /\D/){
-		if(::jack_client($client, $direction) and $track_status eq 'REC' )
-			{ $client }
-		else { "[$client]" }
-	} elsif ($client =~ /\d+/ ){ 
-		if ( $track_status eq 'REC'){ $client }
-		else { "[$client]" }
+	my $type = ::dest_type($client);
+	if ($type eq 'loop'){
+		my ($bus) =  $client =~ /loop,(\w+)/;
+		$track_status eq 'REC' ? $bus : undef;  
+	}
+	elsif ($track_status eq 'OFF') {"[$client]"}
+	elsif ($type eq 'jack_client'){ 
+		::jack_client($client, $direction) 
+			? $client 
+			: "[$client]" 
+	} elsif ($type eq 'soundcard'){ 
+		$track_status eq 'REC' ?  $client : "[$client]"
 	} else { q() }
 }
 sub source_status {

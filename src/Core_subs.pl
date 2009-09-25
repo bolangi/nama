@@ -845,6 +845,29 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 		
 	);
+=comment
+    $user_bus_rec_setup = ::Rule->new(
+
+		name			=>	'user_bus_rec_setup', 
+		chain_id		=>  sub{ $_[0]->n },   
+		target			=>	'REC',
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
+		output_type		=>  'loop',
+		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+		post_input			=>	sub{ my $track = shift;
+										$track->rec_route .
+										$track->mono_to_stereo 
+										},
+		condition 		=> sub { 
+
+			my $track = shift; 
+			return "satisfied" 
+				unless ! defined $inputs{loop}->{"loop," . $track->n}; 
+		},
+		status			=>  1,
+	);
+=cut
 
 
 }
@@ -881,11 +904,11 @@ sub eliminate_loops1 {
 
 	# add chain $n to the list of the customer's (rule's) output device 
 	
-	my $rule = $mix_setup; 
-	defined $outputs{loop}->{$rule->output_object} 
-	  or $outputs{loop}->{$rule->output_object} = [];
-	push @{ $outputs{loop}->{$rule->output_object} }, $n;
-
+	my $track = $ti{$n};
+	my $group = $track->group;
+	my $output_object = $group eq 'Main' ? $loop_mix : "loop,$group";
+	$outputs{loop}->{$output_object} //= [];
+	push @{ $outputs{loop}->{$output_object} }, $n;
 
 	# remove chain $n as source for the loop
 
@@ -900,8 +923,8 @@ sub eliminate_loops1 {
 	#	$rule->output_object, join " ", @{
 	#		$outputs{loop}->{$rule->output_object} };
 	#
-	@{ $outputs{loop}->{$rule->output_object} } = 
-		grep{$_ ne $chain_id} @{ $outputs{loop}->{$rule->output_object} };
+	@{ $outputs{loop}->{$output_object} } = 
+		grep{$_ ne $chain_id} @{ $outputs{loop}->{$output_object} };
 
 	#print $/,"customers of output device ",
 	#	$rule->output_object, join " ", @{
@@ -1280,8 +1303,8 @@ sub generate_setup {
 		map { $_->apply() } ::UserBus::all();
 
 
-		map{ eliminate_loops1($_) } all_chains();
-		eliminate_loops2() unless $mastering_mode;
+		#map{ eliminate_loops1($_) } all_chains();
+		#eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
 
@@ -3899,7 +3922,7 @@ sub add_user_bus {
 	::UserBus->new( 
 		name => $name, 
 		groups => [$name],
-		rules => [qw(rec_setup mon_setup)],
+		rules => [qw(rec_setup mon_setup user_bus_mix_setup)],
 		destination_type => $type // 'loop',
 		destination_id	 => $id // $name,
 		)
@@ -3964,11 +3987,11 @@ sub add_monitor_bus {
 
 sub dest_type { 
 	my $dest = shift;
-	if ($dest !~ /\D/)        { return 'soundcard' } # digits only
-	elsif ($dest =~ /^loop,/) { return 'loop' }
+	if ($dest !~ /\D/)        { 'soundcard' } # digits only
+	elsif ($dest =~ /^loop,/) { 'loop' }
 	elsif ($dest){  # any string 
-		warn("$dest: jack_client doesn't exist.\n") unless jack_client($dest);
-		return 'jack_client' ; }
+		carp( "@{$dest}$dest: jack_client doesn't exist.\n") unless jack_client($dest);
+		'jack_client' ; }
 	else { undef }
 }
 	
