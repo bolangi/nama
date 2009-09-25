@@ -776,7 +776,6 @@ $aux_send = ::Rule->new(
 		post_input			=>	sub{ my $track = $tn{$_[0]->target};
 										$track->mono_to_stereo 
 										},
-		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status eq 'MON'},
 		status			=>  1,
 	);
@@ -817,7 +816,7 @@ $aux_send = ::Rule->new(
 		input_object	=> sub{ my $track = shift; 
 								my $source_track = $tn{$track->target};
 								'loop,'.$source_track->n},
-		condition 		=>  1, # sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
 	);
 
@@ -829,7 +828,7 @@ $aux_send = ::Rule->new(
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
 		pre_output		=>	sub{ $_[0]->pre_send},
-		condition        => 1, # sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		condition        => sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
 		
 	);
@@ -1612,7 +1611,6 @@ sub doodle {
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
 sub reconfigure_engine {
-	return; # DEBUG
 	$debug2 and print "&reconfigure_engine\n";
 	# sometimes we want to skip for debugging
 	

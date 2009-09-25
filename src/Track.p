@@ -276,11 +276,11 @@ sub rec_route {
 	return if $track->source_type eq 'jack_client';
 
 	# no need to route a signal at channel 1
-	return if ! $track->ch_r or $track->ch_r == 1; 
+	return if ! $track->source_id or $track->source_id == 1; 
 	
-	my $route = "-chmove:" . $track->ch_r . ",1"; 
+	my $route = "-chmove:" . $track->source_id . ",1"; 
 	if ( $track->ch_count == 2){
-		$route .= " -chmove:" . ($track->ch_r + 1) . ",2";
+		$route .= " -chmove:" . ($track->source_id + 1) . ",2";
 	}
 	return $route;
 	
