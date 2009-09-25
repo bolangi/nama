@@ -62,8 +62,8 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 0; # subroutine names
-$debug = 0; # debug statements
+$debug2 = 1; # subroutine names
+$debug = 1; # debug statements
 
 ## The names of helper loop_outputack devices:
 

@@ -647,8 +647,8 @@ sub initialize_rules {
 		name			=> 'rec_file', 
 		target			=> 'REC',
 		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> sub{ my $track = shift; $track->source_type },
-		input_object	=> sub{ my $track = shift; $track->source_id},
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
 		output_type		=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -669,8 +669,8 @@ sub initialize_rules {
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=>	'REC',
-		input_type		=> sub{ my $track = shift; $track->source_type },
-		input_object	=> sub{ my $track = shift; $track->source_id},
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
 		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
@@ -777,7 +777,7 @@ $aux_send = ::Rule->new(
 										$track->mono_to_stereo 
 										},
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=>  sub{ $tn{$_[0]->target}->rec_status eq 'MON'},
+		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status eq 'MON'},
 		status			=>  1,
 	);
 
@@ -786,13 +786,13 @@ $aux_send = ::Rule->new(
 		name			=>	'monitor_bus_rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=> 'all',	# follow target track REC 
-		input_type		=> $source_input->type,  #code ref
-		input_object	=> $source_input->object,# code ref
-		post_input			=>	sub{ my $track = $tn{$_[0]->target};
+		input_type		=> sub{ $source_input->type($tn{$_[0]->target()})},
+		input_object	=> sub{ $source_input->object($tn{$_[0]->target()})},
+		post_input		=>	sub{ my $track = $tn{$_[0]->target};
 										$track->rec_route .
 										$track->mono_to_stereo 
 										},
-		condition 		=>  sub{ $tn{$_[0]->target}->rec_status eq 'REC'},
+		condition 		=>  1, # sub{ $tn{$_[0]->target()}->rec_status eq 'REC'},
 		status			=>  1,
 	);
 
@@ -809,7 +809,7 @@ $aux_send = ::Rule->new(
 		input_object	=> sub{ my $track = shift; 
 								my $source_track = $tn{$track->target};
 								'loop,'.$source_track->n},
-		condition 		=>  sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
+		condition 		=>  1, # sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
 	);
 
@@ -818,17 +818,57 @@ $aux_send = ::Rule->new(
 		name			=>  'monitor_bus_out',
 		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
-		output_type		=>  $send_output->type,
-		output_object	=>  $send_output->object, 
+		output_type		=>  sub{ $_[0]->send_type },
+		output_object	=>  sub{ $_[0]->send_id },
 		pre_output		=>	sub{ $_[0]->pre_send},
-		condition        => sub{ $tn{$_[0]->target}->rec_status ne 'OFF'},
+		condition        => 1, # sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
 		
 	);
 
 
 }
+sub source_input {
+	my $track = shift;
+	given ( $track->source_type ){
+		when ( 'soundcard'  ){ $track->soundcard_input }
+		when ( 'jack_client'){
+			if ( $::jack_running ){ ['jack_client', $track->source_id] }
+			else { 	carp($track->name. ": cannot set source ".$track->source_id
+				.". JACK not running."); [undef, undef] }
+		}
+		when ( 'loop'){ ['loop',$track->source_id ] } 
+	}
+}
 
+sub source_input { 
+		my ($type, $id, $track_name) = @_; 
+		given ( $type ){
+		when ( 'soundcard'  ){ return $track->soundcard_input }
+		when ( 'jack_client'){
+			if ( $jack_running ){ return ['jack_client', $track->source_id] }
+			else { 	carp("$track_name: cannot set source $type $id".
+				". JACK not running."); return [qw(null), $track_name] }
+		}
+		when ( 'loop'){ return ['loop', $id ] } 
+		default {return [qw(null), $track->name]}
+	}
+}
+
+sub soundcard_input {
+	my ($channel, $ch_count) = @_;
+	if ($::jack_running) {
+		my $start = $channel;
+		my $end   = $start + $ch_count - 1;
+		['jack_multi' , join q(,),q(jack_multi),
+			map{"system:capture_$_"} $start..$end]
+	} else { ['device' , $::capture_device] }
+}
+sub soundcard_output {
+ 	$::jack_running 
+		? [qw(jack_client system)]  
+		: ['device', $::alsa_playback_device] 
+}
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
 
 
@@ -1605,6 +1645,7 @@ sub doodle {
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
 sub reconfigure_engine {
+	return; # 
 	$debug2 and print "&reconfigure_engine\n";
 	# sometimes we want to skip for debugging
 	
@@ -3877,8 +3918,11 @@ sub add_monitor_bus {
 							rw => 'MON',
 							target => $_,
 							group  => $name,
-							send_select => $dest_type,
-							ch_m => $dest_name)
+							source_type => undef,
+							source_id => undef,
+							send_type => 'soundcard',
+							send_id => $dest_name,
+						)
    } $main->tracks;
 		
 	# create group

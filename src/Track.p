@@ -199,9 +199,8 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->rw eq 'MON' and ! $monitor_version 
 		or $track->hide 
-	){ 				  'OFF' }
+	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
 	# so the result will be REC or MON if conditions are met
@@ -215,8 +214,8 @@ sub rec_status {
 					?  'REC'
 					:  maybe_monitor($monitor_version)
 			}
-			when('soundcard'){ 'REC' }
-			when('loop'){ 'REC' }
+			when('soundcard'){ return 'REC' }
+			when('loop'){ return 'REC' }
 
 			default { croak $track->name. ": missing source type" }
 			# fall back to MON
@@ -275,7 +274,7 @@ sub rec_route {
 	my $track = shift;
 	
 	# no need to route a jack client
-	return if $track->source_select eq 'jack';
+	return if $track->source_type eq 'jack_client';
 
 	# no need to route a signal at channel 1
 	return if ! $track->ch_r or $track->ch_r == 1; 
@@ -312,7 +311,7 @@ sub pre_send {
 	# we channel shift only to soundcard channel numbers higher than 3,
 	# not when the send is to a jack client
 	 
-	return q() if $track->send_select eq 'jack'  or ! $track->aux_output;           
+	return q() if $track->send_type eq 'jack_client'  or ! $track->aux_output;           
 	route(2,$track->aux_output); # stereo signal
 }
 
@@ -366,23 +365,23 @@ sub set_io {
 				print <<CLIENT if ! ::jack_client($id, 'output');
 $name: $direction port for JACK client "$id" not found. 
 CLIENT
+				return $track->source_id;
 			} else {
 		say "JACK server not running! Cannot set JACK client as track source.";
-				$track->source;
+				return $track->source_id;
 			} 
 		}
 
 		when('soundcard'){ 
 			$track->set( $id_field => $id, 
 						 $type_field => 'soundcard');
-			soundcard_channel( $id )
+			return soundcard_channel( $id )
 		}
 		when('loop'){ 
 			$track->set( $id_field => $id, 
 						 $type_field => 'loop');
-			$id;
+			return $id;
 		}
-		when(undef){ undef }
 	}
 } 
 
@@ -636,58 +635,7 @@ sub select_output {
 
 # the following subroutines support IO objects
 
-sub soundcard_input {
-	my $track = shift;
-	if ($::jack_running) {
-		my $start = track->source_id // 1;
-		my $end   = $start + $track->ch_count - 1;
-		['jack_multi' , join q(,),q(jack_multi),
-			map{"system:capture_$_"} $start..$end]
-	} else { ['device' , $::capture_device] }
-}
-sub soundcard_output {
- 	$::jack_running 
-		? [qw(jack_client system)]  
-		: ['device', $::alsa_playback_device] 
-}
-sub source_input {
-	my $track = shift;
-	given ( $track->source_type ){
-		when ( 'soundcard'  ){ $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $::jack_running ){ ['jack_client', $track->source_id] }
-			else { 	carp($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); [undef, undef] }
-		}
-		when ( 'loop'){ ['loop',$track->source_id ] } 
-	}
-}
 
-sub send_output {
-	my $track = shift;
-	given ($track->send_type){
-		when ( 'soundcard' ){ 
-			if ($::jack_running) {
-				my $start = $track->send_id; # Assume channel will be 3 or greater
-				my $end   = $start + 1; # Assume stereo
-				['jack_multi', join q(,),q(jack_multi),
-					map{"system:playback_$_"} $start..$end]
-			} else {[ 'device', $::alsa_playback_device] }
-		}
-		when ('jack_client') { 
-			if ($::jack_running){[ 'jack_client', $track->send_id] }
-			else { carp $track->name . 
-					q(: auxilary send to JACK client specified,) .
-					q( but jackd is not running.  Skipping.);
-					[qw(undef, undef)];
-			}
-		}
-		when ('loop') { [ 'loop', $track->send_id ] }
-			
-		default { [qw(undef, undef)]}
-	}
- };
- 			
 sub modify_rules_list {
 	my $track = shift;
 	my @rules = @_;
