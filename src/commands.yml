@@ -535,6 +535,14 @@ add_monitor_bus_raw:
   short: ambr
   what: add a bus duplicating all raw user tracks for instrument monitor
   parameters: <s_name> <destination> 
+update_monitor_bus:
+  type: bus
+  short: umb
+  what: include tracks added since monitor bus was created
+set_bus:
+  type: bus
+  short: smb
+  what: set bus parameters
 add_slave_track:
   type: track
   short: ast

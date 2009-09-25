@@ -258,19 +258,21 @@ package ::UserBus;
 use strict;
 use Carp;
 our @ISA = '::Bus';
-use vars qw(@buses);
+use vars qw(@buses %by_name);
 
 use ::Object qw(	name
 						groups
 						tracks 
 						rules
+						destination_type
+						destination_id
 
 
 						);
 
 # we will put the following information in the Track as an aux_send
 # 						destination_type
-# 						destination_name
+# 						destination_id
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
 
@@ -285,10 +287,18 @@ sub new {
 		rules  => [],
 		@_ }, $class; 
 	push @buses, $self;
+	$by_name{$self->name} = $self;
 	return $self;
 }
 
 sub all { @buses }
+
+# not object method
+
+# sub by_name {
+# 	my $name = shift;
+# 	( grep { $_->name  eq $name } @buses ); # list context return object
+# }
 
 1;
 __END__

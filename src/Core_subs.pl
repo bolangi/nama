@@ -1020,6 +1020,22 @@ sub add_track_alias {
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
 	add_track(  $name, target => $target );
 }
+sub add_slave_track {
+	my %h = @_;
+	say (qq[Group "$h{group}" does not exist, skipping.]), return
+		 unless $::Group::by_name{$h{group}};
+	say (qq[Target track "$h{target}" does not exist, skipping.]), return
+		 unless $tn{$h{target}};
+		::SlaveTrack->new(	
+			name => "$h{group}_$h{target}",
+			target => $h{target},
+			rw => 'MON',
+			source_type => undef,
+			source_id => undef,
+			send_type => $::UserBus::by_name{$h{group}}->destination_type,
+			send_id   => $::UserBus::by_name{$h{group}}->destination_id,
+			)
+}
 
 # usual track
 
@@ -3174,7 +3190,9 @@ sub restore_state {
 	# restore user buses, directly, skipping constructor 
 	
 	map{ bless $_, '::UserBus'} @user_bus_data;
+	%::UserBus::by_name = ();
 	@::UserBus::buses = @user_bus_data;
+	map{$::UserBus::by_name{$_->name} = $_  } @::UserBus::buses ;
 	
 	# create user tracks
 	
@@ -3506,6 +3524,7 @@ sub load_keywords {
 push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
 push @keywords, keys %iam_cmd;
 push @keywords, keys %effect_j;
+push @keywords, "Audio::Ecasound::Multitrack::";
 }
 
 sub complete {
@@ -3861,23 +3880,31 @@ sub set_region {
 
 sub add_monitor_bus {
 
-	my ($name, $dest_name, $bus_type) = @_;
-	my $dest_type = dest_type( $dest_name );
+	my ($name, $dest_id, $bus_type) = @_;
+	my $dest_type = dest_type( $dest_id );
 
 	# dest_type: soundcard | jack_client | loop
 	
-	print "name: $name: dest_type: $dest_type dest_name: $dest_name\n";
+	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
 
 	#warn("$name: already taken\n"), return if map{$_->name eq $name } or 
+	if ($::UserBus::by_name{$name}){
+		say qq(monitor bus "$name" already exists. Updating with new tracks.");
+
+	} else {
 	::UserBus->new( 
 		name => $name, 
 		groups => [$name],
 		rules => ($bus_type eq 'cooked' 
 			?  [qw(monitor_bus_cooked_setup monitor_bus_out )]
-			:  [qw(monitor_bus_rec_setup monitor_bus_mon_setup monitor_bus_out)]
+			:  [qw(monitor_bus_rec_setup monitor_bus_mon_setup monitor_bus_out)],
+		destination_type => $dest_type,
+		destination_id	 => $dest_id,
+		
 		),
 	) or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
+	}
 
 	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
 							rw => 'MON',
@@ -3885,8 +3912,8 @@ sub add_monitor_bus {
 							group  => $name,
 							source_type => undef,
 							source_id => undef,
-							send_type => 'soundcard',
-							send_id => $dest_name,
+							send_type => $dest_type, 
+							send_id => $dest_id,
 						)
    } $main->tracks;
 		
@@ -3911,4 +3938,11 @@ sub dest_type {
 	else { undef }
 }
 	
+sub update_monitor_bus {
+	my $name = shift;
+		add_monitor_bus( $name, 
+						 $::UserBus::by_name{$name}->destination_id),
+						 "dummy",
+}
+
 ### end
