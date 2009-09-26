@@ -555,7 +555,11 @@ sub client_status {
 			? $client 
 			: "[$client]" 
 	} elsif ($type eq 'soundcard'){ 
-		$track_status eq 'REC' ?  $client : "[$client]"
+		$client 
+			?  ($track_status eq 'REC' 
+				?  $client 
+				: "[$client]")
+			: undef
 	} else { q() }
 }
 sub source_status {
