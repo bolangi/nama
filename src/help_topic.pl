@@ -6,6 +6,7 @@
                     marks
                     effects
                     group
+                    bus
                     mixdown
                     prompt 
                     diagnostics
@@ -60,7 +61,7 @@ track => <<TRACK,
 
    link_track, link          -  create a new, read-only track that uses audio
                                 files from an existing track. 
-								
+
                                 example: link_track new_piano piano
                                 example: link_track intro Mixdown my_song_intro 
 
@@ -111,6 +112,7 @@ track => <<TRACK,
    rec                     -  set track to REC  
    mon                     -  set track to MON
    off, z                  -  set track OFF (omit from setup)
+   rec_defeat, rd          -  toggle track WAV recording on/off
 
  - vol/pan 
 
@@ -251,6 +253,20 @@ group => <<GROUP,
                 
 GROUP
 
+bus => <<BUS,
+   add_monitor_bus_raw, ambr    - copy raw track signals to external monitor 
+   add_monitor_bus_cooked, ambc - copy processed signals to external monitor 
+   update_monitor_bus, umb      - refresh monitor bus track list
+   remove_bus, rb               - remove a bus
+   add_user_bus, aub            - create a sub-bus feeding a regular user track
+                                  of the same name
+                                  example: add_user_bus Strings 
+                                           add_tracks violin cello bass
+                                           for cello violin bass; set group Strings
+BUS
+
+
+
 mixdown => <<MIXDOWN,
    mixdown, mxd                - enable mixdown 
    mixoff,  mxo                - disable mixdown 
@@ -307,7 +323,8 @@ help is available for the following topics:
 5  Marks
 6  Effects
 7  Group control
-8  Mixdown
-9  Command prompt 
-10 Diagnostics
+8  Buses
+9  Mixdown
+10 Command prompt 
+11 Diagnostics
 HELP

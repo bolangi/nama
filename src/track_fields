@@ -1,0 +1,52 @@
+					class					
+
+					name
+					active
+
+					ch_r 
+					ch_m 
+					ch_count
+
+					rw
+
+					vol  
+					pan 
+					latency
+
+					old_vol_level
+					old_pan_level
+					ops 
+					offset 
+
+					n 
+					group 
+
+					playat
+					region_start	
+					region_end
+
+					looping
+
+					hide
+					modifiers
+
+					source_id
+					source_type
+
+					send_id
+					send_type
+					
+
+					jack_source
+					jack_send
+					source_select
+					send_select
+
+					project
+					target
+
+					rules_skip
+					rules_add
+					
+					rec_defeat
+

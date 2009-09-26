@@ -295,8 +295,8 @@ our (
 
 	# new object core
 	
-	$tracker_bus, 
-	$tracker, # tracker_group
+	$main_bus, 
+	$main, # main_group
 	$master_bus, 
 	$master, # master_group
 	$master_track,
@@ -321,13 +321,12 @@ our (
 	%tn, # track by name  (alias %::Track::by_name)
 
 	@tracks_data, # staging for saving
+	@user_bus_data,   # 
 	@groups_data, # 
 	@marks_data, # 
 
-	$playback_device,       # where to send stereo output
-	$playback_device_jack,  # JACK target for stereo output
+	$alsa_playback_device,       # where to send stereo output
 	$capture_device,    # where to get our inputs
-	$capture_device_jack,    # where to get our inputs
 
 
 	# rules
@@ -337,7 +336,7 @@ our (
 	$mix_down_ev,
 	$main_out,
 	$mix_setup,
-	$mix_setup_mon,
+	$mixdown_playback,
 	$mon_setup,
 	$rec_file,
 	$rec_file_soundcard_jack,
@@ -347,6 +346,14 @@ our (
 	$aux_send_soundcard_jack,
 	$aux_receive,
 	$null_setup,
+
+	# rules for instrument monitor buses
+	
+	$monitor_bus_mon_setup,
+	$monitor_bus_rec_setup,
+	$monitor_bus_cooked_setup,
+	$monitor_bus_out,
+	$user_bus_mix_setup,
 	
 	# rules for mastering
 	
@@ -395,12 +402,12 @@ our (
 	$fade_time, 	# duration for fadein(), fadeout()
 	$old_snapshot,  # previous status_snapshot() output
 					# to check if I need to reconfigure engine
-	$old_group_rw, # previous $tracker->rw setting
+	$old_group_rw, # previous $main->rw setting
 	%old_rw,       # previous track rw settings (indexed by track name)
 	
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
-					
+
 
 );

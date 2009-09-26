@@ -196,9 +196,9 @@ sub prepare {
 	
 	# init our buses
 	
-	$tracker_bus  = ::Bus->new(
-		name => 'Tracker_Bus',
-		groups => [qw(Tracker)],
+	$main_bus  = ::Bus->new(
+		name => 'Main_Bus',
+		groups => [qw(Main)],
 		tracks => [],
 		rules  => [ qw( mix_setup 
 						rec_setup
@@ -217,7 +217,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mix_setup_mon mix_file mix_ev) ],
+		rules  => [ qw(mixdown_playback mix_file mix_ev) ],
 	);
 
 	# for metronome or other tracks using 'null' as source
@@ -479,10 +479,26 @@ Loading project "untitled".
 	# read_config( global_config() ); 
 	initialize_rules();
 	initialize_project_data();
+
 	remove_small_wavs(); 
 	rememoize();
 
-	retrieve_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	if (! $tn{Master}){
+
+		$master_track = ::SimpleTrack->new( 
+			group => 'Master', 
+			name => 'Master',
+			rw => 'MON',); # no dir, we won't record tracks
+
+
+		$mixdown_track = ::Track->new( 
+			group => 'Mixdown', 
+			name => 'Mixdown', 
+			rw => 'MON'); 
+	}
+
+
 	$opts{m} = 0; # enable 
 	
 	dig_ruins() unless scalar @::Track::all > 2;
@@ -505,6 +521,7 @@ sub rememoize {
 	unmemoize('candidates');
 	memoize(  'candidates');
 }
+
 
 sub initialize_rules {
 
@@ -558,13 +575,10 @@ sub initialize_rules {
 
 		target			=> 'MON',
 
-	# condition =>	sub{ defined $inputs{mixed}  
-	# 	or $debug and print("no customers for mixed, skipping\n"), 0},
-
-		input_type 		=> 'mixed', 
+		input_type 		=> 'loop', 
 		input_object	=> $loop_mix, 
 
-		output_type		=> 'mixed',
+		output_type		=> 'loop',
 		output_object	=> \&mixer_target,
 		status			=> 1,
 
@@ -582,10 +596,7 @@ sub initialize_rules {
 		chain_id		=> 'MixDown',
 		target			=> 'REC', 
 		
-		# sub{ defined $outputs{mixed} or $debug 
-		#		and print("no customers for mixed, skipping mixdown\n"), 0}, 
-
-		input_type 		=> 'mixed', # bus name
+		input_type 		=> 'loop', 
 		input_object	=> $loop_output,
 
 		output_type		=> 'file',
@@ -605,7 +616,7 @@ sub initialize_rules {
 		chain_id		=> 1, # Master
 		target			=> 'all', 
 		
-		input_type 		=> 'mixed',
+		input_type 		=> 'loop',
 		input_object	=> $loop_mix,
 
 		output_type		=> 'device',
@@ -621,11 +632,11 @@ sub initialize_rules {
 		name			=>  'main_out',
 		chain_id		=>  'MainOut',
 		target			=>  'all',
-		condition 		=>	1,
-		input_type		=>  'mixed',
+		input_type		=>  'loop',
 		input_object	=>  $loop_output,
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
+		condition 		=>	1,
 		status			=>  1,
 		
 	);
@@ -638,28 +649,24 @@ sub initialize_rules {
 		name			=>  'mix_setup',
 		chain_id		=>  sub { my $track = shift; "J". $track->n },
 		target			=>  'all',
-		input_type		=>  'cooked',
+		input_type		=>  'loop',
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_object	=>  $loop_mix,
-		output_type		=>  'cooked',
-		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
+		output_type		=>  'loop',
+		condition 		=>  sub{ defined $inputs{loop}->{$loop_output} },
 		status			=>  1,
 		
 	);
 
-	# for mix track only
-	
-	$mix_setup_mon = ::Rule->new(
+	$mixdown_playback = ::Rule->new(
 
-		name			=>  'mix_setup_mon',
-		chain_id		=>  sub { my $track = shift; "K". $track->n },
+		name			=>  'mixdown_playback',
+		chain_id		=>  2, # Mixdown
 		target			=>  'MON',
-		input_type		=>  'cooked',
+		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=> $soundcard_output->type,
 		output_object	=> $soundcard_output->object,
-# 		output_type		=>  'mixed',
-# 		output_object	=>  \&mixer_target,
 		condition        => 1,
 		status			=>  1,
 		
@@ -673,26 +680,25 @@ sub initialize_rules {
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
-		output_type		=>  'cooked',
+		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=> 1,
 		status			=>  1,
 	);
 
-	# records live input to file
-	# without going through track processing
+	# records unprocessed live input to file
 		
 	$rec_file = ::Rule->new(
 
 		name			=> 'rec_file', 
 		target			=> 'REC',
 		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> $source_input->type, # code ref
-		input_object	=> $source_input->object, # code ref
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
 		output_type		=>  'file',
 		output_object   => sub {
 			my $track = shift; 
@@ -700,22 +706,23 @@ sub initialize_rules {
 			join " ", $track->full_path, $format
 		},
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
+		condition		=> sub {! $_[0]->rec_defeat },
 		status		=>  1,
 	);
 
 	# rec_setup 
 	
 	# convert live inputs to stereo if necessary
-	# this chain takes all track effects
+	# this chain receives all track effects
 	
     $rec_setup = ::Rule->new(
 
 		name			=>	'rec_setup', 
-		chain_id		=>  sub{ my $track = shift; $track->n },   
+		chain_id		=>  sub{ $_[0]->n },   
 		target			=>	'REC',
-		input_type		=> $source_input->type,  #code ref
-		input_object	=> $source_input->object,# code ref
-		output_type		=>  'cooked',
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
+		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
 										$track->rec_route .
@@ -725,7 +732,7 @@ sub initialize_rules {
 
 			my $track = shift; 
 			return "satisfied" 
-				unless ! defined $inputs{cooked}->{"loop," . $track->n}; 
+				unless ! defined $inputs{loop}->{"loop," . $track->n}; 
 		},
 		status			=>  1,
 	);
@@ -733,7 +740,7 @@ sub initialize_rules {
 
 # aux_send 
 # 
-# send a 'cooked' signal to a soundcard output channel or JACK client
+# send a 'loop' signal to a soundcard output channel or JACK client
 
 	
 $aux_send = ::Rule->new(  
@@ -741,15 +748,13 @@ $aux_send = ::Rule->new(
 
 		name			=>  'aux_send', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; "M".$track->n },
-		input_type		=>  'cooked', 
-		input_object	=>  sub{ my $track = shift; "loop," .  $track->n},
+		chain_id 		=>	sub{ "M".$_[0]->n },
+		input_type		=>  'loop', 
+		input_object	=>  sub{ "loop," .  $_[0]->n},
 		output_type		=>  $send_output->type,
-		output_object	=>  $send_output->object, 
-		pre_output		=>	sub{ my $track = shift; $track->pre_send},
- 		condition 		=> sub { my $track = shift; 
- 								return "satisfied" if $track->send},
- 									# and jack_client($track->send, 'input') } ,
+		output_object	=>  $send_output->object,
+		pre_output		=>	sub{ $_[0]->pre_send},
+ 		condition 		=> sub { "satisfied" if $_[0]->send_type},
 		status			=>  1,
 	);
 
@@ -762,12 +767,12 @@ $aux_send = ::Rule->new(
 		
 		name			=>  'null_setup', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
+		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'device',
 		input_object	=>  'null',
-		output_type		=>  'cooked',
+		output_type		=>  'loop',
 		output_object	=>  $loop_mix,
-		condition 		=>  sub{ defined $inputs{mixed}->{$loop_output} },
+		condition 		=>  sub{ defined $inputs{loop}->{$loop_output} },
 		status			=>  1,
 # 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
@@ -780,20 +785,20 @@ $aux_send = ::Rule->new(
 	$stage1 = ::Rule->new(
 		name			=>  'stage1', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		chain_id 		=>	sub{ $_[0]->n },
+		input_type		=>  'loop',
 		input_object	=>  $loop_mastering,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_crossover,
 		status			=>  1,
 	);
 	$stage2 = ::Rule->new(
 		name			=>  'stage2', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		chain_id 		=>	sub{ $_[0]->n },
+		input_type		=>  'loop',
 		input_object	=>  $loop_crossover,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_boost,
 		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
@@ -801,17 +806,98 @@ $aux_send = ::Rule->new(
 	$stage3 = ::Rule->new(
 		name			=>  'stage3', 
 		target			=>  'all',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'mixed',
+		chain_id 		=>	sub{ $_[0]->n },
+		input_type		=>  'loop',
 		input_object	=>  $loop_boost,
-		output_type		=>  'mixed',
+		output_type		=>  'loop',
 		output_object	=>  $loop_output,
 		condition 		=>  sub{ $mastering_mode },
 		status			=>  1,
 	);
 	
-}
+	# rules for instrument monitor buses using raw inputs
+	
+	$monitor_bus_mon_setup = ::Rule->new(
+		
+		name			=>  'monitor_bus_mon_setup', 
+		target			=>  'all',  # follow target track MON
+		chain_id 		=>	sub{ $_[0]->n },
+		input_type		=>  'file',
+		input_object	=>  sub{ $tn{$_[0]->target}->full_path},
+		post_input			=>	sub{ my $track = $tn{$_[0]->target};
+										$track->mono_to_stereo 
+										},
+		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status eq 'MON'},
+		status			=>  1,
+	);
 
+	$monitor_bus_rec_setup = ::Rule->new(
+
+		name			=>	'monitor_bus_rec_setup', 
+		chain_id		=>  sub{ $_[0]->n },   
+		target			=> 'all',	# follow target track REC 
+		input_type		=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->source_input()->[0]
+							},
+		input_object	=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->source_input()->[1]
+							},
+		post_input		=>	sub{ my $track = $tn{$_[0]->target};
+										$track->rec_route .
+										$track->mono_to_stereo 
+										},
+		condition 		=> sub{ my $track = shift;
+								my $target = $tn{$track->target}; 
+								$target->rec_status eq 'REC'},
+		status			=>  1,
+	);
+
+	# rules for instrument monitor buses using cooked signals 
+	
+	#	  based on aux_send, uses Track 'send' field
+	
+	$monitor_bus_cooked_setup = ::Rule->new(
+		
+		name			=>  'monitor_bus_cooked_setup', 
+		target			=>  'all',
+		chain_id		=>  sub{ $_[0]->n },   
+		input_type		=>  'loop',
+		input_object	=> sub{ my $track = shift; 
+								my $source_track = $tn{$track->target};
+								'loop,'.$source_track->n},
+		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		status			=>  1,
+	);
+
+	$monitor_bus_out = ::Rule->new(
+
+		name			=>  'monitor_bus_out',
+		chain_id		=>  sub { $_[0]->n },
+		target			=>  'all',
+		output_type		=> $send_output->type,
+		output_object	=> $send_output->object,
+		pre_output		=>	sub{ $_[0]->pre_send},
+		condition        => sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		status			=>  1,
+		
+	);
+	$user_bus_mix_setup = ::Rule->new(
+
+		name			=>  'user_bus_mix_setup',
+		chain_id		=>  sub { my $track = shift; "J". $track->n },
+		target			=>  'all',
+		input_type		=>  'loop',
+		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
+		output_type		=>  'loop',
+		output_object	=>  sub{ my $track = shift; "loop,".  $track->group },
+		condition 		=>  1, # sub{ defined $inputs{loop}->{$loop_output} },
+		status			=>  1,
+		
+	);
+
+}
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
 
 
@@ -835,70 +921,69 @@ sub eliminate_loops1 {
 	# given track
 	my $n = shift;
 	my $loop_id = "loop,$n";
-	return unless defined $inputs{cooked}->{$loop_id} 
-		and scalar @{$inputs{cooked}->{$loop_id}} == 1;
-	# get customer's id from cooked list and remove it from the list
+	return unless defined $inputs{loop}->{$loop_id} 
+		and scalar @{$inputs{loop}->{$loop_id}} == 1;
+	# get customer's id from loop list and remove it from the list
 
-	my $cooked_id = pop @{ $inputs{cooked}->{$loop_id} }; 
+	my $chain_id = pop @{ $inputs{loop}->{$loop_id} }; 
 
 	# i.e. J3
 
 	# add chain $n to the list of the customer's (rule's) output device 
 	
-	#my $rule  = grep{ $cooked_id =~ /$_->chain_id/ } ::Rule::all_rules();  
-	my $rule = $mix_setup; 
-	defined $outputs{cooked}->{$rule->output_object} 
-	  or $outputs{cooked}->{$rule->output_object} = [];
-	push @{ $outputs{cooked}->{$rule->output_object} }, $n;
-
+	my $track = $ti{$n};
+	my $group = $track->group;
+	my $output_object = $group eq 'Main' ? $loop_mix : "loop,$group";
+	$outputs{loop}->{$output_object} //= [];
+	push @{ $outputs{loop}->{$output_object} }, $n;
 
 	# remove chain $n as source for the loop
 
-	delete $outputs{cooked}->{$loop_id}; 
+	delete $outputs{loop}->{$loop_id}; 
 	
 	# remove customers that use loop as input
 
-	delete $inputs{cooked}->{$loop_id}; 
+	delete $inputs{loop}->{$loop_id}; 
 
-	# remove cooked customer from his output device list
+	# remove loop customer from his output device list
 	# print "customers of output device ",
 	#	$rule->output_object, join " ", @{
-	#		$outputs{cooked}->{$rule->output_object} };
+	#		$outputs{loop}->{$rule->output_object} };
 	#
-	@{ $outputs{cooked}->{$rule->output_object} } = 
-		grep{$_ ne $cooked_id} @{ $outputs{cooked}->{$rule->output_object} };
+	@{ $outputs{loop}->{$output_object} } = 
+		grep{$_ ne $chain_id} @{ $outputs{loop}->{$output_object} };
 
 	#print $/,"customers of output device ",
 	#	$rule->output_object, join " ", @{
-	#		$outputs{cooked}->{$rule->output_object} };
+	#		$outputs{loop}->{$rule->output_object} };
 	#		print $/;
 
 	# transfer any intermediate processing to numeric chain,
 	# deleting the source.
-	$post_input{$n} .= $post_input{$cooked_id};
-	$pre_output{$n} .= $pre_output{$cooked_id}; 
-	delete $post_input{$cooked_id};
-	delete $pre_output{$cooked_id};
+	$post_input{$n} .= $post_input{$chain_id};
+	$pre_output{$n} .= $pre_output{$chain_id}; 
+	delete $post_input{$chain_id};
+	delete $pre_output{$chain_id};
 
 	
 }
 sub eliminate_loops2 {
 
-	# remove $loop_output when only one customer for $inputs{mixed}{$loop_output}
+	# remove $loop_output when only one customer for $inputs{loop}{$loop_output}
 
-	my $ref = ref $inputs{mixed}{$loop_output};
+	my $ref = ref $inputs{loop}{$loop_output};
 
 	if (    $ref =~ /ARRAY/ and 
-			(scalar @{$inputs{mixed}{$loop_output}} == 1) ){
+			(scalar @{$inputs{loop}{$loop_output}} == 1) ){
 
 		$debug and print "i have a loop to eliminate \n";
-		my $customer_id = ${$inputs{mixed}{$loop_output}}[0];
+		my $customer_id = ${$inputs{loop}{$loop_output}}[0];
 		$debug and print "customer chain: $customer_id\n";
 
-		delete $outputs{mixed}{$loop_output};
-		delete $inputs{mixed}{$loop_output};
+		delete $outputs{loop}{$loop_output};
+		delete $inputs{loop}{$loop_output};
 
-	$inputs{mixed}{$loop_mix} = [ $customer_id ];
+	$inputs{loop}{$loop_mix} = [ $customer_id ];
 
 	}
 }
@@ -959,26 +1044,14 @@ sub initialize_project_data {
 
 	$master = ::Group->new(name => 'Master');
 	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');
-	$tracker = ::Group->new(name => 'Tracker', rw => 'REC');
+	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$mastering = ::Group->new(name =>'Mastering');
 	$null    = ::Group->new(name => 'null');
 
 	#print yaml_out( \%::Track::track_names );
 
 
-# create magic tracks, we will create their GUI later, after retrieve
-
-	$master_track = ::SimpleTrack->new( 
-		group => 'Master', 
-		name => 'Master',
-		rw => 'MON',); # no dir, we won't record tracks
-
-
-	$mixdown_track = ::Track->new( 
-		group => 'Mixdown', 
-		name => 'Mixdown', 
-		rw => 'MON'); 
-
+    # create master and mixdown
 }
 ## track and wav file handling
 
@@ -1010,6 +1083,22 @@ sub add_track_alias {
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
 	add_track(  $name, target => $target );
 }
+sub add_slave_track {
+	my %h = @_;
+	say (qq[Group "$h{group}" does not exist, skipping.]), return
+		 unless $::Group::by_name{$h{group}};
+	say (qq[Target track "$h{target}" does not exist, skipping.]), return
+		 unless $tn{$h{target}};
+		::SlaveTrack->new(	
+			name => "$h{group}_$h{target}",
+			target => $h{target},
+			rw => 'MON',
+			source_type => undef,
+			source_id => undef,
+			send_type => $::UserBus::by_name{$h{group}}->destination_type,
+			send_id   => $::UserBus::by_name{$h{group}}->destination_id,
+			)
+}
 
 # usual track
 
@@ -1030,7 +1119,7 @@ sub add_track {
 	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-	my $group = $::Group::by_name{$track->group}; # $tracker, shurely
+	my $group = $::Group::by_name{$track->group}; # $main, shurely
 	#command_process('for mon; mon') if $preview;
 	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
@@ -1057,27 +1146,26 @@ sub dig_ruins {
 
 	# look for wave files
 		
-		my $d = this_wav_dir();
-		opendir my $wav, $d or carp "couldn't open $d: $!";
+	my $d = this_wav_dir();
+	opendir my $wav, $d or carp "couldn't open $d: $!";
 
-		# remove version numbers
-		
-		my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
+	# remove version numbers
+	
+	my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
 
-		closedir $wav;
+	closedir $wav;
 
-		my %wavs;
-		
-		map{ $wavs{$_}++ } @wavs;
-		@wavs = keys %wavs;
+	my %wavs;
+	
+	map{ $wavs{$_}++ } @wavs;
+	@wavs = keys %wavs;
 
-		$debug and print "tracks found: @wavs\n";
-	 
-		$ui->create_master_and_mix_tracks();
+	$debug and print "tracks found: @wavs\n";
+ 
+	$ui->create_master_and_mix_tracks();
 
-		map{add_track($_)}@wavs;
+	map{add_track($_)}@wavs;
 
-#	}
 }
 
 sub remove_small_wavs {
@@ -1219,14 +1307,14 @@ sub generate_setup {
 
 	if ($have_source) {
 
-		# process buses
+		# process system buses
 
 		$debug and print "applying mixdown_bus\n";
 		$mixdown_bus->apply; 
 		$debug and print "applying master_bus\n";
 		$master_bus->apply; 
-		$debug and print "applying tracker_bus (user tracks)\n";
-		$tracker_bus->apply;
+		$debug and print "applying main_bus (user tracks)\n";
+		$main_bus->apply;
 		$debug and print "applying null_bus (user tracks)\n";
 		$null_bus->apply;
 		if ($mastering_mode){
@@ -1235,8 +1323,15 @@ sub generate_setup {
 			$mastering_stage2_bus->apply;
 			$mastering_stage3_bus->apply;
 		}
+
+		# process user defined buses
+
+		
+		map { $_->apply() } ::UserBus::all();
+
+
 		map{ eliminate_loops1($_) } all_chains();
-		#eliminate_loops2() unless $mastering_mode
+		eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
 
@@ -1273,7 +1368,7 @@ sub write_chains {
 	$debug2 and print "&write_chains\n";
 
 	# we assume that %inputs and %outputs will have the
-	# same lowest-level keys, i.e. 'mixed' and 'cooked'
+	# same lowest-level keys, i.e. 'loop' and 'loop'
 	#
 	# @buses is not the right name...
 	
@@ -1322,9 +1417,9 @@ WARN
 
 	#####  Setting jack clients as inputs
  
-	for my $client (keys %{ $inputs{jack} } ){
+	for my $client (keys %{ $inputs{jack_client} } ){
 
-		my @chain_ids = @{ $inputs{jack}->{$client} };
+		my @chain_ids = @{ $inputs{jack_client}->{$client} };
 		my $format;
 
 		if ( $client eq 'system' ){ # we use the full soundcard width
@@ -1401,13 +1496,11 @@ WARN
 
 	### Setting loops as inputs 
 
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $inputs{$bus} }){
-			push  @input_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $inputs{$bus}->{$loop} }),
-				"-i:$loop";
-		}
+	for my $loop ( keys %{ $inputs{loop} }){
+		push  @input_chains, 
+		join " ", 
+			"-a:" . (join ",", @{ $inputs{loop}->{$loop} }),
+			"-i:$loop";
 	}
 	#####  Setting devices as outputs
 	#
@@ -1440,9 +1533,9 @@ WARN
 
 	#####  Setting jack clients as outputs
  
-	for my $client (keys %{ $outputs{jack} } ){
+	for my $client (keys %{ $outputs{jack_client} } ){
 
-		my @chain_ids = @{ $outputs{jack}->{$client} };
+		my @chain_ids = @{ $outputs{jack_client}->{$client} };
 		my $format;
 
 		if ( $client eq 'system' ){ # we use the full soundcard width
@@ -1472,13 +1565,11 @@ WARN
 		
 	### Setting loops as outputs 
 
-	for my $bus( @buses ){ # i.e. 'mixed', 'cooked'
-		for my $loop ( keys %{ $outputs{$bus} }){
-			push  @output_chains, 
-			join " ", 
-				"-a:" . (join ",", @{ $outputs{$bus}->{$loop} }),
-				"-o:$loop";
-		}
+	for my $loop ( keys %{ $outputs{loop} }){
+		push  @output_chains, 
+		join " ", 
+			"-a:" . (join ",", @{ $outputs{loop}->{$loop} }),
+			"-o:$loop";
 	}
 	##### Setting files as outputs (used by rec_file and mix)
 
@@ -1584,8 +1675,8 @@ sub doodle {
 	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
 	
-	$old_group_rw = $tracker->rw;
-	$tracker->set(rw => 'REC');
+	$old_group_rw = $main->rw;
+	$main->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# allow only unique inputs
@@ -1673,7 +1764,7 @@ sub release_doodle_mode {
 
 		$debug2 and print "&release_doodle_mode\n";
 		# restore preview group REC/MON/OFF setting
-		$tracker->set(rw => $old_group_rw);		
+		$main->set(rw => $old_group_rw);		
 
 		# enable playback from disk
 		$mon_setup->set(status => 1);
@@ -1688,10 +1779,10 @@ sub enable_excluded_inputs {
 	$debug2 and print "&enable_excluded_inputs\n";
 	return unless %old_rw;
 
-	map { $tn{$_}->set(rw => $old_rw{$_}) } $tracker->tracks
-		if $tracker->tracks;
+	map { $tn{$_}->set(rw => $old_rw{$_}) } $main->tracks
+		if $main->tracks;
 
-	$tracker->set(rw => $old_group_rw);
+	$main->set(rw => $old_group_rw);
 	%old_rw = ();
 
 }
@@ -1700,15 +1791,15 @@ sub exclude_duplicate_inputs {
 	$debug2 and print "&exclude_duplicate_inputs\n";
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
- 	if ( $tracker->tracks){
+ 	if ( $main->tracks){
  		map { # print "track $_ "; 
 			$old_rw{$_} = $tn{$_}->rw;
  		  	$tn{$_}->set(rw => 'REC');
  			# print "status: ", $tn{$_}->rw, $/ 
- 		} $tracker->tracks;
+ 		} $main->tracks;
  	}
 
-		my @user = $tracker->tracks(); # track names
+		my @user = $main->tracks(); # track names
 		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source;
@@ -2042,7 +2133,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			$ui->global_version_buttons(); # recreate
-			$tracker->set( rw => 'MON');
+			$main->set( rw => 'MON');
 			$ui->refresh();
 			print <<REC;
 WAV files were recorded! 
@@ -3084,9 +3175,13 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 $debug and print "copying tracks data\n";
+map { $_->set( class => ref $_ ) } ::Track::all(); # TODO REMOVE
 map { push @tracks_data, $_->hashref } ::Track::all();
 
 # print "found ", scalar @tracks_data, "tracks\n";
+
+@user_bus_data = (); # 
+map{ push @user_bus_data, $_->hashref } ::UserBus::all();
 
 # prepare marks data for storage (new Mark objects)
 
@@ -3134,8 +3229,8 @@ sub assign_var {
 		#		format => 'yaml', # breaks, stupid!
 				class => '::');
 }
-sub retrieve_state {
-	$debug2 and print "&retrieve_state\n";
+sub restore_state {
+	$debug2 and print "&restore_state\n";
 	my $file = shift;
 	$file = $file || $state_store_file;
 	$file = join_path(project_dir(), $file);
@@ -3150,48 +3245,46 @@ sub retrieve_state {
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
-	#  set group parameters
+	#  destroy and recreate all groups
 
-	map {my $g = $_; 
-		map{
-			$::Group::by_index[$g->{n}]->set($_ => $g->{$_})
-			} keys %{$g};
-	} @groups_data;
+	::Group::initialize();	
+	map { ::Group->new( %{ $_ } ) } @groups_data;  
 
-	#  set Master and Mixdown parmeters
+	# restore user buses, directly, skipping constructor 
 	
-
-
-	map {my $t = $_; 
-			my %track = %{$t};
-		map{
-
-			$ti{$t->{n}}->set($_ => $t->{$_})
-			} keys %track;
-	} @tracks_data[0,1];
-
-	splice @tracks_data, 0, 2;
-
-	$ui->create_master_and_mix_tracks(); 
-
+	map{ bless $_, '::UserBus'} @user_bus_data;
+	%::UserBus::by_name = ();
+	@::UserBus::buses = @user_bus_data;
+	map{$::UserBus::by_name{$_->name} = $_  } @::UserBus::buses ;
+	
 	# create user tracks
 	
 	my $did_apply = 0;
 
 	map{ 
 		my %h = %$_; 
-		#print "old n: $h{n}\n";
-		#print "h: ", join " ", %h, $/;
-		#delete $h{n};
 		$::Track::n = $h{n} if $h{n};
 		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ;
 		# set the correct class for mastering tracks
-		bless $track, '::MasteringTrack' if $track->group eq 'Mastering';
+		if ( $track->class ){ bless $track, $track->class }
+		else { bless $track, '::MasteringTrack' if $track->group eq 'Mastering'; }
+					# TODO REMOVE
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
-		$ui->track_gui($n); 
+	} @tracks_data;
+
+	$ui->create_master_and_mix_tracks();
+	bless $tn{Master}, '::SimpleTrack';   # TODO REMOVE
+
+	map{ 
+		my $n = $_->{n};
+
+		# create gui
+		$ui->track_gui($n) unless $n <= 2;
+
+		# restore effects
 		
 		for my $id (@{$ti{$n}->ops}){
 			$did_apply++ 
@@ -3207,12 +3300,12 @@ sub retrieve_state {
 
 		}
 	} @tracks_data;
-	#print "\n---\n", $tracker->dump;  
+
+	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
 		(map{ ref $_, $/ } ::Track::all()), $/;
-
 
 
 	# restore Alsa mixer settings
@@ -3410,6 +3503,8 @@ sub command_process {
 		} elsif ( lc $bunchy eq 'rec' ){
 			$debug and print "special bunch: rec\n";
 			@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
+		} elsif ( my $group = $::Group::by_name{$bunchy}){
+			@tracks = $group->tracks;
 		} elsif ( lc $bunchy eq 'mon' ){
 			$debug and print "special bunch: mon\n";
 			@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
@@ -3494,6 +3589,7 @@ sub load_keywords {
 push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
 push @keywords, keys %iam_cmd;
 push @keywords, keys %effect_j;
+push @keywords, "Audio::Ecasound::Multitrack::";
 }
 
 sub complete {
@@ -3813,11 +3909,11 @@ sub status_snapshot {
 	# engine
 	
 	my %snapshot = ( project 		=> 	$project_name,
-					 global_version =>  $tracker->version,
+					 global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out->status,
-#					 global_rw      =>  $tracker->rw,
+#					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
@@ -3828,8 +3924,8 @@ sub status_snapshot {
 				rec_status 		=> $_->rec_status,
 				channel_count 	=> $_->ch_count,
 				current_version => $_->current_version,
-				send 			=> $_->send,
-				source 			=> $_->source,
+				send 			=> $_->send_id,
+				source 			=> $_->source_id,
 				shift			=> $_->playat,
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
@@ -3846,5 +3942,93 @@ sub set_region {
 	$::this_track->set(region_end => $end);
 	::Text::show_region();
 }
+
+sub add_user_bus {
+	my ($name, $type, $id) = @_;
+	if ($::Group::by_name{$name} or $tn{$name}){
+		say qq(group, bus, or track "$name" already exists. Skipping."), return;
+	}
+	::UserBus->new( 
+		name => $name, 
+		groups => [$name],
+		rules => [qw(rec_setup mon_setup user_bus_mix_setup)],
+		destination_type => $type // 'loop',
+		destination_id	 => $id // $name,
+		)
+	or carp("can't create bus!\n"), return;
+	::Group->new( name => $name, rw => 'REC');
+	# create mix track
 	
+	::add_track($name, source_type => 'loop', source_id => "loop,$name");
+	
+	
+}
+	
+sub add_monitor_bus {
+
+	my ($name, $dest_id, $bus_type) = @_;
+	my $dest_type = dest_type( $dest_id );
+
+	# dest_type: soundcard | jack_client | loop
+	
+	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
+
+	#warn("$name: already taken\n"), return if map{$_->name eq $name } or 
+	if ($::UserBus::by_name{$name}){
+		say qq(monitor bus "$name" already exists. Updating with new tracks.");
+
+	} else {
+	::UserBus->new( 
+		name => $name, 
+		groups => [$name],
+		rules => ($bus_type eq 'cooked' 
+			?  [qw(monitor_bus_cooked_setup monitor_bus_out )]
+			:  [qw(monitor_bus_rec_setup monitor_bus_mon_setup monitor_bus_out)],
+		destination_type => $dest_type,
+		destination_id	 => $dest_id,
+		
+		),
+	) or carp("can't create bus!\n"), return;
+	::Group->new( name => $name, rw => 'REC');
+	}
+
+	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
+							rw => 'MON',
+							target => $_,
+							group  => $name,
+							source_type => undef,
+							source_id => undef,
+							send_type => $dest_type, 
+							send_id => $dest_id,
+						)
+   } $main->tracks;
+		
+	# create group
+	# create tracks, copies of all 
+	# create rule
+	#
+	# save/restore could work like this:
+	# - save bus info
+	# - recreate bus 
+
+	
+}
+
+sub dest_type { 
+	my $dest = shift;
+	if ($dest !~ /\D/)        { 'soundcard' } # digits only
+	elsif ($dest =~ /^loop,/) { 'loop' }
+	elsif ($dest){  # any string 
+		carp( "@{$dest}$dest: jack_client doesn't exist.\n") unless jack_client($dest);
+		'jack_client' ; }
+	else { undef }
+}
+	
+sub update_monitor_bus {
+	my $name = shift;
+		add_monitor_bus( $name, 
+						 $::UserBus::by_name{$name}->destination_id),
+						 "dummy",
+}
+
 ### end

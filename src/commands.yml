@@ -126,6 +126,12 @@ main_on:
 add_track:
   type: track
   short: add new
+  what: create a new track
+  example: add_track clarinet group woodwinds
+  parameters: <s_name> [ <s_key1> <s_val1> <s_key2> <s_val2>... ]
+add_tracks:
+  type: track
+  short: add new
   what: create one or more new tracks
   example: add_track sax violin tuba
   parameters: <s_name1> [ <s_name2>... ]
@@ -135,6 +141,11 @@ link_track:
   what: create a read-only track that uses .WAV files from another track. 
   parameters: <s_name> <s_target> [ <s_project> ]
   example: link_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
+slave_track:
+  type: track:
+  short: slave
+  what: create a read-only track that gets most of its settings from an existing track, used for instrument monitor buses
+  parameters: name target
 import_audio:
   type: track
   short: import
@@ -158,16 +169,21 @@ off:
   short: z
   what: set current track to OFF (exclude from chain setup)
   parameters: none
+rec_defeat:
+  type: track
+  short: rd
+  what: toggle rec-defeat
+  parameters: none
 source:
   type: track
   what: set track source
   short: src r
-  parameters: <s_jack_client_name> | <i_soundcard_channel>
+  parameters: <i_soundcard_channel> | <s_jack_client_name> # |  <s_loop_id>
 send:
   type: track
   what: set auxilary track destination
   short: out aux m
-  parameters: <s_jack_client_name> | <i_soundcard_channel> (3 or above)
+  parameters: <i_soundcard_channel> (3 or above) | <s_jack_client_name>#  |  <s_loop_id>
 stereo:
   type: track
   what: record two channels for current track
@@ -520,6 +536,38 @@ list_history:
   short: lh
   what: list command history
   parameters: none
+add_monitor_bus_cooked:
+  type: bus
+  short: ambc
+  what: add a monitoring bus that copies all user tracks' processed signals
+  parameters: <s_name> <destination>
+add_monitor_bus_raw:
+  type: bus
+  short: ambr
+  what: add a monitoring bus that copies all user tracks' raw signals
+  parameters: <s_name> <destination> 
+add_user_bus:
+  type: bus
+  short: aub
+  what: add a bus with arbitrary tracks and destination
+update_monitor_bus:
+  type: bus
+  short: umb
+  what: include tracks added since monitor bus was created
+set_bus:
+  type: bus
+  short: sb
+  what: set bus parameters
+add_slave_track:
+  type: track
+  short: ast
+  what: add a slave track to an existing user bus
+  parameters: <s_bus_name> <s_target> 
+remove_bus:
+  type: bus
+  short: rmb
+  what: remove a bus
+  parameters: <s_bus_name>
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

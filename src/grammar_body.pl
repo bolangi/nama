@@ -11,6 +11,7 @@ dd: /\d+/
 name: /[\w:]+\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
+name4: /\w+/
 markname: /\w+/ { 
 	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
@@ -58,10 +59,12 @@ to_start: _to_start end { ::to_start(); 1 }
 to_end: _to_end end { ::to_end(); 1 }
 add_track: _add_track name2(s) end {
 	::add_track(@{$item{'name2(s)'}}); 1}
+add_tracks: _add_tracks name2(s) end {
+	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
-dump_group: _dump_group end { ::pager($::tracker->dump); 1}
+dump_group: _dump_group end { ::pager($::main->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
 remove_track: _remove_track end { 
 	$::this_track->remove; 
@@ -173,10 +176,10 @@ master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
 exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
-source: _source name { $::this_track->set_source( $item{name} ); 1 }
+source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
-	my $object = ::Track::input_object( $source );
+	my $object = $::this_track->input_object;
 	if ( $source ) { 
 		print $::this_track->name, ": input from $object.\n";
 	} else {
@@ -200,6 +203,11 @@ mono: _mono {
 off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
+rec_defeat: _rec_defeat end { 
+	$::this_track->set(rec_defeat => !  $::this_track->rec_defeat);
+	print $::this_track->name, ": WAV record ",
+		($::this_track->rec_defeat ? "disabled" : "enabled"), $/;
+}
 
 set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
 
@@ -370,11 +378,11 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
 group_version: _group_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
-	print $::tracker->version, "\n" ; 1}
+	print $::main->version, "\n" ; 1}
 group_version: _group_version dd end { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
-	$::tracker->set( version => $n ); 1}
+	$::main->set( version => $n ); 1}
 bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
@@ -392,8 +400,8 @@ doodle: _doodle { ::doodle(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { 
-	my $old_group_status = $::tracker->rw;
-	$::tracker->set(rw => 'MON');
+	my $old_group_status = $::main->rw;
+	$::main->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
 	print "delete WAV file $wav? [n] ";
 	my $reply = <STDIN>;
@@ -402,7 +410,7 @@ destroy_current_wav: _destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
 	}
-	$::tracker->set(rw => $old_group_status);
+	$::main->set(rw => $old_group_status);
 	1;
 }
 memoize: _memoize { 
@@ -435,3 +443,45 @@ main_on: _main_on end {
 	$::main_out->set(status => 1);
 1;
 } 
+add_monitor_bus_cooked: _add_monitor_bus_cooked bus_name destination {
+	::add_monitor_bus( $item{bus_name}, $item{destination}, 'cooked' );
+	1;
+
+}
+add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination end {
+	::add_monitor_bus( $item{bus_name}, $item{destination}, 'raw' );
+	1;
+}
+add_user_bus: _add_user_bus bus_name destination(?) end { 
+	my $dest_id = $item{'destination(?)'}->[0];
+	my $dest_type = $dest_id ?  ::dest_type($dest_id) : undef;
+	::add_user_bus( $item{bus_name}, $dest_type, $dest_id); 1
+}
+
+slave_track: _slave_track bus_name target end {
+	::add_slave_track( $item{bus_name}, $item{target} ); 1; } bus_name: /[A-Z]\w+/
+destination: /\d+/ | /loop,\w+/ | name2
+# digits: soundcard channel
+# loop,identifier: loop device
+# name2: track name
+
+remove_bus: _remove_bus bus_name end {
+	foreach my $i ( 0..(scalar @::UserBus::buses - 1) ){
+ 		if( $::UserBus::buses[$i]->name eq $item{bus_name} ){
+ 			print "removing bus: $item{bus_name}\n";
+ 			splice @::UserBus::buses, $i, 1;
+			$::tn{$item{bus_name}}->remove_track;
+ 			map{ $::tn{$_}->remove } 
+ 				grep{ (ref $::tn{$_}) =~ /SlaveTrack/ } 
+ 				$::Group::by_name{$item{bus_name}}->tracks;
+ 			last;
+ 		}
+  	}
+	1;
+ 
+}
+update_monitor_bus: _update_monitor_bus bus_name end {
+ 	::update_monitor_bus( $item{bus_name} );
+ 	1;
+}
+	

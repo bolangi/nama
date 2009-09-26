@@ -8,7 +8,6 @@
 # variables and subs that are imported.
 
 package ::;
-use 5.008;
 use feature ":5.10";
 use Carp;
 use Cwd;
@@ -449,7 +448,7 @@ for an audio processing run.
 
 Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF status.
-The Tracker group, which includes all user tracks, also has
+The Main group, which includes all user tracks, also has
 REC, MON and OFF settings. These provides a convenient way
 to control the behavior of all user tracks.
 
@@ -474,7 +473,7 @@ chain setup. (This setting is distinct from the action of
 the C<mute> command, which sets the volume of the track to
 zero.)
 
-All user tracks belong to the Tracker group, which has a
+All user tracks belong to the Main group, which has a
 group REC/MON/OFF setting and a default version setting for
 the entire group.
  
@@ -490,7 +489,7 @@ The group OFF setting (text command B<group_off>)
 excludes all user tracks from the chain setup, and is
 typically used when playing back mixdown tracks.  The
 B<mixplay> command sets the Mixdown track 
-to MON and the Tracker group to OFF.
+to MON and the Main group to OFF.
 
 The Master bus has only MON/OFF status. Setting REC status
 for the Mixdown bus has the same effect as issuing the
@@ -513,26 +512,49 @@ separate projects, then assemble them using
 C<link_track> to pull the Mixdown tracks
 into a single project for mastering.
 
+=head2 GROUPS
+
+Track groups are used internally. The have a global
+REC/MON/OFF setting that influences the rec-status
+of individual tracks. 
+
+When the group is set to OFF, all tracks are OFF. When the
+group is set to MON, track REC settings are forced to MON.
+When the group is set to REC, tracks can be any of REC, MON
+or OFF.
+
+=head2 BUNCHES
+
+A bunch is just a list of track names. Bunch names are used
+with C<for> to apply one or more commands to to several
+tracks at once. A group name can also be treated as a bunch
+name.
+
+=head2 BUSES
+
+Nama uses buses internally, and provides two kinds of
+user-defined buses. 
+
+B<Monitor buses> are intended as instrument monitors.
+Essentially they allow each musician to have her own mixer
+to control audible signal levels of other musicians. 
+They can route either raw or 'cooked' (i.e. effects
+processed) signals.  
+
+A B<user bus> is a sub bus that feeds through
+an identically named track into the mixer.
+
+	add_user_bus Strings
+	add_tracks violin cello bass
+	for violin cello bass; set group Strings
+	Strings vol -10  # adjust bus output volume
+
+
 =head1 ROUTING
 
 Nama identifies tracks by both a name and a number. The
 track number is used to identify corresponding Ecasound
 signal-processing chains.
-
-=head2 Raw, cooked and mixed signals
-
-Nama's signal flow is organized at three levels: raw, cooked
-and mixed. 
-
-"Raw" signals are the inputs to user tracks. Raw signals can
-come from the soundcard, a WAV file, or a JACK client.
-
-"Cooked" signals are the output of user tracks after volume,
-pan and effects processing.
-
-The "mixed" signal is the combined outputs of all user
-tracks. It is delivered to the Master fader, and to the
-Mixdown WAV file during mixdown.
 
 =head2 Loop devices
 
@@ -553,12 +575,12 @@ We will divide the signal flow into track and mixer
 sections.  Parentheses indicate chain identifiers or the
 corresponding track name.
 
-All "cooked" signals (i.e. the outputs of each
-user track) terminate at loop,111.
+The stereo outputs of each
+user track terminate at loop,mix.
 
 =head3 Track, REC status
 
-    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,111
+    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,mix
       /JACK client   |
                      +---(R3)---> sax_1.wav
 
@@ -570,7 +592,7 @@ modes.
 
 =head3 Track, MON status
 
-    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,111
+    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,mix
 
 =head3 Mixer, with mixdown enabled
 
@@ -580,17 +602,17 @@ which can host additional effects. The Mixdown track
 can also host effects, however these should be used
 during playback only.
 
-    loop,111 --(MixLink)---> loop,222 --(1/Master)---> Sound device
+    loop,mix --(MixLink)---> loop,output --(1/Master)---> Sound device
                                  |
                                  +------(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(1/Master)-> loop,222 -> Sound device
+    loop,mix --(1/Master)-> loop,output -> Sound device
 								  |
 								  +->(2/Mixdown)--> Mixdown_1.wav
 
-    loop,111 --(1/Master)-> loop,221---(mastering)-->loop,222  -> Sound device
-													  |
-													  +->(2/Mixdown)--> Mixdown_1.wa
+    loop,mix --(1/Master)-> loop,master-(mastering)->loop,output -> Sound device
+													     |
+													     +->(2/Mixdown)--> Mixdown_1.wa
 
 In Mastering mode, Master outputs to $loop_mastering
 
@@ -618,7 +640,7 @@ tracks with mastering-related effects.
 
                               +---(Low)---+ 
                               |           |
- loop,111 --(Eq)--> loop,120 -+---(Mid)---+ loop,130 --(Boost)--> loop,222
+ loop,mix --(Eq)--> loop,120 -+---(Mid)---+ loop,130 --(Boost)--> loop,222
                               |           |
                               +---(High)--+ 
 

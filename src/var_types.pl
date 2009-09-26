@@ -18,7 +18,7 @@
 						$mix_to_disk_format
 						$raw_to_disk_format
 						$mixer_out_format
-						$playback_device
+						$alsa_playback_device
 						$capture_device	
 						$project_root 	
 						$use_group_numbering
@@ -50,6 +50,7 @@
 						%old_vol		
 						$this_op
 						@tracks_data
+						@user_bus_data
 						@groups_data
 						@marks_data
 						$loop_enable
@@ -102,5 +103,4 @@
 						%pre_output   
 						%inputs
 						%outputs      );
-
 

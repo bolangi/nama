@@ -47,12 +47,12 @@ sub show_region {
 
 sub show_status {
 	my @fields;
-	push @fields, $tracker->rw eq 'REC' 
+	push @fields, $main->rw eq 'REC' 
 					? "live input allowed" 
 					: "live input disabled";
 	push @fields, "record" if ::really_recording();
 	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
-		map{ $tn{$_} } $tracker->tracks, q(Mixdown);
+		map{ $tn{$_} } $main->tracks, q(Mixdown);
 	push @fields, "mixdown" 
 		if $tn{Mixdown}->rec_status eq 'REC' and $mix_down->status;
 	push @fields, "doodle" if $preview eq 'doodle';
@@ -183,7 +183,7 @@ Track Name      Ver. Setting  Status   Source           Send        Vol  Pan
 TOP
 
 my $format_picture = <<PICTURE;
-@>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> 
+@>>   @<<<<<<<<< @>    @<<    @|||| @||||||||||||| @||||||||||||||  @>>  @>> 
 PICTURE
 
 sub show_tracks {
@@ -197,7 +197,7 @@ sub show_tracks {
 			(ref $_) =~ /MasteringTrack/ 
 					? placeholder() 
 					: lc $_->rw,
-            $_->rec_status,
+            $_->rec_status_display,
             $_->name =~ /Master|Mixdown/ 
 					? placeholder() 
 					: placeholder($_->source_status),
@@ -225,8 +225,8 @@ sub show_tracks {
 sub show_tracks_extra_info {
 
 	my $string;
-	$string .= $/. "Global version setting: ".  $::tracker->version. $/
-		if $::tracker->version;
+	$string .= $/. "Global version setting: ".  $::main->version. $/
+		if $::main->version;
 	$string .=  $/. ::Text::show_status();
 	$string .=  $/;	
 	$string;
@@ -494,13 +494,13 @@ sub t_add_effect {
 }
 sub group_rec { 
 	print "Setting group REC-enable. You may record user tracks.\n";
-	$tracker->set( rw => 'REC'); }
+	$main->set( rw => 'REC'); }
 sub group_mon { 
 	print "Setting group MON mode. No recording on user tracks.\n";
-	$tracker->set( rw => 'MON');}
+	$main->set( rw => 'MON');}
 sub group_off {
 	print "Setting group OFF mode. All user tracks disabled.\n";
-	$tracker->set(rw => 'OFF'); } 
+	$main->set(rw => 'OFF'); } 
 
 sub mixdown {
 	print "Enabling mixdown to file.\n";
@@ -513,7 +513,7 @@ sub mixdown {
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$mixdown_track->set(rw => 'MON');
-	$tracker->set(rw => 'OFF');
+	$main->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'OFF');
 	$ecasound_globals_ecs = $ecasound_globals;
 }
@@ -521,7 +521,7 @@ sub mixoff {
 	print "Leaving mixdown mode.\n";
 	$mixdown_track->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON');
-	$tracker->set(rw => 'MON')}
+	$main->set(rw => 'MON')}
 	$ecasound_globals_ecs = $ecasound_globals;
 
 sub bunch {
