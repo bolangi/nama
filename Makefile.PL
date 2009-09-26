@@ -16,6 +16,7 @@ requires
 		Data::YAML => 0,
 		Event => 0,
 		File::Find::Rule => 0,
+		File::Path => 0,
 		File::Spec::Link => 0,
 		Storable => 0,
 		Getopt::Std => 0,
