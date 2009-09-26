@@ -510,6 +510,44 @@ separate projects, then assemble them using
 C<link_track> to pull the Mixdown tracks
 into a single project for mastering.
 
+=head2 GROUPS
+
+Track groups are used internally. The have a global
+REC/MON/OFF setting that influences the rec-status
+of individual tracks. 
+
+When the group is set to OFF, all tracks are OFF. When the
+group is set to MON, track REC settings are forced to MON.
+When the group is set to REC, tracks can be any of REC, MON
+or OFF.
+
+=head2 BUNCHES
+
+A bunch is just a list of track names. Bunch names are used
+with C<for> to apply one or more commands to to several
+tracks at once. A group name can also be treated as a bunch
+name.
+
+=head2 BUSES
+
+Nama uses buses internally, and provides two kinds of
+user-defined buses. 
+
+B<Monitor buses> are intended as instrument monitors.
+Essentially they allow each musician to have her own mixer
+to control audible signal levels of other musicians. 
+They can route either raw or 'cooked' (i.e. effects
+processed) signals.  
+
+A B<user bus> is a sub bus that feeds through
+an identically named track into the mixer.
+
+	add_user_bus Strings
+	add_tracks violin cello bass
+	for violin cello bass; set group Strings
+	Strings vol -10  # adjust bus output volume
+
+
 =head1 ROUTING
 
 Nama identifies tracks by both a name and a number. The
@@ -562,17 +600,17 @@ which can host additional effects. The Mixdown track
 can also host effects, however these should be used
 during playback only.
 
-    loop,mix --(MixLink)---> loop,222 --(1/Master)---> Sound device
+    loop,mix --(MixLink)---> loop,output --(1/Master)---> Sound device
                                  |
                                  +------(2/Mixdown)--> Mixdown_1.wav
 
-    loop,mix --(1/Master)-> loop,222 -> Sound device
+    loop,mix --(1/Master)-> loop,output -> Sound device
 								  |
 								  +->(2/Mixdown)--> Mixdown_1.wav
 
-    loop,mix --(1/Master)-> loop,221---(mastering)-->loop,222  -> Sound device
-													  |
-													  +->(2/Mixdown)--> Mixdown_1.wa
+    loop,mix --(1/Master)-> loop,master-(mastering)->loop,output -> Sound device
+													     |
+													     +->(2/Mixdown)--> Mixdown_1.wa
 
 In Mastering mode, Master outputs to $loop_mastering
 
