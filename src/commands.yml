@@ -556,7 +556,7 @@ update_monitor_bus:
   what: include tracks added since monitor bus was created
 set_bus:
   type: bus
-  short: smb
+  short: sb
   what: set bus parameters
 add_slave_track:
   type: track
@@ -565,7 +565,7 @@ add_slave_track:
   parameters: <s_bus_name> <s_target> 
 remove_bus:
   type: bus
-  short: rb
+  short: rmb
   what: remove a bus
   parameters: <s_bus_name>
 # midi_inputs:

@@ -470,6 +470,7 @@ remove_bus: _remove_bus bus_name end {
  		if( $::UserBus::buses[$i]->name eq $item{bus_name} ){
  			print "removing bus: $item{bus_name}\n";
  			splice @::UserBus::buses, $i, 1;
+			$::tn{$item{bus_name}}->remove_track;
  			map{ $::tn{$_}->remove } 
  				grep{ (ref $::tn{$_}) =~ /SlaveTrack/ } 
  				$::Group::by_name{$item{bus_name}}->tracks;

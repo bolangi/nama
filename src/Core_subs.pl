@@ -3477,6 +3477,8 @@ sub command_process {
 		} elsif ( lc $bunchy eq 'rec' ){
 			$debug and print "special bunch: rec\n";
 			@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
+		} elsif ( my $group = $::Group::by_name{$bunchy}){
+			@tracks = $group->tracks;
 		} elsif ( lc $bunchy eq 'mon' ){
 			$debug and print "special bunch: mon\n";
 			@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
