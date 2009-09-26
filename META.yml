@@ -14,7 +14,6 @@ no_index:
     - inc
     - t
 requires:
-  autodie: 0
   Audio::Ecasound: 0
   Carp: 0
   Cwd: 0
@@ -32,5 +31,4 @@ requires:
   Term::ReadLine::Gnu: 0
   Text::Format: 0
   Time::HiRes: 0
-  perl: 5.8.0
 version: 0.9974
