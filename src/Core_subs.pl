@@ -846,30 +846,6 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 		
 	);
-=comment
-    $user_bus_rec_setup = ::Rule->new(
-
-		name			=>	'user_bus_rec_setup', 
-		chain_id		=>  sub{ $_[0]->n },   
-		target			=>	'REC',
-		input_type		=> $source_input->type,
-		input_object	=> $source_input->object,
-		output_type		=>  'loop',
-		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-		post_input			=>	sub{ my $track = shift;
-										$track->rec_route .
-										$track->mono_to_stereo 
-										},
-		condition 		=> sub { 
-
-			my $track = shift; 
-			return "satisfied" 
-				unless ! defined $inputs{loop}->{"loop," . $track->n}; 
-		},
-		status			=>  1,
-	);
-=cut
-
 
 }
 sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
