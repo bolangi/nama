@@ -36,7 +36,7 @@ no warnings qw(uninitialized syntax);
 
 BEGIN{ 
 
-our $VERSION = '0.9974';
+our $VERSION = '0.9980';
 
 [% qx(cat ./banner.pl) %]
 

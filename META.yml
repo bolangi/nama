@@ -31,4 +31,5 @@ requires:
   Term::ReadLine::Gnu: 0
   Text::Format: 0
   Time::HiRes: 0
-version: 0.9974
+  perl: 5.10.0
+version: 0.9980

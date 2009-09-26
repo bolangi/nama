@@ -740,7 +740,8 @@ sub get_length {
 	#carp "my call chain\n";
 	my $path = shift;
 	package ::;
-	$::e = Audio::Ecasound->new;
+	
+	eval_iam('cs-disconnect');
 	#print "path: $path\n";
 	eval_iam('cs-add gl');
 	#print eval_iam('cs-selected');
@@ -753,7 +754,7 @@ sub get_length {
 	eval_iam('ai-select '. $path);
 	#print eval_iam('ai-selected');
 	my $length = eval_iam('ai-get-length');
-	$::e = Audio::Ecasound->new;
+	eval_iam('cs-disconnect');
 	#print "length: $length\n";
 	$length;
 }
