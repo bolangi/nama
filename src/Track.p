@@ -230,6 +230,12 @@ sub rec_status {
 	}
 }
 
+sub rec_status_display {
+	my $track = shift;
+	my $status = $track->rec_status;
+	$track->rec_defeat ? "[$status]" : $status;
+}
+
 sub maybe_monitor {
 	my $monitor_version = shift;
 

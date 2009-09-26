@@ -30,7 +30,7 @@ sub new {
 		
 sub apply {
 	
-	local $debug = 1;
+	#local $debug = 1;
 	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);

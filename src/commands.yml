@@ -169,6 +169,11 @@ off:
   short: z
   what: set current track to OFF (exclude from chain setup)
   parameters: none
+rec_defeat:
+  type: track
+  short: rd
+  what: toggle rec-defeat
+  parameters: none
 source:
   type: track
   what: set track source

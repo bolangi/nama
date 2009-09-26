@@ -656,6 +656,7 @@ sub initialize_rules {
 			join " ", $track->full_path, $format
 		},
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
+		condition		=> sub {! $_[0]->rec_defeat },
 		status		=>  1,
 	);
 
@@ -1303,8 +1304,8 @@ sub generate_setup {
 		map { $_->apply() } ::UserBus::all();
 
 
-		#map{ eliminate_loops1($_) } all_chains();
-		#eliminate_loops2() unless $mastering_mode;
+		map{ eliminate_loops1($_) } all_chains();
+		eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
 

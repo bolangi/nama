@@ -183,7 +183,7 @@ Track Name      Ver. Setting  Status   Source           Send        Vol  Pan
 TOP
 
 my $format_picture = <<PICTURE;
-@>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> 
+@>>   @<<<<<<<<< @>    @<<    @|||| @||||||||||||| @||||||||||||||  @>>  @>> 
 PICTURE
 
 sub show_tracks {
@@ -197,7 +197,7 @@ sub show_tracks {
 			(ref $_) =~ /MasteringTrack/ 
 					? placeholder() 
 					: lc $_->rw,
-            $_->rec_status,
+            $_->rec_status_display,
             $_->name =~ /Master|Mixdown/ 
 					? placeholder() 
 					: placeholder($_->source_status),

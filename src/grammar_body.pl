@@ -203,6 +203,11 @@ mono: _mono {
 off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
+rec_defeat: _rec_defeat end { 
+	$::this_track->set(rec_defeat => !  $::this_track->rec_defeat);
+	print $::this_track->name, ": WAV record ",
+		($::this_track->rec_defeat ? "disabled" : "enabled"), $/;
+}
 
 set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
 
