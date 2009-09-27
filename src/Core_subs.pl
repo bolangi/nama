@@ -1069,8 +1069,7 @@ sub add_track {
 	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-	my $group = $::Group::by_name{$track->group}; # $main, shurely
-	#command_process('for mon; mon') if $preview;
+	my $group = $::Group::by_name{$track->group}; 
 	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
 
