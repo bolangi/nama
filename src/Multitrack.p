@@ -33,9 +33,10 @@ use strict;
 use warnings;
 no warnings qw(uninitialized syntax);
 
+use vars qw($VERSION);
 BEGIN{ 
 
-our $VERSION = '0.9974';
+$VERSION = '0.9974';
 
 [% qx(cat ./banner.pl) %]
 

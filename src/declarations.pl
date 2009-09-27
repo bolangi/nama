@@ -408,6 +408,7 @@ our (
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
+	$saved_version, # copy of $VERSION when settings saved
 
 
 );

@@ -59,6 +59,7 @@
 						%bunch
 						$mastering_mode
 						@command_history
+						$saved_version
 						);
 					 
 # used for effects_cache 

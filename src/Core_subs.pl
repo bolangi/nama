@@ -3094,6 +3094,7 @@ sub round {
 
 sub save_state {
 	$debug2 and print "&save_state\n";
+	$saved_version = $VERSION;
 
 	# first save palette to project_dir/palette.yml
 	
@@ -3196,7 +3197,40 @@ sub restore_state {
 	
 	#  destroy and recreate all groups
 
+
 	::Group::initialize();	
+
+	# change group name Tracker to Main (backwards compatibility)
+	
+	if (! $saved_version ){
+	
+		map{ $_->{name} = 'Main'} grep{ $_->{name} eq 'Tracker' } @groups_data;
+
+		# update track fields (backwards compability)
+		
+		for (@tracks_data){
+			if( $_->{source_select} eq 'soundcard'){
+				$_->{source_type} = 'soundcard' ;
+				$_->{source_id} = $_->{ch_r}
+			}
+			elsif( $_->{source_select} eq 'jack'){
+				$_->{source_type} = 'jack_client' ;
+				$_->{source_id} = $_->{jack_source}
+			}
+			if( $_->{send_select} eq 'soundcard'){
+				$_->{send_type} = 'soundcard' ;
+				$_->{send_id} = $_->{ch_m}
+			}
+			elsif( $_->{send_select} eq 'jack'){
+				$_->{send_type} = 'jack_client' ;
+				$_->{send_id} = $_->{jack_send}
+			}
+			my $t = $_;
+			map{ delete $t->{$_} } 
+				qw(ch_r ch_m source_select send_select jack_source jack_send);
+		}
+	}
+		
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses, directly, skipping constructor 
