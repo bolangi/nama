@@ -36,11 +36,7 @@ no warnings qw(uninitialized syntax);
 use vars qw($VERSION);
 BEGIN{ 
 
-<<<<<<< HEAD:src/Multitrack.p
-our $VERSION = '0.9980';
-=======
-$VERSION = '0.9974';
->>>>>>> master:src/Multitrack.p
+$VERSION = '0.9980';
 
 [% qx(cat ./banner.pl) %]
 
