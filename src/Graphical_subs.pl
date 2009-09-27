@@ -601,7 +601,7 @@ sub track_gui {
 			-command => sub { 
 				return if eval_iam("engine-status") eq 'running';
 			#	$ti{$n}->set(rw => 'REC');
-				$ti{$n}->set(ch_r  => $v);
+				$ti{$n}->source($v);
 				refresh_track($n) }
 			)
 	}

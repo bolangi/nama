@@ -8,7 +8,7 @@
 # variables and subs that are imported.
 
 package ::;
-use "5.10.0";
+use 5.10.0;
 use feature ":5.10";
 use Carp;
 use Cwd;
