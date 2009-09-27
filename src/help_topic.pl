@@ -254,15 +254,16 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   add_monitor_bus_raw, ambr    - copy raw track signals to external monitor 
-   add_monitor_bus_cooked, ambc - copy processed signals to external monitor 
-   update_monitor_bus, umb      - refresh monitor bus track list
-   remove_bus, rb               - remove a bus
-   add_user_bus, aub            - create a sub-bus feeding a regular user track
-                                  of the same name
-                                  example: add_user_bus Strings 
-                                           add_tracks violin cello bass
-                                           for cello violin bass; set group Strings
+   add_send_bus_raw, asbr     - create bus and slave tracks for 
+                                sending pre-fader track signals
+   add_send_bus_cooked, asbc  - as above, for post-fader signals
+   update_send_bus, usb       - refresh send bus track list
+   remove_bus, rb             - remove a bus
+   add_sub_bus, asub          - create a sub-bus feeding a regular user track
+                                of the same name
+                                example: add_sub_bus Strings 
+                                         add_tracks violin cello bass
+                                         for cello violin bass; set group Strings
 BUS
 
 

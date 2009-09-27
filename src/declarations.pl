@@ -321,7 +321,7 @@ our (
 	%tn, # track by name  (alias %::Track::by_name)
 
 	@tracks_data, # staging for saving
-	@user_bus_data,   # 
+	@sub_bus_data,   # 
 	@groups_data, # 
 	@marks_data, # 
 
@@ -349,11 +349,11 @@ our (
 
 	# rules for instrument monitor buses
 	
-	$monitor_bus_mon_setup,
-	$monitor_bus_rec_setup,
-	$monitor_bus_cooked_setup,
-	$monitor_bus_out,
-	$user_bus_mix_setup,
+	$send_bus_mon_setup,
+	$send_bus_rec_setup,
+	$send_bus_cooked_setup,
+	$send_bus_out,
+	$sub_bus_mix_setup,
 	
 	# rules for mastering
 	
@@ -408,6 +408,7 @@ our (
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
+	$saved_version, # copy of $VERSION when settings saved
 
 
 );

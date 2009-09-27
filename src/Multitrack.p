@@ -33,9 +33,14 @@ use strict;
 use warnings;
 no warnings qw(uninitialized syntax);
 
+use vars qw($VERSION);
 BEGIN{ 
 
+<<<<<<< HEAD:src/Multitrack.p
 our $VERSION = '0.9980';
+=======
+$VERSION = '0.9974';
+>>>>>>> master:src/Multitrack.p
 
 [% qx(cat ./banner.pl) %]
 
@@ -535,16 +540,15 @@ name.
 Nama uses buses internally, and provides two kinds of
 user-defined buses. 
 
-B<Monitor buses> are intended as instrument monitors.
-Essentially they allow each musician to have her own mixer
-to control audible signal levels of other musicians. 
-They can route either raw or 'cooked' (i.e. effects
-processed) signals.  
+B<Send buses> can be used as instrument monitors,
+or to send pre- or post-fader signals from multiple
+user tracks to an external program such as jconv.
 
-A B<user bus> is a sub bus that feeds through
-an identically named track into the mixer.
+B<Sub buses> enable multiple tracks to be routed through a
+single track for vol/pan/effects processing before reaching
+the mixer.
 
-	add_user_bus Strings
+	add_sub_bus Strings
 	add_tracks violin cello bass
 	for violin cello bass; set group Strings
 	Strings vol -10  # adjust bus output volume

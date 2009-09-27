@@ -560,7 +560,6 @@ sub client_status {
 				?  $client 
 				: "[$client]")
 			: undef
-			
 	} else { q() }
 }
 sub source_status {

@@ -536,21 +536,21 @@ list_history:
   short: lh
   what: list command history
   parameters: none
-add_monitor_bus_cooked:
+add_send_bus_cooked:
   type: bus
   short: ambc
   what: add a monitoring bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
-add_monitor_bus_raw:
+add_send_bus_raw:
   type: bus
   short: ambr
   what: add a monitoring bus that copies all user tracks' raw signals
   parameters: <s_name> <destination> 
-add_user_bus:
+add_sub_bus:
   type: bus
   short: aub
   what: add a bus with arbitrary tracks and destination
-update_monitor_bus:
+update_send_bus:
   type: bus
   short: umb
   what: include tracks added since monitor bus was created
