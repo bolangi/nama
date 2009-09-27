@@ -443,19 +443,19 @@ main_on: _main_on end {
 	$::main_out->set(status => 1);
 1;
 } 
-add_monitor_bus_cooked: _add_monitor_bus_cooked bus_name destination {
-	::add_monitor_bus( $item{bus_name}, $item{destination}, 'cooked' );
+add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
+	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
 	1;
 
 }
-add_monitor_bus_raw: _add_monitor_bus_raw bus_name destination end {
-	::add_monitor_bus( $item{bus_name}, $item{destination}, 'raw' );
+add_send_bus_raw: _add_send_bus_raw bus_name destination end {
+	::add_send_bus( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
-add_user_bus: _add_user_bus bus_name destination(?) end { 
+add_sub_bus: _add_sub_bus bus_name destination(?) end { 
 	my $dest_id = $item{'destination(?)'}->[0];
 	my $dest_type = $dest_id ?  ::dest_type($dest_id) : undef;
-	::add_user_bus( $item{bus_name}, $dest_type, $dest_id); 1
+	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
 slave_track: _slave_track bus_name target end {
@@ -480,8 +480,8 @@ remove_bus: _remove_bus bus_name end {
 	1;
  
 }
-update_monitor_bus: _update_monitor_bus bus_name end {
- 	::update_monitor_bus( $item{bus_name} );
+update_send_bus: _update_send_bus bus_name end {
+ 	::update_send_bus( $item{bus_name} );
  	1;
 }
 	

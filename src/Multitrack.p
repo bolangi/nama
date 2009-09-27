@@ -543,7 +543,7 @@ B<Sub buses> enable multiple tracks to be routed through a
 single track for vol/pan/effects processing before reaching
 the mixer.
 
-	add_user_bus Strings
+	add_sub_bus Strings
 	add_tracks violin cello bass
 	for violin cello bass; set group Strings
 	Strings vol -10  # adjust bus output volume

@@ -767,9 +767,9 @@ $aux_send = ::Rule->new(
 	
 	# rules for instrument monitor buses using raw inputs
 	
-	$monitor_bus_mon_setup = ::Rule->new(
+	$send_bus_mon_setup = ::Rule->new(
 		
-		name			=>  'monitor_bus_mon_setup', 
+		name			=>  'send_bus_mon_setup', 
 		target			=>  'all',  # follow target track MON
 		chain_id 		=>	sub{ $_[0]->n },
 		input_type		=>  'file',
@@ -781,9 +781,9 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
-	$monitor_bus_rec_setup = ::Rule->new(
+	$send_bus_rec_setup = ::Rule->new(
 
-		name			=>	'monitor_bus_rec_setup', 
+		name			=>	'send_bus_rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=> 'all',	# follow target track REC 
 		input_type		=> sub{ my $track = shift;
@@ -808,9 +808,9 @@ $aux_send = ::Rule->new(
 	
 	#	  based on aux_send, uses Track 'send' field
 	
-	$monitor_bus_cooked_setup = ::Rule->new(
+	$send_bus_cooked_setup = ::Rule->new(
 		
-		name			=>  'monitor_bus_cooked_setup', 
+		name			=>  'send_bus_cooked_setup', 
 		target			=>  'all',
 		chain_id		=>  sub{ $_[0]->n },   
 		input_type		=>  'loop',
@@ -821,9 +821,9 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
-	$monitor_bus_out = ::Rule->new(
+	$send_bus_out = ::Rule->new(
 
-		name			=>  'monitor_bus_out',
+		name			=>  'send_bus_out',
 		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
 		output_type		=> $send_output->type,
@@ -833,9 +833,9 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 		
 	);
-	$user_bus_mix_setup = ::Rule->new(
+	$sub_bus_mix_setup = ::Rule->new(
 
-		name			=>  'user_bus_mix_setup',
+		name			=>  'sub_bus_mix_setup',
 		chain_id		=>  sub { my $track = shift; "J". $track->n },
 		target			=>  'all',
 		input_type		=>  'loop',
@@ -3130,8 +3130,8 @@ map { push @tracks_data, $_->hashref } ::Track::all();
 
 # print "found ", scalar @tracks_data, "tracks\n";
 
-@user_bus_data = (); # 
-map{ push @user_bus_data, $_->hashref } ::UserBus::all();
+@sub_bus_data = (); # 
+map{ push @sub_bus_data, $_->hashref } ::UserBus::all();
 
 # prepare marks data for storage (new Mark objects)
 
@@ -3235,9 +3235,9 @@ sub restore_state {
 
 	# restore user buses, directly, skipping constructor 
 	
-	map{ bless $_, '::UserBus'} @user_bus_data;
+	map{ bless $_, '::UserBus'} @sub_bus_data;
 	%::UserBus::by_name = ();
-	@::UserBus::buses = @user_bus_data;
+	@::UserBus::buses = @sub_bus_data;
 	map{$::UserBus::by_name{$_->name} = $_  } @::UserBus::buses ;
 	
 	# create user tracks
@@ -3926,7 +3926,7 @@ sub set_region {
 	::Text::show_region();
 }
 
-sub add_user_bus {
+sub add_sub_bus {
 	my ($name, $type, $id) = @_;
 	if ($::Group::by_name{$name} or $tn{$name}){
 		say qq(group, bus, or track "$name" already exists. Skipping."), return;
@@ -3934,7 +3934,7 @@ sub add_user_bus {
 	::UserBus->new( 
 		name => $name, 
 		groups => [$name],
-		rules => [qw(rec_setup mon_setup user_bus_mix_setup)],
+		rules => [qw(rec_setup mon_setup sub_bus_mix_setup)],
 		destination_type => $type // 'loop',
 		destination_id	 => $id // $name,
 		)
@@ -3947,7 +3947,7 @@ sub add_user_bus {
 	
 }
 	
-sub add_monitor_bus {
+sub add_send_bus {
 
 	my ($name, $dest_id, $bus_type) = @_;
 	my $dest_type = dest_type( $dest_id );
@@ -3965,8 +3965,8 @@ sub add_monitor_bus {
 		name => $name, 
 		groups => [$name],
 		rules => ($bus_type eq 'cooked' 
-			?  [qw(monitor_bus_cooked_setup monitor_bus_out )]
-			:  [qw(monitor_bus_rec_setup monitor_bus_mon_setup monitor_bus_out)],
+			?  [qw(send_bus_cooked_setup send_bus_out )]
+			:  [qw(send_bus_rec_setup send_bus_mon_setup send_bus_out)],
 		destination_type => $dest_type,
 		destination_id	 => $dest_id,
 		
@@ -4007,9 +4007,9 @@ sub dest_type {
 	else { undef }
 }
 	
-sub update_monitor_bus {
+sub update_send_bus {
 	my $name = shift;
-		add_monitor_bus( $name, 
+		add_send_bus( $name, 
 						 $::UserBus::by_name{$name}->destination_id),
 						 "dummy",
 }
