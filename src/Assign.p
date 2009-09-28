@@ -6,10 +6,14 @@ use warnings;
 no warnings q(uninitialized);
 use Carp;
 use IO::All;
-use Data::YAML;
-use Data::YAML::Reader;
-use Data::YAML::Writer;
-use Data::Rmap qw(:all);
+# use Data::YAML::Reader; 
+# use Data::YAML::Writer;
+# use Data::Rmap qw(:all);
+
+# bundle local copies for Debian packaging convenience
+use ::Data::YAML::Reader;
+use ::Data::YAML::Writer;
+use ::Data::Rmap qw(:all);
 #use Data::Dump qw(dump);
 use Storable;
 

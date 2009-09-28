@@ -1,9 +1,9 @@
 vim \
-Multitrack.p \
+Nama.p \
 Core_subs.pl \
 Text_methods.pl \
 grammar_body.pl \
-../lib/Audio/Ecasound/Multitrack.pm \
+../lib/Audio/Nama.pm \
 declarations.pl \
 var_types.pl \
 Track.p \

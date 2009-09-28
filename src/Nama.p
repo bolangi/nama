@@ -13,7 +13,7 @@ use feature ":5.10";
 use strict;
 use warnings;
 no warnings qw(uninitialized syntax);
-use autodie qw(:default); 
+use autodie qw(:default);
 use Carp;
 use Cwd;
 use Data::YAML;
@@ -21,7 +21,6 @@ use Event;
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
-use File::Spec::Link;
 use File::Temp;
 use Getopt::Std;
 use IO::All;
@@ -30,10 +29,13 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
-#use Unix::PID::Tiny;
-#my $pid = Unix::PID::Tiny->new();
 
-# use Timer::HiRes; # select
+# use Timer::HiRes; # automatically detected
+
+# bundle local copies for Debian packaging convenience
+use ::File::Spec::Link;
+# use File::Spec::Link;
+
 # use Tk;           # loaded conditionally
 
 use vars qw($VERSION);
@@ -262,7 +264,7 @@ __END__
 
 =head1 NAME
 
-B<Audio::Ecasound::Multitrack> - Perl extensions for multitrack audio processing
+B<Audio::Nama> - Perl extensions for multitrack audio processing
 
 B<Nama> - Lightweight recorder, mixer and mastering system
 
@@ -697,7 +699,7 @@ None by default.
 
 CPAN, for the distribution.
 
-C<cpan Audio::Ecasound::Multitrack>
+C<cpan Audio::Nama>
 
 You will need to install Tk to use the GUI.
 

@@ -1,14 +1,14 @@
 use inc::Module::Install;
 
          # Define metadata
-         name                'Audio-Ecasound-Multitrack';
-		 all_from            'lib/Audio/Ecasound/Multitrack.pm';
+         name                'Audio-Nama';
+		 all_from            'lib/Audio/Nama.pm';
 		 license_from        'README';
 		 install_script      'script/nama'; 
 
          # Specific dependencies
 		
-requires
+		autodie => 0,
 		Carp => 0,
 		Cwd => 0,
 		Data::YAML => 0,
@@ -21,7 +21,7 @@ requires
 		Getopt::Std => 0,
 		IO::All => 0,
 		IO::Socket => 0,
-		Module::Load::Conditional => 0,
+		Module::Load::Conditional => 0, 
 		Parse::RecDescent => 0,
 		Storable => 0,
 		Term::ReadLine => 0,

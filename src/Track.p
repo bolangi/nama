@@ -744,7 +744,6 @@ sub get_length {
 	#carp "my call chain\n";
 	my $path = shift;
 	package ::;
-	
 	eval_iam('cs-disconnect');
 	#print "path: $path\n";
 	eval_iam('cs-add gl');
