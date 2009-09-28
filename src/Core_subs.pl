@@ -3572,7 +3572,7 @@ sub load_keywords {
 push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
 push @keywords, keys %iam_cmd;
 push @keywords, keys %effect_j;
-push @keywords, "Audio::Ecasound::Multitrack::";
+push @keywords, "Audio::Nama::";
 }
 
 sub complete {

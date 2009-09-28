@@ -8,20 +8,19 @@ license: gpl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: 1.4
-name: Audio-Ecasound-Multitrack
+name: Audio-Nama
 no_index:
   directory:
     - inc
     - t
 requires:
-  autodie: 0
-  Audio::Ecasound: 0
   Carp: 0
   Cwd: 0
   Data::Rmap: 0
   Data::YAML: 0
   Event: 0
   File::Find::Rule: 0
+  File::Path: 0
   File::Spec::Link: 0
   Getopt::Std: 0
   IO::All: 0
@@ -32,5 +31,6 @@ requires:
   Term::ReadLine::Gnu: 0
   Text::Format: 0
   Time::HiRes: 0
-  perl: 5.8.0
+  autodie: 0
+  perl: 5.10.0
 version: 0.9974
