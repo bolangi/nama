@@ -290,8 +290,10 @@ sub prepare {
 	}
 	1;	
 }
+{
+my $default_port = 2868; # Ecasound's default
 sub launch_ecasound_server {
-	my $port = shift;
+	my $port = shift // $default_port;
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = "2>&1>/dev/null &";
 	say ("Using existing Ecasound server"), return if qx(ps ax) =~ /\Q$command/;
@@ -300,11 +302,10 @@ sub launch_ecasound_server {
 	sleep 1;
 }
 
-{
 my $debug;
 my $sock; 
 sub init_ecasound_socket {
-	my $port = shift;
+	my $port = shift // $default_port;
 	$sock = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
