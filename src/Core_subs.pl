@@ -127,12 +127,6 @@ sub prepare {
 	$debug2 and print "&prepare\n";
 	
 
-	$ecasound  = $ENV{ECASOUND} || q(ecasound);
-#	$e = Audio::Ecasound->new();
-	launch_ecasound_server();
-	init_ecasound_socket(); 
-	
-	$debug and print "started Ecasound\n";
 
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
@@ -171,9 +165,6 @@ sub prepare {
 		}
 	}
 
-	
-	get_ecasound_iam_keywords();
-
 
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
@@ -182,6 +173,11 @@ sub prepare {
 
 
 	read_config(global_config());  # from .namarc if we have one
+
+	launch_ecasound_server($ecasound_tcp_port);
+	init_ecasound_socket($ecasound_tcp_port); 
+	
+	get_ecasound_iam_keywords();
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
@@ -295,8 +291,7 @@ sub prepare {
 	1;	
 }
 sub launch_ecasound_server {
-	#my $port = shift;
-	my $port = 2869;
+	my $port = shift;
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = "2>&1>/dev/null &";
 	say ("Using existing Ecasound server"), return if qx(ps ax) =~ /\Q$command/;
@@ -309,8 +304,7 @@ sub launch_ecasound_server {
 my $debug;
 my $sock; 
 sub init_ecasound_socket {
-	#my $port = shift;
-	my $port = 2869;
+	my $port = shift;
 	$sock = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 

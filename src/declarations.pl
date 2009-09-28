@@ -35,6 +35,8 @@ our (
 	$ecasound_globals_ecs, # set to one of the following
 	$ecasound_globals,     # .namarc field
 	$ecasound_globals_for_mixdown,  # .namarc field
+	$ecasound_tcp_port,  # for Ecasound NetECI interface
+	$saved_version, # copy of $VERSION saved with settings in State.yml
 
 
 	$default,		# the internal default configuration file, as string
@@ -408,7 +410,5 @@ our (
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
-	$saved_version, # copy of $VERSION saved with settings in State.yml
-	$ecasound_tcp_port,  # for Ecasound NetECI interface
 
 );
