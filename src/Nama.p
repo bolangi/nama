@@ -32,9 +32,7 @@ use Term::ReadLine;
 
 # use Timer::HiRes; # automatically detected
 
-# bundle local copies for Debian packaging convenience
-use ::File::Spec::Link;
-# use File::Spec::Link;
+use File::Spec::Link;
 
 # use Tk;           # loaded conditionally
 

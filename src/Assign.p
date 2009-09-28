@@ -5,16 +5,10 @@ use strict;
 use warnings;
 no warnings q(uninitialized);
 use Carp;
+use Data::YAML::Reader; 
+use Data::YAML::Writer;
+use Data::Rmap qw(:all);
 use IO::All;
-# use Data::YAML::Reader; 
-# use Data::YAML::Writer;
-# use Data::Rmap qw(:all);
-
-# bundle local copies for Debian packaging convenience
-use ::Data::YAML::Reader;
-use ::Data::YAML::Writer;
-use ::Data::Rmap qw(:all);
-#use Data::Dump qw(dump);
 use Storable;
 
 require Exporter;
