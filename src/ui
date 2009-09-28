@@ -2,6 +2,5 @@
 use 5.10.0;
 use warnings;
 use lib "../lib";
-use Audio::Ecasound::Multitrack;
-package Audio::Ecasound::Multitrack;
-mainloop();
+use Audio::Nama;
+Audio::Nama::nama();

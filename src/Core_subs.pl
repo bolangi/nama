@@ -16,7 +16,7 @@ sub select_sleep {
 # 	sleep $sec
 }
 
-sub mainloop { 
+sub nama { 
 	prepare(); 
 	command_process($execute_on_project_load);
 	$ui->install_handlers();
@@ -3201,6 +3201,12 @@ sub restore_state {
 	::Group::initialize();	
 
 	# change group name Tracker to Main (backwards compatibility)
+ 	if ($saved_version < 0.9981){
+ 	
+ 		for (@tracks_data){ 
+ 			$_->{class} =~ s/Audio::Ecasound::Multitrack/Audio::Nama/ 
+ 		}
+ 	}
 	
 	if (! $saved_version ){
 	
