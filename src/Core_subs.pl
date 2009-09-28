@@ -129,8 +129,8 @@ sub prepare {
 
 	$ecasound  = $ENV{ECASOUND} || q(ecasound);
 #	$e = Audio::Ecasound->new();
+	launch_ecasound_server();
 	init_ecasound_socket(); 
-	
 	
 	$debug and print "started Ecasound\n";
 
@@ -294,17 +294,26 @@ sub prepare {
 	}
 	1;	
 }
-
-sub launch_ecasound {
-	
+sub launch_ecasound_server {
+	#my $port = shift;
+	my $port = 2869;
+	my $command = "ecasound -K -C --server --server-tcp-port=$port";
+	my $redirect = "2>&1>/dev/null &";
+	say ("Using existing Ecasound server"), return if qx(ps ax) =~ /\Q$command/;
+	say "Starting Ecasound server";
+ 	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
+	sleep 1;
 }
+
 {
 my $debug;
 my $sock; 
 sub init_ecasound_socket {
+	#my $port = shift;
+	my $port = 2869;
 	$sock = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
-		PeerPort => '2868', 
+		PeerPort => $port, 
 		Proto => 'tcp', 
 	); 
 	die "Could not create socket: $!\n" unless $sock; 
@@ -342,21 +351,6 @@ reply: $reply";
 }
 }
 
-# init_ecasound_socket();
-# print( eval_iam("preset-register"));
-# sub eval_iam{
-# 	#local $debug = 1;
-# 	#$debug2 and print "&eval_iam\n";
-# 	my $command = shift;
-# 	$debug and print "iam command: $command\n";
-# 	my (@result) = $e->eci($command);
-# 	$debug and print "result: @result\n" unless $command =~ /register/;
-# 	my $errmsg = $e->errmsg();
-# 	# $errmsg and carp("IAM WARN: ",$errmsg), 
-# 	# not needed ecasound prints error on STDOUT
-# 	$e->errmsg('');
-# 	"@result";
-# }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift;
 	my $hours = int ($sec / 3600);

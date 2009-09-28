@@ -9,8 +9,11 @@
 
 package ::;
 use 5.10.0;
-use autodie qw(:default); 
 use feature ":5.10";
+use strict;
+use warnings;
+no warnings qw(uninitialized syntax);
+use autodie qw(:default); 
 use Carp;
 use Cwd;
 use Data::YAML;
@@ -27,11 +30,11 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
+#use Unix::PID::Tiny;
+#my $pid = Unix::PID::Tiny->new();
+
 # use Timer::HiRes; # select
 # use Tk;           # loaded conditionally
-use strict;
-use warnings;
-no warnings qw(uninitialized syntax);
 
 use vars qw($VERSION);
 BEGIN{ 

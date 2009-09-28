@@ -74,6 +74,8 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 ecasound_globals_for_mixdown: "-B auto -r -z:mixmode,sum -z:psr "
 
+ecasound_tpc_port: 2869
+
 # WAVs recorded at the same time get the same numeric suffix
 
 use_group_numbering: 1

@@ -408,7 +408,7 @@ our (
 	@mastering_track_names, # reserved for mastering mode
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
-	$saved_version, # copy of $VERSION when settings saved
-
+	$saved_version, # copy of $VERSION saved with settings in State.yml
+	$ecasound_tcp_port,  # for Ecasound NetECI interface
 
 );

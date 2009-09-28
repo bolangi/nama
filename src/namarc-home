@@ -47,6 +47,8 @@ ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
 
 ecasound_globals_for_mixdown: "-B auto -r -z:mixmode,sum "
 
+ecasound_tcp_port: 2869
+
 use_group_numbering: 1
 
 execute_on_project_load: ~
