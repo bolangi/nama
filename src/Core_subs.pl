@@ -786,26 +786,16 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 	$stage2 = ::Rule->new(
+		%$stage1,          # clone $stage1
 		name			=>  'stage2', 
-		target			=>  'all',
-		chain_id 		=>	sub{ $_[0]->n },
-		input_type		=>  'loop',
 		input_object	=>  $loop_crossover,
-		output_type		=>  'loop',
 		output_object	=>  $loop_boost,
-		condition 		=>  sub{ $mastering_mode },
-		status			=>  1,
 	);
 	$stage3 = ::Rule->new(
+		%$stage1,		   # clone $stage1
 		name			=>  'stage3', 
-		target			=>  'all',
-		chain_id 		=>	sub{ $_[0]->n },
-		input_type		=>  'loop',
 		input_object	=>  $loop_boost,
-		output_type		=>  'loop',
 		output_object	=>  $loop_output,
-		condition 		=>  sub{ $mastering_mode },
-		status			=>  1,
 	);
 	
 	# rules for instrument monitor buses using raw inputs
