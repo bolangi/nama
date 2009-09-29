@@ -263,7 +263,7 @@ bus => <<BUS,
                                 of the same name
                                 example: add_sub_bus Strings 
                                          add_tracks violin cello bass
-                                         for cello violin bass; set group Strings
+                                         for cello violin bass; set bus Strings
 BUS
 
 

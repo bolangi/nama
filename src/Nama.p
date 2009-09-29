@@ -542,8 +542,8 @@ the mixer.
 
 	add_sub_bus Strings
 	add_tracks violin cello bass
-	for violin cello bass; set group Strings
-	Strings vol -10  # adjust bus output volume
+	for violin cello bass; set bus Strings
+	Strings vol - 10  # adjust bus output volume
 
 
 =head1 ROUTING
