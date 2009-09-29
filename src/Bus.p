@@ -121,62 +121,6 @@ sub deref_code {
 		$debug and print "scalar value: $value\n"; 
 		$value }
 }
-#$ perl -e 'my $foo = sub{ print "foo: @_" }; my $a = 3; &$foo($a)'
-# foo: 3$ 
-
-package ::MasterBus; # subclass
-our @ISA = '::Bus';
-use ::Object qw(	name
-						groups
-						tracks 
-						rules
-						
-						);
-
-sub apply {
-	
-	my $bus = shift;
-	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
-	map{ my $rule = $_;
-		print "rule: $rule\n";
-		$rule = $::Rule::by_name{$rule};
-		my $track = "dummy";
-			my $key1 = ::Bus::deref_code($rule->input_type);
-			my $key2 = ::Bus::deref_code($rule->input_object) ;
-			my $chain_id = ::Bus::deref_code($rule->chain_id) ;
-			my $rec_status = $track->rec_status;
-			my $condition_met = ::Bus::deref_code($rule->condition);
-
-			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
-			if(	$condition_met and $rule->status and $rule->target =~ /all|none/ )  {
-
-				defined $rule->input_type and
-					push @{ $::inputs{ $key1 }->{ $key2 } }, $chain_id ;
-
-				$key1 = ::Bus::deref_code($rule->output_type);
-				$key2 = ::Bus::deref_code($rule->output_object) ;
-				$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
-
-				defined $rule->output_type and
-					push @{ $::outputs{ $key1 }->{ $key2 } }, $chain_id;
-				# add intermediate processing
-		
-				my ($post_input, $pre_output);
-				$post_input = ::Bus::deref_code($rule->post_input, $track) 
-					if defined $rule->post_input;
-				$pre_output = ::Bus::deref_code($rule->pre_output, $track) 
-					if defined $rule->pre_output;
-				$debug and print "pre_output: $pre_output, post_input: $post_input\n";
-				$::post_input{$chain_id} .= $post_input if defined $post_input;
-				$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
-
-			} 
-			
-		} @{ $bus->rules }; 
-}
-
-
-
 
 
 # ------------  Rule  --------------------
