@@ -673,7 +673,7 @@ sub initialize_rules {
 		
 		name			=>  'mon_setup', 
 		target			=>  'MON',
-		chain_id 		=>	sub{ $_[0]->n },
+		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		output_type		=>  'loop',
@@ -699,7 +699,7 @@ sub initialize_rules {
 			join " ", $track->full_path, $format
 		},
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
-		condition		=> sub {! $_[0]->rec_defeat },
+		condition		=> sub {my $track = shift; ! $track->rec_defeat },
 		status		=>  1,
 	);
 
@@ -3961,6 +3961,7 @@ sub status_snapshot {
 				shift			=> $_->playat,
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
+				group			=> $_->group,
 
 				
 			} unless $_->rec_status eq 'OFF'

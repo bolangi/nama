@@ -61,6 +61,9 @@ add_track: _add_track name2(s) end {
 	::add_track(@{$item{'name2(s)'}}); 1}
 add_tracks: _add_tracks name2(s) end {
 	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
+set_track: _set_track 'bus' bus_name end {
+	$::this_track->set( group => $item{bus_name}); 1
+} 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
