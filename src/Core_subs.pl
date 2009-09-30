@@ -841,9 +841,9 @@ $aux_send = ::Rule->new(
 	
 	#	  based on aux_send, uses Track 'send' field
 	
-	$send_bus_cooked_setup = ::Rule->new(
+	$send_bus_cooked_input = ::Rule->new(
 		
-		name			=>  'send_bus_cooked_setup', 
+		name			=>  'send_bus_cooked_input', 
 		target			=>  'all',
 		chain_id		=>  sub{ $_[0]->n },   
 		input_type		=>  'loop',
@@ -4005,7 +4005,7 @@ sub add_send_bus {
 		name => $name, 
 		groups => [$name],
 		rules => ($bus_type eq 'cooked' 
-			?  [qw(send_bus_cooked_setup send_bus_out )]
+			?  [qw(send_bus_cooked_input send_bus_out )]
 			:  [qw(send_bus_raw_record_input send_bus_raw_monitor_input send_bus_out)],
 		destination_type => $dest_type,
 		destination_id	 => $dest_id,

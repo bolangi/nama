@@ -350,7 +350,7 @@ our (
 	
 	$send_bus_raw_monitor_input,
 	$send_bus_raw_record_input,
-	$send_bus_cooked_setup,
+	$send_bus_cooked_input,
 	$send_bus_out,
 	$sub_bus_mix_setup,
 	
