@@ -504,7 +504,7 @@ sub group_off {
 
 sub mixdown {
 	print "Enabling mixdown to file.\n";
-	$mixdown_track->set(rw => 'REC'); 
+	$tn{Mixdown}->set(rw => 'REC'); 
 	$main_out->set(status => 0);
 	$tn{Master}->set(rw => 'MON');
 	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
@@ -512,14 +512,14 @@ sub mixdown {
 }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
-	$mixdown_track->set(rw => 'MON');
+	$tn{Mixdown}->set(rw => 'MON');
 	$main->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'OFF');
 	$ecasound_globals_ecs = $ecasound_globals;
 }
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
-	$mixdown_track->set(rw => 'OFF');
+	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON');
 	$main->set(rw => 'MON')}
 	$ecasound_globals_ecs = $ecasound_globals;

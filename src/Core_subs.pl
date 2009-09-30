@@ -213,7 +213,7 @@ sub prepare {
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
-		rules  => [ qw(mixdown_playback mix_file mix_ev) ],
+		rules  => [ qw(mixdown_playback mixdown_to_file mix_ev) ],
 	);
 
 	# for metronome or other tracks using 'null' as source
@@ -479,13 +479,13 @@ Loading project "untitled".
 	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
 	if (! $tn{Master}){
 
-		$master_track = ::SimpleTrack->new( 
+		::SimpleTrack->new( 
 			group => 'Master', 
 			name => 'Master',
 			rw => 'MON',); # no dir, we won't record tracks
 
 
-		$mixdown_track = ::Track->new( 
+		 ::Track->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			rw => 'MON'); 
@@ -581,7 +581,7 @@ sub initialize_rules {
 
 	$mix_down = ::Rule->new(
 
-		name			=> 'mix_file', 
+		name			=> 'mixdown_to_file', 
 
 	# we change the track index away from the standard 2
 	# for Mixdown to ensure no effects are applied.
@@ -3702,7 +3702,7 @@ sub automix {
 	
 	$main_out->set(status => 0);
 
-	# turn off mix_file rule
+	# turn off mixdown_to_file rule
 	$mix_down->set(   status => 0);
 
 	# turn on mix_down_ev
@@ -3752,7 +3752,7 @@ sub automix {
 	### turn off 
 	$mix_down_ev->set(status => 0);
 
-	### turn on mix_file
+	### turn on mixdown_to_file
 	$mix_down->set(status => 1);
 
 	### mixdown

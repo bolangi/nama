@@ -301,10 +301,8 @@ our (
 	$main, # main_group
 	$master_bus, 
 	$master, # master_group
-	$master_track,
 	$mixdown_bus,
 	$mixdown,  # group
-	$mixdown_track,
 	$null_bus,
     $null, # group
 	$mastering, # group
