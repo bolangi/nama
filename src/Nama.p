@@ -317,6 +317,14 @@ Save and reload ALSA mixer state using alsactl
 
 Don't load saved state
 
+=item B<-n>
+
+Communicate with engine via NetECI
+
+=item B<-l>
+
+Communicate with engine via libecasoundc (default, if Audio::Ecasound installed)
+
 =back
 
 =head1 CONTROLLING NAMA/ECASOUND
