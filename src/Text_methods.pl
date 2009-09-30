@@ -450,7 +450,7 @@ sub t_insert_effect {
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	$debug and print "ops to remove and re-apply: @ops\n";
-	my $connected = eval_iam q(cs-connected);
+	my $connected = eval_iam('cs-connected');
 	if ( $connected ){  
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}

@@ -131,7 +131,7 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('amcegstrd:f:D', \%opts); 
+	getopts('amcegstrnd:f:D', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
 	# d: set project root dir
@@ -174,8 +174,16 @@ sub prepare {
 
 	read_config(global_config());  # from .namarc if we have one
 
-	launch_ecasound_server($ecasound_tcp_port);
-	init_ecasound_socket($ecasound_tcp_port); 
+	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
+			and ! $opts{n} ){ 
+		say "Using libecasoundc via Audio::Ecasound.";
+		*eval_iam = \&eval_iam_libecasoundc;
+		$e = Audio::Ecasound->new();
+	} else { 
+		launch_ecasound_server($ecasound_tcp_port);
+		init_ecasound_socket($ecasound_tcp_port); 
+		*eval_iam = \&eval_iam_neteci;
+	}
 	
 	get_ecasound_iam_keywords();
 
@@ -317,7 +325,10 @@ sub init_ecasound_socket {
 	); 
 	die "Could not create socket: $!\n" unless $sock; 
 }
-sub eval_iam {
+
+sub eval_iam { } # stub
+
+sub eval_iam_neteci {
 	my $cmd = shift;
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$sock->send("$cmd\r\n"); 
@@ -350,6 +361,19 @@ reply: $reply";
 }
 }
 
+sub eval_iam_libecasoundc{
+	#local $debug = 1;
+	#$debug2 and print "&eval_iam\n";
+	my $command = shift;
+	$debug and print "iam command: $command\n";
+	my (@result) = $e->eci($command);
+	$debug and print "result: @result\n" unless $command =~ /register/;
+	my $errmsg = $e->errmsg();
+	# $errmsg and carp("IAM WARN: ",$errmsg), 
+	# not needed ecasound prints error on STDOUT
+	$e->errmsg('');
+	"@result";
+}
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift;
 	my $hours = int ($sec / 3600);
@@ -1601,14 +1625,14 @@ sub signal_format {
 }
 
 ## transport functions
-
 sub load_ecs {
 		my $project_file = join_path(&project_dir , $chain_setup_file);
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam"cs-remove" if eval_iam"cs-selected";
+		eval_iam("cs-remove") if eval_iam("cs-selected");
 		eval_iam("cs-load ". $project_file);
-		$debug and map{print "$_\n\n"}map{$e->eci($_)} qw(cs es fs st ctrl-status);
+		$debug and map{print "$_\n\n"}map{eval_iam($_)} qw(cs es fs st ctrl-status);
 }
+
 sub arm {
 
 	# now that we have reconfigure_engine(), use is limited to 
@@ -1897,7 +1921,7 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	print "\nstarting at ", colonize(int (eval_iam"getpos")), $/;
+	print "\nstarting at ", colonize(int eval_iam("getpos")), $/;
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
@@ -2062,7 +2086,7 @@ sub to_start {
 sub to_end { 
 	# ten seconds shy of end
 	return if really_recording();
-	my $end = eval_iam(qq(cs-get-length)) - 10 ;  
+	my $end = eval_iam('cs-get-length') - 10 ;  
 	set_position( $end);
 } 
 sub jump {
@@ -2462,7 +2486,7 @@ sub effect_update {
 	# well?
 	
 	#$debug2 and print "&effect_update\n";
-	my $es = eval_iam"engine-status";
+	my $es = eval_iam("engine-status");
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
 
