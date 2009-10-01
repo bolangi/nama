@@ -177,7 +177,8 @@ sub prepare {
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
 		say "Using libecasoundc via Audio::Ecasound.";
-		*eval_iam = \&eval_iam_libecasoundc;
+		{ no warnings qw(redefine);
+		*eval_iam = \&eval_iam_libecasoundc; }
 		$e = Audio::Ecasound->new();
 	} else { 
 		launch_ecasound_server($ecasound_tcp_port);
