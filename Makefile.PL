@@ -7,6 +7,8 @@ use inc::Module::Install;
 		 install_script      'script/nama'; 
 
          # Specific dependencies
+         
+         requires
 		
 		autodie => 0,
 		Carp => 0,

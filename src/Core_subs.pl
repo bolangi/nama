@@ -31,7 +31,7 @@ sub config_vars {
 }
 
 sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Multitrack/;  # HARDCODED
+	shift @_ if ref $_[0] =~ /Nama/;
 	@_;
 }
 
@@ -165,7 +165,6 @@ sub prepare {
 		}
 	}
 
-
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
@@ -200,73 +199,7 @@ sub prepare {
 	first_run();
 	
 	# init our buses
-	
-	$main_bus  = ::Bus->new(
-		name => 'Main_Bus',
-		groups => [qw(Main)],
-		tracks => [],
-		rules  => [ qw( mix_setup 
-						raw_record_input
-						raw_monitor_input 
-						aux_send 
-						rec_file) ],
-	);
-
-	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
-
-	$master_bus  = ::Bus->new(
-		name => 'Master_Bus',
-		rules  => [ qw(mixer_out main_out) ],
-		groups => ['Master'],
-	);
-	$mixdown_bus  = ::Bus->new(
-		name => 'Mixdown_Bus',
-		groups => [qw(Mixdown) ],
-		rules  => [ qw(mixdown_playback mixdown_to_file mix_ev) ],
-	);
-
-	# for metronome or other tracks using 'null' as source
-	
-	$null_bus = ::Bus->new(
-		name => 'Null_Bus',
-		groups => [qw(null) ],
-		rules => [qw(null_setup)],
-	);
-
-	# Mastering chains
-	
-	# for bypass directly to Master
-	#
-	# we may prefer to use ecasound mute/bypass commands
-	# on mastering chains instead of crossfading with this
-	# chain
-	
-	$bypass_bus = ::Bus->new( 
-		name => 'Bypass',
-		rules => [qw(bypass)], # Similar to main_out
-		tracks => ['Bypass']);
-
-	# for EQ track
-
-	$mastering_stage1_bus = ::Bus->new(
-		name => 'Stage1',
-		rules => ['stage1'], # loop_mix to loop_crossover
-		tracks => ['Eq']);
-
-	# for Low/Mid/High tracks
-	
-	$mastering_stage2_bus = ::Bus->new(
-		name => 'Stage2',
-		rules => ['stage2'], # loop_crossover to loop_boost
-		tracks => [qw(Low Mid High)]);
-
-	# for Final track with boost, limiter
-	
-	$mastering_stage3_bus = ::Bus->new(
-		name => 'Stage3',
-		rules => ['stage3'], #loop_boost to loop_output
-		tracks => [qw(Boost)]);
-
+	init_buses();	
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -540,7 +473,74 @@ sub rememoize {
 	memoize(  'candidates');
 }
 
+sub init_buses {
+	$main_bus  = ::Bus->new(
+		name => 'Main_Bus',
+		groups => [qw(Main)],
+		tracks => [],
+		rules  => [ qw( mix_setup 
+						raw_record_input
+						raw_monitor_input 
+						aux_send 
+						rec_file) ],
+	);
 
+	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
+
+	$master_bus  = ::Bus->new(
+		name => 'Master_Bus',
+		rules  => [ qw(mixer_out main_out) ],
+		groups => ['Master'],
+	);
+	$mixdown_bus  = ::Bus->new(
+		name => 'Mixdown_Bus',
+		groups => [qw(Mixdown) ],
+		rules  => [ qw(mixdown_playback mixdown_to_file mix_ev) ],
+	);
+
+	# for metronome or other tracks using 'null' as source
+	
+	$null_bus = ::Bus->new(
+		name => 'Null_Bus',
+		groups => [qw(null) ],
+		rules => [qw(null_setup)],
+	);
+
+	# Mastering chains
+	
+	# for bypass directly to Master
+	#
+	# we may prefer to use ecasound mute/bypass commands
+	# on mastering chains instead of crossfading with this
+	# chain
+	
+	$bypass_bus = ::Bus->new( 
+		name => 'Bypass',
+		rules => [qw(bypass)], # Similar to main_out
+		tracks => ['Bypass']);
+
+	# for EQ track
+
+	$mastering_stage1_bus = ::Bus->new(
+		name => 'Stage1',
+		rules => ['stage1'], # loop_mix to loop_crossover
+		tracks => ['Eq']);
+
+	# for Low/Mid/High tracks
+	
+	$mastering_stage2_bus = ::Bus->new(
+		name => 'Stage2',
+		rules => ['stage2'], # loop_crossover to loop_boost
+		tracks => [qw(Low Mid High)]);
+
+	# for Final track with boost, limiter
+	
+	$mastering_stage3_bus = ::Bus->new(
+		name => 'Stage3',
+		rules => ['stage3'], #loop_boost to loop_output
+		tracks => [qw(Boost)]);
+
+}
 sub initialize_rules {
 
 	# first make some helper IO objects
@@ -4067,7 +4067,7 @@ sub dest_type {
 	if ($dest !~ /\D/)        { 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { 'loop' }
 	elsif ($dest){  # any string 
-		carp( "@{$dest}$dest: jack_client doesn't exist.\n") unless jack_client($dest);
+		carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
 		'jack_client' ; }
 	else { undef }
 }
