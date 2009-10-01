@@ -2,7 +2,7 @@
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
 MD=..
-TD=$MD/lib/Audio/Ecasound/Multitrack
+TD=$MD/lib/Audio/Nama
 if [ ! -d $TD ]; then
    mkdir -p $TD;
 fi
@@ -11,15 +11,15 @@ then
    mkdir $MD/t
 fi
 
-./preproc -r Audio::Ecasound::Multitrack \
+./preproc -r Audio::Nama \
 		-s $MD/src \
 		-t $TD \
 		-a p \
 		-b pm 
-mv $TD/Multitrack.pm $TD/../Multitrack.pm 
+mv $TD/Nama.pm $TD/../Nama.pm 
 ./preproc  -s $MD/src \
          -t $MD/t  \
-		 -r Audio::Ecasound::Multitrack \
+		 -r Audio::Nama \
 		 -a t \
 		 -b t
 cd ..
