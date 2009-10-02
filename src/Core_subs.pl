@@ -31,7 +31,7 @@ sub config_vars {
 }
 
 sub discard_object {
-	shift @_ if ref $_[0] =~ /Nama/;
+	shift @_ if (ref $_[0]) =~ /Nama/;
 	@_;
 }
 
