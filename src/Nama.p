@@ -319,11 +319,13 @@ Don't load saved state
 
 =item B<-n>
 
-Communicate with engine via NetECI
+Communicate with engine via NetECI. Start Ecasound in
+server mode if necessary.
 
 =item B<-l>
 
-Communicate with engine via libecasoundc (default, if Audio::Ecasound installed)
+Communicate with engine via libecasoundc (default, if
+Audio::Ecasound is installed)
 
 =back
 
@@ -652,8 +654,15 @@ and doodle modes.
 
 =head1 BUGS AND LIMITATIONS
 
-Latency compensation is under development, not currently
-reliable. No waveform or signal level displays are provided.
+No waveform or signal level displays are provided.
+No latency compensation is provided across the various
+signal paths, although this function is under development.
+
+=head1 SECURITY CONCERNS
+
+If you are using Nama with the NetECI interface (i.e. if
+Audio::Ecasound is I<not> installed) you should firewall TCP port 2868 
+if you computer is exposed to the Internet. 
 
 =head1 EXPORT
 
@@ -677,9 +686,9 @@ Build instructions are contained in the F<README> file.
 
 =head1 PATCHES
 
-The main module, Multitrack.pm is a concatenation of
+The main module, Nama.pm is a concatenation of
 several source files.  Patches should be made against the
-source files (see below.)
+source files.
 
 =head1 AUTHOR
 
