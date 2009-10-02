@@ -1,4 +1,0 @@
-#!/usr/local/bin/perl -w
-use IO::All;
-$all = io('config.yaml')->all;
-print $all;

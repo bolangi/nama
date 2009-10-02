@@ -8,6 +8,6 @@ Makefile.old
 broken_tests/*
 pre/*
 try/*
-talk/*
+doc/*
 .git/*
 src/*
