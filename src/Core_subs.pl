@@ -175,7 +175,7 @@ sub prepare {
 
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
-		say "Using libecasoundc via Audio::Ecasound.";
+		say "Using Ecasound via Audio::Ecasound (libecasoundc).";
 		{ no warnings qw(redefine);
 		*eval_iam = \&eval_iam_libecasoundc; }
 		$e = Audio::Ecasound->new();
@@ -252,6 +252,7 @@ my $debug;
 my $sock; 
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
+	say "Creating socket on port $port.";
 	$sock = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
