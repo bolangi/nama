@@ -780,12 +780,11 @@ sub rec_status{
 	'OFF';
 
 }
-no warnings;
 sub ch_r {
+	no warnings;
 	my $track = shift;
 	return '';
 }
-use warnings;
 
 package ::MasteringTrack; # used for mastering chains 
 our @ISA = '::SimpleTrack';
@@ -799,11 +798,8 @@ sub rec_status{
 	my $track = shift;
 	$::mastering_mode ? 'MON' :  'OFF';
 }
-no warnings;
 sub group_last {0}
 sub version {0}
-sub monitor_version {0}
-use warnings;
 
 package ::SlaveTrack; # for instrument monitor bus
 our @ISA = '::SimpleTrack';
