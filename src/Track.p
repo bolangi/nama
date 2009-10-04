@@ -74,7 +74,7 @@ sub new {
 
 
 		## 		defaults ##
-
+					class	=> $class,
 					name 	=> "Audio_$n", 
 					group	=> 'Main', 
 		#			rw   	=> 'REC', # ::add_track() sets REC if necessary

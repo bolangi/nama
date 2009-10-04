@@ -3184,9 +3184,10 @@ sub save_state {
 @tracks_data = (); # zero based, iterate over these to restore
 
 $debug and print "copying tracks data\n";
-map { $_->set( class => ref $_ ) } ::Track::all(); # TODO REMOVE
-map { push @tracks_data, $_->hashref } ::Track::all();
 
+# save track class  ## NOW class stored as track field by new()
+# map { $_->set( class => ref $_ ) } ::Track::all(); 
+map { push @tracks_data, $_->hashref } ::Track::all();
 # print "found ", scalar @tracks_data, "tracks\n";
 
 @sub_bus_data = (); # 
@@ -3259,6 +3260,7 @@ sub restore_state {
 
 	::Group::initialize();	
 
+=comment
 	# change group name Tracker to Main (backwards compatibility)
  	if ($saved_version < 0.9981){
  	
@@ -3296,6 +3298,7 @@ sub restore_state {
 		}
 	}
 		
+=cut
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses, directly, skipping constructor 
@@ -3313,10 +3316,12 @@ sub restore_state {
 		my %h = %$_; 
 		$::Track::n = $h{n} if $h{n};
 		#my @hh = %h; print "size: ", scalar @hh, $/;
-		my $track = ::Track->new( %h ) ;
-		# set the correct class for mastering tracks
+		my $track = ::Track->new( %h ) ; # A::N::Track initially
+		# set the correct class for tracks
+		#die ("illegal class: $h{class}") if $h{class} =~ /Multitrack/;
 		if ( $track->class ){ bless $track, $track->class }
-		else { bless $track, '::MasteringTrack' if $track->group eq 'Mastering'; }
+		#else { die "missing class", $track->name }
+		# else { bless $track, '::MasteringTrack' if $track->group eq 'Mastering'; }
 					# TODO REMOVE
 		my $n = $track->n;
 		#print "new n: $n\n";
