@@ -185,7 +185,6 @@ sub prepare {
 		*eval_iam = \&eval_iam_neteci;
 	}
 	
-	get_ecasound_iam_keywords();
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
@@ -197,13 +196,12 @@ sub prepare {
 	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
 
 	first_run();
-	
-	# init our buses
-	init_buses();	
 
 	prepare_static_effects_data() unless $opts{e};
 
+	get_ecasound_iam_keywords();
 	load_keywords(); # for autocompletion
+
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
@@ -212,6 +210,8 @@ sub prepare {
 	#print "keys effect_i: ", join " ", keys %effect_i;
 	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
 	#die "no keys";	
+	
+	init_buses();	
 	
 	initialize_rules(); # needed for transport_gui
 
