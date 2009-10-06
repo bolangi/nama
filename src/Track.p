@@ -396,7 +396,7 @@ CLIENT
 sub soundcard_input {
 	my $track = shift;
 	if ($::jack_running) {
-		my $start = track->source_id;
+		my $start = $track->source_id;
 		my $end   = $start + $track->ch_count - 1;
 		['jack_multi' , join q(,),q(jack_multi),
 			map{"system:capture_$_"} $start..$end]
