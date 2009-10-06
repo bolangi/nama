@@ -3185,10 +3185,14 @@ sub save_state {
 
 $debug and print "copying tracks data\n";
 
-# save track class  ## NOW class stored as track field by new()
-# map { $_->set( class => ref $_ ) } ::Track::all(); 
 map { push @tracks_data, $_->hashref } ::Track::all();
 # print "found ", scalar @tracks_data, "tracks\n";
+
+# delete unused fields
+map { my $t = $_;
+			map{ delete $t->{$_} } 
+				qw(ch_r ch_m source_select send_select jack_source jack_send);
+} @tracks_data;
 
 @sub_bus_data = (); # 
 map{ push @sub_bus_data, $_->hashref } ::UserBus::all();
@@ -3260,20 +3264,13 @@ sub restore_state {
 
 	::Group::initialize();	
 
-=comment
-	# change group name Tracker to Main (backwards compatibility)
- 	if ($saved_version < 0.9981){
- 	
- 		for (@tracks_data){ 
- 			$_->{class} =~ s/Audio::Ecasound::Multitrack/Audio::Nama/ 
- 		}
- 	}
-	
+	# backward compatibility fixes for older projects
+
 	if (! $saved_version ){
+
+		# Tracker group is now called 'Main'
 	
 		map{ $_->{name} = 'Main'} grep{ $_->{name} eq 'Tracker' } @groups_data;
-
-		# update track fields (backwards compability)
 		
 		for (@tracks_data){
 			if( $_->{source_select} eq 'soundcard'){
@@ -3292,13 +3289,9 @@ sub restore_state {
 				$_->{send_type} = 'jack_client' ;
 				$_->{send_id} = $_->{jack_send}
 			}
-			my $t = $_;
-			map{ delete $t->{$_} } 
-				qw(ch_r ch_m source_select send_select jack_source jack_send);
 		}
 	}
 		
-=cut
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses, directly, skipping constructor 
@@ -3314,22 +3307,23 @@ sub restore_state {
 
 	map{ 
 		my %h = %$_; 
-		$::Track::n = $h{n} if $h{n};
+		$::Track::n = $h{n} if $h{n}; # set class Track's counter
 		#my @hh = %h; print "size: ", scalar @hh, $/;
-		my $track = ::Track->new( %h ) ; # A::N::Track initially
-		# set the correct class for tracks
-		#die ("illegal class: $h{class}") if $h{class} =~ /Multitrack/;
-		if ( $track->class ){ bless $track, $track->class }
-		#else { die "missing class", $track->name }
-		# else { bless $track, '::MasteringTrack' if $track->group eq 'Mastering'; }
-					# TODO REMOVE
+		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
+		if ( $track->class ){ bless $track, $track->class } # current scheme
+
+		# for backward compatibility
+		else { set_track_class($track, '::MasteringTrack') 
+				if $track->group eq 'Mastering'; }
 		my $n = $track->n;
 		#print "new n: $n\n";
 		$debug and print "restoring track: $n\n";
 	} @tracks_data;
 
 	$ui->create_master_and_mix_tracks();
-	bless $tn{Master}, '::SimpleTrack';   # TODO REMOVE
+
+	# for backwards compatibility
+	set_track_class( $tn{Master}, '::SimpleTrack');   
 
 	map{ 
 		my $n = $_->{n};
@@ -3383,6 +3377,12 @@ sub restore_state {
 	
 	$term->SetHistory(@command_history);	
 } 
+
+sub set_track_class {
+	my ($track, $class) = @_;
+	bless $track, $class;
+	$track->set(class => $class);
+}
 
 sub process_control_inputs { }
 

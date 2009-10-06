@@ -3,8 +3,8 @@
 					name
 					active
 
-					ch_r 
-					ch_m 
+					ch_r  # obsolete
+					ch_m  # obsolete
 					ch_count
 
 					rw
@@ -37,10 +37,10 @@
 					send_type
 					
 
-					jack_source
-					jack_send
-					source_select
-					send_select
+					jack_source # obsolete
+					jack_send	# obsolete
+					source_select # obsolete
+					send_select # obsolete
 
 					project
 					target

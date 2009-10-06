@@ -25,7 +25,7 @@ initialize();
 # new attribute will be 
 use ::Object qw(
 
-[% qx(cat ./track_fields) %]
+[% qx(./strip_all ./track_fields) %]
 
 );
 # Note that ->vol return the effect_id 
@@ -769,7 +769,7 @@ package ::SimpleTrack; # used for Master track
 our @ISA = '::Track';
 use ::Object qw(
 
-[% qx(cat ./track_fields) %]
+[% qx(./strip_all ./track_fields) %]
 
 						);
 
@@ -791,7 +791,7 @@ package ::MasteringTrack; # used for mastering chains
 our @ISA = '::SimpleTrack';
 use ::Object qw( 
 
-[% qx(cat ./track_fields) %]
+[% qx(./strip_all ./track_fields) %]
 						
 						);
 
@@ -806,7 +806,7 @@ package ::SlaveTrack; # for instrument monitor bus
 our @ISA = '::SimpleTrack';
 use ::Object qw( 
 
-[% qx(cat ./track_fields) %]
+[% qx(./strip_all ./track_fields) %]
 						
 						);
 sub rec_status {
