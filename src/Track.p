@@ -278,9 +278,10 @@ sub rec_route {
 	no warnings qw(uninitialized);
 	my $track = shift;
 	
-	# no need to route a jack client
-	return if $track->source_type eq 'jack_client';
-	return if $track->source_type eq 'loop';
+	# applies to soundcard input via ALSA
+	
+	return unless $track->source_type eq 'soundcard'
+		and ! $::jack_running;
 
 	# no need to route a signal at channel 1
 	return if ! $track->source_id or $track->source_id == 1; 
