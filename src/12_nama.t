@@ -7,10 +7,6 @@ use Cwd;
 
 BEGIN { use_ok('::') };
 
-1;
-__END__
-# `make test'. After `make install' it should work as `perl 1.t'
-
 diag ("TESTING $0\n");
 
 

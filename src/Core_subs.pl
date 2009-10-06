@@ -2721,7 +2721,7 @@ sub prepare_static_effects_data{
 	#print "newplugins: ", new_plugins(), $/;
 	if ($opts{r} or new_plugins()){ 
 
-		unlink $effects_cache;
+		eval { unlink $effects_cache};
 		print "Regenerating effects data cache\n";
 	}
 
