@@ -808,6 +808,10 @@ use ::Object qw(
 
 [% qx(./strip_all ./track_fields) %]
 						
+sub ch_count {
+	my $track = shift;
+	$tn{$track->target}->ch_count;
+}
 						);
 sub rec_status {
 	my $track = shift;

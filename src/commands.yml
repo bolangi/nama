@@ -538,12 +538,12 @@ list_history:
   parameters: none
 add_send_bus_cooked:
   type: bus
-  short: ambc
+  short: asbc
   what: add a monitoring bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
 add_send_bus_raw:
   type: bus
-  short: ambr
+  short: asbr
   what: add a monitoring bus that copies all user tracks' raw signals
   parameters: <s_name> <destination> 
 add_sub_bus:

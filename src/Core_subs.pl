@@ -205,11 +205,6 @@ sub prepare {
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
-	# prepare_command_dispatch();  # unused
-
-	#print "keys effect_i: ", join " ", keys %effect_i;
-	#map{ print "i: $_, code: $effect_i{$_}->{code}\n" } keys %effect_i;
-	#die "no keys";	
 	
 	init_buses();	
 	
@@ -4027,7 +4022,6 @@ sub add_send_bus {
 	
 	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
 
-	#warn("$name: already taken\n"), return if map{$_->name eq $name } or 
 	if ($::UserBus::by_name{$name}){
 		say qq(monitor bus "$name" already exists. Updating with new tracks.");
 
@@ -4057,14 +4051,6 @@ sub add_send_bus {
 						)
    } $main->tracks;
 		
-	# create group
-	# create tracks, copies of all 
-	# create rule
-	#
-	# save/restore could work like this:
-	# - save bus info
-	# - recreate bus 
-
 	
 }
 

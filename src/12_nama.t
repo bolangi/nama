@@ -52,18 +52,15 @@ params:
 ...
 );
 
-#my $wanthex = unpack("H*", $want);
-#diag $wanthex;
-
-#my $gothex = unpack("H*", yaml_out($::effects[$::effect_i{epp}]));
-
-#diag $gothex;
 
 is( yaml_out($::effects[$::effect_i{epp}]) ,  $want , "Pan hinting");
 
 is( $effects_help[0], 
 	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
 	'Preset help for dyn_compress_brutal');
+
+is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
+
 
 my $cs_got = eval_iam('cs');
 my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
