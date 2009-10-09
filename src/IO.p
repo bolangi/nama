@@ -1,6 +1,6 @@
 # ---------- IO -----------
 use strict;
-package ::IO;
+package ::IO_Helper;
 our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;

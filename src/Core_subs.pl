@@ -547,25 +547,25 @@ sub initialize_rules {
 	# Basically syntax to the Track methods that run the
 	# necessary conditionals
 
-	my $soundcard_input = ::IO->new(
+	my $soundcard_input = ::IO_Helper->new(
 
 		type => 	sub { my $track = shift; $track->soundcard_input()->[0]}, 
 		object => 	sub { my $track = shift; $track->soundcard_input()->[1]},
 	);
 
-	my $soundcard_output = ::IO->new(
+	my $soundcard_output = ::IO_Helper->new(
 
 		type => 	sub { my $track = shift; $track->soundcard_output()->[0]}, 
 		object => 	sub { my $track = shift; $track->soundcard_output()->[1]},
 	);
 
-	my $source_input = ::IO->new(
+	my $source_input = ::IO_Helper->new(
 		type => 	sub { my $track = shift; $track->source_input()->[0]}, 
 		object => 	sub { my $track = shift; $track->source_input()->[1]},
 	);
 
 
-	my $send_output = ::IO->new(
+	my $send_output = ::IO_Helper->new(
 		type => 	sub { my $track = shift; $track->send_output()->[0]}, 
 		object => 	sub { my $track = shift; $track->send_output()->[1]},
 	);
