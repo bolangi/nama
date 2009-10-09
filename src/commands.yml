@@ -539,30 +539,37 @@ list_history:
 add_send_bus_cooked:
   type: bus
   short: asbc
-  what: add a monitoring bus that copies all user tracks' processed signals
+  what: add a send bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
+  example: asbc jconv
 add_send_bus_raw:
   type: bus
   short: asbr
-  what: add a monitoring bus that copies all user tracks' raw signals
-  parameters: <s_name> <destination> 
+  what: add a send bus that copies all user tracks' raw signals
+  parameters: <s_name> <destination>
+  example: asbr The_new_bus jconv
 add_sub_bus:
   type: bus
-  short: aub
+  short: asub
   what: add a bus with arbitrary tracks and destination
+  parameters: <s_name> [destination]
+  example: asub Strings_bus\nasub Strings_bus streamer_app
 update_send_bus:
   type: bus
-  short: umb
-  what: include tracks added since monitor bus was created
-set_bus:
-  type: bus
-  short: sb
-  what: set bus parameters
+  short: usb
+  what: include tracks added since send bus was created
+  parameters: <s_name>
+  example: usb Some_bus 
+# set_bus:
+#   type: bus
+#   short: sb
+#   what: set bus parameters
+# parameters: JPC
 add_slave_track:
   type: track
   short: ast
   what: add a slave track to an existing user bus
-  parameters: <s_bus_name> <s_target> 
+  parameters: <s_bus_name> <s_target_track_name> 
 remove_bus:
   type: bus
   short: rmb

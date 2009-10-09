@@ -8,7 +8,7 @@ parameter: /\d+/
 #value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
 dd: /\d+/
-name: /[\w:]+\/?/
+name: /\w[\w:,]*\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
 name4: /\w+/
@@ -461,7 +461,7 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
-slave_track: _slave_track bus_name target end {
+add_slave_track: _add_slave_track bus_name target end {
 	::add_slave_track( $item{bus_name}, $item{target} ); 1; } bus_name: /[A-Z]\w+/
 destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel

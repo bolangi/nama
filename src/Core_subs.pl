@@ -1334,7 +1334,7 @@ sub generate_setup {
 
 
 		map{ eliminate_loops1($_) } all_chains();
-		eliminate_loops2() unless $mastering_mode;
+		#eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
 

@@ -712,9 +712,9 @@ sub modify_rules_list {
 	my @rules = @_;
 	my %have;
 	map { $have{$_}++ } @rules;
-	map { push @rules, $_ unless $have{$_} } $track->rules_add;
+	map { push @rules, $_ unless $have{$_} } split " ", $track->rules_add;
 	my %skip;
-	map { $skip{$_}++ } $track->rules_skip;
+	map { $skip{$_}++ } split " ", $track->rules_skip;
 	grep { ! $skip{$_} } @rules;
 }
 
@@ -808,11 +808,11 @@ use ::Object qw(
 
 [% qx(./strip_all ./track_fields) %]
 						
+);
 sub ch_count {
 	my $track = shift;
-	$tn{$track->target}->ch_count;
+	$::tn{$track->target}->ch_count;
 }
-						);
 sub rec_status {
 	my $track = shift;
 	$::tn{$track->target}->rec_status ne 'OFF' ? 'MON' : 'OFF';

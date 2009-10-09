@@ -264,6 +264,8 @@ bus => <<BUS,
                                 example: add_sub_bus Strings 
                                          add_tracks violin cello bass
                                          for cello violin bass; set bus Strings
+   add_slave_track, ast       - add a slave_track to an existing user bus
+
 BUS
 
 
