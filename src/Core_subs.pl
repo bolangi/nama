@@ -1298,8 +1298,29 @@ sub generate_setup {
 	
 	# we don't want to go further unless there are signals
 	# to process
-	
+
+my $g = Graph->new();
+
+map{ my $t = $tn{$_};
+	if($t->rec_status ne 'OFF'){
+		#$g->add_edge($t->source_type, $t->name) if $t->rec_status eq 'REC';
+		#$g->add_edge($t->name, 'WAV_out') if $t->rec_status eq 'REC';
+		#$g->add_edge("WAV_in'", $t->name) if $t->rec_status eq 'MON';
+		$g->add_edge($t->name, 'Master');
+	}
+ } $main->tracks; 
+$g->add_edge('Master','soundcard_out');
+
+
+say "The graph is $g";
+
+
+
+
+
+
 =comment
+	
 	my @tracks = ::Track::all();
 
 	shift @tracks; # drop Master
