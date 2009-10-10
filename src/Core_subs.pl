@@ -1309,15 +1309,10 @@ map{ my $t = $tn{$_};
 		$g->add_edge($t->name, 'Master');
 	}
  } $main->tracks; 
-$g->add_edge('Master','soundcard_out');
+#$g->add_edge('Master','soundcard_out');
 
 
 say "The graph is $g";
-
-
-
-
-
 
 =comment
 	
