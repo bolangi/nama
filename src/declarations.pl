@@ -337,17 +337,17 @@ our (
 	$main_out,
 	$mix_setup,
 	$mixdown_playback,
-	$raw_monitor_input,
+	$mon_setup,
 	$rec_file,
-	$raw_record_input,
+	$rec_setup,
 	$aux_send,
 	$aux_receive,
 	$null_setup,
 
 	# rules for instrument monitor buses
 	
-	$send_bus_raw_monitor_input,
-	$send_bus_raw_record_input,
+	$send_bus_mon_setup,
+	$send_bus_rec_setup,
 	$send_bus_cooked_input,
 	$send_bus_out,
 	$sub_bus_mix_setup,

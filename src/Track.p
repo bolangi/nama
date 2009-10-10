@@ -239,9 +239,9 @@ sub rec_status_display {
 sub maybe_monitor {
 	my $monitor_version = shift;
 
-	# I don't want the dependency on $::raw_monitor_input status
+	# I don't want the dependency on $::mon_setup status
 	# although it could be helpful for diagnostic and UI purposes
-	return 'MON' if $monitor_version and $::raw_monitor_input->status;
+	return 'MON' if $monitor_version and $::mon_setup->status;
 	return 'OFF';
 }
 
