@@ -475,11 +475,12 @@ sub init_buses {
 		name => 'Main_Bus',
 		groups => [qw(Main)],
 		tracks => [],
-		rules  => [ qw( mix_setup 
+		rules  => [ qw(
 						rec_setup
 						mon_setup 
 						aux_send 
 						rec_file) ],
+#  mix_setup 
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
@@ -698,8 +699,8 @@ sub initialize_rules {
 		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
-		output_type		=>  'loop',
-		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+# 		output_type		=>  'loop',
+# 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=> 1,
 		status			=>  1,
@@ -737,8 +738,8 @@ sub initialize_rules {
 		target			=>	'REC',
 		input_type		=> $source_input->type,
 		input_object	=> $source_input->object,
-		output_type		=>  'loop',
-		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
+# 		output_type		=>  'loop',
+# 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
 		post_input			=>	sub{ my $track = shift;
 										$track->rec_route .
 										$track->mono_to_stereo 
@@ -1311,10 +1312,13 @@ map{ my $t = $tn{$_};
  } $main->tracks; 
 #$g->add_edge('Master','soundcard_out');
 
+my @mix_link = $g->predecessors('Master');
+
+# replacing mix_link and output portions of rec_setup/mon_setup
+map{ push @{ $outputs{loop}{$loop_mix} }, $tn{$_}->n }  @mix_link;
 
 say "The graph is $g";
 
-=comment
 	
 	my @tracks = ::Track::all();
 
@@ -1363,7 +1367,6 @@ say "The graph is $g";
 		return 1;
 	} else { print "No inputs found!\n";
 	return 0};
-=cut
 1;
 }
 
