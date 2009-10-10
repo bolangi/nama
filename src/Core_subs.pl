@@ -131,7 +131,7 @@ sub prepare {
 	### Option Processing ###
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('amcegstrnd:f:D', \%opts); 
+	getopts('amcegstrnd:f:DR', \%opts); 
 	#print join $/, (%opts);
 	# a: save and reload ALSA state using alsactl
 	# d: set project root dir
@@ -143,6 +143,7 @@ sub prepare {
 	# r: regenerate effects data cache
 	# e: don't load static effects data (for debugging)
 	# s: don't load static effects data cache (for debugging)
+	# R: skip reconfigure engine
 	# D: output debugging info
 	
 	# UI object for interface polymorphism
@@ -1298,6 +1299,7 @@ sub generate_setup {
 	# we don't want to go further unless there are signals
 	# to process
 	
+=comment
 	my @tracks = ::Track::all();
 
 	shift @tracks; # drop Master
@@ -1345,6 +1347,8 @@ sub generate_setup {
 		return 1;
 	} else { print "No inputs found!\n";
 	return 0};
+=cut
+1;
 }
 
 sub useful_Master_effects {
@@ -1696,6 +1700,7 @@ sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 	# sometimes we want to skip for debugging
 	
+	return if $opts{R};
 	return 0 if $disable_auto_reconfigure;
 
 	# we don't want to disturb recording/mixing

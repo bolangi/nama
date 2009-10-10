@@ -29,6 +29,7 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
+use Graph;
 
 # use Timer::HiRes; # automatically detected
 
