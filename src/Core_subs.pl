@@ -3517,7 +3517,7 @@ sub get_ecasound_iam_keywords {
 	
 	local $debug = 0;
 	%iam_cmd = map{$_,1 } 
-				grep{ ! $reserved{$_} } split ",", eval_iam('int-cmd-list');
+				grep{ ! $reserved{$_} } split /[\s,]/, eval_iam('int-cmd-list');
 }
 
 sub process_line {
