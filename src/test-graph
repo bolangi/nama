@@ -1,0 +1,234 @@
+#!/usr/local/bin/perl 
+use Modern::Perl;
+use Graph;
+my $g = Graph->new(refvertexed => 1);
+#$g->add_vertices( qw[sax horn sc mix out]);
+my $foo = { bar => 'baz'};
+#$g->add_vertex( $foo );
+#map{$g->add_edges(qw(sc), $_, $_, qw(mix mix out))} qw(horn sax);
+#$g->add_path(qw[ wav_in sax Master  ]);
+#$g->add_path(qw[ wav_in drums_n_bass Master  ]);
+$g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
+$g->add_path(qw[ Eq Mid Boost]);
+$g->add_path(qw[ Eq High Boost]);
+#$g->add_path(qw(sax jconv mix));
+#$g->add_edge(qw(sc horn));
+#$g->add_edge(qw(a b));
+#$g->add_edges(qw(a b b c c d));
+say "The initial graph is $g";
+
+my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
+my $gr = insert_loops($g);
+
+# insert loop devices
+
+sub insert_loops {
+	my $g = shift;
+	my $gr = Graph->new();
+	map{ my($a,$b) = @$_; 
+		 $gr->add_path( first_segment($a),second_segment($b) )
+	# 	 say join " ", "in: ", first_segment($a);
+	# 	 say join " ", "out:", second_segment($b); 
+		#say( join " ", first_segment($a), second_segment($b) );
+		} $g->edges;
+	$gr
+}
+
+sub in_loop{ "$_[0]_in" }
+sub out_loop{ "$_[0]_out" }
+	
+sub first_segment {
+	my $v = shift;
+	$reserved{$v}  # $v is a source or sink vertex
+		? $v
+		: ($v, out_loop($v))
+}
+sub second_segment{
+	my ($v) = @_;
+	$reserved{$v}  # $v is a sink vertex
+		? $v
+		: (in_loop($v), $v)
+}	
+say "The loop-expanded graph is $gr";
+
+sub eliminate_loops {
+	my $g = shift;
+	
+}
+	
+
+#map{ say @$_ } $g->edges_from('soundcard_in');
+
+__END__
+
+	
+=comment
+
+piano-Master   			track track
+soundcard_in-sax		device track
+Master-soundcard_out	track device
+soundcard_in-soundcard_out device device
+
+
+remove piano-Master
+replace with piano-piano_out-Master_in-Master
+
+track-loop1-loop2-track
+track-loop3-loop2-track
+
+both paths share loop2-track
+both paths have double loops, loop1-loop2, loop3-loop2
+
+source/sink vertices of every graph will _not_ be tracks
+
+
+my @s = $g->source_vertices;
+route(undef, @s);
+sub is_loop(
+	my $name = shift;
+	return if $reserved{$name};
+	if (my($root, $suffix) = $name =~ /(.+)(_(in|out))/
+		and $tn{$root}){
+	
+		return $root;
+	} else { croak "illegal vertex name: $name" }
+}
+sub is_a_track{ $tn{$_[0]} }
+
+
+=comment
+
+cases for routing tracks
+
+input is device, output is device
+input is device, output is track
+input is track, output is device
+input is track, output is track
+
+sub route {
+	my ($source, @successors) = @_;
+	# we assume $source is already routed
+	for my $s( @successors) { 
+		if ( $reserved{$s} ){ 
+			# source/sink, do nothing with $s
+	 	} elsif ( my $t = $tn{$s} ){  # is a track
+			my $chain_id = $t->n;
+			my $p_count = $g->predecessors($s); # number of predecessors
+			my ($type, $object) = source_type_object($source, $t, $p_count);
+			push @{ $inputs{$type}->{$object}, $chain_id;
+
+			# we may have more than one output
+
+			my @successors = $g->successors($s);
+				for my $s2
+			
+			($type, $object) = 
+			push @{ $output
+			
+					my $output = $loop_input{$s};
+					route_io( 	dir => 'output', 
+								type => 'loop', 
+								object => $output, 
+								chains => [ chains( @p )],
+		
+		} else { carp "illegal vertex name: $s" }
+			
+
+sub need_output_loop {
+	my $name = shift;
+
+	# need a loop to branch out or to feed another track
+	
+	$g->successors($name) > 1
+
+		or grep{ $tn{$_} } $g->successors($name)  	
+}	
+	
+sub source_type_object {
+	my ($source, $track, $p_count) = @_;
+
+		# use loop if multiple predecessors
+		# or at least one track predecessor
+
+		# use source's output loop if only one track  predecessor 
+		if ($p_count == 1 and $tn{$source}) {
+			return ('loop',"$source_out")
+			
+		if ($source eq 'soundcard') { 
+			# post_input $track->rec_route TODO
+			return ($soundcard_input->type, $soundcard_input->object)
+		} elsif ($source eq 'jack_client') {
+			return ('jack_client',$track->source_id);
+			
+
+) # source is track
+			
+
+sub route_inputs {
+	my @p = @_;
+	map{ 
+
+		
+
+
+ } @p;
+
+{ my %loops = ();
+  my $i = 0;
+sub get_loop {
+	my $n = shift;
+	return 'L'.$loops{$n} if $loops{$n};
+	$loops{$n} = ++$i;
+	get_loop($n)
+}
+}
+
+	
+	
+
+
+
+sub chains {
+	my @names = @_;
+	map{ $_->n } map{$tn{$_}} @names;
+}
+	
+sub send_to_soundcard {
+	my @names = @_;
+ 	push @{ $outputs{ $soundcard_output->type }{ $soundcard_output->object },
+		map{ $_->n } map{$tn{$_}} @names;
+	map{ push
+}
+
+sub loop_input {
+	
+	
+
+__END__
+
+sax Master
+
+sax-->Master
+sax-->Master
+soundcard-->sax_in---->sax_out--->Master
+soundcard-->sax_in---->sax_out--->Master-->Eq-->Low/Mid/High-->Boost
+sax_in --> WAV
+
+look at sax_in
+
+cases:
+
+1) signal from out tracks
+2) signal from soundcard/JACK client
+
+sax-->(insert)-->Master
+sax-->(wet/dry insert)-->Master
+sax-->sax_insert_1_wet-->Master
+sax-->sax_insert_1_dry-->Master
+
+
+
+rewrite mix_setup
+
+
+

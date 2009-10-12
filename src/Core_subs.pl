@@ -1310,7 +1310,8 @@ map{ my $t = $tn{$_};
 		$g->add_edge($t->name, 'Master');
 	}
  } $main->tracks; 
-#$g->add_edge('Master','soundcard_out');
+
+$g->add_edge('Master','soundcard_out');
 
 my @mix_link = $g->predecessors('Master');
 
