@@ -1,26 +1,19 @@
 #!/usr/local/bin/perl 
 use Modern::Perl;
 use Graph;
-my $g = Graph->new(refvertexed => 1);
-#$g->add_vertices( qw[sax horn sc mix out]);
-my $foo = { bar => 'baz'};
-#$g->add_vertex( $foo );
-#map{$g->add_edges(qw(sc), $_, $_, qw(mix mix out))} qw(horn sax);
-#$g->add_path(qw[ wav_in sax Master  ]);
-#$g->add_path(qw[ wav_in drums_n_bass Master  ]);
+my $g = Graph->new;
 $g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
-$g->add_path(qw[ Eq Mid Boost]);
 $g->add_path(qw[ Eq High Boost]);
-#$g->add_path(qw(sax jconv mix));
-#$g->add_edge(qw(sc horn));
-#$g->add_edge(qw(a b));
-#$g->add_edges(qw(a b b c c d));
+
 say "The initial graph is $g";
 
 my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
+
 my $gr = insert_loops($g);
 
 # insert loop devices
+
+say "The loop-expanded graph is $gr";
 
 sub insert_loops {
 	my $g = shift;
@@ -39,20 +32,51 @@ sub out_loop{ "$_[0]_out" }
 	
 sub first_segment {
 	my $v = shift;
-	$reserved{$v}  # $v is a source or sink vertex
-		? $v
-		: ($v, out_loop($v))
+	is_terminal($v) ? $v : ($v, out_loop($v))
 }
 sub second_segment{
 	my ($v) = @_;
-	$reserved{$v}  # $v is a sink vertex
-		? $v
-		: (in_loop($v), $v)
+	is_terminal($v) ? $v : (in_loop($v),  $v)
 }	
-say "The loop-expanded graph is $gr";
+
+sub is_terminal { $reserved{$_[0]} }
 
 sub eliminate_loops {
 	my $g = shift;
+=comment
+
+- remove loop between soundcard and track
+
+soundcard_in -> sax_in --> sax
+
+my @s = $g->successors("sax_in");
+
+- remove loop between track and soundcard
+
+Master -> Master_out -> soundcard_out
+
+- remove one loop between track and track
+
+-- case 1
+
+Eq -> Eq_out -> Low_in -> Low
+
+my @s = $g->successors("Eq_out");
+
+eliminate Eq_out if one successor and successor is not track
+
+eliminate Low_in if one successor 
+	and successor is track
+	and predecessor is not track
+
+-- case 2
+
+Low -> Low_out -> Boost_in -> Boost
+
+elimnate Low_out if one successor
+    and successor is loop
+
+=cut
 	
 }
 	
