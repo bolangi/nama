@@ -1,11 +1,17 @@
 #!/usr/local/bin/perl 
-use Modern::Perl;
+use feature ':5.10';
+use Carp;
+#use Modern::Perl;
 use Graph;
 my $g = Graph->new;
-$g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
-$g->add_path(qw[ Eq High Boost]);
+#$g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
+#$g->add_path(qw[ Eq High Boost]);
+#$g->add_path(qw[ Eq Low Boost]);
+$g->add_path(qw[ soundcard_in Eq_in Eq Eq_out Low_in Low
+Low_out Boost_in Boost Boost_out soundcard_out]);
 
 say "The initial graph is $g";
+=comment
 
 my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
 
@@ -14,6 +20,14 @@ my $gr = insert_loops($g);
 # insert loop devices
 
 say "The loop-expanded graph is $gr";
+
+delete_middle_vertex( $gr, qw( Eq_out Low_in Low));
+say "The shortened graph is $gr";
+
+=cut
+eliminate_loops($g);
+
+say "The fully shortened graph is $g";
 
 sub insert_loops {
 	my $g = shift;
@@ -41,8 +55,63 @@ sub second_segment{
 
 sub is_terminal { $reserved{$_[0]} }
 
+
+sub delete_middle_vertex {
+	# return 1 if successful
+	my ($g,$a,$b,$c) = @_;
+	say"triple: $a $b $c";
+	return unless is_a_loop($b);
+	say "$b is a loop";
+	my @n = $g->neighbors($b);
+	say("$b: more than 2 neighbors. skipping."), return
+		if scalar @n > 2;
+	return if is_a_track($a) and is_a_track($b);
+	$g->delete_edges($a,$b,$b,$c);
+	$g->add_edges($a,$c);
+	$g->delete_vertex($b);
+	1;
+}
+
+sub is_a_loop{
+	my $name = shift;
+	return if $reserved{$name};
+	if (my($root, $suffix) = $name =~ /(.+)(_(in|out))/){
+		return $root;
+	} 
+}
+# elsif ( $reserved{$name}){ return } 
+# 	else { croak "illegal vertex name: $name" }
+# }
+#sub is_a_track{ $tn{$_[0]} }
+sub is_a_track{ $_[0] !~ /_(in|out)$/ }
+	
 sub eliminate_loops {
 	my $g = shift;
+	my @s = $g->source_vertices;
+	map{ recurse_triples($g, $_) } @s;
+}
+
+sub recurse_triples {
+	my ($g, $a) = @_; # $g: graph, $a: starting vertex
+	say "recurse over $a"; 
+	my @s1 = $g->successors($a);
+	if(scalar @s1 == 1){ # no fan out at $a
+		say "one successor";
+		my ($b) = @s1; # take first element
+		my @s2 = $g->successors($b);
+		if( scalar @s2 == 1) { # no fan out at $b
+		say "one successor";
+			my ($c) = @s2;
+			if( delete_middle_vertex($g,$a,$b,$c) ){
+				recurse_triples($g,$a)
+			} else { recurse_triples($g,$b)	}
+		} else { map{ recurse_triples($g,$_)} @s2 };
+	} elsif (scalar @s1 > 1){
+		map{recurse_triples($g,$_)} @s1;
+	} else { }# no successors, do nothing 
+}
+	
+__END__
 =comment
 
 - remove loop between soundcard and track
@@ -108,16 +177,6 @@ source/sink vertices of every graph will _not_ be tracks
 
 my @s = $g->source_vertices;
 route(undef, @s);
-sub is_loop(
-	my $name = shift;
-	return if $reserved{$name};
-	if (my($root, $suffix) = $name =~ /(.+)(_(in|out))/
-		and $tn{$root}){
-	
-		return $root;
-	} else { croak "illegal vertex name: $name" }
-}
-sub is_a_track{ $tn{$_[0]} }
 
 
 =comment
