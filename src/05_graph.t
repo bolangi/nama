@@ -12,8 +12,6 @@ $g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
 $g->add_path(qw[ Eq High Boost]);
 $g->add_path(qw[ Eq Low Boost]);
 
-say "The initial graph is  $g";
-
 ::Graph::expand_graph($g);
 
 my $expanded = "$g";
@@ -21,7 +19,7 @@ my $expanded = "$g";
 my $expected =
 q(Boost-soundcard_out,Boost_in-Boost,Eq-Eq_out,Eq_out-High,Eq_out-Low,High-Boost_in,Low-Boost_in,Master-Eq,Master_in-Master,piano-Master_in,wav_in-piano);
 
-is( $expanded eq $expected, 1, "graph loop expansion");
+is( $expanded, $expected, "graph loop expansion");
 
 1;
 __END__
