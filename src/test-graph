@@ -1,77 +1,95 @@
-#!/usr/local/bin/perl 
-use feature ':5.10';
+#!/usr/bin/env perl 
+use strict;
+use feature ":5.10";
 use Carp;
-#use Modern::Perl;
 use Graph;
-my $g = Graph->new;
-#$g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
-#$g->add_path(qw[ Eq High Boost]);
-#$g->add_path(qw[ Eq Low Boost]);
-$g->add_path(qw[ soundcard_in Eq_in Eq Eq_out Low_in Low
-Low_out Boost_in Boost Boost_out soundcard_out]);
-
-say "The initial graph is $g";
-=comment
-
+my %seen;
 my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
+my $g = Graph->new;
+my $debug = 1;
+$g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
+$g->add_path(qw[ Eq High Boost]);
+$g->add_path(qw[ Eq Low Boost]);
 
-my $gr = insert_loops($g);
+say "The initial graph is  $g";
 
-# insert loop devices
+expand_graph($g);
 
-say "The loop-expanded graph is $gr";
+say "The expanded graph is $g";
 
-delete_middle_vertex( $gr, qw( Eq_out Low_in Low));
-say "The shortened graph is $gr";
+sub expand_graph {
+	my $g = shift; 
+	map{ my($a,$b) = @{$_}; 
+		$debug and say "reviewing edge: $a-$b";
+		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
+		 add_loop($g,$a,$b) if is_a_track($a) and is_a_track($b);
+	} $g->edges;
+}
 
-=cut
-eliminate_loops($g);
+sub add_loop {
+	my ($g,$a,$b) = @_;
+	$debug and say "adding loop";
+	my $fan_out = successor_count($g,$a);
+	$debug and say "$a: fan_out $fan_out";
+	my $fan_in  = predecessor_count($g,$b);
+	$debug and say "$b: fan_in $fan_in";
+	if ($fan_out > 1){
+		insert_near_side_loop($g,$a,$b)
+	} elsif ($fan_in  > 1){
+		insert_far_side_loop($g,$a,$b)
+	} elsif ($fan_in ==1 and $fan_out == 1){
+		insert_far_side_loop($g,$a,$b)
+			if $b eq 'Master'
+	} else {croak "unexpected fan"};
+}
 
-say "The fully shortened graph is $g";
+sub insert_near_side_loop {
+	my ($g, $a, $b) = @_;
+	$debug and say "$a-$b: insert near side loop";
+	$debug and say("$a-$b: already visited"), return if $seen{"$a-$b"};
+	map{
+	$debug and say "deleting edge: $a-$_";
+	$g->delete_edge($a,$_);
+	$debug and say "adding path: $a " , out_loop($a), " $_";
+	$g->add_path($a,out_loop($a),$_);
+	$seen{"$a-$_"}++
+	} $g->successors($a);
+}
 
-sub insert_loops {
-	my $g = shift;
-	my $gr = Graph->new();
-	map{ my($a,$b) = @$_; 
-		 $gr->add_path( first_segment($a),second_segment($b) )
-	# 	 say join " ", "in: ", first_segment($a);
-	# 	 say join " ", "out:", second_segment($b); 
-		#say( join " ", first_segment($a), second_segment($b) );
-		} $g->edges;
-	$gr
+sub insert_far_side_loop {
+	my ($g, $a, $b) = @_;
+	$debug and say "$a-$b: insert far side loop";
+	$debug and say("$a-$b: already visited"), return if $seen{"$a-$b"};
+	map{
+		$debug and say "deleting edge: $_-$b";
+		$g->delete_edge($_,$b);
+		$debug and say "adding path: $_ " , in_loop($b), " $b";
+		$g->add_path($_,in_loop($b),$b);
+		$seen{"$_-$b"}++
+	} $g->predecessors($b);
+}
+
+
+
+sub successor_count {
+	my ($g, $v) = @_;
+	my @s = $g->successors($v);
+	scalar @s
+}
+sub predecessor_count {
+	my ($g, $v) = @_;
+	my @p = $g->predecessors($v);
+	scalar @p
 }
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
+#sub is_a_track{ $tn{$_[0]} }
+sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;
+	$debug and say "$_[0] is a track"; 1
+}
 	
-sub first_segment {
-	my $v = shift;
-	is_terminal($v) ? $v : ($v, out_loop($v))
-}
-sub second_segment{
-	my ($v) = @_;
-	is_terminal($v) ? $v : (in_loop($v),  $v)
-}	
-
 sub is_terminal { $reserved{$_[0]} }
-
-
-sub delete_middle_vertex {
-	# return 1 if successful
-	my ($g,$a,$b,$c) = @_;
-	say"triple: $a $b $c";
-	return unless is_a_loop($b);
-	say "$b is a loop";
-	my @n = $g->neighbors($b);
-	say("$b: more than 2 neighbors. skipping."), return
-		if scalar @n > 2;
-	return if is_a_track($a) and is_a_track($b);
-	$g->delete_edges($a,$b,$b,$c);
-	$g->add_edges($a,$c);
-	$g->delete_vertex($b);
-	1;
-}
-
 sub is_a_loop{
 	my $name = shift;
 	return if $reserved{$name};
@@ -79,239 +97,4 @@ sub is_a_loop{
 		return $root;
 	} 
 }
-# elsif ( $reserved{$name}){ return } 
-# 	else { croak "illegal vertex name: $name" }
-# }
-#sub is_a_track{ $tn{$_[0]} }
-sub is_a_track{ $_[0] !~ /_(in|out)$/ }
-	
-sub eliminate_loops {
-	my $g = shift;
-	my @s = $g->source_vertices;
-	map{ recurse_triples($g, $_) } @s;
-}
-
-sub recurse_triples {
-	my ($g, $a) = @_; # $g: graph, $a: starting vertex
-	say "recurse over $a"; 
-	my @s1 = $g->successors($a);
-	if(scalar @s1 == 1){ # no fan out at $a
-		say "one successor";
-		my ($b) = @s1; # take first element
-		my @s2 = $g->successors($b);
-		if( scalar @s2 == 1) { # no fan out at $b
-		say "one successor";
-			my ($c) = @s2;
-			if( delete_middle_vertex($g,$a,$b,$c) ){
-				recurse_triples($g,$a)
-			} else { recurse_triples($g,$b)	}
-		} else { map{ recurse_triples($g,$_)} @s2 };
-	} elsif (scalar @s1 > 1){
-		map{recurse_triples($g,$_)} @s1;
-	} else { }# no successors, do nothing 
-}
-	
-__END__
-=comment
-
-- remove loop between soundcard and track
-
-soundcard_in -> sax_in --> sax
-
-my @s = $g->successors("sax_in");
-
-- remove loop between track and soundcard
-
-Master -> Master_out -> soundcard_out
-
-- remove one loop between track and track
-
--- case 1
-
-Eq -> Eq_out -> Low_in -> Low
-
-my @s = $g->successors("Eq_out");
-
-eliminate Eq_out if one successor and successor is not track
-
-eliminate Low_in if one successor 
-	and successor is track
-	and predecessor is not track
-
--- case 2
-
-Low -> Low_out -> Boost_in -> Boost
-
-elimnate Low_out if one successor
-    and successor is loop
-
-=cut
-	
-}
-	
-
-#map{ say @$_ } $g->edges_from('soundcard_in');
-
-__END__
-
-	
-=comment
-
-piano-Master   			track track
-soundcard_in-sax		device track
-Master-soundcard_out	track device
-soundcard_in-soundcard_out device device
-
-
-remove piano-Master
-replace with piano-piano_out-Master_in-Master
-
-track-loop1-loop2-track
-track-loop3-loop2-track
-
-both paths share loop2-track
-both paths have double loops, loop1-loop2, loop3-loop2
-
-source/sink vertices of every graph will _not_ be tracks
-
-
-my @s = $g->source_vertices;
-route(undef, @s);
-
-
-=comment
-
-cases for routing tracks
-
-input is device, output is device
-input is device, output is track
-input is track, output is device
-input is track, output is track
-
-sub route {
-	my ($source, @successors) = @_;
-	# we assume $source is already routed
-	for my $s( @successors) { 
-		if ( $reserved{$s} ){ 
-			# source/sink, do nothing with $s
-	 	} elsif ( my $t = $tn{$s} ){  # is a track
-			my $chain_id = $t->n;
-			my $p_count = $g->predecessors($s); # number of predecessors
-			my ($type, $object) = source_type_object($source, $t, $p_count);
-			push @{ $inputs{$type}->{$object}, $chain_id;
-
-			# we may have more than one output
-
-			my @successors = $g->successors($s);
-				for my $s2
-			
-			($type, $object) = 
-			push @{ $output
-			
-					my $output = $loop_input{$s};
-					route_io( 	dir => 'output', 
-								type => 'loop', 
-								object => $output, 
-								chains => [ chains( @p )],
-		
-		} else { carp "illegal vertex name: $s" }
-			
-
-sub need_output_loop {
-	my $name = shift;
-
-	# need a loop to branch out or to feed another track
-	
-	$g->successors($name) > 1
-
-		or grep{ $tn{$_} } $g->successors($name)  	
-}	
-	
-sub source_type_object {
-	my ($source, $track, $p_count) = @_;
-
-		# use loop if multiple predecessors
-		# or at least one track predecessor
-
-		# use source's output loop if only one track  predecessor 
-		if ($p_count == 1 and $tn{$source}) {
-			return ('loop',"$source_out")
-			
-		if ($source eq 'soundcard') { 
-			# post_input $track->rec_route TODO
-			return ($soundcard_input->type, $soundcard_input->object)
-		} elsif ($source eq 'jack_client') {
-			return ('jack_client',$track->source_id);
-			
-
-) # source is track
-			
-
-sub route_inputs {
-	my @p = @_;
-	map{ 
-
-		
-
-
- } @p;
-
-{ my %loops = ();
-  my $i = 0;
-sub get_loop {
-	my $n = shift;
-	return 'L'.$loops{$n} if $loops{$n};
-	$loops{$n} = ++$i;
-	get_loop($n)
-}
-}
-
-	
-	
-
-
-
-sub chains {
-	my @names = @_;
-	map{ $_->n } map{$tn{$_}} @names;
-}
-	
-sub send_to_soundcard {
-	my @names = @_;
- 	push @{ $outputs{ $soundcard_output->type }{ $soundcard_output->object },
-		map{ $_->n } map{$tn{$_}} @names;
-	map{ push
-}
-
-sub loop_input {
-	
-	
-
-__END__
-
-sax Master
-
-sax-->Master
-sax-->Master
-soundcard-->sax_in---->sax_out--->Master
-soundcard-->sax_in---->sax_out--->Master-->Eq-->Low/Mid/High-->Boost
-sax_in --> WAV
-
-look at sax_in
-
-cases:
-
-1) signal from out tracks
-2) signal from soundcard/JACK client
-
-sax-->(insert)-->Master
-sax-->(wet/dry insert)-->Master
-sax-->sax_insert_1_wet-->Master
-sax-->sax_insert_1_dry-->Master
-
-
-
-rewrite mix_setup
-
-
 
