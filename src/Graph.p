@@ -1,12 +1,12 @@
-#!/usr/bin/env perl 
-use strict;
-use feature ":5.10";
+package ::Graph;
+use Modern::Perl;
 use Carp;
 use Graph;
 my %seen;
 my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
 my $g = Graph->new;
 my $debug = 0;
+=comment
 $g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
 $g->add_path(qw[ Eq High Boost]);
 $g->add_path(qw[ Eq Low Boost]);
@@ -16,6 +16,7 @@ say "The initial graph is  $g";
 expand_graph($g);
 
 say "The expanded graph is $g";
+=cut
 
 sub expand_graph {
 	my $g = shift; 
@@ -85,4 +86,4 @@ sub is_a_loop{
 		return $root;
 	} 
 }
-
+1;
