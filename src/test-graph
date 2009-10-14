@@ -29,9 +29,9 @@ sub expand_graph {
 sub add_loop {
 	my ($g,$a,$b) = @_;
 	$debug and say "adding loop";
-	my $fan_out = successor_count($g,$a);
+	my $fan_out = $g->successors($a);
 	$debug and say "$a: fan_out $fan_out";
-	my $fan_in  = predecessor_count($g,$b);
+	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
 		insert_near_side_loop($g,$a,$b)
@@ -69,18 +69,6 @@ sub insert_far_side_loop {
 	} $g->predecessors($b);
 }
 
-
-
-sub successor_count {
-	my ($g, $v) = @_;
-	my @s = $g->successors($v);
-	scalar @s
-}
-sub predecessor_count {
-	my ($g, $v) = @_;
-	my @p = $g->predecessors($v);
-	scalar @p
-}
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
