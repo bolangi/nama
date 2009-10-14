@@ -1304,7 +1304,11 @@ my $g = Graph->new();
 
 map{ my $t = $tn{$_};
 	if($t->rec_status ne 'OFF'){
-		$g->add_edge($t->source_type, $t->name) if $t->rec_status eq 'REC';
+		$g->add_edge(
+			$t->source_type eq 'soundcard'
+				? 'soundcard_in'
+				: $t->source_type
+			, $t->name) if $t->rec_status eq 'REC';
 		#$g->add_edge($t->name, 'wav_out') if $t->rec_status eq 'REC';
 		$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
 		$g->add_edge($t->name, 'Master');
