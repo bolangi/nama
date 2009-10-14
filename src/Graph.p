@@ -2,11 +2,14 @@ package ::Graph;
 use Modern::Perl;
 use Carp;
 use Graph;
-my %seen;
-my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
-my $g = Graph->new;
-my $debug = 0;
+use vars qw(%seen %reserved $debug);
+
+%reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
+$debug = 1;
 =comment
+my %seen;
+my $g = Graph->new;
+my $debug = 1;
 $g->add_path(qw[ wav_in piano Master Eq Low Boost soundcard_out]) ;
 $g->add_path(qw[ Eq High Boost]);
 $g->add_path(qw[ Eq Low Boost]);
@@ -20,6 +23,7 @@ say "The expanded graph is $g";
 
 sub expand_graph {
 	my $g = shift; 
+	%seen = ();
 	map{ my($a,$b) = @{$_}; 
 		$debug and say "reviewing edge: $a-$b";
 		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};

@@ -1304,22 +1304,22 @@ my $g = Graph->new();
 
 map{ my $t = $tn{$_};
 	if($t->rec_status ne 'OFF'){
-		#$g->add_edge($t->source_type, $t->name) if $t->rec_status eq 'REC';
-		#$g->add_edge($t->name, 'WAV_out') if $t->rec_status eq 'REC';
-		#$g->add_edge("WAV_in'", $t->name) if $t->rec_status eq 'MON';
+		$g->add_edge($t->source_type, $t->name) if $t->rec_status eq 'REC';
+		#$g->add_edge($t->name, 'wav_out') if $t->rec_status eq 'REC';
+		$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
 		$g->add_edge($t->name, 'Master');
 	}
  } $main->tracks; 
 
 $g->add_edge('Master','soundcard_out');
 
-my @mix_link = $g->predecessors('Master');
-
-# replacing mix_link and output portions of rec_setup/mon_setup
-map{ push @{ $outputs{loop}{$loop_mix} }, $tn{$_}->n }  @mix_link;
 
 say "The graph is $g";
 
+::Graph::expand_graph($g);
+
+say "The graph is $g";
+return;
 	
 	my @tracks = ::Track::all();
 

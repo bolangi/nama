@@ -111,6 +111,7 @@ use ::Track;
 use ::Bus;    
 use ::Mark;
 use ::IO;
+use ::Graph;
 
 package ::Wav;
 memoize('candidates') if $::memoize;
