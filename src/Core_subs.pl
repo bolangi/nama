@@ -1284,8 +1284,8 @@ sub really_recording {
 
 sub generate_setup { 
 
-# Create data structures representing chain setup.
-# This step precedes write_chains(), i.e. writing Setup.ecs.
+	# Create data structures representing chain setup.
+	# This step precedes write_chains(), i.e. writing Setup.ecs.
 
 	$debug2 and print "&generate_setup\n";
 
@@ -1300,30 +1300,39 @@ sub generate_setup {
 	# we don't want to go further unless there are signals
 	# to process
 
-my $g = Graph->new();
+	my $g = Graph->new();
 
-map{ my $t = $tn{$_};
-	if($t->rec_status ne 'OFF'){
-		$g->add_edge(
-			$t->source_type eq 'soundcard'
-				? 'soundcard_in'
-				: $t->source_type
-			, $t->name) if $t->rec_status eq 'REC';
-		#$g->add_edge($t->name, 'wav_out') if $t->rec_status eq 'REC';
-		$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
-		$g->add_edge($t->name, 'Master');
-	}
- } $main->tracks; 
+	map{ my $t = $tn{$_};
+		if($t->rec_status ne 'OFF'){
+			$g->add_edge(
+				$t->source_type eq 'soundcard'
+					? 'soundcard_in'
+					: $t->source_type
+				, $t->name) if $t->rec_status eq 'REC';
+			#$g->add_edge($t->name, 'wav_out') if $t->rec_status eq 'REC';
+			$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
+			$g->add_edge($t->name, 'Master');
+		}
+	 } $main->tracks; 
 
-$g->add_edge('Master','soundcard_out');
+	$g->add_edge('Master','soundcard_out');
 
 
-say "The graph is $g";
+	say "The graph is $g";
 
-::Graph::expand_graph($g);
+	::Graph::expand_graph($g);
 
-say "The graph is $g";
-return;
+	say "The graph is $g";
+
+	# deals only with registered track names
+	map{ 
+		generate_input( $tn{$_}, $g->predecessors($_)); # we expect only one
+		generate_output($tn{$_},   $g->successors($_)); # we expect only one
+
+	#	map{ loop/soundcard_out/jack_client_out } $g->edges_from{$t}
+
+	} grep{ $tn{$_} } $g->vertices; 
+	return;
 	
 	my @tracks = ::Track::all();
 
@@ -1373,6 +1382,15 @@ return;
 	} else { print "No inputs found!\n";
 	return 0};
 1;
+}
+
+sub generate_input {
+	my ($track, $input) = @_;
+	# if template do something special
+	
+}
+sub generate_output {
+	my ($track, $output) = @_;
 }
 
 sub useful_Master_effects {
