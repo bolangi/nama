@@ -1287,8 +1287,18 @@ sub generate_setup {
 		$g->add_path(qw[Master Eq Low Boost soundcard_out]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
+	
+		if ($tn{Mixdown}->rec_status eq 'REC'){
+			$g->add_edge(qw(Boost wav_out));
+		}
+			
+
+
 	} else {
 		$g->add_edge('Master','soundcard_out');
+		if ($tn{Mixdown}->rec_status eq 'REC'){
+			$g->add_edge(qw(Master wav_out));
+		}
 	}
 
 	say "The graph is $g";

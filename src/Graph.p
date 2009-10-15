@@ -2,8 +2,8 @@ package ::Graph;
 use Modern::Perl;
 use Carp;
 use Graph;
-my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out );
-my $debug = 1;
+my %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out null_in null_out);
+my $debug = 0;
 my %seen;
 
 sub expand_graph {
@@ -27,10 +27,17 @@ sub add_loop {
 		insert_near_side_loop($g,$a,$b)
 	} elsif ($fan_in  > 1){
 		insert_far_side_loop($g,$a,$b)
-	} elsif ($fan_in ==1 and $fan_out == 1){
+	} elsif ($fan_in == 1 and $fan_out == 1){
+
+	# we expect a single user track to feed to Master_in 
+	# as multiple user tracks do
+	
 			$b eq 'Master' 
 				?  insert_far_side_loop($g,$a,$b)
+
+	# otherwise default to near_side ( *_out ) loops
 				:  insert_near_side_loop($g,$a,$b);
+
 	} else {croak "unexpected fan"};
 }
 
