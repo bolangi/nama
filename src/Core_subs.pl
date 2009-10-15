@@ -1299,6 +1299,9 @@ sub generate_setup {
 
 	# deals only with registered track names
 	map{ 
+		say "track: $_";
+		say join " ", "predecessors:", $g->predecessors($_);
+		say join " ", "successors:", $g->successors($_);
 		generate_input( $tn{$_}, $g->predecessors($_)); # we expect only one
 		generate_output($tn{$_}, $g->successors(  $_)); # we expect only one
 
@@ -1360,7 +1363,12 @@ sub generate_setup {
 							 add_entry('inputs',$type,$id,$track->n);	
 							},
 							
-	soundcard_out	=> sub {},
+	soundcard_out	=> sub { my $track = shift;
+							 my ($type, $id) = @{soundcard_output()};
+							 add_entry('outputs',$type,$id,$track->n);	
+							},
+					
+
 );
 
 =comment
@@ -1416,14 +1424,10 @@ sub generate_output {
 		$key2 = "loop,$output";
 		add_entry(qw[outputs loop], $key2, $track->n);
 	} else {
-		
-		
-		
+		$dispatch{$output}->($track,$output);
 	}
 	# if template do something special
 	#$dispatch
-	
-	
 }
 sub add_entry {
 	no strict "refs";
@@ -1435,8 +1439,8 @@ sub add_entry {
 }
 sub soundcard_output {
  	$::jack_running 
-		? [qw(jack_client system)]  
-		: ['device', $::alsa_playback_device] 
+		? [qw(jack_client system)]
+		: ['device', $::alsa_playback_device]
 }
 
 sub useful_Master_effects {

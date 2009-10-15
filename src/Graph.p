@@ -43,8 +43,9 @@ sub add_loop {
 	} elsif ($fan_in  > 1){
 		insert_far_side_loop($g,$a,$b)
 	} elsif ($fan_in ==1 and $fan_out == 1){
-		insert_far_side_loop($g,$a,$b)
-			if $b eq 'Master'
+			$b eq 'Master' 
+				?  insert_far_side_loop($g,$a,$b)
+				:  insert_near_side_loop($g,$a,$b);
 	} else {croak "unexpected fan"};
 }
 
