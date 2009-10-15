@@ -285,7 +285,7 @@ our (
 	$OUT,				# filehandle for Text mode print
 	#$commands,	# ref created from commands.yml
 	%commands,	# created from commands.yml
-	%dispatch,  # replacement for existing parser
+	%dispatch,  # variable for generate_setup dispatch table
 	$commands_yml, # the string form of commands.yml
 	$cop_hints_yml, # ecasound effects hinting
 

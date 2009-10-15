@@ -504,41 +504,8 @@ sub init_buses {
 		rules => [qw(null_setup)],
 	);
 
-	# Mastering chains
-	
-	# for bypass directly to Master
-	#
-	# we may prefer to use ecasound mute/bypass commands
-	# on mastering chains instead of crossfading with this
-	# chain
-	
-	$bypass_bus = ::Bus->new( 
-		name => 'Bypass',
-		rules => [qw(bypass)], # Similar to main_out
-		tracks => ['Bypass']);
-
-	# for EQ track
-
-	$mastering_stage1_bus = ::Bus->new(
-		name => 'Stage1',
-		rules => ['stage1'], # loop_mix to loop_crossover
-		tracks => ['Eq']);
-
-	# for Low/Mid/High tracks
-	
-	$mastering_stage2_bus = ::Bus->new(
-		name => 'Stage2',
-		rules => ['stage2'], # loop_crossover to loop_boost
-		tracks => [qw(Low Mid High)]);
-
-	# for Final track with boost, limiter
-	
-	$mastering_stage3_bus = ::Bus->new(
-		name => 'Stage3',
-		rules => ['stage3'], #loop_boost to loop_output
-		tracks => [qw(Boost)]);
-
 }
+	
 sub initialize_rules {
 
 	# first make some helper IO objects
@@ -1315,8 +1282,14 @@ sub generate_setup {
 		}
 	 } $main->tracks; 
 
-	$g->add_edge('Master','soundcard_out');
 
+	if ($mastering_mode){
+		$g->add_path(qw[Master Eq Low Boost soundcard_out]);
+		$g->add_path(qw[Eq Mid Boost]);
+		$g->add_path(qw[Eq High Boost]);
+	} else {
+		$g->add_edge('Master','soundcard_out');
+	}
 
 	say "The graph is $g";
 
@@ -1327,12 +1300,13 @@ sub generate_setup {
 	# deals only with registered track names
 	map{ 
 		generate_input( $tn{$_}, $g->predecessors($_)); # we expect only one
-		generate_output($tn{$_},   $g->successors($_)); # we expect only one
+		generate_output($tn{$_}, $g->successors(  $_)); # we expect only one
 
 	#	map{ loop/soundcard_out/jack_client_out } $g->edges_from{$t}
 
 	} grep{ $tn{$_} } $g->vertices; 
-	return;
+
+	
 	
 	my @tracks = ::Track::all();
 
@@ -1350,18 +1324,10 @@ sub generate_setup {
 
 		$debug and print "applying mixdown_bus\n";
 		$mixdown_bus->apply; 
-		$debug and print "applying master_bus\n";
-		$master_bus->apply; 
 		$debug and print "applying main_bus (user tracks)\n";
 		$main_bus->apply;
 		$debug and print "applying null_bus (user tracks)\n";
 		$null_bus->apply;
-		if ($mastering_mode){
-			$debug and print "applying mastering buses\n";
-			$mastering_stage1_bus->apply;
-			$mastering_stage2_bus->apply;
-			$mastering_stage3_bus->apply;
-		}
 
 		# process user defined buses
 
@@ -1369,7 +1335,7 @@ sub generate_setup {
 		map { $_->apply() } ::UserBus::all();
 
 
-		map{ eliminate_loops1($_) } all_chains();
+		#map{ eliminate_loops1($_) } all_chains();
 		#eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
@@ -1379,18 +1345,98 @@ sub generate_setup {
 
 		write_chains();
 		return 1;
-	} else { print "No inputs found!\n";
-	return 0};
+	} else { print "No inputs found!\n"; return 0};
 1;
 }
+%dispatch = (
+ 	wav_in 			=> sub {},
+	wav_out			=> sub {},
+	loop_in 		=> sub {},
+	loop_out 		=> sub {},
+	jack_client_in 	=> sub {},
+	jack_client_out	=> sub {},
+	soundcard_in	=> sub { my $track = shift;
+							 my ($type, $id) = @{$track->soundcard_input};
+							 add_entry('inputs',$type,$id,$track->n);	
+							},
+							
+	soundcard_out	=> sub {},
+);
 
+=comment
+	$rec_file = ::Rule->new(
+
+		name			=> 'rec_file', 
+		target			=> 'REC',
+		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
+		output_type		=>  'file',
+		output_object   => sub {
+			my $track = shift; 
+			my $format = signal_format($raw_to_disk_format, $track->ch_count);
+			join " ", $track->full_path, $format
+		},
+		post_input			=>	sub{ my $track = shift; $track->rec_route },
+		condition		=> sub {my $track = shift; ! $track->rec_defeat },
+		status		=>  1,
+	);
+		input_type		=>  'file',
+		input_object	=>  sub{ my $track = shift; $track->full_path },
+		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
+=cut
 sub generate_input {
 	my ($track, $input) = @_;
+	# we get loop identity from $input
+	# we get all others from $track
+	my $key1 = $input;
+	my $key2;
+	# special case for loops
+	if (::Graph::is_a_loop($input)){
+		$key2 = "loop,$input";
+		add_entry(qw[inputs loop], $key2, $track->n);
+	} else {
+		
+		
+		
+	}
 	# if template do something special
+	#$dispatch
 	
 }
+
 sub generate_output {
 	my ($track, $output) = @_;
+	# we get loop identity from $output
+	# we get all others from $track
+	my $key1 = $output;
+	my $key2;
+	# special case for loops
+	if (::Graph::is_a_loop($output)){
+		$key2 = "loop,$output";
+		add_entry(qw[outputs loop], $key2, $track->n);
+	} else {
+		
+		
+		
+	}
+	# if template do something special
+	#$dispatch
+	
+	
+}
+sub add_entry {
+	no strict "refs";
+	our $dir = shift;
+	my($type, $id, $chain) = @_;
+	my $cmd = q(push @{ $) . $dir. q({$type}{$id} }, $chain;) ;
+	say $cmd;
+	eval $cmd;
+}
+sub soundcard_output {
+ 	$::jack_running 
+		? [qw(jack_client system)]  
+		: ['device', $::alsa_playback_device] 
 }
 
 sub useful_Master_effects {
