@@ -17,8 +17,8 @@ $g->add_path(qw[ Eq Low Boost]);
 my $expanded = "$g";
 
 my $expected =
-q(Boost-soundcard_out,Boost_in-Boost,Eq-Eq_out,Eq_out-High,Eq_out-Low,High-Boost_in,Low-Boost_in,Master-Eq,Master_in-Master,piano-Master_in,wav_in-piano);
-
+'Boost-soundcard_out,Boost_in-Boost,Eq-Eq_out,Eq_out-High,Eq_out-Low,High-Boost_in,Low-Boost_in,Master-Master_out,Master_in-Master,Master_out-Eq,piano-Master_in,wav_in-piano'
+;
 is( $expanded, $expected, "graph loop expansion");
 
 1;
