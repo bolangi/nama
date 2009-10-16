@@ -539,27 +539,6 @@ sub initialize_rules {
 		%rule_names = (); 
 	package ::;
 
-# should we associate rule directly with track on creation?
-
-
-	# combined outputs of user tracks
-	
-	$mixer_out = ::Rule->new( #  
-		name			=> 'mixer_out', 
-		chain_id		=> 1, # Master
-
-		target			=> 'MON',
-
-		input_type 		=> 'loop', 
-		input_object	=> $loop_mix, 
-
-		output_type		=> 'loop',
-		output_object	=> \&mixer_target,
-		status			=> 1,
-
-	);
-
-	# routes mixed signal to file
 
 	$mix_down = ::Rule->new(
 
@@ -600,38 +579,6 @@ sub initialize_rules {
 		status			=> 0,
 	);
 
-	# routes output to JACK or sound card
-
-	$main_out = ::Rule->new(
-
-		name			=>  'main_out',
-		chain_id		=>  'MainOut',
-		target			=>  'all',
-		input_type		=>  'loop',
-		input_object	=>  $loop_output,
-		output_type		=> $soundcard_output->type,
-		output_object	=> $soundcard_output->object,
-		condition 		=>	1,
-		status			=>  1,
-		
-	);
-
-	# routes cooked track output to mixer 
-	# generally optimized away by eliminate_loops()
-	
-	$mix_setup = ::Rule->new(
-
-		name			=>  'mix_setup',
-		chain_id		=>  sub { my $track = shift; "J". $track->n },
-		target			=>  'all',
-		input_type		=>  'loop',
-		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_object	=>  $loop_mix,
-		output_type		=>  'loop',
-		condition 		=>  sub{ defined $inputs{loop}->{$loop_output} },
-		status			=>  1,
-		
-	);
 
 	$mixdown_playback = ::Rule->new(
 
