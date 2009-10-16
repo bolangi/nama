@@ -476,20 +476,12 @@ sub init_buses {
 		groups => [qw(Main)],
 		tracks => [],
 		rules  => [ qw(
-						rec_setup
-						mon_setup 
 						aux_send 
 						rec_file) ],
-#  mix_setup 
 	);
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
 
-	$master_bus  = ::Bus->new(
-		name => 'Master_Bus',
-		rules  => [ qw(mixer_out main_out) ],
-		groups => ['Master'],
-	);
 	$mixdown_bus  = ::Bus->new(
 		name => 'Mixdown_Bus',
 		groups => [qw(Mixdown) ],
@@ -693,32 +685,6 @@ sub initialize_rules {
 		status		=>  1,
 	);
 
-	# rec_setup 
-	
-	# convert live inputs to stereo if necessary
-	# this chain receives all track effects
-	
-    $rec_setup = ::Rule->new(
-
-		name			=>	'rec_setup', 
-		chain_id		=>  sub{ $_[0]->n },   
-		target			=>	'REC',
-		input_type		=> $source_input->type,
-		input_object	=> $source_input->object,
-# 		output_type		=>  'loop',
-# 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-		post_input			=>	sub{ my $track = shift;
-										$track->rec_route .
-										$track->mono_to_stereo 
-										},
-		condition 		=> sub { 
-
-			my $track = shift; 
-			return "satisfied" 
-				unless ! defined $inputs{loop}->{"loop," . $track->n}; 
-		},
-		status			=>  1,
-	);
 
 
 # aux_send 
@@ -1378,6 +1344,11 @@ sub generate_setup {
 	soundcard_in	=> sub { my ($name) = shift;
 							 my ($type, $id) = @{$tn{$name}->soundcard_input};
 							 add_entry('inputs',$type,$id,chain($name));	
+							 if (my $track = $tn{$name}){
+								$post_input{$track->n} = 
+										$track->rec_route .
+										$track->mono_to_stereo 
+							 }
 							},
 							
 	soundcard_out	=> sub { my ($name) = shift;
@@ -1391,31 +1362,6 @@ sub chain {
 	$tn{$name} ? $tn{$name}->n : $name;
 }
 
-=comment
-	$rec_file = ::Rule->new(
-
-		name			=> 'rec_file', 
-		target			=> 'REC',
-		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> $source_input->type,
-		input_object	=> $source_input->object,
-		output_type		=>  'file',
-		output_object   => sub {
-			my $track = shift; 
-			my $format = signal_format($raw_to_disk_format, $track->ch_count);
-			join " ", $track->full_path, $format
-		},
-		post_input			=>	sub{ my $track = shift; $track->rec_route },
-		condition		=> sub {my $track = shift; ! $track->rec_defeat },
-		status		=>  1,
-	);
-
-	# mon setup
-	
-		input_type		=>  'file',
-		input_object	=>  sub{ my $track = shift; $track->full_path },
-		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-=cut
 
 sub generate_io {
 	my ($g, $dir, $name, $io) = @_;
