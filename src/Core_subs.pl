@@ -675,12 +675,11 @@ sub initialize_rules {
 		input_type		=> $source_input->type,
 		input_object	=> $source_input->object,
 		output_type		=>  'file',
-		output_object   => sub {
-			my $track = shift; 
-			my $format = signal_format($raw_to_disk_format, $track->ch_count);
-			join " ", $track->full_path, $format
-		},
+		output_object   => sub { my $track = shift; $track->full_path },
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
+		pre_output	=> sub { my $track = shift; 
+						'-f:'.signal_format($raw_to_disk_format, $track->ch_count);
+						},
 		condition		=> sub {my $track = shift; ! $track->rec_defeat },
 		status		=>  1,
 	);
@@ -1630,14 +1629,12 @@ WARN
 	}
 	##### Setting files as outputs (used by rec_file and mix)
 
-	for my $key ( keys %{ $outputs{file} } ){
-		my ($full_path, $format) = split " ", $key;
+	for my $full_path ( keys %{ $outputs{file} } ){
 		$debug and print "record output file: $full_path\n";
-		my $chain_ids = join ",",@{ $outputs{file}->{$key} };
+		my $chain_ids = join ",",@{ $outputs{file}->{$full_path} };
 		
 		push @output_chains, join ( " ",
 			 "-a:".$chain_ids,
-			 "-f:".$format,
 			 "-o:".$full_path,
 		 );
 			 
