@@ -1285,6 +1285,8 @@ sub generate_setup {
 		my $key2 = "loop,$output";
 		add_entry('outputs', $key1, $key2, chain($name));
 	},
+	null_in			=> sub {},
+	null_out		=> sub {},
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
 	soundcard_in	=> sub { my ($name) = shift;
