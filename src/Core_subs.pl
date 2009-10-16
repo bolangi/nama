@@ -1287,18 +1287,15 @@ sub generate_setup {
 		$g->add_path(qw[Master Eq Low Boost soundcard_out]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
-	
-		if ($tn{Mixdown}->rec_status eq 'REC'){
-			$g->add_edge(qw(Boost wav_out));
-		}
-			
 
+	} else { $g->add_edge('Master','soundcard_out') }
 
-	} else {
-		$g->add_edge('Master','soundcard_out');
-		if ($tn{Mixdown}->rec_status eq 'REC'){
-			$g->add_edge(qw(Master wav_out));
-		}
+	if ($tn{Mixdown}->rec_status eq 'REC'){
+			my @e = (($mastering_mode ? 'Boost' : 'Master'), 'wav_out');
+			$g->add_edge(@e);
+			$g->set_edge_attributes(@e,
+				{ file   => $tn{Mixdown}->full_path,
+				  format => $mix_to_disk_format, });
 	}
 
 	say "The graph is $g";
@@ -1312,14 +1309,14 @@ sub generate_setup {
 		say "track: $_";
 		say join " ", "predecessors:", $g->predecessors($_);
 		say join " ", "successors:", $g->successors($_);
-		generate_input( $tn{$_}, $g->predecessors($_)); # we expect only one
-		generate_output($tn{$_}, $g->successors(  $_)); # we expect only one
+		generate_io($g, 'input',  $_, $g->predecessors($_)); # we expect only one
+		generate_io($g, 'output', $_, $g->successors(  $_)); # we expect only one
 
 	#	map{ loop/soundcard_out/jack_client_out } $g->edges_from{$t}
 
 	} grep{ $tn{$_} } $g->vertices; 
 
-	
+	# map{  } non_track edges	
 	
 	my @tracks = ::Track::all();
 
@@ -1364,22 +1361,35 @@ sub generate_setup {
 %dispatch = (
  	wav_in 			=> sub {},
 	wav_out			=> sub {},
-	loop_in 		=> sub {},
-	loop_out 		=> sub {},
+	loop_source => sub {
+		my ($name, $input) = @_; 
+		my $key1 = "loop";
+		my $key2 = "loop,$input";
+		add_entry('inputs', $key1, $key2, chain($name));
+	},
+	loop_sink 		=> sub {
+		my ($name, $output) = @_; 
+		my $key1 = "loop";
+		my $key2 = "loop,$output";
+		add_entry('outputs', $key1, $key2, chain($name));
+	},
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
-	soundcard_in	=> sub { my $track = shift;
-							 my ($type, $id) = @{$track->soundcard_input};
-							 add_entry('inputs',$type,$id,$track->n);	
+	soundcard_in	=> sub { my ($name) = shift;
+							 my ($type, $id) = @{$tn{$name}->soundcard_input};
+							 add_entry('inputs',$type,$id,chain($name));	
 							},
 							
-	soundcard_out	=> sub { my $track = shift;
+	soundcard_out	=> sub { my ($name) = shift;
 							 my ($type, $id) = @{soundcard_output()};
-							 add_entry('outputs',$type,$id,$track->n);	
+							 add_entry('outputs',$type,$id,chain($name));	
 							},
-					
-
-);
+	);
+							
+sub chain {
+	my $name = shift;
+	$tn{$name} ? $tn{$name}->n : $name;
+}
 
 =comment
 	$rec_file = ::Rule->new(
@@ -1399,45 +1409,37 @@ sub generate_setup {
 		condition		=> sub {my $track = shift; ! $track->rec_defeat },
 		status		=>  1,
 	);
+
+	# mon setup
+	
 		input_type		=>  'file',
 		input_object	=>  sub{ my $track = shift; $track->full_path },
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 =cut
-sub generate_input {
-	my ($track, $input) = @_;
-	# we get loop identity from $input
-	# we get all others from $track
-	my $key1 = $input;
-	my $key2;
-	# special case for loops
-	if (::Graph::is_a_loop($input)){
-		$key2 = "loop,$input";
-		add_entry(qw[inputs loop], $key2, $track->n);
-	} else {
-		
-		
-		
-	}
-	# if template do something special
-	#$dispatch
-	
-}
 
-sub generate_output {
-	my ($track, $output) = @_;
-	# we get loop identity from $output
+sub generate_io {
+	my ($g, $dir, $name, $io) = @_;
+	say ("$name: no $dir found."), return unless $io;
+	# we get loop identity from $io
 	# we get all others from $track
-	my $key1 = $output;
-	my $key2;
+	my @edge = $dir eq 'input' ? ($io, $name) : ($name, $io);
+	say "edge @edge";
+	my $attr = $g->get_edge_attributes(@edge);
+	if ( defined $attr and %$attr ){ 
+	# override normal dispatch system if edge contains entries
+	
+		#my $entries = $attr->{ios};
+		#map { add_entry('',$_->{type}, $_->{$id}, $_->{$chain} } @$entries;
+		#return
+	} 
 	# special case for loops
-	if (::Graph::is_a_loop($output)){
-		$key2 = "loop,$output";
-		add_entry(qw[outputs loop], $key2, $track->n);
+	if (::Graph::is_a_loop($io)){
+		$dispatch{ 
+			 $dir eq 'input' ? 'loop_source' : 'loop_sink' 
+		}->($name, $io);
 	} else {
-		$dispatch{$output}->($track,$output);
+		$dispatch{$io}->($name);
 	}
-	# if template do something special
-	#$dispatch
 }
 sub add_entry {
 	no strict "refs";
