@@ -624,57 +624,30 @@ $aux_send = ::Rule->new(
 
 	# rules for instrument monitor buses using raw inputs
 	
-	$send_bus_mon_setup = ::Rule->new(
+	$mon_setup = ::Rule->new(
 		
-		name			=>  'send_bus_mon_setup', 
-		target			=>  'all',  # follow target track MON
-		chain_id 		=>	sub{ $_[0]->n },
+		name			=>  'mon_setup', 
+		target			=>  'MON',
+		chain_id 		=>	sub{ my $track = shift; $track->n },
 		input_type		=>  'file',
-		input_object	=>  sub{ $tn{$_[0]->target}->full_path},
-		post_input			=>	sub{ my $track = $tn{$_[0]->target};
-										$track->mono_to_stereo 
-										},
-		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status eq 'MON'},
+		input_object	=>  sub{ my $track = shift; $track->full_path },
+		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
+		condition 		=> 1,
 		status			=>  1,
 	);
 
-	$send_bus_rec_setup = ::Rule->new(
+ 	$rec_setup = ::Rule->new(
 
-		name			=>	'send_bus_rec_setup', 
+		name			=>	'rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
-		target			=> 'all',	# follow target track REC 
-		input_type		=> sub{ my $track = shift;
-								my $target = $tn{$track->target}; 
-								$target->source_input()->[0]
-							},
-		input_object	=> sub{ my $track = shift;
-								my $target = $tn{$track->target}; 
-								$target->source_input()->[1]
-							},
-		post_input		=>	sub{ my $track = $tn{$_[0]->target};
+		target			=>	'REC',
+		input_type		=> $source_input->type,
+		input_object	=> $source_input->object,
+		post_input			=>	sub{ my $track = shift;
 										$track->rec_route .
 										$track->mono_to_stereo 
 										},
-		condition 		=> sub{ my $track = shift;
-								my $target = $tn{$track->target}; 
-								$target->rec_status eq 'REC'},
-		status			=>  1,
-	);
-
-	# rules for instrument monitor buses using cooked signals 
-	
-	#	  based on aux_send, uses Track 'send' field
-	
-	$send_bus_cooked_input = ::Rule->new(
-		
-		name			=>  'send_bus_cooked_input', 
-		target			=>  'all',
-		chain_id		=>  sub{ $_[0]->n },   
-		input_type		=>  'loop',
-		input_object	=> sub{ my $track = shift; 
-								my $source_track = $tn{$track->target};
-								'loop,'.$source_track->n},
-		condition 		=>  sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
+		condition 		=> 1,
 		status			=>  1,
 	);
 
@@ -690,6 +663,24 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 		
 	);
+
+	# rules for instrument monitor buses using cooked signals 
+	
+=comment	
+	$send_bus_cooked_input = ::Rule->new(
+		
+		name			=>  'send_bus_cooked_input', 
+		target			=>  'all',
+		chain_id		=>  sub{ $_[0]->n },   
+		input_type		=>  'loop',
+		input_object	=> sub{ my $track = shift; 
+								my $source_track = $tn{$track->target};
+								'loop,'.$source_track->n},
+		condition 		=>  1,
+		status			=>  1,
+	);
+
+
 	$sub_bus_mix_setup = ::Rule->new(
 
 		name			=>  'sub_bus_mix_setup',
@@ -703,6 +694,7 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 		
 	);
+=cut
 
 }
 
@@ -4110,7 +4102,7 @@ sub add_send_bus {
 		groups => [$name],
 		rules => ($bus_type eq 'cooked' 
 			?  [qw(send_bus_cooked_input send_bus_out )]
-			:  [qw(send_bus_rec_setup send_bus_mon_setup send_bus_out)],
+			:  [qw(rec_setup mon_setup send_bus_out)],
 		destination_type => $dest_type,
 		destination_id	 => $dest_id,
 		
