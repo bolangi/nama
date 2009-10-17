@@ -540,27 +540,6 @@ sub initialize_rules {
 	package ::;
 
 
-	$mix_down = ::Rule->new(
-
-		name			=> 'mixdown_to_file', 
-
-	# we change the track index away from the standard 2
-	# for Mixdown to ensure no effects are applied.
-	
-		chain_id		=> 'MixDown',
-		target			=> 'REC', 
-		
-		input_type 		=> 'loop', 
-		input_object	=> $loop_output,
-
-		output_type		=> 'file',
-		output_object   => sub {
-			my $track = shift; 
-			join " ", $track->full_path, $mix_to_disk_format},
-
-		status			=> 1,
-	);
-
 # the following rule is used by automix to normalize
 # the track levels.
 
@@ -579,38 +558,6 @@ sub initialize_rules {
 		status			=> 0,
 	);
 
-
-	$mixdown_playback = ::Rule->new(
-
-		name			=>  'mixdown_playback',
-		chain_id		=>  2, # Mixdown
-		target			=>  'MON',
-		input_type		=>  'file',
-		input_object	=>  sub{ my $track = shift; $track->full_path },
-		output_type		=> $soundcard_output->type,
-		output_object	=> $soundcard_output->object,
-		condition        => 1,
-		status			=>  1,
-		
-	);
-
-
-	# chains for inputs from WAV files
-	# these chains receive all track effects
-
-	$mon_setup = ::Rule->new(
-		
-		name			=>  'mon_setup', 
-		target			=>  'MON',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'file',
-		input_object	=>  sub{ my $track = shift; $track->full_path },
-# 		output_type		=>  'loop',
-# 		output_object	=>  sub{ my $track = shift; "loop," .  $track->n },
-		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> 1,
-		status			=>  1,
-	);
 
 	# records unprocessed live input to file
 		
@@ -675,31 +622,6 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
-# rules for mastering mode
-
-	$stage1 = ::Rule->new(
-		name			=>  'stage1', 
-		target			=>  'all',
-		chain_id 		=>	sub{ $_[0]->n },
-		input_type		=>  'loop',
-		input_object	=>  $loop_mastering,
-		output_type		=>  'loop',
-		output_object	=>  $loop_crossover,
-		status			=>  1,
-	);
-	$stage2 = ::Rule->new(
-		%$stage1,          # clone $stage1
-		name			=>  'stage2', 
-		input_object	=>  $loop_crossover,
-		output_object	=>  $loop_boost,
-	);
-	$stage3 = ::Rule->new(
-		%$stage1,		   # clone $stage1
-		name			=>  'stage3', 
-		input_object	=>  $loop_boost,
-		output_object	=>  $loop_output,
-	);
-	
 	# rules for instrument monitor buses using raw inputs
 	
 	$send_bus_mon_setup = ::Rule->new(
@@ -783,8 +705,6 @@ $aux_send = ::Rule->new(
 	);
 
 }
-sub mixer_target { $mastering_mode ?  $loop_mastering : $loop_output}
-
 
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
