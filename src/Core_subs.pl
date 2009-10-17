@@ -1168,6 +1168,12 @@ sub generate_setup {
 
 	$debug2 and print "&generate_setup\n";
 
+{ no warnings;
+my $i = 410;
+sub get_chain_id { "J".++$i }
+}
+	
+
 
 	%inputs = %outputs 
 			= %post_input 
@@ -1256,14 +1262,33 @@ loop - loop     : input output
 		}
 		# case 5,6:   loop to ( reserved | loop) 
 		elsif(::Graph::is_a_loop($a)){
+			say "cases 5,6";
+
+			my $chain;
 			if($::Graph::reserved{$b}){
 				say "$a-$b: loop to reserved";
+
+				# output entry
+				$chain = $dispatch{$b}->($a);
+
 			} elsif (::Graph::is_a_loop($b)){
 				say "$a-$b: loop to loop";
+
+				# output entry
+				$dispatch{loop_sink}->($chain,$b)
+
 			} else {croak qq(edge $a-$b, "$b": expected reserved or loop); }
+
+			# input entry
+			
+			my $id = loop($a);
+			$inputs{loop}{$id} //= [];
+			push @{$inputs{loop}{$id}}, $chain;
+
 		}
 		# case 7,8:     reserved to ( loop | reserved)
 		elsif($::Graph::reserved{$a}){
+			say "cases 7,8";
 			if(::Graph::is_a_loop($b)){
 				say "$a-$b: reserved to loop";
 			} elsif( ::Graph::reserved{$b}){
@@ -1311,7 +1336,7 @@ loop - loop     : input output
 	} $g->edges_to("wav_out");
 	
 =cut
-	
+=comment	
 	my @tracks = ::Track::all();
 
 	shift @tracks; # drop Master
@@ -1338,7 +1363,6 @@ loop - loop     : input output
 		
 		map { $_->apply() } ::UserBus::all();
 
-
 		#map{ eliminate_loops1($_) } all_chains();
 		#eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
@@ -1347,9 +1371,10 @@ loop - loop     : input output
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 
+=cut
 		write_chains();
-		return 1;
-	} else { print "No inputs found!\n"; return 0};
+#		return 1;
+#	} else { print "No inputs found!\n"; return 0};
 1;
 }
 %dispatch = (
@@ -1357,28 +1382,24 @@ loop - loop     : input output
 	wav_out			=> sub {
 		say "wav_out";
 		my $name = shift;
+		say "name: $name";
 		# case 1: name is loop
 		if( ::Graph::is_a_loop($name)){
+		say "$name: is a loop";
 			my $attr = $g->get_edge_attributes($name,'wav_out');	
 			my ($type,$id,$chain, $pre_output) ;
-			$name = loop($name);
 			if (defined $attr){
 				say yaml_out($attr);
 				my %att = %{$attr};
 				($type,$id,$chain, $pre_output) = @att{qw(type id chain pre_output)};
-				# input entry
-				$inputs{loop}{$name} //= [];
-				push @{$inputs{loop}{$name}}, $chain;
-
 				# output entry
 				$pre_output{$chain} = $pre_output;
 				$outputs{$type}{$id} //= [];
 				push @{$outputs{$type}{$id}}, $chain;
 
-			
-
 			} else { say "$name-wav_out: no file attributes found" }
 			
+		return $chain;
 		}
 		# case 2: name is 'soundcard_in'
 		# case 3: name is 'jack_client_in'
@@ -1400,20 +1421,23 @@ loop - loop     : input output
 	null_out		=> sub {},
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
-	soundcard_in	=> sub { my ($name) = shift;
-							 my ($type, $id) = @{$tn{$name}->soundcard_input};
-							 add_entry('inputs',$type,$id,chain($name));	
-							 if (my $track = $tn{$name}){
-								$post_input{$track->n} = 
-										$track->rec_route .
-										$track->mono_to_stereo 
-							 }
-							},
+	soundcard_in	=> sub { 
+		my ($name) = shift;
+		my ($type, $id) = @{$tn{$name}->soundcard_input};
+		add_entry('inputs',$type,$id,chain($name));	
+		if (my $track = $tn{$name}){
+			$post_input{$track->n} = $track->rec_route .  $track->mono_to_stereo 
+		}
+		},
 							
-	soundcard_out	=> sub { my ($name) = shift;
-							 my ($type, $id) = @{soundcard_output()};
-							 add_entry('outputs',$type,$id,chain($name));	
-							},
+	soundcard_out	=> sub { 
+		my ($name) = shift;
+		my ($type, $id) = @{soundcard_output()};
+		$outputs{$type}{$id} //= [];
+		my $chain = get_chain_id();
+		push @{$outputs{$type}{$id}},$chain;
+		$chain;
+		},
 	);
 							
 sub chain {
