@@ -1179,7 +1179,7 @@ sub generate_setup {
 	# we don't want to go further unless there are signals
 	# to process
 
-	my $g = Graph->new();
+	$g = Graph->new();
 
 	map{ my $t = $tn{$_};
 		if($t->rec_status ne 'OFF'){
@@ -1205,9 +1205,13 @@ sub generate_setup {
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 			my @e = (($mastering_mode ? 'Boost' : 'Master'), 'wav_out');
 			$g->add_edge(@e);
-			$g->set_edge_attributes(@e,
-				{ file   => $tn{Mixdown}->full_path,
-				  format => $mix_to_disk_format, });
+			$g->set_edge_attributes(@e, {
+				  type			=> 'file',
+				  id			=> $tn{Mixdown}->full_path,
+				  pre_output	=> "-f:$mix_to_disk_format",
+				  chain			=> "Mixdown" }); 
+		# no effects will be applied because effects are on chain 2
+												 
 	}
 
 	say "The graph is $g";
@@ -1215,6 +1219,63 @@ sub generate_setup {
 	::Graph::expand_graph($g);
 
 	say "The graph is $g";
+=comment
+
+we want to deal with edges:
+
+reserved - track: input 	
+loop - track    : input		
+track - loop    : output
+track - reserved: output
+reserved - loop : input output
+reserved - reserved : input output 
+loop - reserved : input output
+loop - loop     : input output
+
+=cut 
+
+	map { my ($a,$b) = @$_;
+
+		# cases 1,2:  track to ( loop | reserved )
+		if($tn{$a}){ 
+		say "cases 1,2";
+			if(::Graph::is_a_loop($b)){
+				$dispatch{loop_sink}->($a,$b);
+			} elsif ( $::Graph::reserved{$b} ){
+				$dispatch{$b}->($a);
+			} else {croak qq(edge $a-$b, "$b:" expected loop or reserved); }
+		}
+		# cases 3,4:  ( loop | reserved ) to track
+		elsif($tn{$b}){
+		say "cases 3,4";
+			if(::Graph::is_a_loop($a)){
+				$dispatch{loop_source}->($b,$a);
+			} elsif ( $::Graph::reserved{$a} ){
+				$dispatch{$a}->($b);
+			} else {croak qq(edge $a-$b, "$a": expected loop or reserved); }
+		}
+		# case 5,6:   loop to ( reserved | loop) 
+		elsif(::Graph::is_a_loop($a)){
+			if($::Graph::reserved{$b}){
+				say "$a-$b: loop to reserved";
+			} elsif (::Graph::is_a_loop($b)){
+				say "$a-$b: loop to loop";
+			} else {croak qq(edge $a-$b, "$b": expected reserved or loop); }
+		}
+		# case 7,8:     reserved to ( loop | reserved)
+		elsif($::Graph::reserved{$a}){
+			if(::Graph::is_a_loop($b)){
+				say "$a-$b: reserved to loop";
+			} elsif( ::Graph::reserved{$b}){
+				say "$a-$b: reserved to reserved";
+			} else { croak qq(edge: $a-$b, "$b": expected loop or reserved) }
+			
+		}
+		else { croak qq(edge $a-$b, fell through dispatch tree); }
+	} $g->edges;
+ 
+=comment
+
 
 	# deals only with registered track names
 	map{ 
@@ -1224,11 +1285,32 @@ sub generate_setup {
 		generate_io($g, 'input',  $_, $g->predecessors($_)); # we expect only one
 		generate_io($g, 'output', $_, $g->successors(  $_)); # we expect only one
 
-	#	map{ loop/soundcard_out/jack_client_out } $g->edges_from{$t}
-
 	} grep{ $tn{$_} } $g->vertices; 
-
-	# map{  } non_track edges	
+	say "non track edges";
+	map{ my($a,$b) = @{$_}; 
+		say "$a-$b";
+		generate_io($g, 'output', $a, $b);
+		#$::Graph::reserved{$b} ;
+		#$dispatch{$b}
+		
+	} grep{my($a,$b) = @{$_}; ! $tn{$a} and ! $tn{$b};} 
+	$g->edges;
+=cut
+=comment
+	say "non-track to soundcard edges";
+	map{ my($a,$b) = @{$_}; 
+		say "$a-$b";
+		my $attr = $g->get_edge_attributes($a,$b);
+		say yaml_out($attr) if ref $attr;
+		
+	} grep{my($a,$b) = @{$_}; ! $tn{$a} and $b eq 'soundcard_out'} 
+	$g->edges;
+	map{ my($a,$b) = @{$_}; 
+		say "$a-$b";
+		generate_io($g, 'output', $a, $b);
+	} $g->edges_to("wav_out");
+	
+=cut
 	
 	my @tracks = ::Track::all();
 
@@ -1244,8 +1326,8 @@ sub generate_setup {
 
 		# process system buses
 
-		$debug and print "applying mixdown_bus\n";
-		$mixdown_bus->apply; 
+	#	$debug and print "applying mixdown_bus\n";
+	#	$mixdown_bus->apply; 
 		$debug and print "applying main_bus (user tracks)\n";
 		$main_bus->apply;
 		$debug and print "applying null_bus (user tracks)\n";
@@ -1272,7 +1354,36 @@ sub generate_setup {
 }
 %dispatch = (
  	wav_in 			=> sub {},
-	wav_out			=> sub {},
+	wav_out			=> sub {
+		say "wav_out";
+		my $name = shift;
+		# case 1: name is loop
+		if( ::Graph::is_a_loop($name)){
+			my $attr = $g->get_edge_attributes($name,'wav_out');	
+			my ($type,$id,$chain, $pre_output) ;
+			$name = loop($name);
+			if (defined $attr){
+				say yaml_out($attr);
+				my %att = %{$attr};
+				($type,$id,$chain, $pre_output) = @att{qw(type id chain pre_output)};
+				# input entry
+				$inputs{loop}{$name} //= [];
+				push @{$inputs{loop}{$name}}, $chain;
+
+				# output entry
+				$pre_output{$chain} = $pre_output;
+				$outputs{$type}{$id} //= [];
+				push @{$outputs{$type}{$id}}, $chain;
+
+			
+
+			} else { say "$name-wav_out: no file attributes found" }
+			
+		}
+		# case 2: name is 'soundcard_in'
+		# case 3: name is 'jack_client_in'
+		# case 4: name is a track
+	},
 	loop_source => sub {
 		my ($name, $input) = @_; 
 		my $key1 = "loop";
@@ -1309,24 +1420,22 @@ sub chain {
 	my $name = shift;
 	$tn{$name} ? $tn{$name}->n : $name;
 }
+sub loop {
+	my $name = shift;
+	"loop,$name"
+}
 
 
 sub generate_io {
+
+	# we generate chain halves: X to track, and track to Y
+	# one half in each call to this sub.
+	
+	# 	
 	my ($g, $dir, $name, $io) = @_;
 	say ("$name: no $dir found."), return unless $io;
 	# we get loop identity from $io
-	# we get all others from $track
-	my @edge = $dir eq 'input' ? ($io, $name) : ($name, $io);
-	say "edge @edge";
-	my $attr = $g->get_edge_attributes(@edge);
-	if ( defined $attr and %$attr ){ 
-	# override normal dispatch system if edge contains entries
-	
-		#my $entries = $attr->{ios};
-		#map { add_entry('',$_->{type}, $_->{$id}, $_->{$chain} } @$entries;
-		#return
-	} 
-	# special case for loops
+	# we get all other datas from $track (via $name)
 	if (::Graph::is_a_loop($io)){
 		$dispatch{ 
 			 $dir eq 'input' ? 'loop_source' : 'loop_sink' 
@@ -1335,13 +1444,68 @@ sub generate_io {
 		$dispatch{$io}->($name);
 	}
 }
+
+=comment
+sub generate_special_chains
+	my @edge = $dir eq 'input' ? ($io, $name) : ($name, $io);
+	say "edge @edge";
+	my $attr = $g->get_edge_attributes(@edge);
+
+	# override normal dispatch system if edge contains entries
+	if ( ref $attr ){ 
+	say "attr: ", yaml_out($attr);
+	
+ 		#my $entries = $attr->{$io};
+ 		map { 
+		add_entry($dir.'s',$_->{type}, $_->{id}, $_->{chain}) } $attr;
+		#@$entries;
+ 		return
+	} 
+=cut
+
+sub push_onto {
+
+	# initialize reference to empty array if needed
+	# and push elements onto array
+	
+	# synopsis:
+	# push_onto('$a{b}{c}',1..6);
+	# say scalar @{$a{b}{c}}; # 6
+	
+	my ($sref, @items) = @_;
+	eval "ref $sref" or eval "$sref = []";
+	my $ref = eval $sref;
+	#say ref $ref;
+	push @{$ref}, @items;
+}
+	
 sub add_entry {
-	no strict "refs";
-	our $dir = shift;
+	say join " ", "add entry: ",@_;
+	my $dir = shift;
 	my($type, $id, $chain) = @_;
-	my $cmd = q(push @{ $) . $dir. q({$type}{$id} }, $chain;) ;
+	if ($dir eq 'inputs'){
+		$inputs{$type}{$id} //= [];	
+		push @{ $inputs{$type}{$id} }, $chain;
+	}
+	elsif ($dir eq 'outputs'){
+		$outputs{$type}{$id} //= [];	
+		push @{ $outputs{$type}{$id} }, $chain;
+	}
+	else {croak "illegal dir: $dir" }
+=comment
+	my $ref_string = q($).$dir.qq({$type}{$id});
+	say $ref_string;
+	#$inputs{device}{consumer} //= [];
+	say eval "ref $ref_string";
+	my $cmd = "$ref_string //= [];";
 	say $cmd;
 	eval $cmd;
+	croak qq(eval failed: "$cmd". Error: $@);
+	$cmd = qq(push \@{$ref_string}, $chain;) ;
+	say $cmd;
+	eval $cmd;
+	croak qq(eval failed: "$cmd". Error: $@);
+=cut
 }
 sub soundcard_output {
  	$::jack_running 
