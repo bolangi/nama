@@ -1161,6 +1161,7 @@ sub really_recording {
 	keys %{$outputs{file}}; 
 }
 
+my $i;
 sub generate_setup { 
 
 	# Create data structures representing chain setup.
@@ -1168,10 +1169,9 @@ sub generate_setup {
 
 	$debug2 and print "&generate_setup\n";
 
-{ no warnings;
-my $i = 410;
+$i = 410;
 sub get_chain_id { "J".++$i }
-}
+
 	
 
 
@@ -1194,7 +1194,12 @@ sub get_chain_id { "J".++$i }
 					? 'soundcard_in'
 					: $t->source_type
 				, $t->name) if $t->rec_status eq 'REC';
-			#$g->add_edge($t->name, 'wav_out') if $t->rec_status eq 'REC';
+			if ($t->rec_status eq 'REC' and !  $t->rec_defeat){
+				# add soundcard -> wav_out link
+				# currently accomplished using rec_file
+				#$g->add_edge($t->name, 'wav_out');
+			}
+
 			$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
 			$g->add_edge($t->name, 'Master');
 		}
@@ -1218,7 +1223,17 @@ sub get_chain_id { "J".++$i }
 				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
+	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
+			my @e = qw(wav_in Mixdown soundcard_out);
+			$g->add_path(@e);
+# 			$g->set_edge_attributes(@e, {
+# 				  type			=> 'file',
+# 				  id			=> $tn{Mixdown}->full_path,
+# 				  chain			=> "Mixdown" }); 
+		# no effects will be applied because effects are on chain 2
 	}
+												 
+			
 
 	say "The graph is $g";
 
@@ -1299,47 +1314,10 @@ loop - loop     : input output
 		else { croak qq(edge $a-$b, fell through dispatch tree); }
 	} $g->edges;
  
-=comment
-
-
-	# deals only with registered track names
-	map{ 
-		say "track: $_";
-		say join " ", "predecessors:", $g->predecessors($_);
-		say join " ", "successors:", $g->successors($_);
-		generate_io($g, 'input',  $_, $g->predecessors($_)); # we expect only one
-		generate_io($g, 'output', $_, $g->successors(  $_)); # we expect only one
-
-	} grep{ $tn{$_} } $g->vertices; 
-	say "non track edges";
-	map{ my($a,$b) = @{$_}; 
-		say "$a-$b";
-		generate_io($g, 'output', $a, $b);
-		#$::Graph::reserved{$b} ;
-		#$dispatch{$b}
-		
-	} grep{my($a,$b) = @{$_}; ! $tn{$a} and ! $tn{$b};} 
-	$g->edges;
-=cut
-=comment
-	say "non-track to soundcard edges";
-	map{ my($a,$b) = @{$_}; 
-		say "$a-$b";
-		my $attr = $g->get_edge_attributes($a,$b);
-		say yaml_out($attr) if ref $attr;
-		
-	} grep{my($a,$b) = @{$_}; ! $tn{$a} and $b eq 'soundcard_out'} 
-	$g->edges;
-	map{ my($a,$b) = @{$_}; 
-		say "$a-$b";
-		generate_io($g, 'output', $a, $b);
-	} $g->edges_to("wav_out");
-	
-=cut
-=comment	
 	my @tracks = ::Track::all();
 
 	shift @tracks; # drop Master
+	shift @tracks; # drop Mixdown
 
 	my $have_source = join " ", map{$_->name} 
 								grep{ $_ -> rec_status ne 'OFF'} 
@@ -1371,15 +1349,24 @@ loop - loop     : input output
 		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 
-=cut
 		write_chains();
-#		return 1;
-#	} else { print "No inputs found!\n"; return 0};
+ 		return 1;
+ 	} else { print "No inputs found!\n"; return 0};
 1;
 }
 %dispatch = (
- 	wav_in 			=> sub {},
-	wav_out			=> sub {
+ 	wav_in => sub {
+		my $name = shift;
+		say "wav_in: $name";
+		if (my $t = $tn{$name}){
+			my ($type, $id) = ('file',$t->full_path);
+			$inputs{$type}{$id} //= [];
+			push @{$inputs{$type}{$id}}, $t->n;
+			my $mts = $t->mono_to_stereo;
+			$post_input{$t->n} = $mts if $mts;
+		} else { croak "$name: cannot create wav_in entry without track"}
+	},
+	wav_out	=> sub {
 		say "wav_out";
 		my $name = shift;
 		say "name: $name";
@@ -1434,7 +1421,7 @@ loop - loop     : input output
 		my ($name) = shift;
 		my ($type, $id) = @{soundcard_output()};
 		$outputs{$type}{$id} //= [];
-		my $chain = get_chain_id();
+		my $chain = $tn{$name} ? $tn{$name}->n : get_chain_id();
 		push @{$outputs{$type}{$id}},$chain;
 		$chain;
 		},
@@ -1469,25 +1456,8 @@ sub generate_io {
 	}
 }
 
-=comment
-sub generate_special_chains
-	my @edge = $dir eq 'input' ? ($io, $name) : ($name, $io);
-	say "edge @edge";
-	my $attr = $g->get_edge_attributes(@edge);
 
-	# override normal dispatch system if edge contains entries
-	if ( ref $attr ){ 
-	say "attr: ", yaml_out($attr);
-	
- 		#my $entries = $attr->{$io};
- 		map { 
-		add_entry($dir.'s',$_->{type}, $_->{id}, $_->{chain}) } $attr;
-		#@$entries;
- 		return
-	} 
-=cut
-
-sub push_onto {
+sub push_onto { # I wish
 
 	# initialize reference to empty array if needed
 	# and push elements onto array
