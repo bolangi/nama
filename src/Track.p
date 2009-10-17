@@ -241,7 +241,7 @@ sub maybe_monitor {
 
 	# I don't want the dependency on $::mon_setup status
 	# although it could be helpful for diagnostic and UI purposes
-	return 'MON' if $monitor_version and $::mon_setup->status;
+	return 'MON' if $monitor_version; # and $::mon_setup->status;
 	return 'OFF';
 }
 
@@ -809,15 +809,13 @@ use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 						
 );
-sub ch_count {
-	my $track = shift;
-	$::tn{$track->target}->ch_count;
-}
-sub rec_status {
-	my $track = shift;
-	$::tn{$track->target}->rec_status ne 'OFF' ? 'MON' : 'OFF';
-}
-sub monitor_version { undef }
+sub ch_count { $::tn{$_[0]->target}->ch_count }
+sub rec_status { $::tn{$_[0]->target}->rec_status }
+sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
+sub rec_route { $::tn{$_[0]->target}->rec_route }
+sub source_input { $::tn{$_[0]->target}->source_input} 
+sub full_path { $::tn{$_[0]->target}->full_path} 
+sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
 
 # ---------- Group -----------
 
