@@ -6,8 +6,10 @@ use vars qw(%reserved);
 %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out null_in null_out);
 my $debug = 0;
 my %seen;
+my @anon_tracks;
 
 sub expand_graph {
+	@anon_tracks = ();
 	my $g = shift; 
 	%seen = ();
 	map{ my($a,$b) = @{$_}; 
@@ -55,13 +57,33 @@ sub add_loop {
 sub insert_near_side_loop {
 	my ($g, $a, $b) = @_;
 	$debug and say "$a-$b: insert near side loop";
+	my $j = 'N';
 	map{
 		$debug and say "deleting edge: $a-$_";
-		my $attr = $g->get_edge_attributes($a,$_);
+		#my $attr = $g->get_edge_attributes($a,$_);
+
+		# insert loop in every case
 		$g->delete_edge($a,$_);
-		$debug and say "adding path: $a " , out_loop($a), " $_";
-		$g->add_path($a,out_loop($a),$_);
-		$g->set_edge_attributes(out_loop($a),$_,$attr) if ref $attr;
+		#$debug and say "adding path: $a " , out_loop($a), " $_";
+		$g->add_edge($a,out_loop($a));
+
+		# add second arm if successor is track
+		if ( $::tn{$_} ){ $g->add_edge(out_loop($a), $_) }
+
+		# insert anon track if successor is non-track
+		else {  
+
+			my $n = $j++ . $::tn{$a}->n;
+			my $anon = ::AnonSlaveTrack->new( 
+				target => $a,
+				n => $n,
+				name => $n);
+			push @anon_tracks, $anon;
+
+			$g->add_path(out_loop($a),$anon->name,$_);
+		}
+
+		#$g->set_edge_attributes(out_loop($a),$_,$attr) if ref $attr;
 		#my $att = $g->get_edge_attributes(out_loop($a),$_);
 		#say ::yaml_out($att) if ref $att;
 		$seen{"$a-$_"}++
@@ -71,11 +93,30 @@ sub insert_near_side_loop {
 sub insert_far_side_loop {
 	my ($g, $a, $b) = @_;
 	$debug and say "$a-$b: insert far side loop";
+	my $j = 'A';
 	map{
 		$debug and say "deleting edge: $_-$b";
 		$g->delete_edge($_,$b);
-		$debug and say "adding path: $_ " , in_loop($b), " $b";
-		$g->add_path($_,in_loop($b),$b);
+
+		# insert loop in every case
+		$g->add_edge(in_loop($b),$b);
+
+		# add second arm if predecessor is track
+		if ( $::tn{$_} ){ $g->add_edge($_, in_loop($b)) }
+
+		# insert anon track if successor is non-track
+		else {  
+
+			my $n = $j++ . $::tn{$b}->n;
+			my $anon = ::AnonSlaveTrack->new( 
+				target => $b,
+				n => $n,
+				name => $n);
+			push @anon_tracks, $anon;
+
+			$g->add_path($_, $anon->name, in_loop($b));
+		}
+
 		$seen{"$_-$b"}++
 	} $g->predecessors($b);
 }

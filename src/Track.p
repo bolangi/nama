@@ -706,18 +706,6 @@ sub select_output {
 
 # the following subroutines support IO objects
 
-
-sub modify_rules_list {
-	my $track = shift;
-	my @rules = @_;
-	my %have;
-	map { $have{$_}++ } @rules;
-	map { push @rules, $_ unless $have{$_} } split " ", $track->rules_add;
-	my %skip;
-	map { $skip{$_}++ } split " ", $track->rules_skip;
-	grep { ! $skip{$_} } @rules;
-}
-
 sub region_start {
 	my $track = shift;
 	::Mark::mark_time( $track->{region_start} )
@@ -833,17 +821,10 @@ If we delete them after each setup, and reset the ::Track
 index, we will never see them in the show_tracks display
 so won't need to hide them.
 
-Each track may have two anon tracks (input side
-and output side) so we need to add 'chain_prefix'
-field.
+Each track may have two or more anon tracks (input side
+and output side), so we use incrementing names:
 
-We won't be able to access this track by index
-since we will use the 'n' field for the chain_id,
-not the actual track index. So no effects
-are possible. 
-
-Questionable if this will work. Simplest, tho,
-if it does.
+[incrementing letter] + [track index n]
 
 =cut
 our @ISA = '::SlaveTrack';
@@ -851,10 +832,7 @@ use ::Object qw(
 
 [% qx(./strip_all ./track_fields) %]
 
-chain_prefix
-
-)
-sub n { $_[0]->chain_prefix . $::tn{$_[0]->target}->n }
+);
 						
 # ---------- Group -----------
 

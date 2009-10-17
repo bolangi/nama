@@ -101,7 +101,7 @@ sub apply {
 		$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
 			}
 
-		} $track->modify_rules_list( @{ $bus->rules } );
+		} @{ $bus->rules } );
 	} @tracks; 
 }
 # the following is utility code, not an object method

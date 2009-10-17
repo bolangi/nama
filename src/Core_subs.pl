@@ -1081,6 +1081,10 @@ sub generate_setup {
 
 	$debug2 and print "&generate_setup\n";
 
+
+my @temp_tracks; 
+my $track_n = $::Track::n; # restore before exit sub
+
 $i = 410;
 sub get_chain_id { "J".++$i }
 
@@ -1126,14 +1130,17 @@ sub get_chain_id { "J".++$i }
 	} else { $g->add_edge('Master','soundcard_out') }
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-			my @e = (($mastering_mode ? 'Boost' : 'Master'), 'wav_out');
-			$g->add_edge(@e);
+			#$tn{Mixdown}->set(format => 
+			my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+			$g->add_path(@p);
+=comment
 			$g->set_edge_attributes(@e, {
 				  type			=> 'file',
 				  id			=> $tn{Mixdown}->full_path,
 				  pre_output	=> "-f:$mix_to_disk_format",
 				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
+=cut
 												 
 	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
 			my @e = qw(wav_in Mixdown soundcard_out);
@@ -1149,7 +1156,7 @@ sub get_chain_id { "J".++$i }
 
 	say "The graph is $g";
 
-	::Graph::expand_graph($g);
+	@temp_tracks = ::Graph::expand_graph($g);
 
 	say "The graph is $g";
 =comment
@@ -1160,14 +1167,15 @@ reserved - track: input
 loop - track    : input		
 track - loop    : output
 track - reserved: output
-reserved - loop : input output
-reserved - reserved : input output 
-loop - reserved : input output
-loop - loop     : input output
+reserved - loop : input output # eliminated
+reserved - reserved : input output # eliminated
+loop - reserved : input output # eliminated
+loop - loop     : input output # eliminianted
 
 =cut 
 
 	map { my ($a,$b) = @$_;
+		  say "edge $a-$b";
 
 		# cases 1,2:  track to ( loop | reserved )
 		if($tn{$a}){ 
@@ -1176,7 +1184,7 @@ loop - loop     : input output
 				$dispatch{loop_sink}->($a,$b);
 			} elsif ( $::Graph::reserved{$b} ){
 				$dispatch{$b}->($a);
-			} else {croak qq(edge $a-$b, "$b:" expected loop or reserved); }
+			} else {croak qq("$b:" expected loop or reserved); }
 		}
 		# cases 3,4:  ( loop | reserved ) to track
 		elsif($tn{$b}){
@@ -1185,45 +1193,9 @@ loop - loop     : input output
 				$dispatch{loop_source}->($b,$a);
 			} elsif ( $::Graph::reserved{$a} ){
 				$dispatch{$a}->($b);
-			} else {croak qq(edge $a-$b, "$a": expected loop or reserved); }
+			} else {croak qq("$a": expected loop or reserved); }
 		}
-		# case 5,6:   loop to ( reserved | loop) 
-		elsif(::Graph::is_a_loop($a)){
-			say "cases 5,6";
-
-			my $chain;
-			if($::Graph::reserved{$b}){
-				say "$a-$b: loop to reserved";
-
-				# output entry
-				$chain = $dispatch{$b}->($a);
-
-			} elsif (::Graph::is_a_loop($b)){
-				say "$a-$b: loop to loop";
-
-				# output entry
-				$dispatch{loop_sink}->($chain,$b)
-
-			} else {croak qq(edge $a-$b, "$b": expected reserved or loop); }
-
-			# input entry
-			
-			my $id = loop($a);
-			$inputs{loop}{$id} //= [];
-			push @{$inputs{loop}{$id}}, $chain;
-
-		}
-		# case 7,8:     reserved to ( loop | reserved)
-		elsif($::Graph::reserved{$a}){
-			say "cases 7,8";
-			if(::Graph::is_a_loop($b)){
-				say "$a-$b: reserved to loop";
-			} elsif( ::Graph::reserved{$b}){
-				say "$a-$b: reserved to reserved";
-			} else { croak qq(edge: $a-$b, "$b": expected loop or reserved) }
-			
-		}
-		else { croak qq(edge $a-$b, fell through dispatch tree); }
+		else { croak qq(fell through dispatch tree); }
 	} $g->edges;
  
 	my @tracks = ::Track::all();
@@ -1270,39 +1242,23 @@ loop - loop     : input output
  	wav_in => sub {
 		my $name = shift;
 		say "wav_in: $name";
-		if (my $t = $tn{$name}){
-			my ($type, $id) = ('file',$t->full_path);
-			$inputs{$type}{$id} //= [];
-			push @{$inputs{$type}{$id}}, $t->n;
-			my $mts = $t->mono_to_stereo;
-			$post_input{$t->n} = $mts if $mts;
-		} else { croak "$name: cannot create wav_in entry without track"}
+		my $t = $tn{$name};
+		my ($type, $id) = ('file',$t->full_path);
+		$inputs{$type}{$id} //= [];
+		push @{$inputs{$type}{$id}}, $t->n;
+		my $mts = $t->mono_to_stereo;
+		$post_input{$t->n} = $mts if $mts;
 	},
 	wav_out	=> sub {
 		say "wav_out";
 		my $name = shift;
 		say "name: $name";
-		# case 1: name is loop
-		if( ::Graph::is_a_loop($name)){
-		say "$name: is a loop";
-			my $attr = $g->get_edge_attributes($name,'wav_out');	
-			my ($type,$id,$chain, $pre_output) ;
-			if (defined $attr){
-				say yaml_out($attr);
-				my %att = %{$attr};
-				($type,$id,$chain, $pre_output) = @att{qw(type id chain pre_output)};
-				# output entry
-				$pre_output{$chain} = $pre_output;
-				$outputs{$type}{$id} //= [];
-				push @{$outputs{$type}{$id}}, $chain;
-
-			} else { say "$name-wav_out: no file attributes found" }
-			
-		return $chain;
-		}
-		# case 2: name is 'soundcard_in'
-		# case 3: name is 'jack_client_in'
-		# case 4: name is a track
+		my $t = $tn{$name};
+		my ($type, $id) = ('file',$t->full_path);
+		$outputs{$type}{$id} //= [];
+		push @{$outputs{$type}{$id}}, $t->n;
+		$pre_output{$t->n} = $t->name eq 'Mixdown' 
+			?  $mix_to_disk_format : $raw_to_disk_format;
 	},
 	loop_source => sub {
 		my ($name, $input) = @_; 
