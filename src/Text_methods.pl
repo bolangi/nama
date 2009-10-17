@@ -505,7 +505,7 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
-	$main_out->set(status => 0);
+	#$main_out->set(status => 0); # TODO turn off audio
 	$tn{Master}->set(rw => 'MON');
 	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
 		$ecasound_globals_for_mixdown; 
@@ -514,7 +514,6 @@ sub mixplay {
 	print "Setting mixdown playback mode.\n";
 	$tn{Mixdown}->set(rw => 'MON');
 	$main->set(rw => 'OFF');
-	$tn{Master}->set(rw => 'OFF');
 	$ecasound_globals_ecs = $ecasound_globals;
 }
 sub mixoff { 
