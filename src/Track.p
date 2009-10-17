@@ -198,7 +198,7 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->hide 
+		# or $track->hide 
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
@@ -803,7 +803,7 @@ sub group_last {0}
 sub version {0}
 
 package ::SlaveTrack; # for instrument monitor bus
-our @ISA = '::SimpleTrack';
+our @ISA = '::Track';
 use ::Object qw( 
 
 [% qx(./strip_all ./track_fields) %]
@@ -817,6 +817,12 @@ sub source_input { $::tn{$_[0]->target}->source_input}
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
 
+package ::SlaveTrack; # for instrument monitor bus
+our @ISA = '::SimpleTrack';
+use ::Object qw( 
+
+[% qx(./strip_all ./track_fields) %]
+						
 # ---------- Group -----------
 
 package ::Group;
