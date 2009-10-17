@@ -328,7 +328,7 @@ sub remove {
 	map{ ::remove_effect($_) } @{ $track->ops };
 	delete $by_index{$track->n};
 	delete $by_name{$track->name};
-	@all = grep{ $_->n != $track->n} @all;
+	@all = grep{ $_->name != $track->name} @all;
 }
 
 
@@ -817,11 +817,44 @@ sub source_input { $::tn{$_[0]->target}->source_input}
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
 
-package ::SlaveTrack; # for instrument monitor bus
-our @ISA = '::SimpleTrack';
+package ::AnonSlaveTrack; # for graph generation
+=comment
+we will create these tracks as necessary
+and delete them after generating the setup
+
+soundcard_in -> sax 
+soundcard_in -> loop,sax_in --> sax
+soundcard_in -> J3 -> loop,sax_in -> sax
+
+J3 will have all the information that sax has, and 
+a different chain ID based on sax.
+
+If we delete them after each setup, and reset the ::Track
+index, we will never see them in the show_tracks display
+so won't need to hide them.
+
+Each track may have two anon tracks (input side
+and output side) so we need to add 'chain_prefix'
+field.
+
+We won't be able to access this track by index
+since we will use the 'n' field for the chain_id,
+not the actual track index. So no effects
+are possible. 
+
+Questionable if this will work. Simplest, tho,
+if it does.
+
+=cut
+our @ISA = '::SlaveTrack';
 use ::Object qw( 
 
 [% qx(./strip_all ./track_fields) %]
+
+chain_prefix
+
+)
+sub n { $_[0]->chain_prefix . $::tn{$_[0]->target}->n }
 						
 # ---------- Group -----------
 
