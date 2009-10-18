@@ -27,6 +27,7 @@ sub expand_graph {
 		$b eq 'soundcard_out' and $g->successors($a) > 1
 	} $g->edges;
 	
+	@anon_tracks;
 }
 
 sub add_loop {

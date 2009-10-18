@@ -1082,8 +1082,6 @@ sub generate_setup {
 	$debug2 and print "&generate_setup\n";
 
 
-my @temp_tracks; 
-my $track_n = $::Track::n; # restore before exit sub
 
 $i = 410;
 sub get_chain_id { "J".++$i }
@@ -1130,25 +1128,18 @@ sub get_chain_id { "J".++$i }
 	} else { $g->add_edge('Master','soundcard_out') }
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-			#$tn{Mixdown}->set(format => 
 			my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 			$g->add_path(@p);
-=comment
-			$g->set_edge_attributes(@e, {
-				  type			=> 'file',
-				  id			=> $tn{Mixdown}->full_path,
+			$g->set_vertex_attributes('Mixdown', {
 				  pre_output	=> "-f:$mix_to_disk_format",
 				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
-=cut
 												 
 	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
 			my @e = qw(wav_in Mixdown soundcard_out);
 			$g->add_path(@e);
-# 			$g->set_edge_attributes(@e, {
-# 				  type			=> 'file',
-# 				  id			=> $tn{Mixdown}->full_path,
-# 				  chain			=> "Mixdown" }); 
+			$g->set_vertex_attributes('Mixdown', {
+ 				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
 												 
@@ -1156,30 +1147,23 @@ sub get_chain_id { "J".++$i }
 
 	say "The graph is $g";
 
-	@temp_tracks = ::Graph::expand_graph($g);
+my $track_n = $::Track::n; # restore before exit sub
+my @temp_tracks = ::Graph::expand_graph($g);
 
 	say "The graph is $g";
-=comment
 
-we want to deal with edges:
-
-reserved - track: input 	
-loop - track    : input		
-track - loop    : output
-track - reserved: output
-reserved - loop : input output # eliminated
-reserved - reserved : input output # eliminated
-loop - reserved : input output # eliminated
-loop - loop     : input output # eliminianted
-
-=cut 
+# we deal with edges:
+# 
+# reserved - track: input 	
+# loop - track    : input		
+# track - loop    : output
+# track - reserved: output
 
 	map { my ($a,$b) = @$_;
 		  say "edge $a-$b";
 
 		# cases 1,2:  track to ( loop | reserved )
 		if($tn{$a}){ 
-		say "cases 1,2";
 			if(::Graph::is_a_loop($b)){
 				$dispatch{loop_sink}->($a,$b);
 			} elsif ( $::Graph::reserved{$b} ){
@@ -1188,7 +1172,6 @@ loop - loop     : input output # eliminianted
 		}
 		# cases 3,4:  ( loop | reserved ) to track
 		elsif($tn{$b}){
-		say "cases 3,4";
 			if(::Graph::is_a_loop($a)){
 				$dispatch{loop_source}->($b,$a);
 			} elsif ( $::Graph::reserved{$a} ){
@@ -1209,12 +1192,14 @@ loop - loop     : input output # eliminianted
 
 	#print "have source: $have_source\n";
 
+	# reset Track class
+	map{ $_->remove } @temp_tracks;
+	$::Track::n = $track_n;	
+
 	if ($have_source) {
 
 		# process system buses
 
-	#	$debug and print "applying mixdown_bus\n";
-	#	$mixdown_bus->apply; 
 		$debug and print "applying main_bus (user tracks)\n";
 		$main_bus->apply;
 		$debug and print "applying null_bus (user tracks)\n";
@@ -1225,7 +1210,6 @@ loop - loop     : input output # eliminianted
 		
 		map { $_->apply() } ::UserBus::all();
 
-		#map{ eliminate_loops1($_) } all_chains();
 		#eliminate_loops2() unless $mastering_mode;
 		#	or useful_Master_effects();
 
@@ -1243,57 +1227,91 @@ loop - loop     : input output # eliminianted
 		my $name = shift;
 		say "wav_in: $name";
 		my $t = $tn{$name};
-		my ($type, $id) = ('file',$t->full_path);
-		$inputs{$type}{$id} //= [];
-		push @{$inputs{$type}{$id}}, $t->n;
-		my $mts = $t->mono_to_stereo;
-		$post_input{$t->n} = $mts if $mts;
+		add_entry_h({
+			dir			=> 'inputs',
+			name		=> $name,  # for override
+			type 		=> 'file',
+			id	 		=> $t->full_path,
+			chain		=> $t->n,
+			post_input	=> $t->mono_to_stereo,
+		});
 	},
 	wav_out	=> sub {
 		say "wav_out";
 		my $name = shift;
 		say "name: $name";
 		my $t = $tn{$name};
-		my ($type, $id) = ('file',$t->full_path);
-		$outputs{$type}{$id} //= [];
-		push @{$outputs{$type}{$id}}, $t->n;
-		$pre_output{$t->n} = $t->name eq 'Mixdown' 
-			?  $mix_to_disk_format : $raw_to_disk_format;
+		add_entry_h({
+			dir			=> 'outputs',
+			name		=> $name,  # for override
+			type 		=> 'file',
+			id	 		=> $t->full_path,
+			chain		=> $t->n,
+			pre_output	=> signal_format($raw_to_disk_format, $t->ch_count),
+		});
 	},
 	loop_source => sub {
 		my ($name, $input) = @_; 
-		my $key1 = "loop";
-		my $key2 = "loop,$input";
-		add_entry('inputs', $key1, $key2, chain($name));
+		say "loop_source";
+		my $h = {
+			dir			=> 'inputs',
+			name		=> $name,  # for override
+			type 		=> 'loop',
+			id	 		=> "loop,$input",
+			chain		=> $tn{$name}->n,
+		};
+		add_entry_h($h);
 	},
 	loop_sink 		=> sub {
+		say "loop_sink";
 		my ($name, $output) = @_; 
-		my $key1 = "loop";
-		my $key2 = "loop,$output";
-		add_entry('outputs', $key1, $key2, chain($name));
+		my $h = {
+			dir			=> 'outputs',
+			name		=> $name,  # for override
+			type 		=> 'loop',
+			id	 		=> "loop,$output",
+			chain		=> $tn{$name}->n,
+		};
+		add_entry_h($h);
 	},
 	null_in			=> sub {},
 	null_out		=> sub {},
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
 	soundcard_in	=> sub { 
-		my ($name) = shift;
+		say "soundcard_in";
+		my $name = shift;
+		my $t = $tn{$name};
 		my ($type, $id) = @{$tn{$name}->soundcard_input};
-		add_entry('inputs',$type,$id,chain($name));	
-		if (my $track = $tn{$name}){
-			$post_input{$track->n} = $track->rec_route .  $track->mono_to_stereo 
-		}
-		},
-							
+		add_entry_h({
+			dir  	=> 'inputs',
+			name	=> $name,
+			type 	=> $type,
+			id		=> $id,
+			chain	=> $t->n,
+			post_input => $t->rec_route .  $t->mono_to_stereo, 
+		});
+	},
 	soundcard_out	=> sub { 
-		my ($name) = shift;
+		say "soundcard_out";
+		my $name = shift;
+		my $t = $tn{$name};
 		my ($type, $id) = @{soundcard_output()};
-		$outputs{$type}{$id} //= [];
-		my $chain = $tn{$name} ? $tn{$name}->n : get_chain_id();
-		push @{$outputs{$type}{$id}},$chain;
-		$chain;
-		},
+		add_entry_h({
+			dir  	=> 'outputs',
+			name	=> $name,
+			type 	=> $type,
+			id		=> $id,
+			chain	=> $t->n,
+		});
+	},
 	);
+sub override {
+	my ($hash_ref, $name) = @_;
+		my $attr = $g->get_vertex_attributes($name);
+		say "override: ", join " ",%$attr if $attr;
+		%$hash_ref = (%$hash_ref, %$attr) if $attr;
+}
 							
 sub chain {
 	my $name = shift;
@@ -1325,20 +1343,27 @@ sub generate_io {
 }
 
 
-sub push_onto { # I wish
+sub add_entry_h {
+	my $h = shift;
+	say "add_entry_h";
+	croak "is not a hash ref: $h" unless (ref $h) =~ /HASH/;
+	override($h,$h->{name});
+	say yaml_out($h);
+	my %hsh = %$h;
+	my($dir, $type, $id, $chain, $post_input, $pre_output) = 
+		@hsh{qw(dir type id chain post_input pre_output)};
+	if ($dir eq 'inputs'){
+		$inputs{$type}{$id} //= [];	
+		push @{ $inputs{$type}{$id} }, $chain;
+		$post_input{$chain} = $post_input if $post_input;
+	}
+	elsif ($dir eq 'outputs'){
+		$outputs{$type}{$id} //= [];	
+		push @{ $outputs{$type}{$id} }, $chain;
+		$pre_output{$chain} = $pre_output if $pre_output;
+	}
+	else {croak "illegal dir: $dir" }
 
-	# initialize reference to empty array if needed
-	# and push elements onto array
-	
-	# synopsis:
-	# push_onto('$a{b}{c}',1..6);
-	# say scalar @{$a{b}{c}}; # 6
-	
-	my ($sref, @items) = @_;
-	eval "ref $sref" or eval "$sref = []";
-	my $ref = eval $sref;
-	#say ref $ref;
-	push @{$ref}, @items;
 }
 	
 sub add_entry {
@@ -1490,7 +1515,7 @@ WARN
 
 		map {
 			my ($chain) = /(\d+)/;
-			my $track = $ti{$chain};
+			my $track = $ti{$chain} || $tn{$_}; # XXX special case
 			if ( $track->playat_output 
 					or $track->select_output
 					or $track->modifiers ){

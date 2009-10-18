@@ -325,10 +325,11 @@ sub pre_send {
 sub remove {
 	my $track = shift;
 #	$::ui->remove_track_gui($track->n); TODO
+	my $n = $track->n;
 	map{ ::remove_effect($_) } @{ $track->ops };
 	delete $by_index{$track->n};
 	delete $by_name{$track->name};
-	@all = grep{ $_->name != $track->name} @all;
+	@all = grep{ $_->n != $n} @all;
 }
 
 
