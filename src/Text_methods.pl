@@ -54,7 +54,7 @@ sub show_status {
 	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
 		map{ $tn{$_} } $main->tracks, q(Mixdown);
 	push @fields, "mixdown" 
-		if $tn{Mixdown}->rec_status eq 'REC' and $mix_down->status;
+		if $tn{Mixdown}->rec_status eq 'REC';
 	push @fields, "doodle" if $preview eq 'doodle';
 	push @fields, "preview" if $preview eq 'preview';
 	push @fields, "master" if $mastering_mode;

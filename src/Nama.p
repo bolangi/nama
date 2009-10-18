@@ -71,14 +71,6 @@ $yr = Data::YAML::Reader->new;
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
-## The names of helper loop_outputack devices:
-
-$loop_mix = 'loop,mix';
-$loop_output = 'loop,output';
-$loop_mastering = 'loop,mastering';
-$loop_crossover = 'loop,crossover';
-$loop_boost = 'loop,boost';
-
 # other initializations
 $unit = 1;
 $effects_cache_file = '.effects_cache';
@@ -96,6 +88,7 @@ $save_id = "State";
 $fade_time = 0.3;
 #$SIG{INT} = sub{ mute{$tn{Master}} if engine_running(); die "\nAborting.\n" };
 $old_snapshot = {};
+$main_out = 1; # enable main output
 
 jack_update(); # to be polled by Event
 $memoize = 0;

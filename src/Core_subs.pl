@@ -550,7 +550,7 @@ sub initialize_rules {
 		target			=> 'all', 
 		
 		input_type 		=> 'loop',
-		input_object	=> $loop_mix,
+		input_object	=> 'Master_in',
 
 		output_type		=> 'device',
 		output_object   => 'null',
@@ -687,7 +687,7 @@ $aux_send = ::Rule->new(
 		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
 		output_type		=>  'loop',
 		output_object	=>  sub{ my $track = shift; "loop,".  $track->group },
-		condition 		=>  1, # sub{ defined $inputs{loop}->{$loop_output} },
+		condition 		=>  1,
 		status			=>  1,
 		
 	);

@@ -251,13 +251,6 @@ our (
 	$old_bg, # initial background color.
 	$old_abg, # initial active background color
 
-
-	$loop_mix,  # loop_outputack nodes 
-	$loop_output,  
-	$loop_mastering, 
-	$loop_crossover,
-	$loop_boost,
-
 	@oids,	# output templates, are applied to the
 			# chains collected previously
 			# the results are grouped as
