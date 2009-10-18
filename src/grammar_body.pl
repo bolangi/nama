@@ -439,11 +439,11 @@ list_history: _list_history end {
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
 main_off: _main_off end { 
-	$::main_out->set(status => 0);
+	$::main_out = 0;
 1;
 } 
 main_on: _main_on end { 
-	$::main_out->set(status => 1);
+	$::main_out = 1;
 1;
 } 
 add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
