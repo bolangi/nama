@@ -478,21 +478,21 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$main->last, " \n";
+		join ' ',1..$::Group::by_name{Main}->last, " \n";
 
 			$version->radiobutton( 
 
 				-label => (''),
 				-value => 0,
 				-command => sub { 
-					$main->set(version => 0); 
+					$::Group::by_name{Main}->set(version => 0); 
 					$version->configure(-text => " ");
 					reconfigure_engine();
 					refresh();
 					}
 			);
 
- 	for my $v (1..$main->last) { 
+ 	for my $v (1..$::Group::by_name{Main}->last) { 
 
 	# the highest version number of all tracks in the
 	# $main group
@@ -508,7 +508,7 @@ sub global_version_buttons {
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
-					$main->set(version => $v); 
+					$::Group::by_name{Main}->set(version => $v); 
 					$version->configure(-text => $v);
 					reconfigure_engine();
 					refresh();

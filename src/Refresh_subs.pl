@@ -28,13 +28,13 @@ sub refresh_group {
 		my $status;
 		if ( 	grep{ $_->rec_status eq 'REC'} 
 				map{ $tn{$_} }
-				$main->tracks ){
+				$::Group::by_name{Main}->tracks ){
 
 			$status = 'REC'
 
 		}elsif(	grep{ $_->rec_status eq 'MON'} 
 				map{ $tn{$_} }
-				$main->tracks ){
+				$::Group::by_name{Main}->tracks ){
 
 			$status = 'MON'
 

@@ -392,7 +392,7 @@ our (
 	$fade_time, 	# duration for fadein(), fadeout()
 	$old_snapshot,  # previous status_snapshot() output
 					# to check if I need to reconfigure engine
-	$old_group_rw, # previous $main->rw setting
+	$old_group_rw, # previous $::Group::by_name{Main}->rw setting
 	%old_rw,       # previous track rw settings (indexed by track name)
 	
 	@mastering_track_names, # reserved for mastering mode
