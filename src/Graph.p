@@ -56,7 +56,7 @@ sub add_loop {
 }
 
 sub insert_near_side_loop {
-	my ($g, $a, $b) = @_;
+	my ($g, $a, $b, $loop) = @_;
 	$debug and say "$a-$b: insert near side loop";
 	my $j = 'a';
 	map{
@@ -65,11 +65,11 @@ sub insert_near_side_loop {
 
 		# insert loop in every case
 		$g->delete_edge($a,$_);
-		#$debug and say "adding path: $a " , out_loop($a), " $_";
-		$g->add_edge($a,out_loop($a));
+		#$debug and say "adding path: $a " , $loop, " $_";
+		$g->add_edge($a,$loop);
 
 		# add second arm if successor is track
-		if ( $::tn{$_} ){ $g->add_edge(out_loop($a), $_) }
+		if ( $::tn{$_} ){ $g->add_edge($loop, $_) }
 
 		# insert anon track if successor is non-track
 		else {  
@@ -81,18 +81,18 @@ sub insert_near_side_loop {
 				name => $n);
 			push @anon_tracks, $anon;
 
-			$g->add_path(out_loop($a),$anon->name,$_);
+			$g->add_path($loop,$anon->name,$_);
 		}
 
-		#$g->set_edge_attributes(out_loop($a),$_,$attr) if ref $attr;
-		#my $att = $g->get_edge_attributes(out_loop($a),$_);
+		#$g->set_edge_attributes($loop,$_,$attr) if ref $attr;
+		#my $att = $g->get_edge_attributes($loop,$_);
 		#say ::yaml_out($att) if ref $att;
 		$seen{"$a-$_"}++
 	} $g->successors($a);
 }
 
 sub insert_far_side_loop {
-	my ($g, $a, $b) = @_;
+	my ($g, $a, $b, $loop) = @_;
 	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
 	map{
@@ -100,10 +100,10 @@ sub insert_far_side_loop {
 		$g->delete_edge($_,$b);
 
 		# insert loop in every case
-		$g->add_edge(in_loop($b),$b);
+		$g->add_edge($loop,$b);
 
 		# add second arm if predecessor is track
-		if ( $::tn{$_} ){ $g->add_edge($_, in_loop($b)) }
+		if ( $::tn{$_} ){ $g->add_edge($_, $loop) }
 
 		# insert anon track if successor is non-track
 		else {  
@@ -115,7 +115,7 @@ sub insert_far_side_loop {
 				name => $n);
 			push @anon_tracks, $anon;
 
-			$g->add_path($_, $anon->name, in_loop($b));
+			$g->add_path($_, $anon->name, $loop);
 		}
 
 		$seen{"$_-$b"}++
