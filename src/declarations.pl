@@ -295,16 +295,6 @@ our (
 	$null_bus,
     $null, # group
 
-	# mastering buses
-	
-	# we will try to simplify buses... just rules
-	# tracks will be supplied to apply() method.
-	
-	$bypass_bus,
-	$mastering_stage1_bus,
-	$mastering_stage2_bus,
-	$mastering_stage3_bus,
-	
 	%ti, # track by index (alias %::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
 
