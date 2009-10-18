@@ -292,13 +292,8 @@ our (
 	
 	$main_bus, 
 	$main, # main_group
-	$master_bus, 
-	$master, # master_group
-	$mixdown_bus,
-	$mixdown,  # group
 	$null_bus,
     $null, # group
-	$mastering, # group
 
 	# mastering buses
 	
