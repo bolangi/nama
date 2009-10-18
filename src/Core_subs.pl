@@ -1066,7 +1066,7 @@ my $debug = 1;
 	$debug and say "The graph is $g";
 
 my $track_n = $::Track::n; # restore before exit sub
-my @temp_tracks = ::Graph::expand_graph($g);
+my $temp_tracks = ::Graph::expand_graph($g);
  # will need to remove insert-tracks from this list TODO
 
 	$debug and say "The expanded graph is $g";
@@ -1113,7 +1113,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 
 	# reset Track class
 	say "temp tracks to remove";
-	map{ say $_->name; $_->remove } @temp_tracks;
+	map{ say $_->name; $_->remove } @$temp_tracks;
 	$::Track::n = $track_n;	
 
 	if ($have_source) {

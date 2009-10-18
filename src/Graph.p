@@ -6,10 +6,10 @@ use vars qw(%reserved);
 %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out null_in null_out);
 my $debug = 0;
 my %seen;
-my @anon_tracks;
+my $anon_tracks;
 
 sub expand_graph {
-	@anon_tracks = ();
+	$anon_tracks = [];
 	my $g = shift; 
 	%seen = ();
 	
@@ -33,7 +33,7 @@ sub expand_graph {
 		$b eq 'soundcard_out' and $g->successors($a) > 1
 	} $g->edges;
 	
-	@anon_tracks;
+	$anon_tracks;
 }
 
 sub add_inserts {
@@ -62,27 +62,26 @@ sub add_loop {
 	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
-		push @anon_tracks, insert_near_side_loop($g,$a,$b, out_loop($a))
+		insert_near_side_loop($g,$a,$b, out_loop($a), $anon_tracks)
 	} elsif ($fan_in  > 1){
-		push @anon_tracks, insert_far_side_loop($g,$a,$b, in_loop($b))
+		insert_far_side_loop($g,$a,$b, in_loop($b), $anon_tracks)
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
 	# we expect a single user track to feed to Master_in 
 	# as multiple user tracks do
 	
 			$b eq 'Master' 
-				?  push @anon_tracks, insert_far_side_loop($g,$a,$b,in_loop($b))
+				?  insert_far_side_loop($g,$a,$b,in_loop($b), $anon_tracks)
 
 	# otherwise default to near_side ( *_out ) loops
-				: push @anon_tracks, insert_near_side_loop($g,$a,$b,out_loop($a));
+				: insert_near_side_loop($g,$a,$b,out_loop($a), $anon_tracks);
 
 	} else {croak "unexpected fan"};
 }
 
 sub insert_near_side_loop {
-	my ($g, $a, $b, $loop) = @_;
+	my ($g, $a, $b, $loop, $tracks_ref) = @_;
 	$debug and say "$a-$b: insert near side loop";
-	my @anon_tracks;
 	my $j = 'a';
 	map{
 		$debug and say "deleting edge: $a-$_";
@@ -103,7 +102,7 @@ sub insert_near_side_loop {
 			my $anon = ::AnonSlaveTrack->new( 
 				target => $a,
 				name => $n);
-			push @anon_tracks, $anon;
+			push @$tracks_ref, $anon;
 
 			$g->add_path($loop,$anon->name,$_);
 		}
@@ -113,12 +112,10 @@ sub insert_near_side_loop {
 		#say ::yaml_out($att) if ref $att;
 		$seen{"$a-$_"}++
 	} $g->successors($a);
-	@anon_tracks;
 }
 
 sub insert_far_side_loop {
-	my ($g, $a, $b, $loop) = @_;
-	my @anon_tracks;
+	my ($g, $a, $b, $loop, $tracks_ref) = @_;
 	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
 	map{
@@ -139,14 +136,13 @@ sub insert_far_side_loop {
 				target => $b,
 				n => $n,
 				name => $n);
-			push @anon_tracks, $anon;
+			push @$tracks_ref, $anon;
 
 			$g->add_path($_, $anon->name, $loop);
 		}
 
 		$seen{"$_-$b"}++
 	} $g->predecessors($b);
-	@anon_tracks;
 }
 
 
