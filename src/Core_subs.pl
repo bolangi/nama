@@ -1038,7 +1038,8 @@ sub get_chain_id { "J".++$i }
 				#$g->add_edge($t->name, 'wav_out');
 			}
 
-			$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON';
+			$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON'
+				and $preview ne 'doodle';
 			$g->add_edge($t->name, 'Master');
 		}
 	 } $main->tracks; 
