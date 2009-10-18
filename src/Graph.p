@@ -20,7 +20,7 @@ sub expand_graph {
 	$g->edges;
 	map{ 
 		my($a,$b) = @{$_}; 
-		say "soundcard edge $a $b";
+		$debug and say "soundcard edge $a $b";
 		insert_near_side_loop($g,$a,$b) 
 	}
 	grep{ my($a,$b) = @{$_};  
@@ -58,7 +58,7 @@ sub add_loop {
 sub insert_near_side_loop {
 	my ($g, $a, $b) = @_;
 	$debug and say "$a-$b: insert near side loop";
-	my $j = 'N';
+	my $j = 'a';
 	map{
 		$debug and say "deleting edge: $a-$_";
 		#my $attr = $g->get_edge_attributes($a,$_);
@@ -74,7 +74,7 @@ sub insert_near_side_loop {
 		# insert anon track if successor is non-track
 		else {  
 
-			my $n = $j++ . $::tn{$a}->n;
+			my $n = $::tn{$b}->n . $j++;
 			my $anon = ::AnonSlaveTrack->new( 
 				target => $a,
 				n => $n,
@@ -93,8 +93,8 @@ sub insert_near_side_loop {
 
 sub insert_far_side_loop {
 	my ($g, $a, $b) = @_;
+	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
-	my $j = 'A';
 	map{
 		$debug and say "deleting edge: $_-$b";
 		$g->delete_edge($_,$b);
@@ -108,7 +108,7 @@ sub insert_far_side_loop {
 		# insert anon track if successor is non-track
 		else {  
 
-			my $n = $j++ . $::tn{$b}->n;
+			my $n = $::tn{$b}->n . $j++;
 			my $anon = ::AnonSlaveTrack->new( 
 				target => $b,
 				n => $n,

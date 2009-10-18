@@ -1061,12 +1061,13 @@ sub get_chain_id { "J".++$i }
 		# no effects will be applied because effects are on chain 2
 	}
 												 
-			
+my $debug = 1;	
 
 	$debug and say "The graph is $g";
 
 my $track_n = $::Track::n; # restore before exit sub
 my @temp_tracks = ::Graph::expand_graph($g);
+ # will need to remove insert-tracks from this list TODO
 
 	$debug and say "The expanded graph is $g";
 
