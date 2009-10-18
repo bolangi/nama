@@ -883,6 +883,7 @@ sub new {
 		name 	=> "Group $n", # default name
 		rw   	=> 'REC', 
 		n => $n_,
+		inserts => [],
 		@_ 			}, $class;
 	#return $object if $skip_index;
 	#print "object type: ", ref $object, $/;

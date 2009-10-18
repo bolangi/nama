@@ -1112,7 +1112,8 @@ my @temp_tracks = ::Graph::expand_graph($g);
 	#print "have source: $have_source\n";
 
 	# reset Track class
-	map{ $_->remove } @temp_tracks;
+	say "temp tracks to remove";
+	map{ say $_->name; $_->remove } @temp_tracks;
 	$::Track::n = $track_n;	
 
 	if ($have_source) {

@@ -12,14 +12,20 @@ sub expand_graph {
 	@anon_tracks = ();
 	my $g = shift; 
 	%seen = ();
+	
+	# case 1: both nodes are tracks
+	
 	map{ my($a,$b) = @{$_}; 
 		$debug and say "reviewing edge: $a-$b";
 		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
 		add_loop($g,$a,$b) unless $seen{"$a-$b"};
 	} grep{my($a,$b) = @{$_}; is_a_track($a) and is_a_track($b);} 
 	$g->edges;
+
+	# case 2: fan out from (track) with one arm reaching soundard
 	map{ 
 		my($a,$b) = @{$_}; 
+		is_a_track($a) or croak "$a: expected track." ;
 		$debug and say "soundcard edge $a $b";
 		insert_near_side_loop($g,$a,$b) 
 	}
@@ -30,6 +36,24 @@ sub expand_graph {
 	@anon_tracks;
 }
 
+sub add_inserts {
+	my $g = shift;
+	my @track_names = grep{ $::tn{$_} and @{$::tn{$_}->inserts}} $g->vertices;
+	map{ add_insert($g, $_) } @track_names;
+}
+	
+sub add_insert {
+	my ($g, $name) = @_;
+	my $t = $::tn{$name}; 
+	my @inserts = @{ $t->inserts };
+	
+	
+	# assume post-fader send
+	# t's successor will be loop or reserved
+	
+}
+	
+
 sub add_loop {
 	my ($g,$a,$b) = @_;
 	$debug and say "adding loop";
@@ -38,19 +62,19 @@ sub add_loop {
 	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
-		insert_near_side_loop($g,$a,$b, out_loop($a))
+		push @anon_tracks, insert_near_side_loop($g,$a,$b, out_loop($a))
 	} elsif ($fan_in  > 1){
-		insert_far_side_loop($g,$a,$b, in_loop($b))
+		push @anon_tracks, insert_far_side_loop($g,$a,$b, in_loop($b))
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
 	# we expect a single user track to feed to Master_in 
 	# as multiple user tracks do
 	
 			$b eq 'Master' 
-				?  insert_far_side_loop($g,$a,$b,in_loop($b))
+				?  push @anon_tracks, insert_far_side_loop($g,$a,$b,in_loop($b))
 
 	# otherwise default to near_side ( *_out ) loops
-				: insert_near_side_loop($g,$a,$b,out_loop($a));
+				: push @anon_tracks, insert_near_side_loop($g,$a,$b,out_loop($a));
 
 	} else {croak "unexpected fan"};
 }
@@ -58,6 +82,7 @@ sub add_loop {
 sub insert_near_side_loop {
 	my ($g, $a, $b, $loop) = @_;
 	$debug and say "$a-$b: insert near side loop";
+	my @anon_tracks;
 	my $j = 'a';
 	map{
 		$debug and say "deleting edge: $a-$_";
@@ -77,7 +102,6 @@ sub insert_near_side_loop {
 			my $n = $::tn{$b}->n . $j++;
 			my $anon = ::AnonSlaveTrack->new( 
 				target => $a,
-				n => $n,
 				name => $n);
 			push @anon_tracks, $anon;
 
@@ -89,10 +113,12 @@ sub insert_near_side_loop {
 		#say ::yaml_out($att) if ref $att;
 		$seen{"$a-$_"}++
 	} $g->successors($a);
+	@anon_tracks;
 }
 
 sub insert_far_side_loop {
 	my ($g, $a, $b, $loop) = @_;
+	my @anon_tracks;
 	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
 	map{
@@ -120,6 +146,7 @@ sub insert_far_side_loop {
 
 		$seen{"$_-$b"}++
 	} $g->predecessors($b);
+	@anon_tracks;
 }
 
 
