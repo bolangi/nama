@@ -46,7 +46,15 @@ sub add_insert {
 	my ($g, $name) = @_;
 	my $t = $::tn{$name}; 
 	my @inserts = @{ $t->inserts };
-	
+	my %i = %{ pop @inserts }; # assume just one, copy
+
+	# default to return via same system (soundcard or JACK)
+	$i{return_type} //= $i{send_type};
+
+	# default to return from same JACK client or adjacent soundcard channels
+	$i{return_id}  //= $i{return_type} eq 'jack_client' 
+			? $i{send_id} 
+			: ( $i{insert_type} eq 'cooked' ? 2 : $i{send_id} + $t->ch_count);
 	
 	# assume post-fader send
 	# t's successor will be loop or reserved
