@@ -310,32 +310,16 @@ our (
 
 	# rules
 	
-	$mixer_out,
-	$mix_down,
 	$mix_down_ev,
-	$mix_setup,
-	$mixdown_playback,
 	$mon_setup,
 	$rec_file,
 	$rec_setup,
 	$aux_send,
-	$aux_receive,
 	$null_setup,
 
-	# rules for instrument monitor buses
-	
-	$send_bus_mon_setup,
-	$send_bus_rec_setup,
 	$send_bus_cooked_input,
 	$send_bus_out,
-	$sub_bus_mix_setup,
 	
-	# rules for mastering
-	
-	$stage1,
-	$stage2,
-	$stage3, 
-
 	# mastering mode status
 
 	$mastering_mode,

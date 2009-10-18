@@ -3655,7 +3655,7 @@ sub automix {
 	$main_out = 0;
 
 	# turn off mixdown_to_file rule
-	$mix_down->set(   status => 0);
+	#$MIX_down->set(   status => 0);
 
 	# turn on mix_down_ev
 	$mix_down_ev->set(status => 1);
@@ -3705,7 +3705,7 @@ sub automix {
 	$mix_down_ev->set(status => 0);
 
 	### turn on mixdown_to_file
-	$mix_down->set(status => 1);
+	#$mix_down->set(status => 1);
 
 	### mixdown
 	command_process('mixdown');
