@@ -482,12 +482,6 @@ sub init_buses {
 
 	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
 
-	$mixdown_bus  = ::Bus->new(
-		name => 'Mixdown_Bus',
-		groups => [qw(Mixdown) ],
-		rules  => [ qw(mixdown_playback mixdown_to_file mix_ev) ],
-	);
-
 	# for metronome or other tracks using 'null' as source
 	
 	$null_bus = ::Bus->new(
@@ -763,10 +757,7 @@ sub initialize_project_data {
 	::Track::initialize();
 
 
-	$master = ::Group->new(name => 'Master');
-	$mixdown =  ::Group->new(name => 'Mixdown', rw => 'REC');
 	$main = ::Group->new(name => 'Main', rw => 'REC');
-	$mastering = ::Group->new(name =>'Mastering');
 	$null    = ::Group->new(name => 'null');
 
 	#print yaml_out( \%::Track::track_names );
@@ -3653,7 +3644,7 @@ sub automix {
 
 	# use Smart::Comments '###';
 	# add -ev to mixtrack
-	my $ev = add_effect( { chain => $master->n, type => 'ev' } );
+	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
 
 	# use Ecasound globals for mixdown 
