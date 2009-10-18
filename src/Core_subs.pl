@@ -1042,7 +1042,7 @@ sub get_chain_id { "J".++$i }
 				and $preview ne 'doodle';
 			$g->add_edge($t->name, 'Master');
 		}
-	 } $::Group::by_name{Main}->tracks; 
+	 } $main->tracks; 
 
 
 	if ($mastering_mode){
@@ -1611,8 +1611,8 @@ sub doodle {
 	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
 	
-	$old_group_rw = $::Group::by_name{Main}->rw;
-	$::Group::by_name{Main}->set(rw => 'REC');
+	$old_group_rw = $main->rw;
+	$main->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# allow only unique inputs
@@ -1701,7 +1701,7 @@ sub release_doodle_mode {
 
 		$debug2 and print "&release_doodle_mode\n";
 		# restore preview group REC/MON/OFF setting
-		$::Group::by_name{Main}->set(rw => $old_group_rw);		
+		$main->set(rw => $old_group_rw);		
 
 		# enable playback from disk
 		$mon_setup->set(status => 1);
@@ -1716,10 +1716,10 @@ sub enable_excluded_inputs {
 	$debug2 and print "&enable_excluded_inputs\n";
 	return unless %old_rw;
 
-	map { $tn{$_}->set(rw => $old_rw{$_}) } $::Group::by_name{Main}->tracks
-		if $::Group::by_name{Main}->tracks;
+	map { $tn{$_}->set(rw => $old_rw{$_}) } $main->tracks
+		if $main->tracks;
 
-	$::Group::by_name{Main}->set(rw => $old_group_rw);
+	$main->set(rw => $old_group_rw);
 	%old_rw = ();
 
 }
@@ -1728,15 +1728,15 @@ sub exclude_duplicate_inputs {
 	$debug2 and print "&exclude_duplicate_inputs\n";
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
- 	if ( $::Group::by_name{Main}->tracks){
+ 	if ( $main->tracks){
  		map { # print "track $_ "; 
 			$old_rw{$_} = $tn{$_}->rw;
  		  	$tn{$_}->set(rw => 'REC');
  			# print "status: ", $tn{$_}->rw, $/ 
- 		} $::Group::by_name{Main}->tracks;
+ 		} $main->tracks;
  	}
 
-		my @user = $::Group::by_name{Main}->tracks(); # track names
+		my @user = $main->tracks(); # track names
 		%excluded = ();
 		my %already_used;
 		map{ my $source = $tn{$_}->source;
@@ -2070,7 +2070,7 @@ sub rec_cleanup {
 	if ( ($recorded -  $mixed) >= 1) {
 			# i.e. there are first time recorded tracks
 			$ui->global_version_buttons(); # recreate
-			$::Group::by_name{Main}->set( rw => 'MON');
+			$main->set( rw => 'MON');
 			$ui->refresh();
 			print <<REC;
 WAV files were recorded! 
@@ -3222,6 +3222,7 @@ sub restore_state {
 	}
 		
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
+	$main = $::Group::by_name{Main};
 
 	# restore user buses, directly, skipping constructor 
 	
@@ -3277,7 +3278,7 @@ sub restore_state {
 		}
 	} @tracks_data;
 
-	#print "\n---\n", $::Group::by_name{Main}->dump;  
+	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
@@ -3891,11 +3892,11 @@ sub status_snapshot {
 	# engine
 	
 	my %snapshot = ( project 		=> 	$project_name,
-					 global_version =>  $::Group::by_name{Main}->version,
+					 global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out,
-#					 global_rw      =>  $::Group::by_name{Main}->rw,
+#					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
@@ -3983,7 +3984,7 @@ sub add_send_bus {
 							send_type => $dest_type, 
 							send_id => $dest_id,
 						)
-   } $::Group::by_name{Main}->tracks;
+   } $main->tracks;
 		
 	
 }

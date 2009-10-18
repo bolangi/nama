@@ -47,12 +47,12 @@ sub show_region {
 
 sub show_status {
 	my @fields;
-	push @fields, $::Group::by_name{Main}->rw eq 'REC' 
+	push @fields, $main->rw eq 'REC' 
 					? "live input allowed" 
 					: "live input disabled";
 	push @fields, "record" if ::really_recording();
 	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
-		map{ $tn{$_} } $::Group::by_name{Main}->tracks, q(Mixdown);
+		map{ $tn{$_} } $main->tracks, q(Mixdown);
 	push @fields, "mixdown" 
 		if $tn{Mixdown}->rec_status eq 'REC';
 	push @fields, "doodle" if $preview eq 'doodle';
@@ -494,13 +494,13 @@ sub t_add_effect {
 }
 sub group_rec { 
 	print "Setting group REC-enable. You may record user tracks.\n";
-	$::Group::by_name{Main}->set( rw => 'REC'); }
+	$main->set( rw => 'REC'); }
 sub group_mon { 
 	print "Setting group MON mode. No recording on user tracks.\n";
-	$::Group::by_name{Main}->set( rw => 'MON');}
+	$main->set( rw => 'MON');}
 sub group_off {
 	print "Setting group OFF mode. All user tracks disabled.\n";
-	$::Group::by_name{Main}->set(rw => 'OFF'); } 
+	$main->set(rw => 'OFF'); } 
 
 sub mixdown {
 	print "Enabling mixdown to file.\n";
@@ -510,14 +510,14 @@ sub mixdown {
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$tn{Mixdown}->set(rw => 'MON');
-	$::Group::by_name{Main}->set(rw => 'OFF');
+	$main->set(rw => 'OFF');
 	$main_out = 1;
 }
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
 	$main_out = 1;
-	$::Group::by_name{Main}->set(rw => 'MON')}
+	$main->set(rw => 'MON')}
 
 sub bunch {
 	package ::;
