@@ -1248,26 +1248,6 @@ sub loop {
 }
 
 
-sub generate_io {
-
-	# we generate chain halves: X to track, and track to Y
-	# one half in each call to this sub.
-	
-	# 	
-	my ($g, $dir, $name, $io) = @_;
-	say ("$name: no $dir found."), return unless $io;
-	# we get loop identity from $io
-	# we get all other datas from $track (via $name)
-	if (::Graph::is_a_loop($io)){
-		$dispatch{ 
-			 $dir eq 'input' ? 'loop_source' : 'loop_sink' 
-		}->($name, $io);
-	} else {
-		$dispatch{$io}->($name);
-	}
-}
-
-
 sub add_entry_h {
 	my $h = shift;
 	say "add_entry_h";
@@ -1289,35 +1269,7 @@ sub add_entry_h {
 	}
 	else {croak "illegal dir: $dir" }
 
-}
 	
-sub add_entry {
-	say join " ", "add entry: ",@_;
-	my $dir = shift;
-	my($type, $id, $chain) = @_;
-	if ($dir eq 'inputs'){
-		$inputs{$type}{$id} //= [];	
-		push @{ $inputs{$type}{$id} }, $chain;
-	}
-	elsif ($dir eq 'outputs'){
-		$outputs{$type}{$id} //= [];	
-		push @{ $outputs{$type}{$id} }, $chain;
-	}
-	else {croak "illegal dir: $dir" }
-=comment
-	my $ref_string = q($).$dir.qq({$type}{$id});
-	say $ref_string;
-	#$inputs{device}{consumer} //= [];
-	say eval "ref $ref_string";
-	my $cmd = "$ref_string //= [];";
-	say $cmd;
-	eval $cmd;
-	croak qq(eval failed: "$cmd". Error: $@);
-	$cmd = qq(push \@{$ref_string}, $chain;) ;
-	say $cmd;
-	eval $cmd;
-	croak qq(eval failed: "$cmd". Error: $@);
-=cut
 }
 sub soundcard_output {
  	$::jack_running 
