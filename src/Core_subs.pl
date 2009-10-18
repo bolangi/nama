@@ -3652,7 +3652,7 @@ sub automix {
 	
 	# turn off audio output
 	
-	$main_out->set(status => 0);
+	$main_out = 0;
 
 	# turn off mixdown_to_file rule
 	$mix_down->set(   status => 0);
@@ -3719,7 +3719,7 @@ sub automix {
 
 	### turn on audio output output
 
-	$main_out->set(status => 1);
+	$main_out = 1;
 
 	### default to playing back Mixdown track, setting user tracks to OFF
 
