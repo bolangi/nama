@@ -1072,12 +1072,12 @@ sub get_chain_id { "J".++$i }
 												 
 			
 
-	say "The graph is $g";
+	$debug and say "The graph is $g";
 
 my $track_n = $::Track::n; # restore before exit sub
 my @temp_tracks = ::Graph::expand_graph($g);
 
-	say "The graph is $g";
+	$debug and say "The expanded graph is $g";
 
 # we deal with edges:
 # 
@@ -1087,7 +1087,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 # track - reserved: output
 
 	map { my ($a,$b) = @$_;
-		  say "edge $a-$b";
+		  $debug and say "edge $a-$b";
 
 		# cases 1,2:  track to ( loop | reserved )
 		if($tn{$a}){ 

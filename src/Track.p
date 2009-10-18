@@ -191,7 +191,7 @@ sub rec_status {
 	my $monitor_version = $track->monitor_version;
 
 	my $group = $::Group::by_name{$track->group};
-	say join " ", "group:",$group->name, $group->rw;
+	#say join " ", "group:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
