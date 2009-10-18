@@ -1156,7 +1156,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 %dispatch = (
  	wav_in => sub {
 		my $name = shift;
-		say "wav_in: $name";
+		$debug and say "wav_in: $name";
 		my $t = $tn{$name};
 		add_entry_h({
 			dir			=> 'inputs',
@@ -1168,9 +1168,9 @@ my @temp_tracks = ::Graph::expand_graph($g);
 		});
 	},
 	wav_out	=> sub {
-		say "wav_out";
+		$debug and say "wav_out";
 		my $name = shift;
-		say "name: $name";
+		$debug and say "name: $name";
 		my $t = $tn{$name};
 		add_entry_h({
 			dir			=> 'outputs',
@@ -1183,7 +1183,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 	},
 	loop_source => sub {
 		my ($name, $input) = @_; 
-		say "loop_source";
+		$debug and say "loop_source";
 		my $h = {
 			dir			=> 'inputs',
 			name		=> $name,  # for override
@@ -1194,7 +1194,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 		add_entry_h($h);
 	},
 	loop_sink 		=> sub {
-		say "loop_sink";
+		$debug and say "loop_sink";
 		my ($name, $output) = @_; 
 		my $h = {
 			dir			=> 'outputs',
@@ -1210,7 +1210,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
 	soundcard_in	=> sub { 
-		say "soundcard_in";
+		$debug and say "soundcard_in";
 		my $name = shift;
 		my $t = $tn{$name};
 		my ($type, $id) = @{$tn{$name}->soundcard_input};
@@ -1224,7 +1224,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 		});
 	},
 	soundcard_out	=> sub { 
-		say "soundcard_out";
+		$debug and say "soundcard_out";
 		my $name = shift;
 		my $t = $tn{$name};
 		my ($type, $id) = @{soundcard_output()};
@@ -1240,7 +1240,7 @@ my @temp_tracks = ::Graph::expand_graph($g);
 sub override {
 	my ($hash_ref, $name) = @_;
 		my $attr = $g->get_vertex_attributes($name);
-		say "override: ", join " ",%$attr if $attr;
+		$debug and say "override: ", join " ",%$attr if $attr;
 		%$hash_ref = (%$hash_ref, %$attr) if $attr;
 }
 							
@@ -1256,10 +1256,9 @@ sub loop {
 
 sub add_entry_h {
 	my $h = shift;
-	say "add_entry_h";
+	$debug2 and say "add_entry_h";
 	croak "is not a hash ref: $h" unless (ref $h) =~ /HASH/;
 	override($h,$h->{name});
-	say yaml_out($h);
 	my %hsh = %$h;
 	my($dir, $type, $id, $chain, $post_input, $pre_output) = 
 		@hsh{qw(dir type id chain post_input pre_output)};
