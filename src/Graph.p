@@ -38,19 +38,19 @@ sub add_loop {
 	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
-		insert_near_side_loop($g,$a,$b)
+		insert_near_side_loop($g,$a,$b, out_loop($a))
 	} elsif ($fan_in  > 1){
-		insert_far_side_loop($g,$a,$b)
+		insert_far_side_loop($g,$a,$b, in_loop($b))
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
 	# we expect a single user track to feed to Master_in 
 	# as multiple user tracks do
 	
 			$b eq 'Master' 
-				?  insert_far_side_loop($g,$a,$b)
+				?  insert_far_side_loop($g,$a,$b,in_loop($b))
 
 	# otherwise default to near_side ( *_out ) loops
-				:  insert_near_side_loop($g,$a,$b);
+				: insert_near_side_loop($g,$a,$b,out_loop($a));
 
 	} else {croak "unexpected fan"};
 }
