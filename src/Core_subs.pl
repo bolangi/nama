@@ -1053,6 +1053,8 @@ sub get_chain_id { "J".++$i }
 	} else { $g->add_edge('Master','soundcard_out') }
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
+		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
+			$ecasound_globals_for_mixdown; 
 			my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 			$g->add_path(@p);
 			$g->set_vertex_attributes('Mixdown', {
@@ -1143,8 +1145,12 @@ my @temp_tracks = ::Graph::expand_graph($g);
 		#print "\%outputs\n================\n", yaml_out(\%outputs);
 
 		write_chains();
+		$ecasound_globals_ecs = $ecasound_globals;
  		return 1;
- 	} else { print "No inputs found!\n"; return 0};
+ 	} else { 
+
+		$ecasound_globals_ecs = $ecasound_globals;
+		print "No inputs found!\n"; return 0};
 1;
 }
 %dispatch = (
@@ -3889,7 +3895,7 @@ sub status_snapshot {
 					 global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
-					 main 			=> $main_out->status,
+					 main 			=> $main_out,
 #					 global_rw      =>  $main->rw,
 					
  );

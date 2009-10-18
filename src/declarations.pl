@@ -328,13 +328,13 @@ our (
 	$alsa_playback_device,       # where to send stereo output
 	$capture_device,    # where to get our inputs
 
+	$main_out, # do I route audio output to soundcard?
 
 	# rules
 	
 	$mixer_out,
 	$mix_down,
 	$mix_down_ev,
-	$main_out,
 	$mix_setup,
 	$mixdown_playback,
 	$mon_setup,
