@@ -49,33 +49,57 @@ sub add_insert {
 
 	my ($g, $name) = @_;
 	my $t = $::tn{$name}; 
-	my @inserts = @{ $t->inserts };
-	my %i = %{ pop @inserts }; # assume just one, copy
-
+	my ($i) = @{ $t->inserts }; # assume one insert
 
 	# move following to command input side
 	
 	# default to return via same system (soundcard or JACK)
-	$i{return_type} //= $i{send_type};
+	$i->{return_type} //= $i->{send_type};
 
 	# default to return from same JACK client or adjacent soundcard channels
-	$i{return_id}  //= $i{return_type} eq 'jack_client' 
-			? $i{send_id} 
-			: ( $i{insert_type} eq 'cooked' ? 2 : $i{send_id} + $t->ch_count);
+	$i->{return_id}  //= $i->{return_type} eq 'jack_client' 
+			? $i->{send_id} 
+			: ( $i->{insert_type} eq 'cooked' ? 2 : $i->{send_id} + $t->ch_count);
 	
 	# assume post-fader send
 	# t's successor will be loop or reserved
-	
-	
-	# case 1: cooked insert
-	
-	my $loop = $name."_insert";
-	my ($dry) = insert_near_side_loop( $g, $name, $g->successors($name), $loop);
 
+	# case 1: post-fader insert
+	
+	if($i->{insert_type} eq 'cooked') {	
+	
+	my ($successor) = $g->successors($name);
+	my $loop = $name."_insert";
+	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
+
+	$dry->set( hide => 1);
 	my $wet = ::SlaveTrack->new( 
 				target => $a,
 				name => $dry->name . 'w',
 				hide => 1);
+
+
+	$i->{dry_vol} = $dry->vol;
+	$i->{wet_vol} = $wet->vol;
+
+	# connect wet track to graph
+	
+	$g->add_path($loop, $wet->name, $i->{send_type}."_out");
+
+	# add return leg for wet signal
+	
+	my $wet_return = ::SlaveTrack->new( 
+
+				target => $a,
+				name => $dry->name . 'wr',
+				hide => 1);
+
+	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];
+	
+	$g->add_path($i->{return_type}.'_in',  $dry->name.'wr', $successor);
+
+
+	}
 	
 }
 	

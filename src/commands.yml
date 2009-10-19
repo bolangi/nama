@@ -311,10 +311,10 @@ autofix_tracks:
   what: fixdc and normalize selected versions of all MON tracks 
   parameters: none
 remove_track:
-   type: track
-   short: rmt
-   what: remove effects, parameters and GUI for current track
-   parameters: none 
+  type: track
+  short: rmt
+  what: remove effects, parameters and GUI for current track
+  parameters: none 
 group_rec:
   type: group
   short: grec R
@@ -448,6 +448,16 @@ remove_effect:
   what: remove effects from selected track
   short: fxr rfx
   parameters: <s_effect_id1> [ <s_effect_id2>...]
+add_insert_cooked:
+  type: effect 
+  short: ainc
+  what: add a post-fader send/return to a track
+  parameters: <s_send_id> [<s_return_id>]
+set_insert_wetness:
+  type: effect 
+  short: siw
+  what: set wet/dry balance for track insert: 100 = all wet, 0 = all dry
+  parameters: <n_wetness>
 ctrl_register:
   type: effect
   what: list Ecasound controllers
