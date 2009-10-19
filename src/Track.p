@@ -806,6 +806,7 @@ sub rec_route { $::tn{$_[0]->target}->rec_route }
 sub source_input { $::tn{$_[0]->target}->source_input} 
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
+sub inserts { $::tn{$_[0]->target}->inserts} 
 
 package ::AnonSlaveTrack; # for graph generation
 =comment

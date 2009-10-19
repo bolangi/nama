@@ -43,11 +43,18 @@ sub add_inserts {
 }
 	
 sub add_insert {
+
+	# this routine will be called after expand_graph, so that
+	# every track will connect to either loop or source/sink
+
 	my ($g, $name) = @_;
 	my $t = $::tn{$name}; 
 	my @inserts = @{ $t->inserts };
 	my %i = %{ pop @inserts }; # assume just one, copy
 
+
+	# move following to command input side
+	
 	# default to return via same system (soundcard or JACK)
 	$i{return_type} //= $i{send_type};
 
@@ -58,6 +65,17 @@ sub add_insert {
 	
 	# assume post-fader send
 	# t's successor will be loop or reserved
+	
+	
+	# case 1: cooked insert
+	
+	my $loop = $name."_insert";
+	my ($dry) = insert_near_side_loop( $g, $name, $g->successors($name), $loop);
+
+	my $wet = ::SlaveTrack->new( 
+				target => $a,
+				name => $dry->name . 'w',
+				hide => 1);
 	
 }
 	
@@ -89,11 +107,11 @@ sub add_loop {
 
 sub insert_near_side_loop {
 	my ($g, $a, $b, $loop, $tracks_ref) = @_;
+	$tracks_ref //= [];
 	$debug and say "$a-$b: insert near side loop";
 	my $j = 'a';
 	map{
 		$debug and say "deleting edge: $a-$_";
-		#my $attr = $g->get_edge_attributes($a,$_);
 
 		# insert loop in every case
 		$g->delete_edge($a,$_);
@@ -104,10 +122,11 @@ sub insert_near_side_loop {
 		if ( $::tn{$_} ){ $g->add_edge($loop, $_) }
 
 		# insert anon track if successor is non-track
+		# ( when adding an insert, successor is always non-track )
 		else {  
 
 			my $n = $::tn{$b}->n . $j++;
-			my $anon = ::AnonSlaveTrack->new( 
+			my $anon = ::SlaveTrack->new( 
 				target => $a,
 				name => $n);
 			push @$tracks_ref, $anon;
@@ -115,15 +134,18 @@ sub insert_near_side_loop {
 			$g->add_path($loop,$anon->name,$_);
 		}
 
-		#$g->set_edge_attributes($loop,$_,$attr) if ref $attr;
+		# move attributes to new edge
 		#my $att = $g->get_edge_attributes($loop,$_);
-		#say ::yaml_out($att) if ref $att;
+		#$g->set_edge_attributes($loop,$_,$attr) if ref $attr;
+
 		$seen{"$a-$_"}++
 	} $g->successors($a);
+	@$tracks_ref;
 }
 
 sub insert_far_side_loop {
 	my ($g, $a, $b, $loop, $tracks_ref) = @_;
+	$tracks_ref //= [];
 	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
 	map{
@@ -140,7 +162,7 @@ sub insert_far_side_loop {
 		else {  
 
 			my $n = $::tn{$b}->n . $j++;
-			my $anon = ::AnonSlaveTrack->new( 
+			my $anon = ::SlaveTrack->new( 
 				target => $b,
 				n => $n,
 				name => $n);
@@ -151,6 +173,7 @@ sub insert_far_side_loop {
 
 		$seen{"$_-$b"}++
 	} $g->predecessors($b);
+	@$tracks_ref;
 }
 
 
