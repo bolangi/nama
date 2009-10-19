@@ -1071,6 +1071,9 @@ my $temp_tracks = ::Graph::expand_graph($g);
 
 	$debug and say "The expanded graph is $g";
 
+	::Graph::add_inserts($g);
+
+	$debug and say "The expanded graph with inserts is $g";
 # we deal with edges:
 # 
 # reserved - track: input 	

@@ -12,6 +12,7 @@ use 5.10.0;
 use feature ":5.10";
 use strict;
 use warnings;
+use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
