@@ -756,6 +756,8 @@ sub initialize_project_data {
 	::Group::initialize();
 	::Track::initialize();
 
+	::Group->new(name => 'Master');
+	::Group->new(name => 'Mixdown', rw => 'REC');
 
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
