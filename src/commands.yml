@@ -455,9 +455,14 @@ add_insert_cooked:
   parameters: <s_send_id> [<s_return_id>]
 set_insert_wetness:
   type: effect 
-  short: siw
+  short: wet
   what: set wet/dry balance for track insert: 100 = all wet, 0 = all dry
   parameters: <n_wetness>
+remove_insert:
+  type: effect
+  short: rin
+  what: remove a track's insert
+  parameters: none
 ctrl_register:
   type: effect
   what: list Ecasound controllers

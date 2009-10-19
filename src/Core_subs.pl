@@ -3984,7 +3984,7 @@ sub add_send_bus {
 
 sub dest_type { 
 	my $dest = shift;
-	if ($dest !~ /\D/)        { 'soundcard' } # digits only
+	if (defined $dest and ($dest !~ /\D/))        { 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { 'loop' }
 	elsif ($dest){  # any string 
 		carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);

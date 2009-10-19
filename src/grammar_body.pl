@@ -487,4 +487,41 @@ update_send_bus: _update_send_bus bus_name end {
  	::update_send_bus( $item{bus_name} );
  	1;
 }
+add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
+	my $return_id = "@{$item{'return_id(?)'}}";
+	my $t = $::this_track;
+	my $i = {
+		insert_type => 'cooked',
+		send_type 	=> ::dest_type($return_id),
+		send_id	  	=> $item{send_id},
+		return_type 	=> ::dest_type($return_id),
+		return_id	=> $return_id,
+		wetness		=> 100,
+	};
+	# default to return via same system (soundcard or JACK)
+	$i->{return_type} //= $i->{send_type};
+
+	# default to return from same JACK client or adjacent soundcard channels
+	$i->{return_id}  //= ($i->{return_type} eq 'jack_client'
+			? $i->{send_id} 
+			: ( $i->{insert_type} eq 'cooked' ? 2 : $i->{send_id} + $t->ch_count));
+	
+	$t->set(inserts => [$i]); 1;
+}
+send_id: name
+return_id: name
+
+set_insert_wetness: _set_insert_wetness parameter end {
+	my $i = $::this_track->insert->[0];
+	$i->{wetness} = $item{parameter};
+	1;
+}
+
+set_insert_wetness: _set_insert_wetness end {
+	my $i = $::this_track->insert->[0];
+	 print "insert wet/dry setting: ", $i->{wetness}, $/;
+}
+
+
+
 	
