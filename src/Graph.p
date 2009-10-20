@@ -67,11 +67,13 @@ sub add_insert {
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
 
 	#$dry->set( hide => 1);
-	my $wet = ::SlaveTrack->new( 
-				target => $name,
+	my $wet = ::Track->new( 
 				name => $dry->name . 'w',
-				hide => 1,
-				rw => 'MON',
+				#group => 'Insert',
+ 				send_type => $i->{send_type},
+ 				send_id => $i->{send_id},
+				hide => 0,
+				rw => 'MON', #  irrelevant
 	
 				);
 
@@ -85,12 +87,14 @@ sub add_insert {
 
 	# add return leg for wet signal
 	
-	my $wet_return = ::SlaveTrack->new( 
+	my $wet_return = ::Track->new( 
 
-				target => $name,
 				name => $dry->name . 'wr',
+				#group => 'Insert',
+ 				source_type => $i->{return_type},
+ 				source_id => $i->{return_id},
 				rw => 'MON',
-	#			hide => 1
+				hide => 0,
 			);
 
 	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];

@@ -758,6 +758,7 @@ sub initialize_project_data {
 
 	::Group->new(name => 'Master');
 	::Group->new(name => 'Mixdown', rw => 'REC');
+	::Group->new(name => 'Insert');
 
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
