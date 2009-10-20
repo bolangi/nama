@@ -4,7 +4,7 @@ use Carp;
 use Graph;
 use vars qw(%reserved);
 %reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out null_in null_out);
-my $debug = 0;
+my $debug = 1;
 my %seen;
 my $anon_tracks;
 
@@ -38,7 +38,10 @@ sub expand_graph {
 
 sub add_inserts {
 	my $g = shift;
-	my @track_names = grep{ $::tn{$_} and @{$::tn{$_}->inserts}} $g->vertices;
+	my @track_names = grep{ $::tn{$_} 
+		and $::tn{$_}->inserts
+		and $::tn{$_}->inserts =~ /ARRAY/} $g->vertices;
+	say "Track names: @track_names";
 	map{ add_insert($g, $_) } @track_names;
 }
 	
@@ -48,6 +51,7 @@ sub add_insert {
 	# every track will connect to either loop or source/sink
 
 	my ($g, $name) = @_;
+	$debug and say "add_insert name: $name";
 	my $t = $::tn{$name}; 
 	my ($i) = @{ $t->inserts }; # assume one insert
 
@@ -62,11 +66,12 @@ sub add_insert {
 	my $loop = $name."_insert";
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
 
-	$dry->set( hide => 1);
-	my $wet = ::SlaveTrack->new( 
+	#$dry->set( hide => 1);
+	my $wet = ::Track->new( 
 				target => $a,
 				name => $dry->name . 'w',
-				hide => 1);
+	#			hide => 1
+				);
 
 
 	$i->{dry_vol} = $dry->vol;
@@ -78,11 +83,12 @@ sub add_insert {
 
 	# add return leg for wet signal
 	
-	my $wet_return = ::SlaveTrack->new( 
+	my $wet_return = ::Track->new( 
 
 				target => $a,
 				name => $dry->name . 'wr',
-				hide => 1);
+	#			hide => 1
+			);
 
 	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];
 	
@@ -138,11 +144,12 @@ sub insert_near_side_loop {
 		# insert anon track if successor is non-track
 		# ( when adding an insert, successor is always non-track )
 		else {  
+		$debug and say "successor $_ is non-track";
 
-			my $n = $::tn{$b}->n . $j++;
+			my $nam = $::tn{$a}->n . $j++;
 			my $anon = ::SlaveTrack->new( 
 				target => $a,
-				name => $n);
+				name => $nam);
 			push @$tracks_ref, $anon;
 
 			$g->add_path($loop,$anon->name,$_);
