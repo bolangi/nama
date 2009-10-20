@@ -94,6 +94,7 @@ sub new {
 
 					send_type => undef,
 					send_id   => undef,
+					inserts => [],
 
 					@_ 			}, $class;
 
@@ -887,7 +888,6 @@ sub new {
 		name 	=> "Group $n", # default name
 		rw   	=> 'REC', 
 		n => $n_,
-		inserts => [],
 		@_ 			}, $class;
 	#return $object if $skip_index;
 	#print "object type: ", ref $object, $/;

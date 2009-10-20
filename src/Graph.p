@@ -68,7 +68,7 @@ sub add_insert {
 
 	#$dry->set( hide => 1);
 	my $wet = ::SlaveTrack->new( 
-				target => $a,
+				target => $name,
 				name => $dry->name . 'w',
 				hide => 1,
 				rw => 'MON',
@@ -87,7 +87,7 @@ sub add_insert {
 	
 	my $wet_return = ::SlaveTrack->new( 
 
-				target => $a,
+				target => $name,
 				name => $dry->name . 'wr',
 				rw => 'MON',
 	#			hide => 1
