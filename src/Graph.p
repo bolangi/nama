@@ -67,10 +67,12 @@ sub add_insert {
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
 
 	#$dry->set( hide => 1);
-	my $wet = ::Track->new( 
+	my $wet = ::SlaveTrack->new( 
 				target => $a,
 				name => $dry->name . 'w',
-	#			hide => 1
+				hide => 1,
+				rw => 'MON',
+	
 				);
 
 
@@ -83,10 +85,11 @@ sub add_insert {
 
 	# add return leg for wet signal
 	
-	my $wet_return = ::Track->new( 
+	my $wet_return = ::SlaveTrack->new( 
 
 				target => $a,
 				name => $dry->name . 'wr',
+				rw => 'MON',
 	#			hide => 1
 			);
 

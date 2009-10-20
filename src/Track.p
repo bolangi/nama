@@ -804,11 +804,13 @@ sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
 sub rec_route { $::tn{$_[0]->target}->rec_route }
 sub source_input { $::tn{$_[0]->target}->source_input} 
+sub soundcard_input { $::tn{$_[0]->target}->soundcard_input} 
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
 sub inserts { $::tn{$_[0]->target}->inserts} 
 sub source_type { $::tn{$_[0]->target}->source_type}
 sub source_id { $::tn{$_[0]->target}->source_id}
+sub source_status { $::tn{$_[0]->target}->source_status }
 package ::AnonSlaveTrack; # for graph generation
 =comment
 we will create these tracks as necessary

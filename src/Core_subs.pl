@@ -1102,6 +1102,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 			if(::Graph::is_a_loop($a)){
 				$dispatch{loop_source}->($b,$a);
 			} elsif ( $::Graph::reserved{$a} ){
+				say "reserved ($a) to track ($b)";
 				$dispatch{$a}->($b);
 			} else {croak qq("$a": expected loop or reserved); }
 		}
@@ -1195,7 +1196,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 		add_entry_h($h);
 	},
 	loop_sink 		=> sub {
-		$debug and say "loop_sink";
+		$debug and say "loop_sink @_";
 		my ($name, $output) = @_; 
 		my $h = {
 			dir			=> 'outputs',
@@ -1211,10 +1212,11 @@ my $temp_tracks = ::Graph::expand_graph($g);
 	jack_client_in 	=> sub {},
 	jack_client_out	=> sub {},
 	soundcard_in	=> sub { 
-		$debug and say "soundcard_in";
+		$debug and say "soundcard_in @_";
 		my $name = shift;
 		my $t = $tn{$name};
-		my ($type, $id) = @{$tn{$name}->soundcard_input};
+		say "track: $t, name: $name";
+		my ($type, $id) = @{$t->soundcard_input};
 		add_entry_h({
 			dir  	=> 'inputs',
 			name	=> $name,
@@ -1249,7 +1251,7 @@ sub chain {
 	my $name = shift;
 	$tn{$name} ? $tn{$name}->n : $name;
 }
-sub loop {
+sub loopn {
 	my $name = shift;
 	"loop,$name"
 }
