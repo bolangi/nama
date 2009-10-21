@@ -3932,6 +3932,7 @@ sub status_snapshot {
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
 				group			=> $_->group,
+				inserts			=> yaml_out($_->inserts),
 
 				
 			} unless $_->rec_status eq 'OFF'
