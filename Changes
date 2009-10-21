@@ -77,3 +77,6 @@ Selected revision history for Perl extension Audio::Ecasound::Multitrack
                           WAV files from multiple projects
                         - add mastering mode, 'master_on',
                           'master_off' commands
+0.9981 Wed Oct 21, 2009 - add pre-fader instrument monitor buses
+                        - add post-fader inserts to soundcard or 
+                          JACK clients
