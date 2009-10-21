@@ -145,6 +145,7 @@ our (
  	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd status (pid)
 	$jack_lsp,      # jack_lsp -Ap
+	%jack,			# jack clients data from jack_lsp
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments

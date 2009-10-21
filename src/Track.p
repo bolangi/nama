@@ -212,8 +212,8 @@ sub rec_status {
 		given( $track->source_type){
 			when('jack_client'){
 				::jack_client($track->source_id,'output')
-					?  'REC'
-					:  maybe_monitor($monitor_version)
+					?  return 'REC'
+					:  return maybe_monitor($monitor_version)
 			}
 			when('soundcard'){ return 'REC' }
 			when('loop'){ return 'REC' }

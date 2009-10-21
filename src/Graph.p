@@ -3,7 +3,8 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use vars qw(%reserved);
-%reserved = map{ $_, 1} qw( soundcard_in soundcard_out wav_in wav_out jack_in jack_out null_in null_out);
+%reserved = map{ $_, 1} qw( soundcard_in soundcard_out
+%wav_in wav_out jack_client_in jack_client_out null_in null_out);
 my $debug = 1;
 my %seen;
 my $anon_tracks;

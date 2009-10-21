@@ -1025,11 +1025,8 @@ sub get_chain_id { "J".++$i }
 
 	map{ my $t = $tn{$_};
 		if($t->rec_status ne 'OFF'){
-			$g->add_edge(
-				$t->source_type eq 'soundcard'
-					? 'soundcard_in'
-					: $t->source_type
-				, $t->name) if $t->rec_status eq 'REC';
+			$g->add_edge( $t->source_type . '_in' , $t->name) 
+				if $t->rec_status eq 'REC';
 			if ($t->rec_status eq 'REC' and !  $t->rec_defeat){
 				# add soundcard -> wav_out link
 				# currently accomplished using rec_file
@@ -1214,7 +1211,20 @@ my $temp_tracks = ::Graph::expand_graph($g);
 	},
 	null_in			=> sub {},
 	null_out		=> sub {},
-	jack_client_in 	=> sub {},
+	jack_client_in 	=> sub {
+		$debug and say "jack_client_in @_";
+		my $name = shift;
+		my $t = $tn{$name};
+		my ($type, $id) = @{$t->source_input};
+		add_entry_h({
+			dir  	=> 'inputs',
+			name	=> $name,
+			type 	=> $type,
+			id		=> $id,
+			chain	=> $t->n,
+			post_input => $t->rec_route .  $t->mono_to_stereo, 
+		});
+	},
 	jack_client_out	=> sub {},
 	soundcard_in	=> sub { 
 		$debug and say "soundcard_in @_";
@@ -1269,7 +1279,7 @@ sub add_entry_h {
 	croak "is not a hash ref: $h" unless (ref $h) =~ /HASH/;
 	override($h,$h->{name});
 	my %hsh = %$h;
-	my($dir, $type, $id, $chain, $post_input, $pre_output) = 
+	my($dir, $type, $id, $chain, $post_input,$pre_output) = 
 		@hsh{qw(dir type id chain post_input pre_output)};
 	if ($dir eq 'inputs'){
 		$inputs{$type}{$id} //= [];	
@@ -3640,7 +3650,7 @@ sub jack_client {
 
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
 
-	my %jack;
+	%jack = ();
 
 	map{ 
 		my ($direction) = /properties: (input|output)/;
@@ -4005,7 +4015,7 @@ sub dest_type {
 	if (defined $dest and ($dest !~ /\D/))        { 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { 'loop' }
 	elsif ($dest){  # any string 
-		carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
+		#carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
 		'jack_client' ; }
 	else { undef }
 }
