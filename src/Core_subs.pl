@@ -1382,9 +1382,8 @@ WARN
 			$format = signal_format(
 				$devices{jack}->{signal_format},
 
-				# client's output is our input
-				jack_client($client,q(output)) 
-
+				# the number of channels
+				jack_client($client,q(output)) # client's output is our input
 			);
 
 		} else { # we use track width
@@ -1498,8 +1497,8 @@ WARN
 			$format = signal_format(
 				$devices{jack}->{signal_format},
 
-				# client's input is our output
-				jack_client($client,q(input))
+				# the number of channels
+				jack_client($client,q(input)) # client's input is our output
 			);
 
 		} else { # we use track width
