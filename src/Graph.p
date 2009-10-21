@@ -101,6 +101,9 @@ sub add_insert {
 			);
 	$i->{dry_vol} = $dry->vol;
 	$i->{wet_vol} = $wet_return->vol;
+	
+	::command_process($t->name);
+	::command_process('wet',$i->{wetness});
 
 
 	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];

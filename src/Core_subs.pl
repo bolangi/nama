@@ -3491,7 +3491,7 @@ sub process_line {
 
 
 sub command_process {
-	my $user_input = shift;
+	my $user_input = join " ", @_;
 	return if $user_input =~ /^\s*$/;
 	$debug and print "user input: $user_input\n";
 	my ($cmd, $predicate) = ($user_input =~ /([\S]+?)\b(.*)/);
