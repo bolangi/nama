@@ -707,7 +707,13 @@ sub select_output {
 	}
 }
 
-# the following subroutines support IO objects
+sub remove_insert {
+	my $track = shift;
+	if ( my $i = $track->inserts->[0]){
+		map{ $::tn{$_}->remove }@{ $i->{tracks} };
+		$track->set(inserts => []);
+	}
+}
 
 sub region_start {
 	my $track = shift;

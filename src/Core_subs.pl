@@ -1225,7 +1225,20 @@ my $temp_tracks = ::Graph::expand_graph($g);
 			post_input => $t->rec_route .  $t->mono_to_stereo, 
 		});
 	},
-	jack_client_out	=> sub {},
+	jack_client_out	=> sub {
+		$debug and say "jack_client_out @_";
+		my $name = shift;
+		my $t = $tn{$name};
+		my ($type, $id) = @{$t->send_output};
+		add_entry_h({
+			dir  	=> 'outputs',
+			name	=> $name,
+			type 	=> $type,
+			id		=> $id,
+			chain	=> $t->n,
+			pre_output => $t->pre_send,
+		});
+	},
 	soundcard_in	=> sub { 
 		$debug and say "soundcard_in @_";
 		my $name = shift;

@@ -491,6 +491,7 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
 	my $t = $::this_track;
+	$t->remove_insert;
 	my $i = {
 		insert_type => 'cooked',
 		send_type 	=> ::dest_type($send_id),
@@ -524,10 +525,7 @@ set_insert_wetness: _set_insert_wetness end {
 }
 
 remove_insert: _remove_insert end { 
-	if ( my $i = $::this_track->inserts->[0]){
-		map{ $::tn{$_}->remove }@{ $i->{tracks} };
-		$::this_track->set(inserts => []);
-	}
+	$::this_track->remove_insert;
 	1;
 }
 
