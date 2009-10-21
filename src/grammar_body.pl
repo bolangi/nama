@@ -514,14 +514,23 @@ send_id: name
 return_id: name
 
 set_insert_wetness: _set_insert_wetness parameter end {
-	my $i = $::this_track->insert->[0];
-	$i->{wetness} = $item{parameter};
+	my $p = $item{parameter};
+	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
+		if ! ($p <= 100 and $p >= 0);
+	my $i = $::this_track->inserts->[0];
+	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
+		return 1 unless $i;
+	$i->{wetness} = $p;
+	::modify_effect($i->{wet_vol}, 0, undef, $p);
+	::modify_effect($i->{dry_vol}, 0, undef, 100 - $p);
 	1;
 }
 
 set_insert_wetness: _set_insert_wetness end {
-	my $i = $::this_track->insert->[0];
-	 print "insert wet/dry setting: ", $i->{wetness}, $/;
+	my $i = $::this_track->inserts->[0];
+	print ("track ",$::this_track->n, " has no insert.\n"), return 1 unless $i;
+	 print "The insert is ", 
+		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";
 }
 
 remove_insert: _remove_insert end { 

@@ -2,11 +2,11 @@ package ::Graph;
 use Modern::Perl;
 use Carp;
 use Graph;
-use vars qw(%reserved);
+use vars qw(%reserved $debug);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::dispatch;
-my $debug = 1;
+*debug = \$::debug;
 my %seen;
 my $anon_tracks;
 
@@ -43,7 +43,7 @@ sub add_inserts {
 	my @track_names = grep{ $::tn{$_} 
 		and $::tn{$_}->inserts
 		and $::tn{$_}->inserts =~ /ARRAY/} $g->vertices;
-	say "Track names: @track_names";
+	$debug and say "Inserts will be applied to the following tracks: @track_names";
 	map{ add_insert($g, $_) } @track_names;
 }
 	
@@ -51,6 +51,7 @@ sub add_insert {
 
 	# this routine will be called after expand_graph, so that
 	# every track will connect to either loop or source/sink
+	no warnings qw(uninitialized);
 
 	my ($g, $name) = @_;
 	$debug and say "add_insert name: $name";
@@ -61,7 +62,7 @@ sub add_insert {
 	# t's successor will be loop or reserved
 
 	# case 1: post-fader insert
-	
+		
 	if($i->{insert_type} eq 'cooked') {	
 	
 	my ($successor) = $g->successors($name);
@@ -69,14 +70,14 @@ sub add_insert {
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
 	$dry->set(group => 'Insert');
 
-	#$dry->set( hide => 1);
+	$dry->set( hide => 1);
 	my $wet = ::Track->new( 
 				name => $dry->name . 'w',
 				group => 'Insert',
 				ch_count => 2, # default for cooked
  				send_type => $i->{send_type},
  				send_id => $i->{send_id},
-				hide => 0,
+				hide => 1,
 				rw => 'REC',
 	
 				);
@@ -96,7 +97,7 @@ sub add_insert {
  				source_type => $i->{return_type},
  				source_id => $i->{return_id},
 				rw => 'REC',
-				hide => 0,
+				hide => 1,
 			);
 	$i->{dry_vol} = $dry->vol;
 	$i->{wet_vol} = $wet_return->vol;

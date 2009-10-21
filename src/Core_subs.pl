@@ -498,7 +498,6 @@ sub initialize_rules {
 	%dispatch = (
 		wav_in => sub {
 			my $name = shift;
-			$debug and say "wav_in: $name";
 			my $t = $tn{$name};
 			add_entry_h({
 				dir			=> 'inputs',
@@ -510,9 +509,7 @@ sub initialize_rules {
 			});
 		},
 		wav_out	=> sub {
-			$debug and say "wav_out";
 			my $name = shift;
-			$debug and say "name: $name";
 			my $t = $tn{$name};
 			add_entry_h({
 				dir			=> 'outputs',
@@ -525,7 +522,6 @@ sub initialize_rules {
 		},
 		loop_source => sub {
 			my ($name, $input) = @_; 
-			$debug and say "loop_source";
 			my $h = {
 				dir			=> 'inputs',
 				name		=> $name,  # for override
@@ -536,7 +532,6 @@ sub initialize_rules {
 			add_entry_h($h);
 		},
 		loop_sink 		=> sub {
-			$debug and say "loop_sink @_";
 			my ($name, $output) = @_; 
 			my $h = {
 				dir			=> 'outputs',
@@ -576,10 +571,8 @@ sub initialize_rules {
 			});
 		},
 	soundcard_in	=> sub { 
-		$debug and say "soundcard_in @_";
 		my $name = shift;
 		my $t = $tn{$name};
-		say "track: $t, name: $name";
 		my ($type, $id) = @{$t->soundcard_input};
 		add_entry_h({
 			dir  	=> 'inputs',
@@ -591,7 +584,6 @@ sub initialize_rules {
 			});
 		},
 	soundcard_out	=> sub { 
-		$debug and say "soundcard_out";
 		my $name = shift;
 		my $t = $tn{$name};
 		my ($type, $id) = @{soundcard_output()};
@@ -1171,8 +1163,6 @@ sub get_chain_id { "J".++$i }
 		# no effects will be applied because effects are on chain 2
 	}
 												 
-my $debug = 1;	
-
 	$debug and say "The graph is $g";
 
 my $track_n = $::Track::n; # restore before exit sub
@@ -1202,6 +1192,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 			if(::Graph::is_a_loop($b)){
 				$dispatch{loop_sink}->($a,$b);
 			} elsif ( $::Graph::reserved{$b} ){
+				$debug and say "track ($a) to reserved ($b)";
 				$dispatch{$b}->($a);
 			} else {croak qq("$b:" expected loop or reserved); }
 		}
@@ -1210,7 +1201,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 			if(::Graph::is_a_loop($a)){
 				$dispatch{loop_source}->($b,$a);
 			} elsif ( $::Graph::reserved{$a} ){
-				say "reserved ($a) to track ($b)";
+				$debug and say "reserved ($a) to track ($b)";
 				$dispatch{$a}->($b);
 			} else {croak qq("$a": expected loop or reserved); }
 		}
@@ -1229,8 +1220,8 @@ my $temp_tracks = ::Graph::expand_graph($g);
 	#print "have source: $have_source\n";
 
 	# reset Track class
-	say "temp tracks to remove";
-	map{ say $_->name; $_->remove } @$temp_tracks;
+	$debug and say "temp tracks to remove";
+	$debug and map{ say $_->name; $_->remove } @$temp_tracks;
 	$::Track::n = $track_n;	
 
 	if ($have_source) {
