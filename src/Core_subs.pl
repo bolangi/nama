@@ -756,18 +756,22 @@ sub initialize_project_data {
 	::Group::initialize();
 	::Track::initialize();
 
-	::Group->new(name => 'Master');
-	::Group->new(name => 'Mixdown', rw => 'REC');
-	::Group->new(name => 'Insert');
-
-	$main = ::Group->new(name => 'Main', rw => 'REC');
-	$null    = ::Group->new(name => 'null');
+	create_groups();
 
 	#print yaml_out( \%::Track::track_names );
 
 
     # create master and mixdown
 }
+sub create_groups {
+
+	::Group->new(name => 'Master');
+	::Group->new(name => 'Mixdown', rw => 'REC');
+	::Group->new(name => 'Insert');
+	$main = ::Group->new(name => 'Main', rw => 'REC');
+	$null    = ::Group->new(name => 'null');
+}
+
 ## track and wav file handling
 
 # create read-only track pointing at WAV files of specified
@@ -1235,9 +1239,10 @@ my $temp_tracks = ::Graph::expand_graph($g);
 		add_entry_h({
 			dir  	=> 'outputs',
 			name	=> $name,
-			type 	=> $type,
-			id		=> $id,
+			type 	=> $t->soundcard_output()->[0],
+			id		=> $t->soundcard_output()->[1],
 			chain	=> $t->n,
+			pre_output => $t->pre_send,
 		});
 	},
 	);
@@ -3227,6 +3232,8 @@ sub restore_state {
 		
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
 	$main = $::Group::by_name{Main};
+
+	create_groups('no warning'); # make sure we have them
 
 	# restore user buses, directly, skipping constructor 
 	

@@ -65,11 +65,12 @@ sub add_insert {
 	my ($successor) = $g->successors($name);
 	my $loop = $name."_insert";
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
+	$dry->set(group => 'Insert');
 
 	#$dry->set( hide => 1);
 	my $wet = ::Track->new( 
 				name => $dry->name . 'w',
-				#group => 'Insert',
+				group => 'Insert',
  				send_type => $i->{send_type},
  				send_id => $i->{send_id},
 				hide => 0,
@@ -77,9 +78,6 @@ sub add_insert {
 	
 				);
 
-
-	$i->{dry_vol} = $dry->vol;
-	$i->{wet_vol} = $wet->vol;
 
 	# connect wet track to graph
 	
@@ -90,12 +88,15 @@ sub add_insert {
 	my $wet_return = ::Track->new( 
 
 				name => $dry->name . 'wr',
-				#group => 'Insert',
+				group => 'Insert',
  				source_type => $i->{return_type},
  				source_id => $i->{return_id},
-				rw => 'MON',
+				rw => 'REC',
 				hide => 0,
 			);
+	$i->{dry_vol} = $dry->vol;
+	$i->{wet_vol} = $wet_return->vol;
+
 
 	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];
 	

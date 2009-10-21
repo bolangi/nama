@@ -51,19 +51,10 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	#print "test 1\n";
-	if ($by_name{$vals{name}}){
-	#print "test 2\n";
-	my $track = $by_name{$vals{name}};
-		# print $track->}ame, " hide: ", $track->hide, $/;
-		if ($track->hide) {
-			$track->set(hide => 0);
-			return $track;
-
-		} else {
-		print("track name already in use: $vals{name}\n"), return
-		 #if $track_names{$vals{name}}; 
-		}
+	if (my $track = $by_name{$vals{name}}){
+		if ($track->hide) { $track->set(hide => 0); } 
+		print("track name already in use: $vals{name}\n"); 
+		return $track;
 	}
 	print("reserved track name: $vals{name}\n"), return
 	 if  ! $::mastering_mode 
@@ -140,6 +131,15 @@ sub group_last {
 	#print join " ", 'searching tracks:', $group->tracks, $/;
 	$group->last;
 }
+
+# seems to be missing.. and needed for track-based version numbering
+sub last {
+	my $track = shift;
+	my @versions;
+	@versions =  @{ $track->versions };
+	$versions[-1] || 0;
+}
+	
 
 sub current_wav {
 	my $track = shift;
@@ -876,7 +876,7 @@ sub new {
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak "name missing" unless $vals{name};
-	(carp "group name already in use: $vals{name}\n"), 
+	#(carp "group name already in use: $vals{name}\n"), 
 		return ($by_name{$vals{name}}) if $by_name{$vals{name}};
 	#my $skip_index = $vals{n};
 	my $n_;
@@ -906,6 +906,7 @@ sub tracks { # returns list of track names in group
 }
 
 sub last {
+	$debug and say "group: @_";
 	my $group = shift;
 	my $max = 0;
 	map{ 

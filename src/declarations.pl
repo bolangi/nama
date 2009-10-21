@@ -369,5 +369,4 @@ our (
 	$disable_auto_reconfigure, # for debugging
 
 	$g, 			# Graph var, for chain setup
-
 );

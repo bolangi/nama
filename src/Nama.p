@@ -12,7 +12,7 @@ use 5.10.0;
 use feature ":5.10";
 use strict;
 use warnings;
-use Carp::Always;
+#use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
@@ -69,8 +69,8 @@ $| = 1;     # flush STDOUT buffer on every write
 $yw = Data::YAML::Writer->new; 
 $yr = Data::YAML::Reader->new;
 
-$debug2 = 1; # subroutine names
-$debug = 1; # debug statements
+$debug2 = 0; # subroutine names
+$debug = 0; # debug statements
 
 # other initializations
 $unit = 1;
