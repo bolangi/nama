@@ -3,8 +3,9 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use vars qw(%reserved);
-%reserved = map{ $_, 1} qw( soundcard_in soundcard_out
-%wav_in wav_out jack_client_in jack_client_out null_in null_out);
+# this dispatch table also identifies labels reserved
+# for signal sources and sinks.
+*reserved = \%::dispatch;
 my $debug = 1;
 my %seen;
 my $anon_tracks;

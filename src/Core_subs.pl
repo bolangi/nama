@@ -494,45 +494,151 @@ sub init_buses {
 	
 sub initialize_rules {
 
-	# first make some helper IO objects
-	#
-	# These objects provide code refs that alter their 
-	# output based on whether JACK is running.
-	#
-	# Basically syntax to the Track methods that run the
-	# necessary conditionals
+	# dispatch table for the graph-style routing system 
+	%dispatch = (
+		wav_in => sub {
+			my $name = shift;
+			$debug and say "wav_in: $name";
+			my $t = $tn{$name};
+			add_entry_h({
+				dir			=> 'inputs',
+				name		=> $name,  # for override
+				type 		=> 'file',
+				id	 		=> $t->full_path,
+				chain		=> $t->n,
+				post_input	=> $t->mono_to_stereo,
+			});
+		},
+		wav_out	=> sub {
+			$debug and say "wav_out";
+			my $name = shift;
+			$debug and say "name: $name";
+			my $t = $tn{$name};
+			add_entry_h({
+				dir			=> 'outputs',
+				name		=> $name,  # for override
+				type 		=> 'file',
+				id	 		=> $t->full_path,
+				chain		=> $t->n,
+				pre_output	=> signal_format($raw_to_disk_format, $t->ch_count),
+			});
+		},
+		loop_source => sub {
+			my ($name, $input) = @_; 
+			$debug and say "loop_source";
+			my $h = {
+				dir			=> 'inputs',
+				name		=> $name,  # for override
+				type 		=> 'loop',
+				id	 		=> "loop,$input",
+				chain		=> $tn{$name}->n,
+			};
+			add_entry_h($h);
+		},
+		loop_sink 		=> sub {
+			$debug and say "loop_sink @_";
+			my ($name, $output) = @_; 
+			my $h = {
+				dir			=> 'outputs',
+				name		=> $name,  # for override
+				type 		=> 'loop',
+				id	 		=> "loop,$output",
+				chain		=> $tn{$name}->n,
+			};
+			add_entry_h($h);
+		},
+		null_in			=> sub {},
+		null_out		=> sub {},
+		jack_client_in 	=> sub {
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = @{$t->source_input};
+			add_entry_h({
+				dir  	=> 'inputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+				post_input => $t->rec_route .  $t->mono_to_stereo, 
+			});
+		},
+		jack_client_out	=> sub {
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = @{$t->send_output};
+			add_entry_h({
+				dir  	=> 'outputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+				pre_output => $t->pre_send,
+			});
+		},
+	soundcard_in	=> sub { 
+		$debug and say "soundcard_in @_";
+		my $name = shift;
+		my $t = $tn{$name};
+		say "track: $t, name: $name";
+		my ($type, $id) = @{$t->soundcard_input};
+		add_entry_h({
+			dir  	=> 'inputs',
+			name	=> $name,
+			type 	=> $type,
+			id		=> $id,
+			chain	=> $t->n,
+			post_input => $t->rec_route .  $t->mono_to_stereo, 
+			});
+		},
+	soundcard_out	=> sub { 
+		$debug and say "soundcard_out";
+		my $name = shift;
+		my $t = $tn{$name};
+		my ($type, $id) = @{soundcard_output()};
+		add_entry_h({
+			dir  	=> 'outputs',
+			name	=> $name,
+			type 	=> $t->soundcard_output()->[0],
+			id		=> $t->soundcard_output()->[1],
+			chain	=> $t->n,
+			pre_output => $t->pre_send,
+		});
+	},
+	);
 
+# 	we might use the same routines for jack_client_in/out
+# 	for soundcard_in/out, except the latter would require
+# 	settings for send_type, send_id, ch_count in Master/Mixdown
+# 	or any other track that is graphically directed
+#	to the sound device
+
+	
+	#@dispatch{qw(soundcard_in soundcard_out)} 
+	#	= @dispatch{qw(jack_client_in jack_client_out)};
+
+	# bus/rules-style routing 
+
+	# first make IO_Helper objects, just for pretty syntax
+	
 	my $soundcard_input = ::IO_Helper->new(
-
 		type => 	sub { my $track = shift; $track->soundcard_input()->[0]}, 
-		object => 	sub { my $track = shift; $track->soundcard_input()->[1]},
-	);
-
+		object => 	sub { my $track = shift; $track->soundcard_input()->[1]},);
 	my $soundcard_output = ::IO_Helper->new(
-
 		type => 	sub { my $track = shift; $track->soundcard_output()->[0]}, 
-		object => 	sub { my $track = shift; $track->soundcard_output()->[1]},
-	);
-
+		object => 	sub { my $track = shift; $track->soundcard_output()->[1]},);
 	my $source_input = ::IO_Helper->new(
 		type => 	sub { my $track = shift; $track->source_input()->[0]}, 
-		object => 	sub { my $track = shift; $track->source_input()->[1]},
-	);
-
-
+		object => 	sub { my $track = shift; $track->source_input()->[1]},);
 	my $send_output = ::IO_Helper->new(
 		type => 	sub { my $track = shift; $track->send_output()->[0]}, 
-		object => 	sub { my $track = shift; $track->send_output()->[1]},
-	);
- 			
+		object => 	sub { my $track = shift; $track->send_output()->[1]},);
 
 	package ::Rule;
 		$n = 0;
 		@by_index = ();	# return ref to Track by numeric key
 		%by_name = ();	# return ref to Track by name
 		%rule_names = (); 
-	package ::;
-
+	package Audio::Nama;
 
 # the following rule is used by automix to normalize
 # the track levels.
@@ -1157,118 +1263,6 @@ my $temp_tracks = ::Graph::expand_graph($g);
 		print "No inputs found!\n"; return 0};
 1;
 }
-%dispatch = (
- 	wav_in => sub {
-		my $name = shift;
-		$debug and say "wav_in: $name";
-		my $t = $tn{$name};
-		add_entry_h({
-			dir			=> 'inputs',
-			name		=> $name,  # for override
-			type 		=> 'file',
-			id	 		=> $t->full_path,
-			chain		=> $t->n,
-			post_input	=> $t->mono_to_stereo,
-		});
-	},
-	wav_out	=> sub {
-		$debug and say "wav_out";
-		my $name = shift;
-		$debug and say "name: $name";
-		my $t = $tn{$name};
-		add_entry_h({
-			dir			=> 'outputs',
-			name		=> $name,  # for override
-			type 		=> 'file',
-			id	 		=> $t->full_path,
-			chain		=> $t->n,
-			pre_output	=> signal_format($raw_to_disk_format, $t->ch_count),
-		});
-	},
-	loop_source => sub {
-		my ($name, $input) = @_; 
-		$debug and say "loop_source";
-		my $h = {
-			dir			=> 'inputs',
-			name		=> $name,  # for override
-			type 		=> 'loop',
-			id	 		=> "loop,$input",
-			chain		=> $tn{$name}->n,
-		};
-		add_entry_h($h);
-	},
-	loop_sink 		=> sub {
-		$debug and say "loop_sink @_";
-		my ($name, $output) = @_; 
-		my $h = {
-			dir			=> 'outputs',
-			name		=> $name,  # for override
-			type 		=> 'loop',
-			id	 		=> "loop,$output",
-			chain		=> $tn{$name}->n,
-		};
-		add_entry_h($h);
-	},
-	null_in			=> sub {},
-	null_out		=> sub {},
-	jack_client_in 	=> sub {
-		$debug and say "jack_client_in @_";
-		my $name = shift;
-		my $t = $tn{$name};
-		my ($type, $id) = @{$t->source_input};
-		add_entry_h({
-			dir  	=> 'inputs',
-			name	=> $name,
-			type 	=> $type,
-			id		=> $id,
-			chain	=> $t->n,
-			post_input => $t->rec_route .  $t->mono_to_stereo, 
-		});
-	},
-	jack_client_out	=> sub {
-		$debug and say "jack_client_out @_";
-		my $name = shift;
-		my $t = $tn{$name};
-		my ($type, $id) = @{$t->send_output};
-		add_entry_h({
-			dir  	=> 'outputs',
-			name	=> $name,
-			type 	=> $type,
-			id		=> $id,
-			chain	=> $t->n,
-			pre_output => $t->pre_send,
-		});
-	},
-	soundcard_in	=> sub { 
-		$debug and say "soundcard_in @_";
-		my $name = shift;
-		my $t = $tn{$name};
-		say "track: $t, name: $name";
-		my ($type, $id) = @{$t->soundcard_input};
-		add_entry_h({
-			dir  	=> 'inputs',
-			name	=> $name,
-			type 	=> $type,
-			id		=> $id,
-			chain	=> $t->n,
-			post_input => $t->rec_route .  $t->mono_to_stereo, 
-		});
-	},
-	soundcard_out	=> sub { 
-		$debug and say "soundcard_out";
-		my $name = shift;
-		my $t = $tn{$name};
-		my ($type, $id) = @{soundcard_output()};
-		add_entry_h({
-			dir  	=> 'outputs',
-			name	=> $name,
-			type 	=> $t->soundcard_output()->[0],
-			id		=> $t->soundcard_output()->[1],
-			chain	=> $t->n,
-			pre_output => $t->pre_send,
-		});
-	},
-	);
 sub override {
 	my ($hash_ref, $name) = @_;
 		my $attr = $g->get_vertex_attributes($name);
