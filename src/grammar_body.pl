@@ -501,12 +501,13 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 		wetness		=> 100,
 	};
 	# default to return via same system (soundcard or JACK)
-	#$i->{return_type} //= $i->{send_type};
 
 	# default to return from same JACK client or adjacent soundcard channels
-	#$i->{return_id}  //= ($i->{return_type} eq 'jack_client'
-	#		? $i->{send_id} 
-	#		: ( $i->{insert_type} eq 'cooked' ? 2 : $i->{send_id} + $t->ch_count));
+	if (! $i->{return_id}){
+		$i->{return_type} = $i->{send_type};
+		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
+		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+	}
 	
 	$t->set(inserts => [$i]); 1;
 }
