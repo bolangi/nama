@@ -178,7 +178,9 @@ autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize")
 master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
-exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
+exit: _exit end { 	::save_state($::state_store_file); 
+					kill 15, ::ecasound_pid();  	
+					CORE::exit(); 1}
 source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;

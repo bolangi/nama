@@ -244,8 +244,9 @@ sub launch_ecasound_server {
 	sleep 1;
 }
 
-my $debug;
-my $sock; 
+
+my $sock;
+
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
 	say "Creating socket on port $port.";
@@ -255,6 +256,11 @@ sub init_ecasound_socket {
 		Proto => 'tcp', 
 	); 
 	die "Could not create socket: $!\n" unless $sock; 
+}
+
+sub ecasound_pid {
+	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
+	my ($pid) = split " ", $ps; 
 }
 
 sub eval_iam { } # stub

@@ -4,8 +4,7 @@
 # These are overridden in the ::Text class with no-op stubs.
 # 
 # So all the routines in Graphical_methods.pl can consider
-# themselves to be in the base class, with access to all
-# variables and subs that are imported.
+# themselves to be in the base class.
 
 package ::;
 use 5.10.0;
@@ -18,8 +17,9 @@ use autodie qw(:default);
 use Carp;
 use Cwd;
 use Data::YAML;
-use Event;
+use Event qw(loop unloop unloop_all);
 use File::Find::Rule;
+use File::Spec::Link;
 use File::Path;
 use File::Spec;
 use File::Temp;
@@ -34,8 +34,6 @@ use Graph;
 
 # use Timer::HiRes; # automatically detected
 
-use File::Spec::Link;
-
 # use Tk;           # loaded conditionally
 
 use vars qw($VERSION);
@@ -47,15 +45,12 @@ $VERSION = '0.9982';
 
 }
 
-# use Tk    # loaded conditionally in GUI mode
-
 #use Tk::FontDialog;
 
 
-$| = 1;     # flush STDOUT buffer on every write
-
 ## Definitions ##
 
+$| = 1;     # flush STDOUT buffer on every write
 
 # 'our' declaration: all packages in the file will see the following
 # variables. 
@@ -258,8 +253,6 @@ __END__
 
 =head1 NAME
 
-B<Audio::Nama> - Perl extensions for multitrack audio processing
-
 B<Nama> - Lightweight recorder, mixer and mastering system
 
 =head1 SYNOPSIS
@@ -270,8 +263,9 @@ B<nama> [I<options>] [I<project_name>]
 
 B<Nama> is a lightweight recorder/mixer application using
 Ecasound in the back end to provide effects processing,
-cut-and-paste, mastering, and other functions typically
-found in digital audio workstations.
+mastering, and other functions typically found in
+stand-alone multitrack recorders and digital audio
+workstations.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>
