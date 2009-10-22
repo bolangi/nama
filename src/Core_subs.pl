@@ -732,8 +732,9 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
- 	$rec_setup = ::Rule->new(
 
+ 	$rec_setup = ::Rule->new(	 	# used by UserBus 
+		
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=>	'REC',
@@ -1128,21 +1129,30 @@ sub get_chain_id { "J".++$i }
 
 	$g = Graph->new();
 
-	map{ my $t = $tn{$_};
-		if($t->rec_status ne 'OFF'){
-			$g->add_edge( $t->source_type . '_in' , $t->name) 
-				if $t->rec_status eq 'REC';
-			if ($t->rec_status eq 'REC' and !  $t->rec_defeat){
+	map{ 
+		# create edges representing live sound sources
+
+		$g->add_edge( $_->source_type . '_in' , $_->name) 
+			if $_->rec_status eq 'REC';
+
+		# create edges for WAV file input
+		
+		$g->add_edge('wav_in', $_->name) 
+			if $_->rec_status eq 'MON' and $preview ne 'doodle';
+
+			if ($_->rec_status eq 'REC' and !  $_->rec_defeat){
 				# add soundcard -> wav_out link
 				# currently accomplished using rec_file
-				#$g->add_edge($t->name, 'wav_out');
+				#$g->add_edge($_->name, 'wav_out');
 			}
 
-			$g->add_edge('wav_in', $t->name) if $t->rec_status eq 'MON'
-				and $preview ne 'doodle';
-			$g->add_edge($t->name, 'Master');
-		}
-	 } $main->tracks; 
+		# create default mixer connection
+		
+		$g->add_edge($_->name, 'Master');
+
+	 } 	grep{ $_->rec_status ne 'OFF' } 
+		map{$tn{$_}} 	# convert to Track objects
+		$main->tracks;  # list of Track names
 
 
 	if ($mastering_mode){
