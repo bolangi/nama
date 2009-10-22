@@ -36,4 +36,4 @@ requires:
   Time::HiRes: 0
   autodie: 0
   perl: 5.10.0
-version: 0.9981
+version: 0.9982
