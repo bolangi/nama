@@ -26,7 +26,14 @@ sub show_effects {
 		 	} (0..scalar @pnames - 1);
 			#push @lines, join("; ", @params) . "\n";
  
- 	 } @{ $this_track->ops };
+ 	} @{ $this_track->ops };
+
+	my $i = $this_track->inserts;
+
+	# display if there is actually something there
+
+	if ($i = $i->[0]){ push @lines, yaml_out($i) }
+		
 	join "", @lines;
  	
 }
