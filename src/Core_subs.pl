@@ -261,6 +261,7 @@ sub init_ecasound_socket {
 sub ecasound_pid {
 	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
 	my ($pid) = split " ", $ps; 
+	$pid if $sock;
 }
 
 sub eval_iam { } # stub
