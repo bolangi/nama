@@ -2,17 +2,24 @@
 
 Nama - Ecasound-based recorder, mixer and mastering system
 
-=head1 About 
+=head1 ABOUT 
 
-This distribution provides B<Nama> an Ecasound-based recorder/mixer
-with many DAW-like functions.
+Nama provides a convenient interface for multitrack
+recording, effects processing, mixdown, and mastering.
+Tracks can have auxiliary sends and inserts.  User-defined
+buses allow musicians to have individualized monitors.
 
-Nama has both graphic and command-line and graphic interfaces.
+Nama is based on Ecasound, a stable, versatile and mature
+audio processing engine. Nama gives you everything great
+about Ecasound, along with high-level track, bus
+and project abstractions expected of a digital audio
+workstation.
 
-The graphic interface uses the Tk widget set, with buttons
-and sliders. However it lacks a graphic display 
-of audio waveforms. 
-
+While Nama is especially suited for console users and
+headless applications, it also has Tk-based GUI with
+transport buttons, sliders for track and effects parameters,
+and other commonly used functions.
+ 
 The command-line interface executes internal commands,
 Ecasound commands, perl code, and shell commands. It
 includes history, help, and autocompletion.
@@ -22,27 +29,25 @@ raw fish and draft beer.
 
 =head1 INSTALLATION
 
-To install this module type the following:
+You can probably install Nama via CPAN using the following
+command to pull in all dependencies:
 
-   perl Makefile.PL
-   make
-   make test
-   make install
+        PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
 =head1 DEPENDENCIES
 
 =head2 Perl Modules
 
-Most Perl dependencies are pulled in automatically
-when installing via CPAN. The following will
-install dependencies without prompting.
+Most Perl dependencies are pulled in automatically when
+installing via CPAN. The following will install all required
+dependencies without prompting.
 
-    PERL_MM_USE_DEFAULT=1 cpan Audio::Ecasound::Multitrack 
+    PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
 =head2 Libraries
 
-The Ecasound audio processing libraries must be
-installed. Ecasound may be obtained from
+The Ecasound audio processing libraries must be installed.
+Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled binary
 packages for your Un*x distribution.
 
@@ -54,70 +59,12 @@ http://www.ladspa.org/ladspa_sdk/download.html
 In particular the utility program 'analyseplugin' must be
 installed in a directory in your execution PATH.  
 
-'file', a BSD utility program that detects file formats must
-be installed for Nama to correctly identify stereo files.
+'file', a BSD utility program that detects file formats,
+must be installed for Nama to correctly identify stereo
+files.
 
 Nama's mastering mode uses a number of LADSPA plugins.
 These specified in the configuration file .namarc. 
-
-=head1 BUILD INSTRUCTIONS
-
-You may decide to clone the Nama's github repository and
-from source rather than installing from CPAN.  It is much
-easier to browse or hack on Nama this way. Functionality is
-separated into a number of files, and you will see
-C<$::package_var> instead of
-C<$Audio::Ecasound::Multitrack::package_var>.
-
-You can get also updates more quickly and can share patches
-with other developers.
-
-=head2 Procedure
-
-For typical build and test:
-
-	cpan Text::Template
-	git-clone git://github.com/bolangi/nama.git
-	cd nama/src
-	./build
-    ./ui
-
-To install the module, do as usual:
-
-    cd ..
-	perl Makefile.PL
-    make && make test && make install
-    
-=head2 Description 
-
-The F<build> script creates the perl modules for the
-distribution under the F<nama/lib> directory using F<*.p>,
-F<*.pl>, F<*.t> and other files in the F<nama/src> directory.
-
-F<build> looks into the F<*.p> files for lines that look
-like:
-
-    [% somefile.pl %]
-
-This notation is analogous to the C-preprocessor #include
-directive: F<somefile.pl> gets included in the source
-at that point. Some of these include lines are more complicated:
-
-    [% qx(./strip_comments ./grammar_body) %]
-
-Here the preprocessor runs the script F<strip_comments> on
-F<grammar_body>, removing text that would choke the parser
-generator.
-
-F<Build> provides a few parameters to the preprocessing
-script F<preproc>, which uses the Text::Template to perform
-most of the required substitutions.
-
-To see the names of the files and scripts used to build the
-modules type:
-
-	ls *.p        
-	grep '\[%' *  # shows all include directives
 
 =head1 LICENSE
 

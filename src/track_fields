@@ -44,9 +44,6 @@
 
 					project
 					target
-
-					rules_skip
-					rules_add
 					
 					rec_defeat
-
+					inserts

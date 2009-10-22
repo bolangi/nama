@@ -51,19 +51,10 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	#print "test 1\n";
-	if ($by_name{$vals{name}}){
-	#print "test 2\n";
-	my $track = $by_name{$vals{name}};
-		# print $track->}ame, " hide: ", $track->hide, $/;
-		if ($track->hide) {
-			$track->set(hide => 0);
-			return $track;
-
-		} else {
-		print("track name already in use: $vals{name}\n"), return
-		 if $track_names{$vals{name}}; 
-		}
+	if (my $track = $by_name{$vals{name}}){
+		#if ($track->hide) { $track->set(hide => 0); } 
+		#print("track name already in use: $vals{name}\n"); 
+		return $track;
 	}
 	print("reserved track name: $vals{name}\n"), return
 	 if  ! $::mastering_mode 
@@ -94,6 +85,7 @@ sub new {
 
 					send_type => undef,
 					send_id   => undef,
+					inserts => [],
 
 					@_ 			}, $class;
 
@@ -139,6 +131,15 @@ sub group_last {
 	#print join " ", 'searching tracks:', $group->tracks, $/;
 	$group->last;
 }
+
+# seems to be missing.. and needed for track-based version numbering
+sub last {
+	my $track = shift;
+	my @versions;
+	@versions =  @{ $track->versions };
+	$versions[-1] || 0;
+}
+	
 
 sub current_wav {
 	my $track = shift;
@@ -191,6 +192,7 @@ sub rec_status {
 	my $monitor_version = $track->monitor_version;
 
 	my $group = $::Group::by_name{$track->group};
+	#say join " ", "group:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
@@ -198,7 +200,7 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $track->hide 
+		# or $track->hide 
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
@@ -210,8 +212,8 @@ sub rec_status {
 		given( $track->source_type){
 			when('jack_client'){
 				::jack_client($track->source_id,'output')
-					?  'REC'
-					:  maybe_monitor($monitor_version)
+					?  return 'REC'
+					:  return maybe_monitor($monitor_version)
 			}
 			when('soundcard'){ return 'REC' }
 			when('loop'){ return 'REC' }
@@ -239,9 +241,9 @@ sub rec_status_display {
 sub maybe_monitor {
 	my $monitor_version = shift;
 
-	# I don't want the dependency on $::raw_monitor_input status
+	# I don't want the dependency on $::mon_setup status
 	# although it could be helpful for diagnostic and UI purposes
-	return 'MON' if $monitor_version and $::raw_monitor_input->status;
+	return 'MON' if $monitor_version; # and $::mon_setup->status;
 	return 'OFF';
 }
 
@@ -325,10 +327,11 @@ sub pre_send {
 sub remove {
 	my $track = shift;
 #	$::ui->remove_track_gui($track->n); TODO
+	my $n = $track->n;
 	map{ ::remove_effect($_) } @{ $track->ops };
 	delete $by_index{$track->n};
 	delete $by_name{$track->name};
-	@all = grep{ $_->n != $track->n} @all;
+	@all = grep{ $_->n != $n} @all;
 }
 
 
@@ -704,18 +707,12 @@ sub select_output {
 	}
 }
 
-# the following subroutines support IO objects
-
-
-sub modify_rules_list {
+sub remove_insert {
 	my $track = shift;
-	my @rules = @_;
-	my %have;
-	map { $have{$_}++ } @rules;
-	map { push @rules, $_ unless $have{$_} } split " ", $track->rules_add;
-	my %skip;
-	map { $skip{$_}++ } split " ", $track->rules_skip;
-	grep { ! $skip{$_} } @rules;
+	if ( my $i = $track->inserts->[0]){
+		map{ $::tn{$_}->remove }@{ $i->{tracks} };
+		$track->set(inserts => []);
+	}
 }
 
 sub region_start {
@@ -803,22 +800,53 @@ sub group_last {0}
 sub version {0}
 
 package ::SlaveTrack; # for instrument monitor bus
-our @ISA = '::SimpleTrack';
+our @ISA = '::Track';
 use ::Object qw( 
 
 [% qx(./strip_all ./track_fields) %]
 						
 );
-sub ch_count {
-	my $track = shift;
-	$::tn{$track->target}->ch_count;
-}
-sub rec_status {
-	my $track = shift;
-	$::tn{$track->target}->rec_status ne 'OFF' ? 'MON' : 'OFF';
-}
-sub monitor_version { undef }
+sub ch_count { $::tn{$_[0]->target}->ch_count }
+sub rec_status { $::tn{$_[0]->target}->rec_status }
+sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
+sub rec_route { $::tn{$_[0]->target}->rec_route }
+sub source_input { $::tn{$_[0]->target}->source_input} 
+sub soundcard_input { $::tn{$_[0]->target}->soundcard_input} 
+sub full_path { $::tn{$_[0]->target}->full_path} 
+sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
+sub inserts { $::tn{$_[0]->target}->inserts} 
+sub source_type { $::tn{$_[0]->target}->source_type}
+sub source_id { $::tn{$_[0]->target}->source_id}
+sub source_status { $::tn{$_[0]->target}->source_status }
+package ::AnonSlaveTrack; # for graph generation
+=comment
+we will create these tracks as necessary
+and delete them after generating the setup
 
+soundcard_in -> sax 
+soundcard_in -> loop,sax_in --> sax
+soundcard_in -> J3 -> loop,sax_in -> sax
+
+J3 will have all the information that sax has, and 
+a different chain ID based on sax.
+
+If we delete them after each setup, and reset the ::Track
+index, we will never see them in the show_tracks display
+so won't need to hide them.
+
+Each track may have two or more anon tracks (input side
+and output side), so we use incrementing names:
+
+[incrementing letter] + [track index n]
+
+=cut
+our @ISA = '::SlaveTrack';
+use ::Object qw( 
+
+[% qx(./strip_all ./track_fields) %]
+
+);
+						
 # ---------- Group -----------
 
 package ::Group;
@@ -854,7 +882,7 @@ sub new {
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak "name missing" unless $vals{name};
-	(carp "group name already in use: $vals{name}\n"), 
+	#(carp "group name already in use: $vals{name}\n"), 
 		return ($by_name{$vals{name}}) if $by_name{$vals{name}};
 	#my $skip_index = $vals{n};
 	my $n_;
@@ -884,6 +912,7 @@ sub tracks { # returns list of track names in group
 }
 
 sub last {
+	$debug and say "group: @_";
 	my $group = shift;
 	my $max = 0;
 	map{ 

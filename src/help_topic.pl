@@ -229,6 +229,13 @@ effects => <<EFFECTS,
    append_effect              - add effect to the end of current track
                                 effect chain
    add_controller, acl, cla   - add an Ecasound controller
+
+-  send/receive inserts
+
+   add_insert_cooked,  ainc   - add a post-fader insert to the current track
+   remove_insert,      rin    - remove current track's insert
+   set_insert_wetness, wet    - set/query insert wetness 
+                                example: wet 99 (99% wet, 1% dry)
 EFFECTS
 
 group => <<GROUP,

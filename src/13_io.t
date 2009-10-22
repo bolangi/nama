@@ -11,11 +11,13 @@ BEGIN { use_ok('::IO') };
 
 diag ("TESTING $0\n");
 
+=comment
 my $io = ::IO->new( qw[ type raw
 						object loop,mix
 						format s16_le,2,44100 ] );
 
 	is( $io->type, 'raw', 'IO object create, access');
+=cut
 
 1;
 __END__

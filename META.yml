@@ -24,6 +24,7 @@ requires:
   File::Spec::Link: 0
   File::Temp: 0
   Getopt::Std: 0
+  Graph: 0
   IO::All: 0
   IO::Socket: 0
   Module::Load::Conditional: 0
@@ -35,4 +36,4 @@ requires:
   Time::HiRes: 0
   autodie: 0
   perl: 5.10.0
-version: 0.9980
+version: 0.9982

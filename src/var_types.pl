@@ -61,6 +61,7 @@
 						$mastering_mode
 						@command_history
 						$saved_version
+						$main_out
 						);
 					 
 # used for effects_cache 

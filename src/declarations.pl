@@ -145,6 +145,7 @@ our (
  	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd status (pid)
 	$jack_lsp,      # jack_lsp -Ap
+	%jack,			# jack clients data from jack_lsp
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
@@ -251,13 +252,6 @@ our (
 	$old_bg, # initial background color.
 	$old_abg, # initial active background color
 
-
-	$loop_mix,  # loop_outputack nodes 
-	$loop_output,  
-	$loop_mastering, 
-	$loop_crossover,
-	$loop_boost,
-
 	@oids,	# output templates, are applied to the
 			# chains collected previously
 			# the results are grouped as
@@ -285,7 +279,7 @@ our (
 	$OUT,				# filehandle for Text mode print
 	#$commands,	# ref created from commands.yml
 	%commands,	# created from commands.yml
-	%dispatch,  # replacement for existing parser
+	%dispatch,  # variable for generate_setup dispatch table
 	$commands_yml, # the string form of commands.yml
 	$cop_hints_yml, # ecasound effects hinting
 
@@ -299,24 +293,9 @@ our (
 	
 	$main_bus, 
 	$main, # main_group
-	$master_bus, 
-	$master, # master_group
-	$mixdown_bus,
-	$mixdown,  # group
 	$null_bus,
     $null, # group
-	$mastering, # group
 
-	# mastering buses
-	
-	# we will try to simplify buses... just rules
-	# tracks will be supplied to apply() method.
-	
-	$bypass_bus,
-	$mastering_stage1_bus,
-	$mastering_stage2_bus,
-	$mastering_stage3_bus,
-	
 	%ti, # track by index (alias %::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
 
@@ -328,36 +307,20 @@ our (
 	$alsa_playback_device,       # where to send stereo output
 	$capture_device,    # where to get our inputs
 
+	$main_out, # do I route audio output to soundcard?
 
 	# rules
 	
-	$mixer_out,
-	$mix_down,
 	$mix_down_ev,
-	$main_out,
-	$mix_setup,
-	$mixdown_playback,
-	$raw_monitor_input,
+	$mon_setup,
 	$rec_file,
-	$raw_record_input,
+	$rec_setup,
 	$aux_send,
-	$aux_receive,
 	$null_setup,
 
-	# rules for instrument monitor buses
-	
-	$send_bus_raw_monitor_input,
-	$send_bus_raw_record_input,
 	$send_bus_cooked_input,
 	$send_bus_out,
-	$sub_bus_mix_setup,
 	
-	# rules for mastering
-	
-	$stage1,
-	$stage2,
-	$stage3, 
-
 	# mastering mode status
 
 	$mastering_mode,
@@ -406,4 +369,5 @@ our (
 	@command_history,
 	$disable_auto_reconfigure, # for debugging
 
+	$g, 			# Graph var, for chain setup
 );

@@ -12,6 +12,7 @@ inc/Module/Install/Fetch.pm
 lib/Audio/Nama.pm
 lib/Audio/Nama/Assign.pm
 lib/Audio/Nama/Bus.pm
+lib/Audio/Nama/Graph.pm
 lib/Audio/Nama/Mark.pm
 lib/Audio/Nama/Object.pm
 lib/Audio/Nama/Track.pm

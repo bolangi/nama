@@ -26,7 +26,14 @@ sub show_effects {
 		 	} (0..scalar @pnames - 1);
 			#push @lines, join("; ", @params) . "\n";
  
- 	 } @{ $this_track->ops };
+ 	} @{ $this_track->ops };
+
+	my $i = $this_track->inserts;
+
+	# display if there is actually something there
+
+	if ($i = $i->[0]){ push @lines, yaml_out($i) }
+		
 	join "", @lines;
  	
 }
@@ -54,7 +61,7 @@ sub show_status {
 	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
 		map{ $tn{$_} } $main->tracks, q(Mixdown);
 	push @fields, "mixdown" 
-		if $tn{Mixdown}->rec_status eq 'REC' and $mix_down->status;
+		if $tn{Mixdown}->rec_status eq 'REC';
 	push @fields, "doodle" if $preview eq 'doodle';
 	push @fields, "preview" if $preview eq 'preview';
 	push @fields, "master" if $mastering_mode;
@@ -505,24 +512,19 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
-	$main_out->set(status => 0);
-	$tn{Master}->set(rw => 'MON');
-	$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
-		$ecasound_globals_for_mixdown; 
+	$main_out = 0; # no audio output
 }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$tn{Mixdown}->set(rw => 'MON');
 	$main->set(rw => 'OFF');
-	$tn{Master}->set(rw => 'OFF');
-	$ecasound_globals_ecs = $ecasound_globals;
+	$main_out = 1;
 }
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
-	$tn{Master}->set(rw => 'MON');
+	$main_out = 1;
 	$main->set(rw => 'MON')}
-	$ecasound_globals_ecs = $ecasound_globals;
 
 sub bunch {
 	package ::;

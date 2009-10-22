@@ -4,21 +4,22 @@
 # These are overridden in the ::Text class with no-op stubs.
 # 
 # So all the routines in Graphical_methods.pl can consider
-# themselves to be in the base class, with access to all
-# variables and subs that are imported.
+# themselves to be in the base class.
 
 package ::;
 use 5.10.0;
 use feature ":5.10";
 use strict;
 use warnings;
+#use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
 use Cwd;
 use Data::YAML;
-use Event;
+use Event qw(loop unloop unloop_all);
 use File::Find::Rule;
+use File::Spec::Link;
 use File::Path;
 use File::Spec;
 use File::Temp;
@@ -29,31 +30,27 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
+use Graph;
 
 # use Timer::HiRes; # automatically detected
-
-use File::Spec::Link;
 
 # use Tk;           # loaded conditionally
 
 use vars qw($VERSION);
 BEGIN{ 
 
-$VERSION = '0.9980';
+$VERSION = '0.9982';
 
 [% qx(cat ./banner.pl) %]
 
 }
 
-# use Tk    # loaded conditionally in GUI mode
-
 #use Tk::FontDialog;
 
 
-$| = 1;     # flush STDOUT buffer on every write
-
 ## Definitions ##
 
+$| = 1;     # flush STDOUT buffer on every write
 
 # 'our' declaration: all packages in the file will see the following
 # variables. 
@@ -69,14 +66,6 @@ $yr = Data::YAML::Reader->new;
 
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
-
-## The names of helper loop_outputack devices:
-
-$loop_mix = 'loop,mix';
-$loop_output = 'loop,output';
-$loop_mastering = 'loop,mastering';
-$loop_crossover = 'loop,crossover';
-$loop_boost = 'loop,boost';
 
 # other initializations
 $unit = 1;
@@ -95,6 +84,7 @@ $save_id = "State";
 $fade_time = 0.3;
 #$SIG{INT} = sub{ mute{$tn{Master}} if engine_running(); die "\nAborting.\n" };
 $old_snapshot = {};
+$main_out = 1; # enable main output
 
 jack_update(); # to be polled by Event
 $memoize = 0;
@@ -110,6 +100,7 @@ use ::Track;
 use ::Bus;    
 use ::Mark;
 use ::IO;
+use ::Graph;
 
 package ::Wav;
 memoize('candidates') if $::memoize;
@@ -262,8 +253,6 @@ __END__
 
 =head1 NAME
 
-B<Audio::Nama> - Perl extensions for multitrack audio processing
-
 B<Nama> - Lightweight recorder, mixer and mastering system
 
 =head1 SYNOPSIS
@@ -273,9 +262,10 @@ B<nama> [I<options>] [I<project_name>]
 =head1 DESCRIPTION
 
 B<Nama> is a lightweight recorder/mixer application using
-Ecasound in the back end to provide effects processing,
-cut-and-paste, mastering, and other functions typically
-found in digital audio workstations.
+Ecasound in the back end to provide multitrack recording,
+effects processing, and mastering. Nama provides aux sends,
+inserts, buses and other functions more typical of digital
+audio workstations.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>
@@ -334,7 +324,7 @@ Audio::Ecasound is installed)
 Ecasound is configured through use of I<chain setups>.
 Nama generates appropriate chain setups for 
 recording, playback, mixing, mastering
-and bus routing.
+inserts and bus routing.
 
 Commands for audio processing with Nama/Ecasound fall into
 two categories: I<static commands> that influence the chain
@@ -366,9 +356,8 @@ however this action may be accompanied by an audible click.
 
 General configuration of sound devices and program options
 is performed by editing the file F<.namarc>. Nama
-automatically generates this well-commented file on the
-program's first run, usually placing it in the user's home
-directory.
+automatically generates this file on the program's first
+run, usually placing it in the user's home directory.
 
 =head1 DIAGNOSTICS
 
@@ -384,22 +373,27 @@ C<save> command.
 
 =head1 Tk GRAPHICAL UI 
 
-Invoked by default, the Tk interface provides all
-functionality on two panels, one for general control, the
-second for effects. 
+Invoked by default if Tk is installed, this interface
+provides a large subset of Nama's functionality on two
+panels, one for general control, the second for effects. 
 
-Nama detects and uses plugin hints for 
-parameter range and use of logarithmic scaling.
-Text-entry widgets are used to enter values 
-for plugins without hinted ranges.
+The general panel has buttons for project create, load
+and save, for adding tracks and effects, and for setting
+the vol, pan and record status of each track.
 
 The GUI project name bar and time display change color to indicate
 whether the upcoming operation will include live recording
 (red), mixdown only (yellow) or playback only (green).  Live
 recording and mixdown can take place simultaneously.
 
+The effects window provides sliders for each effect
+parameters. Parameter range, defaults, and log/linear
+scaling hints are automatically detects. Text-entry widgets
+are used to enter parameters values for plugins without
+hinted ranges.
+
 The text command prompt appears in the terminal window
-during GUI operation, and text commands may be issued at any
+during GUI operation. Text commands may be issued at any
 time.
 
 =head1 TEXT UI
@@ -440,7 +434,7 @@ abstractions. Chief among these are tracks.
 Each track has a descriptive name (i.e. vocal) and an
 integer track-number assigned when the track is created.
 The following paragraphs describes track fields and
-settings.
+their settings.
 
 =head2 VERSION NUMBER
 
@@ -450,10 +444,10 @@ recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
 files recorded at the same time have the same version
 numbers. 
 
-Version numbers for playback can be selected at the group
-or track level. By setting the group version number to 5,
-you can play back the fifth take of a song, or perhaps the
-fifth song of a live recording session. 
+The version numbers of files for playback can be selected at
+the group or track level. By setting the group version
+number to 5, you can play back the fifth take of a song, or
+perhaps the fifth song of a live recording session. 
 
 The track version setting, if present, overrides 
 the group setting. Setting the track version to zero
@@ -482,7 +476,7 @@ track set to REC with no live input will default to MON
 status.
 
 I<OFF> status means that no audio is available for the track
-from any source.  A track with no recorded WAV files 
+from any source. A track with no recorded WAV files 
 will show OFF status, even if set to MON.
 
 An OFF setting for a track or group always results in OFF
@@ -507,33 +501,49 @@ of multiple regions or versions of a single track.
 
 C<link_track> can clone tracks from other projects.  Thus
 you could create the sections of a song in separate
-projects, then assemble them using C<link_track> to pull the
-Mixdown tracks into a single project.
+projects, pull them into one project using C<link_track> 
+commands, and sequence them using C<shift> commands.
 
-=head2 GROUPS
+=head2 EFFECTS
+
+Each track gets volume and pan effects by default.  New
+effects added using C<add_effect> are applied after pan and
+before volume.  You can position effects anywhere you choose
+using C<insert_effect> and C<append_effect>.
+
+=head3 SENDS AND INSERTS
+
+The C<send> command can routes a track's post-fader output
+to a soundcard channel or JACK client in addition to the
+normal mixer input. Nama currently allows one aux send per
+track.
+
+The C<add_insert> command configures a post-fader
+send-and-return to soundcard channels or JACK clients.
+Wet and dry signal paths are provided, with a default
+setting of 100% wet.
+
+=head1 GROUPS
 
 Track groups are used internally.  The Main group
 corresponds to a mixer. It has its own REC/MON/OFF setting
 that influences the rec-status of individual tracks. 
 
-When the group is set to OFF, all tracks are OFF. When the
-group is set to MON, track REC settings are forced to MON.
-When the group is set to REC, tracks can be any of REC, MON
-or OFF.  and a default version setting for the entire group.
-The
+Setting a group to OFF forces all of the group's tracks to
+OFF. When the group is set to MON, track REC settings are
+forced to MON.  When the group is set to REC, track status
+can be REC, MON or OFF. 
 
-The group MON mode triggers automatically after a recording
-run.
+The group MON mode triggers automatically after a successful
+recording run.
 
 The B<mixplay> command sets the Mixdown track to MON and the
 Main group to OFF.
 
-The Master bus has only MON/OFF status. 
-
 =head2 BUNCHES
 
 A bunch is just a list of track names. Bunch names are used
-with C<for> to apply one or more commands to to several
+with the keyword C<for> to apply one or more commands to to several
 tracks at once. A group name can also be treated as a bunch
 name.
 
@@ -546,15 +556,14 @@ B<Send buses> can be used as instrument monitors,
 or to send pre- or post-fader signals from multiple
 user tracks to an external program such as jconv.
 
-B<Sub buses> enable multiple tracks to be routed through a
-single track for vol/pan/effects processing before reaching
-the mixer.
+B<Sub buses> (currently broken) enable multiple tracks to be
+routed through a single track for vol/pan/effects processing
+before reaching the mixer.
 
 	add_sub_bus Strings
 	add_tracks violin cello bass
 	for violin cello bass; set bus Strings
 	Strings vol - 10  # adjust bus output volume
-
 
 =head1 ROUTING
 
@@ -564,13 +573,9 @@ number is used.
 
 =head2 Loop devices
 
-Nama uses Ecasound loop devices to be able to deliver each
-of these signals classes to multiple "customers", i.e.  to
-other chains using that signal as input.
-
-An optimizing pass eliminates loop devices that have 
-only one signal outputs. The following diagrams show
-the unoptimized routing.
+Nama uses Ecasound loop devices to join two tracks, 
+or to allow one track to have multiple inputs or
+outputs. 
 
 =head2 Flow diagrams
 
@@ -581,23 +586,24 @@ We will divide the signal flow into track and mixer
 sections.  Parentheses indicate chain identifiers or the
 corresponding track name.
 
-The stereo outputs of each user track terminate at loop,mix.
+The stereo outputs of each user track terminate at 
+Master_in, a loop device at the mixer input.
 
 =head3 Track, REC status
 
-    Sound device   --+---(3)----> loop,3 ---(J3)----> loop,mix
+    Sound device   --+---(3)----> Master_in
       /JACK client   |
                      +---(R3)---> sax_1.wav
 
-REC status indicates that the source of the signal
-is the soundcard or JACK client. The input signal will be 
-written directly to a file except in the special preview and doodle 
+REC status indicates that the source of the signal is the
+soundcard or JACK client. The input signal will be written
+directly to a file except in the special preview and doodle
 modes.
 
 
 =head3 Track, MON status
 
-    sax_1.wav ------(3)----> loop,3 ----(J3)----> loop,mix
+    sax_1.wav ------(3)----> Master_in
 
 =head3 Mixer, with mixdown enabled
 
@@ -606,28 +612,23 @@ delivered to an output device through the Master chain,
 which can host effects. Usually the Master track
 provides final control before audio output or mixdown.
 
-    loop,mix --(1/Master)--> loop,output -> Sound device
+    Master_in --(1/Master)--> Master_out -> Sound device
                                  |
                                  +----->(2/Mixdown)--> Mixdown_1.wav
 
-During mastering, the mastering network is inserted between
-the Master track and the output node C<loop,output>.
-
-    loop,mix --(1/Master)-> loop,mastering-[NETWORK]->loop,output -> Sound device
-                                                         |
-                                                         +->(2/Mixdown)--> Mixdown_1.wa
-
+During mastering, the mastering network is inserted
+between the Master track, and the audio/mixdown output. 
 
 =head3 Mastering Mode
 
 In mastering mode (invoked by C<master_on> and released
 C<master_off>) the following network is used:
 
-                                      +---(Low)---+ 
-                                      |           |
-    lp,mastering -(Eq)-> lp,crossover +---(Mid)---+ lp,boost --(Boost)--> lp,output
-                                      |           |
-                                      +---(High)--+ 
+                          +-(Low)-+ 
+                          |       |
+    Eq-in -(Eq)-> Eq_out -+-(Mid)-+- Boost_in -(Boost)-> soundcard/mixdown
+                          |       |
+                          +-(High)+ 
 
 The B<Eq> track hosts an equalizer.
 
@@ -654,9 +655,9 @@ and doodle modes.
 
 =head1 BUGS AND LIMITATIONS
 
-No waveform or signal level displays are provided.
-No latency compensation is provided across the various
-signal paths, although this function is under development.
+No waveform or signal level displays are provided.  No
+latency compensation is provided across the various signal
+paths at present, although this feature is planned.
 
 =head1 SECURITY CONCERNS
 
@@ -664,31 +665,34 @@ If you are using Nama with the NetECI interface (i.e. if
 Audio::Ecasound is I<not> installed) you should firewall TCP port 2868 
 if you computer is exposed to the Internet. 
 
-=head1 EXPORT
-
-None by default.
-
 =head1 AVAILABILITY
 
-CPAN, for the distribution.
+CPAN, for the distribution. The following
+command will pull in Nama and all its dependencies:
 
-C<cpan Audio::Nama>
+PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
 You will need to install Tk to use the GUI.
 
 C<cpan Tk>
 
+You may want to install Audio::Ecasound
+if you prefer not to have Ecasound running
+in server mode.
+
+C<cpan Audio::Ecasound>
+
 You can pull the source code as follows: 
 
 C<git clone git://github.com/bolangi/nama.git>
 
-Build instructions are contained in the F<README> file.
+Consult the F<BUILD> file for build instructions.
 
 =head1 PATCHES
 
-The main module, Nama.pm is a concatenation of
-several source files.  Patches should be made against the
-source files.
+The main module, Nama.pm, its sister modules are
+concatenations of several source files. Patches 
+against the source files are preferred.
 
 =head1 AUTHOR
 

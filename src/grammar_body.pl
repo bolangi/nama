@@ -138,7 +138,7 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	::pager( ::Text::show_tracks ( ::Track::all ) );
+	::pager( ::Text::show_tracks ( ::Track::all() ) );
 	1;
 }
 modifiers: _modifiers modifier(s) end {
@@ -178,7 +178,9 @@ autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize")
 master_on: _master_on end { ::master_on(); 1 }
 master_off: _master_off end { ::master_off(); 1 }
 
-exit: _exit end { ::save_state($::state_store_file); CORE::exit(); 1}
+exit: _exit end { 	::save_state($::state_store_file); 
+					kill 15, ::ecasound_pid();  	
+					CORE::exit(); 1}
 source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
@@ -439,11 +441,11 @@ list_history: _list_history end {
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
 main_off: _main_off end { 
-	$::main_out->set(status => 0);
+	$::main_out = 0;
 1;
 } 
 main_on: _main_on end { 
-	$::main_out->set(status => 1);
+	$::main_out = 1;
 1;
 } 
 add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
@@ -487,4 +489,57 @@ update_send_bus: _update_send_bus bus_name end {
  	::update_send_bus( $item{bus_name} );
  	1;
 }
+add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
+	my $return_id = "@{$item{'return_id(?)'}}";
+	my $send_id = $item{send_id};
+	my $t = $::this_track;
+	$t->remove_insert;
+	my $i = {
+		insert_type => 'cooked',
+		send_type 	=> ::dest_type($send_id),
+		send_id	  	=> $send_id,
+		return_type 	=> ::dest_type($return_id),
+		return_id	=> $return_id,
+		wetness		=> 100,
+	};
+	# default to return via same system (soundcard or JACK)
+
+	# default to return from same JACK client or adjacent soundcard channels
+	if (! $i->{return_id}){
+		$i->{return_type} = $i->{send_type};
+		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
+		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+	}
+	
+	$t->set(inserts => [$i]); 1;
+}
+send_id: name
+return_id: name
+
+set_insert_wetness: _set_insert_wetness parameter end {
+	my $p = $item{parameter};
+	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
+		if ! ($p <= 100 and $p >= 0);
+	my $i = $::this_track->inserts->[0];
+	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
+		return 1 unless $i;
+	$i->{wetness} = $p;
+	::modify_effect($i->{wet_vol}, 0, undef, $p);
+	::modify_effect($i->{dry_vol}, 0, undef, 100 - $p);
+	1;
+}
+
+set_insert_wetness: _set_insert_wetness end {
+	my $i = $::this_track->inserts->[0];
+	print ("track ",$::this_track->n, " has no insert.\n"), return 1 unless $i;
+	 print "The insert is ", 
+		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";
+}
+
+remove_insert: _remove_insert end { 
+	$::this_track->remove_insert;
+	1;
+}
+
+
 	
