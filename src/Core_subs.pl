@@ -1140,12 +1140,33 @@ sub get_chain_id { "J".++$i }
 		$g->add_edge('wav_in', $_->name) 
 			if $_->rec_status eq 'MON' and $preview ne 'doodle';
 
-			if ($_->rec_status eq 'REC' and !  $_->rec_defeat){
-				# add soundcard -> wav_out link
-				# currently accomplished using rec_file
-				#$g->add_edge($_->name, 'wav_out');
-			}
 
+		# rec_file functionality
+		#
+		# we don't use it because rec_file's chain
+		# names (R3 for track 3) are more convenient
+
+		# this approach, using an anonymous track
+		# has the track's limitation of integer 
+		# track index which is used as chain_id
+		#
+		# we could equally use the following approach
+		# to replace the aux_send rule, but aux_send
+		# already solves the problem neatly
+
+# 			if ($_->rec_status eq 'REC' 
+# 					and ! $_->rec_defeat
+# 					and ! $global_rec_defeat){ 
+# 
+# 				my $anon = ::SlaveTrack->new( 
+# 					target 	=> $_->name,
+# 					rw		=> 'REC',
+# 					name 	=> $_->n . 'w';
+# 				push @temp_tracks, $anon;
+# 
+# 				$g->add_path($_->name, $anon->name, 'wav_out');
+# 			}
+# 
 		# create default mixer connection
 		
 		$g->add_edge($_->name, 'Master');

@@ -199,11 +199,11 @@ sub insert_far_side_loop {
 		# insert anon track if successor is non-track
 		else {  
 
-			my $n = $::tn{$b}->n . $j++;
+			my $nam = $::tn{$b}->n . $j++;
 			my $anon = ::SlaveTrack->new( 
 				target => $b,
-				n => $n,
-				name => $n);
+				name => $nam,
+				rw => 'REC');
 			push @$tracks_ref, $anon;
 
 			$g->add_path($_, $anon->name, $loop);
