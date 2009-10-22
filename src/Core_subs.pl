@@ -261,7 +261,7 @@ sub init_ecasound_socket {
 sub ecasound_pid {
 	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
 	my ($pid) = split " ", $ps; 
-	$pid if $sock;
+	$pid if $sock; # conditional on using socket i.e. Net-ECI
 }
 
 sub eval_iam { } # stub
