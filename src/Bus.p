@@ -4,7 +4,7 @@
 package ::Bus;
 our $VERSION = 1.0;
 use strict;
-our ($debug %by_name);
+our ($debug, %by_name);
 $debug = 0;
 use Carp;
 our @ISA;
