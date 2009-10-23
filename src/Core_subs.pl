@@ -3996,7 +3996,7 @@ sub add_sub_bus {
 	# create mix track
 	
 	::add_track($name, 	source_type => 'track', 
-						source_id 	=> 'dummy',
+						source_id 	=> $name,
 						rec_defeat 	=> 1,
 						);
 	
