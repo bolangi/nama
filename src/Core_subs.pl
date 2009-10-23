@@ -1099,15 +1099,25 @@ sub get_chain_id { "J".++$i }
 	$g = Graph->new();
 
 	map{ 
-		# create edges representing live sound sources
 
-		$g->add_edge( $_->source_type . '_in' , $_->name) 
-			if $_->rec_status eq 'REC';
+
+		if($_->rec_status eq 'REC'){
+			
+		# create edges representing live sound sources
+		
+			if ($_->source_type =~ /soundcard|jack_client/){
+				$g->add_edge( $_->source_type . '_in' , $_->name)
+			} 
+		
+		
+		} elsif($_->rec_status eq 'MON' and $preview ne 'doodle'){
 
 		# create edges for WAV file input
 		
-		$g->add_edge('wav_in', $_->name) 
-			if $_->rec_status eq 'MON' and $preview ne 'doodle';
+		
+			$g->add_edge('wav_in', $_->name) 
+		
+		}
 
 
 		# rec_file functionality
