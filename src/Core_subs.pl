@@ -126,17 +126,39 @@ sub prepare {
 
 	$debug2 and print "&prepare\n";
 	
-=comment
-         my $data   = "file.dat";
-         my $length = 24;
-         my $verbose;
-         $result = GetOptions ("length=i" => \$length,    # numeric
-                               "file=s"   => \$data,      # string
-                               "verbose"  => \$verbose);  #
-=cut
-
 
 	### Option Processing ###
+
+	my %options = qw(
+
+        save-alsa  		a
+		project-root=s  d
+		create-project  c
+		config=s		f
+		gui			  	g
+		text			t
+		no-state		m
+		regenerate-effects-cache	r
+		no-static-effects-data		s
+		no-static-effects-cache		e
+		no-reconfigure-engine		R
+		debugging-output			D
+);
+
+	map{$opts{$_} = ''} values %options;
+
+	# long options
+	
+	my $getopts = 'GetOptions( ';
+	map{ $getopts .= qq("$_" => \\\$opts{$options{$_}}, \n)} keys %options;
+	$getopts .= ' )' ;
+
+	#say $getopts;
+
+	my $result = eval $getopts;
+	
+	# short options
+
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
 	getopts('amcegstrnd:f:DR', \%opts); 
@@ -154,6 +176,7 @@ sub prepare {
 	# R: skip reconfigure engine
 	# D: output debugging info
 	
+
 	# UI object for interface polymorphism
 	
 
@@ -217,7 +240,10 @@ sub prepare {
 	
 	init_buses();	
 	
-	initialize_rules(); # needed for transport_gui
+	initialize_rules(); 					# bus/rule routing
+	say join " ", %::Rule::byname;
+	die "here";
+	initialize_routing_dispatch_table();	# graph-based routing
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -506,10 +532,9 @@ sub init_buses {
 	);
 
 }
-	
-sub initialize_rules {
 
-	# dispatch table for the graph-style routing system 
+sub initialize_routing_dispatch_table {
+
 	%dispatch = (
 		wav_in => sub {
 			my $name = shift;
@@ -622,6 +647,10 @@ sub initialize_rules {
 	
 	#@dispatch{qw(soundcard_in soundcard_out)} 
 	#	= @dispatch{qw(jack_client_in jack_client_out)};
+	
+}
+sub initialize_rules {
+
 
 	# bus/rules-style routing 
 

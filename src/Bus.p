@@ -4,8 +4,9 @@
 package ::Bus;
 our $VERSION = 1.0;
 use strict;
-our ($debug, %by_name);
-$debug = 0;
+our ($debug); # entire file
+
+use vars qw(%by_name);
 use Carp;
 our @ISA;
 use ::Object qw(	name
@@ -20,15 +21,15 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	if (! $vals{name} or $by_name{$vals{name}}){
+		carp($vals{name},": missing or duplicate bus name. Skipping.\n");
+		return;
+	}
 	my $bus = bless { 
 		tracks => [], 
 		groups => [], 
 		rules  => [],
 		@_ }, $class; 
-	if ($by_name{$bus_name}){
-		carp($bus->name,": bus already exists. Skipping.\n");
-		return;
-	}
 	$by_name{$bus->name} = $bus;
 }
 
@@ -66,6 +67,7 @@ sub apply {
 		map{ my $rule_name = $_;
 			$debug and print "apply rule name: $rule_name\n"; 
 			my $rule = $::Rule::by_name{$_};
+			$debug and print "rule $rule"; 
 			my $condition_met = deref_code($rule->condition, $track);
 
 		if ($condition_met){
@@ -119,7 +121,7 @@ sub deref_code {
 	my $type = ref $value || "scalar";
 	my $tracktype = ref $track;
 	#print "found type: $type, value: $value\n";
-	#print "found type: $type, tracktype: $tracktype, value: $value\n";
+	print "found field type: $type, track: ",$track->name, $/;
 	if ( $type  =~ /CODE/){
 		 $debug and print "code found\n";
 		$value = &$value($track);
