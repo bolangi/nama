@@ -1070,21 +1070,33 @@ sub really_recording {
 	keys %{$outputs{file}}; 
 }
 
-my $i;
+sub input_path { # signal path, not file path
+
+	my $track = shift;
+
+	# create edge representing live sound source input
+	
+	if($track->rec_status eq 'REC'){
+
+		if ($track->source_type =~ /soundcard|jack_client/){
+			( $track->source_type . '_in' , $track->name)
+		} 
+
+	} elsif($track->rec_status eq 'MON' and $preview ne 'doodle'){
+
+	# create edge representing WAV file input
+
+		('wav_in', $track->name) 
+
+	}
+}
+
 sub generate_setup { 
 
 	# Create data structures representing chain setup.
 	# This step precedes write_chains(), i.e. writing Setup.ecs.
 
 	$debug2 and print "&generate_setup\n";
-
-
-
-$i = 410;
-sub get_chain_id { "J".++$i }
-
-	
-
 
 	%inputs = %outputs 
 			= %post_input 
@@ -1100,59 +1112,65 @@ sub get_chain_id { "J".++$i }
 
 	map{ 
 
+		# the mix track of user buses will belong to Main group
 
-		if($_->rec_status eq 'REC'){
-			
-		# create edges representing live sound sources
-		
-			if ($_->source_type =~ /soundcard|jack_client/){
-				$g->add_edge( $_->source_type . '_in' , $_->name)
-			} 
-		
-		
-		} elsif($_->rec_status eq 'MON' and $preview ne 'doodle'){
+		# set $track->rec_defeat to skip rec_file
+		# set $track->source_type = 'dummy' to skip rec setup above
 
-		# create edges for WAV file input
-		
-		
-			$g->add_edge('wav_in', $_->name) 
-		
-		}
+		# the input will come via a loop device
+		# by connecting the sub bus track outputs to the mix track
 
+		my @path = input_path($_);
+		$g->add_edge(@path) if @path;
 
-		# rec_file functionality
-		#
-		# we don't use it because rec_file's chain
-		# names (R3 for track 3) are more convenient
-
-		# this approach, using an anonymous track
-		# has the track's limitation of integer 
-		# track index which is used as chain_id
-		#
-		# we could equally use the following approach
-		# to replace the aux_send rule, but aux_send
-		# already solves the problem neatly
-
-# 			if ($_->rec_status eq 'REC' 
-# 					and ! $_->rec_defeat
-# 					and ! $global_rec_defeat){ 
-# 
-# 				my $anon = ::SlaveTrack->new( 
-# 					target 	=> $_->name,
-# 					rw		=> 'REC',
-# 					name 	=> $_->n . 'w';
-# 				push @temp_tracks, $anon;
-# 
-# 				$g->add_path($_->name, $anon->name, 'wav_out');
-# 			}
-# 
 		# create default mixer connection
 		
 		$g->add_edge($_->name, 'Master');
 
-	 } 	grep{ $_->rec_status ne 'OFF' } 
+	} 	grep{ $_->rec_status ne 'OFF' } 
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
+
+
+		# process optional send and sub buses
+
+	map{
+
+		# raw send buses use only fixed-rule routing
+		# we process them in generate io_lists
+
+		if( $_->bus_type eq 'cooked'){  # post-fader send bus
+
+			# The signal path is:
+			#
+			# [target track] -> [slave track] -> [slave track send output]
+			
+			map{   
+				$g->add_path( $tn{$_}->target, $_->name, $tn{$_}->send_type.'_out');
+
+				# it would be possible here to use the override function
+				# set the track vertex send_type and send_id using bus values
+				# dest_type, dest_id, allowing update to match
+				# bus parameters.
+				
+			} $::Group::by_name{$_->name}->tracks;
+		}
+		elsif( $_->bus_type eq 'sub'){   # sub bus
+			my $bus = $_;
+			my $output = $bus->destination_type eq 'track' 
+				? $bus->destination_id
+				: $bus->destination_type . '_out';
+
+			# The signal path is:
+			#
+			# [track input] -> [track] -> [bus destination]
+			
+			map{ 	my @path = (input_path($_), $output);
+					$g->add_edge(@path); 
+
+			} $::Group::by_name{$_->name}->tracks;
+		}
+	} ::UserBus::all() if ::UserBus::all();
 
 
 	if ($mastering_mode){
@@ -1190,7 +1208,12 @@ my $temp_tracks = ::Graph::expand_graph($g);
 
 	::Graph::add_inserts($g);
 
+local($debug) = 1;
+
 	$debug and say "The expanded graph with inserts is $g";
+
+return;
+
 
 # now to create input and output lists %inputs and %outputs
 
@@ -1246,21 +1269,18 @@ my $temp_tracks = ::Graph::expand_graph($g);
 		# process system buses
 
 		$debug and print "applying main_bus (user tracks)\n";
-		$main_bus->apply;
-		$debug and print "applying null_bus (user tracks)\n";
-		$null_bus->apply;
+		$main_bus->apply; # rec file only
 
-		# process user defined buses
+		$debug and print "applying null_bus\n";
+		$null_bus->apply; # TODO
 
+		$debug and print "generating IO for raw_input send buses\n";
+		# others are handled graphically
 		
 		map { $_->apply() } ::UserBus::all();
 
-		#eliminate_loops2() unless $mastering_mode;
-		#	or useful_Master_effects();
-
-
-		#print "minus loops\n \%inputs\n================\n", yaml_out(\%inputs);
-		#print "\%outputs\n================\n", yaml_out(\%outputs);
+		$debug and print "\%inputs\n================\n", yaml_out(\%inputs),
+			"\%outputs\n================\n", yaml_out(\%outputs);
 
 		write_chains();
 		$ecasound_globals_ecs = $ecasound_globals;
@@ -3971,8 +3991,8 @@ sub add_sub_bus {
 	::UserBus->new( 
 		name => $name, 
 		groups => [$name],
-		rules => [qw(rec_setup mon_setup sub_bus_mix_setup)],
-		destination_type => $type // 'loop',
+		rules => [qw(rec_file)],
+		destination_type => $type // 'track',
 		destination_id	 => $id // $name,
 		)
 	or carp("can't create bus!\n"), return;
@@ -3999,9 +4019,10 @@ sub add_send_bus {
 	} else {
 	::UserBus->new( 
 		name => $name, 
+		bus_type => $bus_type,
 		groups => [$name],
 		rules => ($bus_type eq 'cooked' 
-			?  [qw(send_bus_cooked_input send_bus_out )]
+			?  [qw(send_bus_out )]
 			:  [qw(rec_setup mon_setup send_bus_out)],
 		destination_type => $dest_type,
 		destination_id	 => $dest_id,

@@ -9,9 +9,10 @@ $debug = 0;
 use Carp;
 our @ISA;
 use ::Object qw(	name
-						groups
-						tracks 
-						rules
+					groups
+					tracks 
+					rules
+					bus_type
 						
 						);
 
