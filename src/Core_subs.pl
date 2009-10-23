@@ -1148,14 +1148,15 @@ sub generate_setup {
 			# [target track] -> [slave track] -> [slave track send output]
 			
 			map{   
-				$g->add_path( $tn{$_}->target, $_->name, $tn{$_}->send_type.'_out');
+				$g->add_path( $_->target, $_->name, $_->send_type.'_out');
 
 				# it would be possible here to use the override function
 				# set the track vertex send_type and send_id using bus values
 				# dest_type, dest_id, allowing update to match
 				# bus parameters.
 				
-			} $::Group::by_name{$_->name}->tracks;
+			} 	grep{ $_->rec_status ne 'OFF' } 
+				map{$tn{$_}} $::Group::by_name{$_->name}->tracks;
 		}
 		elsif( $_->bus_type eq 'sub'){   # sub bus
 			$debug and say 'process sub bus';
