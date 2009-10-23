@@ -20,7 +20,7 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	$ui->install_handlers();
-	reconfigure_engine();
+	reconfigure_engine() x 5;
 	$ui->loop;
 }
 sub status_vars {
@@ -761,37 +761,6 @@ $aux_send = ::Rule->new(
 		
 	);
 
-	# rules for instrument monitor buses using cooked signals 
-	
-=comment	
-	$send_bus_cooked_input = ::Rule->new(
-		
-		name			=>  'send_bus_cooked_input', 
-		target			=>  'all',
-		chain_id		=>  sub{ $_[0]->n },   
-		input_type		=>  'loop',
-		input_object	=> sub{ my $track = shift; 
-								my $source_track = $tn{$track->target};
-								'loop,'.$source_track->n},
-		condition 		=>  1,
-		status			=>  1,
-	);
-
-
-	$sub_bus_mix_setup = ::Rule->new(
-
-		name			=>  'sub_bus_mix_setup',
-		chain_id		=>  sub { my $track = shift; "J". $track->n },
-		target			=>  'all',
-		input_type		=>  'loop',
-		input_object	=>  sub { my $track = shift; "loop," .  $track->n },
-		output_type		=>  'loop',
-		output_object	=>  sub{ my $track = shift; "loop,".  $track->group },
-		condition 		=>  1,
-		status			=>  1,
-		
-	);
-=cut
 
 }
 

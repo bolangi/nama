@@ -518,7 +518,7 @@ to a soundcard channel or JACK client in addition to the
 normal mixer input. Nama currently allows one aux send per
 track.
 
-The C<add_insert> command configures a post-fader
+The C<add_insert_cooked> command configures a post-fader
 send-and-return to soundcard channels or JACK clients.
 Wet and dry signal paths are provided, with a default
 setting of 100% wet.

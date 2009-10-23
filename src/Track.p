@@ -10,9 +10,9 @@ local $debug = 0;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use ::Wav;
-#use Memoize;
-#memoize ('get_length'); # subroutine, not object method
-#memoize('rec_status');
+use Memoize;
+memoize ('get_length'); # subroutine, not object method
+memoize('rec_status');
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
