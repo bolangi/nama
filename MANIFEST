@@ -22,6 +22,7 @@ MANIFEST			This list of files
 Makefile.PL
 META.yml
 README
+BUILD
 script/nama
 t/02_assign.t
 t/03_wav.t
