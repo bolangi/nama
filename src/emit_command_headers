@@ -84,20 +84,12 @@ elsif ($output eq 'pod'){
 
 		if (my $example = $ref->{$_}->{example}){
 
-
-			# convert literal \n to double newlines
-			
-			$example =~ s/\\n/\n\n/g;
-
-
+			# convert literal !n to double newlines
 			# add C<> tags to command text
 
-			$example =~ s/^(.+)$/C<$1/mg;
-			$example =~ s/^([^()]+)(\(.*?\)\s*|$)/$1>$2/mg;
-
-			# 
-			#$example =~ s/^([^()]+)/C<$1>/mg;
-
+			my @example = split '!n', $example;
+			#print "found ", scalar @example, "lines\n";
+			$example = join "", map{ $_ = "C<$_>\n\n" } @example;
 
 			print "$example\n\n";
 		}
