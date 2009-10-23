@@ -1,11 +1,10 @@
-print <<BANNER;
-
-     /////////////////////////////////////////////////////////////////////
-    //                                        / /   /     ///           /
-   // Nama multitrack recorder v. $VERSION                                /
-  /                                    Audio processing by Ecasound 
- /       (c) 2008 Joel Roth                      ////               //
-/////////////////////////////////////////////////////////////////////
-
+<<BANNER;
+      ////////////////////////////////////////////////////////////////////
+     /                                                                  /
+    /    Nama multitrack recorder v. $VERSION (c)2008-2009 Joel Roth     /
+   /                                                                  /
+  /    Audio processing by Ecasound, courtesy of Kai Vehmanen        /
+ /                                                                  /
+////////////////////////////////////////////////////////////////////
 
 BANNER

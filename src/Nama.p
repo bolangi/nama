@@ -7,10 +7,9 @@
 # themselves to be in the base class.
 
 package ::;
-use 5.10.0;
-use feature ":5.10";
-use strict;
-use warnings;
+use vars qw($VERSION);
+$VERSION = '0.9982';
+use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
@@ -37,14 +36,6 @@ use Graph;
 
 # use Tk;           # loaded conditionally
 
-use vars qw($VERSION);
-BEGIN{ 
-
-$VERSION = '0.9982';
-
-[% qx(cat ./banner.pl) %]
-
-}
 
 #use Tk::FontDialog;
 
@@ -67,6 +58,10 @@ $yr = Data::YAML::Reader->new;
 
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
+
+$banner =
+
+[% qx(cat ./banner.pl) %]
 
 # other initializations
 $unit = 1;

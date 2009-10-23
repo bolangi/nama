@@ -17,6 +17,7 @@ sub select_sleep {
 }
 
 sub nama { 
+	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
 	$ui->install_handlers();
@@ -119,15 +120,10 @@ print "Exiting.\n";
 exit;	
 }
 }
-	
-	
-sub prepare {
-	
 
-	$debug2 and print "&prepare\n";
-	
 
-	### Option Processing ###
+
+sub process_options {
 
 	my %options = qw(
 
@@ -138,6 +134,8 @@ sub prepare {
 		gui			  	g
 		text			t
 		no-state		m
+		net-eci			n
+		help			h
 		regenerate-effects-cache	r
 		no-static-effects-data		s
 		no-static-effects-cache		e
@@ -163,22 +161,41 @@ sub prepare {
 	#push @ARGV, qw(-d /media/sessions test-abc  );
 	getopts('amcegstrnd:f:DR', \%opts); 
 	#print join $/, (%opts);
-	# a: save and reload ALSA state using alsactl
-	# d: set project root dir
-	# c: create project
-	# f: specify configuration file
-	# g: gui mode (default)
-	# t: text mode 
-	# m: don't load state info on initial startup
-	# r: regenerate effects data cache
-	# e: don't load static effects data (for debugging)
-	# s: don't load static effects data cache (for debugging)
-	# R: skip reconfigure engine
-	# D: output debugging info
 	
+	if ($opts{h}){
+	say <<HELP;
 
-	# UI object for interface polymorphism
+USAGE: nama [options] [project_name]
+
+--gui, -g                        Start Nama in GUI mode
+--text, -t                       Start Nama in text mode
+--config, -f                     Specify configuration file (default: ~/.namarc)
+--project-root, -d               Specify project root directory
+--create-project, -c             Create project if it doesn't exist
+--net-eci, -n                    Use Ecasound's Net-ECI interface
+--save-alsa, -a                  Save/restore alsa state with project data
+--help, -h                       This help display
+
+Debugging options:
+
+--no-static-effects-data, -s     Don't load effects data
+--no-state, -m                   Don't load project state
+--no-static-effects-cache, -e    Bypass effects data cache
+--regenerate-effects-cache, -r   Regenerate the effects data cache
+--no-reconfigure-engine, -R      Don't automatically configure engine
+                                 (manually use 'generate' and 'connect' commands)
+--debugging-output, -D           Emit debugging information
+
+HELP
+
+	exit;
+	} else { say $banner; }
+
+}
 	
+sub prepare {
+	
+	$debug2 and print "&prepare\n";
 
 	if ($opts{D}){
 		$debug = 1;
@@ -1138,7 +1155,7 @@ sub generate_setup {
 		# by connecting the sub bus track outputs to the mix track
 
 		my @path = $_->input_path;
-		say "Main bus track input path: @path";
+		#say "Main bus track input path: @path";
 		$g->add_path(@path) if @path;
 
 		# create default mixer connection

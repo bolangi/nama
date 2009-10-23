@@ -11,6 +11,7 @@ our (
 	# it didn't work out to be as helpful as i'd like
 	# because the grammar requires package path anyway
 
+	$banner,
 	$help_screen, 		# 
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic

@@ -121,7 +121,7 @@ sub deref_code {
 	my $type = ref $value || "scalar";
 	my $tracktype = ref $track;
 	#print "found type: $type, value: $value\n";
-	print "found field type: $type, track: ",$track->name, $/;
+	#print "found field type: $type, track: ",$track->name, $/;
 	if ( $type  =~ /CODE/){
 		 $debug and print "code found\n";
 		$value = &$value($track);
