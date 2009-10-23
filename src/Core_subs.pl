@@ -241,7 +241,7 @@ sub prepare {
 	init_buses();	
 	
 	initialize_rules(); 					# bus/rule routing
-	say join " ", %::Rule::by_name;
+	$debug and say join " ", %::Rule::by_name;
 	#die "here";
 	initialize_routing_dispatch_table();	# graph-based routing
 
