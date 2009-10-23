@@ -206,11 +206,12 @@ our @ISA = '::Bus';
 use vars qw(@buses %by_name);
 
 use ::Object qw(	name
-						groups
-						tracks 
-						rules
-						destination_type
-						destination_id
+					groups
+					tracks 
+					rules
+					destination_type
+					destination_id
+					bus_type
 
 
 						);

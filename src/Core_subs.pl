@@ -1141,6 +1141,8 @@ sub generate_setup {
 
 		if( $_->bus_type eq 'cooked'){  # post-fader send bus
 
+			$debug and say 'process post-fader bus';
+
 			# The signal path is:
 			#
 			# [target track] -> [slave track] -> [slave track send output]
@@ -1156,6 +1158,7 @@ sub generate_setup {
 			} $::Group::by_name{$_->name}->tracks;
 		}
 		elsif( $_->bus_type eq 'sub'){   # sub bus
+			$debug and say 'process sub bus';
 			my $bus = $_;
 			my $output = $bus->destination_type eq 'track' 
 				? $bus->destination_id
@@ -1208,12 +1211,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 
 	::Graph::add_inserts($g);
 
-local($debug) = 1;
-
 	$debug and say "The expanded graph with inserts is $g";
-
-return;
-
 
 # now to create input and output lists %inputs and %outputs
 
@@ -3990,6 +3988,7 @@ sub add_sub_bus {
 	}
 	::UserBus->new( 
 		name => $name, 
+		bus_type => 'sub',
 		groups => [$name],
 		rules => [qw(rec_file)],
 		destination_type => $type // 'track',
