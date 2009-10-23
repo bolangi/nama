@@ -566,9 +566,9 @@ add_send_bus_raw:
 add_sub_bus:
   type: bus
   short: asub
-  what: add a bus with arbitrary tracks and destination
-  parameters: <s_name> [destination]
-  example: asub Strings_bus !nasub Strings_bus streamer_app
+  what: add a sub bus (default destination: to mixer via eponymous track)
+  parameters: <s_name> [destination: s_track_name|s_jack_client|n_soundcard channel]
+  example: asub Strings_bus !nasub Strings_bus some_jack_client
 update_send_bus:
   type: bus
   short: usb
