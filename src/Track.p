@@ -216,7 +216,7 @@ sub rec_status {
 					:  return maybe_monitor($monitor_version)
 			}
 			when('soundcard'){ return 'REC' }
-			when('loop'){ return 'REC' }
+			when('track'){ return 'REC' }
 
 			default { croak $track->name. ": missing source type" }
 			# fall back to MON
@@ -334,6 +334,28 @@ sub remove {
 	@all = grep{ $_->n != $n} @all;
 }
 
+# for graph-style routing
+
+sub input_path { # signal path, not file path
+
+	my $track = shift;
+
+	# create edge representing live sound source input
+	
+	if($track->rec_status eq 'REC'){
+
+		if ($track->source_type =~ /soundcard|jack_client/){
+			( $track->source_type . '_in' , $track->name)
+		} 
+
+	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
+
+	# create edge representing WAV file input
+
+		('wav_in', $track->name) 
+
+	}
+}
 
 # The following two subroutines are not object methods.
 

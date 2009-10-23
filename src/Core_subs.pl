@@ -1070,26 +1070,6 @@ sub really_recording {
 	keys %{$outputs{file}}; 
 }
 
-sub input_path { # signal path, not file path
-
-	my $track = shift;
-
-	# create edge representing live sound source input
-	
-	if($track->rec_status eq 'REC'){
-
-		if ($track->source_type =~ /soundcard|jack_client/){
-			( $track->source_type . '_in' , $track->name)
-		} 
-
-	} elsif($track->rec_status eq 'MON' and $preview ne 'doodle'){
-
-	# create edge representing WAV file input
-
-		('wav_in', $track->name) 
-
-	}
-}
 
 sub generate_setup { 
 
@@ -1120,12 +1100,15 @@ sub generate_setup {
 		# the input will come via a loop device
 		# by connecting the sub bus track outputs to the mix track
 
-		my @path = input_path($_);
-		$g->add_edge(@path) if @path;
+		my @path = $_->input_path;
+		say "Main bus track input path: @path";
+		$g->add_path(@path) if @path;
 
 		# create default mixer connection
 		
-		$g->add_edge($_->name, 'Master');
+		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name)
+		# we will remove input-less tracks later
+;
 
 	} 	grep{ $_->rec_status ne 'OFF' } 
 		map{$tn{$_}} 	# convert to Track objects
@@ -1165,17 +1148,30 @@ sub generate_setup {
 				? $bus->destination_id
 				: $bus->destination_type . '_out';
 
+			$debug and say "bus output: $output";
+
 			# The signal path is:
 			#
 			# [track input] -> [track] -> [bus destination]
 			
-			map{ 	my @path = (input_path($_), $output);
-					$g->add_edge(@path); 
+			map{ 	my @path = ($_->input_path, $output);
+					say "path: @path";
+					$g->add_path(@path); 
 
-			} $::Group::by_name{$_->name}->tracks;
+			} map{$tn{$_}} $::Group::by_name{$_->name}->tracks;
 		}
 	} ::UserBus::all() if ::UserBus::all();
 
+	# remove_inputless_tracks
+	
+	# we need to do this so that the mix track of a sub bus with no inputs
+	# is removed
+	
+	while(my @i = ::Graph::inputless_tracks($g)){
+		map{ 	$g->delete_edges(map{@$_} $g->edges_from($_));
+				$g->delete_vertex($_);
+		} @i;
+	}
 
 	if ($mastering_mode){
 		$g->add_path(qw[Master Eq Low Boost soundcard_out]);
@@ -3999,7 +3995,10 @@ sub add_sub_bus {
 	::Group->new( name => $name, rw => 'REC');
 	# create mix track
 	
-	::add_track($name, source_type => 'loop', source_id => "loop,$name");
+	::add_track($name, 	source_type => 'track', 
+						source_id 	=> 'dummy',
+						rec_defeat 	=> 1,
+						);
 	
 	
 }

@@ -4,7 +4,7 @@
 package ::Bus;
 our $VERSION = 1.0;
 use strict;
-our ($debug);
+our ($debug %by_name);
 $debug = 0;
 use Carp;
 our @ISA;
@@ -20,18 +20,22 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	return bless { 
+	my $bus = bless { 
 		tracks => [], 
 		groups => [], 
 		rules  => [],
 		@_ }, $class; 
+	if ($by_name{$bus_name}){
+		carp($bus->name,": bus already exists. Skipping.\n");
+		return;
+	}
+	$by_name{$bus->name} = $bus;
 }
 
 
 		
 sub apply {
 	
-	#local $debug = 1;
 	#print join " ", map{ ref $_ } values %::Rule::by_name; exit;
 	my $bus = shift;
 	$debug and print q(applying rules for bus "), $bus->name, qq("\n);
@@ -62,6 +66,9 @@ sub apply {
 		map{ my $rule_name = $_;
 			$debug and print "apply rule name: $rule_name\n"; 
 			my $rule = $::Rule::by_name{$_};
+			my $condition_met = deref_code($rule->condition, $track);
+
+		if ($condition_met){
 			#print "rule is type: ", ref $rule, $/;
 			$debug and print "condition: ", $rule->condition, $/;
 
@@ -69,7 +76,6 @@ sub apply {
 			my $key2 = deref_code($rule->input_object, $track) ;
 			my $chain_id = deref_code($rule->chain_id, $track) ;
 			my $rec_status = $track->rec_status;
-			my $condition_met = deref_code($rule->condition, $track);
 
 			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
 			if ( 
@@ -101,6 +107,7 @@ sub apply {
 		$::post_input{$chain_id} .= $post_input if defined $post_input;
 		$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
 			}
+		}
 
 		} @{ $bus->rules } ;
 	} @tracks; 

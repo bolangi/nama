@@ -230,4 +230,10 @@ sub is_a_loop{
 		return $root;
 	} 
 }
+
+sub inputless_tracks {
+	my $g = shift;
+	(grep{ is_a_track($_) and $g->is_source_vertex($_) } $g->vertices)
+}	
+		
 1;
