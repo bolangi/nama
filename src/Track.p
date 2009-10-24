@@ -46,7 +46,8 @@ sub new {
 	
 	my $class = shift;
 	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
+    croak "undeclared field: @undeclared" if @undeclared;
 	if (my $track = $by_name{$vals{name}}){
 		#if ($track->hide) { $track->set(hide => 0); } 
 		#print("track name already in use: $vals{name}\n"); 

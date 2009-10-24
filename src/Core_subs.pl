@@ -147,9 +147,10 @@ sub process_options {
 	map{$opts{$_} = ''} values %options;
 
 	# long options
-	
+
+	Getopt::Long::Configure ("bundling");	
 	my $getopts = 'GetOptions( ';
-	map{ $getopts .= qq("$_" => \\\$opts{$options{$_}}, \n)} keys %options;
+	map{ $getopts .= qq("$options{$_}|$_" => \\\$opts{$options{$_}}, \n)} keys %options;
 	$getopts .= ' )' ;
 
 	#say $getopts;
@@ -160,7 +161,7 @@ sub process_options {
 
 	# push @ARGV, qw( -e  );
 	#push @ARGV, qw(-d /media/sessions test-abc  );
-	getopts('amcegstrnd:f:DR', \%opts); 
+	#getopts('amcegstrnd:f:DR', \%opts); 
 	#print join $/, (%opts);
 	
 	if ($opts{h}){
@@ -3309,6 +3310,11 @@ sub restore_state {
 		map{ $_->{name} = 'Main'} grep{ $_->{name} eq 'Tracker' } @groups_data;
 		
 		for (@tracks_data){
+			delete $_->{delay};
+			delete $_->{length};
+			delete $_->{start_position};
+			$_->{group} =~ s/Tracker/Main/;
+
 			if( $_->{source_select} eq 'soundcard'){
 				$_->{source_type} = 'soundcard' ;
 				$_->{source_id} = $_->{ch_r}
