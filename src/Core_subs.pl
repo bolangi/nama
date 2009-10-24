@@ -1617,8 +1617,11 @@ WARN
 		$debug and print "record output file: $full_path\n";
 		my $chain_ids = join ",",@{ $outputs{file}->{$full_path} };
 		
+
+		# in this case  we can be sure that $chain_ids is just one id
 		push @output_chains, join ( " ",
 			 "-a:".$chain_ids,
+			 (grep{/-f:/} split ' ', $pre_output{$chain_ids}), 
 			 "-o:".$full_path,
 		 );
 			 

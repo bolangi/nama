@@ -1,8 +1,7 @@
-
 # ---------- Track -----------
-use feature ":5.10";
-use strict;
 package ::Track;
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;
@@ -10,9 +9,6 @@ local $debug = 0;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use ::Wav;
-use Memoize;
-#memoize ('get_length'); # subroutine, not object method
-#memoize('rec_status');
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
@@ -465,7 +461,7 @@ sub send_output {
 			else { carp $track->name . 
 					q(: auxilary send to JACK client specified,) .
 					q( but jackd is not running.  Skipping.);
-					return [qw(undef, undef)];
+					return [qw(undef  undef)];
 			}
 		}
 		when ('loop') { return [ 'loop', $track->send_id ] }
@@ -788,6 +784,8 @@ sub get_length {
 # subclass
 
 package ::SimpleTrack; # used for Master track
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 use ::Object qw(
 
@@ -810,6 +808,8 @@ sub ch_r {
 }
 
 package ::MasteringTrack; # used for mastering chains 
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 use ::Object qw( 
 
@@ -825,6 +825,8 @@ sub group_last {0}
 sub version {0}
 
 package ::SlaveTrack; # for instrument monitor bus
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 use ::Object qw( 
 
@@ -875,6 +877,8 @@ use ::Object qw(
 # ---------- Group -----------
 
 package ::Group;
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 #use Exporter qw(import);
 #our @EXPORT_OK =qw(group);
@@ -960,6 +964,8 @@ sub all { @by_index[1..scalar @by_index - 1] }
 # ---------- Op -----------
 
 package ::Op;
+use Modern::Perl;
+no warnings qw(uninitialized redefine);
 our $VERSION = 0.5;
 our @ISA;
 use ::Object qw(	op_id 
