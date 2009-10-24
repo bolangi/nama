@@ -24,6 +24,7 @@ use inc::Module::Install;
 		Graph => 0,
 		IO::All => 0,
 		IO::Socket => 0,
+		Modern::Perl => 0,
 		Module::Load::Conditional => 0, 
 		Parse::RecDescent => 0,
 		Storable => 0,
