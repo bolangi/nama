@@ -7,6 +7,7 @@
 # themselves to be in the base class.
 
 package ::;
+require 5.10.0;
 use vars qw($VERSION);
 $VERSION = '0.9982';
 use Modern::Perl;
