@@ -766,7 +766,7 @@ $aux_send = ::Rule->new(
 		input_type		=>  'device',
 		input_object	=>  'null',
 		output_type		=>  'loop',
-		output_object	=>  'Master_in',
+		output_object	=>  'loop,Master_in',
 		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
 		condition 		=> 1,
 		status			=>  1,
