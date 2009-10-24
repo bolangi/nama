@@ -439,7 +439,7 @@ sub source_input {
 		when ( 'soundcard'  ){ return $track->soundcard_input }
 		when ( 'jack_client'){
 			if ( $::jack_running ){ return ['jack_client', $track->source_id] }
-			else { 	carp($track->name. ": cannot set source ".$track->source_id
+			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [undef, undef] }
 		}
 		when ( 'loop'){ return ['loop',$track->source_id ] } 
