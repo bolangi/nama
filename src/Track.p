@@ -11,8 +11,8 @@ local $debug = 0;
 use ::Assign qw(join_path);
 use ::Wav;
 use Memoize;
-memoize ('get_length'); # subroutine, not object method
-memoize('rec_status');
+#memoize ('get_length'); # subroutine, not object method
+#memoize('rec_status');
 use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
@@ -187,12 +187,15 @@ sub monitor_version {
 sub rec_status {
 #	$::debug2 and print "&rec_status\n";
 	my $track = shift;
+	my $bug = shift;
+	local $debug;
+	$debug //= $bug;
 	
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
 	my $group = $::Group::by_name{$track->group};
-	#say join " ", "group:",$group->name, $group->rw;
+	$debug and say join " ", "group:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
