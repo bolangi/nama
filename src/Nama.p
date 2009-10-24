@@ -271,47 +271,69 @@ option provides a text-only interface for console users.
 
 =over 12
 
-=item B<-d> F<project_root>
+=item B<--gui, -g>
 
-Use F<project_root> as Nama's top-level directory.
+Start Nama in GUI mode
 
-=item B<-D> 
+=item B<--text, -t>
 
-Output debugging information
+Start Nama in text mode
 
-=item B<-f> F<config_file>
+=item B<--config, -f> F<config_file>
 
-Use F<config_file> instead of default F<.namarc>
+Use F<config_file> instead of the default configuration file F<~/.namarc>
 
-=item B<-g>
+=item B<--project-root, -d> F<project_root>
 
-GUI mode (default)
+use F<project_root> as Nama's top-level directory
 
-=item B<-t>
+=item B<--create-project, -c>
 
-Text-only mode
+Create project if it doesn't exist
 
-=item B<-c>
+=item B<--net-eci, -n>
 
-Create the specified project if necessary
+Use Ecasound's Net-ECI interface
 
-=item B<-a>
+=item B<--libecasoundc, -l>
 
-Save and reload ALSA mixer state using alsactl
-
-=item B<-m>
-
-Don't load saved state
-
-=item B<-n>
-
-Communicate with engine via NetECI. Start Ecasound in
-server mode if necessary.
-
-=item B<-l>
-
-Communicate with engine via libecasoundc (default, if
+Use Ecasound's libecasoundc interface (default, if
 Audio::Ecasound is installed)
+
+=item B<--save-alsa, -a>
+
+Save/restore alsa state with project data
+
+=item B<--help, -h>
+
+This help display
+
+=head2 Debugging options:
+
+=item B<--no-static-effects-data, -s>
+
+Don't load effects data
+
+=item B<--no-state, -m>
+
+Don't load project state
+
+=item B<--no-static-effects-cache, -e>
+
+Bypass effects data cache
+
+=item B<--regenerate-effects-cache, -r>
+
+Regenerate the effects data cache
+
+=item B<--no-reconfigure-engine, -R>
+
+Don't automatically configure engine (manually use 'generate' and 'connect' commands)
+
+=item B<--debugging-output, -D>
+
+Emit debugging information
+
 
 =back
 

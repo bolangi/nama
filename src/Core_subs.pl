@@ -135,6 +135,7 @@ sub process_options {
 		text			t
 		no-state		m
 		net-eci			n
+		libecasoundc	l
 		help			h
 		regenerate-effects-cache	r
 		no-static-effects-data		s
@@ -173,6 +174,7 @@ USAGE: nama [options] [project_name]
 --project-root, -d               Specify project root directory
 --create-project, -c             Create project if it doesn't exist
 --net-eci, -n                    Use Ecasound's Net-ECI interface
+--libecasoundc, -l               Use Ecasound's libecasoundc interface
 --save-alsa, -a                  Save/restore alsa state with project data
 --help, -h                       This help display
 
