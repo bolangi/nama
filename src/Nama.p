@@ -308,7 +308,11 @@ Save/restore alsa state with project data
 
 This help display
 
+=back
+
 =head2 Debugging options:
+
+=over 12
 
 =item B<--no-static-effects-data, -s>
 
