@@ -9,7 +9,7 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = '0.9982';
+$VERSION = '0.9983';
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
