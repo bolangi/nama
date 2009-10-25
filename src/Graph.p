@@ -70,14 +70,14 @@ sub add_insert {
 	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
 	$dry->set(group => 'Insert');
 
-	#$dry->set( hide => 1);
+	$dry->set( hide => 1);
 	my $wet = ::Track->new( 
 				name => $dry->name . 'w',
 				group => 'Insert',
 				ch_count => 2, # default for cooked
  				send_type => $i->{send_type},
  				send_id => $i->{send_id},
-	#			hide => 1,
+				hide => 1,
 				rw => 'REC',
 	
 				);
@@ -97,7 +97,7 @@ sub add_insert {
  				source_type => $i->{return_type},
  				source_id => $i->{return_id},
 				rw => 'REC',
-	#			hide => 1,
+				hide => 1,
 			);
 	$i->{dry_vol} = $dry->vol;
 	$i->{wet_vol} = $wet_return->vol;
