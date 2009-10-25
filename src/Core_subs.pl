@@ -232,6 +232,8 @@ sub prepare {
 		*eval_iam = \&eval_iam_libecasoundc; }
 		$e = Audio::Ecasound->new();
 	} else { 
+
+		no warnings qw(redefine);
 		launch_ecasound_server($ecasound_tcp_port);
 		init_ecasound_socket($ecasound_tcp_port); 
 		*eval_iam = \&eval_iam_neteci;
@@ -1279,24 +1281,22 @@ effects chain for the original.
 4: big_hall_ambience # name specified
 =cut
 
+	my @cache_rec_tracks = 
 	map {
 
 		my $cooked = $_->name . '_cooked';
-
-		my $write_track = ::CacheRecTrack->new(
+		$g->add_path( $_->name, $cooked, 'wav_out');
+		::CacheRecTrack->new(
 			name => $cooked,
 			group => 'Cooked',
 			target => $_->name,
 		);
 
-
-		$g->add_path( $_->name, $cooked, 'wav_out');
-	}
-
-	grep{ $cooked_record_pending{$_->name}} ::Track::all();
+	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
 
 
 	my $temp_tracks = ::Graph::expand_graph($g);
+	push @$temp_tracks, @cache_rec_tracks;
 
 	$debug and say "The expanded graph is $g";
 
@@ -1350,7 +1350,7 @@ effects chain for the original.
 
 	# reset Track class
 	$debug and say "temp tracks to remove";
-	$debug and map{ say $_->name; $_->remove } @$temp_tracks;
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 	#$::Track::n = $track_n;	
 
 	if ($have_source) {
@@ -4049,12 +4049,18 @@ sub status_snapshot {
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out,
-#					 global_rw      =>  $main->rw,
+					 cache_rec		=> \%cooked_record_pending,
+					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
 	map { 
-		push @{ $snapshot{tracks} }, 
+		my %track = %$_; # dereference object
+		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
+	} grep{ $_->rec_status ne 'OFF' } ::Track::all();
+	\%snapshot
+}
+=comment
 			{
 				name 			=> $_->name,
 				rec_status 		=> $_->rec_status,
@@ -4066,14 +4072,10 @@ sub status_snapshot {
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
 				group			=> $_->group,
-				inserts			=> yaml_out($_->inserts),
+				inserts			=> $_->inserts,
+			}
 
-				
-			} unless $_->rec_status eq 'OFF'
-
-	} ::Track::all();
-	\%snapshot
-}
+=cut
 sub set_region {
 	my ($beg, $end) = @_;
 	$::this_track->set(region_start => $beg);
