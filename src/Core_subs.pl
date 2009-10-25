@@ -21,7 +21,7 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	$ui->install_handlers();
-	reconfigure_engine() x 5;
+	reconfigure_engine();
 	$ui->loop;
 }
 sub status_vars {
@@ -1801,6 +1801,7 @@ sub reconfigure_engine {
 						&&  grep { $_->{rec_status} eq 'REC' } 
 							@{ $status_snapshot->{tracks} };
 
+=comment
 	# restore playback position if possible
 
 	if (	$preview eq 'doodle'
@@ -1812,7 +1813,9 @@ sub reconfigure_engine {
 		$old_pos = undef;
 
 	} else { $old_pos = eval_iam('getpos') }
+=cut
 
+	$old_snapshot = $status_snapshot;
 	my $was_running = engine_running();
 	stop_transport() if $was_running;
 
@@ -1823,7 +1826,6 @@ sub reconfigure_engine {
 		#eval_iam("setpos $old_pos") if $old_pos; # temp disable
 
 	}
-	$old_snapshot = $status_snapshot;
 	start_transport() if $was_running and ! $will_record;
 	$ui->flash_ready;
 	1;
@@ -4050,29 +4052,15 @@ sub status_snapshot {
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out,
-#					 global_rw      =>  $main->rw,
+					 cache_rec		=> {%cooked_record_pending},# copy
+					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
 	map { 
-		push @{ $snapshot{tracks} }, 
-			{
-				name 			=> $_->name,
-				rec_status 		=> $_->rec_status,
-				channel_count 	=> $_->ch_count,
-				current_version => $_->current_version,
-				send 			=> $_->send_id,
-				source 			=> $_->source_id,
-				shift			=> $_->playat,
-				region_start    => $_->region_start,
-				region_end    	=> $_->region_ending,
-				group			=> $_->group,
-				inserts			=> yaml_out($_->inserts),
-
-				
-			} unless $_->rec_status eq 'OFF'
-
-	} ::Track::all();
+		my %track = %$_; # dereference object
+		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
+	} grep{ $_->rec_status ne 'OFF' } ::Track::all();
 	\%snapshot
 }
 sub set_region {
