@@ -577,7 +577,7 @@ sub initialize_routing_dispatch_table {
 				type 		=> 'file',
 				id	 		=> $t->full_path,
 				chain		=> $t->n,
-				pre_output	=> signal_format($raw_to_disk_format, $t->ch_count),
+				pre_output	=> '-f:'.signal_format($raw_to_disk_format, $t->ch_count),
 			});
 		},
 		loop_source => sub {
@@ -900,6 +900,7 @@ sub create_groups {
 	::Group->new(name => 'Master');
 	::Group->new(name => 'Mixdown', rw => 'REC');
 	::Group->new(name => 'Insert');
+	::Group->new(name => 'Cooked');
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
 }
@@ -1245,11 +1246,16 @@ sub generate_setup {
 	}
 												 
 	$debug and say "The graph is $g";
+
+	# we will add some temporary tracks, but maybe some
+	# permanent ones, too.  so safer to skip resetting
+	# index
+# my $track_n = $::Track::n; # restore before exit sub
 =comment
 
 now we want to add paths representing track caching.
 
-%cache_record_pending;
+%cooked_record_pending;
 
 $c_r_p{track_name}++;
 
@@ -1259,29 +1265,38 @@ and push @{ $track->cached_versions }, new_version_number
 
 $track->previous_version->effects_chain: 
 
+whenever we do a cache record, store the 
+previous version and effects chain.
+If that version (or lower) gets set again
+restore that effects chain.
+
+if we cache record that version again, replace that effects chain.
+
+if we cache record a cache recorded version, we save the 
+effects chain for the original. 
+
 3: effects_chain_3   # default naming
 4: big_hall_ambience # name specified
-
-map {
-
-my $cache = $_->name . '_cache';
-$g->add_path( $_->name, $cache, 'wav_out');
-
-$g->set_vertex_attributes($cache, {
-
- 				  chain			=> $cache,
-				  pre_output	=> $mix_to_disk_format,
-				  file			=> 
-
-    });
-}
-
-grep{ $cache_record_pending{$_->name} ::Track::all();
-
 =cut
-my $track_n = $::Track::n; # restore before exit sub
-my $temp_tracks = ::Graph::expand_graph($g);
- # will need to remove insert-tracks from this list TODO
+
+	map {
+
+		my $cooked = $_->name . '_cooked';
+
+		my $write_track = ::CacheRecTrack->new(
+			name => $cooked,
+			group => 'Cooked',
+			target => $_->name,
+		);
+
+
+		$g->add_path( $_->name, $cooked, 'wav_out');
+	}
+
+	grep{ $cooked_record_pending{$_->name}} ::Track::all();
+
+
+	my $temp_tracks = ::Graph::expand_graph($g);
 
 	$debug and say "The expanded graph is $g";
 
@@ -1336,7 +1351,7 @@ my $temp_tracks = ::Graph::expand_graph($g);
 	# reset Track class
 	$debug and say "temp tracks to remove";
 	$debug and map{ say $_->name; $_->remove } @$temp_tracks;
-	$::Track::n = $track_n;	
+	#$::Track::n = $track_n;	
 
 	if ($have_source) {
 
@@ -2193,8 +2208,9 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
+	%cooked_record_pending = () if $recorded;
 	rememoize();
-	my $mixed = scalar ( grep{ /\bmix*.wav/i} @k );
+	my $mixed = scalar ( grep{ /Mixdown_*.wav/} @k );
 	
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
@@ -2203,7 +2219,7 @@ sub rec_cleanup {
 			$main->set( rw => 'MON');
 			$ui->refresh();
 			print <<REC;
-WAV files were recorded! 
+New track versions were recorded! 
 
 Now reviewing your recording...
 

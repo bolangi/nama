@@ -849,34 +849,27 @@ sub source_status { $::tn{$_[0]->target}->source_status }
 sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation
-our @ISA = '::SlaveTrack';
+our @ISA = qw(::SlaveTrack ::Wav);
 use ::Object qw( 
 
 [% qx(./strip_all ./track_fields) %]
 
 );
 sub ch_count { 2 }
-sub rec_status { }
 
 sub current_version {
 	my $track = shift;
 	my $target = $::tn{$track->target};
-	if ($target->rec_status eq 'MON'
-		or $target->rec_status eq 'REC' and $::Group::by_name{$track->target}){
 		$target->last + 1
-	}
+# 	if ($target->rec_status eq 'MON'
+# 		or $target->rec_status eq 'REC' and $::Group::by_name{$track->target}){
+# 	}
 }
 sub current_wav {
-		$::tn{$_[0]->target}->name . '_' . $_[0]->current_version . '.wav'
+	my $track = shift;
+		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
-=comment
-
-	target is MON: target->last + 1
-	target is REC but is a bus mix track: target->last+1
-	target is REC: target->last + 2 # will this break rec_cleanup?
-	
-=cut
-
+sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
 
 # ---------- Group -----------
 
@@ -991,3 +984,5 @@ use ::Object qw(	op_id
 # 
 
 __END__
+
+

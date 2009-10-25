@@ -585,6 +585,11 @@ add_slave_track:
   short: ast
   what: add a slave track to an existing user bus
   parameters: <s_bus_name> <s_target_track_name> 
+cache_track:
+  type: track
+  short: cache
+  what: record the post-fader signal as a new version
+  parameters: none
 remove_bus:
   type: bus
   short: rmb

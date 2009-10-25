@@ -371,4 +371,5 @@ our (
 	$disable_auto_reconfigure, # for debugging
 
 	$g, 			# Graph var, for chain setup
+	%cooked_record_pending, # an intermediate mixdown for tracks
 );
