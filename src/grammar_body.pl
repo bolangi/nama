@@ -541,5 +541,11 @@ remove_insert: _remove_insert end {
 	1;
 }
 
-
-	
+cache_track: _cache_track end {
+	$::cooked_record_pending{ $::this_track->name }++; 
+	1;
+}
+no_cache_track: _no_cache_track end {
+	delete $::cooked_record_pending{ $::this_track->name }; 
+	1;
+}

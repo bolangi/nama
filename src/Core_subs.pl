@@ -232,6 +232,8 @@ sub prepare {
 		*eval_iam = \&eval_iam_libecasoundc; }
 		$e = Audio::Ecasound->new();
 	} else { 
+
+		no warnings qw(redefine);
 		launch_ecasound_server($ecasound_tcp_port);
 		init_ecasound_socket($ecasound_tcp_port); 
 		*eval_iam = \&eval_iam_neteci;
@@ -577,7 +579,7 @@ sub initialize_routing_dispatch_table {
 				type 		=> 'file',
 				id	 		=> $t->full_path,
 				chain		=> $t->n,
-				pre_output	=> signal_format($raw_to_disk_format, $t->ch_count),
+				pre_output	=> '-f:'.signal_format($raw_to_disk_format, $t->ch_count),
 			});
 		},
 		loop_source => sub {
@@ -900,6 +902,7 @@ sub create_groups {
 	::Group->new(name => 'Master');
 	::Group->new(name => 'Mixdown', rw => 'REC');
 	::Group->new(name => 'Insert');
+	::Group->new(name => 'Cooked');
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
 }
@@ -1142,20 +1145,9 @@ sub generate_setup {
 			= @output_chains 
 			= ();
 	
-	# we don't want to go further unless there are signals
-	# to process
-
 	$g = Graph->new();
 
 	map{ 
-
-		# the mix track of user buses will belong to Main group
-
-		# set $track->rec_defeat to skip rec_file
-		# set $track->source_type = 'dummy' to skip rec setup above
-
-		# the input will come via a loop device
-		# by connecting the sub bus track outputs to the mix track
 
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
@@ -1257,9 +1249,54 @@ sub generate_setup {
 												 
 	$debug and say "The graph is $g";
 
-my $track_n = $::Track::n; # restore before exit sub
-my $temp_tracks = ::Graph::expand_graph($g);
- # will need to remove insert-tracks from this list TODO
+	# we will add some temporary tracks, but maybe some
+	# permanent ones, too.  so safer to skip resetting
+	# index
+# my $track_n = $::Track::n; # restore before exit sub
+=comment
+
+now we want to add paths representing track caching.
+
+%cooked_record_pending;
+
+$c_r_p{track_name}++;
+
+during successful rec_cleanup, %c_r_p = ();
+
+and push @{ $track->cached_versions }, new_version_number
+
+$track->previous_version->effects_chain: 
+
+whenever we do a cache record, store the 
+previous version and effects chain.
+If that version (or lower) gets set again
+restore that effects chain.
+
+if we cache record that version again, replace that effects chain.
+
+if we cache record a cache recorded version, we save the 
+effects chain for the original. 
+
+3: effects_chain_3   # default naming
+4: big_hall_ambience # name specified
+=cut
+
+	my @cache_rec_tracks = 
+	map {
+
+		my $cooked = $_->name . '_cooked';
+		$g->add_path( $_->name, $cooked, 'wav_out');
+		::CacheRecTrack->new(
+			name => $cooked,
+			group => 'Cooked',
+			target => $_->name,
+		);
+
+	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
+
+
+	my $temp_tracks = ::Graph::expand_graph($g);
+	push @$temp_tracks, @cache_rec_tracks;
 
 	$debug and say "The expanded graph is $g";
 
@@ -1313,8 +1350,8 @@ my $temp_tracks = ::Graph::expand_graph($g);
 
 	# reset Track class
 	$debug and say "temp tracks to remove";
-	$debug and map{ say $_->name; $_->remove } @$temp_tracks;
-	$::Track::n = $track_n;	
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+	#$::Track::n = $track_n;	
 
 	if ($have_source) {
 
@@ -2171,8 +2208,9 @@ sub rec_cleanup {
 			else { unlink $test_wav }
 		}
 	}
+	%cooked_record_pending = () if $recorded;
 	rememoize();
-	my $mixed = scalar ( grep{ /\bmix*.wav/i} @k );
+	my $mixed = scalar ( grep{ /Mixdown_*.wav/} @k );
 	
 	$debug and print "recorded: $recorded mixed: $mixed\n";
 	if ( ($recorded -  $mixed) >= 1) {
@@ -2181,7 +2219,7 @@ sub rec_cleanup {
 			$main->set( rw => 'MON');
 			$ui->refresh();
 			print <<REC;
-WAV files were recorded! 
+New track versions were recorded! 
 
 Now reviewing your recording...
 

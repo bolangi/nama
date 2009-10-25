@@ -846,35 +846,31 @@ sub inserts { $::tn{$_[0]->target}->inserts}
 sub source_type { $::tn{$_[0]->target}->source_type}
 sub source_id { $::tn{$_[0]->target}->source_id}
 sub source_status { $::tn{$_[0]->target}->source_status }
-package ::AnonSlaveTrack; # for graph generation
-=comment
-we will create these tracks as necessary
-and delete them after generating the setup
+sub dir { $::tn{$_[0]->target}->dir }
 
-soundcard_in -> sax 
-soundcard_in -> loop,sax_in --> sax
-soundcard_in -> J3 -> loop,sax_in -> sax
-
-J3 will have all the information that sax has, and 
-a different chain ID based on sax.
-
-If we delete them after each setup, and reset the ::Track
-index, we will never see them in the show_tracks display
-so won't need to hide them.
-
-Each track may have two or more anon tracks (input side
-and output side), so we use incrementing names:
-
-[incrementing letter] + [track index n]
-
-=cut
-our @ISA = '::SlaveTrack';
+package ::CacheRecTrack; # for graph generation
+our @ISA = qw(::SlaveTrack ::Wav);
 use ::Object qw( 
 
 [% qx(./strip_all ./track_fields) %]
 
 );
-						
+sub ch_count { 2 }
+
+sub current_version {
+	my $track = shift;
+	my $target = $::tn{$track->target};
+		$target->last + 1
+# 	if ($target->rec_status eq 'MON'
+# 		or $target->rec_status eq 'REC' and $::Group::by_name{$track->target}){
+# 	}
+}
+sub current_wav {
+	my $track = shift;
+		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
+}
+sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
+
 # ---------- Group -----------
 
 package ::Group;
@@ -988,3 +984,5 @@ use ::Object qw(	op_id
 # 
 
 __END__
+
+
