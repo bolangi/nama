@@ -40,12 +40,10 @@ sub expand_graph {
 
 sub add_inserts {
 	my $g = shift;
-	my @track_names = grep{ 
-		$::tn{$_} 
+	my @track_names = grep{ $::tn{$_} 
 		and $::tn{$_}->inserts
-		and $::tn{$_}->inserts =~ /ARRAY/} 
-	$g->vertices;
-	$debug and say "Inserts will be applied to tracks: @track_names";
+		and $::tn{$_}->inserts =~ /ARRAY/} $g->vertices;
+	$debug and say "Inserts will be applied to the following tracks: @track_names";
 	map{ add_insert($g, $_) } @track_names;
 }
 	
@@ -157,14 +155,14 @@ sub insert_near_side_loop {
 		$g->add_edge($a,$loop);
 
 		# add second arm if successor is track
-		if ( is_a_track($_) ){ $g->add_edge($loop, $_) }
+		if ( $::tn{$_} ){ $g->add_edge($loop, $_) }
 
 		# insert anon track if successor is non-track
 		# ( when adding an insert, successor is always non-track )
 		else {  
 		$debug and say "successor $_ is non-track";
 
-			my $nam = $a. "_" . $j++;
+			my $nam = $::tn{$a}->n . $j++;
 			my $anon = ::SlaveTrack->new( 
 				target => $a,
 				rw => 'REC',
@@ -196,12 +194,12 @@ sub insert_far_side_loop {
 		$g->add_edge($loop,$b);
 
 		# add second arm if predecessor is track
-		if ( is_a_track($_) ){ $g->add_edge($_, $loop) }
+		if ( $::tn{$_} ){ $g->add_edge($_, $loop) }
 
 		# insert anon track if successor is non-track
 		else {  
 
-			my $nam = $b. "_" . $j++;
+			my $nam = $::tn{$b}->n . $j++;
 			my $anon = ::SlaveTrack->new( 
 				target => $b,
 				name => $nam,
