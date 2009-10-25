@@ -1287,6 +1287,7 @@ effects chain for the original.
 		my $cooked = $_->name . '_cooked';
 		$g->add_path( $_->name, $cooked, 'wav_out');
 		::CacheRecTrack->new(
+			ch_count => 2,
 			name => $cooked,
 			group => 'Cooked',
 			target => $_->name,
