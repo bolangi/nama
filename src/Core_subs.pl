@@ -2204,7 +2204,7 @@ sub rec_cleanup {
 			$debug and print "exists. ";
 			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
 				$debug and print "bigger than a breadbox.  \n";
-				$ti{$n}->set(active => undef); 
+				$ti{$n}->set(active => undef) if $ti{$n};
 				$ui->update_version_button($n, $v);
 			$recorded++;
 			}
