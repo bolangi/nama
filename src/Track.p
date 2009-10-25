@@ -846,6 +846,7 @@ sub inserts { $::tn{$_[0]->target}->inserts}
 sub source_type { $::tn{$_[0]->target}->source_type}
 sub source_id { $::tn{$_[0]->target}->source_id}
 sub source_status { $::tn{$_[0]->target}->source_status }
+sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation
 our @ISA = '::SlaveTrack';
@@ -854,11 +855,29 @@ use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 
 );
-
 sub ch_count { 2 }
-sub rec_status { ($::tn{$_[0]->target} eq 'MON' 
-					or $::Group::by_name{$_[0]->target}) ? 'REC' : 'OFF' }
-						
+sub rec_status { }
+
+sub current_version {
+	my $track = shift;
+	my $target = $::tn{$track->target};
+	if ($target->rec_status eq 'MON'
+		or $target->rec_status eq 'REC' and $::Group::by_name{$track->target}){
+		$target->last + 1
+	}
+}
+sub current_wav {
+		$::tn{$_[0]->target}->name . '_' . $_[0]->current_version . '.wav'
+}
+=comment
+
+	target is MON: target->last + 1
+	target is REC but is a bus mix track: target->last+1
+	target is REC: target->last + 2 # will this break rec_cleanup?
+	
+=cut
+
+
 # ---------- Group -----------
 
 package ::Group;
