@@ -855,8 +855,6 @@ use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 
 );
-sub ch_count { 2 }
-
 sub current_version {
 	my $track = shift;
 	my $target = $::tn{$track->target};
