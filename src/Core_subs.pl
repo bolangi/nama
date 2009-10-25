@@ -1142,20 +1142,9 @@ sub generate_setup {
 			= @output_chains 
 			= ();
 	
-	# we don't want to go further unless there are signals
-	# to process
-
 	$g = Graph->new();
 
 	map{ 
-
-		# the mix track of user buses will belong to Main group
-
-		# set $track->rec_defeat to skip rec_file
-		# set $track->source_type = 'dummy' to skip rec setup above
-
-		# the input will come via a loop device
-		# by connecting the sub bus track outputs to the mix track
 
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
@@ -1256,7 +1245,40 @@ sub generate_setup {
 	}
 												 
 	$debug and say "The graph is $g";
+=comment
 
+now we want to add paths representing track caching.
+
+%cache_record_pending;
+
+$c_r_p{track_name}++;
+
+during successful rec_cleanup, %c_r_p = ();
+
+and push @{ $track->cached_versions }, new_version_number
+
+$track->previous_version->effects_chain: 
+
+3: effects_chain_3   # default naming
+4: big_hall_ambience # name specified
+
+map {
+
+my $cache = $_->name . '_cache';
+$g->add_path( $_->name, $cache, 'wav_out');
+
+$g->set_vertex_attributes($cache, {
+
+ 				  chain			=> $cache,
+				  pre_output	=> $mix_to_disk_format,
+				  file			=> 
+
+    });
+}
+
+grep{ $cache_record_pending{$_->name} ::Track::all();
+
+=cut
 my $track_n = $::Track::n; # restore before exit sub
 my $temp_tracks = ::Graph::expand_graph($g);
  # will need to remove insert-tracks from this list TODO
