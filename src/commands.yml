@@ -590,6 +590,11 @@ cache_track:
   short: cache
   what: record the post-fader signal as a new version
   parameters: none
+no_cache_track:
+  type: track
+  short: nocache noc
+  what: cancel pending post-fader cache 
+  parameters: none
 remove_bus:
   type: bus
   short: rmb

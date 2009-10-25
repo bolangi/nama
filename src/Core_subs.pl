@@ -4049,18 +4049,12 @@ sub status_snapshot {
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main 			=> $main_out,
-					 cache_rec		=> \%cooked_record_pending,
-					 global_rw      =>  $main->rw,
+#					 global_rw      =>  $main->rw,
 					
  );
 	$snapshot{tracks} = [];
 	map { 
-		my %track = %$_; # dereference object
-		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
-	} grep{ $_->rec_status ne 'OFF' } ::Track::all();
-	\%snapshot
-}
-=comment
+		push @{ $snapshot{tracks} }, 
 			{
 				name 			=> $_->name,
 				rec_status 		=> $_->rec_status,
@@ -4072,10 +4066,14 @@ sub status_snapshot {
 				region_start    => $_->region_start,
 				region_end    	=> $_->region_ending,
 				group			=> $_->group,
-				inserts			=> $_->inserts,
-			}
+				inserts			=> yaml_out($_->inserts),
 
-=cut
+				
+			} unless $_->rec_status eq 'OFF'
+
+	} ::Track::all();
+	\%snapshot
+}
 sub set_region {
 	my ($beg, $end) = @_;
 	$::this_track->set(region_start => $beg);
