@@ -601,7 +601,7 @@ remove_bus:
   what: remove a bus
   parameters: <s_bus_name>
 die:
-  what: just end it alrady
+  what: just end it already - a test for the command prompt
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters
