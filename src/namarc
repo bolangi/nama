@@ -80,6 +80,10 @@ ecasound_globals_for_mixdown: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
+# Text mode: use SPACE press to start/stop transport 
+
+press_space_to_start_transport: 1
+
 # commands to execute each time a project is loaded
 
 execute_on_project_load: ~

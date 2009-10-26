@@ -149,6 +149,14 @@ sub install_handlers {
 sub loop {
 	package ::;
 	$term->callback_handler_install($prompt, \&process_line);
+	#$Event::DIED = \&Event::verbose_exception_handler;
+	$Event::DIED = sub {
+		my ($event, $errmsg) = @_;
+		say $errmsg;
+		$attribs->{line_buffer} = q();
+		$term->clear_message();
+		$term->rl_reset_line_state();
+	};
 	Event::loop();
 
 }

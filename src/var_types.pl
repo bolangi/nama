@@ -23,6 +23,7 @@
 						$capture_device	
 						$project_root 	
 						$use_group_numbering
+						$press_space_to_start_transport
 						$execute_on_project_load
 						$initial_user_mode
 						$mastering_effects

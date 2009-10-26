@@ -4,6 +4,7 @@ sign: '+' | '-' | '*' | '/'
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 op_id: /[A-Z]+/
 parameter: /\d+/
+die: 'die' { CORE::die("killed by shakespeare"); 1 }
 #value: /\d+/
 #value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
