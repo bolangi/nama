@@ -887,9 +887,9 @@ sub initialize_project_data {
 	
 	%bunch = ();	
 	
-	::Group::initialize();
-	::Track::initialize();
-	::Bus::initialize();
+	::Group->initialize();
+	::Track->initialize();
+	::Bus->initialize();
 
 	create_groups();
 
