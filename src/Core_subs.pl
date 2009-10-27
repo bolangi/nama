@@ -889,6 +889,7 @@ sub initialize_project_data {
 	
 	::Group::initialize();
 	::Track::initialize();
+	::Bus::initialize();
 
 	create_groups();
 
@@ -1166,6 +1167,9 @@ sub generate_setup {
 
 		# process optional send and sub buses
 
+	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ }
+		values %::Bus::by_name;
+
 	map{
 
 		# raw send buses use only fixed-rule routing
@@ -1209,7 +1213,7 @@ sub generate_setup {
 
 			} map{$tn{$_}} $::Group::by_name{$_->name}->tracks;
 		}
-	} ::UserBus::all() if ::UserBus::all();
+	} @user_buses;
 
 	# remove_inputless_tracks
 	
@@ -1356,18 +1360,9 @@ effects chain for the original.
 
 	if ($have_source) {
 
-		# process system buses
+		# process bus rules
 
-		$debug and print "applying main_bus (user tracks)\n";
-		$main_bus->apply; # rec file only
-
-		$debug and print "applying null_bus\n";
-		$null_bus->apply; # TODO
-
-		$debug and print "generating IO for raw_input send buses\n";
-		# others are handled graphically
-		
-		map { $_->apply() } ::UserBus::all();
+		map { $_->apply() } ::Bus::all();
 
 		$debug and print "\%inputs\n================\n", yaml_out(\%inputs),
 			"\%outputs\n================\n", yaml_out(\%outputs);
@@ -3274,7 +3269,7 @@ map { my $t = $_;
 
 @bus_data = (); # 
 map{ push @bus_data, $_->hashref } 
-	grep{ $_->name =~ !/Main_Bus|Null_Bus} values %::Bus::by_name;
+	grep{ $_->name !~ /Main_Bus|Null_Bus/} ::Bus::all();
 
 # prepare marks data for storage (new Mark objects)
 
@@ -3387,7 +3382,7 @@ sub restore_state {
 	# restore user buses, directly, skipping constructor 
 	
 	map{ my $class = $_->{class};
-		 ::Bus->new{ %$_ }
+		 ::Bus->new( %$_ )
 	} @bus_data;
 	
 	# create user tracks

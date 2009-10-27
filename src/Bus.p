@@ -8,18 +8,16 @@ our $VERSION = 1.0;
 our ($debug); # entire file
 use vars qw(%by_name);
 our @ISA;
-use ::Object qw(	name
-					groups
-					tracks 
-					rules
-					bus_type
-						
+use ::Object qw(						
+[% qx(cat ./bus_fields) %]
 						);
 
+sub initialize { %by_name = () };
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
+    croak "undeclared field: @undeclared" if @undeclared;
 	if (! $vals{name} or $by_name{$vals{name}}){
 		carp($vals{name},": missing or duplicate bus name. Skipping.\n");
 		return;
@@ -131,6 +129,7 @@ sub deref_code {
 		$debug and print "scalar value: $value\n"; 
 		$value }
 }
+sub all { values %by_name };
 
 ### subclass
 
