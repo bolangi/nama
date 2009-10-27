@@ -465,7 +465,8 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 }
 
 add_slave_track: _add_slave_track bus_name target end {
-	::add_slave_track( $item{bus_name}, $item{target} ); 1; } bus_name: /[A-Z]\w+/
+	::add_slave_track( group => $item{bus_name}, target => $item{target} ); 1; } 
+bus_name: /[A-Z]\w+/
 destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel
 # loop,identifier: loop device
@@ -476,7 +477,7 @@ remove_bus: _remove_bus bus_name end {
  		if( $::UserBus::buses[$i]->name eq $item{bus_name} ){
  			print "removing bus: $item{bus_name}\n";
  			splice @::UserBus::buses, $i, 1;
-			$::tn{$item{bus_name}}->remove_track;
+			$::tn{$item{bus_name}}->remove;
  			map{ $::tn{$_}->remove } 
  				grep{ (ref $::tn{$_}) =~ /SlaveTrack/ } 
  				$::Group::by_name{$item{bus_name}}->tracks;
