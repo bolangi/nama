@@ -214,14 +214,9 @@ use Carp;
 our @ISA = '::Bus';
 use vars qw(@buses %by_name);
 
-use ::Object qw(	name
-					groups
-					tracks 
-					rules
-					destination_type
-					destination_id
-					bus_type
+use ::Object qw(	
 
+[% qx(cat ./bus_fields) %]
 
 						);
 
@@ -248,18 +243,30 @@ sub new {
 
 sub all { @buses }
 
-# not object method
+package ::SubBus;
+use Modern::Perl;
+use Carp;
+our @ISA = '::UserBus';
 
-# sub by_name {
-# 	my $name = shift;
-# 	( grep { $_->name  eq $name } @buses ); # list context return object
-# }
+use ::Object qw(
+[% qx(cat ./bus_fields) %]
+);
 
+package ::SendBusCooked;
+use Modern::Perl;
+use Carp;
+our @ISA = '::UserBus';
+use ::Object qw(
+[% qx(cat ./bus_fields ) %]
+);
+
+package ::SendBusRaw;
+use Modern::Perl;
+use Carp;
+our @ISA = '::UserBus';
+use ::Object qw(
+[% qx(cat ./bus_fields ) %]
+
+);
 1;
 __END__
-
-
-						
-						);
-
-1;
