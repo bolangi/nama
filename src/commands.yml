@@ -580,11 +580,11 @@ update_send_bus:
 #   short: sb
 #   what: set bus parameters
 # parameters: JPC
-add_slave_track:
-  type: track
-  short: ast
-  what: add a slave track to an existing user bus
-  parameters: <s_bus_name> <s_target_track_name> 
+# add_slave_track:
+#   type: track
+#   short: ast
+#   what: add a slave track to an existing user bus
+#   parameters: <s_bus_name> <s_target_track_name> 
 cache_track:
   type: track
   short: cache

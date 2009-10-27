@@ -260,7 +260,6 @@ sub prepare {
 		or warn "$project_root: chdir failed: $!\n";
 
 	
-	init_buses();	
 	
 	initialize_rules(); 					# bus/rule routing
 	$debug and say join " ", %::Rule::by_name;
@@ -489,6 +488,7 @@ Loading project "untitled".
 	#chdir project_dir();
 	# read_config( global_config() ); 
 	initialize_rules();
+	init_buses();	
 	initialize_project_data();
 
 	remove_small_wavs(); 
@@ -534,6 +534,7 @@ sub rememoize {
 }
 
 sub init_buses {
+	::Bus->initialize();
 	$main_bus  = ::Bus->new(
 		name => 'Main_Bus',
 		groups => [qw(Main)],
@@ -792,7 +793,7 @@ $aux_send = ::Rule->new(
 	);
 
 
- 	$rec_setup = ::Rule->new(	 	# used by UserBus 
+ 	$rec_setup = ::Rule->new(	 	# used by user buses 
 		
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
@@ -889,7 +890,6 @@ sub initialize_project_data {
 	
 	::Group->initialize();
 	::Track->initialize();
-	::Bus->initialize();
 
 	create_groups();
 
@@ -950,8 +950,8 @@ sub add_slave_track {
 			rw => 'MON',
 			source_type => undef,
 			source_id => undef,
-			send_type => $::UserBus::by_name{$h{group}}->destination_type,
-			send_id   => $::UserBus::by_name{$h{group}}->destination_id,
+			send_type => $::Bus::by_name{$h{group}}->destination_type,
+			send_id   => $::Bus::by_name{$h{group}}->destination_id,
 			)
 }
 
@@ -4102,7 +4102,7 @@ sub add_send_bus {
 	
 	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
 
-	if ($::UserBus::by_name{$name}){
+	if ($::Bus::by_name{$name}){
 		say qq(monitor bus "$name" already exists. Updating with new tracks.");
 
 	} else {
@@ -4151,7 +4151,7 @@ sub dest_type {
 sub update_send_bus {
 	my $name = shift;
 		add_send_bus( $name, 
-						 $::UserBus::by_name{$name}->destination_id),
+						 $::Bus::by_name{$name}->destination_id),
 						 "dummy",
 }
 

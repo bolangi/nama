@@ -131,12 +131,14 @@ sub deref_code {
 }
 sub all { values %by_name };
 
+sub remove { say $_[0]->name, " is system bus, no can remove" }
 
 # we will put the following information in the Track as an aux_send
 # 						destination_type
 # 						destination_id
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
+
 
 package ::SubBus;
 use Modern::Perl;
@@ -153,12 +155,14 @@ sub remove {
 	map{$::tn{$_}->set(group => 'Main') } $::Group::by_name{$bus->name}->tracks;
 
 	# remove bus mix track
-	$::tn{$_->name}->remove;
+	$::tn{$bus->name}->remove;
 
 	# delete group
 	$::Group::by_name{$bus->name}->remove;
-}
 
+	# remove bus
+	delete $::Bus::by_name{$bus->name};
+} 
 
 package ::SendBusRaw;
 use Modern::Perl;
@@ -169,7 +173,16 @@ use ::Object qw(
 
 );
 sub remove {
-	# all slave tracks
+	my $bus = shift;
+
+	# delete all (slave) tracks
+	map{$::tn{$_}->remove } $::Group::by_name{$bus->name}->tracks;
+
+	# delete group
+	$::Group::by_name{$bus->name}->remove;
+
+	# remove bus
+	delete $::Bus::by_name{$bus->name};
 }
 package ::SendBusCooked;
 use Modern::Perl;

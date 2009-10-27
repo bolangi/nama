@@ -473,9 +473,9 @@ destination: /\d+/ | /loop,\w+/ | name2
 # name2: track name
 
 remove_bus: _remove_bus bus_name end {
-	print ("$item{name}: won't remove system bus\n"), return 
-		if $item{name} =~ /Main|Null/;
-	$::Bus::by_name{$item{name}}->remove;
+	print ("$item{bus_name}: no such bus\n"), return 
+		unless $::Bus::by_name{$item{bus_name}};
+	$::Bus::by_name{$item{bus_name}}->remove;
 	1;
  
 }
