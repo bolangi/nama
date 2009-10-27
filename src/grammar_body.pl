@@ -473,17 +473,9 @@ destination: /\d+/ | /loop,\w+/ | name2
 # name2: track name
 
 remove_bus: _remove_bus bus_name end {
-# 	foreach my $i ( 0..(scalar @::UserBus::buses - 1) ){
-#  		if( $::UserBus::buses[$i]->name eq $item{bus_name} ){
-#  			print "removing bus: $item{bus_name}\n";
-#  			splice @::UserBus::buses, $i, 1;
-# 			$::tn{$item{bus_name}}->remove;
-#  			map{ $::tn{$_}->remove } 
-#  				grep{ (ref $::tn{$_}) =~ /SlaveTrack/ } 
-#  				$::Group::by_name{$item{bus_name}}->tracks;
-#  			last;
-#  		}
-#   	}
+	print ("$item{name}: won't remove system bus\n"), return 
+		if $item{name} =~ /Main|Null/;
+	$::Bus::by_name{$item{name}}->remove;
 	1;
  
 }

@@ -878,7 +878,7 @@ our $VERSION = 1.0;
 #use Exporter qw(import);
 #our @EXPORT_OK =qw(group);
 use Carp;
-use vars qw(%by_name @by_index $n);
+use vars qw(%by_name);
 our @ISA;
 initialize();
 
@@ -889,8 +889,6 @@ use ::Object qw( 	name
 					);
 
 sub initialize {
-	$n = 0; 
-	@by_index = ();
 	%by_name = ();
 }
 
@@ -899,8 +897,6 @@ sub new {
 	# returns a reference to an object that is indexed by
 	# name and by an assigned index
 	#
-	# The indexing is bypassed and an object returned 
-	# if an index is given
 	
 	my $class = shift;
 	my %vals = @_;
@@ -908,20 +904,9 @@ sub new {
 	croak "name missing" unless $vals{name};
 	#(carp "group name already in use: $vals{name}\n"), 
 		return ($by_name{$vals{name}}) if $by_name{$vals{name}};
-	#my $skip_index = $vals{n};
-	my $n_;
-	if ( $vals{n} ){
-		$n_ = $vals{n};
-		$n = $n_ 
-	} else { $n_ = ++$n }; 
 	my $object = bless { 	
-		name 	=> "Group $n", # default name
 		rw   	=> 'REC', 
-		n => $n_,
 		@_ 			}, $class;
-	#return $object if $skip_index;
-	#print "object type: ", ref $object, $/;
-	$by_index[$n_] = $object;
 	$by_name{ $object->name } = $object;
 	$object;
 }
@@ -952,10 +937,13 @@ sub last {
 }
 
 
-# all groups
+sub all { values %by_name }
 
-sub all { @by_index[1..scalar @by_index - 1] }
-
+sub remove {
+	my $group = shift;
+	delete $by_name{$group->name};
+}
+		
 # ---------- Op -----------
 
 package ::Op;

@@ -131,18 +131,6 @@ sub deref_code {
 }
 sub all { values %by_name };
 
-### subclass
-
-package ::UserBus;
-use strict;
-use Carp;
-our @ISA = '::Bus';
-
-use ::Object qw(	
-
-[% qx(cat ./bus_fields) %]
-
-						);
 
 # we will put the following information in the Track as an aux_send
 # 						destination_type
@@ -153,22 +141,29 @@ use ::Object qw(
 package ::SubBus;
 use Modern::Perl;
 use Carp;
-our @ISA = '::UserBus';
+our @ISA = '::Bus';
 
 use ::Object qw(
 [% qx(cat ./bus_fields) %]
 );
-
 sub remove {
-	# all non-empty tracks returned to Main group
-	# remove empty tracks, including bus mix track if empty
+	my $bus = shift;
+
+	# all tracks returned to Main group
+	map{$::tn{$_}->set(group => 'Main') } $::Group::by_name{$bus->name}->tracks;
+
+	# remove bus mix track
+	$::tn{$_->name}->remove;
+
 	# delete group
+	$::Group::by_name{$bus->name}->remove;
 }
+
 
 package ::SendBusRaw;
 use Modern::Perl;
 use Carp;
-our @ISA = '::UserBus';
+our @ISA = '::Bus';
 use ::Object qw(
 [% qx(cat ./bus_fields ) %]
 
