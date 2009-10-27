@@ -4075,7 +4075,7 @@ sub add_sub_bus {
 	if ($::Group::by_name{$name} or $tn{$name}){
 		say qq(group, bus, or track "$name" already exists. Skipping."), return;
 	}
-	::UserBus->new( 
+	::SubBus->new( 
 		name => $name, 
 		bus_type => 'sub',
 		groups => [$name],
@@ -4108,18 +4108,22 @@ sub add_send_bus {
 		say qq(monitor bus "$name" already exists. Updating with new tracks.");
 
 	} else {
-	::UserBus->new( 
+	my @args = (
 		name => $name, 
 		bus_type => $bus_type,
 		groups => [$name],
-		rules => ($bus_type eq 'cooked' 
+		rules => $bus_type eq 'cooked' 
 			?  [qw(send_bus_out )]
 			:  [qw(rec_setup mon_setup send_bus_out)],
 		destination_type => $dest_type,
 		destination_id	 => $dest_id,
-		
-		),
-	) or carp("can't create bus!\n"), return;
+	);
+
+	my $bus = $bus_type eq 'cooked'
+		?  ::SendBusCooked->new( @args ) 
+		:  ::SendBusRaw->new( @args );
+
+	$bus or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
 	}
 
@@ -4134,7 +4138,6 @@ sub add_send_bus {
 						)
    } $main->tracks;
 		
-	
 }
 
 sub dest_type { 
