@@ -2,12 +2,11 @@
 # ------------  Bus --------------------
 
 package ::Bus;
-our $VERSION = 1.0;
-use strict;
-our ($debug); # entire file
-
-use vars qw(%by_name);
+use Modern::Perl;
 use Carp;
+our $VERSION = 1.0;
+our ($debug); # entire file
+use vars qw(%by_name);
 our @ISA;
 use ::Object qw(	name
 					groups
@@ -29,7 +28,8 @@ sub new {
 		tracks => [], 
 		groups => [], 
 		rules  => [],
-		@_ }, $class; 
+		class => $class,
+		@_ }, $vals{class} // $class;
 	$by_name{$bus->name} = $bus;
 }
 
@@ -132,6 +132,60 @@ sub deref_code {
 		$value }
 }
 
+### subclass
+
+package ::UserBus;
+use strict;
+use Carp;
+our @ISA = '::Bus';
+
+use ::Object qw(	
+
+[% qx(cat ./bus_fields) %]
+
+						);
+
+# we will put the following information in the Track as an aux_send
+# 						destination_type
+# 						destination_id
+# name, init capital e.g. Brass, identical Group name
+# destination: 3, jconv, loop,output
+
+package ::SubBus;
+use Modern::Perl;
+use Carp;
+our @ISA = '::UserBus';
+
+use ::Object qw(
+[% qx(cat ./bus_fields) %]
+);
+
+sub remove {
+	# all non-empty tracks returned to Main group
+	# remove empty tracks, including bus mix track if empty
+	# delete group
+}
+
+package ::SendBusRaw;
+use Modern::Perl;
+use Carp;
+our @ISA = '::UserBus';
+use ::Object qw(
+[% qx(cat ./bus_fields ) %]
+
+);
+sub remove {
+	# all slave tracks
+}
+package ::SendBusCooked;
+use Modern::Perl;
+use Carp;
+our @ISA = '::SendBusRaw';
+use ::Object qw(
+[% qx(cat ./bus_fields ) %]
+);
+
+
 
 # ------------  Rule  --------------------
 	
@@ -200,73 +254,5 @@ sub dump{
 	print "rule: ", $rule->name, $/;
 }
 
-### subclass
-
-package ::MixBus;
-our @ISA = '::Bus';
-sub apply {} ; ## TODO 
-
-### subclass
-
-package ::UserBus;
-use strict;
-use Carp;
-our @ISA = '::Bus';
-use vars qw(@buses %by_name);
-
-use ::Object qw(	
-
-[% qx(cat ./bus_fields) %]
-
-						);
-
-# we will put the following information in the Track as an aux_send
-# 						destination_type
-# 						destination_id
-# name, init capital e.g. Brass, identical Group name
-# destination: 3, jconv, loop,output
-
-
-sub new {
-	my $class = shift;
-	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	my $self = bless { 
-		tracks => [], 
-		groups => [], 
-		rules  => [],
-		@_ }, $class; 
-	push @buses, $self;
-	$by_name{$self->name} = $self;
-	return $self;
-}
-
-sub all { @buses }
-
-package ::SubBus;
-use Modern::Perl;
-use Carp;
-our @ISA = '::UserBus';
-
-use ::Object qw(
-[% qx(cat ./bus_fields) %]
-);
-
-package ::SendBusCooked;
-use Modern::Perl;
-use Carp;
-our @ISA = '::UserBus';
-use ::Object qw(
-[% qx(cat ./bus_fields ) %]
-);
-
-package ::SendBusRaw;
-use Modern::Perl;
-use Carp;
-our @ISA = '::UserBus';
-use ::Object qw(
-[% qx(cat ./bus_fields ) %]
-
-);
 1;
 __END__

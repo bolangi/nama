@@ -3272,8 +3272,9 @@ map { my $t = $_;
 				qw(ch_r ch_m source_select send_select jack_source jack_send);
 } @tracks_data;
 
-@sub_bus_data = (); # 
-map{ push @sub_bus_data, $_->hashref } ::UserBus::all();
+@bus_data = (); # 
+map{ push @bus_data, $_->hashref } 
+	grep{ $_->name =~ !/Main_Bus|Null_Bus} values %::Bus::by_name;
 
 # prepare marks data for storage (new Mark objects)
 
@@ -3284,6 +3285,9 @@ map { push @marks_data, $_->hashref } ::Mark::all();
 $debug and print "copying groups data\n";
 @groups_data = ();
 map { push @groups_data, $_->hashref } ::Group::all();
+
+$debug and print "copying bus data\n";
+
 
 # save history
 
@@ -3382,10 +3386,9 @@ sub restore_state {
 
 	# restore user buses, directly, skipping constructor 
 	
-	map{ bless $_, '::UserBus'} @sub_bus_data;
-	%::UserBus::by_name = ();
-	@::UserBus::buses = @sub_bus_data;
-	map{$::UserBus::by_name{$_->name} = $_  } @::UserBus::buses ;
+	map{ my $class = $_->{class};
+		 ::Bus->new{ %$_ }
+	} @bus_data;
 	
 	# create user tracks
 	
