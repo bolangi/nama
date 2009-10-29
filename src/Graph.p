@@ -235,5 +235,25 @@ sub inputless_tracks {
 	my $g = shift;
 	(grep{ is_a_track($_) and $g->is_source_vertex($_) } $g->vertices)
 }	
+sub remove_inputless_tracks {
+	my $g = shift;
+	while(my @i = ::Graph::inputless_tracks($g)){
+		map{ 	$g->delete_edges(map{@$_} $g->edges_from($_));
+				$g->delete_vertex($_);
+		} @i;
+	}
+}
+sub outputless_tracks {
+	my $g = shift;
+	(grep{ is_a_track($_) and $g->is_sink_vertex($_) } $g->vertices)
+}	
+sub remove_outputless_tracks {
+	my $g = shift;
+	while(my @i = ::Graph::outputless_tracks($g)){
+		map{ 	$g->delete_edges(map{@$_} $g->edges_to($_));
+				$g->delete_vertex($_);
+		} @i;
+	}
+}
 		
 1;

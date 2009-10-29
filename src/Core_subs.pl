@@ -1219,19 +1219,15 @@ sub generate_setup {
 	
 	# we need to do this so that the mix track of a sub bus with no inputs
 	# is removed
-	
-	while(my @i = ::Graph::inputless_tracks($g)){
-		map{ 	$g->delete_edges(map{@$_} $g->edges_from($_));
-				$g->delete_vertex($_);
-		} @i;
-	}
+
 
 	if ($mastering_mode){
-		$g->add_path(qw[Master Eq Low Boost soundcard_out]);
+		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
+		$g->add_path(qw[Boost soundcard_out]) if $main_out;
 
-	} else { $g->add_edge('Master','soundcard_out') }
+	} else { $g->add_edge('Master','soundcard_out') if $main_out }
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
@@ -1250,6 +1246,9 @@ sub generate_setup {
  				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
+	::Graph::remove_inputless_tracks($g);
+#	::Graph::remove_outputless_tracks($g); # not helpful at present
+	
 												 
 	$debug and say "The graph is $g";
 
@@ -1257,33 +1256,6 @@ sub generate_setup {
 	# permanent ones, too.  so safer to skip resetting
 	# index
 # my $track_n = $::Track::n; # restore before exit sub
-=comment
-
-now we want to add paths representing track caching.
-
-%cooked_record_pending;
-
-$c_r_p{track_name}++;
-
-during successful rec_cleanup, %c_r_p = ();
-
-and push @{ $track->cached_versions }, new_version_number
-
-$track->previous_version->effects_chain: 
-
-whenever we do a cache record, store the 
-previous version and effects chain.
-If that version (or lower) gets set again
-restore that effects chain.
-
-if we cache record that version again, replace that effects chain.
-
-if we cache record a cache recorded version, we save the 
-effects chain for the original. 
-
-3: effects_chain_3   # default naming
-4: big_hall_ambience # name specified
-=cut
 
 	my @cache_rec_tracks = 
 	map {
