@@ -3389,6 +3389,11 @@ sub restore_state {
 	
 	my $did_apply = 0;
 
+	map { 	my $i = $_->{inserts};
+			if($i =~ /ARRAY/){ 
+				$_->{inserts} = scalar @$i ? $i->[0] : {}  }
+	}  @tracks_data;
+
 	map{ 
 		my %h = %$_; 
 		$::Track::n = $h{n} if $h{n}; # set class Track's counter
