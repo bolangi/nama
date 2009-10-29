@@ -82,7 +82,7 @@ sub new {
 
 					send_type => undef,
 					send_id   => undef,
-					inserts => [],
+					inserts => {},
 
 					@_ 			}, $class;
 
@@ -731,9 +731,9 @@ sub select_output {
 
 sub remove_insert {
 	my $track = shift;
-	if ( my $i = $track->inserts->[0]){
-		map{ $::tn{$_}->remove }@{ $i->{tracks} };
-		$track->set(inserts => []);
+	if ( my $i = $track->inserts){
+		map{ $::tn{$_}->remove } @{ $i->{tracks} };
+		$track->set(inserts => {});
 	}
 }
 
