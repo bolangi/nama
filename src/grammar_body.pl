@@ -487,7 +487,7 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
 	my $t = $::this_track;
-	$t->remove_insert;
+	#$t->remove_insert;
 	my $i = {
 		insert_type => 'cooked',
 		send_type 	=> ::dest_type($send_id),
@@ -505,7 +505,7 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
 	
-	$t->set(inserts => [$i]); 1;
+	$t->set(inserts => $i); 1;
 }
 send_id: name
 return_id: name
@@ -514,7 +514,7 @@ set_insert_wetness: _set_insert_wetness parameter end {
 	my $p = $item{parameter};
 	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
 		if ! ($p <= 100 and $p >= 0);
-	my $i = $::this_track->inserts->[0];
+	my $i = $::this_track->inserts;
 	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
 		return 1 unless $i;
 	$i->{wetness} = $p;
@@ -525,7 +525,7 @@ set_insert_wetness: _set_insert_wetness parameter end {
 }
 
 set_insert_wetness: _set_insert_wetness end {
-	my $i = $::this_track->inserts->[0];
+	my $i = $::this_track->inserts;
 	print ("track ",$::this_track->n, " has no insert.\n"), return 1 unless $i;
 	 print "The insert is ", 
 		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";

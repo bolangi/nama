@@ -32,7 +32,7 @@ sub show_effects {
 
 	# display if there is actually something there
 
-	if ($i = $i->[0]){ push @lines, yaml_out($i) }
+	if ($i->{insert_type}){ push @lines, yaml_out($i) }
 		
 	join "", @lines;
  	

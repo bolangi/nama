@@ -41,8 +41,8 @@ sub expand_graph {
 sub add_inserts {
 	my $g = shift;
 	my @track_names = grep{ $::tn{$_} 
-		and $::tn{$_}->inserts
-		and $::tn{$_}->inserts =~ /ARRAY/} $g->vertices;
+		and $::tn{$_}->inserts =~ /HASH/
+		and $::tn{$_}->inserts->{insert_type}} $g->vertices;
 	$debug and say "Inserts will be applied to the following tracks: @track_names";
 	map{ add_insert($g, $_) } @track_names;
 }
@@ -56,7 +56,7 @@ sub add_insert {
 	my ($g, $name) = @_;
 	$debug and say "add_insert name: $name";
 	my $t = $::tn{$name}; 
-	my ($i) = @{ $t->inserts }; # assume one insert
+	my $i = $t->inserts; 
 
 	# assume post-fader send
 	# t's successor will be loop or reserved
