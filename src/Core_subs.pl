@@ -3312,7 +3312,15 @@ sub restore_state {
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
 
+	# restore persistent variables
+
 	assign_var($file, @persistent_vars );
+
+	# restore effect chains
+	
+
+	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain));
+	
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []

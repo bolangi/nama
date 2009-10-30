@@ -557,4 +557,16 @@ delete_effect_chain: _delete_effect_chain name(s) end {
 	map{ delete $::effect_chain{$_} } @{ $item{'name(s)'} };
 	1;
 }
-	
+list_effect_chains: _list_effect_chains name(s?) end {
+	my @names = grep{ $::effect_chain{$_}} @{$item{'name(s?)'}};
+	@names or @names = keys %::effect_chain;
+	map{ my $name = $_;
+		print join ' ', "$name:", 
+		map{$::effect_chain{$name}{type}{$_},
+			@{$::effect_chain{$name}{params}{$_}}
+		} @{$::effect_chain{$name}{ops}};
+		print "\n";
+	} @names;
+	1;
+}
+ 		

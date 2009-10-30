@@ -619,6 +619,7 @@ list_effect_chains:
   type: effect
   short: lec
   what: list names of available effect chains
+  parameters: [<s_name> <s_name>... ]
 # die:
 #   what: just end it already - a test for the command prompt
 # midi_inputs:
