@@ -549,3 +549,12 @@ new_effect_chain: _new_effect_chain name op_id(s?) end {
 	::new_effect_chain($item{name}, @{ $item{'op_id(s?)'} });
 	1;
 }
+add_effect_chain: _add_effect_chain name end {
+	::add_effect_chain($item{name});
+	1;
+}
+delete_effect_chain: _delete_effect_chain name(s) end {
+	map{ delete $::effect_chain{$_} } @{ $item{'name(s)'} };
+	1;
+}
+	

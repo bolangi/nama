@@ -87,6 +87,7 @@ our (
 
 					 #this_wav_dir = 
 	$state_store_file,	# filename for storing @persistent_vars
+	$effect_chain_file, # for storing effect chains
 	$chain_setup_file, # Ecasound uses this 
 
 	$tk_input_channels,# this many radiobuttons appear
@@ -218,6 +219,7 @@ our (
 	$mon,      # background color
 	$off,      # background color
 	$palette_file, # where to save selections
+
 
 	### A separate box for entering IAM (and other) commands
 	$iam_label,

@@ -605,6 +605,20 @@ new_effect_chain:
   short: nec
   what: create a reusable sequence of effects with current parameters
   parameters: <s_name> [<op1>, <op2>,...]
+add_effect_chain:
+  type: effect
+  short: aec
+  what: add an effect chain to the current track
+  parameters: <s_name>
+delete_effect_chain:
+  type: effect
+  short: dec
+  what: remove an effect chain from the list
+  parameters: <s_name>
+list_effect_chains:
+  type: effect
+  short: lec
+  what: list names of available effect chains
 # die:
 #   what: just end it already - a test for the command prompt
 # midi_inputs:

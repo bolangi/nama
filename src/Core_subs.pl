@@ -3205,6 +3205,15 @@ sub save_state {
 	$debug and print "saving palette\n";
 	$ui->save_palette;
 
+	# save %effect_chain, common to all projects
+	
+ 	serialize (
+ 		file => join_path(project_root(), $effect_chain_file),
+		format => 'yaml',
+ 		vars => [ qw( %effect_chain ) ],
+ 		class => '::');
+	
+
 	# do nothing more if only Master and Mixdown
 	
 	if (scalar @::Track::all == 2 ){
@@ -4141,6 +4150,17 @@ sub new_effect_chain {
 					params	=> { map{$_ => $copp{$_} 		} @ops},
 	}
 }
+sub add_effect_chain {
+	my $name = shift;
+	say ("$name: effect chain does not exist"), return 
+		if ! $effect_chain{$name};
+	map { command_process(
+			join " ", 'add_effect',
+			$effect_chain{$name}{type}{$_}, 
+			@{$effect_chain{$name}{params}{$_}})
+	} @{$effect_chain{$name}{ops}};
+			
+}	
 sub push_effect_chain {
 	my $name = shift;
 	# make an effect chain of current effects
