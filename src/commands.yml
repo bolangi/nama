@@ -600,8 +600,13 @@ remove_bus:
   short: rmb
   what: remove a bus
   parameters: <s_bus_name>
-die:
-  what: just end it already - a test for the command prompt
+new_effect_chain:
+  type: effect
+  short: nec
+  what: create a reusable sequence of effects with current parameters
+  parameters: <s_name> [<op1>, <op2>,...]
+# die:
+#   what: just end it already - a test for the command prompt
 # midi_inputs:
 #   type: perform
 #   what: use MIDI messages to control parameters

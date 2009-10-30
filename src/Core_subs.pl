@@ -4132,4 +4132,30 @@ sub update_send_bus {
 						 "dummy",
 }
 
+sub new_effect_chain {
+	my ($name, @ops) = @_;
+#	say "name: $name, ops: @ops";
+	@ops or @ops = @{$this_track->ops};
+	$effect_chain{$name} = { ops 	=> \@ops,
+					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
+					params	=> { map{$_ => $copp{$_} 		} @ops},
+	}
+}
+sub push_effect_chain {
+	my $name = shift;
+	# make an effect chain of current effects
+	# push it onto track's effect chain list
+	# apply effect chain to track
+}
+sub pop_effect_chain {
+	my $name = shift;
+	# if $name, create effect chain
+	# restore previous chain
+}
+sub append_effect_chain {
+}
+sub insert_effect_chain {
+}
+	
+	
 ### end

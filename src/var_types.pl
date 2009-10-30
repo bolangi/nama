@@ -63,6 +63,7 @@
 						@command_history
 						$saved_version
 						$main_out
+						%effect_chain
 						);
 					 
 # used for effects_cache 

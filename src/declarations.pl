@@ -373,4 +373,5 @@ our (
 	$g, 			# Graph var, for chain setup
 	%cooked_record_pending, # an intermediate mixdown for tracks
 	$press_space_to_start_transport, #  in text mode
+	%effect_chain, # named effect sequences
 );

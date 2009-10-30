@@ -4,7 +4,7 @@ sign: '+' | '-' | '*' | '/'
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 op_id: /[A-Z]+/
 parameter: /\d+/
-die: 'die' { CORE::die("killed by shakespeare"); 1 }
+#die: 'die' { CORE::die("killed by shakespeare"); 1 }
 #value: /\d+/
 #value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
@@ -542,5 +542,10 @@ cache_track: _cache_track end {
 }
 no_cache_track: _no_cache_track end {
 	delete $::cooked_record_pending{ $::this_track->name }; 
+	1;
+}
+new_effect_chain: _new_effect_chain name op_id(s?) end {
+	#print "name $item{name}, ops: ", @{$item{'op_id(s?)'}}, $/;
+	::new_effect_chain($item{name}, @{ $item{'op_id(s?)'} });
 	1;
 }
