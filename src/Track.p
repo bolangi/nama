@@ -237,7 +237,7 @@ sub rec_status_display {
 
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! $::preview eq 'doodle';
+	return 'MON' if $monitor_version and ! ($::preview eq 'doodle');
 	return 'OFF';
 }
 
