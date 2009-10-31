@@ -37,6 +37,14 @@ sub initialize {
 	%track_names = (); 
 }
 
+sub idx { # return first free track index
+	my $n = 0;
+	while (++$n){
+		return $n if not $by_index{$n}
+	}
+}
+	
+
 sub new {
 	# returns a reference to an object that is indexed by
 	# name and by an assigned index
@@ -57,7 +65,7 @@ sub new {
 	 if  ! $::mastering_mode 
 		and grep{$vals{name} eq $_} @::mastering_track_names ; 
 
-	my $n = $vals{n} ? $vals{n} : ++$n; 
+	my $n = $vals{n} ? $vals{n} : idx(); 
 	my $object = bless { 
 
 

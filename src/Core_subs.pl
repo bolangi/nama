@@ -1254,11 +1254,6 @@ sub generate_setup {
 	
 	$debug and say "The graph is $g";
 
-	# we will add some temporary tracks, but maybe some
-	# permanent ones, too.  so safer to skip resetting
-	# index
-# my $track_n = $::Track::n; # restore before exit sub
-
 	my @cache_rec_tracks = 
 	map {
 
@@ -1330,7 +1325,6 @@ sub generate_setup {
 	# reset Track class
 	$debug and say "temp tracks to remove";
 	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
-	#$::Track::n = $track_n;	
 
 	if ($have_source) {
 
