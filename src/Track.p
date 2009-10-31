@@ -184,7 +184,7 @@ sub monitor_version {
 
 	my $group = $::Group::by_name{$track->group};
 	return $track->active if $track->active 
-				and grep {$track->active  == $_ } @{$track->versions};
+				and grep {$track->active  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
 				and grep {$group->version  == $_ } @{$track->versions};
 	return undef if $group->version;

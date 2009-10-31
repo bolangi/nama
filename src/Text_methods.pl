@@ -9,8 +9,9 @@ $text_wrap = new Text::Format {
 };
 
 sub show_versions {
- 	"All versions: ". join " ", @{$this_track->versions}, $/
-		if @{$this_track->versions};
+		return @{$this_track->versions} 
+			?  "All versions: ". join(" ", @{$this_track->versions}). $/
+			:  q();
 }
 
 sub show_effects {
@@ -49,7 +50,7 @@ sub show_region {
 		if $this_track->region_start;
 	push @lines, "Region end: ", $this_track->region_end, $/
 		if $this_track->region_end;
-	join "", @lines;
+	return(join "", @lines);
 }
 
 sub show_status {
