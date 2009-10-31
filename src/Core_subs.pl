@@ -889,9 +889,9 @@ sub initialize_project_data {
 	%bunch = ();	
 	
 	::Group->initialize();
+	create_groups();
 	::Track->initialize();
 
-	create_groups();
 
 	#print yaml_out( \%::Track::track_names );
 
@@ -1731,10 +1731,10 @@ sub reconfigure_engine {
 	my $old = yaml_out($old_snapshot);
 
 	if ( $current eq $old){
-			print ("no change in setup\n");
+			$debug and print ("no change in setup\n");
 			return;
 	}
-	print ("setup change\n");
+	$debug and print ("setup change\n");
 
 	# restore playback position unless 
 	
@@ -3299,11 +3299,6 @@ sub restore_state {
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
 	
-	#  destroy and recreate all groups
-
-
-	::Group::initialize();	
-
 	# backward compatibility fixes for older projects
 
 	if (! $saved_version ){
@@ -3336,46 +3331,48 @@ sub restore_state {
 			}
 		}
 	}
+	if( $saved_version < 0.9985){
+	
+		map { 	# store insert without intermediate array
+
+				my $i = $_->{inserts};
+				if($i =~ /ARRAY/){ 
+					$_->{inserts} = scalar @$i ? $i->[0] : {}  }
+
+				# initialize effect_chain_stack
+
+				$_->{effect_chain_stack} //= [];
+
+				# set class for Mastering tracks
+
+				$_->{class} = '::MasteringTrack' if $_->{group} eq 'Mastering';
+				 
+				$_->{class} = '::SimpleTrack' if $_->{name} eq 'Master';
+				
+		}  @tracks_data;
+	}
 		
+	#  destroy and recreate all groups
+
+	::Group::initialize();	
 	map { ::Group->new( %{ $_ } ) } @groups_data;  
-	$main = $::Group::by_name{Main};
+	create_groups(); # make sure we have them all
 
-	create_groups('no warning'); # make sure we have them
-
-	# restore user buses, directly, skipping constructor 
+	# restore user buses
 	
-	map{ my $class = $_->{class};
-		 ::Bus->new( %$_ )
-	} @bus_data;
+	map{ my $class = $_->{class}; ::Bus->new( %$_ ) } @bus_data;
 	
-	# create user tracks
+	# restore user tracks
 	
 	my $did_apply = 0;
 
-	map { 	my $i = $_->{inserts};
-			if($i =~ /ARRAY/){ 
-				$_->{inserts} = scalar @$i ? $i->[0] : {}  }
-	}  @tracks_data;
-
 	map{ 
 		my %h = %$_; 
-		$::Track::n = $h{n} if $h{n}; # set class Track's counter
-		#my @hh = %h; print "size: ", scalar @hh, $/;
 		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
 		if ( $track->class ){ bless $track, $track->class } # current scheme
-
-		# for backward compatibility
-		else { set_track_class($track, '::MasteringTrack') 
-				if $track->group eq 'Mastering'; }
-		my $n = $track->n;
-		#print "new n: $n\n";
-		$debug and print "restoring track: $n\n";
 	} @tracks_data;
 
 	$ui->create_master_and_mix_tracks();
-
-	# for backwards compatibility
-	set_track_class( $tn{Master}, '::SimpleTrack');   
 
 	map{ 
 		my $n = $_->{n};
@@ -4124,11 +4121,42 @@ sub update_send_bus {
 						 "dummy",
 }
 
+sub new_effect_chain_name {
+	my $name = '_'.$this_track->name . '_';
+	my $i;
+	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
+	@{ $this_track->effect_chain_stack };
+	"$name$i"
+}
+
+sub push_effect_chain {
+	my %vals = @_; 
+	my $to_add_name = $vals{add}; # undef in case of bypass
+	my $save_name   = $vals{save} || new_effect_chain_name();
+	new_effect_chain( $save_name ); # current track effects
+	push @{ $this_track->effect_chain_stack }, $save_name;
+	map{ remove_effect($_)} $this_track->fancy_ops;
+	add_effect_chain($to_add_name) if $to_add_name;
+}
+
+sub pop_effect_chain { # restore previous, save current as name if supplied
+	my $save_name = shift;
+	my $previous = pop @{$this_track->effect_chain_stack};
+	if($save_name){ 
+		push_effect_chain( save => $save_name, add => $previous);
+	} 
+	else { 
+		map{ remove_effect($_)} $this_track->fancy_ops;
+		add_effect_chain($previous);
+	}
+}
+
 sub new_effect_chain {
 	my ($name, @ops) = @_;
 #	say "name: $name, ops: @ops";
-	@ops or @ops = @{$this_track->ops};
-	$effect_chain{$name} = { ops 	=> \@ops,
+	@ops or @ops = $this_track->fancy_ops;
+	$effect_chain{$name} = { 
+					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
 					params	=> { map{$_ => $copp{$_} 		} @ops},
 	}
@@ -4144,17 +4172,6 @@ sub add_effect_chain {
 	} @{$effect_chain{$name}{ops}};
 			
 }	
-sub push_effect_chain {
-	my $name = shift;
-	# make an effect chain of current effects
-	# push it onto track's effect chain list
-	# apply effect chain to track
-}
-sub pop_effect_chain {
-	my $name = shift;
-	# if $name, create effect chain
-	# restore previous chain
-}
 sub append_effect_chain {
 }
 sub insert_effect_chain {

@@ -558,8 +558,11 @@ delete_effect_chain: _delete_effect_chain name(s) end {
 	1;
 }
 list_effect_chains: _list_effect_chains name(s?) end {
+
+	# we don't list chains starting with underscore
+	
 	my @names = grep{ $::effect_chain{$_}} @{$item{'name(s?)'}};
-	@names or @names = keys %::effect_chain;
+	@names or @names = grep{ ! /^_/ } keys %::effect_chain;
 	map{ my $name = $_;
 		print join ' ', "$name:", 
 		map{$::effect_chain{$name}{type}{$_},

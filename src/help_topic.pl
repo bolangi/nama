@@ -236,6 +236,14 @@ effects => <<EFFECTS,
    remove_insert,      rin    - remove current track's insert
    set_insert_wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
+
+-  effect chains
+
+   new_effect_chain,   nec    - define a new effect chain
+   add_effect_chain,   aec    - add an effect chain to the current track
+   delete_effect_chain,dec    - delete an effect chain
+   list_effect_chains, lec    - list effect chains and their parameters
+
 EFFECTS
 
 group => <<GROUP,

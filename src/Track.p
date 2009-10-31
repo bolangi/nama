@@ -51,7 +51,7 @@ sub new {
 	#
 	# The indexing is bypassed and an object returned 
 	# if an index n is supplied as  a parameter
-	
+
 	my $class = shift;
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
@@ -91,6 +91,7 @@ sub new {
 					send_type => undef,
 					send_id   => undef,
 					inserts => {},
+					effect_chain_stack => [],
 
 					@_ 			}, $class;
 
@@ -809,7 +810,10 @@ sub ch_r {
 	my $track = shift;
 	return '';
 }
-
+sub fancy_ops { # returns list 
+	my $track = shift;
+	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
+}
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
