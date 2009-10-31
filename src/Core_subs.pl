@@ -1139,64 +1139,67 @@ sub generate_setup {
 
 	$debug2 and print "&generate_setup\n";
 
-	%inputs = %outputs 
-			= %post_input 
-			= %pre_output 
-			= @input_chains 
-			= @output_chains 
-			= ();
+	# initialize data structures
+
+	  %inputs 
+		= %outputs 
+		= %post_input 
+		= %pre_output 
+		= @input_chains 
+		= @output_chains 
+		= ();
+
+	# initialize graph
 	
 	$g = Graph->new();
 
+
+	# make connections for normal users tracks (group Main)
+	
 	map{ 
 
+		# connect inputs
+		
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
+		
+
 		$g->add_path(@path) if @path;
 
-		# create default mixer connection
+		# connect outputs to mixer
 		
-		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name)
-		# we will remove input-less tracks later
-;
+		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name);
 
 	} 	grep{ $_->rec_status ne 'OFF' } 
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
 
 
-		# process optional send and sub buses
+	# process send and sub buses
 
-	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ }
-		values %::Bus::by_name;
-
+	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
 
-		# raw send buses use only fixed-rule routing
-		# we process them in generate io_lists
+		my $bus = $_;
+		# we get tracks from a group of the same name as $bus->name
+		my @tracks = grep{ $_->rec_status ne 'OFF' } 
+					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
 
-		if( $_->bus_type eq 'cooked'){  # post-fader send bus
+		# raw send buses use only fixed-rule routing
+		# we process them later
+
+		if( $bus->bus_type eq 'cooked'){  # post-fader send bus
 
 			$debug and say 'process post-fader bus';
 
 			# The signal path is:
-			#
-			# [target track] -> [slave track] -> [slave track send output]
+			# [target track] -> [slave track] -> [slave track send_output]
 			
-			map{   
-				$g->add_path( $_->target, $_->name, $_->send_type.'_out');
-
-				# it would be possible here to use the override function
-				# set the track vertex send_type and send_id using bus values
-				# dest_type, dest_id, allowing update to match
-				# bus parameters.
-				
-			} 	grep{ $_->rec_status ne 'OFF' } 
-				map{$tn{$_}} $::Group::by_name{$_->name}->tracks;
+			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
+			} @tracks; 
 		}
 		elsif( $_->bus_type eq 'sub'){   # sub bus
 			$debug and say 'process sub bus';
-			my $bus = $_;
 			my $output = $bus->destination_type eq 'track' 
 				? $bus->destination_id
 				: $bus->destination_type . '_out';
@@ -1204,21 +1207,15 @@ sub generate_setup {
 			$debug and say "bus output: $output";
 
 			# The signal path is:
-			#
 			# [track input] -> [track] -> [bus destination]
 			
 			map{ 	my @path = ($_->input_path, $output);
 					say "path: @path";
 					$g->add_path(@path); 
 
-			} map{$tn{$_}} $::Group::by_name{$_->name}->tracks;
+			} @tracks;
 		}
 	} @user_buses;
-
-	# remove_inputless_tracks
-	
-	# we need to do this so that the mix track of a sub bus with no inputs
-	# is removed
 
 
 	if ($mastering_mode){
@@ -1246,10 +1243,15 @@ sub generate_setup {
  				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
-	::Graph::remove_inputless_tracks($g);
-#	::Graph::remove_outputless_tracks($g); # not helpful at present
+	# remove tracks lacking inputs or outputs
+	# (loop devices count as IO destinations)
 	
-												 
+	# we need to do this so that the mix track of a sub bus with no inputs
+	# is removed
+
+	::Graph::remove_inputless_tracks($g);
+	::Graph::remove_outputless_tracks($g); # not helpful at present
+	
 	$debug and say "The graph is $g";
 
 	# we will add some temporary tracks, but maybe some

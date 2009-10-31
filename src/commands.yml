@@ -620,6 +620,11 @@ list_effect_chains:
   short: lec
   what: list names of available effect chains
   parameters: [<s_name> <s_name>... ]
+# push_effect_chain:
+#   type: effect
+#   short: pec
+#   what: applying effect_chain, pushing current track effects onto stack
+#   parameters: [<s_name>]
 # die:
 #   what: just end it already - a test for the command prompt
 # midi_inputs:
