@@ -1311,38 +1311,19 @@ sub generate_setup {
 		else { croak qq(fell through dispatch tree); }
 	} $g->edges;
  
-	my @tracks = ::Track::all();
+	# now we have processed graph, we can remove temp tracks
 
-	shift @tracks; # drop Master
-	shift @tracks; # drop Mixdown
-
-	my $have_source = join " ", map{$_->name} 
-								grep{ $_ -> rec_status ne 'OFF'} 
-								@tracks;
-
-	#print "have source: $have_source\n";
-
-	# reset Track class
 	$debug and say "temp tracks to remove";
 	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 
-	if ($have_source) {
+	# process bus rules
 
-		# process bus rules
-
-		map { $_->apply() } ::Bus::all();
-
-		$debug and print "\%inputs\n================\n", yaml_out(\%inputs),
-			"\%outputs\n================\n", yaml_out(\%outputs);
-
+	map { $_->apply() } ::Bus::all();
+	$ecasound_globals_ecs = $ecasound_globals;
+	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
 		write_chains();
-		$ecasound_globals_ecs = $ecasound_globals;
  		return 1;
- 	} else { 
-
-		$ecasound_globals_ecs = $ecasound_globals;
-		print "No inputs found!\n"; return 0};
-1;
+ 	} else { print "No inputs found!\n"; return 0};
 }
 sub override {
 	my ($hash_ref, $name) = @_;
@@ -1746,11 +1727,16 @@ sub reconfigure_engine {
 
 	# only act if change in configuration
 
-	my $status_snapshot = status_snapshot();
-	
-	#print ("no change in setup\n"),
-	 return 0 if yaml_out($old_snapshot) eq yaml_out($status_snapshot);
+	my $current = yaml_out(status_snapshot());
+	my $old = yaml_out($old_snapshot);
 
+	if ( $current eq $old){
+			print ("no change in setup\n");
+			return;
+	}
+	print ("setup change\n");
+
+=comment
 	# restore playback position unless 
 	
 	#  - doodle mode
@@ -1764,7 +1750,6 @@ sub reconfigure_engine {
 						&&  grep { $_->{rec_status} eq 'REC' } 
 							@{ $status_snapshot->{tracks} };
 
-=comment
 	# restore playback position if possible
 
 	if (	$preview eq 'doodle'
@@ -1776,22 +1761,24 @@ sub reconfigure_engine {
 		$old_pos = undef;
 
 	} else { $old_pos = eval_iam('getpos') }
-=cut
 
-	$old_snapshot = $status_snapshot;
 	my $was_running = engine_running();
 	stop_transport() if $was_running;
+=cut
 
+	$old_snapshot = status_snapshot();
+
+	print STDOUT ::Text::show_tracks ( ::Track::all ) ;
 	if ( generate_setup() ){
-		print STDOUT ::Text::show_tracks ( ::Track::all ) ;
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
 		#eval_iam("setpos $old_pos") if $old_pos; # temp disable
+		#start_transport() if $was_running and ! $will_record;
+		$ui->flash_ready;
+		1; }
+	else {	my $setup = join_path( project_dir(), $chain_setup_file);
+			unlink $setup if -f $setup; }
 
-	}
-	start_transport() if $was_running and ! $will_record;
-	$ui->flash_ready;
-	1;
 }
 
 		
@@ -3527,9 +3514,7 @@ sub all {
 sub show_chain_setup {
 	$debug2 and print "&show_chain_setup\n";
 	my $setup = join_path( project_dir(), $chain_setup_file);
-	print qq(No chain setup available.
-Perhaps you need to create some tracks to record/play.
-), return unless -f $setup;
+	say("No tracks to record or play."), return unless -f $setup;
 	my $chain_setup;
 	io( $setup ) > $chain_setup; 
 	pager( $chain_setup );
@@ -3607,9 +3592,9 @@ sub process_line {
 		$term->addhistory($user_input) 
 			unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
-		enable_excluded_inputs() if $preview eq 'doodle';
+#		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
-		exclude_duplicate_inputs() if $preview eq 'doodle';
+#		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
 	}
 }
@@ -4035,6 +4020,9 @@ sub status_snapshot {
 	# hashref output for detecting if we need to reconfigure
 	# engine
 	
+	#my $ss = {rs => $::ti{3}->rec_status };
+	#$ss;
+	
 	my %snapshot = ( project 		=> 	$project_name,
 					 global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
@@ -4042,14 +4030,14 @@ sub status_snapshot {
 					 main 			=> $main_out,
 					 cache_rec		=> {%cooked_record_pending},# copy
 					 global_rw      =>  $main->rw,
+					 tracks			=> [],
 					
  );
-	$snapshot{tracks} = [];
 	map { 
 		my %track = %$_; # dereference object
 		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
-	} grep{ $_->rec_status ne 'OFF' } ::Track::all();
-	\%snapshot
+	}  ::Track::all();
+	\%snapshot;
 }
 sub set_region {
 	my ($beg, $end) = @_;
