@@ -885,6 +885,7 @@ sub initialize_project_data {
 	$old_snapshot = {};
 	$preview = $initial_user_mode;
 	$mastering_mode = 0;
+	$saved_version = 0; 
 	
 	%bunch = ();	
 	
@@ -892,11 +893,6 @@ sub initialize_project_data {
 	create_groups();
 	::Track->initialize();
 
-
-	#print yaml_out( \%::Track::track_names );
-
-
-    # create master and mixdown
 }
 sub create_groups {
 

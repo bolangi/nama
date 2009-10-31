@@ -129,7 +129,7 @@ sub basename {
 	$self->target || $self->name
 }
 
-sub full_path { my $track = shift; join_path $track->dir, $track->current_wav }
+sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
 sub group_last {
 	my $track = shift;
@@ -183,7 +183,8 @@ sub monitor_version {
 	my $track = shift;
 
 	my $group = $::Group::by_name{$track->group};
-	return $track->active if $track->active;
+	return $track->active if $track->active 
+				and grep {$track->active  == $_ } @{$track->versions};
 	return $group->version if $group->version 
 				and grep {$group->version  == $_ } @{$track->versions};
 	return undef if $group->version;
