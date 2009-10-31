@@ -216,14 +216,11 @@ sub rec_status {
 					:  return maybe_monitor($monitor_version)
 			}
 			when('soundcard'){ return 'REC' }
-			when('track'){ return 'REC' }
-
+			when('track'){ return 'REC' } # maybe $track->rw ??
 			default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
 		}
-		
-			
 	}
 	# third, set MON status if possible
 	
@@ -238,12 +235,9 @@ sub rec_status_display {
 	$track->rec_defeat ? "[$status]" : $status;
 }
 
-sub maybe_monitor {
+sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-
-	# I don't want the dependency on $::mon_setup status
-	# although it could be helpful for diagnostic and UI purposes
-	return 'MON' if $monitor_version; # and $::mon_setup->status;
+	return 'MON' if $monitor_version and ! $::preview eq 'doodle';
 	return 'OFF';
 }
 

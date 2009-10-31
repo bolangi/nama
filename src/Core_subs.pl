@@ -1285,12 +1285,12 @@ sub generate_setup {
 
 # now to create input and output lists %inputs and %outputs
 
-# we deal with edges:
+# the graphic part: we process edges:
 # 
-# reserved - track: input 	
-# loop - track    : input		
-# track - loop    : output
-# track - reserved: output
+# reserved to track: input 	
+# loop to track    : input		
+# track to loop    : output
+# track to reserved: output
 
 	map { my ($a,$b) = @$_;
 		  $debug and say "edge $a-$b";
