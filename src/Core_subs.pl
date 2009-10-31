@@ -1827,7 +1827,7 @@ sub exclude_duplicate_inputs {
  	if ( $main->tracks){
  		map { # print "track $_ "; 
 			$old_rw{$_} = $tn{$_}->rw;
- 		  	$tn{$_}->set(rw => 'REC');
+ 		  	#$tn{$_}->set(rw => 'REC');
  			# print "status: ", $tn{$_}->rw, $/ 
  		} $main->tracks;
  	}
@@ -3590,7 +3590,9 @@ sub process_line {
 		$term->addhistory($user_input) 
 			unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
+		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
+		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
 	}
 }
