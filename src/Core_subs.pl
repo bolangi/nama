@@ -1736,7 +1736,6 @@ sub reconfigure_engine {
 	}
 	print ("setup change\n");
 
-=comment
 	# restore playback position unless 
 	
 	#  - doodle mode
@@ -1744,27 +1743,26 @@ sub reconfigure_engine {
     #  - change in project
     #  - user or Mixdown track is REC enabled
 	
-	my $old_pos;
-
-	my $will_record = ! $preview 
-						&&  grep { $_->{rec_status} eq 'REC' } 
-							@{ $status_snapshot->{tracks} };
-
-	# restore playback position if possible
-
-	if (	$preview eq 'doodle'
-		 	or  $old_snapshot->{project} ne $status_snapshot->{project} 
-			or  $old_snapshot->{global_version} 
-					ne $status_snapshot->{global_version} 
-			or  $will_record  ){
-
-		$old_pos = undef;
-
-	} else { $old_pos = eval_iam('getpos') }
-
-	my $was_running = engine_running();
-	stop_transport() if $was_running;
-=cut
+# 	my $old_pos;
+# 
+# 	my $will_record = ! $preview 
+# 						&&  grep { $_->{rec_status} eq 'REC' } 
+# 							@{ $status_snapshot->{tracks} };
+# 
+# 	# restore playback position if possible
+# 
+# 	if (	$preview eq 'doodle'
+# 		 	or  $old_snapshot->{project} ne $status_snapshot->{project} 
+# 			or  $old_snapshot->{global_version} 
+# 					ne $status_snapshot->{global_version} 
+# 			or  $will_record  ){
+# 
+# 		$old_pos = undef;
+# 
+# 	} else { $old_pos = eval_iam('getpos') }
+# 
+# 	my $was_running = engine_running();
+# 	stop_transport() if $was_running;
 
 	$old_snapshot = status_snapshot();
 
@@ -1772,8 +1770,8 @@ sub reconfigure_engine {
 	if ( generate_setup() ){
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
-		#eval_iam("setpos $old_pos") if $old_pos; # temp disable
-		#start_transport() if $was_running and ! $will_record;
+# 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
+# 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
 		1; }
 	else {	my $setup = join_path( project_dir(), $chain_setup_file);
@@ -3592,9 +3590,7 @@ sub process_line {
 		$term->addhistory($user_input) 
 			unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
-#		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
-#		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
 	}
 }
