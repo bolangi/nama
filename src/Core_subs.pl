@@ -1824,29 +1824,22 @@ sub exclude_duplicate_inputs {
 	$debug2 and print "&exclude_duplicate_inputs\n";
 	print ("already excluded duplicate inputs\n"), return if %old_rw;
 	
- 	if ( $main->tracks){
- 		map { # print "track $_ "; 
-			$old_rw{$_} = $tn{$_}->rw;
- 		  	#$tn{$_}->set(rw => 'REC');
- 			# print "status: ", $tn{$_}->rw, $/ 
- 		} $main->tracks;
- 	}
-
-		my @user = $main->tracks(); # track names
-		%excluded = ();
-		my %already_used;
-		map{ my $source = $tn{$_}->source;
-			 if( $already_used{$source}  ){
-				$excluded{$_} = $tn{$_}->rw;
-			 }
-			 $already_used{$source}++
-		 } grep { $tn{$_}->rec_status eq 'REC' } @user;
-		if ( keys %excluded ){
+	my @user = $main->tracks(); # track names
+	map { $old_rw{$_} = $tn{$_}->rw } @user;
+	%excluded = ();
+	my %already_used;
+	map{ my $source = $tn{$_}->source;
+		 if( $already_used{$source}  ){
+			$excluded{$_} = $tn{$_}->rw;
+		 }
+		 $already_used{$source}++
+	} grep { $tn{$_}->rec_status eq 'REC' } @user;
+	if ( keys %excluded ){
 #			print "Multiple tracks share same inputs.\n";
 #			print "Excluding the following tracks: ", 
 #				join(" ", keys %excluded), "\n";
-			map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
-		}
+		map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
+	}
 }
 
 sub adjust_latency {
