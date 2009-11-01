@@ -97,46 +97,24 @@ sub install_handlers {
 
 	# store output buffer in a scalar (for print)
 	my $outstream = $attribs->{'outstream'};
-
-	# install STDIN handler
-	$event_id{stdin} = Event->io(
-		desc   => 'STDIN handler',           # description;
-		fd     => \*STDIN,                   # handle;
-		poll   => 'r',	                   # watch for incoming chars
-		cb     => sub{ 
-
-					&{$attribs->{'callback_read_char'}}();
-					if ( $attribs->{line_buffer} eq " " ){
-						if (engine_running()){ stop_transport() }
-						else { start_transport() }
-						$attribs->{line_buffer} = q();
- 						$attribs->{point} 		= 0;
- 						$attribs->{end}   		= 0;
-						$term->stuff_char(10);
-					    &{$attribs->{'callback_read_char'}}();
-
-					}
- 				},
-		repeat => 1,                         # keep alive after event;
-	 );
-  	$event_id{sigint} = Event->signal(
-  		desc   => 'Signal handler',           # description;
-  		signal => 'INT',
-  		cb     => sub{  # callback;
-						unloop();
-						remove_small_wavs();
-						kill 15, ::ecasound_pid();  	
-			 			#CORE::exit(); # unloop is enough to end program
-		},
-  	 );
-
-	$event_id{Event_heartbeat} = Event->timer(
-		parked => 1, 						# start it later
-	    desc   => 'heartbeat',               # description;
-	    prio   => 5,                         # low priority;
-		interval => 3,
-	    cb     => \&heartbeat,               # callback;
-	);
+	$event_id{stdin} = AE::io(*STDIN, 0, sub {
+		&{$attribs->{'callback_read_char'}}();
+		if ( $attribs->{line_buffer} eq " " ){
+			if (engine_running()){ stop_transport() }
+			else { start_transport() }
+			$attribs->{line_buffer} = q();
+			$attribs->{point} 		= 0;
+			$attribs->{end}   		= 0;
+			$term->stuff_char(10);
+			&{$attribs->{'callback_read_char'}}();
+		}
+	});
+#   	$event_id{sigint} = AE::signal('SIGINT', sub{ 
+# 		unloop();
+# 		remove_small_wavs();
+# 		kill 15, ::ecasound_pid();  	
+# 		#CORE::exit(); # unloop is enough to end program
+# 	});
 	if ( $midi_inputs =~ /on|capture/ ){
 		my $command = "aseqdump ";
 		$command .= "-p $controller_ports" if $controller_ports;
@@ -191,9 +169,11 @@ sub wraparound {
 }
 
 
-sub start_heartbeat {$event_id{Event_heartbeat}->start() }
+sub start_heartbeat {
+ 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
+}
 
-sub stop_heartbeat {$event_id{Event_heartbeat}->stop() }
+sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
 
 sub cancel_wraparound {
 	$event_id{Event_wraparound}->cancel() if defined $event_id{Event_wraparound}

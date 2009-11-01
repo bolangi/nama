@@ -17,7 +17,6 @@ use autodie qw(:default);
 use Carp;
 use Cwd;
 use Data::YAML;
-use Event qw(loop unloop unloop_all);
 use File::Find::Rule;
 use File::Spec::Link;
 use File::Path;

@@ -204,18 +204,14 @@ sub prepare {
 		$debug = 1;
 		$debug2 = 1;
 	}
-	if ( $opts{t} ){ 
-		# text mode (Event.pm event loop)
-		$ui = ::Text->new;
+	if ( ! $opts{t} and can_load( modules => { Tk => undef } ) ){ 
+		$ui = ::Graphical->new;
 	} else {
-		# default to graphic mode  (Tk event loop)
-		if ( can_load( modules => { 'Tk' => undef } ) ){ 
-			$ui = ::Graphical->new;
-		} else { 
-			print "Module Tk not found. Using Text mode.\n"; 
-			$ui = ::Text->new;
-		}
+		$ui = ::Text->new;
+		can_load( modules =>{ Event => undef});
+		import Event qw(loop unloop unloop_all);
 	}
+	can_load( modules => {AnyEvent => undef});
 
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
