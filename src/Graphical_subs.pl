@@ -7,7 +7,7 @@ sub init_gui {
 	init_palettefields(); # keys only
 
 
-### 	Tk root window 
+	### 	Tk root window 
 
 	# Tk main window
  	$mw = MainWindow->new;  
@@ -18,6 +18,12 @@ sub init_gui {
 	$mw->title("Ecasound/Nama"); 
 	$mw->deiconify;
 	$parent{mw} = $mw;
+
+	### Exit via Ctrl-C 
+
+	$mw->bind('<Control-Key-c>' => \&abort);
+ 	$SIG{INT} = \&abort;
+		
 
 	### init effect window
 
@@ -1165,11 +1171,13 @@ sub start_heartbeat {
 		3000, \&heartbeat);
 		# 3000, *heartbeat{SUB}); # equivalent to above
 }
+
 sub poll_jack {
 	package ::; # no necessary we are already in base class
 	$event_id{tk_poll_jack} = $set_event->repeat( 
 		5000, \&jack_update
 	);
+
 }
 sub stop_heartbeat { tk_event_cancel( qw(tk_heartbeat tk_wraparound)) }
 
@@ -1316,6 +1324,12 @@ sub save_palette {
  		class => '::')
 }
 
+sub abort {
+	remove_small_wavs();
+	kill 15, ::ecasound_pid();
+	$term->rl_deprep_terminal();
+	Tk::exit();
+}
 
 
 ### end

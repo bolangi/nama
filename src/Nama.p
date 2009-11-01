@@ -79,12 +79,6 @@ $use_pager = 1;
 $use_placeholders = 1;
 $save_id = "State";
 $fade_time = 0.3;
-# $SIG{INT} = sub{ 
-# 	unloop();
-# 	remove_small_wavs();
-# 	kill 15, ::ecasound_pid();  	
-# 	die "\nAborting.\n" ;
-# };
 $old_snapshot = {};
 $main_out = 1; # enable main output
 
@@ -150,7 +144,6 @@ sub hello {"make a window";}
 sub install_handlers{};
 sub loop {
     package ::;
-    #MainLoop;
 	my $attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$term->tkRunning(1);

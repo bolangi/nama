@@ -123,10 +123,10 @@ sub install_handlers {
   		desc   => 'Signal handler',           # description;
   		signal => 'INT',
   		cb     => sub{  # callback;
-			unloop();
-			remove_small_wavs();
-			kill 15, ::ecasound_pid();  	
-# 			CORE::exit(); # unloop is enough to end program
+						unloop();
+						remove_small_wavs();
+						kill 15, ::ecasound_pid();  	
+			 			#CORE::exit(); # unloop is enough to end program
 		},
   	 );
 
