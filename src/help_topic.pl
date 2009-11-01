@@ -263,12 +263,13 @@ group => <<GROUP,
    list_bunches, lb           - list groups of tracks (bunches)
    remove_bunches, rb         - remove bunch definitions
 
-   for                        - execute command on several tracks 
-                                or a bunch
+   for                        - execute commands on several tracks 
+                                by name, or by specifying a group or bunch
                                 example: for strings; vol +10
                                 example: for drumkit congas; mute
-                                example: for all; version 5
                                 example: for 3 5; vol * 1.5
+                                example: for all; version 5;; show
+                                  'show' follows ';;' so executes only once
                 
 GROUP
 
