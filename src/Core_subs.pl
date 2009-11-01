@@ -4122,22 +4122,24 @@ sub new_effect_chain_name {
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
 	@{ $this_track->effect_chain_stack };
-	"$name$i"
+	$name . ++$i
 }
 
 sub push_effect_chain {
 	my %vals = @_; 
-	my $to_add_name = $vals{add}; # undef in case of bypass
+	my $add_name = $vals{add}; # undef in case of bypass
 	my $save_name   = $vals{save} || new_effect_chain_name();
+	say "add: $add_name save: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
-	add_effect_chain($to_add_name) if $to_add_name;
+	add_effect_chain($add_name) if $add_name;
 }
 
 sub pop_effect_chain { # restore previous, save current as name if supplied
 	my $save_name = shift;
 	my $previous = pop @{$this_track->effect_chain_stack};
+	say ("no previous effect chain"), return unless $previous;
 	if($save_name){ 
 		push_effect_chain( save => $save_name, add => $previous);
 	} 
@@ -4145,6 +4147,7 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 		map{ remove_effect($_)} $this_track->fancy_ops;
 		add_effect_chain($previous);
 	}
+	delete $effect_chain{$previous};
 }
 
 sub new_effect_chain {

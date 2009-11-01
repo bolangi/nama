@@ -785,6 +785,10 @@ sub get_length {
 	#print "length: $length\n";
 	$length;
 }
+sub fancy_ops { # returns list 
+	my $track = shift;
+	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
+}
 	
 # subclass
 
@@ -810,10 +814,6 @@ sub ch_r {
 	no warnings;
 	my $track = shift;
 	return '';
-}
-sub fancy_ops { # returns list 
-	my $track = shift;
-	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
 }
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;
