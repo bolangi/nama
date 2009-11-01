@@ -580,7 +580,7 @@ sub initialize_routing_dispatch_table {
 				type 		=> 'file',
 				id	 		=> $t->full_path,
 				chain		=> $t->n,
-				pre_output	=> '-f:'.signal_format($raw_to_disk_format, $t->ch_count),
+				pre_output	=> '-f:'.signal_format($raw_to_disk_format, $t->width),
 			});
 		},
 		loop_source => sub {
@@ -663,7 +663,7 @@ sub initialize_routing_dispatch_table {
 
 # 	we might use the same routines for jack_client_in/out
 # 	for soundcard_in/out, except the latter would require
-# 	settings for send_type, send_id, ch_count in Master/Mixdown
+# 	settings for send_type, send_id, width in Master/Mixdown
 # 	or any other track that is graphically directed
 #	to the sound device
 
@@ -731,7 +731,7 @@ sub initialize_rules {
 		output_object   => sub { my $track = shift; $track->full_path },
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
 		pre_output	=> sub { my $track = shift; 
-						'-f:'.signal_format($raw_to_disk_format, $track->ch_count);
+						'-f:'.signal_format($raw_to_disk_format, $track->width);
 						},
 		condition		=> sub {my $track = shift; ! $track->rec_defeat },
 		status		=>  1,
@@ -1256,7 +1256,7 @@ sub generate_setup {
 		my $cooked = $_->name . '_cooked';
 		$g->add_path( $_->name, $cooked, 'wav_out');
 		::CacheRecTrack->new(
-			ch_count => 2,
+			width => 2,
 			name => $cooked,
 			group => 'Cooked',
 			target => $_->name,
@@ -1460,7 +1460,7 @@ WARN
  			$debug and print "found chain id: $n\n";
 			$format = signal_format(
 						$devices{jack}->{signal_format},	
-						$ti{$n}->ch_count
+						$ti{$n}->width
 			);
 		}
 		push  @input_chains, 
@@ -1543,7 +1543,7 @@ WARN
 		my $n = $1;
 		$format = signal_format(
 			$devices{jack}->{signal_format},	
-			$ti{$n}->ch_count
+			$ti{$n}->width
 			);
 		push  @output_chains, 
 		"-a:" . join(",",@chain_ids) 
@@ -1575,7 +1575,7 @@ WARN
  			$debug and print "found chain id: $n\n";
 			$format = signal_format(
 						$devices{jack}->{signal_format},	
-						$ti{$n}->ch_count
+						$ti{$n}->width
 	 		);
 		}
 		push  @output_chains, 
@@ -3342,8 +3342,12 @@ sub restore_state {
 				# set class for Mastering tracks
 
 				$_->{class} = '::MasteringTrack' if $_->{group} eq 'Mastering';
-				 
 				$_->{class} = '::SimpleTrack' if $_->{name} eq 'Master';
+
+				# rename 'ch_count' field to 'width'
+
+				$_->{width} = $_->{ch_count};
+				delete $_->{ch_count};
 				
 		}  @tracks_data;
 	}

@@ -74,7 +74,7 @@ sub add_insert {
 	my $wet = ::Track->new( 
 				name => $dry->name . 'w',
 				group => 'Insert',
-				ch_count => 2, # default for cooked
+				width => 2, # default for cooked
  				send_type => $i->{send_type},
  				send_id => $i->{send_id},
 				hide => 1,
@@ -93,7 +93,7 @@ sub add_insert {
 
 				name => $dry->name . 'wr',
 				group => 'Insert',
-				ch_count => 2, # default for cooked
+				width => 2, # default for cooked
  				source_type => $i->{return_type},
  				source_id => $i->{return_id},
 				rw => 'REC',

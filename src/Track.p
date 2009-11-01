@@ -77,7 +77,7 @@ sub new {
 					n    	=> $n,
 					ops     => [],
 					active	=> undef,
-					ch_count => 1,
+					width => 1,
 					vol  	=> undef,
 					pan 	=> undef,
 
@@ -266,12 +266,12 @@ sub remove_effect { # doesn't touch %cops or %copp data structures
 sub mono_to_stereo { 
 	my $track = shift;
 	my $cmd = "file " .  $track->full_path;
-	if ( 	$track->ch_count == 2 and $track->rec_status eq 'REC'
+	if ( 	$track->width == 2 and $track->rec_status eq 'REC'
 		    or  -e $track->full_path
 				and qx(which file)
 				and qx($cmd) =~ /stereo/i ){ 
 		return q(); 
-	} elsif ( $track->ch_count == 1 and $track->rec_status eq 'REC'
+	} elsif ( $track->width == 1 and $track->rec_status eq 'REC'
 				or  -e $track->full_path
 				and qx(which file)
 				and qx($cmd) =~ /mono/i ){ 
@@ -293,7 +293,7 @@ sub rec_route {
 	return if ! $track->source_id or $track->source_id == 1; 
 	
 	my $route = "-chmove:" . $track->source_id . ",1"; 
-	if ( $track->ch_count == 2){
+	if ( $track->width == 2){
 		$route .= " -chmove:" . ($track->source_id + 1) . ",2";
 	}
 	return $route;
@@ -427,7 +427,7 @@ sub soundcard_input {
 	my $track = shift;
 	if ($::jack_running) {
 		my $start = $track->source_id;
-		my $end   = $start + $track->ch_count - 1;
+		my $end   = $start + $track->width - 1;
 		['jack_multi' , join q(,),q(jack_multi),
 			map{"system:capture_$_"} $start..$end]
 	} else { ['device' , $::capture_device] }
@@ -841,7 +841,7 @@ use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 						
 );
-sub ch_count { $::tn{$_[0]->target}->ch_count }
+sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
 sub rec_route { $::tn{$_[0]->target}->rec_route }

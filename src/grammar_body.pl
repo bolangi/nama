@@ -155,7 +155,7 @@ show_track: _show_track end {
 	$output .= ::Text::show_effects();
 	$output .= ::Text::show_versions();
 	$output .= ::Text::show_modifiers();
-	$output .= join "", "Signal width: ", ::width($::this_track->ch_count), "\n";
+	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::Text::show_region();
 	$output .= ::Text::show_effect_chain_stack();
 	::pager( $output );
@@ -198,12 +198,12 @@ send: _send name { $::this_track->set_send($item{name}); 1}
 send: _send end { $::this_track->set_send(); 1}
 
 stereo: _stereo { 
-	$::this_track->set(ch_count => 2); 
+	$::this_track->set(width => 2); 
 	print $::this_track->name, ": setting to stereo\n";
 	1;
 }
 mono: _mono { 
-	$::this_track->set(ch_count => 1); 
+	$::this_track->set(width => 1); 
 	print $::this_track->name, ": setting to mono\n";
 	1; }
 
