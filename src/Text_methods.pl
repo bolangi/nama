@@ -119,11 +119,16 @@ sub install_handlers {
  				},
 		repeat => 1,                         # keep alive after event;
 	 );
-#  	$event_id{sigint} = Event->signal(
-#  		desc   => 'Signal handler',           # description;
-#  		signal => $SIG{INT},
-#  		cb     => sub{ die "here" }, # callback;
-#  	 );
+  	$event_id{sigint} = Event->signal(
+  		desc   => 'Signal handler',           # description;
+  		signal => 'INT',
+  		cb     => sub{  # callback;
+			unloop();
+			remove_small_wavs();
+			kill 15, ::ecasound_pid();  	
+# 			CORE::exit(); # unloop is enough to end program
+		},
+  	 );
 
 	$event_id{Event_heartbeat} = Event->timer(
 		parked => 1, 						# start it later
