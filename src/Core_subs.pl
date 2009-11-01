@@ -506,6 +506,7 @@ Loading project "untitled".
 		 ::Track->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
+			width => 2,
 			rw => 'MON'); 
 	}
 
@@ -1225,11 +1226,12 @@ sub generate_setup {
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
 			$ecasound_globals_for_mixdown; 
-			my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
-			$g->add_path(@p);
-			$g->set_vertex_attributes('Mixdown', {
-				  pre_output	=> "-f:$mix_to_disk_format",
-				  chain			=> "Mixdown" }); 
+		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+		$g->add_path(@p);
+		$g->set_vertex_attributes('Mixdown', {
+		  pre_output	=> 
+			"-f:".signal_format($mix_to_disk_format,$tn{Mixdown}->width),
+		  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
 	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
@@ -3345,9 +3347,13 @@ sub restore_state {
 				$_->{class} = '::SimpleTrack' if $_->{name} eq 'Master';
 
 				# rename 'ch_count' field to 'width'
-
+				
 				$_->{width} = $_->{ch_count};
 				delete $_->{ch_count};
+
+				# set Mixdown track width to 2
+				
+				$_->{width} = 2 if $_->{name} eq 'Mixdown';
 				
 		}  @tracks_data;
 	}
