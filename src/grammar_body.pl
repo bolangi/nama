@@ -182,6 +182,7 @@ master_off: _master_off end { ::master_off(); 1 }
 
 exit: _exit end { 	::remove_small_wavs();
 					::save_state($::state_store_file); 
+					$::term->rl_deprep_terminal();
 					kill 15, ::ecasound_pid();  	
 					CORE::exit(); 1}
 source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
