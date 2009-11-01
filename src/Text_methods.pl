@@ -159,6 +159,10 @@ sub install_handlers {
 }
 sub loop {
 	package ::;
+	$SIG{INT} = sub{ ::remove_small_wavs();
+					$::term->rl_deprep_terminal();
+					kill 15, ::ecasound_pid();  	
+					CORE::exit(); };
 	$term->callback_handler_install($prompt, \&process_line);
 	#$Event::DIED = \&Event::verbose_exception_handler;
 	$Event::DIED = sub {
