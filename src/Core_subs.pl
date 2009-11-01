@@ -3592,6 +3592,8 @@ sub command_process {
 	if ($cmd eq 'for' 
 			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
 		$debug and print "bunch: $bunchy do: $do\n";
+		my ($do_part, $after) = $do =~ /(.+?);;(.+)/;
+		$do = $do_part if $do_part;
 		my @tracks;
 		if ( lc $bunchy eq 'all' ){
 			$debug and print "special bunch: all\n";
@@ -3620,6 +3622,7 @@ sub command_process {
 		for my $t(@tracks) {
 			command_process("$t; $do");
 		}
+		command_process($after) if $after;
 	} elsif ($cmd eq 'eval') {
 			$debug and print "Evaluating perl code\n";
 			pager( eval $predicate );
@@ -4126,6 +4129,7 @@ sub new_effect_chain_name {
 }
 
 sub push_effect_chain {
+	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
 	my $add_name = $vals{add}; # undef in case of bypass
 	my $save_name   = $vals{save} || new_effect_chain_name();

@@ -157,6 +157,7 @@ show_track: _show_track end {
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->ch_count), "\n";
 	$output .= ::Text::show_region();
+	$output .= ::Text::show_effect_chain_stack();
 	::pager( $output );
 	1;}
 show_track: _show_track name end { 

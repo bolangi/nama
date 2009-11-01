@@ -42,6 +42,11 @@ sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
 }
+sub show_effect_chain_stack {
+		"Bypassed effect chains: ".scalar @{ $this_track->effect_chain_stack }.$/
+			if @{ $this_track->effect_chain_stack } 
+}
+	
 sub show_region {
 	my @lines;
 	push @lines, "Start delay: ",
