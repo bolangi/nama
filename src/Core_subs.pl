@@ -4022,6 +4022,8 @@ sub status_snapshot {
  );
 	map { 
 		my %track = %$_; # dereference object
+		delete $track{ops};
+		delete $track{effect_chain_stack};
 		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
 	}  ::Track::all();
 	\%snapshot;
