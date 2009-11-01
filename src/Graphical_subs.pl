@@ -21,8 +21,7 @@ sub init_gui {
 
 	### Exit via Ctrl-C 
 
-	$mw->bind('<Control-Key-c>' => \&abort);
- 	$SIG{INT} = \&abort;
+	$mw->bind('<Control-Key-c>' => sub{ pre_exit_cleanup(); abort() });
 		
 
 	### init effect window
@@ -1323,13 +1322,5 @@ sub save_palette {
  		vars => [ qw( %palette %namapalette ) ],
  		class => '::')
 }
-
-sub abort {
-	remove_small_wavs();
-	kill 15, ::ecasound_pid();
-	$term->rl_deprep_terminal();
-	Tk::exit();
-}
-
 
 ### end

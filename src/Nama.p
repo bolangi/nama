@@ -88,6 +88,7 @@ $memoize = 0;
 @mastering_track_names = qw(Eq Low Mid High Boost);
 
 $term = new Term::ReadLine("Ecasound/Nama");
+$SIG{INT} = sub{ pre_exit_cleanup(); $ui->abort()};
 
 ## Load my modules
 
@@ -154,6 +155,8 @@ sub loop {
 	}
 }
 
+sub abort { Tk::exit(); }
+
 ## The following methods belong to the Text interface class
 
 package ::Text;
@@ -163,6 +166,8 @@ use Carp;
 sub hello {"hello world!";}
 
 [% qx(cat ./Text_methods.pl ) %]
+
+sub abort { CORE::exit() }
 
 ## NO-OP GRAPHIC METHODS 
 

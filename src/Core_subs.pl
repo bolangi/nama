@@ -4192,5 +4192,10 @@ sub append_effect_chain {
 sub insert_effect_chain {
 }
 	
+sub pre_exit_cleanup {
+	remove_small_wavs();
+	kill 15, ecasound_pid();  	
+	$term->rl_deprep_terminal();
+}
 	
 ### end
