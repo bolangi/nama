@@ -1155,20 +1155,23 @@ sub destroy_marker {
 	$mark_widget{$pos}->destroy; 
 }
 
-sub wraparound {
-	@_ = discard_object @_;
-	my ($diff, $start) = @_;
-	cancel_wraparound();
-	$event_id{tk_wraparound} = $set_event->after( 
-		int( $diff*1000 ), sub{ set_position( $start) } )
-}
-sub cancel_wraparound { tk_event_cancel("tk_wraparound") }
+sub wraparound { ::Text::wraparound() }
+# 	@_ = discard_object @_;
+# 	my ($diff, $start) = @_;
+# 	cancel_wraparound();
+# 	$event_id{tk_wraparound} = $set_event->after( 
+# 		int( $diff*1000 ), sub{ set_position( $start) } )
+
+sub cancel_wraparound {  ::Text::cancel_wraparound() };
+
+#tk_event_cancel("tk_wraparound") }
 
 sub start_heartbeat {
-	#print ref $set_event; 
-	$event_id{tk_heartbeat} = $set_event->repeat( 
-		3000, \&heartbeat);
-		# 3000, *heartbeat{SUB}); # equivalent to above
+# 	#print ref $set_event; 
+# 	$event_id{tk_heartbeat} = $set_event->repeat( 
+# 		3000, \&heartbeat);
+# 		# 3000, *heartbeat{SUB}); # equivalent to above
+::Text::start_heartbeat();
 }
 
 sub poll_jack {

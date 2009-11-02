@@ -109,12 +109,12 @@ sub install_handlers {
 			&{$attribs->{'callback_read_char'}}();
 		}
 	});
-#   	$event_id{sigint} = AE::signal('SIGINT', sub{ 
-# 		unloop();
-# 		remove_small_wavs();
-# 		kill 15, ::ecasound_pid();  	
-# 		#CORE::exit(); # unloop is enough to end program
-# 	});
+   	$event_id{sigint} = AE::signal('INT', sub{ 
+ 		unloop();
+ 		remove_small_wavs();
+ 		kill 15, ::ecasound_pid();  	
+ 		#CORE::exit(); # unloop is enough to end program
+ 	});
 	if ( $midi_inputs =~ /on|capture/ ){
 		my $command = "aseqdump ";
 		$command .= "-p $controller_ports" if $controller_ports;
@@ -158,16 +158,9 @@ sub wraparound {
 	@_ = discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$event_id{Event_wraparound}->cancel()
-		if defined $event_id{Event_wraparound};
-	$event_id{Event_wraparound} = Event->timer(
-	desc   => 'wraparound',               # description;
-	after  => $diff,
-	cb     => sub{ set_position($start) }, # callback;
-   );
-
+	$event_id{Event_wraparound} = undef;
+	$event_id{Event_wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
-
 
 sub start_heartbeat {
  	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
@@ -176,7 +169,7 @@ sub start_heartbeat {
 sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
 
 sub cancel_wraparound {
-	$event_id{Event_wraparound}->cancel() if defined $event_id{Event_wraparound}
+	$event_id{Event_wraparound} = undef;
 }
 
 
