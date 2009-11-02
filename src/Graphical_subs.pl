@@ -21,13 +21,14 @@ sub init_gui {
 
 	### Exit via Ctrl-C 
 
-	$mw->bind('<Control-Key-c>' => \&cleanup_exit); # enough to terminate
+	$mw->bind('<Control-Key-c>' => \&cleanup_exit); 
 
 	### init effect window
 
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
 	$ew->deiconify; 
+	$ew->bind('<Control-Key-c>' => \&cleanup_exit);
 #	$ew->withdraw;
 	$parent{ew} = $ew;
 

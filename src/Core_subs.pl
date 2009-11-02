@@ -4213,6 +4213,7 @@ sub cleanup_exit {
 	remove_small_wavs();
 	kill 15, ecasound_pid();  	
 	$term->rl_deprep_terminal();
+	CORE::exit; # not needed, apparently
 }
 	
 ### end
