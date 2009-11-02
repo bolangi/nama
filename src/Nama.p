@@ -143,6 +143,7 @@ our @ISA = '::';      ## default to root class
 sub hello {"make a window";}
 sub loop {
 	package ::;
+	$attribs->{already_prompted} = 0;
 	$term->tkRunning(1);
   	while (1) {
   		my ($user_input) = $term->readline($prompt) ;
@@ -160,15 +161,16 @@ use ::Assign qw(:all);
 sub hello {"hello world!";}
 
 sub loop {
-       package ::;
-       $Event::DIED = sub {
-               my ($event, $errmsg) = @_;
-               say $errmsg;
-               $attribs->{line_buffer} = q();
-               $term->clear_message();
-               $term->rl_reset_line_state();
-       };
-       Event::loop();
+	package ::;
+	issue_first_prompt();
+	$Event::DIED = sub {
+	   my ($event, $errmsg) = @_;
+	   say $errmsg;
+	   $attribs->{line_buffer} = q();
+	   $term->clear_message();
+	   $term->rl_reset_line_state();
+	};
+	Event::loop();
 }
 
 [% qx(cat ./Text_methods.pl ) %]

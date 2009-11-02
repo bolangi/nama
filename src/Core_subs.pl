@@ -3,7 +3,6 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	reconfigure_engine();
-	issue_first_prompt();
 	$ui->loop;
 }
 sub prepare {
@@ -4146,7 +4145,7 @@ sub cleanup_exit {
  	remove_small_wavs();
  	kill 15, ecasound_pid() if $sock;  	
 	$term->rl_deprep_terminal();
-	#CORE::exit; # not needed, apparently
+	CORE::exit; 
 }
 	
 ### end
