@@ -13,7 +13,7 @@ sub show_effects {
  		 push @lines, $op_id. ": " . $effects[ $i ]->{name}.  "\n";
  		 my @pnames = @{$effects[ $i ]->{params}};
 			map{ push @lines,
-			 	"    " . $pnames[$_]->{name} . ": ".  $copp{$op_id}->[$_] . "\n";
+			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $copp{$op_id}->[$_] . "\n";
 		 	} (0..scalar @pnames - 1);
 			#push @lines, join("; ", @params) . "\n";
  
