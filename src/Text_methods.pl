@@ -153,26 +153,6 @@ sub loop {
 	Event::loop();
 
 }
-sub wraparound {
-	package ::;
-	@_ = discard_object(@_);
-	my ($diff, $start) = @_;
-	#print "diff: $diff, start: $start\n";
-	$event_id{Event_wraparound} = undef;
-	$event_id{Event_wraparound} = AE::timer($diff,0, sub{set_position($start)});
-}
-
-sub start_heartbeat {
- 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
-}
-
-sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
-
-sub cancel_wraparound {
-	$event_id{Event_wraparound} = undef;
-}
-
-
 sub placeholder { 
 	my $val = shift;
 	return $val if $val;

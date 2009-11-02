@@ -1941,7 +1941,7 @@ sub start_transport {
 	eval_iam('start');
 	sleeper(0.5) unless really_recording();
 	unmute();
-	$ui->start_heartbeat();
+	start_heartbeat();
 	print "engine is ", eval_iam("engine-status"), "\n\n"; 
 
 	sleep 1; # time for engine to stabilize
@@ -1952,14 +1952,14 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	$ui->stop_heartbeat
+	stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
 	my ($start, $end);
 	$start  = ::Mark::loop_start();
 	$end    = ::Mark::loop_end();
-	$ui->schedule_wraparound() 
+	schedule_wraparound() 
 		if $loop_enable 
 		and defined $start 
 		and defined $end 
@@ -1981,17 +1981,36 @@ sub schedule_wraparound {
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
 		eval_iam("setpos ".$start);
-		$ui->cancel_wraparound();
+		cancel_wraparound();
 	} elsif ( $diff < 3 ) { #schedule the move
 	$ui->wraparound($diff, $start);
 		
 		;
 	}
 }
+sub wraparound {
+	package ::;
+	@_ = discard_object(@_);
+	my ($diff, $start) = @_;
+	#print "diff: $diff, start: $start\n";
+	$event_id{Event_wraparound} = undef;
+	$event_id{Event_wraparound} = AE::timer($diff,0, sub{set_position($start)});
+}
+
+sub start_heartbeat {
+ 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
+}
+
+sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
+
+sub cancel_wraparound {
+	$event_id{Event_wraparound} = undef;
+}
+
 sub stop_transport { 
 
 	$debug2 and print "&stop_transport\n"; 
-	$ui->stop_heartbeat();
+	stop_heartbeat();
 	mute();
 	eval_iam('stop');	
 	sleeper(0.5);
