@@ -844,7 +844,6 @@ sub initialize_project_data {
 
 	%track_widget = ();
 	%effects_widget = ();
-	
 
 	# time related
 	
@@ -874,6 +873,8 @@ sub initialize_project_data {
 	::Group->initialize();
 	create_groups();
 	::Track->initialize();
+
+	%inputs = %outputs = ();
 
 }
 sub create_groups {
@@ -2094,51 +2095,32 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
- 	my @k = really_recording();
-	$debug and print "intended recordings: " , join $/, @k;
-	return unless @k;
-	print "I was recording!\n";
+ 	return unless my @files = really_recording();
+	$debug and print join $/, "intended recordings:", @files;
 	my $recorded = 0;
- 	for my $k (@k) {    
- 		my ($n) = $outputs{file}{$k}[-1] =~ m/(\d+)/; 
-		print "k: $k, n: $n\n";
-		my $file = $k;
-		$file =~ s/ .*$//;
- 		my $test_wav = $file;
-		$debug and print "track: $n, file: $test_wav\n";
- 		my ($v) = ($test_wav =~ /_(\d+)\.wav$/); 
-		$debug and print "n: $n\nv: $v\n";
-		$debug and print "testing for $test_wav\n";
-		if (-e $test_wav) {
-			$debug and print "exists. ";
-			if (-s $test_wav > 44100) { # 0.5s x 16 bits x 44100/s
-				$debug and print "bigger than a breadbox.  \n";
-				$ti{$n}->set(active => undef) if $ti{$n};
-				$ui->update_version_button($n, $v);
-			$recorded++;
+	$debug and print "found bigger than 44100 bytes:\n";
+ 	for (@files) {    
+		my ($name, $version) = /([^\/]+)_(\d+).wav$/;
+		if (-e $_) {
+			$debug and print "$_ exists. ";
+			if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
+				$debug and print "$_\n";
+				$tn{$name}->set(active => undef) if $tn{$name};
+				$ui->update_version_button($tn{$name}->n, $version);
+			$recorded++ unless $name =~ /Mixdown/;
 			}
-			else { unlink $test_wav }
+			else { unlink $_ }
 		}
 	}
 	%cooked_record_pending = () if $recorded;
 	rememoize();
-	my $mixed = scalar ( grep{ /Mixdown_*.wav/} @k );
-	
-	$debug and print "recorded: $recorded mixed: $mixed\n";
-	if ( ($recorded -  $mixed) >= 1) {
-			# i.e. there are first time recorded tracks
+	if ( $recorded ) {
+			say "Now reviewing your recording...";
 			$ui->global_version_buttons(); # recreate
 			$main->set( rw => 'MON');
 			$ui->refresh();
-			print <<REC;
-New track versions were recorded! 
-
-Now reviewing your recording...
-
-REC
 			reconfigure_engine();
 	}
-		
 } 
 
 ## effect functions
@@ -2629,30 +2611,6 @@ sub apply_op {
 	#map{apply_op($_)} @owns;
 
 }
-# unused 
-sub prepare_command_dispatch {
-	map{ 
-		if (my $subtext = $commands{$_}->{sub}){ # to_start
-			my @short = split " ", $commands{$_}->{short};
-			my @keys = $_;
-			push @keys, @short if @short;
-			map { $dispatch{$_} = eval qq(sub{ $subtext() }) } @keys;
-		}
-	} keys %commands;
-# regex languge
-#
-my $key = qr/\w+/;
-my $someval = qr/[\w.+-]+/;
-my $sign = qr/[+-]/;
-my $op_id = qr/[A-Z]+/;
-my $parameter = qr/\d+/;
-my $value = qr/[\d\.eE+-]+/; # -1.5e-6
-my $dd = qr/\d+/;
-my $name = qr/[\w:]+/;
-my $name2 = qr/[\w-]+/;
-my $name3 = qr/\S+/;
-}
-	
 
 sub prepare_effects_help {
 
@@ -2697,7 +2655,6 @@ sub prepare_effects_help {
 	#			split "\n",eval_iam("control-register");
 	#pager (@lrg, @prg); exit;
 }
-
 
 sub prepare_static_effects_data{
 	
@@ -3663,12 +3620,11 @@ sub command_process {
 	$ui->refresh; # in case we have a graphic environment
 }
 sub load_keywords {
-
-@keywords = keys %commands;
-push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
-push @keywords, keys %iam_cmd;
-push @keywords, keys %effect_j;
-push @keywords, "Audio::Nama::";
+	@keywords = keys %commands;
+	push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
+	push @keywords, keys %iam_cmd;
+	push @keywords, keys %effect_j;
+	push @keywords, "Audio::Nama::";
 }
 
 sub complete {
@@ -3677,9 +3633,8 @@ sub complete {
     return $term->completion_matches($text,\&keyword);
 };
 
-{
-    my $i;
-    sub keyword {
+{ 	my $i;
+sub keyword {
         my ($text, $state) = @_;
         return unless $text;
         if($state) {
@@ -3692,8 +3647,7 @@ sub complete {
             return $keywords[$i] if $keywords[$i] =~ /^\Q$text/;
         };
         return undef;
-    }
-};
+} };
 
 sub jack_update {
 	# cache current JACK status
@@ -3853,13 +3807,16 @@ sub master_on {
 		add_mastering_effects();
 		$this_track = $old_track;
 	} else { unhide_mastering_tracks() }
-
-		
 	
 }
+sub master_off {
+
+	$mastering_mode = 0;
+	hide_mastering_tracks();
+}
+
 
 sub add_mastering_tracks {
-
 
 	map{ 
 		my $track = ::MasteringTrack->new(
@@ -3897,19 +3854,9 @@ sub add_mastering_effects {
 	command_process("append_effect $compressor");
 	command_process("append_effect $spatialiser");
 
-
 	$this_track = $tn{Boost};
 	
 	command_process("append_effect $limiter"); # insert after vol
- 
-}
-
-
-
-sub master_off {
-
-	$mastering_mode = 0;
-	hide_mastering_tracks();
 }
 
 sub unhide_mastering_tracks {
@@ -3922,7 +3869,7 @@ sub hide_mastering_tracks {
 		
 # vol/pan requirements of mastering tracks
 
-my %volpan = (
+{ my %volpan = (
 	Eq => {},
 	Low => {},
 	Mid => {},
@@ -3935,7 +3882,7 @@ sub need_vol_pan {
 	return 1 unless $volpan{$track_name};
 	return 1 if $volpan{$track_name}{$type};
 	return 0;
-}
+} }
 sub pan_check {
 	my $new_position = shift;
 	my $current = $copp{ $this_track->pan }->[0];
