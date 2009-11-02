@@ -80,7 +80,7 @@ ecasound_globals_for_mixdown: "-B auto -r -z:mixmode,sum -z:psr "
 
 use_group_numbering: 1
 
-# Text mode: use SPACE press to start/stop transport 
+# Enable pressing SPACE to start/stop transport (in terminal, cursor in column 1)
 
 press_space_to_start_transport: 1
 

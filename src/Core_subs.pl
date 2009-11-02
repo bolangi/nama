@@ -3,14 +3,14 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	reconfigure_engine();
+	print $prompt;
+	$attribs->{already_prompted} = 0;
 	$ui->loop;
 }
 sub prepare {
 	
 	$debug2 and print "&prepare\n";
 	choose_sleep_routine();
-
-	initialize_terminal();
 
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
@@ -22,7 +22,7 @@ sub prepare {
 
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
-		say "Using Ecasound via Audio::Ecasound (libecasoundc).";
+		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
 		{ no warnings qw(redefine);
 		*eval_iam = \&eval_iam_libecasoundc; }
 		$e = Audio::Ecasound->new();
@@ -65,6 +65,7 @@ sub prepare {
 	$ui->transport_gui;
 	$ui->time_gui;
 	poll_jack();
+	initialize_terminal();
 
 	if (! $project_name ){
 		$project_name = "untitled";
@@ -72,7 +73,6 @@ sub prepare {
 	}
 	print "\nproject_name: $project_name\n";
 	
-
 	if ($project_name){
 		load_project( name => $project_name, create => $opts{c}) ;
 	}
@@ -96,27 +96,31 @@ sub select_sleep {
 
 sub initialize_terminal {
 	$term = new Term::ReadLine("Ecasound/Nama");
-	my $attribs = $term->Attribs;
+	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
-	# store output buffer in a scalar (for print)
-	my $outstream = $attribs->{'outstream'};
+	$attribs->{already_prompted} = 1;
     $term->callback_handler_install($prompt, \&process_line);
-	$event_id{stdin} = AE::io(*STDIN, 0, sub {
-		&{$attribs->{'callback_read_char'}}();
-		if ( $attribs->{line_buffer} eq " " ){
-			if (engine_running()){ stop_transport() }
-			else { start_transport() }
-			$attribs->{line_buffer} = q();
-			$attribs->{point} 		= 0;
-			$attribs->{end}   		= 0;
-			$term->stuff_char(10);
+	$press_space_to_start_transport and 
+		$event_id{stdin} = AE::io(*STDIN, 0, sub {
 			&{$attribs->{'callback_read_char'}}();
-		}
-	});
-
+			if ( $attribs->{line_buffer} eq " " ){
+				if (engine_running()){ stop_transport() }
+				else { start_transport() }
+				$attribs->{line_buffer} = q();
+				$attribs->{point} 		= 0;
+				$attribs->{end}   		= 0;
+	# 			$attribs->{done}   		= 1;
+				$term->stuff_char(10);
+				&{$attribs->{'callback_read_char'}}();
+			}
+		});
 	# handle Control-C from terminal
 
 	$SIG{INT} = \&cleanup_exit;
+	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
+
+}
+sub callback_handler_install {
 }
 	
 sub first_run {
@@ -297,8 +301,6 @@ sub launch_ecasound_server {
 	sleep 1;
 }
 
-
-my $sock;
 
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
@@ -1880,7 +1882,7 @@ sub transport_status {
 		,$/;
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
 	print "\nPress SPACE to start or stop engine.\n\n"
-		unless (ref $ui) =~ /Graphical/;
+		if $press_space_to_start_transport;
 }
 sub start_transport { 
 
@@ -3358,7 +3360,7 @@ sub restore_state {
 
 	# restore command history
 	
-	$term->SetHistory(@command_history);	
+	$term->SetHistory(@command_history) if $term;
 } 
 
 sub set_track_class {
@@ -4111,10 +4113,10 @@ sub insert_effect_chain {
 }
 	
 sub cleanup_exit {
-	remove_small_wavs();
-	kill 15, ecasound_pid();  	
+# 	remove_small_wavs();
+# 	kill 15, ecasound_pid() if $sock;  	
 	$term->rl_deprep_terminal();
-	CORE::exit; # not needed, apparently
+	#CORE::exit; # not needed, apparently
 }
 	
 ### end

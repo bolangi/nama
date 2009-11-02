@@ -376,4 +376,5 @@ our (
 	%cooked_record_pending, # an intermediate mixdown for tracks
 	$press_space_to_start_transport, #  in text mode
 	%effect_chain, # named effect sequences
+	$sock, 			# socket for Net-ECI mode
 );
