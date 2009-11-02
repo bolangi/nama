@@ -3,10 +3,7 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	reconfigure_engine();
-	$term->stuff_char(10);
-	&{$attribs->{'callback_read_char'}}();
-	print $prompt;
-	$attribs->{already_prompted} = 0;
+	issue_first_prompt();
 	$ui->loop;
 }
 sub prepare {
@@ -79,6 +76,12 @@ sub prepare {
 		load_project( name => $project_name, create => $opts{c}) ;
 	}
 	1;	
+}
+sub issue_first_prompt {
+	$term->stuff_char(10); # necessary at first prompt to enable Ctrl-C processing
+	&{$attribs->{'callback_read_char'}}();
+	print $prompt;
+	$attribs->{already_prompted} = 0;
 }
 
 sub choose_sleep_routine {
@@ -3237,27 +3240,23 @@ sub restore_state {
 	
 		map{ $_->{name} = 'Main'} grep{ $_->{name} eq 'Tracker' } @groups_data;
 		
-		for (@tracks_data){
-			delete $_->{delay};
-			delete $_->{length};
-			delete $_->{start_position};
-			$_->{group} =~ s/Tracker/Main/;
-
-			if( $_->{source_select} eq 'soundcard'){
-				$_->{source_type} = 'soundcard' ;
-				$_->{source_id} = $_->{ch_r}
+		for my $t (@tracks_data){
+			$t->{group} =~ s/Tracker/Main/;
+			if( $t->{source_select} eq 'soundcard'){
+				$t->{source_type} = 'soundcard' ;
+				$t->{source_id} = $t->{ch_r}
 			}
-			elsif( $_->{source_select} eq 'jack'){
-				$_->{source_type} = 'jack_client' ;
-				$_->{source_id} = $_->{jack_source}
+			elsif( $t->{source_select} eq 'jack'){
+				$t->{source_type} = 'jack_client' ;
+				$t->{source_id} = $t->{jack_source}
 			}
-			if( $_->{send_select} eq 'soundcard'){
-				$_->{send_type} = 'soundcard' ;
-				$_->{send_id} = $_->{ch_m}
+			if( $t->{send_select} eq 'soundcard'){
+				$t->{send_type} = 'soundcard' ;
+				$t->{send_id} = $t->{ch_m}
 			}
-			elsif( $_->{send_select} eq 'jack'){
-				$_->{send_type} = 'jack_client' ;
-				$_->{send_id} = $_->{jack_send}
+			elsif( $t->{send_select} eq 'jack'){
+				$t->{send_type} = 'jack_client' ;
+				$t->{send_id} = $t->{jack_send}
 			}
 		}
 	}
@@ -3265,28 +3264,33 @@ sub restore_state {
 	
 		map { 	# store insert without intermediate array
 
-				my $i = $_->{inserts};
+				my $t = $_;
+				my $i = $t->{inserts};
 				if($i =~ /ARRAY/){ 
-					$_->{inserts} = scalar @$i ? $i->[0] : {}  }
+					$t->{inserts} = scalar @$i ? $i->[0] : {}  }
 
 				# initialize effect_chain_stack
 
-				$_->{effect_chain_stack} //= [];
+				$t->{effect_chain_stack} //= [];
 
 				# set class for Mastering tracks
 
-				$_->{class} = '::MasteringTrack' if $_->{group} eq 'Mastering';
-				$_->{class} = '::SimpleTrack' if $_->{name} eq 'Master';
+				$t->{class} = '::MasteringTrack' if $t->{group} eq 'Mastering';
+				$t->{class} = '::SimpleTrack' if $t->{name} eq 'Master';
 
 				# rename 'ch_count' field to 'width'
 				
-				$_->{width} = $_->{ch_count};
-				delete $_->{ch_count};
+				$t->{width} = $t->{ch_count};
+				delete $t->{ch_count};
 
 				# set Mixdown track width to 2
 				
-				$_->{width} = 2 if $_->{name} eq 'Mixdown';
+				$t->{width} = 2 if $t->{name} eq 'Mixdown';
 				
+				# remove obsolete fields
+				
+				map{ delete $t->{$_} } qw( delay length start_position ch_m ch_r);
+
 		}  @tracks_data;
 	}
 		
@@ -3939,24 +3943,40 @@ sub status_snapshot {
 	# hashref output for detecting if we need to reconfigure
 	# engine
 	
-	#my $ss = {rs => $::ti{3}->rec_status };
-	#$ss;
-	
 	my %snapshot = ( project 		=> 	$project_name,
-					 global_version =>  $main->version,
+					 #global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
-					 main 			=> $main_out,
+					 main_out 		=> $main_out,
 					 cache_rec		=> {%cooked_record_pending},# copy
-					 global_rw      =>  $main->rw,
+					 #global_rw      =>  $main->rw,
 					 tracks			=> [],
 					
- );
+	);
+	my @relevant_fields = qw(
+		width
+		offset 
+		group 
+		playat
+		region_start	
+		region_end
+		looping
+		source_id
+		source_type
+		send_id
+		send_type
+		project
+		target
+		rec_defeat
+		inserts );
 	map { 
-		my %track = %$_; # dereference object
-		delete $track{ops};
-		delete $track{effect_chain_stack};
-		push @{ $snapshot{tracks}}, {%track, rec_status => $_->rec_status}
+		my %track = %$_; # deref object
+		my %tr = map{ $_, $track{$_}} @relevant_fields;
+		push @{ $snapshot{tracks}}, {
+			%tr, 
+			rec_status => $_->rec_status,
+		 	current_version => $_->current_version,
+			}
 	}  ::Track::all();
 	\%snapshot;
 }
