@@ -116,23 +116,8 @@ sub initialize_terminal {
 	# handle Control-C from terminal
 
 	$SIG{INT} = \&cleanup_exit;
-
 }
 	
-sub status_vars {
-	serialize( class => '::', vars => \@status_vars);
-}
-sub config_vars {
-	serialize( class => '::', vars => \@config_vars);
-}
-
-sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Nama/;
-	@_;
-}
-
-
-
 sub first_run {
 	return if $opts{f};
 	my $config = config_file();
@@ -921,31 +906,9 @@ sub add_track_alias_project {
 	}
 }
 
-# create read-only track pointing at WAV files of specified
-# name in current project
-
-sub add_track_alias {
-	my ($name, $track) = @_;
-	my $target; 
-	if 		( $tn{$track} ){ $target = $track }
-	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
-	add_track(  $name, target => $target );
-}
-sub add_slave_track {
-	my %h = @_;
-	say (qq[Group "$h{group}" does not exist, skipping.]), return
-		 unless $::Group::by_name{$h{group}};
-	say (qq[Target track "$h{target}" does not exist, skipping.]), return
-		 unless $tn{$h{target}};
-		::SlaveTrack->new(	
-			name => "$h{group}_$h{target}",
-			target => $h{target},
-			rw => 'MON',
-			source_type => undef,
-			source_id => undef,
-			send_type => $::Bus::by_name{$h{group}}->destination_type,
-			send_id   => $::Bus::by_name{$h{group}}->destination_id,
-			)
+sub discard_object {
+	shift @_ if (ref $_[0]) =~ /Nama/;
+	@_;
 }
 
 # usual track
@@ -982,10 +945,33 @@ sub add_track {
 	$debug and print "Added new track!\n", $track->dump;
 }
 
-sub dig_ruins { 
-	
+# create read-only track pointing at WAV files of specified
+# name in current project
 
-	# only if there are no tracks , 
+sub add_track_alias {
+	my ($name, $track) = @_;
+	my $target; 
+	if 		( $tn{$track} ){ $target = $track }
+	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
+	add_track(  $name, target => $target );
+}
+sub add_slave_track {
+	my %h = @_;
+	say (qq[Group "$h{group}" does not exist, skipping.]), return
+		 unless $::Group::by_name{$h{group}};
+	say (qq[Target track "$h{target}" does not exist, skipping.]), return
+		 unless $tn{$h{target}};
+		::SlaveTrack->new(	
+			name => "$h{group}_$h{target}",
+			target => $h{target},
+			rw => 'MON',
+			source_type => undef,
+			source_id => undef,
+			send_type => $::Bus::by_name{$h{group}}->destination_type,
+			send_id   => $::Bus::by_name{$h{group}}->destination_id,
+			)
+}
+sub dig_ruins { # only if there are no tracks 
 	
 	$debug2 and print "&dig_ruins";
 	return if ::Track::user();
@@ -1103,7 +1089,7 @@ sub user_rec_tracks {
 	map{ $_->n } @user_rec_tracks;
 }
 
-# return list of indices of user tracks with REC status
+# return list of indices of user tracks with MON status
 
 sub user_mon_tracks {
 	my @user_tracks = ::Track::all();
@@ -1115,15 +1101,9 @@ sub user_mon_tracks {
 
 }
 
-# return $output{file} entries
-# - embedded format strings are included
-# - mixdown track is included
+# return $output{file} entries, including Mixdown 
 
-sub really_recording {  
-
-	keys %{$outputs{file}}; 
-}
-
+sub really_recording {  keys %{$outputs{file}}; }
 
 sub generate_setup { 
 
@@ -1330,12 +1310,6 @@ sub chain {
 	my $name = shift;
 	$tn{$name} ? $tn{$name}->n : $name;
 }
-sub loopn {
-	my $name = shift;
-	"loop,$name"
-}
-
-
 sub add_entry_h {
 	my $h = shift;
 	$debug2 and say "add_entry_h";
@@ -1362,21 +1336,6 @@ sub soundcard_output {
  	$::jack_running 
 		? [qw(jack_client system)]
 		: ['device', $::alsa_playback_device]
-}
-
-sub useful_Master_effects {
-
-	# we have effects other than standard vol/pan
-	scalar @{$tn{Master}->ops} > 2 
-
-	or 
-	# pan is not 50
-	$copp{$tn{Master}->pan}->[0] != 50
-
-	or
-	# vol is not 100
-	
-	$copp{$tn{Master}->vol}->[0] != 100
 }
 
 sub write_chains {
@@ -1946,6 +1905,31 @@ sub start_transport {
 
 	sleep 1; # time for engine to stabilize
 }
+sub stop_transport { 
+
+	$debug2 and print "&stop_transport\n"; 
+	stop_heartbeat();
+	mute();
+	eval_iam('stop');	
+	sleeper(0.5);
+	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
+	unmute();
+	$ui->project_label_configure(-background => $old_bg);
+	rec_cleanup();
+}
+sub transport_running { eval_iam('engine-status') eq 'running'  }
+
+sub disconnect_transport {
+	return if transport_running();
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
+}
+
+sub start_heartbeat {
+ 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
+}
+
+sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
+
 sub heartbeat {
 
 	#	print "heartbeat fired\n";
@@ -1970,7 +1954,6 @@ sub heartbeat {
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 
 }
-
 sub schedule_wraparound {
 
 	return unless $loop_enable;
@@ -1988,6 +1971,9 @@ sub schedule_wraparound {
 		;
 	}
 }
+sub cancel_wraparound {
+	$event_id{Event_wraparound} = undef;
+}
 sub wraparound {
 	package ::;
 	@_ = discard_object(@_);
@@ -1997,30 +1983,7 @@ sub wraparound {
 	$event_id{Event_wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 
-sub start_heartbeat {
- 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
-}
-
-sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
-
-sub cancel_wraparound {
-	$event_id{Event_wraparound} = undef;
-}
-
 sub poll_jack { $event_id{Event_poll_jack} = AE::timer(0,5,\&jack_update) }
-
-sub stop_transport { 
-
-	$debug2 and print "&stop_transport\n"; 
-	stop_heartbeat();
-	mute();
-	eval_iam('stop');	
-	sleeper(0.5);
-	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
-	unmute();
-	$ui->project_label_configure(-background => $old_bg);
-	rec_cleanup();
-}
 
 sub mute {
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
@@ -2029,15 +1992,6 @@ sub mute {
 sub unmute {
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
 	$tn{Master}->unmute;
-}
-
-sub transport_running {
-#	$debug2 and print "&transport_running\n";
-	 eval_iam('engine-status') eq 'running' ;
-}
-sub disconnect_transport {
-	return if transport_running();
-		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 }
 
 # for GUI transport controls
@@ -2136,7 +2090,6 @@ sub jump {
 	sleeper( 0.6);
 }
 ## post-recording functions
-
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
