@@ -1,13 +1,3 @@
-use Carp;
-use Text::Format;
-use ::Assign qw(:all);
-$text_wrap = new Text::Format {
-	columns 		=> 75,
-	firstIndent 	=> 0,
-	bodyIndent		=> 0,
-	tabstop			=> 4,
-};
-
 sub show_versions {
 		return @{$this_track->versions} 
 			?  "All versions: ". join(" ", @{$this_track->versions}). $/
@@ -72,86 +62,6 @@ sub show_status {
 	push @fields, "preview" if $preview eq 'preview';
 	push @fields, "master" if $mastering_mode;
 	"[ ". join(", ", @fields) . " ]\n";
-}
-	
-sub poll_jack {
-	package ::;
-	$event_id{Event_poll_jack} = Event->timer(
-	    desc   => 'poll_jack',               # description;
-	    prio   => 5,                         # low priority;
-		interval => 5,
-	    cb     =>   \&jack_update, # callback;
-	);
-}
-
-sub install_handlers {
-
-	# we are using the Event module's handlers and event loop
-	
-	package ::;
-
-	# setup Term::Readline::GNU
-	$term = new Term::ReadLine("Ecasound/Nama");
-	$attribs = $term->Attribs;
-	$attribs->{attempted_completion_function} = \&complete;
-
-	# store output buffer in a scalar (for print)
-	my $outstream = $attribs->{'outstream'};
-	$event_id{stdin} = AE::io(*STDIN, 0, sub {
-		&{$attribs->{'callback_read_char'}}();
-		if ( $attribs->{line_buffer} eq " " ){
-			if (engine_running()){ stop_transport() }
-			else { start_transport() }
-			$attribs->{line_buffer} = q();
-			$attribs->{point} 		= 0;
-			$attribs->{end}   		= 0;
-			$term->stuff_char(10);
-			&{$attribs->{'callback_read_char'}}();
-		}
-	});
-   	$event_id{sigint} = AE::signal('INT', sub{ 
- 		unloop();
- 		remove_small_wavs();
- 		kill 15, ::ecasound_pid();  	
- 		#CORE::exit(); # unloop is enough to end program
- 	});
-	if ( $midi_inputs =~ /on|capture/ ){
-		my $command = "aseqdump ";
-		$command .= "-p $controller_ports" if $controller_ports;
-		open MIDI, "$command |" or die "can't fork $command: $!";
-		$event_id{sequencer} = Event->io(
-			desc   => 'read ALSA sequencer events',
-			fd     => \*MIDI,                    # handle;
-			poll   => 'r',	                     # watch for incoming chars
-			cb     => \&process_control_inputs, # callback;
-			repeat => 1,                         # keep alive after event;
-		 );
-		$event_id{sequencer_error} = Event->io(
-			desc   => 'read ALSA sequencer events',
-			fd     => \*MIDI,                    # handle;
-			poll   => 'e',	                     # watch for exception
-			cb     => sub { die "sequencer pipe read failed" }, # callback;
-		 );
-	
-	}
-}
-sub loop {
-	package ::;
-	$SIG{INT} = sub{ ::remove_small_wavs();
-					$::term->rl_deprep_terminal();
-					kill 15, ::ecasound_pid();  	
-					CORE::exit(); };
-	$term->callback_handler_install($prompt, \&process_line);
-	#$Event::DIED = \&Event::verbose_exception_handler;
-	$Event::DIED = sub {
-		my ($event, $errmsg) = @_;
-		say $errmsg;
-		$attribs->{line_buffer} = q();
-		$term->clear_message();
-		$term->rl_reset_line_state();
-	};
-	Event::loop();
-
 }
 sub placeholder { 
 	my $val = shift;

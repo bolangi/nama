@@ -16,7 +16,6 @@ no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
 use Cwd;
-use Data::YAML;
 use File::Find::Rule;
 use File::Spec::Link;
 use File::Path;
@@ -30,35 +29,33 @@ use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
 use Graph;
-
 # use Timer::HiRes; # automatically detected
-
 # use Tk;           # loaded conditionally
-
-
-#use Tk::FontDialog;
-
+# use Event;		# loaded conditionally
+# use AnyEvent;		# loaded after Tk or Event
+# use Tk::FontDialog; # hmmm might be nice to use
+use Text::Format;
 
 ## Definitions ##
 
 $| = 1;     # flush STDOUT buffer on every write
 
-# 'our' declaration: all packages in the file will see the following
-# variables. 
+# 'our' declaration: code in all packages in Nama.pm can address
+# the following variables without package name prefix
 
 [% qx(cat ./declarations.pl) %] 
 
 [% qx(cat ./var_types.pl) %]
 
-# instances needed for yaml_out and yaml_in
-
-$yw = Data::YAML::Writer->new; 
-$yr = Data::YAML::Reader->new;
+$text_wrap = new Text::Format {
+	columns 		=> 75,
+	firstIndent 	=> 0,
+	bodyIndent		=> 0,
+	tabstop			=> 4,
+};
 
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
-
-$banner =
 
 [% qx(cat ./banner.pl) %]
 
@@ -85,9 +82,6 @@ jack_update(); # to be polled by Event
 $memoize = 0;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
-
-$term = new Term::ReadLine("Ecasound/Nama");
-$SIG{INT} = sub{ pre_exit_cleanup(); $ui->abort()};
 
 ## Load my modules
 
@@ -125,7 +119,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Core_subs.pl ) %]
 
-[% qx(cat ./Graphical_subs.pl ) %]
+[% qx(cat ./Graphical_subs.pl ) %] # root namespace!
 
 [% qx(cat ./Refresh_subs.pl ) %]
 
@@ -141,17 +135,13 @@ our @ISA = '::';      ## default to root class
 ## The following methods belong to the Graphical interface class
 
 sub hello {"make a window";}
-sub install_handlers{};
 sub loop {
-    package ::;
-	my $attribs = $term->Attribs;
-	$attribs->{attempted_completion_function} = \&complete;
+	package ::;
 	$term->tkRunning(1);
-    $OUT = $term->OUT || \*STDOUT;
-	while (1) {
-		my ($user_input) = $term->readline($prompt) ;
-		process_line( $user_input );
-	}
+  	while (1) {
+  		my ($user_input) = $term->readline($prompt) ;
+  		::process_line( $user_input );
+  	}
 }
 
 sub abort { Tk::exit(); }
@@ -161,8 +151,22 @@ sub abort { Tk::exit(); }
 package ::Text;
 our @ISA = '::';
 use Carp;
+use ::Assign qw(:all);
 
 sub hello {"hello world!";}
+
+sub loop {
+       package ::;
+       $term->callback_handler_install($prompt, \&process_line);
+       $Event::DIED = sub {
+               my ($event, $errmsg) = @_;
+               say $errmsg;
+               $attribs->{line_buffer} = q();
+               $term->clear_message();
+               $term->rl_reset_line_state();
+       };
+       Event::loop();
+}
 
 [% qx(cat ./Text_methods.pl ) %]
 

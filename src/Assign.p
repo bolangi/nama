@@ -57,7 +57,6 @@ $yr = Data::YAML::Reader->new;
 
 use Carp;
 
-
 sub assign {
 	
 	$debug2 and print "&assign\n";
@@ -298,17 +297,22 @@ sub yaml_out {
 sub yaml_in {
 	
 	# $debug2 and print "&yaml_in\n";
-	my $file = shift;
+	my $input = shift;
 	my $yaml; 
-	if ($file !~ /\n/) {
+	if ($input !~ /\n/) {
 		$debug and print "assuming yaml filename input\n";
-		$yaml = io($file)->all;
+		$yaml = io($input)->all;
 	} else { 
 		$debug and print "assuming yaml text input\n";
-		$yaml = $file;
+		if ($input !~ /^---/){
+			$input =~ s/^\n+//s; # remove leading newline at start of file
+			$input =~ s/\n+$//s; # remove trailing newline at end of file
+			$input = join "\n", '---',$input,'...'; # add YAML prefix/suffix
+		}
+		$yaml = $input;
 	}
 	if ($yaml =~ /\t/){
-		croak "YAML file: $file contains illegal TAB character.";
+		croak "YAML file: $input contains illegal TAB character.";
 	}
 	eval q[$yr->read( $yaml )]  or croak "yaml read failed: $@" ; # returns ref
 }

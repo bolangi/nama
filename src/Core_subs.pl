@@ -1,217 +1,16 @@
-if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
-	 { *sleeper = *finesleep;
-		$hires++; }
-else { *sleeper = *select_sleep }
-	
-sub finesleep {
-	my $sec = shift;
-	Time::HiRes::usleep($sec * 1e6);
-}
-sub select_sleep {
-   my $seconds = shift;
-   select( undef, undef, undef, $seconds );
-# 	my $sec = shift;
-# 	$sec = int($sec   + 0.5);
-# 	$sec or $sec++;
-# 	sleep $sec
-}
-
 sub nama { 
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
-	$ui->install_handlers();
 	reconfigure_engine();
 	$ui->loop;
 }
-sub status_vars {
-	serialize( class => '::', vars => \@status_vars);
-}
-sub config_vars {
-	serialize( class => '::', vars => \@config_vars);
-}
-
-sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Nama/;
-	@_;
-}
-
-
-
-sub first_run {
-return if $opts{f};
-my $config = config_file();
-$config = "$ENV{HOME}/$config" unless -e $config;
-$debug and print "config: $config\n";
-if ( ! -e $config and ! -l $config  ) {
-
-# check for missing components
-
-my $missing;
-my @a = `which analyseplugin`;
-@a or print ( <<WARN
-LADSPA helper program 'analyseplugin' not found
-in $ENV{PATH}, your shell's list of executable 
-directories. You will probably have more fun with the LADSPA
-libraries and executables installed. http://ladspa.org
-WARN
-) and  sleeper (0.6) and $missing++;
-my @b = `which ecasound`;
-@b or print ( <<WARN
-Ecasound executable program 'ecasound' not found
-in $ENV{PATH}, your shell's list of executable 
-directories. This suite depends on the Ecasound
-libraries and executables for all audio processing! 
-WARN
-) and sleeper (0.6) and $missing++;
-
-my @c = `which file`;
-@c or print ( <<WARN
-BSD utility program 'file' not found
-in $ENV{PATH}, your shell's list of executable 
-directories. This program is currently required
-to be able to play back mixes in stereo.
-WARN
-) and sleeper (0.6);
-if ( $missing ) {
-print "You lack $missing main parts of this suite.  
-Do you want to continue? [N] ";
-$missing and 
-my $reply = <STDIN>;
-chomp $reply;
-print ("Goodbye.\n"), exit unless $reply =~ /y/i;
-}
-print <<HELLO;
-
-Aloha. Welcome to Nama and Ecasound.
-
-HELLO
-sleeper (0.6);
-print "Configuration file $config not found.
-
-May I create it for you? [yes] ";
-my $make_namarc = <STDIN>;
-sleep 1;
-print <<PROJECT_ROOT;
-
-Nama places all sound and control files under the
-project root directory, by default $ENV{HOME}/nama.
-
-PROJECT_ROOT
-print "Would you like to create $ENV{HOME}/nama? [yes] ";
-my $reply = <STDIN>;
-chomp $reply;
-if ($reply !~ /n/i){
-	$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
-	mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
-} else {
-	print <<OTHER;
-Please make sure to set the project_root directory in
-.namarc, or on the command line using the -d option.
-
-OTHER
-}
-if ($make_namarc !~ /n/i){
-$default > io( $config );
-}
-sleep 1;
-print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
-print "Exiting.\n"; 
-exit;	
-}
-}
-
-
-
-sub process_options {
-
-	my %options = qw(
-
-        save-alsa  		a
-		project-root=s  d
-		create-project  c
-		config=s		f
-		gui			  	g
-		text			t
-		no-state		m
-		net-eci			n
-		libecasoundc	l
-		help			h
-		regenerate-effects-cache	r
-		no-static-effects-data		s
-		no-static-effects-cache		e
-		no-reconfigure-engine		R
-		debugging-output			D
-);
-
-	map{$opts{$_} = ''} values %options;
-
-	# long options
-
-	Getopt::Long::Configure ("bundling");	
-	my $getopts = 'GetOptions( ';
-	map{ $getopts .= qq("$options{$_}|$_" => \\\$opts{$options{$_}}, \n)} keys %options;
-	$getopts .= ' )' ;
-
-	#say $getopts;
-
-	my $result = eval $getopts;
-	
-	# short options
-
-	# push @ARGV, qw( -e  );
-	#push @ARGV, qw(-d /media/sessions test-abc  );
-	#getopts('amcegstrnd:f:DR', \%opts); 
-	#print join $/, (%opts);
-	
-	if ($opts{h}){
-	say <<HELP;
-
-USAGE: nama [options] [project_name]
-
---gui, -g                        Start Nama in GUI mode
---text, -t                       Start Nama in text mode
---config, -f                     Specify configuration file (default: ~/.namarc)
---project-root, -d               Specify project root directory
---create-project, -c             Create project if it doesn't exist
---net-eci, -n                    Use Ecasound's Net-ECI interface
---libecasoundc, -l               Use Ecasound's libecasoundc interface
---save-alsa, -a                  Save/restore alsa state with project data
---help, -h                       This help display
-
-Debugging options:
-
---no-static-effects-data, -s     Don't load effects data
---no-state, -m                   Don't load project state
---no-static-effects-cache, -e    Bypass effects data cache
---regenerate-effects-cache, -r   Regenerate the effects data cache
---no-reconfigure-engine, -R      Don't automatically configure engine
-                                 (manually use 'generate' and 'connect' commands)
---debugging-output, -D           Emit debugging information
-
-HELP
-
-	exit;
-	} else { say $banner; }
-
-}
-	
 sub prepare {
 	
 	$debug2 and print "&prepare\n";
+	choose_sleep_routine();
 
-	if ($opts{D}){
-		$debug = 1;
-		$debug2 = 1;
-	}
-	if ( ! $opts{t} and can_load( modules => { Tk => undef } ) ){ 
-		$ui = ::Graphical->new;
-	} else {
-		$ui = ::Text->new;
-		can_load( modules =>{ Event => undef});
-		import Event qw(loop unloop unloop_all);
-	}
-	can_load( modules => {AnyEvent => undef});
+	initialize_terminal();
 
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
@@ -265,7 +64,7 @@ sub prepare {
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
-	$ui->poll_jack();
+	poll_jack();
 
 	if (! $project_name ){
 		$project_name = "untitled";
@@ -279,6 +78,223 @@ sub prepare {
 	}
 	1;	
 }
+
+sub choose_sleep_routine {
+	if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
+		 { *sleeper = *finesleep;
+			$hires++; }
+	else { *sleeper = *select_sleep }
+}
+sub finesleep {
+	my $sec = shift;
+	Time::HiRes::usleep($sec * 1e6);
+}
+sub select_sleep {
+   my $seconds = shift;
+   select( undef, undef, undef, $seconds );
+}
+
+sub initialize_terminal {
+	$term = new Term::ReadLine("Ecasound/Nama");
+	my $attribs = $term->Attribs;
+	$attribs->{attempted_completion_function} = \&complete;
+	# store output buffer in a scalar (for print)
+	my $outstream = $attribs->{'outstream'};
+	$event_id{stdin} = AE::io(*STDIN, 0, sub {
+		&{$attribs->{'callback_read_char'}}();
+		if ( $attribs->{line_buffer} eq " " ){
+			if (engine_running()){ stop_transport() }
+			else { start_transport() }
+			$attribs->{line_buffer} = q();
+			$attribs->{point} 		= 0;
+			$attribs->{end}   		= 0;
+			$term->stuff_char(10);
+			&{$attribs->{'callback_read_char'}}();
+		}
+	});
+
+	# handle Control-C from terminal
+
+	$SIG{INT} = \&cleanup_exit;
+
+}
+	
+sub status_vars {
+	serialize( class => '::', vars => \@status_vars);
+}
+sub config_vars {
+	serialize( class => '::', vars => \@config_vars);
+}
+
+sub discard_object {
+	shift @_ if (ref $_[0]) =~ /Nama/;
+	@_;
+}
+
+
+
+sub first_run {
+	return if $opts{f};
+	my $config = config_file();
+	$config = "$ENV{HOME}/$config" unless -e $config;
+	$debug and print "config: $config\n";
+	if ( ! -e $config and ! -l $config  ) {
+
+	# check for missing components
+
+	my $missing;
+	my @a = `which analyseplugin`;
+	@a or print ( <<WARN
+LADSPA helper program 'analyseplugin' not found
+in $ENV{PATH}, your shell's list of executable 
+directories. You will probably have more fun with the LADSPA
+libraries and executables installed. http://ladspa.org
+WARN
+	) and  sleeper (0.6) and $missing++;
+	my @b = `which ecasound`;
+	@b or print ( <<WARN
+Ecasound executable program 'ecasound' not found
+in $ENV{PATH}, your shell's list of executable 
+directories. This suite depends on the Ecasound
+libraries and executables for all audio processing! 
+WARN
+	) and sleeper (0.6) and $missing++;
+
+	my @c = `which file`;
+	@c or print ( <<WARN
+BSD utility program 'file' not found
+in $ENV{PATH}, your shell's list of executable 
+directories. This program is currently required
+to be able to play back mixes in stereo.
+WARN
+	) and sleeper (0.6);
+	if ( $missing ) {
+	print "You lack $missing main parts of this suite.  
+Do you want to continue? [N] ";
+	$missing and 
+	my $reply = <STDIN>;
+	chomp $reply;
+	print ("Goodbye.\n"), exit unless $reply =~ /y/i;
+	}
+print <<HELLO;
+
+Aloha. Welcome to Nama and Ecasound.
+
+HELLO
+	sleeper (0.6);
+	print "Configuration file $config not found.
+
+May I create it for you? [yes] ";
+	my $make_namarc = <STDIN>;
+	sleep 1;
+	print <<PROJECT_ROOT;
+
+Nama places all sound and control files under the
+project root directory, by default $ENV{HOME}/nama.
+
+PROJECT_ROOT
+	print "Would you like to create $ENV{HOME}/nama? [yes] ";
+	my $reply = <STDIN>;
+	chomp $reply;
+	if ($reply !~ /n/i){
+		$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
+		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
+	} else {
+		print <<OTHER;
+Please make sure to set the project_root directory in
+.namarc, or on the command line using the -d option.
+
+OTHER
+	}
+	if ($make_namarc !~ /n/i){
+		$default > io( $config );
+	}
+	sleep 1;
+	print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
+	print "Exiting.\n"; 
+	exit;	
+	}
+}
+
+sub process_options {
+
+	my %options = qw(
+
+        save-alsa  		a
+		project-root=s  d
+		create-project  c
+		config=s		f
+		gui			  	g
+		text			t
+		no-state		m
+		net-eci			n
+		libecasoundc	l
+		help			h
+		regenerate-effects-cache	r
+		no-static-effects-data		s
+		no-static-effects-cache		e
+		no-reconfigure-engine		R
+		debugging-output			D
+);
+
+	map{$opts{$_} = ''} values %options;
+
+	# long options
+
+	Getopt::Long::Configure ("bundling");	
+	my $getopts = 'GetOptions( ';
+	map{ $getopts .= qq("$options{$_}|$_" => \\\$opts{$options{$_}}, \n)} keys %options;
+	$getopts .= ' )' ;
+
+	#say $getopts;
+
+	my $result = eval $getopts;
+	
+	if ($opts{h}){
+	say <<HELP; exit; }
+
+USAGE: nama [options] [project_name]
+
+--gui, -g                        Start Nama in GUI mode
+--text, -t                       Start Nama in text mode
+--config, -f                     Specify configuration file (default: ~/.namarc)
+--project-root, -d               Specify project root directory
+--create-project, -c             Create project if it doesn't exist
+--net-eci, -n                    Use Ecasound's Net-ECI interface
+--libecasoundc, -l               Use Ecasound's libecasoundc interface
+--save-alsa, -a                  Save/restore alsa state with project data
+--help, -h                       This help display
+
+Debugging options:
+
+--no-static-effects-data, -s     Don't load effects data
+--no-state, -m                   Don't load project state
+--no-static-effects-cache, -e    Bypass effects data cache
+--regenerate-effects-cache, -r   Regenerate the effects data cache
+--no-reconfigure-engine, -R      Don't automatically configure engine
+                                 (manually use 'generate' and 'connect' commands)
+--debugging-output, -D           Emit debugging information
+
+HELP
+
+
+	say $banner;
+
+	if ($opts{D}){
+		$debug = 1;
+		$debug2 = 1;
+	}
+	if ( ! $opts{t} and can_load( modules => { Tk => undef } ) ){ 
+		$ui = ::Graphical->new;
+	} else {
+		$ui = ::Text->new;
+		can_load( modules =>{ Event => undef});
+		import Event qw(loop unloop unloop_all);
+	}
+	can_load( modules => {AnyEvent => undef});
+
+}
+	
 {
 my $default_port = 2868; # Ecasound's default
 sub launch_ecasound_server {
@@ -409,29 +425,13 @@ sub read_config {
 	$debug2 and print "&read_config\n";
 	
 	my $config = shift;
-	#print "config: $config";;
 	my $yml = length $config > 100 ? $config : $default;
-	#print "yml1: $yml";
 	strip_all( $yml );
-	#print "yml2: $yml";
-	if ($yml !~ /^---/){
-		$yml =~ s/^\n+//s;
-		$yml =~ s/\n+$//s;
-		$yml = join "\n", "---", $yml, "...";
-	}
-#	print "yml3: $yml";
-	eval ('$yr->read($yml)') or croak( "Can't read YAML code: $@");
-	%cfg = %{  $yr->read($yml)  };
-	#print yaml_out( $cfg{abbreviations}); exit;
+	%cfg = %{  yaml_in($yml) };
 	*subst = \%{ $cfg{abbreviations} }; # alias
-#	*devices = \%{ $cfg{devices} }; # alias
-#	assigned by assign_var below
-	#print yaml_out( \%subst ); exit;
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	#print yaml_out \%cfg; 
-	assign_var( \%cfg, @config_vars);  ## XXX
-	#print "config file: $yml";
+	assign_var( \%cfg, @config_vars);
 	$project_root = $opts{d} if $opts{d};
 
 }
@@ -2006,6 +2006,8 @@ sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
 sub cancel_wraparound {
 	$event_id{Event_wraparound} = undef;
 }
+
+sub poll_jack { $event_id{Event_poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub stop_transport { 
 
@@ -4207,7 +4209,7 @@ sub append_effect_chain {
 sub insert_effect_chain {
 }
 	
-sub pre_exit_cleanup {
+sub cleanup_exit {
 	remove_small_wavs();
 	kill 15, ecasound_pid();  	
 	$term->rl_deprep_terminal();

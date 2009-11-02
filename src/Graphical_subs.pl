@@ -21,8 +21,7 @@ sub init_gui {
 
 	### Exit via Ctrl-C 
 
-	$mw->bind('<Control-Key-c>' => sub{ pre_exit_cleanup(); abort() });
-		
+	$mw->bind('<Control-Key-c>' => \&cleanup_exit); # enough to terminate
 
 	### init effect window
 
@@ -1156,18 +1155,6 @@ sub destroy_marker {
 }
 
 
-sub poll_jack {
-	package ::; # no necessary we are already in base class
-	$event_id{tk_poll_jack} = $set_event->repeat( 
-		5000, \&jack_update
-	);
-
-}
-sub tk_event_cancel {
-	@_ = discard_object @_;
-	map{ (ref $event_id{$_}) =~ /Tk/ and $set_event->afterCancel($event_id{$_}) 
-	} @_;
-}
 sub get_saved_colors {
 	$debug2 and print "&get_saved_colors\n";
 
