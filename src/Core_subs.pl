@@ -3,6 +3,8 @@ sub nama {
 	prepare(); 
 	command_process($execute_on_project_load);
 	reconfigure_engine();
+	$term->stuff_char(10);
+	&{$attribs->{'callback_read_char'}}();
 	print $prompt;
 	$attribs->{already_prompted} = 0;
 	$ui->loop;
@@ -100,20 +102,20 @@ sub initialize_terminal {
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
     $term->callback_handler_install($prompt, \&process_line);
-	$press_space_to_start_transport and 
-		$event_id{stdin} = AE::io(*STDIN, 0, sub {
+	$event_id{stdin} = AE::io(*STDIN, 0, sub {
+		&{$attribs->{'callback_read_char'}}();
+		if ( $press_space_to_start_transport and
+				$attribs->{line_buffer} eq " " ){
+			if (engine_running()){ stop_transport() }
+			else { start_transport() }
+			$attribs->{line_buffer} = q();
+			$attribs->{point} 		= 0;
+			$attribs->{end}   		= 0;
+# 			$attribs->{done}   		= 1; # doesn't reprint prompt
+			$term->stuff_char(10);
 			&{$attribs->{'callback_read_char'}}();
-			if ( $attribs->{line_buffer} eq " " ){
-				if (engine_running()){ stop_transport() }
-				else { start_transport() }
-				$attribs->{line_buffer} = q();
-				$attribs->{point} 		= 0;
-				$attribs->{end}   		= 0;
-	# 			$attribs->{done}   		= 1;
-				$term->stuff_char(10);
-				&{$attribs->{'callback_read_char'}}();
-			}
-		});
+		}
+	});
 	# handle Control-C from terminal
 
 	$SIG{INT} = \&cleanup_exit;
@@ -3360,7 +3362,7 @@ sub restore_state {
 
 	# restore command history
 	
-	$term->SetHistory(@command_history) if $term;
+	$term->SetHistory(@command_history);
 } 
 
 sub set_track_class {
@@ -4113,8 +4115,8 @@ sub insert_effect_chain {
 }
 	
 sub cleanup_exit {
-# 	remove_small_wavs();
-# 	kill 15, ecasound_pid() if $sock;  	
+ 	remove_small_wavs();
+ 	kill 15, ecasound_pid() if $sock;  	
 	$term->rl_deprep_terminal();
 	#CORE::exit; # not needed, apparently
 }
