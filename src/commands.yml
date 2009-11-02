@@ -622,14 +622,24 @@ list_effect_chains:
   parameters: [<s_name> <s_name>... ]
 push_effect_chain:
   type: effect
-  short: puc bypass by
+  short: puc
   what: pushing current track effects onto list, optionally applying effect_chain  
   parameters: ['save' <s_save_name>] [ 'add' <s_effect_chain>]
 pop_effect_chain:
   type: effect
-  short: poc nobypass nob
+  short: poc
   what: pop effect chain off track list, optionally saving current effects
   parameters: ['save' <s_save_name>] 
+bypass:
+  type: effect
+  short: by
+  what: bypass track effects except for vol/pan (same as push_effect_chain)
+  parameters: none
+nobypass:
+  type: effect
+  short: nob 
+  what: restored bypassed track effects (same as pop_effect_chain)
+  parameters: none
 # die:
 #   what: just end it already - a test for the command prompt
 # midi_inputs:

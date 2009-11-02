@@ -602,5 +602,5 @@ pop_effect_chain: _pop_effect_chain 'save' name end {
 	::pop_effect_chain(save => $item{name});
 	1;
 }
-
- 		
+bypass:   _bypass   end { ::push_effect_chain(); 1}
+nobypass: _nobypass end {  ::pop_effect_chain(); 1}
