@@ -561,17 +561,25 @@ delete_effect_chain: _delete_effect_chain name(s) end {
 }
 list_effect_chains: _list_effect_chains name(s?) end {
 
-	# we don't list chains starting with underscore
-	
-	my @names = grep{ $::effect_chain{$_}} @{$item{'name(s?)'}};
-	@names or @names = grep{ ! /^_/ } keys %::effect_chain;
+ 	# names(s?) are treated as fragments to match against
+    # effect_chain names
+
+    # we don't list chain_ids starting with underscore
+
+	# first take them all, then we'll whittle down our list
+    
+    my @ids = grep{ ! /^_/ } keys %::effect_chain;
+
+	if (my @frags = @{$item{'name(s?)'}}){
+		@ids = grep{ my $id = $_; grep{ $id =~ /$_/} @frags} @ids; 
+	}
 	map{ my $name = $_;
 		print join ' ', "$name:", 
 		map{$::effect_chain{$name}{type}{$_},
 			@{$::effect_chain{$name}{params}{$_}}
 		} @{$::effect_chain{$name}{ops}};
 		print "\n";
-	} @names;
+	} @ids;
 	1;
 }
 push_effect_chain: _push_effect_chain end {
