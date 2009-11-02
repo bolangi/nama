@@ -6,6 +6,12 @@
 # So all the routines in Graphical_methods.pl can consider
 # themselves to be in the base class.
 
+# $ui->foo defaults to the root namespace
+# picking up subs from Graphical_methods.pl
+
+# in Text mode, $ui->foo picks up methods from the
+# Text namespace, often no-op stubs
+
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
@@ -144,8 +150,6 @@ sub loop {
   	}
 }
 
-sub abort { Tk::exit(); }
-
 ## The following methods belong to the Text interface class
 
 package ::Text;
@@ -168,8 +172,6 @@ sub loop {
 }
 
 [% qx(cat ./Text_methods.pl ) %]
-
-sub abort { CORE::exit() }
 
 ## NO-OP GRAPHIC METHODS 
 

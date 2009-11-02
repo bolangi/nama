@@ -1927,10 +1927,10 @@ sub disconnect_transport {
 }
 
 sub start_heartbeat {
- 	$event_id{Event_heartbeat} = AE::timer(0, 3, \&::heartbeat);
+ 	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
 }
 
-sub stop_heartbeat {$event_id{Event_heartbeat} = undef }
+sub stop_heartbeat {$event_id{heartbeat} = undef }
 
 sub heartbeat {
 
@@ -1974,18 +1974,18 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$event_id{Event_wraparound} = undef;
+	$event_id{wraparound} = undef;
 }
 sub wraparound {
 	package ::;
 	@_ = discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$event_id{Event_wraparound} = undef;
-	$event_id{Event_wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	$event_id{wraparound} = undef;
+	$event_id{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 
-sub poll_jack { $event_id{Event_poll_jack} = AE::timer(0,5,\&jack_update) }
+sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub mute {
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
