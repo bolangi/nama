@@ -100,6 +100,7 @@ sub initialize_terminal {
 	$attribs->{attempted_completion_function} = \&complete;
 	# store output buffer in a scalar (for print)
 	my $outstream = $attribs->{'outstream'};
+    $term->callback_handler_install($prompt, \&process_line);
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
 		if ( $attribs->{line_buffer} eq " " ){

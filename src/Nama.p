@@ -157,7 +157,6 @@ sub hello {"hello world!";}
 
 sub loop {
        package ::;
-       $term->callback_handler_install($prompt, \&process_line);
        $Event::DIED = sub {
                my ($event, $errmsg) = @_;
                say $errmsg;
