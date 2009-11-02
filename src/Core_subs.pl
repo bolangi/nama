@@ -233,7 +233,7 @@ sub process_options {
 
 	#say $getopts;
 
-	my $result = eval $getopts;
+	eval $getopts or die "Stopped.\n";
 	
 	if ($opts{h}){
 	say <<HELP; exit; }
@@ -340,7 +340,7 @@ length: $length
 type: $type
 reply: $reply";
 
-	$return_value == 256 or die "illegal return value" ;
+	$return_value == 256 or die "illegal return value, stopped" ;
 	$reply =~ s/\s+$//; 
 
 	given($type){
