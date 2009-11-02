@@ -3,8 +3,6 @@
 					name
 					active
 
-					ch_r  # obsolete
-					ch_m  # obsolete
 					width
 
 					rw
@@ -35,12 +33,6 @@
 
 					send_id
 					send_type
-					
-
-					jack_source # obsolete
-					jack_send	# obsolete
-					source_select # obsolete
-					send_select # obsolete
 
 					project
 					target

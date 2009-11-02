@@ -3289,8 +3289,16 @@ sub restore_state {
 				
 				# remove obsolete fields
 				
-				map{ delete $t->{$_} } qw( delay length start_position ch_m ch_r);
-
+				map{ delete $t->{$_} } qw( 
+											delay 
+											length 
+											start_position 
+											ch_m 
+											ch_r
+											source_select 
+											jack_source   
+											send_select
+											jack_send);
 		}  @tracks_data;
 	}
 		
