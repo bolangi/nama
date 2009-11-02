@@ -2844,7 +2844,7 @@ sub read_in_effects_data {
 		^(\d+) # number
 		\.    # dot
 		\s+  # spaces
-		(\w.+?) # name, starting with word-char,  non-greedy
+		(.+?) # name, starting with word-char,  non-greedy
 		\s+     # spaces
 		-(el:\w+),? # ladspa_id maybe followed by comma
 		(.*$)        # rest
