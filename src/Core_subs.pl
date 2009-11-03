@@ -371,6 +371,7 @@ sub eval_iam_libecasoundc{
 	# not needed ecasound prints error on STDOUT
 	$e->errmsg('');
 	"@result";
+	#$errmsg ? undef : "@result";
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift;
@@ -1840,7 +1841,7 @@ sub connect_transport {
 		or print("Invalid chain setup, engine not ready.\n"),return;
 	find_op_offsets(); 
 	apply_ops();
-	eval_iam('cs-connect');
+	eval_iam('cs-connect') or say("Failed to connect setup, engine not ready"),return;
 	my $status = eval_iam("engine-status");
 	if ($status ne 'not started'){
 		print("Invalid chain setup, cannot connect engine.\n");
