@@ -1122,6 +1122,10 @@ sub generate_setup {
 
 	$debug2 and print "&generate_setup\n";
 
+	# save current track
+	
+	my $old_this_track = $this_track;
+
 	# initialize data structures
 
 	  %inputs 
@@ -1266,7 +1270,7 @@ sub generate_setup {
 
 	%versions = ();
 	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	say "monitor_versions\n",yaml_out \%versions;
+	$debug and say "monitor_versions\n",yaml_out \%versions;
 
 # now to create input and output lists %inputs and %outputs
 
@@ -1306,6 +1310,7 @@ sub generate_setup {
 	$debug and say "temp tracks to remove";
 	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 
+	$this_track = $old_this_track;
 	# process bus rules
 
 	map { $_->apply() } ::Bus::all();
@@ -2136,12 +2141,14 @@ sub rec_cleanup {
 		my $old_this_track = $this_track;
 		map{    
 			my $t = $this_track = $tn{$_};  
+			say "cache map",yaml_out($t->cache_map);
 			
 			my $cache_map = $t->cache_map;
 			$cache_map->{$t->last} = { 
-				caches 			=> $versions{$_},
+				original 			=> $versions{$_},
 				effect_chain	=> push_effect_chain(), # bypass
 			};
+			say "cache map",yaml_out($t->cache_map);
 			say qq(Saving effects for cached track "$_".
 'replace_effects' will reset "$_" to version $versions{$_});
 
@@ -4116,13 +4123,13 @@ sub new_effect_chain_name {
 sub push_effect_chain {
 	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
-	my $add_name = $vals{add}; # undef in case of bypass
+	#my $add_name = $vals{add}; # undef in case of bypass # disabled!
 	my $save_name   = $vals{save} || new_effect_chain_name();
-	say "add: $add_name save: $save_name"; 
+	#$debug and say "add: $add_name save: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
-	add_effect_chain($add_name) if $add_name;
+	#add_effect_chain($add_name) if $add_name; # disabled!
 	$save_name;
 }
 
@@ -4138,6 +4145,29 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 		add_effect_chain($previous);
 	}
 	delete $effect_chain{$previous};
+}
+sub replace_effects { # add support for cached versions
+	my $t = $this_track;
+	# skip unless MON;
+	#print($t->name, ": requires MON status.\n\n"), 
+	# return 1 unless $t->rec_status eq 'MON';
+# 	print($t->name, ": 'replace_effects' will
+# 		remove all current effects!  Skipping.\n\n"), 
+# 		return 1 unless $t->fancy_ops;
+	# if is cached track, set original version and original effects
+	# skip if fancy effects
+	my $cm = $t->cache_map;
+	my $v = $t->monitor_version;
+	if($cm->{$v}){ # we are a cached version
+		# blast away any existing effects, TODO: warn or abort	
+		map{ remove_effect($_)} $t->fancy_ops;
+		$t->set(active => $cm->{$v}{original});
+		print $t->name, ": setting uncached version ", $t->active, $/;
+		add_effect_chain($cm->{$v}{effect_chain});
+		$t->set(effect_chain_stack => [ 
+			grep{$_ ne $cm->{$v}{effect_chain}} @{ $t->effect_chain_stack}
+		]);
+	} else { pop_effect_chain();}
 }
 
 sub new_effect_chain {
