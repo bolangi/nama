@@ -92,6 +92,8 @@ sub new {
 					send_id   => undef,
 					inserts => {},
 					effect_chain_stack => [],
+					cache_map => {},
+					
 
 					@_ 			}, $class;
 

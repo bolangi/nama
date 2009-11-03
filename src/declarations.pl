@@ -378,4 +378,5 @@ our (
 	$press_space_to_start_transport, #  in text mode
 	%effect_chain, # named effect sequences
 	$sock, 			# socket for Net-ECI mode
+	%versions,		# store active versions for use after engine run
 );

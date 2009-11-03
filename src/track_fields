@@ -1,43 +1,39 @@
-					class					
-
+					class 			# for storage and inspection
+					n   			# track index 
 					name
-					active
+					group 			# group affiliation
 
-					width
+					rw				# REC/MON/OFF setting
+					active			# version setting
+					width			# channel count
 
-					rw
+					ops 			# effect operators list
+					vol				# vol control operator
+					pan				# pan control operator 
+					latency			# latency compensation operator
+					offset
 
-					vol  
-					pan 
-					latency
-
-					old_vol_level
+					old_vol_level	# for mute/unmute
 					old_pan_level
-					ops 
-					offset 
 
-					n 
-					group 
-
-					playat
-					region_start	
+					playat			# for shifting (delaying) playback
+					region_start	# region endpoints
 					region_end
+					modifiers		# Ecasound playat,select,reverse,loop objects
+					looping			# do I loop?
 
-					looping
+					hide			# I'm invisible
 
-					hide
-					modifiers
-
-					source_id
-					source_type
-
-					send_id
+					source_id		# signal source (channel No. or jack client)
+					source_type		# soundcard or jack_client
+					send_id			# as above, for output
 					send_type
 
-					project
-					target
+					target			# link this track to another track name
+					project			# link this track to another project 
 					
-					rec_defeat
-					inserts
+					rec_defeat		# don't record me!
+					inserts			# send/receive data structure, one per track
 
-					effect_chain_stack
+					effect_chain_stack # for bypass and friends
+					cache_map		# original versions of intermediate mixdown

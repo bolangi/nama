@@ -6,16 +6,18 @@
 # So all the routines in Graphical_methods.pl can consider
 # themselves to be in the base class.
 
-# $ui->foo defaults to the root namespace
-# picking up subs from Graphical_methods.pl
-
-# in Text mode, $ui->foo picks up methods from the
-# Text namespace, often no-op stubs
+# How is $ui->init_gui interpreted? If $ui is class ::Text
+# Nama finds a no-op init_gui stub in package ::Text.
+#
+# If $ui is class ::Graphical, 
+# Nama looks for init_gui() in package ::Graphical,
+# finds nothing, so goes to look in the root namespace ::
+# of which ::Text and ::Graphical are both descendants.
 
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = '0.9985';
+$VERSION = 0.9986;
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
@@ -259,7 +261,7 @@ __END__
 
 =head1 NAME
 
-B<Nama> - Lightweight recorder, mixer and mastering system
+B<Nama> - Ecasound-based recorder, mixer and mastering system
 
 =head1 SYNOPSIS
 
@@ -270,12 +272,13 @@ B<nama> [I<options>] [I<project_name>]
 B<Nama> is a lightweight recorder/mixer application using
 Ecasound in the back end to provide multitrack recording,
 effects processing, and mastering. Nama provides aux sends,
-inserts, buses and other functions more typical of digital
-audio workstations.
+inserts, buses, regions and time-shifting functions more
+typical of digital audio workstations.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>
-option provides a text-only interface for console users.
+option provides a text-only interface for console
+users.
 
 =head1 OPTIONS
 
@@ -709,7 +712,7 @@ You will need to install Tk to use the GUI.
 C<cpan Tk>
 
 You may want to install Audio::Ecasound
-if you prefer not to have Ecasound running
+if you prefer not to run Ecasound 
 in server mode.
 
 C<cpan Audio::Ecasound>

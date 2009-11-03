@@ -622,12 +622,12 @@ list_effect_chains:
   parameters: [<s_frag1> <s_frag2>... ]
 bypass_effects:
   type: effect
-  short: bye
+  short: bypass bye
   what: bypass track effects except for vol/pan (pushing onto effect store)
   parameters: none
 replace_effects:
   type: effect
-  short: rep 
+  short: replace rep 
   what: restored bypassed track effects (popping off effect store)
   parameters: none
 ...

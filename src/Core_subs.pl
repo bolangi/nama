@@ -1262,6 +1262,12 @@ sub generate_setup {
 
 	$debug and say "The expanded graph with inserts is $g";
 
+#   store active track versions for later use in cache_map
+
+	%versions = ();
+	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
+	say "monitor_versions\n",yaml_out \%versions;
+
 # now to create input and output lists %inputs and %outputs
 
 # the graphic part: we process edges:
@@ -1841,7 +1847,8 @@ sub connect_transport {
 		or print("Invalid chain setup, engine not ready.\n"),return;
 	find_op_offsets(); 
 	apply_ops();
-	eval_iam('cs-connect') or say("Failed to connect setup, engine not ready"),return;
+	eval_iam('cs-connect');
+	# or say("Failed to connect setup, engine not ready"),return;
 	my $status = eval_iam("engine-status");
 	if ($status ne 'not started'){
 		print("Invalid chain setup, cannot connect engine.\n");
@@ -1871,6 +1878,9 @@ sub transport_status {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
+	if (%cooked_record_pending){
+		say join(" ", keys %cooked_record_pending), ": ready for caching";
+	}
 	if ($loop_enable and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
 		print "looping from ", d1($start), 
@@ -1918,14 +1928,13 @@ sub start_transport {
 sub stop_transport { 
 
 	$debug2 and print "&stop_transport\n"; 
-	stop_heartbeat();
 	mute();
 	eval_iam('stop');	
 	sleeper(0.5);
 	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
 	unmute();
+	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
-	rec_cleanup();
 }
 sub transport_running { eval_iam('engine-status') eq 'running'  }
 
@@ -1938,7 +1947,7 @@ sub start_heartbeat {
  	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
 }
 
-sub stop_heartbeat {$event_id{heartbeat} = undef }
+sub stop_heartbeat {$event_id{heartbeat} = undef; rec_cleanup() }
 
 sub heartbeat {
 
@@ -1946,7 +1955,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	stop_heartbeat()
+	say("\nstopped"),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
@@ -2121,7 +2130,25 @@ sub rec_cleanup {
 			else { unlink $_ }
 		}
 	}
-	%cooked_record_pending = () if $recorded;
+	# store data about cached tracks
+	if ($recorded and %cooked_record_pending){
+		$debug and say "updating track cache_map";
+		my $old_this_track = $this_track;
+		map{    
+			my $t = $this_track = $tn{$_};  
+			
+			my $cache_map = $t->cache_map;
+			$cache_map->{$t->last} = { 
+				caches 			=> $versions{$_},
+				effect_chain	=> push_effect_chain(), # bypass
+			};
+			say qq(Saving effects for cached track "$_".
+'replace_effects' will reset "$_" to version $versions{$_});
+
+		} keys %cooked_record_pending;
+		$this_track = $old_this_track;
+		%cooked_record_pending = ();
+	}
 	rememoize();
 	if ( $recorded ) {
 			say "Now reviewing your recording...";
@@ -3250,18 +3277,22 @@ sub restore_state {
 			}
 		}
 	}
-	if( $saved_version < 0.9985){
+	if( $saved_version < 0.9986){
 	
 		map { 	# store insert without intermediate array
 
 				my $t = $_;
+
+				# use new storage format for inserts
 				my $i = $t->{inserts};
 				if($i =~ /ARRAY/){ 
 					$t->{inserts} = scalar @$i ? $i->[0] : {}  }
+				
+				# initialize inserts effect_chain_stack and cache_map
 
-				# initialize effect_chain_stack
-
+				$t->{inserts} //= {};
 				$t->{effect_chain_stack} //= [];
+				$t->{cache_map} //= {};
 
 				# set class for Mastering tracks
 
@@ -4080,6 +4111,8 @@ sub new_effect_chain_name {
 	$name . ++$i
 }
 
+# too many functions in push and pop!!
+
 sub push_effect_chain {
 	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
@@ -4090,6 +4123,7 @@ sub push_effect_chain {
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
 	add_effect_chain($add_name) if $add_name;
+	$save_name;
 }
 
 sub pop_effect_chain { # restore previous, save current as name if supplied
