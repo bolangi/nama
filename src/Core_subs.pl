@@ -108,8 +108,7 @@ sub initialize_terminal {
 		&{$attribs->{'callback_read_char'}}();
 		if ( $press_space_to_start_transport and
 				$attribs->{line_buffer} eq " " ){
-			if (engine_running()){ stop_transport() }
-			else { start_transport() }
+			toggle_transport();	
 			$attribs->{line_buffer} = q();
 			$attribs->{point} 		= 0;
 			$attribs->{end}   		= 0;
@@ -124,7 +123,9 @@ sub initialize_terminal {
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
 }
-sub callback_handler_install {
+sub toggle_transport {
+	if (engine_running()){ stop_transport() } 
+	else { start_transport() }
 }
 	
 sub first_run {

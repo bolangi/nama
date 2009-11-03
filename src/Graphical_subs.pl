@@ -19,19 +19,24 @@ sub init_gui {
 	$mw->deiconify;
 	$parent{mw} = $mw;
 
-	### Exit via Ctrl-C 
-
-	$mw->bind('<Control-Key-c>' => \&cleanup_exit); 
 
 	### init effect window
 
 	$ew = $mw->Toplevel;
 	$ew->title("Effect Window");
 	$ew->deiconify; 
-	$ew->bind('<Control-Key-c>' => \&cleanup_exit);
 #	$ew->withdraw;
 	$parent{ew} = $ew;
 
+	### Exit via Ctrl-C 
+
+	$mw->bind('<Control-Key-c>' => \&cleanup_exit); 
+	$ew->bind('<Control-Key-c>' => \&cleanup_exit);
+
+    ## Press SPACE to start/stop transport
+
+	$mw->bind('<Control-Key- >' => \&toggle_transport); 
+	$ew->bind('<Control-Key- >' => \&toggle_transport); 
 	
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
@@ -39,9 +44,6 @@ sub init_gui {
 		-width => 1200,
 		-height => 700,	
 		);
-# 		scrollregion =>[2,2,10000,2000],
-# 		-width => 1000,
-# 		-height => 4000,	
 	$effect_frame = $canvas->Frame;
 	my $id = $canvas->createWindow(30,30, -window => $effect_frame,
 											-anchor => 'nw');
@@ -85,6 +87,7 @@ sub init_gui {
 		-textvariable => \$project,
 		-width => 25
 	)->pack(-side => 'left');
+
 	$sn_load = $load_frame->Button->pack(-side => 'left');;
 	$sn_new = $load_frame->Button->pack(-side => 'left');;
 	$sn_quit = $load_frame->Button->pack(-side => 'left');
