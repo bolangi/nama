@@ -2349,69 +2349,61 @@ sub ctrl_index {
 }
 sub cop_add {
 	$debug2 and print "&cop_add\n";
-	my %p 			= %{shift()};
-	my $n 			= $p{chain};
-	my $code		= $p{type};
-	my $parent_id = $p{parent_id};  
-	my $id		= $p{cop_id};   # causes restore behavior when present
-	my $i       = $effect_i{$code};
-	my @values = @{ $p{values} } if $p{values};
-	my $parameter	= $p{parameter};  # needed for parameter controllers
-	                                  # zero based
-$debug and print <<PP;
-n:          $n
-code:       $code
-parent_id:  $parent_id
-cop_id:     $id
-effect_i:   $i
-parameter:  $parameter
-PP
+	my $p = shift;
+	$debug and say yaml_out($p);
 
-	return $id if $id; # do nothing if cop_id has been issued
+	# do nothing if cop_id has been issued, unless forced
+	return $p->{cop_id} if $p->{cop_id};# and ! $p->{force}; 
+
+	# special handling for effect chain restore
+	#local $cop_id = $p->{cop_id} if $p->{force};
 
 	# make entry in %cops with chain, code, display-type, children
 
+	my $i = $effect_i{$p->{type}};
+	my $n = $p->{chain};
+
 	$debug and print "Issuing a new cop_id for track $n: $cop_id\n";
-	# from the cop_id, we may also need to know chain number and effect
+
 
 	$cops{$cop_id} = {chain => $n, 
-					  type => $code,
+					  type => $p->{type},
 					  display => $effects[$i]->{display},
-					  owns => [] }; # DEBUGGIN TEST
+					  owns => [] }; 
 
-	$p{cop_id} = $cop_id;
- 	cop_init( \%p );
+	$p->{cop_id} = $cop_id;
+ 	cop_init( $p );
 
-	if ($parent_id) {
-		$debug and print "parent found: $parent_id\n";
+	if ($p->{parent_id}) {
+		$debug and print "parent found: $p->{parent_id}\n";
 
 		# store relationship
-		$debug and print "parent owns" , join " ",@{ $cops{$parent_id}->{owns}}, "\n";
+		$debug and print "parent owns" , join " ",@{ $cops{$p->{parent_id}}->{owns}}, "\n";
 
-		push @{ $cops{$parent_id}->{owns}}, $cop_id;
+		push @{ $cops{$p->{parent_id}}->{owns}}, $cop_id;
 		$debug and print join " ", "my attributes:", (keys %{ $cops{$cop_id} }), "\n";
-		$cops{$cop_id}->{belongs_to} = $parent_id;
+		$cops{$cop_id}->{belongs_to} = $p->{parent_id};
 		$debug and print join " ", "my attributes again:", (keys %{ $cops{$cop_id} }), "\n";
-		$debug and print "parameter: $parameter\n";
+		$debug and print "parameter: $p->{parameter}\n";
 
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
 		
-		$copp{$cop_id}->[0] = $parameter + 1; 
+		$copp{$cop_id}->[0] = $p->{parameter} + 1; 
 		
  		# find position of parent and insert child immediately afterwards
 
  		my $end = scalar @{ $ti{$n}->ops } - 1 ; 
  		for my $i (0..$end){
  			splice ( @{$ti{$n}->ops}, $i+1, 0, $cop_id ), last
- 				if $ti{$n}->ops->[$i] eq $parent_id 
+ 				if $ti{$n}->ops->[$i] eq $p->{parent_id}
  		}
 	}
 	else { push @{$ti{$n}->ops }, $cop_id; } 
 
 	# set values if present
 	
-	$copp{$cop_id} = \@values if @values; # needed for text mode
+	$copp{$cop_id} = $p->{values}; #  if @values; # needed for text mode
 
 	$cop_id++; # return value then increment
 }
@@ -4126,6 +4118,7 @@ sub new_effect_chain {
 					params	=> { map{$_ => $copp{$_} 		} @ops},
 	}
 }
+
 sub add_effect_chain {
 	my $name = shift;
 	say ("$name: effect chain does not exist"), return 
@@ -4137,11 +4130,6 @@ sub add_effect_chain {
 	} @{$effect_chain{$name}{ops}};
 			
 }	
-sub append_effect_chain {
-}
-sub insert_effect_chain {
-}
-	
 sub cleanup_exit {
  	remove_small_wavs();
  	kill 15, ecasound_pid() if $sock;  	

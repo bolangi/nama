@@ -243,10 +243,8 @@ effects => <<EFFECTS,
    add_effect_chain,   aec    - add an effect chain to the current track
    delete_effect_chain,dec    - delete an effect chain
    list_effect_chains, lec    - list effect chains and their parameters
-   bypass,             by     - suspend current track effects except vol/pan
-   nobypass,           nob    - restore current track effects
-   push_effect_chains, puc    - similar to bypass, with effect chain naming
-   pop_effect_chains,  poc    - similar to nobypass, with effect chain naming
+   bypass_effects,     bye    - suspend current track effects except vol/pan
+   replace_effects,    rep    - restore track effects
 
 EFFECTS
 

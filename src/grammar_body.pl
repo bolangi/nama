@@ -582,31 +582,5 @@ list_effect_chains: _list_effect_chains name(s?) end {
 	} @ids;
 	1;
 }
-push_effect_chain: _push_effect_chain end {
-	::push_effect_chain();
-	1;
-
-}
-push_effect_chain: _push_effect_chain 'save' name {
-	::push_effect_chain(save => $item{name});
-	1;
-}
-push_effect_chain: _push_effect_chain 'save' name 'add' a_name {
-	::push_effect_chain(save => $item{name}, add => $item{a_name});
-	1;
-}
-a_name: name
-push_effect_chain: _push_effect_chain 'add' name {
-	::push_effect_chain(add => $item{name});
-	1;
-}
-pop_effect_chain: _pop_effect_chain end {
-	::pop_effect_chain();
-	1;
-}
-pop_effect_chain: _pop_effect_chain 'save' name end {
-	::pop_effect_chain(save => $item{name});
-	1;
-}
-bypass:   _bypass   end { ::push_effect_chain(); 1}
-nobypass: _nobypass end {  ::pop_effect_chain(); 1}
+bypass_effects:   _bypass_effects end { ::push_effect_chain(); 1}
+replace_effects: _replace_effects end {  ::pop_effect_chain(); 1}

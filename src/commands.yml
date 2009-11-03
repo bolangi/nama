@@ -620,50 +620,14 @@ list_effect_chains:
   short: lec
   what: list names effect chains, matching any strings provided
   parameters: [<s_frag1> <s_frag2>... ]
-push_effect_chain:
+bypass_effects:
   type: effect
-  short: puc
-  what: pushing current track effects onto list, optionally applying effect_chain  
-  parameters: ['save' <s_save_name>] [ 'add' <s_effect_chain>]
-pop_effect_chain:
-  type: effect
-  short: poc
-  what: pop effect chain off track list, optionally saving current effects
-  parameters: ['save' <s_save_name>] 
-bypass:
-  type: effect
-  short: by
-  what: bypass track effects except for vol/pan (same as push_effect_chain)
+  short: bye
+  what: bypass track effects except for vol/pan (pushing onto effect store)
   parameters: none
-nobypass:
+replace_effects:
   type: effect
-  short: nob 
-  what: restored bypassed track effects (same as pop_effect_chain)
+  short: rep 
+  what: restored bypassed track effects (popping off effect store)
   parameters: none
-# die:
-#   what: just end it already - a test for the command prompt
-# midi_inputs:
-#   type: perform
-#   what: use MIDI messages to control parameters
-#   short: midi
-#   parameters: on/off/capture  
-# erase_capture:
-#   type: perform
-#   short: erase
-#   what: erase recorded controller inputs
-#   parameters: optional range, as decimal times in seconds, or mark names or indices 
-# perform:
-#   type: perform
-#   what: playback recorded controller inputs
-#   short: perform perf
-#   parameters: on/off
-# bind_midi:
-#   type: perform
-#   parameters: midi_port midi_controller chain_op_id parameter multiplier offset (log)
-#   what: bind a midi controller to a chain operator parameter
-#   short: bind
-# bind_off:
-#   type: perform
-#   what: remove MIDI binding
-#   parameters: midi_port midi_controller
 ...
