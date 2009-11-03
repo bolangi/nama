@@ -2148,8 +2148,8 @@ sub add_effect {
 			   								# already created in add_track
 
 	$id = cop_add(\%p); 
-	my %pp = ( %p, cop_id => $id); # replace chainop id
-	$ui->add_effect_gui(\%pp);
+	%p = ( %p, cop_id => $id); # replace chainop id
+	$ui->add_effect_gui(\%p);
 	if( eval_iam("cs-is-valid") ){
 		my $er = engine_running();
 		$ti{$n}->mute if $er;
