@@ -842,11 +842,8 @@ sub add_effect_gui {
 		$debug2 and print "&add_effect_gui\n";
 		@_ = discard_object(@_);
 		my %p 			= %{shift()};
-		my $n 			= $p{chain};
-		my $code 			= $p{type};
-		my $parent_id = $p{parent_id};  
-		my $id		= $p{cop_id};   # initiates restore
-		my $parameter		= $p{parameter}; 
+		my ($n,$code,$id,$parent_id,$parameter) =
+			@p{qw(chain type cop_id parent_id parameter)};
 		my $i = $effect_i{$code};
 
 		$debug and print yaml_out(\%p);

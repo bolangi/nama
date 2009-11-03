@@ -2138,8 +2138,9 @@ sub add_effect {
 	$debug2 and print "&add_effect\n";
 	
 	my %p 			= %{shift()};
+	$p{values} ||= [];
 	my ($n,$code,$parent_id,$id,$parameter,$values) =
-		@p{ qw( chain type parent_id cop_id parameter values)};
+		@p{qw( chain type parent_id cop_id parameter values)};
 	my $i = $effect_i{$code};
 
 	return if $id and ($id eq $ti{$n}->vol 
