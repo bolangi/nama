@@ -115,6 +115,7 @@ our (
 	$cop_id, 		# chain operator id, that how we create, 
 					# store, find them, adjust them, and destroy them,
 					# per track or per project?
+	$magical_cop_id, # cut through five levels of subroutines
 	%cops,			 # chain operators stored here
 	%copp,			# their parameters for effect update
 	%copp_exp,      # for log-scaled sliders

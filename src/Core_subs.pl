@@ -2138,14 +2138,9 @@ sub add_effect {
 	$debug2 and print "&add_effect\n";
 	
 	my %p 			= %{shift()};
-	my $n 			= $p{chain};
-	my $code 			= $p{type};
-
-	my $parent_id = $p{parent_id};  
-	my $id		= $p{cop_id};   # initiates restore
-	my $parameter		= $p{parameter};  # for controllers
+	my ($n,$code,$parent_id,$id,$parameter,$values) =
+		@p{ qw( chain type parent_id cop_id parameter values)};
 	my $i = $effect_i{$code};
-	my $values = $p{values};
 
 	return if $id and ($id eq $ti{$n}->vol 
 				or $id eq $ti{$n}->pan);   # skip these effects 
@@ -2350,60 +2345,61 @@ sub ctrl_index {
 sub cop_add {
 	$debug2 and print "&cop_add\n";
 	my $p = shift;
+	my %p = %$p;
 	$debug and say yaml_out($p);
 
-	# do nothing if cop_id has been issued, unless forced
-	return $p->{cop_id} if $p->{cop_id};# and ! $p->{force}; 
+	# do nothing if cop_id has been issued
+	return $p{cop_id} if $p{cop_id};
 
-	# special handling for effect chain restore
-	#local $cop_id = $p->{cop_id} if $p->{force};
+	local $cop_id = $magical_cop_id if $magical_cop_id;
 
 	# make entry in %cops with chain, code, display-type, children
 
-	my $i = $effect_i{$p->{type}};
-	my $n = $p->{chain};
+	my ($n, $type, $parent_id, $parameter)  = 
+		@p{qw(chain type parent_id parameter)};
+	my $i = $effect_i{$type};
 
-	$debug and print "Issuing a new cop_id for track $n: $cop_id\n";
 
+	$debug and print "Issuing a cop_id for track $n: $cop_id\n";
 
 	$cops{$cop_id} = {chain => $n, 
-					  type => $p->{type},
+					  type => $type,
 					  display => $effects[$i]->{display},
 					  owns => [] }; 
 
 	$p->{cop_id} = $cop_id;
  	cop_init( $p );
 
-	if ($p->{parent_id}) {
-		$debug and print "parent found: $p->{parent_id}\n";
+	if ($parent_id) {
+		$debug and print "parent found: $parent_id\n";
 
 		# store relationship
-		$debug and print "parent owns" , join " ",@{ $cops{$p->{parent_id}}->{owns}}, "\n";
+		$debug and print "parent owns" , join " ",@{ $cops{$parent_id}->{owns}}, "\n";
 
-		push @{ $cops{$p->{parent_id}}->{owns}}, $cop_id;
+		push @{ $cops{$parent_id}->{owns}}, $cop_id;
 		$debug and print join " ", "my attributes:", (keys %{ $cops{$cop_id} }), "\n";
-		$cops{$cop_id}->{belongs_to} = $p->{parent_id};
+		$cops{$cop_id}->{belongs_to} = $parent_id;
 		$debug and print join " ", "my attributes again:", (keys %{ $cops{$cop_id} }), "\n";
-		$debug and print "parameter: $p->{parameter}\n";
+		$debug and print "parameter: $parameter\n";
 
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
 		
-		$copp{$cop_id}->[0] = $p->{parameter} + 1; 
+		$copp{$cop_id}->[0] = $parameter + 1; 
 		
  		# find position of parent and insert child immediately afterwards
 
  		my $end = scalar @{ $ti{$n}->ops } - 1 ; 
  		for my $i (0..$end){
  			splice ( @{$ti{$n}->ops}, $i+1, 0, $cop_id ), last
- 				if $ti{$n}->ops->[$i] eq $p->{parent_id}
+ 				if $ti{$n}->ops->[$i] eq $parent_id
  		}
 	}
 	else { push @{$ti{$n}->ops }, $cop_id; } 
 
 	# set values if present
 	
-	$copp{$cop_id} = $p->{values}; #  if @values; # needed for text mode
+	$copp{$cop_id} = $p{values}; #  if @values; # needed for text mode
 
 	$cop_id++; # return value then increment
 }
@@ -4123,10 +4119,12 @@ sub add_effect_chain {
 	my $name = shift;
 	say ("$name: effect chain does not exist"), return 
 		if ! $effect_chain{$name};
-	map { command_process(
-			join " ", 'add_effect',
-			$effect_chain{$name}{type}{$_}, 
-			@{$effect_chain{$name}{params}{$_}})
+	map {  $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
+			command_process( join " ", 
+				'add_effect',
+				$effect_chain{$name}{type}{$_}, 
+				@{$effect_chain{$name}{params}{$_}});
+			$magical_cop_id = undef;
 	} @{$effect_chain{$name}{ops}};
 			
 }	
