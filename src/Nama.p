@@ -242,6 +242,7 @@ $grammar = q(
 [% qx(./emit_command_headers headers) %]
 );
 
+
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 [% qx(cat ./help_topic.pl) %]

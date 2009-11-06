@@ -4,28 +4,24 @@ sign: '+' | '-' | '*' | '/'
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 op_id: /[A-Z]+/
 parameter: /\d+/
-#die: 'die' { CORE::die("killed by shakespeare"); 1 }
-#value: /\d+/
-#value: /[\d\.eE+-]+/
 last: ('last' | '$' ) 
 dd: /\d+/
 name: /\w[\w:,]*\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
 name4: /\w+/
-markname: /\w+/ { 
+marktime: /\d+\.\d+/ # decimal required
+markname: /\w+/ { 	 # must be found
 	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
-marktime: /\d+\.\d+/
 #region_default_end: 'END' | ''
 path: /(["'])[\w-\. \/]+$1/
 path: /[\w\-\.\/]+/
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 
 
-nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
@@ -131,7 +127,6 @@ generate: _generate end { ::generate_setup(); 1}
 arm: _arm end { ::arm(); 1}
 connect: _connect end { ::connect_transport(); 1}
 disconnect: _disconnect end { ::disconnect_transport(); 1}
-#renew_engine: _renew_engine end { ::new_engine(); 1}
 engine_status: _engine_status end { 
 	print(::eval_iam q(engine-status)); print "\n" ; 1}
 start: _start end { ::start_transport(); 1}
@@ -148,6 +143,7 @@ modifiers: _modifiers modifier(s) end {
 	1;}
 
 modifiers: _modifiers end { print $::this_track->modifiers, "\n"; 1}
+nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::show_chain_setup(); 1}
 show_io: _show_io { ::show_io(); 1}
 show_track: _show_track end {
