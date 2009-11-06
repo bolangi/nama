@@ -765,27 +765,20 @@ sub playat {
 sub get_length { 
 	
 	#$debug2 and print "&get_length\n";
-	
-	#print "evaluating....\n";
-	#carp "my call chain\n";
 	my $path = shift;
 	package ::;
-	eval_iam('cs-disconnect');
-	#print "path: $path\n";
+	eval_iam('cs-disconnect') if eval_iam('cs-connected');
 	eval_iam('cs-add gl');
-	#print eval_iam('cs-selected');
 	eval_iam('c-add g');
-	#print eval_iam('c-selected');
 	eval_iam('ai-add ' . $path);
 	eval_iam('ao-add null');
 	eval_iam('cs-connect');
 	eval_iam('engine-launch');
 	eval_iam('ai-select '. $path);
-	#print eval_iam('ai-selected');
 	my $length = eval_iam('ai-get-length');
 	eval_iam('cs-disconnect');
-	#print "length: $length\n";
-	$length;
+	eval_iam('cs-remove gl');
+	sprintf("%.4f", $length);
 }
 sub fancy_ops { # returns list 
 	my $track = shift;

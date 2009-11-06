@@ -1624,7 +1624,8 @@ sub load_ecs {
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove") if eval_iam("cs-selected");
 		eval_iam("cs-load ". $project_file);
-		$debug and map{print "$_\n\n"}map{eval_iam($_)} qw(cs es fs st ctrl-status);
+		eval_iam("cs-select ". $project_file); # needed by Audio::Ecasound, but not Net-ECI !!
+		$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
 }
 
 sub arm {
