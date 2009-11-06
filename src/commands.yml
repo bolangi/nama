@@ -141,11 +141,6 @@ link_track:
   what: create a read-only track that uses .WAV files from another track. 
   parameters: <s_name> <s_target> [ <s_project> ]
   example: link_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
-slave_track:
-  type: track:
-  short: slave
-  what: create a read-only track that gets most of its settings from an existing track, used for instrument monitor buses
-  parameters: name target
 import_audio:
   type: track
   short: import
@@ -315,6 +310,16 @@ remove_track:
   short: rmt
   what: remove effects, parameters and GUI for current track
   parameters: none 
+cache_track:
+  type: track
+  short: cache ct
+  what: record the post-fader signal as a new version
+  parameters: none
+cache_track_cancel:
+  type: track
+  short: cache_cancel ctc
+  what: cancel pending track cache recording
+  parameters: none
 group_rec:
   type: group
   short: grec R
@@ -415,17 +420,17 @@ loop_disable:
 # loop_show:
 #   type: transport
 #   short: ls
-#   what: show loop status and endpoints (TODO)
+#   what: show loop status and endpoints
 #   parameters: none
 add_ctrl:
   type: effect
   what: add a controller to an operator
   parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
-  short: acl cla
+  short: acl
 add_effect:
   type: effect
   what: add effect to current track (placed before volume control)
-  short: fxa afx
+  short: afx
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: add_effect amp 6 (LADSPA Simple amp 6dB gain)!nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required
 append_effect:
@@ -434,19 +439,19 @@ append_effect:
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
-  short: ifx fxi
+  short: ifx
   what: place effect before specified effect (engine stopped, prior to arm only)
   parameters: <s_insert_point_id> <s_effect_code> [ <f_param1> <f_param2>... ]
 modify_effect:
   type: effect
   what: modify an effect parameter
   parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
-  short: fxm mfx
+  short: mfx
   example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)!nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10)!nset multiple effects/parameters: mfx V 1,2,3 + 0.5 mfx V,AC,AD 1,2 3.14
 remove_effect:
   type: effect
   what: remove effects from selected track
-  short: fxr rfx
+  short: rfx
   parameters: <s_effect_id1> [ <s_effect_id2>...]
 add_insert_cooked:
   type: effect 
@@ -575,26 +580,6 @@ update_send_bus:
   what: include tracks added since send bus was created
   parameters: <s_name>
   example: usb Some_bus 
-# set_bus:
-#   type: bus
-#   short: sb
-#   what: set bus parameters
-# parameters: JPC
-# add_slave_track:
-#   type: track
-#   short: ast
-#   what: add a slave track to an existing user bus
-#   parameters: <s_bus_name> <s_target_track_name> 
-cache_track:
-  type: track
-  short: cache
-  what: record the post-fader signal as a new version
-  parameters: none
-no_cache_track:
-  type: track
-  short: nocache noc
-  what: cancel pending post-fader cache 
-  parameters: none
 remove_bus:
   type: bus
   short: rmb
@@ -603,31 +588,36 @@ remove_bus:
 new_effect_chain:
   type: effect
   short: nec
-  what: create a reusable sequence of effects with current parameters
+  what: define a reusable sequence of effects (effect chain) with current parameters
   parameters: <s_name> [<op1>, <op2>,...]
 add_effect_chain:
   type: effect
   short: aec
   what: add an effect chain to the current track
   parameters: <s_name>
+overwrite_effect_chain:
+  type: effect
+  short: oec
+  what: add an effect chain overwriting current effects (which are pushed onto stack)
+  parameters: <s_name>
 delete_effect_chain:
   type: effect
   short: dec
-  what: remove an effect chain from the list
+  what: remove an effect chain definition from the list
   parameters: <s_name>
 list_effect_chains:
   type: effect
   short: lec
-  what: list names effect chains, matching any strings provided
+  what: list effect chains, matching any strings provided
   parameters: [<s_frag1> <s_frag2>... ]
 bypass_effects:
   type: effect
   short: bypass bye
-  what: bypass track effects except for vol/pan (pushing onto effect store)
+  what: bypass track effects (pushing them onto stack) except vol/pan 
   parameters: none
 replace_effects:
   type: effect
   short: replace rep 
-  what: restored bypassed track effects (popping off effect store)
+  what: restore bypassed track effects (pop an effect chain off stack)
   parameters: none
 ...

@@ -4146,16 +4146,9 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	}
 	delete $effect_chain{$previous};
 }
-sub replace_effects { # add support for cached versions
+sub uncache { 
 	my $t = $this_track;
 	# skip unless MON;
-	#print($t->name, ": requires MON status.\n\n"), 
-	# return 1 unless $t->rec_status eq 'MON';
-# 	print($t->name, ": 'replace_effects' will
-# 		remove all current effects!  Skipping.\n\n"), 
-# 		return 1 unless $t->fancy_ops;
-	# if is cached track, set original version and original effects
-	# skip if fancy effects
 	my $cm = $t->cache_map;
 	my $v = $t->monitor_version;
 	if($cm->{$v}){ # we are a cached version
@@ -4167,8 +4160,11 @@ sub replace_effects { # add support for cached versions
 		$t->set(effect_chain_stack => [ 
 			grep{$_ ne $cm->{$v}{effect_chain}} @{ $t->effect_chain_stack}
 		]);
-	} else { pop_effect_chain();}
+	} 
+	else { print $t->name, ": version $v is not cached\n"}
 }
+
+sub replace_effects {  pop_effect_chain()}
 
 sub new_effect_chain {
 	my ($name, @ops) = @_;

@@ -546,7 +546,7 @@ cache_track: _cache_track end {
 	$::cooked_record_pending{ $::this_track->name }++; 
 	1;
 }
-no_cache_track: _no_cache_track end {
+cache_track_cancel: _cache_track_cancel end {
 	delete $::cooked_record_pending{ $::this_track->name }; 
 	1;
 }
@@ -587,6 +587,11 @@ list_effect_chains: _list_effect_chains name(s?) end {
 	1;
 }
 bypass_effects:   _bypass_effects end { ::push_effect_chain(); 1}
-replace_effects: _replace_effects end {  
-	::replace_effects(); 1; 
+replace_effects: _replace_effects end {  ::replace_effects(); 1;}
+overwrite_effect_chain: _overwrite_effect_chain name end {
+	my $name = $item{name};
+	print("$name: unknown effect chain.\n"), return if !  $::effect_chain{$name};
+	::push_effect_chain() if $::this_track->fancy_ops;
+	::add_effect_chain($name); 1
 }
+		
