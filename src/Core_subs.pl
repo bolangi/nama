@@ -1868,7 +1868,7 @@ sub connect_transport {
 	}
 	$length = eval_iam('cs-get-length'); 
 	$ui->length_display(-text => colonize($length));
-	# eval_iam("cs-set-length $length") unless @record;
+	eval_iam("cs-set-length $length") if $tn{Mixdown}->rec_status eq 'REC'; 
 	$ui->clock_config(-text => colonize(0));
 	transport_status();
 	$ui->flash_ready();
