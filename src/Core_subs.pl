@@ -103,7 +103,7 @@ sub initialize_terminal {
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
-    $term->callback_handler_install($prompt, \&process_line);
+    $term->callback_handler_install(prompt(), \&process_line);
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
 		if ( $press_space_to_start_transport and
@@ -123,6 +123,10 @@ sub initialize_terminal {
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
 }
+sub prompt {
+	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+}
+	
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
 	else { start_transport() }
@@ -597,7 +601,18 @@ sub initialize_routing_dispatch_table {
 			add_entry_h($h);
 		},
 		null_in			=> sub {},
-		null_out		=> sub {},
+		null_out		=> sub {
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = qw(device null);
+			add_entry_h({
+				dir  	=> 'outputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+			});
+		},
 		jack_client_in 	=> sub {
 			my $name = shift;
 			my $t = $tn{$name};
@@ -624,32 +639,32 @@ sub initialize_routing_dispatch_table {
 				pre_output => $t->pre_send,
 			});
 		},
-	soundcard_in	=> sub { 
-		my $name = shift;
-		my $t = $tn{$name};
-		my ($type, $id) = @{$t->soundcard_input};
-		add_entry_h({
-			dir  	=> 'inputs',
-			name	=> $name,
-			type 	=> $type,
-			id		=> $id,
-			chain	=> $t->n,
-			post_input => $t->rec_route .  $t->mono_to_stereo, 
+		soundcard_in	=> sub { 
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = @{$t->soundcard_input};
+			add_entry_h({
+				dir  	=> 'inputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+				post_input => $t->rec_route .  $t->mono_to_stereo, 
+				});
+			},
+		soundcard_out	=> sub { 
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = @{soundcard_output()};
+			add_entry_h({
+				dir  	=> 'outputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+				pre_output => $t->pre_send,
 			});
 		},
-	soundcard_out	=> sub { 
-		my $name = shift;
-		my $t = $tn{$name};
-		my ($type, $id) = @{soundcard_output()};
-		add_entry_h({
-			dir  	=> 'outputs',
-			name	=> $name,
-			type 	=> $t->soundcard_output()->[0],
-			id		=> $t->soundcard_output()->[1],
-			chain	=> $t->n,
-			pre_output => $t->pre_send,
-		});
-	},
 	);
 
 # 	we might use the same routines for jack_client_in/out
@@ -1119,6 +1134,8 @@ sub generate_setup {
 
 	# Create data structures representing chain setup.
 	# This step precedes write_chains(), i.e. writing Setup.ecs.
+	
+	my $automix = shift; # we'll create an extra edge Master-null_out
 
 	$debug2 and print "&generate_setup\n";
 
@@ -1213,6 +1230,10 @@ sub generate_setup {
 
 	} else { $g->add_edge('Master','soundcard_out') if $main_out }
 
+	# connect Master to null for automix
+	
+	$g->add_edge(qw[Master null_out]) if $automix;
+
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
 			$ecasound_globals_for_mixdown; 
@@ -1238,7 +1259,7 @@ sub generate_setup {
 	# is removed
 
 	::Graph::remove_inputless_tracks($g);
-	::Graph::remove_outputless_tracks($g); # not helpful at present
+	::Graph::remove_outputless_tracks($g); 
 	
 	$debug and say "The graph is $g";
 
@@ -1927,6 +1948,7 @@ sub start_transport {
 	sleeper(0.5) unless really_recording();
 	unmute();
 	start_heartbeat();
+	sleeper(1);
 	print "engine is ", eval_iam("engine-status"), "\n\n"; 
 
 	sleep 1; # time for engine to stabilize
@@ -3642,12 +3664,15 @@ sub command_process {
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
 				my $c = q(c-select ) . $this_track->n; 
+    			$term->callback_handler_install(prompt(), \&process_line);
 				eval_iam( $c ) if eval_iam( 'cs-connected' );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
-				my $c = q(c-select ) . $this_track->n; eval_iam( $c );
+				my $c = q(c-select ) . $this_track->n; 
+    			$term->callback_handler_install(prompt(), \&process_line);
+				eval_iam( $c );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){
 				$debug and print "Found Iam command\n";
@@ -3747,23 +3772,19 @@ sub jack_client {
 
 sub automix {
 
-	# use Smart::Comments '###';
-	# add -ev to mixtrack
+	use Smart::Comments '###';
+	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
 
-	# use Ecasound globals for mixdown 
-	# mixplay() below restores normal values
+	# use special Ecasound globals for mixdown 
+	
+	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
+		if $ecasound_globals_for_mixdown;
 	
 	# turn off audio output
 	
 	$main_out = 0;
-
-	# turn off mixdown_to_file rule
-	#$MIX_down->set(   status => 0);
-
-	# turn on mix_down_ev
-	$mix_down_ev->set(status => 1);
 
 	### Status before mixdown:
 
@@ -3774,44 +3795,40 @@ sub automix {
 	command_process( 'for mon; vol/10');
 
 	#command_process('show');
-	
-	command_process('arm; start');
+
+	generate_setup('automix'); # pass a bit of magic
+	connect_transport();
+	start_transport();
 
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
 	# parse cop status
 	my $cs = eval_iam('cop-status');
-	my $cs_re = qr/Chain "2".+?result-max-multiplier ([\.\d]+)/s;
+	### cs: $cs
+	my $cs_re = qr/Chain "1".+?result-max-multiplier ([\.\d]+)/s;
 	my ($multiplier) = $cs =~ /$cs_re/;
 
 	### multiplier: $multiplier
 
-	if ( $multiplier - 1 > 0.01 ){
-
-		### apply multiplier to individual tracks
-
-		command_process( "for mon; vol*$multiplier" );
-
-		# keep same audible output volume: UNUSED
-		
-	#	my $master_multiplier = $multiplier/10;
-
-
-		### master multiplier: $multiplier/10
-
-		# command_process("Master; vol/$master_multiplier")
-
-
-	}
 	remove_effect($ev);
+
+	# deal with all silence case, where multiplier is 0.00000
 	
-	### turn off 
-	$mix_down_ev->set(status => 0);
+	if ( $multiplier < 0.00001 ){
 
-	### turn on mixdown_to_file
-	#$mix_down->set(status => 1);
+		say "Signal appears to be silence. Skipping.";
+		command_process( 'for mon; vol*10');
+		$ecasound_globals_ecs = $ecasound_globals;
+		$main_out = 1;
+		return;
+	}
 
+	### apply multiplier to individual tracks
+
+	command_process( "for mon; vol*$multiplier" );
+
+	
 	### mixdown
 	command_process('mixdown');
 
@@ -3829,8 +3846,8 @@ sub automix {
 	### default to playing back Mixdown track, setting user tracks to OFF
 
 	command_process('mixplay');
-	
-#	no Smart::Comments;
+
+	no Smart::Comments;
 	
 }
 

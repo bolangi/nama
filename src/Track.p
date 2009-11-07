@@ -692,7 +692,7 @@ sub unmute {
 	$track->set(old_vol_level => 0);
 }
 
-sub ingest  {
+sub ingest  { # i believe 'import' has a magical meaning
 	my $track = shift;
 	my ($path, $frequency) = @_;
 	my $version  = ${ $track->versions }[-1] + 1;
@@ -716,6 +716,7 @@ sub ingest  {
 		print $cmd;
 		system $cmd or print "error: $!\n";
 	} 
+	rememoize();
 }
 
 sub playat_output {
