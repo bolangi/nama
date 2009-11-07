@@ -315,14 +315,12 @@ our (
 
 	# rules
 	
-	$mix_down_ev,
 	$mon_setup,
 	$rec_file,
 	$rec_setup,
 	$aux_send,
 	$null_setup,
 
-	$send_bus_cooked_input,
 	$send_bus_out,
 	
 	# mastering mode status

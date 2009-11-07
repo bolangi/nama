@@ -705,25 +705,6 @@ sub initialize_rules {
 		%rule_names = (); 
 	package Audio::Nama;
 
-# the following rule is used by automix to normalize
-# the track levels.
-
-	$mix_down_ev = ::Rule->new(
-
-		name			=> 'mix_ev', 
-		chain_id		=> 1, # Master
-		target			=> 'all', 
-		
-		input_type 		=> 'loop',
-		input_object	=> 'Master_in',
-
-		output_type		=> 'device',
-		output_object   => 'null',
-
-		status			=> 0,
-	);
-
-
 	# records unprocessed live input to file
 		
 	$rec_file = ::Rule->new(
