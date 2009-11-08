@@ -4196,4 +4196,14 @@ sub cleanup_exit {
 	CORE::exit; 
 }
 	
+sub cache_track {
+
+	print($this_track->name, ": track caching requires MON status.\n\n"), 
+		return 1 unless $this_track->rec_status eq 'MON';
+	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
+		return 1 unless $this_track->fancy_ops;
+	say $this_track->name,": begin cache recording";
+	$cooked_record_pending{$this_track->name};
+	command_process('solo; main_off; arm; start; nosolo');
+}
 ### end

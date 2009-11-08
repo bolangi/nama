@@ -315,11 +315,6 @@ cache_track:
   short: cache ct
   what: record the post-fader signal as a new version
   parameters: none
-cache_track_cancel:
-  type: track
-  short: cache_cancel ctc
-  what: cancel pending track cache recording
-  parameters: none
 group_rec:
   type: group
   short: grec R
