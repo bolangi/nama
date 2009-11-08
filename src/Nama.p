@@ -258,6 +258,7 @@ $default_palette_yml = <<'PALETTE';
 PALETTE
 
 1;
+
 __END__
 
 =head1 NAME
@@ -270,11 +271,12 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-B<Nama> is a lightweight recorder/mixer application using
-Ecasound in the back end to provide multitrack recording,
-effects processing, and mastering. Nama provides aux sends,
-inserts, buses, regions and time-shifting functions more
-typical of digital audio workstations.
+B<Nama> is a recorder/mixer application using Ecasound in
+the back end to provide multitrack recording, effects
+processing, and mastering. Nama includes aux sends, inserts,
+buses, regions and time-shifting functions. Full help is
+provided, including commands by category, search for
+commands or effects by name or by arbitrary string.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>
@@ -662,7 +664,7 @@ C<master_off>) the following network is used:
 
                           +-(Low)-+ 
                           |       |
-    Eq-in -(Eq)-> Eq_out -+-(Mid)-+- Boost_in -(Boost)-> soundcard/mixdown
+    Eq-in -(Eq)-> Eq_out -+-(Mid)-+- Boost_in -(Boost)-> soundcard/wav_out
                           |       |
                           +-(High)+ 
 
@@ -692,14 +694,14 @@ and doodle modes.
 =head1 BUGS AND LIMITATIONS
 
 No waveform or signal level displays are provided.  No
-latency compensation is provided across the various signal
-paths at present, although this feature is planned.
+latency compensation across signal paths is provided at
+present, although this feature is planned.
 
 =head1 SECURITY CONCERNS
 
 If you are using Nama with the NetECI interface (i.e. if
-Audio::Ecasound is I<not> installed) you should firewall TCP port 2868 
-if you computer is exposed to the Internet. 
+Audio::Ecasound is I<not> installed) you should firewall TCP
+port 2868 if you computer is exposed to the Internet. 
 
 =head1 AVAILABILITY
 
