@@ -5,8 +5,7 @@ use strict;
 use warnings;
 no warnings q(uninitialized);
 use Carp;
-use Data::YAML::Reader; 
-use Data::YAML::Writer;
+use YAML::Tiny;
 use Data::Rmap qw(:all);
 use IO::All;
 use Storable;
@@ -51,9 +50,6 @@ our @EXPORT = qw(
 package ::;
 our ($debug, $debug2, $debug3);
 package ::Assign;
-use vars qw($yw $yr);
-$yw = Data::YAML::Writer->new;
-$yr = Data::YAML::Reader->new;
 
 use Carp;
 
@@ -281,6 +277,7 @@ sub serialize {
 
 sub yaml_out {
 	
+	local $debug = 1;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
@@ -291,8 +288,9 @@ sub yaml_out {
 	my $output;
 	#$debug and print join $/, keys %$data_ref, $/;
 	$debug and print "about to write YAML as string\n";
-    $yw->write( $data_ref, \$output ) if $type =~ /HASH|ARRAY/;
-	$output;
+	my $y = YAML::Tiny->new;
+	$y->[0] = $data_ref;
+	my $yaml = $y->write_string();
 }
 sub yaml_in {
 	
@@ -314,7 +312,10 @@ sub yaml_in {
 	if ($yaml =~ /\t/){
 		croak "YAML file: $input contains illegal TAB character.";
 	}
-	eval q[$yr->read( $yaml )]  or croak "yaml read failed: $@" ; # returns ref
+	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
+	my $y = YAML::Tiny->read_string($yaml);
+	say "YAML::Tiny read error: $YAML::Tiny::errstr" if $YAML::Tiny::errstr;
+	$y->[0];
 }
 
 ## support functions
