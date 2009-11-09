@@ -3233,7 +3233,7 @@ sub assign_var {
 	assign_vars(
 				source => $source,
 				vars   => \@vars,
-		#		format => 'yaml', # breaks, stupid!
+		#		format => 'yaml', # breaks
 				class => '::');
 }
 sub restore_state {
@@ -3241,21 +3241,27 @@ sub restore_state {
 	my $file = shift;
 	$file = $file || $state_store_file;
 	$file = join_path(project_dir(), $file);
-	my $yamlfile = $file;
-	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
-	$file = $yamlfile if -f $yamlfile;
+	$file .= ".yml" unless $file =~ /yml$/;
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
+	
+	my $yaml = io($file)->all;
+
+	# rewrite obsolete null hash/array substitution
+	$yaml =~ s/~NULL_HASH/{}/g;
+	$yaml =~ s/~NULL_ARRAY/[]/g;
+
+	# rewrite %cops 'owns' field to []
+	
+	$yaml =~ s/owns: ~/owns: []/g;
 
 	# restore persistent variables
 
-	assign_var($file, @persistent_vars );
+	assign_var($yaml, @persistent_vars );
 
 	# restore effect chains
-	
 
 	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain));
-	
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
@@ -3333,7 +3339,7 @@ sub restore_state {
 											jack_send);
 		}  @tracks_data;
 	}
-		
+
 	#  destroy and recreate all groups
 
 	::Group::initialize();	
