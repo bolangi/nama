@@ -1186,26 +1186,7 @@ sub add_paths_for_send_and_sub_buses {
 		}
 	} @user_buses;
 }
-sub generate_setup { 
-
-	# Create data structures representing chain setup.
-	# This step precedes write_chains(), i.e. writing Setup.ecs.
-	
-	my $automix = shift; # we'll create an extra edge Master-null_out
-
-	$debug2 and print "&generate_setup\n";
-
-	# save current track
-	
-	my $old_this_track = $this_track;
-
-	initialize_chain_setup_vars();
-	
-	connect_Main_tracks_to_Master();
-
-	add_paths_for_send_and_sub_buses();
-
-	# process mastering mode
+sub add_paths_from_Master {
 
 	if ($mastering_mode){
 		$g->add_path(qw[Master Eq Low Boost]);
@@ -1215,16 +1196,8 @@ sub generate_setup {
 
 	} else { $g->add_edge('Master','soundcard_out') if $main_out }
 
-	# re-route Master to null for automix
-	
-	if( $automix){
-	
-		$g->delete_edges(map{@$_} $g->edges_from('Master'));
-		
-		$g->add_edge(qw[Master null_out]);
-	}
-
-	# Mixdown handling - record
+}
+sub add_paths_for_mixdown_handling {
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
@@ -1246,15 +1219,38 @@ sub generate_setup {
  				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
+}
+sub generate_setup { 
 
-
-	# prune graph
-
-	# remove tracks lacking inputs or outputs
-	# (loop devices count as IO destinations)
+	# Create data structures representing chain setup.
+	# This step precedes write_chains(), i.e. writing Setup.ecs.
 	
-	# we need to do this so that the mix track of a sub bus with no inputs
-	# is removed
+	my $automix = shift; # we'll create an extra edge Master-null_out
+
+	$debug2 and print "&generate_setup\n";
+
+	# save current track
+	
+	my $old_this_track = $this_track;
+
+	initialize_chain_setup_vars();
+	
+	connect_Main_tracks_to_Master();
+
+	add_paths_for_send_and_sub_buses();
+
+	add_paths_from_Master(); # do they affect automix?
+
+	# re-route Master to null for automix
+		
+	if( $automix){
+		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		$g->add_edge(qw[Master null_out]);
+	}
+
+	add_paths_for_mixdown_handling();
+
+	# prune graph: remove tracks lacking inputs or outputs
 
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
@@ -1294,7 +1290,6 @@ sub generate_setup {
 	::Graph::add_inserts($g);
 
 	$debug and say "The expanded graph with inserts is $g";
-
 
 	# create IO lists %inputs and %outputs
 
