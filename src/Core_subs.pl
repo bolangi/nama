@@ -1143,22 +1143,19 @@ sub generate_setup {
 	
 	map{ 
 
-		# connect inputs
+		# connect signal sources to tracks
 		
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
-		
-
 		$g->add_path(@path) if @path;
 
-		# connect outputs to mixer
+		# connect tracks to Master
 		
 		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name);
 
 	} 	grep{ $_->rec_status ne 'OFF' } 
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
-
 
 	# process send and sub buses
 
@@ -1203,6 +1200,8 @@ sub generate_setup {
 	} @user_buses;
 
 
+	# process mastering mode
+
 	if ($mastering_mode){
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
@@ -1211,9 +1210,16 @@ sub generate_setup {
 
 	} else { $g->add_edge('Master','soundcard_out') if $main_out }
 
-	# connect Master to null for automix
+	# re-route Master to null for automix
 	
-	$g->add_edge(qw[Master null_out]) if $automix;
+	if( $automix){
+	
+		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		
+		$g->add_edge(qw[Master null_out]);
+	}
+
+	# Mixdown handling - record
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
@@ -1226,6 +1232,8 @@ sub generate_setup {
 		  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
+	# Mixdown handling - playback
+	
 	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
 			my @e = qw(wav_in Mixdown soundcard_out);
 			$g->add_path(@e);
@@ -1233,6 +1241,10 @@ sub generate_setup {
  				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
+
+
+	# prune graph
+
 	# remove tracks lacking inputs or outputs
 	# (loop devices count as IO destinations)
 	
@@ -1243,6 +1255,8 @@ sub generate_setup {
 	::Graph::remove_outputless_tracks($g); 
 	
 	$debug and say "The graph is $g";
+
+	# track cache routing
 
 	my @cache_rec_tracks = 
 	map {
@@ -1258,30 +1272,33 @@ sub generate_setup {
 
 	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
 
+	# store active track versions for later use in cache_map
+
+	%versions = ();
+	
+	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
+	$debug and say "monitor_versions\n",yaml_out \%versions;
 
 	my $temp_tracks = ::Graph::expand_graph($g);
 	push @$temp_tracks, @cache_rec_tracks;
 
 	$debug and say "The expanded graph is $g";
 
+	# insert handling
+
 	::Graph::add_inserts($g);
 
 	$debug and say "The expanded graph with inserts is $g";
 
-#   store active track versions for later use in cache_map
 
-	%versions = ();
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
+	# create IO lists %inputs and %outputs
 
-# now to create input and output lists %inputs and %outputs
-
-# the graphic part: we process edges:
-# 
-# reserved to track: input 	
-# loop to track    : input		
-# track to loop    : output
-# track to reserved: output
+	# the graphic part: we process edges:
+	# 
+	# reserved to track: input 	
+	# loop to track    : input		
+	# track to loop    : output
+	# track to reserved: output
 
 	map { my ($a,$b) = @$_;
 		  $debug and say "edge $a-$b";
@@ -1313,10 +1330,13 @@ sub generate_setup {
 	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 
 	$this_track = $old_this_track;
-	# process bus rules
+
+	# process static bus rules
 
 	map { $_->apply() } ::Bus::all();
 	$ecasound_globals_ecs = $ecasound_globals;
+
+	# write chains
 	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
 		write_chains();
  		return 1;
