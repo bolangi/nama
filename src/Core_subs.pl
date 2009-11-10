@@ -4219,22 +4219,22 @@ sub cache_track {
 	write_chains_if_something_to_write()
 		and connect_transport()
 		and start_transport(); # no ecasound start is better
-	rec_cleanup(); and 
-
-	if ($recorded){
+	my $name = $this_track->name;
+	if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
 		$debug and say "updating track cache_map";
-			my $t = $this_track;
-			say "cache map",yaml_out($t->cache_map);
-			my $cache_map = $t->cache_map;
-			$cache_map->{$t->last} = { 
-				original 			=> $original_version,
-				effect_chain	=> push_effect_chain(), # bypass
-			};
-			say "cache map",yaml_out($t->cache_map);
-			say qq(Saving effects for cached track "$_".
+		my $t = $this_track;
+		say "cache map",yaml_out($t->cache_map);
+		my $cache_map = $t->cache_map;
+		$cache_map->{$t->last} = { 
+			original 			=> $original_version,
+			effect_chain	=> push_effect_chain(), # bypass
+		};
+		say "cache map",yaml_out($t->cache_map);
+		say qq(Saving effects for cached track "$_".
 'replace_effects' will reset "$_" to version $versions{$_});
-
 	}
+	# set last version; done by new_files_were_recorded
+	rec_cleanup(); # set reasonably expected state
 =cut
 }
 ### end
