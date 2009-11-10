@@ -1126,16 +1126,14 @@ sub generate_setup {
 	add_paths_from_Master(); # do they affect automix?
 
 	# re-route Master to null for automix
-		
 	if( $automix){
 		$g->delete_edges(map{@$_} $g->edges_from('Master'));
 		$g->add_edge(qw[Master null_out]);
 	}
-
 	add_paths_for_mixdown_handling();
 	prune_graph();
 	
-	$debug and say "The graph is $g";
+	$debug and say "The graph is:\n$g";
 
 	# track cache routing
 
@@ -1163,13 +1161,12 @@ sub generate_setup {
 	my $temp_tracks = ::Graph::expand_graph($g);
 	push @$temp_tracks, @cache_rec_tracks;
 
-	$debug and say "The expanded graph is $g";
+	$debug and say "The expanded graph is:\n$g";
 
 	# insert handling
-
 	::Graph::add_inserts($g);
 
-	$debug and say "The expanded graph with inserts is $g";
+	$debug and say "The expanded graph with inserts is\n$g";
 
 	# create IO lists %inputs and %outputs
 
