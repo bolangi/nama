@@ -2127,31 +2127,33 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
+	if( new_files_were_recorded() ){
+		rememoize();
+		say "Now reviewing your recording...";
+		$ui->global_version_buttons(); # recreate
+		$main->set( rw => 'MON');
+		$ui->refresh();
+		reconfigure_engine();
+	}
+}
+sub new_files_were_recorded {
  	return unless my @files = really_recording();
 	$debug and print join $/, "intended recordings:", @files;
 	my $recorded = 0;
 	$debug and print "found bigger than 44100 bytes:\n";
- 	for (@files) {    
-		my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-		if (-e $_) {
-			$debug and print "$_ exists. ";
-			if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
-				$debug and print "$_\n";
-				$tn{$name}->set(active => undef) if $tn{$name};
-				$ui->update_version_button($tn{$name}->n, $version);
-			$recorded++ unless $name =~ /Mixdown/;
+ 	grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
+			if (-e $_) {
+				$debug and print "$_ exists. ";
+				if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
+					$debug and print "$_\n";
+					$tn{$name}->set(active => undef) if $tn{$name};
+					$ui->update_version_button($tn{$name}->n, $version);
+				$recorded++ unless $name =~ /Mixdown/;
+				1;
+				}
+				else { unlink $_; 0 }
 			}
-			else { unlink $_ }
-		}
-	}
-	rememoize();
-	if ( $recorded ) {
-			say "Now reviewing your recording...";
-			$ui->global_version_buttons(); # recreate
-			$main->set( rw => 'MON');
-			$ui->refresh();
-			reconfigure_engine();
-	}
+	} @files;
 } 
 
 ## effect functions
