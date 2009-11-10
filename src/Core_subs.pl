@@ -4203,27 +4203,35 @@ sub cache_track {
 		target => $this_track->name,
 	);
 	my $original_version = $this_track->monitor_version;
+	add_paths_for_sub_buses();  # we will prune unneeded ones
+	my $temp_tracks = ::Graph::expand_graph($g); # array ref
+	push @$temp_tracks, $temp_track;
+	$debug and say "The expanded graph is:\n$g";
+	::Graph::add_inserts($g);
+	$debug and say "The expanded graph with inserts is\n$g";
+	process_routing_graph();
+	$debug and say "temp tracks to remove";
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+	$this_track = $old_this_track;
+	$ecasound_globals_ecs = $ecasound_globals;
+	write_chains_if_something_to_write()
+		and connect_transport()
+		and start_transport(); # no ecasound start is better
+	rec_cleanup(); and 
 
-	# store data about cached tracks
-	if ($recorded and %cooked_record_pending){
+	if ($recorded){
 		$debug and say "updating track cache_map";
-		my $old_this_track = $this_track;
-		map{    
-			my $t = $this_track = $tn{$_};  
+			my $t = $this_track;
 			say "cache map",yaml_out($t->cache_map);
-			
 			my $cache_map = $t->cache_map;
 			$cache_map->{$t->last} = { 
-				original 			=> $versions{$_},
+				original 			=> $original_version,
 				effect_chain	=> push_effect_chain(), # bypass
 			};
 			say "cache map",yaml_out($t->cache_map);
 			say qq(Saving effects for cached track "$_".
 'replace_effects' will reset "$_" to version $versions{$_});
 
-		} keys %cooked_record_pending;
-		$this_track = $old_this_track;
-		%cooked_record_pending = ();
 	}
 =cut
 }
