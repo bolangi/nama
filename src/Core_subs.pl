@@ -1104,27 +1104,82 @@ sub user_mon_tracks {
 	my @user_mon_tracks = grep { $_->rec_status eq 'MON' } @user_tracks;
 	return unless @user_mon_tracks;
 	map{ $_->n } @user_mon_tracks;
-
 }
-
 # return $output{file} entries, including Mixdown 
-
 sub really_recording {  keys %{$outputs{file}}; }
 
 sub generate_setup { 
-
-	# Create data structures representing chain setup.
-	# This step precedes write_chains(), i.e. writing Setup.ecs.
-	
-	my $automix = shift; # we'll create an extra edge Master-null_out
-
 	$debug2 and print "&generate_setup\n";
 
+	my $automix = shift; # route Master to null_out
+
 	# save current track
-	
 	my $old_this_track = $this_track;
 
-	# initialize data structures
+	initialize_chain_setup_vars();
+	connect_Main_tracks_to_Master();
+	add_paths_for_send_and_sub_buses();
+	add_paths_from_Master(); # do they affect automix?
+
+	# re-route Master to null for automix
+	if( $automix){
+		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		$g->add_edge(qw[Master null_out]);
+	}
+	add_paths_for_mixdown_handling();
+	prune_graph();
+	
+	$debug and say "The graph is:\n$g";
+
+	# track cache routing
+
+	my @cache_rec_tracks = 
+	map {
+
+		my $cooked = $_->name . '_cooked';
+		$g->add_path( $_->name, $cooked, 'wav_out');
+		::CacheRecTrack->new(
+			width => 2,
+			name => $cooked,
+			group => 'Cooked',
+			target => $_->name,
+		);
+
+	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
+
+	# store active track versions for later use in cache_map
+
+	%versions = ();
+	
+	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
+	$debug and say "monitor_versions\n",yaml_out \%versions;
+
+	my $temp_tracks = ::Graph::expand_graph($g);
+	push @$temp_tracks, @cache_rec_tracks;
+
+	$debug and say "The expanded graph is:\n$g";
+
+	# insert handling
+	::Graph::add_inserts($g);
+
+	$debug and say "The expanded graph with inserts is\n$g";
+
+	# create IO lists %inputs and %outputs
+
+	process_routing_graph();
+	# now we have processed graph, we can remove temp tracks
+
+	$debug and say "temp tracks to remove";
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+
+	$this_track = $old_this_track;
+
+	process_static_bus_rules();
+	$ecasound_globals_ecs = $ecasound_globals;
+
+	write_chains_if_something_to_write();
+}
+sub initialize_chain_setup_vars {
 
 	  %inputs 
 		= %outputs 
@@ -1137,21 +1192,17 @@ sub generate_setup {
 	# initialize graph
 	
 	$g = Graph->new();
-
-
-	# make connections for normal users tracks (group Main)
-	
+}
+sub connect_Main_tracks_to_Master {
 	map{ 
 
-		# connect inputs
+		# connect signal sources to tracks
 		
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
-		
-
 		$g->add_path(@path) if @path;
 
-		# connect outputs to mixer
+		# connect tracks to Master
 		
 		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name);
 
@@ -1159,8 +1210,8 @@ sub generate_setup {
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
 
-
-	# process send and sub buses
+}
+sub add_paths_for_send_and_sub_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1201,7 +1252,8 @@ sub generate_setup {
 			} @tracks;
 		}
 	} @user_buses;
-
+}
+sub add_paths_from_Master {
 
 	if ($mastering_mode){
 		$g->add_path(qw[Master Eq Low Boost]);
@@ -1211,9 +1263,8 @@ sub generate_setup {
 
 	} else { $g->add_edge('Master','soundcard_out') if $main_out }
 
-	# connect Master to null for automix
-	
-	$g->add_edge(qw[Master null_out]) if $automix;
+}
+sub add_paths_for_mixdown_handling {
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
@@ -1226,6 +1277,8 @@ sub generate_setup {
 		  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
+	# Mixdown handling - playback
+	
 	} elsif ($tn{Mixdown}->rec_status eq 'MON'){
 			my @e = qw(wav_in Mixdown soundcard_out);
 			$g->add_path(@e);
@@ -1233,55 +1286,19 @@ sub generate_setup {
  				  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
-	# remove tracks lacking inputs or outputs
-	# (loop devices count as IO destinations)
-	
-	# we need to do this so that the mix track of a sub bus with no inputs
-	# is removed
-
+}
+sub prune_graph {
+	# prune graph: remove tracks lacking inputs or outputs
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
-	
-	$debug and say "The graph is $g";
-
-	my @cache_rec_tracks = 
-	map {
-
-		my $cooked = $_->name . '_cooked';
-		$g->add_path( $_->name, $cooked, 'wav_out');
-		::CacheRecTrack->new(
-			width => 2,
-			name => $cooked,
-			group => 'Cooked',
-			target => $_->name,
-		);
-
-	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
-
-
-	my $temp_tracks = ::Graph::expand_graph($g);
-	push @$temp_tracks, @cache_rec_tracks;
-
-	$debug and say "The expanded graph is $g";
-
-	::Graph::add_inserts($g);
-
-	$debug and say "The expanded graph with inserts is $g";
-
-#   store active track versions for later use in cache_map
-
-	%versions = ();
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
-
-# now to create input and output lists %inputs and %outputs
-
-# the graphic part: we process edges:
-# 
-# reserved to track: input 	
-# loop to track    : input		
-# track to loop    : output
-# track to reserved: output
+}
+sub process_routing_graph {
+	# the graphic part: we process edges:
+	# 
+	# reserved to track: input 	
+	# loop to track    : input		
+	# track to loop    : output
+	# track to reserved: output
 
 	map { my ($a,$b) = @$_;
 		  $debug and say "edge $a-$b";
@@ -1307,21 +1324,16 @@ sub generate_setup {
 		else { croak qq(fell through dispatch tree); }
 	} $g->edges;
  
-	# now we have processed graph, we can remove temp tracks
+}
+sub process_static_bus_rules { map { $_->apply() } ::Bus::all(); }
 
-	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
-
-	$this_track = $old_this_track;
-	# process bus rules
-
-	map { $_->apply() } ::Bus::all();
-	$ecasound_globals_ecs = $ecasound_globals;
+sub write_chains_if_something_to_write {
 	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
 		write_chains();
  		return 1;
  	} else { print "No inputs found!\n"; return 0};
 }
+
 sub override {
 	my ($hash_ref, $name) = @_;
 		my $attr = $g->get_vertex_attributes($name);
@@ -3233,7 +3245,7 @@ sub assign_var {
 	assign_vars(
 				source => $source,
 				vars   => \@vars,
-		#		format => 'yaml', # breaks, stupid!
+		#		format => 'yaml', # breaks
 				class => '::');
 }
 sub restore_state {
@@ -3241,21 +3253,27 @@ sub restore_state {
 	my $file = shift;
 	$file = $file || $state_store_file;
 	$file = join_path(project_dir(), $file);
-	my $yamlfile = $file;
-	$yamlfile .= ".yml" unless $yamlfile =~ /yml$/;
-	$file = $yamlfile if -f $yamlfile;
+	$file .= ".yml" unless $file =~ /yml$/;
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
+	
+	my $yaml = io($file)->all;
+
+	# rewrite obsolete null hash/array substitution
+	$yaml =~ s/~NULL_HASH/{}/g;
+	$yaml =~ s/~NULL_ARRAY/[]/g;
+
+	# rewrite %cops 'owns' field to []
+	
+	$yaml =~ s/owns: ~/owns: []/g;
 
 	# restore persistent variables
 
-	assign_var($file, @persistent_vars );
+	assign_var($yaml, @persistent_vars );
 
 	# restore effect chains
-	
 
 	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain));
-	
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
@@ -3333,7 +3351,7 @@ sub restore_state {
 											jack_send);
 		}  @tracks_data;
 	}
-		
+
 	#  destroy and recreate all groups
 
 	::Group::initialize();	

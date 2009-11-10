@@ -5,8 +5,7 @@ use strict;
 use warnings;
 no warnings q(uninitialized);
 use Carp;
-use Data::YAML::Reader; 
-use Data::YAML::Writer;
+use YAML::Tiny;
 use Data::Rmap qw(:all);
 use IO::All;
 use Storable;
@@ -51,9 +50,6 @@ our @EXPORT = qw(
 package ::;
 our ($debug, $debug2, $debug3);
 package ::Assign;
-use vars qw($yw $yr);
-$yw = Data::YAML::Writer->new;
-$yr = Data::YAML::Reader->new;
 
 use Carp;
 
@@ -190,24 +186,15 @@ sub assign_vars {
 				$ref = retrieve($source) # Storable
 		}
 
-	# check for a yaml string
-	} elsif ( $source =~ /^\s*---/s ){
+	} elsif ( $source =~ /\n/ ){
 		$debug and print "found yaml text\n";
-		$ref = $yr->read($source);
+		$ref = yaml_in($source);
 
 	# pass a hash_ref to the assigner
 	} elsif ( ref $source ) {
 		$debug and print "found a reference\n";
 		$ref = $source;
 	} else { carp "$source: unidentified data source\n"; }
-
-	# restore empty arrays and hashes where needed
-	
-	if ( $source =~ /\.yml$/i or $source =~ /^\s*---/s ){
-
-		rmap {  $_ = [] if /~NULL_ARRAY/;
-				$_ = {} if /~NULL_HASH/   } $ref;
-	}
 
 	assign(data => $ref, 
 			vars => \@vars, 
@@ -265,14 +252,8 @@ sub serialize {
 			#$pl > io($file);
 		} elsif ($h{format} eq 'yaml'){
 			$file .= '.yml' unless $file =~ /\.yml$/;
-			rmap_array { $_ = q(~NULL_ARRAY) if ! scalar @$_ } \%state;
-			rmap_hash  { $_ = q(~NULL_HASH)  if ! scalar %$_ } \%state;
-			rmap       { $_ = q(~) if ! defined           $_ } \%state;
 			my $yaml = yaml_out(\%state);
 			$yaml > io($file);
-			rmap {  $_ = [] if /~NULL_ARRAY/;
-					$_ = {} if /~NULL_HASH/;
-					$_ = undef if $_ eq '~' } \%state;
 			$debug and print $yaml;
 		}
 	} else { yaml_out(\%state) }
@@ -281,6 +262,7 @@ sub serialize {
 
 sub yaml_out {
 	
+	local $debug = 1;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
@@ -291,30 +273,25 @@ sub yaml_out {
 	my $output;
 	#$debug and print join $/, keys %$data_ref, $/;
 	$debug and print "about to write YAML as string\n";
-    $yw->write( $data_ref, \$output ) if $type =~ /HASH|ARRAY/;
-	$output;
+	my $y = YAML::Tiny->new;
+	$y->[0] = $data_ref;
+	my $yaml = $y->write_string();
 }
 sub yaml_in {
 	
 	# $debug2 and print "&yaml_in\n";
 	my $input = shift;
-	my $yaml; 
-	if ($input !~ /\n/) {
-		$debug and print "assuming yaml filename input\n";
-		$yaml = io($input)->all;
-	} else { 
-		$debug and print "assuming yaml text input\n";
-		if ($input !~ /^---/){
-			$input =~ s/^\n+//s; # remove leading newline at start of file
-			$input =~ s/\n+$//s; # remove trailing newline at end of file
-			$input = join "\n", '---',$input,'...'; # add YAML prefix/suffix
-		}
-		$yaml = $input;
-	}
+	my $yaml = $input =~ /\n/ # check whether file or text
+		? $input 			# yaml text
+		: io($input)->all;	# file name
 	if ($yaml =~ /\t/){
 		croak "YAML file: $input contains illegal TAB character.";
 	}
-	eval q[$yr->read( $yaml )]  or croak "yaml read failed: $@" ; # returns ref
+	$yaml =~ s/^\n+//  ; # remove leading newline at start of file
+	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
+	my $y = YAML::Tiny->read_string($yaml);
+	say "YAML::Tiny read error: $YAML::Tiny::errstr" if $YAML::Tiny::errstr;
+	$y->[0];
 }
 
 ## support functions
