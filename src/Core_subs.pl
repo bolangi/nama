@@ -1118,12 +1118,13 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	connect_Main_tracks_to_Master();
-	add_paths_for_send_and_sub_buses();
+	add_paths_for_send_buses();
+	add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
 
 	# re-route Master to null for automix
 	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		$g->delete_edges(map{@$_} $g->edges_from('Master')); # no, they don't
 		$g->add_edge(qw[Master null_out]);
 	}
 	add_paths_for_mixdown_handling();
@@ -1187,7 +1188,8 @@ sub connect_Main_tracks_to_Master {
 		$main->tracks;  # list of Track names
 
 }
-sub add_paths_for_send_and_sub_buses {
+
+sub add_paths_for_send_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1210,7 +1212,22 @@ sub add_paths_for_send_and_sub_buses {
 			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
 			} @tracks; 
 		}
-		elsif( $_->bus_type eq 'sub'){   # sub bus
+	} @user_buses;
+}
+sub add_paths_for_sub_buses {
+
+	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
+	map{
+
+		my $bus = $_;
+		# we get tracks from a group of the same name as $bus->name
+		my @tracks = grep{ $_->rec_status ne 'OFF' } 
+					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
+
+		# raw send buses use only fixed-rule routing
+		# we process them later
+
+		if( $_->bus_type eq 'sub'){   # sub bus
 			$debug and say 'process sub bus';
 			my $output = $bus->destination_type eq 'track' 
 				? $bus->destination_id
@@ -4176,31 +4193,16 @@ sub cache_track {
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
 		return 1 unless $this_track->fancy_ops;
 	say $this_track->name,": begin cache recording";
-	$cooked_record_pending{$this_track->name};
-	command_process('solo; main_off; arm; start; nosolo');
-	# track cache routing
-
-	my @cache_rec_tracks = 
-	map {
-
-		my $cooked = $_->name . '_cooked';
-		$g->add_path( $_->name, $cooked, 'wav_out');
-		::CacheRecTrack->new(
-			width => 2,
-			name => $cooked,
-			group => 'Cooked',
-			target => $_->name,
-		);
-
-	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
-
-	# store active track versions for later use in cache_map
-
-	%versions = ();
-	
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
-	push @$temp_tracks, @cache_rec_tracks;
+ 	initialize_chain_setup_vars();
+	my $cooked = $this_track->name . '_cooked';
+	$g->add_path( $this_track->name, $cooked, 'wav_out');
+	my $temp_track = ::CacheRecTrack->new(
+		width => 2,
+		name => $cooked,
+		group => 'Cooked',
+		target => $this_track->name,
+	);
+	my $original_version = $this_track->monitor_version;
 
 	# store data about cached tracks
 	if ($recorded and %cooked_record_pending){
