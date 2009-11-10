@@ -1111,20 +1111,8 @@ sub user_mon_tracks {
 
 sub really_recording {  keys %{$outputs{file}}; }
 
-sub generate_setup { 
 
-	# Create data structures representing chain setup.
-	# This step precedes write_chains(), i.e. writing Setup.ecs.
-	
-	my $automix = shift; # we'll create an extra edge Master-null_out
-
-	$debug2 and print "&generate_setup\n";
-
-	# save current track
-	
-	my $old_this_track = $this_track;
-
-	# initialize data structures
+sub initialize_chain_setup_vars {
 
 	  %inputs 
 		= %outputs 
@@ -1137,10 +1125,8 @@ sub generate_setup {
 	# initialize graph
 	
 	$g = Graph->new();
-
-
-	# make connections for normal users tracks (group Main)
-	
+}
+sub connect_Main_tracks_to_Master {
 	map{ 
 
 		# connect signal sources to tracks
@@ -1157,7 +1143,8 @@ sub generate_setup {
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
 
-	# process send and sub buses
+}
+sub add_paths_for_send_and_sub_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1198,7 +1185,25 @@ sub generate_setup {
 			} @tracks;
 		}
 	} @user_buses;
+}
+sub generate_setup { 
 
+	# Create data structures representing chain setup.
+	# This step precedes write_chains(), i.e. writing Setup.ecs.
+	
+	my $automix = shift; # we'll create an extra edge Master-null_out
+
+	$debug2 and print "&generate_setup\n";
+
+	# save current track
+	
+	my $old_this_track = $this_track;
+
+	initialize_chain_setup_vars();
+	
+	connect_Main_tracks_to_Master();
+
+	add_paths_for_send_and_sub_buses();
 
 	# process mastering mode
 
