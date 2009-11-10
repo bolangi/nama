@@ -1131,31 +1131,7 @@ sub generate_setup {
 	
 	$debug and say "The graph is:\n$g";
 
-	# track cache routing
-
-	my @cache_rec_tracks = 
-	map {
-
-		my $cooked = $_->name . '_cooked';
-		$g->add_path( $_->name, $cooked, 'wav_out');
-		::CacheRecTrack->new(
-			width => 2,
-			name => $cooked,
-			group => 'Cooked',
-			target => $_->name,
-		);
-
-	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
-
-	# store active track versions for later use in cache_map
-
-	%versions = ();
-	
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
-
-	my $temp_tracks = ::Graph::expand_graph($g);
-	push @$temp_tracks, @cache_rec_tracks;
+	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 
 	$debug and say "The expanded graph is:\n$g";
 
@@ -2150,27 +2126,6 @@ sub rec_cleanup {
 			}
 			else { unlink $_ }
 		}
-	}
-	# store data about cached tracks
-	if ($recorded and %cooked_record_pending){
-		$debug and say "updating track cache_map";
-		my $old_this_track = $this_track;
-		map{    
-			my $t = $this_track = $tn{$_};  
-			say "cache map",yaml_out($t->cache_map);
-			
-			my $cache_map = $t->cache_map;
-			$cache_map->{$t->last} = { 
-				original 			=> $versions{$_},
-				effect_chain	=> push_effect_chain(), # bypass
-			};
-			say "cache map",yaml_out($t->cache_map);
-			say qq(Saving effects for cached track "$_".
-'replace_effects' will reset "$_" to version $versions{$_});
-
-		} keys %cooked_record_pending;
-		$this_track = $old_this_track;
-		%cooked_record_pending = ();
 	}
 	rememoize();
 	if ( $recorded ) {
@@ -4215,7 +4170,7 @@ sub cleanup_exit {
 }
 	
 sub cache_track {
-
+=comment
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return 1 unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
@@ -4223,5 +4178,51 @@ sub cache_track {
 	say $this_track->name,": begin cache recording";
 	$cooked_record_pending{$this_track->name};
 	command_process('solo; main_off; arm; start; nosolo');
+	# track cache routing
+
+	my @cache_rec_tracks = 
+	map {
+
+		my $cooked = $_->name . '_cooked';
+		$g->add_path( $_->name, $cooked, 'wav_out');
+		::CacheRecTrack->new(
+			width => 2,
+			name => $cooked,
+			group => 'Cooked',
+			target => $_->name,
+		);
+
+	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
+
+	# store active track versions for later use in cache_map
+
+	%versions = ();
+	
+	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
+	$debug and say "monitor_versions\n",yaml_out \%versions;
+	push @$temp_tracks, @cache_rec_tracks;
+
+	# store data about cached tracks
+	if ($recorded and %cooked_record_pending){
+		$debug and say "updating track cache_map";
+		my $old_this_track = $this_track;
+		map{    
+			my $t = $this_track = $tn{$_};  
+			say "cache map",yaml_out($t->cache_map);
+			
+			my $cache_map = $t->cache_map;
+			$cache_map->{$t->last} = { 
+				original 			=> $versions{$_},
+				effect_chain	=> push_effect_chain(), # bypass
+			};
+			say "cache map",yaml_out($t->cache_map);
+			say qq(Saving effects for cached track "$_".
+'replace_effects' will reset "$_" to version $versions{$_});
+
+		} keys %cooked_record_pending;
+		$this_track = $old_this_track;
+		%cooked_record_pending = ();
+	}
+=cut
 }
 ### end
