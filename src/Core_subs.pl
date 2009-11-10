@@ -1104,13 +1104,9 @@ sub user_mon_tracks {
 	my @user_mon_tracks = grep { $_->rec_status eq 'MON' } @user_tracks;
 	return unless @user_mon_tracks;
 	map{ $_->n } @user_mon_tracks;
-
 }
-
 # return $output{file} entries, including Mixdown 
-
 sub really_recording {  keys %{$outputs{file}}; }
-
 
 sub generate_setup { 
 	$debug2 and print "&generate_setup\n";
