@@ -253,11 +253,11 @@ pan_center:
 pan_back:
   type: track
   short: pb
-  what: restore current track pan setting prior to pan_left, pan_right or pan_center 
+  what: restore current track pan setting prior to pan_left, pan_right or pan_center
   parameters: none
 show_tracks:
   type: track 
-  short: show tracks
+  short: show tracks list_tracks lt
   what: show status of all tracks
 show_track:
   type: track
@@ -269,7 +269,7 @@ region:
   parameters: <s_start_mark_name> <s_end_mark_name>
 remove_region:
   type: track
-  short: rmr
+  short: rrg
   what: remove region definition. Entire track plays back. 
   parameters: none
 shift_track:
@@ -307,7 +307,7 @@ autofix_tracks:
   parameters: none
 remove_track:
   type: track
-  short: rmt
+  short:
   what: remove effects, parameters and GUI for current track
   parameters: none 
 cache_track:
@@ -339,9 +339,9 @@ group_off:
   short: goff Z 
   what: group OFF mode, exclude all user tracks from chain setup
   parameters: none
-bunch:
+new_bunch:
   type: group
-  short: bn
+  short: nb
   what: define/list groups of tracks
   parameters: [ <s_group_name> [track1] [track2...] ]
 list_bunches:
@@ -422,9 +422,9 @@ loop_disable:
 #   short: ls
 #   what: show loop status and endpoints
 #   parameters: none
-add_ctrl:
+add_controller:
   type: effect
-  what: add a controller to an operator
+  what: add a controller to an operator (use mfx to modify, rfx to remove)
   parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
   short: acl
 add_effect:
@@ -494,15 +494,15 @@ to_mark:
   what: move playhead to named mark or mark index
   parameters: <s_mark_id> | <i_mark_index> 
   example: to_mark start (go to mark named 'start')
-mark:
+new_mark:
   type: mark
   what: drop mark at current playback position
-  short: k
+  short: mark k
   parameters: [ <s_mark_id> ]
 remove_mark:
   type: mark
   what: Remove mark, default to current mark
-  short: rmm
+  short: rm
   parameters: [ <s_mark_id> | <i_mark_index> ]
   example: remove_mark start (remove mark named 'start')
 next_mark:
@@ -517,7 +517,7 @@ previous_mark:
   parameters: none
 name_mark:
   type: mark
-  short: nmk nom
+  short: nom
   what: Give a name to the current mark
   parameters: <s_mark_id>
   example: name_mark start
@@ -582,7 +582,7 @@ update_send_bus:
   example: usb Some_bus 
 remove_bus:
   type: bus
-  short: rmb
+  short:
   what: remove a bus
   parameters: <s_bus_name>
 new_effect_chain:

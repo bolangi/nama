@@ -274,8 +274,8 @@ remove_mark: _remove_mark end {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
-mark: _mark name end { ::drop_mark $item{name}; 1}
-mark: _mark end {  ::drop_mark(); 1}
+new_mark: _new_mark name end { ::drop_mark $item{name}; 1}
+new_mark: _new_mark end {  ::drop_mark(); 1}
 next_mark: _next_mark end { ::next_mark(); 1}
 previous_mark: _previous_mark end { ::previous_mark(); 1}
 loop_enable: _loop_enable someval(s) end {
@@ -328,7 +328,7 @@ remove_effect: _remove_effect op_id(s) end {
 	::unmute();
 	1;}
 
-add_ctrl: _add_ctrl parent name value(s?) end {
+add_controller: _add_controller parent name value(s?) end {
 	my $code = $item{name};
 	my $parent = $item{parent};
 	my $values = $item{"value(s?)"};
@@ -387,7 +387,7 @@ group_version: _group_version dd end {
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::main->set( version => $n ); 1}
-bunch: _bunch name(s?) { ::Text::bunch( @{$item{'name(s?)'}}); 1}
+new_bunch: _new_bunch name(s) { ::Text::bunch( @{$item{'name(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
  	map{ delete $::bunch{$_} } @{$item{'name(s)'}}; 1}
