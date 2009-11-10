@@ -1112,6 +1112,80 @@ sub user_mon_tracks {
 sub really_recording {  keys %{$outputs{file}}; }
 
 
+sub generate_setup { 
+	$debug2 and print "&generate_setup\n";
+
+	my $automix = shift; # route Master to null_out
+
+	# save current track
+	my $old_this_track = $this_track;
+
+	initialize_chain_setup_vars();
+	connect_Main_tracks_to_Master();
+	add_paths_for_send_and_sub_buses();
+	add_paths_from_Master(); # do they affect automix?
+
+	# re-route Master to null for automix
+		
+	if( $automix){
+		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		$g->add_edge(qw[Master null_out]);
+	}
+
+	add_paths_for_mixdown_handling();
+	prune_graph();
+	
+	$debug and say "The graph is $g";
+
+	# track cache routing
+
+	my @cache_rec_tracks = 
+	map {
+
+		my $cooked = $_->name . '_cooked';
+		$g->add_path( $_->name, $cooked, 'wav_out');
+		::CacheRecTrack->new(
+			width => 2,
+			name => $cooked,
+			group => 'Cooked',
+			target => $_->name,
+		);
+
+	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
+
+	# store active track versions for later use in cache_map
+
+	%versions = ();
+	
+	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
+	$debug and say "monitor_versions\n",yaml_out \%versions;
+
+	my $temp_tracks = ::Graph::expand_graph($g);
+	push @$temp_tracks, @cache_rec_tracks;
+
+	$debug and say "The expanded graph is $g";
+
+	# insert handling
+
+	::Graph::add_inserts($g);
+
+	$debug and say "The expanded graph with inserts is $g";
+
+	# create IO lists %inputs and %outputs
+
+	process_routing_graph();
+	# now we have processed graph, we can remove temp tracks
+
+	$debug and say "temp tracks to remove";
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+
+	$this_track = $old_this_track;
+
+	process_static_bus_rules();
+	$ecasound_globals_ecs = $ecasound_globals;
+
+	write_chains_if_something_to_write();
+}
 sub initialize_chain_setup_vars {
 
 	  %inputs 
@@ -1220,79 +1294,12 @@ sub add_paths_for_mixdown_handling {
 		# no effects will be applied because effects are on chain 2
 	}
 }
-sub generate_setup { 
-
-	# Create data structures representing chain setup.
-	# This step precedes write_chains(), i.e. writing Setup.ecs.
-	
-	my $automix = shift; # we'll create an extra edge Master-null_out
-
-	$debug2 and print "&generate_setup\n";
-
-	# save current track
-	
-	my $old_this_track = $this_track;
-
-	initialize_chain_setup_vars();
-	
-	connect_Main_tracks_to_Master();
-
-	add_paths_for_send_and_sub_buses();
-
-	add_paths_from_Master(); # do they affect automix?
-
-	# re-route Master to null for automix
-		
-	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master'));
-		$g->add_edge(qw[Master null_out]);
-	}
-
-	add_paths_for_mixdown_handling();
-
+sub prune_graph {
 	# prune graph: remove tracks lacking inputs or outputs
-
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
-	
-	$debug and say "The graph is $g";
-
-	# track cache routing
-
-	my @cache_rec_tracks = 
-	map {
-
-		my $cooked = $_->name . '_cooked';
-		$g->add_path( $_->name, $cooked, 'wav_out');
-		::CacheRecTrack->new(
-			width => 2,
-			name => $cooked,
-			group => 'Cooked',
-			target => $_->name,
-		);
-
-	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
-
-	# store active track versions for later use in cache_map
-
-	%versions = ();
-	
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
-
-	my $temp_tracks = ::Graph::expand_graph($g);
-	push @$temp_tracks, @cache_rec_tracks;
-
-	$debug and say "The expanded graph is $g";
-
-	# insert handling
-
-	::Graph::add_inserts($g);
-
-	$debug and say "The expanded graph with inserts is $g";
-
-	# create IO lists %inputs and %outputs
-
+}
+sub process_routing_graph {
 	# the graphic part: we process edges:
 	# 
 	# reserved to track: input 	
@@ -1324,24 +1331,16 @@ sub generate_setup {
 		else { croak qq(fell through dispatch tree); }
 	} $g->edges;
  
-	# now we have processed graph, we can remove temp tracks
+}
+sub process_static_bus_rules { map { $_->apply() } ::Bus::all(); }
 
-	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
-
-	$this_track = $old_this_track;
-
-	# process static bus rules
-
-	map { $_->apply() } ::Bus::all();
-	$ecasound_globals_ecs = $ecasound_globals;
-
-	# write chains
+sub write_chains_if_something_to_write {
 	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
 		write_chains();
  		return 1;
  	} else { print "No inputs found!\n"; return 0};
 }
+
 sub override {
 	my ($hash_ref, $name) = @_;
 		my $attr = $g->get_vertex_attributes($name);
