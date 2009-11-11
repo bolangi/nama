@@ -426,3 +426,4 @@ sub bunch {
 	$bunch{$bunchname} = [ @tracks ];
 	}
 }
+sub add_to_bunch {}

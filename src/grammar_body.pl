@@ -95,7 +95,7 @@ remove_region: _remove_region end {
 	1;
 }
 new_region: _new_region beginning ending name(?) end {
-	::new_region(@item{qw(beginning ending), @{$item{'name(?)'}); 1
+	::new_region(@item{qw(beginning ending), @{$item{'name(?)'}}}); 1
 }
 
 shift_track: _shift_track start_position end {
@@ -395,6 +395,7 @@ new_bunch: _new_bunch name(s) { ::Text::bunch( @{$item{'name(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches name(s) { 
  	map{ delete $::bunch{$_} } @{$item{'name(s)'}}; 1}
+add_to_bunch: _add_to_bunch name(s) end { ::Text::add_to_bunch( @{$item{'name(s)'}});1 }
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register end { 
@@ -485,6 +486,8 @@ update_send_bus: _update_send_bus bus_name end {
  	::update_send_bus( $item{bus_name} );
  	1;
 }
+set_bus: _set_bus end {}
+list_buses: _list_buses end {}
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
@@ -565,7 +568,7 @@ delete_effect_chain: _delete_effect_chain name(s) end {
 }
 list_effect_chains: _list_effect_chains name(s?) end {
 
- 	# names(s?) are treated as fragments to match against
+ 	# name(s?) are treated as fragments to match against
     # effect_chain names
 
     # we don't list chain_ids starting with underscore

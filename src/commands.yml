@@ -348,18 +348,23 @@ group_off:
 new_bunch:
   type: group
   short: nb
-  what: define/list groups of tracks
-  parameters: [ <s_group_name> [track1] [track2...] ]
+  what: define a bunch of tracks
+  parameters: <s_group_name> [<s_track1> <s_track2>...]
 list_bunches:
   type: group
   short: lb
-  what: list groups of tracks (bunches)
+  what: list track bunches
   parameters: none
 remove_bunches:
   short: rb
   type: group
-  what: remove alias for group(s) of tracks (bunches)
+  what: remove the definition of a track bunch
   parameters: <s_bunch_name> [<s_bunch_name>...]
+add_to_bunch:
+  short: ab
+  type: group
+  what: add track(s) to a bunch
+  parameters: <s_bunch_name> <s_track1> [<s_track2>...]
 save_state:
   type: project
   short: keep save
@@ -457,7 +462,7 @@ modify_effect:
 remove_effect:
   type: effect
   what: remove effects from selected track
-  short: rfx
+  short: rfx remove_controller rcl
   parameters: <s_effect_id1> [ <s_effect_id2>...]
 add_insert_cooked:
   type: effect 
@@ -508,7 +513,7 @@ new_mark:
 remove_mark:
   type: mark
   what: Remove mark, default to current mark
-  short: rm
+  short: rmk rom
   parameters: [ <s_mark_id> | <i_mark_index> ]
   example: remove_mark start (remove mark named 'start')
 next_mark:
@@ -529,7 +534,7 @@ name_mark:
   example: name_mark start
 modify_mark:
   type: mark
-  short: move_mark mm
+  short: move_mark mmk mm
   what: change the time setting of current mark
   parameters: [ + | - ] <f_seconds>
 engine_status:
