@@ -79,12 +79,12 @@ link_track: _link_track name target end {
 }
 target: name
 project: name
-region: _region end { print( ::Text::show_region() ); 1 }		
-region: _region beginning ending end { 
+#define_region: _region end { print( ::Text::show_region() ); 1 }		
+set_region: _set_region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
 }
-region: _region beginning end { 
+set_region: _set_region beginning end { 
 	::set_region( $item{beginning}, 'END' );
 	1;
 }
@@ -94,6 +94,10 @@ remove_region: _remove_region end {
 	print $::this_track->name, ": Region definition removed. Full track will play.\n";
 	1;
 }
+new_region: _new_region beginning ending name(?) end {
+	::new_region(@item{qw(beginning ending), @{$item{'name(?)'}); 1
+}
+
 shift_track: _shift_track start_position end {
 	my $pos = $item{start_position};
 	if ( $pos =~ /\d+\.\d+/ ){

@@ -263,24 +263,30 @@ show_track:
   type: track
   short: sh
   what: show current track status
-region:
+set_region:
   type: track
-  what: Specify a track region for playback using marks. Nama allows one region per track. 
+  short: drg
+  what: Specify a playback region for the current track using marks. Use 'new_region' for multiple regions.
   parameters: <s_start_mark_name> <s_end_mark_name>
+new_region:
+  type: track
+  short: nrg
+  what: Create a region for the current track using an auxiliary track 
+  parameters: <s_start_mark_name> <s_end_mark_name> [<s_region_name>]
 remove_region:
   type: track
   short: rrg
-  what: remove region definition. Entire track plays back. 
+  what: remove region (including associated auxiliary track)
   parameters: none
 shift_track:
   type: track
   short: shift
-  what: set playback delay for track/region
+  what: set playback delay for track or region
   parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> 
 unshift_track:
   type: track
   short: unshift
-  what: remove playback delay for track/region
+  what: remove playback delay for track or region
   parameters: none
 modifiers:
   type: track
@@ -585,6 +591,15 @@ remove_bus:
   short:
   what: remove a bus
   parameters: <s_bus_name>
+list_buses:
+  type: bus
+  short: lbs
+  what: list buses and their parameters TODO
+  parameters: none
+set_bus:
+  type: bus
+  short: sbs
+  what: set bus parameters TODO
 new_effect_chain:
   type: effect
   short: nec
