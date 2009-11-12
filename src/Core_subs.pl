@@ -4081,7 +4081,21 @@ sub new_region_name {
 		grep{/$name/} keys %::Track::by_name;
 	$name . ++$i
 }
+sub remove_region {
+	if (! $this_track->region_start){
+		say $this_track->name, ": no region is defined. Skipping.";
+		return;
+	} elsif ($this_track->target ){
+		say $this_track->name, ": looks like a region...  removing.";
+		$this_track->remove;
+	} else { undefine_region() }
+}
 	
+sub undefine_region {
+	$this_track->set(region_start => undef );
+	$this_track->set(region_end => undef );
+	print $this_track->name, ": Region definition removed. Full track will play.\n";
+}
 
 sub add_sub_bus {
 	my ($name, $type, $id) = @_;

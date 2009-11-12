@@ -83,16 +83,10 @@ set_region: _set_region beginning ending end {
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
 }
-set_region: _set_region beginning end { 
-	::set_region( $item{beginning}, 'END' );
+set_region: _set_region beginning end { ::set_region( $item{beginning}, 'END' );
 	1;
 }
-remove_region: _remove_region end {
-	$::this_track->set(region_start => undef );
-	$::this_track->set(region_end => undef );
-	print $::this_track->name, ": Region definition removed. Full track will play.\n";
-	1;
-}
+remove_region: _remove_region end { ::remove_region(); 1; }
 new_region: _new_region beginning ending name(?) end {
 	::new_region(@item{qw(beginning ending), @{$item{'name(?)'}}}); 1
 }
