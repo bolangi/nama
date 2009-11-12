@@ -79,7 +79,6 @@ link_track: _link_track name target end {
 }
 target: name
 project: name
-#define_region: _region end { print( ::Text::show_region() ); 1 }		
 set_region: _set_region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
