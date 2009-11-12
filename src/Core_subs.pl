@@ -364,7 +364,7 @@ reply: $reply";
 }
 
 sub eval_iam_libecasoundc{
-	#local $debug = 1;
+	local $debug = 1;
 	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -2289,7 +2289,7 @@ sub ecasound_effect_index {
 sub remove_op {
 
 	$debug2 and print "&remove_op\n";
-	return unless eval_iam('cs-is-valid');
+	return unless eval_iam('cs-connected') and eval_iam('cs-is-valid');
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	my $index;
@@ -4214,13 +4214,15 @@ sub cache_track {
 	#$debug and say "The expanded graph with inserts is\n$g";
 	process_routing_graph();
 	$this_track = $orig;
+	set_mixdown_globals();
 	if( write_chains_if_something_to_write() ){
 		$debug and say "temp tracks to remove";
 		map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 		set_mixdown_globals();
-		$length = eval_iam('cs-get-length'); 
-		$ui->length_display(-text => colonize($length));
-		if( connect_transport('no_transport_status')){
+		#if( connect_transport('no_transport_status')){
+		if( connect_transport()){
+			$length = eval_iam('cs-get-length'); 
+			$ui->length_display(-text => colonize($length));
 			eval_iam("cs-set-length $length");
 			eval_iam("start");
 			while( eval_iam('engine-status') ne 'finished'){ 

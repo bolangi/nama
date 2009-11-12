@@ -262,7 +262,6 @@ sub serialize {
 
 sub yaml_out {
 	
-	local $debug = 1;
 	$debug2 and print "&yaml_out\n";
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
