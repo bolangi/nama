@@ -1853,10 +1853,6 @@ sub adjust_latency {
 			} keys %latency;
 }
 
-# old version
-
-
-
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	load_ecs(); 
@@ -1910,6 +1906,7 @@ sub transport_status {
 				: " " ),
 				$/;
 	}
+	say "Engine is ready.";
 	print "setup length is ", d1($length), 
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
@@ -2039,146 +2036,6 @@ sub rec_cleanup {
 			reconfigure_engine();
 	}
 } 
-# new borken version
-
-=comment
-sub connect_transport {
-	my $no_transport_status = shift;
-	$debug2 and print "&connect_transport\n";
-	load_ecs(); 
-	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
-		or print("Invalid chain setup, engine not ready.\n"),return;
-	find_op_offsets(); 
-	apply_ops();
-	eval_iam('cs-connect');
-	# or say("Failed to connect setup, engine not ready"),return;
-	my $status = eval_iam("engine-status");
-	if ($status ne 'not started'){
-		print("Invalid chain setup, cannot connect engine.\n");
-		return;
-	}
-	eval_iam('engine-launch');
-	$status = eval_iam("engine-status");
-	if ($status ne 'stopped'){
-		print "Failed to launch engine. Engine status: $status\n";
-		return;
-	}
-	$length = eval_iam('cs-get-length'); 
-	$ui->length_display(-text => colonize($length));
-	eval_iam("cs-set-length $length") if $tn{Mixdown}->rec_status eq 'REC'; 
-	$ui->clock_config(-text => colonize(0));
-	transport_status() unless $no_transport_status;
-	$ui->flash_ready();
-	#print eval_iam("fs");
-	1;
-	
-}
-
-sub transport_status {
-
-	# assume transport is stopped
-	# print looping status, setup length, current position
-	
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
-	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
-	if ($loop_enable and $start and $end){
-		#if (! $end){  $end = $start; $start = 0}
-		print "looping from ", d1($start), 
-			($start > 120 
-				? " (" . colonize( $start ) . ") "  
-				: " " ),
-						"to ", d1($end),
-			($end > 120 
-				? " (".colonize( $end ). ") " 
-				: " " ),
-				$/;
-	}
-	say "Engine is ready.";
-	print "setup length is ", d1($length), 
-		($length > 120	?  " (" . colonize($length). ")" : "" )
-		,$/;
-	print "now at ", colonize( eval_iam( "getpos" )), $/;
-	print "\nPress SPACE to start or stop engine.\n\n"
-		if $press_space_to_start_transport;
-}
-sub start_transport { 
-
-	# set up looping event if needed
-	# mute unless recording
-	# start
-	# wait 0.5s
-	# unmute
-	# start heartbeat
-	# report engine status
-	# sleep 1s
-
-	$debug2 and print "&start_transport\n";
-	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
-
-	print "\nstarting at ", colonize(int eval_iam("getpos")), $/;
-	schedule_wraparound();
-	mute();
-	eval_iam('start');
-	sleeper(0.5) unless really_recording();
-	unmute();
-	start_heartbeat();
-	sleeper(1);
-	print "engine is ", eval_iam("engine-status"), "\n\n"; 
-
-	sleep 1; # time for engine to stabilize
-}
-sub stop_transport { 
-
-	$debug2 and print "&stop_transport\n"; 
-	mute();
-	eval_iam('stop');	
-	sleeper(0.5);
-	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
-	unmute();
-	stop_heartbeat();
-	$ui->project_label_configure(-background => $old_bg);
-}
-sub transport_running { eval_iam('engine-status') eq 'running'  }
-
-sub disconnect_transport {
-	return if transport_running();
-		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-}
-
-sub start_heartbeat {
- 	sleeper(0.5);
-	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
-}
-
-sub stop_heartbeat {$event_id{heartbeat} = undef; rec_cleanup() }
-
-sub heartbeat {
-
-	#	print "heartbeat fired\n";
-
-	my $here   = eval_iam("getpos");
-	my $status = eval_iam('engine-status');
-	say("\nstopped"),stop_heartbeat()
-		#if $status =~ /finished|error|stopped/;
-		if $status =~ /finished|error/;
-	#print join " ", $status, colonize($here), $/;
-	my ($start, $end);
-	$start  = ::Mark::loop_start();
-	$end    = ::Mark::loop_end();
-	schedule_wraparound() 
-		if $loop_enable 
-		and defined $start 
-		and defined $end 
-		and ! really_recording();
-
-	# update time display
-	#
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
-
-}
-
-=cut
 sub schedule_wraparound {
 
 	return unless $loop_enable;
