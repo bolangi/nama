@@ -4063,10 +4063,25 @@ sub status_snapshot {
 }
 sub set_region {
 	my ($beg, $end) = @_;
-	$::this_track->set(region_start => $beg);
-	$::this_track->set(region_end => $end);
+	$this_track->set(region_start => $beg);
+	$this_track->set(region_end => $end);
 	::Text::show_region();
 }
+sub new_region {
+	my ($beg, $end, $name) = @_;
+	my $orig = $this_track;
+	$name ||= new_region_name();
+	add_track_alias($name, $this_track->name);	
+	set_region($beg,$end);
+}
+sub new_region_name {
+	my $name = $this_track->name . '_region_';
+	my $i;
+	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
+		grep{/$name/} keys %::Track::by_name;
+	$name . ++$i
+}
+	
 
 sub add_sub_bus {
 	my ($name, $type, $id) = @_;
