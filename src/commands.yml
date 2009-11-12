@@ -613,6 +613,10 @@ bypass_effects:
 replace_effects:
   type: effect
   short: replace rep 
-  what: restore bypassed track effects (pop an effect chain off stack)
+  what: restore bypassed track effects
+uncache_track:
+  type: effect
+  short: uncache unc
+  what: set uncached track version, restoring effects (if current version is cached)
   parameters: none
 ...

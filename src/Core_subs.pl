@@ -1854,6 +1854,7 @@ sub adjust_latency {
 			} keys %latency;
 }
 sub connect_transport {
+	my $no_transport_status = shift;
 	$debug2 and print "&connect_transport\n";
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
@@ -1877,9 +1878,10 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") if $tn{Mixdown}->rec_status eq 'REC'; 
 	$ui->clock_config(-text => colonize(0));
-	transport_status();
+	transport_status() unless $no_transport_status;
 	$ui->flash_ready();
 	#print eval_iam("fs");
+	1;
 	
 }
 
@@ -2128,32 +2130,36 @@ sub rec_cleanup {
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
 	if( new_files_were_recorded() ){
-		rememoize();
 		say "Now reviewing your recording...";
+		post_rec_configure();
+	}
+}
+sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		$main->set( rw => 'MON');
 		$ui->refresh();
 		reconfigure_engine();
-	}
 }
 sub new_files_were_recorded {
  	return unless my @files = really_recording();
 	$debug and print join $/, "intended recordings:", @files;
 	my $recorded = 0;
 	$debug and print "found bigger than 44100 bytes:\n";
- 	grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-			if (-e $_) {
-				$debug and print "$_ exists. ";
-				if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
-					$debug and print "$_\n";
-					$tn{$name}->set(active => undef) if $tn{$name};
-					$ui->update_version_button($tn{$name}->n, $version);
-				$recorded++ unless $name =~ /Mixdown/;
-				1;
+	if (my @recorded = 
+		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
+				if (-e $_) {
+					$debug and print "$_ exists. ";
+					if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
+						$debug and print "$_\n";
+						$tn{$name}->set(active => undef) if $tn{$name};
+						$ui->update_version_button($tn{$name}->n, $version);
+					$recorded++ unless $name =~ /Mixdown/;
+					1;
+					}
+					else { unlink $_; 0 }
 				}
-				else { unlink $_; 0 }
-			}
-	} @files;
+		} @files
+	) { rememoize(); @recorded }
 } 
 
 ## effect functions
@@ -3725,6 +3731,12 @@ sub jack_client {
 	$jack{$name}{$direction};
 }
 
+sub set_mixdown_globals {
+	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
+		if $ecasound_globals_for_mixdown;
+}
+sub set_normal_globals {$ecasound_globals_ecs = $ecasound_globals}
+
 sub automix {
 
 	use Smart::Comments '###';
@@ -3734,8 +3746,7 @@ sub automix {
 
 	# use special Ecasound globals for mixdown 
 	
-	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
-		if $ecasound_globals_for_mixdown;
+	set_mixdown_globals();
 	
 	# turn off audio output
 	
@@ -3774,7 +3785,7 @@ sub automix {
 
 		say "Signal appears to be silence. Skipping.";
 		command_process( 'for mon; vol*10');
-		$ecasound_globals_ecs = $ecasound_globals;
+		set_normal_globals();
 		$main_out = 1;
 		return;
 	}
@@ -3794,9 +3805,10 @@ sub automix {
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
-	### turn on audio output output
+	### turn on audio output
 
 	$main_out = 1;
+	set_normal_globals();
 
 	### default to playing back Mixdown track, setting user tracks to OFF
 
@@ -4087,7 +4099,8 @@ sub new_effect_chain_name {
 	my $name = '_'.$this_track->name . '_';
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
-	@{ $this_track->effect_chain_stack };
+	@{ $this_track->effect_chain_stack }, 
+		grep{/$name/} keys %effect_chain;
 	$name . ++$i
 }
 
@@ -4096,13 +4109,14 @@ sub new_effect_chain_name {
 sub push_effect_chain {
 	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
-	#my $add_name = $vals{add}; # undef in case of bypass # disabled!
+	###my $add_name = $vals{add}; # undef in case of bypass # disabled!
 	my $save_name   = $vals{save} || new_effect_chain_name();
 	#$debug and say "add: $add_name save: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
-	#add_effect_chain($add_name) if $add_name; # disabled!
+	###add_effect_chain($add_name) if $add_name; # disabled!
+	#say "save name $save_name";
 	$save_name;
 }
 
@@ -4124,20 +4138,23 @@ sub uncache {
 	# skip unless MON;
 	my $cm = $t->cache_map;
 	my $v = $t->monitor_version;
-	if($cm->{$v}){ # we are a cached version
+	if(is_cached()){
 		# blast away any existing effects, TODO: warn or abort	
+		say $t->name, ": removing effects (except vol/pan)" if $t->fancy_ops;
 		map{ remove_effect($_)} $t->fancy_ops;
 		$t->set(active => $cm->{$v}{original});
 		print $t->name, ": setting uncached version ", $t->active, $/;
 		add_effect_chain($cm->{$v}{effect_chain});
-		$t->set(effect_chain_stack => [ 
-			grep{$_ ne $cm->{$v}{effect_chain}} @{ $t->effect_chain_stack}
-		]);
 	} 
 	else { print $t->name, ": version $v is not cached\n"}
 }
+sub is_cached {
+	my $cm = $this_track->cache_map;
+	$cm->{$this_track->monitor_version}
+}
+	
 
-sub replace_effects {  pop_effect_chain()}
+sub replace_effects { is_cached() ? uncache() : pop_effect_chain()}
 
 sub new_effect_chain {
 	my ($name, @ops) = @_;
@@ -4172,12 +4189,14 @@ sub cleanup_exit {
 	
 sub cache_track {
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
-		return 1 unless $this_track->rec_status eq 'MON';
+		return unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return 1 unless $this_track->fancy_ops;
+		return unless $this_track->fancy_ops;
 	say $this_track->name,": begin cache recording";
  	initialize_chain_setup_vars();
-	my $original = $this_track;
+	my $orig = $this_track; 
+	my $orig_version = $orig->monitor_version;
+	#say "orig version: $orig_version";
 	my $cooked = $this_track->name . '_cooked';
 	my $temp_track = ::CacheRecTrack->new(
 		width => 2,
@@ -4185,38 +4204,39 @@ sub cache_track {
 		group => 'Cooked',
 		target => $this_track->name,
 	);
-	$g->add_path( 'wav_in',$original->name, $cooked, 'wav_out');
-	$debug and say "The graph is:\n$g"; 
-	my $original_version = $this_track->monitor_version;
+	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
+	#$debug and say "The graph is:\n$g"; 
 	add_paths_for_sub_buses();  # we will prune unneeded ones
 	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 	push @$temp_tracks, $temp_track;
-	$debug and say "The expanded graph is:\n$g"; 
+	#$debug and say "The expanded graph is:\n$g"; 
 	::Graph::add_inserts($g);
-	$debug and say "The expanded graph with inserts is\n$g";
+	#$debug and say "The expanded graph with inserts is\n$g";
 	process_routing_graph();
-	$ecasound_globals_ecs = $ecasound_globals;
+	$this_track = $orig;
 	if( write_chains_if_something_to_write() ){
-		connect_transport() and start_transport(); 
+		$debug and say "temp tracks to remove";
+		map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+		set_mixdown_globals();
+		connect_transport('no_transport_status') and start_transport(); 
 	# no ecasound start is better
-	my $name = $this_track->name;
+		my $name = $this_track->name;
 		if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
 			$debug and say "updating track cache_map";
-			my $t = $this_track;
-			say "cache map",yaml_out($t->cache_map);
-			my $cache_map = $t->cache_map;
-			$cache_map->{$t->last} = { 
-				original 			=> $original_version,
+			#say "cache map",yaml_out($this_track->cache_map);
+			my $cache_map = $this_track->cache_map;
+			$cache_map->{$this_track->last} = { 
+				original 			=> $orig_version,
 				effect_chain	=> push_effect_chain(), # bypass
 			};
-			say "cache map",yaml_out($t->cache_map);
-			say qq(Saving effects for cached track "$_".
-	'replace_effects' will reset "$_" to version $versions{$_});
+			pop @{$this_track->effect_chain_stack};
+			#say "cache map",yaml_out($this_track->cache_map);
+			say qq(Saving effects for cached track "$name".
+	'replace' will restore effects and set version $orig_version);
 		}
 	# set last version; done by new_files_were_recorded
-	rec_cleanup(); # set reasonably expected state
+		post_rec_configure();
+		set_normal_globals();		
 	}
-	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 }
 ### end
