@@ -496,12 +496,12 @@ ladspa_register:
   parameters: none
 list_marks:
   type: mark
-  short: lm
+  short: lmk lm
   what: List all marks
   parameters: none
 to_mark:
   type: mark
-  short: tom
+  short: tmk tom
   what: move playhead to named mark or mark index
   parameters: <s_mark_id> | <i_mark_index> 
   example: to_mark start (go to mark named 'start')
@@ -518,17 +518,17 @@ remove_mark:
   example: remove_mark start (remove mark named 'start')
 next_mark:
   type: mark
-  short: nm
+  short: nmk nm
   what: Move playback head to next mark
   parameters: none
 previous_mark:
   type: mark
-  short: pm
+  short: pmk pm
   what: Move playback head to previous mark
   parameters: none
 name_mark:
   type: mark
-  short: nom
+  short: nmk nom
   what: Give a name to the current mark
   parameters: <s_mark_id>
   example: name_mark start
