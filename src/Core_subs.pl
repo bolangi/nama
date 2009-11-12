@@ -364,7 +364,6 @@ reply: $reply";
 }
 
 sub eval_iam_libecasoundc{
-	local $debug = 1;
 	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
@@ -1893,9 +1892,6 @@ sub transport_status {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
-	if (%cooked_record_pending){
-		say join(" ", keys %cooked_record_pending), ": ready for caching";
-	}
 	if ($loop_enable and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
 		print "looping from ", d1($start), 
@@ -1908,6 +1904,7 @@ sub transport_status {
 				: " " ),
 				$/;
 	}
+	say "Engine is ready.";
 	print "setup length is ", d1($length), 
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
@@ -2142,14 +2139,18 @@ sub post_rec_configure {
 }
 sub new_files_were_recorded {
  	return unless my @files = really_recording();
+	my $debug = 1;
 	$debug and print join $/, "intended recordings:", @files;
 	my $recorded = 0;
-	$debug and print "found bigger than 44100 bytes:\n";
-	if (my @recorded = 
+	my @recorded = 
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-				if (-e $_) {
-					$debug and print "$_ exists. ";
-					if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
+				my $file = $_;
+				say "name $name, version $version";
+				say "looking for $file";
+				if (-e $file) {
+					$debug and print "$file exists. ";
+					if (-s $file > 44100) { # 0.5s x 16 bits x 44100/s
+						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
 						$tn{$name}->set(active => undef) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
@@ -2158,8 +2159,10 @@ sub new_files_were_recorded {
 					}
 					else { unlink $_; 0 }
 				}
-		} @files
-	) { rememoize(); @recorded }
+		} @files;
+	if( @recorded){
+		rememoize(), return @recorded 
+	}
 } 
 
 ## effect functions
@@ -3767,7 +3770,7 @@ sub automix {
 	start_transport();
 
 	while( eval_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
+		print q(.); sleep 5; $ui->refresh } ; print " Done\n";
 
 	# parse cop status
 	my $cs = eval_iam('cop-status');
@@ -4188,6 +4191,7 @@ sub cleanup_exit {
 }
 	
 sub cache_track {
+	local $debug = 1;
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
@@ -4226,10 +4230,12 @@ sub cache_track {
 			eval_iam("cs-set-length $length");
 			eval_iam("start");
 			while( eval_iam('engine-status') ne 'finished'){ 
-			print q(.); sleep 5; $ui->refresh } ; print "Done\n";
+			print q(.); sleep 5; $ui->refresh } ; print " Done\n";
 		}
 		my $name = $this_track->name;
-		if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
+		my @files = new_files_were_recorded();
+		say "files @files";
+		if (grep{/$name/} @files ){ # false positive possible
 			$debug and say "updating track cache_map";
 			#say "cache map",yaml_out($this_track->cache_map);
 			my $cache_map = $this_track->cache_map;
