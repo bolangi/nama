@@ -2163,7 +2163,6 @@ sub add_effect {
 	$debug2 and print "&add_effect\n";
 	
 	my %p 			= %{shift()};
-	$p{values} ||= [];
 	my ($n,$code,$parent_id,$id,$parameter,$values) =
 		@p{qw( chain type parent_id cop_id parameter values)};
 	my $i = $effect_i{$code};
@@ -2394,7 +2393,25 @@ sub cop_add {
 					  owns => [] }; 
 
 	$p->{cop_id} = $cop_id;
- 	cop_init( $p );
+
+	# set defaults
+	
+	if (! $p{values}){
+		my @vals;
+		$debug and print "no settings found, loading defaults if present\n";
+		my $i = $effect_i{ $cops{$cop_id}->{type} };
+		
+		# don't initialize first parameter if operator has a parent
+		# i.e. if operator is a controller
+		
+		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
+		
+			my $default = $effects[$i]->{params}->[$p]->{default};
+			push @vals, $default;
+		}
+		$debug and print "copid: $cop_id defaults: @vals \n";
+		$copp{$cop_id} = \@vals;
+	}
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -2425,44 +2442,9 @@ sub cop_add {
 
 	# set values if present
 	
-	$copp{$cop_id} = $p{values}; #  if @values; # needed for text mode
+	$copp{$cop_id} = $p{values} if $p{values};
 
 	$cop_id++; # return value then increment
-}
-
-sub cop_init {
-	
-	$debug2 and print "&cop_init\n";
-	my $p = shift;
-	my %p = %$p;
-	my $id = $p{cop_id};
-	my $parent_id = $p{parent_id};
-	my $vals_ref  = $p{vals_ref};
-	
-	$debug and print "cop__id: $id\n";
-
-	my @vals;
-	if (ref $vals_ref) {
-		@vals = @{ $vals_ref };
-		$debug and print ("values supplied\n");
-		@{ $copp{$id} } = @vals;
-		return;
-	} 
-	else { 
-		$debug and print "no settings found, loading defaults if present\n";
-		my $i = $effect_i{ $cops{$id}->{type} };
-		
-		# don't initialize first parameter if operator has a parent
-		# i.e. if operator is a controller
-		
-		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		
-			my $default = $effects[$i]->{params}->[$p]->{default};
-			push @vals, $default;
-		}
-		@{ $copp{$id} } = @vals;
-		$debug and print "copid: $id defaults: @vals \n";
-	}
 }
 
 sub effect_update_copp_set {
