@@ -480,7 +480,7 @@ update_send_bus: _update_send_bus bus_name end {
  	1;
 }
 set_bus: _set_bus { print "stub command, does nothing, sorry.\n"}
-list_buses: _list_buses end { ::pager(map{ $_->dump } values %::Bus::by_name) }
+list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) }
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
