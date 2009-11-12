@@ -4189,52 +4189,52 @@ sub cleanup_exit {
 }
 	
 sub cache_track {
-=comment
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return 1 unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
 		return 1 unless $this_track->fancy_ops;
 	say $this_track->name,": begin cache recording";
  	initialize_chain_setup_vars();
+	my $original = $this_track;
 	my $cooked = $this_track->name . '_cooked';
-	$g->add_path( $this_track->name, $cooked, 'wav_out');
 	my $temp_track = ::CacheRecTrack->new(
 		width => 2,
 		name => $cooked,
 		group => 'Cooked',
 		target => $this_track->name,
 	);
+	$g->add_path( 'wav_in',$original->name, $cooked, 'wav_out');
+	$debug and say "The graph is:\n$g"; 
 	my $original_version = $this_track->monitor_version;
 	add_paths_for_sub_buses();  # we will prune unneeded ones
 	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 	push @$temp_tracks, $temp_track;
-	$debug and say "The expanded graph is:\n$g";
+	$debug and say "The expanded graph is:\n$g"; 
 	::Graph::add_inserts($g);
 	$debug and say "The expanded graph with inserts is\n$g";
 	process_routing_graph();
-	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
-	$this_track = $old_this_track;
 	$ecasound_globals_ecs = $ecasound_globals;
-	write_chains_if_something_to_write()
-		and connect_transport()
-		and start_transport(); # no ecasound start is better
+	if( write_chains_if_something_to_write() ){
+		connect_transport() and start_transport(); 
+	# no ecasound start is better
 	my $name = $this_track->name;
-	if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
-		$debug and say "updating track cache_map";
-		my $t = $this_track;
-		say "cache map",yaml_out($t->cache_map);
-		my $cache_map = $t->cache_map;
-		$cache_map->{$t->last} = { 
-			original 			=> $original_version,
-			effect_chain	=> push_effect_chain(), # bypass
-		};
-		say "cache map",yaml_out($t->cache_map);
-		say qq(Saving effects for cached track "$_".
-'replace_effects' will reset "$_" to version $versions{$_});
-	}
+		if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
+			$debug and say "updating track cache_map";
+			my $t = $this_track;
+			say "cache map",yaml_out($t->cache_map);
+			my $cache_map = $t->cache_map;
+			$cache_map->{$t->last} = { 
+				original 			=> $original_version,
+				effect_chain	=> push_effect_chain(), # bypass
+			};
+			say "cache map",yaml_out($t->cache_map);
+			say qq(Saving effects for cached track "$_".
+	'replace_effects' will reset "$_" to version $versions{$_});
+		}
 	# set last version; done by new_files_were_recorded
 	rec_cleanup(); # set reasonably expected state
-=cut
+	}
+	$debug and say "temp tracks to remove";
+	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 }
 ### end
