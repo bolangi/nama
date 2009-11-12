@@ -4219,14 +4219,13 @@ sub cache_track {
 		map{ $debug and say $_->name; $_->remove } @$temp_tracks;
 		set_mixdown_globals();
 		$length = eval_iam('cs-get-length'); 
-	$ui->length_display(-text => colonize($length));
+		$ui->length_display(-text => colonize($length));
 		if( connect_transport('no_transport_status')){
 			eval_iam("cs-set-length $length");
 			eval_iam("start");
 			while( eval_iam('engine-status') ne 'finished'){ 
 			print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 		}
-	# no ecasound start is better
 		my $name = $this_track->name;
 		if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
 			$debug and say "updating track cache_map";
@@ -4239,9 +4238,8 @@ sub cache_track {
 			pop @{$this_track->effect_chain_stack};
 			#say "cache map",yaml_out($this_track->cache_map);
 			say qq(Saving effects for cached track "$name".
-	'replace' will restore effects and set version $orig_version);
+'replace' will restore effects and set version $orig_version);
 		}
-	# set last version; done by new_files_were_recorded
 		post_rec_configure();
 		set_normal_globals();		
 	}

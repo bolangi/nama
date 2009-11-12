@@ -275,7 +275,7 @@ sub yaml_out {
 	$debug and print "about to write YAML as string\n";
 	my $y = YAML::Tiny->new;
 	$y->[0] = $data_ref;
-	my $yaml = $y->write_string();
+	my $yaml = $y->write_string() . '...';
 }
 sub yaml_in {
 	
