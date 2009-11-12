@@ -1118,12 +1118,13 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	connect_Main_tracks_to_Master();
-	add_paths_for_send_and_sub_buses();
+	add_paths_for_send_buses();
+	add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
 
 	# re-route Master to null for automix
 	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master'));
+		$g->delete_edges(map{@$_} $g->edges_from('Master')); # no, they don't
 		$g->add_edge(qw[Master null_out]);
 	}
 	add_paths_for_mixdown_handling();
@@ -1131,31 +1132,7 @@ sub generate_setup {
 	
 	$debug and say "The graph is:\n$g";
 
-	# track cache routing
-
-	my @cache_rec_tracks = 
-	map {
-
-		my $cooked = $_->name . '_cooked';
-		$g->add_path( $_->name, $cooked, 'wav_out');
-		::CacheRecTrack->new(
-			width => 2,
-			name => $cooked,
-			group => 'Cooked',
-			target => $_->name,
-		);
-
-	} grep{ $cooked_record_pending{$_->name}} ::Track::all();
-
-	# store active track versions for later use in cache_map
-
-	%versions = ();
-	
-	map{ $versions{$_->name} = $_->monitor_version } ::Track::all();
-	$debug and say "monitor_versions\n",yaml_out \%versions;
-
-	my $temp_tracks = ::Graph::expand_graph($g);
-	push @$temp_tracks, @cache_rec_tracks;
+	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 
 	$debug and say "The expanded graph is:\n$g";
 
@@ -1211,7 +1188,8 @@ sub connect_Main_tracks_to_Master {
 		$main->tracks;  # list of Track names
 
 }
-sub add_paths_for_send_and_sub_buses {
+
+sub add_paths_for_send_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1234,7 +1212,22 @@ sub add_paths_for_send_and_sub_buses {
 			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
 			} @tracks; 
 		}
-		elsif( $_->bus_type eq 'sub'){   # sub bus
+	} @user_buses;
+}
+sub add_paths_for_sub_buses {
+
+	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
+	map{
+
+		my $bus = $_;
+		# we get tracks from a group of the same name as $bus->name
+		my @tracks = grep{ $_->rec_status ne 'OFF' } 
+					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
+
+		# raw send buses use only fixed-rule routing
+		# we process them later
+
+		if( $_->bus_type eq 'sub'){   # sub bus
 			$debug and say 'process sub bus';
 			my $output = $bus->destination_type eq 'track' 
 				? $bus->destination_id
@@ -1861,6 +1854,7 @@ sub adjust_latency {
 			} keys %latency;
 }
 sub connect_transport {
+	my $no_transport_status = shift;
 	$debug2 and print "&connect_transport\n";
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
@@ -1884,9 +1878,10 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	eval_iam("cs-set-length $length") if $tn{Mixdown}->rec_status eq 'REC'; 
 	$ui->clock_config(-text => colonize(0));
-	transport_status();
+	transport_status() unless $no_transport_status;
 	$ui->flash_ready();
 	#print eval_iam("fs");
+	1;
 	
 }
 
@@ -2134,52 +2129,37 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
+	if( new_files_were_recorded() ){
+		say "Now reviewing your recording...";
+		post_rec_configure();
+	}
+}
+sub post_rec_configure {
+		$ui->global_version_buttons(); # recreate
+		$main->set( rw => 'MON');
+		$ui->refresh();
+		reconfigure_engine();
+}
+sub new_files_were_recorded {
  	return unless my @files = really_recording();
 	$debug and print join $/, "intended recordings:", @files;
 	my $recorded = 0;
 	$debug and print "found bigger than 44100 bytes:\n";
- 	for (@files) {    
-		my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-		if (-e $_) {
-			$debug and print "$_ exists. ";
-			if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
-				$debug and print "$_\n";
-				$tn{$name}->set(active => undef) if $tn{$name};
-				$ui->update_version_button($tn{$name}->n, $version);
-			$recorded++ unless $name =~ /Mixdown/;
-			}
-			else { unlink $_ }
-		}
-	}
-	# store data about cached tracks
-	if ($recorded and %cooked_record_pending){
-		$debug and say "updating track cache_map";
-		my $old_this_track = $this_track;
-		map{    
-			my $t = $this_track = $tn{$_};  
-			say "cache map",yaml_out($t->cache_map);
-			
-			my $cache_map = $t->cache_map;
-			$cache_map->{$t->last} = { 
-				original 			=> $versions{$_},
-				effect_chain	=> push_effect_chain(), # bypass
-			};
-			say "cache map",yaml_out($t->cache_map);
-			say qq(Saving effects for cached track "$_".
-'replace_effects' will reset "$_" to version $versions{$_});
-
-		} keys %cooked_record_pending;
-		$this_track = $old_this_track;
-		%cooked_record_pending = ();
-	}
-	rememoize();
-	if ( $recorded ) {
-			say "Now reviewing your recording...";
-			$ui->global_version_buttons(); # recreate
-			$main->set( rw => 'MON');
-			$ui->refresh();
-			reconfigure_engine();
-	}
+	if (my @recorded = 
+		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
+				if (-e $_) {
+					$debug and print "$_ exists. ";
+					if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
+						$debug and print "$_\n";
+						$tn{$name}->set(active => undef) if $tn{$name};
+						$ui->update_version_button($tn{$name}->n, $version);
+					$recorded++ unless $name =~ /Mixdown/;
+					1;
+					}
+					else { unlink $_; 0 }
+				}
+		} @files
+	) { rememoize(); @recorded }
 } 
 
 ## effect functions
@@ -2189,7 +2169,6 @@ sub add_effect {
 	$debug2 and print "&add_effect\n";
 	
 	my %p 			= %{shift()};
-	$p{values} ||= [];
 	my ($n,$code,$parent_id,$id,$parameter,$values) =
 		@p{qw( chain type parent_id cop_id parameter values)};
 	my $i = $effect_i{$code};
@@ -2420,7 +2399,25 @@ sub cop_add {
 					  owns => [] }; 
 
 	$p->{cop_id} = $cop_id;
- 	cop_init( $p );
+
+	# set defaults
+	
+	if (! $p{values}){
+		my @vals;
+		$debug and print "no settings found, loading defaults if present\n";
+		my $i = $effect_i{ $cops{$cop_id}->{type} };
+		
+		# don't initialize first parameter if operator has a parent
+		# i.e. if operator is a controller
+		
+		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
+		
+			my $default = $effects[$i]->{params}->[$p]->{default};
+			push @vals, $default;
+		}
+		$debug and print "copid: $cop_id defaults: @vals \n";
+		$copp{$cop_id} = \@vals;
+	}
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -2451,44 +2448,9 @@ sub cop_add {
 
 	# set values if present
 	
-	$copp{$cop_id} = $p{values}; #  if @values; # needed for text mode
+	$copp{$cop_id} = $p{values} if $p{values};
 
 	$cop_id++; # return value then increment
-}
-
-sub cop_init {
-	
-	$debug2 and print "&cop_init\n";
-	my $p = shift;
-	my %p = %$p;
-	my $id = $p{cop_id};
-	my $parent_id = $p{parent_id};
-	my $vals_ref  = $p{vals_ref};
-	
-	$debug and print "cop__id: $id\n";
-
-	my @vals;
-	if (ref $vals_ref) {
-		@vals = @{ $vals_ref };
-		$debug and print ("values supplied\n");
-		@{ $copp{$id} } = @vals;
-		return;
-	} 
-	else { 
-		$debug and print "no settings found, loading defaults if present\n";
-		my $i = $effect_i{ $cops{$id}->{type} };
-		
-		# don't initialize first parameter if operator has a parent
-		# i.e. if operator is a controller
-		
-		for my $p ($parent_id ? 1 : 0..$effects[$i]->{count} - 1) {
-		
-			my $default = $effects[$i]->{params}->[$p]->{default};
-			push @vals, $default;
-		}
-		@{ $copp{$id} } = @vals;
-		$debug and print "copid: $id defaults: @vals \n";
-	}
 }
 
 sub effect_update_copp_set {
@@ -3769,6 +3731,12 @@ sub jack_client {
 	$jack{$name}{$direction};
 }
 
+sub set_mixdown_globals {
+	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
+		if $ecasound_globals_for_mixdown;
+}
+sub set_normal_globals {$ecasound_globals_ecs = $ecasound_globals}
+
 sub automix {
 
 	use Smart::Comments '###';
@@ -3778,8 +3746,7 @@ sub automix {
 
 	# use special Ecasound globals for mixdown 
 	
-	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
-		if $ecasound_globals_for_mixdown;
+	set_mixdown_globals();
 	
 	# turn off audio output
 	
@@ -3818,7 +3785,7 @@ sub automix {
 
 		say "Signal appears to be silence. Skipping.";
 		command_process( 'for mon; vol*10');
-		$ecasound_globals_ecs = $ecasound_globals;
+		set_normal_globals();
 		$main_out = 1;
 		return;
 	}
@@ -3838,9 +3805,10 @@ sub automix {
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
-	### turn on audio output output
+	### turn on audio output
 
 	$main_out = 1;
+	set_normal_globals();
 
 	### default to playing back Mixdown track, setting user tracks to OFF
 
@@ -4131,7 +4099,8 @@ sub new_effect_chain_name {
 	my $name = '_'.$this_track->name . '_';
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
-	@{ $this_track->effect_chain_stack };
+	@{ $this_track->effect_chain_stack }, 
+		grep{/$name/} keys %effect_chain;
 	$name . ++$i
 }
 
@@ -4140,13 +4109,14 @@ sub new_effect_chain_name {
 sub push_effect_chain {
 	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
-	#my $add_name = $vals{add}; # undef in case of bypass # disabled!
+	###my $add_name = $vals{add}; # undef in case of bypass # disabled!
 	my $save_name   = $vals{save} || new_effect_chain_name();
 	#$debug and say "add: $add_name save: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
-	#add_effect_chain($add_name) if $add_name; # disabled!
+	###add_effect_chain($add_name) if $add_name; # disabled!
+	#say "save name $save_name";
 	$save_name;
 }
 
@@ -4168,20 +4138,23 @@ sub uncache {
 	# skip unless MON;
 	my $cm = $t->cache_map;
 	my $v = $t->monitor_version;
-	if($cm->{$v}){ # we are a cached version
+	if(is_cached()){
 		# blast away any existing effects, TODO: warn or abort	
+		say $t->name, ": removing effects (except vol/pan)" if $t->fancy_ops;
 		map{ remove_effect($_)} $t->fancy_ops;
 		$t->set(active => $cm->{$v}{original});
 		print $t->name, ": setting uncached version ", $t->active, $/;
 		add_effect_chain($cm->{$v}{effect_chain});
-		$t->set(effect_chain_stack => [ 
-			grep{$_ ne $cm->{$v}{effect_chain}} @{ $t->effect_chain_stack}
-		]);
 	} 
 	else { print $t->name, ": version $v is not cached\n"}
 }
+sub is_cached {
+	my $cm = $this_track->cache_map;
+	$cm->{$this_track->monitor_version}
+}
+	
 
-sub replace_effects {  pop_effect_chain()}
+sub replace_effects { is_cached() ? uncache() : pop_effect_chain()}
 
 sub new_effect_chain {
 	my ($name, @ops) = @_;
@@ -4214,4 +4187,56 @@ sub cleanup_exit {
 	CORE::exit; 
 }
 	
+sub cache_track {
+	print($this_track->name, ": track caching requires MON status.\n\n"), 
+		return unless $this_track->rec_status eq 'MON';
+	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
+		return unless $this_track->fancy_ops;
+	say $this_track->name,": begin cache recording";
+ 	initialize_chain_setup_vars();
+	my $orig = $this_track; 
+	my $orig_version = $orig->monitor_version;
+	#say "orig version: $orig_version";
+	my $cooked = $this_track->name . '_cooked';
+	my $temp_track = ::CacheRecTrack->new(
+		width => 2,
+		name => $cooked,
+		group => 'Cooked',
+		target => $this_track->name,
+	);
+	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
+	#$debug and say "The graph is:\n$g"; 
+	add_paths_for_sub_buses();  # we will prune unneeded ones
+	my $temp_tracks = ::Graph::expand_graph($g); # array ref
+	push @$temp_tracks, $temp_track;
+	#$debug and say "The expanded graph is:\n$g"; 
+	::Graph::add_inserts($g);
+	#$debug and say "The expanded graph with inserts is\n$g";
+	process_routing_graph();
+	$this_track = $orig;
+	if( write_chains_if_something_to_write() ){
+		$debug and say "temp tracks to remove";
+		map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+		set_mixdown_globals();
+		connect_transport('no_transport_status') and start_transport(); 
+	# no ecasound start is better
+		my $name = $this_track->name;
+		if (grep{/$name/} new_files_were_recorded() ){ # false positive possible
+			$debug and say "updating track cache_map";
+			#say "cache map",yaml_out($this_track->cache_map);
+			my $cache_map = $this_track->cache_map;
+			$cache_map->{$this_track->last} = { 
+				original 			=> $orig_version,
+				effect_chain	=> push_effect_chain(), # bypass
+			};
+			pop @{$this_track->effect_chain_stack};
+			#say "cache map",yaml_out($this_track->cache_map);
+			say qq(Saving effects for cached track "$name".
+	'replace' will restore effects and set version $orig_version);
+		}
+	# set last version; done by new_files_were_recorded
+		post_rec_configure();
+		set_normal_globals();		
+	}
+}
 ### end

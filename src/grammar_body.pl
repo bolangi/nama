@@ -541,18 +541,8 @@ remove_insert: _remove_insert end {
 	1;
 }
 
-cache_track: _cache_track end {
-	print($::this_track->name, ": track caching requires MON status.\n\n"), 
-		return 1 unless $::this_track->rec_status eq 'MON';
-	print($::this_track->name, ": no fancy effects to cache!  Skipping.\n\n"), 
-		return 1 unless $::this_track->fancy_ops;
-	$::cooked_record_pending{ $::this_track->name }++; 
-	1;
-}
-cache_track_cancel: _cache_track_cancel end {
-	delete $::cooked_record_pending{ $::this_track->name }; 
-	1;
-}
+cache_track: _cache_track end { ::cache_track(); 1 }
+uncache_track: _uncache_track end { ::uncache(); 1 }
 new_effect_chain: _new_effect_chain name op_id(s?) end {
 	#print "name $item{name}, ops: ", @{$item{'op_id(s?)'}}, $/;
 	::new_effect_chain($item{name}, @{ $item{'op_id(s?)'} });
