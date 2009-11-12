@@ -1957,7 +1957,8 @@ sub disconnect_transport {
 }
 
 sub start_heartbeat {
- 	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
+ 	sleeper(0.5);
+	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
 }
 
 sub stop_heartbeat {$event_id{heartbeat} = undef; rec_cleanup() }
@@ -2126,9 +2127,9 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
-	if( new_files_were_recorded() ){
+	if( my @files = new_files_were_recorded() ){
 		say "Now reviewing your recording...";
-		post_rec_configure();
+		grep /Mixdown/, @files ? command_process('mixplay') : post_rec_configure();
 	}
 }
 sub post_rec_configure {
