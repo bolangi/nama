@@ -1982,12 +1982,13 @@ sub heartbeat {
 		and defined $end 
 		and ! really_recording();
 
-	# update time display
-	#
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+	update_clock_display();
 
 }
 
+sub update_clock_display { 
+	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+}
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
@@ -3819,10 +3820,14 @@ sub automix {
 
 	generate_setup('automix'); # pass a bit of magic
 	connect_transport();
-	start_transport();
-
+	
+	# start_transport() does a rec_cleanup() on transport stop
+	
+	eval_iam('start'); # don't use heartbeat
+	sleep 2; # time for engine to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 5; $ui->refresh } ; print " Done\n";
+		print q(.); sleep 2; update_clock_display()}; 
+	print " Done\n";
 
 	# parse cop status
 	my $cs = eval_iam('cop-status');
@@ -4277,12 +4282,11 @@ sub cache_track {
 		set_mixdown_globals();
 		#if( connect_transport('no_transport_status')){
 		if( connect_transport()){
-			$length = eval_iam('cs-get-length'); 
-			$ui->length_display(-text => colonize($length));
 			eval_iam("cs-set-length $length");
 			eval_iam("start");
+			sleep 2; # time for transport to stabilize
 			while( eval_iam('engine-status') ne 'finished'){ 
-			print q(.); sleep 5; $ui->refresh } ; print " Done\n";
+			print q(.); sleep 2; update_clock_display() } ; print " Done\n";
 		}
 		my $name = $this_track->name;
 		my @files = new_files_were_recorded();
