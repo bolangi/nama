@@ -1,7 +1,10 @@
 sub show_versions {
-		return @{$this_track->versions} 
-			?  "All versions: ". join(" ", @{$this_track->versions}). $/
-			:  q();
+		if (@{$this_track->versions} ){
+			my $cache_map = $this_track->cache_map;
+			"All versions: ". join(" ", 
+				map { $_ . ( $cache_map->{$_} and 'c') } @{$this_track->versions}
+			). $/
+		} else { q() }
 }
 
 sub show_effects {
