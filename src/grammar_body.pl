@@ -88,7 +88,8 @@ set_region: _set_region beginning end { ::set_region( $item{beginning}, 'END' );
 }
 remove_region: _remove_region end { ::remove_region(); 1; }
 new_region: _new_region beginning ending name(?) end {
-	::new_region(@item{qw(beginning ending), @{$item{'name(?)'}}}); 1
+	my ($name) = @{$item{'name(?)'}};
+	::new_region(@item{qw(beginning ending)}, $name); 1
 }
 
 shift_track: _shift_track start_position end {

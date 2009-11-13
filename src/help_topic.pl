@@ -147,9 +147,10 @@ track => <<TRACK,
 
  - cutting and time shifting
 
-   region                  - specify a track region using mark names
-   remove_region, rmr      - remove region definition. Entire track plays back
-   shift_track, shift      - set playback delay for track/region
+   set_region,    srg      - specify a track region using times or mark names
+   new_region,    nrg      - define a region creating an auxiliary track
+   remove_region, rrg      - remove auxiliary track or region definition
+   shift_track,   shift    - set playback delay for track/region
    unshift_track, unshift  - eliminate playback delay for track/region
 
  - hazardous commands for advanced users
@@ -194,15 +195,15 @@ transport => <<TRANSPORT,
 TRANSPORT
 
 marks => <<MARKS,
-   mark, k            - drop mark at current position, with optional name
-   list_marks, lm     - list marks showing index, time, name
-   next_mark, nm      - jump to next mark 
-   previous_mark, pm  - jump to previous mark 
-   name_mark, nom     - give a name to current mark 
-   to_mark, tom       - jump to a mark by name or index
-   remove_mark, rmm   - remove current mark
-   modify_mark,
-   move_mark, mm      - change the time setting of current mark
+   new_mark,      mark, k     - drop mark at current position, with optional name
+   list_marks,    lmk,  lm    - list marks showing index, time, name
+   next_mark,     nmk,  nm    - jump to next mark 
+   previous_mark, pmk,  pm    - jump to previous mark 
+   name_mark,           nom   - give a name to current mark 
+   to_mark,       tmk,  tom   - jump to a mark by name or index
+   remove_mark,   rmk,  rom   - remove current mark
+   modify_mark, move_mark, 
+    mmk, mm                   - change the time setting of current mark
 MARKS
 
 effects => <<EFFECTS,
@@ -211,8 +212,8 @@ effects => <<EFFECTS,
 
    ladspa_register, lrg       - list LADSPA effects
    preset_register, prg       - list Ecasound presets
-   ctrl_register, crg         - list Ecasound controllers 
-   find_effect, fe            - list available effects matching arguments
+   ctrl_register,   crg       - list Ecasound controllers 
+   find_effect,     fe        - list available effects matching arguments
                                 example: find_effect reverb
    help_effect, he            - full information about an effect 
                                 example: help_effect 1209 
@@ -222,13 +223,13 @@ effects => <<EFFECTS,
 
  - effect manipulation commands
 
-   add_effect,    fxa, afx    - add an effect to the current track
-   insert_effect, fxi, ifx    - insert an effect before another effect
-   modify_effect, fxm, mfx    - set, increment or decrement an effect parameter
-   remove_effect, fxr, rfx    - remove an effect or controller
+   add_effect,    afx         - add an effect to the current track
+   insert_effect, ifx         - insert an effect before another effect
+   modify_effect, mfx         - set, increment or decrement an effect parameter
+   remove_effect, rfx         - remove an effect or controller
    append_effect              - add effect to the end of current track
-                                effect chain
-   add_controller, acl, cla   - add an Ecasound controller
+                                effect list 
+   add_controller, acl        - add an Ecasound controller
 
 -  send/receive inserts
 
@@ -255,11 +256,11 @@ group => <<GROUP,
    group_version, gver, gv    - select default group version 
                               - used for switching among 
                                 several multitrack recordings
-   bunch, bn                  - name a group of tracks
+   new_bunch, bunch, nb       - name a bunch of tracks
                                 e.g. bunch strings violins cello bass
                                 e.g. bunch 3 4 6 7 (track indexes)
-   list_bunches, lb           - list groups of tracks (bunches)
-   remove_bunches, rb         - remove bunch definitions
+   list_bunches,     lb       - list groups of tracks (bunches)
+   remove_bunches,   rb       - remove bunch definitions
 
    for                        - execute commands on several tracks 
                                 by name, or by specifying a group or bunch
@@ -272,28 +273,25 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
-   add_send_bus_raw, asbr     - create bus and slave tracks for 
+   add_send_bus_raw,    asbr  - create bus and slave tracks for 
                                 sending pre-fader track signals
    add_send_bus_cooked, asbc  - as above, for post-fader signals
-   update_send_bus, usb       - refresh send bus track list
-   remove_bus, rb             - remove a bus
-   add_sub_bus, asub          - create a sub-bus feeding a regular user track
+   update_send_bus,     usb   - refresh send bus track list
+   remove_bus,                - remove a bus
+   add_sub_bus,         asub  - create a sub-bus feeding a regular user track
                                 of the same name
                                 example: add_sub_bus Strings 
                                          add_tracks violin cello bass
                                          for cello violin bass; set bus Strings
-   add_slave_track, ast       - add a slave_track to an existing user bus
 
 BUS
 
-
-
 mixdown => <<MIXDOWN,
-   mixdown, mxd                - enable mixdown 
-   mixoff,  mxo                - disable mixdown 
-   mixplay, mxp                - playback a recorded mix 
+   mixdown,    mxd             - enable mixdown 
+   mixoff,     mxo             - disable mixdown 
+   mixplay,    mxp             - playback a recorded mix 
    automix                     - normalize track vol levels, then mixdown
-   master_on, mr               - enter mastering mode
+   master_on,  mr              - enter mastering mode
    master_off, mro             - leave mastering mode
 MIXDOWN
 
@@ -312,10 +310,10 @@ PROMPT
 
 diagnostics => <<DIAGNOSTICS,
 
-   dump_all, dumpall, dumpa     - dump most internal state
-   dump_track, dumpt, dump      - dump current track data
+   dump_all,   dumpall,   dumpa - dump most internal state
+   dump_track, dumpt,     dump  - dump current track data
    dump_group, dumpgroup, dumpg - dump group settings for user tracks
-   show_io, showio              - show chain inputs and outputs
+   show_io,    showio           - show chain inputs and outputs
    engine_status, egs           - display ecasound audio processing engine
                                    status
 DIAGNOSTICS

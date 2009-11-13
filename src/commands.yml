@@ -265,7 +265,7 @@ show_track:
   what: show current track status
 set_region:
   type: track
-  short: drg
+  short: srg
   what: Specify a playback region for the current track using marks. Use 'new_region' for multiple regions.
   parameters: <s_start_mark_name> <s_end_mark_name>
 new_region:
