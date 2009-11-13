@@ -1153,7 +1153,7 @@ sub generate_setup {
 	process_static_bus_rules();
 	$ecasound_globals_ecs = $ecasound_globals;
 
-	write_chains_if_something_to_write();
+	maybe_write_chains();
 }
 sub initialize_chain_setup_vars {
 
@@ -1319,11 +1319,11 @@ sub process_routing_graph {
 }
 sub process_static_bus_rules { map { $_->apply() } ::Bus::all(); }
 
-sub write_chains_if_something_to_write {
+sub maybe_write_chains {
 	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
 		write_chains();
- 		return 1;
- 	} else { print "No inputs found!\n"; return 0};
+ 		1;
+ 	} else { print "No inputs found!\n"; 0 };
 }
 
 sub override {
@@ -1855,6 +1855,7 @@ sub adjust_latency {
 
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
+	my $no_transport_status = shift;
 	load_ecs(); 
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
 		or print("Invalid chain setup, engine not ready.\n"),return;
@@ -1877,9 +1878,10 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-	transport_status();
+	transport_status() unless $no_transport_status;
 	$ui->flash_ready();
 	#print eval_iam("fs");
+	1;
 	
 }
 
@@ -2142,14 +2144,10 @@ sub post_rec_configure {
 }
 sub new_files_were_recorded {
  	return unless my @files = really_recording();
-	my $debug = 1;
 	$debug and print join $/, "intended recordings:", @files;
 	my @recorded =
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-				say "name $name, version $version";
-				say "looking for $_";
 				if (-e ) {
-					$debug and print "$_ exists. ";
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
@@ -4222,16 +4220,13 @@ sub cleanup_exit {
 }
 	
 sub cache_track {
-	local $debug = 1;
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
 		return unless $this_track->fancy_ops;
-	say $this_track->name,": begin cache recording";
  	initialize_chain_setup_vars();
 	my $orig = $this_track; 
-	my $orig_version = $orig->monitor_version;
-	#say "orig version: $orig_version";
+	my $orig_version = $this_track->monitor_version;
 	my $cooked = $this_track->name . '_cooked';
 	my $temp_track = ::CacheRecTrack->new(
 		width => 2,
@@ -4240,46 +4235,40 @@ sub cache_track {
 		target => $this_track->name,
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
-	#$debug and say "The graph is:\n$g"; 
 	add_paths_for_sub_buses();  # we will prune unneeded ones
 	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 	push @$temp_tracks, $temp_track;
-	#$debug and say "The expanded graph is:\n$g"; 
 	::Graph::add_inserts($g);
-	#$debug and say "The expanded graph with inserts is\n$g";
 	process_routing_graph();
-	$this_track = $orig;
 	set_mixdown_globals();
-	if( write_chains_if_something_to_write() ){
-		$debug and say "temp tracks to remove";
-		map{ $debug and say $_->name; $_->remove } @$temp_tracks;
-		set_mixdown_globals();
-		#if( connect_transport('no_transport_status')){
-		if( connect_transport()){
-			eval_iam("cs-set-length $length");
-			eval_iam("start");
-			sleep 2; # time for transport to stabilize
-			while( eval_iam('engine-status') ne 'finished'){ 
-			print q(.); sleep 2; update_clock_display() } ; print " Done\n";
-		}
-		my $name = $this_track->name;
-		my @files = new_files_were_recorded();
-		say "files @files";
-		if (grep{/$name/} @files ){ # false positive possible
-			$debug and say "updating track cache_map";
-			#say "cache map",yaml_out($this_track->cache_map);
-			my $cache_map = $this_track->cache_map;
-			$cache_map->{$this_track->last} = { 
-				original 			=> $orig_version,
-				effect_chain	=> push_effect_chain(), # bypass
-			};
-			pop @{$this_track->effect_chain_stack};
-			#say "cache map",yaml_out($this_track->cache_map);
-			say qq(Saving effects for cached track "$name".
-'replace' will restore effects and set version $orig_version);
-		}
+	maybe_write_chains() or say("nothing to do"), set_normal_globals(), return;
+	map{ $_->remove } @$temp_tracks;
+	set_normal_globals();		
+	connect_transport('no_transport_status')
+		or say ("Couldn't connect engine! Skipping."), return;
+	say $/,$orig->name,": length ". d2($length). " seconds";
+	say "Starting cache operation. Please wait.";
+	eval_iam("cs-set-length $length");
+	eval_iam("start");
+	sleep 2; # time for transport to stabilize
+	while( eval_iam('engine-status') ne 'finished'){ 
+	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
+	$this_track = $orig;
+	my $name = $this_track->name;
+	my @files = grep{/$name/} new_files_were_recorded();
+	if (@files ){ 
+		$debug and say "updating track cache_map";
+		#say "cache map",yaml_out($this_track->cache_map);
+		my $cache_map = $this_track->cache_map;
+		$cache_map->{$this_track->last} = { 
+			original 			=> $orig_version,
+			effect_chain	=> push_effect_chain(), # bypass
+		};
+		pop @{$this_track->effect_chain_stack};
+		#say "cache map",yaml_out($this_track->cache_map);
+		say qq(Saving effects for cached track "$name".
+'replace' will restore effects and set version $orig_version\n);
 		post_rec_configure();
-		set_normal_globals();		
-	}
+	} else { say "track cache operation failed!"; }
 }
 ### end
