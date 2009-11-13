@@ -1989,35 +1989,6 @@ sub heartbeat {
 sub update_clock_display { 
 	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
 }
-sub rec_cleanup {  
-	$debug2 and print "&rec_cleanup\n";
-	print("transport still running, can't cleanup"),return if transport_running();
- 	return unless my @files = really_recording();
-	$debug and print join $/, "intended recordings:", @files;
-	my $recorded = 0;
-	$debug and print "found bigger than 44100 bytes:\n";
- 	for (@files) {    
-		my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-		if (-e $_) {
-			$debug and print "$_ exists. ";
-			if (-s $_ > 44100) { # 0.5s x 16 bits x 44100/s
-				$debug and print "$_\n";
-				$tn{$name}->set(active => undef) if $tn{$name};
-				$ui->update_version_button($tn{$name}->n, $version);
-			$recorded++ unless $name =~ /Mixdown/;
-			}
-			else { unlink $_ }
-		}
-	}
-	rememoize();
-	if ( $recorded ) {
-			say "Now reviewing your recording...";
-			$ui->global_version_buttons(); # recreate
-			$main->set( rw => 'MON');
-			$ui->refresh();
-			reconfigure_engine();
-	}
-} 
 sub schedule_wraparound {
 
 	return unless $loop_enable;
@@ -2154,16 +2125,14 @@ sub jump {
 	sleeper( 0.6);
 }
 ## post-recording functions
-=comment
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
 	if( my @files = new_files_were_recorded() ){
 		say "Now reviewing your recording...";
-		grep /Mixdown/, @files ? command_process('mixplay') : post_rec_configure();
+		(grep /Mixdown/, @files) ? command_process('mixplay') : post_rec_configure();
 	}
 }
-=cut
 sub post_rec_configure {
 
 		$ui->global_version_buttons(); # recreate
@@ -2175,27 +2144,23 @@ sub new_files_were_recorded {
  	return unless my @files = really_recording();
 	my $debug = 1;
 	$debug and print join $/, "intended recordings:", @files;
-	my $recorded = 0;
-	my @recorded = 
+	my @recorded =
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
 				say "name $name, version $version";
 				say "looking for $_";
 				if (-e ) {
-					$debug and print "$file exists. ";
+					$debug and print "$_ exists. ";
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
 						$tn{$name}->set(active => undef) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
-					$recorded++ unless $name =~ /Mixdown/;
 					1;
 					}
 					else { unlink $_; 0 }
 				}
 		} @files;
-	if( @recorded){
-		rememoize(), return @recorded 
-	}
+	if( @recorded){ rememoize(); return @recorded }
 } 
 
 ## effect functions
