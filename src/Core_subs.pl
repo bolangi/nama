@@ -2009,25 +2009,6 @@ sub rec_cleanup {
 			else { unlink $_ }
 		}
 	}
-	# store data about cached tracks
-	if ($recorded and %cooked_record_pending){
-		$debug and say "updating track cache_map";
-		my $old_this_track = $this_track;
-		map{    
-			my $t = $this_track = $tn{$_};  
-			
-			my $cache_map = $t->cache_map;
-			$cache_map->{$t->last} = { 
-				caches 			=> $versions{$_},
-				effect_chain	=> push_effect_chain(), # bypass
-			};
-			say qq(Saving effects for cached track "$_".
-'replace_effects' will reset "$_" to version $versions{$_});
-
-		} keys %cooked_record_pending;
-		$this_track = $old_this_track;
-		%cooked_record_pending = ();
-	}
 	rememoize();
 	if ( $recorded ) {
 			say "Now reviewing your recording...";
@@ -2197,12 +2178,11 @@ sub new_files_were_recorded {
 	my $recorded = 0;
 	my @recorded = 
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
-				my $file = $_;
 				say "name $name, version $version";
-				say "looking for $file";
-				if (-e $file) {
+				say "looking for $_";
+				if (-e ) {
 					$debug and print "$file exists. ";
-					if (-s $file > 44100) { # 0.5s x 16 bits x 44100/s
+					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
 						$tn{$name}->set(active => undef) if $tn{$name};
