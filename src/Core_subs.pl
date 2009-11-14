@@ -2513,14 +2513,11 @@ sub effect_update {
 	my $operator; 
 	# TODO should exit the loop after identifying the
 	# position
-#	my $controller_count = 0;
 	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
 		$operator = $op, last if $ti{$chain}->ops->[$op] eq $id;
-#		$controller_count++ if $cops{$ti{$chain}->ops->[$op]}{parent_id};
 	}
 	$param++; # so the value at $p[0] is applied to parameter 1
 	$operator++; # translates 0th to chain-operator 1
-#	$operator -= $controller_count; # skip controllers 
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $operator, offset: ",
 	$offset{$chain}, " param: $param, value: $val$/";
@@ -2530,28 +2527,6 @@ sub effect_update {
 	eval_iam("copp-set $val");
 }
 
-sub operator_position {
-	my $id = shift;
-	my $chain = $cops{$id}{chain};
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops}
-	my $controller_count = 0;
-	for my $i (0..scalar @ops - 1) {
-		$operator = $i, last if $ops[$i] eq $id;
-		$controller_count++ if $ops[$i]}{parent_id};
-	}
-	$param++; # so the value at $p[0] is applied to parameter 1
-	$operator++; # translates 0th to chain-operator 1
-	$operator -= $controller_count; # skip controllers 
-	
-	
-
-}
-
-sub controller_position {
-
-}
-	
 sub fade {
 	my ($id, $param, $from, $to, $seconds) = @_;
 
