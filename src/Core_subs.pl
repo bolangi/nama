@@ -1977,7 +1977,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	say("\nstopped"),revise_prompt(),stop_heartbeat()
+	say("\nengine is stopped"),revise_prompt(),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
