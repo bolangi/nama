@@ -1913,7 +1913,7 @@ sub transport_status {
 				: " " ),
 				$/;
 	}
-	say "engine is ready";
+	say "Engine is ready.";
 	print "setup length is ", d1($length), 
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
@@ -1936,15 +1936,16 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	print "\n\nstarting at ", colonize(int eval_iam("getpos")), "\n";
+	print "\nstarting at ", colonize(int eval_iam("getpos")), $/;
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
 	sleeper(0.5) unless really_recording();
 	unmute();
 	start_heartbeat();
+	print "engine is ", eval_iam("engine-status"), "\n\n"; 
+
 	sleep 1; # time for engine to stabilize
-	report_engine_status();
 }
 sub stop_transport { 
 
@@ -1952,14 +1953,12 @@ sub stop_transport {
 	mute();
 	eval_iam('stop');	
 	sleeper(0.5);
+	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
 }
 sub transport_running { eval_iam('engine-status') eq 'running'  }
-
-sub report_engine_status {
-	print "\n\nengine is ", eval_iam("engine-status"), "\n\n"; }
 
 sub disconnect_transport {
 	return if transport_running();
@@ -1967,15 +1966,10 @@ sub disconnect_transport {
 }
 
 sub start_heartbeat {
- 	$event_id{heartbeat} = AE::timer(0, 1, \&::heartbeat);
+ 	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
 }
 
-sub stop_heartbeat {
-	$event_id{heartbeat} = undef; 
-	report_engine_status();
-	print prompt();
-	rec_cleanup();
-	}
+sub stop_heartbeat {$event_id{heartbeat} = undef; rec_cleanup() }
 
 sub heartbeat {
 
@@ -1983,7 +1977,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	stop_heartbeat()
+	say("\nstopped"),revise_prompt(),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
@@ -4267,7 +4261,7 @@ sub cache_track {
 	eval_iam("start");
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
-	print q(.); sleep 1; update_clock_display() } ; print " Done\n";
+	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
 	$this_track = $orig;
 	my $name = $this_track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
