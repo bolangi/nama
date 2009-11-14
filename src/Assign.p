@@ -6,7 +6,6 @@ use warnings;
 no warnings q(uninitialized);
 use Carp;
 use YAML::Tiny;
-use Data::Rmap qw(:all);
 use IO::All;
 use Storable;
 
@@ -289,7 +288,7 @@ sub yaml_in {
 	$yaml =~ s/^\n+//  ; # remove leading newline at start of file
 	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
 	my $y = YAML::Tiny->read_string($yaml);
-	say "YAML::Tiny read error: $YAML::Tiny::errstr" if $YAML::Tiny::errstr;
+	print "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
 	$y->[0];
 }
 
