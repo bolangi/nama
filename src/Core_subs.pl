@@ -2472,9 +2472,12 @@ sub effect_update_copp_set {
 	
 	
 sub effect_update {
+
+	# update the parameters of the Ecasound chain operator
+	# referred to by a Nama operator_id
 	
-	# why not use this routine to update %copp values as
-	# well?
+	# (why not use this routine to update %copp values as
+	# well?)
 	
 	#$debug2 and print "&effect_update\n";
 	my $es = eval_iam("engine-status");
@@ -2489,23 +2492,35 @@ sub effect_update {
 
 	$debug and print "chain $chain id $id param $param value $val\n";
 
-	# $param gets incremented, therefore is zero-based. 
-	# %copp is  zero-based
+	# $param is zero-based. 
+	# %copp is  zero-based.
 
 	return if $ti{$chain}->rec_status eq "OFF"; 
+
+	# this will produce a wrong result if the user changes track status
+	# while the engine is running (TODO)
+
 	return if $ti{$chain}->name eq 'Mixdown' and 
 			  $ti{$chain}->rec_status eq 'REC';
+
+	# this is irrelevant the way that mixdown is now
+	# implemented (TODO)
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
 	my $operator; 
+	# TODO should exit the loop after identifying the
+	# position
+	my $controller_count = 0;
 	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
-		$ti{$chain}->ops->[$op] eq $id and $operator = $op;
+		$operator = $op, last if $ti{$chain}->ops->[$op] eq $id;
+		$controller_count++ if $cops{$ti{$chain}->ops->[$op]}{parent_id};
 	}
 	$param++; # so the value at $p[0] is applied to parameter 1
 	$operator++; # translates 0th to chain-operator 1
+	$operator -= $controller_count; # skip controllers 
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $operator, offset: ",
 	$offset{$chain}, " param: $param, value: $val$/";
