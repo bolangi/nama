@@ -712,20 +712,20 @@ If you are using Nama with the NetECI interface (i.e. if
 Audio::Ecasound is I<not> installed) you should block TCP
 port 2868 if you computer is exposed to the Internet. 
 
-=head1 AVAILABILITY
+=head1 INSTALLATION
 
 The following command, available on Unixlike systems with
-Perl installed, will pull in Nama and dependencies required
-for text mode operation:
+Perl installed, will pull in Nama and other Perl libraries
+required for text mode operation:
 
 PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
-You will need to install Tk to use the GUI.
+To use the GUI, you will need to install Tk:
 
 C<cpan Tk>
 
 You may want to install Audio::Ecasound if you prefer not to
-run Ecasound in server mode.
+run Ecasound in server mode:
 
 C<cpan Audio::Ecasound>
 
@@ -734,6 +734,14 @@ You can pull the source code as follows:
 C<git clone git://github.com/bolangi/nama.git>
 
 Consult the F<BUILD> file for build instructions.
+
+=head1 SUPPORT
+
+The Ecasound mailing list is a suitable forum for questions
+regarding Nama installation, usage, feature requests, etc.,
+as well as questions relating to Ecasound itself.
+
+https://lists.sourceforge.net/lists/listinfo/ecasound-list
 
 =head1 PATCHES
 
