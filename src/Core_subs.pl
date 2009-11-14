@@ -77,9 +77,9 @@ sub prepare {
 	1;	
 }
 sub issue_first_prompt {
-	$term->stuff_char(10); # necessary at first prompt to enable Ctrl-C processing
+	$term->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
 	&{$attribs->{'callback_read_char'}}();
-	print $prompt;
+	print prompt();
 	$attribs->{already_prompted} = 0;
 }
 
@@ -98,12 +98,13 @@ sub select_sleep {
    select( undef, undef, undef, $seconds );
 }
 
+
 sub initialize_terminal {
 	$term = new Term::ReadLine("Ecasound/Nama");
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
-    $term->callback_handler_install(prompt(), \&process_line);
+	revise_prompt();
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
 		if ( $press_space_to_start_transport and
@@ -122,6 +123,9 @@ sub initialize_terminal {
 	$SIG{INT} = \&cleanup_exit;
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
+}
+sub revise_prompt {
+    $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
 	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
@@ -1747,13 +1751,14 @@ sub reconfigure_engine {
 
 	$old_snapshot = status_snapshot();
 
-	print STDOUT ::Text::show_tracks ( ::Track::all ) ;
+	print STDOUT ::Text::show_tracks(::Track::all()) ;
 	if ( generate_setup() ){
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
 # 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
+		revise_prompt();
 		1; }
 	else {	my $setup = join_path( project_dir(), $chain_setup_file);
 			unlink $setup if -f $setup; }
@@ -1915,6 +1920,7 @@ sub transport_status {
 	print "now at ", colonize( eval_iam( "getpos" )), $/;
 	print "\nPress SPACE to start or stop engine.\n\n"
 		if $press_space_to_start_transport;
+	#$term->stuff_char(10); 
 }
 sub start_transport { 
 
@@ -1971,7 +1977,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	say("\nstopped"),stop_heartbeat()
+	say("\nstopped"),revise_prompt(),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
@@ -2130,9 +2136,10 @@ sub jump {
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
 	print("transport still running, can't cleanup"),return if transport_running();
-	if( my @files = new_files_were_recorded() ){
-		say "Now reviewing your recording...";
+	if( my (@files) = new_files_were_recorded() ){
+		say join $/, "Now reviewing your recorded files...", (@files);
 		(grep /Mixdown/, @files) ? command_process('mixplay') : post_rec_configure();
+	reconfigure_engine();
 	}
 }
 sub post_rec_configure {
@@ -2158,7 +2165,11 @@ sub new_files_were_recorded {
 					else { unlink $_; 0 }
 				}
 		} @files;
-	if( @recorded){ rememoize(); return @recorded }
+	if(@recorded){
+		rememoize();
+		say join $/,"recorded:",@recorded;
+	}
+	@recorded 
 } 
 
 ## effect functions
@@ -2479,7 +2490,7 @@ sub effect_update {
 	$debug and print "chain $chain id $id param $param value $val\n";
 
 	# $param gets incremented, therefore is zero-based. 
-	# if I check i will find %copp is  zero-based
+	# %copp is  zero-based
 
 	return if $ti{$chain}->rec_status eq "OFF"; 
 	return if $ti{$chain}->name eq 'Mixdown' and 
@@ -2489,17 +2500,17 @@ sub effect_update {
 	# update Ecasound's copy of the parameter
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
-	my $controller; 
+	my $operator; 
 	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
-		$ti{$chain}->ops->[$op] eq $id and $controller = $op;
+		$ti{$chain}->ops->[$op] eq $id and $operator = $op;
 	}
 	$param++; # so the value at $p[0] is applied to parameter 1
-	$controller++; # translates 0th to chain-operator 1
+	$operator++; # translates 0th to chain-operator 1
 	$debug and print 
-	"cop_id $id:  track: $chain, controller: $controller, offset: ",
+	"cop_id $id:  track: $chain, controller: $operator, offset: ",
 	$offset{$chain}, " param: $param, value: $val$/";
 	eval_iam("c-select $chain");
-	eval_iam("cop-select ". ($offset{$chain} + $controller));
+	eval_iam("cop-select ". ($offset{$chain} + $operator));
 	eval_iam("copp-select $param");
 	eval_iam("copp-set $val");
 }
@@ -3624,14 +3635,12 @@ sub command_process {
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
 				my $c = q(c-select ) . $this_track->n; 
-    			$term->callback_handler_install(prompt(), \&process_line);
 				eval_iam( $c ) if eval_iam( 'cs-connected' );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
 				my $c = q(c-select ) . $this_track->n; 
-    			$term->callback_handler_install(prompt(), \&process_line);
 				eval_iam( $c );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){
