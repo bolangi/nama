@@ -716,7 +716,7 @@ sub ingest  { # i believe 'import' has a magical meaning
 		print $cmd;
 		system $cmd or print "error: $!\n";
 	} 
-	rememoize();
+	::rememoize();
 }
 
 sub playat_output {
