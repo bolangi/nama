@@ -359,10 +359,10 @@ Emit debugging information
 
 =head1 CONTROLLING NAMA/ECASOUND
 
-Ecasound is configured through use of I<chain setups>.
-Nama generates appropriate chain setups for 
-recording, playback, mixing, mastering
-inserts and bus routing.
+Ecasound is configured through use of I<chain setups>. Nama
+serves as intermediary generating appropriate chain setups
+for recording, playback, mixing, etc. and running the audio
+processing engine according to user commands.
 
 Commands for audio processing with Nama/Ecasound fall into
 two categories: I<static commands> that influence the chain
@@ -374,40 +374,27 @@ behavior of the audio processing engine.
 Static commands affect I<future> runs of the audio
 processing engine. For example, B<rec, mon> and B<off>
 determine whether the current track will get its audio
-stream from a live source or whether an existing WAV file will be
-played back. Nama responds to static commands by reconfiguring the
-engine as necessary by generating and loading chain setup
-files.
+stream from a live source or whether an existing WAV file
+will be played back. Nama responds to static commands by
+reconfiguring the engine and displaying the updated
+track status in text and GUI form.
 
 =head2 DYNAMIC COMMANDS
 
-Once a chain setup is loaded and the engine launched,
+Once a chain setup is loaded and the engine is launched,
 another subset of commands controls the realtime behavior of
 the audio processing engine. Commonly used I<dynamic
 commands> include transport C<start> and C<stop>; playback
-head repositioning commands such C<forward>,
-C<rewind> and C<setpos>; and C<vol> and C<pan> for adjusting effect
-parameters. Effects can be added during audio processing,
-however this action may be accompanied by an audible click.
+head repositioning commands such C<forward>, C<rewind> and
+C<setpos>. Effects may be added, modified or removed 
+while the engine is running.
 
 =head2 CONFIGURATION
 
 General configuration of sound devices and program options
-is performed by editing the file F<.namarc>. Nama
-automatically generates this file on the program's first
-run, usually placing it in the user's home directory.
-
-=head1 DIAGNOSTICS
-
-By inspecting the current chain setup with the C<chains>
-command, one can easily determine if the audio engine is
-properly configured. (It is much easier to read these setups
-than to write them!) The C<showio> command displays the data
-structure used to generate the chain setup. C<dump> displays
-data for the current track.  The C<dumpall> command shows
-the state of most program objects and variables using the
-same format as the F<State.yml> file created by the
-C<save> command.
+is performed by editing the F<.namarc> file. On Nama's first
+run, a default version of F<.namarc> is usually placed in
+the user's home directory.
 
 =head1 Tk GRAPHICAL UI 
 
@@ -691,6 +678,28 @@ and doodle modes.
 
 [% qx(./emit_command_headers pod) %]
 
+=head1 DIAGNOSTICS
+
+Nama has excellent diagnostic functions. In most situations, 
+the GUI display or the output of the C<show_tracks>
+command (executed automatically on any change in setup)
+shows what to expect the next time the engine is started.
+
+Advanced users or those already experienced with Ecasound
+can use the C<chains> command to inspect the current chain
+setup and determine if Ecasound is properly configured for
+the task at hand.  (It is much easier to read these setups
+than to write them!)
+
+Other commands are available to help programmers and support
+the occasional troubleshooting episode. C<showio> displays
+the data structure used to generate the chain setup. C<dump>
+displays data for the current track.  In correspondence, you
+may be asked to include the F<State.yml> file created by the
+C<save> command, which shows the state of all important
+program objects and variables.  You can inspect this same
+information using the C<dumpall> command.
+
 =head1 BUGS AND LIMITATIONS
 
 No waveform or signal level displays are provided.  No
@@ -700,13 +709,14 @@ present, although this feature is planned.
 =head1 SECURITY CONCERNS
 
 If you are using Nama with the NetECI interface (i.e. if
-Audio::Ecasound is I<not> installed) you should firewall TCP
+Audio::Ecasound is I<not> installed) you should block TCP
 port 2868 if you computer is exposed to the Internet. 
 
 =head1 AVAILABILITY
 
-CPAN, for the distribution. The following
-command will pull in Nama and all its dependencies:
+The following command, available on Unixlike systems with
+Perl installed, will pull in Nama and dependencies required
+for text mode operation:
 
 PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
@@ -714,9 +724,8 @@ You will need to install Tk to use the GUI.
 
 C<cpan Tk>
 
-You may want to install Audio::Ecasound
-if you prefer not to run Ecasound 
-in server mode.
+You may want to install Audio::Ecasound if you prefer not to
+run Ecasound in server mode.
 
 C<cpan Audio::Ecasound>
 
@@ -729,8 +738,8 @@ Consult the F<BUILD> file for build instructions.
 =head1 PATCHES
 
 The main module, Nama.pm, its sister modules are
-concatenations of several source files. Patches 
-against the source files are preferred.
+concatenations of several source files. Patches against the
+source files are preferred.
 
 =head1 AUTHOR
 
