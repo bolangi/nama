@@ -2521,7 +2521,7 @@ sub effect_update {
 		eval_iam("ctrlp-set $val");
 	}
 	else { # is operator
-		my $i = ecasound_i_index($id);
+		my $i = ecasound_operator_index($id);
 		$debug and print 
 		"operator $id: track $chain, index: $i, offset: ",
 		$offset{$chain}, " param $param, value $val\n";
