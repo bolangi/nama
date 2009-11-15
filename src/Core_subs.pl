@@ -3819,20 +3819,17 @@ sub automix {
 
 	command_process( "for mon; vol*$multiplier" );
 
+	# $main_out = 1; # mixdown will turn off and turn on main out
 	
 	### mixdown
-	command_process('mixdown');
-
-	command_process('arm; start');
+	command_process('mixdown; arm; start');
 
 	### turn on audio output
 
-	$main_out = 1;
 	set_normal_globals();
 
-	### default to playing back Mixdown track, setting user tracks to OFF
-
-	command_process('mixplay');
+	# command_process('mixplay'); # rec_cleanup does this
+	# automatically
 
 	#no Smart::Comments;
 	
