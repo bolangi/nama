@@ -3754,6 +3754,7 @@ sub jack_client {
 
 	# synth:in_1 input
 	# synth input
+	# aeolus:out.R
 	
 	my $port;
 	($name, $port) = $name =~ /^([^:]+):?(.*)/;
@@ -3775,11 +3776,11 @@ sub jack_client {
 	map{ 
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
-		my @ports = /(\w+:\w+ )/g;
+		my @ports = /([^:]+:.+)/g;
 		map { 
 				s/ $//; # remove trailing space
 				$jack{ $_ }{ $direction }++;
-				my ($client, $port) = /(\w+):(\w+)/;
+				my ($client, $port) = /(.+?):(.+)/;
 				$jack{ $client }{ $direction }++;
 
 		 } @ports;
