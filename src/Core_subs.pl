@@ -2485,6 +2485,7 @@ sub effect_update {
 	return if $es !~ /not started|stopped|running/;
 
 	my ($id, $param, $val) = @_;
+	$param++; # so the value at $p[0] is applied to parameter 1
 	my $chain = $cops{$id}{chain};
 
 	carp("effect $id: non-existent chain\n"), return
@@ -2497,30 +2498,21 @@ sub effect_update {
 
 	return if $ti{$chain}->rec_status eq "OFF"; 
 
-	# this will produce a wrong result if the user changes track status
-	# while the engine is running (TODO)
+	# above will produce a wrong result if the user changes track status
+	# while the engine is running BUG
 
 	return if $ti{$chain}->name eq 'Mixdown' and 
 			  $ti{$chain}->rec_status eq 'REC';
 
-	# this is irrelevant the way that mixdown is now
-	# implemented (TODO)
+	# above is irrelevant the way that mixdown is now
+	# implemented DEPRECATED
+	
  	$debug and print join " ", @_, "\n";	
 
 	# update Ecasound's copy of the parameter
 
 	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
-	my $operator; 
-	# TODO should exit the loop after identifying the
-	# position
-	my $controller_count = 0;
-	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
-		$operator = $op, last if $ti{$chain}->ops->[$op] eq $id;
-		$controller_count++ if $cops{$ti{$chain}->ops->[$op]}{parent_id};
-	}
-	$param++; # so the value at $p[0] is applied to parameter 1
-	$operator++; # translates 0th to chain-operator 1
-	$operator -= $controller_count; # skip controllers 
+	my $operator = operator_position($id);
 	$debug and print 
 	"cop_id $id:  track: $chain, controller: $operator, offset: ",
 	$offset{$chain}, " param: $param, value: $val$/";
@@ -2534,22 +2526,31 @@ sub operator_position {
 	my $id = shift;
 	my $chain = $cops{$id}{chain};
 	my $track = $ti{$chain};
-	my @ops = @{$track->ops}
+	my @ops = @{$track->ops};
 	my $controller_count = 0;
+	my $position;
 	for my $i (0..scalar @ops - 1) {
-		$operator = $i, last if $ops[$i] eq $id;
-		$controller_count++ if $ops[$i]}{parent_id};
+		$position = $i, last if $ops[$i] eq $id;
+		$controller_count++ if $cops{$ops[$i]}{belongs_to};
 	}
-	$param++; # so the value at $p[0] is applied to parameter 1
-	$operator++; # translates 0th to chain-operator 1
-	$operator -= $controller_count; # skip controllers 
-	
-	
-
+	$position -= $controller_count; # skip controllers 
+	++$position; # translates 0th to chain-position 1
 }
-
+	
+	
 sub controller_position {
-
+	my $id = shift;
+	my $chain = $cops{$id}{chain};
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $operator_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$operator_count++ if ! $cops{$ops[$i]}{belongs_to};
+	}
+	$position -= $operator_count; # skip operators
+	++$position; # translates 0th to chain-position 1
 }
 	
 sub fade {
