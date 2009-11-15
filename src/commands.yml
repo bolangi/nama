@@ -423,11 +423,6 @@ loop_disable:
   short: noloop nl
   what: disable automatic looping
   parameters: none
-# loop_show:
-#   type: transport
-#   short: ls
-#   what: show loop status and endpoints
-#   parameters: none
 add_controller:
   type: effect
   what: add a controller to an operator (use mfx to modify, rfx to remove)
@@ -452,8 +447,8 @@ modify_effect:
   type: effect
   what: modify an effect parameter
   parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
-  short: mfx
-  example: modify_effect V 1 1000 (set effect_id V, parameter 1 to 1000)!nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10)!nset multiple effects/parameters: mfx V 1,2,3 + 0.5 mfx V,AC,AD 1,2 3.14
+  short: mfx modify_controller mcl
+  example: modify_effect V 1 -1 (set effect_id V, parameter 1 to -1)!nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10)!nset multiple effects/parameters: mfx V 1,2,3 + 0.5 ; mfx V,AC,AD 1,2 3.14
 remove_effect:
   type: effect
   what: remove effects from selected track

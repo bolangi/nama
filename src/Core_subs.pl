@@ -2485,6 +2485,7 @@ sub effect_update {
 	return if $es !~ /not started|stopped|running/;
 
 	my ($id, $param, $val) = @_;
+	$param++; # so the value at $p[0] is applied to parameter 1
 	my $chain = $cops{$id}{chain};
 
 	carp("effect $id: non-existent chain\n"), return
@@ -2497,36 +2498,74 @@ sub effect_update {
 
 	return if $ti{$chain}->rec_status eq "OFF"; 
 
-	# this will produce a wrong result if the user changes track status
-	# while the engine is running (TODO)
+	# above will produce a wrong result if the user changes track status
+	# while the engine is running BUG
 
 	return if $ti{$chain}->name eq 'Mixdown' and 
 			  $ti{$chain}->rec_status eq 'REC';
 
-	# this is irrelevant the way that mixdown is now
-	# implemented (TODO)
+	# above is irrelevant the way that mixdown is now
+	# implemented DEPRECATED
+	
  	$debug and print join " ", @_, "\n";	
 
-	# update Ecasound's copy of the parameter
-
-	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
-	my $operator; 
-	# TODO should exit the loop after identifying the
-	# position
-	for my $op (0..scalar @{ $ti{$chain}->ops } - 1) {
-		$operator = $op, last if $ti{$chain}->ops->[$op] eq $id;
-	}
-	$param++; # so the value at $p[0] is applied to parameter 1
-	$operator++; # translates 0th to chain-operator 1
-	$debug and print 
-	"cop_id $id:  track: $chain, controller: $operator, offset: ",
-	$offset{$chain}, " param: $param, value: $val$/";
+	my $old_chain = eval_iam('c-selected');
 	eval_iam("c-select $chain");
-	eval_iam("cop-select ". ($offset{$chain} + $operator));
-	eval_iam("copp-select $param");
-	eval_iam("copp-set $val");
+
+	# update Ecasound's copy of the parameter
+	if( is_controller($id)){
+		my $i = ecasound_controller_index($id);
+		$debug and print 
+		"controller $id: track: $chain, index: $i param: $param, value: $val\n";
+		eval_iam("ctrl-select $i");
+		eval_iam("ctrlp-select $param");
+		eval_iam("ctrlp-set $val");
+	}
+	else { # is operator
+		my $i = ecasound_i_index($id);
+		$debug and print 
+		"operator $id: track $chain, index: $i, offset: ",
+		$offset{$chain}, " param $param, value $val\n";
+		eval_iam("cop-select ". ($offset{$chain} + $i));
+		eval_iam("copp-select $param");
+		eval_iam("copp-set $val");
+	}
+	eval_iam("c-select $old_chain");
 }
 
+sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
+
+sub ecasound_operator_index { # does not include offset
+	my $id = shift;
+	my $chain = $cops{$id}{chain};
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $controller_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$controller_count++ if $cops{$ops[$i]}{belongs_to};
+	}
+	$position -= $controller_count; # skip controllers 
+	++$position; # translates 0th to chain-position 1
+}
+	
+	
+sub ecasound_controller_index {
+	my $id = shift;
+	my $chain = $cops{$id}{chain};
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $operator_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$operator_count++ if ! $cops{$ops[$i]}{belongs_to};
+	}
+	$position -= $operator_count; # skip operators
+	++$position; # translates 0th to chain-position 1
+}
+	
 sub fade {
 	my ($id, $param, $from, $to, $seconds) = @_;
 

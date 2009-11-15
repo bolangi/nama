@@ -151,8 +151,9 @@ sub helpline {
 		$text .=  $commands{$cmd}->{parameters}
 	}
 	$text .= "\n";
-	$text .=  "Example: ". eval( qq("$commands{$cmd}->{example}") ) . $/  
-			if $commands{$cmd}->{example};
+	my $example = $commands{$cmd}->{example};
+	$example =~ s/!n/\n/g;
+	$text .=  "Example: $example\n" if $example;
 	($/, ucfirst $text, $/);
 	
 }
