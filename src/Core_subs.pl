@@ -3760,7 +3760,7 @@ sub set_normal_globals {$ecasound_globals_ecs = $ecasound_globals}
 
 sub automix {
 
-	use Smart::Comments '###';
+	#use Smart::Comments '###';
 	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
@@ -3823,12 +3823,7 @@ sub automix {
 	### mixdown
 	command_process('mixdown');
 
-	command_process('show');
-
 	command_process('arm; start');
-
-	while( eval_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 5; $ui->refresh } ; print "Done\n";
 
 	### turn on audio output
 
@@ -3839,7 +3834,7 @@ sub automix {
 
 	command_process('mixplay');
 
-	no Smart::Comments;
+	#no Smart::Comments;
 	
 }
 
