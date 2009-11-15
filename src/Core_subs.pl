@@ -2203,7 +2203,6 @@ sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 	print("$op_id: effect does not exist\n"), return 
 		unless $cops{$op_id};
-	#print "id $op_id p: $parameter, sign: $sign value: $value\n";
 
 		my $new_value = $value; 
 		if ($sign) {

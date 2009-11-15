@@ -292,8 +292,6 @@ sub t_create_project {
 sub t_add_ctrl {
 	package ::;
 	my ($parent, $code, $values) = @_;
-	print "code: $code, parent: $parent\n";
-	$values and print "values: ", join " ", @{$values};
 	if ( $effect_i{$code} ) {} # do nothing
 	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
 	else { warn "effect code not found: $code\n"; return }
@@ -304,8 +302,6 @@ sub t_add_ctrl {
 				values => $values,
 				type => $code,
 			);
-			#print "adding effect\n";
-			# print (yaml_out(\%p));
 		add_effect( \%p );
 }
 
