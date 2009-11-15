@@ -2509,20 +2509,34 @@ sub effect_update {
 	
  	$debug and print join " ", @_, "\n";	
 
+	my $old_chain = eval_iam('c-selected');
+	eval_iam("c-select $chain");
+
 	# update Ecasound's copy of the parameter
 
-	$debug and print "valid: ", eval_iam("cs-is-valid"), "\n";
-	my $operator = operator_position($id);
-	$debug and print 
-	"cop_id $id:  track: $chain, controller: $operator, offset: ",
-	$offset{$chain}, " param: $param, value: $val$/";
-	eval_iam("c-select $chain");
-	eval_iam("cop-select ". ($offset{$chain} + $operator));
-	eval_iam("copp-select $param");
-	eval_iam("copp-set $val");
+	if( is_controller($id)){
+		my $i = ecasound_controller_index($id);
+		$debug and print 
+		"controller $id: track: $chain, index: $i param: $param, value: $val\n";
+		eval_iam("ctrl-select $i");
+		eval_iam("ctrlp-select $param");
+		eval_iam("ctrlp-set $val");
+	}
+	else { # is operator
+		my $i = ecasound_i_index($id);
+		$debug and print 
+		"operator $id: track $chain, index: $i, offset: ",
+		$offset{$chain}, " param $param, value $val\n";
+		eval_iam("cop-select ". ($offset{$chain} + $i));
+		eval_iam("copp-select $param");
+		eval_iam("copp-set $val");
+	}
+	eval_iam("c-select $old_chain");
 }
 
-sub operator_position {
+sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
+
+sub ecasound_operator_index { # does not include offset
 	my $id = shift;
 	my $chain = $cops{$id}{chain};
 	my $track = $ti{$chain};
@@ -2538,7 +2552,7 @@ sub operator_position {
 }
 	
 	
-sub controller_position {
+sub ecasound_controller_index {
 	my $id = shift;
 	my $chain = $cops{$id}{chain};
 	my $track = $ti{$chain};
