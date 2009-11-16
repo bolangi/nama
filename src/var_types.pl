@@ -13,8 +13,8 @@
 @config_vars = qw(
 						%abbreviations
 						%devices
-						$ecasound_globals
-						$ecasound_globals_for_mixdown
+						$ecasound_globals_realtime
+						$ecasound_globals_default
 						$ecasound_tcp_port
 						$mix_to_disk_format
 						$raw_to_disk_format

@@ -70,9 +70,9 @@ raw_to_disk_format: s16_le,N,frequency
 
 # globals for our chain setups
 
-ecasound_globals: "-B auto -r -z:mixmode,sum -z:psr "
+ecasound_globals_realtime: "-B auto -r -z:mixmode,sum -z:psr "
 
-ecasound_globals_for_mixdown: "-B auto -r -z:mixmode,sum -z:psr "
+ecasound_globals_default: "-B auto -z:mixmode,sum -z:psr "
 
 # ecasound_tcp_port: 2868  
 

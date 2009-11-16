@@ -33,9 +33,8 @@ our (
 	$globals,		# yaml assignments for @global_vars
 					# for appending to config file
 	
-	$ecasound_globals_ecs, # set to one of the following
-	$ecasound_globals,     # .namarc field
-	$ecasound_globals_for_mixdown,  # .namarc field
+	$ecasound_globals_realtime,     # .namarc field
+	$ecasound_globals_default,  # .namarc field
 	$ecasound_tcp_port,  # for Ecasound NetECI interface
 	$saved_version, # copy of $VERSION saved with settings in State.yml
 

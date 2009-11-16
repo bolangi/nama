@@ -1155,7 +1155,6 @@ sub generate_setup {
 	$this_track = $old_this_track;
 
 	process_static_bus_rules();
-	$ecasound_globals_ecs = $ecasound_globals;
 
 	maybe_write_chains();
 }
@@ -1263,8 +1262,6 @@ sub add_paths_from_Master {
 sub add_paths_for_mixdown_handling {
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-		$ecasound_globals_ecs = $ecasound_globals_for_mixdown if 
-			$ecasound_globals_for_mixdown; 
 		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
@@ -1601,9 +1598,17 @@ WARN
 	
 	my $ecs_file = "# ecasound chainsetup file\n\n";
 	$ecs_file   .= "# general\n\n";
-	$ecs_file   .= $tn{Mixdown}->rec_status eq 'REC' 
-					? $ecasound_globals_for_mixdown
-					: $ecasound_globals;
+	my $globals = $ecasound_globals_default;
+
+	# use realtime globals if they exist and we are
+	# recording to a non-mixdown file
+	
+	$globals = $ecasound_globals_realtime
+		if $ecasound_globals_realtime 
+			and grep{ ! /Mixdown/} really_recording();
+			# and exists latency-sensitive monitor output # we should also add
+			
+	$ecs_file   .= $globals;
 	$ecs_file   .= "\n\n";
 	$ecs_file   .= "# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
@@ -3793,12 +3798,6 @@ sub jack_client {
 	$jack{$name}{$direction};
 }
 
-sub set_mixdown_globals {
-	$ecasound_globals_ecs = $ecasound_globals_for_mixdown 
-		if $ecasound_globals_for_mixdown;
-}
-sub set_normal_globals {$ecasound_globals_ecs = $ecasound_globals}
-
 sub automix {
 
 	#use Smart::Comments '###';
@@ -3806,10 +3805,6 @@ sub automix {
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
 
-	# use special Ecasound globals for mixdown 
-	
-	set_mixdown_globals();
-	
 	# turn off audio output
 	
 	$main_out = 0;
