@@ -107,13 +107,13 @@ sub initialize_terminal {
 	revise_prompt();
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
-		if ( $press_space_to_start_transport and
+		if ( # $press_space_to_start_transport and
 				$attribs->{line_buffer} eq " " ){
+
 			toggle_transport();	
 			$attribs->{line_buffer} = q();
 			$attribs->{point} 		= 0;
 			$attribs->{end}   		= 0;
-# 			$attribs->{done}   		= 1; # doesn't reprint prompt
 			$term->stuff_char(10);
 			&{$attribs->{'callback_read_char'}}();
 		}
