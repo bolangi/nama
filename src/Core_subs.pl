@@ -3685,12 +3685,14 @@ sub command_process {
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
+				revise_prompt();
 				my $c = q(c-select ) . $this_track->n; 
 				eval_iam( $c ) if eval_iam( 'cs-connected' );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
+				revise_prompt();
 				my $c = q(c-select ) . $this_track->n; 
 				eval_iam( $c );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
