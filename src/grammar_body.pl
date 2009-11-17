@@ -408,9 +408,8 @@ destroy_current_wav: _destroy_current_wav {
 	$::main->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
 	print "delete WAV file $wav? [n] ";
-	my $reply = $::term->read_key();
-	#print "reply: $reply END\n"; # y: 121 Y: 89
-	if ( $reply == 121 or $reply == 89 ){
+	my $reply = chr($::term->read_key());
+	if ( $reply =~ /y/i ){
 		print "Unlinking.\n";
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
