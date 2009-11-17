@@ -104,7 +104,21 @@ sub initialize_terminal {
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
+	vet_keystrokes();
 	revise_prompt();
+	# handle Control-C from terminal
+
+	$SIG{INT} = \&cleanup_exit;
+	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
+
+}
+sub revise_prompt {
+    $term->callback_handler_install(prompt(), \&process_line);
+}
+sub prompt {
+	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+}
+sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
 		if ( # $press_space_to_start_transport and
@@ -118,17 +132,6 @@ sub initialize_terminal {
 			&{$attribs->{'callback_read_char'}}();
 		}
 	});
-	# handle Control-C from terminal
-
-	$SIG{INT} = \&cleanup_exit;
-	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
-
-}
-sub revise_prompt {
-    $term->callback_handler_install(prompt(), \&process_line);
-}
-sub prompt {
-	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
 }
 	
 sub toggle_transport {
@@ -3846,7 +3849,6 @@ sub automix {
 
 		say "Signal appears to be silence. Skipping.";
 		command_process( 'for mon; vol*10');
-		set_normal_globals();
 		$main_out = 1;
 		return;
 	}
@@ -3861,8 +3863,6 @@ sub automix {
 	command_process('mixdown; arm; start');
 
 	### turn on audio output
-
-	set_normal_globals();
 
 	# command_process('mixplay'); # rec_cleanup does this
 	# automatically
@@ -4290,10 +4290,8 @@ sub cache_track {
 	push @$temp_tracks, $temp_track;
 	::Graph::add_inserts($g);
 	process_routing_graph();
-	set_mixdown_globals();
-	maybe_write_chains() or say("nothing to do"), set_normal_globals(), return;
+	maybe_write_chains() or say("nothing to do"), return;
 	map{ $_->remove } @$temp_tracks;
-	set_normal_globals();		
 	connect_transport('no_transport_status')
 		or say ("Couldn't connect engine! Skipping."), return;
 	say $/,$orig->name,": length ". d2($length). " seconds";

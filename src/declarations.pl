@@ -25,14 +25,10 @@ our (
 					  	# as one big config file
 	@effects_static_vars,	# the list of which variables to store and retrieve
 	@effects_dynamic_vars,		# same for all chain operators
-	@global_vars,    # contained in config file
 	@config_vars,    # contained in config file
 	@status_vars,    # we will dump them for diagnostic use
 	%abbreviations, # for replacements in config files
 
-	$globals,		# yaml assignments for @global_vars
-					# for appending to config file
-	
 	$ecasound_globals_realtime,     # .namarc field
 	$ecasound_globals_default,  # .namarc field
 	$ecasound_tcp_port,  # for Ecasound NetECI interface
