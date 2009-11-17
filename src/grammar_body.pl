@@ -403,7 +403,7 @@ doodle: _doodle { ::doodle(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { 
-	$::term->callback_handler_install(undef);
+	#$::term->callback_handler_install(undef);
 	my $old_group_status = $::main->rw;
 	$::main->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
@@ -415,7 +415,7 @@ destroy_current_wav: _destroy_current_wav {
 		::rememoize();
 #	}
 	$::main->set(rw => $old_group_status);
-	$this_track = $tn{Master};
+	$::this_track = $::tn{Master};
 #	::revise_prompt();
 	1;
 }
