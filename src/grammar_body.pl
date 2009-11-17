@@ -407,16 +407,16 @@ destroy_current_wav: _destroy_current_wav {
 	my $old_group_status = $::main->rw;
 	$::main->set(rw => 'MON');
 	my $wav = $::this_track->full_path;
-#	print "delete WAV file $wav? [n] ";
-#	my $reply = <STDIN>;
-#	if ( $reply =~ /y/i ){
-#		print "Unlinking.\n";
+	print "delete WAV file $wav? [n] ";
+	my $reply = $::term->read_key();
+	#print "reply: $reply END\n"; # y: 121 Y: 89
+	if ( $reply == 121 or $reply == 89 ){
+		print "Unlinking.\n";
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		::rememoize();
-#	}
+	}
 	$::main->set(rw => $old_group_status);
 	$::this_track = $::tn{Master};
-#	::revise_prompt();
 	1;
 }
 memoize: _memoize { 

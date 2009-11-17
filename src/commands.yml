@@ -1,4 +1,6 @@
 ---
+testq:
+  what: test
 help:
   what: display help 
   short: h
