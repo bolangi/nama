@@ -121,7 +121,7 @@ sub prompt {
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
-		if ( # $press_space_to_start_transport and
+		if (  $press_space_to_start_transport and
 				$attribs->{line_buffer} eq " " ){
 
 			toggle_transport();	
