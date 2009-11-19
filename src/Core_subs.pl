@@ -2710,7 +2710,7 @@ sub prepare_effects_help {
 	my $label;
 	map{ 
 
-		if (  my ($_label) = /-(el:\w+)/  ){
+		if (  my ($_label) = /-(el:[-\w]+)/  ){
 				$label = $_label;
 				s/^\s+/ /;				 # trim spaces 
 				s/'//g;     			 # remove apostrophes
@@ -2807,7 +2807,7 @@ sub prepare_effect_index {
 	%effect_j = ();
 	map{ 
 		my $code = $_;
-		my ($short) = $code =~ /:(\w+)/;
+		my ($short) = $code =~ /:([-\w]+)/;
 		if ( $short ) { 
 			if ($effect_j{$short}) { warn "name collision: $_\n" }
 			else { $effect_j{$short} = $code }
@@ -2921,7 +2921,7 @@ sub read_in_effects_data {
 		\s+  # spaces
 		(.+?) # name, starting with word-char,  non-greedy
 		\s+     # spaces
-		-(el:\w+),? # ladspa_id maybe followed by comma
+		-(el:[-\w]+),? # ladspa_id maybe followed by comma
 		(.*$)        # rest
 	/x;
 
