@@ -12,7 +12,6 @@ sub init_gui {
 	# Tk main window
  	$mw = MainWindow->new;  
 	get_saved_colors();
-	$set_event = $mw->Label();
 	$mw->optionAdd('*font', 'Helvetica 12');
 	$mw->optionAdd('*BorderWidth' => 1);
 	$mw->title("Ecasound/Nama"); 
@@ -413,13 +412,10 @@ sub flash_ready {
 	$debug and print "flash color: $color\n";
 	length_display(-background => $color);
 	project_label_configure(-background => $color) unless $preview;
-# 	$event_id{tk_flash_ready}->cancel() if defined $event_id{tk_flash_ready};
-# 	$event_id{tk_flash_ready} = $set_event->after(3000, 
-# 		sub{ length_display(-background => $off);
-# 			 project_label_configure(-background => $off) 
-# }
-# );
+ 	$event_id{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
 }
+sub reset_engine_mode_color_display { project_label_configure(-background => $off) }
+sub set_engine_mode_color_display { project_label_configure(-background => engine_mode_color()) }
 sub group_gui {  
 	@_ = discard_object(@_);
 	my $group = $main; 

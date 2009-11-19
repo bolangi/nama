@@ -1950,6 +1950,7 @@ sub start_transport {
 	eval_iam('start');
 	sleeper(0.5) unless really_recording();
 	unmute();
+	$ui->set_engine_mode_color_display();
 	start_heartbeat();
 	print "engine is ", eval_iam("engine-status"), "\n\n"; 
 
@@ -1974,10 +1975,13 @@ sub disconnect_transport {
 }
 
 sub start_heartbeat {
- 	$event_id{heartbeat} = AE::timer(0, 3, \&::heartbeat);
+ 	$event_id{heartbeat} = AE::timer(0, 1, \&::heartbeat);
 }
 
-sub stop_heartbeat {$event_id{heartbeat} = undef; rec_cleanup() }
+sub stop_heartbeat {
+	$event_id{heartbeat} = undef; 
+	$ui->reset_engine_mode_color_display();
+	rec_cleanup() }
 
 sub heartbeat {
 

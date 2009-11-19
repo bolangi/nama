@@ -329,7 +329,6 @@ our (
 					# for 'repeat' events, so converted to
 					# 'after' events
 	%event_id,    # events will store themselves with a key
-	$set_event,   # the Tk dummy widget used to set events
 	@loop_endpoints, # they define the loop
 	$loop_enable, # whether we automatically loop
 
