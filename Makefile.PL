@@ -11,15 +11,10 @@ use inc::Module::Install;
          requires
 		
 		autodie => 0,
-		Carp => 0,
-		Cwd => 0,
-		Data::YAML => 0,
-		Data::Rmap => 0,
 		Event => 0,
 		AnyEvent =>, 0,
 		File::Find::Rule => 0,
-		File::Path => 0,
-		File::Spec::Link => 0,
+		File::Copy::Link => 0,
 		File::Temp => 0,
 		Graph => 0,
 		IO::All => 0,
@@ -27,10 +22,9 @@ use inc::Module::Install;
 		Modern::Perl => 0,
 		Module::Load::Conditional => 0, 
 		Parse::RecDescent => 0,
-		Storable => 0,
-		Term::ReadLine => 0,
 		Term::ReadLine::Gnu => 0,
 		Text::Format => 0,
 		Time::HiRes => 0,
+		YAML::Tiny => 0,
 		;
         WriteAll;
