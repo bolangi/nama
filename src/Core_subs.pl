@@ -1766,7 +1766,6 @@ sub reconfigure_engine {
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
 # 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
-		revise_prompt();
 		1; }
 	else {	my $setup = join_path( project_dir(), $chain_setup_file);
 			unlink $setup if -f $setup; }
@@ -3620,6 +3619,7 @@ sub process_line {
 		command_process( $user_input );
 		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
+		revise_prompt();
 	}
 }
 
@@ -3698,14 +3698,12 @@ sub command_process {
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
-				revise_prompt();
 				my $c = q(c-select ) . $this_track->n; 
 				eval_iam( $c ) if eval_iam( 'cs-connected' );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
-				revise_prompt();
 				my $c = q(c-select ) . $this_track->n; 
 				eval_iam( $c );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
@@ -3723,6 +3721,7 @@ sub command_process {
 			}    
 		} @user_input;
 	}
+	
 	$ui->refresh; # in case we have a graphic environment
 }
 sub load_keywords {
