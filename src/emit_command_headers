@@ -1,15 +1,15 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use Carp;
 no warnings "uninitialized";
 my $debug = 0;
 my (@commands, @abbrevs);
-use Data::YAML::Reader;
 use IO::All;
+use YAML::Tiny;
 
 my $output = shift @ARGV;
 
-my $yr = Data::YAML::Reader->new;
 my $in = qx(./strip_all  ./commands.yml);
 
 # preserve order for generating docs
@@ -100,16 +100,20 @@ elsif ($output eq 'pod'){
 
 
 sub yaml_in {
+	
 	# $debug2 and print "&yaml_in\n";
-	my $file = shift;
-	my $yaml; 
-	if ($file !~ /\n/) {
-		$debug and print "assuming yaml filename input\n";
-		$yaml = io($file)->all;
-	} else { 
-		$debug and print "assuming yaml text input\n";
-		$yaml = $file;
+	my $input = shift;
+	my $yaml = $input =~ /\n/ # check whether file or text
+		? $input 			# yaml text
+		: io($input)->all;	# file name
+	if ($yaml =~ /\t/){
+		croak "YAML file: $input contains illegal TAB character.";
 	}
-	$yr->read( $yaml ); # returns ref
+	$yaml =~ s/^\n+//  ; # remove leading newline at start of file
+	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
+	my $y = YAML::Tiny->read_string($yaml);
+	print "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
+	$y->[0];
 }
+
 sub add_break { map{ qq(/$_\\b/) } @_ }

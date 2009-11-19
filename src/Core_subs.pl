@@ -3834,7 +3834,7 @@ sub automix {
 	eval_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 2; update_clock_display()}; 
+		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
 	# parse cop status
