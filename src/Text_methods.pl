@@ -218,6 +218,7 @@ sub help_effect {
 		$input = $ladspa_label{$input}
 			or print("$input: effect not found.\n\n"), return;
 	}
+	elsif ( my $id = $ladspa_unique_id{$input} ){$input = $ladspa_label{$id} }
 	if ( $effect_i{$input} ) {} # do nothing
 	elsif ( $effect_j{$input} ) { $input = $effect_j{$input} }
 	else { print("$input: effect not found.\n\n"), return }

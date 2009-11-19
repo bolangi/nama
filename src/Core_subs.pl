@@ -3066,6 +3066,7 @@ sub get_ladspa_hints{
 			$ladspa_help{$plugin_label} = $stanza;
 			$effects_ladspa_file{$plugin_unique_id} = $file;
 			$ladspa_unique_id{$plugin_label} = $plugin_unique_id; 
+			$ladspa_unique_id{$plugin_name} = $plugin_unique_id; 
 			$ladspa_label{$plugin_unique_id} = $plugin_label;
 			$effects_ladspa{$plugin_label}->{name}  = $plugin_name;
 			$effects_ladspa{$plugin_label}->{id}    = $plugin_unique_id;
