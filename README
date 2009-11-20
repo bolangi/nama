@@ -6,45 +6,82 @@ Nama - Ecasound-based recorder, mixer and mastering system
 
 Nama provides a convenient interface for multitrack
 recording, effects processing, mixdown, and mastering.
-Tracks can have auxiliary sends and inserts.  User-defined
-buses allow musicians to have individualized monitors.
+Tracks can have auxiliary sends and inserts. Send buses
+allow musicians to have individualized monitors.  Sub buses
+can be used to create signal processing networks that would
+otherwise require specialized DAW software.
 
 Nama is based on Ecasound, a stable, versatile and mature
-audio processing engine. Nama gives you everything great
-about Ecasound, along with high-level track, bus
-and project abstractions expected of a digital audio
-workstation.
+audio processing engine. To Ecasound's basic capabilities
+Nama adds track, bus and project abstractions expected of a
+digital audio workstation.
 
 While Nama is especially suited for console users and
 headless applications, it also has Tk-based GUI with
-transport buttons, sliders for track and effects parameters,
-and other commonly used functions.
+transport buttons, sliders for volume, pan and effects
+parameters, and access to other commonly used functions.
  
 The command-line interface executes internal commands,
 Ecasound commands, perl code, and shell commands. It
-includes history, help, and autocompletion.
+includes command history, autocompletion, help for commands
+by category or keyword and help for effects by effect name,
+effect label, LADSPA Unique ID or keyword.
 
 'Nama' is Japanese for 'live', describing live performances,
 raw fish and draft beer.
 
 =head1 INSTALLATION
 
-You can probably install Nama via CPAN using the following
-command to pull in all dependencies:
+=head2 Installing Nama and its Perl Dependencies via CPAN
+
+The following command will pull in all required Perl modules
+to run Nama in text mode:
 
         PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
 
-=head1 DEPENDENCIES
+To use the GUI, you will need to install Tk:
 
-=head2 Perl Modules
+		cpan Tk
 
-Most Perl dependencies are pulled in automatically when
-installing via CPAN. The following will install all required
-dependencies without prompting.
+You may optionally install Audio::Ecasound to run Ecasound
+via libecasoundc:
 
-    PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
+		cpan Audio::Ecasound
 
-=head2 Libraries
+=head2 Installing Nama Using the Debian Package System
+
+You can use the following steps to install Nama on a 
+Debian-based system.
+
+1. Install Perl libraries
+
+		apt-get install perl perl-modules libio-all-perl libgraph-perl libtext-format-perl libmodern-perl libfile-find-rule-perl libanyevent-perl libevent-perl libyaml-tiny-perl libparse-recdescent-perl libterm-readline-gnu-perl 
+
+2. Install Ecasound
+
+		apt-get install ecasound
+
+3. Install LADSPA utilities and and some LADSPA plugins
+
+		apt-get install ladspa-sdk swh-plugins tap-plugins
+
+4. Download Nama
+
+		wget http://freeshell.de/~bolangi/nama/libaudio-nama-perl_0.9986-1_all.deb
+
+5. Install Nama
+
+		dpkg -i libaudio-nama-perl_0.9986-1_all.deb
+
+=head3 Build from Source
+
+This option is useful mainly for programmers. You can pull the source code as follows: 
+
+C<git clone git://github.com/bolangi/nama.git>
+
+Consult the F<BUILD> file for build instructions.
+
+=head2 Non-Perl Dependencies
 
 The Ecasound audio processing libraries must be installed.
 Ecasound may be obtained from
@@ -64,7 +101,7 @@ must be installed for Nama to correctly identify stereo
 files.
 
 Nama's mastering mode uses a number of LADSPA plugins.
-These specified in the configuration file .namarc. 
+Defaults are specified in the configuration file .namarc. 
 
 =head1 LICENSE
 
