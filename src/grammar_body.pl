@@ -6,6 +6,7 @@ op_id: /[A-Z]+/
 parameter: /\d+/
 last: ('last' | '$' ) 
 dd: /\d+/
+jack_port: /\w[-+:. \w]+/
 name: /\w[\w:,]*\/?/
 name2: /[\w\-+:]+/
 name3: /\S+/
@@ -178,7 +179,7 @@ exit: _exit end {   ::save_state($::state_store_file);
 					::cleanup_exit();
                     1}	
 
-source: _source name { print "source with argument$/"; $::this_track->set_source( $item{name} ); 1 }
+source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
 	my $object = $::this_track->input_object;
