@@ -1466,6 +1466,19 @@ WARN
 			. join(",",@chain_ids)
 			. " -f:$format -i:jack,$client";
 	}
+	#####  Setting jack_manual inputs
+
+	for my $name (keys %{ $inputs{jack_manual} } ){
+
+		my @chain_ids = @{ $inputs{jack_manual}->{$name} };
+		my $format;
+		$format = signal_format(
+					$devices{jack}->{signal_format},	
+					$tn{$name}->width
+		);
+		push  @input_chains, 
+		"-a:" . join(",",@chain_ids) . " -f:$format -i:jack,,$name\_in";
+	}
 		
 	##### Setting files as inputs (used by mon_setup)
 

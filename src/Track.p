@@ -227,6 +227,7 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
+			when('jack_manual'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('track'){ return 'REC' } # maybe $track->rw ??
 			default { croak $track->name. ": missing source type" }
@@ -503,8 +504,8 @@ sub set_source { # called from parser
 	}
 	if( $source eq 'jack'){
  		$track->set(source_type => 'jack_manual',
- 					source_id => $track->name."_in");
- 		say $track->name, ": JACK input port is ",$track->source_id,
+ 					source_id => $track->name);
+ 		say $track->name, ": JACK input port is ",$track->source_id,"_in",
  		". Make connections manually.";
  		return;
 	} 
