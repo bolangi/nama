@@ -1117,20 +1117,20 @@ sub really_recording {  keys %{$outputs{file}}; }
 sub generate_setup { 
 	$debug2 and print "&generate_setup\n";
 
-	my $automix = shift; # route Master to null_out
+	my $automix = shift; # route Master to null_out if present
 
 	# save current track
 	my $old_this_track = $this_track;
 
 	initialize_chain_setup_vars();
-	connect_Main_tracks_to_Master();
+	add_paths_for_main_tracks();
 	add_paths_for_send_buses();
 	add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
 
 	# re-route Master to null for automix
 	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master')); # no, they don't
+		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
 		$g->add_edge(qw[Master null_out]);
 	}
 	add_paths_for_mixdown_handling();
@@ -1175,7 +1175,7 @@ sub initialize_chain_setup_vars {
 	
 	$g = Graph->new();
 }
-sub connect_Main_tracks_to_Master {
+sub add_paths_for_main_tracks {
 	map{ 
 
 		# connect signal sources to tracks
@@ -1228,9 +1228,6 @@ sub add_paths_for_sub_buses {
 		# we get tracks from a group of the same name as $bus->name
 		my @tracks = grep{ $_->rec_status ne 'OFF' } 
 					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
-
-		# raw send buses use only fixed-rule routing
-		# we process them later
 
 		if( $_->bus_type eq 'sub'){   # sub bus
 			$debug and say 'process sub bus';
