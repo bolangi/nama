@@ -4323,4 +4323,21 @@ sub cache_track {
 		post_rec_configure();
 	} else { say "track cache operation failed!"; }
 }
+sub do_script {
+	say "hello script";
+	my $name = shift;
+	my $file;
+	if( $name =~ m!/!){ $file = $name }
+	else {
+		$file = join_path(project_dir(),$name);
+		if(-e $file){}
+		else{ $file = join_path(project_root(),$name) }
+	}
+	-e $file or say("$file: file not found. Skipping"), return;
+	my @lines = split "\n",io($file)->all;
+	my $old_opt_r = $opts{R};
+	$opts{R} = 1; # turn off auto reconfigure
+	for my $input (@lines) { process_line($input)};
+	$opts{R} = $old_opt_r;
+}
 ### end

@@ -636,4 +636,9 @@ uncache_track:
   short: uncache unc
   what: set uncached track version, restoring effects (if current version is cached)
   parameters: none
+do_script:
+  type: general
+  short: do
+  what: execute Nama commands from a file in project_dir or project_root
+  parameters: <s_filename>
 ...

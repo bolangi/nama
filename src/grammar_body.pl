@@ -583,4 +583,4 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	::push_effect_chain() if $::this_track->fancy_ops;
 	::add_effect_chain($name); 1
 }
-		
+do_script: _do_script name2 end { ::do_script($item{name2});1}
