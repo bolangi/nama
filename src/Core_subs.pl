@@ -645,6 +645,19 @@ sub initialize_routing_dispatch_table {
 				pre_output => $t->pre_send,
 			});
 		},
+		jack_manual_in 	=> sub {
+			my $name = shift;
+			my $t = $tn{$name};
+			my ($type, $id) = @{$t->source_input};
+			add_entry_h({
+				dir  	=> 'inputs',
+				name	=> $name,
+				type 	=> $type,
+				id		=> $id,
+				chain	=> $t->n,
+				post_input => $t->rec_route .  $t->mono_to_stereo, 
+			});
+		},
 		soundcard_in	=> sub { 
 			my $name = shift;
 			my $t = $tn{$name};
@@ -3756,7 +3769,7 @@ sub jack_update {
 	# cache current JACK status
 	$jack_running = jack_running();
 	$jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
-	%jack = %{jack_ports()};
+	%jack = %{jack_ports()} if $jack_running;
 }
 sub jack_client {
 

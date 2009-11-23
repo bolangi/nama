@@ -350,7 +350,7 @@ sub input_path { # signal path, not file path
 	
 	if($track->rec_status eq 'REC'){
 
-		if ($track->source_type =~ /soundcard|jack_client/){
+		if ($track->source_type =~ /soundcard|jack_client|jack_manual/){
 			( $track->source_type . '_in' , $track->name)
 		} 
 
@@ -449,6 +449,11 @@ sub source_input {
 				.". JACK not running."); return [undef, undef] }
 		}
 		when ( 'loop'){ return ['loop',$track->source_id ] } 
+		when ('jack_manual'){
+			if ( $::jack_running ){ return ['jack_manual', $track->source_id] }
+			else { 	say($track->name. ": cannot set source ".$track->source_id
+				.". JACK not running."); return [undef, undef] }
+		}
 	}
 }
 
@@ -496,7 +501,13 @@ sub set_source { # called from parser
 		$track->set(group => 'null');
 		return
 	}
-
+	if( $source eq 'jack'){
+ 		$track->set(source_type => 'jack_manual',
+ 					source_id => $track->name."_in");
+ 		say $track->name, ": JACK input port is ",$track->source_id,
+ 		". Make connections manually.";
+ 		return;
+	} 
 	my $old_source = $track->source;
 	my $new_source = $track->source($source);
 	my $object = $track->input_object;
