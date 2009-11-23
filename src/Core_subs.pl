@@ -3751,10 +3751,12 @@ sub keyword {
         return undef;
 } };
 
+
 sub jack_update {
 	# cache current JACK status
 	$jack_running = jack_running();
 	$jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
+	%jack = %{jack_ports()};
 }
 sub jack_client {
 
@@ -3771,7 +3773,11 @@ sub jack_client {
 	($name, $port) = $name =~ /^([^:]+):?(.*)/;
 
 	# currently we ignore port
-	
+
+	$jack{$name}{$direction};
+}
+
+sub jack_ports {
 	$jack_running or return;
 	my $j = $jack_lsp; 
 	#return if $j =~ /JACK server not running/;
@@ -3781,13 +3787,16 @@ sub jack_client {
 	$j =~ s/\n\s+/ /sg;
 
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
-
-	%jack = ();
+	my %jack = ();
 
 	map{ 
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
-		my @ports = /([^:]+:.+)/g;
+		my @ports = /
+			\s* 			# zero or more spaces
+			([^:]+:[^:]+?) # non-colon string, colon, non-greey non-colon string
+			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
+		/gx;
 		map { 
 				s/ $//; # remove trailing space
 				$jack{ $_ }{ $direction }++;
@@ -3798,9 +3807,9 @@ sub jack_client {
 
 	} split "\n",$j;
 	#print yaml_out \%jack;
-	
-	$jack{$name}{$direction};
+	\%jack
 }
+	
 
 sub automix {
 
