@@ -7,8 +7,7 @@ Nama - Ecasound-based recorder, mixer and mastering system
 Nama is a multitrack recording, effects-processing, mixing
 and mastering application based on the Ecasound audio
 processing engine. Nama adds track, bus and project
-abstractions, graphical user interface and command parser
-that supplement Ecasound's proven capabilities.
+abstractions that supplement Ecasound's proven capabilities.
 
 Nama's features include LADSPA effects hosting, presets, aux
 sends, inserts, regions, time-shifting, send buses (for
@@ -21,17 +20,17 @@ configuration is modelled after JAMin, a respected mastering
 application. The default mastering effects can be customised
 via .namarc, Nama's configuration file. 
 
-Nama has both graphical and text-based user interfaces. 
+Nama has both a graphical user interface and a 
+text interface.
 
 The text interface gives console users an efficient
 environment for audio production. The Gnu ReadLine library
 is used to provide a shell-like command prompt that can
 execute Nama-specific commands, Ecasound interactive-mode
-commands, shell commands and Perl code. Shortcuts, command
-history and tab-completion of commands, filenames and effect
-labels save keystrokes. Online help allows looking up
-commands and effects by category, name, keyword and LADSPA
-unique ID.
+commands, shell commands and Perl code. Tab-completion of
+commands, filenames and effect labels saves keystrokes.
+Online help allows looking up commands and effects by
+category, name, keyword and LADSPA unique ID.
 
 The minimalistic GUI, written in Tk, provides buttons and
 sliders to manage projects, tracks, effects, marks,

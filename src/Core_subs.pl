@@ -1914,10 +1914,35 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	transport_status() unless $no_transport_status;
+	connect_jack_ports();
 	$ui->flash_ready();
 	#print eval_iam("fs");
 	1;
 	
+}
+
+
+sub connect_jack_ports {
+	# connect ports listed in hihat.ports.L to ecasound:hihat_in_1
+	# and                     hihat.ports.R to ecasound:hihat_in_2
+	my $dis = shift;
+	my $debug = 1;
+	my %LR = (1 => 'L', 2 => 'R');
+	map{  my $track = $_; 
+		  my $name = $track->name;
+		  my $dest = "ecasound:$name\_in_";
+		  map{  my $ch = $_;
+				my $file = join_path(project_root(),
+					join q(.),$track->name,'ports',$LR{$ch});
+			   if( -e $file){ 
+					map { 
+						my $cmd = qq(jack_$dis\connect "$_" $dest$ch);
+						$debug and say $cmd;
+						system $cmd;
+					} io($file)->slurp;
+				}
+		  } 1..$track->width;
+	 } grep{ $_->source_type eq 'jack_manual' and $_->rec_status eq 'REC' } ::Track::all();
 }
 
 sub transport_status {
@@ -2003,6 +2028,7 @@ sub start_heartbeat {
 sub stop_heartbeat {
 	$event_id{heartbeat} = undef; 
 	$ui->reset_engine_mode_color_display();
+	connect_jack_ports('dis'); # disconnect
 	rec_cleanup() }
 
 sub heartbeat {
