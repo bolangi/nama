@@ -1935,7 +1935,7 @@ sub connect_jack_ports {
 					my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
 					$cmd .= (/L$/ ? 1 : 2);
 					$debug and say $cmd;
-					#system $cmd;
+					system $cmd;
 			} io($file)->slurp;
 		  }
  	 } grep{ $_->source_type eq 'jack_manual' and $_->rec_status eq 'REC' 
