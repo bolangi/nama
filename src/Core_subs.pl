@@ -1922,19 +1922,56 @@ sub connect_transport {
 
 
 sub connect_jack_ports {
-	# connect ports listed in hihat.ports.L to ecasound:hihat_in_1
-	# and                     hihat.ports.R to ecasound:hihat_in_2
+
+	# use a heuristic to map port names to track channels
+		
+	# If track is mono, all to one input
+	# If track is stereo, map as follows:
+	# 
+	# L or l: 1
+	# R or r: 2
+	# 
+	# # if first entry ends with zero we use this mapping
+	# 0: 1 
+	# 1: 2
+	# 
+	# # otherwise we use this mapping
+	# 1: 1
+	# 2: 2
+	# 
+	# If track is more than stereo, use linenumber % channel_count
+	# 
+	# 1st: 1
+	# 2nd: 2
+	# 3rd: 3
+	# ...
+
 	my $dis = shift;
-	my $debug = 1;
+	my $offset;
+	my %map_RL = (L => 1, R => 2);
 	map{  my $track = $_; 
  		  my $name = $track->name;
  		  my $dest = "ecasound:$name\_in_";
  		  my $file = join_path(project_root(), $track->name.'.ports');
+		  my $line_number = 0;
 		  if( -e $file){ 
 			map {   chomp;
-					my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
-					$cmd .= (/L$/ ? 1 : 2);
-					$debug and say $cmd;
+		  			my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
+					# define offset once based on first port line
+					# ends in zero: 1 
+					# ends in one:  0
+					/(\d)$/ and $offset //= ! $1;
+					#$debug and say "offset: $offset";
+					if( $track->width == 1){ $cmd .= "1" }
+					elsif( $track->width == 2){
+						my($suffix) = /([LlRr]|\d+)$/;
+						#say "suffix: $suffix";
+						$cmd .= ($suffix =~ /\d/) 
+							? ($suffix + $offset)
+							: $map_RL{uc $suffix};
+					} else { $cmd .= ($line_number % $track->width + 1) }
+					$line_number++;
+					#$debug and say $cmd;
 					system $cmd;
 			} io($file)->slurp;
 		  }
