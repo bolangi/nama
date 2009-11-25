@@ -1971,7 +1971,7 @@ sub connect_jack_ports {
 							: $map_RL{uc $suffix};
 					} else { $cmd .= ($line_number % $track->width + 1) }
 					$line_number++;
-					#$debug and say $cmd;
+					$debug and say $cmd;
 					system $cmd;
 			} io($file)->slurp;
 		  }
