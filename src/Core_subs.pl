@@ -1913,6 +1913,8 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
+	disconnect_jack_ports();
+	connect_jack_ports();
 	transport_status() unless $no_transport_status;
 	$ui->flash_ready();
 	#print eval_iam("fs");
@@ -1955,7 +1957,11 @@ sub connect_jack_ports {
  		  my $file = join_path(project_root(), $track->name.'.ports');
 		  my $line_number = 0;
 		  if( -e $file){ 
-			map {   chomp;
+			for (io($file)->slurp){   
+					# $_ is the source port name
+					chomp;
+					# skip silently if port doesn't exist
+					return unless $jack{$_};	
 		  			my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
 					# define offset once based on first port line
 					# ends in zero: 1 
@@ -1973,11 +1979,14 @@ sub connect_jack_ports {
 					$line_number++;
 					$debug and say $cmd;
 					system $cmd;
-			} io($file)->slurp;
+			} ;
 		  }
  	 } grep{ $_->source_type eq 'jack_manual' and $_->rec_status eq 'REC' 
 	 } ::Track::all();
 }
+
+sub disconnect_jack_ports { connect_jack_ports('dis') }
+
 sub transport_status {
 
 	# assume transport is stopped
@@ -2024,7 +2033,6 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	connect_jack_ports();
 	print "\nstarting at ", colonize(int eval_iam("getpos")), $/;
 	schedule_wraparound();
 	mute();
@@ -2062,7 +2070,6 @@ sub start_heartbeat {
 sub stop_heartbeat {
 	$event_id{heartbeat} = undef; 
 	$ui->reset_engine_mode_color_display();
-	connect_jack_ports('dis'); # disconnect
 	rec_cleanup() }
 
 sub heartbeat {
