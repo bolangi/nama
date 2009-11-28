@@ -3635,7 +3635,8 @@ sub show_chain_setup {
 sub pager {
 	$debug2 and print "&pager\n";
 	my @output = @_;
-	my ($screen_lines, $columns) = split " ", qx(stty size);
+#	my ($screen_lines, $columns) = split " ", qx(stty size);
+	my ($screen_lines, $columns) = $term->get_screen_size();
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if ( $use_pager and $line_count > $screen_lines - 2) { 
@@ -4438,5 +4439,22 @@ sub do_script {
 	$opts{R} = 1; # turn off auto reconfigure
 	for my $input (@lines) { process_line($input)};
 	$opts{R} = $old_opt_r;
+}
+sub destroy_current_wav {
+	my $old_group_status = $main->rw;
+	$main->set(rw => 'MON');
+	$this_track->current_version or
+		say($this_track->name, 
+			": No current version (track set to OFF?) Skipping."), return;
+	my $wav = $this_track->full_path;
+	my $reply = $term->readline("delete WAV file $wav? [n] ");
+	#my $reply = chr($term->read_key()); 
+	if ( $reply =~ /y/i ){
+		print "Unlinking.\n";
+		unlink $wav or warn "couldn't unlink $wav: $!\n";
+		rememoize();
+	}
+	$main->set(rw => $old_group_status);
+	1;
 }
 ### end
