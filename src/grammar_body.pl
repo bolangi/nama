@@ -180,6 +180,7 @@ exit: _exit end {   ::save_state($::state_store_file);
                     1}	
 
 source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
+source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
