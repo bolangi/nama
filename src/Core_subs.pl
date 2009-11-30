@@ -1956,7 +1956,7 @@ sub connect_jack_ports {
  		  my $dest = "ecasound:$name\_in_";
  		  my $file = join_path(project_root(), $track->name.'.ports');
 		  my $line_number = 0;
-		  if( -e $file){ 
+		  if( $track->rec_status eq 'REC' and -e $file){ 
 			for (io($file)->slurp){   
 					# $_ is the source port name
 					chomp;
