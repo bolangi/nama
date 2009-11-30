@@ -2865,7 +2865,7 @@ sub prepare_static_effects_data{
 }
 sub new_plugins {
 	my $effects_cache = join_path(&project_root, $effects_cache_file);
-	my $path = $ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
+	my $path = ladspa_path();
 	
 	my @filenames;
 	for my $dir ( split ':', $path){
@@ -3075,10 +3075,12 @@ sub integrate_cop_hints {
 		$effects[ $effect_i{ $code } ] = $hashref;
 	}
 }
+sub ladspa_path {
+	$ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
+}
 sub get_ladspa_hints{
 	$debug2 and print "&get_ladspa_hints\n";
-	$ENV{LADSPA_PATH} or local $ENV{LADSPA_PATH}='/usr/lib/ladspa';
-	my @dirs =  split ':', $ENV{LADSPA_PATH};
+	my @dirs =  split ':', ladspa_path();
 	my $data = '';
 	my %seen = ();
 	my @plugins;
