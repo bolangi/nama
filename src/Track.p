@@ -318,8 +318,8 @@ sub route {
 	$map;
 }
 
-# channel shifting for multi rule 
-#
+# stereo output channel shifting 
+
 sub pre_send {
 	#$debug2 and print "&pre_send\n";
 	my $track = shift;
