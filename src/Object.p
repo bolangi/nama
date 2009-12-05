@@ -37,8 +37,9 @@ sub set {
  	croak "odd number of arguments ",join "\n--\n" ,@_ if @_ % 2;
 	my %new_vals = @_;
 	map{ 
-		$self->{$_} = $new_vals{$_} 
-			if ${"$class\::_is_field"}{$_}
+		$self->{$_} = $new_vals{$_} ;
+			my $key = $_;
+			grep{ ${"$_\::_is_field"}{$key} } $class, @{"$class\::ISA"}
 			or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }

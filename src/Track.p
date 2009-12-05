@@ -807,11 +807,6 @@ package ::SimpleTrack; # used for Master track
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-use ::Object qw(
-
-[% qx(./strip_all ./track_fields) %]
-
-						);
 
 sub rec_status{
 
