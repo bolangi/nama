@@ -217,11 +217,10 @@ sub insert_far_side_loop {
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
-#sub is_a_track{ $tn{$_[0]} }
-sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;
-	$debug and say "$_[0] is a track"; 1
-}
-	
+sub is_a_track{ $::tn{$_[0]} }
+#sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;
+# $debug and say "$_[0] is a track"; 1
+#}
 sub is_terminal { $reserved{$_[0]} }
 sub is_a_loop{
 	my $name = shift;
@@ -230,6 +229,10 @@ sub is_a_loop{
 		return $root;
 	} 
 }
+sub is_a_jumper { 		! is_terminal($_[0])
+				 	and ! is_a_track($_[0]) 
+					and ! is_a_loop($_[0]) }
+	
 
 sub inputless_tracks {
 	my $g = shift;
