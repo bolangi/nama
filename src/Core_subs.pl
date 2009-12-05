@@ -1127,6 +1127,49 @@ sub user_mon_tracks {
 # return $output{file} entries, including Mixdown 
 sub really_recording {  keys %{$outputs{file}}; }
 
+# new object based dispatch
+sub dispatch2 { # creates an IO object from a graph edge
+	my $arr_ref = shift;
+	my($name, $endpoint) = decode_edge($arr_ref);
+	my $track = $tn{$name};
+	my $class = io_class($endpoint);
+	my $try = "$class->new(track => \$track, override(\$name))";
+	say "try: $try";
+	#push @io, eval $try;
+}
+	
+sub decode_edge {
+	# assume track-endpoint or endpoint-track
+	# return track, endpoint
+	my ($a, $b) = @{$_[0]};
+	say "a: $a, b: $b";
+	return $tn{$a} ? @{$_[0]} : reverse @{$_[0]};
+}
+
+{ my %io = qw(
+	null_in			::IO::from_null
+	null_out		::IO::to_null
+	soundcard_in 	::IO::from_soundcard
+	soundcard_out 	::IO::to_soundcard
+	wav_in 			::IO::from_wav
+	wav_out 		::IO::to_wav
+	loop_source		::IO::from_loop
+	loop_sink		::IO::to_loop
+	loop_in			::IO::from_loop
+	loop_out		::IO::to_loop
+	jack_client_in	::IO::from_jack_client
+	jack_client_out ::IO::to_jack_client
+	jack_port_in	::IO::from_jack_port
+	jack_port_out 	::IO::to_jack_port
+	jack_manual_in  ::IO::from_jack_port
+	jack_manual_out ::IO::to_jack_port
+	jack_multi_in	::IO::from_jack_multi
+	jack_multi_out	::IO::to_jack_multi
+	);
+
+sub io_class { $io{$_[0]} or croak "unknown endpoint type: $_[0]"; }
+}
+
 sub generate_setup { 
 	$debug2 and print "&generate_setup\n";
 

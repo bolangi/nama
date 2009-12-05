@@ -1,0 +1,12 @@
+		track		# originating track, if exists
+		chain_id
+		direction 	# input or output
+		type		# redundant, expressed as object class
+		device_id 	# what to append to -i: or -o:
+		width		# no. of channels
+		format		# -f: argument
+		ecs_extra	# post_input or pre_output operators
+#		playat
+#		region_start
+#		region_end
+#		modifiers
