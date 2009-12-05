@@ -807,6 +807,11 @@ package ::SimpleTrack; # used for Master track
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
+use ::Object qw(
+
+[% qx(./strip_all ./track_fields) %]
+
+						);
 
 sub rec_status{
 
@@ -825,6 +830,11 @@ package ::MasteringTrack; # used for mastering chains
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
+use ::Object qw( 
+
+[% qx(./strip_all ./track_fields) %]
+						
+						);
 
 sub rec_status{
 	my $track = shift;
@@ -837,6 +847,11 @@ package ::SlaveTrack; # for instrument monitor bus
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
+use ::Object qw( 
+
+[% qx(./strip_all ./track_fields) %]
+						
+);
 sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
@@ -853,6 +868,11 @@ sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation
 our @ISA = qw(::SlaveTrack ::Wav);
+use ::Object qw( 
+
+[% qx(./strip_all ./track_fields) %]
+
+);
 sub current_version {
 	my $track = shift;
 	my $target = $::tn{$track->target};
