@@ -50,11 +50,11 @@ sub new {
 			", type: $vals{type}, class: $class";
 		my ($type,$id) = @{ 
 			$direction eq 'input'
-			#$vals{direction} eq 'input'
 				? $track->source_input 
 				: $track->send_output
 		};
 		unshift @_, chain 		=> $track->n,
+					direction 	=> $direction,
 					type 		=> $type,
 					device_id 	=> $id,
 					width		=> $track->width,
