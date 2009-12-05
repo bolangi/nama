@@ -37,6 +37,7 @@ use ::Object qw(
 );
 sub new {
 	my $class = shift;
+	my $direction = $class =~ /::from/ ? 'input' : 'output';
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
@@ -48,7 +49,8 @@ sub new {
 		say $track->name, ": source_type: ", $track->source_type, 
 			", type: $vals{type}, class: $class";
 		my ($type,$id) = @{ 
-			$vals{direction} eq 'input'
+			$direction eq 'input'
+			#$vals{direction} eq 'input'
 				? $track->source_input 
 				: $track->send_output
 		};
