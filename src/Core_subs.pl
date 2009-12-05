@@ -1130,10 +1130,10 @@ sub really_recording {  keys %{$outputs{file}}; }
 # new object based dispatch
 sub dispatch2 { # creates an IO object from a graph edge
 	my $arr_ref = shift;
-	my($name, $endpoint) = decode_edge($arr_ref);
+	my($name, $endpoint, $direction) = decode_edge($arr_ref);
 	my $track = $tn{$name};
 	my $class = io_class($endpoint);
-	my $try = "$class->new(track => \$track, override(\$name))";
+	my $try = "$class->new(track => \$track, direction => $direction, override(\$name))";
 	say "try: $try";
 	#push @io, eval $try;
 }
@@ -1143,7 +1143,7 @@ sub decode_edge {
 	# return track, endpoint
 	my ($a, $b) = @{$_[0]};
 	say "a: $a, b: $b";
-	return $tn{$a} ? @{$_[0]} : reverse @{$_[0]};
+	return $tn{$a} ? (@{$_[0]}, 'output') : (reverse(@{$_[0]}), 'input') ;
 }
 
 { my %io = qw(

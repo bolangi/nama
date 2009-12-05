@@ -6,6 +6,9 @@
 		width		# no. of channels
 		format		# -f: argument
 		ecs_extra	# post_input or pre_output operators
+		mono_to_stereo # track method: conversion if needed
+		route		# track method: routing
+		rec_route	# track method: routing
 #		playat
 #		region_start
 #		region_end

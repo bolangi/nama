@@ -56,16 +56,28 @@ sub new {
 					type 		=> $type,
 					device_id 	=> $id,
 					width		=> $track->width,
-					;
-	}
-	my $object = bless { @_	}, $class;
-}
-=comment
+
 					playat		=> $track->playat,
 					region_start=> $track->region_start,
 					region_end	=> $track->region_end,	
 					modifiers	=> $track->modifiers,
-=cut
+
+		# TODO: move the following routines from Track
+		# to IO::base
+
+	
+		# Alternatively, call $track->methods
+		# inside ::IO::base subclasses where they are
+		# needed. That will save duplication
+		
+					mono_to_stereo => $track->mono_to_stereo,
+					route		=> $track->route,
+					rec_route	=> $track->rec_route,
+					full_path	=> $track->full_path,
+					;
+	}
+	my $object = bless { @_	}, $class;
+}
 {my %io = ( input => 'i', output => 'o' );
 sub ecs_string {
 	my $self = shift;
@@ -77,8 +89,17 @@ sub ecs_string {
 }
 }
 
-1;
+package ::IO::from_null;
+use Modern::Perl;
+use Carp;
+use ::Object qw(
+[% qx(./strip_all ./io_fields) %]
+);
+our @ISA = '::IO::base';
+sub ecs_extra { $_[0]->mono_to_stereo }
+sub device_id { 'null' }
 
+1;
 __END__
 
 
@@ -88,13 +109,6 @@ package ::;
 
 #@io; # array for holding IO::* objects that generate chain setup
 #dispatch($_);
-
-package ::IO::from_null;
-use Modern::Perl;
-use Carp;
-our @ISA = '::IO::base';
-use ::Object qw(track chain_id direction type device_id);
-sub ecs_extra { $_[0]->track->mono_to_stereo }
 
 # sub write_chains
 	
