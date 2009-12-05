@@ -44,7 +44,6 @@ sub idx { # return first free track index
 	}
 }
 	
-
 sub new {
 	# returns a reference to an object that is indexed by
 	# name and by an assigned index

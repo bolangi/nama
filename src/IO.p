@@ -37,7 +37,9 @@ use ::Object qw(
 );
 sub new {
 	my $class = shift;
-	my $direction = $class =~ /::from/ ? 'input' : 'output';
+	#my $direction = $class =~ /::from/ ? 'input' : 'output';
+	my $direction = ($class =~ /::from/ ? 'input' : 'output');
+	say "class: $class, direction: $direction";
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
@@ -45,6 +47,7 @@ sub new {
 
 	# we will default to track chain number and input or output values
 	# (these may be overridden)
+	push @_, direction 	=> $direction;
 	if ($track){
 		say $track->name, ": source_type: ", $track->source_type, 
 			", type: $vals{type}, class: $class";
@@ -54,7 +57,6 @@ sub new {
 				: $track->send_output
 		};
 		unshift @_, chain 		=> $track->n,
-					direction 	=> $direction,
 					type 		=> $type,
 					device_id 	=> $id,
 					width		=> $track->width,
@@ -94,11 +96,14 @@ sub ecs_string {
 package ::IO::from_null;
 use Modern::Perl;
 use Carp;
-use ::Object qw(
-[% qx(./strip_all ./io_fields) %]
-);
 our @ISA = '::IO::base';
 sub ecs_extra { $_[0]->mono_to_stereo }
+sub device_id { 'null' }
+
+package ::IO::to_null;
+use Modern::Perl;
+use Carp;
+our @ISA = '::IO::base';
 sub device_id { 'null' }
 
 1;
