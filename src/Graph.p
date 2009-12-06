@@ -5,7 +5,7 @@ use Graph;
 use vars qw(%reserved $debug);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
-*reserved = \%::dispatch;
+*reserved = \%::IO::io_class;
 *debug = \$::debug;
 my %seen;
 my $anon_tracks;

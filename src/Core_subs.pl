@@ -56,8 +56,6 @@ sub prepare {
 	
 	initialize_rules(); 					# bus/rule routing
 	$debug and say join " ", %::Rule::by_name;
-	#die "here";
-	initialize_routing_dispatch_table();	# graph-based routing
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -983,7 +981,7 @@ sub really_recording {  keys %{$outputs{file}}; }
 
 # new object based dispatch
 
-sub dispatch2 { # creates an IO object from a graph edge
+sub dispatch { # creates an IO object from a graph edge
 	my $arr_ref = shift;
 	my($name, $endpoint, $direction) = decode_edge($arr_ref);
 	my $track = $tn{$name};
@@ -994,7 +992,7 @@ sub dispatch2 { # creates an IO object from a graph edge
 	} else { $class = io_class( $endpoint ) }
 	my @args = (track => $track, 
 				endpoint => $endpoint,
-				override2($name));
+				override($name));
 	my $try = "$class->new(\@args)";
 	say "name: $name";
 	say "try: $try";
@@ -1011,31 +1009,7 @@ sub decode_edge {
 	($name, $endpoint, $direction)
 }
 
-{ my %io = qw(
-	null_in					::IO::from_null
-	null_out				::IO::to_null
-	soundcard_in 			::IO::from_soundcard
-	soundcard_out 			::IO::to_soundcard
-	soundcard_device_in 	::IO::from_soundcard_device
-	soundcard_device_out 	::IO::to_soundcard_device
-	wav_in 					::IO::from_wav
-	wav_out 				::IO::to_wav
-	loop_source				::IO::from_loop
-	loop_sink				::IO::to_loop
-	loop_in					::IO::from_loop
-	loop_out				::IO::to_loop
-	jack_client_in			::IO::from_jack_client
-	jack_client_out 		::IO::to_jack_client
-	jack_port_in			::IO::from_jack_port
-	jack_port_out 			::IO::to_jack_port
-	jack_manual_in  		::IO::from_jack_port
-	jack_manual_out 		::IO::to_jack_port
-	jack_multi_in			::IO::from_jack_multi
-	jack_multi_out			::IO::to_jack_multi
-	);
-
-sub io_class { $io{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
-}
+sub io_class { $::IO::io_class{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
 
 sub generate_setup { 
 	$debug2 and print "&generate_setup\n";
@@ -1072,7 +1046,7 @@ sub generate_setup {
 
 	# create IO lists %inputs and %outputs
 
-	process_routing_graph2();
+	process_routing_graph();
 	# now we have processed graph, we can remove temp tracks
 
 	$debug and say "temp tracks to remove";
@@ -1221,8 +1195,8 @@ sub prune_graph {
 
 	
 =cut
-sub process_routing_graph2 {
-	@io = map{ dispatch2($_) } $g->edges;
+sub process_routing_graph {
+	@io = map{ dispatch($_) } $g->edges;
 map { 	push @input_chains, $_->ecs_string;
 		push @post_input, join " ",$_->a_op.$_->ecs_extra if $_->ecs_extra; }
 grep { $_->direction eq 'input' } @io;
@@ -1232,39 +1206,6 @@ map { 	push @output_chains, $_->ecs_string;
 grep { $_->direction eq 'output' } @io;
 }
 	
-sub process_routing_graph {
-	# the graphic part: we process edges:
-	# 
-	# reserved to track: input 	
-	# loop to track    : input		
-	# track to loop    : output
-	# track to reserved: output
-
-	map { my ($a,$b) = @$_;
-		  $debug and say "edge $a-$b";
-
-		# cases 1,2:  track to ( loop | reserved )
-		if($tn{$a}){ 
-			if(::Graph::is_a_loop($b)){
-				$dispatch{loop_sink}->($a,$b);
-			} elsif ( $::Graph::reserved{$b} ){
-				$debug and say "track ($a) to reserved ($b)";
-				$dispatch{$b}->($a);
-			} else {croak qq("$b:" expected loop or reserved); }
-		}
-		# cases 3,4:  ( loop | reserved ) to track
-		elsif($tn{$b}){
-			if(::Graph::is_a_loop($a)){
-				$dispatch{loop_source}->($b,$a);
-			} elsif ( $::Graph::reserved{$a} ){
-				$debug and say "reserved ($a) to track ($b)";
-				$dispatch{$a}->($b);
-			} else {croak qq("$a": expected loop or reserved); }
-		}
-		else { croak qq(fell through dispatch tree); }
-	} $g->edges;
- 
-}
 sub process_static_bus_rules { map { $_->apply() } ::Bus::all(); }
 
 sub maybe_write_chains {
@@ -1274,13 +1215,13 @@ sub maybe_write_chains {
  	} else { print "No inputs found!\n"; 0 };
 }
 
+# sub override {
+# 	my ($hash_ref, $name) = @_;
+# 		my $attr = $g->get_vertex_attributes($name);
+# 		$debug and say "override: ", join " ",%$attr if $attr;
+# 		%$hash_ref = (%$hash_ref, %$attr) if $attr;
+# }
 sub override {
-	my ($hash_ref, $name) = @_;
-		my $attr = $g->get_vertex_attributes($name);
-		$debug and say "override: ", join " ",%$attr if $attr;
-		%$hash_ref = (%$hash_ref, %$attr) if $attr;
-}
-sub override2 {
 	my ($name) = @_;
 		warn("undefined graph\n"), return () unless ref $g =~ /Graph/;
 		my $attr = $g->get_vertex_attributes($name);
@@ -1291,28 +1232,6 @@ sub override2 {
 sub chain {
 	my $name = shift;
 	$tn{$name} ? $tn{$name}->n : $name;
-}
-sub add_entry_h {
-	my $h = shift;
-	$debug2 and say "add_entry_h";
-	croak "is not a hash ref: $h" unless (ref $h) =~ /HASH/;
-	override($h,$h->{name});
-	my %hsh = %$h;
-	my($dir, $type, $id, $chain, $post_input,$pre_output) = 
-		@hsh{qw(dir type id chain post_input pre_output)};
-	if ($dir eq 'inputs'){
-		$inputs{$type}{$id} //= [];	
-		push @{ $inputs{$type}{$id} }, $chain;
-		$post_input{$chain} = $post_input if $post_input;
-	}
-	elsif ($dir eq 'outputs'){
-		$outputs{$type}{$id} //= [];	
-		push @{ $outputs{$type}{$id} }, $chain;
-		$pre_output{$chain} = $pre_output if $pre_output;
-	}
-	else {croak "illegal dir: $dir" }
-
-	
 }
 sub soundcard_output {
  	$::jack_running 
