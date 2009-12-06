@@ -704,12 +704,6 @@ sub initialize_rules {
 
 	# first make IO_Helper objects, just for pretty syntax
 	
-	my $soundcard_input = ::IO_Helper->new(
-		type => 	sub { my $track = shift; $track->soundcard_input()->[0]}, 
-		object => 	sub { my $track = shift; $track->soundcard_input()->[1]},);
-	my $soundcard_output = ::IO_Helper->new(
-		type => 	sub { my $track = shift; $track->soundcard_output()->[0]}, 
-		object => 	sub { my $track = shift; $track->soundcard_output()->[1]},);
 	my $source_input = ::IO_Helper->new(
 		type => 	sub { my $track = shift; $track->source_input()->[0]}, 
 		object => 	sub { my $track = shift; $track->source_input()->[1]},);
@@ -1370,11 +1364,11 @@ sub prune_graph {
 sub process_routing_graph2 {
 	@io = map{ dispatch2($_) } $g->edges;
 map { 	push @input_chains, $_->ecs_string;
-		push @post_input, 	$_->ecs_extra if $_->ecs_extra; }
+		push @post_input, join " ",$_->a_op.$_->ecs_extra if $_->ecs_extra; }
 grep { $_->direction eq 'input' } @io;
 
 map { 	push @output_chains, $_->ecs_string;
-		push @pre_output, 	 $_->ecs_extra if $_->ecs_extra; }
+		push @pre_output, 	join " ",$_->a_op.$_->ecs_extra if $_->ecs_extra; }
 grep { $_->direction eq 'output' } @io;
 }
 	

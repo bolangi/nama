@@ -94,12 +94,13 @@ sub new {
 sub ecs_string {
 	my $self = shift;
 	my @parts;
-	push @parts, '-a:'.$self->chain_id;
+	push @parts, $self->a_op();
 	push @parts, '-f:'.$self->format if $self->format;
 	push @parts, '-'.$io{$self->direction}.':'.$self->device_id;
 	join ' ',@parts;
 }
 }
+sub a_op { '-a:'.$_[0]->chain_id }
 
 package ::IO::from_null;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
@@ -139,7 +140,6 @@ sub new {
 package ::IO::from_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
 sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
-# TODO: -i:consumer -> -i:alsa,default
 
 package ::IO::to_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
