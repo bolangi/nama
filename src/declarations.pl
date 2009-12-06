@@ -147,6 +147,8 @@ our (
 
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
+	@post_input,	# post-input chain operators
+	@pre_output, 	# pre-output chain operators
 
 	%subst,			# alias, substitutions for the config file
 	$tkeca_effects_data,	# original tcl code, actually
@@ -371,4 +373,5 @@ our (
 	%effect_chain, # named effect sequences
 	$sock, 			# socket for Net-ECI mode
 	%versions,		# store active versions for use after engine run
+	@io, 			# accumulate IO objects for generating setup
 );

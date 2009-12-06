@@ -1,6 +1,7 @@
 		track		# originating track, if exists
 		chain_id
 		direction 	# input or output
+		endpoint	# needed for routing to loop devices
 		type		# redundant, expressed as object class
 		device_id 	# what to append to -i: or -o:
 		width		# no. of channels
@@ -10,7 +11,7 @@
 		route		# track method: routing
 		rec_route	# track method: routing
 		full_path
-#		playat
-#		region_start
-#		region_end
-#		modifiers
+		playat
+		region_start
+		region_end
+		modifiers

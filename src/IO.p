@@ -122,11 +122,19 @@ sub device_id { $_[0]->full_path }
 
 package ::IO::from_loop;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
-# device_id from constructor
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	::IO::base::new($class, %vals, device_id => "loop,$vals{endpoint}");
+}
 
 package ::IO::to_loop;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
-# device_id from constructor
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	::IO::base::new($class, %vals, device_id => "loop,$vals{endpoint}");
+}
 
 package ::IO::from_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
@@ -135,6 +143,14 @@ sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
 
 package ::IO::to_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	my ($type, $id) = @{ ::soundcard_output2()};
+	my $try = ::io_class($type) . q{->new(@_, device_id => $id)};
+	say "soundcard constructor eval: $try";
+	eval $try;
+}
 # sub ecs_extra { $_[0]->pre_send} # not a default, belongs
 # in constructor
 
@@ -155,80 +171,20 @@ use Modern::Perl; use Carp; our @ISA = '::IO::base';
 
 package ::IO::to_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO::base';
-1;
-__END__
 
-
-
-__END__
-
-# first try
-
-package ::IO; # base class for all IO objects
-use Modern::Perl;
-our $VERSION = 1.0;
-our ($debug);
-local $debug = 0;
-use Carp;
-our @ISA = ();
-use vars qw($n @all %by_index) ;
-
-use ::Object qw( 	direction
-					type
-					id
-					format
-					channel
-					width
-
-					ecasound_id
-					post_input
-					pre_output
-				);
-
-# unnecessary: direction (from class) type (claass) 
-#
-
-$n = 0;
-
+package ::IO::from_soundcard_device;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
 sub new {
-	
 	my $class = shift;
 	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	my $n = $vals{n} // ++$n; 
-	my $self = bless { n => $n, @_ }, $class;
-	push @all, $self;
-	$by_index{"I$n"} = $self;
-	$self;
-	
+	my $device = $::devices{$vals{device_id}}{ecasound_id};
+	::IO::base::new($class, @_, device_id => $device);
 }
 
-package ::IO::Source::Soundcard;
-our @ISA = '::IO';
-=comment
-add_io(track => sax, direction => source, io_type => soundcard, 
-	io_id => consumer channel => 3, width => 2);
+package ::IO::to_soundcard_device;
+use Modern::Perl; use Carp; our @ISA = '::IO::from_soundcard_device';
 
-
-modify_io
-=cut
-
-	
-package ::IO::Sink::Soundcard;
-our @ISA = '::IO';
-
-package ::IO::Source::Jack_client;
-our @ISA = '::IO';
-
-	
-package ::IO::Sink::Jack_client;
-our @ISA = '::IO';
-
-package ::IO::Sink::Track;
-our @ISA = '::IO';
-
-=comment
-
-# second try
+1;
+__END__
 
 		

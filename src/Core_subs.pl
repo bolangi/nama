@@ -1128,14 +1128,23 @@ sub user_mon_tracks {
 sub really_recording {  keys %{$outputs{file}}; }
 
 # new object based dispatch
+
 sub dispatch2 { # creates an IO object from a graph edge
 	my $arr_ref = shift;
-	my($name, $endpoint) = decode_edge($arr_ref);
+	my($name, $endpoint, $direction) = decode_edge($arr_ref);
 	my $track = $tn{$name};
-	my $class = io_class($endpoint);
-	my $try = "$class->new(track => \$track, override(\$name))";
+	my $class;
+	# special handling for loops 
+	if (::Graph::is_a_loop($endpoint) ){
+		$class = io_class( $direction eq 'input' ?  "loop_source" : "loop_sink")
+	} else { $class = io_class( $endpoint ) }
+	my @args = (track => $track, 
+				endpoint => $endpoint,
+				override2($name));
+	my $try = "$class->new(\@args)";
+	say "name: $name";
 	say "try: $try";
-	#push @io, eval $try;
+	eval $try;
 }
 	
 sub decode_edge {
@@ -1143,31 +1152,35 @@ sub decode_edge {
 	# return track, endpoint
 	my ($a, $b) = @{$_[0]};
 	say "a: $a, b: $b";
-	return $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
+	my ($name, $endpoint) = $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
+	my $direction = $tn{$a} ? 'output' : 'input';
+	($name, $endpoint, $direction)
 }
 
 { my %io = qw(
-	null_in			::IO::from_null
-	null_out		::IO::to_null
-	soundcard_in 	::IO::from_soundcard
-	soundcard_out 	::IO::to_soundcard
-	wav_in 			::IO::from_wav
-	wav_out 		::IO::to_wav
-	loop_source		::IO::from_loop
-	loop_sink		::IO::to_loop
-	loop_in			::IO::from_loop
-	loop_out		::IO::to_loop
-	jack_client_in	::IO::from_jack_client
-	jack_client_out ::IO::to_jack_client
-	jack_port_in	::IO::from_jack_port
-	jack_port_out 	::IO::to_jack_port
-	jack_manual_in  ::IO::from_jack_port
-	jack_manual_out ::IO::to_jack_port
-	jack_multi_in	::IO::from_jack_multi
-	jack_multi_out	::IO::to_jack_multi
+	null_in					::IO::from_null
+	null_out				::IO::to_null
+	soundcard_in 			::IO::from_soundcard
+	soundcard_out 			::IO::to_soundcard
+	soundcard_device_in 	::IO::from_soundcard_device
+	soundcard_device_out 	::IO::to_soundcard_device
+	wav_in 					::IO::from_wav
+	wav_out 				::IO::to_wav
+	loop_source				::IO::from_loop
+	loop_sink				::IO::to_loop
+	loop_in					::IO::from_loop
+	loop_out				::IO::to_loop
+	jack_client_in			::IO::from_jack_client
+	jack_client_out 		::IO::to_jack_client
+	jack_port_in			::IO::from_jack_port
+	jack_port_out 			::IO::to_jack_port
+	jack_manual_in  		::IO::from_jack_port
+	jack_manual_out 		::IO::to_jack_port
+	jack_multi_in			::IO::from_jack_multi
+	jack_multi_out			::IO::to_jack_multi
 	);
 
-sub io_class { $io{$_[0]} or croak "unknown endpoint type: $_[0]"; }
+sub io_class { $io{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
 }
 
 sub generate_setup { 
@@ -1205,7 +1218,7 @@ sub generate_setup {
 
 	# create IO lists %inputs and %outputs
 
-	process_routing_graph();
+	process_routing_graph2();
 	# now we have processed graph, we can remove temp tracks
 
 	$debug and say "temp tracks to remove";
@@ -1213,13 +1226,15 @@ sub generate_setup {
 
 	$this_track = $old_this_track;
 
-	process_static_bus_rules();
+	#process_static_bus_rules(); # for DEV
 
-	maybe_write_chains();
+	# maybe_write_chains; 
+	write_chains(); # for DEV
 }
 sub initialize_chain_setup_vars {
 
-	  %inputs 
+	  @io 
+		= %inputs 
 		= %outputs 
 		= %post_input 
 		= %pre_output 
@@ -1349,6 +1364,11 @@ sub prune_graph {
 
 # sub write_chains
 	
+
+	
+=cut
+sub process_routing_graph2 {
+	@io = map{ dispatch2($_) } $g->edges;
 map { 	push @input_chains, $_->ecs_string;
 		push @post_input, 	$_->ecs_extra if $_->ecs_extra; }
 grep { $_->direction eq 'input' } @io;
@@ -1356,9 +1376,8 @@ grep { $_->direction eq 'input' } @io;
 map { 	push @output_chains, $_->ecs_string;
 		push @pre_output, 	 $_->ecs_extra if $_->ecs_extra; }
 grep { $_->direction eq 'output' } @io;
-
+}
 	
-=cut
 sub process_routing_graph {
 	# the graphic part: we process edges:
 	# 
@@ -1407,6 +1426,13 @@ sub override {
 		$debug and say "override: ", join " ",%$attr if $attr;
 		%$hash_ref = (%$hash_ref, %$attr) if $attr;
 }
+sub override2 {
+	my ($name) = @_;
+		warn("undefined graph\n"), return () unless ref $g =~ /Graph/;
+		my $attr = $g->get_vertex_attributes($name);
+		$debug and say "override: ", join " ",%$attr if $attr;
+		$attr ? %$attr : ();
+}
 							
 sub chain {
 	my $name = shift;
@@ -1439,6 +1465,11 @@ sub soundcard_output {
 		? [qw(jack_client system)]
 		: ['device', $::alsa_playback_device]
 }
+sub soundcard_output2 {
+ 	$::jack_running 
+		? [qw(jack_client_out system)]
+		: ['soundcard_device_out', $::alsa_playback_device]
+}
 
 sub write_chains {
 
@@ -1452,6 +1483,8 @@ sub write_chains {
 	# same lowest-level keys, i.e. 'loop' and 'loop'
 	#
 	# @buses is not the right name...
+
+=comment
 	
 	my @buses = grep { $_ !~ /file|device|jack/ } keys %inputs;
 	
@@ -1680,6 +1713,7 @@ WARN
 			 
 			 
 	}
+=cut
 
 	## write general options
 	
@@ -1700,9 +1734,11 @@ WARN
 	$ecs_file   .= "# audio inputs\n\n";
 	$ecs_file   .= join "\n", sort @input_chains;
 	$ecs_file   .= "\n\n# post-input processing\n\n";
-	$ecs_file   .= join "\n", sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
+#	$ecs_file   .= join "\n", sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
+	$ecs_file   .= join "\n", sort @post_input; # dispatch2
 	$ecs_file   .= "\n\n# pre-output processing\n\n";
-	$ecs_file   .= join "\n", sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
+#	$ecs_file   .= join "\n", sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
+	$ecs_file   .= join "\n", sort @pre_output; # dispatch2
 	$ecs_file   .= "\n\n# audio outputs";
 	$ecs_file   .= join "\n", sort @output_chains, "\n";
 	
@@ -4456,7 +4492,8 @@ sub cache_track {
 	my $temp_tracks = ::Graph::expand_graph($g); # array ref
 	push @$temp_tracks, $temp_track;
 	::Graph::add_inserts($g);
-	process_routing_graph();
+	process_routing_graph(); # XXX
+	write_chains();
 	maybe_write_chains() or say("nothing to do"), return;
 	map{ $_->remove } @$temp_tracks;
 	connect_transport('no_transport_status')

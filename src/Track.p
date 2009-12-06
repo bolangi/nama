@@ -476,8 +476,7 @@ sub send_output {
 		}
 		when ('loop') { return [ 'loop', $track->send_id ] }
 			
-		carp $track->name, ": missing or illegal send_type: ", 
-			$track->send_type, $/;
+		default { return [ 'dummy_type', 'dummy_id' ] }
 	}
  };
 
