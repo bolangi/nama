@@ -1341,6 +1341,24 @@ sub prune_graph {
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
 }
+=comment
+#for our refactor:
+
+#@io; # array for holding IO::* objects that generate chain setup
+#dispatch($_);
+
+# sub write_chains
+	
+map { 	push @input_chains, $_->ecs_string;
+		push @post_input, 	$_->ecs_extra if $_->ecs_extra; }
+grep { $_->direction eq 'input' } @io;
+
+map { 	push @output_chains, $_->ecs_string;
+		push @pre_output, 	 $_->ecs_extra if $_->ecs_extra; }
+grep { $_->direction eq 'output' } @io;
+
+	
+=cut
 sub process_routing_graph {
 	# the graphic part: we process edges:
 	# 

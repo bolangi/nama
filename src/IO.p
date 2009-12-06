@@ -49,22 +49,34 @@ sub new {
 	# (these may be overridden)
 	push @_, direction 	=> $direction;
 	if ($track){
-		say $track->name, ": source_type: ", $track->source_type, 
-			", type: $vals{type}, class: $class";
 		my ($type,$id) = @{ 
 			$direction eq 'input'
-				? $track->source_input 
+				? $track->source_input   # not reliable in MON case
 				: $track->send_output
 		};
-		unshift @_, chain 		=> $track->n,
-					type 		=> $type,
-					device_id 	=> $id,
-					width		=> $track->width,
+		say $track->name, ": source_type: ", $track->source_type, 
+			", type: $type, id: $id, class: $class";
+		my %h;
+		my @assign = qw(
+				chain_id 		$track->n
+				type 			$type
+				device_id 		$id
+				width			$track->width
+				playat			$track->playat
+				region_start	$track->region_start
+				region_end		$track->region_end	
+				modifiers		$track->modifiers
+				mono_to_stereo  $track->mono_to_stereo
+				route			$track->route
+				rec_route		$track->rec_route
+				full_path		$track->full_path
+		);
 
-					playat		=> $track->playat,
-					region_start=> $track->region_start,
-					region_end	=> $track->region_end,	
-					modifiers	=> $track->modifiers,
+		while ( my($key, $var) = splice @assign, 0, 2 ){
+			$h{$key} = eval $var;
+		}
+		say yaml_out \%h;
+		unshift @_, %h;
 
 		# TODO: move the following routines from Track
 		# to IO::base
@@ -74,11 +86,7 @@ sub new {
 		# inside ::IO::base subclasses where they are
 		# needed. That will save duplication
 		
-					mono_to_stereo => $track->mono_to_stereo,
-					route		=> $track->route,
-					rec_route	=> $track->rec_route,
-					full_path	=> $track->full_path,
-					;
+	say join $/, "all fields", @_;
 	}
 	my $object = bless { @_	}, $class;
 }
@@ -94,40 +102,64 @@ sub ecs_string {
 }
 
 package ::IO::from_null;
-use Modern::Perl;
-use Carp;
-our @ISA = '::IO::base';
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
 sub ecs_extra { $_[0]->mono_to_stereo }
 sub device_id { 'null' }
 
 package ::IO::to_null;
-use Modern::Perl;
-use Carp;
-our @ISA = '::IO::base';
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
 sub device_id { 'null' }
 
+package ::IO::from_wav;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+sub device_id { $_[0]->full_path }
+sub ecs_extra { $_[0]->mono_to_stereo }
+
+package ::IO::to_wav;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+sub device_id { $_[0]->full_path }
+# format
+
+package ::IO::from_loop;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+# device_id from constructor
+
+package ::IO::to_loop;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+# device_id from constructor
+
+package ::IO::from_soundcard;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
+# TODO: -i:consumer -> -i:alsa,default
+
+package ::IO::to_soundcard;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+# sub ecs_extra { $_[0]->pre_send} # not a default, belongs
+# in constructor
+
+package ::IO::from_jack_client;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+
+package ::IO::to_jack_client;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+
+package ::IO::from_jack_multi;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+
+package ::IO::to_jack_multi;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+
+package ::IO::from_jack_port;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
+
+package ::IO::to_jack_port;
+use Modern::Perl; use Carp; our @ISA = '::IO::base';
 1;
 __END__
 
 
-package ::;
 
-#for our refactor:
-
-#@io; # array for holding IO::* objects that generate chain setup
-#dispatch($_);
-
-# sub write_chains
-	
-map { 	push @input_chains, $_->ecs_string;
-		push @post_input, 	$_->ecs_extra if $_->ecs_extra; }
-grep { $_->direction eq 'input' } @io;
-
-map { 	push @output_chains, $_->ecs_string;
-		push @pre_output, 	 $_->ecs_extra if $_->ecs_extra; }
-grep { $_->direction eq 'output' } @io;
-	
-=cut
 __END__
 
 # first try

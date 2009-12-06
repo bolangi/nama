@@ -43,6 +43,14 @@ sub set {
 			or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }
+# sub ancestors {
+# 	my $class = ref $_[0];
+# 	$class, parents( @{"$class\::ISA"} );
+# }
+# 
+# sub parents {
+# 	my @ISA = @_;
+# 	map{ 
 sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;

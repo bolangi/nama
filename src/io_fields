@@ -9,6 +9,7 @@
 		mono_to_stereo # track method: conversion if needed
 		route		# track method: routing
 		rec_route	# track method: routing
+		full_path
 #		playat
 #		region_start
 #		region_end
