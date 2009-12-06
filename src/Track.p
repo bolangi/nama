@@ -428,27 +428,22 @@ sub soundcard_input {
 	if ($::jack_running) {
 		my $start = $track->source_id;
 		my $end   = $start + $track->width - 1;
-		['jack_multi' , join q(,),q(jack_multi),
+		['jack_multi_in' , join q(,),q(jack_multi),
 			map{"system:capture_$_"} $start..$end]
-	} else { ['device' , $::capture_device] }
-}
-sub soundcard_output {
- 	$::jack_running 
-		? [qw(jack_client system)]  
-		: ['device', $::alsa_playback_device] 
+	} else { ['soundcard_device_in' , $::capture_device] }
 }
 sub source_input {
 	my $track = shift;
 	given ( $track->source_type ){
 		when ( 'soundcard'  ){ return $track->soundcard_input }
 		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_client', $track->source_id] }
+			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [undef, undef] }
 		}
-		when ( 'loop'){ return ['loop',$track->source_id ] } 
+		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
 		when ('jack_manual'){
-			if ( $::jack_running ){ return ['jack_manual', $track->source_id] }
+			if ( $::jack_running ){ return ['jack_manual_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [undef, undef] }
 		}

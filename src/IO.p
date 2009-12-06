@@ -61,8 +61,9 @@ use ::Object qw(
 sub new {
 	my $class = shift;
 	#my $direction = $class =~ /::from/ ? 'input' : 'output';
-	my $direction = ($class =~ /::from/ ? 'input' : 'output');
-	say "class: $class, direction: $direction";
+	# following may be wrong if this is base class initiation
+	#my $direction = ($class =~ /::from/) ? 'input' : 'output';
+	#say "class: $class, direction: $direction";
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
@@ -70,10 +71,10 @@ sub new {
 
 	# we will default to track chain number and input or output values
 	# (these may be overridden)
-	push @_, direction 	=> $direction;
+	#unshift @_, direction 	=> $direction;
 	if ($track){
 		my ($type,$id) = @{ 
-			$direction eq 'input'
+			$vals{direction} eq 'input'
 				? $track->source_input   # not reliable in MON case
 				: $track->send_output
 		};
@@ -93,12 +94,14 @@ sub new {
 				route			$track->route
 				rec_route		$track->rec_route
 				full_path		$track->full_path
+				soundcard_input $track->soundcard_input
+				source_input	$track->source_input
 		);
 
 		while ( my($key, $var) = splice @assign, 0, 2 ){
 			$h{$key} = eval $var;
 		}
-		say yaml_out \%h;
+		say ::yaml_out \%h;
 		unshift @_, %h;
 
 		# TODO: move the following routines from Track
@@ -109,7 +112,7 @@ sub new {
 		# inside ::IO subclasses where they are
 		# needed. That will save duplication
 		
-	say join $/, "all fields", @_;
+	say join " ", "all fields", @_;
 	}
 	my $object = bless { @_	}, $class;
 }
@@ -162,6 +165,18 @@ sub new {
 
 package ::IO::from_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	my $io = ::IO->new(@_); # to get type... may be jack
+	say "io class: ",ref $io;
+	my ($type, $id) = ($io->type, $io->device_id);
+	say "type: $type, id: $id";
+	$class = ::io_class($type);
+	say "from soundcard class: $class";
+	my $try = "$class->new(\@_)";
+	eval $try or croak "eval failed: $@";
+}
 sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
 
 package ::IO::to_soundcard;
@@ -169,13 +184,12 @@ use Modern::Perl; use Carp; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	my ($type, $id) = @{ ::soundcard_output2()};
-	my $try = ::io_class($type) . q{->new(@_, device_id => $id)};
+	my ($type, $id) = @{ ::soundcard_output()};
+	$class = ::io_class($type);
+	my $try =  "$class->new(\@_, device_id => \$id)";
 	say "soundcard constructor eval: $try";
-	eval $try;
+	eval $try or croak $@;
 }
-# sub ecs_extra { $_[0]->pre_send} # not a default, belongs
-# in constructor
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -199,13 +213,28 @@ package ::IO::from_soundcard_device;
 use Modern::Perl; use Carp; our @ISA = '::IO';
 sub new {
 	my $class = shift;
-	my %vals = @_;
-	my $device = $::devices{$vals{device_id}}{ecasound_id};
-	::IO::new($class, @_, device_id => $device);
+	my $io = ::IO::new($class, @_);
+	#say "io device1: ",$io->device_id;
+	my $device = $::devices{$io->device_id}{ecasound_id};
+	$io->set(device_id => $device);
+	#say "io device2: ",$io->device_id;
+	$io;
 }
 
 package ::IO::to_soundcard_device;
-use Modern::Perl; use Carp; our @ISA = '::IO::from_soundcard_device';
+use Modern::Perl; use Carp; our @ISA = '::IO';
+sub new {
+	my $class = shift;
+	my $io = ::IO::new($class, @_);
+	my $dubious_dev = $io->device_id;
+	# override device_id with default unless meaningful value present
+	if ( ! $::devices{$dubious_dev} ){  
+		$io->set(device_id => $::alsa_playback_device);
+	}
+	my $device = $::devices{$io->device_id}{ecasound_id};
+	$io->set(device_id => $device);
+	$io;
+}
 
 1;
 __END__

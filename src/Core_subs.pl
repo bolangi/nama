@@ -984,19 +984,21 @@ sub really_recording {  keys %{$outputs{file}}; }
 sub dispatch { # creates an IO object from a graph edge
 	my $arr_ref = shift;
 	my($name, $endpoint, $direction) = decode_edge($arr_ref);
+	say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class;
 	# special handling for loops 
 	if (::Graph::is_a_loop($endpoint) ){
+		say "$endpoint is a loop";
 		$class = io_class( $direction eq 'input' ?  "loop_source" : "loop_sink")
 	} else { $class = io_class( $endpoint ) }
 	my @args = (track => $track, 
 				endpoint => $endpoint,
+				direction => $direction,
 				override($name));
+	say "dispatch class: $class";
 	my $try = "$class->new(\@args)";
-	say "name: $name";
-	say "try: $try";
-	eval $try;
+	eval $try or croak "eval failed: $@";
 }
 	
 sub decode_edge {
@@ -1184,25 +1186,15 @@ sub prune_graph {
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
 }
-=comment
-#for our refactor:
 
-#@io; # array for holding IO::* objects that generate chain setup
-#dispatch($_);
-
-# sub write_chains
-	
-
-	
-=cut
 sub process_routing_graph {
 	@io = map{ dispatch($_) } $g->edges;
 map { 	push @input_chains, $_->ecs_string;
-		push @post_input, join " ",$_->a_op.$_->ecs_extra if $_->ecs_extra; }
+		push @post_input, join(" ",$_->a_op,$_->ecs_extra) if $_->ecs_extra; }
 grep { $_->direction eq 'input' } @io;
 
 map { 	push @output_chains, $_->ecs_string;
-		push @pre_output, 	join " ",$_->a_op.$_->ecs_extra if $_->ecs_extra; }
+		push @pre_output, 	join(" ",$_->a_op,$_->ecs_extra) if $_->ecs_extra; }
 grep { $_->direction eq 'output' } @io;
 }
 	
@@ -1234,11 +1226,6 @@ sub chain {
 	$tn{$name} ? $tn{$name}->n : $name;
 }
 sub soundcard_output {
- 	$::jack_running 
-		? [qw(jack_client system)]
-		: ['device', $::alsa_playback_device]
-}
-sub soundcard_output2 {
  	$::jack_running 
 		? [qw(jack_client_out system)]
 		: ['soundcard_device_out', $::alsa_playback_device]
