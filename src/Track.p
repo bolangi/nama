@@ -43,11 +43,14 @@ sub idx { # return first free track index
 }
 	
 sub new {
-	# returns a reference to an object that is indexed by
-	# name and by an assigned index
+	# returns a reference to an object 
 	#
-	# The indexing is bypassed and an object returned 
-	# if an index n is supplied as  a parameter
+	# tracks are indexed by:
+	# (1) name and 
+	# (2) by an assigned index that is used as chain_id
+	#     the index may be supplied as a parameter
+	#
+	# 
 
 	my $class = shift;
 	my %vals = @_;

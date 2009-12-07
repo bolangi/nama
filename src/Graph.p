@@ -63,7 +63,7 @@ sub add_insert {
 
 	# case 1: post-fader insert
 		
-	if($i->{insert_type} eq 'cooked') {	
+	if($i->{insert_type} eq 'cooked') {	 # the only type we support
 	
 	my ($successor) = $g->successors($name);
 	my $loop = $name."_insert";

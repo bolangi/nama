@@ -1,6 +1,6 @@
 # ---------- IO -----------
 package ::IO;
-use Modern::Perl;
+use Modern::Perl; use Carp;
 our %io_class = qw(
 	null_in					::IO::from_null
 	null_out				::IO::to_null

@@ -569,33 +569,6 @@ sub initialize_rules {
 
 	# records unprocessed live input to file
 		
-	$rec_file = ::Rule->new(
-
-		name			=> 'rec_file', 
-		target			=> 'REC',
-		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> sub{ $_[0]->source_input()->[0]},
-		input_object	=> sub{ $_[0]->source_input()->[1]},
-		output_type		=>  'file',
-		output_object   => sub { my $track = shift; $track->full_path },
-		post_input			=>	sub{ my $track = shift; $track->rec_route },
-		pre_output	=> sub { my $track = shift; 
-						'-f:'.signal_format($raw_to_disk_format, $track->width);
-						},
-		output_format	=> sub { my $track = shift; 
-						signal_format($raw_to_disk_format, $track->width);
-						},
-		condition		=> sub {my $track = shift; ! $track->rec_defeat },
-		status		=>  1,
-	);
-
-
-
-# aux_send 
-# 
-# send a 'loop' signal to a soundcard output channel or JACK client
-
-	
 $aux_send = ::Rule->new(  
 
 
@@ -611,24 +584,6 @@ $aux_send = ::Rule->new(
 		status			=>  1,
 	);
 
-# null_setup - for metronome tracks
-#
-# brings input from null device to mixer input
-
-
-	$null_setup = ::Rule->new(
-		
-		name			=>  'null_setup', 
-		target			=>  'all',
-		chain_id 		=>	sub{ $_[0]->n },
-		input_type		=>  'device',
-		input_object	=>  'null',
-		output_type		=>  'loop',
-		output_object	=>  'loop,Master_in',
-		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> 1,
-		status			=>  1,
-	);
 
 	# rules for instrument monitor buses using raw inputs
 	
@@ -1016,6 +971,7 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
+	add_paths_for_recording();
 	add_paths_for_null_input_tracks();
 	add_paths_for_send_buses();
 	add_paths_for_sub_buses();
@@ -1031,7 +987,7 @@ sub generate_setup {
 	
 	$debug and say "The graph is:\n$g";
 
-	my $temp_tracks = ::Graph::expand_graph($g); # array ref
+	$temp_tracks = ::Graph::expand_graph($g); # array ref
 
 	$debug and say "The expanded graph is:\n$g";
 
@@ -1071,6 +1027,8 @@ sub initialize_chain_setup_vars {
 	# initialize graph
 	
 	$g = Graph->new();
+
+	# $temp_tracks will be initialized by expand_graph()
 }
 sub add_paths_for_main_tracks {
 	map{ 
@@ -1090,12 +1048,44 @@ sub add_paths_for_main_tracks {
 		$main->tracks;  # list of Track names
 
 }
+
+sub add_paths_for_recording {
+
+	# we record tracks set to REC, unless rec_defeat is set 
+	# or the track belongs to the 'null' group
+
+	map{ 
+		# create temporary track for rec_file chain
+		
+		my $name = $_->name . '_rec_file';
+		my $anon = ::SlaveTrack->new( 
+			target => $_->name,
+			rw => 'REC',
+			name => $name);
+		push @$temp_tracks, $anon;
+
+		# connect IO
+		
+		my ($type, $device_id) = @{ $_->source_input };
+		say "REC_FILE: type: $type, device_id: $device_id";
+		$g->add_path($type, $name, 'wav_out');
+
+		# set chain_id to R3 (if original track is 3) 
+		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
+
+	} grep{ $_->rec_status eq 'REC' 
+			and not $_->group eq 'null'  
+			and not $_->rec_defeat 
+	} ::Track::all();
+}
+
+
 sub add_paths_for_null_input_tracks {
 
 	map{ $g->add_path('null_in', $_->name, 'Master') }
  	grep{ $_->rec_status eq 'REC' } 
 	map{$tn{$_}} 	# convert to Track objects
-	::Group::by_name{null}->tracks; # list of Track names
+	$::Group::by_name{null}->tracks; # list of Track names
 }
 sub add_paths_for_send_buses {
 
@@ -1170,7 +1160,7 @@ sub add_paths_for_mixdown_handling {
 		$g->set_vertex_attributes('Mixdown', {
 		  format	=> 
 			signal_format($mix_to_disk_format,$tn{Mixdown}->width),
-		  chain			=> "Mixdown" }); 
+		  chain_id			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
 	# Mixdown handling - playback
@@ -1209,24 +1199,14 @@ sub maybe_write_chains {
  	} else { print "No inputs found!\n"; 0 };
 }
 
-# sub override {
-# 	my ($hash_ref, $name) = @_;
-# 		my $attr = $g->get_vertex_attributes($name);
-# 		$debug and say "override: ", join " ",%$attr if $attr;
-# 		%$hash_ref = (%$hash_ref, %$attr) if $attr;
-# }
 sub override {
-	my ($name) = @_;
-		warn("undefined graph\n"), return () unless ref $g =~ /Graph/;
+	$debug2 and say "&override";
+	my $name = shift;
+		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
 		my $attr = $g->get_vertex_attributes($name);
-		$debug and say "override: ", join " ",%$attr if $attr;
 		$attr ? %$attr : ();
 }
 							
-sub chain {
-	my $name = shift;
-	$tn{$name} ? $tn{$name}->n : $name;
-}
 sub soundcard_output {
  	$::jack_running 
 		? [qw(jack_client_out system)]
