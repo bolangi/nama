@@ -52,11 +52,6 @@ sub prepare {
 	chdir $project_root # for filename autocompletion
 		or warn "$project_root: chdir failed: $!\n";
 
-	
-	
-	initialize_rules(); 					# bus/rule routing
-	$debug and say join " ", %::Rule::by_name;
-
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
@@ -485,7 +480,6 @@ Loading project "untitled".
 	} 
 	#chdir project_dir();
 	# read_config( global_config() ); 
-	initialize_rules();
 	init_buses();	
 	initialize_project_data();
 
@@ -990,33 +984,21 @@ sub generate_setup {
 	# now we have processed graph, we can remove temp tracks
 
 	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name; $_->remove } @$temp_tracks;
+	map{ $debug and say $_->name } @$temp_tracks;
+	map{ $_->remove } @$temp_tracks;
+	$temp_tracks = [];
 
 	$this_track = $old_this_track;
 
-	#process_static_bus_rules(); # for DEV
-
-	# maybe_write_chains; 
-	write_chains(); # for DEV
+	write_chains(); 
 }
 sub initialize_chain_setup_vars {
 
-	  @io 
-		= %inputs 
-		= %outputs 
-		= %post_input 
-		= %pre_output 
-		= @input_chains 
-		= @output_chains 
-		= @post_input
-  		= @pre_output
-		= ();
-
-	# initialize graph
-	
-	$g = Graph->new();
-
-	# $temp_tracks will be initialized by expand_graph()
+	@io = (); 			# IO object list
+	$g = Graph->new(); 	
+	$temp_tracks = [];	
+	%inputs = %outputs = %post_input = %pre_output = ();
+	@input_chains = @output_chains = @post_input = @pre_output = ();
 }
 sub add_paths_for_main_tracks {
 	map{ 
@@ -1048,7 +1030,7 @@ sub add_paths_for_recording {
 		my $name = $_->name . '_rec_file';
 		my $anon = ::SlaveTrack->new( 
 			target => $_->name,
-			rw => 'REC',
+			rw => 'OFF',
 			name => $name);
 		push @$temp_tracks, $anon;
 
@@ -1169,24 +1151,27 @@ sub prune_graph {
 
 sub process_routing_graph {
 	@io = map{ dispatch($_) } $g->edges;
-map { 	push @input_chains, $_->ecs_string;
-		push @post_input, join(" ",$_->a_op,$_->ecs_extra) if $_->ecs_extra; }
-grep { $_->direction eq 'input' } @io;
-
-map { 	push @output_chains, $_->ecs_string;
-		push @pre_output, 	join(" ",$_->a_op,$_->ecs_extra) if $_->ecs_extra; }
-grep { $_->direction eq 'output' } @io;
+	map{ $inputs{$_->ecs_string} //= [];
+		push @{$inputs{$_->ecs_string}}, $_->chain_id;
+		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
+	} grep { $_->direction eq 'input' } @io;
+	map{ $outputs{$_->ecs_string} //= [];
+		push @{$outputs{$_->ecs_string}}, $_->chain_id;
+		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
+	} grep { $_->direction eq 'output' } @io;
+	no warnings 'numeric';
+	my @in_keys = sort{$a->[0] <=> $b->[0]} values %inputs;
+	my @out_keys = sort{$a->[0] <=> $b->[0]} values %outputs;
+	use warnings 'numeric';
+	%inputs = reverse %inputs;	
+	%outputs = reverse %outputs;	
+	@input_chains = map {'-a:'.join(',',@$_)." $inputs{$_}"} @in_keys;
+	@output_chains = map {'-a:'.join(',',@$_)." $outputs{$_}"} @out_keys;
+	@post_input = sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
+	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 }
 	
-sub process_static_bus_rules { map { $_->apply() } ::Bus::all(); }
-
-sub maybe_write_chains {
-	if ( grep{keys %{ $outputs{$_} }} qw(file device jack_client jack_multi)){
-		write_chains();
- 		1;
- 	} else { print "No inputs found!\n"; 0 };
-}
-
+	
 sub override {
 	$debug2 and say "&override";
 	my $name = shift;
@@ -1207,8 +1192,6 @@ sub write_chains {
 
 	## write general options
 	
-	my $ecs_file = "# ecasound chainsetup file\n\n";
-	$ecs_file   .= "# general\n\n";
 	my $globals = $ecasound_globals_default;
 
 	# use realtime globals if they exist and we are
@@ -1217,21 +1200,24 @@ sub write_chains {
 	$globals = $ecasound_globals_realtime
 		if $ecasound_globals_realtime 
 			and grep{ ! /Mixdown/} really_recording();
-			# and exists latency-sensitive monitor output # we should also add
+			# we assume there exists latency-sensitive monitor output 
+			# when recording
 			
-	$ecs_file   .= $globals;
-	$ecs_file   .= "\n\n";
-	$ecs_file   .= "# audio inputs\n\n";
-	$ecs_file   .= join "\n", sort @input_chains;
-	$ecs_file   .= "\n\n# post-input processing\n\n";
-#	$ecs_file   .= join "\n", sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
-	$ecs_file   .= join "\n", sort @post_input; # dispatch2
-	$ecs_file   .= "\n\n# pre-output processing\n\n";
-#	$ecs_file   .= join "\n", sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
-	$ecs_file   .= join "\n", sort @pre_output; # dispatch2
-	$ecs_file   .= "\n\n# audio outputs";
-	$ecs_file   .= join "\n", sort @output_chains, "\n";
-	
+	my $ecs_file = join "\n\n", 
+					"# ecasound chainsetup file",
+					"# general",
+					$globals, 
+					"# audio inputs",
+					join("\n", @input_chains), "";
+	$ecs_file .= join "\n\n", 
+					"post-input processing",
+					join("\n", @post_input), "" if @post_input;				
+	$ecs_file .= join "\n\n", 
+					"pre-output processing",
+					join("\n", @pre_output), "" if @pre_output;
+	$ecs_file .= join "\n\n", 
+					"# audio outputs",
+					join("\n", @output_chains), "";
 	$debug and print "ECS:\n",$ecs_file;
 	my $sf = join_path(&project_dir, $chain_setup_file);
 	open my $setup, ">$sf";
@@ -3971,7 +3957,7 @@ sub cache_track {
 	my $orig = $this_track; 
 	my $orig_version = $this_track->monitor_version;
 	my $cooked = $this_track->name . '_cooked';
-	my $temp_track = ::CacheRecTrack->new(
+	my $temp = ::CacheRecTrack->new(
 		width => 2,
 		name => $cooked,
 		group => 'Cooked',
@@ -3979,8 +3965,9 @@ sub cache_track {
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
 	add_paths_for_sub_buses();  # we will prune unneeded ones
-	my $temp_tracks = ::Graph::expand_graph($g); # array ref
-	push @$temp_tracks, $temp_track;
+	my $temp_tracks;
+	push @$temp_tracks, ::Graph::expand_graph($g); # array ref
+	push @$temp_tracks, $temp;
 	::Graph::add_inserts($g);
 	process_routing_graph(); # XXX
 	write_chains();

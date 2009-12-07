@@ -79,7 +79,6 @@ sub new {
 sub ecs_string {
 	my $self = shift;
 	my @parts;
-	push @parts, $self->a_op();
 	push @parts, '-f:'.$self->format if $self->format;
 	push @parts, '-'.$io{$self->direction}.':'.$self->device_id;
 	join ' ',@parts;
@@ -88,7 +87,7 @@ sub ecs_string {
 sub a_op { '-a:'.$_[0]->chain_id }
 our $new_mono_to_stereo = sub {
 	my $class = shift;
-	#my $io = $class->SUPER::new(@_);
+	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use
 	my $io = ::IO::new($class, @_);
 	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
 	$io

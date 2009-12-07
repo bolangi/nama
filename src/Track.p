@@ -278,7 +278,7 @@ sub mono_to_stereo {
 				or  -e $track->full_path
 				and qx(which file)
 				and qx($cmd) =~ /mono/i ){ 
-		return " -chcopy:1,2 " 
+		return "-chcopy:1,2" 
 	} else { # do nothing for higher channel counts
 	} # carp "Track ".$track->name.": Unexpected channel count\n"; 
 }
@@ -313,7 +313,6 @@ sub route {
 	my $map ;
 	for my $c ( map{$width - $_ + 1} 1..$width ) {
 		$map .= " -chmove:$c," . ( $c + $offset);
-		#$map .= " -eac:0,"  . $c;
 	}
 	$map;
 }
