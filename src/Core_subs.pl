@@ -554,21 +554,9 @@ sub init_buses {
 	);
 
 }
-
+=comment
 sub initialize_rules {
 
-
-	# bus/rules-style routing 
-
-	package ::Rule;
-		$n = 0;
-		@by_index = ();	# return ref to Track by numeric key
-		%by_name = ();	# return ref to Track by name
-		%rule_names = (); 
-	package Audio::Nama;
-
-	# records unprocessed live input to file
-		
 $aux_send = ::Rule->new(  
 
 
@@ -628,8 +616,8 @@ $aux_send = ::Rule->new(
 		
 	);
 
-
 }
+=cut
 
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
