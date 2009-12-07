@@ -122,6 +122,7 @@ sub a_op { '-a:'.$_[0]->chain_id }
 package ::IO::from_null;
 use Modern::Perl; use Carp; our @ISA = '::IO';
 sub ecs_extra { $_[0]->mono_to_stereo }
+#sub ecs_extra { join " ", $_[0]->mono_to_stereo, $_[0]->additional }
 sub device_id { 'null' }
 
 package ::IO::to_null;

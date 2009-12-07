@@ -591,6 +591,9 @@ sub initialize_rules {
 		pre_output	=> sub { my $track = shift; 
 						'-f:'.signal_format($raw_to_disk_format, $track->width);
 						},
+		output_format	=> sub { my $track = shift; 
+						signal_format($raw_to_disk_format, $track->width);
+						},
 		condition		=> sub {my $track = shift; ! $track->rec_defeat },
 		status		=>  1,
 	);
@@ -1167,8 +1170,8 @@ sub add_paths_for_mixdown_handling {
 		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
-		  pre_output	=> 
-			"-f:".signal_format($mix_to_disk_format,$tn{Mixdown}->width),
+		  format	=> 
+			signal_format($mix_to_disk_format,$tn{Mixdown}->width),
 		  chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 												 
