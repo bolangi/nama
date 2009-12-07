@@ -374,6 +374,4 @@ our (
 	$sock, 			# socket for Net-ECI mode
 	%versions,		# store active versions for use after engine run
 	@io, 			# accumulate IO objects for generating setup
-	$temp_tracks,   # array ref, tracks will be removed
-                    # after chain setup is generated
 );

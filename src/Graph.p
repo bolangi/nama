@@ -8,10 +8,8 @@ use vars qw(%reserved $debug);
 *reserved = \%::IO::io_class;
 *debug = \$::debug;
 my %seen;
-my $anon_tracks;
 
 sub expand_graph {
-	$anon_tracks = [];
 	my $g = shift; 
 	%seen = ();
 	
@@ -35,7 +33,6 @@ sub expand_graph {
 		$b eq 'soundcard_out' and $g->successors($a) > 1
 	} $g->edges;
 	
-	$anon_tracks;
 }
 
 sub add_inserts {
@@ -124,26 +121,25 @@ sub add_loop {
 	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
-		insert_near_side_loop($g,$a,$b, out_loop($a), $anon_tracks)
+		insert_near_side_loop($g,$a,$b, out_loop($a))
 	} elsif ($fan_in  > 1){
-		insert_far_side_loop($g,$a,$b, in_loop($b), $anon_tracks)
+		insert_far_side_loop($g,$a,$b, in_loop($b))
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
 	# we expect a single user track to feed to Master_in 
 	# as multiple user tracks do
 	
 			$b eq 'Master' 
-				?  insert_far_side_loop($g,$a,$b,in_loop($b), $anon_tracks)
+				?  insert_far_side_loop($g,$a,$b,in_loop($b))
 
 	# otherwise default to near_side ( *_out ) loops
-				: insert_near_side_loop($g,$a,$b,out_loop($a), $anon_tracks);
+				: insert_near_side_loop($g,$a,$b,out_loop($a));
 
 	} else {croak "unexpected fan"};
 }
 
 sub insert_near_side_loop {
-	my ($g, $a, $b, $loop, $tracks_ref) = @_;
-	$tracks_ref //= [];
+	my ($g, $a, $b, $loop) = @_;
 	$debug and say "$a-$b: insert near side loop";
 	my $j = 'a';
 	map{
@@ -166,8 +162,8 @@ sub insert_near_side_loop {
 			my $anon = ::SlaveTrack->new( 
 				target => $a,
 				rw => 'REC',
-				name => $nam);
-			push @$tracks_ref, $anon;
+				name => $nam,
+				group => 'Temp');
 
 			$g->add_path($loop,$anon->name,$_);
 		}
@@ -178,12 +174,10 @@ sub insert_near_side_loop {
 
 		$seen{"$a-$_"}++
 	} $g->successors($a);
-	@$tracks_ref;
 }
 
 sub insert_far_side_loop {
-	my ($g, $a, $b, $loop, $tracks_ref) = @_;
-	$tracks_ref //= [];
+	my ($g, $a, $b, $loop) = @_;
 	my $j = 'm';
 	$debug and say "$a-$b: insert far side loop";
 	map{
@@ -203,15 +197,14 @@ sub insert_far_side_loop {
 			my $anon = ::SlaveTrack->new( 
 				target => $b,
 				name => $nam,
+				group => 'Temp',
 				rw => 'REC');
-			push @$tracks_ref, $anon;
 
 			$g->add_path($_, $anon->name, $loop);
 		}
 
 		$seen{"$_-$b"}++
 	} $g->predecessors($b);
-	@$tracks_ref;
 }
 
 

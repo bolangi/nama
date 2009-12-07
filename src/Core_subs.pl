@@ -669,6 +669,8 @@ sub create_groups {
 	::Group->new(name => 'Mastering'); # mastering network
 	::Group->new(name => 'Insert'); # auxiliary tracks for inserts
 	::Group->new(name => 'Cooked'); # used by CacheRec tracks
+	::Group->new(name => 'Temp'); # tracks to be removed
+								#	after generating chain setup
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
 }
@@ -949,10 +951,7 @@ sub generate_setup {
 	
 	$debug and say "The graph is:\n$g";
 
-	my $tmp = ::Graph::expand_graph($g); # array ref
-	push @$temp_tracks, @$tmp;
-
-	$debug and say "temp_tracks1: ",join " ", map{ $_->name } @$temp_tracks;
+	::Graph::expand_graph($g); 
 
 	$debug and say "The expanded graph is:\n$g";
 
@@ -966,20 +965,19 @@ sub generate_setup {
 	process_routing_graph();
 	# now we have processed graph, we can remove temp tracks
 
-	$debug and say "temp tracks to remove";
-	map{ $debug and say $_->name } @$temp_tracks;
-	map{ $_->remove } @$temp_tracks;
-	$temp_tracks = [];
+	remove_temp_tracks();
 
 	$this_track = $old_this_track;
 
 	write_chains(); 
 }
+sub remove_temp_tracks {
+	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
+}
 sub initialize_chain_setup_vars {
 
 	@io = (); 			# IO object list
 	$g = Graph->new(); 	
-	$temp_tracks = [];	
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 }
@@ -1014,9 +1012,8 @@ sub add_paths_for_recording {
 		my $anon = ::SlaveTrack->new( 
 			target => $_->name,
 			rw => 'OFF',
+			group => 'Temp',
 			name => $name);
-		push @$temp_tracks, $anon;
-		$debug and say "temp_tracks2: ",join " ", map{ $_->name } @$temp_tracks;
 
 		# connect IO
 		
@@ -3966,22 +3963,20 @@ sub cache_track {
 	my $orig = $this_track; 
 	my $orig_version = $this_track->monitor_version;
 	my $cooked = $this_track->name . '_cooked';
-	my $temp = ::CacheRecTrack->new(
+	::CacheRecTrack->new(
 		width => 2,
 		name => $cooked,
-		group => 'Cooked',
+		group => 'Temp',
 		target => $this_track->name,
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
 	add_paths_for_sub_buses();  # we will prune unneeded ones
-	my $temp_tracks;
-	push @$temp_tracks, @{ ::Graph::expand_graph($g) }; # array ref
-	push @$temp_tracks, $temp;
+	::Graph::expand_graph($g); # array ref
 	::Graph::add_inserts($g);
-	process_routing_graph(); # XXX
+	process_routing_graph(); 
 	write_chains();
 	maybe_write_chains() or say("nothing to do"), return;
-	map{ $_->remove } @$temp_tracks;
+	remove_temp_tracks();
 	connect_transport('no_transport_status')
 		or say ("Couldn't connect engine! Skipping."), return;
 	say $/,$orig->name,": length ". d2($length). " seconds";
