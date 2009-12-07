@@ -118,11 +118,15 @@ sub ecs_string {
 }
 }
 sub a_op { '-a:'.$_[0]->chain_id }
+sub new_mono_to_stereo {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
+	$io
+}
 
 package ::IO::from_null;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub ecs_extra { $_[0]->mono_to_stereo }
-#sub ecs_extra { join " ", $_[0]->mono_to_stereo, $_[0]->additional }
 sub device_id { 'null' }
 
 package ::IO::to_null;
@@ -131,8 +135,13 @@ sub device_id { 'null' }
 
 package ::IO::from_wav;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub new {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
+	$io
+}
 sub device_id { $_[0]->full_path }
-sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_wav;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -192,7 +201,12 @@ sub new {
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
-sub ecs_extra { $_[0]->mono_to_stereo }
+sub new {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
+	$io
+}
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -224,14 +238,24 @@ sub new {
 
 package ::IO::from_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub ecs_extra { $_[0]->mono_to_stereo }
+sub new {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
+	$io
+}
 
 package ::IO::to_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
 
 package ::IO::from_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub ecs_extra { $_[0]->mono_to_stereo }
+sub new {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
+	$io
+}
 
 package ::IO::to_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -244,10 +268,11 @@ sub new {
 	#say "io device1: ",$io->device_id;
 	my $device = $::devices{$io->device_id}{ecasound_id};
 	$io->set(device_id => $device);
+	$io->set(ecs_extra => join " ", $io->rec_route, $io->mono_to_stereo) 
+		unless $io->ecs_extra;
 	#say "io device2: ",$io->device_id;
 	$io;
 }
-sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
 
 package ::IO::to_soundcard_device;
 use Modern::Perl; use Carp; our @ISA = '::IO';
