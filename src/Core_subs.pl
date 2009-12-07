@@ -665,6 +665,7 @@ sub initialize_project_data {
 sub create_groups {
 
 	::Group->new(name => 'Master');
+	::Group->new(name => 'Mastering');
 	::Group->new(name => 'Mixdown', rw => 'REC');
 	::Group->new(name => 'Insert');
 	::Group->new(name => 'Cooked');
@@ -1173,10 +1174,9 @@ sub process_routing_graph {
 sub override {
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
-	override_from_vertex($name), override_from_edge($edge)
+	override_from_vertex($name); # , override_from_edge($edge)
 }
 	
-}	
 sub override_from_vertex {
 	my $name = shift;
 		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
@@ -3957,7 +3957,6 @@ sub cleanup_exit {
 	$term->rl_deprep_terminal();
 	CORE::exit; 
 }
-	
 sub cache_track {
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return unless $this_track->rec_status eq 'MON';
@@ -3976,7 +3975,7 @@ sub cache_track {
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
 	add_paths_for_sub_buses();  # we will prune unneeded ones
 	my $temp_tracks;
-	push @$temp_tracks, ::Graph::expand_graph($g); # array ref
+	push @$temp_tracks, @{ ::Graph::expand_graph($g) }; # array ref
 	push @$temp_tracks, $temp;
 	::Graph::add_inserts($g);
 	process_routing_graph(); # XXX
