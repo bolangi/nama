@@ -135,8 +135,16 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_wav;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub new {
+	my $class = shift;
+	my $io = $class->SUPER::new(@_);
+	if ( $io->width and ! $io->format ){
+		$io->{format} = ::signal_format($::raw_to_disk_format, $io->width);
+	}
+	$io
+}
 sub device_id { $_[0]->full_path }
-# format
+# TODO: format
 
 package ::IO::from_loop;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -168,7 +176,6 @@ sub new {
 	my $try = "$class->new(\@_)";
 	eval $try or croak "eval failed: $@";
 }
-sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
 
 package ::IO::to_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -184,6 +191,7 @@ sub new {
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
+#sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -215,12 +223,14 @@ sub new {
 
 package ::IO::from_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
 
 package ::IO::from_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -236,6 +246,7 @@ sub new {
 	#say "io device2: ",$io->device_id;
 	$io;
 }
+sub ecs_extra { join " ", $_[0]->rec_route , $_[0]->mono_to_stereo }
 
 package ::IO::to_soundcard_device;
 use Modern::Perl; use Carp; our @ISA = '::IO';

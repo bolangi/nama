@@ -997,8 +997,7 @@ sub dispatch { # creates an IO object from a graph edge
 				direction => $direction,
 				override($name));
 	say "dispatch class: $class";
-	my $try = "$class->new(\@args)";
-	eval $try or croak "eval failed: $@";
+	$class->new(@args);
 }
 	
 sub decode_edge {
@@ -1070,6 +1069,8 @@ sub initialize_chain_setup_vars {
 		= %pre_output 
 		= @input_chains 
 		= @output_chains 
+		= @post_input
+  		= @pre_output
 		= ();
 
 	# initialize graph
