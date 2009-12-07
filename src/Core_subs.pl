@@ -891,8 +891,8 @@ sub really_recording {  keys %{$outputs{file}}; }
 # new object based dispatch
 
 sub dispatch { # creates an IO object from a graph edge
-	my $arr_ref = shift;
-	my($name, $endpoint, $direction) = decode_edge($arr_ref);
+	my $edge = shift;
+	my($name, $endpoint, $direction) = decode_edge($edge);
 	say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class;
@@ -904,7 +904,7 @@ sub dispatch { # creates an IO object from a graph edge
 	my @args = (track => $track, 
 				endpoint => $endpoint,
 				direction => $direction,
-				override($name));
+				override($name, $edge));
 	say "dispatch class: $class";
 	$class->new(@args);
 }
@@ -1170,12 +1170,23 @@ sub process_routing_graph {
 	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 }
 	
-	
 sub override {
 	$debug2 and say "&override";
+	my ($name, $edge) = @_;
+	override_from_vertex($name), override_from_edge($edge)
+}
+	
+}	
+sub override_from_vertex {
 	my $name = shift;
 		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
 		my $attr = $g->get_vertex_attributes($name);
+		$attr ? %$attr : ();
+}
+sub override_from_edge {
+	my $edge = shift;
+		warn("undefined graph\n"), return () unless (ref $g) =~ /Graph/;
+		my $attr = $g->get_edge_attributes(@$edge);
 		$attr ? %$attr : ();
 }
 							
