@@ -1061,6 +1061,7 @@ sub add_paths_for_null_input_tracks {
 	map{$tn{$_}} 	# convert to Track objects
 	$::Group::by_name{null}->tracks; # list of Track names
 }
+=comment
 sub add_paths_for_send_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
@@ -1071,9 +1072,8 @@ sub add_paths_for_send_buses {
 		my @tracks = grep{ $_->rec_status ne 'OFF' } 
 					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
 
-		# raw send buses use only fixed-rule routing
-		# we process them later
-
+		# we only support post-fader send buses
+		
 		if( $bus->bus_type eq 'cooked'){  # post-fader send bus
 
 			$debug and say 'process post-fader bus';
