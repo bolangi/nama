@@ -72,38 +72,53 @@ sub apply {
 			#print "rule is type: ", ref $rule, $/;
 			$debug and print "condition: ", $rule->condition, $/;
 
-			my $key1 = deref_code($rule->input_type, $track);
-			my $key2 = deref_code($rule->input_object, $track) ;
-			my $chain_id = deref_code($rule->chain_id, $track) ;
 			my $rec_status = $track->rec_status;
 
-			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input key1: $key1, key2: $key2\n";
+			my ($type, $device, $chain_id, $input_format, $output_format);
+			my ($post_input, $pre_output);
 			if ( 
-				$track->rec_status ne 'OFF' 
+				$rec_status ne 'OFF' 
 					and $rule->status
 					and ( 		$rule->target =~ /all|none/
-							or  $rule->target eq $track->rec_status)
+							or  $rule->target eq $rec_status)
 					and $condition_met
 						
 						)  {
+			$type = deref_code($rule->input_type, $track);
+			$device = deref_code($rule->input_object, $track) ;
+			$chain_id = deref_code($rule->chain_id, $track) ;
+			$input_format = deref_code($rule->input_format, $track);
+			$output_format = deref_code($rule->output_format, $track);
+			$post_input = deref_code($rule->post_input, $track) 
+				if defined $rule->post_input;
+			$pre_output = deref_code($rule->pre_output, $track) 
+				if defined $rule->pre_output;
 
-				defined $rule->input_type and
-					push @{ $::inputs{ $key1 }->{ $key2 } }, $chain_id ;
+			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met,  input type: $type, device: $device\n";
+			$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 
-				$key1 = deref_code($rule->output_type, $track);
-				$key2 = deref_code($rule->output_object, $track) ;
-			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output key1: $key1, key2: $key2\n";
+				if ( $rule->input_type ){ 
+					my $class = ::io_class($type);
+					my @args;
+					#push @args, track => $track;
+					push @args, device_id => $device;
+					push @args, format => $input_format if $input_format;
+					push @args, chain_id => $chain_id;
+					push @::io, $class->new(@args);
+				}
+				$type = deref_code($rule->output_type, $track);
+				$device = deref_code($rule->output_object, $track) ;
+				if ( $rule->output_type ){ 
+					my $class = ::io_class($type);
+					my @args;
+					#push @args, track => $track;
+					push @args, device_id => $device;
+					push @args, format => $output_format if $output_format;
+					push @args, chain_id => $chain_id;
+					push @::io, $class->new(@args);
+				}
+			$debug and print "chain_id: $chain_id, rec_status: $rec_status, condition: $condition_met, output type: $type, device: $device\n";
 
-				defined $rule->output_type and
-					push @{ $::outputs{ $key1 }->{ $key2 } }, $chain_id;
-			# add intermediate processing
-		
-		my ($post_input, $pre_output);
-		$post_input = deref_code($rule->post_input, $track) 
-			if defined $rule->post_input;
-		$pre_output = deref_code($rule->pre_output, $track) 
-			if defined $rule->pre_output;
-		$debug and print "pre_output: $pre_output, post_input: $post_input\n";
 		$::post_input{$chain_id} .= $post_input if defined $post_input;
 		$::pre_output{$chain_id} .= $pre_output if defined $pre_output;
 			}
@@ -215,6 +230,7 @@ use ::Object qw( 	name
 
 						input_type
 						input_object
+						input_format
 
 						post_input
 						pre_output 

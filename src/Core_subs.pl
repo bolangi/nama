@@ -1016,6 +1016,7 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
+	add_paths_for_null_input_tracks();
 	add_paths_for_send_buses();
 	add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
@@ -1089,7 +1090,13 @@ sub add_paths_for_main_tracks {
 		$main->tracks;  # list of Track names
 
 }
+sub add_paths_for_null_input_tracks {
 
+	map{ $g->add_path('null_in', $_->name, 'Master') }
+ 	grep{ $_->rec_status eq 'REC' } 
+	map{$tn{$_}} 	# convert to Track objects
+	::Group::by_name{null}->tracks; # list of Track names
+}
 sub add_paths_for_send_buses {
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
