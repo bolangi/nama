@@ -526,28 +526,6 @@ sub rememoize {
 	memoize(  'candidates');
 }
 
-sub init_buses {
-	::Bus->initialize();
-	$main_bus  = ::Bus->new(
-		name => 'Main_Bus',
-		groups => [qw(Main)],
-		tracks => [],
-		rules  => [ qw(
-						aux_send 
-						rec_file) ],
-	);
-
-	# print join (" ", map{ $_->name} ::Rule::all_rules() ), $/;
-
-	# for metronome or other tracks using 'null' as source
-	
-	$null_bus = ::Bus->new(
-		name => 'Null_Bus',
-		groups => [qw(null) ],
-		rules => [qw(null_setup)],
-	);
-
-}
 =comment
 sub initialize_rules {
 
@@ -955,8 +933,8 @@ sub generate_setup {
 	add_paths_for_main_tracks();
 	add_paths_for_recording();
 	add_paths_for_null_input_tracks();
-	add_paths_for_send_buses();
-	add_paths_for_sub_buses();
+	#add_paths_for_send_buses();
+	#add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
 
 	# re-route Master to null for automix
@@ -1115,6 +1093,7 @@ sub add_paths_for_sub_buses {
 		}
 	} @user_buses;
 }
+=cut
 sub add_paths_from_Master {
 
 	if ($mastering_mode){
