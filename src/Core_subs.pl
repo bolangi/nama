@@ -480,7 +480,7 @@ Loading project "untitled".
 	} 
 	#chdir project_dir();
 	# read_config( global_config() ); 
-	init_buses();	
+	#init_buses();	
 	initialize_project_data();
 
 	remove_small_wavs(); 
@@ -933,6 +933,7 @@ sub generate_setup {
 	add_paths_for_main_tracks();
 	add_paths_for_recording();
 	add_paths_for_null_input_tracks();
+	#add_paths_for_aux_sends();
 	#add_paths_for_send_buses();
 	#add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
@@ -1038,6 +1039,16 @@ sub add_paths_for_null_input_tracks {
  	grep{ $_->rec_status eq 'REC' } 
 	map{$tn{$_}} 	# convert to Track objects
 	$::Group::by_name{null}->tracks; # list of Track names
+}
+
+sub add_paths_for_aux_sends {
+	# auxiliary sends go to soundcard or jack_client
+	# track output usually goes to Master or to another track
+	# so we can connect without concern for duplicate connections
+	# which our graph doesn't allow
+	
+	#map {  } 
+	#grep { $_->send_type and $_->rec_status ne 'OFF' } ::Track::all();
 }
 =comment
 sub add_paths_for_send_buses {
@@ -1145,6 +1156,11 @@ sub process_routing_graph {
 	no warnings 'numeric';
 	my @in_keys = sort{$a->[0] <=> $b->[0]} values %inputs;
 	my @out_keys = sort{$a->[0] <=> $b->[0]} values %outputs;
+	my @temp;
+	while( $out_keys[0] =~ /^\D/){
+		push @temp, shift @out_keys;
+	}
+	push @out_keys, sort @temp;
 	use warnings 'numeric';
 	%inputs = reverse %inputs;	
 	%outputs = reverse %outputs;	
@@ -1193,10 +1209,10 @@ sub write_chains {
 					"# audio inputs",
 					join("\n", @input_chains), "";
 	$ecs_file .= join "\n\n", 
-					"post-input processing",
+					"# post-input processing",
 					join("\n", @post_input), "" if @post_input;				
 	$ecs_file .= join "\n\n", 
-					"pre-output processing",
+					"# pre-output processing",
 					join("\n", @pre_output), "" if @pre_output;
 	$ecs_file .= join "\n\n", 
 					"# audio outputs",
