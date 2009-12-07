@@ -55,19 +55,18 @@ sub new {
 				route			$track->route
 				rec_route		$track->rec_route
 				full_path		$track->full_path
-				soundcard_input $track->soundcard_input
 				source_input	$track->source_input
+				send_output		$track->send_output
 		);
 
 		while ( my($key, $var) = splice @assign, 0, 2 ){
-			$h{$key} = eval $var;
+			$h{$key} = eval $var and $@ and croak "$var: eval failed: $@";
 		}
 		say ::yaml_out \%h;
-		unshift @_, %h;
+		unshift @_, %h;  # other arguments (in %h) will supersede track values
 
 		# TODO: move the following routines from Track
 		# to IO
-
 	
 		# Alternatively, call $track->methods
 		# inside ::IO subclasses where they are
@@ -120,7 +119,6 @@ sub new {
 	$io
 }
 sub device_id { $_[0]->full_path }
-# TODO: format
 
 package ::IO::from_loop;
 use Modern::Perl; use Carp; our @ISA = '::IO';

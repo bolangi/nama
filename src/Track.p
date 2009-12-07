@@ -439,11 +439,11 @@ sub source_input {
 		when ( 'jack_client'){
 			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [undef, undef] }
+				.". JACK not running."); return [qw(dummy_e dummy_f)] }
 		}
 		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
 		when ('jack_manual'){
-			if ( $::jack_running ){ return ['jack_manual_in', $track->source_id] }
+			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [undef, undef] }
 		}
@@ -459,19 +459,19 @@ sub send_output {
 				my $end   = $start + 1; # Assume stereo
 				return ['jack_multi', join q(,),q(jack_multi),
 					map{"system:playback_$_"} $start..$end]
-			} else {return [ 'device', $::alsa_playback_device] }
+			} else {return [ 'soundcard_out', $::alsa_playback_device] }
 		}
 		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_client', $track->send_id] }
+			if ($::jack_running){return [ 'jack_client_out', $track->send_id] }
 			else { carp $track->name . 
 					q(: auxilary send to JACK client specified,) .
 					q( but jackd is not running.  Skipping.);
-					return [qw(undef  undef)];
+					return [qw(dummy_a  dummy_b)];
 			}
 		}
-		when ('loop') { return [ 'loop', $track->send_id ] }
+		when ('loop') { return [ 'loop_sink', $track->send_id ] }
 			
-		default { return [ 'dummy_type', 'dummy_id' ] }
+		default { return [ 'dummy_c', 'dummy_d' ] }
 	}
  };
 

@@ -15,5 +15,5 @@
 		region_start
 		region_end
 		modifiers
-		soundcard_input
 		source_input
+		send_output
