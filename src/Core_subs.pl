@@ -664,11 +664,11 @@ sub initialize_project_data {
 }
 sub create_groups {
 
-	::Group->new(name => 'Master');
-	::Group->new(name => 'Mastering');
+	::Group->new(name => 'Master'); # master fader
 	::Group->new(name => 'Mixdown', rw => 'REC');
-	::Group->new(name => 'Insert');
-	::Group->new(name => 'Cooked');
+	::Group->new(name => 'Mastering'); # mastering network
+	::Group->new(name => 'Insert'); # auxiliary tracks for inserts
+	::Group->new(name => 'Cooked'); # used by CacheRec tracks
 	$main = ::Group->new(name => 'Main', rw => 'REC');
 	$null    = ::Group->new(name => 'null');
 }
