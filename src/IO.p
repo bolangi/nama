@@ -184,7 +184,6 @@ sub new {
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
-use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';

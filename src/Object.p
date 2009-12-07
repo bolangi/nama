@@ -30,6 +30,14 @@ sub new {
 	my $class = shift;
 	bless { @_ }, $class;
 }
+
+sub is_legal_key { # not object method
+	my ($class, $key) = @_;
+	return 1 if ${"$class\::_is_field"}{$key};
+	my ($parent_class) = @{"$class\::ISA"};
+	return unless $parent_class and $parent_class !~ /Object::Tiny/;
+	is_legal_key($parent_class,$key);
+}
 sub set {
 	my $self = shift;
 	my $class = ref $self;
@@ -39,8 +47,7 @@ sub set {
 	map{ 
 		$self->{$_} = $new_vals{$_} ;
 			my $key = $_;
-			grep{ ${"$_\::_is_field"}{$key} } $class, @{"$class\::ISA"}
-			or croak "illegal key: $_ for object of type ", ref $self;
+			is_legal_key(ref $self, $key) or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }
 # sub ancestors {
