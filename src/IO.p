@@ -55,15 +55,9 @@ our %io_class = qw(
 	jack_multi_out			::IO::to_jack_multi
 	);
 
-use ::Object qw(
-[% qx(./strip_all ./io_fields) %]
-);
+use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 sub new {
 	my $class = shift;
-	#my $direction = $class =~ /::from/ ? 'input' : 'output';
-	# following may be wrong if this is base class initiation
-	#my $direction = ($class =~ /::from/) ? 'input' : 'output';
-	#say "class: $class, direction: $direction";
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
@@ -71,15 +65,12 @@ sub new {
 
 	# we will default to track chain number and input or output values
 	# (these may be overridden)
-	#unshift @_, direction 	=> $direction;
 	if ($track){
 		my ($type,$id) = @{ 
 			$vals{direction} eq 'input'
 				? $track->source_input   # not reliable in MON case
 				: $track->send_output
 		};
-		say $track->name, ": source_type: ", $track->source_type, 
-			", type: $type, id: $id, class: $class";
 		my %h;
 		my @assign = qw(
 				chain_id 		$track->n
@@ -192,10 +183,36 @@ sub new {
 }
 
 package ::IO::from_jack_client;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
+use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
+sub new {
+	my $class = shift;
+	my $io = ::IO::new($class, @_);
+	my $client = $io->device_id;
+	$io->set(device_id => "jack,$client");
+	my $format;
+	if ( $client eq 'system' ){ # we use the full soundcard width
+
+		$format = ::signal_format(
+			$::devices{jack}->{signal_format},
+
+			# the number of channels
+			::jack_client($client,q(input)) # client's input is our output
+		);
+
+	} else { # we use track width
+
+		$format = ::signal_format(
+					$::devices{jack}->{signal_format},	
+					$io->width
+		);
+	}
+	$io->set(format => $format);
+	$io;
+}
 
 package ::IO::from_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
