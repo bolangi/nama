@@ -118,12 +118,13 @@ sub ecs_string {
 }
 }
 sub a_op { '-a:'.$_[0]->chain_id }
-sub new_mono_to_stereo {
+our $new_mono_to_stereo = sub {
 	my $class = shift;
-	my $io = $class->SUPER::new(@_);
+	#my $io = $class->SUPER::new(@_);
+	my $io = ::IO::new($class, @_);
 	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
 	$io
-}
+};
 
 package ::IO::from_null;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -135,12 +136,7 @@ sub device_id { 'null' }
 
 package ::IO::from_wav;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
-	$io
-}
+*new = $::IO::new_mono_to_stereo;
 sub device_id { $_[0]->full_path }
 
 package ::IO::to_wav;
@@ -149,7 +145,7 @@ sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
 	if ( $io->width and ! $io->format ){
-		$io->{format} = ::signal_format($::raw_to_disk_format, $io->width);
+		$io->set(format => ::signal_format($::raw_to_disk_format, $io->width));
 	}
 	$io
 }
@@ -165,12 +161,7 @@ sub new {
 }
 
 package ::IO::to_loop;
-use Modern::Perl; use Carp; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my %vals = @_;
-	::IO::new($class, %vals, device_id => "loop,$vals{endpoint}");
-}
+use Modern::Perl; use Carp; our @ISA = '::IO::from_loop';
 
 package ::IO::from_soundcard;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -182,9 +173,7 @@ sub new {
 	my ($type, $id) = ($io->type, $io->device_id);
 	say "type: $type, id: $id";
 	$class = ::io_class($type);
-	say "from soundcard class: $class";
-	my $try = "$class->new(\@_)";
-	eval $try or croak "eval failed: $@";
+	$class->new(@_);
 }
 
 package ::IO::to_soundcard;
@@ -194,19 +183,12 @@ sub new {
 	my %vals = @_;
 	my ($type, $id) = @{ ::soundcard_output()};
 	$class = ::io_class($type);
-	my $try =  "$class->new(\@_, device_id => \$id)";
-	say "soundcard constructor eval: $try";
-	eval $try or croak $@;
+	$class->new(@_, device_id => $id);
 }
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
-	$io
-}
+*new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
@@ -238,24 +220,14 @@ sub new {
 
 package ::IO::from_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
-	$io
-}
+*new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_multi;
 use Modern::Perl; use Carp; our @ISA = '::IO';
 
 package ::IO::from_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
-	$io
-}
+*new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_port;
 use Modern::Perl; use Carp; our @ISA = '::IO';
