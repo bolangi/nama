@@ -969,7 +969,10 @@ sub generate_setup {
 	
 	$debug and say "The graph is:\n$g";
 
-	$temp_tracks = ::Graph::expand_graph($g); # array ref
+	my $tmp = ::Graph::expand_graph($g); # array ref
+	push @$temp_tracks, @$tmp;
+
+	$debug and say "temp_tracks1: ",join " ", map{ $_->name } @$temp_tracks;
 
 	$debug and say "The expanded graph is:\n$g";
 
@@ -1033,6 +1036,7 @@ sub add_paths_for_recording {
 			rw => 'OFF',
 			name => $name);
 		push @$temp_tracks, $anon;
+		$debug and say "temp_tracks2: ",join " ", map{ $_->name } @$temp_tracks;
 
 		# connect IO
 		
