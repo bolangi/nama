@@ -1,7 +1,6 @@
 # ---------- IO -----------
 package ::IO;
 use Modern::Perl;
-use Carp;
 our %io_class = qw(
 	null_in					::IO::from_null
 	null_out				::IO::to_null
@@ -96,20 +95,20 @@ our $new_mono_to_stereo = sub {
 };
 
 package ::IO::from_null;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub device_id { 'null' }
 
 package ::IO::to_null;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub device_id { 'null' }
 
 package ::IO::from_wav;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 *new = $::IO::new_mono_to_stereo;
 sub device_id { $_[0]->full_path }
 
 package ::IO::to_wav;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
@@ -121,7 +120,7 @@ sub new {
 sub device_id { $_[0]->full_path }
 
 package ::IO::from_loop;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -129,10 +128,10 @@ sub new {
 }
 
 package ::IO::to_loop;
-use Modern::Perl; use Carp; our @ISA = '::IO::from_loop';
+use Modern::Perl; our @ISA = '::IO::from_loop';
 
 package ::IO::from_soundcard;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -145,7 +144,7 @@ sub new {
 }
 
 package ::IO::to_soundcard;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -155,11 +154,11 @@ sub new {
 }
 
 package ::IO::from_jack_client;
-use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
+use Modern::Perl; our @ISA = '::IO::to_jack_client';
 *new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_client;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = ::IO::new($class, @_);
@@ -187,21 +186,21 @@ sub new {
 }
 
 package ::IO::from_jack_multi;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 *new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_multi;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 
 package ::IO::from_jack_port;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 *new = $::IO::new_mono_to_stereo;
 
 package ::IO::to_jack_port;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 
 package ::IO::from_soundcard_device;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = ::IO::new($class, @_);
@@ -215,7 +214,7 @@ sub new {
 }
 
 package ::IO::to_soundcard_device;
-use Modern::Perl; use Carp; our @ISA = '::IO';
+use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = ::IO::new($class, @_);
