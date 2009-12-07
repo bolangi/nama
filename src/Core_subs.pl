@@ -560,15 +560,6 @@ sub initialize_rules {
 
 	# bus/rules-style routing 
 
-	# first make IO_Helper objects, just for pretty syntax
-	
-	my $source_input = ::IO_Helper->new(
-		type => 	sub { my $track = shift; $track->source_input()->[0]}, 
-		object => 	sub { my $track = shift; $track->source_input()->[1]},);
-	my $send_output = ::IO_Helper->new(
-		type => 	sub { my $track = shift; $track->send_output()->[0]}, 
-		object => 	sub { my $track = shift; $track->send_output()->[1]},);
-
 	package ::Rule;
 		$n = 0;
 		@by_index = ();	# return ref to Track by numeric key
@@ -583,8 +574,8 @@ sub initialize_rules {
 		name			=> 'rec_file', 
 		target			=> 'REC',
 		chain_id		=> sub{ my $track = shift; 'R'. $track->n },   
-		input_type		=> $source_input->type,
-		input_object	=> $source_input->object,
+		input_type		=> sub{ $_[0]->source_input()->[0]},
+		input_object	=> sub{ $_[0]->source_input()->[1]},
 		output_type		=>  'file',
 		output_object   => sub { my $track = shift; $track->full_path },
 		post_input			=>	sub{ my $track = shift; $track->rec_route },
@@ -613,8 +604,8 @@ $aux_send = ::Rule->new(
 		chain_id 		=>	sub{ "M".$_[0]->n },
 		input_type		=>  'loop', 
 		input_object	=>  sub{ "loop," .  $_[0]->n},
-		output_type		=>  $send_output->type,
-		output_object	=>  $send_output->object,
+		output_type		=> sub{ $_[0]->send_output()->[0]},
+		output_object	=> sub{ $_[0]->send_output()->[1]},
 		pre_output		=>	sub{ $_[0]->pre_send},
  		condition 		=> sub { "satisfied" if $_[0]->send_type},
 		status			=>  1,
@@ -659,8 +650,8 @@ $aux_send = ::Rule->new(
 		name			=>	'rec_setup', 
 		chain_id		=>  sub{ $_[0]->n },   
 		target			=>	'REC',
-		input_type		=> $source_input->type,
-		input_object	=> $source_input->object,
+		input_type		=> sub{ $_[0]->source_input()->[0]},
+		input_object	=> sub{ $_[0]->source_input()->[1]},
 		post_input			=>	sub{ my $track = shift;
 										$track->rec_route .
 										$track->mono_to_stereo 
@@ -674,8 +665,8 @@ $aux_send = ::Rule->new(
 		name			=>  'send_bus_out',
 		chain_id		=>  sub { $_[0]->n },
 		target			=>  'all',
-		output_type		=> $send_output->type,
-		output_object	=> $send_output->object,
+		output_type		=> sub{ $_[0]->send_output()->[0]},
+		output_object	=> sub{ $_[0]->send_output()->[1]},
 		pre_output		=>	sub{ $_[0]->pre_send},
 		condition        => sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
 		status			=>  1,
