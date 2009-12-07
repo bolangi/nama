@@ -191,7 +191,7 @@ sub new {
 
 package ::IO::from_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO::to_jack_client';
-#sub ecs_extra { $_[0]->mono_to_stereo }
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_client;
 use Modern::Perl; use Carp; our @ISA = '::IO';
