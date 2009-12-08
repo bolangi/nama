@@ -978,11 +978,11 @@ sub generate_setup {
 	process_routing_graph();
 	# now we have processed graph, we can remove temp tracks
 
-	remove_temp_tracks();
-
 	$this_track = $old_this_track;
 
 	write_chains(); 
+
+	remove_temp_tracks();
 }
 sub remove_temp_tracks {
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
@@ -1058,6 +1058,13 @@ sub add_paths_for_aux_sends {
 	# track output usually goes to Master or to another track
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
+=comment
+		my ($type, $device_id) = @{ $_->send_output };
+		say "aux send name: ", $_->name," type: $type, device_id: $device_id";
+		$g->add_path($_->name, $type);
+		 $g->set_edge_attributes($_->name, $type, 
+			{ track => $_, chain_id => 'S'.$_->n });
+=cut
 	
 	map {  
 		my $name = $_->name . '_aux';

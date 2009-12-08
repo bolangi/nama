@@ -11,3 +11,5 @@ Graphical_subs.pl \
 Refresh_subs.pl \
 Graph.p \
 commands.yml \
+IO.p \
+namarc \

@@ -154,9 +154,11 @@ sub insert_near_side_loop {
 		$debug and say "deleting edge: $a-$_";
 
 		# insert loop in every case
+		my $attr = $g->get_edge_attributes($a,$_);
 		$g->delete_edge($a,$_);
 		$debug and say "adding path: $a " , $loop, " $_";
 		$g->add_edge($a,$loop);
+		$g->set_edge_attributes($a,$loop, $attr) if $attr;
 
 		# add second arm if successor is track
 		if ( $::tn{$_} ){ 
@@ -168,34 +170,34 @@ sub insert_near_side_loop {
 		else {  
 		$debug and say "successor $_ is non-track";
 
-			my $nam = $::tn{$a}->n . $j++;
+			my $nam = $::tn{$a}->name . '_jump'; 
+			my $id = 'J'.$::tn{$a}->n.$j++;
 			my $anon = ::SlaveTrack->new( 
 				target => $a,
 				rw => 'REC',
 				name => $nam,
 				group => 'Temp');
 
-			add_path($loop,$anon->name,$_);
+			add_path($loop,$nam,$_);
+			$g->set_vertex_attributes($nam, { chain_id => $id });
 		}
-
-		# move attributes to new edge
-		#my $att = $g->get_edge_attributes($loop,$_);
-		#$g->set_edge_attributes($loop,$_,$attr) if ref $attr;
-
 		$seen{"$a-$_"}++
 	} $g->successors($a);
 }
 
 sub insert_far_side_loop {
 	my ($g, $a, $b, $loop) = @_;
-	my $j = 'm';
+	my $j = 'a';
 	$debug and say "$a-$b: insert far side loop";
 	map{
 		$debug and say "deleting edge: $_-$b";
+		my $attr = $g->get_edge_attributes($_,$b);
 		$g->delete_edge($_,$b);
+		$debug and say "adding path: $loop, $b";
+		$g->add_edge($loop,$b);
+		$g->set_edge_attributes($loop,$b, $attr) if $attr;
 
 		# insert loop in every case
-		$g->add_edge($loop,$b);
 
 		# add second arm if predecessor is track
 		if ( $::tn{$_} ){ $g->add_edge($_, $loop) }
@@ -203,14 +205,16 @@ sub insert_far_side_loop {
 		# insert anon track if successor is non-track
 		else {  
 
-			my $nam = $::tn{$b}->n . $j++;
+			my $id = 'J'.$::tn{$b}->n . $j++;
+			my $nam = $::tn{$b}->name . '_jump'; 
 			my $anon = ::SlaveTrack->new( 
 				target => $b,
 				name => $nam,
 				group => 'Temp',
 				rw => 'REC');
 
-			add_path($_, $anon->name, $loop);
+			add_path($_, $nam, $loop);
+			$g->set_vertex_attributes($nam, { chain_id => $id });
 		}
 
 		$seen{"$_-$b"}++

@@ -459,7 +459,7 @@ sub send_output {
 			if ($::jack_running) {
 				my $start = $track->send_id; # Assume channel will be 3 or greater
 				my $end   = $start + 1; # Assume stereo
-				return ['jack_multi', join q(,),q(jack_multi),
+				return ['jack_multi_out', join q(,),q(jack_multi),
 					map{"system:playback_$_"} $start..$end]
 			} else {return [ 'soundcard_out', $::alsa_playback_device] }
 		}
