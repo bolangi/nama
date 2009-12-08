@@ -138,9 +138,9 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my $io = ::IO->new(@_); # to get type... may be jack
-	say "io class: ",ref $io;
+	#say "io class: ",ref $io;
 	my ($type, $id) = ($io->type, $io->device_id);
-	say "type: $type, id: $id";
+	#say "type: $type, id: $id";
 	$class = ::io_class($type);
 	$class->new(@_);
 }

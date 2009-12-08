@@ -896,19 +896,19 @@ sub really_recording {  keys %{$outputs{file}}; }
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
 	my($name, $endpoint, $direction) = decode_edge($edge);
-	say "name: $name, endpoint: $endpoint, direction: $direction";
+	#say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class;
 	# special handling for loops 
 	if (::Graph::is_a_loop($endpoint) ){
-		say "$endpoint is a loop";
+		#say "$endpoint is a loop";
 		$class = io_class( $direction eq 'input' ?  "loop_source" : "loop_sink")
 	} else { $class = io_class( $endpoint ) }
 	my @args = (track => $track, 
 				endpoint => $endpoint,
 				direction => $direction,
 				override($name, $edge));
-	say "dispatch class: $class";
+	#say "dispatch class: $class";
 	$class->new(@args);
 }
 	
@@ -916,7 +916,7 @@ sub decode_edge {
 	# assume track-endpoint or endpoint-track
 	# return track, endpoint
 	my ($a, $b) = @{$_[0]};
-	say "a: $a, b: $b";
+	#say "a: $a, b: $b";
 	my ($name, $endpoint) = $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
 	my $direction = $tn{$a} ? 'output' : 'input';
 	($name, $endpoint, $direction)
@@ -925,8 +925,6 @@ sub decode_edge {
 sub io_class { $::IO::io_class{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
 
 sub generate_setup { 
-	my $debug = 1;
-	local $debug2 = 1;
 
 	$debug2 and print "&generate_setup\n";
 
@@ -937,36 +935,34 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
-	$debug and say "The graph1 is:\n$g";
+	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
-	$debug and say "The graph2 is:\n$g";
+	$debug and say "The graph is:\n$g";
 	add_paths_for_null_input_tracks();
-	$debug and say "The graph3 is:\n$g";
+	$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
-	$debug and say "The graph4 is:\n$g";
+	$debug and say "The graph is:\n$g";
 	#add_paths_for_send_buses();
-	#$debug and say "The graph5 is:\n$g";
+	#$debug and say "The graph is:\n$g";
 	#add_paths_for_sub_buses();
-	#$debug and say "The graph6 is:\n$g";
+	#$debug and say "The graph is:\n$g";
 	add_paths_from_Master(); # do they affect automix?
-	$debug and say "The graph7 is:\n$g";
+	$debug and say "The graph is:\n$g";
 
 	# re-route Master to null for automix
 	if( $automix){
 		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
 		$g->add_edge(qw[Master null_out]);
-		$debug and say "The graph8 is:\n$g";
+		$debug and say "The graph is:\n$g";
 	}
 	add_paths_for_mixdown_handling();
-	$debug and say "The graph9 is:\n$g";
+	$debug and say "The graph is:\n$g";
 	prune_graph();
-	$debug and say "The graph10 is:\n$g";
-	
+	$debug and say "The graph is:\n$g";
 
 	::Graph::expand_graph($g); 
 
-	#$debug and say "The graph11 is:\n$g";
-	$debug and say "The expanded graph 11 is:\n$g";
+	$debug and say "The graph is:\n$g";
 
 	# insert handling
 	::Graph::add_inserts($g);
@@ -995,6 +991,7 @@ sub initialize_chain_setup_vars {
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 }
 sub add_paths_for_main_tracks {
+	$debug2 and say "&add_paths_for_main_tracks";
 	map{ 
 
 		# connect signal sources to tracks
@@ -1014,6 +1011,7 @@ sub add_paths_for_main_tracks {
 }
 
 sub add_paths_for_recording {
+	$debug2 and say "&add_paths_for_recording";
 
 	# we record tracks set to REC, unless rec_defeat is set 
 	# or the track belongs to the 'null' group
@@ -1045,6 +1043,7 @@ sub add_paths_for_recording {
 
 
 sub add_paths_for_null_input_tracks {
+	$debug2 and say "&add_paths_for_null_tracks";
 
 	map{ $g->add_path('null_in', $_->name, 'Master') }
  	grep{ $_->rec_status eq 'REC' } 
@@ -1053,6 +1052,7 @@ sub add_paths_for_null_input_tracks {
 }
 
 sub add_paths_for_aux_sends {
+	$debug2 and say "&add_paths_for_aux_sends";
 
 	# auxiliary sends go to soundcard or jack_client
 	# track output usually goes to Master or to another track
@@ -1075,9 +1075,9 @@ sub add_paths_for_aux_sends {
 
 		# connect IO
 
-		say "aux send track: ",$anon->name, " n: ", $anon->n;
+		#say "aux send track: ",$anon->name, " n: ", $anon->n;
 		my ($type, $device_id) = @{ $_->send_output };
-		say "aux send name: $name, type: $type, device_id: $device_id";
+		#say "aux send name: $name, type: $type, device_id: $device_id";
 		$g->add_path($_->name, $name, $type);
 
 		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
@@ -1088,6 +1088,7 @@ sub add_paths_for_aux_sends {
 }
 =comment
 sub add_paths_for_send_buses {
+	$debug2 and say "&add_paths_for_send_buses";
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1113,6 +1114,7 @@ sub add_paths_for_send_buses {
 	} @user_buses;
 }
 sub add_paths_for_sub_buses {
+	$debug2 and say "&add_paths_for_sub_buses";
 
 	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
 	map{
@@ -1143,6 +1145,7 @@ sub add_paths_for_sub_buses {
 }
 =cut
 sub add_paths_from_Master {
+	$debug2 and say "&add_paths_from_Master";
 
 	if ($mastering_mode){
 		$g->add_path(qw[Master Eq Low Boost]);
@@ -1154,6 +1157,7 @@ sub add_paths_from_Master {
 
 }
 sub add_paths_for_mixdown_handling {
+	$debug2 and say "&add_paths_for_mixdown_handling";
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
@@ -1175,12 +1179,14 @@ sub add_paths_for_mixdown_handling {
 	}
 }
 sub prune_graph {
+	$debug2 and say "&prune_graph";
 	# prune graph: remove tracks lacking inputs or outputs
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
 }
 
 sub process_routing_graph {
+	$debug2 and say "&process_routing_graph";
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;

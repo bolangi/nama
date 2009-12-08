@@ -2,16 +2,17 @@ package ::Graph;
 use Modern::Perl;
 use Carp;
 use Graph;
-use vars qw(%reserved $debug);
+use vars qw(%reserved $debug $debug2);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;
-#*debug = \$::debug;
-$debug = 1;
+*debug = \$::debug;
+*debug2 = \$::debug2;
 
 my %seen;
 
 sub expand_graph {
+	
 	my $g = shift; 
 	%seen = ();
 	
