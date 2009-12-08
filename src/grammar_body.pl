@@ -194,7 +194,10 @@ source: _source end {
 }
 send: _send name { $::this_track->set_send($item{name}); 1}
 send: _send end { $::this_track->set_send(); 1}
-
+remove_send: _remove_send end {
+					$::this_track->set(send_type => undef);
+					$::this_track->set(send_id => undef); 1
+}
 stereo: _stereo { 
 	$::this_track->set(width => 2); 
 	print $::this_track->name, ": setting to stereo\n";

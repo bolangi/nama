@@ -178,9 +178,14 @@ source:
   parameters: <i_soundcard_channel> | <s_jack_client_name> | 'jack' (opens ports ecasound:trackname_in_N, connects ports listed in trackname.ports if present in project_root dir)
 send:
   type: track
-  what: set auxilary track destination
+  what: set aux send
   short: out aux m
   parameters: <i_soundcard_channel> (3 or above) | <s_jack_client_name>#  |  <s_loop_id>
+remove_send:
+  type: track
+  short: nosend rms
+  what: remove aux send
+  parameters: none  what: set auxilary track destination
 stereo:
   type: track
   what: record two channels for current track
