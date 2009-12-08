@@ -936,7 +936,7 @@ sub generate_setup {
 	add_paths_for_main_tracks();
 	add_paths_for_recording();
 	add_paths_for_null_input_tracks();
-	#add_paths_for_aux_sends();
+	add_paths_for_aux_sends();
 	#add_paths_for_send_buses();
 	#add_paths_for_sub_buses();
 	add_paths_from_Master(); # do they affect automix?
@@ -1018,7 +1018,6 @@ sub add_paths_for_recording {
 		# connect IO
 		
 		my ($type, $device_id) = @{ $_->source_input };
-		say "REC_FILE: type: $type, device_id: $device_id";
 		$g->add_path($type, $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
@@ -1046,10 +1045,21 @@ sub add_paths_for_aux_sends {
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
 	
-	map { 	
- 			my @edge = ($_->name, $_->send_type.'_out');
- 			$g->add_edge(@edge);
- 			$g->set_edge_attributes(@edge, { chain_id => 'A'.$_->n });
+	map {  
+		my $name = $_->name . '_rec_file';
+		my $anon = ::SlaveTrack->new( 
+			target => $_->name,
+			rw => 'OFF',
+			group => 'Temp',
+			name => $name);
+
+		# connect IO
+		
+		my ($type, $device_id) = @{ $_->send_output };
+		$g->add_path($name, $type);
+
+		# set chain_id to R3 (if original track is 3) 
+		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
 
   	} grep { $_->send_type and $_->rec_status ne 'OFF' } ::Track::all();
 }
