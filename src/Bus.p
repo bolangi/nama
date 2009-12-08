@@ -35,7 +35,7 @@ sub new {
 		
 sub all { values %by_name };
 
-sub remove { say $_[0]->name, " is system bus, no can remove" }
+sub remove { say $_[0]->name, " is system bus. No can remove." }
 
 # we will put the following information in the Track as an aux_send
 # 						destination_type

@@ -58,7 +58,6 @@ sub ecs_string {
 	join ' ',@parts;
 }
 }
-sub a_op { '-a:'.$_[0]->chain_id }
 our $new_mono_to_stereo = sub {
 	my $class = shift;
 	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use
