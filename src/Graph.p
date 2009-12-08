@@ -6,7 +6,9 @@ use vars qw(%reserved $debug);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;
-*debug = \$::debug;
+#*debug = \$::debug;
+$debug = 1;
+
 my %seen;
 
 sub expand_graph {
@@ -16,7 +18,7 @@ sub expand_graph {
 	# case 1: both nodes are tracks
 	
 	map{ my($a,$b) = @{$_}; 
-		$debug and say "reviewing edge: $a-$b";
+		$debug and say "processing track-track edge: $a-$b";
 		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
 		add_loop($g,$a,$b) unless $seen{"$a-$b"};
 	} grep{my($a,$b) = @{$_}; is_a_track($a) and is_a_track($b);} 
@@ -34,7 +36,13 @@ sub expand_graph {
 	} $g->edges;
 	
 }
-
+sub add_path {
+	my @nodes = @_;
+	$debug and say "adding path: ", join " ", @nodes;
+	$::g->add_path(@nodes);
+}
+sub add_edge { add_path(@_) }
+	
 sub add_inserts {
 	my $g = shift;
 	my @track_names = grep{ $::tn{$_} 
@@ -82,7 +90,7 @@ sub add_insert {
 
 	# connect wet track to graph
 	
-	$g->add_path($loop, $wet->name, $i->{send_type}."_out");
+	add_path($loop, $wet->name, $i->{send_type}."_out");
 
 	# add return leg for wet signal
 	
@@ -105,7 +113,7 @@ sub add_insert {
 
 	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];
 	
-	$g->add_path($i->{return_type}.'_in',  $dry->name.'wr', $successor);
+	add_path($i->{return_type}.'_in',  $dry->name.'wr', $successor);
 
 
 	}
@@ -147,12 +155,14 @@ sub insert_near_side_loop {
 
 		# insert loop in every case
 		$g->delete_edge($a,$_);
-		#$debug and say "adding path: $a " , $loop, " $_";
+		$debug and say "adding path: $a " , $loop, " $_";
 		$g->add_edge($a,$loop);
 
 		# add second arm if successor is track
-		if ( $::tn{$_} ){ $g->add_edge($loop, $_) }
-
+		if ( $::tn{$_} ){ 
+			$debug and say "successor '$_' is a track";
+			$debug and say "adding path: $loop, $_";
+			$g->add_edge($loop, $_) }
 		# insert anon track if successor is non-track
 		# ( when adding an insert, successor is always non-track )
 		else {  
@@ -165,7 +175,7 @@ sub insert_near_side_loop {
 				name => $nam,
 				group => 'Temp');
 
-			$g->add_path($loop,$anon->name,$_);
+			add_path($loop,$anon->name,$_);
 		}
 
 		# move attributes to new edge
@@ -200,7 +210,7 @@ sub insert_far_side_loop {
 				group => 'Temp',
 				rw => 'REC');
 
-			$g->add_path($_, $anon->name, $loop);
+			add_path($_, $anon->name, $loop);
 		}
 
 		$seen{"$_-$b"}++

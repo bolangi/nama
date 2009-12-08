@@ -62,7 +62,7 @@ sub new {
 		while ( my($key, $var) = splice @assign, 0, 2 ){
 			$h{$key} = eval $var and $@ and croak "$var: eval failed: $@";
 		}
-		say ::yaml_out \%h;
+		#say ::yaml_out \%h;
 		unshift @_, %h;  # other arguments (in %h) will supersede track values
 
 		# TODO: move the following routines from Track
@@ -72,7 +72,9 @@ sub new {
 		# inside ::IO subclasses where they are
 		# needed. That will save duplication
 		
-	say join " ", "all fields", @_;
+	no warnings  'uninitialized';
+	#say join " ", "all fields", @_;
+	use warnings 'uninitialized';
 	}
 	my $object = bless { @_	}, $class;
 }
@@ -233,6 +235,7 @@ sub new {
 	}
 	my $device = $::devices{$io->device_id}{ecasound_id};
 	$io->set(device_id => $device);
+	$io->set(ecs_extra => $io->pre_send) if $io->pre_send;
 	$io;
 }
 

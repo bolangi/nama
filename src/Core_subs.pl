@@ -925,6 +925,9 @@ sub decode_edge {
 sub io_class { $::IO::io_class{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
 
 sub generate_setup { 
+	my $debug = 1;
+	local $debug2 = 1;
+
 	$debug2 and print "&generate_setup\n";
 
 	my $automix = shift; # route Master to null_out if present
@@ -934,26 +937,36 @@ sub generate_setup {
 
 	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
+	$debug and say "The graph1 is:\n$g";
 	add_paths_for_recording();
+	$debug and say "The graph2 is:\n$g";
 	add_paths_for_null_input_tracks();
+	$debug and say "The graph3 is:\n$g";
 	add_paths_for_aux_sends();
+	$debug and say "The graph4 is:\n$g";
 	#add_paths_for_send_buses();
+	#$debug and say "The graph5 is:\n$g";
 	#add_paths_for_sub_buses();
+	#$debug and say "The graph6 is:\n$g";
 	add_paths_from_Master(); # do they affect automix?
+	$debug and say "The graph7 is:\n$g";
 
 	# re-route Master to null for automix
 	if( $automix){
 		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
 		$g->add_edge(qw[Master null_out]);
+		$debug and say "The graph8 is:\n$g";
 	}
 	add_paths_for_mixdown_handling();
+	$debug and say "The graph9 is:\n$g";
 	prune_graph();
+	$debug and say "The graph10 is:\n$g";
 	
-	$debug and say "The graph is:\n$g";
 
 	::Graph::expand_graph($g); 
 
-	$debug and say "The expanded graph is:\n$g";
+	#$debug and say "The graph11 is:\n$g";
+	$debug and say "The expanded graph 11 is:\n$g";
 
 	# insert handling
 	::Graph::add_inserts($g);
@@ -1004,6 +1017,7 @@ sub add_paths_for_recording {
 
 	# we record tracks set to REC, unless rec_defeat is set 
 	# or the track belongs to the 'null' group
+	my @tracks = ::Track::all();
 
 	map{ 
 		# create temporary track for rec_file chain
@@ -1026,7 +1040,7 @@ sub add_paths_for_recording {
 	} grep{ $_->rec_status eq 'REC' 
 			and not $_->group eq 'null'  
 			and not $_->rec_defeat 
-	} ::Track::all();
+	} @tracks;
 }
 
 
@@ -1046,22 +1060,24 @@ sub add_paths_for_aux_sends {
 	# which our graph doesn't allow
 	
 	map {  
-		my $name = $_->name . '_rec_file';
+		my $name = $_->name . '_aux';
 		my $anon = ::SlaveTrack->new( 
 			target => $_->name,
-			rw => 'OFF',
 			group => 'Temp',
 			name => $name);
 
 		# connect IO
-		
-		my ($type, $device_id) = @{ $_->send_output };
-		$g->add_path($name, $type);
 
-		# set chain_id to R3 (if original track is 3) 
+		say "aux send track: ",$anon->name, " n: ", $anon->n;
+		my ($type, $device_id) = @{ $_->send_output };
+		say "aux send name: $name, type: $type, device_id: $device_id";
+		$g->add_path($_->name, $name, $type);
+
 		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
 
-  	} grep { $_->send_type and $_->rec_status ne 'OFF' } ::Track::all();
+  	} grep { $_->name !~ /_rec_file/ 
+				and $_->send_type 
+				and $_->rec_status ne 'OFF' } ::Track::all();
 }
 =comment
 sub add_paths_for_send_buses {
