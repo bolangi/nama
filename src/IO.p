@@ -37,41 +37,12 @@ sub new {
 	if ($track){
 		my ($type,$id) = @{ 
 			$vals{direction} eq 'input'
-				? $track->source_input   # not reliable in MON case
-				: $track->send_output
+				? $track->{source_input}   # not reliable in MON case
+				: $track->{send_output}
 		};
-		my %h;
-		my @assign = qw(
-				chain_id 		$track->n
-				type 			$type
-				device_id 		$id
-				width			$track->width
-				playat			$track->playat
-				region_start	$track->region_start
-				region_end		$track->region_end	
-				modifiers		$track->modifiers
-				mono_to_stereo  $track->mono_to_stereo
-				route			$track->route
-				rec_route		$track->rec_route
-				full_path		$track->full_path
-				source_input	$track->source_input
-				send_output		$track->send_output
-				pre_send		$track->pre_send
-		);
+		my %type_id = (type => $type, device_id => $id);
+		unshift @_, %$track, %type_id; 
 
-		while ( my($key, $var) = splice @assign, 0, 2 ){
-			$h{$key} = eval $var and $@ and croak "$var: eval failed: $@";
-		}
-		#say ::yaml_out \%h;
-		unshift @_, %h;  # other arguments (in %h) will supersede track values
-
-		# TODO: move the following routines from Track
-		# to IO
-	
-		# Alternatively, call $track->methods
-		# inside ::IO subclasses where they are
-		# needed. That will save duplication
-		
 	no warnings  'uninitialized';
 	#say join " ", "all fields", @_;
 	use warnings 'uninitialized';

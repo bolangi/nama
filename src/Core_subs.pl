@@ -904,9 +904,10 @@ sub dispatch { # creates an IO object from a graph edge
 		#say "$endpoint is a loop";
 		$class = io_class( $direction eq 'input' ?  "loop_source" : "loop_sink")
 	} else { $class = io_class( $endpoint ) }
-	my @args = (track => $track, 
+	my @args = (track => $track_snapshots->{$name},
 				endpoint => $endpoint,
 				direction => $direction,
+				chain_id => $tn{$name}->n,
 				override($name, $edge));
 	#say "dispatch class: $class";
 	$class->new(@args);
@@ -1185,8 +1186,16 @@ sub prune_graph {
 	::Graph::remove_outputless_tracks($g); 
 }
 
+sub track_snapshots {
+	my %tracks = map{ $_->name => $_->track_snapshot } 
+					grep{ $_->rec_status ne 'OFF' } ::Track::all() ;
+	\%tracks;
+}
+	
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
+	$track_snapshots = track_snapshots();
+	#say yaml_out($track_snapshots); die "here";
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;

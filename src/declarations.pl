@@ -373,4 +373,5 @@ our (
 	$sock, 			# socket for Net-ECI mode
 	%versions,		# store active versions for use after engine run
 	@io, 			# accumulate IO objects for generating setup
+	$track_snapshots, # to save recalculating for each IO object
 );

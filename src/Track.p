@@ -441,13 +441,13 @@ sub source_input {
 		when ( 'jack_client'){
 			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [qw(dummy_e dummy_f)] }
+				.". JACK not running."); return [] }
 		}
 		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
 		when ('jack_manual'){
 			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [undef, undef] }
+				.". JACK not running."); return [] }
 		}
 	}
 }
@@ -468,12 +468,12 @@ sub send_output {
 			else { carp $track->name . 
 					q(: auxilary send to JACK client specified,) .
 					q( but jackd is not running.  Skipping.);
-					return [qw(dummy_a  dummy_b)];
+					return [];
 			}
 		}
 		when ('loop') { return [ 'loop_sink', $track->send_id ] }
 			
-		default { return [ 'dummy_c', 'dummy_d' ] }
+		default { return [] }
 	}
  };
 
@@ -793,6 +793,32 @@ sub get_length {
 sub fancy_ops { # returns list 
 	my $track = shift;
 	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
+}
+		
+{ my @fields = qw(
+		n
+		width
+		playat	
+		region_start
+		region_end
+		modifiers
+		mono_to_stereo
+		rec_route
+		full_path
+		source_input
+		send_output
+		pre_send
+);
+sub track_snapshot {
+	my $track = shift;
+	my %snap; 
+	my $i = 0;
+	for(@fields){
+		$snap{$_} = $track->$_;
+		#say "key: $_, val: ",$track->$_;
+	}
+	\%snap;
+}
 }
 	
 # subclass
