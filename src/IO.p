@@ -56,6 +56,7 @@ sub new {
 				full_path		$track->full_path
 				source_input	$track->source_input
 				send_output		$track->send_output
+				pre_send		$track->pre_send
 		);
 
 		while ( my($key, $var) = splice @assign, 0, 2 ){

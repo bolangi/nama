@@ -1040,13 +1040,18 @@ sub add_paths_for_null_input_tracks {
 }
 
 sub add_paths_for_aux_sends {
+
 	# auxiliary sends go to soundcard or jack_client
 	# track output usually goes to Master or to another track
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
 	
-	#map {  } 
-	#grep { $_->send_type and $_->rec_status ne 'OFF' } ::Track::all();
+	map { 	
+ 			my @edge = ($_->name, $_->send_type.'_out');
+ 			$g->add_edge(@edge);
+ 			$g->set_edge_attributes(@edge, { chain_id => 'A'.$_->n });
+
+  	} grep { $_->send_type and $_->rec_status ne 'OFF' } ::Track::all();
 }
 =comment
 sub add_paths_for_send_buses {
@@ -1068,7 +1073,8 @@ sub add_paths_for_send_buses {
 			# The signal path is:
 			# [target track] -> [slave track] -> [slave track send_output]
 			
-			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
+			#map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
+			map{   $g->add_path( $_->target, $_->name, $_->send_type);
 			} @tracks; 
 		}
 	} @user_buses;
@@ -1171,7 +1177,7 @@ sub process_routing_graph {
 sub override {
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
-	override_from_vertex($name); # , override_from_edge($edge)
+	override_from_vertex($name), override_from_edge($edge)
 }
 	
 sub override_from_vertex {
