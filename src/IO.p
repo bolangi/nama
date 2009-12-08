@@ -154,8 +154,12 @@ sub new {
 }
 
 package ::IO::from_jack_client;
-use Modern::Perl; our @ISA = '::IO::to_jack_client';
-*new = $::IO::new_mono_to_stereo;
+use Modern::Perl; our @ISA = '::IO';
+sub new {
+	my $io = ::IO::to_jack_client::new(@_);
+	$io->set(ecs_extra => $io->mono_to_stereo);
+	$io
+}
 
 package ::IO::to_jack_client;
 use Modern::Perl; our @ISA = '::IO';
@@ -167,6 +171,10 @@ sub new {
 	my $format;
 	if ( $client eq 'system' ){ # we use the full soundcard width
 
+		# shift track to correct output channel
+		# we could use jack_multi for this
+
+		$io->set(ecs_extra => $io->pre_send) if $io->pre_send;
 		$format = ::signal_format(
 			$::devices{jack}->{signal_format},
 
