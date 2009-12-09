@@ -972,7 +972,8 @@ sub generate_setup {
 
 	# create IO lists %inputs and %outputs
 
-	process_routing_graph();
+	process_routing_graph() or say("No tracks to record or play."),return;
+
 	# now we have processed graph, we can remove temp tracks
 
 	$this_track = $old_this_track;
@@ -980,6 +981,8 @@ sub generate_setup {
 	write_chains(); 
 
 	remove_temp_tracks();
+
+	1; # used to sense a chain setup ready to run
 }
 sub remove_temp_tracks {
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
@@ -1238,6 +1241,7 @@ sub process_routing_graph {
 	@output_chains = map {'-a:'.join(',',@$_)." $outputs{$_}"} @out_keys;
 	@post_input = sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
 	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
+	@input_chains + @output_chains # to sense empty chain setup
 }
 	
 sub override {
