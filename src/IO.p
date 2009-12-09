@@ -77,8 +77,15 @@ sub device_id { 'null' }
 package ::IO::from_wav;
 use Modern::Perl; our @ISA = '::IO';
 *new = $::IO::new_mono_to_stereo;
-sub device_id { $_[0]->full_path }
-
+sub device_id { 
+	my $io = shift;
+	my @modifiers;
+	push @modifiers, $io->playat_output if $io->playat_output;
+	push @modifiers, $io->select_output if $io->select_output;
+	push @modifiers, split " ", $io->modifiers if $io->modifiers;
+	push @modifiers, $io->full_path;
+	join(q[,],@modifiers);
+}
 package ::IO::to_wav;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
@@ -187,8 +194,10 @@ sub new {
 	#say "io device1: ",$io->device_id;
 	my $device = $::devices{$io->device_id}{ecasound_id};
 	$io->set(device_id => $device);
+	no warnings 'uninitialized';
 	$io->set(ecs_extra => join " ", $io->rec_route, $io->mono_to_stereo) 
 		unless $io->ecs_extra;
+	use warnings 'uninitialized';
 	#say "io device2: ",$io->device_id;
 	$io;
 }

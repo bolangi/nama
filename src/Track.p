@@ -731,7 +731,7 @@ sub ingest  { # i believe 'import' has a magical meaning
 sub playat_output {
 	my $track = shift;
 	if ( $track->playat ){
-		"playat" , $track->playat
+		join ',',"playat" , $track->playat;
 	}
 }
 
@@ -741,7 +741,7 @@ sub select_output {
 		my $end = $track->region_ending;
 		my $start = $track->region_start;
 		my $length = $end - $start;
-		"select", $start, $length
+		join ',',"select", $start, $length
 	}
 }
 
@@ -797,10 +797,10 @@ sub fancy_ops { # returns list
 		
 { my @fields = qw(
 		n
+		name
 		width
-		playat	
-		region_start
-		region_end
+		playat_output
+		select_output
 		modifiers
 		mono_to_stereo
 		rec_route
