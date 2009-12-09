@@ -11,7 +11,9 @@
 					vol				# vol control operator
 					pan				# pan control operator 
 					latency			# latency compensation operator
-					offset
+					offset			# for calculating ecasound chain
+									# chain operator indexes
+									# of track effects
 
 					old_vol_level	# for mute/unmute
 					old_pan_level

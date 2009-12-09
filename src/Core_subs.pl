@@ -3758,18 +3758,14 @@ sub status_snapshot {
 	# engine
 	
 	my %snapshot = ( project 		=> 	$project_name,
-					 #global_version =>  $main->version,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main_out 		=> $main_out,
-					 cache_rec		=> {%cooked_record_pending},# copy
-					 #global_rw      =>  $main->rw,
 					 tracks			=> [],
 					
 	);
 	my @relevant_fields = qw(
 		width
-		offset 
 		group 
 		playat
 		region_start	
@@ -3779,8 +3775,6 @@ sub status_snapshot {
 		source_type
 		send_id
 		send_type
-		project
-		target
 		rec_defeat
 		inserts );
 	map { 
