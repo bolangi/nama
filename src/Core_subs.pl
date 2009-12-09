@@ -1185,16 +1185,34 @@ sub prune_graph {
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
 }
+{
+my @fields = qw(
+		n
+		name
+		width
+		playat_output
+		select_output
+		modifiers
+		mono_to_stereo
+		rec_route
+		full_path
+		source_input
+		send_output
+		pre_send
+);
 
+# an optimization
+# sets a cache of current track method values for io dispatch
 sub track_snapshots {
-	my %tracks = map{ $_->name => $_->track_snapshot } 
+	my %tracks = map{ $_->name => $_->snapshot(\@fields) } 
 					grep{ $_->rec_status ne 'OFF' } ::Track::all() ;
 	\%tracks;
+}
 }
 	
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
-	$track_snapshots = track_snapshots();
+	$track_snapshots = track_snapshots(); # sets global used by dispatch
 	#say yaml_out($track_snapshots); die "here";
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
@@ -1367,9 +1385,9 @@ sub doodle {
 }
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
-	# sometimes we want to skip for debugging
-	
+	# skip if command line option is set
 	return if $opts{R};
+
 	return 0 if $disable_auto_reconfigure;
 
 	# we don't want to disturb recording/mixing
@@ -3751,20 +3769,19 @@ sub effect_code {
 	else { warn "effect code not found: $input\n";}
 	$code;
 }
-
-sub status_snapshot {
-
-	# hashref output for detecting if we need to reconfigure
-	# engine
-	
-	my %snapshot = ( project 		=> 	$project_name,
-					 mastering_mode => $mastering_mode,
-					 preview        => $preview,
-					 main_out 		=> $main_out,
-					 tracks			=> [],
-					
-	);
-	my @relevant_fields = qw(
+	# status_snapshot() 
+	#
+	# hashref output for detecting if we need to reconfigure engine
+	# compared as YAML strings
+	#
+	# why is this different from $track_snapshots used for
+	# dispatch()?
+	#
+	# for one, because dispatch() doesn't need to consider inserts,
+	# which exist as temporary tracks at the time of dispatch()
+{
+	my @sense_reconfigure = qw(
+		name
 		width
 		group 
 		playat
@@ -3776,17 +3793,22 @@ sub status_snapshot {
 		send_id
 		send_type
 		rec_defeat
-		inserts );
-	map { 
-		my %track = %$_; # deref object
-		my %tr = map{ $_, $track{$_}} @relevant_fields;
-		push @{ $snapshot{tracks}}, {
-			%tr, 
-			rec_status => $_->rec_status,
-		 	current_version => $_->current_version,
-			}
-	}  ::Track::all();
+		inserts
+		rec_status
+		current_version
+ );
+sub status_snapshot {
+
+	
+	my %snapshot = ( project 		=> 	$project_name,
+					 mastering_mode => $mastering_mode,
+					 preview        => $preview,
+					 main_out 		=> $main_out,
+					 tracks			=> [], );
+	map { push @{$snapshot{tracks}}, $_->snapshot(\@sense_reconfigure) }
+	::Track::all();
 	\%snapshot;
+}
 }
 sub set_region {
 	my ($beg, $end) = @_;

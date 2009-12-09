@@ -795,25 +795,12 @@ sub fancy_ops { # returns list
 	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
 }
 		
-{ my @fields = qw(
-		n
-		name
-		width
-		playat_output
-		select_output
-		modifiers
-		mono_to_stereo
-		rec_route
-		full_path
-		source_input
-		send_output
-		pre_send
-);
-sub track_snapshot {
+{ sub snapshot {
 	my $track = shift;
+	my $fields = shift;
 	my %snap; 
 	my $i = 0;
-	for(@fields){
+	for(@$fields){
 		$snap{$_} = $track->$_;
 		#say "key: $_, val: ",$track->$_;
 	}
