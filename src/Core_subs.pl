@@ -1327,11 +1327,11 @@ sub arm {
 	# - automix	
 	
 	$debug2 and print "&arm\n";
-	exit_preview();
+	exit_preview_mode();
 	#adjust_latency();
 	if( generate_setup() ){ connect_transport() };
 }
-sub preview {
+sub set_preview_mode {
 
 	# set preview mode, releasing doodle mode if necessary
 	
@@ -1343,7 +1343,7 @@ sub preview {
 
 	# make an announcement if we were in rec-enabled mode
 
-	release_doodle_mode() if $preview eq 'doodle';
+	$main->set(rw => $old_group_rw) if $old_group_rw;
 
 	$preview = "preview";
 
@@ -1353,14 +1353,11 @@ sub preview {
 	print "Type 'arm' to enable recording.\n\n";
 	# reconfigure_engine() will generate setup and start transport
 }
-sub doodle {
-
-	# set doodle mode
+sub set_doodle_mode {
 
 	$debug2 and print "&doodle\n";
 	return if engine_running() and really_recording();
 	$preview = "doodle";
-	$unique_inputs_only = 1;
 
 	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
@@ -1369,10 +1366,6 @@ sub doodle {
 	$main->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
-	# allow only unique inputs
-	
-	exclude_duplicate_inputs();
-
 	# reconfigure_engine will generate setup and start transport
 	
 	print "Setting doodle mode.\n";
@@ -1388,6 +1381,8 @@ sub reconfigure_engine {
 
 	# we don't want to disturb recording/mixing
 	return 1 if really_recording() and engine_running();
+
+	find_duplicate_inputs();
 
 	# only act if change in configuration
 
@@ -1444,70 +1439,40 @@ sub reconfigure_engine {
 }
 
 		
-sub exit_preview { # exit preview and doodle modes
+sub exit_preview_mode { # exit preview and doodle modes
 
-		$debug2 and print "&exit_preview\n";
+		$debug2 and print "&exit_preview_mode\n";
 		return unless $preview;
 		stop_transport() if engine_running();
 		$debug and print "Exiting preview/doodle mode\n";
 		$preview = 0;
-		release_doodle_mode();	
+		$main->set(rw => $old_group_rw) if $old_group_rw;
 
 }
 
-sub release_doodle_mode {
+sub find_duplicate_inputs {
 
-		$debug2 and print "&release_doodle_mode\n";
-		# restore preview group REC/MON/OFF setting
-		$main->set(rw => $old_group_rw);		
-
-		enable_excluded_inputs();
-
-		# enable all rec inputs
-		$unique_inputs_only = 0;
-}
-sub enable_excluded_inputs {
-
-	$debug2 and print "&enable_excluded_inputs\n";
-	return unless %old_rw;
-
-	map { $tn{$_}->set(rw => $old_rw{$_}) } $main->tracks
-		if $main->tracks;
-
-	$main->set(rw => $old_group_rw);
-	%old_rw = ();
-
-}
-sub exclude_duplicate_inputs {
-
-	$debug2 and print "&exclude_duplicate_inputs\n";
-	print ("already excluded duplicate inputs\n"), return if %old_rw;
-	
-	my @user = $main->tracks(); # track names
-	map { $old_rw{$_} = $tn{$_}->rw } @user;
-	%excluded = ();
+	%duplicate_inputs = ();
+	$debug2 and print "&find_duplicate_inputs\n";
 	my %already_used;
-	map{ my $source = $tn{$_}->source;
-		 if( $already_used{$source}  ){
-			$excluded{$_} = $tn{$_}->rw;
-		 }
-		 $already_used{$source}++
-	} grep { $tn{$_}->rec_status eq 'REC' } @user;
-	if ( keys %excluded ){
-#			print "Multiple tracks share same inputs.\n";
-#			print "Excluding the following tracks: ", 
-#				join(" ", keys %excluded), "\n";
-		map{ $tn{$_}->set(rw => 'OFF') } keys %excluded;
-	}
+	%excluded = ();
+	map{	my $source = $_->source;
+			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
+		 	$already_used{$source}++
+	} 
+	grep { $_->rw eq 'REC' }
+	map{ $tn{$_} }
+	$main->tracks(); # track names;
 }
+
 
 sub adjust_latency {
 
 	$debug2 and print "&adjust_latency\n";
 	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
 		::Track::all();
-	preview();
-	exit_preview();
+	set_preview_mode();
+	exit_preview_mode();
 	my $cop_status = eval_iam('cop-status');
 	$debug and print $cop_status;
 	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
@@ -3351,9 +3316,7 @@ sub process_line {
 		$term->addhistory($user_input) 
 			unless $user_input eq $previous_text_command;
 		$previous_text_command = $user_input;
-		enable_excluded_inputs() if $preview eq 'doodle';
 		command_process( $user_input );
-		exclude_duplicate_inputs() if $preview eq 'doodle';
 		reconfigure_engine();
 		revise_prompt();
 	}

@@ -349,11 +349,7 @@ our (
                     # (used with JACK only)
     $prompt,        # for text mode
 	$preview,       # am running engine with rec_file disabled
-	$unique_inputs_only,  # exclude tracks sharing same source
-
-
-	%excluded,      # tracks sharing source with other tracks,
-	                # after the first
+	%duplicate_inputs, # rec_status will be OFF in doodle mode
 	$memoize,       # do I cache this_wav_dir?
 	$hires,        # do I have Timer::HiRes?
 	$fade_time, 	# duration for fadein(), fadeout()
