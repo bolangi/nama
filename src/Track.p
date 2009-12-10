@@ -753,6 +753,9 @@ sub remove_insert {
 	}
 }
 
+# these methods have the same name as tracks fields,
+# therefore we access the fields by hash indexing.
+
 sub region_start {
 	my $track = shift;
 	::Mark::mark_time( $track->{region_start} )
