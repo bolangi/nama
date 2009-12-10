@@ -41,8 +41,8 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 sub apply {
 	my $bus = shift;
 	map { 
-		my ($type, $id, $condition) = @$_{type id condition};
-		map { 
+		my ($type, $id, $condition) = @$_{qw(type id condition)};
+		map { $_
 		} map { $::tn{$_} } $::Group::by_name{$bus->group}->tracks;
 
 	} @{ $bus->destinations };

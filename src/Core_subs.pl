@@ -1006,6 +1006,7 @@ sub add_paths_for_main_tracks {
 }
 
 sub add_paths_for_recording {
+	return if $preview eq 'doodle';
 	$debug2 and say "&add_paths_for_recording";
 
 	# we record tracks set to REC, unless rec_defeat is set 
@@ -1343,7 +1344,6 @@ sub preview {
 	release_doodle_mode() if $preview eq 'doodle';
 
 	$preview = "preview";
-	$rec_file->set(status => 0);
 
 	print "Setting preview mode.\n";
 	print "Using both REC and MON inputs.\n";
@@ -1358,8 +1358,6 @@ sub doodle {
 	$debug2 and print "&doodle\n";
 	return if engine_running() and really_recording();
 	$preview = "doodle";
-	$rec_file->set(status => 0);
-	$mon_setup->set(status => 0);
 	$unique_inputs_only = 1;
 
 	# save rw setting of user tracks (not including null group)
@@ -1453,8 +1451,6 @@ sub exit_preview { # exit preview and doodle modes
 		$preview = 0;
 		release_doodle_mode();	
 
-		$rec_file->set(status => 1);
-
 }
 
 sub release_doodle_mode {
@@ -1462,9 +1458,6 @@ sub release_doodle_mode {
 		$debug2 and print "&release_doodle_mode\n";
 		# restore preview group REC/MON/OFF setting
 		$main->set(rw => $old_group_rw);		
-
-		# enable playback from disk
-		$mon_setup->set(status => 1);
 
 		enable_excluded_inputs();
 
