@@ -2,16 +2,17 @@
 # ------------  Bus --------------------
 
 package ::Bus;
-use Modern::Perl;
-use Carp;
+use Modern::Perl; use Carp; our @ISA;
 our $VERSION = 1.0;
-our ($debug); # entire file
-use vars qw(%by_name);
-our @ISA;
-use ::Object qw(						
-[% qx(cat ./bus_fields) %]
-						);
-
+our ($debug, %by_name); 
+use ::Object qw(
+					name
+					rules
+					destination_type
+					destination_id
+					bus_type
+					class
+);
 sub initialize { %by_name = () };
 sub new {
 	my $class = shift;
@@ -23,16 +24,11 @@ sub new {
 		return;
 	}
 	my $bus = bless { 
-		tracks => [], 
-		groups => [], 
 		rules  => [],
-		class => $class,
-		@_ }, $vals{class} // $class;
+		class => $class, # for serialization
+		@_ }, $vals{class} // $class; # for restore
 	$by_name{$bus->name} = $bus;
 }
-
-
-		
 sub all { values %by_name };
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
@@ -43,15 +39,8 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
 
-
 package ::SubBus;
-use Modern::Perl;
-use Carp;
-our @ISA = '::Bus';
-
-use ::Object qw(
-[% qx(cat ./bus_fields) %]
-);
+use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub remove {
 	my $bus = shift;
 
@@ -69,13 +58,7 @@ sub remove {
 } 
 
 package ::SendBusRaw;
-use Modern::Perl;
-use Carp;
-our @ISA = '::Bus';
-use ::Object qw(
-[% qx(cat ./bus_fields ) %]
-
-);
+use Modern::Perl; use Carp;
 sub remove {
 	my $bus = shift;
 
@@ -89,14 +72,7 @@ sub remove {
 	delete $::Bus::by_name{$bus->name};
 }
 package ::SendBusCooked;
-use Modern::Perl;
-use Carp;
-our @ISA = '::SendBusRaw';
-use ::Object qw(
-[% qx(cat ./bus_fields ) %]
-);
-
-
+use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 
 1;
 __END__
