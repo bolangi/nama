@@ -42,7 +42,10 @@ sub prepare {
 	# capture the sample frequency from .namarc
 	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
 
-	first_run();
+	# skip initializations if user (test) supplies project
+	# directory
+	
+	first_run() unless $opts{d}; 
 
 	prepare_static_effects_data() unless $opts{e};
 
@@ -527,24 +530,6 @@ sub rememoize {
 }
 
 =comment
-sub initialize_rules {
-
-$aux_send = ::Rule->new(  
-
-
-		name			=>  'aux_send', 
-		target			=>  'all',
-		chain_id 		=>	sub{ "M".$_[0]->n },
-		input_type		=>  'loop', 
-		input_object	=>  sub{ "loop," .  $_[0]->n},
-		output_type		=> sub{ $_[0]->send_output()->[0]},
-		output_object	=> sub{ $_[0]->send_output()->[1]},
-		pre_output		=>	sub{ $_[0]->pre_send},
- 		condition 		=> sub { "satisfied" if $_[0]->send_type},
-		status			=>  1,
-	);
-
-
 	# rules for instrument monitor buses using raw inputs
 	
 	$mon_setup = ::Rule->new(

@@ -65,8 +65,8 @@ mixer_out_format: cd-stereo      # for ALSA/OSS
 
 # audio file formats
 
-mix_to_disk_format: s16_le,N,frequency
-raw_to_disk_format: s16_le,N,frequency
+mix_to_disk_format: s16_le,N,frequency,i
+raw_to_disk_format: s16_le,N,frequency,i
 
 # globals for our chain setups
 
