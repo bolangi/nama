@@ -999,14 +999,16 @@ sub add_paths_for_main_tracks {
 		
 		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name);
 
-	} 	grep{ $_->rec_status ne 'OFF' } 
+	} 	# exclude MON tracks in doodle mode	
+		grep{ 1 unless $preview eq 'doodle' and $_->rec_status eq 'MON' } 
+		grep{ $_->rec_status ne 'OFF' }  # exclude OFF tracks
 		map{$tn{$_}} 	# convert to Track objects
 		$main->tracks;  # list of Track names
 
 }
 
 sub add_paths_for_recording {
-	return if $preview eq 'doodle';
+	return if $preview; # don't record during preview modes
 	$debug2 and say "&add_paths_for_recording";
 
 	# we record tracks set to REC, unless rec_defeat is set 
