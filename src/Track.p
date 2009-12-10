@@ -925,10 +925,7 @@ sub new {
 
 
 sub tracks { # returns list of track names in group 
-
 	my $group = shift;
-	my @all = ::Track::all;
-	# map {print "type: ", ref $_, $/} ::Track::all; 
 	map{ $_->name } grep{ $_->group eq $group->name } ::Track::all();
 }
 

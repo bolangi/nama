@@ -62,7 +62,6 @@ is( $effects_help[0],
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
 
-
 my $cs_got = eval_iam('cs');
 my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
 Chain "default" [selected] );

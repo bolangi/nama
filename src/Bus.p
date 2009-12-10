@@ -7,10 +7,7 @@ our $VERSION = 1.0;
 our ($debug, %by_name); 
 use ::Object qw(
 					name
-					rules
-					destination_type
-					destination_id
-					bus_type
+					destinations
 					class
 );
 sub initialize { %by_name = () };
@@ -24,8 +21,8 @@ sub new {
 		return;
 	}
 	my $bus = bless { 
-		rules  => [],
-		class => $class, # for serialization
+		destinations => [],
+		class => $class, # for serialization, may be overridden
 		@_ }, $vals{class} // $class; # for restore
 	$by_name{$bus->name} = $bus;
 }
@@ -33,11 +30,23 @@ sub all { values %by_name };
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
 
+# obsolete
+#
 # we will put the following information in the Track as an aux_send
 # 						destination_type
 # 						destination_id
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
+
+sub apply {
+	my $bus = shift;
+	map { 
+		my ($type, $id, $condition) = @$_{type id condition};
+		map { 
+		} map { $::tn{$_} } $::Group::by_name{$bus->group}->tracks;
+
+	} @{ $bus->destinations };
+}
 
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
