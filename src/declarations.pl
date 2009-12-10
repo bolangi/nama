@@ -349,7 +349,8 @@ our (
                     # (used with JACK only)
     $prompt,        # for text mode
 	$preview,       # am running engine with rec_file disabled
-	%duplicate_inputs, # rec_status will be OFF in doodle mode
+	%duplicate_inputs, # named tracks will be OFF in doodle mode
+	%already_used,  #  source => used_by
 	$memoize,       # do I cache this_wav_dir?
 	$hires,        # do I have Timer::HiRes?
 	$fade_time, 	# duration for fadein(), fadeout()

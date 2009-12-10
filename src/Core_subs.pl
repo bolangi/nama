@@ -1449,14 +1449,14 @@ sub exit_preview_mode { # exit preview and doodle modes
 
 }
 
-sub find_duplicate_inputs {
+sub find_duplicate_inputs { # in Main bus only
 
 	%duplicate_inputs = ();
+	%already_used = ();
 	$debug2 and print "&find_duplicate_inputs\n";
-	my %already_used;
 	map{	my $source = $_->source;
 			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
-		 	$already_used{$source}++
+		 	$already_used{$source} //= $_->name;
 	} 
 	grep { $_->rw eq 'REC' }
 	map{ $tn{$_} }
@@ -1594,10 +1594,16 @@ sub connect_jack_ports {
 sub disconnect_jack_ports { connect_jack_ports('dis') }
 
 sub transport_status {
+	
+	map{ 
+		say("Warning: $_: input ",$tn{$_}->source,
+		" is already used by track ",$already_used{$tn{$_}->source},".")
+		if $duplicate_inputs{$_};
+	} $main->tracks;
+
 
 	# assume transport is stopped
 	# print looping status, setup length, current position
-	
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
