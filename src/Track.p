@@ -759,6 +759,7 @@ sub region_start {
 }
 sub region_ending {
 	my $track = shift;
+	return if $track->rec_status ne 'MON';
 	if ( $track->{region_end} eq 'END' ){
 		return get_length($track->full_path);
 	} else {
