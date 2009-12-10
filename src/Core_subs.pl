@@ -481,9 +481,9 @@ Loading project "untitled".
 			return;
 		}
 	} 
-	#chdir project_dir();
+	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
-	#init_buses();	
+	initialize_buses();	
 	initialize_project_data();
 
 	remove_small_wavs(); 
@@ -588,8 +588,11 @@ sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
 
+sub initialize_buses {
+	$main_bus = ::Bus->new(group => 'Main');
+	$null_bus = ::Bus->new(group => 'Null')
+}
 	
-
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
 
