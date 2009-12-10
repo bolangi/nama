@@ -1412,13 +1412,13 @@ sub reconfigure_engine {
 	}
 	$debug and print ("setup change\n");
 
-	# restore playback position unless 
-	
-	#  - doodle mode
-	#  - change in global version
-    #  - change in project
-    #  - user or Mixdown track is REC enabled
-	
+# 	# restore playback position unless 
+# 	
+# 	#  - doodle mode
+# 	#  - change in global version
+#     #  - change in project
+#     #  - user or Mixdown track is REC enabled
+# 	
 # 	my $old_pos;
 # 
 # 	my $will_record = ! $preview 
