@@ -635,7 +635,6 @@ sub initialize_project_data {
 
 	# $is_armed = 0;
 	
-	%excluded = ();
 	$old_snapshot = {};
 	$preview = $initial_user_mode;
 	$mastering_mode = 0;
@@ -1455,7 +1454,6 @@ sub find_duplicate_inputs {
 	%duplicate_inputs = ();
 	$debug2 and print "&find_duplicate_inputs\n";
 	my %already_used;
-	%excluded = ();
 	map{	my $source = $_->source;
 			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
 		 	$already_used{$source}++
