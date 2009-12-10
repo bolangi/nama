@@ -889,7 +889,9 @@ sub user_mon_tracks {
 	map{ $_->n } @user_mon_tracks;
 }
 # return $output{file} entries, including Mixdown 
-sub really_recording {  keys %{$outputs{file}}; }
+sub really_recording { 
+	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
+}
 
 # new object based dispatch
 
@@ -993,6 +995,7 @@ sub initialize_chain_setup_vars {
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
+	undef $chain_setup;
 }
 sub add_paths_for_main_tracks {
 	$debug2 and say "&add_paths_for_main_tracks";
@@ -1306,6 +1309,7 @@ sub write_chains {
 	open my $setup, ">$sf";
 	print $setup $ecs_file;
 	close $setup;
+	$chain_setup = $ecs_file;
 
 }
 

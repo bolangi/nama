@@ -374,4 +374,5 @@ our (
 	%versions,		# store active versions for use after engine run
 	@io, 			# accumulate IO objects for generating setup
 	$track_snapshots, # to save recalculating for each IO object
+	$chain_setup,	# current chain setup
 );
