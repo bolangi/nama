@@ -274,7 +274,7 @@ sub mono_to_stereo {
 				and qx(which file)
 				and qx($cmd) =~ /stereo/i ){ 
 		return q(); 
-	} elsif ( $track->width == 1 and $track->rec_status eq 'REC'
+	} elsif ( ($track->width == 1 or ! $track->width) and $track->rec_status eq 'REC'
 				or  -e $track->full_path
 				and qx(which file)
 				and qx($cmd) =~ /mono/i ){ 
