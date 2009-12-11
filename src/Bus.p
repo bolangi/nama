@@ -8,6 +8,8 @@ our ($debug, %by_name);
 use ::Object qw(
 					name
 					destinations
+					send_type
+					send_id
 					class
 );
 sub initialize { %by_name = () };
@@ -21,11 +23,11 @@ sub new {
 		return;
 	}
 	my $bus = bless { 
-		destinations => [],
 		class => $class, # for serialization, may be overridden
 		@_ }, $vals{class} // $class; # for restore
 	$by_name{$bus->name} = $bus;
 }
+sub group { $_[0]->name }
 sub all { values %by_name };
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
@@ -38,15 +40,6 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 # name, init capital e.g. Brass, identical Group name
 # destination: 3, jconv, loop,output
 
-sub apply {
-	my $bus = shift;
-	map { 
-		my ($type, $id, $condition) = @$_{qw(type id condition)};
-		map { $_
-		} map { $::tn{$_} } $::Group::by_name{$bus->group}->tracks;
-
-	} @{ $bus->destinations };
-}
 
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
@@ -79,6 +72,13 @@ sub remove {
 
 	# remove bus
 	delete $::Bus::by_name{$bus->name};
+}
+sub apply {
+	my $bus = shift;
+	map{ $::g->add_path( $_->target, $_->name, $bus->send_type.'_out');
+		 $::g->set_edge_attributes($_->_name, $bus->send_type.'out', 
+		{ device_id => $bus->send_id })
+	} grep{ $_->group eq $bus->group} ::Track::all()
 }
 package ::SendBusCooked;
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';

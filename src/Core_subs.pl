@@ -1044,8 +1044,7 @@ sub add_paths_for_send_buses {
 			# The signal path is:
 			# [target track] -> [slave track] -> [slave track send_output]
 			
-			#map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
-			map{   $g->add_path( $_->target, $_->name, $_->send_type);
+			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
 			} @tracks; 
 		}
 	} @user_buses;
@@ -3841,7 +3840,7 @@ sub add_send_bus {
 	my ($name, $dest_id, $bus_type) = @_;
 	my $dest_type = dest_type( $dest_id );
 
-	# dest_type: soundcard | jack_client | loop
+	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
 	
 	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
 
@@ -3851,18 +3850,12 @@ sub add_send_bus {
 	} else {
 	my @args = (
 		name => $name, 
-		bus_type => $bus_type,
-		groups => [$name],
-		rules => $bus_type eq 'cooked' 
-			?  [qw(send_bus_out )]
-			:  [qw(rec_setup mon_setup send_bus_out)],
-		destination_type => $dest_type,
-		destination_id	 => $dest_id,
+		send_type => $dest_type,
+		send_id	 => $dest_id,
 	);
 
-	my $bus = $bus_type eq 'cooked'
-		?  ::SendBusCooked->new( @args ) 
-		:  ::SendBusRaw->new( @args );
+	my $class = $bus_type eq 'cooked' ? '::SendBusCooked' : '::SendBusRaw';
+	my $bus = $class->new( @args );
 
 	$bus or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
@@ -3872,10 +3865,6 @@ sub add_send_bus {
 							rw => 'MON',
 							target => $_,
 							group  => $name,
-							source_type => undef,
-							source_id => undef,
-							send_type => $dest_type, 
-							send_id => $dest_id,
 						)
    } $main->tracks;
 		
