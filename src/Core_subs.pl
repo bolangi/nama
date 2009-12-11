@@ -589,8 +589,8 @@ sub engine_running {
 };
 
 sub initialize_buses {
-	$main_bus = ::Bus->new(name => 'Main');
-	$null_bus = ::Bus->new(name => 'Null');
+	$main_bus = ::Bus->new(name => 'Main_Bus');
+	$null_bus = ::Bus->new(name => 'Null_Bus');
 }
 	
 sub initialize_project_data {
@@ -642,6 +642,7 @@ sub initialize_project_data {
 	
 	%bunch = ();	
 	
+	::Bus->initialize();
 	::Group->initialize();
 	create_groups();
 	::Track->initialize();

@@ -282,7 +282,7 @@ sub mono_to_stereo {
 				and qx($cmd) =~ /mono/i ){ 
 		return "-chcopy:1,2" 
 	} else { # do nothing for higher channel counts
-	} # carp "Track ".$track->name.": Unexpected channel count\n"; 
+	} 
 }
 
 sub rec_route {
