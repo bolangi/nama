@@ -3818,10 +3818,8 @@ sub add_sub_bus {
 	::SubBus->new( 
 		name => $name, 
 		bus_type => 'sub',
-		groups => [$name],
-		rules => [qw(rec_file)],
-		destination_type => $type // 'track',
-		destination_id	 => $id // $name,
+		send_type => $type // 'track',
+		send_id	 => $id // $name,
 		)
 	or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
@@ -3831,8 +3829,6 @@ sub add_sub_bus {
 						source_id 	=> $name,
 						rec_defeat 	=> 1,
 						);
-	
-	
 }
 	
 sub add_send_bus {
@@ -3857,10 +3853,10 @@ sub add_send_bus {
 	my $class = $bus_type eq 'cooked' ? '::SendBusCooked' : '::SendBusRaw';
 	my $bus = $class->new( @args );
 
-	$bus or carp("can't create bus!\n"), return;
 	::Group->new( name => $name, rw => 'REC');
-	}
+	$bus or carp("can't create bus!\n"), return;
 
+	}
 	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
 							rw => 'MON',
 							target => $_,
