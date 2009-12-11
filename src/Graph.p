@@ -231,6 +231,10 @@ sub add_loop {
 	# edges so $a-$loop will not be picked up 
 	# in successors list.
 	
+	# for later assigning chain_id to loop-loop chain
+	# will take forms like J7a, J7b,...
+	# n: track index, j: alphabetical counter
+	$g->set_vertex_attributes($loop,{n => $::tn{$a}->n, j => 'a'});
 	map{ 
  		my $attr = $g->get_edge_attributes($a,$_);
  		$debug and say "deleting edge: $a-$_";

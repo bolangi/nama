@@ -51,9 +51,9 @@ sub new {
 		unshift @_, %$track, %type_id; 
 
 	}
-	no warnings  'uninitialized';
-	say join " ", "all fields", @_;
-	use warnings 'uninitialized';
+	#no warnings  'uninitialized';
+	#say join " ", "all fields", @_;
+	#use warnings 'uninitialized';
 	my $object = bless { @_	}, $class;
 }
 {my %io = ( input => 'i', output => 'o' );
@@ -110,9 +110,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	
-	say "class from_loop invoked: vals: ", ::yaml_out \%vals;
-	::IO::new($class, %vals, device_id => "loop,$vals{device_id}");
+	$class->SUPER::new( %vals, device_id => "loop,$vals{device_id}");
 }
 package ::IO::to_loop;
 use Modern::Perl; our @ISA = '::IO::from_loop';
@@ -123,11 +121,8 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my $io = ::IO->new(@_); # to get type... may be jack
-	say "io class: ",ref $io;
 	my ($type, $id) = ($io->type, $io->device_id);
-	say "type: $type, id: $id";
 	$class = ::IO::get_class($type, $vals{direction});
-	say "class: $class: args: @_";
 	$class->new(@_, device_id => $::capture_device);
 }
 
@@ -200,14 +195,12 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	#say "io device1: ",$io->device_id;
 	my $device = $::devices{$io->device_id}{ecasound_id};
 	$io->set(device_id => $device);
 	no warnings 'uninitialized';
 	$io->set(ecs_extra => join " ", $io->rec_route, $io->mono_to_stereo) 
 		unless $io->ecs_extra;
 	use warnings 'uninitialized';
-	#say "io device2: ",$io->device_id;
 	$io;
 }
 

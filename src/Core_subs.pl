@@ -1180,10 +1180,6 @@ sub process_routing_graph {
 }
 sub non_track_dispatch {
 
-	# loop devices in graphic-routing Nama are always associated with a track
-	# so its always safe to including (track => track_snapshot)
-	# in the edge attributes.
-	
 	# loop-to-loop: assign chain_id to edge (if not present)
 	#
 	# we will use lower case j1, j2 for these "jumper chains"
@@ -1199,21 +1195,13 @@ sub non_track_dispatch {
 
 	# we will issue two IO objects, one for the chain input
 	# fragment, one for the chain output
-	# will be nice if ::Graph::expand_graph, add_insert
-	# can supply the chain_id, that way 
-	# this sub can just look at the two 
-	# nodes, find the right classes and
-	# create the objects.
-	
-	# okay we assume it will
-	#
-	# No it won't, can't know which is the 'real' track
-	# which gets effects
 	
 	my $edge = shift;
 	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
 	my $attr = $g->get_edge_attributes(@$edge);
-	$attr->{chain_id} //= 'j'.++$jumper_id;
+	my $vattr = $g->get_vertex_attributes($edge->[0]);
+	
+	$attr->{chain_id} //= 'J'.$vattr->{n}. $vattr->{j}++;
 	my @direction = qw(input output);
 	map{ 
 		my $direction = shift @direction;
