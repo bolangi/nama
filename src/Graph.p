@@ -33,7 +33,7 @@ sub expand_graph {
 		insert_near_side_loop($g,$a,$b) 
 	}
 	grep{ my($a,$b) = @{$_};  
-		$b eq 'soundcard_out' and $g->successors($a) > 1
+		! is_a_track($b) and $g->successors($a) > 1
 	} $g->edges;
 	
 }
