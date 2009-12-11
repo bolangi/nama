@@ -33,13 +33,13 @@ sub expand_graph {
 
 		elsif ( is_a_track($a) and $g->successors($a) > 1 ) {
 			$debug and say "fan_out from track $a";
-			insert_near_side_loop($g,$a,$b);}
+			add_near_side_loop($g,$a,$b);}
 	
 		# case 3: fan in to track: use far side loop
 		
 		elsif ( is_a_track($b) and $g->predecessors($b) > 1 ) {
 			$debug and say "fan in to track $b";
-			insert_far_side_loop($g,$a,$b);}
+			add_far_side_loop($g,$a,$b);}
 		else { $debug and say "$a-$b: no action taken" }
 	}
 	
@@ -80,7 +80,7 @@ sub add_insert {
 	
 	my ($successor) = $g->successors($name);
 	my $loop = $name."_insert";
-	my ($dry) = insert_near_side_loop( $g, $name, $successor, $loop);
+	my ($dry) = add_near_side_loop( $g, $name, $successor, $loop);
 	$dry->set(group => 'Insert');
 
 	$dry->set( hide => 1);
@@ -137,24 +137,24 @@ sub add_loop {
 	my $fan_in  = $g->predecessors($b);
 	$debug and say "$b: fan_in $fan_in";
 	if ($fan_out > 1){
-		insert_near_side_loop($g,$a,$b, out_loop($a))
+		add_near_side_loop($g,$a,$b, out_loop($a))
 	} elsif ($fan_in  > 1){
-		insert_far_side_loop($g,$a,$b, in_loop($b))
+		add_far_side_loop($g,$a,$b, in_loop($b))
 	} elsif ($fan_in == 1 and $fan_out == 1){
 
 	# we expect a single user track to feed to Master_in 
 	# as multiple user tracks do
 	
 			$b eq 'Master' 
-				?  insert_far_side_loop($g,$a,$b,in_loop($b))
+				?  add_far_side_loop($g,$a,$b,in_loop($b))
 
 	# otherwise default to near_side ( *_out ) loops
-				: insert_near_side_loop($g,$a,$b,out_loop($a));
+				: add_near_side_loop($g,$a,$b,out_loop($a));
 
 	} else {croak "unexpected fan"};
 }
 
- sub insert_near_side_loop {
+ sub add_near_side_loop {
 
 # a - b
 # a - c
@@ -220,28 +220,32 @@ sub add_loop {
 #  so their output edges to soundcard, etc. will all
 #  have unique names.
 
+# I will be moving edges (along with their attributes)
+# but I cannot assign chain_id them because I have
+# no way of knowing which is the edge that will use
+# the track number and will therefore get the track effects
+
  	my ($g, $a, $b, $loop) = @_;
  	$debug and say "$a-$b: insert near side loop";
- 	my $j = 'a'; # index for (possibly) multiple jumper edges
+	# we will insert loop _after_ processing successor
+	# edges so $a-$loop will not be picked up 
+	# in successors list.
+	
 	map{ 
- 		$debug and say "deleting edge: $a-$_";
-		# insert loop 
  		my $attr = $g->get_edge_attributes($a,$_);
+ 		$debug and say "deleting edge: $a-$_";
  		$g->delete_edge($a,$_);
-		# add second arm 
+ 		$debug and say "adding edge: $loop-$_";
 		$g->add_edge($loop, $_);
-		my @chain_id = ();
-		my $id = 'J'.$::tn{$a}->n.$j++;
-		@chain_id = ( chain_id => $id) unless is_a_track($a);
-		$g->set_edge_attributes($loop,$_, { @chain_id, $attr ? %$attr : () });
+		$g->set_edge_attributes($loop,$_, $attr) if $attr;
 		$seen{"$a-$_"}++;
  	} $g->successors($a);
-	$debug and say "adding path: $a " , $loop, " $_";
+	$debug and say "adding edge: $a-$loop";
 	$g->add_edge($a,$loop);
 }
  
 
-sub insert_far_side_loop {
+sub add_far_side_loop {
 	my ($g, $a, $b, $loop) = @_;
 	my $j = 'a';
 	$debug and say "$a-$b: insert far side loop";

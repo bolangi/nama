@@ -847,35 +847,7 @@ Unable to provide latency compensation.
 
 ## chain setup generation
 
-
-sub all_chains {
-	my @active_tracks = grep { $_->rec_status ne q(OFF) } ::Track::all() 
-		if ::Track::all();
-	map{ $_->n} @active_tracks if @active_tracks;
-}
-
-# return list of indices of user tracks with REC status
-
-sub user_rec_tracks {
-	my @user_tracks = ::Track::all();
-	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
-	return unless @user_tracks;
-	my @user_rec_tracks = grep { $_->rec_status eq 'REC' } @user_tracks;
-	return unless @user_rec_tracks;
-	map{ $_->n } @user_rec_tracks;
-}
-
-# return list of indices of user tracks with MON status
-
-sub user_mon_tracks {
-	my @user_tracks = ::Track::all();
-	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
-	return unless @user_tracks;
-	my @user_mon_tracks = grep { $_->rec_status eq 'MON' } @user_tracks;
-	return unless @user_mon_tracks;
-	map{ $_->n } @user_mon_tracks;
-}
-# return $output{file} entries, including Mixdown 
+# return file output entries, including Mixdown 
 sub really_recording { 
 	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
@@ -884,8 +856,10 @@ sub really_recording {
 
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
+	
+	$debug and say "dispatch: $edge->[0]-$edge->[1]";
 	my($name, $endpoint, $direction) = decode_edge($edge);
-	#say "name: $name, endpoint: $endpoint, direction: $direction";
+	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 	my @args = (track => $track_snapshots->{$name},
@@ -899,6 +873,24 @@ sub dispatch { # creates an IO object from a graph edge
 
 
 sub non_track_dispatch {
+
+	# loop devices in graphic-routing Nama are always associated with a track
+	# so its always safe to including (track => # track_snapshot)
+	# in the edge attributes.
+	
+	# loop-to-loop: assign chain_id to edge (if not present)
+	#
+	# we will use lower case j1, j2 for these "jumper chains"
+	
+	# soundcard_in - wav_out: we expect edge attributes 
+	# to have been provided for handling this. 
+
+	# loop-soundcard_out: 
+	#
+	# track7-soundcard_out as aux_send will have chain id S7
+	# that will be transferred by expand_graph() to 
+	# the new edge, loop-soundcard-out
+
 	# we will issue two IO objects, one for the chain input
 	# fragment, one for the chain output
 	# will be nice if ::Graph::expand_graph, add_insert
@@ -911,7 +903,6 @@ sub non_track_dispatch {
 	
 	my $edge = shift;
 	my $attr = $g->get_edge_attributes(@$edge);
-	
 	my @direction = qw(input output);
 	map{ my $class = ::IO::get_class($_, shift @direction);
 	$class->new($attr ? %$attr : () ) } @$edge;
@@ -965,7 +956,7 @@ sub generate_setup {
 
 	::Graph::expand_graph($g); 
 
-	$debug and say "The graph is:\n$g";
+	$debug and say "The expanded graph is:\n$g";
 
 	# insert handling
 	::Graph::add_inserts($g);
