@@ -901,6 +901,26 @@ sub dispatch { # creates an IO object from a graph edge
 	#say "dispatch class: $class";
 	$class->new(@args);
 }
+
+
+sub non_track_dispatch {
+	# we will issue two IO objects, one for the chain input
+	# fragment, one for the chain output
+	# will be nice if ::Graph::expand_graph, add_insert
+	# can supply the chain_id, that way 
+	# this sub can just look at the two 
+	# nodes, find the right classes and
+	# create the objects.
+	
+	# okay we assume it will
+	
+	my $edge = shift;
+	my $attr = $g->get_edge_attributes(@$edge);
+	
+	my @direction = qw(input output);
+	map{ my $class = io_class($_, shift @direction);
+	$class->new($attr ? %$attr : () ) } @$edge;
+}
 	
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
