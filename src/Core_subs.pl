@@ -852,71 +852,6 @@ sub really_recording {
 	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
-# new object based dispatch
-
-sub dispatch { # creates an IO object from a graph edge
-	my $edge = shift;
-	
-	$debug and say "dispatch: $edge->[0]-$edge->[1]";
-	my($name, $endpoint, $direction) = decode_edge($edge);
-	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
-	my $track = $tn{$name};
-	my $class = ::IO::get_class( $endpoint, $direction );
-	my @args = (track => $track_snapshots->{$name},
-				endpoint => $endpoint,
-				direction => $direction,
-				chain_id => $tn{$name}->n,
-				override($name, $edge));
-	#say "dispatch class: $class";
-	$class->new(@args);
-}
-
-
-sub non_track_dispatch {
-
-	# loop devices in graphic-routing Nama are always associated with a track
-	# so its always safe to including (track => # track_snapshot)
-	# in the edge attributes.
-	
-	# loop-to-loop: assign chain_id to edge (if not present)
-	#
-	# we will use lower case j1, j2 for these "jumper chains"
-	
-	# soundcard_in - wav_out: we expect edge attributes 
-	# to have been provided for handling this. 
-
-	# loop-soundcard_out: 
-	#
-	# track7-soundcard_out as aux_send will have chain id S7
-	# that will be transferred by expand_graph() to 
-	# the new edge, loop-soundcard-out
-
-	# we will issue two IO objects, one for the chain input
-	# fragment, one for the chain output
-	# will be nice if ::Graph::expand_graph, add_insert
-	# can supply the chain_id, that way 
-	# this sub can just look at the two 
-	# nodes, find the right classes and
-	# create the objects.
-	
-	# okay we assume it will
-	
-	my $edge = shift;
-	my $attr = $g->get_edge_attributes(@$edge);
-	my @direction = qw(input output);
-	map{ my $class = ::IO::get_class($_, shift @direction);
-	$class->new($attr ? %$attr : () ) } @$edge;
-}
-	
-sub decode_edge {
-	# assume track-endpoint or endpoint-track
-	# return track, endpoint
-	my ($a, $b) = @{$_[0]};
-	#say "a: $a, b: $b";
-	my ($name, $endpoint) = $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
-	my $direction = $tn{$a} ? 'output' : 'input';
-	($name, $endpoint, $direction)
-}
 
 sub generate_setup { 
 
@@ -1031,7 +966,7 @@ sub add_paths_for_recording {
 		# connect IO
 		
 		my ($type, $device_id) = @{ $_->source_input };
-		$g->add_path($type, $name, 'wav_out');
+		$g->add_path($_->source_type ."_in", $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
@@ -1209,10 +1144,13 @@ sub track_snapshots {
 	\%tracks;
 }
 }
+# new object based dispatch from routing graph
 	
+{my $jumper_id;
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
 	$track_snapshots = track_snapshots(); # sets global used by dispatch
+	$jumper_id = 0;  # for loop-to-loop chain ids
 	#say yaml_out($track_snapshots); die "here";
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
@@ -1240,7 +1178,79 @@ sub process_routing_graph {
 	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 	@input_chains + @output_chains # to sense empty chain setup
 }
+sub non_track_dispatch {
+
+	# loop devices in graphic-routing Nama are always associated with a track
+	# so its always safe to including (track => # track_snapshot)
+	# in the edge attributes.
 	
+	# loop-to-loop: assign chain_id to edge (if not present)
+	#
+	# we will use lower case j1, j2 for these "jumper chains"
+	
+	# soundcard_in - wav_out: we expect edge attributes 
+	# to have been provided for handling this. 
+
+	# loop-soundcard_out: 
+	#
+	# track7-soundcard_out as aux_send will have chain id S7
+	# that will be transferred by expand_graph() to 
+	# the new edge, loop-soundcard-out
+
+	# we will issue two IO objects, one for the chain input
+	# fragment, one for the chain output
+	# will be nice if ::Graph::expand_graph, add_insert
+	# can supply the chain_id, that way 
+	# this sub can just look at the two 
+	# nodes, find the right classes and
+	# create the objects.
+	
+	# okay we assume it will
+	
+	my $edge = shift;
+	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
+	my $attr = $g->get_edge_attributes(@$edge);
+	$attr->{chain_id} //= 'j'.++$jumper_id;
+	#say "attr: ",yaml_out $attr;
+	my @direction = qw(input output);
+	map{ 
+		my $class = ::IO::get_class($_, shift @direction);
+		my $attrib = $attr;
+		$attrib->{device_id} //= $_ if ::Graph::is_a_loop($_);
+		$debug and say "$_: class: $class, chain_id: $attrib->{chain_id},",
+ 			"device_id: $attrib->{device_id}";
+		$class->new($attrib ? %$attrib : () ) } @$edge;
+}
+} # end $jumper_id scope 
+	
+
+sub dispatch { # creates an IO object from a graph edge
+	my $edge = shift;
+	non_track_dispatch($edge), return if not grep{ $tn{$_} } @$edge ;
+	$debug and say "dispatch: $edge->[0]-$edge->[1]";
+	my($name, $endpoint, $direction) = decode_edge($edge);
+	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
+	my $track = $tn{$name};
+	my $class = ::IO::get_class( $endpoint, $direction );
+	my @args = (track => $track_snapshots->{$name},
+				endpoint => $endpoint,
+				device_id => $endpoint,
+				direction => $direction,
+				chain_id => $tn{$name}->n,
+				override($name, $edge));
+	#say "dispatch class: $class";
+	$class->new(@args);
+}
+
+sub decode_edge {
+	# assume track-endpoint or endpoint-track
+	# return track, endpoint
+	my ($a, $b) = @{$_[0]};
+	#say "a: $a, b: $b";
+	my ($name, $endpoint) = $tn{$a} ? @{$_[0]} : reverse @{$_[0]} ;
+	my $direction = $tn{$a} ? 'output' : 'input';
+	($name, $endpoint, $direction)
+}
 sub override {
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;

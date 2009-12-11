@@ -246,39 +246,23 @@ sub add_loop {
  
 
 sub add_far_side_loop {
-	my ($g, $a, $b, $loop) = @_;
-	my $j = 'a';
-	$debug and say "$a-$b: insert far side loop";
-	map{
-		$debug and say "deleting edge: $_-$b";
-		my $attr = $g->get_edge_attributes($_,$b);
-		$g->delete_edge($_,$b);
-		$debug and say "adding path: $loop, $b";
-		$g->add_edge($loop,$b);
-		$g->set_edge_attributes($loop,$b, $attr) if $attr;
-
-		# insert loop in every case
-
-		# add second arm if predecessor is track
-		if ( $::tn{$_} ){ $g->add_edge($_, $loop) }
-
-		# insert anon track if successor is non-track
-		else {  
-
-			my $id = 'J'.$::tn{$b}->n . $j++;
-			my $nam = $::tn{$b}->name . '_jump'; 
-			my $anon = ::SlaveTrack->new( 
-				target => $b,
-				name => $nam,
-				group => 'Temp',
-				rw => 'REC');
-
-			add_path($_, $nam, $loop);
-			$g->set_vertex_attributes($nam, { chain_id => $id });
-		}
-
-		$seen{"$_-$b"}++
-	} $g->predecessors($b);
+ 	my ($g, $a, $b, $loop) = @_;
+ 	$debug and say "$a-$b: insert far side loop";
+	# we will insert loop _after_ processing predecessors
+	# edges so $loop-$b  will not be picked up 
+	# in predecessors list.
+	
+	map{ 
+ 		my $attr = $g->get_edge_attributes($_,$b);
+ 		$debug and say "deleting edge: $_-$b";
+ 		$g->delete_edge($_,$b);
+ 		$debug and say "adding edge: $_-$loop";
+		$g->add_edge($_,$loop);
+		$g->set_edge_attributes($_,$loop, $attr) if $attr;
+		$seen{"$_-$b"}++;
+ 	} $g->predecessors($b);
+	$debug and say "adding edge: $loop-$b";
+	$g->add_edge($loop,$b);
 }
 
 

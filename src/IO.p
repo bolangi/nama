@@ -110,7 +110,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	$class->SUPER::new(%vals, device_id => "loop,$vals{endpoint}");
+	$class->SUPER::new(%vals);
 }
 
 package ::IO::to_loop;
@@ -122,11 +122,12 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my $io = ::IO->new(@_); # to get type... may be jack
-	#say "io class: ",ref $io;
+	say "io class: ",ref $io;
 	my ($type, $id) = ($io->type, $io->device_id);
-	#say "type: $type, id: $id";
+	say "type: $type, id: $id";
 	$class = ::IO::get_class($type, $vals{direction});
-	$class->new(@_);
+	say "class: $class: args: @_";
+	$class->new(@_, device_id => $::capture_device);
 }
 
 package ::IO::to_soundcard;

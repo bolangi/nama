@@ -364,7 +364,6 @@ sub input_path { # signal path, not file path
 
 	}
 }
-
 # The following two subroutines are not object methods.
 
 sub all { @all }
