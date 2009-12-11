@@ -24,6 +24,13 @@ our %io_class = qw(
 	jack_multi_out			::IO::to_jack_multi
 	);
 
+sub get_class {
+	my ($endpoint,$direction) = @_;
+	return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"}
+		if ::Graph::is_a_loop($endpoint);
+	$io_class{$endpoint} or croak "unrecognized endpoint type: $endpoint"
+}
+
 use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 sub new {
 	my $class = shift;
@@ -118,7 +125,7 @@ sub new {
 	#say "io class: ",ref $io;
 	my ($type, $id) = ($io->type, $io->device_id);
 	#say "type: $type, id: $id";
-	$class = ::io_class($type);
+	$class = ::IO::get_class($type, $vals{direction});
 	$class->new(@_);
 }
 
@@ -128,7 +135,7 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my ($type, $id) = @{ ::soundcard_output()};
-	$class = ::io_class($type);
+	$class = ::IO::get_class($type, $vals{direction});
 	$class->new(@_, device_id => $id);
 }
 

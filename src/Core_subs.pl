@@ -887,12 +887,7 @@ sub dispatch { # creates an IO object from a graph edge
 	my($name, $endpoint, $direction) = decode_edge($edge);
 	#say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
-	my $class;
-	# special handling for loops 
-	if (::Graph::is_a_loop($endpoint) ){
-		#say "$endpoint is a loop";
-		$class = io_class( $direction eq 'input' ?  "loop_source" : "loop_sink")
-	} else { $class = io_class( $endpoint ) }
+	my $class = ::IO::get_class( $endpoint, $direction );
 	my @args = (track => $track_snapshots->{$name},
 				endpoint => $endpoint,
 				direction => $direction,
@@ -918,7 +913,7 @@ sub non_track_dispatch {
 	my $attr = $g->get_edge_attributes(@$edge);
 	
 	my @direction = qw(input output);
-	map{ my $class = io_class($_, shift @direction);
+	map{ my $class = ::IO::get_class($_, shift @direction);
 	$class->new($attr ? %$attr : () ) } @$edge;
 }
 	
@@ -931,8 +926,6 @@ sub decode_edge {
 	my $direction = $tn{$a} ? 'output' : 'input';
 	($name, $endpoint, $direction)
 }
-
-sub io_class { $::IO::io_class{$_[0]} or croak "unrecognized endpoint type: $_[0]"}
 
 sub generate_setup { 
 
