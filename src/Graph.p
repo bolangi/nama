@@ -16,25 +16,32 @@ sub expand_graph {
 	my $g = shift; 
 	%seen = ();
 	
-	# case 1: both nodes are tracks
 	
-	map{ my($a,$b) = @{$_}; 
-		$debug and say "processing track-track edge: $a-$b";
-		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
-		add_loop($g,$a,$b) unless $seen{"$a-$b"};
-	} grep{my($a,$b) = @{$_}; is_a_track($a) and is_a_track($b);} 
-	$g->edges;
-
-	# case 2: fan out from (track) with one arm reaching soundard
-	map{ 
+	for ($g->edges){
 		my($a,$b) = @{$_}; 
-		is_a_track($a) or croak "$a: expected track." ;
-		$debug and say "soundcard edge $a $b";
-		insert_near_side_loop($g,$a,$b) 
+		$debug and say "$a-$b: processing...";
+		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
+		next if $seen{"$a-$b"};
+
+		# case 1: both nodes are tracks: default insertion logic
+	
+		if ( is_a_track($a) and is_a_track($b) ){ 
+			$debug and say "processing track-track edge: $a-$b";
+			add_loop($g,$a,$b) } 
+
+		# case 2: fan out from track: use near side loop
+
+		elsif ( is_a_track($a) and $g->successors($a) > 1 ) {
+			$debug and say "fan_out from track $a";
+			insert_near_side_loop($g,$a,$b);}
+	
+		# case 3: fan in to track: use far side loop
+		
+		elsif ( is_a_track($b) and $g->predecessors($b) > 1 ) {
+			$debug and say "fan in to track $b";
+			insert_far_side_loop($g,$a,$b);}
+		else { $debug and say "$a-$b: no action taken" }
 	}
-	grep{ my($a,$b) = @{$_};  
-		! is_a_track($b) and $g->successors($a) > 1
-	} $g->edges;
 	
 }
 sub add_path {
@@ -147,44 +154,92 @@ sub add_loop {
 	} else {croak "unexpected fan"};
 }
 
-sub insert_near_side_loop {
-	my ($g, $a, $b, $loop) = @_;
-	$debug and say "$a-$b: insert near side loop";
-	my $j = 'a';
-	map{
-		$debug and say "deleting edge: $a-$_";
+ sub insert_near_side_loop {
 
-		# insert loop in every case
-		my $attr = $g->get_edge_attributes($a,$_);
-		$g->delete_edge($a,$_);
-		$debug and say "adding path: $a " , $loop, " $_";
-		$g->add_edge($a,$loop);
-		$g->set_edge_attributes($a,$loop, $attr) if $attr;
+# a - b
+# a - c
+# a - d
+#
+# converts to 
+#
+# a - a_out
+# a_out - b
+# a_out - c
+# a_out - d
 
-		# add second arm if successor is track
-		if ( $::tn{$_} ){ 
-			$debug and say "successor '$_' is a track";
-			$debug and say "adding path: $loop, $_";
-			$g->add_edge($loop, $_) }
-		# insert anon track if successor is non-track
-		# ( when adding an insert, successor is always non-track )
-		else {  
-		$debug and say "successor $_ is non-track";
+# if b is a track, b provides the chain_id
+#
+# if b is a non-track, we need to use an anonymous track
+# providing a chain_id to make the connection, or we
+# need to make a edge with it's own chain_id and a 
+# reference to the track snapshot. 
+#
+# that is the new method.
+#
+# (comment: why do we need a track snapshot? why can't we
+# just copy the attributes from the track itself? I think
+# because we need to override, and accomplish this by 
+# appending key-value pairs to a hash)
 
-			my $nam = $::tn{$a}->name . '_jump'; 
-			my $id = 'J'.$::tn{$a}->n.$j++;
-			my $anon = ::SlaveTrack->new( 
-				target => $a,
-				rw => 'REC',
-				name => $nam,
-				group => 'Temp');
+# we deal with all edges departing from $a, the left node.
+# I call it a-x below, but it is actually a-$_ where $_ 
+# is an alias to each of the successor node.
+#
+# The old way, using a temporary SlaveTrack
+# 
+# 1. start with a - x
+# 
+# 2. delete a - x 
+# 
+# 3. add a - a_out
+# 
+# 4. x is track: add a_out - x
+# 
+# 5. x is non - track: add a_out - slave_track - x
+# 
+# The new way, using edge attributes
+# 
+# 1,2,3,4. as above
+# 
+# 5. x is non-track: add a_out-x with attributes
+# 	track => a_track_snapshot, chain_id => J<n><a>
+# 	where <n> is the track index, and <a> is an 
+# 	alphabetical incrementing counter.
+#
+#   No auto increment (here), 
+#   a) because we allow ONE aux send and ONE insert per track
+#   b) because we set the chain_id (however determined)
+#      in, for example, the add_paths_for_aux_sends()
+#      so we can consider that problem solved here.
+#
+#  Conclusion: create the new edge and copy the edge attribute if any
+#
+#  Edges are still unique (no multiedge handling needed) because:
+#  If tracks are feeding a bus or Master, with an aux-send to Soundcard,
+#  that is only one edge to Soundcard. Send buses create new tracks,
+#  so their output edges to soundcard, etc. will all
+#  have unique names.
 
-			add_path($loop,$nam,$_);
-			$g->set_vertex_attributes($nam, { chain_id => $id });
-		}
-		$seen{"$a-$_"}++
-	} $g->successors($a);
+ 	my ($g, $a, $b, $loop) = @_;
+ 	$debug and say "$a-$b: insert near side loop";
+ 	my $j = 'a'; # index for (possibly) multiple jumper edges
+	map{ 
+ 		$debug and say "deleting edge: $a-$_";
+		# insert loop 
+ 		my $attr = $g->get_edge_attributes($a,$_);
+ 		$g->delete_edge($a,$_);
+		# add second arm 
+		$g->add_edge($loop, $_);
+		my @chain_id = ();
+		my $id = 'J'.$::tn{$a}->n.$j++;
+		@chain_id = ( chain_id => $id) unless is_a_track($a);
+		$g->set_edge_attributes($loop,$_, { @chain_id, $attr ? %$attr : () });
+		$seen{"$a-$_"}++;
+ 	} $g->successors($a);
+	$debug and say "adding path: $a " , $loop, " $_";
+	$g->add_edge($a,$loop);
 }
+ 
 
 sub insert_far_side_loop {
 	my ($g, $a, $b, $loop) = @_;
