@@ -110,7 +110,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	::IO::new($class, %vals, device_id => "loop,$vals{endpoint}");
+	$class->SUPER::new(%vals, device_id => "loop,$vals{endpoint}");
 }
 
 package ::IO::to_loop;
@@ -151,7 +151,7 @@ package ::IO::to_jack_client;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
-	my $io = ::IO::new($class, @_);
+	my $io = $class->SUPER::new(@_);
 	my $client = $io->device_id;
 	$io->set(device_id => "jack,$client");
 	my $format;
@@ -197,7 +197,7 @@ package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
-	my $io = ::IO::new($class, @_);
+	my $io = $class->SUPER::new(@_);
 	#say "io device1: ",$io->device_id;
 	my $device = $::devices{$io->device_id}{ecasound_id};
 	$io->set(device_id => $device);
@@ -213,7 +213,7 @@ package ::IO::to_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
-	my $io = ::IO::new($class, @_);
+	my $io = $class->SUPER::new(@_);
 	my $dubious_dev = $io->device_id;
 	# override device_id with default unless meaningful value present
 	if ( ! $::devices{$dubious_dev} ){  
