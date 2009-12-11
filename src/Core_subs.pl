@@ -1181,7 +1181,7 @@ sub process_routing_graph {
 sub non_track_dispatch {
 
 	# loop devices in graphic-routing Nama are always associated with a track
-	# so its always safe to including (track => # track_snapshot)
+	# so its always safe to including (track => track_snapshot)
 	# in the edge attributes.
 	
 	# loop-to-loop: assign chain_id to edge (if not present)
@@ -1206,19 +1206,23 @@ sub non_track_dispatch {
 	# create the objects.
 	
 	# okay we assume it will
+	#
+	# No it won't, can't know which is the 'real' track
+	# which gets effects
 	
 	my $edge = shift;
 	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
 	my $attr = $g->get_edge_attributes(@$edge);
 	$attr->{chain_id} //= 'j'.++$jumper_id;
-	#say "attr: ",yaml_out $attr;
 	my @direction = qw(input output);
 	map{ 
-		my $class = ::IO::get_class($_, shift @direction);
-		my $attrib = $attr;
+		my $direction = shift @direction;
+		my $class = ::IO::get_class($_, $direction);
+		my $attrib = {%$attr};
 		$attrib->{device_id} //= $_ if ::Graph::is_a_loop($_);
-		$debug and say "$_: class: $class, chain_id: $attrib->{chain_id},",
- 			"device_id: $attrib->{device_id}";
+		$attrib->{direction} //= $direction;
+		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
+ 			"device_id: $attrib->{device_id}, direction $direction";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 }
 } # end $jumper_id scope 
@@ -1226,14 +1230,14 @@ sub non_track_dispatch {
 
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
-	non_track_dispatch($edge), return if not grep{ $tn{$_} } @$edge ;
+	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
 	$debug and say "dispatch: $edge->[0]-$edge->[1]";
 	my($name, $endpoint, $direction) = decode_edge($edge);
 	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 	my @args = (track => $track_snapshots->{$name},
-				endpoint => $endpoint,
+			#	endpoint => $endpoint,
 				device_id => $endpoint,
 				direction => $direction,
 				chain_id => $tn{$name}->n,

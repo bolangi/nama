@@ -50,10 +50,10 @@ sub new {
 		my %type_id = (type => $type, device_id => $id);
 		unshift @_, %$track, %type_id; 
 
-	no warnings  'uninitialized';
-	#say join " ", "all fields", @_;
-	use warnings 'uninitialized';
 	}
+	no warnings  'uninitialized';
+	say join " ", "all fields", @_;
+	use warnings 'uninitialized';
 	my $object = bless { @_	}, $class;
 }
 {my %io = ( input => 'i', output => 'o' );
@@ -110,9 +110,10 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	$class->SUPER::new(%vals);
+	
+	say "class from_loop invoked: vals: ", ::yaml_out \%vals;
+	::IO::new($class, %vals, device_id => "loop,$vals{device_id}");
 }
-
 package ::IO::to_loop;
 use Modern::Perl; our @ISA = '::IO::from_loop';
 
