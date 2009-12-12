@@ -73,15 +73,15 @@ sub remove {
 	# remove bus
 	delete $::Bus::by_name{$bus->name};
 }
+package ::SendBusCooked;
+use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 sub apply {
 	my $bus = shift;
 	map{ $::g->add_path( $_->target, $_->name, $bus->send_type.'_out');
-		 $::g->set_edge_attributes($_->_name, $bus->send_type.'out', 
+		 $::g->set_edge_attributes(  $_->name, $bus->send_type.'_out', 
 		{ device_id => $bus->send_id })
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
-package ::SendBusCooked;
-use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 
 1;
 __END__

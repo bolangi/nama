@@ -873,6 +873,7 @@ sub generate_setup {
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
 	#add_paths_for_send_buses();
+	map{ $_->apply() } grep{ (ref $_) =~ /SendBus/ } ::Bus::all();
 	#$debug and say "The graph is:\n$g";
 	#add_paths_for_sub_buses();
 	#$debug and say "The graph is:\n$g";
@@ -932,17 +933,18 @@ sub add_paths_for_main_tracks {
 		
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
-		$g->add_path(@path) if @path;
+		$::g->add_path(@path) if @path;
 
 		# connect tracks to Master
 		
-		$g->add_edge($_->name, 'Master'); #  if $g->predecessors($_->name);
+		$::g->add_edge($_->name, 'Master'); 
 
-	} 	# exclude MON tracks in doodle mode	
-		grep{ 1 unless $preview eq 'doodle' and $_->rec_status eq 'MON' } 
-		grep{ $_->rec_status ne 'OFF' }  # exclude OFF tracks
-		map{$tn{$_}} 	# convert to Track objects
-		$main->tracks;  # list of Track names
+	} 	
+		grep{ 1 unless $preview eq 'doodle'
+			 and $_->rec_status eq 'MON' } # exclude MON tracks in doodle mode	
+		grep{ $_->rec_status ne 'OFF' }    # exclude OFF tracks
+		map{$tn{$_}} 	                   # convert to Track objects
+		$main->tracks;                     # list of Track names
 
 }
 
@@ -1024,6 +1026,7 @@ sub add_paths_for_aux_sends {
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
 }
+
 =comment
 sub add_paths_for_send_buses {
 	$debug2 and say "&add_paths_for_send_buses";
