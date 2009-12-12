@@ -1003,7 +1003,7 @@ sub add_paths_for_aux_sends {
 		say "aux send name: ", $_->name," type: $type, device_id: $device_id";
 		$g->add_path($_->name, $type);
 		 $g->set_edge_attributes($_->name, $type, 
-			{ track => $_, chain_id => 'S'.$_->n });
+			{ track => $track_snapshot->{$_->name}, chain_id => 'S'.$_->n });
 =cut
 	
 	map {  
@@ -1022,7 +1022,7 @@ sub add_paths_for_aux_sends {
 
 		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
 
-  	} grep { $_->name !~ /_rec_file/ 
+  	} grep { (ref $_) !~ /Slave/ 
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
 }
