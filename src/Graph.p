@@ -167,59 +167,29 @@ sub add_loop {
 # a_out - d
 # a - a_out
 
-# if b is a track, b provides the chain_id
-#
-# if b is a non-track, we need to use an anonymous track
-# providing a chain_id to make the connection, or we
-# need to make a edge with it's own chain_id and a 
-# reference to the track snapshot. 
-#
-# that is the new method.
-#
-# (comment: why do we need a track snapshot? why can't we
-# just copy the attributes from the track itself? I think
-# because we need to override, and accomplish this by 
-# appending key-value pairs to a hash)
-
 # we deal with all edges departing from $a, the left node.
 # I call it a-x below, but it is actually a-$_ where $_ 
 # is an alias to each of the successor node.
 #
-# The old way, using a temporary SlaveTrack
-# 
 # 1. start with a - x
 # 
 # 2. delete a - x 
 # 
 # 3. add a - a_out
 # 
-# 4. x is track: add a_out - x
+# 4. add a_out - x
 # 
-# 5. x is non - track: add a_out - slave_track - x
-# 
-# The new way, using edge attributes
-# 
-# 1,2,3,4. as above
-# 
-# 5. x is non-track: add a_out-x with attributes
-# 	track => a_track_snapshot, chain_id => J<n><a>
-# 	where <n> is the track index, and <a> is an 
-# 	alphabetical incrementing counter.
+# 5. Add a_out attributes for track name and 
+#    other info need to generate correct chain_ids
 #
-#   No auto increment (here), 
-#   a) because we allow ONE aux send and ONE insert per track
-#   b) because we set the chain_id (however determined)
-#      in, for example, the add_paths_for_aux_sends()
-#      so we can consider that problem solved here.
+# 6. Copy any attributes of edge a - x  to a_out - x.
 #
-#  Conclusion: create the new edge and copy the edge attribute if any
+#  No multiedge handling needed because with our 
+#  current topology, we never have a track
+#  with, for example, multiple edges to a soundcard.
 #
-#  Edges are still unique (no multiedge handling needed) because:
-#  If tracks are feeding a bus or Master, with an aux-send to Soundcard,
-#  that is only one edge to Soundcard. Send buses create new tracks,
-#  so their output edges to soundcard, etc. will all
-#  have unique names.
-
+#  Send buses create new tracks to provide connections.
+#
 # I will be moving edges (along with their attributes)
 # but I cannot assign chain_id them because I have
 # no way of knowing which is the edge that will use
@@ -231,9 +201,15 @@ sub add_loop {
 	# edges so $a-$loop will not be picked up 
 	# in successors list.
 	
-	# for later assigning chain_id to loop-loop chain
-	# will take forms like J7a, J7b,...
+	# We will assign chain_ids to loop-to-loop edges
+	# looking like J7a, J7b,...
+	#
+	# To make this possible, we store the following 
+	# information in the left vertex of
+	# the edge:
+	#
 	# n: track index, j: alphabetical counter
+	# 
 	$g->set_vertex_attributes($loop,{n => $::tn{$a}->n, j => 'a'});
 	map{ 
  		my $attr = $g->get_edge_attributes($a,$_);
@@ -252,10 +228,8 @@ sub add_loop {
 sub add_far_side_loop {
  	my ($g, $a, $b, $loop) = @_;
  	$debug and say "$a-$b: insert far side loop";
-	# we will insert loop _after_ processing predecessors
-	# edges so $loop-$b  will not be picked up 
-	# in predecessors list.
 	
+	$g->set_vertex_attributes($loop,{n => $::tn{$b}->n, j => 'a'});
 	map{ 
  		my $attr = $g->get_edge_attributes($_,$b);
  		$debug and say "deleting edge: $_-$b";
