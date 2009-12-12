@@ -1194,7 +1194,7 @@ sub non_track_dispatch {
 	my $edge = shift;
 	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
 	my $attr = $g->get_edge_attributes(@$edge);
-	say "found edge attributes: ",yaml_out($attr) if $attr;
+	#say "found edge attributes: ",yaml_out($attr) if $attr;
 	# fields: track (snapshot), chain_id (
 
 
