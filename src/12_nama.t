@@ -85,6 +85,11 @@ command_process('r 2');
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
 
+command_process('send 5');
+
+is( $this_track->send_type, 'soundcard', 'set soundcard output');
+is( $this_track->send_id, 5, 'set soundcard output');
+
 $track_snapshots = track_snapshots(); 
 
 my $snap = q(---
@@ -94,10 +99,12 @@ mono_to_stereo: '-chcopy:1,2'
 n: 3
 name: sax
 playat_output: ~
-pre_send: ''
+pre_send: ' -chmove:2,6 -chmove:1,5'
 rec_route: '-chmove:2,1'
 select_output: ~
-send_output: []
+send_output:
+  - soundcard_out
+  - consumer
 source_input:
   - soundcard_device_in
   - consumer
@@ -107,9 +114,32 @@ width: 1
 
 is( yaml_out($track_snapshots->{sax}),  $snap, "track snapshot");
 
-#my $io = ::IO::
+my $io = ::IO->new(track => $track_snapshots->{sax}, direction => 'input');
 
- 
+is( $io->ecs_string, '-i:consumer', 'IO base class object');
+is( $io->type, 'soundcard_device_in', '$io->type');
+
+$io = ::IO::from_soundcard_device->new(track => $track_snapshots->{sax}, direction => 'input'); 
+
+is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard_device 1');
+is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard_device 2');
+
+$io = ::IO::from_soundcard->new(track => $track_snapshots->{sax},
+direction => 'input'); 
+
+is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard 1');
+is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard 2');
+
+
+$io = ::IO::to_soundcard_device->new(track => $track_snapshots->{sax}, direction => 'output'); 
+
+is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
+is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard_device 2');
+
+$io = ::IO::to_soundcard->new(track => $track_snapshots->{sax}, direction => 'output'); 
+
+is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
+is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
 
 1;
 __END__

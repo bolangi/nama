@@ -24,13 +24,13 @@ our %io_class = qw(
 	jack_multi_out			::IO::to_jack_multi
 	);
 
+#  subroutines
 sub get_class {
 	my ($endpoint,$direction) = @_;
 	return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"}
 		if ::Graph::is_a_loop($endpoint);
 	$io_class{$endpoint} or croak "unrecognized endpoint type: $endpoint"
 }
-
 use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 sub new {
 	my $class = shift;

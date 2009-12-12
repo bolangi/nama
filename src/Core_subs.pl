@@ -1151,6 +1151,11 @@ sub track_snapshots {
 	\%tracks;
 }
 }
+sub tvalue {
+	my ($name, $field) = @_;
+	$::track_snapshots{$name}->{$field}
+}
+
 # new object based dispatch from routing graph
 	
 {my $jumper_id;
