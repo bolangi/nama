@@ -589,6 +589,7 @@ sub engine_running {
 };
 
 sub initialize_buses {
+	::Bus->initialize();
 	$main_bus = ::Bus->new(name => 'Main');
 	$null_bus = ::Bus->new(name => 'Null');
 }

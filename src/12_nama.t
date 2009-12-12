@@ -54,7 +54,8 @@ params:
 );
 
 
-is( yaml_out($::effects[$::effect_i{epp}]) ,  $want , "Pan hinting");
+package ::;
+is( yaml_out($effects[$effect_i{epp}]) ,  $want , "Pan hinting");
 
 is( $effects_help[0], 
 	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
@@ -66,6 +67,50 @@ my $cs_got = eval_iam('cs');
 my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
 Chain "default" [selected] );
 is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
+
+my $test_project = 'test';
+
+load_project(name => $test_project, create => 1);
+
+is( project_dir(), "./$test_project", "establish project directory");
+
+command_process('add sax');
+
+like(ref $this_track, qr/Track/, "track creation"); 
+
+is( $this_track->name, 'sax', "current track assignment");
+
+command_process('r 2');
+
+is( $this_track->source_type, 'soundcard', "set soundcard input");
+is( $this_track->source_id,  2, "set input channel");
+
+$track_snapshots = track_snapshots(); 
+
+my $snap = q(---
+full_path: test/.wav/sax_1.wav
+modifiers: ''
+mono_to_stereo: '-chcopy:1,2'
+n: 3
+name: sax
+playat_output: ~
+pre_send: ''
+rec_route: '-chmove:2,1'
+select_output: ~
+send_output: []
+source_input:
+  - soundcard_device_in
+  - consumer
+width: 1
+...
+);
+
+is( yaml_out($track_snapshots->{sax}),  $snap, "track snapshot");
+
+#my $io = ::IO::
+
+ 
+
 1;
 __END__
 	is( $foo, 2, "Scalar number assignment");
@@ -87,6 +132,7 @@ __END__
 	is( scalar @face, 0, "Null array assignment");
 	is( scalar %dict, 0, "Null hash assignment");
 	
+
 
 1;
 __END__
