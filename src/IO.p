@@ -41,13 +41,19 @@ sub new {
 
 	# we will default to track chain number and input or output values
 	# (these may be overridden)
-	if ($track){
+	if ($track and $vals{direction}){
 		my ($type,$id) = @{ 
 			$vals{direction} eq 'input'
 				? $track->{source_input}   # not reliable in MON case
 				: $track->{send_output}
 		};
 		my %type_id = (type => $type, device_id => $id);
+
+		# override priorities:
+		# highest: class->new(@args)
+		# next:    type and device_id from source_input/send_output
+		# last:    $track->snapshots fields
+
 		unshift @_, %$track, %type_id; 
 
 	}
