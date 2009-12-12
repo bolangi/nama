@@ -589,8 +589,8 @@ sub engine_running {
 };
 
 sub initialize_buses {
-	$main_bus = ::Bus->new(name => 'Main_Bus');
-	$null_bus = ::Bus->new(name => 'Null_Bus');
+	$main_bus = ::Bus->new(name => 'Main');
+	$null_bus = ::Bus->new(name => 'Null');
 }
 	
 sub initialize_project_data {
@@ -972,9 +972,10 @@ sub add_paths_for_recording {
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
 
-	} grep{ $_->rec_status eq 'REC' 
-			and not $_->group eq 'null'  
-			and not $_->rec_defeat 
+	} grep{ ref $_ !~ /Slave/  # don't record slave tracks
+			and $_->rec_status eq 'REC' 
+			and not $_->group eq 'null'   # nor null-input tracks
+			and not $_->rec_defeat        # nor rec-defeat tracks
 	} @tracks;
 }
 
@@ -1027,7 +1028,7 @@ sub add_paths_for_aux_sends {
 sub add_paths_for_send_buses {
 	$debug2 and say "&add_paths_for_send_buses";
 
-	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
+	my @user_buses = grep{ $_->name  !~ /Null|Main/ } values %::Bus::by_name;
 	map{
 
 		my $bus = $_;
@@ -1052,7 +1053,7 @@ sub add_paths_for_send_buses {
 sub add_paths_for_sub_buses {
 	$debug2 and say "&add_paths_for_sub_buses";
 
-	my @user_buses = grep{ $_->name  !~ /Null_Bus|Main_Bus/ } values %::Bus::by_name;
+	my @user_buses = grep{ $_->name  !~ /Null|Main/ } values %::Bus::by_name;
 	map{
 
 		my $bus = $_;
@@ -2942,7 +2943,7 @@ map { my $t = $_;
 
 @bus_data = (); # 
 map{ push @bus_data, $_->hashref } 
-	grep{ $_->name !~ /Main_Bus|Null_Bus/} ::Bus::all();
+	grep{ $_->name !~ /Main|Null/} ::Bus::all();
 
 # prepare marks data for storage (new Mark objects)
 

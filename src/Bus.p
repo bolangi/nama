@@ -60,7 +60,7 @@ sub remove {
 } 
 
 package ::SendBusRaw;
-use Modern::Perl; use Carp;
+use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub remove {
 	my $bus = shift;
 
