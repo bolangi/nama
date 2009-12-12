@@ -682,25 +682,22 @@ and doodle modes.
 
 =head1 DIAGNOSTICS
 
-Nama has excellent diagnostic functions. In most situations, 
-the GUI display or the output of the C<show_tracks>
-command (executed automatically on any change in setup)
-shows what to expect the next time the engine is started.
+In most situations, the GUI display and the output of the
+C<show_tracks> command (executed automatically on any change
+in setup) show what to expect the next time the engine is
+started.
 
-Advanced users or those already experienced with Ecasound
-can use the C<chains> command to inspect the current chain
-setup and determine if Ecasound is properly configured for
-the task at hand.  (It is much easier to read these setups
-than to write them!)
+Additionally, Nama has a number of diagnostic functions that
+can help resolve problems without resorting to the debugging
+flag (and wading through its prolific output.) The C<chains>
+command displays the current chain setup to determine if
+Ecasound is properly configured for the task at hand. (It
+is much easier to read these setups than to write them!)
 
-Other commands are available to help programmers and support
-the occasional troubleshooting episode. C<showio> displays
-the data structure used to generate the chain setup. C<dump>
-displays data for the current track.  In correspondence, you
-may be asked to include the F<State.yml> file created by the
-C<save> command, which shows the state of all important
-program objects and variables.  You can inspect this same
-information using the C<dumpall> command.
+The C<dump> command displays data for the current track.
+The C<dumpall> command shows all state that would be saved.
+This is the same output that is written to the F<State.yml>
+file when you issue the C<save> command.
 
 =head1 BUGS AND LIMITATIONS
 

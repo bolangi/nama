@@ -89,7 +89,9 @@ command_process('send 5');
 
 is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
+=comment
 
+# this is ALSA dependent (i.e. no JACK running)
 $track_snapshots = track_snapshots(); 
 
 my $snap = q(---
@@ -140,7 +142,7 @@ $io = ::IO::to_soundcard->new(track => $track_snapshots->{sax}, direction => 'ou
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
-
+=cut
 1;
 __END__
 	is( $foo, 2, "Scalar number assignment");
