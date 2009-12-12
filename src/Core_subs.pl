@@ -950,8 +950,8 @@ sub add_paths_for_main_tracks {
 }
 
 sub add_paths_for_recording {
-	return if $preview; # don't record during preview modes
 	$debug2 and say "&add_paths_for_recording";
+	return if $preview; # don't record during preview modes
 
 	# we record tracks set to REC, unless rec_defeat is set 
 	# or the track belongs to the 'null' group
@@ -959,7 +959,7 @@ sub add_paths_for_recording {
 
 	map{ 
 		# create temporary track for rec_file chain
-		
+		$debug and say "rec file link for $_->name";	
 		my $name = $_->name . '_rec_file';
 		my $anon = ::SlaveTrack->new( 
 			target => $_->name,
@@ -975,7 +975,7 @@ sub add_paths_for_recording {
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
 
-	} grep{ ref $_ !~ /Slave/  # don't record slave tracks
+	} grep{ (ref $_) !~ /Slave/  # don't record slave tracks
 			and $_->rec_status eq 'REC' 
 			and not $_->group eq 'null'   # nor null-input tracks
 			and not $_->rec_defeat        # nor rec-defeat tracks
@@ -999,31 +999,14 @@ sub add_paths_for_aux_sends {
 	# track output usually goes to Master or to another track
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
-=comment
-		my $name = $_->name . '_aux';
-		my $anon = ::SlaveTrack->new( 
-			target => $_->name,
-			group => 'Temp',
-			name => $name);
-
-		# connect IO
-
-		#say "aux send track: ",$anon->name, " n: ", $anon->n;
-		my ($type, $device_id) = @{ $_->send_output };
-		#say "aux send name: $name, type: $type, device_id: $device_id";
-		$g->add_path($_->name, $name, $type);
-
-		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
-=cut
-	
 	map {  
 		my ($type, $device_id) = @{ $_->send_output };
-		say "aux send name: ", $_->name," type: $type, device_id: $device_id";
+		#say "aux send name: ", $_->name," type: $type, device_id: $device_id";
 		$g->add_path($_->name, $type);
 		 $g->set_edge_attributes($_->name, $type, 
-			{ 	track => $track_snapshots->{$_->name}, 
+			{ 	track => $_->name,
 				chain_id => 'S'.$_->n,
-#				pre_send => $_->pre_send,
+
  });
   	} grep { (ref $_) !~ /Slave/ 
 				and $_->send_type 
@@ -1211,7 +1194,12 @@ sub non_track_dispatch {
 	my $edge = shift;
 	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
 	my $attr = $g->get_edge_attributes(@$edge);
+	say "found edge attributes: ",yaml_out($attr) if $attr;
+	# fields: track (snapshot), chain_id (
+
+
 	my $vattr = $g->get_vertex_attributes($edge->[0]);
+	# loop (hihat_in) fields: n: track->n, j: 'a' (counter)
 	
 	$attr->{chain_id} //= 'J'.$vattr->{n}. $vattr->{j}++;
 	my @direction = qw(input output);
@@ -1229,15 +1217,14 @@ sub non_track_dispatch {
 	
 
 sub dispatch { # creates an IO object from a graph edge
-	my $edge = shift;
+my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
 	$debug and say "dispatch: $edge->[0]-$edge->[1]";
 	my($name, $endpoint, $direction) = decode_edge($edge);
 	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
-	my @args = (track => $track_snapshots->{$name},
-			#	endpoint => $endpoint,
+	my @args = (track => $name,
 				device_id => $endpoint,
 				direction => $direction,
 				chain_id => $tn{$name}->n,
@@ -1256,6 +1243,7 @@ sub decode_edge {
 	($name, $endpoint, $direction)
 }
 sub override {
+	# data from edges has priority over data from vertexes
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
 	override_from_vertex($name), override_from_edge($edge)

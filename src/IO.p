@@ -34,19 +34,24 @@ sub get_class {
 use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 sub new {
 	my $class = shift;
+	#say "IO new: class: $class";
 	my %vals = @_;
+	#say ::yaml_out(\%vals);
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	my $track = $vals{track}; # may not exist
+	my $track_name = $vals{track}; # may not exist
+	delete $vals{track};
 
 	# we will default to track chain number and input or output values
 	# (these may be overridden)
-	if ($track and $vals{direction}){
+	if ($track_name and $vals{direction}){
+		my $track = $::track_snapshots->{$track_name};
 		my ($type,$id) = @{ 
 			$vals{direction} eq 'input'
 				? $track->{source_input}   # not reliable in MON case
 				: $track->{send_output}
 		};
+		#my $extra = $vals{direction} eq 'input'
 		my %type_id = (type => $type, device_id => $id);
 
 		# override priorities:
@@ -54,7 +59,7 @@ sub new {
 		# next:    type and device_id from source_input/send_output
 		# last:    $track->snapshots fields
 
-		unshift @_, %$track, %type_id; 
+		@_ = (%$track, %type_id, %vals);
 
 	}
 	#no warnings  'uninitialized';

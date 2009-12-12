@@ -162,10 +162,10 @@ sub add_loop {
 #
 # converts to 
 #
-# a - a_out
 # a_out - b
 # a_out - c
 # a_out - d
+# a - a_out
 
 # if b is a track, b provides the chain_id
 #
@@ -315,3 +315,63 @@ sub remove_outputless_tracks {
 }
 		
 1;
+__END__
+
+The graphic routing system is complicated enough that some comment is
+warranted.
+
+The first step of routing is to create a graph that expresses the signal flow.
+
+	soundcard_in -> sax -> Master -> soundcard_out
+
+If we are to record the input, we need:
+
+	sax -> wav_out
+
+If we add an instrument monitor for the sax player, we need:
+
+	sax -> soundcard_out
+
+Ecasound requires that we insert loop devices wherever the signals
+must fan out or fan in.
+
+	soundcard_in -> sax -> sax_out -> Master -> soundcard_out
+
+	sax_out -> wav_out
+
+	sax_out -> soundcard_out
+
+Here 'sax_out' is a loop device.
+
+Though there are more complicated additions, such as inserts,
+they must follow these same rules.
+
+We then process each edge to generate a line for the Ecasound chain setup
+file.
+
+Master -> soundcard_out is easy to process, because the track
+Master knows what it's outputs should be.
+
+The edge sax_out -> soundcard_out, an auxiliary send, needs to know its
+associated track, as well as the chain_id, the identifier for the Ecasound
+chain corresponding to this edge.
+
+We provide this information as edge attributes.
+
+We also allow vertexes, for example a track or loop device, to carry data is
+well, for example to tell the dispatcher to override the 
+chain_id of a temporary track.
+
+An Ecasound chain setup is a graph comprised of multiple 
+signal processing chains, each of which consists 
+of exactly one input and one output.
+ 
+The dispatch process transforms the graph edges into a group of 
+IO objects, each with enough information to create
+the input or output fragment of a chain.
+
+Finally, these objects are processed into the Ecasound
+chain setup file. 
+
+
+
