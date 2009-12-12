@@ -33,13 +33,13 @@ sub expand_graph {
 
 		elsif ( is_a_track($a) and $g->successors($a) > 1 ) {
 			$debug and say "fan_out from track $a";
-			add_near_side_loop($g,$a,$b);}
+			add_near_side_loop($g,$a,$b,out_loop($a));}
 	
 		# case 3: fan in to track: use far side loop
 		
 		elsif ( is_a_track($b) and $g->predecessors($b) > 1 ) {
 			$debug and say "fan in to track $b";
-			add_far_side_loop($g,$a,$b);}
+			add_far_side_loop($g,$a,$b,in_loop($b));}
 		else { $debug and say "$a-$b: no action taken" }
 	}
 	
@@ -272,8 +272,8 @@ sub add_far_side_loop {
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
-sub is_a_track{ $::tn{$_[0]} }
-#sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;
+#sub is_a_track{ $::tn{$_[0]} }
+sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;}
 # $debug and say "$_[0] is a track"; 1
 #}
 sub is_terminal { $reserved{$_[0]} }

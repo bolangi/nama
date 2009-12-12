@@ -999,14 +999,6 @@ sub add_paths_for_aux_sends {
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
 =comment
-		my ($type, $device_id) = @{ $_->send_output };
-		say "aux send name: ", $_->name," type: $type, device_id: $device_id";
-		$g->add_path($_->name, $type);
-		 $g->set_edge_attributes($_->name, $type, 
-			{ track => $track_snapshot->{$_->name}, chain_id => 'S'.$_->n });
-=cut
-	
-	map {  
 		my $name = $_->name . '_aux';
 		my $anon = ::SlaveTrack->new( 
 			target => $_->name,
@@ -1021,7 +1013,17 @@ sub add_paths_for_aux_sends {
 		$g->add_path($_->name, $name, $type);
 
 		$g->set_vertex_attributes($name, { chain_id => 'S'.$_->n });
-
+=cut
+	
+	map {  
+		my ($type, $device_id) = @{ $_->send_output };
+		say "aux send name: ", $_->name," type: $type, device_id: $device_id";
+		$g->add_path($_->name, $type);
+		 $g->set_edge_attributes($_->name, $type, 
+			{ 	track => $track_snapshots->{$_->name}, 
+				chain_id => 'S'.$_->n,
+#				pre_send => $_->pre_send,
+ });
   	} grep { (ref $_) !~ /Slave/ 
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
