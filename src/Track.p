@@ -424,16 +424,23 @@ CLIENT
 	}
 } 
 
-# the following subroutines support IO objects
+# the following subroutines are used to dispatch IO objects
 
-sub soundcard_input {
+
+sub soundcard_input_type {
+	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
+}
+sub soundcard_input_device_string {
+	# case 1: ALSA 
+	return $::capture_device unless $::jack_running;
+	# case 2: JACK
 	my $track = shift;
-	if ($::jack_running) {
-		my $start = $track->source_id;
-		my $end   = $start + $track->width - 1;
-		['jack_multi_in' , join q(,),q(jack_multi),
-			map{"system:capture_$_"} $start..$end]
-	} else { ['soundcard_device_in' , $::capture_device] }
+	my $start = $track->source_id;
+	my $end   = $start + $track->width - 1;
+	join q(,),q(jack_multi), map{"system:capture_$_"} $start..$end
+}
+sub soundcard_input { 
+	[soundcard_input_type(), $_[0]->soundcard_input_device_string()]
 }
 sub source_input {
 	my $track = shift;
@@ -450,8 +457,12 @@ sub source_input {
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [] }
 		}
+		default { say $track->name, ": unsupported source type: $_"; return [] }
 	}
 }
+
+sub source_type_string { $_[0]->source_input()->[0] }
+sub source_device_string { $_[0]->source_input()->[1] }
 
 sub send_output {
 	my $track = shift;
@@ -477,6 +488,9 @@ sub send_output {
 		default { return [] }
 	}
  };
+
+sub send_type_string { $_[0]->send_input()->[0] }
+sub send_device_string { $_[0]->send_input()->[1] }
 
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;
