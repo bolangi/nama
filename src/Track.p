@@ -286,6 +286,9 @@ sub mono_to_stereo {
 }
 
 sub rec_route {
+
+	# works for mono/stereo only!
+	
 	no warnings qw(uninitialized);
 	my $track = shift;
 	

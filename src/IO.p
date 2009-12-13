@@ -1,4 +1,13 @@
 # ---------- IO -----------
+# 
+# IO objects for writing Ecasound chain setup file
+#
+# Three ways we set fields:
+# 
+# 1. Using the constructor new()
+# 2. Fixing them with a subroutine method (overrides constructor values)
+# 3. AUTOLOAD calling undefined methods on the associated track
+# 
 package ::IO;
 use Modern::Perl; use Carp;
 our %io_class = qw(
@@ -114,7 +123,6 @@ sub new {
 	my $class = $io_class{::soundcard_input_type_string()};
 	$class->new(@_);
 }
-
 package Audio::Nama::IO::to_soundcard;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
@@ -122,7 +130,6 @@ sub new {
 	my $class = $io_class{::soundcard_output_type_string()};
 	$class->new(@_);
 }
-
 package ::IO::from_jack_client;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
@@ -189,4 +196,3 @@ sub ecs_extra { $_[0]->pre_send }
 1;
 __END__
 
-		

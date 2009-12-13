@@ -236,6 +236,7 @@ sub process_options {
 		no-static-effects-data		s
 		no-static-effects-cache		e
 		no-reconfigure-engine		R
+		fake-jack					F
 		debugging-output			D
 );
 
@@ -3387,11 +3388,30 @@ sub keyword {
 } };
 
 
+{ my $fake_jack_lsp = q(system:capture_1
+   alsa_pcm:capture_1
+        properties: output,physical,terminal,
+system:capture_2
+   alsa_pcm:capture_2
+        properties: output,physical,terminal,
+system:playback_1
+   alsa_pcm:playback_1
+        properties: input,physical,terminal,
+system:playback_2
+   alsa_pcm:playback_2
+        properties: input,physical,terminal,
+Horgand:out_1
+        properties: output,terminal,
+Horgand:out_2
+        properties: output,terminal,
+);
+
 sub jack_update {
 	# cache current JACK status
-	$jack_running = jack_running();
-	$jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
+	$jack_running = $opts{F} or jack_running();
+	$jack_lsp = $opts{F} ? $fake_jack_lsp : qx(jack_lsp -Ap 2> /dev/null); 
 	%jack = %{jack_ports()} if $jack_running;
+}
 }
 sub jack_client {
 
