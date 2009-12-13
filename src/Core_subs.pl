@@ -922,7 +922,7 @@ sub add_paths_for_recording {
 
 		# connect IO
 		
-		$g->add_path($_->source_type ."_in", $name, 'wav_out');
+		$g->add_path($_->source_type_string, $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
@@ -981,9 +981,9 @@ sub add_paths_for_send_buses {
 			$debug and say 'process post-fader bus';
 
 			# The signal path is:
-			# [target track] -> [slave track] -> [slave track send_output]
+			# [target track] -> [slave track] -> [slave track send_type_string]
 			
-			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
+			map{   $g->add_path( $_->target, $_->name, $_->send_type_string);
 			} @tracks; 
 		}
 	} @user_buses;
