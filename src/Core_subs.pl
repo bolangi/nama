@@ -1059,47 +1059,12 @@ sub prune_graph {
 	::Graph::remove_inputless_tracks($g);
 	::Graph::remove_outputless_tracks($g); 
 }
-{
-my @fields = qw(
-		n
-		name
-		width
-		playat_output
-		select_output
-		modifiers
-		mono_to_stereo
-		rec_route
-		full_path
-		pre_send
-		soundcard_input_type_string
-		soundcard_input_device_string
-		source_type_string
-		source_device_string
-		send_type_string
-		send_device_string
-);
-
-# an optimization
-# sets a cache of current track method values for io dispatch
-sub track_snapshots {
-	my %tracks = map{ $_->name => $_->snapshot(\@fields) } 
-					grep{ $_->rec_status ne 'OFF' } ::Track::all() ;
-	\%tracks;
-}
-}
-sub tvalue {
-	my ($name, $field) = @_;
-	$::track_snapshots{$name}->{$field}
-}
-
 # new object based dispatch from routing graph
 	
 {my $jumper_id;
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
-	$track_snapshots = track_snapshots(); # sets global used by dispatch
 	$jumper_id = 0;  # for loop-to-loop chain ids
-	#say yaml_out($track_snapshots); die "here";
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
@@ -3696,11 +3661,6 @@ sub effect_code {
 	# hashref output for detecting if we need to reconfigure engine
 	# compared as YAML strings
 	#
-	# why is this different from $track_snapshots used for
-	# dispatch()?
-	#
-	# for one, because dispatch() doesn't need to consider inserts,
-	# which exist as temporary tracks at the time of dispatch()
 {
 	my @sense_reconfigure = qw(
 		name
@@ -3726,6 +3686,7 @@ sub status_snapshot {
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
 					 main_out 		=> $main_out,
+					 jack_running	=> $jack_running,
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@sense_reconfigure) }
 	::Track::all();
