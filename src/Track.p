@@ -559,16 +559,6 @@ sub set_send { # wrapper
 	}
 }
 
-# input channel number, may not be used in current setup
-
-
-sub input {   	
-	my $track = shift;
-	$track->ch_r ? $track->ch_r : 1
-}
-
-# send channel number, may not be used in current setup
-
 sub aux_output { 
 	my $track = shift;
 	$track->send_id > 2 ? $track->send_id : undef 
