@@ -430,17 +430,8 @@ CLIENT
 # the following subroutines are used to dispatch IO objects
 
 
-sub soundcard_input_device_string {
-	# case 1: ALSA 
-	return $::alsa_capture_device unless $::jack_running;
-	# case 2: JACK
-	my $track = shift;
-	my $start = $track->source_id;
-	my $end   = $start + $track->width - 1;
-	join q(,),q(jack_multi), map{"system:capture_$_"} $start..$end
-}
 sub soundcard_input { 
-	[::soundcard_input_type_string(), $_[0]->soundcard_input_device_string()]
+	[::soundcard_input_type_string(), ::soundcard_input_device_string()]
 }
 sub source_input {
 	my $track = shift;
