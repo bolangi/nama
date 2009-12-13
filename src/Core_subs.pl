@@ -1154,10 +1154,9 @@ sub non_track_dispatch {
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
 		my $attrib = {%$attr};
-		$attrib->{device_id} //= $_ if ::Graph::is_a_loop($_); # AA
-		$attrib->{direction} //= $direction;
+		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
- 			"device_id: $attrib->{device_id}, direction $direction";
+ 			"device_id: $attrib->{device_id}";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 }
 } # end $jumper_id scope 
@@ -1172,40 +1171,12 @@ my $edge = shift;
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 	my @args = (track => $name,
-				endpoint => $endpoint, # loops need this # AA
+				endpoint => $endpoint, # for loops
 				chain_id => $tn{$name}->n,
 				override($name, $edge));
 	#say "dispatch class: $class";
 	$class->new(@args);
 }
-=comment
-	#say ::yaml_out(\%vals);
-	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
-    croak "undeclared field: @undeclared" if @undeclared;
-	my $track_name = $vals{track}; # may not exist
-	delete $vals{track};
-	# we will default to track chain number and input or output values
-	# (these may be overridden)
-	if ($track_name and $vals{direction}){
-		my $track = $::track_snapshots->{$track_name};
-		my ($type,$id) = @{ 
-			$vals{direction} eq 'input'
-				? $track->{source_input}   # not reliable in MON case
-				: $track->{send_output}
-		};
-		#my $extra = $vals{direction} eq 'input'
-		my %type_id = (type => $type, device_id => $id);
-
-		# override priorities:
-		# highest: class->new(@args)
-		# next:    type and device_id from source_input/send_output
-		# last:    $track->snapshots fields
-
-		@_ = (%$track, %type_id, %vals);
-	}
-=cut
-
-
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
 	# return track, endpoint

@@ -1,5 +1,4 @@
 		track		# originating track name
-		n			# track's index
 		chain_id	# -a: argument
 		endpoint	# graph node name, for routing to loop devices
 		type		# maps to IO class (e.g. jack_client_in)

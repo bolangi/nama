@@ -100,8 +100,8 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my $io = ::IO->new(@_); # to get type... may be jack
-	$class = $io_class{$io->type};
-	$class->new(@_, device_id => $::capture_device);
+	$class = $io_class{$io->soundcard_input_type_string};
+	$class->new(@_);
 }
 
 package ::IO::to_soundcard;
@@ -173,7 +173,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	my $device = $::devices{$io->device_id}{ecasound_id};
+	my $device = $::devices{$::capture_device}{ecasound_id};
 	$io->set(device_id => $device);
 	no warnings 'uninitialized';
 	$io->set(ecs_extra => join " ", $io->rec_route, $io->mono_to_stereo) 

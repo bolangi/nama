@@ -427,12 +427,12 @@ CLIENT
 # the following subroutines are used to dispatch IO objects
 
 
-sub soundcard_input_type {
+sub soundcard_input_type_string {
 	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
 }
 sub soundcard_input_device_string {
 	# case 1: ALSA 
-	return $::capture_device unless $::jack_running;
+	return $::alsa_capture_device unless $::jack_running;
 	# case 2: JACK
 	my $track = shift;
 	my $start = $track->source_id;
@@ -440,7 +440,7 @@ sub soundcard_input_device_string {
 	join q(,),q(jack_multi), map{"system:capture_$_"} $start..$end
 }
 sub soundcard_input { 
-	[soundcard_input_type(), $_[0]->soundcard_input_device_string()]
+	[soundcard_input_type_string(), $_[0]->soundcard_input_device_string()]
 }
 sub source_input {
 	my $track = shift;

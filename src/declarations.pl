@@ -304,8 +304,8 @@ our (
 	@groups_data, # 
 	@marks_data, # 
 
-	$alsa_playback_device,       # where to send stereo output
-	$capture_device,    # where to get our inputs
+	$alsa_playback_device,
+	$alsa_capture_device,
 
 	$main_out, # do I route audio output to soundcard?
 
