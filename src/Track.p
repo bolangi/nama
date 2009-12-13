@@ -804,7 +804,7 @@ sub fancy_ops { # returns list
 	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
 }
 		
-{ sub snapshot {
+sub snapshot {
 	my $track = shift;
 	my $fields = shift;
 	my %snap; 
@@ -814,7 +814,6 @@ sub fancy_ops { # returns list
 		#say "key: $_, val: ",$track->$_;
 	}
 	\%snap;
-}
 }
 	
 # subclass
