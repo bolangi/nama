@@ -26,56 +26,24 @@ our %io_class = qw(
 
 #  subroutines
 sub get_class {
-	my ($endpoint,$direction) = @_;
-	return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"}
-		if ::Graph::is_a_loop($endpoint);
-	$io_class{$endpoint} or croak "unrecognized endpoint type: $endpoint"
+	my ($type,$direction) = @_;
+	::Graph::is_a_loop($type) and 
+		return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"};
+	$io_class{$type} or croak "unrecognized IO type: $type"
 }
 use ::Object qw( [% qx(./strip_all ./io_fields) %]);
 sub new {
 	my $class = shift;
-	#say "IO new: class: $class";
-	my %vals = @_;
-	#say ::yaml_out(\%vals);
-	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
-    croak "undeclared field: @undeclared" if @undeclared;
-	my $track_name = $vals{track}; # may not exist
-	delete $vals{track};
-
-	# we will default to track chain number and input or output values
-	# (these may be overridden)
-	if ($track_name and $vals{direction}){
-		my $track = $::track_snapshots->{$track_name};
-		my ($type,$id) = @{ 
-			$vals{direction} eq 'input'
-				? $track->{source_input}   # not reliable in MON case
-				: $track->{send_output}
-		};
-		#my $extra = $vals{direction} eq 'input'
-		my %type_id = (type => $type, device_id => $id);
-
-		# override priorities:
-		# highest: class->new(@args)
-		# next:    type and device_id from source_input/send_output
-		# last:    $track->snapshots fields
-
-		@_ = (%$track, %type_id, %vals);
-
-	}
-	#no warnings  'uninitialized';
-	#say join " ", "all fields", @_;
-	#use warnings 'uninitialized';
 	my $object = bless { @_	}, $class;
 }
-{my %io = ( input => 'i', output => 'o' );
 sub ecs_string {
 	my $self = shift;
 	my @parts;
 	push @parts, '-f:'.$self->format if $self->format;
-	push @parts, '-'.$io{$self->direction}.':'.$self->device_id;
+	push @parts, '-'.$self->direction.':'.$self->device_id;
 	join ' ',@parts;
 }
-}
+sub direction { (ref $_[0]) =~ /::from/ ? 'i' : 'o' }
 our $new_mono_to_stereo = sub {
 	my $class = shift;
 	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use
@@ -121,7 +89,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	$class->SUPER::new( %vals, device_id => "loop,$vals{device_id}");
+	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
 package ::IO::to_loop;
 use Modern::Perl; our @ISA = '::IO::from_loop';
@@ -132,8 +100,7 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my $io = ::IO->new(@_); # to get type... may be jack
-	my ($type, $id) = ($io->type, $io->device_id);
-	$class = ::IO::get_class($type, $vals{direction});
+	$class = $io_class{$io->type};
 	$class->new(@_, device_id => $::capture_device);
 }
 
@@ -220,13 +187,8 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	my $dubious_dev = $io->device_id;
-	# override device_id with default unless meaningful value present
-	if ( ! $::devices{$dubious_dev} ){  
-		$io->set(device_id => $::alsa_playback_device);
-	}
-	my $device = $::devices{$io->device_id}{ecasound_id};
-	$io->set(device_id => $device);
+	$io->set(device_id => $::devices{$::alsa_playback_device}{ecasound_id})
+		unless $io->device_id;
 	$io->set(ecs_extra => $io->pre_send) if $io->pre_send;
 	$io;
 }

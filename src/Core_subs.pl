@@ -529,53 +529,6 @@ sub rememoize {
 	memoize(  'candidates');
 }
 
-=comment
-	# rules for instrument monitor buses using raw inputs
-	
-	$mon_setup = ::Rule->new(
-		
-		name			=>  'mon_setup', 
-		target			=>  'MON',
-		chain_id 		=>	sub{ my $track = shift; $track->n },
-		input_type		=>  'file',
-		input_object	=>  sub{ my $track = shift; $track->full_path },
-		post_input		=>	sub{ my $track = shift; $track->mono_to_stereo},
-		condition 		=> 1,
-		status			=>  1,
-	);
-
-
- 	$rec_setup = ::Rule->new(	 	# used by user buses 
-		
-		name			=>	'rec_setup', 
-		chain_id		=>  sub{ $_[0]->n },   
-		target			=>	'REC',
-		input_type		=> sub{ $_[0]->source_input()->[0]},
-		input_object	=> sub{ $_[0]->source_input()->[1]},
-		post_input			=>	sub{ my $track = shift;
-										$track->rec_route .
-										$track->mono_to_stereo 
-										},
-		condition 		=> 1,
-		status			=>  1,
-	);
-
-	$send_bus_out = ::Rule->new(
-
-		name			=>  'send_bus_out',
-		chain_id		=>  sub { $_[0]->n },
-		target			=>  'all',
-		output_type		=> sub{ $_[0]->send_output()->[0]},
-		output_object	=> sub{ $_[0]->send_output()->[1]},
-		pre_output		=>	sub{ $_[0]->pre_send},
-		condition        => sub{ $tn{$_[0]->target()}->rec_status ne 'OFF'},
-		status			=>  1,
-		
-	);
-
-}
-=cut
-
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
 	my @jack  = grep{   my $pid;
@@ -969,7 +922,6 @@ sub add_paths_for_recording {
 
 		# connect IO
 		
-		my ($type, $device_id) = @{ $_->source_input };
 		$g->add_path($_->source_type ."_in", $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
@@ -1121,8 +1073,6 @@ my @fields = qw(
 		mono_to_stereo
 		rec_route
 		full_path
-		source_input
-		send_output
 		pre_send
 );
 
@@ -1207,7 +1157,7 @@ sub non_track_dispatch {
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
 		my $attrib = {%$attr};
-		$attrib->{device_id} //= $_ if ::Graph::is_a_loop($_);
+		$attrib->{device_id} //= $_ if ::Graph::is_a_loop($_); # AA
 		$attrib->{direction} //= $direction;
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}, direction $direction";
@@ -1219,19 +1169,45 @@ sub non_track_dispatch {
 sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
-	$debug and say "dispatch: $edge->[0]-$edge->[1]";
+	$debug and say 'dispatch: ',join ' -> ',  @$edge;
 	my($name, $endpoint, $direction) = decode_edge($edge);
 	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 	my @args = (track => $name,
-				device_id => $endpoint,
-				direction => $direction,
+				endpoint => $endpoint, # loops need this # AA
 				chain_id => $tn{$name}->n,
 				override($name, $edge));
 	#say "dispatch class: $class";
 	$class->new(@args);
 }
+=comment
+	#say ::yaml_out(\%vals);
+	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
+    croak "undeclared field: @undeclared" if @undeclared;
+	my $track_name = $vals{track}; # may not exist
+	delete $vals{track};
+	# we will default to track chain number and input or output values
+	# (these may be overridden)
+	if ($track_name and $vals{direction}){
+		my $track = $::track_snapshots->{$track_name};
+		my ($type,$id) = @{ 
+			$vals{direction} eq 'input'
+				? $track->{source_input}   # not reliable in MON case
+				: $track->{send_output}
+		};
+		#my $extra = $vals{direction} eq 'input'
+		my %type_id = (type => $type, device_id => $id);
+
+		# override priorities:
+		# highest: class->new(@args)
+		# next:    type and device_id from source_input/send_output
+		# last:    $track->snapshots fields
+
+		@_ = (%$track, %type_id, %vals);
+	}
+=cut
+
 
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
