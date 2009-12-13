@@ -209,7 +209,7 @@ sub add_loop {
 	# the edge:
 	#
 	# n: track index, j: alphabetical counter
-	# 
+	 
 	$g->set_vertex_attributes($loop,{n => $::tn{$a}->n, j => 'a'});
 	map{ 
  		my $attr = $g->get_edge_attributes($a,$_);

@@ -44,6 +44,11 @@ sub ecs_string {
 	join ' ',@parts;
 }
 sub direction { (ref $_[0]) =~ /::from/ ? 'i' : 'o' }
+sub AUTOLOAD {
+	my $self = shift;
+	my $method = $AUTOLOAD;
+
+	
 our $new_mono_to_stereo = sub {
 	my $class = shift;
 	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use

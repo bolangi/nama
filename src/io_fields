@@ -1,18 +1,21 @@
 		track		# originating track name
 		chain_id	# -a: argument
 		endpoint	# graph node name, for routing to loop devices
-		type		# maps to IO class (e.g. jack_client_in)
 		device_id 	# -i: or -o: argument
 		format		# -f: argument
 		ecs_extra	# post_input or pre_output operators
 
 		# the following are identical to the corresponding Track methods
 
-		full_path
-		width		# no. of channels
-		mono_to_stereo 
-		rec_route	
-		pre_send
-		playat_output
-		select_output
-		modifiers
+# we don't expect to ever override these
+# so if available, they will come from the track snapshot
+# via AUTOLOAD
+
+#		full_path
+#		width		# no. of channels
+#		mono_to_stereo 
+#		rec_route	
+#		pre_send
+#		playat_output
+#		select_output
+#		modifiers

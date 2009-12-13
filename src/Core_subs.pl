@@ -1122,14 +1122,21 @@ sub process_routing_graph {
 }
 sub non_track_dispatch {
 
-	# loop-to-loop: assign chain_id to edge (if not present)
+	# loop -> loop
+	#	
+	# assign chain_id to edge based on chain_id of left-side loop's
+	# corresponding track:
+	#	
+	# hihat_out -- J7a -> Master_in
 	#
-	# we will use lower case j1, j2 for these "jumper chains"
-	
-	# soundcard_in - wav_out: we expect edge attributes 
+	# soundcard_in -> wav_out (rec_file)
+	#
+	# currently handled using an anonymous track
+	#
+	# we expect edge attributes 
 	# to have been provided for handling this. 
 
-	# loop-soundcard_out: 
+	# loop -> soundcard_out
 	#
 	# track7-soundcard_out as aux_send will have chain id S7
 	# that will be transferred by expand_graph() to 
@@ -1139,15 +1146,14 @@ sub non_track_dispatch {
 	# fragment, one for the chain output
 	
 	my $edge = shift;
-	$debug and say "non-track dispatch: $edge->[0]-$edge->[1]";
+	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
 	my $attr = $g->get_edge_attributes(@$edge);
-	#say "found edge attributes: ",yaml_out($attr) if $attr;
-	# fields: track (snapshot), chain_id (
-
+	$debug and say "found edge attributes: ",yaml_out($attr) if $attr;
 
 	my $vattr = $g->get_vertex_attributes($edge->[0]);
-	# loop (hihat_in) fields: n: track->n, j: 'a' (counter)
-	
+	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
+
+	# loop  fields: n: track->n, j: 'a' (counter)
 	$attr->{chain_id} //= 'J'.$vattr->{n}. $vattr->{j}++;
 	my @direction = qw(input output);
 	map{ 
@@ -1170,6 +1176,8 @@ my $edge = shift;
 	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
+		# we need the $direction because there can be 
+		# edges to and from loop,Master_in
 	my @args = (track => $name,
 				endpoint => $endpoint, # for loops
 				chain_id => $tn{$name}->n,
