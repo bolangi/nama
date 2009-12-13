@@ -237,6 +237,7 @@ sub process_options {
 		no-static-effects-cache		e
 		no-reconfigure-engine		R
 		fake-jack					F
+		fake-alsa					A
 		debugging-output			D
 );
 
@@ -277,6 +278,8 @@ Debugging options:
 --no-reconfigure-engine, -R      Don't automatically configure engine
                                  (manually use 'generate' and 'connect' commands)
 --debugging-output, -D           Emit debugging information
+--fake-jack, -J                  Simulate JACK environment (for testing)
+--fake-alsa, -A                  Simulate ALSA environment (for testing)
 
 HELP
 
@@ -3408,7 +3411,9 @@ Horgand:out_2
 
 sub jack_update {
 	# cache current JACK status
-	$jack_running = $opts{F} or jack_running();
+	if    ( $opts{A} ){ $jack_running = 0  }
+	elsif ( $opts{F} ){ $jack_running = 1  }
+	else  { $jack_running = jack_running() }
 	$jack_lsp = $opts{F} ? $fake_jack_lsp : qx(jack_lsp -Ap 2> /dev/null); 
 	%jack = %{jack_ports()} if $jack_running;
 }

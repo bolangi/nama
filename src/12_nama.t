@@ -91,31 +91,7 @@ is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
 
 # this is ALSA dependent (i.e. no JACK running)
-=comment
-$track_snapshots = track_snapshots(); 
 
-my $snap = q(---
-full_path: test/.wav/sax_1.wav
-modifiers: ''
-mono_to_stereo: '-chcopy:1,2'
-n: 3
-name: sax
-playat_output: ~
-pre_send: ' -chmove:2,6 -chmove:1,5'
-rec_route: '-chmove:2,1'
-select_output: ~
-send_output:
-  - soundcard_out
-  - consumer
-source_input:
-  - soundcard_device_in
-  - consumer
-width: 1
-...
-);
-
-is( yaml_out($track_snapshots->{sax}),  $snap, "track snapshot");
-=cut
 my $io = ::IO->new(track => 'sax');
 
 like( ref $io, qr/IO$/, 'IO base class object');

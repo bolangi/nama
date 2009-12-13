@@ -132,9 +132,7 @@ sub new {
 }
 package ::IO::from_jack_client;
 use Modern::Perl; our @ISA = '::IO';
-sub new {
-	my $io = ::IO::to_jack_client::new(@_);
-}
+sub device_id { 'jack,'.$_[0]->source_device_string}
 sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::to_jack_client;
@@ -142,7 +140,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	my $client = $io->source_device_string;
+	my $client = $io->send_device_string;
 	$io->set(device_id => "jack,$client");
 	my $format;
 	if ( $client eq 'system' ){ # we use the full soundcard width
@@ -171,11 +169,19 @@ sub new {
 
 package ::IO::from_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
+	
 sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
-
+sub ecs_string {
+	my $io = shift;
+	my $start = $io->send_id; # Assume channel will be 3 or greater
+	my $end   = $start + $io->width - 1; # Assume stereo
+	my $client = $io->send_device_string;
+	my $device_string = join q(,),q(jack_multi),
+		map{"$client:playback_$_"} $start..$end;
+}
 package ::IO::from_jack_port;
 use Modern::Perl; our @ISA = '::IO';
 sub ecs_extra { $_[0]->mono_to_stereo }
