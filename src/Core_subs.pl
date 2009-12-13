@@ -868,11 +868,11 @@ sub generate_setup {
 
 	write_chains(); 
 
-	remove_temp_tracks();
+	remove_temporary_tracks();
 
 	1; # used to sense a chain setup ready to run
 }
-sub remove_temp_tracks {
+sub remove_temporary_tracks {
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
 }
 sub initialize_chain_setup_vars {
@@ -3467,6 +3467,8 @@ sub jack_ports {
 				$jack{ $_ }{ $direction }++;
 				my ($client, $port) = /(.+?):(.+)/;
 				$jack{ $client }{ $direction }++;
+				my ($port_prefix) = /:(.+)_\d+$/;
+				$jack{ $client }{ $direction.'_prefix' } = $port_prefix;
 
 		 } @ports;
 
@@ -3945,7 +3947,7 @@ sub cache_track {
 	process_routing_graph(); 
 	write_chains();
 	maybe_write_chains() or say("nothing to do"), return;
-	remove_temp_tracks();
+	remove_temporary_tracks();
 	connect_transport('no_transport_status')
 		or say ("Couldn't connect engine! Skipping."), return;
 	say $/,$orig->name,": length ". d2($length). " seconds";

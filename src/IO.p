@@ -65,6 +65,7 @@ sub AUTOLOAD {
 	say "result: $result";
 	$result;
 }
+sub DESTROY {}
 our $new_mono_to_stereo = sub {
 	my $class = shift;
 	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use
