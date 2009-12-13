@@ -1065,10 +1065,8 @@ sub prune_graph {
 }
 # new object based dispatch from routing graph
 	
-{my $jumper_id;
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
-	$jumper_id = 0;  # for loop-to-loop chain ids
 	@io = map{ dispatch($_) } $g->edges;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
@@ -1094,6 +1092,15 @@ sub process_routing_graph {
 	@post_input = sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
 	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 	@input_chains + @output_chains # to sense empty chain setup
+}
+{ my ($m,$n,$o,$p,$q,$r);
+sub by_chain {
+	($m,$n,$o) = $a =~ /(\D*)(\d+)(\D*)/ ;
+	($p,$q,$r) = $b =~ /(\D*)(\d+)(\D*)/ ;
+	if ($n != $q){ $n <=> $q }
+	elsif ( $m ne $p){ $m cmp $p }
+	else { $o cmp $r }
+}
 }
 sub non_track_dispatch {
 
@@ -1140,8 +1147,6 @@ sub non_track_dispatch {
  			"device_id: $attrib->{device_id}";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 }
-} # end $jumper_id scope 
-	
 
 sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
