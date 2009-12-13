@@ -57,12 +57,9 @@ sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
 	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
-	$::debug and say "self: $self, track: ", $self->track, " method: $method";
 	my $result = q();
 	$result = $::tn{$self->track}->$method if $::tn{$self->track};
-	#$result = $::track_snapshots->{$self->track}{$method} 
-	#	if $::track_snapshots->{$self->track};
-	say "result: $result";
+	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
 	$result;
 }
 sub DESTROY {}
@@ -100,7 +97,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	if ( $io->width and ! $io->format ){
+	if ( ! $io->format ){ # allow for override
 		$io->set(format => ::signal_format($::raw_to_disk_format, $io->width));
 	}
 	$io
