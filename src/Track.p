@@ -831,11 +831,6 @@ sub rec_status{
 	'OFF';
 
 }
-sub ch_r {
-	no warnings;
-	my $track = shift;
-	return '';
-}
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
@@ -856,7 +851,10 @@ sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
 sub rec_route { $::tn{$_[0]->target}->rec_route }
-sub source_input { $::tn{$_[0]->target}->source_input} 
+sub source_type_string { $::tn{$_[0]->target}->source_type_string} 
+sub source_device_string { $::tn{$_[0]->target}->source_device_string} 
+sub send_type_string { $::tn{$_[0]->target}->send_type_string} 
+sub send_device_string { $::tn{$_[0]->target}->send_device_string} 
 sub soundcard_input { $::tn{$_[0]->target}->soundcard_input} 
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
