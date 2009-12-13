@@ -3999,6 +3999,7 @@ sub destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		rememoize();
 	}
+	$term->remove_history($term->where_history);
 	$main->set(rw => $old_group_status);
 	1;
 }
