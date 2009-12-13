@@ -952,14 +952,11 @@ sub add_paths_for_aux_sends {
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
 	map {  
-		my ($type, $device_id) = @{ $_->send_output };
-		#say "aux send name: ", $_->name," type: $type, device_id: $device_id";
-		$g->add_path($_->name, $type);
-		 $g->set_edge_attributes($_->name, $type, 
-			{ 	track => $_->name,
-				chain_id => 'S'.$_->n,
-
- });
+		my @e = ($_->name, $_->send_type_string);
+		$g->add_edge(@e);
+		 $g->set_edge_attributes(@e,
+			  {	track => $_->name,
+				chain_id => 'S'.$_->n,});
   	} grep { (ref $_) !~ /Slave/ 
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
