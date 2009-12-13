@@ -74,7 +74,6 @@ sub device_id { 'null' }
 
 package ::IO::from_wav;
 use Modern::Perl; our @ISA = '::IO';
-*new = $::IO::new_mono_to_stereo;
 sub device_id { 
 	my $io = shift;
 	my @modifiers;
@@ -84,6 +83,8 @@ sub device_id {
 	push @modifiers, $io->full_path;
 	join(q[,],@modifiers);
 }
+sub ecs_extra { $_[0]->mono_to_stereo}
+
 package ::IO::to_wav;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
@@ -126,16 +127,15 @@ package ::IO::from_jack_client;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $io = ::IO::to_jack_client::new(@_);
-	$io->set(ecs_extra => $io->mono_to_stereo);
-	$io
 }
+sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::to_jack_client;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	my $class = shift;
 	my $io = $class->SUPER::new(@_);
-	my $client = $io->device_id;
+	my $client = $io->source_device_string;
 	$io->set(device_id => "jack,$client");
 	my $format;
 	if ( $client eq 'system' ){ # we use the full soundcard width
@@ -164,42 +164,27 @@ sub new {
 
 package ::IO::from_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
-*new = $::IO::new_mono_to_stereo;
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
 
 package ::IO::from_jack_port;
 use Modern::Perl; our @ISA = '::IO';
-*new = $::IO::new_mono_to_stereo;
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_port;
 use Modern::Perl; our @ISA = '::IO';
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	my $device = $::devices{$::alsa_capture_device}{ecasound_id};
-	$io->set(device_id => $device);
-	no warnings 'uninitialized';
-	$io->set(ecs_extra => join " ", $io->rec_route, $io->mono_to_stereo) 
-		unless $io->ecs_extra;
-	use warnings 'uninitialized';
-	$io;
-}
+sub ecs_extra { join ' ', $_[0]->mono_to_stereo, $_[0]->rec_route }
+sub device_id { $::devices{$::alsa_capture_device}{ecasound_id} }
 
 package ::IO::to_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	$io->set(device_id => $::devices{$::alsa_playback_device}{ecasound_id})
-		unless $io->device_id;
-	$io->set(ecs_extra => $io->pre_send) if $io->pre_send;
-	$io;
-}
+sub device_id { $::devices{$::alsa_playback_device}{ecasound_id} }
+sub ecs_extra { $_[0]->pre_send }
 
 1;
 __END__
