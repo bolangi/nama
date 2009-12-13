@@ -178,7 +178,7 @@ use Modern::Perl; our @ISA = '::IO';
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
-sub ecs_extra { join ' ', $_[0]->mono_to_stereo, $_[0]->rec_route }
+sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
 sub device_id { $::devices{$::alsa_capture_device}{ecasound_id} }
 
 package ::IO::to_soundcard_device;
