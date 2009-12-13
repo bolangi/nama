@@ -1538,7 +1538,7 @@ sub connect_jack_ports {
 					system $cmd;
 			} ;
 		  }
- 	 } grep{ $_->source_type eq 'jack_manual' and $_->rec_status eq 'REC' 
+ 	 } grep{ $_->source_type eq 'jack_port' and $_->rec_status eq 'REC' 
 	 } ::Track::all();
 }
 

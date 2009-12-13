@@ -21,14 +21,8 @@ our %io_class = qw(
 	wav_out 				::IO::to_wav
 	loop_source				::IO::from_loop
 	loop_sink				::IO::to_loop
-	loop_in					::IO::from_loop
-	loop_out				::IO::to_loop
-	jack_client_in			::IO::from_jack_client
-	jack_client_out 		::IO::to_jack_client
 	jack_port_in			::IO::from_jack_port
 	jack_port_out 			::IO::to_jack_port
-	jack_manual_in  		::IO::from_jack_port
-	jack_manual_out 		::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
 	);

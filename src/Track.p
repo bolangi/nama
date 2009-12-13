@@ -229,7 +229,7 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
-			when('jack_manual'){ return 'REC' }
+			when('jack_port'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('track'){ return 'REC' } # maybe $track->rw ??
 			default { croak $track->name. ": missing source type" }
@@ -355,7 +355,7 @@ sub input_path { # signal path, not file path
 	
 	if($track->rec_status eq 'REC'){
 
-		if ($track->source_type =~ /soundcard|jack_client|jack_manual/){
+		if ($track->source_type =~ /soundcard|jack_client|jack_port/){
 			( $track->source_type . '_in' , $track->name)
 		} 
 
@@ -438,12 +438,12 @@ sub source_input {
 	given ( $track->source_type ){
 		when ( 'soundcard'  ){ return $track->soundcard_input }
 		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
+			if ( $::jack_running ){ return ['jack_multi_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [] }
 		}
 		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
-		when ('jack_manual'){
+		when ('jack_port'){
 			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [] }
@@ -503,7 +503,7 @@ sub set_source { # called from parser
 		return
 	}
 	if( $source eq 'jack'){
- 		$track->set(source_type => 'jack_manual',
+ 		$track->set(source_type => 'jack_port',
  					source_id => $track->name);
  		say $track->name, ": JACK input port is ",$track->source_id,"_in",
  		". Make connections manually.";
