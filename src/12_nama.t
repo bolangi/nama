@@ -29,6 +29,12 @@ push @ARGV, qw(-d .);
 diag(cwd);
 
 process_options();
+
+diag "force ALSA environment"
+
+$opts{A} = 1;
+$opts{J} = 0;
+
 prepare();
 diag "Check representative variable from default .namarc";
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
@@ -116,6 +122,26 @@ $io = ::IO::to_soundcard->new(track => 'sax');
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
+
+diag "force JACK environment";
+
+$opts{A} = 0;
+$opts{J} = 1;
+
+update_jack();
+
+$io = ::IO::from_soundcard->new(track => 'sax'); 
+
+is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard (jack) 1');
+is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard (jack) 2');
+
+$io = ::IO::to_soundcard->new(track => 'sax'); 
+
+is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard (jack) 1');
+is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard (jack) 2');
+
+
+
 1;
 __END__
 	is( $foo, 2, "Scalar number assignment");

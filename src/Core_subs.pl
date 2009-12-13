@@ -236,7 +236,7 @@ sub process_options {
 		no-static-effects-data		s
 		no-static-effects-cache		e
 		no-reconfigure-engine		R
-		fake-jack					F
+		fake-jack					J
 		fake-alsa					A
 		debugging-output			D
 );
@@ -3412,9 +3412,9 @@ Horgand:out_2
 sub jack_update {
 	# cache current JACK status
 	if    ( $opts{A} ){ $jack_running = 0  }
-	elsif ( $opts{F} ){ $jack_running = 1  }
+	elsif ( $opts{J} ){ $jack_running = 1  }
 	else  { $jack_running = jack_running() }
-	$jack_lsp = $opts{F} ? $fake_jack_lsp : qx(jack_lsp -Ap 2> /dev/null); 
+	$jack_lsp = $opts{J} ? $fake_jack_lsp : qx(jack_lsp -Ap 2> /dev/null); 
 	%jack = %{jack_ports()} if $jack_running;
 }
 }

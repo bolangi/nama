@@ -177,7 +177,7 @@ use Modern::Perl; our @ISA = '::IO';
 sub ecs_string {
 	my $io = shift;
 	my $start = $io->send_id; # Assume channel will be 3 or greater
-	my $end   = $start + $io->width - 1; # Assume stereo
+	my $end   = $start + $io->width - 1;
 	my $client = $io->send_device_string;
 	my $device_string = join q(,),q(jack_multi),
 		map{"$client:playback_$_"} $start..$end;
