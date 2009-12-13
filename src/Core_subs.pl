@@ -1071,6 +1071,12 @@ my @fields = qw(
 		rec_route
 		full_path
 		pre_send
+		soundcard_input_type_string
+		soundcard_input_device_string
+		source_type_string
+		source_device_string
+		send_type_string
+		send_device_string
 );
 
 # an optimization
@@ -1213,13 +1219,13 @@ sub override_from_edge {
 		my $attr = $g->get_edge_attributes(@$edge);
 		$attr ? %$attr : ();
 }
-							
-sub soundcard_output {
- 	$::jack_running 
-		? [qw(jack_client_out system)]
-		: ['soundcard_device_out', $::alsa_playback_device]
+sub soundcard_input_type_string {
+	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
 }
-
+sub soundcard_output_type_string {
+	$::jack_running ? 'jack_client_out' : 'soundcard_device_out'
+}
+							
 sub write_chains {
 
 	$debug2 and print "&write_chains\n";

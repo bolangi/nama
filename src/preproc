@@ -78,9 +78,11 @@ sub process {
 sub bestow_module_root {
 	my ($new_root, $text) = @_;
 
-	# Substitution 1: symbols containing a sigil
+	# Substitution 1: symbols containing a sigil, or 
+	# starting with [ ( or {
 
-		$text =~ s/([\%\$\@\&\#])(::)/$1$new_root$2/mg;
+		$text =~ s/([\%\$\@\&\#\*\(\[\{])(::)/$1$new_root$2/mg;
+		#$text =~ s/([%$@&#*\(\[\{])(::)/$1$new_root$2/mg;
 
 	# Substitution 2: package declarations (two steps)
 
@@ -108,9 +110,11 @@ sub bestow_module_root {
 		$text =~
 		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
 
-	# Substitution 6.1 *::Module{SUB}
+	# Substitution 6.1 *::Module
 		$text =~ s/\*::(\w)/*$new_root\::$1/mg;
 
+	# Substitution 6.2 {::Module::sub()}
+		$text =~ s/\{::(\w)/{$new_root\::$1/mg;
 
 	# Substitution 7: lone '::'
 		$text =~ s/'::'/'$new_root'/g;

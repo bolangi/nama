@@ -89,9 +89,9 @@ command_process('send 5');
 
 is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
-=comment
 
 # this is ALSA dependent (i.e. no JACK running)
+=comment
 $track_snapshots = track_snapshots(); 
 
 my $snap = q(---
@@ -115,34 +115,31 @@ width: 1
 );
 
 is( yaml_out($track_snapshots->{sax}),  $snap, "track snapshot");
+=cut
+my $io = ::IO->new(track => 'sax');
 
-my $io = ::IO->new(track => $track_snapshots->{sax}, direction => 'input');
+like( ref $io, qr/IO$/, 'IO base class object');
 
-is( $io->ecs_string, '-i:consumer', 'IO base class object');
-is( $io->type, 'soundcard_device_in', '$io->type');
-
-$io = ::IO::from_soundcard_device->new(track => $track_snapshots->{sax}, direction => 'input'); 
+$io = ::IO::from_soundcard_device->new(track => 'sax'); 
 
 is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard_device 1');
 is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard_device 2');
 
-$io = ::IO::from_soundcard->new(track => $track_snapshots->{sax},
-direction => 'input'); 
+$io = ::IO::from_soundcard->new(track => 'sax'); 
 
 is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard 1');
 is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard 2');
 
 
-$io = ::IO::to_soundcard_device->new(track => $track_snapshots->{sax}, direction => 'output'); 
+$io = ::IO::to_soundcard_device->new(track => 'sax'); 
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
 is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard_device 2');
 
-$io = ::IO::to_soundcard->new(track => $track_snapshots->{sax}, direction => 'output'); 
+$io = ::IO::to_soundcard->new(track => 'sax'); 
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
-=cut
 1;
 __END__
 	is( $foo, 2, "Scalar number assignment");

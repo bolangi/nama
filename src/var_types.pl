@@ -10,7 +10,7 @@
 						$raw_to_disk_format
 						$mixer_out_format
 						$alsa_playback_device
-						$capture_device	
+						$alsa_capture_device	
 						$project_root 	
 						$use_group_numbering
 						$press_space_to_start_transport
