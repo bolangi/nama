@@ -1193,25 +1193,6 @@ sub override_from_edge {
 		my $attr = $g->get_edge_attributes(@$edge);
 		$attr ? %$attr : ();
 }
-sub soundcard_input_type_string {
-	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
-}
-sub soundcard_output_type_string {
-	$::jack_running ? 'jack_client_out' : 'soundcard_device_out'
-}
-sub soundcard_input_device_string {
-	$::jack_running ? 'system' : $alsa_capture_device
-}
-sub soundcard_output_device_string {
-	$::jack_running ? 'system' : $alsa_playback_device
-}
-sub jack_multi_route {
-	my ($client, $direction, $start, $width)  = @_;
-	my $end   = $start + $width - 1;
-	$direction .= '_prefix'; # key
-	join q(,),q(jack_multi),
-	map{"$client\:$jack{$client}{$direction}$_"} $start..$end
-}
 							
 sub write_chains {
 

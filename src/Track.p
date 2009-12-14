@@ -431,7 +431,7 @@ CLIENT
 
 
 sub soundcard_input { 
-	[::soundcard_input_type_string(), ::soundcard_input_device_string()]
+	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
 }
 sub source_input {
 	my $track = shift;
@@ -461,10 +461,10 @@ sub send_output {
 		when ( 'soundcard' ){ 
 			if ($::jack_running) {
 				return ['jack_multi_out', 'system']
-			} else {return [ 'soundcard_device_out', $::alsa_playback_device] }
+			} else {return [ 'soundcard_device_out', $track->send_id] }
 		}
 		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_client_out', $track->send_id] }
+			if ($::jack_running){return [ 'jack_multi_out', $track->send_id] }
 			else { carp $track->name . 
 					q(: auxilary send to JACK client specified,) .
 					q( but jackd is not running.  Skipping.);

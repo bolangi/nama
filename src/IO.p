@@ -27,18 +27,10 @@ our %io_class = qw(
 	jack_multi_out			::IO::to_jack_multi
 	);
 our $AUTOLOAD;
-#  subroutines
-sub get_class {
-	my ($type,$direction) = @_;
-	::Graph::is_a_loop($type) and 
-		return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"};
-	$io_class{$type} or croak "unrecognized IO type: $type"
-}
+
+### class definition
+
 use ::Object qw( [% qx(./strip_all ./io_fields) %]);
-sub new {
-	my $class = shift;
-	my $object = bless { @_	}, $class;
-}
 sub ecs_string {
 	my $self = shift;
 	my @parts;
@@ -57,13 +49,36 @@ sub AUTOLOAD {
 	$result;
 }
 sub DESTROY {}
-our $new_mono_to_stereo = sub {
-	my $class = shift;
-	#my $io = $class->SUPER::new(@_); # SUPER seems to have limited use
-	my $io = ::IO::new($class, @_);
-	$io->set(ecs_extra => $io->mono_to_stereo) unless $io->ecs_extra;
-	$io
-};
+
+###  utility subroutines
+
+sub get_class {
+	my ($type,$direction) = @_;
+	::Graph::is_a_loop($type) and 
+		return $io_class{ $direction eq 'input' ?  "loop_source" : "loop_sink"};
+	$io_class{$type} or croak "unrecognized IO type: $type"
+}
+sub soundcard_input_type_string {
+	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
+}
+sub soundcard_output_type_string {
+	$::jack_running ? 'jack_multi_out' : 'soundcard_device_out'
+}
+sub soundcard_input_device_string {
+	$::jack_running ? 'system' : $::alsa_capture_device
+}
+sub soundcard_output_device_string {
+	$::jack_running ? 'system' : $::alsa_playback_device
+}
+sub jack_multi_route {
+	my ($client, $direction, $start, $width)  = @_;
+	my $end   = $start + $width - 1;
+	$direction .= '_prefix'; # key
+	join q(,),q(jack_multi),
+	map{"$client\:$::jack{$client}{$direction}$_"} $start..$end
+}
+
+### subclass definitions
 
 package ::IO::from_null;
 use Modern::Perl; our @ISA = '::IO';
@@ -112,14 +127,14 @@ package ::IO::from_soundcard;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	shift; # throw away class
-	my $class = $io_class{::soundcard_input_type_string()};
+	my $class = $io_class{::IO::soundcard_input_type_string()};
 	$class->new(@_);
 }
 package Audio::Nama::IO::to_soundcard;
 use Modern::Perl; our @ISA = '::IO';
 sub new {
 	shift; # throw away class
-	my $class = $io_class{::soundcard_output_type_string()};
+	my $class = $io_class{::IO::soundcard_output_type_string()};
 	$class->new(@_);
 }
 package ::IO::from_jack_client;
@@ -127,59 +142,44 @@ use Modern::Perl; our @ISA = '::IO';
 sub device_id { 'jack,'.$_[0]->source_device_string}
 sub ecs_extra { $_[0]->mono_to_stereo}
 
-package ::IO::to_jack_client;
-use Modern::Perl; our @ISA = '::IO';
-sub new {
-	my $class = shift;
-	my $io = $class->SUPER::new(@_);
-	my $client = $io->send_device_string;
-	$io->set(device_id => "jack,$client");
-	my $format;
-	if ( $client eq 'system' ){ # we use the full soundcard width
-
-		# shift track to correct output channel
-		# we could use jack_multi for this
-
-		$io->set(ecs_extra => $io->pre_send) if $io->pre_send;
-		$format = ::signal_format(
-			$::devices{jack}->{signal_format},
-
-			# the number of channels
-			::jack_client($client,q(input)) # client's input is our output
-		);
-
-	} else { # we use track width
-
-		$format = ::signal_format(
-					$::devices{jack}->{signal_format},	
-					$io->width
-		);
-	}
-	$io->set(format => $format);
-	$io;
-}
-
 package ::IO::from_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
-	
+sub device_id { 
+	my $io = shift;
+	# maybe source_id is an input number
+	my $client = $io->direction eq 'i' 
+		? $io->source_id
+		: $io->send_id;
+	my $channel = 1;
+	# confusing, but the direction is with respect to the client
+	my $direction = $io->direction eq 'i' ? 'output' : 'input';
+	if( ::dest_type($client) eq 'soundcard'){
+		$channel = $client;
+		$client = ::IO::soundcard_input_device_string(); # system, okay for output
+	}
+	::IO::jack_multi_route($client,$direction,$channel,$io->override_width )
+}
+# don't need to specify format, since we take all channels
 sub ecs_extra { $_[0]->mono_to_stereo }
 
+# aux sends will have to specify a width
+sub override_width {my $io = shift;  $io->{width} || $::tn{$io->track}->width } 
+
 package ::IO::to_jack_multi;
-use Modern::Perl; our @ISA = '::IO';
-sub ecs_string {
-	my $io = shift;
-	my $start = $io->send_id; # Assume channel will be 3 or greater
-	my $end   = $start + $io->width - 1;
-	my $client = $io->send_device_string;
-	my $device_string = join q(,),q(jack_multi),
-		map{"$client:playback_$_"} $start..$end;
-}
+use Modern::Perl; our @ISA = '::IO::from_jack_multi';
+sub ecs_extra {}
+
 package ::IO::from_jack_port;
 use Modern::Perl; our @ISA = '::IO';
+sub format { signal_format($::devices{jack}{signal_format}, $_[0]->width)}
+sub device_id { 'jack,,'.$_[0]->name.'\_in' }
+
 sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_port;
 use Modern::Perl; our @ISA = '::IO';
+sub format { signal_format($::devices{jack}{signal_format}, $_[0]->width)}
+sub device_id { 'jack,,'.$_[0]->name.'\_out' }
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
