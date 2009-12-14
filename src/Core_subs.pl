@@ -1077,20 +1077,15 @@ sub process_routing_graph {
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} grep { $_->direction eq 'output' } @io;
 	no warnings 'numeric';
-	my @in_keys = sort{$a->[0] <=> $b->[0]} values %inputs;
-	my @out_keys = sort{$a->[0] <=> $b->[0]} values %outputs;
-	my @temp;
-	while( $out_keys[0] =~ /^\D/){
-		push @temp, shift @out_keys;
-	}
-	push @out_keys, sort @temp;
+	my @in_keys = values %inputs;
+	my @out_keys = values %outputs;
 	use warnings 'numeric';
 	%inputs = reverse %inputs;	
 	%outputs = reverse %outputs;	
-	@input_chains = map {'-a:'.join(',',@$_)." $inputs{$_}"} @in_keys;
-	@output_chains = map {'-a:'.join(',',@$_)." $outputs{$_}"} @out_keys;
-	@post_input = sort map{ "-a:$_ $post_input{$_}"} keys %post_input;
-	@pre_output = sort map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
+	@input_chains = sort by_chain map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;
+	@output_chains = sort by_chain map {'-a:'.join(',',sort by_chain @$_)." $outputs{$_}"} @out_keys;
+	@post_input = sort by_chain map{ "-a:$_ $post_input{$_}"} keys %post_input;
+	@pre_output = sort by_chain map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 	@input_chains + @output_chains # to sense empty chain setup
 }
 { my ($m,$n,$o,$p,$q,$r);
