@@ -35,10 +35,11 @@ sub ecs_string {
 	my $self = shift;
 	my @parts;
 	push @parts, '-f:'.$self->format if $self->format;
-	push @parts, '-'.$self->direction.':'.$self->device_id;
+	push @parts, '-'.$self->io_prefix.':'.$self->device_id;
 	join ' ',@parts;
 }
-sub direction { (ref $_[0]) =~ /::from/ ? 'i' : 'o' }
+sub direction { (ref $_[0]) =~ /::from/ ? 'input' : 'output' }
+sub io_prefix { substr $_[0]->direction, 0, 1 }
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
@@ -147,12 +148,12 @@ use Modern::Perl; our @ISA = '::IO';
 sub device_id { 
 	my $io = shift;
 	# maybe source_id is an input number
-	my $client = $io->direction eq 'i' 
+	my $client = $io->direction eq 'input' 
 		? $io->source_id
 		: $io->send_id;
 	my $channel = 1;
 	# confusing, but the direction is with respect to the client
-	my $direction = $io->direction eq 'i' ? 'output' : 'input';
+	my $direction = $io->direction eq 'input' ? 'output' : 'input';
 	if( ::dest_type($client) eq 'soundcard'){
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
