@@ -77,13 +77,6 @@ sub AUTOLOAD {
 }
 sub DESTROY {}
 
-sub method_output {
-	# return 
-	my ($self, $method) = @_;
-	$self->is_method($method) ? $self->$method : ''
-}
-	
-
 ###  utility subroutines
 
 sub get_class {

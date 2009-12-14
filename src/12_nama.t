@@ -142,30 +142,9 @@ like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
 is ($io->ecs_extra, undef, 'IO to_soundcard: jack 2');
 
+$io = ::IO::to_loop->new(track => 'sax', device_id => 'alsa,default');
 
-
-
-1;
-__END__
-	is( $foo, 2, "Scalar number assignment");
-	is( $name, 'John', "Scalar string assignment");
-	my $sum;
-	map{ $sum += $_ } @face;
-	is ($sum, 25, "Array assignment");
-	is( $dict{fruit}, 'melon', "Hash assignment");
-	is ($serialized, $expected, "Serialization round trip");
-}
-	my $nulls = { 
-		foo => 2, 
-		name => undef,
-		face => [],
-		dict => {},
-	};	
-	diag("scalar array: ",scalar @face, " scalar hash: ", scalar %dict); 
-	assign (data => $nulls, class => 'main', vars => \@var_list);
-	is( scalar @face, 0, "Null array assignment");
-	is( scalar %dict, 0, "Null hash assignment");
-	
+is ($io->device_id, 'alsa,default', 'value overrides method call');
 
 
 1;

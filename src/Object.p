@@ -31,8 +31,9 @@ sub new {
 	bless { @_ }, $class;
 }
 
-sub is_legal_key { # not object method
+sub is_legal_key { 
 	my ($class, $key) = @_;
+	$class = ref $class if ref $class;  # support objects
 	return 1 if ${"$class\::_is_field"}{$key};
 	my ($parent_class) = @{"$class\::ISA"};
 	return unless $parent_class and $parent_class !~ /Object::Tiny/;
