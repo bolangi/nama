@@ -7,7 +7,21 @@
 # 1. Using the constructor new()
 # 2. Fixing them with a subroutine method (overrides constructor values)
 # 3. AUTOLOAD calling undefined methods on the associated track
-# 
+
+# Overriding
+#
+# here is our cunning plan
+#
+# all keys in the arguments for new get an initial _
+# e.g. width -> _width
+#
+# AUTOLOAD takes a call to $io->width and returns
+# $io->{_width} if available or $io->_width() (the method)
+# or $io->track->width
+#
+# for next level of override. 
+
+ 
 package ::IO;
 use Modern::Perl; use Carp;
 our %io_class = qw(
