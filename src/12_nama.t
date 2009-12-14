@@ -30,7 +30,7 @@ diag(cwd);
 
 process_options();
 
-diag "force ALSA environment"
+diag "force ALSA environment";
 
 $opts{A} = 1;
 $opts{J} = 0;
@@ -116,29 +116,32 @@ is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard 2');
 $io = ::IO::to_soundcard_device->new(track => 'sax'); 
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
-is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard_device 2');
+like ($io->ecs_extra, qr/-chmove:2,6 -chmove:1,5/, 'IO to_soundcard_device 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
-is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard 2');
+like ($io->ecs_extra, qr/-chmove:2,6 -chmove:1,5/, 'IO to_soundcard 2');
 
 diag "force JACK environment";
 
 $opts{A} = 0;
 $opts{J} = 1;
 
-update_jack();
+jack_update();
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
+like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
+is ($io->ecs_string, '-i:jack_multi,system:capture_2', 'IO from_soundcard: jack 1');
+is ($io->ecs_extra, '-chcopy:1,2', 'IO from_soundcard: jack 2');
 
-is ($io->ecs_string, '-i:alsa,default', 'IO from_soundcard (jack) 1');
-is ($io->ecs_extra, '-chmove:2,1 -chcopy:1,2', 'IO from_soundcard (jack) 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
+like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 
-is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard (jack) 1');
-is ($io->ecs_extra, ' -chmove:2,6 -chmove:1,5', 'IO to_soundcard (jack) 2');
+is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
+is ($io->ecs_extra, undef, 'IO to_soundcard: jack 2');
+
 
 
 
