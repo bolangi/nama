@@ -1,4 +1,5 @@
-		
+# Fields for IO objects
+
 # These fields are commonly assigned by the dispatch() routine
 # that processes graph edges
 
@@ -14,11 +15,7 @@
 		ecs_extra	# post_input or pre_output operators
 		ecs_string  # full chain setup output
 
-# the following are identical to the corresponding Track methods
-
-# The following fields, and any others will come from the 
-# the track via AUTOLOAD
-# via AUTOLOAD
+# The following fields will come from the associated track via AUTOLOAD
 
 #		full_path
 #		width		# no. of channels

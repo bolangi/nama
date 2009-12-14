@@ -59,16 +59,30 @@ sub AUTOLOAD {
 	# get tail of method call
 	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
 	my $result = q();
-	my $private = "_$method";
-	$result = $self->$private 		# field value
-		|| $self->$private			# method call
 
+# method calls will _not_ be accidentally overriden by track
+# values, since we hereby promise and guarantee there is no
+# overlap between the sets: (IO fields/methods) and (Track
+# fields/methods)
 
-$::tn{$self->track}->$method if $::tn{$self->track};
+# we also guarantee that all methods in the IO class
+# will return 
+
+	my $field = "_$method";
+	return $self->{$field} if exists $self->{$field};
+	return $self->method if $self->is_method($method);
+	my $track = $::tn{$self->track} or return;
+	return $::tn{$self->track}->$method if $track->is_method($method);
 	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
-	$result;
 }
 sub DESTROY {}
+
+sub method_output {
+	# return 
+	my ($self, $method) = @_;
+	$self->is_method($method) ? $self->$method : ''
+}
+	
 
 ###  utility subroutines
 

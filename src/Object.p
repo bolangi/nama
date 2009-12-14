@@ -58,6 +58,19 @@ sub set {
 # sub parents {
 # 	my @ISA = @_;
 # 	map{ 
+sub is_method {  # check symbol table
+	my ($self, $method) = @_;
+	no strict 'refs';
+	my $pkg = (ref $self) . ":\:"; # key for symbol table lookup
+							# written like this to avoid source filter :-(
+	#warn "method: $method";
+	#warn "pkg: $pkg\n";
+	local *sub = ${$pkg}{$method};
+	defined &sub
+}
+	
+# *foo = sub { 3 }; my $pkg = "main::";$name = "foo" ;
+# local *sym = ${$pkg}{$name}; say "yes" if defined &sym
 sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;
