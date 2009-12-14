@@ -59,7 +59,12 @@ sub AUTOLOAD {
 	# get tail of method call
 	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
 	my $result = q();
-	$result = $::tn{$self->track}->$method if $::tn{$self->track};
+	my $private = "_$method";
+	$result = $self->$private 		# field value
+		|| $self->$private			# method call
+
+
+$::tn{$self->track}->$method if $::tn{$self->track};
 	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
 	$result;
 }

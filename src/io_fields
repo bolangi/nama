@@ -1,14 +1,23 @@
+		
+# These fields are commonly assigned by the dispatch() routine
+# that processes graph edges
+
 		track		# originating track name
 		chain_id	# -a: argument
 		endpoint	# graph node name, for routing to loop devices
-		device_id 	# -i: or -o: argument
-		format		# -f: argument
+
+# The following fields can be assigned to override defaults for
+# for special cases
+
+		device_id 	# argument to -i: or -o: operators
+		format		# argument to -f: operator
 		ecs_extra	# post_input or pre_output operators
+		ecs_string  # full chain setup output
 
-		# the following are identical to the corresponding Track methods
+# the following are identical to the corresponding Track methods
 
-# we don't expect to ever override these
-# so if available, they will come from the track snapshot
+# The following fields, and any others will come from the 
+# the track via AUTOLOAD
 # via AUTOLOAD
 
 #		full_path
