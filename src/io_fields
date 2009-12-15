@@ -3,17 +3,18 @@
 # These fields are commonly assigned by the dispatch() routine
 # that processes graph edges
 
-		track		# originating track name
-		chain_id	# -a: argument
-		endpoint	# graph node name, for routing to loop devices
+track		# originating track name
+chain_id	# -a: argument
+endpoint	# graph node name, for routing to loop devices
 
 # The following fields can be assigned to override defaults for
 # for special cases
 
-		device_id 	# argument to -i: or -o: operators
-		format		# argument to -f: operator
-		ecs_extra	# post_input or pre_output operators
-		ecs_string  # full chain setup output
+device_id 	# argument to -i: or -o: operators
+format		# argument to -f: operator
+format_template # signal_format($format_template, $width)
+ecs_extra	# post_input or pre_output operators
+ecs_string  # full chain setup output
 
 # The following fields will come from the associated track via AUTOLOAD
 

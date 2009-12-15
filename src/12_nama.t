@@ -26,7 +26,7 @@ push @ARGV, qw(-t);
 
 push @ARGV, qw(-d .); 
 
-diag(cwd);
+diag("working direction: ",cwd);
 
 process_options();
 
@@ -140,9 +140,9 @@ $io = ::IO::to_soundcard->new(track => 'sax');
 like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 
 is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
-is ($io->ecs_extra, undef, 'IO to_soundcard: jack 2');
+ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
-$io = ::IO::to_loop->new(track => 'sax', device_id => 'alsa,default');
+$io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
 is ($io->device_id, 'alsa,default', 'value overrides method call');
 

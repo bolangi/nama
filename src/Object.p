@@ -66,6 +66,7 @@ sub is_method {  # check symbol table
 							# written like this to avoid source filter :-(
 	#warn "method: $method";
 	#warn "pkg: $pkg\n";
+	return unless exists ${$pkg}{$method};
 	local *sub = ${$pkg}{$method};
 	defined &sub
 }
