@@ -142,9 +142,9 @@ like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
 ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
-$io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
+#$io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
-is ($io->device_id, 'alsa,default', 'value overrides method call');
+#is ($io->device_id, 'alsa,default', 'value overrides method call');
 
 
 1;

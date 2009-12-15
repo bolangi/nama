@@ -2,26 +2,11 @@
 # 
 # IO objects for writing Ecasound chain setup file
 #
-# Three ways we set fields:
+# Three ways we set object values:
 # 
 # 1. Using the constructor new()
-# 2. Fixing them with a subroutine method (overrides constructor values)
+# 2. Defining a method (generally clobbers constructor values)
 # 3. AUTOLOAD calling undefined methods on the associated track
-
-# Overriding
-#
-# here is our cunning plan
-#
-# all keys in the arguments for new get an initial _
-# e.g. width -> _width
-#
-# AUTOLOAD takes a call to $io->width and returns
-# $io->{_width} if available or $io->_width() (the method)
-# or $io->track->width
-#
-# for next level of override. 
-
- 
 package ::IO;
 use Modern::Perl; use Carp;
 
@@ -54,15 +39,9 @@ our $AUTOLOAD;
 
 # we add an underscore to each track field
 
-use ::Object qw( [% join " ",map{chomp; "_".$_} grep{/^\s*$/}qx(./strip_all ./io_fields)%]);
+use ::Object qw( [% qx(./strip_all ./io_fields)%]);
+use Try::Tiny;
 
-sub new {
-	my $class = shift;
-	my %vals = @_;
-	my @args = map{"_".$_, $vals{$_}} keys %vals; # add underscore to key 
-	bless {@args}, $class
-}
-	
 sub ecs_string {
 	my $self = shift;
 	my @parts;
@@ -72,31 +51,22 @@ sub ecs_string {
 }
 sub format { 
 	my $self = shift;
-	::signal_format($self->format_template, $self->width)
-		if $self->format_template and $self->width
+	::signal_format($self->format_template, $self->_width)
+		if $self->format_template and $self->_width
 }
-sub direction { (ref $_[0]) =~ /::from/ ? 'input' : 'output' }
+sub _width { $_[0]->{width} || $_[0]->width }	# allow override  
+no warnings 'redefine';
+sub direction { 								# allow override
+	$_[0]->{direction} || (ref $_[0]) =~ /::from/ ? 'input' : 'output' 
+}
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
 	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
-	my $result = q();
-
-# method calls will _not_ be accidentally overriden by track
-# values, since we hereby promise and guarantee there is no
-# overlap between the sets: (IO fields/methods) and (Track
-# fields/methods)
-
-# we also guarantee that all methods in the IO class
-# will return 
-
-	my $field = "_$method";
-	return $self->{$field} if exists $self->{$field};
-	return $self->$field if $self->is_method($field);
-	my $track = $::tn{$self->track} or return;
-	return $::tn{$self->track}->$method if $track->is_method($method);
-	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
+	my $result;
+ 	try { $result = $::tn{$self->track}->$method } 
+	$result
 }
 sub DESTROY {}
 
@@ -138,7 +108,7 @@ sub device_id { 'null' } #
 
 package ::IO::to_null;
 use Modern::Perl; our @ISA = '::IO';
-sub _device_id { 'null' }  # underscore for testing
+sub device_id { 'null' }  # underscore for testing
 
 package ::IO::from_wav;
 use Modern::Perl; our @ISA = '::IO';
@@ -156,7 +126,8 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::to_wav;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { $_[0]->full_path }
-sub _format_template { $::raw_to_disk_format } # overrideable
+# enable override
+sub format_template { $_[0]->{format_template} || $::raw_to_disk_format } 
 
 package ::IO::from_loop;
 use Modern::Perl; our @ISA = '::IO';
@@ -187,10 +158,6 @@ use Modern::Perl; our @ISA = '::IO';
 sub device_id { 'jack,'.$_[0]->source_device_string}
 sub ecs_extra { $_[0]->mono_to_stereo}
 
-package ::IO::from_jack_multi;
-use Modern::Perl; our @ISA = '::IO::to_jack_multi';
-sub ecs_extra { $_[0]->mono_to_stereo }
-
 package ::IO::to_jack_multi;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { 
@@ -206,19 +173,23 @@ sub device_id {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$direction,$channel,$io->width )
+	::IO::jack_multi_route($client,$direction,$channel,$io->_width )
 }
 # don't need to specify format, since we take all channels
 
-package ::IO::from_jack_port;
-use Modern::Perl; our @ISA = '::IO::to_jack_port';
-sub device_id { 'jack,,'.$_[0]->name.'\_in' }
+package ::IO::from_jack_multi;
+use Modern::Perl; our @ISA = '::IO::to_jack_multi';
 sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_port;
 use Modern::Perl; our @ISA = '::IO';
 sub format_template { $::devices{jack}{signal_format} }
 sub device_id { 'jack,,'.$_[0]->name.'\_out' }
+
+package ::IO::from_jack_port;
+use Modern::Perl; our @ISA = '::IO::to_jack_port';
+sub device_id { 'jack,,'.$_[0]->name.'\_in' }
+sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
