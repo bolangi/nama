@@ -3595,6 +3595,11 @@ sub add_mastering_tracks {
 
  } @mastering_track_names;
 
+	$tn{ $mastering_track_names[-1] }->set( 
+		send_type => 'soundcard',
+		send_id => 1
+	);
+
 }
 
 sub add_mastering_effects {
