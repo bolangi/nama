@@ -64,11 +64,17 @@ sub is_method {  # check symbol table
 	no strict 'refs';
 	my $pkg = (ref $self) . ":\:"; # key for symbol table lookup
 							# written like this to avoid source filter :-(
-	#warn "method: $method";
-	#warn "pkg: $pkg\n";
+	my ($parent) = @{"$pkg\:\:ISA"};
+	$parent .= "\:\:";
+	my ($grandparent) = @{"$parent\:\:ISA"};
+	$grandparent .= "\:\:";
 	return unless exists ${$pkg}{$method};
-	local *sub = ${$pkg}{$method} || ${${$pkg::ISA[0]}}{$method};
-	defined &sub
+	local *sub = ${$pkg}{$method};
+	return 1 if defined &sub;
+	local *sub1 = ${$parent}{$method};
+	return 1 if defined &sub1;
+	local *sub2 = ${$grandparent}{$method};
+	defined &sub2;
 }
 	
 # *foo = sub { 3 }; my $pkg = "main::";$name = "foo" ;

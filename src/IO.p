@@ -54,7 +54,16 @@ our $AUTOLOAD;
 
 # we add an underscore to each track field
 
-use ::Object qw( [% join " ",map{chomp; "_".$_} grep{/^\s*$/}qx(./strip_all ./io_fields)%]);
+use ::Object qw( 
+					_track		
+					_chain_id	
+					_endpoint	
+					_device_id 	
+					_format		
+					_format_template 
+					_ecs_extra	
+					_ecs_string  
+);
 
 sub new {
 	my $class = shift;
@@ -92,12 +101,16 @@ sub AUTOLOAD {
 # will return 
 
 	my $field = "_$method";
+	local *AUTOLOAD = sub{};
 	return $self->{$field} if exists $self->{$field};
-	my $result = eval { $self->$field };
-	return $result unless $@;
-	my $track = $::tn{$self->_track} or return;
-	#return $track->$method if $track->is_method($method);
-	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
+	eval {
+		return $self->$field; 
+		$@ = undef;
+		my $track = $::tn{$self->_track} or return;
+		$@ = undef;
+		return $track->$method;
+	};
+	$@ = undef;
 }
 sub DESTROY {}
 
