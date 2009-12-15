@@ -18,20 +18,7 @@ sub prepare {
 
 	read_config(global_config());  # from .namarc if we have one
 
-	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
-			and ! $opts{n} ){ 
-		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
-		{ no warnings qw(redefine);
-		*eval_iam = \&eval_iam_libecasoundc; }
-		$e = Audio::Ecasound->new();
-	} else { 
-
-		no warnings qw(redefine);
-		launch_ecasound_server($ecasound_tcp_port);
-		init_ecasound_socket($ecasound_tcp_port); 
-		*eval_iam = \&eval_iam_neteci;
-	}
-	
+	select_ecasound_interface();
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
@@ -78,6 +65,25 @@ sub issue_first_prompt {
 	print prompt();
 	$attribs->{already_prompted} = 0;
 }
+
+sub select_ecasound_interface {
+	return if $opts{E};
+	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
+			and ! $opts{n} ){ 
+		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
+		{ no warnings qw(redefine);
+		*eval_iam = \&eval_iam_libecasoundc; }
+		$e = Audio::Ecasound->new();
+	} else { 
+
+		no warnings qw(redefine);
+		launch_ecasound_server($ecasound_tcp_port);
+		init_ecasound_socket($ecasound_tcp_port); 
+		*eval_iam = \&eval_iam_neteci;
+	}
+}
+	
+
 
 sub choose_sleep_routine {
 	if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
@@ -238,6 +244,7 @@ sub process_options {
 		no-reconfigure-engine		R
 		fake-jack					J
 		fake-alsa					A
+		fake-ecasound				E
 		debugging-output			D
 );
 
@@ -276,13 +283,14 @@ Debugging options:
 --no-static-effects-cache, -e    Bypass effects data cache
 --regenerate-effects-cache, -r   Regenerate the effects data cache
 --no-reconfigure-engine, -R      Don't automatically configure engine
-                                 (manually use 'generate' and 'connect' commands)
 --debugging-output, -D           Emit debugging information
---fake-jack, -J                  Simulate JACK environment (for testing)
---fake-alsa, -A                  Simulate ALSA environment (for testing)
+--fake-jack, -J                  Simulate JACK environment
+--fake-alsa, -A                  Simulate ALSA environment
+--no-ecasound, -E                Don't spawn Ecasound process
 
 HELP
 
+#--no-ecasound, -E                Don't load Ecasound (for testing)
 
 	say $banner;
 
@@ -499,6 +507,8 @@ Loading project "untitled".
 		::SimpleTrack->new( 
 			group => 'Master', 
 			name => 'Master',
+			send_type => 'soundcard',
+			send_id => 1,
 			rw => 'MON',); # no dir, we won't record tracks
 
 
@@ -934,6 +944,7 @@ sub add_paths_for_recording {
 	} grep{ (ref $_) !~ /Slave/  # don't record slave tracks
 			and $_->rec_status eq 'REC' 
 			and not $_->group eq 'null'   # nor null-input tracks
+			and not $_->group eq 'Mixdown'# nor Mixdown track
 			and not $_->rec_defeat        # nor rec-defeat tracks
 	} @tracks;
 }
@@ -962,6 +973,7 @@ sub add_paths_for_aux_sends {
 			  {	track => $_->name,
 				chain_id => 'S'.$_->n,});
   	} grep { (ref $_) !~ /Slave/ 
+				and $_->group !~ /Mixdown|Master/
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
 }
@@ -1082,10 +1094,10 @@ sub process_routing_graph {
 	use warnings 'numeric';
 	%inputs = reverse %inputs;	
 	%outputs = reverse %outputs;	
-	@input_chains = sort by_chain map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;
-	@output_chains = sort by_chain map {'-a:'.join(',',sort by_chain @$_)." $outputs{$_}"} @out_keys;
-	@post_input = sort by_chain map{ "-a:$_ $post_input{$_}"} keys %post_input;
-	@pre_output = sort by_chain map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
+	@input_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;
+	@output_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $outputs{$_}"} @out_keys;
+	@post_input = sort by_index map{ "-a:$_ $post_input{$_}"} keys %post_input;
+	@pre_output = sort by_index map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 	@input_chains + @output_chains # to sense empty chain setup
 }
 { my ($m,$n,$o,$p,$q,$r);
@@ -1097,6 +1109,12 @@ sub by_chain {
 	else { $o cmp $r }
 }
 }
+sub by_index {
+	my ($i) = $a =~ /(\d+)/;
+	my ($j) = $b =~ /(\d+)/;
+	$i <=> $j
+}
+
 sub non_track_dispatch {
 
 	# loop -> loop
@@ -1131,7 +1149,8 @@ sub non_track_dispatch {
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
 	# loop  fields: n: track->n, j: 'a' (counter)
-	$attr->{chain_id} //= 'J'.$vattr->{n}. $vattr->{j}++;
+	$attr->{chain_id} //= 'J'.$vattr->{n}. 
+		( $vattr->{j} eq 'a' ? ($vattr->{j}++,''): ++$vattr->{j});
 	my @direction = qw(input output);
 	map{ 
 		my $direction = shift @direction;
@@ -2836,9 +2855,10 @@ sub save_state {
 
 	my $file = shift; # mysettings
 
-	# remove nulls in %cops 
+	# remove null keys in %cops and %copp
 	
 	delete $cops{''};
+	delete $copp{''};
 
 	$file = $file || $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
@@ -3576,6 +3596,11 @@ sub add_mastering_tracks {
 		$ui->track_gui( $track->n );
 
  } @mastering_track_names;
+
+	$tn{ $mastering_track_names[-1] }->set( 
+		send_type => 'soundcard',
+		send_id => 1
+	);
 
 }
 

@@ -65,7 +65,7 @@ sub new {
 	 if  ! $::mastering_mode 
 		and grep{$vals{name} eq $_} @::mastering_track_names ; 
 
-	my $n = $vals{n} ? $vals{n} : idx(); 
+	my $n = $vals{n} || idx(); 
 	my $object = bless { 
 
 
@@ -294,11 +294,11 @@ sub rec_route {
 	
 	# applies to soundcard input via ALSA
 	
-	return unless $track->source_type eq 'soundcard'
+	return '' unless $track->source_type eq 'soundcard'
 		and ! $::jack_running;
 
 	# no need to route a signal at channel 1
-	return if ! $track->source_id or $track->source_id == 1; 
+	return '' if ! $track->source_id or $track->source_id == 1; 
 	
 	my $route = "-chmove:" . $track->source_id . ",1"; 
 	if ( $track->width == 2){

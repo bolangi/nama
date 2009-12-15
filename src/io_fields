@@ -10,11 +10,14 @@ endpoint	# graph node name, for routing to loop devices
 # The following fields can be assigned to override defaults for
 # for special cases
 
-device_id 	# argument to -i: or -o: operators
-format		# argument to -f: operator
-format_template # signal_format($format_template, $width)
+format_template 
+			# argument for signal_format(), eg s16_le,N,44100,i
+output_width# ditto, provides the 'N' for above, overriding track value
+
 ecs_extra	# post_input or pre_output operators
-ecs_string  # full chain setup output
+
+direction	# needed only for IO::any
+device_id 	# needed only for IO::any
 
 # The following fields will come from the associated track via AUTOLOAD
 
