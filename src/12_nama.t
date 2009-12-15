@@ -26,6 +26,10 @@ push @ARGV, qw(-t);
 
 push @ARGV, qw(-d .); 
 
+# suppress loading Ecasound
+
+push @ARGV, q(-E);
+
 diag("working direction: ",cwd);
 
 process_options();

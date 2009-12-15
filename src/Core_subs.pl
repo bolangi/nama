@@ -507,6 +507,8 @@ Loading project "untitled".
 		::SimpleTrack->new( 
 			group => 'Master', 
 			name => 'Master',
+			send_type => 'soundcard',
+			send_id => 1,
 			rw => 'MON',); # no dir, we won't record tracks
 
 
@@ -942,6 +944,7 @@ sub add_paths_for_recording {
 	} grep{ (ref $_) !~ /Slave/  # don't record slave tracks
 			and $_->rec_status eq 'REC' 
 			and not $_->group eq 'null'   # nor null-input tracks
+			and not $_->group eq 'Mixdown'# nor Mixdown track
 			and not $_->rec_defeat        # nor rec-defeat tracks
 	} @tracks;
 }
@@ -1110,6 +1113,7 @@ sub by_index {
 	my ($j) = $b =~ /(\d+)/;
 	$i <=> $j
 }
+
 sub non_track_dispatch {
 
 	# loop -> loop
@@ -1144,7 +1148,8 @@ sub non_track_dispatch {
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
 	# loop  fields: n: track->n, j: 'a' (counter)
-	$attr->{chain_id} //= 'J'.$vattr->{n}. $vattr->{j}++;
+	$attr->{chain_id} //= 'J'.$vattr->{n}. 
+		( $vattr->{j} eq 'a' ? ($vattr->{j}++,''): ++$vattr->{j});
 	my @direction = qw(input output);
 	map{ 
 		my $direction = shift @direction;
