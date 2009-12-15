@@ -93,9 +93,10 @@ sub AUTOLOAD {
 
 	my $field = "_$method";
 	return $self->{$field} if exists $self->{$field};
-	return $self->$field if $self->is_method($field);
-	my $track = $::tn{$self->track} or return;
-	return $::tn{$self->track}->$method if $track->is_method($method);
+	my $result = eval { $self->$field };
+	return $result unless $@;
+	my $track = $::tn{$self->_track} or return;
+	#return $track->$method if $track->is_method($method);
 	#$::debug and say "self: $self, track: ", $self->track, " method: $method, result: $result";
 }
 sub DESTROY {}

@@ -67,7 +67,7 @@ sub is_method {  # check symbol table
 	#warn "method: $method";
 	#warn "pkg: $pkg\n";
 	return unless exists ${$pkg}{$method};
-	local *sub = ${$pkg}{$method};
+	local *sub = ${$pkg}{$method} || ${${$pkg::ISA[0]}}{$method};
 	defined &sub
 }
 	
