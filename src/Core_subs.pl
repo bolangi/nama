@@ -2945,6 +2945,9 @@ sub restore_state {
 	
 	my $yaml = io($file)->all;
 
+	# remove empty key hash lines # YAML::Tiny bug
+	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
+
 	# rewrite obsolete null hash/array substitution
 	$yaml =~ s/~NULL_HASH/{}/g;
 	$yaml =~ s/~NULL_ARRAY/[]/g;
