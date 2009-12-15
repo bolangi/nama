@@ -67,6 +67,7 @@ sub issue_first_prompt {
 }
 
 sub select_ecasound_interface {
+	return if $opts{E};
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
 		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
@@ -282,10 +283,10 @@ Debugging options:
 --no-static-effects-cache, -e    Bypass effects data cache
 --regenerate-effects-cache, -r   Regenerate the effects data cache
 --no-reconfigure-engine, -R      Don't automatically configure engine
-                                 (manually use 'generate' and 'connect' commands)
 --debugging-output, -D           Emit debugging information
---fake-jack, -J                  Simulate JACK environment (for testing)
---fake-alsa, -A                  Simulate ALSA environment (for testing)
+--fake-jack, -J                  Simulate JACK environment
+--fake-alsa, -A                  Simulate ALSA environment
+--no-ecasound, -E                Don't spawn Ecasound process
 
 HELP
 
