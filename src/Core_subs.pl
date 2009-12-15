@@ -973,6 +973,7 @@ sub add_paths_for_aux_sends {
 			  {	track => $_->name,
 				chain_id => 'S'.$_->n,});
   	} grep { (ref $_) !~ /Slave/ 
+				and $_->group !~ /Mixdown|Master/
 				and $_->send_type 
 				and $_->rec_status ne 'OFF' } ::Track::all();
 }
@@ -2854,9 +2855,10 @@ sub save_state {
 
 	my $file = shift; # mysettings
 
-	# remove nulls in %cops 
+	# remove null keys in %cops and %copp
 	
 	delete $cops{''};
+	delete $copp{''};
 
 	$file = $file || $state_store_file;
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
