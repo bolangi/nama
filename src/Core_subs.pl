@@ -4026,4 +4026,17 @@ sub destroy_current_wav {
 	$main->set(rw => $old_group_status);
 	1;
 }
+
+sub some_user_tracks {
+	my $which = shift;
+	my @user_tracks = ::Track::all();
+	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
+	return unless @user_tracks;
+	my @selected_user_tracks = grep { $_->rec_status eq $WHICH } @user_tracks;
+	return unless @selected_user_tracks;
+	map{ $_->n } @selected_user_tracks;
+}
+sub user_rec_tracks { some_user_tracks('REC') }
+sub user_mon_tracks { some_user_tracks('MON') }
+
 ### end
