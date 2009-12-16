@@ -1155,7 +1155,7 @@ sub non_track_dispatch {
 	map{ 
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
-		my $attrib = {%$attr};
+		my $attrib = {%$vattr, %$attr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}";
@@ -1192,7 +1192,7 @@ sub override {
 	# data from edges has priority over data from vertexes
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
-	override_from_vertex($name), override_from_edge($edge)
+	(override_from_vertex($name), override_from_edge($edge))
 }
 	
 sub override_from_vertex {
