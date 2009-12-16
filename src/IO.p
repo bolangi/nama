@@ -71,12 +71,21 @@ sub AUTOLOAD {
 # fields/methods)
 
 # we also guarantee that all methods in the IO class
-# will return 
+# will return the empty string rather than
+# undef or empty list 
+#
+# well if we don't we may get a call to $track, but
+# as we don't expect an overlap of method names
+# it seems okay.
 
 	my $field = "_$method";
 	return $self->{$field} if exists $self->{$field};
-	return $self->$field if $self->can($field);
-	try { $::tn{$self->track}->$method }
+
+	# we check methods for a defined value
+	return $self->$field if $self->can($field) and defined $self->$field;
+
+	my $track = $::tn{$self->track};
+	$track and $track->can($method) and $track->$method;
 }
 sub DESTROY {}
 
