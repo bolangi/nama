@@ -60,36 +60,6 @@ sub set {
 # sub parents {
 # 	my @ISA = @_;
 # 	map{ 
-sub is_method {  # check symbol table
-
-	my $self = shift;
-	my $method = shift;
-	my $class = ref $self;
-	   
-	# First, find all the classes, and the ones it inherits.
-	my %classes = ($class => 1);
-	my @classes = ($class);
-	   
-	while (@classes) {
-	   my $class = pop @classes;
-	   no strict 'refs';
-	   foreach my $class (@{"$class\::ISA"}) {
-		   next if $classes {$class} ++;
-		   push @classes => $class;
-	   }
-	}
-	while (my $class = each %classes) {
-	   no strict 'refs';
-	   print "From class '$class':\n";
-   		while (my $entry = each %{"$class\::"}) {
-			print "\t$entry\n" if defined &{"$class\::$entry"};
-		  	return 1 if defined &{"$class\::$entry"} and $entry eq $method;
-   		}
-#	   my $entry = ${"$class\::"}{$method};
-#	   say "entry is ", ref $entry;
-#	   return 1 if defined &{"$class\::$entry"}
-   }
-}
 sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;
