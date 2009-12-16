@@ -24,10 +24,6 @@ $apple->set( color => 'red' );
 
 is( $apple->color, 'red', "mutator" ); 
 
-ok( $apple->is_method("color"), "method introspection");
-
-diag( $apple->dump );
-
 1;
 
 __END__

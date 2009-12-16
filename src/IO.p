@@ -51,10 +51,9 @@ sub ecs_string {
 }
 sub format { 
 	my $self = shift;
-	::signal_format($self->format_template, $self->_width)
-		if $self->format_template and $self->_width
+	::signal_format($self->format_template, $self->width)
+		if $self->format_template and $self->width
 }
-sub _width { $_[0]->{width} || $_[0]->width }	# allow override  
 no warnings 'redefine';
 sub direction { 								# allow override
 	$_[0]->{direction} || (ref $_[0]) =~ /::from/ ? 'input' : 'output' 
@@ -64,9 +63,20 @@ sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
 	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
-	my $result;
- 	try { $result = $::tn{$self->track}->$method } 
-	$result
+# 	try { $result = $::tn{$self->track}->$method } 
+
+# method calls will _not_ be accidentally overriden by track
+# values, since we hereby promise and guarantee there is no
+# overlap between the sets: (IO fields/methods) and (Track
+# fields/methods)
+
+# we also guarantee that all methods in the IO class
+# will return 
+
+	my $field = "_$method";
+	return $self->{$field} if exists $self->{$field};
+	return $self->$field if $self->can($field);
+	try { $::tn{$self->track}->$method }
 }
 sub DESTROY {}
 
@@ -104,11 +114,11 @@ sub jack_multi_route {
 ### we want to override
 package ::IO::from_null;
 use Modern::Perl; our @ISA = '::IO';
-sub device_id { 'null' } # 
+sub _device_id { 'null' } # 
 
 package ::IO::to_null;
 use Modern::Perl; our @ISA = '::IO';
-sub device_id { 'null' }  # underscore for testing
+sub _device_id { 'null' }  # underscore for testing
 
 package ::IO::from_wav;
 use Modern::Perl; our @ISA = '::IO';
@@ -126,8 +136,7 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::to_wav;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { $_[0]->full_path }
-# enable override
-sub format_template { $_[0]->{format_template} || $::raw_to_disk_format } 
+sub _format_template { $::raw_to_disk_format } 
 
 package ::IO::from_loop;
 use Modern::Perl; our @ISA = '::IO';
@@ -173,7 +182,7 @@ sub device_id {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$direction,$channel,$io->_width )
+	::IO::jack_multi_route($client,$direction,$channel,$io->width )
 }
 # don't need to specify format, since we take all channels
 

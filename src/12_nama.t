@@ -73,11 +73,6 @@ is( $effects_help[0],
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
 
-my $cs_got = eval_iam('cs');
-my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
-Chain "default" [selected] );
-is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
-
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
@@ -146,9 +141,15 @@ like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
 ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
-#$io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
+$io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
-#is ($io->device_id, 'alsa,default', 'value overrides method call');
+is ($io->device_id, 'alsa,default', 'value overrides method call');
+=comment
+my $cs_got = eval_iam('cs');
+my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
+Chain "default" [selected] );
+is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
+=cut
 
 
 1;
