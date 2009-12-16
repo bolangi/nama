@@ -39,7 +39,7 @@ our $AUTOLOAD;
 
 # we add an underscore to each track field
 
-use ::Object qw( [% qx(./strip_all ./io_fields)%]);
+use ::Object qw( [% join " ",map{"_".$_ } grep !/^\s*$/, split " " ,qx(./strip_all ./io_fields)%]);
 use Try::Tiny;
 
 sub ecs_string {

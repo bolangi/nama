@@ -14,7 +14,7 @@ format
 format_template 
 			# argument for signal_format(), eg s16_le,N,44100,i
 #output_width# ditto, provides the 'N' for above, overriding track value
-width
+#width
 ecs_extra	# post_input or pre_output operators
 
 direction	# needed only for IO::any
