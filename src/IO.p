@@ -101,16 +101,10 @@ sub AUTOLOAD {
 # will return 
 
 	my $field = "_$method";
-	local *AUTOLOAD = sub{};
 	return $self->{$field} if exists $self->{$field};
-	eval {
-		return $self->$field; 
-		$@ = undef;
-		my $track = $::tn{$self->_track} or return;
-		$@ = undef;
-		return $track->$method;
-	};
-	$@ = undef;
+	return $self->$field if $self->is_method($field);
+	my $track = $::tn{$self->_track} or return;
+	return $track->$method if $track->is_method($method);
 }
 sub DESTROY {}
 

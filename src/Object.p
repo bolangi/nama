@@ -1,8 +1,9 @@
 package ::Object;
+use Modern::Perl;
 use Carp;
 use ::Assign qw(yaml_out); 
 
-#use strict; # Enable during dev and testing
+no strict; # Enable during dev and testing
 BEGIN {
 	require 5.004;
 	$::Object::VERSION = '1.04';
@@ -60,25 +61,35 @@ sub set {
 # 	my @ISA = @_;
 # 	map{ 
 sub is_method {  # check symbol table
-	my ($self, $method) = @_;
-	no strict 'refs';
-	my $pkg = (ref $self) . ":\:"; # key for symbol table lookup
-							# written like this to avoid source filter :-(
-	my ($parent) = @{"$pkg\:\:ISA"};
-	$parent .= "\:\:";
-	my ($grandparent) = @{"$parent\:\:ISA"};
-	$grandparent .= "\:\:";
-	return unless exists ${$pkg}{$method};
-	local *sub = ${$pkg}{$method};
-	return 1 if defined &sub;
-	local *sub1 = ${$parent}{$method};
-	return 1 if defined &sub1;
-	local *sub2 = ${$grandparent}{$method};
-	defined &sub2;
+
+	my $self = shift;
+	my $method = shift;
+	my $class = ref $self;
+	   
+	# First, find all the classes, and the ones it inherits.
+	my %classes = ($class => 1);
+	my @classes = ($class);
+	   
+	while (@classes) {
+	   my $class = pop @classes;
+	   no strict 'refs';
+	   foreach my $class (@{"$class\::ISA"}) {
+		   next if $classes {$class} ++;
+		   push @classes => $class;
+	   }
+	}
+	while (my $class = each %classes) {
+	   no strict 'refs';
+	   print "From class '$class':\n";
+   		while (my $entry = each %{"$class\::"}) {
+			print "\t$entry\n" if defined &{"$class\::$entry"};
+		  	return 1 if defined &{"$class\::$entry"} and $entry eq $method;
+   		}
+#	   my $entry = ${"$class\::"}{$method};
+#	   say "entry is ", ref $entry;
+#	   return 1 if defined &{"$class\::$entry"}
+   }
 }
-	
-# *foo = sub { 3 }; my $pkg = "main::";$name = "foo" ;
-# local *sym = ${$pkg}{$name}; say "yes" if defined &sym
 sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;
