@@ -3309,9 +3309,9 @@ sub command_process {
 			@tracks = grep{ $tn{$_} or ! /\D/ and $ti{$_} }
 				split " ", $bunchy;
 			$debug and print "multitracks: @tracks\n";
-		} elsif ( @tracks = @{$bunch{$bunchy}}) {
+		} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
 			$debug and print "bunch tracks: @tracks\n";
- 		}
+ 		} else { say "$bunchy: no matching bunch identifier found" }
 		for my $t(@tracks) {
 			command_process("$t; $do");
 		}
@@ -4032,7 +4032,7 @@ sub some_user_tracks {
 	my @user_tracks = ::Track::all();
 	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
 	return unless @user_tracks;
-	my @selected_user_tracks = grep { $_->rec_status eq $WHICH } @user_tracks;
+	my @selected_user_tracks = grep { $_->rec_status eq $which } @user_tracks;
 	return unless @selected_user_tracks;
 	map{ $_->n } @selected_user_tracks;
 }
