@@ -1160,6 +1160,7 @@ sub non_track_dispatch {
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
+		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
 }
 
 sub dispatch { # creates an IO object from a graph edge
@@ -1173,7 +1174,7 @@ my $edge = shift;
 		# we need the $direction because there can be 
 		# edges to and from loop,Master_in
 	my @args = (track => $name,
-				endpoint => $endpoint, # for loops
+			endpoint => $endpoint, # for loops
 				chain_id => $tn{$name}->n,
 				override($name, $edge));
 	#say "dispatch class: $class";
@@ -1190,6 +1191,8 @@ sub decode_edge {
 }
 sub override {
 	# data from edges has priority over data from vertexes
+	# we specify $name, because it could be left or right 
+	# vertex
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
 	(override_from_vertex($name), override_from_edge($edge))
