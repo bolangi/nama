@@ -974,11 +974,11 @@ sub add_paths_for_aux_sends {
 }
 sub add_path_for_one_aux_send {
 	my $track = shift;
-		my @e = ($_->name, $_->send_type_string);
+		my @e = ($track->name, $track->send_type_string);
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
-			  {	track => $_->name,
-				chain_id => 'S'.$_->n,});
+			  {	track => $track->name,
+				chain_id => 'S'.$track->n,});
 }
 
 =comment
@@ -1045,9 +1045,10 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
-		$g->add_path(qw[Boost soundcard_out]) if $main_out;
-
-	} else { $g->add_edge('Master','soundcard_out') if $main_out }
+	}
+	$g->add_path($mastering_mode ?  'Boost' : 'Master',
+			$tn{Master}->send_type_string);
+ 
 
 }
 sub add_paths_for_mixdown_handling {
