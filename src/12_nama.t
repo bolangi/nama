@@ -272,10 +272,109 @@ $expected_setup_lines = <<EXPECTED;
 -a:3 -o:loop,Master_in
 EXPECTED
 check_setup('JACK send-Master-to-alternate-channel setup' );
-#check_setup('ALSA mixdown setup' );
-#check_setup('JACK mixdown setup' );
 
+command_process('Mixdown; rec; gen');
+$expected_setup_lines = <<EXPECTED;
 
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:Mixdown,J1 -i:loop,Master_out
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:J1 -o:jack_multi,system:playback_5
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+
+check_setup('JACK mixdown setup with main out' );
+gen_alsa();
+
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+-a:Mixdown,J1 -i:loop,Master_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:J1  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:J1 -o:alsa,default
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+
+check_setup('ALSA mixdown setup with main out' );
+
+command_process('master_on');
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+-a:4 -i:loop,Master_out
+-a:5,6,7 -i:loop,Eq_out
+-a:8 -i:loop,Boost_in
+-a:Mixdown,J8 -i:loop,Boost_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:J8  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:4 -o:loop,Eq_out
+-a:5,6,7 -o:loop,Boost_in
+-a:8 -o:loop,Boost_out
+-a:J8 -o:alsa,default
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+gen_alsa();
+check_setup('Mixdown in mastering mode - ALSA');
+
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:4 -i:loop,Master_out
+-a:5,6,7 -i:loop,Eq_out
+-a:8 -i:loop,Boost_in
+-a:Mixdown,J8 -i:loop,Boost_out
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:4 -o:loop,Eq_out
+-a:5,6,7 -o:loop,Boost_in
+-a:8 -o:loop,Boost_out
+-a:J8 -o:jack_multi,system:playback_5
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+gen_jack();
+check_setup('Mixdown in mastering mode - JACK');
+sub gen_alsa { force_alsa(); command_process('gen')}
+sub gen_jack { force_jack(); command_process('gen')}
 sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
 sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
 sub setup_content {
