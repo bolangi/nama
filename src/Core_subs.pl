@@ -966,16 +966,19 @@ sub add_paths_for_aux_sends {
 	# track output usually goes to Master or to another track
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
-	map {  
+	map {  add_path_for_one_aux_send( $_ ) } 
+	grep { (ref $_) !~ /Slave/ 
+			and $_->group !~ /Mixdown|Master/
+			and $_->send_type 
+			and $_->rec_status ne 'OFF' } ::Track::all();
+}
+sub add_path_for_one_aux_send {
+	my $track = shift;
 		my @e = ($_->name, $_->send_type_string);
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
 			  {	track => $_->name,
 				chain_id => 'S'.$_->n,});
-  	} grep { (ref $_) !~ /Slave/ 
-				and $_->group !~ /Mixdown|Master/
-				and $_->send_type 
-				and $_->rec_status ne 'OFF' } ::Track::all();
 }
 
 =comment
