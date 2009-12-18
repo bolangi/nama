@@ -3601,13 +3601,16 @@ sub add_mastering_tracks {
 		);
 		$ui->track_gui( $track->n );
 
- } @mastering_track_names;
-
-	$tn{ $mastering_track_names[-1] }->set( 
-		send_type => 'soundcard',
-		send_id => 1
+ 	} grep{ $_ ne 'Boost' } @mastering_track_names;
+	my $track = ::SlaveTrack->new(
+		name => 'Boost', 
+		rw => 'MON',
+		group => 'Mastering', 
+		target => 'Master',
 	);
+	$ui->track_gui( $track->n );
 
+	
 }
 
 sub add_mastering_effects {
