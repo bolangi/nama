@@ -149,9 +149,7 @@ force_alsa();
 
 command_process('3; nosend; gen');
 
-my $setup_lines = setup_content($chain_setup);
-
-my $expected_setup_lines = setup_content(<<EXPECTED );
+my $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
 -a:3,R3 -i:alsa,default
@@ -168,12 +166,17 @@ my $expected_setup_lines = setup_content(<<EXPECTED );
 -a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
 EXPECTED
 
-is( yaml_out($setup_lines), yaml_out($expected_setup_lines), 'ALSA chain setup 1' );
+sub check_setup {
+	my $test_name = shift;
+	is( yaml_out(setup_content($chain_setup)), 
+		yaml_out(setup_content($expected_setup_lines)), 
+		$test_name);
+}
+check_setup('ALSA basic setup' );
 
 force_jack();
 command_process('gen');
-
-$expected_setup_lines = setup_content(<<EXPECTED );
+$expected_setup_lines = <<EXPECTED;
 
 # audio inputs
 
@@ -193,13 +196,10 @@ $expected_setup_lines = setup_content(<<EXPECTED );
 
 EXPECTED
 
-is( yaml_out(setup_content($chain_setup)),
-	yaml_out($expected_setup_lines), 
-	'JACK basic setup ');
+check_setup('JACK basic setup' );
 
 command_process('3;rec_defeat; gen');
-
-$expected_setup_lines = setup_content(<<EXPECTED);
+$expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
 -a:3 -i:jack_multi,system:capture_2
@@ -214,14 +214,10 @@ $expected_setup_lines = setup_content(<<EXPECTED);
 -a:3 -o:loop,Master_in
 EXPECTED
 
-is( yaml_out(setup_content($chain_setup)),
-	yaml_out($expected_setup_lines), 
-	'JACK rec_defeat setup');
+check_setup('JACK rec_defeat setup' );
 
 force_alsa(); command_process('gen');
-
-$expected_setup_lines = setup_content(<<EXPECTED);
-
+$expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
 -a:3 -i:alsa,default
@@ -237,11 +233,47 @@ $expected_setup_lines = setup_content(<<EXPECTED);
 
 EXPECTED
 
-is( yaml_out(setup_content($chain_setup)),
-	yaml_out($expected_setup_lines), 
-	'ALSA rec_defeat setup');
+check_setup('ALSA rec_defeat setup' );
+command_process('Master; send 5;gen');
 
+$expected_setup_lines = <<EXPECTED;
 
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:1  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+EXPECTED
+
+check_setup('ALSA send-Master-to-alternate-channel setup' );
+force_jack(); command_process('gen');
+
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_5
+-a:3 -o:loop,Master_in
+EXPECTED
+check_setup('JACK send-Master-to-alternate-channel setup' );
+#check_setup('ALSA mixdown setup' );
+#check_setup('JACK mixdown setup' );
 
 
 sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
