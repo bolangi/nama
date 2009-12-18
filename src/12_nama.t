@@ -34,11 +34,6 @@ diag("working direction: ",cwd);
 
 process_options();
 
-diag "force ALSA environment";
-
-$opts{A} = 1;
-$opts{J} = 0;
-
 prepare();
 diag "Check representative variable from default .namarc";
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
@@ -73,16 +68,20 @@ is( $effects_help[0],
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
 
-my $cs_got = eval_iam('cs');
-my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
-Chain "default" [selected] );
-is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
+# SKIP: { 
+# my $cs_got = eval_iam('cs');
+# my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
+# Chain "default" [selected] );
+# is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
+# }
 
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
 
 is( project_dir(), "./$test_project", "establish project directory");
+
+force_alsa();
 
 command_process('add sax');
 
@@ -127,12 +126,8 @@ $io = ::IO::to_soundcard->new(track => 'sax');
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 like ($io->ecs_extra, qr/-chmove:2,6 -chmove:1,5/, 'IO to_soundcard 2');
 
-diag "force JACK environment";
+force_jack();
 
-$opts{A} = 0;
-$opts{J} = 1;
-
-jack_update();
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
 like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
@@ -150,6 +145,43 @@ ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
 #is ($io->device_id, 'alsa,default', 'value overrides method call');
 
+command_process('3; nosend; gen');
+
+force_alsa();
+
+my $setup_lines = setup_content($chain_setup);
+
+my $expected_setup_lines = setup_content(<<EXPECTED );
+
+-a:1 -i:loop,Master_in
+-a:3,R3 -i:alsa,default
+
+# post-input processing
+
+-a:R3 -chmove:2,1 -chcopy:1,2
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+-a:R3 -f:s16_le,1,44100,i -o:/otherroot/home/jroth/nama/12nama/.wav/sax_1.wav
+EXPECTED
+
+sub setup_content {
+	my %setup;
+	for (@_){
+		next unless /^-a:/;
+		$setup{$_}++;
+	}
+	\%setup;
+}
+	
+is_deeply( $setup_lines, $expected_setup_lines, 'ALSA chain setup 1' );
+
+
+sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
+sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
 
 1;
 __END__

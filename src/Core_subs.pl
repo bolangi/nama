@@ -67,7 +67,7 @@ sub issue_first_prompt {
 }
 
 sub select_ecasound_interface {
-	return if $opts{E};
+	return if $opts{E} or $opts{A};
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
 		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
