@@ -145,9 +145,9 @@ ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
 #is ($io->device_id, 'alsa,default', 'value overrides method call');
 
-command_process('3; nosend; gen');
-
 force_alsa();
+
+command_process('3; nosend; gen');
 
 my $setup_lines = setup_content($chain_setup);
 
@@ -165,23 +165,49 @@ my $expected_setup_lines = setup_content(<<EXPECTED );
 
 -a:1 -o:alsa,default
 -a:3 -o:loop,Master_in
--a:R3 -f:s16_le,1,44100,i -o:/otherroot/home/jroth/nama/12nama/.wav/sax_1.wav
+-a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
 EXPECTED
 
+is( yaml_out($setup_lines), yaml_out($expected_setup_lines), 'ALSA chain setup 1' );
+
+force_jack();
+command_process('gen');
+
+$expected_setup_lines = setup_content(<<EXPECTED );
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,R3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:R3 -chcopy:1,2
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1
+-a:3 -o:loop,Master_in
+-a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
+
+EXPECTED
+
+is( yaml_out(setup_content($chain_setup)),
+	yaml_out($expected_setup_lines), 
+	'JACK setup 1');
+
+sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
+sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
 sub setup_content {
+	my @lines = split "\n", shift;
 	my %setup;
-	for (@_){
+	for (@lines){
 		next unless /^-a:/;
 		$setup{$_}++;
 	}
 	\%setup;
 }
-	
-is_deeply( $setup_lines, $expected_setup_lines, 'ALSA chain setup 1' );
-
-
-sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
-sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
 
 1;
 __END__
