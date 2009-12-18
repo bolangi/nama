@@ -195,7 +195,54 @@ EXPECTED
 
 is( yaml_out(setup_content($chain_setup)),
 	yaml_out($expected_setup_lines), 
-	'JACK setup 1');
+	'JACK basic setup ');
+
+command_process('3;rec_defeat; gen');
+
+$expected_setup_lines = setup_content(<<EXPECTED);
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1
+-a:3 -o:loop,Master_in
+EXPECTED
+
+is( yaml_out(setup_content($chain_setup)),
+	yaml_out($expected_setup_lines), 
+	'JACK rec_defeat setup');
+
+force_alsa(); command_process('gen');
+
+$expected_setup_lines = setup_content(<<EXPECTED);
+
+
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+
+EXPECTED
+
+is( yaml_out(setup_content($chain_setup)),
+	yaml_out($expected_setup_lines), 
+	'ALSA rec_defeat setup');
+
+
+
 
 sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
 sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
