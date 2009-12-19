@@ -1,5 +1,14 @@
 # ---------- Track -----------
 package ::Track;
+
+# Objects belonging to Track and its subclasses
+# have a 'class' field that is set when the 
+# object is created, and used when restoring
+# the object from a serialized state.
+#
+# So do not re-bless a Track object into
+# a different subclass! 
+
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;

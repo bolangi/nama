@@ -67,7 +67,7 @@ sub issue_first_prompt {
 }
 
 sub select_ecasound_interface {
-	return if $opts{E};
+	return if $opts{E} or $opts{A};
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
 			and ! $opts{n} ){ 
 		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
@@ -966,16 +966,19 @@ sub add_paths_for_aux_sends {
 	# track output usually goes to Master or to another track
 	# so we can connect without concern for duplicate connections
 	# which our graph doesn't allow
-	map {  
-		my @e = ($_->name, $_->send_type_string);
+	map {  add_path_for_one_aux_send( $_ ) } 
+	grep { (ref $_) !~ /Slave/ 
+			and $_->group !~ /Mixdown|Master/
+			and $_->send_type 
+			and $_->rec_status ne 'OFF' } ::Track::all();
+}
+sub add_path_for_one_aux_send {
+	my $track = shift;
+		my @e = ($track->name, $track->send_type_string);
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
-			  {	track => $_->name,
-				chain_id => 'S'.$_->n,});
-  	} grep { (ref $_) !~ /Slave/ 
-				and $_->group !~ /Mixdown|Master/
-				and $_->send_type 
-				and $_->rec_status ne 'OFF' } ::Track::all();
+			  {	track => $track->name,
+				chain_id => 'S'.$track->n,});
 }
 
 =comment
@@ -1042,9 +1045,10 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
-		$g->add_path(qw[Boost soundcard_out]) if $main_out;
-
-	} else { $g->add_edge('Master','soundcard_out') if $main_out }
+	}
+	$g->add_path($mastering_mode ?  'Boost' : 'Master',
+			$tn{Master}->send_type_string);
+ 
 
 }
 sub add_paths_for_mixdown_handling {
@@ -1155,11 +1159,12 @@ sub non_track_dispatch {
 	map{ 
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
-		my $attrib = {%$attr};
+		my $attrib = {%$vattr, %$attr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
+		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
 }
 
 sub dispatch { # creates an IO object from a graph edge
@@ -1173,7 +1178,7 @@ my $edge = shift;
 		# we need the $direction because there can be 
 		# edges to and from loop,Master_in
 	my @args = (track => $name,
-				endpoint => $endpoint, # for loops
+			endpoint => $endpoint, # for loops
 				chain_id => $tn{$name}->n,
 				override($name, $edge));
 	#say "dispatch class: $class";
@@ -1190,9 +1195,11 @@ sub decode_edge {
 }
 sub override {
 	# data from edges has priority over data from vertexes
+	# we specify $name, because it could be left or right 
+	# vertex
 	$debug2 and say "&override";
 	my ($name, $edge) = @_;
-	override_from_vertex($name), override_from_edge($edge)
+	(override_from_vertex($name), override_from_edge($edge))
 }
 	
 sub override_from_vertex {
@@ -3598,13 +3605,16 @@ sub add_mastering_tracks {
 		);
 		$ui->track_gui( $track->n );
 
- } @mastering_track_names;
-
-	$tn{ $mastering_track_names[-1] }->set( 
-		send_type => 'soundcard',
-		send_id => 1
+ 	} grep{ $_ ne 'Boost' } @mastering_track_names;
+	my $track = ::SlaveTrack->new(
+		name => 'Boost', 
+		rw => 'MON',
+		group => 'Mastering', 
+		target => 'Master',
 	);
+	$ui->track_gui( $track->n );
 
+	
 }
 
 sub add_mastering_effects {

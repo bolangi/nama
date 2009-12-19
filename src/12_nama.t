@@ -34,11 +34,6 @@ diag("working direction: ",cwd);
 
 process_options();
 
-diag "force ALSA environment";
-
-$opts{A} = 1;
-$opts{J} = 0;
-
 prepare();
 diag "Check representative variable from default .namarc";
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
@@ -73,11 +68,20 @@ is( $effects_help[0],
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
 
+# SKIP: { 
+# my $cs_got = eval_iam('cs');
+# my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
+# Chain "default" [selected] );
+# is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
+# }
+
 my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
 
 is( project_dir(), "./$test_project", "establish project directory");
+
+force_alsa();
 
 command_process('add sax');
 
@@ -122,12 +126,8 @@ $io = ::IO::to_soundcard->new(track => 'sax');
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 like ($io->ecs_extra, qr/-chmove:2,6 -chmove:1,5/, 'IO to_soundcard 2');
 
-diag "force JACK environment";
+force_jack();
 
-$opts{A} = 0;
-$opts{J} = 1;
-
-jack_update();
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
 like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
@@ -151,6 +151,247 @@ Chain "default" [selected] );
 is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
 =cut
 
+force_alsa();
+
+command_process('3; nosend; gen');
+
+my $expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3,R3 -i:alsa,default
+
+# post-input processing
+
+-a:R3 -chmove:2,1 -chcopy:1,2
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+-a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
+EXPECTED
+
+sub check_setup {
+	my $test_name = shift;
+	is( yaml_out(setup_content($chain_setup)), 
+		yaml_out(setup_content($expected_setup_lines)), 
+		$test_name);
+}
+check_setup('ALSA basic setup' );
+
+force_jack();
+command_process('gen');
+$expected_setup_lines = <<EXPECTED;
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,R3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:R3 -chcopy:1,2
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1
+-a:3 -o:loop,Master_in
+-a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
+
+EXPECTED
+
+check_setup('JACK basic setup' );
+
+command_process('3;rec_defeat; gen');
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1
+-a:3 -o:loop,Master_in
+EXPECTED
+
+check_setup('JACK rec_defeat setup' );
+
+force_alsa(); command_process('gen');
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+
+EXPECTED
+
+check_setup('ALSA rec_defeat setup' );
+command_process('Master; send 5;gen');
+
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:1  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,Master_in
+EXPECTED
+
+check_setup('ALSA send-Master-to-alternate-channel setup' );
+force_jack(); command_process('gen');
+
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_5
+-a:3 -o:loop,Master_in
+EXPECTED
+check_setup('JACK send-Master-to-alternate-channel setup' );
+
+command_process('Mixdown; rec; gen');
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:Mixdown,J1 -i:loop,Master_out
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:J1 -o:jack_multi,system:playback_5
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+
+check_setup('JACK mixdown setup with main out' );
+gen_alsa();
+
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+-a:Mixdown,J1 -i:loop,Master_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:J1  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:J1 -o:alsa,default
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+
+check_setup('ALSA mixdown setup with main out' );
+
+command_process('master_on');
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+-a:4 -i:loop,Master_out
+-a:5,6,7 -i:loop,Eq_out
+-a:8 -i:loop,Boost_in
+-a:Mixdown,J8 -i:loop,Boost_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+
+# pre-output processing
+
+-a:J8  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:4 -o:loop,Eq_out
+-a:5,6,7 -o:loop,Boost_in
+-a:8 -o:loop,Boost_out
+-a:J8 -o:alsa,default
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+gen_alsa();
+check_setup('Mixdown in mastering mode - ALSA');
+
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:4 -i:loop,Master_out
+-a:5,6,7 -i:loop,Eq_out
+-a:8 -i:loop,Boost_in
+-a:Mixdown,J8 -i:loop,Boost_out
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:loop,Master_out
+-a:3 -o:loop,Master_in
+-a:4 -o:loop,Eq_out
+-a:5,6,7 -o:loop,Boost_in
+-a:8 -o:loop,Boost_out
+-a:J8 -o:jack_multi,system:playback_5
+-a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+EXPECTED
+gen_jack();
+check_setup('Mixdown in mastering mode - JACK');
+sub gen_alsa { force_alsa(); command_process('gen')}
+sub gen_jack { force_jack(); command_process('gen')}
+sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
+sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
+sub setup_content {
+	my @lines = split "\n", shift;
+	my %setup;
+	for (@lines){
+		next unless /^-a:/;
+		$setup{$_}++;
+	}
+	\%setup;
+}
 
 1;
 __END__

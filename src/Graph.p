@@ -210,7 +210,9 @@ sub add_loop {
 	#
 	# n: track index, j: alphabetical counter
 	 
-	$g->set_vertex_attributes($loop,{n => $::tn{$a}->n, j => 'a'});
+	$g->set_vertex_attributes($loop,{
+		n => $::tn{$a}->n, j => 'a',
+		track => $::tn{$a}->name});
 	map{ 
  		my $attr = $g->get_edge_attributes($a,$_);
  		$debug and say "deleting edge: $a-$_";
@@ -229,7 +231,9 @@ sub add_far_side_loop {
  	my ($g, $a, $b, $loop) = @_;
  	$debug and say "$a-$b: insert far side loop";
 	
-	$g->set_vertex_attributes($loop,{n => $::tn{$b}->n, j => 'a'});
+	$g->set_vertex_attributes($loop,{
+		n => $::tn{$a}->n, j => 'a',
+		track => $::tn{$a}->name});
 	map{ 
  		my $attr = $g->get_edge_attributes($_,$b);
  		$debug and say "deleting edge: $_-$b";

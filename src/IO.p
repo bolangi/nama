@@ -37,10 +37,18 @@ our $AUTOLOAD;
 # add underscore to field names so that regular method
 # access will go through AUTOLOAD
 
-# we add an underscore to each track field
+# we add an underscore to each key 
 
-use ::Object qw( [% join " ",map{"_".$_ } grep !/^\s*$/, split " " ,qx(./strip_all ./io_fields)%]);
+use ::Object qw([%join " ",map{$_."_" }split " ", qx(./strip_all ./io_fields)%]);
+
 use Try::Tiny;
+
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	my @args = map{$_."_", $vals{$_}} keys %vals; # add underscore to key 
+	bless {@args}, $class
+}
 
 sub ecs_string {
 	my $self = shift;
@@ -54,39 +62,25 @@ sub format {
 	::signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
 }
-no warnings 'redefine';
-sub direction { 								# allow override
-	$_[0]->{direction} || (ref $_[0]) =~ /::from/ ? 'input' : 'output' 
+#sub _direction { # allow override
+sub direction { 
+	(ref $_[0]) =~ /::from/ ? 'input' : 'output' 
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
+
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
-	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
-# 	try { $result = $::tn{$self->track}->$method } 
-
-# method calls will _not_ be accidentally overriden by track
-# values, since we hereby promise and guarantee there is no
-# overlap between the sets: (IO fields/methods) and (Track
-# fields/methods)
-
-# we also guarantee that all methods in the IO class
-# will return the empty string rather than
-# undef or empty list 
-#
-# well if we don't we may get a call to $track, but
-# as we don't expect an overlap of method names
-# it seems okay.
-
-	my $field = "_$method";
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	my $result = q();
+	my $field = "$call\_";
+	my $method = "_$call";
 	return $self->{$field} if exists $self->{$field};
-
-	# we check methods for a defined value
-	return $self->$field if $self->can($field) and defined $self->$field;
-
-	my $track = $::tn{$self->track};
-	$track and $track->can($method) and $track->$method;
+	return $self->$method if $self->can($method);
+	local $@;
+	eval { $::tn{$self->{track_}}->$call }
 }
+
 sub DESTROY {}
 
 ###  utility subroutines
