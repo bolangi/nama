@@ -37,10 +37,18 @@ our $AUTOLOAD;
 # add underscore to field names so that regular method
 # access will go through AUTOLOAD
 
-# we add an underscore to each track field
+# we add an underscore to each key 
 
-use ::Object qw( [% qx(./strip_all ./io_fields)%]);
+use ::Object qw([%join " ",map{"$_\_" }split " ", qx(./strip_all ./io_fields)%]);
+
 use Try::Tiny;
+
+sub new {
+	my $class = shift;
+	my %vals = @_;
+	my @args = map{$_."_", $vals{$_}} keys %vals; # add underscore to key 
+	bless {@args}, $class
+}
 
 sub ecs_string {
 	my $self = shift;
@@ -51,23 +59,28 @@ sub ecs_string {
 }
 sub format { 
 	my $self = shift;
-	::signal_format($self->format_template, $self->_width)
-		if $self->format_template and $self->_width
+	::signal_format($self->format_template, $self->width)
+		if $self->format_template and $self->width
 }
-sub _width { $_[0]->{width} || $_[0]->width }	# allow override  
-no warnings 'redefine';
-sub direction { 								# allow override
-	$_[0]->{direction} || (ref $_[0]) =~ /::from/ ? 'input' : 'output' 
+#sub _direction { # allow override
+sub direction { # allow override
+	(ref $_[0]) =~ /::from/ ? 'input' : 'output' 
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
+
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
-	my ($method) = $AUTOLOAD =~ /([^:]+)$/;
-	my $result;
- 	try { $result = $::tn{$self->track}->$method } 
-	$result
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	my $result = q();
+	my $field = "$call\_";
+	my $method = "_$call";
+	return $self->{$field} if exists $self->{$field};
+	return $self->$method if $self->can($method);
+	local $@;
+	eval { $::tn{$self->{track_}}->$call }
 }
+
 sub DESTROY {}
 
 ###  utility subroutines
@@ -173,7 +186,7 @@ sub device_id {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$direction,$channel,$io->_width )
+	::IO::jack_multi_route($client,$direction,$channel,$io->width )
 }
 # don't need to specify format, since we take all channels
 
