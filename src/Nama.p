@@ -463,6 +463,19 @@ integer track-number assigned when the track is created.
 The following paragraphs describes track fields and
 their settings.
 
+=head2 WIDTH
+
+Specifying 'mono' means one-channel input and recording the
+raw signal as a mono WAV file. The mono signal is duplicated
+to a stereo signal with pan in the default mixer
+configuration.
+
+Specifying 'stereo' means two-channel input with recording
+as a stereo WAV file.
+
+Specifying N channels ('set width N') means N-channel input
+with recording as an N-channel WAV file.
+
 =head2 VERSION NUMBER
 
 Multiple WAV files can be recorded for each track. These are
@@ -666,6 +679,14 @@ The B<Boost> track applies gain and a limiter.
 
 These effects and their default parameters are defined
 in the configuration file F<.namarc>.
+
+=head2 Mixdown
+
+The C<mixdown> command configures Nama for mixdown. 
+The Mixdown track is set to REC (equivalent to C<Mixdown rec>) and the audio
+monitoring output is turned off (equivalent to C<main_off>).
+
+Mixdown proceeds after you enter the C<start> command.
 
 =head2 Preview and Doodle Modes
 

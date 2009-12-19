@@ -741,7 +741,7 @@ sub select_output {
 	my $track = shift;
 	if ( $track->region_start and $track->region_end){
 		my $end = $track->region_ending;
-		my $start = $track->region_start;
+		my $start = $track->region_starting;
 		my $length = $end - $start;
 		join ',',"select", $start, $length
 	}
@@ -758,17 +758,17 @@ sub remove_insert {
 # these methods have the same name as tracks fields,
 # therefore we access the fields by hash indexing.
 
-sub region_start {
+sub region_starting {
 	my $track = shift;
-	::Mark::mark_time( $track->{region_start} )
+	::Mark::mark_time( $track->region_start )
 }
 sub region_ending {
 	my $track = shift;
 	return if $track->rec_status ne 'MON';
-	if ( $track->{region_end} eq 'END' ){
+	if ( $track->region_end eq 'END' ){
 		return get_length($track->full_path);
 	} else {
-		::Mark::mark_time( $track->{region_end} )
+		::Mark::mark_time( $track->region_end )
 	}
 }
 sub playat {
