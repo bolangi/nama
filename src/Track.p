@@ -373,7 +373,6 @@ CLIENT
 # the following subroutines are used to dispatch IO objects
 
 
-
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;
 	$track->set_io( 'source', $id);
@@ -727,11 +726,6 @@ no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
-sub source_type_string { $::tn{$_[0]->target}->source_type_string} 
-sub source_device_string { $::tn{$_[0]->target}->source_device_string} 
-sub send_type_string { $::tn{$_[0]->target}->send_type_string} 
-sub send_device_string { $::tn{$_[0]->target}->send_device_string} 
-sub soundcard_input { $::tn{$_[0]->target}->soundcard_input} 
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
 sub inserts { $::tn{$_[0]->target}->inserts} 
