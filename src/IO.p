@@ -211,11 +211,41 @@ package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
 sub device_id { $::devices{$::alsa_capture_device}{ecasound_id} }
-
+sub input_channel { $_[0]->source_id }
+sub rec_route {
+	# works for mono/stereo only!
+	no warnings qw(uninitialized);
+	my $self = shift;
+	# needed only if input channel is greater than 1
+	return '' if ! $self->input_channel or $self->input_channel == 1; 
+	
+	my $route = "-chmove:" . $self->input_channel . ",1"; 
+	if ( $self->width == 2){
+		$route .= " -chmove:" . ($self->input_channel + 1) . ",2";
+	}
+	return $route;
+}
 package ::IO::to_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { $::devices{$::alsa_playback_device}{ecasound_id} }
-sub ecs_extra { $_[0]->pre_send }
+sub ecs_extra {route(2,$_[0]->output_channel) } # assume stereo signal
+sub output_channel { $_[0]->send_id }
+sub route2 {
+	my ($from, $to, $width) = @_;
+}
+sub route {
+	# routes signals (1..$width) to ($dest..$dest+$width-1 )
+	
+	my ($width, $dest) = @_;
+	return undef if $dest == 1 or ! $dest;
+	# print "route: width: $width, destination: $dest\n\n";
+	my $offset = $dest - 1;
+	my $route ;
+	for my $c ( map{$width - $_ + 1} 1..$width ) {
+		$route .= " -chmove:$c," . ( $c + $offset);
+	}
+	$route;
+}
 
 package ::IO::any;
 use Modern::Perl; our @ISA = '::IO';

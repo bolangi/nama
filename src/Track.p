@@ -294,55 +294,6 @@ sub mono_to_stereo {
 	} 
 }
 
-sub rec_route {
-
-	# works for mono/stereo only!
-	
-	no warnings qw(uninitialized);
-	my $track = shift;
-	
-	# applies to soundcard input via ALSA
-	
-	return '' unless $track->source_type eq 'soundcard'
-		and ! $::jack_running;
-
-	# no need to route a signal at channel 1
-	return '' if ! $track->source_id or $track->source_id == 1; 
-	
-	my $route = "-chmove:" . $track->source_id . ",1"; 
-	if ( $track->width == 2){
-		$route .= " -chmove:" . ($track->source_id + 1) . ",2";
-	}
-	return $route;
-	
-}
-sub route {
-
-	# routes signals 1,2,3,...$width to $dest + 0, $dest + 1, $dest + 2,... 
-	
-	my ($width, $dest) = @_;
-	return undef if $dest == 1 or $dest == 0;
-	# print "route: width: $width, destination: $dest\n\n";
-	my $offset = $dest - 1;
-	my $map ;
-	for my $c ( map{$width - $_ + 1} 1..$width ) {
-		$map .= " -chmove:$c," . ( $c + $offset);
-	}
-	$map;
-}
-
-# stereo output channel shifting 
-
-sub pre_send {
-	#$debug2 and print "&pre_send\n";
-	my $track = shift;
-
-	# we channel shift only to soundcard channel numbers higher than 3,
-	# not when the send is to a jack client
-	 
-	return q() if $track->send_type eq 'jack_client'  or ! $track->aux_output;           
-	route(2,$track->aux_output); # stereo signal
-}
 
 sub remove {
 	my $track = shift;
@@ -556,10 +507,6 @@ sub set_send { # wrapper
 	}
 }
 
-sub aux_output { 
-	my $track = shift;
-	$track->send_id > 2 ? $track->send_id : undef 
-}
 
 sub object_as_text {
 	my ($track, $direction) = @_; # $direction: source | send
@@ -847,7 +794,6 @@ our @ISA = '::Track';
 sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
-sub rec_route { $::tn{$_[0]->target}->rec_route }
 sub source_type_string { $::tn{$_[0]->target}->source_type_string} 
 sub source_device_string { $::tn{$_[0]->target}->source_device_string} 
 sub send_type_string { $::tn{$_[0]->target}->send_type_string} 
@@ -861,7 +807,6 @@ sub source_id { $::tn{$_[0]->target}->source_id}
 sub source_status { $::tn{$_[0]->target}->source_status }
 sub send_type { $::tn{$_[0]->target}->send_type}
 sub send_id { $::tn{$_[0]->target}->send_id}
-sub pre_send { $::tn{$_[0]->target}->pre_send}
 sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation

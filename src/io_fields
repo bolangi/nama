@@ -28,7 +28,6 @@ device_id 	# needed only for IO::any
 #		width		# no. of channels
 #		mono_to_stereo 
 #		rec_route	
-#		pre_send
 #		playat_output
 #		select_output
 #		modifiers
