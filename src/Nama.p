@@ -44,6 +44,16 @@ use Graph;
 # use Tk::FontDialog; # hmmm might be nice to use
 use Text::Format;
 
+## Load my modules
+
+use ::Assign qw(:all);
+use ::Track;
+use ::Group;
+use ::Bus;    
+use ::Mark;
+use ::IO;
+use ::Graph;
+
 ## Definitions ##
 
 $| = 1;     # flush STDOUT buffer on every write
@@ -90,15 +100,6 @@ jack_update(); # to be polled by Event
 $memoize = 1;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
-
-## Load my modules
-
-use ::Assign qw(:all);
-use ::Track;
-use ::Bus;    
-use ::Mark;
-use ::IO;
-use ::Graph;
 
 package ::Wav;
 memoize('candidates') if $::memoize;
