@@ -86,6 +86,23 @@ sub AUTOLOAD {
 }
 
 sub DESTROY {}
+sub mono_to_stereo { 
+	my $self = shift;
+	my $cmd = "file " .  $self->full_path;
+	if ( 	$self->width == 2 and $self->rec_status eq 'REC'
+		    or  -e $self->full_path
+				and qx(which file)
+				and qx($cmd) =~ /stereo/i ){ 
+		return q(); 
+	} elsif ( ($self->width == 1 or ! $self->width) and $self->rec_status eq 'REC'
+				or  -e $self->full_path
+				and qx(which file)
+				and qx($cmd) =~ /mono/i ){ 
+		return "-chcopy:1,2" 
+	} else { # do nothing for higher channel counts
+	} 
+}
+
 
 ###  utility subroutines
 

@@ -277,23 +277,6 @@ sub remove_effect { # doesn't touch %cops or %copp data structures
 
 # the following methods are for channel routing
 
-sub mono_to_stereo { 
-	my $track = shift;
-	my $cmd = "file " .  $track->full_path;
-	if ( 	$track->width == 2 and $track->rec_status eq 'REC'
-		    or  -e $track->full_path
-				and qx(which file)
-				and qx($cmd) =~ /stereo/i ){ 
-		return q(); 
-	} elsif ( ($track->width == 1 or ! $track->width) and $track->rec_status eq 'REC'
-				or  -e $track->full_path
-				and qx(which file)
-				and qx($cmd) =~ /mono/i ){ 
-		return "-chcopy:1,2" 
-	} else { # do nothing for higher channel counts
-	} 
-}
-
 
 sub remove {
 	my $track = shift;
@@ -793,7 +776,6 @@ no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
-sub mono_to_stereo { $::tn{$_[0]->target}->mono_to_stereo }
 sub source_type_string { $::tn{$_[0]->target}->source_type_string} 
 sub source_device_string { $::tn{$_[0]->target}->source_device_string} 
 sub send_type_string { $::tn{$_[0]->target}->send_type_string} 
