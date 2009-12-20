@@ -822,7 +822,14 @@ sub really_recording {
 	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
-sub generate_setup { 
+sub generate_setup { # needed for Tk loop in GUI mode
+					 # Event loop catches error in text mode
+	local $@;
+	eval { &generate_setup_try };
+	$@ and say("error caught while generating setup: $@"),
+		remove_temporary_tracks()
+}
+sub generate_setup_try { 
 
 	$debug2 and print "&generate_setup\n";
 
@@ -835,6 +842,7 @@ sub generate_setup {
 	add_paths_for_main_tracks();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
+	die "here";
 	$debug and say "The graph is:\n$g";
 	add_paths_for_null_input_tracks();
 	$debug and say "The graph is:\n$g";
