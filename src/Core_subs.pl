@@ -936,7 +936,7 @@ sub add_paths_for_recording {
 
 		# connect IO
 		
-		$g->add_path($_->source_type .'_in', $name, 'wav_out');
+		$g->add_path(input_node($_->source_type), $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
@@ -949,6 +949,9 @@ sub add_paths_for_recording {
 	} @tracks;
 }
 
+sub input_node { $_[0].'_in' }
+sub output_node {$_[0].'_out'}
+	
 
 sub add_paths_for_null_input_tracks {
 	$debug2 and say "&add_paths_for_null_tracks";
@@ -974,7 +977,7 @@ sub add_paths_for_aux_sends {
 }
 sub add_path_for_one_aux_send {
 	my $track = shift;
-		my @e = ($track->name, $track->send_type.'_out');
+		my @e = ($track->name, output_node($track->send_type));
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
 			  {	track => $track->name,
@@ -1002,7 +1005,10 @@ sub add_paths_for_send_buses {
 			# The signal path is:
 			# [target track] -> [slave track] -> [slave track send_type_string]
 			
-			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
+			map{   $g->add_path( 
+					$_->target, 
+					$_->name, 
+					output_node($_->send_type));
 			} @tracks; 
 		}
 	} @user_buses;
@@ -1022,7 +1028,7 @@ sub add_paths_for_sub_buses {
 			$debug and say 'process sub bus';
 			my $output = $bus->destination_type eq 'track' 
 				? $bus->destination_id
-				: $bus->destination_type . '_out';
+				: output_node($bus->destination_type)
 
 			$debug and say "bus output: $output";
 
@@ -1047,7 +1053,7 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	$g->add_path($mastering_mode ?  'Boost' : 'Master',
-			$tn{Master}->send_type.'_out');
+			output_node($tn{Master}->send_type));
  
 
 }
