@@ -509,6 +509,7 @@ Loading project "untitled".
 			name => 'Master',
 			send_type => 'soundcard',
 			send_id => 1,
+			width => 2,
 			rw => 'MON',); # no dir, we won't record tracks
 
 
@@ -841,10 +842,8 @@ sub generate_setup {
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
 	#add_paths_for_send_buses();
-	map{ $_->apply() } grep{ (ref $_) =~ /SendBus/ } ::Bus::all();
-	#$debug and say "The graph is:\n$g";
-	#add_paths_for_sub_buses();
-	#$debug and say "The graph is:\n$g";
+	map{ $_->apply() } grep{ (ref $_) =~ /Send|Sub/ } ::Bus::all();
+	$debug and say "The graph is:\n$g";
 	add_paths_from_Master(); # do they affect automix?
 	$debug and say "The graph is:\n$g";
 
@@ -3801,7 +3800,6 @@ sub add_sub_bus {
 	}
 	::SubBus->new( 
 		name => $name, 
-		bus_type => 'sub',
 		send_type => $type // 'track',
 		send_id	 => $id // $name,
 		)

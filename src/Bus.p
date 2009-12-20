@@ -32,17 +32,26 @@ sub all { values %by_name };
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
 
-# obsolete
-#
-# we will put the following information in the Track as an aux_send
-# 						destination_type
-# 						destination_id
-# name, init capital e.g. Brass, identical Group name
-# destination: 3, jconv, loop,output
-
+### subclasses
 
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
+
+# graphic routing: track -> mix_track
+
+sub apply {
+	my $bus = shift;
+	map{ 
+		# connect signal sources to tracks
+		my @path = $_->input_path;
+		$::g->add_path(@path) if @path;
+
+		# connect tracks to mix track
+		
+		$::g->add_edge($_->name, $bus->name); 
+
+	} grep{ $_->group eq $bus->group} ::Track::all()
+}
 sub remove {
 	my $bus = shift;
 
@@ -58,7 +67,6 @@ sub remove {
 	# remove bus
 	delete $::Bus::by_name{$bus->name};
 } 
-
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub remove {
@@ -75,6 +83,9 @@ sub remove {
 }
 package ::SendBusCooked;
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
+
+# graphic routing: target -> slave -> bus_send_type
+
 sub apply {
 	my $bus = shift;
 	map{ my @edge = ($_->name, ::output_node($bus->send_type));

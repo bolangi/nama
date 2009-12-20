@@ -81,6 +81,8 @@ load_project(name => $test_project, create => 1);
 
 is( project_dir(), "./$test_project", "establish project directory");
 
+command_process('Master; mono'); # so older tests work
+
 force_alsa();
 
 command_process('add sax');
@@ -354,6 +356,9 @@ EXPECTED
 gen_alsa();
 check_setup('Mixdown in mastering mode - ALSA');
 
+
+command_process('Master; stereo'); # normal output width
+
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -374,7 +379,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:4 -o:loop,Eq_out
 -a:5,6,7 -o:loop,Boost_in
 -a:8 -o:loop,Boost_out
--a:J8 -o:jack_multi,system:playback_5
+-a:J8 -o:jack_multi,system:playback_5,system:playback_6
 -a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
 EXPECTED
 gen_jack();

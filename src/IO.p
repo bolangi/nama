@@ -93,6 +93,9 @@ sub DESTROY {}
 # They are accessed via AUTOLOAD, querying the track object
 # associated with a particular IO object
 
+# If there is no track for an object, the object must
+# provide any needed data
+
 sub mono_to_stereo { 
 	my $self = shift;
 	my $cmd = "file " .  $self->full_path;
@@ -159,7 +162,7 @@ sub send_type_string { $_[0]->send_output()->[0] }
 sub send_device_string { $_[0]->send_output()->[1] }
 sub playat_output {
 	my $track = shift;
-	if ( $track->playat ){
+	if ( $track->playat_time ){
 		join ',',"playat" , $track->playat_time;
 	}
 }
