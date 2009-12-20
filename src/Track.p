@@ -340,7 +340,7 @@ sub input_path { # signal path, not file path
 	if($track->rec_status eq 'REC'){
 
 		if ($track->source_type =~ /soundcard|jack_client|jack_port/){
-			( $track->source_type . '_in' , $track->name)
+			( ::input_node($track->source_type) , $track->name)
 		} 
 
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){

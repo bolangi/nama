@@ -826,8 +826,10 @@ sub generate_setup { # catch errors and cleanup
 					 
 	local $@;
 	eval { &generate_setup_try };
-	$@ and say("error caught while generating setup: $@"),
-		remove_temporary_tracks()
+	return 1 unless $@;
+	say("error caught while generating setup: $@");
+	remove_temporary_tracks();
+	0;
 }
 sub generate_setup_try { 
 
@@ -971,10 +973,6 @@ sub add_paths_for_null_input_tracks {
 sub add_paths_for_aux_sends {
 	$debug2 and say "&add_paths_for_aux_sends";
 
-	# auxiliary sends go to soundcard or jack_client
-	# track output usually goes to Master or to another track
-	# so we can connect without concern for duplicate connections
-	# which our graph doesn't allow
 	map {  add_path_for_one_aux_send( $_ ) } 
 	grep { (ref $_) !~ /Slave/ 
 			and $_->group !~ /Mixdown|Master/
@@ -987,69 +985,11 @@ sub add_path_for_one_aux_send {
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
 			  {	track => $track->name,
+				# force stereo output width
+				width => 2,
 				chain_id => 'S'.$track->n,});
 }
 
-=comment
-sub add_paths_for_send_buses {
-	$debug2 and say "&add_paths_for_send_buses";
-
-	my @user_buses = grep{ $_->name  !~ /Null|Main/ } values %::Bus::by_name;
-	map{
-
-		my $bus = $_;
-		# we get tracks from a group of the same name as $bus->name
-		my @tracks = grep{ $_->rec_status ne 'OFF' } 
-					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
-
-		# we only support post-fader send buses
-		
-		if( $bus->bus_type eq 'cooked'){  # post-fader send bus
-
-			$debug and say 'process post-fader bus';
-
-			# The signal path is:
-			# [target track] -> [slave track] -> [slave track send_type_string]
-			
-			map{   $g->add_path( 
-					$_->target, 
-					$_->name, 
-					output_node($_->send_type));
-			} @tracks; 
-		}
-	} @user_buses;
-}
-sub add_paths_for_sub_buses {
-	$debug2 and say "&add_paths_for_sub_buses";
-
-	my @user_buses = grep{ $_->name  !~ /Null|Main/ } values %::Bus::by_name;
-	map{
-
-		my $bus = $_;
-		# we get tracks from a group of the same name as $bus->name
-		my @tracks = grep{ $_->rec_status ne 'OFF' } 
-					 map{$tn{$_}} $::Group::by_name{$bus->name}->tracks;
-
-		if( $_->bus_type eq 'sub'){   # sub bus
-			$debug and say 'process sub bus';
-			my $output = $bus->destination_type eq 'track' 
-				? $bus->destination_id
-				: output_node($bus->destination_type)
-
-			$debug and say "bus output: $output";
-
-			# The signal path is:
-			# [track input] -> [track] -> [bus destination]
-			
-			map{ 	my @path = ($_->input_path, $output);
-					say "path: @path";
-					$g->add_path(@path); 
-
-			} @tracks;
-		}
-	} @user_buses;
-}
-=cut
 sub add_paths_from_Master {
 	$debug2 and say "&add_paths_from_Master";
 

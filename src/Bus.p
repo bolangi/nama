@@ -69,6 +69,17 @@ sub remove {
 } 
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
+sub apply {
+	my $bus = shift;
+	map{ 
+		$::g->add_edge($_->input_path);
+		my @edge = ($_->name, ::output_node($bus->send_type));
+		$::g->add_edge(@edge);
+		$::g->set_edge_attributes( @edge, { 
+			send_id => $bus->send_id,
+			width => 2 }); # force to stereo 
+	} grep{ $_->group eq $bus->group and $_->input_path} ::Track::all()
+}
 sub remove {
 	my $bus = shift;
 
