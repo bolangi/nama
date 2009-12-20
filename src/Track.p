@@ -22,19 +22,20 @@ use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
-
-initialize();
-
-# attributes offset, loop, delay for entire setup
-# attribute  modifiers
-# new attribute will be 
 use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
 );
+
 # Note that ->vol return the effect_id 
 # ->old_volume_level is the level saved before muting
 # ->old_pan_level is the level saved before pan full right/left
 # commands
+
+initialize();
+
+### class subroutines
+
+
 
 sub initialize {
 	$n = 0; 	# incrementing numeric key
@@ -50,7 +51,14 @@ sub idx { # return first free track index
 		return $n if not $by_index{$n}
 	}
 }
-	
+sub all { @all }
+
+{ my %non_user = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
+sub user {
+	grep{ ! $non_user{$_} } map{$_->name} @all
+}
+}
+
 sub new {
 	# returns a reference to an object 
 	#
@@ -128,6 +136,8 @@ sub new {
 }
 
 
+### object methods
+
 sub dir {
 	my $self = shift;
 	 $self->project  
@@ -149,7 +159,6 @@ sub group_last {
 	$group->last;
 }
 
-# seems to be missing.. and needed for track-based version numbering
 sub last {
 	my $track = shift;
 	my @versions;
@@ -202,6 +211,13 @@ sub monitor_version {
 	$track->last;
 }
 
+
+sub maybe_monitor { # ordinary sub, not object method
+	my $monitor_version = shift;
+	return 'MON' if $monitor_version and ! ($::preview eq 'doodle');
+	return 'OFF';
+}
+
 sub rec_status {
 #	$::debug2 and print "&rec_status\n";
 	my $track = shift;
@@ -252,41 +268,66 @@ sub rec_status {
 
 	}
 }
-
 sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
 	$track->rec_defeat ? "[$status]" : $status;
 }
 
-sub maybe_monitor { # ordinary sub, not object method
-	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! ($::preview eq 'doodle');
-	return 'OFF';
-}
 
-# the following methods handle effects
-sub remove_effect { # doesn't touch %cops or %copp data structures 
+sub region_start_time {
 	my $track = shift;
-	my @ids = @_;
-	$track->set(ops => [ grep { my $existing = $_; 
-									! grep { $existing eq $_
-									} @ids }  
-							@{$track->ops} ]);
+	::Mark::mark_time( $track->region_start )
 }
-
-# the following methods are for channel routing
-
-
-sub remove {
+sub region_end_time {
 	my $track = shift;
-#	$::ui->remove_track_gui($track->n); TODO
-	my $n = $track->n;
-	map{ ::remove_effect($_) } @{ $track->ops };
-	delete $by_index{$track->n};
-	delete $by_name{$track->name};
-	@all = grep{ $_->n != $n} @all;
+	return if $track->rec_status ne 'MON';
+	if ( $track->region_end eq 'END' ){
+		return get_length($track->full_path);
+	} else {
+		::Mark::mark_time( $track->region_end )
+	}
 }
+sub playat_time {
+	my $track = shift;
+	::Mark::mark_time( $track->playat )
+}
+
+sub get_length { 
+	
+	#$debug2 and print "&get_length\n";
+	my $path = shift;
+	package ::;
+	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+	eval_iam('cs-add gl');
+	eval_iam('c-add g');
+	eval_iam('ai-add ' . $path);
+	eval_iam('ao-add null');
+	eval_iam('cs-connect');
+	eval_iam('engine-launch');
+	eval_iam('ai-select '. $path);
+	my $length = eval_iam('ai-get-length');
+	eval_iam('cs-disconnect');
+	eval_iam('cs-remove gl');
+	sprintf("%.4f", $length);
+}
+sub fancy_ops { # returns list 
+	my $track = shift;
+	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
+}
+		
+sub snapshot {
+	my $track = shift;
+	my $fields = shift;
+	my %snap; 
+	my $i = 0;
+	for(@$fields){
+		$snap{$_} = $track->$_;
+		#say "key: $_, val: ",$track->$_;
+	}
+	\%snap;
+}
+
 
 # for graph-style routing
 
@@ -310,21 +351,45 @@ sub input_path { # signal path, not file path
 
 	}
 }
-# The following two subroutines are not object methods.
 
-sub all { @all }
 
-{ my %non_user = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
-sub user {
-	grep{ ! $non_user{$_} } map{$_->name} @all
+### remove and destroy
+
+sub remove_effect { # doesn't touch %cops or %copp data structures 
+	my $track = shift;
+	my @ids = @_;
+	$track->set(ops => [ grep { my $existing = $_; 
+									! grep { $existing eq $_
+									} @ids }  
+							@{$track->ops} ]);
 }
+sub remove_insert {
+	my $track = shift;
+	if ( my $i = $track->inserts){
+		map{ $::tn{$_}->remove } @{ $i->{tracks} };
+		$track->set(inserts => {});
+	}
 }
+
+# remove track object and all effects
+
+sub remove {
+	my $track = shift;
+#	$::ui->remove_track_gui($track->n); TODO
+	my $n = $track->n;
+	map{ ::remove_effect($_) } @{ $track->ops };
+	delete $by_index{$track->n};
+	delete $by_name{$track->name};
+	@all = grep{ $_->n != $n} @all;
+}
+
+	
 	
 
-### Commands and their support functions
+### object methods for text-based commands 
 
-# The conditional-laced code allows user to use 'source'
-# and 'send' commands in JACK and ALSA modes.
+# Reasonable behavior whether 'source' and 'send' commands 
+# are issued in JACK or ALSA mode.
 
 sub soundcard_channel { $_[0] // 1 }
 sub set_io {
@@ -369,9 +434,6 @@ CLIENT
 		}
 	}
 } 
-
-# the following subroutines are used to dispatch IO objects
-
 
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;
@@ -523,6 +585,9 @@ sub set_off {
 	print $track->name, ": set to OFF\n";
 }
 
+
+# Operations performed by track objects
+
 sub normalize {
 	my $track = shift;
 	if ($track->rec_status ne 'MON'){
@@ -610,89 +675,7 @@ sub ingest  { # i believe 'import' has a magical meaning
 	::rememoize();
 }
 
-sub playat_output {
-	my $track = shift;
-	if ( $track->playat ){
-		join ',',"playat" , $track->playat;
-	}
-}
-
-sub select_output {
-	my $track = shift;
-	if ( $track->region_start and $track->region_end){
-		my $end = $track->region_ending;
-		my $start = $track->region_starting;
-		my $length = $end - $start;
-		join ',',"select", $start, $length
-	}
-}
-
-sub remove_insert {
-	my $track = shift;
-	if ( my $i = $track->inserts){
-		map{ $::tn{$_}->remove } @{ $i->{tracks} };
-		$track->set(inserts => {});
-	}
-}
-
-# these methods have the same name as tracks fields,
-# therefore we access the fields by hash indexing.
-
-sub region_starting {
-	my $track = shift;
-	::Mark::mark_time( $track->region_start )
-}
-sub region_ending {
-	my $track = shift;
-	return if $track->rec_status ne 'MON';
-	if ( $track->region_end eq 'END' ){
-		return get_length($track->full_path);
-	} else {
-		::Mark::mark_time( $track->region_end )
-	}
-}
-sub playat {
-	my $track = shift;
-	::Mark::mark_time( $track->{playat} )
-}
-
 # subroutine, not object method
-
-sub get_length { 
-	
-	#$debug2 and print "&get_length\n";
-	my $path = shift;
-	package ::;
-	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	eval_iam('cs-add gl');
-	eval_iam('c-add g');
-	eval_iam('ai-add ' . $path);
-	eval_iam('ao-add null');
-	eval_iam('cs-connect');
-	eval_iam('engine-launch');
-	eval_iam('ai-select '. $path);
-	my $length = eval_iam('ai-get-length');
-	eval_iam('cs-disconnect');
-	eval_iam('cs-remove gl');
-	sprintf("%.4f", $length);
-}
-sub fancy_ops { # returns list 
-	my $track = shift;
-	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
-}
-		
-sub snapshot {
-	my $track = shift;
-	my $fields = shift;
-	my %snap; 
-	my $i = 0;
-	for(@$fields){
-		$snap{$_} = $track->$_;
-		#say "key: $_, val: ",$track->$_;
-	}
-	\%snap;
-}
-	
 # subclass
 
 package ::SimpleTrack; # used for Master track

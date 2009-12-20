@@ -150,6 +150,22 @@ sub send_output {
 
 sub send_type_string { $_[0]->send_output()->[0] }
 sub send_device_string { $_[0]->send_output()->[1] }
+sub playat_output {
+	my $track = shift;
+	if ( $track->playat ){
+		join ',',"playat" , $track->playat_time;
+	}
+}
+
+sub select_output {
+	my $track = shift;
+	if ( $track->region_start and $track->region_end){
+		my $end = $track->region_end_time;
+		my $start = $track->region_start_time;
+		my $length = $end - $start;
+		join ',',"select", $start, $length
+	}
+}
 
 
 ###  utility subroutines
