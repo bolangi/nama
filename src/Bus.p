@@ -77,9 +77,11 @@ package ::SendBusCooked;
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 sub apply {
 	my $bus = shift;
-	map{ $::g->add_path( $_->target, $_->name, $bus->send_type.'_out');
-		 $::g->set_edge_attributes(  $_->name, $bus->send_type.'_out', 
-		{ device_id => $bus->send_id })
+	map{ my @edge = ($_->name, ::output_node($bus->send_type));
+		 $::g->add_path( $_->target, @edge);
+		 $::g->set_edge_attributes( @edge, { 
+				send_id => $bus->send_id,
+				width => 2})
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
 

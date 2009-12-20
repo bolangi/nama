@@ -86,6 +86,13 @@ sub AUTOLOAD {
 }
 
 sub DESTROY {}
+
+
+# The following are track-related routines that belong here
+# because they are only used in generating chain setups.
+# They are accessed via AUTOLOAD, querying the track object
+# associated with a particular IO object
+
 sub mono_to_stereo { 
 	my $self = shift;
 	my $cmd = "file " .  $self->full_path;
