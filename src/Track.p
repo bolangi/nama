@@ -373,55 +373,6 @@ CLIENT
 # the following subroutines are used to dispatch IO objects
 
 
-sub soundcard_input { 
-	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
-}
-sub source_input {
-	my $track = shift;
-	given ( $track->source_type ){
-		when ( 'soundcard'  ){ return $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_multi_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
-		when ('jack_port'){
-			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		default { say $track->name, ": unsupported source type: $_"; return [] }
-	}
-}
-
-sub source_type_string { $_[0]->source_input()->[0] }
-sub source_device_string { $_[0]->source_input()->[1] }
-
-sub send_output {
-	my $track = shift;
-	given ($track->send_type){
-		when ( 'soundcard' ){ 
-			if ($::jack_running) {
-				return ['jack_multi_out', 'system']
-			} else {return [ 'soundcard_device_out', $track->send_id] }
-		}
-		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_multi_out', $track->send_id] }
-			else { carp $track->name . 
-					q(: auxilary send to JACK client specified,) .
-					q( but jackd is not running.  Skipping.);
-					return [];
-			}
-		}
-		when ('loop') { return [ 'loop_sink', $track->send_id ] }
-			
-		default { return [] }
-	}
- };
-
-sub send_type_string { $_[0]->send_output()->[0] }
-sub send_device_string { $_[0]->send_output()->[1] }
 
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;

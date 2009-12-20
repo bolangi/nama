@@ -936,7 +936,7 @@ sub add_paths_for_recording {
 
 		# connect IO
 		
-		$g->add_path($_->source_type_string, $name, 'wav_out');
+		$g->add_path($_->source_type .'_in', $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
@@ -974,7 +974,7 @@ sub add_paths_for_aux_sends {
 }
 sub add_path_for_one_aux_send {
 	my $track = shift;
-		my @e = ($track->name, $track->send_type_string);
+		my @e = ($track->name, $track->send_type.'_out');
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
 			  {	track => $track->name,
@@ -1002,7 +1002,7 @@ sub add_paths_for_send_buses {
 			# The signal path is:
 			# [target track] -> [slave track] -> [slave track send_type_string]
 			
-			map{   $g->add_path( $_->target, $_->name, $_->send_type_string);
+			map{   $g->add_path( $_->target, $_->name, $_->send_type.'_out');
 			} @tracks; 
 		}
 	} @user_buses;
@@ -1047,7 +1047,7 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	$g->add_path($mastering_mode ?  'Boost' : 'Master',
-			$tn{Master}->send_type_string);
+			$tn{Master}->send_type.'_out');
  
 
 }
