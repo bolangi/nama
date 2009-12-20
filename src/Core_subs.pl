@@ -822,7 +822,6 @@ sub really_recording {
 	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
-
 sub generate_setup { 
 
 	$debug2 and print "&generate_setup\n";
@@ -830,7 +829,7 @@ sub generate_setup {
 	my $automix = shift; # route Master to null_out if present
 
 	# save current track
-	my $old_this_track = $this_track;
+	$old_this_track = $this_track;
 
 	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
@@ -883,6 +882,7 @@ sub generate_setup {
 }
 sub remove_temporary_tracks {
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
+	$this_track = $old_this_track;
 }
 sub initialize_chain_setup_vars {
 

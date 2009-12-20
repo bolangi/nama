@@ -168,6 +168,7 @@ sub loop {
 	issue_first_prompt();
 	$Event::DIED = sub {
 	   my ($event, $errmsg) = @_;
+	   remove_temporary_tracks();
 	   say $errmsg;
 	   $attribs->{line_buffer} = q();
 	   $term->clear_message();
