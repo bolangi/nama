@@ -849,7 +849,6 @@ sub generate_setup_try {
 	$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
-	#add_paths_for_send_buses();
 	map{ $_->apply() } grep{ (ref $_) =~ /Send|Sub/ } ::Bus::all();
 	$debug and say "The graph is:\n$g";
 	add_paths_from_Master(); # do they affect automix?
@@ -4002,6 +4001,7 @@ sub user_mon_tracks { some_user_tracks('MON') }
 
 sub add_insert_cooked {
 	my ($send_id, $return_id) = @_;
+
 	my $t = $::this_track;
 	my $name = $t->name;
 	#$t->remove_insert;
@@ -4013,14 +4013,14 @@ sub add_insert_cooked {
 		return_id	=> $return_id,
 		wetness		=> 100,
 	};
-	# default to return via same system (soundcard or JACK)
-
 	# default to return from same JACK client or adjacent soundcard channels
 	if (! $i->{return_id}){
 		$i->{return_type} = $i->{send_type};
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
+	# default to return via same system (soundcard or JACK)
+
 	
 	$t->set(inserts => $i); 1;
 
@@ -4029,9 +4029,10 @@ sub add_insert_cooked {
 	
 	my $wet = ::SlaveTrack->new( 
 				name => "$name\_wet",
+				target => $name,
 				group => 'Insert',
 				rw => 'REC',
-				hide => 1,
+#				hide => 1,
 			);
 	# in the graph we will override the input with the insert's return source
 
@@ -4042,7 +4043,7 @@ sub add_insert_cooked {
 				name => "$name\_dry", 
 				target => $name,
 				group => 'Insert',
-				hide => 1,
+#				hide => 1,
 				rw => 'REC');
 
 	# the input fields will be ignored, since the track will get input

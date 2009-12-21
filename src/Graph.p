@@ -54,6 +54,7 @@ sub add_edge { add_path(@_) }
 sub add_inserts {
 	my $g = shift;
 	my @track_names = grep{ $::tn{$_} 
+		and $::tn{$_}->group ne 'Temp'
 		and $::tn{$_}->inserts =~ /HASH/
 		and $::tn{$_}->inserts->{insert_type}} $g->vertices;
 	$debug and say "Inserts will be applied to the following tracks: @track_names";
@@ -77,10 +78,11 @@ sub add_insert {
 	no warnings qw(uninitialized);
 
 	my ($g, $name) = @_;
-	$debug and say "add_insert name: $name";
+	$debug and say "add_insert for track: $name";
 	my $t = $::tn{$name}; 
 	my $i = $t->inserts;  # only one allowed
 
+	say "insert structure:", ::yaml_out($i);
 	# assume post-fader send
 	# t's successor will be loop or reserved
 
@@ -90,17 +92,21 @@ sub add_insert {
 	
 		my ($successor) = $g->successors($name);
 		$g->delete_edge($name, $successor);
-		my $loop = $name.'_insert';
-		my $wet = $::tn{$name.'_wet'};
-		my $dry = $::tn{$name.'_dry'};
+		my $loop = "$name\_insert";
+		my $wet = $::tn{"$name\_wet"};
+		my $dry = $::tn{"$name\_dry"};
 
-		# wet send path: track -> loop -> output
+		say "found wet: ", $wet->name, " dry: ",$dry->name;
+
+		# wet send path (no track): track -> loop -> output
 		
-		my @edge = $loop, ::output_node($i->{send_type});
-		$g->add_path($name, @edge);
+		my @edge = ($loop, ::output_node($i->{send_type}));
+		say "edge: @edge";
+		add_path($name, @edge);
+		$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
 		$g->set_edge_attributes(@edge, { 
 			send_id => $i->{send_id},
-			width => 2
+			width => 2,
 		});
 		# wet return path: input -> wet_track (slave) -> successor
 		
@@ -111,14 +117,14 @@ sub add_insert {
 					source_type => $i->{return_type},
 					source_id => $i->{return_id},
 		});
-		$g->add_path(::input_node($i->{return_type}), $wet->name, $successor);
+		add_path(::input_node($i->{return_type}), $wet->name, $successor);
 
-		# connect dry  track to graph
+		# connect dry track to graph
 		
-		add_path(::input_node($i->{source_type}),$loop, $dry->name, );
+		add_path($loop, $dry->name, $successor);
 
 		::command_process($t->name); 
-		::command_process('wet',$i->{wetness});
+		::command_process('wet '.$i->{wetness});
 		# generate_setup() will reset current track 
 	}
 	
@@ -214,12 +220,12 @@ sub add_loop {
  		$debug and say "deleting edge: $a-$_";
  		$g->delete_edge($a,$_);
  		$debug and say "adding edge: $loop-$_";
-		$g->add_edge($loop, $_);
+		add_edge($loop, $_);
 		$g->set_edge_attributes($loop,$_, $attr) if $attr;
 		$seen{"$a-$_"}++;
  	} $g->successors($a);
 	$debug and say "adding edge: $a-$loop";
-	$g->add_edge($a,$loop);
+	add_edge($a,$loop);
 }
  
 
@@ -235,12 +241,12 @@ sub add_far_side_loop {
  		$debug and say "deleting edge: $_-$b";
  		$g->delete_edge($_,$b);
  		$debug and say "adding edge: $_-$loop";
-		$g->add_edge($_,$loop);
+		add_edge($_,$loop);
 		$g->set_edge_attributes($_,$loop, $attr) if $attr;
 		$seen{"$_-$b"}++;
  	} $g->predecessors($b);
 	$debug and say "adding edge: $loop-$b";
-	$g->add_edge($loop,$b);
+	add_edge($loop,$b);
 }
 
 
@@ -254,7 +260,7 @@ sub is_terminal { $reserved{$_[0]} }
 sub is_a_loop{
 	my $name = shift;
 	return if $reserved{$name};
-	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out)$/){
+	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out|insert)$/){
 		return ($root, $suffix);
 	} 
 }
