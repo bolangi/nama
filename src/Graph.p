@@ -62,14 +62,24 @@ sub add_inserts {
 	
 sub add_insert {
 
-	# this routine will be called after expand_graph, so that
-	# every track will connect to either loop or source/sink
+	# Inserts will be read-only objects. To change the 
+	# destination or return, users will remove the insert and
+	# create a new one.
+	#
+	# Since this routine will be called after expand_graph, 
+	# we can be sure that every track will connect to either 
+	# a loop or an output 
+	#
+	# we can add the wet/dry tracks on every generate_setup() run
+	# since the Track class will return us the existing
+	# track if we use the same name
+	#
 	no warnings qw(uninitialized);
 
 	my ($g, $name) = @_;
 	$debug and say "add_insert name: $name";
 	my $t = $::tn{$name}; 
-	my $i = $t->inserts; 
+	my $i = $t->inserts;  # only one allowed
 
 	# assume post-fader send
 	# t's successor will be loop or reserved
@@ -78,52 +88,38 @@ sub add_insert {
 		
 	if($i->{insert_type} eq 'cooked') {	 # the only type we support
 	
-	my ($successor) = $g->successors($name);
-	my $loop = $name."_insert";
-	my ($dry) = add_near_side_loop( $g, $name, $successor, $loop);
-	$dry->set(group => 'Insert');
+		my ($successor) = $g->successors($name);
+		$g->delete_edge($name, $successor);
+		my $loop = $name.'_insert';
+		my $wet = $::tn{$name.'_wet'};
+		my $dry = $::tn{$name.'_dry'};
 
-	$dry->set( hide => 1);
-	my $wet = ::Track->new( 
-				name => $dry->name . 'w',
-				group => 'Insert',
-				width => 2, # default for cooked
- 				send_type => $i->{send_type},
- 				send_id => $i->{send_id},
-				hide => 1,
-				rw => 'REC',
-	
-				);
+		# wet send path: track -> loop -> output
+		
+		my @edge = $loop, ::output_node($i->{send_type});
+		$g->add_path($name, @edge);
+		$g->set_edge_attributes(@edge, { 
+			send_id => $i->{send_id},
+			width => 2
+		});
+		# wet return path: input -> wet_track (slave) -> successor
+		
+		# we override the input with the insert's return source
 
+		$g->set_vertex_attributes($wet->name, {
+					width => 2, # default for cooked
+					source_type => $i->{return_type},
+					source_id => $i->{return_id},
+		});
+		$g->add_path(::input_node($i->{return_type}), $wet->name, $successor);
 
-	# connect wet track to graph
-	
-	add_path($loop, $wet->name, $i->{send_type}."_out");
+		# connect dry  track to graph
+		
+		add_path(::input_node($i->{source_type}),$loop, $dry->name, );
 
-	# add return leg for wet signal
-	
-	my $wet_return = ::Track->new( 
-
-				name => $dry->name . 'wr',
-				group => 'Insert',
-				width => 2, # default for cooked
- 				source_type => $i->{return_type},
- 				source_id => $i->{return_id},
-				rw => 'REC',
-				hide => 1,
-			);
-	$i->{dry_vol} = $dry->vol;
-	$i->{wet_vol} = $wet_return->vol;
-	
-	::command_process($t->name);
-	::command_process('wet',$i->{wetness});
-
-
-	$i->{tracks} = [ map{ $_->name } ($wet, $wet_return, $dry) ];
-	
-	add_path($i->{return_type}.'_in',  $dry->name.'wr', $successor);
-
-
+		::command_process($t->name); 
+		::command_process('wet',$i->{wetness});
+		# generate_setup() will reset current track 
 	}
 	
 }
