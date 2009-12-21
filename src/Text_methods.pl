@@ -181,15 +181,17 @@ IAM
 		@output = map{ helptopic $_ } @help_topic;
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)
-	} elsif ( $commands{$name} ){
-		@output = helpline($name)
 	} else {
 		my %helped = (); 
 		my @help = ();
+		if ( $commands{$name} ){
+			push @help, helpline($name);
+			$helped{$name}++
+		}
 		map{  
 			my $cmd = $_ ;
-			if ($cmd =~ /$name/){
-				push( @help, helpline($cmd));
+			if ($cmd =~ /$name/ ){
+				push @help, helpline($cmd) unless $helped{$cmd}; 
 				$helped{$cmd}++ ;
 			}
 			if ( ! $helped{$cmd} and
