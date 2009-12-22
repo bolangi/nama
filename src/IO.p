@@ -41,8 +41,6 @@ our $AUTOLOAD;
 
 use ::Object qw([%join " ",map{$_."_" }split " ", qx(./strip_all ./io_fields)%]);
 
-use Try::Tiny;
-
 sub new {
 	my $class = shift;
 	my %vals = @_;
