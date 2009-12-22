@@ -3,4 +3,4 @@ use 5.10.0;
 use warnings;
 use lib "../lib";
 use Audio::Nama;
-Audio::Nama::nama();
+Audio::Nama::main();

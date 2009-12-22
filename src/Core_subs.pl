@@ -1,4 +1,4 @@
-sub nama { 
+sub main { 
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
