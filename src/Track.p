@@ -710,7 +710,7 @@ sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
-sub inserts { $::tn{$_[0]->target}->inserts} 
+#sub inserts { $::tn{$_[0]->target}->inserts} 
 sub source_type { $::tn{$_[0]->target}->source_type}
 sub source_id { $::tn{$_[0]->target}->source_id}
 sub source_status { $::tn{$_[0]->target}->source_status }

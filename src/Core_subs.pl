@@ -4002,6 +4002,7 @@ sub user_mon_tracks { some_user_tracks('MON') }
 sub add_insert_cooked {
 	my ($send_id, $return_id) = @_;
 
+	my $old_this_track = $this_track;
 	my $t = $::this_track;
 	my $name = $t->name;
 	#$t->remove_insert;
@@ -4053,6 +4054,7 @@ sub add_insert_cooked {
 	$i->{wet_vol} = $wet->vol;
 	
 	$i->{tracks} = [ map{ $_->name } ($wet, $dry) ];
+	$this_track = $old_this_track;
 }
 
 ### end

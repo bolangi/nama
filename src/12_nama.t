@@ -385,8 +385,102 @@ EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
 
-command_process('master_off');
+command_process('mixoff; master_off');
+command_process('for 4 5 6 7 8; remove_track');
+command_process('Master; send 1');
+command_process('asub Horns; sax set bus Horns; sax stereo');
 
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:alsa,default
+-a:4 -i:loop,sax_out
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chmove:3,2
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:3 -o:loop,sax_out
+-a:4 -o:loop,Master_in
+EXPECTED
+gen_alsa();
+check_setup('Sub-bus - ALSA');
+gen_jack();
+
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2,system:capture_3
+-a:4 -i:loop,sax_out
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_out
+-a:4 -o:loop,Master_in
+EXPECTED
+check_setup('Sub-bus - JACK');
+
+command_process('remove_bus Horns');
+command_process('add_send_bus_cooked Vo 5');
+$expected_setup_lines = <<EXPECTED;
+
+-a:1,4 -i:loop,sax_out
+-a:3 -i:jack_multi,system:capture_2,system:capture_3
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_out
+-a:4 -o:jack_multi,system:playback_5,system:playback_6
+EXPECTED
+gen_jack();
+check_setup('Send bus - soundcard - JACK');
+command_process('remove_bus Vo');
+command_process('sax mono');
+command_process('add_insert_cooked 5');
+my $expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:4 -i:jack_multi,system:capture_7,system:capture_8
+-a:J3,5 -i:loop,sax_insert
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_insert
+-a:4,5 -o:loop,Master_in
+-a:J3 -o:jack_multi,system:playback_5,system:playback_6
+EXPECTED
+sub gen_jack();
+check_setup('Insert via soundcard - JACK');
+command_process('remove_insert');
+command_process('add_send_bus_raw Vo 5');
+$expected_setup_lines = <<EXPECTED;
+
+-a:1 -i:loop,Master_in
+-a:3,4 -i:jack_multi,system:capture_2
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:4 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1
+-a:3 -o:loop,Master_in
+-a:4 -o:jack_multi,system:playback_5,system:playback_6
+EXPECTED
+sub gen_jack();
+check_setup('Send bus - raw  - JACK');
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
@@ -397,6 +491,7 @@ sub setup_content {
 	my %setup;
 	for (@lines){
 		next unless /^-a:/;
+		s/\s*$//;
 		$setup{$_}++;
 	}
 	\%setup;
