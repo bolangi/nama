@@ -384,6 +384,10 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
+
+command_process('master_off');
+
+
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
 sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }

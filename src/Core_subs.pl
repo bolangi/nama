@@ -4032,7 +4032,7 @@ sub add_insert_cooked {
 				target => $name,
 				group => 'Insert',
 				rw => 'REC',
-#				hide => 1,
+				hide => 1,
 			);
 	# in the graph we will override the input with the insert's return source
 
@@ -4043,7 +4043,7 @@ sub add_insert_cooked {
 				name => "$name\_dry", 
 				target => $name,
 				group => 'Insert',
-#				hide => 1,
+				hide => 1,
 				rw => 'REC');
 
 	# the input fields will be ignored, since the track will get input
