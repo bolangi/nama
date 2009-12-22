@@ -670,8 +670,8 @@ sub add_track {
 		name => $name,
 		@params
 	);
-	$this_track = $track;
 	return if ! $track; 
+	$this_track = $track;
 	$debug and print "ref new track: ", ref $track; 
 	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
