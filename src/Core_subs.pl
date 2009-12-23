@@ -403,15 +403,20 @@ sub colonize { # convert seconds to hours:minutes:seconds
 }
 
 ## configuration file
-
-sub project_root { File::Spec::Link->resolve_all($project_root)};
+{
+my %proot; 
+sub project_root { $proot{$project_root} ||= File::Spec::Link->resolve_all($project_root)};
+}
 
 sub config_file { $opts{f} ? $opts{f} : ".namarc" }
+{
+my %wdir; 
 sub this_wav_dir {
 	$project_name and
-	File::Spec::Link->resolve_all(
+	$wdir{$project_name} ||= File::Spec::Link->resolve_all(
 		join_path( project_root(), $project_name, q(.wav) )  
 	);
+}
 }
 sub project_dir  {$project_name and join_path( project_root(), $project_name)
 }

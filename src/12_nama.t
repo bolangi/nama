@@ -13,7 +13,6 @@ diag ("TESTING $0\n");
  
 [% qx(cat ./var_types.pl) %]
 
-
 # defeat namarc detection to force using $default namarc
 
 push @ARGV, qw(-f dummy);
@@ -30,7 +29,7 @@ push @ARGV, qw(-d .);
 
 push @ARGV, q(-E);
 
-diag("working direction: ",cwd);
+diag("working directory: ",cwd);
 
 process_options();
 
