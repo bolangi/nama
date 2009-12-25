@@ -3,6 +3,7 @@ use Test::More qw(no_plan);
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+our ($expected_setup_lines);
 use Cwd;
 
 BEGIN { use_ok('::') };
@@ -156,7 +157,7 @@ force_alsa();
 
 command_process('3; nosend; gen');
 
-my $expected_setup_lines = <<EXPECTED;
+$expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
 -a:3,R3 -i:alsa,default
@@ -173,12 +174,6 @@ my $expected_setup_lines = <<EXPECTED;
 -a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
 EXPECTED
 
-sub check_setup {
-	my $test_name = shift;
-	is( yaml_out(setup_content($chain_setup)), 
-		yaml_out(setup_content($expected_setup_lines)), 
-		$test_name);
-}
 check_setup('ALSA basic setup' );
 
 force_jack();
@@ -440,7 +435,7 @@ check_setup('Send bus - soundcard - JACK');
 command_process('remove_bus Vo');
 command_process('sax mono');
 command_process('add_insert_cooked 5');
-my $expected_setup_lines = <<EXPECTED;
+$expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
 -a:3 -i:jack_multi,system:capture_2
@@ -458,7 +453,7 @@ my $expected_setup_lines = <<EXPECTED;
 -a:4,5 -o:loop,Master_in
 -a:J3 -o:jack_multi,system:playback_5,system:playback_6
 EXPECTED
-sub gen_jack();
+gen_jack();
 check_setup('Insert via soundcard - JACK');
 command_process('remove_insert');
 command_process('add_send_bus_raw Vo 5');
@@ -474,12 +469,13 @@ $expected_setup_lines = <<EXPECTED;
 
 # audio outputs
 
--a:1 -o:jack_multi,system:playback_1
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,Master_in
 -a:4 -o:jack_multi,system:playback_5,system:playback_6
 EXPECTED
-sub gen_jack();
-check_setup('Send bus - raw  - JACK');
+gen_jack();
+
+check_setup('Send bus - raw - JACK');
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
@@ -494,6 +490,12 @@ sub setup_content {
 		$setup{$_}++;
 	}
 	\%setup;
+}
+sub check_setup {
+	my $test_name = shift;
+	is( yaml_out(setup_content($chain_setup)), 
+		yaml_out(setup_content($expected_setup_lines)), 
+		$test_name);
 }
 
 1;
