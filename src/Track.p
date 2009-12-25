@@ -10,6 +10,7 @@ package ::Track;
 # a different subclass! 
 
 use Modern::Perl;
+use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);

@@ -3,6 +3,7 @@ sub main {
 	prepare(); 
 	command_process($execute_on_project_load);
 	reconfigure_engine();
+	command_process($opts{X});
 	$ui->loop;
 }
 sub prepare {
@@ -246,6 +247,7 @@ sub process_options {
 		fake-alsa					A
 		fake-ecasound				E
 		debugging-output			D
+		execute-command=s			X
 );
 
 	map{$opts{$_} = ''} values %options;
@@ -287,6 +289,7 @@ Debugging options:
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
 --no-ecasound, -E                Don't spawn Ecasound process
+--execute-command, -X            Supply a command to execute
 
 HELP
 
@@ -403,13 +406,13 @@ sub colonize { # convert seconds to hours:minutes:seconds
 }
 
 ## configuration file
-{
+{ # OPTIMIZATION
 my %proot; 
 sub project_root { $proot{$project_root} ||= File::Spec::Link->resolve_all($project_root)};
 }
 
 sub config_file { $opts{f} ? $opts{f} : ".namarc" }
-{
+{ # OPTIMIZATION
 my %wdir; 
 sub this_wav_dir {
 	$project_name and
@@ -540,15 +543,51 @@ Loading project "untitled".
 	$debug and print "project_dir: ", project_dir() , $/;
 
  1;
-
+}	
+BEGIN { # OPTMIZATION
+my @wav_functions = qw(
+	get_versions 
+	candidates 
+	targets 
+	versions 
+	last 
+);
+my @track_functions = qw(
+	dir 
+	basename 
+	full_path 
+	group_last 
+	last 
+	current_wav 
+	full_wav_path 
+	current_version 
+	monitor_version 
+	maybe_monitor 
+	rec_status 
+	region_start_time 
+	region_end_time 
+	playat_time 
+	fancy_ops 
+	input_path 
+);
+sub track_memoize { # before generate_setup
+	return unless $memoize;
+	map{package ::Track; memoize($_) } @track_functions;
+}
+sub track_unmemoize { # after generate_setup
+	return unless $memoize;
+	map{package ::Track; unmemoize ($_)} @track_functions;
 }
 sub rememoize {
 	return unless $memoize;
-	package ::Wav;
-	unmemoize('candidates');
-	memoize(  'candidates');
+	map{package ::Wav; unmemoize ($_); memoize($_) } 
+		@wav_functions;
 }
-
+sub init_memoize {
+	return unless $memoize;
+	map{package ::Wav; memoize($_) } @wav_functions;
+}
+}
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
 	my @jack  = grep{   my $pid;
@@ -834,11 +873,13 @@ sub generate_setup { # catch errors and cleanup
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
 	remove_temporary_tracks();
+	track_unmemoize();
 	0;
 }
 sub generate_setup_try { 
 
 	$debug2 and print "&generate_setup\n";
+	track_memoize();
 
 	my $automix = shift; # route Master to null_out if present
 
@@ -890,6 +931,7 @@ sub generate_setup_try {
 	write_chains(); 
 
 	remove_temporary_tracks();
+	track_unmemoize();
 
 	1; # used to sense a chain setup ready to run
 }

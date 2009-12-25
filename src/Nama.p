@@ -101,9 +101,7 @@ $memoize = 1;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 
-package ::Wav;
-memoize('candidates') if $::memoize;
-package ::;
+init_memoize() if $memoize;
 
 # aliases for concise access
 
