@@ -66,7 +66,16 @@ sub init_gui {
 	# $oid_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	$clock_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
 	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
-	$track_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
+ 	my $track_canvas = $mw->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
+ 	$track_canvas->configure(
+ 		scrollregion =>[30,30,600,4800],
+ 		-width => 600,
+ 		-height => 400,	
+ 		);
+	$track_frame = $track_canvas->Frame; # ->pack(-fill => 'both');
+	#$track_frame = $mw->Frame;
+ 	my $id2 = $track_canvas->createWindow(600,200, -window => $track_frame);
+
  	#$group_label = $group_frame->Menubutton(-text => "GROUP",
  #										-tearoff => 0,
  #										-width => 13)->pack(-side => 'left');
