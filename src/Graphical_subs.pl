@@ -39,7 +39,7 @@ sub init_gui {
 	
 	$canvas = $ew->Scrolled('Canvas')->pack;
 	$canvas->configure(
-		scrollregion =>[2,2,10000,2000],
+		scrollregion =>[2,2,10000,10000],
 		-width => 1200,
 		-height => 700,	
 		);
@@ -68,14 +68,15 @@ sub init_gui {
 	#$group_frame = $mw->Frame->pack(-side => 'bottom', -fill => 'both');
  	my $track_canvas = $mw->Scrolled('Canvas')->pack(-side => 'bottom', -fill => 'both');
  	$track_canvas->configure(
- 		scrollregion =>[30,30,600,4800],
- 		-width => 600,
+ 		-scrollregion =>[2,2,400,9600],
+ 		-width => 400,
  		-height => 400,	
  		);
 	$track_frame = $track_canvas->Frame; # ->pack(-fill => 'both');
 	#$track_frame = $mw->Frame;
- 	my $id2 = $track_canvas->createWindow(600,200, -window => $track_frame);
-
+ 	my $id2 = $track_canvas->createWindow(0,0,
+		-window => $track_frame, 
+		-anchor => 'nw');
  	#$group_label = $group_frame->Menubutton(-text => "GROUP",
  #										-tearoff => 0,
  #										-width => 13)->pack(-side => 'left');
