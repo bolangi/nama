@@ -778,11 +778,10 @@ sub track_gui {
 }
 
 sub remove_track_gui {
-	load_project( name => $project_name );
-# 	@_ = discard_object( @_ );
-# 	my $n = shift;
-# 	my $m;
-# 	map {print ++$m, ref $_, $/; (ref $_) =~ /Tk/ and $_->destroy  } @{ $track_widget_remove{$n} };
+ 	@_ = discard_object( @_ );
+ 	my $n = shift;
+ 	my $m;
+ 	map {print ++$m, ref $_, $/; (ref $_) =~ /Tk/ and $_->destroy  } @{ $track_widget_remove{$n} };
 }
 
 sub paint_mute_buttons {

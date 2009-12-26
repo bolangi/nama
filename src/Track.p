@@ -376,7 +376,7 @@ sub remove_insert {
 
 sub remove {
 	my $track = shift;
-#	$::ui->remove_track_gui($track->n); TODO
+	$::ui->remove_track_gui($track->n); 
 	my $n = $track->n;
 	map{ ::remove_effect($_) } @{ $track->ops };
 	delete $by_index{$track->n};
