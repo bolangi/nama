@@ -556,3 +556,5 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	::add_effect_chain($name); 1
 }
 do_script: _do_script name2 end { ::do_script($item{name2});1}
+
+scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }

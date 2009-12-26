@@ -646,4 +646,8 @@ do_script:
   short: do
   what: execute Nama commands from a file in project_dir or project_root
   parameters: <s_filename>
+scan:
+  type: general
+  what: re-read project's .wav directory
+  parameters: none
 ...
