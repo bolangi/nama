@@ -17,7 +17,7 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = 0.9986;
+$VERSION = 1.0;
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
