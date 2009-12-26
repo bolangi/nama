@@ -69,8 +69,6 @@ dump_group: _dump_group end { ::pager($::main->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
 remove_track: _remove_track end { 
 	$::this_track->remove; 
-	#$::ui->remove_track_gui($track->n);
-	$::this_track = $::ti{::Track::idx() - 1};
 	1;
 }
 link_track: _link_track name target project end {

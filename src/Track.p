@@ -376,12 +376,13 @@ sub remove_insert {
 
 sub remove {
 	my $track = shift;
-	$::ui->remove_track_gui($track->n); 
 	my $n = $track->n;
-	map{ ::remove_effect($_) } @{ $track->ops };
-	delete $by_index{$track->n};
-	delete $by_name{$track->name};
-	@all = grep{ $_->n != $n} @all;
+	$::ui->remove_track_gui($n); 
+ 	$::this_track = $::ti{::Track::idx() - 1};
+ 	map{ ::remove_effect($_) } @{ $track->ops };
+ 	delete $by_index{$n};
+ 	delete $by_name{$track->name};
+ 	@all = grep{ $_->n != $n} @all;
 }
 
 	

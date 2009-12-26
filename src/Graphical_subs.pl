@@ -780,8 +780,13 @@ sub track_gui {
 sub remove_track_gui {
  	@_ = discard_object( @_ );
  	my $n = shift;
- 	my $m;
- 	map {print ++$m, ref $_, $/; (ref $_) =~ /Tk/ and $_->destroy  } @{ $track_widget_remove{$n} };
+	#say "&remove_track_gui";
+	#say "track $n";
+	return unless $track_widget_remove{$n};
+	#say "exists";
+	my $m = 0;
+ 	map {$_->destroy  } @{ $track_widget_remove{$n} };
+	delete $track_widget_remove{$n};
 }
 
 sub paint_mute_buttons {
