@@ -2842,14 +2842,7 @@ sub save_state {
 	$debug and print "saving palette\n";
 	$ui->save_palette;
 
-	# save %effect_chain, common to all projects
-	
- 	serialize (
- 		file => join_path(project_root(), $effect_chain_file),
-		format => 'yaml',
- 		vars => [ qw( %effect_chain ) ],
- 		class => '::');
-	
+	save_effect_chains();
 
 	# do nothing more if only Master and Mixdown
 	
@@ -2931,6 +2924,26 @@ $debug and print "serializing\n";
 
 
 }
+
+
+sub save_effect_chains { # if they exist
+	if (keys %effect_chain){
+		serialize (
+			file => join_path(project_root(), $effect_chain_file),
+			format => 'yaml',
+			vars => [ qw( %effect_chain ) ],
+			class => '::');
+	}
+}
+sub restore_effect_chains {
+
+	# but don't overwrite them if already present
+
+	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain))
+		unless keys %effect_chain; 
+}
+
+	
 sub assign_var {
 	my ($source, @vars) = @_;
 	assign_vars(
@@ -2965,9 +2978,7 @@ sub restore_state {
 
 	assign_var($yaml, @persistent_vars );
 
-	# restore effect chains
-
-	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain));
+	restore_effect_chains();
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
