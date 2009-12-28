@@ -411,12 +411,17 @@ sub set_io {
 	given ( ::dest_type( $id ) ){
 		when ('jack_client'){
 			if ( $::jack_running ){
+				my $client_direction = $direction eq 'source' ? 'output' : 'input';
+	
 				$track->set($type_field => 'jack_client',
 							$id_field   => $id);
 				my $name = $track->name;
-				print <<CLIENT if ! ::jack_client($id, 'output');
-$name: $direction port for JACK client "$id" not found. 
-CLIENT
+				my $width = ::jack_client($id, $client_direction);
+				$width or say 
+					qq($name: $direction port for JACK client "$id" not found.);
+				$width ne $track->width and say 
+					$track->name, ": track set to ", ::width($track->width),
+					qq(, but JACK source "$id" is ), ::width($width), '.';
 				return $track->source_id;
 			} else {
 		say "JACK server not running! Cannot set JACK client as track source.";
@@ -463,7 +468,7 @@ sub set_source { # called from parser
  		$track->set(source_type => 'jack_port',
  					source_id => $track->name);
  		say $track->name, ": JACK input port is ",$track->source_id,"_in",
- 		". Make connections manually.";
+ 		". Make connections manually or set up a ports list.";
  		return;
 	} 
 	my $old_source = $track->source;
