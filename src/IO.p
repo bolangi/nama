@@ -28,6 +28,8 @@ our %io_class = qw(
 	jack_port_out 			::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
+	jack_client_in			::IO::from_jack_multi
+	jack_client_out			::IO::to_jack_multi
 	);
 
 ### class definition

@@ -91,7 +91,7 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
-command_process('r 2');
+command_process('source 2');
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
@@ -146,12 +146,11 @@ ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
 $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
 is ($io->device_id, 'alsa,default', 'value overrides method call');
-=comment
-my $cs_got = eval_iam('cs');
-my $cs_want = q(### Chain status (chainsetup 'command-line-setup') ###
-Chain "default" [selected] );
-is( $cs_got, $cs_want, "Evaluate Ecasound 'cs' command");
-=cut
+
+command_process("sax; source Horgand; gen");
+like( $chain_setup, qr/Horgand/, 'set JACK client as input');
+command_process("sax; source 2");
+
 
 force_alsa();
 
