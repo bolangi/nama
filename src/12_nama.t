@@ -149,6 +149,9 @@ is ($io->device_id, 'alsa,default', 'value overrides method call');
 
 command_process("sax; source Horgand; gen");
 like( $chain_setup, qr/Horgand/, 'set JACK client as input');
+command_process("sax; source jack; gen");
+like( $chain_setup, qr/jack,,sax_in/, 'set JACK port for manual input');
+
 command_process("sax; source 2");
 
 
