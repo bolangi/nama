@@ -291,11 +291,11 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 package ::IO::to_jack_port;
 use Modern::Perl; our @ISA = '::IO';
 sub format_template { $::devices{jack}{signal_format} }
-sub device_id { 'jack,,'.$_[0]->name.'\_out' }
+sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
 
 package ::IO::from_jack_port;
 use Modern::Perl; our @ISA = '::IO::to_jack_port';
-sub device_id { 'jack,,'.$_[0]->name.'\_in' }
+sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
 sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::from_soundcard_device;

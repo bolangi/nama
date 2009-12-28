@@ -449,9 +449,9 @@ sub set_source { # called from parser
 	my $track = shift;
 	my $source = shift;
 
-	say "set source";
-	say "track: ",$track->name;
-	say "source: $source";
+	#say "set source";
+	#say "track: ",$track->name;
+	#say "source: $source";
 
 # Special handling for 'null', used for non-input (i.e. metronome) tracks
 
@@ -676,6 +676,8 @@ sub ingest  { # i believe 'import' has a magical meaning
 	} 
 	::rememoize();
 }
+
+sub port_name { $_[0]->target || $_[0]->name } 
 
 # subclasses
 
