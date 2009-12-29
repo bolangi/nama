@@ -296,13 +296,13 @@ Start Nama in GUI mode
 
 Start Nama in text mode
 
-=item B<--config, -f> F<config_file>
+=item B<--config, -f>
 
-Use F<config_file> instead of the default configuration file F<~/.namarc>
+Specify configuration file (default: ~/.namarc)
 
-=item B<--project-root, -d> F<project_root>
+=item B<--project-root, -d>
 
-use F<project_root> as Nama's top-level directory
+Specify project root directory
 
 =item B<--create-project, -c>
 
@@ -314,8 +314,7 @@ Use Ecasound's Net-ECI interface
 
 =item B<--libecasoundc, -l>
 
-Use Ecasound's libecasoundc interface (default, if
-Audio::Ecasound is installed)
+Use Ecasound's libecasoundc interface
 
 =item B<--save-alsa, -a>
 
@@ -327,7 +326,7 @@ This help display
 
 =back
 
-=head2 Debugging options:
+Debugging options:
 
 =over 12
 
@@ -349,12 +348,27 @@ Regenerate the effects data cache
 
 =item B<--no-reconfigure-engine, -R>
 
-Don't automatically configure engine (manually use 'generate' and 'connect' commands)
+Don't automatically configure engine
 
 =item B<--debugging-output, -D>
 
 Emit debugging information
 
+=item B<--fake-jack, -J>
+
+Simulate JACK environment
+
+=item B<--fake-alsa, -A>
+
+Simulate ALSA environment
+
+=item B<--no-ecasound, -E>
+
+Don't spawn Ecasound process
+
+=item B<--execute-command, -X>
+
+Supply a command to execute
 
 =back
 
