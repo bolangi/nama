@@ -9,6 +9,7 @@
 # 3. AUTOLOAD calling undefined methods on the associated track
 package ::IO;
 use Modern::Perl; use Carp;
+our $VERSION = 1.0;
 
 # we will use the following to map from graph node names
 # to IO class names
