@@ -10,6 +10,8 @@ package ::Track;
 # a different subclass! 
 
 use Modern::Perl;
+use Carp;
+use File::Copy qw(copy);
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
@@ -19,7 +21,6 @@ local $debug = 0;
 #our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use ::Wav;
-use Carp;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
@@ -284,7 +285,7 @@ sub region_end_time {
 	my $track = shift;
 	return if $track->rec_status ne 'MON';
 	if ( $track->region_end eq 'END' ){
-		return get_length($track->full_path);
+		return ::get_length($track->full_path);
 	} else {
 		::Mark::mark_time( $track->region_end )
 	}
@@ -294,24 +295,6 @@ sub playat_time {
 	::Mark::mark_time( $track->playat )
 }
 
-sub get_length { 
-	
-	#$debug2 and print "&get_length\n";
-	my $path = shift;
-	package ::;
-	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	eval_iam('cs-add gl');
-	eval_iam('c-add g');
-	eval_iam('ai-add ' . $path);
-	eval_iam('ao-add null');
-	eval_iam('cs-connect');
-	eval_iam('engine-launch');
-	eval_iam('ai-select '. $path);
-	my $length = eval_iam('ai-get-length');
-	eval_iam('cs-disconnect');
-	eval_iam('cs-remove gl');
-	sprintf("%.4f", $length);
-}
 sub fancy_ops { # returns list 
 	my $track = shift;
 	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
@@ -657,29 +640,35 @@ sub unmute {
 
 sub ingest  { # i believe 'import' has a magical meaning
 	my $track = shift;
-	my ($path, $frequency) = @_;
+	my ($path, $frequency) = @_; 
+	#say "path: $path";
 	my $version  = ${ $track->versions }[-1] + 1;
 	if ( ! -r $path ){
 		print "$path: non-existent or unreadable file. No action.\n";
 		return;
-	} else {
-		my $type = qx(file $path);
-		my $channels;
-		if ($type =~ /mono/i){
-			$channels = 1;
-		} elsif ($type =~ /stereo/i){
-			$channels = 2;
-		} else {
-			print "$path: unknown channel count. Assuming mono. \n";
-			$channels = 1;
-		}
-	my $format = ::signal_format($::raw_to_disk_format, $channels);
-	my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,$path -o:).
-		join_path(::this_wav_dir(),$track->name."_$version.wav\n");
-		print $cmd;
-		system $cmd or print "error: $!\n";
+	}
+	my ($depth,$width,$freq) = split ',', ::get_format($path);
+	say "format: ", ::get_format($path);
+	$frequency ||= $freq;
+	if ( ! $frequency ){
+		say "Cannot detect sample rate of $path. Skipping.";
+		say "Use 'import_audio <path> <frequency>' if possible.";
+		return 
+	}
+	my $desired_frequency = ::freq( $::raw_to_disk_format );
+	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
+	#say "destination: $destination";
+	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
+		say "copying $path to $destination";
+		copy($path, $destination) or die "copy failed: $!";
+	} else {	
+		my $format = ::signal_format($::raw_to_disk_format, $width);
+		say "importing $path as $destination, converting to $format";
+		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,$path -o:$destination);
+		#say $cmd;
+		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
-	::rememoize();
+	::rememoize() if $::opts{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 

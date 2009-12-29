@@ -1327,10 +1327,11 @@ sub reconfigure_engine {
 	# skip if command line option is set
 	return if $opts{R};
 
-	return 0 if $disable_auto_reconfigure;
+	return if $disable_auto_reconfigure;
 
 	# we don't want to disturb recording/mixing
 	return 1 if really_recording() and engine_running();
+		# why the return value? TODO delete it
 
 	rememoize(); # check if someone has snuck in some files
 	
@@ -4116,5 +4117,32 @@ sub add_insert_cooked {
 	$i->{tracks} = [ map{ $_->name } ($wet, $dry) ];
 	$this_track = $old_this_track;
 }
+
+sub ecasound_get_info {
+	my ($path, $command) = @_;
+	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+	eval_iam('cs-add gl');
+	eval_iam('c-add g');
+	eval_iam('ai-add ' . $path);
+	eval_iam('ao-add null');
+	eval_iam('cs-connect');
+	eval_iam('engine-launch');
+	eval_iam('ai-select '. $path);
+	my $result = eval_iam($command);
+	eval_iam('cs-disconnect');
+	eval_iam('cs-remove gl');
+	$result;
+}
+sub get_length { 
+	my $path = shift;
+	my $length = ecasound_get_info($path, 'ai-get-length');
+	sprintf("%.4f", $length);
+}
+sub get_format {
+	my $path = shift;
+	ecasound_get_info($path, 'ai-get-format');
+}
+sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
+	
 
 ### end
