@@ -98,10 +98,11 @@ Consult the F<BUILD> file for build instructions.
 
 =head2 Non-Perl Dependencies
 
-The Ecasound audio processing libraries must be installed.
-Ecasound may be obtained from
+The Ecasound audio processing libraries should be installed.
+Ecasound should be compiled with support for LADSPA, libsndfile
+and JACK. Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled binary
-packages for your Un*x distribution.
+package for your Un*x distribution.
 
 The LADSPA SDK is required to autosense LADSPA plugins and
 scaling hints.  It is available at:
@@ -110,10 +111,6 @@ http://www.ladspa.org/ladspa_sdk/download.html
 
 In particular the utility program 'analyseplugin' must be
 installed in a directory in your execution PATH.  
-
-'file', a BSD utility program that detects file formats,
-must be installed for Nama to correctly identify stereo
-files.
 
 Nama's mastering mode uses a number of LADSPA plugins.
 Defaults are specified in the configuration file .namarc. 
