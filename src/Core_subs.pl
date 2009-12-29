@@ -879,7 +879,7 @@ sub generate_setup { # catch errors and cleanup
 sub generate_setup_try { 
 
 	$debug2 and print "&generate_setup\n";
-	track_memoize();
+	track_memoize(); # assume track state frozen during generate setup
 
 	my $automix = shift; # route Master to null_out if present
 
@@ -1332,7 +1332,9 @@ sub reconfigure_engine {
 	# we don't want to disturb recording/mixing
 	return 1 if really_recording() and engine_running();
 
-	find_duplicate_inputs();
+	rememoize(); # check if someone has snuck in some files
+	
+	find_duplicate_inputs(); # we will warn the user later
 
 	# only act if change in configuration
 
