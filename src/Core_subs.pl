@@ -4143,6 +4143,8 @@ sub get_format {
 	ecasound_get_info($path, 'ai-get-format');
 }
 sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
+
+sub channels { [split ',', $_[0] ]->[1] }
 	
 
 ### end

@@ -98,19 +98,14 @@ sub DESTROY {}
 
 sub mono_to_stereo { 
 	my $self = shift;
-	my $cmd = "file " .  $self->full_path;
+	my $file = $self->full_path;
 	if ( 	$self->width == 2 and $self->rec_status eq 'REC'
-		    or  -e $self->full_path
-				and qx(which file)
-				and qx($cmd) =~ /stereo/i ){ 
+		    or  -e $file and ::channels(::get_format($file)) == 2){ 
 		return q(); 
 	} elsif ( ($self->width == 1 or ! $self->width) and $self->rec_status eq 'REC'
-				or  -e $self->full_path
-				and qx(which file)
-				and qx($cmd) =~ /mono/i ){ 
+				or  -e $file and ::channels(::get_format($file)) == 1){ 
 		return "-chcopy:1,2" 
-	} else { # do nothing for higher channel counts
-	} 
+	} else {} # do nothing for higher channel counts
 }
 sub soundcard_input { 
 	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
