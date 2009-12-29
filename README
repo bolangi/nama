@@ -99,8 +99,8 @@ Consult the F<BUILD> file for build instructions.
 =head2 Non-Perl Dependencies
 
 The Ecasound audio processing libraries should be installed.
-Ecasound should be compiled with support for LADSPA, libsndfile
-and JACK. Ecasound may be obtained from
+Ecasound should be compiled with support for LADSPA, libsndfile,
+libsamplerate and JACK. Ecasound may be obtained from
 http://ecasound.seul.org/ecasound/ or as precompiled binary
 package for your Un*x distribution.
 
