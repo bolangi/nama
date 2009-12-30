@@ -168,15 +168,6 @@ directories. This suite depends on the Ecasound
 libraries and executables for all audio processing! 
 WARN
 	) and sleeper (0.6) and $missing++;
-
-	my @c = `which file`;
-	@c or print ( <<WARN
-BSD utility program 'file' not found
-in $ENV{PATH}, your shell's list of executable 
-directories. This program is currently required
-to be able to play back mixes in stereo.
-WARN
-	) and sleeper (0.6);
 	if ( $missing ) {
 	print "You lack $missing main parts of this suite.  
 Do you want to continue? [N] ";
