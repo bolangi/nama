@@ -38,6 +38,8 @@ prepare();
 diag "Check representative variable from default .namarc";
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
 
+=skip
+# Ecasound dependent
 diag "Check static effects data read";
 is ( $::e_bound{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
 
@@ -65,6 +67,8 @@ is( yaml_out($effects[$effect_i{epp}]) ,  $want , "Pan hinting");
 is( $effects_help[0], 
 	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
 	'Preset help for dyn_compress_brutal');
+
+=cut
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
 
