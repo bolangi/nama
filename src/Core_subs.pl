@@ -112,6 +112,7 @@ sub initialize_terminal {
 	# handle Control-C from terminal
 
 	$SIG{INT} = \&cleanup_exit;
+	$SIG{SIGUSR1} = sub { save_state() };
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
 }
@@ -2831,7 +2832,8 @@ sub save_state {
 	$debug2 and print "&save_state\n";
 	$saved_version = $VERSION;
 
-	# first save palette to project_dir/palette.yml
+
+	# some stuff get saved independently of our state file
 	
 	$debug and print "saving palette\n";
 	$ui->save_palette;
@@ -2845,52 +2847,52 @@ sub save_state {
 		return;
 	}
 
-	my $file = shift; # mysettings
+	# save stuff to state file
+
+	my $file = shift || $state_store_file; 
+	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
+	$file =~ /\.yml$/ or $file .= '.yml';	
+	print "\nSaving state as $file\n";
 
 	# remove null keys in %cops and %copp
 	
 	delete $cops{''};
 	delete $copp{''};
 
-	$file = $file || $state_store_file;
-	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
-	$file =~ /\.yml$/ or $file .= '.yml';	
-	# print "filename base: $file\n";
-	print "\nSaving state as $file\n";
 
-# prepare tracks for storage
+	# prepare tracks for storage
 
-@tracks_data = (); # zero based, iterate over these to restore
+	@tracks_data = (); # zero based, iterate over these to restore
 
-$debug and print "copying tracks data\n";
+	$debug and print "copying tracks data\n";
 
-map { push @tracks_data, $_->hashref } ::Track::all();
-# print "found ", scalar @tracks_data, "tracks\n";
+	map { push @tracks_data, $_->hashref } ::Track::all();
+	# print "found ", scalar @tracks_data, "tracks\n";
 
-# delete unused fields
-map { my $t = $_;
-			map{ delete $t->{$_} } 
-				qw(ch_r ch_m source_select send_select jack_source jack_send);
-} @tracks_data;
+	# delete unused fields
+	map { my $t = $_;
+				map{ delete $t->{$_} } 
+					qw(ch_r ch_m source_select send_select jack_source jack_send);
+	} @tracks_data;
 
-@bus_data = (); # 
-map{ push @bus_data, $_->hashref } 
-	grep{ $_->name !~ /Main|Null/} ::Bus::all();
+	@bus_data = (); # 
+	map{ push @bus_data, $_->hashref } 
+		grep{ $_->name !~ /Main|Null/} ::Bus::all();
 
-# prepare marks data for storage (new Mark objects)
+	# prepare marks data for storage (new Mark objects)
 
-@marks_data = ();
-$debug and print "copying marks data\n";
-map { push @marks_data, $_->hashref } ::Mark::all();
+	@marks_data = ();
+	$debug and print "copying marks data\n";
+	map { push @marks_data, $_->hashref } ::Mark::all();
 
-$debug and print "copying groups data\n";
-@groups_data = ();
-map { push @groups_data, $_->hashref } ::Group::all();
+	$debug and print "copying groups data\n";
+	@groups_data = ();
+	map { push @groups_data, $_->hashref } ::Group::all();
 
-$debug and print "copying bus data\n";
+	$debug and print "copying bus data\n";
 
 
-# save history
+	# save history
 
 	my @history = $::term->GetHistory;
 	my %seen;
@@ -2898,7 +2900,7 @@ $debug and print "copying bus data\n";
 	map { push @command_history, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
 
-$debug and print "serializing\n";
+	$debug and print "serializing\n";
 	serialize(
 		file => $file, 
 		format => 'yaml',
