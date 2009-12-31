@@ -112,7 +112,7 @@ sub initialize_terminal {
 	# handle Control-C from terminal
 
 	$SIG{INT} = \&cleanup_exit;
-	$SIG{SIGUSR1} = sub { save_state() };
+	$SIG{USR1} = sub { save_state() };
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
 }
@@ -2859,7 +2859,6 @@ sub save_state {
 	delete $cops{''};
 	delete $copp{''};
 
-
 	# prepare tracks for storage
 
 	@tracks_data = (); # zero based, iterate over these to restore
@@ -2909,7 +2908,7 @@ sub save_state {
 		);
 
 
-# store alsa settings
+	# store alsa settings
 
 	if ( $opts{a} ) {
 		my $file = $file;

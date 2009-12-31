@@ -18,7 +18,6 @@ sub init_gui {
 	$mw->deiconify;
 	$parent{mw} = $mw;
 
-
 	### init effect window
 
 	$ew = $mw->Toplevel;
