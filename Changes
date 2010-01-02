@@ -1,4 +1,28 @@
-Selected revision history for Perl extension Audio::Ecasound::Multitrack
+Major revisions in Perl application Audio::Nama
+
+1.02  Jan 2, 2010 (summarizing last year's changes)
+
+      - Ladish Level 1 support 
+      - big speedup: cache results of Track and Wav methods
+      - new internals: generate setup using graphic routing algorithm
+        and IO objects
+      - send- and sub-buses: rewrite code for new internals
+      - import_audio: copy files unless resampling or converting format
+      - track caching (intermediate mixdown)
+      - track inserts (send/receive) with wet/dry control
+      - track input via JACK port (for manual connection)
+      - track input from a list of ports (to support Linux Sampler)
+      - track normalize and fixdc commands
+      - automix (normalized mixdown) command
+      - region shifting, with multiple regions per track
+      - effect chains (presets)
+      - non-recording preview and doodle modes
+      - unified event code for GUI and text modes
+      - test coverage for chain setup signal routing
+      - new debugging options
+      - rewrite support for Ecasound controllers
+
+Old changelog (increasing version)
 
 0.97  Fri Sep 18 2008   - replace Ext::MakeMaker with Module::Install
 0.975 Mon Dec 29, 2008  - new event sytem supports chainsetup looping 

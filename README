@@ -1,41 +1,32 @@
 =head1 NAME
 
-Nama - Ecasound-based recorder, mixer and mastering system
+Nama - Ecasound-based recorder/mixer
 
 =head1 ABOUT 
 
-Nama is a multitrack recording, effects-processing, mixing
-and mastering application based on the Ecasound audio
-processing engine. Nama adds track, bus and project
-abstractions that supplement Ecasound's proven capabilities.
+Nama is a recorder/mixer application using Ecasound to
+perform multitrack recording, effects processing, and
+mastering.
 
-Nama's features include LADSPA effects hosting, presets, aux
-sends, inserts, regions, time-shifting, send buses (for
-personalised instrument monitors) and sub buses (for
-creating specialised processing networks.) 
+Controlled by a command prompt or by an optional GUI, Nama
+makes multitrack audio production available to console
+users, and in remote or headless applications. 
 
-Nama's mastering mode adds an equalizer, three-band
-compressor and limiter to the signal chain. The
-configuration is modelled after JAMin, a respected mastering
-application. The default mastering effects can be customised
-via .namarc, Nama's configuration file. 
+Nama's features include tracks, buses, effects, presets,
+sends, inserts, marks and regions. Nama supports JACK
+and ALSA audio routing.
 
-Nama has both a graphical user interface and a 
-text interface.
+All signal processing under Nama is non-destructive.
+Effects are generally applied in realtime, with track
+caching (intermediate mixdown) available to conserve CPU.
 
-The text interface gives console users an efficient
-environment for audio production. The Gnu ReadLine library
-is used to provide a shell-like command prompt that can
-execute Nama-specific commands, Ecasound interactive-mode
-commands, shell commands and Perl code. Tab-completion of
-commands, filenames and effect labels saves keystrokes.
-Online help allows looking up commands and effects by
-category, name, keyword and LADSPA unique ID.
+Nama's command prompt is based on the GNU ReadLine library.
+Users can enter Nama commands, Ecasound interactive-mode 
+commands, shell commands or perl code.
 
-The minimalistic GUI, written in Tk, provides buttons and
-sliders to manage projects, tracks, effects, marks,
-recording and mixdown. The command prompt remains available
-when running Nama in GUI mode.
+Nama's optional GUI is based on the Tk widget set,
+providing easy access to effect parameters and basic
+recording functions.
 
 "Nama" is Japanese for "live", describing live performances,
 raw fish and draft beer.
@@ -65,38 +56,21 @@ for a file named Audio-Nama-????.tar.gz in this directory:
 
 =head2 Installing Nama Using the Debian Package System
 
-You can use the following steps to install Nama on a 
-Debian-based system.
-
-1. Install Perl libraries
-
-		apt-get install perl perl-modules libio-all-perl libgraph-perl libtext-format-perl libmodern-perl libfile-find-rule-perl libanyevent-perl libevent-perl libyaml-tiny-perl libparse-recdescent-perl libterm-readline-gnu-perl 
-
-2. Install Ecasound
-
-		apt-get install ecasound
-
-3. Install LADSPA utilities and and some LADSPA plugins
-
-		apt-get install ladspa-sdk swh-plugins tap-plugins
-
-4. Download Nama
-
-		wget http://freeshell.de/~bolangi/nama/libaudio-nama-perl_0.9986-1_all.deb
-
-5. Install Nama
-
-		dpkg -i libaudio-nama-perl_0.9986-1_all.deb
-
+		apt-get install libaudio-nama-perl
+	
 =head2 Build from Source
 
-You can pull the source code as follows: 
+If you want to inspect or modify Nama's internals,
+you can pull the source code as follows: 
 
 		git clone git://github.com/bolangi/nama.git
 
 Consult the F<BUILD> file for build instructions.
 
 =head2 Non-Perl Dependencies
+
+(These dependencies are pulled in automatically if you
+install Nama using apt-get in a Debian system.)
 
 The Ecasound audio processing libraries should be installed.
 Ecasound should be compiled with support for LADSPA, libsndfile,
