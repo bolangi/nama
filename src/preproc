@@ -3,7 +3,17 @@
 # This script provides templating functions for building
 # a perl module from sources.
 #
-# Run 'myproc' to provide preprocessing for Nama/Audio::Ecasound::Multitrack
+# Run 'myproc' to provide preprocessing for Audio::Nama
+#
+#
+# special cases: 
+# Do NOT convert the following:
+#
+# ${$pkg}::IO     						# close bracket before ::
+# "$class\::IO"   						# backslash before ::
+# /::from/::to/							# slash before ::
+# qw( :: ::main main:: ) # SKIP PREPROC # SKIP PREPROC directive
+#
 
 use Text::Template;
 use Getopt::Std;
@@ -78,54 +88,12 @@ sub process {
 sub bestow_module_root {
 	my ($new_root, $text) = @_;
 
-	# Substitution 1: symbols containing a sigil, or 
-	# starting with [ ( or {
-
-		$text =~ s/([\%\$\@\&\#\*\(\[\{])(::)/$1$new_root$2/mg;
-		#$text =~ s/([%$@&#*\(\[\{])(::)/$1$new_root$2/mg;
-
-	# Substitution 2: package declarations (two steps)
-
-		$text =~ s/^(\s*package\s*)(::)/$1$new_root$2/mg;
-		$text =~ s/^(\s*package.*)(::)(\s*;)/$1$3/mg;
-
-	# Substitution 3: @ISA (presumes 'our')
-
-		#/^(\s*our\s+\@ISA.*\W)(::)(\W)/ and print "match 3.1"; #$1$new_root::$3/g;
-		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)(\W)/$1$new_root$3/mg;
-		$text =~ s/^(\s*our\s+\@ISA.*\W)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg;
-
-	# Substitution 4: method calls ::->
-
-		$text =~ s/(\W|^)(::->)/$1$new_root->/mg;
-	  
-	# Substitution 5: method calls ::Graphical->refresh;
- 							 	#  ::Text->loop;
-	
-		$text =~ s/(\W|^)(::)((\w+::)*(\w+)->)/$1$new_root$2$3/mg;
-
-	# Substitution 6: use ::Module;
-	
-		$text =~ s/^(\s*use\s+)(::)(\W)/$1$new_root$3/mg;
-		$text =~
-		s/^(\s*use\s+)(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
-
-	# Substitution 6.1 *::Module
-		$text =~ s/\*::(\w)/*$new_root\::$1/mg;
-
-	# Substitution 6.2 {::Module::sub()}
-		$text =~ s/\{::(\w)/{$new_root\::$1/mg;
-
-	# Substitution 7: lone '::'
-		$text =~ s/'::'/'$new_root'/g;
-
-	# Substitution 8: bare class
-		#$text =~ s/(^|\s|'])(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
-		$text =~ s/(^|[\s'(])(::)((\w+::)*(\w+))+/$1$new_root$2$3/mg; 
-	
-$text;
+		join "\n",map{ 
+			s/([^\w\}\\\/])(::)([\w:])/$1$new_root$2$3/g unless /SKIP PREPROC/;
+			s/([^\w\}\\\/])(::)([^\w])/$1$new_root$3/mg unless /SKIP PREPROC/;
+			$_;
+		} split "\n",$text;
 }
-
 
 sub find_and_process {
 	my ($source_dir, $target_dir, $exta, $extb) = @_; 

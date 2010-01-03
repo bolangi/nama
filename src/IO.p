@@ -65,7 +65,7 @@ sub format {
 }
 #sub _direction { # allow override
 sub direction { 
-	(ref $_[0]) =~ /::from/ ? 'input' : 'output' 
+	(ref $_[0]) =~ /::from/ ? 'input' : 'output'  
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
 
