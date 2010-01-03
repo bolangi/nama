@@ -68,8 +68,7 @@ sub assign {
 		$debug and print "I found an object of class $class...\n";
 	} 
 	$class = $h{class};
- 	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect
-												#from preprocessor
+ 	$class .= "::" unless $class =~ /::$/;  # SKIP_PREPROC
 	my @vars = @{ $h{vars} };
 	my $ref = $h{data};
 	my $type = ref $ref;
@@ -209,7 +208,7 @@ sub serialize {
 	my $class = $h{class};
 	my $file  = $h{file};
 	my $format = $h{format};
- 	$class .= "\:\:" unless $class =~ /\:\:$/;; # backslashes protect from preprocessor!
+ 	$class .= "::" unless $class =~ /::$/; # SKIP_PREPROC
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
 	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 

@@ -8,7 +8,7 @@ use ::Assign qw(:all);
 
 diag ("TESTING $0\n");
 
-my @test_classes = qw( :: main:: main); # SKIP PREPROC
+my @test_classes = qw( :: main:: main); # SKIP_PREPROC
 use vars qw( $foo  @face $name %dict);
 my @var_list = qw( $foo @face $name %dict);
 my $struct2 = { 

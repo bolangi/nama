@@ -12,7 +12,7 @@
 # ${$pkg}::IO     						# close bracket before ::
 # "$class\::IO"   						# backslash before ::
 # /::from/::to/							# slash before ::
-# qw( :: ::main main:: ) # SKIP PREPROC # SKIP PREPROC directive
+# qw( :: ::main main:: ) # SKIP_PREPROC # directive
 #
 
 use Text::Template;
@@ -89,8 +89,8 @@ sub bestow_module_root {
 	my ($new_root, $text) = @_;
 
 		join "\n",map{ 
-			s/([^\w\}\\\/])(::)([\w:])/$1$new_root$2$3/g unless /SKIP PREPROC/;
-			s/([^\w\}\\\/])(::)([^\w])/$1$new_root$3/mg unless /SKIP PREPROC/;
+			s/([^\w\}\\\/])(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
+			s/([^\w\}\\\/])(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
 			$_;
 		} split "\n",$text;
 }
@@ -99,7 +99,6 @@ sub find_and_process {
 	my ($source_dir, $target_dir, $exta, $extb) = @_; 
 	find(\&wanted, $source_dir);
 }
-
 
 sub wanted { 
 	return if grep { $File::Find::name =~ m(/$_/) } 
