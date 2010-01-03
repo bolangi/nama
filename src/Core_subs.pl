@@ -2421,28 +2421,34 @@ sub prepare_static_effects_data{
 
 	prepare_effect_index();
 }
-sub new_plugins {
-	my $effects_cache = join_path(&project_root, $effects_cache_file);
-	my $path = ladspa_path();
-	
+
+sub ladspa_plugin_list {
 	my @filenames;
-	for my $dir ( split ':', $path){
-		opendir DIR, $dir or carp "failed to open directory $dir: $!\n";
+	for my $dir ( split ':', ladspa_path()){
+		{no autodie 'opendir';
+			opendir DIR, $dir or carp "failed to open directory $dir: $!\n";
+		}
 		push @filenames,  map{"$dir/$_"} grep{ /.so$/ } readdir DIR;
 		closedir DIR;
 	}
+	@filenames;
+}
+
+sub new_plugins {
+	my $effects_cache = join_path(&project_root, $effects_cache_file);
+	my @filenames = ladspa_plugin_list();	
 	push @filenames, '/usr/local/share/ecasound/effect_presets',
                  '/usr/share/ecasound/effect_presets',
                  "$ENV{HOME}/.ecasound/effect_presets";
-	my $effmod = modified($effects_cache);
+	my $effects_cache_stamp = modified_stamp($effects_cache);
 	my $latest;
-	map{ my $mod = modified($_);
+	map{ my $mod = modified_stamp($_);
 		 $latest = $mod if $mod > $latest } @filenames;
 
-	$latest > $effmod
+	$latest > $effects_cache_stamp;
 }
 
-sub modified {
+sub modified_stamp {
 	# timestamp that file was modified
 	my $filename = shift;
 	#print "file: $filename\n";
