@@ -72,15 +72,12 @@ sub process {
 	my $hash = {name => 'goblin' };
 	my $text = $template->fill_in(HASH=>$hash);
 	my $rooted_text = &bestow_module_root($new_root,$text);
-	
 
 # we are going to standardize on using :: as the 
 # root package name, so that coding will be
 # separate from the final place in the hierarchy.
-# ::Text, ::Graphical->new will be translated
-# by the preprocessor substitutions below,
-# performed __after__ all the fragments have
-# been substituted.
+# ::, ::Text will be translated to Audio::Nama, # Audio::Nama::Text
+# after the file includes
 
 	if ( $file_out ) { $rooted_text > io($file_out); }
 	else { print $rooted_text }
