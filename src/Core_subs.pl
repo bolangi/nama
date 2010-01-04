@@ -859,14 +859,12 @@ sub really_recording {
 }
 
 sub generate_setup { # catch errors and cleanup
-					 
 	local $@;
 	eval { &generate_setup_try };
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
 	remove_temporary_tracks();
 	track_unmemoize();
-	0;
 }
 sub generate_setup_try { 
 
@@ -1255,6 +1253,7 @@ sub signal_format {
 ## transport functions
 sub load_ecs {
 		my $project_file = join_path(&project_dir , $chain_setup_file);
+		return unless -r $project_file;
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove") if eval_iam("cs-selected");
 		eval_iam("cs-load ". $project_file);
@@ -1443,9 +1442,9 @@ sub adjust_latency {
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $no_transport_status = shift;
-	load_ecs(); 
+	load_ecs() or say("No chain setup, engine not ready."), return;
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
-		or print("Invalid chain setup, engine not ready.\n"),return;
+		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
 	apply_ops();
 	eval_iam('cs-connect');
@@ -3528,7 +3527,8 @@ sub automix {
 
 	#command_process('show');
 
-	generate_setup('automix'); # pass a bit of magic
+	generate_setup('automix') # pass a bit of magic
+		or say("automix: generate_setup failed!"), return;
 	connect_transport();
 	
 	# start_transport() does a rec_cleanup() on transport stop
