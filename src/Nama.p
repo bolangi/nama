@@ -2,9 +2,6 @@
 # 
 # All graphic method are defined in the base class :: .
 # These are overridden in the ::Text class with no-op stubs.
-# 
-# So all the routines in Graphical_methods.pl can consider
-# themselves to be in the base class.
 
 # How is $ui->init_gui interpreted? If $ui is class ::Text
 # Nama finds a no-op init_gui stub in package ::Text.
@@ -14,6 +11,14 @@
 # finds nothing, so goes to look in the root namespace ::
 # of which ::Text and ::Graphical are both descendants.
 
+# 
+# All the routines in Graphical_methods.pl can consider
+# themselves to be in the base class, and can call base
+# class subroutines without a package prefix
+
+# Text_method.pl subroutines live in the ::Text class,
+# and so they must use the :: prefix when calling
+# subroutines in the base class.
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
