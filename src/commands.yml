@@ -323,11 +323,6 @@ remove_track:
   short:
   what: remove effects, parameters and GUI for current track
   parameters: none 
-cache_track:
-  type: track
-  short: cache ct
-  what: record the post-fader signal as a new version
-  parameters: none
 group_rec:
   type: group
   short: grec R
@@ -620,7 +615,7 @@ overwrite_effect_chain:
 delete_effect_chain:
   type: effect
   short: dec
-  what: remove an effect chain definition from the list
+  what: delete an effect chain definition from the list
   parameters: <s_name>
 list_effect_chains:
   type: effect
@@ -636,6 +631,30 @@ replace_effects:
   type: effect
   short: replace rep 
   what: restore bypassed track effects
+new_effect_chain_bunch:
+  type: effect
+  short: neb
+  what: create a series of effect chains for multiple tracks
+  parameters: <s_bunch_name> [<s_effect_chain_bunch_name>]
+apply_effect_chain_bunch:
+  type: effect
+  short: aeb
+  what: overwrite track effects belonging to bunch with preset values
+  parameters: <s_effect_chain_bunch_name>
+delete_effect_chain_bunch:
+  type: effect
+  short: deb
+  what: remove an effect chain bunch definition
+  parameters: <s_effect_chain_bunch_name>
+list_effect_chain_bunches:
+  type: effect
+  short: leb
+  what: list effect chain bunches
+cache_track:
+  type: track
+  short: cache ct
+  what: record the post-fader signal as a new version
+  parameters: none
 uncache_track:
   type: effect
   short: uncache unc
