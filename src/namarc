@@ -8,7 +8,7 @@
 #           Ecasound's configuration file .ecasoundrc . 
 #           In most instances the latter is not required.
 
-#        - The format of this file is YAMLish, preprocessed to allow
+#        - The format of this file is YAML, preprocessed to allow
 #           comments.
 #
 #        - A value _must_ be supplied for each 'leaf' field.
@@ -18,11 +18,11 @@
 #          'device:'. The value for 'device' is the entire indented
 #          data structure that follows in subsequent lines.
 #
-#        - Indents are significant, two spaces indent for
-#          each new level of branching
+#        - Indents are significant. Two spaces indent is
+#          required for each sublevel.
 #
 #        - Use the tilde symbol '~' to represent a null value
-#
+#          For example "execute_on_project_load: ~"
 
 # project root directory
 
