@@ -859,12 +859,18 @@ sub really_recording {
 }
 
 sub generate_setup { # catch errors and cleanup
+
+	# it's possible that some exception could happen during 
+	# this phase
+
+	# therefore return 1 on success, undef on failure
+
 	local $@;
 	eval { &generate_setup_try };
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
 	remove_temporary_tracks();
-	track_unmemoize();
+	track_unmemoize(); # in case generate_setup_try() failed to do so 
 }
 sub generate_setup_try { 
 
@@ -1252,13 +1258,17 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
-		my $project_file = join_path(&project_dir , $chain_setup_file);
-		return unless -r $project_file;
+		my $setup = setup_file();
+		#say "setup file: $setup";
+		#say "exists " if -e $setup;
+		return unless -e $setup;
+		#say "passed conditional";
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove") if eval_iam("cs-selected");
-		eval_iam("cs-load ". $project_file);
-		eval_iam("cs-select ". $project_file); # needed by Audio::Ecasound, but not Net-ECI !!
+		eval_iam("cs-load $setup");
+		eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
 		$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
+		1;
 }
 
 sub arm {
@@ -1270,7 +1280,7 @@ sub arm {
 	$debug2 and print "&arm\n";
 	exit_preview_mode();
 	#adjust_latency();
-	if( generate_setup() ){ connect_transport() };
+	generate_setup() and connect_transport();
 }
 sub set_preview_mode {
 
@@ -1377,10 +1387,11 @@ sub reconfigure_engine {
 # 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
 		1; }
-	else {	my $setup = join_path( project_dir(), $chain_setup_file);
+	else {	my $setup = setup_file();
 			unlink $setup if -f $setup; }
 
 }
+sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
 		
 sub exit_preview_mode { # exit preview and doodle modes
