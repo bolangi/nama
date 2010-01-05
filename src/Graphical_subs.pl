@@ -167,9 +167,6 @@ sub init_gui {
 				#::Text::command_process('quit');
 				exit;
 				 });
-# 	$sn_dump->configure(
-# 		-text => q(Dump state),
-# 		-command => sub{ print &status_vars });
 	$sn_palette->configure(
 		-text => 'Palette',
 		-relief => 'raised',

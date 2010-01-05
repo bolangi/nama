@@ -26,7 +26,6 @@ our (
 	@effects_static_vars,	# the list of which variables to store and retrieve
 	@effects_dynamic_vars,		# same for all chain operators
 	@config_vars,    # contained in config file
-	@status_vars,    # we will dump them for diagnostic use
 	%abbreviations, # for replacements in config files
 
 	$ecasound_globals_realtime,     # .namarc field
@@ -36,7 +35,7 @@ our (
 
 
 	$default,		# the internal default configuration file, as string
-	$default_palette_yml, # not horriffic is about all I can say
+	$default_palette_yml, # default GUI colors
 					
 	$raw_to_disk_format,
 	$mix_to_disk_format,
@@ -56,8 +55,6 @@ our (
 
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
-	$yw,			# yaml writer object
-	$yr,			# yaml reader object
 	%state_c_ops, 	# intermediate copy for storage/retrieval
 	$effects_cache_file, # where we keep info on Ecasound
 					# and LADSPA effects, presets, etc.
@@ -288,7 +285,6 @@ our (
 	$sn_save_text,# text entry widget
 	$sn_save,	# button to save settings
 	$sn_recall,	# button to recall settings
-	$sn_dump,  # button to dump status
 
 	# new object core
 	
