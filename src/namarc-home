@@ -53,7 +53,7 @@ use_group_numbering: 1
 
 press_space_to_start_transport: 1
 
-execute_on_project_load: doodle
+execute_on_project_load: ~
 
 eq: Parametric1
 

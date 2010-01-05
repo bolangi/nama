@@ -860,22 +860,17 @@ sub really_recording {
 
 sub generate_setup { # catch errors and cleanup
 
-	# it's possible that some exception could happen during 
-	# this phase
-
-	# therefore return 1 on success, undef on failure
-
-	local $@;
+	local $@; # don't propagate errors
+#	track_memoize(); 			# freeze track state 
 	eval { &generate_setup_try };
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
-	remove_temporary_tracks();
-	track_unmemoize(); # in case generate_setup_try() failed to do so 
+	remove_temporary_tracks();  # cleanup
+#	track_unmemoize(); 			# unfreeze track state
 }
 sub generate_setup_try { 
 
 	$debug2 and print "&generate_setup\n";
-	track_memoize(); # assume track state frozen during generate setup
 
 	my $automix = shift; # route Master to null_out if present
 
@@ -926,8 +921,6 @@ sub generate_setup_try {
 
 	write_chains(); 
 
-	remove_temporary_tracks();
-	track_unmemoize();
 
 	1; # used to sense a chain setup ready to run
 }
@@ -3068,6 +3061,11 @@ sub restore_state {
 											send_select
 											jack_send);
 		}  @tracks_data;
+	}
+
+	# jack_manual is now called jack_port
+	if ( $saved_version <= 1){
+		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
 
 	#  destroy and recreate all groups
