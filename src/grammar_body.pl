@@ -390,11 +390,11 @@ group_version: _group_version dd end {
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::main->set( version => $n ); 1}
-new_bunch: _new_bunch name(s) { ::Text::bunch( @{$item{'name(s)'}}); 1}
+new_bunch: _new_bunch name4(s) { ::Text::bunch( @{$item{'name4(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
-remove_bunches: _remove_bunches name(s) { 
- 	map{ delete $::bunch{$_} } @{$item{'name(s)'}}; 1}
-add_to_bunch: _add_to_bunch name(s) end { ::Text::add_to_bunch( @{$item{'name(s)'}});1 }
+remove_bunches: _remove_bunches name4(s) { 
+ 	map{ delete $::bunch{$_} } @{$item{'name4(s)'}}; 1}
+add_to_bunch: _add_to_bunch name4(s) end { ::Text::add_to_bunch( @{$item{'name4(s)'}});1 }
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register end { 
@@ -556,16 +556,12 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	::add_effect_chain($name); 1
 }
 do_script: _do_script name2 end { ::do_script($item{name2});1}
-new_effect_chain_bunch: _new_effect_chain_bunch end {
-
-1; }
-delete_effect_chain_bunch: _delete_effect_chain_bunch end {
-
-1; }
-apply_effect_chain_bunch: _apply_effect_chain_bunch end {
-
-1; }
+new_effect_chain_bunch: _new_effect_chain_bunch name4 end {
+	::new_effect_chain_bunch($item{name4}); 1 }
+delete_effect_chain_bunch: _delete_effect_chain_bunch name4 end {
+	::delete_effect_chain_bunch($item{name4}); 1 }
+apply_effect_chain_bunch: _apply_effect_chain_bunch name4 end {
+	::apply_effect_chain_bunch($item{name4}); 1 }
 list_effect_chain_bunches: _list_effect_chain_bunches end {
-1; }
-
+	::list_effect_chain_bunches(); 1 }
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
