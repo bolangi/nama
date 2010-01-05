@@ -744,8 +744,9 @@ file when you issue the C<save> command.
 
 =head1 BUGS AND LIMITATIONS
 
-No waveform or signal level displays are provided.  No
-latency compensation across signal paths is provided at
+No waveform or signal level displays are provided.  
+
+No latency compensation across signal paths is provided at
 present, although this feature is planned.
 
 =head1 SECURITY CONCERNS

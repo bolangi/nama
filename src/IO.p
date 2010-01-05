@@ -9,9 +9,9 @@
 #      + assigned by dispatch: chain_id, loop_id, track, etc.
 #      + override by graph node (higher priority)
 #      + override by graph edge (highest priority)
-# 2. (sub)class methods
-#      + _method_name (access via AUTOLOAD, overrideable by constructor)
-#      + method_name  (not overrideable)
+# 2. (sub)class methods called as $object->method_name
+#      + defined as _method_name (access via AUTOLOAD, overrideable by constructor)
+#      + defined as method_name  (not overrideable)
 # 3. AUTOLOAD
 #      + any other method calls are passed to the the associated track
 #      + illegal track method call generate an exception
