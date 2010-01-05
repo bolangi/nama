@@ -2,11 +2,20 @@
 # 
 # IO objects for writing Ecasound chain setup file
 #
-# Three ways we set object values:
+# Object values can come from three sources:
 # 
-# 1. Using the constructor new()
-# 2. Defining a method (generally clobbers constructor values)
-# 3. AUTOLOAD calling undefined methods on the associated track
+# 1. As arguments to the constructor new() while walking the
+#    routing graph:
+#      + assigned by dispatch: chain_id, loop_id, track, etc.
+#      + override by graph node (higher priority)
+#      + override by graph edge (highest priority)
+# 2. (sub)class methods
+#      + _method_name (access via AUTOLOAD, overrideable by constructor)
+#      + method_name  (not overrideable)
+# 3. AUTOLOAD
+#      + any other method calls are passed to the the associated track
+#      + illegal track method call generate an exception
+
 package ::IO;
 use Modern::Perl; use Carp;
 our $VERSION = 1.0;

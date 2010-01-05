@@ -1147,6 +1147,8 @@ sub non_track_dispatch {
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
 	# loop  fields: n: track->n, j: 'a' (counter)
+	
+	# chain_ids are allocated J7, J7b, J7c...
 	$attr->{chain_id} //= 'J'.$vattr->{n}. 
 		( $vattr->{j} eq 'a' ? ($vattr->{j}++,''): ++$vattr->{j});
 	my @direction = qw(input output);
@@ -1173,8 +1175,8 @@ my $edge = shift;
 		# edges to and from loop,Master_in
 	my @args = (track => $name,
 			endpoint => $endpoint, # for loops
-				chain_id => $tn{$name}->n,
-				override($name, $edge));
+				chain_id => $tn{$name}->n, # default
+				override($name, $edge));   # priority: edge > node
 	#say "dispatch class: $class";
 	$class->new(@args);
 }
