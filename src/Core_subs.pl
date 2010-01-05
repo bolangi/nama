@@ -3919,6 +3919,18 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	}
 	delete $effect_chain{$previous};
 }
+sub new_effect_chain_bunch {
+	my $bunch = shift;
+}
+sub delete_effect_chain_bunch { 
+	my $bunch = shift;
+}
+sub apply_effect_chain_bunch { 
+	my $bunch = shift;
+}
+sub list_effect_chain_bunches { 
+
+}
 sub uncache { 
 	my $t = $this_track;
 	# skip unless MON;

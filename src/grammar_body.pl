@@ -555,7 +555,6 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	::push_effect_chain() if $::this_track->fancy_ops;
 	::add_effect_chain($name); 1
 }
-do_script: _do_script name2 end { ::do_script($item{name2});1}
 new_effect_chain_bunch: _new_effect_chain_bunch name4 end {
 	::new_effect_chain_bunch($item{name4}); 1 }
 delete_effect_chain_bunch: _delete_effect_chain_bunch name4 end {
@@ -564,4 +563,6 @@ apply_effect_chain_bunch: _apply_effect_chain_bunch name4 end {
 	::apply_effect_chain_bunch($item{name4}); 1 }
 list_effect_chain_bunches: _list_effect_chain_bunches end {
 	::list_effect_chain_bunches(); 1 }
+do_script: _do_script name2 end { ::do_script($item{name2});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
+
