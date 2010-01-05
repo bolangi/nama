@@ -3404,6 +3404,10 @@ sub command_process {
 	
 	$ui->refresh; # in case we have a graphic environment
 }
+sub is_bunch {
+	my $name = shift;
+	$::Group::by_name{$name} or $bunch{$name}
+}
 sub load_keywords {
 	@keywords = keys %commands;
 	push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
@@ -3921,6 +3925,7 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 }
 sub new_effect_chain_bunch {
 	my $bunch = shift;
+
 }
 sub delete_effect_chain_bunch { 
 	my $bunch = shift;
