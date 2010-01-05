@@ -37,6 +37,7 @@ use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
 use Graph;
+use Data::Section -setup;
 # use Timer::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
@@ -259,7 +260,18 @@ $default_palette_yml = <<'PALETTE';
 PALETTE
 
 1;
-
+__DATA__
+__[commands_yml]__
+[% qx(./strip_all  ./commands.yml) %]
+__[grammar]__
+[% qx(./strip_all  ./grammar_body.pl) %]
+[% qx(./emit_command_headers headers) %]
+__[chain_op_hints_yml]__
+[% qx(cat ./ecasound_chain_operator_hints.yml) %];
+__[default_namarc]__
+[% qx(cat ./namarc) %]
+__[default_palette_yml]__
+[% qx(cat ./palette.yml) %]
 __END__
 
 =head1 NAME
