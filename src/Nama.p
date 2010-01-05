@@ -11,7 +11,6 @@
 # finds nothing, so goes to look in the root namespace ::
 # of which ::Text and ::Graphical are both descendants.
 
-# 
 # All the routines in Graphical_methods.pl can consider
 # themselves to be in the base class, and can call base
 # class subroutines without a package prefix
@@ -19,6 +18,11 @@
 # Text_method.pl subroutines live in the ::Text class,
 # and so they must use the :: prefix when calling
 # subroutines in the base class.
+#
+# However because both subclass packages occupy the same file as 
+# the base class package, all variables (defined by 'our') can 
+# be accessed without a package prefix.
+
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
