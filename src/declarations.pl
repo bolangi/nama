@@ -289,33 +289,23 @@ our (
 	# new object core
 	
 	$main_bus, 
-	$main, # main_group
+	$main, # main group
 	$null_bus,
-    $null, # group
+    $null, # null group
 
 	%ti, # track by index (alias %::Track::by_index)
 	%tn, # track by name  (alias %::Track::by_name)
 
 	@tracks_data, # staging for saving
-	@bus_data,   # 
+	@bus_data,    # 
 	@groups_data, # 
-	@marks_data, # 
+	@marks_data,  # 
 
 	$alsa_playback_device,
 	$alsa_capture_device,
 
-	$main_out, # do I route audio output to soundcard?
+	$main_out, # boolean: route audio output to soundcard?
 
-	# rules
-	
-	$mon_setup,
-	$rec_file,
-	$rec_setup,
-	$aux_send,
-	$null_setup,
-
-	$send_bus_out,
-	
 	# mastering mode status
 
 	$mastering_mode,

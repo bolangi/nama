@@ -362,33 +362,24 @@ sub time_gui {
 #  the following is based on previous code for multiple buttons
 #  needs cleanup
 
-sub preview_button { 
+sub preview_button {  
 	$debug2 and print "&preview\n";
 	@_ = discard_object(@_);
 	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
-	my $rule = $rec_file;
-	my $status = $rule->status;
 	my $oid_button = $transport_frame->Button( );
 	$oid_button->configure(
 		-text => 'Preview',
 		-command => sub { 
-			$rule->set(status => ! $rule->status);
+			if ($preview ){ # set normal
+			} else { # set preview 
+			}
 			$oid_button->configure( 
 		-background => 
-				$rule->status ? $old_bg : $namapalette{Preview} ,
-		#-activebackground => 
-		#		$rule->status ? $old_bg : $namapalette{ActivePreview} ,
+				$preview ? $old_bg : $namapalette{Preview} ,
 		-text => 
-				$rule->status ? 'Preview' : 'PREVIEW MODE'
+				$preview ? 'Preview' : 'PREVIEW MODE'
 					
 					);
-
-			if ($rule->status) { # rec_file enabled
-				arm()
-			} else { 
-				preview();
-			}
-
 			});
 		push @widget_o, $oid_button;
 		
