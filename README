@@ -93,6 +93,8 @@ Defaults are specified in the configuration file .namarc.
 
 Copyright 2008, 2008 Joel Roth.
 
+=head1 LICENSE
+
 This software is licensed for use under the terms of the GNU
 Public License version 2. The text of this license is
 provided in the file COPYING that is included in this
