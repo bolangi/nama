@@ -3925,20 +3925,19 @@ sub new_effect_chain_name {
 # too many functions in push and pop!!
 
 sub push_effect_chain {
+	$debug2 and say "&push_effect_chain";
 	say("no effects to store"), return unless $this_track->fancy_ops;
 	my %vals = @_; 
-	###my $add_name = $vals{add}; # undef in case of bypass # disabled!
 	my $save_name   = $vals{save} || new_effect_chain_name();
-	#$debug and say "add: $add_name save: $save_name"; 
+	$debug and say "save name: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
 	push @{ $this_track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $this_track->fancy_ops;
-	###add_effect_chain($add_name) if $add_name; # disabled!
-	#say "save name $save_name";
 	$save_name;
 }
 
 sub pop_effect_chain { # restore previous, save current as name if supplied
+	$debug2 and say "&pop_effect_chain";
 	my $save_name = shift;
 	my $previous = pop @{$this_track->effect_chain_stack};
 	say ("no previous effect chain"), return unless $previous;
@@ -3951,7 +3950,15 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	}
 	delete $effect_chain{$previous};
 }
+sub overwrite_effect_chain {
+	$debug2 and say "&overwrite_effect_chain";
+	my ($track, $name) = @_;
+	print("$name: unknown effect chain.\n"), return if !  $effect_chain{$name};
+	push_effect_chain() if $track->fancy_ops;
+	add_effect_chain($track,$name); 
+}
 sub new_effect_profile {
+	$debug2 and say "&new_effect_profile";
 	my ($bunch, $profile) = @_;
 	my @tracks = map{ $tn{$_} } bunch_tracks($bunch);
 	for (@tracks){ 
@@ -3960,6 +3967,7 @@ sub new_effect_profile {
 	$effect_profile{$profile}{tracks} = [ map{ $tn{$_->name}} @tracks ];
 }
 sub delete_effect_profile { 
+	$debug2 and say "&delete_effect_profile";
 	my $name = shift;
 	my @tracks = $effect_profile{$name};
 	delete $effect_profile{$name};
@@ -3971,14 +3979,16 @@ sub private_effect_chain {
 }
 
 sub apply_effect_profile {  # overwriting current effects
-	my $profile = shift;
+	$debug2 and say "&apply_effect_profile";
+	my ($function, $profile) = @_;
 	my @tracks = @{ $effect_profile{$profile}{tracks} };
 	my @missing = grep{ ! $tn{$_} } @tracks;
-	@missing and say(join(',',@missing), ": tracks do not exist. Skipping."),
+	@missing and say(join(',',@missing), ": tracks do not exist. Aborting."),
 		return;
-	map{ $_
-
-	} map{$tn{$_}} @tracks;
+	@missing = grep { ! $effect_chain{private_effect_chain($profile,$_)} } @tracks;
+	@missing and say(join(',',@missing), ": effect chains do not exist. Aborting."),
+		return;
+	map{ $function->( $tn{$_}, private_effect_chain($profile,$_)) } @tracks;
 }
 sub list_effect_profiles { 
 

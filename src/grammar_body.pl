@@ -550,10 +550,7 @@ list_effect_chains: _list_effect_chains name(s?) end {
 bypass_effects:   _bypass_effects end { ::push_effect_chain(); 1}
 replace_effects: _replace_effects end {  ::replace_effects(); 1;}
 overwrite_effect_chain: _overwrite_effect_chain name end {
-	my $name = $item{name};
-	print("$name: unknown effect chain.\n"), return if !  $::effect_chain{$name};
-	::push_effect_chain() if $::this_track->fancy_ops;
-	::add_effect_chain($::this_track,$name); 1
+	::overwrite_effect_chain($::this_track, $item{name}); 1;
 }
 bunch_name: name4 { 
 	::is_bunch($item{name4}) 
@@ -566,7 +563,9 @@ new_effect_profile: _new_effect_profile bunch_name effect_profile_name end {
 delete_effect_profile: _delete_effect_profile effect_profile_name end {
 	::delete_effect_profile($item{effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile effect_profile_name end {
-	::apply_effect_profile($item{effect_profile_name}); 1 }
+	::apply_effect_profile(\&::overwrite_effect_chain, $item{effect_profile_name}); 1 }
+overlay_effect_profile: _overlay_effect_profile effect_profile_name end {
+	::apply_effect_profile(\&::add_effect_chain, $item{effect_profile_name}); 1 }
 list_effect_profiles: _list_effect_profiles end {
 	::list_effect_profiles(); 1 }
 do_script: _do_script name2 end { ::do_script($item{name2});1}

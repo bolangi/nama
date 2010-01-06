@@ -369,7 +369,7 @@ save_state:
   parameters: [ <s_settings_file> ] 
 get_state:
   type: project
-  short: recall restore retrieve
+  short: recall retrieve
   what: retrieve project settings
   parameters: [ <s_settings_file> ] 
 list_projects:
@@ -627,9 +627,9 @@ bypass_effects:
   short: bypass bye
   what: bypass track effects (pushing them onto stack) except vol/pan 
   parameters: none
-replace_effects:
+restore_effects:
   type: effect
-  short: replace rep 
+  short: restore ref 
   what: restore bypassed track effects
 new_effect_profile:
   type: effect
@@ -639,7 +639,12 @@ new_effect_profile:
 apply_effect_profile:
   type: effect
   short: aep
-  what: overwrite track effects belonging to bunch with preset values
+  what: use an effect profile to overwrite effects of multiple tracks
+  parameters: <s_effect_profile_name>
+overlay_effect_profile:
+  type: effect
+  short: oep
+  what: use an effect profile to add effects to multiple tracks
   parameters: <s_effect_profile_name>
 delete_effect_profile:
   type: effect

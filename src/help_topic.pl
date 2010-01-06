@@ -242,12 +242,12 @@ effects => <<EFFECTS,
 
 -  effect chains
 
-   new_effect_chain,   nec    - define a new effect chain
-   add_effect_chain,   aec    - add an effect chain to the current track
-   delete_effect_chain,dec    - delete an effect chain
-   list_effect_chains, lec    - list effect chains and their parameters
-   bypass_effects,     bye    - suspend current track effects except vol/pan
-   replace_effects,    rep    - restore track effects
+   new_effect_chain, nec         - define a new effect chain
+   add_effect_chain, aec         - add an effect chain to the current track
+   delete_effect_chain, dec      - delete an effect chain
+   list_effect_chains, lec       - list effect chains and their parameters
+   bypass_effects, bypass, bye   - suspend current track effects except vol/pan
+   restore_effects, restore, ref - restore track effects
 
 EFFECTS
 
