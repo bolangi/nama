@@ -529,8 +529,12 @@ list_effect_chains: _list_effect_chains name(s?) end {
 }
 
     
-bypass_effects:   _bypass_effects end { ::push_effect_chain($::this_track); 1}
-restore_effects: _restore_effects end {  ::restore_effects(); 1;}
+bypass_effects:   _bypass_effects end { 
+	::push_effect_chain($::this_track) and
+	print $::this_track->name, ": bypassing effects\n"; 1}
+restore_effects: _restore_effects end { 
+	::restore_effects($::this_track) and
+	print $::this_track->name, ": restoring effects\n"; 1}
 overwrite_effect_chain: _overwrite_effect_chain name end {
 	::overwrite_effect_chain($::this_track, $item{name}); 1;
 }

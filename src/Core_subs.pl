@@ -3938,28 +3938,28 @@ sub push_effect_chain {
 
 sub pop_effect_chain { # restore previous
 	$debug2 and say "&pop_effect_chain";
-	my ($track) = @_;
+	my $track = shift;
 	my $previous = pop @{$track->effect_chain_stack};
 	say ("no previous effect chain"), return unless $previous;
 	map{ remove_effect($_)} $track->fancy_ops;
-	add_effect_chain($previous);
+	add_effect_chain($track, $previous);
 	delete $effect_chain{$previous};
 }
 sub overwrite_effect_chain {
 	$debug2 and say "&overwrite_effect_chain";
 	my ($track, $name) = @_;
 	print("$name: unknown effect chain.\n"), return if !  $effect_chain{$name};
-	push_effect_chain() if $track->fancy_ops;
+	push_effect_chain($track) if $track->fancy_ops;
 	add_effect_chain($track,$name); 
 }
 sub new_effect_profile {
 	$debug2 and say "&new_effect_profile";
 	my ($bunch, $profile) = @_;
-	my @tracks = map{ $tn{$_} } bunch_tracks($bunch) ;
-	for (@tracks){ 
-		new_effect_chain($_, private_effect_chain($profile, $_->name)); 
-	}
-	$effect_profile{$profile}{tracks} = [ map{ $_->name} @tracks ];
+	my @tracks = bunch_tracks($bunch);
+	say qq(effect profile "$profile" created for tracks: @tracks);
+	map { new_effect_chain($tn{$_}, private_effect_chain($profile, $_)); 
+	} @tracks;
+	$effect_profile{$profile}{tracks} = [ @tracks ];
 }
 sub delete_effect_profile { 
 	$debug2 and say "&delete_effect_profile";
@@ -3992,32 +3992,36 @@ sub list_effect_profiles {
 	}
 }
 sub uncache { 
-	my $t = $this_track;
+	my $track = shift;
 	# skip unless MON;
-	my $cm = $t->cache_map;
-	my $v = $t->monitor_version;
-	if(is_cached()){
+	my $cache_map = $track->cache_map;
+	my $version = $track->monitor_version;
+	if(is_cached($track)){
 		# blast away any existing effects, TODO: warn or abort	
-		say $t->name, ": removing effects (except vol/pan)" if $t->fancy_ops;
-		map{ remove_effect($_)} $t->fancy_ops;
-		$t->set(active => $cm->{$v}{original});
-		print $t->name, ": setting uncached version ", $t->active, $/;
-		add_effect_chain($cm->{$v}{effect_chain});
+		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
+		map{ remove_effect($_)} $track->fancy_ops;
+		$track->set(active => $cache_map->{$version}{original});
+		print $track->name, ": setting uncached version ", $track->active, $/;
+		add_effect_chain($track, $cache_map->{$version}{effect_chain});
 	} 
-	else { print $t->name, ": version $v is not cached\n"}
+	else { print $track->name, ": version $version is not cached\n"}
 }
 sub is_cached {
-	my $cm = $this_track->cache_map;
-	$cm->{$this_track->monitor_version}
+	my $track = shift;
+	my $cache_map = $track->cache_map;
+	$cache_map->{$track->monitor_version}
 }
 	
 
-sub restore_effects { is_cached() ? uncache() : pop_effect_chain()}
+sub restore_effects { 
+	my $track = shift;
+	is_cached($track) ? uncache($track) : pop_effect_chain($track)}
 
 sub new_effect_chain {
 	my ($track, $name, @ops) = @_;
 #	say "name: $name, ops: @ops";
 	@ops or @ops = $track->fancy_ops;
+	say $track->name, qq(: creating effect chain "$name") unless $name =~ /^_/;
 	$effect_chain{$name} = { 
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
@@ -4027,16 +4031,24 @@ sub new_effect_chain {
 
 sub add_effect_chain {
 	my ($track, $name) = @_;
-	say "track: $track name: ",$track->name, " effect chain: $name";
+	#say "track: $track name: ",$track->name, " effect chain: $name";
 	say ("$name: effect chain does not exist"), return 
 		if ! $effect_chain{$name};
+	say $track->name, qq(: adding effect chain "$name") unless $name =~ /^_/;
 	my $before = $track->vol;
 	map {   $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
+		if ($before){
 			::Text::t_insert_effect(
 				$before, 
 				$effect_chain{$name}{type}{$_}, 
-				@{$effect_chain{$name}{params}{$_}});
-			$magical_cop_id = undef;
+				$effect_chain{$name}{params}{$_});
+		} else { 
+			::Text::t_add_effect(
+				$track, 
+				$effect_chain{$name}{type}{$_}, 
+				$effect_chain{$name}{params}{$_});
+		}
+		$magical_cop_id = undef;
 	} @{$effect_chain{$name}{ops}};
 }	
 sub list_effect_chains {
@@ -4062,6 +4074,7 @@ sub cleanup_exit {
 	CORE::exit; 
 }
 sub cache_track {
+	my $track = $this_track; # TODO separate from $this_track
 	print($this_track->name, ": track caching requires MON status.\n\n"), 
 		return unless $this_track->rec_status eq 'MON';
 	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
@@ -4101,7 +4114,7 @@ sub cache_track {
 		my $cache_map = $this_track->cache_map;
 		$cache_map->{$this_track->last} = { 
 			original 			=> $orig_version,
-			effect_chain	=> push_effect_chain(), # bypass
+			effect_chain	=> push_effect_chain($this_track), # bypass
 		};
 		pop @{$this_track->effect_chain_stack};
 		#say "cache map",yaml_out($this_track->cache_map);
