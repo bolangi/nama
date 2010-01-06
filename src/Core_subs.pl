@@ -2952,20 +2952,20 @@ sub save_effect_profiles { # if they exist
 }
 sub restore_effect_chains {
 
-	# but don't overwrite them if already present
+	my $file = join_path(project_root(), $effect_chain_file);
+	return unless -e $file;
 
-	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain))
-		unless keys %effect_chain; 
+	# don't overwrite them if already present
+	assign_var($file, qw(%effect_chain)) unless keys %effect_chain
 }
 sub restore_effect_profiles {
 
-	# but don't overwrite them if already present
+	my $file = join_path(project_root(), $effect_profile_file);
+	return unless -e $file;
 
-	assign_var(join_path(project_root(), $effect_profile_file), qw(%effect_profile))
-		unless keys %effect_profile; 
+	# don't overwrite them if already present
+	assign_var($file, qw(%effect_profile)) unless keys %effect_profile; 
 }
-
-	
 sub assign_var {
 	my ($source, @vars) = @_;
 	assign_vars(
