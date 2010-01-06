@@ -859,7 +859,6 @@ sub really_recording {
 }
 
 sub generate_setup { # catch errors and cleanup
-
 	$debug2 and print "&generate_setup\n";
 	local $@; # don't propagate errors
 	track_memoize(); 			# freeze track state 
@@ -869,10 +868,8 @@ sub generate_setup { # catch errors and cleanup
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
 }
-sub generate_setup_try { 
-
+sub generate_setup_try {  # TODO: move operations below to buses
 	$debug2 and print "&generate_setup_try\n";
-
 	my $automix = shift; # route Master to null_out if present
 
 	# save current track
