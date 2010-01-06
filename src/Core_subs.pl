@@ -3964,6 +3964,7 @@ sub new_effect_profile {
 sub delete_effect_profile { 
 	$debug2 and say "&delete_effect_profile";
 	my $name = shift;
+	say qq(deleting effect profile: $name);
 	my @tracks = $effect_profile{$name};
 	delete $effect_profile{$name};
 	map{ delete $effect_chain{private_effect_chain($name,$_)} } @tracks;

@@ -544,12 +544,17 @@ bunch_name: name4 {
 	$item{name4};
 }
 effect_profile_name: name4
+existing_effect_profile_name: name4 {
+	print ("$item{name4}: no such effect profile\n"), return
+		unless $::effect_profile{$item{name4}};
+	$item{name4}
+}
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name end {
 	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
 #new_effect_profile: _new_effect_profile bunch_name end {
 	#::new_effect_profile($item{bunch_name}, $item{bunch_name}); 1 }
-delete_effect_profile: _delete_effect_profile effect_profile_name end {
-	::delete_effect_profile($item{effect_profile_name}); 1 }
+delete_effect_profile: _delete_effect_profile existing_effect_profile_name end {
+	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile effect_profile_name end {
 	::apply_effect_profile(\&::overwrite_effect_chain, $item{effect_profile_name}); 1 }
 overlay_effect_profile: _overlay_effect_profile effect_profile_name end {
