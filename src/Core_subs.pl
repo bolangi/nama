@@ -4001,9 +4001,9 @@ sub is_cached {
 sub replace_effects { is_cached() ? uncache() : pop_effect_chain()}
 
 sub new_effect_chain {
-	my ($name, @ops) = @_;
+	my ($track, $name, @ops) = @_;
 #	say "name: $name, ops: @ops";
-	@ops or @ops = $this_track->fancy_ops;
+	@ops ||= $track->fancy_ops;
 	$effect_chain{$name} = { 
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
