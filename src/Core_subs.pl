@@ -2850,7 +2850,7 @@ sub save_state {
 	$ui->save_palette;
 
 	save_effect_chains();
-	save_effect_templates();
+	save_effect_profiles();
 
 	# do nothing more if only Master and Mixdown
 	
@@ -2942,12 +2942,12 @@ sub save_effect_chains { # if they exist
 			class => '::');
 	}
 }
-sub save_effect_templates { # if they exist
-	if (keys %effect_template){
+sub save_effect_profiles { # if they exist
+	if (keys %effect_profile){
 		serialize (
-			file => join_path(project_root(), $effect_template_file),
+			file => join_path(project_root(), $effect_profile_file),
 			format => 'yaml',
-			vars => [ qw( %effect_template ) ],
+			vars => [ qw( %effect_profile ) ],
 			class => '::');
 	}
 }
@@ -2958,12 +2958,12 @@ sub restore_effect_chains {
 	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain))
 		unless keys %effect_chain; 
 }
-sub restore_effect_templates {
+sub restore_effect_profiles {
 
 	# but don't overwrite them if already present
 
-	assign_var(join_path(project_root(), $effect_template_file), qw(%effect_template))
-		unless keys %effect_template; 
+	assign_var(join_path(project_root(), $effect_profile_file), qw(%effect_profile))
+		unless keys %effect_profile; 
 }
 
 	
@@ -3002,7 +3002,7 @@ sub restore_state {
 	assign_var($yaml, @persistent_vars );
 
 	restore_effect_chains();
-	restore_effect_templates();
+	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
@@ -3952,7 +3952,7 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	}
 	delete $effect_chain{$previous};
 }
-sub new_effect_chain_bunch {
+sub new_effect_profile {
 	my ($bunch, $name) = @_;
 	my @tracks = bunch_tracks($bunch);
 	for (@tracks){
@@ -3960,7 +3960,7 @@ sub new_effect_chain_bunch {
 		
 	}
 =comment
-	$effect_template{$name} = { 
+	$effect_profile{$name} = { 
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
 					params	=> { map{$_ => $copp{$_} 		} @ops},
@@ -3968,13 +3968,13 @@ sub new_effect_chain_bunch {
 =cut
 
 }
-sub delete_effect_chain_bunch { 
+sub delete_effect_profile { 
 	my $bunch = shift;
 }
-sub apply_effect_chain_bunch { 
+sub apply_effect_profile { 
 	my $bunch = shift;
 }
-sub list_effect_chain_bunches { 
+sub list_effect_profiles { 
 
 }
 sub uncache { 
@@ -4003,7 +4003,7 @@ sub replace_effects { is_cached() ? uncache() : pop_effect_chain()}
 sub new_effect_chain {
 	my ($track, $name, @ops) = @_;
 #	say "name: $name, ops: @ops";
-	@ops ||= $track->fancy_ops;
+	@ops or @ops = $track->fancy_ops;
 	$effect_chain{$name} = { 
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},

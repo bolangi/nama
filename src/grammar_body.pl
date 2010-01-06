@@ -560,15 +560,15 @@ bunch_name: name4 {
 		or print("$item{name4}: no such bunch name.\n"), return; 
 	1;
 }
-effect_chain_bunch_name: name4
-new_effect_chain_bunch: _new_effect_chain_bunch bunch_name effect_chain_bunch_name end {
-	::new_effect_chain_bunch($item{effect_chain_bunch_name}); 1 }
-delete_effect_chain_bunch: _delete_effect_chain_bunch effect_chain_bunch_name end {
-	::delete_effect_chain_bunch($item{effect_chain_bunch_name}); 1 }
-apply_effect_chain_bunch: _apply_effect_chain_bunch effect_chain_bunch_name end {
-	::apply_effect_chain_bunch($item{effect_chain_bunch_name}); 1 }
-list_effect_chain_bunches: _list_effect_chain_bunches end {
-	::list_effect_chain_bunches(); 1 }
+effect_profile_name: name4
+new_effect_profile: _new_effect_profile bunch_name effect_profile_name end {
+	::new_effect_profile($item{effect_profile_name}); 1 }
+delete_effect_profile: _delete_effect_profile effect_profile_name end {
+	::delete_effect_profile($item{effect_profile_name}); 1 }
+apply_effect_profile: _apply_effect_profile effect_profile_name end {
+	::apply_effect_profile($item{effect_profile_name}); 1 }
+list_effect_profiles: _list_effect_profiles end {
+	::list_effect_profiles(); 1 }
 do_script: _do_script name2 end { ::do_script($item{name2});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
 

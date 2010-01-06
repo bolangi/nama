@@ -631,24 +631,24 @@ replace_effects:
   type: effect
   short: replace rep 
   what: restore bypassed track effects
-new_effect_chain_bunch:
+new_effect_profile:
   type: effect
-  short: neb
+  short: nep
   what: create a series of effect chains for multiple tracks
-  parameters: <s_bunch_name> [<s_effect_chain_bunch_name>]
-apply_effect_chain_bunch:
+  parameters: <s_bunch_name> [<s_effect_profile_name>]
+apply_effect_profile:
   type: effect
-  short: aeb
+  short: aep
   what: overwrite track effects belonging to bunch with preset values
-  parameters: <s_effect_chain_bunch_name>
-delete_effect_chain_bunch:
+  parameters: <s_effect_profile_name>
+delete_effect_profile:
   type: effect
-  short: deb
+  short: dep
   what: remove an effect chain bunch definition
-  parameters: <s_effect_chain_bunch_name>
-list_effect_chain_bunches:
+  parameters: <s_effect_profile_name>
+list_effect_profiles:
   type: effect
-  short: leb
+  short: lep
   what: list effect chain bunches
 cache_track:
   type: track

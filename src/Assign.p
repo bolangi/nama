@@ -192,7 +192,7 @@ sub assign_vars {
 	} elsif ( ref $source ) {
 		$debug and print "found a reference\n";
 		$ref = $source;
-	} else { carp "$source: unidentified data source\n"; }
+	} else { carp "$source: missing data source\n"; }
 
 	assign(data => $ref, 
 			vars => \@vars, 
