@@ -3970,8 +3970,15 @@ sub private_effect_chain {
 	"_$profile:$track_name";
 }
 
-sub apply_effect_profile { 
-	my $bunch = shift;
+sub apply_effect_profile {  # overwriting current effects
+	my $profile = shift;
+	my @tracks = @{ $effect_profile{$profile}{tracks} };
+	my @missing = grep{ ! $tn{$_} } @tracks;
+	@missing and say(join(',',@missing), ": tracks do not exist. Skipping."),
+		return;
+	map{ $_
+
+	} map{$tn{$_}} @tracks;
 }
 sub list_effect_profiles { 
 
