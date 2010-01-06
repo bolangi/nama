@@ -3953,24 +3953,24 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	delete $effect_chain{$previous};
 }
 sub new_effect_profile {
-	my ($bunch, $name) = @_;
-	my @tracks = bunch_tracks($bunch);
-	for (@tracks){
-		# create effect chain _bunch_name:track_name
-		
+	my ($bunch, $profile) = @_;
+	my @tracks = map{ $tn{$_} } bunch_tracks($bunch);
+	for (@tracks){ 
+		new_effect_chain($_, private_effect_chain_id($profile, $_->name)); 
 	}
-=comment
-	$effect_profile{$name} = { 
-					ops 	=> \@ops,
-					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
-					params	=> { map{$_ => $copp{$_} 		} @ops},
-	}
-=cut
-
+	$effect_profile{$profile}{tracks} = [ map{ $tn{$_->name}} @tracks ];
 }
 sub delete_effect_profile { 
-	my $bunch = shift;
+	my $name = shift;
+	my @tracks = $effect_profile{$name};
+	delete $effect_profile{$name};
+	map{ delete $effect_chain{private_effect_chain_id($name,$_)} } @tracks;
 }
+sub private_effect_chain {
+	my ($profile, $track_name) = @_;
+	"_$profile:$track_name";
+}
+
 sub apply_effect_profile { 
 	my $bunch = shift;
 }
