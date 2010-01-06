@@ -3930,7 +3930,7 @@ sub push_effect_chain {
 	say("no effects to store"), return unless $track->fancy_ops;
 	my $save_name   = $vals{save} || new_effect_chain_name();
 	$debug and say "save name: $save_name"; 
-	new_effect_chain( $save_name ); # current track effects
+	new_effect_chain( $track, $save_name ); # current track effects
 	push @{ $track->effect_chain_stack }, $save_name;
 	map{ remove_effect($_)} $track->fancy_ops;
 	$save_name;
