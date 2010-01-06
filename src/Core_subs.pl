@@ -4012,6 +4012,7 @@ sub new_effect_chain {
 
 sub add_effect_chain {
 	my ($track, $name) = @_;
+	say "track: $track name: ",$track->name, " effect chain: $name";
 	say ("$name: effect chain does not exist"), return 
 		if ! $effect_chain{$name};
 	my $before = $track->vol;

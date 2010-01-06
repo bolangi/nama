@@ -350,7 +350,7 @@ sub t_insert_effect {
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}
 
-	::Text::t_add_effect( $code, $values );
+	::Text::t_add_effect( $track, $code, $values );
 
 	$debug and print join " ",@{$track->ops}, $/; 
 

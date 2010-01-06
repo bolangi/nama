@@ -553,7 +553,7 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	my $name = $item{name};
 	print("$name: unknown effect chain.\n"), return if !  $::effect_chain{$name};
 	::push_effect_chain() if $::this_track->fancy_ops;
-	::add_effect_chain($name); 1
+	::add_effect_chain($::this_track,$name); 1
 }
 bunch_name: name4 { 
 	::is_bunch($item{name4}) 
