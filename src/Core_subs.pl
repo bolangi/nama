@@ -3926,28 +3926,23 @@ sub new_effect_chain_name {
 
 sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
-	say("no effects to store"), return unless $this_track->fancy_ops;
-	my %vals = @_; 
+	my ($track, %vals) = @_; 
+	say("no effects to store"), return unless $track->fancy_ops;
 	my $save_name   = $vals{save} || new_effect_chain_name();
 	$debug and say "save name: $save_name"; 
 	new_effect_chain( $save_name ); # current track effects
-	push @{ $this_track->effect_chain_stack }, $save_name;
-	map{ remove_effect($_)} $this_track->fancy_ops;
+	push @{ $track->effect_chain_stack }, $save_name;
+	map{ remove_effect($_)} $track->fancy_ops;
 	$save_name;
 }
 
-sub pop_effect_chain { # restore previous, save current as name if supplied
+sub pop_effect_chain { # restore previous
 	$debug2 and say "&pop_effect_chain";
-	my $save_name = shift;
-	my $previous = pop @{$this_track->effect_chain_stack};
+	my ($track) = @_;
+	my $previous = pop @{$track->effect_chain_stack};
 	say ("no previous effect chain"), return unless $previous;
-	if($save_name){ 
-		push_effect_chain( save => $save_name, add => $previous);
-	} 
-	else { 
-		map{ remove_effect($_)} $this_track->fancy_ops;
-		add_effect_chain($previous);
-	}
+	map{ remove_effect($_)} $track->fancy_ops;
+	add_effect_chain($previous);
 	delete $effect_chain{$previous};
 }
 sub overwrite_effect_chain {
@@ -3964,7 +3959,7 @@ sub new_effect_profile {
 	for (@tracks){ 
 		new_effect_chain($_, private_effect_chain($profile, $_->name)); 
 	}
-	$effect_profile{$profile}{tracks} = [ map{ $tn{$_->name}} @tracks ];
+	$effect_profile{$profile}{tracks} = [ map{ $_->name} @tracks ];
 }
 sub delete_effect_profile { 
 	$debug2 and say "&delete_effect_profile";
