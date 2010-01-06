@@ -4014,7 +4014,7 @@ sub is_cached {
 }
 	
 
-sub replace_effects { is_cached() ? uncache() : pop_effect_chain()}
+sub restore_effects { is_cached() ? uncache() : pop_effect_chain()}
 
 sub new_effect_chain {
 	my ($track, $name, @ops) = @_;
