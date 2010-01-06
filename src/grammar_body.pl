@@ -556,7 +556,8 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 	::add_effect_chain($name); 1
 }
 bunch_name: name4 { 
-	::is_bunch($item{name4}) or print("$item{name4}: no such bunch name."), return; 
+	::is_bunch($item{name4}) 
+		or print("$item{name4}: no such bunch name.\n"), return; 
 	1;
 }
 effect_chain_bunch_name: name4

@@ -2850,6 +2850,7 @@ sub save_state {
 	$ui->save_palette;
 
 	save_effect_chains();
+	save_effect_templates();
 
 	# do nothing more if only Master and Mixdown
 	
@@ -2941,12 +2942,28 @@ sub save_effect_chains { # if they exist
 			class => '::');
 	}
 }
+sub save_effect_templates { # if they exist
+	if (keys %effect_template){
+		serialize (
+			file => join_path(project_root(), $effect_template_file),
+			format => 'yaml',
+			vars => [ qw( %effect_template ) ],
+			class => '::');
+	}
+}
 sub restore_effect_chains {
 
 	# but don't overwrite them if already present
 
 	assign_var(join_path(project_root(), $effect_chain_file), qw(%effect_chain))
 		unless keys %effect_chain; 
+}
+sub restore_effect_templates {
+
+	# but don't overwrite them if already present
+
+	assign_var(join_path(project_root(), $effect_template_file), qw(%effect_template))
+		unless keys %effect_template; 
 }
 
 	
@@ -2985,6 +3002,7 @@ sub restore_state {
 	assign_var($yaml, @persistent_vars );
 
 	restore_effect_chains();
+	restore_effect_templates();
 
 	##  print yaml_out \@groups_data; 
 	# %cops: correct 'owns' null (from YAML) to empty array []
@@ -3924,7 +3942,19 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 	delete $effect_chain{$previous};
 }
 sub new_effect_chain_bunch {
-	my $bunch = shift;
+	my ($bunch, $name) = @_;
+=comment
+	
+
+	my ($name, @ops) = @_;
+#	say "name: $name, ops: @ops";
+	@ops or @ops = $this_track->fancy_ops;
+	$effect_chain{$name} = { 
+					ops 	=> \@ops,
+					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
+					params	=> { map{$_ => $copp{$_} 		} @ops},
+	}
+=cut
 
 }
 sub delete_effect_chain_bunch { 

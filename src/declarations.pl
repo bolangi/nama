@@ -80,6 +80,7 @@ our (
 					 #this_wav_dir = 
 	$state_store_file,	# filename for storing @persistent_vars
 	$effect_chain_file, # for storing effect chains
+	$effect_template_file, # for storing effect templates
 	$chain_setup_file, # Ecasound uses this 
 
 	$tk_input_channels,# this many radiobuttons appear
@@ -354,6 +355,7 @@ our (
 	%cooked_record_pending, # an intermediate mixdown for tracks
 	$press_space_to_start_transport, #  in text mode
 	%effect_chain, # named effect sequences
+	%effect_template, # effect chains for multiple tracks
 	$sock, 			# socket for Net-ECI mode
 	%versions,		# store active versions for use after engine run
 	@io, 			# accumulate IO objects for generating setup
