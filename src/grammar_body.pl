@@ -517,7 +517,7 @@ new_effect_chain: _new_effect_chain name op_id(s?) end {
 	1;
 }
 add_effect_chain: _add_effect_chain name end {
-	::add_effect_chain($item{name});
+	::add_effect_chain($::this_track, $item{name});
 	1;
 }
 delete_effect_chain: _delete_effect_chain name(s) end {

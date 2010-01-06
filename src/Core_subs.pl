@@ -860,17 +860,18 @@ sub really_recording {
 
 sub generate_setup { # catch errors and cleanup
 
+	$debug2 and print "&generate_setup\n";
 	local $@; # don't propagate errors
 #	track_memoize(); 			# freeze track state 
 	eval { &generate_setup_try };
+	remove_temporary_tracks();  # cleanup
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
-	remove_temporary_tracks();  # cleanup
 #	track_unmemoize(); 			# unfreeze track state
 }
 sub generate_setup_try { 
 
-	$debug2 and print "&generate_setup\n";
+	$debug2 and print "&generate_setup_try\n";
 
 	my $automix = shift; # route Master to null_out if present
 
@@ -925,6 +926,7 @@ sub generate_setup_try {
 	1; # used to sense a chain setup ready to run
 }
 sub remove_temporary_tracks {
+	$debug2 and say "&remove_temporary_tracks";
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
 	$this_track = $old_this_track;
 }
@@ -965,8 +967,12 @@ sub add_paths_for_recording {
 
 	# we record tracks set to REC, unless rec_defeat is set 
 	# or the track belongs to the 'null' group
-	my @tracks = ::Track::all();
-
+	my @tracks = grep{ 
+			(ref $_) !~ /Slave/  						# don't record slave tracks
+			and not $_->group =~ /null|Mixdown|Temp/ 	# nor these groups
+			and not $_->rec_defeat        				# nor rec-defeat tracks
+			and $_->rec_status eq 'REC' 
+	} ::Track::all();
 	map{ 
 		# create temporary track for rec_file chain
 		$debug and say "rec file link for $_->name";	
@@ -984,11 +990,6 @@ sub add_paths_for_recording {
 		# set chain_id to R3 (if original track is 3) 
 		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
 
-	} grep{ (ref $_) !~ /Slave/  # don't record slave tracks
-			and $_->rec_status eq 'REC' 
-			and not $_->group eq 'null'   # nor null-input tracks
-			and not $_->group eq 'Mixdown'# nor Mixdown track
-			and not $_->rec_defeat        # nor rec-defeat tracks
 	} @tracks;
 }
 
@@ -1375,6 +1376,7 @@ sub reconfigure_engine {
 	$old_snapshot = status_snapshot();
 
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
+	
 	if ( generate_setup() ){
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
@@ -4012,17 +4014,17 @@ sub new_effect_chain {
 }
 
 sub add_effect_chain {
-	my $name = shift;
+	my ($track, $name) = @_;
 	say ("$name: effect chain does not exist"), return 
 		if ! $effect_chain{$name};
-	map {  $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
-			command_process( join " ", 
-				'add_effect',
+	my $before = $track->vol;
+	map {   $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
+			::Text::t_insert_effect(
+				$before, 
 				$effect_chain{$name}{type}{$_}, 
 				@{$effect_chain{$name}{params}{$_}});
 			$magical_cop_id = undef;
 	} @{$effect_chain{$name}{ops}};
-			
 }	
 sub cleanup_exit {
  	remove_small_wavs();
