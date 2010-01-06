@@ -3405,32 +3405,38 @@ sub is_bunch {
 sub bunch_tracks {
 	my $bunchy = shift;
 	my @tracks;
-		if ( lc $bunchy eq 'all' ){
-			$debug and print "special bunch: all\n";
-			@tracks = ::Track::user();
-		} elsif ( lc $bunchy eq 'rec' ){
-			$debug and print "special bunch: rec\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
-		} elsif ( my $group = $::Group::by_name{$bunchy}){
-			@tracks = $group->tracks;
-		} elsif ( lc $bunchy eq 'mon' ){
-			$debug and print "special bunch: mon\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
-		} elsif ( lc $bunchy eq 'off' ){
-			$debug and print "special bunch: off\n";
-			@tracks = grep{$tn{$_}->rec_status eq 'OFF'} ::Track::user();
-		} elsif ($bunchy =~ /\s/  # multiple identifiers
-			or $tn{$bunchy} 
-			or $bunchy !~ /\D/ and $ti{$bunchy}){ 
+	if ( lc $bunchy eq 'all' ){
+		$debug and print "special bunch: all\n";
+		@tracks = ::Track::user();
+	} elsif ( lc $bunchy eq 'rec' ){
+		$debug and print "special bunch: rec\n";
+		@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
+	} elsif ( my $group = $::Group::by_name{$bunchy}){
+		@tracks = $group->tracks;
+	} elsif ( lc $bunchy eq 'mon' ){
+		$debug and print "special bunch: mon\n";
+		@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
+	} elsif ( lc $bunchy eq 'off' ){
+		$debug and print "special bunch: off\n";
+		@tracks = grep{$tn{$_}->rec_status eq 'OFF'} ::Track::user();
+	} elsif ($bunchy =~ /\s/  # multiple identifiers
+		or $tn{$bunchy} 
+		or $bunchy !~ /\D/ and $ti{$bunchy}){ 
 			$debug and print "multiple tracks found\n";
-			@tracks = grep{ $tn{$_} or ! /\D/ and $ti{$_} }
-				split " ", $bunchy;
-			$debug and print "multitracks: @tracks\n";
-		} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
-			$debug and print "bunch tracks: @tracks\n";
- 		} else { say "$bunchy: no matching bunch identifier found" }
+			# verify all tracks are correctly named
+			my @track_ids = split " ", $bunchy;
+			my @illegal = grep{ ! track_from_name_or_index($_) } @track_ids;
+			if ( @illegal ){
+				say("Invalid track ids: @illegal.  Skipping.");
+			} else { @tracks = map{ $_->name} 
+							   map{ track_from_name_or_index($_)} @track_ids; }
+	} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
+		$debug and print "bunch tracks: @tracks\n";
+	} else { say "$bunchy: no matching bunch identifier found" }
 	@tracks;
 }
+sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
+	
 sub load_keywords {
 	@keywords = keys %commands;
 	push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
@@ -3948,13 +3954,13 @@ sub pop_effect_chain { # restore previous, save current as name if supplied
 }
 sub new_effect_chain_bunch {
 	my ($bunch, $name) = @_;
+	my @tracks = bunch_tracks($bunch);
+	for (@tracks){
+		# create effect chain _bunch_name:track_name
+		
+	}
 =comment
-	
-
-	my ($name, @ops) = @_;
-#	say "name: $name, ops: @ops";
-	@ops or @ops = $this_track->fancy_ops;
-	$effect_chain{$name} = { 
+	$effect_template{$name} = { 
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
 					params	=> { map{$_ => $copp{$_} 		} @ops},
