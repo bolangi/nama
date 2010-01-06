@@ -862,12 +862,12 @@ sub generate_setup { # catch errors and cleanup
 
 	$debug2 and print "&generate_setup\n";
 	local $@; # don't propagate errors
-#	track_memoize(); 			# freeze track state 
+	track_memoize(); 			# freeze track state 
 	eval { &generate_setup_try };
 	remove_temporary_tracks();  # cleanup
+	track_unmemoize(); 			# unfreeze track state
 	return 1 unless $@;
 	say("error caught while generating setup: $@");
-#	track_unmemoize(); 			# unfreeze track state
 }
 sub generate_setup_try { 
 
