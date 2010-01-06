@@ -634,7 +634,7 @@ restore_effects:
 new_effect_profile:
   type: effect
   short: nep
-  what: create a series of effect chains for multiple tracks
+  what: create a named group of effect chains for multiple tracks
   parameters: <s_bunch_name> [<s_effect_profile_name>]
 apply_effect_profile:
   type: effect

@@ -3960,9 +3960,9 @@ sub overwrite_effect_chain {
 sub new_effect_profile {
 	$debug2 and say "&new_effect_profile";
 	my ($bunch, $profile) = @_;
-	my @tracks = map{ $tn{$_} } bunch_tracks($bunch);
+	my @tracks = map{ $tn{$_} } bunch_tracks($bunch) ;
 	for (@tracks){ 
-		new_effect_chain($_, private_effect_chain_id($profile, $_->name)); 
+		new_effect_chain($_, private_effect_chain($profile, $_->name)); 
 	}
 	$effect_profile{$profile}{tracks} = [ map{ $tn{$_->name}} @tracks ];
 }
@@ -3971,11 +3971,11 @@ sub delete_effect_profile {
 	my $name = shift;
 	my @tracks = $effect_profile{$name};
 	delete $effect_profile{$name};
-	map{ delete $effect_chain{private_effect_chain_id($name,$_)} } @tracks;
+	map{ delete $effect_chain{private_effect_chain($name,$_)} } @tracks;
 }
 sub private_effect_chain {
 	my ($profile, $track_name) = @_;
-	"_$profile:$track_name";
+	"_$profile\:$track_name";
 }
 
 sub apply_effect_profile {  # overwriting current effects
@@ -3991,7 +3991,10 @@ sub apply_effect_profile {  # overwriting current effects
 	map{ $function->( $tn{$_}, private_effect_chain($profile,$_)) } @tracks;
 }
 sub list_effect_profiles { 
-
+	while( my $name = each %effect_profile){
+		say "effect profile: $name";
+		list_effect_chains("_$name:");
+	}
 }
 sub uncache { 
 	my $t = $this_track;
@@ -4041,6 +4044,22 @@ sub add_effect_chain {
 			$magical_cop_id = undef;
 	} @{$effect_chain{$name}{ops}};
 }	
+sub list_effect_chains {
+	my @frags = @_; # fragments to match against effect_chain names
+    # we don't list chain_ids starting with underscore
+    # except when searching for particular chains
+    my @ids = grep{ @frags or ! /^_/ } keys %::effect_chain;
+	if (@frags){
+		@ids = grep{ my $id = $_; grep{ $id =~ /$_/} @frags} @ids; 
+	}
+	map{ my $name = $_;
+		print join ' ', "$name:", 
+		map{$effect_chain{$name}{type}{$_},
+			@{$effect_chain{$name}{params}{$_}}
+		} @{$effect_chain{$name}{ops}};
+		print "\n";
+	} @ids;
+}
 sub cleanup_exit {
  	remove_small_wavs();
  	kill 15, ecasound_pid() if $sock;  	

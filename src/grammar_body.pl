@@ -525,28 +525,10 @@ delete_effect_chain: _delete_effect_chain name(s) end {
 	1;
 }
 list_effect_chains: _list_effect_chains name(s?) end {
-
- 	# name(s?) are treated as fragments to match against
-    # effect_chain names
-
-    # we don't list chain_ids starting with underscore
-
-	# first take them all, then we'll whittle down our list
-    
-    my @ids = grep{ ! /^_/ } keys %::effect_chain;
-
-	if (my @frags = @{$item{'name(s?)'}}){
-		@ids = grep{ my $id = $_; grep{ $id =~ /$_/} @frags} @ids; 
-	}
-	map{ my $name = $_;
-		print join ' ', "$name:", 
-		map{$::effect_chain{$name}{type}{$_},
-			@{$::effect_chain{$name}{params}{$_}}
-		} @{$::effect_chain{$name}{ops}};
-		print "\n";
-	} @ids;
-	1;
+	::list_effect_chains( @{ $item{'name(s?)'} } ); 1;
 }
+
+    
 bypass_effects:   _bypass_effects end { ::push_effect_chain(); 1}
 restore_effects: _restore_effects end {  ::restore_effects(); 1;}
 overwrite_effect_chain: _overwrite_effect_chain name end {
@@ -555,11 +537,13 @@ overwrite_effect_chain: _overwrite_effect_chain name end {
 bunch_name: name4 { 
 	::is_bunch($item{name4}) 
 		or print("$item{name4}: no such bunch name.\n"), return; 
-	1;
+	$item{name4};
 }
 effect_profile_name: name4
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name end {
-	::new_effect_profile($item{effect_profile_name}); 1 }
+	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
+#new_effect_profile: _new_effect_profile bunch_name end {
+	#::new_effect_profile($item{bunch_name}, $item{bunch_name}); 1 }
 delete_effect_profile: _delete_effect_profile effect_profile_name end {
 	::delete_effect_profile($item{effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile effect_profile_name end {
