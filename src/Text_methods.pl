@@ -375,11 +375,11 @@ sub t_insert_effect {
 }
 sub t_add_effect {
 	package ::;
-	my ($code, $values)  = @_;
+	my ($track, $code, $values)  = @_;
 	$code = effect_code( $code );	
 	$debug and print "code: ", $code, $/;
 		my %p = (
-			chain => $this_track->n,
+			chain => $track->n,
 			values => $values,
 			type => $code,
 			);
