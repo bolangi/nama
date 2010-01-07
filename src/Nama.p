@@ -46,6 +46,7 @@ use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
 use Graph;
+use Data::Section -setup;
 # use Timer::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
@@ -230,14 +231,9 @@ package ::;
 
 $debug2 and print "Reading grammar\n";
 
-$commands_yml = <<'YML';
-[% qx(./strip_all  ./commands.yml) %]
-YML
+$commands_yml = ${ __PACKAGE__->section_data("commands_yml") };
 
-$cop_hints_yml = <<'YML';
-[% qx(cat ./ecasound_chain_operator_hints.yml) %];
-YML
-
+$cop_hints_yml = ${ __PACKAGE__->section_data("chain_op_hints_yml") };
 %commands = %{ ::yaml_in( $::commands_yml) };
 
 $::AUTOSTUB = 1;
@@ -246,12 +242,7 @@ $::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
 $::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
 $::RD_HINT   = 1; # Give out hints to help fix problems.
 
-$grammar = q(
-
-[% qx(./strip_all  ./grammar_body.pl) %]
-
-[% qx(./emit_command_headers headers) %]
-);
+$grammar = ${ __PACKAGE__->section_data("grammar") };
 
 
 $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
@@ -260,16 +251,21 @@ $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
 # we use the following settings if we can't find config files
 
-$default = <<'FALLBACK_CONFIG';
-[% qx(cat ./namarc) %]
-FALLBACK_CONFIG
-
-$default_palette_yml = <<'PALETTE';
-[% qx(cat ./palette.yml) %]
-PALETTE
-
+$default = ${ __PACKAGE__->section_data("default_namarc") };
+$default_palette_yml = ${ __PACKAGE__->section_data("default_palette_yml") }; 
 1;
-
+__DATA__
+__[commands_yml]__
+[% qx(./strip_all  ./commands.yml) %]
+__[grammar]__
+[% qx(./strip_all  ./grammar_body.pl) %]
+[% qx(./emit_command_headers headers) %]
+__[chain_op_hints_yml]__
+[% qx(cat ./ecasound_chain_operator_hints.yml) %];
+__[default_namarc]__
+[% qx(cat ./namarc) %]
+__[default_palette_yml]__
+[% qx(cat ./palette.yml) %]
 __END__
 
 =head1 NAME
