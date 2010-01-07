@@ -14,7 +14,8 @@ users, and in remote or headless applications.
 
 Nama's features include tracks, buses, effects, presets,
 sends, inserts, marks and regions. Nama supports JACK
-and ALSA audio routing.
+and ALSA audio routing, and Ladish Level 1 session
+handling.
 
 All signal processing under Nama is non-destructive.
 Effects are generally applied in realtime, with track
