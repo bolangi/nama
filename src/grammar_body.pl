@@ -1,8 +1,12 @@
-key: /\w+/ 			# word characters {1,}
+key: /\w+/ 			# word characters {1,} 
+					# used in: set_track
+
 someval: /[\w.+-]+/ # [word character, period, plus, minus] {1,}
+					# used in: set_track, loop_enable
 sign: '+' | '-' | '*' | '/' 
 					# [plus, minus, times, divide] {1}
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
+					# used in: mark times and effect_parameter values
 					# optional sign
 					# ( 	digits/underscores {1,}
 					# 		optional ( decimal point, optional digits )
@@ -12,23 +16,39 @@ value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 					# 				digits{1,}
 					# 			)
 
-float: /\d+\.\d+/   # digit{1,}
+float: /\d+\.\d+/   # used in: shift_track (start_position)
+					# digit{1,}
 					# decimal point
 					# digit{1,}
 
 op_id: /[A-Z]+/		# capital letters {1,}
 parameter: /\d+/	# digits {1,}
-last: ('last' | '$' ) # word last or dollar sign {1}
+# last: ('last' | '$' ) # word last or dollar sign {1}
+					# UNUSED
 dd: /\d+/			# digits {1,}
 jack_port: /\w[-+:. \w]+/ 
+					# used in: source
 					# word character
 					# [plus, minus, colon, period, space, word char]{1,}
 name: /\w[\w:,]*\/?/ # word character 
 					 # [word character, comma, colon]{0,}
 					 # optional slash
+					 # used in: help_effect, save_state, create_project
+					 # get_state
+					 # link_track (too flexible?) show_track
+					 # set_send
+					 # remove_mark new_mark name_mark to_mark
+					 # add_controller add_effect append_effect insert_effect
+					 # new_effect_chain add_effect_chain list_effect_chains
+					 # delete_effect_chain overwrite_effect_chain
 name2: /[\w\-+:]+/ # word characters, +, -, :
+					# used in: help, do_script
 name3: /\S+/		# non-space characters
+					# used in: load_project
 name4: /\w+/		# word characters
+					# used in: bunch_name, effect_profile,
+					# existing_effect_profile
+
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
 	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
@@ -36,7 +56,7 @@ markname: /\w+/ { 	 # word characters
 	$item[1];
 }
 #region_default_end: 'END' | ''
-path: /(["'])[\w-\. \/]+$1/
+path: /(["'])[\w-\. \/]+$1/ # used in: import_audio
 					# single- or double-quote
 					# [word char, dot, space, hyphen, slash]{1,}
 					# close quote
