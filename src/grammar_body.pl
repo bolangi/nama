@@ -1,27 +1,46 @@
-key: /\w+/
-someval: /[\w.+-]+/
-sign: '+' | '-' | '*' | '/'
+key: /\w+/ 			# word characters {1,}
+someval: /[\w.+-]+/ # [word character, period, plus, minus] {1,}
+sign: '+' | '-' | '*' | '/' 
+					# [plus, minus, times, divide] {1}
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
-op_id: /[A-Z]+/
-parameter: /\d+/
-last: ('last' | '$' ) 
-dd: /\d+/
-jack_port: /\w[-+:. \w]+/
-name: /\w[\w:,]*\/?/
-name2: /[\w\-+:]+/
-name3: /\S+/
-name4: /\w+/
+					# optional sign
+					# ( 	digits/underscores {1,}
+					# 		optional ( decimal point, optional digits )
+					# ) or ( decimal point, digits{1,} )
+					# optional: (	exponent e/E
+					# 				optional sign
+					# 				digits{1,}
+					# 			)
+
+op_id: /[A-Z]+/		# capital letters {1,}
+parameter: /\d+/	# digits {1,}
+last: ('last' | '$' ) # word last or dollar sign {1}
+dd: /\d+/			# digits {1,}
+jack_port: /\w[-+:. \w]+/ 
+					# word character
+					# [plus, minus, colon, period, space, word char]{1,}
+name: /\w[\w:,]*\/?/ # word character 
+					 # [word character, comma, colon]{0,}
+					 # optional slash
+name2: /[\w\-+:]+/ # word characters, +, -, :
+name3: /\S+/		# non-space characters
+name4: /\w+/		# word characters
 marktime: /\d+\.\d+/ # decimal required
-markname: /\w+/ { 	 # must be found
+markname: /\w+/ { 	 # word characters
 	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
 #region_default_end: 'END' | ''
 path: /(["'])[\w-\. \/]+$1/
-path: /[\w\-\.\/]+/
+					# single- or double-quote
+					# [word char, dot, space, hyphen, slash]{1,}
+					# close quote
+
+path: /[\w\-\.\/]+/ # [word char, dot, hyphen, slash]{1,}
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
-end: /[;\s]*$/ 
+end: /[;\s]*$/ 		# [space char, semicolon]{0,}
+					# end-of-string
 
 help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
 find_effect: _find_effect name3(s) { 
