@@ -12,6 +12,10 @@ value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 					# 				digits{1,}
 					# 			)
 
+float: /\d+\.\d+/   # digit{1,}
+					# decimal point
+					# digit{1,}
+
 op_id: /[A-Z]+/		# capital letters {1,}
 parameter: /\d+/	# digits {1,}
 last: ('last' | '$' ) # word last or dollar sign {1}
@@ -132,7 +136,6 @@ shift_track: _shift_track start_position end {
 }
 
 start_position:  float | mark_name
-float: /\d+\.\d+/
 mark_name: name
 
 unshift_track: _unshift_track end {
@@ -582,4 +585,3 @@ list_effect_profiles: _list_effect_profiles end {
 	::list_effect_profiles(); 1 }
 do_script: _do_script name2 end { ::do_script($item{name2});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
-
