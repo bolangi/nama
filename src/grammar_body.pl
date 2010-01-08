@@ -495,8 +495,6 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
-add_slave_track: _add_slave_track bus_name target end {
-	::add_slave_track( group => $item{bus_name}, target => $item{target} ); 1; } 
 bus_name: /[A-Z]\w+/
 destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel
