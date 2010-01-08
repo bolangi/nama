@@ -118,8 +118,39 @@ init_memoize() if $memoize;
 
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
-
 # $ti{3}->rw
+
+### COMMAND LINE PARSER 
+
+$debug2 and print "Reading grammar\n";
+
+*commands_yml = __PACKAGE__->section_data("commands_yml");
+*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
+%commands = %{ ::yaml_in( $::commands_yml) };
+
+$::AUTOSTUB = 1;
+$::RD_TRACE = 1;
+$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
+$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
+$::RD_HINT   = 1; # Give out hints to help fix problems.
+
+*grammar = __PACKAGE__->section_data("grammar");
+
+$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+
+[% qx(cat ./help_topic.pl) %]
+
+# we use the following settings if we can't find config files
+
+*default = __PACKAGE__->section_data("default_namarc");
+
+# default colors
+
+*default_palette_yml = __PACKAGE__->section_data("default_palette_yml");
+
+# JACK environment for testing
+
+*fake_jack_lsp = __PACKAGE__->section_data("fake_jack_lsp");
 
 # print remove_spaces("bulwinkle is a...");
 
@@ -225,34 +256,8 @@ sub remove_track_gui {}
 sub reset_engine_mode_color_display {}
 sub set_engine_mode_color_display {}
 
-package ::;
+package ::;  # for Data::Section
 
-### COMMAND LINE PARSER 
-
-$debug2 and print "Reading grammar\n";
-
-$commands_yml = ${ __PACKAGE__->section_data("commands_yml") };
-
-$cop_hints_yml = ${ __PACKAGE__->section_data("chain_op_hints_yml") };
-%commands = %{ ::yaml_in( $::commands_yml) };
-
-$::AUTOSTUB = 1;
-$::RD_TRACE = 1;
-$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
-$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
-$::RD_HINT   = 1; # Give out hints to help fix problems.
-
-$grammar = ${ __PACKAGE__->section_data("grammar") };
-
-
-$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
-
-[% qx(cat ./help_topic.pl) %]
-
-# we use the following settings if we can't find config files
-
-$default = ${ __PACKAGE__->section_data("default_namarc") };
-$default_palette_yml = ${ __PACKAGE__->section_data("default_palette_yml") }; 
 1;
 __DATA__
 __[commands_yml]__
@@ -266,6 +271,9 @@ __[default_namarc]__
 [% qx(cat ./namarc) %]
 __[default_palette_yml]__
 [% qx(cat ./palette.yml) %]
+__[fake_jack_lsp]__
+[% qx(cat ./fake_jack_lsp) %]
+__[end_data_section]__
 __END__
 
 =head1 NAME

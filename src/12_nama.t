@@ -485,8 +485,8 @@ check_setup('Send bus - raw - JACK');
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
-sub force_alsa { $opts{A} = 1; $opts{J} = 0; jack_update(); }
-sub force_jack{ $opts{A} = 0; $opts{J} = 1; jack_update(); }
+sub force_alsa { $opts{A} = 1; $opts{J} = 0; $jack_running = 0; }
+sub force_jack{ $opts{A} = 0; $opts{J} = 1; $jack_running = 1; }
 sub setup_content {
 	my @lines = split "\n", shift;
 	my %setup;

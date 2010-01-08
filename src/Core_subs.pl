@@ -46,18 +46,33 @@ sub prepare {
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
-	poll_jack();
+
+	
+	# fake JACK in testing environment
+	
+	if( $opts{J} or $opts{A} ){  
+		if ( $opts{J}){
+			%jack = %{ jack_ports($fake_jack_lsp) } ;
+		 	$jack_running = 1;
+		}
+	}
+
+	# otherwise poll regularly for JACK status
+	
+	else{ poll_jack() }
+
 	initialize_terminal();
 
+
+	# set default project to "untitled"
+	
 	if (! $project_name ){
 		$project_name = "untitled";
 		$opts{c}++; 
 	}
 	print "\nproject_name: $project_name\n";
 	
-	if ($project_name){
-		load_project( name => $project_name, create => $opts{c}) ;
-	}
+	load_project( name => $project_name, create => $opts{c}) ;
 	1;	
 }
 sub issue_first_prompt {
@@ -1688,8 +1703,8 @@ sub wraparound {
 	$event_id{wraparound} = undef;
 	$event_id{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
-
 sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
+
 
 sub mute {
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
@@ -3467,32 +3482,11 @@ sub keyword {
 } };
 
 
-{ my $fake_jack_lsp = q(system:capture_1
-   alsa_pcm:capture_1
-        properties: output,physical,terminal,
-system:capture_2
-   alsa_pcm:capture_2
-        properties: output,physical,terminal,
-system:playback_1
-   alsa_pcm:playback_1
-        properties: input,physical,terminal,
-system:playback_2
-   alsa_pcm:playback_2
-        properties: input,physical,terminal,
-Horgand:out_1
-        properties: output,terminal,
-Horgand:out_2
-        properties: output,terminal,
-);
-
 sub jack_update {
 	# cache current JACK status
-	if    ( $opts{A} ){ $jack_running = 0  }
-	elsif ( $opts{J} ){ $jack_running = 1  }
-	else  { $jack_running = jack_running() }
-	$jack_lsp = $opts{J} ? $fake_jack_lsp : qx(jack_lsp -Ap 2> /dev/null); 
-	%jack = %{jack_ports()} if $jack_running;
-}
+	$jack_running = jack_running();
+	my $jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
+	%jack = %{jack_ports($jack_lsp)} if $jack_running;
 }
 sub jack_client {
 
@@ -3514,9 +3508,8 @@ sub jack_client {
 }
 
 sub jack_ports {
-	$jack_running or return;
-	my $j = $jack_lsp; 
-	#return if $j =~ /JACK server not running/;
+	my $j = shift || $jack_lsp; 
+	say "jack_lsp: $j";
 
 	# convert to single lines
 
