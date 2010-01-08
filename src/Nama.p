@@ -155,7 +155,7 @@ $parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 # print remove_spaces("bulwinkle is a...");
 
 
-## Class and Object definitions for package '::'
+#### Class and Object definitions for package '::'
 
 our @ISA; # no anscestors
 use ::Object qw(mode);
@@ -174,8 +174,6 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 ## The following code loads the object core of the system 
 ## and initiates the chain templates (rules)
-
-use ::Track;   
 
 package ::Graphical;  ## gui routines
 
