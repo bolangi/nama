@@ -3523,7 +3523,7 @@ sub jack_ports {
 	map{ 
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
-		my @ports = /
+		my @port_aliases = /
 			\s* 			# zero or more spaces
 			([^:]+:[^:]+?) # non-colon string, colon, non-greey non-colon string
 			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
@@ -3532,11 +3532,9 @@ sub jack_ports {
 				s/ $//; # remove trailing space
 				$jack{ $_ }{ $direction }++;
 				my ($client, $port) = /(.+?):(.+)/;
-				$jack{ $client }{ $direction }++;
-				my ($port_prefix) = /:(.+?)\d+$/;
-				$jack{ $client }{ $direction.'_prefix' } = $port_prefix;
+				push @{ $jack{ $client }{ $direction } }, $_; 
 
-		 } @ports;
+		 } @port_aliases;
 
 	} split "\n",$j;
 	#print yaml_out \%jack;

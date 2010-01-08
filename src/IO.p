@@ -206,9 +206,8 @@ sub soundcard_output_device_string {
 sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
 	my $end   = $start + $width - 1;
-	$direction .= '_prefix'; # key
 	join q(,),q(jack_multi),
-	map{"$client\:$::jack{$client}{$direction}$_"} $start..$end
+	@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
 
 ### subclass definitions

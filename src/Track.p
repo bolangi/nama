@@ -399,7 +399,7 @@ sub set_io {
 				$track->set($type_field => 'jack_client',
 							$id_field   => $id);
 				my $name = $track->name;
-				my $width = ::jack_client($id, $client_direction);
+				my $width = scalar @{ ::jack_client($id, $client_direction) };
 				$width or say 
 					qq($name: $direction port for JACK client "$id" not found.);
 				$width ne $track->width and say 
