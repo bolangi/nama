@@ -49,21 +49,16 @@ sub prepare {
 	$ui->time_gui;
 
 	
-	# fake JACK in testing environment
-	
-	if( $opts{J} or $opts{A} ){  
-		if ( $opts{J}){
-			%jack = %{ jack_ports($fake_jack_lsp) } ;
-		 	$jack_running = 1;
-		}
-	}
+	# fake JACK for testing environment
 
-	# otherwise poll regularly for JACK status
-	
-	else{ poll_jack() }
+	%jack = %{ jack_ports($fake_jack_lsp) } ;
+	$jack_running = 1 if $opts{J};
+
+	# periodically check if JACK is running, and get client/port list
+
+	poll_jack() unless $opts{J} or $opts{A};
 
 	initialize_terminal();
-
 
 	# set default project to "untitled"
 	
