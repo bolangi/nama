@@ -1,0 +1,32 @@
+system:capture_1
+   alsa_pcm:capture_1
+        properties: output,physical,terminal,
+system:capture_2
+   alsa_pcm:capture_2
+        properties: output,physical,terminal,
+system:playback_1
+   alsa_pcm:playback_1
+        properties: input,physical,terminal,
+system:playback_2
+   alsa_pcm:playback_2
+        properties: input,physical,terminal,
+Horgand:out_1
+        properties: output,terminal,
+Horgand:out_2
+        properties: output,terminal,
+fluidsynth:left
+	properties: output,
+fluidsynth:right
+	properties: output,
+ecasound:out_1
+	properties: output,
+ecasound:out_2
+	properties: output,
+LinuxSampler:0
+	properties: output,
+LinuxSampler:1
+	properties: output,
+beatrix-0:output-0
+	properties: output,
+beatrix-0:output-1
+	properties: output,
