@@ -1,15 +1,69 @@
 system:capture_1
    alsa_pcm:capture_1
-        properties: output,physical,terminal,
+	properties: output,can-monitor,physical,terminal,
 system:capture_2
    alsa_pcm:capture_2
-        properties: output,physical,terminal,
+	properties: output,can-monitor,physical,terminal,
+system:capture_3
+   alsa_pcm:capture_3
+	properties: output,can-monitor,physical,terminal,
+system:capture_4
+   alsa_pcm:capture_4
+	properties: output,can-monitor,physical,terminal,
+system:capture_5
+   alsa_pcm:capture_5
+	properties: output,can-monitor,physical,terminal,
+system:capture_6
+   alsa_pcm:capture_6
+	properties: output,can-monitor,physical,terminal,
+system:capture_7
+   alsa_pcm:capture_7
+	properties: output,can-monitor,physical,terminal,
+system:capture_8
+   alsa_pcm:capture_8
+	properties: output,can-monitor,physical,terminal,
+system:capture_9
+   alsa_pcm:capture_9
+	properties: output,can-monitor,physical,terminal,
+system:capture_10
+   alsa_pcm:capture_10
+	properties: output,can-monitor,physical,terminal,
+system:capture_11
+   alsa_pcm:capture_11
+	properties: output,can-monitor,physical,terminal,
+system:capture_12
+   alsa_pcm:capture_12
+	properties: output,can-monitor,physical,terminal,
 system:playback_1
    alsa_pcm:playback_1
-        properties: input,physical,terminal,
+	properties: input,physical,terminal,
 system:playback_2
    alsa_pcm:playback_2
-        properties: input,physical,terminal,
+	properties: input,physical,terminal,
+system:playback_3
+   alsa_pcm:playback_3
+	properties: input,physical,terminal,
+system:playback_4
+   alsa_pcm:playback_4
+	properties: input,physical,terminal,
+system:playback_5
+   alsa_pcm:playback_5
+	properties: input,physical,terminal,
+system:playback_6
+   alsa_pcm:playback_6
+	properties: input,physical,terminal,
+system:playback_7
+   alsa_pcm:playback_7
+	properties: input,physical,terminal,
+system:playback_8
+   alsa_pcm:playback_8
+	properties: input,physical,terminal,
+system:playback_9
+   alsa_pcm:playback_9
+	properties: input,physical,terminal,
+system:playback_10
+   alsa_pcm:playback_10
+	properties: input,physical,terminal,
 Horgand:out_1
         properties: output,terminal,
 Horgand:out_2

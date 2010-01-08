@@ -210,6 +210,7 @@ sub soundcard_output_device_string {
 }
 sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
+	# can we route to these channels?
 	my $end   = $start + $width - 1;
 	join q(,),q(jack_multi),
 	@{$::jack{$client}{$direction}}[$start-1..$end-1];
