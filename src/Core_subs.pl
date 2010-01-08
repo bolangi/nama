@@ -1,5 +1,5 @@
 sub main { 
-	setup_grammar();
+	setup_grammar(); # empty
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
@@ -1059,9 +1059,9 @@ sub add_paths_for_mixdown_handling {
 		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
-		  format	=> 
-			signal_format($mix_to_disk_format,$tn{Mixdown}->width),
-		  chain_id			=> "Mixdown" }); 
+		  	format		=> signal_format($mix_to_disk_format,$tn{Mixdown}->width),
+		  	chain_id	=> "Mixdown" },
+		); 
 		# no effects will be applied because effects are on chain 2
 												 
 	# Mixdown handling - playback
@@ -1070,7 +1070,9 @@ sub add_paths_for_mixdown_handling {
 			my @e = qw(wav_in Mixdown soundcard_out);
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
- 				  chain			=> "Mixdown" }); 
+				send_type	=> $tn{Master}->send_type,
+				send_id		=> $tn{Master}->send_id,
+				chain			=> "Mixdown" }); 
 		# no effects will be applied because effects are on chain 2
 	}
 }

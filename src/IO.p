@@ -57,6 +57,11 @@ sub new {
 	my $class = shift;
 	my %vals = @_;
 	my @args = map{$_."_", $vals{$_}} keys %vals; # add underscore to key 
+
+	# note that we won't check for illegal fields
+	# so we can pass any value and allow AUTOLOAD to 
+	# check the hash for it.
+	
 	bless {@args}, $class
 }
 
