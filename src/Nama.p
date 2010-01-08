@@ -119,41 +119,41 @@ init_memoize() if $memoize;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
 # $ti{3}->rw
+sub setup_grammar { 
+}
+	### COMMAND LINE PARSER 
 
-### COMMAND LINE PARSER 
+	$debug2 and print "Reading grammar\n";
 
-$debug2 and print "Reading grammar\n";
+	*commands_yml = __PACKAGE__->section_data("commands_yml");
+	*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
+	%commands = %{ ::yaml_in( $::commands_yml) };
 
-*commands_yml = __PACKAGE__->section_data("commands_yml");
-*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
-%commands = %{ ::yaml_in( $::commands_yml) };
+	$::AUTOSTUB = 1;
+	$::RD_TRACE = 1;
+	$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
+	$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
+	$::RD_HINT   = 1; # Give out hints to help fix problems.
 
-$::AUTOSTUB = 1;
-$::RD_TRACE = 1;
-$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
-$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
-$::RD_HINT   = 1; # Give out hints to help fix problems.
+	*grammar = __PACKAGE__->section_data("grammar");
 
-*grammar = __PACKAGE__->section_data("grammar");
+	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
 
-$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+	[% qx(cat ./help_topic.pl) %]
 
-[% qx(cat ./help_topic.pl) %]
+	# we use the following settings if we can't find config files
 
-# we use the following settings if we can't find config files
+	*default = __PACKAGE__->section_data("default_namarc");
 
-*default = __PACKAGE__->section_data("default_namarc");
+	# default colors
 
-# default colors
+	*default_palette_yml = __PACKAGE__->section_data("default_palette_yml");
 
-*default_palette_yml = __PACKAGE__->section_data("default_palette_yml");
+	# JACK environment for testing
 
-# JACK environment for testing
+	*fake_jack_lsp = __PACKAGE__->section_data("fake_jack_lsp");
 
-*fake_jack_lsp = __PACKAGE__->section_data("fake_jack_lsp");
-
-# print remove_spaces("bulwinkle is a...");
-
+	# print remove_spaces("bulwinkle is a...");
 
 #### Class and Object definitions for package '::'
 

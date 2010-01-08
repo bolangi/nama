@@ -32,6 +32,7 @@ push @ARGV, q(-E);
 
 diag("working directory: ",cwd);
 
+setup_grammar();
 process_options();
 
 prepare();

@@ -1,4 +1,5 @@
 sub main { 
+	setup_grammar();
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
@@ -3490,21 +3491,10 @@ sub jack_update {
 }
 sub jack_client {
 
-	# returns true if client and direction exist
-	# returns number of client ports
+	# returns array of ports if client and direction exist
 	
 	my ($name, $direction)  = @_;
-
-	# synth:in_1 input
-	# synth input
-	# aeolus:out.R
-	
-	my $port;
-	($name, $port) = $name =~ /^([^:]+):?(.*)/;
-
-	# currently we ignore port
-
-	$jack{$name}{$direction};
+	$jack{$name}{$direction} // []
 }
 
 sub jack_ports {

@@ -332,7 +332,7 @@ sub route {
 	# routes signals (1..$width) to ($dest..$dest+$width-1 )
 	
 	my ($width, $dest) = @_;
-	return undef if $dest == 1 or ! $dest;
+	return '' if ! $dest or $dest == 1;
 	# print "route: width: $width, destination: $dest\n\n";
 	my $offset = $dest - 1;
 	my $route ;
