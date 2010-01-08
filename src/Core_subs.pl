@@ -3516,6 +3516,8 @@ sub jack_ports {
 	$j =~ s/\n\s+/ /sg;
 
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
+	#fluidsynth:left properties: output,
+	#fluidsynth:right properties: output,
 	my %jack = ();
 
 	map{ 

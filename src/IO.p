@@ -280,12 +280,12 @@ sub device_id {
 		: $io->send_id;
 	my $channel = 1;
 	# confusing, but the direction is with respect to the client
-	my $direction = $io->direction eq 'input' ? 'output' : 'input';
+	my $client_direction = $io->direction eq 'input' ? 'output' : 'input';
 	if( ::dest_type($client) eq 'soundcard'){
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$direction,$channel,$io->width )
+	::IO::jack_multi_route($client,$client_direction,$channel,$io->width )
 }
 # don't need to specify format, since we take all channels
 
