@@ -638,9 +638,10 @@ sub unmute {
 	$track->set(old_vol_level => 0);
 }
 
-sub ingest  { # i believe 'import' has a magical meaning
+sub import_audio  { 
 	my $track = shift;
 	my ($path, $frequency) = @_; 
+	$path = expand_tilde($path);
 	#say "path: $path";
 	my $version  = ${ $track->versions }[-1] + 1;
 	if ( ! -r $path ){

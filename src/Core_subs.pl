@@ -411,7 +411,8 @@ sub colonize { # convert seconds to hours:minutes:seconds
 ## configuration file
 { # OPTIMIZATION
 my %proot; 
-sub project_root { $proot{$project_root} ||= File::Spec::Link->resolve_all($project_root)};
+sub project_root { $proot{$project_root} ||= 
+		File::Spec::Link->resolve_all(expand_tilde($project_root))}
 }
 
 sub config_file { $opts{f} ? $opts{f} : ".namarc" }
@@ -424,8 +425,11 @@ sub this_wav_dir {
 	);
 }
 }
-sub project_dir  {$project_name and join_path( project_root(), $project_name)
-}
+
+sub project_dir  {$project_name and join_path( project_root(), $project_name) }
+
+sub expand_tilde { my $path = shift; $path =~ s/~/$ENV{HOME}/; $path }
+
 
 sub global_config{
 print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};

@@ -117,7 +117,7 @@ sub mono_to_stereo {
 	if ( 	$self->width == 2 and $self->rec_status eq 'REC'
 		    or  -e $file and ::channels(::get_format($file)) == 2){ 
 		return q(); 
-	} elsif ( ($self->width == 1 or ! $self->width) and $self->rec_status eq 'REC'
+	} elsif ( (! $self->width or $self->width == 1) and $self->rec_status eq 'REC'
 				or  -e $file and ::channels(::get_format($file)) == 1){ 
 		return "-chcopy:1,2" 
 	} else {} # do nothing for higher channel counts
@@ -212,6 +212,10 @@ sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
 	# can we route to these channels?
 	my $end   = $start + $width - 1;
+	my $max = scalar @{$::jack{$client}{$direction}};
+	die qq(JACK client "$client", direction: $direction
+channel ($end) is out of bounds. $max channels maximum.\n) 
+		if $end > $max;
 	join q(,),q(jack_multi),
 	@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
@@ -284,7 +288,7 @@ sub device_id {
 		? $io->source_id
 		: $io->send_id;
 	my $channel = 1;
-	# confusing, but the direction is with respect to the client
+	# we want the direction with respect to the client, i.e.  # reversed
 	my $client_direction = $io->direction eq 'input' ? 'output' : 'input';
 	if( ::dest_type($client) eq 'soundcard'){
 		$channel = $client;

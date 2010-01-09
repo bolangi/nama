@@ -461,10 +461,10 @@ unmemoize: _unmemoize {
 	unmemoize('candidates'); 1
 }
 import_audio: _import_audio path frequency end {
-	$::this_track->ingest( $item{path}, $item{frequency}); 1;
+	$::this_track->import_audio( $item{path}, $item{frequency}); 1;
 }
 import_audio: _import_audio path end {
-	$::this_track->ingest( $item{path}); 1;
+	$::this_track->import_audio( $item{path}); 1;
 }
 frequency: value
 list_history: _list_history end {
