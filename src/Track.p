@@ -354,7 +354,7 @@ sub remove_insert {
 	map{ $::tn{$_}->remove } @{ $i->{tracks} };
 	$track->set(inserts => {});
 }
-sub has_insert  { my $i; $i = $_[0]->inserts and @{ $i->{tracks} } }
+sub has_insert  { my $i = $_[0]->inserts; exists $i->{tracks} and @{ $i->{tracks} } }
 
 # remove track object and all effects
 

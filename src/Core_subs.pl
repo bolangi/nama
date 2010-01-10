@@ -4052,7 +4052,7 @@ sub cache_track {
 	print($track->name, ": track caching requires MON status.\n\n"), 
 		return unless $track->rec_status eq 'MON';
 	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $track->fancy_ops or @{ $track->inserts };
+		return unless $track->fancy_ops or $track->has_insert;
  	initialize_chain_setup_vars();
 	my $orig_version = $track->monitor_version;
 	my $cooked = $track->name . '_cooked';
@@ -4069,7 +4069,7 @@ sub cache_track {
 	write_chains();
 	remove_temporary_tracks();
 	connect_transport('no_transport_status')
-		or say ("Couldn't connect engine! Skipping."), return;
+		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$orig->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
 	eval_iam("cs-set-length $length");
