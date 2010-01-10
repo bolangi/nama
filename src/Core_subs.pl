@@ -4048,20 +4048,19 @@ sub cleanup_exit {
 	CORE::exit; 
 }
 sub cache_track {
-	my $track = $this_track; # TODO separate from $this_track
-	print($this_track->name, ": track caching requires MON status.\n\n"), 
-		return unless $this_track->rec_status eq 'MON';
-	print($this_track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $this_track->fancy_ops;
+	my $track = my $orig = $this_track; 
+	print($track->name, ": track caching requires MON status.\n\n"), 
+		return unless $track->rec_status eq 'MON';
+	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
+		return unless $track->fancy_ops or @{ $track->inserts };
  	initialize_chain_setup_vars();
-	my $orig = $this_track; 
-	my $orig_version = $this_track->monitor_version;
-	my $cooked = $this_track->name . '_cooked';
+	my $orig_version = $track->monitor_version;
+	my $cooked = $track->name . '_cooked';
 	::CacheRecTrack->new(
 		width => 2,
 		name => $cooked,
 		group => 'Temp',
-		target => $this_track->name,
+		target => $track->name,
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
 	::Graph::expand_graph($g); # array ref
@@ -4078,23 +4077,24 @@ sub cache_track {
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
 	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
-	$this_track = $orig;
-	my $name = $this_track->name;
+	$track = $orig;
+	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		$debug and say "updating track cache_map";
-		#say "cache map",yaml_out($this_track->cache_map);
-		my $cache_map = $this_track->cache_map;
-		$cache_map->{$this_track->last} = { 
+		#say "cache map",yaml_out($track->cache_map);
+		my $cache_map = $track->cache_map;
+		$cache_map->{$track->last} = { 
 			original 			=> $orig_version,
-			effect_chain	=> push_effect_chain($this_track), # bypass
+			effect_chain	=> push_effect_chain($track), # bypass
 		};
-		pop @{$this_track->effect_chain_stack};
-		#say "cache map",yaml_out($this_track->cache_map);
+		pop @{$track->effect_chain_stack};
+		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
 'replace' will restore effects and set version $orig_version\n);
 		post_rec_configure();
 	} else { say "track cache operation failed!"; }
+	$this_track = $orig; # unneeded? 
 }
 sub do_script {
 	say "hello script";
