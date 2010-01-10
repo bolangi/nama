@@ -1394,7 +1394,6 @@ sub reconfigure_engine {
 		say "I generated a new setup";
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
-		connect_transport();
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
 # 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
@@ -1463,6 +1462,7 @@ sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $no_transport_status = shift;
 	load_ecs() or say("No chain setup, engine not ready."), return;
+	load_ecs();
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
