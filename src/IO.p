@@ -111,7 +111,7 @@ sub DESTROY {}
 # If there is no track for an object, the object must
 # provide any needed data
 
-sub mono_to_stereo { 
+sub _mono_to_stereo { 
 	my $self = shift;
 	my $file = $self->full_path;
 	if ( 	$self->width == 2 and $self->rec_status eq 'REC'
