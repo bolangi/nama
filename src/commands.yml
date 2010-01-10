@@ -660,12 +660,12 @@ list_effect_profiles:
 cache_track:
   type: track
   short: cache ct
-  what: record the post-fader signal as a new version
+  what: store the effects-processed track signal as a new version
   parameters: none
 uncache_track:
   type: effect
   short: uncache unc
-  what: set uncached track version, restoring effects (if current version is cached)
+  what: select the uncached track version, restoring effects
   parameters: none
 do_script:
   type: general

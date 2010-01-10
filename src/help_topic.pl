@@ -153,6 +153,11 @@ track => <<TRACK,
    shift_track,   shift    - set playback delay for track/region
    unshift_track, unshift  - eliminate playback delay for track/region
 
+- track caching (intermediate mixdown)
+
+   cache_track,   cache,   ct  - store effects-processed track signal as new version
+   uncache_track, uncache, unc - select uncached track version, replace effects
+
  - hazardous commands for advanced users
 
    set_track, set          - directly set current track parameters
@@ -240,7 +245,7 @@ effects => <<EFFECTS,
    set_insert_wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
 
--  effect chains
+-  effect chains (presets, each consisting of multiple effects)
 
    new_effect_chain, nec         - define a new effect chain
    add_effect_chain, aec         - add an effect chain to the current track
@@ -248,6 +253,15 @@ effects => <<EFFECTS,
    list_effect_chains, lec       - list effect chains and their parameters
    bypass_effects, bypass, bye   - suspend current track effects except vol/pan
    restore_effects, restore, ref - restore track effects
+
+-  effect profiles (effect chains for a group of tracks)
+
+   new_effect_profile, nep       - define a new effect profile
+   apply_effect_profile, aep     - apply an effect profile
+                                   (current effects are bypassed)
+   overlay_effect_profile, oep   - apply an effect profile,
+                                   adding to current effects
+   delete_effect_profile, dep    - delete an effect profile definition
 
 EFFECTS
 
