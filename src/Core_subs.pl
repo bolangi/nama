@@ -398,7 +398,7 @@ sub eval_iam_libecasoundc{
 	#$errmsg ? undef : "@result";
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
-	my $sec = shift;
+	my $sec = shift || 0;
 	my $hours = int ($sec / 3600);
 	$sec = $sec % 3600;
 	my $min = int ($sec / 60);
@@ -949,7 +949,7 @@ sub initialize_chain_setup_vars {
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
-	unlink setup_file();
+	{no autodie; unlink setup_file()}
 }
 sub add_paths_for_main_tracks {
 	$debug2 and say "&add_paths_for_main_tracks";
@@ -4064,7 +4064,6 @@ sub cache_track {
 		target => $this_track->name,
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
-	add_paths_for_sub_buses();  # we will prune unneeded ones
 	::Graph::expand_graph($g); # array ref
 	::Graph::add_inserts($g);
 	process_routing_graph(); 
