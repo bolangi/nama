@@ -114,7 +114,7 @@ sub add_insert {
 
 		$g->set_vertex_attributes($wet->name, {
 					width => 2, # default for cooked
-					mono_to_stereo => '',
+					mono_to_stereo => '', # override
 					source_type => $i->{return_type},
 					source_id => $i->{return_id},
 		});
