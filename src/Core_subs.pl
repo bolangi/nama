@@ -873,24 +873,29 @@ sub really_recording {
 	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
-sub generate_setup { # catch errors and cleanup
+sub generate_setup { 
+	# return 1 if successful
+	# catch errors from generate_setup_try() and cleanup
 	$debug2 and print "&generate_setup\n";
+	# save current track
+	$old_this_track = $this_track;
+	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
 	track_memoize(); 			# freeze track state 
-	eval { &generate_setup_try };
+	eval { &generate_setup_try }; # pass @_ 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
-	return 1 unless $@;
-	say("error caught while generating setup: $@");
+	$this_track = $old_this_track;
+	if ($@){
+		say("error caught while generating setup: $@");
+		initialize_chain_setup_vars() unless $debug;
+		return
+	}
+	1;
 }
 sub generate_setup_try {  # TODO: move operations below to buses
 	$debug2 and print "&generate_setup_try\n";
 	my $automix = shift; # route Master to null_out if present
-
-	# save current track
-	$old_this_track = $this_track;
-
-	initialize_chain_setup_vars();
 	add_paths_for_main_tracks();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
@@ -930,12 +935,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	# now we have processed graph, we can remove temp tracks
 
-	$this_track = $old_this_track;
-
 	write_chains(); 
-
-
-	1; # used to sense a chain setup ready to run
 }
 sub remove_temporary_tracks {
 	$debug2 and say "&remove_temporary_tracks";
@@ -949,6 +949,7 @@ sub initialize_chain_setup_vars {
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	unlink setup_file();
 }
 sub add_paths_for_main_tracks {
 	$debug2 and say "&add_paths_for_main_tracks";
@@ -1252,8 +1253,7 @@ sub write_chains {
 					"# audio outputs",
 					join("\n", @output_chains), "";
 	$debug and print "ECS:\n",$ecs_file;
-	my $sf = join_path(&project_dir, $chain_setup_file);
-	open my $setup, ">$sf";
+	open my $setup, ">", setup_file();
 	print $setup $ecs_file;
 	close $setup;
 	$chain_setup = $ecs_file;
@@ -1268,11 +1268,11 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
+		local $debug = 1;
 		my $setup = setup_file();
-		#say "setup file: $setup";
-		#say "exists " if -e $setup;
+		say "setup file: $setup " . ( -e $setup ? "exists" : "");
 		return unless -e $setup;
-		#say "passed conditional";
+		say "passed conditional";
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove") if eval_iam("cs-selected");
 		eval_iam("cs-load $setup");
@@ -1390,17 +1390,15 @@ sub reconfigure_engine {
 	$old_snapshot = status_snapshot();
 
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
-	
 	if ( generate_setup() ){
+		say "I generated a new setup";
 		print STDOUT ::Text::show_tracks_extra_info();
+		connect_transport();
 		connect_transport();
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
 # 		start_transport() if $was_running and ! $will_record;
 		$ui->flash_ready;
-		1; }
-	else {	my $setup = setup_file();
-			unlink $setup if -f $setup; }
-
+	}
 }
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
@@ -3249,14 +3247,6 @@ sub all {
 	
 }
 
-sub show_chain_setup {
-	$debug2 and print "&show_chain_setup\n";
-	my $setup = join_path( project_dir(), $chain_setup_file);
-	say("No tracks to record or play."), return unless -f $setup;
-	my $chain_setup;
-	io( $setup ) > $chain_setup; 
-	pager( $chain_setup );
-}
 sub pager {
 	$debug2 and print "&pager\n";
 	my @output = @_;

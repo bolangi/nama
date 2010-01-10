@@ -82,7 +82,7 @@ $text_wrap = new Text::Format {
 	tabstop			=> 4,
 };
 
-$debug2 = 0; # subroutine names
+$debug2 = 1; # subroutine names
 $debug = 0; # debug statements
 
 [% qx(cat ./banner.pl) %]

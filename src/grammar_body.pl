@@ -184,7 +184,7 @@ modifiers: _modifiers modifier(s) end {
 
 modifiers: _modifiers end { print $::this_track->modifiers, "\n"; 1}
 nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
-show_chain_setup: _show_chain_setup { ::show_chain_setup(); 1}
+show_chain_setup: _show_chain_setup { ::pager($::chain_setup); 1}
 show_io: _show_io { ::show_io(); 1}
 show_track: _show_track end {
 	my $output = ::Text::show_tracks($::this_track);
