@@ -8,6 +8,7 @@ use Carp;
 use YAML::Tiny;
 use IO::All;
 use Storable;
+use Devel::Cycle;
 
 require Exporter;
 
@@ -250,6 +251,7 @@ sub serialize {
 			#$pl > io($file);
 		} elsif ($h{format} eq 'yaml'){
 			$file .= '.yml' unless $file =~ /\.yml$/;
+			find_cycle(\%state);
 			my $yaml = yaml_out(\%state);
 			$yaml > io($file);
 			$debug and print $yaml;

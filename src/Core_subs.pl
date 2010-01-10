@@ -1391,7 +1391,7 @@ sub reconfigure_engine {
 
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
 	if ( generate_setup() ){
-		say "I generated a new setup";
+		#say "I generated a new setup";
 		print STDOUT ::Text::show_tracks_extra_info();
 		connect_transport();
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
