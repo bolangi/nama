@@ -1268,11 +1268,11 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
-		local $debug = 1;
+		#local $debug = 1;
 		my $setup = setup_file();
-		say "setup file: $setup " . ( -e $setup ? "exists" : "");
+		#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 		return unless -e $setup;
-		say "passed conditional";
+		#say "passed conditional";
 		eval_iam("cs-disconnect") if eval_iam("cs-connected");
 		eval_iam("cs-remove") if eval_iam("cs-selected");
 		eval_iam("cs-load $setup");

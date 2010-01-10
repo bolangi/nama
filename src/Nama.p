@@ -82,7 +82,7 @@ $text_wrap = new Text::Format {
 	tabstop			=> 4,
 };
 
-$debug2 = 1; # subroutine names
+$debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
 [% qx(cat ./banner.pl) %]
@@ -108,7 +108,7 @@ $old_snapshot = {};
 $main_out = 1; # enable main output
 
 jack_update(); # to be polled by Event
-$memoize = 0;
+$memoize = 1;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 
