@@ -108,7 +108,7 @@ $old_snapshot = {};
 $main_out = 1; # enable main output
 
 jack_update(); # to be polled by Event
-$memoize = 1;
+$memoize = 0;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 
