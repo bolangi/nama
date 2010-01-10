@@ -3500,7 +3500,7 @@ sub jack_client {
 
 sub jack_ports {
 	my $j = shift || $jack_lsp; 
-	say "jack_lsp: $j";
+	#say "jack_lsp: $j";
 
 	# convert to single lines
 

@@ -205,6 +205,7 @@ show_track: _show_track dd end {
 	$::ti{$item{dd}};
 	1;}
 
+show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
 group_rec: _group_rec end { ::Text::group_rec(); 1}
 group_mon: _group_mon end  { ::Text::group_mon(); 1}
 group_off: _group_off end { ::Text::group_off(); 1}
