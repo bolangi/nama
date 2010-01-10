@@ -4088,7 +4088,15 @@ sub cache_track {
 			original 			=> $orig_version,
 			effect_chain	=> push_effect_chain($track), # bypass
 		};
-		pop @{$track->effect_chain_stack};
+		pop @{$track->effect_chain_stack}; # we keep it elsewhere
+		if ($track->has_insert){
+			say "removing insert... ";
+			say "if you want it again you will need to replace it yourself";
+			say "this is what it was";
+			delete ${ $track->inserts }{tracks};
+			say yaml_out( $track->inserts );
+			$track->remove_insert;
+		}
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
 'replace' will restore effects and set version $orig_version\n);
@@ -4150,7 +4158,7 @@ sub add_insert_cooked {
 	my $old_this_track = $this_track;
 	my $t = $::this_track;
 	my $name = $t->name;
-	#$t->remove_insert;
+	$t->remove_insert;
 	my $i = {
 		insert_type => 'cooked',
 		send_type 	=> ::dest_type($send_id),

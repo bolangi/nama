@@ -349,11 +349,12 @@ sub remove_effect { # doesn't touch %cops or %copp data structures
 }
 sub remove_insert {
 	my $track = shift;
-	if ( my $i = $track->inserts){
-		map{ $::tn{$_}->remove } @{ $i->{tracks} };
-		$track->set(inserts => {});
-	}
+	return unless $track->has_insert;
+	my $i = $track->inserts;
+	map{ $::tn{$_}->remove } @{ $i->{tracks} };
+	$track->set(inserts => {});
 }
+sub has_insert  { my $i; $i = $_[0]->inserts and @{ $i->{tracks} } }
 
 # remove track object and all effects
 
