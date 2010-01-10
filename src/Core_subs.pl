@@ -1462,7 +1462,6 @@ sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $no_transport_status = shift;
 	load_ecs() or say("No chain setup, engine not ready."), return;
-	load_ecs();
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
@@ -4207,16 +4206,16 @@ sub add_insert_cooked {
 sub ecasound_get_info {
 	my ($path, $command) = @_;
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+	eval_iam('cs-remove') if eval_iam('cs-selected');
 	eval_iam('cs-add gl');
 	eval_iam('c-add g');
 	eval_iam('ai-add ' . $path);
 	eval_iam('ao-add null');
 	eval_iam('cs-connect');
-	eval_iam('engine-launch');
 	eval_iam('ai-select '. $path);
 	my $result = eval_iam($command);
 	eval_iam('cs-disconnect');
-	eval_iam('cs-remove gl');
+	eval_iam('cs-remove');
 	$result;
 }
 sub get_length { 
