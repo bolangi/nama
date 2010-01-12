@@ -4063,7 +4063,9 @@ sub cache_track {
 		target => $track->name,
 	);
 	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
-	::Graph::expand_graph($g); # array ref
+	map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+	prune_graph();
+	::Graph::expand_graph($g); 
 	::Graph::add_inserts($g);
 	process_routing_graph(); 
 	write_chains();
