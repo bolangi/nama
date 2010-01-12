@@ -66,18 +66,19 @@ our (
 	%iam_cmd,		# for identifying IAM commands in user input
 	@nama_commands,# array of commands my functions provide
 	%nama_commands,# as hash as well
-	$project_root,	# each project will get a directory here
-	                # and one .nama directory, also with 
-	
-					#
-					# $ENV{HOME}/.namarc
-					# $ENV{HOME}/nama/paul_brocante
-					# $ENV{HOME}/nama/paul_brocante/.wav/vocal_1.wav
-					# $ENV{HOME}/nama/paul_brocante/Store.yml
-					# $ENV{HOME}/nama/.effects_cache
-					# $ENV{HOME}/nama/paul_brocante/.namarc 
+	$project_root,	
 
-					 #this_wav_dir = 
+					# Nama directory structure and files
+
+					# ~/.namarc						# config file
+					# ~/nama/untitled				# project directory
+					# ~/nama/untitled/.wav			# wav directory
+					# ~/nama/untitled/State.yml		# project state
+					# ~/nama/untitled/Setup.ecs		# Ecasound chain setup
+					# ~/nama/.effects_cache			# static effects data
+					# ~/nama/effect_chains			# Nama effect presets
+					# ~/nama/effect_profiles		# Nama effect profiles
+
 	$state_store_file,	# filename for storing @persistent_vars
 	$effect_chain_file, # for storing effect chains
 	$effect_profile_file, # for storing effect templates
