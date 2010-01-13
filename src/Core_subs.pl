@@ -3603,8 +3603,6 @@ sub master_on {
 
 	# create mastering tracks if needed
 	
-	# (no group membership needed)
-
 	if ( ! $tn{Eq} ){  
 	
 		my $old_track = $this_track;
@@ -3933,6 +3931,8 @@ sub new_effect_profile {
 	map { new_effect_chain($tn{$_}, private_effect_chain($profile, $_)); 
 	} @tracks;
 	$effect_profile{$profile}{tracks} = [ @tracks ];
+	save_effect_chains();
+	save_effect_profiles();
 }
 sub delete_effect_profile { 
 	$debug2 and say "&delete_effect_profile";
@@ -4000,7 +4000,8 @@ sub new_effect_chain {
 					ops 	=> \@ops,
 					type 	=> { map{$_ => $cops{$_}{type} 	} @ops},
 					params	=> { map{$_ => $copp{$_} 		} @ops},
-	}
+	};
+	save_effect_chains();
 }
 
 sub add_effect_chain {
