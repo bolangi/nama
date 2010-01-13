@@ -4170,12 +4170,12 @@ sub add_insert_cooked {
 		wetness		=> 100,
 	};
 	# default to return from same JACK client or adjacent soundcard channels
+	# default to return via same system (soundcard or JACK)
 	if (! $i->{return_id}){
 		$i->{return_type} = $i->{send_type};
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
-	# default to return via same system (soundcard or JACK)
 
 	
 	$t->set(inserts => $i); 1;
@@ -4208,7 +4208,7 @@ sub add_insert_cooked {
 	$i->{dry_vol} = $dry->vol;
 	$i->{wet_vol} = $wet->vol;
 	
-	$i->{tracks} = [ map{ $_->name } ($wet, $dry) ];
+	$i->{tracks} = [ $wet->name, $dry->name ];
 	$this_track = $old_this_track;
 }
 
