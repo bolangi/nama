@@ -2134,7 +2134,10 @@ sub cop_add {
 
 	# set values if present
 	
-	$copp{$cop_id} = $p{values} if $p{values};
+	# ugly! The passed values ref may be used for multiple
+	# instances, so we copy it here [ @$values ]
+	
+	$copp{$cop_id} = [ @{$p{values}} ] if $p{values};
 
 	$cop_id++; # return value then increment
 }
@@ -4011,7 +4014,7 @@ sub add_effect_chain {
 		if ! $effect_chain{$name};
 	say $track->name, qq(: adding effect chain "$name") unless $name =~ /^_/;
 	my $before = $track->vol;
-	map {   $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
+	map {  $magical_cop_id = $_ unless $cops{$_}; # try to reuse cop_id
 		if ($before){
 			::Text::t_insert_effect(
 				$before, 
