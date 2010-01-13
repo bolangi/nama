@@ -3674,11 +3674,11 @@ sub add_mastering_effects {
 }
 
 sub unhide_mastering_tracks {
-	map{ $tn{$_}->set(hide => 0)} @mastering_track_names;
+	command_process("for Mastering; set hide 0");
 }
 
 sub hide_mastering_tracks {
-	map{ $tn{$_}->set(hide => 1)} @mastering_track_names;
+	command_process("for Mastering; set hide 1");
  }
 		
 # vol/pan requirements of mastering tracks
@@ -3968,31 +3968,8 @@ sub list_effect_profiles {
 		list_effect_chains("_$name:");
 	}
 }
-sub uncache { 
-	my $track = shift;
-	# skip unless MON;
-	my $cache_map = $track->cache_map;
-	my $version = $track->monitor_version;
-	if(is_cached($track)){
-		# blast away any existing effects, TODO: warn or abort	
-		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
-		map{ remove_effect($_)} $track->fancy_ops;
-		$track->set(active => $cache_map->{$version}{original});
-		print $track->name, ": setting uncached version ", $track->active, $/;
-		add_effect_chain($track, $cache_map->{$version}{effect_chain});
-	} 
-	else { print $track->name, ": version $version is not cached\n"}
-}
-sub is_cached {
-	my $track = shift;
-	my $cache_map = $track->cache_map;
-	$cache_map->{$track->monitor_version}
-}
-	
 
-sub restore_effects { 
-	my $track = shift;
-	is_cached($track) ? uncache($track) : pop_effect_chain($track)}
+sub restore_effects { pop_effect_chain($_[0])}
 
 sub new_effect_chain {
 	my ($track, $name, @ops) = @_;
@@ -4052,7 +4029,7 @@ sub cleanup_exit {
 	CORE::exit; 
 }
 sub cache_track {
-	my $track = my $orig = $this_track; 
+	my $track = shift;
 	print($track->name, ": track caching requires MON status.\n\n"), 
 		return unless $track->rec_status eq 'MON';
 	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
@@ -4066,7 +4043,7 @@ sub cache_track {
 		group => 'Temp',
 		target => $track->name,
 	);
-	$g->add_path( 'wav_in',$orig->name, $cooked, 'wav_out');
+	$g->add_path( 'wav_in',$track->name, $cooked, 'wav_out');
 	map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
 	prune_graph();
 	::Graph::expand_graph($g); 
@@ -4076,14 +4053,13 @@ sub cache_track {
 	remove_temporary_tracks();
 	connect_transport('no_transport_status')
 		or say ("Couldn't connect engine! Aborting."), return;
-	say $/,$orig->name,": length ". d2($length). " seconds";
+	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
 	eval_iam("cs-set-length $length");
 	eval_iam("start");
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
 	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
-	$track = $orig;
 	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
@@ -4105,11 +4081,31 @@ sub cache_track {
 		}
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
-'replace' will restore effects and set version $orig_version\n);
+'uncache' will restore effects and set version $orig_version\n);
 		post_rec_configure();
 	} else { say "track cache operation failed!"; }
-	$this_track = $orig; # unneeded? 
 }
+sub uncache_track { 
+	my $track = shift;
+	# skip unless MON;
+	my $cache_map = $track->cache_map;
+	my $version = $track->monitor_version;
+	if(is_cached($track)){
+		# blast away any existing effects, TODO: warn or abort	
+		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
+		map{ remove_effect($_)} $track->fancy_ops;
+		$track->set(active => $cache_map->{$version}{original});
+		print $track->name, ": setting uncached version ", $track->active, $/;
+		add_effect_chain($track, $cache_map->{$version}{effect_chain});
+	} 
+	else { print $track->name, ": version $version is not cached\n"}
+}
+sub is_cached {
+	my $track = shift;
+	my $cache_map = $track->cache_map;
+	$cache_map->{$track->monitor_version}
+}
+	
 sub do_script {
 	say "hello script";
 	my $name = shift;

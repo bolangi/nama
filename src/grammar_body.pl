@@ -550,8 +550,8 @@ remove_insert: _remove_insert end {
 	1;
 }
 
-cache_track: _cache_track end { ::cache_track(); 1 }
-uncache_track: _uncache_track end { ::uncache(); 1 }
+cache_track: _cache_track end { ::cache_track($::this_track); 1 }
+uncache_track: _uncache_track end { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain name op_id(s?) end {
 	#print "name $item{name}, ops: ", @{$item{'op_id(s?)'}}, $/;
 	::new_effect_chain($::this_track, $item{name}, @{ $item{'op_id(s?)'} });

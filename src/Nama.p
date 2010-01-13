@@ -111,6 +111,7 @@ jack_update(); # to be polled by Event
 $memoize = 1;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
+$mastering_mode = 0;
 
 init_memoize() if $memoize;
 
