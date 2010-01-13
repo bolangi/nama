@@ -4081,7 +4081,6 @@ sub cache_track {
 			say "removing insert... ";
 			say "if you want it again you will need to replace it yourself";
 			say "this is what it was";
-			delete ${ $track->inserts }{tracks};
 			say yaml_out( $track->inserts );
 			$track->remove_insert;
 		}
