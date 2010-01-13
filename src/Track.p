@@ -140,6 +140,8 @@ sub new {
 
 ### object methods
 
+# TODO these conditional clauses should be separated
+# into classes 
 sub dir {
 	my $self = shift;
 	 $self->project  
