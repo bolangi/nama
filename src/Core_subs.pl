@@ -528,11 +528,14 @@ Loading project "untitled".
 			rw => 'MON',); # no dir, we won't record tracks
 
 
-		 ::Track->new( 
+		my $mixdown = ::Track->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,
 			rw => 'MON'); 
+
+		remove_effect($mixdown->vol);
+		remove_effect($mixdown->pan);
 	}
 
 
