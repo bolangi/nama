@@ -2188,8 +2188,8 @@ sub effect_update {
 	
  	$debug and print join " ", @_, "\n";	
 
-	my $old_chain = eval_iam('c-selected');
-	eval_iam("c-select $chain");
+	my $old_chain = eval_iam('c-selected') if eval_iam('cs-selected');
+	ecasound_select_chain($chain);
 
 	# update Ecasound's copy of the parameter
 	if( is_controller($id)){
@@ -2209,7 +2209,7 @@ sub effect_update {
 		eval_iam("copp-select $param");
 		eval_iam("copp-set $val");
 	}
-	eval_iam("c-select $old_chain");
+	ecasound_select_chain($old_chain);
 }
 
 sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
@@ -3380,14 +3380,12 @@ sub command_process {
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd};
-				my $c = q(c-select ) . $this_track->n; 
-				eval_iam( $c ) if eval_iam( 'cs-connected' );
+				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
-				my $c = q(c-select ) . $this_track->n; 
-				eval_iam( $c );
+				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){
 				$debug and print "Found Iam command\n";
@@ -3405,6 +3403,11 @@ sub command_process {
 	}
 	
 	$ui->refresh; # in case we have a graphic environment
+}
+sub ecasound_select_chain {
+	my $n = shift;
+	my $cmd = "c-select $n";
+	eval_iam($cmd) if eval_iam( 'cs-connected' ) =~ /$chain_setup_file/;
 }
 sub is_bunch {
 	my $name = shift;
