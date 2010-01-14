@@ -84,7 +84,6 @@ sub direction {
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
 
-my %dont_fall_through = (ecs_extra => 1, format_template => 1);
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
@@ -95,9 +94,9 @@ sub AUTOLOAD {
 	return $self->{$field} if exists $self->{$field};
 	return $self->$method if $self->can($method);
 	if ( my $track = $::tn{$self->{track_}} ){
-		return $track->$call if $track->can($call)
+		return $track->$call if $track->can($call) 
+		# ->can is reliable here because Track has no AUTOLOAD
 	}
-	#return if $dont_fall_through{$call};
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
 }
 
