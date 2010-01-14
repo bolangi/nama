@@ -4050,16 +4050,26 @@ sub cleanup_exit {
 }
 
 
-{ my ($track, $orig_version, $cooked);
-sub cache_track {
-	$track = shift;
-	print($track->name, ": track caching requires MON status.\n\n"), 
-		return unless $track->rec_status eq 'MON'
-			or $::Bus::by_name{$track->name} and $track->rec_status eq 'REC';
-	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $track->fancy_ops 
+{ my ($orig_version, $cooked);
+sub cache_track { # launch subparts if conditions are met
+	my $track = shift;
+	say $track->name, ": preparing to cache.";
+	
+	# abort warning if necessary when sub-bus mix track
+	if( $::Bus::by_name{$track->name} ){ 
+		$track->rec_status ne 'OFF' or say(
+			"mix track ",$track->name, ": status is OFF. Aborting."), return;
+
+	# abort warning if necessary when normal track
+	} else { 
+		$track->rec_status eq 'MON' or say(
+			$track->name, ": track caching requires MON status. Aborting."), return;
+	}
+	say($track->name, ": no effects to cache!  Skipping."), return 
+		unless 	$track->fancy_ops 
 				or $track->has_insert
 				or $::Bus::by_name{$track->name};
+
 	prepare_to_cache($track);
 	complete_caching($track);
 }

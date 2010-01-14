@@ -41,7 +41,7 @@ use Modern::Perl; use Carp; our @ISA = '::Bus';
 
 sub apply {
 	my $bus = shift;
-	return unless $tn{$bus->name}->rec_status eq 'REC';
+	return unless $::tn{$bus->name}->rec_status eq 'REC';
 	map{ 
 		# connect signal sources to tracks
 		my @path = $_->input_path;
