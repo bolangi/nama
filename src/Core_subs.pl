@@ -4048,29 +4048,51 @@ sub cleanup_exit {
 	$term->rl_deprep_terminal();
 	CORE::exit; 
 }
+
+
+{ my ($track, $orig_version, $cooked);
 sub cache_track {
-	my $track = shift;
+	$track = shift;
 	print($track->name, ": track caching requires MON status.\n\n"), 
-		return unless $track->rec_status eq 'MON';
+		return unless $track->rec_status eq 'MON'
+			or $::Bus::by_name{$track->name} and $track->rec_status eq 'REC';
 	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $track->fancy_ops or $track->has_insert;
+		return unless $track->fancy_ops 
+				or $track->has_insert
+				or $::Bus::by_name{$track->name};
+	prepare_to_cache($track);
+	complete_caching($track);
+}
+
+sub prepare_to_cache {
+	my $track = shift;
+	my $debug = 1;
  	initialize_chain_setup_vars();
-	my $orig_version = $track->monitor_version;
-	my $cooked = $track->name . '_cooked';
+	$orig_version = $track->monitor_version;
+	$cooked = $track->name . '_cooked';
 	::CacheRecTrack->new(
 		width => 2,
 		name => $cooked,
 		group => 'Temp',
 		target => $track->name,
 	);
-	$g->add_path( 'wav_in',$track->name, $cooked, 'wav_out');
+	$g->add_path($track->name, $cooked, 'wav_out');
+	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+	$debug and say "The graph is:\n$g";
 	map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+	$debug and say "The graph1 is:\n$g";
 	prune_graph();
+	$debug and say "The graph2 is:\n$g";
 	::Graph::expand_graph($g); 
+	$debug and say "The graph3 is:\n$g";
 	::Graph::add_inserts($g);
+	$debug and say "The graph4 is:\n$g";
 	process_routing_graph(); 
 	write_chains();
 	remove_temporary_tracks();
+}
+sub complete_caching {
+	my $track = shift;
 	connect_transport('no_transport_status')
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
@@ -4103,6 +4125,7 @@ sub cache_track {
 'uncache' will restore effects and set version $orig_version\n);
 		post_rec_configure();
 	} else { say "track cache operation failed!"; }
+}
 }
 sub uncache_track { 
 	my $track = shift;
