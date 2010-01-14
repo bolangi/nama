@@ -3105,6 +3105,14 @@ sub restore_state {
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
 
+	# make sure Master has reasonable output settings
+	
+	map{ if ( ! $_->{send_type}){
+				$_->{send_type} = 'soundcard',
+				$_->{send_id} = 1
+			}
+		} grep{$_->{name} eq 'Master'} @tracks_data;
+
 	#  destroy and recreate all groups
 
 	::Group::initialize();	

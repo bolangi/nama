@@ -660,12 +660,12 @@ list_effect_profiles:
 cache_track:
   type: track
   short: cache ct
-  what: store the effects-processed track signal as a new version
+  what: store an effects-processed track signal as a new version
   parameters: none
 uncache_track:
   type: effect
   short: uncache unc
-  what: select the uncached track version, restoring effects
+  what: select the uncached track version; restores effects (but not inserts)
   parameters: none
 do_script:
   type: general
