@@ -510,9 +510,10 @@ Loading project "untitled".
 	} 
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
+	
+	eval_iam('cs-remove') if eval_iam('cs-selected');
 	initialize_buses();	
 	initialize_project_data();
-
 	remove_small_wavs(); 
 	rememoize();
 

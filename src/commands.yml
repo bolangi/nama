@@ -183,7 +183,7 @@ remove_send:
   type: track
   short: nosend rms
   what: remove aux send
-  parameters: none  what: set auxilary track destination
+  parameters: none
 stereo:
   type: track
   what: record two channels for current track
