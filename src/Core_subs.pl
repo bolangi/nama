@@ -4076,10 +4076,18 @@ sub prepare_to_cache {
 		group => 'Temp',
 		target => $track->name,
 	);
+	# output path
 	$g->add_path($track->name, $cooked, 'wav_out');
+
+	# input path when $track->rec_status MON
 	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+
 	$debug and say "The graph is:\n$g";
+
+	# input paths: sub buses (significant when
+	# $track->rec_status is REC and track is a sub-bus mix track)
 	map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+
 	$debug and say "The graph1 is:\n$g";
 	prune_graph();
 	$debug and say "The graph2 is:\n$g";
