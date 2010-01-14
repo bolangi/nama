@@ -4048,12 +4048,17 @@ sub cleanup_exit {
 	$term->rl_deprep_terminal();
 	CORE::exit; 
 }
+
+
 sub cache_track {
 	my $track = shift;
 	print($track->name, ": track caching requires MON status.\n\n"), 
-		return unless $track->rec_status eq 'MON';
+		return unless $track->rec_status eq 'MON'
+			or $::Bus::by_name{$track->name} and $track->rec_status eq 'REC';
 	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $track->fancy_ops or $track->has_insert;
+		return unless $track->fancy_ops 
+				or $track->has_insert
+				or $::Bus::by_name{$track->name};
  	initialize_chain_setup_vars();
 	my $orig_version = $track->monitor_version;
 	my $cooked = $track->name . '_cooked';

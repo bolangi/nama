@@ -77,7 +77,8 @@ sub format {
 	::signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
 }
-#sub _direction { # allow override
+sub _format_template {} # allow override
+sub _ecs_extra {}		# allow override
 sub direction { 
 	(ref $_[0]) =~ /::from/ ? 'input' : 'output'  
 }
@@ -96,7 +97,7 @@ sub AUTOLOAD {
 	if ( my $track = $::tn{$self->{track_}} ){
 		return $track->$call if $track->can($call)
 	}
-	return if $dont_fall_through{$call};
+	#return if $dont_fall_through{$call};
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
 }
 
