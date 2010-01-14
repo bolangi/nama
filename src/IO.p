@@ -83,30 +83,20 @@ sub direction {
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
 
-my %dont_fall_through = (ecs_extra 		=> 1, 
-						format_template => 1, 
-						playat_time 	=> 1,
-						region_start 	=> 1,
-						modifiers		=> 1,);
+my %dont_fall_through = (ecs_extra => 1, format_template => 1);
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
-	my $trackname = do {local $@; eval{ $::tn{$self->{track_}}->name } } ;
-	say "track: $trackname";
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	my $result = q();
-	say "call: $call";
 	my $field = "$call\_";
 	my $method = "_$call";
 	return $self->{$field} if exists $self->{$field};
 	return $self->$method if $self->can($method);
-	my $val = do {  local $@; 
-					eval { my $track = $::tn{$self->{track_}}  ;
-						   $track->$call } };
-	say "track val: $val";
-	return $val unless $@; 
-	# never reach here
-	#return if $dont_fall_through{$call};
+	if ( my $track = $::tn{$self->{track_}} ){
+		return $track->$call if $track->can($call)
+	}
+	return if $dont_fall_through{$call};
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
 }
 

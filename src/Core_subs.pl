@@ -4051,12 +4051,9 @@ sub cleanup_exit {
 sub cache_track {
 	my $track = shift;
 	print($track->name, ": track caching requires MON status.\n\n"), 
-		return unless $track->rec_status eq 'MON'
-			or $::Bus::by_name{$track->name} and $track->rec_status eq 'REC';
+		return unless $track->rec_status eq 'MON';
 	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
-		return unless $track->fancy_ops 
-				or $track->has_insert
-				or $::Bus::by_name{$track->name};
+		return unless $track->fancy_ops or $track->has_insert;
  	initialize_chain_setup_vars();
 	my $orig_version = $track->monitor_version;
 	my $cooked = $track->name . '_cooked';
