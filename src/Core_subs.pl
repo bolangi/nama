@@ -368,6 +368,7 @@ sub eval_iam_neteci {
 				(.+)  # rest of string
 				/sx;  # s-flag: . matches newline
 
+$debug and say "iam: $cmd";
 $debug and say "return value: $return_value
 length: $length
 type: $type
@@ -396,6 +397,10 @@ sub eval_iam_libecasoundc{
 	$e->errmsg('');
 	"@result";
 	#$errmsg ? undef : "@result";
+}
+sub initialize_ecasound_engine {
+	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+	eval_iam('cs-remove') if eval_iam('cs-selected');
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift || 0;
@@ -511,7 +516,7 @@ Loading project "untitled".
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
 	
-	eval_iam('cs-remove') if eval_iam('cs-selected');
+	initialize_ecasound_engine(); 
 	initialize_buses();	
 	initialize_project_data();
 	remove_small_wavs(); 
