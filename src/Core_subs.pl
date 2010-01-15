@@ -4141,7 +4141,22 @@ sub complete_caching {
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
 'uncache' will restore effects and set version $orig_version\n);
-		post_rec_configure();
+
+		
+
+		# special handling for sub-bus mix track
+		
+		if ($track->rec_status eq 'REC'){ 
+			$track->set(rw => 'MON');
+			$ui->global_version_buttons(); # recreate
+			$ui->refresh();
+
+		# usual post-record handling is the default
+	
+		} else { post_rec_configure() }
+
+		reconfigure_engine();
+
 	} else { say "track cache operation failed!"; }
 }
 }
@@ -4154,9 +4169,20 @@ sub uncache_track {
 		# blast away any existing effects, TODO: warn or abort	
 		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
 		map{ remove_effect($_)} $track->fancy_ops;
-		$track->set(active => $cache_map->{$version}{original});
-		print $track->name, ": setting uncached version ", $track->active, $/;
-		add_effect_chain($track, $cache_map->{$version}{effect_chain});
+
+		# original WAV -> WAV case: reset version 
+		if ( $cache_map->{$version}{original} ){ 
+			$track->set(active => $cache_map->{$version}{original});
+			print $track->name, ": setting uncached version ", $track->active, $/;
+
+		# assume a sub-bus mix track, i.e. REC -> WAV: set to REC
+		} else { 
+			$track->set(rw => 'REC') ;
+			say $track->name, ": setting sub-bus mix track to REC";
+		} 
+
+		add_effect_chain($track, $cache_map->{$version}{effect_chain})
+			if $cache_map->{$version}{effect_chain};
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
 }

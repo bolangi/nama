@@ -7,27 +7,25 @@ Nama - Ecasound-based recorder/mixer
 Nama performs multitrack recording, mixing and mastering using the
 Ecasound audio processing engine developed by Kai Vehmanen.
 
-Nama's features include tracks, buses, effects, presets,
-sends, inserts, marks and regions. Nama supports JACK
-and ALSA audio frameworks, and Ladish Level 1 session
-handling.
+Nama's features include tracks, buses, effects, presets, sends,
+inserts, marks and regions. Nama supports JACK and ALSA audio
+frameworks, LADSPA plugins, and Ladish Level 1 session handling.
 
 All signal processing under Nama is non-destructive. Effects are
 generally applied in realtime, with track caching (track freezing)
-available to conserve CPU.
+also available.
 
-Nama has dual user interfaces, GUI and terminal mode. 
+Nama has dual user interfaces: GUI and terminal mode. 
 
-Terminal mode gives users full access to Nama's capabilities, giving
+Terminal mode gives users full access to Nama's capabilities, offering
 console users an advanced multitrack audio production tool. The
-command prompt is based on the GNU ReadLine library, which provides
-such conveniences as command history and autocompletion. Users
-can enter Nama commands, Ecasound interactive-mode commands, shell
-commands or perl code.
+command prompt uses GNU ReadLine library to provide such conveniences
+as command history and autocompletion. Users can enter Nama commands,
+Ecasound interactive-mode commands, shell commands or perl code.
 
 Nama's optional GUI provides access to basic recording and
 effects processing functions. It is based on the Tk widget
-set.
+set. The command prompt is simultaneously available.
 
 "Nama" is Japanese for "live", describing live performances,
 raw fish and draft beer.

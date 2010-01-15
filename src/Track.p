@@ -241,7 +241,6 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		# or $track->hide 
 		or $::preview eq 'doodle' and $track->rw eq 'REC' and 
 			$::duplicate_inputs{$track->name}
 	){ 	return			  'OFF' }
