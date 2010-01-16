@@ -592,8 +592,7 @@ sub track_gui {
 					-tearoff => 0,
 				);
 	my @range;
-	push @range, "";
-	push @range, 1..$tk_input_channels if $n > 2;
+	push @range, 1..$soundcard_channels if $n > 2; # exclude Master/Mixdown
 	
 	for my $v (@range) {
 		$ch_r->radiobutton(
@@ -606,18 +605,22 @@ sub track_gui {
 				refresh_track($n) }
 			)
 	}
+	@range = ();
+
+	push @range, "off" if $n > 2;
+	push @range, 1..$soundcard_channels if $n != 2; # exclude Mixdown
+
 	$ch_m = $track_frame->Menubutton(
 					-tearoff => 0,
 					# -relief => 'groove',
 				);
-				for my $v ("off",3..10) {
+				for my $v (@range) {
 					$ch_m->radiobutton(
 						-label => $v,
 						-value => $v,
 						-command => sub { 
 							return if eval_iam("engine-status") eq 'running';
-			#				$ti{$n}->set(rw  => "MON");
-							$ti{$n}->send($v);
+							$ti{$n}->set_send($v);
 							refresh_track($n);
 							reconfigure_engine();
  						}
@@ -834,8 +837,10 @@ sub create_master_and_mix_tracks {
 	group_gui('Main');
 }
 sub remove_unneeded_Mixdown_widgets {
+	map{$_->destroy}
+	map{ $track_widget_remove{$tn{Mixdown}->n}{$_}}
+	grep{ !/number|name|version|rw|ch_r|ch_m/ } keys %{ $track_widget_remove{$tn{Mixdown}->n}}
 }
-
 
 
 sub update_version_button {

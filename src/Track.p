@@ -260,7 +260,8 @@ sub rec_status {
 			when('jack_port'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('track'){ return 'REC' } # maybe $track->rw ??
-			default { croak $track->name. ": missing source type" }
+			default { return 'OFF' }
+			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
 		}
@@ -390,9 +391,15 @@ sub set_io {
 	# respond to a query (no argument)
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
+	# set null values if we receive 'off' from track send/source widgets
+	if ( $id eq 'off'){ 
+		$track->set($type_field => undef);
+		$track->set($id_field => undef);
+		say $track->name, ": disabling $direction.";
+		return;
+	}
 	
 	# set values, returning new setting
-	
 	given ( ::dest_type( $id ) ){
 		when ('jack_client'){
 			if ( $::jack_running ){
