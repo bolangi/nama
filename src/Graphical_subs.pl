@@ -766,9 +766,22 @@ sub track_gui {
 	
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	$track_widget_remove{$n} = [
-		$number, $name, $version, $rw, $ch_r, $ch_m, $vol,
-			$mute, $unity, $pan, $center, @add_effect, $effects ];
+	$track_widget_remove{$n} = {
+		number => $number, 
+		name	=> $name, 
+		version => $version, 
+		rw		=> $rw, 
+		ch_r	=> $ch_r, 
+		ch_m	=> $ch_m, 
+		vol		=> $vol,
+		mute 	=> $mute, 
+		unity	=> $unity, 
+		pan		=> $pan, 
+		center	=> $center, 
+		effects => $effects,
+	};
+	my $i = 1;
+	map{ $track_widget_remove{$n}{ "add_effect_".$i++ } = $_ } @add_effect;
 
 	refresh_track($n);
 
@@ -782,7 +795,7 @@ sub remove_track_gui {
 	return unless $track_widget_remove{$n};
 	#say "exists";
 	my $m = 0;
- 	map {$_->destroy  } @{ $track_widget_remove{$n} };
+ 	map {$_->destroy  } values %{ $track_widget_remove{$n} };
 	delete $track_widget_remove{$n};
 }
 
@@ -816,9 +829,13 @@ sub create_master_and_mix_tracks {
 	track_gui( $tn{Master}->n, @rw_items );
 
 	track_gui( $tn{Mixdown}->n); 
+	remove_unneeded_Mixdown_widgets();
 
 	group_gui('Main');
 }
+sub remove_unneeded_Mixdown_widgets {
+}
+
 
 
 sub update_version_button {
