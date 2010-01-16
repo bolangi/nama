@@ -456,6 +456,14 @@ sub set_source { # called from parser
  		". Make connections manually or set up a ports list.";
  		return;
 	} 
+	if( $source =~ /^\w+\.ports$/){
+		say("$source: file not found in ",project_root(),". Skipping."), return
+			unless -e join_path( project_root(), $source );
+		# check if ports file parses
+		# warn if ports do not exist
+		$track->set(source_type => 'jack_port');
+		$track->set(source_id => $source );
+	}
 	my $old_source = $track->source;
 	my $new_source = $track->source($source);
 	my $object = $track->input_object;

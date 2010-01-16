@@ -221,6 +221,8 @@ exit: _exit end {   ::save_state($::state_store_file);
 					::cleanup_exit();
                     1}	
 
+source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
+portsfile: /\w+\.ports/
 source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
 source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
