@@ -3907,13 +3907,17 @@ sub update_send_bus {
 						 "dummy",
 }
 
-sub new_effect_chain_name {
-	my $name = '_'.$this_track->name . '_';
+sub private_effect_chain_name {
+	my $name = "_$project_name/".$this_track->name.'_';
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
 	@{ $this_track->effect_chain_stack }, 
 		grep{/$name/} keys %effect_chain;
 	$name . ++$i
+}
+sub profile_effect_chain_name {
+	my ($profile, $track_name) = @_;
+	"_$profile\:$track_name";
 }
 
 # too many functions in push and pop!!
@@ -3922,7 +3926,7 @@ sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
 	my ($track, %vals) = @_; 
 	say("no effects to store"), return unless $track->fancy_ops;
-	my $save_name   = $vals{save} || new_effect_chain_name();
+	my $save_name   = $vals{save} || private_effect_chain_name();
 	$debug and say "save name: $save_name"; 
 	new_effect_chain( $track, $save_name ); # current track effects
 	push @{ $track->effect_chain_stack }, $save_name;
@@ -3951,7 +3955,7 @@ sub new_effect_profile {
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
 	say qq(effect profile "$profile" created for tracks: @tracks);
-	map { new_effect_chain($tn{$_}, private_effect_chain($profile, $_)); 
+	map { new_effect_chain($tn{$_}, profile_effect_chain_name($profile, $_)); 
 	} @tracks;
 	$effect_profile{$profile}{tracks} = [ @tracks ];
 	save_effect_chains();
@@ -3963,11 +3967,7 @@ sub delete_effect_profile {
 	say qq(deleting effect profile: $name);
 	my @tracks = $effect_profile{$name};
 	delete $effect_profile{$name};
-	map{ delete $effect_chain{private_effect_chain($name,$_)} } @tracks;
-}
-sub private_effect_chain {
-	my ($profile, $track_name) = @_;
-	"_$profile\:$track_name";
+	map{ delete $effect_chain{profile_effect_chain_name($name,$_)} } @tracks;
 }
 
 sub apply_effect_profile {  # overwriting current effects
@@ -3977,10 +3977,10 @@ sub apply_effect_profile {  # overwriting current effects
 	my @missing = grep{ ! $tn{$_} } @tracks;
 	@missing and say(join(',',@missing), ": tracks do not exist. Aborting."),
 		return;
-	@missing = grep { ! $effect_chain{private_effect_chain($profile,$_)} } @tracks;
+	@missing = grep { ! $effect_chain{profile_effect_chain_name($profile,$_)} } @tracks;
 	@missing and say(join(',',@missing), ": effect chains do not exist. Aborting."),
 		return;
-	map{ $function->( $tn{$_}, private_effect_chain($profile,$_)) } @tracks;
+	map{ $function->( $tn{$_}, profile_effect_chain_name($profile,$_)) } @tracks;
 }
 sub list_effect_profiles { 
 	while( my $name = each %effect_profile){
