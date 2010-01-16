@@ -131,7 +131,7 @@ sub revise_prompt {
     $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
-	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+	"nama $this_bus". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
 }
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
@@ -4115,7 +4115,7 @@ sub complete_caching {
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
-	eval_iam("cs-set-length $length");
+	eval_iam("cs-set-length -1"); # to longest input object
 	eval_iam("start");
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 

@@ -106,6 +106,7 @@ $save_id = "State";
 $fade_time = 0.3;
 $old_snapshot = {};
 $main_out = 1; # enable main output
+$this_bus = 'Main';
 
 jack_update(); # to be polled by Event
 $memoize = 1;

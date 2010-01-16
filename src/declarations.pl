@@ -99,6 +99,7 @@ our (
 	$old_this_track, # when we need to save/restore current track
 	$this_op,      # currently selected effect # future
 	$this_mark,    # current mark  # for future
+	$this_bus, 		# current bus
 
 	@format_fields, # data for replies to text commands
 
