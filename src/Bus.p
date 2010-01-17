@@ -23,7 +23,7 @@ sub new {
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	if (! $vals{name} or $by_name{$vals{name}}){
+	if (! $vals{name} or $by_name{$vals{name}} or $::Group::by_name{$vals{name}}){
 		carp($vals{name},": missing or duplicate bus name. Skipping.\n");
 		return;
 	}

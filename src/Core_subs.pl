@@ -3138,7 +3138,7 @@ sub restore_state {
 
 	# restore user buses
 	
-	map{ my $class = $_->{class}; ::Bus->new( %$_ ) } @bus_data;
+	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 	
 	# restore user tracks
 	
