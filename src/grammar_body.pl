@@ -102,6 +102,7 @@ add_track: _add_track name2(s) end {
 	::add_track(@{$item{'name2(s)'}}); 1}
 add_tracks: _add_tracks name2(s) end {
 	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
+# set bus Brass
 set_track: _set_track 'bus' bus_name end {
 	$::this_track->set( group => $item{bus_name}); 1
 } 
@@ -190,6 +191,8 @@ show_track: _show_track end {
 	my $output = ::Text::show_tracks($::this_track);
 	$output .= ::Text::show_effects();
 	$output .= ::Text::show_versions();
+	$output .= ::Text::show_send();
+	$output .= ::Text::show_bus();
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::Text::show_region();
@@ -221,6 +224,8 @@ exit: _exit end {   ::save_state($::state_store_file);
 					::cleanup_exit();
                     1}	
 
+source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
+portsfile: /\w+\.ports/
 source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
 source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
@@ -496,24 +501,26 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
-bus_name: /[A-Z]\w+/
+bus_name: /[A-Z]\w+/ { 
+	if ( $::Bus::by_name{$item[1]} ){  $item[1] }
+	else { print("$item[1]: no such bus\n"); undef }
+}
 destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel
 # loop,identifier: loop device
 # name2: track name
 
-remove_bus: _remove_bus bus_name end {
-	print ("$item{bus_name}: no such bus\n"), return 
-		unless $::Bus::by_name{$item{bus_name}};
-	$::Bus::by_name{$item{bus_name}}->remove;
-	1;
- 
+remove_bus: _remove_bus bus_name end { 
+	$::Bus::by_name{$item{bus_name}}->remove; 1; 
 }
 update_send_bus: _update_send_bus bus_name end {
  	::update_send_bus( $item{bus_name} );
  	1;
 }
-set_bus: _set_bus { print "stub command, does nothing, sorry.\n"}
+set_bus: _set_bus key someval { $::Bus::by_name{$::this_bus}->set($item{key} => $item{someval}); 1 }
+
+change_bus: _change_bus bus_name { $::this_bus = $item{bus_name} }
+
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) }
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";

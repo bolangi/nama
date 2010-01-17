@@ -84,7 +84,8 @@ our (
 	$effect_profile_file, # for storing effect templates
 	$chain_setup_file, # Ecasound uses this 
 
-	$tk_input_channels,# this many radiobuttons appear
+	$soundcard_channels,# channel selection range 
+	$tk_input_channels,# alias for above
 	                # on the menubutton
 	%cfg,        # 'config' information as hash
 	%devices, 		# alias to data in %cfg
@@ -98,6 +99,7 @@ our (
 	$old_this_track, # when we need to save/restore current track
 	$this_op,      # currently selected effect # future
 	$this_mark,    # current mark  # for future
+	$this_bus, 		# current bus
 
 	@format_fields, # data for replies to text commands
 
