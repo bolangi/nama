@@ -4115,7 +4115,7 @@ sub complete_caching {
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
-	eval_iam("cs-set-length -1"); # to longest input object
+	eval_iam("cs-set-length $length"); # to longest input object
 	eval_iam("start");
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
