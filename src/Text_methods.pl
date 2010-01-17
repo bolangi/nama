@@ -4,8 +4,14 @@ sub show_versions {
 			"All versions: ". join(" ", 
 				map { $_ . ( $cache_map->{$_} and 'c') } @{$this_track->versions}
 			). $/
-		} else { q() }
+		} 
 }
+
+
+sub show_send { "Send: ". $this_track->send_status . $/ if $this_track->send_status
+}
+
+sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
 
 sub show_effects {
 	my @lines;
@@ -74,12 +80,12 @@ sub placeholder {
 
 {
 my $format_top = <<TOP;
-Track Name      Ver. Setting  Status   Source           Send        Vol  Pan 
+Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
 =============================================================================
 TOP
 
 my $format_picture = <<PICTURE;
-@>>   @<<<<<<<<< @>    @<<    @|||| @||||||||||||| @||||||||||||||  @>>  @>> 
+@>>   @<<<<<<<<< @>    @<<    @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
 PICTURE
 
 sub show_tracks {
@@ -97,7 +103,7 @@ sub show_tracks {
             $_->name =~ /Master|Mixdown/ 
 					? placeholder() 
 					: placeholder($_->source_status),
-			placeholder($_->send_status),
+			placeholder($_->group),
 			placeholder($copp{$_->vol}->[0]),
 			placeholder($copp{$_->pan}->[0]),
             #(join " ", @{$_->versions}),

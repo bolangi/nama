@@ -191,6 +191,8 @@ show_track: _show_track end {
 	my $output = ::Text::show_tracks($::this_track);
 	$output .= ::Text::show_effects();
 	$output .= ::Text::show_versions();
+	$output .= ::Text::show_send();
+	$output .= ::Text::show_bus();
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::Text::show_region();
