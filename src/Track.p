@@ -659,7 +659,7 @@ sub unmute {
 sub import_audio  { 
 	my $track = shift;
 	my ($path, $frequency) = @_; 
-	$path = expand_tilde($path);
+	$path = ::expand_tilde($path);
 	#say "path: $path";
 	my $version  = ${ $track->versions }[-1] + 1;
 	if ( ! -r $path ){
