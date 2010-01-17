@@ -2,16 +2,21 @@
 # ------------  Bus --------------------
 
 package ::Bus;
-use Modern::Perl; use Carp; our @ISA;
+use Modern::Perl; use Carp; our @ISA = '::Group';
 our $VERSION = 1.0;
 our ($debug, %by_name); 
 use ::Object qw(
 					name
+					rw
+					version 
+					n	
+
 					destinations
 					send_type
 					send_id
 					class
-);
+
+					);
 sub initialize { %by_name = () };
 sub new {
 	my $class = shift;
