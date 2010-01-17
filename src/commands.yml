@@ -598,13 +598,7 @@ list_buses:
 set_bus:
   type: bus
   short: sbs
-  what: set bus parameters 
-  parameters: <s_busname> <key> <val>
-change_bus:
-  type: bus
-  short: cbs
-  what: choose the current bus
-  parameters: <s_busname>
+  what: set bus parameters TODO
 new_effect_chain:
   type: effect
   short: nec

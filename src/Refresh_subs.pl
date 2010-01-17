@@ -72,7 +72,7 @@ sub refresh_track {
 					? $ti{$n}->source
 					:  q() );
 	$track_widget{$n}->{ch_m}->configure( -text => $ti{$n}->send);
-	$track_widget{$n}->{version}->configure(-text => $ti{$n}->current_version || "");
+	$track_widget{$n}->{version}->configure(-text => $ti{$n}->current_version);
 	
 	map{ set_widget_color( 	$track_widget{$n}->{$_}, 
 							$rec_status)

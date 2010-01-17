@@ -11,7 +11,6 @@
 						$mixer_out_format
 						$alsa_playback_device
 						$alsa_capture_device	
-						$soundcard_channels
 						$project_root 	
 						$use_group_numbering
 						$press_space_to_start_transport

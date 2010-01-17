@@ -95,7 +95,7 @@ $state_store_file = 'State.yml';
 $effect_chain_file = 'effect_chains.yml';
 $effect_profile_file = 'effect_profiles.yml';
 $chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
-$soundcard_channels = 10;
+$tk_input_channels = 10;
 $use_monitor_version_for_mixdown = 1; # not implemented yet
 $project_root = join_path( $ENV{HOME}, "nama");
 $seek_delay = 0.1; # seconds
@@ -106,7 +106,6 @@ $save_id = "State";
 $fade_time = 0.3;
 $old_snapshot = {};
 $main_out = 1; # enable main output
-$this_bus = 'Main';
 
 jack_update(); # to be polled by Event
 $memoize = 1;

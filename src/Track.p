@@ -241,6 +241,7 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
+		# or $track->hide 
 		or $::preview eq 'doodle' and $track->rw eq 'REC' and 
 			$::duplicate_inputs{$track->name}
 	){ 	return			  'OFF' }
@@ -260,8 +261,7 @@ sub rec_status {
 			when('jack_port'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('track'){ return 'REC' } # maybe $track->rw ??
-			default { return 'OFF' }
-			#default { croak $track->name. ": missing source type" }
+			default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
 		}
@@ -391,15 +391,9 @@ sub set_io {
 	# respond to a query (no argument)
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
-	# set null values if we receive 'off' from track send/source widgets
-	if ( $id eq 'off'){ 
-		$track->set($type_field => undef);
-		$track->set($id_field => undef);
-		say $track->name, ": disabling $direction.";
-		return;
-	}
 	
 	# set values, returning new setting
+	
 	given ( ::dest_type( $id ) ){
 		when ('jack_client'){
 			if ( $::jack_running ){
@@ -463,15 +457,6 @@ sub set_source { # called from parser
  		". Make connections manually or set up a ports list.";
  		return;
 	} 
-	if( $source =~ /^\w+\.ports$/){
-		say("$source: file not found in ",project_root(),". Skipping."), return
-			unless -e join_path( project_root(), $source );
-		# check if ports file parses
-		# warn if ports do not exist
-		$track->set(source_type => 'jack_port');
-		$track->set(source_id => $source );
-		# make jack connections on setup/teardown TODO
-	}
 	my $old_source = $track->source;
 	my $new_source = $track->source($source);
 	my $object = $track->input_object;

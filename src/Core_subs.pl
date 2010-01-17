@@ -131,7 +131,7 @@ sub revise_prompt {
     $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
-	"nama $this_bus". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+	"nama". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
 }
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
@@ -3907,17 +3907,13 @@ sub update_send_bus {
 						 "dummy",
 }
 
-sub private_effect_chain_name {
-	my $name = "_$project_name/".$this_track->name.'_';
+sub new_effect_chain_name {
+	my $name = '_'.$this_track->name . '_';
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
 	@{ $this_track->effect_chain_stack }, 
 		grep{/$name/} keys %effect_chain;
 	$name . ++$i
-}
-sub profile_effect_chain_name {
-	my ($profile, $track_name) = @_;
-	"_$profile\:$track_name";
 }
 
 # too many functions in push and pop!!
@@ -3926,7 +3922,7 @@ sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
 	my ($track, %vals) = @_; 
 	say("no effects to store"), return unless $track->fancy_ops;
-	my $save_name   = $vals{save} || private_effect_chain_name();
+	my $save_name   = $vals{save} || new_effect_chain_name();
 	$debug and say "save name: $save_name"; 
 	new_effect_chain( $track, $save_name ); # current track effects
 	push @{ $track->effect_chain_stack }, $save_name;
@@ -3955,7 +3951,7 @@ sub new_effect_profile {
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
 	say qq(effect profile "$profile" created for tracks: @tracks);
-	map { new_effect_chain($tn{$_}, profile_effect_chain_name($profile, $_)); 
+	map { new_effect_chain($tn{$_}, private_effect_chain($profile, $_)); 
 	} @tracks;
 	$effect_profile{$profile}{tracks} = [ @tracks ];
 	save_effect_chains();
@@ -3967,7 +3963,11 @@ sub delete_effect_profile {
 	say qq(deleting effect profile: $name);
 	my @tracks = $effect_profile{$name};
 	delete $effect_profile{$name};
-	map{ delete $effect_chain{profile_effect_chain_name($name,$_)} } @tracks;
+	map{ delete $effect_chain{private_effect_chain($name,$_)} } @tracks;
+}
+sub private_effect_chain {
+	my ($profile, $track_name) = @_;
+	"_$profile\:$track_name";
 }
 
 sub apply_effect_profile {  # overwriting current effects
@@ -3977,10 +3977,10 @@ sub apply_effect_profile {  # overwriting current effects
 	my @missing = grep{ ! $tn{$_} } @tracks;
 	@missing and say(join(',',@missing), ": tracks do not exist. Aborting."),
 		return;
-	@missing = grep { ! $effect_chain{profile_effect_chain_name($profile,$_)} } @tracks;
+	@missing = grep { ! $effect_chain{private_effect_chain($profile,$_)} } @tracks;
 	@missing and say(join(',',@missing), ": effect chains do not exist. Aborting."),
 		return;
-	map{ $function->( $tn{$_}, profile_effect_chain_name($profile,$_)) } @tracks;
+	map{ $function->( $tn{$_}, private_effect_chain($profile,$_)) } @tracks;
 }
 sub list_effect_profiles { 
 	while( my $name = each %effect_profile){
@@ -4050,26 +4050,16 @@ sub cleanup_exit {
 }
 
 
-{ my ($orig_version, $cooked);
-sub cache_track { # launch subparts if conditions are met
-	my $track = shift;
-	say $track->name, ": preparing to cache.";
-	
-	# abort warning if necessary when sub-bus mix track
-	if( $::Bus::by_name{$track->name} ){ 
-		$track->rec_status ne 'OFF' or say(
-			"mix track ",$track->name, ": status is OFF. Aborting."), return;
-
-	# abort warning if necessary when normal track
-	} else { 
-		$track->rec_status eq 'MON' or say(
-			$track->name, ": track caching requires MON status. Aborting."), return;
-	}
-	say($track->name, ": no effects to cache!  Skipping."), return 
-		unless 	$track->fancy_ops 
+{ my ($track, $orig_version, $cooked);
+sub cache_track {
+	$track = shift;
+	print($track->name, ": track caching requires MON status.\n\n"), 
+		return unless $track->rec_status eq 'MON'
+			or $::Bus::by_name{$track->name} and $track->rec_status eq 'REC';
+	print($track->name, ": no effects to cache!  Skipping.\n\n"), 
+		return unless $track->fancy_ops 
 				or $track->has_insert
 				or $::Bus::by_name{$track->name};
-
 	prepare_to_cache($track);
 	complete_caching($track);
 }
@@ -4115,7 +4105,7 @@ sub complete_caching {
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
-	eval_iam("cs-set-length -1"); # to longest input object
+	eval_iam("cs-set-length $length");
 	eval_iam("start");
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
@@ -4141,22 +4131,7 @@ sub complete_caching {
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
 'uncache' will restore effects and set version $orig_version\n);
-
-		
-
-		# special handling for sub-bus mix track
-		
-		if ($track->rec_status eq 'REC'){ 
-			$track->set(rw => 'MON');
-			$ui->global_version_buttons(); # recreate
-			$ui->refresh();
-
-		# usual post-record handling is the default
-	
-		} else { post_rec_configure() }
-
-		reconfigure_engine();
-
+		post_rec_configure();
 	} else { say "track cache operation failed!"; }
 }
 }
@@ -4169,20 +4144,9 @@ sub uncache_track {
 		# blast away any existing effects, TODO: warn or abort	
 		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
 		map{ remove_effect($_)} $track->fancy_ops;
-
-		# original WAV -> WAV case: reset version 
-		if ( $cache_map->{$version}{original} ){ 
-			$track->set(active => $cache_map->{$version}{original});
-			print $track->name, ": setting uncached version ", $track->active, $/;
-
-		# assume a sub-bus mix track, i.e. REC -> WAV: set to REC
-		} else { 
-			$track->set(rw => 'REC') ;
-			say $track->name, ": setting sub-bus mix track to REC";
-		} 
-
-		add_effect_chain($track, $cache_map->{$version}{effect_chain})
-			if $cache_map->{$version}{effect_chain};
+		$track->set(active => $cache_map->{$version}{original});
+		print $track->name, ": setting uncached version ", $track->active, $/;
+		add_effect_chain($track, $cache_map->{$version}{effect_chain});
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
 }
