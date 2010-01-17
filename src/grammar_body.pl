@@ -61,7 +61,7 @@ path: /(["'])[\w-\. \/]+$1/ # used in: import_audio
 					# [word char, dot, space, hyphen, slash]{1,}
 					# close quote
 
-path: /[\w\-\.\/]+/ # [word char, dot, hyphen, slash]{1,}
+path: /~?[\w\-\.\/]+/ # optional tilde [word char, dot, hyphen, slash]{1,}
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
