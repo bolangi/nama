@@ -103,8 +103,8 @@ add_track: _add_track name2(s) end {
 add_tracks: _add_tracks name2(s) end {
 	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
 # set bus Brass
-set_track: _set_track 'bus' bus_name end {
-	$::this_track->set( group => $item{bus_name}); 1
+set_track: _set_track 'bus' existing_bus_name end {
+	$::this_track->set( group => $item{existing_bus_name}); 1
 } 
 set_track: _set_track key someval end {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
@@ -501,25 +501,28 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
 }
 
-bus_name: /[A-Z]\w+/ { 
-	if ( $::Bus::by_name{$item[1]} ){  $item[1] }
-	else { print("$item[1]: no such bus\n"); undef }
+existing_bus_name: bus_name {
+	if ( $::Bus::by_name{$item{bus_name}} ){  $item{bus_name} }
+	else { print("$item{bus_name}: no such bus\n"); undef }
 }
+
+bus_name: /[A-Z]\w+/
+
 destination: /\d+/ | /loop,\w+/ | name2
 # digits: soundcard channel
 # loop,identifier: loop device
 # name2: track name
 
-remove_bus: _remove_bus bus_name end { 
-	$::Bus::by_name{$item{bus_name}}->remove; 1; 
+remove_bus: _remove_bus existing_bus_name end { 
+	$::Bus::by_name{$item{existing_bus_name}}->remove; 1; 
 }
-update_send_bus: _update_send_bus bus_name end {
- 	::update_send_bus( $item{bus_name} );
+update_send_bus: _update_send_bus existing_bus_name end {
+ 	::update_send_bus( $item{existing_bus_name} );
  	1;
 }
 set_bus: _set_bus key someval { $::Bus::by_name{$::this_bus}->set($item{key} => $item{someval}); 1 }
 
-change_bus: _change_bus bus_name { $::this_bus = $item{bus_name} }
+change_bus: _change_bus existing_bus_name { $::this_bus = $item{existing_bus_name} }
 
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) }
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
