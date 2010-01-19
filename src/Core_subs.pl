@@ -131,7 +131,7 @@ sub revise_prompt {
     $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
-	"nama $this_bus". ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+	"nama ". ($this_bus eq 'Main' ? '': $this_bus). ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
 }
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
