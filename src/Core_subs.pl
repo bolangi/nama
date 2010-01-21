@@ -69,6 +69,8 @@ sub prepare {
 	print "\nproject_name: $project_name\n";
 	
 	load_project( name => $project_name, create => $opts{c}) ;
+	restore_effect_chains();
+	restore_effect_profiles();
 	1;	
 }
 sub issue_first_prompt {
@@ -1572,7 +1574,7 @@ sub transport_status {
 		say("Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$already_used{$tn{$_}->source},".")
 		if $duplicate_inputs{$_};
-	} $main->tracks;
+	} grep { $tn{$_}->rec_status eq 'REC' } $main->tracks;
 
 
 	# assume transport is stopped
@@ -3396,12 +3398,14 @@ sub command_process {
 				print "\n";
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
-				$this_track = $tn{$cmd};
+				$this_track = $tn{$cmd}; 
+				$this_bus = $this_track->group; 
 				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
+				$this_bus = $this_track->group; 
 				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){
