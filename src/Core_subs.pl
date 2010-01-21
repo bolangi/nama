@@ -1059,7 +1059,7 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	$g->add_path($mastering_mode ?  'Boost' : 'Master',
-			output_node($tn{Master}->send_type));
+			output_node($tn{Master}->send_type)) if $main_out;
  
 
 }
