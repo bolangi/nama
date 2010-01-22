@@ -2055,7 +2055,7 @@ sub remove_op {
 #
 #
 
-sub root_parent {
+sub root_parent { 
 	my $id = shift;
 	my $parent = $cops{$id}->{belongs_to};
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
@@ -2076,10 +2076,14 @@ sub cop_add {
 	my %p = %$p;
 	$debug and say yaml_out($p);
 
-	# do nothing if cop_id has been issued
+	# return an existing id 
 	return $p{cop_id} if $p{cop_id};
+	
 
-	local $cop_id = $magical_cop_id if $magical_cop_id;
+	# use an externally provided (magical) id or the
+	# incrementing counter
+	
+	my $id = $magical_cop_id || $cop_id;
 
 	# make entry in %cops with chain, code, display-type, children
 
@@ -2088,21 +2092,21 @@ sub cop_add {
 	my $i = $effect_i{$type};
 
 
-	$debug and print "Issuing a cop_id for track $n: $cop_id\n";
+	$debug and print "Issuing a cop_id for track $n: $id\n";
 
-	$cops{$cop_id} = {chain => $n, 
+	$cops{$id} = {chain => $n, 
 					  type => $type,
 					  display => $effects[$i]->{display},
 					  owns => [] }; 
 
-	$p->{cop_id} = $cop_id;
+	$p->{cop_id} = $id;
 
 	# set defaults
 	
 	if (! $p{values}){
 		my @vals;
 		$debug and print "no settings found, loading defaults if present\n";
-		my $i = $effect_i{ $cops{$cop_id}->{type} };
+		my $i = $effect_i{ $cops{$id}->{type} };
 		
 		# don't initialize first parameter if operator has a parent
 		# i.e. if operator is a controller
@@ -2112,8 +2116,8 @@ sub cop_add {
 			my $default = $effects[$i]->{params}->[$p]->{default};
 			push @vals, $default;
 		}
-		$debug and print "copid: $cop_id defaults: @vals \n";
-		$copp{$cop_id} = \@vals;
+		$debug and print "copid: $id defaults: @vals \n";
+		$copp{$id} = \@vals;
 	}
 
 	if ($parent_id) {
@@ -2122,35 +2126,40 @@ sub cop_add {
 		# store relationship
 		$debug and print "parent owns" , join " ",@{ $cops{$parent_id}->{owns}}, "\n";
 
-		push @{ $cops{$parent_id}->{owns}}, $cop_id;
-		$debug and print join " ", "my attributes:", (keys %{ $cops{$cop_id} }), "\n";
-		$cops{$cop_id}->{belongs_to} = $parent_id;
-		$debug and print join " ", "my attributes again:", (keys %{ $cops{$cop_id} }), "\n";
+		push @{ $cops{$parent_id}->{owns}}, $id;
+		$debug and print join " ", "my attributes:", (keys %{ $cops{$id} }), "\n";
+		$cops{$id}->{belongs_to} = $parent_id;
+		$debug and print join " ", "my attributes again:", (keys %{ $cops{$id} }), "\n";
 		$debug and print "parameter: $parameter\n";
 
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
 		
-		$copp{$cop_id}->[0] = $parameter + 1; 
+		$copp{$id}->[0] = $parameter + 1; 
 		
  		# find position of parent and insert child immediately afterwards
 
  		my $end = scalar @{ $ti{$n}->ops } - 1 ; 
  		for my $i (0..$end){
- 			splice ( @{$ti{$n}->ops}, $i+1, 0, $cop_id ), last
+ 			splice ( @{$ti{$n}->ops}, $i+1, 0, $id ), last
  				if $ti{$n}->ops->[$i] eq $parent_id
  		}
 	}
-	else { push @{$ti{$n}->ops }, $cop_id; } 
+	else { push @{$ti{$n}->ops }, $id; } 
 
 	# set values if present
 	
 	# ugly! The passed values ref may be used for multiple
 	# instances, so we copy it here [ @$values ]
 	
-	$copp{$cop_id} = [ @{$p{values}} ] if $p{values};
+	$copp{$id} = [ @{$p{values}} ] if $p{values};
 
-	$cop_id++; # return value then increment
+	# make sure the counter $cop_id will not occupy an
+	# already used value
+	
+	while( $cops{$cop_id}){$cop_id++};
+
+	$id;
 }
 
 sub effect_update_copp_set {
