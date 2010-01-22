@@ -29,7 +29,7 @@ sub new {
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
-		@_ }, $vals{class} // $class; # for restore
+		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
 sub group { $_[0]->name }
