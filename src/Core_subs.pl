@@ -133,7 +133,7 @@ sub revise_prompt {
     $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
-	"nama ". ($this_bus eq 'Main' ? '': $this_bus). ($this_track ? " [".$this_track->name."]" : '') . " ('h' for help)> "
+	"nama ". ($this_bus eq 'Main' ? '': "$this_bus "). ($this_track ? "[".$this_track->name."]" : '') . " ('h' for help)> "
 }
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
@@ -3399,13 +3399,13 @@ sub command_process {
 			} elsif ($tn{$cmd}) { 
 				$debug and print qq(Selecting track "$cmd"\n);
 				$this_track = $tn{$cmd}; 
-				$this_bus = $this_track->group; 
+				set_current_bus();
 				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
 				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
 				$this_track = $ti{$cmd};
-				$this_bus = $this_track->group; 
+				set_current_bus();
 				ecasound_select_chain( $this_track->n );
 				$predicate !~ /^\s*$/ and $parser->command($predicate);
 			} elsif ($iam_cmd{$cmd}){
@@ -3429,6 +3429,12 @@ sub ecasound_select_chain {
 	my $n = shift;
 	my $cmd = "c-select $n";
 	eval_iam($cmd) if eval_iam( 'cs-connected' ) =~ /$chain_setup_file/;
+}
+sub set_current_bus {
+	my $track = shift || $this_track;
+	if( $track->name =~ /Master|Mixdown/){ } # do nothing
+	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
+	else { $this_bus = $track->group }
 }
 sub is_bunch {
 	my $name = shift;
