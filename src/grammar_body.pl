@@ -212,6 +212,9 @@ show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
 group_rec: _group_rec end { ::Text::group_rec(); 1}
 group_mon: _group_mon end  { ::Text::group_mon(); 1}
 group_off: _group_off end { ::Text::group_off(); 1}
+bus_rec: _bus_rec end {$::Bus::by_name{$::this_bus}->set(rw => 'REC'); 1  }
+bus_mon: _bus_mon end {$::Bus::by_name{$::this_bus}->set(rw => 'MON'); 1  }
+bus_off: _bus_off end {$::Bus::by_name{$::this_bus}->set(rw => 'OFF'); 1  }
 mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}

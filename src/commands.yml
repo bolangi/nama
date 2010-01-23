@@ -335,15 +335,27 @@ group_mon:
   short: gmon M
   what: rec-disable user tracks
   parameters: none
-group_version:
-  type: group 
-  short: gn gver gv
-  what: set group version for monitoring (overridden by track-version settings)
 group_off:
   type: group
   short: goff Z 
   what: group OFF mode, exclude all user tracks from chain setup
   parameters: none
+group_version:
+  type: group 
+  short: gn gver gv
+  what: set group version for monitoring (overridden by track-version settings)
+bus_rec:
+  type: bus
+  short: brec
+  what: rec-enable bus tracks
+bus_mon:
+  type: bus
+  short: bmon
+  what: set group-mon mode for bus tracks
+bus_off:
+  type: bus
+  short: boff
+  what: set group-off mode for bus tracks
 new_bunch:
   type: group
   short: nb
