@@ -194,7 +194,7 @@ sub full_wav_path {
 sub current_version {	
 	my $track = shift;
 	my $last = $::use_group_numbering 
-					? $track->group_last
+					? ::Bus::overall_last()
 					: $track->last;
 	my $status = $track->rec_status;
 	#$debug and print "last: $last status: $status\n";
