@@ -52,7 +52,7 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 sub all { grep{ ! $::is_system_bus{$_->name} } values %by_name };
 
 sub overall_last { 
-	my $max = 1;
+	my $max = 0;
 	map{ my $last = $_->last; $max = $last if $last > $max  } all();
 	$max;
 }
