@@ -522,9 +522,14 @@ update_send_bus: _update_send_bus existing_bus_name end {
 }
 set_bus: _set_bus key someval { $::Bus::by_name{$::this_bus}->set($item{key} => $item{someval}); 1 }
 
-change_bus: _change_bus existing_bus_name { $::this_bus = $item{existing_bus_name} }
+change_bus: _change_bus existing_bus_name { 
+	return unless $::this_bus ne $item{existing_bus_name};
+	$::this_bus = $item{existing_bus_name};
+	$::this_track = $::tn{$item{existing_bus_name}} if
+		(ref $::Bus::by_name{$::this_bus}) =~ /SubBus/;
+	1 }
 
-list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) }
+list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};

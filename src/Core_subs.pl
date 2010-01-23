@@ -76,6 +76,7 @@ sub prepare {
 sub issue_first_prompt {
 	$term->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
 	&{$attribs->{'callback_read_char'}}();
+	set_current_bus();
 	print prompt();
 	$attribs->{already_prompted} = 0;
 }
@@ -133,7 +134,8 @@ sub revise_prompt {
     $term->callback_handler_install(prompt(), \&process_line);
 }
 sub prompt {
-	"nama ". ($this_bus eq 'Main' ? '': "$this_bus "). ($this_track ? "[".$this_track->name."]" : '') . " ('h' for help)> "
+	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
+		($this_track ? $this_track->name : '') . "] ('h' for help)> "
 }
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
@@ -3444,7 +3446,7 @@ sub ecasound_select_chain {
 }
 sub set_current_bus {
 	my $track = shift || $this_track;
-	if( $track->name =~ /Master|Mixdown/){ } # do nothing
+	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
 	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
 	else { $this_bus = $track->group }
 }
