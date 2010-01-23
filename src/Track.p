@@ -126,7 +126,7 @@ sub new {
 	::add_pan_control($n);
 	::add_volume_control($n);
 
-	#my $group = $::Group::by_name{ $object->group }; 
+	#my $group = $::Bus::by_name{ $object->group }; 
 
 	# create group if necessary
 	#defined $group or $group = ::Group->new( name => $object->group );
@@ -158,7 +158,7 @@ sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
 sub group_last {
 	my $track = shift;
-	my $group = $::Group::by_name{$track->group}; 
+	my $group = $::Bus::by_name{$track->group}; 
 	#print join " ", 'searching tracks:', $group->tracks, $/;
 	$group->last;
 }
@@ -206,7 +206,7 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 
-	my $group = $::Group::by_name{$track->group};
+	my $group = $::Bus::by_name{$track->group};
 	return $track->active if $track->active 
 				and grep {$track->active  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
@@ -232,7 +232,7 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
-	my $group = $::Group::by_name{$track->group};
+	my $group = $::Bus::by_name{$track->group};
 	$debug and say join " ", "group:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
@@ -742,7 +742,7 @@ sub current_version {
 	my $target = $::tn{$track->target};
 		$target->last + 1
 # 	if ($target->rec_status eq 'MON'
-# 		or $target->rec_status eq 'REC' and $::Group::by_name{$track->target}){
+# 		or $target->rec_status eq 'REC' and $::Bus::by_name{$track->target}){
 # 	}
 }
 sub current_wav {

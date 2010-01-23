@@ -8,36 +8,12 @@ use Carp;
 our(%by_name, $debug);
 *debug = \$::debug;
 our @ISA;
-initialize();
 
-use ::Object qw( 	name
-					rw
-					version 
-					n	
-					);
-
-sub initialize {
-	%by_name = ();
-}
-
-sub new {
-
-	# returns a reference to an object that is indexed by
-	# name and by an assigned index
-	#
-	
-	my $class = shift;
-	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	croak "name missing" unless $vals{name};
-	#(carp "group name already in use: $vals{name}\n"), 
-		return ($by_name{$vals{name}}) if $by_name{$vals{name}};
-	my $object = bless { 	
-		rw   	=> 'REC', 
-		@_ 			}, $class;
-	$by_name{ $object->name } = $object;
-	$object;
-}
+# use ::Object qw( 	name
+# 					rw
+# 					version 
+# 					n	
+# 					);
 
 
 sub tracks { # returns list of track names in group 

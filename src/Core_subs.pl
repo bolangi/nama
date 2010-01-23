@@ -674,24 +674,31 @@ sub initialize_project_data {
 	%bunch = ();	
 	
 	::Bus->initialize();
-	::Group->initialize();
-	create_groups();
+	create_system_buses();
 	::Track->initialize();
 
 	%inputs = %outputs = ();
 
 }
-sub create_groups {
+sub create_system_buses {
+	$debug2 and say "&create_system_buses";
 
-	::Group->new(name => 'Master'); # master fader
-	::Group->new(name => 'Mixdown', rw => 'REC');
-	::Group->new(name => 'Mastering'); # mastering network
-	::Group->new(name => 'Insert'); # auxiliary tracks for inserts
-	::Group->new(name => 'Cooked'); # used by CacheRec tracks
-	::Group->new(name => 'Temp'); # tracks to be removed
-								#	after generating chain setup
-	$main = ::Group->new(name => 'Main', rw => 'REC');
-	$null    = ::Group->new(name => 'null');
+	my $buses = q(
+			Master		# master fader track
+			Mixdown		# mixdown track
+			Mastering	# mastering network
+			Insert		# auxiliary tracks for inserts
+			Cooked		# for track caching
+			Temp		# temp tracks while generating setup
+			Main		# default mixer bus, new tracks assigned to Main
+			Null		# for tracks w/o signal input e.g. metronome
+	);
+	($buses) = strip_comments($buses); # need initial parentheses
+	@system_buses = split " ", $buses;
+	map{ ::Bus->new(name => $_ ) } @system_buses;
+
+	$main = $::Bus::by_name{Main};
+	$null = $::Bus::by_name{null};
 }
 
 ## track and wav file handling
@@ -738,7 +745,7 @@ sub add_track {
 	$track->source($ch_r) if $ch_r;
 #		$track->send($ch_m) if $ch_m;
 
-	my $group = $::Group::by_name{$track->group}; 
+	my $group = $::Bus::by_name{$track->group}; 
 	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
 
@@ -766,7 +773,7 @@ sub add_track_alias {
 sub add_slave_track {
 	my %h = @_;
 	say (qq[Group "$h{group}" does not exist, skipping.]), return
-		 unless $::Group::by_name{$h{group}};
+		 unless $::Bus::by_name{$h{group}};
 	say (qq[Target track "$h{target}" does not exist, skipping.]), return
 		 unless $tn{$h{target}};
 		::SlaveTrack->new(	
@@ -1027,7 +1034,7 @@ sub add_paths_for_null_input_tracks {
 	map{ $g->add_path('null_in', $_->name, 'Master') }
  	grep{ $_->rec_status eq 'REC' } 
 	map{$tn{$_}} 	# convert to Track objects
-	$::Group::by_name{null}->tracks; # list of Track names
+	$::Bus::by_name{Null}->tracks; # list of Track names
 }
 
 sub add_paths_for_aux_sends {
@@ -2922,9 +2929,11 @@ sub save_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
+	$debug and print "copying bus data\n";
 	@bus_data = (); # 
 	map{ push @bus_data, $_->hashref } 
-		grep{ $_->name !~ /Main|Null/} ::Bus::all();
+		grep{ $_->name !~ /Main|Null/} 
+		::Bus::all();
 
 	# prepare marks data for storage (new Mark objects)
 
@@ -2932,11 +2941,6 @@ sub save_state {
 	$debug and print "copying marks data\n";
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
-	$debug and print "copying groups data\n";
-	@groups_data = ();
-	map { push @groups_data, $_->hashref } ::Group::all();
-
-	$debug and print "copying bus data\n";
 
 
 	# save history
@@ -3130,11 +3134,11 @@ sub restore_state {
 			}
 		} grep{$_->{name} eq 'Master'} @tracks_data;
 
-	#  destroy and recreate all groups
+	#  destroy and recreate all buses
 
-	::Group::initialize();	
-	map { ::Group->new( %{ $_ } ) } @groups_data;  
-	create_groups(); # make sure we have them all
+	::Bus::initialize();	
+	create_system_buses(); 
+	#map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses
 	
@@ -3447,7 +3451,7 @@ sub set_current_bus {
 }
 sub is_bunch {
 	my $name = shift;
-	$::Group::by_name{$name} or $bunch{$name}
+	$::Bus::by_name{$name} or $bunch{$name}
 }
 sub bunch_tracks {
 	my $bunchy = shift;
@@ -3458,7 +3462,7 @@ sub bunch_tracks {
 	} elsif ( lc $bunchy eq 'rec' ){
 		$debug and print "special bunch: rec\n";
 		@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
-	} elsif ( my $group = $::Group::by_name{$bunchy}){
+	} elsif ( my $group = $::Bus::by_name{$bunchy}){
 		@tracks = $group->tracks;
 	} elsif ( lc $bunchy eq 'mon' ){
 		$debug and print "special bunch: mon\n";
@@ -3856,22 +3860,21 @@ sub undefine_region {
 
 sub add_sub_bus {
 	my ($name, $type, $id) = @_;
-	if ($::Group::by_name{$name} or $tn{$name}){
-		say qq(group, bus, or track "$name" already exists. Skipping."), return;
-	}
 	::SubBus->new( 
 		name => $name, 
 		send_type => $type // 'track',
 		send_id	 => $id // $name,
-		)
-	or carp("can't create bus!\n"), return;
-	::Group->new( name => $name, rw => 'REC');
+		);
 	# create mix track
-	
-	::add_track($name, 	source_type => 'track', 
-						source_id 	=> $name,
-						rec_defeat 	=> 1,
-						);
+	my @vals = (source_type => 'track', 
+				source_id 	=> $name,
+				rec_defeat 	=> 1);
+
+	if ($tn{$name}){
+		say qq($name: setting as mix track for bus "$name");
+		$tn{$name}->set( @vals );
+
+	} else { ::add_track($name, @vals); }
 }
 	
 sub add_send_bus {
@@ -3896,7 +3899,6 @@ sub add_send_bus {
 	my $class = $bus_type eq 'cooked' ? '::SendBusCooked' : '::SendBusRaw';
 	my $bus = $class->new( @args );
 
-	::Group->new( name => $name, rw => 'REC');
 	$bus or carp("can't create bus!\n"), return;
 
 	}

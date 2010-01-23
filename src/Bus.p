@@ -1,10 +1,16 @@
 
 # ------------  Bus --------------------
+#
+# The base class ::Bus is now used for grouping tracks
+# serving the role of ::Group, which is now a 
+# parent class.
 
 package ::Bus;
-use Modern::Perl; use Carp; our @ISA = '::Group';
+use Modern::Perl; use Carp; our @ISA = qw( ::Object ::Group );
 our $VERSION = 1.0;
 our ($debug, %by_name); 
+*debug = \$::debug;
+
 use ::Object qw(
 					name
 					rw
@@ -23,12 +29,17 @@ sub new {
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	if (! $vals{name} or $by_name{$vals{name}} or $::Group::by_name{$vals{name}}){
-		carp($vals{name},": missing or duplicate bus name. Skipping.\n");
+	if (! $vals{name}){
+		say "missing bus name"; 
+		return
+	}
+	if ( $by_name{$vals{name}} ){ 
+		say "$vals{name}: bus name already exists. Skipping.";
 		return;
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
+		rw   	=> 'REC', # for group control
 		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
@@ -62,13 +73,10 @@ sub remove {
 	my $bus = shift;
 
 	# all tracks returned to Main group
-	map{$::tn{$_}->set(group => 'Main') } $::Group::by_name{$bus->name}->tracks;
+	map{$::tn{$_}->set(group => 'Main') } $::Bus::by_name{$bus->name}->tracks;
 
 	# remove bus mix track
 	$::tn{$bus->name}->remove;
-
-	# delete group
-	$::Group::by_name{$bus->name}->remove;
 
 	# remove bus
 	delete $::Bus::by_name{$bus->name};
@@ -90,10 +98,7 @@ sub remove {
 	my $bus = shift;
 
 	# delete all (slave) tracks
-	map{$::tn{$_}->remove } $::Group::by_name{$bus->name}->tracks;
-
-	# delete group
-	$::Group::by_name{$bus->name}->remove;
+	map{$::tn{$_}->remove } $::Bus::by_name{$bus->name}->tracks;
 
 	# remove bus
 	delete $::Bus::by_name{$bus->name};
