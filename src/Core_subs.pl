@@ -698,6 +698,7 @@ sub create_system_buses {
 	($buses) = strip_comments($buses); # need initial parentheses
 	@system_buses = split " ", $buses;
 	map{ $is_system_bus{$_}++ } @system_buses;
+	delete $is_system_bus{Main}; # because we want to display it
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 
 	$main = $::Bus::by_name{Main};
