@@ -695,6 +695,7 @@ sub create_system_buses {
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	@system_buses = split " ", $buses;
+	map{ $is_system_bus{$_}++ } @system_buses;
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 
 	$main = $::Bus::by_name{Main};
@@ -2931,9 +2932,7 @@ sub save_state {
 
 	$debug and print "copying bus data\n";
 	@bus_data = (); # 
-	map{ push @bus_data, $_->hashref } 
-		grep{ $_->name !~ /Main|Null/} 
-		::Bus::all();
+	map{ push @bus_data, $_->hashref } ::Bus::all();
 
 	# prepare marks data for storage (new Mark objects)
 

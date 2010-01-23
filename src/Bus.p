@@ -44,7 +44,7 @@ sub new {
 	$by_name{$bus->name} = $bus;
 }
 sub group { $_[0]->name }
-sub all { values %by_name };
+sub all { grep{ ! $::is_system_bus{$_->name} } values %by_name };
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
 
