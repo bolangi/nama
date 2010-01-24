@@ -3455,23 +3455,31 @@ sub is_bunch {
 	my $name = shift;
 	$::Bus::by_name{$name} or $bunch{$name}
 }
+my %set_stat = ( 
+				 (map{ $_ => 'rw' } qw(rec mon off) ), 
+				 map{ $_ => 'rec_status' } qw(REC MON OFF)
+				 );
+
 sub bunch_tracks {
+	my $debug = 1;
 	my $bunchy = shift;
 	my @tracks;
-	if ( lc $bunchy eq 'all' ){
+	if ( my $bus = $::Bus::by_name{$bunchy}){
+		@tracks = $bus->tracks;
+	} elsif ( $bunchy eq 'all' ){
 		$debug and print "special bunch: all\n";
-		@tracks = ::Track::user();
-	} elsif ( lc $bunchy eq 'rec' ){
-		$debug and print "special bunch: rec\n";
-		@tracks = grep{$tn{$_}->rec_status eq 'REC'} ::Track::user();
-	} elsif ( my $group = $::Bus::by_name{$bunchy}){
-		@tracks = $group->tracks;
-	} elsif ( lc $bunchy eq 'mon' ){
-		$debug and print "special bunch: mon\n";
-		@tracks = grep{$tn{$_}->rec_status eq 'MON'} ::Track::user();
-	} elsif ( lc $bunchy eq 'off' ){
-		$debug and print "special bunch: off\n";
-		@tracks = grep{$tn{$_}->rec_status eq 'OFF'} ::Track::user();
+		@tracks = grep{ ! $::Bus::by_name{$_} } $::Bus::by_name{Main}->tracks;
+	} elsif ( $bunchy eq 'mix' ){
+		$debug and print "special bunch: all\n";
+		@tracks = grep{ $::Bus::by_name{$_} } $::Bus::by_name{Main}->tracks;
+	} elsif ( $bunchy eq 'bus' ){
+		$debug and print "special bunch: bus\n";
+		@tracks = $::Bus::by_name{$this_bus}->tracks;
+	} elsif ( my $method = $set_stat{$bunchy} ){
+		$debug and say "special bunch: $bunchy, method: $method";
+		$bunchy = uc $bunchy;
+		@tracks = grep{$tn{$_}->$method eq $bunchy} 
+					$::Bus::by_name{$this_bus}->tracks
 	} elsif ($bunchy =~ /\s/  # multiple identifiers
 		or $tn{$bunchy} 
 		or $bunchy !~ /\D/ and $ti{$bunchy}){ 

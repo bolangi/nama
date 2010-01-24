@@ -610,8 +610,33 @@ Main group to OFF.
 
 A bunch is just a list of track names. Bunch names are used
 with the keyword C<for> to apply one or more commands to to several
-tracks at once. A group name can also be treated as a bunch
-name.
+tracks at once. A bunch can be created with the C<new_bunch>
+command. Any bus name can also be treated as a bunch.
+Finally, a number of special bunch keywords are available.
+
+=over 12
+
+=item B<all>
+
+Standard user tracks in the Main (default) bus
+
+=item B<mix>
+
+Sub-bus mix tracks in the Main bus
+
+=item B<bus>
+
+All tracks in the current bus
+
+=item B<rec>, B<mon>, B<off>
+
+All tracks with the corresponding I<setting> in the current bus
+
+=item B<REC>, B<MON>, B<OFF>
+
+All tracks with the corresponding I<status> in the current bus
+
+=back
 
 =head2 BUSES
 
