@@ -49,6 +49,7 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 
 ## class methods
 
+# sub buses, and Main
 sub all { grep{ ! $::is_system_bus{$_->name} } values %by_name };
 
 sub overall_last { 

@@ -1844,7 +1844,7 @@ sub rec_cleanup {
 sub post_rec_configure {
 
 		$ui->global_version_buttons(); # recreate
-		$main->set( rw => 'MON');
+		map{ $_->set(rw => 'MON')} ::Bus::all();
 		$ui->refresh();
 		reconfigure_engine();
 }
@@ -3474,7 +3474,7 @@ sub bunch_tracks {
 		@tracks = grep{ $::Bus::by_name{$_} } $::Bus::by_name{Main}->tracks;
 	} elsif ( $bunchy eq 'bus' ){
 		$debug and print "special bunch: bus\n";
-		@tracks = $::Bus::by_name{$this_bus}->tracks;
+		@tracks = grep{ ! $::Bus::by_name{$_} } $::Bus::by_name{$this_bus}->tracks;
 	} elsif ( my $method = $set_stat{$bunchy} ){
 		$debug and say "special bunch: $bunchy, method: $method";
 		$bunchy = uc $bunchy;

@@ -249,8 +249,12 @@ sub rec_status {
 	# so the result will be REC or MON if conditions are met
 
 	# second, set REC status if possible
-	
-	elsif (	$track->rw eq 'REC' and $group->rw eq 'REC') {
+
+		# we allow a mix track to be REC, even if the 
+		# bus it belongs to is set to MON
+			
+	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
+				or $::Bus::by_name{$track->name}) ){
 		given( $track->source_type){
 			when('jack_client'){
 				::jack_client($track->source_id,'output')
