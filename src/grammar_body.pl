@@ -262,9 +262,17 @@ off: 'off' end {$::this_track->set_off(); 1}
 rec: 'rec' end { $::this_track->set_rec(); 1}
 mon: 'mon' end {$::this_track->set_mon(); 1}
 rec_defeat: _rec_defeat end { 
-	$::this_track->set(rec_defeat => !  $::this_track->rec_defeat);
-	print $::this_track->name, ": WAV record ",
-		($::this_track->rec_defeat ? "disabled" : "enabled"), $/;
+	$::this_track->set(rec_defeat => 1);
+	print $::this_track->name, ": WAV recording disabled!\n";
+}
+rec_enable: _rec_enable end { 
+	$::this_track->set(rec_defeat => 0);
+	print $::this_track->name, ": WAV recording enabled";
+	my $rw = $::Bus::by_name{$::this_track->group}->rw;
+	if ( $rw ne 'REC'){
+		print qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n),
+		"No WAV file will be recorded.\n";
+	} else { print "!\n" }
 }
 
 set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}

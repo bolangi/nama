@@ -254,7 +254,8 @@ sub rec_status {
 		# bus it belongs to is set to MON
 			
 	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
-				or $::Bus::by_name{$track->name}) ){
+				or $::Bus::by_name{$track->name}
+					and $track->rec_defeat) ){
 		given( $track->source_type){
 			when('jack_client'){
 				::jack_client($track->source_id,'output')

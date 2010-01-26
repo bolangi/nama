@@ -167,7 +167,12 @@ off:
 rec_defeat:
   type: track
   short: rd
-  what: toggle rec-defeat
+  what: prevent writing a WAV file for current track
+  parameters: none
+rec_enable:
+  type: track
+  short: re
+  what: allow writing a WAV file for current track
   parameters: none
 source:
   type: track
