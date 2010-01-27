@@ -38,8 +38,6 @@ name: /\w[\w:,]*\/?/ # word character
 					 # link_track (too flexible?) show_track
 					 # set_send
 					 # add_controller add_effect append_effect insert_effect
-					 # new_effect_chain add_effect_chain list_effect_chains
-					 # delete_effect_chain overwrite_effect_chain
 name2: /[\w\-+:]+/ # word characters, +, -, :
 					# used in: help, do_script
 name3: /\S+/		# non-space characters
@@ -48,6 +46,8 @@ name4: /\w+/		# word characters
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
 					 # remove_mark new_mark name_mark to_mark
+					 # new_effect_chain add_effect_chain list_effect_chains
+					 # delete_effect_chain overwrite_effect_chain
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -578,21 +578,21 @@ remove_insert: _remove_insert end {
 
 cache_track: _cache_track end { ::cache_track($::this_track); 1 }
 uncache_track: _uncache_track end { ::uncache_track($::this_track); 1 }
-new_effect_chain: _new_effect_chain name op_id(s?) end {
-	#print "name $item{name}, ops: ", @{$item{'op_id(s?)'}}, $/;
-	::new_effect_chain($::this_track, $item{name}, @{ $item{'op_id(s?)'} });
+new_effect_chain: _new_effect_chain name4 op_id(s?) end {
+	#print "name4 $item{name4}, ops: ", @{$item{'op_id(s?)'}}, $/;
+	::new_effect_chain($::this_track, $item{name4}, @{ $item{'op_id(s?)'} });
 	1;
 }
-add_effect_chain: _add_effect_chain name end {
-	::add_effect_chain($::this_track, $item{name});
+add_effect_chain: _add_effect_chain name4 end {
+	::add_effect_chain($::this_track, $item{name4});
 	1;
 }
-delete_effect_chain: _delete_effect_chain name(s) end {
-	map{ delete $::effect_chain{$_} } @{ $item{'name(s)'} };
+delete_effect_chain: _delete_effect_chain name4(s) end {
+	map{ delete $::effect_chain{$_} } @{ $item{'name4(s)'} };
 	1;
 }
-list_effect_chains: _list_effect_chains name(s?) end {
-	::list_effect_chains( @{ $item{'name(s?)'} } ); 1;
+list_effect_chains: _list_effect_chains name4(s?) end {
+	::list_effect_chains( @{ $item{'name4(s?)'} } ); 1;
 }
 
     
