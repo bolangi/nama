@@ -34,7 +34,6 @@ name: /\w[\w:,]*\/?/ # word character
 					 # [word character, comma, colon]{0,}
 					 # optional slash
 					 # used in: help_effect, save_state, create_project
-					 # get_state
 					 # link_track (too flexible?) show_track
 					 # set_send
 					 # add_controller add_effect append_effect insert_effect
@@ -48,6 +47,7 @@ name4: /\w+/		# word characters
 					 # remove_mark new_mark name_mark to_mark
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
+					 # get_state
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -81,10 +81,10 @@ load_project: _load_project name3 end {
 	::Text::t_load_project $item{name3} ; 1}
 save_state: _save_state name end { ::save_state( $item{name}); 1}
 save_state: _save_state end { ::save_state(); 1}
-get_state: _get_state name end {
+get_state: _get_state name4 end {
  	::load_project( 
  		name => $::project_name,
- 		settings => $item{name}
+ 		settings => $item{name4}
  		); 1}
 get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
