@@ -33,21 +33,23 @@ jack_port: /\w[-+:. \w]+/
 name: /\w[\w:,]*\/?/ # word character 
 					 # [word character, comma, colon]{0,}
 					 # optional slash
-					 # used in: help_effect, save_state, create_project
-					 # link_track (too flexible?) show_track
+					 # used in: help_effect 
 					 # set_send
 					 # add_controller add_effect append_effect insert_effect
 name2: /[\w\-+:]+/ # word characters, +, -, :
-					# used in: help, do_script
-name3: /\S+/		# non-space characters
-					# used in: load_project
+					# used in: help, do_script add_track
+					 # link_track show_track target 
+project_name_re: /\w[\w\-+:]*\/?/	
+					# used in: load_project 
+project_name_re_no_slash: /\w[\w\-+:]*/	
+					# used in create_project
 name4: /\w+/		# word characters
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
 					 # remove_mark new_mark name_mark to_mark
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
-					 # get_state
+name5: /\w[\w.]*/	 # save_state, get_state
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -74,17 +76,17 @@ help: _help name2  { ::Text::help($item{name2}) ; 1}
 help: _help end { print $::help_screen ; 1}
 project_name: _project_name end { 
 	print "project name: ", $::project_name, $/; 1}
-create_project: _create_project name end { 
-	::Text::t_create_project $item{name} ; 1}
+create_project: _create_project project_name_re_no_slash end { 
+	::Text::t_create_project $item{project_name_re_no_slash} ; 1}
 list_projects: _list_projects end { ::list_projects() ; 1}
-load_project: _load_project name3 end {
-	::Text::t_load_project $item{name3} ; 1}
-save_state: _save_state name end { ::save_state( $item{name}); 1}
+load_project: _load_project project_name_re end {
+	::Text::t_load_project $item{project_name_re} ; 1}
+save_state: _save_state name5 end { ::save_state( $item{name5}); 1}
 save_state: _save_state end { ::save_state(); 1}
-get_state: _get_state name4 end {
+get_state: _get_state name5 end {
  	::load_project( 
  		name => $::project_name,
- 		settings => $item{name4}
+ 		settings => $item{name5}
  		); 1}
 get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
@@ -98,10 +100,11 @@ rewind: _rewind value end {
 	::rewind( $item{value} ); 1}
 to_start: _to_start end { ::to_start(); 1 }
 to_end: _to_end end { ::to_end(); 1 }
-add_track: _add_track name2(s) end {
-	::add_track(@{$item{'name2(s)'}}); 1}
-add_tracks: _add_tracks name2(s) end {
-	map{ ::add_track($_)  } @{$item{'name2(s)'}}; 1}
+add_track: _add_track track_name(s) end {
+	::add_track(@{$item{'track_name(s)'}}); 1}
+add_tracks: _add_tracks track_name(s) end {
+	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
+track_name: name2
 # set bus Brass
 set_track: _set_track 'bus' existing_bus_name end {
 	$::this_track->set( group => $item{existing_bus_name}); 1
@@ -115,13 +118,13 @@ remove_track: _remove_track end {
 	$::this_track->remove; 
 	1;
 }
-link_track: _link_track name target project end {
-	::add_track_alias_project($item{name}, $item{target}, $item{project}); 1
+link_track: _link_track track_name target project end {
+	::add_track_alias_project($item{track_name}, $item{target}, $item{project}); 1
 }
-link_track: _link_track name target end {
-	::add_track_alias($item{name}, $item{target}); 1
+link_track: _link_track track_name target end {
+	::add_track_alias($item{track_name}, $item{target}); 1
 }
-target: name
+target: track_name
 project: name
 set_region: _set_region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
