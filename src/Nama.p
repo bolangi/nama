@@ -410,7 +410,7 @@ track status in text and GUI form.
 =head2 DYNAMIC COMMANDS
 
 Once a chain setup is loaded and the engine is launched,
-another subset of commands controls the realtime behavior of
+another set of commands controls the realtime behavior of
 the audio processing engine. Commonly used I<dynamic
 commands> include transport C<start> and C<stop>; playback
 head repositioning commands such C<forward>, C<rewind> and
@@ -427,7 +427,7 @@ the user's home directory.
 =head1 Tk GRAPHICAL UI 
 
 Invoked by default if Tk is installed, this interface
-provides a large subset of Nama's functionality on two
+provides a subset of Nama's functionality on two
 panels, one for general control, the second for effects. 
 
 The general panel has buttons for project create, load
@@ -455,11 +455,22 @@ Press the I<Enter> key if necessary to get the following command prompt.
 
 =over 12
 
-C<nama ('h' for help)E<gt>>
+C<nama [sax] ('h' for help)E<gt>>
 
 =back
 
-You can enter Nama and Ecasound commands directly, Perl code
+In this instance, 'sax' is the current track.
+
+When using sub-buses, the bus is indicated before
+the track:
+
+=over 12
+
+C<nama [Strings/violin] ('h' for help)E<gt>>
+
+=back
+
+At the prompt, you can enter Nama and Ecasound commands, Perl code
 preceded by C<eval> or shell code preceded by C<!>.
 
 Multiple commands on a single line are allowed if delimited
@@ -479,20 +490,15 @@ commands, plugin/preset/controller names, and project names.
 
 =head1 TRACKS
 
-Ecasound deals with audio processing at the level audio and
-loop devices, files, and signal-processing chains. Nama
-provides tracks, buses, marks and other high-level
-abstractions. Chief among these are tracks.
- 
 Each track has a descriptive name (i.e. vocal) and an
 integer track-number assigned when the track is created.
-The following paragraphs describes track fields and
+The following paragraphs describes track attributes and
 their settings.
 
 =head2 WIDTH
 
-Specifying 'mono' means one-channel input and recording the
-raw signal as a mono WAV file. The mono signal is duplicated
+Specifying 'mono' means a one-channel input, which is
+recorded as a mono WAV file. The mono signal is duplicated
 to a stereo signal with pan in the default mixer
 configuration.
 
