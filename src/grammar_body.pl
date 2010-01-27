@@ -37,7 +37,6 @@ name: /\w[\w:,]*\/?/ # word character
 					 # get_state
 					 # link_track (too flexible?) show_track
 					 # set_send
-					 # remove_mark new_mark name_mark to_mark
 					 # add_controller add_effect append_effect insert_effect
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
@@ -48,6 +47,7 @@ name3: /\S+/		# non-space characters
 name4: /\w+/		# word characters
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
+					 # remove_mark new_mark name_mark to_mark
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -327,8 +327,8 @@ remove_mark: _remove_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];
 	1;}
-remove_mark: _remove_mark name end { 
-	my $mark = $::Mark::by_name{$item{name}};
+remove_mark: _remove_mark name4 end { 
+	my $mark = $::Mark::by_name4{$item{name4}};
 	$mark->remove if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
@@ -336,7 +336,7 @@ remove_mark: _remove_mark end {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
-new_mark: _new_mark name end { ::drop_mark $item{name}; 1}
+new_mark: _new_mark name4 end { ::drop_mark $item{name4}; 1}
 new_mark: _new_mark end {  ::drop_mark(); 1}
 next_mark: _next_mark end { ::next_mark(); 1}
 previous_mark: _previous_mark end { ::previous_mark(); 1}
@@ -348,7 +348,7 @@ loop_enable: _loop_enable someval(s) end {
 	@::loop_endpoints = @::loop_endpoints[0,1];
 	1;}
 loop_disable: _loop_disable end { $::loop_enable = 0; 1}
-name_mark: _name_mark name end {$::this_mark->set_name( $item{name}); 1}
+name_mark: _name_mark name4 end {$::this_mark->set_name( $item{name4}); 1}
 list_marks: _list_marks end { 
 	my $i = 0;
 	map{ print( $_->time == $::this_mark->time ? q(*) : q()
@@ -362,8 +362,8 @@ to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->jump_here;
 	1;}
-to_mark: _to_mark name end { 
-	my $mark = $::Mark::by_name{$item{name}};
+to_mark: _to_mark name4 end { 
+	my $mark = $::Mark::by_name4{$item{name4}};
 	$mark->jump_here if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
