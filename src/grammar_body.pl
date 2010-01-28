@@ -30,15 +30,14 @@ jack_port: /\w[-+:. \w]+/
 					# used in: source
 					# word character
 					# [plus, minus, colon, period, space, word char]{1,}
-name: /\w[\w:,]*\/?/ # word character 
+name: /\w[\w:,]*/ # word character 
 					 # [word character, comma, colon]{0,}
-					 # optional slash
 					 # used in: help_effect 
-					 # set_send
+					 # send
 					 # add_controller add_effect append_effect insert_effect
 name2: /[\w\-+:]+/ # word characters, +, -, :
-					# used in: help, do_script add_track
-					 # link_track show_track target 
+					# used in: help, do_script track_name
+					 # 
 project_name_re: /\w[\w\-+:]*\/?/	
 					# used in: load_project 
 project_name_re_no_slash: /\w[\w\-+:]*/	
