@@ -26,10 +26,10 @@ parameter: /\d+/	# digits {1,}
 # last: ('last' | '$' ) # word last or dollar sign {1}
 					# UNUSED
 dd: /\d+/			# digits {1,}
-jack_port: /\w[-+:. \w]+/ 
+jack_port: /\w[-+:.\w]+/ 
 					# used in: source
 					# word character
-					# [plus, minus, colon, period, space, word char]{1,}
+					# [plus, minus, colon, period, word char]{1,}
 name: /\w[\w:,]*/ # word character 
 					 # [word character, comma, colon]{0,}
 					 # used in: help_effect 
@@ -231,8 +231,9 @@ exit: _exit end {   ::save_state($::state_store_file);
 
 source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
-source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
-source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
+# jack_port regex includes digits 'jack' 
+#source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
+#source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
@@ -244,7 +245,7 @@ source: _source end {
 	}
 	1;
 }
-send: _send name { $::this_track->set_send($item{name}); 1}
+send: _send jack_port { $::this_track->set_send($item{jack_port}); 1}
 send: _send end { $::this_track->set_send(); 1}
 remove_send: _remove_send end {
 					$::this_track->set(send_type => undef);
