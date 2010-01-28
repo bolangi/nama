@@ -39,8 +39,9 @@ project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
 anytag: /\S+/
-ident: /\w+/   | <error: illegal identifier, word characters only!>	 
+ident: /[-\w+]/   | <error: illegal identifier, word characters only!>	 
 					# used in: bunch_name, effect_profile,
+					# track_name
 					# existing_effect_profile
 					# save_state, get_state
 					 # remove_mark new_mark name_mark to_mark
