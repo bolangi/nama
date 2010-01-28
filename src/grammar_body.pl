@@ -1,3 +1,6 @@
+#command: test
+#test: 'test' shellish { print "found $item{shellish}\n" }
+
 key: /\w+/ 			# word characters {1,} 
 					# used in: set_track
 
@@ -23,21 +26,20 @@ float: /\d+\.\d+/   # used in: shift_track (start_position)
 
 op_id: /[A-Z]+/		# capital letters {1,}
 parameter: /\d+/	# digits {1,}
-# last: ('last' | '$' ) # word last or dollar sign {1}
-					# UNUSED
 dd: /\d+/			# digits {1,}
-jack_port: shellish
-shellish: /(["'])[^"']+$1/ { $item[1]=~ s/^.//; $item[1] }
-shellish: /\S+/
-effect: /\w[\w:]*/   | <error: illegal characters in effect id>
+shellish: /"(.+)"/ { $1 }
+shellish: /'(.+)'/ { $1 }
+shellish: anytag | <error>
 
 					# used in: help, do_script
 					 # 
-project_id: name4 slash(?) { $item{name4} }
+jack_port: shellish
+effect: /\w[\w:]*/   | <error: illegal identifier, only word characters and colon allowed>
+project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
-name3: /\S+/
-name4: /\w+/   | <error: illegal identifier word characters only!>	 
+anytag: /\S+/
+ident: /\w+/   | <error: illegal identifier, word characters only!>	 
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
 					# save_state, get_state
@@ -52,21 +54,17 @@ markname: /\w+/ { 	 # word characters
 	$item[1];
 }
 #region_default_end: 'END' | ''
-path: /(["'])[\w-\. \/]+$1/ # used in: import_audio
-					# single- or double-quote
-					# [word char, dot, space, hyphen, slash]{1,}
-					# close quote
-
 path: /~?[\w\-\.\/]+/ # optional tilde [word char, dot, hyphen, slash]{1,}
+path: shellish
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
 help_effect: _help_effect effect end { ::Text::help_effect($item{effect}) ; 1}
-find_effect: _find_effect name3(s) { 
-	::Text::find_effect(@{$item{"name3(s)"}}); 1}
+find_effect: _find_effect anytag(s) { 
+	::Text::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' end { ::pager($::commands_yml); 1}
-help: _help name3  { ::Text::help($item{name3}) ; 1}
+help: _help anytag  { ::Text::help($item{anytag}) ; 1}
 help: _help end { print $::help_screen ; 1}
 project_name: _project_name end { 
 	print "project name: ", $::project_name, $/; 1}
@@ -75,12 +73,12 @@ create_project: _create_project project_id end {
 list_projects: _list_projects end { ::list_projects() ; 1}
 load_project: _load_project project_id end {
 	::Text::t_load_project $item{project_id} ; 1}
-save_state: _save_state name4 end { ::save_state( $item{name4}); 1}
+save_state: _save_state ident end { ::save_state( $item{ident}); 1}
 save_state: _save_state end { ::save_state(); 1}
-get_state: _get_state name4 end {
+get_state: _get_state ident end {
  	::load_project( 
  		name => $::project_name,
- 		settings => $item{name4}
+ 		settings => $item{ident}
  		); 1}
 get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
@@ -98,7 +96,7 @@ add_track: _add_track track_name(s) end {
 	::add_track(@{$item{'track_name(s)'}}); 1}
 add_tracks: _add_tracks track_name(s) end {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
-track_name: name4
+track_name: ident
 # set bus Brass
 set_track: _set_track 'bus' existing_bus_name end {
 	$::this_track->set( group => $item{existing_bus_name}); 1
@@ -119,7 +117,7 @@ link_track: _link_track track_name target end {
 	::add_track_alias($item{track_name}, $item{target}); 1
 }
 target: track_name
-project: name4
+project: ident
 set_region: _set_region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
@@ -154,7 +152,7 @@ shift_track: _shift_track start_position end {
 }
 
 start_position:  float | mark_name
-mark_name: name4
+mark_name: ident
 
 unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
@@ -325,8 +323,8 @@ remove_mark: _remove_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];
 	1;}
-remove_mark: _remove_mark name4 end { 
-	my $mark = $::Mark::by_name{$item{name4}};
+remove_mark: _remove_mark ident end { 
+	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->remove if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
@@ -334,7 +332,7 @@ remove_mark: _remove_mark end {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
-new_mark: _new_mark name4 end { ::drop_mark $item{name4}; 1}
+new_mark: _new_mark ident end { ::drop_mark $item{ident}; 1}
 new_mark: _new_mark end {  ::drop_mark(); 1}
 next_mark: _next_mark end { ::next_mark(); 1}
 previous_mark: _previous_mark end { ::previous_mark(); 1}
@@ -346,7 +344,7 @@ loop_enable: _loop_enable someval(s) end {
 	@::loop_endpoints = @::loop_endpoints[0,1];
 	1;}
 loop_disable: _loop_disable end { $::loop_enable = 0; 1}
-name_mark: _name_mark name4 end {$::this_mark->set_name( $item{name4}); 1}
+name_mark: _name_mark ident end {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks end { 
 	my $i = 0;
 	map{ print( $_->time == $::this_mark->time ? q(*) : q()
@@ -360,8 +358,8 @@ to_mark: _to_mark dd end {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->jump_here;
 	1;}
-to_mark: _to_mark name4 end { 
-	my $mark = $::Mark::by_name{$item{name4}};
+to_mark: _to_mark ident end { 
+	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->jump_here if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
@@ -447,11 +445,11 @@ group_version: _group_version dd end {
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::main->set( version => $n ); 1}
-new_bunch: _new_bunch name4(s) { ::Text::bunch( @{$item{'name4(s)'}}); 1}
+new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
-remove_bunches: _remove_bunches name4(s) { 
- 	map{ delete $::bunch{$_} } @{$item{'name4(s)'}}; 1}
-add_to_bunch: _add_to_bunch name4(s) end { ::Text::add_to_bunch( @{$item{'name4(s)'}});1 }
+remove_bunches: _remove_bunches ident(s) { 
+ 	map{ delete $::bunch{$_} } @{$item{'ident(s)'}}; 1}
+add_to_bunch: _add_to_bunch ident(s) end { ::Text::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions end { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register end { 
@@ -545,8 +543,6 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 send_id: jack_port
 return_id: jack_port
 
-shellish: /(["'])[^"']+$1/ { $item[1]=~ s/^.//; $item[1] }
-shellish: /\S+/
 set_insert_wetness: _set_insert_wetness parameter end {
 	my $p = $item{parameter};
 	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
@@ -575,21 +571,21 @@ remove_insert: _remove_insert end {
 
 cache_track: _cache_track end { ::cache_track($::this_track); 1 }
 uncache_track: _uncache_track end { ::uncache_track($::this_track); 1 }
-new_effect_chain: _new_effect_chain name4 op_id(s?) end {
-	#print "name4 $item{name4}, ops: ", @{$item{'op_id(s?)'}}, $/;
-	::new_effect_chain($::this_track, $item{name4}, @{ $item{'op_id(s?)'} });
+new_effect_chain: _new_effect_chain ident op_id(s?) end {
+	#print "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}}, $/;
+	::new_effect_chain($::this_track, $item{ident}, @{ $item{'op_id(s?)'} });
 	1;
 }
-add_effect_chain: _add_effect_chain name4 end {
-	::add_effect_chain($::this_track, $item{name4});
+add_effect_chain: _add_effect_chain ident end {
+	::add_effect_chain($::this_track, $item{ident});
 	1;
 }
-delete_effect_chain: _delete_effect_chain name4(s) end {
-	map{ delete $::effect_chain{$_} } @{ $item{'name4(s)'} };
+delete_effect_chain: _delete_effect_chain ident(s) end {
+	map{ delete $::effect_chain{$_} } @{ $item{'ident(s)'} };
 	1;
 }
-list_effect_chains: _list_effect_chains name4(s?) end {
-	::list_effect_chains( @{ $item{'name4(s?)'} } ); 1;
+list_effect_chains: _list_effect_chains ident(s?) end {
+	::list_effect_chains( @{ $item{'ident(s?)'} } ); 1;
 }
 
     
@@ -599,24 +595,22 @@ bypass_effects:   _bypass_effects end {
 restore_effects: _restore_effects end { 
 	::restore_effects($::this_track) and
 	print $::this_track->name, ": restoring effects\n"; 1}
-overwrite_effect_chain: _overwrite_effect_chain name4 end {
-	::overwrite_effect_chain($::this_track, $item{name4}); 1;
+overwrite_effect_chain: _overwrite_effect_chain ident end {
+	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
-bunch_name: name4 { 
-	::is_bunch($item{name4}) 
-		or print("$item{name4}: no such bunch name.\n"), return; 
-	$item{name4};
+bunch_name: ident { 
+	::is_bunch($item{ident}) 
+		or print("$item{ident}: no such bunch name.\n"), return; 
+	$item{ident};
 }
-effect_profile_name: name4
-existing_effect_profile_name: name4 {
-	print ("$item{name4}: no such effect profile\n"), return
-		unless $::effect_profile{$item{name4}};
-	$item{name4}
+effect_profile_name: ident
+existing_effect_profile_name: ident {
+	print ("$item{ident}: no such effect profile\n"), return
+		unless $::effect_profile{$item{ident}};
+	$item{ident}
 }
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name end {
 	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
-#new_effect_profile: _new_effect_profile bunch_name end {
-	#::new_effect_profile($item{bunch_name}, $item{bunch_name}); 1 }
 delete_effect_profile: _delete_effect_profile existing_effect_profile_name end {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile effect_profile_name end {
