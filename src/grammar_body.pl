@@ -30,9 +30,6 @@ jack_port: /\w[-+:.\w]+/
 					# used in: source
 					# word character
 					# [plus, minus, colon, period, word char]{1,}
-name: /\w[\w:,]*/ # word character 
-					 # [word character, comma, colon]{0,}
-					 # used in: help_effect 
 effect: /\w[\w:]*/
 name2: /[\w\-+:]+/ # word characters, +, -, :
 					# used in: help, do_script track_name
@@ -41,6 +38,7 @@ project_name_re: /\w[\w\-+:]*\/?/
 					# used in: load_project 
 project_name_re_no_slash: /\w[\w\-+:]*/	
 					# used in create_project
+name3: /\S+/
 name4: /\w+/		# word characters
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
@@ -132,8 +130,8 @@ set_region: _set_region beginning end { ::set_region( $item{beginning}, 'END' );
 	1;
 }
 remove_region: _remove_region end { ::remove_region(); 1; }
-new_region: _new_region beginning ending name(?) end {
-	my ($name) = @{$item{'name(?)'}};
+new_region: _new_region beginning ending track_name(?) end {
+	my ($name) = @{$item{'track_name(?)'}};
 	::new_region(@item{qw(beginning ending)}, $name); 1
 }
 
