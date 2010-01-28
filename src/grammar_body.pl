@@ -26,14 +26,13 @@ parameter: /\d+/	# digits {1,}
 # last: ('last' | '$' ) # word last or dollar sign {1}
 					# UNUSED
 dd: /\d+/			# digits {1,}
-jack_port: /\w[-+:. \w]+/ 
-					# used in: source
+jack_port: /\w[-+:.\w]+/ 
 					# word character
 					# [plus, minus, colon, period, space, word char]{1,}
-name: /\w[\w:,]*/ # word character 
+					# used in: source, send
+effect_id: /\w[\w:]*/ # word character 
 					 # [word character, comma, colon]{0,}
 					 # used in: help_effect 
-					 # send
 					 # add_controller add_effect append_effect insert_effect
 name2: /[\w\-+:]+/ # word characters, +, -, :
 					# used in: help, do_script track_name
@@ -49,6 +48,25 @@ name4: /\w+/		# word characters
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
 name5: /\w[\w.]*/	 # save_state, get_state
+
+
+# jack_port: /\w[-+:. \w]+/ 
+# -> jack_port: /\w[-+:.\w]+/
+# 
+# I'm also thinking to tighten up a few other regexes.
+# Together with tightening them, when the match fails,
+# I'll explain to the user, rather than the current "bad command"
+# message.
+# 
+# effect_name: /\w[\w:,]*/  # allows comma, colon
+# -> effect_name: /\w[\w:]*/  # allow colon for pn:xxx el:xxx forms
+# 
+# track_name: /[\w\-+:]+/  # no period, should we allow + : ?
+# 
+# project_name: /\w[\w\-+:]*/ # why allow + : ?
+# 
+# state_file_basename: /\w[\w.]*/ # why allow . ?
+# 
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -67,7 +85,7 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
-help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
+help_effect: _help_effect effect_id end { ::Text::help_effect($item{effect_id}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
 help: _help 'yml' end { ::pager($::commands_yml); 1}
@@ -201,9 +219,9 @@ show_track: _show_track end {
 	$output .= ::Text::show_effect_chain_stack();
 	::pager( $output );
 	1;}
-show_track: _show_track name end { 
+show_track: _show_track track_name end { 
  	::pager( ::Text::show_tracks( 
-	$::tn{$item{name}} )) if $::tn{$item{name}};
+	$::tn{$item{track_name}} )) if $::tn{$item{track_name}};
 	1;}
 show_track: _show_track dd end {  
 	::pager( ::Text::show_tracks( $::ti{$item{dd}} )) if
@@ -231,8 +249,9 @@ exit: _exit end {   ::save_state($::state_store_file);
 
 source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
-source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
-source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
+# jack_port includes 'jack' and 'dd' 
+#source: _source 'jack' end { $::this_track->set_source('jack'); 1 }
+#source: _source dd end { $::this_track->set_source( $item{dd} ); 1 }
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
 	my $source = $::this_track->source;
@@ -244,7 +263,7 @@ source: _source end {
 	}
 	1;
 }
-send: _send name { $::this_track->set_send($item{name}); 1}
+send: _send jack_port { $::this_track->set_send($item{jack_port}); 1}
 send: _send end { $::this_track->set_send(); 1}
 remove_send: _remove_send end {
 					$::this_track->set(send_type => undef);
@@ -392,8 +411,8 @@ remove_effect: _remove_effect op_id(s) end {
 	::unmute();
 	1;}
 
-add_controller: _add_controller parent name value(s?) end {
-	my $code = $item{name};
+add_controller: _add_controller parent effect_id value(s?) end {
+	my $code = $item{effect_id};
 	my $parent = $item{parent};
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
@@ -401,22 +420,22 @@ add_controller: _add_controller parent name value(s?) end {
 	::Text::t_add_ctrl($parent, $code, $values);
 	1;}
 parent: op_id
-add_effect: _add_effect name value(s?)  end { 
-	my $code = $item{name};
+add_effect: _add_effect effect_id value(s?)  end { 
+	my $code = $item{effect_id};
 	my $values = $item{"value(s?)"};
 	my $before = $::this_track->vol;
 	::Text::t_insert_effect($before, $code, $values);
  	1;}
 
-append_effect: _append_effect name value(s?) end {
-	my $code = $item{name};
+append_effect: _append_effect effect_id value(s?) end {
+	my $code = $item{effect_id};
 	my $values = $item{"value(s?)"};
  	::Text::t_add_effect($::this_track, $code, $values);
  	1;}
 
-insert_effect: _insert_effect before name value(s?) end {
+insert_effect: _insert_effect before effect_id value(s?) end {
 	my $before = $item{before};
-	my $code = $item{name};
+	my $code = $item{effect_id};
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
@@ -604,8 +623,8 @@ bypass_effects:   _bypass_effects end {
 restore_effects: _restore_effects end { 
 	::restore_effects($::this_track) and
 	print $::this_track->name, ": restoring effects\n"; 1}
-overwrite_effect_chain: _overwrite_effect_chain name end {
-	::overwrite_effect_chain($::this_track, $item{name}); 1;
+overwrite_effect_chain: _overwrite_effect_chain name4 end {
+	::overwrite_effect_chain($::this_track, $item{name4}); 1;
 }
 bunch_name: name4 { 
 	::is_bunch($item{name4}) 
