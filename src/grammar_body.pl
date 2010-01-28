@@ -26,26 +26,24 @@ parameter: /\d+/	# digits {1,}
 # last: ('last' | '$' ) # word last or dollar sign {1}
 					# UNUSED
 dd: /\d+/			# digits {1,}
-jack_port: /\w[-+:.\w]+/ 
-					# used in: source
-					# word character
-					# [plus, minus, colon, period, word char]{1,}
-effect: /\w[\w:]*/
-name2: /[\w\-+:]+/ # word characters, +, -, :
-					# used in: help, do_script track_name
+jack_port: shellish
+shellish: /(["'])[^"']+$1/ { $item[1]=~ s/^.//; $item[1] }
+shellish: /\S+/
+effect: /\w[\w:]*/   | <error: illegal characters in effect id>
+
+					# used in: help, do_script
 					 # 
-project_name_re: /\w[\w\-+:]*\/?/	
-					# used in: load_project 
-project_name_re_no_slash: /\w[\w\-+:]*/	
-					# used in create_project
+project_id: name4 slash(?) { $item{name4} }
+slash: '/'
+					# used in create_project, load_project
 name3: /\S+/
-name4: /\w+/		# word characters
+name4: /\w+/   | <error: illegal identifier word characters only!>	 
 					# used in: bunch_name, effect_profile,
 					# existing_effect_profile
+					# save_state, get_state
 					 # remove_mark new_mark name_mark to_mark
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
-name5: /\w[\w.]*/	 # save_state, get_state
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
@@ -68,21 +66,21 @@ help_effect: _help_effect effect end { ::Text::help_effect($item{effect}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
 help: _help 'yml' end { ::pager($::commands_yml); 1}
-help: _help name2  { ::Text::help($item{name2}) ; 1}
+help: _help name3  { ::Text::help($item{name3}) ; 1}
 help: _help end { print $::help_screen ; 1}
 project_name: _project_name end { 
 	print "project name: ", $::project_name, $/; 1}
-create_project: _create_project project_name_re_no_slash end { 
-	::Text::t_create_project $item{project_name_re_no_slash} ; 1}
+create_project: _create_project project_id end { 
+	::Text::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects end { ::list_projects() ; 1}
-load_project: _load_project project_name_re end {
-	::Text::t_load_project $item{project_name_re} ; 1}
-save_state: _save_state name5 end { ::save_state( $item{name5}); 1}
+load_project: _load_project project_id end {
+	::Text::t_load_project $item{project_id} ; 1}
+save_state: _save_state name4 end { ::save_state( $item{name4}); 1}
 save_state: _save_state end { ::save_state(); 1}
-get_state: _get_state name5 end {
+get_state: _get_state name4 end {
  	::load_project( 
  		name => $::project_name,
- 		settings => $item{name5}
+ 		settings => $item{name4}
  		); 1}
 get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
@@ -100,7 +98,7 @@ add_track: _add_track track_name(s) end {
 	::add_track(@{$item{'track_name(s)'}}); 1}
 add_tracks: _add_tracks track_name(s) end {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
-track_name: name2
+track_name: name4
 # set bus Brass
 set_track: _set_track 'bus' existing_bus_name end {
 	$::this_track->set( group => $item{existing_bus_name}); 1
@@ -328,7 +326,7 @@ remove_mark: _remove_mark dd end {
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];
 	1;}
 remove_mark: _remove_mark name4 end { 
-	my $mark = $::Mark::by_name4{$item{name4}};
+	my $mark = $::Mark::by_name{$item{name4}};
 	$mark->remove if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
@@ -363,7 +361,7 @@ to_mark: _to_mark dd end {
 	$marks[$item{dd}]->jump_here;
 	1;}
 to_mark: _to_mark name4 end { 
-	my $mark = $::Mark::by_name4{$item{name4}};
+	my $mark = $::Mark::by_name{$item{name4}};
 	$mark->jump_here if defined $mark;
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
@@ -519,10 +517,7 @@ existing_bus_name: bus_name {
 
 bus_name: /[A-Z]\w+/
 
-destination: /\d+/ | /loop,\w+/ | name2
-# digits: soundcard channel
-# loop,identifier: loop device
-# name2: track name
+destination: jack_port # include channel, loop,device, jack_port
 
 remove_bus: _remove_bus existing_bus_name end { 
 	$::Bus::by_name{$item{existing_bus_name}}->remove; 1; 
@@ -550,6 +545,8 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 send_id: jack_port
 return_id: jack_port
 
+shellish: /(["'])[^"']+$1/ { $item[1]=~ s/^.//; $item[1] }
+shellish: /\S+/
 set_insert_wetness: _set_insert_wetness parameter end {
 	my $p = $item{parameter};
 	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
@@ -628,5 +625,5 @@ overlay_effect_profile: _overlay_effect_profile effect_profile_name end {
 	::apply_effect_profile(\&::add_effect_chain, $item{effect_profile_name}); 1 }
 list_effect_profiles: _list_effect_profiles end {
 	::list_effect_profiles(); 1 }
-do_script: _do_script name2 end { ::do_script($item{name2});1}
+do_script: _do_script shellish end { ::do_script($item{shellish});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
