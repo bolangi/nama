@@ -35,6 +35,7 @@ name: /\w[\w:,]*/ # word character
 					 # used in: help_effect 
 					 # send
 					 # add_controller add_effect append_effect insert_effect
+effect: /\w[\w:]*/
 name2: /[\w\-+:]+/ # word characters, +, -, :
 					# used in: help, do_script track_name
 					 # 
@@ -67,7 +68,7 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
-help_effect: _help_effect name end { ::Text::help_effect($item{name}) ; 1}
+help_effect: _help_effect effect end { ::Text::help_effect($item{effect}) ; 1}
 find_effect: _find_effect name3(s) { 
 	::Text::find_effect(@{$item{"name3(s)"}}); 1}
 help: _help 'yml' end { ::pager($::commands_yml); 1}
@@ -201,9 +202,9 @@ show_track: _show_track end {
 	$output .= ::Text::show_effect_chain_stack();
 	::pager( $output );
 	1;}
-show_track: _show_track name end { 
+show_track: _show_track track_name end { 
  	::pager( ::Text::show_tracks( 
-	$::tn{$item{name}} )) if $::tn{$item{name}};
+	$::tn{$item{track_name}} )) if $::tn{$item{track_name}};
 	1;}
 show_track: _show_track dd end {  
 	::pager( ::Text::show_tracks( $::ti{$item{dd}} )) if
@@ -393,8 +394,8 @@ remove_effect: _remove_effect op_id(s) end {
 	::unmute();
 	1;}
 
-add_controller: _add_controller parent name value(s?) end {
-	my $code = $item{name};
+add_controller: _add_controller parent effect value(s?) end {
+	my $code = $item{effect};
 	my $parent = $item{parent};
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
@@ -402,22 +403,22 @@ add_controller: _add_controller parent name value(s?) end {
 	::Text::t_add_ctrl($parent, $code, $values);
 	1;}
 parent: op_id
-add_effect: _add_effect name value(s?)  end { 
-	my $code = $item{name};
+add_effect: _add_effect effect value(s?)  end { 
+	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
 	my $before = $::this_track->vol;
 	::Text::t_insert_effect($before, $code, $values);
  	1;}
 
-append_effect: _append_effect name value(s?) end {
-	my $code = $item{name};
+append_effect: _append_effect effect value(s?) end {
+	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
  	::Text::t_add_effect($::this_track, $code, $values);
  	1;}
 
-insert_effect: _insert_effect before name value(s?) end {
+insert_effect: _insert_effect before effect value(s?) end {
 	my $before = $item{before};
-	my $code = $item{name};
+	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
