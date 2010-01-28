@@ -33,8 +33,6 @@ jack_port: /\w[-+:.\w]+/
 name: /\w[\w:,]*/ # word character 
 					 # [word character, comma, colon]{0,}
 					 # used in: help_effect 
-					 # send
-					 # add_controller add_effect append_effect insert_effect
 effect: /\w[\w:]*/
 name2: /[\w\-+:]+/ # word characters, +, -, :
 					# used in: help, do_script track_name
@@ -125,7 +123,7 @@ link_track: _link_track track_name target end {
 	::add_track_alias($item{track_name}, $item{target}); 1
 }
 target: track_name
-project: name
+project: name4
 set_region: _set_region beginning ending end { 
 	::set_region( @item{ qw( beginning ending ) } );
 	1;
@@ -160,7 +158,7 @@ shift_track: _shift_track start_position end {
 }
 
 start_position:  float | mark_name
-mark_name: name
+mark_name: name4
 
 unshift_track: _unshift_track end {
 	$::this_track->set(playat => undef)
@@ -551,8 +549,8 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	::add_insert_cooked($send_id, $return_id);
 	1;
 }
-send_id: name
-return_id: name
+send_id: jack_port
+return_id: jack_port
 
 set_insert_wetness: _set_insert_wetness parameter end {
 	my $p = $item{parameter};
@@ -606,8 +604,8 @@ bypass_effects:   _bypass_effects end {
 restore_effects: _restore_effects end { 
 	::restore_effects($::this_track) and
 	print $::this_track->name, ": restoring effects\n"; 1}
-overwrite_effect_chain: _overwrite_effect_chain name end {
-	::overwrite_effect_chain($::this_track, $item{name}); 1;
+overwrite_effect_chain: _overwrite_effect_chain name4 end {
+	::overwrite_effect_chain($::this_track, $item{name4}); 1;
 }
 bunch_name: name4 { 
 	::is_bunch($item{name4}) 
