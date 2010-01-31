@@ -709,7 +709,7 @@ sub send_id { $::tn{$_[0]->target}->send_id}
 sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation
-our @ISA = qw(::SlaveTrack ::Wav);
+our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
 	my $target = $::tn{$track->target};
@@ -724,7 +724,7 @@ sub current_wav {
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
 package ::MixDownTrack; 
-our @ISA = qw(::Track ::Wav);
+our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
