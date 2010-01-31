@@ -755,6 +755,17 @@ sub current_wav {
 		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
+package ::MixDownTrack; 
+our @ISA = qw(::Track ::Wav);
+sub current_version {	
+	my $track = shift;
+	my $last = $track->last;
+	my $status = $track->rec_status;
+	#$debug and print "last: $last status: $status\n";
+	if 	($status eq 'REC'){ return ++$last}
+	elsif ( $status eq 'MON'){ return $track->monitor_version } 
+	else { return 0 }
+}
 
 1;
 __END__

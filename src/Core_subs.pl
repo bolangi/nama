@@ -538,7 +538,7 @@ Loading project "untitled".
 			rw => 'MON',); # no dir, we won't record tracks
 
 
-		my $mixdown = ::Track->new( 
+		my $mixdown = ::MixDownTrack->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,

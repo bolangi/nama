@@ -157,6 +157,7 @@ rec:
   parameters: none
 mon:
   type: track
+  short: on
   what: set current track to MON
   parameters: none
 off:
