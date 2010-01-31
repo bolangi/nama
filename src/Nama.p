@@ -63,6 +63,7 @@ use ::Bus;
 use ::Mark;
 use ::IO;
 use ::Graph;
+use ::Wav;
 
 ## Definitions ##
 
