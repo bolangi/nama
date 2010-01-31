@@ -406,6 +406,7 @@ sub group_off {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
+	$main->set(rw => 'MON') if $main->rw eq 'OFF';
 	$main_out = 0; # no audio output
 }
 sub mixplay { 
@@ -418,8 +419,8 @@ sub mixoff {
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
 	$main_out = 1;
-	$main->set(rw => 'MON')}
-
+	$main->set(rw => 'MON')
+}
 sub bunch {
 	package ::;
 	my ($bunchname, @tracks) = @_;
