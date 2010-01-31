@@ -4160,7 +4160,6 @@ sub cache_track { # launch subparts if conditions are met
 
 sub prepare_to_cache {
 	my $track = shift;
-	my $debug = 1;
  	initialize_chain_setup_vars();
 	$orig_version = $track->monitor_version;
 	$cooked = $track->name . '_cooked';
