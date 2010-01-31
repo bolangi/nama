@@ -419,7 +419,7 @@ sub mixoff {
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
 	$main_out = 1;
-	$main->set(rw => 'MON')
+	$main->set(rw => 'MON') if $main->rw eq 'OFF';
 }
 sub bunch {
 	package ::;
