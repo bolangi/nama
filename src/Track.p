@@ -17,8 +17,6 @@ no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;
-#use Exporter qw(import);
-#our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
