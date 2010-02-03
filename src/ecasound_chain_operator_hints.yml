@@ -12,6 +12,18 @@
       name: "Level %"
       resolution: 0
 -
+  code: eadb
+  count: 1
+  display: scale
+  name: Volume
+  params:
+    -
+      begin: -40 
+      default: 0
+      end: 60
+      name: "Level db"
+      resolution: 0.5
+-
   code: epp
   count: 1
   display: scale

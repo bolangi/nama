@@ -109,6 +109,8 @@ $main_out = 1; # enable main output
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
 $memoize = 1;
+$mute_level = -127; # db
+$unity_level = 0;   # db
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

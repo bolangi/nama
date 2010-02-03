@@ -850,7 +850,7 @@ sub add_volume_control {
 	
 	my $vol_id = cop_add({
 				chain => $n, 
-				type => 'ea',
+				type => 'eadb',
 				cop_id => $ti{$n}->vol, # often undefined
 				});
 	
@@ -2309,13 +2309,13 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = 0;
+	my $from  = $mute_level;
 	fade( $id, 0, $from, $to, $fade_time + 0.2);
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	$copp{$id}[0];
-	my $to	  = 0;
+	my $to	  = $mute_level;
 	fade( $id, 0, $from, $to, $fade_time );
 }
 

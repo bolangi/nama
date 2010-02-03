@@ -367,4 +367,6 @@ our (
 	@io, 			# accumulate IO objects for generating setup
 	$track_snapshots, # to save recalculating for each IO object
 	$chain_setup,	# current chain setup
+	$mute_level,	# 0 for ea as vol control, -127 for eadb
+	$unity_level,	# 100 for ea, 0 for eadb
 );
