@@ -1639,9 +1639,10 @@ sub start_transport {
 	unmute();
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
+	sleeper(0.5);
 	print "engine is ", eval_iam("engine-status"), "\n\n"; 
-
-	sleep 1; # time for engine to stabilize
+	sleeper(0.5);
+	
 }
 sub stop_transport { 
 
