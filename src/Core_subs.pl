@@ -1834,7 +1834,7 @@ sub jump {
 ## post-recording functions
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
-	print("transport still running, can't cleanup"),return if transport_running();
+	$debug && print("transport still running, can't cleanup"),return if transport_running();
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
 		(grep /Mixdown/, @files) ? command_process('mixplay') : post_rec_configure();
