@@ -62,7 +62,7 @@ sub show_status {
 	push @fields, $main->rw eq 'REC' 
 					? "live input allowed" 
 					: "live input disabled";
-	push @fields, "record" if ::really_recording();
+	push @fields, "record" if grep{ ! /Mixdown/ } ::really_recording();
 	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
 		map{ $tn{$_} } $main->tracks, q(Mixdown);
 	push @fields, "mixdown" 

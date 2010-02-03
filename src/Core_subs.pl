@@ -892,7 +892,7 @@ Unable to provide latency compensation.
 
 # return file output entries, including Mixdown 
 sub really_recording { 
-	map{ /-o:(.*?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
+	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
 sub generate_setup { 
