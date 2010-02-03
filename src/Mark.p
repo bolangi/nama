@@ -46,8 +46,6 @@ sub new {
 
 sub set_name {
 	my $mark = shift;
-	carp("you attempted to futz $mark, which is not a Mark\n"),
-		return unless (ref $mark) =~ /Mark/;
 	my $name = shift;
 	print "name: $name\n";
 	if ( defined $by_name{ $name } ){
@@ -62,16 +60,11 @@ sub set_name {
 
 sub jump_here {
 	my $mark = shift;
-	carp("you attempted to futz $mark, which is not a Mark\n"),
-		return unless (ref $mark) =~ /Mark/;
 	::eval_iam( "setpos " . $mark->time);
 	$::this_mark = $mark;
 }
 sub remove {
 	my $mark = shift;
-	carp("you attempted to futz $mark, which is [", ref
-	$mark, " ] not a Mark\n"),
-		return unless (ref $mark) =~ /Mark/;
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 		delete $used_names{$mark->name};
@@ -83,14 +76,10 @@ sub remove {
 }
 sub next { 
 	my $mark = shift;
-	carp("you attempted to futz $mark, which is not a Mark\n"),
-		return unless (ref $mark) =~ /Mark/;
 	::next_mark();
 }
 sub previous {
 	my $mark = shift; 
-	carp("you attempted to futz $mark, which is not a Mark\n"),
-		return unless (ref $mark) =~ /Mark/;
 	::previous_mark();
 }
 
