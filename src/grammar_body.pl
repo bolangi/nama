@@ -227,13 +227,9 @@ source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
-	my $source = $::this_track->source;
-	my $object = $::this_track->input_object;
-	if ( $source ) { 
-		print $::this_track->name, ": input from $object.\n";
-	} else {
-		print $::this_track->name, ": REC disabled. No source found.\n";
-	}
+	print $::this_track->name, ": input from ", $::this_track->input_object, "\n";
+	print "however track status is ", $::this_track->rec_status, "\n"
+		if $::this_track->rec_status ne 'REC';
 	1;
 }
 send: _send jack_port { $::this_track->set_send($item{jack_port}); 1}

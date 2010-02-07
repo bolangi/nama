@@ -403,39 +403,42 @@ sub set_io {
 		say $track->name, ": disabling $direction.";
 		return;
 	}
-	
+	if( $id eq 'jack'){
+		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
+ 		$track->set($type_field => 'jack_port',
+ 					source_id => $port_name); 
+ 		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+ 		return;
+	} 
 	# set values, returning new setting
 	given ( ::dest_type( $id ) ){
 		when ('jack_client'){
 			if ( $::jack_running ){
 				my $client_direction = $direction eq 'source' ? 'output' : 'input';
 	
-				$track->set($type_field => 'jack_client',
-							$id_field   => $id);
 				my $name = $track->name;
 				my $width = scalar @{ ::jack_client($id, $client_direction) };
 				$width or say 
 					qq($name: $direction port for JACK client "$id" not found.);
+				$width or return;
 				$width ne $track->width and say 
 					$track->name, ": track set to ", ::width($track->width),
 					qq(, but JACK source "$id" is ), ::width($width), '.';
-				return $track->source_id;
 			} else {
 		say "JACK server not running! Cannot set JACK client as track source.";
-				return $track->source_id;
+				return
 			} 
 		}
-
-		when('soundcard'){ 
-			$track->set( $id_field => $id, 
-						 $type_field => 'soundcard');
-			return soundcard_channel( $id )
+		when('jack_ports_list'){
+			say("$id: file not found in ",project_root(),". Skipping."), return
+				unless -e join_path( project_root(), $id );
+			# check if ports file parses
+			# warn if ports do not exist
 		}
-		when('loop'){ 
-			$track->set( $id_field => $id, 
-						 $type_field => 'loop');
-			return $id;
-		}
+	#	when('soundcard'){ }
+	#	when('loop'){ }
+		$track->set(source_type => $_);
+		$track->set(source_id => $id);
 	}
 } 
 
@@ -455,26 +458,13 @@ sub set_source { # called from parser
 
 	if ($source eq 'null'){
 		$track->set(group => 'null');
+ 		say $track->name, ": Setting input to null device";
 		return
 	}
-	if( $source eq 'jack'){
- 		$track->set(source_type => 'jack_port',
- 					source_id => $track->name);
- 		say $track->name, ": JACK input port is ",$track->source_id,"_in",
- 		". Make connections manually or set up a ports list.";
- 		return;
-	} 
-	if( $source =~ /^\w+\.ports$/){
-		say("$source: file not found in ",project_root(),". Skipping."), return
-			unless -e join_path( project_root(), $source );
-		# check if ports file parses
-		# warn if ports do not exist
-		$track->set(source_type => 'jack_port');
-		$track->set(source_id => $source );
-	}
-	my $old_source = $track->source;
-	my $new_source = $track->source($source);
-	my $object = $track->input_object;
+	my $old_source = $track->input_object;
+	$track->set_io('input',$source);
+	my $new_source = $track->input_object;
+	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
 		print $track->name, ": input unchanged, $object\n";
 	} else {
@@ -516,13 +506,15 @@ sub object_as_text {
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
 	
-	my $output;
+	my $text;
 	given ($track->$type_field){
-		when('soundcard')  { $output = "soundcard channel "}
-		when('jack_client'){ $output = "JACK client "}
-		when('loop')       { $output = "loop device "}
+		when('soundcard')  		{ $text = "soundcard channel "}
+		when('jack_client')		{ $text = "JACK client "}
+		when('loop')       		{ $text = "loop device "}
+		when('jack_ports_list') { $text = "JACK ports list "}
+		when('track') 			{ $text = "bus "}
 	}
-	$output .= $track->$id_field
+	$text .= $track->$id_field
 }
 
 sub input_object { # for text display
