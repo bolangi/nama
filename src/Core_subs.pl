@@ -3926,6 +3926,7 @@ sub dest_type {
 	my $dest = shift;
 	if (defined $dest and ($dest !~ /\D/))        { 'soundcard' } # digits only
 	elsif ($dest =~ /^loop,/) { 'loop' }
+	elsif ($dest =~ /^\w+\.ports/){ 'jack_port' }
 	elsif ($dest){  # any string 
 		#carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
 		'jack_client' ; }
