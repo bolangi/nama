@@ -451,10 +451,6 @@ sub set_source { # called from parser
 	my $track = shift;
 	my $source = shift;
 
-	#say "set source";
-	#say "track: ",$track->name;
-	#say "source: $source";
-
 # Special handling for 'null', used for non-input (i.e. metronome) tracks
 
 	if ($source eq 'null'){
@@ -475,7 +471,6 @@ sub set_source { # called from parser
 		# warn if ports do not exist
 		$track->set(source_type => 'jack_port');
 		$track->set(source_id => $source );
-		# make jack connections on setup/teardown TODO
 	}
 	my $old_source = $track->source;
 	my $new_source = $track->source($source);
