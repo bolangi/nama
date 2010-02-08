@@ -528,13 +528,16 @@ sub output_object {   # text for user display
 
 }
 sub client_status {
-	my ($track_status, $client, $direction) = @_;
-	my $type = ::dest_type($client);
+	my ($track, $track_status, $direction) = @_;
+	my $type_field = ($direction eq 'input' ? 'source_type' : 'send_type' );
+	my $id_field = ($direction eq 'input' ? 'source_id' : 'send_id' );
+	my $type = $track->$type_field;
+	my $client = $track->$id_field; 
 	if ($type eq 'loop'){
 		my ($bus) =  $client =~ /loop,(\w+)/;
 		$track_status eq 'REC' ? $bus : undef;  
 	}
-	elsif ($track_status eq 'OFF') {"[$client]"}
+	elsif ($track_status eq 'OFF') {"[$client]" if $client}
 	elsif ($type eq 'jack_client'){ 
 		::jack_client($client, $direction) 
 			? $client 
@@ -545,16 +548,16 @@ sub client_status {
 				?  $client 
 				: "[$client]")
 			: undef
-	} else { q() }
+	} else {}
 }
 sub source_status {
 	my $track = shift;
 	return if (ref $track) =~ /MasteringTrack/;
-	client_status($track->rec_status, $track->source, 'output')
+	$track->client_status($track->rec_status, 'output')
 }
 sub send_status {
 	my $track = shift;
-	client_status('REC', $track->send, 'input')
+	$track->client_status('REC', 'input')
 }
 
 sub set_rec {
