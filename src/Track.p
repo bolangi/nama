@@ -530,37 +530,12 @@ sub output_object {   # text for user display
 	$track->object_as_text('send');
 
 }
-sub client_status {
-	my ($track, $track_status, $direction) = @_;
-	my $type_field = ($direction eq 'input' ? 'source_type' : 'send_type' );
-	my $id_field = ($direction eq 'input' ? 'source_id' : 'send_id' );
-	my $client_direction = $direction eq 'input' ? 'output' : 'input';
-	my $type = $track->$type_field;
-	my $client = $track->$id_field; 
-# 	if ($type eq 'loop'){ # dead code? no type loop in use!
-# 		my ($bus) =  $client =~ /loop,(\w+)/;
-# 		$track_status eq 'REC' ? $bus : undef;  
-# 	}
-	if ($track_status eq 'OFF') {"[$client]" if $client}
-	elsif ($type eq 'jack_client'){ 
-		@{ ::jack_client($client, $client_direction)}
-			? $client 
-			: "[$client]" 
-	} elsif ($type eq 'soundcard'){ 
-		$client 
-			?  ($track_status eq 'REC' 
-				?  $client 
-				: "[$client]")
-			: undef
-	} else {}
-}
 sub source_status {
 	my $track = shift;
-	$track->client_status($track->rec_status, 'output')
-}
-sub send_status {
-	my $track = shift;
-	$track->client_status('REC', 'input')
+	my $id = $track->source_id;
+	return unless $id;
+	$track->rec_status eq 'REC' ? $id : "[$id]"
+	
 }
 
 sub set_rec {
