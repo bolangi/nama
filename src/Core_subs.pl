@@ -535,14 +535,17 @@ Loading project "untitled".
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => 'MON',); # no dir, we won't record tracks
-
+			rw => 'MON',
+			source_type => undef,
+			source_id => undef); 
 
 		my $mixdown = ::MixDownTrack->new( 
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,
-			rw => 'MON'); 
+			rw => 'MON',
+			source_type => undef,
+			source_id => undef); 
 
 		remove_effect($mixdown->vol);
 		remove_effect($mixdown->pan);

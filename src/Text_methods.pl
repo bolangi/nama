@@ -96,26 +96,14 @@ sub show_tracks {
             $_->n,
             $_->name,
             placeholder( $_->current_version ),
-			(ref $_) =~ /MasteringTrack/ 
-					? placeholder() 
-					: lc $_->rw,
+			lc $_->rw,
             $_->rec_status_display,
-            $_->name =~ /Master|Mixdown/ 
-					? placeholder() 
-					: placeholder($_->source_status),
+			placeholder($_->source_status),
 			placeholder($_->group),
 			placeholder($copp{$_->vol}->[0]),
 			placeholder($copp{$_->pan}->[0]),
-            #(join " ", @{$_->versions}),
-
         } grep{ ! $_-> hide} @tracks;
         
-    #write; # using format below
-    #$- = 0; # $FORMAT_LINES_LEFT # force header on next output
-	
-    #1;
-    #use warnings;
-    #no warnings q(uninitialized);
 	my $output = $^A;
 	$^A = "";
 	#$output .= show_tracks_extra_info();
