@@ -227,7 +227,7 @@ source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
-	print $::this_track->name, ": input from ", $::this_track->input_object, "\n";
+	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
 	print "however track status is ", $::this_track->rec_status, "\n"
 		if $::this_track->rec_status ne 'REC';
 	1;

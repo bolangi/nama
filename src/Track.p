@@ -457,7 +457,9 @@ sub set_source { # called from parser
 # Special handling for 'null', used for non-input (i.e. metronome) tracks
 
 	if ($source eq 'null'){
-		$track->set(group => 'null');
+		$track->set(group => 'null',
+					source_type => undef,
+					source_id => undef);
  		say $track->name, ": Setting input to null device";
 		return
 	}
