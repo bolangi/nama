@@ -411,7 +411,8 @@ sub set_io {
  		return;
 	} 
 	# set values, returning new setting
-	given ( ::dest_type( $id ) ){
+	my $type = ::dest_type( $id );
+	given ($type){
 		when ('jack_client'){
 			if ( $::jack_running ){
 				my $client_direction = $direction eq 'source' ? 'output' : 'input';
@@ -437,9 +438,9 @@ sub set_io {
 		}
 	#	when('soundcard'){ }
 	#	when('loop'){ }
-		$track->set(source_type => $_);
-		$track->set(source_id => $id);
 	}
+	$track->set(source_type => $type);
+	$track->set(source_id => $id);
 } 
 
 sub source { # command for setting, showing track source
@@ -464,7 +465,7 @@ sub set_source { # called from parser
 		return
 	}
 	my $old_source = $track->input_object;
-	$track->set_io('input',$source);
+	$track->set_io('source',$source);
 	my $new_source = $track->input_object;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
@@ -533,15 +534,16 @@ sub client_status {
 	my ($track, $track_status, $direction) = @_;
 	my $type_field = ($direction eq 'input' ? 'source_type' : 'send_type' );
 	my $id_field = ($direction eq 'input' ? 'source_id' : 'send_id' );
+	my $client_direction = $direction eq 'input' ? 'output' : 'input';
 	my $type = $track->$type_field;
 	my $client = $track->$id_field; 
-	if ($type eq 'loop'){
-		my ($bus) =  $client =~ /loop,(\w+)/;
-		$track_status eq 'REC' ? $bus : undef;  
-	}
-	elsif ($track_status eq 'OFF') {"[$client]" if $client}
+# 	if ($type eq 'loop'){ # dead code? no type loop in use!
+# 		my ($bus) =  $client =~ /loop,(\w+)/;
+# 		$track_status eq 'REC' ? $bus : undef;  
+# 	}
+	if ($track_status eq 'OFF') {"[$client]" if $client}
 	elsif ($type eq 'jack_client'){ 
-		::jack_client($client, $direction) 
+		@{ ::jack_client($client, $client_direction)}
 			? $client 
 			: "[$client]" 
 	} elsif ($type eq 'soundcard'){ 
@@ -554,7 +556,6 @@ sub client_status {
 }
 sub source_status {
 	my $track = shift;
-	return if (ref $track) =~ /MasteringTrack/;
 	$track->client_status($track->rec_status, 'output')
 }
 sub send_status {
@@ -713,6 +714,7 @@ sub rec_status{
 	my $track = shift;
 	$::mastering_mode ? 'MON' :  'OFF';
 }
+sub source_status {}
 sub group_last {0}
 sub version {0}
 
