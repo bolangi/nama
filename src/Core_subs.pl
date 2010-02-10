@@ -680,6 +680,7 @@ sub initialize_project_data {
 	
 	::Bus->initialize();
 	create_system_buses();
+	$this_bus = 'Main';
 	::Track->initialize();
 
 	%inputs = %outputs = ();

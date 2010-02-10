@@ -8,7 +8,8 @@ sub show_versions {
 }
 
 
-sub show_send { "Send: ". $this_track->send_status . $/ if $this_track->send_status
+sub show_send { "Send: ". $this_track->send_id. $/ 
+					if $this_track->rec_status ne 'OFF'
 }
 
 sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }

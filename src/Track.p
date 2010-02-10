@@ -735,7 +735,11 @@ sub current_version {
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
 }
-
+sub rec_status {
+	my $track = shift;
+	return 'REC' if $track->rw eq 'REC';
+	::Track::rec_status($track);
+}
 1;
 __END__
 
