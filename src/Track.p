@@ -280,7 +280,7 @@ sub rec_status {
 sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
-	$track->rec_defeat ? "[$status]" : $status;
+	($track->rw eq 'REC' and $track->rec_defeat) ? "[$status]" : $status;
 }
 
 
