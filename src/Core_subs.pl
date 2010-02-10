@@ -543,7 +543,7 @@ Loading project "untitled".
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,
-			rw => 'MON',
+			rw => 'OFF',
 			source_type => undef,
 			source_id => undef); 
 
