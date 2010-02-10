@@ -10,6 +10,7 @@ sub show_versions {
 
 sub show_send { "Send: ". $this_track->send_id. $/ 
 					if $this_track->rec_status ne 'OFF'
+						and $this_track->send_id
 }
 
 sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
@@ -43,8 +44,10 @@ sub show_modifiers {
 		if $this_track->modifiers;
 }
 sub show_effect_chain_stack {
-		"Bypassed effect chains: ".scalar @{ $this_track->effect_chain_stack }.$/
-			if @{ $this_track->effect_chain_stack } 
+		return "Bypassed effect chains: "
+				.scalar @{ $this_track->effect_chain_stack }.$/
+			if @{ $this_track->effect_chain_stack } ;
+		undef;
 }
 	
 sub show_region {
