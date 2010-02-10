@@ -103,6 +103,8 @@ is( $this_track->source_id,  2, "set input channel");
 
 command_process('send 5');
 
+# track sax, source 2, send 5
+
 is( $this_track->send_type, 'soundcard', 'set soundcard output');
 is( $this_track->send_id, 5, 'set soundcard output');
 

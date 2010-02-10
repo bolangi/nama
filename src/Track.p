@@ -439,8 +439,8 @@ sub set_io {
 	#	when('soundcard'){ }
 	#	when('loop'){ }
 	}
-	$track->set(source_type => $type);
-	$track->set(source_id => $id);
+	$track->set($type_field => $type);
+	$track->set($id_field => $id);
 } 
 
 sub source { # command for setting, showing track source
