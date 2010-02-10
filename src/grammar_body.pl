@@ -399,14 +399,7 @@ add_controller: _add_controller parent effect value(s?) end {
 	::Text::t_add_ctrl($parent, $code, $values);
 	1;}
 parent: op_id
-add_effect: _add_effect effect value(s?)  end { 
-	my $code = $item{effect};
-	my $values = $item{"value(s?)"};
-	my $before = $::this_track->vol;
-	::Text::t_insert_effect($before, $code, $values);
- 	1;}
-
-append_effect: _append_effect effect value(s?) end {
+add_effect: _add_effect effect value(s?) end {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
  	::Text::t_add_effect($::this_track, $code, $values);

@@ -451,15 +451,11 @@ add_controller:
   parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
   short: acl
 add_effect:
-  type: effect
-  what: add effect to current track (placed before volume control)
   short: afx
+  type: effect
+  what: add effect to the end of current track
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: add_effect amp 6 (LADSPA Simple amp 6dB gain)!nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required
-append_effect:
-  type: effect
-  what: add effect to the end of current track (mainly legacy use)
-  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
   short: ifx
