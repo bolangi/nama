@@ -2997,6 +2997,9 @@ sub save_state {
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
 
+	@inserts_data = ();
+	$debug and print "copying inserts data\n";
+	map { push @inserts_data, $_->hashref } ::Insert::all();
 
 	# save history
 
@@ -3198,6 +3201,11 @@ sub restore_state {
 	# restore user buses
 	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
+
+	# restore inserts
+	
+	::Insert::initialize();
+	map{ my $class = $_->{class}; $class->new( %$_ ) } @inserts_data;
 	
 	# restore user tracks
 	

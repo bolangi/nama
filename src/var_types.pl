@@ -47,6 +47,7 @@
 						@bus_data
 						@groups_data
 						@marks_data
+						@inserts_data
 						$loop_enable
 						@loop_endpoints
 						$length

@@ -303,11 +303,12 @@ our (
 	%tn, # track by name  (alias %::Track::by_name)
 
 	@tracks_data, # staging for saving
+	@groups_data, # obsolete
+	@marks_data,  # 
+	@inserts_data,
 	@bus_data,    # 
 	@system_buses, # 
 	%is_system_bus, # 
-	@groups_data, # 
-	@marks_data,  # 
 
 	$alsa_playback_device,
 	$alsa_capture_device,

@@ -1,8 +1,9 @@
+{
 package ::Insert;
 use Modern::Perl;
 use Carp;
 no warnings qw(uninitialized redefine);
-our $VERSION = 0.1
+our $VERSION = 0.1;
 our ($debug);
 local $debug = 0;
 use vars qw(%by_index);
@@ -13,10 +14,9 @@ use ::Object qw(
 	send_id
 	return_type
 	return_id
-	wetness
-	tracks
 	wet_track
 	dry_track
+	tracks
 	wetness
 );
 
@@ -24,7 +24,7 @@ initialize();
 
 sub initialize { %by_index = () }
 
-sub idx { # return first free track index
+sub idx { # return first free index
 	my $n = 0;
 	while (++$n){
 		return $n if not $by_index{$n}
@@ -38,16 +38,19 @@ sub new {
     croak "undeclared field: @undeclared" if @undeclared;
 	my $n = $vals{n} || idx(); 
 	my $object = bless { 
-					class	=> $class, # for restore
+					class	=> $class, 	# for restore
+					n 		=> $n,		# index
 					@_ 			}, $class;
 	$by_index{$n} = $object;
 }
-
+}
+{
 package ::PostFaderInsert;
+use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 
 sub add_insert_cooked {
 	my ($send_id, $return_id) = @_;
-	my $old_this_track = $this_track;
+	my $old_this_track = $::this_track;
 	my $t = $::this_track;
 	my $name = $t->name;
 	$t->remove_insert;
@@ -99,6 +102,8 @@ sub add_insert_cooked {
 	$i->{wet_vol} = $wet->vol;
 	
 	$i->{tracks} = [ $wet->name, $dry->name ];
-	$this_track = $old_this_track;
+	$::this_track = $old_this_track;
 }
 
+}
+1;

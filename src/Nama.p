@@ -64,6 +64,7 @@ use ::Mark;
 use ::IO;
 use ::Graph;
 use ::Wav;
+use ::Insert;
 
 ## Definitions ##
 
