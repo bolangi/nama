@@ -37,11 +37,17 @@ sub new {
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	my $n = $vals{n} || idx(); 
-	my $object = bless { 
+	my $i = bless { 
 					class	=> $class, 	# for restore
 					n 		=> $n,		# index
 					@_ 			}, $class;
 	$by_index{$n} = $object;
+	if (! $i->{return_id}){
+		$i->{return_type} = $i->{send_type};
+		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
+		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+	}
+	$i;
 }
 }
 {
@@ -54,24 +60,19 @@ sub add_insert_cooked {
 	my $t = $::this_track;
 	my $name = $t->name;
 	$t->remove_insert;
-	my $i = {
-		insert_type => 'cooked',
+	my $i = ::PostFaderInsert->new( 
 		send_type 	=> ::dest_type($send_id),
 		send_id	  	=> $send_id,
 		return_type 	=> ::dest_type($return_id),
 		return_id	=> $return_id,
 		wetness		=> 100,
+	);
 	};
 	# default to return from same JACK client or adjacent soundcard channels
 	# default to return via same system (soundcard or JACK)
-	if (! $i->{return_id}){
-		$i->{return_type} = $i->{send_type};
-		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
-		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
-	}
 
 	
-	$t->set(inserts => $i); 1;
+	$t->set(inserts => $i->n); 
 
 	# we slave the wet track to the original track so that
 	# we know the external output (if any) will be identical
