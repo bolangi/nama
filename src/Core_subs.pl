@@ -2291,9 +2291,8 @@ sub fade {
 		return;
 	}
 
-	my $resolution = 40; # number of steps per second
-	my $steps = $seconds * $resolution;
-	my $wink  = 1/$resolution;
+	my $steps = $seconds * $fade_resolution;
+	my $wink  = 1/$fade_resolution;
 	my $size = ($to - $from)/$steps;
 	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
 	for (1..$steps - 1){
@@ -2309,13 +2308,13 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = $mute_level;
-	fade( $id, 0, $from, $to, $fade_time + 0.2);
+	my $from  = $fade_out_level;
+	fade( $id, 0, $from, $to, $fade_time);
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	$copp{$id}[0];
-	my $to	  = $mute_level;
+	my $to	  = $fade_out_level;
 	fade( $id, 0, $from, $to, $fade_time );
 }
 

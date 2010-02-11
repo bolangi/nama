@@ -110,7 +110,9 @@ $this_bus = 'Main';
 jack_update(); # to be polled by Event
 $memoize = 1;
 $mute_level = -127; # db
+$fade_out_level = -40;    # db
 $unity_level = 0;   # db
+$fade_resolution = 200; # steps per second
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

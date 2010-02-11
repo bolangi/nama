@@ -368,5 +368,7 @@ our (
 	$track_snapshots, # to save recalculating for each IO object
 	$chain_setup,	# current chain setup
 	$mute_level,	# 0 for ea as vol control, -127 for eadb
+	$fade_out_level, # 
+	$fade_resolution, # steps per second
 	$unity_level,	# 100 for ea, 0 for eadb
 );

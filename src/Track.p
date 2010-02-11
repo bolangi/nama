@@ -604,6 +604,7 @@ sub mute {
 	if ( $::copp{$track->vol}[0] != $::mute_level){   
 		$track->set(old_vol_level => $::copp{$track->vol}[0]);
 		if ( $nofade ){ 
+			say "no fade";
 			effect_update_copp_set( $track->vol, 0, $::mute_level );
 		} else { 
 			fadeout( $track->vol );
