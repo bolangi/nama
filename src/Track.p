@@ -599,35 +599,46 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $::copp{$track->vol}[0] != $::mute_level{$::cops{$track->vol}->{type}}
-		and $::copp{$track->vol}[0] != $::fade_out_level{$::cops{$track->vol}->{type}}){   
+	if ( $::copp{$track->vol}[0] != $track->mute_level
+		and $::copp{$track->vol}[0] != $track->fade_out_level){   
 		$track->set(old_vol_level => $::copp{$track->vol}[0]);
-		if ( $nofade ){ 
-			say "no fade";
-			effect_update_copp_set( 
-				$track->vol, 0, $::mute_level{$::cops{$track->vol}->{type}} );
-		} else { 
-			fadeout( $track->vol );
-		}
+		fadeout( $track->vol ) unless $nofade;
 	}
+	$track->set_vol($track->mute_level);
 }
 sub unmute {
 	package ::;
 	my $track = shift;
 	my $nofade = shift;
-	$track or $track = $::this_track;
-
 	# do nothing if we are not muted
 	return if ! defined $track->old_vol_level;
-
-	if ( $nofade ){ 
-		effect_update_copp_set($track->vol, 0, $track->old_vol_level);
-	} else { 
-		fadein( $track->vol, $track->old_vol_level);
+	if ( $nofade ){
+		$track->set_vol($track->old_vol_level);
+	} 
+	else { 
+		$track->set_vol($track->fade_out_level);
+		fadein($track->vol, $track->old_vol_level);
 	}
 	$track->set(old_vol_level => undef);
 }
 
+sub mute_level {
+	my $track = shift;
+	$::mute_level{$track->vol_type}
+}
+sub fade_out_level {
+	my $track = shift;
+	$::fade_out_level{$track->vol_type}
+}
+sub set_vol {
+	my $track = shift;
+	my $val = shift;
+	::effect_update_copp_set($track->vol, 0, $val);
+}
+sub vol_type {
+	my $track = shift;
+	$::cops{$track->vol}->{type}
+}
 sub import_audio  { 
 	my $track = shift;
 	my ($path, $frequency) = @_; 
