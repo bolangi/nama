@@ -850,17 +850,18 @@ sub add_volume_control {
 	
 	my $vol_id = cop_add({
 				chain => $n, 
-				type => 'eadb',
+				type => $volume_control_operator,
 				cop_id => $ti{$n}->vol, # often undefined
 				});
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
+	$copp{$vol_id}[0] = $unity_level{$volume_control_operator};
 	$vol_id;
 }
 sub add_pan_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "pan");
-	
+
 	my $pan_id = cop_add({
 				chain => $n, 
 				type => 'epp',
@@ -2308,13 +2309,13 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = $fade_out_level;
+	my $from  = $fade_out_level{$cops{$id}->{type}};
 	fade( $id, 0, $from, $to, $fade_time);
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	$copp{$id}[0];
-	my $to	  = $fade_out_level;
+	my $to	  = $fade_out_level{$cops{$id}->{type}};
 	fade( $id, 0, $from, $to, $fade_time );
 }
 

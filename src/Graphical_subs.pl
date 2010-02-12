@@ -662,14 +662,14 @@ sub track_gui {
 
 		$mute = $track_frame->Button(
 			-command => sub { 
-				if ($copp{$vol_id}->[0] != $mute_level) {  # non-zero volume
-					$ti{$n}->set(old_vol_level => $copp{$vol_id}->[0]);
-					effect_update_copp_set( $vol_id, 0, $mute_level);
+				if ($copp{$vol_id}->[0] != $mute_level{$cops{$vol_id}->{type}} and
+					$copp{$vol_id}->[0] != $fade_out_level{$cops{$vol_id}->{type}}
+				) {  # non-zero volume
+					$ti{$n}->mute;
 					$mute->configure(-background => $namapalette{Mute});
 				}
 				else {
-					effect_update_copp_set($vol_id, 0,$ti{$n}->old_vol_level);
-					$ti{$n}->set(old_vol_level => undef);
+					$ti{$n}->unmute;
 					$mute->configure(-background => $off);
 				}
 			}	
@@ -679,7 +679,10 @@ sub track_gui {
 
 		$unity = $track_frame->Button(
 				-command => sub { 
-					effect_update_copp_set($vol_id, 0, $unity_level);
+					effect_update_copp_set(
+						$vol_id, 
+						0, 
+						$unity_level{$cops{$vol_id}->{type}});
 				}
 		  );
 	} else {

@@ -90,6 +90,10 @@ press_space_to_start_transport: 1
 
 execute_on_project_load: ~
 
+# volume controls use this effect (must be 'ea' or 'eadb')
+
+volume_control_operator: eadb
+
 # effects for use in mastering mode
 
 eq: Parametric1 1 0 0 40 0.125 0 0 200 0.125 0 0 600 0.125 0 0 3300 0.125 0

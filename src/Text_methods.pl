@@ -104,7 +104,7 @@ sub show_tracks {
             $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->group),
-			placeholder($copp{$_->vol}->[0]),
+			$copp{$_->vol}->[0],
 			placeholder($copp{$_->pan}->[0]),
         } grep{ ! $_-> hide} @tracks;
         

@@ -55,6 +55,10 @@ press_space_to_start_transport: 1
 
 execute_on_project_load: ~
 
+# volume controls use this effect (must be 'ea' or 'eadb')
+
+volume_control_operator: eadb
+
 eq: Parametric1
 
 low_pass: lowpass_iir

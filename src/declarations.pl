@@ -45,6 +45,7 @@ our (
 
 	# .namarc mastering fields
     $mastering_effects, # apply on entering mastering mode
+	$volume_control_operator,
 	$eq, 
 	$low_pass,
 	$mid_pass,
@@ -367,8 +368,8 @@ our (
 	@io, 			# accumulate IO objects for generating setup
 	$track_snapshots, # to save recalculating for each IO object
 	$chain_setup,	# current chain setup
-	$mute_level,	# 0 for ea as vol control, -127 for eadb
-	$fade_out_level, # 
+	%mute_level,	# 0 for ea as vol control, -127 for eadb
+	%fade_out_level, # 0 for ea, -40 for eadb
 	$fade_resolution, # steps per second
-	$unity_level,	# 100 for ea, 0 for eadb
+	%unity_level,	# 100 for ea, 0 for eadb
 );

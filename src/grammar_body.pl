@@ -289,7 +289,11 @@ all: _all end { ::all() ; 1}
 
 
 unity: _unity end { 
-	::effect_update_copp_set( $::this_track->vol, 0, $::unity_level);
+	::effect_update_copp_set( 
+		$::this_track->vol, 
+		0, 
+		$::unity_level{$::cops{$::this_track->vol}->{type}}
+	);
 	1;}
 
 pan: _pan dd end { 

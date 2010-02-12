@@ -17,6 +17,7 @@
 						$press_space_to_start_transport
 						$execute_on_project_load
 						$initial_user_mode
+						$volume_control_operator
 						$mastering_effects
 						$eq 
 						$low_pass

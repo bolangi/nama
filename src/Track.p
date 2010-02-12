@@ -601,15 +601,18 @@ sub mute {
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
 
-	if ( $::copp{$track->vol}[0] != $::mute_level){   
+	if ( $::copp{$track->vol}[0] != $::mute_level
+		and $::copp{$track->vol}[0] != $::fade_out_level){   
 		$track->set(old_vol_level => $::copp{$track->vol}[0]);
 		if ( $nofade ){ 
-			say "no fade";
-			effect_update_copp_set( $track->vol, 0, $::mute_level );
+#			say "no fade";
+			effect_update_copp_set( 
+				$track->vol, 0, $::mute_level{$::cops{$track->vol}->{type}} );
 		} else { 
 			fadeout( $track->vol );
 		}
 	}
+#	$::copp{$track->vol}[0] = $::mute_level;
 }
 sub unmute {
 	package ::;
