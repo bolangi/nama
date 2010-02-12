@@ -855,7 +855,6 @@ sub add_volume_control {
 				});
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
-	$copp{$vol_id}[0] = $unity_level{$volume_control_operator};
 	$vol_id;
 }
 sub add_pan_control {

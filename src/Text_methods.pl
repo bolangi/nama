@@ -78,7 +78,7 @@ sub show_status {
 }
 sub placeholder { 
 	my $val = shift;
-	return $val if $val;
+	return $val if defined $val;
 	$use_placeholders ? q(--) : q() 
 }
 
@@ -104,7 +104,7 @@ sub show_tracks {
             $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->group),
-			$copp{$_->vol}->[0],
+			placeholder($copp{$_->vol}->[0]),
 			placeholder($copp{$_->pan}->[0]),
         } grep{ ! $_-> hide} @tracks;
         
