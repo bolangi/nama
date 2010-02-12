@@ -718,7 +718,7 @@ sub add_track_alias_project {
 	my ($name, $track, $project) = @_;
 	my $dir =  join_path(project_root(), $project, '.wav'); 
 	if ( -d $dir ){
-		if ( glob "$dir/$track\_*.wav"){
+		if ( glob "$dir/$track*.wav"){
 			print "Found target WAV files.\n";
 			my @params = (target => $track, project => $project);
 			add_track( $name, @params );
