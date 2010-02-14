@@ -82,7 +82,8 @@ sub remove {
 	delete $by_index{$self->n};
 	$::tn{ wet_name($self->track) }->remove;
 	$::tn{ dry_name($self->track) }->remove;
-	$::tn{ $self->track }->set( (ref $self) => undef );
+	my $type = (ref $self) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert';
+	$::tn{ $self->track }->set(  $type => undef );
 }
 	
 sub add_insert {
@@ -105,7 +106,7 @@ sub add_insert {
 		track => $t,
 	);
 	$t->$class and $by_index{$t->$class}->remove;
-	$t->set($class => $i->n); 
+	$t->set($type => $i->n); 
 	$::this_track = $old_this_track;
 }
 
