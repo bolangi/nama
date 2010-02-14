@@ -17,8 +17,10 @@ use ::Object qw(
 	wet_track
 	dry_track
 	tracks
+	track
 	wetness
 );
+# tracks: deprecated
 
 initialize();
 
@@ -31,80 +33,89 @@ sub idx { # return first free index
 	}
 }
 
+sub wet_name {
+	my $name = shift;
+	"$name\_wet"
+}
+sub dry_name {
+	my $name = shift;
+	"$name\_dry"
+}
 sub new {
 	my $class = shift;
 	my %vals = @_;
+	my $track = $::tn{$vals{track}};
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	my $n = $vals{n} || idx(); 
-	my $i = bless { 
-					class	=> $class, 	# for restore
-					n 		=> $n,		# index
-					@_ 			}, $class;
-	$by_index{$n} = $object;
-	if (! $i->{return_id}){
-		$i->{return_type} = $i->{send_type};
-		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
-		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
-	}
-	$i;
-}
-}
-{
-package ::PostFaderInsert;
-use Modern::Perl; use Carp; our @ISA = qw(::Insert);
-
-sub add_insert_cooked {
-	my ($send_id, $return_id) = @_;
-	my $old_this_track = $::this_track;
-	my $t = $::this_track;
-	my $name = $t->name;
-	$t->remove_insert;
-	my $i = ::PostFaderInsert->new( 
-		send_type 	=> ::dest_type($send_id),
-		send_id	  	=> $send_id,
-		return_type 	=> ::dest_type($return_id),
-		return_id	=> $return_id,
-		wetness		=> 100,
-	);
-	};
-	# default to return from same JACK client or adjacent soundcard channels
-	# default to return via same system (soundcard or JACK)
-
-	
-	$t->set(inserts => $i->n); 
-
-	# we slave the wet track to the original track so that
-	# we know the external output (if any) will be identical
-	
+	my $name = $track->name;
 	my $wet = ::SlaveTrack->new( 
-				name => "$name\_wet",
+				name => wet_name($name),
 				target => $name,
 				group => 'Insert',
 				rw => 'REC',
 				hide => 1,
 			);
-	# in the graph we will override the input with the insert's return source
-
-	# we slave the dry track to the original track so that
-	# we know the external output (if any) will be identical
-	
 	my $dry = ::SlaveTrack->new( 
-				name => "$name\_dry", 
+				name => dry_name($name),
 				target => $name,
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
+	$vals{n} ||= idx(); 
+	my $self = bless { 
+					class	=> $class, 	# for restore
+					dry_vol => $dry->vol,
+					wet_vol => $wet->vol,
+					wetness		=> 100,
+					%vals,
+								}, $class;
+	$by_index{$self->n} = $self;
+	if (! $self->{return_id}){
+		$self->{return_type} = $self->{send_type};
+		$self->{return_id} =  $self->{send_id} if $self->{return_type} eq 'jack_client';
+		$self->{return_id} =  $self->{send_id} + 2 if $self->{return_type} eq 'soundcard';
+	}
+	$self;
+}
+sub remove {
+	my $self = shift;
+	delete $by_index{$self->n};
+	$::tn{ wet_name($self->track) }->remove;
+	$::tn{ dry_name($self->track) }->remove;
+	$::tn{ $self->track }->set( (ref $self) => undef );
+}
+	
+sub add_insert {
+	my ($type, $send_id, $return_id) = @_;
+	# $type : prefader_insert | postfader_insert
+	my $old_this_track = $::this_track;
+	my $t = $::this_track;
+	my $name = $t->name;
 
 	# the input fields will be ignored, since the track will get input
 	# via the loop device track_insert
 	
-	$i->{dry_vol} = $dry->vol;
-	$i->{wet_vol} = $wet->vol;
+	my $class =  $type =~ /pre/ ? '::PreFaderInsert' : '::PostFaderInsert';
 	
-	$i->{tracks} = [ $wet->name, $dry->name ];
+	my $i = $class->new( 
+		send_type 	=> ::dest_type($send_id),
+		send_id	  	=> $send_id,
+		return_type 	=> ::dest_type($return_id),
+		return_id	=> $return_id,
+		track => $t,
+	);
+	$t->$class and $by_index{$t->$class}->remove;
+	$t->set($class => $i->n); 
 	$::this_track = $old_this_track;
 }
 
+}
+{
+package ::PostFaderInsert;
+use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+}
+{
+package ::PreFaderInsert;
+use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 }
 1;

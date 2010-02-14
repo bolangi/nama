@@ -36,6 +36,8 @@
 					
 					rec_defeat		# don't record me!
 					inserts			# send/receive data structure, one per track
+					prefader_insert
+					postfader_insert
 
 					effect_chain_stack # for bypass and friends
 					cache_map		# original versions of intermediate mixdown
