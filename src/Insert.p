@@ -79,11 +79,11 @@ sub new {
 }
 sub remove {
 	my $self = shift;
-	delete $by_index{$self->n};
 	$::tn{ wet_name($self->track) }->remove;
 	$::tn{ dry_name($self->track) }->remove;
 	my $type = (ref $self) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert';
 	$::tn{ $self->track }->set(  $type => undef );
+	delete $by_index{$self->n};
 }
 	
 sub add_insert {
@@ -103,7 +103,7 @@ sub add_insert {
 		send_id	  	=> $send_id,
 		return_type 	=> ::dest_type($return_id),
 		return_id	=> $return_id,
-		track => $t,
+		track => $t, # pass track object, store track name in insert object
 	);
 	$t->$class and $by_index{$t->$class}->remove;
 	$t->set($type => $i->n); 
