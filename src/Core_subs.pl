@@ -1040,7 +1040,7 @@ sub add_paths_for_null_input_tracks {
 	$debug2 and say "&add_paths_for_null_tracks";
 
 	map{ $g->add_path('null_in', $_->name, 'Master') }
- 	grep{ $_->rec_status eq 'REC' } 
+ 	grep{ $_->rw eq 'REC' } 
 	map{$tn{$_}} 	# convert to Track objects
 	$::Bus::by_name{Null}->tracks; # list of Track names
 }

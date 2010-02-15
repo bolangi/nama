@@ -237,6 +237,8 @@ sub rec_status {
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
+	# null input 
+
 	# first, check for conditions resulting in status 'OFF'
 
 	if ( $group->rw eq 'OFF'
@@ -253,6 +255,7 @@ sub rec_status {
 		# we allow a mix track to be REC, even if the 
 		# bus it belongs to is set to MON
 			
+	# for null tracks
 	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
 				or $::Bus::by_name{$track->name}
 					and $track->rec_defeat) ){
@@ -454,16 +457,6 @@ sub send { # command for setting, showing track source
 sub set_source { # called from parser 
 	my $track = shift;
 	my $source = shift;
-
-# Special handling for 'null', used for non-input (i.e. metronome) tracks
-
-	if ($source eq 'null'){
-		$track->set(group => 'null',
-					source_type => undef,
-					source_id => undef);
- 		say $track->name, ": Setting input to null device";
-		return
-	}
 	my $old_source = $track->input_object;
 	$track->set_io('source',$source);
 	my $new_source = $track->input_object;

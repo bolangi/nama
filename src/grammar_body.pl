@@ -225,6 +225,12 @@ exit: _exit end {   ::save_state($::state_store_file);
 
 source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
+source: _source 'null' end {
+		$::this_track->set(group => 'Null',
+					source_type => undef,
+					source_id => undef);
+ 		print $::this_track->name, ": Setting input to null device\n";
+	}
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
 source: _source end { 
 	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
