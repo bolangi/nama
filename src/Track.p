@@ -237,8 +237,6 @@ sub rec_status {
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
-	# null input 
-
 	# first, check for conditions resulting in status 'OFF'
 
 	if ( $group->rw eq 'OFF'
@@ -266,6 +264,7 @@ sub rec_status {
 					:  return maybe_monitor($monitor_version)
 			}
 			when('jack_port'){ return 'REC' }
+			when('null'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('track'){ return 'REC' } # maybe $track->rw ??
 			default { return 'OFF' }
@@ -333,7 +332,7 @@ sub input_path { # signal path, not file path
 	
 	if($track->rec_status eq 'REC'){
 
-		if ($track->source_type =~ /soundcard|jack_client|jack_port/){
+		if ($track->source_type =~ /soundcard|jack_client|jack_port|null/){
 			( ::input_node($track->source_type) , $track->name)
 		} 
 
