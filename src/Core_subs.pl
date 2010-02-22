@@ -3844,7 +3844,6 @@ sub set_region {
 }
 sub new_region {
 	my ($beg, $end, $name) = @_;
-	my $orig = $this_track;
 	$name ||= new_region_name();
 	add_track_alias($name, $this_track->name);	
 	set_region($beg,$end);
