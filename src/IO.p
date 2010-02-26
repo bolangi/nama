@@ -312,6 +312,18 @@ use Modern::Perl; our @ISA = '::IO::to_jack_port';
 sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
 sub ecs_extra { $_[0]->mono_to_stereo }
 
+package ::IO::to_jack_client;
+use Modern::Perl; our @ISA = '::IO';
+sub device_id { 
+	my $io = shift;
+	my $client = $io->direction eq 'input' 
+		? $io->source_id
+		: $io->send_id;
+	"jack,$client"
+}
+package ::IO::from_jack_client;
+use Modern::Perl; our @ISA = '::IO::to_jack_client';
+
 package ::IO::from_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
