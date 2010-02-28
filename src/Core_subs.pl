@@ -2997,9 +2997,9 @@ sub save_state {
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
 
-	@inserts_data = ();
 	$debug and print "copying inserts data\n";
-	map { push @inserts_data, $_->hashref } ::Insert::all();
+	%insert_by_index = map{ $_, $::Insert::by_index{$_}->hashref } 
+					keys %::Insert::by_index; 
 
 	# save history
 
@@ -3206,6 +3206,7 @@ sub restore_state {
 	
 	::Insert::initialize();
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @inserts_data;
+	%::Insert::by_index = %insert_by_index;
 	
 	# restore user tracks
 	
@@ -4330,64 +4331,6 @@ sub some_user_tracks {
 }
 sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
-
-sub add_insert_cooked {
-	my ($send_id, $return_id) = @_;
-
-	my $old_this_track = $this_track;
-	my $t = $::this_track;
-	my $name = $t->name;
-	$t->remove_insert;
-	my $i = {
-		insert_type => 'cooked',
-		send_type 	=> ::dest_type($send_id),
-		send_id	  	=> $send_id,
-		return_type 	=> ::dest_type($return_id),
-		return_id	=> $return_id,
-		wetness		=> 100,
-	};
-	# default to return from same JACK client or adjacent soundcard channels
-	# default to return via same system (soundcard or JACK)
-	if (! $i->{return_id}){
-		$i->{return_type} = $i->{send_type};
-		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
-		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
-	}
-
-	
-	$t->set(inserts => $i); 1;
-
-	# we slave the wet track to the original track so that
-	# we know the external output (if any) will be identical
-	
-	my $wet = ::SlaveTrack->new( 
-				name => "$name\_wet",
-				target => $name,
-				group => 'Insert',
-				rw => 'REC',
-				hide => 1,
-			);
-	# in the graph we will override the input with the insert's return source
-
-	# we slave the dry track to the original track so that
-	# we know the external output (if any) will be identical
-	
-	my $dry = ::SlaveTrack->new( 
-				name => "$name\_dry", 
-				target => $name,
-				group => 'Insert',
-				hide => 1,
-				rw => 'REC');
-
-	# the input fields will be ignored, since the track will get input
-	# via the loop device track_insert
-	
-	$i->{dry_vol} = $dry->vol;
-	$i->{wet_vol} = $wet->vol;
-	
-	$i->{tracks} = [ $wet->name, $dry->name ];
-	$this_track = $old_this_track;
-}
 
 sub ecasound_get_info {
 	my ($path, $command) = @_;

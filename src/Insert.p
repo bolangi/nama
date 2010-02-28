@@ -9,6 +9,7 @@ local $debug = 0;
 use vars qw(%by_index);
 use ::Object qw(
 	insert_type
+	n
 	class
 	send_type
 	send_id
@@ -44,10 +45,9 @@ sub dry_name {
 sub new {
 	my $class = shift;
 	my %vals = @_;
-	my $track = $::tn{$vals{track}};
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	my $name = $track->name;
+	my $name = $vals{track};
 	my $wet = ::SlaveTrack->new( 
 				name => wet_name($name),
 				target => $name,
@@ -99,13 +99,13 @@ sub add_insert {
 	my $class =  $type =~ /pre/ ? '::PreFaderInsert' : '::PostFaderInsert';
 	
 	my $i = $class->new( 
+		track => $t->name,
 		send_type 	=> ::dest_type($send_id),
 		send_id	  	=> $send_id,
 		return_type 	=> ::dest_type($return_id),
 		return_id	=> $return_id,
-		track => $t, # pass track object, store track name in insert object
 	);
-	$t->$class and $by_index{$t->$class}->remove;
+	$t->$type and $by_index{$t->$type}->remove;
 	$t->set($type => $i->n); 
 	$::this_track = $old_this_track;
 }

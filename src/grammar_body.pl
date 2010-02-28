@@ -534,7 +534,7 @@ list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
 add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
-	::add_insert_cooked($send_id, $return_id);
+	::Insert::add_insert('postfader_insert',$send_id, $return_id);
 	1;
 }
 send_id: jack_port
