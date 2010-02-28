@@ -3205,8 +3205,11 @@ sub restore_state {
 	# restore inserts
 	
 	::Insert::initialize();
-	map{ my $class = $_->{class}; $class->new( %$_ ) } @inserts_data;
-	%::Insert::by_index = %insert_by_index;
+	#map{ my $class = $_->{class}; $class->new( %$_ ) } @inserts_data;
+	%::Insert::by_index = map { 
+		$_, 
+		bless $insert_by_index{$_},$insert_by_index{$_}{class}
+	} keys %insert_by_index; 
 	
 	# restore user tracks
 	
