@@ -53,12 +53,10 @@ sub add_edge { add_path(@_) }
 	
 sub add_inserts {
 	my $g = shift;
-	my @track_names = grep{ $::tn{$_} 
-		and $::tn{$_}->group ne 'Temp'
-		and $::tn{$_}->inserts =~ /HASH/
-		and $::tn{$_}->inserts->{insert_type}} $g->vertices;
-	$debug and say "Inserts will be applied to the following tracks: @track_names";
-	map{ add_insert($g, $_) } @track_names;
+	map{ add_insert($g, $_) } 
+		grep {$::tn{$_}->prefader_insert or $::tn{$_}->postfader_insert}
+		grep{ $::tn{$_} } 
+		$g->vertices;
 }
 sub add_insert {
 
@@ -76,8 +74,6 @@ sub add_insert {
 
 	$debug and say "insert structure:", ::yaml_out($i);
 
-	# case 1: post-fader insert
-	
 		my $i = $t->postfader_insert;  # assume post-fader send
 	
 		my ($successor) = $g->successors($name);
