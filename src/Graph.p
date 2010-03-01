@@ -60,35 +60,25 @@ sub add_inserts {
 	$debug and say "Inserts will be applied to the following tracks: @track_names";
 	map{ add_insert($g, $_) } @track_names;
 }
-	
 sub add_insert {
 
-	# Inserts will be read-only objects. To change the 
-	# destination or return, users will remove the insert and
-	# create a new one.
-	#
 	# Since this routine will be called after expand_graph, 
-	# we can be sure that every track will connect to either 
-	# a loop or an output 
-	#
-	# we can add the wet/dry tracks on every generate_setup() run
-	# since the Track class will return us the existing
-	# track if we use the same name
-	#
-	no warnings qw(uninitialized);
-
+	# we can be sure that every track vertex will connect to 
+	# to a single edge, either loop or an output 
+	
 	my ($g, $name) = @_;
+	no warnings qw(uninitialized);
+	my $debug = 1;
 	$debug and say "add_insert for track: $name";
-	my $t = $::tn{$name}; 
-	my $i = $t->inserts;  # only one allowed
 
-	say "insert structure:", ::yaml_out($i);
-	# assume post-fader send
-	# t's successor will be loop or reserved
+	my $t = $::tn{$name}; 
+
+
+	$debug and say "insert structure:", ::yaml_out($i);
 
 	# case 1: post-fader insert
-		
-	if($i->{insert_type} eq 'cooked') {	 # the only type we support
+	
+		my $i = $t->postfader_insert;  # assume post-fader send
 	
 		my ($successor) = $g->successors($name);
 		$g->delete_edge($name, $successor);
@@ -96,12 +86,12 @@ sub add_insert {
 		my $wet = $::tn{"$name\_wet"};
 		my $dry = $::tn{"$name\_dry"};
 
-		say "found wet: ", $wet->name, " dry: ",$dry->name;
+		$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
 
 		# wet send path (no track): track -> loop -> output
 		
 		my @edge = ($loop, ::output_node($i->{send_type}));
-		say "edge: @edge";
+		$debug and say "edge: @edge";
 		add_path($name, @edge);
 		$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
 		$g->set_edge_attributes(@edge, { 
@@ -126,10 +116,8 @@ sub add_insert {
 
 		::command_process($t->name); 
 		::command_process('wet '.$i->{wetness});
-		# generate_setup() will reset current track 
 	}
 	
-}
 	
 
 sub add_loop {
