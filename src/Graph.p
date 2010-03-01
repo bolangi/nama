@@ -53,68 +53,14 @@ sub add_edge { add_path(@_) }
 	
 sub add_inserts {
 	my $g = shift;
-	map{ add_insert($g, $_) } 
-		grep {$::tn{$_}->prefader_insert or $::tn{$_}->postfader_insert}
-		grep{ $::tn{$_} } 
-		$g->vertices;
-}
-sub add_insert {
-
-	# Since this routine will be called after expand_graph, 
-	# we can be sure that every track vertex will connect to 
-	# to a single edge, either loop or an output 
-	
-	my ($g, $name) = @_;
-	no warnings qw(uninitialized);
-	my $debug = 1;
-	$debug and say "add_insert for track: $name";
-
-	my $t = $::tn{$name}; 
-
-
-	$debug and say "insert structure:", ::yaml_out($i);
-
-		my $i = $t->postfader_insert;  # assume post-fader send
-	
-		my ($successor) = $g->successors($name);
-		$g->delete_edge($name, $successor);
-		my $loop = "$name\_insert";
-		my $wet = $::tn{"$name\_wet"};
-		my $dry = $::tn{"$name\_dry"};
-
-		$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
-
-		# wet send path (no track): track -> loop -> output
-		
-		my @edge = ($loop, ::output_node($i->{send_type}));
-		$debug and say "edge: @edge";
-		add_path($name, @edge);
-		$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
-		$g->set_edge_attributes(@edge, { 
-			send_id => $i->{send_id},
-			width => 2,
-		});
-		# wet return path: input -> wet_track (slave) -> successor
-		
-		# we override the input with the insert's return source
-
-		$g->set_vertex_attributes($wet->name, {
-					width => 2, # default for cooked
-					mono_to_stereo => '', # override
-					source_type => $i->{return_type},
-					source_id => $i->{return_id},
-		});
-		add_path(::input_node($i->{return_type}), $wet->name, $successor);
-
-		# connect dry track to graph
-		
-		add_path($loop, $dry->name, $successor);
-
-		::command_process($t->name); 
-		::command_process('wet '.$i->{wetness});
+	map{ my $i = $::tn{$_}->prefader_insert;
+		 $::Insert::by_index{$i}->add_paths($g, $_) if $i;
+			$i = $::tn{$_}->postfader_insert;
+		 $::Insert::by_index{$i}->add_paths($g, $_) if $i;
 	}
-	
-	
+	grep{ $::tn{$_} } 
+	$g->vertices;
+}
 
 sub add_loop {
 	my ($g,$a,$b) = @_;
