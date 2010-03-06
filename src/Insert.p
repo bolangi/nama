@@ -128,10 +128,8 @@ sub add_paths {
 	my $t = $::tn{$name}; 
 
 
-	$debug and say "insert structure:", ::yaml_out($i);
+	$debug and say "insert structure:", $self->dump;
 
-		my $i = $self;  # assume post-fader send
-	
 		my ($successor) = $g->successors($name);
 		$g->delete_edge($name, $successor);
 		my $loop = "$name\_insert";
@@ -142,12 +140,12 @@ sub add_paths {
 
 		# wet send path (no track): track -> loop -> output
 		
-		my @edge = ($loop, ::output_node($i->{send_type}));
+		my @edge = ($loop, ::output_node($self->{send_type}));
 		$debug and say "edge: @edge";
-		add_path($name, @edge);
+		::Graph::add_path($name, @edge);
 		$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
 		$g->set_edge_attributes(@edge, { 
-			send_id => $i->{send_id},
+			send_id => $self->{send_id},
 			width => 2,
 		});
 		# wet return path: input -> wet_track (slave) -> successor
@@ -157,17 +155,17 @@ sub add_paths {
 		$g->set_vertex_attributes($wet->name, {
 					width => 2, # default for cooked
 					mono_to_stereo => '', # override
-					source_type => $i->{return_type},
-					source_id => $i->{return_id},
+					source_type => $self->{return_type},
+					source_id => $self->{return_id},
 		});
-		add_path(::input_node($i->{return_type}), $wet->name, $successor);
+		::Graph::add_path(::input_node($self->{return_type}), $wet->name, $successor);
 
 		# connect dry track to graph
 		
-		add_path($loop, $dry->name, $successor);
+		::Graph::add_path($loop, $dry->name, $successor);
 
 		::command_process($t->name); 
-		::command_process('wet '.$i->{wetness});
+		::command_process('wet '.$self->{wetness});
 	}
 	
 	
@@ -190,7 +188,7 @@ sub add_paths {
 	my $t = $::tn{$name}; 
 
 
-	$debug and say "insert structure:", ::yaml_out($i);
+	$debug and say "insert structure:", $self->dump;
 
 	my $i = $t->postfader_insert;  # assume post-fader send
 
@@ -206,7 +204,7 @@ sub add_paths {
 	
 	my @edge = ($loop, ::output_node($i->{send_type}));
 	$debug and say "edge: @edge";
-	add_path($name, @edge);
+	::Graph::add_path($name, @edge);
 	$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
 	$g->set_edge_attributes(@edge, { 
 		send_id => $i->{send_id},
@@ -222,11 +220,11 @@ sub add_paths {
 				source_type => $i->{return_type},
 				source_id => $i->{return_id},
 	});
-	add_path(::input_node($i->{return_type}), $wet->name, $successor);
+	::Graph::add_path(::input_node($i->{return_type}), $wet->name, $successor);
 
 	# connect dry track to graph
 	
-	add_path($loop, $dry->name, $successor);
+	::Graph::add_path($loop, $dry->name, $successor);
 
 	::command_process($t->name); 
 	::command_process('wet '.$i->{wetness});
