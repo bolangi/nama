@@ -20,6 +20,8 @@ use ::Object qw(
 	tracks
 	track
 	wetness
+	wet_vol
+	dry_vol
 );
 # tracks: deprecated
 
@@ -35,57 +37,53 @@ sub idx { # return first free index
 }
 
 sub wet_name {
-	my $name = shift;
-	"$name\_wet"
+	my $self = shift;
+	join '-', $self->track, $self->n, 'wet'; 
 }
 sub dry_name {
-	my $name = shift;
-	"$name\_dry"
+	my $self = shift;
+	join '-', $self->track, $self->n, 'dry'; 
 }
 sub new {
 	my $class = shift;
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
+	$vals{n} ||= idx(); 
+	my $self = bless { 
+					class	=> $class, 	# for restore
+					wetness		=> 100,
+					%vals,
+								}, $class;
 	my $name = $vals{track};
 	my $wet = ::SlaveTrack->new( 
-				name => wet_name($name),
+				name => $self->wet_name,
 				target => $name,
 				group => 'Insert',
 				rw => 'REC',
 				hide => 1,
 			);
 	my $dry = ::SlaveTrack->new( 
-				name => dry_name($name),
+				name => $self->dry_name,
 				target => $name,
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
-	$vals{n} ||= idx(); 
-	my $self = bless { 
-					class	=> $class, 	# for restore
-					dry_vol => $dry->vol,
-					wet_vol => $wet->vol,
-					wetness		=> 100,
-					%vals,
-								}, $class;
+	$self->{dry_vol} = $dry->vol;
+	$self->{wet_vol} = $wet->vol;
 	$by_index{$self->n} = $self;
-	if (! $self->{return_id}){
-		$self->{return_type} = $self->{send_type};
-		$self->{return_id} =  $self->{send_id} if $self->{return_type} eq 'jack_client';
-		$self->{return_id} =  $self->{send_id} + 2 if $self->{return_type} eq 'soundcard';
-	}
-	$self;
 }
 sub remove {
 	my $self = shift;
-	$::tn{ wet_name($self->track) }->remove;
-	$::tn{ dry_name($self->track) }->remove;
+	$::tn{ $self->wet_name }->remove;
+	$::tn{ $self->dry_name }->remove;
 	my $type = (ref $self) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert';
 	$::tn{ $self->track }->set(  $type => undef );
 	delete $by_index{$self->n};
 }
 	
+# subroutine
+#
 sub add_insert {
 	my ($type, $send_id, $return_id) = @_;
 	# $type : prefader_insert | postfader_insert
@@ -105,6 +103,11 @@ sub add_insert {
 		return_type 	=> ::dest_type($return_id),
 		return_id	=> $return_id,
 	);
+	if (! $i->{return_id}){
+		$i->{return_type} = $i->{send_type};
+		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
+		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+	}
 	$t->$type and $by_index{$t->$type}->remove;
 	$t->set($type => $i->n); 
 	$::this_track = $old_this_track;
@@ -133,8 +136,8 @@ sub add_paths {
 		my ($successor) = $g->successors($name);
 		$g->delete_edge($name, $successor);
 		my $loop = "$name\_insert";
-		my $wet = $::tn{"$name\_wet"};
-		my $dry = $::tn{"$name\_dry"};
+		my $wet = $::tn{$self->wet_name};
+		my $dry = $::tn{$self->dry_name};
 
 		$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
 
@@ -173,6 +176,7 @@ sub add_paths {
 {
 package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+=comment
 sub add_paths {
 	my $self = shift;
 
@@ -190,11 +194,15 @@ sub add_paths {
 
 	$debug and say "insert structure:", $self->dump;
 
-	my $i = $t->postfader_insert;  # assume post-fader send
+	my $i = $t->prefader_insert;  # assume post-fader send
 
-	my ($successor) = $g->successors($name);
-	$g->delete_edge($name, $successor);
+	# because of previous processing
+	# there will only be one predecessor
+	
+	my ($predecessor) = $g->predecessors($name);
+	$g->delete_edge($name, $predecessor);
 	my $loop = "$name\_insert";
+
 	my $wet = $::tn{"$name\_wet"};
 	my $dry = $::tn{"$name\_dry"};
 
@@ -208,9 +216,9 @@ sub add_paths {
 	$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
 	$g->set_edge_attributes(@edge, { 
 		send_id => $i->{send_id},
-		width => 2,
+		width => 2, 
 	});
-	# wet return path: input -> wet_track (slave) -> successor
+	# wet return path: input -> wet_track (slave) -> predecessor
 	
 	# we override the input with the insert's return source
 
@@ -220,15 +228,16 @@ sub add_paths {
 				source_type => $i->{return_type},
 				source_id => $i->{return_id},
 	});
-	::Graph::add_path(::input_node($i->{return_type}), $wet->name, $successor);
+	::Graph::add_path(::input_node($i->{return_type}), $wet->name, $predecessor);
 
 	# connect dry track to graph
 	
-	::Graph::add_path($loop, $dry->name, $successor);
+	::Graph::add_path($loop, $dry->name, $predecessor);
 
 	::command_process($t->name); 
 	::command_process('wet '.$i->{wetness});
 }
+=cut
 	
 }
 1;
