@@ -97,6 +97,7 @@ sub AUTOLOAD {
 		return $track->$call if $track->can($call) 
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
+	print $self->dump;
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
 }
 

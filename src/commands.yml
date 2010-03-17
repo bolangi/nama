@@ -475,7 +475,12 @@ remove_effect:
 add_insert_cooked:
   type: effect 
   short: ainc
-  what: add an external post-fader send/return to a track
+  what: add an external post-fader send/return to current track
+  parameters: <s_send_id> [<s_return_id>]
+add_insert_raw:
+  type: effect 
+  short: ainr
+  what: add an external pre-fader send/return to current track
   parameters: <s_send_id> [<s_return_id>]
 set_insert_wetness:
   type: effect 

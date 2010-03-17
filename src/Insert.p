@@ -216,6 +216,7 @@ sub add_paths {
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
 			width => $t->width,
+			track => $name,
 		});
 		#post: wet return path: input -> wet_track (slave) -> successor
 		#pre:  wet return path: input -> wet_track (slave) -> loop
