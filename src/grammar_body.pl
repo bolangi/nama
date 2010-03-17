@@ -531,22 +531,18 @@ change_bus: _change_bus existing_bus_name {
 	1 }
 
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
-add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
+add_insert: _add_insert prepost send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
-	::Insert::add_insert('postfader_insert',$send_id, $return_id);
+	::Insert::add_insert( "$item{prepost}fader_insert",$send_id, $return_id);
 	1;
 }
-add_insert_raw: _add_insert_raw send_id return_id(?) end {
-	my $return_id = "@{$item{'return_id(?)'}}";
-	my $send_id = $item{send_id};
-	::Insert::add_insert('prefader_insert',$send_id, $return_id);
-	1;
-}
+prepost: 'pre' | 'post'
 send_id: jack_port
 return_id: jack_port
 
-set_insert_wetness: _set_insert_wetness parameter end {
+set_insert_wetness: _set_insert_wetness parameter prepost(?) end {
+	my $prepost = "@$item{'prepost(?)'}";
 	my $p = $item{parameter};
 	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
 		if ! ($p <= 100 and $p >= 0);
@@ -567,8 +563,8 @@ set_insert_wetness: _set_insert_wetness end {
 		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";
 }
 
-remove_insert: _remove_insert end { 
-	$::this_track->remove_insert;
+remove_insert: _remove_insert prepost(?) end { 
+	$::this_track->remove_insert("@$item{'prepost(?)'}");
 	1;
 }
 

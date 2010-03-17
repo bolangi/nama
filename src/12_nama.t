@@ -464,7 +464,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Insert via soundcard - JACK');
-command_process('remove_insert');
+command_process('remove_insert'); # XXX
 command_process('add_send_bus_raw Vo 5');
 $expected_setup_lines = <<EXPECTED;
 

@@ -472,26 +472,22 @@ remove_effect:
   what: remove effects from selected track
   short: rfx remove_controller rcl
   parameters: <s_effect_id1> [ <s_effect_id2>...]
-add_insert_cooked:
+add_insert:
   type: effect 
-  short: ainc
-  what: add an external post-fader send/return to current track
-  parameters: <s_send_id> [<s_return_id>]
-add_insert_raw:
-  type: effect 
-  short: ainr
-  what: add an external pre-fader send/return to current track
+  short: aina
+  what: add an external send/return to current track
+  parameters: ( pre | post ) <s_send_id> [<s_return_id>]
   parameters: <s_send_id> [<s_return_id>]
 set_insert_wetness:
   type: effect 
   short: wet
-  what: set wet/dry balance for track insert: 100 = all wet, 0 = all dry
-  parameters: <n_wetness>
+  what: set wet/dry balance for current track insert: 100 = all wet, 0 = all dry
+  parameters: <n_wetness> [ pre | post ]
 remove_insert:
   type: effect
   short: rin
-  what: remove a track's insert
-  parameters: none
+  what: remove an insert from the current track 
+  parameters: [ pre | post ] 
 ctrl_register:
   type: effect
   what: list Ecasound controllers
