@@ -139,7 +139,7 @@ sub add_paths {
 		# i.e. can accept multiple signals
 
 		$g->delete_edge($name, $successor);
-		my $loop = "$name\_insert";
+		my $loop = "$name\_insert_post";
 		my $wet = $::tn{$self->wet_name};
 		my $dry = $::tn{$self->dry_name};
 

@@ -537,6 +537,12 @@ add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
 	::Insert::add_insert('postfader_insert',$send_id, $return_id);
 	1;
 }
+add_insert_raw: _add_insert_raw send_id return_id(?) end {
+	my $return_id = "@{$item{'return_id(?)'}}";
+	my $send_id = $item{send_id};
+	::Insert::add_insert('prefader_insert',$send_id, $return_id);
+	1;
+}
 send_id: jack_port
 return_id: jack_port
 

@@ -191,7 +191,7 @@ sub is_terminal { $reserved{$_[0]} }
 sub is_a_loop{
 	my $name = shift;
 	return if $reserved{$name};
-	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out|insert)$/){
+	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out|insert_p.+)$/){
 		return ($root, $suffix);
 	} 
 }
