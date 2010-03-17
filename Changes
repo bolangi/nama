@@ -1,106 +1,27 @@
-Major revisions in Perl application Audio::Nama
+Major changes to Perl application Audio::Nama
 
-1.02  Jan 2, 2010 (summarizing last year's changes)
+1.052  March 20, 2010 (summary)
 
+      - prompt displays current bus and current track
+      - configurable use of ea or eadb for volume control
       - Ladish Level 1 support 
       - big speedup by caching results of Track and Wav methods
-      - new internals: generate setup using graphic routing algorithm
-        and IO objects
-      - send- and sub-buses: rewrite code for new internals
+      - generate setup using graph representation and IO objects
+      - rewrite send- and sub-buses 
       - track caching (intermediate mixdown)
-      - track inserts (send/receive) with wet/dry control
-      - track input via JACK port (for manual connection)
-      - track input from a list of ports (to support Linux Sampler)
+      - post-fader track inserts (send/receive) with wet/dry control
+      - more flexible track input 
+         + manual connection to JACK port
+         + auto connect to list of JACK ports
       - track normalize and fixdc commands
       - automix (normalized mixdown) command
       - import audio: copy files unless resampling or converting format
       - region shifting, with multiple regions per track
       - effect chains (presets)
+      - effect profiles (effect chains over multiple tracks)
       - non-recording preview and doodle modes
       - unified event code for GUI and text modes
       - rewrite support for Ecasound controllers
       - test coverage for signal routing functions 
       - new debugging options
 
-Old changelog (increasing version)
-
-0.97  Fri Sep 18 2008   - replace Ext::MakeMaker with Module::Install
-0.975 Mon Dec 29, 2008  - new event sytem supports chainsetup looping 
-                          in both console and GUI modes
-0.978 Sat Jan 4, 2009   - much improved JACK support
-                        - jack/nojack commands enable/disable JACK 
-                        - source command sets track input to
-                          either JACK client name or soundcard channel number
-                        - automatic connection to JACK clients
-                        - stereo/mono commands to set track width 
-                        - solo/all commands for selective listening 
-                        - long text output displays in pager
-0.98  Mon Jan 6, 2009   - rewritten man pages
-                        - README contains source build instructions
-0.981 Thu Jan 9, 2009   - add track fields jack_send and send_select
-                        - add track method/command 'send' analagous to 'source'
-                        - add_effect takes LADSPA unique id as well as label
-                        - find_effect (fe) takes multiple keywords
-                        - help_effect (he) analyseplugin output for one effect
-                          designated by label or unique_id
-						- workaround for longstanding parser bug
-0.99 Wed Jan 14, 2009   - auto JACK detection
-                        - send command: aux send to channel
-                          or JACK client
-                        - fw/rw/setpos work as expected with JACK
-                        - autocompletion for text commands
-                        - fix longstanding parser error
-                        - preview mode runs w/o writing WAV files
-                          (available via GUI button)
-                        - full GUI support for Ecasound controllers
-0.991 Wed Jan 14, 2009  - recognize all ecasound-iam commands from 
-                          Ecasound int-cmd-list
-0.992 Thu Jan 15, 2009  - minor fixes
-0.993 Sun Jan 18, 2009  - GUI now has Preview button.  Connects setup as 
-                          specified without writing files.
-						- GUI has Palette and Nama Palette
-						  buttons for setting colors
-                        - Palette settings are saved
-                        - report if zero value encountered
-                          in log-hinted parameter of LADSPA plugin 
-                        - 'send off' or 'send 0' disable
-                          auxiliary send for current track
-                        - use of Time::HiRes is now
-                          optional, with fallback to sleep
-0.994 Mon Jan 19, 2009  - minor fixes
-0.995 Mon Jan 26, 2009  - fix mixdown bug 
-                        - parser reports bad commands
-                        - add normalize, fixdc commands
-                        - add use_group_numbering option
-                        - improved preprocessing script 
-                          (Julien Claassen)
-						- insert effect command
-						- recognize all ecasound chain operators
-						- remove last tkeca code
-						- fixes for get_ladspa_hints
-						  involving logarithmic parameters
-                          with zero for beg/end/default values
-						- fix serialize routine to deal with
-						  null values
-  						- set OFF status for tracks taking
-  						  input from JACK client when no
-						  corresponding JACK port is found
-						- major speedups: cache WAV files 
-						  directory contents, poll for
-						  jackd status.
-						- allow vol * 1.5, vol / 2 in
-						  addition to vol + 20, vol - 30
-						- similar syntax to change
-						  effect parameters (modify_effect)
-						- many commands now report their
-						  actions
-0.9951 Mon Jan 26, 2009 - disable JACK client checking
-0.997  Sun Apr 26  2009 - add 'region' and 'shift' commands
-                        - add 'link_track' command to allow for
-                          multiple regions and for assembling
-                          WAV files from multiple projects
-                        - add mastering mode, 'master_on',
-                          'master_off' commands
-0.9981 Wed Oct 21, 2009 - add pre-fader instrument monitor buses
-                        - add post-fader inserts to soundcard or 
-                          JACK clients
