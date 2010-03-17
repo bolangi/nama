@@ -959,8 +959,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	process_routing_graph() or say("No tracks to record or play."),return;
 
-	# now we have processed graph, we can remove temp tracks
-
 	write_chains(); 
 }
 sub remove_temporary_tracks {
@@ -1512,12 +1510,23 @@ sub connect_transport {
 	disconnect_jack_ports();
 	connect_jack_ports();
 	transport_status() unless $no_transport_status;
+	setup_effect_parameter_sync();
 	$ui->flash_ready();
 	#print eval_iam("fs");
 	1;
 	
 }
 
+sub setup_effect_parameter_sync {
+	@ops_with_controller = ();
+	map { push @ops_with_controller, $_ }
+	grep{ ! is_controller($_) }
+	grep{ scalar @{$cops{$_}{owns}} }
+	map{ @{ $_->ops } } 
+	map{ $tn{$_} } 
+	grep{ $tn{$_} } 
+	$g->vertices;
+}
 
 sub connect_jack_ports {
 
@@ -2248,6 +2257,37 @@ sub effect_update {
 	ecasound_select_chain($old_chain);
 }
 
+sub sync_effect_parameters {
+	# when a controller changes an effect parameter
+	# the effect state can differ from the state in
+	# %copp, Nama's effect parameter store
+	#
+	# this routine syncs them
+	
+	return unless @ops_with_controller;
+	my $old_chain = eval_iam('c-selected');
+	map{ sync_one_effect($_) } @ops_with_controller;
+	eval_iam("c-select $old_chain");
+}
+
+sub sync_one_effect {
+		my $id = shift;
+		my $chain = $cops{$id}{chain};
+		eval_iam("c-select $chain");
+		eval_iam("cop-select " . ( $offset{$chain} + ecasound_operator_index($id)));
+		$copp{$id} = get_cop_params( scalar @{$copp{$id}} );
+}
+
+sub get_cop_params {
+	my $count = shift;
+	my @params;
+	for (1..$count){
+		eval_iam("copp-select $_");
+		push @params, eval_iam("copp-get");
+	}
+	\@params
+}
+		
 sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
 
 sub ecasound_operator_index { # does not include offset
@@ -2321,22 +2361,18 @@ sub fadeout {
 sub find_op_offsets {
 
 	$debug2 and print "&find_op_offsets\n";
-	eval_iam('c-select-all');
-		#my @op_offsets = split "\n",eval_iam("cs");
-		my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
-		shift @op_offsets; # remove comment line
-		$debug and print join "\n\n",@op_offsets; 
-		for my $output (@op_offsets){
-			my $chain_id;
-			($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
-			# print "chain_id: $chain_id\n";
-			next if $chain_id =~ m/\D/; # skip id's containing non-digits
-										# i.e. M1
-			my $quotes = $output =~ tr/"//;
-			$debug and print "offset: $quotes in $output\n"; 
-			$offset{$chain_id} = $quotes/2 - 1;  
-
-		}
+	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
+	$debug and print join "\n\n",@op_offsets; 
+	for my $output (@op_offsets){
+		my $chain_id;
+		($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
+		# print "chain_id: $chain_id\n";
+		next if $chain_id =~ m/\D/; # skip id's containing non-digits
+									# i.e. M1
+		my $quotes = $output =~ tr/"//;
+		$debug and print "offset: $quotes in $output\n"; 
+		$offset{$chain_id} = $quotes/2 - 1;  
+	}
 }
 sub apply_ops {  # in addition to operators in .ecs file
 	
@@ -2916,6 +2952,8 @@ sub save_state {
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	$file =~ /\.yml$/ or $file .= '.yml';	
 	print "\nSaving state as $file\n";
+
+	sync_effect_parameters(); # in case a controller has made a change
 
 	# remove null keys in %cops and %copp
 	

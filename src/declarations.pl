@@ -372,4 +372,6 @@ our (
 	%fade_out_level, # 0 for ea, -40 for eadb
 	$fade_resolution, # steps per second
 	%unity_level,	# 100 for ea, 0 for eadb
+	
+	@ops_with_controller, # for sync-ing effect parameters
 );

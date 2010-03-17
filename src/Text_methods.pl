@@ -16,6 +16,7 @@ sub show_send { "Send: ". $this_track->send_id. $/
 sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
 
 sub show_effects {
+	::sync_effect_parameters();
 	my @lines;
  	map { 
  		my $op_id = $_;
