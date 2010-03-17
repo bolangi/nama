@@ -1182,24 +1182,39 @@ sub non_track_dispatch {
 	# we will issue two IO objects, one for the chain input
 	# fragment, one for the chain output
 	
+	my $debug = 1;
+	
 	my $edge = shift;
 	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
-	my $attr = $g->get_edge_attributes(@$edge);
-	$debug and say "found edge attributes: ",yaml_out($attr) if $attr;
+	my $eattr = $g->get_edge_attributes(@$edge) // {};
+	$debug and say "found edge attributes: ",yaml_out($eattr) if $eattr;
 
-	my $vattr = $g->get_vertex_attributes($edge->[0]);
+	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
-	# loop  fields: n: track->n, j: 'a' (counter)
-	
-	# chain_ids are allocated J7, J7b, J7c...
-	$attr->{chain_id} //= 'J'.$vattr->{n}. 
-		( $vattr->{j} eq 'a' ? ($vattr->{j}++,''): ++$vattr->{j});
+	# if no chain_id is defined, we need to name our chain
+	#
+	# we use the track number and an alphabetical counter 
+	# that we increment
+	#
+	# edge attributes have priority
+	#
+	if ( ! $eattr->{chain_id} ) { # and ! $vattr->{chain_id} ){
+		my $iref = $eattr->{j} ? \$eattr->{j} : 
+					($vattr->{j} ? \$vattr->{j} : 
+						warn("edge @$edge: no jumper counter found"));	
+		my $n = $eattr->{n} || $vattr->{n};
+
+		# loop  fields: n: track->n, j: 'a' (counter)
+		
+		# chain_ids are allocated J7, J7b, J7c...
+		$eattr->{chain_id} = 'J'. $n .  (  $$iref eq 'a' ? ($$iref++,''): ++$$iref);
+	}
 	my @direction = qw(input output);
 	map{ 
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
-		my $attrib = {%$vattr, %$attr};
+		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}";
