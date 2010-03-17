@@ -1517,17 +1517,6 @@ sub connect_transport {
 	
 }
 
-sub setup_effect_parameter_sync {
-	@ops_with_controller = ();
-	map { push @ops_with_controller, $_ }
-	grep{ ! is_controller($_) }
-	grep{ scalar @{$cops{$_}{owns}} }
-	map{ @{ $_->ops } } 
-	map{ $tn{$_} } 
-	grep{ $tn{$_} } 
-	$g->vertices;
-}
-
 sub connect_jack_ports {
 
 	# use a heuristic to map port names to track channels
@@ -2288,6 +2277,17 @@ sub get_cop_params {
 	\@params
 }
 		
+sub setup_effect_parameter_sync {
+	@ops_with_controller = ();
+	map { push @ops_with_controller, $_ }
+	grep{ ! is_controller($_) }
+	grep{ scalar @{$cops{$_}{owns}} }
+	map{ @{ $_->ops } } 
+	map{ $tn{$_} } 
+	grep{ $tn{$_} } 
+	$g->vertices;
+}
+
 sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
 
 sub ecasound_operator_index { # does not include offset
