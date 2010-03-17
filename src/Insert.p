@@ -134,6 +134,10 @@ sub add_paths {
 	$debug and say "insert structure:", $self->dump;
 
 		my ($successor) = $g->successors($name);
+
+		# successor will be either a loop, device or JACK port
+		# i.e. can accept multiple signals
+
 		$g->delete_edge($name, $successor);
 		my $loop = "$name\_insert";
 		my $wet = $::tn{$self->wet_name};
@@ -176,15 +180,14 @@ sub add_paths {
 {
 package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
-=comment
 sub add_paths {
-	my $self = shift;
 
-	# Since this routine will be called after expand_graph, 
-	# we can be sure that every track vertex will connect to 
-	# to a single edge, either loop or an output 
-	
-	my ($g, $name) = @_;
+# --- predecessor --+-- wet-send    wet---+-- insert_pre -- track
+#                   |                     |
+#                   +-------------- dry --+
+           
+
+	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
 	my $debug = 1;
 	$debug and say "add_insert for track: $name";
@@ -194,50 +197,50 @@ sub add_paths {
 
 	$debug and say "insert structure:", $self->dump;
 
-	my $i = $t->prefader_insert;  # assume post-fader send
+		my ($predecessor) = $g->predecessors($name);
+		$g->delete_edge($predecessor, $name);
+		my $loop = "$name\_insert_pre";
+		my $wet = $::tn{$self->wet_name};
+		my $dry = $::tn{$self->dry_name};
 
-	# because of previous processing
-	# there will only be one predecessor
-	
-	my ($predecessor) = $g->predecessors($name);
-	$g->delete_edge($name, $predecessor);
-	my $loop = "$name\_insert";
+		$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
 
-	my $wet = $::tn{"$name\_wet"};
-	my $dry = $::tn{"$name\_dry"};
 
-	$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
+		#post: wet send path (no track): track -> loop -> output
+		#pre:  wet send path (no track): predecessor -> output
+		
+		my @edge = ($predecessor, ::output_node($self->{send_type}));
+		$debug and say "edge: @edge";
+		::Graph::add_path(@edge);
+		$g->set_vertex_attributes($loop, {n => $t->n, j => 'm'});
+		$g->set_edge_attributes(@edge, { 
+			send_id => $self->{send_id},
+			width => $t->width,
+		});
+		#post: wet return path: input -> wet_track (slave) -> successor
+		#pre:  wet return path: input -> wet_track (slave) -> loop
 
-	# wet send path (no track): track -> loop -> output
-	
-	my @edge = ($loop, ::output_node($i->{send_type}));
-	$debug and say "edge: @edge";
-	::Graph::add_path($name, @edge);
-	$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
-	$g->set_edge_attributes(@edge, { 
-		send_id => $i->{send_id},
-		width => 2, 
-	});
-	# wet return path: input -> wet_track (slave) -> predecessor
-	
-	# we override the input with the insert's return source
+		
+		# we override the input with the insert's return source
 
-	$g->set_vertex_attributes($wet->name, {
-				width => 2, # default for cooked
-				mono_to_stereo => '', # override
-				source_type => $i->{return_type},
-				source_id => $i->{return_id},
-	});
-	::Graph::add_path(::input_node($i->{return_type}), $wet->name, $predecessor);
+		$g->set_vertex_attributes($wet->name, {
+					width => $t->width, 
+					mono_to_stereo => '', # override
+					source_type => $self->{return_type},
+					source_id => $self->{return_id},
+		});
+		::Graph::add_path(::input_node($self->{return_type}), $wet->name, $loop);
 
-	# connect dry track to graph
-	
-	::Graph::add_path($loop, $dry->name, $predecessor);
+		# connect dry track to graph
+		#
+		# post: dry path: loop -> dry -> successor
+		# pre: dry path:  predecessor -> dry -> loop
+		
+		::Graph::add_path($predecessor, $dry->name, $loop, $name);
 
-	::command_process($t->name); 
-	::command_process('wet '.$i->{wetness});
-}
-=cut
+		::command_process($t->name); 
+		::command_process('wet '.$self->{wetness});
+	}
 	
 }
 1;
