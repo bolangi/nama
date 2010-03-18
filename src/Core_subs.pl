@@ -312,10 +312,13 @@ HELP
 		$ui = ::Graphical->new;
 	} else {
 		$ui = ::Text->new;
-		can_load( modules =>{ Event => undef});
+		can_load( modules =>{ Event => undef})
+			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
+;
 		import Event qw(loop unloop unloop_all);
 	}
-	can_load( modules => {AnyEvent => undef});
+	can_load( modules => {AnyEvent => undef})
+			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
 
 }
 	
