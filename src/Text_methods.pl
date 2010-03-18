@@ -100,7 +100,7 @@ sub show_tracks {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
-            placeholder( $_->current_version ),
+            placeholder( $_->current_version || undef ),
 			lc $_->rw,
             $_->rec_status_display,
 			placeholder($_->source_status),
