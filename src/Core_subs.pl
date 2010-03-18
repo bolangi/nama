@@ -322,6 +322,14 @@ HELP
 {
 my $default_port = 2868; # Ecasound's default
 sub launch_ecasound_server {
+
+	# we'll try to communicate with an existing ecasound
+	# process provided:
+	#
+	# started with --server option
+	# --server-tcp-port option matches --or--
+	# nama is using Ecasound's default port 2868
+	
 	my $port = shift // $default_port;
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = "2>&1>/dev/null &";
