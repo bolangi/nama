@@ -329,7 +329,7 @@ sub launch_ecasound_server {
 	say ("Using existing Ecasound server"), return 
 		if  $ps =~ /ecasound/
 		and $ps =~ /--server/
-		and $ps =~ /tcp-port=$port/;
+		and ($ps =~ /tcp-port=$port/ or $port == $default_port);
 	say "Starting Ecasound server";
  	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
 	sleep 1;
