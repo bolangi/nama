@@ -89,6 +89,7 @@ sub remove {
 sub add_insert {
 	my ($type, $send_id, $return_id) = @_;
 	# $type : prefader_insert | postfader_insert
+	say "\n",$::this_track->name , ": adding $type\n";
 	my $old_this_track = $::this_track;
 	my $t = $::this_track;
 	my $name = $t->name;
@@ -126,7 +127,7 @@ sub get_id {
 }
 {
 package ::PostFaderInsert;
-use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+use Modern::Perl; use Carp; our @ISA = qw(::Insert); our $debug;
 sub add_paths {
 
 	# Since this routine will be called after expand_graph, 
@@ -135,7 +136,7 @@ sub add_paths {
 	
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	my $debug = 1;
+	#my $debug = 1;
 	$debug and say "add_insert for track: $name";
 
 	my $t = $::tn{$name}; 
@@ -189,7 +190,7 @@ sub add_paths {
 }
 {
 package ::PreFaderInsert;
-use Modern::Perl; use Carp; our @ISA = qw(::Insert);
+use Modern::Perl; use Carp; our @ISA = qw(::Insert); our $debug;
 sub add_paths {
 
 # --- predecessor --+-- wet-send    wet-return ---+-- insert_pre -- track
@@ -199,7 +200,7 @@ sub add_paths {
 
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	my $debug = 1;
+	#my $debug = 1;
 	$debug and say "add_insert for track: $name";
 
 	my $t = $::tn{$name}; 

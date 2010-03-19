@@ -1183,7 +1183,6 @@ sub non_track_dispatch {
 	# we will issue two IO objects, one for the chain input
 	# fragment, one for the chain output
 	
-	my $debug = 1;
 	
 	my $edge = shift;
 	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
@@ -1328,7 +1327,6 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
-		#local $debug = 1;
 		my $setup = setup_file();
 		#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 		return unless -e $setup;
@@ -3551,7 +3549,6 @@ my %set_stat = (
 				 );
 
 sub bunch_tracks {
-	my $debug = 1;
 	my $bunchy = shift;
 	my @tracks;
 	if ( my $bus = $::Bus::by_name{$bunchy}){

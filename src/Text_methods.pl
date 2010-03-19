@@ -83,6 +83,17 @@ sub placeholder {
 	$use_placeholders ? q(--) : q() 
 }
 
+sub show_inserts {
+	my $output;
+	$output = "Prefader insert:\n".
+		$::Insert::by_index{$this_track->prefader_insert}->dump
+		if $this_track->prefader_insert;
+	$output .= "Postfader insert:\n".
+		$::Insert::by_index{$this_track->postfader_insert}->dump
+		if $this_track->postfader_insert;
+	$output
+}
+
 {
 my $format_top = <<TOP;
 Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
