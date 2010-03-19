@@ -443,7 +443,7 @@ gen_jack();
 check_setup('Send bus - soundcard - JACK');
 command_process('remove_bus Vo');
 command_process('sax mono');
-command_process('add_insert_cooked 5');
+command_process('add_insert post 5');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in

@@ -343,6 +343,7 @@ sub rec_route {
 	}
 	return $route;
 }
+{
 package ::IO::to_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { $::devices{$::alsa_playback_device}{ecasound_id} }
@@ -364,7 +365,7 @@ sub route {
 	}
 	$route;
 }
-
+}
 package ::IO::any;
 use Modern::Perl; our @ISA = '::IO';
 

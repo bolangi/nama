@@ -182,13 +182,10 @@ package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 sub add_paths {
 
-# --- predecessor --+-- wet-send    wet---+-- insert_pre -- track
-#                   |                     |
-#                   +-------------- dry --+
+# --- predecessor --+-- wet-send    wet-return ---+-- insert_pre -- track
+#                   |                             |
+#                   +-------------- dry ----------+
            
-# --- predecessor --+-- wet    wet-return-+-- insert_pre -- track
-#                   |                     |
-#                   +-------------- dry --+
 
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
@@ -209,17 +206,8 @@ sub add_paths {
 		$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
 
 
-		#post: wet send path (no track): track -> loop -> output
 		#pre:  wet send path (no track): predecessor -> output
 
-=comment
-
-the problem here is that the jumper attributes reside in
-the vertex, not the edge. this is the fault of 
-nontrack_dispatch
-
-=cut
-		
 		my @edge = ($predecessor, ::output_node($self->{send_type}));
 		$debug and say "edge: @edge";
 		::Graph::add_path(@edge);
@@ -231,7 +219,7 @@ nontrack_dispatch
 			n => $t->n,
 			j => 'm',
 		});
-		#post: wet return path: input -> wet_track (slave) -> successor
+
 		#pre:  wet return path: input -> wet_track (slave) -> loop
 
 		

@@ -564,7 +564,23 @@ set_insert_wetness: _set_insert_wetness end {
 }
 
 remove_insert: _remove_insert prepost(?) end { 
-	$::this_track->remove_insert("@$item{'prepost(?)'}");
+
+	# use prepost spec if provided
+	# remove lone insert without prepost spec
+	
+	my %id = (pre =>  $::this_track->prefader_insert,
+			 post => $::this_track->postfader_insert);
+	my $err = sub { print $::this_track->name.
+	  	": Missing or ambiguous insert. Skipping\n"; 
+		return 1 };
+	my $prepost = "@{$item{'prepost(?)'}}";
+	#print "prepost: $prepost\n";
+	$prepost = $id{pre} ? 'pre' : 'post'
+		if (! $prepost and ! $id{pre} != ! $id{post} );
+	my $id;
+	$err->() unless $id = $id{$prepost};
+	print $::this_track->name.": removing $prepost". "fader insert\n";
+	$::Insert::by_index{$id}->remove;
 	1;
 }
 
