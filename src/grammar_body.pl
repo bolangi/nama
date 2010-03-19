@@ -544,23 +544,28 @@ return_id: jack_port
 set_insert_wetness: _set_insert_wetness parameter prepost(?) end {
 	my $prepost = "@$item{'prepost(?)'}";
 	my $p = $item{parameter};
-	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
-		if ! ($p <= 100 and $p >= 0);
-	my $i = $::this_track->inserts;
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), 
+		return 1 unless $id;
+	print ("wetness parameter must be an integer between 0 and 100\n"), 
+		return 1 unless ($p <= 100 and $p >= 0);
+	my $i = $::Insert::by_index{$id};
 	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
 		return 1 unless $i;
 	$i->{wetness} = $p;
-	::modify_effect($i->{wet_vol}, 0, undef, $p);
+	::modify_effect($i->wet_vol, 0, undef, $p);
 	::sleeper(0.1);
-	::modify_effect($i->{dry_vol}, 0, undef, 100 - $p);
+	::modify_effect($i->dry_vol, 0, undef, 100 - $p);
 	1;
 }
 
-set_insert_wetness: _set_insert_wetness end {
-	my $i = $::this_track->inserts;
-	print ("track ",$::this_track->n, " has no insert.\n"), return 1 unless $i;
+set_insert_wetness: _set_insert_wetness prepost(?) end {
+	my $prepost = "@$item{'prepost(?)'}";
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
+	my $i = $::Insert::by_index{$id};
 	 print "The insert is ", 
-		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";
+		$i->wetness, "% wet, ", (100 - $i->wetness), "% dry.\n";
 }
 
 remove_insert: _remove_insert prepost(?) end { 
@@ -568,17 +573,9 @@ remove_insert: _remove_insert prepost(?) end {
 	# use prepost spec if provided
 	# remove lone insert without prepost spec
 	
-	my %id = (pre =>  $::this_track->prefader_insert,
-			 post => $::this_track->postfader_insert);
-	my $err = sub { print $::this_track->name.
-	  	": Missing or ambiguous insert. Skipping\n"; 
-		return 1 };
 	my $prepost = "@{$item{'prepost(?)'}}";
-	#print "prepost: $prepost\n";
-	$prepost = $id{pre} ? 'pre' : 'post'
-		if (! $prepost and ! $id{pre} != ! $id{post} );
-	my $id;
-	$err->() unless $id = $id{$prepost};
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
 	print $::this_track->name.": removing $prepost". "fader insert\n";
 	$::Insert::by_index{$id}->remove;
 	1;

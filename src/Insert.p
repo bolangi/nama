@@ -114,7 +114,15 @@ sub add_insert {
 	$t->set($type => $i->n); 
 	$::this_track = $old_this_track;
 }
-
+sub get_id {
+	my ($track, $prepost) = @_;
+	my %id = (pre => $track->prefader_insert,
+			 post => $track->postfader_insert);
+	#print "prepost: $prepost\n";
+	$prepost = $id{pre} ? 'pre' : 'post'
+		if (! $prepost and ! $id{pre} != ! $id{post} );
+	$id{$prepost};;
+}
 }
 {
 package ::PostFaderInsert;
