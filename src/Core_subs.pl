@@ -3206,6 +3206,35 @@ sub restore_state {
 	if ( $saved_version <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
+=comment
+	if ( $saved_version < 1.053){ # convert insert data
+		my $n = 0;
+		for my $t (@tracks_data){
+			my $i = $t->{inserts};
+			next unless (ref $i) =~ /HASH/;
+			$t->{postfader_insert} = ++$n;
+			$i->{class} = '::PostFaderInsert';
+			$i->{n} = $n;
+			delete $i->{tracks};
+			$insert_by_index{$n} = $i;
+		} 
+	}
+=cut
+=comment
+dry_vol: AY
+insert_type: cooked
+return_id: 7
+return_type: soundcard
+send_id: 5
+send_type: soundcard
+tracks:
+  - brass_wet
+  - brass_dry
+wet_vol: AW
+wetness: 100
+=cut
+		
+
 
 	# make sure Master has reasonable output settings
 	
@@ -3228,7 +3257,6 @@ sub restore_state {
 	# restore inserts
 	
 	::Insert::initialize();
-	#map{ my $class = $_->{class}; $class->new( %$_ ) } @inserts_data;
 	%::Insert::by_index = map { 
 		$_, 
 		bless $insert_by_index{$_},$insert_by_index{$_}{class}
