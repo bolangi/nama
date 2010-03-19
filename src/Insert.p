@@ -69,8 +69,10 @@ sub new {
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
-	$self->{dry_vol} = $dry->vol;
-	$self->{wet_vol} = $wet->vol;
+	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
+
+	$self->{dry_vol} = ::Text::t_add_effect($dry, 'ea',[0]);
+	$self->{wet_vol} = ::Text::t_add_effect($wet, 'ea',[100]);
 	$by_index{$self->n} = $self;
 }
 sub remove {
