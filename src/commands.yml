@@ -474,10 +474,9 @@ remove_effect:
   parameters: <s_effect_id1> [ <s_effect_id2>...]
 add_insert:
   type: effect 
-  short: aina
+  short: ain
   what: add an external send/return to current track
   parameters: ( pre | post ) <s_send_id> [<s_return_id>]
-  parameters: <s_send_id> [<s_return_id>]
 set_insert_wetness:
   type: effect 
   short: wet

@@ -984,6 +984,7 @@ sub initialize_chain_setup_vars {
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	reset_aux_chain_counter();
 	{no autodie; unlink setup_file()}
 }
 sub add_paths_for_main_tracks {
@@ -1192,23 +1193,9 @@ sub non_track_dispatch {
 	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
-	# if no chain_id is defined, we need to name our chain
-	#
-	# we use the track number and an alphabetical counter 
-	# that we increment
-	#
-	# edge attributes have priority
-	#
-	if ( ! $eattr->{chain_id} ) { # and ! $vattr->{chain_id} ){
-		my $iref = $eattr->{j} ? \$eattr->{j} : 
-					($vattr->{j} ? \$vattr->{j} : 
-						warn("edge @$edge: no jumper counter found"));	
+	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
 		my $n = $eattr->{n} || $vattr->{n};
-
-		# loop  fields: n: track->n, j: 'a' (counter)
-		
-		# chain_ids are allocated J7, J7b, J7c...
-		$eattr->{chain_id} = 'J'. $n .  (  $$iref eq 'a' ? ($$iref++,''): ++$$iref);
+		$eattr->{chain_id} = jumper_count($n);
 	}
 	my @direction = qw(input output);
 	map{ 
@@ -1221,6 +1208,29 @@ sub non_track_dispatch {
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
 }
+
+{ 
+### counter for jumper chains 
+#
+#   sequence: J1 J1a J1b J1c, J2, J3, J4, J4d, J4e
+
+my %used;
+my $counter;
+my $prefix = 'J';
+reset_aux_chain_counter();
+  
+sub reset_aux_chain_counter {
+	%used = ();
+	$counter = 'a';
+}
+sub jumper_count {
+	my $track_index = shift;
+	my $try1 = $prefix . $track_index;
+	$used{$try1}++, return $try1 unless $used{$try1};
+	$try1 . $counter++;
+}
+}
+	
 
 sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
