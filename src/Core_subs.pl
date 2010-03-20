@@ -2235,8 +2235,7 @@ sub effect_update {
 	$param++; # so the value at $p[0] is applied to parameter 1
 	my $chain = $cops{$id}{chain};
 
-	carp("effect $id: non-existent chain\n"), return
-		unless $chain;
+	carp("$id: effect not found. skipping...\n"), return unless $chain;
 
 	$debug and print "chain $chain id $id param $param value $val\n";
 
@@ -3211,7 +3210,7 @@ sub restore_state {
 	if ( $saved_version <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
-	if ( $saved_version < 1.053){ # convert insert data to object
+	if ( $saved_version <= 1.053){ # convert insert data to object
 		my $n = 0;
 		@inserts_data = ();
 		for my $t (@tracks_data){
@@ -3220,6 +3219,8 @@ sub restore_state {
 			$t->{postfader_insert} = ++$n;
 			$i->{class} = '::PostFaderInsert';
 			$i->{n} = $n;
+			$i->{wet_name} = $t->{name} . "_wet";
+			$i->{dry_name} = $t->{name} . "_dry";
 			delete $t->{inserts};
 			delete $i->{tracks};
 			push @inserts_data, $i;
