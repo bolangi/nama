@@ -3111,7 +3111,7 @@ sub restore_state {
 	
 	my $yaml = io($file)->all;
 
-	# remove empty key hash lines # YAML::Tiny bug
+	# remove empty key hash lines # fixes YAML::Tiny bug
 	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
 
 	# rewrite obsolete null hash/array substitution
@@ -3227,32 +3227,6 @@ sub restore_state {
 		} 
 	}
 	$debug and print "inserts data", yaml_out \@inserts_data;
-=comment
-dry_vol: AY
-insert_type: cooked
-return_id: 7
-return_type: soundcard
-send_id: 5
-send_type: soundcard
-tracks:
-  - brass_wet
-  - brass_dry
-wet_vol: AW
-wetness: 100
-
-
-class: Audio::Nama::PostFaderInsert
-dry_vol: AZ
-n: 1
-return_id: 7
-return_type: soundcard
-send_id: 5
-send_type: soundcard
-track: brass
-wet_vol: BA
-wetness: 100
-=cut
-		
 
 
 	# make sure Master has reasonable output settings
