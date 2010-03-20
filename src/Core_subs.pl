@@ -3017,7 +3017,7 @@ sub save_state {
 	
 	$debug and print "copying inserts data\n";
 	@inserts_data = ();
-	for my $k(each %::Insert::by_index ){ 
+	while (my $k = each %::Insert::by_index ){ 
 		push @inserts_data, $::Insert::by_index{$k}->hashref;
 	}
 
