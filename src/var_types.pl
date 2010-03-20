@@ -48,7 +48,6 @@
 						@groups_data
 						@marks_data
 						@inserts_data
-						%insert_by_index
 						$loop_enable
 						@loop_endpoints
 						$length

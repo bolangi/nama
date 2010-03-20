@@ -3013,6 +3013,14 @@ sub save_state {
 	@bus_data = (); # 
 	map{ push @bus_data, $_->hashref } ::Bus::all();
 
+	# prepare inserts data for storage
+	
+	$debug and print "copying inserts data\n";
+	@inserts_data = ();
+	for my $k(each %::Insert::by_index ){ 
+		push @inserts_data, $::Insert::by_index{$k}->hashref;
+	}
+
 	# prepare marks data for storage (new Mark objects)
 
 	@marks_data = ();
@@ -3020,9 +3028,6 @@ sub save_state {
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
 
-	$debug and print "copying inserts data\n";
-	%insert_by_index = map{ $_, $::Insert::by_index{$_}->hashref } 
-					keys %::Insert::by_index; 
 
 	# save history
 
@@ -3206,20 +3211,21 @@ sub restore_state {
 	if ( $saved_version <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
-=comment
-	if ( $saved_version < 1.053){ # convert insert data
+	if ( $saved_version < 1.053){ # convert insert data to object
 		my $n = 0;
+		@inserts_data = ();
 		for my $t (@tracks_data){
 			my $i = $t->{inserts};
-			next unless (ref $i) =~ /HASH/;
+			next unless keys %$i;
 			$t->{postfader_insert} = ++$n;
 			$i->{class} = '::PostFaderInsert';
 			$i->{n} = $n;
+			delete $t->{inserts};
 			delete $i->{tracks};
-			$insert_by_index{$n} = $i;
+			push @inserts_data, $i;
 		} 
 	}
-=cut
+	$debug and print "inserts data", yaml_out \@inserts_data;
 =comment
 dry_vol: AY
 insert_type: cooked
@@ -3231,6 +3237,18 @@ tracks:
   - brass_wet
   - brass_dry
 wet_vol: AW
+wetness: 100
+
+
+class: Audio::Nama::PostFaderInsert
+dry_vol: AZ
+n: 1
+return_id: 7
+return_type: soundcard
+send_id: 5
+send_type: soundcard
+track: brass
+wet_vol: BA
 wetness: 100
 =cut
 		
@@ -3254,14 +3272,6 @@ wetness: 100
 	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
-	# restore inserts
-	
-	::Insert::initialize();
-	%::Insert::by_index = map { 
-		$_, 
-		bless $insert_by_index{$_},$insert_by_index{$_}{class}
-	} keys %insert_by_index; 
-	
 	# restore user tracks
 	
 	my $did_apply = 0;
@@ -3271,6 +3281,15 @@ wetness: 100
 		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
 		if ( $track->class ){ bless $track, $track->class } # current scheme
 	} @tracks_data;
+
+	# restore inserts
+	
+	::Insert::initialize();
+	
+	map{ 
+		bless $_, $_->{class};
+		$::Insert::by_index{$_->{n}} = $_;
+	} @inserts_data;
 
 	$ui->create_master_and_mix_tracks();
 

@@ -85,13 +85,11 @@ sub placeholder {
 
 sub show_inserts {
 	my $output;
-	$output = "Prefader insert:\n".
-		$::Insert::by_index{$this_track->prefader_insert}->dump
+	$output = $::Insert::by_index{$this_track->prefader_insert}->dump
 		if $this_track->prefader_insert;
-	$output .= "Postfader insert:\n".
-		$::Insert::by_index{$this_track->postfader_insert}->dump
+	$output .= $::Insert::by_index{$this_track->postfader_insert}->dump
 		if $this_track->postfader_insert;
-	$output
+	"Inserts:\n".join( "\n",map{" "x4 . $_ } split("\n",$output))."\n" if $output;
 }
 
 {

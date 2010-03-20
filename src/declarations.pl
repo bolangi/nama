@@ -304,8 +304,8 @@ our (
 
 	@tracks_data, # staging for saving
 	@groups_data, # obsolete
-	@marks_data,  # 
-	%insert_by_index, # 
+	@marks_data,  # for storage
+	@inserts_data, # for storage
 	@bus_data,    # 
 	@system_buses, # 
 	%is_system_bus, # 

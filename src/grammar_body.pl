@@ -542,7 +542,7 @@ prepost: 'pre' | 'post'
 send_id: jack_port
 return_id: jack_port
 
-set_insert_wetness: _set_insert_wetness parameter prepost(?) end {
+set_insert_wetness: _set_insert_wetness prepost(?) parameter end {
 	my $prepost = "@$item{'prepost(?)'}";
 	my $p = $item{parameter};
 	my $id = ::Insert::get_id($::this_track,$prepost);

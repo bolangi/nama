@@ -481,7 +481,7 @@ set_insert_wetness:
   type: effect 
   short: wet
   what: set wet/dry balance for current track insert: 100 = all wet, 0 = all dry
-  parameters: <n_wetness> [ pre | post ]
+  parameters: [ pre | post ] <n_wetness> 
 remove_insert:
   type: effect
   short: rin
