@@ -38,8 +38,8 @@ our %io_class = qw(
 	jack_port_out 			::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
-	jack_client_in			::IO::from_jack_multi
-	jack_client_out			::IO::to_jack_multi
+	jack_client_in			::IO::from_jack_client
+	jack_client_out			::IO::to_jack_client
 	);
 
 ### class definition
@@ -130,7 +130,7 @@ sub source_input {
 	given ( $track->source_type ){
 		when ( 'soundcard'  ){ return $track->soundcard_input }
 		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_multi_in', $track->source_id] }
+			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
 			else { 	say($track->name. ": cannot set source ".$track->source_id
 				.". JACK not running."); return [] }
 		}
@@ -155,7 +155,7 @@ sub send_output {
 			} else {return [ 'soundcard_device_out', $track->send_id] }
 		}
 		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_multi_out', $track->send_id] }
+			if ($::jack_running){return [ 'jack_client_out', $track->send_id] }
 			else { carp $track->name . 
 					q(: auxilary send to JACK client specified,) .
 					q( but jackd is not running.  Skipping.);
