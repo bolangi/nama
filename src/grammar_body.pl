@@ -291,6 +291,12 @@ vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 mute: _mute end { $::this_track->mute; 1}
 
 unmute: _unmute end { $::this_track->unmute; 1}
+solo: _solo 'bus' track_name {
+	print ("$item{track_name}: Expected bus track_name. Skipping.\n"), return 1
+		unless $::Bus::by_name{$item{track_name}};
+	::command_process("for all; off;; $item{track_name} mon");
+	1;
+}
 solo: _solo end { ::solo(); 1}
 all: _all end { ::all() ; 1}
 

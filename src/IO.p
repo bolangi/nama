@@ -347,7 +347,7 @@ sub rec_route {
 package ::IO::to_soundcard_device;
 use Modern::Perl; our @ISA = '::IO';
 sub device_id { $::devices{$::alsa_playback_device}{ecasound_id} }
-sub ecs_extra {route(2,$_[0]->output_channel) } # assume stereo signal
+sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
 sub route2 {
 	my ($from, $to, $width) = @_;

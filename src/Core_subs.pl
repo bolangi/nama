@@ -1122,7 +1122,9 @@ sub prune_graph {
 	
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
+	my $debug = 1;
 	@io = map{ dispatch($_) } $g->edges;
+	$debug and map $_->dumpp, @io;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;

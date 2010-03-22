@@ -222,6 +222,8 @@ sub add_paths {
 		::Graph::add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
+			send_type => $self->{send_type},
+			mono_to_stereo => '', # override
 			width => $t->width,
 			track => $name,
 			n => $t->n,
@@ -233,10 +235,13 @@ sub add_paths {
 		# we override the input with the insert's return source
 
 		$g->set_vertex_attributes($wet->name, {
-					width => $t->width, 
-					mono_to_stereo => '', # override
-					source_type => $self->{return_type},
-					source_id => $self->{return_id},
+				width => $t->width, 
+				mono_to_stereo => '', # override
+				source_type => $self->{return_type},
+				source_id => $self->{return_id},
+		});
+		$g->set_vertex_attributes($dry->name, {
+				mono_to_stereo => '', # override
 		});
 		::Graph::add_path(::input_node($self->{return_type}), $wet->name, $loop);
 
