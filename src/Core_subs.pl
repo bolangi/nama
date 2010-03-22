@@ -3227,6 +3227,12 @@ sub restore_state {
 			push @inserts_data, $i;
 		} 
 	}
+	if ( $saved_version <= 1.054){ # source_type track -> bus
+		for my $t (@tracks_data){
+			$t->{source_type} = $t->{source_id} = 'bus'
+				if $t->{source_type} eq 'track';
+		}
+	}
 	$debug and print "inserts data", yaml_out \@inserts_data;
 
 
