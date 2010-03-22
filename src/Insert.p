@@ -77,12 +77,22 @@ sub new {
 	$self->{wet_vol} = ::Text::t_add_effect($wet, 'ea',[100]);
 	$by_index{$self->n} = $self;
 }
+
+# method name for track field holding insert
+
+sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
+
 sub remove {
 	my $self = shift;
 	$::tn{ $self->wet_name }->remove;
 	$::tn{ $self->dry_name }->remove;
-	my $type = (ref $self) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert';
-	$::tn{ $self->track }->set(  $type => undef );
+	my $type = $self->type;
+
+	# look for track that has my id and delete it
+	my ($track) = grep{$_->$type == $self->n} values %::Track::by_name;
+	$track->set(  $type => undef );
+
+	# delete my own index entry
 	delete $by_index{$self->n};
 }
 	
