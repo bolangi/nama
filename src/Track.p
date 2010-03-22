@@ -664,6 +664,13 @@ sub import_audio  {
 
 sub port_name { $_[0]->target || $_[0]->name } 
 
+sub bus_tree { # for solo function to work in sub buses
+	my $track = shift;
+	my $mix = $track->group;
+	return if $mix eq 'Main';
+	($mix, $::tn{$mix}->bus_tree);
+}
+
 # subclasses
 
 package ::SimpleTrack; # used for Master track

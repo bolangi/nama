@@ -3360,26 +3360,25 @@ sub solo {
 	# get list of already muted tracks if I haven't done so already
 	
 	if ( ! @already_muted ){
-	print "none muted\n";
 		@already_muted = grep{ $_->old_vol_level} 
                          map{ $tn{$_} } 
 						 ::Track::user();
-	print join " ", "muted", map{$_->name} @already_muted;
 	}
+	$debug and say join " ", "already muted:", map{$_->name} @already_muted;
 
 	# mute all tracks
-	map { $this_track = $tn{$_}; $this_track->mute(1) } ::Track::user();
+	my @bus_tree = ($this_track->name, $this_track->bus_tree());
+	map { $tn{$_}->mute(1) } 
+	grep { my $tn = $_; ! grep { $tn eq $_ } @bus_tree } 
+	::Track::user();
 
-    $this_track = $current_track;
-    $this_track->unmute(1);
 	$soloing = 1;
 }
 
 sub all {
 	
-	my $current_track = $this_track;
 	# unmute all tracks
-	map { $this_track = $tn{$_}; $this_track->unmute(1) } ::Track::user();
+	map { $tn{$_}->unmute(1) } ::Track::user();
 
 	# re-mute previously muted tracks
 	if (@already_muted){
@@ -3389,10 +3388,10 @@ sub all {
 	# remove listing of muted tracks
 	
 	@already_muted = ();
-	$this_track = $current_track;
 	$soloing = 0;
 	
 }
+	
 
 sub pager {
 	$debug2 and print "&pager\n";
