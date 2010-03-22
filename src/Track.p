@@ -263,7 +263,7 @@ sub rec_status {
 			when('jack_port'){ return 'REC' }
 			when('null'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
-			when('track'){ return 'REC' } # maybe $track->rw ??
+			when('bus'){ return 'REC' } # maybe $track->rw ??
 			default { return 'OFF' }
 			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
@@ -504,7 +504,7 @@ sub object_as_text {
 		when('jack_client')		{ $text = "JACK client "}
 		when('loop')       		{ $text = "loop device "}
 		when('jack_ports_list') { $text = "JACK ports list "}
-		when('track') 			{ $text = "bus "}
+		when('bus') 			{ $text = "bus "}
 	}
 	$text .= $track->$id_field
 }

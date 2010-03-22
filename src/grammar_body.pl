@@ -226,6 +226,9 @@ exit: _exit end {   ::save_state($::state_store_file);
 
 source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
+source: _source 'bus' end {$::this_track->set(
+		source_type => 'bus', 
+		source_id => 'bus'); 1 }
 source: _source 'null' end {
 		$::this_track->set(rec_defeat => 1,
 					source_type => 'null',

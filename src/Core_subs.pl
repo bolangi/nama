@@ -3980,12 +3980,12 @@ sub add_sub_bus {
 	my ($name, $type, $id) = @_;
 	::SubBus->new( 
 		name => $name, 
-		send_type => $type // 'track',
+		send_type => $type // 'bus',
 		send_id	 => $id // $name,
 		);
 	# create mix track
-	my @vals = (source_type => 'track', 
-				source_id 	=> $name,
+	my @vals = (source_type => 'bus', 
+				source_id 	=> 'bus',
 				rec_defeat 	=> 1);
 
 	if ($tn{$name}){
