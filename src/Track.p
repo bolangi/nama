@@ -279,7 +279,7 @@ sub rec_status {
 sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
-	($track->rw eq 'REC' and $track->rec_defeat) ? "[$status]" : $status;
+	($track->rw eq 'REC' and $track->rec_defeat) ? "($status)" : $status;
 }
 
 
@@ -402,6 +402,13 @@ sub set_io {
 		say $track->name, ": disabling $direction.";
 		return;
 	}
+# 	if( $id =~ /\.ports$/){
+# 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
+#  		$track->set($type_field => 'jack_port',
+#  					source_id => $port_name); 
+#  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+#  		return;
+# 	} 
 	if( $id eq 'jack'){
 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
  		$track->set($type_field => 'jack_port',
