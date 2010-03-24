@@ -236,6 +236,8 @@ source: _source 'null' end {
  		print $::this_track->name, ": Setting input to null device\n";
 	}
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
+# jack_port can be 'jack' (manual connect) or a JACK client name
+# set_io decides what to do
 source: _source end { 
 	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
 	print "however track status is ", $::this_track->rec_status, "\n"
