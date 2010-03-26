@@ -61,7 +61,7 @@ devices:
 
 alsa_capture_device: consumer       # for ALSA/OSS
 alsa_playback_device: consumer      # for ALSA/OSS
-mixer_out_format: cd-stereo     	# for ALSA/OSS
+mixer_out_format: cd-stereo         # for ALSA/OSS
 
 # soundcard_channels: 10            # input/output channel selection range (GUI)
 
