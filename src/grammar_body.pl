@@ -1,6 +1,73 @@
 #command: test
 #test: 'test' shellish { print "found $item{shellish}\n" }
 
+# execute shell command if leading '!'
+
+meta: bang shellcode stopper {
+	$::debug and print "Evaluating shell commands!\n";
+	my $output = qx( $item{shellcode});
+	::pager($output) if $output;
+	print "\n";
+	1;
+}
+
+# execute perl code if leading 'eval'
+
+meta: eval perlcode stopper {
+	$::debug and print "Evaluating perl code\n";
+	::eval_perl($item{perlcode});
+	1;
+}
+
+# execute for each specified track if leading 'for'
+
+meta: for bunch_name ';' namacode stopper { 
+ 	$::debug and print "namacode: $item{namacode}\n";
+ 	my @tracks = ::bunch_tracks($item{bunch_name});
+ 	for my $t(@tracks) {
+ 		::leading_track_spec($t);
+		$::parser->meta($item{namacode});
+ 		print("$t; $item{namacode}\n");
+	}
+1}
+
+# execute Ecasound IAM command
+
+command: iam_cmd predicate { 
+	my $user_input = "$item{iam_cmd}$item{predicate}"; 
+	$::debug and print "Found Ecasound IAM command: $user_input\n";
+	my $result = ::eval_iam($user_input);
+	::pager( $result );  
+	1 }
+
+# execute command after setting current track
+
+meta: lump(s /;/) { print join "\n--\n",@$item{'lump(s)'} }
+
+lump: track_spec command
+lump: track_spec
+lump: command
+#lump: semistop
+
+# execute command
+
+#meta: command
+
+predicate: somecode_semistop { " $item{somecode_semistop}" }
+predicate: /$/
+iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
+track_spec: ident { ::leading_track_spec($item{ident}) }
+bang: '!'
+eval: 'eval'
+for: 'for'
+stopper: ';;' | /$/ 
+shellcode: somecode #{ print "shellcode: $item{somecode}\n"}
+perlcode: somecode #{ print "perlcode: $item{somecode}\n"}
+namacode: somecode #{ print "namacode: $item{somecode}\n"}
+somecode: /.+?(?=;;|$)/ 
+somecode_semistop: /.+?/  { $item[1] }
+semistop: /;|$/
+#semi_stop: ';' | /$/
 key: /\w+/ 			# word characters {1,} 
 					# used in: set_track
 

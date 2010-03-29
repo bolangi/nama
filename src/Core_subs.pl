@@ -3480,80 +3480,35 @@ sub process_line {
 }
 
 
+sub leading_track_spec {
+	my $cmd = shift;
+	if( my $track = $tn{$cmd} || $ti{$cmd} ){
+		$debug and print "Selecting track ",$track->name,"\n";
+		$this_track = $track;
+		set_current_bus();
+		ecasound_select_chain( $this_track->n );
+		1;
+	}
+		
+}
+sub do_cmd {
+	my $predicate = shift;
+	$predicate !~ /^\s*$/ and $parser->command($predicate);
+}
+sub eval_perl {
+	my $code = shift;
+	my ($result) = eval $code;
+	print( "Perl command failed: $@\n") if $@;
+	pager($result) unless $@;
+	print "\n";
+}	
+
 sub command_process {
-	my $user_input = join " ", @_;
-	return if $user_input =~ /^\s*$/;
-	$debug and print "user input: $user_input\n";
-	my ($cmd, $predicate) = ($user_input =~ /([\S]+?)\b(.*)/);
-	if ($cmd eq 'for' 
-			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
-		$debug and print "bunch: $bunchy do: $do\n";
-		my ($do_part, $after) = $do =~ /(.+?);;(.+)/;
-		$do = $do_part if $do_part;
-		my @tracks = bunch_tracks($bunchy);
-		for my $t(@tracks) {
-			command_process("$t; $do");
-		}
-		command_process($after) if $after;
-	} elsif ($cmd eq 'eval') {
-			$debug and print "Evaluating perl code\n";
-			pager( eval $predicate );
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
-	}
-	elsif ( $cmd eq '!' ) {
-			$debug and print "Evaluating shell commands!\n";
-			#system $predicate;
-			my $output = qx( $predicate );
-			#print "length: ", length $output, $/;
-			pager($output); 
-			print "\n";
-	} else {
-
-
-		my @user_input = split /\s*;\s*/, $user_input;
-		map {
-			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			$debug and print "cmd: $cmd \npredicate: $predicate\n";
-			if ($cmd eq 'eval') {
-				$debug and print "Evaluating perl code\n";
-				pager( eval $predicate);
-				print "\n";
-				$@ and print "Perl command failed: $@\n";
-			} elsif ($cmd eq '!') {
-				$debug and print "Evaluating shell commands!\n";
-				my $output = qx( $predicate );
-				#print "length: ", length $output, $/;
-				pager($output); 
-				print "\n";
-			} elsif ($tn{$cmd}) { 
-				$debug and print qq(Selecting track "$cmd"\n);
-				$this_track = $tn{$cmd}; 
-				set_current_bus();
-				ecasound_select_chain( $this_track->n );
-				$predicate !~ /^\s*$/ and $parser->command($predicate);
-			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
-				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
-				$this_track = $ti{$cmd};
-				set_current_bus();
-				ecasound_select_chain( $this_track->n );
-				$predicate !~ /^\s*$/ and $parser->command($predicate);
-			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found Iam command\n";
-				my $result = eval_iam($user_input);
-				pager( $result );  
-			} else {
-				$debug and print "Passing to parser\n", $_, $/;
-				#print 1, ref $parser, $/;
-				#print 2, ref $::parser, $/;
-				# both print
-				defined $parser->command($_) 
-					or print "Bad command: $_\n";
-			}    
-		} @user_input;
-	}
-	
+	my $input = shift;
+#	while ($input =~ /\S/) { 
+		say "input: $input";
+		$parser->meta(\$input);
+# };
 	$ui->refresh; # in case we have a graphic environment
 }
 sub ecasound_select_chain {
