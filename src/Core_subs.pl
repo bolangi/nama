@@ -3478,6 +3478,14 @@ sub process_line {
 		revise_prompt();
 	}
 }
+sub command_process {
+	my $input = shift;
+	while ($input =~ /\S/) { 
+		$debug and say "input: $input";
+		$parser->meta(\$input) or print("bad command: $input"), last;
+	}
+	$ui->refresh; # in case we have a graphic environment
+}
 
 
 sub leading_track_spec {
@@ -3491,26 +3499,6 @@ sub leading_track_spec {
 	}
 		
 }
-sub do_cmd {
-	my $predicate = shift;
-	$predicate !~ /^\s*$/ and $parser->command($predicate);
-}
-sub eval_perl {
-	my $code = shift;
-	my ($result) = eval $code;
-	print( "Perl command failed: $@\n") if $@;
-	pager($result) unless $@;
-	print "\n";
-}	
-
-sub command_process {
-	my $input = shift;
-	while ($input =~ /\S/) { 
-		$debug and say "input: $input";
-		$parser->meta(\$input) or print("bad command: $input"), last;
-	}
-	$ui->refresh; # in case we have a graphic environment
-}
 sub ecasound_select_chain {
 	my $n = shift;
 	my $cmd = "c-select $n";
@@ -3522,6 +3510,14 @@ sub set_current_bus {
 	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
 	else { $this_bus = $track->group }
 }
+sub eval_perl {
+	my $code = shift;
+	my ($result) = eval $code;
+	print( "Perl command failed: $@\n") if $@;
+	pager($result) unless $@;
+	print "\n";
+}	
+
 sub is_bunch {
 	my $name = shift;
 	$::Bus::by_name{$name} or $bunch{$name}
