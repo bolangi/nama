@@ -40,21 +40,17 @@ command: iam_cmd predicate {
 	::pager( $result );  
 	1 }
 
-# execute command after setting current track
 
-meta: lump
-#(s /;/) # { print join "\n--\n",@$item{'lump(s)'} }
+# handle a text string up to semicolon or end of string
 
-lump: /[^;]+/ { $::parser->do_lump($item[1]) }
+meta: part semi(?) 
 
-do_lump: track_spec command
-do_lump: track_spec
-do_lump: command
-#lump: semistop
+part: /[^;]+/ { $::parser->do_part($item[1]) }
+semi: ';'
 
-# execute command
-
-#meta: command
+do_part: track_spec command
+do_part: track_spec
+do_part: command
 
 predicate: somecode_semistop { " $item{somecode_semistop}" }
 predicate: /$/

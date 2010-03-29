@@ -3506,9 +3506,7 @@ sub eval_perl {
 sub command_process {
 	my $input = shift;
 	while ($input =~ /\S/) { 
-		$input =~ s/^\s*(;\s*)?//;
-		$input =~ s/s*(;\s*)?$//;
-		say "input: $input";
+		$debug and say "input: $input";
 		$parser->meta(\$input) or print("bad command: $input"), last;
 	}
 	$ui->refresh; # in case we have a graphic environment
