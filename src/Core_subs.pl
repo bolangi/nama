@@ -3505,10 +3505,12 @@ sub eval_perl {
 
 sub command_process {
 	my $input = shift;
-#	while ($input =~ /\S/) { 
+	while ($input =~ /\S/) { 
+		$input =~ s/^\s*(;\s*)?//;
+		$input =~ s/s*(;\s*)?$//;
 		say "input: $input";
-		$parser->meta(\$input);
-# };
+		$parser->meta(\$input) or print("bad command: $input"), last;
+	}
 	$ui->refresh; # in case we have a graphic environment
 }
 sub ecasound_select_chain {

@@ -42,11 +42,14 @@ command: iam_cmd predicate {
 
 # execute command after setting current track
 
-meta: lump(s /;/) { print join "\n--\n",@$item{'lump(s)'} }
+meta: lump
+#(s /;/) # { print join "\n--\n",@$item{'lump(s)'} }
 
-lump: track_spec command
-lump: track_spec
-lump: command
+lump: /[^;]+/ { $::parser->do_lump($item[1]) }
+
+do_lump: track_spec command
+do_lump: track_spec
+do_lump: command
 #lump: semistop
 
 # execute command
