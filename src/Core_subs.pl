@@ -1,5 +1,5 @@
 sub main { 
-	setup_grammar(); # empty
+#	setup_grammar(); # executes directly in body
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
