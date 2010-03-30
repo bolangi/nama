@@ -21,15 +21,18 @@ meta: eval perlcode stopper {
 
 # execute for each specified track if leading 'for'
 
-meta: for bunch_name ';' namacode stopper { 
+meta: for bunch_spec ';' namacode stopper { 
  	$::debug and print "namacode: $item{namacode}\n";
- 	my @tracks = ::bunch_tracks($item{bunch_name});
+ 	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
 		$::parser->meta($item{namacode});
- 		print("$t; $item{namacode}\n");
+ 		#print("$t; $item{namacode}\n");
 	}
-1}
+	1;
+}
+
+bunch_spec: part
 
 # execute Ecasound IAM command
 
@@ -43,9 +46,9 @@ command: iam_cmd predicate {
 
 # handle a text string up to semicolon or end of string
 
-meta: part semi(?) 
+meta: part semi(?) { $::parser->do_part($item{part}) }
 
-part: /[^;]+/ { $::parser->do_part($item[1]) }
+part: /[^;]+/ 
 semi: ';'
 
 do_part: track_spec command
@@ -689,10 +692,11 @@ overwrite_effect_chain: _overwrite_effect_chain ident end {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
 bunch_name: ident { 
-	::is_bunch($item{ident}) 
+	::is_bunch($item{ident}) or ::bunch_tracks($item{ident})
 		or print("$item{ident}: no such bunch name.\n"), return; 
 	$item{ident};
 }
+
 effect_profile_name: ident
 existing_effect_profile_name: ident {
 	print ("$item{ident}: no such effect profile\n"), return
