@@ -3767,29 +3767,29 @@ sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
 
-	command_process("append_effect $eq");
+	command_process("add_effect $eq");
 
 	$this_track = $tn{Low};
 
-	command_process("append_effect $low_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $low_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{Mid};
 
-	command_process("append_effect $mid_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $mid_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{High};
 
-	command_process("append_effect $high_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $high_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{Boost};
 	
-	command_process("append_effect $limiter"); # insert after vol
+	command_process("add_effect $limiter"); # insert after vol
 }
 
 sub unhide_mastering_tracks {
