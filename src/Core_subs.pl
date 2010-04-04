@@ -3480,9 +3480,10 @@ sub process_line {
 }
 sub command_process {
 	my $input = shift;
+	my $input_was = $input;
 	while ($input =~ /\S/) { 
 		$debug and say "input: $input";
-		$parser->meta(\$input) or print("bad command: $input"), last;
+		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
 	}
 	$ui->refresh; # in case we have a graphic environment
 }
