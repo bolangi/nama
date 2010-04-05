@@ -8,6 +8,7 @@
 						$ecasound_tcp_port
 						$mix_to_disk_format
 						$raw_to_disk_format
+						$cache_to_disk_format
 						$mixer_out_format
 						$alsa_playback_device
 						$alsa_capture_device	

@@ -39,6 +39,7 @@ our (
 					
 	$raw_to_disk_format,
 	$mix_to_disk_format,
+	$cache_to_disk_format,
 	$mixer_out_format,
 	$execute_on_project_load, # Nama text commands 
 	$use_group_numbering, # same version number for tracks recorded together

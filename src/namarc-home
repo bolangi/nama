@@ -15,8 +15,6 @@ abbreviations:
 
 devices: 
   jack:
-    soundcard_input_channels: 12
-    soundcard_output_channels: 10
     signal_format: f32_le,N,frequency
   consumer:
     ecasound_id: alsa,default
@@ -32,14 +30,15 @@ devices:
 
 # ALSA device assignments and formats
 
-alsa_capture_device: consumer          # for ALSA/OSS
-alsa_playback_device: consumer       # for ALSA/OSS
+alsa_capture_device: consumer    # for ALSA/OSS
+alsa_playback_device: consumer   # for ALSA/OSS
 mixer_out_format: cd-stereo      # for ALSA/OSS
 
 # audio file formats
 
 mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
+cache_to_disk_format: f24_le,N,frequency,i
 
 # globals for our chain setups
 
