@@ -656,18 +656,24 @@ All tracks with the corresponding I<status> in the current bus
 Nama uses buses internally, and provides two kinds of
 user-defined buses. 
 
-B<Send buses> can be used as instrument monitors,
-or to send pre- or post-fader signals from multiple
-user tracks to an external program such as jconv.
 
-B<Sub buses> (currently broken) enable multiple tracks to be
-routed through a single track for vol/pan/effects processing
-before reaching the mixer.
+B<Sub buses> enable multiple tracks to be routed through a
+single mix track before feeding the main mixer bus (or
+possibly another sub bus.) 
+
+The following commands create a sub bus and assign
+three tracks to it. The mix track takes the name of
+the bus. I<Strings> in this case, and is stereo
+by default.
 
 	add_sub_bus Strings
 	add_tracks violin cello bass
 	for violin cello bass; set bus Strings
-	Strings vol - 10  # adjust bus output volume
+	Strings vol - 10
+
+B<Send buses> can be used as instrument monitors,
+or to send pre- or post-fader signals from multiple
+user tracks to an external program such as jconv.
 
 =head1 ROUTING
 
@@ -795,7 +801,7 @@ present, although this feature is planned.
 
 If you are using Nama with the NetECI interface (i.e. if
 Audio::Ecasound is I<not> installed) you should block TCP
-port 2868 if you computer is exposed to the Internet. 
+port 2868 if your computer is exposed to the Internet. 
 
 =head1 INSTALLATION
 
@@ -830,9 +836,9 @@ https://lists.sourceforge.net/lists/listinfo/ecasound-list
 
 =head1 PATCHES
 
-The main module, Nama.pm, its sister modules are
-concatenations of several source files. Patches against the
-source files are preferred.
+The main module, Nama.pm, and its sister modules are
+concatenations of several source files. Patches against
+these source files are preferred.
 
 =head1 AUTHOR
 

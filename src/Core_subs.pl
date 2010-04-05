@@ -3935,7 +3935,9 @@ sub undefine_region {
 }
 
 sub add_sub_bus {
-	my ($name, $type, $id) = @_;
+	my ($name, $type, $id, @args) = @_; 
+		# command add_sub_bus does not supply @args at present
+	
 	::SubBus->new( 
 		name => $name, 
 		send_type => $type // 'bus',
@@ -3944,7 +3946,9 @@ sub add_sub_bus {
 	# create mix track
 	my @vals = (source_type => 'bus', 
 				source_id 	=> 'bus',
-				rec_defeat 	=> 1);
+				width		=> 2, # default to stereo 
+				rec_defeat 	=> 1,
+				@args);
 
 	if ($tn{$name}){
 		say qq($name: setting as mix track for bus "$name");
