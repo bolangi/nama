@@ -558,8 +558,8 @@ Loading project "untitled".
 			source_type => undef,
 			source_id => undef); 
 
-		remove_effect($mixdown->vol);
-		remove_effect($mixdown->pan);
+		#remove_effect($mixdown->vol);
+		#remove_effect($mixdown->pan);
 	}
 
 
