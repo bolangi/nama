@@ -4180,20 +4180,20 @@ sub prepare_to_cache {
 	my $track = shift;
  	initialize_chain_setup_vars();
 	$orig_version = $track->monitor_version;
-	$cooked = $track->name . '_cooked';
-	my $track = ::CacheRecTrack->new(
-		name => $cooked,
+	my $cooked_name = $track->name . '_cooked';
+	my $cooked = ::CacheRecTrack->new(
+		name => $cooked_name,
 		group => 'Temp',
 		target => $track->name,
 	);
 	# output path
-	$g->add_path($track->name, $cooked, 'wav_out');
+	$g->add_path($track->name, $cooked->name, 'wav_out');
 
 	# input path when $track->rec_status MON
-	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+	$g->add_path('wav_in',$cooked->name) if $track->rec_status eq 'MON';
 	$g->set_vertex_attributes(
-		$cooked, 
-		{ format => signal_format($cache_to_disk_format,$tn{$cooked}->width) }
+		$cooked->name, 
+		{ format => signal_format($cache_to_disk_format,$cooked->width) }
 	); 
 
 	$debug and say "The graph is:\n$g";
