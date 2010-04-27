@@ -911,6 +911,7 @@ sub really_recording {
 }
 
 sub generate_setup { 
+	my $automix = shift;
 	# return 1 if successful
 	# catch errors from generate_setup_try() and cleanup
 	$debug2 and print "&generate_setup\n";
@@ -919,7 +920,7 @@ sub generate_setup {
 	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
 	track_memoize(); 			# freeze track state 
-	eval { &generate_setup_try }; # pass @_ 
+	eval { &generate_setup_try($automix) }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;
@@ -3662,7 +3663,7 @@ sub automix {
 
 	### reduce track volume levels  to 10%
 	
-	command_process( 'for mon; vol/10');
+	command_process( 'for MON; vol/10');
 
 	#command_process('show');
 
