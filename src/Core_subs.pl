@@ -918,8 +918,9 @@ sub generate_setup {
 	$old_this_track = $this_track;
 	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
+		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
-	eval { &generate_setup_try }; # pass @_ 
+	eval { &generate_setup_try }; # gets @_ passed to generate_setup()
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;

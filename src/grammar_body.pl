@@ -32,24 +32,19 @@ meta: for bunch_spec ';' namacode stopper {
 	1;
 }
 
-bunch_spec: part
+bunch_spec: text 
 
-# execute Ecasound IAM command
+# If we have reached here and we match the grammar, we are
+# dealing with either:
+# (1) a Nama command (possibly specifying a new current track) or
+# (2) an Ecasound-IAM command.
 
-command: iam_cmd predicate { 
-	my $user_input = "$item{iam_cmd}$item{predicate}"; 
-	$::debug and print "Found Ecasound IAM command: $user_input\n";
-	my $result = ::eval_iam($user_input);
-	::pager( $result );  
-	1 }
+# consume text up to semicolon or end of string
+# skip the terminal semicolon, if present
+meta: text semicolon(?) { $::parser->do_part($item{text}) }
 
-
-# handle a text string up to semicolon or end of string
-
-meta: part semi(?) { $::parser->do_part($item{part}) }
-
-part: /[^;]+/ 
-semi: ';'
+text: /[^;]+/ 
+semicolon: ';'
 
 do_part: track_spec command
 do_part: track_spec
@@ -70,6 +65,18 @@ somecode: /.+?(?=;;|$)/
 somecode_semistop: /.+?/  { $item[1] }
 semistop: /;|$/
 #semi_stop: ';' | /$/
+
+# execute Ecasound IAM command
+
+command: iam_cmd predicate { 
+	my $user_input = "$item{iam_cmd}$item{predicate}"; 
+	$::debug and print "Found Ecasound IAM command: $user_input\n";
+	my $result = ::eval_iam($user_input);
+	::pager( $result );  
+	1 }
+
+
+
 key: /\w+/ 			# word characters {1,} 
 					# used in: set_track
 
