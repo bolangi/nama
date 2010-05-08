@@ -57,6 +57,7 @@
 						@command_history
 						$saved_version
 						$main_out
+						$this_track_name
 						);
 					 
 # used for effects_cache 

@@ -2996,6 +2996,8 @@ sub save_state {
 	delete $copp{''};
 
 	# prepare tracks for storage
+	
+	$this_track_name = $this_track->name;
 
 	@tracks_data = (); # zero based, iterate over these to restore
 
@@ -3259,11 +3261,19 @@ sub restore_state {
 	
 	my $did_apply = 0;
 
+	# temporary turn on mastering mode to enable
+	# recreating mastering tracksk
+
+	my $current_master_mode = $mastering_mode;
+	$mastering_mode = 1;
+
 	map{ 
 		my %h = %$_; 
 		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
 		if ( $track->class ){ bless $track, $track->class } # current scheme
 	} @tracks_data;
+
+	$mastering_mode = $current_master_mode;
 
 	# restore inserts
 	
@@ -3275,6 +3285,9 @@ sub restore_state {
 	} @inserts_data;
 
 	$ui->create_master_and_mix_tracks();
+
+	$this_track = $tn{$this_track_name} if $this_track_name;
+	set_current_bus();
 
 	map{ 
 		my $n = $_->{n};
@@ -3298,6 +3311,7 @@ sub restore_state {
 
 		}
 	} @tracks_data;
+
 
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
@@ -3648,6 +3662,16 @@ sub jack_ports {
 
 sub automix {
 
+	# get working track set
+	
+	my @tracks = grep{
+					$tn{$_}->rec_status eq 'MON' or
+					$::Bus::by_name{$_} and $tn{$_}->rec_status eq 'REC'
+				 } $main->tracks;
+
+	say "tracks: @tracks";
+	return;
+
 	#use Smart::Comments '###';
 	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
@@ -3661,9 +3685,11 @@ sub automix {
 
 	command_process('show');
 
+	
 	### reduce track volume levels  to 10%
 	
-	command_process( 'for mon; vol/10');
+	
+	command_process( 'for MON; vol/10');
 
 	#command_process('show');
 

@@ -98,7 +98,8 @@ our (
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
-	$old_this_track, # when we need to save/restore current track
+	$this_track_name, # for save/restore 
+	$old_this_track, # when we need to remember previous setting
 	$this_op,      # currently selected effect # future
 	$this_mark,    # current mark  # for future
 	$this_bus, 		# current bus
