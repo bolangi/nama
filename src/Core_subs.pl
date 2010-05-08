@@ -4191,10 +4191,11 @@ sub prepare_to_cache {
 	$g->add_path($track->name, $cooked->name, 'wav_out');
 
 	# input path when $track->rec_status MON
-	$g->add_path('wav_in',$cooked->name) if $track->rec_status eq 'MON';
+	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($cache_to_disk_format,$cooked->width) }
+		{ format => signal_format($cache_to_disk_format,$cooked->width),
+		}
 	); 
 
 	$debug and say "The graph is:\n$g";
