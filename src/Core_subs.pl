@@ -1928,7 +1928,7 @@ sub add_effect {
 	$id = cop_add(\%p); 
 	%p = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%p);
-	if( eval_iam("cs-is-valid") ){
+	if( eval_iam('cs-selected') and eval_iam('cs-is-valid') ){
 		my $er = engine_running();
 		$ti{$n}->mute if $er;
 		apply_op($id);
