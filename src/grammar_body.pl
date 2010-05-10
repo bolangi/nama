@@ -1,12 +1,7 @@
 #command: test
 #test: 'test' shellish { print "found $item{shellish}\n" }
 
-#### Part 1:  Shell, Perl, and 'for' constructions ####
-
-# in each case we consume text up to ';;' (which is discarded)
-# or end-of-line
-
-# Case 1: execute shell command if leading '!'
+# execute shell command if leading '!'
 
 meta: bang shellcode stopper {
 	$::debug and print "Evaluating shell commands!\n";
@@ -16,7 +11,7 @@ meta: bang shellcode stopper {
 	1;
 }
 
-# Case 2: execute perl code if leading 'eval'
+# execute perl code if leading 'eval'
 
 meta: eval perlcode stopper {
 	$::debug and print "Evaluating perl code\n";
@@ -24,7 +19,7 @@ meta: eval perlcode stopper {
 	1;
 }
 
-# Case 3: execute for each specified track if leading 'for'
+# execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 
  	$::debug and print "namacode: $item{namacode}\n";
@@ -37,46 +32,50 @@ meta: for bunch_spec ';' namacode stopper {
 	1;
 }
 
+bunch_spec: text 
+
+# If we have reached here and we match the grammar, we are
+# dealing with either:
+# (1) a Nama command (possibly specifying a new current track) or
+# (2) an Ecasound-IAM command.
+
+# consume text up to semicolon or end of string
+# skip the terminal semicolon, if present
+meta: text semicolon(?) { $::parser->do_part($item{text}) }
+
+text: /[^;]+/ 
+semicolon: ';'
+
+do_part: track_spec command
+do_part: track_spec
+do_part: command
+
+predicate: somecode_semistop { " $item{somecode_semistop}" }
+predicate: /$/
+iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
+track_spec: ident { ::leading_track_spec($item{ident}) }
 bang: '!'
 eval: 'eval'
 for: 'for'
 stopper: ';;' | /$/ 
-shellcode: code_body #{ print "shellcode: $item{code_body}\n"}
-perlcode: code_body #{ print "perlcode: $item{code_body}\n"}
-namacode: code_body #{ print "namacode: $item{code_body}\n"}
-code_body: /.+?(?=;;|$)/
-bunch_spec: text 
-text: /[^;]+/ 
+shellcode: somecode #{ print "shellcode: $item{somecode}\n"}
+perlcode: somecode #{ print "perlcode: $item{somecode}\n"}
+namacode: somecode #{ print "namacode: $item{somecode}\n"}
+somecode: /.+?(?=;;|$)/ 
+somecode_semistop: /.+?/  { $item[1] }
+semistop: /;|$/
+#semi_stop: ';' | /$/
 
-#### Part 2: Identify Nama or Ecasound-IAM commands ####
-
-# consume text up to semicolon (discarded) or end of string
-
-meta: command_text semicolon(?)
-semicolon: ';'
-
-command_text: track_spec command
-command_text: track_spec
-command_text: command
-
-track_spec: ident { ::leading_track_spec($item{ident}) }
-
-#### Part 3: Execute Ecasound IAM command ####
+# execute Ecasound IAM command
 
 command: iam_cmd predicate { 
-	my $user_input = "$item{iam_cmd} $item{predicate}"; 
-	$user_input =~ s/\s+$//;  # remove trailing spaces
+	my $user_input = "$item{iam_cmd}$item{predicate}"; 
 	$::debug and print "Found Ecasound IAM command: $user_input\n";
 	my $result = ::eval_iam($user_input);
 	::pager( $result );  
 	1 }
 
 
-iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
-predicate: /\S.*/ # non-space followed by anything
-predicate: /$/    # end-of-text
-
-#### Part 4: Elements of command grammar ####
 
 key: /\w+/ 			# word characters {1,} 
 					# used in: set_track
@@ -137,11 +136,6 @@ path: shellish
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
-
-#### Part 5: Nama command definitions ####
-
-# acceptable aliases for each command are generated from
-# the file commands.yml by the script emit_command_headers
 
 help_effect: _help_effect effect end { ::Text::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
