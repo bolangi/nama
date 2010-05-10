@@ -52,7 +52,11 @@ text: /[^;]+/
 
 # consume text up to semicolon (discarded) or end of string
 
-meta: command_text semicolon(?)
+meta: command_text
+meta: command_text semicolon rest
+#rest: /.+/ { $::parser->meta($item[1]); 1 }
+rest: /.+/ { print ::yaml_out(\%item); 1 }
+#meta: command_text(s /;/)
 semicolon: ';'
 
 command_text: track_spec command
