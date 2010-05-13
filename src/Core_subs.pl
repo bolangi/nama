@@ -637,7 +637,6 @@ sub engine_running {
 sub initialize_buses {
 	::Bus->initialize();
 	$main_bus = ::Bus->new(name => 'Main');
-	$null_bus = ::Bus->new(name => 'Null');
 }
 	
 sub initialize_project_data {
@@ -708,7 +707,6 @@ sub create_system_buses {
 			Cooked		# for track caching
 			Temp		# temp tracks while generating setup
 			Main		# default mixer bus, new tracks assigned to Main
-			Null		# for tracks w/o signal input e.g. metronome
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	@system_buses = split " ", $buses;
@@ -938,8 +936,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
 	$debug and say "The graph is:\n$g";
-	add_paths_for_null_input_tracks();
-	$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
 	map{ $_->apply() } grep{ (ref $_) =~ /Send|Sub/ } ::Bus::all();
@@ -1046,15 +1042,6 @@ sub add_paths_for_recording {
 sub input_node { $_[0].'_in' }
 sub output_node {$_[0].'_out'}
 	
-
-sub add_paths_for_null_input_tracks {
-	$debug2 and say "&add_paths_for_null_tracks";
-
-	map{ $g->add_path('null_in', $_->name, 'Master') }
- 	grep{ $_->rw eq 'REC' } 
-	map{$tn{$_}} 	# convert to Track objects
-	$::Bus::by_name{Null}->tracks; # list of Track names
-}
 
 sub add_paths_for_aux_sends {
 	$debug2 and say "&add_paths_for_aux_sends";
@@ -3237,7 +3224,7 @@ sub restore_state {
 			# source_type 'track' is now  'bus'
 			$t->{source_type} =~ s/track/bus/;
 
-			# null bus is now 'Null'
+			# convert 'null' bus to 'Null' (which is eliminated below)
 			$t->{group} =~ s/null/Null/;
 		}
 
