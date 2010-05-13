@@ -3672,7 +3672,6 @@ sub automix {
 				 } $main->tracks;
 
 	say "tracks: @tracks";
-	return;
 
 	#use Smart::Comments '###';
 	# add -ev to summed signal
