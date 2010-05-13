@@ -179,7 +179,7 @@ source:
   type: track
   what: set track source
   short: src r
-  parameters: <i_soundcard_channel> | <s_jack_client_name> | 'jack' (opens ports ecasound:trackname_in_N, connects ports listed in trackname.ports if present in project_root dir)
+  parameters: <i_soundcard_channel> | 'null' (for metronome) | <s_jack_client_name> | 'jack' (opens ports ecasound:trackname_in_N, connects ports listed in trackname.ports if present in project_root dir)
 send:
   type: track
   what: set aux send
