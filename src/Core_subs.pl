@@ -3242,6 +3242,14 @@ sub restore_state {
 		}
 
 	}
+
+	# get rid of Null bus routing
+	
+	map{$_->{group}       = 'Main'; 
+		$_->{source_type} = 'null';
+		$_->{source_id}   = 'null';
+  	} grep{$_->{group} eq 'Null'} @tracks_data;
+
 	$debug and print "inserts data", yaml_out \@inserts_data;
 
 
