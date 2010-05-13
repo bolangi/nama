@@ -773,6 +773,7 @@ sub add_track {
 					:  'REC') ;
 	$track_name = $ch_m = $ch_r = undef;
 
+	set_current_bus();
 	$ui->track_gui($track->n);
 	$debug and print "Added new track!\n", $track->dump;
 }
