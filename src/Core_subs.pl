@@ -3257,7 +3257,6 @@ sub restore_state {
 
 	# restore user buses
 		
-	say "bus data found" if @bus_data;
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
 	# restore user tracks
@@ -3524,7 +3523,7 @@ sub ecasound_select_chain {
 	eval_iam($cmd) if eval_iam( 'cs-connected' ) =~ /$chain_setup_file/;
 }
 sub set_current_bus {
-	my $track = shift || $this_track;
+	my $track = shift || $this_track ||= $tn{Master};
 	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
 	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
 	else { $this_bus = $track->group }
