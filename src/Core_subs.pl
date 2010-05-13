@@ -3230,11 +3230,17 @@ sub restore_state {
 			push @inserts_data, $i;
 		} 
 	}
-	if ( $saved_version <= 1.054){ # source_type track -> bus
+	if ( $saved_version <= 1.054){ 
+
 		for my $t (@tracks_data){
-			$t->{source_type} = $t->{source_id} = 'bus'
-				if $t->{source_type} eq 'track';
+
+			# source_type 'track' is now  'bus'
+			$t->{source_type} =~ s/track/bus/;
+
+			# null bus is now 'Null'
+			$t->{group} =~ s/null/Null/;
 		}
+
 	}
 	$debug and print "inserts data", yaml_out \@inserts_data;
 
@@ -3254,7 +3260,8 @@ sub restore_state {
 	#map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses
-	
+		
+	say "bus data found" if @bus_data;
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
 	# restore user tracks
@@ -3688,8 +3695,7 @@ sub automix {
 	
 	### reduce track volume levels  to 10%
 	
-	
-	command_process( 'for MON; vol/10');
+	for (@tracks){ command_process("$_  vol/10") }
 
 	#command_process('show');
 
@@ -3727,17 +3733,16 @@ sub automix {
 
 	### apply multiplier to individual tracks
 
-	command_process( "for mon; vol*$multiplier" );
+	for (@tracks){ command_process( "$_ vol*$multiplier" ) }
 
-	# $main_out = 1; # mixdown will turn off and turn on main out
+	# $main_out = 1; # unnecessary: mixdown will turn off and turn on main out
 	
 	### mixdown
 	command_process('mixdown; arm; start');
 
 	### turn on audio output
 
-	# command_process('mixplay'); # rec_cleanup does this
-	# automatically
+	# command_process('mixplay'); # rec_cleanup does this automatically
 
 	#no Smart::Comments;
 	
