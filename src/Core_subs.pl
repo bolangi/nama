@@ -2217,6 +2217,8 @@ sub effect_update {
 	# well?)
 	
 	#$debug2 and print "&effect_update\n";
+	my $valid_setup = eval_iam("cs-selected") and eval_iam("cs-is-valid");
+	return unless $valid_setup;
 	my $es = eval_iam("engine-status");
 	$debug and print "engine is $es\n";
 	return if $es !~ /not started|stopped|running/;
