@@ -53,84 +53,14 @@ sub add_edge { add_path(@_) }
 	
 sub add_inserts {
 	my $g = shift;
-	my @track_names = grep{ $::tn{$_} 
-		and $::tn{$_}->group ne 'Temp'
-		and $::tn{$_}->inserts =~ /HASH/
-		and $::tn{$_}->inserts->{insert_type}} $g->vertices;
-	$debug and say "Inserts will be applied to the following tracks: @track_names";
-	map{ add_insert($g, $_) } @track_names;
-}
-	
-sub add_insert {
-
-	# Inserts will be read-only objects. To change the 
-	# destination or return, users will remove the insert and
-	# create a new one.
-	#
-	# Since this routine will be called after expand_graph, 
-	# we can be sure that every track will connect to either 
-	# a loop or an output 
-	#
-	# we can add the wet/dry tracks on every generate_setup() run
-	# since the Track class will return us the existing
-	# track if we use the same name
-	#
-	no warnings qw(uninitialized);
-
-	my ($g, $name) = @_;
-	$debug and say "add_insert for track: $name";
-	my $t = $::tn{$name}; 
-	my $i = $t->inserts;  # only one allowed
-
-	say "insert structure:", ::yaml_out($i);
-	# assume post-fader send
-	# t's successor will be loop or reserved
-
-	# case 1: post-fader insert
-		
-	if($i->{insert_type} eq 'cooked') {	 # the only type we support
-	
-		my ($successor) = $g->successors($name);
-		$g->delete_edge($name, $successor);
-		my $loop = "$name\_insert";
-		my $wet = $::tn{"$name\_wet"};
-		my $dry = $::tn{"$name\_dry"};
-
-		say "found wet: ", $wet->name, " dry: ",$dry->name;
-
-		# wet send path (no track): track -> loop -> output
-		
-		my @edge = ($loop, ::output_node($i->{send_type}));
-		say "edge: @edge";
-		add_path($name, @edge);
-		$g->set_vertex_attributes($loop, {n => $t->n, j => 'a'});
-		$g->set_edge_attributes(@edge, { 
-			send_id => $i->{send_id},
-			width => 2,
-		});
-		# wet return path: input -> wet_track (slave) -> successor
-		
-		# we override the input with the insert's return source
-
-		$g->set_vertex_attributes($wet->name, {
-					width => 2, # default for cooked
-					mono_to_stereo => '', # override
-					source_type => $i->{return_type},
-					source_id => $i->{return_id},
-		});
-		add_path(::input_node($i->{return_type}), $wet->name, $successor);
-
-		# connect dry track to graph
-		
-		add_path($loop, $dry->name, $successor);
-
-		::command_process($t->name); 
-		::command_process('wet '.$i->{wetness});
-		# generate_setup() will reset current track 
+	map{ my $i = $::tn{$_}->prefader_insert;
+		 $::Insert::by_index{$i}->add_paths($g, $_) if $i;
+			$i = $::tn{$_}->postfader_insert;
+		 $::Insert::by_index{$i}->add_paths($g, $_) if $i;
 	}
-	
+	grep{ $::tn{$_} } 
+	$g->vertices;
 }
-	
 
 sub add_loop {
 	my ($g,$a,$b) = @_;
@@ -261,7 +191,7 @@ sub is_terminal { $reserved{$_[0]} }
 sub is_a_loop{
 	my $name = shift;
 	return if $reserved{$name};
-	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out|insert)$/){
+	if (my($root, $suffix) = $name =~ /^(.+?)_(in|out|insert_p.+)$/){
 		return ($root, $suffix);
 	} 
 }

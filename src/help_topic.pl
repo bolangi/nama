@@ -240,8 +240,8 @@ effects => <<EFFECTS,
 
 -  send/receive inserts
 
-   add_insert_cooked,  ainc   - add a post-fader insert to the current track
-   remove_insert,      rin    - remove current track's insert
+   add_insert,         ain    - add an insert to current track
+   remove_insert,      rin    - remove an insert from current track
    set_insert_wetness, wet    - set/query insert wetness 
                                 example: wet 99 (99% wet, 1% dry)
 

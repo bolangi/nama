@@ -1,6 +1,82 @@
 #command: test
 #test: 'test' shellish { print "found $item{shellish}\n" }
 
+# execute shell command if leading '!'
+
+meta: bang shellcode stopper {
+	$::debug and print "Evaluating shell commands!\n";
+	my $output = qx( $item{shellcode});
+	::pager($output) if $output;
+	print "\n";
+	1;
+}
+
+# execute perl code if leading 'eval'
+
+meta: eval perlcode stopper {
+	$::debug and print "Evaluating perl code\n";
+	::eval_perl($item{perlcode});
+	1;
+}
+
+# execute for each specified track if leading 'for'
+
+meta: for bunch_spec ';' namacode stopper { 
+ 	$::debug and print "namacode: $item{namacode}\n";
+ 	my @tracks = ::bunch_tracks($item{bunch_spec});
+ 	for my $t(@tracks) {
+ 		::leading_track_spec($t);
+		$::parser->meta($item{namacode});
+ 		#print("$t; $item{namacode}\n");
+	}
+	1;
+}
+
+bunch_spec: text 
+
+# If we have reached here and we match the grammar, we are
+# dealing with either:
+# (1) a Nama command (possibly specifying a new current track) or
+# (2) an Ecasound-IAM command.
+
+# consume text up to semicolon or end of string
+# skip the terminal semicolon, if present
+meta: text semicolon(?) { $::parser->do_part($item{text}) }
+
+text: /[^;]+/ 
+semicolon: ';'
+
+do_part: track_spec command
+do_part: track_spec
+do_part: command
+
+predicate: somecode_semistop { " $item{somecode_semistop}" }
+predicate: /$/
+iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
+track_spec: ident { ::leading_track_spec($item{ident}) }
+bang: '!'
+eval: 'eval'
+for: 'for'
+stopper: ';;' | /$/ 
+shellcode: somecode #{ print "shellcode: $item{somecode}\n"}
+perlcode: somecode #{ print "perlcode: $item{somecode}\n"}
+namacode: somecode #{ print "namacode: $item{somecode}\n"}
+somecode: /.+?(?=;;|$)/ 
+somecode_semistop: /.+?/  { $item[1] }
+semistop: /;|$/
+#semi_stop: ';' | /$/
+
+# execute Ecasound IAM command
+
+command: iam_cmd predicate { 
+	my $user_input = "$item{iam_cmd}$item{predicate}"; 
+	$::debug and print "Found Ecasound IAM command: $user_input\n";
+	my $result = ::eval_iam($user_input);
+	::pager( $result );  
+	1 }
+
+
+
 key: /\w+/ 			# word characters {1,} 
 					# used in: set_track
 
@@ -193,6 +269,7 @@ show_track: _show_track end {
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::Text::show_region();
 	$output .= ::Text::show_effect_chain_stack();
+	$output .= ::Text::show_inserts();
 	::pager( $output );
 	1;}
 show_track: _show_track track_name end { 
@@ -225,6 +302,9 @@ exit: _exit end {   ::save_state($::state_store_file);
 
 source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
 portsfile: /\w+\.ports/
+source: _source 'bus' end {$::this_track->set(
+		source_type => 'bus', 
+		source_id => 'bus'); 1 }
 source: _source 'null' end {
 		$::this_track->set(rec_defeat => 1,
 					source_type => 'null',
@@ -232,6 +312,8 @@ source: _source 'null' end {
  		print $::this_track->name, ": Setting input to null device\n";
 	}
 source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
+# jack_port can be 'jack' (manual connect) or a JACK client name
+# set_io decides what to do
 source: _source end { 
 	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
 	print "however track status is ", $::this_track->rec_status, "\n"
@@ -290,6 +372,12 @@ vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 mute: _mute end { $::this_track->mute; 1}
 
 unmute: _unmute end { $::this_track->unmute; 1}
+# solo: _solo 'bus' track_name {
+# 	print ("$item{track_name}: Expected bus track_name. Skipping.\n"), return 1
+# 		unless $::Bus::by_name{$item{track_name}};
+# 	::command_process("for all; off;; $item{track_name} mon");
+# 	1;
+# }
 solo: _solo end { ::solo(); 1}
 all: _all end { ::all() ; 1}
 
@@ -399,14 +487,7 @@ add_controller: _add_controller parent effect value(s?) end {
 	::Text::t_add_ctrl($parent, $code, $values);
 	1;}
 parent: op_id
-add_effect: _add_effect effect value(s?)  end { 
-	my $code = $item{effect};
-	my $values = $item{"value(s?)"};
-	my $before = $::this_track->vol;
-	::Text::t_insert_effect($before, $code, $values);
- 	1;}
-
-append_effect: _append_effect effect value(s?) end {
+add_effect: _add_effect effect value(s?) end {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
  	::Text::t_add_effect($::this_track, $code, $values);
@@ -538,38 +619,53 @@ change_bus: _change_bus existing_bus_name {
 	1 }
 
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
-add_insert_cooked: _add_insert_cooked send_id return_id(?) end {
+add_insert: _add_insert prepost send_id return_id(?) end {
 	my $return_id = "@{$item{'return_id(?)'}}";
 	my $send_id = $item{send_id};
-	::add_insert_cooked($send_id, $return_id);
+	::Insert::add_insert( "$item{prepost}fader_insert",$send_id, $return_id);
 	1;
 }
+prepost: 'pre' | 'post'
 send_id: jack_port
 return_id: jack_port
 
-set_insert_wetness: _set_insert_wetness parameter end {
+set_insert_wetness: _set_insert_wetness prepost(?) parameter end {
+	my $prepost = "@$item{'prepost(?)'}";
 	my $p = $item{parameter};
-	print ("wetness parameter must be an integer between 0 and 100\n"), return 1
-		if ! ($p <= 100 and $p >= 0);
-	my $i = $::this_track->inserts;
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), 
+		return 1 unless $id;
+	print ("wetness parameter must be an integer between 0 and 100\n"), 
+		return 1 unless ($p <= 100 and $p >= 0);
+	my $i = $::Insert::by_index{$id};
 	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
 		return 1 unless $i;
 	$i->{wetness} = $p;
-	::modify_effect($i->{wet_vol}, 0, undef, $p);
+	::modify_effect($i->wet_vol, 0, undef, $p);
 	::sleeper(0.1);
-	::modify_effect($i->{dry_vol}, 0, undef, 100 - $p);
+	::modify_effect($i->dry_vol, 0, undef, 100 - $p);
 	1;
 }
 
-set_insert_wetness: _set_insert_wetness end {
-	my $i = $::this_track->inserts;
-	print ("track ",$::this_track->n, " has no insert.\n"), return 1 unless $i;
+set_insert_wetness: _set_insert_wetness prepost(?) end {
+	my $prepost = "@$item{'prepost(?)'}";
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
+	my $i = $::Insert::by_index{$id};
 	 print "The insert is ", 
-		$i->{wetness}, "% wet, ", (100 - $i->{wetness}), "% dry.\n";
+		$i->wetness, "% wet, ", (100 - $i->wetness), "% dry.\n";
 }
 
-remove_insert: _remove_insert end { 
-	$::this_track->remove_insert;
+remove_insert: _remove_insert prepost(?) end { 
+
+	# use prepost spec if provided
+	# remove lone insert without prepost spec
+	
+	my $prepost = "@{$item{'prepost(?)'}}";
+	my $id = ::Insert::get_id($::this_track,$prepost);
+	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
+	print $::this_track->name.": removing $prepost". "fader insert\n";
+	$::Insert::by_index{$id}->remove;
 	1;
 }
 
@@ -603,10 +699,11 @@ overwrite_effect_chain: _overwrite_effect_chain ident end {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
 bunch_name: ident { 
-	::is_bunch($item{ident}) 
+	::is_bunch($item{ident}) or ::bunch_tracks($item{ident})
 		or print("$item{ident}: no such bunch name.\n"), return; 
 	$item{ident};
 }
+
 effect_profile_name: ident
 existing_effect_profile_name: ident {
 	print ("$item{ident}: no such effect profile\n"), return

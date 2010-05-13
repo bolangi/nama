@@ -8,6 +8,7 @@
 						$ecasound_tcp_port
 						$mix_to_disk_format
 						$raw_to_disk_format
+						$cache_to_disk_format
 						$mixer_out_format
 						$alsa_playback_device
 						$alsa_capture_device	
@@ -47,6 +48,7 @@
 						@bus_data
 						@groups_data
 						@marks_data
+						@inserts_data
 						$loop_enable
 						@loop_endpoints
 						$length
@@ -55,6 +57,7 @@
 						@command_history
 						$saved_version
 						$main_out
+						$this_track_name
 						);
 					 
 # used for effects_cache 

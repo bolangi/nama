@@ -451,15 +451,11 @@ add_controller:
   parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
   short: acl
 add_effect:
-  type: effect
-  what: add effect to current track (placed before volume control)
   short: afx
+  type: effect
+  what: add effect to the end of current track
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: add_effect amp 6 (LADSPA Simple amp 6dB gain)!nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required
-append_effect:
-  type: effect
-  what: add effect to the end of current track (mainly legacy use)
-  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
   short: ifx
@@ -476,21 +472,21 @@ remove_effect:
   what: remove effects from selected track
   short: rfx remove_controller rcl
   parameters: <s_effect_id1> [ <s_effect_id2>...]
-add_insert_cooked:
+add_insert:
   type: effect 
-  short: ainc
-  what: add an external post-fader send/return to a track
-  parameters: <s_send_id> [<s_return_id>]
+  short: ain
+  what: add an external send/return to current track
+  parameters: ( pre | post ) <s_send_id> [<s_return_id>]
 set_insert_wetness:
   type: effect 
   short: wet
-  what: set wet/dry balance for track insert: 100 = all wet, 0 = all dry
-  parameters: <n_wetness>
+  what: set wet/dry balance for current track insert: 100 = all wet, 0 = all dry
+  parameters: [ pre | post ] <n_wetness> 
 remove_insert:
   type: effect
   short: rin
-  what: remove a track's insert
-  parameters: none
+  what: remove an insert from the current track 
+  parameters: [ pre | post ] 
 ctrl_register:
   type: effect
   what: list Ecasound controllers

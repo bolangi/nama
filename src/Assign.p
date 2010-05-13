@@ -251,7 +251,7 @@ sub serialize {
 
 sub yaml_out {
 	
-	$debug2 and print "&yaml_out\n";
+	$debug2 and carp "&yaml_out";
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
 	$debug and print "data ref type: $type\n "; 

@@ -39,6 +39,7 @@ our (
 					
 	$raw_to_disk_format,
 	$mix_to_disk_format,
+	$cache_to_disk_format,
 	$mixer_out_format,
 	$execute_on_project_load, # Nama text commands 
 	$use_group_numbering, # same version number for tracks recorded together
@@ -97,7 +98,8 @@ our (
 					# implemented
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
-	$old_this_track, # when we need to save/restore current track
+	$this_track_name, # for save/restore 
+	$old_this_track, # when we need to remember previous setting
 	$this_op,      # currently selected effect # future
 	$this_mark,    # current mark  # for future
 	$this_bus, 		# current bus
@@ -303,11 +305,12 @@ our (
 	%tn, # track by name  (alias %::Track::by_name)
 
 	@tracks_data, # staging for saving
+	@groups_data, # obsolete
+	@marks_data,  # for storage
+	@inserts_data, # for storage
 	@bus_data,    # 
 	@system_buses, # 
 	%is_system_bus, # 
-	@groups_data, # 
-	@marks_data,  # 
 
 	$alsa_playback_device,
 	$alsa_capture_device,

@@ -69,6 +69,7 @@ mixer_out_format: cd-stereo         # for ALSA/OSS
 
 mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
+cache_to_disk_format: f24_le,N,frequency,i
 
 # globals for our chain setups
 
@@ -96,11 +97,11 @@ volume_control_operator: eadb # must be 'ea' or 'eadb'
 
 eq: Parametric1 1 0 0 40 0.125 0 0 200 0.125 0 0 600 0.125 0 0 3300 0.125 0
 
-low_pass: lowpass_iir 120 1
+low_pass: lowpass_iir 106 2
 
-mid_pass: bandpass_iir 420 800 1
+mid_pass: bandpass_iir 520 800 2
 
-high_pass: highpass_iir 920 1
+high_pass: highpass_iir 1030 2
 
 compressor: sc4 0 3 16 0 1 3.25 0
 
@@ -112,19 +113,15 @@ limiter: tap_limiter 0 0
 
 # Julien Claassen's Notes on Mastering effect defaults
 # 
-# The eq: All sections turned off, in case you don't want the
-# EQ after all and when you turn them on, you can easily do
-# them one at a time. 
+# Eq: All sections are initially off. You can turn them 
+# on as needed, one at a time. 
 # 
-# All bands set to minimum width, so you can hear center
-# you're going to manipulate clearly. You can always extend.
-# But that way - I've discovered - it's more accurate to work.
-# The band frequencies are just a basic selection, based on my
-# usual starting points.
+# Bandpass: Default settings are courtesy of Fons
+# Adriaensen, who says they will be within 1.5dB of
+# flat settings. 
 # 
-# The compressor's turned off, but some default values are set for all other 
-# params.
+# Compressor is turned off, with reasonable default values 
+# set. 
 # 
-# The spatialiser is set to 0: no effect. Same goes for the
-# limiter. So you can start out clean and slowly work your way
-# from there.
+# Spatialiser and limiter: both initially off so you can start out
+# clean and slowly work your way from there.

@@ -1,5 +1,5 @@
 sub main { 
-	setup_grammar(); # empty
+#	setup_grammar(); # executes directly in body
 	process_options();
 	prepare(); 
 	command_process($execute_on_project_load);
@@ -558,8 +558,8 @@ Loading project "untitled".
 			source_type => undef,
 			source_id => undef); 
 
-		remove_effect($mixdown->vol);
-		remove_effect($mixdown->pan);
+		#remove_effect($mixdown->vol);
+		#remove_effect($mixdown->pan);
 	}
 
 
@@ -637,7 +637,6 @@ sub engine_running {
 sub initialize_buses {
 	::Bus->initialize();
 	$main_bus = ::Bus->new(name => 'Main');
-	$null_bus = ::Bus->new(name => 'Null');
 }
 	
 sub initialize_project_data {
@@ -708,7 +707,6 @@ sub create_system_buses {
 			Cooked		# for track caching
 			Temp		# temp tracks while generating setup
 			Main		# default mixer bus, new tracks assigned to Main
-			Null		# for tracks w/o signal input e.g. metronome
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	@system_buses = split " ", $buses;
@@ -775,6 +773,7 @@ sub add_track {
 					:  'REC') ;
 	$track_name = $ch_m = $ch_r = undef;
 
+	set_current_bus();
 	$ui->track_gui($track->n);
 	$debug and print "Added new track!\n", $track->dump;
 }
@@ -918,8 +917,9 @@ sub generate_setup {
 	$old_this_track = $this_track;
 	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
+		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
-	eval { &generate_setup_try }; # pass @_ 
+	eval { &generate_setup_try }; # gets @_ passed to generate_setup()
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;
@@ -936,8 +936,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	add_paths_for_main_tracks();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
-	$debug and say "The graph is:\n$g";
-	add_paths_for_null_input_tracks();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
@@ -984,6 +982,7 @@ sub initialize_chain_setup_vars {
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	reset_aux_chain_counter();
 	{no autodie; unlink setup_file()}
 }
 sub add_paths_for_main_tracks {
@@ -1044,15 +1043,6 @@ sub add_paths_for_recording {
 sub input_node { $_[0].'_in' }
 sub output_node {$_[0].'_out'}
 	
-
-sub add_paths_for_null_input_tracks {
-	$debug2 and say "&add_paths_for_null_tracks";
-
-	map{ $g->add_path('null_in', $_->name, 'Master') }
- 	grep{ $_->rw eq 'REC' } 
-	map{$tn{$_}} 	# convert to Track objects
-	$::Bus::by_name{Null}->tracks; # list of Track names
-}
 
 sub add_paths_for_aux_sends {
 	$debug2 and say "&add_paths_for_aux_sends";
@@ -1122,6 +1112,7 @@ sub prune_graph {
 sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
 	@io = map{ dispatch($_) } $g->edges;
+	$debug and map $_->dumpp, @io;
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
@@ -1182,30 +1173,53 @@ sub non_track_dispatch {
 	# we will issue two IO objects, one for the chain input
 	# fragment, one for the chain output
 	
+	
 	my $edge = shift;
 	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
-	my $attr = $g->get_edge_attributes(@$edge);
-	$debug and say "found edge attributes: ",yaml_out($attr) if $attr;
+	my $eattr = $g->get_edge_attributes(@$edge) // {};
+	$debug and say "found edge attributes: ",yaml_out($eattr) if $eattr;
 
-	my $vattr = $g->get_vertex_attributes($edge->[0]);
+	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 
-	# loop  fields: n: track->n, j: 'a' (counter)
-	
-	# chain_ids are allocated J7, J7b, J7c...
-	$attr->{chain_id} //= 'J'.$vattr->{n}. 
-		( $vattr->{j} eq 'a' ? ($vattr->{j}++,''): ++$vattr->{j});
+	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
+		my $n = $eattr->{n} || $vattr->{n};
+		$eattr->{chain_id} = jumper_count($n);
+	}
 	my @direction = qw(input output);
 	map{ 
 		my $direction = shift @direction;
 		my $class = ::IO::get_class($_, $direction);
-		my $attrib = {%$vattr, %$attr};
+		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},",
  			"device_id: $attrib->{device_id}";
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
 }
+
+{ 
+### counter for jumper chains 
+#
+#   sequence: J1 J1a J1b J1c, J2, J3, J4, J4d, J4e
+
+my %used;
+my $counter;
+my $prefix = 'J';
+reset_aux_chain_counter();
+  
+sub reset_aux_chain_counter {
+	%used = ();
+	$counter = 'a';
+}
+sub jumper_count {
+	my $track_index = shift;
+	my $try1 = $prefix . $track_index;
+	$used{$try1}++, return $try1 unless $used{$try1};
+	$try1 . $counter++;
+}
+}
+	
 
 sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
@@ -1303,7 +1317,6 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
-		#local $debug = 1;
 		my $setup = setup_file();
 		#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 		return unless -e $setup;
@@ -1903,7 +1916,7 @@ sub add_effect {
 	$id = cop_add(\%p); 
 	%p = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%p);
-	if( eval_iam("cs-is-valid") ){
+	if( eval_iam('cs-selected') and eval_iam('cs-is-valid') ){
 		my $er = engine_running();
 		$ti{$n}->mute if $er;
 		apply_op($id);
@@ -2212,8 +2225,7 @@ sub effect_update {
 	$param++; # so the value at $p[0] is applied to parameter 1
 	my $chain = $cops{$id}{chain};
 
-	carp("effect $id: non-existent chain\n"), return
-		unless $chain;
+	carp("$id: effect not found. skipping...\n"), return unless $chain;
 
 	$debug and print "chain $chain id $id param $param value $val\n";
 
@@ -2972,6 +2984,8 @@ sub save_state {
 	delete $copp{''};
 
 	# prepare tracks for storage
+	
+	$this_track_name = $this_track->name;
 
 	@tracks_data = (); # zero based, iterate over these to restore
 
@@ -2989,6 +3003,14 @@ sub save_state {
 	$debug and print "copying bus data\n";
 	@bus_data = (); # 
 	map{ push @bus_data, $_->hashref } ::Bus::all();
+
+	# prepare inserts data for storage
+	
+	$debug and print "copying inserts data\n";
+	@inserts_data = ();
+	while (my $k = each %::Insert::by_index ){ 
+		push @inserts_data, $::Insert::by_index{$k}->hashref;
+	}
 
 	# prepare marks data for storage (new Mark objects)
 
@@ -3081,7 +3103,7 @@ sub restore_state {
 	
 	my $yaml = io($file)->all;
 
-	# remove empty key hash lines # YAML::Tiny bug
+	# remove empty key hash lines # fixes YAML::Tiny bug
 	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
 
 	# rewrite obsolete null hash/array substitution
@@ -3180,6 +3202,44 @@ sub restore_state {
 	if ( $saved_version <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
+	if ( $saved_version <= 1.053){ # convert insert data to object
+		my $n = 0;
+		@inserts_data = ();
+		for my $t (@tracks_data){
+			my $i = $t->{inserts};
+			next unless keys %$i;
+			$t->{postfader_insert} = ++$n;
+			$i->{class} = '::PostFaderInsert';
+			$i->{n} = $n;
+			$i->{wet_name} = $t->{name} . "_wet";
+			$i->{dry_name} = $t->{name} . "_dry";
+			delete $t->{inserts};
+			delete $i->{tracks};
+			push @inserts_data, $i;
+		} 
+	}
+	if ( $saved_version <= 1.054){ 
+
+		for my $t (@tracks_data){
+
+			# source_type 'track' is now  'bus'
+			$t->{source_type} =~ s/track/bus/;
+
+			# convert 'null' bus to 'Null' (which is eliminated below)
+			$t->{group} =~ s/null/Null/;
+		}
+
+	}
+
+	# get rid of Null bus routing
+	
+	map{$_->{group}       = 'Main'; 
+		$_->{source_type} = 'null';
+		$_->{source_id}   = 'null';
+  	} grep{$_->{group} eq 'Null'} @tracks_data;
+
+	$debug and print "inserts data", yaml_out \@inserts_data;
+
 
 	# make sure Master has reasonable output settings
 	
@@ -3196,12 +3256,19 @@ sub restore_state {
 	#map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses
-	
+		
+	say "bus data found" if @bus_data;
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
-	
+
 	# restore user tracks
 	
 	my $did_apply = 0;
+
+	# temporary turn on mastering mode to enable
+	# recreating mastering tracksk
+
+	my $current_master_mode = $mastering_mode;
+	$mastering_mode = 1;
 
 	map{ 
 		my %h = %$_; 
@@ -3209,7 +3276,21 @@ sub restore_state {
 		if ( $track->class ){ bless $track, $track->class } # current scheme
 	} @tracks_data;
 
+	$mastering_mode = $current_master_mode;
+
+	# restore inserts
+	
+	::Insert::initialize();
+	
+	map{ 
+		bless $_, $_->{class};
+		$::Insert::by_index{$_->{n}} = $_;
+	} @inserts_data;
+
 	$ui->create_master_and_mix_tracks();
+
+	$this_track = $tn{$this_track_name} if $this_track_name;
+	set_current_bus();
 
 	map{ 
 		my $n = $_->{n};
@@ -3233,6 +3314,7 @@ sub restore_state {
 
 		}
 	} @tracks_data;
+
 
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
@@ -3302,26 +3384,25 @@ sub solo {
 	# get list of already muted tracks if I haven't done so already
 	
 	if ( ! @already_muted ){
-	print "none muted\n";
 		@already_muted = grep{ $_->old_vol_level} 
                          map{ $tn{$_} } 
 						 ::Track::user();
-	print join " ", "muted", map{$_->name} @already_muted;
 	}
+	$debug and say join " ", "already muted:", map{$_->name} @already_muted;
 
 	# mute all tracks
-	map { $this_track = $tn{$_}; $this_track->mute(1) } ::Track::user();
+	my @bus_tree = ($this_track->name, $this_track->bus_tree());
+	map { $tn{$_}->mute(1) } 
+	grep { my $tn = $_; ! grep { $tn eq $_ } @bus_tree } 
+	::Track::user();
 
-    $this_track = $current_track;
-    $this_track->unmute(1);
 	$soloing = 1;
 }
 
 sub all {
 	
-	my $current_track = $this_track;
 	# unmute all tracks
-	map { $this_track = $tn{$_}; $this_track->unmute(1) } ::Track::user();
+	map { $tn{$_}->unmute(1) } ::Track::user();
 
 	# re-mute previously muted tracks
 	if (@already_muted){
@@ -3331,10 +3412,10 @@ sub all {
 	# remove listing of muted tracks
 	
 	@already_muted = ();
-	$this_track = $current_track;
 	$soloing = 0;
 	
 }
+	
 
 sub pager {
 	$debug2 and print "&pager\n";
@@ -3415,83 +3496,27 @@ sub process_line {
 		revise_prompt();
 	}
 }
-
-
 sub command_process {
-	my $user_input = join " ", @_;
-	return if $user_input =~ /^\s*$/;
-	$debug and print "user input: $user_input\n";
-	my ($cmd, $predicate) = ($user_input =~ /([\S]+?)\b(.*)/);
-	if ($cmd eq 'for' 
-			and my ($bunchy, $do) = $predicate =~ /\s*(.+?)\s*;(.+)/){
-		$debug and print "bunch: $bunchy do: $do\n";
-		my ($do_part, $after) = $do =~ /(.+?);;(.+)/;
-		$do = $do_part if $do_part;
-		my @tracks = bunch_tracks($bunchy);
-		for my $t(@tracks) {
-			command_process("$t; $do");
-		}
-		command_process($after) if $after;
-	} elsif ($cmd eq 'eval') {
-			$debug and print "Evaluating perl code\n";
-			pager( eval $predicate );
-			print "\n";
-			$@ and print "Perl command failed: $@\n";
+	my $input = shift;
+	my $input_was = $input;
+	while ($input =~ /\S/) { 
+		$debug and say "input: $input";
+		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
 	}
-	elsif ( $cmd eq '!' ) {
-			$debug and print "Evaluating shell commands!\n";
-			#system $predicate;
-			my $output = qx( $predicate );
-			#print "length: ", length $output, $/;
-			pager($output); 
-			print "\n";
-	} else {
-
-
-		my @user_input = split /\s*;\s*/, $user_input;
-		map {
-			my $user_input = $_;
-			my ($cmd, $predicate) = ($user_input =~ /([\S]+)(.*)/);
-			$debug and print "cmd: $cmd \npredicate: $predicate\n";
-			if ($cmd eq 'eval') {
-				$debug and print "Evaluating perl code\n";
-				pager( eval $predicate);
-				print "\n";
-				$@ and print "Perl command failed: $@\n";
-			} elsif ($cmd eq '!') {
-				$debug and print "Evaluating shell commands!\n";
-				my $output = qx( $predicate );
-				#print "length: ", length $output, $/;
-				pager($output); 
-				print "\n";
-			} elsif ($tn{$cmd}) { 
-				$debug and print qq(Selecting track "$cmd"\n);
-				$this_track = $tn{$cmd}; 
-				set_current_bus();
-				ecasound_select_chain( $this_track->n );
-				$predicate !~ /^\s*$/ and $parser->command($predicate);
-			} elsif ($cmd =~ /^\d+$/ and $ti{$cmd}) { 
-				$debug and print qq(Selecting track ), $ti{$cmd}->name, $/;
-				$this_track = $ti{$cmd};
-				set_current_bus();
-				ecasound_select_chain( $this_track->n );
-				$predicate !~ /^\s*$/ and $parser->command($predicate);
-			} elsif ($iam_cmd{$cmd}){
-				$debug and print "Found Iam command\n";
-				my $result = eval_iam($user_input);
-				pager( $result );  
-			} else {
-				$debug and print "Passing to parser\n", $_, $/;
-				#print 1, ref $parser, $/;
-				#print 2, ref $::parser, $/;
-				# both print
-				defined $parser->command($_) 
-					or print "Bad command: $_\n";
-			}    
-		} @user_input;
-	}
-	
 	$ui->refresh; # in case we have a graphic environment
+}
+
+
+sub leading_track_spec {
+	my $cmd = shift;
+	if( my $track = $tn{$cmd} || $ti{$cmd} ){
+		$debug and print "Selecting track ",$track->name,"\n";
+		$this_track = $track;
+		set_current_bus();
+		ecasound_select_chain( $this_track->n );
+		1;
+	}
+		
 }
 sub ecasound_select_chain {
 	my $n = shift;
@@ -3504,6 +3529,14 @@ sub set_current_bus {
 	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
 	else { $this_bus = $track->group }
 }
+sub eval_perl {
+	my $code = shift;
+	my ($result) = eval $code;
+	print( "Perl command failed: $@\n") if $@;
+	pager($result) unless $@;
+	print "\n";
+}	
+
 sub is_bunch {
 	my $name = shift;
 	$::Bus::by_name{$name} or $bunch{$name}
@@ -3514,7 +3547,6 @@ my %set_stat = (
 				 );
 
 sub bunch_tracks {
-	my $debug = 1;
 	my $bunchy = shift;
 	my @tracks;
 	if ( my $bus = $::Bus::by_name{$bunchy}){
@@ -3633,6 +3665,15 @@ sub jack_ports {
 
 sub automix {
 
+	# get working track set
+	
+	my @tracks = grep{
+					$tn{$_}->rec_status eq 'MON' or
+					$::Bus::by_name{$_} and $tn{$_}->rec_status eq 'REC'
+				 } $main->tracks;
+
+	say "tracks: @tracks";
+
 	#use Smart::Comments '###';
 	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
@@ -3646,9 +3687,10 @@ sub automix {
 
 	command_process('show');
 
+	
 	### reduce track volume levels  to 10%
 	
-	command_process( 'for mon; vol/10');
+	for (@tracks){ command_process("$_  vol/10") }
 
 	#command_process('show');
 
@@ -3686,17 +3728,16 @@ sub automix {
 
 	### apply multiplier to individual tracks
 
-	command_process( "for mon; vol*$multiplier" );
+	for (@tracks){ command_process( "$_ vol*$multiplier" ) }
 
-	# $main_out = 1; # mixdown will turn off and turn on main out
+	# $main_out = 1; # unnecessary: mixdown will turn off and turn on main out
 	
 	### mixdown
 	command_process('mixdown; arm; start');
 
 	### turn on audio output
 
-	# command_process('mixplay'); # rec_cleanup does this
-	# automatically
+	# command_process('mixplay'); # rec_cleanup does this automatically
 
 	#no Smart::Comments;
 	
@@ -3754,29 +3795,29 @@ sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
 
-	command_process("append_effect $eq");
+	command_process("add_effect $eq");
 
 	$this_track = $tn{Low};
 
-	command_process("append_effect $low_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $low_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{Mid};
 
-	command_process("append_effect $mid_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $mid_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{High};
 
-	command_process("append_effect $high_pass");
-	command_process("append_effect $compressor");
-	command_process("append_effect $spatialiser");
+	command_process("add_effect $high_pass");
+	command_process("add_effect $compressor");
+	command_process("add_effect $spatialiser");
 
 	$this_track = $tn{Boost};
 	
-	command_process("append_effect $limiter"); # insert after vol
+	command_process("add_effect $limiter"); # insert after vol
 }
 
 sub unhide_mastering_tracks {
@@ -3921,16 +3962,20 @@ sub undefine_region {
 }
 
 sub add_sub_bus {
-	my ($name, $type, $id) = @_;
+	my ($name, $type, $id, @args) = @_; 
+		# command add_sub_bus does not supply @args at present
+	
 	::SubBus->new( 
 		name => $name, 
-		send_type => $type // 'track',
+		send_type => $type // 'bus',
 		send_id	 => $id // $name,
 		);
 	# create mix track
-	my @vals = (source_type => 'track', 
-				source_id 	=> $name,
-				rec_defeat 	=> 1);
+	my @vals = (source_type => 'bus', 
+				source_id 	=> 'bus',
+				width		=> 2, # default to stereo 
+				rec_defeat 	=> 1,
+				@args);
 
 	if ($tn{$name}){
 		say qq($name: setting as mix track for bus "$name");
@@ -4160,21 +4205,24 @@ sub cache_track { # launch subparts if conditions are met
 
 sub prepare_to_cache {
 	my $track = shift;
-	my $debug = 1;
  	initialize_chain_setup_vars();
 	$orig_version = $track->monitor_version;
-	$cooked = $track->name . '_cooked';
-	::CacheRecTrack->new(
-		width => 2,
-		name => $cooked,
+	my $cooked_name = $track->name . '_cooked';
+	my $cooked = ::CacheRecTrack->new(
+		name => $cooked_name,
 		group => 'Temp',
 		target => $track->name,
 	);
 	# output path
-	$g->add_path($track->name, $cooked, 'wav_out');
+	$g->add_path($track->name, $cooked->name, 'wav_out');
 
 	# input path when $track->rec_status MON
 	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+	$g->set_vertex_attributes(
+		$cooked->name, 
+		{ format => signal_format($cache_to_disk_format,$cooked->width),
+		}
+	); 
 
 	$debug and say "The graph is:\n$g";
 
@@ -4323,64 +4371,6 @@ sub some_user_tracks {
 }
 sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
-
-sub add_insert_cooked {
-	my ($send_id, $return_id) = @_;
-
-	my $old_this_track = $this_track;
-	my $t = $::this_track;
-	my $name = $t->name;
-	$t->remove_insert;
-	my $i = {
-		insert_type => 'cooked',
-		send_type 	=> ::dest_type($send_id),
-		send_id	  	=> $send_id,
-		return_type 	=> ::dest_type($return_id),
-		return_id	=> $return_id,
-		wetness		=> 100,
-	};
-	# default to return from same JACK client or adjacent soundcard channels
-	# default to return via same system (soundcard or JACK)
-	if (! $i->{return_id}){
-		$i->{return_type} = $i->{send_type};
-		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
-		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
-	}
-
-	
-	$t->set(inserts => $i); 1;
-
-	# we slave the wet track to the original track so that
-	# we know the external output (if any) will be identical
-	
-	my $wet = ::SlaveTrack->new( 
-				name => "$name\_wet",
-				target => $name,
-				group => 'Insert',
-				rw => 'REC',
-				hide => 1,
-			);
-	# in the graph we will override the input with the insert's return source
-
-	# we slave the dry track to the original track so that
-	# we know the external output (if any) will be identical
-	
-	my $dry = ::SlaveTrack->new( 
-				name => "$name\_dry", 
-				target => $name,
-				group => 'Insert',
-				hide => 1,
-				rw => 'REC');
-
-	# the input fields will be ignored, since the track will get input
-	# via the loop device track_insert
-	
-	$i->{dry_vol} = $dry->vol;
-	$i->{wet_vol} = $wet->vol;
-	
-	$i->{tracks} = [ $wet->name, $dry->name ];
-	$this_track = $old_this_track;
-}
 
 sub ecasound_get_info {
 	my ($path, $command) = @_;

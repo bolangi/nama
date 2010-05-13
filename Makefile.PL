@@ -11,7 +11,7 @@ use inc::Module::Install;
          requires
 		
 		autodie => 0,
-		AnyEvent => 0,
+		AnyEvent => 5.0,
 		Data::Section =>0,
 		Event => 0,
 		File::Find::Rule => 0,

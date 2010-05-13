@@ -835,7 +835,7 @@ sub create_master_and_mix_tracks {
 	track_gui( $tn{Master}->n, @rw_items );
 
 	track_gui( $tn{Mixdown}->n); 
-	remove_unneeded_Mixdown_widgets();
+	#remove_unneeded_Mixdown_widgets();
 
 	group_gui('Main');
 }

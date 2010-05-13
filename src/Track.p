@@ -17,10 +17,7 @@ no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;
-#use Exporter qw(import);
-#our @EXPORT_OK = qw(track);
 use ::Assign qw(join_path);
-use ::Wav;
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
@@ -266,7 +263,7 @@ sub rec_status {
 			when('jack_port'){ return 'REC' }
 			when('null'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
-			when('track'){ return 'REC' } # maybe $track->rw ??
+			when('bus'){ return 'REC' } # maybe $track->rw ??
 			default { return 'OFF' }
 			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
@@ -282,7 +279,7 @@ sub rec_status {
 sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
-	($track->rw eq 'REC' and $track->rec_defeat) ? "[$status]" : $status;
+	($track->rw eq 'REC' and $track->rec_defeat) ? "($status)" : $status;
 }
 
 
@@ -405,6 +402,13 @@ sub set_io {
 		say $track->name, ": disabling $direction.";
 		return;
 	}
+# 	if( $id =~ /\.ports$/){
+# 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
+#  		$track->set($type_field => 'jack_port',
+#  					source_id => $port_name); 
+#  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+#  		return;
+# 	} 
 	if( $id eq 'jack'){
 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
  		$track->set($type_field => 'jack_port',
@@ -507,7 +511,7 @@ sub object_as_text {
 		when('jack_client')		{ $text = "JACK client "}
 		when('loop')       		{ $text = "loop device "}
 		when('jack_ports_list') { $text = "JACK ports list "}
-		when('track') 			{ $text = "bus "}
+		when('bus') 			{ $text = "bus "}
 	}
 	$text .= $track->$id_field
 }
@@ -667,6 +671,13 @@ sub import_audio  {
 
 sub port_name { $_[0]->target || $_[0]->name } 
 
+sub bus_tree { # for solo function to work in sub buses
+	my $track = shift;
+	my $mix = $track->group;
+	return if $mix eq 'Main';
+	($mix, $::tn{$mix}->bus_tree);
+}
+
 # subclasses
 
 package ::SimpleTrack; # used for Master track
@@ -712,7 +723,7 @@ sub send_id { $::tn{$_[0]->target}->send_id}
 sub dir { $::tn{$_[0]->target}->dir }
 
 package ::CacheRecTrack; # for graph generation
-our @ISA = qw(::SlaveTrack ::Wav);
+our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
 	my $target = $::tn{$track->target};
@@ -727,7 +738,7 @@ sub current_wav {
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
 package ::MixDownTrack; 
-our @ISA = qw(::Track ::Wav);
+our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;

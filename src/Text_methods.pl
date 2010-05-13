@@ -83,6 +83,15 @@ sub placeholder {
 	$use_placeholders ? q(--) : q() 
 }
 
+sub show_inserts {
+	my $output;
+	$output = $::Insert::by_index{$this_track->prefader_insert}->dump
+		if $this_track->prefader_insert;
+	$output .= $::Insert::by_index{$this_track->postfader_insert}->dump
+		if $this_track->postfader_insert;
+	"Inserts:\n".join( "\n",map{" "x4 . $_ } split("\n",$output))."\n" if $output;
+}
+
 {
 my $format_top = <<TOP;
 Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
@@ -100,7 +109,7 @@ sub show_tracks {
     map {   formline $format_picture, 
             $_->n,
             $_->name,
-            placeholder( $_->current_version ),
+            placeholder( $_->current_version || undef ),
 			lc $_->rw,
             $_->rec_status_display,
 			placeholder($_->source_status),
