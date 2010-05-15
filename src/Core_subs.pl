@@ -3505,6 +3505,7 @@ sub command_process {
 		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
 	}
 	$ui->refresh; # in case we have a graphic environment
+	set_current_bus();
 }
 
 
@@ -3513,7 +3514,6 @@ sub leading_track_spec {
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
 		$debug and print "Selecting track ",$track->name,"\n";
 		$this_track = $track;
-		set_current_bus();
 		ecasound_select_chain( $this_track->n );
 		1;
 	}
@@ -3675,7 +3675,12 @@ sub automix {
 
 	say "tracks: @tracks";
 
-	#use Smart::Comments '###';
+	## we do not allow automix if inserts are present	
+
+	say("Cannot perform automix if inserts are present. Skipping."), return
+		if grep{$tn{$_}->prefader_insert || $tn{$_}->postfader_insert} @tracks;
+
+	use Smart::Comments '###';
 	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
@@ -3690,10 +3695,19 @@ sub automix {
 
 	
 	### reduce track volume levels  to 10%
-	
-	for (@tracks){ command_process("$_  vol/10") }
 
-	#command_process('show');
+	## accommodate ea and eadb volume controls
+
+	my $vol_operator = $cops{$tn{$tracks[0]}->vol}{type};
+
+	my $reduce_vol_command  = $vol_operator eq 'ea' ? 'vol / 10' : 'vol - 10';
+	my $restore_vol_command = $vol_operator eq 'ea' ? 'vol * 10' : 'vol + 10';
+
+	### reduce vol command: $reduce_vol_command
+
+	for (@tracks){ command_process("$_  $reduce_vol_command") }
+
+	command_process('show');
 
 	generate_setup('automix') # pass a bit of magic
 		or say("automix: generate_setup failed!"), return;
@@ -3722,7 +3736,7 @@ sub automix {
 	if ( $multiplier < 0.00001 ){
 
 		say "Signal appears to be silence. Skipping.";
-		command_process( 'for mon; vol*10');
+		for (@tracks){ command_process("$_  $restore_vol_command") }
 		$main_out = 1;
 		return;
 	}
@@ -3772,6 +3786,7 @@ sub master_off {
 	$mastering_mode = 0;
 	hide_mastering_tracks();
 	map{ $ui->remove_track_gui($tn{$_}->n) } @mastering_track_names;
+	$this_track = $tn{Master} if grep{ $this_track->name eq $_} @mastering_track_names;
 ;
 }
 
