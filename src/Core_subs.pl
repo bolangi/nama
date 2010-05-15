@@ -3566,6 +3566,12 @@ sub bunch_tracks {
 				say("Invalid track ids: @illegal.  Skipping.");
 			} else { @tracks = map{ $_->name} 
 							   map{ track_from_name_or_index($_)} @track_ids; }
+
+	} elsif ( my $method = $set_stat{$bunchy} ){
+		$debug and say "special bunch: $bunchy, method: $method";
+		$bunchy = uc $bunchy;
+		@tracks = grep{$tn{$_}->$method eq $bunchy} 
+				$::Bus::by_name{$this_bus}->tracks
 	} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
 		$debug and print "bunch tracks: @tracks\n";
 	} else { say "$bunchy: no matching bunch identifier found" }
