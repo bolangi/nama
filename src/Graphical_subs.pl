@@ -835,16 +835,9 @@ sub create_master_and_mix_tracks {
 	track_gui( $tn{Master}->n, @rw_items );
 
 	track_gui( $tn{Mixdown}->n); 
-	#remove_unneeded_Mixdown_widgets();
 
 	group_gui('Main');
 }
-# sub remove_unneeded_Mixdown_widgets {
-# 	map{$_->destroy}
-# 	map{ $track_widget_remove{$tn{Mixdown}->n}{$_}}
-# 	grep{ !/number|name|version|rw|ch_r|ch_m/ } keys %{ $track_widget_remove{$tn{Mixdown}->n}}
-# }
-
 
 sub update_version_button {
 	@_ = discard_object(@_);
