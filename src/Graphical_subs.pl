@@ -839,11 +839,11 @@ sub create_master_and_mix_tracks {
 
 	group_gui('Main');
 }
-sub remove_unneeded_Mixdown_widgets {
-	map{$_->destroy}
-	map{ $track_widget_remove{$tn{Mixdown}->n}{$_}}
-	grep{ !/number|name|version|rw|ch_r|ch_m/ } keys %{ $track_widget_remove{$tn{Mixdown}->n}}
-}
+# sub remove_unneeded_Mixdown_widgets {
+# 	map{$_->destroy}
+# 	map{ $track_widget_remove{$tn{Mixdown}->n}{$_}}
+# 	grep{ !/number|name|version|rw|ch_r|ch_m/ } keys %{ $track_widget_remove{$tn{Mixdown}->n}}
+# }
 
 
 sub update_version_button {

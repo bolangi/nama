@@ -3525,7 +3525,7 @@ sub ecasound_select_chain {
 	eval_iam($cmd) if eval_iam( 'cs-connected' ) =~ /$chain_setup_file/;
 }
 sub set_current_bus {
-	my $track = shift || $this_track ||= $tn{Master};
+	my $track = shift || ($this_track ||= $tn{Master});
 	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
 	elsif( $::Bus::by_name{$track->name} ){$this_bus = $track->name }
 	else { $this_bus = $track->group }
@@ -3829,7 +3829,7 @@ sub hide_mastering_tracks {
 	command_process("for Mastering; set hide 1");
  }
 		
-# vol/pan requirements of mastering tracks
+# vol/pan requirements of mastering and mixdown tracks
 
 { my %volpan = (
 	Eq => {},
@@ -3837,14 +3837,32 @@ sub hide_mastering_tracks {
 	Mid => {},
 	High => {},
 	Boost => {vol => 1},
+	Mixdown => {},
 );
 
 sub need_vol_pan {
+
+	# this routine used by 
+	#
+	# + add_track() to determine whether a new track _will_ need vol/pan controls
+	# + add_track_gui() to determine whether an existing track needs vol/pan  
+	
 	my ($track_name, $type) = @_;
-	return 1 unless $volpan{$track_name};
-	return 1 if $volpan{$track_name}{$type};
-	return 0;
-} }
+
+	# $type: vol | pan
+	
+	# Case 1: track already exists
+	
+	return 1 if $tn{$track_name} and $tn{$track_name}->$type;
+
+	# Case 2: track not yet created
+
+	if( $volpan{$track_name} ){
+		return($volpan{$track_name}{$type}	? 1 : 0 )
+	}
+	return 1;
+}
+}
 sub pan_check {
 	my $new_position = shift;
 	my $current = $copp{ $this_track->pan }->[0];
