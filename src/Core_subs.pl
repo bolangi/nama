@@ -3760,13 +3760,19 @@ sub master_on {
 		add_mastering_tracks();
 		add_mastering_effects();
 		$this_track = $old_track;
-	} else { unhide_mastering_tracks() }
-	
+	} else { 
+		unhide_mastering_tracks();
+		map{ $ui->track_gui($tn{$_}->n) } @mastering_track_names;
+	}
+
 }
+	
 sub master_off {
 
 	$mastering_mode = 0;
 	hide_mastering_tracks();
+	map{ $ui->remove_track_gui($tn{$_}->n) } @mastering_track_names;
+;
 }
 
 
