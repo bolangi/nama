@@ -62,7 +62,7 @@ sub refresh_track {
 	my $rec_status = $ti{$n}->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
-	#return unless $track_widget{$n}; # hidden track
+	return unless $track_widget{$n}; # hidden track
 	
 	# set the text for displayed fields
 
@@ -96,7 +96,9 @@ sub refresh_track {
 sub refresh {  
 	remove_small_wavs();
  	$ui->refresh_group(); 
-	map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::Track::all();
+	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::Track::all();
+	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::Track::all();
+	map{ $ui->refresh_track($_) } map{$_->n}  ::Track::all();
 }
 sub refresh_oids{ # OUTPUT buttons
 	map{ $widget_o{$_}->configure( # uses hash

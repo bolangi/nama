@@ -801,6 +801,7 @@ sub remove_track_gui {
 	return unless $track_widget_remove{$n};
  	map {$_->destroy  } @{ $track_widget_remove{$n} };
 	delete $track_widget_remove{$n};
+	delete $track_widget{$n};
 }
 
 sub paint_mute_buttons {
