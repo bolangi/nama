@@ -772,22 +772,23 @@ sub track_gui {
 	
 	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
-	$track_widget_remove{$n} = {
-		number => $number, 
-		name	=> $name, 
-		version => $version, 
-		rw		=> $rw, 
-		ch_r	=> $ch_r, 
-		ch_m	=> $ch_m, 
-		vol		=> $vol,
-		mute 	=> $mute, 
-		unity	=> $unity, 
-		pan		=> $pan, 
-		center	=> $center, 
-		effects => $effects,
-	};
-	my $i = 1;
-	map{ $track_widget_remove{$n}{ "add_effect_".$i++ } = $_ } @add_effect;
+	$track_widget_remove{$n} = [
+		grep{ $_ } (
+			$number, 
+			$name, 
+			$version, 
+			$rw, 
+			$ch_r, 
+			$ch_m, 
+			$vol,
+			$mute, 
+			$unity, 
+			$pan, 
+			$center, 
+			@add_effect,
+			$effects,
+		)
+	];
 
 	refresh_track($n);
 
@@ -796,12 +797,9 @@ sub track_gui {
 sub remove_track_gui {
  	@_ = discard_object( @_ );
  	my $n = shift;
-	#say "&remove_track_gui";
-	#say "track $n";
+	$debug2 and say "&remove_track_gui";
 	return unless $track_widget_remove{$n};
-	#say "exists";
-	my $m = 0;
- 	map {$_->destroy  } values %{ $track_widget_remove{$n} };
+ 	map {$_->destroy  } @{ $track_widget_remove{$n} };
 	delete $track_widget_remove{$n};
 }
 
