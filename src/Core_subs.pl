@@ -3552,20 +3552,9 @@ sub bunch_tracks {
 	my @tracks;
 	if ( my $bus = $::Bus::by_name{$bunchy}){
 		@tracks = $bus->tracks;
-	} elsif ( $bunchy eq 'all' ){
-		$debug and print "special bunch: all\n";
-		@tracks = grep{ ! $::Bus::by_name{$_} } $::Bus::by_name{Main}->tracks;
-	} elsif ( $bunchy eq 'mix' ){
-		$debug and print "special bunch: all\n";
-		@tracks = grep{ $::Bus::by_name{$_} } $::Bus::by_name{Main}->tracks;
 	} elsif ( $bunchy eq 'bus' ){
 		$debug and print "special bunch: bus\n";
 		@tracks = grep{ ! $::Bus::by_name{$_} } $::Bus::by_name{$this_bus}->tracks;
-	} elsif ( my $method = $set_stat{$bunchy} ){
-		$debug and say "special bunch: $bunchy, method: $method";
-		$bunchy = uc $bunchy;
-		@tracks = grep{$tn{$_}->$method eq $bunchy} 
-					$::Bus::by_name{$this_bus}->tracks
 	} elsif ($bunchy =~ /\s/  # multiple identifiers
 		or $tn{$bunchy} 
 		or $bunchy !~ /\D/ and $ti{$bunchy}){ 

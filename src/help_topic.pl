@@ -283,8 +283,8 @@ group => <<GROUP,
                                 example: for strings; vol +10
                                 example: for drumkit congas; mute
                                 example: for 3 5; vol * 1.5
-                                example: for all; version 5;; show
-                                  'show' follows ';;' so executes only once
+                                example: for Main; version 5;; show
+                                 (commands following ';;' execute only once)
                 
 GROUP
 
