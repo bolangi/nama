@@ -19,6 +19,7 @@ lib/Audio/Nama/Object.pm
 lib/Audio/Nama/Track.pm
 lib/Audio/Nama/Wav.pm
 lib/Audio/Nama/IO.pm
+lib/Audio/Nama/Insert.pm
 MANIFEST			This list of files
 Makefile.PL
 META.yml

@@ -294,6 +294,7 @@ mixoff:  _mixoff  end { ::Text::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
 autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize"); 1 }
 master_on: _master_on end { ::master_on(); 1 }
+
 master_off: _master_off end { ::master_off(); 1 }
 
 exit: _exit end {   ::save_state($::state_store_file); 
