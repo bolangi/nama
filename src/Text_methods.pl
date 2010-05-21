@@ -348,8 +348,8 @@ sub t_insert_effect {
 		$offset++;
 	}
 
-	# remove later ops if engine is connected
-	# this will not change the $track->cops list 
+	# remove ops after insertion point if engine is connected
+	# note that this will _not_ change the $track->ops list 
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	$debug and print "ops to remove and re-apply: @ops\n";
@@ -362,14 +362,20 @@ sub t_insert_effect {
 
 	$debug and print join " ",@{$track->ops}, $/; 
 
+	# the new op_id is added to the end of the $track->ops list
+	# so we need to move it to specified insertion point
+
 	my $op = pop @{$track->ops}; 
-	# acts directly on $track, because ->ops returns 
+
+	# the above acts directly on $track, because ->ops returns 
 	# a reference to the array
 
 	# insert the effect id 
 	splice 	@{$track->ops}, $offset, 0, $op;
+
 	$debug and print join " ",@{$track->ops}, $/; 
 
+	# replace the ops that had been removed
 	if ($connected ){  
 		map{ apply_op($_, $n) } @ops;
 	}
@@ -380,6 +386,7 @@ sub t_insert_effect {
 		::unmute();
 		$ui->start_heartbeat;
 	}
+	$op
 }
 sub t_add_effect {
 	package ::;

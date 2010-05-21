@@ -65,6 +65,7 @@ use ::IO;
 use ::Graph;
 use ::Wav;
 use ::Insert;
+use ::Fade;
 
 ## Definitions ##
 

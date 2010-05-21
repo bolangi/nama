@@ -10,6 +10,7 @@
 					ops 			# effect operators list
 					vol				# vol control operator
 					pan				# pan control operator 
+					fader			# fader operator
 					latency			# latency compensation operator
 					offset			# for calculating ecasound chain
 									# chain operator indexes
