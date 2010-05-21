@@ -3675,7 +3675,7 @@ sub automix {
 	say("Cannot perform automix if inserts are present. Skipping."), return
 		if grep{$tn{$_}->prefader_insert || $tn{$_}->postfader_insert} @tracks;
 
-	use Smart::Comments '###';
+	#use Smart::Comments '###';
 	# add -ev to summed signal
 	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
 	### ev id: $ev
