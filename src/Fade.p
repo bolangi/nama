@@ -5,18 +5,18 @@ mark2: markname
 duration: seconds
 relation: fade_to_mark | fade_from_mark
 type: fadein | fadeout
-curve: log
-effect_id: AD
+curve: log # not used
+effect_id: AD # not used, use $track->fader
 track: sax
 
 add_fade
 + fade data structure
 + fade operator
 
-
-
-fade in to|from mark1 [seconds] fade_profile
-fade in mark1 mark2 fade_profile
+fade in mark1 # 0.5s 
+fade out mark1 # 0.5s
+fade in seconds mark1
+fade in mark1 mark2 
 fade in mark1 seconds
 
 remove_fade
@@ -37,20 +37,21 @@ use ::Object qw(
 				 mark2
 				 duration
 				 relation
-				 type
-				 curve
-				 effect_id
 				 track
 				 );
 %by_index = ();	# return ref to Mark by name
-%faders = (); # track_name => effect_id
-
+sub next_n {
+	my $n = 1;
+	while( $by_index{$n} ){ $n++}
+	$n
+}
 sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	
-	my $object = bless { @_	}, $class;
+	my $object = bless { n => next_n(), @_	}, $class;
+	$by_index{$object->n} = $object;
 
 	#print "object class: $class, object type: ", ref $object, $/;
 
@@ -61,7 +62,6 @@ sub new {
 	if( ! $id ){
 		$first_effect_id = $this_track->ops->[0];
 		$id = ::Text::t_insert_effect($first_effect_id, 'eadb', [0]);
-		$object->{effect_id} = $id;
 		$track->set(fader => $id);
 	}
 
