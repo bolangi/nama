@@ -117,6 +117,7 @@ $volume_control_operator = 'ea'; # don't break Stephanie's system
 %fade_out_level = (ea => 0, 	eadb => -40);
 %unity_level 	= (ea => 100, 	eadb => 0); 
 $fade_resolution = 200; # steps per second
+$default_fade_length = 0.5;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

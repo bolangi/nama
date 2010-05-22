@@ -27,6 +27,10 @@ sub show_effects {
 			map{ push @lines,
 			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $copp{$op_id}->[$_] . "\n";
 		 	} (0..scalar @pnames - 1);
+			map{ push @lines,
+			 	"    ".($_+1).": ".  $copp{$op_id}->[$_] . "\n";
+		 	} (scalar @pnames .. (scalar @{$copp{$op_id}} - 1)  )
+				if scalar @{$copp{$op_id}} - scalar @pnames - 1; 
 			#push @lines, join("; ", @params) . "\n";
  
  	} @{ $this_track->ops };

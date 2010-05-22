@@ -723,3 +723,30 @@ list_effect_profiles: _list_effect_profiles end {
 	::list_effect_profiles(); 1 }
 do_script: _do_script shellish end { ::do_script($item{shellish});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
+add_fade: _add_fade in_or_out mark1 duration(?)
+	{ ::Fade->new(  type => $item{in_or_out},
+					mark1 => $item{mark1},
+					duration => $item{'duration(?)'}->[0] 
+								|| $::default_fade_length, 
+					relation => 'fade_from_mark',
+					track => $::this_track->name,
+	)}
+add_fade: _add_fade in_or_out duration(?) mark1 
+	{ ::Fade->new(  type => $item{in_or_out},
+					mark1 => $item{mark1},
+					duration => $item{'duration(?)'}->[0] 
+								|| $::default_fade_length, 
+					track => $::this_track->name,
+					relation => 'fade_to_mark',
+	)}
+add_fade: _add_fade in_or_out mark1 mark2
+	{ ::Fade->new(  type => $item{in_or_out},
+					mark1 => $item{mark1},
+					mark2 => $item{mark2},
+					track => $::this_track->name,
+	)}
+#add_fade: _add_fade in_or_out time1 time2 # not implemented
+in_or_out: 'in' | 'out'
+duration: value
+mark1: ident
+mark2: ident
