@@ -25,14 +25,16 @@ klg param low high pairs pos1 val1 pos2 val2
 
 =cut
 package ::Fade;
+use Modern::Perl;
 our $VERSION = 1.0;
 use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index);
+use vars qw($n %by_index $off_level $down_level $down_fraction);
 use ::Object qw( 
 				 n
+				 type
 				 mark1
 				 mark2
 				 duration
@@ -40,6 +42,9 @@ use ::Object qw(
 				 track
 				 );
 %by_index = ();	# return ref to Mark by name
+$off_level = -256;
+$down_level = -64;
+$down_fraction = 0.75;
 sub next_n {
 	my $n = 1;
 	while( $by_index{$n} ){ $n++}
@@ -60,7 +65,7 @@ sub new {
 	my $track = $::tn{$object->track};
 	my $id = $track->fader;
 	if( ! $id ){
-		$first_effect_id = $this_track->ops->[0];
+		my $first_effect_id = $::this_track->ops->[0];
 		$id = ::Text::t_insert_effect($first_effect_id, 'eadb', [0]);
 		$track->set(fader => $id);
 	}
@@ -75,9 +80,9 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	if( $track->fader and my ($old) = @{$cops{$track->fader}{owns}})
+	if( $track->fader and my ($old) = @{$::cops{$track->fader}{owns}})
 		{ remove_effect($old) }
-	::Text::add_ctrl($id, 'klg',1,-256,0,fader_envelope_pairs($track->name));
+	::Text::add_ctrl($track->fader, 'klg',1,$off_level,0,fader_envelope_pairs($track->name));
 }
 
 sub fades {
@@ -85,12 +90,14 @@ sub fades {
 	(grep{ $_->track eq $track_name } values %by_index)
 }
 
+
+
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
 	my $track_name = shift;
 	my @fades = fades($track_name);
 
-	my @pairs;
+	my @specs;
 	for my $fade ( @fades ){
 
 		# calculate fades
@@ -103,15 +110,33 @@ sub fader_envelope_pairs {
 			$marktime2 = $marktime1;
 			$marktime1 -= $fade->duration
 		} else { $fade->dumpp; die "fade processing failed" }
-		push @pairs, [$marktime1, $marktime2];
+		push @specs, [$marktime1, $marktime2, $fade->type];
 	}
 	# sort fades
-	@pairs = sort{ $a->[0] <=> $b->[0] } @pairs;
+	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 
 	# prepend number of pairs, flatten list
-	(scalar @pairs, map{ @$_ } @pairs)
+	my @pairs = map{ spec_to_pairs($_) } @specs;
+	unshift @pairs, scalar @pairs;
+	@pairs;
 }
 		
+sub spec_to_pairs {
+	my ($from, $to, $type) = @{$_[0]};
+	say "from: $from, to: $to, type: $type";
+	my $cutpos;
+	my @pairs;
+	if ( $type eq 'out' ){
+		$cutpos = $from + 0.95 * ($to - $from);
+		push @pairs, ($from, 1, $cutpos, $down_fraction, $to, 0);
+	} elsif( $type eq 'in' ){
+		$cutpos = $from + 0.05 * ($to - $from);
+		push @pairs, ($from, 0, $cutpos, $down_fraction, $to, 1);
+	}
+	@pairs
+}
+	
+
 sub remove {
 	my $i = shift;
 	my $fade = $by_index{$i};

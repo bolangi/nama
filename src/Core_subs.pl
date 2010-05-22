@@ -3532,9 +3532,9 @@ sub set_current_bus {
 }
 sub eval_perl {
 	my $code = shift;
-	my ($result) = eval $code;
+	my (@result) = eval $code;
 	print( "Perl command failed: $@\n") if $@;
-	pager($result) unless $@;
+	pager(join "\n", @result) unless $@;
 	print "\n";
 }	
 
