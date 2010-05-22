@@ -3020,7 +3020,13 @@ sub save_state {
 	$debug and print "copying marks data\n";
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
-
+	# prepare fade data for storage
+	
+	@fade_data = ();
+	while (my $k = each %::Fade::by_index ){ 
+		push @fade_data, $::Fade::by_index{$k}->hashref;
+	}
+	
 
 	# save history
 
@@ -3338,8 +3344,17 @@ sub restore_state {
 		my %h = %$_; 
 		my $mark = ::Mark->new( %h ) ;
 	} @marks_data;
+
+
 	$ui->restore_time_marks();
 	$ui->paint_mute_buttons;
+
+	# track fades
+	
+	map{ 
+		my %h = %$_; 
+		my $fade = ::Fade->new( %h ) ;
+	} @fade_data;
 
 
 	# restore command history

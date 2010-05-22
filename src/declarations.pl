@@ -309,6 +309,7 @@ our (
 	@marks_data,  # for storage
 	@inserts_data, # for storage
 	@bus_data,    # 
+	@fade_data, #
 	@system_buses, # 
 	%is_system_bus, # 
 
