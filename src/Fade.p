@@ -61,7 +61,7 @@ sub refresh_fade_controller {
 
 	# remove controller if present
 	if( $track->fader and my ($old) = @{$::cops{$track->fader}{owns}})
-		{ remove_effect($old) }
+		{ ::remove_effect($old) }
 
 	# add controller
 	::Text::t_add_ctrl($track->fader,  # parent
