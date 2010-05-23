@@ -113,7 +113,7 @@ sub fader_envelope_pairs {
 		
 sub spec_to_pairs {
 	my ($from, $to, $type) = @{$_[0]};
-	say "from: $from, to: $to, type: $type";
+	$::debug and say "from: $from, to: $to, type: $type";
 	my $cutpos;
 	my @pairs;
 	if ( $type eq 'out' ){

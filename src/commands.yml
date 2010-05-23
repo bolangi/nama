@@ -697,13 +697,18 @@ scan:
   what: re-read project's .wav directory
   parameters: none
 add_fade:
-  type: track
-  short: fade
+  type: effect
+  short: afd fade
   what: add a fade-in or fade-out to current track
   parameters: in|out marks/times (see examples)
   example: fade in mark1 (fade in default 0.5s starting at mark1)!nfade out mark2 2 (fade out over 2s starting at mark2)!nfade out 2 mark2 (fade out over 2s ending at mark2)!nfade out mark1 mark2 (fade out from mark1 to mark2) 
 remove_fade:
-  type: track
+  type: effect 
+  short: rfd
   what: remove a fade from the current track
   parameters: <i_fade_index1> [<i_fade_index2>...]
+list_fade:
+  type: effect
+  short: lfd
+  what: list fades
 ...
