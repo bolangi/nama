@@ -396,15 +396,18 @@ Supply a command to execute
 
 =head1 CONTROLLING NAMA/ECASOUND
 
-Ecasound is configured through use of I<chain setups>. Nama
-serves as intermediary generating appropriate chain setups
-for recording, playback, mixing, etc. and running the audio
-processing engine according to user commands.
+The Ecasound audio engine is configured through use of
+I<chain setups> that specify the signal processing network.
+After lauching the engine, realtime control capabilities are
+available, for example to adjust signal volume and to set playback
+position.
 
-Commands for audio processing with Nama/Ecasound fall into
-two categories: I<static commands> that influence the chain
-setup and I<dynamic commands> that influence the realtime
-behavior of the audio processing engine.
+Nama serves as an intermediary, taking high-level commands
+from the user, generating appropriate chain setups for
+recording, playback, mixing, etc. and running the audio
+engine.
+
+Nama commands can be divided into two categories.
 
 =head2 STATIC COMMANDS
 
@@ -413,8 +416,8 @@ processing engine. For example, B<rec, mon> and B<off>
 determine whether the current track will get its audio
 stream from a live source or whether an existing WAV file
 will be played back. Nama responds to static commands by
-reconfiguring the engine and displaying the updated
-track status in text and GUI form.
+automatically reconfiguring the engine and displaying the
+updated track status.
 
 =head2 DYNAMIC COMMANDS
 
@@ -431,7 +434,7 @@ while the engine is running.
 General configuration of sound devices and program options
 is performed by editing the F<.namarc> file. On Nama's first
 run, a default version of F<.namarc> is usually placed in
-the user's home directory.
+the user's home directory. 
 
 =head1 Tk GRAPHICAL UI 
 
@@ -450,7 +453,7 @@ recording and mixdown can take place simultaneously.
 
 The effects window provides sliders for each effect
 parameters. Parameter range, defaults, and log/linear
-scaling hints are automatically detects. Text-entry widgets
+scaling hints are automatically detected. Text-entry widgets
 are used to enter parameters values for plugins without
 hinted ranges.
 
@@ -485,8 +488,9 @@ preceded by C<eval> or shell code preceded by C<!>.
 Multiple commands on a single line are allowed if delimited
 by semicolons. Usually the lines are split on semicolons and
 the parts are executed sequentially, however if the line
-begins with C<eval> or C<!> the entire line will be given to
-the corresponding interpreter.
+begins with C<eval> or C<!> the entire line (up to double
+semicolons ';;' if present) will be given to the
+corresponding interpreter.
 
 You can access command history using up-arrow/down-arrow.
 
@@ -507,33 +511,36 @@ their settings.
 =head2 WIDTH
 
 Specifying 'mono' means a one-channel input, which is
-recorded as a mono WAV file. The mono signal is duplicated
-to a stereo signal with pan in the default mixer
-configuration.
+recorded as a mono WAV file. Mono signals are duplicated to
+stereo and a pan effect is provided for all user tracks.
 
-Specifying 'stereo' means two-channel input with recording
-as a stereo WAV file.
+Specifying 'stereo' for a track means that two channels of
+audio input will be recorded as an interleaved stereo WAV file.
 
-Specifying N channels ('set width N') means N-channel input
-with recording as an N-channel WAV file.
+Specifying N channels for a track ('set width N') means
+N successive input channels will be recorded as an N-channel 
+interleaved WAV file.
 
 =head2 VERSION NUMBER
 
 Multiple WAV files can be recorded for each track. These are
-identified by a version number that increments with each
+distinguished by a version number that increments with each
 recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
-files recorded at the same time have the same version
+WAV files recorded in the same run have the same version
 numbers. 
 
 The version numbers of files for playback can be selected at
-the group or track level. By setting the group version
+the bus or track level. By setting the bus version
 number to 5, you can play back the fifth take of a song, or
 perhaps the fifth song of a live recording session. 
 
 The track version setting, if present, overrides 
-the group setting. Setting the track version to zero
+the bus setting. Setting the track version to zero
 restores control of the version number to the 
-group setting.
+bus setting.
+
+A bus version setting for the Main bus does I<not>
+propagate to sub-buses.
 
 =head2 REC/MON/OFF
 
@@ -541,17 +548,16 @@ Track REC/MON/OFF status guides audio processing.
 
 Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF status.
-The Main group, which includes all user tracks, also has
+The Main bus, which includes defaul user tracks, also has
 REC, MON and OFF settings that influence the behavior of all
 user tracks.
 
 As the name suggests, I<REC> status indicates that a track
 is ready to record a WAV file. You need to set both track and
-group to REC to source an audio stream from JACK or the
-soundcard. 
+bus to REC to record an audio stream to file.
 
 I<MON> status indicates an audio stream available from disk.
-It requires a MON setting for the track or group as well as
+It requires a MON setting for the track or bus as well as
 the presence of a file with the selected version number.  A
 track set to REC with no live input will default to MON
 status.
@@ -560,13 +566,13 @@ I<OFF> status means that no audio is available for the track
 from any source. A track with no recorded WAV files 
 will show OFF status, even if set to MON.
 
-An OFF setting for a track or group always results in OFF
+An OFF setting for a track or bus always results in OFF
 status, causing the track to be excluded from the
 chain setup. I<Note: This setting is distinct from the action of
 the C<mute> command, which sets the volume of the track to
 zero.>
 
-Newly created user tracks belong to the Main group, which
+Newly created user tracks belong to the Main bus, which
 goes through a mixer and Master fader track to the 
 soundcard for monitoring.
 
@@ -577,24 +583,28 @@ for a portion of an audio file. Use the C<shift> command
 to specify a delay for starting playback.
 
 Only one region may be specified per track.  Use the
-C<link_track> command to clone a track in order to make use
-of multiple regions or versions of a single track. 
+C<new_region> command to clone a track, specifying
+a new region definition. 
 
-C<link_track> can clone tracks from other projects.  Thus
-you could create the sections of a song in separate
-projects, pull them into one project using C<link_track> 
-commands, and sequence them using C<shift> commands.
+C<link_track> can clone tracks from other projects. 
 
 =head2 EFFECTS
 
 Each track gets volume and pan effects by default.  New
-effects added using C<add_effect> are applied after pan and
-before volume.  You can position effects anywhere you choose
-using C<insert_effect> and C<append_effect>.
+effects added using C<add_effect> are applied after pan 
+volume controls.  You can position effects anywhere you choose
+using C<insert_effect>.
+
+=head3 FADERS
+
+Nama allows you to place fades on any track. Fades are
+logarithmic, defined by a mark position and a duration. 
+An extra volume operator, -eadb is applied to the track to
+enable this function.
 
 =head3 SENDS AND INSERTS
 
-The C<send> command can routes a track's post-fader output
+The C<send> command can route a track's post-fader output
 to a soundcard channel or JACK client in addition to the
 normal mixer input. Nama currently allows one aux send per
 track.
@@ -604,22 +614,22 @@ send-and-return to soundcard channels or JACK clients.
 Wet and dry signal paths are provided, with a default
 setting of 100% wet.
 
-=head1 GROUPS
+=head1 BUS-LEVEL REC/MON/OFF SETTING
 
-Track groups are used internally.  The Main group
-corresponds to a mixer. It has its own REC/MON/OFF setting
+By default, all user tracks belong to Nama's Main bus. 
+The Main bus has its own REC/MON/OFF setting
 that influences the rec-status of individual tracks. 
 
-Setting a group to OFF forces all of the group's tracks to
-OFF. When the group is set to MON, track REC settings are
-forced to MON.  When the group is set to REC, track status
+Setting a bus to OFF forces all of the bus tracks to
+OFF. When the bus is set to MON, track REC settings are
+forced to MON.  When the bus is set to REC, track status
 can be REC, MON or OFF. 
 
-The group MON mode triggers automatically after a successful
+The Main bus MON mode triggers automatically after a successful
 recording run.
 
 The B<mixplay> command sets the Mixdown track to MON and the
-Main group to OFF.
+Main bus to OFF.
 
 =head2 BUNCHES
 
@@ -630,18 +640,6 @@ command. Any bus name can also be treated as a bunch.
 Finally, a number of special bunch keywords are available.
 
 =over 12
-
-=item B<all>
-
-Standard user tracks in the Main (default) bus
-
-=item B<mix>
-
-Sub-bus mix tracks in the Main bus
-
-=item B<bus>
-
-All tracks in the current bus
 
 =item B<rec>, B<mon>, B<off>
 
@@ -657,7 +655,6 @@ All tracks with the corresponding I<status> in the current bus
 
 Nama uses buses internally, and provides two kinds of
 user-defined buses. 
-
 
 B<Sub buses> enable multiple tracks to be routed through a
 single mix track before feeding the main mixer bus (or
