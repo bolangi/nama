@@ -284,26 +284,30 @@ show_track: _show_track dd end {
 show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
 bus_rec: _bus_rec end {
 	$::Bus::by_name{$::this_bus}->set(rw => 'REC');
-	print "Setting REC-enable for " . $::this_bus . " bus. You may record user tracks.\n";
+	print "Setting REC-enable for " , $::this_bus ,
+		" bus. You may record user tracks.\n";
 	1; }
 bus_mon: _bus_mon end {
 	$::Bus::by_name{$::this_bus}->set(rw => 'MON');
-	print "Setting MON mode for " . $::this_bus . " bus. No recording on user tracks.\n";
+	print "Setting MON mode for " , $::this_bus , 
+		" bus. No recording on user tracks.\n";
  	1  
 }
 bus_off: _bus_off end {
 	$::Bus::by_name{$::this_bus}->set(rw => 'OFF'); 
-	print "Setting OFF mode for " . $::this_bus . " bus. All user tracks disabled.\n";
-	1  }
+	print "Setting OFF mode for " , $::this_bus,
+		" bus. All user tracks disabled.\n"; 1  }
 bus_version: _bus_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
-	print $::this_bus, " bus default version is: ", $::Bus::by_name{$::this_bus}->version, "\n" ; 1}
+	print $::this_bus, " bus default version is: ", 
+		$::Bus::by_name{$::this_bus}->version, "\n" ; 1}
 bus_version: _bus_version dd end { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::Bus::by_name{$::this_bus}->set( version => $n ); 
-	print $::this_bus, " bus default version set to: ", $::Bus::by_name{$::this_bus}->version, "\n" ; 1}
+	print $::this_bus, " bus default version set to: ", 
+		$::Bus::by_name{$::this_bus}->version, "\n" ; 1}
 mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
