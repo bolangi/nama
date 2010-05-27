@@ -331,37 +331,22 @@ remove_track:
   short:
   what: remove effects, parameters and GUI for current track
   parameters: none 
-group_rec:
-  type: group
-  short: grec R
-  what: rec-enable user tracks in Main bus
-  parameters: none
-group_mon:
-  type: group
-  short: gmon M
-  what: rec-disable user tracks in Main bus
-  parameters: none
-group_off:
-  type: group
-  short: goff Z 
-  what: exclude user tracks in Main bus from chain setup
-  parameters: none
-group_version:
-  type: group 
-  short: gn gver gv
-  what: set default monitoring version for tracks in Main bus
 bus_rec:
   type: bus
-  short: brec
+  short: brec grec
   what: rec-enable bus tracks
 bus_mon:
   type: bus
-  short: bmon
+  short: bmon gmon
   what: set group-mon mode for bus tracks
 bus_off:
   type: bus
-  short: boff
+  short: boff goff
   what: set group-off mode for bus tracks
+bus_version:
+  type: group 
+  short: bn bver bv gver gn gv
+  what: set default monitoring version for tracks in current bus
 new_bunch:
   type: group
   short: nb

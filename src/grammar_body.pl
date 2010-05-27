@@ -282,12 +282,28 @@ show_track: _show_track dd end {
 	1;}
 
 show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
-group_rec: _group_rec end { ::Text::group_rec(); 1}
-group_mon: _group_mon end  { ::Text::group_mon(); 1}
-group_off: _group_off end { ::Text::group_off(); 1}
-bus_rec: _bus_rec end {$::Bus::by_name{$::this_bus}->set(rw => 'REC'); 1  }
-bus_mon: _bus_mon end {$::Bus::by_name{$::this_bus}->set(rw => 'MON'); 1  }
-bus_off: _bus_off end {$::Bus::by_name{$::this_bus}->set(rw => 'OFF'); 1  }
+bus_rec: _bus_rec end {
+	$::Bus::by_name{$::this_bus}->set(rw => 'REC');
+	print "Setting REC-enable for " . $::this_bus . " bus. You may record user tracks.\n";
+	1; }
+bus_mon: _bus_mon end {
+	$::Bus::by_name{$::this_bus}->set(rw => 'MON');
+	print "Setting MON mode for " . $::this_bus . " bus. No recording on user tracks.\n";
+ 	1  
+}
+bus_off: _bus_off end {
+	$::Bus::by_name{$::this_bus}->set(rw => 'OFF'); 
+	print "Setting OFF mode for " . $::this_bus . " bus. All user tracks disabled.\n";
+	1  }
+bus_version: _bus_version end { 
+	use warnings;
+	no warnings qw(uninitialized);
+	print $::this_bus, " bus default version is: ", $::Bus::by_name{$::this_bus}->version, "\n" ; 1}
+bus_version: _bus_version dd end { 
+	my $n = $item{dd};
+	$n = undef if $n == 0;
+	$::Bus::by_name{$::this_bus}->set( version => $n ); 
+	print $::this_bus, " bus default version set to: ", $::Bus::by_name{$::this_bus}->version, "\n" ; 1}
 mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
@@ -523,14 +539,6 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
 	} @{$item{"op_id(s)"}};
 	1;
 }
-group_version: _group_version end { 
-	use warnings;
-	no warnings qw(uninitialized);
-	print $::main->version, "\n" ; 1}
-group_version: _group_version dd end { 
-	my $n = $item{dd};
-	$n = undef if $n == 0;
-	$::main->set( version => $n ); 1}
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches ident(s) { 

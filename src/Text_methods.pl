@@ -406,16 +406,6 @@ sub t_add_effect {
 			$debug and print (yaml_out(\%p));
 		add_effect( \%p );
 }
-sub group_rec { 
-	print "Setting group REC-enable. You may record user tracks.\n";
-	$main->set( rw => 'REC'); }
-sub group_mon { 
-	print "Setting group MON mode. No recording on user tracks.\n";
-	$main->set( rw => 'MON');}
-sub group_off {
-	print "Setting group OFF mode. All user tracks disabled.\n";
-	$main->set(rw => 'OFF'); } 
-
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
