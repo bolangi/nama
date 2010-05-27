@@ -334,22 +334,22 @@ remove_track:
 group_rec:
   type: group
   short: grec R
-  what: rec-enable user tracks
+  what: rec-enable user tracks in Main bus
   parameters: none
 group_mon:
   type: group
   short: gmon M
-  what: rec-disable user tracks
+  what: rec-disable user tracks in Main bus
   parameters: none
 group_off:
   type: group
   short: goff Z 
-  what: group OFF mode, exclude all user tracks from chain setup
+  what: exclude user tracks in Main bus from chain setup
   parameters: none
 group_version:
   type: group 
   short: gn gver gv
-  what: set group version for monitoring (overridden by track-version settings)
+  what: set default monitoring version for tracks in Main bus
 bus_rec:
   type: bus
   short: brec

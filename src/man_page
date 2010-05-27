@@ -290,6 +290,15 @@ Newly created user tracks belong to the Main bus, which
 goes through a mixer and Master fader track to the 
 soundcard for monitoring.
 
+=head2 MARKS
+
+Marks in Nama are similar to those in other audio editing
+software, with one small caveat: Mark positions are relative
+to the beginning of an Ecasound chain setup. If your project
+involves a single track, and you will be shortening the
+stream by setting a region to play, set any marks you need
+I<after> defining the region.
+
 =head2 REGIONS
 
 The C<region> command allows you to define endpoints
