@@ -11,9 +11,9 @@ B<nama> [I<options>] [I<project_name>]
 B<Nama> is a recorder/mixer application using Ecasound in
 the back end to provide multitrack recording, effects
 processing, and mastering. Nama includes aux sends, inserts,
-buses, regions and time-shifting functions. Full help is
-provided, including commands by category, search for
-commands or effects by name or by arbitrary string.
+buses, regions, fades and time-shifting functions. Full help is
+provided, including commands by category and search for
+commands and effects.
 
 By default, Nama starts up a GUI interface with a command
 line interface running in the terminal window. The B<-t>

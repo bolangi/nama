@@ -303,7 +303,10 @@ sub playat_time {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	grep{ $_ ne $track->vol and $_ ne $track->pan } @{ $track->ops }
+	grep{ 		$_ ne $track->vol 
+			and $_ ne $track->pan 
+			and (! $track->fader or $_ ne $track->fader) 
+	} @{ $track->ops }
 }
 		
 sub snapshot {
