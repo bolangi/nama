@@ -22,7 +22,7 @@ sub tracks { # returns list of track names in group
 }
 
 sub last {
-	$debug and say "group: @_";
+	#$debug and say "group: @_";
 	my $group = shift;
 	my $max = 0;
 	map{ 
