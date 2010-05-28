@@ -380,4 +380,5 @@ our (
 	@ops_with_controller, # for sync-ing effect parameters
 	$default_fade_length, 
 	$regenerate_setup, # force us to generate new chain setup
+	%is_ecasound_chain,   # suitable for c-select
 );

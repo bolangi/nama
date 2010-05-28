@@ -1125,6 +1125,7 @@ sub process_routing_graph {
 	my @in_keys = values %inputs;
 	my @out_keys = values %outputs;
 	use warnings 'numeric';
+	%is_ecasound_chain = map{ $_, 1} map{ @$_ } values %inputs;
 	%inputs = reverse %inputs;	
 	%outputs = reverse %outputs;	
 	@input_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;
@@ -2032,10 +2033,7 @@ sub remove_op {
 
 	# select chain
 	
-	my $cmd = "c-select $n";
-	$debug and print "cmd: $cmd$/";
-	eval_iam($cmd);
-	#print "selected chain: ", eval_iam("c-selected"), $/; 
+	return unless ecasound_select_chain($n);
 
 	# deal separately with controllers and chain operators
 
@@ -2063,16 +2061,6 @@ sub remove_op {
 		eval_iam("ctrl-select $ctrl_index");
 		eval_iam("ctrl-remove");
 		$debug and print eval_iam("cs");
-		$index = ctrl_index( $id );
-		my $cmd = "c-select $n";
-		#print "cmd: $cmd$/";
-		eval_iam($cmd);
-		# print "selected chain: ", eval_iam("c-selected"), $/; # Ecasound bug
-		eval_iam("cop-select ". ($offset{$n} + $index));
-		#print "selected operator: ", eval_iam("cop-selected"), $/;
-		eval_iam("cop-remove");
-		$debug and eval_iam("cs");
-
 	}
 }
 
@@ -2213,9 +2201,6 @@ sub effect_update {
 	# update the parameters of the Ecasound chain operator
 	# referred to by a Nama operator_id
 	
-	# (why not use this routine to update %copp values as
-	# well?)
-	
 	#$debug2 and print "&effect_update\n";
 	my $valid_setup = eval_iam("cs-selected") and eval_iam("cs-is-valid");
 	return unless $valid_setup;
@@ -2225,26 +2210,15 @@ sub effect_update {
 
 	my ($id, $param, $val) = @_;
 	$param++; # so the value at $p[0] is applied to parameter 1
+	carp("$id: effect not found. skipping...\n"), return unless $cops{$id};
 	my $chain = $cops{$id}{chain};
-
-	carp("$id: effect not found. skipping...\n"), return unless $chain;
+	return unless $is_ecasound_chain{$chain};
 
 	$debug and print "chain $chain id $id param $param value $val\n";
 
 	# $param is zero-based. 
 	# %copp is  zero-based.
 
-	return if $ti{$chain}->rec_status eq "OFF"; 
-
-	# above will produce a wrong result if the user changes track status
-	# while the engine is running BUG
-
-	return if $ti{$chain}->name eq 'Mixdown' and 
-			  $ti{$chain}->rec_status eq 'REC';
-
-	# above is irrelevant the way that mixdown is now
-	# implemented DEPRECATED
-	
  	$debug and print join " ", @_, "\n";	
 
 	my $old_chain = eval_iam('c-selected') if eval_iam('cs-selected');
@@ -3537,7 +3511,23 @@ sub leading_track_spec {
 sub ecasound_select_chain {
 	my $n = shift;
 	my $cmd = "c-select $n";
-	eval_iam($cmd) if eval_iam( 'cs-connected' ) =~ /$chain_setup_file/;
+
+	if( 
+
+		# specified chain exists in the chain setup
+		$is_ecasound_chain{$n}
+
+		# engine is configured
+		and eval_iam( 'cs-connected' ) =~ /$chain_setup_file/
+
+	){ 	eval_iam($cmd); 
+		return 1 
+
+	} else { 
+		$debug and carp 
+			"c-select $n: attempted to select non-existing Ecasound chain\n"; 
+		return 0
+	}
 }
 sub set_current_bus {
 	my $track = shift || ($this_track ||= $tn{Master});
