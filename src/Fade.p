@@ -141,11 +141,11 @@ sub remove { # supply index
 	if ( ! @track_fades ){ 
 
 		# make sure the fader operator is _on_
-		::effect_update_copp_set( $track->fader, 0, $on_level );
+		#::effect_update_copp_set( $track->fader, 0, $on_level );
 
 		# remove fader entirely
-		# remove_effect($track->$fader);
-		# $::tn{$fade->track}->set(fade => undef);
+		::remove_effect($track->fader);
+		$::tn{$fade->track}->set(fader => undef);
 	}
 	else { refresh_fade_controller($track) }
 }

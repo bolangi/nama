@@ -1535,7 +1535,6 @@ sub connect_transport {
 	disconnect_jack_ports();
 	connect_jack_ports();
 	transport_status() unless $no_transport_status;
-	setup_effect_parameter_sync();
 	$ui->flash_ready();
 	#print eval_iam("fs");
 	1;
@@ -2250,11 +2249,11 @@ sub sync_effect_parameters {
 	# the effect state can differ from the state in
 	# %copp, Nama's effect parameter store
 	#
-	# this routine syncs them
+	# this routine syncs them in prep for save_state()
 	
 	return unless @ops_with_controller;
 	my $old_chain = eval_iam('c-selected');
-	map{ sync_one_effect($_) } @ops_with_controller;
+	map{ sync_one_effect($_) } ops_with_controller();
 	eval_iam("c-select $old_chain");
 }
 
@@ -2276,9 +2275,7 @@ sub get_cop_params {
 	\@params
 }
 		
-sub setup_effect_parameter_sync {
-	@ops_with_controller = ();
-	map { push @ops_with_controller, $_ }
+sub ops_with_controller {
 	grep{ ! is_controller($_) }
 	grep{ scalar @{$cops{$_}{owns}} }
 	map{ @{ $_->ops } } 

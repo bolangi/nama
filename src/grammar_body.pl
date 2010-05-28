@@ -765,11 +765,21 @@ duration: value
 mark1: ident
 mark2: ident
 remove_fade: _remove_fade fade_index  { 
-	return unless $item{fade_index};
-	print "removing fade $item{fade_index} from track "
-		.$::Fade::by_index{$item{fade_index}}->track ."\n"; 
-	::Fade::remove($item{fade_index}) 
+       return unless $item{fade_index};
+       print "removing fade $item{fade_index} from track "
+               .$::Fade::by_index{$item{fade_index}}->track ."\n"; 
+       ::Fade::remove($item{fade_index}) 
 }
+# remove_fade: _remove_fade fade_index(s)  { 
+# 	my @indices = @{$item{'fade_index(s)'}};
+# 	print "indices: @indices\n";
+# 	return unless @indices;
+# 	map{ 
+# 		print "removing fade $_ from track " .$::Fade::by_index{$_}->track ."\n"; 
+# 		::Fade::remove($_) ;
+# 	} @indices;
+# 	1;
+# }
 fade_index: dd 
  { if ( $::Fade::by_index{$item{dd}} ){ return $item{dd}}
    else { print ("invalid fade number: $item{dd}\n"); return 0 }
