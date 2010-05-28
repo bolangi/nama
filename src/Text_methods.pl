@@ -57,7 +57,7 @@ sub show_effect_chain_stack {
 	
 sub show_region {
 	my @lines;
-	push @lines, "Start delay: ",
+	push @lines, "Start at: ",
 		$this_track->playat, $/ if $this_track->playat;
 	push @lines, "Region start: ", $this_track->region_start, $/
 		if $this_track->region_start;

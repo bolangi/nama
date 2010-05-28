@@ -220,7 +220,7 @@ shift_track: _shift_track start_position end {
 		my $time = ::Mark::mark_time( $pos );
 		print $::this_track->name, 
 			qq(: Shifting start time to mark "$pos", $time seconds\n);
-		$::this_track->set(playat => $time);
+		$::this_track->set(playat => $pos);
 		1;
 	} else { print 
 	"Shift value is neither decimal nor mark name. Skipping.\n";
@@ -481,12 +481,14 @@ modify_mark: _modify_mark sign value end {
 	$::this_mark->set( time => $newtime );
 	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
 	::eval_iam("setpos $newtime");
+	$::regenerate_setup++;
 	1;
 	}
 modify_mark: _modify_mark value end {
 	$::this_mark->set( time => $item{value} );
 	print $::this_mark->name, ": set to ", ::d2( $item{value}), "\n";
 	::eval_iam("setpos $item{value}");
+	$::regenerate_setup++;
 	1;
 	}		
 remove_effect: _remove_effect op_id(s) end {

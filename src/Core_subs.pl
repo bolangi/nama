@@ -1401,7 +1401,7 @@ sub reconfigure_engine {
 	my $current = yaml_out(status_snapshot());
 	my $old = yaml_out($old_snapshot);
 
-	if ( $current eq $old){
+	if ( $current eq $old and ! $regenerate_setup){
 			$debug and print ("no change in setup\n");
 			return;
 	}
