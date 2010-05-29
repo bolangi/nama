@@ -50,7 +50,7 @@ do_part: track_spec command
 do_part: track_spec
 do_part: command
 
-predicate: somecode_semistop { " $item{somecode_semistop}" }
+predicate: nonsemi semistop { $item{nonsemi}}
 predicate: /$/
 iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
 track_spec: ident { ::leading_track_spec($item{ident}) }
@@ -62,14 +62,14 @@ shellcode: somecode #{ print "shellcode: $item{somecode}\n"}
 perlcode: somecode #{ print "perlcode: $item{somecode}\n"}
 namacode: somecode #{ print "namacode: $item{somecode}\n"}
 somecode: /.+?(?=;;|$)/ 
-somecode_semistop: /.+?/  { $item[1] }
+nonsemi: /[^;]+/
 semistop: /;|$/
 #semi_stop: ';' | /$/
 
 # execute Ecasound IAM command
 
 command: iam_cmd predicate { 
-	my $user_input = "$item{iam_cmd}$item{predicate}"; 
+	my $user_input = "$item{iam_cmd} $item{predicate}"; 
 	$::debug and print "Found Ecasound IAM command: $user_input\n";
 	my $result = ::eval_iam($user_input);
 	::pager( $result );  
