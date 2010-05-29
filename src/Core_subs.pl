@@ -1514,8 +1514,8 @@ sub connect_transport {
 	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
-	apply_ops();
 	eval_iam('cs-connect');
+	apply_ops();
 	# or say("Failed to connect setup, engine not ready"),return;
 	my $status = eval_iam("engine-status");
 	if ($status ne 'not started'){
@@ -2374,7 +2374,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	$debug2 and print "&apply_ops\n";
 	for my $n ( map{ $_->n } ::Track::all() ) {
 	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
- 		next if $ti{$n}->rec_status eq "OFF" ;
+ 		next unless $is_ecasound_chain{$n};
 		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $offset{$n}; # for MIX
  		#next if ! $offset{$n} ;
@@ -2384,6 +2384,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 		apply_op($id);
 		}
 	}
+	ecasound_select_chain($this_track->n);
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
