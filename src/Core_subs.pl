@@ -2251,7 +2251,6 @@ sub sync_effect_parameters {
 	#
 	# this routine syncs them in prep for save_state()
 	
-	return unless @ops_with_controller;
 	my $old_chain = eval_iam('c-selected');
 	map{ sync_one_effect($_) } ops_with_controller();
 	eval_iam("c-select $old_chain");
