@@ -14,16 +14,19 @@ mastering using Ecasound for all audio processing. Nama
 offers the stable functioning of Ecasound enchanced by high
 level concepts such as tracks and buses and a convenient
 command language.
-
+ 
 Nama has many functions found in digital-audio workstations
 including marks, regions, fades, sends, inserts, buses,
 track freezing and time shifting as well as some functions
 unique to Nama.  Full help is provided, including commands
 by category and search.
 
+Nama runs under ALSA and JACK audio frameworks, and
+automatically discovers all available LADSPA plugins.
+
 Nama has a simple graphic interface based on the Tk
 widget set. By default the GUI displays while the command
-line runs in a terminal window. The B<-t> option provides
+processor runs in a terminal window. The B<-t> option provides
 a text-only interface for console users.
 
 =head1 OPTIONS
