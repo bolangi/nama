@@ -4,28 +4,28 @@ Nama - Ecasound-based recorder/mixer
 
 =head1 ABOUT 
 
-Nama performs multitrack recording, mixing and mastering using the
-Ecasound audio processing engine developed by Kai Vehmanen.
+B<Nama> is a text-based application for multitrack
+recording, mixing and mastering using the Ecasound
+audio engine developed by Kai Vehmanen.
+ 
+Features include tracks, buses, effects, presets,
+sends, inserts, marks and regions. Nama runs under JACK and
+ALSA audio frameworks, automatically detects LADSPA plugins,
+and supports Ladish Level 1 session handling.
 
-Nama's features include tracks, buses, effects, presets, sends,
-inserts, marks and regions. Nama supports JACK and ALSA audio
-frameworks, LADSPA plugins, and Ladish Level 1 session handling.
+All editing under Nama is non-destructive. Effects are
+generally applied in realtime. A track caching (track
+freezing) function is also available.
 
-All signal processing under Nama is non-destructive. Effects are
-generally applied in realtime, with track caching (track freezing)
-also available.
+The command prompt accepts Nama commands, Ecasound
+interactive-mode commands, shell commands and perl code,
+providing command history and autocompletion.  The help
+system covers internal commands and LADSPA effects and
+includes keyword search.
 
-Nama has dual user interfaces: GUI and terminal mode. 
-
-Terminal mode gives users full access to Nama's capabilities, offering
-console users an advanced multitrack audio production tool. The
-command prompt uses GNU ReadLine library to provide such conveniences
-as command history and autocompletion. Users can enter Nama commands,
-Ecasound interactive-mode commands, shell commands or perl code.
-
-Nama's optional GUI provides access to basic recording and
-effects processing functions. It is based on the Tk widget
-set. The command prompt is simultaneously available.
+By default, Nama displays a simple graphic interface while
+the command processor runs in a terminal window. The B<-t>
+option provides a text-only interface for console users.
 
 "Nama" is Japanese for "live", describing live performances,
 raw fish and draft beer.
