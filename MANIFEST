@@ -1,5 +1,4 @@
 Changes
-COPYING
 inc/Module/Install.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/Makefile.pm
