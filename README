@@ -87,19 +87,3 @@ installed in a directory in your execution PATH.
 
 Nama's mastering mode uses a number of LADSPA plugins.
 Defaults are specified in the configuration file .namarc. 
-
-=head1 COPYRIGHT 
-
-Copyright 2008, 2009, 2010 Joel Roth.
-
-=head1 LICENSE
-
-This software is licensed for use under the terms of the GNU
-Public License version 2. The text of this license is
-provided in the file COPYING that is included in this
-distribution.
-
-This software is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.

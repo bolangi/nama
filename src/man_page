@@ -588,18 +588,13 @@ The main module, Nama.pm, and its sister modules are
 concatenations of several source files. Patches against
 these source files are preferred.
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2009, 2010 Joel Roth.  All rights reserved.
-This program  is free software; you may redistribute it
-and/or modify it under the same terms as Perl itself
+This software is copyright (c) 2009-2010 by Joel Roth.
 
-Perl is distributed under your choice of the GNU General
-Public License or the Artistic License. On Debian GNU/Linux
-systems, the complete text of the GNU General Public License
-can be found in `/usr/share/common-licenses/GPL' and the
-Artistic License in `/usr/share/common-licenses/Artistic'.
-Copyright (c) 2009,2010 Joel Roth
+This is free software; you can redistribute it and/or modify
+it under the same terms as the Perl 5 programming language
+system itself.
 
 =head1 AUTHOR
 
