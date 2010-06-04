@@ -588,14 +588,14 @@ The main module, Nama.pm, and its sister modules are
 concatenations of several source files. Patches against
 these source files are preferred.
 
-=head1 COPYRIGHT AND LICENSE
+=head1 AUTHOR
 
-This software is copyright (c) 2009-2010 by Joel Roth.
+Joel Roth, E<lt>joelz@pobox.comE<gt>
+
+=head1 COPYRIGHT & LICENSE
+
+Copyright (c) 2009-2010 by Joel Roth.
 
 This is free software; you can redistribute it and/or modify
 it under the same terms as the Perl 5 programming language
 system itself.
-
-=head1 AUTHOR
-
-Joel Roth, E<lt>joelz@pobox.comE<gt>
