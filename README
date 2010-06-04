@@ -2,7 +2,7 @@
 
 Nama - Ecasound-based recorder/mixer
 
-=head1 ABOUT 
+=head1 DESCRIPTION
 
 B<Nama> is a text-based application for multitrack
 recording, mixing and mastering using the Ecasound
@@ -12,23 +12,6 @@ Features include tracks, buses, effects, presets,
 sends, inserts, marks and regions. Nama runs under JACK and
 ALSA audio frameworks, automatically detects LADSPA plugins,
 and supports Ladish Level 1 session handling.
-
-All editing under Nama is non-destructive. Effects are
-generally applied in realtime. A track caching (track
-freezing) function is also available.
-
-The command prompt accepts Nama commands, Ecasound
-interactive-mode commands, shell commands and perl code,
-providing command history and autocompletion.  The help
-system covers internal commands and LADSPA effects and
-includes keyword search.
-
-By default, Nama displays a simple graphic interface while
-the command processor runs in a terminal window. The B<-t>
-option provides a text-only interface for console users.
-
-"Nama" is Japanese for "live", describing live performances,
-raw fish and draft beer.
 
 =head1 INSTALLATION
 
@@ -48,14 +31,15 @@ via libecasoundc:
 
 		cpan Audio::Ecasound
 
-If you simply want a tarball to inspect or prod, look 
-for a file named Audio-Nama-????.tar.gz in this directory:
+You can browse the sources or download a tarball via:
 
-		http://search.cpan.org/CPAN/authors/id/G/GA/GANGLION/
+		http://search.cpan.org/dist/Audio-Nama
 
-=head2 Installing Nama Using the Debian Package System
+=head2 Debian Install
 
-		apt-get install libaudio-nama-perl
+Soon you should be able to install from Debian by typing:
+
+		apt-get install nama
 	
 =head2 Build from Source
 
