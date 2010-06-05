@@ -2511,15 +2511,20 @@ sub prepare_static_effects_data{
 }
 
 sub ladspa_plugin_list {
-	my @filenames;
+	my @plugins;
+	my %seen;
 	for my $dir ( split ':', ladspa_path()){
 		{no autodie 'opendir';
-			opendir DIR, $dir or carp "failed to open directory $dir: $!\n";
+			opendir DIR, $dir 
+				or carp("failed to open directory $dir: $!\n"), next;
 		}
-		push @filenames,  map{"$dir/$_"} grep{ /.so$/ } readdir DIR;
+		push @plugins,  
+			map{"$dir/$_"} 						# full path
+			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins
+			grep{ /\.so$/} readdir DIR;			# get .so files
 		closedir DIR;
 	}
-	@filenames;
+	@plugins
 }
 
 sub new_plugins {
@@ -2735,14 +2740,7 @@ sub get_ladspa_hints{
 	my @dirs =  split ':', ladspa_path();
 	my $data = '';
 	my %seen = ();
-	my @plugins;
-	for my $dir (@dirs) {
-		opendir DIR, $dir or carp qq(can't open LADSPA dir "$dir" for read: $!\n);
-	
-		push @plugins,  
-			grep{ /\.so$/ and ! $seen{$_} and ++$seen{$_}} readdir DIR;
-		closedir DIR;
-	};
+	my @plugins = ladspa_plugin_list();
 	#pager join $/, @plugins;
 
 	# use these regexes to snarf data
