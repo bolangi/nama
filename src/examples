@@ -1,0 +1,268 @@
+Q. How do you get started with Nama?
+Q. Can you show me how to record my first project?
+
+A. Sure! Note that the following description covers text commands 
+and text display. Similar steps may be conducted using the GUI.
+
+0. Make sure your audio drivers are correctly configured
+and capable of sound input and output.
+
+1. Configure Nama
+
+	% nama
+
+The first time you run Nama, you are asked permission
+for Nama to create the Nama configuration file
+($HOME/.namarc) and Nama project root directory
+($HOME/nama).
+
+The default configuration may be good enough to get started.
+
+If you choose to edit .namarc, use a text editor like
+vim, emacs, etc. If you use a fancy word processor,
+be sure to save the file in ASCII (plain text) format.
+
+2. Start Nama and create a project 'three' (as in Three
+Blind Mice). We will record a live bass input while using a
+drums input from Hydrogen via JACK.
+
+	% nama
+
+	nama> create three
+
+	created project: three
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	No tracks to record or play.
+
+	[ live input allowed ]
+
+	No chain setup, engine not ready.
+	nama [Mixdown] ('h' for help)> 
+
+Tracks and configuration data will be stored in
+$HOME/nama/three
+
+Mixdown is the current track.
+
+3. Create a track
+
+	nama> add bass
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    rec     REC         1          Main        100   50
+
+	[ live input allowed, record ]
+
+	Engine is ready.
+	setup length is 0.0
+	now at 0:00
+
+	Press SPACE to start or stop engine.
+
+	nama [bass] ('h' for help)> 
+
+'bass' is now the current track. Track commands will apply to 'bass'.
+
+The engine is ready to record bass_1.wav, but we won't start it yet.
+
+By default, Nama automatically reconfigures the engine after each 
+command, however Nama will not interrupt the Ecasound engine if it is
+running.
+
+(In the following steps, we show only the tracks display.)
+
+4. Set the input channel to soundcard channel 2
+
+	nama> source 2
+
+	nama [bass] ('h' for help)> source 2
+	bass: input set to soundcard channel 2
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    rec     REC         2          Main        100   50
+
+5. Create a drums track, set the track width to stereo, and
+   set the track input to JACK client Hydrogen. 
+
+	nama> add drums; stereo; source Hydrogen
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    rec     REC         2          Main        100   50
+	  4   drums       1    rec     REC         Hydrogen   Main        100   50
+
+Note that JACK and Hydrogen must be running for this setting
+to take effect.
+
+6. Confirm that Ecasound is properly configured (optional)
+
+	nama> chains
+
+	# ecasound chainsetup file
+
+	# general
+
+	-B auto -r -z:mixmode,sum 
+
+	# audio inputs
+
+	-a:1 -i:loop,Master_in
+	-a:3,R3 -i:jack_multi,system:capture_2
+	-a:4,R4 -i:jack,Hydrogen
+
+	# post-input processing
+
+	-a:3 -chcopy:1,2
+
+	# audio outputs
+
+	-a:1 -o:jack_multi,system:playback_1,system:playback_2
+	-a:3,4 -o:loop,Master_in
+	-a:R3 -f:s16_le,1,44100,i -o:/home/bob/nama/three/.wav/bass_1.wav
+	-a:R4 -f:s16_le,2,44100,i -o:/home/bob/nama/three/.wav/drums_1.wav
+
+7. Record these two tracks
+
+	nama> start 
+
+	(Music played here.)
+
+	nama> stop
+
+You can also use the SPACE bar.
+
+8. Nama now reconfigures Ecasound to playback the WAV files
+just recorded.
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    rec     MON         [2]        Main        100   50
+	  4   drums       1    rec     MON         [Hydrogen] Main        100   50
+
+The 'Main' bus is set to MON, forcing 'bass' and 'drums'
+tracks to MON status. 
+
+9. Add a vocal track, from soundcard channel 3
+
+	nama> add vocal; source 3
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        2    rec     REC         2          Main        100   50
+	  4   drums       2    rec     REC         Hydrogen   Main        100   50
+      5   vocal       2    rec     REC         3          Main        100   50
+
+Note that the Main bus has toggled back to REC. But we don't want to
+record bass and drums again. 
+
+	nama> for bass drums; mon
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      100   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    mon     MON         [2]        Main        100   50
+	  4   drums       1    mon     MON         [Hydrogen] Main        100   50
+      5   vocal       2    rec     REC         3          Main        100   50
+
+You could also use the track number:
+
+	nama> for 3 4; mon
+
+Note that that vocal_2.wav will be recorded, not vocal_1.wav. The version
+number always increments, indicating that vocal_2.wav is recorded _after_
+bass_1.wav and drums_1.wav.
+
+
+10. The vocal take was fine, so now you're ready to make a rough
+mix to send to your mother... ah no, to the Dashed Fantasy Records
+representative in Nashville.
+
+	nama> bass pan 30
+	nama> vol 80
+	nama> drums pan 70
+	nama> vol 50
+	nama> vocal vol 120
+	nama> add_effect time_reverb1
+	nama> Master vol 170
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      170   50
+	  2   Mixdown    --    off     OFF         --         Mixdown      --   --
+	  3   bass        1    mon     MON         [2]        Main         80   30
+	  4   drums       1    mon     MON         [Hydrogen] Main         50   70 
+      5   vocal       2    mon     MON         [3]        Main        120   50
+
+	nama> show_track
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  5   vocal       2    mon     MON         [3]        Main        120   50
+	O: Pan
+		1. Level %: 50
+	P: Volume
+		1. Level %: 120
+	Q: time_reverb1
+	Signal width: mono
+	
+11. Having satisfied ourselves that it sounds good enough for Dashed Fantasy
+to get an idea of our potential, we're ready to mixdown.
+
+	nama> mixdown
+
+	Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+	=============================================================================
+	  1   Master     --    mon     MON         --         Master      150   50
+	  2   Mixdown     1    rec     REC         --         Mixdown      --   --
+	  3   bass        1    mon     MON         [2]        Main         80   30
+	  4   drums       1    mon     MON         [Hydrogen] Main         50   70 
+	  5   vocal       2    mon     MON         [3]        Main        120   50
+
+	nama> start
+
+This should result in a stereo file, Mixdown_1.wav. The default format is CD
+compatible (s16_le,2,44100). The 'mixdown' command disables audio
+monitoring during the engine run.
+
+12. Nama automatically sets the 'mixplay' mode, playing back the
+mix you just created. But instead you want to return to the usual playback
+mode.
+
+	nama> mixoff
+
+13. Probably you will want to save your settings as you
+work.
+
+	nama> save
+
+This will save settings to State.yml in the ~/nama/three
+directory.
+
+But perhaps you have several mixes, and want to save the
+settings for each. You decide to save your settings as dashed_fantasy.yml, 
+and then exit.
+
+	nama> save dash_fantasy
+	nama> quit
+
+When you are ready to start Nama next time. You can do this:
+
+	% nama three
+	nama> restore dashed_fantasy
+
+<< END >>

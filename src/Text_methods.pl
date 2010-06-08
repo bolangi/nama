@@ -4,7 +4,7 @@ sub show_versions {
 			"All versions: ". join(" ", 
 				map { $_ . ( $cache_map->{$_} and 'c') } @{$this_track->versions}
 			). $/
-		} 
+		} else {}
 }
 
 
