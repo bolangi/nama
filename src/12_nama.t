@@ -497,5 +497,16 @@ sub check_setup {
 		$test_name);
 }
 
+sub cleanup { 	
+		unlink './test/Setup.ecs';
+		rmdir './test/.wav';
+		rmdir './test';
+		rmdir './untitled/.wav';
+		rmdir './untitled';
+		unlink './.effects_cache';
+		$term->rl_deprep_terminal();
+}
+
+cleanup();
 1;
 __END__
