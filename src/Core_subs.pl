@@ -393,7 +393,7 @@ reply: $reply";
 	$reply =~ s/\s+$//; 
 
 	given($type){
-		when ('e'){ warn $reply }
+		when ('e'){ carp $reply }
 		default{ return $reply }
 	}
 
@@ -409,13 +409,9 @@ sub eval_iam_libecasoundc{
 	my $errmsg = $e->errmsg();
 	# $errmsg and carp("IAM WARN: ",$errmsg), 
 	# not needed ecasound prints error on STDOUT
-	$e->errmsg('');
+	$e->errmsg(''); #, carp "ecasound error\n" if $errmsg;
 	"@result";
 	#$errmsg ? undef : "@result";
-}
-sub initialize_ecasound_engine {
-	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	eval_iam('cs-remove') if eval_iam('cs-selected');
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift || 0;
@@ -531,7 +527,7 @@ Loading project "untitled".
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
 	
-	initialize_ecasound_engine(); 
+	teardown_engine(); # initialize_ecasound_engine; 
 	initialize_buses();	
 	initialize_project_data();
 	remove_small_wavs(); 
@@ -1322,12 +1318,15 @@ sub load_ecs {
 		#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 		return unless -e $setup;
 		#say "passed conditional";
-		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam("cs-remove") if eval_iam("cs-selected");
+		teardown_engine();
 		eval_iam("cs-load $setup");
 		eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
 		$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
 		1;
+}
+sub teardown_engine {
+		eval_iam("cs-disconnect") if eval_iam("cs-connected");
+		eval_iam("cs-remove") if eval_iam("cs-selected");
 }
 
 sub arm {
@@ -1685,7 +1684,7 @@ sub transport_running { eval_iam('engine-status') eq 'running'  }
 
 sub disconnect_transport {
 	return if transport_running();
-		eval_iam("cs-disconnect") if eval_iam("cs-connected");
+	teardown_engine();
 }
 
 sub start_heartbeat {
@@ -2022,9 +2021,13 @@ sub ecasound_effect_index {
 
 
 sub remove_op {
+	# remove chain operator from Ecasound engine
 
 	$debug2 and print "&remove_op\n";
+
+	# only if engine is configured
 	return unless eval_iam('cs-connected') and eval_iam('cs-is-valid');
+
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
 	my $index;
@@ -4408,9 +4411,10 @@ sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
 
 sub ecasound_get_info {
+	# get information about an audio object
+	
 	my ($path, $command) = @_;
-	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	eval_iam('cs-remove') if eval_iam('cs-selected');
+	teardown_engine();
 	eval_iam('cs-add gl');
 	eval_iam('c-add g');
 	eval_iam('ai-add ' . $path);
@@ -4418,8 +4422,7 @@ sub ecasound_get_info {
 	eval_iam('cs-connect');
 	eval_iam('ai-select '. $path);
 	my $result = eval_iam($command);
-	eval_iam('cs-disconnect');
-	eval_iam('cs-remove');
+	teardown_engine();
 	$result;
 }
 sub get_length { 

@@ -2,10 +2,12 @@ Q. How do you get started with Nama?
 Q. Can you show me how to record my first project?
 
 A. Sure! Note that the following description covers text commands 
-and text display. Similar steps may be conducted using the GUI.
+and text display. (Much of this can also be done using the GUI
+buttons and menus. Just try clicking on stuff.)
 
-0. Make sure your audio drivers are correctly configured
-and capable of sound input and output.
+I'm assuming you have Nama installed, and that sure your
+audio drivers are configured so you system is capable of
+sound input and output.
 
 1. Configure Nama
 
@@ -24,7 +26,8 @@ be sure to save the file in ASCII (plain text) format.
 
 2. Start Nama and create a project 'three' (as in Three
 Blind Mice). We will record a live bass input while using a
-drums input from Hydrogen via JACK.
+drums input from Hydrogen via JACK. We will assume
+JACK is running.
 
 	% nama
 
@@ -42,8 +45,7 @@ drums input from Hydrogen via JACK.
 	No chain setup, engine not ready.
 	nama [Mixdown] ('h' for help)> 
 
-Tracks and configuration data will be stored in
-$HOME/nama/three
+Tracks and configuration data will be stored in $HOME/nama/three
 
 Mixdown is the current track.
 
@@ -135,7 +137,7 @@ to take effect.
 
 	nama> start 
 
-	(Music played here.)
+(Play music here.)
 
 	nama> stop
 
@@ -190,7 +192,8 @@ bass_1.wav and drums_1.wav.
 
 10. The vocal take was fine, so now you're ready to make a rough
 mix to send to your mother... ah no, to the Dashed Fantasy Records
-representative in Nashville.
+representative in Nashville. You fiddle volume and pan
+control, and add an effect:
 
 	nama> bass pan 30
 	nama> vol 80
@@ -245,8 +248,7 @@ mode.
 
 	nama> mixoff
 
-13. Probably you will want to save your settings as you
-work.
+13. Probably you will want to save your settings as you work.
 
 	nama> save
 
@@ -265,4 +267,4 @@ When you are ready to start Nama next time. You can do this:
 	% nama three
 	nama> restore dashed_fantasy
 
-<< END >>
+(END)
