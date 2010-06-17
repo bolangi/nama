@@ -626,6 +626,9 @@ sub jack_running {
 						and grep{ $pid == $_ } @pids 
 				} split "\n", qx(ps ax) ;
 }
+sub valid_engine_setup {
+	eval_iam("cs-selected") and eval_iam("cs-is-valid");
+}
 sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
@@ -1510,7 +1513,7 @@ sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $no_transport_status = shift;
 	load_ecs() or say("No chain setup, engine not ready."), return;
-	eval_iam("cs-selected") and	eval_iam("cs-is-valid")
+	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
 	eval_iam('cs-connect');
@@ -1915,7 +1918,7 @@ sub add_effect {
 	$id = cop_add(\%p); 
 	%p = ( %p, cop_id => $id); # replace chainop id
 	$ui->add_effect_gui(\%p) unless $ti{$n}->hide;
-	if( eval_iam('cs-selected') and eval_iam('cs-is-valid') ){
+	if( valid_engine_setup() ){
 		my $er = engine_running();
 		$ti{$n}->mute if $er;
 		apply_op($id);
@@ -2204,11 +2207,11 @@ sub effect_update {
 	# referred to by a Nama operator_id
 	
 	#$debug2 and print "&effect_update\n";
-	my $valid_setup = eval_iam("cs-selected") and eval_iam("cs-is-valid");
-	return unless $valid_setup;
-	my $es = eval_iam("engine-status");
-	$debug and print "engine is $es\n";
-	return if $es !~ /not started|stopped|running/;
+
+	return unless valid_engine_setup();
+	#my $es = eval_iam("engine-status");
+	#$debug and print "engine is $es\n";
+	#return if $es !~ /not started|stopped|running/;
 
 	my ($id, $param, $val) = @_;
 	$param++; # so the value at $p[0] is applied to parameter 1
@@ -2223,7 +2226,7 @@ sub effect_update {
 
  	$debug and print join " ", @_, "\n";	
 
-	my $old_chain = eval_iam('c-selected') if eval_iam('cs-selected');
+	my $old_chain = eval_iam('c-selected') if valid_engine_setup();
 	ecasound_select_chain($chain);
 
 	# update Ecasound's copy of the parameter
