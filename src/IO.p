@@ -77,7 +77,8 @@ sub format {
 	::signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
 }
-sub _format_template {} # allow override
+sub _format_template {} # the leading underscore allows override
+                        # by a method without the underscore
 sub _ecs_extra {}		# allow override
 sub direction { 
 	(ref $_[0]) =~ /::from/ ? 'input' : 'output'  

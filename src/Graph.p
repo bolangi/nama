@@ -150,12 +150,10 @@ sub add_loop {
  		my $attr = $g->get_edge_attributes($a,$_);
  		$debug and say "deleting edge: $a-$_";
  		$g->delete_edge($a,$_);
- 		$debug and say "adding edge: $loop-$_";
 		add_edge($loop, $_);
 		$g->set_edge_attributes($loop,$_, $attr) if $attr;
 		$seen{"$a-$_"}++;
  	} $g->successors($a);
-	$debug and say "adding edge: $a-$loop";
 	add_edge($a,$loop);
 }
  
@@ -171,12 +169,10 @@ sub add_far_side_loop {
  		my $attr = $g->get_edge_attributes($_,$b);
  		$debug and say "deleting edge: $_-$b";
  		$g->delete_edge($_,$b);
- 		$debug and say "adding edge: $_-$loop";
 		add_edge($_,$loop);
 		$g->set_edge_attributes($_,$loop, $attr) if $attr;
 		$seen{"$_-$b"}++;
  	} $g->predecessors($b);
-	$debug and say "adding edge: $loop-$b";
 	add_edge($loop,$b);
 }
 
