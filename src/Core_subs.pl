@@ -1051,7 +1051,10 @@ sub add_paths_for_recording {
 		$g->add_path(input_node($_->source_type), $name, 'wav_out');
 
 		# set chain_id to R3 (if original track is 3) 
-		$g->set_vertex_attributes($name, { chain_id => 'R'.$_->n });
+		$g->set_vertex_attributes($name, { 
+			chain_id => 'R'.$_->n,
+			mono_to_stereo => '', # override 
+		});
 
 	} @tracks;
 }

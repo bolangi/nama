@@ -163,7 +163,7 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:R3 -chmove:2,1 -chcopy:1,2
+-a:R3 -chmove:2,1
 -a:3 -chmove:2,1 -chcopy:1,2
 
 # audio outputs
@@ -186,7 +186,6 @@ $expected_setup_lines = <<EXPECTED;
 
 # post-input processing
 
--a:R3 -chcopy:1,2
 -a:3 -chcopy:1,2
 
 # audio outputs
