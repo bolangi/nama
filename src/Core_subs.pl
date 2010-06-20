@@ -442,26 +442,34 @@ sub this_wav_dir {
 }
 }
 
-sub project_dir  {$project_name and join_path( project_root(), $project_name) }
+sub project_dir {$project_name and join_path( project_root(), $project_name) }
 
 sub expand_tilde { my $path = shift; $path =~ s/~/$ENV{HOME}/; $path }
 
 
-sub global_config{
-print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};
-my @search_path = (project_dir(), $ENV{HOME}, project_root() );
-my $c = 0;
-	map{ 
-#print $/,++$c,$/;
-			if (-d $_) {
-				my $config = join_path($_, config_file());
-				#print "config: $config\n";
-				if( -f $config ){ 
-					my $yml = io($config)->all ;
-					return $yml;
+sub global_config {
+
+	# return text of config file, in the following order
+	# or priority:
+	#
+	# 1. the file designated by the -f command line argument
+	# 2. .namarc in the current project directory, i.e. ~/nama/untitled/.namarc
+	# 3. .namarc in the home directory, i.e. ~/.namarc
+	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
+	print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};
+	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
+	my $c = 0;
+		map{ 
+	#print $/,++$c,$/;
+				if (-d $_) {
+					my $config = join_path($_, config_file());
+					#print "config: $config\n";
+					if( -f $config ){ 
+						my $yml = io($config)->all ;
+						return $yml;
+					}
 				}
-			}
-		} ( @search_path) 
+			} ( @search_path) 
 }
 
 # sub global_config {
@@ -469,6 +477,11 @@ my $c = 0;
 # }
 
 sub read_config {
+
+	# read and process the configuration file
+	#
+	# use the embedded default file if none other is present
+	
 	$debug2 and print "&read_config\n";
 	
 	my $config = shift;
