@@ -464,6 +464,10 @@ my $c = 0;
 		} ( @search_path) 
 }
 
+# sub global_config {
+# 	io( join_path($ENV{HOME}, config_file()))->all;
+# }
+
 sub read_config {
 	$debug2 and print "&read_config\n";
 	
