@@ -28,7 +28,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		strip_blank_lines
 		strip_comments
 		remove_spaces
-	
+		read_file
+		expand_tilde
+		resolve_path
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -341,5 +343,36 @@ sub remove_spaces {
         $entry =~ s/\s+/_/g;                                                    
         $entry;                                                                 
 }                                                                               
+sub resolve_path {
+	my $path = shift;
+	$path = expand_tilde($path);
+	$path = File::Spec::Link->resolve_all($path);
+}
+sub expand_tilde { 
+	my $path = shift; 
+
+	# ~bob -> /home/bob
+	$path =~ s(
+		^ 		# beginning of line
+		~ 		# tilde
+		(\w+) 	# username
+	)
+	(/home/$1)x;
+
+	# ~/something -> /home/bob/something
+	$path =~ s( 
+		^		# beginning of line
+		~		# tilde
+		/		# slash
+	)
+	($ENV{HOME})x;
+	$path
+}
+sub read_file {
+	my $path = shift;
+	$path = resolve_path($path);
+	io($path)->all;
+}
+
 1;
 

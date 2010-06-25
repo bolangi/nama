@@ -16,7 +16,7 @@ diag ("TESTING $0\n");
 
 # defeat namarc detection to force using $default namarc
 
-push @ARGV, qw(-f dummy);
+push @ARGV, qw(-f /dev/null);
 
 # set text mode (don't start gui)
 

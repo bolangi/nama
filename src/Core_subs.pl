@@ -425,26 +425,31 @@ sub colonize { # convert seconds to hours:minutes:seconds
 }
 
 ## configuration file
+
 { # OPTIMIZATION
-my %proot; 
-sub project_root { $proot{$project_root} ||= 
-		File::Spec::Link->resolve_all(expand_tilde($project_root))}
+
+  # we allow for the (admitted rare) possibility that
+  # $project_root may change
+
+my %proot;
+sub project_root { 
+	$proot{$project_root} ||= resolve_path($project_root)
+}
 }
 
 sub config_file { $opts{f} ? $opts{f} : ".namarc" }
+
 { # OPTIMIZATION
 my %wdir; 
 sub this_wav_dir {
 	$project_name and
-	$wdir{$project_name} ||= File::Spec::Link->resolve_all(
+	$wdir{$project_name} ||= resolve_path(
 		join_path( project_root(), $project_name, q(.wav) )  
 	);
 }
 }
 
 sub project_dir {$project_name and join_path( project_root(), $project_name) }
-
-sub expand_tilde { my $path = shift; $path =~ s/~/$ENV{HOME}/; $path }
 
 
 sub global_config {
@@ -456,16 +461,18 @@ sub global_config {
 	# 2. .namarc in the current project directory, i.e. ~/nama/untitled/.namarc
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
-	print ("reading config file $opts{f}\n"), return io( $opts{f})->all if $opts{f} and -r $opts{f};
+	if( $opts{f} ){
+		print ("reading config file $opts{f}\n");
+		return read_file($opts{f});
+	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
 	my $c = 0;
 		map{ 
-	#print $/,++$c,$/;
 				if (-d $_) {
 					my $config = join_path($_, config_file());
-					#print "config: $config\n";
-					if( -f $config ){ 
-						my $yml = io($config)->all ;
+					if( -f $config or -l $config){ 
+						say "Found config file: $config";
+						my $yml = read_file($config);
 						return $yml;
 					}
 				}
@@ -4386,9 +4393,11 @@ sub is_cached {
 }
 	
 sub do_script {
-	say "hello script";
+
 	my $name = shift;
 	my $file;
+	# look in project_dir() and project_root()
+	# if filename provided does not contain slash
 	if( $name =~ m!/!){ $file = $name }
 	else {
 		$file = join_path(project_dir(),$name);
@@ -4396,7 +4405,7 @@ sub do_script {
 		else{ $file = join_path(project_root(),$name) }
 	}
 	-e $file or say("$file: file not found. Skipping"), return;
-	my @lines = split "\n",io($file)->all;
+	my @lines = split "\n",read_file($file);
 	my $old_opt_r = $opts{R};
 	$opts{R} = 1; # turn off auto reconfigure
 	for my $input (@lines) { process_line($input)};
@@ -4461,5 +4470,8 @@ sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
 
 sub channels { [split ',', $_[0] ]->[1] }
 	
+	
+	
+
 
 ### end
