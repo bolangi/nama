@@ -383,11 +383,12 @@ sub eval_iam_neteci {
 				(.+)  # rest of string
 				/sx;  # s-flag: . matches newline
 
-$debug and say "iam: $cmd";
-$debug and say "return value: $return_value
+$debug and say "ECI command: $cmd";
+$debug and say "Ecasound reply: ", substr($buf,0,256); # first 256 characters
+$debug and say qq(return value: $return_value
 length: $length
 type: $type
-reply: $reply";
+reply: $reply);
 
 	$return_value == 256 or die "illegal return value, stopped" ;
 	$reply =~ s/\s+$//; 
