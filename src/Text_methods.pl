@@ -67,19 +67,25 @@ sub show_region {
 }
 
 sub show_status {
-	my @fields;
-	push @fields, $main->rw eq 'REC' 
-					? "live input allowed" 
-					: "live input disabled";
-	push @fields, "record" if grep{ ! /Mixdown/ } ::really_recording();
-	push @fields, "playback" if grep { $_->rec_status eq 'MON' } 
+	my @modes;
+	print "\n";
+	push @modes, $preview if $preview;
+	push @modes, "master" if $mastering_mode;
+	say   "Modes settings:   ", join(", ", @modes) if @modes;
+	my @actions;
+	push @actions, "record" if grep{ ! /Mixdown/ } ::really_recording();
+	push @actions, "playback" if grep { $_->rec_status eq 'MON' } 
 		map{ $tn{$_} } $main->tracks, q(Mixdown);
-	push @fields, "mixdown" 
-		if $tn{Mixdown}->rec_status eq 'REC';
-	push @fields, "doodle" if $preview eq 'doodle';
-	push @fields, "preview" if $preview eq 'preview';
-	push @fields, "master" if $mastering_mode;
-	"[ ". join(", ", @fields) . " ]\n";
+
+	# We only check Main bus for playback. 
+	# sub-buses will route their playback signals through the 
+	# Main bus, however it may be that sub-bus mixdown
+	# tracks are set to REC (with rec-to-file disabled)
+	
+	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
+	say   "Pending actions:  ", join(", ", @actions) if @actions;
+	print "Main bus setting: ", lc $main->rw;
+	say $main->allows ?  " (Allows track status ". $main->allows. ")" : "";
 }
 sub placeholder { 
 	my $val = shift;
