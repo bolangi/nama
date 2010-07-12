@@ -407,11 +407,12 @@ sub eval_iam_libecasoundc{
 	my (@result) = $e->eci($command);
 	$debug and print "result: @result\n" unless $command =~ /register/;
 	my $errmsg = $e->errmsg();
-	# $errmsg and carp("IAM WARN: ",$errmsg), 
-	# not needed ecasound prints error on STDOUT
-	$e->errmsg(''); #, carp "ecasound error\n" if $errmsg;
+	if( $errmsg ){
+		$e->errmsg(''); 
+		# ecasound already prints error on STDOUT
+		# carp "ecasound reports an error:\n$errmsg\n"; 
+	}
 	"@result";
-	#$errmsg ? undef : "@result";
 }
 sub colonize { # convert seconds to hours:minutes:seconds 
 	my $sec = shift || 0;
