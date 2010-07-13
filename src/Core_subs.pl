@@ -502,6 +502,7 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign_var( \%cfg, @config_vars);
 	$project_root = $opts{d} if $opts{d};
+	$project_root = expand_tilde($project_root);
 
 }
 sub walk_tree {

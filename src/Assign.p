@@ -365,7 +365,7 @@ sub expand_tilde {
 		~		# tilde
 		/		# slash
 	)
-	($ENV{HOME})x;
+	($ENV{HOME}/)x;
 	$path
 }
 sub read_file {
