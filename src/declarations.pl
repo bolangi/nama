@@ -126,8 +126,11 @@ our (
 	@mastering_effect_ids,        # effect ids for mastering mode
 
 	@effects,		# static effects information (parameters, hints, etc.)
-	%effect_i,		# an index , pn:amp -> effect number
-	%effect_j,      # an index , amp -> effect number
+	%effect_i,		# pn:preset_name -> effect number
+	                # el:ladspa_label -> effect number
+	
+	%effect_j,      # preset_name -> pn:preset_name
+	                # ladspa_label -> el:ladspa_label
 	@effects_help,  # one line per effect, for text search
 
 	@ladspa_sorted, # ld

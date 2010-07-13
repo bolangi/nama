@@ -227,35 +227,43 @@ IAM
 	
 }
 sub help_effect {
-	my $input = shift;
-	print "input: $input\n";
+	my ($input, $id, $no_match, @output);
+	$id = $input = shift;
+	push @output, "\n";
+
 	# e.g. help tap_reverb    
 	#      help 2142
 	#      help var_chipmunk # preset
 
+	# convert digits to LADSPA label
 
-	if ($input !~ /\D/){ # all digits
-		$input = $ladspa_label{$input}
-			or print("$input: effect not found.\n\n"), return;
-	}
-	elsif ( my $id = $ladspa_unique_id{$input} ){$input = $ladspa_label{$id} }
-	if ( $effect_i{$input} ) {} # do nothing
-	elsif ( $effect_j{$input} ) { $input = $effect_j{$input} }
-	else { print("$input: effect not found.\n\n"), return }
-	if ($input =~ /pn:/) {
-		print grep{ /$input/  } @effects_help;
-	}
-	elsif ( $input =~ /el:/) {
+	if ($id !~ /\D/){ $id = $ladspa_label{$id} or $no_match++ } 
+
+	# convert ladspa_label to el:ladspa_label
+	# convert preset_name  to pn:preset_name
 	
-	my @output = $ladspa_help{$input};
-	print "label: $input\n";
-	::pager( @output );
-	#print $ladspa_help{$input};
-	} else { 
-	print "$input: Ecasound effect. Type 'man ecasound' for details.\n";
-	}
-}
+	if ($effect_i{$id}){} # we are ready
+	elsif ( $effect_j{$id} ) { $id = $effect_j{$id} }
+	else { $no_match++ }
 
+	# one-line help for Ecasound presets
+	
+	if ($id =~ /pn:/) {
+		push @output, grep{ /$id/  } @effects_help;
+	}
+
+	# full help for LADSPA plugins
+	
+	elsif ( $id =~ /el:/) {
+		@output = $ladspa_help{$id};
+	} else { 
+		@output = qq("$id" is an Ecasound chain operator.
+Type 'man ecasound' at a shell prompt for details.);
+	}
+
+	if( $no_match ){ print "No effects were found matching: $input\n\n"; }
+	else { ::pager(@output) }
+}
 
 sub find_effect {
 	my @keys = @_;
@@ -277,7 +285,7 @@ sub find_effect {
 # 
 # EFFECT
 	::pager( $text_wrap->paragraphs(@matches) , "\n" );
-	} else { print "No matching effects.\n\n" }
+	} else { print join " ", "No effects were found matching:",@keys,"\n\n" }
 }
 
 
