@@ -311,12 +311,14 @@ HELP
 	if ( ! $opts{t} and can_load( modules => { Tk => undef } ) ){ 
 		$ui = ::Graphical->new;
 	} else {
+		say "Unable to load perl Tk module. Starting in console mode." if $opts{g};
 		$ui = ::Text->new;
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
 ;
 		import Event qw(loop unloop unloop_all);
 	}
+	
 	can_load( modules => {AnyEvent => undef})
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
 
