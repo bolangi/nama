@@ -4248,7 +4248,7 @@ sub cleanup_exit {
  	remove_small_wavs();
  	kill 15, ecasound_pid() if $sock;  	
 	$term->rl_deprep_terminal();
-	CORE::exit; 
+	exit; 
 }
 
 
