@@ -1,8 +1,9 @@
-Major changes to Perl application Audio::Nama
+Changes to Audio::Nama
 
-1.057  May 26, 2010
+1.063  August 2, 2010
 
-
+      - various minor improvements
+      - fix Bug#591166 (Debian build support)
 
 1.052  March 20, 2010 (summary)
 
@@ -12,7 +13,7 @@ Major changes to Perl application Audio::Nama
       - big speedup by caching results of Track and Wav methods
       - generate setup using graph representation and IO objects
       - rewrite send- and sub-buses 
-      - track caching (intermediate mixdown)
+      - track caching (track freezing)
       - post-fader track inserts (send/receive) with wet/dry control
       - more flexible track input 
          + manual connection to JACK port
