@@ -41,8 +41,8 @@ process_options();
 
 prepare();
 diag "Check representative variable from default .namarc";
-is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
 
+is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
 =skip
 # Ecasound dependent
 diag "Check static effects data read";
@@ -507,7 +507,6 @@ sub cleanup {
 		rmdir './untitled/.wav';
 		rmdir './untitled';
 		unlink './.effects_cache';
-		$term->rl_deprep_terminal();
 }
 
 cleanup();
