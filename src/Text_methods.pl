@@ -67,8 +67,8 @@ sub show_region {
 }
 
 sub show_status {
-	my @modes;
 	print "\n";
+	my @modes;
 	push @modes, $preview if $preview;
 	push @modes, "master" if $mastering_mode;
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
@@ -83,9 +83,10 @@ sub show_status {
 	# tracks are set to REC (with rec-to-file disabled)
 	
 	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
-	say   "Pending actions:  ", join(", ", @actions) if @actions;
-	print "Main bus setting: ", lc $main->rw;
-	say $main->allows ?  " (Allows track status ". $main->allows. ")" : "";
+	say "Pending actions:  ", join(", ", @actions) if @actions;
+	say "Main bus allows:  ", $main->allows, " track status";
+	say "Main bus version: ",$::main->version if $::main->version;
+	say "Audio output is:  ", $main_out ? "ON" : "OFF";
 }
 sub placeholder { 
 	my $val = shift;
@@ -134,16 +135,6 @@ sub show_tracks {
 	$output;
 }
 
-}
-
-sub show_tracks_extra_info {
-
-	my $string;
-	$string .= $/. "Global version setting: ".  $::main->version. $/
-		if $::main->version;
-	$string .=  $/. ::Text::show_status();
-	$string .=  $/;	
-	$string;
 }
 
 

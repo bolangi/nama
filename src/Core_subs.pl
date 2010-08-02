@@ -1477,7 +1477,7 @@ sub reconfigure_engine {
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
 	if ( generate_setup() ){
 		#say "I generated a new setup";
-		print STDOUT ::Text::show_tracks_extra_info();
+		::Text::show_status();
 		connect_transport();
 # 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
 # 		start_transport() if $was_running and ! $will_record;
@@ -1670,12 +1670,12 @@ sub transport_status {
 				: " " ),
 				$/;
 	}
-	say "Engine is ready.";
-	print "setup length is ", d1($length), 
+	print "Setup length is:  ", d1($length), 
 		($length > 120	?  " (" . colonize($length). ")" : "" )
 		,$/;
-	print "now at ", colonize( eval_iam( "getpos" )), $/;
-	print "\nPress SPACE to start or stop engine.\n\n"
+	say "Now at ", colonize( eval_iam( "getpos" ));
+	say "Engine is ready.";
+	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
 	#$term->stuff_char(10); 
 }

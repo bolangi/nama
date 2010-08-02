@@ -47,7 +47,7 @@ sub group { $_[0]->name }
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
 
-{ my %allows = (REC => 'REC MON', MON => 'MON');
+{ my %allows = (REC => 'REC/MON', MON => 'MON');
 sub allows { $allows{ $_[0]->rw } }
 }
 	
