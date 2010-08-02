@@ -58,7 +58,7 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
-	initialize_terminal();
+	initialize_terminal() unless $opts{T};
 
 	# set default project to "untitled"
 	
@@ -255,6 +255,7 @@ sub process_options {
 		fake-ecasound				E
 		debugging-output			D
 		execute-command=s			X
+		no-terminal					T
 );
 
 	map{$opts{$_} = ''} values %options;
@@ -297,6 +298,7 @@ Debugging options:
 --fake-alsa, -A                  Simulate ALSA environment
 --no-ecasound, -E                Don't spawn Ecasound process
 --execute-command, -X            Supply a command to execute
+--no-terminal, -T				 Don't initialize terminal
 
 HELP
 
@@ -4247,7 +4249,7 @@ sub list_effect_chains {
 sub cleanup_exit {
  	remove_small_wavs();
  	kill 15, ecasound_pid() if $sock;  	
-	$term->rl_deprep_terminal();
+	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 
 }
 

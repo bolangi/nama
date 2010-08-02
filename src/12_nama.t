@@ -30,6 +30,10 @@ push @ARGV, qw(-d .);
 
 push @ARGV, q(-E);
 
+# don't initialize terminal
+
+push @ARGV, q(-T);
+
 diag("working directory: ",cwd);
 
 setup_grammar();
