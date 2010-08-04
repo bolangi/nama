@@ -41,7 +41,11 @@ bunch_spec: text
 
 # consume text up to semicolon or end of string
 # skip the terminal semicolon, if present
-meta: text semicolon(?) { $::parser->do_part($item{text}) }
+
+#meta: text semicolon(?) { $::parser->do_part($item{text}) }
+meta: nosemi(s /\s*;\s*/) semicolon(?) 
+
+nosemi: text { $::parser->do_part($item{text}) }
 
 text: /[^;]+/ 
 semicolon: ';'

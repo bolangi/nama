@@ -3524,6 +3524,9 @@ sub process_line {
 sub command_process {
 	my $input = shift;
 	my $input_was = $input;
+
+	# parse repeatedly until all input is consumed
+	
 	while ($input =~ /\S/) { 
 		$debug and say "input: $input";
 		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
