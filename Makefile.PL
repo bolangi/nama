@@ -16,6 +16,7 @@ use inc::Module::Install;
 		Event => 0,
 		File::Find::Rule => 0,
 		File::Copy::Link => 0,
+		File::HomeDir => 0,
 		File::Temp => 0,
 		Graph => 0,
 		IO::All => 0,
