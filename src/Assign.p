@@ -7,6 +7,7 @@ no warnings q(uninitialized);
 use Carp;
 use YAML::Tiny;
 use IO::All;
+use File::HomeDir;
 use Storable;
 #use Devel::Cycle;
 
@@ -351,13 +352,16 @@ sub resolve_path {
 sub expand_tilde { 
 	my $path = shift; 
 
+ 	my $home = File::HomeDir->my_home;
+
+
 	# ~bob -> /home/bob
 	$path =~ s(
 		^ 		# beginning of line
 		~ 		# tilde
 		(\w+) 	# username
 	)
-	(/home/$1)x;
+	(File::HomeDir->users_home($1))ex;
 
 	# ~/something -> /home/bob/something
 	$path =~ s( 
@@ -365,7 +369,7 @@ sub expand_tilde {
 		~		# tilde
 		/		# slash
 	)
-	($ENV{HOME}/)x;
+	($home/)x;
 	$path
 }
 sub read_file {
