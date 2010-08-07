@@ -1,5 +1,8 @@
 Changes to Audio::Nama
 
+1.064  August 6, 2010
+      - fix Bug rt.cpan.org #60024: Audio::Nama::Assign::expand_tilde()
+
 1.063  August 2, 2010
 
       - various minor improvements
