@@ -3385,11 +3385,19 @@ sub set_position {
     return if really_recording(); # don't allow seek while recording
 
     my $seconds = shift;
-    my $engine_running = ( eval_iam('engine-status') eq 'running');
-    eval_iam('stop') if $engine_running and $jack_running;
-    eval_iam("setpos $seconds");
-    sleeper($seek_delay) if $engine_running and $jack_running;
-    eval_iam('start') if $engine_running;
+    my $coderef = sub{ eval_iam("setpos $seconds") };
+
+    if( $jack_running and eval_iam('engine-status') eq 'running')
+			{ engine_stop_seek_start( $coderef ) }
+	else 	{ $coderef->() }
+}
+
+sub engine_stop_seek_start {
+	my $coderef = shift;
+	eval_iam('stop');
+	$coderef->();
+	sleeper($seek_delay);
+	eval_iam('start');
 }
 
 sub forward {
