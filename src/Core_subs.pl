@@ -3379,16 +3379,17 @@ sub set_track_class {
 
 sub process_control_inputs { }
 
+
 sub set_position {
-	my $seconds = shift;
-	my $am_running = ( eval_iam('engine-status') eq 'running');
-	return if really_recording();
-	my $jack = $jack_running;
-	#print "jack: $jack\n";
-	$am_running and $jack and eval_iam('stop');
-	eval_iam("setpos $seconds");
-	$am_running and $jack and sleeper($seek_delay), eval_iam('start');
-	$ui->clock_config(-text => colonize($seconds));
+
+    return if really_recording(); # don't allow seek while recording
+
+    my $seconds = shift;
+    my $engine_running = ( eval_iam('engine-status') eq 'running');
+    eval_iam('stop') if $engine_running and $jack_running;
+    eval_iam("setpos $seconds");
+    sleeper($seek_delay) if $engine_running and $jack_running;
+    eval_iam('start') if $engine_running;
 }
 
 sub forward {
