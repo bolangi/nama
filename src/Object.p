@@ -33,11 +33,25 @@ sub new {
 }
 
 sub is_legal_key { 
+
+	# The behavior I want here is:
+	#
+	# Example class hierachy: ::Object, ::Wav, ::Track, ::SimpleTrack
+	
+	# By inheriting from Track, SimpleTrack gets all the
+	# attributes of Track and Wav, without having to include
+	# them in the Track class definition
+	
 	my ($class, $key) = @_;
 	$class = ref $class if ref $class;  # support objects
 	return 1 if ${"$class\::_is_field"}{$key};
 	my ($parent_class) = @{"$class\::ISA"};
+
 	return unless $parent_class and $parent_class !~ /Object::Tiny/;
+
+	# this should be:
+	# return unless $parent_class and $parent_class !~ /Object/;
+	
 	is_legal_key($parent_class,$key);
 }
 sub set {
@@ -52,14 +66,6 @@ sub set {
 			is_legal_key(ref $self, $key) or croak "illegal key: $_ for object of type ", ref $self;
 	} keys %new_vals;
 }
-# sub ancestors {
-# 	my $class = ref $_[0];
-# 	$class, parents( @{"$class\::ISA"} );
-# }
-# 
-# sub parents {
-# 	my @ISA = @_;
-# 	map{ 
 sub dumpp  {
 	my $self = shift;
 	my $class = ref $self;
@@ -105,15 +111,27 @@ __END__
   # Define a class
   package Foo;
   
-  use ::Object qw{ bar baz };
+  use ::Object qw{ bux baz };
   
   1;
   
   
   # Use the class
-  my $object = Foo->new( bar => 1 );
+  my $object = Foo->new( bux => 1 );
 
-  $object->set( bar => 2);
+  $object->set( bux => 2);
   
-  print "bar is " . $object->bar . "\n";
+  print "bux is " . $object->bux . "\n";
+
+
+  # Define a subclass (automatically inherits parent attributes)
+
+  package Bar;
+
+  our @ISA = 'Foo';
+
+  my $lonely_bar = Bar->new();
+  
+  $lonely_bar->set(bux => 3); 
+
 
