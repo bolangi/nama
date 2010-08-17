@@ -1963,9 +1963,19 @@ sub add_effect {
 }
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
-	print("$op_id: effect does not exist\n"), return 
-		unless $cops{$op_id};
+		# $parameter: zero based
+	my $cop = $cops{$op_id} 
+		or print("$op_id: non-existing effect id. Skipping\n"), return; 
+	my $code = $cop->{type};
+	my $i = $effect_i{$code};
+	defined $i or croak "undefined effect code for $op_id: ".$cops{$op_id}->code;
+	my $parameter_count = scalar @{ $effects[$i]->{params} };
+	print "op_id: $op_id, code: ",$cops{$op_id}->{type}," parameter count: $parameter_count\n";
 
+	print("$op_id: effect does not exist, skipping\n"), return 
+		unless $cops{$op_id};
+	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
+		unless ($parameter >= 0 and $parameter < $parameter_count);
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 

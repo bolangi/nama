@@ -385,11 +385,11 @@ vol: _vol sign(?) value end {
 		print( $::this_track->name . ": no volume control available\n"), return;
 	$item{sign} = undef;
 	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
-	::modify_effect 
+	::modify_effect(
 		$::this_track->vol,
 		0,
 		$item{sign},
-		$item{value};
+		$item{value});
 	1;
 } 
 vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
@@ -535,7 +535,7 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
 	map{ my $op_id = $_;
 		map{ my $parameter = $_;
 			 $parameter--;
-			 ::effect_update_copp_set( $op_id, $parameter, $item{value});
+			 ::modify_effect( $op_id, $parameter, undef, $item{value});
 		} @{$item{"parameter(s)"}};
 	} @{$item{"op_id(s)"}};
 	1;
