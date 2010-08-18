@@ -208,7 +208,7 @@ set_region: _set_region beginning end { ::set_region( $item{beginning}, 'END' );
 }
 remove_region: _remove_region end { ::remove_region(); 1; }
 new_region: _new_region beginning ending track_name(?) end {
-	my ($name) = @{$item{'track_name(?)'}};
+	my $name = $item{'track_name(?)'}->[0];
 	::new_region(@item{qw(beginning ending)}, $name); 1
 }
 
@@ -383,12 +383,10 @@ set_version: _set_version dd end { $::this_track->set_version($item{dd}); 1}
 vol: _vol sign(?) value end { 
 	$::this_track->vol or 
 		print( $::this_track->name . ": no volume control available\n"), return;
-	$item{sign} = undef;
-	$item{sign} = $item{'sign(?)'}->[0] if $item{'sign(?)'};
 	::modify_effect(
 		$::this_track->vol,
 		0,
-		$item{sign},
+		$item{'sign(?)'}->[0],
 		$item{value});
 	1;
 } 
@@ -531,20 +529,16 @@ insert_effect: _insert_effect before effect value(s?) end {
 
 before: op_id
 
-modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
-	map{ my $op_id = $_;
-		map{ my $parameter = $_;
-			 $parameter--;
-			 ::modify_effect( $op_id, $parameter, undef, $item{value});
-		} @{$item{"parameter(s)"}};
-	} @{$item{"op_id(s)"}};
-	1;
-}
-modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
+modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign(?) value end {
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
 				$parameter--;
-				::modify_effect($op_id, $parameter, @item{qw(sign value)}); 
+				::modify_effect(
+					$op_id, 
+					$parameter, 
+					$item{'sign(?)'}->[0],
+ 					$item{value}
+				); 
 		} @{$item{"parameter(s)"}};
 	} @{$item{"op_id(s)"}};
 	1;
@@ -639,7 +633,7 @@ change_bus: _change_bus existing_bus_name {
 
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
 add_insert: _add_insert prepost send_id return_id(?) end {
-	my $return_id = "@{$item{'return_id(?)'}}";
+	my $return_id = $item{'return_id(?)'}->[0];
 	my $send_id = $item{send_id};
 	::Insert::add_insert( "$item{prepost}fader_insert",$send_id, $return_id);
 	1;
@@ -649,7 +643,7 @@ send_id: jack_port
 return_id: jack_port
 
 set_insert_wetness: _set_insert_wetness prepost(?) parameter end {
-	my $prepost = "@$item{'prepost(?)'}";
+	my $prepost = $item{'prepost(?)'}->[0];
 	my $p = $item{parameter};
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), 
@@ -667,7 +661,7 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter end {
 }
 
 set_insert_wetness: _set_insert_wetness prepost(?) end {
-	my $prepost = "@$item{'prepost(?)'}";
+	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
 	my $i = $::Insert::by_index{$id};
@@ -680,7 +674,7 @@ remove_insert: _remove_insert prepost(?) end {
 	# use prepost spec if provided
 	# remove lone insert without prepost spec
 	
-	my $prepost = "@{$item{'prepost(?)'}}";
+	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
 	print $::this_track->name.": removing $prepost". "fader insert\n";
