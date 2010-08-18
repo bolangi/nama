@@ -1,6 +1,10 @@
 #command: test
 #test: 'test' shellish { print "found $item{shellish}\n" }
 
+# CASE 1: Shell code, perl code or 'for' commands consume text up to ;; or 
+# to the end of line.  The remaining text will be parsed again at the top level
+# until all text is consumed.
+
 # execute shell command if leading '!'
 
 meta: bang shellcode stopper {
@@ -34,13 +38,16 @@ meta: for bunch_spec ';' namacode stopper {
 
 bunch_spec: text 
 
-# If we have reached here and we match the grammar, we are
+# CASE 2: 
+
+# If we have reached here (and we match the grammar) we are
 # dealing with either:
 # (1) a Nama command (possibly specifying a new current track) or
 # (2) an Ecasound-IAM command.
 
-# consume text up to semicolon or end of string
-# skip the terminal semicolon, if present
+# Split text on semicolons, and pass each segment
+# to the parser's 'do_part' command.
+
 
 #meta: text semicolon(?) { $::parser->do_part($item{text}) }
 meta: nosemi(s /\s*;\s*/) semicolon(?) 
