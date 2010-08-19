@@ -284,5 +284,9 @@ __[fake_jack_lsp]__
 __[end_data_section]__
 __END__
 
-[% qx(cat ./man_page) %]
+[% qx(cat ./man_page_part1) %]
+
+[% qx(./emit_command_headers pod) %]
+
+[% qx(cat ./man_page_part2) %]
 
