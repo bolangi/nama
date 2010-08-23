@@ -35,11 +35,27 @@ You can browse the sources or download a tarball via:
 
 		http://search.cpan.org/dist/Audio-Nama
 
-=head2 Debian Install
+=head2 Installing Nama from your distribution's package manager
 
-Soon you should be able to install from Debian by typing:
+=head3 Debian (testing, unstable) 
+
+You can install Nama from Debian by typing:
 
 		apt-get install nama
+
+or
+
+		aptitude nama
+
+To use Nama's GUI, you will also need to install Tk:
+
+		apt-get install perl-tk
+
+=head3 Ubuntu (lucid, maverick)
+
+Use Ubuntu's package Add/Remove tool.
+
+=head3 Arch Linux
 	
 =head2 Build from Source
 
@@ -53,7 +69,7 @@ Consult the F<BUILD> file for build instructions.
 =head2 Non-Perl Dependencies
 
 (These dependencies are pulled in automatically if you
-install Nama using apt-get in a Debian system.)
+install Nama in a Debian system.)
 
 The Ecasound audio processing libraries should be installed.
 Ecasound should be compiled with support for LADSPA, libsndfile,

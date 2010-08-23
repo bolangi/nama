@@ -549,22 +549,29 @@ sub set_rec {
 		print $msg;
 		return;
 	}
-	$track->set(rw => 'REC');
-	$track->rec_status eq 'REC'	or print $track->name, 
-		": set to REC, but current status is ", $track->rec_status, "\n";
+	$track->set_rw('REC');
 }
 sub set_mon {
 	my $track = shift;
-	$track->set(rw => 'MON');
-	$track->rec_status eq 'MON'	or print $track->name, 
-		": set to MON, but current status is ", $track->rec_status, "\n";
+	$track->set_rw('MON');
 }
 sub set_off {
 	my $track = shift;
-	$track->set(rw => 'OFF');
-	print $track->name, ": set to OFF\n";
+	$track->set_rw('OFF');
 }
 
+sub set_rw {
+	my ($track, $setting) = @_;
+	#my $already = $track->rw eq $setting ? " already" : "";
+	$track->set(rw => $setting);
+	my $status = $track->rec_status();
+	#print $track->name, ": set to $setting";
+
+	print $track->name, " set to $setting";
+	say $status ne $setting ? ", but current status is $status" : "";
+
+}
+	
 
 # Operations performed by track objects
 
