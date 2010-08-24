@@ -565,10 +565,8 @@ sub set_rw {
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
 	my $status = $track->rec_status();
-	#print $track->name, ": set to $setting";
-
-	print $track->name, " set to $setting";
-	say $status ne $setting ? ", but current status is $status" : "";
+	say $track->name, " set to $setting", 
+		($status ne $setting ? ", but current status is $status" : "");
 
 }
 	
