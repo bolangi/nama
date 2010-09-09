@@ -113,17 +113,31 @@ sub DESTROY {}
 # If there is no track for an object, the object must
 # provide any needed data
 
-sub _mono_to_stereo { 
-	my $self = shift;
-	my $file = $self->full_path;
-	if ( 	$self->width == 2 and $self->rec_status eq 'REC'
-		    or  -e $file and ::channels(::get_format($file)) == 2){ 
-		return q(); 
-	} elsif ( (! $self->width or $self->width == 1) and $self->rec_status eq 'REC'
-				or  -e $file and ::channels(::get_format($file)) == 1){ 
-		return "-chcopy:1,2" 
-	} else {} # do nothing for higher channel counts
+
+# so chcopy for MON/mono_WAV and REC/mono_track
+
+sub _mono_to_stereo{
+
+	# Truth table
+
+	#REC status, Track width stereo: null
+	#REC status, Track width mono:   chcopy
+	#MON status, WAV width mono:   chcopy
+	#MON status, WAV width stereo: null
+	#Higher channel count (WAV or Track): null
+
+	my $self   = shift;
+	my $status = $self->rec_status();
+	my $copy   = "-chcopy:1,2";
+	my $nocopy = "";
+	my $is_mono_track = sub { $self->width == 1 };
+	my $is_mono_wav   = sub { ::channels(::get_format($self->full_path)) == 1};
+	if  ($status eq 'REC' and $is_mono_track->()
+			or $status eq 'MON' and $is_mono_wav->() )
+		 { $copy }
+	else { $nocopy }
 }
+
 sub soundcard_input { 
 	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
 }
