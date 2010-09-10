@@ -795,8 +795,17 @@ add_comment: _add_comment text {
  	$::this_track->set(comment => $item{text});
  	1;
 }
-add_comment: _add_comment {
+remove_comment: _remove_comment {
  	print $::this_track->name, ": comment removed\n";
  	$::this_track->set(comment => undef);
  	1;
 }
+show_comment: _show_comment {
+	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } $::this_track;
+	1;
+}
+show_comments: _show_comments {
+	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } ::Track::all();
+	1;
+}
+	

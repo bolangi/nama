@@ -698,6 +698,18 @@ list_fade:
   what: list fades
 add_comment:
   type: track
-  what: add comment (replacing any previous comment)
+  what: add comment to current track (replacing any previous comment)
   short: comment ac
+remove_comment:
+  type: track
+  what: remove comment from current track
+  short: rc
+show_comment:
+  type: track
+  what: show comment for current track
+  short: sc
+show_comments:
+  type: track
+  what: show all track comments
+  short: scs
 ...
