@@ -790,3 +790,13 @@ fade_index: dd
    else { print ("invalid fade number: $item{dd}\n"); return 0 }
  }
 list_fade: _list_fade {  ::pager(join "\n",map{$_->dump} values %::Fade::by_index) }
+add_comment: _add_comment text { 
+ 	print $::this_track->name, ": comment: $item{text}\n"; 
+ 	$::this_track->set(comment => $item{text});
+ 	1;
+}
+add_comment: _add_comment {
+ 	print $::this_track->name, ": comment removed\n";
+ 	$::this_track->set(comment => undef);
+ 	1;
+}

@@ -696,4 +696,8 @@ list_fade:
   type: effect
   short: lfd
   what: list fades
+add_comment:
+  type: track
+  what: add comment (replacing any previous comment)
+  short: comment ac
 ...
