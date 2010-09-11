@@ -396,6 +396,19 @@ project_name:
   what: show current project name
   short: project name
   parameters: none
+new_project_template:
+  type: project
+  what: make a project template based on current project
+  short: npt
+  parameters: <s_template_name> [<s_template_description>]
+use_project_template:
+  type: project
+  what: use a template to create tracks for a new, empty project
+  short: upt
+list_project_templates:
+  type: project
+  what: list project templates
+  short: lpt
 generate:
   type: setup
   short: gen
