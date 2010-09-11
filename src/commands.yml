@@ -409,6 +409,11 @@ list_project_templates:
   type: project
   what: list project templates
   short: lpt
+remove_project_template:
+  type: project
+  what: remove project template
+  short: rpt
+  parameters: <s_template_name>
 generate:
   type: setup
   short: gen
