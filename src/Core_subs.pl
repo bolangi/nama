@@ -701,7 +701,7 @@ sub initialize_project_data {
 	# new Marks
 	# print "original marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
- 	map{ $_->remove} ::Mark::all();
+ 	::Mark::initialize();
 	@marks_data = ();
 	#print "remaining marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
@@ -3129,7 +3129,8 @@ sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $file = shift;
 	$file = $file || $state_store_file;
-	$file = join_path(project_dir(), $file);
+	$file = join_path(project_dir(), $file)
+		unless $file =~ m(/);
 	$file .= ".yml" unless $file =~ /yml$/;
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
@@ -4508,11 +4509,10 @@ sub channels { [split ',', $_[0] ]->[1] }
 sub new_project_template {
 	my ($template_name, $template_description) = @_;
 
-
 	# save current project status to temp state file 
 	
-	my $tempname = '__XX_temp_state_file';
-	save_state($tempname);
+	my $previous_state = '_previous_state.yml';
+	save_state($previous_state);
 
 	# edit current project into a template
 	
@@ -4520,13 +4520,10 @@ sub new_project_template {
 	#	- version (still called 'active')
 	# 	- track caching
 	# 	- region start/end points
-	
-	# We probably have no need for 
 	# 	- effect_chain_stack
 	
 	# We throw away 
 	# 	- vol/pan caching  	TODO unmute tracks 
-	# 	- command history
 
 	map{ my $track = $_;
 		 map{ $track->set($_ => undef)  } 
@@ -4543,38 +4540,57 @@ sub new_project_template {
 		
 	} ::Track::all();
 
-	@command_history = ();
+	# Throw away command history
+	
+	$term->SetHistory();
 	
 	# Buses needn't set version info either
 	
-	#	map{$_->set(version => undef)} values %::Bus::by_name;
+	map{$_->set(version => undef)} values %::Bus::by_name;
 	
-	# save to template name
-	
-	save_state($template_name);
-
 	# create template directory if necessary
 	
 	mkdir join_path(project_root(), "templates");
 
-	# mv to template directory
+	# save to template name
 	
-	rename(
-		join_path( project_dir(), "$template_name.yml"), 
-		join_path(project_root(), "templates", "$template_name.yml")
-	);
+	save_state( join_path(project_root(), "templates", "$template_name.yml"));
 
 	# add description, but where?
 	
 	# recall temp name
 	
-	restore_state($tempname);
+ 	load_project(  # restore_state() doesn't do the whole job
+ 		name     => $project_name,
+ 		settings => $previous_state,
+	);
 
 	# remove temp state file
 	
-	# unlink join_path( project_dir(), "$tempname.yml") ;
+	unlink join_path( project_dir(), "$previous_state.yml") ;
 	
 }
+sub use_project_template {
+	my $name = shift;
+	my @tracks = ::Track::all();
 
+	# skip if project isn't empty
+
+	say("User tracks found, aborting. Use templates in an empty project."), 
+		return if scalar @tracks > 2;
+
+	# load template
+	
+ 	load_project(
+ 		name     => $project_name,
+ 		settings => join_path(project_root(),"templates",$name),
+	);
+	save_state();
+}
+sub list_project_templates {
+	my $io = io(join_path(project_root(), "templates"));
+	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $io->all;        
+	pager(@templates);
+}
 
 ### end

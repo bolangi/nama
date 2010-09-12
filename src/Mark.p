@@ -12,10 +12,13 @@ use ::Object qw(
                  time
 				 active
 				 );
-@all = ();	
-%by_name = ();	# return ref to Mark by name
-%used_names = (); 
 
+sub initialize {
+	map{ $_->remove} ::Mark::all();
+	%used_names = ();
+	@all = ();	
+	%by_name = ();	# return ref to Mark by name
+}
 sub new {
 	my $class = shift;	
 	my %vals = @_;

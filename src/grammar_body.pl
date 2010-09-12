@@ -166,10 +166,13 @@ new_project_template: _new_project_template key text(?) {
 	1;
 }
 use_project_template: _use_project_template key {
-	# check if project is empty
-	# load template
+
+	::use_project_template($item{key});
+	1;
 }
 list_project_templates: _list_project_templates {
+	::list_project_templates();
+	1;
 }
 remove_project_template: _remove_project_template key {
 }
