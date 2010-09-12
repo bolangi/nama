@@ -166,15 +166,13 @@ new_project_template: _new_project_template key text(?) {
 	1;
 }
 use_project_template: _use_project_template key {
-
-	::use_project_template($item{key});
-	1;
+	::use_project_template($item{key}); 1;
 }
 list_project_templates: _list_project_templates {
-	::list_project_templates();
-	1;
+	::list_project_templates(); 1;
 }
-remove_project_template: _remove_project_template key {
+remove_project_template: _remove_project_template key(s) {
+	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state ident end { ::save_state( $item{ident}); 1}
 save_state: _save_state end { ::save_state(); 1}

@@ -4601,5 +4601,13 @@ sub list_project_templates {
 	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $io->all;        
 	pager(@templates);
 }
+sub remove_project_template {
+	map{my $name = $_; 
+		say "$name: removing template";
+		$name .= ".yml" unless $name =~ /\.yml$/;
+		unlink join_path( project_root(), "templates", $name);
+	} @_;
+	
+}
 
 ### end

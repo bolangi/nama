@@ -411,11 +411,11 @@ list_project_templates:
   short: lpt
 remove_project_template:
   type: project
-  what: remove project template
+  what: remove one or more project templates
   short: rpt
-  parameters: <s_template_name>
+  parameters: <s_template_name1> [<s_template_name2>... ]
 generate:
-  type: setup
+  type: setups
   short: gen
   what: generate chain setup for audio processing
   parameters: none
