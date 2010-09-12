@@ -2307,7 +2307,7 @@ sub sync_effect_parameters {
 	#
 	# this routine syncs them in prep for save_state()
 	
-	my $old_chain = eval_iam('c-selected');
+	my $old_chain = eval_iam('c-selected') if valid_engine_setup();
 	map{ sync_one_effect($_) } ops_with_controller();
 	eval_iam("c-select $old_chain");
 }
@@ -4508,6 +4508,14 @@ sub channels { [split ',', $_[0] ]->[1] }
 	
 sub new_project_template {
 	my ($template_name, $template_description) = @_;
+
+	my @tracks = ::Track::all();
+
+	# skip if project is empty
+
+	say("No user tracks found, aborting.\n",
+		"Cannot create template from an empty project."), 
+		return if scalar @tracks < 3;
 
 	# save current project status to temp state file 
 	
