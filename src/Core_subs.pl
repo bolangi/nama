@@ -4530,24 +4530,21 @@ sub new_project_template {
 	# 	- track caching
 	# 	- region start/end points
 	# 	- effect_chain_stack
-	
-	# We throw away 
-	# 	- vol/pan caching  	TODO unmute tracks 
+	# Also
+	# 	- unmute all tracks
+	# 	- throw away any pan caching
 
 	map{ my $track = $_;
+		 $track->unmute;
 		 map{ $track->set($_ => undef)  } 
 			qw(	active 
 				cache_map
 				effect_chain_stack
-				old_vol_level
 				old_pan_level
 				region_start
 				region_end
 			)
-	} ::Track::all();
-	map{ my $track = $_
-		
-	} ::Track::all();
+	} @tracks;
 
 	# Throw away command history
 	
