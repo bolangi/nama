@@ -4544,10 +4544,10 @@ sub new_project_template {
 			);
 		 map{ $track->set($_ => [])  } 
 			qw(	effect_chain_stack      
-		);
+			);
 		 map{ $track->set($_ => {})  } 
-			qw( cache_map )	
-		);
+			qw( cache_map 
+			);
 		
 	} @tracks;
 
