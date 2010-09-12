@@ -74,13 +74,8 @@ sub new {
     croak "undeclared field: @undeclared" if @undeclared;
 	if (my $track = $by_name{$vals{name}}){
 		#if ($track->hide) { $track->set(hide => 0); } 
-		print("track name already in use: $vals{name}\n"); 
-		return ; # $track;
+		return # $track;
 	}
-	print("reserved track name: $vals{name}\n"), return
-	 if  ! $::mastering_mode 
-		and grep{$vals{name} eq $_} @::mastering_track_names ; 
-
 	my $n = $vals{n} || idx(); 
 	my $object = bless { 
 

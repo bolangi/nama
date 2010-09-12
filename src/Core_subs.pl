@@ -782,6 +782,12 @@ sub add_track {
 	#return if transport_running();
 	my ($name, @params) = @_;
 	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	
+	say ("$name: track name already in use. Skipping."), return 
+		if $::Track::by_name{$name};
+	say ("$name: reserved track name. Skipping"), return
+	 	if grep $name eq $_, @mastering_track_names; 
+
 	my $track = ::Track->new(
 		name => $name,
 		@params
@@ -3298,8 +3304,8 @@ sub restore_state {
 
 	map{ 
 		my %h = %$_; 
-		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
-		if ( $track->class ){ bless $track, $track->class } # current scheme
+		my $class = $h{class} || "::Track";
+		my $track = $class->new( %h );
 	} @tracks_data;
 
 	$mastering_mode = $current_master_mode;
@@ -4499,8 +4505,76 @@ sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
 
 sub channels { [split ',', $_[0] ]->[1] }
 	
+sub new_project_template {
+	my ($template_name, $template_description) = @_;
+
+
+	# save current project status to temp state file 
 	
+	my $tempname = '__XX_temp_state_file';
+	save_state($tempname);
+
+	# edit current project into a template
 	
+	# No tracks are recorded, so we'll remove 
+	#	- version (still called 'active')
+	# 	- track caching
+	# 	- region start/end points
+	
+	# We probably have no need for 
+	# 	- effect_chain_stack
+	
+	# We throw away 
+	# 	- vol/pan caching  	TODO unmute tracks 
+	# 	- command history
+
+	map{ my $track = $_;
+		 map{ $track->set($_ => undef)  } 
+			qw(	active 
+				cache_map
+				effect_chain_stack
+				old_vol_level
+				old_pan_level
+				region_start
+				region_end
+			)
+	} ::Track::all();
+	map{ my $track = $_
+		
+	} ::Track::all();
+
+	@command_history = ();
+	
+	# Buses needn't set version info either
+	
+	#	map{$_->set(version => undef)} values %::Bus::by_name;
+	
+	# save to template name
+	
+	save_state($template_name);
+
+	# create template directory if necessary
+	
+	mkdir join_path(project_root(), "templates");
+
+	# mv to template directory
+	
+	rename(
+		join_path( project_dir(), "$template_name.yml"), 
+		join_path(project_root(), "templates", "$template_name.yml")
+	);
+
+	# add description, but where?
+	
+	# recall temp name
+	
+	restore_state($tempname);
+
+	# remove temp state file
+	
+	# unlink join_path( project_dir(), "$tempname.yml") ;
+	
+}
 
 
 ### end

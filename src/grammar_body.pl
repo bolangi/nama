@@ -162,11 +162,8 @@ list_projects: _list_projects end { ::list_projects() ; 1}
 load_project: _load_project project_id end {
 	::Text::t_load_project $item{project_id} ; 1}
 new_project_template: _new_project_template key text(?) {
-	# save to temp name
-	# remove version specs
-	# save to template name
-	# mv to template directory
-	# add description
+	::new_project_template($item{key}, $item{text});
+	1;
 }
 use_project_template: _use_project_template key {
 	# check if project is empty
