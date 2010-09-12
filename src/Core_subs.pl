@@ -701,7 +701,7 @@ sub initialize_project_data {
 	# new Marks
 	# print "original marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
- 	map{ $_->remove} ::Mark::all();
+ 	::Mark::initialize();
 	@marks_data = ();
 	#print "remaining marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
@@ -782,6 +782,12 @@ sub add_track {
 	#return if transport_running();
 	my ($name, @params) = @_;
 	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	
+	say ("$name: track name already in use. Skipping."), return 
+		if $::Track::by_name{$name};
+	say ("$name: reserved track name. Skipping"), return
+	 	if grep $name eq $_, @mastering_track_names; 
+
 	my $track = ::Track->new(
 		name => $name,
 		@params
@@ -2301,6 +2307,7 @@ sub sync_effect_parameters {
 	#
 	# this routine syncs them in prep for save_state()
 	
+ 	return unless valid_engine_setup();
 	my $old_chain = eval_iam('c-selected');
 	map{ sync_one_effect($_) } ops_with_controller();
 	eval_iam("c-select $old_chain");
@@ -3123,7 +3130,8 @@ sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $file = shift;
 	$file = $file || $state_store_file;
-	$file = join_path(project_dir(), $file);
+	$file = join_path(project_dir(), $file)
+		unless $file =~ m(/);
 	$file .= ".yml" unless $file =~ /yml$/;
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
@@ -3298,8 +3306,8 @@ sub restore_state {
 
 	map{ 
 		my %h = %$_; 
-		my $track = ::Track->new( %h ) ; # initially Audio::Nama::Track 
-		if ( $track->class ){ bless $track, $track->class } # current scheme
+		my $class = $h{class} || "::Track";
+		my $track = $class->new( %h );
 	} @tracks_data;
 
 	$mastering_mode = $current_master_mode;
@@ -4499,8 +4507,99 @@ sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
 
 sub channels { [split ',', $_[0] ]->[1] }
 	
-	
-	
+sub new_project_template {
+	my ($template_name, $template_description) = @_;
 
+	my @tracks = ::Track::all();
+
+	# skip if project is empty
+
+	say("No user tracks found, aborting.\n",
+		"Cannot create template from an empty project."), 
+		return if scalar @tracks < 3;
+
+	# save current project status to temp state file 
+	
+	my $previous_state = '_previous_state.yml';
+	save_state($previous_state);
+
+	# edit current project into a template
+	
+	# No tracks are recorded, so we'll remove 
+	#	- version (still called 'active')
+	# 	- track caching
+	# 	- region start/end points
+	# 	- effect_chain_stack
+	
+	# We throw away 
+	# 	- vol/pan caching  	TODO unmute tracks 
+
+	map{ my $track = $_;
+		 map{ $track->set($_ => undef)  } 
+			qw(	active 
+				cache_map
+				effect_chain_stack
+				old_vol_level
+				old_pan_level
+				region_start
+				region_end
+			)
+	} ::Track::all();
+	map{ my $track = $_
+		
+	} ::Track::all();
+
+	# Throw away command history
+	
+	$term->SetHistory();
+	
+	# Buses needn't set version info either
+	
+	map{$_->set(version => undef)} values %::Bus::by_name;
+	
+	# create template directory if necessary
+	
+	mkdir join_path(project_root(), "templates");
+
+	# save to template name
+	
+	save_state( join_path(project_root(), "templates", "$template_name.yml"));
+
+	# add description, but where?
+	
+	# recall temp name
+	
+ 	load_project(  # restore_state() doesn't do the whole job
+ 		name     => $project_name,
+ 		settings => $previous_state,
+	);
+
+	# remove temp state file
+	
+	unlink join_path( project_dir(), "$previous_state.yml") ;
+	
+}
+sub use_project_template {
+	my $name = shift;
+	my @tracks = ::Track::all();
+
+	# skip if project isn't empty
+
+	say("User tracks found, aborting. Use templates in an empty project."), 
+		return if scalar @tracks > 2;
+
+	# load template
+	
+ 	load_project(
+ 		name     => $project_name,
+ 		settings => join_path(project_root(),"templates",$name),
+	);
+	save_state();
+}
+sub list_project_templates {
+	my $io = io(join_path(project_root(), "templates"));
+	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $io->all;        
+	pager(@templates);
+}
 
 ### end
