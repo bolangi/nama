@@ -4538,12 +4538,17 @@ sub new_project_template {
 		 $track->unmute;
 		 map{ $track->set($_ => undef)  } 
 			qw(	active 
-				cache_map
-				effect_chain_stack
 				old_pan_level
 				region_start
 				region_end
-			)
+			);
+		 map{ $track->set($_ => [])  } 
+			qw(	effect_chain_stack      
+		);
+		 map{ $track->set($_ => {})  } 
+			qw( cache_map )	
+		);
+		
 	} @tracks;
 
 	# Throw away command history
