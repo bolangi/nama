@@ -1048,8 +1048,8 @@ sub add_paths_for_recording {
 	$debug2 and say "&add_paths_for_recording";
 	return if $preview; # don't record during preview modes
 
-	# we record tracks set to REC, unless rec_defeat is set 
-	# or the track belongs to the 'null' group
+	# get list of REC-status tracks to record
+	
 	my @tracks = grep{ 
 			(ref $_) !~ /Slave/  						# don't record slave tracks
 			and not $_->group =~ /null|Mixdown|Temp/ 	# nor these groups
@@ -1165,6 +1165,9 @@ sub process_routing_graph {
 	my @out_keys = values %outputs;
 	use warnings 'numeric';
 	%is_ecasound_chain = map{ $_, 1} map{ @$_ } values %inputs;
+
+	# sort entries into an aesthetic order
+
 	%inputs = reverse %inputs;	
 	%outputs = reverse %outputs;	
 	@input_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;

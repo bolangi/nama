@@ -446,7 +446,6 @@ sub set_io {
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
 } 
-
 sub source { # command for setting, showing track source
 	my ($track, $id) = @_;
 	$track->set_io( 'source', $id);
