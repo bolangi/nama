@@ -1360,19 +1360,19 @@ sub signal_format {
 
 ## transport functions
 sub load_ecs {
-		my $setup = setup_file();
-		#say "setup file: $setup " . ( -e $setup ? "exists" : "");
-		return unless -e $setup;
-		#say "passed conditional";
-		teardown_engine();
-		eval_iam("cs-load $setup");
-		eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
-		$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
-		1;
+	my $setup = setup_file();
+	#say "setup file: $setup " . ( -e $setup ? "exists" : "");
+	return unless -e $setup;
+	#say "passed conditional";
+	teardown_engine();
+	eval_iam("cs-load $setup");
+	eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
+	$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
+	1;
 }
 sub teardown_engine {
-		eval_iam("cs-disconnect") if eval_iam("cs-connected");
-		eval_iam("cs-remove") if eval_iam("cs-selected");
+	eval_iam("cs-disconnect") if eval_iam("cs-connected");
+	eval_iam("cs-remove") if eval_iam("cs-selected");
 }
 
 sub arm {
