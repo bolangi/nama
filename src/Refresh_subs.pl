@@ -94,7 +94,7 @@ sub refresh_track {
 }
 
 sub refresh {  
-	remove_small_wavs();
+	remove_riff_header_stubs();
  	$ui->refresh_group(); 
 	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::Track::all();
 	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::Track::all();

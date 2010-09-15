@@ -561,7 +561,7 @@ Loading project "untitled".
 	teardown_engine(); # initialize_ecasound_engine; 
 	initialize_buses();	
 	initialize_project_data();
-	remove_small_wavs(); 
+	remove_riff_header_stubs(); 
 	rememoize();
 
 	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
@@ -870,12 +870,12 @@ sub dig_ruins { # only if there are no tracks
 
 }
 
-sub remove_small_wavs {
+sub remove_riff_header_stubs {
 
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 	
-	$debug2 and print "&remove_small_wavs\n";
+	$debug2 and print "&remove_riff_header_stubs\n";
 	
 
 	$debug and print "this wav dir: ", this_wav_dir(), $/;
@@ -1555,6 +1555,7 @@ sub adjust_latency {
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $no_transport_status = shift;
+	remove_riff_header_stubs();
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
@@ -4280,7 +4281,7 @@ sub list_effect_chains {
 	} @ids;
 }
 sub cleanup_exit {
- 	remove_small_wavs();
+ 	remove_riff_header_stubs();
  	kill 15, ecasound_pid() if $sock;  	
 	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 
