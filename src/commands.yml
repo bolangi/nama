@@ -404,15 +404,15 @@ new_project_template:
 use_project_template:
   type: project
   what: use a template to create tracks for a new, empty project
-  short: upt
+  short: upt apt
 list_project_templates:
   type: project
   what: list project templates
   short: lpt
-remove_project_template:
+delete_project_template:
   type: project
   what: remove one or more project templates
-  short: rpt
+  short: dpt
   parameters: <s_template_name1> [<s_template_name2>... ]
 generate:
   type: setups

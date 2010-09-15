@@ -137,7 +137,7 @@ ident: /[-\w]+/   | <error: illegal identifier, word characters only!>
 
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
-	print("$item[1]}: non-existent mark name. Skipping\n"), return undef 
+	print("$item[1]: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
@@ -631,7 +631,11 @@ existing_bus_name: bus_name {
 	else { print("$item{bus_name}: no such bus\n"); undef }
 }
 
-bus_name: /[A-Z]\w+/
+bus_name: /\w+/ {
+	return $item[1] if $item[1] =~ /^[A-Z]/ ;
+	print("Bus name must begin with capital letter.\n"); 
+	return
+}
 
 destination: jack_port # include channel, loop,device, jack_port
 
