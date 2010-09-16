@@ -335,7 +335,7 @@ sub device_id {
 	my $client = $io->direction eq 'input' 
 		? $io->source_id
 		: $io->send_id;
-	# quote client name if necessary
+	# quote client name if necessary, and if not already quoted
 	$client = qq("$client") if $client =~ /\s/ and ! $client =~ /^"/;
 	"jack,$client"
 }
