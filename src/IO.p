@@ -335,6 +335,8 @@ sub device_id {
 	my $client = $io->direction eq 'input' 
 		? $io->source_id
 		: $io->send_id;
+	# quote client name if necessary
+	$client = qq("$client") if $client =~ /\s/ and ! $client =~ /^"/;
 	"jack,$client"
 }
 package ::IO::from_jack_client;
