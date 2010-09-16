@@ -409,10 +409,10 @@ list_project_templates:
   type: project
   what: list project templates
   short: lpt
-delete_project_template:
+remove_project_template:
   type: project
   what: remove one or more project templates
-  short: dpt
+  short: rpt dpt
   parameters: <s_template_name1> [<s_template_name2>... ]
 generate:
   type: setups
