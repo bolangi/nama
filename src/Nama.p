@@ -112,7 +112,7 @@ $main_out = 1; # enable main output
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
 $memoize = 1;
-$volume_control_operator = 'ea'; # don't break Stephanie's system
+$volume_control_operator = 'ea'; # default to linear scale
 %mute_level 	= (ea => 0, 	eadb => -96); 
 %fade_out_level = (ea => 0, 	eadb => -40);
 %unity_level 	= (ea => 100, 	eadb => 0); 
