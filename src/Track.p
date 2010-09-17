@@ -408,9 +408,9 @@ sub set_io {
 		return;
 	}
 	if( $id eq 'jack'){
-		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
+		my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
  		$track->set($type_field => 'jack_port',
- 					source_id => $port_name); 
+ 					$id_field => $port_name); 
  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
  		return;
 	} 
@@ -434,11 +434,13 @@ sub set_io {
 				$track->name, ": track set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.';
 		}
-		when ($_ eq 'jack_manual' or $_ eq 'jack'){
+		when ('jack_manual'){
 			my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
 
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
+			$id = $port_name;
+			$type = 'jack_port';
 		}
 		when( 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
