@@ -319,6 +319,16 @@ sub snapshot {
 
 # for graph-style routing
 
+# translate the new source_type designations to the old API
+{
+my %translate = qw(
+	soundcard soundcard
+	jack_port jack_port
+	jack_manual jack_port
+	jack_ports_list jack_port
+	jack_client jack_client
+	null null
+);
 sub input_path { # signal path, not file path
 
 	my $track = shift;
@@ -328,7 +338,7 @@ sub input_path { # signal path, not file path
 	if($track->rec_status eq 'REC'){
 
 		if ($track->source_type =~ /soundcard|jack_client|jack_port|null/){
-			( ::input_node($track->source_type) , $track->name)
+			( ::input_node($translate{$track->source_type}) , $track->name)
 		} 
 
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
@@ -338,6 +348,7 @@ sub input_path { # signal path, not file path
 		('wav_in', $track->name) 
 
 	}
+}
 }
 
 
