@@ -336,11 +336,8 @@ sub input_path { # signal path, not file path
 	# create edge representing live sound source input
 	
 	if($track->rec_status eq 'REC'){
-
-		if ($track->source_type =~ /soundcard|jack_client|jack_port|null/){
+			return () if $track->source_type eq 'bus';
 			( ::input_node($translate{$track->source_type}) , $track->name)
-		} 
-
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 
 	# create edge representing WAV file input
@@ -512,21 +509,24 @@ sub set_send { # wrapper
 	}
 }
 
-
+{
+my %object_to_text = (
+	soundcard 		=> 'soundcard channel',
+	jack_client 	=> 'JACK client',
+	jack_manual     => 'JACK port',
+	jack_port   	=> 'JACK port',
+	loop 			=> 'loop device',
+	jack_ports_list => "JACK ports list",
+	bus				=> "bus",
+);
 sub object_as_text {
 	my ($track, $direction) = @_; # $direction: source | send
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
-	
-	my $text;
-	given ($track->$type_field){
-		when('soundcard')  		{ $text = "soundcard channel "}
-		when('jack_client')		{ $text = "JACK client "}
-		when('loop')       		{ $text = "loop device "}
-		when('jack_ports_list') { $text = "JACK ports list "}
-		when('bus') 			{ $text = "bus "}
-	}
+	my $text = $object_to_text{$track->$type_field};
+	$text .= ' ';
 	$text .= $track->$id_field
+}
 }
 
 sub input_object { # for text display

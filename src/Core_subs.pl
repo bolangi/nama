@@ -4127,26 +4127,19 @@ sub add_send_bus {
 		
 }
 
-# sub dest_type { 
-# 	my $dest = shift;
-# 	if (defined $dest and ($dest !~ /\D/))        { 'soundcard' } # digits only
-# 	elsif ($dest =~ /^loop,/) { 'loop' }
-# 	elsif ($dest =~ /^\w+\.ports/){ 'jack_ports_list' }
-# 	elsif ($dest){  # any string 
-# 		#carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
-# 		'jack_client' ; }
-# 	else { undef }
-# }
 sub dest_type {
 	my $dest = shift;
-	if (defined $dest and ($dest !~ /\D/)) { 'soundcard'       } # digits only
-	elsif ($dest =~ /^loop,/)              { 'loop'            }
-	elsif ($dest =~ /^man/)                { 'jack_manual'     }
-	# following for backward compatibility
-	elsif ($dest eq 'jack')                { 'jack_manual'     }
-	elsif ($dest =~ /^\w+\.ports/)         { 'jack_ports_list' }
-	elsif ($dest)                          { 'jack_client'     }
-	else                                   {  undef            }
+	my $type;
+	given( $dest ){
+		when( undef )       {                           }
+		when(! /\D/)        { $type = 'soundcard'       } # digits only
+		when(/^loop,/)      { $type = 'loop'            }
+		when(/^man/)        { $type = 'jack_manual'     }
+		when('jack')        { $type = 'jack_manual'     }
+		when(/^\w+\.ports/) { $type = 'jack_ports_list' }
+		default             { $type = 'jack_client'     }
+	}
+	$type
 }
 	
 sub update_send_bus {
