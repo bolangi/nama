@@ -417,11 +417,6 @@ sub set_io {
 			continue;
 		} 
 		when ('jack_manual'){
-		my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
- 		$track->set($type_field => 'jack_port',
- 					$id_field => $port_name); 
- 		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
- 		return;
 			my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
 
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
