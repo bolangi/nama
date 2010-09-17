@@ -382,9 +382,14 @@ sub remove {
 # are issued in JACK or ALSA mode.
 
 sub soundcard_channel { $_[0] // 1 }
+
+
 sub set_io {
 	my ($track, $direction, $id) = @_;
 	# $direction: send | source
+	
+	# set $type and $id variables for assignment 
+	# to track source_* or send_* fields
 	
 	# these are the field names
 	my $type_field = $direction."_type";
@@ -394,19 +399,14 @@ sub set_io {
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
 	# set null values if we receive 'off' from track send/source widgets
+	# UNUSED???
 	if ( $id eq 'off'){ 
+		die $track->name. ": $direction\_id: off not expected";
 		$track->set($type_field => undef);
 		$track->set($id_field => undef);
 		say $track->name, ": disabling $direction.";
 		return;
 	}
-# 	if( $id =~ /\.ports$/){
-# 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
-#  		$track->set($type_field => 'jack_port',
-#  					source_id => $port_name); 
-#  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
-#  		return;
-# 	} 
 	if( $id eq 'jack'){
 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
  		$track->set($type_field => 'jack_port',
@@ -414,31 +414,40 @@ sub set_io {
  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
  		return;
 	} 
+	
 	# set values, returning new setting
 	my $type = ::dest_type( $id );
 	given ($type){
+		when ( /jack/ ){
+			say("JACK server not running! Cannot set JACK client or port as track source."), 
+				return unless $::jack_running
+		} 
 		when ('jack_client'){
-			if ( $::jack_running ){
-				my $client_direction = $direction eq 'source' ? 'output' : 'input';
-	
-				my $name = $track->name;
-				my $width = scalar @{ ::jack_client($id, $client_direction) };
-				$width or say 
-					qq($name: $direction port for JACK client "$id" not found.);
-				$width or return;
-				$width ne $track->width and say 
-					$track->name, ": track set to ", ::width($track->width),
-					qq(, but JACK source "$id" is ), ::width($width), '.';
-			} else {
-		say "JACK server not running! Cannot set JACK client as track source.";
-				return
-			} 
+			my $client_direction = $direction eq 'source' ? 'output' : 'input';
+
+			my $name = $track->name;
+			my $width = scalar @{ ::jack_client($id, $client_direction) };
+			$width or say 
+				qq($name: $direction port for JACK client "$id" not found.);
+			$width or return;
+			$width ne $track->width and say 
+				$track->name, ": track set to ", ::width($track->width),
+				qq(, but JACK source "$id" is ), ::width($width), '.';
 		}
-		when('jack_ports_list'){
-			say("$id: file not found in ",project_root(),". Skipping."), return
-				unless -e join_path( project_root(), $id );
-			# check if ports file parses
+		when ($_ eq 'jack_manual' or $_ eq 'jack'){
+			my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
+
+ 			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+			$id = 'manual';
+		}
+		when( 'jack_ports_list' ){
+			$id =~ /(\w+)\.ports/;
+			my $ports_file_name = ($1 || $track->name) .  '.ports';
+			$id = $ports_file_name;
 			# warn if ports do not exist
+			say("$id: ports file not found in ",project_root(),". Skipping."), 
+				return unless -e join_path( project_root(), $id );
+			# check if ports file parses
 		}
 	#	when('soundcard'){ }
 	#	when('loop'){ }
