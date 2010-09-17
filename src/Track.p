@@ -391,39 +391,58 @@ sub remove {
 
 sub soundcard_channel { $_[0] // 1 }
 
-
 sub set_io {
 	my ($track, $direction, $id) = @_;
 	# $direction: send | source
 	
-	# set $type and $id variables for assignment 
-	# to track source_* or send_* fields
+	# unless we are dealing with a simple query,
+	# by the end of this routine we are going to assign
+	# the following fields using the values in the 
+	# $type and $id variables:
+	#
+	#    source_type
+	#    source_id
+	#
+	#    -OR-
+	#
+	#    send_type
+	#    send_id
 	
-	# these are the field names
+	
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
 
 	# respond to a query (no argument)
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
-	# set null values if we receive 'off' from track send/source widgets
-	# UNUSED???
-	if ( $id eq 'off'){ 
-		die $track->name. ": $direction\_id: off not expected";
-		$track->set($type_field => undef);
-		$track->set($id_field => undef);
-		say $track->name, ": disabling $direction.";
-		return;
-	}
-	
 	# set values, returning new setting
 	my $type = ::dest_type( $id );
 	given ($type){
-		when ( /jack/ ){
-			say("JACK server not running! Cannot set JACK client or port as track source."), 
-				return unless $::jack_running;
-			continue;
+	
+		# some settings need no special adjustments
+
+		when('soundcard'){}
+		#when('loop')     {}  # unused at present
+		when ('bus')     {}
+
+		# rec_defeat tracks with 'null' input
+
+		when ('null'){ 
+			$track->set(rec_defeat => 1);
+			say $track->name, ": recording disabled by default for 'null' input.";
+			say "Use 'rec_enable' if necessary";
+		}
+
+		# don't allow user to set JACK I/O unless JACK server is running
+		
+ 		when ( /jack/ ){
+			say("JACK server not running! "
+				,"Cannot set JACK client or port as track source."), 
+					return unless $::jack_running;
+
+			continue; # don't break out of given/when chain
 		} 
+
 		when ('jack_manual'){
 			my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
 
@@ -453,8 +472,6 @@ sub set_io {
 				return unless -e join_path( project_root(), $id );
 			# check if ports file parses
 		}
-	#	when('soundcard'){ }
-	#	when('loop'){ }
 	}
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
@@ -478,6 +495,9 @@ sub set_source { # called from parser
 		print $track->name, ": input unchanged, $object\n";
 	} else {
 		print $track->name, ": input set to $object\n";
+		# re-enable recording of null-source tracks
+		say($track->name, ": record enabled"),
+		$track->set(rec_defeat => 0) if $old_source eq 'null';
 	}
 }
 
