@@ -1,3 +1,12 @@
+# to initialize the environment, we
+
+# 1. use Audio::Nama (pull in the whole application)
+
+# 2. set the current namespace to Audio::Nama 
+     (so we can put both hands in abdominal cavity)
+
+# 3. declare variables by including the declarations blocks of Nama.pm
+
 package ::;
 use Test::More qw(no_plan);
 use strict;
