@@ -105,16 +105,9 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 
-# The following track-related routines belong here
+# The following methods were moved here from the Track class
 # because they are only used in generating chain setups.
-# They are accessed via AUTOLOAD, querying the track object
-# associated with a particular IO object
-
-# If there is no track for an object, the object must
-# provide any needed data
-
-
-# so chcopy for MON/mono_WAV and REC/mono_track
+# They retain $track as the $self variable.
 
 sub _mono_to_stereo{
 
