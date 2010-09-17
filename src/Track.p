@@ -407,21 +407,28 @@ sub set_io {
 		say $track->name, ": disabling $direction.";
 		return;
 	}
-	if( $id eq 'jack'){
-		my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
- 		$track->set($type_field => 'jack_port',
- 					$id_field => $port_name); 
- 		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
- 		return;
-	} 
 	
 	# set values, returning new setting
 	my $type = ::dest_type( $id );
 	given ($type){
 		when ( /jack/ ){
 			say("JACK server not running! Cannot set JACK client or port as track source."), 
-				return unless $::jack_running
+				return unless $::jack_running;
+			continue;
 		} 
+		when ('jack_manual'){
+		my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
+ 		$track->set($type_field => 'jack_port',
+ 					$id_field => $port_name); 
+ 		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+ 		return;
+			my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
+
+ 			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+			$id = 'manual';
+			$id = $port_name;
+			$type = 'jack_port';
+		}
 		when ('jack_client'){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
 
@@ -433,14 +440,6 @@ sub set_io {
 			$width ne $track->width and say 
 				$track->name, ": track set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.';
-		}
-		when ('jack_manual'){
-			my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
-
- 			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
-			$id = 'manual';
-			$id = $port_name;
-			$type = 'jack_port';
 		}
 		when( 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
