@@ -419,11 +419,11 @@ sub set_io {
 	my $type = ::dest_type( $id );
 	given ($type){
 	
-		# some settings need no special adjustments
+		# no data changes needed for some settings
 
 		when('soundcard'){}
-		#when('loop')     {}  # unused at present
 		when ('bus')     {}
+		#when('loop')     {}  # unused at present
 
 		# rec_defeat tracks with 'null' input
 
@@ -533,8 +533,8 @@ sub set_send { # wrapper
 my %object_to_text = (
 	soundcard 		=> 'soundcard channel',
 	jack_client 	=> 'JACK client',
-	jack_manual     => 'JACK port',
-	jack_port   	=> 'JACK port',
+	jack_manual     => 'JACK manual port',
+	jack_port   	=> 'JACK manual port',
 	loop 			=> 'loop device',
 	jack_ports_list => "JACK ports list",
 	bus				=> "bus",
