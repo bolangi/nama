@@ -557,7 +557,7 @@ sub track_gui {
 	$number = $track_frame->Label(-text => $n,
 									-justify => 'left');
 	my $stub = " ";
-	$stub .= $ti{$n}->active;
+	$stub .= $ti{$n}->version;
 	$name = $track_frame->Label(
 			-text => $ti{$n}->name,
 			-justify => 'left');
@@ -579,7 +579,7 @@ sub track_gui {
 						-variable => \$indicator,
 						-command => 
 		sub { 
-			$ti{$n}->set( active => $v );
+			$ti{$n}->set( version => $v );
 			return if $ti{$n}->rec_status eq "REC";
 			$version->configure( -text=> $ti{$n}->current_version );
 			reconfigure_engine();

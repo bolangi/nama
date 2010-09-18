@@ -1930,7 +1930,7 @@ sub new_files_were_recorded {
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
-						$tn{$name}->set(active => undef) if $tn{$name};
+						$tn{$name}->set(version => undef) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
 					1;
 					}
@@ -3270,12 +3270,23 @@ sub restore_state {
 
 	}
 
+	if ( $saved_version <= 1.055){ 
+
 	# get rid of Null bus routing
 	
-	map{$_->{group}       = 'Main'; 
-		$_->{source_type} = 'null';
-		$_->{source_id}   = 'null';
-  	} grep{$_->{group} eq 'Null'} @tracks_data;
+		map{$_->{group}       = 'Main'; 
+			$_->{source_type} = 'null';
+			$_->{source_id}   = 'null';
+		} grep{$_->{group} eq 'Null'} @tracks_data;
+
+	}
+
+	if ( $saved_version <= 1.064){ 
+		map{$_->{version} = $_->{active};
+			delete $_->{active}}
+			grep{$_->{active}}
+			@tracks_data;
+	}
 
 	$debug and print "inserts data", yaml_out \@inserts_data;
 
@@ -4426,8 +4437,8 @@ sub uncache_track {
 
 		# original WAV -> WAV case: reset version 
 		if ( $cache_map->{$version}{original} ){ 
-			$track->set(active => $cache_map->{$version}{original});
-			print $track->name, ": setting uncached version ", $track->active, $/;
+			$track->set(version => $cache_map->{$version}{original});
+			print $track->name, ": setting uncached version ", $track->version, $/;
 
 		# assume a sub-bus mix track, i.e. REC -> WAV: set to REC
 		} else { 
@@ -4554,7 +4565,7 @@ sub new_project_template {
 	map{ my $track = $_;
 		 $track->unmute;
 		 map{ $track->set($_ => undef)  } 
-			qw(	active 
+			qw( version	
 				old_pan_level
 				region_start
 				region_end

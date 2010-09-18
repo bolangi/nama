@@ -199,8 +199,8 @@ sub monitor_version {
 	my $track = shift;
 
 	my $group = $::Bus::by_name{$track->group};
-	return $track->active if $track->active 
-				and grep {$track->active  == $_ } @{$track->versions} ;
+	return $track->version if $track->version 
+				and grep {$track->version  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
 				and grep {$group->version  == $_ } @{$track->versions};
 	return undef if $group->version;
@@ -506,10 +506,10 @@ sub set_version {
 	my $name = $track->name;
 	if ($n == 0){
 		print "$name: following latest version\n";
-		$track->set(active => $n)
+		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
 		print "$name: anchoring version $n\n";
-		$track->set(active => $n)
+		$track->set(version => $n)
 	} else { 
 		print "$name: version $n does not exist, skipping.\n"
 	}

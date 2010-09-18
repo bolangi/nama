@@ -1,7 +1,7 @@
 package ::Wav;
 our $VERSION = 1.0;
 our @ISA; 
-use ::Object qw(name active dir);
+use ::Object qw(name version dir);
 use warnings;
 use ::Assign qw(:all);
 use Memoize qw(memoize unmemoize);
