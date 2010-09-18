@@ -179,14 +179,14 @@ sub send_output {
 
 sub send_type_string { $_[0]->send_output()->[0] }
 sub send_device_string { $_[0]->send_output()->[1] }
-sub playat_output {
+sub _playat_output {
 	my $track = shift;
 	if ( $track->playat_time ){
 		join ',',"playat" , $track->playat_time;
 	}
 }
 
-sub select_output {
+sub _select_output {
 	my $track = shift;
 	if ( $track->region_start and $track->region_end){
 		my $end = $track->region_end_time;

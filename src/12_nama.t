@@ -9,6 +9,7 @@
 
 package ::;
 use Test::More qw(no_plan);
+use ::Assign qw(yaml_in yaml_out);
 use strict;
 use warnings;
 no warnings qw(uninitialized);
@@ -110,6 +111,88 @@ like(ref $this_track, qr/Track/, "track creation");
 is( $this_track->name, 'sax', "current track assignment");
 
 command_process('source 2');
+
+my @io_test_data = split "\n\n",
+my $yaml = q(---
+-
+  class: from_null
+  ecs_string: -i:null
+-
+  class: to_null
+  ecs_string: -o:null
+-
+  class: to_wav
+  args:
+    track: sax
+  ecs_string: /-f:s16_le,1,44100.+sax_\d+.wav/
+-
+  class: from_wav
+  args:
+    track: sax
+  ecs_string: /sax_\d+.wav/
+-
+  class: from_wav
+  args:
+    track: sax
+    playat_output: playat,5
+    select_output: select,1,4
+  ecs_string: /-i:playat,5,select,1,4,.+sax_\d+.wav/
+  comments: TODO: test through track logic (this test uses override)
+-
+  class: from_loop
+  ecs_string: -i:loop,endpoint
+-
+  class: to_loop
+  ecs_string: -o:loop,endpoint
+-
+  class: from_soundcard
+  ecs_string: dfdsf
+-
+  class: from_jack_client
+  ecs_string: -i:jack,client
+-
+  class: to_jack_client
+  ecs_string: -o:jack,client
+-
+  class: to_jack_multi
+  ecs_string: -i:jack_multi,
+-
+  class: from_jack_multi
+  ecs_string: -o:jack_multi,
+-
+  class: to_jack_port
+  ecs_string: -o:jack_multi,
+-
+  class: from_jack_port
+  ecs_string: -o:jack_multi,
+-
+  class: to_soundcard_device
+  ecs_string: adsfadsf
+-
+  class: from_soundcard_device
+  ecs_string: asdfadsf
+...);
+
+my @test = @{yaml_in($yaml)};
+
+
+my $i;
+
+
+for (@test[0..4]) {
+	my %t = %$_;
+	$i++;
+	diag "test $i";
+	my $class = "Audio::Nama::IO::$t{class}";
+	my $io = $class->new(%{$t{args}});
+	my @keys = sort grep{ $_ ne 'class'} keys %t;
+	if( $t{ecs_string} =~ m(^/)){
+		like( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
+	}else{
+		is(   $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
+	}
+}
+	
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
