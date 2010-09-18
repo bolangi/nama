@@ -112,87 +112,6 @@ is( $this_track->name, 'sax', "current track assignment");
 
 command_process('source 2');
 
-my @io_test_data = split "\n\n",
-my $yaml = q(---
--
-  class: from_null
-  ecs_string: -i:null
--
-  class: to_null
-  ecs_string: -o:null
--
-  class: to_wav
-  args:
-    track: sax
-  ecs_string: /-f:s16_le,1,44100.+sax_\d+.wav/
--
-  class: from_wav
-  args:
-    track: sax
-  ecs_string: /sax_\d+.wav/
--
-  class: from_wav
-  args:
-    track: sax
-    playat_output: playat,5
-    select_output: select,1,4
-  ecs_string: /-i:playat,5,select,1,4,.+sax_\d+.wav/
-  comments: TODO: test through track logic (this test uses override)
--
-  class: from_loop
-  ecs_string: -i:loop,endpoint
--
-  class: to_loop
-  ecs_string: -o:loop,endpoint
--
-  class: from_soundcard
-  ecs_string: dfdsf
--
-  class: from_jack_client
-  ecs_string: -i:jack,client
--
-  class: to_jack_client
-  ecs_string: -o:jack,client
--
-  class: to_jack_multi
-  ecs_string: -i:jack_multi,
--
-  class: from_jack_multi
-  ecs_string: -o:jack_multi,
--
-  class: to_jack_port
-  ecs_string: -o:jack_multi,
--
-  class: from_jack_port
-  ecs_string: -o:jack_multi,
--
-  class: to_soundcard_device
-  ecs_string: adsfadsf
--
-  class: from_soundcard_device
-  ecs_string: asdfadsf
-...);
-
-my @test = @{yaml_in($yaml)};
-
-
-my $i;
-
-
-for (@test[0..4]) {
-	my %t = %$_;
-	$i++;
-	diag "test $i";
-	my $class = "Audio::Nama::IO::$t{class}";
-	my $io = $class->new(%{$t{args}});
-	my @keys = sort grep{ $_ ne 'class'} keys %t;
-	if( $t{ecs_string} =~ m(^/)){
-		like( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
-	}else{
-		is(   $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
-	}
-}
-	
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
@@ -220,9 +139,125 @@ $io = ::IO::to_soundcard->new(track => 'sax');
 is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
 is ($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
 
-
 force_jack();
 
+### Unit Tests for ::IO.pm
+
+# - tests are not wholly unit tests
+# - some dependence on an existing track 'sax'
+# - coverage overlaps tests the follow
+
+my @io_test_data = split "\n\n",
+my $yaml = q(---
+-
+  class: from_null
+  ecs_string: -i:null
+-
+  class: to_null
+  ecs_string: -o:null
+-
+  class: to_wav
+  args:
+    name: sax
+    width: 1
+    full_path: test_dir/sax_1.wav
+  ecs_string: -f:s16_le,1,44100,i -o:test_dir/sax_1.wav
+-
+  class: from_wav
+  args:
+    playat_output: playat,5
+    select_output: select,1,4
+    modifiers: []
+    full_path: test_dir/sax_1.wav
+  ecs_string: /-i:playat,5,select,1,4,.+sax_\d+.wav/
+-
+  class: from_loop
+  args:
+    endpoint: sax_in
+  ecs_string: -i:loop,sax_in
+-
+  class: to_loop
+  args:
+    endpoint: sax_out
+  ecs_string: -o:loop,sax_out
+-
+  class: to_soundcard_device
+  ecs_string: -o:alsa,default
+-
+  class: from_soundcard_device
+  ecs_string: -i:alsa,default
+-
+  class: from_soundcard
+  args:
+    width: 1
+    source_id: 2
+  ecs_string: -i:jack_multi,system:capture_2
+-
+  class: to_soundcard
+  args:
+    width: 2
+    send_id: 5
+  ecs_string: -o:jack_multi,system:playback_5,system:playback_6
+-
+  class: to_jack_port
+  args:
+    track: sax
+  ecs_string: -f:f32_le,1,44100 -o:jack,,sax_out
+-
+  class: from_jack_port
+  args:
+    port_name: sax
+    width: 2
+  ecs_string: -f:f32_le,2,44100 -i:jack,,sax_in
+-
+  class: from_jack_client
+  args:
+    source_id: Horgand
+    source_type: jack_client
+  ecs_string: -i:jack,Horgand
+-
+  class: to_jack_client
+  args:
+    send_id: system
+    send_type: jack_client
+  ecs_string: -o:jack,system
+-
+  class: to_jack_multi
+  track: sax
+  args:
+    width: 2
+    send_id: system
+    send_type: jack_multi
+  ecs_string: -o:jack_multi,system:playback_1,system:playback_2
+-
+  class: from_jack_multi
+  track: sax
+  args:
+    width: 2
+    source_id: Horgand
+    source_type: jack_client
+  ecs_string: -i:jack_multi,Horgand:out_1,Horgand:out_2
+...);
+
+my @test = @{yaml_in($yaml)};
+
+
+my $i;
+
+for (@test) {
+	my %t = %$_;
+	$i++;
+	diag "test $i";
+	my $class = "Audio::Nama::IO::$t{class}";
+	my $io = $class->new(%{$t{args}});
+	my @keys = sort grep{ $_ ne 'class'} keys %t;
+	if( $t{ecs_string} =~ m(^/)){
+		like( $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
+	}else{
+		is(   $io->ecs_string, $t{ecs_string}, "$t{class} ecs_string");
+	}
+}
+	
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
 like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');

@@ -221,7 +221,17 @@ sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
 	# can we route to these channels?
 	my $end   = $start + $width - 1;
-	my $max = scalar @{$::jack{$client}{$direction}};
+
+	# the following logic avoids deferencing undef for a 
+	# non-existent client, and correctly handles
+	# the case of a portname (containing colon)
+	
+	my $count_maybe_ref = $::jack{$client}{$direction};
+	my $max = ref $count_maybe_ref eq 'ARRAY' 
+		? scalar @$count_maybe_ref 
+		: $count_maybe_ref;
+
+	#my $max = scalar @{$::jack{$client}{$direction}};
 	die qq(JACK client "$client", direction: $direction
 channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;
