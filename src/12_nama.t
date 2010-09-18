@@ -102,50 +102,9 @@ load_project(name => $test_project, create => 1);
 
 is( project_dir(), "./$test_project", "establish project directory");
 
-force_alsa();
-
-command_process('add sax');
-
-like(ref $this_track, qr/Track/, "track creation"); 
-
-is( $this_track->name, 'sax', "current track assignment");
-
-command_process('source 2');
-
-
-is( $this_track->source_type, 'soundcard', "set soundcard input");
-is( $this_track->source_id,  2, "set input channel");
-
-command_process('send 5');
-
-# track sax, source 2, send 5
-
-is( $this_track->send_type, 'soundcard', 'set soundcard output');
-is( $this_track->send_id, 5, 'set soundcard output');
-
-# this is ALSA dependent (i.e. no JACK running)
-
-my $io = ::IO->new(track => 'sax');
-
-like( ref $io, qr/IO$/, 'IO base class object');
-
-$io = ::IO::to_soundcard_device->new(track => 'sax'); 
-
-is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
-is ($io->ecs_extra,  ' -chmove:1,5', 'IO to_soundcard_device 2');
-
-$io = ::IO::to_soundcard->new(track => 'sax'); 
-
-is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
-is ($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
-
 force_jack();
 
 ### Unit Tests for ::IO.pm
-
-# - tests are not wholly unit tests
-# - some dependence on an existing track 'sax'
-# - coverage overlaps tests the follow
 
 my @io_test_data = split "\n\n",
 my $yaml = q(---
@@ -201,7 +160,8 @@ my $yaml = q(---
 -
   class: to_jack_port
   args:
-    track: sax
+    width: 1
+    port_name: sax
   ecs_string: -f:f32_le,1,44100 -o:jack,,sax_out
 -
   class: from_jack_port
@@ -223,7 +183,6 @@ my $yaml = q(---
   ecs_string: -o:jack,system
 -
   class: to_jack_multi
-  track: sax
   args:
     width: 2
     send_id: system
@@ -231,7 +190,6 @@ my $yaml = q(---
   ecs_string: -o:jack_multi,system:playback_1,system:playback_2
 -
   class: from_jack_multi
-  track: sax
   args:
     width: 2
     source_id: Horgand
@@ -247,7 +205,7 @@ my $i;
 for (@test) {
 	my %t = %$_;
 	$i++;
-	diag "test $i";
+	diag "IO.pm unit test $i";
 	my $class = "Audio::Nama::IO::$t{class}";
 	my $io = $class->new(%{$t{args}});
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
@@ -258,6 +216,46 @@ for (@test) {
 	}
 }
 	
+
+force_alsa();
+
+command_process('add sax');
+
+like(ref $this_track, qr/Track/, "track creation"); 
+
+is( $this_track->name, 'sax', "current track assignment");
+
+command_process('source 2');
+
+
+is( $this_track->source_type, 'soundcard', "set soundcard input");
+is( $this_track->source_id,  2, "set input channel");
+
+command_process('send 5');
+
+# track sax, source 2, send 5
+
+is( $this_track->send_type, 'soundcard', 'set soundcard output');
+is( $this_track->send_id, 5, 'set soundcard output');
+
+# this is ALSA dependent (i.e. no JACK running)
+
+my $io = ::IO->new(track => 'sax');
+
+like( ref $io, qr/IO$/, 'IO base class object');
+
+$io = ::IO::to_soundcard_device->new(track => 'sax'); 
+
+is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
+is ($io->ecs_extra,  ' -chmove:1,5', 'IO to_soundcard_device 2');
+
+$io = ::IO::to_soundcard->new(track => 'sax'); 
+
+is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
+is ($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
+
+force_jack();
+
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
 like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
