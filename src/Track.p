@@ -446,7 +446,7 @@ sub set_io {
 
 		when ('jack_manual'){
 
-			my $port_name = ::IO::jack_manual_port($track->name,$direction);
+			my $port_name = $track->jack_manual_port($direction);
 
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
@@ -710,6 +710,10 @@ sub import_audio  {
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
+sub jack_manual_port {
+	my ($track, $direction) = @_;
+	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
+}
 
 sub bus_tree { # for solo function to work in sub buses
 	my $track = shift;
