@@ -200,6 +200,7 @@ sub soundcard_input_device_string {
 sub soundcard_output_device_string {
 	$::jack_running ? 'system' : $::alsa_playback_device
 }
+
 sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
 	# can we route to these channels?
@@ -224,8 +225,9 @@ sub quote_jack_port {
 
 ### subclass definitions
 
-### we add an underscore _ to any method name that
-### we want to override
+### method names with a preceding underscore 
+### can be overridded by the object constructor
+
 package ::IO::from_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'null' } # 
@@ -311,18 +313,11 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 
-	my $io = shift;
-	my $client = $io->direction eq 'input' 
-		? $io->source_id
-		: $io->send_id;
-	# quote client name if necessary, and if not already quoted
-	$client = ::IO::quote_jack_client($client);
-	"jack,$client"
-}
+sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
+
 package ::IO::from_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 'jack,'.$_[0]->source_id}
+sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
 sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::from_soundcard_device;
