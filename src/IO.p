@@ -44,6 +44,30 @@ our %io_class = qw(
 	jack_client_out			::IO::to_jack_client
 	);
 
+### class descriptions
+
+# === CLASS ::IO::from_jack_port ===
+#
+# is triggered by source_type codes: 
+#
+#  + jack_manual_in 
+#  + jack_ports_list_in
+#
+# For track 'piano', the class creates an input similar to:
+#
+# -i:jack,,piano_in 
+#
+# which receives input from JACK node: 
+#
+#  + ecasound:piano_in,
+# 
+# If piano is stereo, the actual ports will be:
+#
+#  + ecasound:piano_in_1
+#  + ecasound:piano_in_2
+
+# (CLASS ::IO::to_jack_port is similar)
+
 ### class definition
 
 our $AUTOLOAD;
@@ -140,9 +164,6 @@ sub _mono_to_stereo{
 	else { $nocopy }
 }
 
-sub soundcard_input { 
-	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
-}
 sub playat_output {
 	my $track = shift;
 	if ( $track->playat_time ){
