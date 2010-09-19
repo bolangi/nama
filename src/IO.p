@@ -143,27 +143,6 @@ sub _mono_to_stereo{
 sub soundcard_input { 
 	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
 }
-sub source_input {
-	my $track = shift;
-	given ( $track->source_type ){
-		when ( 'soundcard'  ){ return $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
-		when ('jack_manual'){
-			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		default { say $track->name, ": unsupported source type: $_"; return [] }
-	}
-}
-
-#sub source_type_string { $_[0]->source_input()->[0] }
-sub source_device_string { $_[0]->source_input()->[1] }
 sub playat_output {
 	my $track = shift;
 	if ( $track->playat_time ){
@@ -180,8 +159,6 @@ sub select_output {
 		join ',',"select", $start, $length
 	}
 }
-
-
 ###  utility subroutines
 
 sub get_class {
@@ -324,12 +301,8 @@ sub device_id {
 }
 package ::IO::from_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 'jack,'.$_[0]->source_device_string}
+sub device_id { 'jack,'.$_[0]->source_id}
 sub ecs_extra { $_[0]->mono_to_stereo}
-
-#package ::IO::from_jack_client;
-#use Modern::Perl; use vars qw(@ISA); @ISA = '::IO_client';
-#sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
