@@ -1618,7 +1618,7 @@ sub connect_jack_ports {
 	map{  my $track = $_; 
  		  my $name = $track->name;
  		  my $dest = "ecasound:$name\_in_";
- 		  my $file = join_path(project_root(), $track->source_id);
+				 		  my $file = join_path(project_root(), $track->source_id);
 		  my $line_number = 0;
 		  if( $track->rec_status eq 'REC' and -e $file){ 
 			for (io($file)->slurp){   
@@ -3298,7 +3298,7 @@ sub restore_state {
 				$_->{source_id} = $default_list;
 			} else { 
 				$_->{source_type} = 'jack_manual';
-				$_->{source_id} = ::IO::jack_manual_port($_->name,'input');
+				$_->{source_id} = ::IO::jack_manual_port($_->{name},'input');
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}

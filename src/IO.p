@@ -36,6 +36,8 @@ our %io_class = qw(
 	loop_sink				::IO::to_loop
 	jack_manual_in			::IO::from_jack_port
 	jack_manual_out			::IO::to_jack_port
+	jack_ports_list_in		::IO::from_jack_port
+	jack_ports_list_out		::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
 	jack_client_in			::IO::from_jack_client
