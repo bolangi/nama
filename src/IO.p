@@ -164,30 +164,6 @@ sub source_input {
 
 #sub source_type_string { $_[0]->source_input()->[0] }
 sub source_device_string { $_[0]->source_input()->[1] }
-sub send_output {
-	my $track = shift;
-	given ($track->send_type){
-		when ( 'soundcard' ){ 
-			if ($::jack_running) {
-				return ['jack_multi_out', 'system']
-			} else {return [ 'soundcard_device_out', $track->send_id] }
-		}
-		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_client_out', $track->send_id] }
-			else { carp $track->name . 
-					q(: auxilary send to JACK client specified,) .
-					q( but jackd is not running.  Skipping.);
-					return [];
-			}
-		}
-		when ('loop') { return [ 'loop_sink', $track->send_id ] }
-			
-		default { return [] }
-	}
- };
-
-sub send_type_string { $_[0]->send_output()->[0] }
-sub send_device_string { $_[0]->send_output()->[1] }
 sub playat_output {
 	my $track = shift;
 	if ( $track->playat_time ){
