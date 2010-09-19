@@ -1624,8 +1624,9 @@ sub connect_jack_ports {
 			for (io($file)->slurp){   
 					# $_ is the source port name
 					chomp;
-					# skip silently if port doesn't exist
-					return unless $jack{$_};	
+					# inform user if port doesn't exist
+					say($track->name, qq(: port "$_" not found. Skipping.)),
+						return unless $jack{$_};	
 		  			my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
 					# define offset once based on first port line
 					# ends in zero: 1 
@@ -4149,18 +4150,18 @@ sub dest_type {
 
 		# non JACK related
 
-		when('bus')			{ $type = 'bus'             }
-		when('null')        { $type = 'null'            }
-		when(/^loop,/)      { $type = 'loop'            }
+		when('bus')			   { $type = 'bus'             }
+		when('null')           { $type = 'null'            }
+		when(/^loop,/)         { $type = 'loop'            }
 
-		when(! /\D/)        { $type = 'soundcard'       } # digits only
+		when(! /\D/)           { $type = 'soundcard'       } # digits only
 
 		# JACK related
 
-		when(/^man/)        { $type = 'jack_manual'     }
-		when('jack')        { $type = 'jack_manual'     }
-		when(/^\w+\.ports/) { $type = 'jack_ports_list' }
-		default             { $type = 'jack_client'     }
+		when(/^man/)           { $type = 'jack_manual'     }
+		when('jack')           { $type = 'jack_manual'     }
+		when(/(^\w+\.)?ports/) { $type = 'jack_ports_list' }
+		default                { $type = 'jack_client'     }
 	}
 	$type
 }

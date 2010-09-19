@@ -470,8 +470,8 @@ sub set_io {
 			my $ports_file_name = ($1 || $track->name) .  '.ports';
 			$id = $ports_file_name;
 			# warn if ports do not exist
-			say("$id: ports file not found in ",project_root(),". Skipping."), 
-				return unless -e join_path( project_root(), $id );
+			say($track->name, qq(: ports file "$id" not found in ),::project_root(),". Skipping."), 
+				return unless -e join_path( ::project_root(), $id );
 			# check if ports file parses
 		}
 	}
