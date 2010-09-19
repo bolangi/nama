@@ -255,7 +255,7 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
-			when('jack_port'){ return 'REC' }
+			when('jack_manual'){ return 'REC' }
 			when('null'){ return 'REC' }
 			when('soundcard'){ return 'REC' }
 			when('bus'){ return 'REC' } # maybe $track->rw ??
@@ -450,7 +450,7 @@ sub set_io {
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
 			$id = $port_name;
-			$type = 'jack_port';
+			$type = 'jack_manual';
 		}
 		when ('jack_client'){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
