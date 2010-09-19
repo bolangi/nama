@@ -34,13 +34,39 @@ our %io_class = qw(
 	wav_out 				::IO::to_wav
 	loop_source				::IO::from_loop
 	loop_sink				::IO::to_loop
-	jack_port_in			::IO::from_jack_port
-	jack_port_out 			::IO::to_jack_port
+	jack_manual_in			::IO::from_jack_port
+	jack_manual_out			::IO::to_jack_port
+	jack_ports_list_in		::IO::from_jack_port
+	jack_ports_list_out		::IO::to_jack_port
 	jack_multi_in			::IO::from_jack_multi
 	jack_multi_out			::IO::to_jack_multi
 	jack_client_in			::IO::from_jack_client
 	jack_client_out			::IO::to_jack_client
 	);
+
+### class descriptions
+
+# === CLASS ::IO::from_jack_port ===
+#
+# is triggered by source_type codes: 
+#
+#  + jack_manual_in 
+#  + jack_ports_list_in
+#
+# For track 'piano', the class creates an input similar to:
+#
+# -i:jack,,piano_in 
+#
+# which receives input from JACK node: 
+#
+#  + ecasound:piano_in,
+# 
+# If piano is stereo, the actual ports will be:
+#
+#  + ecasound:piano_in_1
+#  + ecasound:piano_in_2
+
+# (CLASS ::IO::to_jack_port is similar)
 
 ### class definition
 
@@ -130,62 +156,12 @@ sub _mono_to_stereo{
 		 { $copy }
 	else { $nocopy }
 }
-
-sub soundcard_input { 
-	[::IO::soundcard_input_type_string(), $_[0]->source_id()]
-}
-sub source_input {
-	my $track = shift;
-	given ( $track->source_type ){
-		when ( 'soundcard'  ){ return $track->soundcard_input }
-		when ( 'jack_client'){
-			if ( $::jack_running ){ return ['jack_client_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		when ( 'loop'){ return ['loop_source',$track->source_id ] } 
-		when ('jack_port'){
-			if ( $::jack_running ){ return ['jack_port_in', $track->source_id] }
-			else { 	say($track->name. ": cannot set source ".$track->source_id
-				.". JACK not running."); return [] }
-		}
-		default { say $track->name, ": unsupported source type: $_"; return [] }
-	}
-}
-
-sub source_type_string { $_[0]->source_input()->[0] }
-sub source_device_string { $_[0]->source_input()->[1] }
-sub send_output {
-	my $track = shift;
-	given ($track->send_type){
-		when ( 'soundcard' ){ 
-			if ($::jack_running) {
-				return ['jack_multi_out', 'system']
-			} else {return [ 'soundcard_device_out', $track->send_id] }
-		}
-		when ('jack_client') { 
-			if ($::jack_running){return [ 'jack_client_out', $track->send_id] }
-			else { carp $track->name . 
-					q(: auxilary send to JACK client specified,) .
-					q( but jackd is not running.  Skipping.);
-					return [];
-			}
-		}
-		when ('loop') { return [ 'loop_sink', $track->send_id ] }
-			
-		default { return [] }
-	}
- };
-
-sub send_type_string { $_[0]->send_output()->[0] }
-sub send_device_string { $_[0]->send_output()->[1] }
 sub _playat_output {
 	my $track = shift;
 	if ( $track->playat_time ){
 		join ',',"playat" , $track->playat_time;
 	}
 }
-
 sub _select_output {
 	my $track = shift;
 	if ( $track->region_start and $track->region_end){
@@ -195,8 +171,6 @@ sub _select_output {
 		join ',',"select", $start, $length
 	}
 }
-
-
 ###  utility subroutines
 
 sub get_class {
@@ -217,6 +191,7 @@ sub soundcard_input_device_string {
 sub soundcard_output_device_string {
 	$::jack_running ? 'system' : $::alsa_playback_device
 }
+
 sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
 	# can we route to these channels?
@@ -236,13 +211,24 @@ sub jack_multi_route {
 channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;
 	join q(,),q(jack_multi),
-	@{$::jack{$client}{$direction}}[$start-1..$end-1];
+	map{quote_jack_port($_)}
+		@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
+sub default_jack_ports_list {
+	my ($track_name) = shift;
+	"$track_name.ports"
+}
+sub quote_jack_port {
+	my $port = shift;
+	($port =~ /\s/ and $port !~ /^"/) ? qq("$port") : $port
+}
+
 
 ### subclass definitions
 
-### we add an underscore _ to any method name that
-### we want to override
+### method names with a preceding underscore 
+### can be overridded by the object constructor
+
 package ::IO::from_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'null' } # 
@@ -293,11 +279,6 @@ sub new {
 	my $class = $io_class{::IO::soundcard_output_type_string()};
 	$class->new(@_);
 }
-package ::IO::from_jack_client;
-use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 'jack,'.$_[0]->source_device_string}
-sub ecs_extra { $_[0]->mono_to_stereo}
-
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
@@ -333,17 +314,12 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 
-	my $io = shift;
-	my $client = $io->direction eq 'input' 
-		? $io->source_id
-		: $io->send_id;
-	# quote client name if necessary, and if not already quoted
-	$client = qq("$client") if $client =~ /\s/ and ! $client =~ /^"/;
-	"jack,$client"
-}
+sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
+
 package ::IO::from_jack_client;
-use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_client';
+use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
+sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
+sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';

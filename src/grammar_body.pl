@@ -345,20 +345,8 @@ exit: _exit end {   ::save_state($::state_store_file);
 					::cleanup_exit();
                     1}	
 
-source: _source portsfile end { $::this_track->set_source($item{portsfile}); 1 }
-portsfile: /\w+\.ports/
-source: _source 'bus' end {$::this_track->set(
-		source_type => 'bus', 
-		source_id => 'bus'); 1 }
-source: _source 'null' end {
-		$::this_track->set(rec_defeat => 1,
-					source_type => 'null',
-					source_id => 'null');
- 		print $::this_track->name, ": Setting input to null device\n";
-	}
-source: _source jack_port end { $::this_track->set_source( $item{jack_port} ); 1 }
-	# jack_port can be 'jack' (manual connect) or a JACK client name
-	# set_io decides what to do
+source: _source source_id end { $::this_track->set_source($item{source_id}); 1 }
+source_id: shellish
 source: _source end { 
 	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
 	print "however track status is ", $::this_track->rec_status, "\n"

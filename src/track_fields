@@ -4,7 +4,8 @@
 					group 			# group affiliation
 
 					rw				# REC/MON/OFF setting
-					active			# version setting
+					active			# version setting #
+					version         # version setting
 					width			# channel count
 
 					ops 			# effect operators list

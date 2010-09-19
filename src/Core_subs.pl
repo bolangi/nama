@@ -1618,14 +1618,15 @@ sub connect_jack_ports {
 	map{  my $track = $_; 
  		  my $name = $track->name;
  		  my $dest = "ecasound:$name\_in_";
- 		  my $file = join_path(project_root(), $track->name.'.ports');
+				 		  my $file = join_path(project_root(), $track->source_id);
 		  my $line_number = 0;
 		  if( $track->rec_status eq 'REC' and -e $file){ 
 			for (io($file)->slurp){   
 					# $_ is the source port name
 					chomp;
-					# skip silently if port doesn't exist
-					return unless $jack{$_};	
+					# inform user if port doesn't exist
+					say($track->name, qq(: port "$_" not found. Skipping.)),
+						return unless $jack{$_};	
 		  			my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
 					# define offset once based on first port line
 					# ends in zero: 1 
@@ -1645,7 +1646,7 @@ sub connect_jack_ports {
 					system $cmd;
 			} ;
 		  }
- 	 } grep{ $_->source_type eq 'jack_port' and $_->rec_status eq 'REC' 
+ 	 } grep{ $_->source_type eq 'jack_ports_list' and $_->rec_status eq 'REC' 
 	 } ::Track::all();
 }
 
@@ -1930,7 +1931,7 @@ sub new_files_were_recorded {
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
-						$tn{$name}->set(active => undef) if $tn{$name};
+						$tn{$name}->set(version => undef) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
 					1;
 					}
@@ -3270,12 +3271,23 @@ sub restore_state {
 
 	}
 
+	if ( $saved_version <= 1.055){ 
+
 	# get rid of Null bus routing
 	
-	map{$_->{group}       = 'Main'; 
-		$_->{source_type} = 'null';
-		$_->{source_id}   = 'null';
-  	} grep{$_->{group} eq 'Null'} @tracks_data;
+		map{$_->{group}       = 'Main'; 
+			$_->{source_type} = 'null';
+			$_->{source_id}   = 'null';
+		} grep{$_->{group} eq 'Null'} @tracks_data;
+
+	}
+
+	if ( $saved_version <= 1.064){ 
+		map{$_->{version} = $_->{active};
+			delete $_->{active}}
+			grep{$_->{active}}
+			@tracks_data;
+	}
 
 	$debug and print "inserts data", yaml_out \@inserts_data;
 
@@ -3287,6 +3299,21 @@ sub restore_state {
 				$_->{send_id} = 1
 			}
 		} grep{$_->{name} eq 'Master'} @tracks_data;
+
+	if ( $saved_version <= 1.064){ 
+
+		map{ 
+			my $default_list = ::IO::default_jack_ports_list($_->{name});
+
+			if( -e join_path(project_root(),$default_list)){
+				$_->{source_type} = 'jack_ports_list';
+				$_->{source_id} = $default_list;
+			} else { 
+				$_->{source_type} = 'jack_manual';
+				$_->{source_id} = ($_->{target}||$_->{name}).'_in';
+			}
+		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
+	}
 
 	#  destroy and recreate all buses
 
@@ -3732,7 +3759,6 @@ sub jack_ports {
 	\%jack
 }
 	
-
 sub automix {
 
 	# get working track set
@@ -4127,15 +4153,28 @@ sub add_send_bus {
 		
 }
 
-sub dest_type { 
+sub dest_type {
 	my $dest = shift;
-	if (defined $dest and ($dest !~ /\D/))        { 'soundcard' } # digits only
-	elsif ($dest =~ /^loop,/) { 'loop' }
-	elsif ($dest =~ /^\w+\.ports/){ 'jack_ports_list' }
-	elsif ($dest){  # any string 
-		#carp( "$dest: jack_client doesn't exist.\n") unless jack_client($dest);
-		'jack_client' ; }
-	else { undef }
+	my $type;
+	given( $dest ){
+		when( undef )       {                           }
+
+		# non JACK related
+
+		when('bus')			   { $type = 'bus'             }
+		when('null')           { $type = 'null'            }
+		when(/^loop,/)         { $type = 'loop'            }
+
+		when(! /\D/)           { $type = 'soundcard'       } # digits only
+
+		# JACK related
+
+		when(/^man/)           { $type = 'jack_manual'     }
+		when('jack')           { $type = 'jack_manual'     }
+		when(/(^\w+\.)?ports/) { $type = 'jack_ports_list' }
+		default                { $type = 'jack_client'     }
+	}
+	$type
 }
 	
 sub update_send_bus {
@@ -4413,8 +4452,8 @@ sub uncache_track {
 
 		# original WAV -> WAV case: reset version 
 		if ( $cache_map->{$version}{original} ){ 
-			$track->set(active => $cache_map->{$version}{original});
-			print $track->name, ": setting uncached version ", $track->active, $/;
+			$track->set(version => $cache_map->{$version}{original});
+			print $track->name, ": setting uncached version ", $track->version, $/;
 
 		# assume a sub-bus mix track, i.e. REC -> WAV: set to REC
 		} else { 
@@ -4541,7 +4580,7 @@ sub new_project_template {
 	map{ my $track = $_;
 		 $track->unmute;
 		 map{ $track->set($_ => undef)  } 
-			qw(	active 
+			qw( version	
 				old_pan_level
 				region_start
 				region_end

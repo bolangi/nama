@@ -85,22 +85,34 @@ track => <<TRACK,
 
    all, nosolo               -  return to pre-solo status
 
- - channel inputs and outputs 
+ - track inputs and outputs 
 
    source, src, r            -  set track source
-
-                                sax r 3 (record from soundcard channel 3) 
-
-                                organ r synth (record from JACK client "synth")
-
                              -  with no arguments returns current signal source
 
-   send, out, m, aux         -  create an auxiliary send, argument 
-                                can be channel number or JACK client name
+    ----------------------------------------------------------
+	for this input              use this command
+    ----------------------------------------------------------
 
+     * soundcard channel 3      source 3 
+
+     * JACK client              source fluidsynth
+     
+     * JACK port                source fluidsynth:left
+  
+     * JACK port with spaces    source "MPlayer [20120]:out_0"
+ 
+     * unconnected JACK port    source manual (or 'man')
+     
+       note: the port for mono track 'piano' would be ecasound:piano_in_1
+
+     * JACK ports list          source drum.ports (ports list from drums.ports)
+                                source ports  (ports list from trackname.ports)
+    -----------------------------------------------------------
+
+   send, out, m, aux         -  create an auxiliary send
+                             -  same arguments as 'source'
                              -  currently one send allowed per track
-
-                             -  not needed for most setups
  - version 
 
    set_version, version, ver, n  -  set current track version

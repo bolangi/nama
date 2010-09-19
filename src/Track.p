@@ -199,8 +199,8 @@ sub monitor_version {
 	my $track = shift;
 
 	my $group = $::Bus::by_name{$track->group};
-	return $track->active if $track->active 
-				and grep {$track->active  == $_ } @{$track->versions} ;
+	return $track->version if $track->version 
+				and grep {$track->version  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
 				and grep {$group->version  == $_ } @{$track->versions};
 	return undef if $group->version;
@@ -255,11 +255,12 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
-			when('jack_port'){ return 'REC' }
-			when('null'){ return 'REC' }
-			when('soundcard'){ return 'REC' }
-			when('bus'){ return 'REC' } # maybe $track->rw ??
-			default { return 'OFF' }
+			when('jack_manual')		{ return 'REC' }
+			when('jack_ports_list')	{ return 'REC' }
+			when('null')			{ return 'REC' }
+			when('soundcard')		{ return 'REC' }
+			when('bus')				{ return 'REC' } # maybe $track->rw ??
+			default 				{ return 'OFF' }
 			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
@@ -319,6 +320,16 @@ sub snapshot {
 
 # for graph-style routing
 
+# translate the new source_type designations to the old API
+{
+my %translate = qw(
+	soundcard soundcard
+	jack_port jack_port
+	jack_manual jack_port
+	jack_ports_list jack_port
+	jack_client jack_client
+	null null
+);
 sub input_path { # signal path, not file path
 
 	my $track = shift;
@@ -326,11 +337,8 @@ sub input_path { # signal path, not file path
 	# create edge representing live sound source input
 	
 	if($track->rec_status eq 'REC'){
-
-		if ($track->source_type =~ /soundcard|jack_client|jack_port|null/){
-			( ::input_node($track->source_type) , $track->name)
-		} 
-
+			return () if $track->source_type eq 'bus';
+			( ::input_node($translate{$track->source_type}) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 
 	# create edge representing WAV file input
@@ -338,6 +346,7 @@ sub input_path { # signal path, not file path
 		('wav_in', $track->name) 
 
 	}
+}
 }
 
 
@@ -382,66 +391,89 @@ sub remove {
 # are issued in JACK or ALSA mode.
 
 sub soundcard_channel { $_[0] // 1 }
+
 sub set_io {
 	my ($track, $direction, $id) = @_;
 	# $direction: send | source
 	
-	# these are the field names
+	# unless we are dealing with a simple query,
+	# by the end of this routine we are going to assign
+	# the following fields using the values in the 
+	# $type and $id variables:
+	#
+	#    source_type
+	#    source_id
+	#
+	#    -OR-
+	#
+	#    send_type
+	#    send_id
+	
+	
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
 
 	# respond to a query (no argument)
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
-	# set null values if we receive 'off' from track send/source widgets
-	if ( $id eq 'off'){ 
-		$track->set($type_field => undef);
-		$track->set($id_field => undef);
-		say $track->name, ": disabling $direction.";
-		return;
-	}
-# 	if( $id =~ /\.ports$/){
-# 		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
-#  		$track->set($type_field => 'jack_port',
-#  					source_id => $port_name); 
-#  		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
-#  		return;
-# 	} 
-	if( $id eq 'jack'){
-		my $port_name = $track->name . ($direction eq 'input' ? "_in" : "_out" );
- 		$track->set($type_field => 'jack_port',
- 					source_id => $port_name); 
- 		say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
- 		return;
-	} 
 	# set values, returning new setting
 	my $type = ::dest_type( $id );
 	given ($type){
-		when ('jack_client'){
-			if ( $::jack_running ){
-				my $client_direction = $direction eq 'source' ? 'output' : 'input';
 	
-				my $name = $track->name;
-				my $width = scalar @{ ::jack_client($id, $client_direction) };
-				$width or say 
-					qq($name: $direction port for JACK client "$id" not found.);
-				$width or return;
-				$width ne $track->width and say 
-					$track->name, ": track set to ", ::width($track->width),
-					qq(, but JACK source "$id" is ), ::width($width), '.';
-			} else {
-		say "JACK server not running! Cannot set JACK client as track source.";
-				return
-			} 
+		# no data changes needed for some settings
+
+		when('soundcard'){}
+		when ('bus')     {}
+		#when('loop')     {}  # unused at present
+
+		# rec_defeat tracks with 'null' input
+
+		when ('null'){ 
+			$track->set(rec_defeat => 1);
+			say $track->name, ": recording disabled by default for 'null' input.";
+			say "Use 'rec_enable' if necessary";
 		}
-		when('jack_ports_list'){
-			say("$id: file not found in ",project_root(),". Skipping."), return
-				unless -e join_path( project_root(), $id );
-			# check if ports file parses
+
+		# don't allow user to set JACK I/O unless JACK server is running
+		
+ 		when ( /jack/ ){
+			say("JACK server not running! "
+				,"Cannot set JACK client or port as track source."), 
+					return unless $::jack_running;
+
+			continue; # don't break out of given/when chain
+		} 
+
+		when ('jack_manual'){
+
+			my $port_name = $track->jack_manual_port($direction);
+
+ 			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+			$id = 'manual';
+			$id = $port_name;
+			$type = 'jack_manual';
+		}
+		when ('jack_client'){
+			my $client_direction = $direction eq 'source' ? 'output' : 'input';
+
+			my $name = $track->name;
+			my $width = scalar @{ ::jack_client($id, $client_direction) };
+			$width or say 
+				qq($name: $direction port for JACK client "$id" not found.);
+			$width or return;
+			$width ne $track->width and say 
+				$track->name, ": track set to ", ::width($track->width),
+				qq(, but JACK source "$id" is ), ::width($width), '.';
+		}
+		when( 'jack_ports_list' ){
+			$id =~ /(\w+)\.ports/;
+			my $ports_file_name = ($1 || $track->name) .  '.ports';
+			$id = $ports_file_name;
 			# warn if ports do not exist
+			say($track->name, qq(: ports file "$id" not found in ),::project_root(),". Skipping."), 
+				return unless -e join_path( ::project_root(), $id );
+			# check if ports file parses
 		}
-	#	when('soundcard'){ }
-	#	when('loop'){ }
 	}
 	$track->set($type_field => $type);
 	$track->set($id_field => $id);
@@ -465,6 +497,9 @@ sub set_source { # called from parser
 		print $track->name, ": input unchanged, $object\n";
 	} else {
 		print $track->name, ": input set to $object\n";
+		# re-enable recording of null-source tracks
+		say($track->name, ": record enabled"),
+		$track->set(rec_defeat => 0) if $old_source eq 'null';
 	}
 }
 
@@ -473,10 +508,10 @@ sub set_version {
 	my $name = $track->name;
 	if ($n == 0){
 		print "$name: following latest version\n";
-		$track->set(active => $n)
+		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
 		print "$name: anchoring version $n\n";
-		$track->set(active => $n)
+		$track->set(version => $n)
 	} else { 
 		print "$name: version $n does not exist, skipping.\n"
 	}
@@ -496,21 +531,24 @@ sub set_send { # wrapper
 	}
 }
 
-
+{
+my %object_to_text = (
+	soundcard 		=> 'soundcard channel',
+	jack_client 	=> 'JACK client',
+	jack_manual     => 'JACK manual port',
+	jack_port   	=> 'JACK manual port',
+	loop 			=> 'loop device',
+	jack_ports_list => "JACK ports list",
+	bus				=> "bus",
+);
 sub object_as_text {
 	my ($track, $direction) = @_; # $direction: source | send
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
-	
-	my $text;
-	given ($track->$type_field){
-		when('soundcard')  		{ $text = "soundcard channel "}
-		when('jack_client')		{ $text = "JACK client "}
-		when('loop')       		{ $text = "loop device "}
-		when('jack_ports_list') { $text = "JACK ports list "}
-		when('bus') 			{ $text = "bus "}
-	}
+	my $text = $object_to_text{$track->$type_field};
+	$text .= ' ';
 	$text .= $track->$id_field
+}
 }
 
 sub input_object { # for text display
@@ -672,6 +710,10 @@ sub import_audio  {
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
+sub jack_manual_port {
+	my ($track, $direction) = @_;
+	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
+}
 
 sub bus_tree { # for solo function to work in sub buses
 	my $track = shift;
