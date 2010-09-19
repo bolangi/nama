@@ -290,6 +290,7 @@ sub t_load_project {
 	print ("Project $newname does not exist\n"), return
 		unless -d join_path project_root(), $newname; 
 	stop_transport();
+	
 	load_project( name => $newname );
 	print "loaded project: $project_name\n";
 	$debug and print "hook: $::execute_on_project_load\n";

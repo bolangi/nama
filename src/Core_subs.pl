@@ -3059,15 +3059,18 @@ sub save_state {
 	}
 	
 
-	# save history
+	# save history -- 50 entries, maximum
 
 	my @history = $::term->GetHistory;
 	my %seen;
 	@command_history = ();
 	map { push @command_history, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
-
+	my $max = scalar @command_history;
+	$max = 50 if $max > 50;
+	@command_history = @command_history[-$max..-1];
 	$debug and print "serializing\n";
+
 	serialize(
 		file => $file, 
 		format => 'yaml',
