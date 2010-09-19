@@ -255,11 +255,12 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
-			when('jack_manual'){ return 'REC' }
-			when('null'){ return 'REC' }
-			when('soundcard'){ return 'REC' }
-			when('bus'){ return 'REC' } # maybe $track->rw ??
-			default { return 'OFF' }
+			when('jack_manual')		{ return 'REC' }
+			when('jack_ports_list')	{ return 'REC' }
+			when('null')			{ return 'REC' }
+			when('soundcard')		{ return 'REC' }
+			when('bus')				{ return 'REC' } # maybe $track->rw ??
+			default 				{ return 'OFF' }
 			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
