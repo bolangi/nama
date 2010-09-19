@@ -235,6 +235,15 @@ channel ($end) is out of bounds. $max channels maximum.\n)
 	join q(,),q(jack_multi),
 	@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
+sub jack_manual_port {
+	my ($track_name, $direction) = @_;
+	$track_name . ($direction =~ /source|input/ ? '_in' : '_out');
+}
+sub default_jack_ports_list {
+	my ($track_name) = shift;
+	"$track_name.ports"
+}
+
 
 ### subclass definitions
 

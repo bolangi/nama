@@ -444,7 +444,8 @@ sub set_io {
 		} 
 
 		when ('jack_manual'){
-			my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
+
+			my $port_name = ::IO::jack_manual_port($track->name,$direction);
 
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
