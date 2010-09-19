@@ -162,7 +162,7 @@ sub source_input {
 	}
 }
 
-sub source_type_string { $_[0]->source_input()->[0] }
+#sub source_type_string { $_[0]->source_input()->[0] }
 sub source_device_string { $_[0]->source_input()->[1] }
 sub send_output {
 	my $track = shift;
@@ -235,11 +235,16 @@ sub jack_multi_route {
 channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;
 	join q(,),q(jack_multi),
-	@{$::jack{$client}{$direction}}[$start-1..$end-1];
+	map{quote_jack_port($_)}
+		@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
 sub default_jack_ports_list {
 	my ($track_name) = shift;
 	"$track_name.ports"
+}
+sub quote_jack_port {
+	my $port = shift;
+	($port =~ /\s/ and $port !~ /^"/) ? qq("$port") : $port
 }
 
 
@@ -297,11 +302,6 @@ sub new {
 	my $class = $io_class{::IO::soundcard_output_type_string()};
 	$class->new(@_);
 }
-package ::IO::from_jack_client;
-use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 'jack,'.$_[0]->source_device_string}
-sub ecs_extra { $_[0]->mono_to_stereo}
-
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
@@ -343,11 +343,17 @@ sub device_id {
 		? $io->source_id
 		: $io->send_id;
 	# quote client name if necessary, and if not already quoted
-	$client = qq("$client") if $client =~ /\s/ and ! $client =~ /^"/;
+	$client = ::IO::quote_jack_client($client);
 	"jack,$client"
 }
 package ::IO::from_jack_client;
-use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_client';
+use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
+sub device_id { 'jack,'.$_[0]->source_device_string}
+sub ecs_extra { $_[0]->mono_to_stereo}
+
+#package ::IO::from_jack_client;
+#use Modern::Perl; use vars qw(@ISA); @ISA = '::IO_client';
+#sub ecs_extra { $_[0]->mono_to_stereo}
 
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';

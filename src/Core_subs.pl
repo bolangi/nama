@@ -3291,7 +3291,6 @@ sub restore_state {
 
 	if ( $saved_version <= 1.064){ 
 
-		# TODO: does not provide correct port for slave tracks
 		map{ 
 			my $default_list = ::IO::default_jack_ports_list($_->{name});
 
@@ -3300,7 +3299,7 @@ sub restore_state {
 				$_->{source_id} = $default_list;
 			} else { 
 				$_->{source_type} = 'jack_manual';
-				$_->{source_id} = $_->{name}.'_in';
+				$_->{source_id} = ($_->{target}||$_->{name}).'_in';
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
