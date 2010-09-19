@@ -255,11 +255,12 @@ sub rec_status {
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}
-			when('jack_port'){ return 'REC' }
-			when('null'){ return 'REC' }
-			when('soundcard'){ return 'REC' }
-			when('bus'){ return 'REC' } # maybe $track->rw ??
-			default { return 'OFF' }
+			when('jack_manual')		{ return 'REC' }
+			when('jack_ports_list')	{ return 'REC' }
+			when('null')			{ return 'REC' }
+			when('soundcard')		{ return 'REC' }
+			when('bus')				{ return 'REC' } # maybe $track->rw ??
+			default 				{ return 'OFF' }
 			#default { croak $track->name. ": missing source type" }
 			# fall back to MON
 			#default {  maybe_monitor($monitor_version)  }
@@ -444,12 +445,13 @@ sub set_io {
 		} 
 
 		when ('jack_manual'){
-			my $port_name = $track->name . ($direction eq 'source' ? "_in" : "_out" );
+
+			my $port_name = $track->jack_manual_port($direction);
 
  			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
 			$id = $port_name;
-			$type = 'jack_port';
+			$type = 'jack_manual';
 		}
 		when ('jack_client'){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
@@ -468,8 +470,8 @@ sub set_io {
 			my $ports_file_name = ($1 || $track->name) .  '.ports';
 			$id = $ports_file_name;
 			# warn if ports do not exist
-			say("$id: ports file not found in ",project_root(),". Skipping."), 
-				return unless -e join_path( project_root(), $id );
+			say($track->name, qq(: ports file "$id" not found in ),::project_root(),". Skipping."), 
+				return unless -e join_path( ::project_root(), $id );
 			# check if ports file parses
 		}
 	}
@@ -708,6 +710,10 @@ sub import_audio  {
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
+sub jack_manual_port {
+	my ($track, $direction) = @_;
+	$track->port_name . ($direction =~ /source|input/ ? '_in' : '_out');
+}
 
 sub bus_tree { # for solo function to work in sub buses
 	my $track = shift;
