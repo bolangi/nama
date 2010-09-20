@@ -517,5 +517,29 @@ mode> disables MON inputs while enabling only one REC track per
 signal source. The C<arm> command releases both preview
 and doodle modes.
 
+=head2 Autosave
+
+The B<save> command is the usual way to save your work.
+Most settings are saved in the file F<State.yml> in the
+current project directory.
+
+When you type B<quit> Nama will automatically save your 
+work to F<State.yml>. This will overwrite previous settings
+in F<State.yml>. If you I<don't> want this behavior, use
+Ctrl-C to exit Nama.
+
+If you load a new project and there are unsaved 
+changes, Nama will automatically save settings
+in a file tagged with the current date and time,
+for example, F<State-autosave-2010.09.20-15:32:05>.
+
+By specifying some number of minutes for the
+B<autosave_interval> configuration variable in your .namarc
+file, Nama will save your settings periodically,
+provided the engine is not running.
+
+To avoid creating duplicate files, the new settings file
+will be created only if it differs from the previous file.
+
 =head1 TEXT COMMANDS
 

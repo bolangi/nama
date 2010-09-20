@@ -1806,8 +1806,9 @@ sub wraparound {
 sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub setup_autosave { 
-	my $seconds = $autosave_interval * 60;
-	$event_id{autosave} = AE::timer(0,$seconds, \&autosave);
+	# one time only
+	my $seconds = (shift || $autosave_interval) * 60;
+	$event_id{autosave} = AE::timer($seconds,0, \&autosave);
 }
 sub debugging_options {
 	grep{$_} $debug, @opts{qw(R D J A E T)};
@@ -3117,10 +3118,15 @@ sub time_tag {
 }
 
 sub autosave {
+	if (engine_running()){ 
+		setup_autosave(1); # try again in 60s
+		return;
+	}
  	my $file = 'State-autosave-' . time_tag();
  	save_system_state($file);
 	my @saved = autosave_files();
 	my ($next_last, $last) = @saved[-2,-1];
+	setup_autosave(); # standard interval
 	return unless defined $next_last and defined $last;
 	if(files_are_identical($next_last, $last)){
 		unlink $last;
