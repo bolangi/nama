@@ -27,6 +27,7 @@
 						$compressor
 						$spatialiser
 						$limiter
+						$autosave_interval
 
 						);
 

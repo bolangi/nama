@@ -30,6 +30,9 @@
 
 project_root: ~                  # replaced during first run
 
+# autosave - store current project state as # autosave-2010.8.22-15:08:22.yml
+
+autosave_interval: 0 # time in minutes, 0 (zero) to disable
 
 # define abbreviations
 

@@ -2983,6 +2983,7 @@ sub round {
 ## persistent state support
 
 sub save_state {
+	my $file = shift || $state_store_file; 
 	$debug2 and print "&save_state\n";
 	$saved_version = $VERSION;
 
@@ -2992,9 +2993,6 @@ sub save_state {
 	$debug and print "saving palette\n";
 	$ui->save_palette;
 
-	save_effect_chains();
-	save_effect_profiles();
-
 	# do nothing more if only Master and Mixdown
 	
 	if (scalar @::Track::all == 2 ){
@@ -3002,9 +3000,26 @@ sub save_state {
 		return;
 	}
 
+	save_system_state($file);
+	save_effect_chains();
+	save_effect_profiles();
+
+	# store alsa settings
+
+	if ( $opts{a} ) {
+		my $file = $file;
+		$file =~ s/\.yml$//;
+		print "storing ALSA settings\n";
+		print qx(alsactl -f $file.alsa store);
+	}
+}
+
+sub save_system_state {
+
+	my $file = shift;
+
 	# save stuff to state file
 
-	my $file = shift || $state_store_file; 
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	$file =~ /\.yml$/ or $file .= '.yml';	
 	print "\nSaving state as $file\n";
@@ -3079,32 +3094,49 @@ sub save_state {
 		);
 
 
-	# store alsa settings
-
-	if ( $opts{a} ) {
-		my $file = $file;
-		$file =~ s/\.yml$//;
-		print "storing ALSA settings\n";
-		print qx(alsactl -f $file.alsa store);
-	}
-
-
 }
 
+sub time_tag {
+	my @time = localtime time;
+	$time[4]++;
+	$time[5]+=1900;
+	@time = @time[5,4,3,2,1,0];
+	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
+}
+
+# sub autosave {
+# 	my $file = 'autosave-' . time_tag();
+# 	save_state($file);
+# }
+# =comment
+# conditional_save( {
+# 	save_command => sub{  },
+# 	name => autosave_name("State"),
+# 	location => project_dir(),
+# 	compare_finder => \&latest_save_file,
+# 	compare_basename => 'autosave-',
+# 	compare_location => project_dir(),
+# }
+# )
+# =comment
+# 	
+# 
 
 sub save_effect_chains { # if they exist
+	my $file = shift || $effect_chain_file;
 	if (keys %effect_chain){
 		serialize (
-			file => join_path(project_root(), $effect_chain_file),
+			file => join_path(project_root(), $file),
 			format => 'yaml',
 			vars => [ qw( %effect_chain ) ],
 			class => '::');
 	}
 }
 sub save_effect_profiles { # if they exist
+	my $file = shift || $effect_profile_file;
 	if (keys %effect_profile){
 		serialize (
-			file => join_path(project_root(), $effect_profile_file),
+			file => join_path(project_root(), $file),
 			format => 'yaml',
 			vars => [ qw( %effect_profile ) ],
 			class => '::');

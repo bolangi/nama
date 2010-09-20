@@ -383,4 +383,6 @@ our (
 	$default_fade_length, 
 	$regenerate_setup, # force us to generate new chain setup
 	%is_ecasound_chain,   # suitable for c-select
+	
+	$autosave_interval, # how frequently to save
 );
