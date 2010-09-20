@@ -60,7 +60,7 @@ sub prepare {
 
 	# set up autosave
 	
-    setup_autosave() if $autosave_interval and not debugging_options();
+    schedule_autosave() unless debugging_options();
 
 	initialize_terminal() unless $opts{T};
 
@@ -1805,9 +1805,11 @@ sub wraparound {
 }
 sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 
-sub setup_autosave { 
-	# one time only
+sub schedule_autosave { 
+	# one-time timer 
 	my $seconds = (shift || $autosave_interval) * 60;
+	$event_id{autosave} = undef; # cancel any existing timer
+	return unless $seconds;
 	$event_id{autosave} = AE::timer($seconds,0, \&autosave);
 }
 sub debugging_options {
@@ -3119,14 +3121,14 @@ sub time_tag {
 
 sub autosave {
 	if (engine_running()){ 
-		setup_autosave(1); # try again in 60s
+		schedule_autosave(1); # try again in 60s
 		return;
 	}
  	my $file = 'State-autosave-' . time_tag();
  	save_system_state($file);
 	my @saved = autosave_files();
 	my ($next_last, $last) = @saved[-2,-1];
-	setup_autosave(); # standard interval
+	schedule_autosave(); # standard interval
 	return unless defined $next_last and defined $last;
 	if(files_are_identical($next_last, $last)){
 		unlink $last;
@@ -3147,20 +3149,6 @@ sub files_are_identical {
 	my $b = io($fileb)->slurp;
 	$a eq $b
 }
-
-# =comment
-# conditional_save( {
-# 	save_command => sub{  },
-# 	name => autosave_name("State"),
-# 	location => project_dir(),
-# 	compare_finder => \&latest_save_file,
-# 	compare_basename => 'autosave-',
-# 	compare_location => project_dir(),
-# }
-# )
-# =comment
-# 	
-# 
 
 sub save_effect_chains { # if they exist
 	my $file = shift || $effect_chain_file;
