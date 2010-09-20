@@ -288,9 +288,12 @@ sub t_load_project {
 	my $newname = remove_spaces($name);
 	$newname =~ s(/$)(); # remove trailing slash
 	print ("Project $newname does not exist\n"), return
-		unless -d join_path project_root(), $newname; 
+		unless -d join_path(project_root(), $newname);
 	stop_transport();
-	autosave();
+	if(my $savefile = autosave()){
+		say "Unsaved changes to previous project stored as:";
+		say $savefile, "\n";
+	}
 	load_project( name => $newname );
 	print "loaded project: $project_name\n";
 	$debug and print "hook: $::execute_on_project_load\n";

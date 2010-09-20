@@ -58,6 +58,10 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
+	# set up autosave
+	
+    setup_autosave() if $autosave_interval and not debugging_options();
+
 	initialize_terminal() unless $opts{T};
 
 	# set default project to "untitled"
@@ -543,6 +547,7 @@ sub load_project {
 	print ("no project name.. doing nothing.\n"),return 
 		unless $h{name} or $project;
 	$project_name = $h{name} if $h{name};
+
 	if ( ! -d join_path( project_root(), $project_name) ){
 		if ( $h{create} ){
 			map{create_dir($_)} &project_dir, &this_wav_dir ;
@@ -1800,7 +1805,13 @@ sub wraparound {
 }
 sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 
-
+sub setup_autosave { 
+	my $seconds = $autosave_interval * 60;
+	$event_id{autosave} = AE::timer(0,$seconds, \&autosave);
+}
+sub debugging_options {
+	grep{$_} $debug, @opts{qw(R D J A E T)};
+}
 sub mute {
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
 	$tn{Master}->mute;
@@ -3000,7 +3011,8 @@ sub save_state {
 		return;
 	}
 
-	save_system_state($file);
+	print "\nSaving state as ",
+	save_system_state($file), "\n";
 	save_effect_chains();
 	save_effect_profiles();
 
@@ -3022,7 +3034,6 @@ sub save_system_state {
 
 	$file = join_path(&project_dir, $file) unless $file =~ m(/); 
 	$file =~ /\.yml$/ or $file .= '.yml';	
-	print "\nSaving state as $file\n";
 
 	sync_effect_parameters(); # in case a controller has made a change
 
@@ -3094,6 +3105,7 @@ sub save_system_state {
 		);
 
 
+	$file
 }
 
 sub time_tag {
@@ -3104,10 +3116,32 @@ sub time_tag {
 	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
 }
 
-# sub autosave {
-# 	my $file = 'autosave-' . time_tag();
-# 	save_state($file);
-# }
+sub autosave {
+ 	my $file = 'State-autosave-' . time_tag();
+ 	save_system_state($file);
+	my @saved = autosave_files();
+	my ($next_last, $last) = @saved[-2,-1];
+	return unless defined $next_last and defined $last;
+	if(files_are_identical($next_last, $last)){
+		unlink $last;
+		undef; 
+	} else { 
+		$last 
+	}
+}
+sub autosave_files {
+	sort File::Find::Rule  ->file()
+						->name('State-autosave-*')
+							->maxdepth(1)
+						 	->in( project_dir());
+}
+sub files_are_identical {
+	my ($filea,$fileb) = @_;
+	my $a = io($filea)->slurp;
+	my $b = io($fileb)->slurp;
+	$a eq $b
+}
+
 # =comment
 # conditional_save( {
 # 	save_command => sub{  },
