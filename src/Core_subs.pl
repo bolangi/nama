@@ -829,22 +829,6 @@ sub add_track_alias {
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
 	add_track(  $name, target => $target );
 }
-sub add_slave_track {
-	my %h = @_;
-	say (qq[Group "$h{group}" does not exist, skipping.]), return
-		 unless $::Bus::by_name{$h{group}};
-	say (qq[Target track "$h{target}" does not exist, skipping.]), return
-		 unless $tn{$h{target}};
-		::SlaveTrack->new(	
-			name => "$h{group}_$h{target}",
-			target => $h{target},
-			rw => 'MON',
-			source_type => undef,
-			source_id => undef,
-			send_type => $::Bus::by_name{$h{group}}->send_type,
-			send_id   => $::Bus::by_name{$h{group}}->send_id,
-			)
-}
 sub dig_ruins { # only if there are no tracks 
 	
 	$debug2 and print "&dig_ruins";
