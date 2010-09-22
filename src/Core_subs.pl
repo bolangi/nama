@@ -841,8 +841,8 @@ sub add_slave_track {
 			rw => 'MON',
 			source_type => undef,
 			source_id => undef,
-			send_type => $::Bus::by_name{$h{group}}->destination_type,
-			send_id   => $::Bus::by_name{$h{group}}->destination_id,
+			send_type => $::Bus::by_name{$h{group}}->send_type,
+			send_id   => $::Bus::by_name{$h{group}}->send_id,
 			)
 }
 sub dig_ruins { # only if there are no tracks 
@@ -4243,7 +4243,7 @@ sub dest_type {
 sub update_send_bus {
 	my $name = shift;
 		add_send_bus( $name, 
-						 $::Bus::by_name{$name}->destination_id),
+						 $::Bus::by_name{$name}->send_id),
 						 "dummy",
 }
 
