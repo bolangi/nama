@@ -58,6 +58,8 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
+	start_midish() if $midish_enable;
+
 	# set up autosave
 	
     schedule_autosave() unless debugging_options();
@@ -4677,5 +4679,32 @@ sub remove_project_template {
 	} @_;
 	
 }
+sub start_midish {
+	$midish = Expect->spawn("midish","-v")
+		or die "Couldn't start program: $!\n";
+
+	# prevent the program's output from being shown on our STDOUT
+	$midish->log_stdout(0);
+}
+sub midish_command {
+	my  $cmd = shift;
+	say("$cmd: midish not started. Make sure to set midish_enable: 1 in namarc"), 
+		return unless $midish;
+
+$midish->send("\n");
+print_output();
+$midish->expect(1, '+ready', sub{ $midish->send($cmd)});
+$midish->send("\n");
+print_output();
+$midish->expect(1, '+ready', sub{});
+print_output();
+$midish->send("\n");
+$midish->expect(0, '+ready', sub{});
+print_output();
+}
+sub print_output {
+	map{say "midish: $_"} split "\n", $midish->before;
+}
+
 
 ### end

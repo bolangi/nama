@@ -385,4 +385,6 @@ our (
 	%is_ecasound_chain,   # suitable for c-select
 	
 	$autosave_interval, # how frequently to save
+	$midish_enable,       # using midish
+	$midish,     # Expect object
 );

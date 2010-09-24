@@ -812,4 +812,7 @@ show_comments: _show_comments {
 	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } ::Track::all();
 	1;
 }
+midish_command: _midish_command text {
+	::midish_command( $item{text} ); 1
+}
 	

@@ -184,7 +184,7 @@ source:
 send:
   type: track
   what: set aux send
-  short: out aux m
+  short: out aux
   parameters: <i_soundcard_channel> (3 or above) | <s_jack_client_name>#  |  <s_loop_id>
 remove_send:
   type: track
@@ -731,4 +731,9 @@ show_comments:
   type: track
   what: show all track comments
   short: scs
+midish_command:
+  type: midi
+  what: send command text to 'midish' MIDI sequencer shell
+  short: m
+  parameters: <s_command_text>
 ...

@@ -4,6 +4,8 @@ project_root: ~/nama
 
 autosave_interval: 5
 
+midish_enable: 1
+
 # define abbreviations
 
 abbreviations:  
@@ -75,3 +77,6 @@ spatialiser: matrixSpatialiser 0
 limiter: tap_limiter 0 0
 
 # end
+
+
+

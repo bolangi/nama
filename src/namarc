@@ -128,3 +128,7 @@ limiter: tap_limiter 0 0
 # 
 # Spatialiser and limiter: both initially off so you can start out
 # clean and slowly work your way from there.
+#
+# MIDI support
+#
+midish_enable: 0  
