@@ -1567,8 +1567,8 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-	disconnect_jack_ports();
-	connect_jack_ports();
+	disconnect_jack_ports_list();
+	connect_jack_ports_list();
 	transport_status() unless $no_transport_status;
 	$ui->flash_ready();
 	#print eval_iam("fs");
@@ -1576,7 +1576,7 @@ sub connect_transport {
 	
 }
 
-sub connect_jack_ports {
+sub connect_jack_ports_list {
 
 	# use a heuristic to map port names to track channels
 		
@@ -1646,7 +1646,7 @@ sub connect_jack_ports {
 	 } ::Track::all();
 }
 
-sub disconnect_jack_ports { connect_jack_ports('dis') }
+sub disconnect_jack_ports_list { connect_jack_ports_list('dis') }
 
 sub transport_status {
 	
