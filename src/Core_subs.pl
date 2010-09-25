@@ -1607,35 +1607,42 @@ sub connect_jack_ports {
 	map{  my $track = $_; 
  		  my $name = $track->name;
  		  my $dest = "ecasound:$name\_in_";
-				 		  my $file = join_path(project_root(), $track->source_id);
+		  my $file = join_path(project_root(), $track->source_id);
+		  if (-e $file){ 
 		  my $line_number = 0;
-		  if( $track->rec_status eq 'REC' and -e $file){ 
-			for (io($file)->slurp){   
-					# $_ is the source port name
-					chomp;
-					# inform user if port doesn't exist
-					say($track->name, qq(: port "$_" not found. Skipping.)),
-						return unless $jack{$_};	
-		  			my $cmd = q(jack_).$dis.qq(connect "$_" $dest);
-					# define offset once based on first port line
-					# ends in zero: 1 
-					# ends in one:  0
-					/(\d)$/ and $offset //= ! $1;
-					#$debug and say "offset: $offset";
-					if( $track->width == 1){ $cmd .= "1" }
-					elsif( $track->width == 2){
-						my($suffix) = /([LlRr]|\d+)$/;
-						#say "suffix: $suffix";
-						$cmd .= ($suffix =~ /\d/) 
-							? ($suffix + $offset)
-							: $map_RL{uc $suffix};
-					} else { $cmd .= ($line_number % $track->width + 1) }
-					$line_number++;
-					$debug and say $cmd;
-					system $cmd;
-			} ;
-		  }
- 	 } grep{ $_->source_type eq 'jack_ports_list' and $_->rec_status eq 'REC' 
+ 		  my @lines = io($file)->slurp;
+		  for my $port (@lines){   
+			# $port is the source port name
+			chomp $port;
+			say "port file $file, line $line_number, port $port";
+			# inform user if port doesn't exist
+			if($jack{$port}){
+				my $cmd = q(jack_).$dis.qq(connect "$port" $dest);
+				# define offset once based on first port line
+				# ends in zero: 1 
+				# ends in one:  0
+				/(\d)$/ and $offset //= ! $1;
+				#$debug and say "offset: $offset";
+				if( $track->width == 1){ $cmd .= "1" }
+				elsif( $track->width == 2){
+					my($suffix) = /([LlRr]|\d+)$/;
+					#say "suffix: $suffix";
+					$cmd .= ($suffix =~ /\d/) 
+						? ($suffix + $offset)
+						: $map_RL{uc $suffix};
+				} else { $cmd .= ($line_number % $track->width + 1) }
+				$debug and say $cmd;
+				system $cmd;
+			} else {
+				say $track->name, qq(: port "$port" not found. Skipping.) 
+			}
+			$line_number++;
+		  } ;
+	  } else { say $track->name, 
+				": JACK ports file $file not found. No sources connected.";
+	  }
+ 	 } grep{ $_->source_type eq 'jack_ports_list' 
+				and $_->rec_status eq 'REC' 
 	 } ::Track::all();
 }
 
