@@ -1620,6 +1620,8 @@ sub connect_jack_ports_list {
 				say "port file $file, line $line_number, port $port";
 				# inform user if port doesn't exist
 				if($jack{$port}){
+					# setup shell command
+					# quote port in case it contains spaces
 					my $cmd = q(jack_).$dis.qq(connect "$port" $dest);
 					# define offset once based on first port line
 					# ends in zero: 1 
