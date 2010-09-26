@@ -3810,7 +3810,9 @@ sub jack_ports {
 
 		 } @port_aliases;
 
-	} split "\n",$j;
+	} 
+	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
+	split "\n",$j;
 	#print yaml_out \%jack;
 	\%jack
 }
