@@ -386,5 +386,4 @@ our (
 	
 	$autosave_interval, # how frequently to save
 	$midish_enable,       # using midish
-	$midish,     # Expect object
 );

@@ -4679,32 +4679,48 @@ sub remove_project_template {
 	} @_;
 	
 }
-sub start_midish {
-	$midish = Expect->spawn("midish","-v")
-		or die "Couldn't start program: $!\n";
+{
+my($error,$answer)=('','');
+sub setup_midish {
+	use IPC::Open3;
+	use IO::Select;
 
-	# prevent the program's output from being shown on our STDOUT
-	$midish->log_stdout(0);
-}
-sub midish_command {
-	my  $cmd = shift;
-	say("$cmd: midish not started. Make sure to set midish_enable: 1 in namarc"), 
-		return unless $midish;
+	my $pid = open3(\*WRITE, \*READ,\*ERROR,"/usr/bin/midish");
 
-$midish->send("\n");
-print_output();
-$midish->expect(1, '+ready', sub{ $midish->send($cmd)});
-$midish->send("\n");
-print_output();
-$midish->expect(1, '+ready', sub{});
-print_output();
-$midish->send("\n");
-$midish->expect(0, '+ready', sub{});
-print_output();
+	my $sel = new IO::Select();
+
+	$sel->add(\*READ);
+	$sel->add(\*ERROR);
+
 }
-sub print_output {
-	map{say "midish: $_"} split "\n", $midish->before;
+
+while(1){
+
+ print "Enter command\n";
+ chomp(my $query = <STDIN>);
+ 
+ #send query
+ print WRITE "$query\n";
+
+ foreach my $h ($sel->can_read)
+ {
+   my $buf = '';
+   if ($h eq \*ERROR)
+   {
+     sysread(ERROR,$buf,4096);
+     if($buf){print "Midish error-> $buf\n"}
+   }
+   else
+   {
+     sysread(READ,$buf,4096);
+     if($buf){print "$query = $buf\n"}
+   }
+ }
 }
+
+waitpid($pid, 1);
+# It is important to waitpid on your child process,  
+# otherwise zombies could be created. 
 
 
 ### end
