@@ -4347,6 +4347,7 @@ sub list_effect_chains {
 sub cleanup_exit {
  	remove_riff_header_stubs();
  	kill 15, ecasound_pid() if $sock;  	
+	close_midish();
 	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 
 }
@@ -4680,47 +4681,60 @@ sub remove_project_template {
 	
 }
 {
+
 my($error,$answer)=('','');
-sub setup_midish {
-	use IPC::Open3;
-	use IO::Select;
+my ($pid, $sel);
 
-	my $pid = open3(\*WRITE, \*READ,\*ERROR,"/usr/bin/midish");
+sub start_midish {
+	my $executable = qx(which midish);
+	chomp $executable;
+	$executable or say("Midish not found!"), return;
+	$pid = open3(\*MIDISH_WRITE, \*MIDISH_READ,\*MIDISH_ERROR,"$executable -v")
+		or warn "Midish failed to start!";
 
-	my $sel = new IO::Select();
+	$sel = new IO::Select();
 
-	$sel->add(\*READ);
-	$sel->add(\*ERROR);
-
+	$sel->add(\*MIDISH_READ);
+	$sel->add(\*MIDISH_ERROR);
+	midish_command( qq(print "Welcome to Nama/Midish!"\n) );
 }
 
-while(1){
+sub midish_command {
+	my $query = shift;
+	print "\n";
+	$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
 
- print "Enter command\n";
- chomp(my $query = <STDIN>);
- 
- #send query
- print WRITE "$query\n";
+	#send query to midish
+	print MIDISH_WRITE "$query\n";
 
- foreach my $h ($sel->can_read)
- {
-   my $buf = '';
-   if ($h eq \*ERROR)
-   {
-     sysread(ERROR,$buf,4096);
-     if($buf){print "Midish error-> $buf\n"}
-   }
-   else
-   {
-     sysread(READ,$buf,4096);
-     if($buf){print "$query = $buf\n"}
-   }
- }
+	foreach my $h ($sel->can_read)
+	{
+		my $buf = '';
+		if ($h eq \*MIDISH_ERROR)
+		{
+			sysread(MIDISH_ERROR,$buf,4096);
+			if($buf){print "MIDISH ERR-> $buf\n"}
+		}
+		else
+		{
+			sysread(MIDISH_READ,$buf,4096);
+			if($buf){map{say "MIDISH-> $_"} grep{ !/\+ready/ } split "\n", $buf}
+		}
+	}
+	print "\n";
 }
 
-waitpid($pid, 1);
+sub close_midish {
+	midish_command('exit');
+	sleeper(0.1);
+	kill 15,$pid;
+	sleeper(0.1);
+	kill 9,$pid;
+	sleeper(0.1);
+	waitpid($pid, 1);
 # It is important to waitpid on your child process,  
 # otherwise zombies could be created. 
-
+}	
+}
 
 ### end

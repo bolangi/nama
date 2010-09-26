@@ -42,6 +42,8 @@ use File::Temp;
 use Getopt::Long;
 use IO::All;
 use IO::Socket; 
+use IO::Select;
+use IPC::Open3;
 use Module::Load::Conditional qw(can_load); 
 use Parse::RecDescent;
 use Storable; 
