@@ -541,5 +541,25 @@ Nama will not save settings while the engine is running.
 To avoid creating duplicate files, the new settings file
 will be created only if it differs from the previous file.
 
+=head2 Jack ports list file
+
+Use I<source ports> or I<source filename.ports> to ask Nama
+to connect multiple JACK ports listed in a file
+(F<trackname.ports> or F<filename.ports>) to the input
+ports for that track, which will be set to
+I<ecasound:trackname_in_1> for mono. A stereo track will
+use I<ecasound:trackname_in_2> as well.
+
+When dealing with a B<stereo> track, Nama uses a heuristic to
+choose which ports to map to trackname_in_1 and which to
+trackname_in_2.
+
+Connect to trackname_in_1 if port name matches 'L' or 'l' after the colon.
+
+Connect to trackname_in_2 if port name matches 'R' or 'r' after the colon.
+
+Connect port names ending in digits (1,2) or (0,1) to
+(track_name_in_1,trackname_in_2). 
+
 =head1 TEXT COMMANDS
 

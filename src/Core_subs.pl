@@ -1614,29 +1614,46 @@ sub connect_jack_ports_list {
 	  	} else {
 			my $line_number = 0;
 			my @lines = io($file)->slurp;
+			my %port_offset;
 			for my $port (@lines){   
 				# $port is the source port name
 				chomp $port;
-				say "port file $file, line $line_number, port $port";
-				# inform user if port doesn't exist
-				if($jack{$port}){
+				$debug and say "port file $file, line $line_number, port $port";
+				# get basename by matching stuff that precedes colon
+				my ($port_basename) = $port =~ /^([^:]+)/; 
+				$debug and say "port basename: $port_basename";
+				
+				# The following is only significant for
+				# stereo tracks
+
+				# For ports that end in a digit, we need to map: 
+				# + port-0,port-1 to track_in_1,track_in_2
+				# + port-1,port-2 to track_in_1,track_in_2
+				#
+				# To do so, we define and offset based on first 
+				# appearance of port number
+				# ends in zero: offset 1 
+				# ends in one:  offset 0
+				$port =~ /(\d+)$/ and $port_offset{$port_basename} //= ! $1; 
+				
+				
+				$debug and say "offset: $port_offset{$port_basename}";
 					# setup shell command
 					# quote port in case it contains spaces
-					my $cmd = q(jack_).$dis.qq(connect "$port" $dest);
-					# define offset once based on first port line
-					# ends in zero: 1 
-					# ends in one:  0
-					/(\d)$/ and $offset //= ! $1;
-					#$debug and say "offset: $offset";
+					my $p = $port =~ / / ? qq("$port") : $port	;
+					my $cmd = q(jack_).$dis.qq(connect $p $dest);
 					if( $track->width == 1){ $cmd .= "1" }
 					elsif( $track->width == 2){
-						my($suffix) = /([LlRr]|\d+)$/;
-						#say "suffix: $suffix";
-						$cmd .= ($suffix =~ /\d/) 
-							? ($suffix + $offset)
-							: $map_RL{uc $suffix};
+						my($suffix) = $port =~ /(\d+)$/;
+						defined $suffix or ($suffix) = $port =~ /:([LlRr])/;
+						$debug and say "suffix: $suffix";
+						$cmd .= ($suffix =~ /\d+/
+							? ($suffix + $port_offset{$port_basename})
+							: $map_RL{uc $suffix}
+						);
 					} else { $cmd .= ($line_number % $track->width + 1) }
 					$debug and say $cmd;
+				if($jack{$port}){
 					system $cmd;
 				} else {
 					say $track->name, qq(: port "$port" not found. Skipping.) 
