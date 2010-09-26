@@ -1604,46 +1604,46 @@ sub connect_jack_ports_list {
 	my $dis = shift;
 	my $offset;
 	my %map_RL = (L => 1, R => 2);
-	map{  my $track = $_; 
- 		  my $name = $track->name;
- 		  my $dest = "ecasound:$name\_in_";
-		  my $file = join_path(project_root(), $track->source_id);
-		  if (-e $file){ 
-		  my $line_number = 0;
- 		  my @lines = io($file)->slurp;
-		  for my $port (@lines){   
-			# $port is the source port name
-			chomp $port;
-			say "port file $file, line $line_number, port $port";
-			# inform user if port doesn't exist
-			if($jack{$port}){
-				my $cmd = q(jack_).$dis.qq(connect "$port" $dest);
-				# define offset once based on first port line
-				# ends in zero: 1 
-				# ends in one:  0
-				/(\d)$/ and $offset //= ! $1;
-				#$debug and say "offset: $offset";
-				if( $track->width == 1){ $cmd .= "1" }
-				elsif( $track->width == 2){
-					my($suffix) = /([LlRr]|\d+)$/;
-					#say "suffix: $suffix";
-					$cmd .= ($suffix =~ /\d/) 
-						? ($suffix + $offset)
-						: $map_RL{uc $suffix};
-				} else { $cmd .= ($line_number % $track->width + 1) }
-				$debug and say $cmd;
-				system $cmd;
-			} else {
-				say $track->name, qq(: port "$port" not found. Skipping.) 
-			}
-			$line_number++;
-		  } ;
-	  } else { say $track->name, 
+	map{  
+		my $track = $_; 
+ 		my $name = $track->name;
+ 		my $dest = "ecasound:$name\_in_";
+		my $file = join_path(project_root(), $track->source_id);
+		if (! -e -r $file){ say $track->name, 
 				": JACK ports file $file not found. No sources connected.";
-	  }
+	  	} else {
+			my $line_number = 0;
+			my @lines = io($file)->slurp;
+			for my $port (@lines){   
+				# $port is the source port name
+				chomp $port;
+				say "port file $file, line $line_number, port $port";
+				# inform user if port doesn't exist
+				if($jack{$port}){
+					my $cmd = q(jack_).$dis.qq(connect "$port" $dest);
+					# define offset once based on first port line
+					# ends in zero: 1 
+					# ends in one:  0
+					/(\d)$/ and $offset //= ! $1;
+					#$debug and say "offset: $offset";
+					if( $track->width == 1){ $cmd .= "1" }
+					elsif( $track->width == 2){
+						my($suffix) = /([LlRr]|\d+)$/;
+						#say "suffix: $suffix";
+						$cmd .= ($suffix =~ /\d/) 
+							? ($suffix + $offset)
+							: $map_RL{uc $suffix};
+					} else { $cmd .= ($line_number % $track->width + 1) }
+					$debug and say $cmd;
+					system $cmd;
+				} else {
+					say $track->name, qq(: port "$port" not found. Skipping.) 
+				}
+				$line_number++;
+			};
+		}
  	 } grep{ $_->source_type eq 'jack_ports_list' 
-				and $_->rec_status eq 'REC' 
-	 } ::Track::all();
+				and $_->rec_status eq 'REC' } ::Track::all();
 }
 
 sub disconnect_jack_ports_list { connect_jack_ports_list('dis') }
