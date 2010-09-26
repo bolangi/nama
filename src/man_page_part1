@@ -550,16 +550,9 @@ ports for that track, which will be set to
 I<ecasound:trackname_in_1> for mono. A stereo track will
 use I<ecasound:trackname_in_2> as well.
 
-When dealing with a B<stereo> track, Nama uses a heuristic to
-choose which ports to map to trackname_in_1 and which to
-trackname_in_2.
-
-Connect to trackname_in_1 if port name matches 'L' or 'l' after the colon.
-
-Connect to trackname_in_2 if port name matches 'R' or 'r' after the colon.
-
-Connect port names ending in digits (1,2) or (0,1) to
-(track_name_in_1,trackname_in_2). 
+If the track is stereo, ports from the list are alternately
+connected to left and right channels. Larger numbers
+of channels are handled similarly.
 
 =head1 TEXT COMMANDS
 
