@@ -33,7 +33,6 @@ no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
 use Cwd;
-use Expect;
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
