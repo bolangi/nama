@@ -320,6 +320,7 @@ sub snapshot {
 
 # for graph-style routing
 
+=comment
 # translate the new source_type designations to the old API
 {
 my %translate = qw(
@@ -330,6 +331,7 @@ my %translate = qw(
 	jack_client jack_client
 	null null
 );
+=cut
 sub input_path { # signal path, not file path
 
 	my $track = shift;
@@ -338,7 +340,7 @@ sub input_path { # signal path, not file path
 	
 	if($track->rec_status eq 'REC'){
 			return () if $track->source_type eq 'bus';
-			( ::input_node($translate{$track->source_type}) , $track->name)
+			( ::input_node($track->source_type) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 
 	# create edge representing WAV file input
@@ -347,7 +349,7 @@ sub input_path { # signal path, not file path
 
 	}
 }
-}
+#}
 
 
 ### remove and destroy
