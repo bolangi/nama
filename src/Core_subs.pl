@@ -4285,10 +4285,12 @@ sub apply_effect_profile {  # overwriting current effects
 	map{ $function->( $tn{$_}, profile_effect_chain_name($profile,$_)) } @tracks;
 }
 sub list_effect_profiles { 
+	my @results;
 	while( my $name = each %effect_profile){
-		say "effect profile: $name";
-		list_effect_chains("_$name:");
+		push @results, "effect profile: $name\n";
+		push @results, list_effect_chains("_$name:");
 	}
+	@results;
 }
 
 sub restore_effects { pop_effect_chain($_[0])}
@@ -4336,13 +4338,15 @@ sub list_effect_chains {
 	if (@frags){
 		@ids = grep{ my $id = $_; grep{ $id =~ /$_/} @frags} @ids; 
 	}
+	my @results;
 	map{ my $name = $_;
-		print join ' ', "$name:", 
+		push @results, join ' ', "$name:", 
 		map{$effect_chain{$name}{type}{$_},
 			@{$effect_chain{$name}{params}{$_}}
 		} @{$effect_chain{$name}{ops}};
-		print "\n";
+		push @results, "\n";
 	} @ids;
+	@results;
 }
 sub cleanup_exit {
  	remove_riff_header_stubs();

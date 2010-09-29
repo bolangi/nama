@@ -709,7 +709,7 @@ delete_effect_chain: _delete_effect_chain ident(s) end {
 	1;
 }
 list_effect_chains: _list_effect_chains ident(s?) end {
-	::list_effect_chains( @{ $item{'ident(s?)'} } ); 1;
+	::pager(::list_effect_chains( @{ $item{'ident(s?)'} } )); 1;
 }
 
     
@@ -743,7 +743,7 @@ apply_effect_profile: _apply_effect_profile effect_profile_name end {
 overlay_effect_profile: _overlay_effect_profile effect_profile_name end {
 	::apply_effect_profile(\&::add_effect_chain, $item{effect_profile_name}); 1 }
 list_effect_profiles: _list_effect_profiles end {
-	::list_effect_profiles(); 1 }
+	::pager(::list_effect_profiles()); 1 }
 do_script: _do_script shellish end { ::do_script($item{shellish});1}
 scan: _scan end { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)
