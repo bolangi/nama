@@ -4706,6 +4706,8 @@ sub start_midish {
 sub midish_command {
 	my $query = shift;
 	print "\n";
+	$midish_enable or say( qq($query: cannot execute Midish command 
+unless you set "midish_enable: 1" in .namarc)), return;
 	$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
 
 	#send query to midish
