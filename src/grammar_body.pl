@@ -185,12 +185,16 @@ get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
 getpos: _getpos end {  
 	print ::d1( ::eval_iam q(getpos) ), $/; 1}
-setpos: _setpos value end {
-	::set_position($item{value}); 1}
-forward: _forward value end {
-	::forward( $item{value} ); 1}
-rewind: _rewind value end {
-	::rewind( $item{value} ); 1}
+setpos: _setpos timevalue end {
+	::set_position($item{timevalue}); 1}
+forward: _forward timevalue end {
+	::forward( $item{timevalue} ); 1}
+rewind: _rewind timevalue end {
+	::rewind( $item{timevalue} ); 1}
+timevalue: min_sec | seconds
+seconds: value
+min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
+
 to_start: _to_start end { ::to_start(); 1 }
 to_end: _to_end end { ::to_end(); 1 }
 add_track: _add_track track_name(s) end {
