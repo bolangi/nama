@@ -58,7 +58,7 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
-	start_midish() if $midish_enable;
+	start_midish(); # if $midish_enable;
 
 	# set up autosave
 	
@@ -4706,9 +4706,9 @@ sub start_midish {
 sub midish_command {
 	my $query = shift;
 	print "\n";
-	$midish_enable or say( qq($query: cannot execute Midish command 
-unless you set "midish_enable: 1" in .namarc)), return;
-	$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
+	#$midish_enable or say( qq($query: cannot execute Midish command 
+#unless you set "midish_enable: 1" in .namarc)), return;
+	#$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
 
 	#send query to midish
 	print MIDISH_WRITE "$query\n";
