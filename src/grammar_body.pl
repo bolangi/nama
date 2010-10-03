@@ -8,9 +8,6 @@ meta: midish_cmd
 midish_cmd: /[a-z]+/ predicate { 
 	return unless $::midish_command{$item[1]};
 	my $line = "$item[1] $item{predicate}";
-	print "cmd: $item{midish_cmd}\n";
-	print "predicate: $item{predicate}\n";
-	print "line: $line\n";
 	::midish_command($line);
 	1;
 }
