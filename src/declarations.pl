@@ -386,4 +386,5 @@ our (
 	
 	$autosave_interval, # how frequently to save
 	$midish_enable,       # using midish
+	%midish_command,     # keywords listing
 );

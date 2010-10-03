@@ -165,6 +165,11 @@ sub setup_grammar {
 
 	*fake_jack_lsp = __PACKAGE__->section_data("fake_jack_lsp");
 
+	# Midish command keywords
+	
+	%midish_command = map{ $_, 1} split " ", 
+		${ __PACKAGE__->section_data("midish_commands") };
+
 	# print remove_spaces("bulwinkle is a...");
 
 #### Class and Object definitions for package '::'
@@ -283,6 +288,8 @@ __[default_palette_yml]__
 [% qx(cat ./palette.yml) %]
 __[fake_jack_lsp]__
 [% qx(cat ./fake_jack_lsp) %]
+__[midish_commands]__
+[% qx(cat ./midish_commands) %]
 __[end_data_section]__
 __END__
 

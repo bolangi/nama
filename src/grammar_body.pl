@@ -1,6 +1,20 @@
 #command: test
 #test: 'test' shellish { print "found $item{shellish}\n" }
 
+# CASE 0: Midish command 
+
+meta: midish_cmd 
+
+midish_cmd: /[a-z]+/ predicate { 
+	return unless $::midish_command{$item[1]};
+	my $line = "$item[1] $item{predicate}";
+	print "cmd: $item{midish_cmd}\n";
+	print "predicate: $item{predicate}\n";
+	print "line: $line\n";
+	::midish_command($line);
+	1;
+}
+
 # CASE 1: Shell code, perl code or 'for' commands consume text up to ;; or 
 # to the end of line.  The remaining text will be parsed again at the top level
 # until all text is consumed.
