@@ -3708,6 +3708,7 @@ sub load_keywords {
 	push @keywords, grep{$_} map{split " ", $commands{$_}->{short}} @keywords;
 	push @keywords, keys %iam_cmd;
 	push @keywords, keys %effect_j;
+	push @keywords, keys %midish_command if $midish_enable;
 	push @keywords, "Audio::Nama::";
 }
 

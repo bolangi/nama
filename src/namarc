@@ -131,4 +131,10 @@ limiter: tap_limiter 0 0
 #
 # MIDI support
 #
-midish_enable: 0  
+# midish_enable: 0  
+# 
+# midi_input_dev: 
+# 
+# midi_output_dev:
+
+
