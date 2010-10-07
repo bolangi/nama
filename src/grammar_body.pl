@@ -146,6 +146,7 @@ ident: /[-\w]+/   # | <error: illegal identifier, word characters only!> XXX
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
 
+statefile: /[-:\w\.]+/
 marktime: /\d+\.\d+/ # decimal required
 markname: /\w+/ { 	 # word characters
 	print("$item[1]: non-existent mark name. Skipping\n"), return undef 
@@ -187,10 +188,10 @@ remove_project_template: _remove_project_template key(s) {
 }
 save_state: _save_state ident end { ::save_state( $item{ident}); 1}
 save_state: _save_state end { ::save_state(); 1}
-get_state: _get_state ident end {
+get_state: _get_state statefile end {
  	::load_project( 
  		name => $::project_name,
- 		settings => $item{ident}
+ 		settings => $item{statefile}
  		); 1}
 get_state: _get_state end {
  	::load_project( name => $::project_name,) ; 1}
