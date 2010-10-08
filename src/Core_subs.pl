@@ -1445,12 +1445,14 @@ sub reconfigure_engine {
 
 	# only act if change in configuration
 
-	my $current = yaml_out(status_snapshot());
-	my $old = yaml_out($old_snapshot);
-
-	if ( $current eq $old and ! $regenerate_setup){
-			$debug and print ("no change in setup\n");
-			return;
+	if( $regenerate_setup ){} # no check if change flag is already set
+	else {
+		my $current = yaml_out(status_snapshot());
+		my $old = yaml_out($old_snapshot);
+		if ( $current eq $old){
+				$debug and print ("no change in setup\n");
+				return;
+		}
 	}
 	$debug and print ("setup change\n");
 
