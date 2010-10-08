@@ -1698,6 +1698,7 @@ sub stop_transport {
 	$debug2 and print "&stop_transport\n"; 
 	mute();
 	eval_iam('stop');	
+	disable_length_timer();
 	sleeper(0.5);
 	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
 	unmute();
@@ -1769,6 +1770,9 @@ sub cancel_wraparound {
 sub limit_processing_time {
 	my $length = shift // $length;
  	$event_id{processing_time} = AE::timer($length, 0, sub{ eval_iam("stop")});
+}
+sub disable_length_timer {
+	$event_id{processing_time} = undef; 
 }
 sub wraparound {
 	package ::;
