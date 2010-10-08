@@ -1445,7 +1445,10 @@ sub reconfigure_engine {
 
 	# only act if change in configuration
 
-	if( $regenerate_setup ){} # no check if change flag is already set
+	# skip check if regenerate_setup flag is already set
+	if( $regenerate_setup ){ 
+		$regenerate_setup = 0; # reset for next time
+	} 
 	else {
 		my $current = yaml_out(status_snapshot());
 		my $old = yaml_out($old_snapshot);
