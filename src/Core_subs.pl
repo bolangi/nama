@@ -936,6 +936,16 @@ sub really_recording {
 	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 
+sub mixing_only {
+	my $i;
+	my $am_mixing;
+	for (really_recording()){
+		$i++;
+		$am_mixing++ if /Mixdown/;
+	}
+	$i == 1 and $am_mixing
+}
+	
 sub generate_setup { 
 	# return 1 if successful
 	# catch errors from generate_setup_try() and cleanup
@@ -1673,6 +1683,7 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
+	limit_processing_time() if mixing_only();
 	sleeper(0.5) unless really_recording();
 	unmute();
 	$ui->set_engine_mode_color_display();
@@ -1754,6 +1765,10 @@ sub schedule_wraparound {
 }
 sub cancel_wraparound {
 	$event_id{wraparound} = undef;
+}
+sub limit_processing_time {
+	my $length = shift // $length;
+ 	$event_id{processing_time} = AE::timer($length, 0, sub{ eval_iam("stop")});
 }
 sub wraparound {
 	package ::;
@@ -4426,10 +4441,18 @@ sub complete_caching {
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
-	eval_iam("cs-set-length $length"); # to longest input object
+
+	# we try to set processing time this way
+	eval_iam("cs-set-length -1"); # to longest input object
+
 	eval_iam("start");
+
+	# but the engine won't stop if a live input is present,
+
+	limit_processing_time(); # default to setup length
+
 	sleep 2; # time for transport to stabilize
-	while( eval_iam('engine-status') ne 'finished'){ 
+	while( eval_iam('engine-status') !~ /finished|stopped/ ){ 
 	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
 	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
