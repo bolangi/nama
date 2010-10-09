@@ -1430,14 +1430,14 @@ sub set_doodle_mode {
 }
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
+
 	# skip if command line option is set
 	return if $opts{R};
 
 	return if $disable_auto_reconfigure;
 
-	# we don't want to disturb recording/mixing
-	return 1 if really_recording() and engine_running();
-		# why the return value? TODO delete it
+	# don't disturb recording/mixing
+	return if really_recording() and engine_running();
 
 	rememoize(); # check if someone has snuck in some files
 	
@@ -1459,43 +1459,51 @@ sub reconfigure_engine {
 	}
 	$debug and print ("setup change\n");
 
-# 	# restore playback position unless 
-# 	
-# 	#  - doodle mode
-# 	#  - change in global version
-#     #  - change in project
-#     #  - user or Mixdown track is REC enabled
-# 	
-# 	my $old_pos;
-# 
-# 	my $will_record = ! $preview 
-# 						&&  grep { $_->{rec_status} eq 'REC' } 
-# 							@{ $status_snapshot->{tracks} };
-# 
-# 	# restore playback position if possible
-# 
-# 	if (	$preview eq 'doodle'
-# 		 	or  $old_snapshot->{project} ne $status_snapshot->{project} 
-# 			or  $old_snapshot->{global_version} 
-# 					ne $status_snapshot->{global_version} 
-# 			or  $will_record  ){
-# 
-# 		$old_pos = undef;
-# 
-# 	} else { $old_pos = eval_iam('getpos') }
-# 
-# 	my $was_running = engine_running();
-# 	stop_transport() if $was_running;
+ 	my $old_pos;
+ 	my $was_running;
+	my $restore_position;
+	my $previous_snapshot = $old_snapshot;
+
+	# restore previous playback position unless 
+
+	#  - doodle mode
+	#  - change in global version (TODO)
+	#  - change in project
+	#  - new setup involves recording
+	
+	if ( 	$preview eq 'doodle' 
+		 or $old_snapshot->{project} ne $project_name
+		# TODO: or change in global version
+	){} # do nothing
+	else
+	{
+		$old_pos = eval_iam('getpos') if eval_iam('cs-selected');
+		$was_running = engine_running();
+		$restore_position++;
+
+		say "old_pos: $old_pos";
+		say "was_running: $was_running";
+		say "restore_position: $restore_position";
+
+	}
 
 	$old_snapshot = status_snapshot();
 
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
+
 	if ( generate_setup() ){
+		
+		stop_transport() if $was_running;
+
 		#say "I generated a new setup";
 		::Text::show_status();
-		connect_transport();
-# 		eval_iam("setpos $old_pos") if $old_pos; # temp disable
-# 		start_transport() if $was_running and ! $will_record;
+		connect_transport('quiet');
+
+		if( $restore_position and not really_recording()){
+			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $length;
+ 			start_transport('quiet') if $was_running;
+		}
+		transport_status();
 		$ui->flash_ready;
 	}
 }
@@ -1560,7 +1568,7 @@ sub adjust_latency {
 
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
-	my $no_transport_status = shift;
+	my $quiet = shift;
 	remove_riff_header_stubs();
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
@@ -1586,7 +1594,7 @@ sub connect_transport {
 	$ui->clock_config(-text => colonize(0));
 	disconnect_jack_ports_list();
 	connect_jack_ports_list();
-	transport_status() unless $no_transport_status;
+	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
 	1;
@@ -1651,26 +1659,24 @@ sub transport_status {
 	}
 	if ($loop_enable and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
-		print "looping from ", d1($start), 
-			($start > 120 
-				? " (" . colonize( $start ) . ") "  
-				: " " ),
-						"to ", d1($end),
-			($end > 120 
-				? " (".colonize( $end ). ") " 
-				: " " ),
-				$/;
+		say "looping from ", heuristic_time($start),
+				 	"to ",   heuristic_time($end);
 	}
-	print "Setup length is:  ", d1($length), 
-		($length > 120	?  " (" . colonize($length). ")" : "" )
-		,$/;
-	say "Now at ", colonize( eval_iam( "getpos" ));
-	say "Engine is ready.";
+	say "\nNow at: ", colonize( eval_iam( "getpos" ));
+	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
 	#$term->stuff_char(10); 
 }
+
+sub heuristic_time {
+	my $sec = shift;
+	d1($sec) .  ( $sec > 120 ? " (" . colonize( $sec ) . ") "  : " " )
+}
+
 sub start_transport { 
+
+	my $quiet = shift;
 
 	# set up looping event if needed
 	# mute unless recording
@@ -1684,7 +1690,7 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	print "\nStarting at ", colonize(int eval_iam("getpos")), $/;
+	say "\n\nStarting at ", colonize(int eval_iam("getpos")) unless $quiet;
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
@@ -1912,8 +1918,10 @@ sub rec_cleanup {
 	$debug && print("transport still running, can't cleanup"),return if transport_running();
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
-		(grep /Mixdown/, @files) ? command_process('mixplay') : post_rec_configure();
-	reconfigure_engine();
+		(grep /Mixdown/, @files) 
+			? command_process('mixplay') 
+			: post_rec_configure();
+		reconfigure_engine();
 	}
 }
 sub post_rec_configure {
@@ -1921,7 +1929,7 @@ sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		map{ $_->set(rw => 'MON')} ::Bus::all();
 		$ui->refresh();
-		reconfigure_engine();
+	#	reconfigure_engine(); # redundant
 }
 sub new_files_were_recorded {
  	return unless my @files = really_recording();
@@ -4449,7 +4457,7 @@ sub prepare_to_cache {
 }
 sub complete_caching {
 	my $track = shift;
-	connect_transport('no_transport_status')
+	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
@@ -4492,14 +4500,16 @@ sub complete_caching {
 
 		# special handling for sub-bus mix track
 		
-		if ($track->rec_status eq 'REC'){ 
+		if ($track->rec_status eq 'REC')
+		{ 
 			$track->set(rw => 'MON');
 			$ui->global_version_buttons(); # recreate
 			$ui->refresh();
+		} 
 
 		# usual post-record handling is the default
-	
-		} else { post_rec_configure() }
+
+		else { post_rec_configure() }
 
 		reconfigure_engine();
 

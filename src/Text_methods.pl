@@ -87,6 +87,8 @@ sub show_status {
 	say "Main bus allows:  ", $main->allows, " track status";
 	say "Main bus version: ",$::main->version if $::main->version;
 	say "Audio output is:  ", $main_out ? "ON" : "OFF";
+	say "Setup length is:  ", ::heuristic_time($length); 
+		
 }
 sub placeholder { 
 	my $val = shift;
