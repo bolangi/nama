@@ -1684,7 +1684,7 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	print "\nstarting at ", colonize(int eval_iam("getpos")), $/;
+	print "\nStarting at ", colonize(int eval_iam("getpos")), $/;
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
@@ -1694,7 +1694,7 @@ sub start_transport {
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
 	sleeper(0.5);
-	print "engine is ", eval_iam("engine-status"), "\n\n"; 
+	engine_status();
 	sleeper(0.5);
 	
 }
@@ -1705,7 +1705,7 @@ sub stop_transport {
 	eval_iam('stop');	
 	disable_length_timer();
 	sleeper(0.5);
-	print "\nengine is ", eval_iam("engine-status"), "\n\n"; 
+	engine_status();
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
@@ -1715,6 +1715,9 @@ sub transport_running { eval_iam('engine-status') eq 'running'  }
 sub disconnect_transport {
 	return if transport_running();
 	teardown_engine();
+}
+sub engine_status {
+	print "\nEngine is ", eval_iam("engine-status"), "\n\n"; 
 }
 
 sub start_heartbeat {
@@ -1732,7 +1735,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	say("\nengine is stopped"),revise_prompt(),stop_heartbeat()
+	engine_status(),revise_prompt(),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
