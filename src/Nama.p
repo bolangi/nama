@@ -68,6 +68,7 @@ use ::Graph;
 use ::Wav;
 use ::Insert;
 use ::Fade;
+use ::Edit;
 
 ## Definitions ##
 

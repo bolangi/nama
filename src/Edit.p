@@ -8,8 +8,9 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Object qw( 
 				n
-				mark1
-				mark2
+				play_from_mark
+				rec_on_mark
+				rec_off_mark
 				host_track
 				host_version
 				punch_track
@@ -34,6 +35,24 @@ sub new {
 	
 	$object
 	
+}
+
+sub edit_name {
+	my $self = shift;
+	join '-', $self->host_track, 'v'.$self->host_version, 'edit'.$self->n
+}
+
+sub play_from_name {
+	my $self = shift;
+	join '-', $self->edit_name,'play-from'
+}
+sub rec_on_name {
+	my $self = shift;
+	join '-', $self->edit_name,'rec-on'
+}
+sub rec_off_name {
+	my $self = shift;
+	join '-', $self->edit_name,'rec-off'
 }
 
 sub remove { # supply index

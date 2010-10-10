@@ -582,8 +582,8 @@ punch-in and punch-out positions.
 Edits may not overlap, however you may edit the
 edit track(s).
 
-I<merge_edits> will recursively merge all edits
-of the current track, creating a new version.
+I<merge_edits> will recursively merge all edits applied to
+the current track and version, creating a new version.
 
 I<preview_edit> will play the edit segment
 with the marked content removed.
