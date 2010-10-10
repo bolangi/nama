@@ -262,6 +262,7 @@ sub process_options {
 		debugging-output			D
 		execute-command=s			X
 		no-terminal					T
+        no-fade-on-transport-start  F
 );
 
 	map{$opts{$_} = ''} values %options;
@@ -1491,10 +1492,10 @@ sub reconfigure_engine {
 
 	print STDOUT ::Text::show_tracks(::Track::all()) ;
 
+	stop_transport('quiet') if $was_running;
+
 	if ( generate_setup() ){
 		
-		stop_transport() if $was_running;
-
 		#say "I generated a new setup";
 		connect_transport('quiet');
 		::Text::show_status();
@@ -1666,7 +1667,6 @@ sub transport_status {
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
-	#$term->stuff_char(10); 
 }
 
 sub heuristic_time {
@@ -1712,16 +1712,20 @@ sub start_transport {
 }
 sub stop_transport { 
 
+	my $quiet = shift;
 	$debug2 and print "&stop_transport\n"; 
 	mute();
 	eval_iam('stop');	
 	disable_length_timer();
-	sleeper(0.5);
-	engine_status(current_position(),2,0);
+	if ( ! $quiet ){
+		sleeper(0.5);
+		engine_status(current_position(),2,0);
+	}
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
 }
+
 sub transport_running { eval_iam('engine-status') eq 'running'  }
 
 sub disconnect_transport {
@@ -1821,10 +1825,12 @@ sub debugging_options {
 	grep{$_} $debug, @opts{qw(R D J A E T)};
 }
 sub mute {
+	return if $opts{F};
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
 	$tn{Master}->mute;
 }
 sub unmute {
+	return if $opts{F};
 	return if $tn{Master}->rw eq 'OFF' or really_recording();
 	$tn{Master}->unmute;
 }
