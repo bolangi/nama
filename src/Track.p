@@ -72,10 +72,11 @@ sub new {
 	my %vals = @_;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
-	if (my $track = $by_name{$vals{name}}){
-		#if ($track->hide) { $track->set(hide => 0); } 
-		return # $track;
-	}
+	
+	# silently return if track already exists
+	
+	return if $by_name{$vals{name}};
+
 	my $n = $vals{n} || idx(); 
 	my $object = bless { 
 
@@ -799,6 +800,20 @@ sub rec_status {
 	return 'REC' if $track->rw eq 'REC';
 	::Track::rec_status($track);
 }
+{
+package ::EditTrack;
+our @ISA = '::Track';
+our $AUTOLOAD;
+sub AUTOLOAD {
+	my $self = shift;
+    # get tail of method call
+    my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	$::Edit::by_name{$self->name}->$call(@_);
+}
+sub source_id   { $::tn{$_[0]->host_track}->source_id }
+sub source_type { $::tn{$_[0]->host_track}->source_type }
+}
+
 1;
 __END__
 

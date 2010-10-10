@@ -1,11 +1,44 @@
 # ----------- Edit ------------
 package ::Edit;
+
+# each edit is uniquely identified by:
+#  -  host track name
+#  -  host track version
+#  -  edit index
+
+# TODO
+#
+# - I would like to let users adjust edit input source_type/source_id
+#   at the host track
+# - But the host track is set to bus/bus
+#   a. either change the logic for bus designation (with backwards compatibility)
+#   b. or set source_type/id at edit track
+#   c. or copy source_type/id before converting host to mix track
+#   we like (a): $track->input_path() method is the only change
+#   unfortunately we have to replace it with a heuristic:
+#   "if tracks are connected to us, we are a bus, therefore
+#   ignore our inputs."
+#   -OR-
+#   new field "is_mix_track" (set when we create bus
+#   (clear when remove bus)
+#   -OR-
+#   "if a bus has our name AND has signal-producing tracks,
+#   ignore our inputs" (same as previous)
+#
+
+
+
+# - save/recall
+# - new project initializations
+# - region and playat settings
+#
+
 use Modern::Perl;
 our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index);
+use vars qw(%n %by_index %by_name );
 use ::Object qw( 
 				n
 				play_start_mark
@@ -17,53 +50,147 @@ use ::Object qw(
 				punch_version
 				start_pos
 				 );
-%by_index = ();	# return ref to Mark by name
-sub next_n {
-	my $n = 1;
-	while( $by_index{$n} ){ $n++}
-	$n
+
+sub initialize {
+	%n = ();
+	%by_index = ();	
+	%by_name = ();
 }
+
+sub next_n {
+	my ($trackname, $version) = @_;
+	++$n{$trackname}{$version}
+}
+sub edit_index { join ':',@_ }
+
 sub new {
 	my $class = shift;	
 	my %vals = @_;
+
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	
-	my $object = bless { n => next_n(), @_	}, $class;
-	$by_index{$object->n} = $object;
+	my $self = bless { n => next_n(@vals{qw(host_track host_version)}), @_ }, $class;
 
-	#print "object class: $class, object type: ", ref $object, $/;
+	$by_index{ edit_index($self->host_track, $self->host_version, $self->n) } = $self;
+	$by_name{ $self->edit_name } = $self;
+
+	#print "self class: $class, self type: ", ref $self, $/;
 	
-	$object
+	my $name = $self->host_track;
+
+	# get the current version of host_track
+
+	# host track will become mix track of a sub-bus
 	
+	# create the bus
+	
+	::SubBus->new( 
+		name => $name, 
+		send_type => 'bus',
+		send_id	 => $name,
+	);
+
+	# convert host track to mix track
+	
+	my @vals = (source_type => 'bus', 
+				source_id 	=> 'bus',
+				rec_defeat 	=> 1,
+				rw => 'REC',
+				);
+
+	$::tn{$name}->set( @vals );
+
+	# create host track alias if necessary
+
+	# To ensure that users don't get into trouble, we would like to 
+	# restrict this track:
+	#  - version number must *not* be allowed to change
+	#  - rw setting must be fixed to 'MON'
+	#
+	#  The easiest way may be to provide our own 'set' routine
+	#  since this is what is used by all commands
+	
+	my $host_track_alias = ::Track->new(
+		name 	=> $self->host_track_alias_name,
+		version => $::tn{$self->host_track}->monitor_version,
+		target  => $self->host_track,
+		rw		=> 'MON',
+		group   => $self->host_track, # bus affiliation
+	);
+
+	# create edit track
+	#   - same name as edit
+	#   - we expect to record
+	#   - source_type and source_id come from host track
+	
+	my $edit_track = ::EditTrack->new(
+		name	=> $self->edit_name,
+		rw		=> 'REC',
+		group	=> $self->host_track, # bus affiliation
+	); 
+	$self
+}
+
+sub edit_root_name {
+	my $self = shift;
+	join '-', $self->host_track, 'v'.$self->host_version;
 }
 
 sub edit_name {
 	my $self = shift;
-	join '-', $self->host_track, 'v'.$self->host_version, 'edit'.$self->n
+	join '-', $self->edit_root_name, 'edit'.$self->n
+}
+
+sub host_track_alias_name {
+	my $self = shift;
+	join '-', $self->edit_root_name, 'original'
 }
 
 # default mark names
 
-sub play_from_name {
+sub play_start_name {
 	my $self = shift;
 	join '-', $self->edit_name,'play-start'
 }
-sub rec_on_name {
+sub rec_start_name {
 	my $self = shift;
 	join '-', $self->edit_name,'rec-start'
 }
-sub rec_off_name {
+sub rec_end_name {
 	my $self = shift;
 	join '-', $self->edit_name,'rec-end'
 }
 
+sub marktime { 
+	my ($self,$markfield) = @_;
+	::Mark::by_name{$self->$markfield}->time
+}
+
+sub is_active {
+	my $self = shift;
+
+	# the host track's current version must match
+	# the version the Edit object applies to
+	
+	# however the host track 'sax' will be made into a bus
+	# and the original WAV will be offered through
+	# 'sax-v3-original'
+	
+	#$::tn{$self->host_track}->current_version == $self->host_version
+}
+
+
+sub host_alias {
+	my $self = shift;
+}
+
 sub remove { # supply index
 	my $i = shift;
-	my $edit = $by_index{$i};
-	my $track = $::tn{$edit->track};
+	#my $edit = $by_index{$i};
+	#my $track = $::tn{$edit->track};
 	
 	# remove object from index
-	delete $by_index{$i};
+	#delete $by_index{$i};
 
 }
 1;

@@ -736,4 +736,9 @@ midish_command:
   what: send command text to 'midish' MIDI sequencer shell
   short: m
   parameters: <s_command_text>
+new_edit:
+  type: edit
+  what: prepare to edit the current track and version
+  short: ned
+  parameters: hmmm
 ...

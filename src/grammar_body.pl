@@ -838,4 +838,14 @@ show_comments: _show_comments {
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
 }
+
+new_edit: _new_edit {
+	print($::this_track->name, ": must be in MON mode.
+Edits will be applied against current version\n"), return 1
+	unless $::this_track->rec_status eq 'MON' 
+       and $::this_track->monitor_version;
+	print $::this_track->name, ": creating new edit against version ", 
+		$::this_track->monitor_version, "\n";
+}
+	
 	
