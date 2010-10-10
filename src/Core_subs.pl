@@ -1481,9 +1481,9 @@ sub reconfigure_engine {
 		$was_running = engine_running();
 		$restore_position++;
 
-		say "old_pos: $old_pos";
-		say "was_running: $was_running";
-		say "restore_position: $restore_position";
+# 		say "old_pos: $old_pos";
+# 		say "was_running: $was_running";
+# 		say "restore_position: $restore_position";
 
 	}
 
@@ -1496,8 +1496,8 @@ sub reconfigure_engine {
 		stop_transport() if $was_running;
 
 		#say "I generated a new setup";
-		::Text::show_status();
 		connect_transport('quiet');
+		::Text::show_status();
 
 		if( $restore_position and not really_recording()){
 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $length;
@@ -1662,7 +1662,7 @@ sub transport_status {
 		say "looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end);
 	}
-	say "\nNow at: ", colonize( eval_iam( "getpos" ));
+	say "\nNow at: ", current_position();
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
@@ -1690,19 +1690,25 @@ sub start_transport {
 	$debug2 and print "&start_transport\n";
 	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
 
-	say "\n\nStarting at ", colonize(int eval_iam("getpos")) unless $quiet;
+	say "\n\nStarting at ", current_position() unless $quiet;
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
 	limit_processing_time() if mixing_only();
-	sleeper(0.5) unless really_recording();
+ 	#$event_id{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+	sleeper(0.5);
 	unmute();
+	sleeper(0.5);
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
-	sleeper(0.5);
-	engine_status();
-	sleeper(0.5);
-	
+	engine_status() unless $quiet;
+#  	$event_id{start_heartbeat}   = AE::timer(1, 0, 
+# 		sub{ 
+# 			$ui->set_engine_mode_color_display();
+# 			start_heartbeat();
+# 			engine_status();
+# 			print prompt();
+# 		});
 }
 sub stop_transport { 
 
@@ -1711,7 +1717,7 @@ sub stop_transport {
 	eval_iam('stop');	
 	disable_length_timer();
 	sleeper(0.5);
-	engine_status();
+	engine_status(current_position(),2,0);
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
@@ -1722,9 +1728,15 @@ sub disconnect_transport {
 	return if transport_running();
 	teardown_engine();
 }
-sub engine_status {
-	print "\nEngine is ", eval_iam("engine-status"), "\n\n"; 
+sub engine_is {
+	my $pos = shift;
+	"Engine is ". eval_iam("engine-status"). ( $pos ? " at $pos" : "" )
 }
+sub engine_status { 
+	my ($pos, $before_newlines, $after_newlines) = @_;
+	say "\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines;
+}
+sub current_position { colonize(int eval_iam("getpos")) }
 
 sub start_heartbeat {
  	$event_id{heartbeat} = AE::timer(0, 1, \&::heartbeat);
@@ -1741,7 +1753,7 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	engine_status(),revise_prompt(),stop_heartbeat()
+	engine_status(current_position(),2,1),revise_prompt(),stop_heartbeat()
 		#if $status =~ /finished|error|stopped/;
 		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
@@ -1759,7 +1771,7 @@ sub heartbeat {
 }
 
 sub update_clock_display { 
-	$ui->clock_config(-text => colonize(eval_iam('cs-get-position')));
+	$ui->clock_config(-text => current_position());
 }
 sub schedule_wraparound {
 
@@ -1834,7 +1846,7 @@ sub show_unit { $time_step->configure(
 sub drop_mark {
 	$debug2 and print "drop_mark()\n";
 	my $name = shift;
-	my $here = eval_iam("cs-get-position");
+	my $here = eval_iam("getpos");
 
 	print("mark exists already\n"), return 
 		if grep { $_->time == $here } ::Mark::all();
@@ -1877,7 +1889,7 @@ sub next_mark {
 sub previous_mark {
 	my $jumps = shift;
 	$jumps and $jumps--;
-	my $here = eval_iam("cs-get-position");
+	my $here = eval_iam("getpos");
 	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
 	for my $i ( reverse 0..$#marks ){
 		if ($marks[$i]->time < $here ){
@@ -2446,6 +2458,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	for my $n ( map{ $_->n } ::Track::all() ) {
 	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
  		next unless $is_ecasound_chain{$n};
+
 		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $offset{$n}; # for MIX
  		#next if ! $offset{$n} ;
@@ -2459,7 +2472,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
-	
 	my $id = shift;
 	my $selected = shift;
 	$debug and print "id: $id\n";
