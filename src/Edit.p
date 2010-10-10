@@ -92,8 +92,7 @@ sub new {
 
 	# convert host track to mix track
 	
-	my @vals = (source_type => 'bus', 
-				source_id 	=> 'bus',
+	my @vals = (is_mix_track => 1,
 				rec_defeat 	=> 1,
 				rw => 'REC',
 				);

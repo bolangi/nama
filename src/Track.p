@@ -321,18 +321,6 @@ sub snapshot {
 
 # for graph-style routing
 
-=comment
-# translate the new source_type designations to the old API
-{
-my %translate = qw(
-	soundcard soundcard
-	jack_port jack_port
-	jack_manual jack_port
-	jack_ports_list jack_port
-	jack_client jack_client
-	null null
-);
-=cut
 sub input_path { # signal path, not file path
 
 	my $track = shift;
@@ -340,7 +328,14 @@ sub input_path { # signal path, not file path
 	# create edge representing live sound source input
 	
 	if($track->rec_status eq 'REC'){
-			return () if $track->source_type eq 'bus';
+
+			# we skip the source if the track is a 'mix track'
+			# i.e. it gets input from other tracks, not 
+			# the specified source, if any.
+			
+			return () if $track->source_type eq 'bus'
+					  or $track->is_mix_track;
+
 			( ::input_node($track->source_type) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 

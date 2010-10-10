@@ -45,3 +45,4 @@
 					cache_map		# original versions of intermediate mixdown
 
 					comment			# add description of track
+					is_mix_track    # identifies track is bus mix track
