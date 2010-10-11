@@ -127,7 +127,7 @@ sub initialize_terminal {
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
-	vet_keystrokes() if $press_space_to_start_transport;
+	detect_spacebar(); # if $press_space_to_start_transport;
 
 	revise_prompt();
 	# handle Control-C from terminal
@@ -144,7 +144,7 @@ sub prompt {
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
 		($this_track ? $this_track->name : '') . "] ('h' for help)> "
 }
-sub vet_keystrokes {
+sub check_for_spacebar_hit {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
 		if ( $attribs->{line_buffer} eq " " ){
@@ -158,12 +158,51 @@ sub vet_keystrokes {
 		}
 	});
 }
+sub detect_spacebar {
+	$event_id{stdin} = undef; # clean up after get_edit_positions()
+	check_for_spacebar_hit() if $press_space_to_start_transport;
+}
 
-sub get_edit_positions {
+sub detect_keystroke_p {
+	$event_id{stdin} = AE::io(*STDIN, 0, sub {
+		&{$attribs->{'callback_read_char'}}();
+		if (     ! $attribs->{line_buffer} eq "p"
+			 and ! $attribs->{line_buffer} eq "P")
+		{ reset_input_line() }
+		else
+		{
+			if( get_edit_mark() )
+			{
+				reset_input_line();
+				$term->stuff_char(10);
+				&{$attribs->{'callback_read_char'}}();
+			}
+		}
+	});
+}
+
+sub reset_input_line {
+	$attribs->{line_buffer} = q();
+	$attribs->{point} 		= 0;
+	$attribs->{end}   		= 0;
+}
 
 
+{ my $p;
 
-
+sub get_edit_mark {
+	$p++;
+	if($p <= 3){  # record mark
+		my $pos = eval_iam('getpos');
+		say " found position ".d1($pos);
+		return 1
+	}
+	else { # cleanup
+		eval_iam('stop');
+		detect_spacebar();
+		$p = 0;
+	}
+}
 }
 	
 sub toggle_transport {
@@ -1865,13 +1904,20 @@ sub drop_mark {
 	my $name = shift;
 	my $here = eval_iam("getpos");
 
-	print("mark exists already\n"), return 
-		if grep { $_->time == $here } ::Mark::all();
+	if( my $mark = $::Mark::by_name{$name}){
+		say "$name: a mark with this name exists already at: ", 
+			colonize($mark->time);
+		return
+	}
+	if( my ($mark) = grep { $_->time == $here} ::Mark::all()){
+		say q(This position is already marked by "),$mark->name,q(");
+		 return 
+	}
 
 	my $mark = ::Mark->new( time => $here, 
 							name => $name);
 
-		$ui->marker($mark); # for GUI
+	$ui->marker($mark); # for GUI
 }
 sub mark {
 	$debug2 and print "mark()\n";
