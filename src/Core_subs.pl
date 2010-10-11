@@ -127,7 +127,8 @@ sub initialize_terminal {
 	$attribs = $term->Attribs;
 	$attribs->{attempted_completion_function} = \&complete;
 	$attribs->{already_prompted} = 1;
-	vet_keystrokes();
+	vet_keystrokes() if $press_space_to_start_transport;
+
 	revise_prompt();
 	# handle Control-C from terminal
 
@@ -146,8 +147,7 @@ sub prompt {
 sub vet_keystrokes {
 	$event_id{stdin} = AE::io(*STDIN, 0, sub {
 		&{$attribs->{'callback_read_char'}}();
-		if (  $press_space_to_start_transport and
-				$attribs->{line_buffer} eq " " ){
+		if ( $attribs->{line_buffer} eq " " ){
 
 			toggle_transport();	
 			$attribs->{line_buffer} = q();
@@ -157,6 +157,13 @@ sub vet_keystrokes {
 			&{$attribs->{'callback_read_char'}}();
 		}
 	});
+}
+
+sub get_edit_positions {
+
+
+
+
 }
 	
 sub toggle_transport {
@@ -1705,6 +1712,7 @@ sub start_transport {
 	sleeper(0.5);
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
+	sleeper(0.2);
 	engine_status() unless $quiet;
 #  	$event_id{start_heartbeat}   = AE::timer(1, 0, 
 # 		sub{ 

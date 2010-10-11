@@ -759,5 +759,4 @@ start_edit:
 redo_edit:
   type: edit
   what: delete the last edit attempt and start recording again
-  
 ...

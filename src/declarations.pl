@@ -386,8 +386,16 @@ our (
 	
 	%wav_info,			# caches path/length/format/modify-time
 	$autosave_interval, # how frequently to save
+
+	# MIDI
+	
 	$midish_enable,       # using midish
 	%midish_command,     # keywords listing
 	$midi_input_dev,
 	$midi_output_dev, 
+	
+	# Edits
+
+	%edit_points,   # play_start, record_start, record_end	
+	
 );

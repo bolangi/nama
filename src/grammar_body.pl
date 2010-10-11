@@ -853,8 +853,13 @@ set_edit_marks: _set_edit_marks {
 	print q(Ready to set up edit marks! Start engine, then press the "P"
 key three times to mark play-start, record-start and
 record-end positions.);
-    ++$::setup_marks_mode
+    ++$::set_edit_marks_mode
 }
+list_edits: _list_edits {}
+
+start_edit: _start_edit {}
+
+redo_edit: _redo_edit {}
 
 
 	
