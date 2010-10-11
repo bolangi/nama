@@ -1712,7 +1712,6 @@ sub start_transport {
 	sleeper(0.5);
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
-	sleeper(0.2);
 	engine_status() unless $quiet;
 #  	$event_id{start_heartbeat}   = AE::timer(1, 0, 
 # 		sub{ 
