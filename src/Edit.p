@@ -6,27 +6,14 @@ package ::Edit;
 #  -  host track version
 #  -  edit index
 
-# TODO
-#
 # - I would like to let users adjust edit input source_type/source_id
 #   at the host track
-# - But the host track is set to bus/bus
-#   a. either change the logic for bus designation (with backwards compatibility)
-#   b. or set source_type/id at edit track
-#   c. or copy source_type/id before converting host to mix track
-#   we like (a): $track->input_path() method is the only change
-#   unfortunately we have to replace it with a heuristic:
-#   "if tracks are connected to us, we are a bus, therefore
-#   ignore our inputs."
-#   -OR-
-#   new field "is_mix_track" (set when we create bus
-#   (clear when remove bus)
-#   -OR-
-#   "if a bus has our name AND has signal-producing tracks,
-#   ignore our inputs" (same as previous)
+
+# - But as mix track, the host track is usually set to bus/bus
+# - That information goes only to $track->input_path() 
 #
-
-
+# - Solution: new field "is_mix_track"
+# - set when we create bus, clear when remove bus
 
 # - save/recall
 # - new project initializations
