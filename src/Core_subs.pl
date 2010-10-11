@@ -3455,7 +3455,7 @@ sub restore_state {
 	}
 	if ( $saved_version <= 1.065){ 
 
-		map{ $_->{current_edit} or $->{current_edit} = {} }
+		map{ $_->{current_edit} or $_->{current_edit} = {} }
 		grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
 
