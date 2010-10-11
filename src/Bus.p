@@ -90,8 +90,14 @@ sub remove {
 	# all tracks returned to Main group
 	map{$::tn{$_}->set(group => 'Main') } $::Bus::by_name{$bus->name}->tracks;
 
-	# remove bus mix track
-	$::tn{$bus->name}->remove;
+	my $mix_track = $::tn{$bus->name};
+	 
+	# restore mix track to allow normal, non-track input
+	
+	$mix_track->set(is_mix_track => 0);
+
+	# remove mix track unless it has some WAV files
+	$mix_track->remove unless scalar @{ $mix_track->versions };
 
 	# remove bus
 	delete $::Bus::by_name{$bus->name};

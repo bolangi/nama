@@ -191,7 +191,7 @@ sub current_version {
 					: $track->last;
 	my $status = $track->rec_status;
 	#$debug and print "last: $last status: $status\n";
-	if 	($status eq 'REC'){ return ++$last}
+	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
 }
