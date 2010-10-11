@@ -93,19 +93,16 @@ sub new {
 					vol  	=> undef,
 					pan 	=> undef,
 
-					modifiers => q(), # start, reverse, audioloop, playat
-					
-					looping => undef, # do we repeat our sound sample
-
-					source_type => q(soundcard),
-					source_id   => 1,
-
-					send_type => undef,
-					send_id   => undef,
-					inserts => {},
+					modifiers 		=> q(), # start, reverse, audioloop, playat
+					looping 		=> undef, # do we repeat our sound sample
+					source_type 	=> q(soundcard),
+					source_id   	=> 1,
+					send_type 		=> undef,
+					send_id   		=> undef,
+					inserts 		=> {},
 					effect_chain_stack => [],
-					cache_map => {},
-					
+					cache_map 		=> {},
+					current_edit 	=> {},
 
 					@_ 			}, $class;
 

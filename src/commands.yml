@@ -741,10 +741,10 @@ new_edit:
   what: prepare to edit the current track and version
   short: ned
   parameters: hmmm
-set_edit_marks:
+set_edit_points:
   type: edit
   what: mark play-start, record-start and record-end positions for an edit
-  short: sem
+  short: sep
   parameters: none
 list_edits:
   type: edit

@@ -847,13 +847,12 @@ Edits will be applied against current version\n"), return 1
 	print $::this_track->name, ": creating new edit against version ", 
 		$::this_track->monitor_version, "\n";
 }
-set_edit_marks: _set_edit_marks {
+set_edit_points: _set_edit_points {
 	print("You must use a playback-only mode to setup edit marks. Aborting\n"), 
 		return 1 if ::really_recording();
 	print q(Ready to set up edit marks! Start engine, then press the "P"
 key three times to mark play-start, record-start and
 record-end positions.);
-    ++$::set_edit_marks_mode
 }
 list_edits: _list_edits {}
 

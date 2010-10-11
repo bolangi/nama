@@ -46,3 +46,4 @@
 
 					comment			# add description of track
 					is_mix_track    # identifies track is bus mix track
+					current_edit    # {version1 => current_edit1,...}

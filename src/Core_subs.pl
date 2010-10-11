@@ -159,7 +159,7 @@ sub check_for_spacebar_hit {
 	});
 }
 sub detect_spacebar {
-	$event_id{stdin} = undef; # clean up after get_edit_positions()
+	$event_id{stdin} = undef; # clean up after get_edit_mark()
 	check_for_spacebar_hit() if $press_space_to_start_transport;
 }
 
@@ -204,6 +204,11 @@ sub get_edit_mark {
 	}
 }
 }
+
+sub current_edit {
+	
+}
+
 	
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
@@ -3447,6 +3452,11 @@ sub restore_state {
 				$_->{source_id} = ($_->{target}||$_->{name}).'_in';
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
+	}
+	if ( $saved_version <= 1.065){ 
+
+		map{ $_->{current_edit} or $->{current_edit} = {} }
+		grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
 
 	#  destroy and recreate all buses
