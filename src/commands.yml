@@ -741,4 +741,23 @@ new_edit:
   what: prepare to edit the current track and version
   short: ned
   parameters: hmmm
+set_edit_marks:
+  type: edit
+  what: mark play-start, record-start and record-end positions for an edit
+  short: sem
+  parameters: none
+list_edits:
+  type: edit
+  what: list edits for current track and version
+  short: led
+  parameters: none
+start_edit:
+  type: edit
+  what: start recording an edit (may be repeated)
+  short: sed
+  parameters: none
+redo_edit:
+  type: edit
+  what: delete the last edit attempt and start recording again
+  
 ...
