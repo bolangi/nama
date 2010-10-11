@@ -579,11 +579,14 @@ start at the current position. Hit the B<P> key
 three times to designate the playback start,
 punch-in and punch-out positions.
 
+Playback will be restricted to the edit region.
+I<new_edit> without parameters will create
+another edit on the same track. You can repeat
+this procedure until you have an edit you are
+satisfied with.
+
 Edits may not overlap, however you may edit the
 edit track(s).
-
-I<merge_edits> will recursively merge all edits applied to
-the current track and version, creating a new version.
 
 I<preview_edit> will play the edit segment
 with the marked content removed.
@@ -594,9 +597,17 @@ will record an additional version on the edit track.
 I<redo_edit> will delete the most recent version
 and begin recording anew.
 
-The I<restore_edits> command acts on a merged
-version, setting the prior unmerged version
-with all edits available.
+I<merge_edits> will recursively merge all edits applied to
+the current track and version, creating a new version.
+
+I recommend that you merge edits when you are satisfied,
+with the results to protect your edits against an accidental change in mark, region
+or version settings. 
+
+I<restore_edits> acts on a merged version of the
+current track, selecting the prior unmerged version
+with all edits and region definitions in "live" form.
+You may continue to create new edits.
 
 I<list_edits> will label the edits by index
 and time. I<next_edit> will play back the
@@ -606,11 +617,19 @@ played edit becomes the current edit.
 I<delete_edit> will remove the current
 edit. 
 
+I<mute_edits> will disable all edits
+on the current track.
 
+I<mute_edit index> will disable the edit
+with the specified index.
 
+Similarly I<unmute_edit> and I<unmute_edits>
+reverse these effects.
 
-
-
+Behind the scenes, the host track becomes
+the mix track to a sub-bus, that has as sources
+the original audio track, and by zero or more edits, each
+represented by one track object.
 
 =head1 TEXT COMMANDS
 
