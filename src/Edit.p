@@ -33,7 +33,6 @@ use ::Object qw(
 				rec_end_mark
 				host_track
 				host_version
-				play_start_mark	
 				 );
 
 sub initialize {
