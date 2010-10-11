@@ -840,19 +840,27 @@ midish_command: _midish_command text {
 }
 
 new_edit: _new_edit {
-	print($::this_track->name, ": must be in MON mode.
-Edits will be applied against current version\n"), return 1
-	unless $::this_track->rec_status eq 'MON' 
-       and $::this_track->monitor_version;
-	print $::this_track->name, ": creating new edit against version ", 
-		$::this_track->monitor_version, "\n";
+	::new_edit();
+	1;
 }
 set_edit_points: _set_edit_points {
 	print("You must use a playback-only mode to setup edit marks. Aborting\n"), 
 		return 1 if ::really_recording();
-	print q(Ready to set up edit marks! Start engine, then press the "P"
-key three times to mark play-start, record-start and
-record-end positions.);
+	print("You need stop the engine first. Aborting\n"), 
+		return 1 if ::engine_running();
+	print "Ready to set edit points!\n";
+	sleeper(0.2);
+	print q(Press the "P" key three times to mark positions for:
+    + play-start
+    + record-start
+    + record-end
+
+Engine will start in 3 seconds.\n);
+ 	$::event_id{set_edit_points} = AE::timer(3, 0, sub
+	{
+		::detect_keystroke_p();
+		::eval_iam('start')
+	});
 }
 list_edits: _list_edits {}
 

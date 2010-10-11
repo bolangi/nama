@@ -396,6 +396,7 @@ our (
 	
 	# Edits
 
-	%edit_points,   # play_start, record_start, record_end	
+#	%edit_points,   # play_start, record_start, record_end	
+	@edit_points, 
 	
 );

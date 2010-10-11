@@ -717,6 +717,13 @@ sub bus_tree { # for solo function to work in sub buses
 	($mix, $::tn{$mix}->bus_tree);
 }
 
+sub this_edit {
+	my $track = shift;
+	my $v = $track->monitor_version;
+	return unless $v and $track->rec_status eq 'MON';
+	$track->current_edit->{$v}
+}
+	
 # subclasses
 
 package ::SimpleTrack; # used for Master track

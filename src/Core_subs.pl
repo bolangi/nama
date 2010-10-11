@@ -163,53 +163,6 @@ sub detect_spacebar {
 	check_for_spacebar_hit() if $press_space_to_start_transport;
 }
 
-sub detect_keystroke_p {
-	$event_id{stdin} = AE::io(*STDIN, 0, sub {
-		&{$attribs->{'callback_read_char'}}();
-		if (     ! $attribs->{line_buffer} eq "p"
-			 and ! $attribs->{line_buffer} eq "P")
-		{ reset_input_line() }
-		else
-		{
-			if( get_edit_mark() )
-			{
-				reset_input_line();
-				$term->stuff_char(10);
-				&{$attribs->{'callback_read_char'}}();
-			}
-		}
-	});
-}
-
-sub reset_input_line {
-	$attribs->{line_buffer} = q();
-	$attribs->{point} 		= 0;
-	$attribs->{end}   		= 0;
-}
-
-
-{ my $p;
-
-sub get_edit_mark {
-	$p++;
-	if($p <= 3){  # record mark
-		my $pos = eval_iam('getpos');
-		say " found position ".d1($pos);
-		return 1
-	}
-	else { # cleanup
-		eval_iam('stop');
-		detect_spacebar();
-		$p = 0;
-	}
-}
-}
-
-sub current_edit {
-	
-}
-
-	
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
 	else { start_transport() }
@@ -4910,5 +4863,96 @@ sub close_midish {
 # otherwise zombies could be created. 
 }	
 }
+sub detect_keystroke_p {
+	$event_id{stdin} = AE::io(*STDIN, 0, sub {
+		&{$attribs->{'callback_read_char'}}();
+		
+		abort_set_edit_points(), return
+			if $attribs->{line_buffer} eq "q"
+			or $attribs->{line_buffer} eq "Q";
+
+		reset_input_line(), return
+			if  ! $attribs->{line_buffer} eq "p"
+			and ! $attribs->{line_buffer} eq "P";
+
+		get_edit_mark() 
+	});
+}
+
+sub reset_input_line {
+	$attribs->{line_buffer} = q();
+	$attribs->{point} 		= 0;
+	$attribs->{end}   		= 0;
+}
+
+
+{ my $p;
+  my @edit_points; 
+  my @names = qw(dummy play-start rec-start rec-end);
+
+sub initialize_edit_points {
+	$p = 0;
+    @edit_points = ();
+}
+sub abort_set_edit_points {
+	say "...Aborting!";
+	reset_input_line();
+	eval_iam('stop');
+	initialize_edit_points();
+	detect_spacebar();
+}
+
+sub get_edit_mark {
+	$p++;
+	if($p <= 3){  # record mark
+		my $pos = eval_iam('getpos');
+		push @edit_points, $pos;
+		say " got $names[$p] position ".d1($pos);
+		reset_input_line();
+		if($p == 3){ # cleanup
+			@::edit_points = @edit_points; # save to global
+			eval_iam('stop');
+			detect_spacebar();
+			print prompt(), " ";
+			return;
+		}
+		$term->stuff_char(10);
+		&{$attribs->{'callback_read_char'}}();
+	}
+}
+
+	
+sub current_edit {
+	
+}
+
+}
+sub new_edit {
+	#my @edit_points = @_;
+	print($this_track->name, ": must be in MON mode.
+Edits will be applied against current version\n"), return 1
+	unless $this_track->rec_status eq 'MON' ;
+	my $v = $this_track->monitor_version;
+	say $this_track->name, ": creating new edit against version ", $v;
+	my $edit = Edit->new(
+	#	play_start_mark => $edit_points[0],
+	#	rec_start_mark  => $edit_points[1],
+	#	rec_end_mark    => $edit_points[2],
+		host_track 		=> $this_track->name,
+		host_version	=> $v,
+	);
+	$this_track->current_edit->{$v} = $edit->n;
+	transfer_edit_points($edit);
+}
+
+sub transfer_edit_points {
+	say("Use 'set_edit_points' command to specify edit region"), return
+		 unless scalar @edit_points;
+	my $edit = shift;
+	::Mark->new( $edit->play_start_name, $edit_points[0]);
+	::Mark->new( $edit->rec_start_name,  $edit_points[1]);
+	::Mark->new( $edit->rec_end_name,    $edit_points[2]);
+}
+	
 
 ### end
