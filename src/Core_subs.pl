@@ -138,7 +138,7 @@ sub initialize_terminal {
 
 }
 sub revise_prompt {
-    $term->callback_handler_install(prompt(), \&process_line);
+    $term->callback_handler_install($_[0]//prompt(), \&process_line);
 }
 sub prompt {
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
@@ -4910,6 +4910,7 @@ sub get_edit_mark {
 		if($p == 3){ # cleanup
 			@::edit_points = @edit_points; # save to global
 			eval_iam('stop');
+			say "\nEngine is stopped\n";
 			detect_spacebar();
 			print prompt(), " ";
 			return;
@@ -4952,6 +4953,7 @@ sub transfer_edit_points {
 	::Mark->new( $edit->rec_end_name,    $edit_points[2]);
 }
 sub set_edit_points {
+	
 	say("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if really_recording();
 	say("You need stop the engine first. Aborting"), 
@@ -4967,8 +4969,11 @@ Engine will start in 3 seconds.);
 	initialize_edit_points();
  	$event_id{set_edit_points} = AE::timer(3, 0, 
 	sub {
+		reset_input_line();
 		detect_keystroke_p();
-		eval_iam('start')
+		eval_iam('start');
+		say "\n\nEngine is running\n";
+		print prompt();
 	});
 }
 
