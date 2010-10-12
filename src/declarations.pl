@@ -398,5 +398,6 @@ our (
 
 #	%edit_points,   # play_start, record_start, record_end	
 	@edit_points, 
+	$this_edit, 	# current edit
 	
 );

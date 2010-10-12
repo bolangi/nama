@@ -4907,24 +4907,22 @@ sub get_edit_mark {
 		push @edit_points, $pos;
 		say " got $names[$p] position ".d1($pos);
 		reset_input_line();
-		if($p == 3){ # cleanup
+		if( $p == 3){ complete_edit_marks() }
+		else{
+			$term->stuff_char(10);
+			&{$attribs->{'callback_read_char'}}();
+		}
+	}
+}
+
+sub complete_edit_marks {
 			@::edit_points = @edit_points; # save to global
 			eval_iam('stop');
 			say "\nEngine is stopped\n";
 			detect_spacebar();
 			print prompt(), " ";
-			return;
-		}
-		$term->stuff_char(10);
-		&{$attribs->{'callback_read_char'}}();
-	}
 }
-
 	
-sub current_edit {
-	
-}
-
 }
 sub new_edit {
 	#my @edit_points = @_;
@@ -4941,6 +4939,7 @@ Edits will be applied against current version\n"), return 1
 		host_version	=> $v,
 	);
 	$this_track->current_edit->{$v} = $edit->n;
+	$this_edit = $edit;
 	transfer_edit_points($edit);
 }
 
