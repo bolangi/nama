@@ -4871,11 +4871,9 @@ sub detect_keystroke_p {
 			if $attribs->{line_buffer} eq "q"
 			or $attribs->{line_buffer} eq "Q";
 
-		reset_input_line(), return
-			if  ! $attribs->{line_buffer} eq "p"
-			and ! $attribs->{line_buffer} eq "P";
-
-		get_edit_mark() 
+		if (   $attribs->{line_buffer} eq "p"
+			or $attribs->{line_buffer} eq "P"){ get_edit_mark()}
+		else{ reset_input_line() }
 	});
 }
 
@@ -4953,6 +4951,25 @@ sub transfer_edit_points {
 	::Mark->new( $edit->rec_start_name,  $edit_points[1]);
 	::Mark->new( $edit->rec_end_name,    $edit_points[2]);
 }
-	
+sub set_edit_points {
+	say("You must use a playback-only mode to setup edit marks. Aborting"), 
+		return 1 if really_recording();
+	say("You need stop the engine first. Aborting"), 
+		return 1 if engine_running();
+	say "Ready to set edit points!";
+	sleeper(0.2);
+	say q(Press the "P" key three times to mark positions for:
+    + play-start
+    + record-start
+    + record-end
+
+Engine will start in 3 seconds.);
+	initialize_edit_points();
+ 	$event_id{set_edit_points} = AE::timer(3, 0, 
+	sub {
+		detect_keystroke_p();
+		eval_iam('start')
+	});
+}
 
 ### end

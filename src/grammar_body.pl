@@ -843,25 +843,7 @@ new_edit: _new_edit {
 	::new_edit();
 	1;
 }
-set_edit_points: _set_edit_points {
-	print("You must use a playback-only mode to setup edit marks. Aborting\n"), 
-		return 1 if ::really_recording();
-	print("You need stop the engine first. Aborting\n"), 
-		return 1 if ::engine_running();
-	print "Ready to set edit points!\n";
-	sleeper(0.2);
-	print q(Press the "P" key three times to mark positions for:
-    + play-start
-    + record-start
-    + record-end
-
-Engine will start in 3 seconds.\n);
- 	$::event_id{set_edit_points} = AE::timer(3, 0, sub
-	{
-		::detect_keystroke_p();
-		::eval_iam('start')
-	});
-}
+set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
 list_edits: _list_edits {}
 
 start_edit: _start_edit {}
