@@ -312,7 +312,12 @@ sub adjusted_playat_time {
 	::set_edit_vars($track);
 	::new_playat();
 }
-
+sub region_is_out_of_bounds {
+	return unless ::edit_mode();
+	my $track = shift;
+	::set_edit_vars($track);
+	::case() =~ /out_of_bounds/
+}
 
 sub fancy_ops { # returns list 
 	my $track = shift;
