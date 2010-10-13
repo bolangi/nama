@@ -630,7 +630,7 @@ foreach(@tests){
 		$type
 	) = split " ", $_;
 
-	::Track::set_edit_vars_testing( 
+	::set_edit_vars_testing( 
 		$playat, 
 		$region_start, 
 		$region_end, 
@@ -639,8 +639,8 @@ foreach(@tests){
 	);
 
 		
-	is( ::Track::new_playat(), $new_playat, "$index: $type");
-	is( ::Track::new_region_start(), $new_region_start, "$index: $type");
+	is( ::new_playat(), $new_playat, "$index: $type");
+	is( ::new_region_start(), $new_region_start, "$index: $type");
 }
 }
 

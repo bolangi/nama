@@ -302,76 +302,17 @@ sub playat_time {
 sub adjusted_region_start_time {
 	my $track = shift;
 	return $track->region_start_time unless ::edit_mode();
-	$track->set_edit_vars;
-	new_region_start();
+	::set_edit_vars($track);
+	::new_region_start();
 	
 }
 sub adjusted_playat_time { 
 	my $track = shift;
 	return $track->playat_time unless ::edit_mode();
-	$track->set_edit_vars;
-	new_playat();
+	::set_edit_vars($track);
+	::new_playat();
 }
 
-{
-# use internal lexical values for the computations
-
-# track values
-my( $trackname, $playat, $region_start, $region_end);
-
-# edit values
-my( $edit_play_start, $edit_play_end);
-
-# dispatch table
-my( %playat, %region_start);
-
-# test variables
-# my ($index, $new_playat, $new_region_start, $new_region_end);
-
-%region_start = (
-	play_start_within_region 	  => sub {$region_start + $edit_play_start - $playat },
-	play_start_during_playat_delay=> sub {$region_start },
-    out_of_bounds_near            => sub{ "*" },
-    out_of_bounds_far             => sub{ "*" },	
-);
-%playat = (
-	play_start_during_playat_delay => sub{ $playat - $edit_play_start },
-	play_start_within_region       => sub{ 0 },
-    out_of_bounds_near             => sub{ "*" },
-    out_of_bounds_far              => sub{ "*" },	
-);
-
-#print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
-#    new_region_start($case),"/$new_region_start\n";
-#print "case: ",case(), $/;
-
-sub new_playat       {       $playat{case()}->() };
-sub new_region_start { $region_start{case()}->() };
-
-sub case {
-	if ( $playat > $edit_play_end )
-		{ "out_of_bounds_near" }
- elsif ( $playat + $region_end - $region_start < $edit_play_start)
-		{ "out_of_bounds_far" }
- elsif ( $edit_play_start >= $playat)
-		{ "play_start_within_region"}
- elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
-		{ "play_start_during_playat_delay"}
- else{ croak "unexpected region-edit relation for track $trackname" }
-}
-sub set_edit_vars {
-	my $track = shift;
-	$trackname      = $track->name;
-	$playat 		= $track->playat_time;
-	$region_start   = $track->region_start_time;
-	$region_end 	= $track->region_end_time;
-	$edit_play_start= $::this_edit->play_start_time;
-	$edit_play_end	= $::this_edit->play_end_time;
-}
-sub set_edit_vars_testing {
-	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end) = @_;
-}
-}
 
 sub fancy_ops { # returns list 
 	my $track = shift;
