@@ -121,6 +121,7 @@ $volume_control_operator = 'ea'; # default to linear scale
 %unity_level 	= (ea => 100, 	eadb => 0); 
 $fade_resolution = 200; # steps per second
 $default_fade_length = 0.5;
+$edit_playback_end_margin = 1.5;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

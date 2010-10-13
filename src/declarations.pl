@@ -400,5 +400,6 @@ our (
 	@edit_points, 
 	$this_edit, 	# current edit
 	$edit_mode_playback_start_offset,  # applies to all WAV playback
+	$edit_playback_end_margin, # play a little more after edit recording finishes
 	
 );

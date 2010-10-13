@@ -320,7 +320,7 @@ sub adjusted_playat_time {
 my( $trackname, $playat, $region_start, $region_end);
 
 # edit values
-my( $play_start, $play_end);
+my( $edit_play_start, $edit_play_end);
 
 # dispatch table
 my( %playat, %region_start);
@@ -329,13 +329,13 @@ my( %playat, %region_start);
 # my ($index, $new_playat, $new_region_start, $new_region_end);
 
 %region_start = (
-	play_start_within_region 	  => sub {$region_start + $play_start - $playat },
+	play_start_within_region 	  => sub {$region_start + $edit_play_start - $playat },
 	play_start_during_playat_delay=> sub {$region_start },
     out_of_bounds_near            => sub{ "*" },
     out_of_bounds_far             => sub{ "*" },	
 );
 %playat = (
-	play_start_during_playat_delay => sub{ $playat - $play_start },
+	play_start_during_playat_delay => sub{ $playat - $edit_play_start },
 	play_start_within_region       => sub{ 0 },
     out_of_bounds_near             => sub{ "*" },
     out_of_bounds_far              => sub{ "*" },	
@@ -349,13 +349,13 @@ sub new_playat       {       $playat{case()}->() };
 sub new_region_start { $region_start{case()}->() };
 
 sub case {
-	if ( $playat > $play_end )
+	if ( $playat > $edit_play_end )
 		{ "out_of_bounds_near" }
- elsif ( $playat + $region_end - $region_start < $play_start)
+ elsif ( $playat + $region_end - $region_start < $edit_play_start)
 		{ "out_of_bounds_far" }
- elsif ( $play_start >= $playat)
+ elsif ( $edit_play_start >= $playat)
 		{ "play_start_within_region"}
- elsif ( $playat > $play_start and $play_end > $playat )
+ elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
 		{ "play_start_during_playat_delay"}
  else{ croak "unexpected region-edit relation for track $trackname" }
 }
@@ -365,11 +365,11 @@ sub set_edit_vars {
 	$playat 		= $track->playat_time;
 	$region_start   = $track->region_start_time;
 	$region_end 	= $track->region_end_time;
-	$play_start		= $::this_edit->play_start_time;
-	$play_end		= $::this_edit->play_end_time;
+	$edit_play_start= $::this_edit->play_start_time;
+	$edit_play_end	= $::this_edit->play_end_time;
 }
 sub set_edit_vars_testing {
-	($playat, $region_start, $region_end, $play_start, $play_end) = @_;
+	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end) = @_;
 }
 }
 

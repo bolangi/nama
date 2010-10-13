@@ -143,6 +143,22 @@ sub rec_end_name {
 	my $self = shift;
 	join '-', $self->edit_name,'rec-end'
 }
+sub play_start_time {
+	my $self = shift;
+	$self->marktime('play_start_name')
+}
+sub rec_start_time {
+	my $self = shift;
+	$self->marktime('rec_start_name')
+}
+sub rec_end_time {
+	my $self = shift;
+	$self->marktime('rec_end_name')
+}
+sub play_end_time {
+	my $self = shift;
+	$self->marktime('rec_end_name') + $::edit_playback_end_margin
+}
 
 sub marktime { 
 	my ($self,$markfield) = @_;
