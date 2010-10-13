@@ -4976,4 +4976,31 @@ Engine will start in 3 seconds.);
 	});
 }
 
+sub generate_edit_record_setup { # for current edit
+	# set edit track to REC
+	# set global region start offset
+	# set global region length cutoff
+	# set regenerate_setup flag
+	# insert host track fades
+	# mute edit track
+	# schedule unmuting at rec-start point - fade-in
+	# schedule muting at rec-end point     - fade-out
+}
+
+sub start_edit {
+	# start transport!
+	# generate_edit_playback_setup (loop?)
+	# start transport! 
+}
+
+sub preview_edit_doughnut {
+}
+sub preview_edit_hole {
+}
+sub hear_edit {
+}
+
+
+
+
 ### end

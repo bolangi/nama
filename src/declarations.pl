@@ -399,5 +399,6 @@ our (
 #	%edit_points,   # play_start, record_start, record_end	
 	@edit_points, 
 	$this_edit, 	# current edit
+	$edit_mode_playback_start_offset,  # applies to all WAV playback
 	
 );

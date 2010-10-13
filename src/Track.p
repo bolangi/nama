@@ -276,11 +276,19 @@ sub rec_status_display {
 	($track->rw eq 'REC' and $track->rec_defeat) ? "($status)" : $status;
 }
 
+# we modify these routines to support automatic
+# region generation for playback during edit mode
+
+# these settings will only affect WAV playback
 
 sub region_start_time {
 	my $track = shift;
 	::Mark::mark_time( $track->region_start )
 }
+sub adjusted_region_start_time { }
+sub adjusted_region_end_time { }
+sub adjusted_playat_time { }
+
 sub region_end_time {
 	my $track = shift;
 	return if $track->rec_status ne 'MON';

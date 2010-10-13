@@ -844,13 +844,42 @@ new_edit: _new_edit {
 	1;
 }
 set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
-list_edits: _list_edits {}
+list_edits: _list_edits { ::list_edits() }
 
-start_edit: _start_edit {}
+start_edit: _start_edit { ::start_edit() }
 
-redo_edit: _redo_edit {}
+redo_edit: _redo_edit {::redo_edit()}
 
+delete_edit: _delete_edit { ::delete_edit() }
 
-	
-	
-	
+select_edit: _select_edit { ::select_edit() }
+
+preview_edit_doughnut: _preview_edit_doughnut { ::preview_edit_doughnut() }
+
+preview_edit_hole: _preview_edit_hole { ::preview_edit_hole() }
+
+generate_edit_record_setup: _generate_edit_record_setup {
+	::generate_edit_record_setup(); 1
+}
+
+generate_edit_playback_set: _generate_edit_playback_setup {
+	::generate_edit_playback_setup(); 1 
+}
+
+hear_edit: _hear_edit { ::hear_edit() }
+
+edit_track: _edit_track { ::edit_track() }
+
+host_track: _host_track { ::host_track() }
+
+play_start_mark: _play_start_mark {
+	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+ }
+
+rec_start_mark: _rec_start_mark {
+	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+}
+
+rec_end_mark: _rec_end_mark {
+	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+}

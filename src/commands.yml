@@ -738,12 +738,12 @@ midish_command:
   parameters: <s_command_text>
 new_edit:
   type: edit
-  what: prepare to edit the current track and version
+  what: create an edit for the current track and version
   short: ned
   parameters: hmmm
 set_edit_points:
   type: edit
-  what: mark play-start, record-start and record-end positions for an edit
+  what: mark play-start, record-start and record-end positions
   short: sep
   parameters: none
 list_edits:
@@ -769,4 +769,40 @@ delete_edit:
   type: edit
   what: remove an edit and all associated WAV files (destructive)
   parameters: [<i_edit_index>] (defaults to current edit)
+preview_edit_doughnut:
+  type: edit
+  what: play the track region with the edit segment removed
+  short: ped
+  parameters: none
+preview_edit_hole:
+  type: edit
+  what: play the removed edit segment
+  short: peh
+  parameters: none
+hear_edit:
+  type: edit
+  what: play the completed edit
+  short: hed
+  parameters: none
+edit_track:
+  type: edit
+  what: set edit track as current track
+  short: et
+  parameters: none
+host_track:
+  type: edit
+  what: set host track as current track
+  short: ht
+play_start_mark:
+  type: edit
+  what: select (and move to) play start mark
+  short: psm
+rec_start_mark:
+  type: edit
+  what: select (and move to) rec start mark
+  short: rsm
+rec_end_mark:
+  type: edit
+  what: select (and move to) rec end mark
+  short: rem
 ...
