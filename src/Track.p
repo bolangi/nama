@@ -297,20 +297,93 @@ sub playat_time {
 }
 
 # we modify these routines to adjust
-# region and playat values during edit mode
+# region start and playat values during edit mode
 
 sub adjusted_region_start_time {
 	my $track = shift;
-	$track->region_start_time	
-}
-sub adjusted_region_end_time {  # no adjustment needed
-	my $track = shift;
-	$track->region_end_time
+	return $track->region_start_time unless ::edit_mode();
+	$track->set_edit_vars;
+	new_region_start();
+	
 }
 sub adjusted_playat_time { 
 	my $track = shift;
-	$track->playat_time
+	return $track->playat_time unless ::edit_mode();
+	$track->set_edit_vars;
+	new_playat();
 }
+
+{
+# use internal lexical values for the computations
+
+# track values
+my( $trackname, $playat, $region_start, $region_end);
+
+# edit values
+my( $play_start, $play_end);
+
+# dispatch table
+my( %playat, %region_start);
+
+# test variables
+# my ($index, $new_playat, $new_region_start, $new_region_end);
+
+%region_start = (
+	play_start_within_region 	  => sub {$region_start + $play_start - $playat },
+	play_start_during_playat_delay=> sub {$region_start },
+    out_of_bounds_near            => sub{ "*" },
+    out_of_bounds_far             => sub{ "*" },	
+);
+%playat = (
+	play_start_during_playat_delay => sub{ $playat - $play_start },
+	play_start_within_region       => sub{ 0 },
+    out_of_bounds_near             => sub{ "*" },
+    out_of_bounds_far              => sub{ "*" },	
+);
+
+#print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
+#    new_region_start($case),"/$new_region_start\n";
+#print "case: ",case(), $/;
+
+sub new_playat       {       $playat{case()}->() };
+sub new_region_start { $region_start{case()}->() };
+
+sub case {
+	if ( $playat > $play_end )
+		{ "out_of_bounds_near" }
+ elsif ( $playat + $region_end - $region_start < $play_start)
+		{ "out_of_bounds_far" }
+ elsif ( $play_start >= $playat)
+		{ "play_start_within_region"}
+ elsif ( $playat > $play_start and $play_end > $playat )
+		{ "play_start_during_playat_delay"}
+ else{ croak "unexpected region-edit relation for track $trackname" }
+}
+sub set_edit_vars {
+	my $track = shift;
+	$trackname      = $track->name;
+	$playat 		= $track->playat_time;
+	$region_start   = $track->region_start_time;
+	$region_end 	= $track->region_end_time;
+	$play_start		= $::this_edit->play_start_time;
+	$play_end		= $::this_edit->play_end_time;
+}
+sub set_edit_vars_testing {
+	($playat, $region_start, $region_end, $play_start, $play_end) = @_;
+}
+}
+
+=comment
+__DATA__
+1 12 5 15 4   8  *  *  * case-1-example
+2 12 5 15 10 17  2  5 10 case-2-example
+3 12 5 15 13 21  0  6 14 case-3-example
+4 12 5 15 21 26  0 14 19 case-4-example
+5 12 5 15 23 26  *  *  * case-5-example
+6  6 5 15  5  9  1  5  8 edit-region-starts-in-playat
+7  0 5 15  5  9  0 10  * no-play-at
+8 4  5 15  5  9  0  6 10 edit-region-starts-in-track-region 
+=cut
 
 
 sub fancy_ops { # returns list 

@@ -4999,7 +4999,7 @@ sub preview_edit_hole {
 }
 sub hear_edit {
 }
-
+sub edit_mode { defined $this_edit and $this_edit->play_start }
 
 
 

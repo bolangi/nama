@@ -165,7 +165,7 @@ sub _playat_output {
 sub _select_output {
 	my $track = shift;
 	if ( $track->region_start and $track->region_end){
-		my $end   = $track->adjusted_region_end_time;
+		my $end   = $track->region_end_time; # we never adjust this
 		my $start = $track->adjusted_region_start_time;
 		my $length = $end - $start;
 		join ',',"select", $start, $length
