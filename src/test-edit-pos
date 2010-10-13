@@ -1,0 +1,73 @@
+use Modern::Perl;
+no warnings 'uninitialized';
+our($index, $playat, $region_start, $region_end, $play_start,
+$play_end, $new_playat, $new_region_start, $new_region_end,
+$type, %region_start, %playat);
+%region_start = (
+	play_start_within_region 	  => sub{ $region_start + $play_start - $playat },
+	play_start_during_playat_delay=> sub{ $region_start },
+    out_of_bounds_near            => sub{ "*" },
+    out_of_bounds_far             => sub{ "*" },	
+);
+%playat = (
+	play_start_during_playat_delay => sub{ $playat - $play_start },
+	play_start_within_region       => sub{ 0 },
+    out_of_bounds_near             => sub{ "*" },
+    out_of_bounds_far              => sub{ "*" },	
+);
+	
+
+while(
+
+( $index, $playat, $region_start, $region_end, $play_start,
+$play_end, $new_playat, $new_region_start, $new_region_end,
+$type) = 
+split " ",<DATA> ){
+
+=comment
+
+print <<END;
+index:         $index
+playat:        $playat
+region_start:  $region_start
+region_end:    $region_end
+play_start:    $play_start
+play_end:      $play_end
+END
+=cut
+
+my $case = case();
+
+print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
+    new_region_start($case),"/$new_region_start\n";
+print "case: ",case(), $/;
+
+
+
+}	
+sub new_playat {       my $case = shift; $playat{$case}->() };
+sub new_region_start { my $case = shift; $region_start{$case}->() };
+sub new_region_end   {} # region end never changes 
+
+sub case {
+	my $n = shift;
+	if ( $playat > $play_end )
+		{ "out_of_bounds_near" }
+ elsif ( $playat + $region_end - $region_start < $play_start)
+		{ "out_of_bounds_far" }
+ elsif ( $play_start >= $playat)
+		{ "play_start_within_region"}
+ elsif ( $playat > $play_start and $play_end > $playat )
+		{ "play_start_during_playat_delay"}
+}
+
+
+__DATA__
+1 12 5 15 4   8  *  *  * case-1-example
+2 12 5 15 10 17  2  5 10 case-2-example
+3 12 5 15 13 21  0  6 14 case-3-example
+4 12 5 15 21 26  0 14 19 case-4-example
+5 12 5 15 23 26  *  *  * case-5-example
+6  6 5 15  5  9  1  5  8 edit-region-starts-in-playat
+7  0 5 15  5  9  0 10  * no-play-at
+8 4  5 15  5  9  0  6 10 edit-region-starts-in-track-region 
