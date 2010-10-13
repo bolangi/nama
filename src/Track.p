@@ -296,7 +296,7 @@ sub playat_time {
 	::Mark::mark_time( $track->playat )
 }
 
-# we modify these routines to adjust
+# the following methods adjust
 # region start and playat values during edit mode
 
 sub adjusted_region_start_time {
