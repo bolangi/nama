@@ -373,19 +373,6 @@ sub set_edit_vars_testing {
 }
 }
 
-=comment
-__DATA__
-1 12 5 15 4   8  *  *  * case-1-example
-2 12 5 15 10 17  2  5 10 case-2-example
-3 12 5 15 13 21  0  6 14 case-3-example
-4 12 5 15 21 26  0 14 19 case-4-example
-5 12 5 15 23 26  *  *  * case-5-example
-6  6 5 15  5  9  1  5  8 edit-region-starts-in-playat
-7  0 5 15  5  9  0 10  * no-play-at
-8 4  5 15  5  9  0  6 10 edit-region-starts-in-track-region 
-=cut
-
-
 sub fancy_ops { # returns list 
 	my $track = shift;
 	grep{ 		$_ ne $track->vol 

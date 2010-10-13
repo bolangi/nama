@@ -604,6 +604,46 @@ gen_jack();
 
 check_setup('Send bus - raw - JACK');
 
+{
+
+my @tests = split "\n",<<TEST_DATA;
+1 12 5 15 4   8  *  *  * out_of_bounds_near
+2 12 5 15 10 17  2  5 10 play_start_during_playat_delay
+3 12 5 15 13 21  0  6 14 play_start_within_region1
+4 12 5 15 21 26  0 14 19 play_start_within_region2
+5 12 5 15 23 26  *  *  * out_of_bounds_far
+6  0 5 15  5  9  0 10  * play_start_within_region3
+TEST_DATA
+
+foreach(@tests){
+
+	#diag($_);
+	my ($index, 
+		$playat, 
+		$region_start, 
+		$region_end, 
+		$edit_play_start,
+		$edit_play_end, 
+		$new_playat, 
+		$new_region_start, 
+		$new_region_end,
+		$type
+	) = split " ", $_;
+
+	::Track::set_edit_vars_testing( 
+		$playat, 
+		$region_start, 
+		$region_end, 
+		$edit_play_start,
+		$edit_play_end
+	);
+
+		
+	is( ::Track::new_playat(), $new_playat, "$index: $type");
+	is( ::Track::new_region_start(), $new_region_start, "$index: $type");
+}
+}
+
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
 sub force_alsa { $opts{A} = 1; $opts{J} = 0; $jack_running = 0; }
