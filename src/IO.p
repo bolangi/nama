@@ -150,7 +150,7 @@ sub _mono_to_stereo{
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
 	my $is_mono_track = sub { $self->width == 1 };
-	my $is_mono_wav   = sub { ::channels(::get_format($self->full_path)) == 1};
+	my $is_mono_wav   = sub { ::channels(::wav_format($self->full_path)) == 1};
 	if  (      $status eq 'REC' and $is_mono_track->()
 			or $status eq 'MON' and $is_mono_wav->() )
 		 { $copy }

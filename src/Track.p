@@ -287,7 +287,7 @@ sub region_end_time {
 	my $track = shift;
 	return if $track->rec_status ne 'MON';
 	if ( $track->region_end eq 'END' ){
-		return ::get_length($track->full_path);
+		return ::wav_length($track->full_path);
 	} else {
 		::Mark::mark_time( $track->region_end )
 	}
@@ -687,8 +687,8 @@ sub import_audio  {
 		print "$path: non-existent or unreadable file. No action.\n";
 		return;
 	}
-	my ($depth,$width,$freq) = split ',', ::get_format($path);
-	say "format: ", ::get_format($path);
+	my ($depth,$width,$freq) = split ',', ::wav_format($path);
+	say "format: ", ::wav_format($path);
 	$frequency ||= $freq;
 	if ( ! $frequency ){
 		say "Cannot detect sample rate of $path. Skipping.";

@@ -570,6 +570,7 @@ Loading project "untitled".
 	initialize_buses();	
 	initialize_project_data();
 	remove_riff_header_stubs(); 
+	cache_wav_info();
 	rememoize();
 
 	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
@@ -657,6 +658,7 @@ sub init_memoize {
 	map{package ::Wav; memoize($_) } @wav_functions;
 }
 }
+
 sub jack_running {
 	my @pids = split " ", qx(pgrep jackd);
 	my @jack  = grep{   my $pid;
@@ -732,6 +734,8 @@ sub initialize_project_data {
 	::Track->initialize();
 
 	%inputs = %outputs = ();
+	
+	%wav_info = ();
 
 }
 sub create_system_buses {
@@ -1969,6 +1973,7 @@ sub new_files_were_recorded {
 		rememoize();
 		say join $/,"recorded:",@recorded;
 	}
+	map{ get_wav_info($_) } @recorded;
 	@recorded 
 } 
 
@@ -4631,6 +4636,20 @@ sub ecasound_get_info {
 	teardown_engine();
 	$result;
 }
+sub cache_wav_info {
+	my @files = File::Find::Rule
+		->file()
+		->name( '*.wav' )
+		->in( this_wav_dir() );	
+	map{  get_wav_info($_) } @files;
+}
+sub get_wav_info {
+	my $path = shift;
+	#say "path: $path";
+	$wav_info{$path}{length} = get_length($path);
+	$wav_info{$path}{format} = get_format($path);
+	$wav_info{$path}{modify_time} = get_modify_time($path);
+}
 sub get_length { 
 	my $path = shift;
 	my $length = ecasound_get_info($path, 'ai-get-length');
@@ -4644,6 +4663,22 @@ sub get_modify_time {
 	my $path = shift;
 	my @stat = stat $path;
 	$stat[9]
+}
+sub wav_length {
+	my $path = shift;
+	update_wav_cache($path);
+	$wav_info{$path}{length}
+}
+sub wav_format {
+	my $path = shift;
+	update_wav_cache($path);
+	$wav_info{$path}{format}
+}
+sub update_wav_cache {
+	my $path = shift;
+	return unless get_modify_time($path) != $wav_info{$path}{modify_time};
+	say qq(WAV file $path has changed! Updating cache.);
+	get_wav_info($path) 
 }
 	
 sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
