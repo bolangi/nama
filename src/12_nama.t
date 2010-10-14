@@ -606,16 +606,21 @@ check_setup('Send bus - raw - JACK');
 
 {
 
+diag "Edit mode playat and region endpoints adjustment";
 my @tests = split "\n",<<TEST_DATA;
-1 12 5 15 4   8  *  *  * out_of_bounds_near
-2 12 5 15 23 26  *  *  * out_of_bounds_far
-2 12 5 15 10 17  2  5 10 play_start_during_playat_delay
-3 12 5 15 13 21  0  6 14 play_start_within_region1
-4 12 5 15 21 26  0 14 19 play_start_within_region2
-6  0 5 15  5  9  0 10 14 play_start_within_region3
-7  0 0  0  5  9  0  5  9 no_playat_no_region
-8  2 0  0  5  9  0  3  7 no_region_play_start_after_playat_delay
-9  6 0  0  5  9  1  0  3 no_region_play_start_during_playat_delay
+1 12 5 15 4   8  *  *  * 30 out_of_bounds_near
+2 12 5 15 23 26  *  *  * 30 out_of_bounds_far
+3 12 5 15 10 17  2  5 10 30 play_start_during_playat_delay
+4 12 5 15 13 21  0  6 14 30 play_start_within_region1
+5 12 5 15 21 26  0 14 19 30 play_start_within_region2
+6  0 5 15  5  9  0 10 14 30 play_start_within_region3
+7  0 0  0  5  9  0  5  9 30 no_playat_no_region
+8  2 0  0  5  9  0  3  7 30 no_region_play_start_after_playat_delay
+9  6 0  0  5  9  1  0  3 30 no_region_play_start_during_playat_delay
+10 6 0  0  3  5  *  *  * 30 no_region_out_of_bounds_near
+11 6 0  0 40 49  *  *  * 30 no_region_out_of_bounds_far
+12 6 0  0 34 40  0 28 30 30 no_region_play_end_after_wav_length
+
 TEST_DATA
 
 foreach(@tests){
@@ -630,7 +635,8 @@ foreach(@tests){
 		$new_playat, 
 		$new_region_start, 
 		$new_region_end,
-		$type
+		$length,
+		$type,
 	) = split " ", $_;
 
 	::set_edit_vars_testing( 
@@ -638,7 +644,8 @@ foreach(@tests){
 		$region_start, 
 		$region_end, 
 		$edit_play_start,
-		$edit_play_end
+		$edit_play_end,
+		$length,
 	);
 
 		

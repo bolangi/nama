@@ -4637,6 +4637,9 @@ sub some_user_tracks {
 sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
 
+
+### WAV file length/format/modify_time are cached in %wav_info 
+
 sub ecasound_get_info {
 	# get information about an audio object
 	
@@ -5007,7 +5010,7 @@ sub edit_mode { defined $this_edit and defined $this_edit->play_start_time }
 # use internal lexical values for the computations
 
 # track values
-my( $trackname, $playat, $region_start, $region_end);
+my( $trackname, $playat, $region_start, $region_end, $length);
 
 # edit values
 my( $edit_play_start, $edit_play_end);
@@ -5064,9 +5067,14 @@ my( %playat, %region_start, %region_end);
 #    new_region_start($case),"/$new_region_start\n";
 #print "case: ",case(), $/;
 
-sub new_playat       {       $playat{case()}->() };
-sub new_region_start { $region_start{case()}->() };
-sub new_region_end   {   $region_end{case()}->() };
+sub new_playat       {       $playat{edit_case()}->() };
+sub new_region_start { $region_start{edit_case()}->() };
+sub new_region_end   
+	{   
+		my $end = $region_end{edit_case()}->();
+		return $end if $end eq '*';
+		$end < $length ? $end : $length
+	};
 
 
 # the following value will always allow enough time
@@ -5075,48 +5083,36 @@ sub new_region_end   {   $region_end{case()}->() };
 # will be a problem.)
 
 
-sub case {
+sub edit_case {
 
+	# logic for no-region case
+	
     if ( ! $region_start and ! $region_end  )
-		{ 
-
-			# logic for no-region case
-		#
-			    if ( $edit_play_end < $playat)
-					{ "out_of_bounds_near" }
-
-#			# pending knowledge of WAV file length
-#
-#			 elsif ( $playat + $wav_length < $edit_play_start)
-#					{ "out_of_bounds_far" }
-
-			elsif ( $edit_play_start >= $playat)
-				{"no_region_play_start_after_playat_delay"}
- 			elsif (   $edit_play_start < $playat 
-				  and $edit_play_end   > $playat )
-				{ "no_region_play_start_during_playat_delay"}
-				#	{ "play_start_during_playat_delay"}
-
-
-		} 
+	{
+		if( $edit_play_end < $playat)
+			{ "out_of_bounds_near" }
+		elsif( $edit_play_start > $playat + $length)
+			{ "out_of_bounds_far" }
+		elsif( $edit_play_start >= $playat)
+			{"no_region_play_start_after_playat_delay"}
+		elsif( $edit_play_start < $playat and $edit_play_end > $playat )
+			{ "no_region_play_start_during_playat_delay"}
+	} 
+	# logic for region present case
+	
 	elsif ( defined $region_start and defined $region_end )
-		{ 
-		# logic for region present case
-
-			    if ( $edit_play_end < $playat)
-					{ "out_of_bounds_near" }
-			 elsif ( $playat + $region_end - $region_start < $edit_play_start)
-					{ "out_of_bounds_far" }
-			 elsif ( $edit_play_start >= $playat)
-					{ "play_start_within_region"}
-			 elsif ( $edit_play_start < $playat 
-					 and $playat < $edit_play_end)
-					{ "play_start_during_playat_delay"}
-			 else {carp "$trackname: fell through if-then"}
-		}
-
+	{ 
+		if ( $edit_play_end < $playat)
+			{ "out_of_bounds_near" }
+		elsif ( $edit_play_start > $playat + $region_end - $region_start)
+			{ "out_of_bounds_far" }
+		elsif ( $edit_play_start >= $playat)
+			{ "play_start_within_region"}
+		elsif ( $edit_play_start < $playat and $playat < $edit_play_end)
+			{ "play_start_during_playat_delay"}
+		else {carp "$trackname: fell through if-then"}
+	}
 	else { carp "$trackname: improperly defined region" }
-
 }
 
 sub set_test_marks {
@@ -5133,9 +5129,10 @@ sub set_edit_vars {
 	$region_end 	= $track->region_end_time;
 	$edit_play_start= $::this_edit->play_start_time;
 	$edit_play_end	= $::this_edit->play_end_time;
+	$length 		= wav_length($track->full_path);
 }
 sub set_edit_vars_testing {
-	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end) = @_;
+	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
 }
 }
 
