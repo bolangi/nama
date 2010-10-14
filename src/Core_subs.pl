@@ -5023,94 +5023,42 @@ my( %playat, %region_start, %region_end);
 %region_start = (
     out_of_bounds_near				=> sub{ "*" },
     out_of_bounds_far				=> sub{ "*" },	
+
 	play_start_during_playat_delay	=> sub {$region_start },
-	no_region_or_play_start_within_region 
-				=> sub {$region_start + $edit_play_start - $playat },
-);
-%playat = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
-	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
-	no_region_or_play_start_within_region 
-				=> sub{ 0 },
-);
-
-#print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
-#    new_region_start($case),"/$new_region_start\n";
-#print "case: ",case(), $/;
-
-sub new_playat       {       $playat{case()}->() };
-sub new_region_start { $region_start{case()}->() };
-
-# the following value will always allow enough time
-# to record the edit. it may be longer than the 
-# actual WAV file in some cases. (I doubt that
-# will be a problem.)
-
-#sub new_region_end   { $edit_play_end - new_playat() } # XXX
-
-sub case {
-    if ( ! defined $region_start and ! defined $region_end  )
-		{ 
-
-			# logic for no-region case
-
-
-		} 
-	elsif ( defined $region_start and defined $region_end )
-		{ 
-
-		# logic for region present case
-
-			if ( $playat > $edit_play_end )
-					{ "out_of_bounds_near" }
-			 elsif ( $playat + $region_end - $region_start < $edit_play_start)
-					{ "out_of_bounds_far" }
-			 elsif ( $edit_play_start >= $playat)
-					{ "no_region_or_play_start_within_region"}
-			 elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
-					{ "play_start_during_playat_delay"}
-
-			 else {carp "$trackname: fell through if-then"}
-
-		}
-
-	else { carp "$trackname: improperly defined region" }
-
-=comment
-		{ "no_region_or_play_start_within_region" }
- else{ croak "unexpected region-edit relation for track $trackname" }
-=cut
-}
-
-=comment
-%playat = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
-	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
-	no_region_or_play_start_within_region 
-				=> sub{ 0 },
-	no_region_play_start_during_playat_delay
-				=> sub { $playat - $edit_play_start },
-);
-%region_start = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
-	play_start_during_playat_delay	=> sub {$region_start },
-	no_region_or_play_start_within_region 
-				=> sub {$region_start + $edit_play_start - $playat },
 	no_region_play_start_during_playat_delay => sub { 0 },
+
+	play_start_within_region 
+				=> sub {$region_start + $edit_play_start - $playat },
+	no_region_play_start_after_playat_delay
+				=> sub {$region_start + $edit_play_start - $playat },
+);
+%playat = (
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+
+	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
+	no_region_play_start_during_playat_delay
+									=> sub{ $playat - $edit_play_start },
+
+	play_start_within_region   				=> sub{ 0 },
+	no_region_play_start_after_playat_delay => sub{ 0 },
+
 );
 %region_end = (
     out_of_bounds_near				=> sub{ "*" },
     out_of_bounds_far				=> sub{ "*" },	
+
 	play_start_during_playat_delay	
 		=> sub { $region_start + $edit_play_end - $playat },
-	no_region_or_play_start_within_region 
-		=> sub { $region_start + $edit_play_end - $playat },
 	no_region_play_start_during_playat_delay 
-		=> sub { $edit_play_end - $playat },
+		=> sub {                 $edit_play_end - $playat },
+
+	play_start_within_region 
+		=> sub { $region_start + $edit_play_end - $playat },
+	no_region_play_start_after_playat_delay
+		=> sub {                 $edit_play_end - $playat },
 );
+
 
 #print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
 #    new_region_start($case),"/$new_region_start\n";
@@ -5119,35 +5067,58 @@ sub case {
 sub new_playat       {       $playat{case()}->() };
 sub new_region_start { $region_start{case()}->() };
 sub new_region_end   {   $region_end{case()}->() };
-#sub edit_play_length { $edit_play_end - $edit_play_start }
+
 
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
 # actual WAV file in some cases. (I doubt that
 # will be a problem.)
 
-#sub new_region_end   { $edit_play_end - new_playat() } # XXX
 
 sub case {
- if ( $playat > $edit_play_end )
-		{ "out_of_bounds_near" }
- elsif ( $playat + $region_end - $region_start < $edit_play_start)
-		{ "out_of_bounds_far" }
- elsif (! $region_end )    			# no region
-		{ "no_region_play_start_during_playat_delay" }
- elsif ( $playat > $edit_play_start  # play begins during initial silence
-						# XXX what about == condition
-#			and $playat < $edit_play_end    # there is some audio to play
- )
-		{ "no_region_play_start_during_playat_delay" }
- elsif ( 	! $region_end  
-         or $edit_play_start >= $playat)
-		{ "no_region_or_play_start_within_region"}
- elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
-		{ "play_start_during_playat_delay"}
- else{ croak "unexpected region-edit relation for track $trackname" }
+
+    if ( ! $region_start and ! $region_end  )
+		{ 
+
+			# logic for no-region case
+		#
+			    if ( $edit_play_end < $playat)
+					{ "out_of_bounds_near" }
+
+#			# pending knowledge of WAV file length
+#
+#			 elsif ( $playat + $wav_length < $edit_play_start)
+#					{ "out_of_bounds_far" }
+
+			elsif ( $edit_play_start >= $playat)
+				{"no_region_play_start_after_playat_delay"}
+ 			elsif (   $edit_play_start < $playat 
+				  and $edit_play_end   > $playat )
+				{ "no_region_play_start_during_playat_delay"}
+				#	{ "play_start_during_playat_delay"}
+
+
+		} 
+	elsif ( defined $region_start and defined $region_end )
+		{ 
+		# logic for region present case
+
+			    if ( $edit_play_end < $playat)
+					{ "out_of_bounds_near" }
+			 elsif ( $playat + $region_end - $region_start < $edit_play_start)
+					{ "out_of_bounds_far" }
+			 elsif ( $edit_play_start >= $playat)
+					{ "play_start_within_region"}
+			 elsif ( $edit_play_start < $playat 
+					 and $playat < $edit_play_end)
+					{ "play_start_during_playat_delay"}
+			 else {carp "$trackname: fell through if-then"}
+		}
+
+	else { carp "$trackname: improperly defined region" }
+
 }
-=cut
+
 sub set_test_marks {
 	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
 	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
