@@ -5013,24 +5013,37 @@ my( $trackname, $playat, $region_start, $region_end);
 my( $edit_play_start, $edit_play_end);
 
 # dispatch table
-my( %playat, %region_start);
+my( %playat, %region_start, %region_end);
 
 # test variables
 # my ($index, $new_playat, $new_region_start, $new_region_end);
 
-%region_start = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
-	play_start_during_playat_delay	=> sub {$region_start },
-	no_region_or_play_start_within_region 
-				=> sub {$region_start + $edit_play_start - $playat },
-);
 %playat = (
     out_of_bounds_near				=> sub{ "*" },
     out_of_bounds_far				=> sub{ "*" },	
 	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
 	no_region_or_play_start_within_region 
 				=> sub{ 0 },
+	no_region_play_start_during_playat_delay
+				=> sub { $playat - $edit_play_start },
+);
+%region_start = (
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	=> sub {$region_start },
+	no_region_or_play_start_within_region 
+				=> sub {$region_start + $edit_play_start - $playat },
+	no_region_play_start_during_playat_delay => sub { 0 },
+);
+%region_end = (
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	
+		=> sub { $region_start + $edit_play_end - $playat },
+	no_region_or_play_start_within_region 
+		=> sub { $region_start + $edit_play_end - $playat },
+	no_region_play_start_during_playat_delay 
+		=> sub { $edit_play_end - $playat },
 );
 
 #print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
@@ -5039,22 +5052,30 @@ my( %playat, %region_start);
 
 sub new_playat       {       $playat{case()}->() };
 sub new_region_start { $region_start{case()}->() };
+sub new_region_end   {   $region_end{case()}->() };
+#sub edit_play_length { $edit_play_end - $edit_play_start }
 
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
 # actual WAV file in some cases. (I doubt that
 # will be a problem.)
 
-sub new_region_end   { $edit_play_end - new_playat() } # XXX
+#sub new_region_end   { $edit_play_end - new_playat() } # XXX
 
 sub case {
-    if ( ! $region_end  )
-		{ "no_region_or_play_start_within_region" }
- elsif ( $playat > $edit_play_end )
+ if ( $playat > $edit_play_end )
 		{ "out_of_bounds_near" }
  elsif ( $playat + $region_end - $region_start < $edit_play_start)
 		{ "out_of_bounds_far" }
- elsif ( $edit_play_start >= $playat)
+ elsif (! $region_end )    			# no region
+		{ "no_region_play_start_during_playat_delay" }
+ elsif ( $playat > $edit_play_start  # play begins during initial silence
+						# XXX what about == condition
+#			and $playat < $edit_play_end    # there is some audio to play
+ )
+		{ "no_region_play_start_during_playat_delay" }
+ elsif ( 	! $region_end  
+         or $edit_play_start >= $playat)
 		{ "no_region_or_play_start_within_region"}
  elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
 		{ "play_start_during_playat_delay"}
