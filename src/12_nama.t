@@ -613,6 +613,8 @@ my @tests = split "\n",<<TEST_DATA;
 4 12 5 15 21 26  0 14 19 play_start_within_region2
 5 12 5 15 23 26  *  *  * out_of_bounds_far
 6  0 5 15  5  9  0 10  * play_start_within_region3
+7  0 0  0  5  9  0  5  * no_playat_no_region
+8  2 0  0  5  9  0  3  * playat_no_region
 TEST_DATA
 
 foreach(@tests){

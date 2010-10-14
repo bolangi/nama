@@ -5019,16 +5019,18 @@ my( %playat, %region_start);
 # my ($index, $new_playat, $new_region_start, $new_region_end);
 
 %region_start = (
-	play_start_within_region 	  => sub {$region_start + $edit_play_start - $playat },
-	play_start_during_playat_delay=> sub {$region_start },
-    out_of_bounds_near            => sub{ "*" },
-    out_of_bounds_far             => sub{ "*" },	
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	=> sub {$region_start },
+	no_region_or_play_start_within_region 
+				=> sub {$region_start + $edit_play_start - $playat },
 );
 %playat = (
-	play_start_during_playat_delay => sub{ $playat - $edit_play_start },
-	play_start_within_region       => sub{ 0 },
-    out_of_bounds_near             => sub{ "*" },
-    out_of_bounds_far              => sub{ "*" },	
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
+	no_region_or_play_start_within_region 
+				=> sub{ 0 },
 );
 
 #print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
@@ -5039,12 +5041,14 @@ sub new_playat       {       $playat{case()}->() };
 sub new_region_start { $region_start{case()}->() };
 
 sub case {
-	if ( $playat > $edit_play_end )
+    if ( ! $region_end  )
+		{ "no_region_or_play_start_within_region" }
+ elsif ( $playat > $edit_play_end )
 		{ "out_of_bounds_near" }
  elsif ( $playat + $region_end - $region_start < $edit_play_start)
 		{ "out_of_bounds_far" }
  elsif ( $edit_play_start >= $playat)
-		{ "play_start_within_region"}
+		{ "no_region_or_play_start_within_region"}
  elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
 		{ "play_start_during_playat_delay"}
  else{ croak "unexpected region-edit relation for track $trackname" }
