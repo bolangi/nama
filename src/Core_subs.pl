@@ -5018,6 +5018,72 @@ my( %playat, %region_start, %region_end);
 # test variables
 # my ($index, $new_playat, $new_region_start, $new_region_end);
 
+
+
+%region_start = (
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	=> sub {$region_start },
+	no_region_or_play_start_within_region 
+				=> sub {$region_start + $edit_play_start - $playat },
+);
+%playat = (
+    out_of_bounds_near				=> sub{ "*" },
+    out_of_bounds_far				=> sub{ "*" },	
+	play_start_during_playat_delay	=> sub{ $playat - $edit_play_start },
+	no_region_or_play_start_within_region 
+				=> sub{ 0 },
+);
+
+#print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
+#    new_region_start($case),"/$new_region_start\n";
+#print "case: ",case(), $/;
+
+sub new_playat       {       $playat{case()}->() };
+sub new_region_start { $region_start{case()}->() };
+
+# the following value will always allow enough time
+# to record the edit. it may be longer than the 
+# actual WAV file in some cases. (I doubt that
+# will be a problem.)
+
+#sub new_region_end   { $edit_play_end - new_playat() } # XXX
+
+sub case {
+    if ( ! defined $region_start and ! defined $region_end  )
+		{ 
+
+			# logic for no-region case
+
+
+		} 
+	elsif ( defined $region_start and defined $region_end )
+		{ 
+
+		# logic for region present case
+
+			if ( $playat > $edit_play_end )
+					{ "out_of_bounds_near" }
+			 elsif ( $playat + $region_end - $region_start < $edit_play_start)
+					{ "out_of_bounds_far" }
+			 elsif ( $edit_play_start >= $playat)
+					{ "no_region_or_play_start_within_region"}
+			 elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
+					{ "play_start_during_playat_delay"}
+
+			 else {carp "$trackname: fell through if-then"}
+
+		}
+
+	else { carp "$trackname: improperly defined region" }
+
+=comment
+		{ "no_region_or_play_start_within_region" }
+ else{ croak "unexpected region-edit relation for track $trackname" }
+=cut
+}
+
+=comment
 %playat = (
     out_of_bounds_near				=> sub{ "*" },
     out_of_bounds_far				=> sub{ "*" },	
@@ -5081,6 +5147,7 @@ sub case {
 		{ "play_start_during_playat_delay"}
  else{ croak "unexpected region-edit relation for track $trackname" }
 }
+=cut
 sub set_test_marks {
 	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
 	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
