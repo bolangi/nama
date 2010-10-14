@@ -162,7 +162,7 @@ sub play_end_time {
 
 sub marktime { 
 	my ($self,$markfield) = @_;
-	::Mark::by_name{$self->$markfield}->time
+	$::Mark::by_name{$self->$markfield}->time
 }
 
 sub is_active {

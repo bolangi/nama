@@ -868,9 +868,13 @@ generate_edit_playback_set: _generate_edit_playback_setup {
 
 hear_edit: _hear_edit { ::hear_edit() }
 
-edit_track: _edit_track { ::edit_track() }
+edit_track: _edit_track { 
+	defined $::this_edit and $::this_track = $::tn{$::this_edit->edit_name};
+}
 
-host_track: _host_track { ::host_track() }
+host_track: _host_track { 
+	defined $::this_edit and $::this_track = $::tn{$::this_edit->host_track};
+1 }
 
 play_start_mark: _play_start_mark {
 	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1

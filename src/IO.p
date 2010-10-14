@@ -158,18 +158,16 @@ sub _mono_to_stereo{
 }
 sub _playat_output {
 	my $track = shift;
-	if ( $track->playat_time ){
-		join ',',"playat" , $track->adjusted_playat_time;
-	}
+	return unless $track->adjusted_playat_time;
+	join ',',"playat" , $track->adjusted_playat_time;
 }
 sub _select_output {
 	my $track = shift;
-	if ( $track->region_start and $track->region_end){
-		my $end   = $track->region_end_time; # we never adjust this
-		my $start = $track->adjusted_region_start_time;
-		my $length = $end - $start;
-		join ',',"select", $start, $length
-	}
+	my $start = $track->adjusted_region_start_time;
+	my $end   = $track->adjusted_region_end_time;
+	return unless defined $start and defined $end;
+	my $length = $end - $start;
+	join ',',"select", $start, $length
 }
 ###  utility subroutines
 

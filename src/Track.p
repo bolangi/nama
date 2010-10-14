@@ -312,6 +312,13 @@ sub adjusted_playat_time {
 	::set_edit_vars($track);
 	::new_playat();
 }
+sub adjusted_region_end_time {
+	my $track = shift;
+	return $track->region_end_time unless ::edit_mode();
+	::set_edit_vars($track);
+	::new_region_end();
+}
+
 sub region_is_out_of_bounds {
 	return unless ::edit_mode();
 	my $track = shift;

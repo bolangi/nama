@@ -4931,7 +4931,7 @@ Edits will be applied against current version\n"), return 1
 	unless $this_track->rec_status eq 'MON' ;
 	my $v = $this_track->monitor_version;
 	say $this_track->name, ": creating new edit against version ", $v;
-	my $edit = Edit->new(
+	my $edit = ::Edit->new(
 	#	play_start_mark => $edit_points[0],
 	#	rec_start_mark  => $edit_points[1],
 	#	rec_end_mark    => $edit_points[2],
@@ -4947,12 +4947,12 @@ sub transfer_edit_points {
 	say("Use 'set_edit_points' command to specify edit region"), return
 		 unless scalar @edit_points;
 	my $edit = shift;
-	::Mark->new( $edit->play_start_name, $edit_points[0]);
-	::Mark->new( $edit->rec_start_name,  $edit_points[1]);
-	::Mark->new( $edit->rec_end_name,    $edit_points[2]);
+	::Mark->new( name => $edit->play_start_name, time => $edit_points[0]);
+	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
+	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
 }
 sub set_edit_points {
-	
+	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
 	say("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if really_recording();
 	say("You need stop the engine first. Aborting"), 
@@ -4999,7 +4999,7 @@ sub preview_edit_hole {
 }
 sub hear_edit {
 }
-sub edit_mode { defined $this_edit and $this_edit->play_start }
+sub edit_mode { defined $this_edit and defined $this_edit->play_start_time }
 
 ### edit region computations
 
@@ -5040,6 +5040,13 @@ my( %playat, %region_start);
 sub new_playat       {       $playat{case()}->() };
 sub new_region_start { $region_start{case()}->() };
 
+# the following value will always allow enough time
+# to record the edit. it may be longer than the 
+# actual WAV file in some cases. (I doubt that
+# will be a problem.)
+
+sub new_region_end   { $edit_play_end }
+
 sub case {
     if ( ! $region_end  )
 		{ "no_region_or_play_start_within_region" }
@@ -5052,6 +5059,12 @@ sub case {
  elsif ( $playat > $edit_play_start and $edit_play_end > $playat )
 		{ "play_start_during_playat_delay"}
  else{ croak "unexpected region-edit relation for track $trackname" }
+}
+sub set_test_marks {
+	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
+	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
+	::Mark->new(qw(name brass-v49-edit1-rec-end time 9));
+
 }
 sub set_edit_vars {
 	my $track = shift;
