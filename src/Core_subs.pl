@@ -5045,7 +5045,7 @@ sub new_region_start { $region_start{case()}->() };
 # actual WAV file in some cases. (I doubt that
 # will be a problem.)
 
-sub new_region_end   { $edit_play_end }
+sub new_region_end   { $edit_play_end - new_playat() } # XXX
 
 sub case {
     if ( ! $region_end  )

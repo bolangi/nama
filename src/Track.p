@@ -842,6 +842,15 @@ sub AUTOLOAD {
 }
 sub source_id   { $::tn{$_[0]->host_track}->source_id }
 sub source_type { $::tn{$_[0]->host_track}->source_type }
+sub current_version {	
+	my $track = shift;
+	my $last = $track->last;
+	my $status = $track->rec_status;
+	#$debug and print "last: $last status: $status\n";
+	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
+	elsif ( $status eq 'MON'){ return $track->monitor_version } 
+	else { return 0 }
+}
 }
 
 1;
