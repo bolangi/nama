@@ -4640,6 +4640,12 @@ sub get_format {
 	my $path = shift;
 	ecasound_get_info($path, 'ai-get-format');
 }
+sub get_modify_time {
+	my $path = shift;
+	my @stat = stat $path;
+	$stat[9]
+}
+	
 sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
 
 sub channels { [split ',', $_[0] ]->[1] }

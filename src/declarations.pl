@@ -384,6 +384,7 @@ our (
 	$regenerate_setup, # force us to generate new chain setup
 	%is_ecasound_chain,   # suitable for c-select
 	
+	%wav_info,			# caches path/length/format/modify-time
 	$autosave_interval, # how frequently to save
 	$midish_enable,       # using midish
 	%midish_command,     # keywords listing
