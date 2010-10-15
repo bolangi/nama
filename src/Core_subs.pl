@@ -4936,25 +4936,6 @@ sub complete_edit_points {
 	print prompt(), " ";
 }
 }
-sub new_edit {
-	#my @edit_points = @_;
-	print($this_track->name, ": must be in MON mode.
-Edits will be applied against current version\n"), return 1
-	unless $this_track->rec_status eq 'MON' ;
-	my $v = $this_track->monitor_version;
-	say $this_track->name, ": creating new edit against version ", $v;
-	my $edit = ::Edit->new(
-	#	play_start_mark => $edit_points[0],
-	#	rec_start_mark  => $edit_points[1],
-	#	rec_end_mark    => $edit_points[2],
-		host_track 		=> $this_track->name,
-		host_version	=> $v,
-	);
-#	$this_track->current_edit->{$v} = $edit->n;
-	$this_edit = $edit;
-	transfer_edit_points($edit);
-}
-
 sub set_edit_points {
 	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
 	say("You must use a playback-only mode to setup edit marks. Aborting"), 
@@ -4999,13 +4980,32 @@ sub generate_edit_record_setup { # for current edit
 	# schedule muting at rec-end point     - fade-out
 }
 
+sub new_edit {
+	#my @edit_points = @_;
+	print($this_track->name, ": must be in MON mode.
+Edits will be applied against current version\n"), return 1
+	unless $this_track->rec_status eq 'MON' ;
+	my $v = $this_track->monitor_version;
+	say $this_track->name, ": creating new edit against version ", $v;
+	my $edit = ::Edit->new(
+	#	play_start_mark => $edit_points[0],
+	#	rec_start_mark  => $edit_points[1],
+	#	rec_end_mark    => $edit_points[2],
+		host_track 		=> $this_track->name,
+		host_version	=> $v,
+	);
+#	$this_track->current_edit->{$v} = $edit->n;
+	$this_edit = $edit;
+	transfer_edit_points($edit);
+	set_edit_mode();
+}
+
 sub record_edit {
-	# local enable edit mode
-	# set edit track to REC
-	# 
-	# start transport! 
-	#
-	# play_edit
+	set_edit_mode() or say("Aborting."), return;
+	$tn{$this_edit->edit_name}
+	
+	
+	
 }
 sub play_edit {
 	# local enable edit mode
@@ -5019,16 +5019,17 @@ sub preview_edit_in {
 sub preview_edit_out {
 	# local enable edit mode
 }
-sub end_edit 	  { $edit_mode = 0 }
-sub set_edit_mode { $edit_mode++ if edit_mode_conditions() }
+sub end_edit 	  	{ $edit_mode = 0 }
+sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
+sub edit_mode		{ $edit_mode }
 sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
-	$tn{$this_edit->host_track_alias}->rec_status eq 'MON'
-		or say('host track alias: ',$this_edit->host_track_alias,
+	$this_edit->host_alias_track->rec_status eq 'MON'
+		or say('host track alias: ',$this_edit->host_alias,
 				" must be set to MON"), return;
-	$tn{$this_edit->host_track_alias}->monitor_version == $this_edit->host_version
-		or say('host track alias: ',$this_edit->host_track_alias,
+	$this_edit->host_alias_track->monitor_version == $this_edit->host_version
+		or say('host track alias: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
 }

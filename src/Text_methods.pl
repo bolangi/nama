@@ -71,6 +71,7 @@ sub show_status {
 	my @modes;
 	push @modes, $preview if $preview;
 	push @modes, "master" if $mastering_mode;
+	push @modes, "edit"   if ::edit_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::really_recording();

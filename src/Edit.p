@@ -94,7 +94,7 @@ sub new {
 	#  since this is what is used by all commands
 	
 	my $host_track_alias = ::Track->new(
-		name 	=> $self->host_track_alias,
+		name 	=> $self->host_alias,
 		version => $::tn{$self->host_track}->monitor_version,
 		target  => $self->host_track,
 		rw		=> 'MON',
@@ -124,7 +124,7 @@ sub edit_name {
 	join '-', $self->edit_root_name, 'edit'.$self->n
 }
 
-sub host_track_alias {
+sub host_alias {
 	my $self = shift;
 	join '-', $self->edit_root_name, 'original'
 }
@@ -179,9 +179,8 @@ sub is_active {
 }
 
 
-sub host_alias {
-	my $self = shift;
-}
+sub host_alias_track { $::tn{$_[0]->host_alias} }
+sub edit_track 		 { $::tn{$_[0]->edit_name} }
 
 sub remove { # supply index
 	my $i = shift;
