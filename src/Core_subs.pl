@@ -4991,17 +4991,25 @@ sub generate_edit_record_setup { # for current edit
 	# schedule muting at rec-end point     - fade-out
 }
 
-sub start_edit {
-	# start transport!
-	# generate_edit_playback_setup (loop?)
+sub record_edit {
+	# local enable edit mode
+	# set edit track to REC
+	# 
 	# start transport! 
+	#
+	# play_edit
+}
+sub play_edit {
+	# local enable edit mode
+	# generate setup
+	# play edit
 }
 
-sub preview_edit_doughnut {
+sub preview_edit_in {
+	# local enable edit mode
 }
-sub preview_edit_hole {
-}
-sub hear_edit {
+sub preview_edit_out {
+	# local enable edit mode
 }
 sub edit_mode { defined $this_edit and defined $this_edit->play_start_time }
 
