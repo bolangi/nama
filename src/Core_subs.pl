@@ -4920,22 +4920,21 @@ sub get_edit_mark {
 		push @edit_points, $pos;
 		say " got $names[$p] position ".d1($pos);
 		reset_input_line();
-		if( $p == 3){ complete_edit_marks() }
+		if( $p == 3){ complete_edit_points() }
 		else{
 			$term->stuff_char(10);
 			&{$attribs->{'callback_read_char'}}();
 		}
 	}
 }
-
-sub complete_edit_marks {
-			@::edit_points = @edit_points; # save to global
-			eval_iam('stop');
-			say "\nEngine is stopped\n";
-			detect_spacebar();
-			print prompt(), " ";
+sub complete_edit_points {
+	@::edit_points = @edit_points; # save to global
+	eval_iam('stop');
+	say "\nEngine is stopped\n";
+	detect_spacebar();
+	transfer_edit_marks($this_edit) if $this_edit;
+	print prompt(), " ";
 }
-	
 }
 sub new_edit {
 	#my @edit_points = @_;
@@ -4956,14 +4955,6 @@ Edits will be applied against current version\n"), return 1
 	transfer_edit_points($edit);
 }
 
-sub transfer_edit_points {
-	say("Use 'set_edit_points' command to specify edit region"), return
-		 unless scalar @edit_points;
-	my $edit = shift;
-	::Mark->new( name => $edit->play_start_name, time => $edit_points[0]);
-	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
-	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
-}
 sub set_edit_points {
 	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
 	say("You must use a playback-only mode to setup edit marks. Aborting"), 
@@ -4987,6 +4978,14 @@ Engine will start in 3 seconds.);
 		say "\n\nEngine is running\n";
 		print prompt();
 	});
+}
+sub transfer_edit_points {
+	say("Use 'set_edit_points' command to specify edit region"), return
+		 unless scalar @edit_points;
+	my $edit = shift;
+	::Mark->new( name => $edit->play_start_name, time => $edit_points[0]);
+	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
+	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
 }
 
 sub generate_edit_record_setup { # for current edit
@@ -5020,8 +5019,20 @@ sub preview_edit_in {
 sub preview_edit_out {
 	# local enable edit mode
 }
-sub edit_mode { defined $this_edit and defined $this_edit->play_start_time }
-
+sub end_edit 	  { $edit_mode = 0 }
+sub set_edit_mode { $edit_mode++ }
+sub edit_mode {        
+	return unless $edit_mode;
+	defined $this_edit or say('No edit is defined'), return;
+	defined $this_edit->play_start_time or say('No edit points defined'), return;
+	$tn{$this_edit->host_track_alias}->rec_status eq 'MON'
+		or say('host track alias: ',$this_edit->host_track_alias,
+				" must be set to MON"), return;
+	$tn{$this_edit->host_track_alias}->monitor_version == $this_edit->host_version
+		or say('host track alias: ',$this_edit->host_track_alias,
+				" must be set to version ",$this_edit->host_version), return
+	1;
+}
 ### edit region computations
 
 {
