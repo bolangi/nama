@@ -5002,22 +5002,30 @@ Edits will be applied against current version\n"), return 1
 
 sub record_edit {
 	set_edit_mode() or say("Aborting."), return;
-	$tn{$this_edit->edit_name}
-	
-	
-	
+	$this_edit->edit_track->set(rw => 'REC');
+	$::Bus::by_name{$this_edit->host_track}->set(rw => 'REC');
+	setup_edit_fades();
+	$regenerate_setup++;
 }
 sub play_edit {
-	# local enable edit mode
-	# generate setup
-	# play edit
+	setup_edit_fades();
+	$this_edit->edit_track->set(rw => 'MON');
+	set_edit_play_mode();
 }
-
 sub preview_edit_in {
-	# local enable edit mode
+	setup_edit_fades();
+	$this_edit->edit_track->set(rw => 'OFF');
+	set_edit_play_mode();
 }
 sub preview_edit_out {
-	# local enable edit mode
+	setup_edit_fades('reverse');
+	$this_edit->edit_track->set(rw => 'OFF');
+	set_edit_play_mode();
+}
+sub set_edit_play_mode {
+	set_edit_mode() or say("Aborting."), return;
+	$::Bus::by_name{$this_edit->host_track}->set(rw => 'MON');
+	$regenerate_setup++;
 }
 sub end_edit 	  	{ $edit_mode = 0 }
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
@@ -5032,6 +5040,9 @@ sub edit_mode_conditions {
 		or say('host track alias: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
+}
+sub setup_edit_fades {
+
 }
 ### edit region computations
 
