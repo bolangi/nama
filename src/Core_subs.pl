@@ -58,7 +58,7 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
-	start_midish(); # if $midish_enable;
+	start_midish() if $midish_enable;
 
 	# set up autosave
 	
@@ -346,7 +346,7 @@ sub launch_ecasound_server {
 	
 	my $port = shift // $default_port;
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
-	my $redirect = "2>&1>/dev/null &";
+	my $redirect = ">/dev/null &";
 	my $ps = qx(ps ax);
 	say ("Using existing Ecasound server"), return 
 		if  $ps =~ /ecasound/
