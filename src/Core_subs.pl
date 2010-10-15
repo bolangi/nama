@@ -5062,11 +5062,6 @@ my( %playat, %region_start, %region_end);
 		=> sub {                 $edit_play_end - $playat },
 );
 
-
-#print "$index: playat ",new_playat($case),"/$new_playat region_start: ",
-#    new_region_start($case),"/$new_region_start\n";
-#print "case: ",case(), $/;
-
 sub new_playat       {       $playat{edit_case()}->() };
 sub new_region_start { $region_start{edit_case()}->() };
 sub new_region_end   
@@ -5075,13 +5070,10 @@ sub new_region_end
 		return $end if $end eq '*';
 		$end < $length ? $end : $length
 	};
-
-
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
 # actual WAV file in some cases. (I doubt that
 # will be a problem.)
-
 
 sub edit_case {
 

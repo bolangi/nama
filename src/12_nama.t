@@ -608,18 +608,18 @@ check_setup('Send bus - raw - JACK');
 
 diag "Edit mode playat and region endpoints adjustment";
 my @tests = split "\n",<<TEST_DATA;
-1 12 5 15 4   8  *  *  * 30 out_of_bounds_near
-2 12 5 15 23 26  *  *  * 30 out_of_bounds_far
-3 12 5 15 10 17  2  5 10 30 play_start_during_playat_delay
-4 12 5 15 13 21  0  6 14 30 play_start_within_region1
-5 12 5 15 21 26  0 14 19 30 play_start_within_region2
-6  0 5 15  5  9  0 10 14 30 play_start_within_region3
-7  0 0  0  5  9  0  5  9 30 no_playat_no_region
+1 12 5 15 4   8  *  *  * 30 out_of_bounds_near region
+2 12 5 15 23 26  *  *  * 30 out_of_bounds_far region
+3 12 5 15 10 17  2  5 10 30 play_start_during_playat_delay region
+4 12 5 15 13 21  0  6 14 30 play_start_within_region region
+5 12 5 15 21 26  0 14 19 30 play_start_within_region region
+6  0 5 15  5  9  0 10 14 30 play_start_within_region region
+7  0 0  0  5  9  0  5  9 30 no_region_play_start_after_playat_delay no_playat
 8  2 0  0  5  9  0  3  7 30 no_region_play_start_after_playat_delay
 9  6 0  0  5  9  1  0  3 30 no_region_play_start_during_playat_delay
-10 6 0  0  3  5  *  *  * 30 no_region_out_of_bounds_near
-11 6 0  0 40 49  *  *  * 30 no_region_out_of_bounds_far
-12 6 0  0 34 40  0 28 30 30 no_region_play_end_after_wav_length
+10 6 0  0  3  5  *  *  * 30 out_of_bounds_near no_region
+11 6 0  0 40 49  *  *  * 30 out_of_bounds_far  no_region
+12 6 0  0 34 40  0 28 30 30 no_region_play_start_after_playat_delay end_after_wav_length
 
 TEST_DATA
 
@@ -636,7 +636,8 @@ foreach(@tests){
 		$new_region_start, 
 		$new_region_end,
 		$length,
-		$type,
+		$case, 
+		$comment,
 	) = split " ", $_;
 
 	::set_edit_vars_testing( 
@@ -649,9 +650,10 @@ foreach(@tests){
 	);
 
 		
-	is( ::new_playat(), $new_playat, "$index: new_playat: $type");
-	is( ::new_region_start(), $new_region_start, "$index: new_region_start: $type");
-	is( ::new_region_end(), $new_region_end, "$index: new_region_end: $type");
+	is( ::edit_case(), $case, "$index: $case $comment");
+	is( ::new_playat(), $new_playat, "$index: new_playat: $case");
+	is( ::new_region_start(), $new_region_start, "$index: new_region_start: $case");
+	is( ::new_region_end(), $new_region_end, "$index: new_region_end: $case");
 }
 }
 
