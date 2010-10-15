@@ -102,7 +102,7 @@ sub new {
 					inserts 		=> {},
 					effect_chain_stack => [],
 					cache_map 		=> {},
-					current_edit 	=> {},
+				#	current_edit 	=> {},
 
 					@_ 			}, $class;
 
@@ -752,7 +752,7 @@ sub this_edit {
 	my $track = shift;
 	my $v = $track->monitor_version;
 	return unless $v and $track->rec_status eq 'MON';
-	$track->current_edit->{$v}
+#	$track->current_edit->{$v}
 }
 	
 # subclasses
