@@ -102,7 +102,7 @@ sub new {
 					inserts 		=> {},
 					effect_chain_stack => [],
 					cache_map 		=> {},
-				#	current_edit 	=> {},
+					current_edit 	=> {},
 
 					@_ 			}, $class;
 

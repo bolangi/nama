@@ -3418,7 +3418,7 @@ sub restore_state {
 	}
 	if ( $saved_version <= 1.065){ 
 
-	#	map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
+		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
 	}
 
 	#  destroy and recreate all buses
@@ -4994,7 +4994,7 @@ Edits will be applied against current version\n"), return 1
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
 	);
-#	$this_track->current_edit->{$v} = $edit->n;
+	$this_track->current_edit->{$v} = $edit->n;
 	$this_edit = $edit;
 	transfer_edit_points($edit);
 	set_edit_mode();
