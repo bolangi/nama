@@ -1153,8 +1153,9 @@ sub add_paths_for_mixdown_handling {
 sub prune_graph {
 	$debug2 and say "&prune_graph";
 	# prune graph: remove tracks lacking inputs or outputs
-	::Graph::remove_inputless_tracks($g);
-	::Graph::remove_outputless_tracks($g); 
+	::Graph::remove_out_of_bounds_tracks($g) if edit_mode();
+	::Graph::recursively_remove_inputless_tracks($g);
+	::Graph::recursively_remove_outputless_tracks($g); 
 }
 # new object based dispatch from routing graph
 	
@@ -4625,6 +4626,7 @@ sub destroy_current_wav {
 	1;
 }
 
+# the following routines are used only by the GUI
 sub some_user_tracks {
 	my $which = shift;
 	my @user_tracks = ::Track::all();
