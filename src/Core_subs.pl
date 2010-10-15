@@ -633,7 +633,6 @@ my @track_functions = qw(
 	group_last 
 	last 
 	current_wav 
-	full_wav_path 
 	current_version 
 	monitor_version 
 	maybe_monitor 
@@ -978,6 +977,16 @@ sub generate_setup {
 }
 sub generate_setup_try {  # TODO: move operations below to buses
 	$debug2 and print "&generate_setup_try\n";
+
+	# in an ideal CS world, all of the following routing
+	# routines (add_paths_for_*) would be accomplished by
+	# the track or bus itself, rather than the Hand of God, as
+	# appears below.
+	#
+	# On the other hand (or Hand!), one can't complain if
+	# the Hand of God happens to be doing exactly the
+	# right things. :-)
+
 	my $automix = shift; # route Master to null_out if present
 	add_paths_for_main_tracks();
 	$debug and say "The graph is:\n$g";

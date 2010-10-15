@@ -176,11 +176,6 @@ sub current_wav {
 	}
 }
 
-sub full_wav_path {  
-	my $track = shift; 
-	join_path $track->dir, $track->current_wav
-}
-
 sub current_version {	
 	my $track = shift;
 	my $last = $::use_group_numbering 
