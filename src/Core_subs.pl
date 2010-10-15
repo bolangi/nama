@@ -5020,9 +5020,8 @@ sub preview_edit_out {
 	# local enable edit mode
 }
 sub end_edit 	  { $edit_mode = 0 }
-sub set_edit_mode { $edit_mode++ }
-sub edit_mode {        
-	return unless $edit_mode;
+sub set_edit_mode { $edit_mode++ if edit_mode_conditions() }
+sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
 	$tn{$this_edit->host_track_alias}->rec_status eq 'MON'
