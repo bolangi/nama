@@ -28,9 +28,9 @@ our @ISA;
 use vars qw(%n %by_index %by_name );
 use ::Object qw( 
 				n
-				play_start_mark
-				rec_start_mark
-				rec_end_mark
+				play_start_mark_name
+				rec_start_mark_name
+				rec_end_mark_name
 				host_track
 				host_version
 				 );
@@ -143,6 +143,11 @@ sub rec_end_name {
 	my $self = shift;
 	join '-', $self->edit_name,'rec-end'
 }
+
+sub play_start_mark { $::Mark::by_name{$_[0]->play_start_name} }
+sub rec_start_mark  { $::Mark::by_name{$_[0]->rec_start_name}  }
+sub rec_end_mark    { $::Mark::by_name{$_[0]->rec_end_name}    }
+
 sub play_start_time {
 	my $self = shift;
 	$self->marktime('play_start_name')

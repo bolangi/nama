@@ -4988,9 +4988,6 @@ Edits will be applied against current version\n"), return 1
 	my $v = $this_track->monitor_version;
 	say $this_track->name, ": creating new edit against version ", $v;
 	my $edit = ::Edit->new(
-	#	play_start_mark => $edit_points[0],
-	#	rec_start_mark  => $edit_points[1],
-	#	rec_end_mark    => $edit_points[2],
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
 	);
@@ -5167,7 +5164,5 @@ sub set_edit_vars_testing {
 	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
 }
 }
-
-
 
 ### end

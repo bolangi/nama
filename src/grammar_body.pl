@@ -876,14 +876,16 @@ host_track: _host_track {
 	defined $::this_edit and $::this_track = $::tn{$::this_edit->host_track};
 1 }
 
+	
+
 play_start_mark: _play_start_mark {
-	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+	$::this_edit->play_start_mark->jump_here; 1;
  }
 
 rec_start_mark: _rec_start_mark {
-	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+	$::this_edit->play_start_mark->jump_here; 1;
 }
 
 rec_end_mark: _rec_end_mark {
-	$::Mark::by_name{$::this_edit->play_start_mark}->jump_here; 1
+	$::this_edit->play_start_mark->jump_here; 1;
 }
