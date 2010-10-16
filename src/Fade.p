@@ -36,6 +36,7 @@ sub new {
 	{ 
 #		class => $class,  # not needed yet
 		n => next_n(), 
+		relation => 'fade_from_mark',
 		@_	
 	}, $class;
 
@@ -137,6 +138,17 @@ sub spec_to_pairs {
 	@pairs
 }
 	
+
+# utility routines
+
+	# the following routine makes it possible to
+	# remove an edit fade by the name of the edit mark
+	
+sub remove_by_mark_name {
+	my $mark1 = shift;
+	my ($i) = map{ $_->n} grep{ $_->mark1 eq $mark1 } values %by_index; 
+	remove($i) if $i;
+}
 
 sub remove { # supply index
 	my $i = shift;

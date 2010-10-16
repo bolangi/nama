@@ -109,7 +109,7 @@ $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
 $save_id = "State";
-$fade_time = 0.3;
+$fade_time = 0.3; # when starting/stopping transport
 $old_snapshot = {};
 $main_out = 1; # enable main output
 $this_bus = 'Main';
@@ -120,8 +120,9 @@ $volume_control_operator = 'ea'; # default to linear scale
 %fade_out_level = (ea => 0, 	eadb => -40);
 %unity_level 	= (ea => 100, 	eadb => 0); 
 $fade_resolution = 200; # steps per second
-$default_fade_length = 0.5;
+$default_fade_length = 0.5; # for fade-in, fade-out
 $edit_playback_end_margin = 1;
+$edit_crossfade_time = 0.005; # 1/200 seconds
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

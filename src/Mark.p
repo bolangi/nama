@@ -40,7 +40,6 @@ sub new {
 
 	#print "object class: $class, object type: ", ref $object, $/;
 	if ($object->name) {
-		$used_names{$vals{name}}++;
 		$by_name{ $object->name } = $object;
 	}
 	push @all, $object;

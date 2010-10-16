@@ -133,15 +133,15 @@ sub host_alias {
 
 sub play_start_name {
 	my $self = shift;
-	join '-', $self->edit_name,'play-start'
+	$self->play_start_mark_name || (join '-', $self->edit_name,'play-start')
 }
 sub rec_start_name {
 	my $self = shift;
-	join '-', $self->edit_name,'rec-start'
+	$self->rec_start_mark_name || (join '-', $self->edit_name,'rec-start')
 }
 sub rec_end_name {
 	my $self = shift;
-	join '-', $self->edit_name,'rec-end'
+	$self->rec_end_mark_name || (join '-', $self->edit_name,'rec-end')
 }
 
 sub play_start_mark { $::Mark::by_name{$_[0]->play_start_name} }
