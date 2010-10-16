@@ -879,13 +879,14 @@ host_track: _host_track {
 	
 
 play_start_mark: _play_start_mark {
-	$::this_edit->play_start_mark->jump_here; 1;
+	my $mark = $::this_edit->play_start_mark;
+	$mark->jump_here; 1;
  }
 
 rec_start_mark: _rec_start_mark {
-	$::this_edit->play_start_mark->jump_here; 1;
+	$::this_edit->rec_start_mark->jump_here; 1;
 }
 
 rec_end_mark: _rec_end_mark {
-	$::this_edit->play_start_mark->jump_here; 1;
+	$::this_edit->rec_end_mark->jump_here; 1;
 }

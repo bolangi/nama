@@ -66,13 +66,14 @@ sub set_name {
 
 sub jump_here {
 	my $mark = shift;
-	::eval_iam( "setpos " . $mark->adjusted_time);
+	::eval_iam( "setpos " . $mark->time);
 	$::this_mark = $mark;
 }
+sub time { $_[0]->adjusted_time }
 sub adjusted_time {  # for marks within current edit
 	my $mark = shift;
-	return $mark->time unless ::edit_mode();
-	my $time = $mark->time - $this_edit->play_start_time;
+	return $mark->{time} unless ::edit_mode();
+	my $time = $mark->{time} - $::this_edit->play_start_mark->{time};
 	$time > 0 ? $time : 0
 }
 sub remove {
