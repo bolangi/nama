@@ -34,7 +34,7 @@ sub new {
 	
 	my $object = bless 
 	{ 
-		class => $class, 
+#		class => $class,  # not needed yet
 		n => next_n(), 
 		@_	
 	}, $class;
@@ -160,18 +160,6 @@ sub remove { # supply index
 	}
 	else { refresh_fade_controller($track) }
 }
-{
-package ::EditFade;
-use Modern::Perl;
-our @ISA = '::Fade';
-sub fader_envelope_pairs {
-	my $self = shift;
-	::edit_mode() ?  $self->SUPER::fade_envelope_pairs : ()
-}
-
-}
-
-
 
 1;
 
