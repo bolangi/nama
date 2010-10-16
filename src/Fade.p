@@ -15,6 +15,7 @@ use ::Object qw(
 				 duration
 				 relation
 				 track
+				 class
 				 );
 %by_index = ();	# return ref to Mark by name
 $off_level = -256;
@@ -31,7 +32,13 @@ sub new {
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	
-	my $object = bless { n => next_n(), @_	}, $class;
+	my $object = bless 
+	{ 
+		class => $class, 
+		n => next_n(), 
+		@_	
+	}, $class;
+
 	$by_index{$object->n} = $object;
 
 	#print "object class: $class, object type: ", ref $object, $/;
@@ -63,13 +70,17 @@ sub refresh_fade_controller {
 	if( $track->fader and my ($old) = @{$::cops{$track->fader}{owns}})
 		{ ::remove_effect($old) }
 
+	return unless
+		my @pairs = fader_envelope_pairs($track); 
+
 	# add controller
 	::Text::t_add_ctrl($track->fader,  # parent
 					 'klg',	  		 # Ecasound controller
 					 [1,				 # Ecasound parameter 1
 					 $off_level,
 					 $on_level,
-					 fader_envelope_pairs($track)]
+					 @pairs,
+					 ]
 	);
 }
 
@@ -149,5 +160,18 @@ sub remove { # supply index
 	}
 	else { refresh_fade_controller($track) }
 }
+{
+package ::EditFade;
+use Modern::Perl;
+our @ISA = '::Fade';
+sub fader_envelope_pairs {
+	my $self = shift;
+	::edit_mode() ?  $self->SUPER::fade_envelope_pairs : ()
+}
+
+}
+
+
+
 1;
 

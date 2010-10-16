@@ -854,17 +854,9 @@ delete_edit: _delete_edit { ::delete_edit() }
 
 select_edit: _select_edit { ::select_edit() }
 
-preview_edit_doughnut: _preview_edit_doughnut { ::preview_edit_doughnut() }
+preview_edit_in: _preview_edit_in { ::preview_edit_in() }
 
-preview_edit_hole: _preview_edit_hole { ::preview_edit_hole() }
-
-generate_edit_record_setup: _generate_edit_record_setup {
-	::generate_edit_record_setup(); 1
-}
-
-generate_edit_playback_set: _generate_edit_playback_setup {
-	::generate_edit_playback_setup(); 1 
-}
+preview_edit_out: _preview_edit_out { ::preview_edit_out() }
 
 hear_edit: _hear_edit { ::hear_edit() }
 

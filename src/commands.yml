@@ -769,12 +769,12 @@ delete_edit:
   type: edit
   what: remove an edit and all associated WAV files (destructive)
   parameters: [<i_edit_index>] (defaults to current edit)
-preview_edit_doughnut:
+preview_edit_in:
   type: edit
   what: play the track region with the edit segment removed
   short: ped
   parameters: none
-preview_edit_hole:
+preview_edit_out:
   type: edit
   what: play the removed edit segment
   short: peh

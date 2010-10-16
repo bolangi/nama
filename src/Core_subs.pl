@@ -4967,6 +4967,8 @@ sub transfer_edit_points {
 	::Mark->new( name => $edit->play_start_name, time => $edit_points[0]);
 	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
 	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
+	@edit_points = ();
+	setup_edit_fades();
 }
 
 sub generate_edit_record_setup { # for current edit
@@ -5001,21 +5003,17 @@ sub record_edit {
 	set_edit_mode() or say("Aborting."), return;
 	$this_edit->edit_track->set(rw => 'REC');
 	$::Bus::by_name{$this_edit->host_track}->set(rw => 'REC');
-	setup_edit_fades();
 	$regenerate_setup++;
 }
 sub play_edit {
-	setup_edit_fades();
 	$this_edit->edit_track->set(rw => 'MON');
 	set_edit_play_mode();
 }
 sub preview_edit_in {
-	setup_edit_fades();
 	$this_edit->edit_track->set(rw => 'OFF');
 	set_edit_play_mode();
 }
 sub preview_edit_out {
-	setup_edit_fades('reverse');
 	$this_edit->edit_track->set(rw => 'OFF');
 	set_edit_play_mode();
 }
@@ -5039,6 +5037,7 @@ sub edit_mode_conditions {
 	1;
 }
 sub setup_edit_fades {
+	
 
 }
 ### edit region computations
