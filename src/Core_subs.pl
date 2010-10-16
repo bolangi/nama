@@ -5040,18 +5040,40 @@ sub setup_edit_fades {
 	# host_alias_track
 	# remove existing
 	# add new
+	#map{ $_->remove } @{$this_edit->fades};
+	my @fades;
+	push @fades,
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->rec_start_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
-	); 
+	), 
 	::Fade->new(  type => 'in',
 					mark1 => $this_edit->rec_end_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
+	), 
+	::Fade->new(  type => 'out',
+					mark1 => $this_edit->play_start_name,
+					duration => $edit_crossfade_time,
+					relation => 'fade_from_mark',
+					track => $this_edit->edit_name
+	), 
+	::Fade->new(  type => 'in',
+					mark1 => $this_edit->rec_start_name,
+					duration => $edit_crossfade_time,
+					relation => 'fade_from_mark',
+					track => $this_edit->edit_name,
+	), 
+	::Fade->new(  type => 'out',
+					mark1 => $this_edit->rec_end_name,
+					duration => $edit_crossfade_time,
+					relation => 'fade_from_mark',
+					track => $this_edit->edit_name,
 	); 
+	#$edit->set(fades => \@fades);
 	++$regenerate_setup;
 
 	# edit_track
