@@ -5037,12 +5037,13 @@ sub edit_mode_conditions {
 	1;
 }
 sub setup_edit_fades {
-	# host_alias_track
 	# remove existing
 	# add new
 	#map{ $_->remove } @{$this_edit->fades};
 	my @fades;
 	push @fades,
+
+	# host_alias_track
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->rec_start_name,
 					duration => $edit_crossfade_time,
@@ -5055,6 +5056,8 @@ sub setup_edit_fades {
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
+
+	# edit_track
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->play_start_name,
 					duration => $edit_crossfade_time,
@@ -5076,7 +5079,6 @@ sub setup_edit_fades {
 	#$edit->set(fades => \@fades);
 	++$regenerate_setup;
 
-	# edit_track
 	
 
 }
