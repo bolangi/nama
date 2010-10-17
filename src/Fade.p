@@ -129,10 +129,10 @@ sub spec_to_pairs {
 	my $cutpos;
 	my @pairs;
 	if ( $type eq 'out' ){
-		$cutpos = $from + 0.95 * ($to - $from);
+		$cutpos = $from + 0.9 * ($to - $from);
 		push @pairs, ($from, 1, $cutpos, $down_fraction, $to, 0);
 	} elsif( $type eq 'in' ){
-		$cutpos = $from + 0.05 * ($to - $from);
+		$cutpos = $from + 0.1 * ($to - $from);
 		push @pairs, ($from, 0, $cutpos, $down_fraction, $to, 1);
 	}
 	@pairs
