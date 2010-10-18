@@ -159,6 +159,8 @@ sub play_start_mark { $::Mark::by_name{$_[0]->play_start_name} }
 sub rec_start_mark  { $::Mark::by_name{$_[0]->rec_start_name}  }
 sub rec_end_mark    { $::Mark::by_name{$_[0]->rec_end_name}    }
 
+# the following are unadjusted values
+
 sub play_start_time {
 	my $self = shift;
 	$self->marktime('play_start_name')
