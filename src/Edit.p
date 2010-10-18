@@ -195,6 +195,13 @@ sub is_active {
 	
 	#$::tn{$self->host_track}->current_version == $self->host_version
 }
+sub store_fades { # replacing previous
+	my $edit = shift;
+	my @fades = @_;
+	my @indices = map{$_->n} @fades;
+	$edit->remove_fades;
+	$edit->set(fades => \@indices)
+}
 sub remove_fades {
 	my $edit = shift;
 	map{ $_->remove } map{ $::Fade::by_index{$_} } @{$edit->fades};

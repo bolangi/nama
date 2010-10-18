@@ -4997,28 +4997,42 @@ Edits will be applied against current version\n"), return 1
 	transfer_edit_points($edit);
 	set_edit_mode();
 }
+sub set_test_marks {
+	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
+	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
+	::Mark->new(qw(name brass-v49-edit1-rec-end time 9));
+
+}
+sub test_edit {
+	set_test_marks();
+	command_process("new_edit");
+	record_edit();
+}
 
 sub record_edit {
 	set_edit_play_mode();
 	$this_edit->edit_track->set(rw => 'REC');
+	$this_edit->store_fades(std_host_fades(), edit_fades());
 }
 sub play_edit {
 	set_edit_play_mode();
+	$this_edit->edit_track->set(rw => 'MON');
+	$this_edit->store_fades(std_host_fades(), edit_fades());
 }
 sub preview_edit_in {
 	set_edit_play_mode();
 	$this_edit->edit_track->set(rw => 'OFF');
+	$this_edit->store_fades(std_host_fades());
 }
 sub preview_edit_out {
 	set_edit_play_mode();
-	setup_reverse_edit_fades();
 	$this_edit->edit_track->set(rw => 'OFF');
+	$this_edit->store_fades(reverse_host_fades());
 }
 sub set_edit_play_mode {
 	set_edit_mode();
 	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'MON');
-	setup_standard_edit_fades();
 	$regenerate_setup++;
 }
 sub end_edit 	  	{ $edit_mode = 0 }
@@ -5035,69 +5049,38 @@ sub edit_mode_conditions {
 				" must be set to version ",$this_edit->host_version), return
 	1;
 }
-sub setup_standard_edit_fades {
+sub reverse_host_fades { host_fades('in','out') }
 
-	$this_edit->remove_fades;
-	
-	# host_alias_track
-	
-	# we store indices of newly applied fades
-	
-	my @fades = map{ $_->n }
-	::Fade->new(  type => 'out',
+sub std_host_fades { host_fades('out','in') }
+
+sub host_fades {
+	my ($first,$second) = @_;
+	::Fade->new(  type => $first,
 					mark1 => $this_edit->rec_start_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
-	::Fade->new(  type => 'in',
+	::Fade->new(  type => $second,
 					mark1 => $this_edit->rec_end_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
-
-	# edit_track
-	::Fade->new(  type => 'in',
-					mark1 => $this_edit->rec_start_name,
-					duration => $edit_crossfade_time,
-					relation => 'fade_from_mark',
-					track => $this_edit->edit_name,
-	), 
-	::Fade->new(  type => 'out',
-					mark1 => $this_edit->rec_end_name,
-					duration => $edit_crossfade_time,
-					relation => 'fade_from_mark',
-					track => $this_edit->edit_name,
-	); 
-	$this_edit->set(fades => \@fades);
-	++$regenerate_setup;
 }
-sub setup_reverse_edit_fades {
-
-	$this_edit->remove_fades;
-	
-	# host_alias_track
-	
-	# we store indices of newly applied fades
-	
-	my @fades = map{ $_->n }
+sub edit_fades {
 	::Fade->new(  type => 'in',
 					mark1 => $this_edit->rec_start_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
-					track => $this_edit->host_alias,
+					track => $this_edit->edit_name,
 	), 
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->rec_end_name,
 					duration => $edit_crossfade_time,
 					relation => 'fade_from_mark',
-					track => $this_edit->host_alias,
+					track => $this_edit->edit_name,
 	); 
-
-	# edit_track will be muted, no need for fades
-	
-	++$regenerate_setup;
 }
 
 ### edit region computations
@@ -5203,17 +5186,6 @@ sub edit_case {
 	else { carp "$trackname: improperly defined region" }
 }
 
-sub set_test_marks {
-	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
-	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
-	::Mark->new(qw(name brass-v49-edit1-rec-end time 9));
-
-}
-sub test_edit {
-	set_test_marks();
-	command_process("new_edit");
-	setup_standard_edit_fades();
-}
 sub set_edit_vars {
 	my $track = shift;
 	$trackname      = $track->name;
