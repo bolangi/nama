@@ -83,6 +83,16 @@ is( $effects_help[0],
 	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
 	'Preset help for dyn_compress_brutal');
 
+my @result = ::Fade::spec_to_pairs([0,1,'out']);
+my @expected = ( 0, 1, 0.95, 0.75, 1, 0 );
+
+is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-out");
+
+@result = ::Fade::spec_to_pairs([0,1,'in']);
+@expected = ( 0, 0, 0.05, 0.75, 1, 1 );
+
+is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-in");
+
 =cut
 
 is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
