@@ -486,8 +486,8 @@ loop_disable: _loop_disable end { $::loop_enable = 0; 1}
 name_mark: _name_mark ident end {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks end { 
 	my $i = 0;
-	map{ print( $_->time == $::this_mark->time ? q(*) : q()
-	,join " ", $i++, sprintf("%.1f", $_->time), $_->name, "\n")  } 
+	map{ print( $_->{time} == $::this_mark->{time} ? q(*) : q()
+	,join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n")  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";

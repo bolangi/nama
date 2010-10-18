@@ -4999,32 +4999,26 @@ Edits will be applied against current version\n"), return 1
 }
 
 sub record_edit {
-	set_edit_mode() or say("Aborting."), return;
-	$this_edit->bus->set(rw => 'REC');
+	set_edit_play_mode();
 	$this_edit->edit_track->set(rw => 'REC');
-	$regenerate_setup++;
 }
 sub play_edit {
-	$this_edit->bus->set(rw => 'REC');
-	$this_edit->edit_track->set(rw => 'MON');
-	$regenerate_setup++;
 	set_edit_play_mode();
 }
 sub preview_edit_in {
-	$this_edit->bus->set(rw => 'REC');
-	$this_edit->edit_track->set(rw => 'OFF');
-	$regenerate_setup++;
 	set_edit_play_mode();
+	$this_edit->edit_track->set(rw => 'OFF');
 }
 sub preview_edit_out {
-	$this_edit->bus->set(rw => 'REC');
-	$this_edit->edit_track->set(rw => 'OFF');
-	$regenerate_setup++;
 	set_edit_play_mode();
+	setup_reverse_edit_fades();
+	$this_edit->edit_track->set(rw => 'OFF');
 }
 sub set_edit_play_mode {
-	set_edit_mode() or say("Aborting."), return;
+	set_edit_mode();
 	$this_edit->bus->set(rw => 'REC');
+	$this_edit->edit_track->set(rw => 'MON');
+	setup_standard_edit_fades();
 	$regenerate_setup++;
 }
 sub end_edit 	  	{ $edit_mode = 0 }
