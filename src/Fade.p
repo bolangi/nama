@@ -100,17 +100,33 @@ sub refresh_fade_controller {
 					 @pairs,
 					 ]
 	);
+
+	# set fader to correct initial value
+	# 	first fade is type 'in'  : 0
+	# 	first fade is type 'out' : 100%
+	
+	my $initial_level = first_fader_is_type_in($track->name) 
+		? $off_level 
+		: $on_level;
+	::effect_update_copp_set($track->fader,0,$initial_level);
 }
 
 # class subroutines
 
 sub fades {
 	my $track_name = shift;
-	(grep{ $_->track eq $track_name } values %by_index)
+	# sort by unadjusted mark1 time
+	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
+		  $::Mark::by_name{$b->mark1}->{time}
+		}
+	grep{ $_->track eq $track_name } values %by_index
 }
 
-
-
+sub first_fade_is_type_in {
+	my $track_name = shift;
+	my @fades = fades($track_name);
+	$fades[0]->type eq 'in'
+}
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
 	my $track = shift;
@@ -131,7 +147,7 @@ sub fader_envelope_pairs {
 		} else { $fade->dumpp; die "fade processing failed" }
 		push @specs, [$marktime1, $marktime2, $fade->type];
 	}
-	# sort fades
+	# sort fades # already done! XXX
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 
 	# prepend number of pairs, flatten list

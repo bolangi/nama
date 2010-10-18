@@ -2302,7 +2302,6 @@ sub cop_add {
 }
 
 sub effect_update_copp_set {
-
 	my ($id, $param, $val) = @_;
 	effect_update( @_ );
 	$copp{$id}->[$param] = $val;
@@ -5008,16 +5007,19 @@ sub record_edit {
 sub play_edit {
 	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'MON');
+	$regenerate_setup++;
 	set_edit_play_mode();
 }
 sub preview_edit_in {
 	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'OFF');
+	$regenerate_setup++;
 	set_edit_play_mode();
 }
 sub preview_edit_out {
 	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'OFF');
+	$regenerate_setup++;
 	set_edit_play_mode();
 }
 sub set_edit_play_mode {
@@ -5039,12 +5041,12 @@ sub edit_mode_conditions {
 				" must be set to version ",$this_edit->host_version), return
 	1;
 }
-sub setup_edit_fades {
+sub setup_standard_edit_fades {
 	# remove existing
 	# add new
 	#map{ $_->remove } @{$this_edit->fades};
-	my @fades;
-	push @fades,
+	my @fades; # indices
+	push @fades, map{ $_->n } 
 
 	# host_alias_track
 	::Fade->new(  type => 'out',
@@ -5079,7 +5081,7 @@ sub setup_edit_fades {
 					relation => 'fade_from_mark',
 					track => $this_edit->edit_name,
 	); 
-	#$edit->set(fades => \@fades);
+	$this_edit->set(fades => \@fades);
 	++$regenerate_setup;
 
 	

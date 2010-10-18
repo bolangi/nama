@@ -743,12 +743,23 @@ sub bus_tree { # for solo function to work in sub buses
 	($mix, $::tn{$mix}->bus_tree);
 }
 
+sub version_has_edits { 
+	# true if exists track 'sax-v6-edit1'
+	# false if *-edit1 is deleted for some reason
+	my $track = shift;
+	my $version = shift;
+	my $edit_trackname = ::Edit::edit_track_search_string($track->name, $version);
+	$::tn{$edit_trackname}
+}	
+
+=comment
 sub this_edit {
 	my $track = shift;
 	my $v = $track->monitor_version;
 	return unless $v and $track->rec_status eq 'MON';
-#	$track->current_edit->{$v}
+	$track->current_edit->{$v}
 }
+=cut
 	
 # subclasses
 
