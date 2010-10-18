@@ -5001,25 +5001,28 @@ Edits will be applied against current version\n"), return 1
 
 sub record_edit {
 	set_edit_mode() or say("Aborting."), return;
+	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'REC');
-	$::Bus::by_name{$this_edit->host_track}->set(rw => 'REC');
 	$regenerate_setup++;
 }
 sub play_edit {
+	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'MON');
 	set_edit_play_mode();
 }
 sub preview_edit_in {
+	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'OFF');
 	set_edit_play_mode();
 }
 sub preview_edit_out {
+	$this_edit->bus->set(rw => 'REC');
 	$this_edit->edit_track->set(rw => 'OFF');
 	set_edit_play_mode();
 }
 sub set_edit_play_mode {
 	set_edit_mode() or say("Aborting."), return;
-	$::Bus::by_name{$this_edit->host_track}->set(rw => 'MON');
+	$this_edit->bus->set(rw => 'REC');
 	$regenerate_setup++;
 }
 sub end_edit 	  	{ $edit_mode = 0 }
