@@ -6,7 +6,8 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index $off_level $on_level $down_level $down_fraction);
+use vars qw($n %by_index $off_level $on_level $fade_down_level $fade_down_fraction
+$fade_time1_fraction $fade_time2_fraction);
 use ::Object qw( 
 				 n
 				 type
@@ -20,8 +21,24 @@ use ::Object qw(
 %by_index = ();	# return ref to Mark by name
 $off_level = -256;
 $on_level = 0;
-$down_level = -64;
-$down_fraction = 0.75;
+$fade_down_level = -64;
+$fade_down_fraction = 0.75;
+$fade_time1_fraction = 0.9;
+$fade_time2_fraction = 0.1;
+
+# example
+#
+# if fade time is 10 for a fade out
+# and fade start time is 0:
+#
+# from 0 to 9, fade from 0 (100%) to -64db
+# from 9 to 10, fade from -64db to -256db
+
+
+# 
+
+
+
 sub next_n {
 	my $n = 1;
 	while( $by_index{$n} ){ $n++}
@@ -49,7 +66,7 @@ sub new {
 	my $track = $::tn{$object->track};
 	my $id = $track->fader;
 	if( ! $id ){
-		my $first_effect_id = $::this_track->ops->[0];
+		my $first_effect_id = $track->ops->[0];
 		if ( $first_effect_id ){
 			$id = ::Text::t_insert_effect($first_effect_id, 'eadb', [0]);
 		} else { 
@@ -129,11 +146,11 @@ sub spec_to_pairs {
 	my $cutpos;
 	my @pairs;
 	if ( $type eq 'out' ){
-		$cutpos = $from + 0.9 * ($to - $from);
-		push @pairs, ($from, 1, $cutpos, $down_fraction, $to, 0);
+		$cutpos = $from + $fade_time1_fraction * ($to - $from);
+		push @pairs, ($from, 1, $cutpos, $fade_down_fraction, $to, 0);
 	} elsif( $type eq 'in' ){
-		$cutpos = $from + 0.1 * ($to - $from);
-		push @pairs, ($from, 0, $cutpos, $down_fraction, $to, 1);
+		$cutpos = $from + $fade_time2_fraction * ($to - $from);
+		push @pairs, ($from, 0, $cutpos, $fade_down_fraction, $to, 1);
 	}
 	@pairs
 }
