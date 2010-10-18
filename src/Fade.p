@@ -105,7 +105,7 @@ sub refresh_fade_controller {
 	# 	first fade is type 'in'  : 0
 	# 	first fade is type 'out' : 100%
 	
-	my $initial_level = first_fader_is_type_in($track->name) 
+	my $initial_level = first_fade_is_type_in($track->name) 
 		? $off_level 
 		: $on_level;
 	::effect_update_copp_set($track->fader,0,$initial_level);
@@ -113,14 +113,13 @@ sub refresh_fade_controller {
 
 # class subroutines
 
+sub all_fades {
+	my $track_name = shift;
+	grep{ $_->track eq $track_name } values %by_index
+}
 sub fades {
 	my $track_name = shift;
-	# sort by unadjusted mark1 time
-	my @fades = 
-		sort{ $::Mark::by_name{$a->mark1}->{time} <=>
-			  $::Mark::by_name{$b->mark1}->{time}
-			}
-		grep{ $_->track eq $track_name } values %by_index;
+	my @fades = all_fades($track_name);
 
 	# throw away fades that are not in edit play region (if active)
 	@fades = grep
@@ -128,13 +127,17 @@ sub fades {
 		  		$time >= $::this_edit->play_start_time
 			and $time <= $::this_edit->play_end_time
 		} @fades if ::edit_mode() ;
-	@fades
+
+	# sort remaining fades by unadjusted mark1 time
+	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
+		  $::Mark::by_name{$b->mark1}->{time}
+	} @fades;
 }
 
 sub first_fade_is_type_in {
 	my $track_name = shift;
 	my @fades = fades($track_name);
-	$fades[0]->type eq 'in'
+	! scalar @fades or $fades[0]->type eq 'in'
 }
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
@@ -186,29 +189,30 @@ sub spec_to_pairs {
 	# the following routine makes it possible to
 	# remove an edit fade by the name of the edit mark
 	
+# ???? does it even work?
 sub remove_by_mark_name {
 	my $mark1 = shift;
 	my ($i) = map{ $_->n} grep{ $_->mark1 eq $mark1 } values %by_index; 
 	remove($i) if $i;
 }
-
-sub remove { # supply index
+sub remove_by_index {
 	my $i = shift;
 	my $fade = $by_index{$i};
+	$fade->remove;
+}
+
+sub remove { # supply index
+	my $fade = shift;
 	my $track = $::tn{$fade->track};
+	my $i = $fade->n;
 	
 	# remove object from index
 	delete $by_index{$i};
 
-	# if this is the last fade on the track
+	# remove fader entirely if this is the last fade on the track
 	
-	my @track_fades = fades($fade->track);
+	my @track_fades = all_fades($fade->track);
 	if ( ! @track_fades ){ 
-
-		# make sure the fader operator is _on_
-		#::effect_update_copp_set( $track->fader, 0, $on_level );
-
-		# remove fader entirely
 		::remove_effect($track->fader);
 		$::tn{$fade->track}->set(fader => undef);
 	}
