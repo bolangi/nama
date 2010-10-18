@@ -116,10 +116,19 @@ sub refresh_fade_controller {
 sub fades {
 	my $track_name = shift;
 	# sort by unadjusted mark1 time
-	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
-		  $::Mark::by_name{$b->mark1}->{time}
-		}
-	grep{ $_->track eq $track_name } values %by_index
+	my @fades = 
+		sort{ $::Mark::by_name{$a->mark1}->{time} <=>
+			  $::Mark::by_name{$b->mark1}->{time}
+			}
+		grep{ $_->track eq $track_name } values %by_index;
+
+	# throw away fades that are not in edit play region (if active)
+	@fades = grep
+		{ my $time = $::Mark::by_name{$_->mark1}->{time};
+		  		$time >= $::this_edit->play_start_time
+			and $time <= $::this_edit->play_end_time
+		} @fades if ::edit_mode() ;
+	@fades
 }
 
 sub first_fade_is_type_in {
