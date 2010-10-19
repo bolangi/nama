@@ -4,7 +4,7 @@
 					group 			# group affiliation
 
 					rw				# REC/MON/OFF setting
-					active			# version setting #
+					active			# OBSOLETE
 					version         # version setting
 					width			# channel count
 
@@ -37,7 +37,7 @@
 					project			# link this track to another project 
 					
 					rec_defeat		# don't record me!
-					inserts			# send/receive data structure, one per track
+					inserts			# OBSOLETE
 					prefader_insert
 					postfader_insert
 

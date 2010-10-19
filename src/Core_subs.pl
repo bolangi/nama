@@ -3418,6 +3418,7 @@ sub restore_state {
 	if ( $saved_version <= 1.065){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
+		map{ delete $_->{inserts} } @tracks_data;
 	}
 
 	#  destroy and recreate all buses
@@ -4536,18 +4537,20 @@ sub complete_caching {
 			effect_chain	=> push_effect_chain($track), # bypass
 		};
 		pop @{$track->effect_chain_stack}; # we keep it elsewhere
-		if ($track->has_insert){
+		if (my @inserts = grep{$_}(
+				$track->prefader_insert, 
+				$track->postfader_insert)
+		){
 			say "removing insert... ";
 			say "if you want it again you will need to replace it yourself";
 			say "this is what it was";
-			say yaml_out( $track->inserts );
-			$track->remove_insert;
+			map{ say $_->dump; $_->remove } 
+				map{ ::Insert::by_index{$_} } 
+				@inserts;
 		}
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "$name".
 'uncache' will restore effects and set version $orig_version\n);
-
-		
 
 		# special handling for sub-bus mix track
 		

@@ -99,7 +99,6 @@ sub new {
 					source_id   	=> 1,
 					send_type 		=> undef,
 					send_id   		=> undef,
-					inserts 		=> {},
 					effect_chain_stack => [],
 					cache_map 		=> {},
 					current_edit 	=> {},
@@ -381,7 +380,7 @@ sub remove_effect { # doesn't touch %cops or %copp data structures
 									} @ids }  
 							@{$track->ops} ]);
 }
-sub remove_insert {
+sub remove_insert { # XXX
 	my $track = shift;
 	return unless $track->has_insert;
 	my $i = $track->inserts;
