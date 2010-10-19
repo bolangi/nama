@@ -3418,7 +3418,10 @@ sub restore_state {
 	if ( $saved_version <= 1.065){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
-		map{ delete $_->{inserts} } @tracks_data;
+		map{ delete $_->{inserts};
+			 delete $_->{prefader_insert};
+			 delete $_->{postfader_insert};
+ 		} @tracks_data;
 	}
 
 	#  destroy and recreate all buses

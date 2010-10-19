@@ -4,7 +4,6 @@
 					group 			# group affiliation
 
 					rw				# REC/MON/OFF setting
-					active			# OBSOLETE
 					version         # version setting
 					width			# channel count
 
@@ -37,9 +36,6 @@
 					project			# link this track to another project 
 					
 					rec_defeat		# don't record me!
-					inserts			# OBSOLETE
-					prefader_insert
-					postfader_insert
 
 					effect_chain_stack # for bypass and friends
 					cache_map		# original versions of intermediate mixdown
