@@ -100,8 +100,7 @@ sub new {
 	#  - version number must *not* be allowed to change
 	#  - rw setting must be fixed to 'MON'
 	#
-	#  The easiest way may be to provide our own 'set' routine
-	#  since this is what is used by all commands
+	#  The easiest way may be to subclass the 'set' routine
 	
 	my $host_track_alias = ::Track->new(
 		name 	=> $self->host_alias,
@@ -109,7 +108,8 @@ sub new {
 		target  => $self->host_track,
 		rw		=> 'MON',
 		group   => $self->host_track, # bus affiliation
-	);
+	) 
+		unless $::tn{$self->host_alias};
 
 	# create edit track
 	#   - same name as edit
@@ -123,18 +123,14 @@ sub new {
 	); 
 	$self
 }
-
 sub edit_root_name {
 	my $self = shift;
 	join '-', $self->host_track, 'v'.$self->host_version;
 }
-
-
 sub edit_name {
 	my $self = shift;
 	join '-', $self->edit_root_name, 'edit'.$self->n
 }
-
 sub host_alias {
 	my $self = shift;
 	join '-', $self->edit_root_name, 'original'

@@ -4461,6 +4461,7 @@ sub cache_track { # launch subparts if conditions are met
 				or $::Bus::by_name{$track->name};
 
 	prepare_to_cache($track);
+	cache_engine_run($track);
 	complete_caching($track);
 }
 
@@ -4502,7 +4503,7 @@ sub prepare_to_cache {
 	write_chains();
 	remove_temporary_tracks();
 }
-sub complete_caching {
+sub cache_engine_run {
 	my $track = shift;
 	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
@@ -4521,6 +4522,9 @@ sub complete_caching {
 	sleep 2; # time for transport to stabilize
 	while( eval_iam('engine-status') !~ /finished|stopped/ ){ 
 	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
+}
+sub complete_caching {
+	my $track = shift;
 	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
@@ -5035,7 +5039,18 @@ sub set_edit_play_mode {
 	$this_edit->edit_track->set(rw => 'MON');
 	$regenerate_setup++;
 }
-sub end_edit 	  	{ $edit_mode = 0 }
+sub end_track_edit_magic {
+	# convert host track to mix track
+	
+	my $name = $this_edit->host_track;
+	my @vals = (is_mix_track => 0,
+				rec_defeat 	=> 0,
+				rw => 'MON',
+				);
+	$::tn{$name}->set( @vals );
+	$this_edit->bus->set(rw => 'OFF');
+}
+sub end_edit_mode  	{ $edit_mode = 0 }
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
 sub edit_mode		{ $edit_mode }
 sub edit_mode_conditions {        
