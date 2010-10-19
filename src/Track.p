@@ -388,7 +388,7 @@ sub remove_insert {
 	map{ $::tn{$_}->remove } @{ $i->{tracks} };
 	$track->set(inserts => {});
 }
-sub has_insert  { my $i = $_[0]->inserts; exists $i->{tracks} and @{ $i->{tracks} } }
+sub has_insert  { $_[0]->prefader_insert or $_[0]->postfader_insert }
 
 # remove track object and all effects
 
