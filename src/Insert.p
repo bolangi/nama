@@ -124,13 +124,24 @@ sub add_insert {
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
 	$t->$type and $by_index{$t->$type}->remove;
-	$t->set($type => $i->n); 
 	$::this_track = $old_this_track;
 }
 sub get_id {
+	# get Insert index for track
+	
+	# optionally specify whether we are looking for
+	# prefader or postfader insert
+	
+	# 
 	my ($track, $prepost) = @_;
-	my %id = (pre => $track->prefader_insert,
-			 post => $track->postfader_insert);
+	my @inserts = grep{ $track->name eq $_->track} values %by_index;
+	my ($prefader) = (map{$_->n} 
+					grep{$_->class =~ /pre/i} 
+					@inserts);
+	my ($postfader) = (map{$_->n} 
+					grep{$_->class =~ /post/i} 
+					@inserts);
+	my %id = ( pre => $prefader, post => $postfader);
 	#print "prepost: $prepost\n";
 	$prepost = $id{pre} ? 'pre' : 'post'
 		if (! $prepost and ! $id{pre} != ! $id{post} );
