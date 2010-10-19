@@ -137,8 +137,6 @@ sub get_id {
 					grep{$_->class =~ /post/i} 
 					@inserts);
 	my %id = ( pre => $prefader, post => $postfader);
-	say "inserts\n", ::yaml_out(\%id);
-	#print "prepost: $prepost\n";
 	$prepost = $id{pre} ? 'pre' : 'post'
 		if (! $prepost and ! $id{pre} != ! $id{post} );
 	$id{$prepost};;

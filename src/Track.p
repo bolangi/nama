@@ -762,8 +762,6 @@ use Modern::Perl; use Carp;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 
-sub inserts { croak "inserts called" }
-
 sub rec_status{
 
 #	$::debug2 and print "&rec_status (SimpleTrack)\n";
