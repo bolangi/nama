@@ -35,12 +35,6 @@ sub show_effects {
  
  	} @{ $this_track->ops };
 
-	my $i = $this_track->inserts;
-
-	# display if there is actually something there
-
-	if ($i->{insert_type}){ push @lines, yaml_out($i) }
-		
 	join "", @lines;
  	
 }

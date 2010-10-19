@@ -3415,10 +3415,12 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
-	if ( $saved_version <= 1.065){ 
+	if ( $saved_version <= 1.066){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
-		map{ delete $_->{inserts};
+		map{ 
+			delete $_->{active};
+			delete $_->{inserts};
 			 delete $_->{prefader_insert};
 			 delete $_->{postfader_insert};
  		} @tracks_data;
@@ -4155,7 +4157,6 @@ sub effect_code {
 		send_id
 		send_type
 		rec_defeat
-		inserts
 		rec_status
 		current_version
  );

@@ -88,7 +88,6 @@ sub new {
 		#			rw   	=> 'REC', # ::add_track() sets REC if necessary
 					n    	=> $n,
 					ops     => [],
-					active	=> undef,
 					width => 1,
 					vol  	=> undef,
 					pan 	=> undef,
@@ -379,13 +378,6 @@ sub remove_effect { # doesn't touch %cops or %copp data structures
 									! grep { $existing eq $_
 									} @ids }  
 							@{$track->ops} ]);
-}
-sub remove_insert { # XXX
-	my $track = shift;
-	return unless $track->has_insert;
-	my $i = $track->inserts;
-	map{ $::tn{$_}->remove } @{ $i->{tracks} };
-	$track->set(inserts => {});
 }
 sub has_insert  { $_[0]->prefader_insert or $_[0]->postfader_insert }
 
@@ -766,9 +758,11 @@ sub this_edit {
 # subclasses
 
 package ::SimpleTrack; # used for Master track
-use Modern::Perl;
+use Modern::Perl; use Carp;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
+
+sub inserts { croak "inserts called" }
 
 sub rec_status{
 
@@ -799,7 +793,6 @@ sub width { $::tn{$_[0]->target}->width }
 sub rec_status { $::tn{$_[0]->target}->rec_status }
 sub full_path { $::tn{$_[0]->target}->full_path} 
 sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
-#sub inserts { $::tn{$_[0]->target}->inserts} 
 sub source_type { $::tn{$_[0]->target}->source_type}
 sub source_id { $::tn{$_[0]->target}->source_id}
 sub source_status { $::tn{$_[0]->target}->source_status }

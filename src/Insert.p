@@ -86,13 +86,6 @@ sub remove {
 	my $self = shift;
 	$::tn{ $self->wet_name }->remove;
 	$::tn{ $self->dry_name }->remove;
-	my $type = $self->type;
-
-	# look for track that has my id and delete it
-	my ($track) = grep{$_->$type == $self->n} values %::Track::by_name;
-	$track->set(  $type => undef );
-
-	# delete my own index entry
 	delete $by_index{$self->n};
 }
 	
@@ -144,6 +137,7 @@ sub get_id {
 					grep{$_->class =~ /post/i} 
 					@inserts);
 	my %id = ( pre => $prefader, post => $postfader);
+	say "inserts\n", ::yaml_out(\%id);
 	#print "prepost: $prepost\n";
 	$prepost = $id{pre} ? 'pre' : 'post'
 		if (! $prepost and ! $id{pre} != ! $id{post} );
