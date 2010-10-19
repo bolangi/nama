@@ -111,6 +111,9 @@ sub add_insert {
 	
 	my $class =  $type =~ /pre/ ? '::PreFaderInsert' : '::PostFaderInsert';
 	
+	# remove an existing insert of specified type, if present
+	$t->$type and $by_index{$t->$type}->remove;
+
 	my $i = $class->new( 
 		track => $t->name,
 		send_type 	=> ::dest_type($send_id),
@@ -123,7 +126,6 @@ sub add_insert {
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
-	$t->$type and $by_index{$t->$type}->remove;
 	$::this_track = $old_this_track;
 }
 sub get_id {
