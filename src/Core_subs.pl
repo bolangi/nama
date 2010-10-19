@@ -4566,6 +4566,38 @@ sub complete_caching {
 
 	} else { say "track cache operation failed!"; }
 }
+sub merge_edits {
+	# abort with warning if inserts present
+	# push effect_chains (including vol/pan)
+	# cache
+	# restore effects_chain
+	# make sure version, rw settings correct
+	# possibly store comments
+	# warn user about editing if already a cached track
+}
+sub complete_merge_edits {
+	my $track = shift;
+	my $name = $track->name;
+	my @files = grep{/$name/} new_files_were_recorded();
+	if (@files ){ 
+
+		# special handling for sub-bus mix track
+		
+		if ($track->rec_status eq 'REC')
+		{ 
+			$track->set(rw => 'MON');
+			$ui->global_version_buttons(); # recreate
+			$ui->refresh();
+		} 
+
+		# usual post-record handling is the default
+
+		else { post_rec_configure() }
+
+		reconfigure_engine();
+
+	} else { say "No files recorded. Merge edits operation failed!"; }
+}
 }
 sub uncache_track { 
 	my $track = shift;
