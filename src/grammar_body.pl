@@ -709,7 +709,10 @@ remove_insert: _remove_insert prepost(?) end {
 	1;
 }
 
-cache_track: _cache_track end { ::cache_track($::this_track); 1 }
+cache_track: _cache_track additional_time(?) end {
+	::cache_track($::this_track, @$item{'additional_time(?)'}); 1 
+}
+additional_time: dd | float
 uncache_track: _uncache_track end { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain ident op_id(s?) end {
 	#print "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}}, $/;

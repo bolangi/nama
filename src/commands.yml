@@ -685,7 +685,7 @@ cache_track:
   type: track
   short: cache ct
   what: store an effects-processed track signal as a new version
-  parameters: none
+  parameters: [<f_additional_processing_time>]
 uncache_track:
   type: effect
   short: uncache unc

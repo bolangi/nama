@@ -1038,6 +1038,7 @@ sub initialize_chain_setup_vars {
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
 	reset_aux_chain_counter();
+	$length = 0;
 	{no autodie; unlink setup_file()}
 }
 sub add_paths_for_main_tracks {
@@ -4444,10 +4445,12 @@ sub cleanup_exit {
 	exit; 
 }
 
+# some common variables for cache_track and merge_track
+# related routines
 
-{ my ($orig_version, $cooked);
+{ my ($track, $additional_time, $orig_version, $cooked);
 sub cache_track { # launch subparts if conditions are met
-	my $track = shift;
+	($track, $additional_time) = @_;
 	say $track->name, ": preparing to cache.";
 	
 	# check conditions for sub-bus mix track
@@ -4465,13 +4468,12 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $::Bus::by_name{$track->name};
 
-	prepare_to_cache($track);
-	cache_engine_run($track);
-	complete_caching($track);
+	prepare_to_cache();
+	cache_engine_run();
+	complete_caching();
 }
 
 sub prepare_to_cache {
-	my $track = shift;
  	initialize_chain_setup_vars();
 	$orig_version = $track->monitor_version;
 	my $cooked_name = $track->name . '_cooked';
@@ -4509,24 +4511,27 @@ sub prepare_to_cache {
 	remove_temporary_tracks();
 }
 sub cache_engine_run {
-	my $track = shift;
 	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
 
+	my $length = $length + $additional_time;
+
 	# we try to set processing time this way
-	eval_iam("cs-set-length -1"); # to longest input object
+	eval_iam("cs-set-length $length"); 
 
 	eval_iam("start");
 
 	# but the engine won't stop if a live input is present,
 
-	limit_processing_time(); # default to setup length
+	limit_processing_time($length); # default to setup length
 
-	sleep 2; # time for transport to stabilize
-	while( eval_iam('engine-status') !~ /finished|stopped/ ){ 
-	print q(.); sleep 2; update_clock_display() } ; print " Done\n";
+	# block until processing finished
+
+	#sleep 2; # time for transport to stabilize
+	#while( eval_iam('engine-status') !~ /finished|stopped/ ){ 
+	#print q(.); sleep 2; update_clock_display() } ; print " Done\n";
 }
 sub complete_caching {
 	my $track = shift;
