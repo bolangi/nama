@@ -1640,7 +1640,7 @@ sub connect_jack_ports_list {
 	my $is_jack_plumbing = process_is_running('jack.plumbing');
 	my $fh;
 	if( $is_jack_plumbing){
-		open $fh, jack_plumbing_conf(), ">>";
+		open $fh, ">>", jack_plumbing_conf();
 	}
 	map{  
 		my $track = $_; 
@@ -1674,7 +1674,7 @@ sub connect_jack_ports_list {
 
 					my $ecasound_port = $dest .  $ecasound_port_number;
 					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
-					print $fh $config_line, "\n";
+					print $fh "($config_line)\n";
 
 				} else { # fall back to jack_connect
 				
@@ -1689,6 +1689,8 @@ sub connect_jack_ports_list {
 		}
  	 } grep{ $_->source_type eq 'jack_ports_list' 
 				and $_->rec_status eq 'REC' } ::Track::all();
+
+	 close $fh if $is_jack_plumbing;
 }
 
 sub quote { qq("$_[0]")}
