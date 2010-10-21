@@ -401,5 +401,4 @@ our (
 	$this_edit, 	# current edit
 	$edit_playback_end_margin, # play a little more after edit recording finishes
 	$edit_crossfade_time, 	#
-	
 );

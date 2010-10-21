@@ -673,6 +673,15 @@ sub jack_running {
 						and grep{ $pid == $_ } @pids 
 				} split "\n", qx(ps ax) ;
 }
+sub process_is_running {
+	my $name = shift;
+	my @pids = split " ", qx(pgrep $name);
+	my @ps_ax  = grep{   my $pid;
+						/$name/ and ! /defunct/
+						and ($pid) = /(\d+)/
+						and grep{ $pid == $_ } @pids 
+				} split "\n", qx(ps ax) ;
+}
 sub valid_engine_setup {
 	eval_iam("cs-selected") and eval_iam("cs-is-valid");
 }
@@ -964,6 +973,7 @@ sub generate_setup {
 	# save current track
 	$old_this_track = $this_track;
 	initialize_chain_setup_vars();
+	unlink_jack_plumbing_conf();
 	local $@; # don't propagate errors
 		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
@@ -1627,6 +1637,11 @@ sub connect_transport {
 sub connect_jack_ports_list {
 
 	my $dis = shift;
+	my $is_jack_plumbing = process_is_running('jack.plumbing');
+	my $fh;
+	if( $is_jack_plumbing){
+		open $fh, jack_plumbing_conf(), ">>";
+	}
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
@@ -1645,14 +1660,29 @@ sub connect_jack_ports_list {
 				# setup shell command
 				# quote port in case it contains spaces
 				my $p = $port =~ / / ? qq("$port") : $port	;
+
+				# command: jack_connect Horgand_1:1 ecasound:synth_in_
 				my $cmd = q(jack_).$dis.qq(connect $p $dest);
-				if( $track->width == 1){ $cmd .= "1" }
-				else{ $cmd .= ($line_number % $track->width + 1) }
+
+				my $ecasound_port_number = $track->width == 1
+					?  1 
+					: $line_number % $track->width + 1;
+				$cmd .= $ecasound_port_number;
 				$debug and say $cmd;
-				if($jack{$port}){
-					system $cmd;
-				} else {
-					say $track->name, qq(: port "$port" not found. Skipping.) 
+
+				if( $is_jack_plumbing ){
+
+					my $ecasound_port = $dest .  $ecasound_port_number;
+					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
+					print $fh $config_line, "\n";
+
+				} else { # fall back to jack_connect
+				
+					if($jack{$port}){
+						system $cmd;
+					} else {
+						say $track->name, qq(: port "$port" not found. Skipping.) 
+					}
 				}
 				$line_number++;
 			};
@@ -1661,7 +1691,11 @@ sub connect_jack_ports_list {
 				and $_->rec_status eq 'REC' } ::Track::all();
 }
 
-sub disconnect_jack_ports_list { connect_jack_ports_list('dis') }
+sub quote { qq("$_[0]")}
+
+sub disconnect_jack_ports_list { 
+	#connect_jack_ports_list('dis')  # probably we can go without this
+}
 
 sub transport_status {
 	
@@ -5283,6 +5317,13 @@ sub set_edit_vars {
 sub set_edit_vars_testing {
 	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
 }
+}
+
+sub unlink_jack_plumbing_conf {
+	unlink jack_plumbing_conf() if -e jack_plumbing_conf()
+}
+sub jack_plumbing_conf {
+	join_path( $ENV{HOME} , '.jack.plumbing' )
 }
 
 ### end
