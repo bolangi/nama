@@ -977,7 +977,9 @@ sub generate_setup {
 	local $@; # don't propagate errors
 		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
-	eval { &generate_setup_try }; # gets @_ passed to generate_setup()
+
+	# generate_setup_try() gets the @_ passed to generate_setup()
+	my $success = eval { &generate_setup_try }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;
@@ -986,7 +988,7 @@ sub generate_setup {
 		initialize_chain_setup_vars() unless $debug;
 		return
 	}
-	1;
+	$success
 }
 sub generate_setup_try {  # TODO: move operations below to buses
 	$debug2 and print "&generate_setup_try\n";
@@ -1034,9 +1036,13 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	# create IO lists %inputs and %outputs
 
-	process_routing_graph() or say("No tracks to record or play."),return;
-
-	write_chains(); 
+	if ( process_routing_graph() ){
+		write_chains(); 
+		1
+	} else { 
+		say("No tracks to record or play.");
+		0
+	}
 }
 sub remove_temporary_tracks {
 	$debug2 and say "&remove_temporary_tracks";
