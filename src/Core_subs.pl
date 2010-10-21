@@ -1762,11 +1762,11 @@ sub engine_status {
 sub current_position { colonize(int eval_iam("getpos")) }
 
 sub start_heartbeat {
- 	$event_id{heartbeat} = AE::timer(0, 1, \&::heartbeat);
+ 	$event_id{poll_engine} = AE::timer(0, 1, \&::heartbeat);
 }
 
 sub stop_heartbeat {
-	$event_id{heartbeat} = undef; 
+	$event_id{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() }
 
@@ -4448,7 +4448,7 @@ sub cleanup_exit {
 # some common variables for cache_track and merge_track
 # related routines
 
-{ my ($track, $additional_time, $orig_version, $cooked);
+{ my ($track, $additional_time, $processing_time, $orig_version, $cooked);
 sub cache_track { # launch subparts if conditions are met
 	($track, $additional_time) = @_;
 	say $track->name, ": preparing to cache.";
@@ -4470,7 +4470,7 @@ sub cache_track { # launch subparts if conditions are met
 
 	prepare_to_cache();
 	cache_engine_run();
-	complete_caching();
+
 }
 
 sub prepare_to_cache {
@@ -4513,28 +4513,24 @@ sub prepare_to_cache {
 sub cache_engine_run {
 	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
+	my $processing_time = $length + $additional_time;
+
 	say $/,$track->name,": length ". d2($length). " seconds";
 	say "Starting cache operation. Please wait.";
 
-	my $length = $length + $additional_time;
 
 	# we try to set processing time this way
-	eval_iam("cs-set-length $length"); 
+	eval_iam("cs-set-length $processing_time"); 
 
 	eval_iam("start");
 
-	# but the engine won't stop if a live input is present,
+	# ensure that engine stops at completion time
+ 	$event_id{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
 
-	limit_processing_time($length); # default to setup length
-
-	# block until processing finished
-
-	#sleep 2; # time for transport to stabilize
-	#while( eval_iam('engine-status') !~ /finished|stopped/ ){ 
-	#print q(.); sleep 2; update_clock_display() } ; print " Done\n";
+	# complete_caching() contains the remainder of the caching code.
+	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
-	my $track = shift;
 	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
@@ -4609,6 +4605,29 @@ sub complete_merge_edits {
 		reconfigure_engine();
 
 	} else { say "No files recorded. Merge edits operation failed!"; }
+}
+
+sub stop_polling_cache_progress {
+	$event_id{poll_engine} = undef; 
+	$ui->reset_engine_mode_color_display();
+	complete_caching();
+}
+
+sub poll_cache_progress {
+
+	print ".";
+	my $status = eval_iam('engine-status'); 
+	my $here   = eval_iam("getpos");
+	update_clock_display();
+
+	return unless 
+		   $status =~ /finished|error|stopped/ 
+		or $here > $processing_time;
+
+	say "Done.";
+	engine_status(current_position(),2,1);
+	revise_prompt();
+	stop_polling_cache_progress();
 }
 }
 sub uncache_track { 
