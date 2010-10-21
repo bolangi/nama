@@ -137,8 +137,11 @@ sub initialize_terminal {
 	#$event_id{sigint} = AE::signal('INT', \&cleanup_exit);
 
 }
+{my $override;
 sub revise_prompt {
-    $term->callback_handler_install($_[0]//prompt(), \&process_line);
+	$override = $_[0] eq "default" ? undef : $_[0] if defined $_[0];
+    $term->callback_handler_install($override//prompt(), \&process_line);
+}
 }
 sub prompt {
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
@@ -4513,11 +4516,11 @@ sub prepare_to_cache {
 sub cache_engine_run {
 	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
-	my $processing_time = $length + $additional_time;
+	$processing_time = $length + $additional_time;
 
-	say $/,$track->name,": length ". d2($length). " seconds";
-	say "Starting cache operation. Please wait.";
-
+	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
+	print "Starting cache operation. Please wait.";
+	revise_prompt(" "); 
 
 	# we try to set processing time this way
 	eval_iam("cs-set-length $processing_time"); 
@@ -4550,7 +4553,7 @@ sub complete_caching {
 			say "if you want it again you will need to replace it yourself";
 			say "this is what it was";
 			map{ say $_->dump; $_->remove } 
-				map{ ::Insert::by_index{$_} } 
+				map{ $::Insert::by_index{$_} } 
 				@inserts;
 		}
 		#say "cache map",yaml_out($track->cache_map);
@@ -4571,6 +4574,7 @@ sub complete_caching {
 		else { post_rec_configure() }
 
 		reconfigure_engine();
+		revise_prompt("default"); 
 
 	} else { say "track cache operation failed!"; }
 }
@@ -4607,28 +4611,30 @@ sub complete_merge_edits {
 	} else { say "No files recorded. Merge edits operation failed!"; }
 }
 
-sub stop_polling_cache_progress {
-	$event_id{poll_engine} = undef; 
-	$ui->reset_engine_mode_color_display();
-	complete_caching();
-}
-
 sub poll_cache_progress {
 
 	print ".";
 	my $status = eval_iam('engine-status'); 
 	my $here   = eval_iam("getpos");
 	update_clock_display();
+	#say "engine time:   ", d2($here);
+	#say "engine status: ", $status;
 
 	return unless 
 		   $status =~ /finished|error|stopped/ 
 		or $here > $processing_time;
 
 	say "Done.";
-	engine_status(current_position(),2,1);
-	revise_prompt();
+	#engine_status(current_position(),2,1);
+	#revise_prompt();
 	stop_polling_cache_progress();
 }
+sub stop_polling_cache_progress {
+	$event_id{poll_engine} = undef; 
+	$ui->reset_engine_mode_color_display();
+	complete_caching();
+}
+
 }
 sub uncache_track { 
 	my $track = shift;
