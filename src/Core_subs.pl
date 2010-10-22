@@ -4485,7 +4485,7 @@ sub list_effect_chains {
 sub cleanup_exit {
  	remove_riff_header_stubs();
  	kill 15, ecasound_pid() if $sock;  	
-	close_midish();
+	close_midish() if $midish_enable;
 	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 
 }
@@ -5082,7 +5082,6 @@ sub transfer_edit_points {
 	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
 	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
 	@edit_points = ();
-	setup_edit_fades();
 }
 
 sub generate_edit_record_setup { # for current edit
