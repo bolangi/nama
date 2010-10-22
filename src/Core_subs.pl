@@ -751,6 +751,9 @@ sub initialize_project_data {
 	%inputs = %outputs = ();
 	
 	%wav_info = ();
+	
+	$edit_mode = 0;
+	$this_edit = undef;
 
 }
 sub create_system_buses {
@@ -3173,7 +3176,7 @@ sub save_system_state {
 
 	@edit_data = ();
 	while (my $k = each %::Edit::by_name ){
-		push @fade_data, $::Fade::by_name{$k}->hashref;
+		push @edit_data, $::Edit::by_name{$k}->hashref;
 	}
 
 	# save history -- 50 entries, maximum

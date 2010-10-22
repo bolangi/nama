@@ -236,7 +236,7 @@ sub serialize {
 	if ( $h{file} ) {
 
 		if ($h{format} eq 'storable') {
-			my $result1 = store \%state, $file; # old method
+			my $result1 = nstore \%state, $file; # old method
 		} elsif ($h{format} eq 'perl'){
 			$file .= '.pl' unless $file =~ /\.pl$/;
 			#my $pl = dump \%state;

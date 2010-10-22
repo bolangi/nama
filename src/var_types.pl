@@ -51,6 +51,7 @@
 						@groups_data
 						@marks_data
 						@fade_data
+						@edit_data
 						@inserts_data
 						$loop_enable
 						@loop_endpoints

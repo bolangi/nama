@@ -2,7 +2,7 @@
 
 project_root: ~/nama
 
-autosave_interval: 5
+autosave_interval: 0
 
 midish_enable: 0
 
