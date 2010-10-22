@@ -3170,7 +3170,11 @@ sub save_system_state {
 	while (my $k = each %::Fade::by_index ){ 
 		push @fade_data, $::Fade::by_index{$k}->hashref;
 	}
-	
+
+	@edit_data = ();
+	while (my $k = each %::Edit::by_name ){
+		push @fade_data, $::Fade::by_name{$k}->hashref;
+	}
 
 	# save history -- 50 entries, maximum
 
@@ -3571,6 +3575,12 @@ sub restore_state {
 		my $fade = ::Fade->new( %h ) ;
 	} @fade_data;
 
+	# edits 
+	
+	map{ 
+		my %h = %$_; 
+		my $edit = ::Edit->new( %h ) ;
+	} @edit_data;
 
 	# restore command history
 	
