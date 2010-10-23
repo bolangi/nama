@@ -8,7 +8,7 @@ use Carp;
 use YAML::Tiny;
 use IO::All;
 use File::HomeDir;
-use Storable;
+use Storable qw(nstore retrieve);
 #use Devel::Cycle;
 
 require Exporter;
