@@ -310,22 +310,6 @@ sub t_create_project {
 	print "created project: $project_name\n";
 
 }
-sub t_add_ctrl {
-	package ::;
-	my ($parent, $code, $values) = @_;
-	if ( $effect_i{$code} ) {} # do nothing
-	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
-	else { warn "effect code not found: $code\n"; return }
-	$debug and print "code: ", $code, $/;
-		my %p = (
-				chain => $cops{$parent}->{chain},
-				parent_id => $parent,
-				values => $values,
-				type => $code,
-			);
-		add_effect( \%p );
-}
-
 sub t_insert_effect {
 	package ::;
 	my ($before, $code, $values) = @_;
@@ -401,6 +385,7 @@ sub t_insert_effect {
 sub t_add_effect {
 	package ::;
 	my ($track, $code, $values)  = @_;
+	say ("$code: unknown effect. Skipping.\n"), return if ! $effect_j{$code};
 	$code = effect_code( $code );	
 	$debug and print "code: ", $code, $/;
 		my %p = (
@@ -412,6 +397,23 @@ sub t_add_effect {
 			$debug and print (yaml_out(\%p));
 		add_effect( \%p );
 }
+sub t_add_ctrl {
+	package ::;
+	my ($parent, $code, $values, $id) = @_;
+	if ( $effect_i{$code} ) {} # do nothing
+	elsif ( $effect_j{$code} ) { $code = $effect_j{$code} }
+	else { warn "effect code not found: $code\n"; return }
+	$debug and print "code: ", $code, $/;
+		my %p = (
+				chain 		=> $cops{$parent}->{chain},
+				cop_id 		=> $id,
+				parent_id 	=> $parent,
+				values 		=> $values,
+				type 		=> $code,
+			);
+		add_effect( \%p );
+}
+
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 

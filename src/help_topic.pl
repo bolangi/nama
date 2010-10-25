@@ -67,7 +67,7 @@ track => <<TRACK,
 
    import_audio, import      - import a WAV file, resampling if necessary
 
-   remove_track, rmt         - remove effects, parameters and GUI for current
+   remove_track              - remove effects, parameters and GUI for current
                                track
 
    show_tracks, show, tracks -  show status of all tracks
