@@ -2081,7 +2081,7 @@ sub modify_effect {
 		or print("$op_id: non-existing effect id. Skipping\n"), return; 
 	my $code = $cop->{type};
 	my $i = $effect_i{$code};
-	defined $i or croak "undefined effect code for $op_id: ".$cops{$op_id}->code;
+	defined $i or croak "undefined effect code for $op_id: ".$cops{$op_id}->{code};
 	my $parameter_count = scalar @{ $effects[$i]->{params} };
 	#print "op_id: $op_id, code: ",$cops{$op_id}->{type}," parameter count: $parameter_count\n";
 
