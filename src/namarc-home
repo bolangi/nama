@@ -60,7 +60,7 @@ execute_on_project_load: ~
 
 # volume controls use this effect (must be 'ea' or 'eadb')
 
-volume_control_operator: ea
+volume_control_operator: eadb
 
 eq: Parametric1 1 0 0 40 0.125 0 0 200 0.125 0 0 600 0.125 0 0 3300 0.125 0
 

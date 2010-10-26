@@ -803,7 +803,7 @@ remove_fade: _remove_fade fade_index  {
        return unless $item{fade_index};
        print "removing fade $item{fade_index} from track "
                .$::Fade::by_index{$item{fade_index}}->track ."\n"; 
-       ::Fade::remove($item{fade_index}) ;
+       ::Fade::remove_by_index($item{fade_index}) ;
 	   ++$::regenerate_setup;
 }
 # remove_fade: _remove_fade fade_index(s)  { 

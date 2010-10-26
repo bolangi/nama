@@ -2080,8 +2080,8 @@ sub modify_effect {
 	my $cop = $cops{$op_id} 
 		or print("$op_id: non-existing effect id. Skipping\n"), return; 
 	my $code = $cop->{type};
-	my $i = $effect_i{$code};
-	defined $i or croak "undefined effect code for $op_id: ".$cops{$op_id}->{code};
+	my $i = effect_index($code);
+	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
 	my $parameter_count = scalar @{ $effects[$i]->{params} };
 	#print "op_id: $op_id, code: ",$cops{$op_id}->{type}," parameter count: $parameter_count\n";
 
@@ -4194,9 +4194,19 @@ sub effect_code {
 	}
 	elsif ( $effect_i{$input} ) { $code = $input } 
 	elsif ( $effect_j{$input} ) { $code = $effect_j{$input} }
-	else { warn "effect code not found: $input\n";}
+	else { warn "$input: effect code not found\n";}
 	$code;
 }
+
+sub effect_index {
+	my $code = shift;
+	my $i = $effect_i{effect_code($code)};
+	defined $i or warn "$code: effect index not found\n";
+	$i
+}
+
+
+
 	# status_snapshot() 
 	#
 	# hashref output for detecting if we need to reconfigure engine
