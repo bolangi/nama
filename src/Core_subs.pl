@@ -4374,12 +4374,32 @@ sub profile_effect_chain_name {
 sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
 	my ($track, %vals) = @_; 
-	say("no effects to store"), return unless $track->fancy_ops;
+
+	# use supplied ops list, or default to user-applied (fancy) ops
+	
+	my @ops = $vals{ops} ? @{$vals{ops}} : $track->fancy_ops;
+	say("no effects to store"), return unless @ops;
+
+	# use supplied name, or default to private name that will now show 
+	# in listing
+	
 	my $save_name   = $vals{save} || private_effect_chain_name();
 	$debug and say "save name: $save_name"; 
-	new_effect_chain( $track, $save_name ); # current track effects
+
+	# create a new effect-chain definition
+	
+	new_effect_chain( $track, $save_name, @ops ); # current track effects
+
+	# store effect-chain name on track effect-chain stack
+	
 	push @{ $track->effect_chain_stack }, $save_name;
-	map{ remove_effect($_)} $track->fancy_ops;
+
+	# remove stored effects
+	
+	map{ remove_effect($_)} @ops;
+
+	# return name
+
 	$save_name;
 }
 
