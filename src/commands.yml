@@ -270,7 +270,11 @@ pan_back:
 show_tracks:
   type: track 
   short: show tracks list_tracks lt
-  what: show status of all tracks
+  what: show status of all visible tracks
+show_tracks_all:
+  type: track
+  short: showa
+  what: show status of all tracks, visible and hidden
 show_bus_tracks:
   type: track 
   short: shb
