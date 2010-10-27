@@ -3769,6 +3769,7 @@ sub leading_track_spec {
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
 		$debug and print "Selecting track ",$track->name,"\n";
 		$this_track = $track;
+		set_current_bus();
 		ecasound_select_chain( $this_track->n );
 		1;
 	}
