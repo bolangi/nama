@@ -297,7 +297,8 @@ stop: _stop end { ::stop_transport(); 1}
 ecasound_start: _ecasound_start end { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  end { ::eval_iam("start"); 1}
 show_tracks: _show_tracks end { 	
-	::pager( ::Text::show_tracks ( ::Track::all() ) );
+	my @tracks = grep{ ! $_->hide } ::Track::all(); 
+	::pager( ::Text::show_tracks(@tracks));
 	1;
 }
 show_bus_tracks: _show_bus_tracks end { 	

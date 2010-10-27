@@ -124,7 +124,7 @@ sub show_tracks {
 			placeholder($_->group),
 			placeholder($copp{$_->vol}->[0]),
 			placeholder($copp{$_->pan}->[0]),
-        } grep{ ! $_-> hide} @tracks;
+        } @tracks;
         
 	my $output = $^A;
 	$^A = "";
