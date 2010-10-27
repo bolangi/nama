@@ -1551,6 +1551,15 @@ sub reconfigure_engine {
 }
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
+sub show_tracks_limited {
+
+	# Master
+	# Mixdown
+	# Main bus
+	# Current bus
+
+}
+
 		
 sub exit_preview_mode { # exit preview and doodle modes
 
