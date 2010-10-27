@@ -559,16 +559,32 @@ add_controller: _add_controller parent effect value(s?) end {
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::Text::t_add_ctrl($parent, $code, $values);
-	my $i = ::effect_index($code);
- 	print "\nAdded controller $id: $::effects[$i]->{name}\n\n";
-	1;}
+	if($id)
+	{
+		my $i = 	::effect_index($code);
+		my $iname = $::effects[$i]->{name};
+
+		my $pi = 	::effect_index($::cops{$parent}->{type});
+		my $pname = $::effects[$pi]->{name};
+
+		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
+
+	}
+	1;
+}
 add_effect: _add_effect effect value(s?) end {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
  	my $id = ::Text::t_add_effect($::this_track, $code, $values);
-	my $i = ::effect_index($code);
- 	print "\nAdded effect $id: $::effects[$i]->{name}\n\n";
- 	1;}
+	if ($id)
+	{
+		my $i = ::effect_index($code);
+		my $iname = $::effects[$i]->{name};
+
+		print "\nAdded $id ($iname)\n\n";
+	}
+ 	1;
+}
 
 insert_effect: _insert_effect before effect value(s?) end {
 	my $before = $item{before};
@@ -577,8 +593,16 @@ insert_effect: _insert_effect before effect value(s?) end {
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
 	my $id = ::Text::t_insert_effect($before, $code, $values);
-	my $i = ::effect_index($code);
- 	print "\nInserted (before $before) effect $id: $::effects[$i]->{name}\n\n";
+	if($id)
+	{
+		my $i = ::effect_index($code);
+		my $iname = $::effects[$i]->{name};
+
+		my $bi = 	::effect_index($::cops{$before}->{type});
+		my $bname = $::effects[$bi]->{name};
+
+ 		print "\nInserted $id ($iname) before $before ($bname)\n\n";
+	}
 	1;}
 
 before: op_id
