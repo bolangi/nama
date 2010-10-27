@@ -137,4 +137,4 @@ limiter: tap_limiter 0 0
 # 
 # midi_output_dev:
 
-
+# quietly_remove_tracks: 0 # generally ask user to confirm

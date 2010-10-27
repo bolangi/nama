@@ -29,7 +29,7 @@
 						$limiter
 						$autosave_interval
 						$midish_enable
-
+						$quietly_remove_tracks
 						);
 
 						

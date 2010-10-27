@@ -223,10 +223,20 @@ set_track: _set_track key someval end {
 dump_track: _dump_track end { ::pager($::this_track->dump); 1}
 dump_group: _dump_group end { ::pager($::main->dump); 1}
 dump_all: _dump_all end { ::dump_all(); 1}
-remove_track: _remove_track end { 
-	$::this_track->remove; 
-	1;
+remove_track: _remove_track quiet(?) end { 
+ 	my $quiet = scalar @{$item{'quiet(?)'}};
+ 	# remove track quietly if requested
+ 	$::this_track->remove, return 1 if $quiet or $::quietly_remove_tracks;
+ 
+ 	my $name = $::this_track->name; 
+ 	my $reply = $::term->readline("remove track $name? [n] ");
+ 	if ( $reply =~ /y/i ){
+ 		print "Removing track. All WAV files will be kept.\n";
+ 		$::this_track->remove; 
+ 	}
+ 	1;
 }
+quiet: 'quiet'
 link_track: _link_track track_name target project end {
 	::add_track_alias_project($item{track_name}, $item{target}, $item{project}); 1
 }

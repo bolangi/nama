@@ -386,7 +386,9 @@ our (
 	%is_ecasound_chain,   # suitable for c-select
 	
 	%wav_info,			# caches path/length/format/modify-time
+	
 	$autosave_interval, # how frequently to save
+	$quietly_remove_tracks, 
 
 	# MIDI
 	
@@ -402,4 +404,5 @@ our (
 	$this_edit, 	# current edit
 	$edit_playback_end_margin, # play a little more after edit recording finishes
 	$edit_crossfade_time, 	#
+
 );
