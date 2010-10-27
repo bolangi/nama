@@ -621,19 +621,11 @@ unmemoize: _unmemoize {
 	unmemoize('candidates'); 1
 }
 import_audio: _import_audio path frequency end {
-	$::this_track->import_audio( $item{path}, $item{frequency}); 
 
-	# check that track is audible
-	
-	my $bus = $::Bus::by_name{$::this_track->group};
-	$::this_track->set(rw => 'MON') 
-		unless $bus->rw eq 'MON' and $::this_track->rw eq 'REC';
-	print("You must set bus to MON (i.e. \"bus_mon\") to hear this track.\n") 
-		if $bus->rw eq 'OFF';
-	1;
+	::import_audio($::this_track, $item{path}, $item{frequency}); 1;
 }
 import_audio: _import_audio path end {
-	$::this_track->import_audio( $item{path}); 1;
+	::import_audio($::this_track, $item{path}); 1;
 }
 frequency: value
 list_history: _list_history end {

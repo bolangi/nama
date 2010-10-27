@@ -5385,5 +5385,25 @@ sub unlink_jack_plumbing_conf {
 sub jack_plumbing_conf {
 	join_path( $ENV{HOME} , '.jack.plumbing' )
 }
+sub import_audio {
+
+	my ($track, $path, $frequency) = @_;
+	
+	$this_track->import_audio($path, $frequency);
+
+	# check that track is audible
+	
+	my $bus = $::Bus::by_name{$this_track->group};
+
+	# set MON status unless track _is_ audible
+	
+	$this_track->set(rw => 'MON') 
+		unless $bus->rw eq 'MON' and $this_track->rw eq 'REC';
+
+	# warn if bus is OFF
+	
+	print("You must set bus to MON (i.e. \"bus_mon\") to hear this track.\n") 
+		if $bus->rw eq 'OFF';
+}
 
 ### end
