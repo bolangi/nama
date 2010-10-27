@@ -51,8 +51,10 @@ sub prepare {
 	
 	# fake JACK for testing environment
 
-	%jack = %{ jack_ports($fake_jack_lsp) } ;
-	$jack_running = 1 if $opts{J};
+	if( $opts{J}){
+		%jack = %{ jack_ports($fake_jack_lsp) };
+		$jack_running = 1;
+	}
 
 	# periodically check if JACK is running, and get client/port list
 

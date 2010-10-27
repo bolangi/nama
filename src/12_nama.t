@@ -40,6 +40,10 @@ push @ARGV, qw(-d .);
 
 push @ARGV, q(-E);
 
+# fake jack client data
+
+push @ARGV, q(-J);
+
 # don't initialize terminal
 
 push @ARGV, q(-T);
@@ -517,7 +521,7 @@ gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
 
 command_process('mixoff; master_off');
-command_process('for 4 5 6 7 8; remove_track');
+command_process('for 4 5 6 7 8; remove_track quiet');
 command_process('Master; send 1');
 command_process('asub Horns; sax set bus Horns; sax stereo');
 
