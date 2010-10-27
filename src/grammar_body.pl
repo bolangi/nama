@@ -558,13 +558,16 @@ add_controller: _add_controller parent effect value(s?) end {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	::Text::t_add_ctrl($parent, $code, $values);
+	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	my $i = ::effect_index($code);
+ 	print "\nAdded controller $id: $::effects[$i]->{name}\n\n";
 	1;}
-parent: op_id
 add_effect: _add_effect effect value(s?) end {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
- 	::Text::t_add_effect($::this_track, $code, $values);
+ 	my $id = ::Text::t_add_effect($::this_track, $code, $values);
+	my $i = ::effect_index($code);
+ 	print "\nAdded effect $id: $::effects[$i]->{name}\n\n";
  	1;}
 
 insert_effect: _insert_effect before effect value(s?) end {
@@ -573,10 +576,13 @@ insert_effect: _insert_effect before effect value(s?) end {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
-	::Text::t_insert_effect($before, $code, $values);
+	my $id = ::Text::t_insert_effect($before, $code, $values);
+	my $i = ::effect_index($code);
+ 	print "\nInserted (before $before) effect $id: $::effects[$i]->{name}\n\n";
 	1;}
 
 before: op_id
+parent: op_id
 
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign(?) value end {
 	map{ my $op_id = $_;
