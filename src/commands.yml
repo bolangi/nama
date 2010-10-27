@@ -271,6 +271,10 @@ show_tracks:
   type: track 
   short: show tracks list_tracks lt
   what: show status of all tracks
+show_bus_tracks:
+  type: track 
+  short: shb
+  what: show tracks in current bus
 show_track:
   type: track
   short: sh
