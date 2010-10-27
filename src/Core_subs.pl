@@ -975,6 +975,12 @@ sub generate_setup {
 	$debug2 and print "&generate_setup\n";
 	# save current track
 	$old_this_track = $this_track;
+
+	# prevent engine from starting an old setup
+	
+	eval_iam('cs-disconnect') if eval_iam('cs-connected');
+
+
 	initialize_chain_setup_vars();
 	unlink_jack_plumbing_conf();
 	local $@; # don't propagate errors
@@ -1764,7 +1770,8 @@ sub start_transport {
 	# sleep 1s
 
 	$debug2 and print "&start_transport\n";
-	carp("Invalid chain setup, aborting start.\n"),return unless eval_iam("cs-is-valid");
+	say("\nCannot start. Engine is not configured.\n"),return 
+		unless eval_iam("cs-connected");
 
 	say "\n\nStarting at ", current_position() unless $quiet;
 	schedule_wraparound();
@@ -1778,13 +1785,6 @@ sub start_transport {
 	$ui->set_engine_mode_color_display();
 	start_heartbeat();
 	engine_status() unless $quiet;
-#  	$event_id{start_heartbeat}   = AE::timer(1, 0, 
-# 		sub{ 
-# 			$ui->set_engine_mode_color_display();
-# 			start_heartbeat();
-# 			engine_status();
-# 			print prompt();
-# 		});
 }
 sub stop_transport { 
 
