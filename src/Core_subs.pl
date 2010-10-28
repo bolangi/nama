@@ -1666,8 +1666,8 @@ sub connect_transport {
 }
 
 { 
-  my $plumbing_tag = q(;### BEGIN NAMA CONNECTIONS LIST);
-  my $plumbing_header = qq($plumbing_tag
+  my $plumbing_tag = q(BEGIN NAMA CONNECTIONS LIST);
+  my $plumbing_header = qq(;### $plumbing_tag
 ;## The following lines are automatically generated.
 ;## DO NOT place any connection data below this line!!
 ;
@@ -1687,7 +1687,11 @@ sub connect_jack_ports_list {
 	#my $dis = shift;
 	my $dis;
 	my $fh;
+
+	# read user data from ~/.jack.plumbing if we need it
+	
 	if( $is_jack_plumbing){
+
 
 		$debug and say "jack plumbing is running: we will configure";
 		
@@ -1697,7 +1701,7 @@ sub connect_jack_ports_list {
 
 		# keep user data, deleting below tag
 
-		$user_plumbing =~ s/$plumbing_tag.*//gs;
+		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
 	
 		print "user plumbing2  $user_plumbing";
 		open $fh, ">", jack_plumbing_conf();
