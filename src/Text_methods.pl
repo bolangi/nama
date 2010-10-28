@@ -145,11 +145,13 @@ sub show_tracks {
 }
 sub showlist {
 	package ::;
-	my @list = grep{ ! $_->hide } ::Track::all(); 
+
+	my @list = grep{ ! $_->hide } ::Track::all();
+	my $section = [undef,undef,@list];
 	
 	my ($screen_lines, $columns) = $term->get_screen_size();
 
-	return \@list if scalar @list <= $screen_lines - 5;
+	return $section if scalar @list <= $screen_lines - 5;
 
 	my @sections;
 

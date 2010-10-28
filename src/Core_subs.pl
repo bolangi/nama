@@ -1539,7 +1539,6 @@ sub reconfigure_engine {
 
 	$old_snapshot = status_snapshot();
 
-#	print STDOUT ::Text::show_tracks(grep{! $_->hide} ::Track::all()) ;
 	print STDOUT ::Text::show_tracks(grep{! $_->hide} ::Track::all()) ;
 
 	stop_transport('quiet') if $was_running;
