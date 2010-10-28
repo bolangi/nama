@@ -131,6 +131,7 @@ init_memoize() if $memoize;
 
 # aliases for concise access
 
+*bn = \%::Bus::by_name;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
 # $ti{3}->rw

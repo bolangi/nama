@@ -304,8 +304,9 @@ our (
 	$null_bus,
     $null, # null group
 
-	%ti, # track by index (alias %::Track::by_index)
-	%tn, # track by name  (alias %::Track::by_name)
+	%ti, # track by index (alias to %::Track::by_index)
+	%tn, # track by name  (alias to %::Track::by_name)
+	%bn, # bus   by name  (alias to %::Bus::by_name)
 
 	@tracks_data, # staging for saving
 	@groups_data, # obsolete

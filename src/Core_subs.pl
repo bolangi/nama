@@ -5408,4 +5408,9 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 
+sub tracks_to_show {
+	my @list = qw(Master Mixdown);
+	push @list, $bn{Main}->tracks;
+}
+
 ### end
