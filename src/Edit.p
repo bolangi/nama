@@ -71,28 +71,16 @@ sub new {
 	#print "self class: $class, self type: ", ref $self, $/;
 	
 	my $name = $self->host_track;
+	my $host = $::tn{$name};
+
+	# create bus and convert host track to mix track
+	
+	$host->busify;
 
 	# get the current version of host_track
 
 	# host track will become mix track of a sub-bus
 	
-	# create the bus
-	
-	::SubBus->new( 
-		name => $name, 
-		send_type => 'bus',
-		send_id	 => $name,
-	);
-
-	# convert host track to mix track
-	
-	my @vals = (is_mix_track => 1,
-				rec_defeat 	=> 1,
-				rw => 'REC',
-				);
-
-	$::tn{$name}->set( @vals );
-
 	# create host track alias if necessary
 
 	# To ensure that users don't get into trouble, we would like to 

@@ -5415,6 +5415,14 @@ sub explode_track {
 	say($track->name,": I am already a mix track. I cannot explode!"),return
 		if $track->source_type eq 'bus' or $bn{$track->name};
 
+	my @versions = @{ $track->versions };
+
+	# quit if I have only one version
+
+	say($track->name,": Only one version. Skipping."), return
+		if scalar @versions == 1;
+
+	
 }	
 
 
