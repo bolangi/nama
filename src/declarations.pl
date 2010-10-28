@@ -406,4 +406,6 @@ our (
 	$edit_playback_end_margin, # play a little more after edit recording finishes
 	$edit_crossfade_time, 	#
 
+	$format_top,    # show_tracks listing
+	$format_divider,
 );

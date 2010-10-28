@@ -1539,6 +1539,7 @@ sub reconfigure_engine {
 
 	$old_snapshot = status_snapshot();
 
+#	print STDOUT ::Text::show_tracks(grep{! $_->hide} ::Track::all()) ;
 	print STDOUT ::Text::show_tracks(grep{! $_->hide} ::Track::all()) ;
 
 	stop_transport('quiet') if $was_running;
@@ -3684,7 +3685,6 @@ sub all {
 sub pager {
 	$debug2 and print "&pager\n";
 	my @output = @_;
-#	my ($screen_lines, $columns) = split " ", qx(stty size);
 	my ($screen_lines, $columns) = $term->get_screen_size();
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
@@ -5408,9 +5408,5 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 
-sub tracks_to_show {
-	my @list = qw(Master Mixdown);
-	push @list, $bn{Main}->tracks;
-}
 
 ### end

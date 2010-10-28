@@ -50,6 +50,13 @@ sub remove { say $_[0]->name, " is system bus. No can remove." }
 { my %allows = (REC => 'REC/MON', MON => 'MON', OFF => 'OFF');
 sub allows { $allows{ $_[0]->rw } }
 }
+{ my %forces = (
+		REC => 'REC (allows REC/MON)', 
+		MON => 'MON (forces REC to MON)', 
+		OFF => 'OFF (enforces OFF)'
+ );
+sub forces { $forces{ $_[0]->rw } }
+}
 	
 ## class methods
 
@@ -60,6 +67,40 @@ sub overall_last {
 	my $max = 0;
 	map{ my $last = $_->last; $max = $last if $last > $max  } all();
 	$max;
+}
+sub settings_line {
+	
+	my ($mix,$bus) = @_;
+	
+	my $nothing = '-' x 77 . "\n";
+	#return if $maybe_mix->name eq 'Master' or $maybe_mix->group eq 'Mastering';
+	return unless defined $mix;
+
+	# get the correct bus and mix track
+	# this should be coded somewhere else!
+# 	
+# 	my ($mix, $bus);
+# 	
+# 	if( $::bn{$maybe_mix->name}){
+# 		$mix = $maybe_mix;
+# 		$bus = $::bn{$mix->name};
+# 	}
+# 	else { # if not a mix track
+# 		$mix = $::tn{Master};
+# 		$bus = $::main;
+# 	}
+# 
+	#return "no bus settings found!" unless $bus;
+	
+	my ($bustype) = $bus->class =~ /(\w+)$/;
+	my $line = join " ", $bustype ,$bus->name,"is",$bus->forces;
+	$line   .= " Version setting".$bus->version if $bus->version;
+	#$line   .= "feeds", 
+	$line .= " Mix track is ". $mix->rw;
+	$line = "------[$line]";
+	$line .= '-' x (77 - length $line);
+	$line .= "\n";
+	$line
 }
 	
 

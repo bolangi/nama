@@ -746,6 +746,7 @@ sub version_has_edits {
 	$::tn{$edit_trackname}
 }	
 
+
 =comment
 sub this_edit {
 	my $track = shift;

@@ -100,19 +100,20 @@ sub show_inserts {
 	"Inserts:\n".join( "\n",map{" "x4 . $_ } split("\n",$output))."\n" if $output;
 }
 
-{
-my $format_top = <<TOP;
+$format_top = <<TOP;
 Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
 =============================================================================
 TOP
+
+$format_divider = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
 @>>   @<<<<<<<<< @>    @<<    @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
 PICTURE
 
-sub show_tracks {
+sub show_tracks_section {
     no warnings;
-	$^A = $format_top;
+	#$^A = $format_top;
     my @tracks = @_;
     map {   formline $format_picture, 
             $_->n,
@@ -131,7 +132,40 @@ sub show_tracks {
 	#$output .= show_tracks_extra_info();
 	$output;
 }
+sub show_tracks {
+	my @array_refs = @_;
+	my @list = $format_top;
+	for( @array_refs ){
+		my ($mix,$bus) = splice @$_, 0, 2;
+		push @list, 
+			::Bus::settings_line($mix, $bus),
+			show_tracks_section(@$_), 
+	}
+	@list
+}
+sub showlist {
+	package ::;
+	my @list = grep{ ! $_->hide } ::Track::all(); 
+	
+	my ($screen_lines, $columns) = $term->get_screen_size();
 
+	return \@list if scalar @list <= $screen_lines - 5;
+
+	my @sections;
+
+		push @sections, [undef,undef, map $tn{$_},qw(Master Mixdown)];
+		push @sections, [$tn{Master},$bn{Main},map $tn{$_},$bn{Main}->tracks ];
+
+	if( $mastering_mode ){
+
+		push @sections, [undef,undef, map $tn{$_},$bn{Mastering}->tracks]
+
+	} elsif($this_bus ne 'Main'){
+
+		push @sections, [$tn{$this_bus},$bn{$this_bus},
+					map $tn{$_}, $this_bus, $bn{$this_bus}->tracks]
+	}
+	@sections
 }
 
 
