@@ -301,20 +301,15 @@ show_tracks: _show_tracks end {
 	1;
 }
 show_tracks_all: _show_tracks_all end { 	
-	my @tracks = ::Track::all(); 
-	::pager( ::Text::show_tracks(@tracks));
+	my $list = [undef, undef, sort{$a->n <=> $b->n} ::Track::all()];
+	::pager(::Text::show_tracks($list));
 	1;
 }
 show_bus_tracks: _show_bus_tracks end { 	
 
 	my $bus = $::bn{$::this_bus};
-	my $mix = $::tn{$bus->send_id};
-	my @list = ($mix,$bus);
-	push @list, map{$::tn{$_}}
-				grep{$_ ne 'Main'}
-				($mix->name, $bus->tracks);
-
-	::pager(::Text::show_tracks(\@list));
+	my $list = $bus->trackslist;
+	::pager(::Text::show_tracks($list));
 	1;
 }
 modifiers: _modifiers modifier(s) end {

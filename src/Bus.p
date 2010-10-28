@@ -103,6 +103,13 @@ sub settings_line {
 	$line
 }
 	
+sub trackslist {
+	my $bus = shift;
+	my $mix = $::tn{$bus->send_id};
+	my @list = ($mix,$bus);
+	push @list, map{$::tn{$_}} ($mix->name, $bus->tracks);
+	\@list;
+}
 
 ### subclasses
 
