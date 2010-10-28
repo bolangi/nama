@@ -1539,7 +1539,7 @@ sub reconfigure_engine {
 
 	$old_snapshot = status_snapshot();
 
-	print STDOUT ::Text::show_tracks(grep{! $_->hide} ::Track::all()) ;
+	print STDOUT ::Text::show_tracks(::Text::showlist());
 
 	stop_transport('quiet') if $was_running;
 
@@ -5407,5 +5407,18 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 
+sub explode_track {
+	my $track = shift;
+	
+	# quit if I am already a mix track
+
+	say($track->name,": I am already a mix track. I cannot explode!"),return
+		if $track->source_type eq 'bus' or $bn{$track->name};
+
+}	
+
+
+
+	
 
 ### end

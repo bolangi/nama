@@ -941,3 +941,7 @@ rec_start_mark: _rec_start_mark {
 rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
+
+explode_track: _explode_track end {
+	::explode_track($::this_track)
+}

@@ -813,4 +813,7 @@ rec_end_mark:
   type: edit
   what: select (and move to) rec end mark
   short: rem
+explode_track:
+  type: track
+  what: make track into a sub-bus, with one track for each version
 ...
