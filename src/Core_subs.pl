@@ -769,6 +769,9 @@ sub create_system_buses {
 	map{ $is_system_bus{$_}++ } @system_buses;
 	delete $is_system_bus{Main}; # because we want to display it
 	map{ ::Bus->new(name => $_ ) } @system_buses;
+	
+	# a bus should identify it's mix track
+	$bn{Main}->set( send_type => 'track', send_id => 'Master');
 
 	$main = $bn{Main};
 	$null = $bn{null};
@@ -3494,6 +3497,13 @@ sub restore_state {
 		
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
+	my $main = $bn{Main};
+
+	# bus should know its mix track
+	
+	$main->set( send_type => 'track', send_id => 'Master')
+		unless $main->send_type;
+
 	# restore user tracks
 	
 	my $did_apply = 0;
@@ -4289,7 +4299,7 @@ sub add_sub_bus {
 	
 	::SubBus->new( 
 		name => $name, 
-		send_type => $type // 'bus',
+		send_type => $type // 'track',
 		send_id	 => $id // $name,
 		);
 	# create mix track

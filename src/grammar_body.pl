@@ -306,13 +306,15 @@ show_tracks_all: _show_tracks_all end {
 	1;
 }
 show_bus_tracks: _show_bus_tracks end { 	
-	::pager(::Text::show_tracks(
-		
-		map{$::tn{$_}}grep{$_ ne 'Main'}
-		(   $::this_bus, 
-			$::bn{$::this_bus}->tracks 
-		)
-	));
+
+	my $bus = $::bn{$::this_bus};
+	my $mix = $::tn{$bus->send_id};
+	my @list = ($mix,$bus);
+	push @list, map{$::tn{$_}}
+				grep{$_ ne 'Main'}
+				($mix->name, $bus->tracks);
+
+	::pager(::Text::show_tracks(\@list));
 	1;
 }
 modifiers: _modifiers modifier(s) end {

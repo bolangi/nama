@@ -754,7 +754,7 @@ sub busify {
 	
 	::SubBus->new( 
 		name => $name, 
-		send_type => 'bus',
+		send_type => 'track',
 		send_id	 => $name,
 	);
 
