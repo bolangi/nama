@@ -60,6 +60,15 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
+	# we need to know now
+	
+	if ( 		! ($opts{J} or $opts{A})  # testing mockup
+			and jack_running() 
+			and ! process_is_running('jack.plumbing')
+	){ 
+		system('jack.plumbing >/dev/null 2>&1 &');
+	}
+
 	start_midish() if $midish_enable;
 
 	# set up autosave
@@ -1666,17 +1675,27 @@ sub connect_transport {
 
 sub connect_jack_ports_list {
 
+	# skip if we can? 
+	#
+	# no, because stale connections remain, we
+	# have to rewrite every time... if jack.plumbing
+	#
+	local $debug = 1;
+	
+	my $is_jack_plumbing = process_is_running('jack.plumbing');
+
 	#my $dis = shift;
 	my $dis;
-	my $is_jack_plumbing = process_is_running('jack.plumbing');
 	my $fh;
 	if( $is_jack_plumbing){
+
+		$debug and say "jack plumbing is running: we will configure";
 		
 		my $cmd = "cat ".jack_plumbing_conf();
-		#my $user_plumbing = qx($cmd);
 		my $user_plumbing = io(jack_plumbing_conf())->all
 			if -f -r jack_plumbing_conf();
-		print "user plubiming $user_plumbing";
+
+		# keep user data, deleting below tag
 
 		$user_plumbing =~ s/$plumbing_tag.*//gs;
 	
@@ -1700,17 +1719,17 @@ sub connect_jack_ports_list {
 				$debug and say "port file $file, line $line_number, port $port";
 				
 				# setup shell command
-				# quote port in case it contains spaces
-				my $p = $port =~ / / ? qq("$port") : $port	;
-
-				# command: jack_connect Horgand_1:1 ecasound:synth_in_
-				my $cmd = q(jack_).$dis.qq(connect $p $dest);
-
+				
+				if(! $jack{$port}){
+					say $track->name, qq(: port "$port" not found. Skipping.);
+					next
+				}
+			
+				# ecasound port suffix	
+				
 				my $ecasound_port_number = $track->width == 1
 					?  1 
 					: $line_number % $track->width + 1;
-				$cmd .= $ecasound_port_number;
-				$debug and say $cmd;
 
 				if( $is_jack_plumbing ){
 
@@ -1719,12 +1738,15 @@ sub connect_jack_ports_list {
 					print $fh "($config_line)\n";
 
 				} else { # fall back to jack_connect
-				
-					if($jack{$port}){
-						system $cmd;
-					} else {
-						say $track->name, qq(: port "$port" not found. Skipping.) 
-					}
+					# quote port in case it contains spaces
+					my $p = $port =~ / / ? qq("$port") : $port	;
+
+					# command: jack_connect Horgand_1:1 ecasound:synth_in_
+					my $cmd = q(jack_).$dis.qq(connect $p $dest);
+
+					$cmd .= $ecasound_port_number;
+					$debug and say $cmd;
+					system $cmd;
 				}
 				$line_number++;
 			};
