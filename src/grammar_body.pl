@@ -310,7 +310,7 @@ show_bus_tracks: _show_bus_tracks end {
 	::pager(::Text::show_tracks(
 		map{$::tn{$_}}grep{$_ ne 'Main'}
 		(   $::this_bus, 
-			$::Bus::by_name{$::this_bus}->tracks 
+			$::bn{$::this_bus}->tracks 
 		)
 	));
 	1;
@@ -348,31 +348,31 @@ show_track: _show_track dd end {
 
 show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
 bus_rec: _bus_rec end {
-	$::Bus::by_name{$::this_bus}->set(rw => 'REC');
+	$::bn{$::this_bus}->set(rw => 'REC');
 	print "Setting REC-enable for " , $::this_bus ,
 		" bus. You may record user tracks.\n";
 	1; }
 bus_mon: _bus_mon end {
-	$::Bus::by_name{$::this_bus}->set(rw => 'MON');
+	$::bn{$::this_bus}->set(rw => 'MON');
 	print "Setting MON mode for " , $::this_bus , 
 		" bus. No recording on user tracks.\n";
  	1  
 }
 bus_off: _bus_off end {
-	$::Bus::by_name{$::this_bus}->set(rw => 'OFF'); 
+	$::bn{$::this_bus}->set(rw => 'OFF'); 
 	print "Setting OFF mode for " , $::this_bus,
 		" bus. All user tracks disabled.\n"; 1  }
 bus_version: _bus_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
 	print $::this_bus, " bus default version is: ", 
-		$::Bus::by_name{$::this_bus}->version, "\n" ; 1}
+		$::bn{$::this_bus}->version, "\n" ; 1}
 bus_version: _bus_version dd end { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
-	$::Bus::by_name{$::this_bus}->set( version => $n ); 
+	$::bn{$::this_bus}->set( version => $n ); 
 	print $::this_bus, " bus default version set to: ", 
-		$::Bus::by_name{$::this_bus}->version, "\n" ; 1}
+		$::bn{$::this_bus}->version, "\n" ; 1}
 mixdown: _mixdown end { ::Text::mixdown(); 1}
 mixplay: _mixplay end { ::Text::mixplay(); 1}
 mixoff:  _mixoff  end { ::Text::mixoff(); 1}
@@ -420,7 +420,7 @@ rec_defeat: _rec_defeat end {
 rec_enable: _rec_enable end { 
 	$::this_track->set(rec_defeat => 0);
 	print $::this_track->name, ": WAV recording enabled";
-	my $rw = $::Bus::by_name{$::this_track->group}->rw;
+	my $rw = $::bn{$::this_track->group}->rw;
 	if ( $rw ne 'REC'){
 		print qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n),
 		"No WAV file will be recorded.\n";
@@ -446,7 +446,7 @@ mute: _mute end { $::this_track->mute; 1}
 unmute: _unmute end { $::this_track->unmute; 1}
 # solo: _solo 'bus' track_name {
 # 	print ("$item{track_name}: Expected bus track_name. Skipping.\n"), return 1
-# 		unless $::Bus::by_name{$item{track_name}};
+# 		unless $::bn{$item{track_name}};
 # 	::command_process("for all; off;; $item{track_name} mon");
 # 	1;
 # }
@@ -687,7 +687,7 @@ add_sub_bus: _add_sub_bus bus_name destination(?) end {
 }
 
 existing_bus_name: bus_name {
-	if ( $::Bus::by_name{$item{bus_name}} ){  $item{bus_name} }
+	if ( $::bn{$item{bus_name}} ){  $item{bus_name} }
 	else { print("$item{bus_name}: no such bus\n"); undef }
 }
 
@@ -699,19 +699,19 @@ bus_name: /\w+/ {
 destination: jack_port # include channel, loop,device, jack_port
 
 remove_bus: _remove_bus existing_bus_name end { 
-	$::Bus::by_name{$item{existing_bus_name}}->remove; 1; 
+	$::bn{$item{existing_bus_name}}->remove; 1; 
 }
 update_send_bus: _update_send_bus existing_bus_name end {
  	::update_send_bus( $item{existing_bus_name} );
  	1;
 }
-set_bus: _set_bus key someval { $::Bus::by_name{$::this_bus}->set($item{key} => $item{someval}); 1 }
+set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{someval}); 1 }
 
 change_bus: _change_bus existing_bus_name { 
 	return unless $::this_bus ne $item{existing_bus_name};
 	$::this_bus = $item{existing_bus_name};
 	$::this_track = $::tn{$item{existing_bus_name}} if
-		(ref $::Bus::by_name{$::this_bus}) =~ /SubBus/;
+		(ref $::bn{$::this_bus}) =~ /SubBus/;
 	1 }
 
 list_buses: _list_buses end { ::pager(map{ $_->dump } ::Bus::all()) ; 1}

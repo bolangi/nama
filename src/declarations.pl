@@ -306,7 +306,7 @@ our (
 
 	%ti, # track by index (alias to %::Track::by_index)
 	%tn, # track by name  (alias to %::Track::by_name)
-	%bn, # bus   by name  (alias to %::Bus::by_name)
+	%bn, # bus   by name  (alias to %bn)
 
 	@tracks_data, # staging for saving
 	@groups_data, # obsolete

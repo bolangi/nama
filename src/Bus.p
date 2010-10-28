@@ -88,7 +88,7 @@ sub remove {
 	my $bus = shift;
 
 	# all tracks returned to Main group
-	map{$::tn{$_}->set(group => 'Main') } $::Bus::by_name{$bus->name}->tracks;
+	map{$::tn{$_}->set(group => 'Main') } $by_name{$bus->name}->tracks;
 
 	my $mix_track = $::tn{$bus->name};
 	 
@@ -100,7 +100,7 @@ sub remove {
 	$mix_track->remove unless scalar @{ $mix_track->versions };
 
 	# remove bus
-	delete $::Bus::by_name{$bus->name};
+	delete $by_name{$bus->name};
 } 
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
@@ -119,10 +119,10 @@ sub remove {
 	my $bus = shift;
 
 	# delete all (slave) tracks
-	map{$::tn{$_}->remove } $::Bus::by_name{$bus->name}->tracks;
+	map{$::tn{$_}->remove } $by_name{$bus->name}->tracks;
 
 	# remove bus
-	delete $::Bus::by_name{$bus->name};
+	delete $by_name{$bus->name};
 }
 package ::SendBusCooked;
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
