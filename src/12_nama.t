@@ -99,7 +99,7 @@ is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-in");
 
 =cut
 
-is( ref $main_bus, q(Audio::Nama::Bus), 'Bus initializtion');
+is( ref $main, q(Audio::Nama::Bus), 'Bus initializtion');
 
 # SKIP: { 
 # my $cs_got = eval_iam('cs');
