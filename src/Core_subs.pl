@@ -60,9 +60,8 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
-	# we need to know now
-	
-	if ( 		! ($opts{J} or $opts{A})  # testing mockup
+	if ( 	$use_jack_plumbing
+			and ! ($opts{J} or $opts{A})  # testing mockup
 			and jack_running() 
 			and ! process_is_running('jack.plumbing')
 	){ 
@@ -1682,7 +1681,8 @@ sub connect_jack_ports_list {
 	#
 	local $debug = 1;
 	
-	my $is_jack_plumbing = process_is_running('jack.plumbing');
+	my $is_jack_plumbing 
+		= $use_jack_plumbing and process_is_running('jack.plumbing');
 
 	#my $dis = shift;
 	my $dis;

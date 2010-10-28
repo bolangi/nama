@@ -30,6 +30,7 @@
 						$autosave_interval
 						$midish_enable
 						$quietly_remove_tracks
+						$use_jack_plumbing
 						);
 
 						

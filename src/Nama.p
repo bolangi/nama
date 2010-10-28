@@ -94,6 +94,11 @@ $debug = 0; # debug statements
 [% qx(cat ./banner.pl) %]
 
 # other initializations
+#
+
+# the following is default, unless overwritten by namarc
+$use_jack_plumbing = 1; 
+
 $unit = 1;
 $effects_cache_file = '.effects_cache';
 $palette_file = 'palette.yml';

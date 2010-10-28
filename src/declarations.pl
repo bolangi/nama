@@ -55,6 +55,17 @@ our (
 	$spatialiser,
 	$limiter,
 
+	# .namarc MIDI
+	
+	$midish_enable,       # using midish
+	%midish_command,     # keywords listing
+	$midi_input_dev,
+	$midi_output_dev, 
+
+	# .namarc jack.plumbing
+	
+	$use_jack_plumbing,
+
 	$initial_user_mode, # preview, doodle, 0, undef TODO
 	
 	%state_c_ops, 	# intermediate copy for storage/retrieval
@@ -391,12 +402,6 @@ our (
 	$autosave_interval, # how frequently to save
 	$quietly_remove_tracks, 
 
-	# MIDI
-	
-	$midish_enable,       # using midish
-	%midish_command,     # keywords listing
-	$midi_input_dev,
-	$midi_output_dev, 
 	
 	# Edits
 
