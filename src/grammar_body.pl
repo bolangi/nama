@@ -307,6 +307,7 @@ show_tracks_all: _show_tracks_all end {
 }
 show_bus_tracks: _show_bus_tracks end { 	
 	::pager(::Text::show_tracks(
+		
 		map{$::tn{$_}}grep{$_ ne 'Main'}
 		(   $::this_bus, 
 			$::bn{$::this_bus}->tracks 

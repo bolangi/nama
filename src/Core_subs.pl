@@ -576,7 +576,6 @@ Loading project "untitled".
 	# read_config( global_config() ); 
 	
 	teardown_engine(); # initialize_ecasound_engine; 
-	initialize_buses();	
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
@@ -691,11 +690,6 @@ sub engine_running {
 	eval_iam("engine-status") eq "running"
 };
 
-sub initialize_buses {
-	::Bus->initialize();
-	$main_bus = ::Bus->new(name => 'Main');
-}
-	
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
 
