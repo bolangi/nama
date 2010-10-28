@@ -981,7 +981,6 @@ sub generate_setup {
 
 
 	initialize_chain_setup_vars();
-	unlink_jack_plumbing_conf();
 	local $@; # don't propagate errors
 		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
@@ -1657,13 +1656,33 @@ sub connect_transport {
 	
 }
 
+{ 
+  my $plumbing_tag = q(;### BEGIN NAMA CONNECTIONS LIST);
+  my $plumbing_header = qq($plumbing_tag
+;## The following lines are automatically generated.
+;## DO NOT place any connection data below this line!!
+;
+); 
+
 sub connect_jack_ports_list {
 
-	my $dis = shift;
+	#my $dis = shift;
+	my $dis;
 	my $is_jack_plumbing = process_is_running('jack.plumbing');
 	my $fh;
 	if( $is_jack_plumbing){
-		open $fh, ">>", jack_plumbing_conf();
+		
+		my $cmd = "cat ".jack_plumbing_conf();
+		#my $user_plumbing = qx($cmd);
+		my $user_plumbing = io(jack_plumbing_conf())->all
+			if -f -r jack_plumbing_conf();
+		print "user plubiming $user_plumbing";
+
+		$user_plumbing =~ s/$plumbing_tag.*//gs;
+	
+		print "user plumbing2  $user_plumbing";
+		open $fh, ">", jack_plumbing_conf();
+		print $fh $user_plumbing, $plumbing_header;
 	}
 	map{  
 		my $track = $_; 
@@ -1715,7 +1734,7 @@ sub connect_jack_ports_list {
 
 	 close $fh if $is_jack_plumbing;
 }
-
+}
 sub quote { qq("$_[0]")}
 
 sub disconnect_jack_ports_list { 
@@ -5384,9 +5403,6 @@ sub set_edit_vars_testing {
 }
 }
 
-sub unlink_jack_plumbing_conf {
-	unlink jack_plumbing_conf() if -e jack_plumbing_conf()
-}
 sub jack_plumbing_conf {
 	join_path( $ENV{HOME} , '.jack.plumbing' )
 }
