@@ -322,7 +322,8 @@ nomodifiers: _nomodifiers end { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager($::chain_setup); 1}
 show_io: _show_io { ::show_io(); 1}
 show_track: _show_track end {
-	my $output = ::Text::show_tracks($::this_track);
+	my $output = $::format_top;
+	$output .= ::Text::show_tracks_section($::this_track);
 	$output .= ::Text::show_effects();
 	$output .= ::Text::show_versions();
 	$output .= ::Text::show_send();
