@@ -5426,11 +5426,21 @@ sub explode_track {
 	say($track->name,": Only one version. Skipping."), return
 		if scalar @versions == 1;
 
-	
+	$track->busify;
+
+	my $host = $track->name;
+	my @names = map{ "$host-v$_"} @versions;
+	my @exists = grep{ $::tn{$_} } @names;
+	say("@exists: tracks already exist. Aborting."), return if @exists;
+	for my $i (@versions){
+		my $name = "$host-v$i";
+		::VersionTrack->new(
+			name 	=> $name, 
+			target 	=> $host, 
+			version => $i,
+			group	=> $host
+		);
+	}
 }	
-
-
-
-	
 
 ### end

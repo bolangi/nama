@@ -874,6 +874,13 @@ sub current_version {
 	else { return 0 }
 }
 }
+{
+package ::VersionTrack;
+our @ISA ='::Track';
+sub set_version {}
+sub rw { 'MON' }
+sub versions { [$_[0]->version] }
+}
 
 1;
 __END__
