@@ -76,22 +76,6 @@ sub settings_line {
 	#return if $maybe_mix->name eq 'Master' or $maybe_mix->group eq 'Mastering';
 	return unless defined $mix;
 
-	# get the correct bus and mix track
-	# this should be coded somewhere else!
-# 	
-# 	my ($mix, $bus);
-# 	
-# 	if( $::bn{$maybe_mix->name}){
-# 		$mix = $maybe_mix;
-# 		$bus = $::bn{$mix->name};
-# 	}
-# 	else { # if not a mix track
-# 		$mix = $::tn{Master};
-# 		$bus = $::main;
-# 	}
-# 
-	#return "no bus settings found!" unless $bus;
-	
 	my ($bustype) = $bus->class =~ /(\w+)$/;
 	my $line = join " ", $bustype ,$bus->name,"is",$bus->forces;
 	$line   .= " Version setting".$bus->version if $bus->version;

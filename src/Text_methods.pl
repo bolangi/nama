@@ -50,15 +50,35 @@ sub show_effect_chain_stack {
 }
 	
 sub show_region {
+	package ::;
+	my $t = $this_track;
 	my @lines;
-	push @lines, "Start at: ",
-		$this_track->playat, $/ if $this_track->playat;
-	push @lines, "Region start: ", $this_track->region_start, $/
-		if $this_track->region_start;
-	push @lines, "Region end: ", $this_track->region_end, $/
-		if $this_track->region_end;
+	push @lines, "Play at:      ", $t->playat, 
+			" (",colonize(int $t->adjusted_playat_time),")\n" 
+		if $t->playat;
+	push @lines, "Region start: ", $t->region_start,
+			" (",colonize(int $t->adjusted_region_start_time),")\n" 
+		if $t->region_start;
+	push @lines, "Region end:   ", $t->region_end, 
+			" (",colonize(int $t->adjusted_region_end_time),")\n" 
+		if $t->region_end;
 	return(join "", @lines);
 }
+sub show_length {
+	package ::;
+	my $t = $this_track;
+	return unless $t->rec_status eq 'MON';
+	my ($length,$reg_start, $reg_end, $playat);
+	if ($t->region_start){
+		$length = 	$t->adjusted_region_end_time
+				  - $t->adjusted_region_start_time
+	} else {
+		$length = 	$wav_info{$t->full_path}{length};
+	}
+	$playat = $t->adjusted_playat_time;
+	return "Length: ".colonize(int ($playat+$length));
+}
+
 
 sub show_status {
 	print "\n";

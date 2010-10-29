@@ -331,6 +331,7 @@ show_track: _show_track end {
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::Text::show_region();
+	$output .= ::Text::show_length();
 	$output .= ::Text::show_effect_chain_stack();
 	$output .= ::Text::show_inserts();
 	::pager( $output );
