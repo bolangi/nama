@@ -4399,7 +4399,7 @@ sub dest_type {
 	my $dest = shift;
 	my $type;
 	given( $dest ){
-		when( undef )       {                           }
+		when( undef )       {} # do nothing
 
 		# non JACK related
 
@@ -4414,7 +4414,8 @@ sub dest_type {
 		when(/^man/)           { $type = 'jack_manual'     }
 		when('jack')           { $type = 'jack_manual'     }
 		when(/(^\w+\.)?ports/) { $type = 'jack_ports_list' }
-		default                { $type = 'jack_client'     }
+		default                { $type = 'jack_client'     } 
+
 	}
 	$type
 }

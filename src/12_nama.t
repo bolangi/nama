@@ -99,6 +99,26 @@ is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-in");
 
 =cut
 
+# object id => type mappings
+#
+my @id_to_type = (
+	1 						=> 'soundcard',
+    Fluidsynth 				=> 'jack_client',
+	"MPlayer [20120]:out_0" => 'jack_client',
+	"drumkit.ports"			=> 'jack_ports_list',
+	manual					=> 'jack_manual',
+	jack					=> 'jack_manual',
+	bus						=> 'bus',
+	null					=> 'null',
+	"loop,16"				=> 'loop',
+	"loop,Master"			=> 'loop',
+);
+
+while( my($dest,$type) = splice @id_to_type, 0,2){
+	is( dest_type($dest), $type, "$dest => $type");
+}
+
+
 is( ref $main, q(Audio::Nama::Bus), 'Bus initializtion');
 
 # SKIP: { 
