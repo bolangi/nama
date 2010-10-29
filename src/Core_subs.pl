@@ -411,14 +411,17 @@ sub eval_iam_neteci {
 				(.+)  # rest of string
 				/sx;  # s-flag: . matches newline
 
-$debug and say "ECI command: $cmd";
-$debug and say "Ecasound reply: ", substr($buf,0,256); # first 256 characters
-$debug and say qq(return value: $return_value
+if(	! $return_value == 256 ){
+	my $debug++;
+	$debug and say "ECI command: $cmd";
+	$debug and say "Ecasound reply (256 bytes): ", substr($buf,0,256);
+	$debug and say qq(
 length: $length
 type: $type
-reply: $reply);
+full return value: $return_value);
+	die "illegal return value, stopped" ;
 
-	$return_value == 256 or die "illegal return value, stopped" ;
+}
 	$reply =~ s/\s+$//; 
 
 	given($type){
@@ -1703,9 +1706,7 @@ sub connect_jack_ports_list {
 
 		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
 	
-		print "user plumbing2  $user_plumbing";
 		open $fh, ">", jack_plumbing_conf();
-		print $fh $user_plumbing, $plumbing_header;
 	}
 	map{  
 		my $track = $_; 
