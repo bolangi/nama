@@ -5476,15 +5476,26 @@ sub explode_track {
 	my @names = map{ "$host-v$_"} @versions;
 	my @exists = grep{ $::tn{$_} } @names;
 	say("@exists: tracks already exist. Aborting."), return if @exists;
+	my $current = cwd;
+	chdir this_wav_dir();
 	for my $i (@versions){
+
+		# make a track
+
 		my $name = "$host-v$i";
-		::VersionTrack->new(
+		::Track->new(
 			name 	=> $name, 
-			target 	=> $host, 
-			version => $i,
-			group	=> $host
+			rw		=> 'MON',
+			group	=> $host,
 		);
+
+		# symlink the WAV file we want
+
+		symlink $track->targets->{$i}, "$name.wav";
+
+
 	}
+	chdir $current;
 }	
 
 ### end
