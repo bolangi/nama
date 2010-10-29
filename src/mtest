@@ -1,2 +1,2 @@
-cd $PD; ./myproc; cd $MD;perl *.PL; make; make test; reset; cd $PD
+./myproc; cd .. ;perl *.PL; make; make test; reset; cd src
 
