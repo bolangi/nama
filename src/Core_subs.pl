@@ -450,17 +450,6 @@ sub eval_iam_libecasoundc{
 	}
 	"@result";
 }
-sub colonize { # convert seconds to hours:minutes:seconds 
-	my $sec = shift || 0;
-	my $hours = int ($sec / 3600);
-	$sec = $sec % 3600;
-	my $min = int ($sec / 60);
-	$sec = $sec % 60;
-	$sec = "0$sec" if $sec < 10;
-	$min = "0$min" if $min < 10 and $hours;
-	($hours ? "$hours:" : "") . qq($min:$sec);
-}
-
 ## configuration file
 
 { # OPTIMIZATION
@@ -1709,7 +1698,7 @@ sub connect_jack_ports_list {
 		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
 	
 		open $fh, ">", jack_plumbing_conf();
-	
+		
 		print $fh $user_plumbing, $plumbing_header;
 	}
 	map{  
@@ -3136,7 +3125,17 @@ sub round {
 	$n = d2($n) if $n < 10;
 	$n;
 }
-	
+sub colonize { # convert seconds to hours:minutes:seconds 
+	my $sec = shift || 0;
+	my $hours = int ($sec / 3600);
+	$sec = $sec % 3600;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	$min = "0$min" if $min < 10 and $hours;
+	($hours ? "$hours:" : "") . qq($min:$sec);
+}
+
 
 ## persistent state support
 
