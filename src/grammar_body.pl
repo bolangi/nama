@@ -324,14 +324,13 @@ show_io: _show_io { ::show_io(); 1}
 show_track: _show_track end {
 	my $output = $::format_top;
 	$output .= ::Text::show_tracks_section($::this_track);
+	$output .= ::Text::show_region();
 	$output .= ::Text::show_effects();
 	$output .= ::Text::show_versions();
 	$output .= ::Text::show_send();
 	$output .= ::Text::show_bus();
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
-	$output .= ::Text::show_region();
-	$output .= ::Text::show_length();
 	$output .= ::Text::show_effect_chain_stack();
 	$output .= ::Text::show_inserts();
 	::pager( $output );

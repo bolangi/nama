@@ -768,6 +768,17 @@ sub busify {
 	$track->set( @vals );
 }
 
+sub adjusted_length {
+	my $track = shift;
+	my $length;
+	if ($track->region_start){
+		$length = 	$track->adjusted_region_end_time
+				  - $track->adjusted_region_start_time
+	} else {
+		$length = 	$::wav_info{$track->full_path}{length};
+	}
+	$length += $track->adjusted_playat_time;
+}
 
 =comment
 sub this_edit {
