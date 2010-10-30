@@ -70,7 +70,8 @@ sub jump_here {
 }
 {
 no warnings 'redefine';
-sub time { $_[0]->adjusted_time }
+#sub time { $_[0]->adjusted_time }
+#sub time { $_[0]->{time} }
 }
 sub adjusted_time {  # for marks within current edit
 	my $mark = shift;
@@ -100,7 +101,7 @@ sub previous {
 
 # -- Class Methods
 
-sub all { sort { $a->time <=> $b->time }@all }
+sub all { sort { $a->{time} <=> $b->{time} }@all }
 
 sub loop_start { 
 	my @points = sort { $a <=> $b } 
@@ -113,7 +114,7 @@ sub loop_end {
 		grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
 	$points[1];
 }
-sub mark_time {
+sub unadjusted_mark_time {
 	my $tag = shift;
 	$tag or $tag = '';
 	#print "tag: $tag\n";
@@ -130,10 +131,19 @@ sub mark_time {
 	}
 	return undef if ! defined $mark;
 	#print "mark time: ", $mark->time, $/;
-	return $mark->time;
-		
+	return $mark->{time};
+}
+sub mark_time {
+	my $tag = shift;
+	my $time = unadjusted_mark_time($tag);
+	return unless defined $time;
+	$time -= $::this_edit->play_start_time if ::edit_mode();
+	$time
+}
+sub subtract_edit_start_offset {
+	return $_[0] unless ::edit_mode();
+	#$_[0] - 
 }
 
 	
 1;
-

@@ -527,17 +527,22 @@ to_mark: _to_mark ident end {
 #	eval q( $mark->jump_here ) or $debug and print "jump failed: $@\n";
 	1;}
 modify_mark: _modify_mark sign value end {
-	my $newtime = eval($::this_mark->time . $item{sign} . $item{value});
+	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
 	$::this_mark->set( time => $newtime );
 	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
-	::eval_iam("setpos $newtime");
+	print "adjusted to ",$::this_mark->time, "\n" 
+		if $::this_mark->time != $newtime;
+	::eval_iam("setpos ".$::this_mark->time);
 	$::regenerate_setup++;
 	1;
 	}
 modify_mark: _modify_mark value end {
 	$::this_mark->set( time => $item{value} );
-	print $::this_mark->name, ": set to ", ::d2( $item{value}), "\n";
-	::eval_iam("setpos $item{value}");
+	my $newtime = $item{value};
+	print $::this_mark->name, ": set to ", ::d2($newtime),"\n";
+	print "adjusted to ",$::this_mark->time, "\n" 
+		if $::this_mark->time != $newtime;
+	::eval_iam("setpos ".$::this_mark->time);
 	$::regenerate_setup++;
 	1;
 	}		
@@ -730,10 +735,10 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter end {
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), 
 		return 1 unless $id;
-	print ("wetness parameter must be an integer between 0 and 100\n"), 
+	print("wetness parameter must be an integer between 0 and 100\n"), 
 		return 1 unless ($p <= 100 and $p >= 0);
 	my $i = $::Insert::by_index{$id};
-	print ("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
+	print("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
 		return 1 unless $i;
 	$i->{wetness} = $p;
 	::modify_effect($i->wet_vol, 0, undef, $p);
@@ -805,7 +810,7 @@ bunch_name: ident {
 
 effect_profile_name: ident
 existing_effect_profile_name: ident {
-	print ("$item{ident}: no such effect profile\n"), return
+	print("$item{ident}: no such effect profile\n"), return
 		unless $::effect_profile{$item{ident}};
 	$item{ident}
 }
@@ -854,28 +859,19 @@ in_or_out: 'in' | 'out'
 duration: value
 mark1: ident
 mark2: ident
-remove_fade: _remove_fade fade_index  { 
-       return unless $item{fade_index};
-       print "removing fade $item{fade_index} from track "
-               .$::Fade::by_index{$item{fade_index}}->track ."\n"; 
-       ::Fade::remove_by_index($item{fade_index}) ;
-	   ++$::regenerate_setup;
+remove_fade: _remove_fade fade_index(s)  { 
+	my @i = @{ $item{'fade_index(s)'} };
+	::Text::remove_fade($_) for (@i);
+	$::regenerate_setup++;
+	1
 }
-# remove_fade: _remove_fade fade_index(s)  { 
-# 	my @indices = @{$item{'fade_index(s)'}};
-# 	print "indices: @indices\n";
-# 	return unless @indices;
-# 	map{ 
-# 		print "removing fade $_ from track " .$::Fade::by_index{$_}->track ."\n"; 
-# 		::Fade::remove($_) ;
-# 	} @indices;
-# 	1;
-# }
 fade_index: dd 
  { if ( $::Fade::by_index{$item{dd}} ){ return $item{dd}}
-   else { print ("invalid fade number: $item{dd}\n"); return 0 }
+   else { print("invalid fade number: $item{dd}\n"); return 0 }
  }
-list_fade: _list_fade {  ::pager(join "\n",map{$_->dump} values %::Fade::by_index) }
+list_fade: _list_fade {  ::pager(join "\n",
+		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
+		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
  	print $::this_track->name, ": comment: $item{text}\n"; 
  	$::this_track->set(comment => $item{text});
@@ -903,29 +899,36 @@ new_edit: _new_edit {
 	1;
 }
 set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
-list_edits: _list_edits { ::list_edits() }
+list_edits: _list_edits { ::list_edits(); 1}
 
-start_edit: _start_edit { ::start_edit() }
+destroy_edit: _destroy_edit dd { ::destroy_edit($item{dd}); 1}
 
-redo_edit: _redo_edit {::redo_edit()}
+select_edit: _select_edit dd { ::select_edit($item{dd}); 1}
 
-delete_edit: _delete_edit { ::delete_edit() }
+preview_edit_in: _preview_edit_in { ::preview_edit_in(); 1}
 
-select_edit: _select_edit { ::select_edit() }
+preview_edit_out: _preview_edit_out { ::preview_edit_out(); 1}
 
-preview_edit_in: _preview_edit_in { ::preview_edit_in() }
+play_edit: _play_edit { ::play_edit(); 1}
 
-preview_edit_out: _preview_edit_out { ::preview_edit_out() }
-
-hear_edit: _hear_edit { ::hear_edit() }
+record_edit: _record_edit { ::record_edit(); 1}
 
 edit_track: _edit_track { 
-	defined $::this_edit and $::this_track = $::tn{$::this_edit->edit_name};
+	print("You need to select an edit first (list_edits, select_edit)\n"),
+		return unless defined $::this_edit;
+	$::this_track = $::tn{$::this_edit->edit_name}; 1
 }
 
 host_track: _host_track { 
-	defined $::this_edit and $::this_track = $::tn{$::this_edit->host_track};
-1 }
+	print("You need to select an edit first (list_edits, select_edit)\n"),
+		return unless defined $::this_edit;
+	$::this_track = $::tn{$::this_edit->host_alias}; 1 
+}
+edit_mix_track: _edit_mix_track { 
+	print("You need to select an edit first (list_edits, select_edit)\n"),
+		return unless defined $::this_edit;
+	$::this_track = $::tn{$::this_edit->host_track}; 1 
+}
 
 	
 
@@ -941,6 +944,9 @@ rec_start_mark: _rec_start_mark {
 rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
+end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
+
+disable_edits: _disable_edits { ::disable_edits(); 1; }
 
 explode_track: _explode_track end {
 	::explode_track($::this_track)

@@ -179,8 +179,11 @@ sub add_far_side_loop {
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
-#sub is_a_track{ $::tn{$_[0]} }
-sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;}
+sub is_a_track{ $::tn{$_[0]} }  # most reliable
+# although it is unlikely that someone names a track sax_in
+#sub graph_tracks { my $g = shift; grep{is_a_track($_)} $g->vertices }
+# c.f. %is_ecasound_chain for same data (
+#sub is_a_track{ return unless $_[0] !~ /_(in|out)$/;}
 # $debug and say "$_[0] is a track"; 1
 #}
 sub is_terminal { $reserved{$_[0]} }

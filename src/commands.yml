@@ -269,11 +269,11 @@ pan_back:
   parameters: none
 show_tracks:
   type: track 
-  short: show tracks list_tracks lt
-  what: show status of all visible tracks
+  short: show lt
+  what: show track status
 show_tracks_all:
   type: track
-  short: showa
+  short: sha showa 
   what: show status of all tracks, visible and hidden
 show_bus_tracks:
   type: track 
@@ -748,7 +748,7 @@ new_edit:
   type: edit
   what: create an edit for the current track and version
   short: ned
-  parameters: hmmm
+  parameters: none
 set_edit_points:
   type: edit
   what: mark play-start, record-start and record-end positions
@@ -759,60 +759,75 @@ list_edits:
   what: list edits for current track and version
   short: led
   parameters: none
-start_edit:
-  type: edit
-  what: start recording an edit (may be repeated)
-  short: sed
-  parameters: none
-redo_edit:
-  type: edit
-  what: delete the last edit attempt and start recording again
-  short: red
 select_edit:
   type: edit
   what: select an edit to modify or delete, becomes current edit
-  short: choose_edit ced
+  short: sed
   parameters: <i_edit_index>
-delete_edit:
+end_edit_mode:
+  type: edit
+  what: restore full-length play/record
+  short: eem
+  parameters: none
+destroy_edit:
   type: edit
   what: remove an edit and all associated WAV files (destructive)
   parameters: [<i_edit_index>] (defaults to current edit)
 preview_edit_in:
   type: edit
-  what: play the track region with the edit segment removed
-  short: ped
+  what: play the track region without the edit segment 
+  short: pei
   parameters: none
 preview_edit_out:
   type: edit
   what: play the removed edit segment
-  short: peh
+  short: peo
   parameters: none
-hear_edit:
+play_edit:
   type: edit
-  what: play the completed edit
-  short: hed
+  what: play a completed edit
+  short: ped
+  parameters: none
+record_edit:
+  type: edit
+  what: record a WAV file for the current edit
+  short: red
   parameters: none
 edit_track:
   type: edit
-  what: set edit track as current track
+  what: set the edit track as current track
   short: et
   parameters: none
 host_track:
   type: edit
-  what: set host track as current track
+  what: set the host track *alias* as the current track (for setting inputs)
   short: ht
+  parameters: none
+edit_mix_track:
+  type: edit
+  what: set the host track (edit sub-bus mix track) as the current track
+  short: mt
+  parameters: none
 play_start_mark:
   type: edit
   what: select (and move to) play start mark
   short: psm
+  parameters: none
 rec_start_mark:
   type: edit
   what: select (and move to) rec start mark
   short: rsm
+  parameters: none
 rec_end_mark:
   type: edit
   what: select (and move to) rec end mark
   short: rem
+  parameters: none
+disable_edits:
+  type: edit
+  short: ded
+  what: disable editing sub-bus, restore standard track behavior
+  parameters: none
 explode_track:
   type: track
   what: make track into a sub-bus, with one track for each version

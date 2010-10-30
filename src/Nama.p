@@ -26,7 +26,7 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = 1.066;
+$VERSION = 1.068;
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
@@ -127,7 +127,7 @@ $volume_control_operator = 'ea'; # default to linear scale
 $fade_resolution = 200; # steps per second
 $default_fade_length = 0.5; # for fade-in, fade-out
 $edit_playback_end_margin = 3;
-$edit_crossfade_time = 0.005; # 1/200 seconds
+$edit_crossfade_time = 0.01; # 
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

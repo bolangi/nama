@@ -18,13 +18,13 @@ use ::Object qw(
 				 track
 				 class
 				 );
-%by_index = ();	# return ref to Mark by name
 $off_level = -256;
 $on_level = 0;
 $fade_down_level = -64;
 $fade_down_fraction = 0.75;
 $fade_time1_fraction = 0.9;
 $fade_time2_fraction = 0.1;
+initialize();
 
 # example
 #
@@ -34,11 +34,7 @@ $fade_time2_fraction = 0.1;
 # from 0 to 9, fade from 0 (100%) to -64db
 # from 9 to 10, fade from -64db to -256db
 
-
-# 
-
-
-
+sub initialize { %by_index = (); }
 sub next_n {
 	my $n = 1;
 	while( $by_index{$n} ){ $n++}
@@ -61,19 +57,10 @@ sub new {
 
 	#print "object class: $class, object type: ", ref $object, $/;
 
+	my $id = add_fader($object->track);	# only when necessary
 	
-	# add fader effect at the beginning if needed
 	my $track = $::tn{$object->track};
-	my $id = $track->fader;
-	if( ! $id ){
-		my $first_effect_id = $track->ops->[0];
-		if ( $first_effect_id ){
-			$id = ::Text::t_insert_effect($first_effect_id, 'eadb', [0]);
-		} else { 
-			$id = ::Text::t_add_effect('eadb', [0]) 
-		}
-		$track->set(fader => $id);
-	}
+
 	# add linear envelope controller -klg if needed
 	
 	refresh_fade_controller($track);
@@ -157,10 +144,13 @@ sub fader_envelope_pairs {
 			$marktime2 = $marktime1;
 			$marktime1 -= $fade->duration
 		} else { $fade->dumpp; die "fade processing failed" }
+		#say "marktime1: $marktime1";
+		#say "marktime2: $marktime2";
 		push @specs, [$marktime1, $marktime2, $fade->type];
 	}
 	# sort fades # already done! XXX
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
+	#say( ::yaml_out( \@specs));
 
 	# prepend number of pairs, flatten list
 	my @pairs = map{ spec_to_pairs($_) } @specs;
@@ -201,7 +191,7 @@ sub remove_by_index {
 	$fade->remove;
 }
 
-sub remove { # supply index
+sub remove { 
 	my $fade = shift;
 	my $track = $::tn{$fade->track};
 	my $i = $fade->n;
@@ -217,6 +207,26 @@ sub remove { # supply index
 		$::tn{$fade->track}->set(fader => undef);
 	}
 	else { refresh_fade_controller($track) }
+}
+sub add_fader {
+	my $name = shift;
+	my $track = $::tn{$name};
+
+	my $id = $track->fader;
+
+	# create a fader if necessary
+	
+	if (! $id){	
+		
+		my $first_effect = $track->ops->[0];
+		if ( $first_effect ){
+			$id = ::Text::t_insert_effect($first_effect, 'eadb', [0]);
+		} else { 
+			$id = ::Text::t_add_effect('eadb', [0]) 
+		}
+		$track->set(fader => $id);
+	}
+	$id
 }
 
 1;

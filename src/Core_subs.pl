@@ -15,7 +15,7 @@ sub prepare {
 	$project_name = shift @ARGV;
 	$debug and print "project name: $project_name\n";
 
-	$debug and print ("\%opts\n======\n", yaml_out(\%opts)); ; 
+	$debug and print("\%opts\n======\n", yaml_out(\%opts)); ; 
 
 
 	read_config(global_config());  # from .namarc if we have one
@@ -192,7 +192,7 @@ sub first_run {
 
 	my $missing;
 	my @a = `which analyseplugin`;
-	@a or print ( <<WARN
+	@a or print( <<WARN
 LADSPA helper program 'analyseplugin' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. You will probably have more fun with the LADSPA
@@ -200,7 +200,7 @@ libraries and executables installed. http://ladspa.org
 WARN
 	) and  sleeper (0.6) and $missing++;
 	my @b = `which ecasound`;
-	@b or print ( <<WARN
+	@b or print( <<WARN
 Ecasound executable program 'ecasound' not found
 in $ENV{PATH}, your shell's list of executable 
 directories. This suite depends on the Ecasound
@@ -213,7 +213,7 @@ Do you want to continue? [N] ";
 	$missing and 
 	my $reply = <STDIN>;
 	chomp $reply;
-	print ("Goodbye.\n"), exit unless $reply =~ /y/i;
+	print("Goodbye.\n"), exit unless $reply =~ /y/i;
 	}
 print <<HELLO;
 
@@ -495,7 +495,7 @@ sub global_config {
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $opts{f} ){
-		print ("reading config file $opts{f}\n");
+		print("reading config file $opts{f}\n");
 		return read_file($opts{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
@@ -567,7 +567,7 @@ sub load_project {
 	$debug2 and print "&load_project\n";
 	my %h = @_;
 	$debug and print yaml_out \%h;
-	print ("no project name.. doing nothing.\n"),return 
+	print("no project name.. doing nothing.\n"),return 
 		unless $h{name} or $project;
 	$project_name = $h{name} if $h{name};
 
@@ -734,6 +734,7 @@ sub initialize_project_data {
 	# print "original marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
  	::Mark::initialize();
+	::Fade::initialize();
 	@marks_data = ();
 	#print "remaining marks\n";
 	#print join $/, map{ $_->time} ::Mark::all();
@@ -1485,6 +1486,7 @@ sub set_doodle_mode {
 	print "Using live inputs only, with no duplicate inputs\n";
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
+{ my $old_edit_mode;
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
@@ -1510,11 +1512,11 @@ sub reconfigure_engine {
 		my $current = yaml_out(status_snapshot());
 		my $old = yaml_out($old_snapshot);
 		if ( $current eq $old){
-				$debug and print ("no change in setup\n");
+				$debug and print("no change in setup\n");
 				return;
 		}
 	}
-	$debug and print ("setup change\n");
+	$debug and print("setup change\n");
 
  	my $old_pos;
  	my $was_running;
@@ -1527,9 +1529,11 @@ sub reconfigure_engine {
 	#  - change in global version (TODO)
 	#  - change in project
 	#  - new setup involves recording
+	#  - change in edit mode
 	
 	if ( 	$preview eq 'doodle' 
 		 or $old_snapshot->{project} ne $project_name
+		 or $edit_mode != $old_edit_mode
 		# TODO: or change in global version
 	){} # do nothing
 	else
@@ -1545,8 +1549,9 @@ sub reconfigure_engine {
 	}
 
 	$old_snapshot = status_snapshot();
+	$old_edit_mode = $edit_mode;
 
-	print STDOUT ::Text::show_tracks(::Text::showlist());
+	command_process('show_tracks');
 
 	stop_transport('quiet') if $was_running;
 
@@ -1563,6 +1568,7 @@ sub reconfigure_engine {
 		transport_status();
 		$ui->flash_ready;
 	}
+}
 }
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
@@ -1641,8 +1647,9 @@ sub connect_transport {
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
 	eval_iam('cs-connect');
+		#or say("Failed to connect setup, engine not ready"),return;
 	apply_ops();
-	# or say("Failed to connect setup, engine not ready"),return;
+	apply_fades();
 	my $status = eval_iam("engine-status");
 	if ($status ne 'not started'){
 		print("Invalid chain setup, cannot connect engine.\n");
@@ -1707,6 +1714,9 @@ sub connect_jack_ports_list {
 		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
 	
 		open $fh, ">", jack_plumbing_conf();
+	
+		print $fh $user_plumbing, $plumbing_header;
+		
 	}
 	map{  
 		my $track = $_; 
@@ -1740,7 +1750,7 @@ sub connect_jack_ports_list {
 
 					my $ecasound_port = $dest .  $ecasound_port_number;
 					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
-					print $fh "($config_line)\n";
+					$debug and print $fh "($config_line)\n";
 
 				} else { # fall back to jack_connect
 					# quote port in case it contains spaces
@@ -1822,7 +1832,7 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	limit_processing_time() if mixing_only();
+	limit_processing_time() if mixing_only() or edit_mode();
  	#$event_id{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
@@ -1920,7 +1930,7 @@ sub cancel_wraparound {
 }
 sub limit_processing_time {
 	my $length = shift // $length;
- 	$event_id{processing_time} = AE::timer($length, 0, sub{ eval_iam("stop")});
+ 	$event_id{processing_time} = AE::timer($length, 0, \&stop_transport);
 }
 sub disable_length_timer {
 	$event_id{processing_time} = undef; 
@@ -1990,7 +2000,7 @@ sub drop_mark {
 
 	$ui->marker($mark); # for GUI
 }
-sub mark {
+sub mark { # GUI_CODE
 	$debug2 and print "mark()\n";
 	my $mark = shift;
 	my $pos = $mark->time;
@@ -2009,7 +2019,7 @@ sub next_mark {
 	my $jumps = shift;
 	$jumps and $jumps--;
 	my $here = eval_iam("cs-get-position");
-	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	my @marks = ::Mark::all();
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
 			$debug and print "here: $here, future time: ",
@@ -2024,7 +2034,7 @@ sub previous_mark {
 	my $jumps = shift;
 	$jumps and $jumps--;
 	my $here = eval_iam("getpos");
-	my @marks = sort { $a->time <=> $b->time } @::Mark::all;
+	my @marks = ::Mark::all();
 	for my $i ( reverse 0..$#marks ){
 		if ($marks[$i]->time < $here ){
 			eval_iam("setpos " .  $marks[$i+$jumps]->time);
@@ -2112,9 +2122,10 @@ sub add_effect {
 		@p{qw( chain type parent_id cop_id parameter values)};
 	my $i = $effect_i{$code};
 
+	# don't create an existing vol or pan effect
+	
 	return if $id and ($id eq $ti{$n}->vol 
-				or $id eq $ti{$n}->pan);   # skip these effects 
-			   								# already created in add_track
+				or $id eq $ti{$n}->pan);   
 
 	$id = cop_add(\%p); 
 	%p = ( %p, cop_id => $id); # replace chainop id
@@ -3084,7 +3095,7 @@ sub integrate_ladspa_hints {
 	$debug2 and print "&integrate_ladspa_hints\n";
 	map{ 
 		my $i = $effect_i{$_};
-		# print ("$_ not found\n"), 
+		# print("$_ not found\n"), 
 		if ($i) {
 			$effects[$i]->{params} = $effects_ladspa{$_}->{params};
 			# we revise the number of parameters read in from ladspa-register
@@ -3522,14 +3533,22 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
-	if ( $saved_version <= 1.066){ 
+	if ( $saved_version <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
 		map{ 
 			delete $_->{active};
 			delete $_->{inserts};
-			 delete $_->{prefader_insert};
-			 delete $_->{postfader_insert};
+			delete $_->{prefader_insert};
+			delete $_->{postfader_insert};
+			
+			# eliminate field is_mix_track
+			if ($_->{is_mix_track} ){
+				 $_->{source_type} = 'bus';
+				 $_->{source_id}   = undef;
+			}
+			delete $_->{is_mix_track};
+
  		} @tracks_data;
 	}
 
@@ -4598,7 +4617,15 @@ sub cleanup_exit {
 # some common variables for cache_track and merge_track
 # related routines
 
-{ my ($track, $additional_time, $processing_time, $orig_version, $cooked);
+{ # begin shared lexicals for cache_track and merge_edits
+
+	my ($track, 
+		$additional_time, 
+		$processing_time, 
+		$orig_version, 
+		$cooked,
+		$complete_caching_ref);
+
 sub cache_track { # launch subparts if conditions are met
 	($track, $additional_time) = @_;
 	say $track->name, ": preparing to cache.";
@@ -4618,36 +4645,55 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $bn{$track->name};
 
+	$complete_caching_ref = \&update_cache_map;
 	prepare_to_cache();
 	cache_engine_run();
 
 }
 
 sub prepare_to_cache {
+	# uses shared lexicals
+	
  	initialize_chain_setup_vars();
 	$orig_version = $track->monitor_version;
+
+	# create a temporary track to represent the output file
+	
 	my $cooked_name = $track->name . '_cooked';
 	my $cooked = ::CacheRecTrack->new(
 		name => $cooked_name,
 		group => 'Temp',
 		target => $track->name,
 	);
-	# output path
+
+	# connect the temporary track's output path
+	
 	$g->add_path($track->name, $cooked->name, 'wav_out');
 
-	# input path when $track->rec_status MON
-	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+	# set the correct output parameters in the graph
+	
 	$g->set_vertex_attributes(
 		$cooked->name, 
 		{ format => signal_format($cache_to_disk_format,$cooked->width),
 		}
 	); 
 
-	$debug and say "The graph is:\n$g";
+	# Case 1: Caching a standard track
+	
+	# set the original track to read the WAV file
+	
+	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
+	$debug and say "The graph0 is:\n$g";
+	
 
-	# input paths: sub buses (significant when
-	# $track->rec_status is REC and track is a sub-bus mix track)
-	map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all();
+	# Case 2: Caching a sub-bus mix track
+
+	# apply all sub-buses (unneeded ones will be pruned from the graph)
+	
+	map{ $_->apply() } 
+	grep{ (ref $_) =~ /Sub/ } 
+	::Bus::all()
+		if $track->rec_status eq 'REC';
 
 	$debug and say "The graph1 is:\n$g";
 	prune_graph();
@@ -4660,7 +4706,8 @@ sub prepare_to_cache {
 	write_chains();
 	remove_temporary_tracks();
 }
-sub cache_engine_run {
+sub cache_engine_run { # uses shared lexicals
+
 	connect_transport('quiet')
 		or say ("Couldn't connect engine! Aborting."), return;
 	$processing_time = $length + $additional_time;
@@ -4681,9 +4728,19 @@ sub cache_engine_run {
 	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
+	# uses shared lexicals
+	
 	my $name = $track->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
+		
+		&$complete_caching_ref; # update cache map 
+		post_cache_processing();
+
+	} else { say "track cache operation failed!"; }
+}
+sub update_cache_map {
+
 		$debug and say "updating track cache_map";
 		#say "cache map",yaml_out($track->cache_map);
 		my $cache_map = $track->cache_map;
@@ -4704,60 +4761,86 @@ sub complete_caching {
 				@inserts;
 		}
 		#say "cache map",yaml_out($track->cache_map);
-		say qq(Saving effects for cached track "$name".
-'uncache' will restore effects and set version $orig_version\n);
+		say qq(Saving effects for cached track "), $track->name, '".';
+		say qq('uncache' will restore effects and set version $orig_version\n);
+}
 
-		# special handling for sub-bus mix track
-		
-		if ($track->rec_status eq 'REC')
-		{ 
-			$track->set(rw => 'MON');
-			$ui->global_version_buttons(); # recreate
-			$ui->refresh();
-		} 
+sub post_cache_processing {
 
-		# usual post-record handling is the default
+		# only set to MON tracks that would otherwise remain
+		# in a REC status
+		#
+		# track:REC bus:MON -> keep current state
+		# track:REC bus:REC -> set track to MON
 
-		else { post_rec_configure() }
+		$track->set(rw => 'MON') if $track->rec_status eq 'REC';
 
+		$ui->global_version_buttons(); # recreate
+		$ui->refresh();
 		reconfigure_engine();
 		revise_prompt("default"); 
 
-	} else { say "track cache operation failed!"; }
 }
 sub merge_edits {
-	# abort with warning if inserts present
-	# push effect_chains (including vol/pan)
-	# cache
-	# restore effects_chain
-	# make sure version, rw settings correct
-	# possibly store comments
-	# warn user about editing if already a cached track
-}
-sub complete_merge_edits {
-	my $track = shift;
-	my $name = $track->name;
-	my @files = grep{/$name/} new_files_were_recorded();
-	if (@files ){ 
+	# set shared lexicals
 
-		# special handling for sub-bus mix track
+	$additional_time = 0; # needed only for effect caching
+
+	$complete_caching_ref = sub 
+	{ 
+		# restore previous effects
+		pop_effect_chain($track);	
+
+		# possibly store comments
 		
-		if ($track->rec_status eq 'REC')
-		{ 
-			$track->set(rw => 'MON');
-			$ui->global_version_buttons(); # recreate
-			$ui->refresh();
-		} 
+		disable_edits();
+	};
 
-		# usual post-record handling is the default
+	$track = $this_track; 
 
-		else { post_rec_configure() }
+	# maybe we are on an edit track or host alias track
+	
+	# so we will try to merge edits for a track that is the same
+	# name as the current bus, unless the current bus is
+	# a system bus
 
-		reconfigure_engine();
+	$track = $tn{$this_bus} 
+		unless grep{ $this_bus eq $_ } qw(Main Master Mixdown);
+	
+	# make sure the system is in a suitable state
+	
+	# - track has edits
+	# - track doesn't have inserts
+	# - bus and track settings are correct
+	
+	say($track->name, ": version ", $track->monitor_version,
+	"has no edits to merge. Aborting."), return
+		unless $track->version_has_edits;
 
-	} else { say "No files recorded. Merge edits operation failed!"; }
+	say($track->name, ": has inserts. Remove them and try again. Aborting."),
+		return if $track->has_insert;
+
+	say($track->name, ": edits are not enabled. Select an edit for this track 
+and version and try again. Aborting"), return 
+		unless $track->edits_enabled;
+
+	my $bus = $::Bus::by_name{$track->name};
+
+	$bus->set(rw => 'MON'); # no edits of edits
+	
+	# we are good to go
+	
+	say $track->name, ": preparing to merge edits.";
+
+	end_edit_mode(); # possibly set by select_edit
+
+	# push effects off track	
+	
+	push_effects_chain($this_track, ops  => $this_track->ops);  # all of them
+
+	prepare_to_cache();
+	cache_engine_run();
 }
-
 sub poll_cache_progress {
 
 	print ".";
@@ -4780,9 +4863,10 @@ sub stop_polling_cache_progress {
 	$event_id{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
 	complete_caching();
-}
 
 }
+} # end shared lexicals for cache_track and merge_edits
+
 sub uncache_track { 
 	my $track = shift;
 	# skip unless MON;
@@ -5168,9 +5252,11 @@ sub set_edit_points {
     + record-start
     + record-end
 
-Engine will start in 3 seconds.);
+	say q(Press "Q" to quit.)
+
+Engine will start in 2 seconds.);
 	initialize_edit_points();
- 	$event_id{set_edit_points} = AE::timer(3, 0, 
+ 	$event_id{set_edit_points} = AE::timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
@@ -5202,11 +5288,42 @@ sub generate_edit_record_setup { # for current edit
 
 sub new_edit {
 	#my @edit_points = @_;
-	print($this_track->name, ": must be in MON mode.
-Edits will be applied against current version\n"), return 1
-	unless $this_track->rec_status eq 'MON' ;
+	say("You must use 'set_edit_points' before creating a new edit. Aborting."),
+		return unless @edit_points;
+	my $overlap = grep { 
+		my $fail;
+		my $rst = $_->rec_start_time;
+		my $ret = $_->rec_end_time;
+		my $nst = $edit_points[1];
+		my $net = $edit_points[2];
+		my $rst1 = d1($rst);
+		my $ret1 = d1($ret);
+		my $nst1 = d1($nst);
+		my $net1 = d1($net);
+		say("New rec-start time $nst1 conflicts with Edit ",
+			$_->n, ": $rst1 < $nst1 < $ret1"), $fail++
+		if $rst < $nst and $nst < $ret;
+		say("New rec-end time $net1 conflicts with Edit ",
+			$_->n, ": $rst1 < $net1 < $ret1"), $fail++
+		if $rst < $net and $net < $ret;
+		say("New rec interval $nst1 - $net1 conflicts with Edit ",
+			$_->n, ": $rst1 - $ret1"), $fail++
+		if $nst < $rst and $ret < $net;
+		$fail
+	} grep{ $_->host_track eq $this_track->name} 
+		values %Audio::Nama::Edit::by_name;
+	say("Aborting."), return if $overlap;
+	my $name = $this_track->name;
+	my $editre = qr($name-v\d+-edit\d+);
+	say("$name: editing of edits is not currently allowed."),
+		return if $name =~ /-v\d+-edit\d+/;
+	say("$name: must be in MON mode.
+Edits will be applied against current version"), 
+		return unless $this_track->rec_status eq 'MON' 
+			or $this_track->rec_status eq 'REC' and
+			grep{ /$editre/ } keys %::Track::by_name;
 	my $v = $this_track->monitor_version;
-	say $this_track->name, ": creating new edit against version ", $v;
+	say "$name: creating new edit against version $v";
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
@@ -5214,20 +5331,8 @@ Edits will be applied against current version\n"), return 1
 	$this_track->current_edit->{$v} = $edit->n;
 	$this_edit = $edit;
 	transfer_edit_points($edit);
-	set_edit_mode();
-}
-sub set_test_marks {
-	::Mark->new(qw(name brass-v49-edit1-play-start time 3));
-	::Mark->new(qw(name brass-v49-edit1-rec-start time 5));
-	::Mark->new(qw(name brass-v49-edit1-rec-end time 9));
-
-}
-sub test_edit {
-	set_test_marks();
-	command_process("new_edit");
 	record_edit();
 }
-
 sub record_edit {
 	set_edit_play_mode();
 	$this_edit->edit_track->set(rw => 'REC');
@@ -5258,14 +5363,19 @@ sub end_track_edit_magic {
 	# convert host track to mix track
 	
 	my $name = $this_edit->host_track;
-	my @vals = (is_mix_track => 0,
-				rec_defeat 	=> 0,
+	my @vals = (rec_defeat 	=> 0,
 				rw => 'MON',
 				);
 	$::tn{$name}->set( @vals );
 	$this_edit->bus->set(rw => 'OFF');
 }
-sub end_edit_mode  	{ $edit_mode = 0 }
+sub end_edit_mode  	{ 
+
+	# regenerate fades
+	
+	$edit_mode = 0; 
+	$regenerate_setup++ 
+}
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
 sub edit_mode		{ $edit_mode }
 sub edit_mode_conditions {        
@@ -5455,6 +5565,14 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 
+sub list_edits {
+	my @edit_data =
+		map{ s/^---//; s/...\s$//; $_ } 
+		map{ $_->dump }
+		sort{$a->n <=> $b->n} 
+		values %::Edit::by_name;
+	pager(@edit_data);
+}
 sub explode_track {
 	my $track = shift;
 	
@@ -5498,4 +5616,62 @@ sub explode_track {
 	chdir $current;
 }	
 
+sub select_edit {
+	my $n = shift;
+	my ($edit) = grep{ $_->n == $n } values %::Edit::by_name;
+	say("Edit $n not found. Skipping."),return if ! $edit;
+	say( qq(Edit $n applies to track "), $edit->host_track, 
+		 qq(" version ), $edit->host_version, ".
+This does does not match the track's current monitor version,
+which is: ", $edit->host->monitor_version, ". Aborting."), return
+		if $edit->host->monitor_version != $edit->host_version;
+	$this_edit = $edit;
+	$edit->bus->set(rw => 'REC');
+	my @vals = (
+		rw => 'REC',
+		rec_defeat => 1,
+		source_type => 'bus',
+		source_id	=> undef,
+	);
+	$edit->host->set( @vals );
+	set_edit_mode() and play_edit(); # should select_edit do this?
+}
+sub apply_fades {
+	my @tracks = map{$ti{$_}} keys %is_ecasound_chain;
+	map{ ::Fade::refresh_fade_controller($_) }
+	grep{$_->{fader} }  # only if already exists
+	@tracks
+}
+sub disable_edits {
+
+	# if we are on a host track, host alias or edit track
+	# the current bus will be the name of the host track
+	
+	my $host = $tn{$this_bus};
+	defined $host or print($this_track->name,": edits not enabled.\n"), return 1;
+
+	# turn off bus (and all edit tracks)
+	
+	my $bus = $::Bus::by_name{$this_bus};
+	$bus->set(rw => 'OFF');
+
+	# we will use information from current edit
+	# if defined
+	
+	my $edit = $this_edit;
+
+	# reset host track, copying back source settings if possible
+	
+	$host->set(
+		rw 			=> 'MON',
+		rec_defeat	=> 0,
+		source_type => (defined $edit 
+			? $edit->edit_track->source_type
+			: 'soundcard'),
+		source_id 	=> (defined $edit 
+			? $edit->edit_track->source_id
+			: 1),
+	);
+	end_edit_mode();
+}
 ### end

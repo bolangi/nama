@@ -1,24 +1,10 @@
 # ----------- Edit ------------
 package ::Edit;
 
-# each edit is uniquely identified by:
+# each edit is identified by:
 #  -  host track name
 #  -  host track version
-#  -  edit index
-
-# - I would like to let users adjust edit input source_type/source_id
-#   at the host track
-
-# - But as mix track, the host track is usually set to bus/bus
-# - That information goes only to $track->input_path() 
-#
-# - Solution: new field "is_mix_track"
-# - set when we create bus, clear when remove bus
-
-# - save/recall
-# - new project initializations
-# - region and playat settings
-#
+#  -  edit name (i.e. sax-v1) used as key in %by_name
 
 use Modern::Perl;
 our $VERSION = 1.0;
@@ -46,7 +32,11 @@ sub next_n {
 	my ($trackname, $version) = @_;
 	++$n{$trackname}{$version}
 }
-sub edit_index { join ':',@_ }
+
+# this was intended to provide a single index to
+# access/remove edits
+#
+# sub edit_index { join ':',@_ }
 
 sub new {
 	my $class = shift;	
@@ -60,8 +50,8 @@ sub new {
 
 	my $self = bless 
 		{ 
-			n => $n,
-		  	fades => [],
+			n 		=> $n,
+		  	fades 	=> [],
 			@_ 
 		}, $class;
 
@@ -69,35 +59,38 @@ sub new {
 	$by_name{ $self->edit_name } = $self;
 
 	#print "self class: $class, self type: ", ref $self, $/;
-	
+
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
 
-	# create bus and convert host track to mix track
+	# convert host track to mix track
 	
 	$host->busify;
-
-	# get the current version of host_track
-
-	# host track will become mix track of a sub-bus
 	
+	# create the bus
+	
+	::SubBus->new( 
+		name 		=> $host->name, 
+		send_type 	=> 'bus',
+		send_id	 	=> $host->name,
+	);
+
 	# create host track alias if necessary
 
 	# To ensure that users don't get into trouble, we would like to 
 	# restrict this track:
 	#  - version number must *not* be allowed to change
-	#  - rw setting must be fixed to 'MON'
-	#
+	#  - rw setting must be fixed to 'MON' #
 	#  The easiest way may be to subclass the 'set' routine
 	
-	my $host_track_alias = ::Track->new(
-		name 	=> $self->host_alias,
-		version => $::tn{$self->host_track}->monitor_version,
-		target  => $self->host_track,
-		rw		=> 'MON',
-		group   => $self->host_track, # bus affiliation
-	) 
-		unless $::tn{$self->host_alias};
+	my $host_track_alias = $::tn{$self->host_alias} // 
+		::Track->new(
+			name 	=> $self->host_alias,
+			version => $host->monitor_version, # should not be changed!
+			target  => $host->name,
+			rw		=> 'MON',
+			group   => $self->host_track, # bus affiliation
+		);
 
 	# create edit track
 	#   - same name as edit
@@ -105,9 +98,11 @@ sub new {
 	#   - source_type and source_id come from host track
 	
 	my $edit_track = ::EditTrack->new(
-		name	=> $self->edit_name,
-		rw		=> 'REC',
-		group	=> $self->host_track, # bus affiliation
+		name		=> $self->edit_name,
+		rw			=> 'REC',
+		source_type => $host->source_type,
+		source_id	=> $host->source_id,
+		group		=> $self->host_track, # bus affiliation
 	); 
 	$self
 }
@@ -167,18 +162,6 @@ sub marktime {
 	$::Mark::by_name{$self->$markfield}->{time}
 }
 
-sub is_active {
-	my $self = shift;
-
-	# the host track's current version must match
-	# the version the Edit object applies to
-	
-	# however the host track 'sax' will be made into a bus
-	# and the original WAV will be offered through
-	# 'sax-v3-original'
-	
-	#$::tn{$self->host_track}->current_version == $self->host_version
-}
 sub store_fades { # replacing previous
 	my $edit = shift;
 	my @fades = @_;
@@ -192,24 +175,11 @@ sub remove_fades {
 	$edit->set(fades => []);
 }
 
-sub host_alias_track { $::tn{$_[0]->host_alias} }
-sub edit_track 		 { $::tn{$_[0]->edit_name} }
-sub bus { $::bn{$_[0]->host_track} }
+sub host	 		{ $::tn{$_[0]->host_track} }
+sub host_alias_track{ $::tn{$_[0]->host_alias} }
+sub edit_track 		{ $::tn{$_[0]->edit_name} }
+sub bus 			{ $::Bus::by_name{$_[0]->host_track} }
 
 # utility routines
-
-#sub remove { # supply index
-	#my $i = shift;
-	#my $edit = $by_index{$i};
-	#my $track = $::tn{$edit->track};
-	
-	# remove object from index
-	#delete $by_index{$i};
-
-#}
-sub edit_track_search_string {
-	my ($name, $version) = @_;
-	join '-',$name,'v'.$version,'edit1'
-}
 1;
 

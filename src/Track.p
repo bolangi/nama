@@ -273,20 +273,25 @@ sub rec_status_display {
 
 sub region_start_time {
 	my $track = shift;
-	::Mark::mark_time( $track->region_start )
+	#return if $track->rec_status ne 'MON';
+	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
+	::Mark::unadjusted_mark_time( $track->region_start )
 }
 sub region_end_time {
 	my $track = shift;
-	return if $track->rec_status ne 'MON';
+	#return if $track->rec_status ne 'MON';
+	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
 	if ( $track->region_end eq 'END' ){
 		return ::wav_length($track->full_path);
 	} else {
-		::Mark::mark_time( $track->region_end )
+		::Mark::unadjusted_mark_time( $track->region_end )
 	}
 }
 sub playat_time {
 	my $track = shift;
-	::Mark::mark_time( $track->playat )
+	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
+	#return if $track->rec_status ne 'MON';
+	::Mark::unadjusted_mark_time( $track->playat )
 }
 
 # the following methods adjust
@@ -354,8 +359,7 @@ sub input_path { # signal path, not file path
 			# i.e. it gets input from other tracks, not 
 			# the specified source, if any.
 			
-			return () if $track->source_type eq 'bus'
-					  or $track->is_mix_track;
+			return () if $track->source_type eq 'bus';
 
 			( ::input_node($track->source_type) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
@@ -738,13 +742,21 @@ sub bus_tree { # for solo function to work in sub buses
 }
 
 sub version_has_edits { 
-	# true if exists track 'sax-v6-edit1'
-	# false if *-edit1 is deleted for some reason
-	my $track = shift;
-	my $version = shift;
-	my $edit_trackname = ::Edit::edit_track_search_string($track->name, $version);
-	$::tn{$edit_trackname}
+	my ($track) = @_;
+	grep
+		{ 		$_->host_track eq $track->name
+     		and $_->host_version == $track->monitor_version
+		} values %::Edit::by_name;
 }	
+sub edits_enabled {
+	my $track = shift;
+	my $bus;
+	$bus = $::Bus::by_name{$track->name}
+	and $bus->rw ne 'OFF'
+	and $track->rec_status eq 'REC' 
+	and $track->rec_defeat
+	and $track->source_type eq 'bus'
+}
 
 sub busify {
 	my $track = shift;
@@ -760,8 +772,7 @@ sub busify {
 
 	# convert host track to mix track
 	
-	my @vals = (is_mix_track => 1,
-				rec_defeat 	=> 1,
+	my @vals = ( rec_defeat 	=> 1,
 				rw => 'REC',
 				);
 
@@ -862,8 +873,6 @@ sub AUTOLOAD {
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	$::Edit::by_name{$self->name}->$call(@_);
 }
-sub source_id   { $::tn{$_[0]->host_track}->source_id }
-sub source_type { $::tn{$_[0]->host_track}->source_type }
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
@@ -872,6 +881,9 @@ sub current_version {
 	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
+}
+sub playat_time {
+	$_[0]->play_start_time
 }
 }
 {
