@@ -6,7 +6,7 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_name @all  %used_names);
+use vars qw($n %by_name @all);
 use ::Object qw( 
 				 name 
                  time
@@ -15,9 +15,9 @@ use ::Object qw(
 
 sub initialize {
 	map{ $_->remove} ::Mark::all();
-	%used_names = ();
 	@all = ();	
 	%by_name = ();	# return ref to Mark by name
+	@::marks_data = (); # for save/restore
 }
 sub new {
 	my $class = shift;	
@@ -27,7 +27,7 @@ sub new {
 	# to support set_edit_points, we now allow marks to be overwritten
 	#
 	#croak  "name already in use: $vals{name}\n"
-	#	 if $used_names{$vals{name}}; # null name returns false
+	#	 if $by_name{$vals{name}}; # null name returns false
 	
 	my $object = bless { 
 
@@ -58,7 +58,6 @@ sub set_name {
 	}
 	else {
 		$mark->set(name => $name);
-		$used_names{$name}++;
 		$by_name{ $name } = $mark;
 	}
 }
@@ -83,7 +82,6 @@ sub remove {
 	my $mark = shift;
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
-		delete $used_names{$mark->name};
 	}
 	$::debug and warn "marks found: ",scalar @all, $/;
 	# @all = (), return if scalar @all

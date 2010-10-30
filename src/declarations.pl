@@ -123,7 +123,8 @@ our (
 
 	### for effects
 
-	$cop_id, 		# chain operator id, that how we create, 
+	$cop_id, 		# autoincrement counter
+					# chain operator id, that how we create, 
 					# store, find them, adjust them, and destroy them,
 					# per track or per project?
 	$magical_cop_id, # cut through five levels of subroutines
@@ -131,7 +132,6 @@ our (
 	%copp,			# their parameters for effect update
 	%copp_exp,      # for log-scaled sliders
 
-# auxiliary track information - saving not required
 
 	%offset,        # index by chain, offset for user-visible effects 
 	@mastering_effect_ids,        # effect ids for mastering mode
@@ -160,7 +160,8 @@ our (
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
  	$jack_system,   # jack soundcard device
-	$jack_running,  # jackd status (pid)
+	$jack_running,  # jackd server status 
+	$jack_plumbing, # jack.plumbing daemon status
 	$jack_lsp,      # jack_lsp -Ap
 	$fake_jack_lsp, # for testing
 	%jack,			# jack clients data from jack_lsp
@@ -319,13 +320,16 @@ our (
 	%tn, # track by name  (alias to %::Track::by_name)
 	%bn, # bus   by name  (alias to %bn)
 
-	@tracks_data, # staging for saving
-	@groups_data, # obsolete
-	@marks_data,  # for storage
-	@inserts_data, # for storage
-	@bus_data,    #  buses
-	@fade_data, # fades
-	@edit_data, # edits
+	# for serialization (save/restore)
+	
+	@tracks_data,
+	@marks_data,
+	@inserts_data,
+	@bus_data,
+	@fade_data,
+	@edit_data,
+	@groups_data, # for backward compatibility only
+
 	@system_buses, # 
 	%is_system_bus, # 
 

@@ -18,12 +18,6 @@ use ::Object qw(
 				 track
 				 class
 				 );
-$off_level = -256;
-$on_level = 0;
-$fade_down_level = -64;
-$fade_down_fraction = 0.75;
-$fade_time1_fraction = 0.9;
-$fade_time2_fraction = 0.1;
 initialize();
 
 # example
@@ -34,7 +28,10 @@ initialize();
 # from 0 to 9, fade from 0 (100%) to -64db
 # from 9 to 10, fade from -64db to -256db
 
-sub initialize { %by_index = (); }
+sub initialize { 
+	%by_index = (); 
+	@::fade_data = (); # for save/restore
+}
 sub next_n {
 	my $n = 1;
 	while( $by_index{$n} ){ $n++}
@@ -68,6 +65,8 @@ sub new {
 	
 }
 
+# helper routines
+
 sub refresh_fade_controller {
 	my $track = shift;
 
@@ -77,6 +76,10 @@ sub refresh_fade_controller {
 
 	return unless
 		my @pairs = fader_envelope_pairs($track); 
+
+	# add fader if it is missing
+
+	add_fader($track->name);	
 
 	# add controller
 	::Text::t_add_ctrl($track->fader,  # parent
@@ -98,7 +101,6 @@ sub refresh_fade_controller {
 	::effect_update_copp_set($track->fader,0,$initial_level);
 }
 
-# class subroutines
 
 sub all_fades {
 	my $track_name = shift;
@@ -147,7 +149,7 @@ sub fader_envelope_pairs {
 		#say "marktime1: $marktime1";
 		#say "marktime2: $marktime2";
 		push @specs, [$marktime1, $marktime2, $fade->type];
-	}
+}
 	# sort fades # already done! XXX
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 	#say( ::yaml_out( \@specs));
@@ -174,10 +176,8 @@ sub spec_to_pairs {
 }
 	
 
-# utility routines
-
-	# the following routine makes it possible to
-	# remove an edit fade by the name of the edit mark
+# the following routine makes it possible to
+# remove an edit fade by the name of the edit mark
 	
 # ???? does it even work?
 sub remove_by_mark_name {

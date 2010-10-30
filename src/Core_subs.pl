@@ -60,13 +60,17 @@ sub prepare {
 
 	poll_jack() unless $opts{J} or $opts{A};
 
-	if ( 	$use_jack_plumbing
-			and ! ($opts{J} or $opts{A})  # testing mockup
-			and jack_running() 
-			and ! process_is_running('jack.plumbing')
-	){ 
-		system('jack.plumbing >/dev/null 2>&1 &');
-	}
+	sleeper(0.2); # allow time for first polling
+
+	# start jack.plumbing daemon
+	# if allowable and not yet started
+	
+	if ( 	$use_jack_plumbing				# not disabled in namarc
+			and ! ($opts{J} or $opts{A})	# we are not testing   
+			and $jack_running
+			and $jack_plumbing
+
+	){ system('jack.plumbing >/dev/null 2>&1 &') }
 
 	start_midish() if $midish_enable;
 
@@ -677,14 +681,6 @@ sub init_memoize {
 }
 }
 
-sub jack_running {
-	my @pids = split " ", qx(pgrep jackd);
-	my @jack  = grep{   my $pid;
-						/jackd/ and ! /defunct/
-						and ($pid) = /(\d+)/
-						and grep{ $pid == $_ } @pids 
-				} split "\n", qx(ps ax) ;
-}
 sub process_is_running {
 	my $name = shift;
 	my @pids = split " ", qx(pgrep $name);
@@ -711,14 +707,15 @@ sub initialize_project_data {
 		-background => 'lightyellow',
 		); 
 
-	# assign_var($project_init_file, @project_vars);
+	# effect variables - no object code (yet)
+	
+	$cop_id = "A"; # autoincrement counter
+	%cops	= ();  # effect and controller objects (hashes)
+	%copp   = ();  # chain operator parameters
+	               # indexed by {$id}->[$param_no]
+	               # zero-based {AB}->[0] (parameter 1)
 
-	%cops        = ();   
-	$cop_id           = "A"; # autoincrement
-	%copp           = ();    # chain operator parameters, dynamic
-	                        # indexed by {$id}->[$param_no]
-							# and others
-	%old_vol = ();
+	%old_vol = (); 
 
 	@input_chains = ();
 	@output_chains = ();
@@ -726,18 +723,12 @@ sub initialize_project_data {
 	%track_widget = ();
 	%effects_widget = ();
 
-	# time related
-	
 	$markers_armed = 0;
 
-	# new Marks
-	# print "original marks\n";
-	#print join $/, map{ $_->time} ::Mark::all();
  	::Mark::initialize();
 	::Fade::initialize();
-	@marks_data = ();
-	#print "remaining marks\n";
-	#print join $/, map{ $_->time} ::Mark::all();
+	::Edit::initialize();
+	
 	# volume settings
 	
 	%old_vol = ();
@@ -1691,8 +1682,12 @@ sub connect_jack_ports_list {
 	#
 	local $debug = 1;
 	
-	my $is_jack_plumbing 
-		= $use_jack_plumbing and process_is_running('jack.plumbing');
+	my $configure_jack_plumbing =  # boolean
+		(		
+			$use_jack_plumbing 
+		and $jack_running
+		and $jack_plumbing
+		);
 
 	#my $dis = shift;
 	my $dis;
@@ -1700,7 +1695,7 @@ sub connect_jack_ports_list {
 
 	# read user data from ~/.jack.plumbing if we need it
 	
-	if( $is_jack_plumbing){
+	if( $configure_jack_plumbing){
 
 
 		$debug and say "jack plumbing is running: we will configure";
@@ -1746,7 +1741,7 @@ sub connect_jack_ports_list {
 					?  1 
 					: $line_number % $track->width + 1;
 
-				if( $is_jack_plumbing ){
+				if( $configure_jack_plumbing ){
 
 					my $ecasound_port = $dest .  $ecasound_port_number;
 					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
@@ -1769,7 +1764,7 @@ sub connect_jack_ports_list {
  	 } grep{ $_->source_type eq 'jack_ports_list' 
 				and $_->rec_status eq 'REC' } ::Track::all();
 
-	 close $fh if $is_jack_plumbing;
+	 close $fh if $configure_jack_plumbing;
 }
 }
 sub quote { qq("$_[0]")}
@@ -1943,8 +1938,6 @@ sub wraparound {
 	$event_id{wraparound} = undef;
 	$event_id{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
-sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
-
 sub schedule_autosave { 
 	# one-time timer 
 	my $seconds = (shift || $autosave_interval) * 60;
@@ -3555,8 +3548,8 @@ sub restore_state {
 	#  destroy and recreate all buses
 
 	::Bus::initialize();	
+
 	create_system_buses(); 
-	#map { ::Group->new( %{ $_ } ) } @groups_data;  
 
 	# restore user buses
 		
@@ -3961,13 +3954,18 @@ sub keyword {
         return undef;
 } };
 
+# JACK related functions
+
+sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
 	# cache current JACK status
-	$jack_running = jack_running();
+	$jack_running =  process_is_running('jackd');
+	$jack_plumbing = process_is_running('jack.plumbing');
 	my $jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
 	%jack = %{jack_ports($jack_lsp)} if $jack_running;
 }
+
 sub jack_client {
 
 	# returns array of ports if client and direction exist
@@ -5636,7 +5634,10 @@ which is: ", $edit->host->monitor_version, ". Aborting."), return
 	$edit->host->set( @vals );
 	set_edit_mode() and play_edit(); # should select_edit do this?
 }
-sub apply_fades {
+sub apply_fades { 
+	# use info from Fade objects in %::Fade::by_name
+	# applying to tracks that are part of current
+	# chain setup
 	my @tracks = map{$ti{$_}} keys %is_ecasound_chain;
 	map{ ::Fade::refresh_fade_controller($_) }
 	grep{$_->{fader} }  # only if already exists

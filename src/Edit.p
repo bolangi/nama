@@ -24,8 +24,8 @@ use ::Object qw(
 
 sub initialize {
 	%n = ();
-	#%by_index = ();	
 	%by_name = ();
+	@::edits_data = (); # for save/restore
 }
 
 sub next_n {

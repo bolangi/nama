@@ -128,6 +128,12 @@ $fade_resolution = 200; # steps per second
 $default_fade_length = 0.5; # for fade-in, fade-out
 $edit_playback_end_margin = 3;
 $edit_crossfade_time = 0.01; # 
+$::Fade::on_level = 0;
+$::Fade::off_level = -256;
+$::Fade::fade_down_level = -64;
+$::Fade::fade_down_fraction = 0.75;
+$::Fade::fade_time1_fraction = 0.9;
+$::Fade::fade_time2_fraction = 0.1;
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;
