@@ -1707,6 +1707,8 @@ sub connect_jack_ports_list {
 		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
 	
 		open $fh, ">", jack_plumbing_conf();
+
+		print $fh $user_plumbing, $plumbing_header;
 	}
 	map{  
 		my $track = $_; 
