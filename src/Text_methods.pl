@@ -17,9 +17,7 @@ sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
 
 sub show_effects {
 	::sync_effect_parameters();
-	my @lines;
- 	map {  push @lines, show_effect($_) } @{ $this_track->ops };
-	join "", @lines;
+	join "", map { show_effect($_) } @{ $this_track->ops };
 }
 sub show_effect {
  		my $op_id = shift;
