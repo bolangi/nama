@@ -625,6 +625,13 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign(?) value end {
 	} @{$item{"op_id(s)"}};
 	1;
 }
+show_effect: _show_effect op_id(s) {
+	my @lines = 
+		map{ ::Text::show_effect($_) } 
+		grep{ $::cops{$_} }
+		@{ $item{'op_id(s)'}};
+	::pager(@lines); 1
+}
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches ident(s) { 
