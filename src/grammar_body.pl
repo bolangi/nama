@@ -614,10 +614,12 @@ parent: op_id
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	# note that 'sign' results in undef value
+	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
 	1;
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
+	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
 	1;
 }
 show_effect: _show_effect op_id(s) {
