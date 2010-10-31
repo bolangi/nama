@@ -137,7 +137,7 @@ project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
 anytag: /\S+/
-ident: /[-\w]+/   # | <error: illegal identifier, word characters only!> XXX
+ident: /[a-zA-z][\w-]*/  #| <error: illegal name!> 
 					# used in: bunch_name, effect_profile,
 					# track_name
 					# existing_effect_profile
@@ -698,7 +698,7 @@ existing_bus_name: bus_name {
 	else { print("$item{bus_name}: no such bus\n"); undef }
 }
 
-bus_name: /\w+/ {
+bus_name: ident {
 	if($item[1] =~ /^[A-Z]/){ $item[1] }
 	else { print("Bus name must begin with capital letter.\n"); undef} 
 }
