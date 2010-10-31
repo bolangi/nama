@@ -18,8 +18,12 @@ sub show_bus { "Bus: ". $this_track->group. $/ if $this_track->group ne 'Main' }
 sub show_effects {
 	::sync_effect_parameters();
 	my @lines;
- 	map { 
- 		my $op_id = $_;
+ 	map {  push @lines, show_effect($_) } @{ $this_track->ops };
+	join "", @lines;
+}
+sub show_effect {
+ 		my $op_id = shift;
+		my @lines;
 		my @params;
  		 my $i = $effect_i{ $cops{ $op_id }->{type} };
  		 push @lines, $op_id. ": " . $effects[ $i ]->{name}.  "\n";
@@ -32,12 +36,9 @@ sub show_effects {
 		 	} (scalar @pnames .. (scalar @{$copp{$op_id}} - 1)  )
 				if scalar @{$copp{$op_id}} - scalar @pnames - 1; 
 			#push @lines, join("; ", @params) . "\n";
- 
- 	} @{ $this_track->ops };
-
-	join "", @lines;
- 	
+		@lines
 }
+ 
 sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
