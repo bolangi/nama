@@ -371,16 +371,6 @@ sub input_path { # signal path, not file path
 			#  
 			#  subtrack --> mix_track_in --> mix_track
 
-			# comment: individual tracks of a sub bus
-			# connect their outputs to the mix track
-			# (the $bus->apply method takes care of this)
-			#
-			# subtrack ---> mix_track
-			#
-			# later:
-			#  
-			#  subtrack --> mix_track_in --> mix_track
-
 			( ::input_node($track->source_type) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 
