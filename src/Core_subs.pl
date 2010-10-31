@@ -2114,7 +2114,7 @@ sub jump {
 	my $new_pos = $here + $delta * $unit;
 	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
 	set_position( $new_pos );
-	sleeper( 0.6);
+	sleeper( 0.6) if engine_running();
 }
 ## post-recording functions
 sub rec_cleanup {  
@@ -3747,6 +3747,7 @@ sub set_position {
     if( $jack_running and eval_iam('engine-status') eq 'running')
 			{ engine_stop_seek_start( $coderef ) }
 	else 	{ $coderef->() }
+	update_clock_display();
 }
 
 sub engine_stop_seek_start {
