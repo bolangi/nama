@@ -611,18 +611,13 @@ insert_effect: _insert_effect before effect value(s?) end {
 before: op_id
 parent: op_id
 
-modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign(?) value end {
-	map{ my $op_id = $_;
-		map{ 	my $parameter = $_;
-				$parameter--;
-				::modify_effect(
-					$op_id, 
-					$parameter, 
-					$item{'sign(?)'}->[0],
- 					$item{value}
-				); 
-		} @{$item{"parameter(s)"}};
-	} @{$item{"op_id(s)"}};
+modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
+	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
+	# note that 'sign' results in undef value
+	1;
+}
+modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
+	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	1;
 }
 show_effect: _show_effect op_id(s) {

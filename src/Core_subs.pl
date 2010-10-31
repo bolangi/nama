@@ -2216,6 +2216,15 @@ sub modify_effect {
 		$parameter, 
 		$new_value);
 }
+sub modify_multiple_effects {
+	my ($op_ids, $parameters, $sign, $value) = @_;
+	map{ my $op_id = $_;
+		map{ 	my $parameter = $_;
+				$parameter--; # convert to zero-base
+				modify_effect($op_id, $parameter, $sign, $value);
+		} @$parameters
+	} @$op_ids;
+}
 
 sub remove_effect { 
 	@_ = discard_object(@_);
