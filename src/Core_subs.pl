@@ -20,7 +20,8 @@ sub prepare {
 
 	read_config(global_config());  # from .namarc if we have one
 
-	select_ecasound_interface();
+	start_ecasound();
+
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
@@ -100,7 +101,14 @@ sub issue_first_prompt {
 	print prompt();
 	$attribs->{already_prompted} = 0;
 }
-
+sub start_ecasound {
+ 	my @existing_pids = split " ", qx(pgrep ecasound);
+	select_ecasound_interface();
+	sleeper(0.2);
+	@ecasound_pids = grep{ 	my $pid = $_; 
+							! grep{ $pid == $_ } @existing_pids
+						 }	split " ", qx(pgrep ecasound);
+}
 sub select_ecasound_interface {
 	return if $opts{E} or $opts{A};
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
@@ -4663,7 +4671,19 @@ sub list_effect_chains {
 }
 sub cleanup_exit {
  	remove_riff_header_stubs();
- 	kill 15, ecasound_pid() if $sock;  	
+	# for each process: 
+	# - SIGINT (1st time)
+	# - allow time to close down
+	# - SIGINT (2nd time)
+	# - allow time to close down
+	# - SIGKILL
+	map{ my $pid = $_; 
+		 map{ my $signal = $_; 
+			  kill $signal, $pid; 
+			  sleeper(0.2) 
+			} (2,2,9)
+	} @ecasound_pids;
+ 	#kill 15, ecasound_pid() if $sock;  	
 	close_midish() if $midish_enable;
 	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 

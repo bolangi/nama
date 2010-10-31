@@ -31,6 +31,7 @@ our (
 	$ecasound_globals_realtime,     # .namarc field
 	$ecasound_globals_default,  # .namarc field
 	$ecasound_tcp_port,  # for Ecasound NetECI interface
+	@ecasound_pids,      # started by Nama
 	$saved_version, # copy of $VERSION saved with settings in State.yml
 
 
