@@ -744,6 +744,26 @@ show_comments:
   type: track
   what: show all track comments
   short: scs
+add_version_comment:
+  type: track
+  what: add version comment (replacing any previous user comment)
+  short: comment avc
+remove_version_comment:
+  type: track
+  what: remove version comment(s) from current track
+  short: rvc
+show_version_comment:
+  type: track
+  what: show version comment(s)
+  short: svc
+show_version_comments_all:
+  type: track
+  what: show all version comments for current track
+  short: svca
+set_system_version_comment:
+  type: track
+  what: set system version comment (for testing only)
+  short: comment ssvc 
 midish_command:
   type: midi
   what: send command text to 'midish' MIDI sequencer shell

@@ -893,6 +893,31 @@ show_comments: _show_comments {
 	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } ::Track::all();
 	1;
 }
+add_version_comment: _add_version_comment dd(?) text {
+	my $t = $::this_track;
+	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
+	print ::add_version_comment($t,$v,$item{text});
+}	
+remove_version_comment: _remove_version_comment dd {
+	my $t = $::this_track;
+	print ::remove_version_comment($t,$item{dd}); 1
+}
+show_version_comment: _show_version_comment dd(s?) {
+	my $t = $::this_track;
+	my @v = @{$item{'dd(s?)'}};
+	if(!@v){ @v = $t->monitor_version}
+	@v or return 1;
+	::show_version_comments($t,@v);
+	 1;
+}
+show_version_comments_all: _show_version_comments_all {
+	my $t = $::this_track;
+	my @v = @{$t->versions};
+	::show_version_comments($t,@v); 1;
+}
+set_system_version_comment: _set_system_version_comment dd text {
+	print ::set_system_version_comment($::this_track,@item{qw(dd text)});1;
+}
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
 }

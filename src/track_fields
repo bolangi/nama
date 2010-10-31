@@ -40,5 +40,6 @@
 					effect_chain_stack # for bypass and friends
 					cache_map		# original versions of intermediate mixdown
 
-					comment			# add description of track
+					comment			# describe track
+					version_comment # describe a version { 1 => 'comment text' }
 					current_edit    # {version1 => current_edit1,...}
