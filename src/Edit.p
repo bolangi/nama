@@ -5,6 +5,13 @@ package ::Edit;
 #  -  host track name
 #  -  host track version
 #  -  edit name (i.e. sax-v1) used as key in %by_name
+#
+
+# Routing:
+#
+#    sax-v5-original ----+
+#                        |
+#    sax-v5-edit1 -------+--- sax-v5 ----- sax ----- 
 
 use Modern::Perl;
 our $VERSION = 1.0;
@@ -57,15 +64,29 @@ sub new {
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
 
+	# create a top-level sub-bus 
 	# convert host track to mix track
 	
 	$host->busify;
 	
-	# create the bus
+	# create the per-version mix track and sub-bus
 	
+	);
+	
+	::Track->new(
+		name 		=> $self->edit_root_name,
+		rw			=> 'REC',
+		source_type => 'bus',
+		source_id 	=> 'bus',
+		width		=> 2, # default to stereo 
+		rec_defeat 	=> 1,
+		rec_defeat 	=> 1,
+		group   	=> $self->host_track,
+	);
+
 	::SubBus->new( 
-		name 		=> $host->name, 
-		send_type 	=> 'bus',
+		name 		=> $self->edit_root_name, 
+		send_type 	=> 'track',
 		send_id	 	=> $host->name,
 	);
 

@@ -29,6 +29,25 @@
 
 					source_id		# signal source (channel No. or jack client)
 					source_type		# soundcard or jack_client
+
+					# acceptable values (also applies to send_type)
+					#
+					# Active settings:
+					#
+					#  - jack_client
+					#  - jack_ports_list
+					#  - jack_manual
+					#  - soundcard (ALSA/JACK)
+					#
+					# Passive settings:
+					#
+					#  - track
+					#  - bus
+					#  - loop
+					
+					# At present, no activity takes place.
+					# Connections are made by other objects.
+
 					send_id			# as above, for output
 					send_type
 
