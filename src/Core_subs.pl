@@ -5747,23 +5747,23 @@ which is: ", $edit->host->monitor_version, ". Aborting."), return
 	
 	$this_edit = $edit;
 
-	# settings for top-level bus and mix track
+	# turn on top-level bus and mix track
 	
-	$edit->bus->set(rw => 'REC'); # allow sax-v5 to access live signal
+	$edit->bus->set(rw => 'REC');
 
-	my @vals = (
-		rw 			=> 'REC',
-		rec_defeat 	=> 1,
-		source_type => 'bus',
-		source_id	=> undef,
-	);
-	$edit->host->set( @vals );
+	$edit->host->busify;
 
-	# settings for version-level bus and mix track
+	# turn off all version level buses/mix_tracks
+	
+	map{ $tn{$_}->set(rw => 'OFF'); # version mix tracks
+	     $bn{$_}->set(rw => 'OFF'); # version buses
+	} $this_edit->bus->tracks;      # use same name for track/bus
+
+	# turn on what we want
 	
 	$edit->version_bus->set(rw => 'REC');
 
-	$edit->version_mix->set( @vals );
+	$edit->version_mix->busify;
 	
 	set_edit_mode() and play_edit(); # should select_edit do this?
 }
