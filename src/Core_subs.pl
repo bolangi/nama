@@ -1732,6 +1732,9 @@ sub connect_transport {
 	1;
 	
 }
+sub jack_plumbing_conf {
+	join_path( $ENV{HOME} , '.jack.plumbing' )
+}
 
 { 
   my $plumbing_tag = q(BEGIN NAMA CONNECTIONS LIST);
@@ -5024,6 +5027,26 @@ sub do_script {
 	for my $input (@lines) { process_line($input)};
 	$opts{R} = $old_opt_r;
 }
+sub import_audio {
+
+	my ($track, $path, $frequency) = @_;
+	
+	$this_track->import_audio($path, $frequency);
+
+	# check that track is audible
+	
+	my $bus = $bn{$this_track->group};
+
+	# set MON status unless track _is_ audible
+	
+	$this_track->set(rw => 'MON') 
+		unless $bus->rw eq 'MON' and $this_track->rw eq 'REC';
+
+	# warn if bus is OFF
+	
+	print("You must set bus to MON (i.e. \"bus_mon\") to hear this track.\n") 
+		if $bus->rw eq 'OFF';
+}
 sub destroy_current_wav {
 	my $old_group_status = $main->rw;
 	$main->set(rw => 'MON');
@@ -5495,9 +5518,12 @@ sub edit_mode_conditions {
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
 	$this_edit->host_alias_track->rec_status eq 'MON'
 		or say('host track alias: ',$this_edit->host_alias,
-				" must be set to MON"), return;
+				" status must be MON"), return;
+
+	# the following conditions should never be triggered 
+	
 	$this_edit->host_alias_track->monitor_version == $this_edit->host_version
-		or say('host track alias: ',$this_edit->host_alias,
+		or die('host track alias: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
 }
@@ -5653,30 +5679,6 @@ sub set_edit_vars_testing {
 }
 }
 
-sub jack_plumbing_conf {
-	join_path( $ENV{HOME} , '.jack.plumbing' )
-}
-sub import_audio {
-
-	my ($track, $path, $frequency) = @_;
-	
-	$this_track->import_audio($path, $frequency);
-
-	# check that track is audible
-	
-	my $bus = $bn{$this_track->group};
-
-	# set MON status unless track _is_ audible
-	
-	$this_track->set(rw => 'MON') 
-		unless $bus->rw eq 'MON' and $this_track->rw eq 'REC';
-
-	# warn if bus is OFF
-	
-	print("You must set bus to MON (i.e. \"bus_mon\") to hear this track.\n") 
-		if $bus->rw eq 'OFF';
-}
-
 sub list_edits {
 	my @edit_data =
 		map{ s/^---//; s/...\s$//; $_ } 
@@ -5731,21 +5733,38 @@ sub explode_track {
 sub select_edit {
 	my $n = shift;
 	my ($edit) = grep{ $_->n == $n } values %::Edit::by_name;
+
+	# check that conditions are met
+	
 	say("Edit $n not found. Skipping."),return if ! $edit;
 	say( qq(Edit $n applies to track "), $edit->host_track, 
 		 qq(" version ), $edit->host_version, ".
 This does does not match the track's current monitor version,
 which is: ", $edit->host->monitor_version, ". Aborting."), return
 		if $edit->host->monitor_version != $edit->host_version;
+
+	# select edit
+	
 	$this_edit = $edit;
-	$edit->bus->set(rw => 'REC');
+
+	# settings for top-level bus and mix track
+	
+	$edit->bus->set(rw => 'REC'); # allow sax-v5 to access live signal
+
 	my @vals = (
-		rw => 'REC',
-		rec_defeat => 1,
+		rw 			=> 'REC',
+		rec_defeat 	=> 1,
 		source_type => 'bus',
 		source_id	=> undef,
 	);
 	$edit->host->set( @vals );
+
+	# settings for version-level bus and mix track
+	
+	$edit->version_bus->set(rw => 'REC');
+
+	$edit->version_mix->set( @vals );
+	
 	set_edit_mode() and play_edit(); # should select_edit do this?
 }
 sub apply_fades { 
@@ -5759,25 +5778,15 @@ sub apply_fades {
 }
 sub disable_edits {
 
-	# if we are on a host track, host alias or edit track
-	# the current bus will be the name of the host track
-	
-	my $host = $tn{$this_bus};
-	defined $host or print($this_track->name,": edits not enabled.\n"), return 1;
-
-	# turn off bus (and all edit tracks)
-	
-	my $bus = $::Bus::by_name{$this_bus};
-	$bus->set(rw => 'OFF');
-
-	# we will use information from current edit
-	# if defined
-	
+	say("Please select an edit and try again."), return
+		unless defined $this_edit;
 	my $edit = $this_edit;
+
+	$edit->bus->set( rw => 'OFF');
 
 	# reset host track, copying back source settings if possible
 	
-	$host->set(
+	$edit->host->set(
 		rw 			=> 'MON',
 		rec_defeat	=> 0,
 		source_type => (defined $edit 

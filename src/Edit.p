@@ -65,30 +65,22 @@ sub new {
 #    sax-v5-edit1 -----+--- sax-v5 (bus/track) --- sax (bus/track) ----- 
 
 
-	# create a top-level sub-bus 
-	# convert host track to mix track
+	# prepare top-level bus and mix track
 	
 	$host->busify;     # i.e. sax (bus/track)
 	
-	# create the per-version mix track and sub-bus
-	#
-	#                  # i.e. sax-v5 (bus/track)
+	# create the version-level bus and mix track
+	# i.e. sax-v5 (bus/track)
 	
 	::Track->new(
 		name 		=> $self->edit_root_name, # i.e. sax-v5
-		rw			=> 'REC',
+	#	rw			=> 'REC',                 # set by ->busify
 		source_type => 'bus',
 		source_id 	=> 'bus',
-		width		=> 2, # default to stereo 
-		rec_defeat 	=> 1,
+		width		=> 2,                     # default to stereo 
+	#	rec_defeat 	=> 1,                     # set by ->busify
 		group   	=> $self->host_track,     # i.e. sax
-	);
-
-	::SubBus->new( 
-		name 		=> $self->edit_root_name, # i.e. sax-v5
-		send_type 	=> 'track',               # our new standard
-		send_id	 	=> $self->edit_root_name  # i.e. sax-v5
-	);
+	)->busify;                                # create sub-bus
 
 	# create host track alias if necessary
 
@@ -101,9 +93,9 @@ sub new {
 	my $host_track_alias = $::tn{$self->host_alias} // 
 		::VersionTrack->new(
 			name 	=> $self->host_alias,
-			version => $host->monitor_version, # cannot be changed
+			version => $host->monitor_version, # static
 			target  => $host->name,
-			rw		=> 'MON',                  # do not set to REC
+			rw		=> 'MON',                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
 		);
 
@@ -117,7 +109,7 @@ sub new {
 		rw			=> 'REC',
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
-		group		=> $self->host_track, # bus affiliation
+		group		=> $self->edit_root_name,  # i.e. sax-v5
 	); 
 	$self
 }
@@ -190,10 +182,12 @@ sub remove_fades {
 	$edit->set(fades => []);
 }
 
-sub host	 		{ $::tn{$_[0]->host_track} }
-sub host_alias_track{ $::tn{$_[0]->host_alias} }
-sub edit_track 		{ $::tn{$_[0]->edit_name} }
-sub bus 			{ $::Bus::by_name{$_[0]->host_track} }
+sub host	 		{ $::tn{$_[0]->host_track} } # top-level mix track, i.e. 'sax'
+sub bus 			{ $::Bus::by_name{$_[0]->host_track} }  # top-level bus
+sub version_mix     { $::tn{$_[0]->edit_root_name} }        # in top-level bus
+sub version_bus     { $::Bus::by_name{$_[0]->edit_root_name} } # version-level bus
+sub host_alias_track{ $::tn{$_[0]->host_alias} }            # in version_bus
+sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 
 # utility routines
 1;
