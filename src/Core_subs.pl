@@ -5429,7 +5429,7 @@ Edits will be applied against current version"),
 	$this_track->current_edit->{$v} = $edit->n;
 	$this_edit = $edit;
 	transfer_edit_points($edit);
-	record_edit();
+	edit_action('preview_edit_in');
 }
 {my %edit_actions = 
 	(
