@@ -61,4 +61,12 @@
 
 					comment			# describe track
 					version_comment # describe a version { 1 => 'comment text' }
+
+					# new API:
+					# { 1 => 
+				    #		 { 
+					#		 user => 'user comment', 
+					#		 system => 'system comment'
+					#		 },
+					# }
 					current_edit    # {version1 => current_edit1,...}

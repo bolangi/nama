@@ -101,6 +101,7 @@ sub new {
 					effect_chain_stack => [],
 					cache_map 		=> {},
 					current_edit 	=> {},
+					version_comment => {},
 
 					@_ 			}, $class;
 
@@ -801,14 +802,15 @@ sub adjusted_length {
 	$length += $track->adjusted_playat_time;
 }
 
-=comment
-sub this_edit {
-	my $track = shift;
-	my $v = $track->monitor_version;
-	return unless $v and $track->rec_status eq 'MON';
-	$track->current_edit->{$v}
+sub version_comment {
+	my ($track, $v) = @_;
+	my $text   = $track->{version_comment}{$v}{user};
+	$text .= " " if $text;
+	my $system = $track->{version_comment}{$v}{system};
+	$text .= "* $system" if $system;
+	"$v: $text\n" if $text;
 }
-=cut
+				
 	
 # subclasses
 

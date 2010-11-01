@@ -3642,6 +3642,19 @@ sub restore_state {
 
  		} @tracks_data;
 	}
+	if ( $saved_version <= 1.068){ 
+
+		# initialize version_comment field
+		map{ $_->{version_comment} or $_->{version_comment} = {} } @tracks_data;
+
+		# convert existing comments to new format
+		map{ 
+			while ( my($v,$comment) = each %{$_->{version_comment}} )
+			{ 
+				$_->{version_comment}{$v} = { user => $comment }
+			}
+		} grep { $_->{version_comment} } @tracks_data;
+	}
 
 	#  destroy and recreate all buses
 
@@ -5005,6 +5018,8 @@ sub destroy_current_wav {
 	my $reply = $term->readline("delete WAV file $wav? [n] ");
 	#my $reply = chr($term->read_key()); 
 	if ( $reply =~ /y/i ){
+		# remove version comments, if any
+		delete $this_track->{version_comment}{$this_track->current_version};
 		print "Unlinking.\n";
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		rememoize();
@@ -5746,49 +5761,32 @@ sub disable_edits {
 	);
 	end_edit_mode();
 }
-{
-my $comment_re = qr/([^*]*)(\*.*)?/;
 sub show_version_comments {
 	my ($t, @v) = @_;
 	return unless @v;
-	$t->set(version_comment => {}) unless $t->version_comment; # initialize
-	my $c = $t->version_comment;
-	::pager(map{ $c->{$_} ? "$_: $c->{$_}\n" : "" }@v);
+	::pager(map{ $t->version_comment($_) } @v);
 }
 sub add_version_comment {
 	my ($t,$v,$text) = @_;
-	$text =~ s/\s+$//; # remove trailing spaces
-	$t->set(version_comment => {}) unless $t->version_comment; # initialize
-	my $c = $t->version_comment;
-	my ($u,$n) = $c->{$v} =~ /$comment_re/; 
-	$c->{$v} = "$text $n";
-	"$v: $c->{$v}\n";
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	$t->{version_comment}{$v}{user} = $text;
+	$t->version_comment($v);
+}
+sub add_system_version_comment {
+	my ($t,$v,$text) = @_;
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	$t->{version_comment}{$v}{system} = $text;
+	$t->version_comment($v);
 }
 sub remove_version_comment {
 	my ($t,$v) = @_;
-	$t->set(version_comment => {}) unless $t->version_comment; # initialize
-	my $c = $t->version_comment;
-	my ($u,$n) = $c->{$v} =~ /$comment_re/; 
-	if($n){ 
-		$c->{$v} = $n;
-		"$v: $n\n";
-	} else { 
-		delete $c->{$v}; # remove key if no text remains
-		"$v: [comment deleted]\n";
-	}
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	delete $t->{version_comment}{$v}{user};
+	$t->version_comment($v) || "$v: [comment deleted]\n";
+}
+sub remove_system_version_comment {
+	my ($t,$v) = @_;
+	delete $t->{version_comment}{$v}{system} if $t->{version_comment}{$v}
 }
 
-sub set_system_version_comment { 
-	my ($t,$v,$text) = @_;
-	$t->set(version_comment => {}) unless $t->version_comment; # initialize
-	my $c = $t->version_comment;
-	my ($u,$n) = $c->{$v} =~ /$comment_re/; 
-	$u =~ s/\s+$//; # remove trailing spaces
-	my $comment;
-	$comment = "$u " if $u;
-	$comment .= "* $text";
-	$c->{$v} = $comment;
-	"$v: $comment\n";
-}
-}
 ### end
