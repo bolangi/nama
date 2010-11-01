@@ -2685,7 +2685,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 		apply_op($id);
 		}
 	}
-	ecasound_select_chain($this_track->n);
+	ecasound_select_chain($this_track->n) if defined $this_track;
 }
 sub apply_op {
 	$debug2 and print "&apply_op\n";
@@ -4739,10 +4739,12 @@ sub cache_track { # launch subparts if conditions are met
 	($track, $additional_time) = @_;
 	say $track->name, ": preparing to cache.";
 	
-	# check conditions for sub-bus mix track
-	if( $bn{$track->name} ){ 
-		$track->rec_status ne 'OFF' or say(
-			"mix track ",$track->name, ": status is OFF. Aborting."), return;
+	# abort if sub-bus mix track and bus is OFF 
+	if( my $bus = $bn{$track->name}
+		and $track->rec_status eq 'REC' 
+	 ){ 
+		$bus->rw eq 'OFF' and say(
+			$bus->name, ": status is OFF. Aborting."), return;
 
 	# check conditions for normal track
 	} else { 
@@ -4754,7 +4756,6 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $bn{$track->name};
 
-	$complete_caching_ref = \&update_cache_map;
 	prepare_to_cache();
 	cache_engine_run();
 
@@ -4789,20 +4790,23 @@ sub prepare_to_cache {
 
 	# Case 1: Caching a standard track
 	
-	# set the original track to read the WAV file
-	
-	$g->add_path('wav_in',$track->name) if $track->rec_status eq 'MON';
-	$debug and say "The graph0 is:\n$g";
-	
+	if($track->rec_status eq 'MON')
+	{
+		# set the input path
+		$g->add_path('wav_in',$track->name);
+		$debug and say "The graph0 is:\n$g";
+
+		# update cache map to enable 'uncache' command
+		$complete_caching_ref = \&update_cache_map;
+	}
 
 	# Case 2: Caching a sub-bus mix track
 
-	# apply all sub-buses (unneeded ones will be pruned from the graph)
-	
-	map{ $_->apply() } 
-	grep{ (ref $_) =~ /Sub/ } 
-	::Bus::all()
-		if $track->rec_status eq 'REC';
+	elsif($track->rec_status eq 'REC'){
+
+		# apply all sub-buses (unneeded ones will be pruned)
+		map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
+	}
 
 	$debug and say "The graph1 is:\n$g";
 	prune_graph();
@@ -4823,6 +4827,10 @@ sub cache_engine_run { # uses shared lexicals
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
 	print "Starting cache operation. Please wait.";
+	
+	#say "Aborting";
+	#return;  # XXX DEBUG
+	
 	revise_prompt(" "); 
 
 	# we try to set processing time this way
@@ -4843,7 +4851,8 @@ sub complete_caching {
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		&$complete_caching_ref; # update cache map 
+		# update cache map 
+		&$complete_caching_ref if defined $complete_caching_ref;
 		post_cache_processing();
 
 	} else { say "track cache operation failed!"; }
@@ -4887,84 +4896,25 @@ sub post_cache_processing {
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		reconfigure_engine();
+		$this_track = $track;
 		revise_prompt("default"); 
-
-}
-sub merge_edits {
-	# set shared lexicals
-
-	$additional_time = 0; # needed only for effect caching
-
-	$complete_caching_ref = sub 
-	{ 
-		# restore previous effects
-		pop_effect_chain($track);	
-
-		# possibly store comments
-		
-		disable_edits();
-	};
-
-	$track = $this_track; 
-
-	# maybe we are on an edit track or host alias track
-	
-	# so we will try to merge edits for a track that is the same
-	# name as the current bus, unless the current bus is
-	# a system bus
-
-	$track = $tn{$this_bus} 
-		unless grep{ $this_bus eq $_ } qw(Main Master Mixdown);
-	
-	# make sure the system is in a suitable state
-	
-	# - track has edits
-	# - track doesn't have inserts
-	# - bus and track settings are correct
-	
-	say($track->name, ": version ", $track->monitor_version,
-	"has no edits to merge. Aborting."), return
-		unless $track->version_has_edits;
-
-	say($track->name, ": has inserts. Remove them and try again. Aborting."),
-		return if $track->has_insert;
-
-	say($track->name, ": edits are not enabled. Select an edit for this track 
-and version and try again. Aborting"), return 
-		unless $track->edits_enabled;
-
-	my $bus = $::Bus::by_name{$track->name};
-
-	$bus->set(rw => 'MON'); # no edits of edits
-	
-	# we are good to go
-	
-	say $track->name, ": preparing to merge edits.";
-
-	end_edit_mode(); # possibly set by select_edit
-
-	# push effects off track	
-	
-	push_effects_chain($this_track, ops  => $this_track->ops);  # all of them
-
-	prepare_to_cache();
-	cache_engine_run();
 }
 sub poll_cache_progress {
 
+	my $debug++;
 	print ".";
 	my $status = eval_iam('engine-status'); 
 	my $here   = eval_iam("getpos");
 	update_clock_display();
-	#say "engine time:   ", d2($here);
-	#say "engine status: ", $status;
+	$debug and say "engine time:   ", d2($here);
+	$debug and say "engine status: ", $status;
 
 	return unless 
 		   $status =~ /finished|error|stopped/ 
 		or $here > $processing_time;
 
 	say "Done.";
-	#engine_status(current_position(),2,1);
+	$debug and say engine_status(current_position(),2,1);
 	#revise_prompt();
 	stop_polling_cache_progress();
 }
