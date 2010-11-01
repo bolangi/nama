@@ -933,13 +933,13 @@ destroy_edit: _destroy_edit dd { ::destroy_edit($item{dd}); 1}
 
 select_edit: _select_edit dd { ::select_edit($item{dd}); 1}
 
-preview_edit_in: _preview_edit_in { ::preview_edit_in(); 1}
+preview_edit_in: _preview_edit_in   { ::edit_action($item[0]); 1}
 
-preview_edit_out: _preview_edit_out { ::preview_edit_out(); 1}
+preview_edit_out: _preview_edit_out { ::edit_action($item[0]); 1}
 
-play_edit: _play_edit { ::play_edit(); 1}
+play_edit: _play_edit               { ::edit_action($item[0]); 1}
 
-record_edit: _record_edit { ::record_edit(); 1}
+record_edit: _record_edit           { ::edit_action($item[0]); 1}
 
 edit_track: _edit_track { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),

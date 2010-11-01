@@ -5433,19 +5433,19 @@ Edits will be applied against current version"),
 }
 {my %edit_actions = 
 	(
-		record => sub { 
+		record_edit => sub { 
 			$this_edit->edit_track->set(rw => 'REC');
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
-		play => sub {
+		play_edit => sub {
 			$this_edit->edit_track->set(rw => 'MON');
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
-		preview_in => sub {
+		preview_edit_in => sub {
 			$this_edit->edit_track->set(rw => 'OFF');
 			$this_edit->store_fades(std_host_fades());
 		},
-		preview_out => sub {
+		preview_edit_out => sub {
 			$this_edit->edit_track->set(rw => 'OFF');
 			$this_edit->store_fades(reverse_host_fades());
 		},
@@ -5455,6 +5455,7 @@ sub edit_action {
 	my $action = shift;
 	defined $this_edit or say("Please select an edit and try again."), return;
 	set_edit_mode();
+	$this_edit->host_alias_track->set(rw => 'MON'); # all 
 	$edit_actions{$action}->();
 	$regenerate_setup++;
 }
@@ -5473,13 +5474,13 @@ sub edit_mode_conditions {
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
 	$this_edit->host_alias_track->rec_status eq 'MON'
-		or say('host track alias: ',$this_edit->host_alias,
+		or say('host alias track : ',$this_edit->host_alias,
 				" status must be MON"), return;
 
 	# the following conditions should never be triggered 
 	
 	$this_edit->host_alias_track->monitor_version == $this_edit->host_version
-		or die('host track alias: ',$this_edit->host_alias,
+		or die('host alias track: ',$this_edit->host_alias,
 				" must be set to version ",$this_edit->host_version), return
 	1;
 }
