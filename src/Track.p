@@ -772,21 +772,21 @@ sub busify {
 	my $track = shift;
 	my $name = $track->name;
 
-	# create the bus
+	# create the bus if needed
 	
 	::SubBus->new( 
 		name => $name, 
 		send_type => 'track',
 		send_id	 => $name,
-	);
+	) unless $::Bus::by_name{$name};
 
 	# convert host track to mix track
 	
-	my @vals = ( rec_defeat 	=> 1,
-				rw => 'REC',
-				);
+	$track->set(
+		rec_defeat	=> 1,
+		rw 			=> 'REC',
+	);
 
-	$track->set( @vals );
 }
 
 sub adjusted_length {
