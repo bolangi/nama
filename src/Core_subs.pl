@@ -3766,6 +3766,7 @@ sub restore_state {
 	
 	map{ 
 		my %h = %$_; 
+		say yaml_out \%h;
 		my $edit = ::Edit->new( %h ) ;
 	} @edit_data;
 
@@ -4735,6 +4736,7 @@ sub cleanup_exit {
 	$term->rl_deprep_terminal() unless $opts{T};
 	exit; 
 }
+END { cleanup_exit() }
 
 # some common variables for cache_track and merge_track
 # related routines
@@ -5457,7 +5459,13 @@ sub edit_action {
 	set_edit_mode();
 	$this_edit->host_alias_track->set(rw => 'MON'); # all 
 	$edit_actions{$action}->();
-	$regenerate_setup++;
+	#$regenerate_setup++;
+	my $is_setup = generate_setup(); 
+	if ($action !~ /record/ and $is_setup){
+		$loop_enable++;
+		@loop_endpoints = (0,$length - 0.05);
+		connect_transport()#  and transport_start()
+	}
 }
 }
 
@@ -5466,6 +5474,7 @@ sub end_edit_mode  	{
 	# regenerate fades
 	
 	$edit_mode = 0; 
+	$loop_enable = 0;
 	$regenerate_setup++ 
 }
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
