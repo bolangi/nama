@@ -5431,42 +5431,35 @@ Edits will be applied against current version"),
 	transfer_edit_points($edit);
 	record_edit();
 }
-sub record_edit {
-	set_edit_play_mode();
-	$this_edit->edit_track->set(rw => 'REC');
-	$this_edit->store_fades(std_host_fades(), edit_fades());
-}
-sub play_edit {
-	set_edit_play_mode();
-	$this_edit->edit_track->set(rw => 'MON');
-	$this_edit->store_fades(std_host_fades(), edit_fades());
-}
-sub preview_edit_in {
-	set_edit_play_mode();
-	$this_edit->edit_track->set(rw => 'OFF');
-	$this_edit->store_fades(std_host_fades());
-}
-sub preview_edit_out {
-	set_edit_play_mode();
-	$this_edit->edit_track->set(rw => 'OFF');
-	$this_edit->store_fades(reverse_host_fades());
-}
-sub set_edit_play_mode {
+{my %edit_actions = 
+	(
+		record => sub { 
+			$this_edit->edit_track->set(rw => 'REC');
+			$this_edit->store_fades(std_host_fades(), edit_fades());
+		},
+		play => sub {
+			$this_edit->edit_track->set(rw => 'MON');
+			$this_edit->store_fades(std_host_fades(), edit_fades());
+		},
+		preview_in => sub {
+			$this_edit->edit_track->set(rw => 'OFF');
+			$this_edit->store_fades(std_host_fades());
+		},
+		preview_out => sub {
+			$this_edit->edit_track->set(rw => 'OFF');
+			$this_edit->store_fades(reverse_host_fades());
+		},
+	);
+
+sub edit_action {
+	my $action = shift;
+	defined $this_edit or say("Please select an edit and try again."), return;
 	set_edit_mode();
-	$this_edit->bus->set(rw => 'REC');
-	$this_edit->edit_track->set(rw => 'MON');
+	$edit_actions{$action}->();
 	$regenerate_setup++;
 }
-sub end_track_edit_magic {
-	# convert host track to mix track
-	
-	my $name = $this_edit->host_track;
-	my @vals = (rec_defeat 	=> 0,
-				rw => 'MON',
-				);
-	$::tn{$name}->set( @vals );
-	$this_edit->bus->set(rw => 'OFF');
 }
+
 sub end_edit_mode  	{ 
 
 	# regenerate fades
@@ -5727,8 +5720,11 @@ which is: ", $edit->host->monitor_version, ". Aborting."), return
 	$edit->version_bus->set(rw => 'REC');
 
 	$edit->version_mix->busify;
+
+	$edit->host_alias_track->set(rw => 'MON');
+
+	$edit->edit_track->set(rw => 'MON');
 	
-	set_edit_mode() and play_edit(); # should select_edit do this?
 }
 sub apply_fades { 
 	# use info from Fade objects in %::Fade::by_name

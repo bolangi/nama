@@ -770,6 +770,9 @@ sub edits_enabled {
 }
 
 sub busify {
+
+	# does not set an existing bus to REC or MON!
+	
 	my $track = shift;
 	my $name = $track->name;
 
