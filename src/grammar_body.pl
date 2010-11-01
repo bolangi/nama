@@ -698,7 +698,9 @@ existing_bus_name: bus_name {
 	else { print("$item{bus_name}: no such bus\n"); undef }
 }
 
-bus_name: ident {
+bus_name: ident 
+user_bus_name: ident 
+{
 	if($item[1] =~ /^[A-Z]/){ $item[1] }
 	else { print("Bus name must begin with capital letter.\n"); undef} 
 }
