@@ -33,11 +33,6 @@ sub next_n {
 	++$n{$trackname}{$version}
 }
 
-# this was intended to provide a single index to
-# access/remove edits
-#
-# sub edit_index { join ':',@_ }
-
 sub new {
 	my $class = shift;	
 	my %vals = @_;
@@ -55,7 +50,6 @@ sub new {
 			@_ 
 		}, $class;
 
-	# $by_index{ edit_index($self->host_track, $self->host_version, $self->n) } = $self;
 	$by_name{ $self->edit_name } = $self;
 
 	#print "self class: $class, self type: ", ref $self, $/;
