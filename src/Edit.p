@@ -71,6 +71,8 @@ sub new {
 	
 	# create the version-level bus and mix track
 	# i.e. sax-v5 (bus/track)
+
+	# (maybe it already exists)
 	
 	::Track->new(
 		name 		=> $self->edit_root_name, # i.e. sax-v5
@@ -80,7 +82,8 @@ sub new {
 		width		=> 2,                     # default to stereo 
 	#	rec_defeat 	=> 1,                     # set by ->busify
 		group   	=> $self->host_track,     # i.e. sax
-	)->busify;                                # create sub-bus
+	); 
+	$self->version_mix->busify;                                # create sub-bus
 
 	# create host track alias if necessary
 

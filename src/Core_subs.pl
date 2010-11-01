@@ -3766,7 +3766,6 @@ sub restore_state {
 	
 	map{ 
 		my %h = %$_; 
-		say yaml_out \%h;
 		my $edit = ::Edit->new( %h ) ;
 	} @edit_data;
 
