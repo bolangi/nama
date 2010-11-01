@@ -894,6 +894,7 @@ sub AUTOLOAD {
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	$::Edit::by_name{$self->name}->$call(@_);
 }
+sub DESTROY {}
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;

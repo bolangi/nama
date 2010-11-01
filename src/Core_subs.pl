@@ -722,9 +722,23 @@ sub initialize_project_data {
 
 	$markers_armed = 0;
 
+=comment
  	::Mark::initialize();
 	::Fade::initialize();
 	::Edit::initialize();
+	::Bus::initialize();
+	::Track::initialize();
+=cut
+	map{ $_->initialize() }
+	qw(
+ 	::Mark
+	::Fade
+	::Edit
+	::Bus
+	::Track
+	::Insert
+	);
+	
 	
 	# volume settings
 	
@@ -739,10 +753,8 @@ sub initialize_project_data {
 	
 	%bunch = ();	
 	
-	::Bus->initialize();
 	create_system_buses();
 	$this_bus = 'Main';
-	::Track->initialize();
 
 	%inputs = %outputs = ();
 	
@@ -3247,6 +3259,15 @@ sub save_state {
 		print qx(alsactl -f $file.alsa store);
 	}
 }
+sub initialize_serialization_arrays {
+	@tracks_data = (); # zero based, iterate over these to restore
+	@bus_data = (); # 
+	@marks_data = ();
+	@fade_data = ();
+	@inserts_data = ();
+	@edit_data = ();
+	@command_history = ();
+}
 
 sub save_system_state {
 
@@ -3264,11 +3285,11 @@ sub save_system_state {
 	delete $cops{''};
 	delete $copp{''};
 
+	initialize_serialization_arrays();
+	
 	# prepare tracks for storage
 	
 	$this_track_name = $this_track->name;
-
-	@tracks_data = (); # zero based, iterate over these to restore
 
 	$debug and print "copying tracks data\n";
 
@@ -3282,31 +3303,28 @@ sub save_system_state {
 	} @tracks_data;
 
 	$debug and print "copying bus data\n";
-	@bus_data = (); # 
+
 	map{ push @bus_data, $_->hashref } ::Bus::all();
 
 	# prepare inserts data for storage
 	
 	$debug and print "copying inserts data\n";
-	@inserts_data = ();
+	
 	while (my $k = each %::Insert::by_index ){ 
 		push @inserts_data, $::Insert::by_index{$k}->hashref;
 	}
 
 	# prepare marks data for storage (new Mark objects)
 
-	@marks_data = ();
 	$debug and print "copying marks data\n";
 	map { push @marks_data, $_->hashref } ::Mark::all();
 
 	# prepare fade data for storage
 	
-	@fade_data = ();
 	while (my $k = each %::Fade::by_index ){ 
 		push @fade_data, $::Fade::by_index{$k}->hashref;
 	}
 
-	@edit_data = ();
 	while (my $k = each %::Edit::by_name ){
 		push @edit_data, $::Edit::by_name{$k}->hashref;
 	}
@@ -3315,7 +3333,6 @@ sub save_system_state {
 
 	my @history = $::term->GetHistory;
 	my %seen;
-	@command_history = ();
 	map { push @command_history, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
 	my $max = scalar @command_history;
@@ -3439,6 +3456,10 @@ sub restore_state {
 	# rewrite %cops 'owns' field to []
 	
 	$yaml =~ s/owns: ~/owns: []/g;
+
+	# start marshalling with clean slate	
+	
+	initialize_serialization_arrays();
 
 	# restore persistent variables
 
