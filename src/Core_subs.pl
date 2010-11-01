@@ -1133,7 +1133,7 @@ sub add_paths_for_recording {
 			# that way.
 
 			# Later, we will rewrite it that way
-
+=comment
 			$debug and say "rec file link for $_->name";	
 			my $name = $_->name . '_rec_file';
 			my $anon = ::SlaveTrack->new( 
@@ -1142,13 +1142,16 @@ sub add_paths_for_recording {
 				group => 'Temp',
 				name => $name);
 
+=cut
 			# connect IO
 			
-			$g->add_path(input_node($_->source_type), $name, 'wav_out');
+			my @edge = (input_node($_->source_type), 'wav_out');
+			$g->add_path(@edge);
 
 			# set chain_id to R3 (if original track is 3) 
-			$g->set_vertex_attributes($name, { 
+			$g->set_edge_attributes(@edge, { 
 				chain_id => 'R'.$_->n,
+				track => $_->name,
 				mono_to_stereo => '', # override 
 			});
 
