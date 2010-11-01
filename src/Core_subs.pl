@@ -4756,7 +4756,8 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $bn{$track->name};
 
-	prepare_to_cache();
+	prepare_to_cache()
+		or say("Empty routing graph. Aborting."), return;
 	cache_engine_run();
 
 }
@@ -4815,9 +4816,10 @@ sub prepare_to_cache {
 	$debug and say "The graph3 is:\n$g";
 	::Graph::add_inserts($g);
 	$debug and say "The graph4 is:\n$g";
-	process_routing_graph(); 
+	my $success = process_routing_graph();
 	write_chains();
 	remove_temporary_tracks();
+	$success
 }
 sub cache_engine_run { # uses shared lexicals
 
@@ -4827,9 +4829,6 @@ sub cache_engine_run { # uses shared lexicals
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
 	print "Starting cache operation. Please wait.";
-	
-	#say "Aborting";
-	#return;  # XXX DEBUG
 	
 	revise_prompt(" "); 
 
@@ -4896,12 +4895,11 @@ sub post_cache_processing {
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		reconfigure_engine();
-		$this_track = $track;
+		$this_track = $track; # why do we need this?
 		revise_prompt("default"); 
 }
 sub poll_cache_progress {
 
-	my $debug++;
 	print ".";
 	my $status = eval_iam('engine-status'); 
 	my $here   = eval_iam("getpos");
