@@ -99,11 +99,11 @@ sub new {
 	#  The easiest way may be to subclass the 'set' routine
 	
 	my $host_track_alias = $::tn{$self->host_alias} // 
-		::Track->new(
+		::VersionTrack->new(
 			name 	=> $self->host_alias,
-			version => $host->monitor_version, # should not be changed!
+			version => $host->monitor_version, # cannot be changed
 			target  => $host->name,
-			rw		=> 'MON',
+			rw		=> 'MON',                  # do not set to REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
 		);
 

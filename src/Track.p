@@ -912,7 +912,6 @@ sub playat_time {
 package ::VersionTrack;
 our @ISA ='::Track';
 sub set_version {}
-sub rw { 'MON' }
 sub versions { [$_[0]->version] }
 }
 
