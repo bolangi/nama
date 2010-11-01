@@ -5394,6 +5394,9 @@ sub generate_edit_record_setup { # for current edit
 
 sub new_edit {
 	#my @edit_points = @_;
+
+	# abort for many different reasons
+	
 	say("You must use 'set_edit_points' before creating a new edit. Aborting."),
 		return unless @edit_points;
 	my $overlap = grep { 
@@ -5408,13 +5411,13 @@ sub new_edit {
 		my $net1 = d1($net);
 		say("New rec-start time $nst1 conflicts with Edit ",
 			$_->n, ": $rst1 < $nst1 < $ret1"), $fail++
-		if $rst < $nst and $nst < $ret;
+			if $rst < $nst and $nst < $ret;
 		say("New rec-end time $net1 conflicts with Edit ",
 			$_->n, ": $rst1 < $net1 < $ret1"), $fail++
-		if $rst < $net and $net < $ret;
+			if $rst < $net and $net < $ret;
 		say("New rec interval $nst1 - $net1 conflicts with Edit ",
 			$_->n, ": $rst1 - $ret1"), $fail++
-		if $nst < $rst and $ret < $net;
+			if $nst < $rst and $ret < $net;
 		$fail
 	} grep{ $_->host_track eq $this_track->name} 
 		values %Audio::Nama::Edit::by_name;
@@ -5428,6 +5431,9 @@ Edits will be applied against current version"),
 		return unless $this_track->rec_status eq 'MON' 
 			or $this_track->rec_status eq 'REC' and
 			grep{ /$editre/ } keys %::Track::by_name;
+
+	# create edit
+	
 	my $v = $this_track->monitor_version;
 	say "$name: creating new edit against version $v";
 	my $edit = ::Edit->new(
