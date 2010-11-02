@@ -1008,7 +1008,9 @@ set_rec_end_mark: _set_rec_end_mark end {
 	$::edit_points[2] = eval_iam('get_pos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
-disable_edits: _disable_edits { ::disable_edits(); 1; }
+disable_edits: _disable_edits { ::disable_edits();1 }
+
+merge_edits: _merge_edits { ::merge_edits(); 1; }
 
 explode_track: _explode_track end {
 	::explode_track($::this_track)

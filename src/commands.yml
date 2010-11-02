@@ -878,6 +878,10 @@ disable_edits:
   short: ded
   what: disable editing sub-bus, restore standard track behavior
   parameters: none
+merge_edits:
+  type: edit
+  short: med
+  what: mix edits and original into a new host-track WAV version
 explode_track:
   type: track
   what: make track into a sub-bus, with one track for each version

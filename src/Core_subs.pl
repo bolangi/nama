@@ -4757,8 +4757,8 @@ END { cleanup_exit() }
 		$additional_time, 
 		$processing_time, 
 		$orig_version, 
-		$cooked,
-		$complete_caching_ref);
+		$complete_caching_ref,
+		$output_wav);
 
 sub cache_track { # launch subparts if conditions are met
 	($track, $additional_time) = @_;
@@ -4784,6 +4784,7 @@ sub cache_track { # launch subparts if conditions are met
 	prepare_to_cache()
 		or say("Empty routing graph. Aborting."), return;
 	cache_engine_run();
+	$output_wav
 
 }
 
@@ -4801,6 +4802,7 @@ sub prepare_to_cache {
 		group => 'Temp',
 		target => $track->name,
 	);
+	$output_wav = $cooked->current_wav;
 
 	# connect the temporary track's output path
 	
@@ -5718,11 +5720,11 @@ sub select_edit {
 	# check that conditions are met
 	
 	say("Edit $n not found. Skipping."),return if ! $edit;
-	say( qq(Edit $n applies to track "), $edit->host_track, 
-		 qq(" version ), $edit->host_version, ".
-This does does not match the track's current monitor version,
-which is: ", $edit->host->monitor_version, ". Aborting."), return
-		if $edit->host->monitor_version != $edit->host_version;
+# 	say( qq(Edit $n applies to track "), $edit->host_track, 
+# 		 qq(" version ), $edit->host_version, ".
+# This does does not match the track's current monitor version,
+# which is: ", $edit->host->monitor_version, ". Aborting."), return
+# 		if $edit->host->monitor_version != $edit->host_version;
 
 	# select edit
 	
@@ -5766,13 +5768,55 @@ sub disable_edits {
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
-	# $edit->bus->set( rw => 'OFF');
+	$edit->bus->set( rw => 'OFF');
 
-	# reset host track, copying back source settings if possible
+	$edit->version_bus->set( rw => 'OFF');
+
+	# reset host track
 	
 	$edit->host->set( rw => 'MON', rec_defeat => 0);
+}
+sub merge_edits {
+	my $edit = $this_edit;
+	say("Please select an edit and try again."), return
+		unless defined $edit;
+	say($edit->host_alias, ": track must be MON status.  Aborting."), return
+		unless $edit->host_alias_track->rec_status eq 'MON';
+	say("Use exit_edit_mode and try again."), return if edit_mode();
+
+	# create merge message
+	my $v = $edit->host_version;
+	my %edits = 
+		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
+			 my $ver  = $tn{$_}->monitor_version;
+			 $edit => $ver
+		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'MON'} 
+		$edit->version_bus->tracks; 
+	my $msg = "merges ".$edit->host_track."_$v.wav w/".
+		$edit->edit_root_name."-edits ".
+		join " ",map{"$_\_$edits{$_}"} sort{$a<=>$b} keys %edits;
+	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
-end_edit_mode();
+	say $msg;
+
+	# cache at version_mix level
+	
+	my $output_wav = cache_track($edit->version_mix);
+
+	# promote to host track
+
+	my $new_version = $edit->host->last + 1;		
+	my $old = cwd();
+	chdir this_wav_dir();
+	my $new_host_wav = $edit->host_track . "_" .  $new_version . ".wav";
+	symlink $output_wav, $new_host_wav;
+
+	$edit->host->set(version => undef); # default to latest
+	$edit->host->{version_comment}{$new_version}{system} = $msg;
+	chdir $old;
+	disable_edits();
+	$this_track = $edit->host;
+	
 }
 sub show_version_comments {
 	my ($t, @v) = @_;
