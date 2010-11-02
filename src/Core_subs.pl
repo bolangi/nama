@@ -2206,6 +2206,7 @@ sub add_effect {
 		apply_op($id);
 		$ti{$n}->unmute if $er;
 	}
+	$this_op = $id;
 	$id;
 
 }
@@ -2231,7 +2232,8 @@ sub modify_effect {
  				$copp{$op_id}->[$parameter], 
  				$sign,
  				$value);
-		}
+		};
+	$this_op = $op_id;
 	$debug and print "id $op_id p: $parameter, sign: $sign value: $value\n";
 	effect_update_copp_set( 
 		$op_id, 
@@ -2295,6 +2297,7 @@ sub remove_effect {
 	$ti{$n}->remove_effect( $id ); 
 	delete $cops{$id}; # remove entry from chain operator list
 	delete $copp{$id}; # remove entry from chain operator parameters list
+	$this_op = undef;
 }
 
 

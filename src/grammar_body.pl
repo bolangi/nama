@@ -610,6 +610,24 @@ insert_effect: _insert_effect before effect value(s?) end {
 
 before: op_id
 parent: op_id
+modify_effect: _modify_effect parameter(s /,/) value end {
+	print("Operator \"$::this_op\" does not exist.\n"), return 1
+		unless $::cops{$::this_op};
+	::modify_multiple_effects( 
+		[$::this_op], 
+		$item{'parameter(s)'},
+		undef,
+		$item{value});
+	print ::Text::show_effect($::this_op);
+	1;
+}
+modify_effect: _modify_effect parameter(s /,/) sign value end {
+	print("Operator \"$::this_op\" does not exist.\n"), return 1
+		unless $::cops{$::this_op};
+	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
+	print ::Text::show_effect($::this_op);
+	1;
+}
 
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value end {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
@@ -627,7 +645,14 @@ show_effect: _show_effect op_id(s) {
 		map{ ::Text::show_effect($_) } 
 		grep{ $::cops{$_} }
 		@{ $item{'op_id(s)'}};
+	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
+}
+show_effect: _show_effect {
+	print("Operator \"$::this_op\" does not exist.\n"), return 1
+	unless $::cops{$::this_op};
+	print ::Text::show_effect($::this_op);
+	1;
 }
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
