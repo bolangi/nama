@@ -1956,9 +1956,13 @@ sub heartbeat {
 
 	my $here   = eval_iam("getpos");
 	my $status = eval_iam('engine-status');
-	engine_status(current_position(),2,1),revise_prompt(),stop_heartbeat()
+	if( $status =~ /finished|error/ ){
+		engine_status(current_position(),2,1);
+		revise_prompt();
+		stop_heartbeat();
+		eval_iam('setpos 0');
+	}
 		#if $status =~ /finished|error|stopped/;
-		if $status =~ /finished|error/;
 	#print join " ", $status, colonize($here), $/;
 	my ($start, $end);
 	$start  = ::Mark::loop_start();
@@ -5461,13 +5465,17 @@ sub edit_action {
 	set_edit_mode();
 	$this_edit->host_alias_track->set(rw => 'MON'); # all 
 	$edit_actions{$action}->();
-	#$regenerate_setup++;
-	my $is_setup = generate_setup(); 
-	if ($action !~ /record/ and $is_setup){
-		$loop_enable++;
-		@loop_endpoints = (0,$length - 0.05);
-		connect_transport()#  and transport_start()
-	}
+	$regenerate_setup++;
+
+#   TODO: looping
+# 	my $is_setup = generate_setup(); 
+# 	return unless $is_setup;
+# 	if ($action !~ /record/){
+# 		$loop_enable++;
+# 		@loop_endpoints = (0,$length - 0.05);
+# 		#  and transport_start()
+# 	}
+# 	connect_transport(); 
 }
 }
 
