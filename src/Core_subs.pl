@@ -1960,6 +1960,7 @@ sub heartbeat {
 		engine_status(current_position(),2,1);
 		revise_prompt();
 		stop_heartbeat();
+		sleeper(0.2);
 		eval_iam('setpos 0');
 	}
 		#if $status =~ /finished|error|stopped/;
