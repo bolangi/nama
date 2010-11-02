@@ -5440,6 +5440,7 @@ Edits will be applied against current version"),
 	$this_track->current_edit->{$v} = $edit->n;
 	$this_edit = $edit;
 	transfer_edit_points($edit);
+	#select_edit($this_edit->n);
 	edit_action('preview_edit_in');
 }
 {my %edit_actions = 
