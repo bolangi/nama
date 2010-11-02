@@ -111,14 +111,14 @@ sub show_inserts {
 }
 
 $format_top = <<TOP;
-Track Name      Ver. Setting Status      Source       Bus         Vol  Pan
+ No. Name            Ver  Set  Stat       Source       Bus         Vol  Pan
 =============================================================================
 TOP
 
 $format_divider = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>   @<<<<<<<<< @>    @<<    @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
+@>>  @<<<<<<<<<<<<<<< @>  @<<  @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
 PICTURE
 
 sub show_tracks_section {
