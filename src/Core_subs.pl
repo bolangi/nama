@@ -5724,7 +5724,7 @@ which is: ", $edit->host->monitor_version, ". Aborting."), return
 	# turn off all version level buses/mix_tracks
 	
 	map{ $tn{$_}->set(rw => 'OFF'); # version mix tracks
-	     $bn{$_}->set(rw => 'OFF'); # version buses
+	      $bn{$_}->set(rw => 'OFF'); # version buses
 	} $this_edit->bus->tracks;      # use same name for track/bus
 
 	# turn on what we want
@@ -5753,21 +5753,13 @@ sub disable_edits {
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
-	$edit->bus->set( rw => 'OFF');
+	# $edit->bus->set( rw => 'OFF');
 
 	# reset host track, copying back source settings if possible
 	
-	$edit->host->set(
-		rw 			=> 'MON',
-		rec_defeat	=> 0,
-		source_type => (defined $edit 
-			? $edit->edit_track->source_type
-			: 'soundcard'),
-		source_id 	=> (defined $edit 
-			? $edit->edit_track->source_id
-			: 1),
-	);
-	end_edit_mode();
+	$edit->host->set( rw => 'MON', rec_defeat => 0);
+	
+end_edit_mode();
 }
 sub show_version_comments {
 	my ($t, @v) = @_;
