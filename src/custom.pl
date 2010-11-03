@@ -1,22 +1,6 @@
 ### custom.pl - Nama user customization file
 
-# Note: to avoid breaking this file:
-# 
-#   + Be careful of matching curly brackets { }.
-#     All should be properly paired.
-#
-#   + Closing brackets are generally followed by a comma, i.e,
-#
-#          key => q{ some 
-#                    various
-#                    stuff
-#           }, 
-#
-#   + Read syntax guide after __END__ marker
-#
-#   + Do not delete __END__ marker
-
-
+# See notes at end
 
 ##  Prompt section - replaces default user prompt
 
@@ -54,11 +38,26 @@ commands =>
 	},
 
 # __END__
+# 
+
 # Syntax notes:
+
+# 0. Quick Start - To avoid breaking this file:
+#
+#   + Be careful of matching curly brackets {}. (Also [] () if you use them.)
+#     All should be properly paired.
+#
+#   + Closing brackets are usually followed by a comma, i.e,
+#
+#          key => q{ some 
+#                    various
+#                    stuff
+#           }, 
+#
 # 
 # 1. The => Operator
 # 
-#     The => operator is similar to the command ",". It
+#     The => operator is similar to the comma ",". It
 #     is used to indicate a key-value pair, i.e.
 #   
 #          greeting => 'hello earthlings!',
