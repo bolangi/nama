@@ -419,4 +419,6 @@ our (
 
 	$format_top,    # show_tracks listing
 	$format_divider,
+
+	$user_customization_file, 
 );

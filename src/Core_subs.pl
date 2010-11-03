@@ -20,12 +20,14 @@ sub prepare {
 
 	read_config(global_config());  # from .namarc if we have one
 
+	setup_user_customization();	
+
 	start_ecasound();
 
 
 	$debug and print "reading config file\n";
 	if ($opts{d}){
-		print "found command line project_root flag\n";
+		print "project_root $opts{d} specified on command line\n";
 		$project_root = $opts{d};
 	}
 
@@ -161,6 +163,7 @@ sub initialize_terminal {
 }
 {my $override;
 sub revise_prompt {
+	# hack to allow suppressing prompt
 	$override = $_[0] eq "default" ? undef : $_[0] if defined $_[0];
     $term->callback_handler_install($override//prompt(), \&process_line);
 }
@@ -551,6 +554,24 @@ sub substitute{
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
+
+sub setup_user_customization {
+	my $file = join_path(project_root(),$user_customization_file);
+	return unless -r $file;
+	say "reading user customization file $user_customization_file";
+	my @return;
+	unless (@return = do $file) {
+		warn "couldn't parse $file: $@\n" if $@;
+		return;
+	}
+	# convert key-value pairs to hash
+	print @return;
+	my %custom = @return ; 
+	*prompt = $custom{prompt} if (ref $custom{prompt}) =~ 'CODE';
+		
+}
+	
+
 ## project handling
 
 sub list_projects {

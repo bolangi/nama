@@ -114,6 +114,7 @@ $prompt = "nama ('h' for help)> ";
 $use_pager = 1;
 $use_placeholders = 1;
 $save_id = "State";
+$user_customization_file = "custom.pl";
 $fade_time = 0.3; # when starting/stopping transport
 $old_snapshot = {};
 $main_out = 1; # enable main output
