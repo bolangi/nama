@@ -93,6 +93,8 @@ sub show_status {
 	say "Main bus version: ",$::main->version if $::main->version;
 	say "Audio output is:  ", $main_out ? "ON" : "OFF";
 	say "Setup length is:  ", ::heuristic_time($length); 
+	say "Rec time limit:   ", ::heuristic_time($length + $limit_rec_time)
+      if $limit_rec_time;
 		
 }
 sub placeholder { 

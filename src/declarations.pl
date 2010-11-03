@@ -160,6 +160,7 @@ our (
 	$unit,			# jump multiplier, 1 or 60 seconds
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
+	$limit_rec_time,# do we limit recording time? (no if undef)
  	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd server status 
 	$jack_plumbing, # jack.plumbing daemon status
@@ -424,4 +425,6 @@ our (
 	$custom_pl,    # default customization file
 	%user_command,
 	%user_alias,
+	
+
 );

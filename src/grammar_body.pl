@@ -1046,6 +1046,17 @@ version: dd
 read_user_customizations: _read_user_customizations {
 	::setup_user_customization(); 1
 }
+limit_rec_time: _limit_rec_time value { 
+	$::limit_rec_time = $item{value}; 
+	print "Rec time limit:   ", 
+		::heuristic_time($::length + $::limit_rec_time), "\n";
+	1;
+}
+no_limit_rec_time: _no_limit_rec_time { 
+	print "Record stop timer disabled\n";
+	::disable_length_timer();
+	1;
+}
 	
 	
 	

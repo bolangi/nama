@@ -424,7 +424,7 @@ remove_project_template:
   short: rpt dpt
   parameters: <s_template_name1> [<s_template_name2>... ]
 generate:
-  type: setups
+  type: setup
   short: gen
   what: generate chain setup for audio processing
   parameters: none
@@ -894,4 +894,13 @@ read_user_customizations:
   type: general
   what: re-read user customizations file 'custom.pl'
   short: ruc
+limit_rec_time:
+  type: setup
+  what: stop recording after last WAV file finishes playing
+  short: lrt
+  parameters: [<f_additional_seconds>]
+no_limit_rec_time:
+  type: setup
+  what: disable recording stop timer
+  short: nlrt
 ...

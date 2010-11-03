@@ -1129,6 +1129,7 @@ sub initialize_chain_setup_vars {
 	%inputs = %outputs = %post_input = %pre_output = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
+	disable_length_timer();
 	reset_aux_chain_counter();
 	$length = 0;
 	{no autodie; unlink setup_file()}
@@ -1954,7 +1955,9 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	limit_processing_time() if mixing_only() or edit_mode();
+	limit_processing_time($length + $limit_rec_time) 
+		if mixing_only() or edit_mode() or defined $limit_rec_time;
+		# TODO and live processing
  	#$event_id{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
@@ -2057,10 +2060,12 @@ sub cancel_wraparound {
 }
 sub limit_processing_time {
 	my $length = shift // $length;
- 	$event_id{processing_time} = AE::timer($length, 0, \&stop_transport);
+ 	$event_id{processing_time} 
+		= AE::timer($length, 0, sub { ::stop_transport() });
 }
 sub disable_length_timer {
 	$event_id{processing_time} = undef; 
+	undef $limit_rec_time;
 }
 sub wraparound {
 	package ::;
