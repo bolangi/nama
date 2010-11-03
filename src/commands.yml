@@ -631,11 +631,6 @@ set_bus:
   short: sbs
   what: set bus parameters 
   parameters: <s_busname> <key> <val>
-change_bus:
-  type: bus
-  short: cbs
-  what: choose the current bus
-  parameters: <s_busname>
 new_effect_chain:
   type: effect
   short: nec
