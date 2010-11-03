@@ -97,6 +97,26 @@ command: iam_cmd predicate {
 	::pager( $result );  
 	1 }
 
+command: user_command predicate {
+	#print "user command: $item{user_command}\n";
+	#print "predicate: $item{predicate}\n";
+	# why does command name get into predicate ??
+	#::do_user_command($item{user_command}, split " ",$item{predicate});
+	::do_user_command(split " ",$item{predicate});
+	1;
+}
+command: user_alias predicate {
+	#print "alias: $item{user_alias}\n";
+	$::parser->do_part("$item{user_alias} $item{predicate}"); 1
+}
+user_alias: ident { 
+	#print "alias: $item{ident}\n";
+		$::user_alias{$item{ident}} }
+user_command: ident { return $item{ident} if $::user_command{$item{ident}} }
+
+# other commands (generated automatically)
+#
+# command: command_name
 
 
 key: /\w+/ 			# word characters {1,} 
@@ -1022,6 +1042,10 @@ promote_version_to_track: _promote_version_to_track version {
 	);
 }
 version: dd
+
+read_user_customizations: _read_user_customizations {
+	::setup_user_customization(); 1
+}
 	
 	
 	

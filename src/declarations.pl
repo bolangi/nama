@@ -421,4 +421,6 @@ our (
 	$format_divider,
 
 	$user_customization_file, 
+	%user_command,
+	%user_alias,
 );

@@ -883,11 +883,15 @@ explode_track:
 move_to_bus:
   type: track
   what: move current track to another bus
-  short: mtb mbs
+  short: mtb
   parameters: <s_bus_name>
 promote_version_to_track:
   type: track
   what: create a read-only track using specified version of current track
   short: pvt
   parameters: <i_version_number>
+read_user_customizations:
+  type: general
+  what: re-read user customizations file 'custom.pl'
+  short: ruc
 ...

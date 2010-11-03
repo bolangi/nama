@@ -561,16 +561,35 @@ sub setup_user_customization {
 	say "reading user customization file $user_customization_file";
 	my @return;
 	unless (@return = do $file) {
-		warn "couldn't parse $file: $@\n" if $@;
+		say "couldn't parse $file: $@\n" if $@;
 		return;
 	}
 	# convert key-value pairs to hash
-	print @return;
+	$debug and print join "\n",@return;
 	my %custom = @return ; 
-	*prompt = $custom{prompt} if (ref $custom{prompt}) =~ 'CODE';
-		
+	my $prompt;
+	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
+	{ no warnings 'redefine';
+		*prompt = $prompt if $prompt;
+	}
+	my @commands = keys %{ $custom{commands} };
+	for my $cmd(@commands){
+		my $coderef = gen_coderef($cmd,$custom{commands}{$cmd}) or next;
+		$user_command{$cmd} = $coderef;
+	}
+	%user_alias   = %{ $custom{aliases}  };
 }
-	
+sub do_user_command {
+	#say "args: @_";
+	my($cmd, @args) = @_;
+	$user_command{$cmd}->(@args);
+}	
+sub gen_coderef {
+	my ($cmd,$code) = @_;
+	my $coderef = eval "sub{ use feature ':5.10'; $code }";
+	say("couldn't parse command $cmd: $@"), return if $@;
+	$coderef
+}
 
 ## project handling
 
@@ -5003,7 +5022,6 @@ sub is_cached {
 	my $cache_map = $track->cache_map;
 	$cache_map->{$track->monitor_version}
 }
-	
 sub do_script {
 
 	my $name = shift;
