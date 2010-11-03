@@ -304,7 +304,7 @@ remove_region:
   parameters: none
 shift_track:
   type: track
-  short: shift
+  short: shift playat pat
   what: set playback delay for track or region
   parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> 
 unshift_track:
@@ -894,13 +894,22 @@ read_user_customizations:
   type: general
   what: re-read user customizations file 'custom.pl'
   short: ruc
-limit_rec_time:
+limit_run_time:
   type: setup
   what: stop recording after last WAV file finishes playing
   short: lrt
   parameters: [<f_additional_seconds>]
-no_limit_rec_time:
+no_limit_run_time:
   type: setup
   what: disable recording stop timer
   short: nlrt
+offset_run:
+  type: setup
+  short: ofr
+  what: record/play from mark position
+  parameters: <s_mark_name>  
+no_offset_run:
+  type: setup
+  short: nofr
+  what: clear offset run mode
 ...

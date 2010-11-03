@@ -72,10 +72,12 @@ sub time2 {
 }
 sub show_status {
 	print "\n";
+	package ::;
 	my @modes;
 	push @modes, $preview if $preview;
 	push @modes, "master" if $mastering_mode;
 	push @modes, "edit"   if ::edit_mode();
+	push @modes, "offset run" if ::offset_run_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::really_recording();
@@ -87,14 +89,15 @@ sub show_status {
 	# Main bus, however it may be that sub-bus mixdown
 	# tracks are set to REC (with rec-to-file disabled)
 	
+	
 	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
 	say "Pending actions:  ", join(", ", @actions) if @actions;
 	say "Main bus allows:  ", $main->allows, " track status";
 	say "Main bus version: ",$::main->version if $::main->version;
 	say "Audio output is:  ", $main_out ? "ON" : "OFF";
 	say "Setup length is:  ", ::heuristic_time($length); 
-	say "Rec time limit:   ", ::heuristic_time($length + $limit_rec_time)
-      if $limit_rec_time;
+	say "Run time limit:   ", ::heuristic_time($run_time)
+      if $run_time;
 		
 }
 sub placeholder { 

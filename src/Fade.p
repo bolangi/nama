@@ -113,8 +113,8 @@ sub fades {
 	# throw away fades that are not in edit play region (if active)
 	@fades = grep
 		{ my $time = $::Mark::by_name{$_->mark1}->{time};
-		  		$time >= $::this_edit->play_start_time
-			and $time <= $::this_edit->play_end_time
+		  		$time >= ::play_start_time()
+			and $time <= ::play_end_time()
 		} @fades if ::edit_mode() ;
 
 	# sort remaining fades by unadjusted mark1 time

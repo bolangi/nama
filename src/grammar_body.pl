@@ -1046,17 +1046,22 @@ version: dd
 read_user_customizations: _read_user_customizations {
 	::setup_user_customization(); 1
 }
-limit_rec_time: _limit_rec_time value { 
-	$::limit_rec_time = $item{value}; 
-	print "Rec time limit:   ", 
-		::heuristic_time($::length + $::limit_rec_time), "\n";
-	1;
+limit_run_time: _limit_run_time sign(?) dd { 
+	my $sign = $item{'sign(?)'}->[-0];
+	$::run_time = $sign
+		? eval "$::length $sign $item{dd}"
+		: $item{dd};
+	print "Run time limit: ", ::heuristic_time($::run_time), "\n"; 1;
 }
-no_limit_rec_time: _no_limit_rec_time { 
-	print "Record stop timer disabled\n";
+no_limit_run_time: _no_limit_run_time { 
+	print "Run timer disabled\n";
 	::disable_length_timer();
 	1;
 }
-	
-	
-	
+offset_run: _offset_run markname {
+	::offset_run( $item{markname} ); 1
+}
+no_offset_run: _no_offset_run {
+	print "no run offset.\n";
+	::offset_run_mode(0); 1
+}

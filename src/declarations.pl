@@ -160,7 +160,7 @@ our (
 	$unit,			# jump multiplier, 1 or 60 seconds
 	%old_vol,		# a copy of volume settings, for muting
 	$length,		# maximum duration of the recording/playback if known
-	$limit_rec_time,# do we limit recording time? (no if undef)
+	$run_time,		# engine processing time limit (none if undef)
  	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd server status 
 	$jack_plumbing, # jack.plumbing daemon status
@@ -426,5 +426,7 @@ our (
 	%user_command,
 	%user_alias,
 	
+	$offset_run_start_time,
+	$offset_run_end_time,
 
 );

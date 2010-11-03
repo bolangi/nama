@@ -349,7 +349,8 @@ Debugging options:
 --fake-alsa, -A                  Simulate ALSA environment
 --no-ecasound, -E                Don't spawn Ecasound process
 --execute-command, -X            Supply a command to execute
---no-terminal, -T				 Don't initialize terminal
+--no-terminal, -T                Don't initialize terminal
+--no-fades, -F                   No fades on transport start/stop
 
 HELP
 
@@ -1955,8 +1956,8 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	limit_processing_time($length + $limit_rec_time) 
-		if mixing_only() or edit_mode() or defined $limit_rec_time;
+	limit_processing_time($run_time) 
+		if mixing_only() or edit_mode() or defined $run_time;
 		# TODO and live processing
  	#$event_id{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
@@ -2061,11 +2062,11 @@ sub cancel_wraparound {
 sub limit_processing_time {
 	my $length = shift // $length;
  	$event_id{processing_time} 
-		= AE::timer($length, 0, sub { ::stop_transport() });
+		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
 	$event_id{processing_time} = undef; 
-	undef $limit_rec_time;
+	undef $run_time;
 }
 sub wraparound {
 	package ::;
@@ -2207,6 +2208,7 @@ sub rec_cleanup {
 		(grep /Mixdown/, @files) 
 			? command_process('mixplay') 
 			: post_rec_configure();
+		undef $edit_mode if ! defined $this_edit;
 		reconfigure_engine();
 	}
 }
@@ -4802,7 +4804,7 @@ sub cleanup_exit {
 	} @ecasound_pids;
  	#kill 15, ecasound_pid() if $sock;  	
 	close_midish() if $midish_enable;
-	$term->rl_deprep_terminal() unless $opts{T};
+	$term->rl_deprep_terminal() if defined $term;
 	exit; 
 }
 END { cleanup_exit() }
@@ -5550,10 +5552,11 @@ sub end_edit_mode  	{
 	
 	$edit_mode = 0; 
 	$loop_enable = 0;
+	offset_run_mode(0);	
 	$regenerate_setup++ 
 }
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
-sub edit_mode		{ $edit_mode }
+sub edit_mode		{ $edit_mode and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
@@ -5711,9 +5714,19 @@ sub set_edit_vars {
 	$playat 		= $track->playat_time;
 	$region_start   = $track->region_start_time;
 	$region_end 	= $track->region_end_time;
-	$edit_play_start= $::this_edit->play_start_time;
-	$edit_play_end	= $::this_edit->play_end_time;
+	$edit_play_start= play_start_time();
+	$edit_play_end	= play_end_time();
 	$length 		= wav_length($track->full_path);
+}
+sub play_start_time {
+	defined $this_edit 
+		? $this_edit->play_start_time 
+		: $offset_run_start_time
+}
+sub play_end_time {
+	defined $this_edit 
+		? $this_edit->play_end_time 
+		: $offset_run_end_time
 }
 sub set_edit_vars_testing {
 	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
@@ -5903,5 +5916,49 @@ sub remove_system_version_comment {
 	my ($t,$v) = @_;
 	delete $t->{version_comment}{$v}{system} if $t->{version_comment}{$v}
 }
+# offset recording
+
+# Note that although we use ->adjusted_* methods, all are
+# executed outside of edit mode, so we get unadjusted values.
+
+sub setup_length {
+	my $length;
+	map{  my $l = $_->adjusted_length; $length = $l if $l > $length }
+	grep{ defined $_ and $_->rec_status eq 'MON' }
+	map{  $ti{$_} }
+	keys %is_ecasound_chain;
+	$length
+}
+sub offset_run {
+	say("This function not available in edit mode.  Aborting."), 
+		return if edit_mode();
+	my $markname = shift;
+	my $endpoint = setup_length();
+	my $offset = $::Mark::by_name{$markname}->adjusted_time;
+	$offset_run_start_time = $offset;
+	$offset_run_end_time   = $endpoint;
+	offset_run_mode(1);
+	$regenerate_setup++;
+}
+sub clear_offset_recording_vars {
+	$offset_run_start_time = 0;
+	$offset_run_end_time   = 0;
+}
+sub offset_run_mode {
+	my $set = shift;
+	given($set){
+		when(0){  
+			undef $edit_mode;
+			clear_offset_recording_vars();
+			$regenerate_setup++;
+		}
+		when(1){
+			undef $this_edit; 
+			$edit_mode++
+		}
+	}
+	$edit_mode and ! defined $this_edit
+}
+	
 
 ### end

@@ -135,7 +135,7 @@ sub mark_time {
 	my $tag = shift;
 	my $time = unadjusted_mark_time($tag);
 	return unless defined $time;
-	$time -= $::this_edit->play_start_time if ::edit_mode();
+	$time -= ::play_start_time() if ::edit_mode();
 	$time
 }
 sub subtract_edit_start_offset {

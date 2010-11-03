@@ -1,4 +1,3 @@
-# ----------- Edit ------------
 package ::Edit;
 
 # each edit is identified by:
