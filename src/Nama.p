@@ -173,6 +173,10 @@ sub setup_grammar {
 
 	*default = __PACKAGE__->section_data("default_namarc");
 
+	# default user customization file custom.pl - see EOF
+	
+	*custom_pl = __PACKAGE__->section_data("custom_pl");
+
 	# default colors
 
 	*default_palette_yml = __PACKAGE__->section_data("default_palette_yml");
@@ -289,6 +293,7 @@ sub set_engine_mode_color_display {}
 
 package ::;  # for Data::Section
 
+
 1;
 __DATA__
 __[commands_yml]__
@@ -300,6 +305,8 @@ __[chain_op_hints_yml]__
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
 __[default_namarc]__
 [% qx(cat ./namarc) %]
+__[custom_pl]__
+[% qx(cat ./custom.pl) %]
 __[default_palette_yml]__
 [% qx(cat ./palette.yml) %]
 __[fake_jack_lsp]__

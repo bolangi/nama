@@ -421,6 +421,7 @@ our (
 	$format_divider,
 
 	$user_customization_file, 
+	$custom_pl,    # default customization file
 	%user_command,
 	%user_alias,
 );

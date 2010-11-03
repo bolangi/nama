@@ -251,8 +251,20 @@ PROJECT_ROOT
 	my $reply = <STDIN>;
 	chomp $reply;
 	if ($reply !~ /n/i){
+		# write project root path into default namarc
 		$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
+		
+		# create path nama/untitled/.wav
+		#
+		# this creates directories for 
+		#   - project root
+		#   - project name 'untitled', the default project, and
+		#   - project untitled's hidden directory for holding WAV files
+		
 		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
+
+		$custom_pl > io( user_customization_file() );
+		
 	} else {
 		print <<OTHER;
 Please make sure to set the project_root directory in
@@ -556,7 +568,7 @@ sub substitute{
 }
 
 sub setup_user_customization {
-	my $file = join_path(project_root(),$user_customization_file);
+	my $file = user_customization_file();
 	return unless -r $file;
 	say "reading user customization file $user_customization_file";
 	my @return;
@@ -579,6 +591,8 @@ sub setup_user_customization {
 	}
 	%user_alias   = %{ $custom{aliases}  };
 }
+sub user_customization_file { join_path(project_root(),$user_customization_file) }
+
 sub do_user_command {
 	#say "args: @_";
 	my($cmd, @args) = @_;
