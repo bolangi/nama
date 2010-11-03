@@ -214,8 +214,8 @@ add_track: _add_track track_name(s) end {
 add_tracks: _add_tracks track_name(s) end {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
 track_name: ident
-# set bus Brass
-set_track: _set_track 'bus' existing_bus_name end {
+# was set bus Brass
+move_to_bus: _move_to_bus existing_bus_name end {
 	$::this_track->set( group => $item{existing_bus_name}); 1
 } 
 set_track: _set_track key someval end {
@@ -1015,3 +1015,20 @@ merge_edits: _merge_edits { ::merge_edits(); 1; }
 explode_track: _explode_track end {
 	::explode_track($::this_track)
 }
+promote_version_to_track: _promote_version_to_track version {
+	my $v = $item{version};
+	my $t = $::this_track;
+	$t->versions->[$v] or print($t->name,": version $v does not exist.\n"),
+		return;
+	::VersionTrack->new(
+		name 	=> $t->name.":$v",
+		version => $v, # fixed
+		target  => $t->name,
+		rw		=> 'MON',
+		group   => $t->group,
+	);
+}
+version: dd
+	
+	
+	

@@ -77,6 +77,11 @@ track => <<TRACK,
                                 including effects, versions, 
                                 modifiers,  "sax; sh"
 
+   show_bus_tracks, shb      -  show status of current bus,
+                                mix track and member tracks
+
+   show_tracks_all showa sha - show all tracks, including hidden
+
    stereo                    -  set track width to 2 channels
 
    mono                      -  set track width to 1 channel
@@ -316,7 +321,7 @@ bus => <<BUS,
                                 of the same name
                                 example: add_sub_bus Strings 
                                          add_tracks violin cello bass
-                                         for cello violin bass; set bus Strings
+                                         for cello violin bass; move_to_bus Strings
 
 BUS
 

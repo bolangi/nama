@@ -885,4 +885,14 @@ merge_edits:
 explode_track:
   type: track
   what: make track into a sub-bus, with one track for each version
+move_to_bus:
+  type: track
+  what: move current track to another bus
+  short: mtb mbs
+  parameters: <s_bus_name>
+promote_version_to_track:
+  type: track
+  what: create a read-only track using specified version of current track
+  short: pvt
+  parameters: <i_version_number>
 ...
