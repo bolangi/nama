@@ -152,13 +152,7 @@ sub group_last {
 	$group->last;
 }
 
-sub last {
-	my $track = shift;
-	my @versions;
-	@versions =  @{ $track->versions };
-	$versions[-1] || 0;
-}
-	
+sub last { $_[0]->versions->[-1] || 0 }
 
 sub current_wav {
 	my $track = shift;
@@ -710,7 +704,7 @@ sub import_audio  {
 	my ($path, $frequency) = @_; 
 	$path = ::expand_tilde($path);
 	#say "path: $path";
-	my $version  = ${ $track->versions }[-1] + 1;
+	my $version  = $track->last + 1;
 	if ( ! -r $path ){
 		print "$path: non-existent or unreadable file. No action.\n";
 		return;
