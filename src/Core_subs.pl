@@ -5937,9 +5937,8 @@ sub remove_system_version_comment {
 sub setup_length {
 	my $length;
 	map{  my $l = $_->adjusted_length; $length = $l if $l > $length }
-	grep{ defined $_ and $_->rec_status eq 'MON' }
-	map{  $ti{$_} }
-	keys %is_ecasound_chain;
+	grep{ $_-> rec_status eq 'MON' }
+	engine_tracks();
 	$length
 }
 sub offset_run {
