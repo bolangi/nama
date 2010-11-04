@@ -5828,11 +5828,24 @@ sub apply_fades {
 	# use info from Fade objects in %::Fade::by_name
 	# applying to tracks that are part of current
 	# chain setup
-	my @tracks = map{$ti{$_}} keys %is_ecasound_chain;
 	map{ ::Fade::refresh_fade_controller($_) }
 	grep{$_->{fader} }  # only if already exists
-	@tracks
+	engine_tracks();
 }
+sub engine_tracks { # tracks that belong to current chain setup
+     map{$ti{$_}} grep{$ti{$_}} keys %is_ecasound_chain;
+}
+sub is_engine_track { # takes Track object, name or index
+	my $t = shift;
+	my $n;
+	given($t){
+	when( (ref $_) =~ /Track/){ $n = $_->n     }
+	when( ! /\D/ )            { $n = $_        }
+	when(   /\D/ and $tn{$_} ){ $n = $tn{$_}->n}
+	}
+	$is_ecasound_chain{$n}
+}
+	
 sub disable_edits {
 
 	say("Please select an edit and try again."), return
@@ -5937,12 +5950,14 @@ sub offset_run {
 	my $offset = $::Mark::by_name{$markname}->adjusted_time;
 	$offset_run_start_time = $offset;
 	$offset_run_end_time   = $endpoint;
+	$offset_mark = $markname;
 	offset_run_mode(1);
 	$regenerate_setup++;
 }
 sub clear_offset_recording_vars {
-	$offset_run_start_time = 0;
-	$offset_run_end_time   = 0;
+	$offset_run_start_time = undef;
+	$offset_run_end_time   = undef;
+	$offset_mark 		   = undef;
 }
 sub offset_run_mode {
 	my $set = shift;
