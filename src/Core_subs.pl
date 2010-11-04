@@ -1128,6 +1128,7 @@ sub initialize_chain_setup_vars {
 	@io = (); 			# IO object list
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
+	%is_ecasound_chain = ();
 	@input_chains = @output_chains = @post_input = @pre_output = ();
 	undef $chain_setup;
 	disable_length_timer();
@@ -2212,9 +2213,16 @@ sub rec_cleanup {
 		reconfigure_engine();
 	}
 }
+sub adjust_offset_recordings {
+	map {
+		$_->set(playat => $offset_mark);
+		say $_->name, ": offsetting to $offset_mark";
+	} engine_wav_out_tracks();
+}
 sub post_rec_configure {
 
 		$ui->global_version_buttons(); # recreate
+		adjust_offset_recordings();
 		map{ $_->set(rw => 'MON')} ::Bus::all();
 		$ui->refresh();
 	#	reconfigure_engine(); # redundant
@@ -5835,7 +5843,9 @@ sub apply_fades {
 sub engine_tracks { # tracks that belong to current chain setup
      map{$ti{$_}} grep{$ti{$_}} keys %is_ecasound_chain;
 }
-sub is_engine_track { # takes Track object, name or index
+sub is_engine_track { 
+		# takes Track object, name or index
+		# returns object if corresponding track belongs to current chain setup
 	my $t = shift;
 	my $n;
 	given($t){
@@ -5843,7 +5853,10 @@ sub is_engine_track { # takes Track object, name or index
 	when( ! /\D/ )            { $n = $_        }
 	when(   /\D/ and $tn{$_} ){ $n = $tn{$_}->n}
 	}
-	$is_ecasound_chain{$n}
+	$ti{$n} if $is_ecasound_chain{$n}
+}
+sub engine_wav_out_tracks {
+	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
 }
 	
 sub disable_edits {
