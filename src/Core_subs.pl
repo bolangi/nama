@@ -71,7 +71,7 @@ sub prepare {
 	if ( 	$use_jack_plumbing				# not disabled in namarc
 			and ! ($opts{J} or $opts{A})	# we are not testing   
 			and $jack_running
-			and $jack_plumbing
+			and ! $jack_plumbing
 
 	){ system('jack.plumbing >/dev/null 2>&1 &') }
 
