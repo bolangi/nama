@@ -3892,7 +3892,6 @@ sub rewind {
 }
 sub solo {
 	my $current_track = $this_track;
-	if ($soloing) { all() }
 
 	# get list of already muted tracks if I haven't done so already
 	
