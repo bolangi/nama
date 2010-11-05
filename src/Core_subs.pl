@@ -1807,8 +1807,7 @@ sub connect_jack_ports_list {
 		and $jack_plumbing
 		);
 
-	#my $dis = shift;
-	my $dis;
+	my $dis = shift;
 	my $fh;
 
 	# read user data from ~/.jack.plumbing if we need it
@@ -1862,7 +1861,7 @@ sub connect_jack_ports_list {
 
 					my $ecasound_port = $dest .  $ecasound_port_number;
 					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
-					$debug and print $fh "($config_line)\n";
+					print $fh "($config_line)\n" unless $dis;
 
 				} else { # fall back to jack_connect
 					# quote port in case it contains spaces
@@ -1887,7 +1886,7 @@ sub connect_jack_ports_list {
 sub quote { qq("$_[0]")}
 
 sub disconnect_jack_ports_list { 
-	#connect_jack_ports_list('dis')  # probably we can go without this
+	connect_jack_ports_list('dis')  # probably we can go without this
 }
 
 sub transport_status {
