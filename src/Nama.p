@@ -165,7 +165,7 @@ sub setup_grammar {
 
 	*grammar = __PACKAGE__->section_data("grammar");
 
-	$parser = new Parse::RecDescent ($grammar) or croak "Bad grammar!\n";
+	$parser = Parse::RecDescent->new($grammar) or croak "Bad grammar!\n";
 
 	[% qx(cat ./help_topic.pl) %]
 
