@@ -146,8 +146,8 @@ import_audio:
   short: import
   what: import a sound file (wav, ogg, mp3, etc.) to the current track, resampling if necessary.
   parameters: <s_wav_file_path> [i_frequency]
-set_track:
-  short: set
+xxset_track:
+  short: xxset
   type: track
   what: directly set current track parameters (use with care!)
   parameters: <s_track_field> value
@@ -412,8 +412,9 @@ new_project_template:
   parameters: <s_template_name> [<s_template_description>]
 use_project_template:
   type: project
-  what: use a template to create tracks for a new, empty project
+  what: use a template to create tracks in a newly created, empty project
   short: upt apt
+  parameters: <s_template_name>
 list_project_templates:
   type: project
   what: list project templates
