@@ -777,27 +777,19 @@ sub initialize_project_data {
 
 	$markers_armed = 0;
 
-=comment
- 	::Mark::initialize();
-	::Fade::initialize();
-	::Edit::initialize();
-	::Bus::initialize();
-	::Track::initialize();
-=cut
-	map{ $_->initialize() }
-	qw(
- 	::Mark
-	::Fade
-	::Edit
-	::Bus
-	::Track
-	::Insert
-	);
-	
+	map{ $_->initialize() } qw(
+							::Mark
+							::Fade
+							::Edit
+							::Bus
+							::Track
+							::Insert
+							);
 	
 	# volume settings
 	
 	%old_vol = ();
+	@already_muted = ();
 
 	# $is_armed = 0;
 	
@@ -3891,7 +3883,6 @@ sub rewind {
 	forward( -$delta );
 }
 sub solo {
-	my $current_track = $this_track;
 
 	# get list of already muted tracks if I haven't done so already
 	
@@ -3925,7 +3916,6 @@ sub all {
 	
 	@already_muted = ();
 	$soloing = 0;
-	
 }
 	
 

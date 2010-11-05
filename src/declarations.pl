@@ -360,7 +360,7 @@ our (
     $midi_inputs,  # on/off/capture
 
 	@already_muted, # for soloing list of Track objects that are 
-                    # muted before we begin
+					# muted before we begin
     $soloing,       # one user track is on, all others are muted
 
 	%bunch,			# user collections of tracks
