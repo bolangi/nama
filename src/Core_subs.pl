@@ -1808,8 +1808,6 @@ sub connect_jack_ports_list {
 	# no, because stale connections remain, we
 	# have to rewrite every time... if jack.plumbing
 	#
-	local $debug = 1;
-	
 	my $configure_jack_plumbing =  # boolean
 		(		
 			$use_jack_plumbing 
