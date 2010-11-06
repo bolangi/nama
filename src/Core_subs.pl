@@ -1768,12 +1768,15 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
+	sleeper(0.5); # time for ecasound engine to launch
 	start_jack_plumbing();
-	sleeper(0.2);
+	sleeper(0.2); # time for jack.plumbing to launch
 	jack_update();
-	connect_jack_ports_list();
-	sleeper(1.0) if $jack_plumbing 
+	connect_jack_ports_list(); # requires jack.plumbing
+	sleeper(2.0) if $jack_plumbing
 		and grep{ $_->source_type eq 'jack_ports_list' } engine_tracks();
+		# allow time for jack.plumbing to poll
+	kill_jack_plumbing();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
@@ -1886,8 +1889,6 @@ sub quote { qq("$_[0]")}
 
 sub disconnect_jack_ports_list { 
 
-	qx( killall jack.plumbing );
-	sleeper(0.1);
 	connect_jack_ports_list('dis') 
 }
 
@@ -5280,6 +5281,10 @@ sub remove_project_template {
 		unlink join_path( project_root(), "templates", $name);
 	} @_;
 	
+}
+sub kill_jack_plumbing {
+
+	qx( killall jack.plumbing );
 }
 sub start_jack_plumbing {
 	
