@@ -68,12 +68,7 @@ sub prepare {
 	# start jack.plumbing daemon
 	# if allowable and not yet started
 	
-	if ( 	$use_jack_plumbing				# not disabled in namarc
-			and ! ($opts{J} or $opts{A})	# we are not testing   
-			and $jack_running
-			and ! $jack_plumbing
-
-	){ system('jack.plumbing >/dev/null 2>&1 &') }
+	start_jack_plumbing();
 
 	start_midish() if $midish_enable;
 
@@ -1773,7 +1768,9 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
+	start_jack_plumbing();
 	sleeper(0.2);
+	jack_update();
 	connect_jack_ports_list();
 	sleeper(1.0) if $jack_plumbing 
 		and grep{ $_->source_type eq 'jack_ports_list' } engine_tracks();
@@ -1887,7 +1884,12 @@ sub connect_jack_ports_list {
 }
 sub quote { qq("$_[0]")}
 
-sub disconnect_jack_ports_list { connect_jack_ports_list('dis') }
+sub disconnect_jack_ports_list { 
+
+	qx( killall jack.plumbing );
+	sleeper(0.1);
+	connect_jack_ports_list('dis') 
+}
 
 sub transport_status {
 	
@@ -5278,6 +5280,16 @@ sub remove_project_template {
 		unlink join_path( project_root(), "templates", $name);
 	} @_;
 	
+}
+sub start_jack_plumbing {
+	
+	if ( 	$use_jack_plumbing				# not disabled in namarc
+			and ! ($opts{J} or $opts{A})	# we are not testing   
+			and $jack_running
+			and ! $jack_plumbing
+
+	){ system('jack.plumbing &') }
+	#){ system('jack.plumbing >/dev/null 2>&1 &') }
 }
 {
 
