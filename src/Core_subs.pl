@@ -5288,8 +5288,8 @@ sub start_jack_plumbing {
 			and $jack_running
 			and ! $jack_plumbing
 
-	){ system('jack.plumbing &') }
-	#){ system('jack.plumbing >/dev/null 2>&1 &') }
+#	){ system('jack.plumbing &') }
+	){ system('jack.plumbing >/dev/null 2>&1 &') }
 }
 {
 
