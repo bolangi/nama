@@ -1037,7 +1037,7 @@ sub generate_setup {
 	# prevent engine from starting an old setup
 	
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	disconnect_jack_ports_list(); # reset .jack.plumbing
+	disconnect_jack_ports_list();
 
 	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
@@ -1775,7 +1775,8 @@ sub connect_transport {
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2);
 	connect_jack_ports_list();
-	sleeper(1.0) if $jack_plumbing;
+	sleeper(1.0) if $jack_plumbing 
+		and grep{ $_->source_type eq 'jack_ports_list' } engine_tracks();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
@@ -1886,9 +1887,7 @@ sub connect_jack_ports_list {
 }
 sub quote { qq("$_[0]")}
 
-sub disconnect_jack_ports_list { 
-	connect_jack_ports_list('dis')  # probably we can go without this
-}
+sub disconnect_jack_ports_list { connect_jack_ports_list('dis') }
 
 sub transport_status {
 	
