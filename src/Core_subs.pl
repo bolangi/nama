@@ -1773,8 +1773,9 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-	disconnect_jack_ports_list();
+	#disconnect_jack_ports_list();
 	connect_jack_ports_list();
+	sleeper(0.2);
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
