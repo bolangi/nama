@@ -366,20 +366,33 @@ show_track: _show_track dd end {
 
 show_mode: _show_mode end { print STDOUT ::Text::show_status; 1}
 bus_rec: _bus_rec end {
-	$::bn{$::this_bus}->set(rw => 'REC');
+	my $bus = $::bn{$::this_bus}; 
+	$bus->set(rw => 'REC');
+	# set up mix track
+	$::tn{$bus->send_id}->busify
+		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
 	print "Setting REC-enable for " , $::this_bus ,
-		" bus. You may record user tracks.\n";
+		" bus. You may record member tracks.\n";
 	1; }
 bus_mon: _bus_mon end {
-	$::bn{$::this_bus}->set(rw => 'MON');
+	my $bus = $::bn{$::this_bus}; 
+	$bus->set(rw => 'MON');
+	# set up mix track
+	$::tn{$bus->send_id}->busify
+		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
 	print "Setting MON mode for " , $::this_bus , 
-		" bus. No recording on user tracks.\n";
+		" bus. Monitor only for member tracks.\n";
  	1  
 }
 bus_off: _bus_off end {
-	$::bn{$::this_bus}->set(rw => 'OFF'); 
+	my $bus = $::bn{$::this_bus}; 
+	$bus->set(rw => 'OFF');
+	# turn off mix track
+	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
+	{ $mix->set(rw => 'OFF') }
 	print "Setting OFF mode for " , $::this_bus,
-		" bus. All user tracks disabled.\n"; 1  }
+		" bus. Member tracks disabled.\n"; 1  
+}
 bus_version: _bus_version end { 
 	use warnings;
 	no warnings qw(uninitialized);
