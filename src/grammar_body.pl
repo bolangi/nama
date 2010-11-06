@@ -441,9 +441,20 @@ mono: _mono {
 	print $::this_track->name, ": setting to mono\n";
 	1; }
 
-off: 'off' end {$::this_track->set_off(); 1}
-rec: 'rec' end { $::this_track->set_rec(); 1}
-mon: 'mon' end {$::this_track->set_mon(); 1}
+#off: 'off' end {$::this_track->set_off(); 1}
+#rec: 'rec' end { $::this_track->set_rec(); 1}
+#mon: 'mon' end {$::this_track->set_mon(); 1}
+
+# dummy defs to avoid warnings from command.yml entries
+off: 'Xxx' {}
+rec: 'Xxx' {}
+mon: 'Xxx' {}
+
+command: rw
+rw_setting: 'rec'|'mon'|'off'
+rw: rw_setting end {
+	::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 1
+}
 rec_defeat: _rec_defeat end { 
 	$::this_track->set(rec_defeat => 1);
 	print $::this_track->name, ": WAV recording disabled!\n";
