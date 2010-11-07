@@ -1783,6 +1783,19 @@ sub jack_plumbing_conf {
 ;## DO NOT place any connection data below this line!!
 ;
 ); 
+sub initialize_jack_plumbing_conf {  # remove nama lines
+
+		return unless -f -r jack_plumbing_conf();
+
+		# read in file
+		my $user_plumbing = io(jack_plumbing_conf())->all;
+
+		# keep user data, deleting below tag
+		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
+
+		# write out file
+		$user_plumbing > io(jack_plumbing_conf());
+}
 
 my $jack_plumbing_code = sub 
 	{
@@ -1816,28 +1829,20 @@ sub connect_jack_ports_list {
 
 	if( $use_jack_plumbing){
 
-		$debug and say "jack plumbing is running: we will configure";
-		
-		my $cmd = "cat ".jack_plumbing_conf();
-		my $user_plumbing = io(jack_plumbing_conf())->all
-			if -f -r jack_plumbing_conf();
-
-		# keep user data, deleting below tag
-
-		$user_plumbing =~ s/;[# ]*$plumbing_tag.*//gs;
-	
-		open $fh, ">", jack_plumbing_conf();
-		
-		print $fh $user_plumbing, $plumbing_header;
-
+		# write config file
+		initialize_jack_plumbing_conf();
+		open $fh, ">>", jack_plumbing_conf();
+		print $fh $plumbing_header;
 		make_connections($jack_plumbing_code, \@ports_list_tracks);
-
 		close $fh; 
+
+		# run jack.plumbing
 		start_jack_plumbing();
 		sleeper(0.5); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
+		initialize_jack_plumbing_conf();
 	}
-	else { 
+	else {  # use jack_connect
 		make_connections($jack_connect_code, \@ports_list_tracks);
 	}
 }
@@ -1886,6 +1891,7 @@ sub make_connections {
 		}
  	 } @$tracks
 }
+	
 
 sub transport_status {
 	
@@ -5284,10 +5290,7 @@ sub start_jack_plumbing {
 	
 	if ( 	$use_jack_plumbing				# not disabled in namarc
 			and ! ($opts{J} or $opts{A})	# we are not testing   
-			and $jack_running
-			and ! $jack_plumbing
 
-	#){ system('jack.plumbing &') }
 	){ system('jack.plumbing >/dev/null 2>&1 &') }
 }
 {
