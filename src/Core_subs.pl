@@ -1803,6 +1803,7 @@ my $jack_plumbing_code = sub
 		my $ecasound_port = $dest .  $ecasound_port_number;
 		my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
 		print $fh "($config_line)\n"; # $fh in lexical scope
+		$debug and say $config_line;
 	};
 my $jack_connect_code = sub
 	{
