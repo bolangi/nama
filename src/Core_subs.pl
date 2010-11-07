@@ -1768,15 +1768,8 @@ sub connect_transport {
 	$ui->length_display(-text => colonize($length));
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
-	sleeper(0.5); # time for ecasound engine to launch
-	start_jack_plumbing();
-	sleeper(0.2); # time for jack.plumbing to launch
-	jack_update();
-	connect_jack_ports_list(); # requires jack.plumbing
-	sleeper(2.0) if $jack_plumbing
-		and grep{ $_->source_type eq 'jack_ports_list' } engine_tracks();
-		# allow time for jack.plumbing to poll
-	kill_jack_plumbing();
+	sleeper(0.2); # time for ecasound engine to launch
+	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
@@ -1788,6 +1781,7 @@ sub jack_plumbing_conf {
 }
 
 { 
+  my $fh;
   my $plumbing_tag = q(BEGIN NAMA CONNECTIONS LIST);
   my $plumbing_header = qq(;### $plumbing_tag
 ;## The following lines are automatically generated.
@@ -1795,27 +1789,37 @@ sub jack_plumbing_conf {
 ;
 ); 
 
+my $jack_plumbing_code = sub 
+	{
+		my ($port, $dest, $ecasound_port_number) = @_;
+		my $ecasound_port = $dest .  $ecasound_port_number;
+		my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
+		print $fh "($config_line)\n"; # $fh in lexical scope
+	};
+my $jack_connect_code = sub
+	{
+		my ($port, $dest, $ecasound_port_number) = @_;
+		# quote port in case it contains spaces
+		my $p = $port =~ / / ? qq("$port") : $port	;
+
+		my $dis = undef; # we don't worry about disconnecting
+
+		# command: jack_connect Horgand_1:1 ecasound:synth_in_
+		my $cmd = q(jack_).$dis.qq(connect $p $dest);
+
+		$cmd .= $ecasound_port_number;
+		$debug and say $cmd;
+		system $cmd;
+	};
 sub connect_jack_ports_list {
 
-	# skip if we can? 
-	#
-	# no, because stale connections remain, we
-	# have to rewrite every time... if jack.plumbing
-	#
-	my $configure_jack_plumbing =  # boolean
-		(		
-			$use_jack_plumbing 
-		and $jack_running
-		and $jack_plumbing
-		);
+	my @ports_list_tracks = 
+		grep{ $_->source_type eq 'jack_ports_list' 
+	  	  and $_->rec_status  eq 'REC' } engine_tracks();
 
-	my $dis = shift;
-	my $fh;
+	return unless @ports_list_tracks and $jack_running;
 
-	# read user data from ~/.jack.plumbing if we need it
-	
-	if( $configure_jack_plumbing){
-
+	if( $use_jack_plumbing){
 
 		$debug and say "jack plumbing is running: we will configure";
 		
@@ -1830,7 +1834,30 @@ sub connect_jack_ports_list {
 		open $fh, ">", jack_plumbing_conf();
 		
 		print $fh $user_plumbing, $plumbing_header;
+
+		make_connections($jack_plumbing_code, \@ports_list_tracks);
+
+		close $fh; 
+		sleeper(0.3);
+		start_jack_plumbing();
+		sleeper(0.3);
+		system "touch ".jack_plumbing_conf();		
+		sleeper(1.5); # time for jack.plumbing to launch and connect
+		kill_jack_plumbing();
 	}
+	else { 
+		make_connections($jack_connect_code, \@ports_list_tracks);
+	}
+}
+}
+sub quote { qq("$_[0]")}
+
+sub disconnect_jack_ports_list { 
+
+	connect_jack_ports_list('dis') 
+}
+sub make_connections {
+	my ($code, $tracks) = @_;
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
@@ -1859,37 +1886,13 @@ sub connect_jack_ports_list {
 					?  1 
 					: $line_number % $track->width + 1;
 
-				if( $configure_jack_plumbing ){
+				
+				$code->($port, $dest, $ecasound_port_number);
 
-					my $ecasound_port = $dest .  $ecasound_port_number;
-					my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
-					print $fh "($config_line)\n" unless $dis;
-
-				} else { # fall back to jack_connect
-					# quote port in case it contains spaces
-					my $p = $port =~ / / ? qq("$port") : $port	;
-
-					# command: jack_connect Horgand_1:1 ecasound:synth_in_
-					my $cmd = q(jack_).$dis.qq(connect $p $dest);
-
-					$cmd .= $ecasound_port_number;
-					$debug and say $cmd;
-					system $cmd;
-				}
 				$line_number++;
 			};
 		}
- 	 } grep{ $_->source_type eq 'jack_ports_list' 
-				and $_->rec_status eq 'REC' } ::Track::all();
-
-	 close $fh if $configure_jack_plumbing;
-}
-}
-sub quote { qq("$_[0]")}
-
-sub disconnect_jack_ports_list { 
-
-	connect_jack_ports_list('dis') 
+ 	 } @$tracks
 }
 
 sub transport_status {
@@ -5284,7 +5287,7 @@ sub remove_project_template {
 }
 sub kill_jack_plumbing {
 
-	qx( killall jack.plumbing );
+	system 'killall jack.plumbing >/dev/null 2>&1' if $jack_plumbing;
 }
 sub start_jack_plumbing {
 	
