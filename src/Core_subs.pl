@@ -1799,32 +1799,29 @@ sub initialize_jack_plumbing_conf {  # remove nama lines
 
 my $jack_plumbing_code = sub 
 	{
-		my ($port, $dest, $ecasound_port_number) = @_;
-		my $ecasound_port = $dest .  $ecasound_port_number;
-		my $config_line = join " ", 'connect', quote($port), quote($ecasound_port);
-		print $fh "($config_line)\n"; # $fh in lexical scope
+		my ($port1, $port2) = @_;
+		my $debug++;
+		my $config_line = qq{(connect $port1 $port2)};
+		say $fh $config_line; # $fh in lexical scope
 		$debug and say $config_line;
 	};
 my $jack_connect_code = sub
 	{
-		my ($port, $dest, $ecasound_port_number) = @_;
-		# quote port in case it contains spaces
-		my $p = $port =~ / / ? qq("$port") : $port	;
-
-		my $dis = undef; # we don't worry about disconnecting
-
-		# command: jack_connect Horgand_1:1 ecasound:synth_in_
-		my $cmd = q(jack_).$dis.qq(connect $p $dest);
-
-		$cmd .= $ecasound_port_number;
+		my ($port1, $port2) = @_;
+		my $debug++;
+		my $cmd = qq(jack_connect $port1 $port2);
 		$debug and say $cmd;
 		system $cmd;
 	};
 sub connect_jack_ports_list {
 
-	my @ports_list_tracks = 
-		grep{ $_->source_type eq 'jack_ports_list' 
-	  	  and $_->rec_status  eq 'REC' } engine_tracks();
+	my @source_tracks = 
+		grep{ 	$_->source_type eq 'jack_ports_list' and
+	  	  		$_->rec_status  eq 'REC' 
+			} engine_tracks();
+
+	my @send_tracks = 
+		grep{ $_->send_type eq 'jack_ports_list' } engine_tracks();
 
 	# we need JACK
 	return if ! $jack_running;
@@ -1833,7 +1830,9 @@ sub connect_jack_ports_list {
 	#   - tracks to configure
 	#   - or a jack.plumbing config file
 	
-	return if ! -f jack_plumbing_conf() and ! @ports_list_tracks;
+	return if   ! -f jack_plumbing_conf() 
+			and ! @source_tracks
+			and ! @send_tracks;
 
 	if( $use_jack_plumbing or -f jack_plumbing_conf() ){
 
@@ -1841,62 +1840,68 @@ sub connect_jack_ports_list {
 		initialize_jack_plumbing_conf();
 		open $fh, ">>", jack_plumbing_conf();
 		print $fh $plumbing_header;
-		make_connections($jack_plumbing_code, \@ports_list_tracks);
+		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
+		make_connections($jack_plumbing_code, \@send_tracks,   'out');
 		close $fh; 
 
 		# run jack.plumbing
 		start_jack_plumbing();
 		sleeper(0.5); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
-		initialize_jack_plumbing_conf();
+	#	initialize_jack_plumbing_conf();
 	}
 	if( ! $use_jack_plumbing) {  # use jack_connect
-		make_connections($jack_connect_code, \@ports_list_tracks);
+		make_connections($jack_connect_code, \@source_tracks, 'in' );
+		make_connections($jack_connect_code, \@send_tracks,   'out');
 	}
 }
 }
-sub quote { qq("$_[0]")}
+sub quote { $_[0] =~ /^"/ ? $_[0] : qq("$_[0]")}
 
 sub disconnect_jack_ports_list { 
 
 	connect_jack_ports_list('dis') 
 }
 sub make_connections {
-	my ($code, $tracks) = @_;
+	my ($code, $tracks, $direction) = @_;
+	my $ports_list = $direction eq 'in' ? 'source_id' : 'send_id';
+	my $debug++;
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
- 		my $dest = "ecasound:$name\_in_";
-		my $file = join_path(project_root(), $track->source_id);
-		if (! -e -r $file){ say $track->name, 
-				": JACK ports file $file not found. No sources connected.";
-	  	} else {
-			my $line_number = 0;
-			my @lines = io($file)->slurp;
-			for my $port (@lines){   
-				# $port is the source port name
-				chomp $port;
-				$debug and say "port file $file, line $line_number, port $port";
-				
-				# setup shell command
-				
-				if(! $jack{$port}){
-					say $track->name, qq(: port "$port" not found. Skipping.);
-					next
-				}
+ 		my $ecasound_port = "ecasound:$name\_$direction\_";
+		my $file = join_path(project_root(), $track->$ports_list);
+		say($track->name, 
+			": JACK ports file $file not found. No sources connected."), 
+			return if ! -e -r $file;
+		my $line_number = 0;
+		my @lines = io($file)->slurp;
+		for my $external_port (@lines){   
+			# $external_port is the source port name
+			chomp $external_port;
+			$debug and say "port file $file, line $line_number, port $external_port";
+			# setup shell command
 			
-				# ecasound port suffix	
-				
-				my $ecasound_port_number = $track->width == 1
-					?  1 
-					: $line_number % $track->width + 1;
+			if(! $jack{$external_port}){
+				say $track->name, qq(: port "$external_port" not found. Skipping.);
+				next
+			}
+		
+			# ecasound port index
+			
+			my $index = $track->width == 1
+				?  1 
+				: $line_number % $track->width + 1;
 
-				
-				$code->($port, $dest, $ecasound_port_number);
+		my @ports = map{quote($_)} $external_port, $ecasound_port.$index;
 
-				$line_number++;
-			};
-		}
+			  $code->(
+						$direction eq 'in'
+							? @ports
+							: reverse @ports
+					);
+			$line_number++;
+		};
  	 } @$tracks
 }
 	
