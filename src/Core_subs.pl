@@ -5293,7 +5293,8 @@ sub remove_project_template {
 	
 }
 sub kill_jack_plumbing {
-	qx(killall jack.plumbing);
+	qx(killall jack.plumbing >/dev/null 2>&1)
+	unless $opts{A} or $opts{J};
 }
 sub start_jack_plumbing {
 	
