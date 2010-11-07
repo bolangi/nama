@@ -1826,9 +1826,16 @@ sub connect_jack_ports_list {
 		grep{ $_->source_type eq 'jack_ports_list' 
 	  	  and $_->rec_status  eq 'REC' } engine_tracks();
 
-	return unless @ports_list_tracks and $jack_running;
+	# we need JACK
+	return if ! $jack_running;
 
-	if( $use_jack_plumbing){
+	# we need either
+	#   - tracks to configure
+	#   - or a jack.plumbing config file
+	
+	return if ! -f jack_plumbing_conf() and ! @ports_list_tracks;
+
+	if( $use_jack_plumbing or -f jack_plumbing_conf() ){
 
 		# write config file
 		initialize_jack_plumbing_conf();
@@ -1843,7 +1850,7 @@ sub connect_jack_ports_list {
 		kill_jack_plumbing();
 		initialize_jack_plumbing_conf();
 	}
-	else {  # use jack_connect
+	if( ! $use_jack_plumbing) {  # use jack_connect
 		make_connections($jack_connect_code, \@ports_list_tracks);
 	}
 }
