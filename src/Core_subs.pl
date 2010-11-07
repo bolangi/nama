@@ -1833,15 +1833,9 @@ sub connect_jack_ports_list {
 		make_connections($jack_plumbing_code, \@ports_list_tracks);
 
 		close $fh; 
-		say "before plumbing:";
-		#say qx(jack_lsp -c);
-		sleeper(0.6);
 		start_jack_plumbing();
-		#system "touch ".jack_plumbing_conf();		
-		sleeper(2); # time for jack.plumbing to launch and poll
+		sleeper(0.5); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
-		say "after plumbing:";
-		#say qx(jack_lsp -c);
 	}
 	else { 
 		make_connections($jack_connect_code, \@ports_list_tracks);
