@@ -65,11 +65,6 @@ sub prepare {
 
 	sleeper(0.2); # allow time for first polling
 
-	# start jack.plumbing daemon
-	# if allowable and not yet started
-	
-	start_jack_plumbing();
-
 	start_midish() if $midish_enable;
 
 	# set up autosave
@@ -1838,12 +1833,15 @@ sub connect_jack_ports_list {
 		make_connections($jack_plumbing_code, \@ports_list_tracks);
 
 		close $fh; 
-		sleeper(0.3);
+		say "before plumbing:";
+		#say qx(jack_lsp -c);
+		sleeper(0.6);
 		start_jack_plumbing();
-		sleeper(0.3);
-		system "touch ".jack_plumbing_conf();		
-		sleeper(1.5); # time for jack.plumbing to launch and connect
+		#system "touch ".jack_plumbing_conf();		
+		sleeper(2); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
+		say "after plumbing:";
+		#say qx(jack_lsp -c);
 	}
 	else { 
 		make_connections($jack_connect_code, \@ports_list_tracks);
@@ -5286,8 +5284,7 @@ sub remove_project_template {
 	
 }
 sub kill_jack_plumbing {
-
-	system 'killall jack.plumbing >/dev/null 2>&1' if $jack_plumbing;
+	qx(killall jack.plumbing);
 }
 sub start_jack_plumbing {
 	
@@ -5296,7 +5293,7 @@ sub start_jack_plumbing {
 			and $jack_running
 			and ! $jack_plumbing
 
-#	){ system('jack.plumbing &') }
+	#){ system('jack.plumbing &') }
 	){ system('jack.plumbing >/dev/null 2>&1 &') }
 }
 {
