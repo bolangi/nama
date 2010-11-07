@@ -4149,10 +4149,10 @@ sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
 sub jack_update {
 	# cache current JACK status
 	return if engine_running();
-	$jack_running =  process_is_running('jackd');
-	$jack_plumbing = process_is_running('jack.plumbing');
-	my $jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
-	%jack = %{jack_ports($jack_lsp)} if $jack_running;
+	if( $jack_running =  process_is_running('jackd') ){
+		my $jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
+		%jack = %{jack_ports($jack_lsp)}
+	} else { %jack = () }
 }
 
 sub jack_client {
