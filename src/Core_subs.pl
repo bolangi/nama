@@ -1027,7 +1027,6 @@ sub generate_setup {
 	# prevent engine from starting an old setup
 	
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
-	disconnect_jack_ports_list();
 
 	initialize_chain_setup_vars();
 	local $@; # don't propagate errors
@@ -1858,14 +1857,9 @@ sub connect_jack_ports_list {
 }
 sub quote { $_[0] =~ /^"/ ? $_[0] : qq("$_[0]")}
 
-sub disconnect_jack_ports_list { 
-
-	connect_jack_ports_list('dis') 
-}
 sub make_connections {
 	my ($code, $tracks, $direction) = @_;
 	my $ports_list = $direction eq 'in' ? 'source_id' : 'send_id';
-	my $debug++;
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
@@ -1992,7 +1986,6 @@ sub transport_running { eval_iam('engine-status') eq 'running'  }
 sub disconnect_transport {
 	return if transport_running();
 	teardown_engine();
-	disconnect_jack_ports_list();
 }
 sub engine_is {
 	my $pos = shift;
