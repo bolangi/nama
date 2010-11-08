@@ -112,8 +112,6 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
-# end
-
 # Julien Claassen's Notes on Mastering effect defaults
 # 
 # Eq: All sections are initially off. You can turn them 
@@ -128,7 +126,7 @@ limiter: tap_limiter 0 0
 # 
 # Spatialiser and limiter: both initially off so you can start out
 # clean and slowly work your way from there.
-#
+ 
 # MIDI support
 #
 # midish_enable: 0  
@@ -136,9 +134,13 @@ limiter: tap_limiter 0 0
 # midi_input_dev: 
 # 
 # midi_output_dev:
-
+ 
 # jack.plumbing - a daemon for auto-connecting JACK clients
-
-use_jack_plumbing: 1
+# (The default is to use 'jack_connect' which is more reliable)
+#
+# use_jack_plumbing: 0
 
 # quietly_remove_tracks: 0 # generally ask user to confirm
+
+# end
+
