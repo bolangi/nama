@@ -2244,7 +2244,9 @@ sub post_rec_configure {
 
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
-		map{ $_->set(rw => 'MON')} ::Bus::all();
+		# toggle buses of recorded tracks to MON
+		map{ $bn{$_->group}->set(rw => 'MON') } engine_wav_out_tracks();
+		#map{ $_->set(rw => 'MON')} ::Bus::all();
 		$ui->refresh();
 	#	reconfigure_engine(); # redundant
 }
