@@ -1087,7 +1087,7 @@ limit_run_time: _limit_run_time sign(?) dd {
 		: $item{dd};
 	print "Run time limit: ", ::heuristic_time($::run_time), "\n"; 1;
 }
-no_limit_run_time: _no_limit_run_time { 
+limit_run_time_off: _limit_run_time_off { 
 	print "Run timer disabled\n";
 	::disable_length_timer();
 	1;
@@ -1095,7 +1095,7 @@ no_limit_run_time: _no_limit_run_time {
 offset_run: _offset_run markname {
 	::offset_run( $item{markname} ); 1
 }
-no_offset_run: _no_offset_run {
+offset_run_off: _offset_run_off {
 	print "no run offset.\n";
 	::offset_run_mode(0); 1
 }

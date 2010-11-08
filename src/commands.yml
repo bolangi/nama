@@ -900,17 +900,17 @@ limit_run_time:
   what: stop recording after last WAV file finishes playing
   short: lrt
   parameters: [<f_additional_seconds>]
-no_limit_run_time:
+limit_run_time_off:
   type: setup
   what: disable recording stop timer
-  short: nlrt
+  short: lro
 offset_run:
   type: setup
   short: ofr
   what: record/play from mark position
   parameters: <s_mark_name>  
-no_offset_run:
+offset_run_off:
   type: setup
-  short: nofr
+  short: ofo
   what: clear offset run mode
 ...
