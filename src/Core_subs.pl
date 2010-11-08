@@ -65,6 +65,25 @@ sub prepare {
 
 	sleeper(0.2); # allow time for first polling
 
+	# we will start jack.plumbing only when we need it
+	
+	if(		$use_jack_plumbing 
+	and $jack_running 
+	and process_is_running('jack.plumbing')
+	){
+say q(
+
+Jack.plumbing daemon detected!
+
+Please do one of the following then restart Nama:
+
+ - kill the jack.plumbing daemon ("killall jack.plumbing")
+ - set "use_jack_plumbing: 0" in .namarc
+
+Exiting.);
+exit;
+	}
+		
 	start_midish() if $midish_enable;
 
 	# set up autosave
@@ -1838,19 +1857,15 @@ sub connect_jack_ports_list {
 	#   - user-created jack.plumbing config file exists
 	#   - or namarc is configured to use jack.plumbing
 	
-	if( $use_jack_plumbing 
-			or -f jack_plumbing_conf() 
-			or -f '/etc/jack.plumbing')
+	if( $use_jack_plumbing )
 	{
 
 		# write config file
 		initialize_jack_plumbing_conf();
 		open $fh, ">>", jack_plumbing_conf();
 		print $fh $plumbing_header;
-		if ($use_jack_plumbing){
-			make_connections($jack_plumbing_code, \@source_tracks, 'in' );
-			make_connections($jack_plumbing_code, \@send_tracks,   'out');
-		}
+		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
+		make_connections($jack_plumbing_code, \@send_tracks,   'out');
 		close $fh; 
 
 		# run jack.plumbing
