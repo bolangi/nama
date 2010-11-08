@@ -1833,14 +1833,21 @@ sub connect_jack_ports_list {
 			and ! @source_tracks
 			and ! @send_tracks;
 
+
+	# we start jack.plumbing if either
+	#   - user-created jack.plumbing config file exists
+	#   - or namarc is configured to use jack.plumbing
+	
 	if( $use_jack_plumbing or -f jack_plumbing_conf() ){
 
 		# write config file
 		initialize_jack_plumbing_conf();
 		open $fh, ">>", jack_plumbing_conf();
 		print $fh $plumbing_header;
-		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
-		make_connections($jack_plumbing_code, \@send_tracks,   'out');
+		if ($use_jack_plumbing){
+			make_connections($jack_plumbing_code, \@source_tracks, 'in' );
+			make_connections($jack_plumbing_code, \@send_tracks,   'out');
+		}
 		close $fh; 
 
 		# run jack.plumbing
@@ -1849,6 +1856,9 @@ sub connect_jack_ports_list {
 		kill_jack_plumbing();
 		initialize_jack_plumbing_conf();
 	}
+
+	# Nama only adds connections if use_jack_plumbing is set
+	
 	if( ! $use_jack_plumbing) {  # use jack_connect
 		make_connections($jack_connect_code, \@source_tracks, 'in' );
 		make_connections($jack_connect_code, \@send_tracks,   'out');
