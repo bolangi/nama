@@ -1838,7 +1838,10 @@ sub connect_jack_ports_list {
 	#   - user-created jack.plumbing config file exists
 	#   - or namarc is configured to use jack.plumbing
 	
-	if( $use_jack_plumbing or -f jack_plumbing_conf() ){
+	if( $use_jack_plumbing 
+			or -f jack_plumbing_conf() 
+			or -f '/etc/jack.plumbing')
+	{
 
 		# write config file
 		initialize_jack_plumbing_conf();
