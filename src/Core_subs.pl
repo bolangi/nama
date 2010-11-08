@@ -1847,7 +1847,7 @@ sub connect_jack_ports_list {
 		start_jack_plumbing();
 		sleeper(0.5); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
-	#	initialize_jack_plumbing_conf();
+		initialize_jack_plumbing_conf();
 	}
 	if( ! $use_jack_plumbing) {  # use jack_connect
 		make_connections($jack_connect_code, \@source_tracks, 'in' );
