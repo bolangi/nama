@@ -71,17 +71,25 @@ sub prepare {
 	and $jack_running 
 	and process_is_running('jack.plumbing')
 	){
-say q(
 
-Jack.plumbing daemon detected!
+		say "\nJack.plumbing daemon detected!";
+		print "\nAttempting to stop it (will restart as needed)... ";
 
-Please do one of the following then restart Nama:
+		kill_jack_plumbing();
+		sleeper(0.2);
+		if( process_is_running('jack.plumbing') )
+		{
+		say qq(\n\nUnable to stop jack.plumbing daemon.
+
+Please do one of the following, then restart Nama:
 
  - kill the jack.plumbing daemon ("killall jack.plumbing")
  - set "use_jack_plumbing: 0" in .namarc
 
 Exiting.);
 exit;
+		}
+		else { say "Stopped." }
 	}
 		
 	start_midish() if $midish_enable;
