@@ -1852,19 +1852,9 @@ sub connect_jack_ports_list {
 	# we need JACK
 	return if ! $jack_running;
 
-	# we need either
-	#   - tracks to configure
-	#   - or a jack.plumbing config file
-	
-	return if   ! -f jack_plumbing_conf() 
-			and ! @source_tracks
-			and ! @send_tracks;
+	# We need tracks to configure
+	return if ! @source_tracks and ! @send_tracks;
 
-
-	# we start jack.plumbing if either
-	#   - user-created jack.plumbing config file exists
-	#   - or namarc is configured to use jack.plumbing
-	
 	if( $use_jack_plumbing )
 	{
 
@@ -1882,10 +1872,8 @@ sub connect_jack_ports_list {
 		kill_jack_plumbing();
 		initialize_jack_plumbing_conf();
 	}
-
-	# Nama only adds connections if use_jack_plumbing is set
-	
-	if( ! $use_jack_plumbing) {  # use jack_connect
+	else 
+	{
 		make_connections($jack_connect_code, \@source_tracks, 'in' );
 		make_connections($jack_connect_code, \@send_tracks,   'out');
 	}
