@@ -1790,6 +1790,10 @@ sub connect_transport {
 	# eval_iam("cs-set-length $length") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
+	{ # set delay for seeking under JACK
+	my $track_count; map{ $track_count++ } engine_tracks();
+	$seek_delay = $jack_seek_delay || 0.1 + 0.1 * $track_count / 20;
+	}
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();

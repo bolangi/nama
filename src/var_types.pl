@@ -31,6 +31,7 @@
 						$midish_enable
 						$quietly_remove_tracks
 						$use_jack_plumbing
+						$jack_seek_delay
 						);
 
 						

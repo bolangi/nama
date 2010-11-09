@@ -366,8 +366,10 @@ our (
 	%bunch,			# user collections of tracks
 	@keywords,      # for autocompletion
 	$attribs,       # Term::Readline::Gnu object
-	$seek_delay,    # allow microseconds for transport seek
-                    # (used with JACK only)
+	$seek_delay,    # delay to allow engine to seek 
+					# under JACK before restart
+	$jack_seek_delay, # user override for default $seek_delay logic
+					
     $prompt,        # for text mode
 	$preview,       # am running engine with rec_file disabled
 	%duplicate_inputs, # named tracks will be OFF in doodle mode
