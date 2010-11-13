@@ -598,13 +598,13 @@ add_send_bus_cooked:
   short: asbc
   what: add a send bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
-  example: asbc jconv
+  example: asbc Reverb jconv
 add_send_bus_raw:
   type: bus
   short: asbr
   what: add a send bus that copies all user tracks' raw signals
   parameters: <s_name> <destination>
-  example: asbr The_new_bus jconv
+  example: asbr Reverb jconv
 add_sub_bus:
   type: bus
   short: asub

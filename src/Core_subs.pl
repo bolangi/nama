@@ -4604,10 +4604,11 @@ sub add_send_bus {
 	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
 	
 	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
-
+	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
+		say($name,": bus name already in use. Aborting."), return;
+	}
 	if ($bn{$name}){
 		say qq(monitor bus "$name" already exists. Updating with new tracks.");
-
 	} else {
 	my @args = (
 		name => $name, 
