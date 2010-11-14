@@ -129,7 +129,7 @@ PICTURE
 sub show_tracks_section {
     no warnings;
 	#$^A = $format_top;
-    my @tracks = grep{ ref $_ } @_;
+    my @tracks = grep{ ref $_ } @_; # HACK! undef should not be passed
     map {   formline $format_picture, 
             $_->n,
             $_->name,
