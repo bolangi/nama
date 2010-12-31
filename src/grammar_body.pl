@@ -68,9 +68,9 @@ nosemi: text { $::parser->do_part($item{text}) }
 text: /[^;]+/ 
 semicolon: ';'
 
-do_part: track_spec command
-do_part: track_spec
-do_part: command
+do_part: track_spec command end
+do_part: track_spec end
+do_part: command end
 
 predicate: nonsemi semistop { $item{nonsemi}}
 predicate: /$/
@@ -181,7 +181,7 @@ end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
 help_effect: _help_effect effect end { ::Text::help_effect($item{effect}) ; 1}
-find_effect: _find_effect anytag(s) { 
+find_effect: _find_effect anytag(s) end { 
 	::Text::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' end { ::pager($::commands_yml); 1}
 help: _help anytag  { ::Text::help($item{anytag}) ; 1}
@@ -193,17 +193,17 @@ create_project: _create_project project_id end {
 list_projects: _list_projects end { ::list_projects() ; 1}
 load_project: _load_project project_id end {
 	::Text::t_load_project $item{project_id} ; 1}
-new_project_template: _new_project_template key text(?) {
+new_project_template: _new_project_template key text(?) end {
 	::new_project_template($item{key}, $item{text});
 	1;
 }
-use_project_template: _use_project_template key {
+use_project_template: _use_project_template key end {
 	::use_project_template($item{key}); 1;
 }
-list_project_templates: _list_project_templates {
+list_project_templates: _list_project_templates end {
 	::list_project_templates(); 1;
 }
-remove_project_template: _remove_project_template key(s) {
+remove_project_template: _remove_project_template key(s) end {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state ident end { ::save_state( $item{ident}); 1}
@@ -431,12 +431,12 @@ remove_send: _remove_send end {
 					$::this_track->set(send_type => undef);
 					$::this_track->set(send_id => undef); 1
 }
-stereo: _stereo { 
+stereo: _stereo end { 
 	$::this_track->set(width => 2); 
 	print $::this_track->name, ": setting to stereo\n";
 	1;
 }
-mono: _mono { 
+mono: _mono end { 
 	$::this_track->set(width => 1); 
 	print $::this_track->name, ": setting to mono\n";
 	1; }
@@ -496,7 +496,7 @@ vol: _vol end { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 mute: _mute end { $::this_track->mute; 1}
 
 unmute: _unmute end { $::this_track->unmute; 1}
-# solo: _solo 'bus' track_name {
+# solo: _solo 'bus' track_name end {
 # 	print ("$item{track_name}: Expected bus track_name. Skipping.\n"), return 1
 # 		unless $::bn{$item{track_name}};
 # 	::command_process("for all; off;; $item{track_name} mon");
@@ -694,7 +694,7 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value end {
 	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
 	1;
 }
-show_effect: _show_effect op_id(s) {
+show_effect: _show_effect op_id(s) end {
 	my @lines = 
 		map{ ::Text::show_effect($_) } 
 		grep{ $::cops{$_} }
@@ -702,7 +702,7 @@ show_effect: _show_effect op_id(s) {
 	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
 }
-show_effect: _show_effect {
+show_effect: _show_effect end {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
 	unless $::cops{$::this_op};
 	print ::Text::show_effect($::this_op);
@@ -710,7 +710,7 @@ show_effect: _show_effect {
 }
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches end { ::Text::bunch(); 1}
-remove_bunches: _remove_bunches ident(s) { 
+remove_bunches: _remove_bunches ident(s) end { 
  	map{ delete $::bunch{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) end { ::Text::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions end { 
@@ -726,12 +726,12 @@ doodle: _doodle { ::set_doodle_mode(); 1 }
 normalize: _normalize { $::this_track->normalize; 1}
 fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { ::destroy_current_wav(); 1 }
-memoize: _memoize { 
+memoize: _memoize end { 
 	package ::Wav;
 	$::memoize = 1;
 	memoize('candidates'); 1
 }
-unmemoize: _unmemoize {
+unmemoize: _unmemoize end {
 	package ::Wav;
 	$::memoize = 0;
 	unmemoize('candidates'); 1
@@ -936,7 +936,7 @@ in_or_out: 'in' | 'out'
 duration: value
 mark1: ident
 mark2: ident
-remove_fade: _remove_fade fade_index(s)  { 
+remove_fade: _remove_fade fade_index(s) end { 
 	my @i = @{ $item{'fade_index(s)'} };
 	::Text::remove_fade($_) for (@i);
 	$::regenerate_setup++;
@@ -949,34 +949,34 @@ fade_index: dd
 list_fade: _list_fade {  ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
-add_comment: _add_comment text { 
+add_comment: _add_comment text end { 
  	print $::this_track->name, ": comment: $item{text}\n"; 
  	$::this_track->set(comment => $item{text});
  	1;
 }
-remove_comment: _remove_comment {
+remove_comment: _remove_comment end {
  	print $::this_track->name, ": comment removed\n";
  	$::this_track->set(comment => undef);
  	1;
 }
-show_comment: _show_comment {
+show_comment: _show_comment end {
 	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } $::this_track;
 	1;
 }
-show_comments: _show_comments {
+show_comments: _show_comments end {
 	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } ::Track::all();
 	1;
 }
-add_version_comment: _add_version_comment dd(?) text {
+add_version_comment: _add_version_comment dd(?) text end {
 	my $t = $::this_track;
 	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
 	print ::add_version_comment($t,$v,$item{text});
 }	
-remove_version_comment: _remove_version_comment dd {
+remove_version_comment: _remove_version_comment dd end {
 	my $t = $::this_track;
 	print ::remove_version_comment($t,$item{dd}); 1
 }
-show_version_comment: _show_version_comment dd(s?) {
+show_version_comment: _show_version_comment dd(s?) end {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s?)'}};
 	if(!@v){ @v = $t->monitor_version}
@@ -984,49 +984,49 @@ show_version_comment: _show_version_comment dd(s?) {
 	::show_version_comments($t,@v);
 	 1;
 }
-show_version_comments_all: _show_version_comments_all {
+show_version_comments_all: _show_version_comments_all end {
 	my $t = $::this_track;
 	my @v = @{$t->versions};
 	::show_version_comments($t,@v); 1;
 }
-set_system_version_comment: _set_system_version_comment dd text {
+set_system_version_comment: _set_system_version_comment dd text end {
 	print ::set_system_version_comment($::this_track,@item{qw(dd text)});1;
 }
-midish_command: _midish_command text {
+midish_command: _midish_command text end {
 	::midish_command( $item{text} ); 1
 }
 
-new_edit: _new_edit {
+new_edit: _new_edit end {
 	::new_edit();
 	1;
 }
-set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
-list_edits: _list_edits { ::list_edits(); 1}
+set_edit_points: _set_edit_points end { ::set_edit_points(); 1 }
+list_edits: _list_edits end { ::list_edits(); 1}
 
 #destroy_edit: _destroy_edit dd { ::destroy_edit($item{dd}); 1}
 
-select_edit: _select_edit dd { ::select_edit($item{dd}); 1}
+select_edit: _select_edit dd end { ::select_edit($item{dd}); 1}
 
-preview_edit_in: _preview_edit_in   { ::edit_action($item[0]); 1}
+preview_edit_in: _preview_edit_in end  { ::edit_action($item[0]); 1}
 
-preview_edit_out: _preview_edit_out { ::edit_action($item[0]); 1}
+preview_edit_out: _preview_edit_out end { ::edit_action($item[0]); 1}
 
-play_edit: _play_edit               { ::edit_action($item[0]); 1}
+play_edit: _play_edit end              { ::edit_action($item[0]); 1}
 
-record_edit: _record_edit           { ::edit_action($item[0]); 1}
+record_edit: _record_edit end          { ::edit_action($item[0]); 1}
 
-edit_track: _edit_track { 
+edit_track: _edit_track end { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
 	$::this_track = $::tn{$::this_edit->edit_name}; 1
 }
 
-host_track: _host_track { 
+host_track: _host_track end { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
 	$::this_track = $::tn{$::this_edit->host_alias}; 1 
 }
-edit_mix_track: _edit_mix_track { 
+edit_mix_track: _edit_mix_track end { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
 	$::this_track = $::tn{$::this_edit->host_track}; 1 
@@ -1034,16 +1034,16 @@ edit_mix_track: _edit_mix_track {
 
 	
 
-play_start_mark: _play_start_mark {
+play_start_mark: _play_start_mark end {
 	my $mark = $::this_edit->play_start_mark;
 	$mark->jump_here; 1;
  }
 
-rec_start_mark: _rec_start_mark {
+rec_start_mark: _rec_start_mark end {
 	$::this_edit->rec_start_mark->jump_here; 1;
 }
 
-rec_end_mark: _rec_end_mark {
+rec_end_mark: _rec_end_mark end {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 
@@ -1052,17 +1052,22 @@ set_play_start_mark: _set_play_start_mark end {
 set_rec_start_mark: _set_rec_start_mark end {
 	$::edit_points[1] = ::eval_iam('getpos'); 1}
 set_rec_end_mark: _set_rec_end_mark end {
+<<<<<<< HEAD
 	$::edit_points[2] = ::eval_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
+=======
+	$::edit_points[2] = eval_iam('get_pos'); 1}
+end_edit_mode: _end_edit_mode end { ::end_edit_mode(); 1;}
+>>>>>>> 627b3a5... grammar fixes:
 
-disable_edits: _disable_edits { ::disable_edits();1 }
+disable_edits: _disable_edits end { ::disable_edits();1 }
 
-merge_edits: _merge_edits { ::merge_edits(); 1; }
+merge_edits: _merge_edits end { ::merge_edits(); 1; }
 
 explode_track: _explode_track end {
 	::explode_track($::this_track)
 }
-promote_version_to_track: _promote_version_to_track version {
+promote_version_to_track: _promote_version_to_track version end {
 	my $v = $item{version};
 	my $t = $::this_track;
 	$t->versions->[$v] or print($t->name,": version $v does not exist.\n"),
@@ -1077,25 +1082,25 @@ promote_version_to_track: _promote_version_to_track version {
 }
 version: dd
 
-read_user_customizations: _read_user_customizations {
+read_user_customizations: _read_user_customizations end {
 	::setup_user_customization(); 1
 }
-limit_run_time: _limit_run_time sign(?) dd { 
+limit_run_time: _limit_run_time sign(?) dd end { 
 	my $sign = $item{'sign(?)'}->[-0];
 	$::run_time = $sign
 		? eval "$::length $sign $item{dd}"
 		: $item{dd};
 	print "Run time limit: ", ::heuristic_time($::run_time), "\n"; 1;
 }
-limit_run_time_off: _limit_run_time_off { 
+limit_run_time_off: _limit_run_time_off end { 
 	print "Run timer disabled\n";
 	::disable_length_timer();
 	1;
 }
-offset_run: _offset_run markname {
+offset_run: _offset_run markname end {
 	::offset_run( $item{markname} ); 1
 }
-offset_run_off: _offset_run_off {
+offset_run_off: _offset_run_off end {
 	print "no run offset.\n";
 	::offset_run_mode(0); 1
 }
