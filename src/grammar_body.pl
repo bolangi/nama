@@ -450,7 +450,8 @@ off: 'Xxx' {}
 rec: 'Xxx' {}
 mon: 'Xxx' {}
 
-command: rw
+command: rw end # XX 'end' required to make test suite pass
+
 rw_setting: 'rec'|'mon'|'off'
 rw: rw_setting {
 	::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 1
