@@ -565,16 +565,49 @@ Each track can host multiple edits. Edits are
 non-destructive; they are achieved by using Ecasound's
 ability to crossfade and sequence.
 
-Type I<new_edit> without parameters to set up recording an
-edit for the current track and version.
+Select the track to be edited and the correct version.
+
+Before creating the edit, you will now need to create three
+marks:
+
+=over 4
+
+=item * play start point
+=item * rec start point
+=item * rec end point
+
+=back
+
+The edit will replace the audio between the rec start and
+rec end points.
+
+There are two ways to set these points.
+
+=head3 set_edit_points command
 
 Position the playback head a few seconds before the edit.
-Enter the I<set_edit_marks> command. This will start the
+Enter the I<set_edit_points> command. This will start the
 engine. Hit the B<P> key three times to designate the
 playback start, punch-in and punch-out positions.
 
-(Alternatively, you can create your marks manually and
-type I<new_edit play_start_mark rec_start_mark rec_end_mark>.)
+=head3 Specify points individually
+
+Position the playback head at the position you want playback
+for the edit to start. Enter the I<set_play_start_mark>
+command.
+
+Use the same procedure to set the rec start and rec end
+positions using the I<set_rec_start_mark>
+and I<set_rec_end_mark> commands.
+
+=head3 Provide marks as arguments to I<new_edit> (not implemented)
+
+Type I<new_edit play_start_mark rec_start_mark rec_end_mark>.)
+
+=head3 Create the edit 
+
+Enter the I<new_edit> command to create the necessary 
+tracks and data structures.
 
 Use I<preview_edit> to confirm the edit positions.  The
 engine will run and you will hear the host track with the
@@ -582,24 +615,25 @@ target region removed. Playback will be restricted to the
 edit region. You may use I<preview_out> to hear the clip to
 be removed.
 
-Once you are satisfied with the edit positions, you are
+Use I<list_marks> to see the edit marks and I<modify_mark> 
+to nudge them into perfect position.
+
+Once you are satisfied with the mark positions, you are
 ready to record your edit.
 
 Enter I<start_edit>. Playback will begin at first mark. The
 replacement clip will be recorded from the source specified
-in the host track.
+in the original track.
 
 Each I<start_edit> command will record an additional version
 on the edit track. I<redo_edit> will delete (destructively)
 the most recent audio clip and begin recording anew.
 
-I<new_edit> without parameters will create
-another edit on the same track. You can repeat
-this procedure until you have an edit you are
-satisfied with.
+You may specify another range for editing and use
+the editing procedure again as many times as 
+you like. Edits may not overlap.
 
-Edits may not overlap, however you may edit the
-edit track(s).
+=head3 Merging edits
 
 I<merge_edits> will recursively merge all edits applied to
 the current track and version, creating a new version.
@@ -614,6 +648,7 @@ and region definitions in "live" form.  You may continue to
 create new edits.
 
 I<list_edits> will label the edits by index and time.
+
 I<next_edit> will play back the edits one at a time. The
 most recently played edit becomes the current edit.
 
