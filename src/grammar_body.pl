@@ -1048,11 +1048,11 @@ rec_end_mark: _rec_end_mark {
 }
 
 set_play_start_mark: _set_play_start_mark end {
-	$::edit_points[0] = eval_iam('get_pos'); 1}
+	$::edit_points[0] = ::eval_iam('getpos'); 1}
 set_rec_start_mark: _set_rec_start_mark end {
-	$::edit_points[1] = eval_iam('get_pos'); 1}
+	$::edit_points[1] = ::eval_iam('getpos'); 1}
 set_rec_end_mark: _set_rec_end_mark end {
-	$::edit_points[2] = eval_iam('get_pos'); 1}
+	$::edit_points[2] = ::eval_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
 disable_edits: _disable_edits { ::disable_edits();1 }

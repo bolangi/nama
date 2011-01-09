@@ -354,7 +354,7 @@ sub input_path { # signal path, not file path
 			# i.e. it gets input from other tracks, not 
 			# the specified source, if any.
 			
-			return () if $track->source_type eq 'bus';
+			return () if $track->is_mix_track;
 
 			# comment: individual tracks of a sub bus
 			# connect their outputs to the mix track
@@ -615,7 +615,9 @@ sub set_off {
 	my $track = shift;
 	$track->set_rw('OFF');
 }
-sub is_mix_track { $_[0]->source_type eq 'bus' }
+sub is_mix_track { $_[0]->source_type eq 'bus' 
+					or $::Bus::by_name{$_[0]->name}
+}
 
 =comment
 mix
