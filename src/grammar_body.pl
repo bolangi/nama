@@ -1003,7 +1003,7 @@ new_edit: _new_edit {
 set_edit_points: _set_edit_points { ::set_edit_points(); 1 }
 list_edits: _list_edits { ::list_edits(); 1}
 
-destroy_edit: _destroy_edit dd { ::destroy_edit($item{dd}); 1}
+#destroy_edit: _destroy_edit dd { ::destroy_edit($item{dd}); 1}
 
 select_edit: _select_edit dd { ::select_edit($item{dd}); 1}
 

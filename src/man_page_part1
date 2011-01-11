@@ -645,23 +645,13 @@ change in mark, region or version settings.
 I<restore_edits> acts on a merged version of the current
 track, selecting the prior unmerged version with all edits
 and region definitions in "live" form.  You may continue to
-create new edits.
+create new edits. B<TO BE IMPLEMENTED>
 
 I<list_edits> will label the edits by index and time.
 
-I<next_edit> will play back the edits one at a time. The
-most recently played edit becomes the current edit.
+I<end_edit_mode> will restore normal playback mode
 
-I<delete_edit> will remove the current edit. 
-
-I<mute_edits> will disable all edits on the current track.
-
-I<mute_edit index> will disable the edit with the specified
-index.
-
-Similarly I<unmute_edit> and I<unmute_edits> reverse these
-effects.
-
+I<destroy_edit>
 Behind the scenes, the host track becomes the mix track to a
 sub-bus. Sources for the bus are the original audio track, and
 zero or more edits, each represented by one track object.
