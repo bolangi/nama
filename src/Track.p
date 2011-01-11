@@ -616,7 +616,8 @@ sub set_off {
 	$track->set_rw('OFF');
 }
 sub is_mix_track { $_[0]->source_type eq 'bus' 
-#					or $::Bus::by_name{$_[0]->name}
+					or $::Bus::by_name{$_[0]->name}
+					and ! $_[0]->name eq 'Mixdown'
 }
 
 =comment
