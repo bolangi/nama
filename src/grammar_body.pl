@@ -767,11 +767,7 @@ add_send_bus_raw: _add_send_bus_raw bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'raw' );
 	1;
 }
-add_sub_bus: _add_sub_bus bus_name destination(?) { 
-	my $dest_id = $item{'destination(?)'}->[0];
-	my $dest_type = $dest_id ?  ::dest_type($dest_id) : undef;
-	::add_sub_bus( $item{bus_name}, $dest_type, $dest_id); 1
-}
+add_sub_bus: _add_sub_bus bus_name { ::add_sub_bus( $item{bus_name}); 1 }
 
 existing_bus_name: bus_name {
 	if ( $::bn{$item{bus_name}} ){  $item{bus_name} }
