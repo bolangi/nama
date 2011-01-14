@@ -886,6 +886,9 @@ sub add_track {
 	$debug2 and print "&add_track\n";
 	#return if transport_running();
 	my ($name, @params) = @_;
+	my %vals = (name => $name, @params);
+	my $class = $vals{class} // '::Track';
+	
 	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	
 	say ("$name: track name already in use. Skipping."), return 
@@ -893,10 +896,7 @@ sub add_track {
 	say ("$name: reserved track name. Skipping"), return
 	 	if grep $name eq $_, @mastering_track_names; 
 
-	my $track = ::Track->new(
-		name => $name,
-		@params
-	);
+	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
 	$debug and print "ref new track: ", ref $track; 
@@ -4583,17 +4583,20 @@ sub add_sub_bus {
 		send_id	 => $id // $name,
 		);
 	# create mix track
-	my @vals = (source_type => 'bus', 
-				source_id 	=> 'bus',
-				width		=> 2, # default to stereo 
-				rec_defeat 	=> 1,
+	my @vals = (rw 			=> 'REC', # receive signals from tracks
+				rec_defeat 	=> 1,	  # don't write to disk
+				width		=> 2,     # default to stereo 
+				class		=> '::MixTrack',
 				@args);
 
-	if ($tn{$name}){
+	if (my $mixtrack = $tn{$name})
+	{
 		say qq($name: setting as mix track for bus "$name");
-		$tn{$name}->set( @vals );
-
-	} else { ::add_track($name, @vals); }
+		$mixtrack->set( @vals );
+		bless $mixtrack, '::MixTrack';
+	} 
+	else 
+	{ ::add_track($name, @vals); }
 }
 	
 sub add_send_bus {
