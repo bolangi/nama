@@ -917,6 +917,7 @@ sub add_track {
 	set_current_bus();
 	$ui->track_gui($track->n);
 	$debug and print "Added new track!\n", $track->dump;
+	$track;
 }
 
 # create read-only track pointing at WAV files of specified
@@ -4574,28 +4575,33 @@ sub undefine_region {
 }
 
 sub add_sub_bus {
-	my $name = shift; 
+	my ($name, @args) = @_; 
 	
 	::SubBus->new( 
 		name => $name, 
 		send_type => 'track',
 		send_id	 => $name,
-		);
-	# create mix track
-	my @vals = (rw 			=> 'REC', # receive signals from tracks
-				rec_defeat 	=> 1,	  # don't write to disk
-				width		=> 2,     # default to stereo 
-				class		=> '::MixTrack',
-				);
+		) unless $::Bus::by_name{$name};
 
-	if (my $mixtrack = $tn{$name})
-	{
-		say qq($name: setting as mix track for bus "$name");
-		$mixtrack->set( @vals );
-		bless $mixtrack, '::MixTrack';
-	} 
-	else 
-	{ ::add_track($name, @vals); }
+	# create mix track
+	@args = ( 
+		width 		=> 2,     # default to stereo 
+		rec_defeat	=> 1,     # set to rec_defeat (don't record signal)
+		rw 			=> 'REC', # set to REC (accept other track signals)
+		@args
+	);
+
+	$tn{$name} and say qq($name: setting as mix track for bus "$name");
+
+	my $track = $tn{$name} // add_track($name);
+
+	# convert host track to mix track
+	
+	$track->{was_class} = ref $track; # save the current track (sub)class
+	bless $track, '::MixTrack';   # change the class to MixTrack
+
+	$track->set( @args );
+	
 }
 	
 sub add_send_bus {

@@ -789,28 +789,16 @@ sub busify {
 	my $name = $track->name;
 
 	# create the bus if needed
+	# create or convert named track to mix track
 	
-	::SubBus->new( 
-		name => $name, 
-		send_type => 'track',
-		send_id	 => $name,
-	) unless $::Bus::by_name{$name};
-
-	# convert host track to mix track
-	
-	$track->set(
-		rec_defeat	=> 1,
-		rw 			=> 'REC',
-	);
-	$track->{class} = ref $track;
-	bless $track, '::MixTrack';
+	::add_sub_bus($name);
 
 }
 sub unbusify {
 	my $track = shift;
 	$track->set( rw => 'MON',
                  rec_defeat => 0);
-	bless $track, $track->{class}; # restore previously saved class
+	bless $track, $track->{was_class} // '::Track'; # restore class
 }
 
 sub adjusted_length {
