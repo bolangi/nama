@@ -5795,7 +5795,7 @@ sub explode_track {
 	# quit if I am already a mix track
 
 	say($track->name,": I am already a mix track. I cannot explode!"),return
-		if $track->source_type eq 'bus' or $bn{$track->name};
+		if $track->is_mix_track;
 
 	my @versions = @{ $track->versions };
 
