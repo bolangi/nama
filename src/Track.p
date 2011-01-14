@@ -829,6 +829,7 @@ sub version_comment {
 	
 # subclasses
 
+{
 package ::SimpleTrack; # used for Master track
 use Modern::Perl; use Carp;
 no warnings qw(uninitialized redefine);
@@ -842,6 +843,8 @@ sub rec_status{
 	'OFF';
 
 }
+}
+{
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
@@ -854,7 +857,8 @@ sub rec_status{
 sub source_status {}
 sub group_last {0}
 sub version {0}
-
+}
+{
 package ::SlaveTrack; # for instrument monitor bus
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
@@ -869,7 +873,8 @@ sub source_status { $::tn{$_[0]->target}->source_status }
 sub send_type { $::tn{$_[0]->target}->send_type}
 sub send_id { $::tn{$_[0]->target}->send_id}
 sub dir { $::tn{$_[0]->target}->dir }
-
+}
+{
 package ::CacheRecTrack; # for graph generation
 our @ISA = qw(::SlaveTrack);
 sub current_version {
@@ -885,6 +890,8 @@ sub current_wav {
 		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
+}
+{
 package ::MixDownTrack; 
 our @ISA = qw(::Track);
 sub current_version {	
@@ -900,6 +907,7 @@ sub rec_status {
 	my $track = shift;
 	return 'REC' if $track->rw eq 'REC';
 	::Track::rec_status($track);
+}
 }
 {
 package ::EditTrack;
