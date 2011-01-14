@@ -1048,28 +1048,13 @@ rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 
-<<<<<<< HEAD
-set_play_start_mark: _set_play_start_mark end {
+set_play_start_mark: _set_play_start_mark {
 	$::edit_points[0] = ::eval_iam('getpos'); 1}
-set_rec_start_mark: _set_rec_start_mark end {
+set_rec_start_mark: _set_rec_start_mark {
 	$::edit_points[1] = ::eval_iam('getpos'); 1}
-set_rec_end_mark: _set_rec_end_mark end {
-<<<<<<< HEAD
+set_rec_end_mark: _set_rec_end_mark {
 	$::edit_points[2] = ::eval_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
-=======
-	$::edit_points[2] = eval_iam('get_pos'); 1}
-end_edit_mode: _end_edit_mode end { ::end_edit_mode(); 1;}
->>>>>>> 627b3a5... grammar fixes:
-=======
-set_play_start_mark: _set_play_start_mark {
-	$::edit_points[0] = eval_iam('get_pos'); 1}
-set_rec_start_mark: _set_rec_start_mark {
-	$::edit_points[1] = eval_iam('get_pos'); 1}
-set_rec_end_mark: _set_rec_end_mark {
-	$::edit_points[2] = eval_iam('get_pos'); 1}
-end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
->>>>>>> e2a258b... - grammar: remove 'end' from individual commands
 
 disable_edits: _disable_edits { ::disable_edits();1 }
 
