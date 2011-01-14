@@ -802,7 +802,15 @@ sub busify {
 		rec_defeat	=> 1,
 		rw 			=> 'REC',
 	);
+	$track->{class} = ref $track;
+	bless $track, '::MixTrack';
 
+}
+sub unbusify {
+	my $track = shift;
+	$track->set( rw => 'MON',
+                 rec_defeat => 0);
+	bless $track, $track->{class}; # restore previously saved class
 }
 
 sub adjusted_length {

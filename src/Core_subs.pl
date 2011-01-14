@@ -5910,7 +5910,8 @@ sub disable_edits {
 
 	# reset host track
 	
-	$edit->host->set( rw => 'MON', rec_defeat => 0);
+	$edit->host->unbusify;
+	
 }
 sub merge_edits {
 	my $edit = $this_edit;
