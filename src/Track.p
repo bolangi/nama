@@ -1,4 +1,5 @@
 # ---------- Track -----------
+{
 package ::Track;
 
 # Objects belonging to Track and its subclasses
@@ -826,8 +827,10 @@ sub version_comment {
 	"$v: $text\n" if $text;
 }
 				
+}
 	
 # subclasses
+
 
 {
 package ::SimpleTrack; # used for Master track
