@@ -3763,6 +3763,18 @@ sub restore_state {
 			}
 		} grep { $_->{version_comment} } @tracks_data;
 	}
+	# convert to new MixTrack class
+	if ( $saved_version < 1.069){ 
+		map {
+		 	$_->{was_class} = $_->{class};
+			$_->{class} = $_->{'::MixTrack'};
+		} 
+		grep { 
+			$_->{source_type} eq 'bus' or 
+		  	$_->{source_id}   eq 'bus'
+		} 
+		@tracks_data;
+	}
 
 	#  destroy and recreate all buses
 

@@ -1,4 +1,5 @@
 					class 			# for storage and inspection
+					was_class		# what i was before converting to MixTrack
 					n   			# track index 
 					name
 					group 			# group affiliation
