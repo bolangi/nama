@@ -4574,20 +4574,19 @@ sub undefine_region {
 }
 
 sub add_sub_bus {
-	my ($name, $type, $id, @args) = @_; 
-		# command add_sub_bus does not supply @args at present
+	my $name = shift; 
 	
 	::SubBus->new( 
 		name => $name, 
-		send_type => $type // 'track',
-		send_id	 => $id // $name,
+		send_type => 'track',
+		send_id	 => $name,
 		);
 	# create mix track
 	my @vals = (rw 			=> 'REC', # receive signals from tracks
 				rec_defeat 	=> 1,	  # don't write to disk
 				width		=> 2,     # default to stereo 
 				class		=> '::MixTrack',
-				@args);
+				);
 
 	if (my $mixtrack = $tn{$name})
 	{
