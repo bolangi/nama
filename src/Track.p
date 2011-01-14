@@ -942,6 +942,18 @@ our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
 }
+{
+package ::MixTrack;
+our @ISA ='::Track';
+# as a mix track, I have no sources of my own
+# when status is REC
+sub input_path { 
+	my $track = shift;
+	return $track->rec_status eq 'MON'
+		?  $track->SUPER::input_path()	
+		:  ()
+}
+}
 
 1;
 __END__
