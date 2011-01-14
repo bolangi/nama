@@ -616,10 +616,7 @@ sub set_off {
 	my $track = shift;
 	$track->set_rw('OFF');
 }
-sub is_mix_track { $_[0]->source_type eq 'bus' 
-					or $::Bus::by_name{$_[0]->name}
-					and ! $_[0]->name eq 'Mixdown'
-}
+sub is_mix_track { ref $_[0] =~ /MixTrack/ }
 
 =comment
 mix
@@ -772,6 +769,7 @@ sub version_has_edits {
      		and $_->host_version == $track->monitor_version
 		} values %::Edit::by_name;
 }	
+#### UNUSED 
 sub edits_enabled {
 	my $track = shift;
 	my $bus;
@@ -779,8 +777,9 @@ sub edits_enabled {
 	and $bus->rw ne 'OFF'
 	and $track->rec_status eq 'REC' 
 	and $track->rec_defeat
-	and $track->source_type eq 'bus'
+	and $track->is_mix_track
 }
+### 
 
 sub busify {
 
