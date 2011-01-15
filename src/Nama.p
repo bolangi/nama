@@ -125,10 +125,10 @@ $fade_resolution = 200; # steps per second
 $default_fade_length = 0.5; # for fade-in, fade-out
 $edit_playback_end_margin = 3;
 $edit_crossfade_time = 0.03; # 
-$::Fade::fade_down_fraction = 0.75;
+$::Fade::fade_down_fraction = 0.25;
 $::Fade::fade_time1_fraction = 0.9;
 $::Fade::fade_time2_fraction = 0.1;
-$::Fade::fader_op = 'eadb';
+$::Fade::fader_op = 'ea';
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;

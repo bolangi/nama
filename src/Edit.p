@@ -186,18 +186,23 @@ sub remove_fades {
 
 sub destroy {
 	my $edit = shift;
-	$edit->host_alias_track->remove;
 	my @wavs = values %{$edit->edit_track->targets};
+	my $i;
+	say ++$i;
+	my $fades = $edit->fades;
+	map{ $::Fade::by_index{$_}->remove } @$fades;
 	map{ 
-		my $cmd = "unlink ", ::join_path(::this_wav_dir(), $_);
-		say $cmd;
+		my $file = ::join_path(::this_wav_dir(), $_);
+		say "removing $file";
+		#unlink $file;
 	} @wavs;
-	$edit->edit_track->remove;
 	$edit->version_bus->remove;
 	# The host may have a version symlinked to a WAV file 
 	# belonging to the version mix track. So we remove
 	# the track, but not the wav files.
-	$edit->version_mix->remove if defined $edit->version_mix
+	$edit->version_mix->remove if defined $edit->version_mix;
+	$edit->host_alias_track->remove;
+	$edit->edit_track->remove;
 	# in case bus->remove leaves it behind
 }
 
