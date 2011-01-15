@@ -7,7 +7,7 @@ use warnings;
 no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index $off_level $on_level $fade_down_level $fade_down_fraction
-$fade_time1_fraction $fade_time2_fraction);
+$fade_time1_fraction $fade_time2_fraction $fader_op);
 use ::Object qw( 
 				 n
 				 type
@@ -220,9 +220,9 @@ sub add_fader {
 		
 		my $first_effect = $track->ops->[0];
 		if ( $first_effect ){
-			$id = ::Text::t_insert_effect($first_effect, 'eadb', [0]);
+			$id = ::Text::t_insert_effect($first_effect, $::fader_op, [0]);
 		} else { 
-			$id = ::Text::t_add_effect('eadb', [0]) 
+			$id = ::Text::t_add_effect($::fader_op, [0]) 
 		}
 		$track->set(fader => $id);
 	}

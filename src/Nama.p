@@ -131,6 +131,7 @@ $::Fade::fade_down_level = -64;
 $::Fade::fade_down_fraction = 0.75;
 $::Fade::fade_time1_fraction = 0.9;
 $::Fade::fade_time2_fraction = 0.1;
+$::Fade::fader_op = 'eadb';
 
 @mastering_track_names = qw(Eq Low Mid High Boost);
 $mastering_mode = 0;
