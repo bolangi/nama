@@ -408,6 +408,9 @@ sub remove {
 	my $n = $track->n;
 	$::ui->remove_track_gui($n); 
  	$::this_track = $::ti{::Track::idx() - 1};
+	# remove corresponding fades
+	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
+	# remove effects
  	map{ ::remove_effect($_) } @{ $track->ops };
  	delete $by_index{$n};
  	delete $by_name{$track->name};
