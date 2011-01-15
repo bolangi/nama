@@ -5613,6 +5613,17 @@ sub end_edit_mode  	{
 	offset_run_mode(0);	
 	$regenerate_setup++ 
 }
+sub destroy_edit {
+	say("no edit selected"), return unless $this_edit;
+	my $reply = $term->readline('destroy edit "'.$this_track->edit_name.
+		qq(" and all its WAV files?? [n] ));
+	if ( $reply =~ /y/i ){
+		say "permanently removing edit";
+		$this_edit->destroy;
+	}
+	$term->remove_history($term->where_history);
+	end_edit_mode();
+}
 sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
 sub edit_mode		{ $edit_mode and defined $this_edit}
 sub edit_mode_conditions {        

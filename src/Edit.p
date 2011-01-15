@@ -184,6 +184,23 @@ sub remove_fades {
 	$edit->set(fades => []);
 }
 
+sub destroy {
+	my $edit = shift;
+	$edit->host_alias_track->remove;
+	my @wavs = values %{$edit->edit_track->targets};
+	map{ 
+		my $cmd = "unlink ", ::join_path(::this_wav_dir(), $_);
+		say $cmd;
+	} @wavs;
+	$edit->edit_track->remove;
+	$edit->version_bus->remove;
+	# The host may have a version symlinked to a WAV file 
+	# belonging to the version mix track. So we remove
+	# the track, but not the wav files.
+	$edit->version_mix->remove if defined $edit->version_mix
+	# in case bus->remove leaves it behind
+}
+
 sub host	 		{ $::tn{$_[0]->host_track} } # top-level mix track, i.e. 'sax'
 sub bus 			{ $::Bus::by_name{$_[0]->host_track} }  # top-level bus
 sub version_mix     { $::tn{$_[0]->edit_root_name} }        # in top-level bus
