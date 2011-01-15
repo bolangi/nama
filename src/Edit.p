@@ -187,14 +187,12 @@ sub remove_fades {
 sub destroy {
 	my $edit = shift;
 	my @wavs = values %{$edit->edit_track->targets};
-	my $i;
-	say ++$i;
 	my $fades = $edit->fades;
 	map{ $::Fade::by_index{$_}->remove } @$fades;
 	map{ 
 		my $file = ::join_path(::this_wav_dir(), $_);
 		say "removing $file";
-		#unlink $file;
+		unlink $file;
 	} @wavs;
 	$edit->version_bus->remove;
 	# The host may have a version symlinked to a WAV file 
