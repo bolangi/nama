@@ -787,7 +787,7 @@ select_edit:
   parameters: <i_edit_index>
 end_edit_mode:
   type: edit
-  what: restore full-length play/record
+  what: current track plays full length (input from edit sub-bus)
   short: eem
   parameters: none
 # destroy_edit:

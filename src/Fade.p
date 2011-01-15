@@ -6,7 +6,7 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index $off_level $on_level $fade_down_level $fade_down_fraction
+use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
 use ::Object qw( 
 				 n
@@ -69,6 +69,9 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
+	my $operator  = $::cops{$track->fader}->{type};
+	my $off_level = $::mute_level{$operator};
+	my $on_level  = $::unity_level{$operator};
 
 	# remove controller if present
 	if( $track->fader and my ($old) = @{$::cops{$track->fader}{owns}})
@@ -148,7 +151,12 @@ sub fader_envelope_pairs {
 		} else { $fade->dumpp; die "fade processing failed" }
 		#say "marktime1: $marktime1";
 		#say "marktime2: $marktime2";
-		push @specs, [$marktime1, $marktime2, $fade->type];
+		push @specs, 
+		[ 	$marktime1, 
+			$marktime2, 
+			$fade->type, 
+			$::cops{$track->fader}->{type},
+		];
 }
 	# sort fades # already done! XXX
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
@@ -161,17 +169,28 @@ sub fader_envelope_pairs {
 }
 		
 sub spec_to_pairs {
-	my ($from, $to, $type) = @{$_[0]};
+	my ($from, $to, $type, $op) = @{$_[0]};
 	$::debug and say "from: $from, to: $to, type: $type";
 	my $cutpos;
 	my @pairs;
-	if ( $type eq 'out' ){
-		$cutpos = $from + $fade_time1_fraction * ($to - $from);
-		push @pairs, ($from, 1, $cutpos, $fade_down_fraction, $to, 0);
-	} elsif( $type eq 'in' ){
-		$cutpos = $from + $fade_time2_fraction * ($to - $from);
-		push @pairs, ($from, 0, $cutpos, $fade_down_fraction, $to, 1);
+	if ($op eq 'eadb'){
+		if ( $type eq 'out' ){
+			$cutpos = $from + $fade_time1_fraction * ($to - $from);
+			push @pairs, ($from, 1, $cutpos, $fade_down_fraction, $to, 0);
+		} elsif( $type eq 'in' ){
+			$cutpos = $from + $fade_time2_fraction * ($to - $from);
+			push @pairs, ($from, 0, $cutpos, $fade_down_fraction, $to, 1);
+		}
 	}
+	elsif ($op eq 'ea'){
+		if ( $type eq 'out' ){
+			push @pairs, ($from, 1, $to, 0);
+		} elsif( $type eq 'in' ){
+			push @pairs, ($from, 0, $to, 1);
+		}
+	}
+	else { die "missing or illegal fader op: $op" }
+
 	@pairs
 }
 	
@@ -220,9 +239,9 @@ sub add_fader {
 		
 		my $first_effect = $track->ops->[0];
 		if ( $first_effect ){
-			$id = ::Text::t_insert_effect($first_effect, $::fader_op, [0]);
+			$id = ::Text::t_insert_effect($first_effect, $fader_op, [0]);
 		} else { 
-			$id = ::Text::t_add_effect($::fader_op, [0]) 
+			$id = ::Text::t_add_effect($fader_op, [0]) 
 		}
 		$track->set(fader => $id);
 	}
