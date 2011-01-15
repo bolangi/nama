@@ -595,6 +595,7 @@ gen_jack();
 check_setup('Send bus - soundcard - JACK');
 command_process('remove_bus Vo');
 command_process('sax mono');
+=comment
 command_process('add_insert post 5');
 $expected_setup_lines = <<EXPECTED;
 
@@ -637,6 +638,7 @@ EXPECTED
 gen_jack();
 
 check_setup('Send bus - raw - JACK');
+=cut
 
 {
 
