@@ -89,6 +89,7 @@ sub hashref {
 	bless $self, 'HASH'; # easy magic
 	#print yaml_out $self; return;
 	my %guts = %{ $self };
+	$guts{class} = $class; # make sure we save the correct class name
 	#print join " ", %guts; return;
 	#my @keys = keys %guts;
 	#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 

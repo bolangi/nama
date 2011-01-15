@@ -6,9 +6,16 @@ package ::Track;
 # have a 'class' field that is set when the 
 # object is created, and used when restoring
 # the object from a serialized state.
+
+# the ->set_track_class() method re-blesses
+# the object to a different subclass when necessary
+# changing the 'class' field as well as the object
+# class affiliation
 #
-# So do not re-bless a Track object into
-# a different subclass! 
+# the ->hashref() method (in Object.p) 
+# used to serialize will
+# sync the class field to the current object 
+# class, hopefully saving a painful error
 
 use Modern::Perl;
 use Carp;
@@ -779,7 +786,14 @@ sub edits_enabled {
 	and $track->rec_defeat
 	and $track->is_mix_track
 }
-### 
+##### 
+
+sub set_track_class {
+	my ($track, $class) = @_;
+	bless $track, $class;
+	$track->set(class => $class);
+}
+
 
 sub busify {
 
@@ -798,7 +812,7 @@ sub unbusify {
 	my $track = shift;
 	$track->set( rw => 'MON',
                  rec_defeat => 0);
-	bless $track, $track->{was_class} // '::Track'; # restore class
+	$track->set_track_class($track->was_class // '::Track');
 }
 
 sub adjusted_length {

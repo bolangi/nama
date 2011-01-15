@@ -3894,12 +3894,6 @@ sub restore_state {
 	$term->SetHistory(@command_history);
 } 
 
-sub set_track_class {
-	my ($track, $class) = @_;
-	bless $track, $class;
-	$track->set(class => $class);
-}
-
 sub process_control_inputs { }
 
 
@@ -4609,9 +4603,8 @@ sub add_sub_bus {
 
 	# convert host track to mix track
 	
-	$track->{was_class} = ref $track; # save the current track (sub)class
-	bless $track, '::MixTrack';   # change the class to MixTrack
-
+	$track->set(was_class => ref $track); # save the current track (sub)class
+	$track->set_track_class('::MixTrack'); 
 	$track->set( @args );
 	
 }
