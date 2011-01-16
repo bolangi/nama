@@ -5604,6 +5604,7 @@ sub end_edit_mode  	{
 	$edit_mode = 0; 
 	$loop_enable = 0;
 	offset_run_mode(0);	
+	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
 	$regenerate_setup++ 
 }
@@ -5887,6 +5888,7 @@ sub select_edit {
 
 	$edit->edit_track->set(rw => 'MON');
 	
+	$this_track = $edit->host;
 }
 sub apply_fades { 
 	# use info from Fade objects in %::Fade::by_name
