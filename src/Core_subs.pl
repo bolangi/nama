@@ -5459,7 +5459,6 @@ sub complete_edit_points {
 	eval_iam('stop');
 	say "\nEngine is stopped\n";
 	detect_spacebar();
-	transfer_edit_marks($this_edit) if $this_edit;
 	print prompt(), " ";
 }
 }
