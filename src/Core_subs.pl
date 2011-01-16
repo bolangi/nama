@@ -5856,11 +5856,12 @@ sub select_edit {
 	# check that conditions are met
 	
 	say("Edit $n not found. Skipping."),return if ! $edit;
-# 	say( qq(Edit $n applies to track "), $edit->host_track, 
-# 		 qq(" version ), $edit->host_version, ".
-# This does does not match the track's current monitor version,
-# which is: ", $edit->host->monitor_version, ". Aborting."), return
-# 		if $edit->host->monitor_version != $edit->host_version;
+ 	say( qq(Edit $n applies to track "), $edit->host_track, 
+ 		 qq(" version ), $edit->host_version, ".
+This does does not match the current monitor version (",
+$edit->host->monitor_version,"). 
+Set the correct version and try again."), return
+	if $edit->host->monitor_version != $edit->host_version;
 
 	# select edit
 	
@@ -5874,9 +5875,9 @@ sub select_edit {
 
 	# turn off all version level buses/mix_tracks
 	
-	map{ $tn{$_}->set(rw => 'OFF'); # version mix tracks
+	map{ $tn{$_}->set(rw => 'OFF');  # version mix tracks
 	      $bn{$_}->set(rw => 'OFF'); # version buses
-	} $this_edit->host_bus->tracks;      # use same name for track/bus
+	} $this_edit->host_bus->tracks;  # use same name for track/bus
 
 	# turn on what we want
 	
