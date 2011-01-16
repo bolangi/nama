@@ -5950,7 +5950,7 @@ sub merge_edits {
 		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'MON'} 
 		$edit->version_bus->tracks; 
 	my $msg = "merges ".$edit->host_track."_$v.wav w/".
-		$edit->edit_root_name."-edits ".
+		$edit->edit_root_name." edits ".
 		join " ",map{"$_\_$edits{$_}"} sort{$a<=>$b} keys %edits;
 	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
@@ -5963,6 +5963,8 @@ sub merge_edits {
 	# promote to host track
 
 	my $new_version = $edit->host->last + 1;		
+	add_system_version_comment($edit->host, $new_version, $msg);
+	add_system_version_comment($edit->version_mix, $edit->version_mix->last, $msg);
 	my $old = cwd();
 	chdir this_wav_dir();
 	my $new_host_wav = $edit->host_track . "_" .  $new_version . ".wav";
