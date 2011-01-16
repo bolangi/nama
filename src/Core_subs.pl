@@ -6160,5 +6160,12 @@ sub rw_set {
 }
 }
 
+sub select_edit_track {
+	my $track_selector_method = shift;
+	print("You need to select an edit first (list_edits, select_edit)\n"),
+		return unless defined $this_edit;
+	$this_track = $this_edit->$track_selector_method; 
+	command_process('show_track');
+}
 
 ### end

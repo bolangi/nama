@@ -1013,25 +1013,13 @@ play_edit: _play_edit { ::edit_action($item[0]); 1}
 record_edit: _record_edit { ::edit_action($item[0]); 1}
 
 edit_track: _edit_track { 
-	print("You need to select an edit first (list_edits, select_edit)\n"),
-		return unless defined $::this_edit;
-	$::this_track = $::this_edit->edit_track; 1
-}
-host_track_alias: _host_track_alias { 
-	print("You need to select an edit first (list_edits, select_edit)\n"),
-		return unless defined $::this_edit;
-	$::this_track = $::this_edit->host_alias_track; 1 
-}
+	::select_edit_track('edit_track'); 1}
+host_track_alias: _host_track_alias {
+	::select_edit_track('host_alias_track'); 1}
 host_track: _host_track { 
-	print("You need to select an edit first (list_edits, select_edit)\n"),
-		return unless defined $::this_edit;
-	$::this_track = $::this_edit->host; 1 
-}
-version_mix_track: _version_mix_track { 
-	print("You need to select an edit first (list_edits, select_edit)\n"),
-		return unless defined $::this_edit;
-	$::this_track = $::this_edit->version_mix; 1 
-}
+	::select_edit_track('host'); 1}
+version_mix_track: _version_mix_track {
+	::select_edit_track('version_mix'); 1}
 play_start_mark: _play_start_mark {
 	my $mark = $::this_edit->play_start_mark;
 	$mark->jump_here; 1;
