@@ -5949,9 +5949,8 @@ sub merge_edits {
 			 $edit => $ver
 		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'MON'} 
 		$edit->version_bus->tracks; 
-	my $msg = "merges ".$edit->host_track."_$v.wav w/".
-		$edit->edit_root_name." edits ".
-		join " ",map{"$_\_$edits{$_}"} sort{$a<=>$b} keys %edits;
+	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
+		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
 	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
 	say $msg;
