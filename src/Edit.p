@@ -81,6 +81,7 @@ sub new {
 		width		=> 2,                     # default to stereo 
 	#	rec_defeat 	=> 1,                     # set by ->busify
 		group   	=> $self->host_track,     # i.e. sax
+		hide		=> 1,
 	); 
 	$self->version_mix->busify;                                # create sub-bus
 
@@ -99,6 +100,7 @@ sub new {
 			target  => $host->name,
 			rw		=> 'MON',                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
+			hide 	=> 1,
 		);
 
 	# create edit track
@@ -112,6 +114,7 @@ sub new {
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
 		group		=> $self->edit_root_name,  # i.e. sax-v5
+		hide		=> 1,
 	); 
 	$self
 }

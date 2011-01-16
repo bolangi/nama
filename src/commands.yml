@@ -819,15 +819,20 @@ edit_track:
   what: set the edit track as current track
   short: et
   parameters: none
+host_track_alias:
+  type: edit
+  what: set the host track alias as the current track
+  short: hta
+  parameters: none
 host_track:
   type: edit
-  what: set the host track *alias* as the current track (for setting inputs)
+  what: set the host track (edit sub-bus mix track) as the current track
   short: ht
   parameters: none
-edit_mix_track:
+version_mix_track:
   type: edit
-  what: set the host track (edit sub-bus mix track) as the current track
-  short: mt
+  what: set the version mix track as the current track
+  short: vmt 
   parameters: none
 play_start_mark:
   type: edit

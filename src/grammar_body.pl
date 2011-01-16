@@ -1015,35 +1015,33 @@ record_edit: _record_edit { ::edit_action($item[0]); 1}
 edit_track: _edit_track { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
-	$::this_track = $::tn{$::this_edit->edit_name}; 1
+	$::this_track = $::this_edit->edit_track; 1
 }
-
+host_track_alias: _host_track_alias { 
+	print("You need to select an edit first (list_edits, select_edit)\n"),
+		return unless defined $::this_edit;
+	$::this_track = $::this_edit->host_alias_track; 1 
+}
 host_track: _host_track { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
-	$::this_track = $::tn{$::this_edit->host_alias}; 1 
+	$::this_track = $::this_edit->host; 1 
 }
-edit_mix_track: _edit_mix_track { 
+version_mix_track: _version_mix_track { 
 	print("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $::this_edit;
-	$::this_track = $::tn{$::this_edit->host_track}; 1 
+	$::this_track = $::this_edit->version_mix; 1 
 }
-
-	
-
 play_start_mark: _play_start_mark {
 	my $mark = $::this_edit->play_start_mark;
 	$mark->jump_here; 1;
- }
-
+}
 rec_start_mark: _rec_start_mark {
 	$::this_edit->rec_start_mark->jump_here; 1;
 }
-
 rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
-
 set_play_start_mark: _set_play_start_mark {
 	$::edit_points[0] = ::eval_iam('getpos'); 1}
 set_rec_start_mark: _set_rec_start_mark {
