@@ -189,22 +189,48 @@ sub remove_fades {
 
 sub destroy {
 	my $edit = shift;
+
+	# remove object from index hash
+	delete $by_index{$edit->n};
+
+	# list edit track WAV files
 	my @wavs = values %{$edit->edit_track->targets};
-	my $fades = $edit->fades;
-	map{ $::Fade::by_index{$_}->remove } @$fades;
+
+	#   track removal also takes care of fades # VERIFY
+	#	my $fades = $edit->fades;
+	#	map{ $::Fade::by_index{$_}->remove } @$fades;
+
+	# remove edit track
+	$edit->edit_track->remove;
+
+	my @sister_edits = grep{ 
+			$edit->host_track   eq $_->host_track 
+		and $edit->host_version == $_->host_version 
+	} values %by_index;
+
+	# if we are the last edit, remove all auxiliary tracks/buses
+	
+	if ( ! @sister_edits ){
+
+		$edit->host_alias_track->remove;
+
+		$edit->version_bus->remove;
+		# note: bus->remove will not delete a mix track with WAV files
+
+		# The host may have a version symlinked to a WAV file 
+		# belonging to the version mix track. So we remove
+		# the track, but not the wav files.
+
+		$edit->version_mix->remove if defined $edit->version_mix;
+
+		$edit->host_bus->remove;
+	}
+	# remove edit track WAV files if we've reached here
 	map{ 
 		my $file = ::join_path(::this_wav_dir(), $_);
 		say "removing $file";
-		unlink $file;
+		#unlink $file;
 	} @wavs;
-	$edit->version_bus->remove;
-	# The host may have a version symlinked to a WAV file 
-	# belonging to the version mix track. So we remove
-	# the track, but not the wav files.
-	$edit->version_mix->remove if defined $edit->version_mix;
-	$edit->host_alias_track->remove;
-	$edit->edit_track->remove;
-	# in case bus->remove leaves it behind
 }
 
 sub host	 		{ $::tn{$_[0]->host_track} } # top-level mix track, i.e. 'sax'

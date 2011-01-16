@@ -120,11 +120,18 @@ sub remove {
 	map{$::tn{$_}->set(group => 'Main') } $by_name{$bus->name}->tracks;
 
 	my $mix_track = $::tn{$bus->name};
-	 
-	# remove mix track unless it has some WAV files
-	$mix_track->remove unless scalar @{ $mix_track->versions };
 
-	# remove bus
+	if ( defined $mix_track ){
+	 
+		$mix_track->unbusify;
+	
+		# remove mix track unless it has some WAV files
+
+		$mix_track->remove unless scalar @{ $mix_track->versions };
+	}
+
+	# remove bus from index
+	
 	delete $by_name{$bus->name};
 } 
 package ::SendBusRaw;

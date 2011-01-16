@@ -3428,17 +3428,11 @@ sub save_system_state {
 	# prepare marks data for storage (new Mark objects)
 
 	$debug and print "copying marks data\n";
-	map { push @marks_data, $_->hashref } ::Mark::all();
+	push @marks_data, map{ $_->hashref } ::Mark::all();
 
-	# prepare fade data for storage
-	
-	while (my $k = each %::Fade::by_index ){ 
-		push @fade_data, $::Fade::by_index{$k}->hashref;
-	}
+	push @fade_data,  map{ $_->hashref } values %::Fade::by_index;
 
-	while (my $k = each %::Edit::by_name ){
-		push @edit_data, $::Edit::by_name{$k}->hashref;
-	}
+	push @edit_data,  map{ $_->hashref } values %::Edit::by_index;
 
 	# save history -- 50 entries, maximum
 
@@ -5871,7 +5865,7 @@ sub select_edit {
 
 	# turn on top-level bus and mix track
 	
-	$edit->bus->set(rw => 'REC');
+	$edit->host_bus->set(rw => 'REC');
 
 	$edit->host->busify;
 
@@ -5879,7 +5873,7 @@ sub select_edit {
 	
 	map{ $tn{$_}->set(rw => 'OFF'); # version mix tracks
 	      $bn{$_}->set(rw => 'OFF'); # version buses
-	} $this_edit->bus->tracks;      # use same name for track/bus
+	} $this_edit->host_bus->tracks;      # use same name for track/bus
 
 	# turn on what we want
 	
@@ -5925,7 +5919,7 @@ sub disable_edits {
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
-	$edit->bus->set( rw => 'OFF');
+	$edit->host_bus->set( rw => 'OFF');
 
 	$edit->version_bus->set( rw => 'OFF');
 
