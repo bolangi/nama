@@ -51,6 +51,7 @@ sub new {
 		}, $class;
 
 	$by_name{ $self->edit_name } = $self;
+	$by_index{ $self->n } = $self;
 
 	#print "self class: $class, self type: ", ref $self, $/;
 
@@ -192,6 +193,7 @@ sub destroy {
 
 	# remove object from index hash
 	delete $by_index{$edit->n};
+	delete $by_name{$edit->edit_name};
 
 	# list edit track WAV files
 	my @wavs = values %{$edit->edit_track->targets};
@@ -234,7 +236,7 @@ sub destroy {
 }
 
 sub host	 		{ $::tn{$_[0]->host_track} } # top-level mix track, i.e. 'sax'
-sub bus 			{ $::Bus::by_name{$_[0]->host_track} }  # top-level bus
+sub host_bus 		{ $::Bus::by_name{$_[0]->host_track} }  # top-level bus
 sub version_mix     { $::tn{$_[0]->edit_root_name} }        # in top-level bus
 sub version_bus     { $::Bus::by_name{$_[0]->edit_root_name} } # version-level bus
 sub host_alias_track{ $::tn{$_[0]->host_alias} }            # in version_bus
