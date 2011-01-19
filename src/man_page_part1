@@ -484,11 +484,11 @@ C<master_off>) the following network, receives the Master
 track signal as input and provides an output to the
 soundcard or WAV file.
 
-                          +-(Low)-+ 
-                          |       |
-    Eq-in -(Eq)-> Eq_out -+-(Mid)-+- Boost_in -(Boost)-> soundcard/wav_out
-                          |       |
-                          +-(High)+ 
+                       +- Low -+ 
+                       |       |
+         ------ Eq ----+- Mid -+--- Boost -> soundcard/wav_out
+                       |       |
+                       +- High + 
 
 The B<Eq> track hosts an equalizer.
 
