@@ -383,8 +383,6 @@ sub input_path { # signal path, not file path
 
 	}
 }
-#}
-
 
 ### remove and destroy
 
@@ -838,6 +836,22 @@ sub version_comment {
 	$text .= "* $system" if $system;
 	"$v: $text\n" if $text;
 }
+# Modified from Object.p to save class
+sub hashref {
+	my $self = shift;
+	my $class = ref $self;
+	bless $self, 'HASH'; # easy magic
+	#print yaml_out $self; return;
+	my %guts = %{ $self };
+	$guts{class} = $class; # make sure we save the correct class name
+	#print join " ", %guts; return;
+	#my @keys = keys %guts;
+	#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
+	bless $self, $class; # restore
+	return \%guts;
+}
+
+
 				
 }
 	
