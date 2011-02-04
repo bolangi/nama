@@ -2344,7 +2344,8 @@ sub modify_multiple_effects {
 		map{ 	my $parameter = $_;
 				$parameter--; # convert to zero-base
 				modify_effect($op_id, $parameter, $sign, $value);
-		} @$parameters
+		} @$parameters;
+		$this_op = $op_id; # set current effect
 	} @$op_ids;
 }
 

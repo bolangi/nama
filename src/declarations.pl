@@ -112,7 +112,7 @@ our (
 					 # used by Text UI only at present
 	$this_track_name, # for save/restore 
 	$old_this_track, # when we need to remember previous setting
-	$this_op,      # currently selected effect # future
+	$this_op,      # current effect
 	$this_mark,    # current mark  # for future
 	$this_bus, 		# current bus
 

@@ -627,6 +627,7 @@ add_controller: _add_controller parent effect value(s?) {
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
 
+		$::this_op = $id; # set current effect
 	}
 	1;
 }
@@ -638,6 +639,7 @@ add_effect: _add_effect effect value(s?) {
 	{
 		my $i = ::effect_index($code);
 		my $iname = $::effects[$i]->{name};
+		$::this_op = $id; # set current effect
 
 		print "\nAdded $id ($iname)\n\n";
 	}
