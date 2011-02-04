@@ -2402,6 +2402,11 @@ sub remove_effect {
 sub position_effect {
 	my($op, $pos) = @_;
 
+	# we cannot handle controllers
+	
+	print("$op or $pos: controller not allowed, skipping.\n"), return 
+		if grep{ $cops{$_}->{belongs_to} } $op, $pos;
+	
 	# first, modify track data structure
 	
 	print("$op: effect does not exist, skipping.\n"), return unless $cops{$op};
