@@ -2399,15 +2399,47 @@ sub remove_effect {
 	$this_op = undef;
 }
 
+sub position_effect {
+	my($op, $pos) = @_;
+
+	# first, modify track data structure
+	
+	print("$op: effect does not exist, skipping.\n"), return unless $cops{$op};
+	my $track = $ti{$cops{$op}->{chain}};
+	my $op_index = nama_effect_index($op);
+	my @new_op_list = @{$track->ops};
+	# remove op
+	splice @new_op_list, $op_index, 1;
+	my $new_op_index;
+	if ( $pos eq 'ZZZ'){
+		# put it at the end
+		push @new_op_list, $op;
+	}
+	else { 
+		my $track2 = $ti{$cops{$pos}->{chain}};
+		print("$pos: position belongs to a different track, skipping.\n"), return
+			unless $track eq $track2;
+		$new_op_index = nama_effect_index($pos); 
+		# insert op
+		splice @new_op_list, $new_op_index, 0, $op;
+	}
+	# reconfigure the entire engine (inefficient, but easy to do)
+	#say join " - ",@new_op_list;
+	@{$track->ops} = @new_op_list;
+	reconfigure_engine(); 
+	$this_track = $track;
+	command_process('show_track');
+}
 
 sub nama_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
+	my $arr = $ti{$n}->ops;
 	$debug and print "id: $id n: $n \n";
 	$debug and print join $/,@{ $ti{$n}->ops }, $/;
 		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
-			return $pos if $ti{$n}->ops->[$pos] eq $id; 
+			return $pos if $arr->[$pos] eq $id; 
 		};
 }
 sub ecasound_effect_index { 

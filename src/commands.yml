@@ -485,6 +485,11 @@ remove_effect:
   what: remove effects from selected track
   short: rfx remove_controller rcl
   parameters: <s_effect_id1> [ <s_effect_id2>...]
+position_effect:
+  type: effect
+  what: position an effect before another effect (use 'ZZZ' for end)
+  short: pfx
+  parameters: [<s_effect_id>]
 show_effect:
   type: effect
   what: show effect information

@@ -697,6 +697,16 @@ modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
 	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
 	1;
 }
+position_effect: _position_effect op_to_move new_following_op {
+	my $op = $item{op_to_move};
+	my $pos = $item{new_following_op};
+	::position_effect($op, $pos);
+	1;
+}
+
+op_to_move: op_id
+new_following_op: op_id
+	
 show_effect: _show_effect op_id(s) {
 	my @lines = 
 		map{ ::Text::show_effect($_) } 
