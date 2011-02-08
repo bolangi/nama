@@ -1860,6 +1860,8 @@ sub connect_jack_ports_list {
 	# We need tracks to configure
 	return if ! @source_tracks and ! @send_tracks;
 
+	sleeper(0.3); # extra time for ecasound engine to register JACK ports
+
 	if( $use_jack_plumbing )
 	{
 
