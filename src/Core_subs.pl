@@ -305,6 +305,7 @@ sub process_options {
 
         save-alsa  		a
 		project-root=s  d
+		use-pwd			p
 		create-project  c
 		config=s		f
 		gui			  	g
@@ -348,6 +349,7 @@ USAGE: nama [options] [project_name]
 --text, -t                       Start Nama in text mode
 --config, -f                     Specify configuration file (default: ~/.namarc)
 --project-root, -d               Specify project root directory
+--use-pwd, -p                    Use current dir for all WAV and project files
 --create-project, -c             Create project if it doesn't exist
 --net-eci, -n                    Use Ecasound's Net-ECI interface
 --libecasoundc, -l               Use Ecasound's libecasoundc interface
