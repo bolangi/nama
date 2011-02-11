@@ -4033,6 +4033,7 @@ sub nosolo {
 	}
 
 	# remove listing of muted tracks
+	@already_muted = ();
 	
 	$soloing = 0;
 }
