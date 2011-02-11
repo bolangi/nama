@@ -174,7 +174,6 @@ markname: /\w+/ { 	 # word characters
 	$item[1];
 }
 #region_default_end: 'END' | ''
-path: /~?[\w\-\.\/]+/ # optional tilde [word char, dot, hyphen, slash]{1,}
 path: shellish
 modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}

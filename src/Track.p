@@ -750,7 +750,7 @@ sub import_audio  {
 	} else {	
 		my $format = ::signal_format($::raw_to_disk_format, $width);
 		say "importing $path as $destination, converting to $format";
-		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,$path -o:$destination);
+		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		#say $cmd;
 		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
