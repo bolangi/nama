@@ -5252,6 +5252,7 @@ sub ecasound_get_info {
 	# get information about an audio object
 	
 	my ($path, $command) = @_;
+	$path = qq("$path");
 	teardown_engine();
 	eval_iam('cs-add gl');
 	eval_iam('c-add g');
