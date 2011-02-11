@@ -2433,7 +2433,8 @@ sub position_effect {
 	# reconfigure the entire engine (inefficient, but easy to do)
 	#say join " - ",@new_op_list;
 	@{$track->ops} = @new_op_list;
-	reconfigure_engine(); 
+	$regenerate_setup++;
+	reconfigure_engine();
 	$this_track = $track;
 	command_process('show_track');
 }
