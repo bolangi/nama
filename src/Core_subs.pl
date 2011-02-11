@@ -30,6 +30,10 @@ sub prepare {
 		print "project_root $opts{d} specified on command line\n";
 		$project_root = $opts{d};
 	}
+	if ($opts{p}){
+		$project_root = getcwd();
+		print "placing all files in current working directory ($project_root)\n";
+	}
 
 	# capture the sample frequency from .namarc
 	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
@@ -511,6 +515,7 @@ sub config_file { $opts{f} ? $opts{f} : ".namarc" }
 { # OPTIMIZATION
 my %wdir; 
 sub this_wav_dir {
+	$opts{p} and return $project_root; # cwd
 	$project_name and
 	$wdir{$project_name} ||= resolve_path(
 		join_path( project_root(), $project_name, q(.wav) )  
@@ -518,8 +523,10 @@ sub this_wav_dir {
 }
 }
 
-sub project_dir {$project_name and join_path( project_root(), $project_name) }
-
+sub project_dir {
+	$opts{p} and return $project_root; # cwd
+	$project_name and join_path( project_root(), $project_name) 
+}
 
 sub global_config {
 
