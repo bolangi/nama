@@ -497,15 +497,15 @@ vol: _vol { print $::copp{$::this_track->vol}[0], "\n" ; 1}
 mute: _mute { $::this_track->mute; 1}
 
 unmute: _unmute { $::this_track->unmute; 1}
-# solo: _solo 'bus' track_name {
-# 	print ("$item{track_name}: Expected bus track_name. Skipping.\n"), return 1
-# 		unless $::bn{$item{track_name}};
-# 	::command_process("for all; off;; $item{track_name} mon");
-# 	1;
-# }
-solo: _solo { ::solo(); 1}
-all: _all { ::all() ; 1}
 
+
+solo: _solo ident(s) {
+	::solo(@{$item{'ident(s)'}}); 1
+}
+
+solo: _solo { ::solo($::this_track->name); 1}
+all: _all { ::all() ; 1}
+nosolo: _nosolo { ::nosolo() ; 1}
 
 unity: _unity { 
 	::effect_update_copp_set( 

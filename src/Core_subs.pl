@@ -3964,6 +3964,7 @@ sub rewind {
 	forward( -$delta );
 }
 sub solo {
+	my @args = @_;
 
 	# get list of already muted tracks if I haven't done so already
 	
@@ -3972,33 +3973,79 @@ sub solo {
                          map{ $tn{$_} } 
 						 ::Track::user();
 	}
+
 	$debug and say join " ", "already muted:", map{$_->name} @already_muted;
 
-	# mute all tracks
-	my @bus_tree = ($this_track->name, $this_track->bus_tree());
-	map { $tn{$_}->mute(1) } 
-	grep { my $tn = $_; ! grep { $tn eq $_ } @bus_tree } 
-	::Track::user();
+	# convert bunches to tracks
+	my @names = map{ bunch_tracks($_) } @args;
 
+	# use hashes to store our list
+	
+	my %to_mute;
+	my %not_mute;
+	
+	# get dependent tracks
+	
+	my @d = map{ $tn{$_}->bus_tree() } @names;
+
+	# store solo tracks and dependent tracks that we won't mute
+
+	map{ $not_mute{$_}++ } @names, @d;
+
+	# find all siblings tracks not in depends list
+
+	# - get buses list corresponding to our non-muting tracks
+	
+	my %buses;
+	$buses{Main}++; 				# we always want Main
+	
+	map{ $buses{$_}++ } 			# add to buses list
+	map { $tn{$_}->group } 			# corresponding bus (group) names
+	keys %not_mute;					# tracks we want
+
+	# - get sibling tracks we want to mute
+
+	map{ $to_mute{$_}++ }			# add to mute list
+	grep{ ! $not_mute{$_} }			# those we *don't* want
+	map{ $bn{$_}->tracks }			# tracks list
+	keys %buses;					# buses list
+
+	# mute all tracks on our mute list (do we skip already muted tracks?)
+	
+	map{ $tn{$_}->mute('nofade') } keys %to_mute;
+
+	# unmute all tracks on our wanted list
+	
+	map{ $tn{$_}->unmute('nofade') } keys %not_mute;
+	
 	$soloing = 1;
 }
 
-sub all {
-	
+sub nosolo {
+	# unmute all except in @already_muted list
+
 	# unmute all tracks
-	map { $tn{$_}->unmute(1) } ::Track::user();
+	map { $tn{$_}->unmute('nofade') } ::Track::user();
 
 	# re-mute previously muted tracks
 	if (@already_muted){
-		map { $_->mute(1) } @already_muted;
+		map { $_->mute('nofade') } @already_muted;
 	}
 
 	# remove listing of muted tracks
 	
-	@already_muted = ();
 	$soloing = 0;
 }
+sub all {
+
+	# unmute all tracks
+	map { $tn{$_}->unmute('nofade') } ::Track::user();
+
+	# remove listing of muted tracks
+	@already_muted = ();
 	
+	$soloing = 0;
+}
 
 sub pager {
 	$debug2 and print "&pager\n";

@@ -236,11 +236,16 @@ unity:
 solo:
   type: track
   what: mute all but current track
+  short: sl
+  parameters: [track_name(s)] [bunch_name(s)]
+nosolo:
+  type: track
+  what: release solo, previously muted tracks are still muted
+  short: nsl
   parameters: none
 all:
   type: track
-  short: nosolo
-  what: unmute tracks after solo
+  what: release solo, unmuting all tracks
   parameters: none
 pan:
   type: track
