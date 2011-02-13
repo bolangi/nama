@@ -2010,6 +2010,7 @@ sub stop_transport {
 	my $quiet = shift;
 	$debug2 and print "&stop_transport\n"; 
 	mute();
+	my $pos = eval_iam('getpos');
 	eval_iam('stop');	
 	disable_length_timer();
 	if ( ! $quiet ){
@@ -2019,6 +2020,7 @@ sub stop_transport {
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $old_bg);
+	eval_iam("setpos $pos");
 }
 
 sub transport_running { eval_iam('engine-status') eq 'running'  }
