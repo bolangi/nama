@@ -132,7 +132,8 @@ sub fades {
 
 # our envelope must include a straight segment from the
 # beginning of the track (or region) to the fade
-# start. 
+# start. Similarly, we need a straight segment
+# from the last fade to the track (or region) end
 #
 # - If the first fade is a fade-in, the straight
 #   segment will be at zero-percent level
@@ -152,6 +153,13 @@ sub exit_level_is_zero {
 	my @fades = fades($track_name);
 	scalar @fades and $fades[-1]->type eq 'out'
 }
+sub initial_spec { # duration: zero to first_fade start
+	my $track_name = shift;
+}
+sub final_spec {   # duration: last_fade end to length
+	my $track_name = shift;
+}
+
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
 	my $track = shift;
@@ -163,13 +171,15 @@ sub fader_envelope_pairs {
 		# calculate fades
 		my $marktime1 = ::Mark::mark_time($fade->mark1);
 		my $marktime2 = ::Mark::mark_time($fade->mark2);
-		if ($marktime2){  # nothing to do
-		} elsif( $fade->relation eq 'fade_from_mark'){
-			$marktime2 = $marktime1 + $fade->duration
-		} elsif( $fade->relation eq 'fade_to_mark'){
-			$marktime2 = $marktime1;
-			$marktime1 -= $fade->duration
-		} else { $fade->dumpp; die "fade processing failed" }
+		if ($marktime2) {}  # nothing to do
+		elsif( $fade->relation eq 'fade_from_mark')
+			{ $marktime2 = $marktime1 + $fade->duration } 
+		elsif( $fade->relation eq 'fade_to_mark')
+			{
+				$marktime2 = $marktime1;
+				$marktime1 -= $fade->duration
+			} 
+		else { $fade->dumpp; die "fade processing failed" }
 		#say "marktime1: $marktime1";
 		#say "marktime2: $marktime2";
 		push @specs, 
