@@ -133,10 +133,5 @@ sub mark_time {
 	$time -= ::play_start_time() if ::edit_mode();
 	$time
 }
-sub subtract_edit_start_offset {
-	return $_[0] unless ::edit_mode();
-	#$_[0] - 
-}
-
 	
 1;
