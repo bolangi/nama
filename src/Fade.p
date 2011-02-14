@@ -99,10 +99,8 @@ sub refresh_fade_controller {
 	# 	first fade is type 'in'  : 0
 	# 	first fade is type 'out' : 100%
 	
-	my $initial_level = initial_level_is_zero($track->name) 
-		? $off_level 
-		: $on_level;
-	::effect_update_copp_set($track->fader,0,$initial_level);
+	 
+	::effect_update_copp_set($track->fader,0, initial_level($track->name))
 }
 
 
@@ -181,8 +179,7 @@ sub final_pair {   # duration: last_fade end to length
 	my $track = $::tn{$track_name};
 	(	$time, 
 		$init_level, 
-		$track->adjusted_playat_time 
-			+ 	$wav_info{$track->full_path}{length},
+		$track->adjusted_playat_time + $::wav_info{$track->full_path}{length},
 		$finish_level
 	);
 }
