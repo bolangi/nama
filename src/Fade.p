@@ -153,11 +153,16 @@ sub exit_level_is_zero {
 	my @fades = fades($track_name);
 	scalar @fades and $fades[-1]->type eq 'out'
 }
-sub initial_spec { # duration: zero to first_fade start
+sub initial_pair { # duration: zero to first_fade start
 	my $track_name = shift;
+	return () unless my @fades = fades($track_name);
+	my $time = ::Mark::mark_time($fades[0]->mark1);
+	
 }
-sub final_spec {   # duration: last_fade end to length
+sub final_pair {   # duration: last_fade end to length
 	my $track_name = shift;
+	return () unless my @fades = fades($track_name);
+	my $time = ::Mark::mark_time($fades[-1]->mark2);
 }
 
 sub fader_envelope_pairs {
@@ -193,8 +198,14 @@ sub fader_envelope_pairs {
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 	#say( ::yaml_out( \@specs));
 
-	# prepend number of pairs, flatten list
 	my @pairs = map{ spec_to_pairs($_) } @specs;
+
+	# add flat segments 
+	# - from start to first fade 
+	# - from last fade to end
+
+
+	# prepend number of pairs;
 	unshift @pairs, (scalar @pairs / 2);
 	@pairs;
 }
