@@ -302,26 +302,26 @@ sub playat_time {
 
 sub adjusted_region_start_time {
 	my $track = shift;
-	return $track->region_start_time unless $::edit_mode;
+	return $track->region_start_time unless $::offset_run_flag;
 	::set_edit_vars($track);
 	::new_region_start();
 	
 }
 sub adjusted_playat_time { 
 	my $track = shift;
-	return $track->playat_time unless $::edit_mode;
+	return $track->playat_time unless $::offset_run_flag;
 	::set_edit_vars($track);
 	::new_playat();
 }
 sub adjusted_region_end_time {
 	my $track = shift;
-	return $track->region_end_time unless $::edit_mode;
+	return $track->region_end_time unless $::offset_run_flag;
 	::set_edit_vars($track);
 	::new_region_end();
 }
 
 sub region_is_out_of_bounds {
-	return unless $::edit_mode;
+	return unless $::offset_run_flag;
 	my $track = shift;
 	::set_edit_vars($track);
 	::case() =~ /out_of_bounds/
