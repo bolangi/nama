@@ -833,6 +833,7 @@ sub initialize_project_data {
 	
 	%wav_info = ();
 	
+	clear_offset_play_vars();
 	$edit_mode = 0;
 	$this_edit = undef;
 
@@ -5887,7 +5888,7 @@ sub set_edit_vars {
 sub play_start_time {
 	defined $this_edit 
 		? $this_edit->play_start_time 
-		: $offset_run_start_time # undef unless offset run mode
+		: $offset_run_start_time # zero unless offset run mode
 }
 sub play_end_time {
 	defined $this_edit 
@@ -6128,8 +6129,8 @@ sub offset_run {
 	offset_run_mode(1);
 	$regenerate_setup++;
 }
-sub clear_offset_recording_vars {
-	$offset_run_start_time = undef;
+sub clear_offset_play_vars {
+	$offset_run_start_time = 0;
 	$offset_run_end_time   = undef;
 	$offset_mark 		   = undef;
 }
@@ -6138,7 +6139,7 @@ sub offset_run_mode {
 	given($set){
 		when(0){  
 			undef $edit_mode;
-			clear_offset_recording_vars();
+			clear_offset_play_vars();
 			$regenerate_setup++;
 		}
 		when(1){
