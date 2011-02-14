@@ -99,7 +99,7 @@ sub refresh_fade_controller {
 	# 	first fade is type 'in'  : 0
 	# 	first fade is type 'out' : 100%
 	
-	my $initial_level = first_fade_is_type_in($track->name) 
+	my $initial_level = initial_level_is_zero($track->name) 
 		? $off_level 
 		: $on_level;
 	::effect_update_copp_set($track->fader,0,$initial_level);
@@ -114,12 +114,15 @@ sub fades {
 	my $track_name = shift;
 	my @fades = all_fades($track_name);
 
-	# throw away fades that are not in edit play region (if active)
-	@fades = grep
-		{ my $time = $::Mark::by_name{$_->mark1}->{time};
-		  		$time >= ::play_start_time()
-			and $time <= ::play_end_time()
-		} @fades if ::edit_mode() ;
+	# throw away fades that are not in edit play region
+	
+	if(::edit_mode()){
+		@fades = grep
+			{ my $time = $::Mark::by_name{$_->mark1}->{time};
+					$time >= ::play_start_time()
+				and $time <= ::play_end_time()
+			} @fades 
+	}
 
 	# sort remaining fades by unadjusted mark1 time
 	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
@@ -127,10 +130,27 @@ sub fades {
 	} @fades;
 }
 
-sub first_fade_is_type_in {
+# our envelope must include a straight segment from the
+# beginning of the track (or region) to the fade
+# start. 
+#
+# - If the first fade is a fade-in, the straight
+#   segment will be at zero-percent level
+#   (otherwise 100%)
+#
+# - If the last fade is fade-out, the straight
+#   segment will be at zero-percent level
+#   (otherwise 100%)
+
+sub initial_level_is_zero {
 	my $track_name = shift;
 	my @fades = fades($track_name);
-	! scalar @fades or $fades[0]->type eq 'in'
+	scalar @fades and $fades[0]->type eq 'in'
+}
+sub exit_level_is_zero {
+	my $track_name = shift;
+	my @fades = fades($track_name);
+	scalar @fades and $fades[-1]->type eq 'out'
 }
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
