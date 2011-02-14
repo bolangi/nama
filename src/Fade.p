@@ -134,7 +134,7 @@ sub fades {
 # beginning of the track (or region) to the fade
 # start. Similarly, we need a straight segment
 # from the last fade to the track (or region) end
-#
+
 # - If the first fade is a fade-in, the straight
 #   segment will be at zero-percent level
 #   (otherwise 100%)
@@ -143,26 +143,48 @@ sub fades {
 #   segment will be at zero-percent level
 #   (otherwise 100%)
 
-sub initial_level_is_zero {
+# although we can get the precise start and endpoints,
+# I'm using 0 and $track->adjusted_playat_time + track length
+
+sub initial_level {
 	my $track_name = shift;
 	my @fades = fades($track_name);
-	scalar @fades and $fades[0]->type eq 'in'
+	# if we fade in we'll hold level zero from beginning
+	(scalar @fades and $fades[0]->type eq 'in') ? 0 : 1
 }
-sub exit_level_is_zero {
+sub exit_level {
 	my $track_name = shift;
 	my @fades = fades($track_name);
-	scalar @fades and $fades[-1]->type eq 'out'
+	# if we fade out we'll hold level zero from end
+	(scalar @fades and $fades[-1]->type eq 'out') ? 0 : 1
 }
 sub initial_pair { # duration: zero to first_fade start
 	my $track_name = shift;
-	return () unless my @fades = fades($track_name);
-	my $time = ::Mark::mark_time($fades[0]->mark1);
+	my @fades = fades($track_name) or return ();
+	my $time = ::Mark::mark_time($fades[0]->mark1); # ???
+	my $init_level = initial_level($track_name);
+	# finish level is inverted
+	my $finish_level  = $init_level ? 0 : 1;
+	(	0,  # we may be earlier than needed but that's okay
+		$init_level,	
+		$time,
+		$finish_level
+	);
 	
 }
 sub final_pair {   # duration: last_fade end to length
 	my $track_name = shift;
-	return () unless my @fades = fades($track_name);
+	my @fades = fades($track_name) or return ();
 	my $time = ::Mark::mark_time($fades[-1]->mark2);
+	my $init_level = exit_level($track_name);
+	my $finish_level = $init_level ? 0 : 1;
+	my $track = $::tn{$track_name};
+	(	$time, 
+		$init_level, 
+		$track->adjusted_playat_time 
+			+ 	$wav_info{$track->full_path}{length},
+		$finish_level
+	);
 }
 
 sub fader_envelope_pairs {

@@ -5887,12 +5887,12 @@ sub set_edit_vars {
 sub play_start_time {
 	defined $this_edit 
 		? $this_edit->play_start_time 
-		: $offset_run_start_time
+		: $offset_run_start_time # undef unless offset run mode
 }
 sub play_end_time {
 	defined $this_edit 
 		? $this_edit->play_end_time 
-		: $offset_run_end_time
+		: $offset_run_end_time   # undef unless offset run mode
 }
 sub set_edit_vars_testing {
 	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
