@@ -114,11 +114,11 @@ sub fades {
 
 	# throw away fades that are not in edit play region
 	
-	if(::edit_mode()){
+	if($::offset_run_flag){
 		@fades = grep
 			{ my $time = $::Mark::by_name{$_->mark1}->{time};
 					$time >= ::play_start_time()
-				and $time <= ::play_end_time()
+				#and $time <= ::play_end_time()
 			} @fades 
 	}
 
@@ -145,42 +145,33 @@ sub fades {
 # I'm using 0 and $track->adjusted_playat_time + track length
 
 sub initial_level {
+	# return 0, 1 or undef
 	my $track_name = shift;
-	my @fades = fades($track_name);
+	my @fades = fades($track_name) or return undef;
 	# if we fade in we'll hold level zero from beginning
 	(scalar @fades and $fades[0]->type eq 'in') ? 0 : 1
 }
 sub exit_level {
 	my $track_name = shift;
-	my @fades = fades($track_name);
+	my @fades = fades($track_name) or return undef;
 	# if we fade out we'll hold level zero from end
 	(scalar @fades and $fades[-1]->type eq 'out') ? 0 : 1
 }
-sub initial_pair { # duration: zero to first_fade start
+sub initial_pair { # duration: zero to... 
 	my $track_name = shift;
-	my @fades = fades($track_name) or return ();
-	my $time = ::Mark::mark_time($fades[0]->mark1); # ???
 	my $init_level = initial_level($track_name);
-	# finish level is inverted
-	my $finish_level  = $init_level ? 0 : 1;
-	(	0,  # we may be earlier than needed but that's okay
-		$init_level,	
-		$time,
-		$finish_level
-	);
+	defined $init_level or return ();
+	(0,  $init_level )
 	
 }
-sub final_pair {   # duration: last_fade end to length
+sub final_pair {   # duration: .... to length
 	my $track_name = shift;
-	my @fades = fades($track_name) or return ();
-	my $time = ::Mark::mark_time($fades[-1]->mark2);
-	my $init_level = exit_level($track_name);
-	my $finish_level = $init_level ? 0 : 1;
+	my $exit_level = exit_level($track_name);
+	defined $exit_level or return ();
 	my $track = $::tn{$track_name};
-	(	$time, 
-		$init_level, 
+	(
 		$track->adjusted_playat_time + $::wav_info{$track->full_path}{length},
-		$finish_level
+		$exit_level
 	);
 }
 
