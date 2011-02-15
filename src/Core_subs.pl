@@ -1884,7 +1884,7 @@ sub connect_jack_ports_list {
 
 		# run jack.plumbing
 		start_jack_plumbing();
-		sleeper(1.5); # time for jack.plumbing to launch and poll
+		sleeper(3); # time for jack.plumbing to launch and poll
 		kill_jack_plumbing();
 		initialize_jack_plumbing_conf();
 	}
