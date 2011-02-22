@@ -6121,10 +6121,9 @@ sub offset_run {
 	say("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
-	my $endpoint = setup_length();
-	my $offset = $::Mark::by_name{$markname}->adjusted_time;
-	$offset_run_start_time = $offset;
-	$offset_run_end_time   = $endpoint;
+	
+	$offset_run_start_time = $::Mark::by_name{$markname}->time;
+	$offset_run_end_time   = setup_length();
 	$offset_mark = $markname;
 	offset_run_mode(1);
 	$regenerate_setup++;
