@@ -69,7 +69,7 @@ sub jump_here {
 }
 sub adjusted_time {  # for marks within current edit
 	my $mark = shift;
-	return $mark->time unless $::edit_mode;
+	return $mark->time unless $::offset_run_flag;
 	my $time = $mark->time - ::play_start_time();
 	$time > 0 ? $time : 0
 }
