@@ -1,6 +1,7 @@
 # ----------- Fade ------------
 package ::Fade;
 use Modern::Perl;
+use List::Util qw(min);
 our $VERSION = 1.0;
 use Carp;
 use warnings;
@@ -110,15 +111,28 @@ sub all_fades {
 }
 sub fades {
 	my $track_name = shift;
+	my $track = $::tn{$track_name};
 	my @fades = all_fades($track_name);
 
-	# throw away fades that are not in edit play region
 	
 	if($::offset_run_flag){
+
+		# get end time
+		
+		my $length = $::wav_info{$track->full_path}{length};
+		my $play_end = ::play_end_time();
+		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
+
+		# get start time
+	
+		my $play_start_time = ::play_start_time();
+	
+		# throw away fades that are not in play region
+	
 		@fades = grep
 			{ my $time = $::Mark::by_name{$_->mark1}->{time};
-					$time >= ::play_start_time()
-				#and $time <= ::play_end_time()
+					$time >= $play_start_time
+				and $time <= $play_end_time
 			} @fades 
 	}
 
@@ -209,6 +223,7 @@ sub fader_envelope_pairs {
 	#say( ::yaml_out( \@specs));
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
+	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
 
 	# add flat segments 
 	# - from start to first fade 
