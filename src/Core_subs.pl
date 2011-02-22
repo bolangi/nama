@@ -833,7 +833,8 @@ sub initialize_project_data {
 	
 	%wav_info = ();
 	
-	$edit_mode = 0;
+	clear_offset_run_vars();
+	$offset_run_flag = 0;
 	$this_edit = undef;
 
 }
@@ -1620,7 +1621,7 @@ sub set_doodle_mode {
 	print "Using live inputs only, with no duplicate inputs\n";
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
-{ my $old_edit_mode;
+{ my $old_offset_run_status;
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
@@ -1667,7 +1668,7 @@ sub reconfigure_engine {
 	
 	if ( 	$preview eq 'doodle' 
 		 or $old_snapshot->{project} ne $project_name
-		 or $edit_mode != $old_edit_mode
+		 or $offset_run_flag != $old_offset_run_status
 		# TODO: or change in global version
 	){} # do nothing
 	else
@@ -1683,7 +1684,7 @@ sub reconfigure_engine {
 	}
 
 	$old_snapshot = status_snapshot();
-	$old_edit_mode = $edit_mode;
+	$old_offset_run_status = $offset_run_flag;
 
 	command_process('show_tracks');
 
@@ -2248,7 +2249,7 @@ sub rec_cleanup {
 		(grep /Mixdown/, @files) 
 			? command_process('mixplay') 
 			: post_rec_configure();
-		undef $edit_mode if ! defined $this_edit;
+		undef $offset_run_flag if ! defined $this_edit;
 		reconfigure_engine();
 	}
 }
@@ -5702,7 +5703,7 @@ sub end_edit_mode  	{
 
 	# regenerate fades
 	
-	$edit_mode = 0; 
+	$offset_run_flag = 0; 
 	$loop_enable = 0;
 	offset_run_mode(0);	
 	$this_track = $this_edit->host if defined $this_edit;
@@ -5721,8 +5722,8 @@ sub destroy_edit {
 	$this_track = $this_edit->host;
 	end_edit_mode();
 }
-sub set_edit_mode 	{ $edit_mode = edit_mode_conditions() ?  1 : 0 }
-sub edit_mode		{ $edit_mode and defined $this_edit}
+sub set_edit_mode 	{ $offset_run_flag = edit_mode_conditions() ?  1 : 0 }
+sub edit_mode		{ $offset_run_flag and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
@@ -5887,12 +5888,12 @@ sub set_edit_vars {
 sub play_start_time {
 	defined $this_edit 
 		? $this_edit->play_start_time 
-		: $offset_run_start_time
+		: $offset_run_start_time # zero unless offset run mode
 }
 sub play_end_time {
 	defined $this_edit 
 		? $this_edit->play_end_time 
-		: $offset_run_end_time
+		: $offset_run_end_time   # undef unless offset run mode
 }
 sub set_edit_vars_testing {
 	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
@@ -6128,8 +6129,8 @@ sub offset_run {
 	offset_run_mode(1);
 	$regenerate_setup++;
 }
-sub clear_offset_recording_vars {
-	$offset_run_start_time = undef;
+sub clear_offset_run_vars {
+	$offset_run_start_time = 0;
 	$offset_run_end_time   = undef;
 	$offset_mark 		   = undef;
 }
@@ -6137,16 +6138,16 @@ sub offset_run_mode {
 	my $set = shift;
 	given($set){
 		when(0){  
-			undef $edit_mode;
-			clear_offset_recording_vars();
+			undef $offset_run_flag;
+			clear_offset_run_vars();
 			$regenerate_setup++;
 		}
 		when(1){
 			undef $this_edit; 
-			$edit_mode++
+			$offset_run_flag++
 		}
 	}
-	$edit_mode and ! defined $this_edit
+	$offset_run_flag and ! defined $this_edit
 }
 	
 {

@@ -67,15 +67,10 @@ sub jump_here {
 	::eval_iam( "setpos " . $mark->time);
 	$::this_mark = $mark;
 }
-{
-no warnings 'redefine';
-#sub time { $_[0]->adjusted_time }
-#sub time { $_[0]->{time} }
-}
 sub adjusted_time {  # for marks within current edit
 	my $mark = shift;
-	return $mark->{time} unless ::edit_mode();
-	my $time = $mark->{time} - $::this_edit->play_start_mark->{time};
+	return $mark->time unless $::edit_mode;
+	my $time = $mark->time - ::play_start_time();
 	$time > 0 ? $time : 0
 }
 sub remove {
@@ -129,7 +124,7 @@ sub unadjusted_mark_time {
 	}
 	return undef if ! defined $mark;
 	#print "mark time: ", $mark->time, $/;
-	return $mark->{time};
+	return $mark->time;
 }
 sub mark_time {
 	my $tag = shift;
@@ -138,10 +133,5 @@ sub mark_time {
 	$time -= ::play_start_time() if ::edit_mode();
 	$time
 }
-sub subtract_edit_start_offset {
-	return $_[0] unless ::edit_mode();
-	#$_[0] - 
-}
-
 	
 1;

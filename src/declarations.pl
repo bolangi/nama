@@ -413,7 +413,7 @@ our (
 	
 	# Edits
 
-	$edit_mode,
+	$offset_run_flag, # indicates edit or offset_run mode
 	@edit_points, 
 	$this_edit, 	# current edit
 	$edit_playback_end_margin, # play a little more after edit recording finishes

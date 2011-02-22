@@ -1,6 +1,7 @@
 # ----------- Fade ------------
 package ::Fade;
 use Modern::Perl;
+use List::Util qw(min);
 our $VERSION = 1.0;
 use Carp;
 use warnings;
@@ -99,10 +100,8 @@ sub refresh_fade_controller {
 	# 	first fade is type 'in'  : 0
 	# 	first fade is type 'out' : 100%
 	
-	my $initial_level = first_fade_is_type_in($track->name) 
-		? $off_level 
-		: $on_level;
-	::effect_update_copp_set($track->fader,0,$initial_level);
+	 
+	::effect_update_copp_set($track->fader,0, initial_level($track->name))
 }
 
 
@@ -112,14 +111,30 @@ sub all_fades {
 }
 sub fades {
 	my $track_name = shift;
+	my $track = $::tn{$track_name};
 	my @fades = all_fades($track_name);
 
-	# throw away fades that are not in edit play region (if active)
-	@fades = grep
-		{ my $time = $::Mark::by_name{$_->mark1}->{time};
-		  		$time >= ::play_start_time()
-			and $time <= ::play_end_time()
-		} @fades if ::edit_mode() ;
+	
+	if($::offset_run_flag){
+
+		# get end time
+		
+		my $length = $::wav_info{$track->full_path}{length};
+		my $play_end = ::play_end_time();
+		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
+
+		# get start time
+	
+		my $play_start_time = ::play_start_time();
+	
+		# throw away fades that are not in play region
+	
+		@fades = grep
+			{ my $time = $::Mark::by_name{$_->mark1}->{time};
+					$time >= $play_start_time
+				and $time <= $play_end_time
+			} @fades 
+	}
 
 	# sort remaining fades by unadjusted mark1 time
 	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
@@ -127,11 +142,53 @@ sub fades {
 	} @fades;
 }
 
-sub first_fade_is_type_in {
+# our envelope must include a straight segment from the
+# beginning of the track (or region) to the fade
+# start. Similarly, we need a straight segment
+# from the last fade to the track (or region) end
+
+# - If the first fade is a fade-in, the straight
+#   segment will be at zero-percent level
+#   (otherwise 100%)
+#
+# - If the last fade is fade-out, the straight
+#   segment will be at zero-percent level
+#   (otherwise 100%)
+
+# although we can get the precise start and endpoints,
+# I'm using 0 and $track->adjusted_playat_time + track length
+
+sub initial_level {
+	# return 0, 1 or undef
 	my $track_name = shift;
-	my @fades = fades($track_name);
-	! scalar @fades or $fades[0]->type eq 'in'
+	my @fades = fades($track_name) or return undef;
+	# if we fade in we'll hold level zero from beginning
+	(scalar @fades and $fades[0]->type eq 'in') ? 0 : 1
 }
+sub exit_level {
+	my $track_name = shift;
+	my @fades = fades($track_name) or return undef;
+	# if we fade out we'll hold level zero from end
+	(scalar @fades and $fades[-1]->type eq 'out') ? 0 : 1
+}
+sub initial_pair { # duration: zero to... 
+	my $track_name = shift;
+	my $init_level = initial_level($track_name);
+	defined $init_level or return ();
+	(0,  $init_level )
+	
+}
+sub final_pair {   # duration: .... to length
+	my $track_name = shift;
+	my $exit_level = exit_level($track_name);
+	defined $exit_level or return ();
+	my $track = $::tn{$track_name};
+	(
+		$track->adjusted_playat_time + $::wav_info{$track->full_path}{length},
+		$exit_level
+	);
+}
+
 sub fader_envelope_pairs {
 	# return number_of_pairs, pos1, val1, pos2, val2,...
 	my $track = shift;
@@ -143,13 +200,15 @@ sub fader_envelope_pairs {
 		# calculate fades
 		my $marktime1 = ::Mark::mark_time($fade->mark1);
 		my $marktime2 = ::Mark::mark_time($fade->mark2);
-		if ($marktime2){  # nothing to do
-		} elsif( $fade->relation eq 'fade_from_mark'){
-			$marktime2 = $marktime1 + $fade->duration
-		} elsif( $fade->relation eq 'fade_to_mark'){
-			$marktime2 = $marktime1;
-			$marktime1 -= $fade->duration
-		} else { $fade->dumpp; die "fade processing failed" }
+		if ($marktime2) {}  # nothing to do
+		elsif( $fade->relation eq 'fade_from_mark')
+			{ $marktime2 = $marktime1 + $fade->duration } 
+		elsif( $fade->relation eq 'fade_to_mark')
+			{
+				$marktime2 = $marktime1;
+				$marktime1 -= $fade->duration
+			} 
+		else { $fade->dumpp; die "fade processing failed" }
 		#say "marktime1: $marktime1";
 		#say "marktime2: $marktime2";
 		push @specs, 
@@ -163,8 +222,15 @@ sub fader_envelope_pairs {
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 	#say( ::yaml_out( \@specs));
 
-	# prepend number of pairs, flatten list
 	my @pairs = map{ spec_to_pairs($_) } @specs;
+	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
+
+	# add flat segments 
+	# - from start to first fade 
+	# - from last fade to end
+
+
+	# prepend number of pairs;
 	unshift @pairs, (scalar @pairs / 2);
 	@pairs;
 }
