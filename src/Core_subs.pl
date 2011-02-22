@@ -1578,6 +1578,7 @@ sub arm {
 	$debug2 and print "&arm\n";
 	exit_preview_mode();
 	#adjust_latency();
+	$regenerate_setup++;
 	generate_setup() and connect_transport();
 }
 sub set_preview_mode {
