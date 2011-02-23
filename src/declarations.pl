@@ -1,94 +1,96 @@
+# category: fixed
+
 	$banner,
-	$help_screen, 		# 
+
+# category: help
+
+	$help_screen, 		 
 	@help_topic,    # array of help categories
 	%help_topic,    # help text indexed by topic
+
+# category: text UI
+
 	$use_pager,     # display lengthy output data using pager
 	$use_placeholders,  # use placeholders in show_track output
+
 	$text_wrap,          # Text::Format object
-
-	$ui, # object providing class behavior for graphic/text functions
-
-
-	# Variable categories, for config, persistence, serialization
-	
-	@persistent_vars, # a set of variables we save
-	@effects_static_vars,# the list of which variables to store and retrieve
-	@config_vars,    # contained in config file
-
-	# .namarc
-	
-	%cfg,        	# 'config' information as hash
-	%subst,			# alias, substitutions for the config file
-
-	%opts,          # command line options
-	
-	@ecasound_pids,      # started by Nama
-
-
-	$default,		# the internal default configuration file, as string
-					
-	%midish_command,     # keywords listing
-	$midi_input_dev,
-	$midi_output_dev, 
-
-	%state_c_ops, 	# intermediate copy for storage/retrieval
-	$effects_cache_file, # where we keep info on Ecasound
-					# and LADSPA effects, presets, etc.
-	
-	$ecasound, 		# the name to invoke when we want to kill ecasound
-
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
 	%iam_cmd,		# for identifying IAM commands in user input
 	@nama_commands,# array of commands my functions provide
 	%nama_commands,# as hash as well
+	@format_fields, # data for replies to text commands
 
-	# Nama directory structure and files
+# category: UI
 
-	# ~/.namarc						# config file
-	# ~/nama/untitled				# project directory
-	# ~/nama/untitled/.wav			# wav directory
-	# ~/nama/untitled/State.yml		# project state
-	# ~/nama/untitled/Setup.ecs		# Ecasound chain setup
-	# ~/nama/.effects_cache			# static effects data
-	# ~/nama/effect_chains			# Nama effect presets
-	# ~/nama/effect_profiles		# Nama effect profiles
+	$ui, # object providing class behavior for graphic/text functions
+
+# category: serialization
+
+	@persistent_vars, # a set of variables we save
+	@effects_static_vars,# the list of which variables to store and retrieve
+	@config_vars,    # contained in config file
+
+# category: config
+	
+	%cfg,        	# 'config' information as hash
+	%subst,			# alias, substitutions for the config file
+
+	%opts,          # command line options
+	$default,		# the internal default configuration file, as string
+	
+# category: engine
+
+	@ecasound_pids,      # started by Nama
+	$e,				# the name of the variable holding
+					# the Ecasound engine object.
+	$run_time,		# engine processing time limit (none if undef)
+
+# category: MIDI
+					
+	%midish_command,     # keywords listing
+	$midi_input_dev,
+	$midi_output_dev, 
+
+# category: filenames
+
+	$effects_cache_file, # where we keep info on Ecasound
+					# and LADSPA effects, presets, etc.
+	
+	$ecasound, 		# the name to invoke when we want to kill ecasound
+
 
 	$state_store_file,	# filename for storing @persistent_vars
 	$effect_chain_file, # for storing effect chains
 	$effect_profile_file, # for storing effect templates
 	$chain_setup_file, # Ecasound uses this 
 
-	$tk_input_channels,# alias for above
-	                # on the menubutton
-	
-	$use_monitor_version_for_mixdown, # sync mixdown version numbers
-	              	# to selected track versions , not
-					# implemented
+# category: pronouns
+
 	$this_track,	 # the currently active track -- 
 					 # used by Text UI only at present
 	$old_this_track, # when we need to remember previous setting
 	$this_mark,    # current mark  # for future
 	$this_bus, 		# current bus
 
-	@format_fields, # data for replies to text commands
+# category: project
 
-	$project,		# variable for GUI text input
 	$project_name,	# current project name
-	%state_c,		# for backwards compatilility
 
-	### for effects
+# category: effects
 
 	$magical_cop_id, # cut through five levels of subroutines
 
 
 	%offset,        # index by chain, offset for user-visible effects 
-	@mastering_effect_ids,        # effect ids for mastering mode
+					# pertains to engine
 
-	$e,				# the name of the variable holding
-					# the Ecasound engine object.
-					
-	$run_time,		# engine processing time limit (none if undef)
+	@mastering_effect_ids,        # effect ids for mastering mode
+	$tkeca_effects_data,	# original tcl code, actually
+
+
+# category: external resources (ALSA, JACK, etc.)
+
  	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd server status 
 	$jack_plumbing, # jack.plumbing daemon status
@@ -96,14 +98,21 @@
 	$fake_jack_lsp, # for testing
 	%jack,			# jack clients data from jack_lsp
 
+# category: chain setup
+
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
 	@post_input,	# post-input chain operators
 	@pre_output, 	# pre-output chain operators
 
-	$tkeca_effects_data,	# original tcl code, actually
 
-# GUI
+# category: Graphical UI, GUI
+
+	$tk_input_channels,# for menubutton
+	
+
+	$project,		# variable for GUI text input
+
 
 	$default_palette_yml, # default GUI colors
 

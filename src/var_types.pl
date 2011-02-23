@@ -1,48 +1,51 @@
 # variables found in namarc
 #
 @config_vars = qw(
-						%abbreviations
-						%devices
-					
-						$ecasound_globals_realtime
-						$ecasound_globals_default
-						$ecasound_tcp_port
 
-						$mix_to_disk_format
-						$raw_to_disk_format
-						$cache_to_disk_format
-						$mixer_out_format
+	%abbreviations
+	%devices
 
-						$alsa_playback_device
-						$alsa_capture_device	
-						$soundcard_channels
+	$ecasound_globals_realtime
+	$ecasound_globals_default
+	$ecasound_tcp_port
 
-						$project_root 	
-						$use_group_numbering
-						$press_space_to_start_transport
-						$execute_on_project_load
-						$initial_user_mode
+	$mix_to_disk_format
+	$raw_to_disk_format
+	$cache_to_disk_format
+	$mixer_out_format
 
-						$volume_control_operator
-						$mastering_effects
-						$eq 
-						$low_pass
-						$mid_pass
-						$high_pass
-						$compressor
-						$spatialiser
-						$limiter
+	$alsa_playback_device
+	$alsa_capture_device	
+	$soundcard_channels
 
-						$autosave_interval
-						$midish_enable
-						$quietly_remove_tracks
-						$use_jack_plumbing
-						$jack_seek_delay
-						);
+	$project_root 	
+	$use_group_numbering
+	$press_space_to_start_transport
+	$execute_on_project_load
+	$initial_user_mode
 
+	$volume_control_operator
+	$mastering_effects
+	$eq 
+	$low_pass
+	$mid_pass
+	$high_pass
+	$compressor
+	$spatialiser
+	$limiter
+
+	$autosave_interval
+	$midish_enable
+	$quietly_remove_tracks
+	$use_jack_plumbing
+	$jack_seek_delay
+
+	$use_monitor_version_for_mixdown 
+	# sync mixdown version numbers to selected track versions
+	# not implemented
+);
 						
-						
-# used for saving to State.yml
+# variables that get saved to State.yml
 #
 @persistent_vars = qw(
 

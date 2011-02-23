@@ -149,5 +149,15 @@ limiter: tap_limiter 0 0
 
 # initial_user_mode: 0 # preview, doodle, 0
 
+# Nama directory structure and files
+
+# ~/.namarc						# config file
+# ~/nama/untitled				# project directory
+# ~/nama/untitled/.wav			# wav directory
+# ~/nama/untitled/State.yml		# project state
+# ~/nama/untitled/Setup.ecs		# Ecasound chain setup
+# ~/nama/.effects_cache			# static effects data
+# ~/nama/effect_chains			# Nama effect presets
+# ~/nama/effect_profiles		# Nama effect profiles
 # end
 
