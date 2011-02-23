@@ -20,7 +20,11 @@ BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
+our (
 [% qx(cat ./declarations.pl) %] 
+
+[% qx(./add_vars) %]
+);
  
 [% qx(cat ./var_types.pl) %]
 
