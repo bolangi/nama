@@ -77,7 +77,12 @@ $| = 1;     # flush STDOUT buffer on every write
 # 'our' declaration: code in all packages in Nama.pm can address
 # the following variables without package name prefix
 
+our (
 [% qx(cat ./declarations.pl) %] 
+
+[% qx(./add_vars) %]
+
+);
 
 [% qx(cat ./var_types.pl) %]
 

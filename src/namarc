@@ -143,9 +143,11 @@ limiter: tap_limiter 0 0
 # increase the following to 0.5 or more if you suffer 2 - 3
 # second delays when seeking playback position under JACK
 #
-# jack_seek_delay: 0.1
+# jack_seek_delay: 0.1 # user override for default 
 #
 # quietly_remove_tracks: 0 # generally ask user to confirm
+
+# initial_user_mode: 0 # preview, doodle, 0
 
 # end
 
