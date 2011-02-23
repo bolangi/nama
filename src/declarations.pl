@@ -1,6 +1,10 @@
 # category: fixed
 
 	$banner,
+	$debug,				# debug level flags for diagnostics
+	$debug2,			# for subroutine names as execute
+	$debug3,			# deprecated
+						
 
 # category: help
 
@@ -13,13 +17,17 @@
 	$use_pager,     # display lengthy output data using pager
 	$use_placeholders,  # use placeholders in show_track output
 
-	$text_wrap,          # Text::Format object
 	$grammar, 		# filled by Grammar.pm
 	$parser,		# for the objected created by Parse::RecDescent
-	%iam_cmd,		# for identifying IAM commands in user input
-	@nama_commands,# array of commands my functions provide
-	%nama_commands,# as hash as well
+	$text_wrap,		# Text::Format object
 	@format_fields, # data for replies to text commands
+	
+	$commands_yml,	# commands.yml as string
+	%commands,		# created from commands.yml
+	%iam_cmd,		# dictionary of Ecasound IAM commands
+	@nama_commands,
+	%nama_commands,	# as hash
+
 
 # category: UI
 
@@ -65,6 +73,7 @@
 	$effect_profile_file, # for storing effect templates
 	$chain_setup_file, # Ecasound uses this 
 
+
 # category: pronouns
 
 	$this_track,	 # the currently active track -- 
@@ -80,13 +89,16 @@
 # category: effects
 
 	$magical_cop_id, # cut through five levels of subroutines
-
+	$cop_hints_yml,  # ecasound effects hints
 
 	%offset,        # index by chain, offset for user-visible effects 
 					# pertains to engine
 
 	@mastering_effect_ids,        # effect ids for mastering mode
 	$tkeca_effects_data,	# original tcl code, actually
+	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
+	%L,
+	%M,
 
 
 # category: external resources (ALSA, JACK, etc.)
@@ -100,23 +112,35 @@
 
 # category: chain setup
 
+	# for sorting
+	
+	%inputs,
+	%outputs,
+	%post_input,
+	%pre_output,
+
+	# for final result
+	
 	@input_chains,	# list of input chain segments 
 	@output_chains, # list of output chain segments
 	@post_input,	# post-input chain operators
 	@pre_output, 	# pre-output chain operators
 
-
 # category: Graphical UI, GUI
 
 	$tk_input_channels,# for menubutton
 	
+	# variables for GUI text input widgets
 
-	$project,		# variable for GUI text input
-
+	$project,		
+	$track_name,
+	$ch_r,			# recording channel assignment
+	$ch_m,			# monitoring channel assignment
+	$save_id,		# name for save file
 
 	$default_palette_yml, # default GUI colors
 
-	### Widgets
+	# Widgets
 	
 	$mw, 			# main window
 	$ew, 			# effects window
@@ -216,42 +240,9 @@
 	$old_bg, # initial background color.
 	$old_abg, # initial active background color
 
-	@oids,	# output templates, are applied to the
-			# chains collected previously
-			# the results are grouped as
-			# input, output and intermediate sections
-
-	%inputs,
-	%outputs,
-	%post_input,
-	%pre_output,
-
-	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
-
-	$track_name,	# received from Tk text input form
-	%track_names,   # belongs in Track.pm
-	$ch_r,			# recording channel assignment
-	$ch_m,			# monitoring channel assignment
-
-
-	%L,	# for effects
-	%M,
-	$debug,				# debug level flags for diagnostics
-	$debug2,			# for subroutine names as execute
-	$debug3,			# deprecated
-						
-	$OUT,				# filehandle for Text mode print
-	#$commands,	# ref created from commands.yml
-	%commands,	# created from commands.yml
-	$commands_yml, # the string form of commands.yml
-	$cop_hints_yml, # ecasound effects hinting
-
-	$save_id, # text variable
 	$sn_save_text,# text entry widget
 	$sn_save,	# button to save settings
 	$sn_recall,	# button to recall settings
-
-	# new object core
 	
 	$main_bus, 
 	$main, # main group
@@ -261,7 +252,6 @@
 	%ti, # track by index (alias to %::Track::by_index)
 	%tn, # track by name  (alias to %::Track::by_name)
 	%bn, # bus   by name  (alias to %bn)
-
 
 	@system_buses, # 
 	%is_system_bus, # 
