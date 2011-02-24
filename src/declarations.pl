@@ -40,7 +40,6 @@
 	$ui, # object providing class behavior for graphic/text functions
 	$preview,       # for preview and doodle modes
 
-	$user_customization_file, 
 	$custom_pl,    # default customization file
 	%user_command,
 	%user_alias,
@@ -61,6 +60,7 @@
 	
 # category: engine, realtime operation
 
+	$ecasound, 		# the name to invoke when we want to kill ecasound
 	@ecasound_pids,	# processes started by Nama
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
@@ -81,14 +81,11 @@
 
 	$effects_cache_file, # where we keep info on Ecasound
 					# and LADSPA effects, presets, etc.
-	
-	$ecasound, 		# the name to invoke when we want to kill ecasound
-
-
 	$state_store_file,	# filename for storing @persistent_vars
 	$effect_chain_file, # for storing effect chains
 	$effect_profile_file, # for storing effect templates
-	$chain_setup_file, # Ecasound uses this 
+	$chain_setup_file, 	# Ecasound uses this 
+	$user_customization_file, 
 
 
 # category: pronouns

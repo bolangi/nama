@@ -2,29 +2,46 @@
 #
 @config_vars = qw(
 
-	%abbreviations
+# category: external resources
+
 	%devices
+	$alsa_playback_device
+	$alsa_capture_device	
+	$soundcard_channels
 
-	$ecasound_globals_realtime
-	$ecasound_globals_default
-	$ecasound_tcp_port
+# category: audio formats
 
+	%abbreviations
 	$mix_to_disk_format
 	$raw_to_disk_format
 	$cache_to_disk_format
 	$mixer_out_format
 
-	$alsa_playback_device
-	$alsa_capture_device	
-	$soundcard_channels
+# category: engine
+
+	$ecasound_tcp_port
+	$ecasound_globals_realtime
+	$ecasound_globals_default
+
+# category: config
 
 	$project_root 	
 	$use_group_numbering
 	$press_space_to_start_transport
 	$execute_on_project_load
 	$initial_user_mode
-
+	$autosave_interval
+	$midish_enable
+	$quietly_remove_tracks
+	$use_jack_plumbing
+	$jack_seek_delay
+	$use_monitor_version_for_mixdown 
 	$volume_control_operator
+	# sync mixdown version numbers to selected track versions
+	# not implemented
+
+# category: mastering
+
 	$mastering_effects
 	$eq 
 	$low_pass
@@ -33,21 +50,15 @@
 	$compressor
 	$spatialiser
 	$limiter
-
-	$autosave_interval
-	$midish_enable
-	$quietly_remove_tracks
-	$use_jack_plumbing
-	$jack_seek_delay
-
-	$use_monitor_version_for_mixdown 
-	# sync mixdown version numbers to selected track versions
-	# not implemented
 );
 						
 # variables that get saved to State.yml
 #
 @persistent_vars = qw(
+
+	$saved_version 	# copy of $VERSION saved with settings in State.yml
+
+# category: effects
 
 	$cop_id 		# autoincrement counter
 					# chain operator id that how we create, 
@@ -56,12 +67,15 @@
 	%cops			# chain operators stored here
 	%copp			# their parameters for effect update
 	%copp_exp      	# for log-scaled sliders
+
+# category: GUI
+
 	$unit			# jump multiplier, 1 or 60 seconds
 	%oid_status    	# state information for the chain templates
-	%old_vol		# a copy of volume settings, for muting
-	$this_track_name # for save/restore 
-	$this_op      # current effect
+
 	
+# category: object serialization
+
 	@tracks_data
 	@bus_data
 	@groups_data
@@ -70,19 +84,31 @@
 	@edit_data
 	@inserts_data
 
+# category: engine, realtime operation
+
 	@loop_endpoints # they define the loop
 	$loop_enable 	# whether we automatically loop
-						
 	$length			# maximum duration of the recording/playback if known
+
+# category: text UI
+
 	%bunch			# user collections of tracks
-	$mastering_mode
 	@command_history
-	$saved_version 	# copy of $VERSION saved with settings in State.yml
+
+# category: chain setup
+
+	$mastering_mode
 	$main_out 		# boolean: route audio output to soundcard?
-						);
-					 
-# used for effects_cache 
-#
+
+# category: effects
+
+	%old_vol		# a copy of volume settings, for muting
+	$this_track_name # for save/restore 
+	$this_op      	# current effect
+);
+		 
+# effects_cache 
+
 @effects_static_vars = qw(
 
 	@effects		# static effects information (parameters, hints, etc.)
