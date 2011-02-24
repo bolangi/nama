@@ -96,7 +96,7 @@
 	%bunch			# user collections of tracks
 	@command_history
 
-# category: chain setup
+# category: routing
 
 	$mastering_mode
 	$main_out 		# boolean: route audio output to soundcard?
@@ -104,6 +104,9 @@
 # category: effects
 
 	%old_vol		# a copy of volume settings, for muting
+
+# category: pronouns
+
 	$this_track_name # for save/restore 
 	$this_op      	# current effect
 );

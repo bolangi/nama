@@ -35,14 +35,13 @@
 	$format_top,    # show_tracks listing
 	$format_divider,
 
-# category: UI
-
-	$ui, # object providing class behavior for graphic/text functions
-	$preview,       # for preview and doodle modes
-
 	$custom_pl,    # default customization file
 	%user_command,
 	%user_alias,
+
+# category: UI
+
+	$ui, # object providing class behavior for graphic/text functions
 
 # category: serialization
 
@@ -54,9 +53,12 @@
 	
 	%cfg,        	# 'config' information as hash
 	%subst,			# alias, substitutions for the config file
-
 	%opts,          # command line options
 	$default,		# the internal default configuration file, as string
+
+# category: routing
+
+	$preview,       # for preview and doodle modes
 	
 # category: engine, realtime operation
 
