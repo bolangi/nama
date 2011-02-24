@@ -16,6 +16,7 @@
 	$raw_to_disk_format
 	$cache_to_disk_format
 	$mixer_out_format
+	$ladspa_sample_rate 	# needed for frequency-dependent LADSPA effects
 
 # category: engine
 

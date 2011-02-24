@@ -126,7 +126,6 @@
 
 	@mastering_effect_ids,        # effect ids for mastering mode
 	$tkeca_effects_data,	# original tcl code, actually
-	$ladspa_sample_rate,	# used as LADSPA effect parameter fixed at 44100
 	%L,
 	%M,
 

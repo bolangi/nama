@@ -74,6 +74,8 @@ mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: f24_le,N,frequency,i
 
+ladspa_sample_rate: frequency
+
 # globals for our chain setups
 
 ecasound_globals_realtime: "-B auto -r -z:mixmode,sum -z:psr "
