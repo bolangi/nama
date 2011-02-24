@@ -4,7 +4,6 @@
 	$debug,				# debug level flags for diagnostics
 	$debug2,			# for subroutine names as execute
 	$debug3,			# deprecated
-						
 
 # category: help
 
@@ -28,10 +27,23 @@
 	@nama_commands,
 	%nama_commands,	# as hash
 
+	$term, 			# Term::ReadLine object
+	$previous_text_command, # to check for repetition
+	@keywords,      # for autocompletion
+    $prompt,
+	$attribs,       # Term::Readline::Gnu object
+	$format_top,    # show_tracks listing
+	$format_divider,
 
 # category: UI
 
 	$ui, # object providing class behavior for graphic/text functions
+	$preview,       # for preview and doodle modes
+
+	$user_customization_file, 
+	$custom_pl,    # default customization file
+	%user_command,
+	%user_alias,
 
 # category: serialization
 
@@ -47,18 +59,23 @@
 	%opts,          # command line options
 	$default,		# the internal default configuration file, as string
 	
-# category: engine
+# category: engine, realtime operation
 
-	@ecasound_pids,      # started by Nama
+	@ecasound_pids,	# processes started by Nama
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
 	$run_time,		# engine processing time limit (none if undef)
+	$seek_delay,    # delay to allow engine to seek 
+					# under JACK before restart
+	$fade_time, 	# duration for fadein(), fadeout()
 
 # category: MIDI
 					
-	%midish_command,     # keywords listing
+	%midish_command,	# keywords listing
 	$midi_input_dev,
 	$midi_output_dev, 
+	$controller_ports,	# where we listen for MIDI messages
+    $midi_inputs,		# on/off/capture
 
 # category: filenames
 
@@ -76,15 +93,31 @@
 
 # category: pronouns
 
-	$this_track,	 # the currently active track -- 
-					 # used by Text UI only at present
-	$old_this_track, # when we need to remember previous setting
-	$this_mark,    # current mark  # for future
+	$this_track,	# the currently active track -- 
+					# used by Text UI only at present
+	$old_this_track,# when we need to remember previous setting
+	$this_mark,    	# current mark  # for future
 	$this_bus, 		# current bus
+	$this_edit,		# current edit
 
 # category: project
 
 	$project_name,	# current project name
+
+	# buses
+	
+	$main_bus, 
+	$main, # main group
+	$null_bus,
+    $null, # null group
+	@system_buses, 
+	%is_system_bus, 
+
+	# aliases
+	
+	%ti, # track by index (alias to %::Track::by_index)
+	%tn, # track by name  (alias to %::Track::by_name)
+	%bn, # bus   by name  (alias to %::Bus::by_name)
 
 # category: effects
 
@@ -100,6 +133,19 @@
 	%L,
 	%M,
 
+	@already_muted, # for soloing, a list of Track objects that are 
+					# muted before we begin
+    $soloing,       # one user track is on, all others are muted
+
+	%effect_chain, # named effect sequences
+	%effect_profile, # effect chains for multiple tracks
+
+	%mute_level,	# 0 for ea as vol control, -127 for eadb
+	%fade_out_level, # 0 for ea, -40 for eadb
+	$fade_resolution, # steps per second
+	%unity_level,	# 100 for ea, 0 for eadb
+	
+	$default_fade_length, 
 
 # category: external resources (ALSA, JACK, etc.)
 
@@ -125,6 +171,49 @@
 	@output_chains, # list of output chain segments
 	@post_input,	# post-input chain operators
 	@pre_output, 	# pre-output chain operators
+
+# category: events
+
+	%event_id,    # events will store themselves with a key
+
+	%duplicate_inputs, # named tracks will be OFF in doodle mode
+	%already_used,  #  source => used_by
+
+	$memoize,       # do I cache this_wav_dir?
+	$hires,        # do I have Timer::HiRes?
+
+	$old_snapshot,  # previous status_snapshot() output
+					# to check if I need to reconfigure engine
+	$old_group_rw, # previous $main->rw setting
+	%old_rw,       # previous track rw settings (indexed by track name)
+	
+	@mastering_track_names, # reserved for mastering mode
+
+	$disable_auto_reconfigure, # for debugging
+
+	$g, 			# Graph var, for chain setup
+	%cooked_record_pending, # an intermediate mixdown for tracks
+	$sock, 			# socket for Net-ECI mode
+	%versions,		# store active versions for use after engine run
+	@io, 			# accumulate IO objects for generating setup
+	$track_snapshots, # to save recalculating for each IO object
+	$chain_setup,	# current chain setup
+	$regenerate_setup, # force us to generate new chain setup
+	%is_ecasound_chain,   # suitable for c-select
+	
+	%wav_info,			# caches path/length/format/modify-time
+	
+# category: edits
+
+	$offset_run_flag, # indicates edit or offset_run mode
+	$offset_run_start_time,
+	$offset_run_end_time,
+	$offset_mark,
+
+	@edit_points, 
+	$edit_playback_end_margin, # play a little more after edit recording finishes
+	$edit_crossfade_time,
+	$last_edit_name,	# for save/restore
 
 # category: Graphical UI, GUI
 
@@ -243,97 +332,5 @@
 	$sn_save_text,# text entry widget
 	$sn_save,	# button to save settings
 	$sn_recall,	# button to recall settings
-	
-	$main_bus, 
-	$main, # main group
-	$null_bus,
-    $null, # null group
-
-	%ti, # track by index (alias to %::Track::by_index)
-	%tn, # track by name  (alias to %::Track::by_name)
-	%bn, # bus   by name  (alias to %bn)
-
-	@system_buses, # 
-	%is_system_bus, # 
-
-	# mastering mode status
-
-   # marks and playback looping
-   
-	$clock_id,		# used in GUI for the Tk event system
-					# ->cancel method not reliable
-					# for 'repeat' events, so converted to
-					# 'after' events
-	%event_id,    # events will store themselves with a key
-
-   $previous_text_command, # i want to know if i'm repeating
-	$term, 			# Term::ReadLine object
-	$controller_ports, # where we listen for MIDI messages
-    $midi_inputs,  # on/off/capture
-
-	@already_muted, # for soloing list of Track objects that are 
-					# muted before we begin
-    $soloing,       # one user track is on, all others are muted
-
-	@keywords,      # for autocompletion
-	$attribs,       # Term::Readline::Gnu object
-	$seek_delay,    # delay to allow engine to seek 
-					# under JACK before restart
-					
-    $prompt,        # for text mode
-	$preview,       # am running engine with rec_file disabled
-	%duplicate_inputs, # named tracks will be OFF in doodle mode
-	%already_used,  #  source => used_by
-	$memoize,       # do I cache this_wav_dir?
-	$hires,        # do I have Timer::HiRes?
-	$fade_time, 	# duration for fadein(), fadeout()
-	$old_snapshot,  # previous status_snapshot() output
-					# to check if I need to reconfigure engine
-	$old_group_rw, # previous $main->rw setting
-	%old_rw,       # previous track rw settings (indexed by track name)
-	
-	@mastering_track_names, # reserved for mastering mode
-	$disable_auto_reconfigure, # for debugging
-
-	$g, 			# Graph var, for chain setup
-	%cooked_record_pending, # an intermediate mixdown for tracks
-	%effect_chain, # named effect sequences
-	%effect_profile, # effect chains for multiple tracks
-	$sock, 			# socket for Net-ECI mode
-	%versions,		# store active versions for use after engine run
-	@io, 			# accumulate IO objects for generating setup
-	$track_snapshots, # to save recalculating for each IO object
-	$chain_setup,	# current chain setup
-	%mute_level,	# 0 for ea as vol control, -127 for eadb
-	%fade_out_level, # 0 for ea, -40 for eadb
-	$fade_resolution, # steps per second
-	%unity_level,	# 100 for ea, 0 for eadb
-	
-	$default_fade_length, 
-	$regenerate_setup, # force us to generate new chain setup
-	%is_ecasound_chain,   # suitable for c-select
-	
-	%wav_info,			# caches path/length/format/modify-time
-	
-	# Edits
-
-	$offset_run_flag, # indicates edit or offset_run mode
-	@edit_points, 
-	$this_edit, 	# current edit
-	$edit_playback_end_margin, # play a little more after edit recording finishes
-	$edit_crossfade_time, 	#
-	$last_edit_name,  	# for save/restore
-
-	$format_top,    # show_tracks listing
-	$format_divider,
-
-	$user_customization_file, 
-	$custom_pl,    # default customization file
-	%user_command,
-	%user_alias,
-	
-	$offset_run_start_time,
-	$offset_run_end_time,
-	$offset_mark,
 
 # end
