@@ -5,6 +5,12 @@ use inc::Module::Install;
 		 all_from            'lib/Audio/Nama.pm';
          license             'perl';
 		 install_script      'script/nama'; 
+	 keywords
+	        'audio',
+	        'recording',
+	        'mixing';
+	 repository
+	        'https://github.com/bolangi/nama';
 
          # Specific dependencies
          
