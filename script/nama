@@ -1,3 +1,20 @@
 #!/usr/bin/env perl
 use Audio::Nama;
 Audio::Nama::main();
+
+=head1 NAME
+
+Nama is an audio recording, mixing and editing application.
+
+=head1 DESCRIPTION
+
+B<Nama> is a text-based application for multitrack
+recording, mixing and mastering using the Ecasound
+audio engine developed by Kai Vehmanen.
+
+Features include tracks, buses, effects, presets,
+sends, inserts, marks and regions. Nama runs under JACK and
+ALSA audio frameworks, automatically detects LADSPA plugins,
+and supports Ladish Level 1 session handling.
+
+=cut
