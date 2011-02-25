@@ -1,4 +1,5 @@
 use inc::Module::Install;
+no strict 'subs';
 
          # Define metadata
          name                'Audio-Nama';
