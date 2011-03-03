@@ -1091,6 +1091,11 @@ sub signal_format {
 	$template =~ s/N/$channel_count/;
 	my $format = $template;
 }
+sub remove_temporary_tracks {
+	$debug2 and say "&remove_temporary_tracks";
+	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
+	$this_track = $old_this_track;
+}
 
 ## transport functions
 sub load_ecs {
