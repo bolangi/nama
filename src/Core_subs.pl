@@ -2976,10 +2976,8 @@ sub ladspa_plugin_list {
 	my @plugins;
 	my %seen;
 	for my $dir ( split ':', ladspa_path()){
-		{no autodie 'opendir';
-			opendir DIR, $dir 
-				or carp("failed to open directory $dir: $!\n"), next;
-		}
+		next unless -d $dir;
+		opendir DIR, $dir;
 		push @plugins,  
 			map{"$dir/$_"} 						# full path
 			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins
