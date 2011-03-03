@@ -1078,7 +1078,7 @@ sub generate_setup {
 	$this_track = $old_this_track;
 	if ($@){
 		say("error caught while generating setup: $@");
-		initialize_chain_setup_vars() unless $debug;
+		::ChainSetup::initialize() unless $debug;
 		return
 	}
 	$success
