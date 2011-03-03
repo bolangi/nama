@@ -3616,6 +3616,28 @@ sub restore_state {
 	
 	$yaml =~ s/owns: ~/owns: []/g;
 
+	#####  satisfy new, stricter YAML::Tiny
+	
+	# eliminate command history - may be activated in future
+	
+	# $yaml =~ s/^command_history:.+?(^\w+: )/$1/ms;
+
+	# quote other lines where necessary
+
+	my @modified;
+	map
+		{  
+		chomp;
+		if( /^(?<beg>(\s*\w+: )|(\s+- ))(?<end>.+)$/ ){
+			my($beg,$end) = ($+{beg}, $+{end});
+			# quote if contains colon and not quoted
+			if ($end =~ /:/ and $end !~ /^('|")/ ){ $end = qq("$end") }
+			push @modified, "$beg$end\n";
+		}
+		else { push @modified, "$_\n" }
+	} split "\n", $yaml;
+	$yaml = join "", @modified;
+	
 	# start marshalling with clean slate	
 	
 	initialize_serialization_arrays();
