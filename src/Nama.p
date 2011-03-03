@@ -84,7 +84,7 @@ our (
 
 );
 
-[% qx(cat ./var_types.pl) %]
+[% qx(./strip_all ./var_types.pl) %]
 
 $text_wrap = new Text::Format {
 	columns 		=> 75,
