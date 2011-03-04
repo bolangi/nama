@@ -69,8 +69,14 @@ use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
-use ::ChainSetup;
-use ::Persistence qw(:all);
+
+# the following separate out functionality
+# however occupy the :: namespace
+
+use ::Persistence ();
+use ::ChainSetup ();
+use ::CacheTrack ();
+use ::Edit_subs ();
 
 ## Definitions ##
 
