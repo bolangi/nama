@@ -70,6 +70,7 @@ use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::ChainSetup;
+use ::Persistence qw(:all);
 
 ## Definitions ##
 
