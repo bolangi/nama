@@ -69,6 +69,7 @@ use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
+use ::ChainSetup;
 
 ## Definitions ##
 
