@@ -2248,39 +2248,6 @@ sub width {
 	return "$count channels";
 }
 
-sub effect_code {
-	# get text effect code from user input, which could be
-	# - LADSPA Unique ID (number)
-	# - LADSPA Label (el:something)
-	# - abbreviated LADSPA label (something)
-	# - Ecasound operator (something)
-	# - abbreviated Ecasound preset (something)
-	# - Ecasound preset (pn:something)
-	
-	# there is no interference in these labels at present,
-	# so we offer the convenience of using them without
-	# el: and pn: prefixes.
-	
-	my $input = shift;
-	my $code;
-    if ($input !~ /\D/){ # i.e. $input is all digits
-		$code = $ladspa_label{$input} 
-			or carp("$input: LADSPA plugin not found.  Aborting.\n"), return;
-	}
-	elsif ( $effect_i{$input} ) { $code = $input } 
-	elsif ( $effect_j{$input} ) { $code = $effect_j{$input} }
-	else { warn "$input: effect code not found\n";}
-	$code;
-}
-
-sub effect_index {
-	my $code = shift;
-	my $i = $effect_i{effect_code($code)};
-	defined $i or warn "$code: effect index not found\n";
-	$i
-}
-
-
 
 	# status_snapshot() 
 	#
