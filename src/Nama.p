@@ -83,6 +83,7 @@ use ::Wavinfo_subs ();
 use ::Config_subs ();
 use ::Memoize_subs ();
 use ::Project_subs ();
+use ::Terminal_subs ();
 
 ## Definitions ##
 
