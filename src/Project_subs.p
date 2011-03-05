@@ -36,6 +36,10 @@ our (
 	$project,	
 );
 
+## project templates
+
+our ($term, %bn);
+
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
 
@@ -218,6 +222,113 @@ sub remove_riff_header_stubs {
     $debug and print join $/, @wavs;
 
 	map { unlink $_ } @wavs; 
+}
+
+## project templates
+
+sub new_project_template {
+	my ($template_name, $template_description) = @_;
+
+	my @tracks = ::Track::all();
+
+	# skip if project is empty
+
+	say("No user tracks found, aborting.\n",
+		"Cannot create template from an empty project."), 
+		return if scalar @tracks < 3;
+
+	# save current project status to temp state file 
+	
+	my $previous_state = '_previous_state.yml';
+	save_state($previous_state);
+
+	# edit current project into a template
+	
+	# No tracks are recorded, so we'll remove 
+	#	- version (still called 'active')
+	# 	- track caching
+	# 	- region start/end points
+	# 	- effect_chain_stack
+	# Also
+	# 	- unmute all tracks
+	# 	- throw away any pan caching
+
+	map{ my $track = $_;
+		 $track->unmute;
+		 map{ $track->set($_ => undef)  } 
+			qw( version	
+				old_pan_level
+				region_start
+				region_end
+			);
+		 map{ $track->set($_ => [])  } 
+			qw(	effect_chain_stack      
+			);
+		 map{ $track->set($_ => {})  } 
+			qw( cache_map 
+			);
+		
+	} @tracks;
+
+	# Throw away command history
+	
+	$term->SetHistory();
+	
+	# Buses needn't set version info either
+	
+	map{$_->set(version => undef)} values %bn;
+	
+	# create template directory if necessary
+	
+	mkdir join_path(project_root(), "templates");
+
+	# save to template name
+	
+	save_state( join_path(project_root(), "templates", "$template_name.yml"));
+
+	# add description, but where?
+	
+	# recall temp name
+	
+ 	load_project(  # restore_state() doesn't do the whole job
+ 		name     => $project_name,
+ 		settings => $previous_state,
+	);
+
+	# remove temp state file
+	
+	unlink join_path( project_dir(), "$previous_state.yml") ;
+	
+}
+sub use_project_template {
+	my $name = shift;
+	my @tracks = ::Track::all();
+
+	# skip if project isn't empty
+
+	say("User tracks found, aborting. Use templates in an empty project."), 
+		return if scalar @tracks > 2;
+
+	# load template
+	
+ 	load_project(
+ 		name     => $project_name,
+ 		settings => join_path(project_root(),"templates",$name),
+	);
+	save_state();
+}
+sub list_project_templates {
+	my $io = io(join_path(project_root(), "templates"));
+	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $io->all;        
+	pager(@templates);
+}
+sub remove_project_template {
+	map{my $name = $_; 
+		say "$name: removing template";
+		$name .= ".yml" unless $name =~ /\.yml$/;
+		unlink join_path( project_root(), "templates", $name);
+	} @_;
+	
 }
 1;
 __END__
