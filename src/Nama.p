@@ -77,6 +77,7 @@ use ::Persistence ();
 use ::ChainSetup ();
 use ::CacheTrack ();
 use ::Edit_subs ();
+use ::Util qw(rw_set);
 
 ## Definitions ##
 
