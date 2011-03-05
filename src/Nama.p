@@ -84,6 +84,7 @@ use ::Config_subs ();
 use ::Memoize_subs ();
 use ::Project_subs ();
 use ::Terminal_subs ();
+use ::Effect_chain_subs ();
 
 ## Definitions ##
 
