@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+use vars qw($cop_hints_yml);
 our (
 	%tn,
 	%ti,
@@ -21,10 +22,24 @@ our (
 	$magical_cop_id,
 	%offset,
 );
+our (
+	%opts,
+	$effects_cache_file,
+	@effects_static_vars,
+	%effect_j,
+	@ladspa_sorted,
+	%e_bound,
+#	$cop_hints_yaml,    # error explicit package name required at line 867
+	$ladspa_sample_rate,
+	%ladspa_help,
+	%effects_ladspa_file,
+	%ladspa_unique_id,
+	%ladspa_label,
+	%effects_ladspa,
+	@effects_help,
+);
 
-
-## effect functions
-
+## high-level functions
 sub add_effect {
 	
 	$debug2 and print "&add_effect\n";
@@ -181,6 +196,8 @@ sub position_effect {
 	command_process('show_track');
 }
 
+## array indices for Nama and Ecasound effects and controllers
+
 sub nama_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
 	my $id = shift;
@@ -206,8 +223,107 @@ sub ecasound_effect_index {
 	$offset{$n} + $opcount;
 }
 
+sub ctrl_index { 
+	my $id = shift;
+	nama_effect_index($id) - nama_effect_index(root_parent($id));
+
+}
+
+sub ecasound_operator_index { # does not include offset
+	my $id = shift;
+	my $chain = $cops{$id}{chain};
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $controller_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$controller_count++ if $cops{$ops[$i]}{belongs_to};
+	}
+	$position -= $controller_count; # skip controllers 
+	++$position; # translates 0th to chain-position 1
+}
+	
+	
+sub ecasound_controller_index {
+	my $id = shift;
+	my $chain = $cops{$id}{chain};
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $operator_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$operator_count++ if ! $cops{$ops[$i]}{belongs_to};
+	}
+	$position -= $operator_count; # skip operators
+	++$position; # translates 0th to chain-position 1
+}
 
 
+## Ecasound engine -- apply/remove chain operators
+
+sub apply_ops {  # in addition to operators in .ecs file
+	
+	$debug2 and print "&apply_ops\n";
+	for my $n ( map{ $_->n } ::Track::all() ) {
+	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
+ 		next unless $is_ecasound_chain{$n};
+
+		#next if $n == 2; # no volume control for mix track
+		#next if ! defined $offset{$n}; # for MIX
+ 		#next if ! $offset{$n} ;
+
+	# controllers will follow ops, so safe to apply all in order
+		for my $id ( @{ $ti{$n}->ops } ) {
+		apply_op($id);
+		}
+	}
+	ecasound_select_chain($this_track->n) if defined $this_track;
+}
+
+sub apply_op {
+	$debug2 and print "&apply_op\n";
+	my $id = shift;
+	my $selected = shift;
+	$debug and print "id: $id\n";
+	my $code = $cops{$id}->{type};
+	my $dad = $cops{$id}->{belongs_to};
+	$debug and print "chain: $cops{$id}->{chain} type: $cops{$id}->{type}, code: $code\n";
+	#  if code contains colon, then follow with comma (preset, LADSPA)
+	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
+	
+	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
+	my @vals = @{ $copp{$id} };
+	$debug and print "values: @vals\n";
+
+	# we start to build iam command
+
+	my $add = $dad ? "ctrl-add " : "cop-add "; 
+	
+	$add .= $code . join ",", @vals;
+
+	# if my parent has a parent then we need to append the -kx  operator
+
+	$add .= " -kx" if $cops{$dad}->{belongs_to};
+	$debug and print "command:  ", $add, "\n";
+
+	eval_iam("c-select $cops{$id}->{chain}") 
+		if $selected != $cops{$id}->{chain};
+
+	if ( $dad ) {
+	eval_iam("cop-select " . ecasound_effect_index($dad));
+	}
+
+	eval_iam($add);
+	$debug and print "children found: ", join ",", "|",@{$cops{$id}->{owns}},"|\n";
+	my $ref = ref $cops{$id}->{owns} ;
+	$ref =~ /ARRAY/ or croak "expected array";
+	my @owns = @{ $cops{$id}->{owns} };
+	$debug and print "owns: @owns\n";  
+	#map{apply_op($_)} @owns;
+
+}
 sub remove_op {
 	# remove chain operator from Ecasound engine
 
@@ -281,11 +397,8 @@ sub root_parent {
 	$parent;
 }
 
-sub ctrl_index { 
-	my $id = shift;
-	nama_effect_index($id) - nama_effect_index(root_parent($id));
+## manage Nama effects -- entries in %cops array 
 
-}
 sub cop_add {
 	$debug2 and print "&cop_add\n";
 	my $p = shift;
@@ -378,12 +491,8 @@ sub cop_add {
 	$id;
 }
 
-sub effect_update_copp_set {
-	my ($id, $param, $val) = @_;
-	effect_update( @_ );
-	$copp{$id}->[$param] = $val;
-}
-	
+## synchronize Ecasound chain operator parameters 
+#  with Nama effect parameter
 
 sub effect_update {
 
@@ -434,6 +543,15 @@ sub effect_update {
 	ecasound_select_chain($old_chain);
 }
 
+# set both Nama effect and Ecasound chain operator
+# parameters
+
+sub effect_update_copp_set {
+	my ($id, $param, $val) = @_;
+	effect_update( @_ );
+	$copp{$id}->[$param] = $val;
+}
+
 sub sync_effect_parameters {
 	# when a controller changes an effect parameter
 	# the effect state can differ from the state in
@@ -454,6 +572,8 @@ sub sync_one_effect {
 		eval_iam("cop-select " . ( $offset{$chain} + ecasound_operator_index($id)));
 		$copp{$id} = get_cop_params( scalar @{$copp{$id}} );
 }
+
+	
 
 sub get_cop_params {
 	my $count = shift;
@@ -476,36 +596,494 @@ sub ops_with_controller {
 
 sub is_controller { my $id = shift; $cops{$id}{belongs_to} }
 
-sub ecasound_operator_index { # does not include offset
-	my $id = shift;
-	my $chain = $cops{$id}{chain};
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $controller_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$controller_count++ if $cops{$ops[$i]}{belongs_to};
+sub find_op_offsets {
+
+	$debug2 and print "&find_op_offsets\n";
+	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
+	$debug and print join "\n\n",@op_offsets; 
+	for my $output (@op_offsets){
+		my $chain_id;
+		($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
+		# print "chain_id: $chain_id\n";
+		next if $chain_id =~ m/\D/; # skip id's containing non-digits
+									# i.e. M1
+		my $quotes = $output =~ tr/"//;
+		$debug and print "offset: $quotes in $output\n"; 
+		$offset{$chain_id} = $quotes/2 - 1;  
 	}
-	$position -= $controller_count; # skip controllers 
-	++$position; # translates 0th to chain-position 1
+}
+
+## register data about LADSPA plugins, and Ecasound effects and
+#  presets (names, ids, parameters, hints) 
+
+sub prepare_static_effects_data{
+	
+	$debug2 and print "&prepare_static_effects_data\n";
+
+	my $effects_cache = join_path(&project_root, $effects_cache_file);
+
+	#print "newplugins: ", new_plugins(), $/;
+	if ($opts{r} or new_plugins()){ 
+
+		eval { unlink $effects_cache};
+		print "Regenerating effects data cache\n";
+	}
+
+	if (-f $effects_cache and ! $opts{s}){  
+		$debug and print "found effects cache: $effects_cache\n";
+		assign_var($effects_cache, @effects_static_vars);
+	} else {
+		
+		$debug and print "reading in effects data, please wait...\n";
+		read_in_effects_data();  
+		# cop-register, preset-register, ctrl-register, ladspa-register
+		get_ladspa_hints();     
+		integrate_ladspa_hints();
+		integrate_cop_hints();
+		sort_ladspa_effects();
+		prepare_effects_help();
+		serialize (
+			file => $effects_cache, 
+			vars => \@effects_static_vars,
+			class => '::',
+			format => 'storable');
+	}
+
+	prepare_effect_index();
+}
+
+sub ladspa_plugin_list {
+	my @plugins;
+	my %seen;
+	for my $dir ( split ':', ladspa_path()){
+		next unless -d $dir;
+		opendir my ($dirh), $dir;
+		push @plugins,  
+			map{"$dir/$_"} 						# full path
+			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins
+			grep{ /\.so$/} readdir $dirh;			# get .so files
+		closedir $dirh;
+	}
+	@plugins
+}
+
+sub new_plugins {
+	my $effects_cache = join_path(&project_root, $effects_cache_file);
+	my @filenames = ladspa_plugin_list();	
+	push @filenames, '/usr/local/share/ecasound/effect_presets',
+                 '/usr/share/ecasound/effect_presets',
+                 "$ENV{HOME}/.ecasound/effect_presets";
+	my $effects_cache_stamp = modified_stamp($effects_cache);
+	my $latest;
+	map{ my $mod = modified_stamp($_);
+		 $latest = $mod if $mod > $latest } @filenames;
+
+	$latest > $effects_cache_stamp;
+}
+
+sub modified_stamp {
+	# timestamp that file was modified
+	my $filename = shift;
+	#print "file: $filename\n";
+	my @s = stat $filename;
+	$s[9];
+}
+sub prepare_effect_index {
+	$debug2 and print "&prepare_effect_index\n";
+	%effect_j = ();
+	map{ 
+		my $code = $_;
+		my ($short) = $code =~ /:([-\w]+)/;
+		if ( $short ) { 
+			if ($effect_j{$short}) { warn "name collision: $_\n" }
+			else { $effect_j{$short} = $code }
+		}else{ $effect_j{$code} = $code };
+	} keys %effect_i;
+	#print yaml_out \%effect_j;
+}
+sub extract_effects_data {
+	$debug2 and print "&extract_effects_data\n";
+	my ($lower, $upper, $regex, $separator, @lines) = @_;
+	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
+		if $lower + @lines - 1 != $upper;
+	$debug and print"lower: $lower upper: $upper  separator: $separator\n";
+	#$debug and print "lines: ". join "\n",@lines, "\n";
+	$debug and print "regex: $regex\n";
+	
+	for (my $j = $lower; $j <= $upper; $j++) {
+		my $line = shift @lines;
+	
+		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
+		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
+		$debug and print "Number: $no Name: $name Code: $id Rest: $rest\n";
+		my @p_names = split $separator,$rest; 
+		map{s/'//g}@p_names; # remove leading and trailing q(') in ladspa strings
+		$debug and print "Parameter names: @p_names\n";
+		$effects[$j]={};
+		$effects[$j]->{number} = $no;
+		$effects[$j]->{code} = $id;
+		$effects[$j]->{name} = $name;
+		$effects[$j]->{count} = scalar @p_names;
+		$effects[$j]->{params} = [];
+		$effects[$j]->{display} = qq(field);
+		map{ push @{$effects[$j]->{params}}, {name => $_} } @p_names
+			if @p_names;
+;
+	}
+}
+sub sort_ladspa_effects {
+	$debug2 and print "&sort_ladspa_effects\n";
+#	print yaml_out(\%e_bound); 
+	my $aa = $e_bound{ladspa}{a};
+	my $zz = $e_bound{ladspa}{z};
+#	print "start: $aa end $zz\n";
+	map{push @ladspa_sorted, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
+	splice @ladspa_sorted, $aa, 0,
+		 sort { $effects[$a]->{name} cmp $effects[$b]->{name} } ($aa .. $zz) ;
+	$debug and print "sorted array length: ". scalar @ladspa_sorted, "\n";
+}		
+sub read_in_effects_data {
+	
+	$debug2 and print "&read_in_effects_data\n";
+
+	my $lr = eval_iam("ladspa-register");
+
+	#print $lr; 
+	
+	my @ladspa =  split "\n", $lr;
+	
+	# join the two lines of each entry
+	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
+
+	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
+	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
+	my @cop = grep {! /^\w*$/ } split "\n", eval_iam("cop-register");
+
+	$debug and print "found ", scalar @cop, " Ecasound chain operators\n";
+	$debug and print "found ", scalar @preset, " Ecasound presets\n";
+	$debug and print "found ", scalar @ctrl, " Ecasound controllers\n";
+	$debug and print "found ", scalar @lad, " LADSPA effects\n";
+
+	# index boundaries we need to make effects list and menus
+	$e_bound{cop}{a}   = 1;
+	$e_bound{cop}{z}   = @cop; # scalar
+	$e_bound{ladspa}{a} = $e_bound{cop}{z} + 1;
+	$e_bound{ladspa}{b} = $e_bound{cop}{z} + int(@lad/4);
+	$e_bound{ladspa}{c} = $e_bound{cop}{z} + 2*int(@lad/4);
+	$e_bound{ladspa}{d} = $e_bound{cop}{z} + 3*int(@lad/4);
+	$e_bound{ladspa}{z} = $e_bound{cop}{z} + @lad;
+	$e_bound{preset}{a} = $e_bound{ladspa}{z} + 1;
+	$e_bound{preset}{b} = $e_bound{ladspa}{z} + int(@preset/2);
+	$e_bound{preset}{z} = $e_bound{ladspa}{z} + @preset;
+	$e_bound{ctrl}{a}   = $e_bound{preset}{z} + 1;
+	$e_bound{ctrl}{z}   = $e_bound{preset}{z} + @ctrl;
+
+	my $cop_re = qr/
+		^(\d+) # number
+		\.    # dot
+		\s+   # spaces+
+		(\w.+?) # name, starting with word-char,  non-greedy
+		# (\w+) # name
+		,\s*  # comma spaces* 
+		-(\w+)    # cop_id 
+		:?     # maybe colon (if parameters)
+		(.*$)  # rest
+	/x;
+
+	my $preset_re = qr/
+		^(\d+) # number
+		\.    # dot
+		\s+   # spaces+
+		(\w+) # name
+		,\s*  # comma spaces* 
+		-(pn:\w+)    # preset_id 
+		:?     # maybe colon (if parameters)
+		(.*$)  # rest
+	/x;
+
+	my $ladspa_re = qr/
+		^(\d+) # number
+		\.    # dot
+		\s+  # spaces
+		(.+?) # name, starting with word-char,  non-greedy
+		\s+     # spaces
+		-(el:[-\w]+),? # ladspa_id maybe followed by comma
+		(.*$)        # rest
+	/x;
+
+	my $ctrl_re = qr/
+		^(\d+) # number
+		\.     # dot
+		\s+    # spaces
+		(\w.+?) # name, starting with word-char,  non-greedy
+		,\s*    # comma, zero or more spaces
+		-(k\w+):?    # ktrl_id maybe followed by colon
+		(.*$)        # rest
+	/x;
+
+	extract_effects_data(
+		$e_bound{cop}{a},
+		$e_bound{cop}{z},
+		$cop_re,
+		q(','),
+		@cop,
+	);
+
+
+	extract_effects_data(
+		$e_bound{ladspa}{a},
+		$e_bound{ladspa}{z},
+		$ladspa_re,
+		q(','),
+		@lad,
+	);
+
+	extract_effects_data(
+		$e_bound{preset}{a},
+		$e_bound{preset}{z},
+		$preset_re,
+		q(,),
+		@preset,
+	);
+	extract_effects_data(
+		$e_bound{ctrl}{a},
+		$e_bound{ctrl}{z},
+		$ctrl_re,
+		q(,),
+		@ctrl,
+	);
+
+
+
+	for my $i (0..$#effects){
+		 $effect_i{ $effects[$i]->{code} } = $i; 
+		 $debug and print "i: $i code: $effects[$i]->{code} display: $effects[$i]->{display}\n";
+	}
+
+	$debug and print "\@effects\n======\n", yaml_out(\@effects); ; 
+}
+
+sub integrate_cop_hints {
+
+	my @cop_hints =  @{ yaml_in( $cop_hints_yml ) };
+	for my $hashref ( @cop_hints ){
+		#print "cop hints ref type is: ",ref $hashref, $/;
+		my $code = $hashref->{code};
+		$effects[ $effect_i{ $code } ] = $hashref;
+	}
+}
+sub ladspa_path {
+	$ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
+}
+sub get_ladspa_hints{
+	$debug2 and print "&get_ladspa_hints\n";
+	my @dirs =  split ':', ladspa_path();
+	my $data = '';
+	my %seen = ();
+	my @plugins = ladspa_plugin_list();
+	#pager join $/, @plugins;
+
+	# use these regexes to snarf data
+	
+	my $pluginre = qr/
+	Plugin\ Name:       \s+ "([^"]+)" \s+
+	Plugin\ Label:      \s+ "([^"]+)" \s+
+	Plugin\ Unique\ ID: \s+ (\d+)     \s+
+	[^\x00]+(?=Ports) 		# swallow maximum up to Ports
+	Ports: \s+ ([^\x00]+) 	# swallow all
+	/x;
+
+	my $paramre = qr/
+	"([^"]+)"   #  name inside quotes
+	\s+
+	(.+)        # rest
+	/x;
+		
+	my $i;
+
+	for my $file (@plugins){
+		my @stanzas = split "\n\n", qx(analyseplugin $file);
+		for my $stanza (@stanzas) {
+
+			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
+			  = $stanza =~ /$pluginre/ 
+				or carp "*** couldn't match plugin stanza $stanza ***";
+			$debug and print "plugin label: $plugin_label $plugin_unique_id\n";
+
+			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
+
+			my @params;  # data
+			my @names;
+			for my $p (@lines) {
+				next if $p =~ /^\s*$/;
+				$p =~ s/\.{3}/10/ if $p =~ /amplitude|gain/i;
+				$p =~ s/\.{3}/60/ if $p =~ /delay|decay/i;
+				$p =~ s(\.{3})($ladspa_sample_rate/2) if $p =~ /frequency/i;
+				$p =~ /$paramre/;
+				my ($name, $rest) = ($1, $2);
+				my ($dir, $type, $range, $default, $hint) = 
+					split /\s*,\s*/ , $rest, 5;
+				$debug and print join( 
+				"|",$name, $dir, $type, $range, $default, $hint) , $/; 
+				#  if $hint =~ /logarithmic/;
+				if ( $range =~ /toggled/i ){
+					$range = q(0 to 1);
+					$hint .= q(toggled);
+				}
+				my %p;
+				$p{name} = $name;
+				$p{dir} = $dir;
+				$p{hint} = $hint;
+				my ($beg, $end, $default_val, $resolution) 
+					= range($name, $range, $default, $hint, $plugin_label);
+				$p{begin} = $beg;
+				$p{end} = $end;
+				$p{default} = $default_val;
+				$p{resolution} = $resolution;
+				push @params, { %p };
+			}
+
+			$plugin_label = "el:" . $plugin_label;
+			$ladspa_help{$plugin_label} = $stanza;
+			$effects_ladspa_file{$plugin_unique_id} = $file;
+			$ladspa_unique_id{$plugin_label} = $plugin_unique_id; 
+			$ladspa_unique_id{$plugin_name} = $plugin_unique_id; 
+			$ladspa_label{$plugin_unique_id} = $plugin_label;
+			$effects_ladspa{$plugin_label}->{name}  = $plugin_name;
+			$effects_ladspa{$plugin_label}->{id}    = $plugin_unique_id;
+			$effects_ladspa{$plugin_label}->{params} = [ @params ];
+			$effects_ladspa{$plugin_label}->{count} = scalar @params;
+			$effects_ladspa{$plugin_label}->{display} = 'scale';
+		}	#	pager( join "\n======\n", @stanzas);
+		#last if ++$i > 10;
+	}
+
+	$debug and print yaml_out(\%effects_ladspa); 
+}
+
+sub srate_val {
+	my $input = shift;
+	my $val_re = qr/(
+			[+-]? 			# optional sign
+			\d+				# one or more digits
+			(\.\d+)?	 	# optional decimal
+			(e[+-]?\d+)?  	# optional exponent
+	)/ix;					# case insensitive e/E
+	my ($val) = $input =~ /$val_re/; #  or carp "no value found in input: $input\n";
+	$val * ( $input =~ /srate/ ? $ladspa_sample_rate : 1 )
 }
 	
-	
-sub ecasound_controller_index {
-	my $id = shift;
-	my $chain = $cops{$id}{chain};
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $operator_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! $cops{$ops[$i]}{belongs_to};
+sub range {
+	my ($name, $range, $default, $hint, $plugin_label) = @_; 
+	my $multiplier = 1;;
+	my ($beg, $end) = split /\s+to\s+/, $range;
+	$beg = 		srate_val( $beg );
+	$end = 		srate_val( $end );
+	$default = 	srate_val( $default );
+	$default = $default || $beg;
+	$debug and print "beg: $beg, end: $end, default: $default\n";
+	if ( $name =~ /gain|amplitude/i ){
+		$beg = 0.01 unless $beg;
+		$end = 0.01 unless $end;
 	}
-	$position -= $operator_count; # skip operators
-	++$position; # translates 0th to chain-position 1
+	my $resolution = ($end - $beg) / 100;
+	if    ($hint =~ /integer|toggled/i ) { $resolution = 1; }
+	elsif ($hint =~ /logarithmic/ ) {
+
+		$beg = round ( log $beg ) if $beg;
+		$end = round ( log $end ) if $end;
+		$resolution = ($end - $beg) / 100;
+		$default = $default ? round (log $default) : $default;
+	}
+	
+	$resolution = d2( $resolution + 0.002) if $resolution < 1  and $resolution > 0.01;
+	$resolution = dn ( $resolution, 3 ) if $resolution < 0.01;
+	$resolution = int ($resolution + 0.1) if $resolution > 1 ;
+	
+	($beg, $end, $default, $resolution)
+
 }
+sub integrate_ladspa_hints {
+	$debug2 and print "&integrate_ladspa_hints\n";
+	map{ 
+		my $i = $effect_i{$_};
+		# print("$_ not found\n"), 
+		if ($i) {
+			$effects[$i]->{params} = $effects_ladspa{$_}->{params};
+			# we revise the number of parameters read in from ladspa-register
+			$effects[$i]->{count} = scalar @{$effects_ladspa{$_}->{params}};
+			$effects[$i]->{display} = $effects_ladspa{$_}->{display};
+		}
+	} keys %effects_ladspa;
+
+my %L;
+my %M;
+
+map { $L{$_}++ } keys %effects_ladspa;
+map { $M{$_}++ } grep {/el:/} keys %effect_i;
+
+for my $k (keys %L) {
+	$M{$k} or $debug and print "$k not found in ecasound listing\n";
+}
+for my $k (keys %M) {
+	$L{$k} or $debug and print "$k not found in ladspa listing\n";
+}
+
+
+$debug and print join "\n", sort keys %effects_ladspa;
+$debug and print '-' x 60, "\n";
+$debug and print join "\n", grep {/el:/} sort keys %effect_i;
+
+#print yaml_out \@effects; exit;
+
+}
+
+## generate effects help data
+
+sub prepare_effects_help {
+
+	# presets
+	map{	s/^.*? //; 				# remove initial number
+					$_ .= "\n";				# add newline
+					my ($id) = /(pn:\w+)/; 	# find id
+					s/,/, /g;				# to help line breaks
+					push @effects_help,    $_;  #store help
+
+				}  split "\n",eval_iam("preset-register");
+
+	# LADSPA
+	my $label;
+	map{ 
+
+		if (  my ($_label) = /-(el:[-\w]+)/  ){
+				$label = $_label;
+				s/^\s+/ /;				 # trim spaces 
+				s/'//g;     			 # remove apostrophes
+				$_ .="\n";               # add newline
+				push @effects_help, $_;  # store help
+
+		} else { 
+				# replace leading number with LADSPA Unique ID
+				s/^\d+/$ladspa_unique_id{$label}/;
+
+				s/\s+$/ /;  			# remove trailing spaces
+				substr($effects_help[-1],0,0) = $_; # join lines
+				$effects_help[-1] =~ s/,/, /g; # 
+				$effects_help[-1] =~ s/,\s+$//;
+				
+		}
+
+	} reverse split "\n",eval_iam("ladspa-register");
+
+
+#my @lines = reverse split "\n",eval_iam("ladspa-register");
+#pager( scalar @lines, $/, join $/,@lines);
+	
+	#my @crg = map{s/^.*? -//; $_ .= "\n" }
+	#			split "\n",eval_iam("control-register");
+	#pager (@lrg, @prg); exit;
+}
+
 
 1;
 __END__

@@ -81,6 +81,7 @@ use ::Effect_subs ();
 use ::Util qw(rw_set);
 use ::Wavinfo_subs ();
 use ::Config_subs ();
+use ::Memoize_subs ();
 
 ## Definitions ##
 
