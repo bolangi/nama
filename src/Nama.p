@@ -79,6 +79,8 @@ use ::CacheTrack ();
 use ::Edit_subs ();
 use ::Effect_subs ();
 use ::Util qw(rw_set);
+use ::Wavinfo_subs ();
+use ::Config_subs ();
 
 ## Definitions ##
 

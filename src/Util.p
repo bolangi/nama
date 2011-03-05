@@ -16,6 +16,11 @@ our @ISA = qw(Exporter);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
 rw_set
+freq
+channels
+input_node
+output_node
+signal_format
 
 ) ] );
 
@@ -138,3 +143,15 @@ sub rw_set {
 }
 }
 
+sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
+
+sub channels { [split ',', $_[0] ]->[1] }
+	
+sub input_node { $_[0].'_in' }
+sub output_node {$_[0].'_out'}
+
+sub signal_format {
+	my ($template, $channel_count) = @_;
+	$template =~ s/N/$channel_count/;
+	my $format = $template;
+}

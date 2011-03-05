@@ -43,6 +43,7 @@ our (	$debug,
 package ::ChainSetup;
 
 use Modern::Perl;
+use ::Util qw(input_node output_node);
 
 sub initialize {
 	@io = (); 			# IO object list
@@ -175,7 +176,7 @@ sub add_paths_for_recording {
 
 			# connect IO
 			
-			$g->add_path(::input_node($_->source_type), $name, 'wav_out');
+			$g->add_path(input_node($_->source_type), $name, 'wav_out');
 
 			# set chain_id to R3 (if original track is 3) 
 			$g->set_vertex_attributes($name, { 
@@ -239,7 +240,7 @@ sub add_paths_for_aux_sends {
 }
 sub add_path_for_one_aux_send {
 	my $track = shift;
-		my @e = ($track->name, ::output_node($track->send_type));
+		my @e = ($track->name, output_node($track->send_type));
 		$g->add_edge(@e);
 		 $g->set_edge_attributes(@e,
 			  {	track => $track->name,
@@ -257,7 +258,7 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	$g->add_path($mastering_mode ?  'Boost' : 'Master',
-			::output_node($tn{Master}->send_type)) if $main_out;
+			output_node($tn{Master}->send_type)) if $main_out;
  
 
 }

@@ -18,6 +18,7 @@
 
 package ::IO;
 use Modern::Perl; use Carp;
+use ::Util qw(channels signal_format);
 our $VERSION = 1.0;
 
 # we will use the following to map from graph node names
@@ -100,7 +101,7 @@ sub ecs_string {
 }
 sub format { 
 	my $self = shift;
-	::signal_format($self->format_template, $self->width)
+	signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
 }
 sub _format_template {} # the leading underscore allows override
@@ -150,7 +151,7 @@ sub _mono_to_stereo{
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
 	my $is_mono_track = sub { $self->width == 1 };
-	my $is_mono_wav   = sub { ::channels(::wav_format($self->full_path)) == 1};
+	my $is_mono_wav   = sub { channels(::wav_format($self->full_path)) == 1};
 	if  (      $status eq 'REC' and $is_mono_track->()
 			or $status eq 'MON' and $is_mono_wav->() )
 		 { $copy }

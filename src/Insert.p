@@ -23,6 +23,7 @@ use ::Object qw(
 	wet_vol
 	dry_vol
 );
+use ::Util qw(input_node output_node);
 # tracks: deprecated
 
 initialize();
@@ -175,7 +176,7 @@ sub add_paths {
 
 	# wet send path (no track): track -> loop -> output
 	
-	my @edge = ($loop, ::output_node($self->{send_type}));
+	my @edge = ($loop, output_node($self->{send_type}));
 	$debug and say "edge: @edge";
 	::Graph::add_path($name, @edge);
 	$g->set_vertex_attributes($loop, {n => $t->n});
@@ -193,7 +194,7 @@ sub add_paths {
 				source_type => $self->{return_type},
 				source_id => $self->{return_id},
 	});
-	::Graph::add_path(::input_node($self->{return_type}), $wet->name, $successor);
+	::Graph::add_path(input_node($self->{return_type}), $wet->name, $successor);
 
 	# connect dry track to graph
 	
@@ -232,7 +233,7 @@ sub add_paths {
 
 		#pre:  wet send path (no track): predecessor -> output
 
-		my @edge = ($predecessor, ::output_node($self->{send_type}));
+		my @edge = ($predecessor, output_node($self->{send_type}));
 		$debug and say "edge: @edge";
 		::Graph::add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
@@ -258,7 +259,7 @@ sub add_paths {
 		$g->set_vertex_attributes($dry->name, {
 				mono_to_stereo => '', # override
 		});
-		::Graph::add_path(::input_node($self->{return_type}), $wet->name, $loop);
+		::Graph::add_path(input_node($self->{return_type}), $wet->name, $loop);
 
 		# connect dry track to graph
 		#

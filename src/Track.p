@@ -26,6 +26,7 @@ our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;
 use ::Assign qw(join_path);
+use ::Util qw(freq input_node);
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
@@ -374,7 +375,7 @@ sub input_path { # signal path, not file path
 			#  
 			#  subtrack --> mix_track_in --> mix_track
 
-			( ::input_node($track->source_type) , $track->name)
+			( input_node($track->source_type) , $track->name)
 	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
 
 	# create edge representing WAV file input

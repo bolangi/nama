@@ -497,102 +497,6 @@ sub eval_iam_libecasoundc{
 	}
 	"@result";
 }
-## configuration file
-
-{ # OPTIMIZATION
-
-  # we allow for the (admitted rare) possibility that
-  # $project_root may change
-
-my %proot;
-sub project_root { 
-	$proot{$project_root} ||= resolve_path($project_root)
-}
-}
-
-sub config_file { $opts{f} ? $opts{f} : ".namarc" }
-
-{ # OPTIMIZATION
-my %wdir; 
-sub this_wav_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and
-	$wdir{$project_name} ||= resolve_path(
-		join_path( project_root(), $project_name, q(.wav) )  
-	);
-}
-}
-
-sub project_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and join_path( project_root(), $project_name) 
-}
-
-sub global_config {
-
-	# return text of config file, in the following order
-	# or priority:
-	#
-	# 1. the file designated by the -f command line argument
-	# 2. .namarc in the current project directory, i.e. ~/nama/untitled/.namarc
-	# 3. .namarc in the home directory, i.e. ~/.namarc
-	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
-	if( $opts{f} ){
-		print("reading config file $opts{f}\n");
-		return read_file($opts{f});
-	}
-	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
-	my $c = 0;
-		map{ 
-				if (-d $_) {
-					my $config = join_path($_, config_file());
-					if( -f $config or -l $config){ 
-						say "Found config file: $config";
-						my $yml = read_file($config);
-						return $yml;
-					}
-				}
-			} ( @search_path) 
-}
-
-# sub global_config {
-# 	io( join_path($ENV{HOME}, config_file()))->all;
-# }
-
-sub read_config {
-
-	# read and process the configuration file
-	#
-	# use the embedded default file if none other is present
-	
-	$debug2 and print "&read_config\n";
-	
-	my $config = shift;
-	my $yml = length $config > 100 ? $config : $default;
-	strip_all( $yml );
-	%cfg = %{  yaml_in($yml) };
-	*subst = \%{ $cfg{abbreviations} }; # alias
-	walk_tree(\%cfg);
-	walk_tree(\%cfg); # second pass completes substitutions
-	assign_var( \%cfg, @config_vars);
-	$project_root = $opts{d} if $opts{d};
-	$project_root = expand_tilde($project_root);
-
-}
-sub walk_tree {
-	#$debug2 and print "&walk_tree\n";
-	my $ref = shift;
-	map { substitute($ref, $_) } 
-		grep {$_ ne q(abbreviations)} 
-			keys %{ $ref };
-}
-sub substitute{
-	my ($parent, $key)  = @_;
-	my $val = $parent->{$key};
-	#$debug and print qq(key: $key val: $val\n);
-	ref $val and walk_tree($val)
-		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
-}
 sub setup_user_customization {
 	my $file = user_customization_file();
 	return unless -r $file;
@@ -1081,14 +985,6 @@ sub generate_setup {
 		return
 	}
 	$success
-}
-sub input_node { $_[0].'_in' }
-sub output_node {$_[0].'_out'}
-
-sub signal_format {
-	my ($template, $channel_count) = @_;
-	$template =~ s/N/$channel_count/;
-	my $format = $template;
 }
 sub remove_temporary_tracks {
 	$debug2 and say "&remove_temporary_tracks";
@@ -3576,73 +3472,6 @@ sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
 
 
-### WAV file length/format/modify_time are cached in %wav_info 
-
-sub ecasound_get_info {
-	# get information about an audio object
-	
-	my ($path, $command) = @_;
-	$path = qq("$path");
-	teardown_engine();
-	eval_iam('cs-add gl');
-	eval_iam('c-add g');
-	eval_iam('ai-add ' . $path);
-	eval_iam('ao-add null');
-	eval_iam('cs-connect');
-	eval_iam('ai-select '. $path);
-	my $result = eval_iam($command);
-	teardown_engine();
-	$result;
-}
-sub cache_wav_info {
-	my @files = File::Find::Rule
-		->file()
-		->name( '*.wav' )
-		->in( this_wav_dir() );	
-	map{  get_wav_info($_) } @files;
-}
-sub get_wav_info {
-	my $path = shift;
-	#say "path: $path";
-	$wav_info{$path}{length} = get_length($path);
-	$wav_info{$path}{format} = get_format($path);
-	$wav_info{$path}{modify_time} = get_modify_time($path);
-}
-sub get_length { 
-	my $path = shift;
-	my $length = ecasound_get_info($path, 'ai-get-length');
-	sprintf("%.4f", $length);
-}
-sub get_format {
-	my $path = shift;
-	ecasound_get_info($path, 'ai-get-format');
-}
-sub get_modify_time {
-	my $path = shift;
-	my @stat = stat $path;
-	$stat[9]
-}
-sub wav_length {
-	my $path = shift;
-	update_wav_cache($path);
-	$wav_info{$path}{length}
-}
-sub wav_format {
-	my $path = shift;
-	update_wav_cache($path);
-	$wav_info{$path}{format}
-}
-sub update_wav_cache {
-	my $path = shift;
-	return unless get_modify_time($path) != $wav_info{$path}{modify_time};
-	say qq(WAV file $path has changed! Updating cache.);
-	get_wav_info($path) 
-}
-	
-sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
-
-sub channels { [split ',', $_[0] ]->[1] }
-	
 sub new_project_template {
 	my ($template_name, $template_description) = @_;
 
