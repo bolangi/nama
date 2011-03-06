@@ -35,9 +35,14 @@ our (
 	$initial_user_mode,
 	$project,	
 );
+our ( 					# for create_system_buses
+	%is_system_bus,
+	@system_buses,
+	$main,
+	$null,
+);
 
-our ($term, %bn); # project templates
-
+our ($term, %bn); 		# for project templates
 
 sub list_projects {
 	my $projects = join "\n", sort map{
@@ -232,6 +237,32 @@ sub remove_riff_header_stubs {
 
 	map { unlink $_ } @wavs; 
 }
+
+sub create_system_buses {
+	$debug2 and say "&create_system_buses";
+
+	my $buses = q(
+			Master		# master fader track
+			Mixdown		# mixdown track
+			Mastering	# mastering network
+			Insert		# auxiliary tracks for inserts
+			Cooked		# for track caching
+			Temp		# temp tracks while generating setup
+			Main		# default mixer bus, new tracks assigned to Main
+	);
+	($buses) = strip_comments($buses); # need initial parentheses
+	@system_buses = split " ", $buses;
+	map{ $is_system_bus{$_}++ } @system_buses;
+	delete $is_system_bus{Main}; # because we want to display it
+	map{ ::Bus->new(name => $_ ) } @system_buses;
+	
+	# a bus should identify it's mix track
+	$bn{Main}->set( send_type => 'track', send_id => 'Master');
+
+	$main = $bn{Main};
+	$null = $bn{null};
+}
+
 
 ## project templates
 
