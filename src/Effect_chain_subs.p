@@ -2,6 +2,8 @@
 
 package ::;
 use Modern::Perl;
+no warnings 'uninitialized';
+
 our (
 	$project_name,
 	$this_track,

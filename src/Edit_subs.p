@@ -1,5 +1,6 @@
 package ::;
-use Modern::Perl;
+use Modern::Perl; use Carp;
+no warnings 'uninitialized';
 
 our (
 	%event_id,

@@ -1,8 +1,7 @@
 # ----------- Initialize --------
 
 package ::;
-use Modern::Perl;
-use Carp;
+use Modern::Perl; use Carp;
 our (
 	$ui,
 	%opts,
