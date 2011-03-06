@@ -36,9 +36,18 @@ our (
 	$project,	
 );
 
-## project templates
+our ($term, %bn); # project templates
 
-our ($term, %bn);
+
+sub list_projects {
+	my $projects = join "\n", sort map{
+			my ($vol, $dir, $lastdir) = File::Spec->splitpath($_); $lastdir
+		} File::Find::Rule  ->directory()
+							->maxdepth(1)
+							->extras( { follow => 1} )
+						 	->in( project_root());
+	pager($projects);
+}
 
 sub initialize_project_data {
 	$debug2 and print "&initialize_project_data\n";
