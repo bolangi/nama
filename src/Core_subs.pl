@@ -66,47 +66,9 @@ sub discard_object {
 }
 
 
-sub schedule_autosave { 
-	# one-time timer 
-	my $seconds = (shift || $autosave_interval) * 60;
-	$event_id{autosave} = undef; # cancel any existing timer
-	return unless $seconds;
-	$event_id{autosave} = AE::timer($seconds,0, \&autosave);
-}
 sub debugging_options {
 	grep{$_} $debug, @opts{qw(R D J A E T)};
 }
-sub autosave {
-	if (engine_running()){ 
-		schedule_autosave(1); # try again in 60s
-		return;
-	}
- 	my $file = 'State-autosave-' . time_tag();
- 	save_system_state($file);
-	my @saved = autosave_files();
-	my ($next_last, $last) = @saved[-2,-1];
-	schedule_autosave(); # standard interval
-	return unless defined $next_last and defined $last;
-	if(files_are_identical($next_last, $last)){
-		unlink $last;
-		undef; 
-	} else { 
-		$last 
-	}
-}
-sub autosave_files {
-	sort File::Find::Rule  ->file()
-						->name('State-autosave-*')
-							->maxdepth(1)
-						 	->in( project_dir());
-}
-sub files_are_identical {
-	my ($filea,$fileb) = @_;
-	my $a = io($filea)->slurp;
-	my $b = io($fileb)->slurp;
-	$a eq $b
-}
-
 sub process_control_inputs { }
 
 
