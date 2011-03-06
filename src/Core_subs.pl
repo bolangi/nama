@@ -52,10 +52,6 @@ sub do_user_command {
 
 sub list_plugins {}
 		
-
-
-## chain setup generation
-
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
 sub show_tracks_limited {
