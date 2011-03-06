@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+use Carp;
 use vars qw($cop_hints_yml);
 our (
 	%tn,

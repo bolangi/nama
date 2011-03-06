@@ -173,46 +173,6 @@ sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
 
-sub d1 {
-	my $n = shift;
-	sprintf("%.1f", $n)
-}
-sub d2 {
-	my $n = shift;
-	sprintf("%.2f", $n)
-}
-sub dn {
-	my ($n, $places) = @_;
-	sprintf("%." . $places . "f", $n);
-}
-sub round {
-	my $n = shift;
-	return 0 if $n == 0;
-	$n = int $n if $n > 10;
-	$n = d2($n) if $n < 10;
-	$n;
-}
-sub colonize { # convert seconds to hours:minutes:seconds 
-	my $sec = shift || 0;
-	my $hours = int ($sec / 3600);
-	$sec = $sec % 3600;
-	my $min = int ($sec / 60);
-	$sec = $sec % 60;
-	$sec = "0$sec" if $sec < 10;
-	$min = "0$min" if $min < 10 and $hours;
-	($hours ? "$hours:" : "") . qq($min:$sec);
-}
-
-
-
-sub time_tag {
-	my @time = localtime time;
-	$time[4]++;
-	$time[5]+=1900;
-	@time = @time[5,4,3,2,1,0];
-	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
-}
-
 sub autosave {
 	if (engine_running()){ 
 		schedule_autosave(1); # try again in 60s
@@ -285,27 +245,6 @@ sub leading_track_spec {
 		1;
 	}
 		
-}
-sub ecasound_select_chain {
-	my $n = shift;
-	my $cmd = "c-select $n";
-
-	if( 
-
-		# specified chain exists in the chain setup
-		$is_ecasound_chain{$n}
-
-		# engine is configured
-		and eval_iam( 'cs-connected' ) =~ /$chain_setup_file/
-
-	){ 	eval_iam($cmd); 
-		return 1 
-
-	} else { 
-		$debug and carp 
-			"c-select $n: attempted to select non-existing Ecasound chain\n"; 
-		return 0
-	}
 }
 sub set_current_bus {
 	my $track = shift || ($this_track ||= $tn{Master});
@@ -778,73 +717,4 @@ sub user_rec_tracks { some_user_tracks('REC') }
 sub user_mon_tracks { some_user_tracks('MON') }
 
 
-sub kill_jack_plumbing {
-	qx(killall jack.plumbing >/dev/null 2>&1)
-	unless $opts{A} or $opts{J};
-}
-sub start_jack_plumbing {
-	
-	if ( 	$use_jack_plumbing				# not disabled in namarc
-			and ! ($opts{J} or $opts{A})	# we are not testing   
-
-	){ system('jack.plumbing >/dev/null 2>&1 &') }
-}
-{
-
-my($error,$answer)=('','');
-my ($pid, $sel);
-
-sub start_midish {
-	my $executable = qx(which midish);
-	chomp $executable;
-	$executable or say("Midish not found!"), return;
-	$pid = open3(\*MIDISH_WRITE, \*MIDISH_READ,\*MIDISH_ERROR,"$executable -v")
-		or warn "Midish failed to start!";
-
-	$sel = new IO::Select();
-
-	$sel->add(\*MIDISH_READ);
-	$sel->add(\*MIDISH_ERROR);
-	midish_command( qq(print "Welcome to Nama/Midish!"\n) );
-}
-
-sub midish_command {
-	my $query = shift;
-	print "\n";
-	#$midish_enable or say( qq($query: cannot execute Midish command 
-#unless you set "midish_enable: 1" in .namarc)), return;
-	#$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
-
-	#send query to midish
-	print MIDISH_WRITE "$query\n";
-
-	foreach my $h ($sel->can_read)
-	{
-		my $buf = '';
-		if ($h eq \*MIDISH_ERROR)
-		{
-			sysread(MIDISH_ERROR,$buf,4096);
-			if($buf){print "MIDISH ERR-> $buf\n"}
-		}
-		else
-		{
-			sysread(MIDISH_READ,$buf,4096);
-			if($buf){map{say "MIDISH-> $_"} grep{ !/\+ready/ } split "\n", $buf}
-		}
-	}
-	print "\n";
-}
-
-sub close_midish {
-	midish_command('exit');
-	sleeper(0.1);
-	kill 15,$pid;
-	sleeper(0.1);
-	kill 9,$pid;
-	sleeper(0.1);
-	waitpid($pid, 1);
-# It is important to waitpid on your child process,  
-# otherwise zombies could be created. 
-}	
-}
 

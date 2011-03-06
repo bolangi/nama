@@ -4,6 +4,7 @@
 
 package ::;
 use Modern::Perl;
+use Carp;
 use ::Util qw(process_is_running really_recording);
 
 our (
@@ -28,6 +29,9 @@ our (
 	%event_id,
 	$loop_enable,
 	$run_time,
+
+	%is_ecasound_chain,
+	$chain_setup_file,
 );
 
 sub valid_engine_setup {
@@ -308,6 +312,27 @@ sub wraparound {
 	#print "diff: $diff, start: $start\n";
 	$event_id{wraparound} = undef;
 	$event_id{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+}
+sub ecasound_select_chain {
+	my $n = shift;
+	my $cmd = "c-select $n";
+
+	if( 
+
+		# specified chain exists in the chain setup
+		$is_ecasound_chain{$n}
+
+		# engine is configured
+		and eval_iam( 'cs-connected' ) =~ /$chain_setup_file/
+
+	){ 	eval_iam($cmd); 
+		return 1 
+
+	} else { 
+		$debug and carp 
+			"c-select $n: attempted to select non-existing Ecasound chain\n"; 
+		return 0
+	}
 }
 1;
 __END__

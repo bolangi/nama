@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+use Carp;
 
 our (
 	$debug,

@@ -24,6 +24,11 @@ output_node
 signal_format
 process_is_running
 really_recording
+d1
+d2
+dn
+colonize
+time_tag
 
 ) ] );
 
@@ -171,3 +176,46 @@ sub process_is_running {
 sub really_recording { 
 	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
+sub d1 {
+	my $n = shift;
+	sprintf("%.1f", $n)
+}
+sub d2 {
+	my $n = shift;
+	sprintf("%.2f", $n)
+}
+sub dn {
+	my ($n, $places) = @_;
+	sprintf("%." . $places . "f", $n);
+}
+sub round {
+	my $n = shift;
+	return 0 if $n == 0;
+	$n = int $n if $n > 10;
+	$n = d2($n) if $n < 10;
+	$n;
+}
+sub colonize { # convert seconds to hours:minutes:seconds 
+	my $sec = shift || 0;
+	my $hours = int ($sec / 3600);
+	$sec = $sec % 3600;
+	my $min = int ($sec / 60);
+	$sec = $sec % 60;
+	$sec = "0$sec" if $sec < 10;
+	$min = "0$min" if $min < 10 and $hours;
+	($hours ? "$hours:" : "") . qq($min:$sec);
+}
+
+
+
+sub time_tag {
+	my @time = localtime time;
+	$time[4]++;
+	$time[5]+=1900;
+	@time = @time[5,4,3,2,1,0];
+	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
+}
+
+1;
+__END__
+

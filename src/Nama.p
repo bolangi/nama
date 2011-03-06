@@ -78,7 +78,7 @@ use ::ChainSetup ();
 use ::CacheTrack ();
 use ::Edit_subs ();
 use ::Effect_subs ();
-use ::Util qw(rw_set process_is_running);
+use ::Util qw(rw_set process_is_running d1 d2 dn colonize time_tag);
 use ::Wavinfo_subs ();
 use ::Config_subs ();
 use ::Memoize_subs ();
@@ -95,6 +95,7 @@ use ::Track_subs ();
 use ::Jack_subs ();
 use ::Mode_subs ();
 use ::Mute_Solo_Fade ();
+use ::Midi_subs ();
 
 ## Definitions ##
 
