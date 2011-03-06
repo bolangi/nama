@@ -4,6 +4,9 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 our (
+
+# generate_setup()
+
 	$debug,
 	$debug2,
 	$regenerate_setup,
@@ -12,7 +15,7 @@ our (
 	$seek_delay,
 	$jack_seek_delay,
 
-# reconfigure engine
+# reconfigure_engine()
 
 	$this_track,
 	$old_this_track,
@@ -23,25 +26,30 @@ our (
 	$project_name,
 	$offset_run_flag,
 
-# status snapshot
+# status_snapshot()
 
 	$mastering_mode,
 	$jack_running,
 	$main_out,
 
-# find_duplicate_inputs
+# find_duplicate_inputs()
 
 	$main,
 	%already_used,
 	%duplicate_inputs,
 	%tn,
 
-# transport_status
+# transport_status()
 
  	%cooked_record_pending,
  	$loop_enable,
 	$press_space_to_start_transport,
 
+# adjust_latency()
+
+	%copp,
+	%cfg,
+	%ti,
 
 );	
 
@@ -305,6 +313,35 @@ sub transport_status {
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
+}
+sub adjust_latency {
+
+	$debug2 and print "&adjust_latency\n";
+	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
+		::Track::all();
+	set_preview_mode();
+	exit_preview_mode();
+	my $cop_status = eval_iam('cop-status');
+	$debug and print $cop_status;
+	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
+	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
+	my %chains = $cop_status =~ /$chain_re/sg;
+	$debug and print yaml_out(\%chains);
+	my %latency;
+	map { my @latencies = $chains{$_} =~ /$latency_re/g;
+			$debug and print "chain $_: latencies @latencies\n";
+			my $chain = $_;
+		  map{ $latency{$chain} += $_ } @latencies;
+		 } grep { $_ > 2 } sort keys %chains;
+	$debug and print yaml_out(\%latency);
+	my $max;
+	map { $max = $_ if $_ > $max  } values %latency;
+	$debug and print "max: $max\n";
+	map { my $adjustment = ($max - $latency{$_}) /
+			$cfg{abbreviations}{frequency} * 1000;
+			$debug and print "chain: $_, adjustment: $adjustment\n";
+			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
+			} keys %latency;
 }
 1;
 __END__

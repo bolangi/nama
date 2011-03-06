@@ -57,35 +57,6 @@ sub do_user_command {
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
 
 
-sub adjust_latency {
-
-	$debug2 and print "&adjust_latency\n";
-	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
-		::Track::all();
-	set_preview_mode();
-	exit_preview_mode();
-	my $cop_status = eval_iam('cop-status');
-	$debug and print $cop_status;
-	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
-	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
-	my %chains = $cop_status =~ /$chain_re/sg;
-	$debug and print yaml_out(\%chains);
-	my %latency;
-	map { my @latencies = $chains{$_} =~ /$latency_re/g;
-			$debug and print "chain $_: latencies @latencies\n";
-			my $chain = $_;
-		  map{ $latency{$chain} += $_ } @latencies;
-		 } grep { $_ > 2 } sort keys %chains;
-	$debug and print yaml_out(\%latency);
-	my $max;
-	map { $max = $_ if $_ > $max  } values %latency;
-	$debug and print "max: $max\n";
-	map { my $adjustment = ($max - $latency{$_}) /
-			$cfg{abbreviations}{frequency} * 1000;
-			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
-			} keys %latency;
-}
 
 # throw away first argument
 
