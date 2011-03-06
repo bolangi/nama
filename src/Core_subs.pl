@@ -3,7 +3,7 @@ sub main {
 	process_options(); 		# Option_subs.pm
 	initialize_interfaces();# Initialize_subs.pm
 	command_process($execute_on_project_load);
-	reconfigure_engine();	# Engine_setup_sups.pm
+	reconfigure_engine();	# Engine_setup_subs.pm
 	command_process($opts{X});
 	$ui->loop;
 }
@@ -318,4 +318,4 @@ sub show_tracks_limited {
 }
 sub process_control_inputs { }
 
-		
+### end Core_subs
