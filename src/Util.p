@@ -29,6 +29,7 @@ d2
 dn
 colonize
 time_tag
+heuristic_time
 
 ) ] );
 
@@ -215,6 +216,12 @@ sub time_tag {
 	@time = @time[5,4,3,2,1,0];
 	sprintf "%4d.%02d.%02d-%02d:%02d:%02d", @time
 }
+
+sub heuristic_time {
+	my $sec = shift;
+	d1($sec) .  ( $sec > 120 ? " (" . colonize( $sec ) . ") "  : " " )
+}
+
 
 1;
 __END__

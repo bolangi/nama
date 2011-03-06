@@ -145,12 +145,6 @@ sub transport_status {
 	say "\nPress SPACE to start or stop engine.\n"
 		if $press_space_to_start_transport;
 }
-
-sub heuristic_time {
-	my $sec = shift;
-	d1($sec) .  ( $sec > 120 ? " (" . colonize( $sec ) . ") "  : " " )
-}
-
 sub schedule_autosave { 
 	# one-time timer 
 	my $seconds = (shift || $autosave_interval) * 60;
