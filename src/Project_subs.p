@@ -3,6 +3,7 @@
 package ::;
 use Modern::Perl;
 use Carp;
+use File::Slurp;
 
 our (
 	$debug,
@@ -359,8 +360,8 @@ sub use_project_template {
 	save_state();
 }
 sub list_project_templates {
-	my $io = io(join_path(project_root(), "templates"));
-	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $io->all;        
+	my $read = read_file(join_path(project_root(), "templates"));
+	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $read;        
 	pager(@templates);
 }
 sub remove_project_template {

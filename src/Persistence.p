@@ -3,6 +3,7 @@
 
 package ::;
 use Modern::Perl;
+use File::Slurp;
 no warnings 'uninitialized';
 
 our (
@@ -164,7 +165,7 @@ sub restore_state {
 	! -f $file and (print "file not found: $file\n"), return;
 	$debug and print "using file: $file\n";
 	
-	my $yaml = io($file)->all;
+	my $yaml = read_file($file);
 
 	# remove empty key hash lines # fixes YAML::Tiny bug
 	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
@@ -605,8 +606,8 @@ sub autosave_files {
 }
 sub files_are_identical {
 	my ($filea,$fileb) = @_;
-	my $a = io($filea)->slurp;
-	my $b = io($fileb)->slurp;
+	my $a = read_file($filea);
+	my $b = read_file($fileb);
 	$a eq $b
 }
 

@@ -20,6 +20,7 @@ package ::Track;
 use Modern::Perl;
 use Carp;
 use File::Copy qw(copy);
+use File::Slurp;
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
@@ -27,7 +28,6 @@ our ($debug);
 local $debug = 0;
 use ::Assign qw(join_path);
 use ::Util qw(freq input_node dest_type);
-use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
 use ::Object qw(

@@ -75,7 +75,7 @@ sub global_config {
 }
 
 # sub global_config {
-# 	io( join_path($ENV{HOME}, config_file()))->all;
+# 	read_file( join_path($ENV{HOME}, config_file()));
 # }
 
 sub read_config {
@@ -179,7 +179,7 @@ PROJECT_ROOT
 		
 		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
 
-		$custom_pl > io( user_customization_file() );
+		 write_file(user_customization_file(), $custom_pl);
 		
 	} else {
 		print <<OTHER;
@@ -189,7 +189,7 @@ Please make sure to set the project_root directory in
 OTHER
 	}
 	if ($make_namarc !~ /n/i){
-		$default > io( $config );
+		write_file($config, $default);
 	}
 	sleep 1;
 	print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
