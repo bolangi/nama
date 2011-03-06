@@ -10,24 +10,23 @@
 package ::;
 use Test::More qw(no_plan);
 use ::Assign qw(yaml_in yaml_out);
-use vars qw($chain_setup);
 use strict;
 use warnings;
 no warnings qw(uninitialized);
 our ($expected_setup_lines);
 use Cwd;
 
+our (
+	$main,
+	$this_track,
+	$chain_setup,
+	%opts,
+	$jack_running,
+);
+
 BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
-
-our (
-[% qx(cat ./declarations.pl) %] 
-
-[% qx(./add_vars) %]
-);
- 
-[% qx(cat ./var_types.pl) %]
 
 # defeat namarc detection to force using $default namarc
 
@@ -55,8 +54,8 @@ push @ARGV, q(-T);
 
 diag("working directory: ",cwd);
 
-::process_options();
-::initialize_interfaces();
+process_options();
+initialize_interfaces();
 diag "Check representative variable from default .namarc";
 
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
@@ -311,6 +310,8 @@ $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 is ($io->device_id, 'alsa,default', 'value overrides method call');
 
 command_process("sax; source Horgand; gen");
+generate_setup();
+diag( $this_track->dump );
 like( $chain_setup, qr/Horgand/, 'set JACK client as input');
 command_process("sax; source jack; gen");
 like( $chain_setup, qr/jack,,sax_in/, 'set JACK port for manual input');

@@ -494,14 +494,12 @@ sub write_chains {
 					"# audio outputs",
 					join("\n", @output_chains), "";
 	$debug and print "ECS:\n",$ecs_file;
-	open my $setup, ">", ::setup_file();
-	print $setup $ecs_file;
-	close $setup;
+	open my $fh, ">", ::setup_file();
+	print $fh $ecs_file;
+	close $fh;
 	$chain_setup = $ecs_file;
 
 }
-
-chain_setup { $chain_setup };
 
 1;
 __END__

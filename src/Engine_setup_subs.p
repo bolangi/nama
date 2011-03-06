@@ -70,7 +70,7 @@ sub generate_setup {
 	track_memoize(); 			# freeze track state 
 
 	# generate_setup_try() gets the @_ passed to generate_setup()
-	my $success = eval { &::ChainSetup::generate_setup_try }; 
+	my $success = eval { ::ChainSetup::generate_setup_try() }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;
