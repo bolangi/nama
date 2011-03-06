@@ -119,7 +119,7 @@ sub fades {
 
 		# get end time
 		
-		my $length = $::wav_info{$track->full_path}{length};
+		my $length = ::wav_length($track->full_path);
 		my $play_end = ::play_end_time();
 		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
 
@@ -184,7 +184,7 @@ sub final_pair {   # duration: .... to length
 	defined $exit_level or return ();
 	my $track = $::tn{$track_name};
 	(
-		$track->adjusted_playat_time + $::wav_info{$track->full_path}{length},
+		$track->adjusted_playat_time + ::wav_length($track->full_path),
 		$exit_level
 	);
 }
