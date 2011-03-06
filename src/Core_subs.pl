@@ -1,14 +1,14 @@
 sub main { 
-#	setup_grammar(); # executes directly in body
-	process_options();
-	initialize_interfaces(); 
+#	setup_grammar(); 		# executes directly in body
+	process_options(); 		# Option_subs.pm
+	initialize_interfaces();# Initialize_subs.pm
 	command_process($execute_on_project_load);
-	reconfigure_engine();
+	reconfigure_engine();	# Engine_setup_sups.pm
 	command_process($opts{X});
 	$ui->loop;
 }
 
-## User Customization
+## User Customization -- called by initialize_interfaces()
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
@@ -44,39 +44,17 @@ sub gen_coderef {
 	$coderef
 }
 
+# called from grammar
+
 sub do_user_command {
 	#say "args: @_";
 	my($cmd, @args) = @_;
 	$user_command{$cmd}->(@args);
 }	
 
-sub list_plugins {}
-		
+# called from ChainSetup.pm and Engine_setup_subs.pm
+
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
-
-sub show_tracks_limited {
-
-	# Master
-	# Mixdown
-	# Main bus
-	# Current bus
-
-}
-
-		
-sub find_duplicate_inputs { # in Main bus only
-
-	%duplicate_inputs = ();
-	%already_used = ();
-	$debug2 and print "&find_duplicate_inputs\n";
-	map{	my $source = $_->source;
-			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
-		 	$already_used{$source} //= $_->name;
-	} 
-	grep { $_->rw eq 'REC' }
-	map{ $tn{$_} }
-	$main->tracks(); # track names;
-}
 
 
 sub adjust_latency {
@@ -108,39 +86,15 @@ sub adjust_latency {
 			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
 			} keys %latency;
 }
+
+# throw away first argument
+
 sub discard_object {
 	shift @_ if (ref $_[0]) =~ /Nama/;
 	@_;
 }
 
 
-sub transport_status {
-	
-	map{ 
-		say("Warning: $_: input ",$tn{$_}->source,
-		" is already used by track ",$already_used{$tn{$_}->source},".")
-		if $duplicate_inputs{$_};
-	} grep { $tn{$_}->rec_status eq 'REC' } $main->tracks;
-
-
-	# assume transport is stopped
-	# print looping status, setup length, current position
-	my $start  = ::Mark::loop_start();
-	my $end    = ::Mark::loop_end();
-	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
-	if (%cooked_record_pending){
-		say join(" ", keys %cooked_record_pending), ": ready for caching";
-	}
-	if ($loop_enable and $start and $end){
-		#if (! $end){  $end = $start; $start = 0}
-		say "looping from ", heuristic_time($start),
-				 	"to ",   heuristic_time($end);
-	}
-	say "\nNow at: ", current_position();
-	say "Engine is ". ( engine_running() ? "running." : "ready.");
-	say "\nPress SPACE to start or stop engine.\n"
-		if $press_space_to_start_transport;
-}
 sub schedule_autosave { 
 	# one-time timer 
 	my $seconds = (shift || $autosave_interval) * 60;
@@ -505,3 +459,17 @@ sub destroy_current_wav {
 	1;
 }
 
+# TODO
+
+sub list_plugins {}
+		
+sub show_tracks_limited {
+
+	# Master
+	# Mixdown
+	# Main bus
+	# Current bus
+
+}
+
+		

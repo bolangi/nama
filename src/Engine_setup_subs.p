@@ -29,6 +29,20 @@ our (
 	$jack_running,
 	$main_out,
 
+# find_duplicate_inputs
+
+	$main,
+	%already_used,
+	%duplicate_inputs,
+	%tn,
+
+# transport_status
+
+ 	%cooked_record_pending,
+ 	$loop_enable,
+	$press_space_to_start_transport,
+
+
 );	
 
 sub generate_setup { 
@@ -185,6 +199,19 @@ sub status_snapshot {
 	\%snapshot;
 }
 }
+sub find_duplicate_inputs { # in Main bus only
+
+	%duplicate_inputs = ();
+	%already_used = ();
+	$debug2 and print "&find_duplicate_inputs\n";
+	map{	my $source = $_->source;
+			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
+		 	$already_used{$source} //= $_->name;
+	} 
+	grep { $_->rw eq 'REC' }
+	map{ $tn{$_} }
+	$main->tracks(); # track names;
+}
 sub load_ecs {
 	my $setup = setup_file();
 	#say "setup file: $setup " . ( -e $setup ? "exists" : "");
@@ -251,6 +278,33 @@ sub connect_transport {
 	#print eval_iam("fs");
 	1;
 	
+}
+sub transport_status {
+	
+	map{ 
+		say("Warning: $_: input ",$tn{$_}->source,
+		" is already used by track ",$already_used{$tn{$_}->source},".")
+		if $duplicate_inputs{$_};
+	} grep { $tn{$_}->rec_status eq 'REC' } $main->tracks;
+
+
+	# assume transport is stopped
+	# print looping status, setup length, current position
+	my $start  = ::Mark::loop_start();
+	my $end    = ::Mark::loop_end();
+	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
+	if (%cooked_record_pending){
+		say join(" ", keys %cooked_record_pending), ": ready for caching";
+	}
+	if ($loop_enable and $start and $end){
+		#if (! $end){  $end = $start; $start = 0}
+		say "looping from ", heuristic_time($start),
+				 	"to ",   heuristic_time($end);
+	}
+	say "\nNow at: ", current_position();
+	say "Engine is ". ( engine_running() ? "running." : "ready.");
+	say "\nPress SPACE to start or stop engine.\n"
+		if $press_space_to_start_transport;
 }
 1;
 __END__
