@@ -82,47 +82,6 @@ sub remove_temporary_tracks {
 	$this_track = $old_this_track;
 }
 
-sub set_preview_mode {
-
-	# set preview mode, releasing doodle mode if necessary
-	
-	$debug2 and print "&preview\n";
-
-	# do nothing if already in 'preview' mode
-	
-	if ( $preview eq 'preview' ){ return }
-
-	# make an announcement if we were in rec-enabled mode
-
-	$main->set(rw => $old_group_rw) if $old_group_rw;
-
-	$preview = "preview";
-
-	print "Setting preview mode.\n";
-	print "Using both REC and MON inputs.\n";
-	print "WAV recording is DISABLED.\n\n";
-	print "Type 'arm' to enable recording.\n\n";
-	# reconfigure_engine() will generate setup and start transport
-}
-sub set_doodle_mode {
-
-	$debug2 and print "&doodle\n";
-	return if engine_running() and really_recording();
-	$preview = "doodle";
-
-	# save rw setting of user tracks (not including null group)
-	# and set those tracks to REC
-	
-	$old_group_rw = $main->rw;
-	$main->set(rw => 'REC');
-	$tn{Mixdown}->set(rw => 'OFF');
-	
-	# reconfigure_engine will generate setup and start transport
-	
-	print "Setting doodle mode.\n";
-	print "Using live inputs only, with no duplicate inputs\n";
-	print "Exit using 'preview' or 'arm' commands.\n";
-}
 { my $old_offset_run_status;
 sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
