@@ -88,7 +88,8 @@ use ::Effect_chain_subs ();
 use ::Initialize_subs ();
 use ::Option_subs ();
 use ::Realtime_subs ();
-use ::Setup_Engine_subs ();
+use ::Engine_setup_subs ();
+use ::Engine_cleanup_subs ();
 
 ## Definitions ##
 
