@@ -52,6 +52,26 @@ sub do_user_command {
 	$user_command{$cmd}->(@args);
 }	
 
+sub do_script {
+
+	my $name = shift;
+	my $file;
+	# look in project_dir() and project_root()
+	# if filename provided does not contain slash
+	if( $name =~ m!/!){ $file = $name }
+	else {
+		$file = join_path(project_dir(),$name);
+		if(-e $file){}
+		else{ $file = join_path(project_root(),$name) }
+	}
+	-e $file or say("$file: file not found. Skipping"), return;
+	my @lines = split "\n",read_file($file);
+	my $old_opt_r = $opts{R};
+	$opts{R} = 1; # turn off auto reconfigure
+	for my $input (@lines) { process_line($input)};
+	$opts{R} = $old_opt_r;
+}
+
 sub dump_all {
 	my $tmp = ".dump_all";
 	my $fname = join_path( project_root(), $tmp);
@@ -98,167 +118,6 @@ sub eval_perl {
 	pager(join "\n", @result) unless $@;
 	print "\n";
 }	
-
-sub is_bunch {
-	my $name = shift;
-	$bn{$name} or $bunch{$name}
-}
-my %set_stat = ( 
-				 (map{ $_ => 'rw' } qw(rec mon off) ), 
-				 map{ $_ => 'rec_status' } qw(REC MON OFF)
-				 );
-
-sub bunch_tracks {
-	my $bunchy = shift;
-	my @tracks;
-	if ( my $bus = $bn{$bunchy}){
-		@tracks = $bus->tracks;
-	} elsif ( $bunchy eq 'bus' ){
-		$debug and print "special bunch: bus\n";
-		@tracks = grep{ ! $bn{$_} } $bn{$this_bus}->tracks;
-	} elsif ($bunchy =~ /\s/  # multiple identifiers
-		or $tn{$bunchy} 
-		or $bunchy !~ /\D/ and $ti{$bunchy}){ 
-			$debug and print "multiple tracks found\n";
-			# verify all tracks are correctly named
-			my @track_ids = split " ", $bunchy;
-			my @illegal = grep{ ! track_from_name_or_index($_) } @track_ids;
-			if ( @illegal ){
-				say("Invalid track ids: @illegal.  Skipping.");
-			} else { @tracks = map{ $_->name} 
-							   map{ track_from_name_or_index($_)} @track_ids; }
-
-	} elsif ( my $method = $set_stat{$bunchy} ){
-		$debug and say "special bunch: $bunchy, method: $method";
-		$bunchy = uc $bunchy;
-		@tracks = grep{$tn{$_}->$method eq $bunchy} 
-				$bn{$this_bus}->tracks
-	} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
-		$debug and print "bunch tracks: @tracks\n";
-	} else { say "$bunchy: no matching bunch identifier found" }
-	@tracks;
-}
-sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
-	
-sub pan_check {
-	my $new_position = shift;
-	my $current = $copp{ $this_track->pan }->[0];
-	$this_track->set(old_pan_level => $current)
-		unless defined $this_track->old_pan_level;
-	effect_update_copp_set(
-		$this_track->pan,	# id
-		0, 					# parameter
-		$new_position,		# value
-	);
-}
-	
-## called from ChainSetup.pm and Engine_setup_subs.pm
-
-sub setup_file { join_path( project_dir(), $chain_setup_file) };
-
-
-## called from 
-# Track_subs
-# Graphical_subs
-# Refresh_subs
-# Core_subs
-# Realtime_subs
-
-# throw away first argument
-
-sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Nama/;
-	@_;
-}
-
-
-
-
-# vol/pan requirements of mastering and mixdown tracks
-
-{ my %volpan = (
-	Eq => {},
-	Low => {},
-	Mid => {},
-	High => {},
-	Boost => {vol => 1},
-	Mixdown => {},
-);
-
-sub need_vol_pan {
-
-	# this routine used by 
-	#
-	# + add_track() to determine whether a new track _will_ need vol/pan controls
-	# + add_track_gui() to determine whether an existing track needs vol/pan  
-	
-	my ($track_name, $type) = @_;
-
-	# $type: vol | pan
-	
-	# Case 1: track already exists
-	
-	return 1 if $tn{$track_name} and $tn{$track_name}->$type;
-
-	# Case 2: track not yet created
-
-	if( $volpan{$track_name} ){
-		return($volpan{$track_name}{$type}	? 1 : 0 )
-	}
-	return 1;
-}
-}
-
-# track width in words
-
-sub width {
-	my $count = shift;
-	return 'mono' if $count == 1;
-	return 'stereo' if $count == 2;
-	return "$count channels";
-}
-
-
-sub cleanup_exit {
- 	remove_riff_header_stubs();
-	# for each process: 
-	# - SIGINT (1st time)
-	# - allow time to close down
-	# - SIGINT (2nd time)
-	# - allow time to close down
-	# - SIGKILL
-	map{ my $pid = $_; 
-		 map{ my $signal = $_; 
-			  kill $signal, $pid; 
-			  sleeper(0.2) 
-			} (2,2,9)
-	} @ecasound_pids;
- 	#kill 15, ecasound_pid() if $sock;  	
-	close_midish() if $midish_enable;
-	$term->rl_deprep_terminal() if defined $term;
-	exit; 
-}
-END { cleanup_exit() }
-
-sub do_script {
-
-	my $name = shift;
-	my $file;
-	# look in project_dir() and project_root()
-	# if filename provided does not contain slash
-	if( $name =~ m!/!){ $file = $name }
-	else {
-		$file = join_path(project_dir(),$name);
-		if(-e $file){}
-		else{ $file = join_path(project_root(),$name) }
-	}
-	-e $file or say("$file: file not found. Skipping"), return;
-	my @lines = split "\n",read_file($file);
-	my $old_opt_r = $opts{R};
-	$opts{R} = 1; # turn off auto reconfigure
-	for my $input (@lines) { process_line($input)};
-	$opts{R} = $old_opt_r;
-}
 sub import_audio {
 
 	my ($track, $path, $frequency) = @_;
@@ -299,6 +158,151 @@ sub destroy_current_wav {
 	$main->set(rw => $old_group_status);
 	1;
 }
+
+
+sub is_bunch {
+	my $name = shift;
+	$bn{$name} or $bunch{$name}
+}
+
+# called from grammar_body.pl, Mute_Solo_Fade, Effect_chain_subs
+{
+my %set_stat = ( 
+				 (map{ $_ => 'rw' } qw(rec mon off) ), 
+				 map{ $_ => 'rec_status' } qw(REC MON OFF)
+				 );
+
+sub bunch_tracks {
+	my $bunchy = shift;
+	my @tracks;
+	if ( my $bus = $bn{$bunchy}){
+		@tracks = $bus->tracks;
+	} elsif ( $bunchy eq 'bus' ){
+		$debug and print "special bunch: bus\n";
+		@tracks = grep{ ! $bn{$_} } $bn{$this_bus}->tracks;
+	} elsif ($bunchy =~ /\s/  # multiple identifiers
+		or $tn{$bunchy} 
+		or $bunchy !~ /\D/ and $ti{$bunchy}){ 
+			$debug and print "multiple tracks found\n";
+			# verify all tracks are correctly named
+			my @track_ids = split " ", $bunchy;
+			my @illegal = grep{ ! track_from_name_or_index($_) } @track_ids;
+			if ( @illegal ){
+				say("Invalid track ids: @illegal.  Skipping.");
+			} else { @tracks = map{ $_->name} 
+							   map{ track_from_name_or_index($_)} @track_ids; }
+
+	} elsif ( my $method = $set_stat{$bunchy} ){
+		$debug and say "special bunch: $bunchy, method: $method";
+		$bunchy = uc $bunchy;
+		@tracks = grep{$tn{$_}->$method eq $bunchy} 
+				$bn{$this_bus}->tracks
+	} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
+		$debug and print "bunch tracks: @tracks\n";
+	} else { say "$bunchy: no matching bunch identifier found" }
+	@tracks;
+}
+}
+sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
+	
+sub pan_check {
+	my $new_position = shift;
+	my $current = $copp{ $this_track->pan }->[0];
+	$this_track->set(old_pan_level => $current)
+		unless defined $this_track->old_pan_level;
+	effect_update_copp_set(
+		$this_track->pan,	# id
+		0, 					# parameter
+		$new_position,		# value
+	);
+}
+	
+## called from ChainSetup.pm and Engine_setup_subs.pm
+
+sub setup_file { join_path( project_dir(), $chain_setup_file) };
+
+
+## called from 
+# Track_subs
+# Graphical_subs
+# Refresh_subs
+# Core_subs
+# Realtime_subs
+
+# throw away first argument
+
+sub discard_object {
+	shift @_ if (ref $_[0]) =~ /Nama/;
+	@_;
+}
+
+# vol/pan requirements of mastering and mixdown tracks
+
+# called from Track_subs, Graphical_subs
+{ my %volpan = (
+	Eq => {},
+	Low => {},
+	Mid => {},
+	High => {},
+	Boost => {vol => 1},
+	Mixdown => {},
+);
+
+sub need_vol_pan {
+
+	# this routine used by 
+	#
+	# + add_track() to determine whether a new track _will_ need vol/pan controls
+	# + add_track_gui() to determine whether an existing track needs vol/pan  
+	
+	my ($track_name, $type) = @_;
+
+	# $type: vol | pan
+	
+	# Case 1: track already exists
+	
+	return 1 if $tn{$track_name} and $tn{$track_name}->$type;
+
+	# Case 2: track not yet created
+
+	if( $volpan{$track_name} ){
+		return($volpan{$track_name}{$type}	? 1 : 0 )
+	}
+	return 1;
+}
+}
+
+# track width in words
+# called from grammar_body.pl,Track.pm
+
+sub width {
+	my $count = shift;
+	return 'mono' if $count == 1;
+	return 'stereo' if $count == 2;
+	return "$count channels";
+}
+
+
+sub cleanup_exit {
+ 	remove_riff_header_stubs();
+	# for each process: 
+	# - SIGINT (1st time)
+	# - allow time to close down
+	# - SIGINT (2nd time)
+	# - allow time to close down
+	# - SIGKILL
+	map{ my $pid = $_; 
+		 map{ my $signal = $_; 
+			  kill $signal, $pid; 
+			  sleeper(0.2) 
+			} (2,2,9)
+	} @ecasound_pids;
+ 	#kill 15, ecasound_pid() if $sock;  	
+	close_midish() if $midish_enable;
+	$term->rl_deprep_terminal() if defined $term;
+	exit; 
+}
+END { cleanup_exit() }
 
 # TODO
 
