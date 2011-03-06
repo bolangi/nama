@@ -4,7 +4,8 @@
 # well-defined interfaces
 
 package ::;
-our ( %tn );
+our ( %tn ); 			# rw_set()
+our ( $chain_setup); 	# really_recording()
 
 package ::Util;
 use Modern::Perl;
@@ -21,6 +22,8 @@ channels
 input_node
 output_node
 signal_format
+process_is_running
+really_recording
 
 ) ] );
 
@@ -154,4 +157,17 @@ sub signal_format {
 	my ($template, $channel_count) = @_;
 	$template =~ s/N/$channel_count/;
 	my $format = $template;
+}
+sub process_is_running {
+	my $name = shift;
+	my @pids = split " ", qx(pgrep $name);
+	my @ps_ax  = grep{   my $pid;
+						/$name/ and ! /defunct/
+						and ($pid) = /(\d+)/
+						and grep{ $pid == $_ } @pids 
+				} split "\n", qx(ps ax) ;
+}
+# return file output entries, including Mixdown 
+sub really_recording { 
+	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }

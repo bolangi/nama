@@ -368,7 +368,7 @@ sub t_insert_effect {
 	$code = effect_code( $code );	
 	my $running = engine_running();
 	print("Cannot insert effect while engine is recording.\n"), return 
-		if $running and ::really_recording;
+		if $running and really_recording();
 	print("Cannot insert effect before controller.\n"), return 
 		if $cops{$before}->{belongs_to};
 

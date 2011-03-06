@@ -78,7 +78,7 @@ use ::ChainSetup ();
 use ::CacheTrack ();
 use ::Edit_subs ();
 use ::Effect_subs ();
-use ::Util qw(rw_set);
+use ::Util qw(rw_set process_is_running);
 use ::Wavinfo_subs ();
 use ::Config_subs ();
 use ::Memoize_subs ();
@@ -87,6 +87,8 @@ use ::Terminal_subs ();
 use ::Effect_chain_subs ();
 use ::Initialize_subs ();
 use ::Option_subs ();
+use ::Realtime_subs ();
+use ::Setup_Engine_subs ();
 
 ## Definitions ##
 
@@ -251,6 +253,7 @@ sub loop {
 package ::Text;
 our @ISA = '::';
 use Carp;
+use ::Util qw(really_recording);
 use ::Assign qw(:all);
 
 sub hello {"hello world!";}
