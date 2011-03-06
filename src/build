@@ -1,9 +1,9 @@
 #!/bin/sh
-$MD/src/sort_vars > $MD/src/variables.sorted.txt
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
 MD=..
 TD=$MD/lib/Audio/Nama
+$MD/src/sort_vars > $MD/src/variables.sorted.txt
 if [ ! -d $TD ]; then
    mkdir -p $TD;
 fi
