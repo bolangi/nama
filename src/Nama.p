@@ -94,6 +94,7 @@ use ::Mark_and_jump_subs ();
 use ::Track_subs ();
 use ::Jack_subs ();
 use ::Mode_subs ();
+use ::Mute_Solo_Fade ();
 
 ## Definitions ##
 
