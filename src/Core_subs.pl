@@ -508,16 +508,16 @@ sub import_audio {
 
 	my ($track, $path, $frequency) = @_;
 	
-	$this_track->import_audio($path, $frequency);
+	$track->import_audio($path, $frequency);
 
 	# check that track is audible
 	
-	my $bus = $bn{$this_track->group};
+	my $bus = $bn{$track->group};
 
 	# set MON status unless track _is_ audible
 	
-	$this_track->set(rw => 'MON') 
-		unless $bus->rw eq 'MON' and $this_track->rw eq 'REC';
+	$track->set(rw => 'MON') 
+		unless $bus->rw eq 'MON' and $track->rw eq 'REC';
 
 	# warn if bus is OFF
 	
