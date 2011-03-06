@@ -2,7 +2,7 @@
 use File::Slurp;
 use Modern::Perl;
 my @lines;
-push @lines, read_file('declarations.pl'), read_file('var_types.pl');
+push @lines, read_file("$ENV{MD}/src/declarations.pl"), read_file("$ENV{MD}/src/var_types.pl");
 map{ chomp $_ } @lines;
 
 my $category;

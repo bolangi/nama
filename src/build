@@ -1,5 +1,5 @@
 #!/bin/sh
-./sort_vars > variables.sorted.txt
+$MD/src/sort_vars > $MD/src/variables.sorted.txt
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
 MD=..
