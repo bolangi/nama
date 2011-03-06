@@ -10,6 +10,7 @@
 package ::;
 use Test::More qw(no_plan);
 use ::Assign qw(yaml_in yaml_out);
+use vars qw($chain_setup);
 use strict;
 use warnings;
 no warnings qw(uninitialized);
@@ -54,10 +55,8 @@ push @ARGV, q(-T);
 
 diag("working directory: ",cwd);
 
-setup_grammar();
-process_options();
-
-prepare();
+::process_options();
+::initialize_interfaces();
 diag "Check representative variable from default .namarc";
 
 is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");

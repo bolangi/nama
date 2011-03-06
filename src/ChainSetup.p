@@ -501,5 +501,7 @@ sub write_chains {
 
 }
 
+chain_setup { $chain_setup };
+
 1;
 __END__

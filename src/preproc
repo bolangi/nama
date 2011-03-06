@@ -86,8 +86,8 @@ sub bestow_module_root {
 	my ($new_root, $text) = @_;
 
 		join "\n",map{ 
-			s/([^\w\}\\\/])(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
-			s/([^\w\}\\\/])(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
+			s/([^\w\}\\\/]|^)(::)([\w:])/$1$new_root$2$3/g unless /SKIP_PREPROC/;
+			s/([^\w\}\\\/]|^)(::)([^\w])/$1$new_root$3/mg unless /SKIP_PREPROC/;
 			$_;
 		} split "\n",$text;
 }

@@ -3,6 +3,7 @@
 package ::;
 use Modern::Perl;
 use Carp;
+use ::Util qw(round);
 no warnings 'uninitialized';
 use vars qw($cop_hints_yml);
 our (

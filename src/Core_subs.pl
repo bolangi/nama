@@ -85,21 +85,6 @@ sub show_io {
 	pager( $output );
 }
 
-sub command_process {
-	my $input = shift;
-	my $input_was = $input;
-
-	# parse repeatedly until all input is consumed
-	
-	while ($input =~ /\S/) { 
-		$debug and say "input: $input";
-		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
-	}
-	$ui->refresh; # in case we have a graphic environment
-	set_current_bus();
-}
-
-
 sub leading_track_spec {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
@@ -165,6 +150,18 @@ sub is_bunch {
 	$bn{$name} or $bunch{$name}
 }
 
+sub pan_check {
+	my $new_position = shift;
+	my $current = $copp{ $this_track->pan }->[0];
+	$this_track->set(old_pan_level => $current)
+		unless defined $this_track->old_pan_level;
+	effect_update_copp_set(
+		$this_track->pan,	# id
+		0, 					# parameter
+		$new_position,		# value
+	);
+}
+
 # called from grammar_body.pl, Mute_Solo_Fade, Effect_chain_subs
 {
 my %set_stat = ( 
@@ -204,23 +201,26 @@ sub bunch_tracks {
 }
 }
 sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
+
+# called from almost everywhere
+
+sub command_process {
+	my $input = shift;
+	my $input_was = $input;
+
+	# parse repeatedly until all input is consumed
 	
-sub pan_check {
-	my $new_position = shift;
-	my $current = $copp{ $this_track->pan }->[0];
-	$this_track->set(old_pan_level => $current)
-		unless defined $this_track->old_pan_level;
-	effect_update_copp_set(
-		$this_track->pan,	# id
-		0, 					# parameter
-		$new_position,		# value
-	);
+	while ($input =~ /\S/) { 
+		$debug and say "input: $input";
+		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
+	}
+	$ui->refresh; # in case we have a graphic environment
+	set_current_bus();
 }
 	
 ## called from ChainSetup.pm and Engine_setup_subs.pm
 
 sub setup_file { join_path( project_dir(), $chain_setup_file) };
-
 
 ## called from 
 # Track_subs
@@ -229,7 +229,7 @@ sub setup_file { join_path( project_dir(), $chain_setup_file) };
 # Core_subs
 # Realtime_subs
 
-# throw away first argument
+# throw away first argument # XXX should be eliminated
 
 sub discard_object {
 	shift @_ if (ref $_[0]) =~ /Nama/;
@@ -281,7 +281,6 @@ sub width {
 	return 'stereo' if $count == 2;
 	return "$count channels";
 }
-
 
 sub cleanup_exit {
  	remove_riff_header_stubs();

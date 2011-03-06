@@ -86,6 +86,9 @@ use ::Util qw(
 	time_tag 
 	heuristic_time
 	dest_type
+	channels
+	signal_format
+	dest_type
 );
 use ::Initialize_subs ();
 use ::Option_subs ();
