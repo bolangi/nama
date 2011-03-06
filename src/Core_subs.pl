@@ -428,42 +428,6 @@ sub width {
 }
 
 
-	# status_snapshot() 
-	#
-	# hashref output for detecting if we need to reconfigure engine
-	# compared as YAML strings
-	#
-{
-	my @sense_reconfigure = qw(
-		name
-		width
-		group 
-		playat
-		region_start	
-		region_end
-		looping
-		source_id
-		source_type
-		send_id
-		send_type
-		rec_defeat
-		rec_status
-		current_version
- );
-sub status_snapshot {
-
-	
-	my %snapshot = ( project 		=> 	$project_name,
-					 mastering_mode => $mastering_mode,
-					 preview        => $preview,
-					 main_out 		=> $main_out,
-					 jack_running	=> $jack_running,
-					 tracks			=> [], );
-	map { push @{$snapshot{tracks}}, $_->snapshot(\@sense_reconfigure) }
-	::Track::all();
-	\%snapshot;
-}
-}
 sub cleanup_exit {
  	remove_riff_header_stubs();
 	# for each process: 
