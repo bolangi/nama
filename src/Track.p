@@ -824,7 +824,7 @@ sub adjusted_length {
 		$length = 	$track->adjusted_region_end_time
 				  - $track->adjusted_region_start_time
 	} else {
-		$length = 	$::wav_info{$track->full_path}{length};
+		$length = 	::wav_length($track->full_path);
 	}
 	$length += $track->adjusted_playat_time;
 }

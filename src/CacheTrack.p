@@ -117,7 +117,7 @@ sub prepare_to_cache {
 sub cache_engine_run { # uses shared lexicals
 
 	connect_transport('quiet')
-		or say ("Couldn't connect engine! Aborting."), return;
+		or say("Couldn't connect engine! Aborting."), return;
 	$processing_time = $length + $additional_time;
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";

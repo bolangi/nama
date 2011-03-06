@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+no warnings 'uninitialized';
 our (
 	$debug,
 	$debug2,

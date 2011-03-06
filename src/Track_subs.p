@@ -51,9 +51,9 @@ sub add_track {
 	
 	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
 	
-	say ("$name: track name already in use. Skipping."), return 
+	say("$name: track name already in use. Skipping."), return 
 		if $::Track::by_name{$name};
-	say ("$name: reserved track name. Skipping"), return
+	say("$name: reserved track name. Skipping"), return
 	 	if grep $name eq $_, @mastering_track_names; 
 
 	my $track = $class->new(%vals);

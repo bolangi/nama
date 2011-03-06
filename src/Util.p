@@ -8,7 +8,8 @@ our ( %tn ); 			# rw_set()
 our ( $chain_setup); 	# really_recording()
 
 package ::Util;
-use Modern::Perl;
+use Modern::Perl; use Carp;
+no warnings 'uninitialized';
 
 require Exporter;
 

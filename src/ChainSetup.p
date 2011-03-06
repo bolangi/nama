@@ -4,6 +4,7 @@
 
 
 package ::;
+use Modern::Perl; use Carp;
 
 # these variables are specific to chain setup
 # and get initialized each time a chain setup
@@ -43,6 +44,7 @@ our (	$debug,
 package ::ChainSetup;
 
 use Modern::Perl;
+no warnings 'uninitialized';
 use ::Util qw(input_node output_node);
 
 sub initialize {

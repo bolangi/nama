@@ -3,8 +3,8 @@
 ## loading and running the Ecasound engine
 
 package ::;
-use Modern::Perl;
-use Carp;
+use Modern::Perl; use Carp;
+no warnings 'uninitialized';
 use ::Util qw(process_is_running really_recording);
 
 our (

@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+no warnings 'uninitialized';
 use Carp;
 our (
 	$term,
