@@ -96,6 +96,7 @@ use ::Jack_subs ();
 use ::Mode_subs ();
 use ::Mute_Solo_Fade ();
 use ::Midi_subs ();
+use ::Bus_subs ();
 
 ## Definitions ##
 

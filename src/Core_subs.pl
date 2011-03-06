@@ -161,18 +161,6 @@ sub schedule_autosave {
 sub debugging_options {
 	grep{$_} $debug, @opts{qw(R D J A E T)};
 }
-# for GUI transport controls
-
-sub toggle_unit {
-	if ($unit == 1){
-		$unit = 60;
-		
-	} else{ $unit = 1; }
-}
-sub show_unit { $time_step->configure(
-	-text => ($unit == 1 ? 'Sec' : 'Min') 
-)}
-
 sub autosave {
 	if (engine_running()){ 
 		schedule_autosave(1); # try again in 60s
@@ -245,15 +233,6 @@ sub leading_track_spec {
 		1;
 	}
 		
-}
-sub set_current_bus {
-	my $track = shift || ($this_track ||= $tn{Master});
-	#say "track: $track";
-	#say "this_track: $this_track";
-	#say "master: $tn{Master}";
-	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
-	elsif( $bn{$track->name} ){$this_bus = $track->name }
-	else { $this_bus = $track->group }
 }
 sub eval_perl {
 	my $code = shift;
@@ -526,70 +505,6 @@ sub undefine_region {
 	print $this_track->name, ": Region definition removed. Full track will play.\n";
 }
 
-sub add_sub_bus {
-	my ($name, @args) = @_; 
-	
-	::SubBus->new( 
-		name => $name, 
-		send_type => 'track',
-		send_id	 => $name,
-		) unless $::Bus::by_name{$name};
-
-	# create mix track
-	@args = ( 
-		width 		=> 2,     # default to stereo 
-		rec_defeat	=> 1,     # set to rec_defeat (don't record signal)
-		rw 			=> 'REC', # set to REC (accept other track signals)
-		@args
-	);
-
-	$tn{$name} and say qq($name: setting as mix track for bus "$name");
-
-	my $track = $tn{$name} // add_track($name);
-
-	# convert host track to mix track
-	
-	$track->set(was_class => ref $track); # save the current track (sub)class
-	$track->set_track_class('::MixTrack'); 
-	$track->set( @args );
-	
-}
-	
-sub add_send_bus {
-
-	my ($name, $dest_id, $bus_type) = @_;
-	my $dest_type = dest_type( $dest_id );
-
-	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
-	
-	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
-	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
-		say($name,": bus name already in use. Aborting."), return;
-	}
-	if ($bn{$name}){
-		say qq(monitor bus "$name" already exists. Updating with new tracks.");
-	} else {
-	my @args = (
-		name => $name, 
-		send_type => $dest_type,
-		send_id	 => $dest_id,
-	);
-
-	my $class = $bus_type eq 'cooked' ? '::SendBusCooked' : '::SendBusRaw';
-	my $bus = $class->new( @args );
-
-	$bus or carp("can't create bus!\n"), return;
-
-	}
-	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
-							rw => 'MON',
-							target => $_,
-							group  => $name,
-						)
-   } $main->tracks;
-		
-}
-
 sub dest_type {
 	my $dest = shift;
 	my $type;
@@ -614,14 +529,6 @@ sub dest_type {
 	}
 	$type
 }
-	
-sub update_send_bus {
-	my $name = shift;
-		add_send_bus( $name, 
-						 $bn{$name}->send_id),
-						 "dummy",
-}
-
 sub cleanup_exit {
  	remove_riff_header_stubs();
 	# for each process: 
@@ -702,19 +609,4 @@ sub destroy_current_wav {
 	$main->set(rw => $old_group_status);
 	1;
 }
-
-# the following routines are used only by the GUI
-sub some_user_tracks {
-	my $which = shift;
-	my @user_tracks = ::Track::all();
-	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
-	return unless @user_tracks;
-	my @selected_user_tracks = grep { $_->rec_status eq $which } @user_tracks;
-	return unless @selected_user_tracks;
-	map{ $_->n } @selected_user_tracks;
-}
-sub user_rec_tracks { some_user_tracks('REC') }
-sub user_mon_tracks { some_user_tracks('MON') }
-
-
 

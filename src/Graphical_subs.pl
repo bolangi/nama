@@ -358,6 +358,15 @@ sub time_gui {
 	)->pack(-side => 'left');	
 
 }
+sub toggle_unit {
+	if ($unit == 1){
+		$unit = 60;
+		
+	} else{ $unit = 1; }
+}
+sub show_unit { $time_step->configure(
+	-text => ($unit == 1 ? 'Sec' : 'Min') 
+)}
 
 #  the following is based on previous code for multiple buttons
 #  needs cleanup
@@ -401,7 +410,19 @@ sub engine_mode_color {
 		} elsif ( user_mon_tracks() ){  
 				$namapalette{Play}; 	# just playback
 		} else { $old_bg } 
-	}
+}
+sub user_rec_tracks { some_user_tracks('REC') }
+sub user_mon_tracks { some_user_tracks('MON') }
+
+sub some_user_tracks {
+	my $which = shift;
+	my @user_tracks = ::Track::all();
+	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
+	return unless @user_tracks;
+	my @selected_user_tracks = grep { $_->rec_status eq $which } @user_tracks;
+	return unless @selected_user_tracks;
+	map{ $_->n } @selected_user_tracks;
+}
 
 sub flash_ready {
 
