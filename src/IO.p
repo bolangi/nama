@@ -18,7 +18,7 @@
 
 package ::IO;
 use Modern::Perl; use Carp;
-use ::Util qw(channels signal_format);
+use ::Util qw(channels signal_format dest_type);
 our $VERSION = 1.0;
 
 # we will use the following to map from graph node names
@@ -289,7 +289,7 @@ sub device_id {
 	my $channel = 1;
 	# we want the direction with respect to the client, i.e.  # reversed
 	my $client_direction = $io->direction eq 'input' ? 'output' : 'input';
-	if( ::dest_type($client) eq 'soundcard'){
+	if( dest_type($client) eq 'soundcard'){
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}

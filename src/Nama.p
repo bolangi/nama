@@ -78,7 +78,15 @@ use ::ChainSetup ();
 use ::CacheTrack ();
 use ::Edit_subs ();
 use ::Effect_subs ();
-use ::Util qw(rw_set process_is_running d1 d2 dn colonize time_tag heuristic_time);
+use ::Util qw(
+	rw_set 
+	process_is_running 
+	d1 d2 dn 
+	colonize 
+	time_tag 
+	heuristic_time
+	dest_type
+);
 use ::Wavinfo_subs ();
 use ::Config_subs ();
 use ::Memoize_subs ();

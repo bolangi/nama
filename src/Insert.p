@@ -23,7 +23,7 @@ use ::Object qw(
 	wet_vol
 	dry_vol
 );
-use ::Util qw(input_node output_node);
+use ::Util qw(input_node output_node dest_type);
 # tracks: deprecated
 
 initialize();

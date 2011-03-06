@@ -499,30 +499,6 @@ sub undefine_region {
 	print $this_track->name, ": Region definition removed. Full track will play.\n";
 }
 
-sub dest_type {
-	my $dest = shift;
-	my $type;
-	given( $dest ){
-		when( undef )       {} # do nothing
-
-		# non JACK related
-
-		when('bus')			   { $type = 'bus'             }
-		when('null')           { $type = 'null'            }
-		when(/^loop,/)         { $type = 'loop'            }
-
-		when(! /\D/)           { $type = 'soundcard'       } # digits only
-
-		# JACK related
-
-		when(/^man/)           { $type = 'jack_manual'     }
-		when('jack')           { $type = 'jack_manual'     }
-		when(/(^\w+\.)?ports/) { $type = 'jack_ports_list' }
-		default                { $type = 'jack_client'     } 
-
-	}
-	$type
-}
 sub cleanup_exit {
  	remove_riff_header_stubs();
 	# for each process: 

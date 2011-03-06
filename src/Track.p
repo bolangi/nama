@@ -26,7 +26,7 @@ our $VERSION = 1.0;
 our ($debug);
 local $debug = 0;
 use ::Assign qw(join_path);
-use ::Util qw(freq input_node);
+use ::Util qw(freq input_node dest_type);
 use IO::All;
 use vars qw($n %by_name @by_index %track_names %by_index @all);
 our @ISA = '::Wav';
@@ -451,7 +451,7 @@ sub set_io {
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
 	# set values, returning new setting
-	my $type = ::dest_type( $id );
+	my $type = dest_type( $id );
 	given ($type){
 	
 		# no data changes needed for some settings
