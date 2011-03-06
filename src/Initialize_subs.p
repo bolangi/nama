@@ -156,6 +156,9 @@ exit;
 	restore_effect_profiles();
 	1;	
 }
+sub debugging_options {
+	grep{$_} $debug, @opts{qw(R D J A E T)};
+}
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);
 	select_ecasound_interface();

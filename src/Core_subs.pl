@@ -52,26 +52,6 @@ sub do_user_command {
 	$user_command{$cmd}->(@args);
 }	
 
-# called from ChainSetup.pm and Engine_setup_subs.pm
-
-sub setup_file { join_path( project_dir(), $chain_setup_file) };
-
-
-
-# throw away first argument
-
-sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Nama/;
-	@_;
-}
-
-
-sub debugging_options {
-	grep{$_} $debug, @opts{qw(R D J A E T)};
-}
-sub process_control_inputs { }
-
-
 sub dump_all {
 	my $tmp = ".dump_all";
 	my $fname = join_path( project_root(), $tmp);
@@ -160,100 +140,40 @@ sub bunch_tracks {
 }
 sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
 	
-	
-sub automix {
-
-	# get working track set
-	
-	my @tracks = grep{
-					$tn{$_}->rec_status eq 'MON' or
-					$bn{$_} and $tn{$_}->rec_status eq 'REC'
-				 } $main->tracks;
-
-	say "tracks: @tracks";
-
-	## we do not allow automix if inserts are present	
-
-	say("Cannot perform automix if inserts are present. Skipping."), return
-		if grep{$tn{$_}->prefader_insert || $tn{$_}->postfader_insert} @tracks;
-
-	#use Smart::Comments '###';
-	# add -ev to summed signal
-	my $ev = add_effect( { chain => $tn{Master}->n, type => 'ev' } );
-	### ev id: $ev
-
-	# turn off audio output
-	
-	$main_out = 0;
-
-	### Status before mixdown:
-
-	command_process('show');
-
-	
-	### reduce track volume levels  to 10%
-
-	## accommodate ea and eadb volume controls
-
-	my $vol_operator = $cops{$tn{$tracks[0]}->vol}{type};
-
-	my $reduce_vol_command  = $vol_operator eq 'ea' ? 'vol / 10' : 'vol - 10';
-	my $restore_vol_command = $vol_operator eq 'ea' ? 'vol * 10' : 'vol + 10';
-
-	### reduce vol command: $reduce_vol_command
-
-	for (@tracks){ command_process("$_  $reduce_vol_command") }
-
-	command_process('show');
-
-	generate_setup('automix') # pass a bit of magic
-		or say("automix: generate_setup failed!"), return;
-	connect_transport();
-	
-	# start_transport() does a rec_cleanup() on transport stop
-	
-	eval_iam('start'); # don't use heartbeat
-	sleep 2; # time for engine to stabilize
-	while( eval_iam('engine-status') ne 'finished'){ 
-		print q(.); sleep 1; update_clock_display()}; 
-	print " Done\n";
-
-	# parse cop status
-	my $cs = eval_iam('cop-status');
-	### cs: $cs
-	my $cs_re = qr/Chain "1".+?result-max-multiplier ([\.\d]+)/s;
-	my ($multiplier) = $cs =~ /$cs_re/;
-
-	### multiplier: $multiplier
-
-	remove_effect($ev);
-
-	# deal with all silence case, where multiplier is 0.00000
-	
-	if ( $multiplier < 0.00001 ){
-
-		say "Signal appears to be silence. Skipping.";
-		for (@tracks){ command_process("$_  $restore_vol_command") }
-		$main_out = 1;
-		return;
-	}
-
-	### apply multiplier to individual tracks
-
-	for (@tracks){ command_process( "$_ vol*$multiplier" ) }
-
-	# $main_out = 1; # unnecessary: mixdown will turn off and turn on main out
-	
-	### mixdown
-	command_process('mixdown; arm; start');
-
-	### turn on audio output
-
-	# command_process('mixplay'); # rec_cleanup does this automatically
-
-	#no Smart::Comments;
-	
+sub pan_check {
+	my $new_position = shift;
+	my $current = $copp{ $this_track->pan }->[0];
+	$this_track->set(old_pan_level => $current)
+		unless defined $this_track->old_pan_level;
+	effect_update_copp_set(
+		$this_track->pan,	# id
+		0, 					# parameter
+		$new_position,		# value
+	);
 }
+	
+## called from ChainSetup.pm and Engine_setup_subs.pm
+
+sub setup_file { join_path( project_dir(), $chain_setup_file) };
+
+
+## called from 
+# Track_subs
+# Graphical_subs
+# Refresh_subs
+# Core_subs
+# Realtime_subs
+
+# throw away first argument
+
+sub discard_object {
+	shift @_ if (ref $_[0]) =~ /Nama/;
+	@_;
+}
+
+
+
+
 # vol/pan requirements of mastering and mixdown tracks
 
 { my %volpan = (
@@ -287,18 +207,6 @@ sub need_vol_pan {
 	}
 	return 1;
 }
-}
-
-sub pan_check {
-	my $new_position = shift;
-	my $current = $copp{ $this_track->pan }->[0];
-	$this_track->set(old_pan_level => $current)
-		unless defined $this_track->old_pan_level;
-	effect_update_copp_set(
-		$this_track->pan,	# id
-		0, 					# parameter
-		$new_position,		# value
-	);
 }
 
 # track width in words
@@ -404,5 +312,6 @@ sub show_tracks_limited {
 	# Current bus
 
 }
+sub process_control_inputs { }
 
 		
