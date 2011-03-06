@@ -58,11 +58,11 @@ process_options();
 initialize_interfaces();
 diag "Check representative variable from default .namarc";
 
-is ( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
+is( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
 =skip
 # Ecasound dependent
 diag "Check static effects data read";
-is ( $::e_bound{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
+is( $::e_bound{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
 
 diag "Check effect hinting and help";
 
@@ -282,36 +282,34 @@ like( ref $io, qr/IO$/, 'IO base class object');
 
 $io = ::IO::to_soundcard_device->new(track => 'sax'); 
 
-is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
-is ($io->ecs_extra,  ' -chmove:1,5', 'IO to_soundcard_device 2');
+is($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
+is($io->ecs_extra,  ' -chmove:1,5', 'IO to_soundcard_device 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 
-is ($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
-is ($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
+is($io->ecs_string, '-o:alsa,default', 'IO to_soundcard 1');
+is($io->ecs_extra, ' -chmove:1,5', 'IO to_soundcard 2');
 
 force_jack();
 
 
 $io = ::IO::from_soundcard->new(track => 'sax'); 
 like (ref $io, qr/from_jack_multi/, 'sound system ALSA/JACK detection: input');
-is ($io->ecs_string, '-i:jack_multi,system:capture_2', 'IO from_soundcard: jack 1');
-is ($io->ecs_extra, '-chcopy:1,2', 'IO from_soundcard: jack 2');
+is($io->ecs_string, '-i:jack_multi,system:capture_2', 'IO from_soundcard: jack 1');
+is($io->ecs_extra, '-chcopy:1,2', 'IO from_soundcard: jack 2');
 
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 like (ref $io, qr/to_jack_multi/, 'sound system ALSA/JACK detection: output');
 
-is ($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
-ok (! $io->ecs_extra, 'IO to_soundcard: jack 2');
+is($io->ecs_string, '-o:jack_multi,system:playback_5', 'IO to_soundcard: jack 1');
+ok(! $io->ecs_extra, 'IO to_soundcard: jack 2');
 
 $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
-is ($io->device_id, 'alsa,default', 'value overrides method call');
+is($io->device_id, 'alsa,default', 'value overrides method call');
 
 command_process("sax; source Horgand; gen");
-generate_setup();
-diag( $this_track->dump );
 like( $chain_setup, qr/Horgand/, 'set JACK client as input');
 command_process("sax; source jack; gen");
 like( $chain_setup, qr/jack,,sax_in/, 'set JACK port for manual input');

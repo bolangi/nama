@@ -69,8 +69,7 @@ sub generate_setup {
 		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
 
-	# generate_setup_try() gets the @_ passed to generate_setup()
-	my $success = eval { ::ChainSetup::generate_setup_try() }; 
+	my $success = eval { ::ChainSetup::generate_setup_try(@_) }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	$this_track = $old_this_track;
@@ -79,7 +78,7 @@ sub generate_setup {
 		::ChainSetup::initialize() unless $debug;
 		return
 	}
-	$success
+	$success;
 }
 sub remove_temporary_tracks {
 	$debug2 and say "&remove_temporary_tracks";

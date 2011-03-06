@@ -45,7 +45,7 @@ package ::ChainSetup;
 
 use Modern::Perl;
 no warnings 'uninitialized';
-use ::Util qw(input_node output_node);
+use ::Util qw(signal_format input_node output_node really_recording);
 
 sub initialize {
 	@io = (); 			# IO object list

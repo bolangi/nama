@@ -89,6 +89,8 @@ use ::Util qw(
 	channels
 	signal_format
 	dest_type
+	input_node
+	output_node
 );
 use ::Initialize_subs ();
 use ::Option_subs ();
