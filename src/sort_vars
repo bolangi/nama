@@ -1,8 +1,9 @@
 #!/usr/bin/env perl
 use File::Slurp;
 use Modern::Perl;
+my $dir = shift // '.';
 my @lines;
-push @lines, read_file("$ENV{MD}/src/declarations.pl"), read_file("$ENV{MD}/src/var_types.pl");
+push @lines, read_file("$dir/declarations.pl"), read_file("$dir/var_types.pl");
 map{ chomp $_ } @lines;
 
 my $category;
