@@ -6,7 +6,6 @@ use Modern::Perl;
 our (
 	$debug,
 	%bn,
-	$g,
 	$length,
 	$ui,
 	$this_track,
@@ -57,7 +56,7 @@ sub cache_track { # launch subparts if conditions are met
 sub prepare_to_cache {
 	# uses shared lexicals
 	
- 	::ChainSetup::initialize();
+ 	my $g = ::ChainSetup::initialize();
 	$orig_version = $track->monitor_version;
 
 	# create a temporary track to represent the output file

@@ -177,7 +177,7 @@ sub add_paths {
 	
 	my @edge = ($loop, output_node($self->{send_type}));
 	$debug and say "edge: @edge";
-	::Graph::add_path($name, @edge);
+	$g->add_path( $name, @edge);
 	$g->set_vertex_attributes($loop, {n => $t->n});
 	$g->set_edge_attributes(@edge, { 
 		send_id => $self->{send_id},
@@ -193,11 +193,11 @@ sub add_paths {
 				source_type => $self->{return_type},
 				source_id => $self->{return_id},
 	});
-	::Graph::add_path(input_node($self->{return_type}), $wet->name, $successor);
+	$g->add_path(input_node($self->{return_type}), $wet->name, $successor);
 
 	# connect dry track to graph
 	
-	::Graph::add_path($loop, $dry->name, $successor);
+	$g->add_path($loop, $dry->name, $successor);
 	}
 	
 }
@@ -234,7 +234,7 @@ sub add_paths {
 
 		my @edge = ($predecessor, output_node($self->{send_type}));
 		$debug and say "edge: @edge";
-		::Graph::add_path(@edge);
+		$g->add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
 			send_type => $self->{send_type},
@@ -258,14 +258,14 @@ sub add_paths {
 		$g->set_vertex_attributes($dry->name, {
 				mono_to_stereo => '', # override
 		});
-		::Graph::add_path(input_node($self->{return_type}), $wet->name, $loop);
+		$g->add_path(input_node($self->{return_type}), $wet->name, $loop);
 
 		# connect dry track to graph
 		#
 		# post: dry path: loop -> dry -> successor
 		# pre: dry path:  predecessor -> dry -> loop
 		
-		::Graph::add_path($predecessor, $dry->name, $loop, $name);
+		$g->add_path($predecessor, $dry->name, $loop, $name);
 	}
 	
 }

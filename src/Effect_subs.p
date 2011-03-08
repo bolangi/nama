@@ -13,7 +13,6 @@ our (
 	$this_op,
 	%cops,
 	%copp,
-	$g,	
 	$debug,
 	$debug2,
 	$ui,
@@ -627,9 +626,7 @@ sub ops_with_controller {
 	grep{ ! is_controller($_) }
 	grep{ scalar @{$cops{$_}{owns}} }
 	map{ @{ $_->ops } } 
-	map{ $tn{$_} } 
-	grep{ $tn{$_} } 
-	$g->vertices;
+	::ChainSetup::engine_tracks();
 }
 
 sub is_controller { my $id = shift; $cops{$id}{belongs_to} }

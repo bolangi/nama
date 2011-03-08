@@ -101,15 +101,16 @@ use Modern::Perl; use Carp; our @ISA = '::Bus';
 
 sub apply {
 	my $bus = shift;
+	my $g = shift;
 	return unless $::tn{$bus->name}->rec_status eq 'REC';
 	map{ 
 		# connect signal sources to tracks
 		my @path = $_->input_path;
-		$::g->add_path(@path) if @path;
+		$g->add_path(@path) if @path;
 
 		# connect tracks to mix track
 		
-		$::g->add_edge($_->name, $bus->name); 
+		$g->add_edge($_->name, $bus->name); 
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
@@ -163,9 +164,10 @@ use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 
 sub apply {
 	my $bus = shift;
+	my $g = shift;
 	map{ my @edge = ($_->name, ::output_node($bus->send_type));
-		 $::g->add_path( $_->target, @edge);
-		 $::g->set_edge_attributes( @edge, { 
+		 $g->add_path( $_->target, @edge);
+		 $g->set_edge_attributes( @edge, { 
 				send_id => $bus->send_id,
 				width => 2})
 	} grep{ $_->group eq $bus->group} ::Track::all()

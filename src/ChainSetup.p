@@ -5,15 +5,7 @@
 package ::;
 use Modern::Perl; use Carp;
 
-# these variables are specific to chain setup
-# and get initialized each time a chain setup
-# is generated
-
-our (	
-	$g,
-	
-);
-# these variables are other globals that 
+# these variables are globals that 
 # are touched in creating chain setups
 our (	$debug,
 		$debug2,
@@ -37,6 +29,9 @@ use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
 
 our (
+
+	$g,  # routing graph object
+
 	@io, # IO objects corresponding to chain setup
 
 	%is_ecasound_chain, # chains in final chain seutp
@@ -69,6 +64,7 @@ sub initialize {
 	::disable_length_timer();
 	reset_aux_chain_counter();
 	{no autodie; unlink ::setup_file()}
+	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
@@ -163,11 +159,11 @@ sub add_paths_for_main_tracks {
 		
 		my @path = $_->input_path;
 		#say "Main bus track input path: @path";
-		$::g->add_path(@path) if @path;
+		$g->add_path(@path) if @path;
 
 		# connect tracks to Master
 		
-		$::g->add_edge($_->name, 'Master'); 
+		$g->add_edge($_->name, 'Master'); 
 
 	} 	
 		grep{ 1 unless $preview eq 'doodle'

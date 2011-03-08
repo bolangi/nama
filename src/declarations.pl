@@ -153,10 +153,6 @@
 	$fake_jack_lsp, # for testing
 	%jack,			# jack clients data from jack_lsp
 
-# category: chain setup
-
-	$g, 			# Graph var, for chain setup
-
 # category: events
 
 	%event_id,    # events will store themselves with a key

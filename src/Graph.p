@@ -44,12 +44,6 @@ sub expand_graph {
 	}
 	
 }
-sub add_path {
-	my @nodes = @_;
-	$debug and say "adding path: ", join " ", @nodes;
-	$::g->add_path(@nodes);
-}
-sub add_edge { add_path(@_) }
 	
 sub add_inserts {
 	my $g = shift;
@@ -150,11 +144,11 @@ sub add_loop {
  		my $attr = $g->get_edge_attributes($a,$_);
  		$debug and say "deleting edge: $a-$_";
  		$g->delete_edge($a,$_);
-		add_edge($loop, $_);
+		$g->add_edge($loop, $_);
 		$g->set_edge_attributes($loop,$_, $attr) if $attr;
 		$seen{"$a-$_"}++;
  	} $g->successors($a);
-	add_edge($a,$loop);
+	$g->add_edge($a,$loop);
 }
  
 
@@ -169,11 +163,11 @@ sub add_far_side_loop {
  		my $attr = $g->get_edge_attributes($_,$b);
  		$debug and say "deleting edge: $_-$b";
  		$g->delete_edge($_,$b);
-		add_edge($_,$loop);
+		$g->add_edge($_,$loop);
 		$g->set_edge_attributes($_,$loop, $attr) if $attr;
 		$seen{"$_-$b"}++;
  	} $g->predecessors($b);
-	add_edge($loop,$b);
+	$g->add_edge($loop,$b);
 }
 
 
@@ -210,7 +204,7 @@ sub remove_out_of_bounds_tracks {
 sub recursively_remove_inputless_tracks {
 	my $g = shift;
 	# make multiple passes if necessary
-	while(my @i = ::Graph::inputless_tracks($g)){
+	while(my @i = inputless_tracks($g)){
 		remove_tracks($g, @i);
 	}
 }
@@ -220,7 +214,7 @@ sub outputless_tracks {
 }	
 sub recursively_remove_outputless_tracks {
 	my $g = shift;
-	while(my @i = ::Graph::outputless_tracks($g)){
+	while(my @i = outputless_tracks($g)){
 		remove_tracks($g, @i);
 	}
 }
