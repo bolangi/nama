@@ -174,9 +174,20 @@ sub reconfigure_engine {
 	#
 	# hashref output for detecting if we need to reconfigure engine
 	# compared as YAML strings
-	#
+
+
+	# %status_snaphot indicates Nama's internal
+	# state. It consists of 
+	# - the values of selected global variables
+	# - selected field values of each track
+	
+
+	
 {
-	my @sense_reconfigure = qw(
+
+	# these track fields will be inspected
+	
+	my @relevant_track_fields = qw(
 		name
 		width
 		group 
@@ -201,7 +212,7 @@ sub status_snapshot {
 					 main_out 		=> $main_out,
 					 jack_running	=> $jack_running,
 					 tracks			=> [], );
-	map { push @{$snapshot{tracks}}, $_->snapshot(\@sense_reconfigure) }
+	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
 	::Track::all();
 	\%snapshot;
 }
