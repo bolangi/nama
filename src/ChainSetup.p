@@ -10,7 +10,6 @@ use Modern::Perl; use Carp;
 our (	$debug,
 		$debug2,
 		$debug3,
-		$this_track,
 		$preview,
 		%tn,
 		$main,
