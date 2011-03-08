@@ -1,7 +1,6 @@
 # ---------- ChainSetup-----------
 #
-# variables we need to access
-
+# variables in the main namespace we need to access
 
 package ::;
 use Modern::Perl; use Carp;
@@ -10,19 +9,12 @@ use Modern::Perl; use Carp;
 # and get initialized each time a chain setup
 # is generated
 
-our (	@io,
-		$g,
-		%inputs,
-		%outputs,
-		%post_input,
-		%pre_output,
-		%is_ecasound_chain,
-		@input_chains,
-		@output_chains,
-		@post_input,
-		@pre_output,
-		$chain_setup,
-		$length,
+our (	
+	$g,
+
+	
+	$chain_setup,	# final result as string
+	%is_ecasound_chain, # chains in final chain seutp
 );
 # these variables are other globals that 
 # are touched in creating chain setups
@@ -46,6 +38,26 @@ package ::ChainSetup;
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node really_recording);
+use ::Assign qw(yaml_out);
+
+our (
+	@io, # IO objects corresponding to chain setup
+
+	# for sorting final result
+
+	%inputs,
+	%outputs,
+	%post_input,
+	%pre_output,
+
+	# for final result
+	
+	@input_chains,	# list of input chain segments 
+	@output_chains, # list of output chain segments
+	@post_input,	# post-input chain operators
+	@pre_output, 	# pre-output chain operators
+	);
+
 
 sub initialize {
 	@io = (); 			# IO object list
@@ -56,9 +68,13 @@ sub initialize {
 	undef $chain_setup;
 	::disable_length_timer();
 	reset_aux_chain_counter();
-	$length = 0;
 	{no autodie; unlink ::setup_file()}
 }
+sub show_io {
+	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
+	::pager( $output );
+}
+
 sub generate_setup_try {  # TODO: move operations below to buses
 	$debug2 and print "&generate_setup_try\n";
 

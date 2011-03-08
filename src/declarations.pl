@@ -156,19 +156,10 @@
 
 # category: chain setup
 
-	# for sorting
-	
-	%inputs,
-	%outputs,
-	%post_input,
-	%pre_output,
-
-	# for final result
-	
-	@input_chains,	# list of input chain segments 
-	@output_chains, # list of output chain segments
-	@post_input,	# post-input chain operators
-	@pre_output, 	# pre-output chain operators
+	$chain_setup,	# current chain setup
+	#@io, 			# accumulate IO objects for generating setup
+	$g, 			# Graph var, for chain setup
+	%is_ecasound_chain,   # suitable for c-select
 
 # category: events
 
@@ -189,15 +180,11 @@
 
 	$disable_auto_reconfigure, # for debugging
 
-	$g, 			# Graph var, for chain setup
 	%cooked_record_pending, # an intermediate mixdown for tracks
 	$sock, 			# socket for Net-ECI mode
 	%versions,		# store active versions for use after engine run
-	@io, 			# accumulate IO objects for generating setup
 	$track_snapshots, # to save recalculating for each IO object
-	$chain_setup,	# current chain setup
 	$regenerate_setup, # force us to generate new chain setup
-	%is_ecasound_chain,   # suitable for c-select
 	
 	%wav_info,			# caches path/length/format/modify-time
 	

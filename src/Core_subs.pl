@@ -80,11 +80,6 @@ sub dump_all {
 }
 
 
-sub show_io {
-	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
-	pager( $output );
-}
-
 sub leading_track_spec {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){

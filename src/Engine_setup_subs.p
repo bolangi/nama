@@ -65,7 +65,8 @@ sub generate_setup {
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
 
 	::ChainSetup::initialize();
-	local $@; # don't propagate errors
+	$length = 0;  # TODO replace global with sub
+	local $@; # don't propagate errors # TODO try/catch
 		# NOTE: it would be better to use try/catch
 	track_memoize(); 			# freeze track state 
 

@@ -339,7 +339,7 @@ modifiers: _modifiers modifier(s) {
 modifiers: _modifiers { print $::this_track->modifiers, "\n"; 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager($::chain_setup); 1}
-show_io: _show_io { ::show_io(); 1}
+show_io: _show_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
 	my $output = $::format_top;
 	$output .= ::Text::show_tracks_section($::this_track);
