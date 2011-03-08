@@ -86,10 +86,9 @@ sub master_on {
 	
 	if ( ! $tn{Eq} ){  
 	
-		my $old_track = $this_track;
+		local $this_track;
 		add_mastering_tracks();
 		add_mastering_effects();
-		$this_track = $old_track;
 	} else { 
 		unhide_mastering_tracks();
 		map{ $ui->track_gui($tn{$_}->n) } @mastering_track_names;
