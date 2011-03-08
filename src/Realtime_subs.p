@@ -5,7 +5,7 @@
 package ::;
 use Modern::Perl; use Carp;
 no warnings 'uninitialized';
-use ::Util qw(process_is_running really_recording);
+use ::Util qw(process_is_running);
 
 our (
 	$debug,
@@ -33,7 +33,7 @@ sub engine_running {
 sub mixing_only {
 	my $i;
 	my $am_mixing;
-	for (really_recording()){
+	for (::ChainSetup::really_recording()){
 		$i++;
 		$am_mixing++ if /Mixdown/;
 	}
@@ -137,7 +137,7 @@ sub heartbeat {
 		if $loop_enable 
 		and defined $start 
 		and defined $end 
-		and ! really_recording();
+		and ! ::ChainSetup::really_recording();
 
 	update_clock_display();
 

@@ -5,7 +5,6 @@
 
 package ::;
 our ( %tn ); 			# rw_set()
-our ( $chain_setup); 	# really_recording()
 
 package ::Util;
 use Modern::Perl; use Carp;
@@ -24,7 +23,6 @@ input_node
 output_node
 signal_format
 process_is_running
-really_recording
 d1
 d2
 dn
@@ -175,10 +173,6 @@ sub process_is_running {
 						and ($pid) = /(\d+)/
 						and grep{ $pid == $_ } @pids 
 				} split "\n", qx(ps ax) ;
-}
-# return file output entries, including Mixdown 
-sub really_recording { 
-	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 sub d1 {
 	my $n = shift;

@@ -41,7 +41,7 @@ sub post_rec_configure {
 	#	reconfigure_engine(); # redundant
 }
 sub new_files_were_recorded {
- 	return unless my @files = really_recording();
+ 	return unless my @files = ::ChainSetup::really_recording();
 	$debug and print join $/, "intended recordings:", @files;
 	my @recorded =
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;

@@ -36,7 +36,7 @@ package ::ChainSetup;
 
 use Modern::Perl;
 no warnings 'uninitialized';
-use ::Util qw(signal_format input_node output_node really_recording);
+use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
 
 our (
@@ -71,6 +71,7 @@ sub initialize {
 	reset_aux_chain_counter();
 	{no autodie; unlink ::setup_file()}
 }
+sub ecasound_chain_setup { $chain_setup } 
 sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
 
 sub engine_tracks { # tracks that belong to current chain setup
@@ -90,6 +91,10 @@ sub is_engine_track {
 }
 sub engine_wav_out_tracks {
 	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
+}
+# return file output entries, including Mixdown 
+sub really_recording { 
+	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
 }
 	
 sub show_io {

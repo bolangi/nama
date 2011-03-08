@@ -274,7 +274,6 @@ sub loop {
 package ::Text;
 our @ISA = '::';
 use Carp;
-use ::Util qw(really_recording);
 use ::Assign qw(:all);
 
 sub hello {"hello world!";}

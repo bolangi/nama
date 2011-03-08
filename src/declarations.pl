@@ -156,7 +156,6 @@
 
 # category: chain setup
 
-	$chain_setup,	# current chain setup
 	$g, 			# Graph var, for chain setup
 
 # category: events

@@ -97,7 +97,7 @@ sub reconfigure_engine {
 	return if $disable_auto_reconfigure;
 
 	# don't disturb recording/mixing
-	return if really_recording() and engine_running();
+	return if ::ChainSetup::really_recording() and engine_running();
 
 	rememoize(); # check if someone has snuck in some files
 	
@@ -162,7 +162,7 @@ sub reconfigure_engine {
 		connect_transport('quiet');
 		::Text::show_status();
 
-		if( $restore_position and not really_recording()){
+		if( $restore_position and not ::ChainSetup::really_recording()){
 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $length;
  			start_transport('quiet') if $was_running;
 		}

@@ -80,7 +80,7 @@ sub show_status {
 	push @modes, "offset run" if ::offset_run_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
 	my @actions;
-	push @actions, "record" if grep{ ! /Mixdown/ } ::really_recording();
+	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
 	push @actions, "playback" if grep { $_->rec_status eq 'MON' } 
 		map{ $tn{$_} } $main->tracks, q(Mixdown);
 
@@ -330,7 +330,7 @@ sub find_effect {
 
 sub t_load_project {
 	package ::;
-	return if engine_running() and really_recording();
+	return if engine_running() and ::ChainSetup::really_recording();
 	my $name = shift;
 	print "input name: $name\n";
 	my $newname = remove_spaces($name);
@@ -368,7 +368,7 @@ sub t_insert_effect {
 	$code = effect_code( $code );	
 	my $running = engine_running();
 	print("Cannot insert effect while engine is recording.\n"), return 
-		if $running and really_recording();
+		if $running and ::ChainSetup::really_recording();
 	print("Cannot insert effect before controller.\n"), return 
 		if $cops{$before}->{belongs_to};
 

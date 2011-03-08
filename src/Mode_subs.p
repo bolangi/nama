@@ -47,7 +47,7 @@ sub set_preview_mode {
 sub set_doodle_mode {
 
 	$debug2 and print "&doodle\n";
-	return if engine_running() and really_recording();
+	return if engine_running() and ::ChainSetup::really_recording();
 	$preview = "doodle";
 
 	# save rw setting of user tracks (not including null group)

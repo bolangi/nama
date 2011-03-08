@@ -21,12 +21,12 @@ our (
 
 sub mute {
 	return if $opts{F};
-	return if $tn{Master}->rw eq 'OFF' or really_recording();
+	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
 	$tn{Master}->mute;
 }
 sub unmute {
 	return if $opts{F};
-	return if $tn{Master}->rw eq 'OFF' or really_recording();
+	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
 	$tn{Master}->unmute;
 }
 sub fade {

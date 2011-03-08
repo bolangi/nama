@@ -86,7 +86,7 @@ sub complete_edit_points {
 sub set_edit_points {
 	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
 	say("You must use a playback-only mode to setup edit marks. Aborting"), 
-		return 1 if really_recording();
+		return 1 if ::ChainSetup::really_recording();
 	say("You need stop the engine first. Aborting"), 
 		return 1 if engine_running();
 	say "Ready to set edit points!";

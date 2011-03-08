@@ -83,17 +83,17 @@ sub previous_mark {
 ## jump recording head position
 
 sub to_start { 
-	return if really_recording();
+	return if ::ChainSetup::really_recording();
 	set_position( 0 );
 }
 sub to_end { 
 	# ten seconds shy of end
-	return if really_recording();
+	return if ::ChainSetup::really_recording();
 	my $end = eval_iam('cs-get-length') - 10 ;  
 	set_position( $end);
 } 
 sub jump {
-	return if really_recording();
+	return if ::ChainSetup::really_recording();
 	my $delta = shift;
 	$debug2 and print "&jump\n";
 	my $here = eval_iam('getpos');
@@ -105,7 +105,7 @@ sub jump {
 }
 sub set_position {
 
-    return if really_recording(); # don't allow seek while recording
+    return if ::ChainSetup::really_recording(); # don't allow seek while recording
 
     my $seconds = shift;
     my $coderef = sub{ eval_iam("setpos $seconds") };

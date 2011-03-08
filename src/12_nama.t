@@ -19,7 +19,6 @@ use Cwd;
 our (
 	$main,
 	$this_track,
-	$chain_setup,
 	%opts,
 	$jack_running,
 );
@@ -310,9 +309,9 @@ $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 is($io->device_id, 'alsa,default', 'value overrides method call');
 
 command_process("sax; source Horgand; gen");
-like( $chain_setup, qr/Horgand/, 'set JACK client as input');
+like( ::ChainSetup::ecasound_chain_setup(), qr/Horgand/, 'set JACK client as input');
 command_process("sax; source jack; gen");
-like( $chain_setup, qr/jack,,sax_in/, 'set JACK port for manual input');
+like( ::ChainSetup::ecasound_chain_setup(), qr/jack,,sax_in/, 'set JACK port for manual input');
 
 command_process("sax; source 2");
 
@@ -711,7 +710,7 @@ sub setup_content {
 }
 sub check_setup {
 	my $test_name = shift;
-	is( yaml_out(setup_content($chain_setup)), 
+	is( yaml_out(setup_content(::ChainSetup::ecasound_chain_setup())), 
 		yaml_out(setup_content($expected_setup_lines)), 
 		$test_name);
 }
