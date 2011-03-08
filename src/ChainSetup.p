@@ -333,10 +333,10 @@ sub process_routing_graph {
 
 	# sort entries into an aesthetic order
 
-	%inputs = reverse %inputs;	
-	%outputs = reverse %outputs;	
-	@input_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $inputs{$_}"} @in_keys;
-	@output_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $outputs{$_}"} @out_keys;
+	my %rinputs = reverse %inputs;	
+	my %routputs = reverse %outputs;	
+	@input_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $rinputs{$_}"} @in_keys;
+	@output_chains = sort map {'-a:'.join(',',sort by_chain @$_)." $routputs{$_}"} @out_keys;
 	@post_input = sort by_index map{ "-a:$_ $post_input{$_}"} keys %post_input;
 	@pre_output = sort by_index map{ "-a:$_ $pre_output{$_}"} keys %pre_output;
 	@input_chains + @output_chains # to sense empty chain setup
