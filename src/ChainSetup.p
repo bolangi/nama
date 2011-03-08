@@ -11,9 +11,7 @@ use Modern::Perl; use Carp;
 
 our (	
 	$g,
-
 	
-	$chain_setup,	# final result as string
 );
 # these variables are other globals that 
 # are touched in creating chain setups
@@ -21,7 +19,6 @@ our (	$debug,
 		$debug2,
 		$debug3,
 		$this_track,
-		$old_this_track,
 		$preview,
 		%tn,
 		$main,
@@ -57,6 +54,8 @@ our (
 	@output_chains, # list of output chain segments
 	@post_input,	# post-input chain operators
 	@pre_output, 	# pre-output chain operators
+
+	$chain_setup,	# final result as string
 	);
 
 
