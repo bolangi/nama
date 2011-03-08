@@ -16,7 +16,6 @@ our (
 	$g,	
 	$debug,
 	$debug2,
-	%is_ecasound_chain,
 	$ui,
 	%effect_i,
 	@effects,
@@ -307,7 +306,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	$debug2 and print "&apply_ops\n";
 	for my $n ( map{ $_->n } ::Track::all() ) {
 	$debug and print "chain: $n, offset: ", $offset{$n}, "\n";
- 		next unless $is_ecasound_chain{$n};
+ 		next unless ::ChainSetup::is_ecasound_chain($n);
 
 		#next if $n == 2; # no volume control for mix track
 		#next if ! defined $offset{$n}; # for MIX
@@ -549,7 +548,7 @@ sub effect_update {
 	$param++; # so the value at $p[0] is applied to parameter 1
 	carp("$id: effect not found. skipping...\n"), return unless $cops{$id};
 	my $chain = $cops{$id}{chain};
-	return unless $is_ecasound_chain{$chain};
+	return unless ::ChainSetup::is_ecasound_chain($chain);
 
 	$debug and print "chain $chain id $id param $param value $val\n";
 

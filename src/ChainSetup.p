@@ -14,7 +14,6 @@ our (
 
 	
 	$chain_setup,	# final result as string
-	%is_ecasound_chain, # chains in final chain seutp
 );
 # these variables are other globals that 
 # are touched in creating chain setups
@@ -43,6 +42,8 @@ use ::Assign qw(yaml_out);
 our (
 	@io, # IO objects corresponding to chain setup
 
+	%is_ecasound_chain, # chains in final chain seutp
+
 	# for sorting final result
 
 	%inputs,
@@ -70,6 +71,27 @@ sub initialize {
 	reset_aux_chain_counter();
 	{no autodie; unlink ::setup_file()}
 }
+sub is_ecasound_chain { $is_ecasound_chain{$_[0]} }
+
+sub engine_tracks { # tracks that belong to current chain setup
+     map{$::ti{$_}} grep{$::ti{$_}} keys %is_ecasound_chain;
+}
+sub is_engine_track { 
+		# takes Track object, name or index
+		# returns object if corresponding track belongs to current chain setup
+	my $t = shift;
+	my $n;
+	given($t){
+	when( (ref $_) =~ /Track/){ $n = $_->n     }
+	when( ! /\D/ )            { $n = $_        }
+	when(   /\D/ and $tn{$_} ){ $n = $::tn{$_}->n}
+	}
+	$::ti{$n} if $is_ecasound_chain{$n}
+}
+sub engine_wav_out_tracks {
+	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
+}
+	
 sub show_io {
 	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
 	::pager( $output );

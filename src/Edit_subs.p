@@ -9,7 +9,6 @@ our (
 	%tn,
 	%ti,
 	%bn,
-	%is_ecasound_chain,
 	@edit_points,
 	$this_track,
 	$regenerate_setup,
@@ -525,25 +524,7 @@ sub apply_fades {
 	# chain setup
 	map{ ::Fade::refresh_fade_controller($_) }
 	grep{$_->{fader} }  # only if already exists
-	engine_tracks();
-}
-sub engine_tracks { # tracks that belong to current chain setup
-     map{$ti{$_}} grep{$ti{$_}} keys %is_ecasound_chain;
-}
-sub is_engine_track { 
-		# takes Track object, name or index
-		# returns object if corresponding track belongs to current chain setup
-	my $t = shift;
-	my $n;
-	given($t){
-	when( (ref $_) =~ /Track/){ $n = $_->n     }
-	when( ! /\D/ )            { $n = $_        }
-	when(   /\D/ and $tn{$_} ){ $n = $tn{$_}->n}
-	}
-	$ti{$n} if $is_ecasound_chain{$n}
-}
-sub engine_wav_out_tracks {
-	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
+	::ChainSetup::engine_tracks();
 }
 	
 sub disable_edits {
@@ -640,7 +621,7 @@ sub setup_length {
 	my $length;
 	map{  my $l = $_->adjusted_length; $length = $l if $l > $length }
 	grep{ $_-> rec_status eq 'MON' }
-	engine_tracks();
+	::ChainSetup::engine_tracks();
 	$length
 }
 sub offset_run {

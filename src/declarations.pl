@@ -157,9 +157,7 @@
 # category: chain setup
 
 	$chain_setup,	# current chain setup
-	#@io, 			# accumulate IO objects for generating setup
 	$g, 			# Graph var, for chain setup
-	%is_ecasound_chain,   # suitable for c-select
 
 # category: events
 

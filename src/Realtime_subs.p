@@ -19,7 +19,6 @@ our (
 	$loop_enable,
 	$run_time,
 
-	%is_ecasound_chain,
 	$chain_setup_file,
 );
 
@@ -191,7 +190,7 @@ sub ecasound_select_chain {
 	if( 
 
 		# specified chain exists in the chain setup
-		$is_ecasound_chain{$n}
+		::ChainSetup::is_ecasound_chain($n)
 
 		# engine is configured
 		and eval_iam( 'cs-connected' ) =~ /$chain_setup_file/
