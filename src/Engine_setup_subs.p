@@ -18,7 +18,6 @@ our (
 # reconfigure_engine()
 
 	$this_track,
-	$old_this_track,
 	%opts,
 	$disable_auto_reconfigure,
 	$old_snapshot,
@@ -58,7 +57,7 @@ sub generate_setup {
 	# catch errors from generate_setup_try() and cleanup
 	$debug2 and print "&generate_setup\n";
 	# save current track
-	$old_this_track = $this_track;
+	local $this_track;
 
 	# prevent engine from starting an old setup
 	
@@ -73,7 +72,6 @@ sub generate_setup {
 	my $success = eval { ::ChainSetup::generate_setup_try(@_) }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
-	$this_track = $old_this_track;
 	if ($@){
 		say("error caught while generating setup: $@");
 		::ChainSetup::initialize() unless $debug;
@@ -84,7 +82,6 @@ sub generate_setup {
 sub remove_temporary_tracks {
 	$debug2 and say "&remove_temporary_tracks";
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
-	$this_track = $old_this_track;
 }
 
 { my $old_offset_run_status;

@@ -96,7 +96,7 @@ sub add_insert {
 	my ($type, $send_id, $return_id) = @_;
 	# $type : prefader_insert | postfader_insert
 	say "\n",$::this_track->name , ": adding $type\n";
-	my $old_this_track = $::this_track;
+	local $::this_track;
 	my $t = $::this_track;
 	my $name = $t->name;
 
@@ -120,7 +120,6 @@ sub add_insert {
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
 	}
-	$::this_track = $old_this_track;
 }
 sub get_id {
 	# get Insert index for track

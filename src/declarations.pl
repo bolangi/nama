@@ -94,7 +94,6 @@
 
 	$this_track,	# the currently active track -- 
 					# used by Text UI only at present
-	$old_this_track,# when we need to remember previous setting
 	$this_mark,    	# current mark  # for future
 	$this_bus, 		# current bus
 	$this_edit,		# current edit
