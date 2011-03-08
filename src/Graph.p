@@ -9,6 +9,7 @@ use vars qw(%reserved $debug $debug2);
 *debug = \$::debug;
 *debug2 = \$::debug2;
 
+{
 my %seen;
 
 sub expand_graph {
@@ -170,6 +171,7 @@ sub add_far_side_loop {
 	$g->add_edge($loop,$b);
 }
 
+}
 
 sub in_loop{ "$_[0]_in" }
 sub out_loop{ "$_[0]_out" }
