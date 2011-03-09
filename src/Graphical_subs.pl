@@ -405,7 +405,7 @@ sub paint_button {
 sub engine_mode_color {
 		if ( user_rec_tracks()  ){ 
 				$rec  					# live recording
-		} elsif ( &really_recording ){ 
+		} elsif ( ::ChainSetup::really_recording() ){ 
 				$namapalette{Mixdown}	# mixdown only 
 		} elsif ( user_mon_tracks() ){  
 				$namapalette{Play}; 	# just playback

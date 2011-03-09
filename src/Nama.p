@@ -69,6 +69,7 @@ use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::Text;
+use ::Graphical;
 
 # the following separate out functionality
 # however occupy the :: namespace
@@ -252,23 +253,6 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 ## The following code loads the object core of the system 
 ## and initiates the chain templates (rules)
-
-package ::Graphical;  ## gui routines
-
-our @ISA = '::';      ## default to root class
-
-## The following methods belong to the Graphical interface class
-
-sub hello {"make a window";}
-sub loop {
-	package ::;
-	$attribs->{already_prompted} = 0;
-	$term->tkRunning(1);
-  	while (1) {
-  		my ($user_input) = $term->readline($prompt) ;
-  		::process_line( $user_input );
-  	}
-}
 
 package ::;  # for Data::Section
 

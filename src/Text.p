@@ -104,3 +104,5 @@ sub remove_track_gui {}
 sub reset_engine_mode_color_display {}
 sub set_engine_mode_color_display {}
 
+1;
+__END__
