@@ -364,7 +364,7 @@ sub t_create_project {
 sub t_insert_effect {
 	package ::;
 	my ($before, $code, $values) = @_;
-	say ("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
+	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
 	$code = effect_code( $code );	
 	my $running = engine_running();
 	print("Cannot insert effect while engine is recording.\n"), return 
@@ -437,7 +437,7 @@ sub t_insert_effect {
 sub t_add_effect {
 	package ::;
 	my ($track, $code, $values)  = @_;
-	say ("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
+	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
 	$code = effect_code( $code );	
 	$debug and print "code: ", $code, $/;
 		my %p = (
