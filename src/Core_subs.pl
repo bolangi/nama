@@ -224,13 +224,6 @@ sub setup_file { join_path( project_dir(), $chain_setup_file) };
 # Core_subs
 # Realtime_subs
 
-# throw away first argument # XXX should be eliminated
-
-sub discard_object {
-	shift @_ if (ref $_[0]) =~ /Nama/;
-	@_;
-}
-
 # vol/pan requirements of mastering and mixdown tracks
 
 # called from Track_subs, Graphical_subs

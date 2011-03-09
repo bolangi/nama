@@ -158,9 +158,7 @@ sub schedule_wraparound {
 		eval_iam("setpos ".$start);
 		cancel_wraparound();
 	} elsif ( $diff < 3 ) { #schedule the move
-	$ui->wraparound($diff, $start);
-		
-		;
+		wraparound($diff, $start);
 	}
 }
 sub cancel_wraparound {
@@ -177,7 +175,6 @@ sub disable_length_timer {
 }
 sub wraparound {
 	package ::;
-	@_ = discard_object(@_);
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
 	$event_id{wraparound} = undef;

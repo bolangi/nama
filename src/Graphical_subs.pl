@@ -553,7 +553,7 @@ sub track_gui {
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "REC");
 					
-					refresh_track($n);
+					$ui->refresh_track($n);
 					refresh_group();
 					::reconfigure_engine();
 			}],
@@ -561,7 +561,7 @@ sub track_gui {
 				-command  => sub { 
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
-					refresh_track($n);
+					$ui->refresh_track($n);
 					refresh_group();
 					::reconfigure_engine();
 			}],
@@ -569,7 +569,7 @@ sub track_gui {
 				-command  => sub { 
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "OFF");
-					refresh_track($n);
+					$ui->refresh_track($n);
 					refresh_group();
 					::reconfigure_engine();
 			}],
@@ -623,7 +623,7 @@ sub track_gui {
 				return if ::eval_iam("engine-status") eq 'running';
 			#	$ti{$n}->set(rw => 'REC');
 				$ti{$n}->source($v);
-				refresh_track($n) }
+				$ui->refresh_track($n) }
 			)
 	}
 	@range = ();
@@ -642,7 +642,7 @@ sub track_gui {
 						-command => sub { 
 							return if ::eval_iam("engine-status") eq 'running';
 							$ti{$n}->set_send($v);
-							refresh_track($n);
+							$ui->refresh_track($n);
 							::reconfigure_engine();
  						}
 				 		)
@@ -811,7 +811,7 @@ sub track_gui {
 		)
 	];
 
-	refresh_track($n);
+	$ui->refresh_track($n);
 
 }
 
@@ -842,13 +842,13 @@ sub create_master_and_mix_tracks {
 				-command  => sub { 
 						return if ::eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "MON");
-						refresh_track($tn{Master}->n);
+						$ui->refresh_track($tn{Master}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
 						return if ::eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "OFF");
-						refresh_track($tn{Master}->n);
+						$ui->refresh_track($tn{Master}->n);
 			}],
 		);
 

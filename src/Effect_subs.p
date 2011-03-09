@@ -116,7 +116,6 @@ sub modify_multiple_effects {
 }
 
 sub remove_effect { 
-	@_ = discard_object(@_);
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	carp("$id: does not exist, skipping...\n"), return unless $cops{$id};
@@ -157,9 +156,7 @@ sub remove_effect {
 			@{ $cops{$parent}->{owns} } ,$/;
 
 	}
-	# remove id from track object
-
-	$ti{$n}->remove_effect( $id ); 
+	$ti{$n}->remove_effect_from_track( $id ); 
 	delete $cops{$id}; # remove entry from chain operator list
 	delete $copp{$id}; # remove entry from chain operator parameters list
 	$this_op = undef;

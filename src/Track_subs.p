@@ -42,7 +42,6 @@ sub add_track_alias_project {
 
 sub add_track {
 
-	@_ = discard_object(@_);
 	$debug2 and print "&add_track\n";
 	#return if transport_running();
 	my ($name, @params) = @_;
