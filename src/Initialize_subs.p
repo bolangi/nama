@@ -35,11 +35,11 @@ sub initialize_interfaces {
 		$debug = 1;
 		$debug2 = 1;
 	}
-	if ( ! $opts{t} and can_load( modules => { Tk => undef } ) ){ 
-		$ui = ::Graphical->new;
+	if ( ! $opts{t} and ::Graphical::initialize_tk() ){ 
+		$ui = ::Graphical->new();
 	} else {
 		say "Unable to load perl Tk module. Starting in console mode." if $opts{g};
-		$ui = ::Text->new;
+		$ui = ::Text->new();
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
 ;

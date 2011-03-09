@@ -237,7 +237,7 @@ $sn_namapalette->AddItems( @color_items);
 }
 
 sub transport_gui {
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
@@ -276,7 +276,7 @@ sub transport_gui {
 
 }
 sub time_gui {
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$debug2 and print "&time_gui\n";
 
 	my $time_label = $clock_frame->Label(
@@ -373,7 +373,7 @@ sub show_unit { $time_step->configure(
 
 sub preview_button {  
 	$debug2 and print "&preview\n";
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my $oid_button = $transport_frame->Button( );
 	$oid_button->configure(
@@ -396,7 +396,7 @@ sub preview_button {
 	
 }
 sub paint_button {
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my ($button, $color) = @_;
 	$button->configure(-background => $color,
 						-activebackground => $color);
@@ -435,7 +435,7 @@ sub flash_ready {
 sub reset_engine_mode_color_display { project_label_configure(-background => $off) }
 sub set_engine_mode_color_display { project_label_configure(-background => engine_mode_color()) }
 sub group_gui {  
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my $group = $main; 
 	my $dummy = $track_frame->Label(-text => ' '); 
 	$group_label = 	$track_frame->Label(
@@ -463,31 +463,31 @@ sub group_gui {
 			'command' => 'REC',
 			-background => $old_bg,
 			-command => sub { 
-				return if eval_iam("engine-status") eq 'running';
+				return if ::eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'REC');
 				$group_rw->configure(-text => 'REC');
 				refresh();
-				reconfigure_engine()
+				::reconfigure_engine()
 				}
 			],[
 			'command' => 'MON',
 			-background => $old_bg,
 			-command => sub { 
-				return if eval_iam("engine-status") eq 'running';
+				return if ::eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'MON');
 				$group_rw->configure(-text => 'MON');
 				refresh();
-				reconfigure_engine()
+				::reconfigure_engine()
 				}
 			],[
 			'command' => 'OFF',
 			-background => $old_bg,
 			-command => sub { 
-				return if eval_iam("engine-status") eq 'running';
+				return if ::eval_iam("engine-status") eq 'running';
 				$group->set(rw => 'OFF');
 				$group_rw->configure(-text => 'OFF');
 				refresh();
-				reconfigure_engine()
+				::reconfigure_engine()
 				}
 			]);
 			$dummy->grid($group_label, $group_version, $group_rw);
@@ -509,7 +509,7 @@ sub global_version_buttons {
 				-command => sub { 
 					$main->set(version => 0); 
 					$version->configure(-text => " ");
-					reconfigure_engine();
+					::reconfigure_engine();
 					refresh();
 					}
 			);
@@ -532,7 +532,7 @@ sub global_version_buttons {
 				-command => sub { 
 					$main->set(version => $v); 
 					$version->configure(-text => $v);
-					reconfigure_engine();
+					::reconfigure_engine();
 					refresh();
 					}
 
@@ -541,7 +541,7 @@ sub global_version_buttons {
 }
 sub track_gui { 
 	$debug2 and print "&track_gui\n";
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my $n = shift;
 	return if $ti{$n}->hide;
 	
@@ -550,28 +550,28 @@ sub track_gui {
 			[ 'command' => "REC",
 				-foreground => 'red',
 				-command  => sub { 
-					return if eval_iam("engine-status") eq 'running';
+					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "REC");
 					
 					refresh_track($n);
 					refresh_group();
-					reconfigure_engine();
+					::reconfigure_engine();
 			}],
 			[ 'command' => "MON",
 				-command  => sub { 
-					return if eval_iam("engine-status") eq 'running';
+					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
 					refresh_track($n);
 					refresh_group();
-					reconfigure_engine();
+					::reconfigure_engine();
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-					return if eval_iam("engine-status") eq 'running';
+					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "OFF");
 					refresh_track($n);
 					refresh_group();
-					reconfigure_engine();
+					::reconfigure_engine();
 			}],
 		);
 	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
@@ -603,7 +603,7 @@ sub track_gui {
 			$ti{$n}->set( version => $v );
 			return if $ti{$n}->rec_status eq "REC";
 			$version->configure( -text=> $ti{$n}->current_version );
-			reconfigure_engine();
+			::reconfigure_engine();
 			}
 					);
 	}
@@ -620,7 +620,7 @@ sub track_gui {
 			-label => $v,
 			-value => $v,
 			-command => sub { 
-				return if eval_iam("engine-status") eq 'running';
+				return if ::eval_iam("engine-status") eq 'running';
 			#	$ti{$n}->set(rw => 'REC');
 				$ti{$n}->source($v);
 				refresh_track($n) }
@@ -640,10 +640,10 @@ sub track_gui {
 						-label => $v,
 						-value => $v,
 						-command => sub { 
-							return if eval_iam("engine-status") eq 'running';
+							return if ::eval_iam("engine-status") eq 'running';
 							$ti{$n}->set_send($v);
 							refresh_track($n);
-							reconfigure_engine();
+							::reconfigure_engine();
  						}
 				 		)
 				}
@@ -658,7 +658,7 @@ sub track_gui {
 	my $p_num = 0; # needed when using parameter controllers
 	# Volume
 	
-	if ( need_vol_pan($ti{$n}->name, "vol") ){
+	if ( ::need_vol_pan($ti{$n}->name, "vol") ){
 
 		my $vol_id = $ti{$n}->vol;
 
@@ -700,7 +700,7 @@ sub track_gui {
 
 		$unity = $track_frame->Button(
 				-command => sub { 
-					effect_update_copp_set(
+					::effect_update_copp_set(
 						$vol_id, 
 						0, 
 						$unity_level{$cops{$vol_id}->{type}});
@@ -714,7 +714,7 @@ sub track_gui {
 
 	}
 
-	if ( need_vol_pan($ti{$n}->name, "pan") ){
+	if ( ::need_vol_pan($ti{$n}->name, "pan") ){
 	  
 		# Pan
 		
@@ -735,7 +735,7 @@ sub track_gui {
 
 		$center = $track_frame->Button(
 			-command => sub { 
-				effect_update_copp_set($pan_id, 0, 50);
+				::effect_update_copp_set($pan_id, 0, 50);
 			}
 		  );
 	} else { 
@@ -816,7 +816,7 @@ sub track_gui {
 }
 
 sub remove_track_gui {
- 	@_ = discard_object( @_ );
+ 	@_ = ::discard_object( @_ );
  	my $n = shift;
 	$debug2 and say "&remove_track_gui";
 	return unless $track_widget_remove{$n};
@@ -840,13 +840,13 @@ sub create_master_and_mix_tracks {
 	my @rw_items = (
 			[ 'command' => "MON",
 				-command  => sub { 
-						return if eval_iam("engine-status") eq 'running';
+						return if ::eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "MON");
 						refresh_track($tn{Master}->n);
 			}],
 			[ 'command' => "OFF", 
 				-command  => sub { 
-						return if eval_iam("engine-status") eq 'running';
+						return if ::eval_iam("engine-status") eq 'running';
 						$tn{Master}->set(rw => "OFF");
 						refresh_track($tn{Master}->n);
 			}],
@@ -860,7 +860,7 @@ sub create_master_and_mix_tracks {
 }
 
 sub update_version_button {
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
 	my $w = $track_widget{$n}->{version};
@@ -875,7 +875,7 @@ sub update_version_button {
 
 sub add_effect_gui {
 		$debug2 and print "&add_effect_gui\n";
-		@_ = discard_object(@_);
+		@_ = ::discard_object(@_);
 		my %p 			= %{shift()};
 		my ($n,$code,$id,$parent_id,$parameter) =
 			@p{qw(chain type cop_id parent_id parameter)};
@@ -966,15 +966,15 @@ sub add_effect_gui {
 
 
 sub project_label_configure{ 
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$project_label->configure( @_ ) }
 
 sub length_display{ 
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$setup_length->configure(@_)};
 
 sub clock_config { 
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$clock->configure( @_ )}
 
 sub manifest { $ew->deiconify() }
@@ -990,7 +990,7 @@ sub destroy_widgets {
 	%mark_widget and map{ $_->destroy } values %mark_widget;
 }
 sub remove_effect_gui { 
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	$debug2 and print "&remove_effect_gui\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -1092,7 +1092,7 @@ sub make_scale {
 			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { effect_update($id, $p, $copp{$id}->[$p]) }
+		  -command => sub { ::effect_update($id, $p, $copp{$id}->[$p]) }
 		  );
 
 		# auxiliary field for logarithmic display
@@ -1107,7 +1107,7 @@ sub make_scale {
 				-variable => \$copp_exp{$id}->[$p],
 		  		-command => sub { 
 					$copp{$id}->[$p] = exp $copp_exp{$id}->[$p];
-					effect_update($id, $p, $copp{$id}->[$p]);
+					::effect_update($id, $p, $copp{$id}->[$p]);
 					$log_display->configure(
 						-text => 
 						$effects[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
@@ -1131,7 +1131,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$copp{$id}->[$p],
 			-width => 6,
-	#		-command => sub { effect_update($id, $p, $copp{$id}->[$p]) },
+	#		-command => sub { ::effect_update($id, $p, $copp{$id}->[$p]) },
 			# doesn't work with Entry widget
 			);	
 
@@ -1165,7 +1165,7 @@ sub arm_mark_toggle {
 	}
 }
 sub marker {
-	@_ = discard_object( @_); # UI
+	@_ = ::discard_object( @_); # UI
 	my $mark = shift; # Mark
 	#print "mark is ", ref $mark, $/;
 	my $pos = $mark->time;
@@ -1173,19 +1173,19 @@ sub marker {
 		$mark_widget{$pos} = $mark_frame->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $off,
-			-command => sub { mark($mark) },
+			-command => sub { ::mark($mark) },
 		)->pack(-side => 'left');
 }
 
 sub restore_time_marks {
-	@_ = discard_object( @_);
+	@_ = ::discard_object( @_);
 # 	map {$_->dumpp} ::Mark::all(); 
 #	::Mark::all() and 
 	map{ $ui->marker($_) } ::Mark::all() ; 
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
 sub destroy_marker {
-	@_ = discard_object( @_);
+	@_ = ::discard_object( @_);
 	my $pos = shift;
 	$mark_widget{$pos}->destroy; 
 }
@@ -1196,19 +1196,19 @@ sub get_saved_colors {
 
 	# aliases
 	
-	*old_bg = \$palette{mw}{background};
-	*old_abg = \$palette{mw}{activeBackground};
+	*::old_bg = \$palette{mw}{background};
+	*::old_abg = \$palette{mw}{activeBackground};
 	$old_bg = '#d915cc1bc3cf' unless $old_bg;
 	#print "pb: $palette{mw}{background}\n";
 
 
 	my $pal = join_path($project_root, $palette_file);
 	-f $pal or $pal = $default_palette_yml;
-	assign_var( $pal, qw[%palette %namapalette]);
+	::assign_var( $pal, qw[%palette %namapalette]);
 	
-	*rec = \$namapalette{RecBackground};
-	*mon = \$namapalette{MonBackground};
-	*off = \$namapalette{OffBackground};
+	*::rec = \$namapalette{RecBackground};
+	*::mon = \$namapalette{MonBackground};
+	*::off = \$namapalette{OffBackground};
 
 	$old_abg = $palette{mw}{activeBackground};
 	$old_abg = $project_label->cget('-activebackground') unless $old_abg;

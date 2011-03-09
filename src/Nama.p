@@ -247,12 +247,6 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Core_subs.pl ) %]
 
-[% qx(cat ./Graphical_subs.pl ) %] # root namespace!
-
-[% qx(cat ./Refresh_subs.pl ) %]
-
-## The following code loads the object core of the system 
-## and initiates the chain templates (rules)
 
 package ::;  # for Data::Section
 

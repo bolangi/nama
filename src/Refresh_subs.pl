@@ -11,8 +11,8 @@ sub set_widget_color {
 							MON  => $mon,
 							OFF  => $off );
 		
-#	print "namapalette:\n",yaml_out( \%namapalette);
-#	print "rec: $rec, mon: $mon, off: $off\n";
+	#print "namapalette:\n",yaml_out( \%namapalette);
+	#print "rec: $rec, mon: $mon, off: $off\n";
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );
@@ -55,7 +55,7 @@ $debug and print "group status: $status\n";
 }
 sub refresh_track {
 	
-	@_ = discard_object(@_);
+	@_ = ::discard_object(@_);
 	my $n = shift;
 	$debug2 and print "&refresh_track\n";
 	
@@ -94,7 +94,7 @@ sub refresh_track {
 }
 
 sub refresh {  
-	remove_riff_header_stubs();
+	::remove_riff_header_stubs();
  	$ui->refresh_group(); 
 	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::Track::all();
 	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::Track::all();
