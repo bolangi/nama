@@ -3,6 +3,8 @@
 package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
+
+# global variables
 our (
 	%opts, 			# command line options
 	
@@ -10,14 +12,18 @@ our (
 	$project_name,	# startup value
 
 	@config_vars, 	# vars to read from namarc
-	%subst,			# substitutions		
-	%cfg,			# namarc YAML converted to HASH
 	$sampling_frequency, # set from 'frequency' abbreviation in namarc
 	$default,		# default namarc
 	$custom_pl,		# user customizations
 
 	$debug,
 	$debug2,
+
+);
+
+# exclusive to this module
+our ( 
+	%subst,			# substitutions		
 );
 
 ## configuration file
@@ -64,7 +70,7 @@ sub read_config {
 	my $config = shift;
 	my $yml = length $config > 100 ? $config : $default;
 	strip_all( $yml );
-	%cfg = %{  yaml_in($yml) };
+	my %cfg = %{  yaml_in($yml) };
 	*subst = \%{ $cfg{abbreviations} }; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
