@@ -2,19 +2,22 @@ Contents of nama/src directory
 
 Core classes (converted to .pm files under nama/lib)
 
-   175 Bus.p     - buses
-   247 Edit.p    - edits
-   319 Fade.p    - fades
-   298 Graph.p   - routing graph
-    49 Group.p   - base class for Bus.p
-   369 IO.p      - generate Ecasound chain setup input and outputs
-   273 Insert.p  - inserts
-   137 Mark.p    - marks
-   137 Object.p  - base class for all objects
-   988 Track.p   - tracks
-    70 Wav.p     - base class for Track.p
-       Graphical.p - GUI methods and subs
-       Text.p    - Text UI methods and subs
+   175 Bus.p             - buses
+   247 Edit.p            - edits
+   319 Fade.p            - fades
+   298 Graph.p           - routing graph
+    49 Group.p           - base class for Bus.p
+   369 IO.p              - generate Ecasound chain setup input and outputs
+   273 Insert.p          - inserts
+   137 Mark.p            - marks
+   137 Object.p          - base class for all objects
+   988 Track.p           - tracks
+    70 Wav.p             - base class for Track.p
+   194 Graphical.p       - GUI methods and subs
+  1332 Graphical_subs.pl - merged into above
+   112 Refresh_subs.pl   - merged into above 
+   108 Text.p            - Text UI methods and subs
+   509 Text_methods.pl   - merged into above
 
 Object Attributes (with comments)
 
@@ -28,9 +31,6 @@ More core code, merged into Nama.p to make Nama.pm
     10 banner.pl
    320 Core_subs.pl
    334 declarations.pl
-  1332 Graphical_subs.pl - for Audio::Nama::Graphical class
-   112 Refresh_subs.pl   - ditto
-   509 Text_methods.pl   - for Audio::Nama::Text class
   1095 grammar_body.pl
    388 help_topic.pl
    135 var_types.pl
