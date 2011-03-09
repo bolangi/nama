@@ -7,7 +7,6 @@ our (
 	$debug2,
 	$preview,
 	$main,
-	$old_group_rw,
 	%tn,
 	$mastering_mode,
 	@mastering_track_names,
@@ -21,6 +20,9 @@ our (
 	$limiter,
 	$eq,
 );
+
+{
+my $old_group_rw; # for restore on exiting doodle/preview mode
 
 sub set_preview_mode {
 
@@ -72,6 +74,7 @@ sub exit_preview_mode { # exit preview and doodle modes
 		$preview = 0;
 		$main->set(rw => $old_group_rw) if $old_group_rw;
 
+}
 }
 
 sub master_on {
