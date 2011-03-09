@@ -4,48 +4,23 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 our (
-	%opts,
-	$project_root,
-	%subst,
-	$debug2,
-	$project_name,
-	%cfg,
-	$default,
-	@config_vars,
-	$custom_pl,
+	%opts, 			# command line options
+	
+	$project_root,	# directory
+	$project_name,	# startup value
+
+	@config_vars, 	# vars to read from namarc
+	%subst,			# substitutions		
+	%cfg,			# namarc YAML converted to HASH
+	$sampling_frequency, # set from 'frequency' abbreviation in namarc
+	$default,		# default namarc
+	$custom_pl,		# user customizations
+
 	$debug,
+	$debug2,
 );
 
 ## configuration file
-
-{ # OPTIMIZATION
-
-  # we allow for the (admitted rare) possibility that
-  # $project_root may change
-
-my %proot;
-sub project_root { 
-	$proot{$project_root} ||= resolve_path($project_root)
-}
-}
-
-sub config_file { $opts{f} ? $opts{f} : ".namarc" }
-
-{ # OPTIMIZATION
-my %wdir; 
-sub this_wav_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and
-	$wdir{$project_name} ||= resolve_path(
-		join_path( project_root(), $project_name, q(.wav) )  
-	);
-}
-}
-
-sub project_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and join_path( project_root(), $project_name) 
-}
 
 sub global_config {
 
@@ -96,6 +71,7 @@ sub read_config {
 	assign_var( \%cfg, @config_vars);
 	$project_root = $opts{d} if $opts{d};
 	$project_root = expand_tilde($project_root);
+	$sampling_frequency = $cfg{abbreviations}{frequency};
 
 }
 sub walk_tree {

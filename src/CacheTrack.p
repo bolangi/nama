@@ -98,7 +98,7 @@ sub prepare_to_cache {
 	elsif($track->rec_status eq 'REC'){
 
 		# apply all sub-buses (unneeded ones will be pruned)
-		map{ $_->apply() } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
+		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 	}
 
 	$debug and say "The graph1 is:\n$g";

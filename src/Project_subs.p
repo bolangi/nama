@@ -36,6 +36,7 @@ our (
 	$old_snapshot,
 	$initial_user_mode,
 	$project,	
+	$project_root,
 );
 our ( 					# for create_system_buses
 	%is_system_bus,
@@ -45,6 +46,35 @@ our ( 					# for create_system_buses
 );
 
 our ($term, %bn); 		# for project templates
+
+{ # OPTIMIZATION
+
+  # we allow for the (admitted rare) possibility that
+  # $project_root may change
+
+my %proot;
+sub project_root { 
+	$proot{$project_root} ||= resolve_path($project_root)
+}
+}
+
+sub config_file { $opts{f} ? $opts{f} : ".namarc" }
+
+{ # OPTIMIZATION
+my %wdir; 
+sub this_wav_dir {
+	$opts{p} and return $project_root; # cwd
+	$project_name and
+	$wdir{$project_name} ||= resolve_path(
+		join_path( project_root(), $project_name, q(.wav) )  
+	);
+}
+}
+
+sub project_dir {
+	$opts{p} and return $project_root; # cwd
+	$project_name and join_path( project_root(), $project_name) 
+}
 
 sub list_projects {
 	my $projects = join "\n", sort map{

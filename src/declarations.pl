@@ -51,8 +51,6 @@
 
 # category: config
 	
-	%cfg,        	# 'config' information as hash
-	%subst,			# alias, substitutions for the config file
 	%opts,          # command line options
 	$default,		# the internal default configuration file, as string
 
@@ -152,6 +150,7 @@
 	$jack_lsp,      # jack_lsp -Ap
 	$fake_jack_lsp, # for testing
 	%jack,			# jack clients data from jack_lsp
+	$sampling_frequency, # of souncard
 
 # category: events
 

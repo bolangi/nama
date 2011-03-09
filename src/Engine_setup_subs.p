@@ -47,8 +47,8 @@ our (
 # adjust_latency()
 
 	%copp,
-	%cfg,
 	%ti,
+	$sampling_frequency,
 
 );	
 
@@ -65,11 +65,13 @@ sub generate_setup {
 
 	::ChainSetup::initialize();
 	$length = 0;  # TODO replace global with sub
-	local $@; # don't propagate errors # TODO try/catch
-		# NOTE: it would be better to use try/catch
+	# TODO: use try/catch
+	# catch errors unless testing (no-terminal option)
+	local $@ unless $opts{T}; 
 	track_memoize(); 			# freeze track state 
-
-	my $success = eval { ::ChainSetup::generate_setup_try(@_) }; 
+	my $success = $opts{T} 
+		?  ::ChainSetup::generate_setup_try(@_)
+		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
 	remove_temporary_tracks();  # cleanup
 	track_unmemoize(); 			# unfreeze track state
 	if ($@){
@@ -345,8 +347,7 @@ sub adjust_latency {
 	my $max;
 	map { $max = $_ if $_ > $max  } values %latency;
 	$debug and print "max: $max\n";
-	map { my $adjustment = ($max - $latency{$_}) /
-			$cfg{abbreviations}{frequency} * 1000;
+	map { my $adjustment = ($max - $latency{$_}) / $sampling_frequency * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
 			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
 			} keys %latency;
