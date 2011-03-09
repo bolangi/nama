@@ -237,7 +237,7 @@ $sn_namapalette->AddItems( @color_items);
 }
 
 sub transport_gui {
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$debug2 and print "&transport_gui\n";
 
 	$transport_label = $transport_frame->Label(
@@ -263,7 +263,7 @@ sub transport_gui {
 		-command => sub { 
 		return if transport_running();
 		my $color = engine_mode_color();
-		project_label_configure(-background => $color);
+		$ui->project_label_configure(-background => $color);
 		start_transport();
 				});
 # 	$transport_setup_and_connect->configure(
@@ -276,7 +276,7 @@ sub transport_gui {
 
 }
 sub time_gui {
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$debug2 and print "&time_gui\n";
 
 	my $time_label = $clock_frame->Label(
@@ -373,7 +373,7 @@ sub show_unit { $time_step->configure(
 
 sub preview_button {  
 	$debug2 and print "&preview\n";
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
 	my $oid_button = $transport_frame->Button( );
 	$oid_button->configure(
@@ -396,7 +396,7 @@ sub preview_button {
 	
 }
 sub paint_button {
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	my ($button, $color) = @_;
 	$button->configure(-background => $color,
 						-activebackground => $color);
@@ -428,14 +428,14 @@ sub flash_ready {
 
 	my $color = engine_mode_color();
 	$debug and print "flash color: $color\n";
-	length_display(-background => $color);
-	project_label_configure(-background => $color) unless $preview;
+	$ui->length_display(-background => $color);
+	$ui->project_label_configure(-background => $color) unless $preview;
  	$event_id{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
 }
-sub reset_engine_mode_color_display { project_label_configure(-background => $off) }
-sub set_engine_mode_color_display { project_label_configure(-background => engine_mode_color()) }
+sub reset_engine_mode_color_display { $ui->project_label_configure(-background => $off) }
+sub set_engine_mode_color_display { $ui->project_label_configure(-background => engine_mode_color()) }
 sub group_gui {  
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	my $group = $main; 
 	my $dummy = $track_frame->Label(-text => ' '); 
 	$group_label = 	$track_frame->Label(
@@ -541,7 +541,7 @@ sub global_version_buttons {
 }
 sub track_gui { 
 	$debug2 and print "&track_gui\n";
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	my $n = shift;
 	return if $ti{$n}->hide;
 	
@@ -816,7 +816,7 @@ sub track_gui {
 }
 
 sub remove_track_gui {
- 	@_ = ::discard_object( @_ );
+ 	my $ui = shift;
  	my $n = shift;
 	$debug2 and say "&remove_track_gui";
 	return unless $track_widget_remove{$n};
@@ -852,15 +852,15 @@ sub create_master_and_mix_tracks {
 			}],
 		);
 
-	track_gui( $tn{Master}->n, @rw_items );
+	$ui->track_gui( $tn{Master}->n, @rw_items );
 
-	track_gui( $tn{Mixdown}->n); 
+	$ui->track_gui( $tn{Mixdown}->n); 
 
-	group_gui('Main');
+	$ui->group_gui('Main');
 }
 
 sub update_version_button {
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	my ($n, $v) = @_;
 	carp ("no version provided \n") if ! $v;
 	my $w = $track_widget{$n}->{version};
@@ -875,7 +875,7 @@ sub update_version_button {
 
 sub add_effect_gui {
 		$debug2 and print "&add_effect_gui\n";
-		@_ = ::discard_object(@_);
+		my $ui = shift;
 		my %p 			= %{shift()};
 		my ($n,$code,$id,$parent_id,$parameter) =
 			@p{qw(chain type cop_id parent_id parameter)};
@@ -966,15 +966,15 @@ sub add_effect_gui {
 
 
 sub project_label_configure{ 
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$project_label->configure( @_ ) }
 
 sub length_display{ 
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$setup_length->configure(@_)};
 
 sub clock_config { 
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$clock->configure( @_ )}
 
 sub manifest { $ew->deiconify() }
@@ -990,7 +990,7 @@ sub destroy_widgets {
 	%mark_widget and map{ $_->destroy } values %mark_widget;
 }
 sub remove_effect_gui { 
-	@_ = ::discard_object(@_);
+	my $ui = shift;
 	$debug2 and print "&remove_effect_gui\n";
 	my $id = shift;
 	my $n = $cops{$id}->{chain};
@@ -1165,7 +1165,7 @@ sub arm_mark_toggle {
 	}
 }
 sub marker {
-	@_ = ::discard_object( @_); # UI
+	my $ui = shift;
 	my $mark = shift; # Mark
 	#print "mark is ", ref $mark, $/;
 	my $pos = $mark->time;
@@ -1178,14 +1178,14 @@ sub marker {
 }
 
 sub restore_time_marks {
-	@_ = ::discard_object( @_);
+	my $ui = shift;
 # 	map {$_->dumpp} ::Mark::all(); 
 #	::Mark::all() and 
 	map{ $ui->marker($_) } ::Mark::all() ; 
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
 sub destroy_marker {
-	@_ = ::discard_object( @_);
+	my $ui = shift;
 	my $pos = shift;
 	$mark_widget{$pos}->destroy; 
 }
