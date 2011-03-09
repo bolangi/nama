@@ -1,0 +1,129 @@
+Contents of nama/src directory
+
+Core classes (converted to .pm files under nama/lib)
+
+   175 Bus.p     - buses
+   247 Edit.p    - edits
+   319 Fade.p    - fades
+   298 Graph.p   - routing graph
+    49 Group.p   - base class for Bus.p
+   369 IO.p      - generate Ecasound chain setup input and outputs
+   273 Insert.p  - inserts
+   137 Mark.p    - marks
+   137 Object.p  - base class for all objects
+   988 Track.p   - tracks
+    70 Wav.p     - base class for Track.p
+       Graphical.p - GUI methods and subs
+       Text.p    - Text UI methods and subs
+
+Object Attributes (with comments)
+
+     8 bus_fields
+    33 io_fields
+    73 track_fields
+ 
+More core code, merged into Nama.p to make Nama.pm
+
+   365 Nama.p
+    10 banner.pl
+   320 Core_subs.pl
+   334 declarations.pl
+  1332 Graphical_subs.pl - for Audio::Nama::Graphical class
+   112 Refresh_subs.pl   - ditto
+   509 Text_methods.pl   - for Audio::Nama::Text class
+  1095 grammar_body.pl
+   388 help_topic.pl
+   135 var_types.pl
+
+Functional sections, recently separated into modules
+
+   252 CacheTrack.p          - for track-level mixdown (track freezing)
+   505 ChainSetup.p          - generates chain setup
+    95 Bus_subs.p            - functions using bus objects
+   202 Config_subs.p         - read namarc
+   687 Edit_subs.p           - editing functions
+   181 Effect_chain_subs.p   - effect chains and profiles
+  1221 Effect_subs.p         - effects and controllers
+   346 Engine_setup_subs.p   - prepare for engine run
+    68 Engine_cleanup_subs.p - processing after engine run
+   306 Initialize_subs.p     - Nama startup
+   214 Jack_subs.p           - JACK related code
+   140 Mark_and_jump_subs.p  - marks and playback repositioning
+    52 Memoize_subs.p        - cache the results of track and setup routines
+    66 Midi_subs.p           - stub for future expansion (starts midish)
+   170 Mode_subs.p           - mastering, preview, doodle
+   155 Mute_Solo_Fade.p      - changes track and main volume during engine run
+    89 Option_subs.p         - process command-line options
+   615 Persistence.p         - save and restore project state
+   376 Project_subs.p        - manage projects and project templates
+   209 Realtime_subs.p       - manage the Ecasound engine run
+    42 Region_subs.p         - manage regions
+   178 Terminal_subs.p       - terminal control
+   141 Track_subs.p          - adding and removing tracks
+    72 Wavinfo_subs.p        - cache length and modification time
+
+Utility routines
+
+   376 Assign.p - serialization support functions
+   255 Util.p
+
+Data files
+
+   931 commands.yml                       - for grammar and docs
+   494 ecasound_chain_operator_hints.yml  - used by GUI
+    30 palette.yml                        - default GUI colors
+   165 namarc                             - default config file
+    84 custom.pl                          - example custom commands
+
+Documentation
+
+   660 man_page_part1
+    77 man_page_part2
+
+Tests
+
+   72 02_assign.t
+   15 03_wav.t
+   29 04_object.t
+   24 11_mark.t
+  730 12_nama.t
+   23 13_io.t
+
+User scripts for preprocessing, run and test 
+
+  27 myproc               - preprocess (drives preproc)
+  32 build                - preprocess; perl Makefile.PL (before make)
+   1 mui                  - preprocess and run (without make)
+   6 ui                   - run
+   2 mtest                - preprocess and run test suite
+
+Preprocessing scripts
+
+ 149 preproc              - merges files and adds namespace prefix
+   2 makeman              - generates man pages in ROFF and HTML
+  16 strip_all            - strip comments and blank lines
+   5 strip_comments       - strip comments
+ 119 emit_command_headers - generates grammar and docs from commands_yml
+   6 add_persistent_vars  - extract @persistent_vars from var_types.pl
+   6 add_vars             - remove comments from declarations.pl
+
+Variable tracing
+
+   37 sort_vars           - output to variables.sorted.txt
+   44 vars.bysub          - locate and count variables
+  311 vars.count          - ditto
+  322 vars.sub            - ditto
+
+Other scripts
+
+   4 list_all_subs
+  39 list_calls
+  19 list_subs
+   2 make_stubs
+   1 linecountnocomments
+   1 linecount
+
+
+
+-- 
+Joel Roth
