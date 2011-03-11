@@ -237,7 +237,7 @@ track_name: ident
 move_to_bus: _move_to_bus existing_bus_name {
 	$::this_track->set( group => $item{existing_bus_name}); 1
 } 
-xxset_track: _xxset_track key someval {
+set_track: _set_track key someval {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track { ::pager($::this_track->dump); 1}
 dump_group: _dump_group { ::pager($::main->dump); 1}

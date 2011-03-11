@@ -146,8 +146,7 @@ import_audio:
   short: import
   what: import a sound file (wav, ogg, mp3, etc.) to the current track, resampling if necessary.
   parameters: <s_wav_file_path> [i_frequency]
-xxset_track:
-  short: xxset
+set_track:
   type: track
   what: directly set current track parameters (use with care!)
   parameters: <s_track_field> value

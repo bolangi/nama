@@ -161,11 +161,11 @@ sub add_mastering_effects {
 }
 
 sub unhide_mastering_tracks {
-	command_process("for Mastering; set hide 0");
+	command_process("for Mastering; set_track hide 0");
 }
 
 sub hide_mastering_tracks {
-	command_process("for Mastering; set hide 1");
+	command_process("for Mastering; set_track hide 1");
  }
 		
 1;
