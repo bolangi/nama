@@ -35,10 +35,8 @@ sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
 		# toggle buses of recorded tracks to MON
-		map{ $bn{$_->group}->set(rw => 'MON') } engine_wav_out_tracks();
-		#map{ $_->set(rw => 'MON')} ::Bus::all();
+		map{ $bn{$_->group}->set(rw => 'MON') } ::ChainSetup::engine_wav_out_tracks();
 		$ui->refresh();
-	#	reconfigure_engine(); # redundant
 }
 sub new_files_were_recorded {
  	return unless my @files = ::ChainSetup::really_recording();
