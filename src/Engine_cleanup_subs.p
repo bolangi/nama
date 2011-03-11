@@ -28,7 +28,7 @@ sub adjust_offset_recordings {
 	map {
 		$_->set(playat => $offset_mark);
 		say $_->name, ": offsetting to $offset_mark";
-	} engine_wav_out_tracks();
+	} ::ChainSetup::engine_wav_out_tracks();
 }
 sub post_rec_configure {
 
