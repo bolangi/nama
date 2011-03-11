@@ -111,7 +111,6 @@ our (
 	@palettefields, # set by setPalette method
 	@namafields,    # field names for color palette used by nama
 	%namapalette,     # nama's indicator colors
-	%palette,  # overall color scheme
 	$rec,      # background color
 	$mon,      # background color
 	$off,      # background color
