@@ -19,25 +19,6 @@ our (
 	@mastering_track_names,
 );
 
-# create read-only track pointing at WAV files of specified
-# track name in a different project
-
-sub add_track_alias_project {
-	my ($name, $track, $project) = @_;
-	my $dir =  join_path(project_root(), $project, '.wav'); 
-	if ( -d $dir ){
-		if ( glob "$dir/$track*.wav"){
-			print "Found target WAV files.\n";
-			my @params = (target => $track, project => $project);
-			add_track( $name, @params );
-		} else { print "No WAV files found.  Skipping.\n"; return; }
-	} else { 
-		print("$project: project does not exist.  Skipping.\n");
-		return;
-	}
-}
-
-
 # usual track
 
 sub add_track {
@@ -89,6 +70,25 @@ sub add_track_alias {
 	elsif	( $ti{$track} ){ $target = $ti{$track}->name }
 	add_track(  $name, target => $target );
 }
+# create read-only track pointing at WAV files of specified
+# track name in a different project
+
+sub add_track_alias_project {
+	my ($name, $track, $project) = @_;
+	my $dir =  join_path(project_root(), $project, '.wav'); 
+	if ( -d $dir ){
+		if ( glob "$dir/$track*.wav"){
+			print "Found target WAV files.\n";
+			my @params = (target => $track, project => $project);
+			add_track( $name, @params );
+		} else { print "No WAV files found.  Skipping.\n"; return; }
+	} else { 
+		print("$project: project does not exist.  Skipping.\n");
+		return;
+	}
+}
+
+
 sub add_volume_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "vol");
