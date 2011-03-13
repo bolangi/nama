@@ -942,8 +942,9 @@ add_fade: _add_fade in_or_out mark1 mark2
 #add_fade: _add_fade in_or_out time1 time2 # not implemented
 in_or_out: 'in' | 'out'
 duration: value
-mark1: ident
-mark2: ident
+mark1: mark_ident
+mark2: mark_ident
+mark_ident: /[A-Za-z]\w*/
 remove_fade: _remove_fade fade_index(s) { 
 	my @i = @{ $item{'fade_index(s)'} };
 	::Text::remove_fade($_) for (@i);

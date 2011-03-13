@@ -110,6 +110,9 @@ sub all_fades {
 	grep{ $_->track eq $track_name } values %by_index
 }
 sub fades {
+
+	# get fades within playable region
+	
 	my $track_name = shift;
 	my $track = $::tn{$track_name};
 	my @fades = all_fades($track_name);
@@ -235,11 +238,22 @@ sub fader_envelope_pairs {
 	@pairs;
 }
 		
+# each 'spec' is an array reference of the form [ $from, $to, $type, $op ]
+#
+# $from: time (in seconds)
+# $to:   time (in seconds)
+# $type: 'in' or 'out'     
+# $op:   'ea' or 'eadb'
+
 sub spec_to_pairs {
 	my ($from, $to, $type, $op) = @{$_[0]};
 	$::debug and say "from: $from, to: $to, type: $type";
 	my $cutpos;
 	my @pairs;
+
+	# op 'eadb' uses two-stage fade
+	
+	
 	if ($op eq 'eadb'){
 		if ( $type eq 'out' ){
 			$cutpos = $from + $fade_time1_fraction * ($to - $from);
@@ -249,6 +263,9 @@ sub spec_to_pairs {
 			push @pairs, ($from, 0, $cutpos, $fade_down_fraction, $to, 1);
 		}
 	}
+
+	# op 'ea' uses one-stage fade
+	
 	elsif ($op eq 'ea'){
 		if ( $type eq 'out' ){
 			push @pairs, ($from, 1, $to, 0);
