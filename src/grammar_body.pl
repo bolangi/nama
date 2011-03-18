@@ -168,7 +168,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 
 statefile: /[-:\w\.]+/
 marktime: /\d+\.\d+/ # decimal required
-markname: /\w+/ { 	 # word characters
+markname: /[A-Za-z]\w*/ { 
 	print("$item[1]: non-existent mark name. Skipping\n"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
@@ -942,9 +942,8 @@ add_fade: _add_fade in_or_out mark1 mark2
 #add_fade: _add_fade in_or_out time1 time2 # not implemented
 in_or_out: 'in' | 'out'
 duration: value
-mark1: mark_ident
-mark2: mark_ident
-mark_ident: /[A-Za-z]\w*/
+mark1: markname
+mark2: markname
 remove_fade: _remove_fade fade_index(s) { 
 	my @i = @{ $item{'fade_index(s)'} };
 	::Text::remove_fade($_) for (@i);
