@@ -948,11 +948,13 @@ sub rec_status {
 }
 }
 {
-package ::EditTrack;
+package ::EditTrack; use Carp qw(carp cluck);
 our @ISA = '::Track';
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
+	local $debug = 1;
+	$debug and print $self->name, ": args @_\n";
     # get tail of method call
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	$::Edit::by_name{$self->name}->$call(@_);
@@ -968,6 +970,7 @@ sub current_version {
 	else { return 0 }
 }
 sub playat_time {
+	$debug and cluck $_[0]->name . "->playat_time\n";
 	$_[0]->play_start_time
 }
 }
