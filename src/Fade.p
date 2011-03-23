@@ -226,7 +226,9 @@ sub fader_envelope_pairs {
 	#say( ::yaml_out( \@specs));
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
-	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
+
+#   XXX results in bug via AUTOLOAD for EditTrack
+#	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
 
 	# add flat segments 
 	# - from start to first fade 
