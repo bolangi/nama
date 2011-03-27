@@ -5,7 +5,7 @@ use Carp;
 no warnings "uninitialized";
 my $debug = 0;
 my (@commands, @abbrevs);
-use IO::All;
+use File::Slurp;
 use YAML::Tiny;
 
 my $output = shift @ARGV;
@@ -105,7 +105,7 @@ sub yaml_in {
 	my $input = shift;
 	my $yaml = $input =~ /\n/ # check whether file or text
 		? $input 			# yaml text
-		: io($input)->all;	# file name
+		: read_file($input);	# file name
 	if ($yaml =~ /\t/){
 		croak "YAML file: $input contains illegal TAB character.";
 	}
@@ -113,7 +113,7 @@ sub yaml_in {
 	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
 	$yaml = quote_yaml_scalars($yaml);
 	my $y = YAML::Tiny->read_string($yaml);
-	print "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
+	die "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
 	$y->[0];
 }
 sub quote_yaml_scalars {
@@ -125,9 +125,9 @@ sub quote_yaml_scalars {
 		if( /^(?<beg>(\s*\w+: )|(\s+- ))(?<end>.+)$/ ){
 			my($beg,$end) = ($+{beg}, $+{end});
 			# quote if contains colon and not quoted
-			if ($end =~ /:/ and $end !~ /^('|")/ ){ 
-				$end =~ s(")(\\")g; # escape existing double quotes
-				$end = qq("$end") } # double-quote string
+			if ($end =~ /:\s/ and $end !~ /^('|")/ ){ 
+				$end =~ s(')(\\')g; # escape existing single quotes
+				$end = qq('$end') } # single-quote string
 			push @modified, "$beg$end\n";
 		}
 		else { push @modified, "$_\n" }

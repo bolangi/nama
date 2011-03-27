@@ -179,14 +179,6 @@ sub restore_state {
 	
 	$yaml =~ s/owns: ~/owns: []/g;
 
-	#####  satisfy new, stricter YAML::Tiny
-	
-	# eliminate command history
-	
-	# $yaml =~ s/^command_history:.+?(^\w+: )/$1/ms;
-
-	# quote other lines where necessary
-	
 	$yaml = quote_yaml_scalars( $yaml );
 	
 	# start marshalling with clean slate	

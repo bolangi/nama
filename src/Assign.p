@@ -381,9 +381,9 @@ sub quote_yaml_scalars {
 		if( /^(?<beg>(\s*\w+: )|(\s+- ))(?<end>.+)$/ ){
 			my($beg,$end) = ($+{beg}, $+{end});
 			# quote if contains colon and not quoted
-			if ($end =~ /:/ and $end !~ /^('|")/ ){ 
-				$end =~ s(")(\\")g; # escape existing double quotes
-				$end = qq("$end") } # double-quote string
+			if ($end =~ /:\s/ and $end !~ /^('|")/ ){ 
+				$end =~ s(')(\\')g; # escape existing single quotes
+				$end = qq('$end') } # single-quote string
 			push @modified, "$beg$end\n";
 		}
 		else { push @modified, "$_\n" }
