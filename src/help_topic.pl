@@ -10,6 +10,7 @@
                     mixdown
                     prompt 
                     diagnostics
+					edits
 
                 ) ;
 
@@ -177,10 +178,10 @@ track => <<TRACK,
 
  - hazardous commands for advanced users
 
-   set_track, set          - directly set current track parameters
+   set_track               - directly set current track parameters
 
    destroy_current_wav     - unlink current track's selected WAV version.
-                             Nama's only destructive command. USE WITH CARE!
+                             Destructive command! USE WITH CARE!!
 
 TRACK
 
@@ -356,7 +357,49 @@ diagnostics => <<DIAGNOSTICS,
    engine_status, egs           - display ecasound audio processing engine
                                    status
 DIAGNOSTICS
-    
+
+edits => <<EDITS,
+
+-  general
+
+   list_edits,       led        - list edits
+   new_edit,         ned        - create new edit for current track and version
+   select_edit,      sed        - choose an edit to modify, becomes current edit
+   end_edit_mode,    eem        - track plays full length
+   disable_edits,    ded        - disable edits for current track
+   destroy_edit                 - remove all WAV files and data for current edit
+   
+-  edit marks
+
+   set_edit_points,  sep        - mark play start, rec start and rec end 
+
+   play_start_mark,  psm        - select and move to play start mark
+   rec_start_mark,   rsm        - select and move to rec start mark
+   red_end_mark,     rem        - select and move to rec end mark
+
+   set_play_start_mark, spsm    - set mark to current position
+   set_rec_start_mark,  srsm    - set mark to current position
+   set_rec_end_mark,    srem    - set mark to current position
+
+-  preview edit segment
+
+   preview_edit_in   pei        - preview track with edit segment removed
+   preview_edit_out  peo        - preview edit segment to be removed
+
+-  record/play edit
+
+   record_edit       red        - record a WAV file for current edit
+   play_edit         ped        - play a completed edit
+
+-  select edit related tracks
+
+   edit_track,       et         - set edit track as current track
+   edit_track,       et         - set edit track as current track
+   host_track,       ht         - set host track alias as current track
+   host_track_alias, hta        - set host track alias as current track
+   version_mix_track,vmt        - set version mix track as current track 
+EDITS
+   
 );
 # print values %help_topic;
 
@@ -385,4 +428,5 @@ help is available for the following topics:
 9  Mixdown
 10 Command prompt 
 11 Diagnostics
+12 Edits
 HELP

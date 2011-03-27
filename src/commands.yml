@@ -873,16 +873,6 @@ set_rec_end_mark:
   what: set rec_end_mark to current engine position
   short: srem
   parameters: none
-rec_start_mark:
-  type: edit
-  what: select (and move to) rec start mark
-  short: rsm
-  parameters: none
-rec_end_mark:
-  type: edit
-  what: select (and move to) rec end mark
-  short: rem
-  parameters: none
 disable_edits:
   type: edit
   short: ded
