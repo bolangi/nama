@@ -10,6 +10,7 @@
                     mixdown
                     prompt 
                     diagnostics
+					fades
 					edits
 
                 ) ;
@@ -399,6 +400,18 @@ edits => <<EDITS,
    host_track_alias, hta        - set host track alias as current track
    version_mix_track,vmt        - set version mix track as current track 
 EDITS
+
+fades => <<FADES,
+   add_fade,         afd, fade  - add fade (in or out) to current track
+                                  examples: 
+                                      fade in song_start 0.2
+                                  (fades in at mark 'song_start' over 0.2 s)
+                                      fade out 0.5 song_start
+                                  (fades out over 0.5 s ending at 'song_start')
+                                  
+   remove_fade,      rfd        - remove fade (by index)
+   list_fade         lfd        - list all fades
+FADES
    
 );
 # print values %help_topic;
@@ -429,4 +442,5 @@ help is available for the following topics:
 10 Command prompt 
 11 Diagnostics
 12 Edits
+13 Fades
 HELP
