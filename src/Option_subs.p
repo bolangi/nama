@@ -16,7 +16,7 @@ sub process_options {
 		config=s		f
 		gui			  	g
 		text			t
-		no-state		m
+		no-state		M
 		net-eci			n
 		libecasoundc	l
 		help			h

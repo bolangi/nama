@@ -82,7 +82,7 @@ sub initialize_interfaces {
 	
 	first_run() unless $opts{d}; 
 
-	prepare_static_effects_data() unless $opts{e};
+	prepare_static_effects_data() unless $opts{S};
 
 	get_ecasound_iam_keywords();
 	load_keywords(); # for autocompletion

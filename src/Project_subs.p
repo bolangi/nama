@@ -178,7 +178,7 @@ Loading project "untitled".
 	cache_wav_info();
 	rememoize();
 
-	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{m} ;
+	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{M} ;
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 
@@ -204,7 +204,7 @@ Loading project "untitled".
 	}
 
 
-	$opts{m} = 0; # enable 
+	$opts{M} = 0; # enable 
 	
 	dig_ruins() unless scalar @::Track::all > 2;
 

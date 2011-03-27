@@ -661,7 +661,7 @@ sub prepare_static_effects_data{
 		print "Regenerating effects data cache\n";
 	}
 
-	if (-f $effects_cache and ! $opts{s}){  
+	if (-f $effects_cache and ! $opts{C}){  
 		$debug and print "found effects cache: $effects_cache\n";
 		assign_var($effects_cache, @effects_static_vars);
 	} else {
