@@ -31,6 +31,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		remove_spaces
 		expand_tilde
 		resolve_path
+		quote_yaml_scalars
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -371,6 +372,25 @@ sub expand_tilde {
 	($home/)x;
 	$path
 }
+sub quote_yaml_scalars {
+	my $yaml = shift;
+	my @modified;
+	map
+		{  
+		chomp;
+		if( /^(?<beg>(\s*\w+: )|(\s+- ))(?<end>.+)$/ ){
+			my($beg,$end) = ($+{beg}, $+{end});
+			# quote if contains colon and not quoted
+			if ($end =~ /:/ and $end !~ /^('|")/ ){ 
+				$end =~ s(")(\\")g; # escape existing double quotes
+				$end = qq("$end") } # double-quote string
+			push @modified, "$beg$end\n";
+		}
+		else { push @modified, "$_\n" }
+	} split "\n", $yaml;
+	join "", @modified;
+}
+	
 
 1;
 

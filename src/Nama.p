@@ -196,6 +196,7 @@ sub setup_grammar {
 	$debug2 and print "Reading grammar\n";
 
 	*commands_yml = __PACKAGE__->section_data("commands_yml");
+	$commands_yml = quote_yaml_scalars($commands_yml);
 	*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
 	%commands = %{ ::yaml_in( $::commands_yml) };
 
@@ -254,7 +255,7 @@ package ::;  # for Data::Section
 1;
 __DATA__
 __[commands_yml]__
-[% qx(./strip_all  ./commands.yml) %]
+[% qx(./strip_all ./commands.yml ) %]
 __[grammar]__
 [% qx(./strip_all  ./grammar_body.pl) %]
 [% qx(./emit_command_headers headers) %]

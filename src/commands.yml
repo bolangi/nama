@@ -456,7 +456,10 @@ loop_enable:
   short: loop
   what: loop playback between two points
   parameters: '<start> <end> (start, end: mark names, mark indices, decimal seconds)'
-  example: loop_enable 1.5 10.0 (loop between 1.5 and 10.0 seconds) !nloop_enable 1 5 (loop between mark indices 1 and 5) !nloop_enable start end (loop between mark ids 'start' and 'end')
+  example: |
+    loop_enable 1.5 10.0  # loop between 1.5 and 10.0 seconds
+    loop_enable 1 5       # loop between mark indices 1 and 5 
+    loop_enable start end # loop between mark ids 'start' and 'end'
 loop_disable:
   type: setup 
   short: noloop nl

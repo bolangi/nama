@@ -209,7 +209,7 @@ sub helpline {
 	}
 	$text .= "\n";
 	my $example = $commands{$cmd}->{example};
-	$example =~ s/!n/\n/g;
+	#$example =~ s/!n/\n/g;
 	$text .=  "Example: $example\n" if $example;
 	($/, ucfirst $text, $/);
 	
