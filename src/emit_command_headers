@@ -111,9 +111,29 @@ sub yaml_in {
 	}
 	$yaml =~ s/^\n+//  ; # remove leading newline at start of file
 	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
+	$yaml = quote_yaml_scalars($yaml);
 	my $y = YAML::Tiny->read_string($yaml);
 	print "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
 	$y->[0];
 }
+sub quote_yaml_scalars {
+	my $yaml = shift;
+	my @modified;
+	map
+		{  
+		chomp;
+		if( /^(?<beg>(\s*\w+: )|(\s+- ))(?<end>.+)$/ ){
+			my($beg,$end) = ($+{beg}, $+{end});
+			# quote if contains colon and not quoted
+			if ($end =~ /:/ and $end !~ /^('|")/ ){ 
+				$end =~ s(")(\\")g; # escape existing double quotes
+				$end = qq("$end") } # double-quote string
+			push @modified, "$beg$end\n";
+		}
+		else { push @modified, "$_\n" }
+	} split "\n", $yaml;
+	join "", @modified;
+}
+	
 
 sub add_break { map{ qq(/$_\\b/) } @_ }

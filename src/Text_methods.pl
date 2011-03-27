@@ -210,7 +210,15 @@ sub helpline {
 	$text .= "\n";
 	my $example = $commands{$cmd}->{example};
 	#$example =~ s/!n/\n/g;
-	$text .=  "Example: $example\n" if $example;
+	if ($example){
+		$text .=  "Example: ";
+		if ($example =~ /\n/s){
+			$example = "\n$example";    # add leading newline
+			$example =~ s(\n)(\n    )g; # indent
+		}
+		$text .=  $example;
+		$text .= "\n";
+	}
 	($/, ucfirst $text, $/);
 	
 }

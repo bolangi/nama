@@ -455,11 +455,11 @@ loop_enable:
   type: setup 
   short: loop
   what: loop playback between two points
-  parameters: '<start> <end> (start, end: mark names, mark indices, decimal seconds)'
+  parameters: <start> <end> (start, end: mark names, mark indices, decimal seconds)
   example: |
-    loop_enable 1.5 10.0  # loop between 1.5 and 10.0 seconds
-    loop_enable 1 5       # loop between mark indices 1 and 5 
-    loop_enable start end # loop between mark ids 'start' and 'end'
+    loop_enable 1.5 10.0  ; loop between 1.5 and 10.0 seconds
+    loop_enable 1 5       ; loop between mark indices 1 and 5 
+    loop_enable start end ; loop between mark ids 'start' and 'end'
 loop_disable:
   type: setup 
   short: noloop nl
@@ -475,7 +475,10 @@ add_effect:
   type: effect
   what: add effect to the end of current track
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
-  example: 'add_effect amp 6 (LADSPA Simple amp 6dB gain)!nadd_effect var_dali (preset var_dali) Note: no el: or pn: prefix is required'
+  example: |2
+    add_effect amp 6     ; LADSPA Simple amp 6dB gain
+    add_effect var_dali  ; preset var_dali. Note that you don't need
+                         ; Ecasound's el: or pn: prefix
 insert_effect:
   type: effect
   short: ifx
@@ -486,7 +489,11 @@ modify_effect:
   what: modify an effect parameter
   parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
   short: mfx modify_controller mcl
-  example: 'modify_effect V 1 -1 (set effect_id V, parameter 1 to -1)!nmodify_effect V 1 - 10 (reduce effect_id V, parameter 1 by 10)!nset multiple effects/parameters: mfx V 1,2,3 + 0.5 ; mfx V,AC,AD 1,2 3.14'
+  example: |
+    modify_effect V 1 -1           ; set effect_id V, parameter 1 to -1
+    modify_effect V 1 - 10         ; reduce effect_id V, parameter 1 by 10
+    modify_effect V 1,2,3 + 0.5    ; modify multiple parameters
+    modify_effect V,AC,AD 1,2 3.14 ; set multiple effects/parameters
 remove_effect:
   type: effect
   what: remove effects from selected track
@@ -510,7 +517,7 @@ add_insert:
 set_insert_wetness:
   type: effect 
   short: wet
-  what: 'set wet/dry balance for current track insert: 100 = all wet, 0 = all dry'
+  what: set wet/dry balance for current track insert: 100 = all wet, 0 = all dry
   parameters: [ pre | post ] <n_wetness> 
 remove_insert:
   type: effect
@@ -620,9 +627,11 @@ add_send_bus_raw:
 add_sub_bus:
   type: bus
   short: asub
-  what: 'add a sub bus (default destination: to mixer via eponymous track)'
-  parameters: '<s_name> [destination: s_track_name|s_jack_client|n_soundcard channel]'
-  example: asub Strings_bus !nasub Strings_bus some_jack_client
+  what: add a sub bus (default destination: to mixer via eponymous track)
+  parameters: <s_name> [destination: s_track_name|s_jack_client|n_soundcard channel]
+  example: |
+    asub Strings_bus
+    asub Strings_bus some_jack_client
 update_send_bus:
   type: bus
   short: usb
@@ -726,7 +735,11 @@ add_fade:
   short: afd fade
   what: add a fade-in or fade-out to current track
   parameters: in|out marks/times (see examples)
-  example: fade in mark1 (fade in default 0.5s starting at mark1)!nfade out mark2 2 (fade out over 2s starting at mark2)!nfade out 2 mark2 (fade out over 2s ending at mark2)!nfade out mark1 mark2 (fade out from mark1 to mark2) 
+  example: |
+    fade in mark1        ; fade in default 0.5s starting at mark1
+    fade out mark2 2     ; fade out over 2s starting at mark2
+    fade out 2 mark2     ; fade out over 2s ending at mark2
+    fade out mark1 mark2 ; fade out from mark1 to mark2
 remove_fade:
   type: effect 
   short: rfd
