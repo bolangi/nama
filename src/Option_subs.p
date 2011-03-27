@@ -21,8 +21,8 @@ sub process_options {
 		libecasoundc	l
 		help			h
 		regenerate-effects-cache	r
-		no-static-effects-data		s
-		no-static-effects-cache		e
+		no-static-effects-data		S
+		no-static-effects-cache		C
 		no-reconfigure-engine		R
 		fake-jack					J
 		fake-alsa					A
@@ -61,13 +61,13 @@ USAGE: nama [options] [project_name]
 --libecasoundc, -l               Use Ecasound's libecasoundc interface
 --save-alsa, -a                  Save/restore alsa state with project data
 --help, -h                       This help display
+--regenerate-effects-cache, -r   Regenerate the effects data cache
 
 Debugging options:
 
---no-static-effects-data, -s     Don't load effects data
---no-state, -m                   Don't load project state
---no-static-effects-cache, -e    Bypass effects data cache
---regenerate-effects-cache, -r   Regenerate the effects data cache
+--no-state, -M                   Don't load project state
+--no-static-effects-data, -S     Don't load effects data
+--no-static-effects-cache, -C    Bypass effects data cache
 --no-reconfigure-engine, -R      Don't automatically configure engine
 --debugging-output, -D           Emit debugging information
 --fake-jack, -J                  Simulate JACK environment
