@@ -26,19 +26,21 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = 1.069;
+$VERSION = 1.070;
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
 use Cwd;
+use Data::Section -setup;
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
 use File::Spec::Link;
 use File::Temp;
 use Getopt::Long;
+use Graph;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
@@ -46,14 +48,14 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable; 
 use Term::ReadLine;
-use Graph;
-use Data::Section -setup;
-# use Timer::HiRes; # automatically detected
+use Text::Format;
+# use File::HomeDir;# Assign.pm
+# use File::Slurp;  # several
+# use List::Util;   # Fade.pm
+# use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
 # use AnyEvent;		# loaded after Tk or Event
-# use Tk::FontDialog; # hmmm might be nice to use
-use Text::Format;
 
 ## Load my modules
 

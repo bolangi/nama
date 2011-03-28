@@ -1,13 +1,9 @@
 blib/*
 MANIFEST.bak
 MANIFEST.SKIP
-META.0
 README.html
 Makefile
 Makefile.old
-broken_tests/*
-pre/*
 try/*
-doc/*
 .git/*
 src/*

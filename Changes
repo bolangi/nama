@@ -1,5 +1,24 @@
 Changes to Audio::Nama
 
+1.070 March 27, 2011
+
+      New features
+      - track edits (non-destructive punch-in style recording)
+      - track comments
+      - version comments
+      - project templates
+      - autosave
+      - support jack.plumbing and jack_connect for JACK
+        client connections
+      - user-defined commands (custom.pl)
+
+      Other changes
+      - expanded test coverage
+      - initial support for Midish MIDI sequencer and filter
+      - separate code into multiple modules
+      - many fixes and improvements
+
+
 1.064  August 6, 2010
       - fix Bug rt.cpan.org #60024: Audio::Nama::Assign::expand_tilde()
 
