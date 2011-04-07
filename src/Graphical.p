@@ -2,6 +2,8 @@
 
 package ::;
 
+our $VERSION = 1.071;
+
 our ( 
 	$attribs,
 	$term,

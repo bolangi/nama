@@ -145,6 +145,7 @@ sub get_id {
 {
 package ::PostFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert); our $debug;
+use ::Util qw(input_node output_node dest_type);
 sub add_paths {
 
 	# Since this routine will be called after expand_graph, 
@@ -204,6 +205,7 @@ sub add_paths {
 {
 package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert); our $debug;
+use ::Util qw(input_node output_node dest_type);
 sub add_paths {
 
 # --- predecessor --+-- wet-send    wet-return ---+-- insert_pre -- track

@@ -48,6 +48,7 @@ use Carp;
 use ::Assign qw(:all);
 
 our @ISA = '::';
+our $VERSION = 1.071;
 
 sub hello {"hello world!";}
 
