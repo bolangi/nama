@@ -18,6 +18,7 @@ mv $TD/Nama.pm $TD/../Nama.pm
 		 -r Audio::Nama \
 		 -a t \
 		 -b t
+./generate_executable_stub
 #cd ..
 #perl Makefile.PL
 echo "Now you can go to the nama toplevel directory and type:"
