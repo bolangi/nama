@@ -1,54 +1,59 @@
 Changes to Audio::Nama
 
+1.073 April 9, 2011
+
+     * fix bug with inserts
+     * move entire man page to executable
+
 1.070 March 27, 2011
 
       New features
-      - track edits (non-destructive punch-in style recording)
-      - track comments
-      - version comments
-      - project templates
-      - autosave
-      - support jack.plumbing and jack_connect for JACK
+      * track edits (non-destructive punch-in style recording)
+      * track comments
+      * version comments
+      * project templates
+      * autosave
+      * support jack.plumbing and jack_connect for JACK
         client connections
-      - user-defined commands (custom.pl)
+      * user-defined commands (custom.pl)
 
       Other changes
-      - expanded test coverage
-      - initial support for Midish MIDI sequencer and filter
-      - separate code into multiple modules
-      - many fixes and improvements
+      * expanded test coverage
+      * initial support for Midish MIDI sequencer and filter
+      * separate code into multiple modules
+      * many fixes and improvements
 
 
 1.064  August 6, 2010
-      - fix Bug rt.cpan.org #60024: Audio::Nama::Assign::expand_tilde()
+      * fix Bug rt.cpan.org #60024: Audio::Nama::Assign::expand_tilde()
 
 1.063  August 2, 2010
 
-      - various minor improvements
-      - fix Bug#591166 (Debian build support)
+      * various minor improvements
+      * fix Bug#591166 (Debian build support)
 
 1.052  March 20, 2010 (summary)
 
-      - prompt displays current bus and current track
-      - configurable use of ea or eadb for volume control
-      - Ladish Level 1 support 
-      - big speedup by caching results of Track and Wav methods
-      - generate setup using graph representation and IO objects
-      - rewrite send- and sub-buses 
-      - track caching (track freezing)
-      - post-fader track inserts (send/receive) with wet/dry control
-      - more flexible track input 
+      * prompt displays current bus and current track
+      * configurable use of ea or eadb for volume control
+      * Ladish Level 1 support 
+      * big speedup by caching results of Track and Wav methods
+      * generate setup using graph representation and IO objects
+      * rewrite send- and sub-buses 
+      * track caching (track freezing)
+      * post-fader track inserts (send/receive) with wet/dry control
+      * more flexible track input 
          + manual connection to JACK port
          + auto connect to list of JACK ports
-      - track normalize and fixdc commands
-      - automix (normalized mixdown) command
-      - import audio: copy files unless resampling or converting format
-      - region shifting, with multiple regions per track
-      - effect chains (presets)
-      - effect profiles (effect chains over multiple tracks)
-      - non-recording preview and doodle modes
-      - unified event code for GUI and text modes
-      - rewrite support for Ecasound controllers
-      - test coverage for signal routing functions 
-      - new debugging options
+      * track normalize and fixdc commands
+      * automix (normalized mixdown) command
+      * import audio: copy files unless resampling or converting format
+      * region shifting, with multiple regions per track
+      * effect chains (presets)
+      * effect profiles (effect chains over multiple tracks)
+      * non-recording preview and doodle modes
+      * unified event code for GUI and text modes
+      * rewrite support for Ecasound controllers
+      * test coverage for signal routing functions 
+      * new debugging options
 

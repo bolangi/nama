@@ -1,0 +1,19 @@
+#!/usr/bin/env perl
+use Modern::Perl;
+use File::Slurp;
+use autodie;
+
+my $script = '../script/nama';
+my $exec = <<EXEC;
+#!/usr/bin/env perl
+use Audio::Nama;
+Audio::Nama::main();
+__END__
+EXEC
+
+my @man;
+push @man, read_file('man_page_part1');
+push @man, qx(./emit_command_headers pod);
+push @man, read_file('man_page_part2');
+write_file($script, $exec, @man);
+chmod 0755, $script;

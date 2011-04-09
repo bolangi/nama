@@ -26,7 +26,7 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = 1.072;
+$VERSION = 1.073;
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
@@ -276,9 +276,19 @@ __[midish_commands]__
 __[end_data_section]__
 __END__
 
-[% qx(cat ./man_page_part1) %]
+=head1 NAME
 
-[% qx(./emit_command_headers pod) %]
+Nama (Audio::Nama) - an audio recording, mixing and editing application
 
-[% qx(cat ./man_page_part2) %]
+=head1 DESCRIPTION
 
+B<Nama> is an application for multitrack recording,
+non-destructive editing, mixing and mastering using the
+Ecasound audio engine developed by Kai Vehmanen.
+
+Features include tracks, buses, effects, presets,
+sends, inserts, marks and regions. Nama runs under JACK and
+ALSA audio frameworks, automatically detects LADSPA plugins,
+and supports Ladish Level 1 session handling.
+
+Type C<man nama> for details.

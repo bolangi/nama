@@ -8,9 +8,10 @@ B<nama> [I<options>] [I<project_name>]
 
 =head1 DESCRIPTION
 
-B<Nama> is a text-based application for multitrack
-recording, mixing and mastering using the Ecasound
-audio engine developed by Kai Vehmanen.
+B<Nama> is an application for multitrack recording,
+non-destructive editing, mixing and mastering using the
+Ecasound audio engine developed by Kai Vehmanen.
+Primarily text-based, it also has a simple Tk based GUI.
  
 Features include tracks with multiple WAV versions (AKA
 takes), buses, effects, presets, sends, inserts, marks,
