@@ -3,7 +3,9 @@ use Modern::Perl;
 use File::Slurp;
 use autodie;
 
-my $script = '../script/nama';
+my $script_dir = '../script';
+mkdir $script_dir unless -d $script_dir;
+my $script = "$script_dir/nama";
 my $exec = <<EXEC;
 #!/usr/bin/env perl
 use Audio::Nama;
