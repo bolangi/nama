@@ -2,7 +2,8 @@ use inc::Module::Install;
 
          # Define metadata
          name                'Audio-Nama';
-		 all_from            'lib/Audio/Nama.pm';
+		 version_from        'lib/Audio/Nama.pm';
+		 all_from            'script/nama';
          license             'perl';
 		 install_script      'script/nama'; 
 	 keywords
