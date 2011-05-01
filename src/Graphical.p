@@ -182,12 +182,14 @@ sub loop {
 
 sub initialize_tk { can_load( modules => { Tk => undef } ) }
 
-[% qx(cat ./Graphical_subs.pl ) %] # root namespace!
+# the following graphical methods are placed in the root namespace
+# allowing access to root namespace variables 
+# with a package path
+
+package ::;
+[% qx(cat ./Graphical_subs.pl ) %]
 
 [% qx(cat ./Refresh_subs.pl ) %]
-
-## The following code loads the object core of the system 
-## and initiates the chain templates (rules)
 
 1;
 __END__
