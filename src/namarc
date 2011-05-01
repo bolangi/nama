@@ -52,10 +52,12 @@ devices:
     ecasound_id: alsa,default
     input_format: cd-stereo
     output_format: cd-stereo
+    hardware_latency: 0
   multi:
     ecasound_id: alsa,ice1712
     input_format: s32_le,12,frequency
     output_format: s32_le,10,frequency
+    hardware_latency: 0
   null:
     ecasound_id: null
     output_format: ~

@@ -150,7 +150,7 @@ sub _mono_to_stereo{
 	my $copy   = "-chcopy:1,2";
 	my $nocopy = "";
 	my $is_mono_track = sub { $self->width == 1 };
-	my $is_mono_wav   = sub { ::channels(::wav_format($self->full_path)) == 1};
+	my $is_mono_wav   = sub { ::channels($self->wav_format) == 1};
 	if  (      $status eq 'REC' and $is_mono_track->()
 			or $status eq 'MON' and $is_mono_wav->() )
 		 { $copy }
@@ -163,10 +163,18 @@ sub _playat_output {
 }
 sub _select_output {
 	my $track = shift;
-	my $start = $track->adjusted_region_start_time;
+	my $start = $track->adjusted_region_start_time + ::hardware_latency();
 	my $end   = $track->adjusted_region_end_time;
-	return unless defined $start and defined $end;
-	my $length = $end - $start;
+	return unless ::hardware_latency() or defined $start and defined $end;
+	my $length;
+	# CASE 1: a region is defined 
+	if ($end) { 
+		$length = $end - $start;
+	}
+	# CASE 2: only hardware latency
+	else {
+		$length = $track->wav_length - $start
+	}
 	join ',',"select", $start, $length
 }
 ###  utility subroutines

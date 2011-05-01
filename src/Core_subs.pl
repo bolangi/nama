@@ -305,4 +305,9 @@ sub show_tracks_limited {
 }
 sub process_control_inputs { }
 
+sub hardware_latency {
+	$devices{$alsa_capture_device}{hardware_latency}
+}
+	
+
 ### end Core_subs
