@@ -824,11 +824,12 @@ sub busify {
 	# create the bus if needed
 	# create or convert named track to mix track
 	
-	::add_sub_bus($name);
+	::add_sub_bus($name) unless $track->is_system_track;
 
 }
 sub unbusify {
 	my $track = shift;
+	return unless $track->is_system_track;
 	$track->set( rw => 'MON',
                  rec_defeat => 0);
 	$track->set_track_class($track->was_class // '::Track');
@@ -887,6 +888,8 @@ sub rec_status {
 }
 sub rec_status_display { $_[0]->rec_status } 
 }
+sub busify {}
+sub unbusify {}
 {
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;
