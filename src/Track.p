@@ -18,7 +18,7 @@ package ::Track;
 # class, hopefully saving a painful error
 
 use Modern::Perl;
-use Carp;
+use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
 use File::Slurp;
 use Memoize qw(memoize unmemoize);
@@ -58,12 +58,14 @@ sub idx { # return first free track index
 		return $n if not $by_index{$n}
 	}
 }
-sub all { values %by_name }
+sub all { sort{$a->n <=> $b->n } values %by_name }
 
-{ my %non_user = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
+{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
 sub user {
-	grep{ ! $non_user{$_} } map{$_->name} all();
+	grep{ ! $system_track{$_} } map{$_->name} all();
 }
+sub is_user_track   { !  $system_track{$_[0]->name} } 
+sub is_system_track {    $system_track{$_[0]->name} } 
 }
 
 sub new {
@@ -880,14 +882,10 @@ use Modern::Perl; use Carp;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 
-sub rec_status{
-
-#	$::debug2 and print "&rec_status (SimpleTrack)\n";
-	my $track = shift;
-	return 'MON' unless $track->rw eq 'OFF';
-	'OFF';
-
+sub rec_status {
+	$_[0]->rw eq 'OFF' ? 'OFF' : 'MON'
 }
+sub rec_status_display { $_[0]->rec_status } 
 }
 {
 package ::MasteringTrack; # used for mastering chains 

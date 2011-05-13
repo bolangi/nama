@@ -453,7 +453,11 @@ command: rw end # XX 'end' required to make test suite pass
 
 rw_setting: 'rec'|'mon'|'off'
 rw: rw_setting {
-	::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 1
+	# skip fancy logic for system tracks, just set track 'rw' field
+	$::this_track->is_system_track 
+		? $::this_track->set(rw => uc $item{rw_setting}) 
+		: ::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 
+	1
 }
 rec_defeat: _rec_defeat { 
 	$::this_track->set(rec_defeat => 1);
