@@ -28,7 +28,7 @@ our ($debug);
 local $debug = 0;
 use ::Assign qw(join_path);
 use ::Util qw(freq input_node dest_type);
-use vars qw($n %by_name @by_index %track_names %by_index @all);
+use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(
 [% qx(./strip_all ./track_fields) %]
@@ -47,7 +47,6 @@ initialize();
 
 sub initialize {
 	$n = 0; 	# incrementing numeric key
-	@all = ();
 	%by_index = ();	# return ref to Track by numeric key
 	%by_name = ();	# return ref to Track by name
 	%track_names = (); 
@@ -59,11 +58,11 @@ sub idx { # return first free track index
 		return $n if not $by_index{$n}
 	}
 }
-sub all { @all }
+sub all { values %by_name }
 
 { my %non_user = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
 sub user {
-	grep{ ! $non_user{$_} } map{$_->name} @all
+	grep{ ! $non_user{$_} } map{$_->name} all();
 }
 }
 
@@ -119,7 +118,6 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	push @all, $object;
 	#::add_latency_compensation($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
@@ -421,7 +419,6 @@ sub remove {
  	map{ ::remove_effect($_) } @{ $track->ops };
  	delete $by_index{$n};
  	delete $by_name{$track->name};
- 	@all = grep{ $_->n != $n} @all;
 }
 
 	

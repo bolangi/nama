@@ -19,7 +19,6 @@ our (
 	%cops,
 	%copp,
 	$main,
-	$main_out,
 	$length,
 	$run_time,
 	$use_placeholders,

@@ -94,7 +94,6 @@ sub show_status {
 	say "Pending actions:  ", join(", ", @actions) if @actions;
 	say "Main bus allows:  ", $main->allows, " track status";
 	say "Main bus version: ",$::main->version if $::main->version;
-	say "Audio output is:  ", $main_out ? "ON" : "OFF";
 	say "Setup length is:  ", ::heuristic_time($length); 
 	say "Run time limit:   ", ::heuristic_time($run_time)
       if $run_time;
@@ -476,19 +475,19 @@ sub t_add_ctrl {
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
-	$main->set(rw => 'MON') if $main->rw eq 'OFF';
-	$main_out = 0; # no audio output
+	$tn{Master}->set(rw => 'OFF'); 
+	$main->set(rw => 'MON');
 }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$tn{Mixdown}->set(rw => 'MON');
+	$tn{Master}->set(rw => 'MON'); 
 	$main->set(rw => 'OFF');
-	$main_out = 1;
 }
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
-	$main_out = 1;
+	$tn{Master}->set(rw => 'MON'); 
 	$main->set(rw => 'MON') if $main->rw eq 'OFF';
 }
 sub bunch {

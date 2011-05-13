@@ -14,7 +14,6 @@ our (	$debug,
 		%tn,
 		$main,
 		$mastering_mode,
-		$main_out,
 		$mix_to_disk_format,
 		$ecasound_globals_default,
 		$ecasound_globals_realtime,
@@ -297,7 +296,7 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq High Boost]);
 	}
 	$g->add_path($mastering_mode ?  'Boost' : 'Master',
-			output_node($tn{Master}->send_type)) if $main_out;
+			output_node($tn{Master}->send_type)) if $tn{Master}->rw ne 'OFF'
  
 
 }

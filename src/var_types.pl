@@ -99,7 +99,6 @@
 # category: routing
 
 	$mastering_mode
-	$main_out 		# boolean: route audio output to soundcard?
 
 # category: effects
 

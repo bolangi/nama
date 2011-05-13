@@ -29,7 +29,6 @@ our (
 
 	$mastering_mode,
 	$jack_running,
-	$main_out,
 
 # find_duplicate_inputs()
 
@@ -209,7 +208,6 @@ sub status_snapshot {
 	my %snapshot = ( project 		=> 	$project_name,
 					 mastering_mode => $mastering_mode,
 					 preview        => $preview,
-					 main_out 		=> $main_out,
 					 jack_running	=> $jack_running,
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }

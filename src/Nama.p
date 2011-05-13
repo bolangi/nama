@@ -163,7 +163,6 @@ $save_id = "State";
 $user_customization_file = "custom.pl";
 $fade_time = 0.3; # when starting/stopping transport
 $old_snapshot = {};
-$main_out = 1; # enable main output
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
 $memoize = 1;

@@ -762,11 +762,11 @@ list_history: _list_history {
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
 main_off: _main_off { 
-	$::main_out = 0;
+	$::tn{Master}->set(rw => 'OFF');
 1;
 } 
 main_on: _main_on { 
-	$::main_out = 1;
+	$::tn{Master}->set(rw => 'MON');
 1;
 } 
 add_send_bus_cooked: _add_send_bus_cooked bus_name destination {

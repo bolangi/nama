@@ -27,7 +27,6 @@ our (
 
 	%bn,
 	$main,
-	$main_out,
 );
 our (
 	%opts,
@@ -1138,7 +1137,7 @@ sub automix {
 
 	# turn off audio output
 	
-	$main_out = 0;
+	$tn{Master}->set(rw => 'OFF');
 
 	### Status before mixdown:
 
@@ -1188,7 +1187,7 @@ sub automix {
 
 		say "Signal appears to be silence. Skipping.";
 		for (@tracks){ command_process("$_  $restore_vol_command") }
-		$main_out = 1;
+		$tn{Master}->set(rw => 'MON');
 		return;
 	}
 
@@ -1196,8 +1195,6 @@ sub automix {
 
 	for (@tracks){ command_process( "$_ vol*$multiplier" ) }
 
-	# $main_out = 1; # unnecessary: mixdown will turn off and turn on main out
-	
 	### mixdown
 	command_process('mixdown; arm; start');
 
