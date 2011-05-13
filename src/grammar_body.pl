@@ -765,14 +765,6 @@ list_history: _list_history {
 	my %seen;
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
-main_off: _main_off { 
-	$::tn{Master}->set(rw => 'OFF');
-1;
-} 
-main_on: _main_on { 
-	$::tn{Master}->set(rw => 'MON');
-1;
-} 
 add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
 	1;
