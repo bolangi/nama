@@ -630,7 +630,26 @@ add_controller: _add_controller parent effect value(s?) {
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
 
-		$::this_op = $id; # set current effect
+	}
+	1;
+}
+add_controller: _add_controller effect value(s?) {
+	my $code = $item{effect};
+	my $parent = $::this_op;
+	my $values = $item{"value(s?)"};
+	#print "values: " , ref $values, $/;
+	#print join ", ", @{$values} if $values;
+	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	if($id)
+	{
+		my $i = 	::effect_index($code);
+		my $iname = $::effects[$i]->{name};
+
+		my $pi = 	::effect_index($::cops{$parent}->{type});
+		my $pname = $::effects[$pi]->{name};
+
+		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
+
 	}
 	1;
 }
