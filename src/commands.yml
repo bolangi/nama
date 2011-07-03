@@ -459,8 +459,8 @@ loop_disable:
   parameters: none
 add_controller:
   type: effect
-  what: add a controller to an operator (use mfx to modify, rfx to remove)
-  parameters: <s_parent_id> <s_effect_code> [ <f_param1> <f_param2>...]
+  what: add a controller to an operator (current operator, by default) use mfx to modify, rfx to remove)
+  parameters: [<s_operator_id>] <s_effect_code> [ <f_param1> <f_param2>...]
   short: acl
 add_effect:
   short: afx
