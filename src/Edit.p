@@ -912,7 +912,7 @@ sub select_edit_track {
 	command_process('show_track');
 }
 
-}
+} # end package
 
 1;
 

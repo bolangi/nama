@@ -274,6 +274,6 @@ sub rewind {
 	forward( -$delta );
 }
 	
-}	
+} # end package
 1;
 __END__
