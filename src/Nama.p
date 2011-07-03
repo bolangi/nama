@@ -111,7 +111,6 @@ use ::Bus_subs ();
 use ::Track_subs ();
 use ::Region_subs ();
 use ::Effect_chain_subs ();
-use ::Mark_and_jump_subs ();
 use ::Midi_subs ();
 use ::Memoize_subs ();
 
