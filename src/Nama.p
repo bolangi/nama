@@ -79,7 +79,6 @@ use ::Graphical;
 use ::Persistence ();
 use ::ChainSetup ();
 use ::CacheTrack ();
-use ::Edit_subs ();
 use ::Effect_subs ();
 use ::Util qw(
 	rw_set 

@@ -137,7 +137,7 @@ sub mark_time {
 
 
 # ---------- Mark and jump routines --------
-
+{
 package ::;
 use Modern::Perl;
 our (
@@ -274,7 +274,5 @@ sub rewind {
 	forward( -$delta );
 }
 	
-1;
-__END__
-	
+}	
 1;
