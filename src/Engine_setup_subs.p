@@ -68,7 +68,7 @@ sub generate_setup {
 	# catch errors unless testing (no-terminal option)
 	local $@ unless $opts{T}; 
 	track_memoize(); 			# freeze track state 
-	my $success = $opts{T} 
+	my $success = $opts{T}      # don't catch errors during testing 
 		?  ::ChainSetup::generate_setup_try(@_)
 		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
 	remove_temporary_tracks();  # cleanup

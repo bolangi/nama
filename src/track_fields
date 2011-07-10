@@ -31,7 +31,7 @@
 					source_id		# signal source (channel No. or jack client)
 					source_type		# soundcard or jack_client
 
-					# acceptable values (also applies to send_type)
+					# acceptable source_type values (also applies to send_type)
 					#
 					# Active settings:
 					#
