@@ -10,12 +10,10 @@ inc/Module/Install/Scripts.pm
 inc/Module/Install/Fetch.pm
 lib/Audio/Nama/Assign.pm
 lib/Audio/Nama/Bus.pm
-lib/Audio/Nama/Bus_subs.pm
 lib/Audio/Nama/CacheTrack.pm
 lib/Audio/Nama/ChainSetup.pm
 lib/Audio/Nama/Config_subs.pm
 lib/Audio/Nama/Edit.pm
-lib/Audio/Nama/Edit_subs.pm
 lib/Audio/Nama/Effect_chain_subs.pm
 lib/Audio/Nama/Effect_subs.pm
 lib/Audio/Nama/Engine_cleanup_subs.pm
@@ -29,7 +27,6 @@ lib/Audio/Nama/Initialize_subs.pm
 lib/Audio/Nama/Insert.pm
 lib/Audio/Nama/Jack_subs.pm
 lib/Audio/Nama/Mark.pm
-lib/Audio/Nama/Mark_and_jump_subs.pm
 lib/Audio/Nama/Memoize_subs.pm
 lib/Audio/Nama/Midi_subs.pm
 lib/Audio/Nama/Mode_subs.pm
@@ -43,7 +40,6 @@ lib/Audio/Nama/Region_subs.pm
 lib/Audio/Nama/Terminal_subs.pm
 lib/Audio/Nama/Text.pm
 lib/Audio/Nama/Track.pm
-lib/Audio/Nama/Track_subs.pm
 lib/Audio/Nama/Util.pm
 lib/Audio/Nama/Wav.pm
 lib/Audio/Nama/Wavinfo_subs.pm
