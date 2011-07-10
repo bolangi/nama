@@ -150,7 +150,7 @@ sub reconfigure_engine {
 	$old_snapshot = status_snapshot();
 	$old_offset_run_status = $offset_run_flag;
 
-	command_process('show_tracks');
+	command_process('show_tracks_all');
 
 	stop_transport('quiet') if $was_running;
 
