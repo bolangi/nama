@@ -1,0 +1,66 @@
+Track 				base class
+SimpleTrack			used for Master track
+
+    ->rec_status() 			can be only MON or OFF (not REC)
+	->rec_status_display() 	modified to suit above
+	->busify()				disabled
+	->unbusify()			disabled
+
+MasteringTrack		used for mastering network
+
+	subclasses SimpleTrack
+
+	->rec_status()			determined by $mastering_mode (MON/OFF)
+	->source_status()		returns undef
+	->group_last()			returns 0
+	->version()				returns 0 (influences track display)
+
+SlaveTrack			instrument monitor bus, tracks created by link_track command
+
+	the following methods/attributes all apply to the target project/track:
+
+	width, rec_status, full_path, monitor_version, source_type, source_id,
+	source_status, send_type, send_id, dir
+	
+CacheRecTrack		temporary track used track freezing 
+					(recording effects-processed track signal)
+
+	subclasses SlaveTrack
+
+	->current_version()		returns target track current version + 1
+	->current_wav()			uses above rather than ancestor version
+	->full_path()			uses above rather than ancestor version
+
+MixDownTrack		Mixdown track
+
+	->current_version()		simplified
+	->rec_status()			does not depend on any bus setting
+
+EditTrack
+
+	uses AUTOLOAD to apply methods for corresponding Edit object
+
+	->current_version()		simplified, similar to MixDownTrack's
+							but checks rec_defeat attribute
+	->playat_time()			returns Edit object ->play_start_time() 
+
+VersionTrack
+
+	->set_version()			disabled
+	->versions()			returns only [ $self->version ]
+
+MixTrack					class for bus mix tracks
+							source determined by bus not own attributes
+
+	->input_path()			return ancestor method when MON
+							otherwise return empty list
+
+
+
+	
+
+
+
+
+
+
