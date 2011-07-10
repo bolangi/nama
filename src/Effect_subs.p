@@ -69,7 +69,6 @@ sub add_effect {
 		apply_op($id);
 		$ti{$n}->unmute if $er;
 	}
-	$this_op = $id;
 	$id;
 
 }
