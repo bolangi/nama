@@ -12,7 +12,6 @@ our (
 	$cop_id,
 	%cops,
 	%copp,
-	%old_vol,
 	@input_chains,
 	@output_chains,
 	$preview,
@@ -104,8 +103,6 @@ sub initialize_project_data {
 	               # indexed by {$id}->[$param_no]
 	               # zero-based {AB}->[0] (parameter 1)
 
-	%old_vol = (); 
-
 	@input_chains = ();
 	@output_chains = ();
 
@@ -125,7 +122,6 @@ sub initialize_project_data {
 	
 	# volume settings
 	
-	%old_vol = ();
 	@already_muted = ();
 
 	# $is_armed = 0;

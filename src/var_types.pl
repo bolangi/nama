@@ -100,10 +100,6 @@
 
 	$mastering_mode
 
-# category: effects
-
-	%old_vol		# a copy of volume settings, for muting
-
 # category: pronouns
 
 	$this_track_name # for save/restore 
