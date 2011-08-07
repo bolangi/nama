@@ -1,5 +1,9 @@
 Changes to Audio::Nama
 
+1.076 August 8, 2011
+
+     * numerous fixes (consult git log for details)
+
 1.073 April 9, 2011
 
      * fix bug with inserts
