@@ -273,7 +273,7 @@ __END__
 
 =head1 NAME
 
-Nama (Audio::Nama) - an audio recording, mixing and editing application
+Nama/Audio::Nama - an audio recording, mixing and editing application
 
 =head1 DESCRIPTION
 
