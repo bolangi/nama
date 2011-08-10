@@ -72,7 +72,7 @@ sub solo {
 	# get list of already muted tracks if I haven't done so already
 	
 	if ( ! @already_muted ){
-		@already_muted = grep{ $_->old_vol_level} 
+		@already_muted = grep{ defined $_->old_vol_level} 
                          map{ $tn{$_} } 
 						 ::Track::user();
 	}
