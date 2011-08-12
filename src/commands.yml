@@ -925,4 +925,8 @@ offset_run_off:
   type: setup
   short: ofo
   what: clear offset run mode
+view_waveform:
+  type: general
+  short: view
+  what: launch external waveform viewer for current monitor track/version
 ...

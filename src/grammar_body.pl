@@ -1108,3 +1108,17 @@ offset_run_off: _offset_run_off {
 	print "no run offset.\n";
 	::offset_run_mode(0); 1
 }
+view_waveform: _view_waveform { 
+	
+	if ($::waveform_viewer){ 
+		my $cmd = join " ",
+			$::waveform_viewer,
+			"--driver",
+			$::jack_running ? "jack" : "alsa",
+			$::this_track->full_path,
+			"&";
+		system($cmd) 
+	}
+	else { print "No waveform viewer available (need to install mhwaveedit?)\n" }
+}
+	

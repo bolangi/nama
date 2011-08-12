@@ -1,5 +1,10 @@
 Changes to Audio::Nama
 
+1.077 August 12, 2011
+
+     * fix: nosolo doesn't restore previous state (umutes all tracks)
+     * incorporate whatis.patch from debian
+
 1.076 August 8, 2011
 
      * numerous fixes (consult git log for details)
