@@ -1110,15 +1110,32 @@ offset_run_off: _offset_run_off {
 }
 view_waveform: _view_waveform { 
 	
-	if ($::waveform_viewer){ 
+	my $viewer = 'mhwaveedit';
+	if( `which $viewer` =~ m/\S/){ 
 		my $cmd = join " ",
-			$::waveform_viewer,
+			$viewer,
 			"--driver",
 			$::jack_running ? "jack" : "alsa",
 			$::this_track->full_path,
 			"&";
 		system($cmd) 
 	}
-	else { print "No waveform viewer available (need to install mhwaveedit?)\n" }
+	else { print "No waveform viewer available (need to install Mhwaveedit?)\n" }
 }
+edit_waveform: _edit_waveform { 
+	
+	if ( `which audacity` =~ m/\S/ ){  # executable found
+		my $cmd = join " ",
+			'audacity',
+			$::this_track->full_path,
+			"&";
+		my $old_pwd = ::getcwd();		
+		chdir ::this_wav_dir();
+		system($cmd);
+		chdir $old_pwd;
+	}
+	else { print "No waveform editor available (need to install Audacity?)\n" }
+	1;
+}
+
 	

@@ -137,7 +137,6 @@ exit;
 	}
 		
 	start_midish() if $midish_enable;
-	initialize_waveform_viewer(); # check for mhwaveedit
 
 	# set up autosave
 	
@@ -305,11 +304,6 @@ sub eval_iam_libecasoundc{
 	"@result";
 }
 
-sub initialize_waveform_viewer {
-	my $default_viewer = 'mhwaveedit';
-	$waveform_viewer = $default_viewer if `which $default_viewer`;
-}
-	
 	
 1;
 __END__

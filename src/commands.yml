@@ -927,6 +927,10 @@ offset_run_off:
   what: clear offset run mode
 view_waveform:
   type: general
-  short: view
-  what: launch external waveform viewer for current monitor track/version
+  short: wview
+  what: launch mhwavedit to view/edit waveform of current track/version WAV file
+edit_waveform:
+  type: general
+  short: wedit
+  what: launch audacity to view/edit waveform of current track/version WAV file
 ...
