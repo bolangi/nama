@@ -21,9 +21,9 @@ midish_cmd: /[a-z]+/ predicate {
 meta: bang shellcode stopper {
 	$::debug and print "Evaluating shell commands!\n";
 	my $shellcode = $item{shellcode};
-	print "to shell: $shellcode\n";
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
-	print "to shell: $shellcode\n";
+	print "executing this shell code:  $shellcode\n" 
+		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
 	::pager($output) if $output;
 	print "\n";
