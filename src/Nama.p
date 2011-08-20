@@ -76,25 +76,25 @@ use ::Graphical;
 # the following separate out functionality
 # however occupy the :: namespace
 
-use ::Initialize_subs ();
-use ::Option_subs ();
-use ::Config_subs ();
-use ::Terminal_subs ();
-use ::Wavinfo_subs ();
-use ::Project_subs ();
-use ::Mode_subs ();
+use ::Initializations ();
+use ::Options ();
+use ::Config ();
+use ::Terminal ();
+use ::Wavinfo ();
+use ::Project ();
+use ::Modes ();
 use ::ChainSetup ();
-use ::Engine_setup_subs ();
-use ::Engine_cleanup_subs ();
-use ::Realtime_subs ();
+use ::Engine_setup ();
+use ::Engine_cleanup ();
+use ::Realtime ();
 use ::Mute_Solo_Fade ();
-use ::Jack_subs ();
-use ::Region_subs ();
-use ::Effect_chain_subs ();
-use ::Midi_subs ();
-use ::Memoize_subs ();
+use ::Jack ();
+use ::Regions ();
+use ::Effect_chains ();
+use ::Midi ();
+use ::Memoize ();
 use ::CacheTrack ();
-use ::Effect_subs ();
+use ::Effects ();
 use ::Persistence ();
 use ::Util qw(
 	rw_set 
