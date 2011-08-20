@@ -1,4 +1,4 @@
-# ------------ Graphical Interface ------------
+# ------------ Graphical User Interface ------------
 
 package ::;
 
