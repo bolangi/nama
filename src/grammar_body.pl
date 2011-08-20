@@ -20,7 +20,11 @@ midish_cmd: /[a-z]+/ predicate {
 
 meta: bang shellcode stopper {
 	$::debug and print "Evaluating shell commands!\n";
-	my $output = qx( $item{shellcode});
+	my $shellcode = $item{shellcode};
+	print "to shell: $shellcode\n";
+	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
+	print "to shell: $shellcode\n";
+	my $output = qx( $shellcode );
 	::pager($output) if $output;
 	print "\n";
 	1;
