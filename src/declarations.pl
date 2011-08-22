@@ -147,7 +147,6 @@
 
 # category: external resources (ALSA, JACK, etc.)
 
- 	$jack_system,   # jack soundcard device
 	$jack_running,  # jackd server status 
 	$jack_plumbing, # jack.plumbing daemon status
 	$jack_lsp,      # jack_lsp -Ap
