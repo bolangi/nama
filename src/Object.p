@@ -10,18 +10,19 @@ BEGIN {
 }
 
 sub import {
-	return unless shift eq '::Object';
+	return unless shift eq '__PACKAGE__';
 	my $pkg   = caller;
-	my $child = !! @{"${pkg}::ISA"};
+	my $child = 0+@{"${pkg}::ISA"};
 	eval join '',
 		"package $pkg;\n",
 		' use vars qw(%_is_field);   ',
 		' map{ $_is_field{$_}++ } @_;',
-		($child ? () : "\@${pkg}::ISA = '::Object';\n"),
+		($child ? () : "\@${pkg}::ISA = __PACKAGE__;\n"),
 		map {
 			defined and ! ref and /^[^\W\d]\w*$/s
 			or die "Invalid accessor name '$_'";
-			"sub $_ { return \$_[0]->{$_} }\n"
+			"sub $_ : lvalue { \$_[0]->{$_} }"
+			#"sub $_ { return \$_[0]->{$_} }\n"  # non-lvalue
 		} @_;
 	die "Failed to generate $pkg" if $@;
 	return 1;
