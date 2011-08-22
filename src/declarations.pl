@@ -190,7 +190,6 @@
 	@edit_points, 
 	$edit_playback_end_margin, # play a little more after edit recording finishes
 	$edit_crossfade_time,
-	$last_edit_name,	# for save/restore
 
 # category: Graphical UI, GUI
 
