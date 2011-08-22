@@ -119,14 +119,6 @@ sub init_gui {
 		-textvariable => \$track_name, 
 		-width => 12
 	)->pack(-side => 'left');
-# 	$build_track_mon_label = $add_frame->Label(
-# 		-text => "Aux send: (channel/client):",
-# 		-width => 18
-# 	)->pack(-side => 'left');
-# 	$build_track_mon_text = $add_frame->Entry(
-# 		-textvariable => \$ch_m, 
-# 		-width => 10
-# 	)->pack(-side => 'left');
 	$build_track_rec_label = $add_frame->Label(
 		-text => "Input channel or client:"
 	)->pack(-side => 'left');
@@ -175,10 +167,6 @@ sub init_gui {
 		-text => 'Nama palette',
 		-relief => 'raised',
 	);
-# 	$sn_effects_palette->configure(
-# 		-text => 'Effects palette',
-# 		-relief => 'raised',
-# 	);
 
 my @color_items = map { [ 'command' => $_, 
 							-command  => colorset('mw', $_ ) ]
@@ -188,13 +176,6 @@ $sn_palette->AddItems( @color_items);
 @color_items = map { [ 'command' => $_, 
 							-command  => namaset( $_ ) ]
 						} @namafields;
-
-# $sn_effects_palette->AddItems( @color_items);
-# 
-# @color_items = map { [ 'command' => $_, 
-# 						-command  => namaset($_, $namapalette{$_})]
-# 						} @namafields;
-$sn_namapalette->AddItems( @color_items);
 
 	$build_track_add_mono->configure( 
 			-text => 'Add Mono Track',
@@ -217,23 +198,6 @@ $sn_namapalette->AddItems( @color_items);
 	$widgets[0]->grid(@widgets[1..$#widgets]);
 
 
-#  unified command processing by command_process 
-# 	
- 	$iam_label = $iam_frame->Label(
-# 	-text => "         Command: "
- 		)->pack(-side => 'left');;
-# 	$iam_text = $iam_frame->Entry( 
-# 		-textvariable => \$iam, -width => 45)
-# 		->pack(-side => 'left');;
-# 	$iam_execute = $iam_frame->Button(
-# 			-text => 'Execute',
-# 			-command => sub { ::Text::command_process( $iam ) }
-# 			
-# 		)->pack(-side => 'left');;
-# 
-# 			#join  " ",
-# 			# grep{ $_ !~ add fxa afx } split /\s*;\s*/, $iam) 
-		
 }
 
 sub transport_gui {
@@ -244,14 +208,8 @@ sub transport_gui {
 		-text => 'TRANSPORT',
 		-width => 12,
 		)->pack(-side => 'left');;
-	# disable Arm button
-	# $transport_setup_and_connect  = $transport_frame->Button->pack(-side => 'left');;
 	$transport_start = $transport_frame->Button->pack(-side => 'left');
 	$transport_stop = $transport_frame->Button->pack(-side => 'left');
-	#$transport_setup = $transport_frame->Button->pack(-side => 'left');;
-	#$transport_connect = $transport_frame->Button->pack(-side => 'left');;
-	#$transport_disconnect = $transport_frame->Button->pack(-side => 'left');;
-	# $transport_new = $transport_frame->Button->pack(-side => 'left');;
 
 	$transport_stop->configure(-text => "Stop",
 	-command => sub { 
@@ -266,10 +224,6 @@ sub transport_gui {
 		$ui->project_label_configure(-background => $color);
 		start_transport();
 				});
-# 	$transport_setup_and_connect->configure(
-# 			-text => 'Arm',
-# 			-command => sub {arm()}
-# 						 );
 
 #preview_button();
 #mastering_button();
@@ -1152,8 +1106,6 @@ sub marker {
 
 sub restore_time_marks {
 	my $ui = shift;
-# 	map {$_->dumpp} ::Mark::all(); 
-#	::Mark::all() and 
 	map{ $ui->marker($_) } ::Mark::all() ; 
 	$time_step->configure( -text => $unit == 1 ? q(Sec) : q(Min) )
 }
