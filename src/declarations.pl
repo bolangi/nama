@@ -60,7 +60,6 @@
 	
 # category: engine, realtime operation
 
-	$ecasound, 		# the name to invoke when we want to kill ecasound
 	@ecasound_pids,	# processes started by Nama
 	$e,				# the name of the variable holding
 					# the Ecasound engine object.
