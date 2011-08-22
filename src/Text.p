@@ -83,7 +83,6 @@ sub flash_ready {}
 sub update_master_version_button {}
 sub update_version_button {}
 sub paint_button {}
-sub refresh_oids {}
 sub project_label_configure{}
 sub length_display{}
 sub clock_display {}
