@@ -148,7 +148,7 @@
 # category: external resources (ALSA, JACK, etc.)
 
 	$jack_running,  # jackd server status 
-	$jack_plumbing, # jack.plumbing daemon status
+	$jack_plumbing, 
 	$jack_lsp,      # jack_lsp -Ap
 	$fake_jack_lsp, # for testing
 	%jack,			# jack clients data from jack_lsp
