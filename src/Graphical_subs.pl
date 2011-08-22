@@ -271,7 +271,7 @@ sub transport_gui {
 # 			-command => sub {arm()}
 # 						 );
 
-# preview_button();
+#preview_button();
 #mastering_button();
 
 }
@@ -368,33 +368,6 @@ sub show_unit { $time_step->configure(
 	-text => ($unit == 1 ? 'Sec' : 'Min') 
 )}
 
-#  the following is based on previous code for multiple buttons
-#  needs cleanup
-
-sub preview_button {  
-	$debug2 and print "&preview\n";
-	my $ui = shift;
-	#my $outputs = $oid_frame->Label(-text => 'OUTPUTS', -width => 12);
-	my $oid_button = $transport_frame->Button( );
-	$oid_button->configure(
-		-text => 'Preview',
-		-command => sub { 
-			if ($preview ){ # set normal
-			} else { # set preview 
-			}
-			$oid_button->configure( 
-		-background => 
-				$preview ? $old_bg : $namapalette{Preview} ,
-		-text => 
-				$preview ? 'Preview' : 'PREVIEW MODE'
-					
-					);
-			});
-		push @widget_o, $oid_button;
-		
-	map { $_ -> pack(-side => 'left') } (@widget_o);
-	
-}
 sub paint_button {
 	my $ui = shift;
 	my ($button, $color) = @_;
