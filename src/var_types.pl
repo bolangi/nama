@@ -106,7 +106,7 @@
 	$this_op      	# current effect
 );
 		 
-# effects_cache 
+# category: effects_cache 
 
 @effects_static_vars = qw(
 
