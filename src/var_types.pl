@@ -43,7 +43,6 @@
 
 # category: mastering
 
-	$mastering_effects
 	$eq 
 	$low_pass
 	$mid_pass
