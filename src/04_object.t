@@ -24,6 +24,10 @@ $apple->set( color => 'red' );
 
 is( $apple->color, 'red', "mutator" ); 
 
+$apple->color = 'blue'; 
+
+is( $apple->color, 'blue', "lvalue" ); 
+
 1;
 
 __END__
