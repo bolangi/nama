@@ -125,5 +125,5 @@
 					# get plugin unique id from plugin label
 	%ladspa_label  # get plugin label from unique id
 	%ladspa_help   # plugin_label => analyseplugin output
-	%e_bound		# for displaying hundreds of effects in groups
+	%e_bound		# GUI: for displaying hundreds of effects in groups
 );
