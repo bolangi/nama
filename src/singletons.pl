@@ -1,7 +1,11 @@
-$fx,
+$ui,
 $project,
+$fx,
 $fx_cache,
 $mode,
 $buses,
 $groups,
-
+$tracks,
+$runtime,
+$setup
+$config
