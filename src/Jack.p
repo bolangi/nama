@@ -5,6 +5,7 @@ use File::Slurp;
 no warnings 'uninitialized';
 
 our (
+[% qx(cat ./singletons.pl) %]
 	$debug,
 	$jack_running,
 	%jack,

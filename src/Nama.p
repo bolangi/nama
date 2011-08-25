@@ -123,6 +123,8 @@ our (
 
 [% qx(./add_vars) %]
 
+[% qx(cat ./singletons.pl) %]
+
 );
 
 [% qx(./strip_all ./var_types.pl) %]

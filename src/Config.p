@@ -6,6 +6,10 @@ no warnings 'uninitialized';
 
 # global variables
 our (
+
+
+[% qx(cat ./singletons.pl) %]
+
 	%opts, 			# command line options
 	
 	$project_root,	# directory

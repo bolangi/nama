@@ -8,6 +8,9 @@ no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
 our (
+
+[% qx(cat ./singletons.pl) %]
+
 	$debug,
 	$debug2,
 

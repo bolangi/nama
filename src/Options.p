@@ -3,7 +3,10 @@
 package ::;
 use Modern::Perl;
 
-our (%opts);
+our (
+[% qx(cat ./singletons.pl) %]
+%opts
+);
 
 sub process_options {
 

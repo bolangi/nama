@@ -6,6 +6,7 @@ use Carp;
 use File::Slurp;
 
 our (
+[% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
 	$ui,

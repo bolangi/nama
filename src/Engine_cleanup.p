@@ -2,6 +2,7 @@
 package ::;
 use Modern::Perl;
 our (
+[% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
 	$offset_run_flag,

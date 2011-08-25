@@ -4,6 +4,7 @@
 package ::;
 
 our (
+[% qx(cat ./singletons.pl) %]
 	$preview,
 	$mastering_mode,
 	%tn,

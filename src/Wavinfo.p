@@ -4,7 +4,9 @@ package ::;
 use Modern::Perl;
 
 our (%wav_info);
-
+our (
+[% qx(cat ./singletons.pl) %]
+);
 ### WAV file length/format/modify_time are cached in %wav_info 
 
 sub ecasound_get_info {

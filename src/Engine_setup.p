@@ -5,6 +5,8 @@ use Modern::Perl;
 no warnings 'uninitialized';
 our (
 
+[% qx(cat ./singletons.pl) %]
+
 # generate_setup()
 
 	$debug,

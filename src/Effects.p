@@ -7,6 +7,7 @@ use ::Util qw(round);
 no warnings 'uninitialized';
 use vars qw($cop_hints_yml);
 our (
+[% qx(cat ./singletons.pl) %]
 	%tn,
 	%ti,
 	$this_track,

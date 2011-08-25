@@ -9,6 +9,8 @@ no warnings 'uninitialized';
 
 our (
 
+[% qx(cat ./singletons.pl) %]
+
 [% qx(./add_persistent_vars) %]
 
 # autosave

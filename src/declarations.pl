@@ -1,3 +1,8 @@
+# category: singletons
+
+	# see file ./src/singletons.pl
+
+
 # category: fixed
 
 	$banner,

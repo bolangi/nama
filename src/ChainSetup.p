@@ -7,7 +7,11 @@ use Modern::Perl; use Carp;
 
 # these variables are globals that 
 # are touched in creating chain setups
-our (	$debug,
+our ( 
+
+[% qx(cat ./singletons.pl) %]
+
+		$debug,
 		$debug2,
 		$debug3,
 		$preview,

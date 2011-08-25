@@ -3,6 +3,7 @@
 package ::;
 use Modern::Perl; use Carp;
 our (
+[% qx(cat ./singletons.pl) %]
 	$ui,
 	%opts,
 	%jack,

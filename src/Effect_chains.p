@@ -5,6 +5,9 @@ use Modern::Perl;
 no warnings 'uninitialized';
 
 our (
+
+[% qx(cat ./singletons.pl) %]
+
 	$project_name,
 	$this_track,
 	%effect_chain,

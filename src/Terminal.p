@@ -5,6 +5,7 @@ use Modern::Perl;
 no warnings 'uninitialized';
 use Carp;
 our (
+[% qx(cat ./singletons.pl) %]
 	$term,
 	$attribs,
 	$this_bus,

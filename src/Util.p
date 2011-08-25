@@ -5,6 +5,9 @@
 
 package ::;
 our ( %tn ); 			# rw_set()
+our (
+[% qx(cat ./singletons.pl) %]
+);
 
 package ::Util;
 use Modern::Perl; use Carp;

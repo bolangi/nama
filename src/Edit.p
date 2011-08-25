@@ -11,6 +11,9 @@ our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
 our @ISA;
+our (
+[% qx(cat ./singletons.pl) %]
+);
 use vars qw(%n %by_index %by_name );
 use ::Object qw( 
 				n

@@ -5,6 +5,7 @@ package ::;
 our $VERSION = 1.071;
 
 our ( 
+[% qx(cat ./singletons.pl) %]
 	$attribs,
 	$term,
 	$prompt,

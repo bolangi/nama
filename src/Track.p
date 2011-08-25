@@ -25,6 +25,10 @@ use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
+our (
+[% qx(cat ./singletons.pl) %]
+);
+
 local $debug = 0;
 use ::Assign qw(join_path);
 use ::Util qw(freq input_node dest_type);

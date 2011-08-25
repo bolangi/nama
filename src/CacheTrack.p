@@ -4,6 +4,9 @@ package ::;
 use Modern::Perl;
 
 our (
+
+[% qx(cat ./singletons.pl) %]
+
 	$debug,
 	%bn,
 	$length,
