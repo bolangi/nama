@@ -12,15 +12,11 @@ our (
 	$cop_id,
 	%cops,
 	%copp,
-	@input_chains,
-	@output_chains,
 	$preview,
 	$mastering_mode,
 	$saved_version,
 	%bunch,
 	$this_bus,
-	%inputs,
-	%outputs,
 	%wav_info,
 	$offset_run_flag,
 	$this_edit,
@@ -103,9 +99,6 @@ sub initialize_project_data {
 	               # indexed by {$id}->[$param_no]
 	               # zero-based {AB}->[0] (parameter 1)
 
-	@input_chains = ();
-	@output_chains = ();
-
 	%track_widget = ();
 	%effects_widget = ();
 
@@ -136,14 +129,13 @@ sub initialize_project_data {
 	create_system_buses();
 	$this_bus = 'Main';
 
-	%inputs = %outputs = ();
-	
 	%wav_info = ();
 	
 	clear_offset_run_vars();
 	$offset_run_flag = 0;
 	$this_edit = undef;
 
+	::ChainSetup::initialize();
 }
 sub load_project {
 	$debug2 and print "&load_project\n";
