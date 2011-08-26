@@ -17,22 +17,20 @@ my @target_files = glob("*.p *pl *.t");
 my %files;
 map{ say $_} @target_files;
 map{ $files{$_} = read_file($_)} @target_files;
-#my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
-#my $s_regex = qr/my [^;]*?$singleton_name\b/s;
 
 my @old_vars = keys %var_map;
 map{ my $file = $_;
 
 	map {   my $old_var_name = $_;
-			my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
+			my $ov_regex = qr/my [^;\n]*?$old_var_name\b/m;
 			say "my declaration with old var name $old_var_name found in file $file" 
-				if $files{$file} =~ /$ov_regex/s
+				if $files{$file} =~ /$ov_regex/m
 	} @old_vars;
 	map {
 			my $singleton_name = $_;
-			my $s_regex = qr/my [^;]*?$singleton_name\b/s;
+			my $s_regex = qr/my [^;\n]*?$singleton_name\b/m;
 			say "my declaration with singleton name $singleton_name found in file $file" 
-				if $files{$file} =~ /$s_regex/s
+				if $files{$file} =~ /$s_regex/m
 	} @singletons
 } @target_files;
 
