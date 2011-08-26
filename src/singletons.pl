@@ -1,4 +1,5 @@
 $ui,
+%proot,
 $project,
 $mode,
 $file,

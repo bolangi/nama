@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 use Modern::Perl;
 use File::Slurp;
 my %var_map = 
@@ -12,28 +13,28 @@ use Data::Dumper;
 #print Dumper \%var_map;
 #print join $/, singletons();
 
-my @filenames = glob("*.p *pl *.t");
-say join $/, @filenames;
-my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
-my $s_regex = qr/my [^;]*?$singleton_name\b/s;
+my @target_files = glob("*.p *pl *.t");
+my %files;
+map{ say $_} @target_files;
+map{ $files{$_} = read_file($_)} @target_files;
+#my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
+#my $s_regex = qr/my [^;]*?$singleton_name\b/s;
 
 my @old_vars = keys %var_map;
-map{
-	my $file = $_;
-	my $contents = read_file($_);
+map{ my $file = $_;
 
 	map {   my $old_var_name = $_;
 			my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
 			say "old var name $old_var_name found in file $file" 
-				if $contents =~ /$ov_regex/s
+				if $files{$file} =~ /$ov_regex/s
 	} @old_vars;
 	map {
 			my $singleton_name = $_;
 			my $s_regex = qr/my [^;]*?$singleton_name\b/s;
 			say "singleton name $singleton_name found in file $file" 
-				if $contents =~ /$ov_regex/s
+				if $files{$file} =~ /$s_regex/s
 	} @singletons
-} @filenames;
+} @target_files;
 
 =comment
 
