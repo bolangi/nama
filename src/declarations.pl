@@ -133,7 +133,6 @@
 					# pertains to engine
 
 	@mastering_effect_ids,        # effect ids for mastering mode
-	$tkeca_effects_data,	# original tcl code, actually
 	%L,
 	%M,
 
