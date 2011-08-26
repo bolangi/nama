@@ -71,7 +71,6 @@
 # category: GUI
 
 	$unit			# jump multiplier, 1 or 60 seconds
-	%oid_status    	# state information for the chain templates
 
 	
 # category: object serialization
