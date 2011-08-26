@@ -38,7 +38,6 @@ our ( 					# for create_system_buses
 	%is_system_bus,
 	@system_buses,
 	$main,
-	$null,
 );
 
 our ($term, %bn); 		# for project templates
@@ -281,7 +280,6 @@ sub create_system_buses {
 	$bn{Main}->set( send_type => 'track', send_id => 'Master');
 
 	$main = $bn{Main};
-	$null = $bn{null};
 }
 
 
