@@ -25,13 +25,13 @@ map{ my $file = $_;
 
 	map {   my $old_var_name = $_;
 			my $ov_regex = qr/my [^;]*?$old_var_name\b/s;
-			say "old var name $old_var_name found in file $file" 
+			say "my declaration with old var name $old_var_name found in file $file" 
 				if $files{$file} =~ /$ov_regex/s
 	} @old_vars;
 	map {
 			my $singleton_name = $_;
 			my $s_regex = qr/my [^;]*?$singleton_name\b/s;
-			say "singleton name $singleton_name found in file $file" 
+			say "my declaration with singleton name $singleton_name found in file $file" 
 				if $files{$file} =~ /$s_regex/s
 	} @singletons
 } @target_files;
