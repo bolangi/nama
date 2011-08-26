@@ -47,7 +47,7 @@ sub jack_ports {
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
 	#fluidsynth:left properties: output,
 	#fluidsynth:right properties: output,
-	my %jack = ();
+	my %jack_ports = ();
 
 	map{ 
 		my ($direction) = /properties: (input|output)/;
@@ -59,17 +59,16 @@ sub jack_ports {
 		/gx;
 		map { 
 				s/ $//; # remove trailing space
-				push @{ $jack{ $_ }{ $direction } }, $_;
+				push @{ $jack_ports{ $_ }{ $direction } }, $_;
 				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack{ $client }{ $direction } }, $_; 
+				push @{ $jack_ports{ $client }{ $direction } }, $_; 
 
 		 } @port_aliases;
 
 	} 
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
 	split "\n",$j;
-	#print yaml_out \%jack;
-	\%jack
+	\%jack_ports
 }
 
 # connect jack ports via jack.plumbing or jack_connect
