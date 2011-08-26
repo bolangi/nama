@@ -33,14 +33,11 @@ our (
 	$initial_user_mode,
 	$project,	
 	$project_root,
-);
-our ( 					# for create_system_buses
 	%is_system_bus,
-	@system_buses,
 	$main,
+	$term, 
+	%bn,
 );
-
-our ($term, %bn); 		# for project templates
 
 { # OPTIMIZATION
 
@@ -271,7 +268,7 @@ sub create_system_buses {
 			Main		# default mixer bus, new tracks assigned to Main
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
-	@system_buses = split " ", $buses;
+	my @system_buses = split " ", $buses;
 	map{ $is_system_bus{$_}++ } @system_buses;
 	delete $is_system_bus{Main}; # because we want to display it
 	map{ ::Bus->new(name => $_ ) } @system_buses;
