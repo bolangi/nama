@@ -109,7 +109,6 @@
 	$main_bus, 
 	$main, # main group
 	$null_bus,
-	@system_buses, 
 	%is_system_bus, 
 
 	# aliases
