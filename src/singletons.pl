@@ -7,5 +7,9 @@ $buses,
 $groups,
 $tracks,
 $runtime,
-$setup
-$config
+$setup,
+$config,
+$engine,
+$jack,
+$text,
+$gui,
