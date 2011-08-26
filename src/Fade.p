@@ -73,9 +73,8 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my %mute_level = (ea => 0, 	eadb => -256); 
 	my $operator  = $::cops{$track->fader}->{type};
-	my $off_level = $mute_level{$operator};
+	my $off_level = $::mute_level{$operator};
 	my $on_level  = $::unity_level{$operator};
 
 	# remove controller if present
