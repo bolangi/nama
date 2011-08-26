@@ -122,6 +122,7 @@
 	%ti, # track by index (alias to %::Track::by_index)
 	%tn, # track by name  (alias to %::Track::by_name)
 	%bn, # bus   by name  (alias to %::Bus::by_name)
+	%gn, # group by name  (alias to %::Group::by_name)
 
 # category: effects
 
