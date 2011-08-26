@@ -382,7 +382,6 @@ sub generate_edit_record_setup { # for current edit
 }
 
 sub new_edit {
-	#my @edit_points = @_;
 
 	# abort for many different reasons
 	
