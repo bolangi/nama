@@ -13,14 +13,8 @@ our (
 
 [% qx(./add_persistent_vars) %]
 
-# autosave
-
 	$autosave_interval,
 	%event_id,
-
-);
-
-our (
 	$state_store_file,
 	$effect_chain_file,
 	$effect_profile_file,
