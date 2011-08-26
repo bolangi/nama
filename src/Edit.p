@@ -297,12 +297,12 @@ sub reset_input_line {
 
 
 { my $p;
-  my @edit_points; 
+  my @_edit_points; 
   my @names = qw(dummy play-start rec-start rec-end);
 
 sub initialize_edit_points {
 	$p = 0;
-    @edit_points = ();
+    @_edit_points = ();
 }
 sub abort_set_edit_points {
 	say "...Aborting!";
@@ -316,7 +316,7 @@ sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
 		my $pos = eval_iam('getpos');
-		push @edit_points, $pos;
+		push @_edit_points, $pos;
 		say " got $names[$p] position ".d1($pos);
 		reset_input_line();
 		if( $p == 3){ complete_edit_points() }
@@ -327,7 +327,7 @@ sub get_edit_mark {
 	}
 }
 sub complete_edit_points {
-	@::edit_points = @edit_points; # save to global
+	@::edit_points = @_edit_points; # save to global
 	eval_iam('stop');
 	say "\nEngine is stopped\n";
 	detect_spacebar();
