@@ -180,7 +180,6 @@
 
 	%cooked_record_pending, # an intermediate mixdown for tracks
 	$sock, 			# socket for Net-ECI mode
-	%versions,		# store active versions for use after engine run
 	$track_snapshots, # to save recalculating for each IO object
 	$regenerate_setup, # force us to generate new chain setup
 	
