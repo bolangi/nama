@@ -270,16 +270,8 @@
 	$off,      # background color
 	$palette_file, # where to save selections
 
-
-	### A separate box for entering IAM (and other) commands
-	$iam_label,
-	$iam_text,
-	$iam, # variable for text entry
-	$iam_execute,
-	$iam_error, # unused
-
 	# add track gui
-	#
+	
 	$build_track_label,
 	$build_track_text,
 	$build_track_add_mono,
