@@ -133,9 +133,6 @@
 					# pertains to engine
 
 	@mastering_effect_ids,        # effect ids for mastering mode
-	%L,
-	%M,
-
 	@already_muted, # for soloing, a list of Track objects that are 
 					# muted before we begin
     $soloing,       # one user track is on, all others are muted
