@@ -24,7 +24,6 @@ our (
 	$sock,
 	$ecasound_tcp_port,
 	$hires,
-	$waveform_viewer,
 
 );
 sub initialize_interfaces {

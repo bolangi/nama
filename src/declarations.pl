@@ -81,10 +81,6 @@
 	$controller_ports,	# where we listen for MIDI messages
     $midi_inputs,		# on/off/capture
 
-# category: view waveform
-
-    $waveform_viewer,   # mhwaveedit at present
-
 # category: filenames
 
 	$effects_cache_file, # where we keep info on Ecasound
