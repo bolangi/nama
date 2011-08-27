@@ -196,9 +196,9 @@ sub setup_grammar { }
 
 	$debug2 and print "Reading grammar\n";
 
-	$text->{commands_yml} = get_section_data("commands_yml");
-	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml)};
-	$fx->{ecasound_effect_hints} = get_section_data("chain_op_hints_yml");
+	$text->{commands_yml} = get_data_section("commands_yml");
+	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
+	$fx->{ecasound_effect_hints} = get_data_section("chain_op_hints_yml");
 	$text->{commands} = ::yaml_in( $text->{commands_yml}) ;
 
 	$::AUTOSTUB = 1;
@@ -207,7 +207,7 @@ sub setup_grammar { }
 	$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
 	$::RD_HINT   = 1; # Give out hints to help fix problems.
 
-	$text->{grammar} = get_data_section('grammar);
+	$text->{grammar} = get_data_section('grammar');
 
 	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
 
@@ -215,27 +215,27 @@ sub setup_grammar { }
 
 	# we use the following settings if we can't find config files
 
-	$config->{default} = get_section_data("default_namarc");
+	$config->{default} = get_data_section("default_namarc");
 
 	use Data::Dumper;
 	print Dumper $config;
 
 	# default user customization file custom.pl - see EOF
 	
-	$config->{custom_pl} = get_section_data("custom_pl");
+	$config->{custom_pl} = get_data_section("custom_pl");
 
 	# default colors
 
-	$config->{gui_default_palette_yml} = get_section_data("default_palette_yml");
+	$config->{gui_default_palette_yml} = get_data_section("default_palette_yml");
 
 	# JACK environment for testing
 
-	$config->{jack_fake_ports_list} = get_section_data("fake_jack_lsp");
+	$config->{jack_fake_ports_list} = get_data_section("fake_jack_lsp");
 
 	# Midish command keywords
 	
 	%{$midi->{keywords}} = 
-			map{ $_, 1} split " ", get_section_data("midish_commands");
+			map{ $_, 1} split " ", get_data_section("midish_commands");
 
 	# print remove_spaces("bulwinkle is a...");
 
