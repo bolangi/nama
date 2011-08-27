@@ -22,12 +22,14 @@ our (
 	$cop_id,
 	$magical_cop_id,
 	%offset,
+[% qx(cat ./singletons.pl) %]
+);
 	
 # automix()
 
+our (
 	%bn,
 	$main,
-[% qx(cat ./singletons.pl) %]
 );
 our (
 	%opts,
@@ -36,7 +38,6 @@ our (
 	%effect_j,
 	@ladspa_sorted,
 	%e_bound,
-#	$cop_hints_yaml,    # error explicit package name required at line 867
 	$ladspa_sample_rate,
 	%ladspa_help,
 	%effects_ladspa_file,
