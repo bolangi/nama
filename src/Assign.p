@@ -1,6 +1,7 @@
 package ::Assign;
 our $VERSION = 1.0;
 use 5.008;
+use feature 'state';
 use strict;
 use warnings;
 no warnings q(uninitialized);
@@ -9,6 +10,8 @@ use YAML::Tiny;
 use File::Slurp;
 use File::HomeDir;
 use Storable qw(nstore retrieve);
+use JSON::XS;
+use Data::Dumper::Concise;
 #use Devel::Cycle;
 
 require Exporter;
@@ -247,6 +250,18 @@ sub serialize {
 			my $yaml = yaml_out(\%state);
 			write_file($file, $yaml);
 			$debug and print $yaml;
+		} elsif ($h{format} eq 'json'){
+			state $to_json = JSON::XS->new->utf8->pretty(1) ;
+			$file .= '.json' unless $file =~ /\.json$/;
+			#find_cycle(\%state);
+          	my $json = $to_json->encode(\%state) . "\n";
+			write_file($file, $json);
+			$debug and print $json;
+		} elsif ($h{format} eq 'dumper'){
+			$file .= '.pl' unless $file =~ /\.pl$/;
+			my $perl_source = Dumper(\%state);
+			write_file($file, $perl_source);
+			$debug and print $perl_source;
 		}
 	} else { yaml_out(\%state) }
 
