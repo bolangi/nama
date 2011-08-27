@@ -6,117 +6,117 @@ our $VERSION = 1.071;
 
 our ( 
 [% qx(cat ./singletons.pl) %]
-	$attribs,
-	$term,
-	$prompt,
+	$text->{term_attribs},
+	$text->{term},
+	$text->{prompt},
 	$debug,
 	$debug2,
-	$preview,
-	$main,
+	$mode->{preview},
+	$gn{Main},
 	$ui,
 	%ti,
 	%tn,
 	%bn,
 	
-	%effect_i,
-	%effect_j,
-	@effects,
-	%cops,
-	%copp,
-	%copp_exp,
-	%mute_level,
-	%unity_level,
-	%fade_out_level,
+	%{$fx_cache->{full_label_to_index}},
+	%{$fx_cache->{partial_label_to_full}},
+	@{$fx_cache->{registry}},
+	%{$fx->{applied}},
+	%{$fx->{params}},
+	%{$fx->{params_log}},
+	%{$fx->{mute_level}},
+	%{$fx->{unity_level}},
+	%{$fx->{fade_out_level}},
 	
-	$project_name,
-	$project_root,
-	$unit,
+	$gui->{_project_name}->{name},
+	$config->{root_dir},
+	$gui->{_seek_unit},
 
-	%event_id,
-	$soundcard_channels,
-	$tk_input_channels,# for menubutton
-	%e_bound,
-	@ladspa_sorted,
+	%{$engine->{events}},
+	$config->{soundcard_channels},
+	$config->{soundcard_channels},# for menubutton
+	%{$fx_cache->{split}},
+	@{$fx_cache->{ladspa_sorted}},
 	%oid_status,	
-	$default_palette_yml, # default GUI colors
-	$palette_file, # where to save selections
+	$config->{gui_default_palette_yml}, # default GUI colors
+	$file->{gui_palette}, # where to save selections
 
-	%palette,
+	%{$gui->{_palette}},
 	%nama_palette,
 );
 our (
 	
 	# variables for GUI text input widgets
 
-	$project,		
-	$track_name,
-	$ch_r,			# recording channel assignment
-	$ch_m,			# monitoring channel assignment
-	$save_id,		# name for save file
+	$gui->{_project_name},		
+	$gui->{_track_name},
+	$gui->{_chr},			# recording channel assignment
+	$gui->{_chm},			# monitoring channel assignment
+	$gui->{_save_id},		# name for save file
 
 
 	# Widgets
 	
-	$mw, 			# main window
-	$ew, 			# effects window
-	$canvas, 		# to lay out the effects window
+	$gui->{mw}, 			# main window
+	$gui->{ew}, 			# effects window
+	$gui->{canvas}, 		# to lay out the effects window
 
 	# each part of the main window gets its own frame
 	# to control the layout better
 
-	$load_frame,
-	$add_frame,
-	$group_frame,
-	$time_frame,
-	$clock_frame,
+	$gui->{load_frame},
+	$gui->{add_frame},
+	$gui->{group_frame},
+	$gui->{time_frame},
+	$gui->{clock_frame},
 	$oid_frame,
-	$track_frame,
-	$effect_frame,
-	$iam_frame,
-	$perl_eval_frame,
-	$transport_frame,
-	$mark_frame,
-	$fast_frame, # forward, rewind, etc.
+	$gui->{track_frame},
+	$gui->{fx_frame},
+	$gui->{iam_frame},
+	$gui->{perl_frame},
+	$gui->{transport_frame},
+	$gui->{mark_frame},
+	$gui->{seek_frame}, # forward, rewind, etc.
 
 	## collected widgets (i may need to destroy them)
 
-	%parent, # ->{mw} = $mw; # main window
-			 # ->{ew} = $ew; # effects window
+	%{$gui->{parents}}, # ->{mw} = $gui->{mw}; # main window
+			 # ->{ew} = $gui->{ew}; # effects window
 			 # eventually will contain all major frames
-	$group_label, 
-	$group_rw, # 
-	$group_version, # 
-	%track_widget, # for chains (tracks)
-	%track_widget_remove, # what to destroy by remove_track
-	%effects_widget, # for effects
+	$gui->{group_label}, 
+	$gui->{group_rw}, # 
+	$gui->{group_version}, # 
+	%{$gui->{tracks}}, # for chains (tracks)
+	%{$gui->{tracks_remove}}, # what to destroy by remove_track
+	%{$gui->{fx}}, # for effects
 	@widget_o, # for templates (oids) 
 	%widget_o, # 
-	%mark_widget, # marks
+	%{$gui->{marks}}, # marks
 
-	@global_version_buttons, # to set the same version for
+	@{$gui->{global_version_buttons}}, # to set the same version for
 						  	#	all tracks
-	$markers_armed, # set true to enable removing a mark
-	$mark_remove,   # a button that sets $markers_armed
-	$time_step,     # widget shows jump multiplier unit (seconds or minutes)
-	$clock, 		# displays clock
-	$setup_length,  # displays setup running time
+	$gui->{_markers_armed}, # set true to enable removing a mark
+	$gui->{mark_remove},   # a button that sets $gui->{_markers_armed}
+	$gui->{seek_unit},     # widget shows jump multiplier unit (seconds or minutes)
+	$gui->{clock}, 		# displays clock
+	$gui->{setup_length},  # displays setup running time
 
-	$project_label,	# project name
+	$gui->{project_head},	# project name
 
-	$sn_label,		# project load/save/quit	
-	$sn_text,
-	$sn_load,
-	$sn_new,
-	$sn_quit,
-	$sn_palette, # configure default master window colors
-	$sn_namapalette, # configure nama-specific master-window colors
-	$sn_effects_palette, # configure effects window colors
-	@palettefields, # set by setPalette method
-	@namafields,    # field names for color palette used by nama
-	%namapalette,     # nama's indicator colors
-	$rec,      # background color
-	$mon,      # background color
-	$off,      # background color
+	$gui->{project_label},		# project load/save/quit	
+	$gui->{project_entry},
+	$gui->{load_project},
+	$gui->{new_project},
+	$gui->{quit},
+	$gui->{_palette}, # configure default master window colors
+	$gui->{_nama_palette}, # configure nama-specific master-window colors
+	$gui->{_fx_palette}, # configure effects window colors
+	@{$gui->{_palette_fields}}, # set by setPalette method
+	@{$gui->{_nama_fields}},    # field names for color palette used by nama
+	%{$gui->{_nama_palette}},     # nama's indicator colors
+	$gui->{rec_bg},      # background color
+	$gui->{mon_bg},      # background color
+	$gui->{off_bg},      # background color
 
 
 	### A separate box for entering IAM (and other) commands
@@ -128,34 +128,34 @@ our (
 
 	# add track gui
 	#
-	$build_track_label,
-	$build_track_text,
-	$build_track_add_mono,
-	$build_track_add_stereo,
-	$build_track_rec_label,
-	$build_track_rec_text,
-	$build_track_mon_label,
-	$build_track_mon_text,
+	$gui->{add_track}->{label},
+	$gui->{add_track}->{text_entry},
+	$gui->{add_track}->{add_mono},
+	$gui->{add_track}->{add_stereo},
+	$gui->{add_track}->{rec_label},
+	$gui->{add_track}->{rec_text},
+	$gui->{add_track}->{mon_label},
+	$gui->{add_track}->{mon_text},
 
 	$build_new_take,
 
 	# transport controls
 	
-	$transport_label,
-	$transport_setup_and_connect,
+	$gui->{engine}->{label},
+	$gui->{engine}->{arm},
 	$transport_setup, # unused
 	$transport_connect, # unused
-	$transport_disconnect,
+	$gui->{engine}->{disconnect},
 	$transport_new,
-	$transport_start,
-	$transport_stop,
+	$gui->{engine}->{start},
+	$gui->{engine}->{stop},
 
-	$old_bg, # initial background color.
-	$old_abg, # initial active background color
+	$gui->{_old_bg}, # initial background color.
+	$gui->{_old_abg}, # initial active background color
 
-	$sn_save_text,# text entry widget
-	$sn_save,	# button to save settings
-	$sn_recall,	# button to recall settings
+	$gui->{savefile_entry},# text entry widget
+	$gui->{save_project},	# button to save settings
+	$gui->{load_savefile},	# button to recall settings
 );
 
 package ::Graphical;  ## gui routines
@@ -173,10 +173,10 @@ our @ISA = '::';      ## default to root class
 sub hello {"make a window";}
 sub loop {
 	package ::;
-	$attribs->{already_prompted} = 0;
-	$term->tkRunning(1);
+	$text->{term_attribs}->{already_prompted} = 0;
+	$text->{term}->tkRunning(1);
   	while (1) {
-  		my ($user_input) = $term->readline($prompt) ;
+  		my ($user_input) = $text->{term}->readline($text->{prompt}) ;
   		::process_line( $user_input );
   	}
 }

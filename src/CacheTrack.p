@@ -9,11 +9,11 @@ our (
 
 	$debug,
 	%bn,
-	$length,
+	$setup->{audio_length},
 	$ui,
 	$this_track,
-	$cache_to_disk_format,
-	%event_id,
+	$config->{formats}->{cache_to_disk},
+	%{$engine->{events}},
 );
 
 # some common variables for cache_track and merge_track
@@ -80,7 +80,7 @@ sub prepare_to_cache {
 	
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($cache_to_disk_format,$cooked->width),
+		{ format => signal_format($config->{formats}->{cache_to_disk},$cooked->width),
 		}
 	); 
 
@@ -120,7 +120,7 @@ sub cache_engine_run { # uses shared lexicals
 
 	connect_transport('quiet')
 		or say("Couldn't connect engine! Aborting."), return;
-	$processing_time = $length + $additional_time;
+	$processing_time = $setup->{audio_length} + $additional_time;
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
 	print "Starting cache operation. Please wait.";
@@ -133,7 +133,7 @@ sub cache_engine_run { # uses shared lexicals
 	eval_iam("start");
 
 	# ensure that engine stops at completion time
- 	$event_id{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
+ 	$engine->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
 
 	# complete_caching() contains the remainder of the caching code.
 	# It is triggered by stop_polling_cache_progress()
@@ -212,7 +212,7 @@ sub poll_cache_progress {
 	stop_polling_cache_progress();
 }
 sub stop_polling_cache_progress {
-	$event_id{poll_engine} = undef; 
+	$engine->{events}->{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
 	complete_caching();
 

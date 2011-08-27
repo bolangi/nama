@@ -1,5 +1,5 @@
 $ui,
-$project,
+$gui->{_project_name},
 $mode,
 $file,
 $graph,

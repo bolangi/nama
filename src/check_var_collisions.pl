@@ -50,14 +50,14 @@ sub var_map {
 __END__
 
 
-@effects -> $effects
+@{$fx_cache->{registry}} -> $effects
 
 Collision detection
 
 I don't want to replace any lexical variables that
 happened to be named the same as globals!
 
-do I have any 'my' variables named @effects? # would be wrongly substituted
+do I have any 'my' variables named @{$fx_cache->{registry}}? # would be wrongly substituted
 do I have any 'my' variables named $config  # would mask global
 
 assume one-line 'my' statements 
@@ -70,7 +70,7 @@ $regex = qr/^\s*my .*?$singleton_name\b/m;
 Do I have any variables named $effects? 
 
 Exclude $effects_gui (followed by underscore)
-Exclude $effects[$i] (normally subscripted array)
+Exclude $fx_cache->{registry}->[$i] (normally subscripted array)
 
 $regex = qr/\$effects(?![_\[])/;
 

@@ -14,13 +14,13 @@ our (
 		$debug,
 		$debug2,
 		$debug3,
-		$preview,
+		$mode->{preview},
 		%tn,
-		$main,
-		$mastering_mode,
-		$mix_to_disk_format,
-		$ecasound_globals_default,
-		$ecasound_globals_realtime,
+		$gn{Main},
+		$mode->{mastering},
+		$config->{formats}->{mix_to_disk},
+		$config->{engine}->{globals_default},
+		$config->{engine}->{globals_realtime},
 );		 	
 
 package ::ChainSetup;
@@ -168,17 +168,17 @@ sub add_paths_for_main_tracks {
 		$g->add_edge($_->name, 'Master'); 
 
 	} 	
-		grep{ 1 unless $preview eq 'doodle'
+		grep{ 1 unless $mode->{preview} eq 'doodle'
 			 and $_->rec_status eq 'MON' } # exclude MON tracks in doodle mode	
 		grep{ $_->rec_status ne 'OFF' }    # exclude OFF tracks
 		map{$tn{$_}} 	                   # convert to Track objects
-		$main->tracks;                     # list of Track names
+		$gn{Main}->tracks;                     # list of Track names
 
 }
 
 sub add_paths_for_recording {
 	$debug2 and say "&add_paths_for_recording";
-	return if $preview; # don't record during preview modes
+	return if $mode->{preview}; # don't record during preview modes
 
 	# get list of REC-status tracks to record
 	
@@ -294,12 +294,12 @@ sub add_path_for_one_aux_send {
 sub add_paths_from_Master {
 	$debug2 and say "&add_paths_from_Master";
 
-	if ($mastering_mode){
+	if ($mode->{mastering}){
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 	}
-	$g->add_path($mastering_mode ?  'Boost' : 'Master',
+	$g->add_path($mode->{mastering} ?  'Boost' : 'Master',
 			output_node($tn{Master}->send_type)) if $tn{Master}->rw ne 'OFF'
  
 
@@ -308,10 +308,10 @@ sub add_paths_for_mixdown_handling {
 	$debug2 and say "&add_paths_for_mixdown_handling";
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-		my @p = (($mastering_mode ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
-		  	format		=> signal_format($mix_to_disk_format,$tn{Mixdown}->width),
+		  	format		=> signal_format($config->{formats}->{mix_to_disk},$tn{Mixdown}->width),
 		  	chain_id	=> "Mixdown" },
 		); 
 		# no effects will be applied because effects are on chain 2
@@ -507,13 +507,13 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $ecasound_globals_default;
+	my $globals = $config->{engine}->{globals_default};
 
 	# use realtime globals if they exist and we are
 	# recording to a non-mixdown file
 	
-	$globals = $ecasound_globals_realtime
-		if $ecasound_globals_realtime 
+	$globals = $config->{engine}->{globals_realtime}
+		if $config->{engine}->{globals_realtime} 
 			and grep{ ! /Mixdown/} really_recording();
 			# we assume there exists latency-sensitive monitor output 
 			# when recording

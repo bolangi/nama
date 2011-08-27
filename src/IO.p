@@ -166,16 +166,16 @@ sub _select_output {
 	my $start = $track->adjusted_region_start_time + ::hardware_latency();
 	my $end   = $track->adjusted_region_end_time;
 	return unless ::hardware_latency() or defined $start and defined $end;
-	my $length;
+	my $setup->{audio_length};
 	# CASE 1: a region is defined 
 	if ($end) { 
-		$length = $end - $start;
+		$setup->{audio_length} = $end - $start;
 	}
 	# CASE 2: only hardware latency
 	else {
-		$length = $track->wav_length - $start
+		$setup->{audio_length} = $track->wav_length - $start
 	}
-	join ',',"select", $start, $length
+	join ',',"select", $start, $setup->{audio_length}
 }
 ###  utility subroutines
 
@@ -186,16 +186,16 @@ sub get_class {
 	$io_class{$type} or croak "unrecognized IO type: $type"
 }
 sub soundcard_input_type_string {
-	$::jack_running ? 'jack_multi_in' : 'soundcard_device_in'
+	$jack->{jackd_running} ? 'jack_multi_in' : 'soundcard_device_in'
 }
 sub soundcard_output_type_string {
-	$::jack_running ? 'jack_multi_out' : 'soundcard_device_out'
+	$jack->{jackd_running} ? 'jack_multi_out' : 'soundcard_device_out'
 }
 sub soundcard_input_device_string {
-	$::jack_running ? 'system' : $::alsa_capture_device
+	$jack->{jackd_running} ? 'system' : $config->{alsa_capture_device}
 }
 sub soundcard_output_device_string {
-	$::jack_running ? 'system' : $::alsa_playback_device
+	$jack->{jackd_running} ? 'system' : $config->{alsa_playback_device}
 }
 
 sub jack_multi_route {
@@ -221,8 +221,8 @@ channel ($end) is out of bounds. $max channels maximum.\n)
 		@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
 sub default_jack_ports_list {
-	my ($track_name) = shift;
-	"$track_name.ports"
+	my ($gui->{_track_name}) = shift;
+	"$gui->{_track_name}.ports"
 }
 sub quote_jack_port {
 	my $port = shift;
@@ -259,7 +259,7 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::to_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $_[0]->full_path }
-sub _format_template { $::raw_to_disk_format } 
+sub _format_template { $config->{formats}->{raw_to_disk} } 
 
 package ::IO::from_loop;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
@@ -330,7 +330,7 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
-sub device_id { $::devices{$::alsa_capture_device}{ecasound_id} }
+sub device_id { $::devices{$config->{alsa_capture_device}}{ecasound_id} }
 sub input_channel { $_[0]->source_id }
 sub rec_route {
 	# works for mono/stereo only!
@@ -348,7 +348,7 @@ sub rec_route {
 {
 package ::IO::to_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { $::devices{$::alsa_playback_device}{ecasound_id} }
+sub device_id { $::devices{$config->{alsa_playback_device}}{ecasound_id} }
 sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
 sub route2 {

@@ -192,7 +192,7 @@ sub current_wav {
 
 sub current_version {	
 	my $track = shift;
-	my $last = $::use_group_numbering 
+	my $last = $config->{use_group_numbering} 
 					? ::Bus::overall_last()
 					: $track->last;
 	my $status = $track->rec_status;
@@ -217,7 +217,7 @@ sub monitor_version {
 
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! ($::preview eq 'doodle');
+	return 'MON' if $monitor_version and ! ($mode->{preview} eq 'doodle');
 	return 'OFF';
 }
 
@@ -240,7 +240,7 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $::preview eq 'doodle' and $track->rw eq 'REC' and 
+		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
 			$::duplicate_inputs{$track->name}
 	){ 	return			  'OFF' }
 
@@ -315,26 +315,26 @@ sub playat_time {
 
 sub adjusted_region_start_time {
 	my $track = shift;
-	return $track->region_start_time unless $::offset_run_flag;
+	return $track->region_start_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_region_start();
 	
 }
 sub adjusted_playat_time { 
 	my $track = shift;
-	return $track->playat_time unless $::offset_run_flag;
+	return $track->playat_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_playat();
 }
 sub adjusted_region_end_time {
 	my $track = shift;
-	return $track->region_end_time unless $::offset_run_flag;
+	return $track->region_end_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_region_end();
 }
 
 sub region_is_out_of_bounds {
-	return unless $::offset_run_flag;
+	return unless $mode->{offset_run};
 	my $track = shift;
 	::set_edit_vars($track);
 	::case() =~ /out_of_bounds/
@@ -388,7 +388,7 @@ sub input_path { # signal path, not file path
 			#  subtrack --> mix_track_in --> mix_track
 
 			( input_node($track->source_type) , $track->name)
-	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
+	} elsif($track->rec_status eq 'MON' and $mode->{preview} ne 'doodle'){
 
 	# create edge representing WAV file input
 
@@ -399,7 +399,7 @@ sub input_path { # signal path, not file path
 
 ### remove and destroy
 
-sub remove_effect_from_track { # doesn't touch %cops or %copp data structures 
+sub remove_effect_from_track { # doesn't touch %{$fx->{applied}} or %{$fx->{params}} data structures 
 	my $track = shift;
 	my @ids = @_;
 	$track->set(ops => [ grep { my $existing = $_; 
@@ -484,7 +484,7 @@ sub set_io {
  		when ( /jack/ ){
 			say("JACK server not running! "
 				,"Cannot set JACK client or port as track source."), 
-					return unless $::jack_running;
+					return unless $jack->{jackd_running};
 
 			continue; # don't break out of given/when chain
 		} 
@@ -763,14 +763,14 @@ sub import_audio  {
 		say "Use 'import_audio <path> <frequency>' if possible.";
 		return 
 	}
-	my $desired_frequency = freq( $::raw_to_disk_format );
+	my $desired_frequency = freq( $config->{formats}->{raw_to_disk} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
 	#say "destination: $destination";
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
 		say "copying $path to $destination";
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
-		my $format = ::signal_format($::raw_to_disk_format, $width);
+		my $format = ::signal_format($config->{formats}->{raw_to_disk}, $width);
 		say "importing $path as $destination, converting to $format";
 		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		#say $cmd;
@@ -841,14 +841,14 @@ sub unbusify {
 
 sub adjusted_length {
 	my $track = shift;
-	my $length;
+	my $setup->{audio_length};
 	if ($track->region_start){
-		$length = 	$track->adjusted_region_end_time
+		$setup->{audio_length} = 	$track->adjusted_region_end_time
 				  - $track->adjusted_region_start_time
 	} else {
-		$length = 	$track->wav_length;
+		$setup->{audio_length} = 	$track->wav_length;
 	}
-	$length += $track->adjusted_playat_time;
+	$setup->{audio_length} += $track->adjusted_playat_time;
 }
 
 sub version_comment {
@@ -902,7 +902,7 @@ our @ISA = '::SimpleTrack';
 
 sub rec_status{
 	my $track = shift;
-	$::mastering_mode ? 'MON' :  'OFF';
+	$mode->{mastering} ? 'MON' :  'OFF';
 }
 sub source_status {}
 sub group_last {0}
@@ -1018,13 +1018,13 @@ our (
 	%tn,
 	%ti,
 	%bn,
-	%effect_j,
-	$ch_m,
-	$ch_r,
-	$track_name,
-	$volume_control_operator,
-	$preview,
-	@mastering_track_names,
+	%{$fx_cache->{partial_label_to_full}},
+	$gui->{_chm},
+	$gui->{_chr},
+	$gui->{_track_name},
+	$config->{volume_control_operator},
+	$mode->{preview},
+	@{$mastering->{track_names}},
 );
 
 # usual track
@@ -1037,22 +1037,22 @@ sub add_track {
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
 	
-	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	$debug and print "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}\n";
 	
 	say("$name: track name already in use. Skipping."), return 
 		if $::Track::by_name{$name};
 	say("$name: reserved track name. Skipping"), return
-	 	if grep $name eq $_, @mastering_track_names; 
+	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
 	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
 	$debug and print "ref new track: ", ref $track; 
-	$track->source($ch_r) if $ch_r;
-#		$track->send($ch_m) if $ch_m;
+	$track->source($gui->{_chr}) if $gui->{_chr};
+#		$track->send($gui->{_chm}) if $gui->{_chm};
 
 	my $group = $bn{$track->group}; 
-	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
+	command_process('for mon; mon') if $mode->{preview} and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
 
 	# normal tracks default to 'REC'
@@ -1060,7 +1060,7 @@ sub add_track {
 	$track->set(rw => $track->target
 					?  'MON'
 					:  'REC') ;
-	$track_name = $ch_m = $ch_r = undef;
+	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();
 	$ui->track_gui($track->n);
@@ -1082,16 +1082,16 @@ sub add_track_alias {
 # track name in a different project
 
 sub add_track_alias_project {
-	my ($name, $track, $project) = @_;
-	my $dir =  join_path(project_root(), $project, '.wav'); 
+	my ($name, $track, $gui->{_project_name}) = @_;
+	my $dir =  join_path(project_root(), $gui->{_project_name}, '.wav'); 
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
 			print "Found target WAV files.\n";
-			my @params = (target => $track, project => $project);
+			my @params = (target => $track, project => $gui->{_project_name});
 			add_track( $name, @params );
 		} else { print "No WAV files found.  Skipping.\n"; return; }
 	} else { 
-		print("$project: project does not exist.  Skipping.\n");
+		print("$gui->{_project_name}: project does not exist.  Skipping.\n");
 		return;
 	}
 }
@@ -1103,7 +1103,7 @@ sub add_volume_control {
 	
 	my $vol_id = cop_add({
 				chain => $n, 
-				type => $volume_control_operator,
+				type => $config->{volume_control_operator},
 				cop_id => $ti{$n}->vol, # often undefined
 				});
 	
@@ -1130,7 +1130,7 @@ sub add_pan_control {
 sub add_latency_compensation {
 	print('LADSPA L/C/R Delay effect not found.
 Unable to provide latency compensation.
-'), return unless $effect_j{lcrDelay};
+'), return unless $fx_cache->{partial_label_to_full}->{lcrDelay};
 	my $n = shift;
 	my $id = cop_add({
 				chain => $n, 

@@ -5,8 +5,8 @@ our (
 [% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
-	$offset_run_flag,
-	$offset_mark,
+	$mode->{offset_run},
+	$setup->{offset_run}->{mark},
 	$ui,
 	%bn,
 	%tn,
@@ -21,14 +21,14 @@ sub rec_cleanup {
 		(grep /Mixdown/, @files) 
 			? command_process('mixplay') 
 			: post_rec_configure();
-		undef $offset_run_flag if ! defined $this_edit;
+		undef $mode->{offset_run} if ! defined $this_edit;
 		reconfigure_engine();
 	}
 }
 sub adjust_offset_recordings {
 	map {
-		$_->set(playat => $offset_mark);
-		say $_->name, ": offsetting to $offset_mark";
+		$_->set(playat => $setup->{offset_run}->{mark});
+		say $_->name, ": offsetting to $setup->{offset_run}->{mark}";
 	} ::ChainSetup::engine_wav_out_tracks();
 }
 sub post_rec_configure {

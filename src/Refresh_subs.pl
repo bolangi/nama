@@ -2,17 +2,17 @@
 
 sub set_widget_color {
 	my ($widget, $status) = @_;
-	my %rw_foreground = (	REC  => $namapalette{RecForeground},
-						 	MON => $namapalette{MonForeground},
-						 	OFF => $namapalette{OffForeground},
+	my %rw_foreground = (	REC  => $gui->{_nama_palette}->{RecForeground},
+						 	MON => $gui->{_nama_palette}->{MonForeground},
+						 	OFF => $gui->{_nama_palette}->{OffForeground},
 						);
 
-	my %rw_background =  (	REC  => $rec,
-							MON  => $mon,
-							OFF  => $off );
+	my %rw_background =  (	REC  => $gui->{rec_bg},
+							MON  => $gui->{mon_bg},
+							OFF  => $gui->{off_bg} );
 		
-	#print "namapalette:\n",yaml_out( \%namapalette);
-	#print "rec: $rec, mon: $mon, off: $off\n";
+	#print "namapalette:\n",yaml_out( $gui->{_nama_palette});
+	#print "rec: $gui->{rec_bg}, mon: $gui->{mon_bg}, off: $gui->{off_bg}\n";
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );
@@ -28,13 +28,13 @@ sub refresh_group {
 		my $status;
 		if ( 	grep{ $_->rec_status eq 'REC'} 
 				map{ $tn{$_} }
-				$main->tracks ){
+				$gn{Main}->tracks ){
 
 			$status = 'REC'
 
 		}elsif(	grep{ $_->rec_status eq 'MON'} 
 				map{ $tn{$_} }
-				$main->tracks ){
+				$gn{Main}->tracks ){
 
 			$status = 'MON'
 
@@ -44,14 +44,14 @@ sub refresh_group {
 
 $debug and print "group status: $status\n";
 
-	set_widget_color($group_rw, $status); 
+	set_widget_color($gui->{group_rw}, $status); 
 
 
 
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|off/i;
 		#$debug and print "attempting to set $status color: ", $take_color{$status},"\n";
 
-	set_widget_color( $group_rw, $status) if $group_rw;
+	set_widget_color( $gui->{group_rw}, $status) if $gui->{group_rw};
 }
 sub refresh_track {
 	
@@ -62,30 +62,30 @@ sub refresh_track {
 	my $rec_status = $ti{$n}->rec_status;
 	$debug and print "track: $n rec_status: $rec_status\n";
 
-	return unless $track_widget{$n}; # hidden track
+	return unless $gui->{tracks}->{$n}; # hidden track
 	
 	# set the text for displayed fields
 
-	$track_widget{$n}->{rw}->configure(-text => $rec_status);
-	$track_widget{$n}->{ch_r}->configure( -text => 
+	$gui->{tracks}->{$n}->{rw}->configure(-text => $rec_status);
+	$gui->{tracks}->{$n}->{ch_r}->configure( -text => 
 				$n > 2
 					? $ti{$n}->source
 					:  q() );
-	$track_widget{$n}->{ch_m}->configure( -text => $ti{$n}->send);
-	$track_widget{$n}->{version}->configure(-text => $ti{$n}->current_version || "");
+	$gui->{tracks}->{$n}->{ch_m}->configure( -text => $ti{$n}->send);
+	$gui->{tracks}->{$n}->{version}->configure(-text => $ti{$n}->current_version || "");
 	
-	map{ set_widget_color( 	$track_widget{$n}->{$_}, 
+	map{ set_widget_color( 	$gui->{tracks}->{$n}->{$_}, 
 							$rec_status)
 	} qw(name rw );
 	
-	set_widget_color( 	$track_widget{$n}->{ch_r},
+	set_widget_color( 	$gui->{tracks}->{$n}->{ch_r},
 				
  							($rec_status eq 'REC'
 								and $n > 2 )
  								? 'REC'
  								: 'OFF');
 	
-	set_widget_color( $track_widget{$n}->{ch_m},
+	set_widget_color( $gui->{tracks}->{$n}->{ch_m},
 							$rec_status eq 'OFF' 
 								? 'OFF'
 								: $ti{$n}->send 

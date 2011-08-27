@@ -184,7 +184,7 @@ our (
 	$this_bus,
 	%tn,
 	%bn,
-	$main,
+	$gn{Main},
 );
 
 sub set_current_bus {
@@ -256,7 +256,7 @@ sub add_send_bus {
 							target => $_,
 							group  => $name,
 						)
-   } $main->tracks;
+   } $gn{Main}->tracks;
 		
 }
 

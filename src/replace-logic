@@ -97,7 +97,7 @@ map {
 
 				# substitute variable with deref, i.e. @effects -> @{$fx->{registry}}
 
-				my $re = qr/$sigil
+				$re = qr/$sigil
 							(::)?
 							$ident
 							\b
@@ -120,7 +120,7 @@ map {
 		if ($sigil eq '@')
 
 		{
-				$re = qr / 	\$			# dollar sigil
+				my $re = qr / 	\$			# dollar sigil
 							\#			# last index
 							$ident
 							\b
@@ -152,7 +152,7 @@ map {
 		keys %var_map;
 	write_file($filename, $file);
 	#say "filename: $filename\n$file";
-}  grep{ $_ eq 'Effects.p' }  keys %files;
+}  grep{ $_ ne 'Effects.p' }  keys %files;
 
 
 

@@ -10,62 +10,62 @@ our (
 	$debug,
 	$debug2,
 	$ui,
-	$cop_id,
-	%cops,
-	%copp,
-	$preview,
-	$mastering_mode,
-	$saved_version,
-	%bunch,
+	$fx->{id_counter},
+	%{$fx->{applied}},
+	%{$fx->{params}},
+	$mode->{preview},
+	$mode->{mastering},
+	$gui->{_project_name}->{save_file_version_number},
+	%{$gui->{_project_name}->{bunch}},
 	$this_bus,
-	%wav_info,
-	$offset_run_flag,
+	%{$setup->{wav_info}},
+	$mode->{offset_run},
 	$this_edit,
-	$project_name,
-	$state_store_file,
-	%opts,
+	$gui->{_project_name}->{name},
+	$file->{state_store},
+	%{$config->{opts}},
 	%tn,
-	%track_widget,
-	%effects_widget,
-	$markers_armed,
-	@already_muted,
-	$old_snapshot,
-	$initial_user_mode,
-	$project,	
-	$project_root,
-	%is_system_bus,
-	$main,
-	$term, 
+	%{$gui->{tracks}},
+	%{$gui->{fx}},
+	$gui->{_markers_armed},
+	@{$fx->{muted}},
+	$setup->{_old_snapshot},
+	$config->{initial_mode},
+	$gui->{_project_name},	
+	$config->{root_dir},
+	%{$config->{_is_system_bus}},
+	$gn{Main},
+	$text->{term}, 
 	%bn,
 );
 
 { # OPTIMIZATION
 
   # we allow for the (admitted rare) possibility that
-  # $project_root may change
+  # $config->{root_dir} may change
 
 my %proot;
 sub project_root { 
-	$proot{$project_root} ||= resolve_path($project_root)
+	$proot{$config->{root_dir}} ||= resolve_path($config->{root_dir})
 }
 }
 
-sub config_file { $opts{f} ? $opts{f} : ".namarc" }
+sub config_file { $config->{opts}->{f} ? $config->{opts}->{f} : ".namarc" }
 
 { # OPTIMIZATION
 my %wdir; 
 sub this_wav_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and
-	$wdir{$project_name} ||= resolve_path(
-		join_path( project_root(), $project_name, q(.wav) )  
+	$config->{opts}->{p} and return $config->{root_dir}; # cwd
+	$gui->{_project_name}->{name} and
+	$wdir{$gui->{_project_name}->{name}} ||= resolve_path(
+		join_path( project_root(), $gui->{_project_name}->{name}, q(.wav) )  
 	);
 }
 }
 
 sub project_dir {
-	$opts{p} and return $project_root; # cwd
-	$project_name and join_path( project_root(), $project_name) 
+	$config->{opts}->{p} and return $config->{root_dir}; # cwd
+	$gui->{_project_name}->{name} and join_path( project_root(), $gui->{_project_name}->{name}) 
 }
 
 sub list_projects {
@@ -84,22 +84,22 @@ sub initialize_project_data {
 	return if transport_running();
 	$ui->destroy_widgets();
 	$ui->project_label_configure(
-		-text => uc $project_name, 
+		-text => uc $gui->{_project_name}->{name}, 
 		-background => 'lightyellow',
 		); 
 
 	# effect variables - no object code (yet)
 	
-	$cop_id = "A"; # autoincrement counter
-	%cops	= ();  # effect and controller objects (hashes)
-	%copp   = ();  # chain operator parameters
+	$fx->{id_counter} = "A"; # autoincrement counter
+	%{$fx->{applied}}	= ();  # effect and controller objects (hashes)
+	%{$fx->{params}}   = ();  # chain operator parameters
 	               # indexed by {$id}->[$param_no]
 	               # zero-based {AB}->[0] (parameter 1)
 
-	%track_widget = ();
-	%effects_widget = ();
+	%{$gui->{tracks}} = ();
+	%{$gui->{fx}} = ();
 
-	$markers_armed = 0;
+	$gui->{_markers_armed} = 0;
 
 	map{ $_->initialize() } qw(
 							::Mark
@@ -112,24 +112,24 @@ sub initialize_project_data {
 	
 	# volume settings
 	
-	@already_muted = ();
+	@{$fx->{muted}} = ();
 
 	# $is_armed = 0;
 	
-	$old_snapshot = {};
-	$preview = $initial_user_mode;
-	$mastering_mode = 0;
-	$saved_version = 0; 
+	$setup->{_old_snapshot} = {};
+	$mode->{preview} = $config->{initial_mode};
+	$mode->{mastering} = 0;
+	$gui->{_project_name}->{save_file_version_number} = 0; 
 	
-	%bunch = ();	
+	%{$gui->{_project_name}->{bunch}} = ();	
 	
 	create_system_buses();
 	$this_bus = 'Main';
 
-	%wav_info = ();
+	%{$setup->{wav_info}} = ();
 	
 	clear_offset_run_vars();
-	$offset_run_flag = 0;
+	$mode->{offset_run} = 0;
 	$this_edit = undef;
 
 	::ChainSetup::initialize();
@@ -139,15 +139,15 @@ sub load_project {
 	my %h = @_;
 	$debug and print yaml_out \%h;
 	print("no project name.. doing nothing.\n"),return 
-		unless $h{name} or $project;
-	$project_name = $h{name} if $h{name};
+		unless $h{name} or $gui->{_project_name};
+	$gui->{_project_name}->{name} = $h{name} if $h{name};
 
-	if ( ! -d join_path( project_root(), $project_name) ){
+	if ( ! -d join_path( project_root(), $gui->{_project_name}->{name}) ){
 		if ( $h{create} ){
 			map{create_dir($_)} &project_dir, &this_wav_dir ;
 		} else { 
 			print qq(
-Project "$project_name" does not exist. 
+Project "$gui->{_project_name}->{name}" does not exist. 
 Loading project "untitled".
 );
 			load_project( qw{name untitled create 1} );
@@ -163,7 +163,7 @@ Loading project "untitled".
 	cache_wav_info();
 	rememoize();
 
-	restore_state( $h{settings} ? $h{settings} : $state_store_file) unless $opts{M} ;
+	restore_state( $h{settings} ? $h{settings} : $file->{state_store}) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 
@@ -189,7 +189,7 @@ Loading project "untitled".
 	}
 
 
-	$opts{M} = 0; # enable 
+	$config->{opts}->{M} = 0; # enable 
 	
 	dig_ruins() unless scalar @::Track::all > 2;
 
@@ -269,14 +269,14 @@ sub create_system_buses {
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	my @system_buses = split " ", $buses;
-	map{ $is_system_bus{$_}++ } @system_buses;
-	delete $is_system_bus{Main}; # because we want to display it
+	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
+	delete $config->{_is_system_bus}->{Main}; # because we want to display it
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 	
 	# a bus should identify it's mix track
 	$bn{Main}->set( send_type => 'track', send_id => 'Master');
 
-	$main = $bn{Main};
+	$gn{Main} = $bn{Main};
 }
 
 
@@ -328,7 +328,7 @@ sub new_project_template {
 
 	# Throw away command history
 	
-	$term->SetHistory();
+	$text->{term}->SetHistory();
 	
 	# Buses needn't set version info either
 	
@@ -347,7 +347,7 @@ sub new_project_template {
 	# recall temp name
 	
  	load_project(  # restore_state() doesn't do the whole job
- 		name     => $project_name,
+ 		name     => $gui->{_project_name}->{name},
  		settings => $previous_state,
 	);
 
@@ -368,7 +368,7 @@ sub use_project_template {
 	# load template
 	
  	load_project(
- 		name     => $project_name,
+ 		name     => $gui->{_project_name}->{name},
  		settings => join_path(project_root(),"templates",$name),
 	);
 	save_state();

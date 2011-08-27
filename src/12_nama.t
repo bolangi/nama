@@ -17,17 +17,17 @@ our ($expected_setup_lines);
 use Cwd;
 
 our (
-	$main,
+	$gn{Main},
 	$this_track,
-	%opts,
-	$jack_running,
+	%{$config->{opts}},
+	$jack->{jackd_running},
 );
 
 BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
-# defeat namarc detection to force using $default namarc
+# defeat namarc detection to force using $config->{default} namarc
 
 push @ARGV, qw(-f /dev/null);
 
@@ -57,7 +57,7 @@ process_options();
 initialize_interfaces();
 diag "Check representative variable from default .namarc";
 
-is( $::mix_to_disk_format, "s16_le,N,44100,i", "Read mix_to_disk_format");
+is( $config->{formats}->{mix_to_disk}, "s16_le,N,44100,i", "Read mix_to_disk_format");
 =skip
 # Ecasound dependent
 diag "Check static effects data read";
@@ -82,9 +82,9 @@ params:
 
 
 package ::;
-is( yaml_out($effects[$effect_i{epp}]) ,  $want , "Pan hinting");
+is( yaml_out($fx_cache->{registry}->[$fx_cache->{full_label_to_index}->{epp}]) ,  $want , "Pan hinting");
 
-is( $effects_help[0], 
+is( $fx_cache->{user_help}->[0], 
 	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
 	'Preset help for dyn_compress_brutal');
 
@@ -120,7 +120,7 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 }
 
 
-is( ref $main, q(Audio::Nama::Bus), 'Bus initializtion');
+is( ref $gn{Main}, q(Audio::Nama::Bus), 'Bus initializtion');
 
 # SKIP: { 
 # my $cs_got = eval_iam('cs');
@@ -672,7 +672,7 @@ foreach(@tests){
 		$new_playat, 
 		$new_region_start, 
 		$new_region_end,
-		$length,
+		$setup->{audio_length},
 		$case, 
 		$comment,
 	) = split " ", $_;
@@ -683,7 +683,7 @@ foreach(@tests){
 		$region_end, 
 		$edit_play_start,
 		$edit_play_end,
-		$length,
+		$setup->{audio_length},
 	);
 
 		
@@ -696,8 +696,8 @@ foreach(@tests){
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
-sub force_alsa { $opts{A} = 1; $opts{J} = 0; $jack_running = 0; }
-sub force_jack{ $opts{A} = 0; $opts{J} = 1; $jack_running = 1; }
+sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
+sub force_jack{ $config->{opts}->{A} = 0; $config->{opts}->{J} = 1; $jack->{jackd_running} = 1; }
 sub setup_content {
 	my @lines = split "\n", shift;
 	my %setup;

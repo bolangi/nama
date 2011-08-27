@@ -5,38 +5,38 @@ package ::;
 
 our (
 [% qx(cat ./singletons.pl) %]
-	$preview,
-	$mastering_mode,
+	$mode->{preview},
+	$mode->{mastering},
 	%tn,
 	%ti,
 	%bn,
-	$attribs,
-	$term,
+	$text->{term_attribs},
+	$text->{term},
 	$this_track,
 	$this_bus,
-	%effect_i,
-	%effect_j,
-	@effects,
-	%cops,
-	%copp,
-	$main,
-	$length,
-	$run_time,
-	$use_placeholders,
-	$format_top,
-	$format_divider,
-	@format_fields,
+	%{$fx_cache->{full_label_to_index}},
+	%{$fx_cache->{partial_label_to_full}},
+	@{$fx_cache->{registry}},
+	%{$fx->{applied}},
+	%{$fx->{params}},
+	$gn{Main},
+	$setup->{audio_length},
+	$setup->{runtime_limit},
+	$config->{use_placeholders},
+	$text->{format_top},
+	$text->{format_divider},
+	@{$text->{format_fields}},
 	$debug,
-	%bunch,
-	%commands,
-	%ladspa_label,
-	@effects_help,
-	@help_topic,
-	%help_topic,
-	%ladspa_help,
-	$text_wrap,
-	$project_name,
-	%iam_cmd,
+	%{$gui->{_project_name}->{bunch}},
+	%{$text->{commands}},
+	%{$fx_cache->{ladspa_id_to_label}},
+	@{$fx_cache->{user_help}},
+	@{$help->{arr_topic}},
+	%{$help->{topic}},
+	%{$fx_cache->{ladspa_help}},
+	$text->{wrap},
+	$gui->{_project_name}->{name},
+	%{$text->{iam}},
 	$ui,
 		
 );
@@ -58,9 +58,9 @@ sub loop {
 	$Event::DIED = sub {
 	   my ($event, $errmsg) = @_;
 	   say $errmsg;
-	   $attribs->{line_buffer} = q();
-	   $term->clear_message();
-	   $term->rl_reset_line_state();
+	   $text->{term_attribs}->{line_buffer} = q();
+	   $text->{term}->clear_message();
+	   $text->{term}->rl_reset_line_state();
 	};
 	Event::loop();
 }

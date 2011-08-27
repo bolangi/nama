@@ -69,7 +69,7 @@ sub jump_here {
 }
 sub adjusted_time {  # for marks within current edit
 	my $mark = shift;
-	return $mark->time unless $::offset_run_flag;
+	return $mark->time unless $mode->{offset_run};
 	my $time = $mark->time - ::play_start_time();
 	$time > 0 ? $time : 0
 }
@@ -98,13 +98,13 @@ sub all { sort { $a->{time} <=> $b->{time} }@all }
 
 sub loop_start { 
 	my @points = sort { $a <=> $b } 
-	grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
+	grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
 	#print "points @points\n";
 	$points[0];
 }
 sub loop_end {
 	my @points =sort { $a <=> $b } 
-		grep{ $_ } map{ mark_time($_)} @::loop_endpoints[0,1];
+		grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
 	$points[1];
 }
 sub unadjusted_mark_time {
@@ -145,11 +145,11 @@ our (
 	$debug2,
 	$ui,
 	$this_mark,
-	$unit,
-	$length,
-	$jack_running,
-	$seek_delay,
-	$markers_armed,
+	$gui->{_seek_unit},
+	$setup->{audio_length},
+	$jack->{jackd_running},
+	$config->{engine}->{jack_seek_delay},
+	$gui->{_markers_armed},
 );
 
 
@@ -177,7 +177,7 @@ sub mark { # GUI_CODE
 	$debug2 and print "mark()\n";
 	my $mark = shift;
 	my $pos = $mark->time;
-	if ($markers_armed){ 
+	if ($gui->{_markers_armed}){ 
 			$ui->destroy_marker($pos);
 			$mark->remove;
 		    arm_mark_toggle(); # disarm
@@ -235,9 +235,9 @@ sub jump {
 	my $delta = shift;
 	$debug2 and print "&jump\n";
 	my $here = eval_iam('getpos');
-	$debug and print "delta: $delta\nhere: $here\nunit: $unit\n\n";
-	my $new_pos = $here + $delta * $unit;
-	$new_pos = $new_pos < $length ? $new_pos : $length - 10;
+	$debug and print "delta: $delta\nhere: $here\nunit: $gui->{_seek_unit}\n\n";
+	my $new_pos = $here + $delta * $gui->{_seek_unit};
+	$new_pos = $new_pos < $setup->{audio_length} ? $new_pos : $setup->{audio_length} - 10;
 	set_position( $new_pos );
 	sleeper( 0.6) if engine_running();
 }
@@ -248,7 +248,7 @@ sub set_position {
     my $seconds = shift;
     my $coderef = sub{ eval_iam("setpos $seconds") };
 
-    if( $jack_running and eval_iam('engine-status') eq 'running')
+    if( $jack->{jackd_running} and eval_iam('engine-status') eq 'running')
 			{ engine_stop_seek_start( $coderef ) }
 	else 	{ $coderef->() }
 	update_clock_display();
@@ -258,7 +258,7 @@ sub engine_stop_seek_start {
 	my $coderef = shift;
 	eval_iam('stop');
 	$coderef->();
-	sleeper($seek_delay);
+	sleeper($config->{engine}->{jack_seek_delay});
 	eval_iam('start');
 }
 

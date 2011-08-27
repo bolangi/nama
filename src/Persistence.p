@@ -13,32 +13,32 @@ our (
 
 [% qx(./add_persistent_vars) %]
 
-	$autosave_interval,
-	%event_id,
-	$state_store_file,
-	$effect_chain_file,
-	$effect_profile_file,
-	%effect_chain,
-	%effect_profile,
+	$config->{autosave_interval},
+	%{$engine->{events}},
+	$file->{state_store},
+	$file->{effect_chain},
+	$file->{effect_profile},
+	%{$fx->{chain}},
+	%{$fx->{profile}},
 	%tn,
 	%ti,
 	%bn,
-	$term,
+	$text->{term},
 	$this_track,
 	$this_bus,
 	@persistent_vars,
 	$ui,
 	$VERSION,
-	%opts,
+	%{$config->{opts}},
 	$debug, 
 	$debug2,
 	$debug3
 );
 
 sub save_state {
-	my $file = shift || $state_store_file; 
+	my $file = shift || $file->{state_store}; 
 	$debug2 and print "&save_state\n";
-	$saved_version = $VERSION;
+	$gui->{_project_name}->{save_file_version_number} = $VERSION;
 
 
 	# some stuff get saved independently of our state file
@@ -60,7 +60,7 @@ sub save_state {
 
 	# store alsa settings
 
-	if ( $opts{a} ) {
+	if ( $config->{opts}->{a} ) {
 		my $file = $file;
 		$file =~ s/\.yml$//;
 		print "storing ALSA settings\n";
@@ -74,7 +74,7 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
-	@command_history = ();
+	@{$text->{command_history}} = ();
 }
 
 sub save_system_state {
@@ -88,10 +88,10 @@ sub save_system_state {
 
 	sync_effect_parameters(); # in case a controller has made a change
 
-	# remove null keys in %cops and %copp
+	# remove null keys in %{$fx->{applied}} and %{$fx->{params}}
 	
-	delete $cops{''};
-	delete $copp{''};
+	delete $fx->{applied}->{''};
+	delete $fx->{params}->{''};
 
 	initialize_serialization_arrays();
 	
@@ -133,13 +133,13 @@ sub save_system_state {
 
 	# save history -- 50 entries, maximum
 
-	my @history = $::term->GetHistory;
+	my @history = $text->{term}->GetHistory;
 	my %seen;
-	map { push @command_history, $_ 
+	map { push @{$text->{command_history}}, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
-	my $max = scalar @command_history;
+	my $max = scalar @{$text->{command_history}};
 	$max = 50 if $max > 50;
-	@command_history = @command_history[-$max..-1];
+	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
 	serialize(
@@ -155,7 +155,7 @@ sub save_system_state {
 sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $file = shift;
-	$file = $file || $state_store_file;
+	$file = $file || $file->{state_store};
 	$file = join_path(project_dir(), $file)
 		unless $file =~ m(/);
 	$file .= ".yml" unless $file =~ /yml$/;
@@ -171,7 +171,7 @@ sub restore_state {
 	$yaml =~ s/~NULL_HASH/{}/g;
 	$yaml =~ s/~NULL_ARRAY/[]/g;
 
-	# rewrite %cops 'owns' field to []
+	# rewrite %{$fx->{applied}} 'owns' field to []
 	
 	$yaml =~ s/owns: ~/owns: []/g;
 
@@ -189,11 +189,11 @@ sub restore_state {
 	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
-	# %cops: correct 'owns' null (from YAML) to empty array []
+	# %{$fx->{applied}}: correct 'owns' null (from YAML) to empty array []
 	
 	# backward compatibility fixes for older projects
 
-	if (! $saved_version ){
+	if (! $gui->{_project_name}->{save_file_version_number} ){
 
 		# Tracker group is now called 'Main'
 	
@@ -219,7 +219,7 @@ sub restore_state {
 			}
 		}
 	}
-	if( $saved_version < 0.9986){
+	if( $gui->{_project_name}->{save_file_version_number} < 0.9986){
 	
 		map { 	# store insert without intermediate array
 
@@ -266,10 +266,10 @@ sub restore_state {
 	}
 
 	# jack_manual is now called jack_port
-	if ( $saved_version <= 1){
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
-	if ( $saved_version <= 1.053){ # convert insert data to object
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.053){ # convert insert data to object
 		my $n = 0;
 		@inserts_data = ();
 		for my $t (@tracks_data){
@@ -285,7 +285,7 @@ sub restore_state {
 			push @inserts_data, $i;
 		} 
 	}
-	if ( $saved_version <= 1.054){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.054){ 
 
 		for my $t (@tracks_data){
 
@@ -298,7 +298,7 @@ sub restore_state {
 
 	}
 
-	if ( $saved_version <= 1.055){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.055){ 
 
 	# get rid of Null bus routing
 	
@@ -309,7 +309,7 @@ sub restore_state {
 
 	}
 
-	if ( $saved_version <= 1.064){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.064){ 
 		map{$_->{version} = $_->{active};
 			delete $_->{active}}
 			grep{$_->{active}}
@@ -327,7 +327,7 @@ sub restore_state {
 			}
 		} grep{$_->{name} eq 'Master'} @tracks_data;
 
-	if ( $saved_version <= 1.064){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.064){ 
 
 		map{ 
 			my $default_list = ::IO::default_jack_ports_list($_->{name});
@@ -341,7 +341,7 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
-	if ( $saved_version <= 1.067){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
 		map{ 
@@ -359,7 +359,7 @@ sub restore_state {
 
  		} @tracks_data;
 	}
-	if ( $saved_version <= 1.068){ 
+	if ( $gui->{_project_name}->{save_file_version_number} <= 1.068){ 
 
 		# initialize version_comment field
 		map{ $_->{version_comment} or $_->{version_comment} = {} } @tracks_data;
@@ -373,7 +373,7 @@ sub restore_state {
 		} grep { $_->{version_comment} } @tracks_data;
 	}
 	# convert to new MixTrack class
-	if ( $saved_version < 1.069){ 
+	if ( $gui->{_project_name}->{save_file_version_number} < 1.069){ 
 		map {
 		 	$_->{was_class} = $_->{class};
 			$_->{class} = $_->{'::MixTrack'};
@@ -395,12 +395,12 @@ sub restore_state {
 		
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
-	my $main = $bn{Main};
+	my $gn{Main} = $bn{Main};
 
 	# bus should know its mix track
 	
-	$main->set( send_type => 'track', send_id => 'Master')
-		unless $main->send_type;
+	$gn{Main}->set( send_type => 'track', send_id => 'Master')
+		unless $gn{Main}->send_type;
 
 	# restore user tracks
 	
@@ -409,8 +409,8 @@ sub restore_state {
 	# temporary turn on mastering mode to enable
 	# recreating mastering tracksk
 
-	my $current_master_mode = $mastering_mode;
-	$mastering_mode = 1;
+	my $current_master_mode = $mode->{mastering};
+	$mode->{mastering} = 1;
 
 	map{ 
 		my %h = %$_; 
@@ -418,7 +418,7 @@ sub restore_state {
 		my $track = $class->new( %h );
 	} @tracks_data;
 
-	$mastering_mode = $current_master_mode;
+	$mode->{mastering} = $current_master_mode;
 
 	# restore inserts
 	
@@ -448,17 +448,17 @@ sub restore_state {
 					or $id eq $ti{$n}->pan;
 			
 			add_effect({
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
+						chain => $fx->{applied}->{$id}->{chain},
+						type => $fx->{applied}->{$id}->{type},
 						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
+						parent_id => $fx->{applied}->{$id}->{belongs_to},
 						});
 
 		}
 	} @tracks_data;
 
 
-	#print "\n---\n", $main->dump;  
+	#print "\n---\n", $gn{Main}->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 
@@ -466,7 +466,7 @@ sub restore_state {
 
 
 	# restore Alsa mixer settings
-	if ( $opts{a} ) {
+	if ( $config->{opts}->{a} ) {
 		my $file = $file; 
 		$file =~ s/\.yml$//;
 		print "restoring ALSA settings\n";
@@ -500,7 +500,7 @@ sub restore_state {
 
 	# restore command history
 	
-	$term->SetHistory(@command_history);
+	$text->{term}->SetHistory(@{$text->{command_history}});
 } 
 sub assign_var {
 	my ($source, @vars) = @_;
@@ -512,50 +512,50 @@ sub assign_var {
 }
 
 sub save_effect_chains { # if they exist
-	my $file = shift || $effect_chain_file;
-	if (keys %effect_chain){
+	my $file = shift || $file->{effect_chain};
+	if (keys %{$fx->{chain}}){
 		serialize (
 			file => join_path(project_root(), $file),
 			format => 'yaml',
-			vars => [ qw( %effect_chain ) ],
+			vars => [ qw( %{$fx->{chain}} ) ],
 			class => '::');
 	}
 }
 sub save_effect_profiles { # if they exist
-	my $file = shift || $effect_profile_file;
-	if (keys %effect_profile){
+	my $file = shift || $file->{effect_profile};
+	if (keys %{$fx->{profile}}){
 		serialize (
 			file => join_path(project_root(), $file),
 			format => 'yaml',
-			vars => [ qw( %effect_profile ) ],
+			vars => [ qw( %{$fx->{profile}} ) ],
 			class => '::');
 	}
 }
 sub restore_effect_chains {
 
-	my $file = join_path(project_root(), $effect_chain_file);
+	my $file = join_path(project_root(), $file->{effect_chain});
 	return unless -e $file;
 
 	# don't overwrite them if already present
-	assign_var($file, qw(%effect_chain)) unless keys %effect_chain
+	assign_var($file, qw(%{$fx->{chain}})) unless keys %{$fx->{chain}}
 }
 sub restore_effect_profiles {
 
-	my $file = join_path(project_root(), $effect_profile_file);
+	my $file = join_path(project_root(), $file->{effect_profile});
 	return unless -e $file;
 
 	# don't overwrite them if already present
-	assign_var($file, qw(%effect_profile)) unless keys %effect_profile; 
+	assign_var($file, qw(%{$fx->{profile}})) unless keys %{$fx->{profile}}; 
 }
 
 # autosave
 
 sub schedule_autosave { 
 	# one-time timer 
-	my $seconds = (shift || $autosave_interval) * 60;
-	$event_id{autosave} = undef; # cancel any existing timer
+	my $seconds = (shift || $config->{autosave_interval}) * 60;
+	$engine->{events}->{autosave} = undef; # cancel any existing timer
 	return unless $seconds;
-	$event_id{autosave} = AE::timer($seconds,0, \&autosave);
+	$engine->{events}->{autosave} = AE::timer($seconds,0, \&autosave);
 }
 sub autosave {
 	if (engine_running()){ 

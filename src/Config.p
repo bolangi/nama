@@ -10,15 +10,15 @@ our (
 
 [% qx(cat ./singletons.pl) %]
 
-	%opts, 			# command line options
+	%{$config->{opts}}, 			# command line options
 	
-	$project_root,	# directory
-	$project_name,	# startup value
+	$config->{root_dir},	# directory
+	$gui->{_project_name}->{name},	# startup value
 
 	@config_vars, 	# vars to read from namarc
-	$sampling_frequency, # set from 'frequency' abbreviation in namarc
-	$default,		# default namarc
-	$custom_pl,		# user customizations
+	$config->{sampling_freq}, # set from 'frequency' abbreviation in namarc
+	$config->{default},		# default namarc
+	$file->{custom_pl},		# user customizations
 
 	$debug,
 	$debug2,
@@ -41,9 +41,9 @@ sub global_config {
 	# 2. .namarc in the current project directory, i.e. ~/nama/untitled/.namarc
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
-	if( $opts{f} ){
-		print("reading config file $opts{f}\n");
-		return read_file($opts{f});
+	if( $config->{opts}->{f} ){
+		print("reading config file $config->{opts}->{f}\n");
+		return read_file($config->{opts}->{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
 	my $c = 0;
@@ -72,16 +72,16 @@ sub read_config {
 	$debug2 and print "&read_config\n";
 	
 	my $config = shift;
-	my $yml = length $config > 100 ? $config : $default;
+	my $yml = length $config > 100 ? $config : $config->{default};
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
 	*subst = \%{ $cfg{abbreviations} }; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign_var( \%cfg, @config_vars);
-	$project_root = $opts{d} if $opts{d};
-	$project_root = expand_tilde($project_root);
-	$sampling_frequency = $cfg{abbreviations}{frequency};
+	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
+	$config->{root_dir} = expand_tilde($config->{root_dir});
+	$config->{sampling_freq} = $cfg{abbreviations}{frequency};
 
 }
 sub walk_tree {
@@ -99,7 +99,7 @@ sub substitute{
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 sub first_run {
-	return if $opts{f};
+	return if $config->{opts}->{f};
 	my $config = config_file();
 	$config = "$ENV{HOME}/$config" unless -e $config;
 	$debug and print "config: $config\n";
@@ -154,7 +154,7 @@ PROJECT_ROOT
 	chomp $reply;
 	if ($reply !~ /n/i){
 		# write project root path into default namarc
-		$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
+		$config->{default} =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
 		
 		# create path nama/untitled/.wav
 		#
@@ -165,7 +165,7 @@ PROJECT_ROOT
 		
 		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
 
-		 write_file(user_customization_file(), $custom_pl);
+		 write_file(user_customization_file(), $file->{custom_pl});
 		
 	} else {
 		print <<OTHER;
@@ -175,7 +175,7 @@ Please make sure to set the project_root directory in
 OTHER
 	}
 	if ($make_namarc !~ /n/i){
-		write_file($config, $default);
+		write_file($config, $config->{default});
 	}
 	sleep 1;
 	print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";

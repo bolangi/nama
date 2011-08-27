@@ -129,7 +129,7 @@ our (
 
 [% qx(./strip_all ./var_types.pl) %]
 
-$text_wrap = new Text::Format {
+$text->{wrap} = new Text::Format {
 	columns 		=> 75,
 	firstIndent 	=> 0,
 	bodyIndent		=> 0,
@@ -143,44 +143,44 @@ $debug = 0; # debug statements
 
 # other initializations
 
-$unit = 1;
-$effects_cache_file = '.effects_cache';
-$palette_file = 'palette.yml';
-$state_store_file = 'State.yml';
-$effect_chain_file = 'effect_chains.yml';
-$effect_profile_file = 'effect_profiles.yml';
-$chain_setup_file = 'Setup.ecs'; # For loading by Ecasound
-$soundcard_channels = 10;
-$use_monitor_version_for_mixdown = 1; # not implemented yet
-$project_root = join_path( $ENV{HOME}, "nama");
-$seek_delay = 0.1; # seconds
-$prompt = "nama ('h' for help)> ";
-$use_pager = 1;
-$use_placeholders = 1;
-$save_id = "State";
-$user_customization_file = "custom.pl";
-$fade_time = 0.3; # when starting/stopping transport
-$old_snapshot = {};
+$gui->{_seek_unit} = 1;
+$file->{effects_cache} = '.effects_cache';
+$file->{gui_palette} = 'palette.yml';
+$file->{state_store} = 'State.yml';
+$file->{effect_chain} = 'effect_chains.yml';
+$file->{effect_profile} = 'effect_profiles.yml';
+$file->{chain_setup} = 'Setup.ecs'; # For loading by Ecasound
+$config->{soundcard_channels} = 10;
+$config->{sync_mixdown_and_monitor_version_numbers} = 1; # not implemented yet
+$config->{root_dir} = join_path( $ENV{HOME}, "nama");
+$config->{engine}->{jack_seek_delay} = 0.1; # seconds
+$text->{prompt} = "nama ('h' for help)> ";
+$config->{use_pager} = 1;
+$config->{use_placeholders} = 1;
+$gui->{_save_id} = "State";
+$file->{user_customization} = "custom.pl";
+$config->{engine}->{fade_length_on_start_stop} = 0.3; # when starting/stopping transport
+$setup->{_old_snapshot} = {};
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
-$memoize = 1;
-$volume_control_operator = 'ea'; # default to linear scale
-%mute_level 	= (ea => 0, 	eadb => -96); 
-%fade_out_level = (ea => 0, 	eadb => -40);
-%unity_level 	= (ea => 100, 	eadb => 0); 
-$fade_resolution = 200; # steps per second
-$default_fade_length = 0.5; # for fade-in, fade-out
-$edit_playback_end_margin = 3;
-$edit_crossfade_time = 0.03; # 
+$config->{memoize} = 1;
+$config->{volume_control_operator} = 'ea'; # default to linear scale
+%{$fx->{mute_level}} 	= (ea => 0, 	eadb => -96); 
+%{$fx->{fade_out_level}} = (ea => 0, 	eadb => -40);
+%{$fx->{unity_level}} 	= (ea => 100, 	eadb => 0); 
+$fx->{fade_resolution} = 200; # steps per second
+$config->{engine}->{fade_default_length} = 0.5; # for fade-in, fade-out
+$config->{edit}->{playback_past_last_mark} = 3;
+$config->{edit}->{crossfade_time} = 0.03; # 
 $::Fade::fade_down_fraction = 0.75;
 $::Fade::fade_time1_fraction = 0.9;
 $::Fade::fade_time2_fraction = 0.1;
 $::Fade::fader_op = 'ea';
 
-@mastering_track_names = qw(Eq Low Mid High Boost);
-$mastering_mode = 0;
+@{$mastering->{track_names}} = qw(Eq Low Mid High Boost);
+$mode->{mastering} = 0;
 
-init_memoize() if $memoize;
+init_memoize() if $config->{memoize};
 
 # aliases for concise access
 
@@ -196,9 +196,9 @@ sub setup_grammar {
 	$debug2 and print "Reading grammar\n";
 
 	*commands_yml = __PACKAGE__->section_data("commands_yml");
-	$commands_yml = quote_yaml_scalars($commands_yml);
+	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
 	*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
-	%commands = %{ ::yaml_in( $::commands_yml) };
+	%{$text->{commands}} = %{ ::yaml_in( $text->{commands_yml}) };
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;
@@ -208,7 +208,7 @@ sub setup_grammar {
 
 	*grammar = __PACKAGE__->section_data("grammar");
 
-	$parser = Parse::RecDescent->new($grammar) or croak "Bad grammar!\n";
+	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
 
 	[% qx(cat ./help_topic.pl) %]
 
@@ -230,7 +230,7 @@ sub setup_grammar {
 
 	# Midish command keywords
 	
-	%midish_command = map{ $_, 1} split " ", 
+	%{$midi->{keywords}} = map{ $_, 1} split " ", 
 		${ __PACKAGE__->section_data("midish_commands") };
 
 	# print remove_spaces("bulwinkle is a...");

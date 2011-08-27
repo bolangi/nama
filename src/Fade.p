@@ -108,25 +108,25 @@ sub refresh_fade_controller {
 
 
 sub all_fades {
-	my $track_name = shift;
-	grep{ $_->track eq $track_name } values %by_index
+	my $gui->{_track_name} = shift;
+	grep{ $_->track eq $gui->{_track_name} } values %by_index
 }
 sub fades {
 
 	# get fades within playable region
 	
-	my $track_name = shift;
-	my $track = $::tn{$track_name};
-	my @fades = all_fades($track_name);
+	my $gui->{_track_name} = shift;
+	my $track = $::tn{$gui->{_track_name}};
+	my @fades = all_fades($gui->{_track_name});
 
 	
-	if($::offset_run_flag){
+	if($mode->{offset_run}){
 
 		# get end time
 		
-		my $length = $track->wav_length;
+		my $setup->{audio_length} = $track->wav_length;
 		my $play_end = ::play_end_time();
-		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
+		my $play_end_time = $play_end ?  min($play_end, $setup->{audio_length}) : $setup->{audio_length};
 
 		# get start time
 	
@@ -165,29 +165,29 @@ sub fades {
 
 sub initial_level {
 	# return 0, 1 or undef
-	my $track_name = shift;
-	my @fades = fades($track_name) or return undef;
+	my $gui->{_track_name} = shift;
+	my @fades = fades($gui->{_track_name}) or return undef;
 	# if we fade in we'll hold level zero from beginning
 	(scalar @fades and $fades[0]->type eq 'in') ? 0 : 1
 }
 sub exit_level {
-	my $track_name = shift;
-	my @fades = fades($track_name) or return undef;
+	my $gui->{_track_name} = shift;
+	my @fades = fades($gui->{_track_name}) or return undef;
 	# if we fade out we'll hold level zero from end
 	(scalar @fades and $fades[-1]->type eq 'out') ? 0 : 1
 }
 sub initial_pair { # duration: zero to... 
-	my $track_name = shift;
-	my $init_level = initial_level($track_name);
+	my $gui->{_track_name} = shift;
+	my $init_level = initial_level($gui->{_track_name});
 	defined $init_level or return ();
 	(0,  $init_level )
 	
 }
 sub final_pair {   # duration: .... to length
-	my $track_name = shift;
-	my $exit_level = exit_level($track_name);
+	my $gui->{_track_name} = shift;
+	my $exit_level = exit_level($gui->{_track_name});
 	defined $exit_level or return ();
-	my $track = $::tn{$track_name};
+	my $track = $::tn{$gui->{_track_name}};
 	(
 		$track->adjusted_playat_time + $track->wav_length,
 		$exit_level
