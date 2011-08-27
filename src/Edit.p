@@ -1,3 +1,7 @@
+our (
+[% qx(cat ./singletons.pl) %]
+);
+
 package ::Edit;
 
 # each edit is identified by:
@@ -11,9 +15,6 @@ our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
 our @ISA;
-our (
-[% qx(cat ./singletons.pl) %]
-);
 use vars qw(%n %by_index %by_name );
 use ::Object qw( 
 				n
@@ -254,24 +255,11 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 
 our (
-	%{$engine->{events}},
-	$text->{term},
-	$text->{term_attribs},
 	%tn,
 	%ti,
 	%bn,
-	@{$setup->{edit_points}},
 	$this_track,
-	$setup->{changed},
-	$mode->{offset_run},
-	$mode->{loop_enable},
 	$this_edit,
-	$setup->{offset_run}->{start_time},
-	$setup->{offset_run}->{end_time},
-	$setup->{offset_run}->{mark},
-	$config->{edit}->{crossfade_time},
-
-
 );
 	
 
@@ -553,7 +541,7 @@ sub edit_fades {
 # use internal lexical values for the computations
 
 # track values
-my( $trackname, $playat, $region_start, $region_end, $setup->{audio_length});
+my( $trackname, $playat, $region_start, $region_end, $setup_length);
 
 # edit values
 my( $edit_play_start, $edit_play_end);
@@ -611,7 +599,7 @@ sub new_region_end
 	{   
 		my $end = $region_end{edit_case()}->();
 		return $end if $end eq '*';
-		$end < $setup->{audio_length} ? $end : $setup->{audio_length}
+		$end < $setup_length ? $end : $setup_length
 	};
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
@@ -626,7 +614,7 @@ sub edit_case {
 	{
 		if( $edit_play_end < $playat)
 			{ "out_of_bounds_near" }
-		elsif( $edit_play_start > $playat + $setup->{audio_length})
+		elsif( $edit_play_start > $playat + $setup_length)
 			{ "out_of_bounds_far" }
 		elsif( $edit_play_start >= $playat)
 			{"no_region_play_start_after_playat_delay"}
@@ -658,7 +646,7 @@ sub set_edit_vars {
 	$region_end 	= $track->region_end_time;
 	$edit_play_start= play_start_time();
 	$edit_play_end	= play_end_time();
-	$setup->{audio_length} 		= wav_length($track->full_path);
+	$setup_length 		= wav_length($track->full_path);
 }
 sub play_start_time {
 	defined $this_edit 
@@ -671,7 +659,7 @@ sub play_end_time {
 		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
 }
 sub set_edit_vars_testing {
-	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $setup->{audio_length}) = @_;
+	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $setup_length) = @_;
 }
 }
 
@@ -868,11 +856,11 @@ sub remove_system_version_comment {
 # executed outside of edit mode, so we get unadjusted values.
 
 sub setup_length {
-	my $setup->{audio_length};
-	map{  my $l = $_->adjusted_length; $setup->{audio_length} = $l if $l > $setup->{audio_length} }
+	my $setup_length;
+	map{  my $l = $_->adjusted_length; $setup_length = $l if $l > $setup_length }
 	grep{ $_-> rec_status eq 'MON' }
 	::ChainSetup::engine_tracks();
-	$setup->{audio_length}
+	$setup_length
 }
 sub offset_run {
 	say("This function not available in edit mode.  Aborting."), 
