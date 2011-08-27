@@ -13,18 +13,12 @@ our (
 	$debug,
 	$debug2,
 	$ui,
+	%bn,
+	%gn,
+	@effects_static_vars,
 [% qx(cat ./singletons.pl) %]
 );
 	
-# automix()
-
-our (
-	%bn,
-	%gn,
-);
-our (
-	@effects_static_vars,
-);
 
 ## high-level functions
 sub add_effect {

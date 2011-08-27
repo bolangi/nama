@@ -7,12 +7,6 @@ no warnings 'uninitialized';
 our (
 [% qx(cat ./singletons.pl) %]
 	$debug,
-	$jack->{jackd_running},
-	%{$jack->{clients}},
-	$jack->{ports_list_text},
-	$config->{use_jack_plumbing},
-	%{$engine->{events}},
-	%{$config->{opts}},
 );
 
 # general functions

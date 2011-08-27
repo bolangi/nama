@@ -15,14 +15,6 @@ our (
 	$debug2,
 
 	$ui,
-	$setup->{audio_length},
-
-	$gui->{_old_bg},
-	%{$engine->{events}},
-	$mode->{loop_enable},
-	$setup->{runtime_limit},
-
-	$file->{chain_setup},
 );
 
 sub valid_engine_setup {

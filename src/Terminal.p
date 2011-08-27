@@ -6,22 +6,10 @@ no warnings 'uninitialized';
 use Carp;
 our (
 [% qx(cat ./singletons.pl) %]
-	$text->{term},
-	$text->{term_attribs},
 	$this_bus,
 	$this_track,
-	%{$engine->{events}},
 	$debug,
 	$debug2,
-	%{$fx_cache->{partial_label_to_full}},
-	$config->{press_space-to-start},
-	$config->{use_pager},
-	$text->{previous_cmd},
-	@{$text->{keywords}},
-	%{$text->{commands}},
-	%{$text->{iam}},
-	%{$midi->{keywords}},
-	$config->{use_midish},
 );
 
 

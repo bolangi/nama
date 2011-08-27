@@ -1,4 +1,7 @@
 # ---------- Track -----------
+our (
+[% qx(cat ./singletons.pl) %]
+);
 {
 package ::Track;
 
@@ -25,9 +28,6 @@ use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
-our (
-[% qx(cat ./singletons.pl) %]
-);
 
 local $debug = 0;
 use ::Assign qw(join_path);
@@ -841,14 +841,14 @@ sub unbusify {
 
 sub adjusted_length {
 	my $track = shift;
-	my $setup->{audio_length};
+	my $setup_length;
 	if ($track->region_start){
-		$setup->{audio_length} = 	$track->adjusted_region_end_time
+		$setup_length = 	$track->adjusted_region_end_time
 				  - $track->adjusted_region_start_time
 	} else {
-		$setup->{audio_length} = 	$track->wav_length;
+		$setup_length = 	$track->wav_length;
 	}
-	$setup->{audio_length} += $track->adjusted_playat_time;
+	$setup_length += $track->adjusted_playat_time;
 }
 
 sub version_comment {
@@ -1018,13 +1018,6 @@ our (
 	%tn,
 	%ti,
 	%bn,
-	%{$fx_cache->{partial_label_to_full}},
-	$gui->{_chm},
-	$gui->{_chr},
-	$gui->{_track_name},
-	$config->{volume_control_operator},
-	$mode->{preview},
-	@{$mastering->{track_names}},
 );
 
 # usual track
@@ -1082,16 +1075,16 @@ sub add_track_alias {
 # track name in a different project
 
 sub add_track_alias_project {
-	my ($name, $track, $gui->{_project_name}) = @_;
-	my $dir =  join_path(project_root(), $gui->{_project_name}, '.wav'); 
+	my ($name, $track, $project_name) = @_;
+	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
 			print "Found target WAV files.\n";
-			my @params = (target => $track, project => $gui->{_project_name});
+			my @params = (target => $track, project => $project_name);
 			add_track( $name, @params );
 		} else { print "No WAV files found.  Skipping.\n"; return; }
 	} else { 
-		print("$gui->{_project_name}: project does not exist.  Skipping.\n");
+		print("$project_name: project does not exist.  Skipping.\n");
 		return;
 	}
 }

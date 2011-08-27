@@ -4,19 +4,10 @@ package ::;
 use Modern::Perl;
 our (
 [% qx(cat ./singletons.pl) %]
-	%{$config->{opts}},
 	%tn,
 	%bn,
-	$config->{hires_timer},
 	$debug,
 	$debug2,
-	%{$fx->{fade_out_level}},
-	%{$fx->{applied}},
-	%{$fx->{params}},
-	@{$fx->{muted}},
-	$fx->{fade_resolution},
-	$config->{engine}->{fade_length_on_start_stop},
-	$mode->{soloing},
 );
 
 

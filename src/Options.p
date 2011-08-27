@@ -5,7 +5,6 @@ use Modern::Perl;
 
 our (
 [% qx(cat ./singletons.pl) %]
-%{$config->{opts}}
 );
 
 sub process_options {

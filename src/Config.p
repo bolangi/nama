@@ -10,15 +10,7 @@ our (
 
 [% qx(cat ./singletons.pl) %]
 
-	%{$config->{opts}}, 			# command line options
-	
-	$config->{root_dir},	# directory
-	$gui->{_project_name}->{name},	# startup value
-
 	@config_vars, 	# vars to read from namarc
-	$config->{sampling_freq}, # set from 'frequency' abbreviation in namarc
-	$config->{default},		# default namarc
-	$file->{custom_pl},		# user customizations
 
 	$debug,
 	$debug2,

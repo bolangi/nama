@@ -3,7 +3,6 @@
 package ::;
 use Modern::Perl;
 
-our (%{$setup->{wav_info}});
 our (
 [% qx(cat ./singletons.pl) %]
 );

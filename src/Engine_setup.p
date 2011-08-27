@@ -11,45 +11,12 @@ our (
 
 	$debug,
 	$debug2,
-	$setup->{changed},
-	$setup->{audio_length},
 	$ui,
-	$config->{engine}->{jack_seek_delay},
-	$config->{engine}->{jack_seek_delay},
-
-# reconfigure_engine()
 
 	$this_track,
-	%{$config->{opts}},
-	$config->{disable_auto_reconfigure},
-	$setup->{_old_snapshot},
-	$mode->{preview},
-	$gui->{_project_name}->{name},
-	$mode->{offset_run},
-
-# status_snapshot()
-
-	$mode->{mastering},
-	$jack->{jackd_running},
-
-# find_duplicate_inputs()
-
-	$gn{Main},
-	%{$setup->{inputs_used}},
-	%{$setup->{tracks_with_duplicate_inputs}},
 	%tn,
-
-# transport_status()
-
- 	%{$setup->{cooked_record_pending}},
- 	$mode->{loop_enable},
-	$config->{press_space-to-start},
-
-# adjust_latency()
-
-	%{$fx->{params}},
+	%gn,
 	%ti,
-	$config->{sampling_freq},
 
 );	
 

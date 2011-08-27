@@ -13,23 +13,14 @@ our (
 
 [% qx(./add_persistent_vars) %]
 
-	$config->{autosave_interval},
-	%{$engine->{events}},
-	$file->{state_store},
-	$file->{effect_chain},
-	$file->{effect_profile},
-	%{$fx->{chain}},
-	%{$fx->{profile}},
 	%tn,
 	%ti,
 	%bn,
-	$text->{term},
 	$this_track,
 	$this_bus,
 	@persistent_vars,
 	$ui,
 	$VERSION,
-	%{$config->{opts}},
 	$debug, 
 	$debug2,
 	$debug3

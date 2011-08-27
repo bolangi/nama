@@ -8,16 +8,10 @@ our (
 
 [% qx(cat ./singletons.pl) %]
 
-	$gui->{_project_name}->{name},
 	$this_track,
-	%{$fx->{chain}},
-	%{$fx->{profile}},
 	$debug,
 	$debug2,
 	%tn,
-	%{$fx->{applied}},
-	%{$fx->{params}},
-	$fx->{magical_cop_id},
 );
 
 

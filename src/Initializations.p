@@ -5,26 +5,8 @@ use Modern::Perl; use Carp;
 our (
 [% qx(cat ./singletons.pl) %]
 	$ui,
-	%{$config->{opts}},
-	%{$jack->{clients}},
-	$jack->{jackd_running},
-	$config->{use_midish},
-	$gui->{_project_name}->{name},
 	$debug,
 	$debug2,
-	$config->{banner},
-	$config->{root_dir},
-	$config->{sample_rate},
-	%{$config->{devices}},
-	$jack->{fake_ports_list},
-	$config->{use_jack_plumbing},
-	@{$engine->{pids}},
-	$engine->{ecasound},
-	$file->{user_customization},
-	$engine->{socket},
-	$config->{engine}->{tcp_port},
-	$config->{hires_timer},
-
 );
 sub initialize_interfaces {
 	

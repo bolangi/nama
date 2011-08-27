@@ -5,8 +5,6 @@ our (
 [% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
-	$mode->{offset_run},
-	$setup->{offset_run}->{mark},
 	$ui,
 	%bn,
 	%tn,

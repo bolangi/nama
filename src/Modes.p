@@ -6,20 +6,9 @@ our (
 [% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
-	$mode->{preview},
-	$gn{Main},
 	%tn,
-	$mode->{mastering},
-	@{$mastering->{track_names}},
 	$ui,
 	$this_track,
-	$mastering->{fx_compressor},
-	$mastering->{fx_spatialiser},
-	$mastering->{fx_low_pass},
-	$mastering->{fx_mid_pass},
-	$mastering->{fx_high_pass},
-	$mastering->{fx_limiter},
-	$mastering->{fx_eq},
 );
 
 {

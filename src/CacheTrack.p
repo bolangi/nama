@@ -9,11 +9,8 @@ our (
 
 	$debug,
 	%bn,
-	$setup->{audio_length},
 	$ui,
 	$this_track,
-	$config->{formats}->{cache_to_disk},
-	%{$engine->{events}},
 );
 
 # some common variables for cache_track and merge_track

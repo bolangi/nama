@@ -14,13 +14,8 @@ our (
 		$debug,
 		$debug2,
 		$debug3,
-		$mode->{preview},
 		%tn,
-		$gn{Main},
-		$mode->{mastering},
-		$config->{formats}->{mix_to_disk},
-		$config->{engine}->{globals_default},
-		$config->{engine}->{globals_realtime},
+		%gn,
 );		 	
 
 package ::ChainSetup;
