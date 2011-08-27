@@ -23,10 +23,10 @@ sub setup_user_customization {
 	# convert key-value pairs to hash
 	$debug and print join "\n",@return;
 	my %custom = @return ; 
-	my $text->{prompt};
-	$text->{prompt} = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
+	my $prompt;
+	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
 	{ no warnings 'redefine';
-		*prompt = $text->{prompt} if $text->{prompt};
+		*prompt = $prompt if $prompt;
 	}
 	my @commands = keys %{ $custom{commands} };
 	for my $cmd(@commands){
@@ -243,18 +243,18 @@ sub need_vol_pan {
 	# + add_track() to determine whether a new track _will_ need vol/pan controls
 	# + add_track_gui() to determine whether an existing track needs vol/pan  
 	
-	my ($gui->{_track_name}, $type) = @_;
+	my ($track_name, $type) = @_;
 
 	# $type: vol | pan
 	
 	# Case 1: track already exists
 	
-	return 1 if $tn{$gui->{_track_name}} and $tn{$gui->{_track_name}}->$type;
+	return 1 if $tn{$track_name} and $tn{$track_name}->$type;
 
 	# Case 2: track not yet created
 
-	if( $volpan{$gui->{_track_name}} ){
-		return($volpan{$gui->{_track_name}}{$type}	? 1 : 0 )
+	if( $volpan{$track_name} ){
+		return($volpan{$track_name}{$type}	? 1 : 0 )
 	}
 	return 1;
 }
