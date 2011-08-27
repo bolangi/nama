@@ -34,19 +34,6 @@ map{ my $file = $_;
 	} @singletons
 } @target_files;
 
-=comment
-
-substitute $project->{name} for $project_name in assignment
-
-	$project->{name} = ......
-
-substitute $config->{devices} for %devices
-and use a reference to the hash instead of a hash
-
-	$config->{devices} = { hash structure }
-
-=cut
-
 sub singletons {
 	my $singletons = read_file("./singletons.pl");
 	map{ s/,//; $_ } split " ", $singletons;

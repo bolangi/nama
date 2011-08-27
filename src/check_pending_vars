@@ -1,0 +1,22 @@
+#!/usr/bin/perl -w
+use Modern::Perl;
+use File::Slurp;
+my $map_file = shift;
+my %vars = map {$_ => 1} map {/([\%\@\$]\w+)/} split "\n", qx(./strip_all ./variables.sorted.txt);
+
+my %guivars = map{ $_ => 1} map{ /([\%\@\$]\w+)/ } qx(cat ./gui_vars);
+#say keys %vars 
+
+my @lines = qx(cat $map_file);
+my %covered =   map{ $_ => 1} grep{ $_ } map{ /([\%\@\$]\w+).*?[\%\@\$]\w+/} @lines;
+my %uncovered = map{ $_ => 1} grep{ $_ } map{ /([\%\@\$]\w+)/}
+grep { ! /[\%\@\$].*?[\%\@\$]/ } @lines;
+
+#say keys %covered;
+map { say $_ } grep{ ! $covered{$_} and ! $guivars{$_} and !  $uncovered{$_} } keys %vars;
+
+
+#say keys %guivars;
+
+
+
