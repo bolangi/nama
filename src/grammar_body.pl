@@ -45,7 +45,7 @@ meta: for bunch_spec ';' namacode stopper {
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
-		$text->{parser}->meta($item{namacode});
+		$::text->{parser}->meta($item{namacode});
  		#print("$t; $item{namacode}\n");
 	}
 	1;
@@ -64,10 +64,10 @@ bunch_spec: text
 # to the parser's 'do_part' command.
 
 
-#meta: text semicolon(?) { $text->{parser}->do_part($item{text}) }
+#meta: text semicolon(?) { $::text->{parser}->do_part($item{text}) }
 meta: nosemi(s /\s*;\s*/) semicolon(?) 
 
-nosemi: text { $text->{parser}->do_part($item{text}) }
+nosemi: text { $::text->{parser}->do_part($item{text}) }
 
 text: /[^;]+/ 
 semicolon: ';'
@@ -111,7 +111,7 @@ command: user_command predicate {
 }
 command: user_alias predicate {
 	#print "alias: $item{user_alias}\n";
-	$text->{parser}->do_part("$item{user_alias} $item{predicate}"); 1
+	$::text->{parser}->do_part("$item{user_alias} $item{predicate}"); 1
 }
 user_alias: ident { 
 	#print "alias: $item{ident}\n";
@@ -186,11 +186,11 @@ end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 help_effect: _help_effect effect { ::Text::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::Text::find_effect(@{$item{"anytag(s)"}}); 1}
-help: _help 'yml' { ::pager($text->{commands_yml}); 1}
+help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::Text::help($item{anytag}) ; 1}
-help: _help { print $help->{screen} ; 1}
+help: _help { print $::help->{screen} ; 1}
 project_name: _project_name { 
-	print "project name: ", $gui->{_project_name}->{name}, $/; 1}
+	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
 create_project: _create_project project_id { 
 	::Text::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -213,11 +213,11 @@ save_state: _save_state ident { ::save_state( $item{ident}); 1}
 save_state: _save_state { ::save_state(); 1}
 get_state: _get_state statefile {
  	::load_project( 
- 		name => $gui->{_project_name}->{name},
+ 		name => $::gui->{_project_name}->{name},
  		settings => $item{statefile}
  		); 1}
 get_state: _get_state {
- 	::load_project( name => $gui->{_project_name}->{name},) ; 1}
+ 	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
 getpos: _getpos {  
 	print ::d1( ::eval_iam q(getpos) ), $/; 1}
 setpos: _setpos timevalue {
@@ -244,15 +244,15 @@ move_to_bus: _move_to_bus existing_bus_name {
 set_track: _set_track key someval {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track { ::pager($::this_track->dump); 1}
-dump_group: _dump_group { ::pager($gn{Main}->dump); 1}
+dump_group: _dump_group { ::pager($::gn{Main}->dump); 1}
 dump_all: _dump_all { ::dump_all(); 1}
 remove_track: _remove_track quiet(?) { 
  	my $quiet = scalar @{$item{'quiet(?)'}};
  	# remove track quietly if requested
- 	$::this_track->remove, return 1 if $quiet or $config->{quietly_remove_tracks};
+ 	$::this_track->remove, return 1 if $quiet or $::config->{quietly_remove_tracks};
  
  	my $name = $::this_track->name; 
- 	my $reply = $text->{term}->readline("remove track $name? [n] ");
+ 	my $reply = $::text->{term}->readline("remove track $name? [n] ");
  	if ( $reply =~ /y/i ){
  		print "Removing track. All WAV files will be kept.\n";
  		$::this_track->remove; 
@@ -345,7 +345,7 @@ nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 show_io: _show_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
-	my $output = $text->{format_top};
+	my $output = $::text->{format_top};
 	$output .= ::Text::show_tracks_section($::this_track);
 	$output .= ::Text::show_region();
 	$output .= ::Text::show_effects();
@@ -416,7 +416,7 @@ master_on: _master_on { ::master_on(); 1 }
 
 master_off: _master_off { ::master_off(); 1 }
 
-exit: _exit {   ::save_state($file->{state_store}); 
+exit: _exit {   ::save_state($::file->{state_store}); 
 					::cleanup_exit();
                     1}	
 
@@ -563,11 +563,11 @@ previous_mark: _previous_mark { ::previous_mark(); 1}
 loop_enable: _loop_enable someval(s) {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
 	#print join $/, @new_endpoints;
-	$mode->{loop_enable} = 1;
-	@{$setup->{loop_endpoints}} = (@new_endpoints, @{$setup->{loop_endpoints}}); 
-	@{$setup->{loop_endpoints}} = @{$setup->{loop_endpoints}}[0,1];
+	$::mode->{loop_enable} = 1;
+	@{$::setup->{loop_endpoints}} = (@new_endpoints, @{$::setup->{loop_endpoints}}); 
+	@{$::setup->{loop_endpoints}} = @{$::setup->{loop_endpoints}}[0,1];
 	1;}
-loop_disable: _loop_disable { $mode->{loop_enable} = 0; 1}
+loop_disable: _loop_disable { $::mode->{loop_enable} = 0; 1}
 name_mark: _name_mark ident {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks { 
 	my $i = 0;
@@ -594,7 +594,7 @@ modify_mark: _modify_mark sign value {
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
 	::eval_iam("setpos ".$::this_mark->time);
-	$setup->{changed}++;
+	$::setup->{changed}++;
 	1;
 	}
 modify_mark: _modify_mark value {
@@ -604,7 +604,7 @@ modify_mark: _modify_mark value {
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
 	::eval_iam("setpos ".$::this_mark->time);
-	$setup->{changed}++;
+	$::setup->{changed}++;
 	1;
 	}		
 remove_effect: _remove_effect op_id(s) {
@@ -767,12 +767,12 @@ fixdc: _fixdc { $::this_track->fixdc; 1}
 destroy_current_wav: _destroy_current_wav { ::destroy_current_wav(); 1 }
 memoize: _memoize { 
 	package ::Wav;
-	$config->{memoize} = 1;
+	$::config->{memoize} = 1;
 	memoize('candidates'); 1
 }
 unmemoize: _unmemoize {
 	package ::Wav;
-	$config->{memoize} = 0;
+	$::config->{memoize} = 0;
 	unmemoize('candidates'); 1
 }
 import_audio: _import_audio path frequency {
@@ -784,7 +784,7 @@ import_audio: _import_audio path {
 }
 frequency: value
 list_history: _list_history {
-	my @history = $text->{term}->GetHistory;
+	my @history = $::text->{term}->GetHistory;
 	my %seen;
 	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
 }
@@ -934,21 +934,21 @@ add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
 					duration => $item{'duration(?)'}->[0] 
-								|| $config->{engine}->{fade_default_length}, 
+								|| $::config->{engine}->{fade_default_length}, 
 					relation => 'fade_from_mark',
 					track => $::this_track->name,
 	); 
-	++$setup->{changed};
+	++$::setup->{changed};
 }
 add_fade: _add_fade in_or_out duration(?) mark1 
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
 					duration => $item{'duration(?)'}->[0] 
-								|| $config->{engine}->{fade_default_length}, 
+								|| $::config->{engine}->{fade_default_length}, 
 					track => $::this_track->name,
 					relation => 'fade_to_mark',
 	);
-	++$setup->{changed};
+	++$::setup->{changed};
 }
 add_fade: _add_fade in_or_out mark1 mark2
 { 	::Fade->new(  type => $item{in_or_out},
@@ -956,7 +956,7 @@ add_fade: _add_fade in_or_out mark1 mark2
 					mark2 => $item{mark2},
 					track => $::this_track->name,
 	);
-	++$setup->{changed};
+	++$::setup->{changed};
 }
 #add_fade: _add_fade in_or_out time1 time2 # not implemented
 in_or_out: 'in' | 'out'
@@ -966,7 +966,7 @@ mark2: markname
 remove_fade: _remove_fade fade_index(s) { 
 	my @i = @{ $item{'fade_index(s)'} };
 	::Text::remove_fade($_) for (@i);
-	$setup->{changed}++;
+	$::setup->{changed}++;
 	1
 }
 fade_index: dd 
@@ -1095,10 +1095,10 @@ read_user_customizations: _read_user_customizations {
 }
 limit_run_time: _limit_run_time sign(?) dd { 
 	my $sign = $item{'sign(?)'}->[-0];
-	$setup->{runtime_limit} = $sign
-		? eval "$setup->{audio_length} $sign $item{dd}"
+	$::setup->{runtime_limit} = $sign
+		? eval "$::setup->{audio_length} $sign $item{dd}"
 		: $item{dd};
-	print "Run time limit: ", ::heuristic_time($setup->{runtime_limit}), "\n"; 1;
+	print "Run time limit: ", ::heuristic_time($::setup->{runtime_limit}), "\n"; 1;
 }
 limit_run_time_off: _limit_run_time_off { 
 	print "Run timer disabled\n";
@@ -1119,7 +1119,7 @@ view_waveform: _view_waveform {
 		my $cmd = join " ",
 			$viewer,
 			"--driver",
-			$jack->{jackd_running} ? "jack" : "alsa",
+			$::jack->{jackd_running} ? "jack" : "alsa",
 			$::this_track->full_path,
 			"&";
 		system($cmd) 
