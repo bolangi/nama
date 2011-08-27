@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+use Modern::Perl;
+my $file = shift;
+my @lines = split "\n", qx(./strip_all $file);
+for (@lines) {
+my $test_cmd;
+if ( /([\%\$\@]\w+)\s+(\$\w+{.*})/ ){ $test_cmd = "$1 = $2" }
+if ( /([\%\$\@]\w+)\s+(\$\w+->{.*})/ ){ $test_cmd = "$1 = $2" }
+say $test_cmd;
+no strict;
+eval $test_cmd;
+say "failed: $_" if $@;
+}
+
