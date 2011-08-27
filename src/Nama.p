@@ -120,6 +120,8 @@ $| = 1;     # flush STDOUT buffer on every write
 
 our (
 
+$commands_yml,
+
 [% qx(cat ./declarations.pl) %] 
 
 [% qx(./add_vars) %]
@@ -190,16 +192,16 @@ init_memoize() if $config->{memoize};
 *ti = \%::Track::by_index;
 *gn = \%::Group::by_index;
 # $ti{3}->rw
-sub setup_grammar { 
-}
+sub setup_grammar { }
+
 	### COMMAND LINE PARSER 
 
 	$debug2 and print "Reading grammar\n";
 
 	*commands_yml = __PACKAGE__->section_data("commands_yml");
-	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
+	$commands_yml = quote_yaml_scalars($commands_yml);
 	*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
-	%{$text->{commands}} = %{ ::yaml_in( $text->{commands_yml}) };
+	%{$text->{commands}} = %{ ::yaml_in( $commands_yml) };
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;

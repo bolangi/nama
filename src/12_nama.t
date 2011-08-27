@@ -17,10 +17,9 @@ our ($expected_setup_lines);
 use Cwd;
 
 our (
-	$gn{Main},
+[% qx(cat ./singletons.pl) %]
+	%gn,
 	$this_track,
-	%{$config->{opts}},
-	$jack->{jackd_running},
 );
 
 BEGIN { use_ok('::') };
