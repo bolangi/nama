@@ -1,4 +1,9 @@
 # ---------- IO -----------
+our (
+
+[% qx(cat ./singletons.pl) %]
+
+);
 # 
 # IO objects for writing Ecasound chain setup file
 #
@@ -166,16 +171,16 @@ sub _select_output {
 	my $start = $track->adjusted_region_start_time + ::hardware_latency();
 	my $end   = $track->adjusted_region_end_time;
 	return unless ::hardware_latency() or defined $start and defined $end;
-	my $setup->{audio_length};
+	my $setup_length;
 	# CASE 1: a region is defined 
 	if ($end) { 
-		$setup->{audio_length} = $end - $start;
+		$setup_length = $end - $start;
 	}
 	# CASE 2: only hardware latency
 	else {
-		$setup->{audio_length} = $track->wav_length - $start
+		$setup_length = $track->wav_length - $start
 	}
-	join ',',"select", $start, $setup->{audio_length}
+	join ',',"select", $start, $setup_length
 }
 ###  utility subroutines
 
@@ -221,8 +226,8 @@ channel ($end) is out of bounds. $max channels maximum.\n)
 		@{$::jack{$client}{$direction}}[$start-1..$end-1];
 }
 sub default_jack_ports_list {
-	my ($gui->{_track_name}) = shift;
-	"$gui->{_track_name}.ports"
+	my ($track_name) = shift;
+	"$track_name.ports"
 }
 sub quote_jack_port {
 	my $port = shift;

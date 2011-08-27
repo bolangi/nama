@@ -1,5 +1,12 @@
 
 # ----------- Mark ------------
+
+our (
+
+[% qx(cat ./singletons.pl) %]
+
+);
+
 package ::Mark;
 our $VERSION = 1.0;
 use Carp;
@@ -145,11 +152,6 @@ our (
 	$debug2,
 	$ui,
 	$this_mark,
-	$gui->{_seek_unit},
-	$setup->{audio_length},
-	$jack->{jackd_running},
-	$config->{engine}->{jack_seek_delay},
-	$gui->{_markers_armed},
 );
 
 

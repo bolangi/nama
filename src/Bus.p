@@ -184,7 +184,7 @@ our (
 	$this_bus,
 	%tn,
 	%bn,
-	$gn{Main},
+	%gn,
 );
 
 sub set_current_bus {
