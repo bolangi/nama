@@ -28,7 +28,7 @@
 
 	$config->{root_dir} 	
 	$config->{use_group_numbering}
-	$config->{press_space-to-start}
+	$config->{press_space_to_start}
 	$config->{execute_on_project_load}
 	$config->{initial_mode}
 	$config->{autosave_interval}

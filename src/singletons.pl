@@ -13,3 +13,6 @@ $gui,
 $midi,
 $help,
 $mastering,
+$project,
+
+%gn,

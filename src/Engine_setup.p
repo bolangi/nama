@@ -289,7 +289,7 @@ sub transport_status {
 	say "\nNow at: ", current_position();
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
-		if $config->{press_space-to-start};
+		if $config->{press_space_to_start};
 }
 sub adjust_latency {
 

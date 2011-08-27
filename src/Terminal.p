@@ -26,7 +26,7 @@ sub initialize_terminal {
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
-	detect_spacebar(); # if $config->{press_space-to-start};
+	detect_spacebar(); # if $config->{press_space_to_start};
 
 	revise_prompt();
 	# handle Control-C from terminal
@@ -63,7 +63,7 @@ sub check_for_spacebar_hit {
 }
 sub detect_spacebar {
 	$engine->{events}->{stdin} = undef; # clean up after get_edit_mark()
-	check_for_spacebar_hit() if $config->{press_space-to-start};
+	check_for_spacebar_hit() if $config->{press_space_to_start};
 }
 
 sub pager {

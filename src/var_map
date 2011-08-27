@@ -147,7 +147,7 @@
 	$default						$config->{default}	
 	$project_root 	 				$config->{root_dir}
 	$use_group_numbering 			$config->{use_group_numbering}
-	$press_space_to_start_transport $config->{press_space-to-start}
+	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
 	$initial_user_mode 				$config->{initial_mode}
 	$autosave_interval 				$config->{autosave_interval}

@@ -140,7 +140,7 @@ exit;
 	1;	
 }
 sub debugging_options {
-	grep{$_} $debug, @opts{qw(R D J A E T)};
+	grep{$_} $debug, @{$config->{opts}}{qw(R D J A E T)};
 }
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);
@@ -240,7 +240,7 @@ sub eval_iam_neteci {
 	my $buf;
 	$engine->{socket}->recv($buf, 65536);
 
-	my ($return_value, $setup->{audio_length}, $type, $reply) =
+	my ($return_value, $setup_length, $type, $reply) =
 		$buf =~ /(\d+)# digits
 				 \    # space
 				 (\d+)# digits
@@ -255,7 +255,7 @@ if(	! $return_value == 256 ){
 	$debug and say "ECI command: $cmd";
 	$debug and say "Ecasound reply (256 bytes): ", substr($buf,0,256);
 	$debug and say qq(
-length: $setup->{audio_length}
+length: $setup_length
 type: $type
 full return value: $return_value);
 	die "illegal return value, stopped" ;

@@ -16,7 +16,7 @@ our (
 
 
 sub private_effect_chain_name {
-	my $name = "_$gui->{_project_name}->{name}/".$this_track->name.'_';
+	my $name = "_$project->{name}/".$this_track->name.'_';
 	my $i;
 	map{ my ($j) = /_(\d+)$/; $i = $j if $j > $i; }
 	@{ $this_track->effect_chain_stack }, 
@@ -24,8 +24,8 @@ sub private_effect_chain_name {
 	$name . ++$i
 }
 sub profile_effect_chain_name {
-	my ($profile, $gui->{_track_name}) = @_;
-	"_$profile\:$gui->{_track_name}";
+	my ($profile, $track_name) = @_;
+	"_$profile\:$track_name";
 }
 
 # too many functions in push and pop!!
