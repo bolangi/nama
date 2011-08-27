@@ -501,7 +501,7 @@ sub track_gui {
 					::reconfigure_engine();
 			}],
 		);
-	my ($number, $name, $version, $rw, $gui->{_chr}, $gui->{_chm}, $vol, $mute, $solo, $unity, $pan, $center);
+	my ($number, $name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $solo, $unity, $pan, $center);
 	$number = $gui->{track_frame}->Label(-text => $n,
 									-justify => 'left');
 	my $stub = " ";
@@ -535,7 +535,7 @@ sub track_gui {
 					);
 	}
 
-	$gui->{_chr} = $gui->{track_frame}->Menubutton(
+	$ch_r = $gui->{track_frame}->Menubutton(
 					# -relief => 'groove',
 					-tearoff => 0,
 				);
@@ -543,7 +543,7 @@ sub track_gui {
 	push @range, 1..$config->{soundcard_channels} if $n > 2; # exclude Master/Mixdown
 	
 	for my $v (@range) {
-		$gui->{_chr}->radiobutton(
+		$ch_r->radiobutton(
 			-label => $v,
 			-value => $v,
 			-command => sub { 
@@ -558,12 +558,12 @@ sub track_gui {
 	push @range, "off" if $n > 2;
 	push @range, 1..$config->{soundcard_channels} if $n != 2; # exclude Mixdown
 
-	$gui->{_chm} = $gui->{track_frame}->Menubutton(
+	$ch_m = $gui->{track_frame}->Menubutton(
 					-tearoff => 0,
 					# -relief => 'groove',
 				);
 				for my $v (@range) {
-					$gui->{_chm}->radiobutton(
+					$ch_m->radiobutton(
 						-label => $v,
 						-value => $v,
 						-command => sub { 
@@ -677,7 +677,7 @@ sub track_gui {
 	# all effects of the track
 
 	@{ $gui->{tracks}->{$n} }{qw(name version rw ch_r ch_m mute effects)} 
-		= ($name,  $version, $rw, $gui->{_chr}, $gui->{_chm}, $mute, \$effects);#a ref to the object
+		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
 	#$debug and print "=============\n$gui->{tracks}\n",yaml_out($gui->{tracks});
 	my $independent_effects_frame 
 		= ${ $gui->{tracks}->{$n}->{effects} }->Frame->pack(-fill => 'x');
@@ -718,7 +718,7 @@ sub track_gui {
 
 	map{push @add_effect, effect_button($n, shift @tags, shift @starts, shift @ends)} 1..@tags;
 	
-	$number->grid($name, $version, $rw, $gui->{_chr}, $gui->{_chm}, $vol, $mute, $unity, $pan, $center, @add_effect);
+	$number->grid($name, $version, $rw, $ch_r, $ch_m, $vol, $mute, $unity, $pan, $center, @add_effect);
 
 	$gui->{tracks_remove}->{$n} = [
 		grep{ $_ } (
@@ -726,8 +726,8 @@ sub track_gui {
 			$name, 
 			$version, 
 			$rw, 
-			$gui->{_chr}, 
-			$gui->{_chm}, 
+			$ch_r, 
+			$ch_m, 
 			$vol,
 			$mute, 
 			$unity, 
