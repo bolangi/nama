@@ -710,7 +710,7 @@ sub prepare_effect_index {
 			else { $fx_cache->{partial_label_to_full}->{$short} = $code }
 		}else{ $fx_cache->{partial_label_to_full}->{$code} = $code };
 	} keys %{$fx_cache->{full_label_to_index}};
-	#print yaml_out \%{$fx_cache->{partial_label_to_full}};
+	#print yaml_out $fx_cache->{partial_label_to_full};
 }
 sub extract_effects_data {
 	$debug2 and print "&extract_effects_data\n";
@@ -744,7 +744,7 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	$debug2 and print "&sort_ladspa_effects\n";
-#	print yaml_out(\%{$fx_cache->{split}}); 
+#	print yaml_out($fx_cache->{split}); 
 	my $aa = $fx_cache->{split}->{ladspa}{a};
 	my $zz = $fx_cache->{split}->{ladspa}{z};
 #	print "start: $aa end $zz\n";
@@ -871,7 +871,7 @@ sub read_in_effects_data {
 		 $debug and print "i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}\n";
 	}
 
-	$debug and print "\@{$fx_cache->{registry}}\n======\n", yaml_out(\@{$fx_cache->{registry}}); ; 
+	$debug and print "$fx_cache->{registry}\n======\n", yaml_out($fx_cache->{registry}); ; 
 }
 
 sub integrate_cop_hints {
@@ -969,7 +969,7 @@ sub get_ladspa_hints{
 		#last if ++$i > 10;
 	}
 
-	$debug and print yaml_out(\%{$fx_cache->{ladspa}}); 
+	$debug and print yaml_out($fx_cache->{ladspa}); 
 }
 
 sub srate_val {
@@ -1045,7 +1045,7 @@ $debug and print join "\n", sort keys %{$fx_cache->{ladspa}};
 $debug and print '-' x 60, "\n";
 $debug and print join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}};
 
-#print yaml_out \@{$fx_cache->{registry}}; exit;
+#print yaml_out $fx_cache->{registry}; exit;
 
 }
 
