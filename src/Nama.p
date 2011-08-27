@@ -33,7 +33,7 @@ no warnings qw(uninitialized syntax);
 use autodie qw(:default);
 use Carp;
 use Cwd;
-use Data::Section -setup;
+use Data::Section::Simple qw(get_data_section);
 use File::Find::Rule;
 use File::Path;
 use File::Spec;
@@ -120,8 +120,6 @@ $| = 1;     # flush STDOUT buffer on every write
 
 our (
 
-$commands_yml,
-
 [% qx(cat ./declarations.pl) %] 
 
 [% qx(./add_vars) %]
@@ -198,10 +196,10 @@ sub setup_grammar { }
 
 	$debug2 and print "Reading grammar\n";
 
-	*commands_yml = __PACKAGE__->section_data("commands_yml");
-	$commands_yml = quote_yaml_scalars($commands_yml);
-	*cop_hints_yml = __PACKAGE__->section_data("chain_op_hints_yml");
-	%{$text->{commands}} = %{ ::yaml_in( $commands_yml) };
+	$text->{commands_yml} = get_section_data("commands_yml");
+	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml)};
+	$fx->{ecasound_effect_hints} = get_section_data("chain_op_hints_yml");
+	$text->{commands} = ::yaml_in( $text->{commands_yml}) ;
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;
@@ -209,7 +207,7 @@ sub setup_grammar { }
 	$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
 	$::RD_HINT   = 1; # Give out hints to help fix problems.
 
-	*grammar = __PACKAGE__->section_data("grammar");
+	$text->{grammar} = get_data_section('grammar);
 
 	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
 
@@ -217,24 +215,27 @@ sub setup_grammar { }
 
 	# we use the following settings if we can't find config files
 
-	*default = __PACKAGE__->section_data("default_namarc");
+	$config->{default} = get_section_data("default_namarc");
+
+	use Data::Dumper;
+	print Dumper $config;
 
 	# default user customization file custom.pl - see EOF
 	
-	*custom_pl = __PACKAGE__->section_data("custom_pl");
+	$config->{custom_pl} = get_section_data("custom_pl");
 
 	# default colors
 
-	*default_palette_yml = __PACKAGE__->section_data("default_palette_yml");
+	$config->{gui_default_palette_yml} = get_section_data("default_palette_yml");
 
 	# JACK environment for testing
 
-	*fake_jack_lsp = __PACKAGE__->section_data("fake_jack_lsp");
+	$config->{jack_fake_ports_list} = get_section_data("fake_jack_lsp");
 
 	# Midish command keywords
 	
-	%{$midi->{keywords}} = map{ $_, 1} split " ", 
-		${ __PACKAGE__->section_data("midish_commands") };
+	%{$midi->{keywords}} = 
+			map{ $_, 1} split " ", get_section_data("midish_commands");
 
 	# print remove_spaces("bulwinkle is a...");
 
@@ -257,24 +258,23 @@ package ::;  # for Data::Section
 
 1;
 __DATA__
-__[commands_yml]__
+@@ commands_yml
 [% qx(./strip_all ./commands.yml ) %]
-__[grammar]__
+@@ grammar
 [% qx(./strip_all  ./grammar_body.pl) %]
 [% qx(./emit_command_headers headers) %]
-__[chain_op_hints_yml]__
+@@ chain_op_hints_yml
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
-__[default_namarc]__
+@@ default_namarc
 [% qx(cat ./namarc) %]
-__[custom_pl]__
+@@ custom.pl
 [% qx(cat ./custom.pl) %]
-__[default_palette_yml]__
+@@ default_palette_yml
 [% qx(cat ./palette.yml) %]
-__[fake_jack_lsp]__
+@@ fake_jack_lsp
 [% qx(cat ./fake_jack_lsp) %]
-__[midish_commands]__
+@@ midish_commands
 [% qx(cat ./midish_commands) %]
-__[end_data_section]__
 __END__
 
 =head1 NAME
