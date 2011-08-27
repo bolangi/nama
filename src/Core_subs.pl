@@ -12,12 +12,12 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
-	my $file = user_customization_file();
-	return unless -r $file;
-	say "reading user customization file $file->{user_customization}";
+	my $filename= user_customization_file();
+	return unless -r $filename;
+	say "reading user customization file $filename";
 	my @return;
-	unless (@return = do $file) {
-		say "couldn't parse $file: $@\n" if $@;
+	unless (@return = do $filename) {
+		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
 	# convert key-value pairs to hash

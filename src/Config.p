@@ -63,8 +63,10 @@ sub read_config {
 	
 	$debug2 and print "&read_config\n";
 	
-	my $config = shift;
-	my $yml = length $config > 100 ? $config : $config->{default};
+	my $config_name_or_contents = shift;
+	my $yml = length $config_name_or_contents > 100
+		?  $config_name_or_contents
+		:  $config->{default};
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
 	*subst = \%{ $cfg{abbreviations} }; # alias
