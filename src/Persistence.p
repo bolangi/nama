@@ -386,12 +386,12 @@ sub restore_state {
 		
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
-	my $gn{Main} = $bn{Main};
+	my $main = $bn{Main};
 
 	# bus should know its mix track
 	
-	$gn{Main}->set( send_type => 'track', send_id => 'Master')
-		unless $gn{Main}->send_type;
+	$main->set( send_type => 'track', send_id => 'Master')
+		unless $main->send_type;
 
 	# restore user tracks
 	
@@ -449,7 +449,7 @@ sub restore_state {
 	} @tracks_data;
 
 
-	#print "\n---\n", $gn{Main}->dump;  
+	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
 	$debug and print join " ", 

@@ -1,8 +1,9 @@
 # ------ Memoize subroutines ------
-
+our (
+[% qx(cat ./singletons.pl) %]
+);
 package ::;
 use Modern::Perl;
-our ( $config->{memoize} );
 
 BEGIN { # OPTMIZATION
 my @wav_functions = qw(
