@@ -145,41 +145,56 @@ $debug = 0; # debug statements
 # other initializations
 
 $gui->{_seek_unit} = 1;
-$file->{effects_cache} = '.effects_cache';
-$file->{gui_palette} = 'palette.yml';
-$file->{state_store} = 'State.yml';
-$file->{effect_chain} = 'effect_chains.yml';
-$file->{effect_profile} = 'effect_profiles.yml';
-$file->{chain_setup} = 'Setup.ecs'; # For loading by Ecasound
+
+$file = {
+			effects_cache 		=> '.effects_cache',
+			gui_palette 		=> 'palette.yml',
+			state_store 		=> 'State.yml',
+			effect_chain 		=> 'effect_chains.yml',
+			effect_profile 		=> 'effect_profiles.yml',
+			chain_setup 		=> 'Setup.ecs',
+			user_customization 	=> "custom.pl",
+};
+
 $prompt = "nama ('h' for help)> ";
 $gui->{_save_id} = "State";
-$file->{user_customization} = "custom.pl";
-$config->{root_dir} = join_path( $ENV{HOME}, "nama");
-$config->{soundcard_channels} = 10;
-$config->{sync_mixdown_and_monitor_version_numbers} = 1; # not implemented yet
-$config->{engine}->{jack_seek_delay} = 0.1; # seconds
 
-$config->{use_pager} = 1;
-$config->{use_placeholders} = 1;
-$config->{memoize} = 1;
-$config->{volume_control_operator} = 'ea'; # default to linear scale
-$config->{engine}->{fade_length_on_start_stop} = 0.3; # when starting/stopping transport
-$config->{engine}->{fade_default_length} = 0.5; # for fade-in, fade-out
-$config->{edit}->{playback_past_last_mark} = 3;
-$config->{edit}->{crossfade_time} = 0.03; # 
-$setup->{_old_snapshot} = {};
+$config = {
+	root_dir 					=> join_path( $ENV{HOME}, "nama"),
+	soundcard_channels 			=> 10,
+	memoize 					=> 1,
+	use_pager 					=> 1,
+	use_placeholders 			=> 1,
+	volume_control_operator 	=> 'ea', # default to linear scale
+	sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
+};
+$config->{engine} = {
+	fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
+	fade_default_length 		=> 0.5, # for fade-in, fade-out
+	jack_seek_delay 			=> 0.1, # seconds
+};
+$config->{edit} = {
+	playback_past_last_mark 	=> 3,
+	crossfade_time 				=> 0.03,
+};
+
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
-%{$fx->{mute_level}} 	= (ea => 0, 	eadb => -96); 
-%{$fx->{fade_out_level}} = (ea => 0, 	eadb => -40);
-%{$fx->{unity_level}} 	= (ea => 100, 	eadb => 0); 
-$fx->{fade_resolution} = 200; # steps per second
+$fx = {
+	mute_level 					=> {ea => 0, 	eadb => -96}, 
+	fade_out_level 				=> {ea => 0, 	eadb => -40},
+	unity_level 				=> {ea => 100, 	eadb => 0}, 
+	fade_resolution 			=> 200, # steps per second
+};
 $::Fade::fade_down_fraction = 0.75;
 $::Fade::fade_time1_fraction = 0.9;
 $::Fade::fade_time2_fraction = 0.1;
 $::Fade::fader_op = 'ea';
 
-@{$mastering->{track_names}} = qw(Eq Low Mid High Boost);
+$setup->{_old_snapshot} = {};
+
+$mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
+
 $mode->{mastering} = 0;
 
 init_memoize() if $config->{memoize};
