@@ -76,6 +76,8 @@ sub assign {
 ASSIGN
 	#$debug and print yaml_out($ref);
 
+	# index what sigil an identifier should get
+	
 	my %sigil;
 	map{ 
 		my ($s, $identifier) = /(.)([\w:]+)/;
@@ -91,7 +93,7 @@ ASSIGN
 		my $key = $_;
 		chomp $key;
 		my $full_class_path = 
-			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
+ 			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
 
 			# use the supplied class unless the variable name
 			# contains \:\:
@@ -106,6 +108,14 @@ ASSIGN
 			"didn't find a match for $key in ", join " ", @vars, $/;
 		} else {
 			my ($sigil, $identifier) = ($sigil{$key}, $key);
+
+			#### search for variable renaming map
+			my $from = "$sigil$identifier";
+
+			if ($h{var_map} and my $new_var = $h{var_map}->{$from} )
+			{
+				$full_class_path = $new_var;
+			}
 			$eval .= $full_class_path;
 			$eval .= q( = );
 
@@ -154,7 +164,7 @@ sub assign_vars {
 	my @vars = @{ $h{vars} };
 	my $class = $h{class};
 	my $format = $h{format};
-	# assigns vars in @var_list to values from $source
+	# assigns vars in @vars to values from $source
 	# $source can be a :
 	#      - filename or
 	#      - string containing YAML data
@@ -175,6 +185,10 @@ sub assign_vars {
 				$debug and print "found a perl file: $source\n";
 				my $code = read_file($source);
 				$ref = eval $code or carp "$source: eval failed: $@\n";
+		} elsif ( $source =~ /\.json$/i ){
+				$debug and print "found a JSON file: $source\n";
+				my $json = read_file($source);
+				$ref = decode_json($json);
 		} else {
 				$debug and print "assuming Storable file: $source\n";
 				$ref = retrieve($source) # Storable
@@ -192,6 +206,7 @@ sub assign_vars {
 
 	assign(data => $ref, 
 			vars => \@vars, 
+			var_map => $h{var_map},
 			class => $class);
 	1;	
 
