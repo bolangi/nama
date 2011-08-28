@@ -144,7 +144,6 @@ $debug = 0; # debug statements
 
 # other initializations
 
-$gui->{_seek_unit} = 1;
 
 $file = {
 			effects_cache 		=> '.effects_cache',
@@ -156,8 +155,8 @@ $file = {
 			user_customization 	=> "custom.pl",
 };
 
-$prompt = "nama ('h' for help)> ";
 $gui->{_save_id} = "State";
+$gui->{_seek_unit} = 1;
 
 $config = {
 	root_dir 					=> join_path( $ENV{HOME}, "nama"),
@@ -178,8 +177,11 @@ $config->{edit} = {
 	crossfade_time 				=> 0.03,
 };
 
+$prompt = "nama ('h' for help)> ";
+
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
+
 $fx = {
 	mute_level 					=> {ea => 0, 	eadb => -96}, 
 	fade_out_level 				=> {ea => 0, 	eadb => -40},
@@ -233,9 +235,6 @@ sub setup_grammar { }
 
 	$config->{default} = get_data_section("default_namarc");
 
-	use Data::Dumper;
-	print Dumper $config;
-
 	# default user customization file custom.pl - see EOF
 	
 	$config->{custom_pl} = get_data_section("custom_pl");
@@ -250,8 +249,10 @@ sub setup_grammar { }
 
 	# Midish command keywords
 	
-	%{$midi->{keywords}} = 
-			map{ $_, 1} split " ", get_data_section("midish_commands");
+	$midi->{keywords} = 
+	{
+			map{ $_, 1} split " ", get_data_section("midish_commands")
+	};
 
 	# print remove_spaces("bulwinkle is a...");
 
