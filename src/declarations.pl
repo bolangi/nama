@@ -36,6 +36,7 @@
 # 	$text->{previous_cmd}, # to check for repetition
 # 	@{$text->{keywords}},      # for autocompletion
 #     $text->{prompt},
+$prompt,
 # 	$text->{term_attribs},       # Term::Readline::Gnu object
 # 	$text->{format_top},    # show_tracks listing
 # 	$text->{format_divider},

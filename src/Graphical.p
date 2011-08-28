@@ -13,6 +13,7 @@ our (
 	%tn,
 	%bn,
 	%gn,
+	$prompt,
 	
 	%nama_palette,
 );
@@ -35,7 +36,7 @@ sub loop {
 	$text->{term_attribs}->{already_prompted} = 0;
 	$text->{term}->tkRunning(1);
   	while (1) {
-  		my ($user_input) = $text->{term}->readline($text->{prompt}) ;
+  		my ($user_input) = $text->{term}->readline($prompt) ;
   		::process_line( $user_input );
   	}
 }

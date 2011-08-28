@@ -25,9 +25,7 @@ sub setup_user_customization {
 	my %custom = @return ; 
 	my $prompt;
 	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
-	{ no warnings 'redefine';
-		*prompt = $prompt if $prompt;
-	}
+	*prompt = $prompt if $prompt;
 	my @commands = keys %{ $custom{commands} };
 	for my $cmd(@commands){
 		my $coderef = gen_coderef($cmd,$custom{commands}{$cmd}) or next;
