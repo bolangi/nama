@@ -151,28 +151,29 @@ $file->{state_store} = 'State.yml';
 $file->{effect_chain} = 'effect_chains.yml';
 $file->{effect_profile} = 'effect_profiles.yml';
 $file->{chain_setup} = 'Setup.ecs'; # For loading by Ecasound
-$config->{soundcard_channels} = 10;
-$config->{sync_mixdown_and_monitor_version_numbers} = 1; # not implemented yet
-$config->{root_dir} = join_path( $ENV{HOME}, "nama");
-$config->{engine}->{jack_seek_delay} = 0.1; # seconds
 $prompt = "nama ('h' for help)> ";
-$config->{use_pager} = 1;
-$config->{use_placeholders} = 1;
 $gui->{_save_id} = "State";
 $file->{user_customization} = "custom.pl";
+$config->{root_dir} = join_path( $ENV{HOME}, "nama");
+$config->{soundcard_channels} = 10;
+$config->{sync_mixdown_and_monitor_version_numbers} = 1; # not implemented yet
+$config->{engine}->{jack_seek_delay} = 0.1; # seconds
+
+$config->{use_pager} = 1;
+$config->{use_placeholders} = 1;
+$config->{memoize} = 1;
+$config->{volume_control_operator} = 'ea'; # default to linear scale
 $config->{engine}->{fade_length_on_start_stop} = 0.3; # when starting/stopping transport
+$config->{engine}->{fade_default_length} = 0.5; # for fade-in, fade-out
+$config->{edit}->{playback_past_last_mark} = 3;
+$config->{edit}->{crossfade_time} = 0.03; # 
 $setup->{_old_snapshot} = {};
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
-$config->{memoize} = 1;
-$config->{volume_control_operator} = 'ea'; # default to linear scale
 %{$fx->{mute_level}} 	= (ea => 0, 	eadb => -96); 
 %{$fx->{fade_out_level}} = (ea => 0, 	eadb => -40);
 %{$fx->{unity_level}} 	= (ea => 100, 	eadb => 0); 
 $fx->{fade_resolution} = 200; # steps per second
-$config->{engine}->{fade_default_length} = 0.5; # for fade-in, fade-out
-$config->{edit}->{playback_past_last_mark} = 3;
-$config->{edit}->{crossfade_time} = 0.03; # 
 $::Fade::fade_down_fraction = 0.75;
 $::Fade::fade_time1_fraction = 0.9;
 $::Fade::fade_time2_fraction = 0.1;
