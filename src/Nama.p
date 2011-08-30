@@ -144,6 +144,7 @@ $debug = 0; # debug statements
 
 # other initializations
 
+#$engine->{events} = {};
 
 $file = {
 			effects_cache 		=> '.effects_cache',

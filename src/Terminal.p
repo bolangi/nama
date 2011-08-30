@@ -63,7 +63,7 @@ sub check_for_spacebar_hit {
 }
 sub detect_spacebar {
 	$engine->{events}->{stdin} = undef; # clean up after get_edit_mark()
-	check_for_spacebar_hit() if $config->{press_space_to_start};
+	check_for_spacebar_hit() # if $config->{press_space_to_start};
 }
 
 sub pager {
