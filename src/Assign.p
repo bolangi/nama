@@ -1,4 +1,5 @@
 package ::Assign;
+use Modern::Perl;
 our $VERSION = 1.0;
 use 5.008;
 use feature 'state';
@@ -78,31 +79,49 @@ ASSIGN
 
 	# index what sigil an identifier should get
 	
+
+	# autosave_interval  | $autosave_interval | $config->{autosave_interval}
+
+	# $autosave_interval = ....
+    # $config->autosave_interval = ....
+	
+	# we need to create search-and-replace strings
 	my %sigil;
-	map{ 
-		my ($s, $identifier) = /(.)([\w:]+)/;
-		$sigil{$identifier} = $s;
+	my %ident;
+	map { 
+		my $oldvar = my $var = $_;
+		my ($dummy, $old_identifier) = /^([\$\%\@])([\w-:\[\]{}]+)$/;
+		$var = $h{var_map}->{$var} if $h{var_map} and $h{var_map}->{$var};
+		say "oldvar: $oldvar, newvar: $var";
+		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
+			$sigil{$old_identifier} = $sigil;
+			$ident{$old_identifier} = $identifier;
 	} @vars;
-	#print yaml_out(\%sigil); exit;
+
+	print "SIGIL\n", yaml_out(\%sigil);
+	print "IDENT\n", yaml_out(\%ident);
+	die "near";
+
+	
 	#print join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
-	my @keys =  keys %{ $ref };
+	my @keys =  keys %{ $ref }; # identifiers, *no* sigils
 	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
 	map{  
 		my $eval;
 		my $key = $_;
 		chomp $key;
 		my $full_class_path = 
- 			$sigil{$key} . ($key =~/:\:/ ? '': $class) . $key;
+ 			$sigil{$key} . ($key =~/:\:/ ? '': $class) .  $ident{$key};
 
 			# use the supplied class unless the variable name
 			# contains \:\:
 			
-# 		$debug and print <<DEBUG;
-# key:             $key
-# full_class_path: $full_class_path
-# sigil{key}:      $sigil{$key}
-# DEBUG
+		$debug and print <<DEBUG;
+key:             $key
+sigil{key}:      $sigil{$key}
+full_class_path: $full_class_path
+DEBUG
 		if ( ! $sigil{$key} ){
 			$debug and carp 
 			"didn't find a match for $key in ", join " ", @vars, $/;
@@ -111,6 +130,8 @@ ASSIGN
 
 			#### search for variable renaming map
 			my $from = "$sigil$identifier";
+			say "from: $from"; # e.g. $autosave_interval
+			say yaml_out($h{var_map});
 
 			if ($h{var_map} and my $new_var = $h{var_map}->{$from} )
 			{
