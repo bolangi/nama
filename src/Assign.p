@@ -136,7 +136,8 @@ DEBUG
 
 			my $val = $ref->{$key};
 
-			if ($sigil eq '$') { # scalar assignment
+			if (! ref $val or ref $val eq 'SCALAR')  # scalar assignment
+			{
 
 				# extract value
 
@@ -154,16 +155,15 @@ DEBUG
 
 				$eval .=  $val;  # append to assignment
 
-			} else { # array, hash assignment
+			} 
+			elsif ( ref $val eq 'ARRAY' or ref $val eq 'HASH')
+			{ 
+				
 					
-				die "attempted array or hash assignment is not supported";
 
-				$eval .= qq($sigil\{);
-				$eval .= q($ref->{ );
-				$eval .= qq("$key");
-				$eval .= q( } );
-				$eval .= q( } );
+				$eval .= q($val) ;
 			}
+			else { die "unsupported assignment: ".ref $val }
 			$debug and print $eval, $/; 
 			eval($eval);
 			$debug and $@ and carp "failed to eval $eval: $@\n";

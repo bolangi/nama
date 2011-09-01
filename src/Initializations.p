@@ -41,9 +41,10 @@ sub initialize_interfaces {
 
 
 	read_config(global_config());  # from .namarc if we have one
-	say "#### Config file ####";
 
-	say yaml_out($config); die "arghee";
+	$debug and say "#### Config file ####";
+	$debug and say yaml_out($config); 
+	
 	setup_user_customization();	
 
 	start_ecasound();
