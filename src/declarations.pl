@@ -183,8 +183,8 @@ $prompt,
 # 	$setup->{offset_run}->{mark},
 
 # 	@{$setup->{edit_points}}, 
-# 	$config->{edit}->{playback_past_last_mark}, # play a little more after edit recording finishes
-# 	$config->{edit}->{crossfade_time},
+# 	$config->{edit_playback_past_last_mark}, # play a little more after edit recording finishes
+# 	$config->{edit_crossfade_time},
 
 # category: Graphical UI, GUI
 

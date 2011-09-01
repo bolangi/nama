@@ -171,7 +171,7 @@ sub rec_end_time {
 }
 sub play_end_time {
 	my $self = shift;
-	$self->marktime('rec_end_name') + $config->{edit}->{playback_past_last_mark}
+	$self->marktime('rec_end_name') + $config->{edit_playback_past_last_mark}
 }
 
 sub marktime { 
@@ -509,13 +509,13 @@ sub host_fades {
 	my ($first,$second) = @_;
 	::Fade->new(  type => $first,
 					mark1 => $this_edit->rec_start_name,
-					duration => $config->{edit}->{crossfade_time},
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
 	::Fade->new(  type => $second,
 					mark1 => $this_edit->rec_end_name,
-					duration => $config->{edit}->{crossfade_time},
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
@@ -523,13 +523,13 @@ sub host_fades {
 sub edit_fades {
 	::Fade->new(  type => 'in',
 					mark1 => $this_edit->rec_start_name,
-					duration => $config->{edit}->{crossfade_time},
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->edit_name,
 	), 
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->rec_end_name,
-					duration => $config->{edit}->{crossfade_time},
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->edit_name,
 	); 
