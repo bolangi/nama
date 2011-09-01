@@ -70,9 +70,9 @@ $prompt,
 # 	$engine->{ecasound},				# the name of the variable holding
 					# the Ecasound engine object.
 # 	$setup->{runtime_limit},		# engine processing time limit (none if undef)
-# 	$config->{engine}->{jack_seek_delay},    # delay to allow engine to seek 
+# 	$config->{engine_jack_seek_delay},    # delay to allow engine to seek 
 					# under JACK before restart
-# 	$config->{engine}->{fade_length_on_start_stop}, 	# duration for fadein(), fadeout()
+# 	$config->{engine_fade_length_on_start_stop}, 	# duration for fadein(), fadeout()
 
 # category: MIDI
 					
@@ -140,7 +140,7 @@ $prompt,
 # 	$fx->{fade_resolution}, # steps per second
 # 	%{$fx->{unity_level}},	# 100 for ea, 0 for eadb
 	
-# 	$config->{engine}->{fade_default_length}, 
+# 	$config->{engine_fade_default_length}, 
 
 # category: external resources (ALSA, JACK, etc.)
 
@@ -278,14 +278,14 @@ $prompt,
 
 	# transport controls
 	
-# 	$gui->{engine}->{label},
-# 	$gui->{engine}->{arm},
+# 	$gui->{engine_label},
+# 	$gui->{engine_arm},
 	$transport_setup, # unused
 	$transport_connect, # unused
-# 	$gui->{engine}->{disconnect},
+# 	$gui->{engine_disconnect},
 	$transport_new,
-# 	$gui->{engine}->{start},
-# 	$gui->{engine}->{stop},
+# 	$gui->{engine_start},
+# 	$gui->{engine_stop},
 
 # 	$gui->{_old_bg}, # initial background color.
 # 	$gui->{_old_abg}, # initial active background color

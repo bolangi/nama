@@ -934,7 +934,7 @@ add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
 					duration => $item{'duration(?)'}->[0] 
-								|| $::config->{engine}->{fade_default_length}, 
+								|| $::config->{engine_fade_default_length}, 
 					relation => 'fade_from_mark',
 					track => $::this_track->name,
 	); 
@@ -944,7 +944,7 @@ add_fade: _add_fade in_or_out duration(?) mark1
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
 					duration => $item{'duration(?)'}->[0] 
-								|| $::config->{engine}->{fade_default_length}, 
+								|| $::config->{engine_fade_default_length}, 
 					track => $::this_track->name,
 					relation => 'fade_to_mark',
 	);

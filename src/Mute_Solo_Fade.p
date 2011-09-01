@@ -49,13 +49,13 @@ sub fade {
 sub fadein {
 	my ($id, $to) = @_;
 	my $from  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
-	fade( $id, 0, $from, $to, $config->{engine}->{fade_length_on_start_stop});
+	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop});
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	$fx->{params}->{$id}[0];
 	my $to	  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
-	fade( $id, 0, $from, $to, $config->{engine}->{fade_length_on_start_stop} );
+	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop} );
 }
 
 sub solo {

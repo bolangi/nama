@@ -164,8 +164,8 @@ sub select_ecasound_interface {
 	} else { 
 
 		no warnings qw(redefine);
-		launch_ecasound_server($config->{engine}->{tcp_port});
-		init_ecasound_socket($config->{engine}->{tcp_port}); 
+		launch_ecasound_server($config->{engine_tcp_port});
+		init_ecasound_socket($config->{engine_tcp_port}); 
 		*eval_iam = \&eval_iam_neteci;
 	}
 }

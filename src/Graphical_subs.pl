@@ -204,19 +204,19 @@ sub transport_gui {
 	my $ui = shift;
 	$debug2 and print "&transport_gui\n";
 
-	$gui->{engine}->{label} = $gui->{transport_frame}->Label(
+	$gui->{engine_label} = $gui->{transport_frame}->Label(
 		-text => 'TRANSPORT',
 		-width => 12,
 		)->pack(-side => 'left');;
-	$gui->{engine}->{start} = $gui->{transport_frame}->Button->pack(-side => 'left');
-	$gui->{engine}->{stop} = $gui->{transport_frame}->Button->pack(-side => 'left');
+	$gui->{engine_start} = $gui->{transport_frame}->Button->pack(-side => 'left');
+	$gui->{engine_stop} = $gui->{transport_frame}->Button->pack(-side => 'left');
 
-	$gui->{engine}->{stop}->configure(-text => "Stop",
+	$gui->{engine_stop}->configure(-text => "Stop",
 	-command => sub { 
 					stop_transport();
 				}
 		);
-	$gui->{engine}->{start}->configure(
+	$gui->{engine_start}->configure(
 		-text => "Start",
 		-command => sub { 
 		return if transport_running();

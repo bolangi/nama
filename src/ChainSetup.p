@@ -502,13 +502,13 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $config->{engine}->{globals_default};
+	my $globals = $config->{engine_globals_default};
 
 	# use realtime globals if they exist and we are
 	# recording to a non-mixdown file
 	
-	$globals = $config->{engine}->{globals_realtime}
-		if $config->{engine}->{globals_realtime} 
+	$globals = $config->{engine_globals_realtime}
+		if $config->{engine_globals_realtime} 
 			and grep{ ! /Mixdown/} really_recording();
 			# we assume there exists latency-sensitive monitor output 
 			# when recording

@@ -255,7 +255,7 @@ sub connect_transport {
 	sleeper(0.2); # time for ecasound engine to launch
 	{ # set delay for seeking under JACK
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$config->{engine}->{jack_seek_delay} = $config->{engine}->{jack_seek_delay} || 0.1 + 0.1 * $track_count / 20;
+	$config->{engine_jack_seek_delay} = $config->{engine_jack_seek_delay} || 0.1 + 0.1 * $track_count / 20;
 	}
 	connect_jack_ports_list();
 	transport_status() unless $quiet;

@@ -260,7 +260,7 @@ sub engine_stop_seek_start {
 	my $coderef = shift;
 	eval_iam('stop');
 	$coderef->();
-	sleeper($config->{engine}->{jack_seek_delay});
+	sleeper($config->{engine_jack_seek_delay});
 	eval_iam('start');
 }
 
