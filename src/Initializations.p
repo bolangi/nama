@@ -42,11 +42,8 @@ sub initialize_interfaces {
 
 	read_config(global_config());  # from .namarc if we have one
 	say "#### Config file ####";
-	my @tags = map{ s/^[\$\%\@]//; $_ } @::config_vars;	
-	map { say $_, ": ", ref $config->{$_} 
-							? yaml_out $config->{$_} 
-							: $config->{$_} 
-	} @tags;
+
+	say yaml_out($config); die "arghee";
 	setup_user_customization();	
 
 	start_ecasound();

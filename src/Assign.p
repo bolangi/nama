@@ -52,6 +52,7 @@ use Carp;
 sub assign {
 	
 	$debug2 and print "&assign\n";
+	local $debug = 1;
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
@@ -86,11 +87,12 @@ ASSIGN
     # $config->autosave_interval = ....
 	
 	# we need to create search-and-replace strings
+	# sigil-less old_identifier
 	my %sigil;
 	my %ident;
 	map { 
 		my $oldvar = my $var = $_;
-		my ($dummy, $old_identifier) = /^([\$\%\@])([\w-:\[\]{}]+)$/;
+		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\w:\[\]{}]+)$/;
 		$var = $h{var_map}->{$var} if $h{var_map} and $h{var_map}->{$var};
 		say "oldvar: $oldvar, newvar: $var";
 		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
@@ -100,7 +102,6 @@ ASSIGN
 
 	print "SIGIL\n", yaml_out(\%sigil);
 	print "IDENT\n", yaml_out(\%ident);
-	die "near";
 
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
@@ -111,36 +112,29 @@ ASSIGN
 		my $eval;
 		my $key = $_;
 		chomp $key;
+		my $sigil = $sigil{$key};
 		my $full_class_path = 
- 			$sigil{$key} . ($key =~/:\:/ ? '': $class) .  $ident{$key};
+ 			$sigil . ($key =~/:\:/ ? '': $class) .  $ident{$key};
 
 			# use the supplied class unless the variable name
 			# contains \:\:
 			
 		$debug and print <<DEBUG;
 key:             $key
-sigil{key}:      $sigil{$key}
+sigil:      $sigil
 full_class_path: $full_class_path
 DEBUG
-		if ( ! $sigil{$key} ){
+		if ( ! $sigil ){
 			$debug and carp 
 			"didn't find a match for $key in ", join " ", @vars, $/;
-		} else {
-			my ($sigil, $identifier) = ($sigil{$key}, $key);
+		} 
+		else 
+		{
 
-			#### search for variable renaming map
-			my $from = "$sigil$identifier";
-			say "from: $from"; # e.g. $autosave_interval
-			say yaml_out($h{var_map});
-
-			if ($h{var_map} and my $new_var = $h{var_map}->{$from} )
-			{
-				$full_class_path = $new_var;
-			}
 			$eval .= $full_class_path;
 			$eval .= q( = );
 
-			my $val = $ref->{$identifier};
+			my $val = $ref->{$key};
 
 			if ($sigil eq '$') { # scalar assignment
 
@@ -162,10 +156,11 @@ DEBUG
 
 			} else { # array, hash assignment
 					
+				die "attempted array or hash assignment is not supported";
 
 				$eval .= qq($sigil\{);
 				$eval .= q($ref->{ );
-				$eval .= qq("$identifier");
+				$eval .= qq("$key");
 				$eval .= q( } );
 				$eval .= q( } );
 			}
