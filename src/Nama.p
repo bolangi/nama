@@ -170,7 +170,7 @@ $config = {
 	engine_fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
 	engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 	enginejack_seek_delay 			=> 0.1, # seconds
-	edit_playback_past_last_mark 	=> 3,
+	edit_playback_end_margin 	=> 3,
 	edit_crossfade_time 				=> 0.03,
 };
 

@@ -171,7 +171,7 @@ sub rec_end_time {
 }
 sub play_end_time {
 	my $self = shift;
-	$self->marktime('rec_end_name') + $config->{edit_playback_past_last_mark}
+	$self->marktime('rec_end_name') + $config->{edit_playback_end_margin}
 }
 
 sub marktime { 
