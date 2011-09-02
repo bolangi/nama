@@ -160,22 +160,18 @@ $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
 
 $config = {
-	root_dir 					=> join_path( $ENV{HOME}, "nama"),
-	soundcard_channels 			=> 10,
-	memoize 					=> 1,
-	use_pager 					=> 1,
-	use_placeholders 			=> 1,
-	volume_control_operator 	=> 'ea', # default to linear scale
+	root_dir 						=> join_path( $ENV{HOME}, "nama"),
+	soundcard_channels 				=> 10,
+	memoize 						=> 1,
+	use_pager 						=> 1,
+	use_placeholders 				=> 1,
+	volume_control_operator 		=> 'ea', # default to linear scale
 	sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
-};
-$config->{engine} = {
-	fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
-	fade_default_length 		=> 0.5, # for fade-in, fade-out
-	jack_seek_delay 			=> 0.1, # seconds
-};
-$config->{edit} = {
-	playback_past_last_mark 	=> 3,
-	crossfade_time 				=> 0.03,
+	engine_fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
+	engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
+	enginejack_seek_delay 			=> 0.1, # seconds
+	edit_playback_past_last_mark 	=> 3,
+	edit_crossfade_time 				=> 0.03,
 };
 
 $prompt = "nama ('h' for help)> ";
@@ -246,7 +242,7 @@ sub setup_grammar { }
 
 	# JACK environment for testing
 
-	$config->{jack_fake_ports_list} = get_data_section("fake_jack_lsp");
+	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
 
 	# Midish command keywords
 	
