@@ -14,5 +14,3 @@ $midi,
 $help,
 $mastering,
 $project,
-
-%gn,

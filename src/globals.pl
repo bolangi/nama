@@ -1,0 +1,12 @@
+$this_track,
+$this_bus,
+$this_op,
+$this_param,
+%tn,
+%ti
+%bn,
+%gn,
+$debug,
+$debug2,
+@config_vars,
+@persistent_vars,
