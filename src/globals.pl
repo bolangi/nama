@@ -3,7 +3,7 @@ $this_bus,
 $this_op,
 $this_param,
 %tn,
-%ti
+%ti,
 %bn,
 %gn,
 $debug,
