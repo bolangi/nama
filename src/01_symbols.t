@@ -3,6 +3,16 @@ use strict;
 
 BEGIN { use_ok(qw(::Globals) ) };
 
+use ::Globals qw($ui);
+
+is($ui, 'bullwinkle', 'global variable import');
+
+package Foo;
+
+use ::Globals qw(:all);
+
+main::is($ui, 'bullwinkle', 'global variable-all-tag import');
+
 1;
 __END__
 use ::Assign qw(:all);
