@@ -158,13 +158,18 @@ DEBUG
 			} 
 			elsif ( ref $val eq 'ARRAY' or ref $val eq 'HASH')
 			{ 
-				
-					
-
-				$eval .= q($val) ;
+				if ($sigil eq '$')	# assign reference
+				{				
+					$eval .= q($val) ;
+				}
+				else				# dereference and assign
+				{
+					$eval .= qq($sigil) ;
+					$eval .= q({$val}) ;
+				}
 			}
 			else { die "unsupported assignment: ".ref $val }
-			$debug and print $eval, $/; 
+			$debug and print "eval string: ",$eval, $/; 
 			eval($eval);
 			$debug and $@ and carp "failed to eval $eval: $@\n";
 		}  # end if sigil{key}
