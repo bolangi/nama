@@ -1,5 +1,7 @@
 package ::Globals;
 use Modern::Perl;
+1;
+__END__
 use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
@@ -39,6 +41,9 @@ debug => [qw( 		$debug
 						@persistent_vars
 	)],
 );
+$ui = 'bullwinkle';  # for testing
+1;
+__END__
 {
 	my %seen;
 	push @{$EXPORT_TAGS{all}}, grep {!$seen{$_}++} @{$EXPORT_TAGS{$_}} foreach

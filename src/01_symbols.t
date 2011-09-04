@@ -1,8 +1,7 @@
-
 use Test::More qw(no_plan);
 use strict;
 
-BEGIN { use_ok(qw( ::Globals :all )) };
+BEGIN { use_ok(qw(::Globals) ) };
 
 1;
 __END__
