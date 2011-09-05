@@ -1,15 +1,7 @@
 # ----------- Engine cleanup (post-recording) -----------
 package ::;
 use Modern::Perl;
-our (
-[% qx(cat ./singletons.pl) %]
-	$debug,
-	$debug2,
-	$ui,
-	%bn,
-	%tn,
-	$this_edit,
-);
+use ::Globals qw(:all);
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";

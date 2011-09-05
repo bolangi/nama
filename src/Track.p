@@ -1,6 +1,6 @@
 # ---------- Track -----------
 our (
-[% qx(cat ./singletons.pl) %]
+[% join q(, ), split " ", qx(cat ./singletons.pl) %]
 );
 {
 package ::Track;

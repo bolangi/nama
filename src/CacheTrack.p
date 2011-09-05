@@ -2,16 +2,7 @@
 
 package ::;
 use Modern::Perl;
-
-our (
-
-[% qx(cat ./singletons.pl) %]
-
-	$debug,
-	%bn,
-	$ui,
-	$this_track,
-);
+use ::Globals qw(:all);
 
 # some common variables for cache_track and merge_track
 # related routines

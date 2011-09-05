@@ -3,10 +3,10 @@
 package ::;
 use Modern::Perl; use Carp;
 our (
-[% qx(cat ./singletons.pl) %]
 	$ui,
 	$debug,
 	$debug2,
+[% join qq(,\n), split " ",qx(cat ./singletons.pl) %]
 );
 sub initialize_interfaces {
 	

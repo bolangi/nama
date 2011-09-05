@@ -4,22 +4,9 @@
 
 package ::;
 use Modern::Perl; use Carp;
-
-# these variables are globals that 
-# are touched in creating chain setups
-our ( 
-
-[% qx(cat ./singletons.pl) %]
-
-		$debug,
-		$debug2,
-		$debug3,
-		%tn,
-		%gn,
-);		 	
-
 package ::ChainSetup;
 
+use ::Globals qw(:all);
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);

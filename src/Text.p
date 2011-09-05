@@ -4,7 +4,6 @@
 package ::;
 
 our (
-[% qx(cat ./singletons.pl) %]
 	%tn,
 	%ti,
 	%bn,
@@ -13,6 +12,7 @@ our (
 	%gn,
 	$debug,
 	$ui,
+[% join qq(,\n), split( " ", qx(cat ./singletons.pl)) %]
 		
 );
 

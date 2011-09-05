@@ -1,12 +1,6 @@
 
 # ----------- Mark ------------
 
-our (
-
-[% qx(cat ./singletons.pl) %]
-
-);
-
 package ::Mark;
 our $VERSION = 1.0;
 use Carp;
@@ -14,6 +8,7 @@ use warnings;
 no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_name @all);
+use ::Globals qw(:all);
 use ::Object qw( 
 				 name 
                  time
@@ -147,13 +142,7 @@ sub mark_time {
 {
 package ::;
 use Modern::Perl;
-our (
-	$debug,
-	$debug2,
-	$ui,
-	$this_mark,
-);
-
+use ::Globals qw(:all);
 
 sub drop_mark {
 	$debug2 and print "drop_mark()\n";

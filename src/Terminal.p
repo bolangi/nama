@@ -4,8 +4,8 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use Carp;
+use ::Globals qw(:singletons);
 our (
-[% qx(cat ./singletons.pl) %]
 	$this_bus,
 	$this_track,
 	$debug,

@@ -3,17 +3,7 @@
 package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
-
-our (
-
-[% qx(cat ./singletons.pl) %]
-
-	$this_track,
-	$debug,
-	$debug2,
-	%tn,
-);
-
+use ::Globals qw(:all);
 
 sub private_effect_chain_name {
 	my $name = "_$project->{name}/".$this_track->name.'_';

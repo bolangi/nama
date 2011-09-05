@@ -10,7 +10,7 @@ our @ISA;
 use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
 our (
-[% qx(cat ./singletons.pl) %]
+[% join q(, ), split " ", qx(cat ./singletons.pl) %]
 );
 use ::Object qw( 
 				 n

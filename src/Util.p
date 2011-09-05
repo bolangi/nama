@@ -3,14 +3,10 @@
 # this package is for small subroutines with
 # well-defined interfaces
 
-package ::;
-our ( %tn ); 			# rw_set()
-our (
-[% qx(cat ./singletons.pl) %]
-);
-
 package ::Util;
 use Modern::Perl; use Carp;
+use ::Globals qw(:all);
+
 no warnings 'uninitialized';
 
 require Exporter;

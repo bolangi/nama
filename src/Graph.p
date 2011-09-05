@@ -4,7 +4,7 @@ use Carp;
 use Graph;
 use vars qw(%reserved $debug $debug2);
 our (
-[% qx(cat ./singletons.pl) %]
+[% join q(, ), split " ",qx(cat ./singletons.pl) %]
 );
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.

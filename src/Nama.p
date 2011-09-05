@@ -118,6 +118,10 @@ $| = 1;     # flush STDOUT buffer on every write
 # 'our' declaration: code in all packages in Nama.pm can address
 # the following variables without package name prefix
 
+use ::Globals qw(:all);
+
+$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
+=comment
 our (
 
 [% qx(cat ./declarations.pl) %] 
@@ -129,6 +133,8 @@ our (
 );
 
 [% qx(./strip_all ./var_types.pl) %]
+
+=cut
 
 $text->{wrap} = new Text::Format {
 	columns 		=> 75,

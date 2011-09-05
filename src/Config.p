@@ -8,14 +8,14 @@ no warnings 'uninitialized';
 our (
 
 
-[% qx(cat ./singletons.pl) %]
-
 	@config_vars, 	# vars to read from namarc
 
 	$debug,
 	$debug2,
 
 );
+
+use ::Globals qw(:singletons);
 
 # exclusive to this module
 our ( 

@@ -2,6 +2,8 @@ $this_track
 $this_bus
 $this_op
 $this_param
+$this_mark
+$this_edit
 %tn
 %ti
 %bn

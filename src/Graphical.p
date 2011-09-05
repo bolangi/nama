@@ -5,7 +5,6 @@ package ::;
 our $VERSION = 1.071;
 
 our ( 
-[% qx(cat ./singletons.pl) %]
 	$debug,
 	$debug2,
 	$ui,
@@ -16,6 +15,7 @@ our (
 	$prompt,
 	
 	%nama_palette,
+[% join qq(,\n), split " ",qx(cat ./singletons.pl) %]
 );
 
 package ::Graphical;  ## gui routines

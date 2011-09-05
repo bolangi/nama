@@ -3,22 +3,7 @@
 package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
-our (
-
-[% qx(cat ./singletons.pl) %]
-
-# generate_setup()
-
-	$debug,
-	$debug2,
-	$ui,
-
-	$this_track,
-	%tn,
-	%gn,
-	%ti,
-
-);	
+use ::Globals qw(:all);
 
 sub generate_setup { 
 	# return 1 if successful

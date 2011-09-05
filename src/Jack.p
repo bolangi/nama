@@ -4,10 +4,7 @@ use Modern::Perl;
 use File::Slurp;
 no warnings 'uninitialized';
 
-our (
-[% qx(cat ./singletons.pl) %]
-	$debug,
-);
+use ::Globals qw(:singletons :debug);
 
 # general functions
 

@@ -7,15 +7,7 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
-our (
-
-[% qx(cat ./singletons.pl) %]
-
-	$debug,
-	$debug2,
-
-	$ui,
-);
+use ::Globals qw(:singletons :debug);
 
 sub valid_engine_setup {
 	eval_iam("cs-selected") and eval_iam("cs-is-valid");

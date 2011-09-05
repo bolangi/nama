@@ -3,9 +3,7 @@
 package ::;
 use Modern::Perl;
 
-our (
-[% qx(cat ./singletons.pl) %]
-);
+use ::Globals qw(:singletons);
 
 sub process_options {
 

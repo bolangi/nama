@@ -2,14 +2,7 @@
 
 package ::;
 use Modern::Perl;
-our (
-[% qx(cat ./singletons.pl) %]
-	%tn,
-	%bn,
-	$debug,
-	$debug2,
-);
-
+use ::Globals qw(:all);
 
 sub mute {
 	return if $config->{opts}->{F};

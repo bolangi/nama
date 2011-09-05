@@ -5,20 +5,7 @@ use Modern::Perl;
 use Carp;
 use ::Util qw(round);
 no warnings 'uninitialized';
-our (
-	%tn,
-	%ti,
-	$this_track,
-	$this_op,
-	$debug,
-	$debug2,
-	$ui,
-	%bn,
-	%gn,
-	@effects_static_vars,
-[% qx(cat ./singletons.pl) %]
-);
-	
+use ::Globals qw(:all);	
 
 ## high-level functions
 sub add_effect {
