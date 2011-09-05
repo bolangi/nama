@@ -26,6 +26,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		store_vars
 		yaml_out
 		yaml_in
+		json_in
+		json_out
 		create_dir
 		join_path
 		wav_off
@@ -47,6 +49,7 @@ package ::;
 our ($debug, $debug2, $debug3);
 package ::Assign;
 
+state $to_json = JSON::XS->new->utf8->pretty(1) ;
 use Carp;
 
 sub assign {
@@ -287,7 +290,6 @@ sub serialize {
 			write_file($file, $yaml);
 			$debug and print $yaml;
 		} elsif ($h{format} eq 'json'){
-			state $to_json = JSON::XS->new->utf8->pretty(1) ;
 			$file .= '.json' unless $file =~ /\.json$/;
 			#find_cycle(\%state);
           	my $json = $to_json->encode(\%state) . "\n";
@@ -301,6 +303,22 @@ sub serialize {
 		}
 	} else { yaml_out(\%state) }
 
+}
+
+sub json_out {
+	$debug2 and carp "&json_out";
+	my $data_ref = shift;
+	my $type = ref $data_ref;
+	croak "attempting to code wrong data type: $type"
+		if $type !~ /HASH|ARRAY/;
+	$to_json->encode($data_ref);
+}
+
+sub json_in {
+	$debug2 and carp "&json_in";
+	my $json = shift;
+	my $data_ref = decode_json($json);
+	$data_ref
 }
 
 sub yaml_out {

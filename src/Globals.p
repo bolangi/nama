@@ -34,6 +34,7 @@ debug => [qw( 		$debug
 						%ti
 						%bn
 						%gn
+						$prompt
 	)],
 
 	var_types => [qw(

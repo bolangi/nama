@@ -4,6 +4,7 @@ $this_op
 $this_param
 $this_mark
 $this_edit
+$prompt
 %tn
 %ti
 %bn

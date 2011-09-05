@@ -2,24 +2,12 @@
 ## The following methods belong to the Text interface class
 
 package ::;
-
-our (
-	%tn,
-	%ti,
-	%bn,
-	$this_track,
-	$this_bus,
-	%gn,
-	$debug,
-	$ui,
-[% join qq(,\n), split( " ", qx(cat ./singletons.pl)) %]
-		
-);
+use ::Globals qw(:all);
 
 package ::Text;
-use Modern::Perl; 
+use Modern::Perl; use Carp;
 no warnings 'uninitialized';
-use Carp;
+use ::Globals qw(:all);
 use ::Assign qw(:all);
 
 our @ISA = '::';
