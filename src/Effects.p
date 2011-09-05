@@ -623,7 +623,7 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
 		$debug and print "found effects cache: $effects_cache\n";
-		assign_var($effects_cache, @effects_static_vars);
+		assign_var($effects_cache, qw($fx_cache));
 	} else {
 		
 		$debug and print "reading in effects data, please wait...\n";
@@ -636,7 +636,7 @@ sub prepare_static_effects_data{
 		prepare_effects_help();
 		serialize (
 			file => $effects_cache, 
-			vars => \@effects_static_vars,
+			vars => [qw($fx_cache)],
 			class => '::',
 			format => 'storable');
 	}
