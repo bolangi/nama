@@ -226,7 +226,7 @@ sub helptopic {
 	$index =~ /^(\d+)$/ and $index = $help->{arr_topic}->[$index];
 	my @output;
 	push @output, "\n-- ", ucfirst $index, " --\n\n";
-	push @output, $help->{arr_topic}->{$index}, $/;
+	push @output, $help->{topic}->{$index}, $/;
 	@output;
 }
 
@@ -239,9 +239,9 @@ sub help {
 $name is an Ecasound command.  See 'man ecasound-iam'.
 IAM
 	my @output;
-	if ( $help->{arr_topic}->{$name}){
+	if ( $help->{topic}->{$name}){
 		@output = helptopic($name);
-	} elsif ($name !~ /\D/ and $name == 0){
+	} elsif ($name == 0){
 		@output = map{ helptopic $_ } @{$help->{arr_topic}};
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)

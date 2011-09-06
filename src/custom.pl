@@ -7,7 +7,7 @@
 prompt =>  
 	q{
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
-		($this_track ? $this_track->name : '') . "] "
+		($this_track ? $this_track->name : '') . "] >"
 	},
 
 
