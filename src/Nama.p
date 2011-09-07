@@ -228,10 +228,6 @@ sub setup_grammar { }
 
 	[% qx(cat ./help_topic.pl) %]
 
-	# default user customization file custom.pl - see EOF
-	
-	$config->{custom_pl} = get_data_section("custom_pl");
-
 	# default colors
 
 	$config->{gui_default_palette_yml} = get_data_section("default_palette_yml");
@@ -277,7 +273,7 @@ __DATA__
 [% qx(cat ./ecasound_chain_operator_hints.yml) %];
 @@ default_namarc
 [% qx(cat ./namarc) %]
-@@ custom.pl
+@@ custom_pl
 [% qx(cat ./custom.pl) %]
 @@ default_palette_yml
 [% qx(cat ./palette.yml) %]

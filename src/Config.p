@@ -162,7 +162,7 @@ PROJECT_ROOT
 		
 		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
 
-		 write_file(user_customization_file(), $file->{custom_pl});
+		 write_file(user_customization_file(), get_data_section('custom_pl'));
 		
 	} else {
 		print <<OTHER;
