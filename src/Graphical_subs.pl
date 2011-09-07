@@ -1129,7 +1129,7 @@ sub get_saved_colors {
 
 	my $pal = join_path($config->{root_dir}, $file->{gui_palette});
 	-f $pal or $pal = $config->{gui_default_palette_yml};
-	::assign_var( $pal, qw[%{$gui->{_palette}} %{$gui->{_nama_palette}}]);
+	::assign_var_map( $pal, qw(%palette %namapalette) );
 	
 	*::rec = \$gui->{_nama_palette}->{RecBackground};
 	*::mon = \$gui->{_nama_palette}->{MonBackground};
