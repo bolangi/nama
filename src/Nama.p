@@ -163,11 +163,11 @@ $config = {
 	use_placeholders 				=> 1,
 	volume_control_operator 		=> 'ea', # default to linear scale
 	sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
-	engine_fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
+	engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
 	engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 	engine_jack_seek_delay 			=> 0.1, # seconds
-	edit_playback_end_margin 	=> 3,
-	edit_crossfade_time 				=> 0.03,
+	edit_playback_end_margin 		=> 3,
+	edit_crossfade_time 			=> 0.03,
 };
 
 $prompt = "nama ('h' for help)> ";
