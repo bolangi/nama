@@ -104,8 +104,8 @@
 	$this_op      	# current effect
 );
 		 
+=comment
 # category: effects_cache 
-
 @effects_static_vars = qw(
 
 	@effects		# static effects information (parameters, hints, etc.)
@@ -126,3 +126,4 @@
 	%ladspa_help   # plugin_label => analyseplugin output
 	%e_bound		# GUI: for displaying hundreds of effects in groups
 );
+=cut

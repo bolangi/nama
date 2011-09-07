@@ -490,6 +490,7 @@ sub assign_var {
 }
 sub assign_var_map {
 	my ($source, @vars) = @_;
+	say "assign_var_map, vars ", join " ", @vars;
 	assign_vars(
 				source => $source,
 				vars   => \@vars,

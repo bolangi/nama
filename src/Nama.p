@@ -122,20 +122,9 @@ $| = 1;     # flush STDOUT buffer on every write
 use ::Globals qw(:all);
 
 $ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
-=comment
-our (
-
-[% qx(cat ./declarations.pl) %] 
-
-[% qx(./add_vars) %]
-
-[% qx(cat ./singletons.pl) %]
-
-);
 
 [% qx(./strip_all ./var_types.pl) %]
 
-=cut
 
 $text->{wrap} = new Text::Format {
 	columns 		=> 75,
@@ -176,7 +165,7 @@ $config = {
 	sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
 	engine_fade_length_on_start_stop 	=> 0.3, # when starting/stopping transport
 	engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
-	enginejack_seek_delay 			=> 0.1, # seconds
+	engine_jack_seek_delay 			=> 0.1, # seconds
 	edit_playback_end_margin 	=> 3,
 	edit_crossfade_time 				=> 0.03,
 };

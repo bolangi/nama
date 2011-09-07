@@ -4,18 +4,7 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 
-# global variables
-our (
-
-
-	@config_vars, 	# vars to read from namarc
-
-	$debug,
-	$debug2,
-
-);
-
-use ::Globals qw(:singletons);
+use ::Globals qw(:all);
 
 # exclusive to this module
 our ( 
@@ -63,14 +52,12 @@ sub read_config {
 	
 	$debug2 and print "&read_config\n";
 	
-	my $config_name_or_contents = shift;
-	my $yml = length $config_name_or_contents > 100
-		?  $config_name_or_contents
-		:  get_data_section("default_namarc");
-
+	my $config_file = shift;
+	
+	my $yml = $config_file // get_data_section("default_namarc");
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
-	*subst = \%{ $cfg{abbreviations} }; # alias
+	*subst = \%{$cfg{abbreviations}}; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign_var_map( \%cfg, @config_vars);
