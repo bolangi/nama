@@ -228,10 +228,6 @@ sub setup_grammar { }
 
 	[% qx(cat ./help_topic.pl) %]
 
-	# we use the following settings if we can't find config files
-
-	$config->{default} = get_data_section("default_namarc");
-
 	# default user customization file custom.pl - see EOF
 	
 	$config->{custom_pl} = get_data_section("custom_pl");

@@ -66,7 +66,8 @@ sub read_config {
 	my $config_name_or_contents = shift;
 	my $yml = length $config_name_or_contents > 100
 		?  $config_name_or_contents
-		:  $config->{default};
+		:  get_data_section("default_namarc");
+
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
 	*subst = \%{ $cfg{abbreviations} }; # alias
@@ -94,10 +95,10 @@ sub substitute{
 }
 sub first_run {
 	return if $config->{opts}->{f};
-	my $config = config_file();
-	$config = "$ENV{HOME}/$config" unless -e $config;
-	$debug and print "config: $config\n";
-	if ( ! -e $config and ! -l $config  ) {
+	my $config_path = config_file();
+	$config_path = "$ENV{HOME}/$config_path" unless -e $config_path;
+	$debug and print "config path: $config_path\n";
+	if ( ! -e $config_path and ! -l $config_path  ) {
 
 	# check for missing components
 
@@ -132,7 +133,7 @@ Aloha. Welcome to Nama and Ecasound.
 
 HELLO
 	sleeper (0.6);
-	print "Configuration file $config not found.
+	print "Configuration file $config_path not found.
 
 May I create it for you? [yes] ";
 	my $make_namarc = <STDIN>;
@@ -146,9 +147,11 @@ PROJECT_ROOT
 	print "Would you like to create $ENV{HOME}/nama? [yes] ";
 	my $reply = <STDIN>;
 	chomp $reply;
+	my $default_config;
 	if ($reply !~ /n/i){
 		# write project root path into default namarc
-		$config->{default} =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
+		$default_config = get_data_section("default_namarc");
+		$default_config =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
 		
 		# create path nama/untitled/.wav
 		#
@@ -169,10 +172,10 @@ Please make sure to set the project_root directory in
 OTHER
 	}
 	if ($make_namarc !~ /n/i){
-		write_file($config, $config->{default});
+		write_file($config_path, $default_config);
 	}
 	sleep 1;
-	print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
+	print "\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n";
 	print "Exiting.\n"; 
 	exit;	
 	}
