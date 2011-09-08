@@ -16,11 +16,7 @@ no warnings qw(uninitialized);
 our ($expected_setup_lines);
 use Cwd;
 
-our (
-[% qx(cat ./singletons.pl) %]
-	%gn,
-	$this_track,
-);
+use ::Globals qw(:all);
 
 BEGIN { use_ok('::') };
 
@@ -671,7 +667,7 @@ foreach(@tests){
 		$new_playat, 
 		$new_region_start, 
 		$new_region_end,
-		$setup->{audio_length},
+		$length,
 		$case, 
 		$comment,
 	) = split " ", $_;
@@ -682,7 +678,7 @@ foreach(@tests){
 		$region_end, 
 		$edit_play_start,
 		$edit_play_end,
-		$setup->{audio_length},
+		$length,
 	);
 
 		
