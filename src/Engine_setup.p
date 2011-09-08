@@ -263,7 +263,7 @@ sub transport_status {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
-	if (%{$setup->{cooked_record_pending}}){
+	if (ref $setup->{cooked_record_pending} and %{$setup->{cooked_record_pending}}){
 		say join(" ", keys %{$setup->{cooked_record_pending}}), ": ready for caching";
 	}
 	if ($mode->{loop_enable} and $start and $end){
