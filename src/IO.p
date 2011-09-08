@@ -283,7 +283,7 @@ sub new {
 	my $class = $io_class{::IO::soundcard_input_type_string()};
 	$class->new(@_);
 }
-package Audio::Nama::IO::to_soundcard;
+package ::IO::to_soundcard;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub new {
 	shift; # throw away class
@@ -315,7 +315,7 @@ sub ecs_extra { $_[0]->mono_to_stereo }
 
 package ::IO::to_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub format_template { $::devices{jack}{signal_format} }
+sub format_template { $config->{devices}->{jack}->{signal_format} }
 sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
 
 package ::IO::from_jack_port;
@@ -335,7 +335,7 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
-sub device_id { $::devices{$config->{alsa_capture_device}}{ecasound_id} }
+sub device_id { $config->{devices}->{$config->{alsa_capture_device}}->{ecasound_id} }
 sub input_channel { $_[0]->source_id }
 sub rec_route {
 	# works for mono/stereo only!
@@ -353,7 +353,7 @@ sub rec_route {
 {
 package ::IO::to_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { $::devices{$config->{alsa_playback_device}}{ecasound_id} }
+sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
 sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }
 sub output_channel { $_[0]->send_id }
 sub route2 {
