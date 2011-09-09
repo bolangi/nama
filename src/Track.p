@@ -1,6 +1,9 @@
 # ---------- Track -----------
+
+# provide access to singletons in root namespace
 package ::;
 our ($gui, $ui, $config, $mode, $jack, %tn);
+
 {
 package ::Track;
 
