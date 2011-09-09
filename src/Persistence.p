@@ -7,7 +7,7 @@ use File::Slurp;
 use ::Assign qw(quote_yaml_scalars);
 no warnings 'uninitialized';
 
-use ::Globals qw(:all :serialize);
+use ::Globals qw(:all);
 my %var_map = qw(
 
 [% qx(./var_map_gen) %]
