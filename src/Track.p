@@ -1,7 +1,6 @@
 # ---------- Track -----------
-our (
-[% join q(, ), split " ", qx(cat ./singletons.pl) %]
-);
+package ::;
+our ($gui, $ui, $config, $mode, $jack, %tn);
 {
 package ::Track;
 

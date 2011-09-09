@@ -1,5 +1,6 @@
 # -------- Text Interface -----------
 ## The following methods belong to the Text interface class
+
 package ::Text;
 use Modern::Perl; use Carp;
 no warnings 'uninitialized';
