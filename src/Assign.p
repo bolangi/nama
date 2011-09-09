@@ -44,12 +44,9 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
+use ::Globals qw($debug $debug2);
 
-package ::;
-our ($debug, $debug2, $debug3);
-package ::Assign;
-
-state $to_json = JSON::XS->new->utf8->pretty(1) ;
+our $to_json = JSON::XS->new->utf8->pretty(1) ;
 use Carp;
 
 sub assign {
