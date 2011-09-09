@@ -9,9 +9,7 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
-our (
-[% join q(, ), split " ", qx(cat ./singletons.pl) %]
-);
+use ::Globals qw(:singletons);
 use ::Object qw( 
 				 n
 				 type

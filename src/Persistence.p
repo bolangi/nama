@@ -161,7 +161,7 @@ sub restore_state {
 
 	# restore persistent variables
 
-	assign_var($yaml, @persistent_vars );
+	assign_var_map($yaml, @persistent_vars );
 
 	restore_effect_chains();
 	restore_effect_profiles();
