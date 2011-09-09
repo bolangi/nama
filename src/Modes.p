@@ -2,7 +2,6 @@
 
 package ::;
 use Modern::Perl;
-use ::Globals qw(:all);
 {
 my $old_group_rw; # for restore on exiting doodle/preview mode
 
