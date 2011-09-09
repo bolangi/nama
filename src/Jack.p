@@ -4,8 +4,6 @@ use Modern::Perl;
 use File::Slurp;
 no warnings 'uninitialized';
 
-use ::Globals qw(:singletons :debug);
-
 # general functions
 
 sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
