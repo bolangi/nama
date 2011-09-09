@@ -3,8 +3,7 @@
 package ::;
 use Modern::Perl;
 
-use ::Globals qw(:singletons);
-### WAV file length/format/modify_time are cached in %{$setup->{wav_info}} 
+### WAV file length/format/modify_time are cached in $setup->{wav_info} 
 
 sub ecasound_get_info {
 	# get information about an audio object
