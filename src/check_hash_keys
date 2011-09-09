@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+use Modern::Perl;
+use File::Slurp;
+my @var_map = split "\n", qx(cat ./var_map);
+my %singletons;
+my %skeys; 
+{no warnings 'uninitialized';
+map{ my ($from, $to) = split " ", $_;
+	if ( my ($singleton, $key) = $to =~ /^(\$\w+)->{(\w+)}/)
+	{
+		#say "singleton: $singleton, key: $key";
+		$singletons{$singleton}++;
+		$skeys{$singleton} //= {};
+		$skeys{$singleton}{$key}++;
+	}
+} @var_map;
+}
+my @files = glob("*.p *.pl *.t");
+=comment
+use Data::Dumper::Concise;
+print Dumper \%singletons;
+print Dumper \%skeys;
+
+print join " ", @files;
+=cut
+
+my $srevars = join '|', map{ s/\$//; $_ } keys %singletons;
+my $sre = qr/\$($srevars)->{(\w+)}/;
+
+map{ 
+	my $filename = $_;
+	my $file = read_file($filename);
+	while( $file =~ /$sre/g )
+	{
+		my($singleton,$key) = ($1,$2);
+		#say "found $singleton, $key";
+		say "$filename: illegal key ", $singleton, '->{', $key , '}'
+			if ! $skeys{"\$$singleton"}{$key}
+	}
+} @files;

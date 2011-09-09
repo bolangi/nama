@@ -1,0 +1,8 @@
+#!/usr/bin/perl
+use Modern::Perl;
+use File::Slurp;
+print join $/, 
+		#map  { split " ", $_ }  # store as key/value pairs
+		grep { my @var = split " ", $_; @var == 2 } # take only substitutions
+		grep{ ! /^\s*$/ }  	# skip blank lines
+		split "\n", read_file("./var_map");
