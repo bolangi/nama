@@ -3,7 +3,6 @@
 package ::Graphical;  ## gui routines
 use Modern::Perl; use Carp;
 our $VERSION = 1.071;
-our (%palette, %nama_palette);
 use ::Globals qw($text);
 
 use Module::Load::Conditional qw(can_load);
