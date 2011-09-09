@@ -1,25 +1,11 @@
 # ------------ Graphical User Interface ------------
 
-package ::;
-
-our $VERSION = 1.071;
-
-our ( 
-	$debug,
-	$debug2,
-	$ui,
-	%ti,
-	%tn,
-	%bn,
-	%gn,
-	$prompt,
-	
-	%nama_palette,
-[% join qq(,\n), split " ",qx(cat ./singletons.pl) %]
-);
-
 package ::Graphical;  ## gui routines
 use Modern::Perl; use Carp;
+our $VERSION = 1.071;
+our (%palette, %nama_palette);
+use ::Globals qw($text);
+
 use Module::Load::Conditional qw(can_load);
 use ::Assign qw(:all);
 use ::Util qw(colonize);
