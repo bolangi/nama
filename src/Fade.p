@@ -76,7 +76,7 @@ sub refresh_fade_controller {
 	my $on_level  = $::unity_level{$operator};
 
 	# remove controller if present
-	if( $track->fader and my ($old) = @{$::cops{$track->fader}{owns}})
+	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
 		{ ::remove_effect($old) }
 
 	return unless
