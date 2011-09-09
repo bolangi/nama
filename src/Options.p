@@ -3,8 +3,6 @@
 package ::;
 use Modern::Perl;
 
-use ::Globals qw(:singletons);
-
 sub process_options {
 
 	my %options = qw(
