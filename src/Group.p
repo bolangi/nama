@@ -2,19 +2,11 @@ package ::Group;
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
-#use Exporter qw(import);
-#our @EXPORT_OK =qw(group);
 use Carp;
-our(%by_name, $debug);
-*debug = \$::debug;
-our @ISA;
+our(%by_name, @ISA);
+use ::Globals qw($debug);
 
-# use ::Object qw( 	name
-# 					rw
-# 					version 
-# 					n	
-# 					);
-
+# fields: name rw version n	
 
 sub tracks { # returns list of track names in group 
 	my $group = shift;
