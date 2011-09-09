@@ -142,7 +142,6 @@ sub mark_time {
 {
 package ::;
 use Modern::Perl;
-use ::Globals qw(:all);
 
 sub drop_mark {
 	$debug2 and print "drop_mark()\n";
