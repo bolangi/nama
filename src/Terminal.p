@@ -4,14 +4,7 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use Carp;
-use ::Globals qw(:singletons);
-our (
-	$this_bus,
-	$this_track,
-	$debug,
-	$debug2,
-);
-
+use ::Globals qw(:singletons $this_bus $this_track $debug $debug2);
 
 sub issue_first_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
