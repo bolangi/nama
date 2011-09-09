@@ -1,6 +1,5 @@
 # ---------- IO -----------
-our ($config, $jack, %tn);
-use ::Globals qw($config $jack %tn);
+
 # 
 # IO objects for writing Ecasound chain setup file
 #
@@ -21,6 +20,10 @@ use ::Globals qw($config $jack %tn);
 package ::IO;
 use Modern::Perl; use Carp;
 our $VERSION = 1.0;
+
+# provide following vars to all packages
+our ($config, $jack, %tn);
+use ::Globals qw($config $jack %tn);
 
 # we will use the following to map from graph node names
 # to IO class names
