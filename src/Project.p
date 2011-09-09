@@ -5,8 +5,6 @@ use Modern::Perl;
 use Carp;
 use File::Slurp;
 
-use ::Globals qw(:all);
-
 { # OPTIMIZATION
 
   # we allow for the (admitted rare) possibility that
