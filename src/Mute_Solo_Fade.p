@@ -2,7 +2,6 @@
 
 package ::;
 use Modern::Perl;
-use ::Globals qw(:all);
 
 sub mute {
 	return if $config->{opts}->{F};
