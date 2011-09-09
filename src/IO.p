@@ -1,9 +1,6 @@
 # ---------- IO -----------
-our (
-
-[% join q(, ), split " ", qx(cat ./singletons.pl) %]
-
-);
+our ($config, $jack, %tn);
+use ::Globals qw($config $jack %tn);
 # 
 # IO objects for writing Ecasound chain setup file
 #
@@ -212,7 +209,7 @@ sub jack_multi_route {
 	# non-existent client, and correctly handles
 	# the case of a portname (containing colon)
 	
-	my $count_maybe_ref = $::jack{$client}{$direction};
+	my $count_maybe_ref = $jack->{clients}->{$client}{$direction};
 	my $max = ref $count_maybe_ref eq 'ARRAY' 
 		? scalar @$count_maybe_ref 
 		: $count_maybe_ref;
@@ -223,7 +220,7 @@ channel ($end) is out of bounds. $max channels maximum.\n)
 		if $end > $max;
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)}
-		@{$::jack{$client}{$direction}}[$start-1..$end-1];
+		@{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1];
 }
 sub default_jack_ports_list {
 	my ($track_name) = shift;
