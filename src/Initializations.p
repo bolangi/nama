@@ -2,12 +2,7 @@
 
 package ::;
 use Modern::Perl; use Carp;
-our (
-	$ui,
-	$debug,
-	$debug2,
-[% join qq(,\n), split " ",qx(cat ./singletons.pl) %]
-);
+
 sub initialize_interfaces {
 	
 	$debug2 and print "&prepare\n";
