@@ -2,7 +2,7 @@
 
 # provide access to singletons in root namespace
 package ::;
-our ($gui, $ui, $config, $mode, $jack, %tn);
+our ($gui, $ui, $config, $mode, $mastering, $jack, $fx_cache, %tn);
 
 {
 package ::Track;
