@@ -1,9 +1,5 @@
 # -------- Text Interface -----------
 ## The following methods belong to the Text interface class
-
-package ::;
-use ::Globals qw(:all);
-
 package ::Text;
 use Modern::Perl; use Carp;
 no warnings 'uninitialized';
