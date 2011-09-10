@@ -31,6 +31,16 @@ time_tag
 heuristic_time
 dest_type
 
+create_dir
+join_path
+wav_off
+strip_all
+strip_blank_lines
+strip_comments
+remove_spaces
+expand_tilde
+resolve_path
+
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -241,6 +251,92 @@ sub dest_type {
 
 	}
 	$type
+}
+
+sub create_dir {
+	my @dirs = @_;
+	map{ my $dir = $_;
+	$debug and print "creating [ $dir ]\n";
+		-e $dir 
+#and (carp "create_dir: '$dir' already exists, skipping...\n") 
+			or system qq( mkdir -p $dir)
+		} @dirs;
+}
+
+sub join_path {
+	
+	my @parts = @_;
+	my $path = join '/', @parts;
+	$path =~ s(/{2,})(/)g;
+	#$debug and print "path: $path\n";
+	$path;
+}
+
+sub wav_off {
+	my $wav = shift;
+	$wav =~ s/\.wav\s*$//i;
+	$wav;
+}
+
+sub strip_all{ strip_trailing_spaces(strip_blank_lines( strip_comments(@_))) }
+
+sub strip_trailing_spaces {
+	map {s/\s+$//} @_;
+	@_;
+}
+sub strip_blank_lines {
+	map{ s/\n(\s*\n)+/\n/sg } @_;
+	map{ s/^\n+//s } @_;
+	@_;
+	 
+}
+
+sub strip_comments { #  
+	map{ s/#.*$//mg; } @_;
+	map{ s/\s+$//mg; } @_;
+
+	@_
+} 
+
+sub remove_spaces {                                                             
+        my $entry = shift;                                                      
+        # remove leading and trailing spaces                                    
+                                                                                
+        $entry =~ s/^\s*//;                                                     
+        $entry =~ s/\s*$//;                                                     
+                                                                                
+        # convert other spaces to underscores                                   
+                                                                                
+        $entry =~ s/\s+/_/g;                                                    
+        $entry;                                                                 
+}                                                                               
+sub resolve_path {
+	my $path = shift;
+	$path = expand_tilde($path);
+	$path = File::Spec::Link->resolve_all($path);
+}
+sub expand_tilde { 
+	my $path = shift; 
+
+ 	my $home = File::HomeDir->my_home;
+
+
+	# ~bob -> /home/bob
+	$path =~ s(
+		^ 		# beginning of line
+		~ 		# tilde
+		(\w+) 	# username
+	)
+	(File::HomeDir->users_home($1))ex;
+
+	# ~/something -> /home/bob/something
+	$path =~ s( 
+		^		# beginning of line
+		~		# tilde
+		/		# slash
+	)
+	($home/)x;
+	$path
 }
 
 1;

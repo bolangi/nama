@@ -32,8 +32,7 @@ our $VERSION = 1.0;
 our ($debug);
 
 local $debug = 0;
-use ::Assign qw(join_path);
-use ::Util qw(freq input_node dest_type);
+use ::Util qw(freq input_node dest_type join_path);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(

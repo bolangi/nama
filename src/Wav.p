@@ -4,6 +4,7 @@ our @ISA;
 use ::Object qw(name version dir);
 use warnings;
 use ::Assign qw(:all);
+use ::Util qw(join_path);
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized);
 use Carp;

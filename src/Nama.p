@@ -73,6 +73,7 @@ use ::Fade;
 use ::Edit;
 use ::Text;
 use ::Graphical;
+use ::ChainSetup ();
 
 # the following separate out functionality
 # however occupy the :: namespace
@@ -84,7 +85,6 @@ use ::Terminal ();
 use ::Wavinfo ();
 use ::Project ();
 use ::Modes ();
-use ::ChainSetup ();
 use ::Engine_setup ();
 use ::Engine_cleanup ();
 use ::Realtime ();
@@ -97,20 +97,7 @@ use ::Memoize ();
 use ::CacheTrack ();
 use ::Effects ();
 use ::Persistence ();
-use ::Util qw(
-	rw_set 
-	process_is_running 
-	d1 d2 dn 
-	colonize 
-	time_tag 
-	heuristic_time
-	dest_type
-	channels
-	signal_format
-	dest_type
-	input_node
-	output_node
-);
+use ::Util qw(:all);
 
 ## Definitions ##
 

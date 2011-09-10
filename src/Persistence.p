@@ -8,11 +8,7 @@ use ::Assign qw(quote_yaml_scalars);
 no warnings 'uninitialized';
 
 use ::Globals qw(:all);
-my %var_map = qw(
 
-[% qx(./var_map_gen) %]
-
-);
 sub save_state {
 	my $file = shift || $file->{state_store}; 
 	$debug2 and print "&save_state\n";
@@ -466,7 +462,7 @@ sub restore_state {
 	
 	map{ 
 		my %h = %$_; 
-		my $fade = ::Fade->new( %h ) ;
+#		my $fade = ::Fade->new( %h ) ;
 	} @fade_data;
 
 	# edits 
@@ -480,24 +476,6 @@ sub restore_state {
 	
 	$text->{term}->SetHistory(@{$text->{command_history}});
 } 
-sub assign_var {
-	my ($source, @vars) = @_;
-	assign_vars(
-				source => $source,
-				vars   => \@vars,
-		#		format => 'yaml', # breaks
-				class => '::');
-}
-sub assign_var_map {
-	my ($source, @vars) = @_;
-	say "assign_var_map, vars ", join " ", @vars;
-	assign_vars(
-				source => $source,
-				vars   => \@vars,
-				var_map => \%var_map,
-		#		format => 'yaml', # breaks
-				class => '::');
-}
 
 sub save_effect_chains { # if they exist
 	my $file = shift || $file->{effect_chain};
