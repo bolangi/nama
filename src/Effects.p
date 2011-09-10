@@ -13,6 +13,7 @@ sub add_effect {
 	$debug2 and print "&add_effect\n";
 	
 	my %p 			= %{shift()};
+	$debug and say yaml_out \%p;
 	my ($n,$code,$parent_id,$id,$parameter,$values) =
 		@p{qw( chain type parent_id cop_id parameter values)};
 	my $i = $fx_cache->{full_label_to_index}->{$code};
