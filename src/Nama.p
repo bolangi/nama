@@ -141,6 +141,8 @@ $file = {
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
+$gui->{_default_palette_yml} = get_data_section("default_palette_yml");
+
 
 $config = {
 	root_dir 						=> join_path( $ENV{HOME}, "nama"),
@@ -204,10 +206,6 @@ sub setup_grammar { }
 
 	[% qx(cat ./help_topic.pl) %]
 
-	# default colors
-
-	$config->{gui_default_palette_yml} = get_data_section("default_palette_yml");
-
 	# JACK environment for testing
 
 	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
@@ -251,8 +249,6 @@ __DATA__
 [% qx(cat ./namarc) %]
 @@ custom_pl
 [% qx(cat ./custom.pl) %]
-@@ default_palette_yml
-[% qx(cat ./palette.yml) %]
 @@ fake_jack_lsp
 [% qx(cat ./fake_jack_lsp) %]
 @@ midish_commands

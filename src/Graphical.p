@@ -38,6 +38,9 @@ package ::;
 [% qx(cat ./Refresh_subs.pl ) %]
 
 1;
-__END__
+__DATA__
+@@ default_palette_yml
+[% qx(cat ./palette.yml) %]
 
+__END__
 
