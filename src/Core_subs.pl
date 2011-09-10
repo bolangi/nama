@@ -12,6 +12,7 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
+	$debug2 and say "&setup_user_customization";
 	my $filename= user_customization_file();
 	return unless -r $filename;
 	say "reading user customization file $filename";
