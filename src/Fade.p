@@ -9,7 +9,7 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
-use ::Globals qw(:singletons);
+use ::Globals qw(:singletons $debug);
 use ::Object qw( 
 				 n
 				 type
@@ -54,7 +54,7 @@ sub new {
 
 	$by_index{$object->n} = $object;
 
-	#print "object class: $class, object type: ", ref $object, $/;
+	$debug and print "object class: $class, object type: ", ref $object, $/;
 
 	my $id = add_fader($object->track);	# only when necessary
 	
@@ -212,8 +212,8 @@ sub fader_envelope_pairs {
 				$marktime1 -= $fade->duration
 			} 
 		else { $fade->dumpp; die "fade processing failed" }
-		#say "marktime1: $marktime1";
-		#say "marktime2: $marktime2";
+		$debug and say "marktime1: $marktime1";
+		$debug and say "marktime2: $marktime2";
 		push @specs, 
 		[ 	$marktime1, 
 			$marktime2, 
@@ -223,7 +223,7 @@ sub fader_envelope_pairs {
 }
 	# sort fades # already done! XXX
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
-	#say( ::yaml_out( \@specs));
+	$debug and say( ::yaml_out( \@specs));
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
 
