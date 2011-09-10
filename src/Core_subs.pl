@@ -12,18 +12,15 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
-	$debug2 and say "&setup_user_customization";
-	my $filename= user_customization_file();
+	my $filename = user_customization_file();
 	return unless -r $filename;
 	say "reading user customization file $filename";
-	my @return;
-	unless (@return = do $filename) {
+	my %custom;
+	unless (%custom = do $filename) {
 		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
-	# convert key-value pairs to hash
-	$debug and print join "\n",@return;
-	my %custom = @return ; 
+	$debug and say 'customization :', yaml_out(\%custom);
 	my $prompt;
 	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
 	*prompt = $prompt if $prompt;
@@ -32,7 +29,7 @@ sub setup_user_customization {
 		my $coderef = gen_coderef($cmd,$custom{commands}{$cmd}) or next;
 		$text->{user_command}->{$cmd} = $coderef;
 	}
-	%{$text->{user_alias}}   = %{ $custom{aliases}  };
+	$text->{user_alias}   = $custom{aliases};
 }
 sub user_customization_file { join_path(project_root(),$file->{user_customization}) }
 
