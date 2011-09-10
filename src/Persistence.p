@@ -503,7 +503,7 @@ sub restore_effect_chains {
 	return unless -e $file;
 
 	# don't overwrite them if already present
-	assign_var($file, qw(%{$fx->{chain}})) unless keys %{$fx->{chain}}
+	assign_var_map($file, qw(%{$fx->{chain}})) unless keys %{$fx->{chain}}
 }
 sub restore_effect_profiles {
 
@@ -511,7 +511,7 @@ sub restore_effect_profiles {
 	return unless -e $file;
 
 	# don't overwrite them if already present
-	assign_var($file, qw(%{$fx->{profile}})) unless keys %{$fx->{profile}}; 
+	assign_var_map($file, qw(%{$fx->{profile}})) unless keys %{$fx->{profile}}; 
 }
 
 # autosave

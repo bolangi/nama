@@ -1,9 +1,11 @@
 # ---------- Track -----------
+#
+# give all classes (packages) access to global vars 
 
-# provide access to singletons in root namespace
 package ::;
-our ($gui, $ui, $config, $mode, $mastering, $jack, $fx_cache, %tn);
-
+our (
+	[% join qq(,\n\t), split " ", qx(cat 	./singletons.pl ./globals.pl  ./serialize.pl ) %]
+);
 {
 package ::Track;
 
@@ -1011,15 +1013,6 @@ sub input_path {
 {
 package ::;
 use Modern::Perl;
-our (
-	$debug,
-	$debug2,
-	$this_track,
-	$ui,
-	%tn,
-	%ti,
-	%bn,
-);
 
 # usual track
 
