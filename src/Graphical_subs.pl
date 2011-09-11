@@ -100,7 +100,7 @@ sub init_gui {
 	$gui->{new_project} = $gui->{load_frame}->Button->pack(-side => 'left');;
 	$gui->{quit} = $gui->{load_frame}->Button->pack(-side => 'left');
 	$gui->{save_project} = $gui->{load_frame}->Button->pack(-side => 'left');
-	my $gui->{savefile_entry} = $gui->{load_frame}->Entry(
+	$gui->{savefile_entry} = $gui->{load_frame}->Entry(
 									-textvariable => \$gui->{_save_id},
 									-width => 15
 									)->pack(-side => 'left');
@@ -258,7 +258,7 @@ sub time_gui {
 	$gui->{mark_frame} = $gui->{time_frame}->Frame->pack(
 		-side => 'bottom', 
 		-fill => 'both');
-	my $gui->{seek_frame} = $gui->{time_frame}->Frame->pack(
+	$gui->{seek_frame} = $gui->{time_frame}->Frame->pack(
 		-side => 'bottom', 
 		-fill => 'both');
 	# jump
