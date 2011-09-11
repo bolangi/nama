@@ -497,12 +497,16 @@ sub save_effect_profiles { # if they exist
 			class => '::');
 	}
 }
+# load effect chains and profiles
+
+# - don't stomp on existing settings
+# - allow for old or new variable names
+
 sub restore_effect_chains {
 
 	my $file = join_path(project_root(), $file->{effect_chain});
 	return unless -e $file;
 
-	# don't overwrite them if already present
 	assign_var_map($file, qw(%effect_chain $fx->{chain})) unless keys %{$fx->{chain}}
 }
 sub restore_effect_profiles {
