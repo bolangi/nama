@@ -37,8 +37,8 @@ sub get_wav_info {
 }
 sub get_length { 
 	my $path = shift;
-	my $setup->{audio_length} = ecasound_get_info($path, 'ai-get-length');
-	sprintf("%.4f", $setup->{audio_length});
+	my $length = ecasound_get_info($path, 'ai-get-length');
+	sprintf("%.4f", $length);
 }
 sub get_format {
 	my $path = shift;
