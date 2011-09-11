@@ -51,17 +51,17 @@ sub do_user_command {
 sub do_script {
 
 	my $name = shift;
-	my $file;
+	my $filename;
 	# look in project_dir() and project_root()
 	# if filename provided does not contain slash
-	if( $name =~ m!/!){ $file = $name }
+	if( $name =~ m!/!){ $filename = $name }
 	else {
-		$file = join_path(project_dir(),$name);
-		if(-e $file){}
-		else{ $file = join_path(project_root(),$name) }
+		$filename = join_path(project_dir(),$name);
+		if(-e $filename){}
+		else{ $filename = join_path(project_root(),$name) }
 	}
-	-e $file or say("$file: file not found. Skipping"), return;
-	my @lines = split "\n",read_file($file);
+	-e $filename or say("$filename: file not found. Skipping"), return;
+	my @lines = split "\n",read_file($filename);
 	my $old_opt_r = $config->{opts}->{R};
 	$config->{opts}->{R} = 1; # turn off auto reconfigure
 	for my $input (@lines) { process_line($input)};
