@@ -5,7 +5,6 @@ use Modern::Perl;
 use Carp;
 use ::Util qw(round);
 no warnings 'uninitialized';
-use ::Globals qw(:all);	
 
 ## high-level functions
 sub add_effect {
@@ -16,6 +15,8 @@ sub add_effect {
 	$debug and say yaml_out \%p;
 	my ($n,$code,$parent_id,$id,$parameter,$values) =
 		@p{qw( chain type parent_id cop_id parameter values)};
+	! $p{chain} and
+		carp("effect id: $code is missing track number, skipping\n"), return ;
 	my $i = $fx_cache->{full_label_to_index}->{$code};
 
 	# don't create an existing vol or pan effect
