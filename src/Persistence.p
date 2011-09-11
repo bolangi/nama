@@ -462,7 +462,7 @@ sub restore_state {
 	
 	map{ 
 		my %h = %$_; 
-#		my $fade = ::Fade->new( %h ) ;
+		my $fade = ::Fade->new( %h ) ;
 	} @fade_data;
 
 	# edits 

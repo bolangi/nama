@@ -45,7 +45,6 @@ use Carp;
 sub assign {
 	
 	$debug2 and print "&assign\n";
-	local $debug = 1;
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
@@ -87,14 +86,14 @@ ASSIGN
 		my $oldvar = my $var = $_;
 		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\w:\[\]{}]+)$/;
 		$var = $h{var_map}->{$var} if $h{var_map} and $h{var_map}->{$var};
-		say "oldvar: $oldvar, newvar: $var";
+		$debug and say "oldvar: $oldvar, newvar: $var";
 		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
 			$sigil{$old_identifier} = $sigil;
 			$ident{$old_identifier} = $identifier;
 	} @vars;
 
-	print "SIGIL\n", yaml_out(\%sigil);
-	print "IDENT\n", yaml_out(\%ident);
+	$debug and print "SIGIL\n", yaml_out(\%sigil);
+	$debug and print "IDENT\n", yaml_out(\%ident);
 
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
@@ -242,7 +241,7 @@ sub assign_var {
 );
 sub assign_var_map {
 	my ($source, @vars) = @_;
-	say "assign_var_map, vars ", join " ", @vars;
+	$debug and say "assign_var_map, vars ", join " ", @vars;
 	assign_vars(
 				source => $source,
 				vars   => \@vars,
