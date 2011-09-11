@@ -196,29 +196,29 @@ splice @{$text->{format_fields}}, 0, 9
 
 sub helpline {
 	my $cmd = shift;
-	my $text = "Command: $cmd\n";
-	$text .=  "Shortcuts: $text->{commands}->{$cmd}->{short}\n"
+	my $out = "Command: $cmd\n";
+	$out .=  "Shortcuts: $text->{commands}->{$cmd}->{short}\n"
 			if $text->{commands}->{$cmd}->{short};	
-	$text .=  "Description: $text->{commands}->{$cmd}->{what}\n";
-	$text .=  "Usage: $cmd "; 
+	$out .=  "Description: $text->{commands}->{$cmd}->{what}\n";
+	$out .=  "Usage: $cmd "; 
 
 	if ( $text->{commands}->{$cmd}->{parameters} 
 			&& $text->{commands}->{$cmd}->{parameters} ne 'none' ){
-		$text .=  $text->{commands}->{$cmd}->{parameters}
+		$out .=  $text->{commands}->{$cmd}->{parameters}
 	}
-	$text .= "\n";
+	$out .= "\n";
 	my $example = $text->{commands}->{$cmd}->{example};
 	#$example =~ s/!n/\n/g;
 	if ($example){
-		$text .=  "Example: ";
+		$out .=  "Example: ";
 		if ($example =~ /\n/s){
 			$example = "\n$example";    # add leading newline
 			$example =~ s(\n)(\n    )g; # indent
 		}
-		$text .=  $example;
-		$text .= "\n";
+		$out .=  $example;
+		$out .= "\n";
 	}
-	($/, ucfirst $text, $/);
+	($/, ucfirst $out, $/);
 	
 }
 sub helptopic {
