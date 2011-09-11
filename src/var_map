@@ -157,7 +157,6 @@
 	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
 	$volume_control_operator 		$config->{volume_control_operator}
 	$tk_input_channels 				$config->{soundcard_channels}
-	$banner 						$config->{banner}
 	$disable_auto_reconfigure 		$config->{disable_auto_reconfigure}
 
     $edit_playback_end_margin  		$config->{edit_playback_end_margin}

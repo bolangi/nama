@@ -7,7 +7,8 @@ sub initialize_interfaces {
 	
 	$debug2 and print "&prepare\n";
 
-	say $config->{banner};
+	say
+[% qx(cat ./banner.pl) %]
 
 	if ($config->{opts}->{D}){
 		$debug = 1;

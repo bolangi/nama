@@ -123,8 +123,6 @@ $text->{wrap} = new Text::Format {
 $debug2 = 0; # subroutine names
 $debug = 0; # debug statements
 
-[% qx(cat ./banner.pl) %]
-
 # other initializations
 
 #$engine->{events} = {};
