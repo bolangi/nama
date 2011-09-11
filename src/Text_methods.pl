@@ -241,7 +241,7 @@ IAM
 	my @output;
 	if ( $help->{topic}->{$name}){
 		@output = helptopic($name);
-	} elsif ($name == 0){
+	} elsif ($name =~ /^0/){
 		@output = map{ helptopic $_ } @{$help->{arr_topic}};
 	} elsif ( $name =~ /^(\d+)$/ and $1 < 20  ){
 		@output = helptopic($name)
