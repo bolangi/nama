@@ -12,9 +12,9 @@ sub jack_update {
 	# cache current JACK status
 	return if engine_running();
 	if( $jack->{jackd_running} =  process_is_running('jackd') ){
-		my $jack->{ports_list_text} = qx(jack_lsp -Ap 2> /dev/null); 
-		%{$jack->{clients}} = %{jack_ports($jack->{ports_list_text})}
-	} else { %{$jack->{clients}} = () }
+		my $ports_list = qx(jack_lsp -Ap 2> /dev/null); 
+		$jack->{clients} = jack_ports($ports_list);
+	} else { $jack->{clients} = {} }
 }
 
 sub jack_client {

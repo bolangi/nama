@@ -150,9 +150,9 @@ sub cancel_wraparound {
 	$engine->{events}->{wraparound} = undef;
 }
 sub limit_processing_time {
-	my $setup->{audio_length} = shift // $setup->{audio_length};
+	my $length = shift // $setup->{audio_length};
  	$engine->{events}->{processing_time} 
-		= AE::timer($setup->{audio_length}, 0, sub { ::stop_transport(); print prompt() });
+		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
 	$engine->{events}->{processing_time} = undef; 
