@@ -136,14 +136,15 @@ sub load_keywords {
 }
 
 sub complete {
-    my ($text, $line, $start, $end) = @_;
-#	print join $/, $text, $line, $start, $end, $/;
-    return $text->{term}->completion_matches($text,\&keyword);
+    my ($string, $line, $start, $end) = @_;
+	print join $/, $string, $line, $start, $end, $/;
+	my $term = $text->{term};
+    return $term->completion_matches($string,\&keyword);
 };
 
-{ 	my $i;
 sub keyword {
-        my ($text, $state) = @_;
+		state $i;	
+        my ($string, $state) = @_;
         return unless $text;
         if($state) {
             $i++;
@@ -152,9 +153,10 @@ sub keyword {
             $i = 0;
         }
         for (; $i<=$#{$text->{keywords}}; $i++) {
-            return $text->{keywords}->[$i] if $text->{keywords}->[$i] =~ /^\Q$text/;
+            return $text->{keywords}->[$i] 
+				if $text->{keywords}->[$i] =~ /^\Q$string/;
         };
         return undef;
-} };
+};
 1;
 __END__
