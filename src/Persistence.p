@@ -10,7 +10,7 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 
 sub save_state {
-	my $file = shift || $file->{state_store}; 
+	my $filename = shift || $file->{state_store}; 
 	$debug2 and print "&save_state\n";
 	$gui->{_project_name}->{save_file_version_number} = $VERSION;
 
@@ -28,17 +28,17 @@ sub save_state {
 	}
 
 	print "\nSaving state as ",
-	save_system_state($file), "\n";
+	save_system_state($filename), "\n";
 	save_effect_chains();
 	save_effect_profiles();
 
 	# store alsa settings
 
 	if ( $config->{opts}->{a} ) {
-		my $file = $file;
-		$file =~ s/\.yml$//;
+		my $filename = $filename;
+		$filename =~ s/\.yml$//;
 		print "storing ALSA settings\n";
-		print qx(alsactl -f $file.alsa store);
+		print qx(alsactl -f $filename.alsa store);
 	}
 }
 sub initialize_serialization_arrays {
@@ -53,12 +53,12 @@ sub initialize_serialization_arrays {
 
 sub save_system_state {
 
-	my $file = shift;
+	my $filename = shift;
 
 	# save stuff to state file
 
-	$file = join_path(project_dir(), $file) unless $file =~ m(/); 
-	$file =~ /\.yml$/ or $file .= '.yml';	
+	$filename = join_path(project_dir(), $filename) unless $filename =~ m(/); 
+	$filename =~ /\.yml$/ or $filename .= '.yml';	
 
 	sync_effect_parameters(); # in case a controller has made a change
 
@@ -117,26 +117,26 @@ sub save_system_state {
 	$debug and print "serializing\n";
 
 	serialize(
-		file => $file, 
+		file => $filename, 
 		format => 'yaml',
 		vars => \@persistent_vars,
 		class => '::',
 		);
 
 
-	$file
+	$filename
 }
 sub restore_state {
 	$debug2 and print "&restore_state\n";
-	my $file = shift;
-	$file = $file || $file->{state_store};
-	$file = join_path(project_dir(), $file)
-		unless $file =~ m(/);
-	$file .= ".yml" unless $file =~ /yml$/;
-	! -f $file and (print "file not found: $file\n"), return;
-	$debug and print "using file: $file\n";
+	my $filename = shift;
+	$filename = $filename || $file->{state_store};
+	$filename = join_path(project_dir(), $filename)
+		unless $filename =~ m(/);
+	$filename .= ".yml" unless $filename =~ /yml$/;
+	! -f $filename and (print "file not found: $filename\n"), return;
+	$debug and print "using file: $filename\n";
 	
-	my $yaml = read_file($file);
+	my $yaml = read_file($filename);
 
 	# remove empty key hash lines # fixes YAML::Tiny bug
 	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
@@ -441,10 +441,10 @@ sub restore_state {
 
 	# restore Alsa mixer settings
 	if ( $config->{opts}->{a} ) {
-		my $file = $file; 
-		$file =~ s/\.yml$//;
+		my $filename = $filename; 
+		$filename =~ s/\.yml$//;
 		print "restoring ALSA settings\n";
-		print qx(alsactl -f $file.alsa restore);
+		print qx(alsactl -f $filename.alsa restore);
 	}
 
 	# text mode marks 
@@ -478,20 +478,20 @@ sub restore_state {
 } 
 
 sub save_effect_chains { # if they exist
-	my $file = shift || $file->{effect_chain};
+	my $filename = shift || $file->{effect_chain};
 	if (keys %{$fx->{chain}}){
 		serialize (
-			file => join_path(project_root(), $file),
+			file => join_path(project_root(), $filename),
 			format => 'yaml',
 			vars => [ qw( %{$fx->{chain}} ) ],
 			class => '::');
 	}
 }
 sub save_effect_profiles { # if they exist
-	my $file = shift || $file->{effect_profile};
+	my $filename = shift || $file->{effect_profile};
 	if (keys %{$fx->{profile}}){
 		serialize (
-			file => join_path(project_root(), $file),
+			file => join_path(project_root(), $filename),
 			format => 'yaml',
 			vars => [ qw( %{$fx->{profile}} ) ],
 			class => '::');
@@ -504,18 +504,18 @@ sub save_effect_profiles { # if they exist
 
 sub restore_effect_chains {
 
-	my $file = join_path(project_root(), $file->{effect_chain});
-	return unless -e $file;
+	my $filename = join_path(project_root(), $file->{effect_chain});
+	return unless -e $filename;
 
-	assign_var_map($file, qw(%effect_chain $fx->{chain})) unless keys %{$fx->{chain}}
+	assign_var_map($filename, qw(%effect_chain $fx->{chain})) unless keys %{$fx->{chain}}
 }
 sub restore_effect_profiles {
 
-	my $file = join_path(project_root(), $file->{effect_profile});
-	return unless -e $file;
+	my $filename = join_path(project_root(), $file->{effect_profile});
+	return unless -e $filename;
 
 	# don't overwrite them if already present
-	assign_var_map($file, qw(%effect_profile $fx->{profile})) unless keys %{$fx->{profile}}; 
+	assign_var_map($filename, qw(%effect_profile $fx->{profile})) unless keys %{$fx->{profile}}; 
 }
 
 # autosave
@@ -532,8 +532,8 @@ sub autosave {
 		schedule_autosave(1); # try again in 60s
 		return;
 	}
- 	my $file = 'State-autosave-' . time_tag();
- 	save_system_state($file);
+ 	my $filename = 'State-autosave-' . time_tag();
+ 	save_system_state($filename);
 	my @saved = autosave_files();
 	my ($next_last, $last) = @saved[-2,-1];
 	schedule_autosave(); # standard interval
@@ -552,9 +552,9 @@ sub autosave_files {
 						 	->in( project_dir());
 }
 sub files_are_identical {
-	my ($filea,$fileb) = @_;
-	my $a = read_file($filea);
-	my $b = read_file($fileb);
+	my ($filenamea,$filenameb) = @_;
+	my $a = read_file($filenamea);
+	my $b = read_file($filenameb);
 	$a eq $b
 }
 
