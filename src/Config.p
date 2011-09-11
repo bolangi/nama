@@ -30,10 +30,10 @@ sub global_config {
 	my $c = 0;
 		map{ 
 				if (-d $_) {
-					my $config = join_path($_, config_file());
-					if( -f $config or -l $config){ 
-						say "Found config file: $config";
-						my $yml = read_file($config);
+					my $config_path = join_path($_, config_file());
+					if( -f $config_path or -l $config_path){ 
+						say "Found config file: $config_path";
+						my $yml = read_file($config_path);
 						return $yml;
 					}
 				}
