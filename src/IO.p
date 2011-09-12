@@ -1,3 +1,6 @@
+package ::;
+our (%tn, $jack);
+
 # ---------- IO -----------
 
 # 
@@ -125,7 +128,7 @@ sub AUTOLOAD {
 	my $method = "_$call";
 	return $self->{$field} if exists $self->{$field};
 	return $self->$method if $self->can($method);
-	if ( my $track = $::tn{$self->{track_}} ){
+	if ( my $track = $tn{$self->{track_}} ){
 		return $track->$call if $track->can($call) 
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
@@ -217,7 +220,7 @@ sub jack_multi_route {
 		? scalar @$count_maybe_ref 
 		: $count_maybe_ref;
 
-	#my $max = scalar @{$::jack->{clients}->{$client}{$direction}};
+	#my $max = scalar @{$jack->{clients}->{$client}{$direction}};
 	die qq(JACK client "$client", direction: $direction
 channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;
