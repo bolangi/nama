@@ -6,7 +6,7 @@
 meta: midish_cmd 
 
 midish_cmd: /[a-z]+/ predicate { 
-	return unless $::midish_command{$item[1]};
+	return unless $::midi->{keywords}->{$item[1]};
 	my $line = "$item[1] $item{predicate}";
 	::midish_command($line);
 	1;
@@ -78,7 +78,7 @@ do_part: command end
 
 predicate: nonsemi semistop { $item{nonsemi}}
 predicate: /$/
-iam_cmd: ident { $item{ident} if $::iam_cmd{$item{ident}} }
+iam_cmd: ident { $item{ident} if $::text->{iam}->{$item{ident}} }
 track_spec: ident { ::leading_track_spec($item{ident}) }
 bang: '!'
 eval: 'eval'
@@ -115,8 +115,8 @@ command: user_alias predicate {
 }
 user_alias: ident { 
 	#print "alias: $item{ident}\n";
-		$::user_alias{$item{ident}} }
-user_command: ident { return $item{ident} if $::user_command{$item{ident}} }
+		$::text->{user_alias}->{$item{ident}} }
+user_command: ident { return $item{ident} if $::text->{user_command}->{$item{ident}} }
 
 # other commands (generated automatically)
 #
@@ -190,7 +190,7 @@ help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::Text::help($item{anytag}) ; 1}
 help: _help { print $::help->{screen} ; 1}
 project_name: _project_name { 
-	print "project name: ", $::project->{name}, $/; 1}
+	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
 create_project: _create_project project_id { 
 	::Text::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -213,11 +213,11 @@ save_state: _save_state ident { ::save_state( $item{ident}); 1}
 save_state: _save_state { ::save_state(); 1}
 get_state: _get_state statefile {
  	::load_project( 
- 		name => $::project->{name},
+ 		name => $::gui->{_project_name}->{name},
  		settings => $item{statefile}
  		); 1}
 get_state: _get_state {
- 	::load_project( name => $::project->{name},) ; 1}
+ 	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
 getpos: _getpos {  
 	print ::d1( ::eval_iam q(getpos) ), $/; 1}
 setpos: _setpos timevalue {
@@ -499,7 +499,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { print $::copp{$::this_track->vol}[0], "\n" ; 1}
+vol: _vol { print $::fx->{params}->{$::this_track->vol}[0], "\n" ; 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -518,7 +518,7 @@ unity: _unity {
 	::effect_update_copp_set( 
 		$::this_track->vol, 
 		0, 
-		$::unity_level{$::cops{$::this_track->vol}->{type}}
+		$::fx->{unity_level}->{$::fx->{applied}->{$::this_track->vol}->{type}}
 	);
 	1;}
 
@@ -528,7 +528,7 @@ pan: _pan dd {
 pan: _pan sign dd {
 	::modify_effect( $::this_track->pan, 0, $item{sign}, $item{dd} );
 	1;} 
-pan: _pan { print $::copp{$::this_track->pan}[0], "\n"; 1}
+pan: _pan { print $::fx->{params}->{$::this_track->pan}[0], "\n"; 1}
 pan_right: _pan_right { ::pan_check( 100 ); 1}
 pan_left:  _pan_left  { ::pan_check(   0 ); 1}
 pan_center: _pan_center { ::pan_check(  50 ); 1}
@@ -627,10 +627,10 @@ add_controller: _add_controller parent effect value(s?) {
 	if($id)
 	{
 		my $i = 	::effect_index($code);
-		my $iname = $::effects[$i]->{name};
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::cops{$parent}->{type});
-		my $pname = $::effects[$pi]->{name};
+		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
 
@@ -647,10 +647,10 @@ add_controller: _add_controller effect value(s?) {
 	if($id)
 	{
 		my $i = 	::effect_index($code);
-		my $iname = $::effects[$i]->{name};
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::cops{$parent}->{type});
-		my $pname = $::effects[$pi]->{name};
+		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
 
@@ -664,7 +664,7 @@ add_effect: _add_effect effect value(s?) {
 	if ($id)
 	{
 		my $i = ::effect_index($code);
-		my $iname = $::effects[$i]->{name};
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
 		$::this_op = $id; # set current effect
 
 		print "\nAdded $id ($iname)\n\n";
@@ -682,10 +682,10 @@ insert_effect: _insert_effect before effect value(s?) {
 	if($id)
 	{
 		my $i = ::effect_index($code);
-		my $iname = $::effects[$i]->{name};
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $bi = 	::effect_index($::cops{$before}->{type});
-		my $bname = $::effects[$bi]->{name};
+		my $bi = 	::effect_index($::fx->{applied}->{$before}->{type});
+		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		print "\nInserted $id ($iname) before $before ($bname)\n\n";
 	}
@@ -695,7 +695,7 @@ before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::cops{$::this_op};
+		unless $::fx->{applied}->{$::this_op};
 	::modify_multiple_effects( 
 		[$::this_op], 
 		$item{'parameter(s)'},
@@ -706,7 +706,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::cops{$::this_op};
+		unless $::fx->{applied}->{$::this_op};
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	print ::Text::show_effect($::this_op);
 	1;
@@ -736,21 +736,21 @@ new_following_op: op_id
 show_effect: _show_effect op_id(s) {
 	my @lines = 
 		map{ ::Text::show_effect($_) } 
-		grep{ $::cops{$_} }
+		grep{ $::fx->{applied}->{$_} }
 		@{ $item{'op_id(s)'}};
 	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-	unless $::cops{$::this_op};
+	unless $::fx->{applied}->{$::this_op};
 	print ::Text::show_effect($::this_op);
 	1;
 }
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches ident(s) { 
- 	map{ delete $::bunch{$_} } @{$item{'ident(s)'}}; 1}
+ 	map{ delete $::gui->{_project_name}->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::Text::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
@@ -889,7 +889,7 @@ add_effect_chain: _add_effect_chain ident {
 	1;
 }
 delete_effect_chain: _delete_effect_chain ident(s) {
-	map{ delete $::effect_chain{$_} } @{ $item{'ident(s)'} };
+	map{ delete $::fx->{chain}->{$_} } @{ $item{'ident(s)'} };
 	1;
 }
 list_effect_chains: _list_effect_chains ident(s?) {
@@ -915,7 +915,7 @@ bunch_name: ident {
 effect_profile_name: ident
 existing_effect_profile_name: ident {
 	print("$item{ident}: no such effect profile\n"), return
-		unless $::effect_profile{$item{ident}};
+		unless $::fx->{profile}->{$item{ident}};
 	$item{ident}
 }
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name {
@@ -1061,11 +1061,11 @@ rec_end_mark: _rec_end_mark {
 	$::this_edit->rec_end_mark->jump_here; 1;
 }
 set_play_start_mark: _set_play_start_mark {
-	$::edit_points[0] = ::eval_iam('getpos'); 1}
+	$::setup->{edit_points}->[0] = ::eval_iam('getpos'); 1}
 set_rec_start_mark: _set_rec_start_mark {
-	$::edit_points[1] = ::eval_iam('getpos'); 1}
+	$::setup->{edit_points}->[1] = ::eval_iam('getpos'); 1}
 set_rec_end_mark: _set_rec_end_mark {
-	$::edit_points[2] = ::eval_iam('getpos'); 1}
+	$::setup->{edit_points}->[2] = ::eval_iam('getpos'); 1}
 end_edit_mode: _end_edit_mode { ::end_edit_mode(); 1;}
 
 disable_edits: _disable_edits { ::disable_edits();1 }

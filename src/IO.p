@@ -217,7 +217,7 @@ sub jack_multi_route {
 		? scalar @$count_maybe_ref 
 		: $count_maybe_ref;
 
-	#my $max = scalar @{$::jack{$client}{$direction}};
+	#my $max = scalar @{$::jack->{clients}->{$client}{$direction}};
 	die qq(JACK client "$client", direction: $direction
 channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;

@@ -244,7 +244,7 @@ sub rec_status {
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
-			$::duplicate_inputs{$track->name}
+			$::setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
@@ -708,9 +708,9 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $::copp{$track->vol}[0] != $track->mute_level
-		and $::copp{$track->vol}[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $::copp{$track->vol}[0]);
+	if ( $::fx->{params}->{$track->vol}[0] != $track->mute_level
+		and $::fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
+		$track->set(old_vol_level => $::fx->{params}->{$track->vol}[0]);
 		fadeout( $track->vol ) unless $nofade;
 	}
 	$track->set_vol($track->mute_level);
@@ -733,11 +733,11 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$::mute_level{$track->vol_type}
+	$::fx->{mute_level}->{$track->vol_type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$::fade_out_level{$track->vol_type}
+	$::fx->{fade_out_level}->{$track->vol_type}
 }
 sub set_vol {
 	my $track = shift;
@@ -746,7 +746,7 @@ sub set_vol {
 }
 sub vol_type {
 	my $track = shift;
-	$::cops{$track->vol}->{type}
+	$::fx->{applied}->{$track->vol}->{type}
 }
 sub import_audio  { 
 	my $track = shift;
@@ -779,7 +779,7 @@ sub import_audio  {
 		#say $cmd;
 		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
-	::rememoize() if $::opts{R}; # usually handled by reconfigure_engine() 
+	::rememoize() if $::config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 

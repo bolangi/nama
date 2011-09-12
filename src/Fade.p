@@ -73,9 +73,9 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = $::cops{$track->fader}->{type};
-	my $off_level = $::mute_level{$operator};
-	my $on_level  = $::unity_level{$operator};
+	my $operator  = $::fx->{applied}->{$track->fader}->{type};
+	my $off_level = $::fx->{mute_level}->{$operator};
+	my $on_level  = $::fx->{unity_level}->{$operator};
 
 	# remove controller if present
 	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
@@ -220,7 +220,7 @@ sub fader_envelope_pairs {
 		[ 	$marktime1, 
 			$marktime2, 
 			$fade->type, 
-			$::cops{$track->fader}->{type},
+			$::fx->{applied}->{$track->fader}->{type},
 		];
 }
 	# sort fades -  may not need this

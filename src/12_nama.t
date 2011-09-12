@@ -56,7 +56,7 @@ is( $config->{formats}->{mix_to_disk}, "s16_le,N,44100,i", "Read mix_to_disk_for
 =skip
 # Ecasound dependent
 diag "Check static effects data read";
-is( $::e_bound{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
+is( $::fx_cache->{split}->{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
 
 diag "Check effect hinting and help";
 
