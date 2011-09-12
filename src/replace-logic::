@@ -2,7 +2,6 @@
 use Modern::Perl;
 use File::Slurp;
 my ($simulate) = grep{ $_ eq '-n' } @ARGV;
-$simulate and die "happily";
 my %files;
 my @target_files = glob "*.p *.pl *.t";
 map{ $files{$_} = read_file($_)} @target_files;
@@ -70,10 +69,10 @@ map {
 
 		my $var = $_;
 		
-		say "replacing $var";
+		#say "replacing $var";
 		my ($sigil,$ident) = sigil($var);
 
-		say "var: $var sigil: $sigil ident: $ident";
+		#say "var: $var sigil: $sigil ident: $ident";
 
 		my $new_var = $var_map{$var};
 		
@@ -81,7 +80,7 @@ map {
 
 		$new_var =~ s/([\%\@\$])/$1::/;
 
-		say "new: $new_var sigil: $new_sigil ident: $new_ident";
+		#say "new: $new_var sigil: $new_sigil ident: $new_ident";
 
 		my $new_var_colon = "$new_sigil\::$new_ident";
 
@@ -164,8 +163,9 @@ map {
 
 	} 
 		keys %var_map;
-	write_file($filename, $file);
-	say "filename: $filename\n$file";
+	write_file($filename, $file) unless $simulate;
+	say "filename: $filename";
+	say $file if $simulate;
 } (@target_files);
 
 
