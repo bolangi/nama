@@ -9,7 +9,7 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
-use ::Globals qw(:singletons $debug $debug2);
+use ::Globals qw(:singletons %tn $debug $debug2 @fade_data);
 local $debug2 = local $debug = 1;
 
 use ::Object qw( 
@@ -34,7 +34,7 @@ initialize();
 
 sub initialize { 
 	%by_index = (); 
-	@::fade_data = (); # for save/restore
+	@fade_data = (); # for save/restore
 }
 sub next_n {
 	my $n = 1;
@@ -60,7 +60,7 @@ sub new {
 
 	my $id = add_fader($object->track);	# only when necessary
 	
-	my $track = $::tn{$object->track};
+	my $track = $tn{$object->track};
 
 	# add linear envelope controller -klg if needed
 	
@@ -73,9 +73,9 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = $::fx->{applied}->{$track->fader}->{type};
-	my $off_level = $::fx->{mute_level}->{$operator};
-	my $on_level  = $::fx->{unity_level}->{$operator};
+	my $operator  = $fx->{applied}->{$track->fader}->{type};
+	my $off_level = $fx->{mute_level}->{$operator};
+	my $on_level  = $fx->{unity_level}->{$operator};
 
 	# remove controller if present
 	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
@@ -116,7 +116,7 @@ sub fades {
 	# get fades within playable region
 	
 	my $track_name = shift;
-	my $track = $::tn{$track_name};
+	my $track = $tn{$track_name};
 	my @fades = all_fades($track_name);
 
 	
@@ -187,7 +187,7 @@ sub final_pair {   # duration: .... to length
 	my $track_name = shift;
 	my $exit_level = exit_level($track_name);
 	defined $exit_level or return ();
-	my $track = $::tn{$track_name};
+	my $track = $tn{$track_name};
 	(
 		$track->adjusted_playat_time + $track->wav_length,
 		$exit_level
@@ -220,7 +220,7 @@ sub fader_envelope_pairs {
 		[ 	$marktime1, 
 			$marktime2, 
 			$fade->type, 
-			$::fx->{applied}->{$track->fader}->{type},
+			$fx->{applied}->{$track->fader}->{type},
 		];
 }
 	# sort fades -  may not need this
@@ -251,7 +251,7 @@ sub fader_envelope_pairs {
 
 sub spec_to_pairs {
 	my ($from, $to, $type, $op) = @{$_[0]};
-	$::debug and say "from: $from, to: $to, type: $type";
+	$debug and say "from: $from, to: $to, type: $type";
 	my $cutpos;
 	my @pairs;
 
@@ -300,7 +300,7 @@ sub remove_by_index {
 
 sub remove { 
 	my $fade = shift;
-	my $track = $::tn{$fade->track};
+	my $track = $tn{$fade->track};
 	my $i = $fade->n;
 	
 	# remove object from index
@@ -311,13 +311,13 @@ sub remove {
 	my @track_fades = all_fades($fade->track);
 	if ( ! @track_fades ){ 
 		::remove_effect($track->fader);
-		$::tn{$fade->track}->set(fader => undef);
+		$tn{$fade->track}->set(fader => undef);
 	}
 	else { refresh_fade_controller($track) }
 }
 sub add_fader {
 	my $name = shift;
-	my $track = $::tn{$name};
+	my $track = $tn{$name};
 
 	my $id = $track->fader;
 
