@@ -49,7 +49,7 @@ sub new {
 	my $object = bless 
 	{ 
 #		class => $class,  # not needed yet
-		n => next_n(), 
+		n => next_n(),    
 		relation => 'fade_from_mark',
 		@_	
 	}, $class;
@@ -223,7 +223,7 @@ sub fader_envelope_pairs {
 			$::cops{$track->fader}->{type},
 		];
 }
-	# sort fades # already done! XXX
+	# sort fades -  may not need this
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
 	$debug and say( ::yaml_out( \@specs));
 
