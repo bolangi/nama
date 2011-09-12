@@ -82,9 +82,9 @@ sub initialize_project_data {
 	$setup->{_old_snapshot} = {};
 	$mode->{preview} = $config->{initial_mode};
 	$mode->{mastering} = 0;
-	$gui->{_project_name}->{save_file_version_number} = 0; 
+	$project->{save_file_version_number} = 0; 
 	
-	%{$gui->{_project_name}->{bunch}} = ();	
+	%{$project->{bunch}} = ();	
 	
 	create_system_buses();
 	$this_bus = 'Main';

@@ -145,7 +145,7 @@ sub init_gui {
 		 sub {save_state($gui->{_save_id}) });
 	$gui->{load_savefile}->configure(
 		-text => 'Recall settings',
- 		-command => sub {load_project (name => $gui->{_project_name}->{name}, 
+ 		-command => sub {load_project (name => $project->{name},  # current project 
  										settings => $gui->{_save_id})},
 				);
 	$gui->{quit}->configure(-text => "Quit",

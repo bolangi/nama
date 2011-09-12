@@ -342,7 +342,7 @@ sub t_load_project {
 		say $savefile, "\n";
 	}
 	load_project( name => $newname );
-	print "loaded project: $gui->{_project_name}->{name}\n";
+	print "loaded project: $project->{name}\n";
 	$debug and print "hook: $config->{execute_on_project_load}\n";
 	::command_process($config->{execute_on_project_load});
 		
@@ -357,7 +357,7 @@ sub t_create_project {
 		name => remove_spaces($name),
 		create => 1,
 	);
-	print "created project: $gui->{_project_name}->{name}\n";
+	print "created project: $project->{name}\n";
 
 }
 sub t_insert_effect {
@@ -486,15 +486,15 @@ sub bunch {
 	package ::;
 	my ($bunchname, @tracks) = @_;
 	if (! $bunchname){
-		::pager(yaml_out( $gui->{_project_name}->{bunch} ));
+		::pager(yaml_out( $project->{bunch} ));
 	} elsif (! @tracks){
-		$gui->{_project_name}->{bunch}->{$bunchname} 
-			and print "bunch $bunchname: @{$gui->{_project_name}->{bunch}->{$bunchname}}\n" 
+		$project->{bunch}->{$bunchname} 
+			and print "bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n" 
 			or  print "bunch $bunchname: does not exist.\n";
 	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
 		print "@mispelled: mispelled track(s), skipping.\n";
 	} else {
-	$gui->{_project_name}->{bunch}->{$bunchname} = [ @tracks ];
+	$project->{bunch}->{$bunchname} = [ @tracks ];
 	}
 }
 sub add_to_bunch {}

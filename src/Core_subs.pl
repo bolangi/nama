@@ -138,7 +138,7 @@ sub destroy_current_wav {
 
 sub is_bunch {
 	my $name = shift;
-	$bn{$name} or $gui->{_project_name}->{bunch}->{$name}
+	$bn{$name} or $project->{bunch}->{$name}
 }
 
 sub pan_check {
@@ -185,7 +185,7 @@ sub bunch_tracks {
 		$bunchy = uc $bunchy;
 		@tracks = grep{$tn{$_}->$method eq $bunchy} 
 				$bn{$this_bus}->tracks
-	} elsif ( $gui->{_project_name}->{bunch}->{$bunchy} and @tracks = @{$gui->{_project_name}->{bunch}->{$bunchy}}  ) {
+	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$gui->{_project_name}->{bunch}->{$bunchy}}  ) {
 		$debug and print "bunch tracks: @tracks\n";
 	} else { say "$bunchy: no matching bunch identifier found" }
 	@tracks;

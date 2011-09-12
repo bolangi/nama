@@ -30,8 +30,8 @@ sub initialize_interfaces {
 
 	choose_sleep_routine();
 
-	$gui->{_project_name}->{name} = shift @ARGV;
-	$debug and print "project name: $gui->{_project_name}->{name}\n";
+	$project->{name} = shift @ARGV;
+	$debug and print "project name: $project->{name}\n";
 
 	$debug and print("$config->{opts}\n======\n", yaml_out($config->{opts})); ; 
 
@@ -127,13 +127,13 @@ exit;
 
 	# set default project to "untitled"
 	
-	if (! $gui->{_project_name}->{name} ){
-		$gui->{_project_name}->{name} = "untitled";
+	if (! $project->{name} ){
+		$project->{name} = "untitled";
 		$config->{opts}->{c}++; 
 	}
-	print "\nproject_name: $gui->{_project_name}->{name}\n";
+	print "\nproject_name: $project->{name}\n";
 	
-	load_project( name => $gui->{_project_name}->{name}, create => $config->{opts}->{c}) ;
+	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	restore_effect_chains();
 	restore_effect_profiles();
 	1;	

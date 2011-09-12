@@ -85,7 +85,7 @@ sub reconfigure_engine {
 	#  - change in edit mode
 	
 	if ( 	$mode->{preview} eq 'doodle' 
-		 or $setup->{_old_snapshot}->{project} ne $gui->{_project_name}->{name}
+		 or $setup->{_old_snapshot}->{project} ne $project->{name}
 		 or $mode->{offset_run} != $old_offset_run_status
 		# TODO: or change in global version
 	){} # do nothing
@@ -159,7 +159,7 @@ sub reconfigure_engine {
 sub status_snapshot {
 
 	
-	my %snapshot = ( project 		=> 	$gui->{_project_name}->{name},
+	my %snapshot = ( project 		=> 	$project->{name},
 					 mastering_mode => $mode->{mastering},
 					 preview        => $mode->{preview},
 					 jack_running	=> $jack->{jackd_running},
