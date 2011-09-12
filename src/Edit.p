@@ -233,9 +233,9 @@ sub destroy {
 	}
 	# remove edit track WAV files if we've reached here
 	map{ 
-		my $file = ::join_path(::this_wav_dir(), $_);
-		say "removing $file";
-		#unlink $file;
+		my $path = ::join_path(::this_wav_dir(), $_);
+		say "removing $path";
+		#unlink $path;
 	} @wavs;
 }
 
