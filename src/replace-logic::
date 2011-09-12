@@ -1,0 +1,213 @@
+#!/usr/bin/perl
+use Modern::Perl;
+use File::Slurp;
+my %files;
+my @target_files = glob "*.p *.pl *.t";
+map{ $files{$_} = read_file($_)} @target_files;
+
+my %var_map = 
+			
+			map  { split " ", $_ }  # store as key/value pairs
+			grep { my @var = split " ", $_; @var == 2 } # take only substitutions
+			grep{ ! /^\s*$/ }  	# skip blank lines
+			split "\n", read_file("./var_map");
+
+=comment
+my %var_map = ( '@effects' => '$fx->{registry}',
+			 '$scalar'  => '$fx->{scalar}',
+);
+
+=cut
+# remove 'our @effects' declaration (later)
+
+use Data::Dumper;
+#print Dumper \%var_map;
+
+my $file = <<'FILE';
+
+our ( $off @effects %goof );
+
+@effects,
+
+$effects[$i],
+
+\@effects,
+
+$scalar,
+
+$cops{$i},
+
+     @effects_static_vars 
+
+@::effects,
+
+$::effects[$i],
+
+\@::effects,
+
+$::scalar,
+
+$::cops{$i},
+
+     @::effects_static_vars 
+FILE
+my $was = $file;
+
+$files{foo_test} = $file;
+
+# remove our declaration
+
+map { 
+	my $filename = $_;
+	my $file = $files{$_};
+	#$filename = 'test';
+	
+ 	say "file $filename $file";
+
+	map { 
+
+		my $var = $_;
+		
+		say "replacing $var";
+		my ($sigil,$ident) = sigil($var);
+
+		say "var: $var sigil: $sigil ident: $ident";
+
+		my $new_var = $var_map{$var};
+		
+		my ($new_sigil, $new_ident) = sigil($new_var);
+
+		$new_var =~ s/([\%\@\$])/$1::/;
+
+		say "new: $new_var sigil: $new_sigil ident: $new_ident";
+
+		my $new_var_colon = "$new_sigil\::$new_ident";
+
+		if ($sigil eq '$')
+			{
+				my $re = qr/\$
+							::
+							$ident
+							\b
+							/x;
+
+				# direct substitution only
+				$file =~ s/$re/$new_var_colon/g;
+			}
+		elsif ( $sigil eq '@' or $sigil eq '%' )
+			{
+				# substitute ref-ed variable with replacement 
+				# \@effects -> $fx->{registry}
+
+				my $re = qr/\\
+							$sigil
+							::
+							$ident
+							\b
+							/x;
+
+				$file =~ s/$re/$new_var/g;
+
+				# substitute variable with deref, i.e. @effects -> @{$fx->{registry}}
+
+				$re = qr/$sigil
+							::
+							$ident
+							\b
+							/x;
+
+				$file =~ s/$re/$sigil\{$new_var_colon\}/g;
+
+				# change array to array_ref subscripting
+				# $effects[$i] -> $fx->{registry}->[$i]
+
+				$re = qr/	\$   		# dollar sigil
+							::	     	# main package prefix
+							$ident		
+							([\[\{])	# open curly or square bracket
+							/x;
+
+
+				$file =~ s/$re/\$::$new_ident\->$1/g;
+			}
+		if ($sigil eq '@')
+
+		{
+				my $re = qr / 	\$			# dollar sigil
+							\#			# last index
+							$ident
+							\b
+						/x;
+			 	$file =~ s/$re/\$#{$new_var_colon}/g;
+			
+		}
+
+		# remove redundant ref-deref
+
+		# \@{$fx->{registry}} -> $fx->{registry} 
+
+		#All these substitutions must be modified for
+		#grammar_body.pl. No! we skip and fix later.
+
+=comment
+			my $re = qr/
+						\\ 		# backlash
+						[\%\@]	# array or hash sigil
+						[\{\[]  # open curly or square bracket
+						$new_var
+						/x;
+
+			$file =~ s/$re/$new_var/g;
+=cut
+
+	} 
+		#grep{ $_ =~ /\@effects/ } 
+		keys %var_map;
+	#write_file($filename, $file);
+	say "filename: $filename\n$file";
+} ('foo_test');
+
+
+
+
+sub sigil { $_[0] =~ /([\%\@\$])(.+)/ }  # $fx->{add} becomes qw( $ fx->{add} )
+											 # $fx becomes qw( $ fx)
+__END__
+Restore
+
+if version less than 1.079, replace array/hash assignment 
+of targeted variables with array/hash reference assignemnt
+
+
+%cops -> $cops
+
+Look for $cops(?![_{]|->)
+
+our %cops -> our $cops
+
+%cops -> %$cops 
+
+\%$cops -> $cops
+
+$cops[$i] -> $cops->[$i]
+
+
+
+Quoted Interpolation
+
+Look for $object->method_call contained within common
+quoting
+
+"          " 
+qq(        ) 
+qx(        )
+qr/        /
+=~ m/      /
+=~ s/      /
+
+<<HEREIS;
+
+Project name:
+$project->name
+
+HEREIS
