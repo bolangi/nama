@@ -12,7 +12,7 @@ use ::Globals qw(:all);
 sub save_state {
 	my $filename = shift || $file->{state_store}; 
 	$debug2 and print "&save_state\n";
-	$gui->{_project_name}->{save_file_version_number} = $VERSION;
+	$project->{save_file_version_number} = $VERSION;
 
 
 	# some stuff get saved independently of our state file
@@ -167,7 +167,7 @@ sub restore_state {
 	
 	# backward compatibility fixes for older projects
 
-	if (! $gui->{_project_name}->{save_file_version_number} ){
+	if (! $project->{save_file_version_number} ){
 
 		# Tracker group is now called 'Main'
 	
@@ -193,7 +193,7 @@ sub restore_state {
 			}
 		}
 	}
-	if( $gui->{_project_name}->{save_file_version_number} < 0.9986){
+	if( $project->{save_file_version_number} < 0.9986){
 	
 		map { 	# store insert without intermediate array
 
@@ -240,10 +240,10 @@ sub restore_state {
 	}
 
 	# jack_manual is now called jack_port
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1){
+	if ( $project->{save_file_version_number} <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.053){ # convert insert data to object
+	if ( $project->{save_file_version_number} <= 1.053){ # convert insert data to object
 		my $n = 0;
 		@inserts_data = ();
 		for my $t (@tracks_data){
@@ -259,7 +259,7 @@ sub restore_state {
 			push @inserts_data, $i;
 		} 
 	}
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.054){ 
+	if ( $project->{save_file_version_number} <= 1.054){ 
 
 		for my $t (@tracks_data){
 
@@ -272,7 +272,7 @@ sub restore_state {
 
 	}
 
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.055){ 
+	if ( $project->{save_file_version_number} <= 1.055){ 
 
 	# get rid of Null bus routing
 	
@@ -283,7 +283,7 @@ sub restore_state {
 
 	}
 
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.064){ 
+	if ( $project->{save_file_version_number} <= 1.064){ 
 		map{$_->{version} = $_->{active};
 			delete $_->{active}}
 			grep{$_->{active}}
@@ -301,7 +301,7 @@ sub restore_state {
 			}
 		} grep{$_->{name} eq 'Master'} @tracks_data;
 
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.064){ 
+	if ( $project->{save_file_version_number} <= 1.064){ 
 
 		map{ 
 			my $default_list = ::IO::default_jack_ports_list($_->{name});
@@ -315,7 +315,7 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.067){ 
+	if ( $project->{save_file_version_number} <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
 		map{ 
@@ -333,7 +333,7 @@ sub restore_state {
 
  		} @tracks_data;
 	}
-	if ( $gui->{_project_name}->{save_file_version_number} <= 1.068){ 
+	if ( $project->{save_file_version_number} <= 1.068){ 
 
 		# initialize version_comment field
 		map{ $_->{version_comment} or $_->{version_comment} = {} } @tracks_data;
@@ -347,7 +347,7 @@ sub restore_state {
 		} grep { $_->{version_comment} } @tracks_data;
 	}
 	# convert to new MixTrack class
-	if ( $gui->{_project_name}->{save_file_version_number} < 1.069){ 
+	if ( $project->{save_file_version_number} < 1.069){ 
 		map {
 		 	$_->{was_class} = $_->{class};
 			$_->{class} = $_->{'::MixTrack'};

@@ -5,15 +5,12 @@ use Modern::Perl;
 use Carp;
 use File::Slurp;
 
-{ # OPTIMIZATION
+# this sub caches the symlink-resolved form of the 
+# project root directory
 
-  # we allow for the (admitted rare) possibility that
-  # $config->{root_dir} may change
-
-my %proot;
 sub project_root { 
+	state %proot;
 	$proot{$config->{root_dir}} ||= resolve_path($config->{root_dir})
-}
 }
 
 sub config_file { $config->{opts}->{f} ? $config->{opts}->{f} : ".namarc" }
@@ -22,16 +19,16 @@ sub config_file { $config->{opts}->{f} ? $config->{opts}->{f} : ".namarc" }
 my %wdir; 
 sub this_wav_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
-	$gui->{_project_name}->{name} and
-	$wdir{$gui->{_project_name}->{name}} ||= resolve_path(
-		join_path( project_root(), $gui->{_project_name}->{name}, q(.wav) )  
+	$project->{name} and
+	$wdir{$project->{name}} ||= resolve_path(
+		join_path( project_root(), $project->{name}, q(.wav) )  
 	);
 }
 }
 
 sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
-	$gui->{_project_name}->{name} and join_path( project_root(), $gui->{_project_name}->{name}) 
+	$project->{name} and join_path( project_root(), $project->{name}) 
 }
 
 sub list_projects {
@@ -50,7 +47,7 @@ sub initialize_project_data {
 	return if transport_running();
 	$ui->destroy_widgets();
 	$ui->project_label_configure(
-		-text => uc $gui->{_project_name}->{name}, 
+		-text => uc $project->{name}, 
 		-background => 'lightyellow',
 		); 
 
@@ -105,15 +102,15 @@ sub load_project {
 	my %h = @_;
 	$debug and print yaml_out \%h;
 	print("no project name.. doing nothing.\n"),return 
-		unless $h{name} or $gui->{_project_name};
-	$gui->{_project_name}->{name} = $h{name} if $h{name};
+		unless $h{name} or $project->{name};
+	$project->{name} = $h{name} if $h{name};
 
-	if ( ! -d join_path( project_root(), $gui->{_project_name}->{name}) ){
+	if ( ! -d join_path( project_root(), $project->{name}) ){
 		if ( $h{create} ){
 			map{create_dir($_)} &project_dir, &this_wav_dir ;
 		} else { 
 			print qq(
-Project "$gui->{_project_name}->{name}" does not exist. 
+Project "$project->{name}" does not exist. 
 Loading project "untitled".
 );
 			load_project( qw{name untitled create 1} );
@@ -313,7 +310,7 @@ sub new_project_template {
 	# recall temp name
 	
  	load_project(  # restore_state() doesn't do the whole job
- 		name     => $gui->{_project_name}->{name},
+ 		name     => $project->{name},
  		settings => $previous_state,
 	);
 
@@ -334,7 +331,7 @@ sub use_project_template {
 	# load template
 	
  	load_project(
- 		name     => $gui->{_project_name}->{name},
+ 		name     => $project->{name},
  		settings => join_path(project_root(),"templates",$name),
 	);
 	save_state();
