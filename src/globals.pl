@@ -13,3 +13,4 @@ $debug
 $debug2
 @config_vars
 @persistent_vars
+@new_persistent_vars

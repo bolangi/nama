@@ -44,6 +44,7 @@ debug => [qw( 		$debug
 
 						@config_vars
 						@persistent_vars
+						@new_persistent_vars
 	)],
 
 	serialize =>  [qw(

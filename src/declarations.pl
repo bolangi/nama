@@ -50,7 +50,8 @@ $prompt,
 
 # category: serialization
 
-	@persistent_vars, # a set of variables we save
+	@persistent_vars, # a set of global variables we save
+	@new_persistent_vars, # variables and hash entries
 	@effects_static_vars,# the list of which variables to store and retrieve
 	@config_vars,    # contained in config file
 

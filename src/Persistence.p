@@ -119,7 +119,7 @@ sub save_system_state {
 	serialize(
 		file => $filename, 
 		format => 'yaml',
-		vars => \@persistent_vars,
+		vars => \@new_persistent_vars,
 		class => '::',
 		);
 
