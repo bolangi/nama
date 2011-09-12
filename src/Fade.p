@@ -9,7 +9,9 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index $fade_down_fraction
 $fade_time1_fraction $fade_time2_fraction $fader_op);
-use ::Globals qw(:singletons $debug);
+use ::Globals qw(:singletons $debug $debug2);
+local $debug2 = local $debug = 1;
+
 use ::Object qw( 
 				 n
 				 type
