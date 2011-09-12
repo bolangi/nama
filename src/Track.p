@@ -131,13 +131,13 @@ sub new {
 	::add_pan_control($n);
 	::add_volume_control($n);
 
-	#my $group = $::bn{ $object->group }; 
+	#my $group = $bn{ $object->group }; 
 
 	# create group if necessary
 	#defined $group or $group = ::Group->new( name => $object->group );
 	#my @existing = $group->tracks ;
 	#$group->set( tracks => [ @existing, $object->name ]);
-	$::this_track = $object;
+	$this_track = $object;
 	$object;
 	
 }
@@ -158,7 +158,7 @@ sub dir {
 # overrides default Object::Tiny accessor (returning $self->{target})
 sub target {
 	my $self = shift;
-	my $parent = $::tn{$self->{target}};
+	my $parent = $tn{$self->{target}};
 	defined $parent && $parent->target || $self->{target};
 }
 
@@ -171,7 +171,7 @@ sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
 sub group_last {
 	my $track = shift;
-	my $group = $::bn{$track->group}; 
+	my $group = $bn{$track->group}; 
 	#print join " ", 'searching tracks:', $group->tracks, $/;
 	$group->last;
 }
@@ -208,7 +208,7 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 
-	my $group = $::bn{$track->group};
+	my $group = $bn{$track->group};
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
@@ -225,7 +225,7 @@ sub maybe_monitor { # ordinary sub, not object method
 }
 
 sub rec_status {
-#	$::debug2 and print "&rec_status\n";
+#	$debug2 and print "&rec_status\n";
 	my $track = shift;
 	my $bug = shift;
 	local $debug;
@@ -234,7 +234,7 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
-	my $group = $::bn{$track->group};
+	my $group = $bn{$track->group};
 	#$debug and say join " ", "bus:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
@@ -244,7 +244,7 @@ sub rec_status {
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
-			$::setup->{tracks_with_duplicate_inputs}->{$track->name}
+			$setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
@@ -257,7 +257,7 @@ sub rec_status {
 			
 	# for null tracks
 	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
-				or $::bn{$track->name}
+				or $bn{$track->name}
 					and $track->rec_defeat) ){
 		given( $track->source_type){
 			when('jack_client'){
@@ -420,8 +420,8 @@ sub postfader_insert { ::Insert::get_id($_[0],'post') }
 sub remove {
 	my $track = shift;
 	my $n = $track->n;
-	$::ui->remove_track_gui($n); 
- 	$::this_track = $::ti{::Track::idx() - 1};
+	$ui->remove_track_gui($n); 
+ 	$this_track = $ti{::Track::idx() - 1};
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
@@ -708,9 +708,9 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $::fx->{params}->{$track->vol}[0] != $track->mute_level
-		and $::fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $::fx->{params}->{$track->vol}[0]);
+	if ( $fx->{params}->{$track->vol}[0] != $track->mute_level
+		and $fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
+		$track->set(old_vol_level => $fx->{params}->{$track->vol}[0]);
 		fadeout( $track->vol ) unless $nofade;
 	}
 	$track->set_vol($track->mute_level);
@@ -733,11 +733,11 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$::fx->{mute_level}->{$track->vol_type}
+	$fx->{mute_level}->{$track->vol_type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$::fx->{fade_out_level}->{$track->vol_type}
+	$fx->{fade_out_level}->{$track->vol_type}
 }
 sub set_vol {
 	my $track = shift;
@@ -746,7 +746,7 @@ sub set_vol {
 }
 sub vol_type {
 	my $track = shift;
-	$::fx->{applied}->{$track->vol}->{type}
+	$fx->{applied}->{$track->vol}->{type}
 }
 sub import_audio  { 
 	my $track = shift;
@@ -779,7 +779,7 @@ sub import_audio  {
 		#say $cmd;
 		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
-	::rememoize() if $::config->{opts}->{R}; # usually handled by reconfigure_engine() 
+	::rememoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
@@ -792,7 +792,7 @@ sub bus_tree { # for solo function to work in sub buses
 	my $track = shift;
 	my $mix = $track->group;
 	return if $mix eq 'Main';
-	($mix, $::tn{$mix}->bus_tree);
+	($mix, $tn{$mix}->bus_tree);
 }
 
 sub version_has_edits { 
@@ -806,7 +806,7 @@ sub version_has_edits {
 sub edits_enabled {
 	my $track = shift;
 	my $bus;
-	$bus = $::Bus::by_name{$track->name}
+	$bus = $bn{$track->name}
 	and $bus->rw ne 'OFF'
 	and $track->rec_status eq 'REC' 
 	and $track->rec_defeat
@@ -916,31 +916,31 @@ package ::SlaveTrack; # for instrument monitor bus
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub width { $::tn{$_[0]->target}->width }
-sub rec_status { $::tn{$_[0]->target}->rec_status }
-sub full_path { $::tn{$_[0]->target}->full_path} 
-sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
-sub source_type { $::tn{$_[0]->target}->source_type}
-sub source_id { $::tn{$_[0]->target}->source_id}
-sub source_status { $::tn{$_[0]->target}->source_status }
-sub send_type { $::tn{$_[0]->target}->send_type}
-sub send_id { $::tn{$_[0]->target}->send_id}
-sub dir { $::tn{$_[0]->target}->dir }
+sub width { $tn{$_[0]->target}->width }
+sub rec_status { $tn{$_[0]->target}->rec_status }
+sub full_path { $tn{$_[0]->target}->full_path} 
+sub monitor_version { $tn{$_[0]->target}->monitor_version} 
+sub source_type { $tn{$_[0]->target}->source_type}
+sub source_id { $tn{$_[0]->target}->source_id}
+sub source_status { $tn{$_[0]->target}->source_status }
+sub send_type { $tn{$_[0]->target}->send_type}
+sub send_id { $tn{$_[0]->target}->send_id}
+sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::CacheRecTrack; # for graph generation
 our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
-	my $target = $::tn{$track->target};
+	my $target = $tn{$track->target};
 		$target->last + 1
 # 	if ($target->rec_status eq 'MON'
-# 		or $target->rec_status eq 'REC' and $::bn{$track->target}){
+# 		or $target->rec_status eq 'REC' and $bn{$track->target}){
 # 	}
 }
 sub current_wav {
 	my $track = shift;
-		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
+		$tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
 }
@@ -1027,7 +1027,7 @@ sub add_track {
 	$debug and print "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}\n";
 	
 	say("$name: track name already in use. Skipping."), return 
-		if $::Track::by_name{$name};
+		if $tn{$name};
 	say("$name: reserved track name. Skipping"), return
 	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
