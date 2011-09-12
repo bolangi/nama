@@ -316,20 +316,12 @@ sub find_effect {
 	#print "keys: @keys\n";
 	#my @output;
 	my @matches = grep{ 
-		my $help = $_; 
+		my $_help = $_; 
 		my $didnt_match;
-		map{ $help =~ /\Q$_\E/i or $didnt_match++ }  @keys;
+		map{ $_help =~ /\Q$_\E/i or $didnt_match++ }  @keys;
 		! $didnt_match; # select if no cases of non-matching
 	} @{$fx_cache->{user_help}};
 	if ( @matches ){
-# 		push @output, <<EFFECT;
-# 
-# Effects matching "@keys" were found. The "pn:" prefix 
-# indicates an Ecasound preset. The "el:" prefix indicates
-# a LADSPA plugin. No prefix indicates an Ecasound chain
-# operator.
-# 
-# EFFECT
 	::pager( $text->{wrap}->paragraphs(@matches) , "\n" );
 	} else { print join " ", "No effects were found matching:",@keys,"\n\n" }
 }
