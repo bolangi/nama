@@ -1,4 +1,10 @@
 # gui handling
+
+# in the $gui variable, keys with leading _underscore
+# indicate regular variables
+#
+# $gui->{_project_name}  # normal scalar/array/hash values
+# $gui->{no_underscore}  # Tk objects (widgets, frames, etc.)
 #
 sub init_gui {
 
