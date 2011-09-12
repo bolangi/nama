@@ -190,7 +190,7 @@ help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::Text::help($item{anytag}) ; 1}
 help: _help { print $::help->{screen} ; 1}
 project_name: _project_name { 
-	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
+	print "project name: ", $::project->{name}, $/; 1}
 create_project: _create_project project_id { 
 	::Text::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -213,11 +213,11 @@ save_state: _save_state ident { ::save_state( $item{ident}); 1}
 save_state: _save_state { ::save_state(); 1}
 get_state: _get_state statefile {
  	::load_project( 
- 		name => $::gui->{_project_name}->{name},
+ 		name => $::project->{name},
  		settings => $item{statefile}
  		); 1}
 get_state: _get_state {
- 	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
+ 	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
 	print ::d1( ::eval_iam q(getpos) ), $/; 1}
 setpos: _setpos timevalue {
