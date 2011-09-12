@@ -20,8 +20,15 @@
 # subroutines in the base class.
 #
 # However because both subclass packages occupy the same file as 
-# the base class package, all variables (defined by 'our') can 
+# the base class package, all variables defined by 'our' can 
 # be accessed without a package prefix.
+#
+# With the introduction of variable export by ::Globals,
+# 'our' is used secondarily to provide the global vars to multiple
+# members of a class hierarchy to singletons, pronouns,
+# and other categories of remaining globals.
+#
+#
 
 package ::;
 require 5.10.0;
