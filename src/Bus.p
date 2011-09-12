@@ -1,15 +1,16 @@
-
 # ------------  Bus --------------------
 #
 # The base class ::Bus is now used for grouping tracks
 # serving the role of ::Group, which is now a 
 # parent class.
 
+package ::;
+our ($debug);
+
 package ::Bus;
 use Modern::Perl; use Carp; our @ISA = qw( ::Object ::Group );
 our $VERSION = 1.0;
-our ($debug, %by_name); 
-*debug = \$::debug;
+our (%by_name); 
 
 use ::Object qw(
 					name
