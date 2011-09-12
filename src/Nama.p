@@ -139,7 +139,6 @@ $file = {
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
-$gui->{_default_palette_yml} = get_data_section("default_palette_yml");
 
 
 $config = {

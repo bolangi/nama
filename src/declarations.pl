@@ -5,7 +5,6 @@
 
 # category: fixed
 
-# 	$config->{banner},
 	$debug,				# debug level flags for diagnostics
 	$debug2,			# for subroutine names as execute
 	$debug3,			# deprecated
@@ -197,8 +196,6 @@ $prompt,
 # 	$gui->{_chr},			# recording channel assignment
 # 	$gui->{_chm},			# monitoring channel assignment
 # 	$gui->{_save_id},		# name for save file
-
-# 	$config->{gui_default_palette_yml}, # default GUI colors
 
 	# Widgets
 	
