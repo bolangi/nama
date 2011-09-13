@@ -13,7 +13,7 @@ use File::HomeDir;
 use Storable qw(nstore retrieve);
 use JSON::XS;
 use Data::Dumper::Concise;
-#use Devel::Cycle;
+use Devel::Cycle;
 
 require Exporter;
 
@@ -258,14 +258,21 @@ sub serialize {
 	my $file  = $h{file};
 	my $format = $h{format} //= 'json'; # default to json
 
- 	$class .= "::" unless $class =~ /::$/; # SKIP_PREPROC
+ 	$class //= "::";
+	$class =~ /::$/ or $class .= '::'; # SKIP_PREPROC
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
-	map{ my ($sigil, $identifier, $key) = /
-			(.) 		# first character, sigil
-			([\w:]+)	# identifier, possibly perl namespace 
-			(->{\w+})?  # optional hash key for new hash-singleton vars
+	my $parse_re = 
+			qr/ ^ 				# beginning anchor
+			([\%\@\$]) 		# first character, sigil
+			([\w:]+)		# identifier, possibly perl namespace 
+			(?:->{(\w+)})?  # optional hash key for new hash-singleton vars
+			$ 				# end anchor
 			/x;
+	map{ 
+		my ($sigil, $identifier, $key) = /$parse_re/;
+
+	$debug and say "found sigil: $sigil, ident: $identifier, key: $key";
 
 # note: for  YAML::Reader/Writer  all scalars must contain values, not references
 # more YAML adjustments 
@@ -287,14 +294,15 @@ sub serialize {
 							. $sigil
 							. ($identifier =~ /:/ ? '' : $class)
 							. $identifier
-							. $key ? qq(->{$key}) : q();
+							. ($key ? qq(->{$key}) : q());
 
+		$debug and say "value: $value";
 
 			
 		 my $eval_string =  q($state{')
 							. $identifier
 							. q('})
-							. $key ? qq(->{$key}) : q()
+							. ($key ? qq(->{$key}) : q() )
 							. q( = )
 							. $value;
 
