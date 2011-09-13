@@ -288,6 +288,7 @@ sub serialize {
 # in case $key is provided
 # $state{ident}->{$key} = $singleton->{$key};
 #
+			
 
 		my $value =  ($sigil ne q($) ? q(\\) : q() ) 
 
@@ -306,11 +307,17 @@ sub serialize {
 							. q( = )
 							. $value;
 
-	$debug and print "attempting to eval $eval_string\n";
-	eval($eval_string) or $debug  and print 
-		"eval returned zero or failed ($@\n)";
+		if ($identifier){
+			$debug and print "attempting to eval $eval_string\n";
+			eval($eval_string) or $debug  and print 
+				"eval returned zero or failed ($@\n)";
+		}
 	} @vars;
 	find_cycle(\%state);
+	$debug and say '\%state', $/, Dumper \%state;
+	#use Data::Dumper::Concise;
+	#use Data::Rmap;
+	#print map{ Dumper $_ } grep { (ref $_) =~ /SCALAR/ and say "SCALAR ref found :-(" } rmap_all { $_ } \%state;
 	if ( $h{file} ) {
 
 		if ($h{format} eq 'storable') {

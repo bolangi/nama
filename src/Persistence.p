@@ -118,7 +118,7 @@ sub save_system_state {
 
 	serialize(
 		file => $filename, 
-		format => 'yaml',
+		format => 'json',
 		vars => \@new_persistent_vars,
 		class => '::',
 		);
