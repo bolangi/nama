@@ -256,39 +256,53 @@ sub serialize {
 	my @vars = @{ $h{vars} };
 	my $class = $h{class};
 	my $file  = $h{file};
-	my $format = $h{format};
+	my $format = $h{format} //= 'json'; # default to json
+
  	$class .= "::" unless $class =~ /::$/; # SKIP_PREPROC
 	$debug and print "file: $file, class: $class\nvariables...@vars\n";
 	my %state;
-	map{ my ($sigil, $identifier) = /(.)([\w:]+)/; 
+	map{ my ($sigil, $identifier, $key) = /
+			(.) 		# first character, sigil
+			([\w:]+)	# identifier, possibly perl namespace 
+			(->{\w+})?  # optional hash key for new hash-singleton vars
+			/x;
 
-
-
-# for  YAML::Reader/Writer
-#
-#  all scalars must contain values, not references
+# note: for  YAML::Reader/Writer  all scalars must contain values, not references
+# more YAML adjustments 
+# restore will break if a null field is not converted to '~'
 
 		#my $value =  q(\\) 
+
+# directly assign scalar, but take hash/array references
+# $state{ident} = $scalar
+# $state{ident} = \%hash
+# $state{ident} = \@array
+
+# in case $key is provided
+# $state{ident}->{$key} = $singleton->{$key};
+#
+
 		my $value =  ($sigil ne q($) ? q(\\) : q() ) 
 
 							. $sigil
 							. ($identifier =~ /:/ ? '' : $class)
-							. $identifier;
+							. $identifier
+							. $key ? qq(->{$key}) : q();
 
-# more YAML adjustments 
-#
-# restore will break if a null field is not converted to '~'
+
 			
 		 my $eval_string =  q($state{')
 							. $identifier
 							. q('})
+							. $key ? qq(->{$key}) : q()
 							. q( = )
 							. $value;
+
 	$debug and print "attempting to eval $eval_string\n";
 	eval($eval_string) or $debug  and print 
 		"eval returned zero or failed ($@\n)";
 	} @vars;
-	# my $result1 = store \%state, $file; # old method
+	find_cycle(\%state);
 	if ( $h{file} ) {
 
 		if ($h{format} eq 'storable') {
@@ -299,13 +313,11 @@ sub serialize {
 			#write_file($file, $pl);
 		} elsif ($h{format} eq 'yaml'){
 			$file .= '.yml' unless $file =~ /\.yml$/;
-			#find_cycle(\%state);
 			my $yaml = yaml_out(\%state);
 			write_file($file, $yaml);
 			$debug and print $yaml;
 		} elsif ($h{format} eq 'json'){
 			$file .= '.json' unless $file =~ /\.json$/;
-			#find_cycle(\%state);
           	my $json = $to_json->encode(\%state) . "\n";
 			write_file($file, $json);
 			$debug and print $json;
