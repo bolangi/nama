@@ -250,25 +250,45 @@ sub assign_var_map {
 				class => '::');
 }
 }
-sub serialize {
-	$debug2 and print "&serialize\n";
-	my %h = @_;
-	my @vars = @{ $h{vars} };
-	my $class = $h{class};
-	my $file  = $h{file};
-	my $format = $h{format} //= 'json'; # default to json
-
- 	$class //= "::";
-	$class =~ /::$/ or $class .= '::'; # SKIP_PREPROC
-	$debug and print "file: $file, class: $class\nvariables...@vars\n";
-	my %state;
-	my $parse_re = 
-			qr/ ^ 				# beginning anchor
+{
+	my %suffix = 
+	(
+		storable => "bin",
+		perl	 => "pl",
+		json	 => "json",
+		yaml	 => "yml",
+	);
+	my %dispatch = 
+	( storable => sub { my($ref, $path) = @_; nstore($ref, $path) },
+	  perl     => sub { my($ref, $path) = @_; write_file($path, Dumper $ref) },
+	  yaml	   => sub { my($ref, $path) = @_; write_file($path, yaml_out($ref))},
+	  json	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
+	);
+	my $parse_re =  		# initialize only once
+			qr/ ^ 			# beginning anchor
 			([\%\@\$]) 		# first character, sigil
 			([\w:]+)		# identifier, possibly perl namespace 
 			(?:->{(\w+)})?  # optional hash key for new hash-singleton vars
 			$ 				# end anchor
 			/x;
+sub serialize {
+	$debug2 and print "&serialize\n";
+
+	my %h = @_;
+	my @vars = @{ $h{vars} };
+	my $class = $h{class};
+	my $file  = $h{file};
+	my $format = $h{format} // 'perl'; # default to Data::Dumper::Concise
+
+ 	$class //= "::";
+	$class =~ /::$/ or $class .= '::'; # SKIP_PREPROC
+	$debug and print "file: $file, class: $class\nvariables...@vars\n";
+
+	# first we marshall data into %state
+
+	my %state;
+
+
 	map{ 
 		my ($sigil, $identifier, $key) = /$parse_re/;
 
@@ -313,37 +333,23 @@ sub serialize {
 				"eval returned zero or failed ($@\n)";
 		}
 	} @vars;
-	find_cycle(\%state);
+	#find_cycle(\%state);
 	$debug and say '\%state', $/, Dumper \%state;
 	#use Data::Dumper::Concise;
 	#use Data::Rmap;
 	#print map{ Dumper $_ } grep { (ref $_) =~ /SCALAR/ and say "SCALAR ref found :-(" } rmap_all { $_ } \%state;
-	if ( $h{file} ) {
 
-		if ($h{format} eq 'storable') {
-			my $result1 = nstore \%state, $file; # old method
-		} elsif ($h{format} eq 'perl'){
-			$file .= '.pl' unless $file =~ /\.pl$/;
-			#my $pl = dump \%state;
-			#write_file($file, $pl);
-		} elsif ($h{format} eq 'yaml'){
-			$file .= '.yml' unless $file =~ /\.yml$/;
-			my $yaml = yaml_out(\%state);
-			write_file($file, $yaml);
-			$debug and print $yaml;
-		} elsif ($h{format} eq 'json'){
-			$file .= '.json' unless $file =~ /\.json$/;
-          	my $json = $to_json->encode(\%state) . "\n";
-			write_file($file, $json);
-			$debug and print $json;
-		} elsif ($h{format} eq 'dumper'){
-			$file .= '.pl' unless $file =~ /\.pl$/;
-			my $perl_source = Dumper(\%state);
-			write_file($file, $perl_source);
-			$debug and print $perl_source;
-		}
-	} else { yaml_out(\%state) }
 
+	# YAML out for screen dumps
+	
+	return( yaml_out(\%state) ) unless $h{file};
+
+	# now we serialize %state
+	
+	my $path = "$h{file}.$suffix{$format}";
+
+	$dispatch{$format}->(\%state, $path);
+}
 }
 
 sub json_out {

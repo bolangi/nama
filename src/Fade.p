@@ -7,11 +7,9 @@ use Carp;
 use warnings;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index $fade_down_fraction
-$fade_time1_fraction $fade_time2_fraction $fader_op);
-use ::Globals qw(:singletons %tn $debug $debug2 @fade_data);
+use vars qw($n %by_index);
+use ::Globals qw(:singletons %tn $debug $debug2 @fade_data); 
 local $debug2 = local $debug = 1;
-
 use ::Object qw( 
 				 n
 				 type
@@ -260,11 +258,11 @@ sub spec_to_pairs {
 	
 	if ($op eq 'eadb'){
 		if ( $type eq 'out' ){
-			$cutpos = $from + $fade_time1_fraction * ($to - $from);
-			push @pairs, ($from, 1, $cutpos, $fade_down_fraction, $to, 0);
+			$cutpos = $from + $config->{fade_time1_fraction} * ($to - $from);
+			push @pairs, ($from, 1, $cutpos, $config->{fade_down_fraction}, $to, 0);
 		} elsif( $type eq 'in' ){
-			$cutpos = $from + $fade_time2_fraction * ($to - $from);
-			push @pairs, ($from, 0, $cutpos, $fade_down_fraction, $to, 1);
+			$cutpos = $from + $config->{fade_time2_fraction} * ($to - $from);
+			push @pairs, ($from, 0, $cutpos, $config->{fade_down_fraction}, $to, 1);
 		}
 	}
 
@@ -327,9 +325,9 @@ sub add_fader {
 		
 		my $first_effect = $track->ops->[0];
 		if ( $first_effect ){
-			$id = ::Text::t_insert_effect($first_effect, $fader_op, [0]);
+			$id = ::Text::t_insert_effect($first_effect, $config->{fader_op}, [0]);
 		} else { 
-			$id = ::Text::t_add_effect($fader_op, [0]) 
+			$id = ::Text::t_add_effect($config->{fader_op}, [0]) 
 		}
 		$track->set(fader => $id);
 	}

@@ -136,12 +136,12 @@ $debug = 0; # debug statements
 
 $file = {
 			effects_cache 		=> '.effects_cache',
-			gui_palette 		=> 'palette.yml',
-			state_store 		=> 'State.yml',
-			effect_chain 		=> 'effect_chains.yml',
-			effect_profile 		=> 'effect_profiles.yml',
+			gui_palette 		=> 'palette',
+			state_store 		=> 'State',
+			effect_chain 		=> 'effect_chains',
+			effect_profile 		=> 'effect_profiles',
 			chain_setup 		=> 'Setup.ecs',
-			user_customization 	=> "custom.pl",
+			user_customization 	=> 'custom.pl',
 };
 
 $gui->{_save_id} = "State";
@@ -161,6 +161,10 @@ $config = {
 	engine_jack_seek_delay 			=> 0.1, # seconds
 	edit_playback_end_margin 		=> 3,
 	edit_crossfade_time 			=> 0.03,
+	fade_down_fraction 				=> 0.75,
+	fade_time1_fraction 			=> 0.9,
+	fade_time2_fraction 			=> 0.1,
+	fader_op 						=> 'ea',
 };
 
 $prompt = "nama ('h' for help)> ";
@@ -174,11 +178,6 @@ $fx = {
 	unity_level 				=> {ea => 100, 	eadb => 0}, 
 	fade_resolution 			=> 200, # steps per second
 };
-$::Fade::fade_down_fraction = 0.75;
-$::Fade::fade_time1_fraction = 0.9;
-$::Fade::fade_time2_fraction = 0.1;
-$::Fade::fader_op = 'ea';
-
 $setup->{_old_snapshot} = {};
 
 $mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];

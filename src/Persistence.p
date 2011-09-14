@@ -14,7 +14,6 @@ sub save_state {
 	$debug2 and print "&save_state\n";
 	$project->{save_file_version_number} = $VERSION;
 
-
 	# some stuff get saved independently of our state file
 	
 	$debug and print "saving palette\n";
@@ -58,11 +57,11 @@ sub save_system_state {
 	# save stuff to state file
 
 	$filename = join_path(project_dir(), $filename) unless $filename =~ m(/); 
-	$filename =~ /\.yml$/ or $filename .= '.yml';	
 
 	sync_effect_parameters(); # in case a controller has made a change
 
-	# remove null keys in %{$fx->{applied}} and %{$fx->{params}}
+	# remove null keys in $fx->{applied} and $fx->{params}
+	# would be better to find where they come from
 	
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
@@ -118,7 +117,7 @@ sub save_system_state {
 
 	serialize(
 		file => $filename, 
-		format => 'json',
+		format => 'perl',
 		vars => \@new_persistent_vars,
 		class => '::',
 		);
@@ -482,8 +481,8 @@ sub save_effect_chains { # if they exist
 	if (keys %{$fx->{chain}}){
 		serialize (
 			file => join_path(project_root(), $filename),
-			format => 'yaml',
-			vars => [ qw( %{$fx->{chain}} ) ],
+			format => 'perl',
+			vars => [ qw( $fx->{chain} ) ],
 			class => '::');
 	}
 }
@@ -492,8 +491,8 @@ sub save_effect_profiles { # if they exist
 	if (keys %{$fx->{profile}}){
 		serialize (
 			file => join_path(project_root(), $filename),
-			format => 'yaml',
-			vars => [ qw( %{$fx->{profile}} ) ],
+			format => 'perl',
+			vars => [ qw( $fx->{profile} ) ],
 			class => '::');
 	}
 }
