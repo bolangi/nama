@@ -233,7 +233,7 @@ sub create_system_buses {
 	($buses) = strip_comments($buses); # need initial parentheses
 	my @system_buses = split " ", $buses;
 	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
-	delete $config->{_is_system_bus}->{Main}; # because we want to display it
+	delete $config->{_is_system_bus}->{Main}; # don't mask Main
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 	
 	# a bus should identify it's mix track
