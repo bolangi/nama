@@ -42,6 +42,11 @@ use ::Globals qw($debug $debug2);
 our $to_json = JSON::XS->new->utf8->pretty(1) ;
 use Carp;
 
+{my $var_map = { qw(
+
+[% qx(./var_map_gen) %]
+
+) };
 sub assign {
 	
 	$debug2 and print "&assign\n";
@@ -84,8 +89,9 @@ ASSIGN
 	my %ident;
 	map { 
 		my $oldvar = my $var = $_;
-		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\w:\[\]{}]+)$/;
-		$var = $h{var_map}->{$var} if $h{var_map} and $h{var_map}->{$var};
+		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\>\w:\[\]{}]+)$/;
+		$var = $var_map->{$var} if $h{var_map} and $var_map->{$var};
+
 		$debug and say "oldvar: $oldvar, newvar: $var";
 		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
 			$sigil{$old_identifier} = $sigil;
@@ -168,6 +174,7 @@ DEBUG
 	} @keys;
 	1;
 }
+}
 
 sub assign_vars {
 	$debug2 and print "&assign_vars\n";
@@ -234,21 +241,15 @@ sub assign_var {
 				class => '::');
 }
 
-{my %var_map = qw(
-
-[% qx(./var_map_gen) %]
-
-);
 sub assign_var_map {
 	my ($source, @vars) = @_;
 	$debug and say "assign_var_map, vars ", join " ", @vars;
 	assign_vars(
 				source => $source,
 				vars   => \@vars,
-				var_map => \%var_map,
+				var_map => 1,
 		#		format => 'yaml', # breaks
 				class => '::');
-}
 }
 {
 	my %suffix = 
@@ -287,7 +288,6 @@ sub serialize {
 	# first we marshall data into %state
 
 	my %state;
-
 
 	map{ 
 		my ($sigil, $identifier, $key) = /$parse_re/;

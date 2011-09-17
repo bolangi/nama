@@ -125,30 +125,87 @@ sub save_system_state {
 
 	$filename
 }
+{
+my %is_legal_suffix = (
+		json => 'json', 
+		yaml => 'yaml', 
+		pl 	 => 'perl',
+		bin  => 'storable',
+);
+sub get_newest {
+	my $path = shift;
+	my ($dir, $name) = $path =~ m!^(.*?)([^/]+)$!; 
+	my @sorted = 
+		sort{ $a->[1] <=> $b->[1] } 
+		grep{ $is_legal_suffix{$_->[2]} }
+		map 
+		{ 
+			my ($suffix) = m/^$path(?:\.(\w+))?$/;
+			[$_, -M $_, $suffix] 
+		} 
+		glob("$path*");
+	my $debug = 1;
+	$debug and say yaml_out \@sorted;
+	($sorted[0]->[0], $sorted[0]->[2]);
+}
+}
+
+{ my %decode = 
+	(
+		json => \&json_in,
+		yaml => sub 
+		{ 
+			my $yaml = shift;
+			# remove empty key hash lines # fixes YAML::Tiny bug
+			$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
+
+			# rewrite obsolete null hash/array substitution
+			$yaml =~ s/~NULL_HASH/{}/g;
+			$yaml =~ s/~NULL_ARRAY/[]/g;
+
+			# rewrite $fx->{applied} 'owns' field to []
+			
+			# Note: this should be fixed at initialization
+			# however we should leave this code 
+			# for compatibility with past projects.
+			
+			$yaml =~ s/owns: ~/owns: []/g;
+
+			$yaml = quote_yaml_scalars( $yaml );
+
+			yaml_in($yaml);
+		},
+		perl => sub {my $perl_source = shift; eval $perl_source},
+	);
+	
+	@decode{qw(yml pl)} = ( $decode{yaml}, $decode{perl});
+	print join ' ', 'keys: ', keys %decode;
+
+sub decode {
+
+	my ($suffix, $source) = @_;
+	$decode{$suffix} 
+		or die qq(key $suffix: expecting one of).join q(,),keys %decode;
+	$decode{$suffix}->($source);
+}
+}
+
 sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $filename = shift;
 	$filename = $filename || $file->{state_store};
 	$filename = join_path(project_dir(), $filename)
 		unless $filename =~ m(/);
-	$filename .= ".yml" unless $filename =~ /yml$/;
-	! -f $filename and (print "file not found: $filename\n"), return;
-	$debug and print "using file: $filename\n";
+	# $filename includes path at this point
+	my( $path, $suffix ) = get_newest($filename);
 	
-	my $yaml = read_file($filename);
+	$debug and print "using file: $path\n";
 
-	# remove empty key hash lines # fixes YAML::Tiny bug
-	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
+	my $source = read_file($path);
 
-	# rewrite obsolete null hash/array substitution
-	$yaml =~ s/~NULL_HASH/{}/g;
-	$yaml =~ s/~NULL_ARRAY/[]/g;
-
-	# rewrite %{$fx->{applied}} 'owns' field to []
-	
-	$yaml =~ s/owns: ~/owns: []/g;
-
-	$yaml = quote_yaml_scalars( $yaml );
+	say "suffix: $suffix";	
+	say "source: $source";
+	my $ref = decode($suffix, $source);
 	
 	# start marshalling with clean slate	
 	
@@ -156,7 +213,17 @@ sub restore_state {
 
 	# restore persistent variables
 
-	assign_var_map($yaml, @persistent_vars );
+	# get union of old and new lists 
+	my %seen;
+	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
+
+	# TODO maybe this should be just assign()
+	assign_vars(
+				source => $ref,
+				vars   => \@persist_vars,
+				var_map => 1,
+				format => 'ref',
+				class => '::');
 
 	restore_effect_chains();
 	restore_effect_profiles();
