@@ -625,7 +625,12 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
 		$debug and print "found effects cache: $effects_cache\n";
-		assign_var($effects_cache, qw($fx_cache));
+		assign(
+			data => decode($effects_cache, 'storable'),
+			vars => [qw($fx_cache)],
+			class => '::'
+		);
+			
 	} else {
 		
 		$debug and print "reading in effects data, please wait...\n";

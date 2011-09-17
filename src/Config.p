@@ -60,7 +60,12 @@ sub read_config {
 	*subst = \%{$cfg{abbreviations}}; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	assign_var_map( \%cfg, @config_vars);
+	assign( 
+		data => \%cfg,
+		vars => [ @config_vars ], # config file format doesnt change
+		class => '::',
+		var_map => 1,
+	);
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
 	$config->{sampling_freq} = $cfg{abbreviations}{frequency};

@@ -126,15 +126,38 @@ sub save_system_state {
 	$filename
 }
 {
-my %is_legal_suffix = (
+my %is_legal_suffix = ( 
 		json => 'json', 
-		yaml => 'yaml', 
+		yml => 'yaml', 
 		pl 	 => 'perl',
 		bin  => 'storable',
+		yaml => 'yaml', # we allow formats as well
+		perl => 'perl',
+		storable => 'storable',
 );
+=comment
+my $re_eval = q{qr/\.(};
+$re_eval .= (join '|', keys %is_legal_suffix)
+$re_eval .= q{)$/};
+my $suffix_re = eval $re_eval;
+=cut
+
 sub get_newest {
-	my $path = shift;
+	
+	# choose the newest
+	#
+	my ($path, $format) = @_;
+	
+	# simply return the file
+	# if filename matches exactly, 
+	# and we know the format
+	
+	return($path, $format) if -f $path and $is_legal_suffix{$format};
+
 	my ($dir, $name) = $path =~ m!^(.*?)([^/]+)$!; 
+	
+	# otherwise we glob, sort and filter directory entries
+	
 	my @sorted = 
 		sort{ $a->[1] <=> $b->[1] } 
 		grep{ $is_legal_suffix{$_->[2]} }
@@ -176,9 +199,11 @@ sub get_newest {
 			yaml_in($yaml);
 		},
 		perl => sub {my $perl_source = shift; eval $perl_source},
+		storable => sub { my $bin = shift; thaw( $bin) },
 	);
 	
-	@decode{qw(yml pl)} = ( $decode{yaml}, $decode{perl});
+	# allow dispatch by either file format or suffix 
+	@decode{qw(yml pl bin)} = @decode{qw(yaml perl storable)};
 	print join ' ', 'keys: ', keys %decode;
 
 sub decode {
@@ -197,6 +222,7 @@ sub restore_state {
 	$filename = join_path(project_dir(), $filename)
 		unless $filename =~ m(/);
 	# $filename includes path at this point
+
 	my( $path, $suffix ) = get_newest($filename);
 	
 	$debug and print "using file: $path\n";
@@ -216,9 +242,7 @@ sub restore_state {
 	# get union of old and new lists 
 	my %seen;
 	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
-
-	# TODO maybe this should be just assign()
-	assign_vars(
+	assign(
 				source => $ref,
 				vars   => \@persist_vars,
 				var_map => 1,
@@ -571,12 +595,22 @@ sub save_effect_profiles { # if they exist
 sub restore_effect_chains {
 
 	my $filename = join_path(project_root(), $file->{effect_chain});
-	return unless -e $filename;
 
-	assign_var_map($filename, qw(%effect_chain $fx->{chain})) unless keys %{$fx->{chain}}
+	# we want either new style with extension .effect_chains.pl
+	# or old type without extension .effect_chains
+	
+	my ($source, $format) = get_newest($filename) || get_newest($filename,'yaml');
+	return unless $source;
+	my $ref = decode($source, $format);
+	assign(
+		data => $ref,
+		vars => [ qw(%effect_chain $fx->{chain})],
+		var_map => 1,
+		);
 }
 sub restore_effect_profiles {
 
+	# TODO same as above
 	my $filename = join_path(project_root(), $file->{effect_profile});
 	return unless -e $filename;
 

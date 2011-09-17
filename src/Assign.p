@@ -22,9 +22,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		
 		serialize
 		assign
-		assign_vars
-		assign_var
-		assign_var_map
 		store_vars
 		yaml_out
 		yaml_in
@@ -48,7 +45,14 @@ use Carp;
 
 ) };
 sub assign {
-	
+  # Usage: 
+  # assign ( 
+  # data 	=> $ref,
+  # vars 	=> \@vars,
+  # var_map => 1,
+  #	class => $class
+  #	);
+
 	$debug2 and print "&assign\n";
 	
 	my %h = @_; # parameters appear in %h
@@ -176,81 +180,6 @@ DEBUG
 }
 }
 
-sub assign_vars {
-	$debug2 and print "&assign_vars\n";
-	
-	my %h = @_;
-	my $source = $h{source};
-	my @vars = @{ $h{vars} };
-	my $class = $h{class};
-	my $format = $h{format};
-	# assigns vars in @vars to values from $source
-	# $source can be a :
-	#      - filename or
-	#      - string containing YAML data
-	#      - reference to a hash array containing assignments
-	#
-	# returns a $ref containing the retrieved data structure
-	$debug and print "source: ", (ref $source) || $source, "\n";
-	$debug and print "variable list: @vars\n";
-	my $ref;
-
-### figure out what to do with input
-
-	if ($source !~ /\n/ and -f $source){
-		if ( $source =~ /\.yml$/i or $format eq 'yaml'){
-				$debug and print "found a yaml file: $source\n";
-				$ref = yaml_in($source);
-		} elsif ( $source =~ /\.pl$/i or $format eq 'perl'){
-				$debug and print "found a perl file: $source\n";
-				my $code = read_file($source);
-				$ref = eval $code or carp "$source: eval failed: $@\n";
-		} elsif ( $source =~ /\.json$/i ){
-				$debug and print "found a JSON file: $source\n";
-				my $json = read_file($source);
-				$ref = decode_json($json);
-		} else {
-				$debug and print "assuming Storable file: $source\n";
-				$ref = retrieve($source) # Storable
-		}
-
-	} elsif ( $source =~ /\n/ ){
-		$debug and print "found yaml text\n";
-		$ref = yaml_in($source);
-
-	# pass a hash_ref to the assigner
-	} elsif ( ref $source ) {
-		$debug and print "found a reference\n";
-		$ref = $source;
-	} else { carp "$source: missing data source\n"; }
-
-	assign(data => $ref, 
-			vars => \@vars, 
-			var_map => $h{var_map},
-			class => $class);
-	1;	
-
-}
-
-sub assign_var {
-	my ($source, @vars) = @_;
-	assign_vars(
-				source => $source,
-				vars   => \@vars,
-		#		format => 'yaml', # breaks
-				class => '::');
-}
-
-sub assign_var_map {
-	my ($source, @vars) = @_;
-	$debug and say "assign_var_map, vars ", join " ", @vars;
-	assign_vars(
-				source => $source,
-				vars   => \@vars,
-				var_map => 1,
-		#		format => 'yaml', # breaks
-				class => '::');
-}
 {
 	my %suffix = 
 	(
