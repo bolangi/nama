@@ -229,8 +229,8 @@ sub restore_state {
 
 	my $source = read_file($path);
 
-	say "suffix: $suffix";	
-	say "source: $source";
+	$debug and say "suffix: $suffix";	
+	$debug and say "source: $source";
 	my $ref = decode($suffix, $source);
 	
 	# start marshalling with clean slate	
@@ -606,19 +606,23 @@ sub restore_effect_chains {
 		data => $ref,
 		vars => [ qw(%effect_chain $fx->{chain})],
 		var_map => 1,
+		class => '::',
 		);
 }
 sub restore_effect_profiles {
 
-	# TODO same as above
 	my $filename = join_path(project_root(), $file->{effect_profile});
-	return unless -e $filename;
+	my ($source, $format) = get_newest($filename) || get_newest($filename,'yaml');
+	return unless $source;
+	my $ref = decode($source, $format);
+	assign(
+		data => $ref,
+		vars => [ qw(%effect_profile $fx->{profile})],
+		var_map => 1,
+		class => '::',
+		);
 
-	# don't overwrite them if already present
-	assign_var_map($filename, qw(%effect_profile $fx->{profile})) unless keys %{$fx->{profile}}; 
 }
-
-# autosave
 
 sub schedule_autosave { 
 	# one-time timer 
