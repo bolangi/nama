@@ -225,6 +225,7 @@ sub restore_state {
 	
 	$debug and print "using file: $path\n";
 
+	carp("$path: file not found"), return if ! -f $path;
 	my $source = read_file($path);
 
 	$debug and say "suffix: $suffix";	

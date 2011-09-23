@@ -15,10 +15,11 @@ use warnings;
 no warnings qw(uninitialized);
 our ($expected_setup_lines);
 use Cwd;
+use ::;
 
 use ::Globals qw(:all);
 
-BEGIN { use_ok('::') };
+#BEGIN { use_ok('::') }; # TAP parsing error
 
 diag ("TESTING $0\n");
 
