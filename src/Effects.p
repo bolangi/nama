@@ -626,7 +626,7 @@ sub prepare_static_effects_data{
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
 		$debug and print "found effects cache: $effects_cache\n";
 		assign(
-			data => decode($effects_cache, 'storable'),
+			data => decode($effects_cache, 'json'),
 			vars => [qw($fx_cache)],
 			class => '::'
 		);
@@ -645,7 +645,7 @@ sub prepare_static_effects_data{
 			file => $effects_cache, 
 			vars => [qw($fx_cache)],
 			class => '::',
-			format => 'storable');
+			format => 'json');
 	}
 
 	prepare_effect_index();

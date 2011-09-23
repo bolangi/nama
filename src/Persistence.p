@@ -2,10 +2,9 @@
 
 
 package ::;
-use Modern::Perl;
+use Modern::Perl; no warnings 'uninitialized';
 use File::Slurp;
 use ::Assign qw(quote_yaml_scalars);
-no warnings 'uninitialized';
 
 use ::Globals qw(:all);
 
@@ -167,7 +166,6 @@ sub get_newest {
 			[$_, -M $_, $suffix] 
 		} 
 		glob("$path*");
-	my $debug = 1;
 	$debug and say yaml_out \@sorted;
 	($sorted[0]->[0], $sorted[0]->[2]);
 }
@@ -208,7 +206,7 @@ sub get_newest {
 
 sub decode {
 
-	my ($suffix, $source) = @_;
+	my ($source, $suffix) = @_;
 	$decode{$suffix} 
 		or die qq(key $suffix: expecting one of).join q(,),keys %decode;
 	$decode{$suffix}->($source);
@@ -231,7 +229,7 @@ sub restore_state {
 
 	$debug and say "suffix: $suffix";	
 	$debug and say "source: $source";
-	my $ref = decode($suffix, $source);
+	my $ref = decode($source, $suffix);
 	
 	# start marshalling with clean slate	
 	
@@ -594,14 +592,16 @@ sub save_effect_profiles { # if they exist
 
 sub restore_effect_chains {
 
-	my $filename = join_path(project_root(), $file->{effect_chain});
+	$debug2 and say "&restore_effect_chains";
 
-	# we want either new style with extension .effect_chains.pl
-	# or old type without extension .effect_chains
-	
-	my ($source, $format) = get_newest($filename) || get_newest($filename,'yaml');
+	my $path = join_path(project_root(), $file->{effect_chain});
+
+	my ($resolved, $format) = get_newest($path);  
+	my $source = read_file($resolved);
 	return unless $source;
+	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
+	$debug and print Dumper $ref;
 	assign(
 		data => $ref,
 		vars => [ qw(%effect_chain $fx->{chain})],
@@ -611,8 +611,9 @@ sub restore_effect_chains {
 }
 sub restore_effect_profiles {
 
-	my $filename = join_path(project_root(), $file->{effect_profile});
-	my ($source, $format) = get_newest($filename) || get_newest($filename,'yaml');
+	$debug2 and say "&restore_effect_profiles";
+	my $path = join_path(project_root(), $file->{effect_profile});
+	my ($source, $format) = get_newest($path);
 	return unless $source;
 	my $ref = decode($source, $format);
 	assign(
