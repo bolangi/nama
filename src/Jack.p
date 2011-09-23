@@ -10,6 +10,8 @@ sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
 	# cache current JACK status
+	#
+	# skip if Ecasound is busy
 	return if engine_running();
 	if( $jack->{jackd_running} =  process_is_running('jackd') ){
 		my $ports_list = qx(jack_lsp -Ap 2> /dev/null); 
