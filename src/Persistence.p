@@ -55,7 +55,7 @@ sub save_system_state {
 
 	# save stuff to state file
 
-	$filename = join_path(project_dir(), $filename) unless $filename =~ m(/); 
+	my $path = join_path(project_dir(), $filename) unless $filename =~ m(/); 
 
 	sync_effect_parameters(); # in case a controller has made a change
 
@@ -76,7 +76,7 @@ sub save_system_state {
 	map { push @tracks_data, $_->hashref } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
 
-	# delete unused fields
+	# delete obsolete fields
 	map { my $t = $_;
 				map{ delete $t->{$_} } 
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
@@ -115,14 +115,14 @@ sub save_system_state {
 	$debug and print "serializing\n";
 
 	serialize(
-		file => $filename, 
+		file => $path,
 		format => 'perl',
 		vars => \@new_persistent_vars,
 		class => '::',
 		);
 
 
-	$filename
+	$path
 }
 {
 my %is_legal_suffix = ( 
