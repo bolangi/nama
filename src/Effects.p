@@ -616,7 +616,7 @@ sub prepare_static_effects_data{
 
 	my $effects_cache = join_path(&project_root, $file->{effects_cache});
 
-	#print "newplugins: ", new_plugins(), $/;
+	$debug and say join "\n", "newplugins:", new_plugins();
 	if ($config->{opts}->{r} or new_plugins()){ 
 
 		eval { unlink $effects_cache};

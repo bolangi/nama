@@ -241,10 +241,9 @@ sub restore_state {
 	my %seen;
 	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
 	assign(
-				source => $ref,
+				data => $ref,
 				vars   => \@persist_vars,
 				var_map => 1,
-				format => 'ref',
 				class => '::');
 
 	restore_effect_chains();
