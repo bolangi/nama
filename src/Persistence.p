@@ -46,7 +46,7 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
-	@{$text->{command_history}} = ();
+	$text->{command_history} = {};
 }
 
 sub save_system_state {
@@ -230,7 +230,7 @@ sub restore_state {
 	$debug and say "suffix: $suffix";	
 	$debug and say "source: $source";
 	my $ref = decode($source, $suffix);
-	
+
 	# start marshalling with clean slate	
 	
 	initialize_serialization_arrays();
@@ -240,10 +240,12 @@ sub restore_state {
 	# get union of old and new lists 
 	my %seen;
 	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
+
+	# map variable names for Nama State file versions below 1.08
 	assign(
 				data => $ref,
 				vars   => \@persist_vars,
-				var_map => 1,
+				var_map => $ref->{saved_version} < 1.08,
 				class => '::');
 
 	restore_effect_chains();
@@ -605,7 +607,7 @@ sub restore_effect_chains {
 	assign(
 		data => $ref,
 		vars => [ qw(%effect_chain $fx->{chain})],
-		var_map => 1,
+		var_map => $ref->{saved_version} < 1.08,
 		class => '::',
 		);
 }
@@ -622,7 +624,7 @@ sub restore_effect_profiles {
 	assign(
 		data => $ref,
 		vars => [ qw(%effect_profile $fx->{profile})],
-		var_map => 1,
+		var_map => $ref->{saved_version} < 1.08,
 		class => '::',
 		);
 
