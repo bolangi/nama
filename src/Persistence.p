@@ -597,8 +597,9 @@ sub restore_effect_chains {
 	my $path = join_path(project_root(), $file->{effect_chain});
 
 	my ($resolved, $format) = get_newest($path);  
+	carp("$resolved: file not found"), return unless $resolved;
 	my $source = read_file($resolved);
-	return unless $source;
+	carp("$resolved: empty file"), return unless $source;
 	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
 	$debug and print Dumper $ref;
@@ -613,8 +614,11 @@ sub restore_effect_profiles {
 
 	$debug2 and say "&restore_effect_profiles";
 	my $path = join_path(project_root(), $file->{effect_profile});
-	my ($source, $format) = get_newest($path);
-	return unless $source;
+	my ($resolved, $format) = get_newest($path);
+	carp("$resolved: file not found"), return unless $resolved;
+	my $source = read_file($resolved);
+	carp("$resolved: empty file"), return unless $source;
+	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
 	assign(
 		data => $ref,
