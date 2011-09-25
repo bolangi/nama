@@ -165,7 +165,7 @@ $config = {
 	fade_time1_fraction 			=> 0.9,
 	fade_time2_fraction 			=> 0.1,
 	fader_op 						=> 'ea',
-	serialize_formats               => [ qw(yaml json perl) ],
+	serialize_formats               => [ qw(yaml) ],
 };
 
 $prompt = "nama ('h' for help)> ";
