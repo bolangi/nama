@@ -107,6 +107,9 @@ sub save_system_state {
 
 	my @history = $text->{term}->GetHistory;
 	my %seen;
+	say ref $text->{command_history};
+	say yaml_out $text->{command_history};
+	$text->{command_history} = [];
 	map { push @{$text->{command_history}}, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
 	my $max = scalar @{$text->{command_history}};
@@ -114,13 +117,15 @@ sub save_system_state {
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
-	serialize(
-		file => $path,
-		format => 'perl',
-		vars => \@new_persistent_vars,
-		class => '::',
-		);
+	map{ 	my $format = $_ ;
+			serialize(
+				file => $path,
+				format => $format,
+				vars => \@new_persistent_vars,
+				class => '::',
+				);
 
+	} @{$config->{serialize_formats}};
 
 	$path
 }
