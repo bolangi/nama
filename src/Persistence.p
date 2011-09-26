@@ -254,8 +254,10 @@ sub restore_state {
 				var_map => $ref->{saved_version} < 1.08,
 				class => '::');
 
-	# remove null keyed entry from $fx->{applied},  $fx->{params}
+	say yaml_out( $fx ); die 'fx applied!!'; # BROKEN
 	
+	# remove null keyed entry from $fx->{applied},  $fx->{params}
+
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
 
@@ -516,10 +518,11 @@ sub restore_state {
 		# restore effects
 		
 		for my $id (@{$ti{$n}->ops}){
-			$did_apply++ 
+			$did_apply++  # need to show GUI effect window
 				unless $id eq $ti{$n}->vol
 					or $id eq $ti{$n}->pan;
 			
+			say "id: $id, fx ref type: ",ref $fx->{applied}->{$id};
 			add_effect({
 						chain => $fx->{applied}->{$id}->{chain},
 						type => $fx->{applied}->{$id}->{type},

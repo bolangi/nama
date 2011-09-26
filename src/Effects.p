@@ -610,11 +610,15 @@ sub find_op_offsets {
 ## register data about LADSPA plugins, and Ecasound effects and
 #  presets (names, ids, parameters, hints) 
 
+sub effects_cache {
+	state $registry_format = 'json';
+	join_path(&project_root, $file->{effects_cache} .  ".$registry_format");
+}
 sub prepare_static_effects_data{
 	
 	$debug2 and print "&prepare_static_effects_data\n";
 
-	my $effects_cache = join_path(&project_root, $file->{effects_cache});
+	my $effects_cache = effects_cache();
 
 	$debug and say join "\n", "newplugins:", new_plugins();
 	if ($config->{opts}->{r} or new_plugins()){ 
@@ -625,8 +629,9 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
 		$debug and print "found effects cache: $effects_cache\n";
+		my $source = read_file($effects_cache); # scalar assign
 		assign(
-			data => decode($effects_cache, 'json'),
+			data => decode($source, 'json'),
 			vars => [qw($fx_cache)],
 			class => '::'
 		);
@@ -667,7 +672,7 @@ sub ladspa_plugin_list {
 }
 
 sub new_plugins {
-	my $effects_cache = join_path(&project_root, $file->{effects_cache});
+	my $effects_cache = effects_cache();
 	my @filenames = ladspa_plugin_list();	
 	push @filenames, '/usr/local/share/ecasound/effect_presets',
                  '/usr/share/ecasound/effect_presets',
