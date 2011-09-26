@@ -343,6 +343,9 @@ sub serialize {
 	#find_cycle(\%state);
 	$debug and say '\%state', $/, Dumper \%state;
 
+	# YAML out for screen dumps
+	return( yaml_out(\%state) ) unless $h{file};
+
 	# now we serialize %state
 	
 	my $path = "$h{file}.$suffix{$format}";
