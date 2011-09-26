@@ -10,6 +10,7 @@ use ::Globals qw(:all);
 
 sub save_state {
 	my $filename = shift || $file->{state_store}; 
+	my $path = join_path(project_dir(), $filename);
 	$debug2 and print "&save_state\n";
 	$project->{save_file_version_number} = $VERSION;
 
@@ -26,7 +27,7 @@ sub save_state {
 	}
 
 	print "\nSaving state as ",
-	save_system_state($filename), "\n";
+	save_system_state($path), "\n";
 	save_effect_chains();
 	save_effect_profiles();
 
@@ -51,11 +52,7 @@ sub initialize_serialization_arrays {
 
 sub save_system_state {
 
-	my $filename = shift;
-
-	# save stuff to state file
-
-	my $path = join_path(project_dir(), $filename) unless $filename =~ m(/); 
+	my $path = shift;
 
 	sync_effect_parameters(); # in case a controller has made a change
 
@@ -107,8 +104,6 @@ sub save_system_state {
 
 	my @history = $text->{term}->GetHistory;
 	my %seen;
-	say ref $text->{command_history};
-	say yaml_out $text->{command_history};
 	$text->{command_history} = [];
 	map { push @{$text->{command_history}}, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
@@ -116,6 +111,8 @@ sub save_system_state {
 	$max = 50 if $max > 50;
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
+
+	my @formats = $path =~ /dump_all/ ? 'yaml' : @{$config->{serialize_formats}};
 
 	map{ 	my $format = $_ ;
 			serialize(
@@ -125,7 +122,7 @@ sub save_system_state {
 				class => '::',
 				);
 
-	} @{$config->{serialize_formats}};
+	} @formats;
 
 	$path
 }

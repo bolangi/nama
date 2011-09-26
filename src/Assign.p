@@ -342,14 +342,6 @@ sub serialize {
 	} @vars;
 	#find_cycle(\%state);
 	$debug and say '\%state', $/, Dumper \%state;
-	#use Data::Dumper::Concise;
-	#use Data::Rmap;
-	#print map{ Dumper $_ } grep { (ref $_) =~ /SCALAR/ and say "SCALAR ref found :-(" } rmap_all { $_ } \%state;
-
-
-	# YAML out for screen dumps
-	
-	return( yaml_out(\%state) ) unless $h{file};
 
 	# now we serialize %state
 	

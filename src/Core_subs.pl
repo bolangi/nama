@@ -71,7 +71,7 @@ sub do_script {
 sub dump_all {
 	my $tmp = ".dump_all";
 	my $fname = join_path( project_root(), $tmp);
-	save_state($fname);
+	save_system_state($fname);
 	file_pager("$fname.yml");
 }
 
