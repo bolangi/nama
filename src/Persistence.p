@@ -207,7 +207,6 @@ sub get_newest {
 	
 	# allow dispatch by either file format or suffix 
 	@decode{qw(yml pl bin)} = @decode{qw(yaml perl storable)};
-	print join ' ', 'keys: ', keys %decode;
 
 sub decode {
 
@@ -246,15 +245,26 @@ sub restore_state {
 	# get union of old and new lists 
 	my %seen;
 	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
-
 	# map variable names for Nama State file versions below 1.08
-	assign(
-				data => $ref,
-				vars   => \@persist_vars,
-				var_map => $ref->{saved_version} < 1.08,
-				class => '::');
+	# check for files lacking the new-style version field
+	
+	#if ( ! exists $ref->{project}->{save_file_version_number})
+	#{
+		assign(
+					data => $ref,
+					vars   => \@persistent_vars,
+					var_map => 1,
+					class => '::');
+	#}
+	#else
+	#{  
+		my $args = { data => $ref };
+		assign_singletons( $args );
+	#	assign_serialization_arrays( $args );
+	#	assign_pronouns( $args);
+	#}
 
-	say yaml_out( $fx ); die 'fx applied!!'; # BROKEN
+	#say yaml_out( $fx ); die 'fx applied!!'; # BROKEN
 	
 	# remove null keyed entry from $fx->{applied},  $fx->{params}
 
