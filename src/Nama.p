@@ -195,7 +195,7 @@ sub setup_grammar { }
 
 	$text->{commands_yml} = get_data_section("commands_yml");
 	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
-	$text->{commands} = ::yaml_in( $text->{commands_yml}) ;
+	$text->{commands} = yaml_in( $text->{commands_yml}) ;
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;
