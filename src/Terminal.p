@@ -137,7 +137,7 @@ sub load_keywords {
 
 sub complete {
     my ($string, $line, $start, $end) = @_;
-	print join $/, $string, $line, $start, $end, $/;
+	#print join $/, $string, $line, $start, $end, $/;
 	my $term = $text->{term};
     return $term->completion_matches($string,\&keyword);
 };
