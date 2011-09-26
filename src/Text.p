@@ -22,9 +22,7 @@ sub loop {
 	   $text->{term}->clear_message();
 	   $text->{term}->rl_reset_line_state();
 	};
-	map{ say $_, ": ", ref $engine->{events}->{$_} } keys %{ $engine->{events} };
 	use Data::Dumper::Concise;
-	print "space: ", $config->{press_space_to_start}, $/;
 	Event::loop();
 }
 

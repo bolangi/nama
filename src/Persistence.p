@@ -243,29 +243,28 @@ sub restore_state {
 	# restore persistent variables
 
 	# get union of old and new lists 
-	my %seen;
-	my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
-	# map variable names for Nama State file versions below 1.08
-	# check for files lacking the new-style version field
+	#my %seen;
+	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
+	# handle old-style State files
+	# handle serialization arrays (used by new-style State files as well)
+	# handle some extra vars (ditto)
 	
-	#if ( ! exists $ref->{project}->{save_file_version_number})
-	#{
-		assign(
-					data => $ref,
-					vars   => \@persistent_vars,
-					var_map => 1,
-					class => '::');
-	#}
-	#else
-	#{  
+	assign(
+				data => $ref,
+				vars   => \@persistent_vars,
+				var_map => 1,
+				class => '::');
+	
+	# correctly restore singletons
+	
+	if ( exists $ref->{project}->{save_file_version_number})
+	{
 		my $args = { data => $ref };
 		assign_singletons( $args );
 	#	assign_serialization_arrays( $args );
 	#	assign_pronouns( $args);
-	#}
+	}
 
-	#say yaml_out( $fx ); die 'fx applied!!'; # BROKEN
-	
 	# remove null keyed entry from $fx->{applied},  $fx->{params}
 
 	delete $fx->{applied}->{''};
@@ -532,7 +531,6 @@ sub restore_state {
 				unless $id eq $ti{$n}->vol
 					or $id eq $ti{$n}->pan;
 			
-			say "id: $id, fx ref type: ",ref $fx->{applied}->{$id};
 			add_effect({
 						chain => $fx->{applied}->{$id}->{chain},
 						type => $fx->{applied}->{$id}->{type},
