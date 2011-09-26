@@ -254,11 +254,15 @@ sub restore_state {
 				var_map => $ref->{saved_version} < 1.08,
 				class => '::');
 
+	# remove null keyed entry from $fx->{applied},  $fx->{params}
+	
+	delete $fx->{applied}->{''};
+	delete $fx->{params}->{''};
+
 	restore_effect_chains();
 	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
-	# %{$fx->{applied}}: correct 'owns' null (from YAML) to empty array []
 	
 	# backward compatibility fixes for older projects
 
