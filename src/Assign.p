@@ -183,6 +183,11 @@ DEBUG
 }
 }
 
+# assign_singletons() assigns hash key/value entries
+# rather than a top-level hash reference to avoid
+# clobbering singleton key/value pairs initialized
+# elsewhere.
+ 
 my @singleton_idents = map{ /^.(.+)/; $1 }  # remove leading '$' sigil
 qw(
 [% qx(cat ./singletons.pl) %]
