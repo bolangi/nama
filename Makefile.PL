@@ -20,7 +20,8 @@ use inc::Module::Install;
 		qw(
 			autodie  0
 			AnyEvent  5.0
-			Data::Section 0
+			Data::Dumper::Concise 0
+			Data::Section::Simple 0
 			Event  0
 			File::Find::Rule  0
 			File::Copy  0
