@@ -13,7 +13,6 @@ use File::HomeDir;
 use Storable qw(nstore retrieve);
 use JSON::XS;
 use Data::Dumper::Concise;
-use Devel::Cycle;
 
 require Exporter;
 
@@ -345,7 +344,6 @@ sub serialize {
 				"eval returned zero or failed ($@\n)";
 		}
 	} @vars;
-	#find_cycle(\%state);
 	$debug and say '\%state', $/, Dumper \%state;
 
 	# YAML out for screen dumps
