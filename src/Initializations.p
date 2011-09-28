@@ -295,9 +295,9 @@ sub eval_iam_libecasoundc{
 sub restart_ecasound {
 	say "killing ecasound processes @{$engine->{pids}}";
 	kill_my_ecasound_processes();
-	say "restarting Ecasound engine";
+	say "restarting Ecasound engine - your may need to use the 'arm' command";
 	select_ecasound_interface();
-	$setup->{changed}++;
+	#$setup->{changed}++;
 	reconfigure_engine();
 }
 sub kill_my_ecasound_processes {
