@@ -78,6 +78,10 @@ ecasound_stop:
   short: S
   what: ecasound-only stop
   parameters: none
+restart_ecasound:
+  type: transport
+  what: re-spawn ecasound engine
+  parameters: none
 preview:
   type: transport
   what: start engine with rec_file disabled (for mic test, etc.)
