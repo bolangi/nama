@@ -235,9 +235,11 @@ sub eval_iam { } # stub
 sub eval_iam_neteci {
 	my $cmd = shift;
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$engine->{socket}->send("$cmd\r\n"); 
+	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
-	$engine->{socket}->recv($buf, 65536);
+	# get socket reply, restart ecasound on error
+	my $result = $engine->{socket}->recv($buf, 65536);
+	defined $result or restart_ecasound(), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
 		$buf =~ /(\d+)# digits
@@ -257,13 +259,17 @@ if(	! $return_value == 256 ){
 length: $setup_length
 type: $type
 full return value: $return_value);
-	die "illegal return value, stopped" ;
+	say "illegal return value from ecasound engine: $return_value" ;
+	restart_ecasound();
 
 }
 	$reply =~ s/\s+$//; 
 
 	given($type){
-		when ('e'){ carp $reply }
+		when ('e'){ carp $reply;
+			restart_ecasound() if $reply =~ /in engine-status/;
+
+}
 		default{ return $reply }
 	}
 
@@ -278,13 +284,25 @@ sub eval_iam_libecasoundc{
 	$debug and print "result: @result\n" unless $command =~ /register/;
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
+		restart_ecasound() if $errmsg =~ /in engine-status/;
 		$engine->{ecasound}->errmsg(''); 
 		# ecasound already prints error on STDOUT
 		# carp "ecasound reports an error:\n$errmsg\n"; 
 	}
 	"@result";
 }
-
 	
+sub restart_ecasound {
+	say "killing ecasound processes @{$engine->{pids}}";
+	kill_my_ecasound_processes();
+	say "restarting Ecasound engine";
+	select_ecasound_interface();
+	$setup->{changed}++;
+	reconfigure_engine();
+}
+sub kill_my_ecasound_processes {
+	my @signals = (15, 9);
+	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
+}
 1;
 __END__
