@@ -199,6 +199,7 @@ sub helpline {
 	my $out = "Command: $cmd\n";
 	$out .=  "Shortcuts: $text->{commands}->{$cmd}->{short}\n"
 			if $text->{commands}->{$cmd}->{short};	
+	$out .=  "Category: $text->{commands}->{$cmd}->{type}\n";
 	$out .=  "Description: $text->{commands}->{$cmd}->{what}\n";
 	$out .=  "Usage: $cmd "; 
 
