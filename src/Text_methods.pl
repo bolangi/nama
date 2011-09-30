@@ -19,6 +19,18 @@ sub show_effects {
 	::sync_effect_parameters();
 	join "", map { show_effect($_) } @{ $this_track->ops };
 }
+sub list_effects {
+	::sync_effect_parameters();
+	join " ", map{ list_effect($_) } @{ $this_track->ops };
+}
+
+sub list_effect {
+	my $op_id = shift;
+	my $i = $fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
+	my $name = $fx_cache->{registry}->[ $i ]->{name};
+	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
+}
+
 sub show_effect {
  		my $op_id = shift;
 		my @lines;

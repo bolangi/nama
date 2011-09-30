@@ -505,6 +505,11 @@ show_effect:
   what: show effect information
   short: sfx
   parameters: <s_effect_id1> [ <s_effect_id2>...]
+list_effects:
+  type: effect
+  what: short list of effects on current track
+  short: lfx
+  parameters: none
 add_insert:
   type: effect 
   short: ain

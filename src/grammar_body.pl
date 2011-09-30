@@ -748,6 +748,7 @@ show_effect: _show_effect {
 	print ::Text::show_effect($::this_op);
 	1;
 }
+list_effects: _list_effects { ::pager(::Text::list_effects()); 1}
 new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::Text::bunch(); 1}
 remove_bunches: _remove_bunches ident(s) { 
