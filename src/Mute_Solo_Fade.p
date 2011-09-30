@@ -99,11 +99,11 @@ sub solo {
 
 	# mute all tracks on our mute list (do we skip already muted tracks?)
 	
-	map{ $tn{$_}->mute('nofade') } keys %to_mute;
+	do_many_tracks( { tracks => [ keys %to_mute ], method => 'mute' } );
 
 	# unmute all tracks on our wanted list
 	
-	map{ $tn{$_}->unmute('nofade') } keys %not_mute;
+	do_many_tracks( { tracks => [ keys %not_mute ], method => 'unmute' } );
 	
 	$mode->{soloing} = 1;
 }
@@ -112,11 +112,11 @@ sub nosolo {
 	# unmute all except in @{$fx->{muted}} list
 
 	# unmute all tracks
-	map { $tn{$_}->unmute('nofade') } ::Track::user();
+	do_many_tracks( { tracks => [ ::Track::user() ], method => 'unmute' } );
 
 	# re-mute previously muted tracks
 	if (@{$fx->{muted}}){
-		map { $_->mute('nofade') } @{$fx->{muted}};
+		do_many_tracks( { tracks => [ @{$fx->{muted}} ], method => 'mute' } );
 	}
 
 	# remove listing of muted tracks
@@ -127,12 +127,20 @@ sub nosolo {
 sub all {
 
 	# unmute all tracks
-	map { $tn{$_}->unmute('nofade') } ::Track::user();
+	do_many_tracks( { tracks => [ ::Track::user() ], method => 'mute' } );
 
 	# remove listing of muted tracks
 	@{$fx->{muted}} = ();
 	
 	$mode->{soloing} = 0;
+}
+
+sub do_many_tracks {
+	# args: { tracks => [ name list ], method => method_name }
+	my $args = shift;
+	my $method = $args->{method};
+	my $delay = $args->{delay} || 0.01;
+	map{ $tn{$_}->$method('nofade'); sleeper($delay) } @{$args->{tracks}};
 }
 
 1;

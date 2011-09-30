@@ -5,7 +5,7 @@ use ::Object qw(name version dir);
 use warnings;
 use ::Assign qw(:all);
 use ::Util qw(join_path);
-use Memoize qw(memoize unmemoize);
+use Memoize qw(memoize unmemoize); # called by code in ::Memoize.pm
 no warnings qw(uninitialized);
 use Carp;
 
