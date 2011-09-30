@@ -69,3 +69,4 @@ sub last {
 	my $self = shift;
 	pop @{ $self->versions} }
 
+1;
