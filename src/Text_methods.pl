@@ -21,7 +21,7 @@ sub show_effects {
 }
 sub list_effects {
 	::sync_effect_parameters();
-	join " ", map{ list_effect($_) } @{ $this_track->ops };
+	join " ", "Effects on", $this_track->name.':', map{ list_effect($_) } @{ $this_track->ops };
 }
 
 sub list_effect {
