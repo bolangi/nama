@@ -351,7 +351,8 @@ sub serialize {
 
 	# now we serialize %state
 	
-	my $path = "$h{file}.$suffix{$format}";
+	my $path = $h{file};
+	$path .= ".$suffix{$format}" unless $path =~ /\.$suffix{$format}/;
 
 	$dispatch{$format}->(\%state, $path);
 }
