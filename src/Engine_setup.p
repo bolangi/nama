@@ -238,10 +238,12 @@ sub connect_transport {
 	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
-	{ # set delay for seeking under JACK
+
+	# set delay for seeking under JACK
+	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$config->{engine_jack_seek_delay} = $config->{engine_jack_seek_delay} || 0.1 + 0.1 * $track_count / 20;
-	}
+	$config->{engine_jack_seek_delay} = $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 );
+
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
