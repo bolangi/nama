@@ -625,7 +625,7 @@ sub restore_effect_chains {
 	assign(
 		data => $ref,
 		vars => [ qw(%effect_chain $fx->{chain})],
-		var_map => $ref->{saved_version} < 1.08,
+		var_map => 1,
 		class => '::',
 		);
 }
@@ -642,7 +642,7 @@ sub restore_effect_profiles {
 	assign(
 		data => $ref,
 		vars => [ qw(%effect_profile $fx->{profile})],
-		var_map => $ref->{saved_version} < 1.08,
+		var_map => 1,
 		class => '::',
 		);
 
