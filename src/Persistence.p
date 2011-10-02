@@ -590,7 +590,7 @@ sub save_effect_chains { # if they exist
 		serialize (
 			file => join_path(project_root(), $filename),
 			format => 'perl',
-			vars => [ qw( $fx->{chain} ) ],
+			vars => [ qw( $fx->{chain} $VERSION) ],
 			class => '::');
 	}
 }
@@ -600,7 +600,7 @@ sub save_effect_profiles { # if they exist
 		serialize (
 			file => join_path(project_root(), $filename),
 			format => 'perl',
-			vars => [ qw( $fx->{profile} ) ],
+			vars => [ qw( $fx->{profile}  $VERSION ) ],
 			class => '::');
 	}
 }
@@ -622,12 +622,18 @@ sub restore_effect_chains {
 	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
 	$debug and print Dumper $ref;
-	assign(
-		data => $ref,
-		vars => [ qw(%effect_chain $fx->{chain})],
-		var_map => 1,
-		class => '::',
-		);
+	if ( $ref->{VERSION} >= 1.08 )
+	{
+		assign_singletons( { data => $ref } );
+	}
+	else {
+		assign(
+			data => $ref,
+			vars => [ qw(%effect_chain)],
+			var_map => 1,
+			class => '::',
+			);
+	}
 }
 sub restore_effect_profiles {
 
@@ -639,12 +645,18 @@ sub restore_effect_profiles {
 	carp("$resolved: empty file"), return unless $source;
 	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
-	assign(
-		data => $ref,
-		vars => [ qw(%effect_profile $fx->{profile})],
-		var_map => 1,
-		class => '::',
-		);
+	if ( $ref->{VERSION} >= 1.08 )
+	{
+		assign_singletons( { data => $ref } );
+	}
+	else {
+		assign(
+			data => $ref,
+			vars => [ qw(%effect_profile)],
+			var_map => 1,
+			class => '::',
+			);
+	}
 
 }
 
