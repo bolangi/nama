@@ -111,11 +111,11 @@ sub init_gui {
 									-width => 15
 									)->pack(-side => 'left');
 	$gui->{load_savefile} = $gui->{load_frame}->Button->pack(-side => 'left');
-	$gui->{_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
+	$gui->{palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
-	$gui->{_nama_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
+	$gui->{nama_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
-	#$gui->{_fx_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
+	#$gui->{fx_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
 	#	->pack( -side => 'left');
 	# $sn_dump = $gui->{load_frame}->Button->pack(-side => 'left');
 
@@ -165,11 +165,11 @@ sub init_gui {
 				#::Text::command_process('quit');
 				exit;
 				 });
-	$gui->{_palette}->configure(
+	$gui->{palette}->configure(
 		-text => 'Palette',
 		-relief => 'raised',
 	);
-	$gui->{_nama_palette}->configure(
+	$gui->{nama_palette}->configure(
 		-text => 'Nama palette',
 		-relief => 'raised',
 	);
@@ -177,7 +177,7 @@ sub init_gui {
 my @color_items = map { [ 'command' => $_, 
 							-command  => colorset('mw', $_ ) ]
 						} @{$gui->{_palette_fields}};
-$gui->{_palette}->AddItems( @color_items);
+$gui->{palette}->AddItems( @color_items);
 
 @color_items = map { [ 'command' => $_, 
 							-command  => namaset( $_ ) ]
@@ -1134,19 +1134,19 @@ sub get_saved_colors {
 
 
 	my $pal = join_path($config->{root_dir}, $file->{gui_palette});
+	$pal .= '.yml';
+	say "pal $pal";
 	$pal = -f $pal 
-			? read_file($pal)
+			? scalar read_file($pal)
 			: get_data_section('default_palette_yml');
-	::assign( 
-		data => decode($pal, 'yaml'), 
-		vars => [qw(%palette %namapalette, $gui->{_palette}, $gui->{_nama_palette})],
-		class => '::',
-		var_map => 1,
-	);
+	my $ref = decode($pal, 'yaml');
+	#say "palette file",yaml_out($ref);
+
+	assign_singletons({ data => $ref });
 	
-	*::rec = \$gui->{_nama_palette}->{RecBackground};
-	*::mon = \$gui->{_nama_palette}->{MonBackground};
-	*::off = \$gui->{_nama_palette}->{OffBackground};
+	*::rec = $gui->{_nama_palette}->{RecBackground};
+	*::mon = $gui->{_nama_palette}->{MonBackground};
+	*::off = $gui->{_nama_palette}->{OffBackground};
 	
 	$gui->{_old_abg} = $gui->{_palette}->{mw}{activeBackground};
 	$gui->{_old_abg} = $gui->{project_head}->cget('-activebackground') unless $gui->{_old_abg};
@@ -1268,3 +1268,5 @@ sub save_palette {
 }
 
 ### end
+__END__
+

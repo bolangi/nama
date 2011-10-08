@@ -1,30 +1,31 @@
 ---
-namapalette:
-  Capture: '#f22c92f088d3'
-  ClockBackground: '#998ca489b438'
-  ClockForeground: '#000000000000'
-  GroupBackground: '#998ca489b438'
-  GroupForeground: '#000000000000'
-  MarkArmed: '#d74a811f443f'
-  Mixdown: '#bf67c5a1491f'
-  MonBackground: '#9420a9aec871'
-  MonForeground: Black
-  Mute: '#a5a183828382'
-  OffBackground: '#998ca489b438'
-  OffForeground: Black
-  Play: '#68d7aabf755c'
-  RecBackground: '#d9156e866335'
-  RecForeground: Black
-  SendBackground: '#9ba79cbbcc8a'
-  SendForeground: Black
-  SourceBackground: '#f22c92f088d3'
-  SourceForeground: Black
-palette:
-  ew:
-    background: '#d915cc1bc3cf'
-    foreground: black
-  mw:
-    activeBackground: '#81acc290d332'
-    background: '#998ca489b438'
-    foreground: black
+gui:
+  _nama_palette:
+    Capture: '#f22c92f088d3'
+    ClockBackground: '#998ca489b438'
+    ClockForeground: '#000000000000'
+    GroupBackground: '#998ca489b438'
+    GroupForeground: '#000000000000'
+    MarkArmed: '#d74a811f443f'
+    Mixdown: '#bf67c5a1491f'
+    MonBackground: '#9420a9aec871'
+    MonForeground: Black
+    Mute: '#a5a183828382'
+    OffBackground: '#998ca489b438'
+    OffForeground: Black
+    Play: '#68d7aabf755c'
+    RecBackground: '#d9156e866335'
+    RecForeground: Black
+    SendBackground: '#9ba79cbbcc8a'
+    SendForeground: Black
+    SourceBackground: '#f22c92f088d3'
+    SourceForeground: Black
+  _palette:
+    ew:
+      background: '#d915cc1bc3cf'
+      foreground: black
+    mw:
+      activeBackground: '#81acc290d332'
+      background: '#998ca489b438'
+      foreground: black
 ...

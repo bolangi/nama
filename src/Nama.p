@@ -145,6 +145,7 @@ $file = {
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
+$gui->{marks} = {};
 
 
 $config = {
@@ -255,6 +256,8 @@ __DATA__
 [% qx(cat ./fake_jack_lsp) %]
 @@ midish_commands
 [% qx(cat ./midish_commands) %]
+@@ default_palette_yml
+[% qx(cat ./palette.yml) %]
 __END__
 
 =head1 NAME
