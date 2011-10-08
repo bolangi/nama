@@ -65,7 +65,12 @@ sub pager {
 	my ($screen_lines, $columns) = $text->{term}->get_screen_size();
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
-	if ( $config->{use_pager} and $line_count > $screen_lines - 2) { 
+	if 
+	( 
+		(ref $ui) =~ /Text/  # pager interferes with GUI
+		and $config->{use_pager} 
+		and $line_count > $screen_lines - 2
+	) { 
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
 		print $fh @output;
