@@ -2,9 +2,9 @@ sub main {
 #	setup_grammar(); 		# executes directly in body
 	process_options(); 		# Option_subs.pm
 	initialize_interfaces();# Initialize_subs.pm
-	command_process($execute_on_project_load);
+	command_process($config->{execute_on_project_load});
 	reconfigure_engine();	# Engine_setup_subs.pm
-	command_process($opts{X});
+	command_process($config->{opts}->{X});
 	$ui->loop;
 }
 
@@ -12,30 +12,26 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
-	my $file = user_customization_file();
-	return unless -r $file;
-	say "reading user customization file $user_customization_file";
-	my @return;
-	unless (@return = do $file) {
-		say "couldn't parse $file: $@\n" if $@;
+	my $filename = user_customization_file();
+	return unless -r $filename;
+	say "reading user customization file $filename";
+	my %custom;
+	unless (%custom = do $filename) {
+		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
-	# convert key-value pairs to hash
-	$debug and print join "\n",@return;
-	my %custom = @return ; 
+	$debug and say 'customization :', yaml_out(\%custom);
 	my $prompt;
 	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
-	{ no warnings 'redefine';
-		*prompt = $prompt if $prompt;
-	}
+	*prompt = $prompt if $prompt;
 	my @commands = keys %{ $custom{commands} };
 	for my $cmd(@commands){
 		my $coderef = gen_coderef($cmd,$custom{commands}{$cmd}) or next;
-		$user_command{$cmd} = $coderef;
+		$text->{user_command}->{$cmd} = $coderef;
 	}
-	%user_alias   = %{ $custom{aliases}  };
+	$text->{user_alias}   = $custom{aliases};
 }
-sub user_customization_file { join_path(project_root(),$user_customization_file) }
+sub user_customization_file { join_path(project_root(),$file->{user_customization}) }
 
 sub gen_coderef {
 	my ($cmd,$code) = @_;
@@ -49,33 +45,33 @@ sub gen_coderef {
 sub do_user_command {
 	#say "args: @_";
 	my($cmd, @args) = @_;
-	$user_command{$cmd}->(@args);
+	$text->{user_command}->{$cmd}->(@args);
 }	
 
 sub do_script {
 
 	my $name = shift;
-	my $file;
+	my $filename;
 	# look in project_dir() and project_root()
 	# if filename provided does not contain slash
-	if( $name =~ m!/!){ $file = $name }
+	if( $name =~ m!/!){ $filename = $name }
 	else {
-		$file = join_path(project_dir(),$name);
-		if(-e $file){}
-		else{ $file = join_path(project_root(),$name) }
+		$filename = join_path(project_dir(),$name);
+		if(-e $filename){}
+		else{ $filename = join_path(project_root(),$name) }
 	}
-	-e $file or say("$file: file not found. Skipping"), return;
-	my @lines = split "\n",read_file($file);
-	my $old_opt_r = $opts{R};
-	$opts{R} = 1; # turn off auto reconfigure
+	-e $filename or say("$filename: file not found. Skipping"), return;
+	my @lines = split "\n",read_file($filename);
+	my $old_opt_r = $config->{opts}->{R};
+	$config->{opts}->{R} = 1; # turn off auto reconfigure
 	for my $input (@lines) { process_line($input)};
-	$opts{R} = $old_opt_r;
+	$config->{opts}->{R} = $old_opt_r;
 }
 
 sub dump_all {
 	my $tmp = ".dump_all";
 	my $fname = join_path( project_root(), $tmp);
-	save_state($fname);
+	save_system_state($fname);
 	file_pager("$fname.yml");
 }
 
@@ -119,14 +115,14 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 sub destroy_current_wav {
-	my $old_group_status = $main->rw;
-	$main->set(rw => 'MON');
+	my $old_group_status = $gn{Main}->rw;
+	$gn{Main}->set(rw => 'MON');
 	$this_track->current_version or
 		say($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;
-	my $reply = $term->readline("delete WAV file $wav? [n] ");
-	#my $reply = chr($term->read_key()); 
+	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
+	#my $reply = chr($text->{term}->read_key()); 
 	if ( $reply =~ /y/i ){
 		# remove version comments, if any
 		delete $this_track->{version_comment}{$this_track->current_version};
@@ -134,20 +130,20 @@ sub destroy_current_wav {
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		rememoize();
 	}
-	$term->remove_history($term->where_history);
-	$main->set(rw => $old_group_status);
+	$text->{term}->remove_history($text->{term}->where_history);
+	$gn{Main}->set(rw => $old_group_status);
 	1;
 }
 
 
 sub is_bunch {
 	my $name = shift;
-	$bn{$name} or $bunch{$name}
+	$bn{$name} or $project->{bunch}->{$name}
 }
 
 sub pan_check {
 	my $new_position = shift;
-	my $current = $copp{ $this_track->pan }->[0];
+	my $current = $fx->{params}->{ $this_track->pan }->[0];
 	$this_track->set(old_pan_level => $current)
 		unless defined $this_track->old_pan_level;
 	effect_update_copp_set(
@@ -189,7 +185,7 @@ sub bunch_tracks {
 		$bunchy = uc $bunchy;
 		@tracks = grep{$tn{$_}->$method eq $bunchy} 
 				$bn{$this_bus}->tracks
-	} elsif ( $bunch{$bunchy} and @tracks = @{$bunch{$bunchy}}  ) {
+	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$gui->{_project_name}->{bunch}->{$bunchy}}  ) {
 		$debug and print "bunch tracks: @tracks\n";
 	} else { say "$bunchy: no matching bunch identifier found" }
 	@tracks;
@@ -207,7 +203,7 @@ sub command_process {
 	
 	while ($input =~ /\S/) { 
 		$debug and say "input: $input";
-		$parser->meta(\$input) or print("bad command: $input_was\n"), last;
+		$text->{parser}->meta(\$input) or print("bad command: $input_was\n"), last;
 	}
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
@@ -215,7 +211,7 @@ sub command_process {
 	
 ## called from ChainSetup.pm and Engine_setup_subs.pm
 
-sub setup_file { join_path( project_dir(), $chain_setup_file) };
+sub setup_file { join_path( project_dir(), $file->{chain_setup}) };
 
 ## called from 
 # Track_subs
@@ -283,10 +279,10 @@ sub cleanup_exit {
 			  kill $signal, $pid; 
 			  sleeper(0.2) 
 			} (2,2,9)
-	} @ecasound_pids;
- 	#kill 15, ecasound_pid() if $sock;  	
-	close_midish() if $midish_enable;
-	$term->rl_deprep_terminal() if defined $term;
+	} @{$engine->{pids}};
+ 	#kill 15, ecasound_pid() if $engine->{socket};  	
+	close_midish() if $config->{use_midish};
+	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit; 
 }
 END { cleanup_exit() }
@@ -306,7 +302,7 @@ sub show_tracks_limited {
 sub process_control_inputs { }
 
 sub hardware_latency {
-	$devices{$alsa_capture_device}{hardware_latency}
+	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency}
 }
 	
 

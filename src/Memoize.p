@@ -1,8 +1,6 @@
 # ------ Memoize subroutines ------
-
 package ::;
 use Modern::Perl;
-our ( $memoize );
 
 BEGIN { # OPTMIZATION
 my @wav_functions = qw(
@@ -30,20 +28,20 @@ my @track_functions = qw(
 	input_path 
 );
 sub track_memoize { # before generate_setup
-	return unless $memoize;
+	return unless $config->{memoize};
 	map{package ::Track; memoize($_) } @track_functions;
 }
 sub track_unmemoize { # after generate_setup
-	return unless $memoize;
+	return unless $config->{memoize};
 	map{package ::Track; unmemoize ($_)} @track_functions;
 }
 sub rememoize {
-	return unless $memoize;
+	return unless $config->{memoize};
 	map{package ::Wav; unmemoize ($_); memoize($_) } 
 		@wav_functions;
 }
 sub init_memoize {
-	return unless $memoize;
+	return unless $config->{memoize};
 	map{package ::Wav; memoize($_) } @wav_functions;
 }
 }

@@ -3,53 +3,7 @@
 package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
-our (
-
-# generate_setup()
-
-	$debug,
-	$debug2,
-	$regenerate_setup,
-	$length,
-	$ui,
-	$seek_delay,
-	$jack_seek_delay,
-
-# reconfigure_engine()
-
-	$this_track,
-	%opts,
-	$disable_auto_reconfigure,
-	$old_snapshot,
-	$preview,
-	$project_name,
-	$offset_run_flag,
-
-# status_snapshot()
-
-	$mastering_mode,
-	$jack_running,
-
-# find_duplicate_inputs()
-
-	$main,
-	%already_used,
-	%duplicate_inputs,
-	%tn,
-
-# transport_status()
-
- 	%cooked_record_pending,
- 	$loop_enable,
-	$press_space_to_start_transport,
-
-# adjust_latency()
-
-	%copp,
-	%ti,
-	$sampling_frequency,
-
-);	
+use ::Globals qw(:all);
 
 sub generate_setup { 
 	# return 1 if successful
@@ -63,12 +17,12 @@ sub generate_setup {
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
 
 	::ChainSetup::initialize();
-	$length = 0;  # TODO replace global with sub
+	$setup->{audio_length} = 0;  # TODO replace global with sub
 	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)
-	local $@ unless $opts{T}; 
+	local $@ unless $config->{opts}->{T}; 
 	track_memoize(); 			# freeze track state 
-	my $success = $opts{T}      # don't catch errors during testing 
+	my $success = $config->{opts}->{T}      # don't catch errors during testing 
 		?  ::ChainSetup::generate_setup_try(@_)
 		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
 	remove_temporary_tracks();  # cleanup
@@ -90,9 +44,9 @@ sub reconfigure_engine {
 	$debug2 and print "&reconfigure_engine\n";
 
 	# skip if command line option is set
-	return if $opts{R};
+	return if $config->{opts}->{R};
 
-	return if $disable_auto_reconfigure;
+	return if $config->{disable_auto_reconfigure};
 
 	# don't disturb recording/mixing
 	return if ::ChainSetup::really_recording() and engine_running();
@@ -104,12 +58,12 @@ sub reconfigure_engine {
 	# only act if change in configuration
 
 	# skip check if regenerate_setup flag is already set
-	if( $regenerate_setup ){ 
-		$regenerate_setup = 0; # reset for next time
+	if( $setup->{changed} ){ 
+		$setup->{changed} = 0; # reset for next time
 	} 
 	else {
 		my $current = yaml_out(status_snapshot());
-		my $old = yaml_out($old_snapshot);
+		my $old = yaml_out($setup->{_old_snapshot});
 		if ( $current eq $old){
 				$debug and print("no change in setup\n");
 				return;
@@ -120,7 +74,7 @@ sub reconfigure_engine {
  	my $old_pos;
  	my $was_running;
 	my $restore_position;
-	my $previous_snapshot = $old_snapshot;
+	my $previous_snapshot = $setup->{_old_snapshot};
 
 	# restore previous playback position unless 
 
@@ -130,9 +84,9 @@ sub reconfigure_engine {
 	#  - new setup involves recording
 	#  - change in edit mode
 	
-	if ( 	$preview eq 'doodle' 
-		 or $old_snapshot->{project} ne $project_name
-		 or $offset_run_flag != $old_offset_run_status
+	if ( 	$mode->{preview} eq 'doodle' 
+		 or $setup->{_old_snapshot}->{project} ne $project->{name}
+		 or $mode->{offset_run} != $old_offset_run_status
 		# TODO: or change in global version
 	){} # do nothing
 	else
@@ -147,10 +101,10 @@ sub reconfigure_engine {
 
 	}
 
-	$old_snapshot = status_snapshot();
-	$old_offset_run_status = $offset_run_flag;
+	$setup->{_old_snapshot} = status_snapshot();
+	$old_offset_run_status = $mode->{offset_run};
 
-	command_process('show_tracks_all');
+	command_process('show_tracks');
 
 	stop_transport('quiet') if $was_running;
 
@@ -161,7 +115,7 @@ sub reconfigure_engine {
 		::Text::show_status();
 
 		if( $restore_position and not ::ChainSetup::really_recording()){
-			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $length;
+			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};
  			start_transport('quiet') if $was_running;
 		}
 		transport_status();
@@ -205,10 +159,10 @@ sub reconfigure_engine {
 sub status_snapshot {
 
 	
-	my %snapshot = ( project 		=> 	$project_name,
-					 mastering_mode => $mastering_mode,
-					 preview        => $preview,
-					 jack_running	=> $jack_running,
+	my %snapshot = ( project 		=> 	$project->{name},
+					 mastering_mode => $mode->{mastering},
+					 preview        => $mode->{preview},
+					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
 	::Track::all();
@@ -217,16 +171,16 @@ sub status_snapshot {
 }
 sub find_duplicate_inputs { # in Main bus only
 
-	%duplicate_inputs = ();
-	%already_used = ();
+	%{$setup->{tracks_with_duplicate_inputs}} = ();
+	%{$setup->{inputs_used}} = ();
 	$debug2 and print "&find_duplicate_inputs\n";
 	map{	my $source = $_->source;
-			$duplicate_inputs{$_->name}++ if $already_used{$source} ;
-		 	$already_used{$source} //= $_->name;
+			$setup->{tracks_with_duplicate_inputs}->{$_->name}++ if $setup->{inputs_used}->{$source} ;
+		 	$setup->{inputs_used}->{$source} //= $_->name;
 	} 
 	grep { $_->rw eq 'REC' }
 	map{ $tn{$_} }
-	$main->tracks(); # track names;
+	$gn{Main}->tracks(); # track names;
 }
 sub load_ecs {
 	my $setup = setup_file();
@@ -253,7 +207,7 @@ sub arm {
 	$debug2 and print "&arm\n";
 	exit_preview_mode();
 	#adjust_latency();
-	$regenerate_setup++;
+	$setup->{changed}++;
 	generate_setup() and connect_transport();
 }
 sub connect_transport {
@@ -279,15 +233,17 @@ sub connect_transport {
 		print "Failed to launch engine. Engine status: $status\n";
 		return;
 	}
-	$length = eval_iam('cs-get-length'); 
-	$ui->length_display(-text => colonize($length));
-	# eval_iam("cs-set-length $length") unless @record;
+	$setup->{audio_length} = eval_iam('cs-get-length'); 
+	$ui->length_display(-text => colonize($setup->{audio_length}));
+	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
-	{ # set delay for seeking under JACK
+
+	# set delay for seeking under JACK
+	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$seek_delay = $jack_seek_delay || 0.1 + 0.1 * $track_count / 20;
-	}
+	$config->{engine_jack_seek_delay} = $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 );
+
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
@@ -299,20 +255,20 @@ sub transport_status {
 	
 	map{ 
 		say("Warning: $_: input ",$tn{$_}->source,
-		" is already used by track ",$already_used{$tn{$_}->source},".")
-		if $duplicate_inputs{$_};
-	} grep { $tn{$_}->rec_status eq 'REC' } $main->tracks;
+		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
+		if $setup->{tracks_with_duplicate_inputs}->{$_};
+	} grep { $tn{$_}->rec_status eq 'REC' } $gn{Main}->tracks;
 
 
 	# assume transport is stopped
 	# print looping status, setup length, current position
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
-	#print "start: $start, end: $end, loop_enable: $loop_enable\n";
-	if (%cooked_record_pending){
-		say join(" ", keys %cooked_record_pending), ": ready for caching";
+	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
+	if (ref $setup->{cooked_record_pending} and %{$setup->{cooked_record_pending}}){
+		say join(" ", keys %{$setup->{cooked_record_pending}}), ": ready for caching";
 	}
-	if ($loop_enable and $start and $end){
+	if ($mode->{loop_enable} and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
 		say "looping from ", heuristic_time($start),
 				 	"to ",   heuristic_time($end);
@@ -320,12 +276,12 @@ sub transport_status {
 	say "\nNow at: ", current_position();
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
-		if $press_space_to_start_transport;
+		if $config->{press_space_to_start};
 }
 sub adjust_latency {
 
 	$debug2 and print "&adjust_latency\n";
-	map { $copp{$_->latency}[0] = 0  if $_->latency() } 
+	map { $fx->{params}->{$_->latency}[0] = 0  if $_->latency() } 
 		::Track::all();
 	set_preview_mode();
 	exit_preview_mode();
@@ -345,7 +301,7 @@ sub adjust_latency {
 	my $max;
 	map { $max = $_ if $_ > $max  } values %latency;
 	$debug and print "max: $max\n";
-	map { my $adjustment = ($max - $latency{$_}) / $sampling_frequency * 1000;
+	map { my $adjustment = ($max - $latency{$_}) / $config->{sampling_freq} * 1000;
 			$debug and print "chain: $_, adjustment: $adjustment\n";
 			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
 			} keys %latency;

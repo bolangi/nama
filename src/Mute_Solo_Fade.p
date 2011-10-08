@@ -2,30 +2,14 @@
 
 package ::;
 use Modern::Perl;
-our (
-	%opts,
-	%tn,
-	%bn,
-	$hires,
-	$debug,
-	$debug2,
-	%fade_out_level,
-	%cops,
-	%copp,
-	@already_muted,
-	$fade_resolution,
-	$fade_time,
-	$soloing,
-);
-
 
 sub mute {
-	return if $opts{F};
+	return if $config->{opts}->{F};
 	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
 	$tn{Master}->mute;
 }
 sub unmute {
-	return if $opts{F};
+	return if $config->{opts}->{F};
 	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
 	$tn{Master}->unmute;
 }
@@ -34,13 +18,13 @@ sub fade {
 
 	# no fade without Timer::HiRes
 	# no fade unless engine is running
-	if ( ! engine_running() or ! $hires ){
+	if ( ! engine_running() or ! $config->{hires_timer} ){
 		effect_update_copp_set ( $id, $param, $to );
 		return;
 	}
 
-	my $steps = $seconds * $fade_resolution;
-	my $wink  = 1/$fade_resolution;
+	my $steps = $seconds * $fx->{fade_resolution};
+	my $wink  = 1/$fx->{fade_resolution};
 	my $size = ($to - $from)/$steps;
 	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
 	for (1..$steps - 1){
@@ -56,14 +40,14 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = $fade_out_level{$cops{$id}->{type}};
-	fade( $id, 0, $from, $to, $fade_time);
+	my $from  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
+	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop});
 }
 sub fadeout {
 	my $id    = shift;
-	my $from  =	$copp{$id}[0];
-	my $to	  = $fade_out_level{$cops{$id}->{type}};
-	fade( $id, 0, $from, $to, $fade_time );
+	my $from  =	$fx->{params}->{$id}[0];
+	my $to	  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
+	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop} );
 }
 
 sub solo {
@@ -71,13 +55,13 @@ sub solo {
 
 	# get list of already muted tracks if I haven't done so already
 	
-	if ( ! @already_muted ){
-		@already_muted = grep{ defined $_->old_vol_level} 
+	if ( ! @{$fx->{muted}} ){
+		@{$fx->{muted}} = grep{ defined $_->old_vol_level} 
                          map{ $tn{$_} } 
 						 ::Track::user();
 	}
 
-	$debug and say join " ", "already muted:", map{$_->name} @already_muted;
+	$debug and say join " ", "already muted:", map{$_->name} @{$fx->{muted}};
 
 	# convert bunches to tracks
 	my @names = map{ bunch_tracks($_) } @args;
@@ -115,40 +99,48 @@ sub solo {
 
 	# mute all tracks on our mute list (do we skip already muted tracks?)
 	
-	map{ $tn{$_}->mute('nofade') } keys %to_mute;
+	do_many_tracks( { tracks => [ keys %to_mute ], method => 'mute' } );
 
 	# unmute all tracks on our wanted list
 	
-	map{ $tn{$_}->unmute('nofade') } keys %not_mute;
+	do_many_tracks( { tracks => [ keys %not_mute ], method => 'unmute' } );
 	
-	$soloing = 1;
+	$mode->{soloing} = 1;
 }
 
 sub nosolo {
-	# unmute all except in @already_muted list
+	# unmute all except in @{$fx->{muted}} list
 
 	# unmute all tracks
-	map { $tn{$_}->unmute('nofade') } ::Track::user();
+	do_many_tracks( { tracks => [ ::Track::user() ], method => 'unmute' } );
 
 	# re-mute previously muted tracks
-	if (@already_muted){
-		map { $_->mute('nofade') } @already_muted;
+	if (@{$fx->{muted}}){
+		do_many_tracks( { tracks => [ @{$fx->{muted}} ], method => 'mute' } );
 	}
 
 	# remove listing of muted tracks
-	@already_muted = ();
+	@{$fx->{muted}} = ();
 	
-	$soloing = 0;
+	$mode->{soloing} = 0;
 }
 sub all {
 
 	# unmute all tracks
-	map { $tn{$_}->unmute('nofade') } ::Track::user();
+	do_many_tracks( { tracks => [ ::Track::user() ], method => 'mute' } );
 
 	# remove listing of muted tracks
-	@already_muted = ();
+	@{$fx->{muted}} = ();
 	
-	$soloing = 0;
+	$mode->{soloing} = 0;
+}
+
+sub do_many_tracks {
+	# args: { tracks => [ name list ], method => method_name }
+	my $args = shift;
+	my $method = $args->{method};
+	my $delay = $args->{delay} || 0.01;
+	map{ $tn{$_}->$method('nofade'); sleeper($delay) } @{$args->{tracks}};
 }
 
 1;

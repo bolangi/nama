@@ -53,7 +53,34 @@
 );
 						
 # variables that get saved to State.yml
-#
+
+# these are the converted vars
+
+@new_persistent_vars = qw(
+
+	$project->{save_file_version_number}
+	$fx->{id_counter}
+	$fx->{applied}
+	$fx->{params}
+	$fx->{params_log}}
+	$gui->{_seek_unit}
+	@tracks_data
+	@bus_data
+	@groups_data
+	@marks_data
+	@fade_data
+	@edit_data
+	@inserts_data
+	$setup->{loop_endpoints}
+	$mode->{loop_enable}
+	$setup->{audio_length}
+	$project->{bunch}
+	$text->{command_history}
+	$mode->{mastering}
+	$this_track_name
+	$this_op
+);
+
 @persistent_vars = qw(
 
 	$saved_version 	# copy of $VERSION saved with settings in State.yml
@@ -71,7 +98,6 @@
 # category: GUI
 
 	$unit			# jump multiplier, 1 or 60 seconds
-	%oid_status    	# state information for the chain templates
 
 	
 # category: object serialization
@@ -105,8 +131,8 @@
 	$this_op      	# current effect
 );
 		 
+=comment
 # category: effects_cache 
-
 @effects_static_vars = qw(
 
 	@effects		# static effects information (parameters, hints, etc.)
@@ -125,5 +151,6 @@
 					# get plugin unique id from plugin label
 	%ladspa_label  # get plugin label from unique id
 	%ladspa_help   # plugin_label => analyseplugin output
-	%e_bound		# for displaying hundreds of effects in groups
+	%e_bound		# GUI: for displaying hundreds of effects in groups
 );
+=cut

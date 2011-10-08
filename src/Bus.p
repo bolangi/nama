@@ -1,15 +1,16 @@
-
 # ------------  Bus --------------------
 #
 # The base class ::Bus is now used for grouping tracks
 # serving the role of ::Group, which is now a 
 # parent class.
 
+package ::;
+our ($debug);
+
 package ::Bus;
 use Modern::Perl; use Carp; our @ISA = qw( ::Object ::Group );
 our $VERSION = 1.0;
-our ($debug, %by_name); 
-*debug = \$::debug;
+our (%by_name); 
 
 use ::Object qw(
 					name
@@ -58,7 +59,7 @@ sub forces { $forces{ $_[0]->rw } }
 ## class methods
 
 # sub buses, and Main
-sub all { grep{ ! $::is_system_bus{$_->name} } values %by_name };
+sub all { grep{ ! $::config->{_is_system_bus}->{$_->name} } values %by_name };
 
 sub overall_last { 
 	my $max = 0;
@@ -184,7 +185,7 @@ our (
 	$this_bus,
 	%tn,
 	%bn,
-	$main,
+	%gn,
 );
 
 sub set_current_bus {
@@ -256,7 +257,7 @@ sub add_send_bus {
 							target => $_,
 							group  => $name,
 						)
-   } $main->tracks;
+   } $gn{Main}->tracks;
 		
 }
 

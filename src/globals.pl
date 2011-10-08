@@ -1,0 +1,16 @@
+$this_track
+$this_bus
+$this_op
+$this_param
+$this_mark
+$this_edit
+$prompt
+%tn
+%ti
+%bn
+%gn
+$debug
+$debug2
+@config_vars
+@persistent_vars
+@new_persistent_vars

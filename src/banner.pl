@@ -1,4 +1,4 @@
-$banner = <<BANNER;
+<<BANNER;
       ////////////////////////////////////////////////////////////////////
      /                                                                  /
     /    Nama multitrack recorder v. $VERSION (c)2008-2011 Joel Roth     /

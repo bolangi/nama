@@ -3,6 +3,9 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use vars qw(%reserved $debug $debug2);
+our (
+[% join q(, ), split " ",qx(cat ./singletons.pl) %]
+);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;

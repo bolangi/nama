@@ -2,7 +2,6 @@
 
 package ::;
 use Modern::Perl; use Carp;
-our ($this_track);
 
 sub set_region {
 	my ($beg, $end) = @_;

@@ -1,4 +1,11 @@
 # ---------- Track -----------
+#
+# give all classes (packages) access to global vars 
+
+package ::;
+our (
+	[% join qq(,\n\t), split " ", qx(cat 	./singletons.pl ./globals.pl  ./serialize.pl ) %]
+);
 {
 package ::Track;
 
@@ -25,9 +32,9 @@ use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 our ($debug);
+
 local $debug = 0;
-use ::Assign qw(join_path);
-use ::Util qw(freq input_node dest_type);
+use ::Util qw(freq input_node dest_type join_path);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(
@@ -124,13 +131,13 @@ sub new {
 	::add_pan_control($n);
 	::add_volume_control($n);
 
-	#my $group = $::bn{ $object->group }; 
+	#my $group = $bn{ $object->group }; 
 
 	# create group if necessary
 	#defined $group or $group = ::Group->new( name => $object->group );
 	#my @existing = $group->tracks ;
 	#$group->set( tracks => [ @existing, $object->name ]);
-	$::this_track = $object;
+	$this_track = $object;
 	$object;
 	
 }
@@ -151,7 +158,7 @@ sub dir {
 # overrides default Object::Tiny accessor (returning $self->{target})
 sub target {
 	my $self = shift;
-	my $parent = $::tn{$self->{target}};
+	my $parent = $tn{$self->{target}};
 	defined $parent && $parent->target || $self->{target};
 }
 
@@ -164,7 +171,7 @@ sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
 sub group_last {
 	my $track = shift;
-	my $group = $::bn{$track->group}; 
+	my $group = $bn{$track->group}; 
 	#print join " ", 'searching tracks:', $group->tracks, $/;
 	$group->last;
 }
@@ -188,7 +195,7 @@ sub current_wav {
 
 sub current_version {	
 	my $track = shift;
-	my $last = $::use_group_numbering 
+	my $last = $config->{use_group_numbering} 
 					? ::Bus::overall_last()
 					: $track->last;
 	my $status = $track->rec_status;
@@ -201,7 +208,7 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 
-	my $group = $::bn{$track->group};
+	my $group = $bn{$track->group};
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;
 	return $group->version if $group->version 
@@ -213,12 +220,12 @@ sub monitor_version {
 
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! ($::preview eq 'doodle');
+	return 'MON' if $monitor_version and ! ($mode->{preview} eq 'doodle');
 	return 'OFF';
 }
 
 sub rec_status {
-#	$::debug2 and print "&rec_status\n";
+#	$debug2 and print "&rec_status\n";
 	my $track = shift;
 	my $bug = shift;
 	local $debug;
@@ -227,7 +234,7 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
-	my $group = $::bn{$track->group};
+	my $group = $bn{$track->group};
 	#$debug and say join " ", "bus:",$group->name, $group->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
@@ -236,8 +243,8 @@ sub rec_status {
 
 	if ( $group->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $::preview eq 'doodle' and $track->rw eq 'REC' and 
-			$::duplicate_inputs{$track->name}
+		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
+			$setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $group->rw and $track->rw are REC or MON
@@ -250,7 +257,7 @@ sub rec_status {
 			
 	# for null tracks
 	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
-				or $::bn{$track->name}
+				or $bn{$track->name}
 					and $track->rec_defeat) ){
 		given( $track->source_type){
 			when('jack_client'){
@@ -311,26 +318,26 @@ sub playat_time {
 
 sub adjusted_region_start_time {
 	my $track = shift;
-	return $track->region_start_time unless $::offset_run_flag;
+	return $track->region_start_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_region_start();
 	
 }
 sub adjusted_playat_time { 
 	my $track = shift;
-	return $track->playat_time unless $::offset_run_flag;
+	return $track->playat_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_playat();
 }
 sub adjusted_region_end_time {
 	my $track = shift;
-	return $track->region_end_time unless $::offset_run_flag;
+	return $track->region_end_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_region_end();
 }
 
 sub region_is_out_of_bounds {
-	return unless $::offset_run_flag;
+	return unless $mode->{offset_run};
 	my $track = shift;
 	::set_edit_vars($track);
 	::case() =~ /out_of_bounds/
@@ -384,7 +391,7 @@ sub input_path { # signal path, not file path
 			#  subtrack --> mix_track_in --> mix_track
 
 			( input_node($track->source_type) , $track->name)
-	} elsif($track->rec_status eq 'MON' and $::preview ne 'doodle'){
+	} elsif($track->rec_status eq 'MON' and $mode->{preview} ne 'doodle'){
 
 	# create edge representing WAV file input
 
@@ -395,7 +402,7 @@ sub input_path { # signal path, not file path
 
 ### remove and destroy
 
-sub remove_effect_from_track { # doesn't touch %cops or %copp data structures 
+sub remove_effect_from_track { # doesn't touch %{$fx->{applied}} or %{$fx->{params}} data structures 
 	my $track = shift;
 	my @ids = @_;
 	$track->set(ops => [ grep { my $existing = $_; 
@@ -413,8 +420,8 @@ sub postfader_insert { ::Insert::get_id($_[0],'post') }
 sub remove {
 	my $track = shift;
 	my $n = $track->n;
-	$::ui->remove_track_gui($n); 
- 	$::this_track = $::ti{::Track::idx() - 1};
+	$ui->remove_track_gui($n); 
+ 	$this_track = $ti{::Track::idx() - 1};
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
@@ -480,7 +487,7 @@ sub set_io {
  		when ( /jack/ ){
 			say("JACK server not running! "
 				,"Cannot set JACK client or port as track source."), 
-					return unless $::jack_running;
+					return unless $jack->{jackd_running};
 
 			continue; # don't break out of given/when chain
 		} 
@@ -701,9 +708,9 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $::copp{$track->vol}[0] != $track->mute_level
-		and $::copp{$track->vol}[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $::copp{$track->vol}[0]);
+	if ( $fx->{params}->{$track->vol}[0] != $track->mute_level
+		and $fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
+		$track->set(old_vol_level => $fx->{params}->{$track->vol}[0]);
 		fadeout( $track->vol ) unless $nofade;
 	}
 	$track->set_vol($track->mute_level);
@@ -726,11 +733,11 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$::mute_level{$track->vol_type}
+	$fx->{mute_level}->{$track->vol_type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$::fade_out_level{$track->vol_type}
+	$fx->{fade_out_level}->{$track->vol_type}
 }
 sub set_vol {
 	my $track = shift;
@@ -739,7 +746,7 @@ sub set_vol {
 }
 sub vol_type {
 	my $track = shift;
-	$::cops{$track->vol}->{type}
+	$fx->{applied}->{$track->vol}->{type}
 }
 sub import_audio  { 
 	my $track = shift;
@@ -759,20 +766,20 @@ sub import_audio  {
 		say "Use 'import_audio <path> <frequency>' if possible.";
 		return 
 	}
-	my $desired_frequency = freq( $::raw_to_disk_format );
+	my $desired_frequency = freq( $config->{formats}->{raw_to_disk} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
 	#say "destination: $destination";
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
 		say "copying $path to $destination";
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
-		my $format = ::signal_format($::raw_to_disk_format, $width);
+		my $format = ::signal_format($config->{formats}->{raw_to_disk}, $width);
 		say "importing $path as $destination, converting to $format";
 		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		#say $cmd;
 		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
-	::rememoize() if $::opts{R}; # usually handled by reconfigure_engine() 
+	::rememoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 
@@ -785,7 +792,7 @@ sub bus_tree { # for solo function to work in sub buses
 	my $track = shift;
 	my $mix = $track->group;
 	return if $mix eq 'Main';
-	($mix, $::tn{$mix}->bus_tree);
+	($mix, $tn{$mix}->bus_tree);
 }
 
 sub version_has_edits { 
@@ -799,7 +806,7 @@ sub version_has_edits {
 sub edits_enabled {
 	my $track = shift;
 	my $bus;
-	$bus = $::Bus::by_name{$track->name}
+	$bus = $bn{$track->name}
 	and $bus->rw ne 'OFF'
 	and $track->rec_status eq 'REC' 
 	and $track->rec_defeat
@@ -837,14 +844,14 @@ sub unbusify {
 
 sub adjusted_length {
 	my $track = shift;
-	my $length;
+	my $setup_length;
 	if ($track->region_start){
-		$length = 	$track->adjusted_region_end_time
+		$setup_length = 	$track->adjusted_region_end_time
 				  - $track->adjusted_region_start_time
 	} else {
-		$length = 	$track->wav_length;
+		$setup_length = 	$track->wav_length;
 	}
-	$length += $track->adjusted_playat_time;
+	$setup_length += $track->adjusted_playat_time;
 }
 
 sub version_comment {
@@ -898,7 +905,7 @@ our @ISA = '::SimpleTrack';
 
 sub rec_status{
 	my $track = shift;
-	$::mastering_mode ? 'MON' :  'OFF';
+	$mode->{mastering} ? 'MON' :  'OFF';
 }
 sub source_status {}
 sub group_last {0}
@@ -909,31 +916,31 @@ package ::SlaveTrack; # for instrument monitor bus
 use Modern::Perl;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub width { $::tn{$_[0]->target}->width }
-sub rec_status { $::tn{$_[0]->target}->rec_status }
-sub full_path { $::tn{$_[0]->target}->full_path} 
-sub monitor_version { $::tn{$_[0]->target}->monitor_version} 
-sub source_type { $::tn{$_[0]->target}->source_type}
-sub source_id { $::tn{$_[0]->target}->source_id}
-sub source_status { $::tn{$_[0]->target}->source_status }
-sub send_type { $::tn{$_[0]->target}->send_type}
-sub send_id { $::tn{$_[0]->target}->send_id}
-sub dir { $::tn{$_[0]->target}->dir }
+sub width { $tn{$_[0]->target}->width }
+sub rec_status { $tn{$_[0]->target}->rec_status }
+sub full_path { $tn{$_[0]->target}->full_path} 
+sub monitor_version { $tn{$_[0]->target}->monitor_version} 
+sub source_type { $tn{$_[0]->target}->source_type}
+sub source_id { $tn{$_[0]->target}->source_id}
+sub source_status { $tn{$_[0]->target}->source_status }
+sub send_type { $tn{$_[0]->target}->send_type}
+sub send_id { $tn{$_[0]->target}->send_id}
+sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::CacheRecTrack; # for graph generation
 our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
-	my $target = $::tn{$track->target};
+	my $target = $tn{$track->target};
 		$target->last + 1
 # 	if ($target->rec_status eq 'MON'
-# 		or $target->rec_status eq 'REC' and $::bn{$track->target}){
+# 		or $target->rec_status eq 'REC' and $bn{$track->target}){
 # 	}
 }
 sub current_wav {
 	my $track = shift;
-		$::tn{$track->target}->name . '_' . $track->current_version . '.wav'
+		$tn{$track->target}->name . '_' . $track->current_version . '.wav'
 }
 sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav) }
 }
@@ -1006,22 +1013,6 @@ sub input_path {
 {
 package ::;
 use Modern::Perl;
-our (
-	$debug,
-	$debug2,
-	$this_track,
-	$ui,
-	%tn,
-	%ti,
-	%bn,
-	%effect_j,
-	$ch_m,
-	$ch_r,
-	$track_name,
-	$volume_control_operator,
-	$preview,
-	@mastering_track_names,
-);
 
 # usual track
 
@@ -1033,22 +1024,22 @@ sub add_track {
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
 	
-	$debug and print "name: $name, ch_r: $ch_r, ch_m: $ch_m\n";
+	$debug and print "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}\n";
 	
 	say("$name: track name already in use. Skipping."), return 
-		if $::Track::by_name{$name};
+		if $tn{$name};
 	say("$name: reserved track name. Skipping"), return
-	 	if grep $name eq $_, @mastering_track_names; 
+	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
 	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
 	$debug and print "ref new track: ", ref $track; 
-	$track->source($ch_r) if $ch_r;
-#		$track->send($ch_m) if $ch_m;
+	$track->source($gui->{_chr}) if $gui->{_chr};
+#		$track->send($gui->{_chm}) if $gui->{_chm};
 
 	my $group = $bn{$track->group}; 
-	command_process('for mon; mon') if $preview and $group->rw eq 'MON';
+	command_process('for mon; mon') if $mode->{preview} and $group->rw eq 'MON';
 	$group->set(rw => 'REC') unless $track->target; # not if is alias
 
 	# normal tracks default to 'REC'
@@ -1056,7 +1047,7 @@ sub add_track {
 	$track->set(rw => $track->target
 					?  'MON'
 					:  'REC') ;
-	$track_name = $ch_m = $ch_r = undef;
+	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();
 	$ui->track_gui($track->n);
@@ -1078,16 +1069,16 @@ sub add_track_alias {
 # track name in a different project
 
 sub add_track_alias_project {
-	my ($name, $track, $project) = @_;
-	my $dir =  join_path(project_root(), $project, '.wav'); 
+	my ($name, $track, $project_name) = @_;
+	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
 			print "Found target WAV files.\n";
-			my @params = (target => $track, project => $project);
+			my @params = (target => $track, project => $project_name);
 			add_track( $name, @params );
 		} else { print "No WAV files found.  Skipping.\n"; return; }
 	} else { 
-		print("$project: project does not exist.  Skipping.\n");
+		print("$project_name: project does not exist.  Skipping.\n");
 		return;
 	}
 }
@@ -1099,7 +1090,7 @@ sub add_volume_control {
 	
 	my $vol_id = cop_add({
 				chain => $n, 
-				type => $volume_control_operator,
+				type => $config->{volume_control_operator},
 				cop_id => $ti{$n}->vol, # often undefined
 				});
 	
@@ -1126,7 +1117,7 @@ sub add_pan_control {
 sub add_latency_compensation {
 	print('LADSPA L/C/R Delay effect not found.
 Unable to provide latency compensation.
-'), return unless $effect_j{lcrDelay};
+'), return unless $fx_cache->{partial_label_to_full}->{lcrDelay};
 	my $n = shift;
 	my $id = cop_add({
 				chain => $n, 

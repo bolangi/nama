@@ -1,0 +1,16 @@
+$ui
+$mode
+$file
+$graph
+$setup
+$config
+$jack
+$fx
+$fx_cache
+$engine
+$text
+$gui
+$midi
+$help
+$mastering
+$project

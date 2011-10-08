@@ -2,48 +2,17 @@
 
 
 package ::;
-use Modern::Perl;
+use Modern::Perl; no warnings 'uninitialized';
 use File::Slurp;
 use ::Assign qw(quote_yaml_scalars);
-no warnings 'uninitialized';
 
-our (
-
-[% qx(./add_persistent_vars) %]
-
-# autosave
-
-	$autosave_interval,
-	%event_id,
-
-);
-
-our (
-	$state_store_file,
-	$effect_chain_file,
-	$effect_profile_file,
-	%effect_chain,
-	%effect_profile,
-	%tn,
-	%ti,
-	%bn,
-	$term,
-	$this_track,
-	$this_bus,
-	@persistent_vars,
-	$ui,
-	$VERSION,
-	%opts,
-	$debug, 
-	$debug2,
-	$debug3
-);
+use ::Globals qw(:all);
 
 sub save_state {
-	my $file = shift || $state_store_file; 
+	my $filename = shift || $file->{state_store}; 
+	my $path = join_path(project_dir(), $filename);
 	$debug2 and print "&save_state\n";
-	$saved_version = $VERSION;
-
+	$project->{save_file_version_number} = $VERSION;
 
 	# some stuff get saved independently of our state file
 	
@@ -58,17 +27,17 @@ sub save_state {
 	}
 
 	print "\nSaving state as ",
-	save_system_state($file), "\n";
+	save_system_state($path), "\n";
 	save_effect_chains();
 	save_effect_profiles();
 
 	# store alsa settings
 
-	if ( $opts{a} ) {
-		my $file = $file;
-		$file =~ s/\.yml$//;
+	if ( $config->{opts}->{a} ) {
+		my $filename = $filename;
+		$filename =~ s/\.yml$//;
 		print "storing ALSA settings\n";
-		print qx(alsactl -f $file.alsa store);
+		print qx(alsactl -f $filename.alsa store);
 	}
 }
 sub initialize_serialization_arrays {
@@ -78,24 +47,20 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
-	@command_history = ();
+	$text->{command_history} = {};
 }
 
 sub save_system_state {
 
-	my $file = shift;
-
-	# save stuff to state file
-
-	$file = join_path(project_dir(), $file) unless $file =~ m(/); 
-	$file =~ /\.yml$/ or $file .= '.yml';	
+	my $path = shift;
 
 	sync_effect_parameters(); # in case a controller has made a change
 
-	# remove null keys in %cops and %copp
+	# remove null keys in $fx->{applied} and $fx->{params}
+	# would be better to find where they come from
 	
-	delete $cops{''};
-	delete $copp{''};
+	delete $fx->{applied}->{''};
+	delete $fx->{params}->{''};
 
 	initialize_serialization_arrays();
 	
@@ -108,7 +73,7 @@ sub save_system_state {
 	map { push @tracks_data, $_->hashref } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
 
-	# delete unused fields
+	# delete obsolete fields
 	map { my $t = $_;
 				map{ delete $t->{$_} } 
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
@@ -137,67 +102,179 @@ sub save_system_state {
 
 	# save history -- 50 entries, maximum
 
-	my @history = $::term->GetHistory;
+	my @history = $text->{term}->GetHistory;
 	my %seen;
-	map { push @command_history, $_ 
+	$text->{command_history} = [];
+	map { push @{$text->{command_history}}, $_ 
 			unless $seen{$_}; $seen{$_}++ } @history;
-	my $max = scalar @command_history;
+	my $max = scalar @{$text->{command_history}};
 	$max = 50 if $max > 50;
-	@command_history = @command_history[-$max..-1];
+	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
-	serialize(
-		file => $file, 
-		format => 'yaml',
-		vars => \@persistent_vars,
-		class => '::',
-		);
+	my @formats = $path =~ /dump_all/ ? 'yaml' : @{$config->{serialize_formats}};
 
+	map{ 	my $format = $_ ;
+			serialize(
+				file => $path,
+				format => $format,
+				vars => \@new_persistent_vars,
+				class => '::',
+				);
 
-	$file
+	} @formats;
+
+	$path
 }
+{
+my %is_legal_suffix = ( 
+		json => 'json', 
+		yml => 'yaml', 
+		pl 	 => 'perl',
+		bin  => 'storable',
+		yaml => 'yaml', # we allow formats as well
+		perl => 'perl',
+		storable => 'storable',
+);
+=comment
+my $re_eval = q{qr/\.(};
+$re_eval .= (join '|', keys %is_legal_suffix)
+$re_eval .= q{)$/};
+my $suffix_re = eval $re_eval;
+=cut
+
+sub get_newest {
+	
+	# choose the newest
+	#
+	my ($path, $format) = @_;
+	
+	# simply return the file
+	# if filename matches exactly, 
+	# and we know the format
+	
+	return($path, $format) if -f $path and $is_legal_suffix{$format};
+
+	my ($dir, $name) = $path =~ m!^(.*?)([^/]+)$!; 
+	
+	# otherwise we glob, sort and filter directory entries
+	
+	my @sorted = 
+		sort{ $a->[1] <=> $b->[1] } 
+		grep{ $is_legal_suffix{$_->[2]} }
+		map 
+		{ 
+			my ($suffix) = m/^$path(?:\.(\w+))?$/;
+			[$_, -M $_, $suffix] 
+		} 
+		glob("$path*");
+	$debug and say yaml_out \@sorted;
+	($sorted[0]->[0], $sorted[0]->[2]);
+}
+}
+
+{ my %decode = 
+	(
+		json => \&json_in,
+		yaml => sub 
+		{ 
+			my $yaml = shift;
+			# remove empty key hash lines # fixes YAML::Tiny bug
+			$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
+
+			# rewrite obsolete null hash/array substitution
+			$yaml =~ s/~NULL_HASH/{}/g;
+			$yaml =~ s/~NULL_ARRAY/[]/g;
+
+			# rewrite $fx->{applied} 'owns' field to []
+			
+			# Note: this should be fixed at initialization
+			# however we should leave this code 
+			# for compatibility with past projects.
+			
+			$yaml =~ s/owns: ~/owns: []/g;
+
+			$yaml = quote_yaml_scalars( $yaml );
+
+			yaml_in($yaml);
+		},
+		perl => sub {my $perl_source = shift; eval $perl_source},
+		storable => sub { my $bin = shift; thaw( $bin) },
+	);
+	
+	# allow dispatch by either file format or suffix 
+	@decode{qw(yml pl bin)} = @decode{qw(yaml perl storable)};
+
+sub decode {
+
+	my ($source, $suffix) = @_;
+	$decode{$suffix} 
+		or die qq(key $suffix: expecting one of).join q(,),keys %decode;
+	$decode{$suffix}->($source);
+}
+}
+
 sub restore_state {
 	$debug2 and print "&restore_state\n";
-	my $file = shift;
-	$file = $file || $state_store_file;
-	$file = join_path(project_dir(), $file)
-		unless $file =~ m(/);
-	$file .= ".yml" unless $file =~ /yml$/;
-	! -f $file and (print "file not found: $file\n"), return;
-	$debug and print "using file: $file\n";
+	my $filename = shift;
+	$filename = $filename || $file->{state_store};
+	$filename = join_path(project_dir(), $filename)
+		unless $filename =~ m(/);
+	# $filename includes path at this point
+
+	my( $path, $suffix ) = get_newest($filename);
 	
-	my $yaml = read_file($file);
+	$debug and print "using file: $path\n";
 
-	# remove empty key hash lines # fixes YAML::Tiny bug
-	$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
+	carp("$path: file not found"), return if ! -f $path;
+	my $source = read_file($path);
 
-	# rewrite obsolete null hash/array substitution
-	$yaml =~ s/~NULL_HASH/{}/g;
-	$yaml =~ s/~NULL_ARRAY/[]/g;
+	$debug and say "suffix: $suffix";	
+	$debug and say "source: $source";
+	my $ref = decode($source, $suffix);
 
-	# rewrite %cops 'owns' field to []
-	
-	$yaml =~ s/owns: ~/owns: []/g;
-
-	$yaml = quote_yaml_scalars( $yaml );
-	
 	# start marshalling with clean slate	
 	
 	initialize_serialization_arrays();
 
 	# restore persistent variables
 
-	assign_var($yaml, @persistent_vars );
+	# get union of old and new lists 
+	#my %seen;
+	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
+	# handle old-style State files
+	# handle serialization arrays (used by new-style State files as well)
+	# handle some extra vars (ditto)
+	
+	assign(
+				data => $ref,
+				vars   => \@persistent_vars,
+				var_map => 1,
+				class => '::');
+	
+	# correctly restore singletons
+	
+	if ( exists $ref->{project}->{save_file_version_number})
+	{
+		my $args = { data => $ref };
+		assign_singletons( $args );
+	#	assign_serialization_arrays( $args );
+	#	assign_pronouns( $args);
+	}
+
+	# remove null keyed entry from $fx->{applied},  $fx->{params}
+
+	delete $fx->{applied}->{''};
+	delete $fx->{params}->{''};
 
 	restore_effect_chains();
 	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
-	# %cops: correct 'owns' null (from YAML) to empty array []
 	
 	# backward compatibility fixes for older projects
 
-	if (! $saved_version ){
+	if (! $project->{save_file_version_number} ){
 
 		# Tracker group is now called 'Main'
 	
@@ -223,7 +300,7 @@ sub restore_state {
 			}
 		}
 	}
-	if( $saved_version < 0.9986){
+	if( $project->{save_file_version_number} < 0.9986){
 	
 		map { 	# store insert without intermediate array
 
@@ -270,10 +347,10 @@ sub restore_state {
 	}
 
 	# jack_manual is now called jack_port
-	if ( $saved_version <= 1){
+	if ( $project->{save_file_version_number} <= 1){
 		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
 	}
-	if ( $saved_version <= 1.053){ # convert insert data to object
+	if ( $project->{save_file_version_number} <= 1.053){ # convert insert data to object
 		my $n = 0;
 		@inserts_data = ();
 		for my $t (@tracks_data){
@@ -289,7 +366,7 @@ sub restore_state {
 			push @inserts_data, $i;
 		} 
 	}
-	if ( $saved_version <= 1.054){ 
+	if ( $project->{save_file_version_number} <= 1.054){ 
 
 		for my $t (@tracks_data){
 
@@ -302,7 +379,7 @@ sub restore_state {
 
 	}
 
-	if ( $saved_version <= 1.055){ 
+	if ( $project->{save_file_version_number} <= 1.055){ 
 
 	# get rid of Null bus routing
 	
@@ -313,7 +390,7 @@ sub restore_state {
 
 	}
 
-	if ( $saved_version <= 1.064){ 
+	if ( $project->{save_file_version_number} <= 1.064){ 
 		map{$_->{version} = $_->{active};
 			delete $_->{active}}
 			grep{$_->{active}}
@@ -331,7 +408,7 @@ sub restore_state {
 			}
 		} grep{$_->{name} eq 'Master'} @tracks_data;
 
-	if ( $saved_version <= 1.064){ 
+	if ( $project->{save_file_version_number} <= 1.064){ 
 
 		map{ 
 			my $default_list = ::IO::default_jack_ports_list($_->{name});
@@ -345,7 +422,7 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
-	if ( $saved_version <= 1.067){ 
+	if ( $project->{save_file_version_number} <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
 		map{ 
@@ -363,7 +440,7 @@ sub restore_state {
 
  		} @tracks_data;
 	}
-	if ( $saved_version <= 1.068){ 
+	if ( $project->{save_file_version_number} <= 1.068){ 
 
 		# initialize version_comment field
 		map{ $_->{version_comment} or $_->{version_comment} = {} } @tracks_data;
@@ -377,7 +454,7 @@ sub restore_state {
 		} grep { $_->{version_comment} } @tracks_data;
 	}
 	# convert to new MixTrack class
-	if ( $saved_version < 1.069){ 
+	if ( $project->{save_file_version_number} < 1.069){ 
 		map {
 		 	$_->{was_class} = $_->{class};
 			$_->{class} = $_->{'::MixTrack'};
@@ -413,8 +490,8 @@ sub restore_state {
 	# temporary turn on mastering mode to enable
 	# recreating mastering tracksk
 
-	my $current_master_mode = $mastering_mode;
-	$mastering_mode = 1;
+	my $current_master_mode = $mode->{mastering};
+	$mode->{mastering} = 1;
 
 	map{ 
 		my %h = %$_; 
@@ -422,7 +499,7 @@ sub restore_state {
 		my $track = $class->new( %h );
 	} @tracks_data;
 
-	$mastering_mode = $current_master_mode;
+	$mode->{mastering} = $current_master_mode;
 
 	# restore inserts
 	
@@ -447,15 +524,15 @@ sub restore_state {
 		# restore effects
 		
 		for my $id (@{$ti{$n}->ops}){
-			$did_apply++ 
+			$did_apply++  # need to show GUI effect window
 				unless $id eq $ti{$n}->vol
 					or $id eq $ti{$n}->pan;
 			
 			add_effect({
-						chain => $cops{$id}->{chain},
-						type => $cops{$id}->{type},
+						chain => $fx->{applied}->{$id}->{chain},
+						type => $fx->{applied}->{$id}->{type},
 						cop_id => $id,
-						parent_id => $cops{$id}->{belongs_to},
+						parent_id => $fx->{applied}->{$id}->{belongs_to},
 						});
 
 		}
@@ -470,11 +547,11 @@ sub restore_state {
 
 
 	# restore Alsa mixer settings
-	if ( $opts{a} ) {
-		my $file = $file; 
-		$file =~ s/\.yml$//;
+	if ( $config->{opts}->{a} ) {
+		my $filename = $filename; 
+		$filename =~ s/\.yml$//;
 		print "restoring ALSA settings\n";
-		print qx(alsactl -f $file.alsa restore);
+		print qx(alsactl -f $filename.alsa restore);
 	}
 
 	# text mode marks 
@@ -504,70 +581,99 @@ sub restore_state {
 
 	# restore command history
 	
-	$term->SetHistory(@command_history);
+	$text->{term}->SetHistory(@{$text->{command_history}});
 } 
-sub assign_var {
-	my ($source, @vars) = @_;
-	assign_vars(
-				source => $source,
-				vars   => \@vars,
-		#		format => 'yaml', # breaks
-				class => '::');
-}
 
 sub save_effect_chains { # if they exist
-	my $file = shift || $effect_chain_file;
-	if (keys %effect_chain){
+	my $filename = shift || $file->{effect_chain};
+	if (keys %{$fx->{chain}}){
 		serialize (
-			file => join_path(project_root(), $file),
-			format => 'yaml',
-			vars => [ qw( %effect_chain ) ],
+			file => join_path(project_root(), $filename),
+			format => 'perl',
+			vars => [ qw( $fx->{chain} $VERSION) ],
 			class => '::');
 	}
 }
 sub save_effect_profiles { # if they exist
-	my $file = shift || $effect_profile_file;
-	if (keys %effect_profile){
+	my $filename = shift || $file->{effect_profile};
+	if (keys %{$fx->{profile}}){
 		serialize (
-			file => join_path(project_root(), $file),
-			format => 'yaml',
-			vars => [ qw( %effect_profile ) ],
+			file => join_path(project_root(), $filename),
+			format => 'perl',
+			vars => [ qw( $fx->{profile}  $VERSION ) ],
 			class => '::');
 	}
 }
+# load effect chains and profiles
+
+# - don't stomp on existing settings
+# - allow for old or new variable names
+
 sub restore_effect_chains {
 
-	my $file = join_path(project_root(), $effect_chain_file);
-	return unless -e $file;
+	$debug2 and say "&restore_effect_chains";
 
-	# don't overwrite them if already present
-	assign_var($file, qw(%effect_chain)) unless keys %effect_chain
+	my $path = join_path(project_root(), $file->{effect_chain});
+
+	my ($resolved, $format) = get_newest($path);  
+	carp("$resolved: file not found"), return unless $resolved;
+	my $source = read_file($resolved);
+	carp("$resolved: empty file"), return unless $source;
+	$debug and say "format: $format, source: \n",$source;
+	my $ref = decode($source, $format);
+	$debug and print Dumper $ref;
+	if ( $ref->{VERSION} >= 1.08 )
+	{
+		assign_singletons( { data => $ref } );
+	}
+	else {
+		assign(
+			data => $ref,
+			vars => [ qw(%effect_chain)],
+			var_map => 1,
+			class => '::',
+			);
+	}
 }
 sub restore_effect_profiles {
 
-	my $file = join_path(project_root(), $effect_profile_file);
-	return unless -e $file;
+	$debug2 and say "&restore_effect_profiles";
+	my $path = join_path(project_root(), $file->{effect_profile});
+	my ($resolved, $format) = get_newest($path);
+	carp("$resolved: file not found"), return unless $resolved;
+	my $source = read_file($resolved);
+	carp("$resolved: empty file"), return unless $source;
+	$debug and say "format: $format, source: \n",$source;
+	my $ref = decode($source, $format);
+	if ( $ref->{VERSION} >= 1.08 )
+	{
+		assign_singletons( { data => $ref } );
+	}
+	else {
+		assign(
+			data => $ref,
+			vars => [ qw(%effect_profile)],
+			var_map => 1,
+			class => '::',
+			);
+	}
 
-	# don't overwrite them if already present
-	assign_var($file, qw(%effect_profile)) unless keys %effect_profile; 
 }
-
-# autosave
 
 sub schedule_autosave { 
 	# one-time timer 
-	my $seconds = (shift || $autosave_interval) * 60;
-	$event_id{autosave} = undef; # cancel any existing timer
+	my $seconds = (shift || $config->{autosave_interval}) * 60;
+	$engine->{events}->{autosave} = undef; # cancel any existing timer
 	return unless $seconds;
-	$event_id{autosave} = AE::timer($seconds,0, \&autosave);
+	$engine->{events}->{autosave} = AE::timer($seconds,0, \&autosave);
 }
 sub autosave {
 	if (engine_running()){ 
 		schedule_autosave(1); # try again in 60s
 		return;
 	}
- 	my $file = 'State-autosave-' . time_tag();
- 	save_system_state($file);
+ 	my $filename = 'State-autosave-' . time_tag();
+ 	save_system_state($filename);
 	my @saved = autosave_files();
 	my ($next_last, $last) = @saved[-2,-1];
 	schedule_autosave(); # standard interval
@@ -586,9 +692,9 @@ sub autosave_files {
 						 	->in( project_dir());
 }
 sub files_are_identical {
-	my ($filea,$fileb) = @_;
-	my $a = read_file($filea);
-	my $b = read_file($fileb);
+	my ($filenamea,$filenameb) = @_;
+	my $a = read_file($filenamea);
+	my $b = read_file($filenameb);
 	$a eq $b
 }
 

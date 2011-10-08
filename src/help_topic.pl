@@ -1,4 +1,4 @@
-@help_topic = qw( all
+@{$help->{arr_topic}} = qw( all
                     project
                     track
                     chain_setup
@@ -15,7 +15,7 @@
 
                 ) ;
 
-%help_topic = (
+%{$help->{topic}} = (
 
 help => <<HELP,
    help <command>          - show help for <command>
@@ -414,9 +414,9 @@ fades => <<FADES,
 FADES
    
 );
-# print values %help_topic;
+# print values %{$help->{topic}};
 
-$help_screen = <<HELP;
+$help->{screen} = <<HELP;
 
 Welcome to Nama help
 

@@ -12,16 +12,16 @@ BEGIN {
 sub import {
 	return unless shift eq '::Object';
 	my $pkg   = caller;
-	my $child = !! @{"${pkg}::ISA"};
+	my $child = 0+@{"${pkg}::ISA"};
 	eval join '',
 		"package $pkg;\n",
 		' use vars qw(%_is_field);   ',
 		' map{ $_is_field{$_}++ } @_;',
-		($child ? () : "\@${pkg}::ISA = '::Object';\n"),
+		($child ? () : "\@${pkg}::ISA = ::Object;\n"),
 		map {
 			defined and ! ref and /^[^\W\d]\w*$/s
 			or die "Invalid accessor name '$_'";
-			"sub $_ { return \$_[0]->{$_} }\n"
+			"sub $_ : lvalue { \$_[0]->{$_} }"
 		} @_;
 	die "Failed to generate $pkg" if $@;
 	return 1;

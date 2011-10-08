@@ -7,7 +7,7 @@
 prompt =>  
 	q{
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
-		($this_track ? $this_track->name : '') . "] "
+		($this_track ? $this_track->name : '') . "] > "
 	},
 
 
@@ -18,6 +18,7 @@ aliases =>
 		mbs => 'move_to_bus',
 		pcv => 'promote_current_version',
 		hi => 'greet',
+		djp => 'disable_jack_polling',
 	},
 
 
@@ -25,6 +26,11 @@ aliases =>
 
 commands => 
 	{
+			
+		disable_jack_polling => 
+			q{
+				$engine->{events}->{poll_jack} = undef
+			},
 		promote_current_version =>
 			q{
 				my $v = $this_track->monitor_version;

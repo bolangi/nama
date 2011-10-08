@@ -3,9 +3,7 @@
 package ::;
 use Modern::Perl;
 
-our (%wav_info);
-
-### WAV file length/format/modify_time are cached in %wav_info 
+### WAV file length/format/modify_time are cached in $setup->{wav_info} 
 
 sub ecasound_get_info {
 	# get information about an audio object
@@ -33,9 +31,9 @@ sub cache_wav_info {
 sub get_wav_info {
 	my $path = shift;
 	#say "path: $path";
-	$wav_info{$path}{length} = get_length($path);
-	$wav_info{$path}{format} = get_format($path);
-	$wav_info{$path}{modify_time} = get_modify_time($path);
+	$setup->{wav_info}->{$path}{length} = get_length($path);
+	$setup->{wav_info}->{$path}{format} = get_format($path);
+	$setup->{wav_info}->{$path}{modify_time} = get_modify_time($path);
 }
 sub get_length { 
 	my $path = shift;
@@ -54,16 +52,16 @@ sub get_modify_time {
 sub wav_length {
 	my $path = shift;
 	update_wav_cache($path);
-	$wav_info{$path}{length}
+	$setup->{wav_info}->{$path}{length}
 }
 sub wav_format {
 	my $path = shift;
 	update_wav_cache($path);
-	$wav_info{$path}{format}
+	$setup->{wav_info}->{$path}{format}
 }
 sub update_wav_cache {
 	my $path = shift;
-	return unless get_modify_time($path) != $wav_info{$path}{modify_time};
+	return unless get_modify_time($path) != $setup->{wav_info}->{$path}{modify_time};
 	say qq(WAV file $path has changed! Updating cache.);
 	get_wav_info($path) 
 }

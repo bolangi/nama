@@ -78,6 +78,10 @@ ecasound_stop:
   short: S
   what: ecasound-only stop
   parameters: none
+restart_ecasound:
+  type: transport
+  what: re-spawn ecasound engine
+  parameters: none
 preview:
   type: transport
   what: start engine with rec_file disabled (for mic test, etc.)
@@ -265,11 +269,11 @@ pan_back:
   parameters: none
 show_tracks:
   type: track 
-  short: lt
+  short: lt show
   what: show track status
 show_tracks_all:
   type: track
-  short: show sha showa 
+  short: sha showa 
   what: show status of all tracks, visible and hidden
 show_bus_tracks:
   type: track 
@@ -501,6 +505,11 @@ show_effect:
   what: show effect information
   short: sfx
   parameters: <s_effect_id1> [ <s_effect_id2>...]
+list_effects:
+  type: effect
+  what: short list of effects on current track
+  short: lfx
+  parameters: none
 add_insert:
   type: effect 
   short: ain

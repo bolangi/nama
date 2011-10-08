@@ -7,21 +7,6 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
-our (
-	$debug,
-	$debug2,
-
-	$ui,
-	$length,
-
-	$old_bg,
-	%event_id,
-	$loop_enable,
-	$run_time,
-
-	$chain_setup_file,
-);
-
 sub valid_engine_setup {
 	eval_iam("cs-selected") and eval_iam("cs-is-valid");
 }
@@ -61,10 +46,10 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	limit_processing_time($run_time) 
-		if mixing_only() or edit_mode() or defined $run_time;
+	limit_processing_time($setup->{runtime_limit}) 
+		if mixing_only() or edit_mode() or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$event_id{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+ 	#$engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
 	sleeper(0.5);
@@ -86,7 +71,7 @@ sub stop_transport {
 	}
 	unmute();
 	stop_heartbeat();
-	$ui->project_label_configure(-background => $old_bg);
+	$ui->project_label_configure(-background => $gui->{_old_bg});
 	eval_iam("setpos $pos");
 }
 
@@ -107,11 +92,11 @@ sub engine_status {
 sub current_position { colonize(int eval_iam("getpos")) }
 
 sub start_heartbeat {
- 	$event_id{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+ 	$engine->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
 }
 
 sub stop_heartbeat {
-	$event_id{poll_engine} = undef; 
+	$engine->{events}->{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() }
 
@@ -134,7 +119,7 @@ sub heartbeat {
 	$start  = ::Mark::loop_start();
 	$end    = ::Mark::loop_end();
 	schedule_wraparound() 
-		if $loop_enable 
+		if $mode->{loop_enable} 
 		and defined $start 
 		and defined $end 
 		and ! ::ChainSetup::really_recording();
@@ -148,7 +133,7 @@ sub update_clock_display {
 }
 sub schedule_wraparound {
 
-	return unless $loop_enable;
+	return unless $mode->{loop_enable};
 	my $here   = eval_iam("getpos");
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
@@ -162,23 +147,23 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$event_id{wraparound} = undef;
+	$engine->{events}->{wraparound} = undef;
 }
 sub limit_processing_time {
-	my $length = shift // $length;
- 	$event_id{processing_time} 
+	my $length = shift // $setup->{audio_length};
+ 	$engine->{events}->{processing_time} 
 		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
-	$event_id{processing_time} = undef; 
-	undef $run_time;
+	$engine->{events}->{processing_time} = undef; 
+	undef $setup->{runtime_limit};
 }
 sub wraparound {
 	package ::;
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$event_id{wraparound} = undef;
-	$event_id{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	$engine->{events}->{wraparound} = undef;
+	$engine->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 sub ecasound_select_chain {
 	my $n = shift;
@@ -190,7 +175,7 @@ sub ecasound_select_chain {
 		::ChainSetup::is_ecasound_chain($n)
 
 		# engine is configured
-		and eval_iam( 'cs-connected' ) =~ /$chain_setup_file/
+		and eval_iam( 'cs-connected' ) =~ /$file->{chain_setup}/
 
 	){ 	eval_iam($cmd); 
 		return 1 

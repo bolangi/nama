@@ -2,44 +2,22 @@
 
 package ::;
 use Modern::Perl; use Carp;
-our (
-	$ui,
-	%opts,
-	%jack,
-	$jack_running,
-	$midish_enable,
-	$project_name,
-	$debug,
-	$debug2,
-	$banner,
-	$project_root,
-	$ladspa_sample_rate,
-	%devices,
-	$fake_jack_lsp,
-	$use_jack_plumbing,
-	@ecasound_pids,
-	$e,
-	$user_customization_file,
-	$sock,
-	$ecasound_tcp_port,
-	$hires,
-	$waveform_viewer,
 
-);
 sub initialize_interfaces {
 	
 	$debug2 and print "&prepare\n";
 
-	say $banner;
+	say
+[% qx(cat ./banner.pl) %]
 
-	if ($opts{D}){
+	if ($config->{opts}->{D}){
 		$debug = 1;
 		$debug2 = 1;
 	}
-	if ( ! $opts{t} and ::Graphical::initialize_tk() ){ 
+	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
-		say "Unable to load perl Tk module. Starting in console mode." if $opts{g};
+		say "Unable to load perl Tk module. Starting in console mode." if $config->{opts}->{g};
 		$ui = ::Text->new();
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
@@ -52,44 +30,47 @@ sub initialize_interfaces {
 
 	choose_sleep_routine();
 
-	$project_name = shift @ARGV;
-	$debug and print "project name: $project_name\n";
+	$project->{name} = shift @ARGV;
+	$debug and print "project name: $project->{name}\n";
 
-	$debug and print("\%opts\n======\n", yaml_out(\%opts)); ; 
+	$debug and print("$config->{opts}\n======\n", yaml_out($config->{opts})); ; 
 
 
 	read_config(global_config());  # from .namarc if we have one
 
+	$debug and say "#### Config file ####";
+	$debug and say yaml_out($config); 
+	
 	setup_user_customization();	
 
 	start_ecasound();
 
 
 	$debug and print "reading config file\n";
-	if ($opts{d}){
-		print "project_root $opts{d} specified on command line\n";
-		$project_root = $opts{d};
+	if ($config->{opts}->{d}){
+		print "project_root $config->{opts}->{d} specified on command line\n";
+		$config->{root_dir} = $config->{opts}->{d};
 	}
-	if ($opts{p}){
-		$project_root = getcwd();
-		print "placing all files in current working directory ($project_root)\n";
+	if ($config->{opts}->{p}){
+		$config->{root_dir} = getcwd();
+		print "placing all files in current working directory ($config->{root_dir})\n";
 	}
 
 	# capture the sample frequency from .namarc
-	($ladspa_sample_rate) = $devices{jack}{signal_format} =~ /(\d+)(,i)?$/;
+	($config->{sample_rate}) = $config->{devices}->{jack}{signal_format} =~ /(\d+)(,i)?$/;
 
 	# skip initializations if user (test) supplies project
 	# directory
 	
-	first_run() unless $opts{d}; 
+	first_run() unless $config->{opts}->{d}; 
 
-	prepare_static_effects_data() unless $opts{S};
+	prepare_static_effects_data() unless $config->{opts}->{S};
 
 	get_ecasound_iam_keywords();
 	load_keywords(); # for autocompletion
 
-	chdir $project_root # for filename autocompletion
-		or warn "$project_root: chdir failed: $!\n";
+	chdir $config->{root_dir} # for filename autocompletion
+		or warn "$config->{root_dir}: chdir failed: $!\n";
 
 	$ui->init_gui;
 	$ui->transport_gui;
@@ -98,21 +79,21 @@ sub initialize_interfaces {
 	
 	# fake JACK for testing environment
 
-	if( $opts{J}){
-		%jack = %{ jack_ports($fake_jack_lsp) };
-		$jack_running = 1;
+	if( $config->{opts}->{J}){
+		%{$jack->{clients}} = %{ jack_ports($jack->{fake_ports_list}) };
+		$jack->{jackd_running} = 1;
 	}
 
 	# periodically check if JACK is running, and get client/port list
 
-	poll_jack() unless $opts{J} or $opts{A};
+	poll_jack() unless $config->{opts}->{J} or $config->{opts}->{A};
 
 	sleeper(0.2); # allow time for first polling
 
 	# we will start jack.plumbing only when we need it
 	
-	if(		$use_jack_plumbing 
-	and $jack_running 
+	if(		$config->{use_jack_plumbing} 
+	and $jack->{jackd_running} 
 	and process_is_running('jack.plumbing')
 	){
 
@@ -136,51 +117,51 @@ exit;
 		else { say "Stopped." }
 	}
 		
-	start_midish() if $midish_enable;
+	start_midish() if $config->{use_midish};
 
 	# set up autosave
 	
     schedule_autosave() unless debugging_options();
 
-	initialize_terminal() unless $opts{T};
+	initialize_terminal() unless $config->{opts}->{T};
 
 	# set default project to "untitled"
 	
-	if (! $project_name ){
-		$project_name = "untitled";
-		$opts{c}++; 
+	if (! $project->{name} ){
+		$project->{name} = "untitled";
+		$config->{opts}->{c}++; 
 	}
-	print "\nproject_name: $project_name\n";
+	print "\nproject_name: $project->{name}\n";
 	
-	load_project( name => $project_name, create => $opts{c}) ;
+	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	restore_effect_chains();
 	restore_effect_profiles();
 	1;	
 }
 sub debugging_options {
-	grep{$_} $debug, @opts{qw(R D J A E T)};
+	grep{$_} $debug, @{$config->{opts}}{qw(R D J A E T)};
 }
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);
 	select_ecasound_interface();
 	sleeper(0.2);
-	@ecasound_pids = grep{ 	my $pid = $_; 
+	@{$engine->{pids}} = grep{ 	my $pid = $_; 
 							! grep{ $pid == $_ } @existing_pids
 						 }	split " ", qx(pgrep ecasound);
 }
 sub select_ecasound_interface {
-	return if $opts{E} or $opts{A};
+	return if $config->{opts}->{E} or $config->{opts}->{A};
 	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
-			and ! $opts{n} ){ 
+			and ! $config->{opts}->{n} ){ 
 		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
 		{ no warnings qw(redefine);
 		*eval_iam = \&eval_iam_libecasoundc; }
-		$e = Audio::Ecasound->new();
+		$engine->{ecasound} = Audio::Ecasound->new();
 	} else { 
 
 		no warnings qw(redefine);
-		launch_ecasound_server($ecasound_tcp_port);
-		init_ecasound_socket($ecasound_tcp_port); 
+		launch_ecasound_server($config->{engine_tcp_port});
+		init_ecasound_socket($config->{engine_tcp_port}); 
 		*eval_iam = \&eval_iam_neteci;
 	}
 }
@@ -190,7 +171,7 @@ sub select_ecasound_interface {
 sub choose_sleep_routine {
 	if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
 		 { *sleeper = *finesleep;
-			$hires++; }
+			$config->{hires_timer}++; }
 	else { *sleeper = *select_sleep }
 }
 sub finesleep {
@@ -235,18 +216,18 @@ sub launch_ecasound_server {
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
 	say "Creating socket on port $port.";
-	$sock = new IO::Socket::INET (
+	$engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
 		Proto => 'tcp', 
 	); 
-	die "Could not create socket: $!\n" unless $sock; 
+	die "Could not create socket: $!\n" unless $engine->{socket}; 
 }
 
 sub ecasound_pid {
 	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
 	my ($pid) = split " ", $ps; 
-	$pid if $sock; # conditional on using socket i.e. Net-ECI
+	$pid if $engine->{socket}; # conditional on using socket i.e. Net-ECI
 }
 
 sub eval_iam { } # stub
@@ -254,11 +235,13 @@ sub eval_iam { } # stub
 sub eval_iam_neteci {
 	my $cmd = shift;
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$sock->send("$cmd\r\n"); 
+	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
-	$sock->recv($buf, 65536);
+	# get socket reply, restart ecasound on error
+	my $result = $engine->{socket}->recv($buf, 65536);
+	defined $result or restart_ecasound(), return;
 
-	my ($return_value, $length, $type, $reply) =
+	my ($return_value, $setup_length, $type, $reply) =
 		$buf =~ /(\d+)# digits
 				 \    # space
 				 (\d+)# digits
@@ -273,16 +256,20 @@ if(	! $return_value == 256 ){
 	$debug and say "ECI command: $cmd";
 	$debug and say "Ecasound reply (256 bytes): ", substr($buf,0,256);
 	$debug and say qq(
-length: $length
+length: $setup_length
 type: $type
 full return value: $return_value);
-	die "illegal return value, stopped" ;
+	say "illegal return value from ecasound engine: $return_value" ;
+	restart_ecasound();
 
 }
 	$reply =~ s/\s+$//; 
 
 	given($type){
-		when ('e'){ carp $reply }
+		when ('e'){ carp $reply;
+			restart_ecasound() if $reply =~ /in engine-status/;
+
+}
 		default{ return $reply }
 	}
 
@@ -293,17 +280,29 @@ sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
 	my $command = shift;
 	$debug and print "iam command: $command\n";
-	my (@result) = $e->eci($command);
+	my (@result) = $engine->{ecasound}->eci($command);
 	$debug and print "result: @result\n" unless $command =~ /register/;
-	my $errmsg = $e->errmsg();
+	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
-		$e->errmsg(''); 
+		restart_ecasound() if $errmsg =~ /in engine-status/;
+		$engine->{ecasound}->errmsg(''); 
 		# ecasound already prints error on STDOUT
 		# carp "ecasound reports an error:\n$errmsg\n"; 
 	}
 	"@result";
 }
-
 	
+sub restart_ecasound {
+	say "killing ecasound processes @{$engine->{pids}}";
+	kill_my_ecasound_processes();
+	say "restarting Ecasound engine - your may need to use the 'arm' command";
+	select_ecasound_interface();
+	#$setup->{changed}++;
+	reconfigure_engine();
+}
+sub kill_my_ecasound_processes {
+	my @signals = (15, 9);
+	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
+}
 1;
 __END__

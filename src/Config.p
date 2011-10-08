@@ -4,22 +4,7 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 
-# global variables
-our (
-	%opts, 			# command line options
-	
-	$project_root,	# directory
-	$project_name,	# startup value
-
-	@config_vars, 	# vars to read from namarc
-	$sampling_frequency, # set from 'frequency' abbreviation in namarc
-	$default,		# default namarc
-	$custom_pl,		# user customizations
-
-	$debug,
-	$debug2,
-
-);
+use ::Globals qw(:all);
 
 # exclusive to this module
 our ( 
@@ -37,18 +22,18 @@ sub global_config {
 	# 2. .namarc in the current project directory, i.e. ~/nama/untitled/.namarc
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
-	if( $opts{f} ){
-		print("reading config file $opts{f}\n");
-		return read_file($opts{f});
+	if( $config->{opts}->{f} ){
+		print("reading config file $config->{opts}->{f}\n");
+		return read_file($config->{opts}->{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
 	my $c = 0;
 		map{ 
 				if (-d $_) {
-					my $config = join_path($_, config_file());
-					if( -f $config or -l $config){ 
-						say "Found config file: $config";
-						my $yml = read_file($config);
+					my $config_path = join_path($_, config_file());
+					if( -f $config_path or -l $config_path){ 
+						say "Found config file: $config_path";
+						my $yml = read_file($config_path);
 						return $yml;
 					}
 				}
@@ -67,17 +52,23 @@ sub read_config {
 	
 	$debug2 and print "&read_config\n";
 	
-	my $config = shift;
-	my $yml = length $config > 100 ? $config : $default;
+	my $config_file = shift;
+	
+	my $yml = $config_file // get_data_section("default_namarc");
 	strip_all( $yml );
 	my %cfg = %{  yaml_in($yml) };
-	*subst = \%{ $cfg{abbreviations} }; # alias
+	*subst = \%{$cfg{abbreviations}}; # alias
 	walk_tree(\%cfg);
 	walk_tree(\%cfg); # second pass completes substitutions
-	assign_var( \%cfg, @config_vars);
-	$project_root = $opts{d} if $opts{d};
-	$project_root = expand_tilde($project_root);
-	$sampling_frequency = $cfg{abbreviations}{frequency};
+	assign( 
+		data => \%cfg,
+		vars => [ @config_vars ], # config file format doesnt change
+		class => '::',
+		var_map => 1,
+	);
+	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
+	$config->{root_dir} = expand_tilde($config->{root_dir});
+	$config->{sampling_freq} = $cfg{abbreviations}{frequency};
 
 }
 sub walk_tree {
@@ -95,11 +86,11 @@ sub substitute{
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
 sub first_run {
-	return if $opts{f};
-	my $config = config_file();
-	$config = "$ENV{HOME}/$config" unless -e $config;
-	$debug and print "config: $config\n";
-	if ( ! -e $config and ! -l $config  ) {
+	return if $config->{opts}->{f};
+	my $config_path = config_file();
+	$config_path = "$ENV{HOME}/$config_path" unless -e $config_path;
+	$debug and print "config path: $config_path\n";
+	if ( ! -e $config_path and ! -l $config_path  ) {
 
 	# check for missing components
 
@@ -134,7 +125,7 @@ Aloha. Welcome to Nama and Ecasound.
 
 HELLO
 	sleeper (0.6);
-	print "Configuration file $config not found.
+	print "Configuration file $config_path not found.
 
 May I create it for you? [yes] ";
 	my $make_namarc = <STDIN>;
@@ -148,9 +139,11 @@ PROJECT_ROOT
 	print "Would you like to create $ENV{HOME}/nama? [yes] ";
 	my $reply = <STDIN>;
 	chomp $reply;
+	my $default_config;
 	if ($reply !~ /n/i){
 		# write project root path into default namarc
-		$default =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
+		$default_config = get_data_section("default_namarc");
+		$default_config =~ s/^project_root.*$/project_root: $ENV{HOME}\/nama/m;
 		
 		# create path nama/untitled/.wav
 		#
@@ -161,7 +154,7 @@ PROJECT_ROOT
 		
 		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
 
-		 write_file(user_customization_file(), $custom_pl);
+		 write_file(user_customization_file(), get_data_section('custom_pl'));
 		
 	} else {
 		print <<OTHER;
@@ -171,10 +164,10 @@ Please make sure to set the project_root directory in
 OTHER
 	}
 	if ($make_namarc !~ /n/i){
-		write_file($config, $default);
+		write_file($config_path, $default_config);
 	}
 	sleep 1;
-	print "\n.... Done!\n\nPlease edit $config and restart Nama.\n\n";
+	print "\n.... Done!\n\nPlease edit $config_path and restart Nama.\n\n";
 	print "Exiting.\n"; 
 	exit;	
 	}

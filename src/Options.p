@@ -3,8 +3,6 @@
 package ::;
 use Modern::Perl;
 
-our (%opts);
-
 sub process_options {
 
 	my %options = qw(
@@ -33,20 +31,20 @@ sub process_options {
         no-fade-on-transport-start  F
 );
 
-	map{$opts{$_} = ''} values %options;
+	map{$config->{opts}->{$_} = ''} values %options;
 
 	# long options
 
 	Getopt::Long::Configure ("bundling");	
 	my $getopts = 'GetOptions( ';
-	map{ $getopts .= qq("$options{$_}|$_" => \\\$opts{$options{$_}}, \n)} keys %options;
+	map{ $getopts .= qq("$options{$_}|$_" => \\\$config->{opts}->{$options{$_}}, \n)} keys %options;
 	$getopts .= ' )' ;
 
 	#say $getopts;
 
 	eval $getopts or die "Stopped.\n";
 	
-	if ($opts{h}){
+	if ($config->{opts}->{h}){
 	say <<HELP; exit; }
 
 USAGE: nama [options] [project_name]

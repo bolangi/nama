@@ -4,27 +4,19 @@ use Modern::Perl;
 use File::Slurp;
 no warnings 'uninitialized';
 
-our (
-	$debug,
-	$jack_running,
-	%jack,
-	$jack_lsp,
-	$use_jack_plumbing,
-	%event_id,
-	%opts,
-);
-
 # general functions
 
-sub poll_jack { $event_id{poll_jack} = AE::timer(0,5,\&jack_update) }
+sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
 	# cache current JACK status
+	#
+	# skip if Ecasound is busy
 	return if engine_running();
-	if( $jack_running =  process_is_running('jackd') ){
-		my $jack_lsp = qx(jack_lsp -Ap 2> /dev/null); 
-		%jack = %{jack_ports($jack_lsp)}
-	} else { %jack = () }
+	if( $jack->{jackd_running} =  process_is_running('jackd') ){
+		my $ports_list = qx(jack_lsp -Ap 2> /dev/null); 
+		$jack->{clients} = jack_ports($ports_list);
+	} else { $jack->{clients} = {} }
 }
 
 sub jack_client {
@@ -32,11 +24,11 @@ sub jack_client {
 	# returns array of ports if client and direction exist
 	
 	my ($name, $direction)  = @_;
-	$jack{$name}{$direction} // []
+	$jack->{clients}->{$name}{$direction} // []
 }
 
 sub jack_ports {
-	my $j = shift || $jack_lsp; 
+	my $j = shift || $jack->{ports_list_text}; 
 	#say "jack_lsp: $j";
 
 	# convert to single lines
@@ -46,7 +38,7 @@ sub jack_ports {
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
 	#fluidsynth:left properties: output,
 	#fluidsynth:right properties: output,
-	my %jack = ();
+	my %jack_ports = ();
 
 	map{ 
 		my ($direction) = /properties: (input|output)/;
@@ -58,17 +50,16 @@ sub jack_ports {
 		/gx;
 		map { 
 				s/ $//; # remove trailing space
-				push @{ $jack{ $_ }{ $direction } }, $_;
+				push @{ $jack_ports{ $_ }{ $direction } }, $_;
 				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack{ $client }{ $direction } }, $_; 
+				push @{ $jack_ports{ $client }{ $direction } }, $_; 
 
 		 } @port_aliases;
 
 	} 
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
 	split "\n",$j;
-	#print yaml_out \%jack;
-	\%jack
+	\%jack_ports
 }
 
 # connect jack ports via jack.plumbing or jack_connect
@@ -124,14 +115,14 @@ sub connect_jack_ports_list {
 		grep{ $_->send_type eq 'jack_ports_list' } ::ChainSetup::engine_tracks();
 
 	# we need JACK
-	return if ! $jack_running;
+	return if ! $jack->{jackd_running};
 
 	# We need tracks to configure
 	return if ! @source_tracks and ! @send_tracks;
 
 	sleeper(0.3); # extra time for ecasound engine to register JACK ports
 
-	if( $use_jack_plumbing )
+	if( $config->{use_jack_plumbing} )
 	{
 
 		# write config file
@@ -176,7 +167,7 @@ sub make_connections {
 			$debug and say "port file $file, line $line_number, port $external_port";
 			# setup shell command
 			
-			if(! $jack{$external_port}){
+			if(! $jack->{clients}->{$external_port}){
 				say $track->name, qq(: port "$external_port" not found. Skipping.);
 				next
 			}
@@ -200,12 +191,12 @@ sub make_connections {
 }
 sub kill_jack_plumbing {
 	qx(killall jack.plumbing >/dev/null 2>&1)
-	unless $opts{A} or $opts{J};
+	unless $config->{opts}->{A} or $config->{opts}->{J};
 }
 sub start_jack_plumbing {
 	
-	if ( 	$use_jack_plumbing				# not disabled in namarc
-			and ! ($opts{J} or $opts{A})	# we are not testing   
+	if ( 	$config->{use_jack_plumbing}				# not disabled in namarc
+			and ! ($config->{opts}->{J} or $config->{opts}->{A})	# we are not testing   
 
 	){ system('jack.plumbing >/dev/null 2>&1 &') }
 }

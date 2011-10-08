@@ -1,16 +1,7 @@
 # ----------- Engine cleanup (post-recording) -----------
 package ::;
 use Modern::Perl;
-our (
-	$debug,
-	$debug2,
-	$offset_run_flag,
-	$offset_mark,
-	$ui,
-	%bn,
-	%tn,
-	$this_edit,
-);
+use ::Globals qw(:all);
 
 sub rec_cleanup {  
 	$debug2 and print "&rec_cleanup\n";
@@ -20,14 +11,14 @@ sub rec_cleanup {
 		(grep /Mixdown/, @files) 
 			? command_process('mixplay') 
 			: post_rec_configure();
-		undef $offset_run_flag if ! defined $this_edit;
+		undef $mode->{offset_run} if ! defined $this_edit;
 		reconfigure_engine();
 	}
 }
 sub adjust_offset_recordings {
 	map {
-		$_->set(playat => $offset_mark);
-		say $_->name, ": offsetting to $offset_mark";
+		$_->set(playat => $setup->{offset_run}->{mark});
+		say $_->name, ": offsetting to $setup->{offset_run}->{mark}";
 	} ::ChainSetup::engine_wav_out_tracks();
 }
 sub post_rec_configure {

@@ -1,3 +1,7 @@
+our (
+[% join q(, ), split " ", qx(cat ./singletons.pl) %]
+);
+
 package ::Edit;
 
 # each edit is identified by:
@@ -167,7 +171,7 @@ sub rec_end_time {
 }
 sub play_end_time {
 	my $self = shift;
-	$self->marktime('rec_end_name') + $::edit_playback_end_margin
+	$self->marktime('rec_end_name') + $config->{edit_playback_end_margin}
 }
 
 sub marktime { 
@@ -229,9 +233,9 @@ sub destroy {
 	}
 	# remove edit track WAV files if we've reached here
 	map{ 
-		my $file = ::join_path(::this_wav_dir(), $_);
-		say "removing $file";
-		#unlink $file;
+		my $path = ::join_path(::this_wav_dir(), $_);
+		say "removing $path";
+		#unlink $path;
 	} @wavs;
 }
 
@@ -251,55 +255,42 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 
 our (
-	%event_id,
-	$term,
-	$attribs,
 	%tn,
 	%ti,
 	%bn,
-	@edit_points,
 	$this_track,
-	$regenerate_setup,
-	$offset_run_flag,
-	$loop_enable,
 	$this_edit,
-	$offset_run_start_time,
-	$offset_run_end_time,
-	$offset_mark,
-	$edit_crossfade_time,
-
-
 );
 	
 
 sub detect_keystroke_p {
-	$event_id{stdin} = AE::io(*STDIN, 0, sub {
-		&{$attribs->{'callback_read_char'}}();
+	$engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
+		&{$text->{term_attribs}->{'callback_read_char'}}();
 		
 		abort_set_edit_points(), return
-			if $attribs->{line_buffer} eq "q"
-			or $attribs->{line_buffer} eq "Q";
+			if $text->{term_attribs}->{line_buffer} eq "q"
+			or $text->{term_attribs}->{line_buffer} eq "Q";
 
-		if (   $attribs->{line_buffer} eq "p"
-			or $attribs->{line_buffer} eq "P"){ get_edit_mark()}
+		if (   $text->{term_attribs}->{line_buffer} eq "p"
+			or $text->{term_attribs}->{line_buffer} eq "P"){ get_edit_mark()}
 		else{ reset_input_line() }
 	});
 }
 
 sub reset_input_line {
-	$attribs->{line_buffer} = q();
-	$attribs->{point} 		= 0;
-	$attribs->{end}   		= 0;
+	$text->{term_attribs}->{line_buffer} = q();
+	$text->{term_attribs}->{point} 		= 0;
+	$text->{term_attribs}->{end}   		= 0;
 }
 
 
 { my $p;
-  my @edit_points; 
+  my @_edit_points; 
   my @names = qw(dummy play-start rec-start rec-end);
 
 sub initialize_edit_points {
 	$p = 0;
-    @edit_points = ();
+    @_edit_points = ();
 }
 sub abort_set_edit_points {
 	say "...Aborting!";
@@ -313,18 +304,18 @@ sub get_edit_mark {
 	$p++;
 	if($p <= 3){  # record mark
 		my $pos = eval_iam('getpos');
-		push @edit_points, $pos;
+		push @_edit_points, $pos;
 		say " got $names[$p] position ".d1($pos);
 		reset_input_line();
 		if( $p == 3){ complete_edit_points() }
 		else{
-			$term->stuff_char(10);
-			&{$attribs->{'callback_read_char'}}();
+			$text->{term}->stuff_char(10);
+			&{$text->{term_attribs}->{'callback_read_char'}}();
 		}
 	}
 }
 sub complete_edit_points {
-	@::edit_points = @edit_points; # save to global
+	@{$setup->{edit_points}} = @_edit_points; # save to global
 	eval_iam('stop');
 	say "\nEngine is stopped\n";
 	detect_spacebar();
@@ -348,7 +339,7 @@ sub set_edit_points {
 
 Engine will start in 2 seconds.);
 	initialize_edit_points();
- 	$event_id{set_edit_points} = AE::timer(2, 0, 
+ 	$engine->{events}->{set_edit_points} = AE::timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
@@ -359,12 +350,12 @@ Engine will start in 2 seconds.);
 }
 sub transfer_edit_points {
 	say("Use 'set_edit_points' command to specify edit region"), return
-		 unless scalar @edit_points;
+		 unless scalar @{$setup->{edit_points}};
 	my $edit = shift;
-	::Mark->new( name => $edit->play_start_name, time => $edit_points[0]);
-	::Mark->new( name => $edit->rec_start_name,  time => $edit_points[1]);
-	::Mark->new( name => $edit->rec_end_name,    time => $edit_points[2]);
-	@edit_points = ();
+	::Mark->new( name => $edit->play_start_name, time => $setup->{edit_points}->[0]);
+	::Mark->new( name => $edit->rec_start_name,  time => $setup->{edit_points}->[1]);
+	::Mark->new( name => $edit->rec_end_name,    time => $setup->{edit_points}->[2]);
+	@{$setup->{edit_points}} = ();
 }
 
 sub generate_edit_record_setup { # for current edit
@@ -379,18 +370,17 @@ sub generate_edit_record_setup { # for current edit
 }
 
 sub new_edit {
-	#my @edit_points = @_;
 
 	# abort for many different reasons
 	
 	say("You must use 'set_edit_points' before creating a new edit. Aborting."),
-		return unless @edit_points;
+		return unless @{$setup->{edit_points}};
 	my $overlap = grep { 
 		my $fail;
 		my $rst = $_->rec_start_time;
 		my $ret = $_->rec_end_time;
-		my $nst = $edit_points[1];
-		my $net = $edit_points[2];
+		my $nst = $setup->{edit_points}->[1];
+		my $net = $setup->{edit_points}->[2];
 		my $rst1 = d1($rst);
 		my $ret1 = d1($ret);
 		my $nst1 = d1($nst);
@@ -458,14 +448,14 @@ sub edit_action {
 	set_edit_mode();
 	$this_edit->host_alias_track->set(rw => 'MON'); # all 
 	$edit_actions{$action}->();
-	$regenerate_setup++;
+	$setup->{changed}++;
 
 #   TODO: looping
 # 	my $is_setup = generate_setup(); 
 # 	return unless $is_setup;
 # 	if ($action !~ /record/){
-# 		$loop_enable++;
-# 		@loop_endpoints = (0,$length - 0.05);
+# 		$mode->{loop_enable}++;
+# 		@{$setup->{loop_endpoints}} = (0,$setup->{audio_length} - 0.05);
 # 		#  and transport_start()
 # 	}
 # 	connect_transport(); 
@@ -476,27 +466,27 @@ sub end_edit_mode  	{
 
 	# regenerate fades
 	
-	$offset_run_flag = 0; 
-	$loop_enable = 0;
+	$mode->{offset_run} = 0; 
+	$mode->{loop_enable} = 0;
 	offset_run_mode(0);	
 	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
-	$regenerate_setup++ 
+	$setup->{changed}++ 
 }
 sub destroy_edit {
 	say("no edit selected"), return unless $this_edit;
-	my $reply = $term->readline('destroy edit "'.$this_edit->edit_name.
+	my $reply = $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
 		qq(" and all its WAV files?? [n] ));
 	if ( $reply =~ /y/i ){
 		say "permanently removing edit";
 		$this_edit->destroy;
 	}
-	$term->remove_history($term->where_history);
+	$text->{term}->remove_history($text->{term}->where_history);
 	$this_track = $this_edit->host;
 	end_edit_mode();
 }
-sub set_edit_mode 	{ $offset_run_flag = edit_mode_conditions() ?  1 : 0 }
-sub edit_mode		{ $offset_run_flag and defined $this_edit}
+sub set_edit_mode 	{ $mode->{offset_run} = edit_mode_conditions() ?  1 : 0 }
+sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
@@ -519,13 +509,13 @@ sub host_fades {
 	my ($first,$second) = @_;
 	::Fade->new(  type => $first,
 					mark1 => $this_edit->rec_start_name,
-					duration => $edit_crossfade_time,
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
 	::Fade->new(  type => $second,
 					mark1 => $this_edit->rec_end_name,
-					duration => $edit_crossfade_time,
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->host_alias,
 	), 
@@ -533,13 +523,13 @@ sub host_fades {
 sub edit_fades {
 	::Fade->new(  type => 'in',
 					mark1 => $this_edit->rec_start_name,
-					duration => $edit_crossfade_time,
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->edit_name,
 	), 
 	::Fade->new(  type => 'out',
 					mark1 => $this_edit->rec_end_name,
-					duration => $edit_crossfade_time,
+					duration => $config->{edit_crossfade_time},
 					relation => 'fade_from_mark',
 					track => $this_edit->edit_name,
 	); 
@@ -551,7 +541,7 @@ sub edit_fades {
 # use internal lexical values for the computations
 
 # track values
-my( $trackname, $playat, $region_start, $region_end, $length);
+my( $trackname, $playat, $region_start, $region_end, $setup_length);
 
 # edit values
 my( $edit_play_start, $edit_play_end);
@@ -609,7 +599,7 @@ sub new_region_end
 	{   
 		my $end = $region_end{edit_case()}->();
 		return $end if $end eq '*';
-		$end < $length ? $end : $length
+		$end < $setup_length ? $end : $setup_length
 	};
 # the following value will always allow enough time
 # to record the edit. it may be longer than the 
@@ -624,7 +614,7 @@ sub edit_case {
 	{
 		if( $edit_play_end < $playat)
 			{ "out_of_bounds_near" }
-		elsif( $edit_play_start > $playat + $length)
+		elsif( $edit_play_start > $playat + $setup_length)
 			{ "out_of_bounds_far" }
 		elsif( $edit_play_start >= $playat)
 			{"no_region_play_start_after_playat_delay"}
@@ -656,20 +646,20 @@ sub set_edit_vars {
 	$region_end 	= $track->region_end_time;
 	$edit_play_start= play_start_time();
 	$edit_play_end	= play_end_time();
-	$length 		= wav_length($track->full_path);
+	$setup_length 		= wav_length($track->full_path);
 }
 sub play_start_time {
 	defined $this_edit 
 		? $this_edit->play_start_time 
-		: $offset_run_start_time # zero unless offset run mode
+		: $setup->{offset_run}->{start_time} # zero unless offset run mode
 }
 sub play_end_time {
 	defined $this_edit 
 		? $this_edit->play_end_time 
-		: $offset_run_end_time   # undef unless offset run mode
+		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
 }
 sub set_edit_vars_testing {
-	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $length) = @_;
+	($playat, $region_start, $region_end, $edit_play_start, $edit_play_end, $setup_length) = @_;
 }
 }
 
@@ -866,42 +856,42 @@ sub remove_system_version_comment {
 # executed outside of edit mode, so we get unadjusted values.
 
 sub setup_length {
-	my $length;
-	map{  my $l = $_->adjusted_length; $length = $l if $l > $length }
+	my $setup_length;
+	map{  my $l = $_->adjusted_length; $setup_length = $l if $l > $setup_length }
 	grep{ $_-> rec_status eq 'MON' }
 	::ChainSetup::engine_tracks();
-	$length
+	$setup_length
 }
 sub offset_run {
 	say("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
 	
-	$offset_run_start_time = $::Mark::by_name{$markname}->time;
-	$offset_run_end_time   = setup_length();
-	$offset_mark = $markname;
+	$setup->{offset_run}->{start_time} = $::Mark::by_name{$markname}->time;
+	$setup->{offset_run}->{end_time}   = setup_length();
+	$setup->{offset_run}->{mark} = $markname;
 	offset_run_mode(1);
-	$regenerate_setup++;
+	$setup->{changed}++;
 }
 sub clear_offset_run_vars {
-	$offset_run_start_time = 0;
-	$offset_run_end_time   = undef;
-	$offset_mark 		   = undef;
+	$setup->{offset_run}->{start_time} = 0;
+	$setup->{offset_run}->{end_time}   = undef;
+	$setup->{offset_run}->{mark} 		   = undef;
 }
 sub offset_run_mode {
 	my $set = shift;
 	given($set){
 		when(0){  
-			undef $offset_run_flag;
+			undef $mode->{offset_run};
 			clear_offset_run_vars();
-			$regenerate_setup++;
+			$setup->{changed}++;
 		}
 		when(1){
 			undef $this_edit; 
-			$offset_run_flag++
+			$mode->{offset_run}++
 		}
 	}
-	$offset_run_flag and ! defined $this_edit
+	$mode->{offset_run} and ! defined $this_edit
 }
 	
 sub select_edit_track {
