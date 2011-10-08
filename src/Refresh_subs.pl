@@ -7,10 +7,9 @@ sub set_widget_color {
 						 	OFF => $gui->{_nama_palette}->{OffForeground},
 						);
 
-	my %rw_background =  (	REC  => $gui->{rec_bg},
-							MON  => $gui->{mon_bg},
-							OFF  => $gui->{off_bg} );
-		
+	my %rw_background =  (	REC  => $gui->{_nama_palette}->{RecBackground},
+							MON  => $gui->{_nama_palette}->{MonBackground},
+							OFF  => $gui->{_nama_palette}->{OffBackground});
 	#print "namapalette:\n",yaml_out( $gui->{_nama_palette});
 	#print "rec: $gui->{rec_bg}, mon: $gui->{mon_bg}, off: $gui->{off_bg}\n";
 

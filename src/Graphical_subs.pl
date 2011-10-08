@@ -337,7 +337,7 @@ sub paint_button {
 
 sub engine_mode_color {
 		if ( user_rec_tracks()  ){ 
-				$gui->{rec_bg}  					# live recording
+				$gui->{_nama_palette}->{RecBackground} # live recording 
 		} elsif ( ::ChainSetup::really_recording() ){ 
 				$gui->{_nama_palette}->{Mixdown}	# mixdown only 
 		} elsif ( user_mon_tracks() ){  
@@ -365,7 +365,9 @@ sub flash_ready {
 	$ui->project_label_configure(-background => $color) unless $mode->{preview};
  	$engine->{events}->{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
 }
-sub reset_engine_mode_color_display { $ui->project_label_configure(-background => $gui->{off_bg}) }
+sub reset_engine_mode_color_display { $ui->project_label_configure(
+	-background => $gui->{_nama_palette}->{OffBackground} )
+}
 sub set_engine_mode_color_display { $ui->project_label_configure(-background => engine_mode_color()) }
 sub group_gui {  
 	my $ui = shift;
@@ -624,7 +626,7 @@ sub track_gui {
 				}
 				else {
 					$ti{$n}->unmute;
-					$mute->configure(-background => $gui->{off_bg});
+					$mute->configure(-background => $gui->{_nama_palette}->{OffBackground})
 				}
 			}	
 		  );
@@ -1105,7 +1107,7 @@ sub marker {
 	#print $pos, " ", int $pos, $/;
 		$gui->{marks}->{$pos} = $gui->{mark_frame}->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
-			-background => $gui->{off_bg},
+			-background => $gui->{_nama_palette}->{OffBackground},
 			-command => sub { ::mark($mark) },
 		)->pack(-side => 'left');
 }
@@ -1127,10 +1129,10 @@ sub get_saved_colors {
 
 	# aliases
 	
-	*::old_bg = \$gui->{_palette}->{mw}{background};
-	*::old_abg = \$gui->{_palette}->{mw}{activeBackground};
-	$gui->{_old_bg} = '#d915cc1bc3cf' unless $gui->{_old_bg};
-	#print "pb: $gui->{_palette}->{mw}{background}\n";
+	$gui->{_old_bg} = $gui->{_palette}{mw}{background};
+	$gui->{_old_abg} = $gui->{_palette}{mw}{activeBackground};
+	$gui->{_old_bg} //= '#d915cc1bc3cf';
+	#print "pb: $gui->{_palette}{mw}{background}\n";
 
 
 	my $pal = join_path($config->{root_dir}, $file->{gui_palette});
@@ -1143,10 +1145,6 @@ sub get_saved_colors {
 	#say "palette file",yaml_out($ref);
 
 	assign_singletons({ data => $ref });
-	
-	*::rec = $gui->{_nama_palette}->{RecBackground};
-	*::mon = $gui->{_nama_palette}->{MonBackground};
-	*::off = $gui->{_nama_palette}->{OffBackground};
 	
 	$gui->{_old_abg} = $gui->{_palette}->{mw}{activeBackground};
 	$gui->{_old_abg} = $gui->{project_head}->cget('-activebackground') unless $gui->{_old_abg};
@@ -1268,5 +1266,4 @@ sub save_palette {
 }
 
 ### end
-__END__
 
