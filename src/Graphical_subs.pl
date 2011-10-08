@@ -1263,7 +1263,7 @@ sub save_palette {
  	serialize (
  		file => join_path(project_root(), $file->{gui_palette}),
 		format => 'yaml',
- 		vars => [ qw( %{$gui->{_palette}} %{$gui->{_nama_palette}} ) ],
+ 		vars => [ qw( $gui->{_palette} $gui->{_nama_palette} ) ],
  		class => '::')
 }
 
