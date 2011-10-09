@@ -130,28 +130,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 		0
 	}
 }
-sub add_paths_for_main_tracks {
-	$debug2 and say "&add_paths_for_main_tracks";
-	map{ 
-
-		# connect signal sources to tracks
-		
-		my @path = $_->input_path;
-		#say "Main bus track input path: @path";
-		$g->add_path(@path) if @path;
-
-		# connect tracks to Master
-		
-		$g->add_edge($_->name, 'Master'); 
-
-	} 	
-		grep{ 1 unless $mode->{preview} eq 'doodle'
-			 and $_->rec_status eq 'MON' } # exclude MON tracks in doodle mode	
-		grep{ $_->rec_status ne 'OFF' }    # exclude OFF tracks
-		map{$tn{$_}} 	                   # convert to Track objects
-		$bn{Main}->tracks;                     # list of Track names
-
-}
 
 sub add_paths_for_recording {
 	$debug2 and say "&add_paths_for_recording";
@@ -161,7 +139,7 @@ sub add_paths_for_recording {
 	
 	my @tracks = grep{ 
 			(ref $_) !~ /Slave/  						# don't record slave tracks
-			and not $_->group =~ /null|Mixdown|Temp/ 	# nor these groups
+			and not $_->group =~ /Mixdown|Temp/ 	# nor these groups
 			and not $_->rec_defeat        				# nor rec-defeat tracks
 			and $_->rec_status eq 'REC' 
 	} ::Track::all();
