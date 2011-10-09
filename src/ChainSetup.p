@@ -92,7 +92,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	#add_paths_for_main_tracks();
 	#$debug and say "The graph is:\n$g";
 	#add_paths_for_recording();
-	$debug and say "The graph is:\n$g";
+	#$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
 	map{ $_->apply($g) } grep{ (ref $_) =~ /Send|Sub/ } ::Bus::all();
@@ -131,26 +131,16 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	}
 }
 
-
 sub add_paths_for_aux_sends {
 	$debug2 and say "&add_paths_for_aux_sends";
 
-	map {  add_path_for_one_aux_send( $_ ) } 
+	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
 	grep { (ref $_) !~ /Slave/ 
 			and $_->group !~ /Mixdown|Master/
 			and $_->send_type 
 			and $_->rec_status ne 'OFF' } ::Track::all();
 }
-sub add_path_for_one_aux_send {
-	my $track = shift;
-		my @e = ($track->name, output_node($track->send_type));
-		$g->add_edge(@e);
-		 $g->set_edge_attributes(@e,
-			  {	track => $track->name,
-				# force stereo output width
-				width => 2,
-				chain_id => 'S'.$track->n,});
-}
+
 
 sub add_paths_from_Master {
 	$debug2 and say "&add_paths_from_Master";
