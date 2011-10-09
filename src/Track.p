@@ -883,14 +883,11 @@ package ::SimpleTrack; # used for Master track
 use Modern::Perl; use Carp;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-
-sub rec_status {
-	$_[0]->rw eq 'OFF' ? 'OFF' : 'MON'
-}
-sub rec_status_display { $_[0]->rec_status } 
-}
+sub rec_status { $_[0]->rw ne 'OFF' ? 'REC' : 'OFF' }
+#sub rec_status_display { $_[0]->rw ne 'OFF' ? 'MON' : 'OFF' }
 sub busify {}
 sub unbusify {}
+}
 {
 package ::MasteringTrack; # used for mastering chains 
 use Modern::Perl;

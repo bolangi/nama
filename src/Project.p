@@ -135,7 +135,8 @@ Loading project "untitled".
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => 'MON',
+			rw => 'REC',
+			rec_defeat => 1,
 			source_type => undef,
 			source_id => undef); 
 
@@ -228,16 +229,19 @@ sub create_system_buses {
 			Insert		# auxiliary tracks for inserts
 			Cooked		# for track caching
 			Temp		# temp tracks while generating setup
-			Main		# default mixer bus, new tracks assigned to Main
+			#Main		# default mixer bus, new tracks assigned to Main
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	my @system_buses = split " ", $buses;
 	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
 	delete $config->{_is_system_bus}->{Main}; # don't mask Main
 	map{ ::Bus->new(name => $_ ) } @system_buses;
+	::SubBus->new(
+		name 		=> 'Main',
+		send_type 	=> 'track', 
+		send_id => 'Master');
 	
 	# a bus should identify it's mix track
-	$bn{Main}->set( send_type => 'track', send_id => 'Master');
 }
 
 
