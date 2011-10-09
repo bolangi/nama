@@ -124,7 +124,7 @@ use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub apply {
 	my $bus = shift;
 	my $g = shift;
-	$debug say "Expected track as bus destination, found type: ",
+	$debug and say "Expected track as bus destination, found type: ",
 		$bus->send_type, " id: ", $bus->send_id;
 	return unless $::tn{$bus->send_id}->rec_status eq 'REC';
 	map{ 

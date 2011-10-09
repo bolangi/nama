@@ -222,6 +222,8 @@ sub remove_riff_header_stubs {
 sub create_system_buses {
 	$debug2 and say "&create_system_buses";
 
+	# The following are ::Bus objects, no auto routing
+	
 	my $buses = q(
 			Master		# master fader track
 			Mixdown		# mixdown track
@@ -234,14 +236,12 @@ sub create_system_buses {
 	($buses) = strip_comments($buses); # need initial parentheses
 	my @system_buses = split " ", $buses;
 	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
-	delete $config->{_is_system_bus}->{Main}; # don't mask Main
+	
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 	::SubBus->new(
 		name 		=> 'Main',
 		send_type 	=> 'track', 
 		send_id => 'Master');
-	
-	# a bus should identify it's mix track
 }
 
 

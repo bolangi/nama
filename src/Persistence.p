@@ -474,14 +474,10 @@ sub restore_state {
 
 	# restore user buses
 		
-	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
-
-	my $main = $bn{Main};
-
-	# bus should know its mix track
+	# Main exists, therefore is not created, stored values 
+	# are lost.  TODO
 	
-	$main->set( send_type => 'track', send_id => 'Master')
-		unless $main->send_type;
+	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
 
 	# restore user tracks
 	
