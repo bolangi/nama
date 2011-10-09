@@ -1094,7 +1094,7 @@ sub automix {
 	my @tracks = grep{
 					$tn{$_}->rec_status eq 'MON' or
 					$bn{$_} and $tn{$_}->rec_status eq 'REC'
-				 } $gn{Main}->tracks;
+				 } $bn{Main}->tracks;
 
 	say "tracks: @tracks";
 

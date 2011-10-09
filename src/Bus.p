@@ -256,7 +256,7 @@ sub add_send_bus {
 							target => $_,
 							group  => $name,
 						)
-   } $gn{Main}->tracks;
+   } $bn{Main}->tracks;
 		
 }
 

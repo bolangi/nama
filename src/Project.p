@@ -239,7 +239,7 @@ sub create_system_buses {
 	# a bus should identify it's mix track
 	$bn{Main}->set( send_type => 'track', send_id => 'Master');
 
-	$gn{Main} = $bn{Main};
+	$bn{Main} = $bn{Main};
 }
 
 

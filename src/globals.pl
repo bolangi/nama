@@ -8,7 +8,6 @@ $prompt
 %tn
 %ti
 %bn
-%gn
 $debug
 $debug2
 @config_vars

@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($config %tn %gn $debug $debug2 $mode);
+use ::Globals qw($config %tn %bn $debug $debug2 $mode);
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
@@ -149,7 +149,7 @@ sub add_paths_for_main_tracks {
 			 and $_->rec_status eq 'MON' } # exclude MON tracks in doodle mode	
 		grep{ $_->rec_status ne 'OFF' }    # exclude OFF tracks
 		map{$tn{$_}} 	                   # convert to Track objects
-		$gn{Main}->tracks;                     # list of Track names
+		$bn{Main}->tracks;                     # list of Track names
 
 }
 

@@ -180,7 +180,7 @@ sub find_duplicate_inputs { # in Main bus only
 	} 
 	grep { $_->rw eq 'REC' }
 	map{ $tn{$_} }
-	$gn{Main}->tracks(); # track names;
+	$bn{Main}->tracks(); # track names;
 }
 sub load_ecs {
 	my $setup = setup_file();
@@ -257,7 +257,7 @@ sub transport_status {
 		say("Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
 		if $setup->{tracks_with_duplicate_inputs}->{$_};
-	} grep { $tn{$_}->rec_status eq 'REC' } $gn{Main}->tracks;
+	} grep { $tn{$_}->rec_status eq 'REC' } $bn{Main}->tracks;
 
 
 	# assume transport is stopped

@@ -122,7 +122,7 @@ sub show_status {
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
 	push @actions, "playback" if grep { $_->rec_status eq 'MON' } 
-		map{ $tn{$_} } $gn{Main}->tracks, q(Mixdown);
+		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
 	# sub-buses will route their playback signals through the 
@@ -132,8 +132,8 @@ sub show_status {
 	
 	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
 	say "Pending actions:  ", join(", ", @actions) if @actions;
-	say "Main bus allows:  ", $gn{Main}->allows, " track status";
-	say "Main bus version: ",$gn{Main}->version if $gn{Main}->version;
+	say "Main bus allows:  ", $bn{Main}->allows, " track status";
+	say "Main bus version: ",$bn{Main}->version if $bn{Main}->version;
 	say "Setup length is:  ", ::heuristic_time($setup->{audio_length}); 
 	say "Run time limit:   ", ::heuristic_time($setup->{runtime_limit})
       if $setup->{runtime_limit};
@@ -509,19 +509,19 @@ sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
 	$tn{Master}->set(rw => 'OFF'); 
-	$gn{Main}->set(rw => 'MON');
+	$bn{Main}->set(rw => 'MON');
 }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
 	$tn{Mixdown}->set(rw => 'MON');
 	$tn{Master}->set(rw => 'MON'); 
-	$gn{Main}->set(rw => 'OFF');
+	$bn{Main}->set(rw => 'OFF');
 }
 sub mixoff { 
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON'); 
-	$gn{Main}->set(rw => 'MON') if $gn{Main}->rw eq 'OFF';
+	$bn{Main}->set(rw => 'MON') if $bn{Main}->rw eq 'OFF';
 }
 sub bunch {
 	package ::;

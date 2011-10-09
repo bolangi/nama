@@ -371,7 +371,7 @@ sub reset_engine_mode_color_display { $ui->project_label_configure(
 sub set_engine_mode_color_display { $ui->project_label_configure(-background => engine_mode_color()) }
 sub group_gui {  
 	my $ui = shift;
-	my $group = $gn{Main}; 
+	my $group = $bn{Main}; 
 	my $dummy = $gui->{track_frame}->Label(-text => ' '); 
 	$gui->{group_label} = 	$gui->{track_frame}->Label(
 			-text => "G R O U P",
@@ -435,24 +435,24 @@ sub global_version_buttons {
 	$version and map { $_->destroy } $version->children;
 		
 	$debug and print "making global version buttons range:",
-		join ' ',1..$gn{Main}->last, " \n";
+		join ' ',1..$bn{Main}->last, " \n";
 
 			$version->radiobutton( 
 
 				-label => (''),
 				-value => 0,
 				-command => sub { 
-					$gn{Main}->set(version => 0); 
+					$bn{Main}->set(version => 0); 
 					$version->configure(-text => " ");
 					::reconfigure_engine();
 					refresh();
 					}
 			);
 
- 	for my $v (1..$gn{Main}->last) { 
+ 	for my $v (1..$bn{Main}->last) { 
 
 	# the highest version number of all tracks in the
-	# $gn{Main} group
+	# $bn{Main} group
 	
 	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
 	
@@ -465,7 +465,7 @@ sub global_version_buttons {
 				-label => ($v ? $v : ''),
 				-value => $v,
 				-command => sub { 
-					$gn{Main}->set(version => $v); 
+					$bn{Main}->set(version => $v); 
 					$version->configure(-text => $v);
 					::reconfigure_engine();
 					refresh();

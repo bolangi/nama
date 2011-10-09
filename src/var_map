@@ -3,7 +3,7 @@
 	%bunch						$project->{bunch}
 	
 	$main_bus 					$bn{Main}
-	$main						$gn{Main} 
+	$main						$bn{Main} 
 	$null_bus					$bn{null}
 
 	%abbreviations				$config->{abbreviations}
@@ -21,7 +21,6 @@
 	%ti
 	%tn
 	%bn
-	%gn
 	
 	$debug
 	$debug2

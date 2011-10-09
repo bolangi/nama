@@ -115,8 +115,8 @@ sub import_audio {
 		if $bus->rw eq 'OFF';
 }
 sub destroy_current_wav {
-	my $old_group_status = $gn{Main}->rw;
-	$gn{Main}->set(rw => 'MON');
+	my $old_group_status = $bn{Main}->rw;
+	$bn{Main}->set(rw => 'MON');
 	$this_track->current_version or
 		say($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
@@ -131,7 +131,7 @@ sub destroy_current_wav {
 		rememoize();
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
-	$gn{Main}->set(rw => $old_group_status);
+	$bn{Main}->set(rw => $old_group_status);
 	1;
 }
 

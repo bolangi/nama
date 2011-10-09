@@ -108,7 +108,7 @@ $prompt,
 	# buses
 	
 # 	$bn{Main}, 
-# 	$gn{Main}, # main group
+# 	$bn{Main}, # main group
 # 	$bn{null},
 # 	%{$config->{_is_system_bus}}, 
 
@@ -117,7 +117,6 @@ $prompt,
 	%ti, # track by index (alias to %::Track::by_index)
 	%tn, # track by name  (alias to %::Track::by_name)
 	%bn, # bus   by name  (alias to %::Bus::by_name)
-	%gn, # group by name  (alias to %::Group::by_name)
 
 # category: effects
 

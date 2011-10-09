@@ -244,7 +244,7 @@ move_to_bus: _move_to_bus existing_bus_name {
 set_track: _set_track key someval {
 	 $::this_track->set( $item{key}, $item{someval} ); 1}
 dump_track: _dump_track { ::pager($::this_track->dump); 1}
-dump_group: _dump_group { ::pager($::gn{Main}->dump); 1}
+dump_group: _dump_group { ::pager($::bn{Main}->dump); 1}
 dump_all: _dump_all { ::dump_all(); 1}
 remove_track: _remove_track quiet(?) { 
  	my $quiet = scalar @{$item{'quiet(?)'}};

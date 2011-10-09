@@ -3,7 +3,6 @@ use Modern::Perl;
 *bn = \%::Bus::by_name;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
-*gn = \%::Group::by_index;
 use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
@@ -36,7 +35,6 @@ debug => [qw( 		$debug
 						%tn
 						%ti
 						%bn
-						%gn
 						$prompt
 	)],
 

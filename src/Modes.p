@@ -17,7 +17,7 @@ sub set_preview_mode {
 
 	# make an announcement if we were in rec-enabled mode
 
-	$gn{Main}->set(rw => $old_group_rw) if $old_group_rw;
+	$bn{Main}->set(rw => $old_group_rw) if $old_group_rw;
 
 	$mode->{preview} = "preview";
 
@@ -36,8 +36,8 @@ sub set_doodle_mode {
 	# save rw setting of user tracks (not including null group)
 	# and set those tracks to REC
 	
-	$old_group_rw = $gn{Main}->rw;
-	$gn{Main}->set(rw => 'REC');
+	$old_group_rw = $bn{Main}->rw;
+	$bn{Main}->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# reconfigure_engine will generate setup and start transport
@@ -53,7 +53,7 @@ sub exit_preview_mode { # exit preview and doodle modes
 		stop_transport() if engine_running();
 		$debug and print "Exiting preview/doodle mode\n";
 		$mode->{preview} = 0;
-		$gn{Main}->set(rw => $old_group_rw) if $old_group_rw;
+		$bn{Main}->set(rw => $old_group_rw) if $old_group_rw;
 
 }
 }
