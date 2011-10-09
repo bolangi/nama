@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw(:all);
+use ::Globals qw($config %tn %gn $debug $debug2 $mode);
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
