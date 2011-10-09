@@ -93,7 +93,7 @@ sub trackslist {
 }
 
 ### subclasses
-
+{
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 
@@ -135,6 +135,8 @@ sub remove {
 	
 	delete $by_name{$bus->name};
 } 
+}
+{
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub apply {
@@ -157,6 +159,8 @@ sub remove {
 	# remove bus
 	delete $by_name{$bus->name};
 }
+}
+{
 package ::SendBusCooked;
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 
@@ -174,6 +178,7 @@ sub apply {
 }
 
 
+}
 # ---------- Bus routines --------
 {
 package ::;
@@ -184,7 +189,6 @@ our (
 	$this_bus,
 	%tn,
 	%bn,
-	%gn,
 );
 
 sub set_current_bus {
@@ -271,10 +275,4 @@ sub update_send_bus {
 } # end package
 
 1;
-__END__
-
-
-
-
-
 __END__
