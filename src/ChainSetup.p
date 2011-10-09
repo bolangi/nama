@@ -1,11 +1,6 @@
 # ---------- ChainSetup-----------
-#
-# variables in the main namespace we need to access
 
-package ::;
-use Modern::Perl; use Carp;
 package ::ChainSetup;
-
 use ::Globals qw(:all);
 use Modern::Perl;
 no warnings 'uninitialized';
