@@ -1,11 +1,11 @@
 # gui handling
 
 # in the $gui variable, keys with leading _underscore
-# indicate regular variables
+# indicate variables
 #
-# $gui->{_project_name}  # normal scalar/array/hash values
-# $gui->{no_underscore}  # Tk objects (widgets, frames, etc.)
-#
+# $gui->{_project_name}  # scalar/array/hash var
+# $gui->{mw}             # Tk objects (widgets, frames, etc.)
+
 sub init_gui {
 
 	$debug2 and print "&init_gui\n";
@@ -1092,9 +1092,8 @@ sub resolution {
 sub arm_mark_toggle { 
 	if ($gui->{_markers_armed}) {
 		$gui->{_markers_armed} = 0;
-		$gui->{mark_remove}->configure( -background => $gui->{off_bg});
-	}
-	else{
+		$gui->{mark_remove}->configure( -background => $gui->{_nama_palette}->{OffBackground});
+	 } else{
 		$gui->{_markers_armed} = 1;
 		$gui->{mark_remove}->configure( -background => $gui->{_nama_palette}->{MarkArmed});
 	}

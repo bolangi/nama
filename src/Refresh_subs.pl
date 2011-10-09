@@ -10,8 +10,6 @@ sub set_widget_color {
 	my %rw_background =  (	REC  => $gui->{_nama_palette}->{RecBackground},
 							MON  => $gui->{_nama_palette}->{MonBackground},
 							OFF  => $gui->{_nama_palette}->{OffBackground});
-	#print "namapalette:\n",yaml_out( $gui->{_nama_palette});
-	#print "rec: $gui->{rec_bg}, mon: $gui->{mon_bg}, off: $gui->{off_bg}\n";
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );

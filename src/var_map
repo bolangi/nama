@@ -232,9 +232,9 @@
 	$sn_load						$gui->{load_project}
 	$sn_new							$gui->{new_project}
 	$sn_quit						$gui->{quit}
-	$sn_palette 					$gui->{_palette}
-	$sn_namapalette 				$gui->{_nama_palette}
-	$sn_effects_palette 			$gui->{_fx_palette}
+	$sn_palette 					$gui->{palette}
+	$sn_namapalette 				$gui->{nama_palette}
+	$sn_effects_palette 			$gui->{fx_palette}
 	$sn_save_text  					$gui->{savefile_entry}
 	$sn_save						$gui->{save_project}	
 	$sn_recall						$gui->{load_savefile}
@@ -243,9 +243,6 @@
 	@namafields    					$gui->{_nama_fields}
 	%namapalette   					$gui->{_nama_palette}
 	%palette 						$gui->{_palette} 
-	$rec      						$gui->{rec_bg}
-	$mon     						$gui->{mon_bg} 
-	$off     						$gui->{off_bg} 
 
 	$build_track_label 				$gui->{add_track}->{label}
 	$build_track_text 				$gui->{add_track}->{text_entry}
@@ -263,3 +260,13 @@
 	$transport_stop  				$gui->{engine_stop}
 	$old_bg 						$gui->{_old_bg}
 	$old_abg 						$gui->{_old_abg}
+
+# fade related
+
+** $config->{fade_time1_fraction}
+** $config->{fade_down_fraction}
+** $config->{fade_time2_fraction}
+** $config->{fade_down_fraction}
+** $config->{fader_op}
+
+** $config->{serialize_formats}
