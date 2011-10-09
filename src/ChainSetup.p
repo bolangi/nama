@@ -94,13 +94,12 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	
 	map{ $_->apply($g) } ::Bus::all();
 	$debug and say "The graph is:\n$g";
+	
+	# now various manual routing
 
-	#add_paths_for_main_tracks();
-	#$debug and say "The graph is:\n$g";
-	#add_paths_for_recording();
-	#$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
+
 	add_paths_from_Master(); # do they affect automix?
 	$debug and say "The graph is:\n$g";
 
@@ -136,6 +135,12 @@ sub generate_setup_try {  # TODO: move operations below to buses
 }
 
 sub add_paths_for_aux_sends {
+
+	# currently this routing is track-oriented 
+
+	# we could add this to the ::Bus base class
+	# then suppress it in Mixdown and Master groups
+
 	$debug2 and say "&add_paths_for_aux_sends";
 
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
@@ -154,9 +159,9 @@ sub add_paths_from_Master {
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 	}
-	$g->add_path($mode->{mastering} ?  'Boost' : 'Master',
-			output_node($tn{Master}->send_type)) if $tn{Master}->rw ne 'OFF'
- 
+	my $final_leg_origin = $mode->{mastering} ?  'Boost' : 'Master';
+	$g->add_path($final_leg_origin, output_node($tn{Master}->send_type)) 
+		if $tn{Master}->rw ne 'OFF'
 
 }
 sub add_paths_for_mixdown_handling {
