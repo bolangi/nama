@@ -830,7 +830,7 @@ sub busify {
 }
 sub unbusify {
 	my $track = shift;
-	return unless $track->is_system_track;
+	return if $track->is_system_track;
 	$track->set( rw => 'MON',
                  rec_defeat => 0);
 	$track->set_track_class($track->was_class // '::Track');
