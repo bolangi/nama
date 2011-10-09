@@ -89,7 +89,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	# right things. :-)
 
 	my $automix = shift; # route Master to null_out if present
-	add_paths_for_main_tracks();
+	#add_paths_for_main_tracks();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_recording();
 	$debug and say "The graph is:\n$g";

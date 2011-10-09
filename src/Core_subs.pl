@@ -87,13 +87,32 @@ sub leading_track_spec {
 	}
 		
 }
+{ my @namespace_abbreviations = qw(
+	Assign 
+	Track
+	Bus
+	Mark
+	IO
+	Graph
+	Wav
+	Insert
+	Fade                                                      
+	Edit
+	Text
+	ChainSetup
+);
+
+my $namespace_root = 'Audio::Nama';
+
 sub eval_perl {
 	my $code = shift;
+	map{ $code =~ s/::$_/$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
 	my (@result) = eval $code;
 	print( "Perl command failed: $@\n") if $@;
 	pager(join "\n", @result) unless $@;
 	print "\n";
 }	
+}
 sub import_audio {
 
 	my ($track, $path, $frequency) = @_;
