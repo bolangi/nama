@@ -293,3 +293,26 @@ $prompt,
 # 	$gui->{load_savefile},	# button to recall settings
 
 # end
+=comment
+# category: effects_cache 
+@effects_static_vars = qw(
+
+	@effects		# static effects information (parameters, hints, etc.)
+	%effect_i		# pn:preset_name -> effect number
+	                # el:ladspa_label -> effect number
+	
+	%effect_j      # preset_name -> pn:preset_name
+	                # ladspa_label -> el:ladspa_label
+	@effects_help  # one line per effect, for text search
+
+	@ladspa_sorted # ld
+	%effects_ladspa # parsed data from analyseplugin 
+	%effects_ladspa_file 
+					# get plugin filename from Plugin Unique ID
+	%ladspa_unique_id 
+					# get plugin unique id from plugin label
+	%ladspa_label  # get plugin label from unique id
+	%ladspa_help   # plugin_label => analyseplugin output
+	%e_bound		# GUI: for displaying hundreds of effects in groups
+);
+=cut

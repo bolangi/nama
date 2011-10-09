@@ -1,5 +1,6 @@
-# variables found in namarc
-#
+# list of variables found in namarc
+# these are converted to entries in $config->{ }
+
 @config_vars = qw(
 
 # category: external resources
@@ -52,9 +53,7 @@
 	$limiter
 );
 						
-# variables that get saved to State.yml
-
-# these are the converted vars
+# list of variables that get saved to State.yml
 
 @new_persistent_vars = qw(
 
@@ -80,6 +79,10 @@
 	$this_track_name
 	$this_op
 );
+
+# this list of variables is 
+# retained for backward compatibility
+# with State.yml file version 1.078 and earlier
 
 @persistent_vars = qw(
 
@@ -131,26 +134,3 @@
 	$this_op      	# current effect
 );
 		 
-=comment
-# category: effects_cache 
-@effects_static_vars = qw(
-
-	@effects		# static effects information (parameters, hints, etc.)
-	%effect_i		# pn:preset_name -> effect number
-	                # el:ladspa_label -> effect number
-	
-	%effect_j      # preset_name -> pn:preset_name
-	                # ladspa_label -> el:ladspa_label
-	@effects_help  # one line per effect, for text search
-
-	@ladspa_sorted # ld
-	%effects_ladspa # parsed data from analyseplugin 
-	%effects_ladspa_file 
-					# get plugin filename from Plugin Unique ID
-	%ladspa_unique_id 
-					# get plugin unique id from plugin label
-	%ladspa_label  # get plugin label from unique id
-	%ladspa_help   # plugin_label => analyseplugin output
-	%e_bound		# GUI: for displaying hundreds of effects in groups
-);
-=cut
