@@ -90,8 +90,8 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	my $automix = shift; # route Master to null_out if present
 	#add_paths_for_main_tracks();
-	$debug and say "The graph is:\n$g";
-	add_paths_for_recording();
+	#$debug and say "The graph is:\n$g";
+	#add_paths_for_recording();
 	$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
 	$debug and say "The graph is:\n$g";
@@ -129,100 +129,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 		say("No tracks to record or play.");
 		0
 	}
-}
-
-sub add_paths_for_recording {
-	$debug2 and say "&add_paths_for_recording";
-	return if $mode->{preview}; # don't record during preview modes
-
-	# get list of REC-status tracks to record
-	
-	my @tracks = grep{ 
-			(ref $_) !~ /Slave/  						# don't record slave tracks
-			and not $_->group =~ /Mixdown|Temp/ 	# nor these groups
-			and not $_->rec_defeat        				# nor rec-defeat tracks
-			and $_->rec_status eq 'REC' 
-	} ::Track::all();
-	map{ 
-
-		# Track input from a WAV, JACK client, or soundcard
-		#
-		# We record 'raw' signal, as per docs and design
-
-		if( $_->source_type !~ /track|bus|loop/ ){
-		
-			# create temporary track for rec_file chain
-
-			# we do this because the path doesn't
-			# include the original track.
-			#
-			# but why not supply the track as 
-			# an edge attribute, then the source
-			# and output info can be provided 
-			# that way.
-
-			# Later, we will rewrite it that way
-
-			$debug and say "rec file link for $_->name";	
-			my $name = $_->name . '_rec_file';
-			my $anon = ::SlaveTrack->new( 
-				target => $_->name,
-				rw => 'OFF',
-				group => 'Temp',
-				name => $name);
-
-			# connect IO
-			
-			$g->add_path(input_node($_->source_type), $name, 'wav_out');
-
-			# set chain_id to R3 (if original track is 3) 
-			$g->set_vertex_attributes($name, { 
-				chain_id => 'R'.$_->n,
-				mono_to_stereo => '', # override 
-			});
-
-		} elsif ($_->source_type =~ /bus|track/) {
-
-			# for tracks with identified (track|bus) input
-
-			# cache_tracks/merge_edits has its own logic
-			# therefore these connections (triggered from
-			# generate_setup()) will not affect AFAIK
-			# any other recording scenario
-
-			# special case, record 'cooked' signal
-
-			# generally a sub bus 
-			# - has 'rec_defeat' set (therefore doesn't reach here)
-			# - receives a stereo input
-			# - mix track width is set to stereo (default)
-
-			my @edge = ($_->name, 'wav_out'); # cooked signal
-
-			$g->add_path(@edge); 
-
-			# set chain_id to R3 (if original track is 3) 
-
-			$g->set_edge_attributes(@edge, { 
-				chain_id => 'R'.$_->n,
-			});
-			
-			# if this path is left unconnected, 
-			# i.e. track gets no input		
-			# it will be removed by prune_graph()
-			
-			# to record raw:
-			
-			# source_type: loop
-			# source_id:   loop,track_name_in
-
-			# but for WAV to contain content, 
-			# we need to guarantee that track_name as
-			# an input
-		}
-
-
-	} @tracks;
 }
 
 
