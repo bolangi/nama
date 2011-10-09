@@ -124,7 +124,11 @@ use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub apply {
 	my $bus = shift;
 	my $g = shift;
-	return unless $::tn{$bus->name}->rec_status eq 'REC';
+	die "expected track as bus destination, found type: ",
+		$bus->send_type, " id: ", $bus->send_id
+		unless $bus->send_type eq 'track' and
+      	$::tn{$bus->send_id}; 
+	return unless $::tn{$bus->send_id}->rec_status eq 'REC';
 	map{ 
 		# connect signal sources to tracks
 		my @path = $_->input_path;
@@ -132,7 +136,7 @@ sub apply {
 
 		# connect tracks to mix track
 		
-		$g->add_edge($_->name, $bus->name); 
+		$g->add_edge($_->name, $bus->send_id); 
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
