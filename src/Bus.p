@@ -3,7 +3,7 @@
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Globals qw($debug);
-our @ISA = qw( ::Object ::Group );
+our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
 
@@ -41,6 +41,28 @@ sub new {
 	$by_name{$bus->name} = $bus;
 }
 sub group { $_[0]->name }
+
+
+sub tracks { # returns list of track names in bus
+	my $bus = shift;
+	map{ $_->name } grep{ $_->group eq $bus->name } ::Track::all();
+}
+
+sub last {
+	#$debug and say "group: @_";
+	my $group = shift;
+	my $max = 0;
+	map{ 
+		my $track = $_;
+		my $last;
+		$last = $track->last || 0;
+		#print "track: ", $track->name, ", last: $last\n";
+
+		$max = $last if $last > $max;
+
+	}	map { $::Track::by_name{$_} } $group->tracks;
+	$max;
+}
 
 sub remove { say $_[0]->name, " is system bus. No can remove." }
 

@@ -68,7 +68,6 @@ use Text::Format;
 
 use ::Assign qw(:all);
 use ::Track;
-use ::Group;
 use ::Bus;    
 use ::Mark;
 use ::IO;

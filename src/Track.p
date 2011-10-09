@@ -131,12 +131,6 @@ sub new {
 	::add_pan_control($n);
 	::add_volume_control($n);
 
-	#my $group = $bn{ $object->group }; 
-
-	# create group if necessary
-	#defined $group or $group = ::Group->new( name => $object->group );
-	#my @existing = $group->tracks ;
-	#$group->set( tracks => [ @existing, $object->name ]);
 	$this_track = $object;
 	$object;
 	
