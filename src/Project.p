@@ -222,7 +222,8 @@ sub remove_riff_header_stubs {
 sub create_system_buses {
 	$debug2 and say "&create_system_buses";
 
-	# The following are ::Bus objects, no auto routing
+	# The following are ::Bus objects, no routing.
+	# They are hidden from the user.
 	
 	my $buses = q(
 			Master		# master fader track
@@ -231,17 +232,29 @@ sub create_system_buses {
 			Insert		# auxiliary tracks for inserts
 			Cooked		# for track caching
 			Temp		# temp tracks while generating setup
-			#Main		# default mixer bus, new tracks assigned to Main
 	);
 	($buses) = strip_comments($buses); # need initial parentheses
 	my @system_buses = split " ", $buses;
-	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
+
+	# create them
 	
 	map{ ::Bus->new(name => $_ ) } @system_buses;
+
+	# remember to hide them
+	
+	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
+
+	# create Main bus (the mixer)
+
 	::SubBus->new(
 		name 		=> 'Main',
 		send_type 	=> 'track', 
 		send_id => 'Master');
+
+	# create Manual bus (for user routed tracks)
+
+	::SubBus->new( name => 'Manual');
+	
 }
 
 

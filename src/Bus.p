@@ -129,16 +129,18 @@ sub apply {
 	my $g = shift;
 	$debug and say "Expected track as bus destination, found type: ",
 		$bus->send_type, " id: ", $bus->send_id;
-	return unless $::tn{$bus->send_id}->rec_status eq 'REC';
 	map{ 
 		# connect signal sources to tracks
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
 
 		# connect tracks to mix track
-		
-		$g->add_edge($_->name, $bus->send_id); 
 
+		$g->add_edge($_->name, $bus->send_id)
+			if 		$bus->send_type eq 'track' 
+				and $bus->send_id
+				and $::tn{$bus->send_id}->rec_status eq 'REC';
+		
 		# add paths for recording
 			
 		::Graph::add_path_for_rec($g,$_) 
