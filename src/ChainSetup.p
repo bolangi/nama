@@ -89,13 +89,17 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	# right things. :-)
 
 	my $automix = shift; # route Master to null_out if present
+	
+	# start with bus routing
+	
+	map{ $_->apply($g) } ::Bus::all();
+	$debug and say "The graph is:\n$g";
+
 	#add_paths_for_main_tracks();
 	#$debug and say "The graph is:\n$g";
 	#add_paths_for_recording();
 	#$debug and say "The graph is:\n$g";
 	add_paths_for_aux_sends();
-	$debug and say "The graph is:\n$g";
-	map{ $_->apply($g) } grep{ (ref $_) =~ /Send|Sub/ } ::Bus::all();
 	$debug and say "The graph is:\n$g";
 	add_paths_from_Master(); # do they affect automix?
 	$debug and say "The graph is:\n$g";

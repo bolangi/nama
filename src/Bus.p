@@ -114,6 +114,8 @@ sub trackslist {
 	\@list;
 }
 
+sub apply {}  # base class does no routing of its own
+
 ### subclasses
 {
 package ::SubBus;
