@@ -166,6 +166,8 @@ sub freq { [split ',', $_[0] ]->[2] }  # e.g. s16_le,2,44100
 
 sub channels { [split ',', $_[0] ]->[1] }
 	
+# these are the names of loop devices corresponding
+# to pre- and post-fader nodes of a track signal
 sub input_node { $_[0].'_in' }
 sub output_node {$_[0].'_out'}
 
