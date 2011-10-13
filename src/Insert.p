@@ -64,7 +64,10 @@ sub new {
 				target => $name,
 				group => 'Insert',
 				rw => 'REC',
-				hide => 1,
+	
+				# don't hide wet track if used for hosting effects
+				
+				hide => ! $self->is_local_effects_host,
 			);
 	my $dry = ::SlaveTrack->new( 
 				name => $self->dry_name,
