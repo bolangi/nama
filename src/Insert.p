@@ -141,6 +141,8 @@ sub get_id {
 		if (! $prepost and ! $id{pre} != ! $id{post} );
 	$id{$prepost};;
 }
+
+sub is_local_effects_host { ! $_[0]->send_id }
 }
 {
 package ::PostFaderInsert;
@@ -174,27 +176,50 @@ sub add_paths {
 
 	$debug and say "found wet: ", $wet->name, " dry: ",$dry->name;
 
-	# wet send path (no track): track -> loop -> output
+	# if no insert target, our insert will 
+	# a parallel effects host with wet/dry dry branches
 	
-	my @edge = ($loop, output_node($self->{send_type}));
-	$debug and say "edge: @edge";
-	$g->add_path( $name, @edge);
-	$g->set_vertex_attributes($loop, {n => $t->n});
-	$g->set_edge_attributes(@edge, { 
-		send_id => $self->{send_id},
-		width => 2,
-	});
-	# wet return path: input -> wet_track (slave) -> successor
-	
-	# we override the input with the insert's return source
+	# --- track ---insert_post--+--- wet ---+-- successor 
+	#                           |           |
+	#                           +--- dry ---+
 
-	$g->set_vertex_attributes($wet->name, {
-				width => 2, # default for cooked
-				mono_to_stereo => '', # override
-				source_type => $self->{return_type},
-				source_id => $self->{return_id},
-	});
-	$g->add_path(input_node($self->{return_type}), $wet->name, $successor);
+	# otherwise a conventional wet path with send and receive arms
+	
+	# --- track ---insert_post--+-- wet-send    wet-return ---+-- successor
+	#                           |                             |
+	#                           +-------------- dry ----------+
+	
+	if ( $self->is_local_effects_host )
+	{
+		$g->add_path($name, $loop, $wet->name, $successor);
+
+	}
+	else
+
+	{	
+		# wet send path (no extra track): track -> loop -> output
+
+		my @edge = ($loop, output_node($self->{send_type}));
+		$debug and say "edge: @edge";
+		$g->add_path( $name, @edge);
+		$g->set_vertex_attributes($loop, {n => $t->n});
+		$g->set_edge_attributes(@edge, { 
+			send_id => $self->{send_id},
+			width => 2,
+		});
+		# wet return path: input -> wet_track (slave) -> successor
+		
+		# we override the input with the insert's return source
+
+		$g->set_vertex_attributes($wet->name, {
+					width => 2, # default for cooked
+					mono_to_stereo => '', # override
+					source_type => $self->{return_type},
+					source_id => $self->{return_id},
+		});
+		$g->add_path(input_node($self->{return_type}), $wet->name, $successor);
+
+	}
 
 	# connect dry track to graph
 	
