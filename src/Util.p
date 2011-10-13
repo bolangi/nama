@@ -15,31 +15,31 @@ our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
-rw_set
-freq
-channels
-input_node
-output_node
-signal_format
-process_is_running
-d1
-d2
-dn
-round
-colonize
-time_tag
-heuristic_time
-dest_type
+	rw_set
+	freq
+	channels
+	input_node
+	output_node
+	signal_format
+	process_is_running
+	d1
+	d2
+	dn
+	round
+	colonize
+	time_tag
+	heuristic_time
+	dest_type
 
-create_dir
-join_path
-wav_off
-strip_all
-strip_blank_lines
-strip_comments
-remove_spaces
-expand_tilde
-resolve_path
+	create_dir
+	join_path
+	wav_off
+	strip_all
+	strip_blank_lines
+	strip_comments
+	remove_spaces
+	expand_tilde
+	resolve_path
 
 ) ] );
 
@@ -234,22 +234,21 @@ sub dest_type {
 	my $dest = shift;
 	my $type;
 	given( $dest ){
-		when( undef )       {} # do nothing
+		when( undef )			{ $type = undef}
 
 		# non JACK related
 
-		when('bus')			   { $type = 'bus'             }
-		when('null')           { $type = 'null'            }
-		when(/^loop,/)         { $type = 'loop'            }
-
-		when(! /\D/)           { $type = 'soundcard'       } # digits only
+		when('bus')			 	{ $type = 'bus'			   }
+		when('null')		 	{ $type = 'null'			}
+		when(/^loop,/)		 	{ $type = 'loop'			}
+		when(! /\D/)			{ $type = 'soundcard'	   } # digits only
 
 		# JACK related
 
-		when(/^man/)           { $type = 'jack_manual'     }
-		when('jack')           { $type = 'jack_manual'     }
-		when(/(^\w+\.)?ports/) { $type = 'jack_ports_list' }
-		default                { $type = 'jack_client'     } 
+		when(/^man/)			{ $type = 'jack_manual'	 }
+		when('jack')			{ $type = 'jack_manual'	 }
+		when(/(^\w+\.)?ports/)	{ $type = 'jack_ports_list' }
+		default					{ $type = 'jack_client'	 } 
 
 	}
 	$type
@@ -300,18 +299,18 @@ sub strip_comments { #
 	@_
 } 
 
-sub remove_spaces {                                                             
-        my $entry = shift;                                                      
-        # remove leading and trailing spaces                                    
-                                                                                
-        $entry =~ s/^\s*//;                                                     
-        $entry =~ s/\s*$//;                                                     
-                                                                                
-        # convert other spaces to underscores                                   
-                                                                                
-        $entry =~ s/\s+/_/g;                                                    
-        $entry;                                                                 
-}                                                                               
+sub remove_spaces {															 
+		my $entry = shift;													  
+		# remove leading and trailing spaces									
+																				
+		$entry =~ s/^\s*//;													 
+		$entry =~ s/\s*$//;													 
+																				
+		# convert other spaces to underscores								   
+																				
+		$entry =~ s/\s+/_/g;													
+		$entry;																 
+}																			   
 sub resolve_path {
 	my $path = shift;
 	$path = expand_tilde($path);

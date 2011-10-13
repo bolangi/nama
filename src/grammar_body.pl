@@ -825,6 +825,10 @@ update_send_bus: _update_send_bus existing_bus_name {
 set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{someval}); 1 }
 
 list_buses: _list_buses { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
+add_insert: _add_insert 'local' {
+	::Insert::add_insert( 'postfader_insert');
+	1;
+}
 add_insert: _add_insert prepost send_id return_id(?) {
 	my $return_id = $item{'return_id(?)'}->[0];
 	my $send_id = $item{send_id};
