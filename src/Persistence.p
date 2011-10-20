@@ -694,5 +694,18 @@ sub files_are_identical {
 	$a eq $b
 }
 
+{ my $use_git = 1;
+  my $checkpoint_setup = 1;
+  my $checkpoint_change = 0;
+sub git_commit { $use_git and system qq(git commit -a -m "$_[0]") }
+
+sub git_tag { $use_git and system 'git tag' } 
+
+sub git_new_branch { system qq(git checkout -b $_[0])  }
+
+sub git_checkout { system qq(git checkout $_[0] ) }
+
+}
+
 1;
 __END__
