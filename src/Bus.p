@@ -136,10 +136,12 @@ sub apply {
 
 		# connect tracks to mix track
 
+		# can we get rid of this (bus dependence) completely?
+
 		$g->add_edge($_->name, $bus->send_id)
 			if 		$bus->send_type eq 'track' 
-				and $bus->send_id
-				and $::tn{$bus->send_id}->rec_status eq 'REC';
+				and $bus->send_id;
+
 		
 		# add paths for recording
 			
