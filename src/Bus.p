@@ -1,5 +1,6 @@
 # ------------  Bus --------------------
 
+
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Globals qw($debug);
@@ -157,7 +158,8 @@ sub apply {
 		# add paths for recording
 			
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq 'REC' and ! $_->rec_defeat;
+			if $_->rec_status eq 'REC' and ! $_->rec_defeat
+				and ! $::mode->{preview} eq 'doodle';
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
