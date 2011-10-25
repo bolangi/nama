@@ -183,6 +183,10 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
+connect_target: connect_type connect_id { [ @item{qw(connect_type connect_id)} ] }
+connect_type: 'track' | 'loop' | 'jack' 
+connect_id: shellish 
+
 help_effect: _help_effect effect { ::Text::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::Text::find_effect(@{$item{"anytag(s)"}}); 1}
@@ -420,7 +424,8 @@ master_off: _master_off { ::master_off(); 1 }
 exit: _exit {   ::save_state($::file->{state_store}); 
 					::cleanup_exit();
                     1}	
-
+source: _source connect_target { 
+	$::this_track->set_source(@{$item{connect_target}}); 1 }
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
@@ -429,6 +434,8 @@ source: _source {
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
+send: _send connect_target { 
+	$::this_track->set_send(@{$item{connect_target}}); 1 }
 send: _send jack_port { $::this_track->set_send($item{jack_port}); 1}
 send: _send { $::this_track->set_send(); 1}
 remove_send: _remove_send {
