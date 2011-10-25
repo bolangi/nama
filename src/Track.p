@@ -249,7 +249,6 @@ sub rec_status {
 		# we allow a mix track to be REC, even if the 
 		# bus it belongs to is set to MON
 			
-	# for null tracks
 	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
 				or $bn{$track->name}
 					and $track->rec_defeat) ){
