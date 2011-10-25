@@ -185,6 +185,17 @@ sub remove {
 } 
 }
 {
+package ::MasterBus;
+use Modern::Perl; use Carp; our @ISA = '::SubBus';
+sub apply {
+	my ($bus,$g) = @_;
+	$bus->SUPER::apply($g);
+	map { $g->add_edge($_->name, $bus->send_id) } 
+	grep{ $_->group eq $bus->group} 
+	::Track::all()
+}
+}
+{
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 sub apply {
