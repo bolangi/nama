@@ -530,9 +530,9 @@ sub send { # command for setting, showing track source
 }
 sub set_source { # called from parser 
 	my $track = shift;
-	my $source = shift;
+	my ($source, $type) = @_;
 	my $old_source = $track->input_object;
-	$track->set_io('source',$source);
+	$track->set_io('source',$source, $type);
 	my $new_source = $track->input_object;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
@@ -540,6 +540,7 @@ sub set_source { # called from parser
 	} else {
 		print $track->name, ": input set to $object\n";
 		# re-enable recording of null-source tracks
+		# TODO: does null source really get recorded?
 		say($track->name, ": record enabled"),
 		$track->set(rec_defeat => 0) if $old_source eq 'null';
 	}
