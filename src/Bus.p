@@ -121,12 +121,27 @@ sub apply {}  # base class does no routing of its own
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Util qw(input_node);
+use Try::Tiny;
 
 # graphic routing: track -> mix_track
 
+{
+
+my $g;
+my $bus;
+my %dispatch = (
+
+	# connect member tracks to  mix track
+	# if mix track is known and mix track is set to REC
+	track => sub { $::tn{$bus->send_id}->rec_status eq 'REC'  },
+
+	# connect loop device, with verification
+	loop  => sub { $bus->send_id =~ /^\w+_(in|out)$/ },
+);
+
 sub apply {
-	my $bus = shift;
-	my $g = shift;
+	$bus = shift;
+	$g = shift;
 	$debug and say "Expected track as bus destination, found type: ",
 		$bus->send_type, " id: ", $bus->send_id;
 	map{ 
@@ -134,14 +149,10 @@ sub apply {
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
 
-		# connect tracks to mix track
-
-		# can we get rid of this (bus dependence) completely?
 
 		$g->add_edge($_->name, $bus->send_id)
-			if 		$bus->send_type eq 'track' 
-				and $bus->send_id;
-
+			if 	try { $dispatch{$bus->send_type}->() } 
+			catch {  warn "caught error: $_" } ;
 		
 		# add paths for recording
 			
@@ -149,6 +160,7 @@ sub apply {
 			if $_->rec_status eq 'REC' and ! $_->rec_defeat;
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
+}
 }
 sub remove {
 	my $bus = shift;
