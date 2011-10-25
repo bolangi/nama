@@ -204,7 +204,7 @@ sub bunch_tracks {
 		$bunchy = uc $bunchy;
 		@tracks = grep{$tn{$_}->$method eq $bunchy} 
 				$bn{$this_bus}->tracks
-	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$gui->{_project_name}->{bunch}->{$bunchy}}  ) {
+	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$project->{bunch}->{$bunchy}}  ) {
 		$debug and print "bunch tracks: @tracks\n";
 	} else { say "$bunchy: no matching bunch identifier found" }
 	@tracks;
