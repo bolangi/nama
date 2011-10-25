@@ -39,6 +39,7 @@ use inc::Module::Install;
 			Term::ReadLine::Gnu  0
 			Text::Format  0
 			Time::HiRes  0
+			Try::Tiny  0
 			YAML::Tiny  0
 		);
         WriteAll;
