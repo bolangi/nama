@@ -61,7 +61,7 @@ my %bus_logic = (
 		{
 			my ($bus, $track) = @_;
 			$track->set_rec;
-			$bus->set(rw => 'MON');
+#			$bus->set(rw => 'MON');
 		},
 
 	# setting mix track to MON 
@@ -99,19 +99,19 @@ my %bus_logic = (
 			my ($bus, $track) = @_;
 			if ($bus->rw eq 'MON'){
 				
-				# set REC tracks to MON
-				map{$_->set(rw => 'MON')  } 
-				grep{$_->rw eq 'REC'} 
-				map{$tn{$_}}
-				$bus->tracks;
+# 				# set REC tracks to MON
+# 				map{$_->set(rw => 'MON')  } 
+# 				grep{$_->rw eq 'REC'} 
+# 				map{$tn{$_}}
+# 				$bus->tracks;
 
 			}
 			if ($bus->rw eq 'OFF'){
 			
 				# set all tracks to OFF 
-				map{$_->set(rw => 'OFF')  } 
-				map{$tn{$_}}
-				$bus->tracks;
+# 				map{$_->set(rw => 'OFF')  } 
+# 				map{$tn{$_}}
+# 				$bus->tracks;
 			}
 
 			$track->set_rec;
