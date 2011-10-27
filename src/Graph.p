@@ -11,24 +11,23 @@ use vars qw(%reserved $debug $debug2);
 *debug2 = \$::debug2;
 
 sub add_path_for_rec {
-	my ($g,$track) = @_;
+
+	# connect input source to file via temporary track
+	
+	my($g,$track) = @_;
 	# Track input from a WAV, JACK client, or soundcard
+	# Record 'raw' signal
 	#
-	# We record 'raw' signal, as per docs and design
+	# Do *not* record signals if the source reports it is
+	# a track, bus or loop
 
 	if( $_->source_type !~ /track|bus|loop/ )
 	{
 		# create temporary track for rec_file chain
 
-		# we do this because the path doesn't
-		# include the original track.
-		#
-		# but why not supply the track as 
-		# an edge attribute, then the source
-		# and output info can be provided 
-		# that way.
-
-		# Later, we will rewrite it that way
+		# (it may be possible to avoid creating a 
+		# temporary track by providing the data as 
+		# graph edge attributes)
 
 		$debug and say "rec file link for $_->name";	
 		my $name = $_->name . '_rec_file';
@@ -38,14 +37,21 @@ sub add_path_for_rec {
 			group => 'Temp',
 			name => $name);
 
-		# connect IO
+		# connect writepath: source --> temptrackname --> wav_out
 		
 		$g->add_path(input_node($_->source_type), $name, 'wav_out');
 
-		# set chain_id to R3 (if original track is 3) 
+
 		$g->set_vertex_attributes($name, { 
+
+			# set chain_id to R3 (if original track is 3) 
+
 			chain_id => 'R'.$_->n,
-			mono_to_stereo => '', # override 
+
+			# do not perform mono-to-stereo copy,
+			# (override IO class default)
+
+			mono_to_stereo => '', 
 		});
 
 	} 
@@ -62,6 +68,7 @@ sub add_path_for_rec {
 		# special case, record 'cooked' signal
 
 		# generally a sub bus 
+
 		# - has 'rec_defeat' set (therefore doesn't reach here)
 		# - receives a stereo input
 		# - mix track width is set to stereo (default)
@@ -86,12 +93,14 @@ sub add_path_for_rec {
 		# source_id:   loop,track_name_in
 
 		# but for WAV to contain content, 
-		# we need to guarantee that track_name as
+		# we need to guarantee that track_name has
 		# an input
 	}
 }
 sub add_path_for_aux_send {
 	my ($g, $track) = @_;
+		# for track 'sax', send_type 'jack_client', create route as 
+		# sax-jack_client_out
 		my @edge = ($track->name, output_node($track->send_type));
 		$g->add_edge(@edge);
 		 $g->set_edge_attributes(

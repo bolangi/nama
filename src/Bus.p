@@ -143,14 +143,17 @@ my %dispatch = (
 sub apply {
 	$bus = shift;
 	$g = shift;
+	$debug and say "bus ", $bus->name, ": applying routes";
 	$debug and say "Expected track as bus destination, found type: ",
 		$bus->send_type, " id: ", $bus->send_id;
 	map{ 
 		# connect signal sources to tracks
+		$debug and say "track ",$_->name;
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
+		$debug and scalar @path and say "input path: @path";
 
-
+		try{ $debug and say join " ", "bus output:", $_->name, $bus->send_id };
 		$g->add_edge($_->name, $bus->send_id)
 			if 	try { $dispatch{$bus->send_type}->() } 
 			catch {  warn "caught error: $_" } ;
