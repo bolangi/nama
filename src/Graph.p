@@ -15,6 +15,7 @@ sub add_path_for_rec {
 	# connect input source to file via temporary track
 	
 	my($g,$track) = @_;
+
 	# Track input from a WAV, JACK client, or soundcard
 	# Record 'raw' signal
 	#
