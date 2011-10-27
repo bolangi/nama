@@ -16,6 +16,7 @@ sub add_path_for_rec {
 	
 	my($g,$track) = @_;
 
+	$debug2 and say "&add_path_for_rec: track ",$track;	
 	# Track input from a WAV, JACK client, or soundcard
 	# Record 'raw' signal
 	#
