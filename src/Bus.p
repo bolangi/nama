@@ -170,7 +170,7 @@ sub apply {
 		::Graph::add_path_for_rec($g,$_) 
 			if $_->rec_status eq 'REC' 
 			and ! $_->rec_defeat
-				and ! ($::mode->{preview} eq 'doodle' );
+				and $::mode->{preview} !~ /doodle|preview/ ;
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
