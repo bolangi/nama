@@ -161,15 +161,16 @@ sub apply {
 		# add paths for recording
 		#
 		#
-		say "rec status: ",$_->rec_status;
-		say "rec defeat: ",$_->rec_defeat; 
-		say '$mode->{preview}: ',$::mode->{preview};
-		say "result", $_->rec_status eq 'REC' and ! $_->rec_defeat
-				and ! $::mode->{preview} eq 'doodle';
+		# say "rec status: ",$_->rec_status;
+		# say "rec defeat: ",$_->rec_defeat; 
+		# say q($mode->{preview}: ),$::mode->{preview};
+		# say "result", $_->rec_status eq 'REC' and ! $_->rec_defeat
+		# 		and ! ( $::mode->{preview} eq 'doodle' );
 			
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq 'REC' and ! $_->rec_defeat
-				and ! $::mode->{preview} eq 'doodle';
+			if $_->rec_status eq 'REC' 
+			and ! $_->rec_defeat
+				and ! ($::mode->{preview} eq 'doodle' );
 
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
