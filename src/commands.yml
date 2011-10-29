@@ -946,4 +946,13 @@ rerecord:
   type: setup
   short: rerec
   what: restore recorded tracks from previous run to REC setting
+RECORD_START:
+  type: transport
+  short: RECORD RCD RST
+  what: start writing WAV files in eager output mode
+eager:
+  type: general
+  what: output signals as soon as possible
+  example: eager on play (play WAV files)
+  parameters: "'on' | 'off' [ 'play' ]"
 ...

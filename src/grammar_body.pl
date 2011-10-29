@@ -1163,4 +1163,26 @@ rerecord: _rerecord {
 		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 1
 }
 
+RECORD_START: _RECORD_START {  
+
+	# disable doodle
+	$::mode->{preview} = undef;
 	
+	::reconfigure_engine();
+	::transport_start();
+}
+eager: _eager is_on with_wav(?) { 
+ 	$item{is_on} and do
+	{ 
+		$item{'with_wav(?)'} ||= [];
+ 		$::mode->{eager} 
+			= $::mode->{preview} 
+			= @{$item{'with_wav(?)'} } ? 'preview' : 'doodle';
+ 	};
+}
+with_wav: 'wav_play' | 'wav' | 'play'  { $item[-1] } 
+
+is_on: 'on'|'off' { $item[-1] eq 'on' ? 1 : 0}
+
+
+

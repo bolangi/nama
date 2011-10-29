@@ -65,6 +65,7 @@
 	%help_topic   				$help->{topic}
  
 	$preview      				$mode->{preview}
+    $eager_mode					$mode->{_eager_opt}
     $offset_run_flag 			$mode->{offset_run}
     $soloing       				$mode->{soloing}
 	$loop_enable 				$mode->{loop_enable}
