@@ -1155,4 +1155,12 @@ edit_waveform: _edit_waveform {
 	1;
 }
 
+rerecord: _rerecord { 
+		scalar @{$::setup->{_last_rec_tracks}} 
+			?  print "Toggling previous recording tracks to REC\n"
+			:  print "No tracks in REC list. Skipping.\n";
+		
+		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 1
+}
+
 	

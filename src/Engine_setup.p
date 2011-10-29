@@ -6,9 +6,11 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 
 sub generate_setup { 
+
 	# return 1 if successful
 	# catch errors from generate_setup_try() and cleanup
 	$debug2 and print "&generate_setup\n";
+
 	# save current track
 	local $this_track;
 
@@ -17,6 +19,7 @@ sub generate_setup {
 	eval_iam('cs-disconnect') if eval_iam('cs-connected');
 
 	::ChainSetup::initialize();
+
 	$setup->{audio_length} = 0;  # TODO replace global with sub
 	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)
@@ -50,6 +53,16 @@ sub reconfigure_engine {
 
 	# don't disturb recording/mixing
 	return if ::ChainSetup::really_recording() and engine_running();
+	
+	# store recorded trackrefs if any for re-record function
+	#
+	# an empty set (e.g. in post-record monitoring)
+	# will not overwrite a previous set
+	
+	if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
+	{
+		$setup->{_last_rec_tracks} = \@rec_tracks;
+	}
 
 	rememoize(); # check if someone has snuck in some files
 	

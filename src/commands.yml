@@ -942,4 +942,8 @@ edit_waveform:
   type: general
   short: wedit
   what: launch audacity to view/edit waveform of current track/version WAV file
+rerecord:
+  type: setup
+  short: rerec
+  what: restore recorded tracks from previous run to REC setting
 ...

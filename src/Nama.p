@@ -179,6 +179,7 @@ $fx = {
 	fade_resolution 			=> 200, # steps per second
 };
 $setup->{_old_snapshot} = {};
+$setup->{_last_rec_tracks} = [];
 
 $mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
 

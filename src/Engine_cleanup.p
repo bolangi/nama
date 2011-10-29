@@ -26,7 +26,8 @@ sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
 		# toggle buses of recorded tracks to MON
-		map{ $bn{$_->group}->set(rw => 'MON') } ::ChainSetup::engine_wav_out_tracks();
+
+		map{ $_->set(rw => 'MON') } @{$setup->{_last_rec_tracks}};
 		$ui->refresh();
 }
 sub new_files_were_recorded {
