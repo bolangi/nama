@@ -211,7 +211,6 @@ sub monitor_version {
 	$track->last;
 }
 
-
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
 	return 'MON' if $monitor_version and ! ($mode->{preview} eq 'doodle');
@@ -245,15 +244,16 @@ sub rec_status {
 	# so the result will be REC or MON if conditions are met
 
 	# second, set REC status if possible
+	
+	if( $track->rw eq 'REC'){
 
-		# we allow a mix track to be REC, even if the 
-		# bus it belongs to is set to MON
-			
-	elsif (	$track->rw eq 'REC' and ($group->rw eq 'REC'
-				or $bn{$track->name}
-					and $track->rec_defeat) ){
 		given( $track->source_type){
+			# XXX if no jack client , play WAV file??
 			when('jack_client'){
+
+				# we expect an existing JACK client that
+				# *outputs* a signal for our track input
+				
 				::jack_client($track->source_id,'output')
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)

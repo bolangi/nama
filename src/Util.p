@@ -55,92 +55,59 @@ my %bus_logic = (
 	{
 
 	# setting mix track to REC
-	# set bus to MON (user should set bus to REC)
 	
 		REC => sub
 		{
 			my ($bus, $track) = @_;
 			$track->set_rec;
-#			$bus->set(rw => 'MON');
+			$bus->set(rw => 'REC');
 		},
 
-	# setting mix track to MON 
-	# set bus to OFF
+	# setting a mix track to MON 
+	
+	# currently we set feeding bus to OFF
+	
+	# TODO skip connecting forward to
+	# a MON status track.
 	
 		MON => sub
 		{
 			my ($bus, $track) = @_;
 			$track->set_mon;
+
+			
 			$bus->set(rw => 'OFF');
 		},
 		OFF => sub
 		{
 
 	# setting mix track to OFF 
-	# set bus to OFF
 	
 			my ($bus, $track) = @_;
 			$track->set_off;
-			$bus->set(rw => 'OFF');
 		}
 	},
 	member_track =>
 	{
 
 	# setting member track to REC
-	#
-	# - set REC siblings to MON if bus is MON
-	# - set all siblings to OFF if bus is OFF
-	# - set bus to REC
-	# - set mix track to REC/rec_defeat
 	
 		REC => sub 
 		{ 
 			my ($bus, $track) = @_;
-			if ($bus->rw eq 'MON'){
-				
-# 				# set REC tracks to MON
-# 				map{$_->set(rw => 'MON')  } 
-# 				grep{$_->rw eq 'REC'} 
-# 				map{$tn{$_}}
-# 				$bus->tracks;
-
-			}
-			if ($bus->rw eq 'OFF'){
-			
-				# set all tracks to OFF 
-# 				map{$_->set(rw => 'OFF')  } 
-# 				map{$tn{$_}}
-# 				$bus->tracks;
-			}
-
+			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
 			$track->set_rec;
-
-			$bus->set(rw => 'REC');
 			$tn{$bus->send_id}->busify;
 			
 		},
 
 	# setting member track to MON 
-	#
-	# - set all siblings to OFF if bus is OFF
-	# - set bus to MON
-	# - set mix track to REC/rec_defeat
 	
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
-			if ($bus->rw eq 'OFF'){
-			
-				# set all tracks to OFF 
-				map{$_->set(rw => 'OFF')  } 
-				map{$::tn{$_}}
-				$bus->tracks;
-
-				$bus->set(rw => 'MON');
-			}
+			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
 			$track->set_mon;
-			#$tn{$bus->send_id}->busify; why needed????
 
 		},
 
