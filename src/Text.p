@@ -510,7 +510,7 @@ sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 
 	$tn{Master}->set(rw => 'OFF'); 
-	$bn{Main}->set(rw => 'MON');
+	$bn{Main}->set(rw => 'REC');
 }
 sub mixplay { 
 	print "Setting mixdown playback mode.\n";
@@ -522,7 +522,7 @@ sub mixoff {
 	print "Leaving mixdown mode.\n";
 	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON'); 
-	$bn{Main}->set(rw => 'MON') if $bn{Main}->rw eq 'OFF';
+	$bn{Main}->set(rw => 'REC') if $bn{Main}->rw eq 'OFF';
 }
 sub bunch {
 	package ::;
