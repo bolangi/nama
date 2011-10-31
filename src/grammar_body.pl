@@ -1169,7 +1169,7 @@ RECORD_START: _RECORD_START {
 	$::mode->{preview} = undef;
 	
 	::reconfigure_engine();
-	::transport_start();
+	::start_transport();
 }
 eager: _eager is_on with_wav(?) { 
  	$item{is_on} and do
