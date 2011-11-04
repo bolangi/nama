@@ -315,6 +315,7 @@ beginning: marktime | markname
 ending: 'END' | marktime | markname 
 generate: _generate { ::generate_setup(); 1}
 arm: _arm { ::arm(); 1}
+arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
 engine_status: _engine_status { 
@@ -1165,16 +1166,6 @@ rerecord: _rerecord {
 		1;
 }
 
-RECORD_START: _RECORD_START {  
-
-	return if ::engine_running() and ::ChainSetup::really_recording();
-
-	::exit_preview_mode();	
-	::stop_transport();
-
-	::reconfigure_engine();
-	::start_transport();
-}
 eager: _eager mode_string { $::mode->{eager} = $item{mode_string} }
 mode_string: 'off'    { 0 }
 mode_string: 'doodle' 

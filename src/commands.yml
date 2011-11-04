@@ -433,6 +433,11 @@ arm:
   type: setup
   what: generate and connect chain setup
   parameters: none
+arm_start:
+  short: arms
+  type: setup
+  what: generate/connect chain setup and start engine
+  parameters: none
 connect:
   type: setup
   short: con
@@ -945,14 +950,9 @@ edit_waveform:
 rerecord:
   type: setup
   short: rerec
-  what: restore recorded tracks from previous run to REC setting
-RECORD_START:
-  type: transport
-  short: RECORD RCD RST
-  what: start writing WAV files in eager output mode
+  what: record as previously, restoring tracks to REC
 eager:
   type: general
   what: output signals as soon as possible
-  example: eager on play (play WAV files)
-  parameters: "'on' | 'off' [ 'play' ]"
+  parameters: off | doodle | preview
 ...

@@ -224,6 +224,7 @@ sub arm {
 	$setup->{changed}++;
 	generate_setup() and connect_transport();
 }
+
 sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $quiet = shift;
