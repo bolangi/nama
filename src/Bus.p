@@ -286,7 +286,7 @@ sub add_sub_bus {
 	@args = ( 
 		width 		=> 2,     # default to stereo 
 		rec_defeat	=> 1,     # set to rec_defeat (don't record signal)
-		rw 			=> 'REC', # set to REC (accept other track signals)
+		rw 			=> 'REC', # essentially 'on'
 		@args
 	);
 

@@ -48,6 +48,8 @@
     $offset_mark           		$setup->{offset_run}->{mark}
     @edit_points           		$setup->{edit_points}
 
+	$dummy						$setup->{_last_rec_tracks}
+
     @effects        			$fx_cache->{registry}
     %effect_i       			$fx_cache->{full_label_to_index}
     %effect_j       			$fx_cache->{partial_label_to_full}
@@ -118,6 +120,8 @@
 	%user_command 				$text->{user_command}
 	%user_alias   				$text->{user_alias}
 	@command_history 			$text->{command_history}
+
+	$dummy						$mode->{_eager_opt}
 
 	$this_track
 	$this_mark
