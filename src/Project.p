@@ -94,6 +94,8 @@ sub initialize_project_data {
 	clear_offset_run_vars();
 	$mode->{offset_run} = 0;
 	$this_edit = undef;
+	
+	$mode->{preview} = 0;
 
 	::ChainSetup::initialize();
 }
