@@ -33,17 +33,12 @@ sub set_doodle_mode {
 	return if engine_running() and ::ChainSetup::really_recording();
 	$mode->{preview} = "doodle";
 
-	# save rw setting of user tracks (not including null group)
-	# and set those tracks to REC
-	
-	$old_group_rw = $bn{Main}->rw;
-	$bn{Main}->set(rw => 'REC');
 	$tn{Mixdown}->set(rw => 'OFF');
 	
 	# reconfigure_engine will generate setup and start transport
 	
 	print "Setting doodle mode.\n";
-	print "Using live inputs only, with no duplicate inputs\n";
+	print "Using live inputs only, no duplicate inputs\n";
 	print "Exit using 'preview' or 'arm' commands.\n";
 }
 sub exit_preview_mode { # exit preview and doodle modes
@@ -53,9 +48,13 @@ sub exit_preview_mode { # exit preview and doodle modes
 		stop_transport() if engine_running();
 		$debug and print "Exiting preview/doodle mode\n";
 		$mode->{preview} = 0;
-		$bn{Main}->set(rw => $old_group_rw) if $old_group_rw;
 
 }
+
+sub restore_preview_mode { 
+	$mode->{preview} = $mode->{eager};
+}
+
 }
 
 sub master_on {

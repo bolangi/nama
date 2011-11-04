@@ -4,6 +4,8 @@ project_root: ~/nama
 
 autosave_interval: 0
 
+eager_mode: doodle 
+
 midish_enable: 0
 
 # define abbreviations

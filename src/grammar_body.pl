@@ -1160,29 +1160,22 @@ rerecord: _rerecord {
 			?  print "Toggling previous recording tracks to REC\n"
 			:  print "No tracks in REC list. Skipping.\n";
 		
-		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 1
+		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 
+		::restore_preview_mode();
+		1;
 }
 
 RECORD_START: _RECORD_START {  
 
-	# disable doodle
-	$::mode->{preview} = undef;
-	
+	return if ::engine_running() and ::ChainSetup::really_recording();
+
+	::exit_preview_mode();	
+	::stop_transport();
+
 	::reconfigure_engine();
 	::start_transport();
 }
-eager: _eager is_on with_wav(?) { 
- 	$item{is_on} and do
-	{ 
-		$item{'with_wav(?)'} ||= [];
- 		$::mode->{eager} 
-			= $::mode->{preview} 
-			= @{$item{'with_wav(?)'} } ? 'preview' : 'doodle';
- 	};
-}
-with_wav: 'wav_play' | 'wav' | 'play'  { $item[-1] } 
-
-is_on: 'on'|'off' { $item[-1] eq 'on' ? 1 : 0}
-
-
-
+eager: _eager mode_string { $::mode->{eager} = $item{mode_string} }
+mode_string: 'off'    { 0 }
+mode_string: 'doodle' 
+mode_string: 'preview'

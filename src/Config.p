@@ -1,5 +1,10 @@
 # ------ Config subroutines ------
 
+# To create a new config var:
+#
+# add the symbol e.g. $eager_mode to @config_vars in var_type.pl
+# add the mapping (e.g. $eager_mode $mode->{_eager_opt} ) to file var_map
+
 package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
@@ -69,7 +74,6 @@ sub read_config {
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
 	$config->{sampling_freq} = $cfg{abbreviations}{frequency};
-
 }
 sub walk_tree {
 	#$debug2 and print "&walk_tree\n";

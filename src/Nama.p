@@ -185,10 +185,6 @@ $mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
 
 $mode->{mastering} = 0;
 
-# set eager mode
-
-$mode->{_eager_opt } and command_process($mode->{_eager_opt});
-
 init_memoize() if $config->{memoize};
 
 sub setup_grammar { }

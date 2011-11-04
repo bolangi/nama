@@ -120,18 +120,9 @@ sub import_audio {
 	$track->import_audio($path, $frequency);
 
 	# check that track is audible
-	
-	my $bus = $bn{$track->group};
 
-	# set MON status unless track _is_ audible
-	
-	$track->set(rw => 'MON') 
-		unless $bus->rw eq 'MON' and $track->rw eq 'REC';
+	$track->set(rw => 'MON');
 
-	# warn if bus is OFF
-	
-	print("You must set bus to MON (i.e. \"bus_mon\") to hear this track.\n") 
-		if $bus->rw eq 'OFF';
 }
 sub destroy_current_wav {
 	my $old_group_status = $bn{Main}->rw;

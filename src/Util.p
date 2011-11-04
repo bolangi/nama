@@ -95,9 +95,10 @@ my %bus_logic = (
 		REC => sub 
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
+			$bus->set(rw => 'REC');
 			$track->set_rec;
 			$tn{$bus->send_id}->busify;
+			::restore_preview_mode();
 			
 		},
 

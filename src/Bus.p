@@ -265,6 +265,7 @@ our (
 
 sub set_current_bus {
 	my $track = shift || ($this_track ||= $tn{Master});
+	return unless $track;
 	#say "track: $track";
 	#say "this_track: $this_track";
 	#say "master: $tn{Master}";

@@ -150,9 +150,9 @@ limiter: tap_limiter 0 0
 # jack_seek_delay: 0.1 # user override for default 
 #
 # quietly_remove_tracks: 0 # generally ask user to confirm
+#
+# eager_mode: doodle | preview
 
-#initial_user_mode: eager # monitor REC inputs,
-                         # "eager play' also plays MON tracks 
 # Nama directory structure and files
 
 # ~/.namarc						# config file
