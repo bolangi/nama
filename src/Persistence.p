@@ -698,7 +698,13 @@ sub files_are_identical {
 { my $use_git = 1;
   my $checkpoint_setup = 1;
   my $checkpoint_change = 0;
-sub git_commit { $use_git and system qq(git commit -a -m "$_[0]") }
+sub git_commit { 
+	return unless $use_git;
+	my $arg = shift;
+	my @add_list = @{ $arg->{git_add} //= [] };
+	my $msg = $arg->{msg};
+	system "git add @add_list" if @add_list;
+	system qq(git commit -m "$_[0]") }
 
 sub git_tag { $use_git and system 'git tag' } 
 
