@@ -271,25 +271,11 @@ sub cleanup_exit {
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit; 
 }
-END { cleanup_exit() }
-
-# TODO
-
-sub list_plugins {}
-		
-sub show_tracks_limited {
-
-	# Master
-	# Mixdown
-	# Main bus
-	# Current bus
-
-}
-sub process_control_inputs { }
 
 sub hardware_latency {
 	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency}
 }
 	
+END { cleanup_exit() }
 
 ### end Core_subs
