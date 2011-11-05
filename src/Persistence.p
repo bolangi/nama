@@ -105,11 +105,12 @@ sub save_system_state {
 	my @history = $text->{term}->GetHistory;
 	my %seen;
 	$text->{command_history} = [];
-	map { push @{$text->{command_history}}, $_ 
-			unless $seen{$_}; $seen{$_}++ } @history;
-	my $max = scalar @{$text->{command_history}};
-	$max = 50 if $max > 50;
-	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
+# 	
+# 	map { push @{$text->{command_history}}, $_ 
+# 			unless $seen{$_}; $seen{$_}++ } @history;
+# 	my $max = scalar @{$text->{command_history}};
+# 	$max = 50 if $max > 50;
+# 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
 	my @formats = $path =~ /dump_all/ ? 'yaml' : @{$config->{serialize_formats}};
