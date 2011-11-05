@@ -227,20 +227,20 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
-	my $group = $bn{$track->group};
-	#$debug and say join " ", "bus:",$group->name, $group->rw;
+	my $bus = $bn{$track->group};
+	#$debug and say join " ", "bus:",$bus->name, $bus->rw;
 	$debug and print "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version\n";
 
 	# first, check for conditions resulting in status 'OFF'
 
-	if ( $group->rw eq 'OFF'
+	if ( $bus->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
-	# having reached here, we know $group->rw and $track->rw are REC or MON
+	# having reached here, we know $bus->rw and $track->rw are REC or MON
 	# so the result will be REC or MON if conditions are met
 
 	# second, set REC status if possible
