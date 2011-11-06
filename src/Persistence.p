@@ -695,22 +695,47 @@ sub files_are_identical {
 	$a eq $b
 }
 
+
+
 { my $use_git = 1;
-  my $checkpoint_setup = 1;
-  my $checkpoint_change = 0;
+
+sub git_do_command {
+	my $current = getcwd();
+	chdir project_dir();
+	my @result = qx(@_);
+	chdir $current;
+	return @result;
+}
+
+sub git_save { git_commit (git_add => [ qw(State.yml)] ) }
+
 sub git_commit { 
 	return unless $use_git;
-	my $arg = shift;
-	my @add_list = @{ $arg->{git_add} //= [] };
-	my $msg = $arg->{msg};
-	system "git add @add_list" if @add_list;
-	system qq(git commit -m "$_[0]") }
+	my %args = @_;
+	my @add_list = @{ $args{git_add} //= [] };
+	my $msg = $args{msg};
+	git_do_command("git add @add_list") if @add_list;
+	my $cmd = 'git commit';
+	$cmd .= qq(-m "$msg") if $msg;
+	git_do_command($cmd);
+}
 
-sub git_tag { $use_git and system 'git tag' } 
+sub git_tag { 
+	return unless $use_git;
+	my ($tag_name,$msg) = @_;
+	my $cmd = "git tag $tag_name";
+	$cmd .= " -m $msg" if $msg;
+	git_do_command($cmd);
+}
 
-sub git_new_branch { system qq(git checkout -b $_[0])  }
+sub git_branch_exists { 
+	grep{ $_ eq $_[0] } 
+	map{ s/^\*//; s/^\s+//; $_}  # remove leading * and spaces
+	split "\n", join "\n", git_do_command("git branch");
+}
+sub git_state_has_changed {  git_do_command("git diff State.yml") }
 
-sub git_checkout { system qq(git checkout $_[0] ) }
+sub git_checkout { git_do_command("git checkout @_") }
 
 }
 
