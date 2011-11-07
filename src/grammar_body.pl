@@ -76,7 +76,7 @@ do_part: track_spec command end
 do_part: track_spec end
 do_part: command end
 
-predicate: nonsemi semistop { $item{nonsemi}}
+predicate: nonsemi end { $item{nonsemi}}
 predicate: /$/
 iam_cmd: ident { $item{ident} if $::text->{iam}->{$item{ident}} }
 track_spec: ident { ::leading_track_spec($item{ident}) }
@@ -531,12 +531,14 @@ unity: _unity {
 	);
 	1;}
 
-pan: _pan float { 
-	::effect_update_copp_set( $::this_track->pan, 0, $item{float});
+pan: _pan panval { 
+	::effect_update_copp_set( $::this_track->pan, 0, $item{panval});
 	1;} 
-pan: _pan sign float {
-	::modify_effect( $::this_track->pan, 0, $item{sign}, $item{float} );
+pan: _pan sign panval {
+	::modify_effect( $::this_track->pan, 0, $item{sign}, $item{panval} );
 	1;} 
+panval: float 
+      | dd
 pan: _pan { print $::fx->{params}->{$::this_track->pan}[0], "\n"; 1}
 pan_right: _pan_right { ::pan_check( 100 ); 1}
 pan_left:  _pan_left  { ::pan_check(   0 ); 1}
