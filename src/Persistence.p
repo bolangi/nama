@@ -707,14 +707,19 @@ sub git_do_command {
 	return @result;
 }
 
-sub git_save { git_commit (git_add => [ qw(State.yml)] ) }
+sub git_save_state { git_save('State.yml') }
+
+sub git_save { 
+	my ($file,$msg) = @_;
+	return unless git_do_command("git diff $file");
+	git_add($file);
+	git_commit($msg);
+}
+sub git_add { git_do_command("git add @_") }
 
 sub git_commit { 
 	return unless $use_git;
-	my %args = @_;
-	my @add_list = @{ $args{git_add} //= [] };
-	my $msg = $args{msg};
-	git_do_command("git add @add_list") if @add_list;
+	my $msg = shift;
 	my $cmd = 'git commit';
 	$cmd .= qq(-m "$msg") if $msg;
 	git_do_command($cmd);
@@ -724,7 +729,7 @@ sub git_tag {
 	return unless $use_git;
 	my ($tag_name,$msg) = @_;
 	my $cmd = "git tag $tag_name";
-	$cmd .= " -m $msg" if $msg;
+	$cmd .= qq(-m "$msg") if $msg;
 	git_do_command($cmd);
 }
 
