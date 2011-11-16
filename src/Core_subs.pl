@@ -312,7 +312,7 @@ sub show_tracks_limited {
 sub process_control_inputs { }
 
 sub hardware_latency {
-	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency}
+	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
 }
 	
 
