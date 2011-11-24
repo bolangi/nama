@@ -10,9 +10,8 @@
                     mixdown
                     prompt 
                     diagnostics
-					fades
 					edits
-
+					fades
                 ) ;
 
 %{$help->{topic}} = (
