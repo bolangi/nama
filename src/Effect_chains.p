@@ -13,12 +13,17 @@ sub private_effect_chain_name {
 		grep{/$name/} keys %{$fx->{chain}};
 	$name . ++$i
 }
+sub fx_bypass_name {
+	my $id = shift;
+	return "_$project->{name}/_bypass_$id";
+}
+
 sub profile_effect_chain_name {
 	my ($profile, $track_name) = @_;
 	"_$profile\:$track_name";
 }
 
-# too many functions in push and pop!!
+
 
 sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
@@ -43,11 +48,9 @@ sub push_effect_chain {
 	
 	push @{ $track->effect_chain_stack }, $save_name;
 
-	# remove stored effects
+	# operate on stored effects (remove or bypass)
 	
-	map{ remove_effect($_)} @ops;
-
-	# return name
+	map { $vals{operation}->($_) } @ops;
 
 	$save_name;
 }
@@ -65,8 +68,55 @@ sub overwrite_effect_chain {
 	$debug2 and say "&overwrite_effect_chain";
 	my ($track, $name) = @_;
 	print("$name: unknown effect chain.\n"), return if !  $fx->{chain}->{$name};
-	push_effect_chain($track) if $track->fancy_ops;
+	push_effect_chain($track, operation => \&remove_effect) if $track->fancy_ops;
 	add_effect_chain($track,$name); 
+}
+sub bypass_effect { 
+	my $id = shift; # assume legal fx name
+	my $track = $ti{$fx->{applied}->{id}->{chain}};
+	
+	# do nothing if already bypassed
+	
+	say("$id: effect is already bypassed, skipping."), return 
+		if $fx->{applied}->{id}->{bypass};
+	
+	# record that i am bypassed
+	$fx->{applied}->{$id}->{bypass}++;
+
+	# use the special "bypass" effect chain
+	
+	new_effect_chain(
+			$track,
+			ops => [ $id ], 
+			save => fx_bypass_name($id),
+	);
+
+	my $before = $track->{ops}->[  nama_effect_index($id) - 1 ];
+	remove_effect($id);
+	::Text::t_insert_effect($before, "ea", [100]);
+}
+
+sub restore_effect {
+	my $id = shift; # assume legal fx name
+	
+	# do nothing if already bypassed
+	
+	say("$id: effect is already bypassed, skipping."), return 
+		if $fx->{applied}->{id}->{bypass};
+
+	my $vals = $fx->{chain}->{fx_bypass_name($id)}->{params}->{$id};
+	my $type = $fx->{chain}->{fx_bypass_name($id)}->{type}->{$id};
+
+	my $track = $ti{$fx->{applied}->{$id}->{chain}};
+	my $before = $track->{ops}->[  nama_effect_index($id) - 1 ];
+	remove_effect($id);
+	::Text::t_insert_effect($before, $type, $vals);
+
+	# erase that i am bypassed
+	undef $fx->{applied}->{$id}->{bypass};
+
+	# erase my effect chain
+	delete $fx->{chain}->{fx_bypass_name($id)};
 }
 sub new_effect_profile {
 	$debug2 and say "&new_effect_profile";

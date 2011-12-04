@@ -388,7 +388,6 @@ sub t_load_project {
 	$debug and print "hook: $config->{execute_on_project_load}\n";
 	::command_process($config->{execute_on_project_load});
 		
-	
 }
 
     

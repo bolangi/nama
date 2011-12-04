@@ -913,12 +913,30 @@ list_effect_chains: _list_effect_chains ident(s?) {
 }
 
     
-bypass_effects:   _bypass_effects { 
-	::push_effect_chain($::this_track) and
-	print $::this_track->name, ": bypassing effects\n"; 1}
-restore_effects: _restore_effects { 
+bypass_effects:   _bypass_effects op_id(s) { 
+	# save by pushing onto current track's effect chain list
+	my $arr_ref = $item{'op_id(s)'};
+
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! $::fx->{applied}->{$_} } @$arr_ref;
+	say("@illegal: illegal effect(s), aborting.") if @illegal;
+	map{ ::bypass_effect($_) } @$arr_ref;
+}
+
+
+# bypass_effects: _bypass_effects effect_chain_name {
+# 	say("$item{effect_chain_name}:" effect chain does not exist"), 
+# 		return unless my $chain = $fx->{chains}->{$item{effect_chain_name}};
+# }
+
+# bypass_effects: _bypass_effects {
+# 	map{ ::bypass_effect($_) } 
+# }
+
+bring_back_effects: _bring_back_effects op_id(s) { 
 	::restore_effects($::this_track) and
 	print $::this_track->name, ": restoring effects\n"; 1}
+
 overwrite_effect_chain: _overwrite_effect_chain ident {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }

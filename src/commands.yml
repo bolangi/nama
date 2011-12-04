@@ -668,17 +668,17 @@ add_effect_chain:
   type: effect
   short: aec
   what: add an effect chain to the current track
-  parameters: <s_name>
+  parameters: <s_effect_chain_name>
 overwrite_effect_chain:
   type: effect
   short: oec
-  what: add an effect chain overwriting current effects (which are pushed onto stack)
-  parameters: <s_name>
+  what: add an effect chain overwriting current effects (which are pushed onto the bypass list)
+  parameters: <s_effect_chain_name>
 delete_effect_chain:
   type: effect
   short: dec
   what: delete an effect chain definition from the list
-  parameters: <s_name>
+  parameters: <s_effect_chain_name>
 list_effect_chains:
   type: effect
   short: lec
@@ -686,13 +686,14 @@ list_effect_chains:
   parameters: [<s_frag1> <s_frag2>... ]
 bypass_effects:
   type: effect
-  short: bypass bye
-  what: bypass track effects (pushing them onto stack) except vol/pan 
-  parameters: none
-restore_effects:
+  short: bfx
+  what: bypass effects, saving to list, default to all except vol/pan 
+  parameters: [<s_id1> <s_id2>...]
+bring_back_effects:
   type: effect
-  short: restore ref 
-  what: restore bypassed track effects
+  short: bbfx
+  what: restore effects (default to most recent chain on bypass list)
+  parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> ]
 new_effect_profile:
   type: effect
   short: nep
