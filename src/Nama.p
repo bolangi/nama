@@ -140,6 +140,8 @@ $file = {
 			effect_profile 		=> 'effect_profiles',
 			chain_setup 		=> 'Setup.ecs',
 			user_customization 	=> 'custom.pl',
+			project_effect_chains => 'project_effect_chains',
+			user_effect_chains  => 'user_effect_chains',
 };
 
 $gui->{_save_id} = "State";

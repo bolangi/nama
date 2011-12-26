@@ -580,14 +580,77 @@ sub restore_state {
 	$text->{term}->SetHistory(@{$text->{command_history}});
 } 
 
-sub save_effect_chains { # if they exist
+sub save_effect_chains { 
+
+	# rename old-style effect chains file
+	
+	my $old_fx_chains = join_path(project_root(), $file->{effect_chain});
+	-e $old_fx_chains and rename $old_fx_chains, "$old_fx_chains.obsolete";
+
+# backwards compabilitiy
+
+# load old file 
+# save user effects only in effect_chains.yml
+# save all project-specific in project directories
+
+# apply via two sets
+# devide into two sets
+# load user effects - copy to $fx->{effect_chains}
+# load project_specific - copy
+=comment
+
+alternately use separarate variables:
+
+	$fx->{project_effect_chains}
+	$fx->{user_effect_chains}
+
+=cut
+
+# save - 
+
+
+	# we save in two separate files
+	
+	# user defined effect chains are saved in
+	# the project_root
+	#
+	# system defined effect chains are 
+	# saved in the project directory.
+	
 	my $filename = shift || $file->{effect_chain};
-	if (keys %{$fx->{chain}}){
-		serialize (
-			file => join_path(project_root(), $filename),
+	my @keys = keys %{$fx->{chain}} ;
+	say "keys: @keys";
+	my $private_re = qr/^_/;
+	my @user_keys = grep{ ! /$private_re/ } @keys;
+	say "user keys: @user_keys";
+	my $project_re = qr/^_$project->{name}/;
+	my @project_keys = grep{ /$project_re/ } @keys;
+	say "project keys: @project_keys";
+	my %user =    map{ ($_, $fx->{chain}->{$_}) } @user_keys;
+	my %project = map{ ($_, $fx->{chain}->{$_}) } @project_keys;
+	
+	say "user effect chains: ", yaml_out(\%user);
+	say "project effect chains: ", yaml_out(\%project);
+
+	$fx->{user_effect_chains} = \%user;
+	$fx->{project_effect_chains} = \%project;
+	if (keys %{$fx->{user_effect_chains}})
+	{
+		serialize(
+			file => join_path(project_root(), $file->{user_effect_chains}),
 			format => 'perl',
-			vars => [ qw( $fx->{chain} $VERSION) ],
-			class => '::');
+			vars => [ qw( $fx->{user_effect_chains} $VERSION) ],
+			class => '::',
+		);
+	}
+	if (keys %{$fx->{project_effect_chains}})
+	{
+		serialize(
+			file => join_path(project_root(), project_dir(), $file->{project_effect_chains}),
+			format => 'perl',
+			vars => [ qw( $fx->{project_effect_chains} $VERSION) ],
+			class => '::',
+		);
 	}
 }
 sub save_effect_profiles { # if they exist
@@ -609,27 +672,36 @@ sub restore_effect_chains {
 
 	$debug2 and say "&restore_effect_chains";
 
-	my $path = join_path(project_root(), $file->{effect_chain});
+	my $old_fx_chains     = join_path(project_root(), $file->{effect_chain});
+	my $user_fx_chains    = join_path(project_root(), $file->{user_effect_chains});
+	my $project_fx_chains = join_path(project_dir(),  $file->{project_effect_chains});
 
-	my ($resolved, $format) = get_newest($path);  
-	carp("$resolved: file not found"), return unless $resolved;
-	my $source = read_file($resolved);
-	carp("$resolved: empty file"), return unless $source;
-	$debug and say "format: $format, source: \n",$source;
-	my $ref = decode($source, $format);
-	$debug and print Dumper $ref;
-	if ( $ref->{VERSION} >= 1.08 )
-	{
-		assign_singletons( { data => $ref } );
-	}
-	else {
-		assign(
-			data => $ref,
-			vars => [ qw(%effect_chain)],
-			var_map => 1,
-			class => '::',
-			);
-	}
+	my $fx_chain_files = (-e $user_fx_chains or -e $project_fx_chains)
+		? [$user_fx_chains, $project_fx_chains]
+		: [$old_fx_chains];
+
+	map{ 
+		my $path = $_;
+		my ($resolved, $format) = get_newest($path);  
+		carp("$resolved: file not found"), return unless $resolved;
+		my $source = read_file($resolved);
+		carp("$resolved: empty file"), return unless $source;
+		$debug and say "format: $format, source: \n",$source;
+		my $ref = decode($source, $format);
+		$debug and print Dumper $ref;
+		if ( $ref->{VERSION} >= 1.08 )
+		{
+			assign_singletons( { data => $ref } );
+		}
+		else {
+			assign(
+				data => $ref,
+				vars => [ qw(%effect_chain)],
+				var_map => 1,
+				class => '::',
+				);
+		}
+	} @$fx_chain_files;
 }
 sub restore_effect_profiles {
 
