@@ -582,12 +582,13 @@ loop_disable: _loop_disable { $::mode->{loop_enable} = 0; 1}
 name_mark: _name_mark ident {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks { 
 	my $i = 0;
-	map{ print( $_->{time} == $::this_mark->{time} ? q(*) : q()
+	my @lines = map{ ( $_->{time} == $::this_mark->{time} ? q(*) : q()
 	,join " ", $i++, sprintf("%.1f", $_->{time}), $_->name, "\n")  } 
 		  #sort { $a->time <=> $b->time } 
 		  @::Mark::all;
 	my $start = my $end = "undefined";
-	print "now at ", sprintf("%.1f", ::eval_iam "getpos"), "\n";
+	push @lines, "now at ". sprintf("%.1f", ::eval_iam "getpos"). "\n";
+	::pager(@lines);
 	1;}
 to_mark: _to_mark dd {
 	my @marks = ::Mark::all();
