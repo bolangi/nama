@@ -83,6 +83,8 @@
 	%offset        				$fx->{offset}
 	@already_muted  			$fx->{muted}
 	%effect_chain 				$fx->{chain}
+	**							$fx->{user_effect_chain}
+	**							$fx->{project_effect_chain}
 	%effect_profile 			$fx->{profile}
 	%mute_level					$fx->{mute_level}
 	%fade_out_level 			$fx->{fade_out_level}
@@ -175,6 +177,8 @@
 	$ecasound_globals_default		$config->{engine_globals_default}
  
 	$effects_cache_file 			$file->{effects_cache}
+	** 								$file->{user_effect_chains}
+	**								$file->{project_effect_chains}
 	$state_store_file				$file->{state_store}
 	$effect_chain_file 				$file->{effect_chain}
 	$effect_profile_file 			$file->{effect_profile}

@@ -926,7 +926,7 @@ bypass_effects:   _bypass_effects op_id(s) {
 
 # bypass_effects: _bypass_effects effect_chain_name {
 # 	say("$item{effect_chain_name}:" effect chain does not exist"), 
-# 		return unless my $chain = $fx->{chains}->{$item{effect_chain_name}};
+# 		return unless my $chain = $fx->{chain}->{$item{effect_chain_name}};
 # }
 
 # bypass_effects: _bypass_effects {

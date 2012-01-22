@@ -637,8 +637,8 @@ sub convert_effect_chains {
 	say "user effect chains: ", yaml_out(\%user);
 	say "project effect chains: ", yaml_out(\%project);
 
-	$fx->{user_effect_chains} = \%user;
-	$fx->{project_effect_chains} = \%project;
+	$fx->{user_effect_chain} = \%user;
+	$fx->{project_effect_chain} = \%project;
 	
 
 	save_effect_chains();
@@ -647,21 +647,21 @@ sub convert_effect_chains {
 
 sub save_effect_chains { 
 
-	if (keys %{$fx->{user_effect_chains}})
+	if (keys %{$fx->{user_effect_chain}})
 	{
 		serialize(
 			file => join_path(project_root(), $file->{user_effect_chains}),
 			format => 'perl',
-			vars => [ qw( $fx->{user_effect_chains} $VERSION) ],
+			vars => [ qw( $fx->{user_effect_chain} $VERSION) ],
 			class => '::',
 		);
 	}
-	if (keys %{$fx->{project_effect_chains}})
+	if (keys %{$fx->{project_effect_chain}})
 	{
 		serialize(
 			file => join_path(project_dir(), $file->{project_effect_chains}),
 			format => 'perl',
-			vars => [ qw( $fx->{project_effect_chains} $VERSION) ],
+			vars => [ qw( $fx->{project_effect_chain} $VERSION) ],
 			class => '::',
 		);
 	}
@@ -683,7 +683,7 @@ sub restore_effect_chains {
 	$debug2 and say "&restore_effect_chains";
 
 	my $user_fx_chains    = join_path(project_root(), $file->{user_effect_chains});
-	my $project_fx_chains = join_path(project_dir(),  $file->{project_effect_chains});
+	my $project_fx_chains = join_path(project_dir(), $file->{project_effect_chains});
 
 	my @fx_chain_files = ($user_fx_chains, $project_fx_chains);
 
