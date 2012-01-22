@@ -177,24 +177,35 @@ sub new_effect_chain {
 sub add_effect_chain {
 	my ($track, $name) = @_;
 	#say "track: $track name: ",$track->name, " effect chain: $name";
-	say("$name: effect chain does not exist"), return 
-		if ! $fx->{chain}->{$name};
-	say $track->name, qq(: adding effect chain "$name") unless $name =~ /^_/;
+
+	my $is_project_effect_chain = $name =~ /^_/;
+	my $effect_chain = $fx->{user_effect_chain}{$name}
+ 						|| $fx->{project_effect_chain}{$name};
+
+	$effect_chain or do 
+		{ say("$name: effect chain does not exist") 
+			unless $is_project_effect_chain;
+		  return;
+		};
+
+	say $track->name, qq(: adding effect chain "$name") 
+		unless $is_project_effect_chain;
+
 	my $before = $track->vol;
 	map {  $fx->{magical_cop_id} = $_ unless $fx->{applied}->{$_}; # try to reuse cop_id
 		if ($before){
 			::Text::t_insert_effect(
 				$before, 
-				$fx->{chain}->{$name}{type}{$_}, 
-				$fx->{chain}->{$name}{params}{$_});
+				$effect_chain->{type}{$_}, 
+				$effect_chain->{params}{$_});
 		} else { 
 			::Text::t_add_effect(
 				$track, 
-				$fx->{chain}->{$name}{type}{$_}, 
-				$fx->{chain}->{$name}{params}{$_});
+				$effect_chain->{type}{$_}, 
+				$effect_chain->{params}{$_});
 		}
 		$fx->{magical_cop_id} = undef;
-	} @{$fx->{chain}->{$name}{ops}};
+	} @{$effect_chain->{ops}};
 }	
 sub list_effect_chains {
 	my @frags = @_; # fragments to match against effect_chain names
