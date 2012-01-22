@@ -580,44 +580,49 @@ sub restore_state {
 	$text->{term}->SetHistory(@{$text->{command_history}});
 } 
 
-sub save_effect_chains { 
+# Effect Chains
+#
+# we have two type of effect chains
+# + user effect chains - user defined, available to all projects
+# + system generated effect chains - private, per project
 
-	# rename old-style effect chains file
+
+sub convert_effect_chains {
+
 	
-	my $old_fx_chains = join_path(project_root(), $file->{effect_chain});
-	-e $old_fx_chains and rename $old_fx_chains, "$old_fx_chains.obsolete";
+	my $old_fx_chains = join_path(project_root(), 'effect_chains');
 
-# backwards compabilitiy
+	my ($resolved, $format) = get_newest($old_fx_chains);  
+	return unless $resolved;
+	my $source = read_file($resolved);
+	carp("$resolved: empty file"), return unless $source;
+	$debug and say "format: $format, source: \n",$source;
+	my $ref = decode($source, $format);
+	$debug and print Dumper $ref;
 
-# load old file 
-# save user effects only in effect_chains.yml
-# save all project-specific in project directories
-
-# apply via two sets
-# devide into two sets
-# load user effects - copy to $fx->{effect_chains}
-# load project_specific - copy
-=comment
-
-alternately use separarate variables:
-
-	$fx->{project_effect_chains}
-	$fx->{user_effect_chains}
-
-=cut
-
-# save - 
-
-
-	# we save in two separate files
+	# deal with both existing formats
 	
-	# user defined effect chains are saved in
-	# the project_root
-	#
-	# system defined effect chains are 
-	# saved in the project directory.
-	
-	my $filename = shift || $file->{effect_chain};
+	if ( $ref->{VERSION} >= 1.08 )
+	{
+		assign_singletons( { data => $ref } );
+	}
+	else {
+		our %effect_chain;
+		assign(
+			data => $ref,
+			vars => [ qw(%effect_chain)],
+			var_map => 1,
+			class => '::',
+			);
+		$fx->{chain} = \%effect_chain;
+	}
+
+
+	rename $old_fx_chains, "$old_fx_chains.obsolete";
+
+	# now separate into user and per project (system generated)
+	# effect chains
+
 	my @keys = keys %{$fx->{chain}} ;
 	say "keys: @keys";
 	my $private_re = qr/^_/;
@@ -634,6 +639,14 @@ alternately use separarate variables:
 
 	$fx->{user_effect_chains} = \%user;
 	$fx->{project_effect_chains} = \%project;
+	
+
+	save_effect_chains();
+
+}
+
+sub save_effect_chains { 
+
 	if (keys %{$fx->{user_effect_chains}})
 	{
 		serialize(
@@ -646,12 +659,13 @@ alternately use separarate variables:
 	if (keys %{$fx->{project_effect_chains}})
 	{
 		serialize(
-			file => join_path(project_root(), project_dir(), $file->{project_effect_chains}),
+			file => join_path(project_dir(), $file->{project_effect_chains}),
 			format => 'perl',
 			vars => [ qw( $fx->{project_effect_chains} $VERSION) ],
 			class => '::',
 		);
 	}
+	
 }
 sub save_effect_profiles { # if they exist
 	my $filename = shift || $file->{effect_profile};
@@ -663,22 +677,15 @@ sub save_effect_profiles { # if they exist
 			class => '::');
 	}
 }
-# load effect chains and profiles
-
-# - don't stomp on existing settings
-# - allow for old or new variable names
 
 sub restore_effect_chains {
 
 	$debug2 and say "&restore_effect_chains";
 
-	my $old_fx_chains     = join_path(project_root(), $file->{effect_chain});
 	my $user_fx_chains    = join_path(project_root(), $file->{user_effect_chains});
 	my $project_fx_chains = join_path(project_dir(),  $file->{project_effect_chains});
 
-	my $fx_chain_files = (-e $user_fx_chains or -e $project_fx_chains)
-		? [$user_fx_chains, $project_fx_chains]
-		: [$old_fx_chains];
+	my @fx_chain_files = ($user_fx_chains, $project_fx_chains);
 
 	map{ 
 		my $path = $_;
@@ -689,19 +696,9 @@ sub restore_effect_chains {
 		$debug and say "format: $format, source: \n",$source;
 		my $ref = decode($source, $format);
 		$debug and print Dumper $ref;
-		if ( $ref->{VERSION} >= 1.08 )
-		{
-			assign_singletons( { data => $ref } );
-		}
-		else {
-			assign(
-				data => $ref,
-				vars => [ qw(%effect_chain)],
-				var_map => 1,
-				class => '::',
-				);
-		}
-	} @$fx_chain_files;
+		assign_singletons( { data => $ref } ); 
+	} @fx_chain_files;
+	# TODO apply effect chain checks both lists XXX
 }
 sub restore_effect_profiles {
 

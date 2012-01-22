@@ -136,7 +136,6 @@ $file = {
 			effects_cache 		=> '.effects_cache',
 			gui_palette 		=> 'palette',
 			state_store 		=> 'State',
-			effect_chain 		=> 'effect_chains',
 			effect_profile 		=> 'effect_profiles',
 			chain_setup 		=> 'Setup.ecs',
 			user_customization 	=> 'custom.pl',
