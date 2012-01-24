@@ -1,10 +1,71 @@
 # ------------- Effect-Chain and -Profile routines --------
 
-package ::;
+package ::EffectChain;
 use Modern::Perl;
-no warnings 'uninitialized';
+use Carp;
 use ::Globals qw(:all);
 
+our $VERSION = 0.001;
+no warnings qw(uninitialized);
+our @ISA;
+use vars qw($n %by_index);
+use ::Object qw( 
+		n	
+		attrib
+		op_list
+        op_data
+		);
+=comment
+	attrib   => { key1 => val1, key2 => val2, key3 => val3  },
+	op_list  => [id1, id2, id3,...    ],
+	op_data  => { id1 => { 
+					type => type1, 
+					params => [   ],
+					owns   => ida,
+					belongs_to => idb,
+					},
+				  id2 => {
+					},
+				},
+attrib:
+	name 
+	id
+	project
+	global
+	profile
+	user
+	system
+	track_name
+	track_version
+	track_cache
+	bypass
+=cut
+=comment
+		
+global_effect_chains
+project_effect_chains
+
+my $n = get_effect_chain(\%attribute_targets);
+add_effect_chain($n);
+
+=cut
+
+sub initialize {
+	$n = 0;
+	%by_index = ();	
+	@::global_effect_chains_data = ();  # for save/restore
+    @::project_effect_chains_data = (); 
+}
+sub new {
+	my $class = shift;	
+	my %vals = @_;
+	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	my $object = bless { n => ++$n, @_	}, $class;
+	$by_index{$n} = $object;
+	$object;
+}
+1;
+__END__
 sub private_effect_chain_name {
 	my $name = "_$project->{name}/".$this_track->name.'_';
 	my $i;
@@ -22,9 +83,6 @@ sub profile_effect_chain_name {
 	my ($profile, $track_name) = @_;
 	"_$profile\:$track_name";
 }
-
-
-
 sub push_effect_chain {
 	$debug2 and say "&push_effect_chain";
 	my ($track, %vals) = @_; 
@@ -228,73 +286,6 @@ sub list_effect_chains {
 1;
 
 __END__
-package ::EffectChain;
-
-our $VERSION = 0.001;
-use Carp;
-use warnings;
-no warnings qw(uninitialized);
-our @ISA;
-use vars qw($n %by_index);
-use ::Object qw( 
-		n	
-		attrib
-		op_list
-        op_data
-		);
-=comment
-	attrib   => { key1 => val1, key2 => val2, key3 => val3  },
-	op_list  => [id1, id2, id3,...    ],
-	op_data  => { id1 => { 
-					type => type1, 
-					params => [   ],
-					owns   => ida,
-					belongs_to => idb,
-					},
-				  id2 => {
-					},
-				},
-attrib:
-	name 
-	id
-	project
-	global
-	profile
-	user
-	system
-	track_name
-	track_version
-	track_cache
-	bypass
-=cut
-
-sub initialize {
-	$n = 1;
-	%by_index = ();	
-	@::global_effect_chains_data = ();  # for save/restore
-    @::project_effect_chains_data = (); 
-}
-sub new {
-	my $class = shift;	
-	my %vals = @_;
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	my $object = bless { @_	}, $class;
-	$by_index{$n} = $object;
-	$object;
-	
-}
-
-
-
-=comment
-		
-global_effect_chains
-project_effect_chains
-
-my $n = get_effect_chain(\%attribute_targets);
-add_effect_chain($n);
-
-=cut
 
 1;
 __END__
