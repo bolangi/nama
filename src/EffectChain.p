@@ -11,45 +11,21 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Object qw( 
 		n	
-		attrib
 		op_list
         op_data
-		);
-=comment
-	attrib   => { key1 => val1, key2 => val2, key3 => val3  },
-	op_list  => [id1, id2, id3,...    ],
-	op_data  => { id1 => { 
-					type => type1, 
-					params => [   ],
-					owns   => ida,
-					belongs_to => idb,
-					},
-				  id2 => {
-					},
-				},
-attrib:
-	name 
-	id
-	project
-	global
-	profile
-	user
-	system
-	track_name
-	track_version
-	track_cache
-	bypass
-=cut
-=comment
 		
-global_effect_chains
-project_effect_chains
-
-my $n = get_effect_chain(\%attribute_targets);
-add_effect_chain($n);
-
-=cut
-
+		name
+		id
+		project
+		global
+		profile
+		user
+		system
+		track_name
+		track_version
+		track_cache
+		bypass
+		);
 sub initialize {
 	$n = 0;
 	%by_index = ();	
@@ -60,12 +36,87 @@ sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	my $object = bless { n => ++$n, @_	}, $class;
+	my $n = $vals{n} || ++$n;
+	my $object = bless { n => $n, @_	}, $class;
 	$by_index{$n} = $object;
 	$object;
+
 }
+
+sub get_effect_chain { # exportable
+	my %args = @_;
+	my $single_match = delete $args{single_match};
+	# first check if index is known
+	return $by_index{$args{n}} if $args{n};
+
+	# otherwise all specified fields must match
+	my @indices = grep
+		{ 	my $fx_chain = $by_index{$_};
+			
+			# find non matches
+			my @non_matches = grep { $fx_chain->$_ ne $args{$_} } keys %args
+
+			# boolean opposite: return true if zero non matches
+			! scalar @non_matches
+		
+       } keys %by_index
+
+	return @indices unless $single_match and @indices > 1
+}
+	
+	
 1;
 __END__
+=comment
+    n # unique id
+	op_list  => [id1, id2, id3,...    ],
+	op_data  => { id1 => { 
+					type => type1, 
+					params => [   ],
+					owns   => ida,
+					belongs_to => idb,
+					},
+				  id2 => {
+					},
+				},
+
+	# searchable fields
+	name  # for user defined fx chains
+	id    # for bypass
+	project # identifies project specific fx chain
+	global  # identifies global fx chain (generally user defined)
+	profile # belongs to specified profile, or *some* profile
+	user    # user defined
+	system  # system generated
+	track_name #  applies to specified track name
+	track_version # applies to specified track version
+	track_cache # used for track caching
+	bypass # used for bypass 
+=cut
+=comment
+
+TODO: 
+
+* initialize(): need to ensure effect chains are loaded
+before calling new()
+
+* save/restore $::EffectChain::n
+
+index n must be an incrementing Nama persistent global, otherwise
+a user-defined chain could be assigned an index that is used
+by project-specific chain in another project.
+
+* attributes should be true fields
+
+		
+global_effect_chains
+project_effect_chains
+
+my $n = get_effect_chain(\%attribute_targets);
+add_effect_chain($n);
+
+=cut
+
 sub private_effect_chain_name {
 	my $name = "_$project->{name}/".$this_track->name.'_';
 	my $i;
