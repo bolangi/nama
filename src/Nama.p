@@ -79,6 +79,7 @@ use ::Edit;
 use ::Text;
 use ::Graphical;
 use ::ChainSetup ();
+use ::EffectChain;
 
 # the following separate out functionality
 # however occupy the :: namespace

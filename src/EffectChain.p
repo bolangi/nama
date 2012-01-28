@@ -3,12 +3,15 @@
 package ::EffectChain;
 use Modern::Perl;
 use Carp;
+use Exporter qw(import);
+our @EXPORT = qw(get_effect_chain);
+
 use ::Globals qw(:all);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw($n %by_index);
+our ($n, %by_index);
 use ::Object qw( 
 		n	
 		op_list
@@ -34,6 +37,7 @@ sub initialize {
 }
 sub new {
 	my $class = shift;	
+	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	my $n = $vals{n} || ++$n;
@@ -54,12 +58,12 @@ sub get_effect_chain { # exportable
 		{ 	my $fx_chain = $by_index{$_};
 			
 			# find non matches
-			my @non_matches = grep { $fx_chain->$_ ne $args{$_} } keys %args
+			my @non_matches = grep { $fx_chain->$_ ne $args{$_} } keys %args;
 
 			# boolean opposite: return true if zero non matches
 			! scalar @non_matches
 		
-       } keys %by_index
+       } keys %by_index;
 
 	return @indices unless $single_match and @indices > 1
 }
@@ -127,6 +131,7 @@ sub private_effect_chain_name {
 		grep{/$name/} keys %{$fx->{chain}};
 	$name . ++$i
 }
+# old bypass 
 sub fx_bypass_name {
 	my $id = shift;
 	return "_$project->{name}/_bypass_$id";
