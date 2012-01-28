@@ -52,7 +52,6 @@ sub new {
 
 	my $object = bless { n => $n, ops_data => $ops_data, @_	}, $class;
 	$by_index{$n} = $object;
-	save_effect_chains();
 	$object;
 
 }
