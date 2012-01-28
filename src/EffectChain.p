@@ -106,13 +106,15 @@ index n must be an incrementing Nama persistent global, otherwise
 a user-defined chain could be assigned an index that is used
 by project-specific chain in another project.
 
+DONE
+
 * attributes should be true fields
 
 		
 global_effect_chains
 project_effect_chains
 
-my $n = get_effect_chain(\%attribute_targets);
+my $n = get_effect_chain(%attribute_targets);
 add_effect_chain($n);
 
 =cut
@@ -227,47 +229,6 @@ sub restore_effect {
 	# erase my effect chain
 	delete $fx->{chain}->{fx_bypass_name($id)};
 }
-sub new_effect_profile {
-	$debug2 and say "&new_effect_profile";
-	my ($bunch, $profile) = @_;
-	my @tracks = bunch_tracks($bunch);
-	say qq(effect profile "$profile" created for tracks: @tracks);
-	map { new_effect_chain($tn{$_}, profile_effect_chain_name($profile, $_)); 
-	} @tracks;
-	$fx->{profile}->{$profile}{tracks} = [ @tracks ];
-	save_effect_chains();
-	save_effect_profiles();
-}
-sub delete_effect_profile { 
-	$debug2 and say "&delete_effect_profile";
-	my $name = shift;
-	say qq(deleting effect profile: $name);
-	my @tracks = $fx->{profile}->{$name};
-	delete $fx->{profile}->{$name};
-	map{ delete $fx->{chain}->{profile_effect_chain_name($name,$_)} } @tracks;
-}
-
-sub apply_effect_profile {  # overwriting current effects
-	$debug2 and say "&apply_effect_profile";
-	my ($function, $profile) = @_;
-	my @tracks = @{ $fx->{profile}->{$profile}{tracks} };
-	my @missing = grep{ ! $tn{$_} } @tracks;
-	@missing and say(join(',',@missing), ": tracks do not exist. Aborting."),
-		return;
-	@missing = grep { ! $fx->{chain}->{profile_effect_chain_name($profile,$_)} } @tracks;
-	@missing and say(join(',',@missing), ": effect chains do not exist. Aborting."),
-		return;
-	map{ $function->( $tn{$_}, profile_effect_chain_name($profile,$_)) } @tracks;
-}
-sub list_effect_profiles { 
-	my @results;
-	while( my $name = each %{$fx->{profile}}){
-		push @results, "effect profile: $name\n";
-		push @results, list_effect_chains("_$name:");
-	}
-	@results;
-}
-
 sub restore_effects { pop_effect_chain($_[0])}
 
 sub new_effect_chain {
