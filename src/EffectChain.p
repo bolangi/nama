@@ -36,13 +36,23 @@ sub initialize {
     @::project_effect_chains_data = (); 
 }
 sub new {
+	# ops_list => [id1, id2, id3,...];
 	my $class = shift;	
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	# we expect some effects
+	return unless $vals{ops_list};
 	my $n = $vals{n} || ++$n;
-	my $object = bless { n => $n, @_	}, $class;
+	my $ops_data = {};
+	map { 	
+		$ops_data->{type}->{$_}   = $fx->{applied}->{$_}{type};
+		$ops_data->{params}->{$_} = $fx->{params}->{$_};
+	} @{$vals{ops_list}};
+
+	my $object = bless { n => $n, ops_data => $ops_data, @_	}, $class;
 	$by_index{$n} = $object;
+	save_effect_chains();
 	$object;
 
 }
