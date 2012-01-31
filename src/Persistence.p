@@ -637,8 +637,8 @@ sub convert_effect_chains {
 	say "user effect chains: ", yaml_out(\%user);
 	say "project effect chains: ", yaml_out(\%project);
 
-	$fx->{user_effect_chain} = \%user;
-	$fx->{project_effect_chain} = \%project;
+	$fx->{user_effect_chains} = \%user;
+	$fx->{project_effect_chains} = \%project;
 	
 
 	save_effect_chains();

@@ -118,9 +118,12 @@ before calling new()
 
 * save/restore $::EffectChain::n
 
-index n must be an incrementing Nama persistent global, otherwise
+* index n must be an incrementing Nama persistent global, otherwise
 a user-defined chain could be assigned an index that is used
 by project-specific chain in another project.
+
+* convert_effect_chains()
+
 
 DONE
 
@@ -266,8 +269,8 @@ sub add_effect_chain {
 	#say "track: $track name: ",$track->name, " effect chain: $name";
 
 	my $is_project_effect_chain = $name =~ /^_/;
-	my $effect_chain = $fx->{user_effect_chain}{$name}
- 						|| $fx->{project_effect_chain}{$name};
+	my $effect_chain = $fx->{global_effect_chains}{$name}
+ 						|| $fx->{project_effect_chains}{$name};
 
 	$effect_chain or do 
 		{ say("$name: effect chain does not exist") 
