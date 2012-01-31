@@ -689,29 +689,23 @@ sub restore_effect_chains {
 
 	my @fx_chain_files = ($global_fx_chains, $project_fx_chains);
 
-	# TODO:
-# 	assign(
-# 				data => $ref,
-# 				vars   => \@persistent_vars,
-# 				var_map => 1,
-# 				class => '::');
-# 	
-# 	map{ 
-# 		my %h = %$_; 
-# 		my $mark = ::Mark->new( %h ) ;
-# 	} @marks_data;
-# 	map{ 
-# 		my $path = $_;
-# 		my ($resolved, $format) = get_newest($path);  
-# 		carp("$resolved: file not found"), return unless $resolved;
-# 		my $source = read_file($resolved);
-# 		carp("$resolved: empty file"), return unless $source;
-# 		$debug and say "format: $format, source: \n",$source;
-# 		my $ref = decode($source, $format);
-# 		$debug and print Dumper $ref;
-# 		assign_singletons( { data => $ref } ); 
-# 	} @fx_chain_files;
-# 	# TODO apply effect chain checks both lists XXX
+	map{ 
+		my $path = $_;
+		my ($resolved, $format) = get_newest($path);  
+		carp("$resolved: file not found"), return unless $resolved;
+		my $source = read_file($resolved);
+		carp("$resolved: empty file"), return unless $source;
+		$debug and say "format: $format, source: \n",$source;
+		my $ref = decode($source, $format);
+		$debug and print Dumper $ref;
+		my @fx_chains_data = @$ref;
+		map
+			{ 	my %h = %$_;
+				my $fx_chain = ::EffectChain->new(%h);
+	
+			} @fx_chains_data;
+		
+	} @fx_chain_files;
 }
 sub restore_effect_profiles {
 
