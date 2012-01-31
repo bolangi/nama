@@ -56,7 +56,10 @@ sub new {
 
 }
 
-sub get_effect_chain { # exportable
+sub global_effect_chains { get_effect_chain(global => 1) }
+sub project_effect_chains { get_effect_chain(global => 0) }
+
+sub get_effect_chain { 
 	my %args = @_;
 	my $single_match = delete $args{single_match};
 	# first check if index is known
