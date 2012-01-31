@@ -6,4 +6,7 @@
 @edit_data
 @inserts_data
 $this_track_name
+@project_effect_chains_data
+@global_effect_chains_data
+
 

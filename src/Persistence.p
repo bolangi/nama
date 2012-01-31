@@ -658,13 +658,12 @@ sub save_effect_chains {
 		vars => [ qw(@global_effect_chains_data $VERSION $::EffectChain::n ) ],
 		class => '::',
 	);
-	}
 	if (@project_effect_chains_data)
 	{
 		serialize(
 			file => join_path(project_dir(), $file->{project_effect_chains}),
 			format => 'perl',
-			vars => [ qw( @project_effect_chains_data) $VERSION) ],
+			vars => [ qw( @project_effect_chains_data $VERSION) ],
 			class => '::',
 		);
 	}
