@@ -83,8 +83,6 @@
 	%offset        				$fx->{offset}
 	@already_muted  			$fx->{muted}
 	%effect_chain 				$fx->{chain}
-	**							$fx->{global_effect_chains}
-	**							$fx->{project_effect_chains}
 	%effect_profile 			$fx->{profile}
 	%mute_level					$fx->{mute_level}
 	%fade_out_level 			$fx->{fade_out_level}

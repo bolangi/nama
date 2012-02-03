@@ -607,6 +607,39 @@ sub find_op_offsets {
 	}
 }
 
+sub expanded_ops_list { # including controllers
+	my @ops_list = @_;
+	return () unless @_;
+	my @expanded = ();
+	map 
+	{ push @expanded, 
+		$_, 
+		expanded_ops_list( @{ $fx->{applied}->{$_}->{owns} } );
+ 	} @ops_list;
+	@expanded
+}
+	
+
+sub ops_data {
+	my @ops_list = expanded_ops_list(@_);
+	my $ops_data = {};
+
+	# keep parameters with other fx data
+	map { 	
+		$ops_data->{$_}            = $fx->{applied}->{$_};
+		$ops_data->{$_}->{params}  = $fx->{params}->{$_};
+	} @ops_list;
+	
+	# we don't need chain (track) number or display type
+	
+	map { 
+		delete $ops_data->{$_}{chain};
+		delete $ops_data->{$_}{display};
+	} @ops_list;
+	$ops_data;
+}
+
+
 ## register data about LADSPA plugins, and Ecasound effects and
 #  presets (names, ids, parameters, hints) 
 

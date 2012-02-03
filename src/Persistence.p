@@ -620,7 +620,7 @@ sub convert_effect_chains {
 
 	rename $old_fx_chains, "$old_fx_chains.obsolete";
 
-	# now separate into user and per project (system generated)
+	# now separate into global and project 
 	# effect chains
 
 	my @keys = keys %{$fx->{chain}} ;

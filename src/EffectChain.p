@@ -6,7 +6,7 @@ use Carp;
 use Exporter qw(import);
 our @EXPORT = qw(get_effect_chain);
 
-use ::Globals qw(:all);
+use ::Globals qw($fx);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
@@ -55,6 +55,7 @@ sub new {
 	$object;
 
 }
+	
 
 sub global_effect_chains { get_effect_chain(global => 1) }
 sub project_effect_chains { get_effect_chain(global => 0) }
@@ -123,6 +124,10 @@ a user-defined chain could be assigned an index that is used
 by project-specific chain in another project.
 
 * convert_effect_chains()
+
+* track caching uses push_effect_chain
+  + convert to bypass all
+  + convert old projects?
 
 
 DONE
