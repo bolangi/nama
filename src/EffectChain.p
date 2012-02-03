@@ -14,8 +14,8 @@ our @ISA;
 our ($n, %by_index);
 use ::Object qw( 
 		n	
-		op_list
-        op_data
+		ops_list
+        ops_data
 		
 		name
 		id
@@ -30,7 +30,7 @@ use ::Object qw(
 		bypass
 		);
 sub initialize {
-	$n = 0;
+	$n = 1;
 	%by_index = ();	
 	@::global_effect_chains_data = ();  # for save/restore
     @::project_effect_chains_data = (); 
@@ -41,19 +41,34 @@ sub new {
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+	croak "must have exactly one of 'global' or 'project' fields defined" 
+		unless ($vals{global} xor $vals{project});
 	# we expect some effects
-	return unless $vals{ops_list};
+	croak "expected non-empty ops_list" unless scalar @{$vals{ops_list}};
 	my $n = $vals{n} || ++$n;
 	my $ops_data = {};
 	map { 	
-		$ops_data->{type}->{$_}   = $fx->{applied}->{$_}{type};
-		$ops_data->{params}->{$_} = $fx->{params}->{$_};
+		$ops_data->{$_}           = $fx->{applied}->{$_};
+		$ops_data->{$_}->{params} = $fx->{params}->{$_};
+		delete $ops_data->{$_}->{chain};
+		delete $ops_data->{$_}->{display};
+		
+# 		map { 
+# 			my $op = $_;
+# 			delete $ops_data->{$op}->{$_}
+# 		} qw( chain display )
+
 	} @{$vals{ops_list}};
 
-	my $object = bless { n => $n, ops_data => $ops_data, @_	}, $class;
+	my $object = bless 
+		{ 
+			n => $n, 
+			ops_data => $ops_data, 
+			@_	
+
+		}, $class;
 	$by_index{$n} = $object;
 	$object;
-
 }
 	
 
