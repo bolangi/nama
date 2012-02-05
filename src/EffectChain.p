@@ -4,7 +4,6 @@ package ::EffectChain;
 use Modern::Perl;
 use Carp;
 use Exporter qw(import);
-our @EXPORT = qw(get_effect_chain);
 
 use ::Globals qw($fx);
 
@@ -65,14 +64,15 @@ sub new {
 	$by_index{$n} = $object;
 	$object;
 }
+sub destroy {
+	my $self = shift;
+	delete $by_index{$self->n};
+	save_effect_chains();
+}
 	
-
-sub global_effect_chains { get_effect_chain(global => 1) }
-sub project_effect_chains { get_effect_chain(global => 0) }
-
-sub get_effect_chain { 
+sub find { 
 	my %args = @_;
-	my $single_match = delete $args{single_match};
+	my $unique = delete $args{unique};
 	# first check if index is known
 	return $by_index{$args{n}} if $args{n};
 
@@ -88,7 +88,9 @@ sub get_effect_chain {
 		
        } keys %by_index;
 
-	return @indices unless $single_match and @indices > 1
+	warn("unique index requested by multiple indices found. Skipping.\n"),
+		return if $unique and @indices > 1;
+	return @indices 
 }
 	
 	
@@ -171,45 +173,6 @@ sub profile_effect_chain_name {
 	my ($profile, $track_name) = @_;
 	"_$profile\:$track_name";
 }
-sub push_effect_chain {
-	$debug2 and say "&push_effect_chain";
-	my ($track, %vals) = @_; 
-
-	# use supplied ops list, or default to user-applied (fancy) ops
-	
-	my @ops = $vals{ops} ? @{$vals{ops}} : $track->fancy_ops;
-	say("no effects to store"), return unless @ops;
-
-	# use supplied name, or default to private name that will now show 
-	# in listing
-	
-	my $save_name   = $vals{save} || private_effect_chain_name();
-	$debug and say "save name: $save_name"; 
-
-	# create a new effect-chain definition
-	
-	new_effect_chain( $track, $save_name, @ops ); # current track effects
-
-	# store effect-chain name on track effect-chain stack
-	
-	push @{ $track->effect_chain_stack }, $save_name;
-
-	# operate on stored effects (remove or bypass)
-	
-	map { $vals{operation}->($_) } @ops;
-
-	$save_name;
-}
-
-sub pop_effect_chain { # restore previous
-	$debug2 and say "&pop_effect_chain";
-	my $track = shift;
-	my $previous = pop @{$track->effect_chain_stack};
-	say("no previous effect chain"), return unless $previous;
-	map{ remove_effect($_)} $track->fancy_ops;
-	add_effect_chain($track, $previous);
-	delete $fx->{chain}->{$previous};
-}
 sub overwrite_effect_chain {
 	$debug2 and say "&overwrite_effect_chain";
 	my ($track, $name) = @_;
@@ -266,18 +229,6 @@ sub restore_effect {
 }
 sub restore_effects { pop_effect_chain($_[0])}
 
-sub new_effect_chain {
-	my ($track, $name, @ops) = @_;
-#	say "name: $name, ops: @ops";
-	@ops or @ops = $track->fancy_ops;
-	say $track->name, qq(: creating effect chain "$name") unless $name =~ /^_/;
-	$fx->{chain}->{$name} = { 
-					ops 	=> \@ops,
-					type 	=> { map{$_ => $fx->{applied}->{$_}{type} 	} @ops},
-					params	=> { map{$_ => $fx->{params}->{$_} 		} @ops},
-	};
-	save_effect_chains();
-}
 
 sub add_effect_chain {
 	my ($track, $name) = @_;
@@ -312,27 +263,4 @@ sub add_effect_chain {
 		$fx->{magical_cop_id} = undef;
 	} @{$effect_chain->{ops}};
 }	
-sub list_effect_chains {
-	my @frags = @_; # fragments to match against effect_chain names
-    # we don't list chain_ids starting with underscore
-    # except when searching for particular chains
-    my @ids = grep{ @frags or ! /^_/ } keys %{$fx->{chain}};
-	if (@frags){
-		@ids = grep{ my $id = $_; grep{ $id =~ /$_/} @frags} @ids; 
-	}
-	my @results;
-	map{ my $name = $_;
-		push @results, join ' ', "$name:", 
-		map{$fx->{chain}->{$name}{type}{$_},
-			@{$fx->{chain}->{$name}{params}{$_}}
-		} @{$fx->{chain}->{$name}{ops}};
-		push @results, "\n";
-	} @ids;
-	@results;
-}
-1;
-
-__END__
-
-1;
-__END__
+# end

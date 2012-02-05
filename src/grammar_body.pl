@@ -897,19 +897,39 @@ additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain ident op_id(s?) {
 	#print "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}}, $/;
-	::new_effect_chain($::this_track, $item{ident}, @{ $item{'op_id(s?)'} });
+	my @ops = @{$item{'op_id(s?)'}} || $::this_track->fancy_ops;
+	::EffectChain->new(
+		user   => 1,
+		global => 1,
+		name   => $item{ident},
+		ops_list => [ @ops ],
+	);
 	1;
 }
 add_effect_chain: _add_effect_chain ident {
-	::add_effect_chain($::this_track, $item{ident});
+	::EffectChain::find(
+		unique => 1, 
+		user   => 1, 
+		name   => $item{ident}
+	)->add($::this_track);
 	1;
 }
 delete_effect_chain: _delete_effect_chain ident(s) {
-	map{ delete $::fx->{chain}->{$_} } @{ $item{'ident(s)'} };
+	map{ 
+		::EffectChain::find(
+			unique => 1, 
+			user   => 1,
+			name   => $_
+		)->destroy() 
+
+	} @{ $item{'ident(s)'} };
 	1;
 }
 list_effect_chains: _list_effect_chains ident(s?) {
-	::pager(::list_effect_chains( @{ $item{'ident(s?)'} } )); 1;
+	::pager( 
+		map{ ::EffectChain::find(name => $_)->dump() } @{ $item{'ident(s?)'} } 
+	);
+	1;
 }
 
     
