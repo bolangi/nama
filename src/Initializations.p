@@ -135,7 +135,6 @@ exit;
 	
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	restore_effect_chains();
-	restore_effect_profiles();
 	1;	
 }
 sub debugging_options {

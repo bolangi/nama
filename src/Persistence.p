@@ -268,7 +268,6 @@ sub restore_state {
 	delete $fx->{params}->{''};
 
 	restore_effect_chains();
-	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
 	
@@ -669,16 +668,6 @@ sub save_effect_chains {
 	}
 	
 }
-sub save_effect_profiles { # if they exist
-	my $filename = shift || $file->{effect_profile};
-	if (keys %{$fx->{profile}}){
-		serialize (
-			file => join_path(project_root(), $filename),
-			format => 'perl',
-			vars => [ qw( $fx->{profile}  $VERSION ) ],
-			class => '::');
-	}
-}
 
 sub restore_effect_chains {
 
@@ -699,37 +688,9 @@ sub restore_effect_chains {
 		my $ref = decode($source, $format);
 		$debug and print Dumper $ref;
 		my @fx_chains_data = @$ref;
-		map
-			{ 	my %h = %$_;
-				my $fx_chain = ::EffectChain->new(%h);
-	
-			} @fx_chains_data;
+		map { my $fx_chain = ::EffectChain->new(%$_) } @fx_chains_data;
 		
 	} @fx_chain_files;
-}
-sub restore_effect_profiles {
-
-	$debug2 and say "&restore_effect_profiles";
-	my $path = join_path(project_root(), $file->{effect_profile});
-	my ($resolved, $format) = get_newest($path);
-	carp("$resolved: file not found"), return unless $resolved;
-	my $source = read_file($resolved);
-	carp("$resolved: empty file"), return unless $source;
-	$debug and say "format: $format, source: \n",$source;
-	my $ref = decode($source, $format);
-	if ( $ref->{VERSION} >= 1.08 )
-	{
-		assign_singletons( { data => $ref } );
-	}
-	else {
-		assign(
-			data => $ref,
-			vars => [ qw(%effect_profile)],
-			var_map => 1,
-			class => '::',
-			);
-	}
-
 }
 
 sub schedule_autosave { 

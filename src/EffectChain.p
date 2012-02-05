@@ -52,11 +52,6 @@ sub new {
 		$ops_data->{$_}->{params} = $fx->{params}->{$_};
 		delete $ops_data->{$_}->{chain};
 		delete $ops_data->{$_}->{display};
-		
-# 		map { 
-# 			my $op = $_;
-# 			delete $ops_data->{$op}->{$_}
-# 		} qw( chain display )
 
 	} @{$vals{ops_list}};
 
