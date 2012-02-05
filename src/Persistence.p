@@ -645,8 +645,8 @@ sub convert_effect_chains {
 }
 
 sub save_effect_chains { 
-	@global_effect_chains_data  = map{ $_->hashref } global_effect_chains();
-	@project_effect_chains_data = map{ $_->hashref } project_effect_chains();
+	@global_effect_chains_data  = map{ $_->hashref } ::EffectChains::find(global => 1);
+	@project_effect_chains_data = map{ $_->hashref } ::EffectChains::find(project => 1);
 
 	# always save global effect chain data because it contains
 	# incrementing counter
