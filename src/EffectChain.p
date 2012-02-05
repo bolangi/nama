@@ -64,6 +64,31 @@ sub new {
 	$by_index{$n} = $object;
 	$object;
 }
+sub add {
+	my $self = shift;
+	my $track = shift;
+
+	say $track->name, qq(: adding effect chain ). $self->name 
+		unless $self->system;
+
+	my $before = $track->vol;
+	map {  $fx->{magical_cop_id} = $_ unless $fx->{applied}->{$_}; # try to reuse cop_id
+		if ($before){
+			::Text::t_insert_effect(
+				$before, 
+				$self->ops_data->{$_}->{type}, 
+				$self->ops_data->{$_}->{params}
+			);
+		} else { 
+			::Text::t_add_effect(
+				$track, 
+				$self->ops_data->{$_}->{type}, 
+				$self->ops_data->{$_}->{params}
+			);
+		}
+		$fx->{magical_cop_id} = undef;
+	} @{$self->ops_list};
+}	
 sub destroy {
 	my $self = shift;
 	delete $by_index{$self->n};
