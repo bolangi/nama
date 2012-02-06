@@ -492,9 +492,7 @@ sub t_add_effect {
 sub t_add_ctrl {
 	package ::;
 	my ($parent, $code, $values, $id) = @_;
-	if ( $fx_cache->{full_label_to_index}->{$code} ) {} # do nothing
-	elsif ( $fx_cache->{partial_label_to_full}->{$code} ) { $code = $fx_cache->{partial_label_to_full}->{$code} }
-	else { warn "effect code not found: $code\n"; return }
+	$code = effect_code( $code );
 	$debug and print "code: ", $code, $/;
 		my %p = (
 				chain 		=> $fx->{applied}->{$parent}->{chain},

@@ -28,6 +28,9 @@ use ::Object qw(
 		track_cache
 		bypass
 		);
+
+initialize();
+
 sub initialize {
 	$n = 1;
 	%by_index = ();	
@@ -62,6 +65,7 @@ sub new {
 
 		}, $class;
 	$by_index{$n} = $object;
+	$object->dumpp;
 	$object;
 }
 sub add {
@@ -72,7 +76,11 @@ sub add {
 		unless $self->system;
 
 	my $before = $track->vol;
-	map {  $fx->{magical_cop_id} = $_ unless $fx->{applied}->{$_}; # try to reuse cop_id
+	map {  
+
+		# try to reuse existing op id
+		$fx->{magical_cop_id} = $_ unless $fx->{applied}->{$_};
+
 		if ($before){
 			::Text::t_insert_effect(
 				$before, 
@@ -86,7 +94,7 @@ sub add {
 				$self->ops_data->{$_}->{params}
 			);
 		}
-		$fx->{magical_cop_id} = undef;
+		undef $fx->{magical_cop_id};
 	} @{$self->ops_list};
 }	
 sub destroy {
@@ -102,8 +110,8 @@ sub find {
 	return $by_index{$args{n}} if $args{n};
 
 	# otherwise all specified fields must match
-	my @indices = grep
-		{ 	my $fx_chain = $by_index{$_};
+my @found = grep
+		{ 	my $fx_chain = $_;
 			
 			# find non matches
 			my @non_matches = grep { $fx_chain->$_ ne $args{$_} } keys %args;
@@ -111,11 +119,11 @@ sub find {
 			# boolean opposite: return true if zero non matches
 			! scalar @non_matches
 		
-       } keys %by_index;
+       } values %by_index;
 
-	warn("unique index requested by multiple indices found. Skipping.\n"),
-		return if $unique and @indices > 1;
-	return @indices 
+	warn("unique chain requested by multiple chains found. Skipping.\n"),
+		return if $unique and @found > 1;
+	return @found
 }
 	
 	
