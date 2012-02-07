@@ -33,6 +33,7 @@ sub add_effect {
 	my $p = shift;
 	
 	set_chain_value($p);
+	say yaml_out($p);
 
 	my ($n,$code,$parent_id,$id,$suggested_id, $parameter,$values) =
 		@$p{qw( chain type parent_id cop_id suggested_id parameter values)};
@@ -380,6 +381,8 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub apply_op {
 	$debug2 and print "&apply_op\n";
 	my $id = shift;
+	$debug and carp "null id, ignored";
+	return unless $id;
 	my $selected = shift;
 	$debug and print "id: $id\n";
 	my $code = $fx->{applied}->{$id}->{type};
@@ -505,7 +508,7 @@ sub cop_add {
 		@$p{qw(chain type cop_id parent_id parameter)};
 
 	# return existing op_id if effect already exists
-	return $id if $fx->{applied}->{$id};
+	return $id if $id and $fx->{applied}->{$id};
 	
 	# use an externally provided (magical) id or the
 	# incrementing counter
