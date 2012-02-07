@@ -77,8 +77,16 @@ sub new {
 				rw => 'REC');
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 
-	$self->{dry_vol} = ::Text::t_add_effect($dry, 'ea',[0]);
-	$self->{wet_vol} = ::Text::t_add_effect($wet, 'ea',[100]);
+	$self->{dry_vol} = ::add_effect({
+		track  => $dry, 
+		type   => 'ea',
+		values => [0]
+	});
+	$self->{wet_vol} = ::add_effect({
+		track  => $wet, 
+		type   => 'ea',
+		values => [100],
+	});
 	$by_index{$self->n} = $self;
 }
 

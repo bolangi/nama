@@ -328,7 +328,11 @@ sub add_fader {
 		if ( $first_effect ){
 			$id = ::Text::t_insert_effect($first_effect, $config->{fader_op}, [0]);
 		} else { 
-			$id = ::Text::t_add_effect($config->{fader_op}, [0]) 
+			$id = add_effect({
+				track 	=> $track, 
+				type 	=> $config->{fader_op}, 
+				values 	=> [0],
+			});
 		}
 		$track->set(fader => $id);
 	}

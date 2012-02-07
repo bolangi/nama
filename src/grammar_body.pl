@@ -634,7 +634,11 @@ add_controller: _add_controller parent effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	my $id = ::add_effect({
+		parent_id => $parent, 
+		type	  => $code, 
+		values	  => $values,
+	});
 	if($id)
 	{
 		my $i = 	::effect_index($code);
@@ -654,7 +658,11 @@ add_controller: _add_controller effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	my $id = ::add_effect({
+		parent_id	=> $parent, 
+		type		=> $code, 
+		values		=> $values,
+	});
 	if($id)
 	{
 		my $i = 	::effect_index($code);
@@ -671,7 +679,11 @@ add_controller: _add_controller effect value(s?) {
 add_effect: _add_effect effect value(s?) {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
- 	my $id = ::Text::t_add_effect($::this_track, $code, $values);
+ 	my $id = ::add_effect({
+		track  => $::this_track, 
+		type   => $code, 
+		values => $values
+	});
 	if ($id)
 	{
 		my $i = ::effect_index($code);
