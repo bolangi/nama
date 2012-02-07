@@ -12,7 +12,7 @@ sub set_chain_value {
 
 	return if $p->{chain}; # don't do it twice
 	
-	# set chain from track if known (add effect)
+	# set chain from track if known
 	
 	if( $p->{track} )
 	{ 
@@ -33,7 +33,6 @@ sub add_effect {
 	my $p = shift;
 	
 	set_chain_value($p);
-	say yaml_out($p);
 
 	my ($n,$code,$parent_id,$id,$suggested_id, $parameter,$values) =
 		@$p{qw( chain type parent_id cop_id suggested_id parameter values)};
@@ -366,10 +365,6 @@ sub apply_ops {  # in addition to operators in .ecs file
 	$debug and print "chain: $n, offset: ", $fx->{offset}->{$n}, "\n";
  		next unless ::ChainSetup::is_ecasound_chain($n);
 
-		#next if $n == 2; # no volume control for mix track
-		#next if ! defined $fx->{offset}->{$n}; # for MIX
- 		#next if ! $fx->{offset}->{$n} ;
-
 	# controllers will follow ops, so safe to apply all in order
 		for my $id ( @{ $ti{$n}->ops } ) {
 		apply_op($id);
@@ -381,7 +376,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub apply_op {
 	$debug2 and print "&apply_op\n";
 	my $id = shift;
-	$debug and carp "null id, ignored";
+	! $id and warn "null id, skipping";
 	return unless $id;
 	my $selected = shift;
 	$debug and print "id: $id\n";
@@ -556,9 +551,9 @@ sub cop_add {
 		push @{ $fx->{applied}->{$parent_id}->{owns}}, $id;
 		$debug and print "parent owns" , join " ",@{ $fx->{applied}->{$parent_id}->{owns}}, "\n";
 
-		$debug and print join " ", "my attributes:", (keys %{ $fx->{applied}->{$id} }), "\n";
+		$debug and print join " ", "my attributes:", yaml_out($fx->{applied}->{$id}), "\n";
 		$fx->{applied}->{$id}->{belongs_to} = $parent_id;
-		$debug and print join " ", "my attributes again:", (keys %{ $fx->{applied}->{$id} }), "\n";
+		$debug and print join " ", "my attributes again:", yaml_out($fx->{applied}->{$id}), "\n";
 		$debug and print "parameter: $parameter\n";
 
 		# set fx-param to the parameter number, which one

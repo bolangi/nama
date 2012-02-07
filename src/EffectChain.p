@@ -68,7 +68,6 @@ sub new {
 	$object->dumpp;
 	$object;
 }
-=comment
 sub add {
 	my $self = shift;
 	my $track = shift;
@@ -78,52 +77,29 @@ sub add {
 
 	#@$p{qw( chain type parent_id cop_id parameter values)};
 	my $before = $track->vol;
-	map {  
+	map 
+	{  
+		# insert effect, not controller, if necessary
 
-		my $p = {};
-	
-		$p->{
-
-		# controller case
-		if (my $parent = $self->ops_data->{$_}->{belongs_to})
+		if ($before and !  $self->{ops_data}->{belongs_to})
 		{
-		
-			l(
-				$parent,
+			insert_effect(
+				$before, 
 				$self->ops_data->{$_}->{type}, 
-				$self->ops_data->{$_}->{params},
+				$self->ops_data->{$_}->{params}
 			);
-
-
-			);
-				
-				
-				
 		}
 		else 
-		{
-			if ($before)
-			{
-				::Text::t_insert_effect(
-					$before, 
-					$self->ops_data->{$_}->{type}, 
-					$self->ops_data->{$_}->{params}
-				);
-			}
-			else 
-			{ 
-					::Text::t_add_effect(
-					$track, 
-					$self->ops_data->{$_}->{type}, 
-					$self->ops_data->{$_}->{params}
-				);
-			}
+		{ 
+			add_effect({
+				track  => $track, 
+				type   => $self->ops_data->{$_}->{type}, 
+				values => $self->ops_data->{$_}->{params},
+				parent_id => $self->ops_data->{$_}->{belongs_to},
+			});
 		}
-		undef $fx->{magical_cop_id};
 	} @{$self->ops_list};
 }
-}	
-=cut
 sub destroy {
 	my $self = shift;
 	delete $by_index{$self->n};
