@@ -87,14 +87,15 @@ sub refresh_fade_controller {
 	add_fader($track->name);	
 
 	# add controller
-	::Text::t_add_ctrl($track->fader,  # parent
-					 'klg',	  		 # Ecasound controller
-					 [1,				 # Ecasound parameter 1
-					 $off_level,
-					 $on_level,
-					 @pairs,
-					 ]
-	);
+	::add_effect({
+		parent_id 	=> $track->fader,
+		type		=> 'klg',	  		 # Ecasound controller
+		values		=> [	1,				 # Ecasound parameter 1
+					 		$off_level,
+					 		$on_level,
+					 		@pairs,
+					 	]
+	});
 
 	# set fader to correct initial value
 	# 	first fade is type 'in'  : 0

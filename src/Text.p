@@ -474,35 +474,6 @@ sub t_insert_effect {
 	}
 	$op
 }
-sub t_add_effect {
-	package ::;
-	my ($track, $code, $values)  = @_;
-	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
-	$code = effect_code( $code );	
-	$debug and print "code: ", $code, $/;
-		my %p = (
-			chain => $track->n,
-			values => $values,
-			type => $code,
-			);
-			#print "adding effect\n";
-			$debug and print(yaml_out(\%p));
-		add_effect( \%p );
-}
-sub t_add_ctrl {
-	package ::;
-	my ($parent, $code, $values, $id) = @_;
-	$code = effect_code( $code );
-	$debug and print "code: ", $code, $/;
-		my %p = (
-				chain 		=> $fx->{applied}->{$parent}->{chain},
-				cop_id 		=> $id,
-				parent_id 	=> $parent,
-				values 		=> $values,
-				type 		=> $code,
-			);
-		add_effect( \%p );
-}
 sub mixdown {
 	print "Enabling mixdown to file.\n";
 	$tn{Mixdown}->set(rw => 'REC'); 

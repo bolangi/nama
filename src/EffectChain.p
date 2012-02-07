@@ -5,7 +5,7 @@ use Modern::Perl;
 use Carp;
 use Exporter qw(import);
 
-use ::Globals qw($fx);
+use ::Globals qw($fx $this_op);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
@@ -68,35 +68,62 @@ sub new {
 	$object->dumpp;
 	$object;
 }
+=comment
 sub add {
 	my $self = shift;
 	my $track = shift;
-
+	local $this_op; # don't change current op
 	say $track->name, qq(: adding effect chain ). $self->name 
 		unless $self->system;
 
+	#@$p{qw( chain type parent_id cop_id parameter values)};
 	my $before = $track->vol;
 	map {  
 
-		# try to reuse existing op id
-		$fx->{magical_cop_id} = $_ unless $fx->{applied}->{$_};
+		my $p = {};
+	
+		$p->{
 
-		if ($before){
-			::Text::t_insert_effect(
-				$before, 
+		# controller case
+		if (my $parent = $self->ops_data->{$_}->{belongs_to})
+		{
+		
+			::Text::t_add_ctrl(
+				$parent,
 				$self->ops_data->{$_}->{type}, 
-				$self->ops_data->{$_}->{params}
+				$self->ops_data->{$_}->{params},
 			);
-		} else { 
-			::Text::t_add_effect(
-				$track, 
-				$self->ops_data->{$_}->{type}, 
-				$self->ops_data->{$_}->{params}
+
+
 			);
+				
+				
+				
+		}
+		else 
+		{
+			if ($before)
+			{
+				::Text::t_insert_effect(
+					$before, 
+					$self->ops_data->{$_}->{type}, 
+					$self->ops_data->{$_}->{params}
+				);
+			}
+			else 
+			{ 
+					::Text::t_add_effect(
+					$track, 
+					$self->ops_data->{$_}->{type}, 
+					$self->ops_data->{$_}->{params}
+				);
+			}
 		}
 		undef $fx->{magical_cop_id};
 	} @{$self->ops_list};
+}
 }	
+=cut
 sub destroy {
 	my $self = shift;
 	delete $by_index{$self->n};
@@ -110,7 +137,7 @@ sub find {
 	return $by_index{$args{n}} if $args{n};
 
 	# otherwise all specified fields must match
-my @found = grep
+	my @found = grep
 		{ 	my $fx_chain = $_;
 			
 			# find non matches

@@ -2,36 +2,55 @@
 
 package ::;
 use Modern::Perl;
+use List::MoreUtils qw(insert_after_string);
 use Carp;
 use ::Util qw(round);
 no warnings 'uninitialized';
 
-## high-level functions
-sub add_effect {
+sub set_chain_value {
+	my $p = shift;
+
+	return if $p->{chain}; # don't do it twice
 	
-	$debug2 and print "&add_effect\n";
+	# set chain from track if known (add effect)
 	
-	my %p 			= %{shift()};
-	$debug and say yaml_out \%p;
-	my ($n,$code,$parent_id,$id,$parameter,$values) =
-		@p{qw( chain type parent_id cop_id parameter values)};
-	! $p{chain} and
+	if( $p->{track} )
+	{ 
+		$p->{chain} = $p->{track}->n;
+	  	delete $p->{track}
+	}
+
+	# set chain from parent effect if known (add controller)
+	
+	elsif( $p->{parent_id})
+	{ 
+		$p->{chain} = $fx->{applied}->{$p->{parent_id}}->{chain} 
+	}
+	$debug and print(yaml_out($p));
+}
+
+sub add_effect { 
+	my $p = shift;
+	
+	set_chain_value($p);
+
+	my ($n,$code,$parent_id,$id,$suggested_id, $parameter,$values) =
+		@$p{qw( chain type parent_id cop_id suggested_id parameter values)};
+	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
-	my $i = $fx_cache->{full_label_to_index}->{$code};
 
-	# don't create an existing vol or pan effect
+	cop_add($p); 
 	
-	return if $id and ($id eq $ti{$n}->vol 
-				or $id eq $ti{$n}->pan);   
-
-	$id = cop_add(\%p); 
-	%p = ( %p, cop_id => $id); # replace chainop id
-	$ui->add_effect_gui(\%p) unless $ti{$n}->hide;
-	if( valid_engine_setup() ){
-		my $er = engine_running();
-		$ti{$n}->mute if $er;
-		apply_op($id);
-		$ti{$n}->unmute if $er;
+	$ui->add_effect_gui($p) unless $ti{$n}->hide;
+	if( valid_engine_setup() )
+	{
+		if (engine_running())
+		{ 
+			$ti{$n}->mute;
+			apply_op($id);
+			$ti{$n}->unmute;
+		}
+		else { apply_op($id) }
 	}
 	$id;
 
@@ -240,13 +259,21 @@ sub effect_code {
 	
 	my $input = shift;
 	my $code;
-    if ($input !~ /\D/){ # i.e. $input is all digits
-		$code = $fx_cache->{ladspa_id_to_label}->{$input} 
-			or carp("$input: LADSPA plugin not found.  Aborting.\n"), return;
+    if ($input !~ /\D/) # i.e. $input is all digits
+	{
+		$code = $fx_cache->{ladspa_id_to_label}->{$input};
+		defined $code or carp("$input: LADSPA plugin not found.  Aborting.\n"),
+			return;
 	}
-	elsif ( $fx_cache->{full_label_to_index}->{$input} ) { $code = $input } 
-	elsif ( $fx_cache->{partial_label_to_full}->{$input} ) { $code = $fx_cache->{partial_label_to_full}->{$input} }
-	else { warn "$input: effect code not found\n";}
+	elsif ( $fx_cache->{full_label_to_index}->{$input} )
+	{
+		$code = $input 
+	}
+	else 
+	{ 
+		$code = $fx_cache->{partial_label_to_full}->{$input} 
+	}
+	defined $code or warn("$input: effect code not found.  Skipping.\n");
 	$code;
 }
 
@@ -393,65 +420,67 @@ sub root_parent {
 	$parent;
 }
 
-## manage Nama effects -- entries in %{$fx->{applied}} array 
+## Nama effects are represented by entries in $fx->{applied}
+## and by the ops array in each track, $track->ops
 
 sub cop_add {
 	$debug2 and print "&cop_add\n";
 	my $p = shift;
-	my %p = %$p;
 	$debug and say yaml_out($p);
 
-	# return an existing id 
-	return $p{cop_id} if $p{cop_id};
-	
+	# parameter is used only by GUI XXX
+	my ($n, $type, $id, $parent_id, $parameter)  = 
+		@$p{qw(chain type cop_id parent_id parameter)};
 
+	# return existing op_id if effect already exists
+	return $id if $fx->{applied}->{$id};
+	
 	# use an externally provided (magical) id or the
 	# incrementing counter
 	
-	my $id = $fx->{magical_cop_id} || $fx->{id_counter};
+	$id = $p->{cop_id} = $fx->{magical_cop_id} || $fx->{id_counter};
 
-	# make entry in %{$fx->{applied}} with chain, code, display-type, children
-
-	my ($n, $type, $parent_id, $parameter)  = 
-		@p{qw(chain type parent_id parameter)};
-	my $i = $fx_cache->{full_label_to_index}->{$type};
-
+	my $i = effect_index($type);
 
 	$debug and print "Issuing a cop_id for track $n: $id\n";
-
-	$fx->{applied}->{$id} = {chain => $n, 
-					  type => $type,
-					  display => $fx_cache->{registry}->[$i]->{display},
-					  owns => [] }; 
-
-	$p->{cop_id} = $id;
-
-	# set defaults
 	
-	if (! $p{values}){
+	# make entry in $fx->{applied} with chain, code, display-type, children
+
+	$fx->{applied}->{$id} = 
+	{
+		chain 	=> $n, 
+		type 	=> $type,
+		display => $fx_cache->{registry}->[$i]->{display}, # XX do we need this???
+		owns 	=> [],
+	}; 
+
+	# set defaults for effects only (not controllers)
+	
+	if (! $parent_id and ! $p->{values}){
 		my @vals;
 		$debug and print "no settings found, loading defaults if present\n";
-		my $i = $fx_cache->{full_label_to_index}->{ $fx->{applied}->{$id}->{type} };
 		
-		# don't initialize first parameter if operator has a parent
-		# i.e. if operator is a controller
+		# if the effect is a controller (has a parent), we don't 
+		# initialize the first parameter (the control target)
 		
-		for my $p ($parent_id ? 1 : 0..$fx_cache->{registry}->[$i]->{count} - 1) {
+		for my $j (0..$fx_cache->{registry}->[$i]->{count} - 1) {
 		
-			my $default = $fx_cache->{registry}->[$i]->{params}->[$p]->{default};
-			push @vals, $default;
+			push @vals, $fx_cache->{registry}->[$i]->{params}->[$j]->{default};
 		}
 		$debug and print "copid: $id defaults: @vals \n";
-		$fx->{params}->{$id} = \@vals;
+		$p->{values} = \@vals;
 	}
+	
+	$fx->{params}->{$id} = $p->{values};
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
 
 		# store relationship
-		$debug and print "parent owns" , join " ",@{ $fx->{applied}->{$parent_id}->{owns}}, "\n";
 
 		push @{ $fx->{applied}->{$parent_id}->{owns}}, $id;
+		$debug and print "parent owns" , join " ",@{ $fx->{applied}->{$parent_id}->{owns}}, "\n";
+
 		$debug and print join " ", "my attributes:", (keys %{ $fx->{applied}->{$id} }), "\n";
 		$fx->{applied}->{$id}->{belongs_to} = $parent_id;
 		$debug and print join " ", "my attributes again:", (keys %{ $fx->{applied}->{$id} }), "\n";
@@ -460,24 +489,17 @@ sub cop_add {
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
 		
-		$fx->{params}->{$id}->[0] = $parameter + 1; 
+		#$fx->{params}->{$id}->[0] = $parameter + 1;  # XXX
+			# only GUI sets $parameter XXXX
 		
- 		# find position of parent and insert child immediately afterwards
+ 		# find position of parent in the track ops array 
+ 		# and insert child immediately afterwards
 
- 		my $end = scalar @{ $ti{$n}->ops } - 1 ; 
- 		for my $i (0..$end){
- 			splice ( @{$ti{$n}->ops}, $i+1, 0, $id ), last
- 				if $ti{$n}->ops->[$i] eq $parent_id
- 		}
+		insert_after_string($parent_id, $id, @{$ti{$n}->ops}), 
+
 	}
 	else { push @{$ti{$n}->ops }, $id; } 
 
-	# set values if present
-	
-	# ugly! The passed values ref may be used for multiple
-	# instances, so we copy it here [ @$values ]
-	
-	$fx->{params}->{$id} = [ @{$p{values}} ] if $p{values};
 
 	# make sure the counter $fx->{id_counter} will not occupy an
 	# already used value
