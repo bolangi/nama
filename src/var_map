@@ -78,7 +78,6 @@
 	@ecasound_pids				$engine->{pids}
 	$e							$engine->{ecasound}
 
-	$magical_cop_id				$fx->{magical_cop_id}
 	$cop_hints_yml 				$fx->{ecasound_effect_hints}
 	%offset        				$fx->{offset}
 	@already_muted  			$fx->{muted}

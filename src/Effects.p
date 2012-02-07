@@ -505,10 +505,7 @@ sub cop_add {
 	# return existing op_id if effect already exists
 	return $id if $id and $fx->{applied}->{$id};
 	
-	# use an externally provided (magical) id or the
-	# incrementing counter
-	
-	$id = $p->{cop_id} = $fx->{magical_cop_id} || $fx->{id_counter};
+	$id = $p->{cop_id} = $fx->{id_counter};
 
 	my $i = effect_index($type);
 
