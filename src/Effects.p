@@ -39,7 +39,7 @@ sub add_effect {
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
-	cop_add($p); 
+	$id = cop_add($p); 
 	
 	$ui->add_effect_gui($p) unless $ti{$n}->hide;
 	if( valid_engine_setup() )
@@ -63,7 +63,7 @@ sub insert_effect {
 	print("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	print("Cannot insert effect before controller.\n"), return 
-		if $fx->{applied}->{$before}->{belongs_to};
+		if is_controller($before);
 
 	if ($running){
 		$ui->stop_heartbeat;
@@ -174,7 +174,7 @@ sub remove_effect {
 	carp("$id: does not exist, skipping...\n"), return unless $fx->{applied}->{$id};
 	my $n = $fx->{applied}->{$id}->{chain};
 		
-	my $parent = $fx->{applied}->{$id}->{belongs_to} ;
+	my $parent = parent($id);
 	$debug and print "id: $id, parent: $parent\n";
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -221,7 +221,7 @@ sub position_effect {
 	# we cannot handle controllers
 	
 	print("$op or $pos: controller not allowed, skipping.\n"), return 
-		if grep{ $fx->{applied}->{$_}->{belongs_to} } $op, $pos;
+		if grep{ is_controller($_) } $op, $pos;
 	
 	# first, modify track data structure
 	
@@ -273,7 +273,7 @@ sub ecasound_effect_index {
 	$debug and print "id: $id n: $n \n",join $/,@{ $ti{$n}->ops }, $/;
 	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
-			next if $fx->{applied}->{$op}->{belongs_to};
+			next if is_controller($op);
 			++$opcount;
 			last if $op eq $id
 	} 
@@ -295,7 +295,7 @@ sub ecasound_operator_index { # does not include offset
 	my $position;
 	for my $i (0..scalar @ops - 1) {
 		$position = $i, last if $ops[$i] eq $id;
-		$controller_count++ if $fx->{applied}->{$ops[$i]}{belongs_to};
+		$controller_count++ if is_controller($ops[$i]);
 	}
 	$position -= $controller_count; # skip controllers 
 	++$position; # translates 0th to chain-position 1
@@ -311,7 +311,7 @@ sub ecasound_controller_index {
 	my $position;
 	for my $i (0..scalar @ops - 1) {
 		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! $fx->{applied}->{$ops[$i]}{belongs_to};
+		$operator_count++ if ! is_controller($ops[$i]);
 	}
 	$position -= $operator_count; # skip operators
 	++$position; # translates 0th to chain-position 1
@@ -376,12 +376,12 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub apply_op {
 	$debug2 and print "&apply_op\n";
 	my $id = shift;
-	! $id and warn "null id, skipping";
+	! $id and carp "null id, skipping";
 	return unless $id;
 	my $selected = shift;
 	$debug and print "id: $id\n";
 	my $code = $fx->{applied}->{$id}->{type};
-	my $dad = $fx->{applied}->{$id}->{belongs_to};
+	my $dad = parent($id);
 	$debug and print "chain: $fx->{applied}->{$id}->{chain} type: $fx->{applied}->{$id}->{type}, code: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
@@ -398,7 +398,7 @@ sub apply_op {
 
 	# if my parent has a parent then we need to append the -kx  operator
 
-	$add .= " -kx" if $fx->{applied}->{$dad}->{belongs_to};
+	$add .= " -kx" if is_controller($dad);
 	$debug and print "command:  ", $add, "\n";
 
 	eval_iam("c-select $fx->{applied}->{$id}->{chain}") 
@@ -428,7 +428,7 @@ sub remove_op {
 	my $id = shift;
 	my $n = $fx->{applied}->{$id}->{chain};
 	my $index;
-	my $parent = $fx->{applied}->{$id}->{belongs_to}; 
+	my $parent = parent($id);
 
 	# select chain
 	
@@ -482,12 +482,9 @@ sub remove_op {
 
 sub root_parent { 
 	my $id = shift;
-	my $parent = $fx->{applied}->{$id}->{belongs_to};
+	my $parent = parent($id);
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
-	my $root_parent = $fx->{applied}->{$parent}->{belongs_to};
-	$parent = $root_parent || $parent;
-	$debug and print "$id: is a controller-controller, root parent: $parent\n";
-	$parent;
+	parent($parent) || $parent
 }
 
 ## Nama effects are represented by entries in $fx->{applied}
@@ -677,7 +674,9 @@ sub ops_with_controller {
 	::ChainSetup::engine_tracks();
 }
 
-sub is_controller { my $id = shift; $fx->{applied}->{$id}{belongs_to} }
+sub is_controller { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+
+*parent = \&is_controller;
 
 sub find_op_offsets {
 
