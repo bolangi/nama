@@ -953,12 +953,9 @@ delete_effect_chain: _delete_effect_chain ident(s) {
 	1;
 }
 list_effect_chains: _list_effect_chains ident(s?) {
-	::pager( 
-		map{ ::EffectChain::find(name => $_)->dump() } @{ $item{'ident(s?)'} } 
-	);
+	::pager( map{ $_->dump } ::EffectChain::find(user => 1)  );
 	1;
 }
-
     
 bypass_effects:   _bypass_effects op_id(s) { 
 	# save by pushing onto current track's effect chain list
