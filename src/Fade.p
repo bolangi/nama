@@ -322,20 +322,17 @@ sub add_fader {
 
 	my $id = $track->fader;
 
-	# create a fader if necessary
+	# create a fader if necessary, place before first effect
+	# if it exists
 	
 	if (! $id){	
-		
 		my $first_effect = $track->ops->[0];
-		if ( $first_effect ){
-			$id = ::Text::t_insert_effect($first_effect, $config->{fader_op}, [0]);
-		} else { 
-			$id = add_effect({
-				track 	=> $track, 
-				type 	=> $config->{fader_op}, 
-				values 	=> [0],
-			});
-		}
+		$id = ::add_effect({
+				before 	=> $first_effect, 
+				track	=> $track,
+				type	=> $config->{fader_op}, 
+				values	=> [0],
+		});
 		$track->set(fader => $id);
 	}
 	$id

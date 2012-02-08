@@ -35,16 +35,32 @@ sub set_chain_value {
 	{ 
 		$p->{chain} = chain($p->{parent_id})
 	}
+	# set chain from insert target if known (insert effect)
+	
+	elsif( $p->{before} )
+	{
+		$p->{chain} = chain($p->{before});
+	}
 	$debug and print(yaml_out($p));
+
 }
+
+# we allow add_effect to handle both regular add effect as well as
+# insert effect cases
 
 sub add_effect { 
 	my $p = shift;
 	
 	set_chain_value($p);
 
-	my ($n,$code,$parent_id,$id,$suggested_id, $parameter,$values) =
-		@$p{qw( chain type parent_id cop_id suggested_id parameter values)};
+	# we do a kind of GOTO for insert effect
+	# insert_effect() in turn calls add_effect
+	# to avoid a loop, insert_effect() removes $p->{before}
+	
+	return insert_effect($p) if $p->{before};
+
+	my ($n,$before, $code,$parent_id,$id,$suggested_id, $parameter,$values) =
+		@$p{qw( chain before type parent_id cop_id suggested_id parameter values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
@@ -65,7 +81,8 @@ sub add_effect {
 
 }
 sub insert_effect {
-	my ($before, $code, $values) = @_;
+	my $p = shift;
+	my ($before, $code, $values) = @$p{qw(before type values)};
 	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
 	$code = effect_code( $code );	
 	my $running = engine_running();
@@ -106,7 +123,10 @@ sub insert_effect {
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}
 
-	add_effect({track => $track, type => $code, values => $values} );
+	# call add_effect, making sure we don't come back!
+	
+	delete $p->{before};
+	add_effect($p);
 
 	$debug and print join " ",@{$track->ops}, $/; 
 
@@ -496,8 +516,8 @@ sub cop_add {
 	$debug and say yaml_out($p);
 
 	# parameter is used only by GUI XXX
-	my ($n, $type, $id, $parent_id, $parameter)  = 
-		@$p{qw(chain type cop_id parent_id parameter)};
+	my ($n, $type, $id, $parent_id, $may_change_id, $parameter)  = 
+		@$p{qw(chain type cop_id parent_id may_change_id parameter)};
 
 	# return existing op_id if effect already exists
 	return $id if $id and fx($id);

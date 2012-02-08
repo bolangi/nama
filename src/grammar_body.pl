@@ -688,9 +688,9 @@ add_effect: _add_effect effect value(s?) {
 	{
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
-		$::this_op = $id; # set current effect
 
 		print "\nAdded $id ($iname)\n\n";
+		$::this_op = $id;
 	}
  	1;
 }
@@ -701,7 +701,11 @@ insert_effect: _insert_effect before effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
-	my $id = ::Text::t_insert_effect($before, $code, $values);
+	my $id = ::add_effect({
+		before 	=> $before, 
+		type	=> $code, 
+		values	=> $values,
+	});
 	if($id)
 	{
 		my $i = ::effect_index($code);
@@ -711,6 +715,7 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		print "\nInserted $id ($iname) before $before ($bname)\n\n";
+		$::this_op = $id;
 	}
 	1;}
 

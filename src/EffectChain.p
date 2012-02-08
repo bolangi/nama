@@ -4,8 +4,9 @@ package ::EffectChain;
 use Modern::Perl;
 use Carp;
 use Exporter qw(import);
+use Data::Rmap;
 
-use ::Globals qw($fx $this_op);
+use ::Globals qw($fx $this_op $debug);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
@@ -29,7 +30,24 @@ use ::Object qw(
 		bypass
 		);
 
+
 initialize();
+
+## sugar for accessing individual effect attributes
+
+sub is_controller {
+	my ($self, $id) = @_;
+	$self->{ops_data}->{$_}->{belongs_to}
+}
+*parent = \&is_controller;
+sub type {
+	my ($self, $id) = @_;
+	$self->{ops_data}->{$_}->{type}
+}
+sub params {
+	my ($self, $id) = @_;
+	$self->{ops_data}->{$_}->{params}
+}
 
 sub initialize {
 	$n = 1;
@@ -50,8 +68,8 @@ sub new {
 	my $n = $vals{n} || ++$n;
 	my $ops_data = {};
 	map { 	
-		$ops_data->{$_}           = $fx->{applied}->{$_};
-		$ops_data->{$_}->{params} = $fx->{params}->{$_};
+		$ops_data->{$_}           = ::fx($_);
+		$ops_data->{$_}->{params} = ::params($_);
 		delete $ops_data->{$_}->{chain};
 		delete $ops_data->{$_}->{display};
 
@@ -65,9 +83,10 @@ sub new {
 
 		}, $class;
 	$by_index{$n} = $object;
-	$object->dumpp;
+	$debug and say $object->dump;
 	$object;
 }
+
 sub add {
 	my $self = shift;
 	my $track = shift;
@@ -78,26 +97,15 @@ sub add {
 	#@$p{qw( chain type parent_id cop_id parameter values)};
 	my $before = $track->vol;
 	map 
-	{  
-		# insert effect, not controller, if necessary
-
-		if ($before and !  $self->{ops_data}->{belongs_to})
-		{
-			insert_effect(
-				$before, 
-				$self->ops_data->{$_}->{type}, 
-				$self->ops_data->{$_}->{params}
-			);
-		}
-		else 
-		{ 
-			add_effect({
-				track  => $track, 
-				type   => $self->ops_data->{$_}->{type}, 
-				values => $self->ops_data->{$_}->{params},
-				parent_id => $self->ops_data->{$_}->{belongs_to},
-			});
-		}
+	{	add_effect({
+			before		=> $before, # for effect, not controller
+			chain  		=> $track->n,
+			type   		=> $self->type($_),
+			values 		=> $self->params($_),
+			parent_id 	=> $self->parent($_), # only indicates controller
+			cop_id 		=> $_,
+			weak_assignment => 1,
+		});
 	} @{$self->ops_list};
 }
 sub destroy {
