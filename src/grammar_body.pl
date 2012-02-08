@@ -527,7 +527,7 @@ unity: _unity {
 	::effect_update_copp_set( 
 		$::this_track->vol, 
 		0, 
-		$::fx->{unity_level}->{$::fx->{applied}->{$::this_track->vol}->{type}}
+		$::fx->{unity_level}->{::type($::this_track->vol)}
 	);
 	1;}
 
@@ -644,7 +644,7 @@ add_controller: _add_controller parent effect value(s?) {
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pi = 	::effect_index(::type($parent));
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -668,7 +668,7 @@ add_controller: _add_controller effect value(s?) {
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pi = 	::effect_index(::type($parent));
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -707,7 +707,7 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $bi = 	::effect_index($::fx->{applied}->{$before}->{type});
+		my $bi = 	::effect_index(::type($before));
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		print "\nInserted $id ($iname) before $before ($bname)\n\n";
@@ -718,7 +718,7 @@ before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	::modify_multiple_effects( 
 		[$::this_op], 
 		$item{'parameter(s)'},
@@ -729,7 +729,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	print ::Text::show_effect($::this_op);
 	1;
@@ -759,14 +759,14 @@ new_following_op: op_id
 show_effect: _show_effect op_id(s) {
 	my @lines = 
 		map{ ::Text::show_effect($_) } 
-		grep{ $::fx->{applied}->{$_} }
+		grep{ ::fx($_) }
 		@{ $item{'op_id(s)'}};
 	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-	unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	print ::Text::show_effect($::this_op);
 	1;
 }
@@ -960,7 +960,7 @@ bypass_effects:   _bypass_effects op_id(s) {
 	my $arr_ref = $item{'op_id(s)'};
 
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! $::fx->{applied}->{$_} } @$arr_ref;
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	say("@illegal: illegal effect(s), aborting.") if @illegal;
 	map{ ::bypass_effect($_) } @$arr_ref;
 }
