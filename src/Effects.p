@@ -13,6 +13,8 @@ sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
 sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns}       }
 sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
+sub params : lvalue { my $id = shift; $fx->{params}->{$id}
+}
 
 sub set_chain_value {
 	my $p = shift;
@@ -143,7 +145,6 @@ sub modify_effect {
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
-	#print "op_id: $op_id, code: ",$fx->{applied}->{$op_id}->{type}," parameter count: $parameter_count\n";
 
 	print("$op_id: effect does not exist, skipping\n"), return 
 		unless fx($op_id);
@@ -179,9 +180,9 @@ sub remove_effect {
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	carp("$id: does not exist, skipping...\n"), return unless $fx->{applied}->{$id};
-	my $n = chain($id);
-		
-	my $parent = father($id);
+	my $n 		= chain($id);
+	my $parent 	= father($id);
+	my $owns	= owns($id);
 	$debug and print "id: $id, parent: $parent\n";
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -189,36 +190,33 @@ sub remove_effect {
 
 	$ui->remove_effect_gui($id);
 
-		# recursively remove children
-		$debug and print "children found: ", join "|",@{$fx->{applied}->{$id}->{owns}},"\n";
-		map{remove_effect($_)}@{ $fx->{applied}->{$id}->{owns} } 
-			if defined $fx->{applied}->{$id}->{owns};
+	# recursively remove children
+	$debug and say "children found: ", join ",",@$owns if defined $owns;
+	map{ remove_effect($_) } @$owns if defined $owns;
 ;
 
-	if ( ! $parent ) { # i am a chain operator, have no parent
-		remove_op($id);
+	# remove chain operator
+	
+	if ( ! $parent ) { remove_op($id) } 
 
-	} else {  # i am a controller
-
-	# remove the controller
+	# remove controller
+	
+	else { 
  			
  		remove_op($id);
 
-	# i remove ownership of deleted controller
+		# remove parent ownership of deleted controller
 
-		$debug and print "parent $parent owns list: ", join " ",
-			@{ $fx->{applied}->{$parent}->{owns} }, "\n";
+		my $parent_owns = owns($parent);
+		$debug and say "parent $parent owns: ", join ",", @$parent_owns;
 
-		@{ $fx->{applied}->{$parent}->{owns} }  =  grep{ $_ ne $id}
-			@{ $fx->{applied}->{$parent}->{owns} } ; 
-		$fx->{applied}->{$id}->{belongs_to} = undef;
-		$debug and print "parent $parent new owns list: ", join " ",
-			@{ $fx->{applied}->{$parent}->{owns} } ,$/;
+		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
+		$debug and say "parent $parent new owns list: ", join ",", @$parent_owns;
 
 	}
 	$ti{$n}->remove_effect_from_track( $id ); 
 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
-	delete $fx->{params}->{$id}; # remove entry from chain operator parameters list
+	delete $fx->{params }->{$id}; # remove entry from chain operator parameters list
 	$this_op = undef;
 }
 
@@ -232,7 +230,7 @@ sub position_effect {
 	
 	# first, modify track data structure
 	
-	print("$op: effect does not exist, skipping.\n"), return unless $fx->{applied}->{$op};
+	print("$op: effect does not exist, skipping.\n"), return unless fx($op);
 	my $track = $ti{chain($op)};
 	my $op_index = nama_effect_index($op);
 	my @new_op_list = @{$track->ops};
@@ -502,7 +500,7 @@ sub cop_add {
 		@$p{qw(chain type cop_id parent_id parameter)};
 
 	# return existing op_id if effect already exists
-	return $id if $id and $fx->{applied}->{$id};
+	return $id if $id and fx($id);
 	
 	$id = $p->{cop_id} = $fx->{id_counter};
 
@@ -544,12 +542,12 @@ sub cop_add {
 
 		# store relationship
 
-		push @{ $fx->{applied}->{$parent_id}->{owns}}, $id;
-		$debug and print "parent owns" , join " ",@{ $fx->{applied}->{$parent_id}->{owns}}, "\n";
+		push @{ owns($parent_id) }, $id;
+		$debug and say "parent owns" , join " ",@{owns($parent_id)};
 
-		$debug and print join " ", "my attributes:", yaml_out($fx->{applied}->{$id}), "\n";
-		$fx->{applied}->{$id}->{belongs_to} = $parent_id;
-		$debug and print join " ", "my attributes again:", yaml_out($fx->{applied}->{$id}), "\n";
+		$debug and say join " ", "my attributes:", yaml_out(fx($id));
+		father($id) = $parent_id;
+		$debug and say join " ", "my attributes again:", yaml_out(fx($id));
 		$debug and print "parameter: $parameter\n";
 
 		# set fx-param to the parameter number, which one
@@ -570,7 +568,7 @@ sub cop_add {
 	# make sure the counter $fx->{id_counter} will not occupy an
 	# already used value
 	
-	while( $fx->{applied}->{$fx->{id_counter}}){$fx->{id_counter}++};
+	while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
 
 	$id;
 }
@@ -592,7 +590,7 @@ sub effect_update {
 
 	my ($id, $param, $val) = @_;
 	$param++; # so the value at $p[0] is applied to parameter 1
-	carp("$id: effect not found. skipping...\n"), return unless $fx->{applied}->{$id};
+	carp("$id: effect not found. skipping...\n"), return unless fx($id);
 	my $chain = chain($id);
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
@@ -671,7 +669,7 @@ sub get_cop_params {
 		
 sub ops_with_controller {
 	grep{ ! is_controller($_) }
-	grep{ scalar @{$fx->{applied}->{$_}{owns}} }
+	grep{ scalar @{owns($_)} }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }
@@ -703,7 +701,7 @@ sub expanded_ops_list { # including controllers
 	map 
 	{ push @expanded, 
 		$_, 
-		expanded_ops_list( @{ $fx->{applied}->{$_}->{owns} } );
+		expanded_ops_list( @{owns($_)} );
  	} @ops_list;
 	@expanded
 }
@@ -715,8 +713,8 @@ sub ops_data {
 
 	# keep parameters with other fx data
 	map { 	
-		$ops_data->{$_}            = $fx->{applied}->{$_};
-		$ops_data->{$_}->{params}  = $fx->{params}->{$_};
+		$ops_data->{$_}            = fx($_);
+		$ops_data->{$_}->{params}  = params($_);
 	} @ops_list;
 	
 	# we don't need chain (track) number or display type
@@ -1243,7 +1241,7 @@ sub automix {
 
 	## accommodate ea and eadb volume controls
 
-	my $vol_operator = $fx->{applied}->{$tn{$tracks[0]}->vol}{type};
+	my $vol_operator = type($tn{$tracks[0]}->vol);
 
 	my $reduce_vol_command  = $vol_operator eq 'ea' ? 'vol / 10' : 'vol - 10';
 	my $restore_vol_command = $vol_operator eq 'ea' ? 'vol * 10' : 'vol + 10';
