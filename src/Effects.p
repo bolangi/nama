@@ -8,7 +8,7 @@ use ::Util qw(round);
 no warnings 'uninitialized';
 
 sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
-sub father : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
 sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns}       }
@@ -181,7 +181,7 @@ sub remove_effect {
 	my $id = shift;
 	carp("$id: does not exist, skipping...\n"), return unless $fx->{applied}->{$id};
 	my $n 		= chain($id);
-	my $parent 	= father($id);
+	my $parent 	= parent($id);
 	my $owns	= owns($id);
 	$debug and print "id: $id, parent: $parent\n";
 
@@ -386,14 +386,14 @@ sub apply_op {
 	my $selected = shift;
 	$debug and print "id: $id\n";
 	my $code = type($id);
-	my $dad = father($id);
+	my $dad = parent($id);
 	my $chain = chain($id);
 	$debug and print "chain: ",chain($id),"type: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
 	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
-	my @vals = @{ $fx->{params}->{$id} };
+	my @vals = @{ params($id) };
 	$debug and print "values: @vals\n";
 
 	# we start to build iam command
@@ -482,9 +482,9 @@ sub remove_op {
 
 sub root_parent { 
 	my $id = shift;
-	my $parent = father($id);
+	my $parent = parent($id);
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
-	father($parent) || $parent
+	parent($parent) || $parent
 }
 
 ## Nama effects are represented by entries in $fx->{applied}
@@ -535,7 +535,7 @@ sub cop_add {
 		$p->{values} = \@vals;
 	}
 	
-	$fx->{params}->{$id} = $p->{values};
+	params($id) = $p->{values};
 
 	if ($parent_id) {
 		$debug and print "parent found: $parent_id\n";
@@ -546,7 +546,7 @@ sub cop_add {
 		$debug and say "parent owns" , join " ",@{owns($parent_id)};
 
 		$debug and say join " ", "my attributes:", yaml_out(fx($id));
-		father($id) = $parent_id;
+		parent($id) = $parent_id;
 		$debug and say join " ", "my attributes again:", yaml_out(fx($id));
 		$debug and print "parameter: $parameter\n";
 
@@ -631,6 +631,7 @@ sub effect_update {
 sub effect_update_copp_set {
 	my ($id, $param, $val) = @_;
 	effect_update( @_ );
+	# params($id)->[$param] = $val; # equivalent but confusing
 	$fx->{params}->{$id}->[$param] = $val;
 }
 
@@ -674,8 +675,6 @@ sub ops_with_controller {
 	::ChainSetup::engine_tracks();
 }
 
-
-*parent = \&is_controller;
 
 sub find_op_offsets {
 
