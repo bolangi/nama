@@ -76,6 +76,7 @@ sub refresh_fade_controller {
 	my $on_level  = $fx->{unity_level}->{$operator};
 
 	# remove controller if present
+	$debug and say "removing fade controller";
 	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
 		{ ::remove_effect($old) }
 
@@ -87,6 +88,7 @@ sub refresh_fade_controller {
 	add_fader($track->name);	
 
 	# add controller
+	$debug and say "applying fade controller";
 	::add_effect({
 		parent_id 	=> $track->fader,
 		type		=> 'klg',	  		 # Ecasound controller

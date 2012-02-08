@@ -409,7 +409,7 @@ sub apply_op {
 	}
 
 	eval_iam($add);
-	$debug and print "children found: ", join ",", "|",@{$fx->{applied}->{$id}->{owns}},"|\n";
+	$debug and print "children found: ", join ",", "(",@{$fx->{applied}->{$id}->{owns}},")\n";
 	my $ref = ref $fx->{applied}->{$id}->{owns} ;
 	$ref =~ /ARRAY/ or croak "expected array";
 	my @owns = @{ $fx->{applied}->{$id}->{owns} };
