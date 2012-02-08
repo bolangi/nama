@@ -57,7 +57,7 @@ sub add_effect {
 	# insert_effect() in turn calls add_effect
 	# to avoid a loop, insert_effect() removes $p->{before}
 	
-	return insert_effect($p) if $p->{before};
+	return _insert_effect($p) if $p->{before};
 
 	my ($n,$before, $code,$parent_id,$id,$suggested_id, $parameter,$values) =
 		@$p{qw( chain before type parent_id cop_id suggested_id parameter values)};
@@ -80,7 +80,7 @@ sub add_effect {
 	$id;
 
 }
-sub insert_effect {
+sub _insert_effect {  # call only from add_effect
 	my $p = shift;
 	my ($before, $code, $values) = @$p{qw(before type values)};
 	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
