@@ -4,7 +4,6 @@ package ::EffectChain;
 use Modern::Perl;
 use Carp;
 use Exporter qw(import);
-use Data::Rmap;
 
 use ::Globals qw($fx $this_op $debug);
 
@@ -39,7 +38,10 @@ sub is_controller {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$_}->{belongs_to}
 }
-*parent = \&is_controller;
+sub parent : lvalue {
+	my ($self, $id) = @_;
+	$self->{ops_data}->{$_}->{belongs_to}
+}
 sub type {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$_}->{type}
@@ -134,10 +136,9 @@ sub add {
 		});
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
+		# change all controllers to belong to new id
 		{
-			bless $self, 'HASH';
-			rmap{ s/$orig_id/$new_id/ } $self->{ops_data};
-			bless $self, __PACKAGE__;
+			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
 	} @{$self->ops_list};
