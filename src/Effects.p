@@ -59,8 +59,8 @@ sub add_effect {
 	
 	return _insert_effect($p) if $p->{before};
 
-	my ($n,$before, $code,$parent_id,$id,$suggested_id, $parameter,$values) =
-		@$p{qw( chain before type parent_id cop_id suggested_id parameter values)};
+	my ($n,$before, $code,$parent_id,$id,$rename_id, $parameter,$values) =
+		@$p{qw( chain before type parent_id cop_id rename_id parameter values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
@@ -516,11 +516,13 @@ sub cop_add {
 	$debug and say yaml_out($p);
 
 	# parameter is used only by GUI XXX
-	my ($n, $type, $id, $parent_id, $may_change_id, $parameter)  = 
-		@$p{qw(chain type cop_id parent_id may_change_id parameter)};
+	my ($n, $type, $id, $parent_id, $rename_id, $parameter)  = 
+		@$p{qw(chain type cop_id parent_id rename_id parameter)};
 
 	# return existing op_id if effect already exists
-	return $id if $id and fx($id);
+	# unless (for effect chains) we prefer to get a new id
+	#
+	return $id if $id and fx($id) and ! $rename_id;
 	
 	$id = $p->{cop_id} = $fx->{id_counter};
 

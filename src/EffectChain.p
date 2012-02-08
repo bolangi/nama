@@ -95,17 +95,51 @@ sub add {
 		unless $self->system;
 
 	#@$p{qw( chain type parent_id cop_id parameter values)};
+
+	
+	# make a copy of object that we can alter
+	# 
+	# we need to alter the op_ids that show
+	# relationship between effects and controllers
+	#
+	# we do this using Data::Rmap to recursively
+	# change the values
+	
+	# this is for the case that the project has
+	# already used he op_ids we've recorded.
+	#
+	# for example:
+	#
+	# $self->{ops_data}->{EF}->{belongs_to}->{AB}
+	#
+	# but op_id AB is taken, AC is allocated
+	# so we need to convert s/AB/AC/
+	#
+	# (an alternative implementation would be to 
+	# store the relationships in a graph)
+	
+	$self = bless { %$self }, __PACKAGE__;
+
+	
 	my $before = $track->vol;
 	map 
-	{	add_effect({
+	{	my $new_id = add_effect({
 			before		=> $before, # for effect, not controller
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
 			values 		=> $self->params($_),
-			parent_id 	=> $self->parent($_), # only indicates controller
+			parent_id 	=> $self->parent($_),
 			cop_id 		=> $_,
-			weak_assignment => 1,
+			rename_id	=> 1,
 		});
+		my $orig_id = $_;
+		if ( $new_id ne $orig_id)
+		{
+			bless $self, 'HASH';
+			rmap{ s/$orig_id/$new_id/ } $self->{ops_data};
+			bless $self, __PACKAGE__;
+		}
+		
 	} @{$self->ops_list};
 }
 sub destroy {
