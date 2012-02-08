@@ -21,6 +21,7 @@ use inc::Module::Install;
 			autodie  0
 			AnyEvent  5.0
 			Data::Dumper::Concise 0
+			Data::Rmap 0
 			Data::Section::Simple 0
 			Event  0
 			File::Find::Rule  0
@@ -33,6 +34,8 @@ use inc::Module::Install;
 			IO::Socket  0
 			IO::Select  0
 			IPC::Open3  0
+			List::Util 0
+			List::MoreUtils 0
 			Modern::Perl  0
 			Module::Load::Conditional  0 
 			Parse::RecDescent  0

@@ -56,9 +56,11 @@ use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Format;
+# use Data::Rmap    # EffectChain.pm
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
 # use List::Util;   # Fade.pm
+# use List::MoreUtils;   # Effects.pm
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
