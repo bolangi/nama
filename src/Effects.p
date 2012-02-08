@@ -7,6 +7,13 @@ use Carp;
 use ::Util qw(round);
 no warnings 'uninitialized';
 
+sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub father : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
+sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
+sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns}       }
+sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
+
 sub set_chain_value {
 	my $p = shift;
 
@@ -24,7 +31,7 @@ sub set_chain_value {
 	
 	elsif( $p->{parent_id})
 	{ 
-		$p->{chain} = $fx->{applied}->{$p->{parent_id}}->{chain} 
+		$p->{chain} = chain($p->{parent_id})
 	}
 	$debug and print(yaml_out($p));
 }
@@ -71,7 +78,7 @@ sub insert_effect {
 		eval_iam('stop');
 		sleeper( 0.05);
 	}
-	my $n = $fx->{applied}->{ $before }->{chain} or 
+	my $n = chain($before) or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
 	
@@ -139,7 +146,7 @@ sub modify_effect {
 	#print "op_id: $op_id, code: ",$fx->{applied}->{$op_id}->{type}," parameter count: $parameter_count\n";
 
 	print("$op_id: effect does not exist, skipping\n"), return 
-		unless $fx->{applied}->{$op_id};
+		unless fx($op_id);
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 		my $new_value = $value; 
@@ -172,9 +179,9 @@ sub remove_effect {
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
 	carp("$id: does not exist, skipping...\n"), return unless $fx->{applied}->{$id};
-	my $n = $fx->{applied}->{$id}->{chain};
+	my $n = chain($id);
 		
-	my $parent = parent($id);
+	my $parent = father($id);
 	$debug and print "id: $id, parent: $parent\n";
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -226,7 +233,7 @@ sub position_effect {
 	# first, modify track data structure
 	
 	print("$op: effect does not exist, skipping.\n"), return unless $fx->{applied}->{$op};
-	my $track = $ti{$fx->{applied}->{$op}->{chain}};
+	my $track = $ti{chain($op)};
 	my $op_index = nama_effect_index($op);
 	my @new_op_list = @{$track->ops};
 	# remove op
@@ -237,7 +244,7 @@ sub position_effect {
 		push @new_op_list, $op;
 	}
 	else { 
-		my $track2 = $ti{$fx->{applied}->{$pos}->{chain}};
+		my $track2 = $ti{chain($pos)};
 		print("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
 		$new_op_index = nama_effect_index($pos); 
@@ -258,7 +265,7 @@ sub position_effect {
 sub nama_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
 	my $id = shift;
-	my $n = $fx->{applied}->{$id}->{chain};
+	my $n = chain($id);
 	my $arr = $ti{$n}->ops;
 	$debug and print "id: $id n: $n \n";
 	$debug and print join $/,@{ $ti{$n}->ops }, $/;
@@ -268,7 +275,7 @@ sub nama_effect_index { # returns nama chain operator index
 }
 sub ecasound_effect_index { 
 	my $id = shift;
-	my $n = $fx->{applied}->{$id}->{chain};
+	my $n = chain($id);
 	my $opcount;  # one-based
 	$debug and print "id: $id n: $n \n",join $/,@{ $ti{$n}->ops }, $/;
 	for my $op (@{ $ti{$n}->ops }) { 
@@ -288,7 +295,7 @@ sub ctrl_index {
 
 sub ecasound_operator_index { # does not include offset
 	my $id = shift;
-	my $chain = $fx->{applied}->{$id}{chain};
+	my $chain = chain($id);
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $controller_count = 0;
@@ -304,7 +311,7 @@ sub ecasound_operator_index { # does not include offset
 	
 sub ecasound_controller_index {
 	my $id = shift;
-	my $chain = $fx->{applied}->{$id}{chain};
+	my $chain = chain($id);
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $operator_count = 0;
@@ -380,9 +387,10 @@ sub apply_op {
 	return unless $id;
 	my $selected = shift;
 	$debug and print "id: $id\n";
-	my $code = $fx->{applied}->{$id}->{type};
-	my $dad = parent($id);
-	$debug and print "chain: $fx->{applied}->{$id}->{chain} type: $fx->{applied}->{$id}->{type}, code: $code\n";
+	my $code = type($id);
+	my $dad = father($id);
+	my $chain = chain($id);
+	$debug and print "chain: ",chain($id),"type: $code\n";
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
@@ -392,29 +400,23 @@ sub apply_op {
 
 	# we start to build iam command
 
-	my $add = $dad ? "ctrl-add " : "cop-add "; 
+	my $add_cmd = $dad ? "ctrl-add " : "cop-add "; 
 	
-	$add .= $code . join ",", @vals;
+	$add_cmd .= $code . join ",", @vals;
 
-	# if my parent has a parent then we need to append the -kx  operator
+	# append the -kx  operator for a controller-controller
+	$add_cmd .= " -kx" if is_controller($dad);
 
-	$add .= " -kx" if is_controller($dad);
-	$debug and print "command:  ", $add, "\n";
+	$debug and print "command:  ", $add_cmd, "\n";
 
-	eval_iam("c-select $fx->{applied}->{$id}->{chain}") 
-		if $selected != $fx->{applied}->{$id}->{chain};
+	eval_iam("c-select $chain") if $selected != $chain;
+	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
+	eval_iam($add_cmd);
 
-	if ( $dad ) {
-	eval_iam("cop-select " . ecasound_effect_index($dad));
-	}
-
-	eval_iam($add);
-	$debug and print "children found: ", join ",", "(",@{$fx->{applied}->{$id}->{owns}},")\n";
-	my $ref = ref $fx->{applied}->{$id}->{owns} ;
+	my $ref = ref owns($id) ;
 	$ref =~ /ARRAY/ or croak "expected array";
-	my @owns = @{ $fx->{applied}->{$id}->{owns} };
-	$debug and print "owns: @owns\n";  
-	#map{apply_op($_)} @owns;
+	my @owns = @{ owns($id) }; 
+	$debug and say "children found: ", join ",", @{owns($id)};
 
 }
 sub remove_op {
@@ -426,17 +428,17 @@ sub remove_op {
 	return unless eval_iam('cs-connected') and eval_iam('cs-is-valid');
 
 	my $id = shift;
-	my $n = $fx->{applied}->{$id}->{chain};
-	my $index;
-	my $parent = parent($id);
+	my $n = chain($id);
 
 	# select chain
 	
 	return unless ecasound_select_chain($n);
 
 	# deal separately with controllers and chain operators
+	
+	my $index;
 
-	if ( !  $parent ){ # chain operator
+	if ( ! is_controller($id) ){ # chain operator
 		$debug and print "no parent, assuming chain operator\n";
 	
 		$index = ecasound_effect_index( $id );
@@ -482,9 +484,9 @@ sub remove_op {
 
 sub root_parent { 
 	my $id = shift;
-	my $parent = parent($id);
+	my $parent = father($id);
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
-	parent($parent) || $parent
+	father($parent) || $parent
 }
 
 ## Nama effects are represented by entries in $fx->{applied}
@@ -591,7 +593,7 @@ sub effect_update {
 	my ($id, $param, $val) = @_;
 	$param++; # so the value at $p[0] is applied to parameter 1
 	carp("$id: effect not found. skipping...\n"), return unless $fx->{applied}->{$id};
-	my $chain = $fx->{applied}->{$id}{chain};
+	my $chain = chain($id);
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
 	$debug and print "chain $chain id $id param $param value $val\n";
@@ -649,7 +651,7 @@ sub sync_effect_parameters {
 
 sub sync_one_effect {
 		my $id = shift;
-		my $chain = $fx->{applied}->{$id}{chain};
+		my $chain = chain($id);
 		eval_iam("c-select $chain");
 		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
 		$fx->{params}->{$id} = get_cop_params( scalar @{$fx->{params}->{$id}} );
@@ -674,7 +676,6 @@ sub ops_with_controller {
 	::ChainSetup::engine_tracks();
 }
 
-sub is_controller { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 
 *parent = \&is_controller;
 
