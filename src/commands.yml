@@ -504,7 +504,7 @@ position_effect:
   type: effect
   what: position an effect before another effect (use 'ZZZ' for end)
   short: pfx
-  parameters: [<s_effect_id>]
+  parameters: [<s_id_to_move>, <s_position_id>]
 show_effect:
   type: effect
   what: show effect information
