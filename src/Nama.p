@@ -150,8 +150,8 @@ package ::File;
 	}
 	1;
 }
-
-$file = bless {
+$file = bless 
+{
 	effects_cache 			=> ['.effects_cache', 		\&project_root],
 	gui_palette 			=> ['palette',        		\&project_root],
 	state_store 			=> ['State',          		\&project_dir ],
@@ -165,7 +165,6 @@ $file = bless {
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
 $gui->{marks} = {};
-
 
 $config = {
 	root_dir 						=> join_path( $ENV{HOME}, "nama"),
@@ -255,9 +254,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Core_subs.pl ) %]
 
-
 package ::;  # for Data::Section
-
 
 1;
 __DATA__
