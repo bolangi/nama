@@ -135,16 +135,34 @@ $debug = 0; # debug statements
 
 #$engine->{events} = {};
 
-$file = {
-			effects_cache 		=> '.effects_cache',
-			gui_palette 		=> 'palette',
-			state_store 		=> 'State',
-			effect_profile 		=> 'effect_profiles',
-			chain_setup 		=> 'Setup.ecs',
-			user_customization 	=> 'custom.pl',
-			project_effect_chains => 'project_effect_chains',
-			user_effect_chains  => 'user_effect_chains',
-};
+{
+package ::File;
+	use Carp;
+	sub AUTOLOAD {
+		my ($self, $filename) = @_;
+		# get tail of method call
+		my ($method) = $::File::AUTOLOAD =~ /([^:]+)$/;
+		croak "$method: illegal method call" unless $self->{$method};
+		my $dir_sub = $self->{$method}->[1];
+		$filename ||= $self->{$method}->[0];
+		my $path = ::join_path($dir_sub->(), $filename);
+		say "full path: $path";
+		$path;
+		
+	}
+	1;
+}
+
+$file = bless {
+	effects_cache 			=> ['.effects_cache', 		\&project_root],
+	gui_palette 			=> ['palette',        		\&project_root],
+	state_store 			=> ['State',          		\&project_dir ],
+	effect_profile 			=> ['effect_profiles',		\&project_root],
+	chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
+	user_customization 		=> ['custom.pl',      		\&project_root],
+	project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
+	global_effect_chains  	=> ['global_effect_chains', \&project_root],
+}, '::File';
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;

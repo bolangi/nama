@@ -197,7 +197,7 @@ sub find_duplicate_inputs { # in Main bus only
 	$bn{Main}->tracks(); # track names;
 }
 sub load_ecs {
-	my $setup = setup_file();
+	my $setup = $file->chain_setup;
 	#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 	return unless -e $setup;
 	#say "passed conditional";

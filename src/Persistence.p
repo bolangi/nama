@@ -9,8 +9,8 @@ use ::Assign qw(quote_yaml_scalars);
 use ::Globals qw(:all);
 
 sub save_state {
-	my $filename = shift || $file->{state_store}; 
-	my $path = join_path(project_dir(), $filename);
+	my $filename = shift;
+	my $path = $file->state_store($filename);
 	$debug2 and print "&save_state\n";
 	$project->{save_file_version_number} = $VERSION;
 
@@ -217,10 +217,7 @@ sub decode {
 sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $filename = shift;
-	$filename = $filename || $file->{state_store};
-	$filename = join_path(project_dir(), $filename)
-		unless $filename =~ m(/);
-	# $filename includes path at this point
+	$filename = $file->state_store($filename);
 
 	my( $path, $suffix ) = get_newest($filename);
 	
@@ -652,7 +649,7 @@ sub save_effect_chains {
 	# incrementing counter
 
 	serialize(
-		file => join_path(project_root(), $file->{global_effect_chains}),
+		file => $file->global_effect_chains,
 		format => 'perl',
 		vars => [ qw(@global_effect_chains_data $VERSION $::EffectChain::n ) ],
 		class => '::',
@@ -660,7 +657,7 @@ sub save_effect_chains {
 	if (@project_effect_chains_data)
 	{
 		serialize(
-			file => join_path(project_dir(), $file->{project_effect_chains}),
+			file => $file->project_effect_chains,
 			format => 'perl',
 			vars => [ qw( @project_effect_chains_data $VERSION) ],
 			class => '::',
@@ -672,12 +669,6 @@ sub save_effect_chains {
 sub restore_effect_chains {
 
 	$debug2 and say "&restore_effect_chains";
-
-	my $global_fx_chains    = join_path(project_root(), $file->{global_effect_chains});
-	my $project_fx_chains = join_path(project_dir(), $file->{project_effect_chains});
-
-	my @fx_chain_files = ($global_fx_chains, $project_fx_chains);
-
 	map{ 
 		my $path = $_;
 		my ($resolved, $format) = get_newest($path);  
@@ -690,7 +681,7 @@ sub restore_effect_chains {
 		my @fx_chains_data = @$ref;
 		map { my $fx_chain = ::EffectChain->new(%$_) } @fx_chains_data;
 		
-	} @fx_chain_files;
+	} ($file->global_effect_chains, $file->project_effect_chains);
 }
 
 sub schedule_autosave { 

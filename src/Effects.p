@@ -754,7 +754,7 @@ sub ops_data {
 
 sub effects_cache {
 	state $registry_format = 'json';
-	join_path(&project_root, $file->{effects_cache} .  ".$registry_format");
+	$file->effects_cache . ".$registry_format";
 }
 sub prepare_static_effects_data{
 	

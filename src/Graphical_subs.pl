@@ -1134,7 +1134,7 @@ sub get_saved_colors {
 	#print "pb: $gui->{_palette}{mw}{background}\n";
 
 
-	my $pal = join_path($config->{root_dir}, $file->{gui_palette});
+	my $pal = $file->gui_palette;
 	$pal .= '.yml';
 	say "pal $pal";
 	$pal = -f $pal 
@@ -1258,7 +1258,7 @@ sub init_palettefields {
 
 sub save_palette {
  	serialize (
- 		file => join_path(project_root(), $file->{gui_palette}),
+ 		file => $file->gui_palette,
 		format => 'yaml',
  		vars => [ qw( $gui->{_palette} $gui->{_nama_palette} ) ],
  		class => '::')

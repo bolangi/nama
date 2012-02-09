@@ -128,7 +128,7 @@ Loading project "untitled".
 	cache_wav_info();
 	rememoize();
 
-	restore_state( $h{settings} ? $h{settings} : $file->{state_store}) unless $config->{opts}->{M} ;
+	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 

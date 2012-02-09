@@ -12,7 +12,7 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
-	my $filename = user_customization_file();
+	my $filename = $file->user_customization();
 	return unless -r $filename;
 	say "reading user customization file $filename";
 	my %custom;
@@ -31,7 +31,6 @@ sub setup_user_customization {
 	}
 	$text->{user_alias}   = $custom{aliases};
 }
-sub user_customization_file { join_path(project_root(),$file->{user_customization}) }
 
 sub gen_coderef {
 	my ($cmd,$code) = @_;
@@ -219,9 +218,6 @@ sub command_process {
 	set_current_bus();
 }
 	
-## called from ChainSetup.pm and Engine_setup_subs.pm
-
-sub setup_file { join_path( project_dir(), $file->{chain_setup}) };
 
 ## called from 
 # Track_subs
