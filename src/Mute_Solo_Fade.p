@@ -56,7 +56,7 @@ sub solo {
 	# get list of already muted tracks if I haven't done so already
 	
 	if ( ! @{$fx->{muted}} ){
-		@{$fx->{muted}} = grep{ defined $_->old_vol_level} 
+		@{$fx->{muted}} = map{ $_->name } grep{ defined $_->old_vol_level} 
                          map{ $tn{$_} } 
 						 ::Track::user();
 	}
@@ -127,7 +127,7 @@ sub nosolo {
 sub all {
 
 	# unmute all tracks
-	do_many_tracks( { tracks => [ ::Track::user() ], method => 'mute' } );
+	do_many_tracks( { tracks => [ ::Track::user() ], method => 'unmute' } );
 
 	# remove listing of muted tracks
 	@{$fx->{muted}} = ();
