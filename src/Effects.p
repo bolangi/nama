@@ -313,6 +313,7 @@ sub ctrl_index {
 
 sub ecasound_operator_index { # does not include offset
 	my $id = shift;
+	$id or croak "missing effect id";
 	my $chain = chain($id);
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};

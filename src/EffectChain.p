@@ -70,8 +70,8 @@ sub new {
 	my $n = $vals{n} || ++$n;
 	my $ops_data = {};
 	map { 	
-		$ops_data->{$_}           = ::fx($_);
-		$ops_data->{$_}->{params} = ::params($_);
+		$ops_data->{$_}           = { %{ ::fx($_)    } };  # copy
+		$ops_data->{$_}->{params} = [ @{ ::params($_)} ];  # copy;
 		delete $ops_data->{$_}->{chain};
 		delete $ops_data->{$_}->{display};
 
@@ -125,7 +125,7 @@ sub add {
 	
 	my $before = $track->vol;
 	map 
-	{	my $new_id = add_effect({
+	{	my $new_id = ::add_effect({
 			before		=> $before, # for effect, not controller
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
@@ -169,7 +169,7 @@ sub find {
 
 	warn("unique chain requested by multiple chains found. Skipping.\n"),
 		return if $unique and @found > 1;
-	return @found
+	return @found; 
 }
 	
 	
