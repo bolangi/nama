@@ -146,9 +146,7 @@ package ::File;
 		my $dir_sub = $self->{$method}->[1];
 		$filename ||= $self->{$method}->[0];
 		my $path = ::join_path($dir_sub->(), $filename);
-		say "full path: $path";
 		$path;
-		
 	}
 	1;
 }
