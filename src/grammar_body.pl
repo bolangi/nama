@@ -934,12 +934,11 @@ new_effect_chain: _new_effect_chain ident op_id(s?) {
 	1;
 }
 add_effect_chain: _add_effect_chain ident {
-	my ($c) = ::EffectChain::find(
+	::EffectChain::find(
 		unique => 1, 
 		user   => 1, 
 		name   => $item{ident}
-	);
-	$c->add($::this_track);
+	)->add($::this_track);
 	1;
 }
 delete_effect_chain: _delete_effect_chain ident(s) {

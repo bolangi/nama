@@ -169,7 +169,7 @@ sub find {
 
 	warn("unique chain requested by multiple chains found. Skipping.\n"),
 		return if $unique and @found > 1;
-	return @found; 
+	return $unique ? pop @found : @found; 
 }
 	
 	
