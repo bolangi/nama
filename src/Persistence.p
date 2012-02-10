@@ -664,6 +664,7 @@ sub convert_effect_chains {
 		my $ec = $converted->{$_};
 		::EffectChain->new(
 			user 		=> 1,
+			name		=> $_,
 			global 		=> 1,
 			ops_list	=> $ec->{ops_list},
 			ops_data	=> $ec->{ops_data},	

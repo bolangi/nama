@@ -953,10 +953,16 @@ delete_effect_chain: _delete_effect_chain ident(s) {
 	1;
 }
 list_effect_chains: _list_effect_chains ident(s?) {
-	::pager( map{ $_->dump } ::EffectChain::find(user => 1)  );
+	my @defaults = (user => 1, profile => undef);
+	my @args;
+	@args = @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	(scalar @args) % 2 == 0 
+		or print("odd number of arguments\n@args\n"), return 0;
+	# zero as arg represents undef
+	#@args = map { $_ == 0 ? undef : $_ } @args;
+	::pager( map{ $_->dump } ::EffectChain::find(@defaults, @args)  );
 	1;
 }
-    
 bypass_effects:   _bypass_effects op_id(s) { 
 	# save by pushing onto current track's effect chain list
 	my $arr_ref = $item{'op_id(s)'};

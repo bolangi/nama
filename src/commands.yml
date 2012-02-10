@@ -682,8 +682,8 @@ delete_effect_chain:
 list_effect_chains:
   type: effect
   short: lec
-  what: list effect chains, matching any strings provided
-  parameters: [<s_frag1> <s_frag2>... ]
+  what: list effect chains, matching key/value pairs if provided
+  parameters: [<s_key1> <s_val1>... ]
 bypass_effects:
   type: effect
   short: bfx
