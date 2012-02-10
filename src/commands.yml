@@ -702,22 +702,17 @@ new_effect_profile:
 apply_effect_profile:
   type: effect
   short: aep
-  what: use an effect profile to overwrite effects of multiple tracks
-  parameters: <s_effect_profile_name>
-overlay_effect_profile:
-  type: effect
-  short: oep
   what: use an effect profile to add effects to multiple tracks
   parameters: <s_effect_profile_name>
 delete_effect_profile:
   type: effect
   short: dep
-  what: remove an effect chain bunch definition
+  what: delete an effect profile
   parameters: <s_effect_profile_name>
 list_effect_profiles:
   type: effect
   short: lep
-  what: list effect chain bunches
+  what: list effect profile 
 cache_track:
   type: track
   short: cache ct

@@ -610,20 +610,6 @@ sub convert_effect_chains {
 
 	#rename $resolved, "$resolved.obsolete";
 
-	# we only save user-defined effect chains
-	# and possibly profiles:
-	# this means we will lose backward compatibility
-	# for:
-	# 1) reversible track caching
-	# 2) 
-	#"_$profile\:$track_name";
-	
-#    profiles will be identified by
-#    profile => 1 
-#    name => myprofile # we allow multiple chains to have same name
-#    track_name => 
-
-	
 	my @keys = keys %{$fx->{chain}} ;
 
 	#### convert data format
@@ -701,7 +687,6 @@ sub convert_effect_chains {
 		);
 		
 	} @cache_keys;
-	#save_effect_chains();
 
 }
 

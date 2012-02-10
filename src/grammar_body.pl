@@ -960,7 +960,10 @@ list_effect_chains: _list_effect_chains ident(s?) {
 		or print("odd number of arguments\n@args\n"), return 0;
 	# zero as arg represents undef
 	#@args = map { $_ == 0 ? undef : $_ } @args;
-	::pager( map{ $_->dump } ::EffectChain::find(@defaults, @args)  );
+	::pager( 
+		map{ $_->dump } 
+		::EffectChain::find(@defaults, @args)  
+	);
 	1;
 }
 bypass_effects:   _bypass_effects op_id(s) { 
@@ -999,19 +1002,24 @@ bunch_name: ident {
 effect_profile_name: ident
 existing_effect_profile_name: ident {
 	print("$item{ident}: no such effect profile\n"), return
-		unless $::fx->{profile}->{$item{ident}};
+		unless ::EffectChain::find(profile => $item{ident});
 	$item{ident}
 }
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name {
 	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
 delete_effect_profile: _delete_effect_profile existing_effect_profile_name {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
-apply_effect_profile: _apply_effect_profile effect_profile_name {
-	::apply_effect_profile(\&::overwrite_effect_chain, $item{effect_profile_name}); 1 }
-overlay_effect_profile: _overlay_effect_profile effect_profile_name {
-	::apply_effect_profile(\&::add_effect_chain, $item{effect_profile_name}); 1 }
-list_effect_profiles: _list_effect_profiles {
-	::pager(::list_effect_profiles()); 1 }
+apply_effect_profile: _apply_effect_profile existing_effect_profile_name {
+	::apply_effect_profile($item{effect_profile_name}); 1 }
+list_effect_profiles: _list_effect_profiles existing_effect_profile_name(?) {
+	my $name;
+	($name) = @{ $item[2] } if $item[2];
+	::pager( 
+		map{ $_->dump } 
+		::EffectChain::find(profile => $name || 1)  
+	);
+	1;
+}
 do_script: _do_script shellish { ::do_script($item{shellish});1}
 scan: _scan { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)

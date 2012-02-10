@@ -5,7 +5,7 @@ use Modern::Perl;
 use Carp;
 use Exporter qw(import);
 
-use ::Globals qw($fx $this_op $debug);
+use ::Globals qw(%tn $this_op $debug);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
@@ -100,36 +100,17 @@ sub new {
 }
 
 sub add {
-	my $self = shift;
-	my $track = shift;
+	my ($self, $track) = @_;
+	
+	# Apply effect chain to track argument, if supplied;
+	# otherwise use the track specified by effect chain's track_name field.
+	
+	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
+	
 	local $this_op; # don't change current op
 	say $track->name, qq(: adding effect chain ). $self->name 
 		unless $self->system;
 
-	#@$p{qw( chain type parent_id cop_id parameter values)};
-
-	
-	# make a copy of object that we can alter
-	# 
-	# we need to alter the op_ids that show
-	# relationship between effects and controllers
-	#
-	# we do this using Data::Rmap to recursively
-	# change the values
-	
-	# this is for the case that the project has
-	# already used he op_ids we've recorded.
-	#
-	# for example:
-	#
-	# $self->{ops_data}->{EF}->{belongs_to}->{AB}
-	#
-	# but op_id AB is taken, AC is allocated
-	# so we need to convert s/AB/AC/
-	#
-	# (an alternative implementation would be to 
-	# store the relationships in a graph)
-	
 	$self = bless { %$self }, __PACKAGE__;
 
 	
@@ -156,7 +137,6 @@ sub add {
 sub destroy {
 	my $self = shift;
 	delete $by_index{$self->n};
-	save_effect_chains();
 }
 	
 sub find { 
@@ -201,7 +181,43 @@ sub find {
 
 	warn("unique chain requested by multiple chains found. Skipping.\n"),
 		return if $unique and @found > 1;
-	return $unique ? pop @found : @found; 
+	return $unique ? pop @found : sort{ $a->n cmp $b->n } @found; 
+}
+####  Effect profile routines
+
+package ::;
+sub new_effect_profile {
+	$debug2 and say "&new_effect_profile";
+	my ($bunch, $profile) = @_;
+	my @tracks = bunch_tracks($bunch);
+	say qq(effect profile "$profile" created for tracks: @tracks);
+	map { 
+		::EffectChain->new(
+			profile 	=> $profile,
+			user		=> 1,
+			global		=> 1,
+			track_name	=> $_,
+			ops_list	=> [ $tn{$_}->fancy_ops ],
+		);
+	} @tracks;
+}
+sub delete_effect_profile { 
+	$debug2 and say "&delete_effect_profile";
+	my $name = shift;
+	say qq(deleting effect profile: $name);
+	map{ $_->destroy} ::EffectChain::find( profile => $name );
+}
+
+sub apply_effect_profile {  # overwriting current effects
+	$debug2 and say "&apply_effect_profile";
+	my ($profile) = @_;
+	my @chains = ::EffectChain::find(profile => $profile);
+
+	map{ say "adding track $_"; add_track($_) } 
+	grep{ !$tn{$_} } 
+	map{ $_->track_name } 
+	@chains;	
+	map{ $_->add } @chains;
 }
 	
 	

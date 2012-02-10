@@ -99,7 +99,6 @@ use ::Realtime ();
 use ::Mute_Solo_Fade ();
 use ::Jack ();
 use ::Regions ();
-use ::Effect_chains ();
 use ::Midi ();
 use ::Memoize ();
 use ::CacheTrack ();
