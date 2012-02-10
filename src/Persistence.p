@@ -585,10 +585,7 @@ sub restore_state {
 
 sub convert_effect_chains {
 
-	
-	my $old_fx_chains = join_path(project_root(), 'effect_chains');
-
-	my ($resolved, $format) = get_newest($old_fx_chains);  
+	my ($resolved, $format) = get_newest($file->old_effect_chains);  
 	return unless $resolved;
 	my $source = read_file($resolved);
 	carp("$resolved: empty file"), return unless $source;
@@ -603,41 +600,107 @@ sub convert_effect_chains {
 		assign_singletons( { data => $ref } );
 	}
 	else {
-		our %effect_chain;
 		assign(
 			data => $ref,
 			vars => [ qw(%effect_chain)],
 			var_map => 1,
 			class => '::',
 			);
-		$fx->{chain} = \%effect_chain;
 	}
 
+	#rename $resolved, "$resolved.obsolete";
 
-	rename $old_fx_chains, "$old_fx_chains.obsolete";
+	# we only save user-defined effect chains
+	# and possibly profiles:
+	# this means we will lose backward compatibility
+	# for:
+	# 1) reversible track caching
+	# 2) 
+	#"_$profile\:$track_name";
+	
+#    profiles will be identified by
+#    profile => 1 
+#    name => myprofile # we allow multiple chains to have same name
+#    track_name => 
 
-	# now separate into global and project 
-	# effect chains
-
+	
 	my @keys = keys %{$fx->{chain}} ;
+
+	#### convert data format
+
+	say "converting effect chains to new format";
 	say "keys: @keys";
+
+	my $converted = {};
+	map
+	{ 
+		my $name = $_;
+		$converted->{$name}->{ops_list} = $fx->{chain}->{$name}->{ops};
+		map 
+		{
+			$converted->{$name}->{ops_data}->{$_}->{type} 
+				= $fx->{chain}->{$name}->{type}->{$_};
+			$converted->{$name}->{ops_data}->{$_}->{params} 
+				= $fx->{chain}->{$name}->{params}->{$_};
+		} @{ $converted->{$name}->{ops_list} };
+
+	} @keys;
+	say "conveted: ",yaml_out $converted;
+
+	#### separate key by type
+
 	my $private_re = qr/^_/;
 	my @user_keys = grep{ ! /$private_re/ } @keys;
-	say "user keys: @user_keys";
-	my $project_re = qr/^_$project->{name}/;
-	my @project_keys = grep{ /$project_re/ } @keys;
-	say "project keys: @project_keys";
-	my %user =    map{ ($_, $fx->{chain}->{$_}) } @user_keys;
-	my %project = map{ ($_, $fx->{chain}->{$_}) } @project_keys;
+	my @profile_keys = grep{ /_\w+:\w+/ } @keys;
+	my @cache_keys   = grep{ /_\w+\/\w+/} @keys;
+	say join " ", "user keys:", @user_keys;
 	
-	say "user effect chains: ", yaml_out(\%user);
-	say "project effect chains: ", yaml_out(\%project);
+	say join " ", "profile keys:", @profile_keys;
+	say join " ", "track cache keys:", @cache_keys;
 
-	$fx->{user_effect_chains} = \%user;
-	$fx->{project_effect_chains} = \%project;
-	
+	map 
+	{
+		
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			user 		=> 1,
+			global 		=> 1,
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @user_keys;
 
-	save_effect_chains();
+	map 
+	{
+		my ($profile, $trackname) = /^_(\w+):(\w+)/;
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			user 		=> 1,
+			global 		=> 1,
+			profile		=> $profile,
+			track_name  => $trackname,
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @profile_keys;
+
+	map 
+	{
+		my ($project, $trackname, $version) = /^_(\w+)\/(\w+)_(\d+)$/;
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			project		=> $project,
+			track_cache	=> 1,
+			track_name  => $trackname,
+			track_version => $version,
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @cache_keys;
+	#save_effect_chains();
 
 }
 

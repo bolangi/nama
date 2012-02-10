@@ -69,12 +69,22 @@ sub new {
 	croak "expected non-empty ops_list" unless scalar @{$vals{ops_list}};
 	my $n = $vals{n} || ++$n;
 	my $ops_data = {};
+	# ops data can either be 
+	# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
+	# + or taken from existing effects, e.g. $fx->{applied}
 	map { 	
-		$ops_data->{$_}           = { %{ ::fx($_)    } };  # copy
-		$ops_data->{$_}->{params} = [ @{ ::params($_)} ];  # copy;
-		delete $ops_data->{$_}->{chain};
-		delete $ops_data->{$_}->{display};
 
+		if ( $vals{ops_data} )
+		{ 	
+			$ops_data->{$_} = $vals{ops_data}->{$_} 
+		}
+		else
+		{
+			$ops_data->{$_} = { %{ ::fx($_)  } };  # copy of $fx->{applied}->{$_}
+			$ops_data->{$_}->{params} = [ @{ ::params($_)} ];  # copy;
+			delete $ops_data->{$_}->{chain};
+			delete $ops_data->{$_}->{display};
+		}
 	} @{$vals{ops_list}};
 
 	my $object = bless 
@@ -152,17 +162,39 @@ sub destroy {
 sub find { 
 	my %args = @_;
 	my $unique = delete $args{unique};
-	# first check if index is known
+
+	# first check for a specified index that matches
+	# an existing chain
+	
 	return $by_index{$args{n}} if $args{n};
 
 	# otherwise all specified fields must match
+	
 	my @found = grep
 		{ 	my $fx_chain = $_;
 			
-			# find non matches
-			my @non_matches = grep { $fx_chain->$_ ne $args{$_} } keys %args;
+			# check if any specified fields *don't* match
+			
+			my @non_matches = grep 
+			{ 
+				# not: arg matches field exactly
 
-			# boolean opposite: return true if zero non matches
+				! ($fx_chain->$_ eq $args{$_}) 
+
+				and	
+
+				# not:
+				# + arg is 1 (true) 
+				# + field is present
+				# + field is other than version (which must match exactly)
+
+				! ($_ ne 'version' and $args{$_} == 1 and $fx_chain->$_)
+
+			} keys %args;
+
+			# if no non-matches, then all have matched, 
+			# and we return true
+
 			! scalar @non_matches
 		
        } values %by_index;
