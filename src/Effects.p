@@ -199,7 +199,10 @@ sub modify_multiple_effects {
 sub remove_effect { 
 	$debug2 and print "&remove_effect\n";
 	my $id = shift;
-	carp("$id: does not exist, skipping...\n"), return unless $fx->{applied}->{$id};
+	if( ! fx($id) ){
+		$debug and carp("$id: does not exist, skipping...\n");
+		return;
+	}
 	my $n 		= chain($id);
 	my $parent 	= parent($id);
 	my $owns	= owns($id);

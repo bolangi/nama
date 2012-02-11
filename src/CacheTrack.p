@@ -144,11 +144,23 @@ sub update_cache_map {
 		$debug and say "updating track cache_map";
 		#say "cache map",yaml_out($track->cache_map);
 		my $cache_map = $track->cache_map;
-		$cache_map->{$track->last} = { 
-			original 			=> $orig_version,
-			effect_chain	=> push_effect_chain($track), # bypass
-		};
-		pop @{$track->effect_chain_stack}; # we keep it elsewhere
+		if ( my @ops_list = $track->fancy_ops )
+		{
+			my $ec = ::EffectChain->new(
+				track_cache => 1,
+				track_name	=> $track->name,
+				track_version => $orig_version,
+				project => 1,
+				system => 1,
+				ops_list => \@ops_list,
+			);
+			map{ remove_effect($_) } @ops_list;
+
+			$cache_map->{$track->last} = { 
+				original 			=> $orig_version,
+				effect_chain	=> $ec->n
+			};
+		}
 		if (my @inserts = grep{$_}(
 				$track->prefader_insert, 
 				$track->postfader_insert)
@@ -228,8 +240,9 @@ sub uncache_track {
 			say $track->name, ": setting sub-bus mix track to REC";
 		} 
 
-		add_effect_chain($track, $cache_map->{$version}{effect_chain})
-			if $cache_map->{$version}{effect_chain};
+		my $ec = ::EffectChain::find(n => $cache_map->{$version}{effect_chain});
+		$ec->add($track) if defined $ec;
+		
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
 }
