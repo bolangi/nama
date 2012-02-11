@@ -338,10 +338,10 @@ sub region_is_out_of_bounds {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	grep{ 		$_ ne $track->vol 
-			and $_ ne $track->pan 
-			and (! $track->fader or $_ ne $track->fader) 
-	} @{ $track->ops }
+	my @skip = grep {$_} map { $track->$_ } qw(vol pan fader);
+	my %skip;
+	map{ $skip{$_}++ } ::expanded_ops_list(@skip);
+	grep{ ! $skip{$_} } @{ $track->ops };
 }
 		
 sub snapshot {
