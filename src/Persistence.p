@@ -29,7 +29,6 @@ sub save_state {
 	print "\nSaving state as ",
 	save_system_state($path), "\n";
 	save_effect_chains();
-	save_effect_profiles();
 
 	# store alsa settings
 
