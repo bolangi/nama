@@ -240,8 +240,26 @@ sub uncache_track {
 			say $track->name, ": setting sub-bus mix track to REC";
 		} 
 
-		my $ec = ::EffectChain::find(n => $cache_map->{$version}{effect_chain});
-		$ec->add($track) if defined $ec;
+		my $v = $cache_map->{$version}{effect_chain};
+
+		# get effect change by index if ID is all digits
+		my $ec;
+		if ($v !~ /\D/) 
+		{ 
+			$ec = ::EffectChain::find(n => $v);
+		}
+		else
+		{   # get version number from name (_waltz/piano_3)
+			# not really version number, actually just an index
+			($v) = $v =~ /_(\d+)$/; 
+			$ec = ::EffectChain::find(
+				track_track => 1,
+				track_name	=> $track->name,
+				track_version => "V$v",
+				unique		=> 1,
+			);
+			$ec->add($track) if defined $ec;
+		}
 		
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
