@@ -960,6 +960,17 @@ list_effect_chains: _list_effect_chains ident(s?) {
 		or print("odd number of arguments\n@args\n"), return 0;
 	# zero as arg represents undef
 	#@args = map { $_ == 0 ? undef : $_ } @args;
+	::pager( map{ $_->summary} ::EffectChain::find(@defaults, @args)  );
+	1;
+}
+show_effect_chains: _show_effect_chains ident(s?) {
+	my @defaults = (user => 1, profile => undef);
+	my @args;
+	@args = @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	(scalar @args) % 2 == 0 
+		or print("odd number of arguments\n@args\n"), return 0;
+	# zero as arg represents undef
+	#@args = map { $_ == 0 ? undef : $_ } @args;
 	::pager( 
 		map{ $_->dump } 
 		::EffectChain::find(@defaults, @args)  
@@ -1011,13 +1022,58 @@ delete_effect_profile: _delete_effect_profile existing_effect_profile_name {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile existing_effect_profile_name {
 	::apply_effect_profile($item{effect_profile_name}); 1 }
-list_effect_profiles: _list_effect_profiles existing_effect_profile_name(?) {
+list_effect_profiles: _list_effect_profiles ident(?) {
 	my $name;
-	($name) = @{ $item[2] } if $item[2];
-	::pager( 
-		map{ $_->dump } 
-		::EffectChain::find(profile => $name || 1)  
-	);
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my @output = 
+		map
+		{ 	
+			$name = $_->profile;
+			$_->track_name;
+		} ::EffectChain::find(profile => $name);
+	if( @output )
+	{ ::pager( "\nname: $name\ntracks: ", join " ",@output) }
+	else { print "no match\n" }
+	1;
+}
+show_effect_profiles: _show_effect_profiles ident(?) {
+	my $name;
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my $old_profile_name;
+	my $profile_name;
+	my @output = 
+		grep{ ! /index:/ }
+		map
+		{ 	
+			
+			# return profile name at top if changed
+			# return summary
+
+			my @out;
+			my $profile_name = $_->profile;
+			if ( $profile_name ne $old_profile_name )
+			{
+			 	push @out, "name: $profile_name\n";
+				$old_profile_name = $profile_name 
+			}
+			push @out, $_->summary;
+			@out
+		} ::EffectChain::find(profile => $name);
+	if( @output )
+	{ ::pager( @output); }
+	else { print "no match\n" }
+	1;
+}
+full_effect_profiles: _full_effect_profiles ident(?) {
+	my $name;
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my @output = map{ $_->dump } ::EffectChain::find(profile => $name )  ;
+	if( @output )
+	{ ::pager( @output); }
+	else { print "no match\n" }
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}

@@ -713,6 +713,14 @@ list_effect_profiles:
   type: effect
   short: lep
   what: list effect profile 
+show_effect_profiles:
+  type: effect
+  short: sepr
+  what: list effect profile 
+full_effect_profiles:
+  type: effect
+  short: fep
+  what: dump effect profile data structure
 cache_track:
   type: track
   short: cache ct

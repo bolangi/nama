@@ -5,7 +5,7 @@ use Modern::Perl;
 use Carp;
 use Exporter qw(import);
 
-use ::Globals qw(%tn $this_op $debug);
+use ::Globals qw($fx_cache %tn $this_op $debug);
 
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
@@ -168,7 +168,7 @@ sub find {
 				# + field is present
 				# + field is other than version (which must match exactly)
 
-				! ($_ ne 'version' and $args{$_} == 1 and $fx_chain->$_)
+				! ($_ ne 'version' and $args{$_} eq 1 and $fx_chain->$_)
 
 			} keys %args;
 
@@ -183,6 +183,21 @@ sub find {
 		return if $unique and @found > 1;
 	return $unique ? pop @found : sort{ $a->n cmp $b->n } @found; 
 }
+
+sub summary {
+	my $self = shift;
+	my @output;
+	push @output, "index: ". $self->n;
+	push @output, "name: ".$self->name if $self->name;
+	push @output, "track name: ".$self->track_name if $self->track_name;
+	push @output,	
+	map{ 
+		my $i = ::effect_index( $self->{ops_data}->{$_}->{type} ); 
+		my $name = "    ". $fx_cache->{registry}->[$i]->{name};
+	} @{$_->ops_list};
+	map{ $_,"\n"} @output;
+}
+	
 ####  Effect profile routines
 
 package ::;
