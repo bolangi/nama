@@ -679,9 +679,11 @@ add_controller: _add_controller effect value(s?) {
 add_effect: _add_effect effect value(s?) {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
+	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+		unless ::effect_index($code);
  	my $id = ::add_effect({
 		track  => $::this_track, 
-		type   => $code, 
+		type   => ::effect_code($code),
 		values => $values
 	});
 	if ($id)
