@@ -681,7 +681,10 @@ sub convert_effect_chains {
 			project		=> $project,
 			track_cache	=> 1,
 			track_name  => $trackname,
-			track_version => $version,
+			track_version => "V$version", 
+				# we use "V" prefix in order to
+				# distinguish old (arbitrary) index from new
+				# entry which indicates a specific track version
 			ops_list	=> $ec->{ops_list},
 			ops_data	=> $ec->{ops_data},	
 		);
