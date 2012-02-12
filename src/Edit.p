@@ -29,6 +29,7 @@ use ::Object qw(
 sub initialize {
 	%n = ();
 	%by_name = ();
+	%by_index = ();
 	@::edits_data = (); # for save/restore
 }
 
