@@ -3,10 +3,6 @@
 
 package ::;
 use Modern::Perl; no warnings 'uninitialized';
-use File::Slurp;
-use ::Assign qw(quote_yaml_scalars);
-
-use ::Globals qw(:all);
 
 sub save_state {
 	my $filename = shift;
@@ -261,6 +257,25 @@ sub restore_state {
 	##  print yaml_out \@groups_data; 
 	
 	# backward compatibility fixes for older projects
+	
+	
+	my @vars = qw(
+				@tracks_data
+				@bus_data
+				@groups_data
+				@marks_data
+				@fade_data
+				@edit_data
+				@inserts_data
+	);
+
+	# remove non HASH entries
+	map {
+		my $var = $_;
+		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
+		say "want to eval: $eval_text "; 
+		eval $eval_text;
+	} @vars;
 
 	if (! $project->{save_file_version_number} ){
 
@@ -539,12 +554,13 @@ sub restore_state {
 	}
 
 	# text mode marks 
-		
-	map{ 
-		my %h = %$_; 
-		my $mark = ::Mark->new( %h ) ;
-	} @marks_data;
 
+ 	map
+    {
+		my %h = %$_;
+		my $mark = ::Mark->new( %h ) ;
+    } 
+    grep { (ref $_) =~ /HASH/ } @marks_data;
 
 	$ui->restore_time_marks();
 	$ui->paint_mute_buttons;
@@ -565,7 +581,10 @@ sub restore_state {
 
 	# restore command history
 	
-	$text->{term}->SetHistory(@{$text->{command_history}});
+	$text->{term}->SetHistory(@{$text->{command_history}})
+		if (ref $text->{command_history}) =~ /ARRAY/;
+
+;
 } 
 
 # Effect Chains
@@ -596,7 +615,7 @@ sub convert_project_format {
 		$state_yml{$_}=[];
 		my $dir = join_path( project_root(), $_);
 		say "project dir: $dir";
-		 push @{ $state_yml{$_} }, map{ /(\w+).yml$/ } File::Find::Rule->file()
+		 push @{ $state_yml{$_} }, map{ m{([^/]*?).yml$} } File::Find::Rule->file()
 								     					  	->name('*.yml')
 															->in($dir);
 
@@ -611,8 +630,10 @@ sub convert_project_format {
 
 			# exercise all our backward compatibility
 			# interrogations
+			#my @args = (name => $project, "settings" => $_, nodig => 1);
 			my @args = (name => $project, "settings" => $_);
 
+			say "convert_project: @args";
 			convert_project(@args);
 				# 	- load, 
 				# 	- save in new format, 
@@ -629,48 +650,27 @@ sub convert_project_format {
 	
 }
 sub convert_project {
+	use autodie qw(:default);
 	# after project is loaded, project_dir() can be used as normal
 	# move_state_files() also uses project_dir()
 	my %args = @_;
+	say join " ", "load project", %args;
 
-	try 
-	{
-
-		load_project(%args);
-	}
-	catch 
-	{ 
-		my $errmsg = "error during load project: "
-					.join(" ",%args)
-					."\n$_\n\n";
-		log_errmsg($errmsg);
-		$errors_encountered++;
-		return;
-	}
-	
-	try
-	{
-		# save in the new hopefully, stable, format
-		save_state($_); 
-	}
-	catch
-	{
-		my $errmsg = "error during save project: "
-					.join(" ",%args)
-					."\n$_\n\n";
-		log_errmsg($errmsg);
-		$errors_encountered++;
-		return;
-	}
-	# if we move the files, it means all files for the
-	# project were successfully converted
+	load_project(%args);
+	die "didn't convert project dir to $args{name}: is ",project_dir() unless project_dir() =~ /$args{name}/;
+	say "saving state ", join " ", %args;
+	save_state($args{settings});
+	my $save_file = join_path(project_dir(),$args{settings}.".json");
+	die "didn't create save file ".$save_file unless -e $save_file;
 	move_state_files($args{name});
 	
 }
 sub move_state_files {
+	use autodie qw(:default);
 	my $project = shift;
+	say "move state files for $project";
 
-	my $source_dir = join_path(project_root(),$_);
+	my $source_dir = join_path(project_root(),$project);
 	my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
 	mkdir $target_dir;
 	map 
@@ -678,6 +678,9 @@ sub move_state_files {
 		my $file = "$_.yml";
 		my $from_path = join_path(project_dir(),$file);
 		my $to_path   = join_path($target_dir,$file); 
+
+		say "ready for: rename $from_path, $to_path";
+=comment
 
 		try
 		{
@@ -688,16 +691,18 @@ sub move_state_files {
 			my $errmsg = qq(error in command rename("$from_path","$to_path"): \n$_);
 			log_errmsg($errmsg);
 		}
+=cut
 	} @{ $state_yml{$project} } 
 }
 
 sub log_errmsg {
 		my $errmsg = shift;
-		warn $errmsg;
+		#warn $errmsg;
 		my $log_cmd = join( " ", 
-			"cat", qq("$errmsg"), 
+			"echo", qq("$errmsg"), 
 			">>",join_path(project_root(),"project_conversion_errors.log")
 		);
+		say $log_cmd;
 		system $log_cmd;
 		$errors_encountered++;
 }

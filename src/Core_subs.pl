@@ -106,9 +106,14 @@ my $namespace_root = 'Audio::Nama';
 sub eval_perl {
 	my $code = shift;
 	map{ $code =~ s/::$_/$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
-	my (@result) = eval $code;
-	print( "Perl command failed: $@\n") if $@;
-	pager(join "\n", @result) unless $@;
+	my $err;
+	my @result;
+	@result = eval $code;
+	if ($@){
+		print( "Perl command failed: \ncode: $code\nerror: $@");
+		undef $@;
+	}
+	else { pager(join "\n", @result) }
 	print "\n";
 }	
 }

@@ -157,7 +157,8 @@ Loading project "untitled".
 
 	$config->{opts}->{M} = 0; # enable 
 	
-	dig_ruins() unless scalar @::Track::all > 2;
+	# $h{nodig} allow skip for convert_project_format
+	dig_ruins() unless (scalar @::Track::all > 2 ) or $h{nodig};
 
 	# possible null if Text mode
 	

@@ -56,6 +56,7 @@ use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Format;
+use Try::Tiny;
 # use Data::Rmap    # EffectChain.pm
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
