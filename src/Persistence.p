@@ -578,8 +578,13 @@ sub restore_state {
 # Effect Chains
 #
 # we have two type of effect chains
-# + user effect chains - user defined, available to all projects
-# + system generated effect chains - private, per project
+# + global effect chains - usually user defined, available to all projects
+# + system generated effect chains, per project
+
+our @effect_chains_data;
+our @global_effect_chain_vars  = qw(@effect_chains_data $EffectChain_n );
+*::EffectChain_n = \$::EffectChain::n;
+our @project_effect_chain_vars = qw(@effect_chains_data);
 
 
 sub convert_effect_chains {
@@ -690,28 +695,69 @@ sub convert_effect_chains {
 		
 	} @cache_keys;
 
-}
+	# 
 
+
+}
+sub save_converted_effect_chains {
+	#save_global_effect_chains();
+	
+	my %by_project;
+	my @project_effect_chains = ::EffectChain::find(project => 1);
+
+	map {$by_project{$_->project}++ } @project_effect_chains;
+=comment
+	# initialize empty array refs
+
+	map {$by_project{$_->project}=[] } @project_effect_chains;
+
+	# sort effect chains on one array per profile
+	#
+	map { push @{$by_project{$_->project}}, $_->hashref} @project_effect_chains; 
+
+=cut
+	say yaml_out(\%by_project);
+	#map { save_project_effect_chains( ); } keys %by_project
+
+
+}
+	
 sub save_effect_chains { 
-	@global_effect_chains_data  = map{ $_->hashref } ::EffectChains::find(global => 1);
-	@project_effect_chains_data = map{ $_->hashref } ::EffectChains::find(project => 1);
+	save_global_effect_chains();
+	save_project_effect_chains(project_dir());
+}
+sub save_global_effect_chains {
+
+	@effect_chains_data  = map{ $_->hashref } ::EffectChain::find(global => 1);
 
 	# always save global effect chain data because it contains
 	# incrementing counter
+	print "efd: " , yaml_out \@effect_chains_data;
+
 
 	serialize(
 		file => $file->global_effect_chains,
-		format => 'perl',
-		vars => [ qw(@global_effect_chains_data $VERSION $::EffectChain::n ) ],
+		format => 'yaml',
+		vars => \@global_effect_chain_vars,
 		class => '::',
 	);
-	if (@project_effect_chains_data)
+}
+
+sub save_project_effect_chains {
+	my $project = shift; # allow to cross multiple projects
+	@effect_chains_data = map{ $_->hashref } ::EffectChain::find(project => $project);
+
+	if (@effect_chains_data)
 	{
 		serialize(
-			file => $file->project_effect_chains,
-			format => 'perl',
-			vars => [ qw( @project_effect_chains_data $VERSION) ],
-			class => '::',
+			file => join_path(
+				project_root(), 
+				$project, 
+				$file->{project_effect_chains}
+			),
+			format => 'yaml',
+			vars => \@project_effect_chain_vars,
+			class => '::EffectChain',
 		);
 	}
 	
@@ -729,8 +775,12 @@ sub restore_effect_chains {
 		$debug and say "format: $format, source: \n",$source;
 		my $ref = decode($source, $format);
 		$debug and print Dumper $ref;
-		my @fx_chains_data = @$ref;
-		map { my $fx_chain = ::EffectChain->new(%$_) } @fx_chains_data;
+		assign(
+				data => $ref,
+				vars   => \@project_effect_chain_vars,
+				var_map => 1,
+				class => '::');
+		map { my $fx_chain = ::EffectChain->new(%$_) } @effect_chains_data; 
 		
 	} ($file->global_effect_chains, $file->project_effect_chains);
 }

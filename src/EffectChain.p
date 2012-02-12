@@ -7,6 +7,8 @@ use Exporter qw(import);
 
 use ::Globals qw($fx_cache %tn $this_op $debug);
 
+our @effect_chain_data;
+
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
 our @ISA;
