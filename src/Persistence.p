@@ -611,7 +611,7 @@ sub convert_effect_chains {
 			);
 	}
 
-	#rename $resolved, "$resolved.obsolete";
+	rename $resolved, "$resolved.obsolete";
 
 	my @keys = keys %{$fx->{chain}} ;
 
