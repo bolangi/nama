@@ -582,7 +582,7 @@ our @project_effect_chain_vars = qw(@effect_chains_data);
 my (@projects, @projects_completed, %state_yml, $errors_encountered);
 
 sub conversion_completed { -e success_file }
-sub success_file { join_path(project_root(), '.conversion_completed')} }
+sub success_file { join_path(project_root(), '.conversion_completed') }
 sub convert_project_format {
 	return if conversion_completed();
     @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
@@ -668,36 +668,38 @@ sub convert_project {
 	
 }
 sub move_state_files {
-		my $project = shift;
+	my $project = shift;
 
-		my $source_dir = join_path(project_root(),$_);
-		my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
+	my $source_dir = join_path(project_root(),$_);
+	my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
+	mkdir $target_dir;
+	map 
+	{ 
+		my $file = "$_.yml";
+		my $from_path = join_path(project_dir(),$file);
+		my $to_path   = join_path($target_dir,$file); 
 
 		try
 		{
-			mkdir $target_dir;
-			map { 
-				my $file = "$_.yml";
-				my $from_path = join_path(project_dir(),$file);
-				my $to_path   = join_path($target_dir,$file); 
-				rename $from_path, $to_path;
-
-			} @{ $state_yml{$project} } 
+			rename $from_path, $to_path;
 		}
 		catch
 		{
 			my $errmsg = qq(error in command rename("$from_path","$to_path"): \n$_);
 			log_errmsg($errmsg);
 		}
+	} @{ $state_yml{$project} } 
 }
 
 sub log_errmsg {
 		my $errmsg = shift;
 		warn $errmsg;
-		my $log_cmd = join " ", "cat", qq("$errmsg"), ">>",join_path(project_root(),project_conversion_errors.log);
+		my $log_cmd = join( " ", 
+			"cat", qq("$errmsg"), 
+			">>",join_path(project_root(),"project_conversion_errors.log")
+		);
 		system $log_cmd;
 		$errors_encountered++;
-							 
 }
 }
 =comment
