@@ -135,13 +135,6 @@ my %is_legal_suffix = (
 		perl => 'perl',
 		storable => 'storable',
 );
-=comment
-my $re_eval = q{qr/\.(};
-$re_eval .= (join '|', keys %is_legal_suffix)
-$re_eval .= q{)$/};
-my $suffix_re = eval $re_eval;
-=cut
-
 sub get_newest {
 	
 	# choose the newest
@@ -609,8 +602,8 @@ sub convert_project_format {
 
 		my @state_files = @{$state_yml{$_}};
 		my $project = $_;
-		load_project($_);
 		map {
+			load_project( name => $project, "settings" => $_  );
 			retrieve_state($_); # yaml
 			save_project($_); # json
 		} @state_files;
