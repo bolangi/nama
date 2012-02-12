@@ -582,8 +582,7 @@ sub restore_state {
 # + system generated effect chains, per project
 
 our @effect_chains_data;
-our @global_effect_chain_vars  = qw(@effect_chains_data $EffectChain_n );
-*::EffectChain_n = \$::EffectChain::n;
+our @global_effect_chain_vars  = qw(@effect_chains_data $::EffectChain::n );
 our @project_effect_chain_vars = qw(@effect_chains_data);
 
 
@@ -694,31 +693,16 @@ sub convert_effect_chains {
 		);
 		
 	} @cache_keys;
-
-	# 
-
-
 }
 sub save_converted_effect_chains {
-	#save_global_effect_chains();
+	save_global_effect_chains();
 	
 	my %by_project;
 	my @project_effect_chains = ::EffectChain::find(project => 1);
 
 	map {$by_project{$_->project}++ } @project_effect_chains;
-=comment
-	# initialize empty array refs
-
-	map {$by_project{$_->project}=[] } @project_effect_chains;
-
-	# sort effect chains on one array per profile
-	#
-	map { push @{$by_project{$_->project}}, $_->hashref} @project_effect_chains; 
-
-=cut
 	say yaml_out(\%by_project);
-	#map { save_project_effect_chains( ); } keys %by_project
-
+	map { save_project_effect_chains($_); } keys %by_project
 
 }
 	
@@ -732,9 +716,7 @@ sub save_global_effect_chains {
 
 	# always save global effect chain data because it contains
 	# incrementing counter
-	print "efd: " , yaml_out \@effect_chains_data;
-
-
+	
 	serialize(
 		file => $file->global_effect_chains,
 		format => 'yaml',
@@ -753,11 +735,11 @@ sub save_project_effect_chains {
 			file => join_path(
 				project_root(), 
 				$project, 
-				$file->{project_effect_chains}
+				$file->{project_effect_chains}->[0], # grab filename only
 			),
 			format => 'yaml',
 			vars => \@project_effect_chain_vars,
-			class => '::EffectChain',
+			class => '::',
 		);
 	}
 	
@@ -777,7 +759,7 @@ sub restore_effect_chains {
 		$debug and print Dumper $ref;
 		assign(
 				data => $ref,
-				vars   => \@project_effect_chain_vars,
+				vars   => \@global_effect_chain_vars, # for project, too
 				var_map => 1,
 				class => '::');
 		map { my $fx_chain = ::EffectChain->new(%$_) } @effect_chains_data; 
