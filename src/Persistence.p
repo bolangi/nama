@@ -585,7 +585,58 @@ our @effect_chains_data;
 our @global_effect_chain_vars  = qw(@effect_chains_data $::EffectChain::n );
 our @project_effect_chain_vars = qw(@effect_chains_data);
 
+sub conversion_completed { -e join_path(project_root(), '.conversion_completed')}
+sub convert_project_format {
+	return if conversion_completed();
+    my @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
+									->maxdepth(1)
+									->mindepth(1)
+									->in(project_root());
+	map { say } @projects;
+	my %state_yml;
+	map {     
+		$state_yml{$_}=[];
+		my $dir = join_path( project_root(), $_);
+		say "project dir: $dir";
+		 push @{ $state_yml{$_} }, map{ /(\w+).yml$/ } File::Find::Rule->file()
+								     					  	->name('*.yml')
+															->in($dir);
 
+	} @projects;
+			
+
+	map {
+
+		my @state_files = @{$state_yml{$_}};
+		my $project = $_;
+		load_project($_);
+		map {
+			retrieve_state($_); # yaml
+			save_project($_); # json
+		} @state_files;
+
+	} @projects;
+	yaml_out(\%state_yml);	
+}
+						 
+=comment
+
+
++ a .conversion_completed_NN file in the project root directory
+  (NN is current Nama version)
+
+Here is pseudo code (with BASIC style line numbers :-)
+
+10 return unless $convert_old_files == true and not exists file .conversion_completed 
+20 iterate through each project directory
+30 next if .old_state_files_NN directory is present
+40 load each *.yml file (probably do not generate chain setup)
+50 save to _new.*.yml (or possibly some other format)
+60 move *.yml files to .old_state_files
+70 rename _new.*.yml to *.yml
+80 create .conversion_completed_NN in project root directory
+
+=cut
 sub convert_effect_chains {
 
 	my ($resolved, $format) = get_newest($file->old_effect_chains);  
