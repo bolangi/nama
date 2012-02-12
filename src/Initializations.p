@@ -119,9 +119,9 @@ exit;
 		
 	start_midish() if $config->{use_midish};
 
-	# set up autosave
+	# set up autosave - DISABLED (forever, I hope)
 	
-    schedule_autosave() unless debugging_options();
+   #  schedule_autosave() unless debugging_options();
 
 	initialize_terminal() unless $config->{opts}->{T};
 
