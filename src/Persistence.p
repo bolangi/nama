@@ -578,15 +578,20 @@ our @effect_chains_data;
 our @global_effect_chain_vars  = qw(@effect_chains_data $::EffectChain::n );
 our @project_effect_chain_vars = qw(@effect_chains_data);
 
-sub conversion_completed { -e join_path(project_root(), '.conversion_completed')}
+{
+my (@projects, @projects_completed, %state_yml, $errors_encountered);
+
+sub conversion_completed { -e success_file }
+sub success_file { join_path(project_root(), '.conversion_completed')} }
 sub convert_project_format {
 	return if conversion_completed();
-    my @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
+    @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
 									->maxdepth(1)
 									->mindepth(1)
 									->in(project_root());
 	map { say } @projects;
-	my %state_yml;
+
+	# create hash $state_yml{project}[file1, file2...]
 	map {     
 		$state_yml{$_}=[];
 		my $dir = join_path( project_root(), $_);
@@ -603,15 +608,98 @@ sub convert_project_format {
 		my @state_files = @{$state_yml{$_}};
 		my $project = $_;
 		map {
-			load_project( name => $project, "settings" => $_  );
-			retrieve_state($_); # yaml
-			save_project($_); # json
+
+			# exercise all our backward compatibility
+			# interrogations
+			my @args = (name => $project, "settings" => $_);
+
+			convert_project(@args);
+				# 	- load, 
+				# 	- save in new format, 
+				# 	- move old state files)
+
+			
 		} @state_files;
+		
 
 	} @projects;
-	yaml_out(\%state_yml);	
+	return if $errors_encountered;
+	open my $fh, '>', success_file();
+	close $fh; # touch
+	
 }
-						 
+sub convert_project {
+	# after project is loaded, project_dir() can be used as normal
+	# move_state_files() also uses project_dir()
+	my %args = @_;
+
+	try 
+	{
+
+		load_project(%args);
+	}
+	catch 
+	{ 
+		my $errmsg = "error during load project: "
+					.join(" ",%args)
+					."\n$_\n\n";
+		log_errmsg($errmsg);
+		$errors_encountered++;
+		return;
+	}
+	
+	try
+	{
+		# save in the new hopefully, stable, format
+		save_state($_); 
+	}
+	catch
+	{
+		my $errmsg = "error during save project: "
+					.join(" ",%args)
+					."\n$_\n\n";
+		log_errmsg($errmsg);
+		$errors_encountered++;
+		return;
+	}
+	# if we move the files, it means all files for the
+	# project were successfully converted
+	move_state_files($args{name});
+	
+}
+sub move_state_files {
+		my $project = shift;
+
+		my $source_dir = join_path(project_root(),$_);
+		my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
+
+		try
+		{
+			mkdir $target_dir;
+			map { 
+				my $file = "$_.yml";
+				my $from_path = join_path(project_dir(),$file);
+				my $to_path   = join_path($target_dir,$file); 
+				rename $from_path, $to_path;
+
+			} @{ $state_yml{$project} } 
+		}
+		catch
+		{
+			my $errmsg = qq(error in command rename("$from_path","$to_path"): \n$_);
+			log_errmsg($errmsg);
+		}
+}
+
+sub log_errmsg {
+		my $errmsg = shift;
+		warn $errmsg;
+		my $log_cmd = join " ", "cat", qq("$errmsg"), ">>",join_path(project_root(),project_conversion_errors.log);
+		system $log_cmd;
+		$errors_encountered++;
+							 
+}
+}
 =comment
 
 
