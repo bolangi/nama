@@ -2,6 +2,7 @@
 
 
 package ::;
+use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
@@ -573,10 +574,12 @@ sub restore_state {
 	} @fade_data;
 
 	# edits 
+	#
 	
+		# DISABLE EDIT RESTORE FOR CONVERSION XX
 	map{ 
 		my %h = %$_; 
-		my $edit = ::Edit->new( %h ) ;
+#		my $edit = ::Edit->new( %h ) ;
 	} @edit_data;
 
 	# restore command history
@@ -600,10 +603,15 @@ our @project_effect_chain_vars = qw(@effect_chains_data);
 {
 my (@projects, @projects_completed, %state_yml, $errors_encountered);
 
-sub conversion_completed { -e success_file }
+sub conversion_completed { -e success_file() }
 sub success_file { join_path(project_root(), '.conversion_completed') }
 sub convert_project_format {
-	return if conversion_completed();
+	say("conversion previously completed.
+To repeat, remove ~/nama/.conversion_completed and try again"), 
+		return if conversion_completed();
+
+	archive_state_files();
+	convert_effect_chains();
     @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
 									->maxdepth(1)
 									->mindepth(1)
@@ -620,6 +628,7 @@ sub convert_project_format {
 															->in($dir);
 
 	} @projects;
+	say yaml_out(\%state_yml);
 			
 
 	map {
@@ -649,10 +658,15 @@ sub convert_project_format {
 	close $fh; # touch
 	
 }
+sub archive_state_files {
+	my $cmd = q(tar -zcf ).join_path(project_root(), "nama_state.tgz ").
+					q(`find ).project_root().q( -name '*.yml'`);
+	system $cmd;
+}
 sub convert_project {
 	use autodie qw(:default);
-	# after project is loaded, project_dir() can be used as normal
-	# move_state_files() also uses project_dir()
+	
+
 	my %args = @_;
 	say join " ", "load project", %args;
 
@@ -662,13 +676,15 @@ sub convert_project {
 	save_state($args{settings});
 	my $save_file = join_path(project_dir(),$args{settings}.".json");
 	die "didn't create save file ".$save_file unless -e $save_file;
-	move_state_files($args{name});
+	#copy_state_files($args{name}); 
 	
 }
-sub move_state_files {
+
+sub copy_state_files {
+
 	use autodie qw(:default);
 	my $project = shift;
-	say "move state files for $project";
+	say "copy state files for $project";
 
 	my $source_dir = join_path(project_root(),$project);
 	my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
@@ -679,19 +695,8 @@ sub move_state_files {
 		my $from_path = join_path(project_dir(),$file);
 		my $to_path   = join_path($target_dir,$file); 
 
-		say "ready for: rename $from_path, $to_path";
-=comment
-
-		try
-		{
-			rename $from_path, $to_path;
-		}
-		catch
-		{
-			my $errmsg = qq(error in command rename("$from_path","$to_path"): \n$_);
-			log_errmsg($errmsg);
-		}
-=cut
+		say "ready for: copy $from_path, $to_path";
+		copy $from_path, $to_path;
 	} @{ $state_yml{$project} } 
 }
 
@@ -707,24 +712,6 @@ sub log_errmsg {
 		$errors_encountered++;
 }
 }
-=comment
-
-
-+ a .conversion_completed_NN file in the project root directory
-  (NN is current Nama version)
-
-Here is pseudo code (with BASIC style line numbers :-)
-
-10 return unless $convert_old_files == true and not exists file .conversion_completed 
-20 iterate through each project directory
-30 next if .old_state_files_NN directory is present
-40 load each *.yml file (probably do not generate chain setup)
-50 save to _new.*.yml (or possibly some other format)
-60 move *.yml files to .old_state_files
-70 rename _new.*.yml to *.yml
-80 create .conversion_completed_NN in project root directory
-
-=cut
 sub convert_effect_chains {
 
 	my ($resolved, $format) = get_newest($file->old_effect_chains);  

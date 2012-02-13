@@ -127,6 +127,8 @@ exit;
 
 	# set default project to "untitled"
 	
+	# convert_project_format(); # unless .conversion_completed file found
+	
 	if (! $project->{name} ){
 		$project->{name} = "untitled";
 		$config->{opts}->{c}++; 

@@ -62,6 +62,7 @@ sub new {
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
+	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::command_process("dumpa")) if !$host;
 
 # Routing:
 #
