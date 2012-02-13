@@ -43,6 +43,7 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
+	@effect_chain_data = ();
 	$text->{command_history} = {};
 }
 
@@ -95,6 +96,8 @@ sub save_system_state {
 	push @fade_data,  map{ $_->hashref } values %::Fade::by_index;
 
 	push @edit_data,  map{ $_->hashref } values %::Edit::by_index;
+
+	
 
 	# save history -- 50 entries, maximum
 
