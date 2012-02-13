@@ -893,18 +893,5 @@ sub restore_effect_chains {
 	} ($file->global_effect_chains, $file->project_effect_chains);
 }
 
-sub autosave_files {
-	sort File::Find::Rule  ->file()
-						->name('State-autosave-*')
-							->maxdepth(1)
-						 	->in( project_dir());
-}
-sub files_are_identical {
-	my ($filenamea,$filenameb) = @_;
-	my $a = read_file($filenamea);
-	my $b = read_file($filenameb);
-	$a eq $b
-}
-
 1;
 __END__

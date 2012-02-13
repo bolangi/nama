@@ -153,7 +153,6 @@
 	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
 	$initial_user_mode 				$config->{initial_mode}
-	$autosave_interval 				$config->{autosave_interval}
 	$midish_enable 					$config->{use_midish}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}

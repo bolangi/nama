@@ -82,13 +82,7 @@ ASSIGN
 	#$debug and print yaml_out($ref);
 
 	# index what sigil an identifier should get
-	
 
-	# autosave_interval  | $autosave_interval | $config->{autosave_interval}
-
-	# $autosave_interval = ....
-    # $config->autosave_interval = ....
-	
 	# we need to create search-and-replace strings
 	# sigil-less old_identifier
 	my %sigil;

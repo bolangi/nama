@@ -32,7 +32,6 @@
 	$press_space_to_start_transport
 	$execute_on_project_load
 	$initial_user_mode
-	$autosave_interval
 	$midish_enable
 	$quietly_remove_tracks
 	$use_jack_plumbing
