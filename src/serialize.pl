@@ -5,5 +5,7 @@
 @fade_data
 @edit_data
 @inserts_data
-@effect_chain_data
+@global_effect_chain_vars
+@global_effect_chain_data
+@project_effect_chain_data
 $this_track_name

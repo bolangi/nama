@@ -43,6 +43,7 @@ debug => [qw( 		$debug
 						@config_vars
 						@persistent_vars
 						@new_persistent_vars
+						@global_effect_chain_vars
 	)],
 
 	serialize =>  [qw(

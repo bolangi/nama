@@ -1,4 +1,10 @@
 # ------------- Effect-Chain and -Profile routines --------
+# Effect Chains
+#
+# we have two type of effect chains
+# + global effect chains - usually user defined, available to all projects
+# + system generated effect chains, per project
+
 
 package ::EffectChain;
 use Modern::Perl;
@@ -17,7 +23,7 @@ use ::Object qw(
 		n	
 		ops_list
         ops_data
-		
+		inserts_data
 		name
 		id
 		project

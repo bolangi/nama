@@ -52,7 +52,13 @@
 	$spatialiser
 	$limiter
 );
-						
+					
+# user defined or other globally accessible effect chains 
+# are saved in a separate file to suit version control
+# requirements. 
+
+@global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
+
 # list of variables that get saved to State.yml
 
 @new_persistent_vars = qw(
@@ -70,7 +76,7 @@
 	@fade_data
 	@edit_data
 	@inserts_data
-	@effect_chain_data
+	@project_effect_chain_data
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
 	$setup->{audio_length}

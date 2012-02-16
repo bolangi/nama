@@ -25,7 +25,7 @@ sub save_state {
 
 	print "\nSaving state as ",
 	save_system_state($path), "\n";
-	save_effect_chains();
+	save_global_effect_chains();
 
 	# store alsa settings
 
@@ -43,7 +43,8 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
-	@effect_chain_data = ();
+	@project_effect_chain_data = ();
+	@global_effect_chain_data = ();
 	$text->{command_history} = {};
 }
 
@@ -97,7 +98,7 @@ sub save_system_state {
 
 	push @edit_data,  map{ $_->hashref } values %::Edit::by_index;
 
-	
+	@project_effect_chain_data = ::EffectChain::find(project => $project->{name});
 
 	# save history -- 50 entries, maximum
 
@@ -593,16 +594,6 @@ sub restore_state {
 ;
 } 
 
-# Effect Chains
-#
-# we have two type of effect chains
-# + global effect chains - usually user defined, available to all projects
-# + system generated effect chains, per project
-
-our @effect_chains_data;
-our @global_effect_chain_vars  = qw(@effect_chains_data $::EffectChain::n );
-our @project_effect_chain_vars = qw(@effect_chains_data);
-
 {
 my (@projects, @projects_completed, %state_yml, $errors_encountered);
 
@@ -740,7 +731,7 @@ sub convert_effect_chains {
 			);
 	}
 
-	rename $resolved, "$resolved.obsolete";
+	#rename $resolved, "$resolved.obsolete";
 
 	my @keys = keys %{$fx->{chain}} ;
 
@@ -835,13 +826,9 @@ sub save_converted_effect_chains {
 
 }
 	
-sub save_effect_chains { 
-	save_global_effect_chains();
-	save_project_effect_chains(project_dir());
-}
 sub save_global_effect_chains {
 
-	@effect_chains_data  = map{ $_->hashref } ::EffectChain::find(global => 1);
+	@global_effect_chain_data  = map{ $_->hashref } ::EffectChain::find(global => 1);
 
 	# always save global effect chain data because it contains
 	# incrementing counter
@@ -849,36 +836,20 @@ sub save_global_effect_chains {
 	serialize(
 		file => $file->global_effect_chains,
 		format => 'yaml',
-		vars => \@global_effect_chain_vars,
+		vars => \@global_effect_chain_vars, 
 		class => '::',
 	);
 }
 
+# unneeded after conversion - DEPRECATED
 sub save_project_effect_chains {
 	my $project = shift; # allow to cross multiple projects
-	@effect_chains_data = map{ $_->hashref } ::EffectChain::find(project => $project);
-
-	if (@effect_chains_data)
-	{
-		serialize(
-			file => join_path(
-				project_root(), 
-				$project, 
-				$file->{project_effect_chains}->[0], # grab filename only
-			),
-			format => 'yaml',
-			vars => \@project_effect_chain_vars,
-			class => '::',
-		);
-	}
-	
+	@project_effect_chain_data = map{ $_->hashref } ::EffectChain::find(project => $project);
 }
-
 sub restore_effect_chains {
 
 	$debug2 and say "&restore_effect_chains";
-	map{ 
-		my $path = $_;
+		my $path =  $file->global_effect_chains;
 		my ($resolved, $format) = get_newest($path);  
 		carp("$resolved: file not found"), return unless $resolved;
 		my $source = read_file($resolved);
@@ -888,12 +859,10 @@ sub restore_effect_chains {
 		$debug and print Dumper $ref;
 		assign(
 				data => $ref,
-				vars   => \@global_effect_chain_vars, # for project, too
+				vars   => \@global_effect_chain_vars, 
 				var_map => 1,
 				class => '::');
-		map { my $fx_chain = ::EffectChain->new(%$_) } @effect_chains_data; 
-		
-	} ($file->global_effect_chains, $file->project_effect_chains);
+		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
 
 1;
