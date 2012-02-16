@@ -3,25 +3,35 @@ use Modern::Perl;
 use Carp;
 use ::Assign qw(yaml_out); 
 
+{
+	package ::Does::Serialize;
+	use Role::Basic;
+	requires 'as_hash';
+	sub as_hash {
+		my $self = shift;
+		my $class = ref $self;
+		bless $self, 'HASH'; # easy magic
+		#print yaml_out $self; return;
+		my %guts = %{ $self };
+		#print join " ", %guts; return;
+		#my @keys = keys %guts;
+		#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
+		bless $self, $class; # restore
+		return \%guts; # *not* a copy, a risk, but we
+                       # are serializing, not altering 
+	}
+}
 =comment
 
-
-  In a role:
-
-package ::Does::Serialize;
+::Does::Persist
+	# later,
 	# for the class, provides an
 	# (possibly filtered, altered) 
 	# array of objects.
 
-	# for the object, 
-use Role::Basic;
-use JSON::XS;
-requires 'hashref';
 
-sub as_hash {
-	my ($self = shift;
-	$self->as_hash );
-}
+
+  In a role:
 
 1;
 
