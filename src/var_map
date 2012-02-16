@@ -7,7 +7,7 @@
 	$null_bus					$bn{null}
 
 	%abbreviations				$config->{abbreviations}
-	@serialize_formats          $config->{serialize_formats}
+	$serialize_formats          $config->{serialize_formats}
 
 	$mix_to_disk_format 		$config->{formats}->{mix_to_disk}
 	$raw_to_disk_format 		$config->{formats}->{raw_to_disk}

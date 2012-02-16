@@ -186,11 +186,11 @@ $config = bless {
 	fade_time2_fraction 			=> 0.1,
 	fader_op 						=> 'ea',
 	# for save_system_state()
-	serialize_formats               => [ qw(json) ],
+	serialize_formats               => 'json',
 }, '::Config';
 
 { package ::Config;
-our @ISA = ::Object; #  for ->dump and ->hashref methods
+our @ISA = '::Object'; #  for ->dump and ->hashref methods
 sub serialize_formats { split " ", $_[0]->{serialize_formats} }
 }
 
