@@ -18,9 +18,9 @@ use Role::Basic;
 use JSON::XS;
 requires 'hashref';
 
-sub hashref {
+sub as_hash {
 	my ($self = shift;
-	$self->hashref );
+	$self->as_hash );
 }
 
 1;
@@ -118,7 +118,7 @@ sub dump {
 	bless $self, $class; # restore
 	return $output;
 }
-sub hashref {
+sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic

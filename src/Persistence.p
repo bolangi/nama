@@ -68,7 +68,7 @@ sub save_system_state {
 
 	$debug and print "copying tracks data\n";
 
-	map { push @tracks_data, $_->hashref } ::Track::all();
+	map { push @tracks_data, $_->as_hash } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
 
 	# delete obsolete fields
@@ -79,24 +79,24 @@ sub save_system_state {
 
 	$debug and print "copying bus data\n";
 
-	map{ push @bus_data, $_->hashref } ::Bus::all();
+	@bus_data = map{ $_->as_hash } ::Bus::all();
 
 	# prepare inserts data for storage
 	
 	$debug and print "copying inserts data\n";
 	
-	@inserts_data = map{ $_->hashref } values %::Insert::by_index;
+	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	$debug and print "copying marks data\n";
-	@marks_data = map{ $_->hashref } ::Mark::all();
+	@marks_data = map{ $_->as_hash } ::Mark::all();
 
-	@fade_data = map{ $_->hashref } values %::Fade::by_index;
+	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
 
-	@edit_data = map{ $_->hashref } values %::Edit::by_index;
+	@edit_data = map{ $_->as_hash } values %::Edit::by_index;
 
-	@project_effect_chain_data = map { $_->hashref } ::EffectChain::find(project => $project->{name});
+	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => $project->{name});
 
 	# save history -- 50 entries, maximum
 
@@ -826,7 +826,7 @@ sub save_converted_effect_chains {
 	
 sub save_global_effect_chains {
 
-	@global_effect_chain_data  = map{ $_->hashref } ::EffectChain::find(global => 1);
+	@global_effect_chain_data  = map{ $_->as_hash } ::EffectChain::find(global => 1);
 
 	# always save global effect chain data because it contains
 	# incrementing counter
@@ -845,7 +845,7 @@ sub save_global_effect_chains {
 # unneeded after conversion - DEPRECATED
 sub save_project_effect_chains {
 	my $project = shift; # allow to cross multiple projects
-	@project_effect_chain_data = map{ $_->hashref } ::EffectChain::find(project => $project);
+	@project_effect_chain_data = map{ $_->as_hash } ::EffectChain::find(project => $project);
 }
 sub restore_effect_chains {
 

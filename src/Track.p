@@ -19,7 +19,7 @@ package ::Track;
 # changing the 'class' field as well as the object
 # class affiliation
 #
-# the ->hashref() method (in Object.p) 
+# the ->as_hash() method (in Object.p) 
 # used to serialize will
 # sync the class field to the current object 
 # class, hopefully saving a painful error
@@ -857,7 +857,7 @@ sub version_comment {
 	"$v: $text\n" if $text;
 }
 # Modified from Object.p to save class
-sub hashref {
+sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic

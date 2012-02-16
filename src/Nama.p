@@ -190,7 +190,7 @@ $config = bless {
 }, '::Config';
 
 { package ::Config;
-our @ISA = '::Object'; #  for ->dump and ->hashref methods
+our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 sub serialize_formats { split " ", $_[0]->{serialize_formats} }
 }
 
