@@ -168,7 +168,7 @@ $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
 $gui->{marks} = {};
 
-$config = {
+$config = bless {
 	root_dir 						=> join_path( $ENV{HOME}, "nama"),
 	soundcard_channels 				=> 10,
 	memoize 						=> 1,
@@ -187,7 +187,12 @@ $config = {
 	fader_op 						=> 'ea',
 	# for save_system_state()
 	serialize_formats               => [ qw(json) ],
-};
+}, '::Config';
+
+{ package ::Config;
+our @ISA = ::Object; #  for ->dump and ->hashref methods
+sub serialize_formats { split " ", $_[0]->{serialize_formats} }
+}
 
 $prompt = "nama ('h' for help)> ";
 

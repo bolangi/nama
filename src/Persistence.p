@@ -85,20 +85,18 @@ sub save_system_state {
 	
 	$debug and print "copying inserts data\n";
 	
-	while (my $k = each %::Insert::by_index ){ 
-		push @inserts_data, $::Insert::by_index{$k}->hashref;
-	}
+	@inserts_data = map{ $_->hashref } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	$debug and print "copying marks data\n";
-	push @marks_data, map{ $_->hashref } ::Mark::all();
+	@marks_data = map{ $_->hashref } ::Mark::all();
 
-	push @fade_data,  map{ $_->hashref } values %::Fade::by_index;
+	@fade_data = map{ $_->hashref } values %::Fade::by_index;
 
-	push @edit_data,  map{ $_->hashref } values %::Edit::by_index;
+	@edit_data = map{ $_->hashref } values %::Edit::by_index;
 
-	@project_effect_chain_data = ::EffectChain::find(project => $project->{name});
+	@project_effect_chain_data = map { $_->hashref } ::EffectChain::find(project => $project->{name});
 
 	# save history -- 50 entries, maximum
 
@@ -112,7 +110,7 @@ sub save_system_state {
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
-	my @formats = $path =~ /dump_all/ ? 'yaml' : @{$config->{serialize_formats}};
+	my @formats = $path =~ /dump_all/ ? 'yaml' : $config->serialize_formats;
 
 	map{ 	my $format = $_ ;
 			serialize(
@@ -832,13 +830,16 @@ sub save_global_effect_chains {
 
 	# always save global effect chain data because it contains
 	# incrementing counter
-	
-	serialize(
-		file => $file->global_effect_chains,
-		format => 'yaml',
-		vars => \@global_effect_chain_vars, 
-		class => '::',
-	);
+
+	map{ 	my $format = $_ ;
+			serialize(
+				file => $file->global_effect_chains,
+				format => $format,
+				vars => \@global_effect_chain_vars, 
+				class => '::',
+			);
+	} $config->serialize_formats;
+
 }
 
 # unneeded after conversion - DEPRECATED

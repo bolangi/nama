@@ -81,6 +81,10 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
+# serialization choice
+
+serialize_formats: json yaml perl
+
 # end
 
 
