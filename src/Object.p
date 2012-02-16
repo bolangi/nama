@@ -3,6 +3,41 @@ use Modern::Perl;
 use Carp;
 use ::Assign qw(yaml_out); 
 
+=comment
+
+
+  In a role:
+
+package ::Does::Serialize;
+	# for the class, provides an
+	# (possibly filtered, altered) 
+	# array of objects.
+
+	# for the object, 
+use Role::Basic;
+use JSON::XS;
+requires 'hashref';
+
+sub hashref {
+	my ($self = shift;
+	$self->hashref );
+}
+
+1;
+
+  In your class:
+           
+           package My::Class;
+           use Role::Basic 'with';
+           
+           with qw(
+               Does::Serialize::AsYAML
+           );
+           
+           sub as_hash { ... } # because the role requires it
+
+=cut
+
 no strict; # Enable during dev and testing
 BEGIN {
 	require 5.004;
