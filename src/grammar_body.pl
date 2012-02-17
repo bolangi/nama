@@ -1306,3 +1306,33 @@ eager: _eager mode_string { $::mode->{eager} = $item{mode_string} }
 mode_string: 'off'    { 0 }
 mode_string: 'doodle' 
 mode_string: 'preview'
+
+config_key: key {
+	my $key = $item{key};
+	warn("$key: illegal config setting"), return 0
+		unless grep{ /^.$key$/ } keys ::Assign::var_map();
+	return $key
+}
+config: _config config_key shellish {
+	my $arg = $item{shellish};
+	my $key = $item{config_key};
+	$::project->{config}->{$key} = $arg;
+	return 1;
+}
+config: _config config_key {
+	my $key = $item{config_key};
+ 	my $arg = $::project->{config}->{$key};
+ 	if (defined $arg) {
+ 		print "project specific setting for $key: $arg\n";
+ 	}
+ 	return 1;
+}
+# unset: _unset config_key {
+# 	my $key = $item{config_key};
+# 	my $arg = $::project->{config}->{$key};
+# 	print "removing project-specific setting for $key: $arg\n";
+# 	print "value will default to global config file (.namarc) setting\n";
+# 	delete $::project->{$item{config_key}};
+# 	print "currently ",$::config->$key, "\n";
+# 	1;
+# }
