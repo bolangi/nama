@@ -190,8 +190,29 @@ $config = bless {
 }, '::Config';
 
 { package ::Config;
+use Carp;
+use ::Globals qw($debug :singletons);
+use Modern::Perl;
 our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 sub serialize_formats { split " ", $_[0]->{serialize_formats} }
+our $AUTOLOAD;
+sub AUTOLOAD {
+	my $self = shift;
+	local $debug = 1;
+    # get tail of method call
+    my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	#croak join " ", ref $self, "call:", $call;
+	#croak "$call: illegal method call for ".(ref $self) unless $self->{$call};
+	return $project->{config}->{$call} if $project->{config}->{$call};
+	# otherwise look for it  # might be in $config,
+	# $mastering, etc. refer to var_map for var name
+	my ($var) = map  { ::Assign::var_map()->{$_} } 
+				grep { /^.$call$/ } 
+				keys %{::Assign::var_map()};
+	my $result = eval $var;
+	croak "error: $@" if $@;
+	return $result;
+}
 }
 
 $prompt = "nama ('h' for help)> ";

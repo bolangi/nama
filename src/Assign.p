@@ -41,11 +41,17 @@ use ::Globals qw($debug $debug2);
 our $to_json = JSON::XS->new->utf8->pretty(1) ;
 use Carp;
 
+               # working code, we alias this to the following lexical
+
 {my $var_map = { qw(
 
 [% qx(./var_map_gen) %]
 
 ) };
+sub var_map {  $var_map } # to allow outside access while keeping
+                          # working lexical
+
+
 sub assign {
   # Usage: 
   # assign ( 

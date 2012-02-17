@@ -5,7 +5,11 @@
 # add the symbol e.g. $eager_mode to @config_vars in var_type.pl
 # add the mapping (e.g. $eager_mode $mode->{_eager_opt} ) to file var_map
 
+# these subs are in the main namespace
+
 package ::;
+
+
 use Modern::Perl;
 no warnings 'uninitialized';
 
