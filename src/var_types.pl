@@ -60,16 +60,12 @@
 
 @global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
 
-
-# for holding any project-specific settings
-
-@project_config_vars qw( $project->{config} );
-
 # list of variables that get saved to State.yml
 
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
+	$project->{config}
 	$fx->{id_counter}
 	$fx->{applied}
 	$fx->{params}

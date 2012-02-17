@@ -959,4 +959,12 @@ eager:
   type: general
   what: output signals as soon as possible
   parameters: off | doodle | preview
+config:
+  type: general
+  what: set project-specific config values
+  parameters: <s_parameter_name> <s_literal_or_quoted_string>
+unset:
+  type: general
+  what: delete project-specific config values (globals used)
+  parameters: <s_parameter_name>
 ...

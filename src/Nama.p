@@ -159,6 +159,7 @@ $file = bless
 	chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 	user_customization 		=> ['custom.pl',      		\&project_root],
 	project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
+	project_config			=> ['project_config', 		\&project_dir ],
 	global_effect_chains  	=> ['global_effect_chains', \&project_root],
 	old_effect_chains  		=> ['effect_chains', 		\&project_root],
 

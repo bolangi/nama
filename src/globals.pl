@@ -13,3 +13,4 @@ $debug2
 @config_vars
 @persistent_vars
 @new_persistent_vars
+@project_config_vars
