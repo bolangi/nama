@@ -194,7 +194,17 @@ use Carp;
 use ::Globals qw($debug :singletons);
 use Modern::Perl;
 our @ISA = '::Object'; #  for ->dump and ->as_hash methods
-sub serialize_formats { split " ", $_[0]->{serialize_formats} }
+
+# special handling of serialize formats to store them as 
+# space separate tags, must duplicate AUTOLOAD checking
+
+sub serialize_formats { 
+		split " ", 
+		(
+			$project->{config}->{serialize_formats} 
+		  || $_[0]->{serialize_formats}
+		)
+}
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
@@ -203,6 +213,7 @@ sub AUTOLOAD {
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	#croak join " ", ref $self, "call:", $call;
 	#croak "$call: illegal method call for ".(ref $self) unless $self->{$call};
+	$debug and say "Config AUTOLOAD: call is $call";
 	return $project->{config}->{$call} if $project->{config}->{$call};
 	# otherwise look for it  # might be in $config,
 	# $mastering, etc. refer to var_map for var name
