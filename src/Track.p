@@ -760,14 +760,14 @@ sub import_audio  {
 		say "Use 'import_audio <path> <frequency>' if possible.";
 		return 
 	}
-	my $desired_frequency = freq( $config->{formats}->{raw_to_disk} );
+	my $desired_frequency = freq( $config->{raw_to_disk_format} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
 	#say "destination: $destination";
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
 		say "copying $path to $destination";
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
-		my $format = ::signal_format($config->{formats}->{raw_to_disk}, $width);
+		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
 		say "importing $path as $destination, converting to $format";
 		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		#say $cmd;
