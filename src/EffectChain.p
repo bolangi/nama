@@ -20,21 +20,7 @@ no warnings qw(uninitialized);
 our @ISA;
 our ($n, %by_index);
 use ::Object qw( 
-		n	
-		ops_list
-        ops_data
-		inserts_data
-		name
-		id
-		project
-		global
-		profile
-		user
-		system
-		track_name
-		track_version
-		track_cache
-		bypass
+[% qx(cat ./effect_chain_fields) %]
 		);
 
 
