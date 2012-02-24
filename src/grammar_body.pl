@@ -990,20 +990,15 @@ bypass_effects: _bypass_effects 'all' {
 }
 
 effect_chain_id: effect_chain_id_pair(s) {
-		die " i found an effect chain id"
-# 		my @pairs = @{$item{'effect_chain_id_pairs(s)'}};
-# 		my @found = ::EffectChain::find(@pairs);
-# 		@found and 
-# 			print join " ", 
-# 			"found effect chain(s):",
-# 			map{ 'name:' ,$_->name, 'n', $_->n } @found;
-# 			or
-# 			print("no matching effect chain\n"), return 0;
-# 
+ 		die " i found an effect chain id";
+  		my @pairs = @{$item{'effect_chain_id_pair(s)'}};
+  		my @found = ::EffectChain::find(@pairs);
+  		@found and 
+  			print join " ", 
+  			"found effect chain(s):",
+  			map{ ('name:', $_->name, 'n', $_->n )} @found;
+  			#map{ 1 } @found;
 }
-# 		
-# 		
-# 
 effect_chain_id_pair: fxc_key fxc_val { return @$item{fxc_key fxc_val} }
 
 fxc_key: 'n'|                #### HARDCODED XX
