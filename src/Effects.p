@@ -733,7 +733,17 @@ sub expanded_ops_list { # including controllers
 	map 
 	{ push @expanded, 
 		$_, 
-		expanded_ops_list( @{owns($_)} );
+		expanded_ops_list( reverse @{owns($_)} );
+
+		# we reverse controllers listing so 
+		# the first controller is applied last
+		# the insert operation places it adjacent to 
+		# its parent controller
+		# as a result, the controllers end up
+		# in the same order as the original
+		#
+		# which is convenient for RCS
+		
  	} @ops_list;
 	@expanded
 }
