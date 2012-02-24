@@ -684,26 +684,16 @@ list_effect_chains:
   short: lec
   what: list effect chains, matching key/value pairs if provided
   parameters: [<s_key1> <s_val1>... ]
-bypass_all_effects:
-  type: effect
-  short: bfxa
-  what: bypass all effects on current track except vol/pan
-  parameters: none
-bypass_effect:
+bypass_effects:
   type: effect
   short: bfx
-  what: bypass selected effects on current track 
-  parameters: [<s_id1> <s_id2>...]
+  what: bypass effects on current track, default to all
+  parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> }
 bring_back_effects:
   type: effect
   short: bbfx
-  what: restore effects (default to most recent chain on bypass list)
+  what: restore effects (default to all)
   parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> ]
-bring_back_all_effects:
-  type: effect
-  short: bbfxa
-  what: restore all effects for current track 
-  parameters: none
 new_effect_profile:
   type: effect
   short: nep

@@ -979,6 +979,53 @@ show_effect_chains: _show_effect_chains ident(s?) {
 	);
 	1;
 }
+bypass_effects:  _bypass_effects effect_chain_id {
+	
+	1;
+}
+bypass_effects: _bypass_effects 'all' { 
+	print "track ",$::this_track->name,": bypassing all effects";
+	$::this_track->bypass($::this_track->fancy_ops);  
+	1; 
+}
+
+effect_chain_id: effect_chain_id_pair(s) {
+		die " i found an effect chain id"
+# 		my @pairs = @{$item{'effect_chain_id_pairs(s)'}};
+# 		my @found = ::EffectChain::find(@pairs);
+# 		@found and 
+# 			print join " ", 
+# 			"found effect chain(s):",
+# 			map{ 'name:' ,$_->name, 'n', $_->n } @found;
+# 			or
+# 			print("no matching effect chain\n"), return 0;
+# 
+}
+# 		
+# 		
+# 
+effect_chain_id_pair: fxc_key fxc_val { return @$item{fxc_key fxc_val} }
+
+fxc_key: 'n'|                #### HARDCODED XX
+		'ops_list'|
+        'ops_dat'|
+		'inserts_data'|
+		'name'|
+		'id'|
+		'project'|
+		'global'|
+		'profile'|
+		'user'|
+		'system'|
+		'track_name'|
+		'track_version'|
+		'track_cache'|
+		'bypass'
+
+# [% join " | ", split " ", qx(cat ./effect_chain_fields.pl) %]
+fxc_val: shellish
+
+
 bypass_effects:   _bypass_effects op_id(s) { 
 	# save by pushing onto current track's effect chain list
 	my $arr_ref = $item{'op_id(s)'};
@@ -999,8 +1046,26 @@ bypass_effects:   _bypass_effects op_id(s) {
 # 	map{ ::bypass_effect($_) } 
 # }
 
+bring_back_effects: _bring_back_effects effect_chain_id { 
+	1;
+}
+
+this_track_op_id: op_id(s) { 
+	my %ops = map{ $_ => 1 } @{$::this_track->ops};
+	my @ids = @{$item{'op_id(s)'}};
+	my @belonging 	= grep {   $ops{$_} } @ids;
+	my @alien 		= grep { ! $ops{$_} } @ids;
+	@alien and print("@alien: don't belong to track ",$::this_track->name, "skipping.\n"); 
+	@belonging	
+}
+
+	
 bring_back_effects: _bring_back_effects op_id(s) { 
-	::restore_effects($::this_track) and
+	
+	print $::this_track->name, ": restoring effects\n"; 1}
+
+bring_back_effects: _bring_back_effects op_id(s) { 
+	effects($::this_track) and
 	print $::this_track->name, ": restoring effects\n"; 1}
 
 overwrite_effect_chain: _overwrite_effect_chain ident {
