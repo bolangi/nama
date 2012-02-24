@@ -45,8 +45,8 @@ sub set_chain_value {
 
 }
 
-# we allow add_effect to handle both regular add effect as well as
-# insert effect cases
+# slightly weird code allows add_effect to handle both
+# regular add effect as well as insert effect cases
 
 sub add_effect { 
 	my $p = shift;
@@ -584,6 +584,13 @@ sub cop_add {
 		
  		# find position of parent in the track ops array 
  		# and insert child immediately afterwards
+ 		#
+ 		# to keep controller order constant for RCS
+ 		# controllers must be reverse in order 
+ 		# they are stored on effect chain when applied
+ 		
+		# what if controller has two controllers?
+		# effect chain apply should reverse them, too
 
 		insert_after_string($parent_id, $id, @{$ti{$n}->ops}), 
 
@@ -1323,6 +1330,34 @@ sub automix {
 	#no Smart::Comments;
 	
 }
+
+sub bypass_effects {
+	my @ops = @_;
+=comment
+	mute track
+	make op effect_chain containing op and controllers
+	delete controllers
+	delete existing op ($fx->{applied} $fx->{params})
+	but leave entry in $track->ops
+	replace entry for op_id with vol 100
+	unmute track
+=cut
+}
+	
+sub restore_effects {
+	my @ops = @_;
+=comment
+	mute track
+	replace dummy with original 
+	add_effect_chain conditional (or add-effect
+	conditional?) to add_effect allows
+      to replace existing effect if bypass
+	add controllers 
+	unmute track
+=cut
+}
+		
+	
 
 
 1;

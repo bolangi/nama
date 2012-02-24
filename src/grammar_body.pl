@@ -979,15 +979,44 @@ show_effect_chains: _show_effect_chains ident(s?) {
 	);
 	1;
 }
-bypass_effects:  _bypass_effects effect_chain_id {
-	
-	1;
-}
 bypass_effects: _bypass_effects 'all' { 
 	print "track ",$::this_track->name,": bypassing all effects";
-	$::this_track->bypass($::this_track->fancy_ops);  
+	::bypass_effects(@{$::this_track->ops});  
 	1; 
 }
+bypass_effects:   _bypass_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	print "restoring effects\n";
+	::bypass_effects(@$arr_ref);
+}
+bypass_effects:  _bypass_effects effect_chain_id {
+	
+	print "bypass ops corresponding to effect chain";
+	1;
+}
+
+# effect_on_current_track: op_id { 
+# 	my $id = $item{op_id};
+# 	my $found = 
+# 	$::fx($id) or print("$id: effect does not exist.\n"), return 0;
+# 	grep{$id eq $_  } @{$::this_track->ops} 
+# 			   or print("$id: effect does not belong to track",
+# 						$::this_track->name,"\n"), return 0;			  
+# 	$id;
+# }
+
+# bypass_effects: _bypass_effects effect_chain_name {
+# 	say("$item{effect_chain_name}:" effect chain does not exist"), 
+# 		return unless my $chain = $fx->{chain}->{$item{effect_chain_name}};
+# }
+
+# bypass_effects: _bypass_effects {
+# 	map{ ::bypass_effect($_) } 
+# }
+
 
 effect_chain_id: effect_chain_id_pair(s) {
  		die " i found an effect chain id";
@@ -1021,29 +1050,6 @@ fxc_key: 'n'|                #### HARDCODED XX
 fxc_val: shellish
 
 
-bypass_effects:   _bypass_effects op_id(s) { 
-	# save by pushing onto current track's effect chain list
-	my $arr_ref = $item{'op_id(s)'};
-
-	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! ::fx($_) } @$arr_ref;
-	say("@illegal: illegal effect(s), aborting.") if @illegal;
-	map{ ::bypass_effect($_) } @$arr_ref;
-}
-
-
-# bypass_effects: _bypass_effects effect_chain_name {
-# 	say("$item{effect_chain_name}:" effect chain does not exist"), 
-# 		return unless my $chain = $fx->{chain}->{$item{effect_chain_name}};
-# }
-
-# bypass_effects: _bypass_effects {
-# 	map{ ::bypass_effect($_) } 
-# }
-
-bring_back_effects: _bring_back_effects effect_chain_id { 
-	1;
-}
 
 this_track_op_id: op_id(s) { 
 	my %ops = map{ $_ => 1 } @{$::this_track->ops};
@@ -1054,15 +1060,20 @@ this_track_op_id: op_id(s) {
 	@belonging	
 }
 
+bring_back_effects: _bring_back_effects effect_chain_id { 
+	1;
+}
 	
 bring_back_effects: _bring_back_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: illegal effect(s), aborting.") if @illegal;
+	print "restoring effects\n";
+	::bring_back_effects(@$arr_ref);
+	1;
+}
 	
-	print $::this_track->name, ": restoring effects\n"; 1}
-
-bring_back_effects: _bring_back_effects op_id(s) { 
-	effects($::this_track) and
-	print $::this_track->name, ": restoring effects\n"; 1}
-
 overwrite_effect_chain: _overwrite_effect_chain ident {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
