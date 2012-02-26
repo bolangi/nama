@@ -191,6 +191,9 @@ sub current_version {
 	my $track = shift;
 	my $status = $track->rec_status;
 	#$debug and print "last: $last status: $status\n";
+
+	# two possible version numbers, depending on REC/MON status
+	
 	if 	($status eq 'REC' and ! $track->rec_defeat)
 	{ 
 		my $last = $config->{use_group_numbering} 
