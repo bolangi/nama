@@ -1362,19 +1362,17 @@ sub automix {
 
 { my @dummy_fx = (type => 'ea', values => [100]);
 sub bypass_effects {
-
 	
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
 	#mute track
 
-	# create one EffectChain named after effect 
-	# with controllers included
+	# create one EffectChain identified by track and effect id
 	
 	foreach my $op ( @ops)
 	{ 
 		my $fx_chain_id = $op; 
-		my @eops = expanded_ops_list($op); 
+		my @eops = expanded_ops_list($op);  # save controllers as well
 
 		die "$fx_chain_id: effect chain already exists." 
 			if ::EffectChain::find(id => $fx_chain_id);
@@ -1387,7 +1385,7 @@ sub bypass_effects {
 			id => $fx_chain_id, # 
 			ops_list => \@eops, 
 		);
-		replace_effect($op, { @dummy_fx });
+		replace_effect({ @dummy_fx });
 	}
 	#unmute track
 }
