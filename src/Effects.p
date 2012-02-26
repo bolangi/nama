@@ -761,7 +761,7 @@ sub intersect_with_track_ops_list {
 	my @intersection = grep { $ops{$_} } @effects;
 	my @outersection = grep { !$ops{$_} } @effects;
 	carp "@outersection: effects don't belong to track: ", $track->name, 
-			". skipping.";
+			". skipping." if @outersection;
 	@intersection
 }
 
@@ -1385,7 +1385,7 @@ sub bypass_effects {
 			id => $fx_chain_id, # 
 			ops_list => \@eops, 
 		);
-		replace_effect({ @dummy_fx });
+		replace_effect({ cop_id => $op, @dummy_fx });
 	}
 	#unmute track
 }
