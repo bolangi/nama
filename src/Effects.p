@@ -45,9 +45,6 @@ sub set_chain_value {
 
 }
 
-# slightly weird code allows add_effect to handle both
-# regular add effect as well as insert effect cases
-
 sub add_effect { 
 	my $p = shift;
 	
