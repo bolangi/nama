@@ -7,6 +7,9 @@ use Carp;
 use ::Util qw(round);
 no warnings 'uninitialized';
 
+# access routines
+# the lvalue routines can be on the left side of an assignment
+
 sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
@@ -16,7 +19,10 @@ sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
 sub params : lvalue { my $id = shift; $fx->{params}->{$id}
 }
 
+# analyze the arguments to determine the track index
+
 sub set_chain_value {
+		
 	my $p = shift;
 
 	return if $p->{chain}; # don't do it twice
