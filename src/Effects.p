@@ -53,11 +53,10 @@ sub add_effect {
 	
 	set_chain_value($p);
 
-	# we do a kind of GOTO for insert effect
-	# insert_effect() in turn calls add_effect
-	# to avoid a loop, insert_effect() removes $p->{before}
 	
-	return _insert_effect($p) if $p->{before};
+	#  call _insert_effect to deal with the insert case
+
+	if ( $p->{before} ){ _insert_effect($p); return  }
 
 	my ($n,$before, $code,$parent_id,$id,$rename_id, $parameter,$values) =
 		@$p{qw( chain before type parent_id cop_id rename_id parameter values)};
@@ -114,7 +113,6 @@ sub _insert_effect {  # call only from add_effect
 	}
 
 	# remove ops after insertion point if engine is connected
-	# note that this will _not_ change the $track->ops list 
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	$debug and print "ops to remove and re-apply: @ops\n";
@@ -524,7 +522,7 @@ sub cop_add {
 		@$p{qw(chain type cop_id parent_id rename_id parameter)};
 
 	# return existing op_id if effect already exists
-	# unless (for effect chains) we prefer to get a new id
+	# unless effect chain asks us to get a new id
 	#
 	return $id if $id and fx($id) and ! $rename_id;
 	
