@@ -1367,13 +1367,14 @@ sub bypass_effects {
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
 	#mute track
+
+	# create one EffectChain named after effect 
+	# with controllers included
+	
 	foreach my $op ( @ops)
 	{ 
-
-		# + store effect and children as effect chain
-		
 		my $fx_chain_id = $op; 
-		my @ops = expanded_ops_list($op); 
+		my @eops = expanded_ops_list($op); 
 
 		die "$fx_chain_id: effect chain already exists." 
 			if ::EffectChain::find(id => $fx_chain_id);
@@ -1383,8 +1384,8 @@ sub bypass_effects {
 			system => 1,
 			track_name => $track->name,
 			project => 1,
-			id => $fx_chain_id,
-			ops_list => [ $op ], 
+			id => $fx_chain_id, # 
+			ops_list => \@eops, 
 		);
 		replace_effect($op, { @dummy_fx });
 	}
@@ -1395,8 +1396,12 @@ sub bypass_effects {
 sub replace_effect {
 	my ($fx) = @_;
 
-	my $op = $fx->{cop_id};
-	croak "op not found in ", eval { $fx->dump };
+	# argemnet can be either effect hash or effect chain
+	
+	# get the effect_id from either
+	
+	my $op = $fx->{cop_id} || eval { $fx->cop_id}; 
+	undef $@;
 
 	# $fx is either ::EffectChain or a hash with arguments
 	# to add_effect()

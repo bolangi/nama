@@ -22,9 +22,13 @@ our ($n, %by_index);
 use ::Object qw( 
 [% qx(cat ./effect_chain_fields) %]
 		);
-
-
 initialize();
+
+# for compatibility with standard effects
+sub cop_id { $_[0]->{id} }  
+
+# all bypass types are set to clobber_id
+sub clobber_id { my $self = shift; $self->bypass} 
 
 ## sugar for accessing individual effect attributes
 
@@ -115,7 +119,7 @@ sub add {
 			values 		=> $self->params($_),
 			parent_id 	=> $self->parent($_),
 			cop_id 		=> $_,
-			rename_id	=> 1,
+			clobber_id	=> $self->clobber_id,
 		});
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
@@ -131,7 +135,6 @@ sub destroy {
 	delete $by_index{$self->n};
 }
 
-sub clobber_id { my $self = shift; $self->bypass}
 	
 sub find { 
 	my %args = @_;
