@@ -681,11 +681,15 @@ add_effect: _add_effect effect value(s?) {
 	my $values = $item{"value(s?)"};
 	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
 		unless ::effect_index($code);
- 	my $id = ::add_effect({
+	my $args = {
 		track  => $::this_track, 
 		type   => ::effect_code($code),
 		values => $values
-	});
+	};
+	# place effect before fader if there is one
+	my $fader = $::this_track->pan || $::this_track->vol; 
+	$args->{before} = $fader if $fader;
+ 	my $id = ::add_effect($args);
 	if ($id)
 	{
 		my $i = ::effect_index($code);
@@ -980,23 +984,31 @@ show_effect_chains: _show_effect_chains ident(s?) {
 	1;
 }
 bypass_effects: _bypass_effects 'all' { 
-	print "track ",$::this_track->name,": bypassing all effects";
-	::bypass_effects(@{$::this_track->ops});  
+	print "track ",$::this_track->name,": bypassing all effects (except vol/pan)";
+	::bypass_effects(@{$::this_track->fancy_ops});  
 	1; 
+}
+bring_back_effects:   _bring_back_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	print "restoring effects\n";
+	::restore_effects($::this_track,@$arr_ref);
 }
 bypass_effects:   _bypass_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	print "restoring effects\n";
-	::bypass_effects(@$arr_ref);
+	print "bypassing effects\n";
+	::bypass_effects($::this_track,@$arr_ref);
 }
-bypass_effects:  _bypass_effects effect_chain_id {
-	
-	print "bypass ops corresponding to effect chain";
-	1;
-}
+# bypass_effects:  _bypass_effects effect_chain_id {
+# 	
+# 	print "bypass ops corresponding to effect chain";
+# 	1;
+# }
 
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
@@ -1006,15 +1018,6 @@ bypass_effects:  _bypass_effects effect_chain_id {
 # 			   or print("$id: effect does not belong to track",
 # 						$::this_track->name,"\n"), return 0;			  
 # 	$id;
-# }
-
-# bypass_effects: _bypass_effects effect_chain_name {
-# 	say("$item{effect_chain_name}:" effect chain does not exist"), 
-# 		return unless my $chain = $fx->{chain}->{$item{effect_chain_name}};
-# }
-
-# bypass_effects: _bypass_effects {
-# 	map{ ::bypass_effect($_) } 
 # }
 
 
