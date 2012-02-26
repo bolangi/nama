@@ -15,10 +15,6 @@ sub set_preview_mode {
 	
 	if ( $mode->{preview} eq 'preview' ){ return }
 
-	# make an announcement if we were in rec-enabled mode
-
-	$bn{Main}->set(rw => $old_group_rw) if $old_group_rw;
-
 	$mode->{preview} = "preview";
 
 	print "Setting preview mode.\n";
