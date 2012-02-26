@@ -747,6 +747,19 @@ sub expanded_ops_list { # including controllers
  	} @ops_list;
 	@expanded
 }
+
+sub intersect_with_track_ops_list {
+	my ($track, @effects)  = @_;
+	my %ops;
+	map{ $ops{$_}++} @{$track->ops};
+	my @intersection = grep { $ops{$_} } @effects;
+	my @outersection = grep { !$ops{$_} } @effects;
+	carp "@outersection: effects don't belong to track: ", $track->name, 
+			". skipping.";
+	@intersection
+}
+
+
 	
 
 sub ops_data {
@@ -1342,16 +1355,40 @@ sub automix {
 }
 
 sub bypass_effects {
-	my @ops = @_;
-=comment
-	mute track
-	make op effect_chain containing op and controllers
-	delete controllers
-	delete existing op ($fx->{applied} $fx->{params})
-	but leave entry in $track->ops
-	replace entry for op_id with vol 100
-	unmute track
-=cut
+	my($track, @ops) = @_;
+	@ops = intersect_with_track_ops_list($track,@ops);
+	foreach my $op ( @ops)
+	{ 
+		#mute track
+		# make op effect_chain containing op and controllers
+		
+		my $fx_chain_id = $_; 
+		my @ops = expanded_ops_list($op); 
+
+		die "$fx_chain_id: effect chain already exists." 
+			if ::EffectChain::find(id => $fx_chain_id);
+		::EffectChain->new(
+			bypass => 1,
+			system => 1,
+			project => 1,
+			id => $fx_chain_id,
+			ops_list => [ @ops ], 
+		);
+		# delete controllers
+		map { remove_effect($_) } @{ owns($op) }; 
+			
+		# replace effect with dummy
+		
+		add_effect({ 
+			cop_id => $fx_chain_id,
+			type   => 'ea',
+			values => [100],
+			track => $track,
+			overwrite => 1,
+		});
+		#	but leave entry in $track->ops
+		
+	#unmute track
 }
 	
 sub restore_effects {
