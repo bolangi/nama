@@ -1428,7 +1428,7 @@ sub replace_effect {
 	}
 	elsif ( (ref $fx) =~ /EffectChain/)
 	{
-		$fx->add($successor);
+		$fx->add($track, $successor);
 	}
 	else 
 	{ 
