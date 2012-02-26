@@ -1354,57 +1354,110 @@ sub automix {
 	
 }
 
+{ my @dummy_fx = (type => 'ea', values => [100]);
 sub bypass_effects {
+
+	
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
+	#mute track
 	foreach my $op ( @ops)
 	{ 
-		#mute track
-		# make op effect_chain containing op and controllers
+
+		# + store effect and children as effect chain
 		
-		my $fx_chain_id = $_; 
+		my $fx_chain_id = $op; 
 		my @ops = expanded_ops_list($op); 
 
 		die "$fx_chain_id: effect chain already exists." 
 			if ::EffectChain::find(id => $fx_chain_id);
+	
 		::EffectChain->new(
 			bypass => 1,
 			system => 1,
+			track_name => $track->name,
 			project => 1,
 			id => $fx_chain_id,
-			ops_list => [ @ops ], 
+			ops_list => [ $op ], 
 		);
-		# delete controllers
-		map { remove_effect($_) } @{ owns($op) }; 
-			
-		# replace effect with dummy
-		
-		add_effect({ 
-			cop_id => $fx_chain_id,
-			type   => 'ea',
-			values => [100],
-			track => $track,
-			overwrite => 1,
-		});
-		#	but leave entry in $track->ops
-		
+		replace_effect($op, { @dummy_fx });
+	}
 	#unmute track
 }
+}
+
+sub replace_effect {
+	my ($op, $fx) = @_;
+
+	# $fx is either ::EffectChain or a hash with arguments
+	# to add_effect()
+		
+	# + get current position
+	# + delete effect
+	# + insert dummy effect
+	my $track = $ti{chain($op)};
+
+	# delete controllers
+
+	map { remove_effect($_) } @{ owns($op) }; 
+
+	# get my location
+
+	my $n = nama_effect_index($op);
+
+	remove_effect($op);
 	
+	# what has moved into my spot?
+	
+	my $successor = ${ $track->ops }->{$n}; 
+
+
+	# assemble arguments
+
+	my @args;
+	if ( (ref $fx) =~ /HASH/ )
+	{
+	
+		push @args, 	track => $track, 
+						cop_id => $op, 
+						%$fx,
+
+		push @args, before => $successor if defined $successor;
+
+		add_effect({ @args });
+	}
+	elsif ( (ref $fx) =~ /EffectChain/)
+	{
+		$fx->add($successor);
+	}
+	else 
+	{ 
+		croak "expected effect chain or hash, got" 
+			.  (ref $fx) || 'scalar' 
+	}
+}
+
+sub all_bypassed_effects {
+	my $track = shift;
+	::EffectChain::find( bypass => 1, track_name => $track->name);
+}
+
 sub restore_effects {
-	my @ops = @_;
-=comment
-	mute track
-	replace dummy with original 
-	add_effect_chain conditional (or add-effect
-	conditional?) to add_effect allows
-      to replace existing effect if bypass
-	add controllers 
-	unmute track
-=cut
+	my($track, @ops) = @_;
+	@ops = intersect_with_track_ops_list($track,@ops);
+	return unless @ops;
+	# mute track
+	foreach my $op ( @ops)
+	{
+		my ($fxc) = ::EffectChain::find( bypass 	=> 1, 
+										 track_name => $track->name, 
+										 id 		=> $op);
+		carp("$op: no effect chain for bypassed op."), return unless $fxc;
+		replace_effect($op, $fxc);
+	}
+	#unmute track
 }
 		
-	
 
 
 1;

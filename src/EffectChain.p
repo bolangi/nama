@@ -94,7 +94,7 @@ sub new {
 }
 
 sub add {
-	my ($self, $track) = @_;
+	my ($self, $track, $successor) = @_;
 	
 	# Apply effect chain to track argument, if supplied;
 	# otherwise use the track specified by effect chain's track_name field.
@@ -106,12 +106,10 @@ sub add {
 		unless $self->system;
 
 	$self = bless { %$self }, __PACKAGE__;
-
-	
-	my $before = $track->vol;
+	$successor ||= $track->vol; # place before volume 
 	map 
 	{	my $new_id = ::add_effect({
-			before		=> $before, # for effect, not controller
+			before		=> $successor, # ignored in controller case
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
 			values 		=> $self->params($_),
