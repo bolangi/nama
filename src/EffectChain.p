@@ -130,6 +130,8 @@ sub destroy {
 	my $self = shift;
 	delete $by_index{$self->n};
 }
+
+sub clobber_id { my $self = shift; $self->bypass}
 	
 sub find { 
 	my %args = @_;

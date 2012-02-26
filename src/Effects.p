@@ -521,15 +521,16 @@ sub cop_add {
 	$debug and say yaml_out($p);
 
 	# parameter is used only by GUI XXX
-	my ($n, $type, $id, $parent_id, $rename_id, $parameter)  = 
-		@$p{qw(chain type cop_id parent_id rename_id parameter)};
+	my ($n, $type, $id, $parent_id, $rename_id, $clobber_id, $parameter)  = 
+		@$p{qw(chain type cop_id parent_id rename_id clobber_id parameter)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
 	#
-	return $id if $id and fx($id) and ! $rename_id;
+	return $id if $id and fx($id) and ! $clobber_id;
 	
-	$id = $p->{cop_id} = $fx->{id_counter};
+	if (  ! $clobber_id )
+	{ $id = $p->{cop_id} = $fx->{id_counter}  }
 
 	my $i = effect_index($type);
 
@@ -599,10 +600,14 @@ sub cop_add {
 	else { push @{$ti{$n}->ops }, $id; } 
 
 
-	# make sure the counter $fx->{id_counter} will not occupy an
-	# already used value
+	# don't touch counter if we are clobbering
 	
-	while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
+	if ( ! $clobber_id )
+	{
+		# make sure the counter $fx->{id_counter} will not occupy an
+		# already used value
+		while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
+	}
 
 	$id;
 }
@@ -1388,7 +1393,10 @@ sub bypass_effects {
 }
 
 sub replace_effect {
-	my ($op, $fx) = @_;
+	my ($fx) = @_;
+
+	my $op = $fx->{cop_id};
+	croak "op not found in ", eval { $fx->dump };
 
 	# $fx is either ::EffectChain or a hash with arguments
 	# to add_effect()
@@ -1400,7 +1408,7 @@ sub replace_effect {
 
 	# delete controllers
 
-	map { remove_effect($_) } @{ owns($op) }; 
+	map { remove_effect($_) } @{ owns($op)||[] }; 
 
 	# get my location
 
@@ -1410,20 +1418,25 @@ sub replace_effect {
 	
 	# what has moved into my spot?
 	
-	my $successor = ${ $track->ops }->{$n}; 
+	my $successor = $track->ops->[$n]; 
 
 
 	# assemble arguments
 
 	my @args;
-	if ( (ref $fx) =~ /HASH/ )
+	if ( ref($fx) =~ /HASH/ )
 	{
 	
 		push @args, 	track => $track, 
 						cop_id => $op, 
-						%$fx,
+						clobber_id => 1,
+						(%$fx);
 
-		push @args, before => $successor if defined $successor;
+		defined $successor and push @args, before => $successor;
+		
+		#my %b = (@args);
+		#delete $b{track};
+		#say "args: ",yaml_out \%b;
 
 		add_effect({ @args });
 	}
@@ -1454,7 +1467,7 @@ sub restore_effects {
 										 track_name => $track->name, 
 										 id 		=> $op);
 		carp("$op: no effect chain for bypassed op."), return unless $fxc;
-		replace_effect($op, $fxc);
+		replace_effect($fxc);
 	}
 	#unmute track
 }
