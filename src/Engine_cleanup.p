@@ -39,7 +39,7 @@ sub new_files_were_recorded {
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
 						$debug and print "found bigger than 44100 bytes:\n";
 						$debug and print "$_\n";
-						$tn{$name}->set(version => undef) if $tn{$name};
+						$tn{$name}->set(version => $version) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
 					1;
 					}
