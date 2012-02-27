@@ -14,7 +14,10 @@ sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
-sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns}       }
+
+# ensure owns field is initialized as anonymous array
+
+sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
 sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
 sub params : lvalue { my $id = shift; $fx->{params}->{$id}
 }
@@ -761,7 +764,9 @@ sub expanded_ops_list { # including controllers
 		# which is convenient for RCS
 		
  	} @ops_list;
-	@expanded
+
+	my %seen;
+	@expanded = grep { ! $seen{$_}++ } @expanded;
 }
 
 sub intersect_with_track_ops_list {

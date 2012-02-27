@@ -958,29 +958,19 @@ delete_effect_chain: _delete_effect_chain ident(s) {
 	} @{ $item{'ident(s)'} };
 	1;
 }
-list_effect_chains: _list_effect_chains ident(s?) {
-	my @defaults = (user => 1, profile => undef);
+show_effect_chains: _show_effect_chains ident(s?) 
+{
 	my @args;
-	@args = @{ $item{'ident(s)'} } if $item{'ident(s)'};
-	(scalar @args) % 2 == 0 
-		or print("odd number of arguments\n@args\n"), return 0;
-	# zero as arg represents undef
-	#@args = map { $_ == 0 ? undef : $_ } @args;
-	::pager( map{ $_->summary} ::EffectChain::find(@defaults, @args)  );
-	1;
+	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	::pager(map{$_->dump} ::EffectChain::find(@args));
 }
-show_effect_chains: _show_effect_chains ident(s?) {
-	my @defaults = (user => 1, profile => undef);
-	my @args;
-	@args = @{ $item{'ident(s)'} } if $item{'ident(s)'};
+list_user_effect_chains: _list_user_effect_chains idents(s?)
+{
+	my @args = ('user' , 1);
+	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
 	(scalar @args) % 2 == 0 
 		or print("odd number of arguments\n@args\n"), return 0;
-	# zero as arg represents undef
-	#@args = map { $_ == 0 ? undef : $_ } @args;
-	::pager( 
-		map{ $_->dump } 
-		::EffectChain::find(@defaults, @args)  
-	);
+	::pager( map{ $_->summary} ::EffectChain::find(@args)  );
 	1;
 }
 bypass_effects: _bypass_effects 'all' { 

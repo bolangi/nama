@@ -126,6 +126,7 @@ sub add {
 
 		# avoid incorrectly calling _insert_effect 
 		# (and controllers are not positioned relative to other  effects)
+		# 
 		
 		$args->{before} = $successor unless $args->{parent_id};
 
@@ -241,7 +242,5 @@ sub apply_effect_profile {  # overwriting current effects
 	@chains;	
 	map{ $_->add } @chains;
 }
-	
-	
 1;
 __END__
