@@ -39,7 +39,7 @@ sub initialize_interfaces {
 	read_config(global_config());  # from .namarc if we have one
 
 	$debug and say "#### Config file ####";
-	$debug and say yaml_out($config); 
+	#$debug and say yaml_out($config); XX config is object now; needs a dump method
 	
 	setup_user_customization();	
 

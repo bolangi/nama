@@ -10,6 +10,7 @@ package ::EffectChain;
 use Modern::Perl;
 use Carp;
 use Exporter qw(import);
+use Storable qw(dclone);
 
 use ::Globals qw($fx_cache %tn $this_op $debug);
 
@@ -34,19 +35,19 @@ sub clobber_id { my $self = shift; $self->bypass}
 
 sub is_controller {
 	my ($self, $id) = @_;
-	$self->{ops_data}->{$_}->{belongs_to}
+	$self->{ops_data}->{$id}->{belongs_to}
 }
 sub parent : lvalue {
 	my ($self, $id) = @_;
-	$self->{ops_data}->{$_}->{belongs_to}
+	$self->{ops_data}->{$id}->{belongs_to}
 }
 sub type {
 	my ($self, $id) = @_;
-	$self->{ops_data}->{$_}->{type}
+	$self->{ops_data}->{$id}->{type}
 }
 sub params {
 	my ($self, $id) = @_;
-	$self->{ops_data}->{$_}->{params}
+	$self->{ops_data}->{$id}->{params}
 }
 
 sub initialize {
@@ -78,8 +79,8 @@ sub new {
 		}
 		else
 		{
-			$ops_data->{$_} = { %{ ::fx($_)  } };  # copy of $fx->{applied}->{$_}
-			$ops_data->{$_}->{params} = [ @{ ::params($_)} ];  # copy;
+			$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
+			$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
 			delete $ops_data->{$_}->{chain};
 			delete $ops_data->{$_}->{display};
 		}
@@ -112,21 +113,30 @@ sub add {
 	$self = bless { %$self }, __PACKAGE__;
 	$successor ||= $track->vol; # place before volume 
 	map 
-	{	my $new_id = ::add_effect({
-			before		=> $successor, # ignored in controller case
+	{	
+		my $args = 
+		{
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
 			values 		=> $self->params($_),
 			parent_id 	=> $self->parent($_),
 			cop_id 		=> $_,
 			clobber_id	=> $self->clobber_id,
-		});
+		};
+
+		# avoid incorrectly calling _insert_effect 
+		# (and controllers are not positioned relative to other  effects)
+		
+		$args->{before} = $successor unless $args->{parent_id};
+
+		my $new_id = ::add_effect($args);
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
 		# change all controllers to belong to new id
 		{
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
+		
 		
 	} @{$self->ops_list};
 }

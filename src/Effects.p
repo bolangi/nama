@@ -61,8 +61,8 @@ sub add_effect {
 
 	if ( $p->{before} ){ _insert_effect($p); return  }
 
-	my ($n,$before, $code,$parent_id,$id,$rename_id, $parameter,$values) =
-		@$p{qw( chain before type parent_id cop_id rename_id parameter values)};
+	my (    $n,   $before, $code,$parent_id,$id, $clobber_id, $values) =
+	@$p{qw( chain before    type parent_id  cop_id clobber_id values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
@@ -520,21 +520,31 @@ sub cop_add {
 	my $p = shift;
 	$debug and say yaml_out($p);
 
-	# parameter is used only by GUI XXX
-	my ($n, $type, $id, $parent_id, $rename_id, $clobber_id, $parameter)  = 
-		@$p{qw(chain type cop_id parent_id rename_id clobber_id parameter)};
+	my ($n,  $type, $id, $parent_id, $clobber_id)  = 
+	@$p{qw( 
+	    chain type cop_id parent_id   clobber_id)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
 	#
+	$debug and say "$id: returning existing id" if $id and fx($id) and ! $clobber_id;
 	return $id if $id and fx($id) and ! $clobber_id;
 	
 	if (  ! $clobber_id )
-	{ $id = $p->{cop_id} = $fx->{id_counter}  }
+	{ 
+		$id = $p->{cop_id} = $fx->{id_counter}  ;
+      	$debug and say "$id: new id issued";
+	}
+	else 
+	{ 
+		$debug and say ::fx($id) ? "$id: clobbering existing effect" 
+				         : "$id: re-using effect id"
+	}
+
 
 	my $i = effect_index($type);
 
-	$debug and print "Issuing a cop_id for track $n: $id\n";
+	$debug and say "Issuing a cop_id for track $n: $id";
 	
 	# make entry in $fx->{applied} with chain, code, display-type, children
 
@@ -576,7 +586,7 @@ sub cop_add {
 		$debug and say join " ", "my attributes:", yaml_out(fx($id));
 		parent($id) = $parent_id;
 		$debug and say join " ", "my attributes again:", yaml_out(fx($id));
-		$debug and print "parameter: $parameter\n";
+		#$debug and print "parameter: $parameter\n";
 
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
@@ -1373,6 +1383,7 @@ sub bypass_effects {
 	{ 
 		my $fx_chain_id = $op; 
 		my @eops = expanded_ops_list($op);  # save controllers as well
+		say "ops list: @eops";
 
 		die "$fx_chain_id: effect chain already exists." 
 			if ::EffectChain::find(id => $fx_chain_id);
@@ -1427,7 +1438,10 @@ sub replace_effect {
 	# assemble arguments
 
 	my @args;
-	if ( ref($fx) =~ /HASH/ )
+
+	# we expect a HASH or EffectChain
+	
+	if ( ref($fx) !~ /EffectChain/ ) 
 	{
 	
 		push @args, 	track => $track, 
@@ -1443,7 +1457,7 @@ sub replace_effect {
 
 		add_effect({ @args });
 	}
-	elsif ( (ref $fx) =~ /EffectChain/)
+	elsif ( ref($fx) =~ /EffectChain/)
 	{
 		$fx->add($track, $successor);
 	}
@@ -1471,6 +1485,9 @@ sub restore_effects {
 										 id 		=> $op);
 		carp("$op: no effect chain for bypassed op."), return unless $fxc;
 		replace_effect($fxc);
+
+		# remove effect chain
+		$fxc->destroy if ref($fxc) =~ /EffectChain/;
 	}
 	#unmute track
 }
