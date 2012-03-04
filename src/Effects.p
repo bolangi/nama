@@ -1381,7 +1381,7 @@ sub bypass_effects {
 	
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
-	#mute track
+	$track->mute;
 
 	# create one EffectChain identified by track and effect id
 	
@@ -1404,7 +1404,7 @@ sub bypass_effects {
 		);
 		replace_effect({ cop_id => $op, @dummy_fx });
 	}
-	#unmute track
+	$track->unmute;
 }
 }
 
@@ -1483,7 +1483,7 @@ sub restore_effects {
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
 	return unless @ops;
-	# mute track
+	$track->mute;
 	foreach my $op ( @ops)
 	{
 		my ($fxc) = ::EffectChain::find( bypass 	=> 1, 
@@ -1495,7 +1495,7 @@ sub restore_effects {
 		# remove effect chain
 		$fxc->destroy if ref($fxc) =~ /EffectChain/;
 	}
-	#unmute track
+	$track->unmute
 }
 		
 
