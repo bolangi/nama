@@ -56,13 +56,14 @@ sub set_chain_value {
 
 sub add_effect { 
 	my $p = shift;
+	#$debug and say "add effect arguments0:\n",yaml_out($p);
 	
 	set_chain_value($p);
 
-	
+	$debug and say "add effect arguments1:\n",yaml_out($p);
 	#  call _insert_effect to deal with the insert case
 
-	if ( $p->{before} ){ _insert_effect($p); return  }
+	if ( $p->{before} ){ return _insert_effect($p) }
 
 	my (    $n,   $before, $code,$parent_id,$id, $clobber_id, $values) =
 	@$p{qw( chain before    type parent_id  cop_id clobber_id values)};

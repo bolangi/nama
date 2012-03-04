@@ -131,6 +131,7 @@ sub add {
 		$args->{before} = $successor unless $args->{parent_id};
 
 		my $new_id = ::add_effect($args);
+		$debug and say "new id: $new_id";
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
 		# change all controllers to belong to new id
