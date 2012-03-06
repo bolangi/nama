@@ -53,7 +53,7 @@ process_options();
 initialize_interfaces();
 diag "Check representative variable from default .namarc";
 
-is( $config->{formats}->{mix_to_disk}, "s16_le,N,44100,i", "Read mix_to_disk_format");
+is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
 =skip
 # Ecasound dependent
 diag "Check static effects data read";
