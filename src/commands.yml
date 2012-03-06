@@ -701,7 +701,7 @@ bypass_effects:
   parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> }
 bring_back_effects:
   type: effect
-  short: bbfx
+  short: restore_effects bbfx
   what: restore effects (default to all)
   parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> ]
 new_effect_profile:
