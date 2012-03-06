@@ -81,13 +81,6 @@ sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
 }
-sub show_effect_chain_stack {
-		return "Bypassed effect chains: "
-				.scalar @{ $this_track->effect_chain_stack }.$/
-			if @{ $this_track->effect_chain_stack } ;
-		undef;
-}
-	
 sub show_region {
 	my $t = $::this_track;
 	return unless $t->rec_status eq 'MON';
