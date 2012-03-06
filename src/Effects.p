@@ -54,17 +54,26 @@ sub set_chain_value {
 
 }
 
-sub add_effect { 
+
+sub add_effect {
 	my $p = shift;
 	#$debug and say "add effect arguments0:\n",yaml_out($p);
 	
 	set_chain_value($p);
 
 	$debug and say "add effect arguments1:\n",yaml_out($p);
-	#  call _insert_effect to deal with the insert case
 
-	if ( $p->{before} ){ return _insert_effect($p) }
+	# either insert or add, depending on 'before' setting
+	
+	my $id = $p->{before} ?  _insert_effect($p) : _add_effect($p);
+	
+	# return effect ID
+	$id
+}
 
+
+sub _add_effect { 
+	my $p = shift;
 	my (    $n,   $before, $code,$parent_id,$id, $clobber_id, $values) =
 	@$p{qw( chain before    type parent_id  cop_id clobber_id values)};
 	! $p->{chain} and
@@ -128,10 +137,7 @@ sub _insert_effect {  # call only from add_effect
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}
 
-	# call add_effect, making sure we don't come back!
-	
-	delete $p->{before};
-	add_effect($p);
+	_add_effect($p);
 
 	$debug and print join " ",@{$track->ops}, $/; 
 
