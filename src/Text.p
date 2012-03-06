@@ -63,8 +63,28 @@ sub show_effect {
  		my $op_id = shift;
 		my @lines;
 		my @params;
- 		 my $i = ::effect_index(::type($op_id)); 
- 		 push @lines, $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name}.  "\n";
+
+		# if bypassed, effect has been replaced by a dummy
+		# so we need to get effect name 
+		# from corresponding effect chain
+
+		my ($fx_chain) = ::is_bypassed($op_id);
+
+		my $type = $fx_chain 
+			? $fx_chain->{ops_data}->{$op_id}->{type} 
+			: ::type($op_id);
+		
+ 		my $i = ::effect_index($type);
+		
+ 		my $name =  $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name};
+		 
+		return $name . " (bypassed)\n" if $fx_chain;
+
+		# return effect parameters for the non-bypass case
+
+		$name .= "\n";
+
+		 push @lines, $name;
  		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 			map{ push @lines,
 			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
