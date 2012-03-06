@@ -1478,6 +1478,10 @@ sub all_bypassed_effects {
 	my $track = shift;
 	::EffectChain::find( bypass => 1, track_name => $track->name);
 }
+sub is_bypassed {
+	my $id = shift;
+	::EffectChain::find( id => $id )
+}
 
 sub restore_effects {
 	my($track, @ops) = @_;
