@@ -700,6 +700,29 @@ add_effect: _add_effect effect value(s?) {
  	1;
 }
 
+# cut-and-paste copy of add_effect, without using 'before' parameter
+append_effect: _append_effect effect value(s?) {
+	my $code = $item{effect};
+	my $values = $item{"value(s?)"};
+	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+		unless ::effect_index($code);
+	my $args = {
+		track  => $::this_track, 
+		type   => ::effect_code($code),
+		values => $values
+	};
+ 	my $id = ::add_effect($args);
+	if ($id)
+	{
+		my $i = ::effect_index($code);
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
+
+		print "\nAdded $id ($iname)\n\n";
+		$::this_op = $id;
+	}
+ 	1;
+}
+
 insert_effect: _insert_effect before effect value(s?) {
 	my $before = $item{before};
 	my $code = $item{effect};

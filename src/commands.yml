@@ -474,12 +474,17 @@ add_controller:
 add_effect:
   short: afx
   type: effect
-  what: add effect to the end of current track
+  what: add effect before fader (vol/pan controls)
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: |2
     add_effect amp 6     ; LADSPA Simple amp 6dB gain
     add_effect var_dali  ; preset var_dali. Note that you don't need
                          ; Ecasound's el: or pn: prefix
+append_effect:
+  short: apfx
+  type: effect
+  what: add effect after fader
+  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
   short: ifx
