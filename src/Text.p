@@ -63,7 +63,7 @@ sub show_effect {
  		my $op_id = shift;
 		my @lines;
 		my @params;
- 		 my $i = $fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
+ 		 my $i = ::effect_index(::type($op_id)); 
  		 push @lines, $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name}.  "\n";
  		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 			map{ push @lines,
