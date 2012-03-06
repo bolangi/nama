@@ -696,7 +696,7 @@ list_user_effect_chains:
   parameters: [<s_key1> <s_val1>... ]
 bypass_effects:
   type: effect
-  short: bfx
+  short: bypass bfx
   what: bypass effects on current track, default to all
   parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> }
 bring_back_effects:
