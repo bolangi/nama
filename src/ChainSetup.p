@@ -171,7 +171,7 @@ sub add_paths_for_mixdown_handling {
 		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
-		  	format		=> signal_format($config->{formats}->{mix_to_disk},$tn{Mixdown}->width),
+		  	format		=> signal_format($config->{mix_to_disk_format},$tn{Mixdown}->width),
 		  	chain_id	=> "Mixdown" },
 		); 
 		# no effects will be applied because effects are on chain 2
