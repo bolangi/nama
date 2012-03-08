@@ -40,6 +40,7 @@
 	$volume_control_operator
 	$eager_mode
 	$serialize_formats
+	$use_git
 	# sync mixdown version numbers to selected track versions
 	# not implemented
 

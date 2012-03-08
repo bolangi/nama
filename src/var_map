@@ -18,6 +18,7 @@
 	$use_placeholders  			$config->{use_placeholders}
 	%is_system_bus 				$config->{_is_system_bus}
 	$sampling_frequency			$config->{sampling_freq}
+	$use_git					$config->{use_git}
 	
 	%ti
 	%tn

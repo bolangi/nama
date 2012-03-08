@@ -85,6 +85,8 @@ limiter: tap_limiter 0 0
 
 serialize_formats: json yaml perl
 
+use_git: 1
+
 # end
 
 
