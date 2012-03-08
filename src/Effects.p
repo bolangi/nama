@@ -1417,35 +1417,32 @@ sub bypass_effects {
 sub replace_effect {
 	my ($fx) = @_;
 
-	# argemnet can be either effect hash or effect chain
+	# $fx is either ::EffectChain or a hash with arguments
+	# to add_effect()
 	
 	# get the effect_id from either
 	
 	my $op = $fx->{cop_id} || eval { $fx->cop_id}; 
 	undef $@;
 
-	# $fx is either ::EffectChain or a hash with arguments
-	# to add_effect()
 		
-	# + get current position
-	# + delete effect
-	# + insert dummy effect
 	my $track = $ti{chain($op)};
 
 	# delete controllers
 
 	map { remove_effect($_) } @{ owns($op)||[] }; 
 
-	# get my location
+	# get my position
 
 	my $n = nama_effect_index($op);
 
+	# delete effect
+	
 	remove_effect($op);
 	
 	# what has moved into my spot?
 	
 	my $successor = $track->ops->[$n]; 
-
 
 	# assemble arguments
 
