@@ -47,6 +47,7 @@ use File::Spec;
 use File::Spec::Link;
 use File::Temp;
 use Getopt::Long;
+use Git::Repository;
 use Graph;
 use IO::Socket; 
 use IO::Select;
