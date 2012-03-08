@@ -122,12 +122,21 @@ Loading project "untitled".
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
 	
-	teardown_engine(); # initialize_ecasound_engine; 
+	teardown_engine();
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	rememoize();
 
+	# initialize git repository if necessary
+	
+	Git::Repository->run( init => project_dir())
+		unless -d join_path( project_dir(). '.git');
+
+	# load repository
+
+	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
+	
 	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){
 
