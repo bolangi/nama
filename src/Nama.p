@@ -189,6 +189,7 @@ $config = bless {
 	fader_op 						=> 'ea',
 	# for save_system_state()
 	serialize_formats               => 'json',
+	use_git							=> 1,
 }, '::Config';
 
 { package ::Config;
