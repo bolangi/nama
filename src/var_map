@@ -275,3 +275,5 @@
 ** $config->{fader_op}
 
 ** $config->{serialize_formats}
+
+** $project->{config}
