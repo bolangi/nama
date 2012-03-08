@@ -131,11 +131,12 @@ Loading project "untitled".
 	# initialize git repository if necessary
 	
 	Git::Repository->run( init => project_dir())
-		unless -d join_path( project_dir(). '.git');
+		if $config->{use_git} and ! -d join_path( project_dir(). '.git');
 
 	# load repository
 
-	$project->{repo} = Git::Repository->new( work_tree => project_dir() );
+	$project->{repo} = Git::Repository->new( work_tree => project_dir() )
+		if $config->{use_git};
 	
 	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){

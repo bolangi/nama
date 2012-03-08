@@ -136,6 +136,11 @@ $debug = 0; # debug statements
 
 #$engine->{events} = {};
 
+#
+#  Singleton $file is a ::File
+#  + use AUTOLOAD to provide method calls for full path i.e. $file->state_store
+#
+
 {
 package ::File;
 	use Carp;
@@ -156,6 +161,7 @@ $file = bless
 	effects_cache 			=> ['.effects_cache', 		\&project_root],
 	gui_palette 			=> ['palette',        		\&project_root],
 	state_store 			=> ['State',          		\&project_dir ],
+	git_state_store 		=> ['State.json',      		\&project_dir ],
 	effect_profile 			=> ['effect_profiles',		\&project_root],
 	chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 	user_customization 		=> ['custom.pl',      		\&project_root],
