@@ -68,7 +68,7 @@ sub prepare_to_cache {
 	
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($config->{formats}->{cache_to_disk},$cooked->width),
+		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
 		}
 	); 
 
