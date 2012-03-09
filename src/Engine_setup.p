@@ -125,8 +125,12 @@ sub reconfigure_engine {
 		
 		$debug and say "I generated a new setup";
 		
-		# save monitoring setups only
-		git_snapshot() unless really_recording();
+		# we save:
+		# + monitoring setups 
+		# + preview setups
+		# + doodle setups
+		
+		git_snapshot() unless really_recording(); 
 
 		connect_transport('quiet');
 		::Text::show_status();
