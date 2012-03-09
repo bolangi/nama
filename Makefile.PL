@@ -29,7 +29,7 @@ use inc::Module::Install;
 			File::HomeDir  0
 			File::Slurp  0
 			File::Temp  0
-			Git::Respository 0
+			Git::Repository 0
 			Graph  0
 			IO::Socket  0
 			IO::Select  0
