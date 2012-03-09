@@ -3,6 +3,7 @@ use Modern::Perl;
 use Carp;
 use ::Assign qw(yaml_out); 
 
+=comment
 {
 	package ::Does::Serialize;
 	use Role::Basic;
@@ -21,7 +22,6 @@ use ::Assign qw(yaml_out);
                        # are serializing, not altering 
 	}
 }
-=comment
 
 ::Does::Persist
 	# later,
