@@ -1404,7 +1404,7 @@ sub bypass_effects {
 			bypass => 1,
 			system => 1,
 			track_name => $track->name,
-			project => 1,
+			project => $::project->{name},
 			id => $fx_chain_id, # 
 			ops_list => \@eops, 
 		);

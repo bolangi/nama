@@ -604,6 +604,7 @@ To repeat, remove ~/nama/.conversion_completed and try again"),
 
 	archive_state_files();
 	convert_effect_chains();
+	save_global_effect_chains();
     @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
 									->maxdepth(1)
 									->mindepth(1)
