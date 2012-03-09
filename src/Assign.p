@@ -38,7 +38,7 @@ our @EXPORT = ();
 
 use ::Globals qw($debug $debug2);
 
-our $to_json = JSON::XS->new->utf8->pretty(1) ;
+our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
 
                # working code, we alias this to the following lexical
