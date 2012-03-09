@@ -130,7 +130,7 @@ sub reconfigure_engine {
 		# + preview setups
 		# + doodle setups
 		
-		git_snapshot() unless really_recording(); 
+		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
 		::Text::show_status();
