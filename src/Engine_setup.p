@@ -124,7 +124,10 @@ sub reconfigure_engine {
 	if ( generate_setup() ){
 		
 		$debug and say "I generated a new setup";
-		git_snapshot();
+		
+		# save monitoring setups only
+		git_snapshot() unless really_recording();
+
 		connect_transport('quiet');
 		::Text::show_status();
 
