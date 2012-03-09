@@ -123,7 +123,7 @@ exit;
 
 	# set default project to "untitled"
 	
-	# convert_project_format(); # unless .conversion_completed file found
+	#convert_project_format(); # mark with .conversion_completed file in ~/nama
 	
 	if (! $project->{name} ){
 		$project->{name} = "untitled";
