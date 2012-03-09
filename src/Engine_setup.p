@@ -125,14 +125,6 @@ sub reconfigure_engine {
 		
 		$debug and say "I generated a new setup";
 		git_snapshot();
-
-sub git_snapshot {
-	return unless $config->{use_git};
-	save_state();
-	$project->{repo}->run( add => $file->git_state_store );
-	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
-}
-	
 		connect_transport('quiet');
 		::Text::show_status();
 

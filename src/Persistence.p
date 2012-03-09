@@ -866,6 +866,11 @@ sub restore_effect_chains {
 				class => '::');
 		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
-
+sub git_snapshot {
+	return unless $config->{use_git};
+	save_state();
+	$project->{repo}->run( add => $file->git_state_store );
+	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
+}
 1;
 __END__
