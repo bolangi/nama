@@ -758,15 +758,6 @@ Set the correct version and try again."), return
 	
 	$this_track = $edit->host;
 }
-sub apply_fades { 
-	# use info from Fade objects in %::Fade::by_name
-	# applying to tracks that are part of current
-	# chain setup
-	map{ ::Fade::refresh_fade_controller($_) }
-	grep{$_->{fader} }  # only if already exists
-	::ChainSetup::engine_tracks();
-}
-	
 sub disable_edits {
 
 	say("Please select an edit and try again."), return
