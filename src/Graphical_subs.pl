@@ -872,7 +872,7 @@ sub add_effect_gui {
 					-command => sub { add_effect ({
 							parent_id => $id,
 							chain => $n,
-							parameter  => $p,
+							values => [ $p  + 1 ],
 							type => $fx_cache->{registry}->[$j]->{code} } )  }
 				];
 
