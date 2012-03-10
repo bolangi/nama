@@ -276,7 +276,7 @@ sub restore_state {
 	map {
 		my $var = $_;
 		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
-		say "want to eval: $eval_text "; 
+		$debug and say "want to eval: $eval_text "; 
 		eval $eval_text;
 	} @vars;
 

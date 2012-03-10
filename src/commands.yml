@@ -969,12 +969,12 @@ eager:
   type: general
   what: output signals as soon as possible
   parameters: off | doodle | preview
-config:
-  type: general
-  what: get or set project-specific config values (args may be quoted)
-  parameters: <s_parameter_name> [<s_arguments>]
-unset:
-  type: general
-  what: delete project-specific config values (fall back to global config)
-  parameters: <s_parameter_name>
+# config:
+#   type: general
+#   what: get or set project-specific config values (args may be quoted)
+#   parameters: <s_parameter_name> [<s_arguments>]
+# unset:
+#   type: general
+#   what: delete project-specific config values (fall back to global config)
+#   parameters: <s_parameter_name>
 ...
