@@ -1,5 +1,24 @@
 Changes to Audio::Nama
 
+1.100 March 9, 2012
+
+	* New serialization format, prefer json
+	* convert_project_format() routine for archive-and-update project format
+	* New class EffectChain used to specify presets, store bypass parameters
+	* Replace hated and maligned bus MON mode filter. 
+	  (Use 'rerecord' to toggle to previous REC setup.)
+    * Eager mode - get sound to soundcard ASAP. 
+      + Issue the 'arm' command when ready to record.
+      + Two varieties of eager: preview and doodle
+      + Declare as eager_mode: doodle in .namarc
+    * Support for multiple serialization formats
+    * Optional use of Git for managing state
+      files and therefore project development. 
+	* Rename source files
+	* Replace 225 global variables by 16 "singletons",
+	  which are still global variables 
+		
+
 1.078 August 19, 2011
 
      * new commands
