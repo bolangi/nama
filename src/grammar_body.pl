@@ -620,7 +620,11 @@ modify_mark: _modify_mark value {
 remove_effect: _remove_effect op_id(s) {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	::mute();
-	map{ print "removing effect id: $_\n"; ::remove_effect( $_ )
+	map{ 
+		print "removing effect id: $_\n"; 
+		my ($fx_chain) = ::is_bypassed($_);
+		$fx_chain->destroy if $fx_chain;
+		::remove_effect( $_ )
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 	::sleeper(0.5);
