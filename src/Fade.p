@@ -74,11 +74,11 @@ sub refresh_fade_controller {
 	my $operator  = $fx->{applied}->{$track->fader}->{type};
 	my $off_level = $fx->{mute_level}->{$operator};
 	my $on_level  = $fx->{unity_level}->{$operator};
+	my $controller; # effect ID
+	($controller) = @{$fx->{applied}->{$track->fader}{owns}} if $track->fader;
 
-	# remove controller if present
 	$debug and say "removing fade controller";
-	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
-		{ ::remove_effect($old) }
+	::remove_effect($controller) if $controller;
 
 	return unless
 		my @pairs = fader_envelope_pairs($track); 
@@ -90,6 +90,7 @@ sub refresh_fade_controller {
 	# add controller
 	$debug and say "applying fade controller";
 	::add_effect({
+		cop_id		=> $controller,
 		parent_id 	=> $track->fader,
 		type		=> 'klg',	  		 # Ecasound controller
 		values		=> [	1,				 # Ecasound parameter 1
