@@ -697,8 +697,8 @@ list_user_effect_chains:
 bypass_effects:
   type: effect
   short: bypass bfx
-  what: bypass effects on current track, default to all
-  parameters: [<s_id1> <s_id2>... | <s_effect_chain_name> }
+  what: bypass effects on current track, default to current effect
+  parameters: [<s_id1> <s_id2>... | 'all' ]
 bring_back_effects:
   type: effect
   short: restore_effects bbfx

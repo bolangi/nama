@@ -1481,7 +1481,7 @@ sub replace_effect {
 
 sub is_bypassed {
 	my $id = shift;
-	::EffectChain::find( id => $id )
+	::EffectChain::find( bypass => 1, id => $id )
 }
 
 sub restore_effects {
