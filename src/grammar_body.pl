@@ -999,10 +999,37 @@ list_user_effect_chains: _list_user_effect_chains ident(s?)
 	::pager( map{ $_->summary} ::EffectChain::find(@args)  );
 	1;
 }
+##### bypass
+#
+#  argument(s) provided
+#
+bypass_effects:   _bypass_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	print "bypassing effects\n";
+	::bypass_effects($::this_track,@$arr_ref);
+	
+	# set last specified as the current op
+	$::this_op = $arr_ref->[-1];
+}
+#
+#  all effects on current track
+#
 bypass_effects: _bypass_effects 'all' { 
-	print "track ",$::this_track->name,": bypassing all effects (except vol/pan)";
-	::bypass_effects(@{$::this_track->fancy_ops});  
+	print "track ",$::this_track->name,": bypassing all effects (except vol/pan)\n";
+	::bypass_effects($::this_track, (@{$::this_track->fancy_ops}))
+		if scalar @{$::this_track->fancy_ops};
 	1; 
+}
+#
+#  current effect 
+#
+bypass_effects: _bypass_effects { 
+ 	print "track ",$::this_track->name,": bypassing $::this_effect\n"; 
+ 	::bypass_effects($::this_track, $::this_op);  
+ 	1; 
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
@@ -1012,20 +1039,14 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	print "restoring effects\n";
 	::restore_effects($::this_track,@$arr_ref);
 }
-bypass_effects:   _bypass_effects op_id(s) { 
+bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	print "bypassing effects\n";
-	::bypass_effects($::this_track,@$arr_ref);
+	print "restoring effects\n";
+	::restore_effects($::this_track,@$arr_ref);
 }
-# bypass_effects:  _bypass_effects effect_chain_id {
-# 	
-# 	print "bypass ops corresponding to effect chain";
-# 	1;
-# }
-
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
 # 	my $found = 
