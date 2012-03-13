@@ -1010,17 +1010,16 @@ bypass_effects:   _bypass_effects op_id(s) {
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
 	print "bypassing effects\n";
 	::bypass_effects($::this_track,@$arr_ref);
-	
-	# set last specified as the current op
-	$::this_op = $arr_ref->[-1];
+	# set current effect in special case of one op only
+	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
 }
 #
 #  all effects on current track
 #
 bypass_effects: _bypass_effects 'all' { 
 	print "track ",$::this_track->name,": bypassing all effects (except vol/pan)\n";
-	::bypass_effects($::this_track, (@{$::this_track->fancy_ops}))
-		if scalar @{$::this_track->fancy_ops};
+	::bypass_effects($::this_track, $::this_track->fancy_ops)
+		if $::this_track->fancy_ops;
 	1; 
 }
 #
@@ -1031,13 +1030,9 @@ bypass_effects: _bypass_effects {
  	::bypass_effects($::this_track, $::this_op);  
  	1; 
 }
-bring_back_effects:   _bring_back_effects op_id(s) { 
-	my $arr_ref = $item{'op_id(s)'};
-	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! ::fx($_) } @$arr_ref;
-	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+bring_back_effects:   _bring_back_effects end { 
 	print "restoring effects\n";
-	::restore_effects($::this_track,@$arr_ref);
+	::restore_effects( $::this_track, $::this_op);
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
@@ -1046,6 +1041,12 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
 	print "restoring effects\n";
 	::restore_effects($::this_track,@$arr_ref);
+	# set current effect in special case of one op only
+	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
+}
+bring_back_effects:   _bring_back_effects 'all' { 
+	print "restoring effects\n";
+	::restore_effects( $::this_track, $::this_track->bypassed);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
@@ -1090,7 +1091,6 @@ fxc_key: 'n'|                #### HARDCODED XX
 fxc_val: shellish
 
 
-
 this_track_op_id: op_id(s) { 
 	my %ops = map{ $_ => 1 } @{$::this_track->ops};
 	my @ids = @{$item{'op_id(s)'}};
@@ -1100,20 +1100,6 @@ this_track_op_id: op_id(s) {
 	@belonging	
 }
 
-bring_back_effects: _bring_back_effects effect_chain_id { 
-	1;
-}
-	
-bring_back_effects: _bring_back_effects op_id(s) { 
-	my $arr_ref = $item{'op_id(s)'};
-	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! ::fx($_) } @$arr_ref;
-	print("@illegal: illegal effect(s), aborting.") if @illegal;
-	print "restoring effects\n";
-	::bring_back_effects(@$arr_ref);
-	1;
-}
-	
 overwrite_effect_chain: _overwrite_effect_chain ident {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
