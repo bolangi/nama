@@ -1385,6 +1385,8 @@ sub automix {
 { my @dummy_fx = (type => 'ea', values => [100]);
 sub bypass_effects {
 	
+	local $this_op;
+
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
 	$track->mute;
@@ -1477,16 +1479,13 @@ sub replace_effect {
 	}
 }
 
-sub all_bypassed_effects {
-	my $track = shift;
-	::EffectChain::find( bypass => 1, track_name => $track->name);
-}
 sub is_bypassed {
 	my $id = shift;
 	::EffectChain::find( id => $id )
 }
 
 sub restore_effects {
+	local $this_op;
 	my($track, @ops) = @_;
 	@ops = intersect_with_track_ops_list($track,@ops);
 	return unless @ops;
