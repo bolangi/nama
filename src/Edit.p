@@ -1,8 +1,6 @@
-our (
-[% join q(, ), split " ", qx(cat ./singletons.pl) %]
-);
-
+{
 package ::Edit;
+use ::Globals qw(:singletons);
 
 # each edit is identified by:
 #  -  host track name
@@ -250,6 +248,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 
 # utility routines
 
+}
 # -------- Edit routines; Main Namespace ------
 {
 package ::;
