@@ -12,7 +12,7 @@ use vars qw(%reserved $debug $debug2);
 
 sub add_path_for_rec {
 
-	# connect input source to file via temporary track
+	# connect input source to file 
 	
 	my($g,$track) = @_;
 
