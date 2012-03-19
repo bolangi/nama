@@ -98,6 +98,7 @@ sub leading_track_spec {
 	Fade                                                      
 	Edit
 	Text
+	EffectChain
 	ChainSetup
 );
 
@@ -105,7 +106,7 @@ my $namespace_root = 'Audio::Nama';
 
 sub eval_perl {
 	my $code = shift;
-	map{ $code =~ s/::$_/$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
+	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
 	my $err;
 	my @result;
 	@result = eval $code;
