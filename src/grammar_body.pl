@@ -421,9 +421,11 @@ master_on: _master_on { ::master_on(); 1 }
 
 master_off: _master_off { ::master_off(); 1 }
 
-exit: _exit {   ::save_state($::file->{state_store}); 
-					::cleanup_exit();
-                    1}	
+exit: _exit {   
+	::save_state(); 
+	::cleanup_exit();
+	1
+}	
 source: _source connect_target { 
 	$::this_track->set_source(@{$item{connect_target}}); 1 }
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
