@@ -360,7 +360,6 @@ show_track: _show_track {
 	$output .= ::Text::show_bus();
 	$output .= ::Text::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
-	$output .= ::Text::show_effect_chain_stack();
 	$output .= ::Text::show_inserts();
 	::pager( $output );
 	1;}
@@ -527,7 +526,7 @@ unity: _unity {
 	::effect_update_copp_set( 
 		$::this_track->vol, 
 		0, 
-		$::fx->{unity_level}->{$::fx->{applied}->{$::this_track->vol}->{type}}
+		$::fx->{unity_level}->{::type($::this_track->vol)}
 	);
 	1;}
 
@@ -622,7 +621,11 @@ modify_mark: _modify_mark value {
 remove_effect: _remove_effect op_id(s) {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	::mute();
-	map{ print "removing effect id: $_\n"; ::remove_effect( $_ )
+	map{ 
+		print "removing effect id: $_\n"; 
+		my ($fx_chain) = ::is_bypassed($_);
+		$fx_chain->destroy if $fx_chain;
+		::remove_effect( $_ )
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 	::sleeper(0.5);
@@ -635,13 +638,17 @@ add_controller: _add_controller parent effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	my $id = ::add_effect({
+		parent_id => $parent, 
+		type	  => $code, 
+		values	  => $values,
+	});
 	if($id)
 	{
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pi = 	::effect_index(::type($parent));
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -655,13 +662,17 @@ add_controller: _add_controller effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
-	my $id = ::Text::t_add_ctrl($parent, $code, $values);
+	my $id = ::add_effect({
+		parent_id	=> $parent, 
+		type		=> $code, 
+		values		=> $values,
+	});
 	if($id)
 	{
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index($::fx->{applied}->{$parent}->{type});
+		my $pi = 	::effect_index(::type($parent));
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -672,14 +683,47 @@ add_controller: _add_controller effect value(s?) {
 add_effect: _add_effect effect value(s?) {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
- 	my $id = ::Text::t_add_effect($::this_track, $code, $values);
+	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+		unless ::effect_index($code);
+	my $args = {
+		track  => $::this_track, 
+		type   => ::effect_code($code),
+		values => $values
+	};
+	# place effect before fader if there is one
+	my $fader = $::this_track->pan || $::this_track->vol; 
+	$args->{before} = $fader if $fader;
+ 	my $id = ::add_effect($args);
 	if ($id)
 	{
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
-		$::this_op = $id; # set current effect
 
 		print "\nAdded $id ($iname)\n\n";
+		$::this_op = $id;
+	}
+ 	1;
+}
+
+# cut-and-paste copy of add_effect, without using 'before' parameter
+append_effect: _append_effect effect value(s?) {
+	my $code = $item{effect};
+	my $values = $item{"value(s?)"};
+	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+		unless ::effect_index($code);
+	my $args = {
+		track  => $::this_track, 
+		type   => ::effect_code($code),
+		values => $values
+	};
+ 	my $id = ::add_effect($args);
+	if ($id)
+	{
+		my $i = ::effect_index($code);
+		my $iname = $::fx_cache->{registry}->[$i]->{name};
+
+		print "\nAdded $id ($iname)\n\n";
+		$::this_op = $id;
 	}
  	1;
 }
@@ -690,16 +734,21 @@ insert_effect: _insert_effect before effect value(s?) {
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	print join ", ", @{$values} if $values;
-	my $id = ::Text::t_insert_effect($before, $code, $values);
+	my $id = ::add_effect({
+		before 	=> $before, 
+		type	=> $code, 
+		values	=> $values,
+	});
 	if($id)
 	{
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $bi = 	::effect_index($::fx->{applied}->{$before}->{type});
+		my $bi = 	::effect_index(::type($before));
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		print "\nInserted $id ($iname) before $before ($bname)\n\n";
+		$::this_op = $id;
 	}
 	1;}
 
@@ -707,7 +756,7 @@ before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	::modify_multiple_effects( 
 		[$::this_op], 
 		$item{'parameter(s)'},
@@ -718,7 +767,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	print ::Text::show_effect($::this_op);
 	1;
@@ -748,14 +797,14 @@ new_following_op: op_id
 show_effect: _show_effect op_id(s) {
 	my @lines = 
 		map{ ::Text::show_effect($_) } 
-		grep{ $::fx->{applied}->{$_} }
+		grep{ ::fx($_) }
 		@{ $item{'op_id(s)'}};
 	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
-	unless $::fx->{applied}->{$::this_op};
+		unless ::fx($::this_op);
 	print ::Text::show_effect($::this_op);
 	1;
 }
@@ -897,29 +946,161 @@ cache_track: _cache_track additional_time(?) {
 additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain ident op_id(s?) {
+	my $name = $item{ident};
 	#print "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}}, $/;
-	::new_effect_chain($::this_track, $item{ident}, @{ $item{'op_id(s?)'} });
+	my @ops = @{$item{'op_id(s?)'}};
+	scalar @ops or @ops = $::this_track->fancy_ops;
+	# include controllers
+	@ops = ::expanded_ops_list(@ops);
+	my ($old_entry) = ::EffectChain::find(user => 1, name => $name);
+
+	# overwrite identically named effect chain
+	my @options;
+	push(@options, 'n' , $old_entry->n) if $old_entry;
+	::EffectChain->new(
+		user   => 1,
+		global => 1,
+		name   => $item{ident},
+		ops_list => [ @ops ],
+		@options,
+	);
 	1;
 }
 add_effect_chain: _add_effect_chain ident {
-	::add_effect_chain($::this_track, $item{ident});
+	::EffectChain::find(
+		unique => 1, 
+		user   => 1, 
+		name   => $item{ident}
+	)->add($::this_track);
 	1;
 }
 delete_effect_chain: _delete_effect_chain ident(s) {
-	map{ delete $::fx->{chain}->{$_} } @{ $item{'ident(s)'} };
+	map{ 
+		::EffectChain::find(
+			unique => 1, 
+			user   => 1,
+			name   => $_
+		)->destroy() 
+
+	} @{ $item{'ident(s)'} };
 	1;
 }
-list_effect_chains: _list_effect_chains ident(s?) {
-	::pager(::list_effect_chains( @{ $item{'ident(s?)'} } )); 1;
+show_effect_chains: _show_effect_chains ident(s?) 
+{
+	my @args;
+	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	::pager(map{$_->dump} ::EffectChain::find(@args));
+}
+list_user_effect_chains: _list_user_effect_chains ident(s?)
+{
+	my @args = ('user' , 1);
+	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	(scalar @args) % 2 == 0 
+		or print("odd number of arguments\n@args\n"), return 0;
+	::pager( map{ $_->summary} ::EffectChain::find(@args)  );
+	1;
+}
+##### bypass
+#
+#  argument(s) provided
+#
+bypass_effects:   _bypass_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	print "bypassing effects\n";
+	::bypass_effects($::this_track,@$arr_ref);
+	# set current effect in special case of one op only
+	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
+}
+#
+#  all effects on current track
+#
+bypass_effects: _bypass_effects 'all' { 
+	print "track ",$::this_track->name,": bypassing all effects (except vol/pan)\n";
+	::bypass_effects($::this_track, $::this_track->fancy_ops)
+		if $::this_track->fancy_ops;
+	1; 
+}
+#
+#  current effect 
+#
+bypass_effects: _bypass_effects { 
+ 	print "track ",$::this_track->name,": bypassing $::this_effect\n"; 
+ 	::bypass_effects($::this_track, $::this_op);  
+ 	1; 
+}
+bring_back_effects:   _bring_back_effects end { 
+	print "restoring effects\n";
+	::restore_effects( $::this_track, $::this_op);
+}
+bring_back_effects:   _bring_back_effects op_id(s) { 
+	my $arr_ref = $item{'op_id(s)'};
+	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
+	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	print "restoring effects\n";
+	::restore_effects($::this_track,@$arr_ref);
+	# set current effect in special case of one op only
+	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
+}
+bring_back_effects:   _bring_back_effects 'all' { 
+	print "restoring effects\n";
+	::restore_effects( $::this_track, $::this_track->bypassed);
+}
+# effect_on_current_track: op_id { 
+# 	my $id = $item{op_id};
+# 	my $found = 
+# 	$::fx($id) or print("$id: effect does not exist.\n"), return 0;
+# 	grep{$id eq $_  } @{$::this_track->ops} 
+# 			   or print("$id: effect does not belong to track",
+# 						$::this_track->name,"\n"), return 0;			  
+# 	$id;
+# }
+
+
+effect_chain_id: effect_chain_id_pair(s) {
+ 		die " i found an effect chain id";
+  		my @pairs = @{$item{'effect_chain_id_pair(s)'}};
+  		my @found = ::EffectChain::find(@pairs);
+  		@found and 
+  			print join " ", 
+  			"found effect chain(s):",
+  			map{ ('name:', $_->name, 'n', $_->n )} @found;
+  			#map{ 1 } @found;
+}
+effect_chain_id_pair: fxc_key fxc_val { return @$item{fxc_key fxc_val} }
+
+fxc_key: 'n'|                #### HARDCODED XX
+		'ops_list'|
+        'ops_dat'|
+		'inserts_data'|
+		'name'|
+		'id'|
+		'project'|
+		'global'|
+		'profile'|
+		'user'|
+		'system'|
+		'track_name'|
+		'track_version'|
+		'track_cache'|
+		'bypass'
+
+# [% join " | ", split " ", qx(cat ./effect_chain_fields.pl) %]
+fxc_val: shellish
+
+
+this_track_op_id: op_id(s) { 
+	my %ops = map{ $_ => 1 } @{$::this_track->ops};
+	my @ids = @{$item{'op_id(s)'}};
+	my @belonging 	= grep {   $ops{$_} } @ids;
+	my @alien 		= grep { ! $ops{$_} } @ids;
+	@alien and print("@alien: don't belong to track ",$::this_track->name, "skipping.\n"); 
+	@belonging	
 }
 
-    
-bypass_effects:   _bypass_effects { 
-	::push_effect_chain($::this_track) and
-	print $::this_track->name, ": bypassing effects\n"; 1}
-restore_effects: _restore_effects { 
-	::restore_effects($::this_track) and
-	print $::this_track->name, ": restoring effects\n"; 1}
 overwrite_effect_chain: _overwrite_effect_chain ident {
 	::overwrite_effect_chain($::this_track, $item{ident}); 1;
 }
@@ -932,19 +1113,69 @@ bunch_name: ident {
 effect_profile_name: ident
 existing_effect_profile_name: ident {
 	print("$item{ident}: no such effect profile\n"), return
-		unless $::fx->{profile}->{$item{ident}};
+		unless ::EffectChain::find(profile => $item{ident});
 	$item{ident}
 }
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name {
 	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
 delete_effect_profile: _delete_effect_profile existing_effect_profile_name {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
-apply_effect_profile: _apply_effect_profile effect_profile_name {
-	::apply_effect_profile(\&::overwrite_effect_chain, $item{effect_profile_name}); 1 }
-overlay_effect_profile: _overlay_effect_profile effect_profile_name {
-	::apply_effect_profile(\&::add_effect_chain, $item{effect_profile_name}); 1 }
-list_effect_profiles: _list_effect_profiles {
-	::pager(::list_effect_profiles()); 1 }
+apply_effect_profile: _apply_effect_profile existing_effect_profile_name {
+	::apply_effect_profile($item{effect_profile_name}); 1 }
+list_effect_profiles: _list_effect_profiles ident(?) {
+	my $name;
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my @output = 
+		map
+		{ 	
+			$name = $_->profile;
+			$_->track_name;
+		} ::EffectChain::find(profile => $name);
+	if( @output )
+	{ ::pager( "\nname: $name\ntracks: ", join " ",@output) }
+	else { print "no match\n" }
+	1;
+}
+show_effect_profiles: _show_effect_profiles ident(?) {
+	my $name;
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my $old_profile_name;
+	my $profile_name;
+	my @output = 
+		grep{ ! /index:/ }
+		map
+		{ 	
+			
+			# return profile name at top if changed
+			# return summary
+
+			my @out;
+			my $profile_name = $_->profile;
+			if ( $profile_name ne $old_profile_name )
+			{
+			 	push @out, "name: $profile_name\n";
+				$old_profile_name = $profile_name 
+			}
+			push @out, $_->summary;
+			@out
+		} ::EffectChain::find(profile => $name);
+	if( @output )
+	{ ::pager( @output); }
+	else { print "no match\n" }
+	1;
+}
+full_effect_profiles: _full_effect_profiles ident(?) {
+	my $name;
+	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
+	$name ||= 1;
+	my @output = map{ $_->dump } ::EffectChain::find(profile => $name )  ;
+	if( @output )
+	{ ::pager( @output); }
+	else { print "no match\n" }
+	1;
+}
 do_script: _do_script shellish { ::do_script($item{shellish});1}
 scan: _scan { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)
@@ -1173,3 +1404,33 @@ eager: _eager mode_string { $::mode->{eager} = $item{mode_string} }
 mode_string: 'off'    { 0 }
 mode_string: 'doodle' 
 mode_string: 'preview'
+
+# config_key: key {
+# 	my $key = $item{key};
+# 	warn("$key: illegal config setting"), return 0
+# 		unless grep{ /^.$key$/ } keys ::Assign::var_map();
+# 	return $key
+# }
+# config: _config config_key shellish {
+# 	my $arg = $item{shellish};
+# 	my $key = $item{config_key};
+# 	$::project->{config}->{$key} = $arg;
+# 	return 1;
+# }
+# config: _config config_key {
+# 	my $key = $item{config_key};
+#  	my $arg = $::project->{config}->{$key};
+#  	if (defined $arg) {
+#  		print "project specific setting for $key: $arg\n";
+#  	}
+#  	return 1;
+# }
+# unset: _unset config_key {
+# 	my $key = $item{config_key};
+# 	my $arg = $::project->{config}->{$key};
+# 	print "removing project-specific setting for $key: $arg\n";
+# 	print "value will default to global config file (.namarc) setting\n";
+# 	delete $::project->{$item{config_key}};
+# 	print "currently ",$::config->$key, "\n";
+# 	1;
+# }

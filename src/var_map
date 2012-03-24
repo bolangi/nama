@@ -7,16 +7,18 @@
 	$null_bus					$bn{null}
 
 	%abbreviations				$config->{abbreviations}
+	$serialize_formats          $config->{serialize_formats}
 
-	$mix_to_disk_format 		$config->{formats}->{mix_to_disk}
-	$raw_to_disk_format 		$config->{formats}->{raw_to_disk}
-	$cache_to_disk_format 		$config->{formats}->{cache_to_disk}
-	$mixer_out_format 			$config->{formats}->{mixer_out}
+	$mix_to_disk_format 		$config->{mix_to_disk_format}
+	$raw_to_disk_format 		$config->{raw_to_disk_format}
+	$cache_to_disk_format 		$config->{cache_to_disk_format}
+	$mixer_out_format 			$config->{mixer_out_format}
 	$ladspa_sample_rate 	 	$config->{sample_rate}
 	$use_pager     				$config->{use_pager}
 	$use_placeholders  			$config->{use_placeholders}
 	%is_system_bus 				$config->{_is_system_bus}
 	$sampling_frequency			$config->{sampling_freq}
+	$use_git					$config->{use_git}
 	
 	%ti
 	%tn
@@ -78,7 +80,6 @@
 	@ecasound_pids				$engine->{pids}
 	$e							$engine->{ecasound}
 
-	$magical_cop_id				$fx->{magical_cop_id}
 	$cop_hints_yml 				$fx->{ecasound_effect_hints}
 	%offset        				$fx->{offset}
 	@already_muted  			$fx->{muted}
@@ -154,7 +155,6 @@
 	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
 	$initial_user_mode 				$config->{initial_mode}
-	$autosave_interval 				$config->{autosave_interval}
 	$midish_enable 					$config->{use_midish}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
@@ -175,6 +175,8 @@
 	$ecasound_globals_default		$config->{engine_globals_default}
  
 	$effects_cache_file 			$file->{effects_cache}
+	** 								$file->{global_effect_chains}
+	**								$file->{project_effect_chains}
 	$state_store_file				$file->{state_store}
 	$effect_chain_file 				$file->{effect_chain}
 	$effect_profile_file 			$file->{effect_profile}
@@ -274,3 +276,5 @@
 ** $config->{fader_op}
 
 ** $config->{serialize_formats}
+
+** $project->{config}

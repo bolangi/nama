@@ -63,8 +63,28 @@ sub show_effect {
  		my $op_id = shift;
 		my @lines;
 		my @params;
- 		 my $i = $fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
- 		 push @lines, $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name}.  "\n";
+
+		# if bypassed, effect has been replaced by a dummy
+		# so we need to get effect name 
+		# from corresponding effect chain
+
+		my ($fx_chain) = ::is_bypassed($op_id);
+
+		my $type = $fx_chain 
+			? $fx_chain->{ops_data}->{$op_id}->{type} 
+			: ::type($op_id);
+		
+ 		my $i = ::effect_index($type);
+		
+ 		my $name =  $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name};
+		 
+		return $name . " (bypassed)\n" if $fx_chain;
+
+		# return effect parameters for the non-bypass case
+
+		$name .= "\n";
+
+		 push @lines, $name;
  		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 			map{ push @lines,
 			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
@@ -81,13 +101,6 @@ sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
 }
-sub show_effect_chain_stack {
-		return "Bypassed effect chains: "
-				.scalar @{ $this_track->effect_chain_stack }.$/
-			if @{ $this_track->effect_chain_stack } ;
-		undef;
-}
-	
 sub show_region {
 	my $t = $::this_track;
 	return unless $t->rec_status eq 'MON';
@@ -378,17 +391,11 @@ sub t_load_project {
 	print("Project $newname does not exist\n"), return
 		unless -d join_path(project_root(), $newname);
 	stop_transport();
-	save_state();
-	if(my $savefile = autosave()){
-		say "Unsaved changes to previous project stored as:";
-		say $savefile, "\n";
-	}
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
 	$debug and print "hook: $config->{execute_on_project_load}\n";
 	::command_process($config->{execute_on_project_load});
 		
-	
 }
 
     
@@ -401,110 +408,6 @@ sub t_create_project {
 	);
 	print "created project: $project->{name}\n";
 
-}
-sub t_insert_effect {
-	package ::;
-	my ($before, $code, $values) = @_;
-	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
-	$code = effect_code( $code );	
-	my $running = engine_running();
-	print("Cannot insert effect while engine is recording.\n"), return 
-		if $running and ::ChainSetup::really_recording();
-	print("Cannot insert effect before controller.\n"), return 
-		if $fx->{applied}->{$before}->{belongs_to};
-
-	if ($running){
-		$ui->stop_heartbeat;
-		::mute();
-		eval_iam('stop');
-		sleeper( 0.05);
-	}
-	my $n = $fx->{applied}->{ $before }->{chain} or 
-		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
-		return;
-	
-	my $track = $ti{$n};
-	$debug and print $track->name, $/;
-	#$debug and print join " ",@{$track->ops}, $/; 
-
-	# find offset 
-	
-	my $offset = 0;
-	for my $id ( @{$track->ops} ){
-		last if $id eq $before;
-		$offset++;
-	}
-
-	# remove ops after insertion point if engine is connected
-	# note that this will _not_ change the $track->ops list 
-
-	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
-	$debug and print "ops to remove and re-apply: @ops\n";
-	my $connected = eval_iam('cs-connected');
-	if ( $connected ){  
-		map{ remove_op($_)} reverse @ops; # reverse order for correct index
-	}
-
-	::Text::t_add_effect( $track, $code, $values );
-
-	$debug and print join " ",@{$track->ops}, $/; 
-
-	# the new op_id is added to the end of the $track->ops list
-	# so we need to move it to specified insertion point
-
-	my $op = pop @{$track->ops}; 
-
-	# the above acts directly on $track, because ->ops returns 
-	# a reference to the array
-
-	# insert the effect id 
-	splice 	@{$track->ops}, $offset, 0, $op;
-
-	$debug and print join " ",@{$track->ops}, $/; 
-
-	# replace the ops that had been removed
-	if ($connected ){  
-		map{ apply_op($_, $n) } @ops;
-	}
-		
-	if ($running){
-		eval_iam('start');	
-		sleeper(0.3);
-		::unmute();
-		$ui->start_heartbeat;
-	}
-	$op
-}
-sub t_add_effect {
-	package ::;
-	my ($track, $code, $values)  = @_;
-	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
-	$code = effect_code( $code );	
-	$debug and print "code: ", $code, $/;
-		my %p = (
-			chain => $track->n,
-			values => $values,
-			type => $code,
-			);
-			#print "adding effect\n";
-			$debug and print(yaml_out(\%p));
-		add_effect( \%p );
-}
-sub t_add_ctrl {
-	package ::;
-	my ($parent, $code, $values, $id) = @_;
-	if ( $fx_cache->{full_label_to_index}->{$code} ) {} # do nothing
-	elsif ( $fx_cache->{partial_label_to_full}->{$code} ) { $code = $fx_cache->{partial_label_to_full}->{$code} }
-	else { warn "effect code not found: $code\n"; return }
-	$debug and print "code: ", $code, $/;
-		my %p = (
-				chain 		=> $fx->{applied}->{$parent}->{chain},
-				cop_id 		=> $id,
-				parent_id 	=> $parent,
-				values 		=> $values,
-				type 		=> $code,
-			);
-		add_effect( \%p );
 }
 sub mixdown {
 	print "Enabling mixdown to file.\n";

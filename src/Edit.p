@@ -1,8 +1,6 @@
-our (
-[% join q(, ), split " ", qx(cat ./singletons.pl) %]
-);
-
+{
 package ::Edit;
+use ::Globals qw(:singletons);
 
 # each edit is identified by:
 #  -  host track name
@@ -29,6 +27,7 @@ use ::Object qw(
 sub initialize {
 	%n = ();
 	%by_name = ();
+	%by_index = ();
 	@::edits_data = (); # for save/restore
 }
 
@@ -61,6 +60,7 @@ sub new {
 
 	my $name = $self->host_track;
 	my $host = $::tn{$name};
+	confess( ::project_dir().": missing host_track".  $::this_track->dump. $self->dump. ::command_process("dumpa")) if !$host;
 
 # Routing:
 #
@@ -248,6 +248,7 @@ sub edit_track 		{ $::tn{$_[0]->edit_name} }             # in version_bus
 
 # utility routines
 
+}
 # -------- Edit routines; Main Namespace ------
 {
 package ::;
@@ -756,15 +757,6 @@ Set the correct version and try again."), return
 	
 	$this_track = $edit->host;
 }
-sub apply_fades { 
-	# use info from Fade objects in %::Fade::by_name
-	# applying to tracks that are part of current
-	# chain setup
-	map{ ::Fade::refresh_fade_controller($_) }
-	grep{$_->{fader} }  # only if already exists
-	::ChainSetup::engine_tracks();
-}
-	
 sub disable_edits {
 
 	say("Please select an edit and try again."), return

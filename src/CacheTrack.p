@@ -68,7 +68,7 @@ sub prepare_to_cache {
 	
 	$g->set_vertex_attributes(
 		$cooked->name, 
-		{ format => signal_format($config->{formats}->{cache_to_disk},$cooked->width),
+		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
 		}
 	); 
 
@@ -144,11 +144,23 @@ sub update_cache_map {
 		$debug and say "updating track cache_map";
 		#say "cache map",yaml_out($track->cache_map);
 		my $cache_map = $track->cache_map;
-		$cache_map->{$track->last} = { 
-			original 			=> $orig_version,
-			effect_chain	=> push_effect_chain($track), # bypass
-		};
-		pop @{$track->effect_chain_stack}; # we keep it elsewhere
+		if ( my @ops_list = $track->fancy_ops )
+		{
+			my $ec = ::EffectChain->new(
+				track_cache => 1,
+				track_name	=> $track->name,
+				track_version => $orig_version,
+				project => 1,
+				system => 1,
+				ops_list => \@ops_list,
+			);
+			map{ remove_effect($_) } @ops_list;
+
+			$cache_map->{$track->last} = { 
+				original 			=> $orig_version,
+				effect_chain	=> $ec->n
+			};
+		}
 		if (my @inserts = grep{$_}(
 				$track->prefader_insert, 
 				$track->postfader_insert)
@@ -228,8 +240,27 @@ sub uncache_track {
 			say $track->name, ": setting sub-bus mix track to REC";
 		} 
 
-		add_effect_chain($track, $cache_map->{$version}{effect_chain})
-			if $cache_map->{$version}{effect_chain};
+		my $v = $cache_map->{$version}{effect_chain};
+
+		# get effect change by index if ID is all digits
+		my $ec;
+		if ($v !~ /\D/) 
+		{ 
+			$ec = ::EffectChain::find(n => $v);
+		}
+		else
+		{   # get version number from name (_waltz/piano_3)
+			# not really version number, actually just an index
+			($v) = $v =~ /_(\d+)$/; 
+			$ec = ::EffectChain::find(
+				track_track => 1,
+				track_name	=> $track->name,
+				track_version => "V$v",
+				unique		=> 1,
+			);
+			$ec->add($track) if defined $ec;
+		}
+		
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
 }

@@ -170,12 +170,11 @@ sub ecasound_select_chain {
 	my $cmd = "c-select $n";
 
 	if( 
-
 		# specified chain exists in the chain setup
 		::ChainSetup::is_ecasound_chain($n)
 
 		# engine is configured
-		and eval_iam( 'cs-connected' ) =~ /$file->{chain_setup}/
+		and eval_iam( 'cs-connected' ) =~ /$file->{chain_setup}->[0]/
 
 	){ 	eval_iam($cmd); 
 		return 1 

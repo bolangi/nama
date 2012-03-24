@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($config %tn %bn $debug $debug2 $mode);
+use ::Globals qw($file $config %tn %bn $debug $debug2 $mode);
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
@@ -42,7 +42,7 @@ sub initialize {
 	undef $chain_setup;
 	::disable_length_timer();
 	reset_aux_chain_counter();
-	{no autodie; unlink ::setup_file()}
+	{no autodie; unlink $file->chain_setup}
 	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
@@ -171,7 +171,7 @@ sub add_paths_for_mixdown_handling {
 		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
-		  	format		=> signal_format($config->{formats}->{mix_to_disk},$tn{Mixdown}->width),
+		  	format		=> signal_format($config->{mix_to_disk_format},$tn{Mixdown}->width),
 		  	chain_id	=> "Mixdown" },
 		); 
 		# no effects will be applied because effects are on chain 2
@@ -394,7 +394,7 @@ sub write_chains {
 					"# audio outputs",
 					join("\n", @output_chains), "";
 	$debug and print "ECS:\n",$ecs_file;
-	open my $fh, ">", ::setup_file();
+	open my $fh, ">", $file->chain_setup;
 	print $fh $ecs_file;
 	close $fh;
 	$chain_setup = $ecs_file;

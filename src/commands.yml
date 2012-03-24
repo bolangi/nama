@@ -474,12 +474,17 @@ add_controller:
 add_effect:
   short: afx
   type: effect
-  what: add effect to the end of current track
+  what: add effect before fader (vol/pan controls)
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: |2
     add_effect amp 6     ; LADSPA Simple amp 6dB gain
     add_effect var_dali  ; preset var_dali. Note that you don't need
                          ; Ecasound's el: or pn: prefix
+append_effect:
+  short: apfx
+  type: effect
+  what: add effect after fader
+  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
 insert_effect:
   type: effect
   short: ifx
@@ -504,7 +509,7 @@ position_effect:
   type: effect
   what: position an effect before another effect (use 'ZZZ' for end)
   short: pfx
-  parameters: [<s_effect_id>]
+  parameters: [<s_id_to_move>, <s_position_id>]
 show_effect:
   type: effect
   what: show effect information
@@ -668,31 +673,37 @@ add_effect_chain:
   type: effect
   short: aec
   what: add an effect chain to the current track
-  parameters: <s_name>
+  parameters: <s_effect_chain_name>
 overwrite_effect_chain:
   type: effect
   short: oec
-  what: add an effect chain overwriting current effects (which are pushed onto stack)
-  parameters: <s_name>
+  what: add an effect chain overwriting current effects (which are pushed onto the bypass list)
+  parameters: <s_effect_chain_name>
 delete_effect_chain:
   type: effect
   short: dec
   what: delete an effect chain definition from the list
-  parameters: <s_name>
-list_effect_chains:
+  parameters: <s_effect_chain_name>
+show_effect_chains:
   type: effect
-  short: lec
-  what: list effect chains, matching any strings provided
-  parameters: [<s_frag1> <s_frag2>... ]
+  short: sec 
+  what: dump effect chains, matching key/value pairs if provided
+  parameters: [<s_key1> <s_val1>... ]
+list_user_effect_chains:
+  type: effect
+  short: luec luc
+  what: list *user* effect chains, matching key/value pairs if provided
+  parameters: [<s_key1> <s_val1>... ]
 bypass_effects:
   type: effect
-  short: bypass bye
-  what: bypass track effects (pushing them onto stack) except vol/pan 
-  parameters: none
-restore_effects:
+  short: bypass bfx
+  what: bypass effects on current track (default to current effect)
+  parameters: [<s_id1> <s_id2>... | 'all' ]
+bring_back_effects:
   type: effect
-  short: restore ref 
-  what: restore bypassed track effects
+  short: restore_effects bbfx
+  what: restore effects (default to current effect)
+  parameters: [<s_id1> <s_id2>... | 'all' ]
 new_effect_profile:
   type: effect
   short: nep
@@ -701,22 +712,25 @@ new_effect_profile:
 apply_effect_profile:
   type: effect
   short: aep
-  what: use an effect profile to overwrite effects of multiple tracks
-  parameters: <s_effect_profile_name>
-overlay_effect_profile:
-  type: effect
-  short: oep
   what: use an effect profile to add effects to multiple tracks
   parameters: <s_effect_profile_name>
 delete_effect_profile:
   type: effect
   short: dep
-  what: remove an effect chain bunch definition
+  what: delete an effect profile
   parameters: <s_effect_profile_name>
 list_effect_profiles:
   type: effect
   short: lep
-  what: list effect chain bunches
+  what: list effect profile 
+show_effect_profiles:
+  type: effect
+  short: sepr
+  what: list effect profile 
+full_effect_profiles:
+  type: effect
+  short: fep
+  what: dump effect profile data structure
 cache_track:
   type: track
   short: cache ct
@@ -955,4 +969,12 @@ eager:
   type: general
   what: output signals as soon as possible
   parameters: off | doodle | preview
+# config:
+#   type: general
+#   what: get or set project-specific config values (args may be quoted)
+#   parameters: <s_parameter_name> [<s_arguments>]
+# unset:
+#   type: general
+#   what: delete project-specific config values (fall back to global config)
+#   parameters: <s_parameter_name>
 ...

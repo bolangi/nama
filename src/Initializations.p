@@ -39,7 +39,7 @@ sub initialize_interfaces {
 	read_config(global_config());  # from .namarc if we have one
 
 	$debug and say "#### Config file ####";
-	$debug and say yaml_out($config); 
+	#$debug and say yaml_out($config); XX config is object now; needs a dump method
 	
 	setup_user_customization();	
 
@@ -119,13 +119,11 @@ exit;
 		
 	start_midish() if $config->{use_midish};
 
-	# set up autosave
-	
-    schedule_autosave() unless debugging_options();
-
 	initialize_terminal() unless $config->{opts}->{T};
 
 	# set default project to "untitled"
+	
+	#convert_project_format(); # mark with .conversion_completed file in ~/nama
 	
 	if (! $project->{name} ){
 		$project->{name} = "untitled";
@@ -135,7 +133,6 @@ exit;
 	
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	restore_effect_chains();
-	restore_effect_profiles();
 	1;	
 }
 sub debugging_options {

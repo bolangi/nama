@@ -4,7 +4,7 @@ project_root: ~/nama
 
 autosave_interval: 0
 
-eager_mode: doodle 
+#eager_mode: doodle
 
 midish_enable: 0
 
@@ -23,7 +23,7 @@ devices:
   jack:
     signal_format: f32_le,N,frequency
   consumer:
-    ecasound_id: alsa,default
+    ecasound_id: alsahw,Intel
     input_format: cd-stereo
     output_format: cd-stereo
     hardware_latency: 0
@@ -80,6 +80,12 @@ compressor: sc4 0 3 16 0 1 3.25 0
 spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
+
+# serialization choice
+
+serialize_formats: json yaml perl
+
+use_git: 1
 
 # end
 

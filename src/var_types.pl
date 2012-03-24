@@ -32,7 +32,6 @@
 	$press_space_to_start_transport
 	$execute_on_project_load
 	$initial_user_mode
-	$autosave_interval
 	$midish_enable
 	$quietly_remove_tracks
 	$use_jack_plumbing
@@ -40,6 +39,8 @@
 	$use_monitor_version_for_mixdown 
 	$volume_control_operator
 	$eager_mode
+	$serialize_formats
+	$use_git
 	# sync mixdown version numbers to selected track versions
 	# not implemented
 
@@ -53,12 +54,19 @@
 	$spatialiser
 	$limiter
 );
-						
+					
+# user defined or other globally accessible effect chains 
+# are saved in a separate file to suit version control
+# requirements. 
+
+@global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
+
 # list of variables that get saved to State.yml
 
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
+	$project->{config}
 	$fx->{id_counter}
 	$fx->{applied}
 	$fx->{params}
@@ -71,6 +79,7 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+	@project_effect_chain_data
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
 	$setup->{audio_length}

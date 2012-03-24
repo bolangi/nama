@@ -1,5 +1,30 @@
 Changes to Audio::Nama
 
+1.100 March 9, 2012
+
+	* New serialization format, prefer json
+	* convert_project_format() 
+	   + archives project state.yml files
+       + converts them to new format state.json 
+	   + run as nama> eval convert_project_format
+	* New class EffectChain used to specify presets, store bypass parameters
+	* Replace hated and maligned bus MON mode filter. 
+	  (Use 'rerecord' to toggle to previous REC setup.)
+    * Eager mode - get sound to soundcard ASAP. 
+      + Declare as eager_mode: doodle in .namarc
+      + Two varieties of eager: preview and doodle
+        - doodle: monitor "live" inputs only
+        - preview: monitor "live" inputs while playing back WAV files
+      + Issue the 'arm' command when ready to record.
+    * Optional use of Git for managing state
+      files and therefore project development. 
+	* Rename source files
+	* Replace 225 global variables by 16 "singletons",
+	  which are still global variables 
+    * support for multiple serialization formats
+    * Miscellaneous fixes
+		
+
 1.078 August 19, 2011
 
      * new commands

@@ -29,10 +29,12 @@ use inc::Module::Install;
 			File::HomeDir  0
 			File::Slurp  0
 			File::Temp  0
+			Git::Repository 0
 			Graph  0
 			IO::Socket  0
 			IO::Select  0
 			IPC::Open3  0
+			List::Util 0
 			Modern::Perl  0
 			Module::Load::Conditional  0 
 			Parse::RecDescent  0

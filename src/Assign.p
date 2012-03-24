@@ -38,14 +38,20 @@ our @EXPORT = ();
 
 use ::Globals qw($debug $debug2);
 
-our $to_json = JSON::XS->new->utf8->pretty(1) ;
+our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
+
+               # working code, we alias this to the following lexical
 
 {my $var_map = { qw(
 
 [% qx(./var_map_gen) %]
 
 ) };
+sub var_map {  $var_map } # to allow outside access while keeping
+                          # working lexical
+
+
 sub assign {
   # Usage: 
   # assign ( 
@@ -82,13 +88,7 @@ ASSIGN
 	#$debug and print yaml_out($ref);
 
 	# index what sigil an identifier should get
-	
 
-	# autosave_interval  | $autosave_interval | $config->{autosave_interval}
-
-	# $autosave_interval = ....
-    # $config->autosave_interval = ....
-	
 	# we need to create search-and-replace strings
 	# sigil-less old_identifier
 	my %sigil;
@@ -249,7 +249,7 @@ sub assign_serialization_arrays {
 	$class .= '::'; # SKIP_PREPROC
 	map {
 		my $ident = $_;
-		if( defined $data->{ident} ){
+		if( defined $data->{$ident} ){
 			my $type = ref $data->{$ident};
 			$type eq 'ARRAY' or die "$ident: expected ARRAY, got $type";
 			my $cmd = q($).$class.$ident. q( = @{$data->{$ident}});
@@ -262,20 +262,28 @@ sub assign_serialization_arrays {
 }
 }
 
-{
-	my %suffix = 
+our %suffix = 
 	(
 		storable => "bin",
 		perl	 => "pl",
 		json	 => "json",
 		yaml	 => "yml",
 	);
-	my %dispatch = 
+our %dispatch = 
 	( storable => sub { my($ref, $path) = @_; nstore($ref, $path) },
 	  perl     => sub { my($ref, $path) = @_; write_file($path, Dumper $ref) },
 	  yaml	   => sub { my($ref, $path) = @_; write_file($path, yaml_out($ref))},
 	  json	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
 	);
+
+sub serialize_and_write {
+	my ($ref, $path, $format) = @_;
+	$path .= ".$suffix{$format}" unless $path =~ /\.$suffix{$format}$/;
+	$dispatch{$format}->($ref, $path)
+}
+
+
+{
 	my $parse_re =  		# initialize only once
 			qr/ ^ 			# beginning anchor
 			([\%\@\$]) 		# first character, sigil
@@ -352,9 +360,8 @@ sub serialize {
 	# now we serialize %state
 	
 	my $path = $h{file};
-	$path .= ".$suffix{$format}" unless $path =~ /\.$suffix{$format}$/;
 
-	$dispatch{$format}->(\%state, $path);
+	serialize_and_write(\%state, $path, $format);
 }
 }
 

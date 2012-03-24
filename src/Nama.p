@@ -47,6 +47,7 @@ use File::Spec;
 use File::Spec::Link;
 use File::Temp;
 use Getopt::Long;
+use Git::Repository;
 use Graph;
 use IO::Socket; 
 use IO::Select;
@@ -56,9 +57,12 @@ use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Format;
+use Try::Tiny;
+# use Data::Rmap    # EffectChain.pm
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
 # use List::Util;   # Fade.pm
+# use List::MoreUtils;   # Effects.pm
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
@@ -79,6 +83,7 @@ use ::Edit;
 use ::Text;
 use ::Graphical;
 use ::ChainSetup ();
+use ::EffectChain;
 
 # the following separate out functionality
 # however occupy the :: namespace
@@ -96,7 +101,6 @@ use ::Realtime ();
 use ::Mute_Solo_Fade ();
 use ::Jack ();
 use ::Regions ();
-use ::Effect_chains ();
 use ::Midi ();
 use ::Memoize ();
 use ::CacheTrack ();
@@ -132,22 +136,47 @@ $debug = 0; # debug statements
 
 #$engine->{events} = {};
 
-$file = {
-			effects_cache 		=> '.effects_cache',
-			gui_palette 		=> 'palette',
-			state_store 		=> 'State',
-			effect_chain 		=> 'effect_chains',
-			effect_profile 		=> 'effect_profiles',
-			chain_setup 		=> 'Setup.ecs',
-			user_customization 	=> 'custom.pl',
-};
+#
+#  Singleton $file is a ::File
+#  + use AUTOLOAD to provide method calls for full path i.e. $file->state_store
+#
+
+{
+package ::File;
+	use Carp;
+	sub AUTOLOAD {
+		my ($self, $filename) = @_;
+		# get tail of method call
+		my ($method) = $::File::AUTOLOAD =~ /([^:]+)$/;
+		croak "$method: illegal method call" unless $self->{$method};
+		my $dir_sub = $self->{$method}->[1];
+		$filename ||= $self->{$method}->[0];
+		my $path = ::join_path($dir_sub->(), $filename);
+		$path;
+	}
+	1;
+}
+$file = bless 
+{
+	effects_cache 			=> ['.effects_cache', 		\&project_root],
+	gui_palette 			=> ['palette',        		\&project_root],
+	state_store 			=> ['State',          		\&project_dir ],
+	git_state_store 		=> ['State.json',      		\&project_dir ],
+	effect_profile 			=> ['effect_profiles',		\&project_root],
+	chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
+	user_customization 		=> ['custom.pl',      		\&project_root],
+	project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
+	project_config			=> ['project_config', 		\&project_dir ],
+	global_effect_chains  	=> ['global_effect_chains', \&project_root],
+	old_effect_chains  		=> ['effect_chains', 		\&project_root],
+
+}, '::File';
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
 $gui->{marks} = {};
 
-
-$config = {
+$config = bless {
 	root_dir 						=> join_path( $ENV{HOME}, "nama"),
 	soundcard_channels 				=> 10,
 	memoize 						=> 1,
@@ -164,8 +193,46 @@ $config = {
 	fade_time1_fraction 			=> 0.9,
 	fade_time2_fraction 			=> 0.1,
 	fader_op 						=> 'ea',
-	serialize_formats               => [ qw(yaml) ],
-};
+	# for save_system_state()
+	serialize_formats               => 'json',
+}, '::Config';
+
+{ package ::Config;
+use Carp;
+use ::Globals qw($debug :singletons);
+use Modern::Perl;
+our @ISA = '::Object'; #  for ->dump and ->as_hash methods
+
+# special handling of serialize formats to store them as 
+# space separate tags, must duplicate AUTOLOAD checking
+
+sub serialize_formats { 
+		split " ", 
+		(
+			$project->{config}->{serialize_formats} 
+		  || $_[0]->{serialize_formats}
+		)
+}
+our $AUTOLOAD;
+sub AUTOLOAD {
+	my $self = shift;
+	local $debug = 1;
+    # get tail of method call
+    my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	#croak join " ", ref $self, "call:", $call;
+	#croak "$call: illegal method call for ".(ref $self) unless $self->{$call};
+	$debug and say "Config AUTOLOAD: call is $call";
+	return $project->{config}->{$call} if $project->{config}->{$call};
+	# otherwise look for it  # might be in $config,
+	# $mastering, etc. refer to var_map for var name
+	my ($var) = map  { ::Assign::var_map()->{$_} } 
+				grep { /^.$call$/ } 
+				keys %{::Assign::var_map()};
+	my $result = eval $var;
+	croak "error: $@" if $@;
+	return $result;
+}
+}
 
 $prompt = "nama ('h' for help)> ";
 
@@ -235,9 +302,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 [% qx(cat ./Core_subs.pl ) %]
 
-
 package ::;  # for Data::Section
-
 
 1;
 __DATA__

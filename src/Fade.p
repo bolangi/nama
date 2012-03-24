@@ -74,10 +74,11 @@ sub refresh_fade_controller {
 	my $operator  = $fx->{applied}->{$track->fader}->{type};
 	my $off_level = $fx->{mute_level}->{$operator};
 	my $on_level  = $fx->{unity_level}->{$operator};
+	my $controller; # effect ID
+	($controller) = @{$fx->{applied}->{$track->fader}{owns}} if $track->fader;
 
-	# remove controller if present
-	if( $track->fader and my ($old) = @{$fx->{applied}->{$track->fader}{owns}})
-		{ ::remove_effect($old) }
+	$debug and say "removing fade controller";
+	::remove_effect($controller) if $controller;
 
 	return unless
 		my @pairs = fader_envelope_pairs($track); 
@@ -87,14 +88,17 @@ sub refresh_fade_controller {
 	add_fader($track->name);	
 
 	# add controller
-	::Text::t_add_ctrl($track->fader,  # parent
-					 'klg',	  		 # Ecasound controller
-					 [1,				 # Ecasound parameter 1
-					 $off_level,
-					 $on_level,
-					 @pairs,
-					 ]
-	);
+	$debug and say "applying fade controller";
+	::add_effect({
+		cop_id		=> $controller,
+		parent_id 	=> $track->fader,
+		type		=> 'klg',	  		 # Ecasound controller
+		values		=> [	1,				 # Ecasound parameter 1
+					 		$off_level,
+					 		$on_level,
+					 		@pairs,
+					 	]
+	});
 
 	# set fader to correct initial value
 	# 	first fade is type 'in'  : 0
@@ -319,20 +323,33 @@ sub add_fader {
 
 	my $id = $track->fader;
 
-	# create a fader if necessary
+	# create a fader if necessary, place before first effect
+	# if it exists
 	
 	if (! $id){	
-		
 		my $first_effect = $track->ops->[0];
-		if ( $first_effect ){
-			$id = ::Text::t_insert_effect($first_effect, $config->{fader_op}, [0]);
-		} else { 
-			$id = ::Text::t_add_effect($config->{fader_op}, [0]) 
-		}
+		$id = ::add_effect({
+				before 	=> $first_effect, 
+				track	=> $track,
+				type	=> $config->{fader_op}, 
+				values	=> [0],
+		});
 		$track->set(fader => $id);
 	}
 	$id
 }
+
+package ::;
+
+sub apply_fades { 
+	# use info from Fade objects in %::Fade::by_name
+	# applying to tracks that are part of current
+	# chain setup
+	map{ ::Fade::refresh_fade_controller($_) }
+	grep{$_->{fader} }  # only if already exists
+	::ChainSetup::engine_tracks();
+}
+	
 
 1;
 

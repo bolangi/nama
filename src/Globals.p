@@ -43,17 +43,13 @@ debug => [qw( 		$debug
 						@config_vars
 						@persistent_vars
 						@new_persistent_vars
+						@global_effect_chain_vars
 	)],
 
 	serialize =>  [qw(
-						@tracks_data
-						@bus_data
-						@groups_data
-						@marks_data
-						@fade_data
-						@edit_data
-						@inserts_data
-						$this_track_name
+
+[% qx(cat ./serialize.pl ) %]
+
 	)],
 );
 our $ui = 'bullwinkle';  # for testing

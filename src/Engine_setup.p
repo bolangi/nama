@@ -123,7 +123,15 @@ sub reconfigure_engine {
 
 	if ( generate_setup() ){
 		
-		#say "I generated a new setup";
+		$debug and say "I generated a new setup";
+		
+		# we save:
+		# + monitoring setups 
+		# + preview setups
+		# + doodle setups
+		
+		git_snapshot() unless ::ChainSetup::really_recording(); 
+
 		connect_transport('quiet');
 		::Text::show_status();
 
@@ -197,7 +205,7 @@ sub find_duplicate_inputs { # in Main bus only
 	$bn{Main}->tracks(); # track names;
 }
 sub load_ecs {
-	my $setup = setup_file();
+	my $setup = $file->chain_setup;
 	#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 	return unless -e $setup;
 	#say "passed conditional";

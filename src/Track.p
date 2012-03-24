@@ -19,7 +19,7 @@ package ::Track;
 # changing the 'class' field as well as the object
 # class affiliation
 #
-# the ->hashref() method (in Object.p) 
+# the ->as_hash() method (in Object.p) 
 # used to serialize will
 # sync the class field to the current object 
 # class, hopefully saving a painful error
@@ -189,12 +189,18 @@ sub current_wav {
 
 sub current_version {	
 	my $track = shift;
-	my $last = $config->{use_group_numbering} 
-					? ::Bus::overall_last()
-					: $track->last;
 	my $status = $track->rec_status;
 	#$debug and print "last: $last status: $status\n";
-	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
+
+	# two possible version numbers, depending on REC/MON status
+	
+	if 	($status eq 'REC' and ! $track->rec_defeat)
+	{ 
+		my $last = $config->{use_group_numbering} 
+					? ::Bus::overall_last()
+					: $track->last;
+		return ++$last
+	}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
 }
@@ -338,10 +344,10 @@ sub region_is_out_of_bounds {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	grep{ 		$_ ne $track->vol 
-			and $_ ne $track->pan 
-			and (! $track->fader or $_ ne $track->fader) 
-	} @{ $track->ops }
+	my @skip = grep {$_} map { $track->$_ } qw(vol pan fader);
+	my %skip;
+	map{ $skip{$_}++ } ::expanded_ops_list(@skip);
+	grep{ ! $skip{$_} } @{ $track->ops };
 }
 		
 sub snapshot {
@@ -760,14 +766,14 @@ sub import_audio  {
 		say "Use 'import_audio <path> <frequency>' if possible.";
 		return 
 	}
-	my $desired_frequency = freq( $config->{formats}->{raw_to_disk} );
+	my $desired_frequency = freq( $config->{raw_to_disk_format} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
 	#say "destination: $destination";
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
 		say "copying $path to $destination";
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
-		my $format = ::signal_format($config->{formats}->{raw_to_disk}, $width);
+		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
 		say "importing $path as $destination, converting to $format";
 		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		#say $cmd;
@@ -857,7 +863,7 @@ sub version_comment {
 	"$v: $text\n" if $text;
 }
 # Modified from Object.p to save class
-sub hashref {
+sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
@@ -871,7 +877,10 @@ sub hashref {
 	return \%guts;
 }
 
-
+sub bypassed {
+	my $self = shift;
+	map{ $_->id } ::EffectChain::find( bypass => 1, track_name => $self->name )
+}
 				
 }
 

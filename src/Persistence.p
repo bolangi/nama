@@ -2,15 +2,12 @@
 
 
 package ::;
+use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
-use File::Slurp;
-use ::Assign qw(quote_yaml_scalars);
-
-use ::Globals qw(:all);
 
 sub save_state {
-	my $filename = shift || $file->{state_store}; 
-	my $path = join_path(project_dir(), $filename);
+	my $filename = shift;
+	my $path = $file->state_store($filename);
 	$debug2 and print "&save_state\n";
 	$project->{save_file_version_number} = $VERSION;
 
@@ -28,8 +25,7 @@ sub save_state {
 
 	print "\nSaving state as ",
 	save_system_state($path), "\n";
-	save_effect_chains();
-	save_effect_profiles();
+	save_global_effect_chains();
 
 	# store alsa settings
 
@@ -47,6 +43,8 @@ sub initialize_serialization_arrays {
 	@fade_data = ();
 	@inserts_data = ();
 	@edit_data = ();
+	@project_effect_chain_data = ();
+	@global_effect_chain_data = ();
 	$text->{command_history} = {};
 }
 
@@ -70,7 +68,7 @@ sub save_system_state {
 
 	$debug and print "copying tracks data\n";
 
-	map { push @tracks_data, $_->hashref } ::Track::all();
+	map { push @tracks_data, $_->as_hash } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
 
 	# delete obsolete fields
@@ -81,24 +79,24 @@ sub save_system_state {
 
 	$debug and print "copying bus data\n";
 
-	map{ push @bus_data, $_->hashref } ::Bus::all();
+	@bus_data = map{ $_->as_hash } ::Bus::all();
 
 	# prepare inserts data for storage
 	
 	$debug and print "copying inserts data\n";
 	
-	while (my $k = each %::Insert::by_index ){ 
-		push @inserts_data, $::Insert::by_index{$k}->hashref;
-	}
+	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	$debug and print "copying marks data\n";
-	push @marks_data, map{ $_->hashref } ::Mark::all();
+	@marks_data = map{ $_->as_hash } ::Mark::all();
 
-	push @fade_data,  map{ $_->hashref } values %::Fade::by_index;
+	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
 
-	push @edit_data,  map{ $_->hashref } values %::Edit::by_index;
+	@edit_data = map{ $_->as_hash } values %::Edit::by_index;
+
+	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => $project->{name});
 
 	# save history -- 50 entries, maximum
 
@@ -112,7 +110,7 @@ sub save_system_state {
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	$debug and print "serializing\n";
 
-	my @formats = $path =~ /dump_all/ ? 'yaml' : @{$config->{serialize_formats}};
+	my @formats = $path =~ /dump_all/ ? 'yaml' : $config->serialize_formats;
 
 	map{ 	my $format = $_ ;
 			serialize(
@@ -136,13 +134,6 @@ my %is_legal_suffix = (
 		perl => 'perl',
 		storable => 'storable',
 );
-=comment
-my $re_eval = q{qr/\.(};
-$re_eval .= (join '|', keys %is_legal_suffix)
-$re_eval .= q{)$/};
-my $suffix_re = eval $re_eval;
-=cut
-
 sub get_newest {
 	
 	# choose the newest
@@ -217,10 +208,7 @@ sub decode {
 sub restore_state {
 	$debug2 and print "&restore_state\n";
 	my $filename = shift;
-	$filename = $filename || $file->{state_store};
-	$filename = join_path(project_dir(), $filename)
-		unless $filename =~ m(/);
-	# $filename includes path at this point
+	$filename = $file->state_store($filename);
 
 	my( $path, $suffix ) = get_newest($filename);
 	
@@ -268,11 +256,29 @@ sub restore_state {
 	delete $fx->{params}->{''};
 
 	restore_effect_chains();
-	restore_effect_profiles();
 
 	##  print yaml_out \@groups_data; 
 	
 	# backward compatibility fixes for older projects
+	
+	
+	my @vars = qw(
+				@tracks_data
+				@bus_data
+				@groups_data
+				@marks_data
+				@fade_data
+				@edit_data
+				@inserts_data
+	);
+
+	# remove non HASH entries
+	map {
+		my $var = $_;
+		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
+		$debug and say "want to eval: $eval_text "; 
+		eval $eval_text;
+	} @vars;
 
 	if (! $project->{save_file_version_number} ){
 
@@ -551,12 +557,13 @@ sub restore_state {
 	}
 
 	# text mode marks 
-		
-	map{ 
-		my %h = %$_; 
-		my $mark = ::Mark->new( %h ) ;
-	} @marks_data;
 
+ 	map
+    {
+		my %h = %$_;
+		my $mark = ::Mark->new( %h ) ;
+    } 
+    grep { (ref $_) =~ /HASH/ } @marks_data;
 
 	$ui->restore_time_marks();
 	$ui->paint_mute_buttons;
@@ -569,55 +576,147 @@ sub restore_state {
 	} @fade_data;
 
 	# edits 
+	#
 	
+		# DISABLE EDIT RESTORE FOR CONVERSION XX
 	map{ 
 		my %h = %$_; 
-		my $edit = ::Edit->new( %h ) ;
+#		my $edit = ::Edit->new( %h ) ;
 	} @edit_data;
 
 	# restore command history
 	
-	$text->{term}->SetHistory(@{$text->{command_history}});
+	$text->{term}->SetHistory(@{$text->{command_history}})
+		if (ref $text->{command_history}) =~ /ARRAY/;
+
+;
 } 
 
-sub save_effect_chains { # if they exist
-	my $filename = shift || $file->{effect_chain};
-	if (keys %{$fx->{chain}}){
-		serialize (
-			file => join_path(project_root(), $filename),
-			format => 'perl',
-			vars => [ qw( $fx->{chain} $VERSION) ],
-			class => '::');
-	}
+{
+my (@projects, @projects_completed, %state_yml, $errors_encountered);
+
+sub conversion_completed { -e success_file() }
+sub success_file { join_path(project_root(), '.conversion_completed') }
+sub convert_project_format {
+	say("conversion previously completed.
+To repeat, remove ~/nama/.conversion_completed and try again"), 
+		return if conversion_completed();
+
+	archive_state_files();
+	convert_effect_chains();
+	save_global_effect_chains();
+    @projects = map{ /(\w+)$/ } File::Find::Rule->directory()
+									->maxdepth(1)
+									->mindepth(1)
+									->in(project_root());
+	map { say } @projects;
+
+	# create hash $state_yml{project}[file1, file2...]
+	map {     
+		$state_yml{$_}=[];
+		my $dir = join_path( project_root(), $_);
+		say "project dir: $dir";
+		 push @{ $state_yml{$_} }, map{ m{([^/]*?).yml$} } File::Find::Rule->file()
+								     					  	->name('*.yml')
+															->in($dir);
+
+	} @projects;
+	say yaml_out(\%state_yml);
+			
+
+	map {
+
+		my @state_files = @{$state_yml{$_}};
+		my $project = $_;
+		map {
+
+			# exercise all our backward compatibility
+			# interrogations
+			#my @args = (name => $project, "settings" => $_, nodig => 1);
+			my @args = (name => $project, "settings" => $_);
+
+			say "convert_project: @args";
+			convert_project(@args);
+				# 	- load, 
+				# 	- save in new format, 
+				# 	- move old state files)
+
+			
+		} @state_files;
+		
+
+	} @projects;
+	return if $errors_encountered;
+	open my $fh, '>', success_file();
+	close $fh; # touch
+	
 }
-sub save_effect_profiles { # if they exist
-	my $filename = shift || $file->{effect_profile};
-	if (keys %{$fx->{profile}}){
-		serialize (
-			file => join_path(project_root(), $filename),
-			format => 'perl',
-			vars => [ qw( $fx->{profile}  $VERSION ) ],
-			class => '::');
-	}
+sub archive_state_files {
+	my $cmd = q(tar -zcf ).join_path(project_root(), "nama_state.tgz ").
+					q(`find ).project_root().q( -name '*.yml'`);
+	system $cmd;
 }
-# load effect chains and profiles
+sub convert_project {
+	use autodie qw(:default);
+	
 
-# - don't stomp on existing settings
-# - allow for old or new variable names
+	my %args = @_;
+	say join " ", "load project", %args;
 
-sub restore_effect_chains {
+	load_project(%args);
+	die "didn't convert project dir to $args{name}: is ",project_dir() unless project_dir() =~ /$args{name}/;
+	say "saving state ", join " ", %args;
+	save_state($args{settings});
+	my $save_file = join_path(project_dir(),$args{settings}.".json");
+	die "didn't create save file ".$save_file unless -e $save_file;
+	#copy_state_files($args{name}); 
+	
+}
 
-	$debug2 and say "&restore_effect_chains";
+sub copy_state_files {
 
-	my $path = join_path(project_root(), $file->{effect_chain});
+	use autodie qw(:default);
+	my $project = shift;
+	say "copy state files for $project";
 
-	my ($resolved, $format) = get_newest($path);  
-	carp("$resolved: file not found"), return unless $resolved;
+	my $source_dir = join_path(project_root(),$project);
+	my $target_dir = join_path($source_dir,"old_state_files_$VERSION");
+	mkdir $target_dir;
+	map 
+	{ 
+		my $file = "$_.yml";
+		my $from_path = join_path(project_dir(),$file);
+		my $to_path   = join_path($target_dir,$file); 
+
+		say "ready for: copy $from_path, $to_path";
+		copy $from_path, $to_path;
+	} @{ $state_yml{$project} } 
+}
+
+sub log_errmsg {
+		my $errmsg = shift;
+		#warn $errmsg;
+		my $log_cmd = join( " ", 
+			"echo", qq("$errmsg"), 
+			">>",join_path(project_root(),"project_conversion_errors.log")
+		);
+		say $log_cmd;
+		system $log_cmd;
+		$errors_encountered++;
+}
+}
+sub convert_effect_chains {
+
+	my ($resolved, $format) = get_newest($file->old_effect_chains);  
+	return unless $resolved;
 	my $source = read_file($resolved);
 	carp("$resolved: empty file"), return unless $source;
 	$debug and say "format: $format, source: \n",$source;
 	my $ref = decode($source, $format);
 	$debug and print Dumper $ref;
+
+	# deal with both existing formats
+	
 	if ( $ref->{VERSION} >= 1.08 )
 	{
 		assign_singletons( { data => $ref } );
@@ -630,69 +729,148 @@ sub restore_effect_chains {
 			class => '::',
 			);
 	}
-}
-sub restore_effect_profiles {
 
-	$debug2 and say "&restore_effect_profiles";
-	my $path = join_path(project_root(), $file->{effect_profile});
-	my ($resolved, $format) = get_newest($path);
-	carp("$resolved: file not found"), return unless $resolved;
-	my $source = read_file($resolved);
-	carp("$resolved: empty file"), return unless $source;
-	$debug and say "format: $format, source: \n",$source;
-	my $ref = decode($source, $format);
-	if ( $ref->{VERSION} >= 1.08 )
+	#rename $resolved, "$resolved.obsolete";
+
+	my @keys = keys %{$fx->{chain}} ;
+
+	#### convert data format
+
+	say "converting effect chains to new format";
+	say "keys: @keys";
+
+	my $converted = {};
+	map
+	{ 
+		my $name = $_;
+		$converted->{$name}->{ops_list} = $fx->{chain}->{$name}->{ops};
+		map 
+		{
+			$converted->{$name}->{ops_data}->{$_}->{type} 
+				= $fx->{chain}->{$name}->{type}->{$_};
+			$converted->{$name}->{ops_data}->{$_}->{params} 
+				= $fx->{chain}->{$name}->{params}->{$_};
+		} @{ $converted->{$name}->{ops_list} };
+
+	} @keys;
+	say "conveted: ",yaml_out $converted;
+
+	#### separate key by type
+
+	my $private_re = qr/^_/;
+	my @user_keys = grep{ ! /$private_re/ } @keys;
+	my @profile_keys = grep{ /_\w+:\w+/ } @keys;
+	my @cache_keys   = grep{ /_\w+\/\w+/} @keys;
+	say join " ", "user keys:", @user_keys;
+	
+	say join " ", "profile keys:", @profile_keys;
+	say join " ", "track cache keys:", @cache_keys;
+
+	map 
 	{
-		assign_singletons( { data => $ref } );
-	}
-	else {
-		assign(
-			data => $ref,
-			vars => [ qw(%effect_profile)],
-			var_map => 1,
-			class => '::',
+		
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			user 		=> 1,
+			name		=> $_,
+			global 		=> 1,
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @user_keys;
+
+	map 
+	{
+		my ($profile, $trackname) = /^_(\w+):(\w+)/;
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			user 		=> 1,
+			global 		=> 1,
+			profile		=> $profile,
+			track_name  => $trackname,
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @profile_keys;
+
+	map 
+	{
+		my ($project, $trackname, $version) = /^_(\w+)\/(\w+)_(\d+)$/;
+		my $ec = $converted->{$_};
+		::EffectChain->new(
+			project		=> $project,
+			track_cache	=> 1,
+			track_name  => $trackname,
+			track_version => "V$version", 
+				# we use "V" prefix in order to
+				# distinguish old (arbitrary) index from new
+				# entry which indicates a specific track version
+			ops_list	=> $ec->{ops_list},
+			ops_data	=> $ec->{ops_data},	
+		);
+		
+	} @cache_keys;
+}
+sub save_converted_effect_chains {
+	save_global_effect_chains();
+	
+	my %by_project;
+	my @project_effect_chains = ::EffectChain::find(project => 1);
+
+	map {$by_project{$_->project}++ } @project_effect_chains;
+	say yaml_out(\%by_project);
+	map { save_project_effect_chains($_); } keys %by_project
+
+}
+	
+sub save_global_effect_chains {
+
+	@global_effect_chain_data  = map{ $_->as_hash } ::EffectChain::find(global => 1);
+
+	# always save global effect chain data because it contains
+	# incrementing counter
+
+	map{ 	my $format = $_ ;
+			serialize(
+				file => $file->global_effect_chains,
+				format => $format,
+				vars => \@global_effect_chain_vars, 
+				class => '::',
 			);
-	}
+	} $config->serialize_formats;
 
 }
 
-sub schedule_autosave { 
-	# one-time timer 
-	my $seconds = (shift || $config->{autosave_interval}) * 60;
-	$engine->{events}->{autosave} = undef; # cancel any existing timer
-	return unless $seconds;
-	$engine->{events}->{autosave} = AE::timer($seconds,0, \&autosave);
+# unneeded after conversion - DEPRECATED
+sub save_project_effect_chains {
+	my $project = shift; # allow to cross multiple projects
+	@project_effect_chain_data = map{ $_->as_hash } ::EffectChain::find(project => $project);
 }
-sub autosave {
-	if (engine_running()){ 
-		schedule_autosave(1); # try again in 60s
-		return;
-	}
- 	my $filename = 'State-autosave-' . time_tag();
- 	save_system_state($filename);
-	my @saved = autosave_files();
-	my ($next_last, $last) = @saved[-2,-1];
-	schedule_autosave(); # standard interval
-	return unless defined $next_last and defined $last;
-	if(files_are_identical($next_last, $last)){
-		unlink $last;
-		undef; 
-	} else { 
-		$last 
-	}
-}
-sub autosave_files {
-	sort File::Find::Rule  ->file()
-						->name('State-autosave-*')
-							->maxdepth(1)
-						 	->in( project_dir());
-}
-sub files_are_identical {
-	my ($filenamea,$filenameb) = @_;
-	my $a = read_file($filenamea);
-	my $b = read_file($filenameb);
-	$a eq $b
-}
+sub restore_effect_chains {
 
+	$debug2 and say "&restore_effect_chains";
+		my $path =  $file->global_effect_chains;
+		my ($resolved, $format) = get_newest($path);  
+		carp("$resolved: file not found"), return unless $resolved;
+		my $source = read_file($resolved);
+		carp("$resolved: empty file"), return unless $source;
+		$debug and say "format: $format, source: \n",$source;
+		my $ref = decode($source, $format);
+		$debug and print Dumper $ref;
+		assign(
+				data => $ref,
+				vars   => \@global_effect_chain_vars, 
+				var_map => 1,
+				class => '::');
+		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
+}
+sub git_snapshot {
+	return unless $config->{use_git};
+	save_state();
+	$project->{repo}->run( add => $file->git_state_store );
+	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
+}
 1;
 __END__

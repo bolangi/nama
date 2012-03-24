@@ -12,7 +12,7 @@ sub main {
 #  we leave it here because it needs access to all global variables
 
 sub setup_user_customization {
-	my $filename = user_customization_file();
+	my $filename = $file->user_customization();
 	return unless -r $filename;
 	say "reading user customization file $filename";
 	my %custom;
@@ -31,7 +31,6 @@ sub setup_user_customization {
 	}
 	$text->{user_alias}   = $custom{aliases};
 }
-sub user_customization_file { join_path(project_root(),$file->{user_customization}) }
 
 sub gen_coderef {
 	my ($cmd,$code) = @_;
@@ -99,6 +98,7 @@ sub leading_track_spec {
 	Fade                                                      
 	Edit
 	Text
+	EffectChain
 	ChainSetup
 );
 
@@ -106,10 +106,15 @@ my $namespace_root = 'Audio::Nama';
 
 sub eval_perl {
 	my $code = shift;
-	map{ $code =~ s/::$_/$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
-	my (@result) = eval $code;
-	print( "Perl command failed: $@\n") if $@;
-	pager(join "\n", @result) unless $@;
+	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
+	my $err;
+	my @result;
+	@result = eval $code;
+	if ($@){
+		print( "Perl command failed: \ncode: $code\nerror: $@");
+		undef $@;
+	}
+	else { pager(join "\n", @result) }
 	print "\n";
 }	
 }
@@ -125,8 +130,8 @@ sub import_audio {
 
 }
 sub destroy_current_wav {
-	my $old_group_status = $bn{Main}->rw;
-	$bn{Main}->set(rw => 'MON');
+	carp($this_track->name.": must be set to MON."), return
+		unless $this_track->rec_status eq 'MON';
 	$this_track->current_version or
 		say($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
@@ -141,7 +146,8 @@ sub destroy_current_wav {
 		rememoize();
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
-	$bn{Main}->set(rw => $old_group_status);
+	$this_track->set(version => 0);  # reset
+	$this_track->set(version => $this_track->current_version); 
 	1;
 }
 
@@ -219,9 +225,6 @@ sub command_process {
 	set_current_bus();
 }
 	
-## called from ChainSetup.pm and Engine_setup_subs.pm
-
-sub setup_file { join_path( project_dir(), $file->{chain_setup}) };
 
 ## called from 
 # Track_subs

@@ -171,7 +171,8 @@ sub _playat_output {
 }
 sub _select_output {
 	my $track = shift;
-	my $start = $track->adjusted_region_start_time + ::hardware_latency();
+	no warnings 'uninitialized';
+	my $start = $track->adjusted_region_start_time + Audio::Nama::hardware_latency();
 	my $end   = $track->adjusted_region_end_time;
 	return unless ::hardware_latency() or defined $start and defined $end;
 	my $setup_length;
@@ -267,7 +268,7 @@ sub ecs_extra { $_[0]->mono_to_stereo}
 package ::IO::to_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $_[0]->full_path }
-sub _format_template { $config->{formats}->{raw_to_disk} } 
+sub _format_template { $config->{raw_to_disk_format} } 
 
 package ::IO::from_loop;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
