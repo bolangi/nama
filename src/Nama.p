@@ -216,7 +216,6 @@ sub serialize_formats {
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
-	local $debug = 1;
     # get tail of method call
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	#croak join " ", ref $self, "call:", $call;
@@ -228,7 +227,8 @@ sub AUTOLOAD {
 	my ($var) = map  { ::Assign::var_map()->{$_} } 
 				grep { /^.$call$/ } 
 				keys %{::Assign::var_map()};
-	my $result = eval $var;
+	my $result;
+	$result = eval $var if $var;
 	croak "error: $@" if $@;
 	return $result;
 }
