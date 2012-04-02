@@ -98,8 +98,8 @@ sub _add_effect {
 sub _insert_effect {  # call only from add_effect
 	my $p = shift;
 	my ($before, $code, $values) = @$p{qw(before type values)};
-	say("$code: unknown effect. Skipping.\n"), return if ! effect_code($code);
-	$code = effect_code( $code );	
+	say("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
+	$code = full_effect_code( $code );	
 	my $running = engine_running();
 	print("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -356,7 +356,7 @@ sub ecasound_controller_index {
 	$position -= $operator_count; # skip operators
 	++$position; # translates 0th to chain-position 1
 }
-sub effect_code {
+sub full_effect_code {
 	# get text effect code from user input, which could be
 	# - LADSPA Unique ID (number)
 	# - LADSPA Label (el:something)
@@ -389,9 +389,11 @@ sub effect_code {
 	$code;
 }
 
+
+# get integer effect index for Nama effect registry
 sub effect_index {
 	my $code = shift;
-	my $i = $fx_cache->{full_label_to_index}->{effect_code($code)};
+	my $i = $fx_cache->{full_label_to_index}->{full_effect_code($code)};
 	defined $i or warn "$code: effect index not found\n";
 	$i
 }
@@ -1397,7 +1399,6 @@ sub bypass_effects {
 	{ 
 		my $fx_chain_id = $op; 
 		my @eops = expanded_ops_list($op);  # save controllers as well
-		say "ops list: @eops";
 
 		die "$fx_chain_id: effect chain already exists." 
 			if ::EffectChain::find(id => $fx_chain_id);
@@ -1411,6 +1412,10 @@ sub bypass_effects {
 			ops_list => \@eops, 
 		);
 		replace_effect({ cop_id => $op, @dummy_fx });
+
+		# report action 
+		my $name = $fx_cache->{registry}->[effect_index(type($op))]->{name};
+		say "$op ($name)";
 	}
 	$track->unmute;
 }
@@ -1497,6 +1502,10 @@ sub restore_effects {
 										 id 		=> $op);
 		carp("$op: no effect chain for bypassed op."), return unless $fxc;
 		replace_effect($fxc);
+
+		# report action 
+		my $name = $fx_cache->{registry}->[effect_index(type($op))]->{name};
+		say "$op ($name)";
 
 		# remove effect chain
 		$fxc->destroy if ref($fxc) =~ /EffectChain/;

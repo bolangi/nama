@@ -689,7 +689,7 @@ add_effect: _add_effect effect value(s?) {
 		unless ::effect_index($code);
 	my $args = {
 		track  => $::this_track, 
-		type   => ::effect_code($code),
+		type   => ::full_effect_code($code),
 		values => $values
 	};
 	# place effect before fader if there is one
@@ -715,7 +715,7 @@ append_effect: _append_effect effect value(s?) {
 		unless ::effect_index($code);
 	my $args = {
 		track  => $::this_track, 
-		type   => ::effect_code($code),
+		type   => ::full_effect_code($code),
 		values => $values
 	};
  	my $id = ::add_effect($args);
