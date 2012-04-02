@@ -1400,8 +1400,8 @@ sub bypass_effects {
 		my $fx_chain_id = $op; 
 		my @eops = expanded_ops_list($op);  # save controllers as well
 
-		die "$fx_chain_id: effect chain already exists." 
-			if ::EffectChain::find(id => $fx_chain_id);
+		say("$fx_chain_id: effect chain already exists.  Skipping."), next 
+			if my @dummy = ::EffectChain::find(id => $fx_chain_id);
 	
 		::EffectChain->new(
 			bypass => 1,
@@ -1500,7 +1500,7 @@ sub restore_effects {
 		my ($fxc) = ::EffectChain::find( bypass 	=> 1, 
 										 track_name => $track->name, 
 										 id 		=> $op);
-		carp("$op: no effect chain for bypassed op."), return unless $fxc;
+		say("$op is not bypassed. Skipping."), next unless $fxc;
 		replace_effect($fxc);
 
 		# report action 
