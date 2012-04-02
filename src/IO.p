@@ -252,6 +252,14 @@ package ::IO::to_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'null' }  # underscore for testing
 
+package ::IO::from_rtnull;
+use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
+sub _device_id { 'rtnull' } # 
+
+package ::IO::to_rtnull;
+use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
+sub _device_id { 'rtnull' }  # underscore for testing
+
 package ::IO::from_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 

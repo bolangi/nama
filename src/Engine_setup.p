@@ -241,20 +241,20 @@ sub arm_rtnull {
 local %::IO::io_class = qw(
 	null_in					::IO::from_null
 	null_out				::IO::to_null
-	soundcard_in 			::IO::from_null
-	soundcard_out 			::IO::to_null
+	soundcard_in 			::IO::from_rtnull
+	soundcard_out 			::IO::to_rtnull
 	wav_in 					::IO::from_wav
 	wav_out 				::IO::to_wav
 	loop_source				::IO::from_loop
 	loop_sink				::IO::to_loop
-	jack_manual_in			::IO::from_null
-	jack_manual_out			::IO::to_null
-	jack_ports_list_in		::IO::from_null
-	jack_ports_list_out		::IO::to_null
-	jack_multi_in			::IO::from_null
-	jack_multi_out			::IO::to_null
-	jack_client_in			::IO::from_null
-	jack_client_out			::IO::to_null
+	jack_manual_in			::IO::from_rtnull
+	jack_manual_out			::IO::to_rtnull
+	jack_ports_list_in		::IO::from_rtnull
+	jack_ports_list_out		::IO::to_rtnull
+	jack_multi_in			::IO::from_rtnull
+	jack_multi_out			::IO::to_rtnull
+	jack_client_in			::IO::from_rtnull
+	jack_client_out			::IO::to_rtnull
 	);
 
 arm();
