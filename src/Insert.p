@@ -96,7 +96,7 @@ sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
 
 sub remove {
 	my $self = shift;
-	local $this_track;
+	local $::this_track;
 	$::tn{ $self->wet_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	delete $by_index{$self->n};
