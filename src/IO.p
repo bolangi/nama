@@ -244,22 +244,31 @@ sub quote_jack_port {
 ### method names with a preceding underscore 
 ### can be overridded by the object constructor
 
+{
 package ::IO::from_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'null' } # 
+}
 
+{
 package ::IO::to_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'null' }  # underscore for testing
+}
 
+{
 package ::IO::from_rtnull;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'rtnull' } # 
+}
 
+{
 package ::IO::to_rtnull;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub _device_id { 'rtnull' }  # underscore for testing
+}
 
+{
 package ::IO::from_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
@@ -272,12 +281,16 @@ sub device_id {
 	join(q[,],@modifiers);
 }
 sub ecs_extra { $_[0]->mono_to_stereo}
+}
 
+{
 package ::IO::to_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $_[0]->full_path }
 sub _format_template { $config->{raw_to_disk_format} } 
+}
 
+{
 package ::IO::from_loop;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub new {
@@ -285,9 +298,13 @@ sub new {
 	my %vals = @_;
 	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
+}
+{
 package ::IO::to_loop;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::from_loop';
+}
 
+{
 package ::IO::from_soundcard;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub new {
@@ -295,6 +312,8 @@ sub new {
 	my $class = $io_class{::IO::soundcard_input_type_string()};
 	$class->new(@_);
 }
+}
+{
 package ::IO::to_soundcard;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub new {
@@ -302,6 +321,8 @@ sub new {
 	my $class = $io_class{::IO::soundcard_output_type_string()};
 	$class->new(@_);
 }
+}
+{
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
@@ -320,30 +341,42 @@ sub device_id {
 	::IO::jack_multi_route($client,$client_direction,$channel,$io->width )
 }
 # don't need to specify format, since we take all channels
+}
 
+{
 package ::IO::from_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_multi';
 sub ecs_extra { $_[0]->mono_to_stereo }
+}
 
+{
 package ::IO::to_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub format_template { $config->{devices}->{jack}->{signal_format} }
 sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
+}
 
+{
 package ::IO::from_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_port';
 sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
 sub ecs_extra { $_[0]->mono_to_stereo }
+}
 
+{
 package ::IO::to_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
+}
 
+{
 package ::IO::from_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
 sub ecs_extra { $_[0]->mono_to_stereo}
+}
 
+{
 package ::IO::from_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
@@ -361,6 +394,7 @@ sub rec_route {
 		$route .= " -chmove:" . ($self->input_channel + 1) . ",2";
 	}
 	return $route;
+}
 }
 {
 package ::IO::to_soundcard_device;
@@ -385,8 +419,10 @@ sub route {
 	$route;
 }
 }
+{
 package ::IO::any;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
+}
 
 
 1;
