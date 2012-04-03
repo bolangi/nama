@@ -111,7 +111,7 @@ sub heartbeat {
 		revise_prompt();
 		stop_heartbeat();
 		sleeper(0.2);
-		eval_iam('setpos 0');
+		set_position(0);
 	}
 		#if $status =~ /finished|error|stopped/;
 	#print join " ", $status, colonize($here), $/;
@@ -140,7 +140,7 @@ sub schedule_wraparound {
 	my $diff = $end - $here;
 	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
 	if ( $diff < 0 ){ # go at once
-		eval_iam("setpos ".$start);
+		set_position($start);
 		cancel_wraparound();
 	} elsif ( $diff < 3 ) { #schedule the move
 		wraparound($diff, $start);

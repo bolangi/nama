@@ -606,7 +606,7 @@ modify_mark: _modify_mark sign value {
 	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
-	::eval_iam("setpos ".$::this_mark->time);
+	::set_position($::this_mark->time);
 	$::setup->{changed}++;
 	1;
 	}
@@ -616,7 +616,7 @@ modify_mark: _modify_mark value {
 	print $::this_mark->name, ": set to ", ::d2($newtime),"\n";
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
-	::eval_iam("setpos ".$::this_mark->time);
+	::set_position($::this_mark->time);
 	$::setup->{changed}++;
 	1;
 	}		
