@@ -171,7 +171,9 @@ sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: zero based
 	my $cop = $fx->{applied}->{$op_id} 
-		or print("$op_id: non-existing effect id. Skipping\n"), return; 
+		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
+	my @dummy = ::is_bypassed($op_id)
+		and say("$op_id: cannot modify bypassed effect.  Skipping."), return;
 	my $code = $cop->{type};
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
@@ -195,6 +197,7 @@ sub modify_effect {
 		$op_id, 
 		$parameter, 
 		$new_value);
+	1
 }
 sub modify_multiple_effects {
 	my ($op_ids, $parameters, $sign, $value) = @_;

@@ -764,21 +764,25 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	print ::Text::show_effect($::this_op);
+	print ::Text::show_effect($::this_op)
+		unless my @dummy = ::is_bypassed($::this_op);
 	1;
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
 		unless ::fx($::this_op);
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
-	print ::Text::show_effect($::this_op);
+	print ::Text::show_effect($::this_op)
+		unless my @dummy = ::is_bypassed($::this_op);
 	1;
 }
 
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	# note that 'sign' results in undef value
-	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
+	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }))
+		unless scalar @{ $item{'op_id(s)'} } == 1 
+			and my @dummy = ::is_bypassed($::this_op);
 	1;
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
