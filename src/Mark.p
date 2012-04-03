@@ -66,7 +66,7 @@ sub set_name {
 
 sub jump_here {
 	my $mark = shift;
-	::eval_iam( "setpos " . $mark->time);
+	::set_position($mark->time);
 	$::this_mark = $mark;
 }
 sub adjusted_time {  # for marks within current edit
@@ -188,7 +188,7 @@ sub next_mark {
 		if ($marks[$i]->time - $here > 0.001 ){
 			$debug and print "here: $here, future time: ",
 			$marks[$i]->time, $/;
-			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			set_position($marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];
 			return;
 		}
@@ -201,7 +201,7 @@ sub previous_mark {
 	my @marks = ::Mark::all();
 	for my $i ( reverse 0..$#marks ){
 		if ($marks[$i]->time < $here ){
-			eval_iam("setpos " .  $marks[$i+$jumps]->time);
+			set_position($marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];
 			return;
 		}
