@@ -180,7 +180,7 @@ sub mark { # GUI_CODE
 }
 
 sub next_mark {
-	my $jumps = shift;
+	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = eval_iam("cs-get-position");
 	my @marks = ::Mark::all();
@@ -195,7 +195,7 @@ sub next_mark {
 	}
 }
 sub previous_mark {
-	my $jumps = shift;
+	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = eval_iam("getpos");
 	my @marks = ::Mark::all();
