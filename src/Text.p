@@ -54,8 +54,10 @@ sub list_effects {
 
 sub list_effect {
 	my $op_id = shift;
-	my $i = $fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
-	my $name = $fx_cache->{registry}->[ $i ]->{name};
+	my $type = ::original_type($op_id);
+	my $i = ::effect_index($type);
+	my $name = ::original_name($op_id);
+	$name .= q(, bypassed) if my @dummy = ::is_bypassed($op_id);
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
@@ -64,21 +66,10 @@ sub show_effect {
 		my @lines;
 		my @params;
 
-		# if bypassed, effect has been replaced by a dummy
-		# so we need to get effect name 
-		# from corresponding effect chain
-
-		my ($fx_chain) = ::is_bypassed($op_id);
-
-		my $type = $fx_chain 
-			? $fx_chain->{ops_data}->{$op_id}->{type} 
-			: ::type($op_id);
-		
- 		my $i = ::effect_index($type);
-		
- 		my $name =  $op_id. ": " . $fx_cache->{registry}->[ $i ]->{name};
+ 		my $name =  $op_id. ": " . ::original_name($op_id);
+		my $i = ::effect_index(::original_type($op_id));
 		 
-		return $name . " (bypassed)\n" if $fx_chain;
+		return "$name (bypassed)\n" if my @dummy = ::is_bypassed($op_id);
 
 		# return effect parameters for the non-bypass case
 

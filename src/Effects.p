@@ -1414,11 +1414,33 @@ sub bypass_effects {
 		replace_effect({ cop_id => $op, @dummy_fx });
 
 		# report action 
-		my $name = $fx_cache->{registry}->[effect_index(type($op))]->{name};
+		my $name = ::original_name($op);
 		say "$op ($name)";
 	}
 	$track->unmute;
 }
+}
+
+# get correct (original) type of bypassed effects that
+# have been replaced by a dummy vol operator
+
+sub original_type {
+	my $op_id = shift;
+	# if bypassed, effect has been replaced by a dummy
+	# so we need to get effect name 
+	# from corresponding effect chain
+
+	my ($fx_chain) = is_bypassed($op_id);
+
+	my $type = $fx_chain 
+		? $fx_chain->{ops_data}->{$op_id}->{type} 
+		: type($op_id);
+	$type
+}
+sub original_name {
+	my $op_id = shift;
+	my $type = original_type($op_id);
+	$fx_cache->{registry}->[effect_index($type)]->{name};
 }
 
 sub replace_effect {
