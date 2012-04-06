@@ -139,7 +139,7 @@ sub do_many_tracks {
 	# args: { tracks => [ name list ], method => method_name }
 	my $args = shift;
 	my $method = $args->{method};
-	my $delay = $args->{delay} || 0.01;
+	my $delay = $args->{delay} || $config->{no_fade_mute_delay};
 	map{ $tn{$_}->$method('nofade'); sleeper($delay) } @{$args->{tracks}};
 }
 

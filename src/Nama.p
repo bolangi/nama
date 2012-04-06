@@ -193,10 +193,11 @@ $config = bless {
 	fade_time1_fraction 			=> 0.9,
 	fade_time2_fraction 			=> 0.1,
 	fader_op 						=> 'ea',
-	mute_level 					=> {ea => 0, 	eadb => -96}, 
-	fade_out_level 				=> {ea => 0, 	eadb => -40},
-	unity_level 				=> {ea => 100, 	eadb => 0}, 
-	fade_resolution 			=> 20, # steps per second
+	mute_level 						=> {ea => 0, 	eadb => -96}, 
+	fade_out_level 					=> {ea => 0, 	eadb => -40},
+	unity_level 					=> {ea => 100, 	eadb => 0}, 
+	fade_resolution 				=> 20, # steps per second
+	no_fade_mute_delay				=> 0.03,
 	# for save_system_state()
 	serialize_formats               => 'json',
 }, '::Config';
