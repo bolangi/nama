@@ -1460,10 +1460,6 @@ sub replace_effect {
 		
 	my $track = $ti{chain($op)};
 
-	# delete controllers
-
-	map { remove_effect($_) } @{ owns($op)||[] }; 
-
 	# get my position
 
 	my $n = nama_effect_index($op);
