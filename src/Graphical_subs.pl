@@ -618,8 +618,8 @@ sub track_gui {
 
 		$mute = $gui->{track_frame}->Button(
 			-command => sub { 
-				if ($fx->{params}->{$vol_id}->[0] != $fx->{mute_level}->{$fx->{applied}->{$vol_id}->{type}} and
-					$fx->{params}->{$vol_id}->[0] != $fx->{fade_out_level}->{$fx->{applied}->{$vol_id}->{type}}
+				if ($fx->{params}->{$vol_id}->[0] != $config->{mute_level}->{$fx->{applied}->{$vol_id}->{type}} and
+					$fx->{params}->{$vol_id}->[0] != $config->{fade_out_level}->{$fx->{applied}->{$vol_id}->{type}}
 				) {  # non-zero volume
 					$ti{$n}->mute;
 					$mute->configure(-background => $gui->{_nama_palette}->{Mute});
@@ -638,7 +638,7 @@ sub track_gui {
 					::effect_update_copp_set(
 						$vol_id, 
 						0, 
-						$fx->{unity_level}->{$fx->{applied}->{$vol_id}->{type}});
+						$config->{unity_level}->{$fx->{applied}->{$vol_id}->{type}});
 				}
 		  );
 	} else {

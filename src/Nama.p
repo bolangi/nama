@@ -195,6 +195,10 @@ $config = bless {
 	fader_op 						=> 'ea',
 	# for save_system_state()
 	serialize_formats               => 'json',
+	mute_level 					=> {ea => 0, 	eadb => -96}, 
+	fade_out_level 				=> {ea => 0, 	eadb => -40},
+	unity_level 				=> {ea => 100, 	eadb => 0}, 
+	fade_resolution 			=> 200, # steps per second
 }, '::Config';
 
 { package ::Config;
@@ -239,12 +243,6 @@ $prompt = "nama ('h' for help)> ";
 $this_bus = 'Main';
 jack_update(); # to be polled by Event
 
-$fx = {
-	mute_level 					=> {ea => 0, 	eadb => -96}, 
-	fade_out_level 				=> {ea => 0, 	eadb => -40},
-	unity_level 				=> {ea => 100, 	eadb => 0}, 
-	fade_resolution 			=> 200, # steps per second
-};
 $setup->{_old_snapshot} = {};
 $setup->{_last_rec_tracks} = [];
 

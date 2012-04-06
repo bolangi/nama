@@ -733,11 +733,11 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$fx->{mute_level}->{$track->vol_type}
+	$config->{mute_level}->{$track->vol_type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$fx->{fade_out_level}->{$track->vol_type}
+	$config->{fade_out_level}->{$track->vol_type}
 }
 sub set_vol {
 	my $track = shift;

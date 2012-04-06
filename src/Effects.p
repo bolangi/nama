@@ -1447,14 +1447,14 @@ sub original_name {
 }
 
 sub replace_effect {
-	my ($fx) = @_;
+	my ($fxc) = @_;
 
-	# $fx is either ::EffectChain or a hash with arguments
+	# $fxc is either ::EffectChain or a hash with arguments
 	# to add_effect()
 	
 	# get the effect_id from either
 	
-	my $op = $fx->{cop_id} || eval { $fx->cop_id}; 
+	my $op = $fxc->{cop_id} || eval { $fxc->cop_id}; 
 	undef $@;
 
 		
@@ -1482,13 +1482,13 @@ sub replace_effect {
 
 	# we expect a HASH or EffectChain
 	
-	if ( ref($fx) !~ /EffectChain/ ) 
+	if ( ref($fxc) !~ /EffectChain/ ) 
 	{
 	
 		push @args, 	track => $track, 
 						cop_id => $op, 
 						clobber_id => 1,
-						(%$fx);
+						(%$fxc);
 
 		defined $successor and push @args, before => $successor;
 		
@@ -1498,14 +1498,14 @@ sub replace_effect {
 
 		add_effect({ @args });
 	}
-	elsif ( ref($fx) =~ /EffectChain/)
+	elsif ( ref($fxc) =~ /EffectChain/)
 	{
-		$fx->add($track, $successor);
+		$fxc->add($track, $successor);
 	}
 	else 
 	{ 
 		croak "expected effect chain or hash, got" 
-			.  (ref $fx) || 'scalar' 
+			.  (ref $fxc) || 'scalar' 
 	}
 }
 

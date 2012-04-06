@@ -72,8 +72,8 @@ sub new {
 sub refresh_fade_controller {
 	my $track = shift;
 	my $operator  = $fx->{applied}->{$track->fader}->{type};
-	my $off_level = $fx->{mute_level}->{$operator};
-	my $on_level  = $fx->{unity_level}->{$operator};
+	my $off_level = $config->{mute_level}->{$operator};
+	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller; # effect ID
 	($controller) = @{$fx->{applied}->{$track->fader}{owns}} if $track->fader;
 

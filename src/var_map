@@ -85,10 +85,10 @@
 	@already_muted  			$fx->{muted}
 	%effect_chain 				$fx->{chain}
 	%effect_profile 			$fx->{profile}
-	%mute_level					$fx->{mute_level}
-	%fade_out_level 			$fx->{fade_out_level}
-	$fade_resolution 			$fx->{fade_resolution}
-	%unity_level				$fx->{unity_level}
+	%mute_level					$config->{mute_level}
+	%fade_out_level 			$config->{fade_out_level}
+	$fade_resolution 			$config->{fade_resolution}
+	%unity_level				$config->{unity_level}
 	$cop_id 					$fx->{id_counter}
 	%cops		 				$fx->{applied}
 	%copp						$fx->{params}

@@ -23,8 +23,8 @@ sub fade {
 		return;
 	}
 
-	my $steps = $seconds * $fx->{fade_resolution};
-	my $wink  = 1/$fx->{fade_resolution};
+	my $steps = $seconds * $config->{fade_resolution};
+	my $wink  = 1/$config->{fade_resolution};
 	my $size = ($to - $from)/$steps;
 	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
 	for (1..$steps - 1){
@@ -40,13 +40,13 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
+	my $from  = $config->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
 	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop});
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	$fx->{params}->{$id}[0];
-	my $to	  = $fx->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
+	my $to	  = $config->{fade_out_level}->{$fx->{applied}->{$id}->{type}};
 	fade( $id, 0, $from, $to, $config->{engine_fade_length_on_start_stop} );
 }
 

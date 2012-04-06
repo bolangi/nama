@@ -528,7 +528,7 @@ unity: _unity {
 	::effect_update_copp_set( 
 		$::this_track->vol, 
 		0, 
-		$::fx->{unity_level}->{::type($::this_track->vol)}
+		$::config->{unity_level}->{::type($::this_track->vol)}
 	);
 	1;}
 
