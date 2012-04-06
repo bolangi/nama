@@ -1414,8 +1414,8 @@ sub bypass_effects {
 			id => $fx_chain_id, # 
 			ops_list => \@eops, 
 		);
-		replace_effect({ cop_id => $op, @dummy_fx });
-
+		replace_effect({ cop_id => $op, @dummy_fx }); 
+		
 		# report action 
 		my $name = ::original_name($op);
 		say "$op ($name)";
@@ -1445,8 +1445,11 @@ sub original_name {
 	my $type = original_type($op_id);
 	$fx_cache->{registry}->[effect_index($type)]->{name};
 }
-
 sub replace_effect {
+		my $fxc = shift;
+		jack_stop_do_start( sub{ _replace_effect($fxc) }, 0.03);
+}
+sub _replace_effect {
 	my ($fxc) = @_;
 
 	# $fxc is either ::EffectChain or a hash with arguments
