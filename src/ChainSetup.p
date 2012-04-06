@@ -123,6 +123,14 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	$debug and say "The expanded graph with inserts is\n$g";
 
+	# Mix tracks to mono if Master is mono
+	# (instead of just throwing away right channel)
+
+	if ($g->has_vertex('Master') and $tn{Master}->width == 1)
+	{
+		$g->set_vertex_attribute('Master', 'ecs_extra' => '-chmix:1')
+	}
+
 	# create IO lists %inputs and %outputs
 
 	if ( process_routing_graph() ){
