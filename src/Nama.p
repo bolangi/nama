@@ -91,6 +91,7 @@ use ::EffectChain;
 # however occupy the :: namespace
 
 use ::Grammar ();
+use ::Help ();
 use ::Custom ();
 use ::Initializations ();
 use ::Options ();
@@ -276,8 +277,6 @@ sub setup_grammar { }
 	$text->{grammar} = get_data_section('grammar');
 
 	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
-
-	[% qx(cat ./help_topic.pl) %]
 
 	# JACK environment for testing
 
