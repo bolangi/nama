@@ -16,6 +16,22 @@ my %set_stat = (
 				 map{ $_ => 'rec_status' } qw(REC MON OFF)
 				 );
 
+sub bunch {
+	my ($bunchname, @tracks) = @_;
+	if (! $bunchname){
+		::pager(yaml_out( $project->{bunch} ));
+	} elsif (! @tracks){
+		$project->{bunch}->{$bunchname} 
+			and print "bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n" 
+			or  print "bunch $bunchname: does not exist.\n";
+	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
+		print "@mispelled: mispelled track(s), skipping.\n";
+	} else {
+	$project->{bunch}->{$bunchname} = [ @tracks ];
+	}
+}
+sub add_to_bunch {}
+
 sub bunch_tracks {
 	my $bunchy = shift;
 	my @tracks;
@@ -47,4 +63,5 @@ sub bunch_tracks {
 	@tracks;
 }
 }
+sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
 1;

@@ -1,37 +1,3 @@
-sub import_audio {
-
-	my ($track, $path, $frequency) = @_;
-	
-	$track->import_audio($path, $frequency);
-
-	# check that track is audible
-
-	$track->set(rw => 'MON');
-
-}
-sub destroy_current_wav {
-	carp($this_track->name.": must be set to MON."), return
-		unless $this_track->rec_status eq 'MON';
-	$this_track->current_version or
-		say($this_track->name, 
-			": No current version (track set to OFF?) Skipping."), return;
-	my $wav = $this_track->full_path;
-	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
-	#my $reply = chr($text->{term}->read_key()); 
-	if ( $reply =~ /y/i ){
-		# remove version comments, if any
-		delete $this_track->{version_comment}{$this_track->current_version};
-		print "Unlinking.\n";
-		unlink $wav or warn "couldn't unlink $wav: $!\n";
-		rememoize();
-	}
-	$text->{term}->remove_history($text->{term}->where_history);
-	$this_track->set(version => 0);  # reset
-	$this_track->set(version => $this_track->current_version); 
-	1;
-}
-
-
 sub pan_check {
 	my $new_position = shift;
 	my $current = $fx->{params}->{ $this_track->pan }->[0];
@@ -43,8 +9,6 @@ sub pan_check {
 		$new_position,		# value
 	);
 }
-sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
-
 # vol/pan requirements of mastering and mixdown tracks
 
 # called from Track_subs, Graphical_subs

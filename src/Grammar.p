@@ -385,23 +385,6 @@ sub mixoff {
 	$tn{Master}->set(rw => 'MON'); 
 	$bn{Main}->set(rw => 'REC') if $bn{Main}->rw eq 'OFF';
 }
-sub bunch {
-	package ::;
-	my ($bunchname, @tracks) = @_;
-	if (! $bunchname){
-		::pager(yaml_out( $project->{bunch} ));
-	} elsif (! @tracks){
-		$project->{bunch}->{$bunchname} 
-			and print "bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n" 
-			or  print "bunch $bunchname: does not exist.\n";
-	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
-		print "@mispelled: mispelled track(s), skipping.\n";
-	} else {
-	$project->{bunch}->{$bunchname} = [ @tracks ];
-	}
-}
-sub add_to_bunch {}
-
 sub remove_fade {
 	my $i = shift;
 	my $fade = $::Fade::by_index{$i}
@@ -409,5 +392,39 @@ sub remove_fade {
 	print "removing fade $i from track " .$fade->track ."\n"; 
 	$fade->remove;
 }
+sub import_audio {
+
+	my ($track, $path, $frequency) = @_;
+	
+	$track->import_audio($path, $frequency);
+
+	# check that track is audible
+
+	$track->set(rw => 'MON');
+
+}
+sub destroy_current_wav {
+	carp($this_track->name.": must be set to MON."), return
+		unless $this_track->rec_status eq 'MON';
+	$this_track->current_version or
+		say($this_track->name, 
+			": No current version (track set to OFF?) Skipping."), return;
+	my $wav = $this_track->full_path;
+	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
+	#my $reply = chr($text->{term}->read_key()); 
+	if ( $reply =~ /y/i ){
+		# remove version comments, if any
+		delete $this_track->{version_comment}{$this_track->current_version};
+		print "Unlinking.\n";
+		unlink $wav or warn "couldn't unlink $wav: $!\n";
+		rememoize();
+	}
+	$text->{term}->remove_history($text->{term}->where_history);
+	$this_track->set(version => 0);  # reset
+	$this_track->set(version => $this_track->current_version); 
+	1;
+}
+
+
 
 1;
