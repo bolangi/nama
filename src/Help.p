@@ -62,17 +62,22 @@ IAM
 			push @help, helpline($name);
 			$helped{$name}++
 		}
-		map{  
+		map
+		{  
 			my $cmd = $_ ;
-			if ($cmd =~ /$name/ ){
+			if ($cmd =~ /$name/ )
+			{
 				push @help, helpline($cmd) unless $helped{$cmd}; 
 				$helped{$cmd}++ ;
 			}
+			no warnings 'uninitialized';
 			if ( ! $helped{$cmd} and
-					grep{ /$name/ } split " ", $text->{commands}->{$cmd}->{short} ){
+					grep{ /$name/ } split " ", $text->{commands}->{$cmd}->{short})
+			{
 				push @help, helpline($cmd) 
 			}
 		} keys %{$text->{commands}};
+
 		if ( @help ){ push @output, 
 			qq("$name" matches the following commands:\n\n), @help;
 		}

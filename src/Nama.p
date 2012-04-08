@@ -114,6 +114,16 @@ use ::Effects ();
 use ::Persistence ();
 use ::Util qw(:all);
 
+sub main { 
+	#setup_grammar(); 		# executes directly in body
+	process_options(); 		# Option_subs.pm
+	initialize_interfaces();# Initialize_subs.pm
+	command_process($config->{execute_on_project_load});
+	reconfigure_engine();	# Engine_setup_subs.pm
+	command_process($config->{opts}->{X});
+	$ui->loop;
+}
+
 ## Definitions ##
 
 $| = 1;     # flush STDOUT buffer on every write
@@ -259,7 +269,9 @@ $mode->{mastering} = 0;
 
 init_memoize() if $config->{memoize};
 
-sub setup_grammar { }
+setup_grammar();
+
+sub setup_grammar {
 
 	### COMMAND LINE PARSER 
 
@@ -291,6 +303,8 @@ sub setup_grammar { }
 	};
 
 	# print remove_spaces("bulwinkle is a...");
+
+}
 
 #### Class and Object definitions for package '::'
 

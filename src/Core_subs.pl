@@ -1,13 +1,3 @@
-sub main { 
-#	setup_grammar(); 		# executes directly in body
-	process_options(); 		# Option_subs.pm
-	initialize_interfaces();# Initialize_subs.pm
-	command_process($config->{execute_on_project_load});
-	reconfigure_engine();	# Engine_setup_subs.pm
-	command_process($config->{opts}->{X});
-	$ui->loop;
-}
-
 sub import_audio {
 
 	my ($track, $path, $frequency) = @_;
