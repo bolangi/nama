@@ -5,7 +5,6 @@
 
 package ::;
 use Modern::Perl;
-use Data::Section::Simple qw(get_data_section);
 
 sub setup_grammar {
 
