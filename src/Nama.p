@@ -123,6 +123,27 @@ sub main {
 	command_process($config->{opts}->{X});
 	$ui->loop;
 }
+sub cleanup_exit {
+ 	remove_riff_header_stubs();
+	# for each process: 
+	# - SIGINT (1st time)
+	# - allow time to close down
+	# - SIGINT (2nd time)
+	# - allow time to close down
+	# - SIGKILL
+	map{ my $pid = $_; 
+		 map{ my $signal = $_; 
+			  kill $signal, $pid; 
+			  sleeper(0.2) 
+			} (2,2,9)
+	} @{$engine->{pids}};
+ 	#kill 15, ecasound_pid() if $engine->{socket};  	
+	close_midish() if $config->{use_midish};
+	$text->{term}->rl_deprep_terminal() if defined $text->{term};
+	exit; 
+}
+END { cleanup_exit() }
+
 
 ## Definitions ##
 
@@ -234,6 +255,9 @@ sub serialize_formats {
 		  || $_[0]->{serialize_formats}
 		)
 }
+sub hardware_latency {
+	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
+}
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
@@ -286,8 +310,6 @@ use ::Object qw(mode);
 sub hello {"superclass hello"}
 
 sub new { my $class = shift; return bless {@_}, $class }
-
-[% qx(cat ./Core_subs.pl ) %]
 
 package ::;  # for Data::Section
 

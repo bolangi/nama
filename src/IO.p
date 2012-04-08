@@ -1,5 +1,5 @@
 package ::;
-our (%tn, $jack);
+our (%tn, $jack, $config);
 
 # ---------- IO -----------
 
@@ -172,9 +172,9 @@ sub _playat_output {
 sub _select_output {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my $start = $track->adjusted_region_start_time + Audio::Nama::hardware_latency();
+	my $start = $track->adjusted_region_start_time + $config->hardware_latency();
 	my $end   = $track->adjusted_region_end_time;
-	return unless ::hardware_latency() or defined $start and defined $end;
+	return unless $config->hardware_latency() or defined $start and defined $end;
 	my $setup_length;
 	# CASE 1: a region is defined 
 	if ($end) { 

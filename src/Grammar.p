@@ -425,6 +425,17 @@ sub destroy_current_wav {
 	1;
 }
 
+sub pan_check {
+	my $new_position = shift;
+	my $current = $fx->{params}->{ $this_track->pan }->[0];
+	$this_track->set(old_pan_level => $current)
+		unless defined $this_track->old_pan_level;
+	effect_update_copp_set(
+		$this_track->pan,	# id
+		0, 					# parameter
+		$new_position,		# value
+	);
+}
 
 
 1;
