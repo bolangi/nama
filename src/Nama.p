@@ -90,6 +90,7 @@ use ::EffectChain;
 # the following separate out functionality
 # however occupy the :: namespace
 
+use ::Bunch ();
 use ::Grammar ();
 use ::Help ();
 use ::Custom ();

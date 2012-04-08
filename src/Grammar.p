@@ -1,4 +1,7 @@
-# --------------------- Grammar ----------------------
+# --------------------- Command Grammar ----------------------
+#
+
+# support routines for grammar_body.pl
 
 package ::;
 use Modern::Perl;
