@@ -86,6 +86,9 @@ sub leading_track_spec {
 	}
 		
 }
+
+### allow commands to abbreviate Audio::Nama::Class as ::Class
+
 { my @namespace_abbreviations = qw(
 	Assign 
 	Track
