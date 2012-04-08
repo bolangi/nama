@@ -3,9 +3,6 @@
 package ::;
 use Modern::Perl;
 
-
-# called from grammar
-
 sub do_user_command {
 	#say "args: @_";
 	my($cmd, @args) = @_;
