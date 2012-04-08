@@ -36,8 +36,19 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
+sub command_process {
+	my $input = shift;
+	my $input_was = $input;
 
-
+	# parse repeatedly until all input is consumed
+	
+	while ($input =~ /\S/) { 
+		$debug and say "input: $input";
+		$text->{parser}->meta(\$input) or print("bad command: $input_was\n"), last;
+	}
+	$ui->refresh; # in case we have a graphic environment
+	set_current_bus();
+}
 sub do_user_command {
 	#say "args: @_";
 	my($cmd, @args) = @_;

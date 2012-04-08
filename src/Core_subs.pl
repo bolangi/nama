@@ -45,30 +45,6 @@ sub pan_check {
 }
 sub track_from_name_or_index { /\D/ ? $tn{$_[0]} : $ti{$_[0]}  }
 
-# called from almost everywhere
-
-sub command_process {
-	my $input = shift;
-	my $input_was = $input;
-
-	# parse repeatedly until all input is consumed
-	
-	while ($input =~ /\S/) { 
-		$debug and say "input: $input";
-		$text->{parser}->meta(\$input) or print("bad command: $input_was\n"), last;
-	}
-	$ui->refresh; # in case we have a graphic environment
-	set_current_bus();
-}
-	
-
-## called from 
-# Track_subs
-# Graphical_subs
-# Refresh_subs
-# Core_subs
-# Realtime_subs
-
 # vol/pan requirements of mastering and mixdown tracks
 
 # called from Track_subs, Graphical_subs
