@@ -5,6 +5,39 @@
 
 package ::;
 use Modern::Perl;
+use Data::Section::Simple qw(get_data_section);
+
+sub setup_grammar {
+
+	### COMMAND LINE PARSER 
+
+	$debug2 and print "Reading grammar\n";
+
+	$text->{commands_yml} = get_data_section("commands_yml");
+	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
+	$text->{commands} = yaml_in( $text->{commands_yml}) ;
+
+	$::AUTOSTUB = 1;
+	$::RD_TRACE = 1;
+	$::RD_ERRORS = 1; # Make sure the parser dies when it encounters an error
+	$::RD_WARN   = 1; # Enable warnings. This will warn on unused rules &c.
+	$::RD_HINT   = 1; # Give out hints to help fix problems.
+
+	$text->{grammar} = get_data_section('grammar');
+
+	$text->{parser} = Parse::RecDescent->new($text->{grammar}) or croak "Bad grammar!\n";
+
+	# Midish command keywords
+	
+	$midi->{keywords} = 
+	{
+			map{ $_, 1} split " ", get_data_section("midish_commands")
+	};
+
+	# print remove_spaces("bulwinkle is a...");
+
+}
+
 
 sub do_user_command {
 	#say "args: @_";
