@@ -133,7 +133,7 @@ sub reconfigure_engine {
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
-		::Text::show_status();
+		show_status();
 
 		if( $restore_position and not ::ChainSetup::really_recording()){
 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};

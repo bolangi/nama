@@ -7,7 +7,7 @@ sub set_region {
 	my ($beg, $end) = @_;
 	$this_track->set(region_start => $beg);
 	$this_track->set(region_end => $end);
-	::Text::show_region();
+	show_region();
 }
 sub new_region {
 	my ($beg, $end, $name) = @_;

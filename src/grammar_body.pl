@@ -187,19 +187,19 @@ connect_target: connect_type connect_id { [ @item{qw(connect_type connect_id)} ]
 connect_type: 'track' | 'loop' | 'jack' 
 connect_id: shellish 
 
-help_effect: _help_effect effect { ::Text::help_effect($item{effect}) ; 1}
+help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
-	::Text::find_effect(@{$item{"anytag(s)"}}); 1}
+	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
-help: _help anytag  { ::Text::help($item{anytag}) ; 1}
+help: _help anytag  { ::help($item{anytag}) ; 1}
 help: _help { print $::help->{screen} ; 1}
 project_name: _project_name { 
 	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
 create_project: _create_project project_id { 
-	::Text::t_create_project $item{project_id} ; 1}
+	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
 load_project: _load_project project_id {
-	::Text::t_load_project $item{project_id} ; 1}
+	::t_load_project $item{project_id} ; 1}
 new_project_template: _new_project_template key text(?) {
 	::new_project_template($item{key}, $item{text});
 	1;
@@ -326,19 +326,19 @@ ecasound_start: _ecasound_start { ::eval_iam("stop"); 1}
 ecasound_stop: _ecasound_stop  { ::eval_iam("start"); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
-	::pager( ::Text::show_tracks(::Text::showlist()));
+	::pager( ::show_tracks(::showlist()));
 	1;
 }
 show_tracks_all: _show_tracks_all { 	
 	my $list = [undef, undef, sort{$a->n <=> $b->n} ::Track::all()];
-	::pager(::Text::show_tracks($list));
+	::pager(::show_tracks($list));
 	1;
 }
 show_bus_tracks: _show_bus_tracks { 	
 
 	my $bus = $::bn{$::this_bus};
 	my $list = $bus->trackslist;
-	::pager(::Text::show_tracks($list));
+	::pager(::show_tracks($list));
 	1;
 }
 modifiers: _modifiers modifier(s) {
@@ -352,27 +352,27 @@ show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup
 show_io: _show_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
-	$output .= ::Text::show_tracks_section($::this_track);
-	$output .= ::Text::show_region();
-	$output .= ::Text::show_effects();
-	$output .= ::Text::show_versions();
-	$output .= ::Text::show_send();
-	$output .= ::Text::show_bus();
-	$output .= ::Text::show_modifiers();
+	$output .= ::show_tracks_section($::this_track);
+	$output .= ::show_region();
+	$output .= ::show_effects();
+	$output .= ::show_versions();
+	$output .= ::show_send();
+	$output .= ::show_bus();
+	$output .= ::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
-	$output .= ::Text::show_inserts();
+	$output .= ::show_inserts();
 	::pager( $output );
 	1;}
 show_track: _show_track track_name { 
- 	::pager( ::Text::show_tracks( 
+ 	::pager( ::show_tracks( 
 	$::tn{$item{track_name}} )) if $::tn{$item{track_name}};
 	1;}
 show_track: _show_track dd {  
-	::pager( ::Text::show_tracks( $::ti{$item{dd}} )) if
+	::pager( ::show_tracks( $::ti{$item{dd}} )) if
 	$::ti{$item{dd}};
 	1;}
 
-show_mode: _show_mode { print STDOUT ::Text::show_status; 1}
+show_mode: _show_mode { print STDOUT ::show_status; 1}
 bus_rec: _bus_rec {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'REC');
@@ -412,9 +412,9 @@ bus_version: _bus_version dd {
 	$::bn{$::this_bus}->set( version => $n ); 
 	print $::this_bus, " bus default version set to: ", 
 		$::bn{$::this_bus}->version, "\n" ; 1}
-mixdown: _mixdown { ::Text::mixdown(); 1}
-mixplay: _mixplay { ::Text::mixplay(); 1}
-mixoff:  _mixoff  { ::Text::mixoff(); 1}
+mixdown: _mixdown { ::mixdown(); 1}
+mixplay: _mixplay { ::mixplay(); 1}
+mixoff:  _mixoff  { ::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
 autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize"); 1 }
 master_on: _master_on { ::master_on(); 1 }
@@ -764,7 +764,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	print ::Text::show_effect($::this_op)
+	print ::show_effect($::this_op)
 		unless my @dummy = ::is_bypassed($::this_op);
 	1;
 }
@@ -772,7 +772,7 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
 		unless ::fx($::this_op);
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
-	print ::Text::show_effect($::this_op)
+	print ::show_effect($::this_op)
 		unless my @dummy = ::is_bypassed($::this_op);
 	1;
 }
@@ -780,14 +780,14 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	# note that 'sign' results in undef value
-	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }))
+	::pager(::show_effect(@{ $item{'op_id(s)'} }))
 		unless scalar @{ $item{'op_id(s)'} } == 1 
 			and my @dummy = ::is_bypassed($::this_op);
 	1;
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
-	::pager(::Text::show_effect(@{ $item{'op_id(s)'} }));
+	::pager(::show_effect(@{ $item{'op_id(s)'} }));
 	1;
 }
 position_effect: _position_effect op_to_move new_following_op {
@@ -802,7 +802,7 @@ new_following_op: op_id
 	
 show_effect: _show_effect op_id(s) {
 	my @lines = 
-		map{ ::Text::show_effect($_) } 
+		map{ ::show_effect($_) } 
 		grep{ ::fx($_) }
 		@{ $item{'op_id(s)'}};
 	$::this_op = $item{'op_id(s)'}->[-1];
@@ -811,15 +811,15 @@ show_effect: _show_effect op_id(s) {
 show_effect: _show_effect {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
 		unless ::fx($::this_op);
-	print ::Text::show_effect($::this_op);
+	print ::show_effect($::this_op);
 	1;
 }
-list_effects: _list_effects { ::pager(::Text::list_effects()); 1}
-new_bunch: _new_bunch ident(s) { ::Text::bunch( @{$item{'ident(s)'}}); 1}
-list_bunches: _list_bunches { ::Text::bunch(); 1}
+list_effects: _list_effects { ::pager(::list_effects()); 1}
+new_bunch: _new_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
+list_bunches: _list_bunches { ::bunch(); 1}
 remove_bunches: _remove_bunches ident(s) { 
  	map{ delete $::gui->{_project_name}->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
-add_to_bunch: _add_to_bunch ident(s) { ::Text::add_to_bunch( @{$item{'ident(s)'}});1 }
+add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
 	print join " ", @{$::this_track->versions}, "\n"; 1}
 ladspa_register: _ladspa_register { 
@@ -1219,7 +1219,7 @@ mark1: markname
 mark2: markname
 remove_fade: _remove_fade fade_index(s) { 
 	my @i = @{ $item{'fade_index(s)'} };
-	::Text::remove_fade($_) for (@i);
+	::remove_fade($_) for (@i);
 	$::setup->{changed}++;
 	1
 }

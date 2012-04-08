@@ -162,7 +162,7 @@ sub init_gui {
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
-				#::Text::command_process('quit');
+				#::command_process('quit');
 				exit;
 				 });
 	$gui->{palette}->configure(
@@ -194,7 +194,7 @@ $gui->{palette}->AddItems( @color_items);
 			-command => sub { 
 								return if $gui->{_track_name} =~ /^\s*$/;	
 								add_track(remove_spaces($gui->{_track_name}));
-								::Text::command_process('stereo');
+								command_process('stereo');
 	});
 
 	my @labels = 
