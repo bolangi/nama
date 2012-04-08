@@ -1083,6 +1083,51 @@ sub add_track_alias_project {
 	}
 }
 
+# vol/pan requirements of mastering and mixdown tracks
+
+# called from Track_subs, Graphical_subs
+{ my %volpan = (
+	Eq => {},
+	Low => {},
+	Mid => {},
+	High => {},
+	Boost => {vol => 1},
+	Mixdown => {},
+);
+
+sub need_vol_pan {
+
+	# this routine used by 
+	#
+	# + add_track() to determine whether a new track _will_ need vol/pan controls
+	# + add_track_gui() to determine whether an existing track needs vol/pan  
+	
+	my ($track_name, $type) = @_;
+
+	# $type: vol | pan
+	
+	# Case 1: track already exists
+	
+	return 1 if $tn{$track_name} and $tn{$track_name}->$type;
+
+	# Case 2: track not yet created
+
+	if( $volpan{$track_name} ){
+		return($volpan{$track_name}{$type}	? 1 : 0 )
+	}
+	return 1;
+}
+}
+
+# track width in words
+
+sub width {
+	my $count = shift;
+	return 'mono' if $count == 1;
+	return 'stereo' if $count == 2;
+	return "$count channels";
+}
+
 
 sub add_volume_control {
 	my $n = shift;
