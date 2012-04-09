@@ -53,7 +53,7 @@ use IO::Socket;
 use IO::Select;
 use IPC::Open3;
 use Log::Dispatch;
-use Log::Log4perl;
+use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
 use Parse::RecDescent;
 use Storable qw(thaw);

@@ -230,11 +230,32 @@ sub ecasound_pid {
 sub initialize_logger {
 
 	my $conf = q(
-		log4perl.rootLogger=DEBUG, A1
-		log4perl.appender.A1=Log::Log4perl::Appender::Screen
-		log4perl.appender.A1.layout=Log::Log4perl::Layout::SimpleLayout
+		#log4perl.rootLogger				= DEBUG, IAM
+		log4perl.category.ECI			= DEBUG, IAM
+		log4perl.appender.IAM			= Log::Log4perl::Appender::Screen
+		log4perl.appender.IAM.layout	= Log::Log4perl::Layout::PatternLayout
+		log4perl.appender.IAM.layout.ConversionPattern = %R %m 
+		#log4perl.additivity.IAM			= 0
 	);
 	Log::Log4perl::init(\$conf);
+
+# code near-equivalent 
+
+# 	my $eci_logger = get_logger('ECI');
+# 	my $root_logger = get_logger('');
+# 	my $iam_appender = Log::Log4perl::Appender->new("Log::Log4perl::Appender::Screen");
+# 	my $iam_layout = Log::Log4perl::Layout::PatternLayout->new("%R %m");
+# 	say $iam_layout;
+# 	$iam_appender->layout($iam_layout);
+# 	say $iam_appender;
+# 	$eci_logger->add_appender($iam_appender);
+# 	$eci_logger->level($TRACE);
+# 	#$iam_appender->additivity(0);
+# 	$root_logger->add_appender($iam_appender);
+# 	$root_logger->level($TRACE);
+		
+
+
 }
 
 
