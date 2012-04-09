@@ -220,7 +220,7 @@ sub process_routing_graph {
 	$debug2 and say "&process_routing_graph";
 	@io = map{ dispatch($_) } $g->edges;
 	$debug and map $_->dumpp, @io;
-	# $logger->debug( sub{ map $_->dump, @io });
+	$logger->debug( sub{ map $_->dump, @io });
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
@@ -288,14 +288,14 @@ sub non_track_dispatch {
 	
 	my $edge = shift;
 	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
-	# $logger->debug("non-track IO dispatch:",join ' -> ',@$edge");
+	$logger->debug("non-track IO dispatch:",join ' -> ',@$edge);
 	my $eattr = $g->get_edge_attributes(@$edge) // {};
 	$debug and say "found edge attributes: ",yaml_out($eattr) if $eattr;
-	# $logger->debug("found edge attributes: ",yaml_out($eattr)) if $eattr;
+	$logger->debug("found edge attributes: ",yaml_out($eattr)) if $eattr;
 
 	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
 	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
-	# $logger->debug("found vertex attributes: ",yaml_out($vattr)) if $vattr;
+	$logger->debug("found vertex attributes: ",yaml_out($vattr)) if $vattr;
 
 	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
 		my $n = $eattr->{n} || $vattr->{n};
@@ -308,7 +308,7 @@ sub non_track_dispatch {
 		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}";
-		# $logger->debug("non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
+		$logger->debug("non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
 }
@@ -340,10 +340,10 @@ sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
 	$debug and say 'dispatch: ',join ' -> ',  @$edge;
-	# $logger->debug('dispatch: ',join ' -> ',  @$edge);
+	$logger->debug('dispatch: ',join ' -> ',  @$edge);
 	my($name, $endpoint, $direction) = decode_edge($edge);
 	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
-	# $logger->debug("name: $name, endpoint: $endpoint, direction: $direction");
+	$logger->debug("name: $name, endpoint: $endpoint, direction: $direction");
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 		# we need the $direction because there can be 
@@ -419,7 +419,7 @@ sub write_chains {
 					"# audio outputs",
 					join("\n", @output_chains), "";
 	$debug and print "ECS:\n",$ecs_file;
-	# $logger->debug("Chain setup:\n",$ecs_file);
+	$logger->debug("Chain setup:\n",$ecs_file);
 	open my $fh, ">", $file->chain_setup;
 	print $fh $ecs_file;
 	close $fh;
