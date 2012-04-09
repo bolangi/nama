@@ -230,39 +230,23 @@ sub ecasound_pid {
 sub initialize_logger {
 
 	my $conf = q(
-		#log4perl.rootLogger				= DEBUG, IAM
+		#log4perl.rootLogger			= DEBUG, IAM
 		log4perl.category.ECI			= DEBUG, IAM
 		log4perl.appender.IAM			= Log::Log4perl::Appender::Screen
 		log4perl.appender.IAM.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.IAM.layout.ConversionPattern = %R %m 
-		#log4perl.additivity.IAM			= 0
+		log4perl.appender.IAM.layout.ConversionPattern = [ %R ] %m%n
+		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
 	Log::Log4perl::init(\$conf);
 
-# code near-equivalent 
-
-# 	my $eci_logger = get_logger('ECI');
-# 	my $root_logger = get_logger('');
-# 	my $iam_appender = Log::Log4perl::Appender->new("Log::Log4perl::Appender::Screen");
-# 	my $iam_layout = Log::Log4perl::Layout::PatternLayout->new("%R %m");
-# 	say $iam_layout;
-# 	$iam_appender->layout($iam_layout);
-# 	say $iam_appender;
-# 	$eci_logger->add_appender($iam_appender);
-# 	$eci_logger->level($TRACE);
-# 	#$iam_appender->additivity(0);
-# 	$root_logger->add_appender($iam_appender);
-# 	$root_logger->level($TRACE);
-		
-
-
 }
-
 
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my ($cmd,$log) = @_;
+	my ($cmd) = @_;
+	my $logger = get_logger('ECI');
+	$logger->debug($cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -303,11 +287,12 @@ full return value: $return_value);
 	}
 
 }
-}
 
 sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
-	my ($cmd,$log) = @_;
+	my ($cmd) = @_;
+	my $logger = get_logger('ECI');
+	$logger->debug($cmd);
 	$debug and print "iam command: $cmd\n";
 	my (@result) = $engine->{ecasound}->eci($cmd);
 	$debug and print "result: @result\n" unless $cmd =~ /register/;
@@ -319,6 +304,7 @@ sub eval_iam_libecasoundc{
 		# carp "ecasound reports an error:\n$errmsg\n"; 
 	}
 	"@result";
+}
 }
 	
 sub restart_ecasound {

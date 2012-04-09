@@ -117,8 +117,8 @@ use ::Util qw(:all);
 sub main { 
 	#setup_grammar(); 		# executes directly in body
 	process_options();
-	initialize_interfaces();
 	initialize_logger();
+	initialize_interfaces();
 	command_process($config->{execute_on_project_load});
 	reconfigure_engine();	# Engine_setup_subs.pm
 	command_process($config->{opts}->{X});
