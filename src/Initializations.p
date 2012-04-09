@@ -227,10 +227,21 @@ sub ecasound_pid {
 	$pid if $engine->{socket}; # conditional on using socket i.e. Net-ECI
 }
 
+sub initialize_logger {
+
+	my $conf = q(
+		log4perl.rootLogger=DEBUG, A1
+		log4perl.appender.A1=Log::Log4perl::Appender::Screen
+		log4perl.appender.A1.layout=Log::Log4perl::Layout::SimpleLayout
+	);
+	Log::Log4perl::init(\$conf);
+}
+
+
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my $cmd = shift;
+	my ($cmd,$log) = @_;
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -275,10 +286,10 @@ full return value: $return_value);
 
 sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
-	my $command = shift;
-	$debug and print "iam command: $command\n";
-	my (@result) = $engine->{ecasound}->eci($command);
-	$debug and print "result: @result\n" unless $command =~ /register/;
+	my ($cmd,$log) = @_;
+	$debug and print "iam command: $cmd\n";
+	my (@result) = $engine->{ecasound}->eci($cmd);
+	$debug and print "result: @result\n" unless $cmd =~ /register/;
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
 		restart_ecasound() if $errmsg =~ /in engine-status/;
@@ -301,5 +312,24 @@ sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
 	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
 }
+sub log_msg {
+	my $log = shift;
+	if ( $log )
+	{
+		my $category 	= $log->{category};
+		my $level		= $log->{level};	
+		my $msg			= $log->{msg};
+		my $cmd			= $log->{cmd};
+		my $result		= $log->{result}; 
+		my $logger = Log::Log4perl->get_logger($category);
+		my @msg;
+		push @msg, "command: $cmd" if $cmd;
+		push @msg, "message: $msg" if $msg;
+		push @msg, "result: $result" if $result;
+		my $message = join q(, ), @msg;
+		$logger->$level($message);
+	}
+}
+
 1;
 __END__
