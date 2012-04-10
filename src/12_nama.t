@@ -50,7 +50,7 @@ push @ARGV, q(-T);
 diag("working directory: ",cwd);
 
 definitions();
-process_options();
+process_command_line_options();
 initialize_interfaces();
 setup_grammar();
 diag "Check representative variable from default .namarc";

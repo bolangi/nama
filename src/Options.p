@@ -3,7 +3,7 @@
 package ::;
 use Modern::Perl;
 
-sub process_options {
+sub process_command_line_options {
 
 	my %options = qw(
 
