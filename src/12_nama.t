@@ -49,6 +49,7 @@ push @ARGV, q(-T);
 
 diag("working directory: ",cwd);
 
+definitions();
 process_options();
 initialize_interfaces();
 diag "Check representative variable from default .namarc";
