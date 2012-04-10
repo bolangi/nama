@@ -52,7 +52,6 @@ use Graph;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
-use Log::Dispatch;
 use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
 use Parse::RecDescent;
@@ -117,7 +116,6 @@ use ::Util qw(:all);
 sub main { 
 	#setup_grammar(); 		# executes directly in body
 	process_options();
-	initialize_logger();
 	initialize_interfaces();
 	command_process($config->{execute_on_project_load});
 	reconfigure_engine();	# Engine_setup_subs.pm
@@ -150,9 +148,6 @@ END { cleanup_exit() }
 
 $| = 1;     # flush STDOUT buffer on every write
 
-# 'our' declaration: code in all packages in Nama.pm can address
-# the following variables without package name prefix
-
 use ::Globals qw(:all);
 
 $ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
@@ -182,6 +177,10 @@ $debug = 0; # debug statements
 {
 package ::File;
 	use Carp;
+	sub logfile {
+		my $self = shift;
+		$ENV{NAMA_LOGFILE} || $self->_logfile
+	}
 	sub AUTOLOAD {
 		my ($self, $filename) = @_;
 		# get tail of method call
@@ -207,8 +206,10 @@ $file = bless
 	project_config			=> ['project_config', 		\&project_dir ],
 	global_effect_chains  	=> ['global_effect_chains', \&project_root],
 	old_effect_chains  		=> ['effect_chains', 		\&project_root],
+	_logfile				=> ['nama.log',				\&project_root],
 
 }, '::File';
+
 
 $gui->{_save_id} = "State";
 $gui->{_seek_unit} = 1;
