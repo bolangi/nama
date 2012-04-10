@@ -92,14 +92,15 @@ use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
-use ::ChainSetup;
 use ::EffectChain;
 
 # The following modules serve only to define and segregate subroutines. 
-# They occupy the root namespace and do not execute any code when use'd.
+# They occupy the root namespace (except ::ChainSetup)
+# and do not execute any code when use'd.
 
 use ::Bunch ();
 use ::Grammar ();
+use ::ChainSetup (); # separate namespace
 use ::Help ();
 use ::Custom ();
 use ::Initializations ();
