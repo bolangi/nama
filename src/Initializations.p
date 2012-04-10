@@ -5,14 +5,11 @@ use Modern::Perl; use Carp;
 
 sub definitions {
 
-	
-
 	$| = 1;     # flush STDOUT buffer on every write
 
 	$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
 
 	[% qx(./strip_all ./var_types.pl) %]
-
 
 	$text->{wrap} = new Text::Format {
 		columns 		=> 75,
@@ -24,14 +21,15 @@ sub definitions {
 	$debug2 = 0; # subroutine names
 	$debug = 0; # debug statements
 
-	# other initializations
+	####### Initialize singletons #######
 
-	#$engine->{events} = {};
-
+	# Some of these "singletons" (imported by 'use Globals')
+	# are just hashes, however we are adding object
+	# behavior.
 	#
-	#  Singleton $file is a ::File
-	#  + use AUTOLOAD to provide method calls for full path i.e. $file->state_store
-	#
+	# $file belongs to class ::File, and uses
+	# AUTOLOAD to generate methods to provide full path
+	# to various system files, for example $file->state_store
 
 	{
 	package ::File;
@@ -118,25 +116,6 @@ sub definitions {
 	}
 	sub hardware_latency {
 		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
-	}
-	our $AUTOLOAD;
-	sub AUTOLOAD {
-		my $self = shift;
-		# get tail of method call
-		my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-		#croak join " ", ref $self, "call:", $call;
-		#croak "$call: illegal method call for ".(ref $self) unless $self->{$call};
-		$debug and say "Config AUTOLOAD: call is $call";
-		return $project->{config}->{$call} if $project->{config}->{$call};
-		# otherwise look for it  # might be in $config,
-		# $mastering, etc. refer to var_map for var name
-		my ($var) = map  { ::Assign::var_map()->{$_} } 
-					grep { /^.$call$/ } 
-					keys %{::Assign::var_map()};
-		my $result;
-		$result = eval $var if $var;
-		croak "error: $@" if $@;
-		return $result;
 	}
 	}
 
