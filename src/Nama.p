@@ -51,27 +51,35 @@ use ::Assign qw(:all);
 use ::Globals qw(:all);
 use ::Util qw(:all);
 
-# These are the two user interface classes, descendents
-# of the base class ::.
+# Import the two user-interface classes
 
 use ::Text;
 use ::Graphical;
 
-# The singleton $ui belongs to one of these classes
+# They are descendents of a base class we define in the root namespace
+
+our @ISA; # no ancestors
+use ::Object qw(mode); # based on Object::Tiny
+
+sub hello {"superclass hello"}
+
+sub new { my $class = shift; return bless {@_}, $class }
+
+# The singleton $ui belongs to either the ::Text or ::Graphical class
 # depending on command line flags (-t or -g).
-# This (along with the availability of Tk and X) 
+# This (along with the availability of Tk) 
 # determines whether the GUI comes up. The Text UI
 # is *always* available in the terminal that launched
 # Nama.
 
 # How is $ui->init_gui interpreted? If $ui belongs to class
-# ::Text, Nama finds a no-op init_gui stub in package ::Text
+# ::Text, Nama finds a no-op init_gui() stub in package ::Text
 # and does nothing.
 
 # If $ui belongs to class ::Graphical, Nama looks for
 # init_gui() in package ::Graphical, finds nothing, so goes to
 # look in the base class.  All graphical methods (found in
-# Graphical_subs.pl) are defined in the base class so they can
+# Graphical_subs.pl) are defined in the root namespace so they can
 # call Nama core methods without a package prefix.
 
 ######## Nama classes ########
@@ -114,13 +122,15 @@ use ::CacheTrack ();
 use ::Effects ();
 use ::Persistence ();
 
+#### Imperative subroutines
+
 sub main { 
 	definitions();
-	process_options();
+	process_command_line_options();
 	initialize_interfaces();
 	setup_grammar();
 	command_process($config->{execute_on_project_load});
-	reconfigure_engine();	# Engine_setup_subs.pm
+	reconfigure_engine();
 	command_process($config->{opts}->{X});
 	$ui->loop;
 }
@@ -145,19 +155,6 @@ sub cleanup_exit {
 }
 END { cleanup_exit() }
 
-
-#### Class and Object definitions for package '::'
-
-our @ISA; # no anscestors
-use ::Object qw(mode);
-
-## The following methods belong to the root class
-
-sub hello {"superclass hello"}
-
-sub new { my $class = shift; return bless {@_}, $class }
-
-package ::;  # required for Data::Section::Simple to read the following
 
 1;
 __DATA__
