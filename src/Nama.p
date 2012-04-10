@@ -98,30 +98,34 @@ use ::EffectChain;
 # They occupy the root namespace (except ::ChainSetup)
 # and do not execute any code when use'd.
 
-use ::Bunch ();
-use ::Grammar ();
-use ::ChainSetup (); # separate namespace
-use ::Help ();
-use ::Custom ();
 use ::Initializations ();
 use ::Options ();
 use ::Config ();
+use ::Custom ();
 use ::Terminal ();
-use ::Wavinfo ();
+use ::Grammar ();
+use ::Help ();
+
 use ::Project ();
-use ::Modes ();
+use ::Persistence ();
+
+use ::ChainSetup (); # separate namespace
 use ::Graph ();
+use ::Modes ();
+use ::Memoize ();
+
 use ::Engine_setup ();
 use ::Engine_cleanup ();
+use ::Effects ();
 use ::Realtime ();
 use ::Mute_Solo_Fade ();
 use ::Jack ();
+
 use ::Regions ();
-use ::Midi ();
-use ::Memoize ();
 use ::CacheTrack ();
-use ::Effects ();
-use ::Persistence ();
+use ::Bunch ();
+use ::Wavinfo ();
+use ::Midi ();
 
 #### Imperative subroutines
 
