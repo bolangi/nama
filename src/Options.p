@@ -29,6 +29,7 @@ sub process_options {
 		execute-command=s			X
 		no-terminal					T
         no-fade-on-transport-start  F
+		log=s@                      L
 );
 
 	map{$config->{opts}->{$_} = ''} values %options;
@@ -40,7 +41,7 @@ sub process_options {
 	map{ $getopts .= qq("$options{$_}|$_" => \\\$config->{opts}->{$options{$_}}, \n)} keys %options;
 	$getopts .= ' )' ;
 
-	#say $getopts;
+	say $getopts;
 
 	eval $getopts or die "Stopped.\n";
 	

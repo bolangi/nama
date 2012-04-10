@@ -229,12 +229,18 @@ sub ecasound_pid {
 
 sub initialize_logger {
 
-	my $conf = q(
+	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
+	my $logfile = $ENV{NAMA_ECI} || "$ENV{HOME}/nama.eci.log";
+	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, IAM
-		log4perl.category.ECI			= DEBUG, IAM
+		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
 		log4perl.appender.IAM			= Log::Log4perl::Appender::Screen
+		log4perl.appender.IAM_file		= Log::Log4perl::Appender::File
+		log4perl.appender.IAM_file.filename	= $logfile
+		log4perl.appender.IAM_file.layout	= Log::Log4perl::Layout::PatternLayout
+		log4perl.appender.IAM_file.layout.ConversionPattern = $layout
 		log4perl.appender.IAM.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.IAM.layout.ConversionPattern = [ %R ] %m%n
+		log4perl.appender.IAM.layout.ConversionPattern = $layout
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
 	Log::Log4perl::init(\$conf);
