@@ -24,8 +24,7 @@ sub definitions {
 	####### Initialize singletons #######
 
 	# Some of these "singletons" (imported by 'use Globals')
-	# are just hashes, however we are adding object
-	# behavior.
+	# are just hashes, some have object behavior.
 	#
 	# $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
@@ -122,7 +121,7 @@ sub definitions {
 	$prompt = "nama ('h' for help)> ";
 
 	$this_bus = 'Main';
-	jack_update(); # to be polled by Event
+	jack_update(); # determine if jackd is running
 
 	$setup->{_old_snapshot} = {};
 	$setup->{_last_rec_tracks} = [];
@@ -138,7 +137,6 @@ sub definitions {
 	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
 
 }
-
 
 sub initialize_interfaces {
 	
@@ -184,7 +182,6 @@ sub initialize_interfaces {
 
 	start_ecasound();
 
-
 	$debug and print "reading config file\n";
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -195,7 +192,7 @@ sub initialize_interfaces {
 		print "placing all files in current working directory ($config->{root_dir})\n";
 	}
 
-	# capture the sample frequency from .namarc
+	# set soundcard sample frequency from .namarc
 	($config->{sample_rate}) = $config->{devices}->{jack}{signal_format} =~ /(\d+)(,i)?$/;
 
 	# skip initializations if user (test) supplies project
