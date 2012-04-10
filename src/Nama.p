@@ -69,25 +69,31 @@ use Try::Tiny;
 # use Event;		# loaded conditionally
 # use AnyEvent;		# loaded after Tk or Event
 
-## Load my modules
+####### Load Nama modules
+
+## import functions and variables
 
 use ::Assign qw(:all);
+use ::Globals qw(:all);
+use ::Util qw(:all);
+
+## Classes
+
 use ::Track;
 use ::Bus;    
 use ::Mark;
 use ::IO;
-use ::Graph;
 use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::Text;
 use ::Graphical;
-use ::ChainSetup ();
+use ::ChainSetup;
 use ::EffectChain;
 
-# the following separate out functionality
-# however occupy the :: namespace
+# The following modules serve only to define and segregate subroutines. 
+# They occupy the root namespace and do not execute any code when use'd.
 
 use ::Bunch ();
 use ::Grammar ();
@@ -100,6 +106,7 @@ use ::Terminal ();
 use ::Wavinfo ();
 use ::Project ();
 use ::Modes ();
+use ::Graph ();
 use ::Engine_setup ();
 use ::Engine_cleanup ();
 use ::Realtime ();
@@ -111,7 +118,6 @@ use ::Memoize ();
 use ::CacheTrack ();
 use ::Effects ();
 use ::Persistence ();
-use ::Util qw(:all);
 
 sub main { 
 	#setup_grammar(); 		# executes directly in body
@@ -147,8 +153,6 @@ END { cleanup_exit() }
 ## Definitions ##
 
 $| = 1;     # flush STDOUT buffer on every write
-
-use ::Globals qw(:all);
 
 $ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
 
