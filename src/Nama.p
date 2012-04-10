@@ -40,12 +40,13 @@ use Try::Tiny;
 # use AnyEvent;		# loaded after Tk or Event
 
 ########## Nama modules ###########
-
+#
 # Note that :: in the *.p source files is expanded by       # SKIP_PREPROC
 # preprocessing to Audio::Nama in the generated *.pm files. # SKIP_PREPROC
 # ::Assign becomes Audio::Nama::Assign                      # SKIP_PREPROC
-
+#
 # These modules import functions and variables
+#
 
 use ::Assign qw(:all);
 use ::Globals qw(:all);
@@ -94,9 +95,12 @@ use ::Fade;
 use ::Edit;
 use ::EffectChain;
 
+####### Nama subroutines ######
+#
 # The following modules serve only to define and segregate subroutines. 
 # They occupy the root namespace (except ::ChainSetup)
 # and do not execute any code when use'd.
+#
 
 use ::Initializations ();
 use ::Options ();
@@ -126,8 +130,6 @@ use ::CacheTrack ();
 use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
-
-#### Imperative subroutines
 
 sub main { 
 	definitions();
