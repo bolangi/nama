@@ -133,8 +133,6 @@ sub definitions {
 
 	init_memoize() if $config->{memoize};
 
-	setup_grammar();
-
 	# JACK environment for testing
 
 	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");

@@ -1,35 +1,3 @@
-## Note on object model
-# 
-# All graphic method are defined in the base class :: .
-# These are overridden in the ::Text class with no-op stubs.
-
-# How is $ui->init_gui interpreted? If $ui is class ::Text
-# Nama finds a no-op init_gui stub in package ::Text.
-#
-# If $ui is class ::Graphical, 
-# Nama looks for init_gui() in package ::Graphical,
-# finds nothing, so goes to look in the root namespace ::
-# of which ::Text and ::Graphical are both descendants.
-
-# All the routines in Graphical_methods.pl can consider
-# themselves to be in the base class, and can call base
-# class subroutines without a package prefix
-
-# Text_method.pl subroutines live in the ::Text class,
-# and so they must use the :: prefix when calling
-# subroutines in the base class.
-#
-# However because both subclass packages occupy the same file as 
-# the base class package, all variables defined by 'our' can 
-# be accessed without a package prefix.
-#
-# With the introduction of variable export by ::Globals,
-# 'our' is used secondarily to provide the global vars to multiple
-# members of a class hierarchy to singletons, pronouns,
-# and other categories of remaining globals.
-#
-#
-
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
@@ -38,6 +6,9 @@ use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
+
+########## External dependencies ##########
+
 use Carp;
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
@@ -59,25 +30,51 @@ use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Format;
 use Try::Tiny;
-# use Data::Rmap    # EffectChain.pm
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
 # use List::Util;   # Fade.pm
-# use List::MoreUtils;   # Effects.pm
+# use List::MoreUtils; # Effects.pm
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
 # use AnyEvent;		# loaded after Tk or Event
 
-####### Load Nama modules
+########## Nama modules ###########
 
-## import functions and variables
+# Note that :: in the *.p source files is expanded by       # SKIP_PREPROC
+# preprocessing to Audio::Nama in the generated *.pm files. # SKIP_PREPROC
+# ::Assign becomes Audio::Nama::Assign                      # SKIP_PREPROC
+
+# These modules import functions and variables
 
 use ::Assign qw(:all);
 use ::Globals qw(:all);
 use ::Util qw(:all);
 
-## Classes
+# These are the two user interface classes, descendents
+# of the base class ::.
+
+use ::Text;
+use ::Graphical;
+
+# The singleton $ui belongs to one of these classes
+# depending on command line flags (-t or -g).
+# This (along with the availability of Tk and X) 
+# determines whether the GUI comes up. The Text UI
+# is *always* available in the terminal that launched
+# Nama.
+
+# How is $ui->init_gui interpreted? If $ui belongs to class
+# ::Text, Nama finds a no-op init_gui stub in package ::Text
+# and does nothing.
+
+# If $ui belongs to class ::Graphical, Nama looks for
+# init_gui() in package ::Graphical, finds nothing, so goes to
+# look in the base class.  All graphical methods (found in
+# Graphical_subs.pl) are defined in the base class so they can
+# call Nama core methods without a package prefix.
+
+######## Nama classes ########
 
 use ::Track;
 use ::Bus;    
@@ -87,8 +84,6 @@ use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
-use ::Text;
-use ::Graphical;
 use ::ChainSetup;
 use ::EffectChain;
 
@@ -120,10 +115,10 @@ use ::Effects ();
 use ::Persistence ();
 
 sub main { 
-	#setup_grammar(); 		# executes directly in body
 	definitions();
 	process_options();
 	initialize_interfaces();
+	setup_grammar();
 	command_process($config->{execute_on_project_load});
 	reconfigure_engine();	# Engine_setup_subs.pm
 	command_process($config->{opts}->{X});
@@ -162,7 +157,7 @@ sub hello {"superclass hello"}
 
 sub new { my $class = shift; return bless {@_}, $class }
 
-package ::;  # for Data::Section
+package ::;  # required for Data::Section::Simple to read the following
 
 1;
 __DATA__
