@@ -454,7 +454,7 @@ sub global_version_buttons {
 	# the highest version number of all tracks in the
 	# $bn{Main} group
 	
-	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all;
+	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all();
 	
 		next unless grep{  grep{ $v == $_ } @{ $ti{$_}->versions } }
 			@user_track_indices;
@@ -765,7 +765,7 @@ sub paint_mute_buttons {
 			-background 		=> $gui->{_nama_palette}->{Mute},
 
 			)} grep { $ti{$_}->old_vol_level}# muted tracks
-				map { $_->n } ::Track::all;  # track numbers
+				map { $_->n } ::Track::all();  # track numbers
 }
 
 sub create_master_and_mix_tracks { 

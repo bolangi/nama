@@ -1,35 +1,3 @@
-## Note on object model
-# 
-# All graphic method are defined in the base class :: .
-# These are overridden in the ::Text class with no-op stubs.
-
-# How is $ui->init_gui interpreted? If $ui is class ::Text
-# Nama finds a no-op init_gui stub in package ::Text.
-#
-# If $ui is class ::Graphical, 
-# Nama looks for init_gui() in package ::Graphical,
-# finds nothing, so goes to look in the root namespace ::
-# of which ::Text and ::Graphical are both descendants.
-
-# All the routines in Graphical_methods.pl can consider
-# themselves to be in the base class, and can call base
-# class subroutines without a package prefix
-
-# Text_method.pl subroutines live in the ::Text class,
-# and so they must use the :: prefix when calling
-# subroutines in the base class.
-#
-# However because both subclass packages occupy the same file as 
-# the base class package, all variables defined by 'our' can 
-# be accessed without a package prefix.
-#
-# With the introduction of variable export by ::Globals,
-# 'our' is used secondarily to provide the global vars to multiple
-# members of a class hierarchy to singletons, pronouns,
-# and other categories of remaining globals.
-#
-#
-
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
@@ -38,6 +6,9 @@ use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
 use autodie qw(:default);
+
+########## External dependencies ##########
+
 use Carp;
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
@@ -52,72 +23,121 @@ use Graph;
 use IO::Socket; 
 use IO::Select;
 use IPC::Open3;
+use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
 use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Format;
 use Try::Tiny;
-# use Data::Rmap    # EffectChain.pm
 # use File::HomeDir;# Assign.pm
 # use File::Slurp;  # several
 # use List::Util;   # Fade.pm
-# use List::MoreUtils;   # Effects.pm
+# use List::MoreUtils; # Effects.pm
 # use Time::HiRes; # automatically detected
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
 # use AnyEvent;		# loaded after Tk or Event
 
-## Load my modules
+########## Nama modules ###########
+#
+# Note that :: in the *.p source files is expanded by       # SKIP_PREPROC
+# preprocessing to Audio::Nama in the generated *.pm files. # SKIP_PREPROC
+# ::Assign becomes Audio::Nama::Assign                      # SKIP_PREPROC
+#
+# These modules import functions and variables
+#
 
 use ::Assign qw(:all);
+use ::Globals qw(:all);
+use ::Util qw(:all);
+
+# Import the two user-interface classes
+
+use ::Text;
+use ::Graphical;
+
+# They are descendents of a base class we define in the root namespace
+
+our @ISA; # no ancestors
+use ::Object qw(mode); # based on Object::Tiny
+
+sub hello {"superclass hello"}
+
+sub new { my $class = shift; return bless {@_}, $class }
+
+# The singleton $ui belongs to either the ::Text or ::Graphical class
+# depending on command line flags (-t or -g).
+# This (along with the availability of Tk) 
+# determines whether the GUI comes up. The Text UI
+# is *always* available in the terminal that launched
+# Nama.
+
+# How is $ui->init_gui interpreted? If $ui belongs to class
+# ::Text, Nama finds a no-op init_gui() stub in package ::Text
+# and does nothing.
+
+# If $ui belongs to class ::Graphical, Nama looks for
+# init_gui() in package ::Graphical, finds nothing, so goes to
+# look in the base class.  All graphical methods (found in
+# Graphical_subs.pl) are defined in the root namespace so they can
+# call Nama core methods without a package prefix.
+
+######## Nama classes ########
+
 use ::Track;
 use ::Bus;    
 use ::Mark;
 use ::IO;
-use ::Graph;
 use ::Wav;
 use ::Insert;
 use ::Fade;
 use ::Edit;
-use ::Text;
-use ::Graphical;
-use ::ChainSetup ();
 use ::EffectChain;
 
-# the following separate out functionality
-# however occupy the :: namespace
+####### Nama subroutines ######
+#
+# The following modules serve only to define and segregate subroutines. 
+# They occupy the root namespace (except ::ChainSetup)
+# and do not execute any code when use'd.
+#
 
-use ::Bunch ();
-use ::Grammar ();
-use ::Help ();
-use ::Custom ();
 use ::Initializations ();
 use ::Options ();
 use ::Config ();
+use ::Custom ();
 use ::Terminal ();
-use ::Wavinfo ();
+use ::Grammar ();
+use ::Help ();
+
 use ::Project ();
+use ::Persistence ();
+
+use ::ChainSetup (); # separate namespace
+use ::Graph ();
 use ::Modes ();
+use ::Memoize ();
+
 use ::Engine_setup ();
 use ::Engine_cleanup ();
+use ::Effects ();
 use ::Realtime ();
 use ::Mute_Solo_Fade ();
 use ::Jack ();
+
 use ::Regions ();
-use ::Midi ();
-use ::Memoize ();
 use ::CacheTrack ();
-use ::Effects ();
-use ::Persistence ();
-use ::Util qw(:all);
+use ::Bunch ();
+use ::Wavinfo ();
+use ::Midi ();
 
 sub main { 
-	#setup_grammar(); 		# executes directly in body
-	process_options(); 		# Option_subs.pm
-	initialize_interfaces();# Initialize_subs.pm
+	definitions();
+	process_command_line_options();
+	initialize_interfaces();
+	setup_grammar();
 	command_process($config->{execute_on_project_load});
-	reconfigure_engine();	# Engine_setup_subs.pm
+	reconfigure_engine();
 	command_process($config->{opts}->{X});
 	$ui->loop;
 }
@@ -142,174 +162,6 @@ sub cleanup_exit {
 }
 END { cleanup_exit() }
 
-
-## Definitions ##
-
-$| = 1;     # flush STDOUT buffer on every write
-
-# 'our' declaration: code in all packages in Nama.pm can address
-# the following variables without package name prefix
-
-use ::Globals qw(:all);
-
-$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
-
-[% qx(./strip_all ./var_types.pl) %]
-
-
-$text->{wrap} = new Text::Format {
-	columns 		=> 75,
-	firstIndent 	=> 0,
-	bodyIndent		=> 0,
-	tabstop			=> 4,
-};
-
-$debug2 = 0; # subroutine names
-$debug = 0; # debug statements
-
-# other initializations
-
-#$engine->{events} = {};
-
-#
-#  Singleton $file is a ::File
-#  + use AUTOLOAD to provide method calls for full path i.e. $file->state_store
-#
-
-{
-package ::File;
-	use Carp;
-	sub AUTOLOAD {
-		my ($self, $filename) = @_;
-		# get tail of method call
-		my ($method) = $::File::AUTOLOAD =~ /([^:]+)$/;
-		croak "$method: illegal method call" unless $self->{$method};
-		my $dir_sub = $self->{$method}->[1];
-		$filename ||= $self->{$method}->[0];
-		my $path = ::join_path($dir_sub->(), $filename);
-		$path;
-	}
-	1;
-}
-$file = bless 
-{
-	effects_cache 			=> ['.effects_cache', 		\&project_root],
-	gui_palette 			=> ['palette',        		\&project_root],
-	state_store 			=> ['State',          		\&project_dir ],
-	git_state_store 		=> ['State.json',      		\&project_dir ],
-	effect_profile 			=> ['effect_profiles',		\&project_root],
-	chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
-	user_customization 		=> ['custom.pl',      		\&project_root],
-	project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
-	project_config			=> ['project_config', 		\&project_dir ],
-	global_effect_chains  	=> ['global_effect_chains', \&project_root],
-	old_effect_chains  		=> ['effect_chains', 		\&project_root],
-
-}, '::File';
-
-$gui->{_save_id} = "State";
-$gui->{_seek_unit} = 1;
-$gui->{marks} = {};
-
-$config = bless {
-	root_dir 						=> join_path( $ENV{HOME}, "nama"),
-	soundcard_channels 				=> 10,
-	memoize 						=> 1,
-	use_pager 						=> 1,
-	use_placeholders 				=> 1,
-	volume_control_operator 		=> 'ea', # default to linear scale
-	sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
-	engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
-	engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
-	engine_base_jack_seek_delay 	=> 0.1, # seconds
-	edit_playback_end_margin 		=> 3,
-	edit_crossfade_time 			=> 0.03,
-	fade_down_fraction 				=> 0.75,
-	fade_time1_fraction 			=> 0.9,
-	fade_time2_fraction 			=> 0.1,
-	fader_op 						=> 'ea',
-	mute_level 						=> {ea => 0, 	eadb => -96}, 
-	fade_out_level 					=> {ea => 0, 	eadb => -40},
-	unity_level 					=> {ea => 100, 	eadb => 0}, 
-	fade_resolution 				=> 20, # steps per second
-	no_fade_mute_delay				=> 0.03,
-	# for save_system_state()
-	serialize_formats               => 'json',
-}, '::Config';
-
-{ package ::Config;
-use Carp;
-use ::Globals qw($debug :singletons);
-use Modern::Perl;
-our @ISA = '::Object'; #  for ->dump and ->as_hash methods
-
-# special handling of serialize formats to store them as 
-# space separate tags, must duplicate AUTOLOAD checking
-
-sub serialize_formats { 
-		split " ", 
-		(
-			$project->{config}->{serialize_formats} 
-		  || $_[0]->{serialize_formats}
-		)
-}
-sub hardware_latency {
-	$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
-}
-our $AUTOLOAD;
-sub AUTOLOAD {
-	my $self = shift;
-    # get tail of method call
-    my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	#croak join " ", ref $self, "call:", $call;
-	#croak "$call: illegal method call for ".(ref $self) unless $self->{$call};
-	$debug and say "Config AUTOLOAD: call is $call";
-	return $project->{config}->{$call} if $project->{config}->{$call};
-	# otherwise look for it  # might be in $config,
-	# $mastering, etc. refer to var_map for var name
-	my ($var) = map  { ::Assign::var_map()->{$_} } 
-				grep { /^.$call$/ } 
-				keys %{::Assign::var_map()};
-	my $result;
-	$result = eval $var if $var;
-	croak "error: $@" if $@;
-	return $result;
-}
-}
-
-$prompt = "nama ('h' for help)> ";
-
-$this_bus = 'Main';
-jack_update(); # to be polled by Event
-
-$setup->{_old_snapshot} = {};
-$setup->{_last_rec_tracks} = [];
-
-$mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
-
-$mode->{mastering} = 0;
-
-init_memoize() if $config->{memoize};
-
-setup_grammar();
-
-# JACK environment for testing
-
-$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
-
-
-#### Class and Object definitions for package '::'
-
-our @ISA; # no anscestors
-use ::Object qw(mode);
-
-## The following methods belong to the root class
-
-sub hello {"superclass hello"}
-
-sub new { my $class = shift; return bless {@_}, $class }
-
-package ::;  # for Data::Section
 
 1;
 __DATA__

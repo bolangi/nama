@@ -35,6 +35,7 @@ use inc::Module::Install;
 			IO::Select  0
 			IPC::Open3  0
 			List::Util 0
+			Log::Log4perl 0
 			Modern::Perl  0
 			Module::Load::Conditional  0 
 			Parse::RecDescent  0

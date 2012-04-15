@@ -3,7 +3,7 @@
 package ::;
 use Modern::Perl;
 
-sub process_options {
+sub process_command_line_options {
 
 	my %options = qw(
 
@@ -29,6 +29,7 @@ sub process_options {
 		execute-command=s			X
 		no-terminal					T
         no-fade-on-transport-start  F
+		log=s@                      L
 );
 
 	map{$config->{opts}->{$_} = ''} values %options;

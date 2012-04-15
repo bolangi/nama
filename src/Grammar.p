@@ -116,13 +116,15 @@ sub eval_perl {
 	my $code = shift;
 	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
 	my $err;
-	my @result;
-	@result = eval $code;
+	my @result = eval $code;
 	if ($@){
 		print( "Perl command failed: \ncode: $code\nerror: $@");
 		undef $@;
 	}
-	else { pager(join "\n", @result) }
+	else { 
+		no warnings 'uninitialized';
+		pager(join "\n", @result) 
+	}
 	print "\n";
 }	
 }

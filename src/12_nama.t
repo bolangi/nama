@@ -49,8 +49,10 @@ push @ARGV, q(-T);
 
 diag("working directory: ",cwd);
 
-process_options();
+definitions();
+process_command_line_options();
 initialize_interfaces();
+setup_grammar();
 diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");

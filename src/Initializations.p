@@ -3,6 +3,141 @@
 package ::;
 use Modern::Perl; use Carp;
 
+sub definitions {
+
+	$| = 1;     # flush STDOUT buffer on every write
+
+	$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
+
+	[% qx(./strip_all ./var_types.pl) %]
+
+	$text->{wrap} = new Text::Format {
+		columns 		=> 75,
+		firstIndent 	=> 0,
+		bodyIndent		=> 0,
+		tabstop			=> 4,
+	};
+
+	$debug2 = 0; # subroutine names
+	$debug = 0; # debug statements
+
+	####### Initialize singletons #######
+
+	# Some of these "singletons" (imported by 'use Globals')
+	# are just hashes, some have object behavior.
+	#
+	# $file belongs to class ::File, and uses
+	# AUTOLOAD to generate methods to provide full path
+	# to various system files, for example $file->state_store
+
+	{
+	package ::File;
+		use Carp;
+		sub logfile {
+			my $self = shift;
+			$ENV{NAMA_LOGFILE} || $self->_logfile
+		}
+		sub AUTOLOAD {
+			my ($self, $filename) = @_;
+			# get tail of method call
+			my ($method) = $::File::AUTOLOAD =~ /([^:]+)$/;
+			croak "$method: illegal method call" unless $self->{$method};
+			my $dir_sub = $self->{$method}->[1];
+			$filename ||= $self->{$method}->[0];
+			my $path = ::join_path($dir_sub->(), $filename);
+			$path;
+		}
+		1;
+	}
+	$file = bless 
+	{
+		effects_cache 			=> ['.effects_cache', 		\&project_root],
+		gui_palette 			=> ['palette',        		\&project_root],
+		state_store 			=> ['State',          		\&project_dir ],
+		git_state_store 		=> ['State.json',      		\&project_dir ],
+		effect_profile 			=> ['effect_profiles',		\&project_root],
+		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
+		user_customization 		=> ['custom.pl',      		\&project_root],
+		project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
+		project_config			=> ['project_config', 		\&project_dir ],
+		global_effect_chains  	=> ['global_effect_chains', \&project_root],
+		old_effect_chains  		=> ['effect_chains', 		\&project_root],
+		_logfile				=> ['nama.log',				\&project_root],
+
+	}, '::File';
+
+
+	$gui->{_save_id} = "State";
+	$gui->{_seek_unit} = 1;
+	$gui->{marks} = {};
+
+	$config = bless {
+		root_dir 						=> join_path( $ENV{HOME}, "nama"),
+		soundcard_channels 				=> 10,
+		memoize 						=> 1,
+		use_pager 						=> 1,
+		use_placeholders 				=> 1,
+		volume_control_operator 		=> 'ea', # default to linear scale
+		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
+		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
+		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
+		engine_base_jack_seek_delay 	=> 0.1, # seconds
+		edit_playback_end_margin 		=> 3,
+		edit_crossfade_time 			=> 0.03,
+		fade_down_fraction 				=> 0.75,
+		fade_time1_fraction 			=> 0.9,
+		fade_time2_fraction 			=> 0.1,
+		fader_op 						=> 'ea',
+		mute_level 						=> {ea => 0, 	eadb => -96}, 
+		fade_out_level 					=> {ea => 0, 	eadb => -40},
+		unity_level 					=> {ea => 100, 	eadb => 0}, 
+		fade_resolution 				=> 20, # steps per second
+		no_fade_mute_delay				=> 0.03,
+		# for save_system_state()
+		serialize_formats               => 'json',
+	}, '::Config';
+
+	{ package ::Config;
+	use Carp;
+	use ::Globals qw($debug :singletons);
+	use Modern::Perl;
+	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
+
+	# special handling of serialize formats to store them as 
+	# space separate tags, must duplicate AUTOLOAD checking
+
+	sub serialize_formats { 
+			split " ", 
+			(
+				$project->{config}->{serialize_formats} 
+			  || $_[0]->{serialize_formats}
+			)
+	}
+	sub hardware_latency {
+		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
+	}
+	}
+
+	$prompt = "nama ('h' for help)> ";
+
+	$this_bus = 'Main';
+	jack_update(); # determine if jackd is running
+
+	$setup->{_old_snapshot} = {};
+	$setup->{_last_rec_tracks} = [];
+
+	$mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
+
+	$mode->{mastering} = 0;
+
+	init_memoize() if $config->{memoize};
+
+	# JACK environment for testing
+
+	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
+
+}
+
 sub initialize_interfaces {
 	
 	$debug2 and print "&prepare\n";
@@ -37,6 +172,8 @@ sub initialize_interfaces {
 
 
 	read_config(global_config());  # from .namarc if we have one
+	
+	initialize_logger();
 
 	$debug and say "#### Config file ####";
 	#$debug and say yaml_out($config); XX config is object now; needs a dump method
@@ -44,7 +181,6 @@ sub initialize_interfaces {
 	setup_user_customization();	
 
 	start_ecasound();
-
 
 	$debug and print "reading config file\n";
 	if ($config->{opts}->{d}){
@@ -56,7 +192,7 @@ sub initialize_interfaces {
 		print "placing all files in current working directory ($config->{root_dir})\n";
 	}
 
-	# capture the sample frequency from .namarc
+	# set soundcard sample frequency from .namarc
 	($config->{sample_rate}) = $config->{devices}->{jack}{signal_format} =~ /(\d+)(,i)?$/;
 
 	# skip initializations if user (test) supplies project
@@ -227,10 +363,32 @@ sub ecasound_pid {
 	$pid if $engine->{socket}; # conditional on using socket i.e. Net-ECI
 }
 
+sub initialize_logger {
+
+	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
+	my $logfile = $ENV{NAMA_ECI} || "$ENV{HOME}/nama.eci.log";
+	my $conf = qq(
+		#log4perl.rootLogger			= DEBUG, IAM
+		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
+		log4perl.appender.IAM			= Log::Log4perl::Appender::Screen
+		log4perl.appender.IAM_file		= Log::Log4perl::Appender::File
+		log4perl.appender.IAM_file.filename	= $logfile
+		log4perl.appender.IAM_file.layout	= Log::Log4perl::Layout::PatternLayout
+		log4perl.appender.IAM_file.layout.ConversionPattern = $layout
+		log4perl.appender.IAM.layout	= Log::Log4perl::Layout::PatternLayout
+		log4perl.appender.IAM.layout.ConversionPattern = $layout
+		#log4perl.additivity.IAM			= 0 # doesn't work... why?
+	);
+	Log::Log4perl::init(\$conf);
+
+}
+
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my $cmd = shift;
+	my ($cmd) = @_;
+	my $logger = get_logger('ECI');
+	$logger->debug($cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -271,14 +429,15 @@ full return value: $return_value);
 	}
 
 }
-}
 
 sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
-	my $command = shift;
-	$debug and print "iam command: $command\n";
-	my (@result) = $engine->{ecasound}->eci($command);
-	$debug and print "result: @result\n" unless $command =~ /register/;
+	my ($cmd) = @_;
+	my $logger = get_logger('ECI');
+	$logger->debug($cmd);
+	$debug and print "iam command: $cmd\n";
+	my (@result) = $engine->{ecasound}->eci($cmd);
+	$debug and print "result: @result\n" unless $cmd =~ /register/;
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
 		restart_ecasound() if $errmsg =~ /in engine-status/;
@@ -287,6 +446,7 @@ sub eval_iam_libecasoundc{
 		# carp "ecasound reports an error:\n$errmsg\n"; 
 	}
 	"@result";
+}
 }
 	
 sub restart_ecasound {
@@ -301,5 +461,24 @@ sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
 	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
 }
+sub log_msg {
+	my $log = shift;
+	if ( $log )
+	{
+		my $category 	= $log->{category};
+		my $level		= $log->{level};	
+		my $msg			= $log->{msg};
+		my $cmd			= $log->{cmd};
+		my $result		= $log->{result}; 
+		my $logger = Log::Log4perl->get_logger($category);
+		my @msg;
+		push @msg, "command: $cmd" if $cmd;
+		push @msg, "message: $msg" if $msg;
+		push @msg, "result: $result" if $result;
+		my $message = join q(, ), @msg;
+		$logger->$level($message);
+	}
+}
+
 1;
 __END__
