@@ -41,7 +41,7 @@ sub process_command_line_options {
 	map{ $getopts .= qq("$options{$_}|$_" => \\\$config->{opts}->{$options{$_}}, \n)} keys %options;
 	$getopts .= ' )' ;
 
-	say $getopts;
+	#say $getopts;
 
 	eval $getopts or die "Stopped.\n";
 	
