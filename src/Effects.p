@@ -1417,69 +1417,6 @@ sub bypass_effects {
 	$track->unmute;
 }
 
-sub replace_effect {
-		my $fxc = shift;
-		jack_stop_do_start( sub{ _replace_effect($fxc) }, 0.03);
-}
-sub _replace_effect {
-	my ($fxc) = @_;
-
-	# $fxc is either ::EffectChain or a hash with arguments
-	# to add_effect()
-	
-	# get the effect_id from either
-	
-	my $op = $fxc->{cop_id} || eval { $fxc->cop_id}; 
-	undef $@;
-
-		
-	my $track = $ti{chain($op)};
-
-	# get my position
-
-	my $n = nama_effect_index($op);
-
-	# delete effect
-	
-	remove_effect($op);
-	
-	# what has moved into my spot?
-	
-	my $successor = $track->ops->[$n]; 
-
-	# assemble arguments
-
-	my @args;
-
-	# we expect a HASH or EffectChain
-	
-	if ( ref($fxc) !~ /EffectChain/ ) 
-	{
-	
-		push @args, 	track => $track, 
-						cop_id => $op, 
-						clobber_id => 1,
-						(%$fxc);
-
-		defined $successor and push @args, before => $successor;
-		
-		#my %b = (@args);
-		#delete $b{track};
-		#say "args: ",yaml_out \%b;
-
-		add_effect({ @args });
-	}
-	elsif ( ref($fxc) =~ /EffectChain/)
-	{
-		$fxc->add($track, $successor);
-	}
-	else 
-	{ 
-		croak "expected effect chain or hash, got" 
-			.  (ref $fxc) || 'scalar' 
-	}
-}
-
 sub restore_effects {
 	local $this_op;
 	my($track, @ops) = @_;
@@ -1488,18 +1425,6 @@ sub restore_effects {
 	$track->mute;
 	foreach my $op ( @ops)
 	{
-		my ($fxc) = ::EffectChain::find( bypass 	=> 1, 
-										 track_name => $track->name, 
-										 id 		=> $op);
-		say("$op is not bypassed. Skipping."), next unless $fxc;
-		replace_effect($fxc);
-
-		# report action 
-		my $name = $fx_cache->{registry}->[effect_index(type($op))]->{name};
-		say "$op ($name)";
-
-		# remove effect chain
-		$fxc->destroy if ref($fxc) =~ /EffectChain/;
 	}
 	$track->unmute
 }
