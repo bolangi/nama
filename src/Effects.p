@@ -1414,6 +1414,7 @@ sub bypass_effects {
 		my $i = ecasound_effect_index($op);
 		eval_iam("cop-select $i");
 		eval_iam("cop-bypass on");
+		bypassed($op) = 1;
 	}
 	$track->unmute;
 }
