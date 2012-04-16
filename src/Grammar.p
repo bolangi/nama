@@ -164,6 +164,30 @@ sub list_effect {
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
+
+sub show_effect {
+ 	my $op_id = shift;
+	my @lines;
+	my @params;
+ 	my $i = fxindex($op_id);
+	my $name = name($op_id);
+	$name .= " (bypassed)" if bypassed($op_id);
+	$name .= "\n";
+ 	push @lines, "$op_id: $name";
+ 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
+	map
+	{ 	push @lines,
+		"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+	} (0..scalar @pnames - 1);
+	map
+	{ 	push @lines,
+	 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
+		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
+	#push @lines, join("; ", @params) . "\n";
+	@lines
+}
+ 
 sub show_effect {
  		my $op_id = shift;
 		my @lines;

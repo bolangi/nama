@@ -14,12 +14,24 @@ sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
+sub bypassed: lvalue{ my $id = shift; $fx->{applied}->{$id}->{bypassed}   }
 
 # ensure owns field is initialized as anonymous array
 
 sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
 sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
 sub params : lvalue { my $id = shift; $fx->{params}->{$id}
+}
+
+
+# get information from registry
+sub fxindex {
+	my $op_id = shift;
+	$fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
+}
+sub name {
+	my $op_id = shift;
+	$fx_cache->{registry}->[fxindex($op_id)]->{name}
 }
 
 # analyze the arguments to determine the track index
