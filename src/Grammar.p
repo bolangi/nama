@@ -45,6 +45,12 @@ sub command_process {
 	}
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
+	# select chain operator if appropriate
+	if ($this_track->n eq chain($this_op)){
+		eval_iam("c-select ".$this_track->n);
+		eval_iam("cop-select ".  ecasound_effect_index($this_op));
+	}
+		
 }
 sub do_user_command {
 	#say "args: @_";
