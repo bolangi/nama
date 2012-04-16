@@ -1398,8 +1398,17 @@ sub automix {
 }
 
 sub bypass_effects {
-	
 	my($track, @ops) = @_;
+	_bypass_effects($track, @ops, 'on');
+}
+sub restore_effects {
+	my($track, @ops) = @_;
+	_bypass_effects($track, @ops, 'off');
+}
+
+sub _bypass_effects {
+	
+	my($track, @ops, $off_or_on) = @_;
 
 	# only process ops that belong to this track
 	@ops = intersect_with_track_ops_list($track,@ops);
@@ -1411,25 +1420,10 @@ sub bypass_effects {
 	{ 
 		my $i = ecasound_effect_index($op);
 		eval_iam("cop-select $i");
-		eval_iam("cop-bypass on");
+		eval_iam("cop-bypass $off_or_on");
 		bypassed($op) = 1;
 	}
 	$track->unmute;
 }
-
-sub restore_effects {
-	local $this_op;
-	my($track, @ops) = @_;
-	@ops = intersect_with_track_ops_list($track,@ops);
-	return unless @ops;
-	$track->mute;
-	foreach my $op ( @ops)
-	{
-	}
-	$track->unmute
-}
-		
-
-
 1;
 __END__
