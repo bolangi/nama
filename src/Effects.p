@@ -1399,64 +1399,25 @@ sub automix {
 	
 }
 
-{ my @dummy_fx = (type => 'ea', values => [100]);
 sub bypass_effects {
 	
-	local $this_op;
-
 	my($track, @ops) = @_;
-	@ops = intersect_with_track_ops_list($track,@ops);
-	$track->mute;
 
-	# create one EffectChain identified by track and effect id
-	
+	# only process ops that belong to this track
+	@ops = intersect_with_track_ops_list($track,@ops);
+
+	$track->mute;
+	eval_iam("c-select ".$track->n);
+
 	foreach my $op ( @ops)
 	{ 
-		my $fx_chain_id = $op; 
-		my @eops = expanded_ops_list($op);  # save controllers as well
-
-		say("$fx_chain_id: effect chain already exists.  Skipping."), next 
-			if my @dummy = ::EffectChain::find(id => $fx_chain_id);
-	
-		::EffectChain->new(
-			bypass => 1,
-			system => 1,
-			track_name => $track->name,
-			project => $::project->{name},
-			id => $fx_chain_id, # 
-			ops_list => \@eops, 
-		);
-		replace_effect({ cop_id => $op, @dummy_fx }); 
-		
-		# report action 
-		my $name = ::original_name($op);
-		say "$op ($name)";
+		my $i = ecasound_effect_index($op);
+		eval_iam("cop-select $i");
+		eval_iam("cop-bypass on");
 	}
 	$track->unmute;
 }
-}
 
-# get correct (original) type of bypassed effects that
-# have been replaced by a dummy vol operator
-
-sub original_type {
-	my $op_id = shift;
-	# if bypassed, effect has been replaced by a dummy
-	# so we need to get effect name 
-	# from corresponding effect chain
-
-	my ($fx_chain) = is_bypassed($op_id);
-
-	my $type = $fx_chain 
-		? $fx_chain->{ops_data}->{$op_id}->{type} 
-		: type($op_id);
-	$type
-}
-sub original_name {
-	my $op_id = shift;
-	my $type = original_type($op_id);
-	$fx_cache->{registry}->[effect_index($type)]->{name};
-}
 sub replace_effect {
 		my $fxc = shift;
 		jack_stop_do_start( sub{ _replace_effect($fxc) }, 0.03);

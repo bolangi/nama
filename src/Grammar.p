@@ -157,10 +157,8 @@ sub list_effects {
 
 sub list_effect {
 	my $op_id = shift;
-	my $type = ::original_type($op_id);
-	my $i = ::effect_index($type);
-	my $name = ::original_name($op_id);
-	$name .= q(, bypassed) if my @dummy = ::is_bypassed($op_id);
+	my $name = name($op_id);
+	$name .= q(, bypassed) if bypassed($op_id);
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
