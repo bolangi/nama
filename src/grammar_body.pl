@@ -1004,7 +1004,8 @@ bypass_effects:   _bypass_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
- 	print "track ",$::this_track->name,", bypassing effects: @$arr_ref\n"; 
+ 	print "track ",$::this_track->name,", bypassing effects:\n";
+	print ::named_effects_list(@$arr_ref);
 	::bypass_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
@@ -1022,12 +1023,14 @@ bypass_effects: _bypass_effects 'all' {
 #  current effect 
 #
 bypass_effects: _bypass_effects { 
- 	print "track ",$::this_track->name,", bypassing effects: $::this_op\n"; 
+ 	print "track ",$::this_track->name,", bypassing effects:\n"; 
+	print ::named_effects_list($::this_op);
  	::bypass_effects($::this_track, $::this_op);  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	print "restoring effects: $::this_op\n";
+	print "restoring effects:\n";
+	print ::named_effects_list($::this_op);
 	::restore_effects( $::this_track, $::this_op);
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
@@ -1035,14 +1038,15 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	print "restoring effects: @$arr_ref\n";
+	print "restoring effects:\n";
+	print ::named_effects_list(@$arr_ref);
 	::restore_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
 }
 bring_back_effects:   _bring_back_effects 'all' { 
-	print "restoring effects\n";
-	::restore_effects( $::this_track, $::this_track->bypassed);
+	print "restoring all effects\n";
+	::restore_effects( $::this_track, $::this_track->fancy_ops);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};

@@ -185,6 +185,10 @@ sub show_effect {
 	#push @lines, join("; ", @params) . "\n";
 	@lines
 }
+sub named_effects_list {
+	my @ops = @_;
+	join("\n", map{ "$_ (" . ::name($_). ")" } @ops), "\n";
+}
  
 sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/

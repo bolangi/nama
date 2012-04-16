@@ -877,11 +877,6 @@ sub as_hash {
 	return \%guts;
 }
 
-sub bypassed {
-	my $self = shift;
-	map{ $_->id } ::EffectChain::find( bypass => 1, track_name => $self->name )
-}
-				
 }
 
 # subclasses
