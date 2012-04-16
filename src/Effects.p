@@ -184,8 +184,6 @@ sub modify_effect {
 		# $parameter: zero based
 	my $cop = $fx->{applied}->{$op_id} 
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
-	my @dummy = ::is_bypassed($op_id)
-		and say("$op_id: cannot modify bypassed effect.  Skipping."), return;
 	my $code = $cop->{type};
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
@@ -1480,11 +1478,6 @@ sub _replace_effect {
 		croak "expected effect chain or hash, got" 
 			.  (ref $fxc) || 'scalar' 
 	}
-}
-
-sub is_bypassed {
-	my $id = shift;
-	::EffectChain::find( bypass => 1, id => $id )
 }
 
 sub restore_effects {
