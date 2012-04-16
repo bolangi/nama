@@ -33,14 +33,14 @@ sub name {
 	my $op_id = shift;
 	$fx_cache->{registry}->[fxindex($op_id)]->{name}
 }
-
-# analyze the arguments to determine the track index
+ 
+# make sure the chain number (track index) is set
 
 sub set_chain_value {
 		
 	my $p = shift;
 
-	return if $p->{chain}; # don't do it twice
+	return if $p->{chain}; # return if already set
 	
 	# set chain from track if known
 	
