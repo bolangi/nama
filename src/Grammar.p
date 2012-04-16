@@ -186,33 +186,6 @@ sub show_effect {
 	@lines
 }
  
-sub show_effect {
- 		my $op_id = shift;
-		my @lines;
-		my @params;
-
- 		my $name =  $op_id. ": " . ::original_name($op_id);
-		my $i = ::effect_index(::original_type($op_id));
-		 
-		return "$name (bypassed)\n" if my @dummy = ::is_bypassed($op_id);
-
-		# return effect parameters for the non-bypass case
-
-		$name .= "\n";
-
-		 push @lines, $name;
- 		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
-			map{ push @lines,
-			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
-		 	} (0..scalar @pnames - 1);
-			map{ push @lines,
-			 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
-		 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
-				if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
-			#push @lines, join("; ", @params) . "\n";
-		@lines
-}
- 
 sub show_modifiers {
 	join "", "Modifiers: ",$this_track->modifiers, $/
 		if $this_track->modifiers;
