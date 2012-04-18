@@ -134,8 +134,8 @@ use ::Midi ();
 sub main { 
 	definitions();
 	process_command_line_options();
-	initialize_interfaces();
 	setup_grammar();
+	initialize_interfaces();
 	command_process($config->{execute_on_project_load});
 	reconfigure_engine();
 	command_process($config->{opts}->{X});
