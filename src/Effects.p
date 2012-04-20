@@ -1122,7 +1122,7 @@ sub get_ladspa_hints{
 				or carp "*** couldn't match plugin stanza $stanza ***";
 			$debug and print "plugin label: $plugin_label $plugin_unique_id\n";
 
-			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
+			my @lines = grep{ /control/ } split "\n",$ports;
 
 			my @params;  # data
 			my @names;
