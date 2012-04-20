@@ -114,6 +114,7 @@ sub definitions {
 			)
 	}
 	sub hardware_latency {
+		no warnings 'uninitialized';
 		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
 	}
 	}
