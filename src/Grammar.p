@@ -180,8 +180,13 @@ sub show_effect {
 
 		 push @lines, $name;
  		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
-			map{ push @lines,
-			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+			map{ 
+				my $i = $_;
+				my $name = $pnames[$_]->{name};
+				$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
+
+				push @lines, "    ".($_+1).q(. ) . $name . ": ".  
+							$fx->{params}->{$op_id}->[$_] . "\n";
 		 	} (0..scalar @pnames - 1);
 			map{ push @lines,
 			 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
