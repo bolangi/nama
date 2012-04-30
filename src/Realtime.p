@@ -195,7 +195,7 @@ sub jack_stop_do_start {
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
-		eval_iam('stop');
+		eval_iam('sync-stop');
 		$coderef->();
 		sleeper($delay) if $delay;
 		eval_iam('start');
