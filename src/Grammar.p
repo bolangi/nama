@@ -166,6 +166,7 @@ sub list_effect {
 
 sub show_effect {
  		my $op_id = shift;
+		no warnings 'uninitialized';
 		my @lines;
 		my @params;
 
@@ -186,7 +187,7 @@ sub show_effect {
 				$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
 
 				push @lines, "    ".($_+1).q(. ) . $name . ": ".  
-							$fx->{params}->{$op_id}->[$_] . "\n";
+							params($op_id)->[$_] . "\n";
 		 	} (0..scalar @pnames - 1);
 			map{ push @lines,
 			 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";

@@ -18,9 +18,8 @@ sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
 # ensure owns field is initialized as anonymous array
 
 sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
-sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
-sub params : lvalue { my $id = shift; $fx->{params}->{$id}
-}
+sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}                }
+sub params : lvalue { my $id = shift; $fx->{params}->{$id}                 }
 
 # analyze the arguments to determine the track index
 
@@ -183,6 +182,9 @@ sub modify_effect {
 		unless fx($op_id);
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
+	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
+		if $fx_cache->{registry}->[effect_index(type($op_id))]->{params}->[$parameter]->{dir} eq 'output';
+
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 
