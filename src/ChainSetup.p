@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config %tn %bn $debug $debug2 $mode);
+use ::Globals qw($file $config $jack %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
 no warnings 'uninitialized';
@@ -402,6 +402,9 @@ sub write_chains {
 			and grep{ ! /Mixdown/} really_recording();
 			# we assume there exists latency-sensitive monitor output 
 			# when recording
+	
+	my $format = signal_format($config->{devices}->{jack}->{signal_format},2);
+	$globals .= " -f:$format" if $jack->{jackd_running};
 			
 	my $ecs_file = join "\n\n", 
 					"# ecasound chainsetup file",

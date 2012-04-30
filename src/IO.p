@@ -106,6 +106,11 @@ sub ecs_string {
 	push @parts, '-'.$self->io_prefix.':'.$self->device_id;
 	join ' ',@parts;
 }
+
+## the format() method generates the correct Ecasound format string,
+## (e.g. -f:f32_le,2,48000) if the _format_template() method
+## returns a signal format template (e.g. f32_le,N,48000)
+
 sub format { 
 	my $self = shift;
 	::signal_format($self->format_template, $self->width)
@@ -113,6 +118,7 @@ sub format {
 }
 sub _format_template {} # the leading underscore allows override
                         # by a method without the underscore
+
 sub _ecs_extra {}		# allow override
 sub direction { 
 	(ref $_[0]) =~ /::from/ ? 'input' : 'output'  
