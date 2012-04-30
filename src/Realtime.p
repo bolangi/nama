@@ -46,8 +46,8 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	#limit_processing_time($setup->{runtime_limit}) 
-	#	if mixing_only() or edit_mode() or defined $setup->{runtime_limit};
+	limit_processing_time($setup->{runtime_limit}) 
+		if mixing_only() or edit_mode() or defined $setup->{runtime_limit};
 		# TODO and live processing
  	#$engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
