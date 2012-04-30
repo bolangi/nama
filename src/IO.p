@@ -278,12 +278,12 @@ sub _device_id { 'rtnull' }  # underscore for testing
 package ::IO::from_wav;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
-	my $io = shift;
+	my $self = shift;
 	my @modifiers;
-	push @modifiers, $io->playat_output if $io->playat_output;
-	push @modifiers, $io->select_output if $io->select_output;
-	push @modifiers, split " ", $io->modifiers if $io->modifiers;
-	push @modifiers, $io->full_path;
+	push @modifiers, $self->playat_output if $self->playat_output;
+	push @modifiers, $self->select_output if $self->select_output;
+	push @modifiers, split " ", $self->modifiers if $self->modifiers;
+	push @modifiers, $self->full_path;
 	join(q[,],@modifiers);
 }
 sub ecs_extra { $_[0]->mono_to_stereo}
@@ -332,19 +332,19 @@ sub new {
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 
-	my $io = shift;
+	my $self = shift;
 	# maybe source_id is an input number
-	my $client = $io->direction eq 'input' 
-		? $io->source_id
-		: $io->send_id;
+	my $client = $self->direction eq 'input' 
+		? $self->source_id
+		: $self->send_id;
 	my $channel = 1;
 	# we want the direction with respect to the client, i.e.  # reversed
-	my $client_direction = $io->direction eq 'input' ? 'output' : 'input';
+	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
 	if( ::dest_type($client) eq 'soundcard'){
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$client_direction,$channel,$io->width )
+	::IO::jack_multi_route($client,$client_direction,$channel,$self->width )
 }
 # don't need to specify format, since we take all channels
 }
