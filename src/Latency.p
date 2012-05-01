@@ -26,12 +26,19 @@ sub insert_latency {
 }
 sub predecessor_latency {
 	my $track = shift;
-	my @predecessors = 
-		grep{ $tn{$_} } # filter out non-tracks (sources)
-		$setup->{latency_graph}->predecessors($track->name);
-	my $max = max map { track_latency($_) } map { $tn{$_} } @predecessors;
-	map { $setup->{sibling_latency}->{$_} = $max } @predecessors;
+	my @predecessors = $setup->{latency_graph}->predecessors($track->name);
+	scalar @predecessors or return 0;
+	sibling_latency(@predecessors) + loop_device_latency();
 }
+sub sibling_latency {
+	my @siblings = grep{ $tn{$_} } @_; # filter out non-tracks (sources)
+	scalar @siblings or return 0;
+	my $max = max map { track_latency($_) } map { $tn{$_} } @siblings;
+	map { $setup->{sibling_latency}->{$_} = $max } @siblings;
+	return $max
+}
+sub loop_device_latency { 0 }
+
 sub op_latency {
 	my $op = shift;
 	return 0 if is_controller($op); # skip controllers
