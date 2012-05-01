@@ -624,9 +624,6 @@ remove_effect: _remove_effect op_id(s) {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	::mute();
 	map{ 
-		print "removing effect id: $_\n"; 
-		my ($fx_chain) = ::is_bypassed($_);
-		$fx_chain->destroy if $fx_chain;
 		::remove_effect( $_ )
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
@@ -765,30 +762,22 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		undef,
 		$item{value});
 	print ::show_effect($::this_op)
-		unless my @dummy = ::is_bypassed($::this_op);
-	1;
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	print("Operator \"$::this_op\" does not exist.\n"), return 1
 		unless ::fx($::this_op);
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	print ::show_effect($::this_op)
-		unless my @dummy = ::is_bypassed($::this_op);
-	1;
 }
 
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	# note that 'sign' results in undef value
 	::pager(::show_effect(@{ $item{'op_id(s)'} }))
-		unless scalar @{ $item{'op_id(s)'} } == 1 
-			and my @dummy = ::is_bypassed($::this_op);
-	1;
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
 	::pager(::show_effect(@{ $item{'op_id(s)'} }));
-	1;
 }
 position_effect: _position_effect op_to_move new_following_op {
 	my $op = $item{op_to_move};
@@ -1015,7 +1004,8 @@ bypass_effects:   _bypass_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
- 	print "track ",$::this_track->name,", bypassing effects:\n"; 
+ 	print "track ",$::this_track->name,", bypassing effects:\n";
+	print ::named_effects_list(@$arr_ref);
 	::bypass_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
@@ -1034,11 +1024,13 @@ bypass_effects: _bypass_effects 'all' {
 #
 bypass_effects: _bypass_effects { 
  	print "track ",$::this_track->name,", bypassing effects:\n"; 
+	print ::named_effects_list($::this_op);
  	::bypass_effects($::this_track, $::this_op);  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	print "restoring effects\n";
+	print "restoring effects:\n";
+	print ::named_effects_list($::this_op);
 	::restore_effects( $::this_track, $::this_op);
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
@@ -1046,14 +1038,15 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
 	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	print "restoring effects\n";
+	print "restoring effects:\n";
+	print ::named_effects_list(@$arr_ref);
 	::restore_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
 }
 bring_back_effects:   _bring_back_effects 'all' { 
-	print "restoring effects\n";
-	::restore_effects( $::this_track, $::this_track->bypassed);
+	print "restoring all effects\n";
+	::restore_effects( $::this_track, $::this_track->fancy_ops);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
