@@ -28,17 +28,26 @@ sub track_latency {
 		my $i = effect_index(type($op));	
 		my $p = 0; 
 		my $p_index;
+
+		# get latency parameter
+		
+		# TODO make this a lazy object method
+
 		for my $param ( @{ $fx_cache->{registry}->[$i]->{params} } )
 		{
-			($p_index = $p), last if $param->{name} =~ /latency/i and $param->{dir} eq 'output';
+			($p_index = $p), last 
+				if lc( $param->{name}) eq 'latency' 
+					and $param->{dir} eq 'output';
 			$p++;
 		}
-		
+		$total += get_live_param($op, $p_index) if defined $p_index;
+
 	} $track->fancy_ops;
-	
+	$total
 }
 
 sub get_live_param { # for effect, not controller
+					 # $param is position, starting at zero
 	my ($op, $param) = @_;
 	$param++; # index from one
 	my $n = chain($op);
