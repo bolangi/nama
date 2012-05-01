@@ -4,36 +4,26 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
-
-sub latency_comp {
-	my $mix_track_name = shift;
-	my $g = $setup->{latency_graph};
-	my @members = $g->predecessors($mix_track_name);
-	my $latency = track_latency($tn{$mix_track_name});
-	my @latencies;
-	map 
-	{ 
-		
-	$_	
-		
-	} @members;
-}
+use List::Util qw(max);
 
 sub track_latency {
 	my $track = shift;
 	my $total = 0;
 	map { $total += op_latency($_) } $track->fancy_ops;
 	$total += insert_latency($track);
-	$total += member_latency($track);
+	$total += predecessor_latency($track);
+	$setup->{track_latency}->{$track->name} = $total;
 	$total
 }
 
 sub insert_latency {
 
 }
-sub member_latency {
-
-
+sub predecessor_latency {
+	my $track = shift;
+	my @predecessors = $setup->{latency_graph}->predecessors($track->name);
+	my $max = max map { track_latency($_) } map { $tn{$_} } @predecessors;
+	map { $setup->{sibling_latency}->{$_} = $max } @predecessors;
 }
 
 sub op_latency {
@@ -70,32 +60,4 @@ sub get_live_param { # for effect, not controller
 }
 	
 
-sub adjust_latency {
-
-	$debug2 and print "&adjust_latency\n";
-	map { $fx->{params}->{$_->latency}[0] = 0  if $_->latency() } 
-		::Track::all();
-	set_preview_mode();
-	exit_preview_mode();
-	my $cop_status = eval_iam('cop-status');
-	$debug and print $cop_status;
-	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
-	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
-	my %chains = $cop_status =~ /$chain_re/sg;
-	$debug and print yaml_out(\%chains);
-	my %latency;
-	map { my @latencies = $chains{$_} =~ /$latency_re/g;
-			$debug and print "chain $_: latencies @latencies\n";
-			my $chain = $_;
-		  map{ $latency{$chain} += $_ } @latencies;
-		 } grep { $_ > 2 } sort keys %chains;
-	$debug and print yaml_out(\%latency);
-	my $max;
-	map { $max = $_ if $_ > $max  } values %latency;
-	$debug and print "max: $max\n";
-	map { my $adjustment = ($max - $latency{$_}) / $config->{sampling_freq} * 1000;
-			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
-			} keys %latency;
-}
 1;
