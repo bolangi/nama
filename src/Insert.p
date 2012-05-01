@@ -101,6 +101,7 @@ sub remove {
 	$::tn{ $self->dry_name }->remove;
 	delete $by_index{$self->n};
 }
+sub latency { 0 }
 	
 # subroutine
 #

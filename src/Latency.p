@@ -15,17 +15,23 @@ sub track_latency {
 	$setup->{track_latency}->{$track->name} = $total;
 	$total
 }
-
 sub insert_latency {
-
+	my $track = shift;
+	my $latency = 0;
+	map{ $latency += $_->latency}
+		grep{ $_ }
+		map{ $::Insert::by_index{$_} }
+		($track->prefader_insert, $track->postfader_insert);
+	$latency;
 }
 sub predecessor_latency {
 	my $track = shift;
-	my @predecessors = $setup->{latency_graph}->predecessors($track->name);
+	my @predecessors = 
+		grep{ $tn{$_} } # filter out non-tracks (sources)
+		$setup->{latency_graph}->predecessors($track->name);
 	my $max = max map { track_latency($_) } map { $tn{$_} } @predecessors;
 	map { $setup->{sibling_latency}->{$_} = $max } @predecessors;
 }
-
 sub op_latency {
 	my $op = shift;
 	return 0 if is_controller($op); # skip controllers
@@ -34,7 +40,6 @@ sub op_latency {
 		? get_live_param($op, $p) 
 		: 0
 }
-
 sub latency_param {
 	my $op = shift;
 	my $i = effect_index(type($op));	
@@ -47,7 +52,6 @@ sub latency_param {
 	}
 	undef
 }
-
 sub get_live_param { # for effect, not controller
 					 # $param is position, starting at one
 	my ($op, $param) = @_;
@@ -58,6 +62,4 @@ sub get_live_param { # for effect, not controller
 	eval_iam("copp-select $param");
 	eval_iam("copp-get")
 }
-	
-
 1;
