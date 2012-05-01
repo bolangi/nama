@@ -4,6 +4,7 @@ package ::ChainSetup;
 use ::Globals qw($file $config $jack %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
+use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
@@ -119,6 +120,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph with mixdown mods:\n$g");
 	prune_graph();
+	$setup->{latency_graph} = dclone($g);
 	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph after pruning unterminated branches:\n$g");
 

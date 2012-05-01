@@ -1,6 +1,7 @@
 	$project_name				$project->{name}
 	$saved_version 				$project->{save_file_version_number}
 	%bunch						$project->{bunch}
+	**							$project->{repo}
 	
 	$main_bus 					$bn{Main}
 	$main						$bn{Main} 
@@ -19,6 +20,7 @@
 	%is_system_bus 				$config->{_is_system_bus}
 	$sampling_frequency			$config->{sampling_freq}
 	$use_git					$config->{use_git}
+	**							$config->{no_fade_mute_delay}
 	
 	%ti
 	%tn
@@ -44,6 +46,7 @@
 	$run_time					$setup->{runtime_limit}
 	@loop_endpoints 			$setup->{loop_endpoints}
 	$length						$setup->{audio_length}
+	** 							$setup->{latency_graph}
 
     $offset_run_start_time 		$setup->{offset_run}->{start_time}
     $offset_run_end_time   		$setup->{offset_run}->{end_time}
