@@ -22,19 +22,18 @@ sub latency_comp {
 sub track_latency {
 	my $track = shift;
 	my $total = 0;
-	map
-	{ 
-		my $op = $_;
-
-		# get latency parameter
-		
-		# TODO make this a lazy object method
-
-		$total += op_latency($op);
-
-	} $track->fancy_ops;
-	
+	map { $total += op_latency($_) } $track->fancy_ops;
+	$total += insert_latency($track);
+	$total += member_latency($track);
 	$total
+}
+
+sub insert_latency {
+
+}
+sub member_latency {
+
+
 }
 
 sub op_latency {
