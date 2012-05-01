@@ -130,6 +130,7 @@ use ::CacheTrack ();
 use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
+use ::Latency ();
 
 sub main { 
 	definitions();
