@@ -127,7 +127,7 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	#::add_latency_compensation($n);	
+	::add_latency_compensation($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
 
@@ -1155,17 +1155,13 @@ sub add_pan_control {
 # necessary
 
 sub add_latency_compensation {
-	print('LADSPA L/C/R Delay effect not found.
-Unable to provide latency compensation.
-'), return unless $fx_cache->{partial_label_to_full}->{lcrDelay};
 	my $n = shift;
 	my $id = cop_add({
 				chain => $n, 
-				type => 'el:lcrDelay',
+				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency, # may be undef
-				values => [ 0,0,0,50,0,0,0,0,0,50,1 ],
-				# We will be adjusting the 
-				# the third parameter, center delay (index  2)
+				values => [ 0,0,1,100,0 ], 
+				# We will be adjusting the first (delay) parameter
 				});
 	
 	$ti{$n}->set(latency => $id);  # save the id for next time
