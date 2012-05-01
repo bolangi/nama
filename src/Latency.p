@@ -25,31 +25,43 @@ sub track_latency {
 	map
 	{ 
 		my $op = $_;
-		my $i = effect_index(type($op));	
-		my $p = 0; 
-		my $p_index;
 
 		# get latency parameter
 		
 		# TODO make this a lazy object method
 
-		for my $param ( @{ $fx_cache->{registry}->[$i]->{params} } )
-		{
-			($p_index = $p), last 
-				if lc( $param->{name}) eq 'latency' 
-					and $param->{dir} eq 'output';
-			$p++;
-		}
-		$total += get_live_param($op, $p_index) if defined $p_index;
+		$total += op_latency($op);
 
 	} $track->fancy_ops;
+	
 	$total
 }
 
+sub op_latency {
+	my $op = shift;
+	return 0 if is_controller($op); # skip controllers
+	my $p = latency_param($op);
+	defined $p 
+		? get_live_param($op, $p) 
+		: 0
+}
+
+sub latency_param {
+	my $op = shift;
+	my $i = effect_index(type($op));	
+	my $p = 0; 
+	for my $param ( @{ $fx_cache->{registry}->[$i]->{params} } )
+	{
+		$p++;
+		return $p if lc( $param->{name}) eq 'latency' 
+					and $param->{dir} eq 'output';
+	}
+	undef
+}
+
 sub get_live_param { # for effect, not controller
-					 # $param is position, starting at zero
+					 # $param is position, starting at one
 	my ($op, $param) = @_;
-	$param++; # index from one
 	my $n = chain($op);
 	my $i = ecasound_effect_index($op);
 	eval_iam("c-select $n");
