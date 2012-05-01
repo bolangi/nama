@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack %tn %bn $debug $debug2 $mode);
+use ::Globals qw($file $config $jack $setup %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
 use Storable qw(dclone);
@@ -151,6 +151,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 		1
 	} else { 
 		say("No tracks to record or play.");
+		delete $setup->{latency_graph};
 		0
 	}
 }

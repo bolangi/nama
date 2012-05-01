@@ -329,6 +329,51 @@ sub transport_status {
 	say "\nPress SPACE to start or stop engine.\n"
 		if $config->{press_space_to_start};
 }
+sub latency_comp {
+	my $mix_track_name = shift;
+	my $g = $setup->{latency_graph};
+	my @members = $g->predecessors($mix_track_name);
+	my $latency = track_latency($tn{$mix_track_name});
+	my @latencies;
+	map 
+	{ 
+		
+	$_	
+		
+	} @members;
+}
+
+sub track_latency {
+	my $track = shift;
+	my $total = 0;
+	map
+	{ 
+		my $op = $_;
+		my $i = effect_index(type($op));	
+		my $p = 0; 
+		my $p_index;
+		for my $param ( @{ $fx_cache->{registry}->[$i]->{params} } )
+		{
+			($p_index = $p), last if $param->{name} =~ /latency/i and $param->{dir} eq 'output';
+			$p++;
+		}
+		
+	} $track->fancy_ops;
+	
+}
+
+sub get_live_param { # for effect, not controller
+	my ($op, $param) = @_;
+	$param++; # index from one
+	my $n = chain($op);
+	my $i = ecasound_effect_index($op);
+	eval_iam("c-select $n");
+	eval_iam("cop-select $i");
+	eval_iam("copp-select $param");
+	eval_iam("copp-get")
+}
+	
+
 sub adjust_latency {
 
 	$debug2 and print "&adjust_latency\n";
