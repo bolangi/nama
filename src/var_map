@@ -46,7 +46,6 @@
 	$run_time					$setup->{runtime_limit}
 	@loop_endpoints 			$setup->{loop_endpoints}
 	$length						$setup->{audio_length}
-	** 							$setup->{latency_graph}
 
     $offset_run_start_time 		$setup->{offset_run}->{start_time}
     $offset_run_end_time   		$setup->{offset_run}->{end_time}
@@ -54,6 +53,10 @@
     @edit_points           		$setup->{edit_points}
 
 	$dummy						$setup->{_last_rec_tracks}
+
+	** 							$setup->{latency_graph}
+	**							$setup->{track_latency}
+	**							$setup->{sibling_latency}
 
     @effects        			$fx_cache->{registry}
     %effect_i       			$fx_cache->{full_label_to_index}
@@ -175,7 +178,10 @@
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
 	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
-	$ecasound_globals_default		$config->{engine_globals_default}
+	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
+	$ecasound_globals_general		$config->{engine_globals_general}
+	$ecasound_buffersize_realtime	$config->{ecasound_buffersize_realtime}
+	$ecasound_buffersize_nonrealtime	$config->{ecasound_buffersize_nonrealtime}
  
 	$effects_cache_file 			$file->{effects_cache}
 	** 								$file->{global_effect_chains}
