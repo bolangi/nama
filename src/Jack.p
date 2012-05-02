@@ -15,7 +15,9 @@ sub jack_update {
 	return if engine_running();
 	if( $jack->{jackd_running} =  process_is_running('jackd') ){
 		my $ports_list = qx(jack_lsp -Ap 2> /dev/null); 
+		my $ports_latency = qx(jack_lsp -l 2> /dev/null); 
 		$jack->{clients} = jack_ports($ports_list);
+		jack_ports_latency();
 	} else { $jack->{clients} = {} }
 }
 
@@ -26,6 +28,83 @@ sub jack_client {
 	my ($name, $direction)  = @_;
 	$jack->{clients}->{$name}{$direction} // []
 }
+
+sub jack_ports_latency {
+	
+	my $j = qx(jack_lsp -l);
+	#my $j = shift || $jack->{ports_latency_text};
+	
+	state $port_latency_re = qr(
+
+
+							# ecasound:in_1
+							
+							(?<client>[^:]+)  # non-colon
+							:                 # colon
+							(?<port>\S+?)     # non-space
+							\s+
+
+							# port latency = 2048 frames
+
+							\Qport latency = \E    
+							(?<port_latency>\d+)
+							\Q frames\E
+							\s+
+
+							# port playback latency = [ 0 2048 ] frames
+
+							\Qport playback latency = [ \E
+							(?<playback_min>\d+)
+							\s+
+							(?<playback_max>\d+)
+							\Q ] frames\E
+							\s+
+
+							# port capture latency = [ 0 2048 ] frames
+
+							\Qport capture latency = [ \E
+							(?<capture_min>\d+)
+							\s+
+							(?<capture_max>\d+)
+							\Q ] frames\E
+
+						)x;
+
+	# convert to single lines
+
+	$j =~ s/\n\s+/ /sg;
+	
+	my @ports = split "\n",$j;
+	map
+	{
+
+		/$port_latency_re/;
+
+		$debug and say;
+		#$debug and say Dumper %+;
+		$debug and say $+{client};
+		$debug and say $+{port};
+		$debug and say $+{port_latency};
+		$debug and say $+{capture_min};
+		$debug and say $+{capture_max};
+		$debug and say $+{playback_min};
+		$debug and say $+{playback_max};
+		
+		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{port}
+			= $+{port_latency};
+		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{min}
+			= $+{capture_min};
+		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{max}
+			= $+{capture_max};
+		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{playback}->{min}
+			= $+{playback_min};
+		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{playback}->{max}
+			= $+{playback_max};
+		
+	} @ports;
+	
+}
+
 
 sub jack_ports {
 	my $j = shift || $jack->{ports_list_text}; 
