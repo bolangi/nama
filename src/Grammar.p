@@ -136,6 +136,8 @@ sub eval_perl {
 }	
 }
 
+#### Formatted text output
+
 sub show_versions {
 		if (@{$this_track->versions} ){
 			my $cache_map = $this_track->cache_map;
@@ -348,6 +350,9 @@ format STDOUT =
 @>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> ~~
 splice @{$text->{format_fields}}, 0, 9
 .
+
+
+#### Some Text Commands
 
 sub t_load_project {
 	package ::;
