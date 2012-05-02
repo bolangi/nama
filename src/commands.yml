@@ -524,7 +524,7 @@ add_insert:
   type: effect 
   short: ain
   what: add an external send/return to current track
-  parameters: ( pre | post ) <s_send_id> [<s_return_id>]
+  parameters: ( pre | post ) <s_send_id> [<s_return_id>] -or- local (for wet/dry control)
 set_insert_wetness:
   type: effect 
   short: wet

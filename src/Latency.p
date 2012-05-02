@@ -37,7 +37,10 @@ sub sibling_latency {
 	map { $setup->{sibling_latency}->{$_} = $max } @siblings;
 	return $max
 }
-sub loop_device_latency { 0 }
+sub loop_device_latency { 
+	
+
+ }
 
 sub op_latency {
 	my $op = shift;
