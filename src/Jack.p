@@ -126,7 +126,7 @@ sub jack_ports {
 			\s* 			# zero or more spaces
 			([^:]+:[^:]+?) # non-colon string, colon, non-greedy non-colon string
 			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
-		/gx;
+		/x; # /gx; #### Match once only!!!
 		map { 
 				s/ $//; # remove trailing space
 				push @{ $jack_ports{ $_ }{ $direction } }, $_;
