@@ -38,6 +38,8 @@ our (
 
 sub initialize {
 	@io = (); 			# IO object list
+	delete $setup->{latency_graph};
+	delete $setup->{final_graph};
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
 	%is_ecasound_chain = ();
@@ -134,6 +136,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	$debug and say "The expanded graph with inserts is\n$g";
 	$logger->debug("Graph with inserts:\n$g");
+	$setup->{final_graph} = declone($g);
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)

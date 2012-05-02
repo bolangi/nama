@@ -177,9 +177,9 @@
 	$seek_delay    					$config->{engine_jack_seek_delay}
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
+	$ecasound_globals_general		$config->{engine_globals_general}
 	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
 	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
-	$ecasound_globals_general		$config->{engine_globals_general}
 	$ecasound_buffersize_realtime	$config->{ecasound_buffersize_realtime}
 	$ecasound_buffersize_nonrealtime	$config->{ecasound_buffersize_nonrealtime}
  

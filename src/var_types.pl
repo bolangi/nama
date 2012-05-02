@@ -22,8 +22,11 @@
 # category: engine
 
 	$ecasound_tcp_port
+	$ecasound_globals_general
 	$ecasound_globals_realtime
-	$ecasound_globals_default
+	$ecasound_globals_nonrealtime
+	$ecasound_buffersize_realtime
+	$ecasound_buffersize_nonrealtime
 
 # category: config
 
