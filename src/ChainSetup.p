@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup %tn %bn $debug $debug2 $mode);
+use ::Globals qw($file $config $jack $setup $engine %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
 use Storable qw(dclone);
@@ -136,7 +136,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	$debug and say "The expanded graph with inserts is\n$g";
 	$logger->debug("Graph with inserts:\n$g");
-	$setup->{final_graph} = declone($g);
+	$setup->{final_graph} = dclone($g);
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)
@@ -401,9 +401,9 @@ sub write_chains {
 	
 	my $globals = $config->{engine_globals_general};
 	$globals .=  setup_requires_realtime()
-			? join " ", " -b $config->{ecasound_buffersize_realtime}", 
+			? join " ", " -b:$config->{ecasound_buffersize_realtime}", 
 				$config->{engine_globals_realtime}
-			: join " ", " -b $config->{ecasound_buffersize_nonrealtime}", 
+			: join " ", " -b:$config->{ecasound_buffersize_nonrealtime}", 
 				$config->{engine_globals_nonrealtime};
 
 	# use realtime globals if they exist and we are
@@ -451,7 +451,7 @@ sub has_vertex { $setup->{final_graph}->has_vertex($_[0]) }
 
 sub set_buffersize { 
 	my $buffer_type = setup_requires_realtime() ? "realtime" : "nonrealtime";
-	$engine->{buffersize} = $config->{"ecasound_buffersize_$buffertype"}	;
+	$engine->{buffersize} = $config->{"ecasound_buffersize_$buffer_type"}	;
 }
 
 1;
