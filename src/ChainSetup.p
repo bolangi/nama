@@ -151,6 +151,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	if ( process_routing_graph() ){
 		write_chains(); 
+		set_buffersize();
 		1
 	} else { 
 		say("No tracks to record or play.");
@@ -398,7 +399,12 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $config->{engine_globals_default};
+	my $globals = $config->{engine_globals_general};
+	$globals .=  setup_requires_realtime()
+			? join " ", " -b $config->{ecasound_buffersize_realtime}", 
+				$config->{engine_globals_realtime}
+			: join " ", " -b $config->{ecasound_buffersize_nonrealtime}", 
+				$config->{engine_globals_nonrealtime};
 
 	# use realtime globals if they exist and we are
 	# recording to a non-mixdown file
@@ -434,6 +440,18 @@ sub write_chains {
 	close $fh;
 	$chain_setup = $ecs_file;
 
+}
+sub setup_requires_realtime {
+	my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
+	grep { has_vertex("$_\_in") } @fields 
+		and grep { has_vertex("$_\_out") } @fields
+
+}
+sub has_vertex { $setup->{final_graph}->has_vertex($_[0]) }
+
+sub set_buffersize { 
+	my $buffer_type = setup_requires_realtime() ? "realtime" : "nonrealtime";
+	$engine->{buffersize} = $config->{"ecasound_buffersize_$buffertype"}	;
 }
 
 1;

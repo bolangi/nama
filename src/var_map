@@ -55,6 +55,7 @@
 	$dummy						$setup->{_last_rec_tracks}
 
 	** 							$setup->{latency_graph}
+	**							$setup->{final_graph}
 	**							$setup->{track_latency}
 	**							$setup->{sibling_latency}
 
@@ -85,6 +86,7 @@
 	$sock 						$engine->{socket}
 	@ecasound_pids				$engine->{pids}
 	$e							$engine->{ecasound}
+	**							$engine->{buffersize}
 
 	$cop_hints_yml 				$fx->{ecasound_effect_hints}
 	%offset        				$fx->{offset}
