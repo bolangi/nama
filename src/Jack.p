@@ -84,14 +84,14 @@ sub jack_ports_latency {
 		#$debug and say Dumper %+;
 		$debug and say $+{client};
 		$debug and say $+{port};
-		$debug and say $+{port_latency};
+# 		$debug and say $+{port_latency};
 		$debug and say $+{capture_min};
 		$debug and say $+{capture_max};
 		$debug and say $+{playback_min};
 		$debug and say $+{playback_max};
 		
-		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{port}
-			= $+{port_latency};
+# 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{port}
+# 			= $+{port_latency};
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{min}
 			= $+{capture_min};
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{max}
