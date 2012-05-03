@@ -37,8 +37,6 @@ our (
 
 
 sub initialize {
-	map{ ::remove_effect($_->latency)  } ::Track::all()
-		unless $setup->{preserve_latency_ops};
 	@io = (); 			# IO object list
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};

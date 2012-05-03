@@ -121,6 +121,9 @@ sub reconfigure_engine {
 
 	stop_transport('quiet') if $was_running;
 
+	map{ ::remove_effect($_->latency)  } ::Track::all()
+		unless $setup->{preserve_latency_ops};
+
 	if ( generate_setup() ){
 		
 		$debug and say "I generated a new setup";
