@@ -37,6 +37,7 @@ our (
 
 
 sub initialize {
+	map{ remove_effect($_->latency)  } Track::all();
 	@io = (); 			# IO object list
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};
@@ -155,7 +156,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 		1
 	} else { 
 		say("No tracks to record or play.");
-		delete $setup->{latency_graph};
 		0
 	}
 }
