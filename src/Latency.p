@@ -16,6 +16,7 @@ sub track_latency {
 	$total
 }
 sub track_ops_latency {
+	# LADSPA plugins return latency in milliseconds
 	my $track = shift;
 	my $total;
 	map { $total += op_latency($_) } $track->fancy_ops;
@@ -46,7 +47,8 @@ sub sibling_latency {
 	return $max
 }
 sub loop_device_latency { 
-	$engine->{buffersize} / $config->{sample_rate} # i.e. soundcard frequency
+	# results in milliseconds
+	$engine->{buffersize} / $config->{sample_rate} * 1000 
 }
 
 sub op_latency {
