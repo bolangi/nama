@@ -144,7 +144,7 @@ sub reconfigure_engine {
 
 		connect_transport('quiet');
 
-		measure_and_adjust_latency();
+		calculate_and_adjust_latency();
 
 		show_status();
 
@@ -173,7 +173,7 @@ sub apply_latency_ops {
 
   	} 	::ChainSetup::engine_tracks();
 }
-sub measure_and_adjust_latency {
+sub calculate_and_adjust_latency {
 
 	###### For etd only adjustment
 	# remove (or reset) latency operators
@@ -189,7 +189,7 @@ sub measure_and_adjust_latency {
 
 }
 
-sub measure_and_adjust_latency_fancy {
+sub calculate_and_adjust_latency_fancy {
 
 	##### For combined playat/etd adjustment
 	# generate and connect chain setup
