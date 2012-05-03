@@ -127,7 +127,7 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_latency_compensation($n);	
+	::add_latency_control_op($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
 
@@ -1156,17 +1156,18 @@ sub add_pan_control {
 	$pan_id;
 }
 
-# not used at present. we are probably going to offset the playat value if
-# necessary
-
-sub add_latency_compensation {
+sub add_latency_control_op {
 	my $n = shift;
 	my $id = cop_add({
 				chain => $n, 
 				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency, # may be undef
-				values => [ 0,0,1,100,0 ], 
-				# We will be adjusting the first (delay) parameter
+				values => [ 0,  # no delay
+							0,  # no surround mode
+							1,  # 1 delay operation
+							100,# 100% delayed signal
+							0 ],# feedback 0% of signal each iteration
+			# We will be adjusting the first (delay) parameter
 				});
 	
 	$ti{$n}->set(latency => $id);  # save the id for next time
