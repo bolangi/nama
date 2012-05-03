@@ -156,6 +156,36 @@ sub get_id {
 
 sub is_local_effects_host { ! $_[0]->send_id }
 
+
+### Insert Latency calculation
+#    
+#    In brief, the maximum latency for the two arms is the
+#    latency of any effects on the wet track plus the additional
+#    latency of the JACK client and JACK connection. (We
+#    assume send/receive from the same client.)
+#    
+#    Here is the long explanation:
+#    
+#    We need to calculate and compensate the latency
+#    of the two arms of the insert.
+#    
+#    $setup->{sibling_latency} is the maximum latency value
+#    measured among a group of parallel tracks (i.e.
+#    bus members).
+#    
+#    For example, Low, Mid and High tracks for mastering
+#    are siblings. When we get the maximum for the
+#    group, we set $setup->{sibling_latency}->{track_name} = $max
+#    
+#    $setup->{track_latency}->{track_name} is the latency
+#    calculated for a track (including predecessor tracks when
+#    that is significant.)
+#    
+#    So later on, when we get to adjusting latency, the
+#    amount is given by
+#    
+#    $setup->{sibling_latency}->{track_name} - $setup->{track_latency}->{track_name}
+#    
 sub latency { 
 
 	my $self = shift;

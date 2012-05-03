@@ -44,18 +44,23 @@ sub remove_temporary_tracks {
 
 { my $old_offset_run_status;
 sub reconfigure_engine {
+
+	my $force = shift;
+
 	$debug2 and print "&reconfigure_engine\n";
 
 	# skip if command line option is set
-	return if $config->{opts}->{R};
-
-	return if $config->{disable_auto_reconfigure};
+	# don't skip if $force argument given
+	
+	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure})
+		and not $force;
 
 	# don't disturb recording/mixing
+	
 	return if ::ChainSetup::really_recording() and engine_running();
 	
 	# store recorded trackrefs if any for re-record function
-	#
+	
 	# an empty set (e.g. in post-record monitoring)
 	# will not overwrite a previous set
 	
@@ -69,8 +74,8 @@ sub reconfigure_engine {
 	find_duplicate_inputs(); # we will warn the user later
 
 	# only act if change in configuration
-
 	# skip check if regenerate_setup flag is already set
+	
 	if( $setup->{changed} ){ 
 		$setup->{changed} = 0; # reset for next time
 	} 
@@ -83,6 +88,9 @@ sub reconfigure_engine {
 		}
 	}
 	$debug and print("setup change\n");
+
+
+	##### Restore previous position and running status
 
  	my $old_pos;
  	my $was_running;
@@ -121,8 +129,7 @@ sub reconfigure_engine {
 
 	stop_transport('quiet') if $was_running;
 
-	map{ ::remove_effect($_->latency)  } ::Track::all()
-		unless $setup->{preserve_latency_ops};
+	reset_latency_ops();
 
 	if ( generate_setup() ){
 		
@@ -135,38 +142,9 @@ sub reconfigure_engine {
 		
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
-# generate and connect chain setup                                                 
-# calculate latency                                                                
-# compensate latency                                                               
-# regenerate chain setup                                                           
-# connect as usual   
-#
 		connect_transport('quiet');
 
-		if ( ! $setup->{track_latency} )
-		{
-			my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-			say "starting node: $starting_track_name";
-			measure_track_latency($tn{$starting_track_name});
-
-			# add latency adjustment only if track
-			# needs adjustment and is not performing WAV playback
-			# (in which case playat handles this)
-
-			map
-			{   
-				add_latency_compensation($_->n); # TODO unless no siblings
-				modify_effect($_->latency,0,$_->latency_offset)
-					unless not $_->latency_offset 
-							or $setup->{latency_graph}->has_edge('wav_in',$_->name);
-			} engine_tracks();
-
-
-			$setup->{preserve_latency_ops}++;
-			$setup->{changed}++;
-			reconfigure_engine();
-			delete $setup->{preserve_latency_ops};
-		}
+		measure_and_adjust_latency();
 
 		show_status();
 
@@ -180,7 +158,73 @@ sub reconfigure_engine {
 	}
 }
 }
-	# status_snapshot() 
+
+sub reset_latency_ops {
+	map{ modify_effect($_->latency, 0, 0)  } ::Track::all()
+}
+sub remove_latency_ops {
+	map{ ::remove_effect($_->latency)  } ::Track::all()
+		unless $setup->{preserve_latency_ops};
+}
+sub measure_and_adjust_latency {
+
+	###### For etd only adjustment
+	# remove (or reset) latency operators
+	# generate and connect setup
+	# measure latency
+	# add (or set) operators (optimize: to plural sibling edges, not only edges)
+	
+		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
+		say "starting node: $starting_track_name";
+
+		measure_track_latency($tn{$starting_track_name});
+
+		map
+		{   
+			add_latency_compensation($_->n); # TODO unless no siblings
+			modify_effect($_->latency,0,$_->latency_offset)
+
+		} engine_tracks();
+
+	}
+
+sub measure_and_adjust_latency_fancy {
+
+	##### For combined playat/etd adjustment
+	# generate and connect chain setup
+	# calculate latency 
+	# compensate latency
+	# regenerate chain setup
+	# connect as usual
+
+	if ( ! $setup->{track_latency} )
+	{
+		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
+		say "starting node: $starting_track_name";
+		measure_track_latency($tn{$starting_track_name});
+
+		# add latency adjustment only if track
+		# needs adjustment and is not performing WAV playback
+		# (in which case playat handles this)
+
+		map
+		{   
+			add_latency_compensation($_->n); # TODO unless no siblings
+			modify_effect($_->latency,0,$_->latency_offset)
+				unless not $_->latency_offset 
+						or $setup->{latency_graph}->has_edge('wav_in',$_->name);
+		} engine_tracks();
+
+
+		$setup->{preserve_latency_ops}++;
+		$setup->{changed}++;
+		reconfigure_engine();
+		delete $setup->{preserve_latency_ops};
+	}
+}
+
+
+#### status_snapshot() 
 	#
 	# hashref output for detecting if we need to reconfigure engine
 	# compared as YAML strings
