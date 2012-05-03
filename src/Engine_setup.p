@@ -140,10 +140,7 @@ sub reconfigure_engine {
 #
 		connect_transport('quiet');
 
- 		my $starting_track_name = 
-
-( grep{ $_ eq 'Boost' } map {$_->name }
- 								::ChainSetup::engine_tracks()) ?  'Boost' : 'Master'; 
+ 		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 		say "starting node: $starting_track_name";
 
 		#measure_track_latency($tn{$starting_track_name});
