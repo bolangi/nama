@@ -34,6 +34,7 @@
 	$jack_lsp      				$jack->{ports_list_text}
 	$fake_jack_lsp 				$jack->{fake_ports_list}
 	%jack						$jack->{clients}
+	**							$jack->{period}
 	
 	$old_snapshot  				$setup->{_old_snapshot}
 	%old_rw       				$setup->{_old_track_rw_status}

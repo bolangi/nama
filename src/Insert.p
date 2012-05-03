@@ -7,7 +7,7 @@ our $VERSION = 0.1;
 our ($debug);
 local $debug = 0;
 use vars qw(%by_index);
-use ::Globals qw($jack $setup);
+use ::Globals qw($jack $setup $config);
 use ::Object qw(
 	insert_type
 	n
@@ -164,9 +164,16 @@ sub latency {
 	# get the latency associated with the JACK client, if any
 	if($self->send_type eq "jack_client")
 	{
+
+		my $client_latency_frames = 
+			$jack->{clients}->{$_->send_name}->{playback}->{max} 
+				+ $jack->{clients}->{$_->send_name}->{capture}->{max};
+		my $jack_connection_latency_frames = $jack->{period}; 
+		
 		$additional_latency =
-			($jack->{clients}->{$_->send_name}->{playback_max} +
-			$jack->{clients}->{$_->send_name}->{capture_max})/1000;
+		($client_latency_frames 
+			+ $jack_connection_latency_frames) /$config->{sample_rate};
+				
 	}
 	
 	# set the track and sibling(i.e. max) latency values

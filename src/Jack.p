@@ -18,6 +18,9 @@ sub jack_update {
 		my $ports_latency = qx(jack_lsp -l 2> /dev/null); 
 		$jack->{clients} = jack_ports($ports_list);
 		jack_ports_latency();
+
+		# we know that capture latency is 1 period
+		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
 	} else { $jack->{clients} = {} }
 }
 
