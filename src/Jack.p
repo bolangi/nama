@@ -9,7 +9,7 @@ no warnings 'uninitialized';
 sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
-	say "&jack_update";
+	$debug2 and say "&jack_update";
 	# cache current JACK status
 	#
 	# skip if Ecasound is busy
@@ -37,7 +37,7 @@ sub parse_port_latency {
 	# default to use output of jack_lsp -l
 	
 	my $j = shift || qx(jack_lsp -l 2> /dev/null); 
-	say "latency input $j";
+	$debug and say "latency input $j";
 	
 	state $port_latency_re = qr(
 
@@ -112,9 +112,9 @@ sub parse_ports_list {
 
 	# default to output of jack_lsp -p
 	
-	say "&parse_ports_list";
+	$debug2 and say "&parse_ports_list";
 	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
-	say "input: $j";
+	$debug and say "input: $j";
 
 	# convert to single lines
 
@@ -125,7 +125,6 @@ sub parse_ports_list {
 	#fluidsynth:right properties: output,
 
 	map{ 
-		say;
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
 		my @port_aliases = /
@@ -134,20 +133,18 @@ sub parse_ports_list {
 			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
 		/gx; 
 		map { 
-			say;
 				s/ $//; # remove trailing space
 
 				# make entries for 'system' and 'system:capture_1'
 				push @{ $jack->{clients}->{$_}->{$direction} }, $_;
 				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack->{clients}->{$direction} }, $_; 
+				push @{ $jack->{clients}->{$client}->{$direction} }, $_; 
 
 		 } @port_aliases;
 
 	} 
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
 	split "\n",$j;
-	say yaml_out $jack->{clients};
 }
 
 # connect jack ports via jack.plumbing or jack_connect
