@@ -129,7 +129,7 @@ sub reconfigure_engine {
 
 	stop_transport('quiet') if $was_running;
 
-	reset_latency_ops();
+	remove_latency_ops();
 
 	if ( generate_setup() ){
 		
@@ -164,7 +164,7 @@ sub reset_latency_ops {
 }
 sub remove_latency_ops {
 	map{ ::remove_effect($_->latency)  } ::Track::all()
-		unless $setup->{preserve_latency_ops};
+		# unless $setup->{preserve_latency_ops};
 }
 sub measure_and_adjust_latency {
 
