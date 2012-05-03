@@ -38,9 +38,8 @@ sub sibling_latency {
 	return $max
 }
 sub loop_device_latency { 
-	
-
- }
+	$engine->{buffersize} / $config->{sample_rate} # i.e. soundcard frequency
+}
 
 sub op_latency {
 	my $op = shift;
