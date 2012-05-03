@@ -132,7 +132,22 @@ sub reconfigure_engine {
 		
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
+# generate and connect chain setup                                                 
+# calculate latency                                                                
+# compensate latency                                                               
+# regenerate chain setup                                                           
+# connect as usual   
+#
 		connect_transport('quiet');
+
+ 		my $starting_track_name = 
+
+( grep{ $_ eq 'Boost' } map {$_->name }
+ 								::ChainSetup::engine_tracks()) ?  'Boost' : 'Master'; 
+		say "starting node: $starting_track_name";
+
+		#measure_track_latency($tn{$starting_track_name});
+
 		show_status();
 
 		if( $restore_position and not ::ChainSetup::really_recording()){

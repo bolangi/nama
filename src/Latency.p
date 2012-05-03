@@ -6,7 +6,7 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 use List::Util qw(max);
 
-sub track_latency {
+sub measure_track_latency {
 	my $track = shift;
 	my $total = 0;
 	$total += track_ops_latency($track);
@@ -39,7 +39,7 @@ sub predecessor_latency {
 sub sibling_latency {
 	my @siblings = grep{ $tn{$_} } @_; # filter out non-tracks (sources)
 	scalar @siblings or return 0;
-	my $max = max map { track_latency($_) } map { $tn{$_} } @siblings;
+	my $max = max map { measure_track_latency($_) } map { $tn{$_} } @siblings;
 	map { $setup->{sibling_latency}->{$_} = $max } @siblings;
 	return $max
 }
