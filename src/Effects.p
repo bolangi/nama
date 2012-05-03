@@ -97,6 +97,7 @@ sub _add_effect {
 	{
 		if (engine_running())
 		{ 
+			# TODO sync-stop/start
 			$ti{$n}->mute;
 			apply_op($id);
 			$ti{$n}->unmute;

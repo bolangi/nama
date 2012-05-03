@@ -140,10 +140,30 @@ sub reconfigure_engine {
 #
 		connect_transport('quiet');
 
- 		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-		say "starting node: $starting_track_name";
+		if ( ! $setup->{track_latency} )
+		{
+			my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
+			say "starting node: $starting_track_name";
+			measure_track_latency($tn{$starting_track_name});
 
-		#measure_track_latency($tn{$starting_track_name});
+			# add latency adjustment only if track
+			# needs adjustment and is not performing WAV playback
+			# (in which case playat handles this)
+
+			map
+			{   
+				add_latency_compensation($_->n); # TODO unless no siblings
+				modify_effect($_->latency,0,$_->latency_offset)
+					unless not $_->latency_offset 
+							or $setup->{latency_graph}->has_edge('wav_in',$_->name);
+			} engine_tracks();
+
+
+			$setup->{preserve_latency_ops}++;
+			$setup->{changed}++;
+			reconfigure_engine();
+			delete $setup->{preserve_latency_ops};
+		}
 
 		show_status();
 

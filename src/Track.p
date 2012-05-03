@@ -876,6 +876,11 @@ sub as_hash {
 	bless $self, $class; # restore
 	return \%guts;
 }
+sub latency_offset {
+	my $track = shift;
+	no warnings 'uninitialized';
+	$setup->{sibling_latency}->{$track->name} - $setup->{track_latency}->{$track->name};
+}
 
 }
 
