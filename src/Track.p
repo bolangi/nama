@@ -1162,11 +1162,11 @@ sub add_latency_control_op {
 				chain => $n, 
 				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency, # may be undef
-				values => [ 0,  # no delay
-							0,  # no surround mode
-							1,  # 1 delay operation
-							100,# 100% delayed signal
-							0 ],# feedback 0% of signal each iteration
+				values => [ 0,    # no delay
+							0,    # no surround mode
+							1,    # 1 delay operation
+							100,  # 100% delayed signal
+							100 ],# feedback in each iteration
 			# We will be adjusting the first (delay) parameter
 				});
 	
