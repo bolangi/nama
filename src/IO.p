@@ -26,7 +26,7 @@ our $VERSION = 1.0;
 
 # provide following vars to all packages
 our ($config, $jack, %tn);
-use ::Globals qw($config $jack %tn);
+use ::Globals qw($config $jack %tn $setup);
 
 # we will use the following to map from graph node names
 # to IO class names
