@@ -9,18 +9,18 @@ no warnings 'uninitialized';
 sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
+	say "&jack_update";
 	# cache current JACK status
 	#
 	# skip if Ecasound is busy
 	return if engine_running();
-	if( $jack->{jackd_running} =  process_is_running('jackd') ){
-		my $ports_list = qx(jack_lsp -Ap 2> /dev/null); 
-		my $ports_latency = qx(jack_lsp -l 2> /dev/null); 
-		$jack->{clients} = jack_ports($ports_list);
-		jack_ports_latency();
+	if( $jack->{jackd_running} = process_is_running('jackd') ){
+		parse_ports_list();
+		parse_port_latency();
 
-		# we know that capture latency is 1 period
+		# we know that JACK capture latency is 1 period
 		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
+
 	} else { $jack->{clients} = {} }
 }
 
@@ -32,10 +32,12 @@ sub jack_client {
 	$jack->{clients}->{$name}{$direction} // []
 }
 
-sub jack_ports_latency {
+sub parse_port_latency {
 	
-	my $j = qx(jack_lsp -l);
-	#my $j = shift || $jack->{ports_latency_text};
+	# default to use output of jack_lsp -l
+	
+	my $j = shift || qx(jack_lsp -l 2> /dev/null); 
+	say "latency input $j";
 	
 	state $port_latency_re = qr(
 
@@ -47,10 +49,10 @@ sub jack_ports_latency {
 							(?<port>\S+?)     # non-space
 							\s+
 
-							# port latency = 2048 frames
+							# port latency = 2048 frames #  DEPRECATED
 
 							\Qport latency = \E    
-							(?<port_latency>\d+)
+							\d+ # don't capture
 							\Q frames\E
 							\s+
 
@@ -87,14 +89,11 @@ sub jack_ports_latency {
 		#$debug and say Dumper %+;
 		$debug and say $+{client};
 		$debug and say $+{port};
-# 		$debug and say $+{port_latency};
 		$debug and say $+{capture_min};
 		$debug and say $+{capture_max};
 		$debug and say $+{playback_min};
 		$debug and say $+{playback_max};
 		
-# 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{port}
-# 			= $+{port_latency};
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{min}
 			= $+{capture_min};
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{max}
@@ -109,9 +108,13 @@ sub jack_ports_latency {
 }
 
 
-sub jack_ports {
-	my $j = shift || $jack->{ports_list_text}; 
-	#say "jack_lsp: $j";
+sub parse_ports_list {
+
+	# default to output of jack_lsp -p
+	
+	say "&parse_ports_list";
+	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
+	say "input: $j";
 
 	# convert to single lines
 
@@ -120,28 +123,31 @@ sub jack_ports {
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
 	#fluidsynth:left properties: output,
 	#fluidsynth:right properties: output,
-	my %jack_ports = ();
 
 	map{ 
+		say;
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
 		my @port_aliases = /
 			\s* 			# zero or more spaces
 			([^:]+:[^:]+?) # non-colon string, colon, non-greedy non-colon string
 			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
-		/x; # /gx; #### Match once only!!!
+		/gx; 
 		map { 
+			say;
 				s/ $//; # remove trailing space
-				push @{ $jack_ports{ $_ }{ $direction } }, $_;
+
+				# make entries for 'system' and 'system:capture_1'
+				push @{ $jack->{clients}->{$_}->{$direction} }, $_;
 				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack_ports{ $client }{ $direction } }, $_; 
+				push @{ $jack->{clients}->{$direction} }, $_; 
 
 		 } @port_aliases;
 
 	} 
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
 	split "\n",$j;
-	\%jack_ports
+	say yaml_out $jack->{clients};
 }
 
 # connect jack ports via jack.plumbing or jack_connect

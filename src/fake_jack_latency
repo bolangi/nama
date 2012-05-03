@@ -1,0 +1,32 @@
+system:capture_1
+        port latency = 1024 frames
+        port playback latency = [ 0 0 ] frames
+        port capture latency = [ 1024 1024 ] frames
+system:capture_2
+        port latency = 1024 frames
+        port playback latency = [ 0 0 ] frames
+        port capture latency = [ 1024 1024 ] frames
+system:playback_1
+        port latency = 2048 frames
+        port playback latency = [ 2048 2048 ] frames
+        port capture latency = [ 0 0 ] frames
+system:playback_2
+        port latency = 2048 frames
+        port playback latency = [ 2048 2048 ] frames
+        port capture latency = [ 0 0 ] frames
+LinuxSampler:capture_1
+        port latency = 1024 frames
+        port playback latency = [ 256 256 ] frames
+        port capture latency = [ 512 1024 ] frames
+LinuxSampler:capture_2
+        port latency = 1024 frames
+        port playback latency = [ 256 256 ] frames
+        port capture latency = [ 256 1024 ] frames
+LinuxSampler:playback_1
+        port latency = 2048 frames
+        port playback latency = [ 2048 2048 ] frames
+        port capture latency = [ 512 512 ] frames
+LinuxSampler:playback_2
+        port latency = 2048 frames
+        port playback latency = [ 2048 2048 ] frames
+        port capture latency = [ 512 512 ] frames

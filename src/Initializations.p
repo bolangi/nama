@@ -122,8 +122,7 @@ sub definitions {
 	$prompt = "nama ('h' for help)> ";
 
 	$this_bus = 'Main';
-	jack_update(); # determine if jackd is running
-
+	
 	$setup->{_old_snapshot} = {};
 	$setup->{_last_rec_tracks} = [];
 
@@ -132,10 +131,6 @@ sub definitions {
 	$mode->{mastering} = 0;
 
 	init_memoize() if $config->{memoize};
-
-	# JACK environment for testing
-
-	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
 
 }
 
@@ -217,11 +212,12 @@ sub initialize_interfaces {
 	# fake JACK for testing environment
 
 	if( $config->{opts}->{J}){
-		%{$jack->{clients}} = %{ jack_ports($jack->{fake_ports_list}) };
+		parse_ports_list(get_data_section("fake_jack_lsp"));
+		parse_port_latency(get_data_section("fake_jack_latency"));
 		$jack->{jackd_running} = 1;
 	}
 
-	# periodically check if JACK is running, and get client/port list
+	# periodically check if JACK is running, and get client/port/latency list
 
 	poll_jack() unless $config->{opts}->{J} or $config->{opts}->{A};
 

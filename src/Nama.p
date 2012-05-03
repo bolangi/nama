@@ -179,6 +179,8 @@ __DATA__
 [% qx(cat ./custom.pl) %]
 @@ fake_jack_lsp
 [% qx(cat ./fake_jack_lsp) %]
+@@ fake_jack_latency
+[% qx(cat ./fake_jack_latency) %]
 @@ midish_commands
 [% qx(cat ./midish_commands) %]
 @@ default_palette_yml
