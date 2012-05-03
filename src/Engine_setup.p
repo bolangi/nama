@@ -166,6 +166,13 @@ sub remove_latency_ops {
 	map{ ::remove_effect($_->latency)  } ::Track::all()
 		# unless $setup->{preserve_latency_ops};
 }
+sub apply_latency_ops {
+	map
+	{ 	::add_latency_control_op($_->n); # keeps existing op_id
+		modify_effect($_->latency,0,'+',$_->latency_offset)
+
+  	} 	::ChainSetup::engine_tracks();
+}
 sub measure_and_adjust_latency {
 
 	###### For etd only adjustment
@@ -175,18 +182,12 @@ sub measure_and_adjust_latency {
 	# add (or set) operators (optimize: to plural sibling edges, not only edges)
 	
 		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-		say "starting node: $starting_track_name";
+		$debug and say "starting node: $starting_track_name";
 
-		measure_track_latency($tn{$starting_track_name});
+		sibling_latency($starting_track_name);
+		apply_latency_ops();
 
-		map
-		{   
-			add_latency_compensation($_->n); # TODO unless no siblings
-			modify_effect($_->latency,0,$_->latency_offset)
-
-		} engine_tracks();
-
-	}
+}
 
 sub measure_and_adjust_latency_fancy {
 
@@ -201,7 +202,7 @@ sub measure_and_adjust_latency_fancy {
 	{
 		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 		say "starting node: $starting_track_name";
-		measure_track_latency($tn{$starting_track_name});
+		track_latency($tn{$starting_track_name});
 
 		# add latency adjustment only if track
 		# needs adjustment and is not performing WAV playback
