@@ -189,7 +189,7 @@ sub is_local_effects_host { ! $_[0]->send_id }
 sub latency { 
 
 	my $self = shift;
-	my $additional_latency = 0;
+	my $jack_related_latency = 0;
 
 	# get the latency associated with the JACK client, if any
 	if($self->send_type eq "jack_client")
@@ -200,37 +200,37 @@ sub latency {
 				+ $jack->{clients}->{$_->send_name}->{capture}->{max};
 		my $jack_connection_latency_frames = $jack->{period}; 
 		
-		$additional_latency =
-		($client_latency_frames 
-			+ $jack_connection_latency_frames) /$config->{sample_rate};
-				
+		$jack_related_latency =
+			($client_latency_frames + $jack_connection_latency_frames) 
+			/$config->{sample_rate}
+			* 1000;
 	}
 	
-	# set the track and sibling(i.e. max) latency values
-	# for wet and dry tracks
-	
-	# we'd like to assume no effects on dry arm
-	
-	$setup->{track_latency}->{$_->dry_name} = 0;
 
-	# but if we want to be sure
+	# set the track and sibling(i.e. max) latency values
+	# for wet and dry arms (tracks)
+	
+	# assuming no latency-causing effects on the dry arm
+	$setup->{track_latency}->{$_->dry_name} = 0;
+	
+	# checking the dry arm  TODO
 	
 	#$setup->{track_latency}->{$_->dry_name} = 
 	#	track_ops_latency($::tn{$_->dry_name})
 	#	+ insert_latency($::tn{$_->dry_name});
 
-
-	# assuming nothing on dry arm
+	# sibling latency (i.e. max), is same as wet track latency
 	
-	  $setup->{sibling_latency}->{$_->wet_name}
-	= $setup->{sibling_latency}->{$_->dry_name} 
-	= $setup->{track_latency}->{$_->wet_name} 
-	= track_ops_latency($::tn{$_->wet_name}) 
-		+ $additional_latency
+	my $latency = $setup->{sibling_latency}->{$_->wet_name}
+				= $setup->{sibling_latency}->{$_->dry_name} 
+				= $setup->{track_latency}->{$_->wet_name} 
+				= track_ops_latency($::tn{$_->wet_name}) + $jack_related_latency
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
 		;
-	my $latency = ::loop_device_latency() + 
-					$setup->{sibling_latency}->{$_->wet_name};
+
+	# increment insert latency by one additional loop device
+	
+	$latency += ::loop_device_latency(); 
 }
 }
 {
