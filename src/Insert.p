@@ -7,6 +7,7 @@ our $VERSION = 0.1;
 our ($debug);
 local $debug = 0;
 use vars qw(%by_index);
+use ::Globals qw($jack $setup);
 use ::Object qw(
 	insert_type
 	n
@@ -101,8 +102,6 @@ sub remove {
 	$::tn{ $self->dry_name }->remove;
 	delete $by_index{$self->n};
 }
-sub latency { 0 }
-	
 # subroutine
 #
 sub add_insert {
@@ -156,6 +155,46 @@ sub get_id {
 }
 
 sub is_local_effects_host { ! $_[0]->send_id }
+
+sub latency { 
+
+	my $self = shift;
+	my $additional_latency = 0;
+
+	# get the latency associated with the JACK client, if any
+	if($self->send_type eq "jack_client")
+	{
+		$additional_latency =
+			($jack->{clients}->{$_->send_name}->{playback_max} +
+			$jack->{clients}->{$_->send_name}->{capture_max})/1000;
+	}
+	
+	# set the track and sibling(i.e. max) latency values
+	# for wet and dry tracks
+	
+	# we'd like to assume no effects on dry arm
+	
+	$setup->{track_latency}->{$_->dry_name} = 0;
+
+	# but if we want to be sure
+	
+	#$setup->{track_latency}->{$_->dry_name} = 
+	#	track_ops_latency($::tn{$_->dry_name})
+	#	+ insert_latency($::tn{$_->dry_name});
+
+
+	# assuming nothing on dry arm
+	
+	  $setup->{sibling_latency}->{$_->wet_name}
+	= $setup->{sibling_latency}->{$_->dry_name} 
+	= $setup->{track_latency}->{$_->wet_name} 
+	= track_ops_latency($::tn{$_->wet_name}) 
+		+ $additional_latency
+		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
+		;
+	my $latency = ::loop_device_latency() + 
+					$setup->{sibling_latency}->{$_->wet_name};
+}
 }
 {
 package ::PostFaderInsert;

@@ -9,10 +9,16 @@ use List::Util qw(max);
 sub track_latency {
 	my $track = shift;
 	my $total = 0;
-	map { $total += op_latency($_) } $track->fancy_ops;
+	$total += track_ops_latency($track);
 	$total += insert_latency($track);
 	$total += predecessor_latency($track);
 	$setup->{track_latency}->{$track->name} = $total;
+	$total
+}
+sub track_ops_latency {
+	my $track = shift;
+	my $total;
+	map { $total += op_latency($_) } $track->fancy_ops;
 	$total
 }
 sub insert_latency {
