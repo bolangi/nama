@@ -37,9 +37,9 @@ our (
 
 
 sub initialize {
-	@io = (); 			# IO object list
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};
+	@io = (); 			# IO object list
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
 	%is_ecasound_chain = ();

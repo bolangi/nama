@@ -6,6 +6,55 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 use List::Util qw(max);
 
+###### For etd only adjustment
+#
+#   remove (or reset) latency operators
+#   generate and connect setup
+#   determine latency
+#   add (or set) operators 
+#    (to optimize: add operators only to plural sibling edges, not only edges)
+
+sub calculate_and_adjust_latency {
+
+	initialize_latency_vars();
+	
+	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
+	$debug and say "starting node: $starting_track_name";
+
+	sibling_latency($starting_track_name);
+	apply_latency_ops();
+}
+
+sub reset_latency_ops {
+	map{ modify_effect($_->latency, 0, 0)  } ::Track::all()
+}
+sub remove_latency_ops {
+	map{ ::remove_effect($_->latency)  } ::Track::all()
+		# unless $setup->{preserve_latency_ops};
+}
+sub apply_latency_ops {
+	map
+	{ 	::add_latency_control_op($_->n); # keeps existing op_id
+		modify_effect($_->latency,0,'+',$_->latency_offset)
+
+  	} 	::ChainSetup::engine_tracks();
+}
+
+sub initialize_latency_vars {
+	map { 
+		delete $setup->{$_}
+
+	} qw(
+		sibling_latency 
+		track_latency
+		track_own_latency
+		track_insert_latency
+		track_insert_ops_latency
+		track_insert_jack_client_latency
+		track_ops_latency
+	);
+}
+
 sub track_latency {
 	my $track = shift;
 	my $total = 0;

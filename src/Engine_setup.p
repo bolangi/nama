@@ -129,12 +129,13 @@ sub reconfigure_engine {
 
 	stop_transport('quiet') if $was_running;
 
-	remove_latency_ops();
 
 	if ( generate_setup() ){
 		
 		$debug and say "I generated a new setup";
 		
+		remove_latency_ops();
+
 		# we save:
 		# + monitoring setups 
 		# + preview setups
@@ -157,71 +158,6 @@ sub reconfigure_engine {
 		$ui->flash_ready;
 	}
 }
-}
-
-sub reset_latency_ops {
-	map{ modify_effect($_->latency, 0, 0)  } ::Track::all()
-}
-sub remove_latency_ops {
-	map{ ::remove_effect($_->latency)  } ::Track::all()
-		# unless $setup->{preserve_latency_ops};
-}
-sub apply_latency_ops {
-	map
-	{ 	::add_latency_control_op($_->n); # keeps existing op_id
-		modify_effect($_->latency,0,'+',$_->latency_offset)
-
-  	} 	::ChainSetup::engine_tracks();
-}
-sub calculate_and_adjust_latency {
-
-	###### For etd only adjustment
-	# remove (or reset) latency operators
-	# generate and connect setup
-	# measure latency
-	# add (or set) operators (optimize: to plural sibling edges, not only edges)
-	
-		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-		$debug and say "starting node: $starting_track_name";
-
-		sibling_latency($starting_track_name);
-		apply_latency_ops();
-
-}
-
-sub calculate_and_adjust_latency_fancy {
-
-	##### For combined playat/etd adjustment
-	# generate and connect chain setup
-	# calculate latency 
-	# compensate latency
-	# regenerate chain setup
-	# connect as usual
-
-	if ( ! $setup->{track_latency} )
-	{
-		my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-		say "starting node: $starting_track_name";
-		track_latency($tn{$starting_track_name});
-
-		# add latency adjustment only if track
-		# needs adjustment and is not performing WAV playback
-		# (in which case playat handles this)
-
-		map
-		{   
-			add_latency_compensation($_->n); # TODO unless no siblings
-			modify_effect($_->latency,0,$_->latency_offset)
-				unless not $_->latency_offset 
-						or $setup->{latency_graph}->has_edge('wav_in',$_->name);
-		} engine_tracks();
-
-
-		$setup->{preserve_latency_ops}++;
-		$setup->{changed}++;
-		reconfigure_engine();
-		delete $setup->{preserve_latency_ops};
-	}
 }
 
 
