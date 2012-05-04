@@ -307,8 +307,9 @@ sub connect_transport {
 	# set delay for seeking under JACK
 	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$config->{engine_jack_seek_delay} = $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 );
-
+	$engine->{jack_seek_delay} = $jack->{jackd_running}
+		?  $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 )
+		:  0;
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();

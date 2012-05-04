@@ -54,10 +54,9 @@
 
 	$dummy						$setup->{_last_rec_tracks}
 
+	**							$setup->{latency}
 	** 							$setup->{latency_graph}
 	**							$setup->{final_graph}
-	**							$setup->{track_latency}
-	**							$setup->{sibling_latency}
 
     @effects        			$fx_cache->{registry}
     %effect_i       			$fx_cache->{full_label_to_index}
