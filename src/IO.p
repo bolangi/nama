@@ -172,8 +172,10 @@ sub _mono_to_stereo{
 }
 sub _playat_output {
 	my $track = shift;
-	return unless $track->adjusted_playat_time or $track->latency_offset;
-	join ',',"playat" , $track->adjusted_playat_time + $track->latency_offset
+	return unless $track->adjusted_playat_time 
+		# or $track->latency_offset;
+	join ',',"playat" , $track->adjusted_playat_time 
+		# + $track->latency_offset
 }
 sub _select_output {
 	my $track = shift;
