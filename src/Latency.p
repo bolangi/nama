@@ -58,11 +58,26 @@ sub initialize_latency_vars {
 sub track_latency {
 	my $track = shift;
 	my $total = 0;
-	$total += track_ops_latency($track);
-	$total += insert_latency($track);
+
+	### track effect operator latency
+	
+	$total += ($setup->{track_ops_latency}->{$track->name} 
+				= track_ops_latency($track));
+
+	### track insert latency
+	
+	$total += ($setup->{track_insert_latency}->{$track->name}
+				= insert_latency($track));
+
+	### track self latency (without predecessors)
+	
+	$setup->{track_own_latency}->{$track->name} = $total;
+
+	### track total latency (including predecessor latency)
+
 	$total += predecessor_latency($track);
-	$setup->{track_latency}->{$track->name} = $total;
-	$total
+	$setup->{track_latency}->{$track->name} = $total
+
 }
 sub track_ops_latency {
 	# LADSPA plugins return latency in milliseconds
