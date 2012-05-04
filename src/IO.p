@@ -26,7 +26,7 @@ our $VERSION = 1.0;
 
 # provide following vars to all packages
 our ($config, $jack, %tn);
-use ::Globals qw($config $jack %tn);
+use ::Globals qw($config $jack %tn $setup);
 
 # we will use the following to map from graph node names
 # to IO class names
@@ -173,7 +173,9 @@ sub _mono_to_stereo{
 sub _playat_output {
 	my $track = shift;
 	return unless $track->adjusted_playat_time;
-	join ',',"playat" , $track->adjusted_playat_time;
+		# or $track->latency_offset;
+	join ',',"playat" , $track->adjusted_playat_time 
+		# + $track->latency_offset
 }
 sub _select_output {
 	my $track = shift;
@@ -215,6 +217,7 @@ sub soundcard_output_device_string {
 
 sub jack_multi_route {
 	my ($client, $direction, $start, $width)  = @_;
+	#say "client $client, $direction $direction, start: $start, width $width";
 	# can we route to these channels?
 	my $end   = $start + $width - 1;
 

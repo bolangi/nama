@@ -122,8 +122,7 @@ sub definitions {
 	$prompt = "nama ('h' for help)> ";
 
 	$this_bus = 'Main';
-	jack_update(); # determine if jackd is running
-
+	
 	$setup->{_old_snapshot} = {};
 	$setup->{_last_rec_tracks} = [];
 
@@ -132,10 +131,6 @@ sub definitions {
 	$mode->{mastering} = 0;
 
 	init_memoize() if $config->{memoize};
-
-	# JACK environment for testing
-
-	$jack->{fake_ports_list} = get_data_section("fake_jack_lsp");
 
 }
 
@@ -214,11 +209,12 @@ sub initialize_interfaces {
 	# fake JACK for testing environment
 
 	if( $config->{opts}->{J}){
-		%{$jack->{clients}} = %{ jack_ports($jack->{fake_ports_list}) };
+		parse_ports_list(get_data_section("fake_jack_lsp"));
+		parse_port_latency(get_data_section("fake_jack_latency"));
 		$jack->{jackd_running} = 1;
 	}
 
-	# periodically check if JACK is running, and get client/port list
+	# periodically check if JACK is running, and get client/port/latency list
 
 	poll_jack() unless $config->{opts}->{J} or $config->{opts}->{A};
 
@@ -384,8 +380,8 @@ sub initialize_logger {
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my ($cmd) = @_;
-	my $logger = get_logger('ECI');
+	my ($cmd, $category) = @_;
+	my $logger = get_logger($category || $config->{log} || 'ECI');
 	$logger->debug($cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
@@ -428,10 +424,10 @@ full return value: $return_value);
 
 }
 
-sub eval_iam_libecasoundc{
+sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
-	my ($cmd) = @_;
-	my $logger = get_logger('ECI');
+	my ($cmd, $category) = @_;
+	my $logger = get_logger($category || $config->{log} || 'ECI');
 	$logger->debug($cmd);
 	$debug and print "iam command: $cmd\n";
 	my (@result) = $engine->{ecasound}->eci($cmd);
@@ -464,11 +460,13 @@ sub log_msg {
 	if ( $log )
 	{
 		my $category 	= $log->{category};
-		my $level		= $log->{level};	
+		my $level		= $log->{level} || 'debug';
 		my $msg			= $log->{msg};
 		my $cmd			= $log->{cmd};
 		my $result		= $log->{result}; 
-		my $logger = Log::Log4perl->get_logger($category);
+		my $logger = ref $category 
+			? $category 
+			: Log::Log4perl->get_logger($category);
 		my @msg;
 		push @msg, "command: $cmd" if $cmd;
 		push @msg, "message: $msg" if $msg;

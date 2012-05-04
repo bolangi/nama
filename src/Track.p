@@ -127,7 +127,6 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	#::add_latency_compensation($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
 
@@ -401,7 +400,7 @@ sub input_path { # signal path, not file path
 
 ### remove and destroy
 
-sub remove_effect_from_track { # doesn't touch %{$fx->{applied}} or %{$fx->{params}} data structures 
+sub remove_effect_from_track { # doesn't touch $fx->{applied} or $fx->{params} data structures 
 	my $track = shift;
 	my @ids = @_;
 	$track->set(ops => [ grep { my $existing = $_; 
@@ -876,12 +875,13 @@ sub as_hash {
 	bless $self, $class; # restore
 	return \%guts;
 }
-
-sub bypassed {
-	my $self = shift;
-	map{ $_->id } ::EffectChain::find( bypass => 1, track_name => $self->name )
+sub latency_offset {
+	my $track = shift;
+	no warnings 'uninitialized';
+	$setup->{latency}->{sibling}->{$track->name} 
+		- $setup->{latency}->{track}->{$track->name}->{total};
 }
-				
+
 }
 
 # subclasses
@@ -1156,21 +1156,19 @@ sub add_pan_control {
 	$pan_id;
 }
 
-# not used at present. we are probably going to offset the playat value if
-# necessary
-
-sub add_latency_compensation {
-	print('LADSPA L/C/R Delay effect not found.
-Unable to provide latency compensation.
-'), return unless $fx_cache->{partial_label_to_full}->{lcrDelay};
+sub add_latency_control_op {
 	my $n = shift;
+	my $delay = shift || 0;
 	my $id = cop_add({
 				chain => $n, 
-				type => 'el:lcrDelay',
+				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency, # may be undef
-				values => [ 0,0,0,50,0,0,0,0,0,50,1 ],
-				# We will be adjusting the 
-				# the third parameter, center delay (index  2)
+				values => [ $delay,
+							0,    # no surround mode
+							1,    # 1 delay operation
+							100,  # 100% delayed signal
+							100 ],# feedback in each iteration
+			# We will be adjusting the first (delay) parameter
 				});
 	
 	$ti{$n}->set(latency => $id);  # save the id for next time

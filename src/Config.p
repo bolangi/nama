@@ -77,7 +77,8 @@ sub read_config {
 	);
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
-	$config->{sampling_freq} = $cfg{abbreviations}{frequency};
+	$config->{sample_rate} = $cfg{abbreviations}{frequency};
+	set_default_globals(); # in case they are undefined
 }
 sub walk_tree {
 	#$debug2 and print "&walk_tree\n";
@@ -179,6 +180,16 @@ OTHER
 	print "Exiting.\n"; 
 	exit;	
 	}
+}
+
+sub set_default_globals {
+
+	$config->{engine_globals_general} ||= "-z:mixmode,sum";
+	$config->{engine_globals_realtime} ||= "-z:db,100000 -z:nointbuf";
+	$config->{engine_globals_nonrealtime} ||= "-z:nodb -z:intbuf";
+	$config->{engine_buffersize_realtime} ||= 256; 
+	$config->{engine_buffersize_nonrealtime} ||= 1024;
+
 }
 
 1;

@@ -51,6 +51,13 @@ sub command_process {
 	}
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
+	# select chain operator if appropriate
+	no warnings 'uninitialized';
+	if ($this_track->n eq chain($this_op)){
+		eval_iam("c-select ".$this_track->n);
+		eval_iam("cop-select ".  ecasound_effect_index($this_op));
+	}
+		
 }
 sub do_user_command {
 	#say "args: @_";
@@ -135,6 +142,8 @@ sub eval_perl {
 }	
 }
 
+#### Formatted text output
+
 sub show_versions {
 		if (@{$this_track->versions} ){
 			my $cache_map = $this_track->cache_map;
@@ -163,38 +172,41 @@ sub list_effects {
 
 sub list_effect {
 	my $op_id = shift;
-	my $type = ::original_type($op_id);
-	my $i = ::effect_index($type);
-	my $name = ::original_name($op_id);
-	$name .= q(, bypassed) if my @dummy = ::is_bypassed($op_id);
+	my $name = name($op_id);
+	$name .= q(, bypassed) if bypassed($op_id);
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
+
 sub show_effect {
- 		my $op_id = shift;
-		my @lines;
-		my @params;
-
- 		my $name =  $op_id. ": " . ::original_name($op_id);
-		my $i = ::effect_index(::original_type($op_id));
-		 
-		return "$name (bypassed)\n" if my @dummy = ::is_bypassed($op_id);
-
-		# return effect parameters for the non-bypass case
-
-		$name .= "\n";
-
-		 push @lines, $name;
- 		 my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
-			map{ push @lines,
-			 	"    ".($_+1).q(. ) . $pnames[$_]->{name} . ": ".  $fx->{params}->{$op_id}->[$_] . "\n";
-		 	} (0..scalar @pnames - 1);
-			map{ push @lines,
-			 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
-		 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
-				if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
-			#push @lines, join("; ", @params) . "\n";
-		@lines
+ 	my $op_id = shift;
+	my @lines;
+	my @params;
+ 	my $i = fxindex($op_id);
+	my $name = name($op_id);
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+	$name .= " ($ladspa_id)" if $ladspa_id;
+	$name .= " (bypassed)" if bypassed($op_id);
+	$name .= "\n";
+ 	push @lines, "$op_id: $name";
+	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
+	map
+	{ 
+		my $name = $pnames[$_]->{name};
+		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
+		push @lines, "    ".($_+1).q(. ) . $name . ": ".  params($op_id)->[$_] . "\n";
+	} (0..scalar @pnames - 1);
+	map
+	{ 	push @lines,
+	 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
+		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
+	#push @lines, join("; ", @params) . "\n";
+	@lines
+}
+sub named_effects_list {
+	my @ops = @_;
+	join("\n", map{ "$_ (" . ::name($_). ")" } @ops), "\n";
 }
  
 sub show_modifiers {
@@ -346,6 +358,9 @@ format STDOUT =
 @>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> ~~
 splice @{$text->{format_fields}}, 0, 9
 .
+
+
+#### Some Text Commands
 
 sub t_load_project {
 	package ::;

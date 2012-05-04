@@ -11,24 +11,49 @@ no warnings 'uninitialized';
 # the lvalue routines can be on the left side of an assignment
 
 sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub has_read_only_param {
+	my $id = shift;
+	my $entry = $fx_cache->{registry}->[fxindex($id)];
+		for(0..scalar @{$entry->{params}} - 1)
+		{
+			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
+		}
+}
+sub is_read_only {
+    my ($op_id, $param) = @_;
+    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	$entry->{params}->[$param]->{dir} eq 'output'
+}          
+
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
+sub bypassed: lvalue{ my $id = shift; $fx->{applied}->{$id}->{bypassed}   }
 
 # ensure owns field is initialized as anonymous array
 
 sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
-sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}               }
-sub params : lvalue { my $id = shift; $fx->{params}->{$id}
-}
+sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}                }
+sub params : lvalue { my $id = shift; $fx->{params}->{$id}                 }
 
-# analyze the arguments to determine the track index
+
+# get information from registry
+sub fxindex {
+	my $op_id = shift;
+	$fx_cache->{full_label_to_index}->{ type($op_id) };
+}
+sub name {
+	my $op_id = shift;
+	$fx_cache->{registry}->[fxindex($op_id)]->{name}
+}
+ 
+# make sure the chain number (track index) is set
 
 sub set_chain_value {
 		
 	my $p = shift;
 
-	return if $p->{chain}; # don't do it twice
+	return if $p->{chain}; # return if already set
 	
 	# set chain from track if known
 	
@@ -87,7 +112,7 @@ sub _add_effect {
 		if (engine_running())
 		{ 
 			$ti{$n}->mute;
-			apply_op($id);
+			stop_do_start( sub{ apply_op($id) }, 0.05);
 			$ti{$n}->unmute;
 		}
 		else { apply_op($id) }
@@ -109,8 +134,8 @@ sub _insert_effect {  # call only from add_effect
 	if ($running){
 		$ui->stop_heartbeat;
 		mute();
-		eval_iam('stop');
-		sleeper( 0.05);
+		eval_iam('stop-sync');
+		sleeper( 0.05); 
 	}
 	my $n = chain($before) or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
@@ -172,8 +197,6 @@ sub modify_effect {
 		# $parameter: zero based
 	my $cop = $fx->{applied}->{$op_id} 
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
-	my @dummy = ::is_bypassed($op_id)
-		and say("$op_id: cannot modify bypassed effect.  Skipping."), return;
 	my $code = $cop->{type};
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
@@ -183,6 +206,8 @@ sub modify_effect {
 		unless fx($op_id);
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
+	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
+		if is_read_only($op_id, $parameter);
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 
@@ -708,7 +733,7 @@ sub sync_effect_parameters {
 	
  	return unless valid_engine_setup();
 	my $old_chain = eval_iam('c-selected');
-	map{ sync_one_effect($_) } ops_with_controller();
+	map{ sync_one_effect($_) } ops_with_controller(), ops_with_read_only_params();
 	eval_iam("c-select $old_chain");
 }
 
@@ -717,7 +742,7 @@ sub sync_one_effect {
 		my $chain = chain($id);
 		eval_iam("c-select $chain");
 		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
-		$fx->{params}->{$id} = get_cop_params( scalar @{$fx->{params}->{$id}} );
+		params($id) = get_cop_params( scalar @{$fx->{params}->{$id}} );
 }
 
 	
@@ -735,6 +760,11 @@ sub get_cop_params {
 sub ops_with_controller {
 	grep{ ! is_controller($_) }
 	grep{ scalar @{owns($_)} }
+	map{ @{ $_->ops } } 
+	::ChainSetup::engine_tracks();
+}
+sub ops_with_read_only_params {
+	grep{ has_read_only_param($_) }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }
@@ -1122,7 +1152,7 @@ sub get_ladspa_hints{
 				or carp "*** couldn't match plugin stanza $stanza ***";
 			$debug and print "plugin label: $plugin_label $plugin_unique_id\n";
 
-			my @lines = grep{ /input/ and /control/ } split "\n",$ports;
+			my @lines = grep{ /control/ } split "\n",$ports;
 
 			my @params;  # data
 			my @names;
@@ -1387,157 +1417,33 @@ sub automix {
 	
 }
 
-{ my @dummy_fx = (type => 'ea', values => [100]);
 sub bypass_effects {
-	
-	local $this_op;
-
 	my($track, @ops) = @_;
-	@ops = intersect_with_track_ops_list($track,@ops);
-	$track->mute;
+	_bypass_effects($track, 'on', @ops);
+}
+sub restore_effects {
+	my($track, @ops) = @_;
+	_bypass_effects($track, 'off', @ops);
+}
 
-	# create one EffectChain identified by track and effect id
+sub _bypass_effects {
 	
+	my($track, $off_or_on, @ops) = @_;
+
+	# only process ops that belong to this track
+	@ops = intersect_with_track_ops_list($track,@ops);
+
+	$track->mute;
+	eval_iam("c-select ".$track->n);
+
 	foreach my $op ( @ops)
 	{ 
-		my $fx_chain_id = $op; 
-		my @eops = expanded_ops_list($op);  # save controllers as well
-
-		say("$fx_chain_id: effect chain already exists.  Skipping."), next 
-			if my @dummy = ::EffectChain::find(id => $fx_chain_id);
-	
-		::EffectChain->new(
-			bypass => 1,
-			system => 1,
-			track_name => $track->name,
-			project => $::project->{name},
-			id => $fx_chain_id, # 
-			ops_list => \@eops, 
-		);
-		replace_effect({ cop_id => $op, @dummy_fx }); 
-		
-		# report action 
-		my $name = ::original_name($op);
-		say "$op ($name)";
+		my $i = ecasound_effect_index($op);
+		eval_iam("cop-select $i");
+		eval_iam("cop-bypass $off_or_on");
+		bypassed($op) = ($off_or_on eq 'on') ? 1 : 0;
 	}
 	$track->unmute;
 }
-}
-
-# get correct (original) type of bypassed effects that
-# have been replaced by a dummy vol operator
-
-sub original_type {
-	my $op_id = shift;
-	# if bypassed, effect has been replaced by a dummy
-	# so we need to get effect name 
-	# from corresponding effect chain
-
-	my ($fx_chain) = is_bypassed($op_id);
-
-	my $type = $fx_chain 
-		? $fx_chain->{ops_data}->{$op_id}->{type} 
-		: type($op_id);
-	$type
-}
-sub original_name {
-	my $op_id = shift;
-	my $type = original_type($op_id);
-	$fx_cache->{registry}->[effect_index($type)]->{name};
-}
-sub replace_effect {
-		my $fxc = shift;
-		jack_stop_do_start( sub{ _replace_effect($fxc) }, 0.03);
-}
-sub _replace_effect {
-	my ($fxc) = @_;
-
-	# $fxc is either ::EffectChain or a hash with arguments
-	# to add_effect()
-	
-	# get the effect_id from either
-	
-	my $op = $fxc->{cop_id} || eval { $fxc->cop_id}; 
-	undef $@;
-
-		
-	my $track = $ti{chain($op)};
-
-	# get my position
-
-	my $n = nama_effect_index($op);
-
-	# delete effect
-	
-	remove_effect($op);
-	
-	# what has moved into my spot?
-	
-	my $successor = $track->ops->[$n]; 
-
-	# assemble arguments
-
-	my @args;
-
-	# we expect a HASH or EffectChain
-	
-	if ( ref($fxc) !~ /EffectChain/ ) 
-	{
-	
-		push @args, 	track => $track, 
-						cop_id => $op, 
-						clobber_id => 1,
-						(%$fxc);
-
-		defined $successor and push @args, before => $successor;
-		
-		#my %b = (@args);
-		#delete $b{track};
-		#say "args: ",yaml_out \%b;
-
-		add_effect({ @args });
-	}
-	elsif ( ref($fxc) =~ /EffectChain/)
-	{
-		$fxc->add($track, $successor);
-	}
-	else 
-	{ 
-		croak "expected effect chain or hash, got" 
-			.  (ref $fxc) || 'scalar' 
-	}
-}
-
-sub is_bypassed {
-	my $id = shift;
-	::EffectChain::find( bypass => 1, id => $id )
-}
-
-sub restore_effects {
-	local $this_op;
-	my($track, @ops) = @_;
-	@ops = intersect_with_track_ops_list($track,@ops);
-	return unless @ops;
-	$track->mute;
-	foreach my $op ( @ops)
-	{
-		my ($fxc) = ::EffectChain::find( bypass 	=> 1, 
-										 track_name => $track->name, 
-										 id 		=> $op);
-		say("$op is not bypassed. Skipping."), next unless $fxc;
-		replace_effect($fxc);
-
-		# report action 
-		my $name = $fx_cache->{registry}->[effect_index(type($op))]->{name};
-		say "$op ($name)";
-
-		# remove effect chain
-		$fxc->destroy if ref($fxc) =~ /EffectChain/;
-	}
-	$track->unmute
-}
-		
-
-
 1;
 __END__

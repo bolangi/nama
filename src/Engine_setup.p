@@ -44,18 +44,23 @@ sub remove_temporary_tracks {
 
 { my $old_offset_run_status;
 sub reconfigure_engine {
+
+	my $force = shift;
+
 	$debug2 and print "&reconfigure_engine\n";
 
 	# skip if command line option is set
-	return if $config->{opts}->{R};
-
-	return if $config->{disable_auto_reconfigure};
+	# don't skip if $force argument given
+	
+	return if ($config->{opts}->{R} or $config->{disable_auto_reconfigure})
+		and not $force;
 
 	# don't disturb recording/mixing
+	
 	return if ::ChainSetup::really_recording() and engine_running();
 	
 	# store recorded trackrefs if any for re-record function
-	#
+	
 	# an empty set (e.g. in post-record monitoring)
 	# will not overwrite a previous set
 	
@@ -69,8 +74,8 @@ sub reconfigure_engine {
 	find_duplicate_inputs(); # we will warn the user later
 
 	# only act if change in configuration
-
 	# skip check if regenerate_setup flag is already set
+	
 	if( $setup->{changed} ){ 
 		$setup->{changed} = 0; # reset for next time
 	} 
@@ -83,6 +88,9 @@ sub reconfigure_engine {
 		}
 	}
 	$debug and print("setup change\n");
+
+
+	##### Restore previous position and running status
 
  	my $old_pos;
  	my $was_running;
@@ -121,6 +129,7 @@ sub reconfigure_engine {
 
 	stop_transport('quiet') if $was_running;
 
+
 	if ( generate_setup() ){
 		
 		$debug and say "I generated a new setup";
@@ -133,6 +142,7 @@ sub reconfigure_engine {
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
+
 		show_status();
 
 		if( $restore_position and not ::ChainSetup::really_recording()){
@@ -145,7 +155,9 @@ sub reconfigure_engine {
 	}
 }
 }
-	# status_snapshot() 
+
+
+#### status_snapshot() 
 	#
 	# hashref output for detecting if we need to reconfigure engine
 	# compared as YAML strings
@@ -228,7 +240,6 @@ sub arm {
 	
 	$debug2 and print "&arm\n";
 	exit_preview_mode();
-	#adjust_latency();
 	$setup->{changed}++;
 	generate_setup() and connect_transport();
 }
@@ -265,6 +276,8 @@ sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $quiet = shift;
 	remove_riff_header_stubs();
+	remove_latency_ops() unless $config->{opts}->{O};
+
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
@@ -285,6 +298,7 @@ sub connect_transport {
 		return;
 	}
 	$setup->{audio_length} = eval_iam('cs-get-length'); 
+	sync_effect_parameters();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
 	$ui->clock_config(-text => colonize(0));
@@ -293,12 +307,14 @@ sub connect_transport {
 	# set delay for seeking under JACK
 	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$config->{engine_jack_seek_delay} = $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 );
-
+	$engine->{jack_seek_delay} = $jack->{jackd_running}
+		?  $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 )
+		:  0;
 	connect_jack_ports_list();
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
+	calculate_and_adjust_latency() unless $config->{opts}->{O};
 	1;
 	
 }
@@ -328,34 +344,6 @@ sub transport_status {
 	say "Engine is ". ( engine_running() ? "running." : "ready.");
 	say "\nPress SPACE to start or stop engine.\n"
 		if $config->{press_space_to_start};
-}
-sub adjust_latency {
-
-	$debug2 and print "&adjust_latency\n";
-	map { $fx->{params}->{$_->latency}[0] = 0  if $_->latency() } 
-		::Track::all();
-	set_preview_mode();
-	exit_preview_mode();
-	my $cop_status = eval_iam('cop-status');
-	$debug and print $cop_status;
-	my $chain_re  = qr/Chain "(\d+)":\s+(.*?)(?=Chain|$)/s;
-	my $latency_re = qr/\[\d+\]\s+latency\s+([\d\.]+)/;
-	my %chains = $cop_status =~ /$chain_re/sg;
-	$debug and print yaml_out(\%chains);
-	my %latency;
-	map { my @latencies = $chains{$_} =~ /$latency_re/g;
-			$debug and print "chain $_: latencies @latencies\n";
-			my $chain = $_;
-		  map{ $latency{$chain} += $_ } @latencies;
-		 } grep { $_ > 2 } sort keys %chains;
-	$debug and print yaml_out(\%latency);
-	my $max;
-	map { $max = $_ if $_ > $max  } values %latency;
-	$debug and print "max: $max\n";
-	map { my $adjustment = ($max - $latency{$_}) / $config->{sampling_freq} * 1000;
-			$debug and print "chain: $_, adjustment: $adjustment\n";
-			effect_update_copp_set($ti{$_}->latency, 2, $adjustment);
-			} keys %latency;
 }
 1;
 __END__

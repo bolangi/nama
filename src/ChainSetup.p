@@ -1,9 +1,10 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack %tn %bn $debug $debug2 $mode);
+use ::Globals qw($file $config $jack $setup $engine %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
+use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
@@ -36,6 +37,8 @@ our (
 
 
 sub initialize {
+	delete $setup->{latency_graph};
+	delete $setup->{final_graph};
 	@io = (); 			# IO object list
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
@@ -119,6 +122,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph with mixdown mods:\n$g");
 	prune_graph();
+	$setup->{latency_graph} = dclone($g);
 	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph after pruning unterminated branches:\n$g");
 
@@ -132,6 +136,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	$debug and say "The expanded graph with inserts is\n$g";
 	$logger->debug("Graph with inserts:\n$g");
+	$setup->{final_graph} = dclone($g);
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)
@@ -146,6 +151,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	if ( process_routing_graph() ){
 		write_chains(); 
+		set_buffersize();
 		1
 	} else { 
 		say("No tracks to record or play.");
@@ -392,7 +398,12 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $config->{engine_globals_default};
+	my $globals = $config->{engine_globals_general};
+	$globals .=  setup_requires_realtime()
+			? join " ", " -b:$config->{engine_buffersize_realtime}", 
+				$config->{engine_globals_realtime}
+			: join " ", " -b:$config->{engine_buffersize_nonrealtime}", 
+				$config->{engine_globals_nonrealtime};
 
 	# use realtime globals if they exist and we are
 	# recording to a non-mixdown file
@@ -428,6 +439,18 @@ sub write_chains {
 	close $fh;
 	$chain_setup = $ecs_file;
 
+}
+sub setup_requires_realtime {
+	my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
+	grep { has_vertex("$_\_in") } @fields 
+		and grep { has_vertex("$_\_out") } @fields
+
+}
+sub has_vertex { $setup->{final_graph}->has_vertex($_[0]) }
+
+sub set_buffersize { 
+	my $buffer_type = setup_requires_realtime() ? "realtime" : "nonrealtime";
+	$engine->{buffersize} = $config->{"engine_buffersize_$buffer_type"}	;
 }
 
 1;

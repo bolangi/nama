@@ -7,6 +7,7 @@ our $VERSION = 0.1;
 our ($debug);
 local $debug = 0;
 use vars qw(%by_index);
+use ::Globals qw($jack $setup $config);
 use ::Object qw(
 	insert_type
 	n
@@ -101,7 +102,6 @@ sub remove {
 	$::tn{ $self->dry_name }->remove;
 	delete $by_index{$self->n};
 }
-	
 # subroutine
 #
 sub add_insert {
@@ -155,6 +155,92 @@ sub get_id {
 }
 
 sub is_local_effects_host { ! $_[0]->send_id }
+
+
+### Insert Latency calculation
+#    
+#    In brief, the maximum latency for the two arms is the
+#    latency of any effects on the wet track plus the additional
+#    latency of the JACK client and JACK connection. (We
+#    assume send/receive from the same client.)
+#    
+#    Here is the long explanation:
+#    
+#    We need to calculate and compensate the latency
+#    of the two arms of the insert.
+#    
+#    $setup->{latency}->{sibling} is the maximum latency value
+#    measured among a group of parallel tracks (i.e.
+#    bus members).
+#    
+#    For example, Low, Mid and High tracks for mastering
+#    are siblings. When we get the maximum for the
+#    group, we set $setup->{latency}->{sibling}->{track_name} = $max
+#    
+#    $setup->{latency}->{track}->{track_name}->{total} is the latency
+#    calculated for a track (including predecessor tracks when
+#    that is significant.)
+#    
+#    So later on, when we get to adjusting latency, the
+#    amount is given by
+#    
+#    $setup->{latency}->{sibling}->{track_name}
+#    - $setup->{latency}->{track}->{track_name}
+#    
+sub latency { 
+
+		# return value in milliseconds
+
+# 		track_insert_latency
+# 		track_insert_jack_client_latency
+
+	my $self = shift;
+	my $jack_related_latency;
+
+	# get the latency associated with the JACK client, if any
+	if($self->send_type eq "jack_client")
+	{
+
+		my $client_latency_frames 
+			= $jack->{clients}->{$_->send_name}->{playback}->{max} 
+				+ $jack->{clients}->{$_->send_name}->{capture}->{max};
+		my $jack_connection_latency_frames = $jack->{period}; 
+
+		$jack_related_latency
+			= $setup->{latency}->{track}->{$_->track}->{insert_jack}
+			= ($client_latency_frames + $jack_connection_latency_frames) 
+				/ $config->{sample_rate}
+				* 1000;
+	}
+	
+
+	# set the track and sibling(i.e. max) latency values
+	# for wet and dry arms (tracks)
+	
+	# In $setup->{latency}->{track}->{track_name}
+	# we include latency of the loop device added by the insert
+	# which affects both wet and dry tracks
+	# 
+	# We do not include latency of predecessor tracks
+	
+	my $dry_track_latency  # total
+		= $setup->{latency}->{track}->{$_->dry_name}->{total}
+		= track_ops_latency($::tn{$_->dry_name}) + loop_device_latency();
+		#	+ insert_latency($::tn{$_->dry_name});
+	
+	my $wet_track_ops_latency
+		= $setup->{latency}->{track}->{$_->wet_name}->{ops}
+		= track_ops_latency($::tn{$_->wet_name});
+
+	# sibling latency (i.e. max), is same as wet track latency
+	
+	my $wet_track_latency
+	= $setup->{latency}->{track}->{$_->wet_name}->{total}
+	= $setup->{latency}->{sibling}->{$_->wet_name}
+	= $setup->{latency}->{sibling}->{$_->dry_name} 
+	= $wet_track_ops_latency + $jack_related_latency + loop_device_latency();
+		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
+}
 }
 {
 package ::PostFaderInsert;

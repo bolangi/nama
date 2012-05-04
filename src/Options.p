@@ -30,6 +30,8 @@ sub process_command_line_options {
 		no-terminal					T
         no-fade-on-transport-start  F
 		log=s@                      L
+		no-latency                  O
+		
 );
 
 	map{$config->{opts}->{$_} = ''} values %options;
@@ -75,11 +77,10 @@ Debugging options:
 --execute-command, -X            Supply a command to execute
 --no-terminal, -T                Don't initialize terminal
 --no-fades, -F                   No fades on transport start/stop
+--no-latency, -O                 Don't apply latency compensation
+--log, -L                        Categories to log
 
 HELP
-
-#--no-ecasound, -E                Don't load Ecasound (for testing)
-
 
 }
 1;
