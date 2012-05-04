@@ -99,7 +99,7 @@ sub _add_effect {
 		{ 
 			# TODO sync-stop/start
 			$ti{$n}->mute;
-			apply_op($id);
+			stop_do_start( sub{ apply_op($id) }, 0.05)
 			$ti{$n}->unmute;
 		}
 		else { apply_op($id) }
