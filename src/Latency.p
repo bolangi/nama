@@ -42,6 +42,8 @@ sub apply_latency_ops {
 
 sub initialize_latency_vars {
 	$setup->{latency} = {};
+	$setup->{latency}->{track} = {};
+	$setup->{latency}->{sibling} = {};
 }
 
 sub track_latency {
@@ -75,7 +77,7 @@ sub track_latency {
 sub track_ops_latency {
 	# LADSPA plugins return latency in milliseconds
 	my $track = shift;
-	my $total;
+	my $total = 0;;
 	map { $total += op_latency($_) } $track->fancy_ops;
 	$total
 }
