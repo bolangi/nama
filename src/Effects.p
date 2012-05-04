@@ -121,8 +121,8 @@ sub _insert_effect {  # call only from add_effect
 	if ($running){
 		$ui->stop_heartbeat;
 		mute();
-		eval_iam('stop');
-		sleeper( 0.05);
+		eval_iam('sync-stop');
+		sleeper( 0.05); 
 	}
 	my $n = chain($before) or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 

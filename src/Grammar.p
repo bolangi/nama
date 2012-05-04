@@ -178,6 +178,8 @@ sub show_effect {
 	my @params;
  	my $i = fxindex($op_id);
 	my $name = name($op_id);
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+	$name .= " ($ladspa_id)" if $ladspa_id;
 	$name .= " (bypassed)" if bypassed($op_id);
 	$name .= "\n";
  	push @lines, "$op_id: $name";

@@ -185,14 +185,6 @@ sub ecasound_select_chain {
 		return 0
 	}
 }
-sub jack_stop_do_start {
-	my ($coderef, $delay) = @_;
-    if( $jack->{jackd_running} and eval_iam('engine-status') eq 'running')
-	{
-			stop_do_start( $coderef, $delay);
-	}
-	else 	{ $coderef->() }
-}
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
 		eval_iam('sync-stop');
