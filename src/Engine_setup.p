@@ -301,6 +301,7 @@ sub connect_transport {
 		return;
 	}
 	$setup->{audio_length} = eval_iam('cs-get-length'); 
+	sync_effect_parameters();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
 	$ui->clock_config(-text => colonize(0));

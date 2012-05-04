@@ -11,6 +11,16 @@ no warnings 'uninitialized';
 # the lvalue routines can be on the left side of an assignment
 
 sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub has_read_only_param {
+	my $id = shift;
+	my $entry = $fx_cache->{registry}->[fxindex($id)];
+		for(0..scalar @{$entry->{params}} - 1)
+		{
+			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
+		}
+}
+
+
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
 sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
@@ -26,7 +36,7 @@ sub params : lvalue { my $id = shift; $fx->{params}->{$id}                 }
 # get information from registry
 sub fxindex {
 	my $op_id = shift;
-	$fx_cache->{full_label_to_index}->{ $fx->{applied}->{ $op_id }->{type} };
+	$fx_cache->{full_label_to_index}->{ type($op_id) };
 }
 sub name {
 	my $op_id = shift;
@@ -193,8 +203,7 @@ sub modify_effect {
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
-		if $fx_cache->{registry}->[effect_index(type($op_id))]->{params}->[$parameter]->{dir} eq 'output';
-
+		if is_read_only($op_id);
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 
@@ -720,7 +729,7 @@ sub sync_effect_parameters {
 	
  	return unless valid_engine_setup();
 	my $old_chain = eval_iam('c-selected');
-	map{ sync_one_effect($_) } ops_with_controller();
+	map{ sync_one_effect($_) } ops_with_controller(), ops_with_read_only_params();
 	eval_iam("c-select $old_chain");
 }
 
@@ -729,7 +738,7 @@ sub sync_one_effect {
 		my $chain = chain($id);
 		eval_iam("c-select $chain");
 		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
-		$fx->{params}->{$id} = get_cop_params( scalar @{$fx->{params}->{$id}} );
+		params($id) = get_cop_params( scalar @{$fx->{params}->{$id}} );
 }
 
 	
@@ -747,6 +756,11 @@ sub get_cop_params {
 sub ops_with_controller {
 	grep{ ! is_controller($_) }
 	grep{ scalar @{owns($_)} }
+	map{ @{ $_->ops } } 
+	::ChainSetup::engine_tracks();
+}
+sub ops_with_read_only_params {
+	grep{ has_read_only_param($_) }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }

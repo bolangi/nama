@@ -53,6 +53,8 @@ sub save_system_state {
 	my $path = shift;
 
 	sync_effect_parameters(); # in case a controller has made a change
+	# we sync read-only parameters, too, but I think that is
+	# harmless
 
 	# remove null keys in $fx->{applied} and $fx->{params}
 	# would be better to find where they come from
