@@ -380,8 +380,8 @@ sub initialize_logger {
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my ($cmd) = @_;
-	my $logger = get_logger('ECI');
+	my ($cmd, $category) = @_;
+	my $logger = get_logger($category || 'ECI');
 	$logger->debug($cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
@@ -427,7 +427,7 @@ full return value: $return_value);
 sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
 	my ($cmd) = @_;
-	my $logger = get_logger('ECI');
+	my $logger = get_logger($category || 'ECI');
 	$logger->debug($cmd);
 	$debug and print "iam command: $cmd\n";
 	my (@result) = $engine->{ecasound}->eci($cmd);
