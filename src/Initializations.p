@@ -426,7 +426,7 @@ full return value: $return_value);
 
 sub eval_iam_libecasoundc{
 	#$debug2 and print "&eval_iam\n";
-	my ($cmd) = @_;
+	my ($cmd, $category) = @_;
 	my $logger = get_logger($category || 'ECI');
 	$logger->debug($cmd);
 	$debug and print "iam command: $cmd\n";
@@ -460,11 +460,13 @@ sub log_msg {
 	if ( $log )
 	{
 		my $category 	= $log->{category};
-		my $level		= $log->{level};	
+		my $level		= $log->{level} || 'debug';
 		my $msg			= $log->{msg};
 		my $cmd			= $log->{cmd};
 		my $result		= $log->{result}; 
-		my $logger = Log::Log4perl->get_logger($category);
+		my $logger = ref $category 
+			? $category 
+			: Log::Log4perl->get_logger($category);
 		my @msg;
 		push @msg, "command: $cmd" if $cmd;
 		push @msg, "message: $msg" if $msg;
