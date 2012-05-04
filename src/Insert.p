@@ -188,49 +188,57 @@ sub is_local_effects_host { ! $_[0]->send_id }
 #    
 sub latency { 
 
+		# return value in milliseconds
+
+# 		track_insert_latency
+# 		track_insert_jack_client_latency
+
 	my $self = shift;
-	my $jack_related_latency = 0;
+	my $jack_related_latency;
 
 	# get the latency associated with the JACK client, if any
 	if($self->send_type eq "jack_client")
 	{
 
-		my $client_latency_frames = 
-			$jack->{clients}->{$_->send_name}->{playback}->{max} 
+		my $client_latency_frames 
+			= $jack->{clients}->{$_->send_name}->{playback}->{max} 
 				+ $jack->{clients}->{$_->send_name}->{capture}->{max};
 		my $jack_connection_latency_frames = $jack->{period}; 
-		
-		$jack_related_latency =
-			($client_latency_frames + $jack_connection_latency_frames) 
-			/$config->{sample_rate}
-			* 1000;
+
+		$jack_related_latency
+			= $setup->{track_insert_jack_client_latency}->{$_->track}
+			= ($client_latency_frames + $jack_connection_latency_frames) 
+				/ $config->{sample_rate}
+				* 1000;
 	}
 	
 
 	# set the track and sibling(i.e. max) latency values
 	# for wet and dry arms (tracks)
 	
-	# assuming no latency-causing effects on the dry arm
-	$setup->{track_latency}->{$_->dry_name} = 0;
+	# In $setup->{track_latency}->{track_name}
+	# we include latency of the loop device added by the insert
+	# which affects both wet and dry tracks
+	# 
+	# We do not include latency of predecessor tracks
 	
-	# checking the dry arm  TODO
+	my $dry_track_latency  # total
+		= $setup->{track_latency}->{$_->dry_name}
+		= track_ops_latency($::tn{$_->dry_name}) + loop_device_latency();
+		#	+ insert_latency($::tn{$_->dry_name});
 	
-	#$setup->{track_latency}->{$_->dry_name} = 
-	#	track_ops_latency($::tn{$_->dry_name})
-	#	+ insert_latency($::tn{$_->dry_name});
+	my $wet_track_ops_latency
+		= $setup->{track_ops_latency}->{$_->wet_name}
+		= track_ops_latency($::tn{$_->wet_name});
 
 	# sibling latency (i.e. max), is same as wet track latency
 	
-	my $latency = $setup->{sibling_latency}->{$_->wet_name}
-				= $setup->{sibling_latency}->{$_->dry_name} 
-				= $setup->{track_latency}->{$_->wet_name} 
-				= track_ops_latency($::tn{$_->wet_name}) + $jack_related_latency
+	my $wet_track_latency
+	= $setup->{track_latency}->{$_->wet_name}
+	= $setup->{sibling_latency}->{$_->wet_name}
+	= $setup->{sibling_latency}->{$_->dry_name} 
+	= $wet_track_ops_latency + $jack_related_latency + loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
-		;
-
-	# increment insert latency by one additional loop device
-	
-	$latency += ::loop_device_latency(); 
 }
 }
 {

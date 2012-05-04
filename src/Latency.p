@@ -45,13 +45,15 @@ sub initialize_latency_vars {
 		delete $setup->{$_}
 
 	} qw(
-		sibling_latency 
+
+		sibling_latency    
 		track_latency
 		track_own_latency
-		track_insert_latency
-		track_insert_ops_latency
-		track_insert_jack_client_latency
 		track_ops_latency
+		track_insert_latency
+		track_insert_dry_ops_latency
+		track_insert_wet_ops_latency
+		track_insert_wet_jack_client_latency
 	);
 }
 
