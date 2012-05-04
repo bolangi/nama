@@ -97,7 +97,6 @@ sub _add_effect {
 	{
 		if (engine_running())
 		{ 
-			# TODO sync-stop/start
 			$ti{$n}->mute;
 			stop_do_start( sub{ apply_op($id) }, 0.05);
 			$ti{$n}->unmute;
@@ -121,7 +120,7 @@ sub _insert_effect {  # call only from add_effect
 	if ($running){
 		$ui->stop_heartbeat;
 		mute();
-		eval_iam('sync-stop');
+		eval_iam('stop-sync');
 		sleeper( 0.05); 
 	}
 	my $n = chain($before) or 
