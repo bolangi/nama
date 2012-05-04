@@ -41,7 +41,13 @@ sub command_process {
 	
 	while ($input =~ /\S/) { 
 		$debug and say "input: $input";
-		$text->{parser}->meta(\$input) or print("bad command: $input_was\n"), last;
+		$text->{parser}->meta(\$input) or do
+		{
+			print("bad command: $input_was\n"); 
+			system($config->{beep_command}) if $config->{beep_command};
+			last;
+		};
+			
 	}
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();

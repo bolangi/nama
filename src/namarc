@@ -76,7 +76,7 @@ mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: f24_le,N,frequency,i
 
-ladspa_sample_rate: frequency
+sample_rate: frequency
 
 # globals for our chain setups
 
@@ -99,6 +99,10 @@ press_space_to_start_transport: 1
 execute_on_project_load: ~
 
 volume_control_operator: eadb # must be 'ea' or 'eadb'
+
+# beep PC speaker on command error
+
+# beep_command: beep -f 350 -l 700
 
 # effects for use in mastering mode
 
