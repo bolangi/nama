@@ -127,7 +127,6 @@ sub new {
 	#print "names used: ", ::yaml_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_latency_control_op($n);	
 	::add_pan_control($n);
 	::add_volume_control($n);
 

@@ -134,8 +134,6 @@ sub reconfigure_engine {
 		
 		$debug and say "I generated a new setup";
 		
-		remove_latency_ops();
-
 		# we save:
 		# + monitoring setups 
 		# + preview setups
@@ -144,8 +142,6 @@ sub reconfigure_engine {
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
-
-		calculate_and_adjust_latency();
 
 		show_status();
 
@@ -244,7 +240,6 @@ sub arm {
 	
 	$debug2 and print "&arm\n";
 	exit_preview_mode();
-	#adjust_latency();
 	$setup->{changed}++;
 	generate_setup() and connect_transport();
 }
@@ -281,6 +276,8 @@ sub connect_transport {
 	$debug2 and print "&connect_transport\n";
 	my $quiet = shift;
 	remove_riff_header_stubs();
+	remove_latency_ops() unless $config->{opts}->{O};
+
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
@@ -316,6 +313,7 @@ sub connect_transport {
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
+	calculate_and_adjust_latency() unless $config->{opts}->{O};
 	1;
 	
 }
