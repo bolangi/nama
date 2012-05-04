@@ -879,7 +879,8 @@ sub as_hash {
 sub latency_offset {
 	my $track = shift;
 	no warnings 'uninitialized';
-	$setup->{sibling_latency}->{$track->name} - $setup->{track_latency}->{$track->name};
+	$setup->{latency}->{sibling}->{$track->name} 
+		- $setup->{latency}->{track}->{$track->name}->{total};
 }
 
 }
@@ -1158,11 +1159,12 @@ sub add_pan_control {
 
 sub add_latency_control_op {
 	my $n = shift;
+	my $delay = shift || 0;
 	my $id = cop_add({
 				chain => $n, 
 				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency, # may be undef
-				values => [ 0,    # no delay
+				values => [ $delay,
 							0,    # no surround mode
 							1,    # 1 delay operation
 							100,  # 100% delayed signal

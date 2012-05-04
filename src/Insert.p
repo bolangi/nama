@@ -169,22 +169,23 @@ sub is_local_effects_host { ! $_[0]->send_id }
 #    We need to calculate and compensate the latency
 #    of the two arms of the insert.
 #    
-#    $setup->{sibling_latency} is the maximum latency value
+#    $setup->{latency}->{sibling} is the maximum latency value
 #    measured among a group of parallel tracks (i.e.
 #    bus members).
 #    
 #    For example, Low, Mid and High tracks for mastering
 #    are siblings. When we get the maximum for the
-#    group, we set $setup->{sibling_latency}->{track_name} = $max
+#    group, we set $setup->{latency}->{sibling}->{track_name} = $max
 #    
-#    $setup->{track_latency}->{track_name} is the latency
+#    $setup->{latency}->{track}->{track_name}->{total} is the latency
 #    calculated for a track (including predecessor tracks when
 #    that is significant.)
 #    
 #    So later on, when we get to adjusting latency, the
 #    amount is given by
 #    
-#    $setup->{sibling_latency}->{track_name} - $setup->{track_latency}->{track_name}
+#    $setup->{latency}->{sibling}->{track_name}
+#    - $setup->{latency}->{track}->{track_name}
 #    
 sub latency { 
 
@@ -206,7 +207,7 @@ sub latency {
 		my $jack_connection_latency_frames = $jack->{period}; 
 
 		$jack_related_latency
-			= $setup->{track_insert_jack_client_latency}->{$_->track}
+			= $setup->{latency}->{track}->{$_->track}->{insert_jack}
 			= ($client_latency_frames + $jack_connection_latency_frames) 
 				/ $config->{sample_rate}
 				* 1000;
@@ -216,27 +217,27 @@ sub latency {
 	# set the track and sibling(i.e. max) latency values
 	# for wet and dry arms (tracks)
 	
-	# In $setup->{track_latency}->{track_name}
+	# In $setup->{latency}->{track}->{track_name}
 	# we include latency of the loop device added by the insert
 	# which affects both wet and dry tracks
 	# 
 	# We do not include latency of predecessor tracks
 	
 	my $dry_track_latency  # total
-		= $setup->{track_latency}->{$_->dry_name}
+		= $setup->{latency}->{track}->{$_->dry_name}->{total}
 		= track_ops_latency($::tn{$_->dry_name}) + loop_device_latency();
 		#	+ insert_latency($::tn{$_->dry_name});
 	
 	my $wet_track_ops_latency
-		= $setup->{track_ops_latency}->{$_->wet_name}
+		= $setup->{latency}->{track}->{$_->wet_name}->{ops}
 		= track_ops_latency($::tn{$_->wet_name});
 
 	# sibling latency (i.e. max), is same as wet track latency
 	
 	my $wet_track_latency
-	= $setup->{track_latency}->{$_->wet_name}
-	= $setup->{sibling_latency}->{$_->wet_name}
-	= $setup->{sibling_latency}->{$_->dry_name} 
+	= $setup->{latency}->{track}->{$_->wet_name}->{total}
+	= $setup->{latency}->{sibling}->{$_->wet_name}
+	= $setup->{latency}->{sibling}->{$_->dry_name} 
 	= $wet_track_ops_latency + $jack_related_latency + loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
 }

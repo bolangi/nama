@@ -41,44 +41,35 @@ sub apply_latency_ops {
 }
 
 sub initialize_latency_vars {
-	map { 
-		delete $setup->{$_}
-
-	} qw(
-
-		sibling_latency    
-		track_latency
-		track_own_latency
-		track_ops_latency
-		track_insert_latency
-		track_insert_dry_ops_latency
-		track_insert_wet_ops_latency
-		track_insert_wet_jack_client_latency
-	);
+	$setup->{latency} = {};
 }
 
 sub track_latency {
 	my $track = shift;
-	my $total = 0;
 
-	### track effect operator latency
+	# initialize
+	my $node = $setup->{latency}->{track}->{$track->name} = {};
+	my $accumulator = 0;
+
+	### track effects latency
 	
-	$total += ($setup->{track_ops_latency}->{$track->name} 
-				= track_ops_latency($track));
+	$accumulator += ($node->{ops} = track_ops_latency($track));
 
 	### track insert latency
 	
-	$total += ($setup->{track_insert_latency}->{$track->name}
-				= insert_latency($track));
+	$accumulator += ($node->{insert} = insert_latency($track));
 
-	### track self latency (without predecessors)
+	### track's own latency
 	
-	$setup->{track_own_latency}->{$track->name} = $total;
+	$node->{own} = $accumulator;
 
-	### track total latency (including predecessor latency)
+	### track predecessor latency
 
-	$total += predecessor_latency($track);
-	$setup->{track_latency}->{$track->name} = $total
+	$accumulator += ($node->{predecessor} = predecessor_latency($track));
+
+	### track total latency
+
+	$node->{total} = $accumulator;
 
 }
 sub track_ops_latency {
@@ -99,17 +90,20 @@ sub insert_latency {
 }
 sub predecessor_latency {
 	my $track = shift;
-	my @predecessors = $setup->{latency_graph}->predecessors($track->name);
+	my @predecessors 
+		= grep{ ::Graph::is_a_track($_) } 
+			$setup->{latency_graph}->predecessors($track->name);
 	scalar @predecessors or return 0;
 	#say "track: ",$track->name;
 	sibling_latency(@predecessors) + loop_device_latency();
 }
 sub sibling_latency {
-	my @siblings = grep{ $tn{$_} } @_; # filter out non-tracks (sources)
+	my @siblings = grep{ ::Graph::is_a_track($_) } @_; 
+	my $node = $setup->{latency}->{sibling};
 	#say join " ", "siblings:", @siblings;
 	scalar @siblings or return 0;
-	my $max = max map { track_latency($_) } map { $tn{$_} } @siblings;
-	map { $setup->{sibling_latency}->{$_} = $max } @siblings;
+	my $max = max map { track_latency($_) } map{$tn{$_}} @siblings;
+	map { $node->{$_} = $max } @siblings;
 	return $max
 }
 sub loop_device_latency { 
