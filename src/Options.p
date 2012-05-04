@@ -78,6 +78,7 @@ Debugging options:
 --no-terminal, -T                Don't initialize terminal
 --no-fades, -F                   No fades on transport start/stop
 --no-latency, -O                 Don't apply latency compensation
+--log, -L                        Categories to log
 
 HELP
 
