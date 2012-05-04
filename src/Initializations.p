@@ -188,9 +188,6 @@ sub initialize_interfaces {
 		print "placing all files in current working directory ($config->{root_dir})\n";
 	}
 
-	# set soundcard sample frequency from .namarc
-	($config->{sample_rate}) = $config->{devices}->{jack}{signal_format} =~ /(\d+)(,i)?$/;
-
 	# skip initializations if user (test) supplies project
 	# directory
 	
