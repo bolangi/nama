@@ -357,25 +357,6 @@ sub ecasound_pid {
 	$pid if $engine->{socket}; # conditional on using socket i.e. Net-ECI
 }
 
-sub initialize_logger {
-
-	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_ECI} || "$ENV{HOME}/nama.eci.log";
-	my $conf = qq(
-		#log4perl.rootLogger			= DEBUG, IAM
-		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
-		log4perl.appender.IAM			= Log::Log4perl::Appender::Screen
-		log4perl.appender.IAM_file		= Log::Log4perl::Appender::File
-		log4perl.appender.IAM_file.filename	= $logfile
-		log4perl.appender.IAM_file.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.IAM_file.layout.ConversionPattern = $layout
-		log4perl.appender.IAM.layout	= Log::Log4perl::Layout::PatternLayout
-		log4perl.appender.IAM.layout.ConversionPattern = $layout
-		#log4perl.additivity.IAM			= 0 # doesn't work... why?
-	);
-	Log::Log4perl::init(\$conf);
-
-}
 
 sub eval_iam { } # stub
 
@@ -401,14 +382,7 @@ sub eval_iam_neteci {
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
-	my $debug++;
-	$debug and say "ECI command: $cmd";
-	$debug and say "Ecasound reply (256 bytes): ", substr($buf,0,256);
-	$debug and say qq(
-length: $setup_length
-type: $type
-full return value: $return_value);
-	say "illegal return value from ecasound engine: $return_value" ;
+	$logger->error("Ecasound return value was $return_value (expected 256)");
 	restart_ecasound();
 
 }
@@ -444,9 +418,17 @@ sub eval_iam_libecasoundc {
 }
 	
 sub restart_ecasound {
-	say "killing ecasound processes @{$engine->{pids}}";
+	log_msg({ 
+		category 	=> 'ECI',
+		msg 	 	=> "killing ecasound processes @{$engine->{pids}}",
+		level		=> 'info',
+	});	
 	kill_my_ecasound_processes();
-	say "restarting Ecasound engine - your may need to use the 'arm' command";
+	log_msg({ 
+		category 	=> 'ECI',
+		msg 	 	=> "restarting Ecasound engine - your may need to use the 'arm' command",
+		level		=> 'info',
+	});	
 	select_ecasound_interface();
 	#$setup->{changed}++;
 	reconfigure_engine();
@@ -454,26 +436,6 @@ sub restart_ecasound {
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
 	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
-}
-sub log_msg {
-	my $log = shift;
-	if ( $log )
-	{
-		my $category 	= $log->{category};
-		my $level		= $log->{level} || 'debug';
-		my $msg			= $log->{msg};
-		my $cmd			= $log->{cmd};
-		my $result		= $log->{result}; 
-		my $logger = ref $category 
-			? $category 
-			: Log::Log4perl->get_logger($category);
-		my @msg;
-		push @msg, "command: $cmd" if $cmd;
-		push @msg, "message: $msg" if $msg;
-		push @msg, "result: $result" if $result;
-		my $message = join q(, ), @msg;
-		$logger->$level($message);
-	}
 }
 
 1;

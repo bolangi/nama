@@ -132,6 +132,8 @@ use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
 
+use ::Log ();
+
 sub main { 
 	definitions();
 	process_command_line_options();
