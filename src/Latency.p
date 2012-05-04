@@ -34,8 +34,13 @@ sub remove_latency_ops {
 }
 sub apply_latency_ops {
 	map
-	{ 	::add_latency_control_op($_->n); # keeps existing op_id
-		modify_effect($_->latency,0,'+',$_->latency_offset)
+	{ 	
+		# apply offset, keeping existing op_id
+		::add_latency_control_op($_->n, $_->latency_offset); # keeps existing op_id
+
+		# store offset for debugging
+		
+		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
 
   	} 	::ChainSetup::engine_tracks();
 }
