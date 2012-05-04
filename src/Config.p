@@ -77,7 +77,7 @@ sub read_config {
 	);
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
-	$config->{sampling_freq} = $cfg{abbreviations}{frequency};
+	$config->{sample_rate} = $cfg{abbreviations}{frequency};
 	set_default_globals(); # in case they are undefined
 }
 sub walk_tree {
