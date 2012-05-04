@@ -30,7 +30,6 @@ sub reset_latency_ops {
 }
 sub remove_latency_ops {
 	map{ ::remove_effect($_->latency)  } ::Track::all()
-		# unless $setup->{preserve_latency_ops};
 }
 sub apply_latency_ops {
 	map
