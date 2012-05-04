@@ -19,7 +19,11 @@ sub has_read_only_param {
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
 }
-
+sub is_read_only {
+    my ($op_id, $param) = @_;
+    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	$entry->{params}->[$param]->{dir} eq 'output'
+}          
 
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
@@ -203,7 +207,7 @@ sub modify_effect {
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
-		if is_read_only($op_id);
+		if is_read_only($op_id, $parameter);
 		my $new_value = $value; 
 		if ($sign) {
 			$new_value = 
