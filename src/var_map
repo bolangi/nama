@@ -183,8 +183,8 @@
 	$ecasound_globals_general		$config->{engine_globals_general}
 	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
 	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
-	$ecasound_buffersize_realtime	$config->{ecasound_buffersize_realtime}
-	$ecasound_buffersize_nonrealtime	$config->{ecasound_buffersize_nonrealtime}
+	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
+	$ecasound_buffersize_nonrealtime	$config->{engine_buffersize_nonrealtime}
  
 	$effects_cache_file 			$file->{effects_cache}
 	** 								$file->{global_effect_chains}
