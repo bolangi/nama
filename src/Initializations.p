@@ -361,7 +361,8 @@ sub eval_iam { } # stub
 
 sub eval_iam_neteci {
 	my ($cmd, $category) = @_;
-	loged($cmd);
+	$category ||= 'ECI';
+	logit($category, 'debug', $cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -380,34 +381,38 @@ sub eval_iam_neteci {
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
-	loged("Ecasound return value was $return_value (expected 256)");
+	logit('ECI','debug', $cmd) if $category ne 'ECI';
+	logit('ECI','error',"Ecasound return value was $return_value (expected 256)");
 	restart_ecasound();
 
 }
 	$reply =~ s/\s+$//; 
 
-	given($type){
-		when ('e'){ carp $reply;
-			restart_ecasound() if $reply =~ /in engine-status/;
-
-}
-		default{ return $reply }
+	if( $type eq 'e')
+	{
+		logit('ECI','error',"Engine error: $reply");
+		restart_ecasound() if $reply =~ /in engine-status/;
 	}
-
+	else
+	{ 	logit($category,'debug',"Net-ECI result: $reply");
+		$reply
+	}
+	
 }
 
 sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
 	my ($cmd, $category) = @_;
-	loged($cmd);
+	$category ||= 'ECI';
+	logit($category,'debug',$cmd);
 	my (@result) = $engine->{ecasound}->eci($cmd);
-	loged("result: @result"); # unless $cmd =~ /register/;
+	logit($category, 'debug',"ECI result: @result") 
+		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
 		restart_ecasound() if $errmsg =~ /in engine-status/;
 		$engine->{ecasound}->errmsg(''); 
-		# ecasound already prints error on STDOUT
-		# TODO print message?
+		# Audio::Ecasound already prints error
 	}
 	"@result";
 }

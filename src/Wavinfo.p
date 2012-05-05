@@ -14,16 +14,18 @@ sub ecasound_get_info {
 
 	$path = qq("$path");
 	teardown_engine();
-	eval_iam('cs-add gl');
-	eval_iam('c-add g');
-	eval_iam('ai-add ' . $path);
-	eval_iam('ao-add null');
-	eval_iam('cs-connect');
-	eval_iam('ai-select '. $path);
-	my $result = eval_iam($command);
+	_eval_iam('cs-add gl');
+	_eval_iam('c-add g');
+	_eval_iam('ai-add ' . $path);
+	_eval_iam('ao-add null');
+	_eval_iam('cs-connect');
+	_eval_iam('ai-select '. $path);
+	my $result = _eval_iam($command);
 	teardown_engine();
 	$result;
 }
+sub _eval_iam { eval_iam($_[0], 'WAVINFO') }
+
 sub cache_wav_info {
 	my @files = File::Find::Rule
 		->file()
