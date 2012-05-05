@@ -1,6 +1,7 @@
 # ----------- Logging ------------
 
 package ::;
+use Modern::Perl;
 use Carp;
 
 sub initialize_logger {
@@ -8,11 +9,24 @@ sub initialize_logger {
 	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE};
 	my $appender = $logfile ? 'FILE' : 'STDERR';
+
+	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
+		log4perl.category.WAVINFO		= DEBUG, $appender
+		log4perl.category.ECI			= DEBUG, $appender
+		log4perl.category.ECI_result	= DEBUG, $appender
+		log4perl.category.CONFIG		= DEBUG, $appender
+		log4perl.category.ECI_FX		= DEBUG, $appender
+);
+	my %log_cats = map
+	{
+		my ($cat) = /category\.(\S+)/;
+		($cat => $_)
+	} @log_cats;
+	
+	say Dumper %log_cats;
+
 	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, IAM
-		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
-		log4perl.category.ECI			= DEBUG, $appender
-		log4perl.category.CONFIG		= DEBUG, $appender
 
 		# screen appender
 		log4perl.appender.STDERR		= Log::Log4perl::Appender::Screen
@@ -27,6 +41,10 @@ sub initialize_logger {
 
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
+	# add lines for the categories we want to log
+	$conf .= join "\n", undef, @log_cats{ @{$config->{opts}->{L}} }
+		if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
+	say $conf;
 	Log::Log4perl::init(\$conf);
 
 }

@@ -122,6 +122,7 @@ sub _add_effect {
 }
 sub _insert_effect {  # call only from add_effect
 	my $p = shift;
+	local $config->{category} = 'ECI_FX';
 	my ($before, $code, $values) = @$p{qw(before type values)};
 	say("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
 	$code = full_effect_code( $code );	
@@ -445,6 +446,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 
 sub apply_op {
 	$debug2 and print "&apply_op\n";
+	local $config->{category} = 'ECI_FX';
 	my $id = shift;
 	! $id and carp "null id, skipping";
 	return unless $id;
@@ -486,9 +488,10 @@ sub remove_op {
 	# remove chain operator from Ecasound engine
 
 	$debug2 and print "&remove_op\n";
+	local $config->{category} = 'ECI_FX';
 
 	# only if engine is configured
-	return unless eval_iam('cs-connected') and eval_iam('cs-is-valid');
+	return unless valid_engine_setup();
 
 	my $id = shift;
 	my $n = chain($id);
@@ -666,6 +669,7 @@ sub cop_add {
 #  with Nama effect parameter
 
 sub effect_update {
+	local $config->{category} = 'ECI_FX';
 
 	# update the parameters of the Ecasound chain operator
 	# referred to by a Nama operator_id
@@ -725,6 +729,7 @@ sub effect_update_copp_set {
 }
 
 sub sync_effect_parameters {
+	local $config->{category} = 'ECI_FX';
 	# when a controller changes an effect parameter
 	# the effect state can differ from the state in
 	# %{$fx->{params}}, Nama's effect parameter store
@@ -748,6 +753,7 @@ sub sync_one_effect {
 	
 
 sub get_cop_params {
+	local $config->{category} = 'ECI_FX';
 	my $count = shift;
 	my @params;
 	for (1..$count){
@@ -772,6 +778,7 @@ sub ops_with_read_only_params {
 
 sub find_op_offsets {
 
+	local $config->{category} = 'ECI_FX';
 	$debug2 and print "&find_op_offsets\n";
 	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
 	$debug and print join "\n\n",@op_offsets; 
@@ -1428,6 +1435,7 @@ sub restore_effects {
 
 sub _bypass_effects {
 	
+	local $config->{category} = 'ECI_FX';
 	my($track, $off_or_on, @ops) = @_;
 
 	# only process ops that belong to this track

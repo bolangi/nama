@@ -361,7 +361,7 @@ sub eval_iam { } # stub
 
 sub eval_iam_neteci {
 	my ($cmd, $category) = @_;
-	$category ||= 'ECI';
+	$category ||=  ( $config->{category} || 'ECI' );
 	logit($category, 'debug', $cmd);
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
@@ -394,7 +394,7 @@ if(	! $return_value == 256 ){
 		restart_ecasound() if $reply =~ /in engine-status/;
 	}
 	else
-	{ 	logit($category,'debug',"Net-ECI result: $reply");
+	{ 	logit('ECI_result','debug',"Net-ECI result: $reply");
 		$reply
 	}
 	
@@ -403,10 +403,11 @@ if(	! $return_value == 256 ){
 sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
 	my ($cmd, $category) = @_;
-	$category ||= 'ECI';
+	$category ||=  ( $config->{category} || 'ECI' );
+	#say "category: $category";
 	logit($category,'debug',$cmd);
 	my (@result) = $engine->{ecasound}->eci($cmd);
-	logit($category, 'debug',"ECI result: @result") 
+	logit('ECI_result', 'debug',"ECI result: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
