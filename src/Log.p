@@ -7,7 +7,7 @@ use Carp;
 sub initialize_logger {
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_LOGFILE};
+	my $logfile = $ENV{NAMA_LOGFILE} || "/dev/null";
 	my $appender = $logfile ? 'FILE' : 'STDERR';
 
 	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
@@ -23,10 +23,19 @@ sub initialize_logger {
 		($cat => $_)
 	} @log_cats;
 	
+	my @cats = grep{ $log_cats{$_} }  split ',', $config->{opts}->{L};
+	
+	say "Logging categories: @cats" if @cats;
+
 	#say Dumper %log_cats;
 
 	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, IAM
+
+		# dummy entry - avoid no logger/no appender warnings
+		log4perl.category.DUMMY			= DEBUG, DUMMY
+		log4perl.appender.DUMMY			= Log::Log4perl::Appender::Screen
+		log4perl.appender.DUMMY.layout	= Log::Log4perl::Layout::NoopLayout
 
 		# screen appender
 		log4perl.appender.STDERR		= Log::Log4perl::Appender::Screen
@@ -42,10 +51,8 @@ sub initialize_logger {
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", undef, @log_cats{ split ',', $config->{opts}->{L} }
-		if $config->{opts}->{L} ;
-		#if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
-	#say $conf;
+	$conf .= join "\n", undef, @log_cats{@cats} if $config->{opts}->{L} ;
+	#say $conf; 
 	Log::Log4perl::init(\$conf);
 
 }
