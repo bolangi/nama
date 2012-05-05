@@ -7,7 +7,7 @@ use Carp;
 sub initialize_logger {
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_LOGFILE};
+	my $logfile = $ENV{NAMA_LOGFILE} || "";
 	my $appender = $logfile ? 'FILE' : 'STDERR';
 
 	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
@@ -52,7 +52,7 @@ sub initialize_logger {
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", undef, @log_cats{@cats} if $config->{opts}->{L} ;
+	$conf .= join "\n", "", @log_cats{@cats} if $config->{opts}->{L} ;
 	#say $conf; 
 	Log::Log4perl::init(\$conf);
 
@@ -63,6 +63,8 @@ sub logei { logit('ECI','info',$_[0]) }
 
 sub logit {
 	my ($category, $level, $message) = @_;
+	#croak("$category, $level, $message");
+	return unless $category;
 	my $logger = get_logger($category);
 	$logger->$level($message);
 }

@@ -160,6 +160,7 @@ sub initialize_interfaces {
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
 
 	choose_sleep_routine();
+	initialize_logger();
 
 	$project->{name} = shift @ARGV;
 	logit('CONFIG','debug',"project name: $project->{name}");
@@ -169,8 +170,6 @@ sub initialize_interfaces {
 
 	read_config(global_config());  # from .namarc if we have one
 	
-	initialize_logger();
-
 	logit('CONFIG','debug',sub{"Config data\n".Dumper $config});
 	
 	setup_user_customization();	
@@ -360,19 +359,11 @@ sub ecasound_pid {
 sub eval_iam { } # stub
 
 sub eval_iam_neteci {
-	my ($cmd, $category) = @_;
-
-	# use magical global override if provided
-	
-	$category ||=  $config->{category};
-
-	# force all categories to 'ECI' if 'ECI' is defined
-	# (exception for WAVINFO, which is too noisy)
-	
-	$category = 'ECI' if $config->{want_logging}->{ECI}
-		and not $category eq 'WAVINFO';
+	my $cmd = shift;
+	my $category = munge_category(shift());
 
 	logit($category, 'debug', "Net-ECI sent: $cmd");
+
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -411,16 +402,11 @@ if(	! $return_value == 256 ){
 
 sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
-	my ($cmd, $category) = @_;
-	$category ||=  ( $config->{category} || 'ECI' );
-
-	# force all categories to 'ECI' if 'ECI' is defined
-	# (exception for WAVINFO, which is too noisy)
+	my $cmd = shift;
+	my $category = munge_category(shift());
 	
- 	$category = 'ECI' if $config->{want_logging}->{ECI}
- 		and not $category eq 'WAVINFO';
-	#say "category: $category";
-	logit($category,'debug',   "ECI sent: $cmd");
+	logit($category,'debug',"ECI sent: $cmd");
+
 	my (@result) = $engine->{ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
@@ -432,6 +418,19 @@ sub eval_iam_libecasoundc {
 	}
 	"@result";
 }
+sub munge_category {
+
+	# override undefined category by magical global setting
+	my $cat = shift || $config->{category};
+
+	# force all categories to 'ECI' if 'ECI' is 
+	# selected for logging
+	# (exception: WAVINFO, which is too noisy)
+	
+	no warnings 'uninitialized';
+	return 'ECI' if $config->{want_logging}->{ECI} and not $cat eq 'WAVINFO';
+}
+
 }
 	
 sub restart_ecasound {
