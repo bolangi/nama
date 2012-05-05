@@ -41,7 +41,8 @@ use ::Globals qw($debug $debug2);
 our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
 
-               # working code, we alias this to the following lexical
+*logit = \&::logit;
+our $logger = Log::Log4perl->get_logger();
 
 {my $var_map = { qw(
 
@@ -61,25 +62,25 @@ sub assign {
   #	class => $class
   #	);
 
-	$debug2 and print "&assign\n";
+	logit('SUB','debug',"&assign");
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
-	carp "didn't expect scalar here" if ref $h{data} eq 'SCALAR';
-	carp "didn't expect code here" if ref $h{data} eq 'CODE';
+	$logger->logcarp("didn't expect scalar here") if ref $h{data} eq 'SCALAR';
+	$logger->logcarp("didn't expect code here") if ref $h{data} eq 'CODE';
 	# print "data: $h{data}, ", ref $h{data}, $/;
 
 	if ( ref $h{data} !~ /^(HASH|ARRAY|CODE|GLOB|HANDLE|FORMAT)$/){
 		# we guess object
 		$class = ref $h{data}; 
-		$debug and print "I found an object of class $class...\n";
+		$logger->debug("I found an object of class $class");
 	} 
 	$class = $h{class};
  	$class .= "::" unless $class =~ /::$/;  # SKIP_PREPROC
 	my @vars = @{ $h{vars} };
 	my $ref = $h{data};
 	my $type = ref $ref;
-	$debug and print <<ASSIGN;
+	$logger->debug(<<ASSIGN);
 	data type: $type
 	data: $ref
 	class: $class
@@ -98,20 +99,19 @@ ASSIGN
 		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\>\w:\[\]{}]+)$/;
 		$var = $var_map->{$var} if $h{var_map} and $var_map->{$var};
 
-		$debug and say "oldvar: $oldvar, newvar: $var";
+		$logger->debug("oldvar: $oldvar, newvar: $var");
 		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
 			$sigil{$old_identifier} = $sigil;
 			$ident{$old_identifier} = $identifier;
 	} @vars;
 
-	$debug and print "SIGIL\n", yaml_out(\%sigil);
-	$debug and print "IDENT\n", yaml_out(\%ident);
-
+	$logger->debug(sub{"SIGIL\n". yaml_out(\%sigil)});
+	$logger->debug(sub{"IDENT\n". yaml_out(\%ident)});
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
 	my @keys =  keys %{ $ref }; # identifiers, *no* sigils
-	$debug and print join " ","found keys: ", keys %{ $ref },"\n---\n";
+	$logger->debug(sub{ join " ","found keys: ", keys %{ $ref },"\n---\n"});
 	map{  
 		my $eval;
 		my $key = $_;
@@ -123,14 +123,15 @@ ASSIGN
 			# use the supplied class unless the variable name
 			# contains \:\:
 			
-		$debug and print <<DEBUG;
+		$logger->debug(<<DEBUG);
 key:             $key
 sigil:      $sigil
 full_class_path: $full_class_path
 DEBUG
 		if ( ! $sigil ){
-			$debug and carp 
+			$logger->logwarn(sub{
 			"didn't find a match for $key in ", join " ", @vars, $/;
+			});
 		} 
 		else 
 		{
@@ -173,9 +174,9 @@ DEBUG
 				}
 			}
 			else { die "unsupported assignment: ".ref $val }
-			$debug and print "eval string: ",$eval, $/; 
+			$logger->debug("eval string: $eval"); 
 			eval($eval);
-			$debug and $@ and carp "failed to eval $eval: $@\n";
+			$logger->logcarp("failed to eval $eval: $@") if $@;
 		}  # end if sigil{key}
 	} @keys;
 	1;
@@ -211,9 +212,9 @@ sub assign_singletons {
 					$key,
 					'}',
 					' = $data->{$ident}->{$key}';
-				$debug and say "eval: $cmd";
+				$logger->debug("eval: $cmd");
 				eval $cmd;
-				carp "error during eval: $@" if $@;
+				$logger->logcarp("error during eval: $@") if $@;
 			} keys %{ $data->{$ident} }
 		}
 	} @singleton_idents;
@@ -230,9 +231,9 @@ sub assign_pronouns {
 			my $type = ref $data->{$ident};
 			die "$ident: expected scalar, got $type" if $type;
 			my $cmd = q($).$class.$ident. q( = $data->{$ident});
-			$debug and say "eval: $cmd";
+			$logger->debug("eval: $cmd");
 			eval $cmd;
-			carp "error during eval: $@" if $@;
+			$logger->logcarp("error during eval: $@") if $@;
 		}
 	} @pronouns;
 }
@@ -254,9 +255,9 @@ sub assign_serialization_arrays {
 			$type eq 'ARRAY' or die "$ident: expected ARRAY, got $type";
 			my $cmd = q($).$class.$ident. q( = @{$data->{$ident}});
 			#my $cmd = q(*).$class.$ident. q( = $data->{$ident});
-			$debug and say "eval: $cmd";
+			$logger->debug("eval: $cmd");
 			eval $cmd;
-			carp "error during eval: $@" if $@;
+			$logger->logcarp("error during eval: $@") if $@;
 		}
 	} @arrays;
 }
@@ -292,7 +293,7 @@ sub serialize_and_write {
 			$ 				# end anchor
 			/x;
 sub serialize {
-	$debug2 and print "&serialize\n";
+	logit('SUB','debug',"&serialize");
 
 	my %h = @_;
 	my @vars = @{ $h{vars} };
@@ -302,7 +303,7 @@ sub serialize {
 
  	$class //= "::";
 	$class =~ /::$/ or $class .= '::'; # SKIP_PREPROC
-	$debug and print "file: $file, class: $class\nvariables...@vars\n";
+	$logger->debug("file: $file, class: $class\nvariables...@vars");
 
 	# first we marshall data into %state
 
@@ -311,7 +312,7 @@ sub serialize {
 	map{ 
 		my ($sigil, $identifier, $key) = /$parse_re/;
 
-	$debug and say "found sigil: $sigil, ident: $identifier, key: $key";
+	$logger->debug("found sigil: $sigil, ident: $identifier, key: $key");
 
 # note: for  YAML::Reader/Writer  all scalars must contain values, not references
 # more YAML adjustments 
@@ -336,7 +337,7 @@ sub serialize {
 							. $identifier
 							. ($key ? qq(->{$key}) : q());
 
-		$debug and say "value: $value";
+		$logger->debug("value: $value");
 
 			
 		 my $eval_string =  q($state{')
@@ -347,12 +348,12 @@ sub serialize {
 							. $value;
 
 		if ($identifier){
-			$debug and print "attempting to eval $eval_string\n";
+			$logger->debug("attempting to eval $eval_string");
 			eval($eval_string) or $debug  and print 
 				"eval returned zero or failed ($@\n)";
 		}
 	} @vars;
-	$debug and say '\%state', $/, Dumper \%state;
+	$logger->debug(sub{join $/,'\%state', Dumper \%state});
 
 	# YAML out for screen dumps
 	return( yaml_out(\%state) ) unless $h{file};
@@ -366,7 +367,7 @@ sub serialize {
 }
 
 sub json_out {
-	$debug2 and carp "&json_out";
+	logit('SUB','debug',"&json_out");
 	my $data_ref = shift;
 	my $type = ref $data_ref;
 	croak "attempting to code wrong data type: $type"
@@ -375,7 +376,7 @@ sub json_out {
 }
 
 sub json_in {
-	$debug2 and carp "&json_in";
+	logit('SUB','debug',"&json_in");
 	my $json = shift;
 	my $data_ref = decode_json($json);
 	$data_ref
@@ -383,23 +384,23 @@ sub json_in {
 
 sub yaml_out {
 	
-	$debug2 and carp "&yaml_out";
+	logit('SUB','debug',"&yaml_out");
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
-	$debug and print "data ref type: $type\n "; 
-	carp "can't yaml-out a Scalar!!\n" if ref $data_ref eq 'SCALAR';
-	croak "attempting to code wrong data type: $type"
+	$logger->debug("data ref type: $type");
+	$logger->logcarp("can't yaml-out a Scalar!!") if ref $data_ref eq 'SCALAR';
+	$logger->logcroak("attempting to code wrong data type: $type")
 		if $type !~ /HASH|ARRAY/;
 	my $output;
 	#$debug and print join $/, keys %$data_ref, $/;
-	$debug and print "about to write YAML as string\n";
+	$logger->debug("about to write YAML as string");
 	my $y = YAML::Tiny->new;
 	$y->[0] = $data_ref;
 	my $yaml = $y->write_string() . "...\n";
 }
 sub yaml_in {
 	
-	# $debug2 and print "&yaml_in\n";
+	# logit('SUB','debug',"&yaml_in");
 	my $input = shift;
 	my $yaml = $input =~ /\n/ # check whether file or text
 		? $input 			# yaml text
