@@ -211,7 +211,7 @@ sub summary {
 
 package ::;
 sub new_effect_profile {
-	$debug2 and say "&new_effect_profile";
+	logsub("&new_effect_profile");
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
 	say qq(effect profile "$profile" created for tracks: @tracks);
@@ -226,14 +226,14 @@ sub new_effect_profile {
 	} @tracks;
 }
 sub delete_effect_profile { 
-	$debug2 and say "&delete_effect_profile";
+	logsub("&delete_effect_profile");
 	my $name = shift;
 	say qq(deleting effect profile: $name);
 	map{ $_->destroy} ::EffectChain::find( profile => $name );
 }
 
 sub apply_effect_profile {  # overwriting current effects
-	$debug2 and say "&apply_effect_profile";
+	logsub("&apply_effect_profile");
 	my ($profile) = @_;
 	my @chains = ::EffectChain::find(profile => $profile);
 

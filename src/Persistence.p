@@ -8,7 +8,7 @@ use Modern::Perl; no warnings 'uninitialized';
 sub save_state {
 	my $filename = shift;
 	my $path = $file->state_store($filename);
-	$debug2 and print "&save_state\n";
+	logsub("&save_state");
 	$project->{save_file_version_number} = $VERSION;
 
 	# some stuff get saved independently of our state file
@@ -208,7 +208,7 @@ sub decode {
 }
 
 sub restore_state {
-	$debug2 and print "&restore_state\n";
+	logsub("&restore_state");
 	my $filename = shift;
 	$filename = $file->state_store($filename);
 
@@ -852,7 +852,7 @@ sub save_project_effect_chains {
 }
 sub restore_effect_chains {
 
-	$debug2 and say "&restore_effect_chains";
+	logsub("&restore_effect_chains");
 		my $path =  $file->global_effect_chains;
 		my ($resolved, $format) = get_newest($path);  
 		carp("$resolved: file not found"), return unless $resolved;

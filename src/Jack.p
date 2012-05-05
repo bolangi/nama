@@ -9,7 +9,7 @@ no warnings 'uninitialized';
 sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
 
 sub jack_update {
-	$debug2 and say "&jack_update";
+	logsub("&jack_update");
 	# cache current JACK status
 	#
 	# skip if Ecasound is busy
@@ -112,7 +112,7 @@ sub parse_ports_list {
 
 	# default to output of jack_lsp -p
 	
-	$debug2 and say "&parse_ports_list";
+	logsub("&parse_ports_list");
 	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
 	$debug and say "input: $j";
 

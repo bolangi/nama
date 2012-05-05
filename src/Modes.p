@@ -9,7 +9,7 @@ sub set_preview_mode {
 
 	# set preview mode, releasing doodle mode if necessary
 	
-	$debug2 and print "&preview\n";
+	logsub("&preview");
 
 	# do nothing if already in 'preview' mode
 	
@@ -25,7 +25,7 @@ sub set_preview_mode {
 }
 sub set_doodle_mode {
 
-	$debug2 and print "&doodle\n";
+	logsub("&doodle");
 	return if engine_running() and ::ChainSetup::really_recording();
 	$mode->{preview} = "doodle";
 
@@ -39,7 +39,7 @@ sub set_doodle_mode {
 }
 sub exit_preview_mode { # exit preview and doodle modes
 
-		$debug2 and print "&exit_preview_mode\n";
+		logsub("&exit_preview_mode");
 		return unless $mode->{preview};
 		stop_transport() if engine_running();
 		$debug and print "Exiting preview/doodle mode\n";

@@ -60,7 +60,7 @@ sub detect_spacebar {
 }
 
 sub pager {
-	$debug2 and print "&pager\n";
+	logsub("&pager");
 	my @output = @_;
 	my ($screen_lines, $columns) = $text->{term}->get_screen_size();
 	my $line_count = 0;
@@ -81,7 +81,7 @@ sub pager {
 	print "\n\n";
 }
 sub file_pager {
-	$debug2 and print "&file_pager\n";
+	logsub("&file_pager");
 	my $fname = shift;
 	if (! -e $fname or ! -r $fname ){
 		carp "file not found or not readable: $fname\n" ;
@@ -119,7 +119,7 @@ sub get_ecasound_iam_keywords {
 }
 
 sub process_line {
-	$debug2 and print "&process_line\n";
+	logsub("&process_line");
 	my ($user_input) = @_;
 	$debug and print "user input: $user_input\n";
 	if (defined $user_input and $user_input !~ /^\s*$/) {

@@ -3,12 +3,13 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use ::Util qw(input_node output_node);
-use vars qw(%reserved $debug $debug2);
+use vars qw(%reserved $debug);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;
-*debug = \$::debug;
-*debug2 = \$::debug2;
+our $logger;
+
+sub initialize_logger { $logger = Log::Log4perl->get_logger() }
 
 sub add_path_for_rec {
 
@@ -16,14 +17,14 @@ sub add_path_for_rec {
 	
 	my($g,$track) = @_;
 
-	$debug2 and say "&add_path_for_rec: track ",$track;	
+	logsub("&add_path_for_rec: track ".$track->name);
 	# Track input from a WAV, JACK client, or soundcard
 	# Record 'raw' signal
 	#
 	# Do *not* record signals if the source reports it is
 	# a track, bus or loop
 
-	if( $_->source_type !~ /track|bus|loop/ )
+	if( $track->source_type !~ /track|bus|loop/ )
 	{
 		# create temporary track for rec_file chain
 
@@ -31,24 +32,24 @@ sub add_path_for_rec {
 		# temporary track by providing the data as 
 		# graph edge attributes)
 
-		$debug and say "rec file link for $_->name";	
-		my $name = $_->name . '_rec_file';
+		$logger->debug("rec file link for ".$track->name);
+		my $name = $track->name . '_rec_file';
 		my $anon = ::SlaveTrack->new( 
-			target => $_->name,
+			target => $track->name,
 			rw => 'OFF',
 			group => 'Temp',
 			name => $name);
 
 		# connect writepath: source --> temptrackname --> wav_out
 		
-		$g->add_path(input_node($_->source_type), $name, 'wav_out');
+		$g->add_path(input_node($track->source_type), $name, 'wav_out');
 
 
 		$g->set_vertex_attributes($name, { 
 
 			# set chain_id to R3 (if original track is 3) 
 
-			chain_id => 'R'.$_->n,
+			chain_id => 'R'.$track->n,
 
 			# do not perform mono-to-stereo copy,
 			# (override IO class default)
@@ -57,7 +58,7 @@ sub add_path_for_rec {
 		});
 
 	} 
-	elsif ($_->source_type =~ /bus|track/) 
+	elsif ($track->source_type =~ /bus|track/) 
 	{
 
 		# for tracks with identified (track|bus) input
@@ -75,14 +76,14 @@ sub add_path_for_rec {
 		# - receives a stereo input
 		# - mix track width is set to stereo (default)
 
-		my @edge = ($_->name, 'wav_out'); # cooked signal
+		my @edge = ($track->name, 'wav_out'); # cooked signal
 
 		$g->add_path(@edge); 
 
 		# set chain_id to R3 (if original track is 3) 
 
 		$g->set_edge_attributes(@edge, { 
-			chain_id => 'R'.$_->n,
+			chain_id => 'R'.$track->n,
 		});
 		
 		# if this path is left unconnected, 
@@ -101,6 +102,7 @@ sub add_path_for_rec {
 }
 sub add_path_for_aux_send {
 	my ($g, $track) = @_;
+		logsub("&add_path_for_aux_send: track ".$track->name);
 		# for track 'sax', send_type 'jack_client', create route as 
 		# sax-jack_client_out
 		my @edge = ($track->name, output_node($track->send_type));
@@ -123,28 +125,28 @@ sub expand_graph {
 	
 	for ($g->edges){
 		my($a,$b) = @{$_}; 
-		$debug and say "$a-$b: processing...";
-		$debug and say "$a-$b: already seen" if $seen{"$a-$b"};
+		$logger->debug("$a-$b: processing...");
+		$logger->debug("$a-$b: already seen") if $seen{"$a-$b"};
 		next if $seen{"$a-$b"};
 
 		# case 1: both nodes are tracks: default insertion logic
 	
 		if ( is_a_track($a) and is_a_track($b) ){ 
-			$debug and say "processing track-track edge: $a-$b";
+			$logger->debug("processing track-track edge: $a-$b");
 			add_loop($g,$a,$b) } 
 
 		# case 2: fan out from track: use near side loop
 
 		elsif ( is_a_track($a) and $g->successors($a) > 1 ) {
-			$debug and say "fan_out from track $a";
+			$logger->debug("fan_out from track $a");
 			add_near_side_loop($g,$a,$b,out_loop($a));}
 	
 		# case 3: fan in to track: use far side loop
 		
 		elsif ( is_a_track($b) and $g->predecessors($b) > 1 ) {
-			$debug and say "fan in to track $b";
+			$logger->debug("fan in to track $b");
 			add_far_side_loop($g,$a,$b,in_loop($b));}
-		else { $debug and say "$a-$b: no action taken" }
+		else { $logger->debug("$a-$b: no action taken") }
 	}
 	
 }
@@ -162,11 +164,11 @@ sub add_inserts {
 
 sub add_loop {
 	my ($g,$a,$b) = @_;
-	$debug and say "adding loop";
+	$logger->debug("adding loop");
 	my $fan_out = $g->successors($a);
-	$debug and say "$a: fan_out $fan_out";
+	$logger->debug("$a: fan_out $fan_out");
 	my $fan_in  = $g->predecessors($b);
-	$debug and say "$b: fan_in $fan_in";
+	$logger->debug("$b: fan_in $fan_in");
 	if ($fan_out > 1){
 		add_near_side_loop($g,$a,$b, out_loop($a))
 	} elsif ($fan_in  > 1){
@@ -227,7 +229,7 @@ sub add_loop {
 # the track number and will therefore get the track effects
 
  	my ($g, $a, $b, $loop) = @_;
- 	$debug and say "$a-$b: insert near side loop";
+ 	$logger->debug("$a-$b: insert near side loop");
 	# we will insert loop _after_ processing successor
 	# edges so $a-$loop will not be picked up 
 	# in successors list.
@@ -246,7 +248,7 @@ sub add_loop {
 		track => $::tn{$a}->name});
 	map{ 
  		my $attr = $g->get_edge_attributes($a,$_);
- 		$debug and say "deleting edge: $a-$_";
+ 		$logger->debug("deleting edge: $a-$_");
  		$g->delete_edge($a,$_);
 		$g->add_edge($loop, $_);
 		$g->set_edge_attributes($loop,$_, $attr) if $attr;
@@ -258,14 +260,14 @@ sub add_loop {
 
 sub add_far_side_loop {
  	my ($g, $a, $b, $loop) = @_;
- 	$debug and say "$a-$b: insert far side loop";
+ 	$logger->debug("$a-$b: insert far side loop");
 	
 	$g->set_vertex_attributes($loop,{
 		n => $::tn{$a}->n, j => 'a',
 		track => $::tn{$a}->name});
 	map{ 
  		my $attr = $g->get_edge_attributes($_,$b);
- 		$debug and say "deleting edge: $_-$b";
+ 		$logger->debug("deleting edge: $_-$b");
  		$g->delete_edge($_,$b);
 		$g->add_edge($_,$loop);
 		$g->set_edge_attributes($_,$loop, $attr) if $attr;

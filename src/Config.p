@@ -59,7 +59,7 @@ sub read_config {
 	#
 	# use the embedded default file if none other is present
 	
-	$debug2 and print "&read_config\n";
+	logsub("&read_config");
 	
 	my $config_file = shift;
 	
@@ -81,7 +81,7 @@ sub read_config {
 	set_default_globals(); # in case they are undefined
 }
 sub walk_tree {
-	#$debug2 and print "&walk_tree\n";
+	#logsub("&walk_tree");
 	my $ref = shift;
 	map { substitute($ref, $_) } 
 		grep {$_ ne q(abbreviations)} 

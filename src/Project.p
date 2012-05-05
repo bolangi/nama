@@ -42,7 +42,7 @@ sub list_projects {
 }
 
 sub initialize_project_data {
-	$debug2 and print "&initialize_project_data\n";
+	logsub("&initialize_project_data");
 
 	return if transport_running();
 	$ui->destroy_widgets();
@@ -100,7 +100,7 @@ sub initialize_project_data {
 	::ChainSetup::initialize();
 }
 sub load_project {
-	$debug2 and print "&load_project\n";
+	logsub("&load_project");
 	my %h = @_;
 	$debug and print yaml_out \%h;
 	print("no project name.. doing nothing.\n"),return 
@@ -184,7 +184,7 @@ Loading project "untitled".
 
 sub dig_ruins { # only if there are no tracks 
 	
-	$debug2 and print "&dig_ruins";
+	logsub("&dig_ruins");
 	return if ::Track::user();
 	$debug and print "looking for WAV files\n";
 
@@ -217,7 +217,7 @@ sub remove_riff_header_stubs {
 	# 44 byte stubs left by a recording chainsetup that is 
 	# connected by not started
 	
-	$debug2 and print "&remove_riff_header_stubs\n";
+	logsub("&remove_riff_header_stubs");
 	
 
 	$debug and print "this wav dir: ", this_wav_dir(), $/;
@@ -233,7 +233,7 @@ sub remove_riff_header_stubs {
 }
 
 sub create_system_buses {
-	$debug2 and say "&create_system_buses";
+	logsub("&create_system_buses");
 
 	# The following are ::Bus objects, no routing.
 	# They are hidden from the user.

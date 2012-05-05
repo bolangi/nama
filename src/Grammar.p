@@ -7,7 +7,7 @@ sub setup_grammar {
 
 	### COMMAND LINE PARSER 
 
-	$debug2 and print "Reading grammar\n";
+	logsub("&setup_grammar");
 
 	$text->{commands_yml} = get_data_section("commands_yml");
 	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});

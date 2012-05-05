@@ -38,7 +38,7 @@ sub start_transport {
 	# report engine status
 	# sleep 1s
 
-	$debug2 and print "&start_transport\n";
+	logsub("&start_transport");
 	say("\nCannot start. Engine is not configured.\n"),return 
 		unless eval_iam("cs-connected");
 
@@ -60,7 +60,7 @@ sub start_transport {
 sub stop_transport { 
 
 	my $quiet = shift;
-	$debug2 and print "&stop_transport\n"; 
+	logsub("&stop_transport"); 
 	mute();
 	my $pos = eval_iam('getpos');
 	eval_iam('stop');	

@@ -4,7 +4,7 @@ use Modern::Perl;
 use ::Globals qw(:all);
 
 sub rec_cleanup {  
-	$debug2 and print "&rec_cleanup\n";
+	logsub("&rec_cleanup");
 	$debug && print("transport still running, can't cleanup"),return if transport_running();
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);

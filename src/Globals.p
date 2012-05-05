@@ -22,7 +22,6 @@ our %EXPORT_TAGS =
 	)],
 
 debug => [qw( 		$debug
-					$debug2
 )],
 
 	pronouns => [qw(

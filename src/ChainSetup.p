@@ -9,7 +9,6 @@ use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
-our $logger = Log::Log4perl->get_logger();
 
 our (
 
@@ -34,10 +33,13 @@ our (
 	@pre_output, 	# pre-output chain operators
 
 	$chain_setup,	# final result as string
+	$logger
 	);
 
 
 sub initialize {
+	$logger = Log::Log4perl->get_logger();
+	::Graph::initialize_logger();
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};
 	@io = (); 			# IO object list

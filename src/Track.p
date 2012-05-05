@@ -223,7 +223,7 @@ sub maybe_monitor { # ordinary sub, not object method
 }
 
 sub rec_status {
-#	$debug2 and print "&rec_status\n";
+#	logsub("&rec_status");
 	my $track = shift;
 	my $bug = shift;
 	local $debug;
@@ -1018,7 +1018,7 @@ use Modern::Perl;
 
 sub add_track {
 
-	$debug2 and print "&add_track\n";
+	logsub("&add_track");
 	#return if transport_running();
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);

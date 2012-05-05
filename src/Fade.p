@@ -8,8 +8,8 @@ use warnings;
 no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index);
-use ::Globals qw(:singletons %tn $debug $debug2 @fade_data); 
-local $debug2 = local $debug = 1;
+use ::Globals qw(:singletons %tn $debug @fade_data); 
+local $debug = 1;
 use ::Object qw( 
 				 n
 				 type

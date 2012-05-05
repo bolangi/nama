@@ -8,7 +8,7 @@
 
 sub init_gui {
 
-	$debug2 and print "&init_gui\n";
+	logsub("&init_gui");
 
 	init_palettefields(); # keys only
 
@@ -208,7 +208,7 @@ $gui->{palette}->AddItems( @color_items);
 
 sub transport_gui {
 	my $ui = shift;
-	$debug2 and print "&transport_gui\n";
+	logsub("&transport_gui");
 
 	$gui->{engine_label} = $gui->{transport_frame}->Label(
 		-text => 'TRANSPORT',
@@ -237,7 +237,7 @@ sub transport_gui {
 }
 sub time_gui {
 	my $ui = shift;
-	$debug2 and print "&time_gui\n";
+	logsub("&time_gui");
 
 	my $time_label = $gui->{clock_frame}->Label(
 		-text => 'TIME', 
@@ -475,7 +475,7 @@ sub global_version_buttons {
  	}
 }
 sub track_gui { 
-	$debug2 and print "&track_gui\n";
+	logsub("&track_gui");
 	my $ui = shift;
 	my $n = shift;
 	return if $ti{$n}->hide;
@@ -753,7 +753,7 @@ sub track_gui {
 sub remove_track_gui {
  	my $ui = shift;
  	my $n = shift;
-	$debug2 and say "&remove_track_gui";
+	logsub("&remove_track_gui");
 	return unless $gui->{tracks_remove}->{$n};
  	map {$_->destroy  } @{ $gui->{tracks_remove}->{$n} };
 	delete $gui->{tracks_remove}->{$n};
@@ -769,7 +769,7 @@ sub paint_mute_buttons {
 }
 
 sub create_master_and_mix_tracks { 
-	$debug2 and print "&create_master_and_mix_tracks\n";
+	logsub("&create_master_and_mix_tracks");
 
 
 	my @rw_items = (
@@ -809,7 +809,7 @@ sub update_version_button {
 }
 
 sub add_effect_gui {
-		$debug2 and print "&add_effect_gui\n";
+		logsub("&add_effect_gui");
 		my $ui = shift;
 		my %p 			= %{shift()};
 		my ($n,$code,$id,$parent_id,$parameter) =
@@ -926,7 +926,7 @@ sub destroy_widgets {
 }
 sub remove_effect_gui { 
 	my $ui = shift;
-	$debug2 and print "&remove_effect_gui\n";
+	logsub("&remove_effect_gui");
 	my $id = shift;
 	my $n = $fx->{applied}->{$id}->{chain};
 	$debug and print "id: $id, chain: $n\n";
@@ -941,7 +941,7 @@ sub remove_effect_gui {
 
 sub effect_button {
 	local $debug = 0;	
-	$debug2 and print "&effect_button\n";
+	logsub("&effect_button");
 	my ($n, $label, $start, $end) = @_;
 	$debug and print "chain $n label $label start $start end $end\n";
 	my @items;
@@ -974,7 +974,7 @@ sub effect_button {
 
 sub make_scale {
 	
-	$debug2 and print "&make_scale\n";
+	logsub("&make_scale");
 	my $ref = shift;
 	my %p = %{$ref};
 # 	%p contains following:
@@ -1124,7 +1124,7 @@ sub destroy_marker {
 
 
 sub get_saved_colors {
-	$debug2 and print "&get_saved_colors\n";
+	logsub("&get_saved_colors");
 
 	# aliases
 	

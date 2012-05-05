@@ -9,7 +9,7 @@ sub generate_setup {
 
 	# return 1 if successful
 	# catch errors from generate_setup_try() and cleanup
-	$debug2 and print "&generate_setup\n";
+	logsub("&generate_setup");
 
 	# save current track
 	local $this_track;
@@ -38,7 +38,7 @@ sub generate_setup {
 	$success;
 }
 sub remove_temporary_tracks {
-	$debug2 and say "&remove_temporary_tracks";
+	logsub("&remove_temporary_tracks");
 	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
 }
 
@@ -47,7 +47,7 @@ sub reconfigure_engine {
 
 	my $force = shift;
 
-	$debug2 and print "&reconfigure_engine\n";
+	logsub("&reconfigure_engine");
 
 	# skip if command line option is set
 	# don't skip if $force argument given
@@ -207,7 +207,7 @@ sub find_duplicate_inputs { # in Main bus only
 
 	%{$setup->{tracks_with_duplicate_inputs}} = ();
 	%{$setup->{inputs_used}} = ();
-	$debug2 and print "&find_duplicate_inputs\n";
+	logsub("&find_duplicate_inputs");
 	map{	my $source = $_->source;
 			$setup->{tracks_with_duplicate_inputs}->{$_->name}++ if $setup->{inputs_used}->{$source} ;
 		 	$setup->{inputs_used}->{$source} //= $_->name;
@@ -238,7 +238,7 @@ sub arm {
 	# - exiting preview
 	# - automix	
 	
-	$debug2 and print "&arm\n";
+	logsub("&arm");
 	exit_preview_mode();
 	$setup->{changed}++;
 	generate_setup() and connect_transport();
@@ -273,7 +273,7 @@ arm();
 }
 
 sub connect_transport {
-	$debug2 and print "&connect_transport\n";
+	logsub("&connect_transport");
 	my $quiet = shift;
 	remove_riff_header_stubs();
 	remove_latency_ops() unless $config->{opts}->{O};

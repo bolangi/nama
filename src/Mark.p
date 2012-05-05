@@ -145,7 +145,7 @@ use Modern::Perl;
 use ::Globals qw(:all);
 
 sub drop_mark {
-	$debug2 and print "drop_mark()\n";
+	logsub("&drop_mark");
 	my $name = shift;
 	my $here = eval_iam("getpos");
 
@@ -165,7 +165,7 @@ sub drop_mark {
 	$ui->marker($mark); # for GUI
 }
 sub mark { # GUI_CODE
-	$debug2 and print "mark()\n";
+	logsub("&mark");
 	my $mark = shift;
 	my $pos = $mark->time;
 	if ($gui->{_markers_armed}){ 
@@ -224,7 +224,7 @@ sub to_end {
 sub jump {
 	return if ::ChainSetup::really_recording();
 	my $delta = shift;
-	$debug2 and print "&jump\n";
+	logsub("&jump");
 	my $here = eval_iam('getpos');
 	$debug and print "delta: $delta\nhere: $here\nunit: $gui->{_seek_unit}\n\n";
 	my $new_pos = $here + $delta * $gui->{_seek_unit};

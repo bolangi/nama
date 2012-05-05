@@ -18,7 +18,6 @@ sub definitions {
 		tabstop			=> 4,
 	};
 
-	$debug2 = 0; # subroutine names
 	$debug = 0; # debug statements
 
 	####### Initialize singletons #######
@@ -136,15 +135,11 @@ sub definitions {
 
 sub initialize_interfaces {
 	
-	$debug2 and print "&prepare\n";
+	logsub("&prepare");
 
 	say
 [% qx(cat ./banner.pl) %]
 
-	if ($config->{opts}->{D}){
-		$debug = 1;
-		$debug2 = 1;
-	}
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
@@ -401,7 +396,7 @@ if(	! $return_value == 256 ){
 }
 
 sub eval_iam_libecasoundc {
-	#$debug2 and print "&eval_iam\n";
+	#logsub("&eval_iam");
 	my $cmd = shift;
 	my $category = munge_category(shift());
 	
