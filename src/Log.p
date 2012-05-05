@@ -37,6 +37,12 @@ sub log_eci_cmd {
 		cmd			=> $cmd,
 	});
 }
+sub logit {
+	my ($category, $level, $message) = @_;
+	my $logger = get_logger($category);
+	$logger->$level($message);
+}
+	
 sub log_eci_result {
 	my $msg = shift;
 	my $cat = 'ECI';
