@@ -14,7 +14,7 @@ sub effects_cache {
 }
 sub prepare_static_effects_data{
 	
-	$debug2 and print "&prepare_static_effects_data\n";
+	logsub("&prepare_static_effects_data");
 
 	my $effects_cache = effects_cache();
 
@@ -91,7 +91,7 @@ sub modified_stamp {
 	$s[9];
 }
 sub prepare_effect_index {
-	$debug2 and print "&prepare_effect_index\n";
+	logsub("&prepare_effect_index");
 	%{$fx_cache->{partial_label_to_full}} = ();
 	map{ 
 		my $code = $_;
@@ -104,7 +104,7 @@ sub prepare_effect_index {
 	#print yaml_out $fx_cache->{partial_label_to_full};
 }
 sub extract_effects_data {
-	$debug2 and print "&extract_effects_data\n";
+	logsub("&extract_effects_data");
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
@@ -134,7 +134,7 @@ sub extract_effects_data {
 	}
 }
 sub sort_ladspa_effects {
-	$debug2 and print "&sort_ladspa_effects\n";
+	logsub("&sort_ladspa_effects");
 #	print yaml_out($fx_cache->{split}); 
 	my $aa = $fx_cache->{split}->{ladspa}{a};
 	my $zz = $fx_cache->{split}->{ladspa}{z};
@@ -146,7 +146,7 @@ sub sort_ladspa_effects {
 }		
 sub read_in_effects_data {
 	
-	$debug2 and print "&read_in_effects_data\n";
+	logsub("&read_in_effects_data");
 
 	my $lr = eval_iam("ladspa-register");
 
@@ -278,7 +278,7 @@ sub ladspa_path {
 	$ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
 }
 sub get_ladspa_hints{
-	$debug2 and print "&get_ladspa_hints\n";
+	logsub("&get_ladspa_hints");
 	my @dirs =  split ':', ladspa_path();
 	my $data = '';
 	my %seen = ();
@@ -406,7 +406,7 @@ sub range {
 
 }
 sub integrate_ladspa_hints {
-	$debug2 and print "&integrate_ladspa_hints\n";
+	logsub("&integrate_ladspa_hints");
 	map{ 
 		my $i = $fx_cache->{full_label_to_index}->{$_};
 		# print("$_ not found\n"), 

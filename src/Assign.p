@@ -37,8 +37,6 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-use ::Globals qw($debug $debug2);
-
 our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
 
@@ -349,8 +347,8 @@ sub serialize {
 
 		if ($identifier){
 			$logger->debug("attempting to eval $eval_string");
-			eval($eval_string) or $debug  and print 
-				"eval returned zero or failed ($@\n)";
+			eval($eval_string) 
+				or $logger->error("eval returned zero or failed ($@)");
 		}
 	} @vars;
 	$logger->debug(sub{join $/,'\%state', Dumper \%state});
