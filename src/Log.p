@@ -6,7 +6,7 @@ use Carp;
 
 sub initialize_logger {
 
-	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
+	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE};
 	my $appender = $logfile ? 'FILE' : 'STDERR';
 
