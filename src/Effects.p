@@ -82,7 +82,7 @@ sub set_chain_value {
 
 sub add_effect {
 	my $p = shift;
-	logit('SUB','debug', "&add_effect");
+	logsub("&add_effect");
 	#logit('FX','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
 	
 	set_chain_value($p);
@@ -238,7 +238,7 @@ sub modify_multiple_effects {
 }
 
 sub remove_effect { 
-	logit('SUB','debug', "&remove_effect");
+	logsub("&remove_effect");
 	my $id = shift;
 	if( ! fx($id) ){
 		$logger->logcarp("$id: does not exist, skipping...\n");
@@ -432,7 +432,7 @@ sub effect_index {
 
 sub apply_ops {  # in addition to operators in .ecs file
 	
-	logit('SUB','debug', "&apply_ops");
+	logsub("&apply_ops");
 	for my $n ( map{ $_->n } ::Track::all() ) {
 	$logger->debug( "chain: $n, offset: $fx->{offset}->{$n}");
  		next unless ::ChainSetup::is_ecasound_chain($n);
@@ -446,7 +446,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 }
 
 sub apply_op {
-	logit('SUB','debug', "&apply_op");
+	logsub("&apply_op");
 	local $config->{category} = 'ECI_FX';
 	my $id = shift;
 	! $id and carp "null id, skipping";
@@ -488,7 +488,7 @@ sub apply_op {
 sub remove_op {
 	# remove chain operator from Ecasound engine
 
-	logit('SUB','debug', "&remove_op");
+	logsub("&remove_op");
 	local $config->{category} = 'ECI_FX';
 
 	# only if engine is configured
@@ -560,7 +560,7 @@ sub root_parent {
 ## and by the ops array in each track, $track->ops
 
 sub cop_add {
-	logit('SUB','debug', "&cop_add");
+	logsub("&cop_add");
 	my $p = shift;
 	$logger->debug(sub{yaml_out($p)});
 
@@ -675,7 +675,7 @@ sub effect_update {
 	# update the parameters of the Ecasound chain operator
 	# referred to by a Nama operator_id
 	
-	#logit('SUB','debug', "&effect_update");
+	#logsub("&effect_update");
 
 	return unless valid_engine_setup();
 	#my $es = eval_iam("engine-status");
@@ -776,7 +776,7 @@ sub ops_with_read_only_params {
 sub find_op_offsets {
 
 	local $config->{category} = 'ECI_FX';
-	logit('SUB','debug', "&find_op_offsets");
+	logsub("&find_op_offsets");
 	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
 	$logger->debug( join "\n\n",@op_offsets);
 	for my $output (@op_offsets){

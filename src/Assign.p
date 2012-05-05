@@ -10,7 +10,7 @@ use Carp;
 use YAML::Tiny;
 use File::Slurp;
 use File::HomeDir;
-use ::Log qw(logit);
+use ::Log qw(logsub);
 use Storable qw(nstore retrieve);
 use JSON::XS;
 use Data::Dumper::Concise;
@@ -62,7 +62,7 @@ sub assign {
   #	class => $class
   #	);
 
-	logit('SUB','debug',"&assign");
+	logsub("&assign");
 	
 	my %h = @_; # parameters appear in %h
 	my $class;
@@ -293,7 +293,7 @@ sub serialize_and_write {
 			$ 				# end anchor
 			/x;
 sub serialize {
-	logit('SUB','debug',"&serialize");
+	logsub("&serialize");
 
 	my %h = @_;
 	my @vars = @{ $h{vars} };
@@ -367,7 +367,7 @@ sub serialize {
 }
 
 sub json_out {
-	logit('SUB','debug',"&json_out");
+	logsub("&json_out");
 	my $data_ref = shift;
 	my $type = ref $data_ref;
 	croak "attempting to code wrong data type: $type"
@@ -376,7 +376,7 @@ sub json_out {
 }
 
 sub json_in {
-	logit('SUB','debug',"&json_in");
+	logsub("&json_in");
 	my $json = shift;
 	my $data_ref = decode_json($json);
 	$data_ref
@@ -384,7 +384,7 @@ sub json_in {
 
 sub yaml_out {
 	
-	logit('SUB','debug',"&yaml_out");
+	logsub("&yaml_out");
 	my ($data_ref) = shift; 
 	my $type = ref $data_ref;
 	$logger->debug("data ref type: $type");
@@ -400,7 +400,7 @@ sub yaml_out {
 }
 sub yaml_in {
 	
-	# logit('SUB','debug',"&yaml_in");
+	# logsub("&yaml_in");
 	my $input = shift;
 	my $yaml = $input =~ /\n/ # check whether file or text
 		? $input 			# yaml text

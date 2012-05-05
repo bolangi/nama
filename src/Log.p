@@ -1,12 +1,11 @@
 # ----------- Logging ------------
 
 package ::Log;
-use Exporter;
-our @ISA = 'Exporter';
-our @EXPORT_OK = qw(logit initialize_logger);
 use Modern::Perl;
 use Log::Log4perl qw(get_logger :levels);
-use Carp;
+use Exporter;
+our @ISA = 'Exporter';
+our @EXPORT_OK = qw(logit logsub initialize_logger);
 our $appender;
 
 sub initialize_logger {
@@ -58,5 +57,6 @@ sub logit {
 	my $logger = get_logger($category);
 	$logger->$level($message);
 }
+sub logsub { logit('SUB','debug',$_[0]) }
 	
 1;
