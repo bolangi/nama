@@ -7,7 +7,7 @@ use Carp;
 sub initialize_logger {
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_LOGFILE} || "/dev/null";
+	my $logfile = $ENV{NAMA_LOGFILE};
 	my $appender = $logfile ? 'FILE' : 'STDERR';
 
 	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
