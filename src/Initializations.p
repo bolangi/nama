@@ -162,23 +162,22 @@ sub initialize_interfaces {
 	choose_sleep_routine();
 
 	$project->{name} = shift @ARGV;
-	$debug and print "project name: $project->{name}\n";
+	logit('CONFIG','debug',"project name: $project->{name}");
 
-	$debug and print("$config->{opts}\n======\n", yaml_out($config->{opts})); ; 
-
+	logit('CONFIG','debug',
+		sub{"Command line options\n".  yaml_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	
 	initialize_logger();
 
-	$debug and say "#### Config file ####";
-	#$debug and say yaml_out($config); XX config is object now; needs a dump method
+	logit('CONFIG','debug',sub{"Config data\n".Dumper $config});
 	
 	setup_user_customization();	
 
 	start_ecasound();
 
-	$debug and print "reading config file\n";
+	logit('CONFIG','debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
 		$config->{root_dir} = $config->{opts}->{d};
@@ -362,8 +361,8 @@ sub eval_iam { } # stub
 
 sub eval_iam_neteci {
 	my ($cmd, $category) = @_;
-	my $logger = get_logger($category || $config->{log} || 'ECI');
-	$logger->debug($cmd);
+	$category ||=  ( $config->{category} || 'ECI' );
+	logit($category, 'debug', "Net-ECI sent: $cmd");
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
 	my $buf;
@@ -382,53 +381,47 @@ sub eval_iam_neteci {
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
-	$logger->error("Ecasound return value was $return_value (expected 256)");
+	logit($category,'error',"Net-ECI bad return value: $return_value (expected 256)");
 	restart_ecasound();
 
 }
 	$reply =~ s/\s+$//; 
 
-	given($type){
-		when ('e'){ carp $reply;
-			restart_ecasound() if $reply =~ /in engine-status/;
-
-}
-		default{ return $reply }
+	if( $type eq 'e')
+	{
+		logit($category,'error',"ECI error! Command: $cmd. Reply: $reply");
+		restart_ecasound() if $reply =~ /in engine-status/;
 	}
-
+	else
+	{ 	logit($category,'debug',"Net-ECI  got: $reply");
+		$reply
+	}
+	
 }
 
 sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
 	my ($cmd, $category) = @_;
-	my $logger = get_logger($category || $config->{log} || 'ECI');
-	$logger->debug($cmd);
-	$debug and print "iam command: $cmd\n";
+	$category ||=  ( $config->{category} || 'ECI' );
+	#say "category: $category";
+	logit($category,'debug',   "ECI sent: $cmd");
 	my (@result) = $engine->{ecasound}->eci($cmd);
-	$debug and print "result: @result\n" unless $cmd =~ /register/;
+	logit($category, 'debug',"ECI  got: @result") 
+		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){
 		restart_ecasound() if $errmsg =~ /in engine-status/;
 		$engine->{ecasound}->errmsg(''); 
-		# ecasound already prints error on STDOUT
-		# carp "ecasound reports an error:\n$errmsg\n"; 
+		# Audio::Ecasound already prints error
 	}
 	"@result";
 }
 }
 	
 sub restart_ecasound {
-	log_msg({ 
-		category 	=> 'ECI',
-		msg 	 	=> "killing ecasound processes @{$engine->{pids}}",
-		level		=> 'info',
-	});	
+	logei("killing ecasound processes @{$engine->{pids}}");
 	kill_my_ecasound_processes();
-	log_msg({ 
-		category 	=> 'ECI',
-		msg 	 	=> "restarting Ecasound engine - your may need to use the 'arm' command",
-		level		=> 'info',
-	});	
+	logei("restarting Ecasound engine - your may need to use the 'arm' command");	
 	select_ecasound_interface();
 	#$setup->{changed}++;
 	reconfigure_engine();

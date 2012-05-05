@@ -1,17 +1,33 @@
 # ----------- Logging ------------
 
 package ::;
+use Modern::Perl;
 use Carp;
 
 sub initialize_logger {
 
-	my $layout = "[\%R] %m%n"; # backslash to protect from source filter
+	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE};
 	my $appender = $logfile ? 'FILE' : 'STDERR';
+
+	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
+		log4perl.category.WAVINFO		= DEBUG, $appender
+		log4perl.category.ECI			= DEBUG, $appender
+		log4perl.category.ECI_result	= DEBUG, $appender
+		log4perl.category.CONFIG		= DEBUG, $appender
+		log4perl.category.ECI_FX		= DEBUG, $appender
+		log4perl.category.FX			= DEBUG, $appender
+);
+	my %log_cats = map
+	{
+		my ($cat) = /category\.(\S+)/;
+		($cat => $_)
+	} @log_cats;
+	
+	#say Dumper %log_cats;
+
 	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, IAM
-		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
-		log4perl.category.ECI			= DEBUG, $appender
 
 		# screen appender
 		log4perl.appender.STDERR		= Log::Log4perl::Appender::Screen
@@ -26,48 +42,22 @@ sub initialize_logger {
 
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
+	# add lines for the categories we want to log
+	$conf .= join "\n", undef, @log_cats{ split ',', $config->{opts}->{L} }
+		if $config->{opts}->{L} ;
+		#if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
+	say $conf;
 	Log::Log4perl::init(\$conf);
 
 }
-sub log_eci_cmd {
-	my $cmd = shift;
-	my $cat = 'ECI';
-	log_msg({
-		category 	=> $cat,
-		cmd			=> $cmd,
-	});
-}
-sub log_eci_result {
-	my $msg = shift;
-	my $cat = 'ECI';
-	log_msg({
-		category 	=> $cat,
-		result 		=> $msg,
-	});
-}
-sub log_eci {
-	my $msg = shift;
+sub loged { logit('ECI','debug',$_[0]) }
+
+sub logei { logit('ECI','info',$_[0]) }
+
+sub logit {
+	my ($category, $level, $message) = @_;
+	my $logger = get_logger($category);
+	$logger->$level($message);
 }
 	
-
-sub log_msg {
-	my $log = shift;
-	if ( $log )
-	{
-		my $category 	= $log->{category};
-		my $level		= $log->{level} || 'debug';
-		my $msg			= $log->{msg};
-		my $cmd			= $log->{cmd};
-		my $result		= $log->{result}; 
-		my $logger = ref $category 
-			? $category 
-			: Log::Log4perl->get_logger($category);
-		my @msg;
-		push @msg, "command: $cmd" if $cmd;
-		push @msg, "message: $msg" if $msg;
-		push @msg, "result: $result" if $result;
-		my $message = join q(, ), @msg;
-		$logger->$level($message);
-	}
-}
 1;

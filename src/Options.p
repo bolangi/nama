@@ -29,7 +29,7 @@ sub process_command_line_options {
 		execute-command=s			X
 		no-terminal					T
         no-fade-on-transport-start  F
-		log=s@                      L
+		log=s                       L
 		no-latency                  O
 		
 );

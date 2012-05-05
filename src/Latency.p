@@ -139,6 +139,7 @@ sub latency_param {
 }
 sub get_live_param { # for effect, not controller
 					 # $param is position, starting at one
+	local $config->{category} = 'ECI_FX';
 	my ($op, $param) = @_;
 	my $n = chain($op);
 	my $i = ecasound_effect_index($op);
