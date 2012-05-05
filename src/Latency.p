@@ -29,7 +29,7 @@ sub reset_latency_ops {
 	map{ modify_effect($_->latency, 0, 0)  } ::Track::all()
 }
 sub remove_latency_ops {
-	map{ ::remove_effect($_->latency)  } ::Track::all()
+	map{ ::remove_effect($_->latency) if $_->latency } ::Track::all()
 }
 sub apply_latency_ops {
 	map
