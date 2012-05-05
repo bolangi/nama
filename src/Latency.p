@@ -32,8 +32,11 @@ sub remove_latency_ops {
 	map{ ::remove_effect($_->latency) if $_->latency } ::Track::all()
 }
 sub apply_latency_ops {
-	map
+	
+	for ( ::ChainSetup::engine_tracks() )
 	{ 	
+		next unless has_siblings($_);
+		
 		# apply offset, keeping existing op_id
 		::add_latency_control_op($_->n, $_->latency_offset); # keeps existing op_id
 
@@ -41,13 +44,19 @@ sub apply_latency_ops {
 		
 		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
 
-  	} 	::ChainSetup::engine_tracks();
+  	}
+}
+sub has_siblings { 
+	my $count = $setup->{latency}->{sibling_count}->{$_[0]->name};
+	#say "track: ",$_[0]->name, " siblings: $count";
+	$setup->{latency}->{sibling_count}->{$_[0]->name} > 1 
 }
 
 sub initialize_latency_vars {
 	$setup->{latency} = {};
 	$setup->{latency}->{track} = {};
 	$setup->{latency}->{sibling} = {};
+	$setup->{latency}->{sibling_count} = {};
 }
 
 sub track_latency {
@@ -110,6 +119,8 @@ sub sibling_latency {
 	scalar @siblings or return 0;
 	my $max = max map { track_latency($_) } map{$tn{$_}} @siblings;
 	map { $node->{$_} = $max } @siblings;
+	my $node2 = $setup->{latency}->{sibling_count};
+	map { $node2->{$_} = scalar @siblings } @siblings;
 	return $max
 }
 sub loop_device_latency { 
