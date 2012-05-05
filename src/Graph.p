@@ -3,6 +3,7 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use ::Util qw(input_node output_node);
+use ::Log qw(logsub);
 use vars qw(%reserved $debug);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
