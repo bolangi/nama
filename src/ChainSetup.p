@@ -1,15 +1,15 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup $engine %tn %bn $debug $debug2 $mode);
-use vars qw($logger);
+use ::Globals qw($file $config $jack $setup $engine %tn %bn $mode);
+use ::Log qw(logsub);
 use Modern::Perl;
 use Data::Dumper::Concise;
 use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(yaml_out);
-BEGIN { $logger = Log::Log4perl::get_logger() }
+our $logger = Log::Log4perl->get_logger();
 
 our (
 
@@ -83,7 +83,7 @@ sub show_io {
 }
 
 sub generate_setup_try {  # TODO: move operations below to buses
-	$debug2 and print "&generate_setup_try\n";
+	logsub("&generate_setup_try");
 
 	# in an ideal CS world, all of the following routing
 	# routines (add_paths_for_*) would be accomplished by
@@ -100,16 +100,13 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	
 	map{ $_->apply($g) } ::Bus::all();
 	$logger->debug("Graph after bus routing:\n$g");
-	$debug and say "The graph is:\n$g";
 	
 	# now various manual routing
 
 	add_paths_for_aux_sends();
-	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph after aux sends:\n$g");
 
 	add_paths_from_Master(); # do they affect automix?
-	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph with paths from Master:\n$g");
 
 	# re-route Master to null for automix
@@ -117,25 +114,20 @@ sub generate_setup_try {  # TODO: move operations below to buses
 		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
 		$g->add_edge(qw[Master null_out]);
 		$logger->debug("Graph with automix mods:\n$g");
-		$debug and say "The graph is:\n$g";
 	}
 	add_paths_for_mixdown_handling();
-	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph with mixdown mods:\n$g");
 	prune_graph();
 	$setup->{latency_graph} = dclone($g);
-	$debug and say "The graph is:\n$g";
 	$logger->debug("Graph after pruning unterminated branches:\n$g");
 
 	::Graph::expand_graph($g); 
 
-	$debug and say "The expanded graph is:\n$g";
 	$logger->debug("Graph after adding loop devices:\n$g");
 
 	# insert handling
 	::Graph::add_inserts($g);
 
-	$debug and say "The expanded graph with inserts is\n$g";
 	$logger->debug("Graph with inserts:\n$g");
 	$setup->{final_graph} = dclone($g);
 
@@ -167,7 +159,7 @@ sub add_paths_for_aux_sends {
 	# we could add this to the ::Bus base class
 	# then suppress it in Mixdown and Master groups
 
-	$debug2 and say "&add_paths_for_aux_sends";
+	logsub("&add_paths_for_aux_sends");
 
 	map {  ::Graph::add_path_for_aux_send($g, $_ ) } 
 	grep { (ref $_) !~ /Slave/ 
@@ -178,7 +170,7 @@ sub add_paths_for_aux_sends {
 
 
 sub add_paths_from_Master {
-	$debug2 and say "&add_paths_from_Master";
+	logsub("&add_paths_from_Master");
 
 	if ($mode->{mastering}){
 		$g->add_path(qw[Master Eq Low Boost]);
@@ -191,7 +183,7 @@ sub add_paths_from_Master {
 
 }
 sub add_paths_for_mixdown_handling {
-	$debug2 and say "&add_paths_for_mixdown_handling";
+	logsub("&add_paths_for_mixdown_handling");
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
 		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
@@ -215,7 +207,7 @@ sub add_paths_for_mixdown_handling {
 	}
 }
 sub prune_graph {
-	$debug2 and say "&prune_graph";
+	logsub("&prune_graph");
 	# prune graph: remove tracks lacking inputs or outputs
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
 	::Graph::recursively_remove_inputless_tracks($g);
@@ -224,10 +216,9 @@ sub prune_graph {
 # new object based dispatch from routing graph
 	
 sub process_routing_graph {
-	$debug2 and say "&process_routing_graph";
+	logsub("&process_routing_graph");
 	@io = map{ dispatch($_) } $g->edges;
-	$debug and map $_->dumpp, @io;
-	$logger->debug( sub{ map $_->dump, @io });
+	$logger->debug( sub{ join "\n",map $_->dump, @io });
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
@@ -294,14 +285,11 @@ sub non_track_dispatch {
 	
 	
 	my $edge = shift;
-	$debug and say "non-track dispatch: ",join ' -> ',@$edge;
 	$logger->debug("non-track IO dispatch:",join ' -> ',@$edge);
 	my $eattr = $g->get_edge_attributes(@$edge) // {};
-	$debug and say "found edge attributes: ",yaml_out($eattr) if $eattr;
 	$logger->debug("found edge attributes: ",yaml_out($eattr)) if $eattr;
 
 	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
-	$debug and say "found vertex attributes: ",yaml_out($vattr) if $vattr;
 	$logger->debug("found vertex attributes: ",yaml_out($vattr)) if $vattr;
 
 	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
@@ -314,7 +302,6 @@ sub non_track_dispatch {
 		my $class = ::IO::get_class($_, $direction);
 		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
-		$debug and say "non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}";
 		$logger->debug("non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
 		$class->new($attrib ? %$attrib : () ) } @$edge;
 		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
@@ -346,10 +333,8 @@ sub jumper_count {
 sub dispatch { # creates an IO object from a graph edge
 my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
-	$debug and say 'dispatch: ',join ' -> ',  @$edge;
 	$logger->debug('dispatch: ',join ' -> ',  @$edge);
 	my($name, $endpoint, $direction) = decode_edge($edge);
-	$debug and say "name: $name, endpoint: $endpoint, direction: $direction";
 	$logger->debug("name: $name, endpoint: $endpoint, direction: $direction");
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
@@ -375,7 +360,7 @@ sub override {
 	# data from edges has priority over data from vertexes
 	# we specify $name, because it could be left or right 
 	# vertex
-	$debug2 and say "&override";
+	logsub("&override");
 	my ($name, $edge) = @_;
 	(override_from_vertex($name), override_from_edge($edge))
 }
@@ -395,7 +380,7 @@ sub override_from_edge {
 							
 sub write_chains {
 
-	$debug2 and print "&write_chains\n";
+	logsub("&write_chains");
 
 	## write general options
 	
@@ -433,7 +418,6 @@ sub write_chains {
 	$ecs_file .= join "\n\n", 
 					"# audio outputs",
 					join("\n", @output_chains), "";
-	$debug and print "ECS:\n",$ecs_file;
 	$logger->debug("Chain setup:\n",$ecs_file);
 	open my $fh, ">", $file->chain_setup;
 	print $fh $ecs_file;
