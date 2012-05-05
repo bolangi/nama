@@ -4,6 +4,7 @@ package ::ChainSetup;
 use ::Globals qw($file $config $jack $setup $engine %tn %bn $debug $debug2 $mode);
 use vars qw($logger);
 use Modern::Perl;
+use Data::Dumper::Concise;
 use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
