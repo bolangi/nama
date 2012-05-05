@@ -5,6 +5,7 @@ use Modern::Perl;
 use Carp;
 
 sub initialize_logger {
+	my $cat_string = shift;
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
@@ -17,6 +18,7 @@ sub initialize_logger {
 		log4perl.category.CONFIG		= DEBUG, $appender
 		log4perl.category.ECI_FX		= DEBUG, $appender
 		log4perl.category.FX			= DEBUG, $appender
+		log4perl.category.SUB			= DEBUG, $appender
 );
 	my %log_cats = map
 	{
@@ -24,7 +26,7 @@ sub initialize_logger {
 		($cat => $_)
 	} @log_cats;
 	
-	my @cats = grep{ $log_cats{$_} }  split ',', $config->{opts}->{L};
+	my @cats = grep{ $log_cats{$_} }  split ',', $cat_string;
 	$config->{want_logging} = { map { $_, 1 } @cats };
 	
 	say "Logging categories: @cats" if @cats;
