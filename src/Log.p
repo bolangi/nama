@@ -12,6 +12,7 @@ sub initialize_logger {
 		#log4perl.rootLogger			= DEBUG, IAM
 		#log4perl.category.ECI			= DEBUG, IAM, IAM_file
 		log4perl.category.ECI			= DEBUG, $appender
+		log4perl.category.CONFIG		= DEBUG, $appender
 
 		# screen appender
 		log4perl.appender.STDERR		= Log::Log4perl::Appender::Screen
@@ -29,51 +30,14 @@ sub initialize_logger {
 	Log::Log4perl::init(\$conf);
 
 }
-sub log_eci_cmd {
-	my $cmd = shift;
-	my $cat = 'ECI';
-	log_msg({
-		category 	=> $cat,
-		cmd			=> $cmd,
-	});
-}
+sub loged { logit('ECI','debug',$_[0]) }
+
+sub logei { logit('ECI','info',$_[0]) }
+
 sub logit {
 	my ($category, $level, $message) = @_;
 	my $logger = get_logger($category);
 	$logger->$level($message);
 }
 	
-sub log_eci_result {
-	my $msg = shift;
-	my $cat = 'ECI';
-	log_msg({
-		category 	=> $cat,
-		result 		=> $msg,
-	});
-}
-sub log_eci {
-	my $msg = shift;
-}
-	
-
-sub log_msg {
-	my $log = shift;
-	if ( $log )
-	{
-		my $category 	= $log->{category};
-		my $level		= $log->{level} || 'debug';
-		my $msg			= $log->{msg};
-		my $cmd			= $log->{cmd};
-		my $result		= $log->{result}; 
-		my $logger = ref $category 
-			? $category 
-			: Log::Log4perl->get_logger($category);
-		my @msg;
-		push @msg, "command: $cmd" if $cmd;
-		push @msg, "message: $msg" if $msg;
-		push @msg, "result: $result" if $result;
-		my $message = join q(, ), @msg;
-		$logger->$level($message);
-	}
-}
 1;
