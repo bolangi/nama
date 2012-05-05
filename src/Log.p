@@ -16,6 +16,7 @@ sub initialize_logger {
 		log4perl.category.ECI_result	= DEBUG, $appender
 		log4perl.category.CONFIG		= DEBUG, $appender
 		log4perl.category.ECI_FX		= DEBUG, $appender
+		log4perl.category.FX			= DEBUG, $appender
 );
 	my %log_cats = map
 	{
@@ -23,7 +24,7 @@ sub initialize_logger {
 		($cat => $_)
 	} @log_cats;
 	
-	say Dumper %log_cats;
+	#say Dumper %log_cats;
 
 	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, IAM

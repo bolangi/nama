@@ -75,18 +75,19 @@ sub set_chain_value {
 	{
 		$p->{chain} = chain($p->{before});
 	}
-	$debug and print(yaml_out($p));
+	#$debug and print(yaml_out($p));
 
 }
 
 
 sub add_effect {
 	my $p = shift;
-	#$debug and say "add effect arguments0:\n",yaml_out($p);
+	$debug2 and say "&add_effect";
+	logit('FX','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
 	
 	set_chain_value($p);
 
-	$debug and say "add effect arguments1:\n",yaml_out($p);
+	logit('FX','debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
 
 	# either insert or add, depending on 'before' setting
 	
@@ -143,7 +144,7 @@ sub _insert_effect {  # call only from add_effect
 		return;
 	
 	my $track = $ti{$n};
-	$debug and print $track->name, $/;
+	#$debug and print $track->name, $/;
 	#$debug and print join " ",@{$track->ops}, $/; 
 
 	# find offset 
