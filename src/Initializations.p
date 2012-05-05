@@ -160,7 +160,7 @@ sub initialize_interfaces {
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
 
 	choose_sleep_routine();
-	initialize_logger($config->{opts}->{L});
+	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
 	logit('CONFIG','debug',"project name: $project->{name}");

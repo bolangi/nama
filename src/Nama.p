@@ -132,7 +132,7 @@ use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
 
-use ::Log ();
+use ::Log qw(logit initialize_logger);
 
 sub main { 
 	definitions();

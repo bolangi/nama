@@ -1,7 +1,11 @@
 # ----------- Logging ------------
 
-package ::;
+package ::Log;
+use Exporter;
+our @ISA = 'Exporter';
+our @EXPORT_OK = qw(logit initialize_logger);
 use Modern::Perl;
+use Log::Log4perl qw(get_logger :levels);
 use Carp;
 
 sub initialize_logger {
@@ -27,14 +31,14 @@ sub initialize_logger {
 	} @log_cats;
 	
 	my @cats = grep{ $log_cats{$_} }  split ',', $cat_string;
-	$config->{want_logging} = { map { $_, 1 } @cats };
 	
 	say "Logging categories: @cats" if @cats;
 
 	#say Dumper %log_cats;
 
 	my $conf = qq(
-		#log4perl.rootLogger			= DEBUG, IAM
+		#log4perl.rootLogger			= DEBUG, $appender
+		#log4perl.category.Audio.Nama	= DEBUG, $appender
 
 		# dummy entry - avoid no logger/no appender warnings
 		log4perl.category.DUMMY			= DEBUG, DUMMY
@@ -52,17 +56,16 @@ sub initialize_logger {
 		log4perl.appender.FILE.layout	= Log::Log4perl::Layout::PatternLayout
 		log4perl.appender.FILE.layout.ConversionPattern = $layout
 
-		#log4perl.additivity.IAM			= 0 # doesn't work... why?
+		#log4perl.additivity.SUB			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", "", @log_cats{@cats} if $config->{opts}->{L} ;
+	$conf .= join "\n", "", @log_cats{@cats} if @cats;
 	#say $conf; 
 	Log::Log4perl::init(\$conf);
-
+	return( { map { $_, 1 } @cats } )
 }
 sub logit {
 	my ($category, $level, $message) = @_;
-	#croak("$category, $level, $message");
 	return unless $category;
 	my $logger = get_logger($category);
 	$logger->$level($message);

@@ -10,6 +10,7 @@ use Carp;
 use YAML::Tiny;
 use File::Slurp;
 use File::HomeDir;
+use ::Log qw(logit);
 use Storable qw(nstore retrieve);
 use JSON::XS;
 use Data::Dumper::Concise;
@@ -41,7 +42,6 @@ use ::Globals qw($debug $debug2);
 our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
 
-*logit = \&::logit;
 our $logger = Log::Log4perl->get_logger();
 
 {my $var_map = { qw(
