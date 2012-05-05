@@ -42,8 +42,9 @@ sub initialize_logger {
 		#log4perl.additivity.IAM			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", undef, @log_cats{ @{$config->{opts}->{L}} }
-		if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
+	$conf .= join "\n", undef, @log_cats{ split ',', $config->{opts}->{L} }
+		if $config->{opts}->{L} ;
+		#if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
 	say $conf;
 	Log::Log4perl::init(\$conf);
 
