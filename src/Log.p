@@ -7,30 +7,18 @@ our @EXPORT_OK = qw(logit initialize_logger);
 use Modern::Perl;
 use Log::Log4perl qw(get_logger :levels);
 use Carp;
+our $appender;
 
 sub initialize_logger {
 	my $cat_string = shift;
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
-	my $appender = $logfile ? 'FILE' : 'STDERR';
+	$appender = $logfile ? 'FILE' : 'STDERR';
 
-	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
-		log4perl.category.ECI_WAVINFO	= DEBUG, $appender
-		log4perl.category.ECI_OTHER		= DEBUG, $appender
-		log4perl.category.ECI			= DEBUG, $appender
-		log4perl.category.CONFIG		= DEBUG, $appender
-		log4perl.category.ECI_FX		= DEBUG, $appender
-		log4perl.category.FX			= DEBUG, $appender
-		log4perl.category.SUB			= DEBUG, $appender
-);
-	my %log_cats = map
-	{
-		my ($cat) = /category\.(\S+)/;
-		($cat => $_)
-	} @log_cats;
-	
-	my @cats = grep{ $log_cats{$_} }  split ',', $cat_string;
+sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
+
+	my @cats = map { s/::/Audio::Nama::/; $_} split ',', $cat_string; # SKIP_PREPROC
 	
 	say "Logging categories: @cats" if @cats;
 
@@ -59,7 +47,7 @@ sub initialize_logger {
 		#log4perl.additivity.SUB			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", "", @log_cats{@cats} if @cats;
+	$conf .= join "\n", "", map{ cat_line($_)} @cats if @cats;
 	#say $conf; 
 	Log::Log4perl::init(\$conf);
 	return( { map { $_, 1 } @cats } )
