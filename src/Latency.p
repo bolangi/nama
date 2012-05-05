@@ -35,7 +35,7 @@ sub apply_latency_ops {
 	
 	for ( ::ChainSetup::engine_tracks() )
 	{ 	
-		next unless has_siblings($_);
+		next unless has_siblings($_) and $_->latency_offset;
 		
 		# apply offset, keeping existing op_id
 		::add_latency_control_op($_->n, $_->latency_offset); # keeps existing op_id
