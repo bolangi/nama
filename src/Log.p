@@ -11,7 +11,8 @@ sub initialize_logger {
 	my $appender = $logfile ? 'FILE' : 'STDERR';
 
 	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
-		log4perl.category.WAVINFO		= DEBUG, $appender
+		log4perl.category.ECI_WAVINFO	= DEBUG, $appender
+		log4perl.category.ECI_OTHER		= DEBUG, $appender
 		log4perl.category.ECI			= DEBUG, $appender
 		log4perl.category.CONFIG		= DEBUG, $appender
 		log4perl.category.ECI_FX		= DEBUG, $appender

@@ -10,7 +10,7 @@ sub ecasound_get_info {
 	
 	my ($path, $command) = @_;
 
-	local $config->{category} = 'WAVINFO';
+	local $config->{category} = 'ECI_WAVINFO';
 
 	$path = qq("$path");
 	teardown_engine();

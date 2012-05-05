@@ -419,16 +419,21 @@ sub eval_iam_libecasoundc {
 	"@result";
 }
 sub munge_category {
-
+	
+	my $cat = shift;
+	
 	# override undefined category by magical global setting
-	my $cat = shift || $config->{category};
+	# default to 'ECI_OTHER'
+	
+	$cat  ||= ($config->{category} || 'ECI_OTHER');
 
-	# force all categories to 'ECI' if 'ECI' is 
-	# selected for logging
-	# (exception: WAVINFO, which is too noisy)
+	# force all categories to 'ECI' if 'ECI' is selected for logging
+	# (exception: ECI_WAVINFO, which is too noisy)
 	
 	no warnings 'uninitialized';
-	return 'ECI' if $config->{want_logging}->{ECI} and not $cat eq 'WAVINFO';
+	return 'ECI' if $config->{want_logging}->{ECI} and not $cat eq 'ECI_WAVINFO';
+
+	$cat
 }
 
 }
