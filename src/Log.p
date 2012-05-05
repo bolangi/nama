@@ -57,10 +57,6 @@ sub initialize_logger {
 	Log::Log4perl::init(\$conf);
 
 }
-sub loged { logit('ECI','debug',$_[0]) }
-
-sub logei { logit('ECI','info',$_[0]) }
-
 sub logit {
 	my ($category, $level, $message) = @_;
 	#croak("$category, $level, $message");
