@@ -13,7 +13,6 @@ sub initialize_logger {
 	my @log_cats = grep{ $_ } split /\s*\n\s*/, qq(
 		log4perl.category.WAVINFO		= DEBUG, $appender
 		log4perl.category.ECI			= DEBUG, $appender
-		log4perl.category.ECI_result	= DEBUG, $appender
 		log4perl.category.CONFIG		= DEBUG, $appender
 		log4perl.category.ECI_FX		= DEBUG, $appender
 		log4perl.category.FX			= DEBUG, $appender
@@ -46,7 +45,7 @@ sub initialize_logger {
 	$conf .= join "\n", undef, @log_cats{ split ',', $config->{opts}->{L} }
 		if $config->{opts}->{L} ;
 		#if ref $config->{opts}->{L} and scalar @{$config->{opts}->{L}};
-	say $conf;
+	#say $conf;
 	Log::Log4perl::init(\$conf);
 
 }

@@ -83,7 +83,7 @@ sub set_chain_value {
 sub add_effect {
 	my $p = shift;
 	$debug2 and say "&add_effect";
-	logit('FX','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
+	#logit('FX','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
 	
 	set_chain_value($p);
 
