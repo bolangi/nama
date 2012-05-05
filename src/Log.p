@@ -24,6 +24,7 @@ sub initialize_logger {
 	} @log_cats;
 	
 	my @cats = grep{ $log_cats{$_} }  split ',', $config->{opts}->{L};
+	$config->{want_logging} = { map { $_, 1 } @cats };
 	
 	say "Logging categories: @cats" if @cats;
 

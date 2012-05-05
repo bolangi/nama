@@ -361,7 +361,17 @@ sub eval_iam { } # stub
 
 sub eval_iam_neteci {
 	my ($cmd, $category) = @_;
-	$category ||=  ( $config->{category} || 'ECI' );
+
+	# use magical global override if provided
+	
+	$category ||=  $config->{category};
+
+	# force all categories to 'ECI' if 'ECI' is defined
+	# (exception for WAVINFO, which is too noisy)
+	
+	$category = 'ECI' if $config->{want_logging}->{ECI}
+		and not $category eq 'WAVINFO';
+
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
@@ -403,6 +413,12 @@ sub eval_iam_libecasoundc {
 	#$debug2 and print "&eval_iam\n";
 	my ($cmd, $category) = @_;
 	$category ||=  ( $config->{category} || 'ECI' );
+
+	# force all categories to 'ECI' if 'ECI' is defined
+	# (exception for WAVINFO, which is too noisy)
+	
+ 	$category = 'ECI' if $config->{want_logging}->{ECI}
+ 		and not $category eq 'WAVINFO';
 	#say "category: $category";
 	logit($category,'debug',   "ECI sent: $cmd");
 	my (@result) = $engine->{ecasound}->eci($cmd);
