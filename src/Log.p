@@ -52,10 +52,10 @@ sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 	return( { map { $_, 1 } @cats } )
 }
 sub logit {
-	my ($category, $level, $message) = @_;
+	my ($category, $level, @message) = @_;
 	return unless $category;
 	my $logger = get_logger($category);
-	$logger->$level($message);
+	$logger->$level(@message);
 }
 sub logsub { logit('SUB','debug',$_[0]) }
 	

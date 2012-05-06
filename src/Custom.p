@@ -12,7 +12,7 @@ sub setup_user_customization {
 		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
-	$debug and say 'customization :', yaml_out(\%custom);
+	logit('::Custom','debug','customization :', yaml_out(\%custom);
 	my $prompt;
 	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
 	*prompt = $prompt if $prompt;
