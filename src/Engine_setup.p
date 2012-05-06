@@ -83,11 +83,11 @@ sub reconfigure_engine {
 		my $current = yaml_out(status_snapshot());
 		my $old = yaml_out($setup->{_old_snapshot});
 		if ( $current eq $old){
-				$debug and print("no change in setup\n");
+				logit('::Engine_setup','debug',"no change in setup");
 				return;
 		}
 	}
-	$debug and print("setup change\n");
+	logit('::Engine_setup','debug',"setup change");
 
 
 	##### Restore previous position and running status
@@ -132,7 +132,7 @@ sub reconfigure_engine {
 
 	if ( generate_setup() ){
 		
-		$debug and say "I generated a new setup";
+		logit('::Engine_setup','debug',"I generated a new setup");
 		
 		# we save:
 		# + monitoring setups 
@@ -224,7 +224,7 @@ sub load_ecs {
 	teardown_engine();
 	eval_iam("cs-load $setup");
 	eval_iam("cs-select $setup"); # needed by Audio::Ecasound, but not Net-ECI !!
-	$debug and map{eval_iam($_)} qw(cs es fs st ctrl-status);
+	logit('::Engine_setup','debug',sub{map{eval_iam($_)} qw(cs es fs st ctrl-status)});
 	1;
 }
 sub teardown_engine {
