@@ -433,18 +433,5 @@ sub munge_category {
 
 }
 	
-sub restart_ecasound {
-	logei("killing ecasound processes @{$engine->{pids}}");
-	kill_my_ecasound_processes();
-	logei("restarting Ecasound engine - your may need to use the 'arm' command");	
-	select_ecasound_interface();
-	#$setup->{changed}++;
-	reconfigure_engine();
-}
-sub kill_my_ecasound_processes {
-	my @signals = (15, 9);
-	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
-}
-
 1;
 __END__
