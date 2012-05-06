@@ -3,11 +3,13 @@ use Modern::Perl;
 use Carp;
 use Graph;
 use ::Util qw(input_node output_node);
+use Log::Log4perl;
 use ::Log qw(logsub);
-use vars qw(%reserved $debug);
+use vars qw(%reserved);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
 *reserved = \%::IO::io_class;
+
 our $logger;
 
 sub initialize_logger { $logger = Log::Log4perl->get_logger() }

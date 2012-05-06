@@ -33,7 +33,7 @@ our (
 	@pre_output, 	# pre-output chain operators
 
 	$chain_setup,	# final result as string
-	$logger
+	$logger,
 	);
 
 

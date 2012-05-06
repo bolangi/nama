@@ -158,20 +158,20 @@ sub initialize_interfaces {
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
-	logit('CONFIG','debug',"project name: $project->{name}");
+	logit('::Config','debug',"project name: $project->{name}");
 
-	logit('CONFIG','debug',
+	logit('::Config','debug',
 		sub{"Command line options\n".  yaml_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	
-	logit('CONFIG','debug',sub{"Config data\n".Dumper $config});
+	logit('::Config','debug',sub{"Config data\n".Dumper $config});
 	
 	setup_user_customization();	
 
 	start_ecasound();
 
-	logit('CONFIG','debug',"reading config file");
+	logit('::Config','debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
 		$config->{root_dir} = $config->{opts}->{d};

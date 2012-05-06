@@ -3,15 +3,12 @@
 
 package ::Bus;
 use Modern::Perl; use Carp; 
-use ::Globals qw($debug);
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
 
 our $VERSION = 1.0;
-our (%by_name); 
-our ($debug); 
-
+our (%by_name, $logger);
 use ::Object qw(
 					name
 					rw
@@ -21,7 +18,11 @@ use ::Object qw(
 					class
 
 					);
-sub initialize { %by_name = () };
+sub initialize { 
+	%by_name = (); 
+	$logger = Log::Log4perl->get_logger("::Bus");
+	
+};
 sub new {
 	my $class = shift;
 	my %vals = @_;
@@ -50,7 +51,7 @@ sub tracks { # returns list of track names in bus
 }
 
 sub last {
-	#$debug and say "group: @_";
+	#$logger->debug( "group: @_");
 	my $group = shift;
 	my $max = 0;
 	map{ 
@@ -143,17 +144,17 @@ my %dispatch = (
 sub apply {
 	$bus = shift;
 	$g = shift;
-	$debug and say "bus ", $bus->name, ": applying routes";
-	$debug and say "Expected track as bus destination, found type: ",
-		$bus->send_type, " id: ", $bus->send_id;
+	$logger->debug( "bus ". $bus->name. ": applying routes");
+	$logger->debug( "Expected track as bus destination, found type: ".
+		$bus->send_type. " id: ". $bus->send_id);
 	map{ 
 		# connect signal sources to tracks
-		$debug and say "track ",$_->name;
+		$logger->debug( "track ".$_->name);
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
-		$debug and scalar @path and say "input path: @path";
+		$logger->debug("input path: @path") if scalar @path;
 
-		try{ $debug and say join " ", "bus output:", $_->name, $bus->send_id };
+		try{ $logger->debug( join " ", "bus output:", $_->name, $bus->send_id) };
 		$g->add_edge($_->name, $bus->send_id)
 			if 	try { $dispatch{$bus->send_type}->() } 
 			catch {  warn "caught error: $_" } ;
