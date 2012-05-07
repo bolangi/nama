@@ -239,6 +239,14 @@ sub latency {
 	= $wet_track_ops_latency + $jack_related_latency + ::loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
 }
+
+# class methods
+
+sub get_inserts {
+	my $trackname = shift;
+	grep{ $_-> track eq $trackname } values %by_index;
+}
+
 }
 {
 package ::PostFaderInsert;

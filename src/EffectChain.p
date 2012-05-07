@@ -87,11 +87,15 @@ sub new {
 		}
 	} @{$vals{ops_list}};
 
+	# convert inserts to hash references 
+	$vals{inserts_data} = [ map { $_->as_hash } @{$vals{inserts_data}} ]	
+		if $vals{inserts_data};
+
 	my $object = bless 
 		{ 
 			n => $n, 
 			ops_data => $ops_data, 
-			@_	
+			@_	# inserts are supplied via inserts_data => [ @inserts ]
 
 		}, $class;
 	$by_index{$n} = $object;
