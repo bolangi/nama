@@ -139,7 +139,7 @@ sub get_id {
 	
 	# 
 	my ($track, $prepost) = @_;
-	my @inserts = grep{ $track->name eq $_->track} values %by_index;
+	my @inserts = get_inserts($track->name);
 	my ($prefader) = (map{$_->n} 
 					grep{$_->class =~ /pre/i} 
 					@inserts);
@@ -151,6 +151,11 @@ sub get_id {
 		if (! $prepost and ! $id{pre} != ! $id{post} );
 	$id{$prepost};;
 }
+sub get_inserts {
+	my $trackname = shift;
+	grep{ $_-> track eq $trackname } values %by_index;
+}
+
 
 sub is_local_effects_host { ! $_[0]->send_id }
 
@@ -238,13 +243,6 @@ sub latency {
 	= $setup->{latency}->{sibling}->{$_->dry_name} 
 	= $wet_track_ops_latency + $jack_related_latency + ::loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
-}
-
-# class methods
-
-sub get_inserts {
-	my $trackname = shift;
-	grep{ $_-> track eq $trackname } values %by_index;
 }
 
 }
