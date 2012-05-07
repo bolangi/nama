@@ -187,7 +187,7 @@ sub ecasound_select_chain {
 }
 sub stop_do_start {
 	my ($coderef, $delay) = @_;
-	engine_running() ?  stop_do_start( $coderef, $delay)
+	engine_running() ?  _stop_do_start( $coderef, $delay)
 					 : $coderef->()
 
 }
