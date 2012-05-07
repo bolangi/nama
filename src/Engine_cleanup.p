@@ -32,13 +32,12 @@ sub post_rec_configure {
 }
 sub new_files_were_recorded {
  	return unless my @files = ::ChainSetup::really_recording();
-	$debug and print join $/, "intended recordings:", @files;
+	logit('::Engine_cleanup','debug',join $/, "intended recordings:", @files);
 	my @recorded =
 		grep { 	my ($name, $version) = /([^\/]+)_(\d+).wav$/;
 				if (-e ) {
 					if (-s  > 44100) { # 0.5s x 16 bits x 44100/s
-						$debug and print "found bigger than 44100 bytes:\n";
-						$debug and print "$_\n";
+						logit('::Engine_cleanup','debug',"File size >44100 bytes: $_");
 						$tn{$name}->set(version => $version) if $tn{$name};
 						$ui->update_version_button($tn{$name}->n, $version);
 					1;

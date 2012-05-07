@@ -26,7 +26,7 @@ sub fade {
 	my $steps = $seconds * $config->{fade_resolution};
 	my $wink  = 1/$config->{fade_resolution};
 	my $size = ($to - $from)/$steps;
-	$debug and print "id: $id, param: $param, from: $from, to: $to, seconds: $seconds\n";
+	logit('::Mute','debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
 	for (1..$steps - 1){
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
@@ -61,7 +61,7 @@ sub solo {
 						 ::Track::user();
 	}
 
-	$debug and say join " ", "already muted:", map{$_->name} @{$fx->{muted}};
+	logit('::Mute','debug', join " ", "already muted:", sub{map{$_->name} @{$fx->{muted}}});
 
 	# convert bunches to tracks
 	my @names = map{ bunch_tracks($_) } @args;

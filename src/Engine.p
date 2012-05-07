@@ -138,7 +138,7 @@ sub schedule_wraparound {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
-	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	logit('::Engine','debug', "here: $here, start: $start, end: $end, diff: $diff");
 	if ( $diff < 0 ){ # go at once
 		set_position($start);
 		cancel_wraparound();
@@ -198,6 +198,19 @@ sub _stop_do_start {
 		sleeper($delay) if $delay;
 		eval_iam('start');
 }
+sub restart_ecasound {
+	logit("killing ecasound processes @{$engine->{pids}}");
+	kill_my_ecasound_processes();
+	logei("restarting Ecasound engine - your may need to use the 'arm' command");	
+	select_ecasound_interface();
+	#$setup->{changed}++;
+	reconfigure_engine();
+}
+sub kill_my_ecasound_processes {
+	my @signals = (15, 9);
+	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
+}
+
 
 1;
 __END__

@@ -158,20 +158,20 @@ sub initialize_interfaces {
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
-	logit('CONFIG','debug',"project name: $project->{name}");
+	logit('::Config','debug',"project name: $project->{name}");
 
-	logit('CONFIG','debug',
+	logit('::Config','debug',
 		sub{"Command line options\n".  yaml_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	
-	logit('CONFIG','debug',sub{"Config data\n".Dumper $config});
+	logit('::Config','debug',sub{"Config data\n".Dumper $config});
 	
 	setup_user_customization();	
 
 	start_ecasound();
 
-	logit('CONFIG','debug',"reading config file");
+	logit('::Config','debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
 		$config->{root_dir} = $config->{opts}->{d};
@@ -433,18 +433,5 @@ sub munge_category {
 
 }
 	
-sub restart_ecasound {
-	logei("killing ecasound processes @{$engine->{pids}}");
-	kill_my_ecasound_processes();
-	logei("restarting Ecasound engine - your may need to use the 'arm' command");	
-	select_ecasound_interface();
-	#$setup->{changed}++;
-	reconfigure_engine();
-}
-sub kill_my_ecasound_processes {
-	my @signals = (15, 9);
-	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
-}
-
 1;
 __END__

@@ -4,7 +4,7 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use Carp;
-use ::Globals qw(:singletons $this_bus $this_track $debug $debug2);
+use ::Globals qw(:singletons $this_bus $this_track);
 
 sub issue_first_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -113,7 +113,6 @@ sub get_ecasound_iam_keywords {
 									t
 									?	);
 	
-	local $debug = 0;
 	%{$text->{iam}} = map{$_,1 } 
 				grep{ ! $reserved{$_} } split /[\s,]/, eval_iam('int-cmd-list');
 }
@@ -121,7 +120,7 @@ sub get_ecasound_iam_keywords {
 sub process_line {
 	logsub("&process_line");
 	my ($user_input) = @_;
-	$debug and print "user input: $user_input\n";
+	logit('::Terminal','debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd};

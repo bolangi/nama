@@ -8,8 +8,8 @@ use warnings;
 no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_index);
-use ::Globals qw(:singletons %tn $debug @fade_data); 
-local $debug = 1;
+use ::Globals qw(:singletons %tn @fade_data); 
+use ::Log qw(logit);
 use ::Object qw( 
 				 n
 				 type
@@ -54,7 +54,7 @@ sub new {
 
 	$by_index{$object->n} = $object;
 
-	$debug and print "object class: $class, object type: ", ref $object, $/;
+	logit('::Fade','debug',"object class: $class, object type: ", ref $object);
 
 	my $id = add_fader($object->track);	# only when necessary
 	
@@ -77,7 +77,7 @@ sub refresh_fade_controller {
 	my $controller; # effect ID
 	($controller) = @{$fx->{applied}->{$track->fader}{owns}} if $track->fader;
 
-	$debug and say "removing fade controller";
+	logit('::Fade','debug',"removing fade controller");
 	::remove_effect($controller) if $controller;
 
 	return unless
@@ -88,7 +88,7 @@ sub refresh_fade_controller {
 	add_fader($track->name);	
 
 	# add controller
-	$debug and say "applying fade controller";
+	logit('::Fade','debug',"applying fade controller");
 	::add_effect({
 		cop_id		=> $controller,
 		parent_id 	=> $track->fader,
@@ -216,8 +216,7 @@ sub fader_envelope_pairs {
 				$marktime1 -= $fade->duration
 			} 
 		else { $fade->dumpp; die "fade processing failed" }
-		$debug and say "marktime1: $marktime1";
-		$debug and say "marktime2: $marktime2";
+		logit('::Fade','debug',"marktime1: $marktime1, marktime2: $marktime2");
 		push @specs, 
 		[ 	$marktime1, 
 			$marktime2, 
@@ -227,7 +226,7 @@ sub fader_envelope_pairs {
 }
 	# sort fades -  may not need this
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
-	$debug and say( ::yaml_out( \@specs));
+	logit('::Fade','debug',sub{::yaml_out( \@specs)});
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
 
@@ -253,7 +252,7 @@ sub fader_envelope_pairs {
 
 sub spec_to_pairs {
 	my ($from, $to, $type, $op) = @{$_[0]};
-	$debug and say "from: $from, to: $to, type: $type";
+	logit('::Fade','debug',"from: $from, to: $to, type: $type");
 	my $cutpos;
 	my @pairs;
 

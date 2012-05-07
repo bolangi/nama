@@ -19,7 +19,7 @@ sub calculate_and_adjust_latency {
 	initialize_latency_vars();
 	
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-	$debug and say "starting node: $starting_track_name";
+	logit('::Latency','debug',"starting node: $starting_track_name");
 
 	sibling_latency($starting_track_name);
 	apply_latency_ops();

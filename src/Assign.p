@@ -40,7 +40,7 @@ our @EXPORT = ();
 our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
 use Carp;
 
-our $logger = Log::Log4perl->get_logger();
+my $logger = Log::Log4perl->get_logger();
 
 {my $var_map = { qw(
 
@@ -84,7 +84,7 @@ sub assign {
 	class: $class
 	vars: @vars
 ASSIGN
-	#$debug and print yaml_out($ref);
+	#$logger->debug(sub{yaml_out($ref)});
 
 	# index what sigil an identifier should get
 
@@ -390,7 +390,7 @@ sub yaml_out {
 	$logger->logcroak("attempting to code wrong data type: $type")
 		if $type !~ /HASH|ARRAY/;
 	my $output;
-	#$debug and print join $/, keys %$data_ref, $/;
+	#$logger->debug(join " ",keys %$data_ref);
 	$logger->debug("about to write YAML as string");
 	my $y = YAML::Tiny->new;
 	$y->[0] = $data_ref;

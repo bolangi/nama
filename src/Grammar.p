@@ -40,7 +40,7 @@ sub command_process {
 	# parse repeatedly until all input is consumed
 	
 	while ($input =~ /\S/) { 
-		$debug and say "input: $input";
+		logit('::Grammar','debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
 		{
 			print("bad command: $input_was\n"); 
@@ -96,7 +96,7 @@ sub dump_all {
 sub leading_track_spec {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
-		$debug and print "Selecting track ",$track->name,"\n";
+		logit('::Grammar','debug',"Selecting track ",$track->name);
 		$this_track = $track;
 		set_current_bus();
 		ecasound_select_chain( $this_track->n );
@@ -374,12 +374,9 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
-	$debug and print "hook: $config->{execute_on_project_load}\n";
+	logit('::Grammar','debug',"load hook: $config->{execute_on_project_load}");
 	::command_process($config->{execute_on_project_load});
-		
 }
-
-    
 sub t_create_project {
 	package ::;
 	my $name = shift;

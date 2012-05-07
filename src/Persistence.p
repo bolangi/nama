@@ -13,7 +13,7 @@ sub save_state {
 
 	# some stuff get saved independently of our state file
 	
-	$debug and print "saving palette\n";
+	logit('::Persistence','debug', "saving palette");
 	$ui->save_palette;
 
 	# do nothing more if only Master and Mixdown
@@ -68,7 +68,7 @@ sub save_system_state {
 	
 	$this_track_name = $this_track->name;
 
-	$debug and print "copying tracks data\n";
+	logit('::Persistence','debug', "copying tracks data");
 
 	map { push @tracks_data, $_->as_hash } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
@@ -79,19 +79,19 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-	$debug and print "copying bus data\n";
+	logit('::Persistence','debug', "copying bus data");
 
 	@bus_data = map{ $_->as_hash } ::Bus::all();
 
 	# prepare inserts data for storage
 	
-	$debug and print "copying inserts data\n";
+	logit('::Persistence','debug', "copying inserts data");
 	
 	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
-	$debug and print "copying marks data\n";
+	logit('::Persistence','debug', "copying marks data");
 	@marks_data = map{ $_->as_hash } ::Mark::all();
 
 	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
@@ -110,7 +110,7 @@ sub save_system_state {
 	my $max = scalar @{$text->{command_history}};
 	$max = 50 if $max > 50;
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
-	$debug and print "serializing\n";
+	logit('::Persistence','debug', "serializing");
 
 	my @formats = $path =~ /dump_all/ ? 'yaml' : $config->serialize_formats;
 
@@ -161,7 +161,7 @@ sub get_newest {
 			[$_, -M $_, $suffix] 
 		} 
 		glob("$path*");
-	$debug and say yaml_out \@sorted;
+	logit('::Persistence','debug', sub{yaml_out \@sorted});
 	($sorted[0]->[0], $sorted[0]->[2]);
 }
 }
@@ -214,13 +214,13 @@ sub restore_state {
 
 	my( $path, $suffix ) = get_newest($filename);
 	
-	$debug and print "using file: $path\n";
+	logit('::Persistence','debug', "using file: $path");
 
 	carp("$path: file not found"), return if ! -f $path;
 	my $source = read_file($path);
 
-	$debug and say "suffix: $suffix";	
-	$debug and say "source: $source";
+	logit('::Persistence','debug', "suffix: $suffix");	
+	logit('::Persistence','debug', "source: $source");
 	my $ref = decode($source, $suffix);
 
 	# start marshalling with clean slate	
@@ -278,7 +278,7 @@ sub restore_state {
 	map {
 		my $var = $_;
 		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
-		$debug and say "want to eval: $eval_text "; 
+		logit('::Persistence','debug', "want to eval: $eval_text "); 
 		eval $eval_text;
 	} @vars;
 
@@ -405,7 +405,7 @@ sub restore_state {
 			@tracks_data;
 	}
 
-	$debug and print "inserts data", yaml_out \@inserts_data;
+	logit('::Persistence','debug', "inserts data", sub{yaml_out \@inserts_data});
 
 
 	# make sure Master has reasonable output settings
@@ -546,8 +546,7 @@ sub restore_state {
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
-	$debug and print join " ", 
-		(map{ ref $_, $/ } ::Track::all()), $/;
+	logit('::Persistence','debug', sub{ join " ", map{ ref $_, $/ } ::Track::all() });
 
 
 	# restore Alsa mixer settings
@@ -713,9 +712,9 @@ sub convert_effect_chains {
 	return unless $resolved;
 	my $source = read_file($resolved);
 	carp("$resolved: empty file"), return unless $source;
-	$debug and say "format: $format, source: \n",$source;
+	logit('::Persistence','debug', "format: $format, source: \n$source");
 	my $ref = decode($source, $format);
-	$debug and print Dumper $ref;
+	logit('::Persistence','debug', sub{Dumper $ref});
 
 	# deal with both existing formats
 	
@@ -858,9 +857,9 @@ sub restore_effect_chains {
 		carp("$resolved: file not found"), return unless $resolved;
 		my $source = read_file($resolved);
 		carp("$resolved: empty file"), return unless $source;
-		$debug and say "format: $format, source: \n",$source;
+		logit('::Persistence','debug', "format: $format, source: \n",$source);
 		my $ref = decode($source, $format);
-		$debug and print Dumper $ref;
+		logit('::Persistence','debug', sub{Dumper $ref});
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 

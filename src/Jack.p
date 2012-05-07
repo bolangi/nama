@@ -37,7 +37,7 @@ sub parse_port_latency {
 	# default to use output of jack_lsp -l
 	
 	my $j = shift || qx(jack_lsp -l 2> /dev/null); 
-	$debug and say "latency input $j";
+	logit('::Jack','debug', "latency input $j");
 	
 	state $port_latency_re = qr(
 
@@ -85,14 +85,13 @@ sub parse_port_latency {
 
 		/$port_latency_re/;
 
-		$debug and say;
-		#$debug and say Dumper %+;
-		$debug and say $+{client};
-		$debug and say $+{port};
-		$debug and say $+{capture_min};
-		$debug and say $+{capture_max};
-		$debug and say $+{playback_min};
-		$debug and say $+{playback_max};
+		#logit('::Jack','debug', Dumper %+);
+		logit('::Jack','debug', "client: ",$+{client});
+		logit('::Jack','debug', "port: ",$+{port});
+		logit('::Jack','debug', "capture min: ", $+{capture_min});
+		logit('::Jack','debug', "capture max: ",$+{capture_max});
+		logit('::Jack','debug', "playback min: ",$+{playback_min});
+		logit('::Jack','debug', "playback max: ",$+{playback_max});
 		
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{min}
 			= $+{capture_min};
@@ -114,7 +113,7 @@ sub parse_ports_list {
 	
 	logsub("&parse_ports_list");
 	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
-	$debug and say "input: $j";
+	logit('::Jack','debug', "input: $j");
 
 	# convert to single lines
 
@@ -179,14 +178,14 @@ my $jack_plumbing_code = sub
 		my $debug++;
 		my $config_line = qq{(connect $port1 $port2)};
 		say $fh $config_line; # $fh in lexical scope
-		$debug and say $config_line;
+		logit('::Jack','debug', $config_line);
 	};
 my $jack_connect_code = sub
 	{
 		my ($port1, $port2) = @_;
 		my $debug++;
 		my $cmd = qq(jack_connect $port1 $port2);
-		$debug and say $cmd;
+		logit('::Jack','debug', $cmd);
 		system $cmd;
 	};
 sub connect_jack_ports_list {
@@ -249,7 +248,7 @@ sub make_connections {
 		for my $external_port (@lines){   
 			# $external_port is the source port name
 			chomp $external_port;
-			$debug and say "port file $file, line $line_number, port $external_port";
+			logit('::Jack','debug', "port file $file, line $line_number, port $external_port");
 			# setup shell command
 			
 			if(! $jack->{clients}->{$external_port}){
