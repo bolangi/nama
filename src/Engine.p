@@ -138,7 +138,7 @@ sub schedule_wraparound {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
-	$debug and print "here: $here, start: $start, end: $end, diff: $diff\n";
+	logit('::Engine','debug', "here: $here, start: $start, end: $end, diff: $diff");
 	if ( $diff < 0 ){ # go at once
 		set_position($start);
 		cancel_wraparound();

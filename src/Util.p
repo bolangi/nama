@@ -6,6 +6,7 @@
 package ::Util;
 use Modern::Perl; use Carp;
 use ::Globals qw(:all);
+use ::Log qw(logit);
 
 no warnings 'uninitialized';
 
@@ -225,7 +226,7 @@ sub dest_type {
 sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
-	$debug and print "creating [ $dir ]\n";
+	logit('::Util','debug',"creating directory [ $dir ]");
 		-e $dir 
 #and (carp "create_dir: '$dir' already exists, skipping...\n") 
 			or system qq( mkdir -p $dir)
@@ -237,7 +238,6 @@ sub join_path {
 	my @parts = @_;
 	my $path = join '/', @parts;
 	$path =~ s(/{2,})(/)g;
-	#$debug and print "path: $path\n";
 	$path;
 }
 
