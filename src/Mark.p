@@ -9,6 +9,7 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_name @all);
 use ::Globals qw(:all);
+use ::Log qw(logit);
 use ::Object qw( 
 				 name 
                  time
@@ -80,7 +81,7 @@ sub remove {
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	$::debug and warn "marks found: ",scalar @all, $/;
+	logit('::Mark',warn "marks found: ",scalar @all);
 	# @all = (), return if scalar @all
 	@all = grep { $_->time != $mark->time } @all;
 
@@ -186,8 +187,7 @@ sub next_mark {
 	my @marks = ::Mark::all();
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
-			$debug and print "here: $here, future time: ",
-			$marks[$i]->time, $/;
+			logit('::Mark','debug', "here: $here, future time: ", $marks[$i]->time);
 			set_position($marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];
 			return;
@@ -226,7 +226,7 @@ sub jump {
 	my $delta = shift;
 	logsub("&jump");
 	my $here = eval_iam('getpos');
-	$debug and print "delta: $delta\nhere: $here\nunit: $gui->{_seek_unit}\n\n";
+	logit('::Mark','debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
 	$new_pos = $new_pos < $setup->{audio_length} ? $new_pos : $setup->{audio_length} - 10;
 	set_position( $new_pos );
