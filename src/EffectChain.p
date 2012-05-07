@@ -13,7 +13,7 @@ use Exporter qw(import);
 use Storable qw(dclone);
 use ::Log qw(logit);
 
-use ::Globals qw($fx_cache %tn $this_op $debug);
+use ::Globals qw($fx_cache %tn $this_op);
 
 our @effect_chain_data;
 

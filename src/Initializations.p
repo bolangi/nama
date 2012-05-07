@@ -18,8 +18,6 @@ sub definitions {
 		tabstop			=> 4,
 	};
 
-	$debug = 0; # debug statements
-
 	####### Initialize singletons #######
 
 	# Some of these "singletons" (imported by 'use Globals')
@@ -98,7 +96,7 @@ sub definitions {
 
 	{ package ::Config;
 	use Carp;
-	use ::Globals qw($debug :singletons);
+	use ::Globals qw(:singletons);
 	use Modern::Perl;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
@@ -257,9 +255,6 @@ exit;
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	restore_effect_chains();
 	1;	
-}
-sub debugging_options {
-	grep{$_} $debug, @{$config->{opts}}{qw(R D J A E T)};
 }
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);

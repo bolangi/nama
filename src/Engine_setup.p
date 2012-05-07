@@ -32,7 +32,7 @@ sub generate_setup {
 	track_unmemoize(); 			# unfreeze track state
 	if ($@){
 		say("error caught while generating setup: $@");
-		::ChainSetup::initialize() unless $debug;
+		::ChainSetup::initialize();
 		return
 	}
 	$success;

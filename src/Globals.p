@@ -21,9 +21,6 @@ our %EXPORT_TAGS =
 
 	)],
 
-debug => [qw( 		$debug
-)],
-
 	pronouns => [qw(
 						$this_track
 						$this_bus

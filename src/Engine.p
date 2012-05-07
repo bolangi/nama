@@ -180,8 +180,8 @@ sub ecasound_select_chain {
 		return 1 
 
 	} else { 
-		$debug and carp 
-			"c-select $n: attempted to select non-existing Ecasound chain\n"; 
+		logit('::Engine','logcarp', 
+			"c-select $n: attempted to select non-existing Ecasound chain"); 
 		return 0
 	}
 }

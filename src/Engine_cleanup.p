@@ -5,7 +5,7 @@ use ::Globals qw(:all);
 
 sub rec_cleanup {  
 	logsub("&rec_cleanup");
-	$debug && print("transport still running, can't cleanup"),return if transport_running();
+	logit('::Engine_cleanup','debug',"transport still running, can't cleanup"),return if transport_running();
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
 		(grep /Mixdown/, @files) 

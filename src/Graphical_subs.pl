@@ -360,7 +360,7 @@ sub some_user_tracks {
 sub flash_ready {
 
 	my $color = engine_mode_color();
-	$debug and print "flash color: $color\n";
+	logit(__PACKAGE__,'debug', "flash color: $color");
 	$ui->length_display(-background => $color);
 	$ui->project_label_configure(-background => $color) unless $mode->{preview};
  	$engine->{events}->{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
@@ -430,12 +430,11 @@ sub group_gui {
 
 }
 sub global_version_buttons {
-	local $debug = 0;
 	my $version = $gui->{group_version};
 	$version and map { $_->destroy } $version->children;
 		
-	$debug and print "making global version buttons range:",
-		join ' ',1..$bn{Main}->last, " \n";
+	logit(__PACKAGE__,'debug', "making global version buttons range: " ,
+		join ' ',1..$bn{Main}->last);
 
 			$version->radiobutton( 
 
@@ -480,7 +479,7 @@ sub track_gui {
 	my $n = shift;
 	return if $ti{$n}->hide;
 	
-	$debug and print "found index: $n\n";
+	logit(__PACKAGE__,'debug', "found index: $n");
 	my @rw_items = @_ ? @_ : (
 			[ 'command' => "REC",
 				-foreground => 'red',
@@ -597,10 +596,7 @@ sub track_gui {
 
 		my $vol_id = $ti{$n}->vol;
 
-		local $debug = 0;
-
-
-		$debug and print "vol cop_id: $vol_id\n";
+		logit(__PACKAGE__,'debug', "vol cop_id: $vol_id");
 		my %p = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
 				type => 'ea',
@@ -610,8 +606,8 @@ sub track_gui {
 				);
 
 
-		 $debug and do {my %q = %p; delete $q{parent}; print
-		 "=============\n%p\n",yaml_out(\%q)};
+		 logit(__PACKAGE__,'debug',sub{my %q = %p; delete $q{parent}; print
+		 "=============\n%p\n",yaml_out(\%q)});
 
 		$vol = make_scale ( \%p );
 		# Mute
@@ -655,7 +651,7 @@ sub track_gui {
 		
 		my $pan_id = $ti{$n}->pan;
 		
-		$debug and print "pan cop_id: $pan_id\n";
+		logit(__PACKAGE__,'debug', "pan cop_id: $pan_id");
 		$p_num = 0;           # first parameter
 		my %q = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
@@ -663,7 +659,7 @@ sub track_gui {
 				cop_id => $pan_id,
 				p_num		=> $p_num,
 				);
-		# $debug and do { my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) };
+		# logit(__PACKAGE__,'debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) });
 		$pan = make_scale ( \%q );
 
 		# Center
@@ -686,7 +682,7 @@ sub track_gui {
 
 	@{ $gui->{tracks}->{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	#$debug and print "=============\n$gui->{tracks}\n",yaml_out($gui->{tracks});
+	#logit(__PACKAGE__,'debug', "=============$gui->{tracks}\n",sub{yaml_out($gui->{tracks})});
 	my $independent_effects_frame 
 		= ${ $gui->{tracks}->{$n}->{effects} }->Frame->pack(-fill => 'x');
 
@@ -704,7 +700,7 @@ sub track_gui {
 	$independent_effects_frame
 		->Label(-text => uc $ti{$n}->name )->pack(-side => 'left');
 
-	#$debug and print( "Number: $n\n"),MainLoop if $n == 2;
+	#logit(__PACKAGE__,'debug',"Number: $n"),MainLoop if $n == 2;
 	my @tags = qw( EF P1 P2 L1 L2 L3 L4 );
 	my @starts =   ( $fx_cache->{split}->{cop}{a}, 
 					 $fx_cache->{split}->{preset}{a}, 
@@ -816,9 +812,9 @@ sub add_effect_gui {
 			@p{qw(chain type cop_id parent_id parameter)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
 
-		$debug and print yaml_out(\%p);
+		logit(__PACKAGE__,'debug', sub{yaml_out(\%p)});
 
-		$debug and print "cop_id: $id, parent_id: $parent_id\n";
+		logit(__PACKAGE__,'debug', "cop_id: $id, parent_id: $parent_id");
 		# $id is determined by cop_add, which will return the
 		# existing cop_id if supplied
 
@@ -826,7 +822,7 @@ sub add_effect_gui {
 		
 		my $display_type = $fx->{applied}->{$id}->{display}; # individual setting
 		defined $display_type or $display_type = $fx_cache->{registry}->[$i]->{display}; # template
-		$debug and print "display type: $display_type\n";
+		logit(__PACKAGE__,'debug', "display type: $display_type");
 
 		return if $display_type eq q(hidden);
 
@@ -849,7 +845,7 @@ sub add_effect_gui {
 		my $parentage = $fx_cache->{registry}->[ $fx_cache->{full_label_to_index}->{ $fx->{applied}->{$parent_id}->{type}} ]
 			->{name};
 		$parentage and $parentage .=  " - ";
-		$debug and print "parentage: $parentage\n";
+		logit(__PACKAGE__,'debug', "parentage: $parentage");
 		my $eff = $frame->Menubutton(
 			-text => $parentage. $fx_cache->{registry}->[$i]->{name}, -tearoff => 0,);
 
@@ -865,7 +861,7 @@ sub add_effect_gui {
 
 		for my $p (0..$fx_cache->{registry}->[$i]->{count} - 1 ) {
 		my @items;
-		#$debug and print "p_first: $p_first, p_last: $p_last\n";
+		#logit(__PACKAGE__,'debug', "p_first: $p_first, p_last: $p_last");
 		for my $j ($fx_cache->{split}->{ctrl}{a}..$fx_cache->{split}->{ctrl}{z}) {   
 			push @items, 				
 				[ 'command' => $fx_cache->{registry}->[$j]->{name},
@@ -882,8 +878,8 @@ sub add_effect_gui {
 				-menuitems => [@items],
 				-tearoff => 0,
 		);
-			$debug and print "parameter name: ",
-				$fx_cache->{registry}->[$i]->{params}->[$p]->{name},"\n";
+			logit(__PACKAGE__,'debug', "parameter name: ",
+				$fx_cache->{registry}->[$i]->{params}->[$p]->{name});
 			my $v =  # for argument vector 
 			{	parent => \$frame,
 				cop_id => $id, 
@@ -929,10 +925,10 @@ sub remove_effect_gui {
 	logsub("&remove_effect_gui");
 	my $id = shift;
 	my $n = $fx->{applied}->{$id}->{chain};
-	$debug and print "id: $id, chain: $n\n";
+	logit(__PACKAGE__,'debug', "id: $id, chain: $n");
 
-	$debug and print "i have widgets for these ids: ", join " ",keys %{$gui->{fx}}, "\n";
-	$debug and print "preparing to destroy: $id\n";
+	logit(__PACKAGE__,'debug', "i have widgets for these ids: ", join " ",keys %{$gui->{fx}});
+	logit(__PACKAGE__,'debug', "preparing to destroy: $id");
 	return unless defined $gui->{fx}->{$id};
 	$gui->{fx}->{$id}->destroy();
 	delete $gui->{fx}->{$id}; 
@@ -940,18 +936,17 @@ sub remove_effect_gui {
 }
 
 sub effect_button {
-	local $debug = 0;	
 	logsub("&effect_button");
 	my ($n, $label, $start, $end) = @_;
-	$debug and print "chain $n label $label start $start end $end\n";
+	logit(__PACKAGE__,'debug', "chain $n label $label start $start end $end");
 	my @items;
 	my $widget;
 	my @indices = ($start..$end);
 	if ($start >= $fx_cache->{split}->{ladspa}{a} and $start <= $fx_cache->{split}->{ladspa}{z}){
 		@indices = ();
 		@indices = @{$fx_cache->{ladspa_sorted}}[$start..$end];
-		$debug and print "length sorted indices list: ".scalar @indices. "\n";
-	$debug and print "Indices: @indices\n";
+		logit(__PACKAGE__,'debug', "length sorted indices list: ",scalar @indices );
+	logit(__PACKAGE__,'debug', "Indices: @indices");
 	}
 		
 		for my $j (@indices) { 
@@ -988,21 +983,21 @@ sub make_scale {
 	my $p  = $p{p_num};
 	my $i  = $fx_cache->{full_label_to_index}->{$code};
 
-	$debug and print "id: $id code: $code\n";
+	logit(__PACKAGE__,'debug', "id: $id code: $code");
 	
 
 	# check display format, may be text-field or hidden,
 
-	$debug and  print "i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}\n";
+	logit(__PACKAGE__,'debug',"i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}");
 	my $display_type = $fx->{applied}->{$id}->{display};
 	defined $display_type or $display_type = $fx_cache->{registry}->[$i]->{display};
-	$debug and print "display type: $display_type\n";
+	logit(__PACKAGE__,'debug', "display type: $display_type");
 	return if $display_type eq q(hidden);
 
 
-	$debug and print "to: ", $fx_cache->{registry}->[$i]->{params}->[$p]->{end}, "\n";
-	$debug and print "p: $p code: $code\n";
-	$debug and print "is_log_scale: ".is_log_scale($i,$p), "\n";
+	logit(__PACKAGE__,'debug', "to: ", $fx_cache->{registry}->[$i]->{params}->[$p]->{end}) ;
+	logit(__PACKAGE__,'debug', "p: $p code: $code");
+	logit(__PACKAGE__,'debug', "is_log_scale: ".is_log_scale($i,$p));
 
 	# set display type to individually specified value if it exists
 	# otherwise to the default for the controller class
@@ -1206,10 +1201,9 @@ sub namaset {
 }
 
 sub colorchooser { 
-	#print "colorchooser\n";
-	#my $debug = 1;
+	logsub("&colorchooser");
 	my ($field, $initialcolor) = @_;
-	$debug and print "field: $field, initial color: $initialcolor\n";
+	logit(__PACKAGE__,'debug', "field: $field, initial color: $initialcolor");
 	my $new_color = $gui->{mw}->chooseColor(
 							-title => $field,
 							-initialcolor => $initialcolor,
