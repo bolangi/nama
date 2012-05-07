@@ -873,5 +873,34 @@ sub git_snapshot {
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
 }
+
+sub git_tag { 
+	return unless $config->{use_git};
+	my ($tag_name,$msg) = @_;
+	$project->{repo}->tag( '--message',$msg);
+}
+sub git_checkout {
+	return unless $config->{use_git};
+	my $branchname = shift;
+	$project->{repo}->run(checkout => $branchname)
+		if git_branch_exists($branchname);
+}
+sub git_create_branch {
+	return unless $config->{use_git};
+	my $branchname = shift;
+	$project->{repo}->run(checkout => '-b',$branchname)
+		unless git_branch_exists($branchname);
+}
+
+sub git_diff {  $project->{repo}->run('diff') }
+
+sub git_branch_exists { 
+	return unless $config->{use_git};
+	my $branchname = shift;
+	grep{ $_ eq $branchname } 
+	map{ s/^\s+//; s/^\* //; $_}
+	$project->{repo}->run("branch");
+}
+
 1;
 __END__
