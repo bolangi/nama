@@ -17,7 +17,9 @@ sub initialize_logger {
 
 sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
-	my @cats = map { s/::/Audio::Nama::/; $_} split ',', $cat_string; # SKIP_PREPROC
+	my @cats = map { s/::/Audio::Nama::/; $_}                    # SKIP_PREPROC
+				map { s/^/::/ unless /^::/ or /^ECI/ or /^SUB/; $_ } # SKIP_PREPROC
+				split ',', $cat_string;                    
 	
 	say "Logging categories: @cats" if @cats;
 
