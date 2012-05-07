@@ -8,6 +8,7 @@ our (
 );
 {
 package ::Track;
+use ::Log qw(logit);
 
 # Objects belonging to Track and its subclasses
 # have a 'class' field that is set when the 
@@ -31,9 +32,7 @@ use File::Slurp;
 use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
-our ($debug);
 
-local $debug = 0;
 use ::Util qw(freq input_node dest_type join_path);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
@@ -181,7 +180,7 @@ sub current_wav {
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		$filename
 	} else {
-		$debug and print "track ", $track->name, ": no current version\n" ;
+		logit('::Track','debug', "track ", $track->name, ": no current version") ;
 		undef; 
 	}
 }
@@ -189,7 +188,7 @@ sub current_wav {
 sub current_version {	
 	my $track = shift;
 	my $status = $track->rec_status;
-	#$debug and print "last: $last status: $status\n";
+	#logit('::Track','debug', "last: $last status: $status");
 
 	# two possible version numbers, depending on REC/MON status
 	
@@ -225,17 +224,14 @@ sub maybe_monitor { # ordinary sub, not object method
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
-	my $bug = shift;
-	local $debug;
-	$debug //= $bug;
 	
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
 	my $group = $bn{$track->group};
-	#$debug and say join " ", "bus:",$group->name, $group->rw;
-	$debug and print "track: ", $track->name, ", source: ",
-		$track->source_id, ", monitor version: $monitor_version\n";
+	#logit('::Track','debug', join " ", "bus:",$group->name, $group->rw);
+	logit('::Track','debug', "track: ", $track->name, ", source: ",
+		$track->source_id, ", monitor version: $monitor_version");
 
 	# first, check for conditions resulting in status 'OFF'
 
@@ -889,7 +885,7 @@ sub latency_offset {
 
 {
 package ::SimpleTrack; # used for Master track
-use Modern::Perl; use Carp;
+use Modern::Perl; use Carp; use ::Log qw(logit);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status { $_[0]->rw ne 'OFF' ? 'REC' : 'OFF' }
@@ -899,7 +895,7 @@ sub unbusify {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 
-use Modern::Perl;
+use Modern::Perl; use ::Log qw(logit);
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
@@ -913,7 +909,7 @@ sub version {0}
 }
 {
 package ::SlaveTrack; # for instrument monitor bus
-use Modern::Perl;
+use Modern::Perl; use ::Log qw(logit);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
@@ -929,6 +925,7 @@ sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::CacheRecTrack; # for graph generation
+use ::Log qw(logit);
 our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
@@ -946,12 +943,13 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 }
 {
 package ::MixDownTrack; 
+use ::Log qw(logit);
 our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
 	my $last = $track->last;
 	my $status = $track->rec_status;
-	#$debug and print "last: $last status: $status\n";
+	#logit('::Track','debug', "last: $last status: $status");
 	if 	($status eq 'REC'){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
@@ -964,12 +962,12 @@ sub rec_status {
 }
 {
 package ::EditTrack; use Carp qw(carp cluck);
+use ::Log qw(logit);
 our @ISA = '::Track';
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
-	local $debug = 1;
-	$debug and print $self->name, ": args @_\n";
+	logit('::Track','debug', $self->name, ": args @_");
     # get tail of method call
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	$::Edit::by_name{$self->name}->$call(@_);
@@ -979,24 +977,26 @@ sub current_version {
 	my $track = shift;
 	my $last = $track->last;
 	my $status = $track->rec_status;
-	#$debug and print "last: $last status: $status\n";
+	#logit('::Track','debug', "last: $last status: $status");
 	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
 }
 sub playat_time {
-	$debug and cluck $_[0]->name . "->playat_time\n";
+	logit('::Track','logcluck',$_[0]->name . "->playat_time");
 	$_[0]->play_start_time
 }
 }
 {
 package ::VersionTrack;
+use ::Log qw(logit);
 our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
 }
 {
 package ::MixTrack;
+use ::Log qw(logit);
 our @ISA ='::Track';
 # as a mix track, I have no sources of my own
 # when status is REC
@@ -1024,7 +1024,7 @@ sub add_track {
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
 	
-	$debug and print "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}\n";
+	logit('::Track','debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
 	
 	say("$name: track name already in use. Skipping."), return 
 		if $tn{$name};
@@ -1034,7 +1034,7 @@ sub add_track {
 	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
-	$debug and print "ref new track: ", ref $track; 
+	logit('::Track','debug', "ref new track: ", ref $track); 
 	$track->source($gui->{_chr}) if $gui->{_chr};
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
@@ -1051,7 +1051,7 @@ sub add_track {
 
 	set_current_bus();
 	$ui->track_gui($track->n);
-	$debug and print "Added new track!\n", $track->dump;
+	logit('::Track','debug', "Added new track!\n", sub{$track->dump});
 	$track;
 }
 
