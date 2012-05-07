@@ -287,6 +287,14 @@ show_mode:
   type: setup
   short: shm
   what: show current record/playback modes
+show_track_latency:
+  type: track
+  short: shl
+  what: show latency data for current track
+show_latency_all:
+  type: diagnostics
+  short: shla
+  what: dump all latency data
 set_region:
   type: track
   short: srg

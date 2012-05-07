@@ -1404,6 +1404,15 @@ mode_string: 'off'    { 0 }
 mode_string: 'doodle' 
 mode_string: 'preview'
 
+show_track_latency: _show_track_latency {
+	my $node = $::setup->{latency}->{track}->{$::this_track->name};
+	print ::yaml_out($node) if $node;
+	1;
+}
+show_latency_all: _show_latency_all { 
+	print ::yaml_out($::setup->{latency}) if $::setup->{latency} 
+	1;
+}
 # config_key: key {
 # 	my $key = $item{key};
 # 	warn("$key: illegal config setting"), return 0
