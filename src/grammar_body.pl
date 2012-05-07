@@ -881,13 +881,13 @@ set_bus: _set_bus key someval { $::bn{$::this_bus}->set($item{key} => $item{some
 
 list_buses: _list_buses { ::pager(map{ $_->dump } ::Bus::all()) ; 1}
 add_insert: _add_insert 'local' {
-	::Insert::add_insert( 'postfader_insert');
+	::Insert::add_insert( $::this_track,'postfader_insert');
 	1;
 }
 add_insert: _add_insert prepost send_id return_id(?) {
 	my $return_id = $item{'return_id(?)'}->[0];
 	my $send_id = $item{send_id};
-	::Insert::add_insert( "$item{prepost}fader_insert",$send_id, $return_id);
+	::Insert::add_insert($::this_track, "$item{prepost}fader_insert",$send_id, $return_id);
 	1;
 }
 prepost: 'pre' | 'post'

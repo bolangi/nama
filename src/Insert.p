@@ -105,12 +105,10 @@ sub remove {
 # subroutine
 #
 sub add_insert {
-	my ($type, $send_id, $return_id) = @_;
+	my ($track, $type, $send_id, $return_id) = @_;
 	# $type : prefader_insert | postfader_insert
-	say "\n",$::this_track->name , ": adding $type\n";
-	local $::this_track = $::this_track; # temporarily change
-	my $t = $::this_track;
-	my $name = $t->name;
+	say "\n",$track->name , ": adding $type\n";
+	my $name = $track->name;
 
 	# the input fields will be ignored, since the track will get input
 	# via the loop device track_insert
@@ -118,10 +116,10 @@ sub add_insert {
 	my $class =  $type =~ /pre/ ? '::PreFaderInsert' : '::PostFaderInsert';
 	
 	# remove an existing insert of specified type, if present
-	$t->$type and $by_index{$t->$type}->remove;
+	$track->$type and $by_index{$track->$type}->remove;
 
 	my $i = $class->new( 
-		track => $t->name,
+		track => $track->name,
 		send_type 	=> ::dest_type($send_id),
 		send_id	  	=> $send_id,
 		return_type 	=> ::dest_type($return_id),
@@ -225,12 +223,12 @@ sub latency {
 	
 	my $dry_track_latency  # total
 		= $setup->{latency}->{track}->{$_->dry_name}->{total}
-		= track_ops_latency($::tn{$_->dry_name}) + loop_device_latency();
+		= ::track_ops_latency($::tn{$_->dry_name}) + ::loop_device_latency();
 		#	+ insert_latency($::tn{$_->dry_name});
 	
 	my $wet_track_ops_latency
 		= $setup->{latency}->{track}->{$_->wet_name}->{ops}
-		= track_ops_latency($::tn{$_->wet_name});
+		= ::track_ops_latency($::tn{$_->wet_name});
 
 	# sibling latency (i.e. max), is same as wet track latency
 	
@@ -238,9 +236,17 @@ sub latency {
 	= $setup->{latency}->{track}->{$_->wet_name}->{total}
 	= $setup->{latency}->{sibling}->{$_->wet_name}
 	= $setup->{latency}->{sibling}->{$_->dry_name} 
-	= $wet_track_ops_latency + $jack_related_latency + loop_device_latency();
+	= $wet_track_ops_latency + $jack_related_latency + ::loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
 }
+
+# class methods
+
+sub get_inserts {
+	my $trackname = shift;
+	grep{ $_-> track eq $trackname } values %by_index;
+}
+
 }
 {
 package ::PostFaderInsert;

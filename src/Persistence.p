@@ -510,7 +510,7 @@ sub restore_state {
 	::Insert::initialize();
 	
 	map{ 
-		bless $_, $_->{class};
+		bless $_, $_->{class}; # bless directly, bypassing constructor
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 

@@ -144,33 +144,27 @@ sub update_cache_map {
 		logit('::CacheTrack','debug', "updating track cache_map");
 		#logit('::CacheTrack','debug',sub{"cache map\n".yaml_out($track->cache_map)});
 		my $cache_map = $track->cache_map;
-		if ( my @ops_list = $track->fancy_ops )
+		my @inserts_list = ::Insert::get_inserts($track->name);
+		my @ops_list = $track->fancy_ops;
+		if ( @inserts_list or @ops_list )
 		{
 			my $ec = ::EffectChain->new(
 				track_cache => 1,
 				track_name	=> $track->name,
-				track_version => $orig_version,
+				track_version_original => $orig_version,
+				track_version_result => $track->last,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
+				inserts_data => \@inserts_list,
 			);
 			map{ remove_effect($_) } @ops_list;
+			map{ $_->remove        } @inserts_list;
 
 			$cache_map->{$track->last} = { 
 				original 			=> $orig_version,
 				effect_chain	=> $ec->n
 			};
-		}
-		if (my @inserts = grep{$_}(
-				$track->prefader_insert, 
-				$track->postfader_insert)
-		){
-			say "removing insert... ";
-			say "if you want it again you will need to replace it yourself";
-			say "this is what it was";
-			map{ say $_->dump; $_->remove } 
-				map{ $::Insert::by_index{$_} } 
-				@inserts;
 		}
 		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "), $track->name, '".';
