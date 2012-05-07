@@ -1410,7 +1410,7 @@ show_track_latency: _show_track_latency {
 	1;
 }
 show_latency_all: _show_latency_all { 
-	print ::yaml_out($::setup->{latency}) if $::setup->{latency} 
+	print ::yaml_out($::setup->{latency}) if $::setup->{latency};
 	1;
 }
 # config_key: key {
