@@ -163,9 +163,9 @@ sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 
 sub group_last {
 	my $track = shift;
-	my $group = $bn{$track->group}; 
-	#print join " ", 'searching tracks:', $group->tracks, $/;
-	$group->last;
+	my $bus = $bn{$track->group}; 
+	#print join " ", 'searching tracks:', $bus->tracks, $/;
+	$bus->last;
 }
 
 sub last { $_[0]->versions->[-1] || 0 }
@@ -206,12 +206,12 @@ sub current_version {
 sub monitor_version {
 	my $track = shift;
 
-	my $group = $bn{$track->group};
+	my $bus = $bn{$track->group};
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;
-	return $group->version if $group->version 
-				and grep {$group->version  == $_ } @{$track->versions};
-	return undef if $group->version;
+	return $bus->version if $bus->version 
+				and grep {$bus->version  == $_ } @{$track->versions};
+	return undef if $bus->version;
 	$track->last;
 }
 
@@ -228,20 +228,20 @@ sub rec_status {
 	#my $source_id = $track->source_id;
 	my $monitor_version = $track->monitor_version;
 
-	my $group = $bn{$track->group};
-	#logit('::Track','debug', join " ", "bus:",$group->name, $group->rw);
+	my $bus = $bn{$track->group};
+	#logit('::Track','debug', join " ", "bus:",$bus->name, $bus->rw);
 	logit('::Track','debug', "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version");
 
 	# first, check for conditions resulting in status 'OFF'
 
-	if ( $group->rw eq 'OFF'
+	if ( $bus->rw eq 'OFF'
 		or $track->rw eq 'OFF'
 		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
-	# having reached here, we know $group->rw and $track->rw are REC or MON
+	# having reached here, we know $bus->rw and $track->rw are REC or MON
 	# so the result will be REC or MON if conditions are met
 
 	# second, set REC status if possible
@@ -1038,9 +1038,9 @@ sub add_track {
 	$track->source($gui->{_chr}) if $gui->{_chr};
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
-	my $group = $bn{$track->group}; 
-	command_process('for mon; mon') if $mode->{preview} and $group->rw eq 'MON';
-	$group->set(rw => 'REC') unless $track->target; # not if is alias
+	my $bus = $bn{$track->group}; 
+	command_process('for mon; mon') if $mode->{preview} and $bus->rw eq 'MON';
+	$bus->set(rw => 'REC') unless $track->target; # not if is alias
 
 	# normal tracks default to 'REC'
 	# track aliases default to 'MON'
