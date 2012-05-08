@@ -108,7 +108,10 @@ sub new {
 				my @dry_ops = @{$tn{$_->dry_name}->ops};
 				my $wet_effect_chain = ::EffectChain->new(
 					project => 1,
-					track_cache => 1,
+					track_cache => 1, # if we include an insert
+										# does it mean track_cache?
+										# probably not
+										
 				#	track_name => 'brass-1-wet', # don't need this, do we?
 					insert	=> 1,
 					ops_list => \@wet_ops,
@@ -137,6 +140,15 @@ sub new {
 				# track: we already know the track from
 				#    the parent effect chain
 
+				# What is left:
+				# 
+				# 	class
+				#	wetness
+				#	send_type
+				#	send_id
+				#	return_type
+				#	return_id
+				
 				$hash
 			} @{$vals{inserts_data}}
 		];
@@ -155,11 +167,11 @@ sub new {
 	$object;
 }
 
+### apply effect chain to the specified track
+### or the track specified by the effect chain's track_name field.
+
 sub add {
 	my ($self, $track, $successor) = @_;
-	
-	# Apply effect chain to track argument, if supplied;
-	# otherwise use the track specified by effect chain's track_name field.
 	
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
 	
@@ -198,6 +210,22 @@ sub add {
 		
 		
 	} @{$self->ops_list};
+
+	map 
+	{
+		say "found insert data:\n",::yaml_out($_);
+
+		# get effect chain indices for wet/dry arms
+		
+		my $wet_effect_chain = delete $_->{wet_effect_chain};
+		my $dry_effect_chain = delete $_->{dry_effect_chain};
+		my $class 			 = delete $_->{class};
+
+		$_->{track} = $track->name;
+		::Insert::new($class, %$_);
+
+	} @{$self->inserts_data};
+
 }
 sub destroy {
 	my $self = shift;
