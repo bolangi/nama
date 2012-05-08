@@ -8,7 +8,7 @@ use vars qw(%by_index);
 use ::Globals qw($jack $setup $config);
 use ::Log qw(logit);
 use ::Object qw(
-[% qx( ./strip_comments cat ./insert_fields ) %]
+[% qx( ./strip_comments ./insert_fields ) %]
 );
 
 use ::Util qw(input_node output_node dest_type);
