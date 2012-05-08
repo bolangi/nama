@@ -430,7 +430,7 @@ sub write_chains {
 sub setup_requires_realtime {
 	my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
 	grep { has_vertex("$_\_in") } @fields 
-		and grep { has_vertex("$_\_out") } @fields
+		or grep { has_vertex("$_\_out") } @fields
 
 }
 sub has_vertex { $setup->{final_graph}->has_vertex($_[0]) }
