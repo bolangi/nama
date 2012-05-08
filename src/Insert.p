@@ -75,6 +75,8 @@ sub new {
 		type   => 'ea',
 		values => [100],
 	});
+	# synchronize effects with wetness setting
+	$self->set_wetness($self->{wetness}); 
 	$by_index{$self->n} = $self;
 }
 
@@ -116,6 +118,7 @@ sub add_insert {
 		$i->{return_type} = $i->{send_type};
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+			# TODO adjust to suit track channel width?
 	}
 }
 sub get_id {
