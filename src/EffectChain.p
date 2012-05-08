@@ -222,7 +222,7 @@ sub add {
 		my $class 			 = delete $_->{class};
 
 		$_->{track} = $track->name;
-		::Insert::new($class, %$_);
+		my $insert = $class->new(%$_);
 
 	} @{$self->inserts_data};
 
