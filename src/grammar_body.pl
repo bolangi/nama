@@ -905,13 +905,9 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter {
 	my $i = $::Insert::by_index{$id};
 	print("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
 		return 1 unless $i;
-	$i->{wetness} = $p;
-	::modify_effect($i->wet_vol, 0, undef, $p);
-	::sleeper(0.1);
-	::modify_effect($i->dry_vol, 0, undef, 100 - $p);
+	$i->set_wetness($p);
 	1;
 }
-
 set_insert_wetness: _set_insert_wetness prepost(?) {
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
