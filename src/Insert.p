@@ -8,22 +8,8 @@ use vars qw(%by_index);
 use ::Globals qw($jack $setup $config);
 use ::Log qw(logit);
 use ::Object qw(
-	insert_type
-	n
-	class
-	send_type
-	send_id
-	return_type
-	return_id
-	wet_track
-	dry_track
-	tracks
-	track
-	wetness
-	wet_vol
-	dry_vol
+[% qx( ./strip_comments cat ./insert_fields ) %]
 );
-# field tracks: deprecated
 
 use ::Util qw(input_node output_node dest_type);
 
@@ -76,6 +62,7 @@ sub new {
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
+
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 
 	$self->{dry_vol} = ::add_effect({
