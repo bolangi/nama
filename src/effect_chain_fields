@@ -5,9 +5,13 @@
 ###	    Group 1 - core functionality
 
 		n					# index
+
 		ops_list			# list of effect ids (may include controllers)
-        ops_data			# effect data (optional, can be derived
-							# from ops_list
+							# constructor argument, but not part
+							# of constructed object 
+							
+        ops_data			# effect data, can be generated from
+							# ops_list
 							
 		inserts_data		# we need to build something special from this
 							# + can contain pre and post-fader inserts
@@ -16,6 +20,7 @@
 							#   maybe wet_effect_chain, dry_effect_chain
 
 ### 	Group 2 - attributes for searching and sorting
+
 
 		name				# for user-defined effect chains
 
@@ -39,3 +44,7 @@
 		track_version_result 	# WAV version of track caching result 
 
 		track_version_original 	# WAV version of track before caching 
+
+		insert				# true value identifies belonging to an insert
+		
+		track_cache			# true value identifies belonging to track caching

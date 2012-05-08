@@ -22,7 +22,7 @@ no warnings qw(uninitialized);
 our @ISA;
 our ($n, %by_index);
 use ::Object qw( 
-[% qx(cat ./effect_chain_fields) %]
+[% qx(./strip_comments ./effect_chain_fields) %]
 		);
 initialize();
 
@@ -66,8 +66,12 @@ sub new {
 	croak "must have exactly one of 'global' or 'project' fields defined" 
 		unless ($vals{global} xor $vals{project});
 	# we expect some effects
-	croak "expected non-empty ops_list" unless scalar @{$vals{ops_list}};
+
+	croak "expected either non-empty ops_list or insert_data" 
+		unless scalar @{$vals{ops_list}} or scalar @{$vals{inserts_data}};
+
 	my $n = $vals{n} || ++$n;
+
 	my $ops_data = {};
 	# ops data can either be 
 	# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
@@ -87,15 +91,63 @@ sub new {
 		}
 	} @{$vals{ops_list}};
 
-	# convert inserts to hash references 
-	$vals{inserts_data} = [ map { $_->as_hash } @{$vals{inserts_data}} ]	
-		if $vals{inserts_data};
+	$vals{ops_data} = $ops_data;
+
+	if( $vals{inserts_data})
+	{
+
+		# rewrite inserts to store what we need:
+		# 1. for general-purpose effects chain use
+		# 2. for track caching use
+		
+		$vals{inserts_data} = 
+		[ 
+			map
+			{ 
+				my @wet_ops = @{$tn{$_->wet_name}->ops};
+				my @dry_ops = @{$tn{$_->dry_name}->ops};
+				my $wet_effect_chain = ::EffectChain->new(
+					project => 1,
+					track_cache => 1,
+				#	track_name => 'brass-1-wet', # don't need this, do we?
+					insert	=> 1,
+					ops_list => \@wet_ops,
+				);
+				my $dry_effect_chain = ::EffectChain->new(
+					project => 1,
+					track_cache => 1,
+				#	track_name => 'brass-1-dry',# don't need this, do we?
+					insert => 1,
+					ops_list => \@dry_ops,
+				);
+				my $hash = dclone($_->as_hash);
+
+				$hash->{wet_effect_chain} = $wet_effect_chain->n;
+				$hash->{dry_effect_chain} = $dry_effect_chain->n;
+
+				map{ delete $hash->{$_} } qw(n dry_vol wet_vol track);	
+
+				# Reasons for deleting insert attributes
+				
+				# n: we'll get a new index when we re-apply
+				# dry_vol, wet_vol: will never be re-allocated
+				#    so why not reuse them?
+				#    except for general purpose we'd like to
+				#    re-allocate
+				# track: we already know the track from
+				#    the parent effect chain
+
+				$hash
+			} @{$vals{inserts_data}}
+		];
+	}
+
+	say ::yaml_out($vals{inserts_data}) if $vals{inserts_data};
 
 	my $object = bless 
 		{ 
 			n => $n, 
-			ops_data => $ops_data, 
-			@_	# inserts are supplied via inserts_data => [ @inserts ]
+			%vals,
 
 		}, $class;
 	$by_index{$n} = $object;
