@@ -14,6 +14,25 @@ use List::Util qw(max);
 #   add (or set) operators 
 #    (to optimize: add operators only to plural sibling edges, not only edges)
 
+sub add_latency_control_op {
+	my $n = shift;
+	my $delay = shift || 0;
+	my $id = cop_add({
+				chain => $n, 
+				type => 'etd', # ecasound time delay operator
+				cop_id => $ti{$n}->latency, # may be undef
+				values => [ $delay,
+							0,    # no surround mode
+							1,    # 1 delay operation
+							100,  # 100% delayed signal
+							100 ],# feedback in each iteration
+			# We will be adjusting the first (delay) parameter
+				});
+	
+	$ti{$n}->set(latency => $id);  # save the id for next time
+	$id;
+}
+
 sub calculate_and_adjust_latency {
 
 	initialize_latency_vars();
