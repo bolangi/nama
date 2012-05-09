@@ -497,6 +497,7 @@ sub restore_state {
 	my $current_master_mode = $mode->{mastering};
 	$mode->{mastering} = 1;
 
+	map{ $_->{latency_op} = delete $_->{latency} if $_->{latency} } @tracks_data;
 	map{ 
 		my %h = %$_; 
 		my $class = $h{class} || "::Track";

@@ -20,7 +20,7 @@ sub add_latency_control_op {
 	my $id = cop_add({
 				chain => $n, 
 				type => 'etd', # ecasound time delay operator
-				cop_id => $ti{$n}->latency, # may be undef
+				cop_id => $ti{$n}->latency_op, # may be undef
 				values => [ $delay,
 							0,    # no surround mode
 							1,    # 1 delay operation
@@ -29,7 +29,7 @@ sub add_latency_control_op {
 			# We will be adjusting the first (delay) parameter
 				});
 	
-	$ti{$n}->set(latency => $id);  # save the id for next time
+	$ti{$n}->set(latency_op => $id);  # save the id for next time
 	$id;
 }
 
@@ -46,9 +46,9 @@ sub calculate_and_adjust_latency {
 }
 
 sub reset_latency_ops {
-	map{ modify_effect($_->latency, 0, 0)  } ::ChainSetup::engine_tracks()}
+	map{ modify_effect($_->latency_op, 0, 0)  } ::ChainSetup::engine_tracks()}
 sub remove_latency_ops {
-	map{ ::remove_effect($_->latency) if $_->latency } ::ChainSetup::engine_tracks()
+	map{ ::remove_effect($_->latency_op) if $_->latency_op } ::ChainSetup::engine_tracks()
 }
 sub apply_latency_ops {
 	
@@ -116,10 +116,7 @@ sub track_ops_latency {
 sub insert_latency {
 	my $track = shift;
 	my $latency = 0;
-	map{ $latency += $_->latency}
-		grep{ $_ }
-		map{ $::Insert::by_index{$_} }
-		($track->prefader_insert, $track->postfader_insert);
+	map{ $latency += $_->latency_offset} ::Insert::get_inserts($track->name);
 	$latency;
 }
 sub predecessor_latency {
