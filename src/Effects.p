@@ -4,15 +4,17 @@ package ::;
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 no warnings 'uninitialized';
-use Carp;
+use Carp qw(cluck);
 
 # access routines
 # the lvalue routines can be on the left side of an assignment
 
 sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub has_read_only_param {
-	my $id = shift;
-	my $entry = $fx_cache->{registry}->[fxindex($id)];
+	my $op_id = shift;
+	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	cluck("undefined or unregistered effect id: $op_id"), return
+		unless $op_id and $entry;
 		for(0..scalar @{$entry->{params}} - 1)
 		{
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
@@ -21,6 +23,8 @@ sub has_read_only_param {
 sub is_read_only {
     my ($op_id, $param) = @_;
     my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	cluck("undefined or unregistered effect id: $op_id"), return
+		unless $op_id and $entry;
 	$entry->{params}->[$param]->{dir} eq 'output'
 }          
 
