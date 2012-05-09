@@ -200,8 +200,8 @@ sub latency {
 	{
 
 		my $client_latency_frames 
-			= $jack->{clients}->{$_->send_name}->{playback}->{max} 
-				+ $jack->{clients}->{$_->send_name}->{capture}->{max};
+			= $jack->{clients}->{$_->send_id}->{playback}->{max} 
+				+ $jack->{clients}->{$_->send_id}->{capture}->{max};
 		my $jack_connection_latency_frames = $jack->{period}; 
 
 		$jack_related_latency
