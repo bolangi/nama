@@ -36,6 +36,7 @@ sub add_latency_control_op {
 sub calculate_and_adjust_latency {
 
 	initialize_latency_vars();
+	return if $config->{opts}->{O};
 	
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 	logit('::Latency','debug',"starting node: $starting_track_name");
