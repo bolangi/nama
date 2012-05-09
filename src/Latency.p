@@ -46,9 +46,10 @@ sub calculate_and_adjust_latency {
 }
 
 sub reset_latency_ops {
-	map{ modify_effect($_->latency_op, 0, 0)  } ::ChainSetup::engine_tracks()}
+	map{ modify_effect($_->latency_op, 0, 0) if $_->latency_op } ::Track::all();
+}
 sub remove_latency_ops {
-	map{ ::remove_effect(delete $_->{latency_op})} grep{ $_->latency_op } ::Track::all();
+	map{ ::remove_effect($_->latency_op) if $_->latency_op } ::Track::all();
 }
 sub apply_latency_ops {
 	
