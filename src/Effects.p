@@ -973,5 +973,63 @@ sub _bypass_effects {
 	}
 	$track->unmute;
 }
+sub check_effects_for_consistency {
+
+	my %seen_ids;
+	my $is_error;
+	map
+	{     
+		my $track = $_;
+		my @ops = @{ $track->{ops} };
+		my $is_track_error;
+
+		# check for missing special-purpose ops
+
+		my $no_vol_op 		= ! $track->vol;
+		my $no_pan_op 		= ! $track->pan;
+		my $no_latency_op 	= ! $track->latency_op;
+
+		# check for orphan special-purpose op entries
+
+		my $orphan_vol_op = $track->vol if $track->vol 
+			and !  grep { $track->vol eq $_ } @ops;
+		my $orphan_pan_op = $track->pan if $track->pan 
+			and !  grep { $track->pan eq $_ } @ops;
+		my $orphan_latency_op = $track->latency_op if $track->latency_op
+			and !  grep { $track->latency_op eq $_ } @ops;
+
+		# check for undefined op ids 
+		
+		my @track_undef_op_ids;
+
+		my $i = 0;
+		map { defined $_ or push @track_undef_op_ids, $i } @ops;
+
+		# remove undefined op ids from list
+		
+		@ops = grep{ $_ } @ops;
+
+		# check for op ids without corresponding entry in $fx->{applied}
+
+		my @illegitimate_op_ids;
+		map { fx($_) or push @illegitimate_op_ids, $_ } @ops;
+
+	} ::Track::all();
+
+	# check entries in $fx->{applied}
+	
+	# check for null op_id
+	
+	my $is_undef_entry;
+
+	$is_undef_entry++ if $fx->{applied}->{undef};
+
+	# check for incomplete entries in $fx->{applied}
+	
+	my @incomplete_entries = 
+		grep { ! params($_) or ! type($_) or ! chain($_) } 
+		grep { $_ } keys %{$fx->{applied}};
+	
+}
 1;
 __END__
