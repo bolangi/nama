@@ -17,7 +17,7 @@ use List::Util qw(max);
 sub add_latency_control_op {
 	my $n = shift;
 	my $delay = shift || 0;
-	my $id = cop_add({
+	my $id = add_effect({
 				chain => $n, 
 				type => 'etd', # ecasound time delay operator
 				cop_id => $ti{$n}->latency_op, # may be undef
