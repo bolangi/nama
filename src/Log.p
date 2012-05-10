@@ -13,7 +13,7 @@ sub initialize_logger {
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
-	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
+	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
 	
 	$appender = $logfile ? 'FILE' : 'STDERR';
 
