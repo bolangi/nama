@@ -13,9 +13,9 @@ sub initialize_logger {
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
+	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) };
+	
 	$appender = $logfile ? 'FILE' : 'STDERR';
-
-sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
 	my @cats = map { s/::/Audio::Nama::/; $_}                    # SKIP_PREPROC
 				map { s/^/::/ unless /^::/ or /^ECI/ or /^SUB/; $_ } # SKIP_PREPROC
@@ -53,6 +53,8 @@ sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 	Log::Log4perl::init(\$conf);
 	return( { map { $_, 1 } @cats } )
 }
+sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
+
 sub logit {
 	my ($category, $level, @message) = @_;
 	return unless $category;
