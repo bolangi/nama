@@ -6,7 +6,11 @@ no warnings 'uninitialized';
 
 # general functions
 
-sub poll_jack { $engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) }
+sub poll_jack { 
+		jack_update(); # first time
+		# then repeat
+		$engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) 
+}
 
 sub jack_update {
 	logsub("&jack_update");
