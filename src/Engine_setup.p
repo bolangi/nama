@@ -4,6 +4,7 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
+use ::Effects qw(:all);
 
 sub generate_setup { 
 

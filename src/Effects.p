@@ -1,6 +1,6 @@
 # ------ Effect Routines -------
 
-package ::; # share namespace with Nama.pm and several others
+package ::Effects; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 no warnings 'uninitialized';
@@ -17,8 +17,12 @@ use ::Globals qw(
 					$setup 
 					$this_op 
 					$this_track);
+*valid_engine_setup = \&::valid_engine_setup;
+*engine_running		= \&::engine_running;
+*eval_iam			= \&::eval_iam;
+*ecasound_select_chain = \&::ecasound_select_chain;
 
-
+use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					parent
@@ -29,7 +33,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					fx
 					params
 					
-					fx_index
+					fxindex
 					name
 
 
@@ -37,6 +41,12 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					add_effect
 					remove_effect
 					modify_effect
+
+					effect_update_copp_set
+					sync_effect_parameters
+					find_op_offsets
+					apply_ops
+					expanded_ops_list
 
 ) ] );
 

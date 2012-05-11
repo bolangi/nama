@@ -1013,6 +1013,7 @@ sub input_path {
 {
 package ::;
 use Modern::Perl;
+use ::Effects qw(:all);
 
 # usual track
 

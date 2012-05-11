@@ -1,6 +1,7 @@
 # --------------------- Command Grammar ----------------------
 
 package ::;
+use ::Effects qw(:all);
 use Modern::Perl;
 
 sub setup_grammar {

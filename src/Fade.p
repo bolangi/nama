@@ -10,6 +10,7 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logit);
+use ::Effects qw(:all);
 use ::Object qw( 
 				 n
 				 type
@@ -71,14 +72,14 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = ::type($track->fader);
+	my $operator  = type($track->fader);
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller; # effect ID
-	($controller) = @{::owns($track->fader)} if $track->fader;
+	($controller) = @{owns($track->fader)} if $track->fader;
 
 	logit('::Fade','debug',"removing fade controller");
-	::remove_effect($controller) if $controller;
+	remove_effect($controller) if $controller;
 
 	return unless
 		my @pairs = fader_envelope_pairs($track); 
@@ -89,7 +90,7 @@ sub refresh_fade_controller {
 
 	# add controller
 	logit('::Fade','debug',"applying fade controller");
-	::add_effect({
+	add_effect({
 		cop_id		=> $controller,
 		parent_id 	=> $track->fader,
 		type		=> 'klg',	  		 # Ecasound controller
@@ -105,7 +106,7 @@ sub refresh_fade_controller {
 	# 	first fade is type 'out' : 100%
 	
 	 
-	::effect_update_copp_set($track->fader,0, initial_level($track->name))
+	effect_update_copp_set($track->fader,0, initial_level($track->name))
 }
 
 
