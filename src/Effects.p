@@ -200,9 +200,9 @@ sub _insert_effect {  # call only from add_effect
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: zero based
-	my $cop = $fx->{applied}->{$op_id} 
+	my $cop = fx($op_id)
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
-	my $code = $cop->{type};
+	my $code = type($op_id);
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
