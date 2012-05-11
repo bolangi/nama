@@ -284,7 +284,8 @@ sub remove_effect {
 	}
 	$ti{$n}->remove_effect_from_track( $id ); 
 	# remove entries for chain operator attributes and parameters
-	fx($id) = params($id) = {};
+ 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
+    delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
 	$this_op = undef;
 }
 
