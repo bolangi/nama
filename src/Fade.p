@@ -71,11 +71,11 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = $fx->{applied}->{$track->fader}->{type};
+	my $operator  = type($track->fader);
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller; # effect ID
-	($controller) = @{$fx->{applied}->{$track->fader}{owns}} if $track->fader;
+	($controller) = @{owns($track->fader)} if $track->fader;
 
 	logit('::Fade','debug',"removing fade controller");
 	::remove_effect($controller) if $controller;
@@ -221,7 +221,7 @@ sub fader_envelope_pairs {
 		[ 	$marktime1, 
 			$marktime2, 
 			$fade->type, 
-			$fx->{applied}->{$track->fader}->{type},
+			type($track->fader),
 		];
 }
 	# sort fades -  may not need this
