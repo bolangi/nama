@@ -51,14 +51,6 @@ sub initialize_project_data {
 		-background => 'lightyellow',
 		); 
 
-	# effect variables - no object code (yet)
-	
-	$fx->{id_counter} = "A"; # autoincrement counter
-	%{$fx->{applied}}	= ();  # effect and controller objects (hashes)
-	%{$fx->{params}}   = ();  # chain operator parameters
-	               # indexed by {$id}->[$param_no]
-	               # zero-based {AB}->[0] (parameter 1)
-
 	$gui->{tracks} = {};
 	$gui->{fx} = {};
 
@@ -72,10 +64,7 @@ sub initialize_project_data {
 							::Track
 							::Insert
 							);
-	
-	# volume settings
-	
-	$fx->{muted} = [];
+	initialize_effects_data();
 
 	# $is_armed = 0;
 	
@@ -99,6 +88,24 @@ sub initialize_project_data {
 
 	::ChainSetup::initialize();
 }
+sub initialize_effects_data {
+
+	# effect variables - no object code (yet)
+	
+	$fx->{id_counter} = "A"; # autoincrement counter
+	%{$fx->{applied}}	= ();  # effect and controller objects (hashes)
+	%{$fx->{params}}   = ();  # chain operator parameters
+	               # indexed by {$id}->[$param_no]
+	               # zero-based {AB}->[0] (parameter 1)
+
+	# volume settings
+	
+	$fx->{muted} = [];
+
+}
+
+	
+
 sub load_project {
 	logsub("&load_project");
 	my %h = @_;
