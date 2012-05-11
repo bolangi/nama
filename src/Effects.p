@@ -4,7 +4,45 @@ package ::; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 no warnings 'uninitialized';
-use Carp qw(cluck);
+use Carp;
+use ::Log qw(logsub logit);
+use ::Globals qw(
+					$fx 
+					$fx_cache 
+					$ui 
+					%ti 
+					%tn 
+					%bn 
+					$config 
+					$setup 
+					$this_op 
+					$this_track);
+
+
+our %EXPORT_TAGS = ( 'all' => [ qw(
+
+					parent
+					chain
+					type
+					bypassed
+					owns
+					fx
+					params
+					
+					fx_index
+					name
+
+
+					cop_add
+					add_effect
+					remove_effect
+					modify_effect
+
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = ();
 
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
