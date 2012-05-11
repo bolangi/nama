@@ -1,32 +1,10 @@
 # ------ Effect Routines -------
 
-package ::;
+package ::; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 no warnings 'uninitialized';
 use Carp qw(cluck);
-
-# access routines
-# the lvalue routines can be on the left side of an assignment
-
-sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
-sub has_read_only_param {
-	my $op_id = shift;
-	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
-		for(0..scalar @{$entry->{params}} - 1)
-		{
-			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
-		}
-}
-sub is_read_only {
-    my ($op_id, $param) = @_;
-    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
-	$entry->{params}->[$param]->{dir} eq 'output'
-}          
 
 sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
 sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
@@ -50,6 +28,29 @@ sub name {
 	$fx_cache->{registry}->[fxindex($op_id)]->{name}
 }
  
+
+# access routines
+# the lvalue routines can be on the left side of an assignment
+
+sub is_controller 	{ my $id = shift; parent($id) }
+sub has_read_only_param {
+	my $op_id = shift;
+	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
+		return unless $op_id and $entry;
+		for(0..scalar @{$entry->{params}} - 1)
+		{
+			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
+		}
+}
+sub is_read_only {
+    my ($op_id, $param) = @_;
+    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
+		return unless $op_id and $entry;
+	$entry->{params}->[$param]->{dir} eq 'output'
+}          
+
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
@@ -200,7 +201,7 @@ sub _insert_effect {  # call only from add_effect
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: zero based
-	my $cop = $fx->{applied}->{$op_id} 
+	my $cop = fx($op_id) 
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
 	my $code = $cop->{type};
 	my $i = effect_index($code);
@@ -282,8 +283,8 @@ sub remove_effect {
 
 	}
 	$ti{$n}->remove_effect_from_track( $id ); 
-	delete $fx->{applied}->{$id}; # remove entry from chain operator list
-	delete $fx->{params }->{$id}; # remove entry from chain operator parameters list
+	# remove entries for chain operator attributes and parameters
+	fx($id) = params($id) = {};
 	$this_op = undef;
 }
 
