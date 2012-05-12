@@ -12,16 +12,24 @@ our $appender;
 sub initialize_logger {
 	my $cat_string = shift;
 
+	my @all_cats = qw(
+[% qx(./get_logging_cats) %]
+	);
+
+	my %negate = map{ $_ => 1} map{ s/^!//; $_ } grep{ /^!/ } 
+		expand_cats(split q(,), $cat_string);
+	say("negate\n",::yaml_out(\%negate));
+
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
 	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
 	
 	$appender = $logfile ? 'FILE' : 'STDERR';
 
-	my @cats = map { s/::/Audio::Nama::/; $_}                    # SKIP_PREPROC
-				map { s/^/::/ unless /^::/ or /^ECI/ or /^SUB/; $_ } # SKIP_PREPROC
-				split ',', $cat_string;                    
+	my @cats = expand_cats(split ',', $cat_string);
+	say "log cats: @cats";
 	
+	@cats = grep{ ! $negate{$_} } expand_cats(@all_cats) if grep {$_ eq 'all'} @cats;
 	say "Logging categories: @cats" if @cats;
 
 	#say Dumper %log_cats;
@@ -43,7 +51,7 @@ sub initialize_logger {
 		# file appender
 		log4perl.appender.FILE		= Log::Log4perl::Appender::File
 		log4perl.appender.FILE.filename	= $logfile
-		log4perl.appender.FILE.layout	= Log::Log4perl::Layout::PatternLayout
+		log4perl.appender.FILE.layout	= Log::Log3perl::Layout::PatternLayout
 		log4perl.appender.FILE.layout.ConversionPattern = $layout
 
 		#log4perl.additivity.SUB			= 0 # doesn't work... why?
@@ -56,6 +64,12 @@ sub initialize_logger {
 }
 sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
+sub expand_cats {
+	my @cats = @_;
+	map { s/^(!)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
+	map { s/^(!)?/$1::/ unless /^::/ or /^!?ECI/ or /^!?SUB/ or /^all$/; $_ }# SKIP_PREPROC
+	@cats;
+}
 {
 my %is_method = map { $_ => 1 } 
 		qw( trace debug info warn error fatal
