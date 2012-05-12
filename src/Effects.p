@@ -11,6 +11,7 @@ use Carp qw(cluck);
 
 sub is_controller { 
 	my $id = shift; 
+	catch_null_id($id);
 	$fx->{applied}->{$id}->{belongs_to} 
 
 }
@@ -510,7 +511,7 @@ sub apply_op {
 	$add_cmd .= $code . join ",", @vals;
 
 	# append the -kx  operator for a controller-controller
-	$add_cmd .= " -kx" if is_controller($dad);
+	$add_cmd .= " -kx" if $dad and is_controller($dad);
 
 	logit('::Effects','debug', "command: $add_cmd");
 
