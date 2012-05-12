@@ -57,6 +57,9 @@ sub command_process {
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  ecasound_effect_index($this_op));
 	}
+
+	my $result = check_fx_consistency();
+	logit('::Effects','logconfess',"Inconsistency found in effects data\n",::yaml_out($result)) if $result->{is_error};
 		
 }
 sub do_user_command {

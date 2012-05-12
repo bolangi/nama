@@ -1010,7 +1010,7 @@ sub _bypass_effects {
 	}
 	$track->unmute;
 }
-sub check_effects_for_consistency {
+sub check_fx_consistency {
 
 	my $result = {};
 	my %seen_ids;
@@ -1034,8 +1034,13 @@ sub check_effects_for_consistency {
 			if $track->vol and !  grep { $track->vol eq $_ } @ops;
 		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
 			if $track->pan and !  grep { $track->pan eq $_ } @ops;
-		$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
-			if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
+
+		# we don't check for orphan latency ops as this is
+		# allowed in order to keep constant $op_id over
+		# time (slower incrementing of fx counter)
+		
+		#$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
+		#	if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
 
 		# check for undefined op ids 
 		
@@ -1052,11 +1057,11 @@ sub check_effects_for_consistency {
 
 		# check for op ids without corresponding entry in $fx->{applied}
 
-		my @illegitimate_op_ids;
-		map { fx($_) or push @illegitimate_op_ids, $_ } @ops;
+		my @uninstantiated_op_ids;
+		map { fx($_) or push @uninstantiated_op_ids, $_ } @ops;
 
-		$is_track_error++, $result->{track}->{$name}->{illegitimate_op_ids} 
-			= \@illegitimate_op_ids if @illegitimate_op_ids;
+		$is_track_error++, $result->{track}->{$name}->{uninstantiated_op_ids} 
+			= \@uninstantiated_op_ids if @uninstantiated_op_ids;
 
 		$result->{track}->{$name}->{is_error}++ if $is_track_error;
 		$result->{is_error}++ if $is_track_error;
@@ -1066,17 +1071,21 @@ sub check_effects_for_consistency {
 	
 	# check for null op_id
 	
-	my $is_undef_entry;
 
-	$is_undef_entry++ if $fx->{applied}->{undef};
+	$result->{applied}->{is_undef_entry}++ if $fx->{applied}->{undef};
 
 	# check for incomplete entries in $fx->{applied}
 	
 	my @incomplete_entries = 
 		grep { ! params($_) or ! type($_) or ! chain($_) } 
 		grep { $_ } keys %{$fx->{applied}};
+
+	if(@incomplete_entries)
+	{
+		$result->{applied}->{incomplete_entries} = \@incomplete_entries;
+		$result->{is_error}++
+	}
 	$result;
-	
 }
 1;
 __END__
