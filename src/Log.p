@@ -18,7 +18,7 @@ sub initialize_logger {
 
 	my %negate = map{ $_ => 1} map{ s/^!//; $_ } grep{ /^!/ } 
 		expand_cats(split q(,), $cat_string);
-	say("negate\n",::yaml_out(\%negate));
+	#say("negate\n",::yaml_out(\%negate));
 
 	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
@@ -27,10 +27,10 @@ sub initialize_logger {
 	$appender = $logfile ? 'FILE' : 'STDERR';
 
 	my @cats = expand_cats(split ',', $cat_string);
-	say "log cats: @cats";
+	#say "log cats: @cats";
 	
 	@cats = grep{ ! $negate{$_} } expand_cats(@all_cats) if grep {$_ eq 'ALL'} @cats;
-	say "Logging categories: @cats" if @cats;
+	#say "Logging categories: @cats" if @cats;
 
 	#say Dumper %log_cats;
 
