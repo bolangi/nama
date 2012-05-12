@@ -29,7 +29,7 @@ sub initialize_logger {
 	my @cats = expand_cats(split ',', $cat_string);
 	say "log cats: @cats";
 	
-	@cats = grep{ ! $negate{$_} } expand_cats(@all_cats) if grep {$_ eq 'all'} @cats;
+	@cats = grep{ ! $negate{$_} } expand_cats(@all_cats) if grep {$_ eq 'ALL'} @cats;
 	say "Logging categories: @cats" if @cats;
 
 	#say Dumper %log_cats;
@@ -67,7 +67,7 @@ sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 sub expand_cats {
 	my @cats = @_;
 	map { s/^(!)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
-	map { s/^(!)?/$1::/ unless /^::/ or /^!?ECI/ or /^!?SUB/ or /^all$/; $_ }# SKIP_PREPROC
+	map { s/^(!)?/$1::/ unless /^::/ or /^!?ECI/ or /^!?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
 	@cats;
 }
 {
