@@ -9,47 +9,87 @@ use Carp qw(cluck);
 # access routines
 # the lvalue routines can be on the left side of an assignment
 
-sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub is_controller { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{belongs_to} 
+
+}
 sub has_read_only_param {
-	my $op_id = shift;
-	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
+	my $id = shift;
+	catch_null_id($id);
+	my $entry = $fx_cache->{registry}->[fxindex($id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+		return unless $id and $entry;
 		for(0..scalar @{$entry->{params}} - 1)
 		{
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
 }
 sub is_read_only {
-    my ($op_id, $param) = @_;
-    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
+    my ($id, $param) = @_;
+	catch_null_id($id);
+    my $entry = $fx_cache->{registry}->[fxindex($id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+		return unless $id and $entry;
 	$entry->{params}->[$param]->{dir} eq 'output'
 }          
 
-sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
-sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
-sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
-sub bypassed: lvalue{ my $id = shift; $fx->{applied}->{$id}->{bypassed}   }
+sub parent : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{belongs_to} 
+}
+sub chain  : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{chain}      
+}
+sub type   : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{type}       
+}
+sub bypassed: lvalue{ 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{bypassed}   
+}
 
 # ensure owns field is initialized as anonymous array
 
-sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
-sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}                }
-sub params : lvalue { my $id = shift; $fx->{params}->{$id}                 }
-
+sub owns   : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{owns} ||= [] 
+} 
+sub fx     : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}                
+}
+sub params : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{params}->{$id}
+}
 
 # get information from registry
 sub fxindex {
-	my $op_id = shift;
-	$fx_cache->{full_label_to_index}->{ type($op_id) };
+	my $id = shift;
+	catch_null_id($id);
+	$fx_cache->{full_label_to_index}->{ type($id) };
 }
 sub name {
-	my $op_id = shift;
-	$fx_cache->{registry}->[fxindex($op_id)]->{name}
+	my $id = shift;
+	catch_null_id($id);
+	$fx_cache->{registry}->[fxindex($id)]->{name}
 }
  
+sub catch_null_id {
+	my $id = shift;
+	logit('::Effects','logconfess',"null effect id") unless $id;
+}
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
