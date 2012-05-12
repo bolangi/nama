@@ -257,6 +257,15 @@ sub restore_state {
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
 
+	# remove null entries
+	
+	map { say "deleted null effect $_"; 
+			delete $fx->{applied}->{$_}; 
+			delete $fx->{params}->{$_} } 
+	grep {     
+		$fx->{applied}->{$_} eq undef or ! %{$fx->{applied}->{$_}}
+	} keys %{$fx->{applied}};
+
 	restore_effect_chains();
 
 	##  print yaml_out \@groups_data; 
