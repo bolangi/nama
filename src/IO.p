@@ -216,7 +216,7 @@ sub soundcard_output_device_string {
 }
 
 sub jack_multi_route {
-	my ($client, $direction, $start, $width)  = @_;
+	my ($client, $direction, $start, $width, $trackname)  = @_;
 	#say "client $client, $direction $direction, start: $start, width $width";
 	# can we route to these channels?
 	my $end   = $start + $width - 1;
@@ -231,8 +231,7 @@ sub jack_multi_route {
 		: $count_maybe_ref;
 
 	#my $max = scalar @{$jack->{clients}->{$client}{$direction}};
-	die qq(JACK client "$client", direction: $direction
-channel ($end) is out of bounds. $max channels maximum.\n) 
+	die qq(track $trackname: JACK client "$client", direction: $direction channel ($end) is out of bounds. $max channels maximum.\n) 
 		if $end > $max;
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)}
@@ -347,7 +346,7 @@ sub device_id {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	::IO::jack_multi_route($client,$client_direction,$channel,$self->width )
+	::IO::jack_multi_route($client,$client_direction,$channel,$self->width, ::try{$self->name} )
 }
 # don't need to specify format, since we take all channels
 }
