@@ -53,7 +53,7 @@ sub command_process {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	if ($this_track->n eq chain($this_op)){
+	if ($this_op and $this_track->n eq chain($this_op)){
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  ecasound_effect_index($this_op));
 	}

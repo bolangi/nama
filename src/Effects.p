@@ -11,7 +11,6 @@ use Carp qw(cluck);
 
 sub is_controller { 
 	my $id = shift; 
-	catch_null_id($id);
 	$fx->{applied}->{$id}->{belongs_to} 
 
 }
@@ -491,10 +490,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub apply_op {
 	logsub("&apply_op");
 	local $config->{category} = 'ECI_FX';
-	my $id = shift;
-	! $id and carp "null id, skipping";
-	return unless $id;
-	my $selected = shift;
+	my ($id, $selected_chain) = @_;
 	logit('::Effects','debug', "id: $id");
 	my $code = type($id);
 	my $dad = parent($id);
@@ -518,7 +514,7 @@ sub apply_op {
 
 	logit('::Effects','debug', "command: $add_cmd");
 
-	eval_iam("c-select $chain") if $selected != $chain;
+	eval_iam("c-select $chain") if $selected_chain != $chain;
 	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
 	eval_iam($add_cmd);
 
