@@ -4,6 +4,7 @@ package ::Log;
 use Modern::Perl;
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;
+use Carp;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(logit logsub initialize_logger);
 our $appender;
@@ -55,11 +56,19 @@ sub initialize_logger {
 }
 sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
+{
+my %is_method = map { $_ => 1 } 
+		qw( trace debug info warn error fatal
+			logwarn logdie
+			logcarp logcroak logcluck logconfess);
+	
 sub logit {
 	my ($category, $level, @message) = @_;
 	return unless $category;
+	confess "illegal level: $level" unless $is_method{$level};
 	my $logger = get_logger($category);
 	$logger->$level(@message);
+}
 }
 sub logsub { logit('SUB','debug',$_[0]) }
 	
