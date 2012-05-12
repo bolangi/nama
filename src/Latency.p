@@ -117,7 +117,7 @@ sub track_ops_latency {
 sub insert_latency {
 	my $track = shift;
 	my $latency = 0;
-	map{ $latency += $_->latency_offset} ::Insert::get_inserts($track->name);
+	map{ $latency += $_->latency} ::Insert::get_inserts($track->name);
 	$latency;
 }
 sub predecessor_latency {
