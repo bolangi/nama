@@ -81,7 +81,7 @@ sub remove {
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	logit('::Mark',warn "marks found: ",scalar @all);
+	logit('::Mark','debug', "marks found: ",scalar @all);
 	# @all = (), return if scalar @all
 	@all = grep { $_->time != $mark->time } @all;
 
