@@ -975,11 +975,13 @@ sub _bypass_effects {
 }
 sub check_effects_for_consistency {
 
+	my $result = {};
 	my %seen_ids;
 	my $is_error;
 	map
 	{     
 		my $track = $_;
+		my $name = $track->name;
 		my @ops = @{ $track->{ops} };
 		my $is_track_error;
 
@@ -991,19 +993,21 @@ sub check_effects_for_consistency {
 
 		# check for orphan special-purpose op entries
 
-		my $orphan_vol_op = $track->vol if $track->vol 
-			and !  grep { $track->vol eq $_ } @ops;
-		my $orphan_pan_op = $track->pan if $track->pan 
-			and !  grep { $track->pan eq $_ } @ops;
-		my $orphan_latency_op = $track->latency_op if $track->latency_op
-			and !  grep { $track->latency_op eq $_ } @ops;
+		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol 
+			if $track->vol and !  grep { $track->vol eq $_ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
+			if $track->pan and !  grep { $track->pan eq $_ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
+			if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
 
 		# check for undefined op ids 
 		
-		my @track_undef_op_ids;
+		my @track_undef_op_pos;
 
 		my $i = 0;
-		map { defined $_ or push @track_undef_op_ids, $i } @ops;
+		map { defined $_ or push @track_undef_op_pos, $i; $i++ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{undef_op_pos}
+			= \@track_undef_op_pos if @track_undef_op_pos;
 
 		# remove undefined op ids from list
 		
@@ -1014,6 +1018,11 @@ sub check_effects_for_consistency {
 		my @illegitimate_op_ids;
 		map { fx($_) or push @illegitimate_op_ids, $_ } @ops;
 
+		$is_track_error++, $result->{track}->{$name}->{illegitimate_op_ids} 
+			= \@illegitimate_op_ids if @illegitimate_op_ids;
+
+		$result->{track}->{$name}->{is_error}++ if $is_track_error;
+		$result->{is_error}++ if $is_track_error;
 	} ::Track::all();
 
 	# check entries in $fx->{applied}
@@ -1029,6 +1038,7 @@ sub check_effects_for_consistency {
 	my @incomplete_entries = 
 		grep { ! params($_) or ! type($_) or ! chain($_) } 
 		grep { $_ } keys %{$fx->{applied}};
+	$result;
 	
 }
 1;
