@@ -656,6 +656,7 @@ add_controller: _add_controller parent effect value(s?) {
 	1;
 }
 add_controller: _add_controller effect value(s?) {
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
 	my $code = $item{effect};
 	my $parent = $::this_op;
 	my $values = $item{"value(s?)"};
@@ -754,8 +755,7 @@ insert_effect: _insert_effect before effect value(s?) {
 before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
-	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless ::fx($::this_op);
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
 	::modify_multiple_effects( 
 		[$::this_op], 
 		$item{'parameter(s)'},
@@ -764,8 +764,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 	print ::show_effect($::this_op)
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
-	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless ::fx($::this_op);
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	print ::show_effect($::this_op)
 }
@@ -798,8 +797,7 @@ show_effect: _show_effect op_id(s) {
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
-	print("Operator \"$::this_op\" does not exist.\n"), return 1
-		unless ::fx($::this_op);
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
 	print ::show_effect($::this_op);
 	1;
 }
@@ -1023,12 +1021,14 @@ bypass_effects: _bypass_effects 'all' {
 #  current effect 
 #
 bypass_effects: _bypass_effects { 
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
  	print "track ",$::this_track->name,", bypassing effects:\n"; 
 	print ::named_effects_list($::this_op);
  	::bypass_effects($::this_track, $::this_op);  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
+	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
 	print "restoring effects:\n";
 	print ::named_effects_list($::this_op);
 	::restore_effects( $::this_track, $::this_op);

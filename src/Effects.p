@@ -9,47 +9,87 @@ use Carp qw(cluck);
 # access routines
 # the lvalue routines can be on the left side of an assignment
 
-sub is_controller 	{ my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
+sub is_controller { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{belongs_to} 
+
+}
 sub has_read_only_param {
-	my $op_id = shift;
-	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
+	my $id = shift;
+	catch_null_id($id);
+	my $entry = $fx_cache->{registry}->[fxindex($id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+		return unless $id and $entry;
 		for(0..scalar @{$entry->{params}} - 1)
 		{
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
 }
 sub is_read_only {
-    my ($op_id, $param) = @_;
-    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
+    my ($id, $param) = @_;
+	catch_null_id($id);
+    my $entry = $fx_cache->{registry}->[fxindex($id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+		return unless $id and $entry;
 	$entry->{params}->[$param]->{dir} eq 'output'
 }          
 
-sub parent : lvalue { my $id = shift; $fx->{applied}->{$id}->{belongs_to} }
-sub chain  : lvalue { my $id = shift; $fx->{applied}->{$id}->{chain}      }
-sub type   : lvalue { my $id = shift; $fx->{applied}->{$id}->{type}       }
-sub bypassed: lvalue{ my $id = shift; $fx->{applied}->{$id}->{bypassed}   }
+sub parent : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{belongs_to} 
+}
+sub chain  : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{chain}      
+}
+sub type   : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{type}       
+}
+sub bypassed: lvalue{ 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{bypassed}   
+}
 
 # ensure owns field is initialized as anonymous array
 
-sub owns   : lvalue { my $id = shift; $fx->{applied}->{$id}->{owns} ||= [] } 
-sub fx     : lvalue { my $id = shift; $fx->{applied}->{$id}                }
-sub params : lvalue { my $id = shift; $fx->{params}->{$id}                 }
-
+sub owns   : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}->{owns} ||= [] 
+} 
+sub fx     : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{applied}->{$id}                
+}
+sub params : lvalue { 
+	my $id = shift; 
+	catch_null_id($id);
+	$fx->{params}->{$id}
+}
 
 # get information from registry
 sub fxindex {
-	my $op_id = shift;
-	$fx_cache->{full_label_to_index}->{ type($op_id) };
+	my $id = shift;
+	catch_null_id($id);
+	$fx_cache->{full_label_to_index}->{ type($id) };
 }
 sub name {
-	my $op_id = shift;
-	$fx_cache->{registry}->[fxindex($op_id)]->{name}
+	my $id = shift;
+	catch_null_id($id);
+	$fx_cache->{registry}->[fxindex($id)]->{name}
 }
  
+sub catch_null_id {
+	my $id = shift;
+	logit('::Effects','logconfess',"null effect id") unless $id;
+}
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
@@ -451,10 +491,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 sub apply_op {
 	logsub("&apply_op");
 	local $config->{category} = 'ECI_FX';
-	my $id = shift;
-	! $id and carp "null id, skipping";
-	return unless $id;
-	my $selected = shift;
+	my ($id, $selected_chain) = @_;
 	logit('::Effects','debug', "id: $id");
 	my $code = type($id);
 	my $dad = parent($id);
@@ -474,11 +511,11 @@ sub apply_op {
 	$add_cmd .= $code . join ",", @vals;
 
 	# append the -kx  operator for a controller-controller
-	$add_cmd .= " -kx" if is_controller($dad);
+	$add_cmd .= " -kx" if $dad and is_controller($dad);
 
 	logit('::Effects','debug', "command: $add_cmd");
 
-	eval_iam("c-select $chain") if $selected != $chain;
+	eval_iam("c-select $chain") if $selected_chain != $chain;
 	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
 	eval_iam($add_cmd);
 
@@ -972,6 +1009,83 @@ sub _bypass_effects {
 		bypassed($op) = ($off_or_on eq 'on') ? 1 : 0;
 	}
 	$track->unmute;
+}
+sub check_fx_consistency {
+
+	my $result = {};
+	my %seen_ids;
+	my $is_error;
+	map
+	{     
+		my $track = $_;
+		my $name = $track->name;
+		my @ops = @{ $track->{ops} };
+		my $is_track_error;
+
+		# check for missing special-purpose ops
+
+		my $no_vol_op 		= ! $track->vol;
+		my $no_pan_op 		= ! $track->pan;
+		my $no_latency_op 	= ! $track->latency_op;
+
+		# check for orphan special-purpose op entries
+
+		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol 
+			if $track->vol and !  grep { $track->vol eq $_ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
+			if $track->pan and !  grep { $track->pan eq $_ } @ops;
+
+		# we don't check for orphan latency ops as this is
+		# allowed in order to keep constant $op_id over
+		# time (slower incrementing of fx counter)
+		
+		#$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
+		#	if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
+
+		# check for undefined op ids 
+		
+		my @track_undef_op_pos;
+
+		my $i = 0;
+		map { defined $_ or push @track_undef_op_pos, $i; $i++ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{undef_op_pos}
+			= \@track_undef_op_pos if @track_undef_op_pos;
+
+		# remove undefined op ids from list
+		
+		@ops = grep{ $_ } @ops;
+
+		# check for op ids without corresponding entry in $fx->{applied}
+
+		my @uninstantiated_op_ids;
+		map { fx($_) or push @uninstantiated_op_ids, $_ } @ops;
+
+		$is_track_error++, $result->{track}->{$name}->{uninstantiated_op_ids} 
+			= \@uninstantiated_op_ids if @uninstantiated_op_ids;
+
+		$result->{track}->{$name}->{is_error}++ if $is_track_error;
+		$result->{is_error}++ if $is_track_error;
+	} ::Track::all();
+
+	# check entries in $fx->{applied}
+	
+	# check for null op_id
+	
+
+	$result->{applied}->{is_undef_entry}++ if $fx->{applied}->{undef};
+
+	# check for incomplete entries in $fx->{applied}
+	
+	my @incomplete_entries = 
+		grep { ! params($_) or ! type($_) or ! chain($_) } 
+		grep { $_ } keys %{$fx->{applied}};
+
+	if(@incomplete_entries)
+	{
+		$result->{applied}->{incomplete_entries} = \@incomplete_entries;
+		$result->{is_error}++
+	}
+	$result;
 }
 1;
 __END__
