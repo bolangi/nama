@@ -8,22 +8,8 @@ use vars qw(%by_index);
 use ::Globals qw($jack $setup $config);
 use ::Log qw(logit);
 use ::Object qw(
-	insert_type
-	n
-	class
-	send_type
-	send_id
-	return_type
-	return_id
-	wet_track
-	dry_track
-	tracks
-	track
-	wetness
-	wet_vol
-	dry_vol
+[% qx( ./strip_comments ./insert_fields ) %]
 );
-# field tracks: deprecated
 
 use ::Util qw(input_node output_node dest_type);
 
@@ -76,6 +62,7 @@ sub new {
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
+
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 
 	$self->{dry_vol} = ::add_effect({
@@ -88,6 +75,8 @@ sub new {
 		type   => 'ea',
 		values => [100],
 	});
+	# synchronize effects with wetness setting
+	$self->set_wetness($self->{wetness}); 
 	$by_index{$self->n} = $self;
 }
 
@@ -129,6 +118,7 @@ sub add_insert {
 		$i->{return_type} = $i->{send_type};
 		$i->{return_id} =  $i->{send_id} if $i->{return_type} eq 'jack_client';
 		$i->{return_id} =  $i->{send_id} + 2 if $i->{return_type} eq 'soundcard';
+			# TODO adjust to suit track channel width?
 	}
 }
 sub get_id {
@@ -139,7 +129,7 @@ sub get_id {
 	
 	# 
 	my ($track, $prepost) = @_;
-	my @inserts = grep{ $track->name eq $_->track} values %by_index;
+	my @inserts = get_inserts($track->name);
 	my ($prefader) = (map{$_->n} 
 					grep{$_->class =~ /pre/i} 
 					@inserts);
@@ -151,8 +141,21 @@ sub get_id {
 		if (! $prepost and ! $id{pre} != ! $id{post} );
 	$id{$prepost};;
 }
+sub get_inserts {
+	my $trackname = shift;
+	grep{ $_-> track eq $trackname } values %by_index;
+}
+
 
 sub is_local_effects_host { ! $_[0]->send_id }
+
+sub set_wetness {
+	my ($self, $p) = @_;
+	$self->{wetness} = $p;
+	::modify_effect($self->wet_vol, 0, undef, $p);
+	::sleeper(0.1);
+	::modify_effect($self->dry_vol, 0, undef, 100 - $p);
+}
 
 
 ### Insert Latency calculation
@@ -238,13 +241,6 @@ sub latency {
 	= $setup->{latency}->{sibling}->{$_->dry_name} 
 	= $wet_track_ops_latency + $jack_related_latency + ::loop_device_latency();
 		# + insert_latency($::tn{$_->wet_name}) # for inserts within inserts
-}
-
-# class methods
-
-sub get_inserts {
-	my $trackname = shift;
-	grep{ $_-> track eq $trackname } values %by_index;
 }
 
 }

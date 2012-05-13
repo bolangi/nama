@@ -1,0 +1,14 @@
+	insert_type # obsolete, use class
+	n			# index
+	class
+	send_type
+	send_id
+	return_type
+	return_id
+	wet_track  	# obsolete, use method wet_name
+	dry_track  	# obsolete, use method dry_name
+	tracks     	# obsolete
+	track		# insert applies to this track
+	wetness		# 0 to 100
+	wet_vol		# effect id
+	dry_vol		# effect id
