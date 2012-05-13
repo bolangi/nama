@@ -20,7 +20,7 @@ sub initialize_logger {
 		expand_cats(split q(,), $cat_string);
 	#say("negate\n",::yaml_out(\%negate));
 
-	my $layout = "[\%r] %m%n"; # backslash to protect from source filter
+	my $layout = "[\%r] %c %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE} || "";
 	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
 	
