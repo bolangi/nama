@@ -1,1 +1,2 @@
 pod2man --section=1 Nama.pm nama.1 --name=nama
+pod2html --title="nama(1)" --infile=Nama.pm --outfile=nama.html
