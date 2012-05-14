@@ -226,7 +226,7 @@ sub dest_type {
 sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
-	logit('::Util','debug',"creating directory [ $dir ]");
+	logit(__LINE__,'::Util','debug',"creating directory [ $dir ]");
 		-e $dir 
 #and (carp "create_dir: '$dir' already exists, skipping...\n") 
 			or system qq( mkdir -p $dir)

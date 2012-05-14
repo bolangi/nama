@@ -156,20 +156,20 @@ sub initialize_interfaces {
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
-	logit('::Config','debug',"project name: $project->{name}");
+	logit(__LINE__,'::Config','debug',"project name: $project->{name}");
 
-	logit('::Config','debug',
+	logit(__LINE__,'::Config','debug',
 		sub{"Command line options\n".  yaml_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	
-	logit('::Config','debug',sub{"Config data\n".Dumper $config});
+	logit(__LINE__,'::Config','debug',sub{"Config data\n".Dumper $config});
 	
 	setup_user_customization();	
 
 	start_ecasound();
 
-	logit('::Config','debug',"reading config file");
+	logit(__LINE__,'::Config','debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
 		$config->{root_dir} = $config->{opts}->{d};
@@ -352,7 +352,7 @@ sub eval_iam_neteci {
 	my $cmd = shift;
 	my $category = munge_category(shift());
 
-	logit($category, 'debug', "Net-ECI sent: $cmd");
+	logit(__LINE__,$category, 'debug', "Net-ECI sent: $cmd");
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$engine->{socket}->send("$cmd\r\n");
@@ -372,7 +372,7 @@ sub eval_iam_neteci {
 				/sx;  # s-flag: . matches newline
 
 if(	! $return_value == 256 ){
-	logit($category,'error',"Net-ECI bad return value: $return_value (expected 256)");
+	logit(__LINE__,$category,'error',"Net-ECI bad return value: $return_value (expected 256)");
 	restart_ecasound();
 
 }
@@ -380,11 +380,11 @@ if(	! $return_value == 256 ){
 
 	if( $type eq 'e')
 	{
-		logit($category,'error',"ECI error! Command: $cmd. Reply: $reply");
+		logit(__LINE__,$category,'error',"ECI error! Command: $cmd. Reply: $reply");
 		restart_ecasound() if $reply =~ /in engine-status/;
 	}
 	else
-	{ 	logit($category,'debug',"Net-ECI  got: $reply");
+	{ 	logit(__LINE__,$category,'debug',"Net-ECI  got: $reply");
 		$reply
 	}
 	
@@ -395,10 +395,10 @@ sub eval_iam_libecasoundc {
 	my $cmd = shift;
 	my $category = munge_category(shift());
 	
-	logit($category,'debug',"ECI sent: $cmd");
+	logit(__LINE__,$category,'debug',"ECI sent: $cmd");
 
 	my (@result) = $engine->{ecasound}->eci($cmd);
-	logit($category, 'debug',"ECI  got: @result") 
+	logit(__LINE__,$category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
 	my $errmsg = $engine->{ecasound}->errmsg();
 	if( $errmsg ){

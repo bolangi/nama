@@ -42,7 +42,7 @@ sub exit_preview_mode { # exit preview and doodle modes
 		logsub("&exit_preview_mode");
 		return unless $mode->{preview};
 		stop_transport() if engine_running();
-		logit('::Mode','debug', "Exiting preview/doodle mode");
+		logit(__LINE__,'::Mode','debug', "Exiting preview/doodle mode");
 		$mode->{preview} = 0;
 
 }

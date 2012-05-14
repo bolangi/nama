@@ -180,7 +180,7 @@ sub current_wav {
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		$filename
 	} else {
-		logit('::Track','debug', "track ", $track->name, ": no current version") ;
+		logit(__LINE__,'::Track','debug', "track ", $track->name, ": no current version") ;
 		undef; 
 	}
 }
@@ -188,7 +188,7 @@ sub current_wav {
 sub current_version {	
 	my $track = shift;
 	my $status = $track->rec_status;
-	#logit('::Track','debug', "last: $last status: $status");
+	#logit(__LINE__,'::Track','debug', "last: $last status: $status");
 
 	# two possible version numbers, depending on REC/MON status
 	
@@ -229,8 +229,8 @@ sub rec_status {
 	my $monitor_version = $track->monitor_version;
 
 	my $bus = $bn{$track->group};
-	#logit('::Track','debug', join " ", "bus:",$bus->name, $bus->rw);
-	logit('::Track','debug', "track: ", $track->name, ", source: ",
+	#logit(__LINE__,'::Track','debug', join " ", "bus:",$bus->name, $bus->rw);
+	logit(__LINE__,'::Track','debug', "track: ", $track->name, ", source: ",
 		$track->source_id, ", monitor version: $monitor_version");
 
 	# first, check for conditions resulting in status 'OFF'
@@ -949,7 +949,7 @@ sub current_version {
 	my $track = shift;
 	my $last = $track->last;
 	my $status = $track->rec_status;
-	#logit('::Track','debug', "last: $last status: $status");
+	#logit(__LINE__,'::Track','debug', "last: $last status: $status");
 	if 	($status eq 'REC'){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
@@ -967,7 +967,7 @@ our @ISA = '::Track';
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
-	logit('::Track','debug', $self->name, ": args @_");
+	logit(__LINE__,'::Track','debug', $self->name, ": args @_");
     # get tail of method call
     my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	$::Edit::by_name{$self->name}->$call(@_);
@@ -977,13 +977,13 @@ sub current_version {
 	my $track = shift;
 	my $last = $track->last;
 	my $status = $track->rec_status;
-	#logit('::Track','debug', "last: $last status: $status");
+	#logit(__LINE__,'::Track','debug', "last: $last status: $status");
 	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
 	elsif ( $status eq 'MON'){ return $track->monitor_version } 
 	else { return 0 }
 }
 sub playat_time {
-	logit('::Track','logcluck',$_[0]->name . "->playat_time");
+	logit(__LINE__,'::Track','logcluck',$_[0]->name . "->playat_time");
 	$_[0]->play_start_time
 }
 }
@@ -1024,7 +1024,7 @@ sub add_track {
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
 	
-	logit('::Track','debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
+	logit(__LINE__,'::Track','debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
 	
 	say("$name: track name already in use. Skipping."), return 
 		if $tn{$name};
@@ -1034,7 +1034,7 @@ sub add_track {
 	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
-	logit('::Track','debug', "ref new track: ", ref $track); 
+	logit(__LINE__,'::Track','debug', "ref new track: ", ref $track); 
 	$track->source($gui->{_chr}) if $gui->{_chr};
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
@@ -1051,7 +1051,7 @@ sub add_track {
 
 	set_current_bus();
 	$ui->track_gui($track->n);
-	logit('::Track','debug', "Added new track!\n", sub{$track->dump});
+	logit(__LINE__,'::Track','debug', "Added new track!\n", sub{$track->dump});
 	$track;
 }
 

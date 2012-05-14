@@ -102,7 +102,7 @@ sub initialize_project_data {
 sub load_project {
 	logsub("&load_project");
 	my %h = @_;
-	logit('::Project','debug', sub{yaml_out \%h});
+	logit(__LINE__,'::Project','debug', sub{yaml_out \%h});
 	print("no project name.. doing nothing.\n"),return 
 		unless $h{name} or $project->{name};
 	$project->{name} = $h{name} if $h{name};
@@ -175,9 +175,9 @@ Loading project "untitled".
 	$ui->global_version_buttons(); 
 	$ui->refresh_group;
 
-	logit('::Project','debug', "project_root: ", project_root());
-	logit('::Project','debug', "this_wav_dir: ", this_wav_dir());
-	logit('::Project','debug', "project_dir: ", project_dir());
+	logit(__LINE__,'::Project','debug', "project_root: ", project_root());
+	logit(__LINE__,'::Project','debug', "this_wav_dir: ", this_wav_dir());
+	logit(__LINE__,'::Project','debug', "project_dir: ", project_dir());
 
  1;
 }	
@@ -186,7 +186,7 @@ sub dig_ruins { # only if there are no tracks
 	
 	logsub("&dig_ruins");
 	return if ::Track::user();
-	logit('::Project','debug', "looking for WAV files");
+	logit(__LINE__,'::Project','debug', "looking for WAV files");
 
 	# look for wave files
 		
@@ -204,7 +204,7 @@ sub dig_ruins { # only if there are no tracks
 	map{ $wavs{$_}++ } @wavs;
 	@wavs = keys %wavs;
 
-	logit('::Project','debug', "tracks found: @wavs");
+	logit(__LINE__,'::Project','debug', "tracks found: @wavs");
  
 	$ui->create_master_and_mix_tracks();
 
@@ -220,14 +220,14 @@ sub remove_riff_header_stubs {
 	logsub("&remove_riff_header_stubs");
 	
 
-	logit('::Project','debug', "this wav dir: ", this_wav_dir());
+	logit(__LINE__,'::Project','debug', "this wav dir: ", this_wav_dir());
 	return unless this_wav_dir();
          my @wavs = File::Find::Rule ->name( qr/\.wav$/i )
                                         ->file()
                                         ->size(44)
                                         ->extras( { follow => 1} )
                                      ->in( this_wav_dir() );
-    logit('::Project','debug', join $/, @wavs);
+    logit(__LINE__,'::Project','debug', join $/, @wavs);
 
 	map { unlink $_ } @wavs; 
 }

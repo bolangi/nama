@@ -39,14 +39,14 @@ sub refresh_group {
 		
 			$status = 'OFF' }
 
-logit('::Refresh','debug', "group status: $status");
+logit(__LINE__,'::Refresh','debug', "group status: $status");
 
 	set_widget_color($gui->{group_rw}, $status); 
 
 
 
 	croak "some crazy status |$status|\n" if $status !~ m/rec|mon|off/i;
-		#logit('::Refresh','debug', "attempting to set $status color: ", $take_color{$status});
+		#logit(__LINE__,'::Refresh','debug', "attempting to set $status color: ", $take_color{$status});
 
 	set_widget_color( $gui->{group_rw}, $status) if $gui->{group_rw};
 }
@@ -57,7 +57,7 @@ sub refresh_track {
 	logsub("&refresh_track");
 	
 	my $rec_status = $ti{$n}->rec_status;
-	logit('::Refresh','debug', "track: $n rec_status: $rec_status");
+	logit(__LINE__,'::Refresh','debug', "track: $n rec_status: $rec_status");
 
 	return unless $gui->{tracks}->{$n}; # hidden track
 	

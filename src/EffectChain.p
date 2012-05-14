@@ -163,7 +163,7 @@ sub new {
 
 		}, $class;
 	$by_index{$n} = $object;
-	logit('::EffectChain','debug',sub{$object->dump});
+	logit(__LINE__,'::EffectChain','debug',sub{$object->dump});
 	$object;
 }
 
@@ -200,7 +200,7 @@ sub add {
 		$args->{before} = $successor unless $args->{parent_id};
 
 		my $new_id = ::add_effect($args);
-		logit('::EffectChain','debug',"new id: $new_id");
+		logit(__LINE__,'::EffectChain','debug',"new id: $new_id");
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
 		# change all controllers to belong to new id
