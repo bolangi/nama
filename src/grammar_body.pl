@@ -156,7 +156,7 @@ shellish: anytag | <error>
 					# used in: help, do_script
 					 # 
 jack_port: shellish
-effect: /\w[\w:]*/   | <error: illegal identifier, only word characters and colon allowed>
+effect: /\w[\w:-]*/   | <error: illegal identifier, only word characters and colon allowed>
 project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
