@@ -69,7 +69,8 @@ sub new {
 	# we expect some effects
 
 	croak "expected either non-empty ops_list or insert_data" 
-		unless scalar @{$vals{ops_list}} or scalar @{$vals{inserts_data}};
+		unless $vals{ops_list} and scalar @{$vals{ops_list}} 
+		    or $vals{inserts_data} and scalar @{$vals{inserts_data}};
 
 	my $n = $vals{n} || ++$n;
 
