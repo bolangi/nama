@@ -150,7 +150,7 @@ sub new {
 				#	send_id
 				#	return_type
 				#	return_id
-					wet_effect_chain => ec_index,
+				#	wet_effect_chain => ec_index,
 				#   dry_effect_chain => ec_index,
 				
 				$hash
