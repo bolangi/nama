@@ -1,0 +1,392 @@
+1. Calf Compressor
+	-elv2:http://calf.sourceforge.net/plugins/Compressor,'Threshold','Ratio','
+... Attack','Release','Makeup Gain','Knee','Detection','Stereo
+... Link','A-weighting','Compression','Peak Output','0dB','Bypass'
+2. Calf Filter
+	-elv2:http://calf.sourceforge.net/plugins/Filter,'Frequency','Resonance','
+... Mode','Inertia'
+3. Calf Filterclavier
+	-elv2:http://calf.sourceforge.net/plugins/Filterclavier,'Transpose','Detun
+... e','Max. Resonance','Mode','Portamento time'
+4. Calf Flanger
+	-elv2:http://calf.sourceforge.net/plugins/Flanger,'Minimum
+... delay','Modulation depth','Modulation rate','Feedback','Stereo
+... phase','Reset','Amount','Dry Amount'
+5. Calf Monosynth
+	-elv2:http://calf.sourceforge.net/plugins/Monosynth,'Osc1 Wave','Osc2
+... Wave','O1<>2 Detune','Osc 2 transpose','Phase mode','O1<>2
+... Mix','Filter','Cutoff','Resonance','Separation','Env->Cutoff','Env->Res'
+... ,'Env->Amp','Attack','Decay','Sustain','Release','Key Follow','Legato
+... Mode','Portamento','Vel->Filter','Vel->Amp','Volume','PBend Range'
+6. Calf MultiChorus
+	-elv2:http://calf.sourceforge.net/plugins/MultiChorus,'Minimum
+... delay','Modulation depth','Modulation rate','Stereo
+... phase','Voices','Inter-voice phase','Amount','Dry Amount','Center Frq
+... 1','Center Frq 2','Q'
+7. Calf Phaser
+	-elv2:http://calf.sourceforge.net/plugins/Phaser,'Center
+... Freq','Modulation depth','Modulation rate','Feedback','#
+... Stages','Stereo phase','Reset','Amount','Dry Amount'
+8. Calf Reverb
+	-elv2:http://calf.sourceforge.net/plugins/Reverb,'Decay time','High Frq
+... Damp','Room size','Diffusion','Wet Amount','Dry Amount','Pre
+... Delay','Bass Cut','Treble Cut'
+9. Calf Rotary Speaker
+	-elv2:http://calf.sourceforge.net/plugins/RotarySpeaker,'Speed Mode','Tap
+... Spacing','Tap Offset','Mod Depth','Treble Motor','Bass Motor','Mic
+... Distance','Reflection'
+10. Calf Vintage Delay
+	-elv2:http://calf.sourceforge.net/plugins/VintageDelay,'Tempo','Subdivide'
+... ,'Time L','Time R','Feedback','Amount','Mix mode','Medium','Dry Amount'
+11. IR
+	-elv2:http://factorial.hu/plugins/lv2/ir,'Reverse
+... IR','Predelay','Attack','Attack
+... time','Envelope','Length','Stretch','Stereo width in','Stereo width
+... IR','Autogain','Dry','Dry gain','Wet','Wet
+... gain','FileHash0','FileHash1','FileHash2','Dry L meter','Dry R
+... meter','Wet L meter','Wet R meter','Latency'
+12. Aliasing
+	-elv2:http://plugin.org.uk/swh-plugins/alias,'Aliasing level'
+13. Allpass delay line, cubic spline interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/allpass_c,'Max Delay (s)','Delay
+... Time (s)','Decay Time (s)'
+14. Allpass delay line, linear interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/allpass_l,'Max Delay (s)','Delay
+... Time (s)','Decay Time (s)'
+15. Allpass delay line, noninterpolating
+	-elv2:http://plugin.org.uk/swh-plugins/allpass_n,'Max Delay (s)','Delay
+... Time (s)','Decay Time (s)'
+16. AM pitchshifter
+	-elv2:http://plugin.org.uk/swh-plugins/amPitchshift,'Pitch shift','Buffer
+... size','latency'
+17. Simple amplifier
+	-elv2:http://plugin.org.uk/swh-plugins/amp,'Amps gain (dB)'
+18. Analogue Oscillator
+	-elv2:http://plugin.org.uk/swh-plugins/analogueOsc,'Waveform (1=sin,
+... 2=tri, 3=squ, 4=saw)','Frequency (Hz)','Warmth','Instability'
+19. Artificial latency
+	-elv2:http://plugin.org.uk/swh-plugins/artificialLatency,'Delay
+... (ms)','latency'
+20. Auto phaser
+	-elv2:http://plugin.org.uk/swh-plugins/autoPhaser,'Attack time
+... (s)','Decay time (s)','Modulation depth','Feedback','Spread (octaves)'
+21. Glame Bandpass Analog Filter
+	-elv2:http://plugin.org.uk/swh-plugins/bandpass_a_iir,'Center Frequency
+... (Hz)','Bandwidth (Hz)'
+22. Glame Bandpass Filter
+	-elv2:http://plugin.org.uk/swh-plugins/bandpass_iir,'Center Frequency
+... (Hz)','Bandwidth (Hz)','Stages(2 poles per stage)'
+23. Bode frequency shifter
+	-elv2:http://plugin.org.uk/swh-plugins/bodeShifter,'Frequency
+... shift','latency'
+24. Bode frequency shifter (CV)
+	-elv2:http://plugin.org.uk/swh-plugins/bodeShifterCV,'Base shift','Mix
+... (-1=down, +1=up)','CV Attenuation','latency'
+25. GLAME Butterworth Highpass
+	-elv2:http://plugin.org.uk/swh-plugins/butthigh_iir,'Cutoff Frequency
+... (Hz)','Resonance'
+26. GLAME Butterworth Lowpass
+	-elv2:http://plugin.org.uk/swh-plugins/buttlow_iir,'Cutoff Frequency
+... (Hz)','Resonance'
+27. Glame Butterworth X-over Filter
+	-elv2:http://plugin.org.uk/swh-plugins/bwxover_iir,'Cutoff Frequency
+... (Hz)','Resonance'
+28. Chebyshev distortion
+	-elv2:http://plugin.org.uk/swh-plugins/chebstortion,'Distortion'
+29. Comb Filter
+	-elv2:http://plugin.org.uk/swh-plugins/comb,'Band separation
+... (Hz)','Feedback'
+30. Comb Splitter
+	-elv2:http://plugin.org.uk/swh-plugins/combSplitter,'Band separation (Hz)'
+31. Comb delay line, cubic spline interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/comb_c,'Max Delay (s)','Delay Time
+... (s)','Decay Time (s)'
+32. Comb delay line, linear interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/comb_l,'Max Delay (s)','Delay Time
+... (s)','Decay Time (s)'
+33. Comb delay line, noninterpolating
+	-elv2:http://plugin.org.uk/swh-plugins/comb_n,'Max Delay (s)','Delay Time
+... (s)','Decay Time (s)'
+34. Constant Signal Generator
+	-elv2:http://plugin.org.uk/swh-plugins/const,'Signal amplitude'
+35. Crossover distortion
+	-elv2:http://plugin.org.uk/swh-plugins/crossoverDist,'Crossover
+... amplitude','Smoothing'
+36. DC Offset Remover
+	-elv2:http://plugin.org.uk/swh-plugins/dcRemove,
+37. Exponential signal decay
+	-elv2:http://plugin.org.uk/swh-plugins/decay,'Decay Time (s)'
+38. Decimator
+	-elv2:http://plugin.org.uk/swh-plugins/decimator,'Bit depth','Sample rate
+... (Hz)'
+39. Declipper
+	-elv2:http://plugin.org.uk/swh-plugins/declip,
+40. Simple delay line, cubic spline interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/delay_c,'Max Delay (s)','Delay
+... Time (s)'
+41. Simple delay line, linear interpolation
+	-elv2:http://plugin.org.uk/swh-plugins/delay_l,'Max Delay (s)','Delay
+... Time (s)'
+42. Simple delay line, noninterpolating
+	-elv2:http://plugin.org.uk/swh-plugins/delay_n,'Max Delay (s)','Delay
+... Time (s)'
+43. Delayorama
+	-elv2:http://plugin.org.uk/swh-plugins/delayorama,'Random seed','Input
+... gain (dB)','Feedback (%)','Number of taps','First delay (s)','Delay
+... range (s)','Delay change','Delay random (%)','Amplitude
+... change','Amplitude random (%)','Dry/wet mix'
+44. Diode Processor
+	-elv2:http://plugin.org.uk/swh-plugins/diode,'Mode (0 for none, 1 for
+... half wave, 2 for full wave)'
+45. Audio Divider (Suboctave Generator)
+	-elv2:http://plugin.org.uk/swh-plugins/divider,'Denominator'
+46. DJ flanger
+	-elv2:http://plugin.org.uk/swh-plugins/djFlanger,'LFO sync','LFO period
+... (s)','LFO depth (ms)','Feedback (%)'
+47. DJ EQ
+	-elv2:http://plugin.org.uk/swh-plugins/dj_eq,'Lo gain (dB)','Mid gain
+... (dB)','Hi gain (dB)','latency'
+48. DJ EQ (mono)
+	-elv2:http://plugin.org.uk/swh-plugins/dj_eq_mono,'Lo gain (dB)','Mid
+... gain (dB)','Hi gain (dB)','latency'
+49. Dyson compressor
+	-elv2:http://plugin.org.uk/swh-plugins/dysonCompress,'Peak limit
+... (dB)','Release time (s)','Fast compression ratio','Compression ratio'
+50. Fractionally Addressed Delay Line
+	-elv2:http://plugin.org.uk/swh-plugins/fadDelay,'Delay
+... (seconds)','Feedback (dB)'
+51. Fast Lookahead limiter
+	-elv2:http://plugin.org.uk/swh-plugins/fastLookaheadLimiter,'Input gain
+... (dB)','Limit (dB)','Release time (s)','Attenuation (dB)','latency'
+52. Flanger
+	-elv2:http://plugin.org.uk/swh-plugins/flanger,'Delay base (ms)','Max
+... slowdown (ms)','LFO frequency (Hz)','Feedback'
+53. FM Oscillator
+	-elv2:http://plugin.org.uk/swh-plugins/fmOsc,'Waveform (1=sin, 2=tri,
+... 3=squ, 4=saw)'
+54. Foldover distortion
+	-elv2:http://plugin.org.uk/swh-plugins/foldover,'Drive','Skew'
+55. 4 x 4 pole allpass
+	-elv2:http://plugin.org.uk/swh-plugins/fourByFourPole,'Frequency
+... 1','Feedback 1','Frequency 2','Feedback 2','Frequency 3','Feedback
+... 3','Frequency 4','Feedback 4'
+56. Fast overdrive
+	-elv2:http://plugin.org.uk/swh-plugins/foverdrive,'Drive level'
+57. Frequency tracker
+	-elv2:http://plugin.org.uk/swh-plugins/freqTracker,'Tracking speed'
+58. Gate
+	-elv2:http://plugin.org.uk/swh-plugins/gate,'LF key filter (Hz)','HF key
+... filter (Hz)','Threshold (dB)','Attack (ms)','Hold (ms)','Decay
+... (ms)','Range (dB)','Output select (-1 = key listen, 0 = gate, 1 =
+... bypass)','Key level (dB)','Gate state'
+59. Giant flange
+	-elv2:http://plugin.org.uk/swh-plugins/giantFlange,'Double delay','LFO
+... frequency 1 (Hz)','Delay 1 range (s)','LFO frequency 2 (Hz)','Delay 2
+... range (s)','Feedback','Dry/Wet level'
+60. Gong model
+	-elv2:http://plugin.org.uk/swh-plugins/gong,'Inner damping','Outer
+... damping','Mic position','Inner size 1','Inner stiffness 1 +','Inner
+... stiffness 1 -','Inner size 2','Inner stiffness 2 +','Inner stiffness 2
+... -','Inner size 3','Inner stiffness 3 +','Inner stiffness 3 -','Inner
+... size 4','Inner stiffness 4 +','Inner stiffness 4 -','Outer size
+... 1','Outer stiffness 1 +','Outer stiffness 1 -','Outer size 2','Outer
+... stiffness 2 +','Outer stiffness 2 -','Outer size 3','Outer stiffness 3
+... +','Outer stiffness 3 -','Outer size 4','Outer stiffness 4 +','Outer
+... stiffness 4 -'
+61. Gong beater
+	-elv2:http://plugin.org.uk/swh-plugins/gongBeater,'Impulse gain
+... (dB)','Strike gain (dB)','Strike duration (s)'
+62. GVerb
+	-elv2:http://plugin.org.uk/swh-plugins/gverb,'Roomsize (m)','Reverb time
+... (s)','Damping','Input bandwidth','Dry signal level (dB)','Early
+... reflection level (dB)','Tail level (dB)'
+63. Hard Limiter
+	-elv2:http://plugin.org.uk/swh-plugins/hardLimiter,'dB limit','Wet
+... level','Residue level'
+64. Harmonic generator
+	-elv2:http://plugin.org.uk/swh-plugins/harmonicGen,'Fundamental
+... magnitude','2nd harmonic magnitude','3rd harmonic magnitude','4th
+... harmonic magnitude','5th harmonic magnitude','6th harmonic
+... magnitude','7th harmonic magnitude','8th harmonic magnitude','9th
+... harmonic magnitude','10th harmonic magnitude'
+65. Hermes Filter
+	-elv2:http://plugin.org.uk/swh-plugins/hermesFilter,'LFO1 freq
+... (Hz)','LFO1 wave (0 = sin, 1 = tri, 2 = saw, 3 = squ, 4 = s&h)','LFO2
+... freq (Hz)','LFO2 wave (0 = sin, 1 = tri, 2 = saw, 3 = squ, 4 =
+... s&h)','Osc1 freq (Hz)','Osc1 wave (0 = sin, 1 = tri, 2 = saw, 3 = squ,
+... 4 = noise)','Osc2 freq (Hz)','Osc2 wave (0 = sin, 1 = tri, 2 = saw, 3 =
+... squ, 4 = noise)','Ringmod 1 depth (0=none, 1=AM, 2=RM)','Ringmod 2
+... depth (0=none, 1=AM, 2=RM)','Ringmod 3 depth (0=none, 1=AM,
+... 2=RM)','Osc1 gain (dB)','RM1 gain (dB)','Osc2 gain (dB)','RM2 gain
+... (dB)','Input gain (dB)','RM3 gain (dB)','Xover lower freq','Xover upper
+... freq','Dist1 drive','Dist2 drive','Dist3 drive','Filt1 type (0=none,
+... 1=LP, 2=HP, 3=BP, 4=BR, 5=AP)','Filt1 freq','Filt1 q','Filt1
+... resonance','Filt1 LFO1 level','Filt1 LFO2 level','Filt2 type (0=none,
+... 1=LP, 2=HP, 3=BP, 4=BR, 5=AP)','Filt2 freq','Filt2 q','Filt2
+... resonance','Filt2 LFO1 level','Filt2 LFO2 level','Filt3 type (0=none,
+... 1=LP, 2=HP, 3=BP, 4=BR, 5=AP)','Filt3 freq','Filt3 q','Filt3
+... resonance','Filt3 LFO1 level','Filt3 LFO2 level','Delay1 length
+... (s)','Delay1 feedback','Delay1 wetness','Delay2 length (s)','Delay2
+... feedback','Delay2 wetness','Delay3 length (s)','Delay3
+... feedback','Delay3 wetness','Band 1 gain (dB)','Band 2 gain (dB)','Band
+... 3 gain (dB)'
+66. Glame Highpass Filter
+	-elv2:http://plugin.org.uk/swh-plugins/highpass_iir,'Cutoff
+... Frequency','Stages(2 poles per stage)'
+67. Hilbert transformer
+	-elv2:http://plugin.org.uk/swh-plugins/hilbert,'latency'
+68. Non-bandlimited single-sample impulses
+	-elv2:http://plugin.org.uk/swh-plugins/impulse_fc,'Frequency (Hz)'
+69. Inverter
+	-elv2:http://plugin.org.uk/swh-plugins/inv,
+70. Karaoke
+	-elv2:http://plugin.org.uk/swh-plugins/karaoke,'Vocal volume (dB)'
+71. L/C/R Delay
+	-elv2:http://plugin.org.uk/swh-plugins/lcrDelay,'L delay (ms)','L
+... level','C delay (ms)','C level','R delay (ms)','R
+... level','Feedback','High damp (%)','Low damp (%)','Spread','Dry/Wet
+... level'
+72. LFO Phaser
+	-elv2:http://plugin.org.uk/swh-plugins/lfoPhaser,'LFO rate (Hz)','LFO
+... depth','Feedback','Spread (octaves)'
+73. Lookahead limiter
+	-elv2:http://plugin.org.uk/swh-plugins/lookaheadLimiter,'Limit
+... (dB)','Lookahead delay','Attenuation (dB)','latency'
+74. Lookahead limiter (fixed latency)
+	-elv2:http://plugin.org.uk/swh-plugins/lookaheadLimiterConst,'Limit
+... (dB)','Lookahead time (s)','Attenuation (dB)','latency'
+75. Glame Lowpass Filter
+	-elv2:http://plugin.org.uk/swh-plugins/lowpass_iir,'Cutoff
+... Frequency','Stages(2 poles per stage)'
+76. LS Filter
+	-elv2:http://plugin.org.uk/swh-plugins/lsFilter,'Filter type (0=LP, 1=BP,
+... 2=HP)','Cutoff frequency (Hz)','Resonance'
+77. Matrix: MS to Stereo
+	-elv2:http://plugin.org.uk/swh-plugins/matrixMSSt,'Width'
+78. Matrix Spatialiser
+	-elv2:http://plugin.org.uk/swh-plugins/matrixSpatialiser,'Width'
+79. Matrix: Stereo to MS
+	-elv2:http://plugin.org.uk/swh-plugins/matrixStMS,
+80. Multiband EQ
+	-elv2:http://plugin.org.uk/swh-plugins/mbeq,'50Hz gain (low
+... shelving)','100Hz gain','156Hz gain','220Hz gain','311Hz gain','440Hz
+... gain','622Hz gain','880Hz gain','1250Hz gain','1750Hz gain','2500Hz
+... gain','3500Hz gain','5000Hz gain','10000Hz gain','20000Hz
+... gain','latency'
+81. Modulatable delay
+	-elv2:http://plugin.org.uk/swh-plugins/modDelay,'Base delay (s)'
+82. Multivoice Chorus
+	-elv2:http://plugin.org.uk/swh-plugins/multivoiceChorus,'Number of
+... voices','Delay base (ms)','Voice separation (ms)','Detune (%)','LFO
+... frequency (Hz)','Output attenuation (dB)'
+83. Higher Quality Pitch Scaler
+	-elv2:http://plugin.org.uk/swh-plugins/pitchScaleHQ,'Pitch
+... co-efficient','latency'
+84. Plate reverb
+	-elv2:http://plugin.org.uk/swh-plugins/plate,'Reverb
+... time','Damping','Dry/wet mix'
+85. Pointer cast distortion
+	-elv2:http://plugin.org.uk/swh-plugins/pointerCastDistortion,'Effect
+... cutoff freq (Hz)','Dry/wet mix'
+86. Rate shifter
+	-elv2:http://plugin.org.uk/swh-plugins/rateShifter,'Rate'
+87. Retro Flanger
+	-elv2:http://plugin.org.uk/swh-plugins/retroFlange,'Average stall
+... (ms)','Flange frequency (Hz)'
+88. Reverse Delay (5s max)
+	-elv2:http://plugin.org.uk/swh-plugins/revdelay,'Delay Time (s)','Dry
+... Level (dB)','Wet Level (dB)','Feedback','Crossfade samples'
+89. Ringmod with LFO
+	-elv2:http://plugin.org.uk/swh-plugins/ringmod_1i1o1l,'Modulation depth
+... (0=none, 1=AM, 2=RM)','Frequency (Hz)','Sine level','Triangle
+... level','Sawtooth level','Square level'
+90. Ringmod with two inputs
+	-elv2:http://plugin.org.uk/swh-plugins/ringmod_2i1o,'Modulation depth
+... (0=none, 1=AM, 2=RM)'
+91. Barry's Satan Maximiser
+	-elv2:http://plugin.org.uk/swh-plugins/satanMaximiser,'Decay time
+... (samples)','Knee point (dB)'
+92. SC1
+	-elv2:http://plugin.org.uk/swh-plugins/sc1,'Attack time (ms)','Release
+... time (ms)','Threshold level (dB)','Ratio (1:n)','Knee radius
+... (dB)','Makeup gain (dB)'
+93. SC2
+	-elv2:http://plugin.org.uk/swh-plugins/sc2,'Attack time (ms)','Release
+... time (ms)','Threshold level (dB)','Ratio (1:n)','Knee radius
+... (dB)','Makeup gain (dB)'
+94. SC3
+	-elv2:http://plugin.org.uk/swh-plugins/sc3,'Attack time (ms)','Release
+... time (ms)','Threshold level (dB)','Ratio (1:n)','Knee radius
+... (dB)','Makeup gain (dB)','Chain balance'
+95. SC4
+	-elv2:http://plugin.org.uk/swh-plugins/sc4,'RMS/peak','Attack time
+... (ms)','Release time (ms)','Threshold level (dB)','Ratio (1:n)','Knee
+... radius (dB)','Makeup gain (dB)','Amplitude (dB)','Gain reduction (dB)'
+96. SE4
+	-elv2:http://plugin.org.uk/swh-plugins/se4,'RMS/peak','Attack time
+... (ms)','Release time (ms)','Threshold level (dB)','Ratio (1:n)','Knee
+... radius (dB)','Attenuation (dB)','Amplitude (dB)','Gain expansion (dB)'
+97. Wave shaper
+	-elv2:http://plugin.org.uk/swh-plugins/shaper,'Waveshape'
+98. Signal sifter
+	-elv2:http://plugin.org.uk/swh-plugins/sifter,'Sift size'
+99. Sine + cosine oscillator
+	-elv2:http://plugin.org.uk/swh-plugins/sinCos,'Base frequency
+... (Hz)','Pitch offset'
+100. Single band parametric
+	-elv2:http://plugin.org.uk/swh-plugins/singlePara,'Gain (dB)','Frequency
+... (Hz)','Bandwidth (octaves)'
+101. Sinus wavewrapper
+	-elv2:http://plugin.org.uk/swh-plugins/sinusWavewrapper,'Wrap degree'
+102. Smooth Decimator
+	-elv2:http://plugin.org.uk/swh-plugins/smoothDecimate,'Resample
+... rate','Smoothing'
+103. Mono to Stereo splitter
+	-elv2:http://plugin.org.uk/swh-plugins/split,
+104. Surround matrix encoder
+	-elv2:http://plugin.org.uk/swh-plugins/surroundEncoder,
+105. State Variable Filter
+	-elv2:http://plugin.org.uk/swh-plugins/svf,'Filter type (0=none, 1=LP,
+... 2=HP, 3=BP, 4=BR, 5=AP)','Filter freq','Filter Q','Filter resonance'
+106. Tape Delay Simulation
+	-elv2:http://plugin.org.uk/swh-plugins/tapeDelay,'Tape speed (inches/sec,
+... 1=normal)','Dry level (dB)','Tap 1 distance (inches)','Tap 1 level
+... (dB)','Tap 2 distance (inches)','Tap 2 level (dB)','Tap 3 distance
+... (inches)','Tap 3 level (dB)','Tap 4 distance (inches)','Tap 4 level
+... (dB)'
+107. Transient mangler
+	-elv2:http://plugin.org.uk/swh-plugins/transient,'Attack speed','Sustain
+... time'
+108. Triple band parametric with shelves
+	-elv2:http://plugin.org.uk/swh-plugins/triplePara,'Low-shelving gain
+... (dB)','Low-shelving frequency (Hz)','Low-shelving slope','Band 1 gain
+... (dB)','Band 1 frequency (Hz)','Band 1 bandwidth (octaves)','Band 2 gain
+... (dB)','Band 2 frequency (Hz)','Band 2 bandwidth (octaves)','Band 3 gain
+... (dB)','Band 3 frequency (Hz)','Band 3 bandwidth
+... (octaves)','High-shelving gain (dB)','High-shelving frequency
+... (Hz)','High-shelving slope'
+109. Valve saturation
+	-elv2:http://plugin.org.uk/swh-plugins/valve,'Distortion
+... level','Distortion character'
+110. Valve rectifier
+	-elv2:http://plugin.org.uk/swh-plugins/valveRect,'Sag level','Distortion'
+111. VyNil (Vinyl Effect)
+	-elv2:http://plugin.org.uk/swh-plugins/vynil,'Year','RPM','Surface
+... warping','Crackle','Wear'
+112. Wave Terrain Oscillator
+	-elv2:http://plugin.org.uk/swh-plugins/waveTerrain,
+113. Crossfade
+	-elv2:http://plugin.org.uk/swh-plugins/xfade,'Crossfade'
+114. Crossfade (4 outs)
+	-elv2:http://plugin.org.uk/swh-plugins/xfade4,'Crossfade'
+115. z-1
+	-elv2:http://plugin.org.uk/swh-plugins/zm1,
+116. TalentedHack
+	-elv2:urn:jeremy.salwen:plugins:talentedhack,'Mix','Pull To In
+... Tune','Smooth Pitch','Formant Correction','Formant Warp','Jump To Midi
+... Input','Pitch Correct Midi Out','Quantize LFO','LFO Amplitude','LFO
+... Rate (Hz)','LFO Shape','LFO Symmetry','Concert A (Hz)','Detect
+... A','Detect A#','Detect B','Detect C','Detect C#','Detect D','Detect
+... D#','Detect E','Detect F','Detect F#','Detect G','Detect G#','Output
+... A','Output A#','Output B','Output C','Output C#','Output D','Output
+... D#','Output E','Output F','Output F#','Output G','Output G#','Latency'

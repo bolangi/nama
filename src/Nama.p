@@ -182,7 +182,7 @@ __DATA__
 @@ fake_jack_lsp
 [% qx(cat ./fake_jack_lsp) %]
 @@ fake_lv2_register
-[% qx(cat ./lv2-register) %]
+[% qx(cat ./fake_lv2_register) %]
 @@ fake_jack_latency
 [% qx(cat ./fake_jack_latency) %]
 @@ midish_commands
