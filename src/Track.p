@@ -499,7 +499,7 @@ sub set_io {
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
 
 			my $name = $track->name;
-			my $width = scalar @{ ::jack_client($id, $client_direction) };
+			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
 			$width or say 
 				qq($name: $direction port for JACK client "$id" not found.);
 			$width or return;
