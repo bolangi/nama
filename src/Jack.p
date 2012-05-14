@@ -41,7 +41,7 @@ sub parse_port_latency {
 	# default to use output of jack_lsp -l
 	
 	my $j = shift || qx(jack_lsp -l 2> /dev/null); 
-	logit('::Jack','debug', "latency input $j");
+	logit(__LINE__,'::Jack','debug', "latency input $j");
 	
 	state $port_latency_re = qr(
 
@@ -89,13 +89,13 @@ sub parse_port_latency {
 
 		/$port_latency_re/;
 
-		#logit('::Jack','debug', Dumper %+);
-		logit('::Jack','debug', "client: ",$+{client});
-		logit('::Jack','debug', "port: ",$+{port});
-		logit('::Jack','debug', "capture min: ", $+{capture_min});
-		logit('::Jack','debug', "capture max: ",$+{capture_max});
-		logit('::Jack','debug', "playback min: ",$+{playback_min});
-		logit('::Jack','debug', "playback max: ",$+{playback_max});
+		#logit(__LINE__,'::Jack','debug', Dumper %+);
+		logit(__LINE__,'::Jack','debug', "client: ",$+{client});
+		logit(__LINE__,'::Jack','debug', "port: ",$+{port});
+		logit(__LINE__,'::Jack','debug', "capture min: ", $+{capture_min});
+		logit(__LINE__,'::Jack','debug', "capture max: ",$+{capture_max});
+		logit(__LINE__,'::Jack','debug', "playback min: ",$+{playback_min});
+		logit(__LINE__,'::Jack','debug', "playback max: ",$+{playback_max});
 		
 		$jack->{clients}->{$+{client}}->{$+{port}}->{latency}->{capture}->{min}
 			= $+{capture_min};
@@ -117,7 +117,7 @@ sub parse_ports_list {
 	
 	logsub("&parse_ports_list");
 	my $j = shift || qx(jack_lsp -p 2> /dev/null); 
-	logit('::Jack','debug', "input: $j");
+	logit(__LINE__,'::Jack','debug', "input: $j");
 
 	# convert to single lines
 
@@ -182,14 +182,14 @@ my $jack_plumbing_code = sub
 		my $debug++;
 		my $config_line = qq{(connect $port1 $port2)};
 		say $fh $config_line; # $fh in lexical scope
-		logit('::Jack','debug', $config_line);
+		logit(__LINE__,'::Jack','debug', $config_line);
 	};
 my $jack_connect_code = sub
 	{
 		my ($port1, $port2) = @_;
 		my $debug++;
 		my $cmd = qq(jack_connect $port1 $port2);
-		logit('::Jack','debug', $cmd);
+		logit(__LINE__,'::Jack','debug', $cmd);
 		system $cmd;
 	};
 sub connect_jack_ports_list {
@@ -252,7 +252,7 @@ sub make_connections {
 		for my $external_port (@lines){   
 			# $external_port is the source port name
 			chomp $external_port;
-			logit('::Jack','debug', "port file $file, line $line_number, port $external_port");
+			logit(__LINE__,'::Jack','debug', "port file $file, line $line_number, port $external_port");
 			# setup shell command
 			
 			if(! $jack->{clients}->{$external_port}){

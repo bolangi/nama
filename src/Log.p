@@ -77,13 +77,14 @@ my %is_method = map { $_ => 1 }
 			logcarp logcroak logcluck logconfess);
 	
 sub logit {
-	my ($category, $level, @message) = @_;
+	my ($line_number, $category, $level, @message) = @_;
+	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	return unless $category;
 	confess "illegal level: $level" unless $is_method{$level};
 	my $logger = get_logger($category);
-	$logger->$level(@message);
+	$logger->$level($line_number_output, @message);
 }
 }
-sub logsub { logit('SUB','debug',$_[0]) }
+sub logsub { logit(undef, 'SUB','debug',$_[0]) }
 	
 1;

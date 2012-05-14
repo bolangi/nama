@@ -138,7 +138,7 @@ sub schedule_wraparound {
 	my $start  = ::Mark::loop_start();
 	my $end    = ::Mark::loop_end();
 	my $diff = $end - $here;
-	logit('::Engine','debug', "here: $here, start: $start, end: $end, diff: $diff");
+	logit(__LINE__,'::Engine','debug', "here: $here, start: $start, end: $end, diff: $diff");
 	if ( $diff < 0 ){ # go at once
 		set_position($start);
 		cancel_wraparound();
@@ -180,7 +180,7 @@ sub ecasound_select_chain {
 		return 1 
 
 	} else { 
-		logit('::Engine','logcarp', 
+		logit(__LINE__,'::Engine','logcarp', 
 			"c-select $n: attempted to select non-existing Ecasound chain"); 
 		return 0
 	}
@@ -199,7 +199,7 @@ sub _stop_do_start {
 		eval_iam('start');
 }
 sub restart_ecasound {
-	logit("killing ecasound processes @{$engine->{pids}}");
+	logit(__LINE__,"killing ecasound processes @{$engine->{pids}}");
 	kill_my_ecasound_processes();
 	logei("restarting Ecasound engine - your may need to use the 'arm' command");	
 	select_ecasound_interface();

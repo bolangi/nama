@@ -18,7 +18,7 @@ sub prepare_static_effects_data{
 
 	my $effects_cache = effects_cache();
 
-	logit("::Effects_registry",'debug', join "\n", "newplugins:", new_plugins());
+	logit(__LINE__,"::Effects_registry",'debug', join "\n", "newplugins:", new_plugins());
 	if ($config->{opts}->{r} or new_plugins()){ 
 
 		eval { unlink $effects_cache};
@@ -26,7 +26,7 @@ sub prepare_static_effects_data{
 	}
 
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
-		logit("::Effects_registry",'debug', "found effects cache: $effects_cache");
+		logit(__LINE__,"::Effects_registry",'debug', "found effects cache: $effects_cache");
 		my $source = read_file($effects_cache); # scalar assign
 		assign(
 			data => decode($source, 'json'),
@@ -36,7 +36,7 @@ sub prepare_static_effects_data{
 			
 	} else {
 		
-		logit("::Effects_registry",'debug', "reading in effects data, please wait...");
+		logit(__LINE__,"::Effects_registry",'debug', "reading in effects data, please wait...");
 		read_in_effects_data();  
 		# cop-register, preset-register, ctrl-register, ladspa-register
 		get_ladspa_hints();     
@@ -108,19 +108,19 @@ sub extract_effects_data {
 	my ($lower, $upper, $regex, $separator, @lines) = @_;
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
-	logit("::Effects_registry",'debug',"lower: $lower upper: $upper  separator: $separator");
-	#logit("::Effects_registry",'debug', "lines: ". join "\n",@lines);
-	logit("::Effects_registry",'debug', "regex: $regex");
+	logit(__LINE__,"::Effects_registry",'debug',"lower: $lower upper: $upper  separator: $separator");
+	#logit(__LINE__,"::Effects_registry",'debug', "lines: ". join "\n",@lines);
+	logit(__LINE__,"::Effects_registry",'debug', "regex: $regex");
 	
 	for (my $j = $lower; $j <= $upper; $j++) {
 		my $line = shift @lines;
 	
 		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
 		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
-		logit("::Effects_registry",'debug', "Number: $no Name: $name Code: $id Rest: $rest");
+		logit(__LINE__,"::Effects_registry",'debug', "Number: $no Name: $name Code: $id Rest: $rest");
 		my @p_names = split $separator,$rest; 
 		map{s/'//g}@p_names; # remove leading and trailing q(') in ladspa strings
-		logit("::Effects_registry",'debug', "Parameter names: @p_names");
+		logit(__LINE__,"::Effects_registry",'debug', "Parameter names: @p_names");
 		$fx_cache->{registry}->[$j]={};
 		$fx_cache->{registry}->[$j]->{number} = $no;
 		$fx_cache->{registry}->[$j]->{code} = $id;
@@ -142,7 +142,7 @@ sub sort_ladspa_effects {
 	map{push @{$fx_cache->{ladspa_sorted}}, 0} ( 1 .. $aa ); # fills array slice [0..$aa-1]
 	splice @{$fx_cache->{ladspa_sorted}}, $aa, 0,
 		 sort { $fx_cache->{registry}->[$a]->{name} cmp $fx_cache->{registry}->[$b]->{name} } ($aa .. $zz) ;
-	logit("::Effects_registry",'debug', "sorted array length: ". scalar @{$fx_cache->{ladspa_sorted}});
+	logit(__LINE__,"::Effects_registry",'debug', "sorted array length: ". scalar @{$fx_cache->{ladspa_sorted}});
 }		
 sub read_in_effects_data {
 	
@@ -161,10 +161,10 @@ sub read_in_effects_data {
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
 	my @cop = grep {! /^\w*$/ } split "\n", eval_iam("cop-register");
 
-	logit("::Effects_registry",'debug', "found ", scalar @cop, " Ecasound chain operators");
-	logit("::Effects_registry",'debug', "found ", scalar @preset, " Ecasound presets");
-	logit("::Effects_registry",'debug', "found ", scalar @ctrl, " Ecasound controllers");
-	logit("::Effects_registry",'debug', "found ", scalar @lad, " LADSPA effects");
+	logit(__LINE__,"::Effects_registry",'debug', "found ", scalar @cop, " Ecasound chain operators");
+	logit(__LINE__,"::Effects_registry",'debug', "found ", scalar @preset, " Ecasound presets");
+	logit(__LINE__,"::Effects_registry",'debug', "found ", scalar @ctrl, " Ecasound controllers");
+	logit(__LINE__,"::Effects_registry",'debug', "found ", scalar @lad, " LADSPA effects");
 
 	# index boundaries we need to make effects list and menus
 	$fx_cache->{split}->{cop}{a}   = 1;
@@ -259,10 +259,10 @@ sub read_in_effects_data {
 
 	for my $i (0..$#{$fx_cache->{registry}}){
 		 $fx_cache->{full_label_to_index}->{ $fx_cache->{registry}->[$i]->{code} } = $i; 
-		 logit("::Effects_registry",'debug', "i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}");
+		 logit(__LINE__,"::Effects_registry",'debug', "i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}");
 	}
 
-	logit("::Effects_registry",'debug', sub{"$fx_cache->{registry}\n======\n", yaml_out($fx_cache->{registry})}); ; 
+	logit(__LINE__,"::Effects_registry",'debug', sub{"$fx_cache->{registry}\n======\n", yaml_out($fx_cache->{registry})}); ; 
 }
 
 sub integrate_cop_hints {
@@ -310,7 +310,7 @@ sub get_ladspa_hints{
 			my ($plugin_name, $plugin_label, $plugin_unique_id, $ports)
 			  = $stanza =~ /$pluginre/ 
 				or carp "*** couldn't match plugin stanza $stanza ***";
-			logit("::Effects_registry",'debug', "plugin label: $plugin_label $plugin_unique_id");
+			logit(__LINE__,"::Effects_registry",'debug', "plugin label: $plugin_label $plugin_unique_id");
 
 			my @lines = grep{ /control/ } split "\n",$ports;
 
@@ -325,7 +325,7 @@ sub get_ladspa_hints{
 				my ($name, $rest) = ($1, $2);
 				my ($dir, $type, $range, $default, $hint) = 
 					split /\s*,\s*/ , $rest, 5;
-				logit("::Effects_registry",'debug', join( 
+				logit(__LINE__,"::Effects_registry",'debug', join( 
 				"|",$name, $dir, $type, $range, $default, $hint) ); 
 				#  if $hint =~ /logarithmic/;
 				if ( $range =~ /toggled/i ){
@@ -360,7 +360,7 @@ sub get_ladspa_hints{
 		#last if ++$i > 10;
 	}
 
-	logit("::Effects_registry",'debug', sub{yaml_out($fx_cache->{ladspa})});
+	logit(__LINE__,"::Effects_registry",'debug', sub{yaml_out($fx_cache->{ladspa})});
 }
 
 sub srate_val {
@@ -383,7 +383,7 @@ sub range {
 	$end = 		srate_val( $end );
 	$default = 	srate_val( $default );
 	$default = $default || $beg;
-	logit("::Effects_registry",'debug', "beg: $beg, end: $end, default: $default");
+	logit(__LINE__,"::Effects_registry",'debug', "beg: $beg, end: $end, default: $default");
 	if ( $name =~ /gain|amplitude/i ){
 		$beg = 0.01 unless $beg;
 		$end = 0.01 unless $end;
@@ -425,16 +425,16 @@ map { $L{$_}++ } keys %{$fx_cache->{ladspa}};
 map { $M{$_}++ } grep {/el:/} keys %{$fx_cache->{full_label_to_index}};
 
 for my $k (keys %L) {
-	$M{$k} or logit("::Effects_registry",'debug', "$k not found in ecasound listing");
+	$M{$k} or logit(__LINE__,"::Effects_registry",'debug', "$k not found in ecasound listing");
 }
 for my $k (keys %M) {
-	$L{$k} or logit("::Effects_registry",'debug', "$k not found in ladspa listing");
+	$L{$k} or logit(__LINE__,"::Effects_registry",'debug', "$k not found in ladspa listing");
 }
 
 
-logit("::Effects_registry",'debug', sub {join "\n", sort keys %{$fx_cache->{ladspa}}});
-logit("::Effects_registry",'debug', '-' x 60);
-logit("::Effects_registry",'debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}}});
+logit(__LINE__,"::Effects_registry",'debug', sub {join "\n", sort keys %{$fx_cache->{ladspa}}});
+logit(__LINE__,"::Effects_registry",'debug', '-' x 60);
+logit(__LINE__,"::Effects_registry",'debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}}});
 
 #print yaml_out $fx_cache->{registry}; exit;
 

@@ -562,7 +562,7 @@ remove_mark: _remove_mark dd {
 remove_mark: _remove_mark ident { 
 	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->remove if defined $mark;
-#	eval q( $mark->jump_here ) or ::logit('::Grammar','debug',"jump failed: $@");
+#	eval q( $mark->jump_here ) or ::logit(__LINE__,'::Grammar','debug',"jump failed: $@");
 	1;}
 remove_mark: _remove_mark { 
 	return unless (ref $::this_mark) =~ /Mark/;
@@ -598,7 +598,7 @@ to_mark: _to_mark dd {
 to_mark: _to_mark ident { 
 	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->jump_here if defined $mark;
-#	eval q( $mark->jump_here ) or ::logit('::Grammar','debug',"jump failed: $@");
+#	eval q( $mark->jump_here ) or ::logit(__LINE__,'::Grammar','debug',"jump failed: $@");
 	1;}
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});

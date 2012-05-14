@@ -257,12 +257,12 @@ sub add_paths {
 	
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	logit('::Insert','debug', "add_insert for track: $name");
+	logit(__LINE__,'::Insert','debug', "add_insert for track: $name");
 
 	my $t = $::tn{$name}; 
 
 
-	logit('::Insert','debug', "insert structure: ", sub{$self->dump});
+	logit(__LINE__,'::Insert','debug', "insert structure: ", sub{$self->dump});
 
 	my ($successor) = $g->successors($name);
 
@@ -274,7 +274,7 @@ sub add_paths {
 	my $wet = $::tn{$self->wet_name};
 	my $dry = $::tn{$self->dry_name};
 
-	logit('::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+	logit(__LINE__,'::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
 
 	# if no insert target, our insert will 
 	# a parallel effects host with wet/dry dry branches
@@ -300,7 +300,7 @@ sub add_paths {
 		# wet send path (no extra track): track -> loop -> output
 
 		my @edge = ($loop, output_node($self->{send_type}));
-		logit('::Insert','debug', "edge: @edge");
+		logit(__LINE__,'::Insert','debug', "edge: @edge");
 		$g->add_path( $name, @edge);
 		$g->set_vertex_attributes($loop, {n => $t->n});
 		$g->set_edge_attributes(@edge, { 
@@ -341,12 +341,12 @@ sub add_paths {
 
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	logit('::Insert','debug', "add_insert for track: $name");
+	logit(__LINE__,'::Insert','debug', "add_insert for track: $name");
 
 	my $t = $::tn{$name}; 
 
 
-	logit('::Insert','debug', "insert structure:", sub{$self->dump});
+	logit(__LINE__,'::Insert','debug', "insert structure:", sub{$self->dump});
 
 		my ($predecessor) = $g->predecessors($name);
 		$g->delete_edge($predecessor, $name);
@@ -354,13 +354,13 @@ sub add_paths {
 		my $wet = $::tn{$self->wet_name};
 		my $dry = $::tn{$self->dry_name};
 
-		logit('::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+		logit(__LINE__,'::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
 
 
 		#pre:  wet send path (no track): predecessor -> output
 
 		my @edge = ($predecessor, output_node($self->{send_type}));
-		logit('::Insert','debug', "edge: @edge");
+		logit(__LINE__,'::Insert','debug', "edge: @edge");
 		$g->add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},

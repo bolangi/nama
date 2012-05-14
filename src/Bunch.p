@@ -38,12 +38,12 @@ sub bunch_tracks {
 	if ( my $bus = $bn{$bunchy}){
 		@tracks = $bus->tracks;
 	} elsif ( $bunchy eq 'bus' ){
-		logit('::Bunch','debug', "special bunch: bus");
+		logit(__LINE__,'::Bunch','debug', "special bunch: bus");
 		@tracks = grep{ ! $bn{$_} } $bn{$this_bus}->tracks;
 	} elsif ($bunchy =~ /\s/  # multiple identifiers
 		or $tn{$bunchy} 
 		or $bunchy !~ /\D/ and $ti{$bunchy}){ 
-			logit('::Bunch','debug', "multiple tracks found");
+			logit(__LINE__,'::Bunch','debug', "multiple tracks found");
 			# verify all tracks are correctly named
 			my @track_ids = split " ", $bunchy;
 			my @illegal = grep{ ! track_from_name_or_index($_) } @track_ids;
@@ -53,12 +53,12 @@ sub bunch_tracks {
 							   map{ track_from_name_or_index($_)} @track_ids; }
 
 	} elsif ( my $method = $set_stat{$bunchy} ){
-		logit('::Bunch','debug', "special bunch: $bunchy, method: $method");
+		logit(__LINE__,'::Bunch','debug', "special bunch: $bunchy, method: $method");
 		$bunchy = uc $bunchy;
 		@tracks = grep{$tn{$_}->$method eq $bunchy} 
 				$bn{$this_bus}->tracks
 	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$project->{bunch}->{$bunchy}}  ) {
-		logit('::Bunch','debug', "bunch tracks: @tracks");
+		logit(__LINE__,'::Bunch','debug', "bunch tracks: @tracks");
 	} else { say "$bunchy: no matching bunch identifier found" }
 	@tracks;
 }

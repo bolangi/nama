@@ -120,7 +120,7 @@ sub get_ecasound_iam_keywords {
 sub process_line {
 	logsub("&process_line");
 	my ($user_input) = @_;
-	logit('::Terminal','debug',"user input: $user_input");
+	logit(__LINE__,'::Terminal','debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd};

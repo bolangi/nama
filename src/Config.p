@@ -90,7 +90,7 @@ sub walk_tree {
 sub substitute{
 	my ($parent, $key)  = @_;
 	my $val = $parent->{$key};
-	#logit('::Config','debug', qq(key: $key val: $val\n) );
+	#logit(__LINE__,'::Config','debug', qq(key: $key val: $val\n) );
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
@@ -98,7 +98,7 @@ sub first_run {
 	return if $config->{opts}->{f};
 	my $config_path = config_file();
 	$config_path = "$ENV{HOME}/$config_path" unless -e $config_path;
-	logit('::Config','debug', "config path: $config_path" );
+	logit(__LINE__,'::Config','debug', "config path: $config_path" );
 	if ( ! -e $config_path and ! -l $config_path  ) {
 
 	# check for missing components
