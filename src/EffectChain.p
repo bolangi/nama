@@ -175,6 +175,26 @@ sub new {
 ### apply effect chain to the specified track
 ### or the track specified by the effect chain's track_name field.
 
+sub add_ops {
+	my($self, $track, $successor) = @_;
+
+}
+sub add_inserts {
+	my($self, $track, $successor) = @_;
+}
+sub add_all {
+	my($self, $track, $successor) = @_;
+}
+sub clobber_ops {
+	my($self, $track) = @_;
+}
+sub clobber_inserts {
+	my($self, $track) = @_;
+}
+sub clobber_all {
+	my($self, $track) = @_;
+}
+
 sub add {
 	my ($self, $track, $successor) = @_;
 	
@@ -185,7 +205,7 @@ sub add {
 		unless $self->system;
 
 	$self = bless { %$self }, __PACKAGE__;
-	$successor ||= $track->vol; # place before volume 
+	$successor ||= $track->vol; # place effects before volume 
 	map 
 	{	
 		my $args = 
