@@ -98,9 +98,11 @@ sub track_latency {
 	
 	$node->{own} = $accumulator;
 
-	### track predecessor latency
+	### track predecessor latency (if has tracks as predecessors)
 
 	$accumulator += ($node->{predecessor} = predecessor_latency($track));
+
+	### track source latency (if track has "live" i.e.  non-WAV input)
 
 	### track total latency
 
@@ -114,6 +116,46 @@ sub track_ops_latency {
 	map { $total += op_latency($_) } $track->fancy_ops;
 	$total
 }
+sub jack_client : lvalue {
+	my $name = shift;
+	# we require that every call is already known correct
+	# try it till it breaks
+	
+	logit->logconfess("$name: non-existent JACK client") 
+		if not $jack->{clients}->{$name} ;
+	$jack->{clients}->{$name}
+
+}
+sub jack_client_latency : lvalue {
+	my $name = shift;
+	my $client = jack_client($name);
+	# TODO
+
+}
+
+sub jack_client_playback_latency {
+	my $name = shift;
+	my $node = jack_client($name)
+		or logit('::Latency','debug',"$name: non existing JACK client"),
+		return 0;
+	$node->{playback}->{min}
+		ne $node->{playback}->{max}
+	and logit('::Latency','debug','encountered unmatched latencies', sub{ yaml_out($node) });
+}
+	
+
+
+sub input_latency {
+	my $track = shift;
+	my $latency;
+	my $source_id = $track->source_id;
+	given($track->source_type){
+		when('jack_client'){ $latency = jack_client_capture_latency($source_id) }
+		when(''){}
+	}
+}
+
+
 sub insert_latency {
 	my $track = shift;
 	my $latency = 0;

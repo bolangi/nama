@@ -255,7 +255,7 @@ sub rec_status {
 				# we expect an existing JACK client that
 				# *outputs* a signal for our track input
 				
-				::jack_client($track->source_id,'output')
+				::jack_client_array($track->source_id,'output')
 					?  return 'REC'
 					:  return maybe_monitor($monitor_version)
 			}

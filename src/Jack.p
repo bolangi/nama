@@ -28,7 +28,7 @@ sub jack_update {
 	} else { $jack->{clients} = {} }
 }
 
-sub jack_client {
+sub jack_client_array {
 
 	# returns array of ports if client and direction exist
 	
