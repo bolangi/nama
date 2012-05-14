@@ -111,10 +111,9 @@ sub extract_effects_data {
 	logit(__LINE__,"::Effects_registry",'debug',"lower: $lower upper: $upper  separator: $separator");
 	#logit(__LINE__,"::Effects_registry",'debug', "lines: ". join "\n",@lines);
 	logit(__LINE__,"::Effects_registry",'debug', "regex: $regex");
-	
-	for (my $j = $lower; $j <= $upper; $j++) {
-		my $line = shift @lines;
-	
+	my $j = $lower - 1;
+	while(my $line = shift @lines){
+		$j++;
 		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
 		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
 		logit(__LINE__,"::Effects_registry",'debug', "Number: $no Name: $name Code: $id Rest: $rest");
