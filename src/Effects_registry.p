@@ -100,7 +100,7 @@ sub prepare_effect_index {
 			if ($fx_cache->{partial_label_to_full}->{$short}) { warn "name collision: $_\n" }
 			else { $fx_cache->{partial_label_to_full}->{$short} = $code }
 		}else{ $fx_cache->{partial_label_to_full}->{$code} = $code };
-	} keys %{$fx_cache->{full_label_to_index}};
+	} grep{ !/^elv2:/ }keys %{$fx_cache->{full_label_to_index}};
 	#print yaml_out $fx_cache->{partial_label_to_full};
 }
 sub extract_effects_data {
@@ -116,6 +116,7 @@ sub extract_effects_data {
 		$j++;
 		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
 		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
+		# $no is unimportant; it from the list numbering
 		logit(__LINE__,"::Effects_registry",'debug', "Number: $no Name: $name Code: $id Rest: $rest");
 		my @p_names = split $separator,$rest; 
 		map{s/'//g}@p_names; # remove leading and trailing q(') in ladspa strings
@@ -129,8 +130,15 @@ sub extract_effects_data {
 		$fx_cache->{registry}->[$j]->{display} = qq(field);
 		map{ push @{$fx_cache->{registry}->[$j]->{params}}, {name => $_} } @p_names
 			if @p_names;
-;
+ 		# abbrevations for lv2: lv2-foo for elv2:http://something.com/other/foo
+ 		if ($id =~ /elv2:/){
+			#say "found LV2: $id";
+ 			my ($suffix) = $id =~ /(?:elv2:).*?([^\/]+)$/;
+			#say "suffix: $suffix";
+ 			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $id;
+ 		}
 	}
+
 }
 sub sort_ladspa_effects {
 	logsub("&sort_ladspa_effects");
@@ -523,11 +531,40 @@ sub prepare_effects_help {
 	} reverse split "\n",eval_iam("ladspa-register");
 
 
-#my @lines = reverse split "\n",eval_iam("ladspa-register");
-#pager( scalar @lines, $/, join $/,@lines);
+=comment
+	# HELP FOR LV2 PLUGINS
 	
-	#my @crg = map{s/^.*? -//; $_ .= "\n" }
-	#			split "\n",eval_iam("control-register");
-	#pager (@lrg, @prg); exit;
+	my $lv2 = get_data_section('fake_lv2_register');
+
+	# join wrapped lines
+	$lv2 =~ s/\n  			# newline
+						\.{3}		# three dots '...'
+						\x20		# a space
+						//gx;      # delete, multiple times, expanded regex
+
+	# now we can handle similar to LADSPA	
+	
+	# split on newlines
+	my @lv2 = split /\n/,$lv2;
+		if (  my ($_label) = /-(elv2:)/  ){
+				$label = $_label;
+				s/^\s+/ /;				 # trim spaces 
+				s/'//g;     			 # remove apostrophes
+				$_ .="\n";               # add newline
+				push @{$fx_cache->{user_help}}, $_;  # store help
+
+		} else { 
+
+	
+		}
+
+
+	logit(__LINE__,'::Effects_registry','trace',sub{ yaml_out(\@lv2) });
+
+	# join pairs of lines
+	@lv2 = map { join " ", splice(@lv2,0,2) } 1..@lv2/2;
+
+=cut
+
 }
 1;
