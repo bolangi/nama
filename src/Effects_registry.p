@@ -148,6 +148,9 @@ sub read_in_effects_data {
 	
 	logsub("&read_in_effects_data");
 
+
+	#### LADSPA
+
 	my $lr = eval_iam("ladspa-register");
 
 	#print $lr; 
@@ -156,6 +159,29 @@ sub read_in_effects_data {
 	
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
+
+
+	#### LV2
+
+	my $lv2 = get_data_section('fake_lv2_register');
+
+	# join wrapped lines
+	$lv2 =~ s/\n  			# newline
+						\.{3}		# three dots '...'
+						\x20		# a space
+						//gx;      # delete, multiple times, expanded regex
+
+	# now we can handle similar to LADSPA	
+	
+	# split on newlines
+	my @lv2 = split /\n/,$lv2;
+
+	logit(__LINE__,'::Effects_registry','trace',sub{ yaml_out(\@lv2) });
+
+	# join pairs of lines
+	@lv2 = map { join " ", splice(@lv2,0,2) } 1..@lv2/2;
+
+	logit(__LINE__,'::Effects_registry','trace',sub{ yaml_out(\@lv2) });
 
 	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
@@ -207,9 +233,22 @@ sub read_in_effects_data {
 		^(\d+) # number
 		\.    # dot
 		\s+  # spaces
-		(.+?) # name, starting with word-char,  non-greedy
+		(.+?) # name,  any non-greedy
 		\s+     # spaces
 		-(el:[-\w]+),? # ladspa_id maybe followed by comma
+		(.*$)        # rest
+	/x;
+	my $lv2_re = qr/
+		^(\d+) # number
+		\.    # dot
+		\s+  # spaces
+		(.+?) # name,  any non-greedy
+		\s+     # space
+
+		-(?<name> # named captured named 'name'
+		elv2:     # prefix is -elv2:
+		[^,]+        # URL: non-comma chars 
+		), 			# comma
 		(.*$)        # rest
 	/x;
 
@@ -238,6 +277,13 @@ sub read_in_effects_data {
 		$ladspa_re,
 		q(','),
 		@lad,
+	);
+	extract_effects_data(
+		$fx_cache->{split}->{lv2}{a},
+		$fx_cache->{split}->{lv2}{z},
+		$lv2_re,
+		q(','),
+		@lv2,
 	);
 
 	extract_effects_data(
