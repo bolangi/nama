@@ -58,6 +58,7 @@ sub initialize {
     @::project_effect_chains_data = (); 
 }
 sub new {
+	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
 	my $class = shift;	
 	defined $n or die "key var $n is undefined";
@@ -99,6 +100,7 @@ sub new {
 		# rewrite inserts to store what we need:
 		# 1. for general-purpose effects chain use
 		# 2. for track caching use
+	
 		
 		$vals{inserts_data} = 
 		[ 
@@ -148,6 +150,8 @@ sub new {
 				#	send_id
 				#	return_type
 				#	return_id
+					wet_effect_chain => ec_index,
+				#   dry_effect_chain => ec_index,
 				
 				$hash
 			} @{$vals{inserts_data}}
