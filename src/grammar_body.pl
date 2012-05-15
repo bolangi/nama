@@ -35,9 +35,8 @@ meta: bang shellcode stopper {
 meta: eval perlcode stopper {
 	$::debug and print "Evaluating perl code\n";
 	::eval_perl($item{perlcode});
-	1;
+	1
 }
-
 # execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 

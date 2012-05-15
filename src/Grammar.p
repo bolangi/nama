@@ -139,11 +139,11 @@ sub eval_perl {
 	}
 	else { 
 		no warnings 'uninitialized';
+		@result = map{ dumper($_) } @result;
 		pager(join "\n", @result) 
-	}
-	print "\n";
-}	
+	}	
 }
+} # end namespace abbreviations
 
 #### Formatted text output
 
@@ -459,6 +459,5 @@ sub pan_check {
 		$new_position,		# value
 	);
 }
-
 
 1;
