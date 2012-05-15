@@ -37,6 +37,7 @@ sub prepare_static_effects_data{
 	} else {
 		
 		logit(__LINE__,"::Effects_registry",'debug', "reading in effects data, please wait...");
+		initialize_effect_index();
 		read_in_effects_data();  
 		# cop-register, preset-register, ctrl-register, ladspa-register
 		get_ladspa_hints();     
@@ -90,9 +91,11 @@ sub modified_stamp {
 	my @s = stat $filename;
 	$s[9];
 }
+sub initialize_effect_index {
+	$fx_cache->{partial_label_to_full} = {};
+}
 sub prepare_effect_index {
 	logsub("&prepare_effect_index");
-	%{$fx_cache->{partial_label_to_full}} = ();
 	map{ 
 		my $code = $_;
 		my ($short) = $code =~ /:([-\w]+)/;
