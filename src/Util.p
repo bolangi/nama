@@ -5,6 +5,7 @@
 
 package ::Util;
 use Modern::Perl; use Carp;
+use ::Assign qw(json_out);
 use ::Globals qw(:all);
 use ::Log qw(logit);
 
@@ -41,6 +42,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	remove_spaces
 	expand_tilde
 	resolve_path
+	dumper
 
 ) ] );
 
@@ -306,6 +308,12 @@ sub expand_tilde {
 	)
 	($home/)x;
 	$path
+}
+sub dumper { 
+	! ref and $_ 
+	or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
+	or $_->can('as_hash') and json_out($_->as_hash)  
+	or Dumper $_ 
 }
 
 1;
