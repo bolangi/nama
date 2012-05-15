@@ -22,6 +22,16 @@ sub setup_user_customization {
 		$text->{user_command}->{$cmd} = $coderef;
 	}
 	$text->{user_alias}   = $custom{aliases};
+	map{ my $longform = $custom{fxshortcuts}->{$_};
+		 if(effect_index($longform))
+			{
+				$fx_cache->{partial_label_to_full}->{$_} = $longform
+			}
+		 else 
+			{ logit('::Custom','info',
+				"$longform: effect not found, cannot create shortcut") 
+			}
+ 	} keys %{$custom{fxshortcuts}};
 }
 
 sub gen_coderef {

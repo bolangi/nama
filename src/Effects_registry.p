@@ -99,7 +99,8 @@ sub prepare_effect_index {
 		if ( $short ) { 
 			if ($fx_cache->{partial_label_to_full}->{$short}) { warn "name collision: $_\n" }
 			else { $fx_cache->{partial_label_to_full}->{$short} = $code }
-		}else{ $fx_cache->{partial_label_to_full}->{$code} = $code };
+		}
+		$fx_cache->{partial_label_to_full}->{$code} = $code;
 	} grep{ !/^elv2:/ }keys %{$fx_cache->{full_label_to_index}};
 	#print yaml_out $fx_cache->{partial_label_to_full};
 }
@@ -132,11 +133,12 @@ sub extract_effects_data {
 			if @p_names;
  		# abbrevations for lv2: lv2-foo for elv2:http://something.com/other/foo
  		if ($id =~ /elv2:/){
-			#say "found LV2: $id";
  			my ($suffix) = $id =~ /(?:elv2:).*?([^\/]+)$/;
-			#say "suffix: $suffix";
  			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $id;
  		}
+
+		# abbreviate index takes full names as well
+		$fx_cache->{partial_label_to_full}->{$id} = $id;
 	}
 
 }
@@ -212,6 +214,8 @@ sub read_in_effects_data {
 	$fx_cache->{split}->{preset}{z} = $fx_cache->{split}->{ladspa}{z} + @preset;
 	$fx_cache->{split}->{ctrl}{a}   = $fx_cache->{split}->{preset}{z} + 1;
 	$fx_cache->{split}->{ctrl}{z}   = $fx_cache->{split}->{preset}{z} + @ctrl;
+	$fx_cache->{split}->{lv2}{a}   = $fx_cache->{split}->{ctrl}{z} + 1;
+	$fx_cache->{split}->{lv2}{z}   = $fx_cache->{split}->{ctrl}{z} + @lv2;
 
 	my $cop_re = qr/
 		^(\d+) # number
