@@ -151,6 +151,8 @@ sub initialize_interfaces {
 	
 	can_load( modules => {AnyEvent => undef})
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
+	can_load( modules => {jacks => undef})
+		and $jack->{use_jacks}++;
 
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
