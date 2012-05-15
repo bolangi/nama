@@ -19,7 +19,7 @@ sub jack_update {
 	# skip if Ecasound is busy
 	return if engine_running();
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
-		parse_ports_list();
+		#parse_ports_list();
 		$jack->{use_jacks} 
 			?  jacks_get_port_latency() 
 			:  parse_port_latency();
@@ -39,6 +39,8 @@ sub jack_client_array {
 }
 
 sub jacks_get_port_latency {
+	logsub('&jacks_get_port_latency');
+	delete $jack->{clients};
 
 my $jc;
 
