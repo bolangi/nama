@@ -136,8 +136,16 @@ sub extract_effects_data {
 			if @p_names;
  		# abbrevations for lv2: lv2-foo for elv2:http://something.com/other/foo
  		if ($id =~ /elv2:/){
+
  			my ($suffix) = $id =~ /(?:elv2:).*?([^\/]+)$/;
+			my $trimmed = $line;
+			$trimmed =~ s/^\d+\.\s*//;
+			$trimmed =~ s/\t/ /g;
+			$trimmed =~ s/'//g;
+			$trimmed =~ s/,/, /g;
+			$trimmed = "LV2 $trimmed";
  			$fx_cache->{partial_label_to_full}->{"lv2-$suffix"} = $id;
+			push @{$fx_cache->{user_help}}, $trimmed;  # store help
  		}
 
 		# abbreviate index takes full names as well
@@ -536,42 +544,6 @@ sub prepare_effects_help {
 		}
 
 	} reverse split "\n",eval_iam("ladspa-register");
-
-
-=comment
-	# HELP FOR LV2 PLUGINS
-	
-	my $lv2 = get_data_section('fake_lv2_register');
-
-	# join wrapped lines
-	$lv2 =~ s/\n  			# newline
-						\.{3}		# three dots '...'
-						\x20		# a space
-						//gx;      # delete, multiple times, expanded regex
-
-	# now we can handle similar to LADSPA	
-	
-	# split on newlines
-	my @lv2 = split /\n/,$lv2;
-		if (  my ($_label) = /-(elv2:)/  ){
-				$label = $_label;
-				s/^\s+/ /;				 # trim spaces 
-				s/'//g;     			 # remove apostrophes
-				$_ .="\n";               # add newline
-				push @{$fx_cache->{user_help}}, $_;  # store help
-
-		} else { 
-
-	
-		}
-
-
-	logit(__LINE__,'::Effects_registry','trace',sub{ yaml_out(\@lv2) });
-
-	# join pairs of lines
-	@lv2 = map { join " ", splice(@lv2,0,2) } 1..@lv2/2;
-
-=cut
 
 }
 1;
