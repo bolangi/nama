@@ -56,7 +56,7 @@ sub jacks_get_port_latency {
 			([^:]+$)# non-colon stuff to end
 			/x;
 
-	say qq(client: $client_name, port: $port_name);
+	#say qq(client: $client_name, port: $port_name);
 
     my $port = $jc->getPort($pname);
 
@@ -174,32 +174,11 @@ sub parse_ports_list {
 	#fluidsynth:right properties: output,
 	logit(__LINE__,'::Jack','debug', $j);
 
-=comment
-	map{ 
-		my ($direction) = /properties: (input|output)/;
-		s/properties:.+//;
-		my @port_aliases = /
-			\s* 			# zero or more spaces
-			([^:]+:[^:]+?) # non-colon string, colon, non-greedy non-colon string
-			(?=[-+.\w]+:|\s+$) # zero-width port name or spaces to end-of-string
-		/gx; 
-		map { 
-				s/ $//; # remove trailing space
-
-				# make entries for 'system' and 'system:capture_1'
-				push @{ $jack->{clients}->{$_}->{$direction} }, $_;
-				my ($client, $port) = /(.+?):(.+)/;
-				push @{ $jack->{clients}->{$client}->{$direction} }, $_; 
-
-		 } @port_aliases;
-
-	} 
-=cut
 	map{ 
 		my ($direction) = /properties: (input|output)/;
 		my ($name,$port)= /^(.+?):([^:]+) properties/;
 		my $full_name = "$name:$port";
-		say "full name: $full_name, name, $name, port: $port, direction: $direction";
+		#say "full name: $full_name, name, $name, port: $port, direction: $direction";
 		push @{ $jack->{clients}->{$full_name}->{$direction}}, $full_name;
 		push @{ $jack->{clients}->{$name}->{$direction} }, $full_name; 
 	}
