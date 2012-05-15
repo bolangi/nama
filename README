@@ -4,14 +4,27 @@ Nama - Ecasound-based recorder/mixer
 
 =head1 DESCRIPTION
 
-B<Nama> is a text-based application for multitrack
+B<Nama> is a application and library for multitrack
 recording, mixing and mastering using the Ecasound
 audio engine developed by Kai Vehmanen.
- 
-Features include tracks, buses, effects, presets,
-sends, inserts, marks and regions. Nama runs under JACK and
-ALSA audio frameworks, automatically detects LADSPA plugins,
-and supports Ladish Level 1 session handling.
+
+Nama builds signal processing graphs for Ecasound 
+while offering the user familiar concepts of
+of track, bus, effect, preset, send, insert, mark 
+and region, as well as various templates 
+and tools for automating project setup.
+
+Wavform editing and display is provided 
+by external applications, such as Audacity or Mhwaveedit.
+
+A simple and convenient GUI is provided,
+more powerful capabilities available
+at the command prompt. 
+
+Nama runs under JACK and ALSA audio frameworks,
+automatically detects LADSPA and LV2 plugins, 
+uses Git for project management.
+supports Ladish Level 1 session handling.
 
 =head1 INSTALLATION
 
@@ -85,5 +98,19 @@ http://www.ladspa.org/ladspa_sdk/download.html
 In particular the utility program 'analyseplugin' must be
 installed in a directory in your execution PATH.  
 
-Nama's mastering mode uses a number of LADSPA plugins.
-Defaults are specified in the configuration file .namarc. 
+Nama's mastering mode uses a number of LADSPA plugins
+in a reasonably flat starting configuration.
+provided that the user installs the plugins
+listed in the default configuration file .namarc.
+
+Git is required to utilize Nama's source control 
+and undo features. 
+
+=head2 COPYRIGHT
+
+Unless specified otherwise, this code is 
+2003 - 2012, copyright Joel Roth
+
+All rights are reserved except as provided by the Gnu Public
+License, version 3, as detailed in the file COPYING provided
+with this distribution.
