@@ -257,8 +257,9 @@ sub jack_multi_route {
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)}
 		@{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1];
-sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
+
 }
+#sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
 sub default_jack_ports_list {
 	my ($track_name) = shift;
 	"$track_name.ports"
