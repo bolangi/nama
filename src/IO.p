@@ -96,8 +96,26 @@ sub new {
 	# so we can pass any value and allow AUTOLOAD to 
 	# check the hash for it.
 	
-	bless {@args}, $class
+	my $self = bless {@args}, $class;
+
+	my $direction = $self->direction; # input or output
+
+	# join IO objects to graph
+	if( my $name = $self->trackcall('name')){   # avoiding AUTOLOAD
+												# in future
+												# could catch with Try::Tiny
+		# initialize 'IO' attribute as empty array
+		#if ( ! defined $setup->{final_graph}->get_vertex_attribute($name, 'IO'))
+		#{ $setup->{final_graph}->set_vertex_attribute($name, 'IO', []) }
+		my $arrayref =
+		$setup->{final_graph}->set_vertex_attribute($name, "IO_$direction") = $self;
+	}
+	$self
 }
+
+# latency stubs
+sub capture_latency { undef }
+sub playback_latency { undef }
 
 sub ecs_string {
 	my $self = shift;
@@ -124,6 +142,13 @@ sub direction {
 	(ref $_[0]) =~ /::from/ ? 'input' : 'output'  
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
+
+sub trackcall {
+	my ($self, $call, @args) = @_;
+	if ( my $track = $tn{$self->{track_}} ){
+		return $track->$call(@args) if $track->can($call) 
+	}
+}
 
 sub AUTOLOAD {
 	my $self = shift;
