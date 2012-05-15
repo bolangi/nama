@@ -165,7 +165,6 @@ sub initialize_interfaces {
 	
 	logit(__LINE__,'::Config','debug',sub{"Config data\n".Dumper $config});
 	
-	setup_user_customization();	
 
 	start_ecasound();
 
@@ -185,6 +184,7 @@ sub initialize_interfaces {
 	first_run() unless $config->{opts}->{d}; 
 
 	prepare_static_effects_data() unless $config->{opts}->{S};
+	setup_user_customization();	# depends on effect_index() in above
 
 	get_ecasound_iam_keywords();
 	load_keywords(); # for autocompletion

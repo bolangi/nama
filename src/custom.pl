@@ -21,11 +21,11 @@ aliases =>
 		djp => 'disable_jack_polling',
 	},
 
-# fxshortcuts => 
-# 	{
-# 		foo => 'ea'
-# 	},
-# 
+fxshortcuts => 
+	{
+		foo => 'ea'
+	},
+
 
 ## Commands section - user defined commands
 
