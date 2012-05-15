@@ -144,9 +144,14 @@ sub jack_client_playback_latency {
 }
 	
 
-
-sub input_latency {
+=comment
+sub input_latency { # can come from IO objects, they know jack connections
 	my $track = shift;
+	
+	# no latency for WAV file playback
+	return 0 if $track->rec_status ne 'REC'
+
+	# 
 	my $latency;
 	my $source_id = $track->source_id;
 	given($track->source_type){
@@ -154,6 +159,7 @@ sub input_latency {
 		when(''){}
 	}
 }
+=cut
 
 
 sub insert_latency {
