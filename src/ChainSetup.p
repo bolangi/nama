@@ -131,7 +131,11 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	::Graph::add_inserts($g);
 
 	$logger->debug("Graph with inserts:\n$g");
+
+	::Graph::add_jack_io($g);
 	$setup->{final_graph} = dclone($g);
+
+	
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)

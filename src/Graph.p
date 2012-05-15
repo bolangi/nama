@@ -335,6 +335,15 @@ sub remove_tracks {
 				$g->delete_vertex($_);
 		} @names;
 }
+
+### we need jack clients latency 
+sub add_jack_io {
+	my $g = shift;
+		
+
+}
+	
+		
 		
 1;
 __END__
