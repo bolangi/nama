@@ -20,7 +20,9 @@ sub jack_update {
 	return if engine_running();
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
 		parse_ports_list();
-		parse_port_latency();
+		$jack->{use_jacks} 
+			?  jacks_get_port_latency() 
+			:  parse_port_latency();
 
 		# we know that JACK capture latency is 1 period
 		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
@@ -36,6 +38,47 @@ sub jack_client_array {
 	$jack->{clients}->{$name}{$direction} // []
 }
 
+sub jacks_get_port_latency {
+
+my $jc;
+
+$jc = jacks::JsClient->new("watch latency", undef, $jacks::JackNullOption, 0);
+
+my $plist =  $jc->getPortNames(".");
+
+for (my $i = 0; $i < $plist->length(); $i++) {
+    my $pname = $plist->get($i);
+	my ($client_name,$port_name) = $pname =~ /
+		(.+?)	# anything, non-greedy 
+		:		# a colon
+		([^:]+$)# non-colon stuff to end
+		/x;
+
+	say qq(client: $client_name, port: $port_name);
+
+    my $port = $jc->getPort($pname);
+
+    my $platency = $port->getLatencyRange($jacks::JackPlaybackLatency);
+    my $pmin = $platency->min();
+    my $pmax = $platency->max();
+    logit(__LINE__,'::Jack','debug',"$pname: playback Latency [ $pmin $pmax ]");
+	$jack->{clients}->{$client_name}->{$port_name}->{latency}->{playback}->{min} 
+		= $pmin;
+	$jack->{clients}->{$client_name}->{$port_name}->{latency}->{playback}->{max} 
+		= $pmax;
+
+    my $clatency = $port->getLatencyRange($jacks::JackCaptureLatency);
+    my $cmin = $clatency->min();
+    my $cmax = $clatency->max();
+    logit(__LINE__,'::Jack','debug',"$pname: capture Latency [ $cmin $cmax ]");
+	$jack->{clients}->{$client_name}->{$port_name}->{latency}->{capture}->{min} 
+		= $cmin;
+	$jack->{clients}->{$client_name}->{$port_name}->{latency}->{capture}->{max} 
+		= $cmax;
+}
+
+
+}
 sub parse_port_latency {
 	
 	# default to use output of jack_lsp -l
