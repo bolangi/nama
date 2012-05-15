@@ -223,16 +223,34 @@ sub prune_graph {
 	
 sub process_routing_graph {
 	logsub("&process_routing_graph");
+
+	# generate a set of IO objects from edges
 	@io = map{ dispatch($_) } $g->edges;
+	
 	$logger->debug( sub{ join "\n",map $_->dump, @io });
+
+	# sort chain_ids by attached input object
+	# one line will show all with that one input
+	# -a:3,5,6 -i:foo
+	
 	map{ $inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
+
+	# supplemental post-input modifiers
+	
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} grep { $_->direction eq 'input' } @io;
+
+	# sort chain_ids by output
+
 	map{ $outputs{$_->ecs_string} //= [];
 		push @{$outputs{$_->ecs_string}}, $_->chain_id;
+
+	# pre-output modifers
+	
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
 	} grep { $_->direction eq 'output' } @io;
+
 	no warnings 'numeric';
 	my @in_keys = values %inputs;
 	my @out_keys = values %outputs;
