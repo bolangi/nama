@@ -18,43 +18,43 @@ sub jack_update {
 	#
 	# skip if Ecasound is busy
 	return if engine_running();
+	$jack->{clients} = {} ;
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
-		#parse_ports_list();
-		$jack->{use_jacks} 
+		parse_ports_list();
+			$jack->{use_jacks} 
 			?  jacks_get_port_latency() 
 			:  parse_port_latency();
 
 		# we know that JACK capture latency is 1 period
 		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
 
-	} else { $jack->{clients} = {} }
+	} else { }
 }
 
 sub jack_client_array {
+	logsub("&jack_client_array");
 
 	# returns array of ports if client and direction exist
 	
 	my ($name, $direction)  = @_;
-	$jack->{clients}->{$name}{$direction} // []
+#	$jack->{clients}->{$name}{$direction} // []
 }
 
 sub jacks_get_port_latency {
 	logsub('&jacks_get_port_latency');
-	delete $jack->{clients};
+	my $jc;
 
-my $jc;
+	$jc = jacks::JsClient->new("watch latency", undef, $jacks::JackNullOption, 0);
 
-$jc = jacks::JsClient->new("watch latency", undef, $jacks::JackNullOption, 0);
+	my $plist =  $jc->getPortNames(".");
 
-my $plist =  $jc->getPortNames(".");
-
-for (my $i = 0; $i < $plist->length(); $i++) {
-    my $pname = $plist->get($i);
-	my ($client_name,$port_name) = $pname =~ /
-		(.+?)	# anything, non-greedy 
-		:		# a colon
-		([^:]+$)# non-colon stuff to end
-		/x;
+	for (my $i = 0; $i < $plist->length(); $i++) {
+		my $pname = $plist->get($i);
+		my ($client_name,$port_name) = $pname =~ /
+			(.+?)	# anything, non-greedy 
+			:		# a colon
+			([^:]+$)# non-colon stuff to end
+			/x;
 
 	say qq(client: $client_name, port: $port_name);
 
@@ -82,6 +82,7 @@ for (my $i = 0; $i < $plist->length(); $i++) {
 
 }
 sub parse_port_latency {
+	logsub("&parse_port_latency");
 	
 	# default to use output of jack_lsp -l
 	
@@ -171,7 +172,9 @@ sub parse_ports_list {
 	# system:capture_1 alsa_pcm:capture_1 properties: output,physical,terminal,
 	#fluidsynth:left properties: output,
 	#fluidsynth:right properties: output,
+	logit(__LINE__,'::Jack','debug', $j);
 
+=comment
 	map{ 
 		my ($direction) = /properties: (input|output)/;
 		s/properties:.+//;
@@ -191,6 +194,16 @@ sub parse_ports_list {
 		 } @port_aliases;
 
 	} 
+=cut
+	map{ 
+		my ($direction) = /properties: (input|output)/;
+		my ($name,$port)= /^(.+?):([^:]+) properties/;
+		my $full_name = "$name:$port";
+		say "full name: $full_name, name, $name, port: $port, direction: $direction";
+		push @{ $jack->{clients}->{$full_name}->{$direction}}, $full_name;
+		push @{ $jack->{clients}->{$name}->{$direction} }, $full_name; 
+	}
+	
 	grep{ ! /^jack:/i } # skip spurious jackd diagnostic messages
 	split "\n",$j;
 }

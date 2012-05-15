@@ -255,7 +255,7 @@ sub jack_multi_route {
 # 	die qq(track $trackname: JACK client "$client", direction: $direction channel ($end) is out of bounds. $max channels maximum.\n) 
 # 		if $end > $max;
 	join q(,),q(jack_multi),
-	map{quote_jack_port($_)}
+	map{quote_jack_port($_)} #1 # XXX
 		@{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1];
 
 }
