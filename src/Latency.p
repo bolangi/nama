@@ -137,31 +137,25 @@ sub jack_client_playback_latency {
 	my $name = shift;
 	my $node = jack_client($name)
 		or logit(__LINE__,'::Latency','debug',"$name: non existing JACK client"),
-		return 0;
+		return;
 	$node->{playback}->{min}
 		ne $node->{playback}->{max}
-	and logit(__LINE__,'::Latency','debug','encountered unmatched latencies', sub{ yaml_out($node) });
+	and logit(__LINE__,'::Latency','info','encountered unmatched latencies', 
+		sub{ json_out($node) });
+	$node->{playback}->{min}
+}
+sub jack_client_capture_latency {
+	my $name = shift;
+	my $node = jack_client($name)
+		or logit(__LINE__,'::Latency','debug',"$name: non existing JACK client"),
+		return;
+	$node->{capture}->{min}
+		ne $node->{capture}->{max}
+	and logit(__LINE__,'::Latency','info','encountered unmatched latencies', 
+		sub{ json_out($node) });
+	$node->{capture}->{min}
 }
 	
-
-=comment
-sub input_latency { # can come from IO objects, they know jack connections
-	my $track = shift;
-	
-	# no latency for WAV file playback
-	return 0 if $track->rec_status ne 'REC'
-
-	# 
-	my $latency;
-	my $source_id = $track->source_id;
-	given($track->source_type){
-		when('jack_client'){ $latency = jack_client_capture_latency($source_id) }
-		when(''){}
-	}
-}
-=cut
-
-
 sub insert_latency {
 	my $track = shift;
 	my $latency = 0;

@@ -878,6 +878,20 @@ sub latency_offset {
 		- $setup->{latency}->{track}->{$track->name}->{total};
 }
 
+
+sub capture_latency {
+	my $track = shift;
+	if (my $io = $setup->{track}->{input_object}){
+		$io->capture_latency()
+	}
+}
+sub playback_latency {
+	my $track = shift;
+	if (my $io = $setup->{track}->{output_object}){
+		$io->playback_latency()
+	}
+}
+
 }
 
 # subclasses

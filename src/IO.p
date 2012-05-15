@@ -102,13 +102,7 @@ sub new {
 
 	# join IO objects to graph
 	if( my $name = $self->trackcall('name')){   # avoiding AUTOLOAD
-												# in future
-												# could catch with Try::Tiny
-		# initialize 'IO' attribute as empty array
-		#if ( ! defined $setup->{final_graph}->get_vertex_attribute($name, 'IO'))
-		#{ $setup->{final_graph}->set_vertex_attribute($name, 'IO', []) }
-		my $arrayref =
-		$setup->{final_graph}->set_vertex_attribute($name, "IO_$direction") = $self;
+		$setup->{track}->{$name}->{"$direction\_object"} = $self;
 	}
 	$self
 }
@@ -263,6 +257,7 @@ sub jack_multi_route {
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)}
 		@{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1];
+sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
 }
 sub default_jack_ports_list {
 	my ($track_name) = shift;
@@ -360,12 +355,16 @@ sub new {
 {
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub device_id { 
+sub client {
 	my $self = shift;
-	# maybe source_id is an input number
 	my $client = $self->direction eq 'input' 
 		? $self->source_id
 		: $self->send_id;
+}
+sub device_id { 
+	my $self = shift;
+	# maybe source_id is an input number
+	my $client = $self->client;
 	my $channel = 1;
 	# we want the direction with respect to the client, i.e.  # reversed
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
@@ -376,6 +375,16 @@ sub device_id {
 	::IO::jack_multi_route($client,$client_direction,$channel,$self->width, ::try{$self->name} )
 }
 # don't need to specify format, since we take all channels
+
+sub capture_latency {
+	my $self = shift;
+	jack_client_capture_latency($self->client())
+}
+sub playback_latency {
+	my $self = shift;
+	jack_client_playback_latency($self->client())
+}
+
 }
 
 {
