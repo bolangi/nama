@@ -4,7 +4,7 @@ use inc::Module::Install;
          name                'Audio-Nama';
 		 version_from        'lib/Audio/Nama.pm';
 		 all_from            'script/nama';
-         license             'perl';
+         license             'gpl';
 		 install_script      'script/nama'; 
 	 keywords
 	        'audio',
