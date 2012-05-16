@@ -37,7 +37,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-our $to_json = JSON::XS->new->utf8->pretty->canonical(1) ;
+our $to_json = JSON::XS->new->utf8->allow_blessed->pretty->canonical(1) ;
 use Carp;
 
 my $logger = Log::Log4perl->get_logger();

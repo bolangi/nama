@@ -4,7 +4,9 @@
 # well-defined interfaces
 
 package ::Util;
-use Modern::Perl; use Carp;
+use Modern::Perl; 
+use Carp;
+use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Globals qw(:all);
 use ::Log qw(logit);
@@ -311,10 +313,9 @@ sub expand_tilde {
 }
 sub dumper { 
 	! defined $_ and "undef"
-	or ! ref and $_ 
+	or ! (ref $_) and $_ 
 	or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
-	or (ref $_) and $_->can('as_hash') and json_out($_->as_hash)  
-	or Dumper $_ 
+	or ref $_ and Dumper($_)
 }
 
 1;
