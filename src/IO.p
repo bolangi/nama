@@ -244,11 +244,6 @@ sub jack_multi_route {
 	# non-existent client, and correctly handles
 	# the case of a portname (containing colon)
 	
-	my $count_maybe_ref = $jack->{clients}->{$client}{$direction};
-	my $max = ref $count_maybe_ref eq 'ARRAY' 
-		? scalar @$count_maybe_ref 
-		: $count_maybe_ref;
-
  	my $max = scalar @{$jack->{clients}->{$client}{$direction}};
  	die qq(track $trackname: JACK client "$client", direction: $direction channel ($end) is out of bounds. $max channels maximum.\n) if $end > $max
 		and $config->{enforce_channel_bounds};
