@@ -383,7 +383,6 @@ sub ports {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
-	say $self->representative_port($client);
 	::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
 }
 
