@@ -27,6 +27,7 @@ our $VERSION = 1.0;
 
 # provide following vars to all packages
 our ($config, $jack, %tn);
+our (%by_name); # index for $by_name{trackname}->{input} = $object
 use ::Globals qw($config $jack %tn $setup);
 use Try::Tiny;
 
@@ -104,13 +105,14 @@ sub new {
 
 	# join IO objects to graph
 	my $name;
-	$name  = $self->name ; # expect to be okay because all Temp tracks remain
+	try{ $name  = $self->name }
+	catch {  say "name method blew up for this object"  }; 
 
 	::logit(__LINE__,"::IO","debug","I belong to track $name\n",
 		sub{Dumper($self)} );
 	
 	if($name){
-		$setup->{track}->{$name}->{"$direction\_object"} = $self;
+		$by_name{$name}->{$direction} = $self;
 	}
 	else {say "DOES NOT HAVE ASSOCIATED TRACK"}
 	$self

@@ -314,7 +314,7 @@ sub expand_tilde {
 sub dumper { 
 	! defined $_ and "undef"
 	or ! (ref $_) and $_ 
-	or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
+	#or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
 	or ref $_ and Dumper($_)
 }
 
