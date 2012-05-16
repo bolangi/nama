@@ -121,8 +121,9 @@ sub new {
 }
 
 # latency stubs
-sub capture_latency { undef }
-sub playback_latency { undef }
+sub capture_latency {}
+sub playback_latency {}
+sub ports {}
 
 sub ecs_string {
 	my $self = shift;
@@ -369,6 +370,10 @@ sub client {
 }
 sub device_id { 
 	my $self = shift;
+	::IO::jack_multi_route($self->ports)
+}
+sub ports {
+	my $self = shift;
 	# maybe source_id is an input number
 	my $client = $self->client;
 	my $channel = 1;
@@ -379,11 +384,8 @@ sub device_id {
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
 	say $self->representative_port($client);
-	my @ports = ::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
-	::IO::jack_multi_route(@ports)
-
+	::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
 }
-# don't need to specify format, since we take all channels
 
 sub representative_port {
 	my ($self) = @_;
