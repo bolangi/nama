@@ -881,18 +881,20 @@ sub latency_offset {
 
 sub capture_latency {
 	my $track = shift;
-	if (my $io = $setup->{track}->{input_object}){
+	if (my $io = $::IO::by_name{$track->name}->{input}){
 		$io->capture_latency()
 	}
+	else { logit(__LINE__,'::Track','logconfess',"didn't get IO object, got $io")}
+
 }
 sub playback_latency {
 	my $track = shift;
-	if (my $io = $setup->{track}->{output_object}){
+	if (my $io = $::IO::by_name{$track->name}->{output}){
 		$io->playback_latency()
 	}
+	else { logit(__LINE__,'::Track','logconfess',"didn't get IO object, got $io")}
 }
-
-}
+} # end package
 
 # subclasses
 
