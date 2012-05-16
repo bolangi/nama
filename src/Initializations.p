@@ -90,6 +90,7 @@ sub definitions {
 		unity_level 					=> {ea => 100, 	eadb => 0}, 
 		fade_resolution 				=> 20, # steps per second
 		no_fade_mute_delay				=> 0.03,
+		enforce_channel_bounds			=> 1,
 		# for save_system_state()
 		serialize_formats               => 'json',
 	}, '::Config';

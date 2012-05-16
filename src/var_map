@@ -285,3 +285,4 @@
 	**								$config->{serialize_formats}
 	**								$project->{config}
 	$beep_command 					$config->{beep_command}
+	$enforce_channel_bounds    $config->{enforce_channel_bounds}
