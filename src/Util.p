@@ -310,9 +310,10 @@ sub expand_tilde {
 	$path
 }
 sub dumper { 
-	! ref and $_ 
+	! defined $_ and "undef"
+	or ! ref and $_ 
 	or (ref $_) =~ /HASH|ARRAY/ and ::json_out($_)
-	or $_->can('as_hash') and json_out($_->as_hash)  
+	or (ref $_) and $_->can('as_hash') and json_out($_->as_hash)  
 	or Dumper $_ 
 }
 
