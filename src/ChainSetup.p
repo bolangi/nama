@@ -49,6 +49,7 @@ sub initialize {
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};
 	@io = (); 			# IO object list
+	::IO::initialize();
 	$g = Graph->new(); 	
 	%inputs = %outputs = %post_input = %pre_output = ();
 	%is_ecasound_chain = ();
