@@ -18,16 +18,20 @@ sub jack_update {
 	#
 	# skip if Ecasound is busy
 	return if engine_running();
+
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
-		#parse_ports_list();
+		# reset our clients data 
+		$jack->{clients} ||= {};
+
 		$jack->{use_jacks} 
 			?  jacks_get_port_latency() 
 			:  parse_port_latency();
+		parse_ports_list();
 
 		# we know that JACK capture latency is 1 period
 		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
 
-	} else { $jack->{clients} = {} }
+	} else {  }
 }
 
 sub jack_client_array {
