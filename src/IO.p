@@ -249,13 +249,12 @@ sub jack_multi_route {
 		? scalar @$count_maybe_ref 
 		: $count_maybe_ref;
 
-# disable channel bounds checking
-# 
- 	#my $max = scalar @{$jack->{clients}->{$client}{$direction}};
- 	#die qq(track $trackname: JACK client "$client", direction: $direction channel ($end) is out of bounds. $max channels maximum.\n) if $end > $max;
+ 	my $max = scalar @{$jack->{clients}->{$client}{$direction}};
+ 	die qq(track $trackname: JACK client "$client", direction: $direction channel ($end) is out of bounds. $max channels maximum.\n) if $end > $max;
 	join q(,),q(jack_multi),
 	map{quote_jack_port($_)} 
-		@{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1];
+		  @{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1]
+			 if $jack->{clients}->{$client}{$direction};
 
 }
 #sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
