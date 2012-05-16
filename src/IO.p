@@ -31,6 +31,8 @@ our (%by_name); # index for $by_name{trackname}->{input} = $object
 use ::Globals qw($config $jack %tn $setup);
 use Try::Tiny;
 
+sub initialize { %by_name = () }
+
 # we will use the following to map from graph node names
 # to IO class names
 
