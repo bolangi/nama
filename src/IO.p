@@ -22,11 +22,13 @@ our (%tn, $jack, $config);
 
 package ::IO;
 use Modern::Perl; use Carp;
+use Data::Dumper::Concise;
 our $VERSION = 1.0;
 
 # provide following vars to all packages
 our ($config, $jack, %tn);
 use ::Globals qw($config $jack %tn $setup);
+use Try::Tiny;
 
 # we will use the following to map from graph node names
 # to IO class names
@@ -101,9 +103,16 @@ sub new {
 	my $direction = $self->direction; # input or output
 
 	# join IO objects to graph
-	if( my $name = $self->trackcall('name')){   # avoiding AUTOLOAD
+	my $name;
+	$name  = $self->name ; # expect to be okay because all Temp tracks remain
+
+	::logit(__LINE__,"::IO","debug","I belong to track $name\n",
+		sub{Dumper($self)} );
+	
+	if($name){
 		$setup->{track}->{$name}->{"$direction\_object"} = $self;
 	}
+	else {say "DOES NOT HAVE ASSOCIATED TRACK"}
 	$self
 }
 
@@ -368,9 +377,15 @@ sub device_id {
 		$channel = $client;
 		$client = ::IO::soundcard_input_device_string(); # system, okay for output
 	}
+	say $self->representative_port($client);
 	::IO::jack_multi_route($client,$client_direction,$channel,$self->width, ::try{$self->name} )
 }
 # don't need to specify format, since we take all channels
+
+sub representative_port {
+	my ($self) = @_;
+	$jack->{clients}->{$self->client}->{$self->direction}->[-1];
+}
 
 sub capture_latency {
 	my $self = shift;

@@ -37,7 +37,13 @@ our (
 	);
 
 
+sub remove_temporary_tracks {
+	logsub("&remove_temporary_tracks");
+	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
+}
 sub initialize {
+
+	remove_temporary_tracks();# start clean
 	$logger = Log::Log4perl->get_logger();
 	::Graph::initialize_logger();
 	delete $setup->{latency_graph};

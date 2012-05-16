@@ -28,7 +28,7 @@ sub generate_setup {
 	my $success = $config->{opts}->{T}      # don't catch errors during testing 
 		?  ::ChainSetup::generate_setup_try(@_)
 		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
-	remove_temporary_tracks();  # cleanup
+	#remove_temporary_tracks();  
 	track_unmemoize(); 			# unfreeze track state
 	if ($@){
 		say("error caught while generating setup: $@");
@@ -36,10 +36,6 @@ sub generate_setup {
 		return
 	}
 	$success;
-}
-sub remove_temporary_tracks {
-	logsub("&remove_temporary_tracks");
-	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
 }
 
 { my $old_offset_run_status;
