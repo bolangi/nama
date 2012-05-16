@@ -387,11 +387,6 @@ sub ports {
 	::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
 }
 
-sub representative_port {
-	my ($self) = @_;
-	$jack->{clients}->{$self->client}->{$self->direction}->[-1];
-}
-
 sub capture_latency {
 	my $self = shift;
 	jack_client_capture_latency($self->client())
