@@ -150,13 +150,6 @@ sub direction {
 }
 sub io_prefix { substr $_[0]->direction, 0, 1 } # 'i' or 'o'
 
-sub trackcall {
-	my ($self, $call, @args) = @_;
-	if ( my $track = $tn{$self->{track_}} ){
-		return $track->$call(@args) if $track->can($call) 
-	}
-}
-
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
