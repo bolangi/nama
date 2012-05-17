@@ -33,6 +33,7 @@ sub cop_id { $_[0]->{id} }
 sub clobber_id { my $self = shift; $self->bypass} 
 
 ## sugar for accessing individual effect attributes
+## similar sugar is used for effects. 
 
 sub is_controller {
 	my ($self, $id) = @_;
@@ -78,19 +79,42 @@ sub new {
 	# ops data can either be 
 	# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
 	# + or taken from existing effects, e.g. $fx->{applied}
+	#
+	# in either case, we want to clone the data structures
+	# to ensure we don't damage objects in the original
+	# structure.
+	
 	map { 	
 
-		if ( $vals{ops_data} )
+		if ( $vals{ops_data}->{$_} )
+										
 		{ 	
-			$ops_data->{$_} = $vals{ops_data}->{$_} 
+			$ops_data->{$_} 		  = dclone($vals{ops_data}->{$_});
 		}
 		else
 		{
 			$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
 			$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
+			# our op IDs are ALL CAPS, so will not conflict
+			# with params when accessing via key
+			#
+			# however this would be wrong:
+			#
+			# map{ show_effect($_) }   keys %{$ops_data}
+			#
+			# because keys includes 'params'
+
+			
+			# we don't need these attributes
+			# chain will likely change
+			# when applied
 			delete $ops_data->{$_}->{chain};
 			delete $ops_data->{$_}->{display};
+
+			# the 'display' attribute was only used control 
+			# the GUI layout.
 		}
+
 	} @{$vals{ops_list}};
 
 	$vals{ops_data} = $ops_data;
@@ -175,6 +199,8 @@ sub new {
 ### apply effect chain to the specified track
 ### or the track specified by the effect chain's track_name field.
 
+### what determines which is used
+
 sub add_ops {
 	my($self, $track, $successor) = @_;
 
@@ -198,11 +224,17 @@ sub clobber_all {
 sub add {
 	my ($self, $track, $successor) = @_;
 	
+	# Higher priority: argument 
+	# Lower priority:  effect chain's own track name attribute
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
 	
-	local $this_op; # don't change current op
-	say $track->name, qq(: adding effect chain ). $self->name 
-		unless $self->system;
+	local $this_op; # restore to present value on exiting subroutine
+					# i.e. avoid save/restore using $old_this_op 
+
+	logit(__LINE__,'::EffectChain','debug',$track->name,
+			qq(: adding effect chain ), $self->name, Dumper $self
+		 
+		);
 
 	$self = bless { %$self }, __PACKAGE__;
 	$successor ||= $track->vol; # place effects before volume 
@@ -224,11 +256,18 @@ sub add {
 		
 		$args->{before} = $successor unless $args->{parent_id};
 
+
 		my $new_id = ::add_effect($args);
+		
+		# the effect ID may be new, or it may be previously 
+		# assigned ID, 
+		# whatever value is supplied is guaranteed
+		# to be unique; not to collide with any other effect
+		
 		logit(__LINE__,'::EffectChain','debug',"new id: $new_id");
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
-		# change all controllers to belong to new id
+		# re-write all controllers to belong to new id
 		{
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
