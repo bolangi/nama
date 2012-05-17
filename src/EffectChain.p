@@ -255,7 +255,7 @@ sub add_inserts {
 	my ($self, $track) = @_;
 	map 
 	{
-		my $insert_data = dclone($_);
+		my $insert_data = dclone($_); # copy so safe to modify 
 		say "found insert data:\n",::yaml_out($insert_data);
 
 		# get effect chain indices for wet/dry arms
@@ -265,8 +265,9 @@ sub add_inserts {
 		my $class 			 = delete $insert_data->{class};
 
 		$insert_data->{track} = $track->name;
-		my $insert = $class->new(%$_);
-
+		my $insert = $class->new(%$insert_data);
+		#$::by_index{$wet_effect_chain}->add($insert->wet_name, $tn{$insert->wet_name}->vol)
+		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol)
 	} @{$self->inserts_data};
 }
 
