@@ -28,7 +28,6 @@ meta: bang shellcode stopper {
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
 	::pager($output) if $output;
-	print "\n";
 	1;
 }
 
@@ -47,7 +46,7 @@ meta: for bunch_spec ';' namacode stopper {
  	for my $t(@tracks) {
  		::leading_track_spec($t);
 		$::text->{parser}->meta($item{namacode});
- 		#print("$t; $item{namacode}\n");
+ 		#::pager2(("$t); $item{namacode}");
 	}
 	1;
 }
@@ -174,7 +173,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 statefile: /[-:\w\.]+/
 marktime: /\d+\.\d+/ # decimal required
 markname: /[A-Za-z]\w*/ { 
-	print("$item[1]: non-existent mark name. Skipping\n"), return undef 
+	::pager2("$item[1]: non-existent mark name. Skipping"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
@@ -193,9 +192,9 @@ find_effect: _find_effect anytag(s) {
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { print $::help->{screen} ; 1}
+help: _help { ::pager2( $::help->{screen} ); 1}
 project_name: _project_name { 
-	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
+	::pager2( "project name: ", $::gui->{_project_name}->{name}); 1}
 create_project: _create_project project_id { 
 	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -224,7 +223,7 @@ get_state: _get_state statefile {
 get_state: _get_state {
  	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
 getpos: _getpos {  
-	print ::d1( ::eval_iam q(getpos) ), $/; 1}
+	::pager2( ::d1( ::eval_iam q(getpos) )); 1}
 setpos: _setpos timevalue {
 	::set_position($item{timevalue}); 1}
 forward: _forward timevalue {
@@ -259,7 +258,7 @@ remove_track: _remove_track quiet(?) {
  	my $name = $::this_track->name; 
  	my $reply = $::text->{term}->readline("remove track $name? [n] ");
  	if ( $reply =~ /y/i ){
- 		print "Removing track. All WAV files will be kept.\n";
+ 		::pager2( "Removing track. All WAV files will be kept.");
  		$::this_track->remove; 
  	}
  	1;
@@ -299,8 +298,8 @@ shift_track: _shift_track start_position {
 		pager2($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
-	} else { print 
-	"Shift value is neither decimal nor mark name. Skipping.\n";
+	} else { 
+		::pager2( "Shift value is neither decimal nor mark name. Skipping.");
 	0;
 	}
 }
@@ -318,8 +317,7 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { 
-	print(::eval_iam q(engine-status)); print "\n" ; 1}
+engine_status: _engine_status { ::pager2(::eval_iam q(engine-status)); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::eval_iam('start'); 1}
@@ -327,6 +325,7 @@ ecasound_stop: _ecasound_stop  { ::eval_iam('stop'); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
 	::pager( ::show_tracks(::showlist()));
+
 	1;
 }
 show_tracks_all: _show_tracks_all { 	
@@ -346,7 +345,7 @@ modifiers: _modifiers modifier(s) {
 	@{$item{"modifier(s)"}}, q() ));
 	1;}
 
-modifiers: _modifiers { print $::this_track->modifiers, "\n"; 1}
+modifiers: _modifiers { ::pager2( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 show_io: _show_io { ::ChainSetup::show_io(); 1}
@@ -372,15 +371,14 @@ show_track: _show_track dd {
 	$::ti{$item{dd}};
 	1;}
 
-show_mode: _show_mode { print STDOUT ::show_status; 1}
+show_mode: _show_mode { ::pager2( ::show_status()); 1}
 bus_rec: _bus_rec {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'REC');
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	print "Setting REC-enable for " , $::this_bus ,
-		" bus. You may record member tracks.\n";
+	::pager2( "Setting REC-enable for " , $::this_bus , " bus. You may record member tracks.");
 	1; }
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
@@ -388,8 +386,7 @@ bus_mon: _bus_mon {
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	print "Setting MON mode for " , $::this_bus , 
-		" bus. Monitor only for member tracks.\n";
+	::pager2( "Setting MON mode for " , $::this_bus , " bus. Monitor only for member tracks.");
  	1  
 }
 bus_off: _bus_off {
@@ -398,20 +395,17 @@ bus_off: _bus_off {
 	# turn off mix track
 	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
 	{ $mix->set(rw => 'OFF') }
-	print "Setting OFF mode for " , $::this_bus,
-		" bus. Member tracks disabled.\n"; 1  
+	::pager2( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
 }
 bus_version: _bus_version { 
 	use warnings;
 	no warnings qw(uninitialized);
-	print $::this_bus, " bus default version is: ", 
-		$::bn{$::this_bus}->version, "\n" ; 1}
+	::pager2( $::this_bus, " bus default version is: ", $::bn{$::this_bus}->version, "" ); 1}
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::bn{$::this_bus}->set( version => $n ); 
-	print $::this_bus, " bus default version set to: ", 
-		$::bn{$::this_bus}->version, "\n" ; 1}
+	::pager2( $::this_bus, " bus default version set to: ", $::bn{$::this_bus}->version); 1}
 mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
 mixoff:  _mixoff  { ::mixoff(); 1}
@@ -431,8 +425,8 @@ source: _source connect_target {
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
-	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
-	print "however track status is ", $::this_track->rec_status, "\n"
+	::pager2( $::this_track->name, ": input set to ", $::this_track->input_object);
+	::pager2( "however track status is ", $::this_track->rec_status)
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
@@ -446,12 +440,12 @@ remove_send: _remove_send {
 }
 stereo: _stereo { 
 	$::this_track->set(width => 2); 
-	print $::this_track->name, ": setting to stereo\n";
+	::pager2( $::this_track->name, ": setting to stereo");
 	1;
 }
 mono: _mono { 
 	$::this_track->set(width => 1); 
-	print $::this_track->name, ": setting to mono\n";
+	::pager2( $::this_track->name, ": setting to mono");
 	1; }
 
 #off: 'off' {$::this_track->set_off(); 1}
@@ -475,23 +469,23 @@ rw: rw_setting {
 }
 rec_defeat: _rec_defeat { 
 	$::this_track->set(rec_defeat => 1);
-	print $::this_track->name, ": WAV recording disabled!\n";
+	::pager2( $::this_track->name, ": WAV recording disabled!");
 }
 rec_enable: _rec_enable { 
 	$::this_track->set(rec_defeat => 0);
-	print $::this_track->name, ": WAV recording enabled";
+	::pager2( $::this_track->name, ": WAV recording enabled");
 	my $rw = $::bn{$::this_track->group}->rw;
 	if ( $rw ne 'REC'){
-		print qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n),
-		"No WAV file will be recorded.\n";
-	} else { print "!\n" }
+		::pager2( qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n), "No WAV file will be recorded.");
+	} 
+	1
 }
 
 set_version: _set_version dd { $::this_track->set_version($item{dd}); 1}
 
 vol: _vol value { 
 	$::this_track->vol or 
-		print( $::this_track->name . ": no volume control available\n"), return;
+		::pager2(( $::this_track->name . ": no volume control available")), return;
 	::modify_effect(
 		$::this_track->vol,
 		0,
@@ -501,7 +495,7 @@ vol: _vol value {
 } 
 vol: _vol sign(?) value { 
 	$::this_track->vol or 
-		print( $::this_track->name . ": no volume control available\n"), return;
+		::pager2( $::this_track->name . ": no volume control available"), return;
 	::modify_effect(
 		$::this_track->vol,
 		0,
@@ -509,7 +503,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { print $::fx->{params}->{$::this_track->vol}[0], "\n" ; 1}
+vol: _vol { ::pager2( $::fx->{params}->{$::this_track->vol}[0]); 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -540,7 +534,7 @@ pan: _pan sign panval {
 	1;} 
 panval: float 
       | dd
-pan: _pan { print $::fx->{params}->{$::this_track->pan}[0], "\n"; 1}
+pan: _pan { ::pager2( $::fx->{params}->{$::this_track->pan}[0]); 1}
 pan_right: _pan_right { ::pan_check( 100 ); 1}
 pan_left:  _pan_left  { ::pan_check(   0 ); 1}
 pan_center: _pan_center { ::pan_check(  50 ); 1}
@@ -574,7 +568,7 @@ next_mark: _next_mark { ::next_mark(); 1}
 previous_mark: _previous_mark { ::previous_mark(); 1}
 loop_enable: _loop_enable someval(s) {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
-	#print join $/, @new_endpoints;
+	#::pager2( @new_endpoints);
 	$::mode->{loop_enable} = 1;
 	@{$::setup->{loop_endpoints}} = (@new_endpoints, @{$::setup->{loop_endpoints}}); 
 	@{$::setup->{loop_endpoints}} = @{$::setup->{loop_endpoints}}[0,1];
@@ -603,8 +597,8 @@ to_mark: _to_mark ident {
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
 	$::this_mark->set( time => $newtime );
-	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
-	print "adjusted to ",$::this_mark->time, "\n" 
+	::pager2( $::this_mark->name, ": set to ", ::d2( $newtime));
+	::pager2( "adjusted to ",$::this_mark->time)
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
 	$::setup->{changed}++;
@@ -613,8 +607,8 @@ modify_mark: _modify_mark sign value {
 modify_mark: _modify_mark value {
 	$::this_mark->set( time => $item{value} );
 	my $newtime = $item{value};
-	print $::this_mark->name, ": set to ", ::d2($newtime),"\n";
-	print "adjusted to ",$::this_mark->time, "\n" 
+	::pager2( $::this_mark->name, ": set to ", ::d2($newtime));
+	::pager2( "adjusted to ",$::this_mark->time)
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
 	$::setup->{changed}++;
