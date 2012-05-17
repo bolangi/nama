@@ -287,7 +287,7 @@ new_region: _new_region beginning ending track_name(?) {
 shift_track: _shift_track start_position {
 	my $pos = $item{start_position};
 	if ( $pos =~ /\d+\.\d+/ ){
-		print $::this_track->name, ": Shifting start time to $pos seconds\n";
+		::pager2($::this_track->name, ": Shifting start time to $pos seconds");
 		$::this_track->set(playat => $pos);
 		1;
 	}
