@@ -973,13 +973,13 @@ delete_effect_chain: _delete_effect_chain ident(s) {
 	} @{ $item{'ident(s)'} };
 	1;
 }
-show_effect_chains: _show_effect_chains ident(s?) 
+find_effect_chains: _find_effect_chains ident(s?) 
 {
 	my @args;
 	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
 	::pager(map{$_->dump} ::EffectChain::find(@args));
 }
-list_user_effect_chains: _list_user_effect_chains ident(s?)
+find_user_effect_chains: _find_user_effect_chains ident(s?)
 {
 	my @args = ('user' , 1);
 	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};

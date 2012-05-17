@@ -692,14 +692,14 @@ delete_effect_chain:
   short: dec
   what: delete an effect chain definition from the list
   parameters: <s_effect_chain_name>
-show_effect_chains:
+find_effect_chains:
   type: effect
-  short: sec 
+  short: fec
   what: dump effect chains, matching key/value pairs if provided
   parameters: [<s_key1> <s_val1>... ]
-list_user_effect_chains:
+find_user_effect_chains:
   type: effect
-  short: luec luc
+  short: fuc
   what: list *user* effect chains, matching key/value pairs if provided
   parameters: [<s_key1> <s_val1>... ]
 bypass_effects:
