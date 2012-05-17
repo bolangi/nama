@@ -1,5 +1,7 @@
 #command: test
-#test: 'test' shellish { print "found $item{shellish}\n" }
+#test: 'test' shellish { 
+#	::pager2( "found $item{shellish}");
+#	}
 
 # CASE 0: Midish command 
 
@@ -22,7 +24,7 @@ meta: bang shellcode stopper {
 	::logit(__LINE__,'::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
-	print "executing this shell code:  $shellcode\n" 
+	::pager2( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
 	::pager($output) if $output;
@@ -294,8 +296,7 @@ shift_track: _shift_track start_position {
 	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
 	elsif ( $::Mark::by_name{$pos} ){
 		my $time = ::Mark::mark_time( $pos );
-		print $::this_track->name, 
-			qq(: Shifting start time to mark "$pos", $time seconds\n);
+		pager2($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
 	} else { print 
