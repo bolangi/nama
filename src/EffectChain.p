@@ -29,9 +29,6 @@ initialize();
 # for compatibility with standard effects
 sub cop_id { $_[0]->{id} }  
 
-# all bypass types are set to clobber_id
-sub clobber_id { my $self = shift; $self->bypass} 
-
 ## sugar for accessing individual effect attributes
 ## similar sugar is used for effects. 
 
@@ -247,7 +244,6 @@ sub add {
 			values 		=> $self->params($_),
 			parent_id 	=> $self->parent($_),
 			cop_id 		=> $_,
-			clobber_id	=> $self->clobber_id,
 		};
 
 		# avoid incorrectly calling _insert_effect 

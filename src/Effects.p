@@ -143,8 +143,8 @@ sub add_effect {
 
 sub _add_effect { 
 	my $p = shift;
-	my (    $n,   $before, $code,$parent_id,$id, $clobber_id, $values) =
-	@$p{qw( chain before    type parent_id  cop_id clobber_id values)};
+	my (    $n,   $before, $code,$parent_id,$id, $values) =
+	@$p{qw( chain before    type parent_id  cop_id values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
@@ -605,27 +605,18 @@ sub cop_add {
 	my $p = shift;
 	logit(__LINE__,'::Effects','debug',sub{yaml_out($p)});
 
-	my ($n,  $type, $id, $parent_id, $clobber_id)  = 
+	my ($n,  $type, $id, $parent_id)  = 
 	@$p{qw( 
-	    chain type cop_id parent_id   clobber_id)};
+	    chain type cop_id parent_id)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
 	#
-	logit(__LINE__,'::Effects','debug',"$id: returning existing id") if $id and fx($id) and ! $clobber_id;
-	return $id if $id and fx($id) and ! $clobber_id;
+	logit(__LINE__,'::Effects','debug',"$id: returning existing id") if $id and fx($id);
+	return $id if $id and fx($id);
 	
-	if (  ! $clobber_id )
-	{ 
-		$id = $p->{cop_id} = $fx->{id_counter}  ;
-      	logit(__LINE__,'::Effects','debug',"$id: new id issued");
-	}
-	else 
-	{ 
-		logit(__LINE__,'::Effects','debug',sub{ ::fx($id) ? "$id: clobbering existing effect" 
-				         : "$id: re-using effect id" });
-	}
-
+	$id = $p->{cop_id} = $fx->{id_counter}  ;
+	logit(__LINE__,'::Effects','debug',"$id: cop id issued");
 
 	my $i = effect_index($type);
 
@@ -695,14 +686,9 @@ sub cop_add {
 	else { push @{$ti{$n}->ops }, $id; } 
 
 
-	# don't touch counter if we are clobbering
-	
-	if ( ! $clobber_id )
-	{
-		# make sure the counter $fx->{id_counter} will not occupy an
-		# already used value
-		while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
-	}
+	# make sure the counter $fx->{id_counter} will not occupy an
+	# already used value
+	while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
 
 	$id;
 }
