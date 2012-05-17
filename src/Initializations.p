@@ -384,7 +384,7 @@ if(	! $return_value == 256 ){
 	if( $type eq 'e')
 	{
 		logit(__LINE__,$category,'error',"ECI error! Command: $cmd. Reply: $reply");
-		restart_ecasound() if $reply =~ /in engine-status/;
+		#restart_ecasound() if $reply =~ /in engine-status/;
 	}
 	else
 	{ 	logit(__LINE__,$category,'debug',"Net-ECI  got: $reply");

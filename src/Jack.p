@@ -34,6 +34,17 @@ sub jack_update {
 	} else {  }
 }
 
+sub client_port {
+	my $name = shift;
+	$name =~ /
+				(?<client>.+?)	# anything, non-greedy 
+	:							# a colon
+				(?<port>[^:]+$) # non-colon stuff to end
+	/x;
+
+	@+{qw(client port)}
+}
+
 sub jack_client_array {
 
 	# returns array of ports if client and direction exist
@@ -54,11 +65,7 @@ my $plist =  $jc->getPortNames(".");
 
 for (my $i = 0; $i < $plist->length(); $i++) {
     my $pname = $plist->get($i);
-	my ($client_name,$port_name) = $pname =~ /
-		(.+?)	# anything, non-greedy 
-		:		# a colon
-		([^:]+$)# non-colon stuff to end
-		/x;
+	my ($client_name,$port_name) = client_port($pname);
 
 	#say qq(client: $client_name, port: $port_name);
 

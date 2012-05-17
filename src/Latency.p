@@ -133,27 +133,28 @@ sub jack_client_latency : lvalue {
 
 }
 
-sub jack_client_playback_latency {
-	my $name = shift;
+sub jack_client_node_latency {
+	my ($names, $direction) = shift; # $names can be array_ref or scalar
+	my $name;
+	$name = ref $names ? $names->[0] : $names;
+	$direction = $direction eq 'input' ? 'capture' : 'playback';
+	my ($client, $port) = client_port($name);
 	my $node = jack_client($name)
 		or logit(__LINE__,'::Latency','debug',"$name: non existing JACK client"),
 		return;
-	$node->{playback}->{min}
-		ne $node->{playback}->{max}
+	$node->{latency}->{$direction}->{min}
+		ne $node->{latency}->{$direction}->{max}
 	and logit(__LINE__,'::Latency','info','encountered unmatched latencies', 
 		sub{ json_out($node) });
-	$node->{playback}->{min}
+	$node->{latency}->{$direction}->{min}
+}
+sub jack_client_playback_latency {
+	my $name = shift;
+	jack_client_node_latency($name,'output');
 }
 sub jack_client_capture_latency {
 	my $name = shift;
-	my $node = jack_client($name)
-		or logit(__LINE__,'::Latency','debug',"$name: non existing JACK client"),
-		return;
-	$node->{capture}->{min}
-		ne $node->{capture}->{max}
-	and logit(__LINE__,'::Latency','info','encountered unmatched latencies', 
-		sub{ json_out($node) });
-	$node->{capture}->{min}
+	jack_client_node_latency($name,'input');
 }
 	
 sub insert_latency {
