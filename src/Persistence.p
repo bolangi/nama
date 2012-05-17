@@ -210,13 +210,20 @@ sub decode {
 sub restore_state {
 	logsub("&restore_state");
 	my $filename = shift;
+
+	# convert it to a path w/o extension
 	$filename = $file->state_store($filename);
 
+	# get state file, newest if more than one
+	# with same name, differing extensions
+	# i.e. State.json and State.yml
 	my( $path, $suffix ) = get_newest($filename);
 	
 	logit(__LINE__,'::Persistence','debug', "using file: $path");
 
-	carp("$path: file not found"), return if ! -f $path;
+	say(
+		$path ? "path: == $path.* ==," : "undefined path,"
+			," state file not found"), return if ! -f $path;
 	my $source = read_file($path);
 
 	logit(__LINE__,'::Persistence','debug', "suffix: $suffix");	

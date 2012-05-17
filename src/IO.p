@@ -110,8 +110,10 @@ sub new {
 	try{ $name  = $self->name }
 	catch {  say "name method blew up for this object"  }; 
 
+	{ no warnings 'uninitialized';
 	::logit(__LINE__,"::IO","debug","I belong to track $name\n",
 		sub{Dumper($self)} );
+	}
 	
 	if($name){
 		$by_name{$name}->{$direction} = $self;
@@ -160,9 +162,11 @@ sub AUTOLOAD {
 	my $method = "_$call";
 	return $self->{$field} if exists $self->{$field};
 	return $self->$method if $self->can($method);
+	{ no warnings 'uninitialized'; 
 	if ( my $track = $tn{$self->{track_}} ){
 		return $track->$call if $track->can($call) 
 		# ->can is reliable here because Track has no AUTOLOAD
+	}
 	}
 	print $self->dump;
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";

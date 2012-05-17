@@ -458,8 +458,9 @@ sub full_effect_code {
 	{ 
 		$code = $fx_cache->{partial_label_to_full}->{$input} 
 	}
-	defined $code or warn("$input: effect code not found.  Skipping.\n");
-	$code;
+	defined $code or ($config->{opts}->{E} or
+		warn("$input: effect code not found.  Skipping.\n")),
+		return unless 	$code;
 }
 
 
@@ -467,7 +468,7 @@ sub full_effect_code {
 sub effect_index {
 	my $code = shift;
 	my $i = $fx_cache->{full_label_to_index}->{full_effect_code($code)};
-	defined $i or warn "$code: effect index not found\n";
+	defined $i or $config->{opts}->{E} or warn("$code: effect index not found\n");
 	$i
 }
 

@@ -1039,9 +1039,9 @@ sub add_track {
 	my ($name, @params) = @_;
 	my %vals = (name => $name, @params);
 	my $class = $vals{class} // '::Track';
-	
+	{ no warnings 'uninitialized';	
 	logit(__LINE__,'::Track','debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
-	
+	}	
 	say("$name: track name already in use. Skipping."), return 
 		if $tn{$name};
 	say("$name: reserved track name. Skipping"), return

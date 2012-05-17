@@ -142,11 +142,12 @@ my %dispatch = (
 );
 
 sub apply {
+	no warnings 'uninitialized';
 	$bus = shift;
 	$g = shift;
 	$logger->debug( "bus ". $bus->name. ": applying routes");
-	$logger->debug( "Expected track as bus destination, found type: ".
-		$bus->send_type. " id: ". $bus->send_id);
+	$logger->debug( "Expected track as bus destination, found type: (",
+		$bus->send_type, ") id: (", $bus->send_id, q[)] );
 	map{ 
 		# connect signal sources to tracks
 		$logger->debug( "track ".$_->name);

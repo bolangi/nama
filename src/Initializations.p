@@ -159,7 +159,9 @@ sub initialize_interfaces {
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
+	{no warnings 'uninitialized';
 	logit(__LINE__,'::Config','debug',"project name: $project->{name}");
+	}
 
 	logit(__LINE__,'::Config','debug',
 		sub{"Command line options\n".  yaml_out($config->{opts})});
