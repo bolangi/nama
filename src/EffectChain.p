@@ -194,34 +194,12 @@ sub new {
 }
 
 ### apply effect chain to the specified track
-### or the track specified by the effect chain's track_name field.
 
-### what determines which is used
 
 sub add_ops {
 	my($self, $track, $successor) = @_;
-
-}
-sub add_inserts {
-	my($self, $track, $successor) = @_;
-}
-sub add_all {
-	my($self, $track, $successor) = @_;
-}
-sub clobber_ops {
-	my($self, $track) = @_;
-}
-sub clobber_inserts {
-	my($self, $track) = @_;
-}
-sub clobber_all {
-	my($self, $track) = @_;
-}
-
-sub add {
-	my ($self, $track, $successor) = @_;
 	
-	# Higher priority: argument 
+	# Higher priority: track argument 
 	# Lower priority:  effect chain's own track name attribute
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
 	
@@ -271,20 +249,44 @@ sub add {
 		
 	} @{$self->ops_list};
 
+
+}
+sub add_inserts {
+	my ($self, $track) = @_;
 	map 
 	{
-		say "found insert data:\n",::yaml_out($_);
+		my $insert_data = dclone($_);
+		say "found insert data:\n",::yaml_out($insert_data);
 
 		# get effect chain indices for wet/dry arms
 		
-		my $wet_effect_chain = delete $_->{wet_effect_chain};
-		my $dry_effect_chain = delete $_->{dry_effect_chain};
-		my $class 			 = delete $_->{class};
+		my $wet_effect_chain = delete $insert_data->{wet_effect_chain};
+		my $dry_effect_chain = delete $insert_data->{dry_effect_chain};
+		my $class 			 = delete $insert_data->{class};
 
-		$_->{track} = $track->name;
+		$insert_data->{track} = $track->name;
 		my $insert = $class->new(%$_);
 
 	} @{$self->inserts_data};
+}
+
+sub add_all {
+	my($self, $track, $successor) = @_;
+}
+sub clobber_ops {
+	my($self, $track) = @_;
+}
+sub clobber_inserts {
+	my($self, $track) = @_;
+}
+sub clobber_all {
+	my($self, $track) = @_;
+}
+
+sub add {
+	my ($self, $track, $successor) = @_;
+	$self->add_ops($track, $successor);
+	$self->add_inserts($track);
 
 }
 sub destroy {
