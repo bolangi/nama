@@ -19,7 +19,7 @@ midish_cmd: /[a-z]+/ predicate {
 # execute shell command if leading '!'
 
 meta: bang shellcode stopper {
-	$::debug and print "Evaluating shell commands!\n";
+	::logit(__LINE__,'::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
 	print "executing this shell code:  $shellcode\n" 
@@ -33,14 +33,14 @@ meta: bang shellcode stopper {
 # execute perl code if leading 'eval'
 
 meta: eval perlcode stopper {
-	$::debug and print "Evaluating perl code\n";
+	logit(__LINE__,'::Grammar','debug',"Evaluating perl code");
 	::eval_perl($item{perlcode});
 	1
 }
 # execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 
- 	$::debug and print "namacode: $item{namacode}\n";
+ 	::logit(__LINE__,'Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
@@ -95,7 +95,7 @@ semistop: /;|$/
 
 command: iam_cmd predicate { 
 	my $user_input = "$item{iam_cmd} $item{predicate}"; 
-	$::debug and print "Found Ecasound IAM command: $user_input\n";
+	::logit(__LINE__,'::Grammar','debug',"Found Ecasound IAM command: $user_input");
 	my $result = ::eval_iam($user_input);
 	::pager( $result );  
 	1 }
