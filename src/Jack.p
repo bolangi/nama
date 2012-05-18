@@ -21,11 +21,12 @@ sub jack_update {
 
 	if( $jack->{jackd_running} = process_is_running('jackd') ){
 		# reset our clients data 
-		$jack->{clients} ||= {};
+		$jack->{clients} = {};
 
-		$jack->{use_jacks} 
-			?  jacks_get_port_latency() 
-			:  parse_port_latency();
+		#$jack->{use_jacks} 
+		#	?  jacks_get_port_latency() 
+		#	:  
+		parse_port_latency();
 		parse_ports_list();
 
 		# we know that JACK capture latency is 1 period
