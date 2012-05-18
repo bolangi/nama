@@ -42,7 +42,7 @@ meta: eval perlcode stopper {
 # execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 
- 	::logit(__LINE__,'Grammar','debug',"namacode: $item{namacode}");
+ 	::logit(__LINE__,'::Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
