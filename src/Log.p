@@ -78,6 +78,7 @@ my %is_method = map { $_ => 1 }
 	
 sub logit {
 	my ($line_number, $category, $level, @message) = @_;
+	my $debug; ++$debug and $category =~ /Effect/and say qq($line_number, $category, $level, @message) ;
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	return unless $category;
 	confess "illegal level: $level" unless $is_method{$level};
@@ -85,6 +86,6 @@ sub logit {
 	$logger->$level($line_number_output, @message);
 }
 }
-sub logsub { logit(undef, 'SUB','debug',$_[0]) }
+sub logsub { logit('SUB','debug',$_[0]) }
 	
 1;

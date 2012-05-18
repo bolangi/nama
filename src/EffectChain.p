@@ -189,7 +189,7 @@ sub new {
 
 		}, $class;
 	$by_index{$n} = $object;
-	logit(__LINE__,'::EffectChain','debug',sub{$object->dump});
+	logit('::EffectChain','debug',sub{$object->dump});
 	$object;
 }
 
@@ -206,7 +206,7 @@ sub add_ops {
 	local $this_op; # restore to present value on exiting subroutine
 					# i.e. avoid save/restore using $old_this_op 
 
-	logit(__LINE__,'::EffectChain','debug',$track->name,
+	logit('::EffectChain','debug',$track->name,
 			qq(: adding effect chain ), $self->name, Dumper $self
 		 
 		);
@@ -238,7 +238,7 @@ sub add_ops {
 		# whatever value is supplied is guaranteed
 		# to be unique; not to collide with any other effect
 		
-		logit(__LINE__,'::EffectChain','debug',"new id: $new_id");
+		logit('::EffectChain','debug',"new id: $new_id");
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
 		# re-write all controllers to belong to new id

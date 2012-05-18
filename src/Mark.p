@@ -81,7 +81,7 @@ sub remove {
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	logit(__LINE__,'::Mark','debug', "marks found: ",scalar @all);
+	logit('::Mark','debug', "marks found: ",scalar @all);
 	# @all = (), return if scalar @all
 	@all = grep { $_->time != $mark->time } @all;
 
@@ -187,7 +187,7 @@ sub next_mark {
 	my @marks = ::Mark::all();
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
-			logit(__LINE__,'::Mark','debug', "here: $here, future time: ", $marks[$i]->time);
+			logit('::Mark','debug', "here: $here, future time: ", $marks[$i]->time);
 			set_position($marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];
 			return;
@@ -226,7 +226,7 @@ sub jump {
 	my $delta = shift;
 	logsub("&jump");
 	my $here = eval_iam('getpos');
-	logit(__LINE__,'::Mark','debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
+	logit('::Mark','debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
 	$new_pos = $new_pos < $setup->{audio_length} ? $new_pos : $setup->{audio_length} - 10;
 	set_position( $new_pos );

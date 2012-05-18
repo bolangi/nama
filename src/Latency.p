@@ -39,7 +39,7 @@ sub calculate_and_adjust_latency {
 	return if $config->{opts}->{O};
 	
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-	logit(__LINE__,'::Latency','debug',"starting node: $starting_track_name");
+	logit('::Latency','debug',"starting node: $starting_track_name");
 
 	sibling_latency($starting_track_name);
 	apply_latency_ops();
@@ -140,11 +140,11 @@ sub jack_client_node_latency {
 	$direction = $direction eq 'input' ? 'capture' : 'playback';
 	my ($client, $port) = client_port($name);
 	my $node = jack_client($name)
-		or logit(__LINE__,'::Latency','debug',"$name: non existing JACK client"),
+		or logit('::Latency','debug',"$name: non existing JACK client"),
 		return;
 	$node->{latency}->{$direction}->{min}
 		ne $node->{latency}->{$direction}->{max}
-	and logit(__LINE__,'::Latency','info','encountered unmatched latencies', 
+	and logit('::Latency','info','encountered unmatched latencies', 
 		sub{ json_out($node) });
 	$node->{latency}->{$direction}->{min}
 }

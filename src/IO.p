@@ -111,7 +111,7 @@ sub new {
 	catch {  say "name method blew up for this object"  }; 
 
 	{ no warnings 'uninitialized';
-	::logit(__LINE__,"::IO","debug","I belong to track $name\n",
+	::logit("::IO","debug","I belong to track $name\n",
 		sub{Dumper($self)} );
 	}
 	

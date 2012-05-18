@@ -40,7 +40,7 @@ sub command_process {
 	# parse repeatedly until all input is consumed
 	
 	while ($input =~ /\S/) { 
-		logit(__LINE__,'::Grammar','debug',"input: $input");
+		logit('::Grammar','debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
 		{
 			print("bad command: $input_was\n"); 
@@ -59,7 +59,7 @@ sub command_process {
 	}
 
 	my $result = check_fx_consistency();
-	logit(__LINE__,'::Effects','logconfess',"Inconsistency found in effects data\n",::yaml_out($result)) if $result->{is_error};
+	logit('::Effects','logconfess',"Inconsistency found in effects data\n",::yaml_out($result)) if $result->{is_error};
 		
 }
 sub do_user_command {
@@ -99,7 +99,7 @@ sub dump_all {
 sub leading_track_spec {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
-		logit(__LINE__,'::Grammar','debug',"Selecting track ",$track->name);
+		logit('::Grammar','debug',"Selecting track ",$track->name);
 		$this_track = $track;
 		set_current_bus();
 		ecasound_select_chain( $this_track->n );
@@ -377,7 +377,7 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
-	logit(__LINE__,'::Grammar','debug',"load hook: $config->{execute_on_project_load}");
+	logit('::Grammar','debug',"load hook: $config->{execute_on_project_load}");
 	::command_process($config->{execute_on_project_load});
 }
 sub t_create_project {

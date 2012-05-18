@@ -19,7 +19,7 @@ sub has_read_only_param {
 	my $id = shift;
 	catch_null_id($id);
 	my $entry = $fx_cache->{registry}->[fxindex($id)];
-	logit(__LINE__,'::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
 		return unless $id and $entry;
 		for(0..scalar @{$entry->{params}} - 1)
 		{
@@ -30,7 +30,7 @@ sub is_read_only {
     my ($id, $param) = @_;
 	catch_null_id($id);
     my $entry = $fx_cache->{registry}->[fxindex($id)];
-	logit(__LINE__,'::Effects','logcluck',"undefined or unregistered effect id: $id"), 
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
 		return unless $id and $entry;
 	$entry->{params}->[$param]->{dir} eq 'output'
 }          
@@ -88,7 +88,7 @@ sub name {
  
 sub catch_null_id {
 	my $id = shift;
-	logit(__LINE__,'::Effects','logconfess',"null effect id") unless $id;
+	logit('::Effects','logconfess',"null effect id") unless $id;
 }
 # make sure the chain number (track index) is set
 
@@ -118,7 +118,7 @@ sub set_chain_value {
 	{
 		$p->{chain} = chain($p->{before});
 	}
-	#logit(__LINE__,'::Effects','debug',(yaml_out($p));
+	#logit('::Effects','debug',(yaml_out($p));
 
 }
 
@@ -126,11 +126,11 @@ sub set_chain_value {
 sub add_effect {
 	my $p = shift;
 	logsub("&add_effect");
-	#logit(__LINE__,'::Effects','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
+	#logit('::Effects','debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
 	
 	set_chain_value($p);
 
-	logit(__LINE__,'::Effects','debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
+	logit('::Effects','debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
 
 	# either insert or add, depending on 'before' setting
 	
@@ -187,8 +187,8 @@ sub _insert_effect {  # call only from add_effect
 		return;
 	
 	my $track = $ti{$n};
-	#logit(__LINE__,'::Effects','debug', $track->name, $/;
-	#logit(__LINE__,'::Effects','debug', "@{$track->ops}")
+	#logit('::Effects','debug', $track->name, $/;
+	#logit('::Effects','debug', "@{$track->ops}")
 
 	# find offset 
 	
@@ -201,7 +201,7 @@ sub _insert_effect {  # call only from add_effect
 	# remove ops after insertion point if engine is connected
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
-	logit(__LINE__,'::Effects','debug',"ops to remove and re-apply: @ops");
+	logit('::Effects','debug',"ops to remove and re-apply: @ops");
 	my $connected = eval_iam('cs-connected');
 	if ( $connected ){  
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
@@ -209,7 +209,7 @@ sub _insert_effect {  # call only from add_effect
 
 	_add_effect($p);
 
-	logit(__LINE__,'::Effects','debug',"@{$track->ops}");
+	logit('::Effects','debug',"@{$track->ops}");
 
 	# the new op_id is added to the end of the $track->ops list
 	# so we need to move it to specified insertion point
@@ -222,7 +222,7 @@ sub _insert_effect {  # call only from add_effect
 	# insert the effect id 
 	splice 	@{$track->ops}, $offset, 0, $op;
 
-	logit(__LINE__,'::Effects','debug',sub{"@{$track->ops}"});
+	logit('::Effects','debug',sub{"@{$track->ops}"});
 
 	# replace the ops that had been removed
 	if ($connected ){  
@@ -262,7 +262,7 @@ sub modify_effect {
  				$value);
 		};
 	$this_op = $op_id;
-	logit(__LINE__,'::Effects','debug', "id $op_id p: $parameter, sign: $sign value: $value");
+	logit('::Effects','debug', "id $op_id p: $parameter, sign: $sign value: $value");
 	effect_update_copp_set( 
 		$op_id, 
 		$parameter, 
@@ -284,21 +284,21 @@ sub remove_effect {
 	logsub("&remove_effect");
 	my $id = shift;
 	if( ! fx($id) ){
-		logit(__LINE__,'::Effects','logcarp',"$id: does not exist, skipping...\n");
+		logit('::Effects','logcarp',"$id: does not exist, skipping...\n");
 		return;
 	}
 	my $n 		= chain($id);
 	my $parent 	= parent($id);
 	my $owns	= owns($id);
-	logit(__LINE__,'::Effects','debug', "id: $id, parent: $parent");
+	logit('::Effects','debug', "id: $id, parent: $parent");
 
 	my $object = $parent ? q(controller) : q(chain operator); 
-	logit(__LINE__,'::Effects','debug', qq(ready to remove $object "$id" from track "$n"));
+	logit('::Effects','debug', qq(ready to remove $object "$id" from track "$n"));
 
 	$ui->remove_effect_gui($id);
 
 	# recursively remove children
-	logit(__LINE__,'::Effects','debug',"children found: ". join ",",@$owns) if defined $owns;
+	logit('::Effects','debug',"children found: ". join ",",@$owns) if defined $owns;
 	map{ remove_effect($_) } @$owns if defined $owns;
 ;
 
@@ -315,10 +315,10 @@ sub remove_effect {
 		# remove parent ownership of deleted controller
 
 		my $parent_owns = owns($parent);
-		logit(__LINE__,'::Effects','debug',"parent $parent owns: ". join ",", @$parent_owns);
+		logit('::Effects','debug',"parent $parent owns: ". join ",", @$parent_owns);
 
 		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
-		logit(__LINE__,'::Effects','debug',"parent $parent new owns list: ". join ",", @$parent_owns);
+		logit('::Effects','debug',"parent $parent new owns list: ". join ",", @$parent_owns);
 
 	}
 	$ti{$n}->remove_effect_from_track( $id ); 
@@ -372,8 +372,8 @@ sub nama_effect_index { # returns nama chain operator index
 	my $id = shift;
 	my $n = chain($id);
 	my $arr = $ti{$n}->ops;
-	logit(__LINE__,'::Effects','debug', "id: $id n: $n");
-	logit(__LINE__,'::Effects','debug', "@{$ti{$n}->ops}" );
+	logit('::Effects','debug', "id: $id n: $n");
+	logit('::Effects','debug', "@{$ti{$n}->ops}" );
 		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
 			return $pos if $arr->[$pos] eq $id; 
 		};
@@ -382,7 +382,7 @@ sub ecasound_effect_index {
 	my $id = shift;
 	my $n = chain($id);
 	my $opcount;  # one-based
-	logit(__LINE__,'::Effects','debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	logit('::Effects','debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
 			next if is_controller($op);
@@ -478,7 +478,7 @@ sub apply_ops {  # in addition to operators in .ecs file
 	
 	logsub("&apply_ops");
 	for my $n ( map{ $_->n } ::Track::all() ) {
-	logit(__LINE__,'::Effects','debug', "chain: $n, offset: $fx->{offset}->{$n}");
+	logit('::Effects','debug', "chain: $n, offset: $fx->{offset}->{$n}");
  		next unless ::ChainSetup::is_ecasound_chain($n);
 
 	# controllers will follow ops, so safe to apply all in order
@@ -493,17 +493,17 @@ sub apply_op {
 	logsub("&apply_op");
 	local $config->{category} = 'ECI_FX';
 	my ($id, $selected_chain) = @_;
-	logit(__LINE__,'::Effects','debug', "id: $id");
+	logit('::Effects','debug', "id: $id");
 	my $code = type($id);
 	my $dad = parent($id);
 	my $chain = chain($id);
-	logit(__LINE__,'::Effects','debug', "chain: ".chain($id)." type: $code");
+	logit('::Effects','debug', "chain: ".chain($id)." type: $code");
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
 	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
 	my @vals = @{ params($id) };
-	logit(__LINE__,'::Effects','debug', "values: @vals");
+	logit('::Effects','debug', "values: @vals");
 
 	# we start to build iam command
 
@@ -514,7 +514,7 @@ sub apply_op {
 	# append the -kx  operator for a controller-controller
 	$add_cmd .= " -kx" if $dad and is_controller($dad);
 
-	logit(__LINE__,'::Effects','debug', "command: $add_cmd");
+	logit('::Effects','debug', "command: $add_cmd");
 
 	eval_iam("c-select $chain") if $selected_chain != $chain;
 	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
@@ -523,7 +523,7 @@ sub apply_op {
 	my $ref = ref owns($id) ;
 	$ref =~ /ARRAY/ or croak "expected array";
 	my @owns = @{ owns($id) }; 
-	logit(__LINE__,'::Effects','debug',"children found: ". join ",", @{owns($id)});
+	logit('::Effects','debug',"children found: ". join ",", @{owns($id)});
 
 }
 sub remove_op {
@@ -547,29 +547,29 @@ sub remove_op {
 	my $index;
 
 	if ( ! is_controller($id) ){ # chain operator
-		logit(__LINE__,'::Effects','debug', "no parent, assuming chain operator");
+		logit('::Effects','debug', "no parent, assuming chain operator");
 	
 		$index = ecasound_effect_index( $id );
-		logit(__LINE__,'::Effects','debug', "ops list for chain $n: @{$ti{$n}->ops}");
-		logit(__LINE__,'::Effects','debug', "operator id to remove: $id");
-		logit(__LINE__,'::Effects','debug', "ready to remove from chain $n, operator id $id, index $index");
-		logit(__LINE__,'::Effects','debug',sub{eval_iam("cs")});
+		logit('::Effects','debug', "ops list for chain $n: @{$ti{$n}->ops}");
+		logit('::Effects','debug', "operator id to remove: $id");
+		logit('::Effects','debug', "ready to remove from chain $n, operator id $id, index $index");
+		logit('::Effects','debug',sub{eval_iam("cs")});
 		eval_iam("cop-select ". ecasound_effect_index($id) );
-		logit(__LINE__,'::Effects','debug',sub{"selected operator: ". eval_iam("cop-selected")});
+		logit('::Effects','debug',sub{"selected operator: ". eval_iam("cop-selected")});
 		eval_iam("cop-remove");
-		logit(__LINE__,'::Effects','debug',sub{eval_iam("cs")});
+		logit('::Effects','debug',sub{eval_iam("cs")});
 
 	} else { # controller
 
-		logit(__LINE__,'::Effects','debug', "has parent, assuming controller");
+		logit('::Effects','debug', "has parent, assuming controller");
 
 		my $ctrl_index = ctrl_index($id);
-		logit(__LINE__,'::Effects','debug', eval_iam("cs"));
+		logit('::Effects','debug', eval_iam("cs"));
 		eval_iam("cop-select ".  ecasound_effect_index(root_parent($id)));
-		logit(__LINE__,'::Effects','debug', "selected operator: ". eval_iam("cop-selected"));
+		logit('::Effects','debug', "selected operator: ". eval_iam("cop-selected"));
 		eval_iam("ctrl-select $ctrl_index");
 		eval_iam("ctrl-remove");
-		logit(__LINE__,'::Effects','debug', eval_iam("cs"));
+		logit('::Effects','debug', eval_iam("cs"));
 	}
 }
 
@@ -603,7 +603,7 @@ sub root_parent {
 sub cop_add {
 	logsub("&cop_add");
 	my $p = shift;
-	logit(__LINE__,'::Effects','debug',sub{yaml_out($p)});
+	logit('::Effects','debug',sub{yaml_out($p)});
 
 	my ($n,  $type, $id, $parent_id)  = 
 	@$p{qw( 
@@ -612,15 +612,15 @@ sub cop_add {
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
 	#
-	logit(__LINE__,'::Effects','debug',"$id: returning existing id") if $id and fx($id);
+	logit('::Effects','debug',"$id: returning existing id") if $id and fx($id);
 	return $id if $id and fx($id);
 	
 	$id = $p->{cop_id} = $fx->{id_counter}  ;
-	logit(__LINE__,'::Effects','debug',"$id: cop id issued");
+	logit('::Effects','debug',"$id: cop id issued");
 
 	my $i = effect_index($type);
 
-	logit(__LINE__,'::Effects','debug',"Issuing a cop_id for track $n: $id");
+	logit('::Effects','debug',"Issuing a cop_id for track $n: $id");
 	
 	# make entry in $fx->{applied} with chain, code, display-type, children
 
@@ -636,7 +636,7 @@ sub cop_add {
 	
 	if (! $parent_id and ! $p->{values}){
 		my @vals;
-		logit(__LINE__,'::Effects','debug', "no settings found, loading defaults if present");
+		logit('::Effects','debug', "no settings found, loading defaults if present");
 		
 		# if the effect is a controller (has a parent), we don't 
 		# initialize the first parameter (the control target)
@@ -645,24 +645,24 @@ sub cop_add {
 		
 			push @vals, $fx_cache->{registry}->[$i]->{params}->[$j]->{default};
 		}
-		logit(__LINE__,'::Effects','debug', "copid: $id defaults: @vals");
+		logit('::Effects','debug', "copid: $id defaults: @vals");
 		$p->{values} = \@vals;
 	}
 	
 	params($id) = $p->{values};
 
 	if ($parent_id) {
-		logit(__LINE__,'::Effects','debug', "parent found: $parent_id");
+		logit('::Effects','debug', "parent found: $parent_id");
 
 		# store relationship
 
 		push @{ owns($parent_id) }, $id;
-		logit(__LINE__,'::Effects','debug',"parent owns @{owns($parent_id)}");
+		logit('::Effects','debug',"parent owns @{owns($parent_id)}");
 
-		logit(__LINE__,'::Effects','debug',sub{join " ", "my attributes:", yaml_out(fx($id))});
+		logit('::Effects','debug',sub{join " ", "my attributes:", yaml_out(fx($id))});
 		parent($id) = $parent_id;
-		logit(__LINE__,'::Effects','debug',sub{join " ", "my attributes again:", yaml_out(fx($id))});
-		#logit(__LINE__,'::Effects','debug', "parameter: $parameter");
+		logit('::Effects','debug',sub{join " ", "my attributes again:", yaml_out(fx($id))});
+		#logit('::Effects','debug', "parameter: $parameter");
 
 		# set fx-param to the parameter number, which one
 		# above the zero-based array offset that $parameter represents
@@ -706,7 +706,7 @@ sub effect_update {
 
 	return unless valid_engine_setup();
 	#my $es = eval_iam("engine-status");
-	#logit(__LINE__,'::Effects','debug', "engine is $es");
+	#logit('::Effects','debug', "engine is $es");
 	#return if $es !~ /not started|stopped|running/;
 
 	my ($id, $param, $val) = @_;
@@ -715,7 +715,7 @@ sub effect_update {
 	my $chain = chain($id);
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
-	logit(__LINE__,'::Effects','debug', "chain $chain id $id param $param value $val");
+	logit('::Effects','debug', "chain $chain id $id param $param value $val");
 
 	# $param is zero-based. 
 	# %{$fx->{params}} is  zero-based.
@@ -726,14 +726,14 @@ sub effect_update {
 	# update Ecasound's copy of the parameter
 	if( is_controller($id)){
 		my $i = ecasound_controller_index($id);
-		logit(__LINE__,'::Effects','debug', "controller $id: track: $chain, index: $i param: $param, value: $val");
+		logit('::Effects','debug', "controller $id: track: $chain, index: $i param: $param, value: $val");
 		eval_iam("ctrl-select $i");
 		eval_iam("ctrlp-select $param");
 		eval_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = ecasound_operator_index($id);
-		logit(__LINE__,'::Effects','debug', "operator $id: track $chain, index: $i, offset: ".
+		logit('::Effects','debug', "operator $id: track $chain, index: $i, offset: ".
 		$fx->{offset}->{$chain}. " param $param, value $val");
 		eval_iam("cop-select ". ($fx->{offset}->{$chain} + $i));
 		eval_iam("copp-select $param");
@@ -805,7 +805,7 @@ sub find_op_offsets {
 	local $config->{category} = 'ECI_FX';
 	logsub("&find_op_offsets");
 	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
-	logit(__LINE__,'::Effects','debug', join "\n\n",@op_offsets);
+	logit('::Effects','debug', join "\n\n",@op_offsets);
 	for my $output (@op_offsets){
 		my $chain_id;
 		($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
@@ -813,7 +813,7 @@ sub find_op_offsets {
 		next if $chain_id =~ m/\D/; # skip id's containing non-digits
 									# i.e. M1
 		my $quotes = $output =~ tr/"//;
-		logit(__LINE__,'::Effects','debug', "offset: $quotes in $output");
+		logit('::Effects','debug', "offset: $quotes in $output");
 		$fx->{offset}->{$chain_id} = $quotes/2 - 1;  
 	}
 }

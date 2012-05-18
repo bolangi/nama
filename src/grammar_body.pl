@@ -21,7 +21,7 @@ midish_cmd: /[a-z]+/ predicate {
 # execute shell command if leading '!'
 
 meta: bang shellcode stopper {
-	::logit(__LINE__,'::Grammar','debug',"Evaluating shell commands!");
+	::logit('::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
 	::pager2( "executing this shell code:  $shellcode" )
@@ -35,14 +35,14 @@ meta: bang shellcode stopper {
 # execute perl code if leading 'eval'
 
 meta: eval perlcode stopper {
-	::logit(__LINE__,'::Grammar','debug',"Evaluating perl code");
+	::logit('::Grammar','debug',"Evaluating perl code");
 	::eval_perl($item{perlcode});
 	1
 }
 # execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 
- 	::logit(__LINE__,'::Grammar','debug',"namacode: $item{namacode}");
+ 	::logit('::Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
@@ -97,7 +97,7 @@ semistop: /;|$/
 
 command: iam_cmd predicate { 
 	my $user_input = "$item{iam_cmd} $item{predicate}"; 
-	::logit(__LINE__,'::Grammar','debug',"Found Ecasound IAM command: $user_input");
+	::logit('::Grammar','debug',"Found Ecasound IAM command: $user_input");
 	my $result = ::eval_iam($user_input);
 	::pager( $result );  
 	1 }
@@ -562,7 +562,7 @@ remove_mark: _remove_mark dd {
 remove_mark: _remove_mark ident { 
 	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->remove if defined $mark;
-#	eval q( $mark->jump_here ) or ::logit(__LINE__,'::Grammar','debug',"jump failed: $@");
+#	eval q( $mark->jump_here ) or ::logit('::Grammar','debug',"jump failed: $@");
 	1;}
 remove_mark: _remove_mark { 
 	return unless (ref $::this_mark) =~ /Mark/;
@@ -598,7 +598,7 @@ to_mark: _to_mark dd {
 to_mark: _to_mark ident { 
 	my $mark = $::Mark::by_name{$item{ident}};
 	$mark->jump_here if defined $mark;
-#	eval q( $mark->jump_here ) or ::logit(__LINE__,'::Grammar','debug',"jump failed: $@");
+#	eval q( $mark->jump_here ) or ::logit('::Grammar','debug',"jump failed: $@");
 	1;}
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
