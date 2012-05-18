@@ -35,7 +35,7 @@ meta: bang shellcode stopper {
 # execute perl code if leading 'eval'
 
 meta: eval perlcode stopper {
-	logit(__LINE__,'::Grammar','debug',"Evaluating perl code");
+	::logit(__LINE__,'::Grammar','debug',"Evaluating perl code");
 	::eval_perl($item{perlcode});
 	1
 }
