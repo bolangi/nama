@@ -37,6 +37,8 @@ sub jack_update {
 
 sub client_port {
 	my $name = shift;
+$name =~ /(.+?):([^:]+)$/;
+=comment
 	$name =~ /
 				(?<client>.+?)	# anything, non-greedy 
 	:							# a colon
@@ -44,6 +46,8 @@ sub client_port {
 	/x;
 
 	@+{qw(client port)}
+=cut
+$1, $2
 }
 
 sub jack_client_array {

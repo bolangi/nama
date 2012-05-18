@@ -126,27 +126,21 @@ sub jack_client : lvalue {
 	$jack->{clients}->{$name}
 
 }
-sub jack_client_latency : lvalue {
-	my $name = shift;
-	my $client = jack_client($name);
-	# TODO
-
-}
-
 sub jack_client_node_latency {
-	my ($names, $direction) = shift; # $names can be array_ref or scalar
+	my ($names, $dir) = @_; # $names can be array_ref or scalar
 	my $name;
 	$name = ref $names ? $names->[0] : $names;
-	$direction = $direction eq 'input' ? 'capture' : 'playback';
+	my $direction = ($dir eq 'input') ? 'capture' : 'playback';
 	my ($client, $port) = client_port($name);
-	my $node = jack_client($name)
+	logit('::Latency','debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
+	my $node = jack_client($client)
 		or logit('::Latency','debug',"$name: non existing JACK client"),
 		return;
-	$node->{latency}->{$direction}->{min}
-		ne $node->{latency}->{$direction}->{max}
+	$node->{$port}->{latency}->{$direction}->{min}
+		ne $node->{$port}->{latency}->{$direction}->{max}
 	and logit('::Latency','info','encountered unmatched latencies', 
 		sub{ json_out($node) });
-	$node->{latency}->{$direction}->{min}
+	$node->{$port}->{latency}->{$direction}->{min}
 }
 sub jack_client_playback_latency {
 	my $name = shift;

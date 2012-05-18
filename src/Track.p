@@ -879,20 +879,28 @@ sub latency_offset {
 }
 
 
+sub input_object {
+	my $track = shift;
+	$::IO::by_name{$track->name}->{input}
+}
+sub output_object {
+	my $track = shift;
+	$::IO::by_name{$track->name}->{output}
+}
 sub capture_latency {
 	my $track = shift;
-	if (my $io = $::IO::by_name{$track->name}->{input}){
-		$io->capture_latency()
-	}
-	else { logit('::Track','logconfess',"didn't get IO object, got $io")}
-
+	my $io = $track->input_object;
+	return $io->capture_latency if ref $io;
+}
+sub capture_latency {
+	my $track = shift;
+	my $io = $track->input_object;
+	return $io->capture_latency if ref $io;
 }
 sub playback_latency {
 	my $track = shift;
-	if (my $io = $::IO::by_name{$track->name}->{output}){
-		$io->playback_latency()
-	}
-	else { logit('::Track','logconfess',"didn't get IO object, got $io")}
+	my $io = $track->input_object;
+	return $io->capture_latency if ref $io;
 }
 } # end package
 
