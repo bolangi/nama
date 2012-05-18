@@ -431,7 +431,7 @@ source: _source connect_target {
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
-	print $::this_track->name, ": input set to ", $::this_track->input_object, "\n";
+	print $::this_track->name, ": input set to ", $::this_track->input_object_text, "\n";
 	print "however track status is ", $::this_track->rec_status, "\n"
 		if $::this_track->rec_status ne 'REC';
 	1;

@@ -531,9 +531,9 @@ sub send { # command for setting, showing track source
 sub set_source { # called from parser 
 	my $track = shift;
 	my ($source, $type) = @_;
-	my $old_source = $track->input_object;
+	my $old_source = $track->input_object_text;
 	$track->set_io('source',$source, $type);
-	my $new_source = $track->input_object;
+	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
 		print $track->name, ": input unchanged, $object\n";
@@ -564,7 +564,7 @@ sub set_send { # wrapper
 	my ($track, $output) = @_;
 	my $old_send = $track->send;
 	my $new_send = $track->send($output);
-	my $object = $track->output_object;
+	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
 		print $track->name, ": send unchanged, ",
 			( $object ?  $object : 'off'), "\n";
@@ -594,12 +594,12 @@ sub object_as_text {
 }
 }
 
-sub input_object { # for text display
+sub input_object_text { # for text display
 	my $track = shift;
 	$track->object_as_text('source');
 }
 
-sub output_object {   # text for user display
+sub output_object_text {   # text for user display
 	my $track = shift;
 	$track->object_as_text('send');
 
