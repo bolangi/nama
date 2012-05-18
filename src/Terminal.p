@@ -59,9 +59,13 @@ sub detect_spacebar {
 	check_for_spacebar_hit() # if $config->{press_space_to_start};
 }
 
+sub throw {
+	logsub("&throw");
+	pager2(@_)
+}
 sub pager2 {
 	logsub("&pager2");
-	pager(@_)
+	pager(join "", @_)
 }
 sub pager {
 	logsub("&pager");
