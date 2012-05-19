@@ -490,7 +490,7 @@ set_version: _set_version dd { $::this_track->set_version($item{dd}); 1}
 
 vol: _vol value { 
 	$::this_track->vol or 
-		print( $::this_track->name . ": no volume control available\n"), return;
+		::throw(( $::this_track->name . ": no volume control available")), return;
 	::modify_effect(
 		$::this_track->vol,
 		0,
@@ -500,7 +500,7 @@ vol: _vol value {
 } 
 vol: _vol sign(?) value { 
 	$::this_track->vol or 
-		print( $::this_track->name . ": no volume control available\n"), return;
+		::throw( $::this_track->name . ": no volume control available"), return;
 	::modify_effect(
 		$::this_track->vol,
 		0,
@@ -508,7 +508,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { print $::fx->{params}->{$::this_track->vol}[0], "\n" ; 1}
+vol: _vol { ::pager2( $::fx->{params}->{$::this_track->vol}[0]); 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -539,7 +539,7 @@ pan: _pan sign panval {
 	1;} 
 panval: float 
       | dd
-pan: _pan { print $::fx->{params}->{$::this_track->pan}[0], "\n"; 1}
+pan: _pan { ::pager2( $::fx->{params}->{$::this_track->pan}[0]); 1}
 pan_right: _pan_right { ::pan_check( 100 ); 1}
 pan_left:  _pan_left  { ::pan_check(   0 ); 1}
 pan_center: _pan_center { ::pan_check(  50 ); 1}
@@ -573,7 +573,7 @@ next_mark: _next_mark { ::next_mark(); 1}
 previous_mark: _previous_mark { ::previous_mark(); 1}
 loop_enable: _loop_enable someval(s) {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
-	#print join $/, @new_endpoints;
+	#::pager2( @new_endpoints);
 	$::mode->{loop_enable} = 1;
 	@{$::setup->{loop_endpoints}} = (@new_endpoints, @{$::setup->{loop_endpoints}}); 
 	@{$::setup->{loop_endpoints}} = @{$::setup->{loop_endpoints}}[0,1];
