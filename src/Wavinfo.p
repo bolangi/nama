@@ -5,6 +5,56 @@ use Modern::Perl;
 
 ### WAV file length/format/modify_time are cached in $setup->{wav_info} 
 
+### Cached methods
+
+sub wav_length {  
+	my $path = shift;
+	_update_wav_cache($path);
+	$setup->{wav_info}->{$path}{length}
+}
+sub wav_format {
+	my $path = shift;
+	_update_wav_cache($path);
+	$setup->{wav_info}->{$path}{format}
+}
+
+### Implementation
+
+sub cache_wav_info {
+	my @files = File::Find::Rule
+		->file()
+		->name( '*.wav' )
+		->in( this_wav_dir() );	
+	map{  _get_wav_info($_) } @files;
+}
+sub _get_wav_info {
+	my $path = shift;
+	#say "path: $path";
+	$setup->{wav_info}->{$path}{length} = _get_length($path);
+	$setup->{wav_info}->{$path}{format} = _get_format($path);
+	$setup->{wav_info}->{$path}{modify_time} = _get_modify_time($path);
+}
+sub _get_length { 
+	my $path = shift;
+	my $length = ecasound_get_info($path, 'ai-get-length');
+	$length ? sprintf("%.4f", $length) : undef
+}
+sub _get_format {
+	my $path = shift;
+	ecasound_get_info($path, 'ai-get-format');
+}
+sub _get_modify_time {
+	my $path = shift;
+	my @stat = stat $path;
+	$stat[9]
+}
+sub _update_wav_cache {
+	my $path = shift;
+	return unless _get_modify_time($path) != $setup->{wav_info}->{$path}{modify_time};
+	say qq(WAV file $path has changed! Updating cache.);
+	get_wav_info($path) 
+}
+
 sub ecasound_get_info {
 	# get information about an audio object
 	
@@ -23,50 +73,6 @@ sub ecasound_get_info {
 	my $result = eval_iam($command);
 	teardown_engine();
 	$result;
-}
-sub cache_wav_info {
-	my @files = File::Find::Rule
-		->file()
-		->name( '*.wav' )
-		->in( this_wav_dir() );	
-	map{  get_wav_info($_) } @files;
-}
-sub get_wav_info {
-	my $path = shift;
-	#say "path: $path";
-	$setup->{wav_info}->{$path}{length} = get_length($path);
-	$setup->{wav_info}->{$path}{format} = get_format($path);
-	$setup->{wav_info}->{$path}{modify_time} = get_modify_time($path);
-}
-sub get_length { 
-	my $path = shift;
-	my $length = ecasound_get_info($path, 'ai-get-length');
-	sprintf("%.4f", $length);
-}
-sub get_format {
-	my $path = shift;
-	ecasound_get_info($path, 'ai-get-format');
-}
-sub get_modify_time {
-	my $path = shift;
-	my @stat = stat $path;
-	$stat[9]
-}
-sub wav_length {
-	my $path = shift;
-	update_wav_cache($path);
-	$setup->{wav_info}->{$path}{length}
-}
-sub wav_format {
-	my $path = shift;
-	update_wav_cache($path);
-	$setup->{wav_info}->{$path}{format}
-}
-sub update_wav_cache {
-	my $path = shift;
-	return unless get_modify_time($path) != $setup->{wav_info}->{$path}{modify_time};
-	say qq(WAV file $path has changed! Updating cache.);
-	get_wav_info($path) 
 }
 1;
 __END__
