@@ -137,6 +137,7 @@ use ::Log qw(logit logsub initialize_logger);
 sub main { 
 	definitions();
 	process_command_line_options();
+	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 	setup_grammar();
 	initialize_interfaces();
 	command_process($config->{execute_on_project_load});

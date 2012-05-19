@@ -80,6 +80,7 @@ my %is_method = map { $_ => 1 }
 sub logit {
 	my ($line_number, $category, $level, @message) = @_;
 	#say qq($line_number, $category, $level, @message) ;
+	#confess("first call to logit");
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	return unless $category;
 	confess "illegal level: $level" unless $is_method{$level};
