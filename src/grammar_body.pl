@@ -796,8 +796,8 @@ show_effect: _show_effect op_id(s) {
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
-	print ::show_effect($::this_op);
+	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
+	::pager2( ::show_effect($::this_op));
 	1;
 }
 list_effects: _list_effects { ::pager(::list_effects()); 1}
@@ -807,7 +807,7 @@ remove_bunches: _remove_bunches ident(s) {
  	map{ delete $::gui->{_project_name}->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
-	print join " ", @{$::this_track->versions}, "\n"; 1}
+	::pager2( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::eval_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
@@ -840,7 +840,7 @@ frequency: value
 list_history: _list_history {
 	my @history = $::text->{term}->GetHistory;
 	my %seen;
-	map { print "$_\n" unless $seen{$_}; $seen{$_}++ } @history
+	::pager2( grep{ ! $seen{$_}; $seen{$_}++ } @history );
 }
 add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
@@ -855,14 +855,14 @@ add_sub_bus: _add_sub_bus bus_name { ::add_sub_bus( $item{bus_name}); 1 }
 
 existing_bus_name: bus_name {
 	if ( $::bn{$item{bus_name}} ){  $item{bus_name} }
-	else { print("$item{bus_name}: no such bus\n"); undef }
+	else { ::throw("$item{bus_name}: no such bus"); undef }
 }
 
 bus_name: ident 
 user_bus_name: ident 
 {
 	if($item[1] =~ /^[A-Z]/){ $item[1] }
-	else { print("Bus name must begin with capital letter.\n"); undef} 
+	else { ::throw("Bus name must begin with capital letter."); undef} 
 }
 
 destination: jack_port # include channel, loop,device, jack_port
@@ -895,12 +895,12 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter {
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $p = $item{parameter};
 	my $id = ::Insert::get_id($::this_track,$prepost);
-	print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), 
+	::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), 
 		return 1 unless $id;
-	print("wetness parameter must be an integer between 0 and 100\n"), 
+	::throw("wetness parameter must be an integer between 0 and 100"), 
 		return 1 unless ($p <= 100 and $p >= 0);
 	my $i = $::Insert::by_index{$id};
-	print("track '",$::this_track->n, "' has no insert.  Skipping.\n"),
+	::throw("track '",$::this_track->n, "' has no insert.  Skipping."),
 		return 1 unless $i;
 	$i->set_wetness($p);
 	1;
@@ -908,10 +908,9 @@ set_insert_wetness: _set_insert_wetness prepost(?) parameter {
 set_insert_wetness: _set_insert_wetness prepost(?) {
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
-	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
+	$id or ::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), return 1 ;
 	my $i = $::Insert::by_index{$id};
-	 print "The insert is ", 
-		$i->wetness, "% wet, ", (100 - $i->wetness), "% dry.\n";
+	 ::pager2( "The insert is ", $i->wetness, "% wet, ", (100 - $i->wetness), "% dry.");
 }
 
 remove_insert: _remove_insert prepost(?) { 
@@ -921,8 +920,8 @@ remove_insert: _remove_insert prepost(?) {
 	
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
-	$id or print($::this_track->name.  ": Missing or ambiguous insert. Skipping\n"), return 1 ;
-	print $::this_track->name.": removing $prepost". "fader insert\n";
+	$id or ::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), return 1 ;
+	::pager2( $::this_track->name.": removing $prepost". "fader insert");
 	$::Insert::by_index{$id}->remove;
 	1;
 }
@@ -935,7 +934,7 @@ additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain ident op_id(s?) {
 	my $name = $item{ident};
-	#print "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}}, $/;
+	#::pager2( "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}});
 	my @ops = @{$item{'op_id(s?)'}};
 	scalar @ops or @ops = $::this_track->fancy_ops;
 	# include controllers
@@ -984,7 +983,7 @@ find_user_effect_chains: _find_user_effect_chains ident(s?)
 	my @args = ('user' , 1);
 	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
 	(scalar @args) % 2 == 0 
-		or print("odd number of arguments\n@args\n"), return 0;
+		or ::throw("odd number of arguments\n@args\n"), return 0;
 	::pager( map{ $_->summary} ::EffectChain::find(@args)  );
 	1;
 }
@@ -996,9 +995,9 @@ bypass_effects:   _bypass_effects op_id(s) {
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
-	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
- 	print "track ",$::this_track->name,", bypassing effects:\n";
-	print ::named_effects_list(@$arr_ref);
+	::throw("@illegal: non-existing effect(s), skipping."), return 0 if @illegal;
+ 	::pager2( "track ",$::this_track->name,", bypassing effects:");
+	::pager2( ::named_effects_list(@$arr_ref));
 	::bypass_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
@@ -1007,7 +1006,7 @@ bypass_effects:   _bypass_effects op_id(s) {
 #  all effects on current track
 #
 bypass_effects: _bypass_effects 'all' { 
-	print "track ",$::this_track->name,", bypassing all effects (except vol/pan)\n";
+	::pager2( "track ",$::this_track->name,", bypassing all effects (except vol/pan)");
 	::bypass_effects($::this_track, $::this_track->fancy_ops)
 		if $::this_track->fancy_ops;
 	1; 
@@ -1016,40 +1015,40 @@ bypass_effects: _bypass_effects 'all' {
 #  current effect 
 #
 bypass_effects: _bypass_effects { 
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
- 	print "track ",$::this_track->name,", bypassing effects:\n"; 
-	print ::named_effects_list($::this_op);
+	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
+ 	::pager2( "track ",$::this_track->name,", bypassing effects:"); 
+	::pager2( ::named_effects_list($::this_op));
  	::bypass_effects($::this_track, $::this_op);  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
-	print "restoring effects:\n";
-	print ::named_effects_list($::this_op);
+	::pager2("current effect is undefined, skipping"), return 1 if ! $::this_op;
+	::pager2( "restoring effects:");
+	::pager2( ::named_effects_list($::this_op));
 	::restore_effects( $::this_track, $::this_op);
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fx($_) } @$arr_ref;
-	print("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	print "restoring effects:\n";
-	print ::named_effects_list(@$arr_ref);
+	::throw("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
+	::pager2( "restoring effects:");
+	::pager2( ::named_effects_list(@$arr_ref));
 	::restore_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
 }
 bring_back_effects:   _bring_back_effects 'all' { 
-	print "restoring all effects\n";
+	::pager2( "restoring all effects");
 	::restore_effects( $::this_track, $::this_track->fancy_ops);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
 # 	my $found = 
-# 	$::fx($id) or print("$id: effect does not exist.\n"), return 0;
+# 	$::fx($id) or ::pager2("$id: effect does not exist."), return 0;
 # 	grep{$id eq $_  } @{$::this_track->ops} 
-# 			   or print("$id: effect does not belong to track",
-# 						$::this_track->name,"\n"), return 0;			  
+# 			   or ::pager2("$id: effect does not belong to track",
+# 						$::this_track->name), return 0;			  
 # 	$id;
 # }
 
@@ -1059,9 +1058,10 @@ effect_chain_id: effect_chain_id_pair(s) {
   		my @pairs = @{$item{'effect_chain_id_pair(s)'}};
   		my @found = ::EffectChain::find(@pairs);
   		@found and 
-  			print join " ", 
-  			"found effect chain(s):",
-  			map{ ('name:', $_->name, 'n', $_->n )} @found;
+  			::pager2(
+				join " ", "found effect chain(s):",
+  				map{ ('name:', $_->name, 'n', $_->n )} @found
+			)
   			#map{ 1 } @found;
 }
 effect_chain_id_pair: fxc_key fxc_val { return @$item{fxc_key fxc_val} }
@@ -1091,7 +1091,7 @@ this_track_op_id: op_id(s) {
 	my @ids = @{$item{'op_id(s)'}};
 	my @belonging 	= grep {   $ops{$_} } @ids;
 	my @alien 		= grep { ! $ops{$_} } @ids;
-	@alien and print("@alien: don't belong to track ",$::this_track->name, "skipping.\n"); 
+	@alien and ::pager2("@alien: don't belong to track ",$::this_track->name, "skipping."); 
 	@belonging	
 }
 
@@ -1100,13 +1100,13 @@ overwrite_effect_chain: _overwrite_effect_chain ident {
 }
 bunch_name: ident { 
 	::is_bunch($item{ident}) or ::bunch_tracks($item{ident})
-		or print("$item{ident}: no such bunch name.\n"), return; 
+		or ::throw("$item{ident}: no such bunch name."), return; 
 	$item{ident};
 }
 
 effect_profile_name: ident
 existing_effect_profile_name: ident {
-	print("$item{ident}: no such effect profile\n"), return
+	::pager2("$item{ident}: no such effect profile"), return
 		unless ::EffectChain::find(profile => $item{ident});
 	$item{ident}
 }
@@ -1128,7 +1128,7 @@ list_effect_profiles: _list_effect_profiles ident(?) {
 		} ::EffectChain::find(profile => $name);
 	if( @output )
 	{ ::pager( "\nname: $name\ntracks: ", join " ",@output) }
-	else { print "no match\n" }
+	else { ::throw("no match") }
 	1;
 }
 show_effect_profiles: _show_effect_profiles ident(?) {
@@ -1157,7 +1157,7 @@ show_effect_profiles: _show_effect_profiles ident(?) {
 		} ::EffectChain::find(profile => $name);
 	if( @output )
 	{ ::pager( @output); }
-	else { print "no match\n" }
+	else { ::throw("no match") }
 	1;
 }
 full_effect_profiles: _full_effect_profiles ident(?) {
@@ -1167,11 +1167,11 @@ full_effect_profiles: _full_effect_profiles ident(?) {
 	my @output = map{ $_->dump } ::EffectChain::find(profile => $name )  ;
 	if( @output )
 	{ ::pager( @output); }
-	else { print "no match\n" }
+	else { ::throw("no match") }
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}
-scan: _scan { print "scanning ", ::this_wav_dir(), "\n"; ::rememoize() }
+scan: _scan { ::pager2( "scanning ", ::this_wav_dir()); ::rememoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
@@ -1213,37 +1213,37 @@ remove_fade: _remove_fade fade_index(s) {
 }
 fade_index: dd 
  { if ( $::Fade::by_index{$item{dd}} ){ return $item{dd}}
-   else { print("invalid fade number: $item{dd}\n"); return 0 }
+   else { ::pager2("invalid fade number: $item{dd}"); return 0 }
  }
 list_fade: _list_fade {  ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
- 	print $::this_track->name, ": comment: $item{text}\n"; 
+ 	::pager2( $::this_track->name, ": comment: $item{text}"); 
  	$::this_track->set(comment => $item{text});
  	1;
 }
 remove_comment: _remove_comment {
- 	print $::this_track->name, ": comment removed\n";
+ 	::pager2( $::this_track->name, ": comment removed");
  	$::this_track->set(comment => undef);
  	1;
 }
 show_comment: _show_comment {
-	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } $::this_track;
+	map{ ::pager2( "(",$_->group,") ", $_->name, ": ", $_->comment) } $::this_track;
 	1;
 }
 show_comments: _show_comments {
-	map{ print "(",$_->group,") ", $_->name, ": ", $_->comment, "\n"; } ::Track::all();
+	map{ ::pager2( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::Track::all();
 	1;
 }
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
 	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
-	print ::add_version_comment($t,$v,$item{text});
+	::pager2( ::add_version_comment($t,$v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
-	print ::remove_version_comment($t,$item{dd}); 1
+	::pager2( ::remove_version_comment($t,$item{dd})); 1
 }
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
@@ -1259,7 +1259,7 @@ show_version_comments_all: _show_version_comments_all {
 	::show_version_comments($t,@v); 1;
 }
 set_system_version_comment: _set_system_version_comment dd text {
-	print ::set_system_version_comment($::this_track,@item{qw(dd text)});1;
+	::pager2( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
@@ -1320,7 +1320,7 @@ explode_track: _explode_track {
 promote_version_to_track: _promote_version_to_track version {
 	my $v = $item{version};
 	my $t = $::this_track;
-	$t->versions->[$v] or print($t->name,": version $v does not exist.\n"),
+	$t->versions->[$v] or ::pager2($t->name,": version $v does not exist."),
 		return;
 	::VersionTrack->new(
 		name 	=> $t->name.":$v",
@@ -1336,14 +1336,14 @@ read_user_customizations: _read_user_customizations {
 	::setup_user_customization(); 1
 }
 limit_run_time: _limit_run_time sign(?) dd { 
-	my $sign = $item{'sign(?)'}->[-0];
+	my $sign = $item{'sign(?)'}->[-1]; 
 	$::setup->{runtime_limit} = $sign
 		? eval "$::setup->{audio_length} $sign $item{dd}"
 		: $item{dd};
-	print "Run time limit: ", ::heuristic_time($::setup->{runtime_limit}), "\n"; 1;
+	::pager2( "Run time limit: ", ::heuristic_time($::setup->{runtime_limit})); 1;
 }
 limit_run_time_off: _limit_run_time_off { 
-	print "Run timer disabled\n";
+	::pager2( "Run timer disabled");
 	::disable_length_timer();
 	1;
 }
@@ -1351,7 +1351,7 @@ offset_run: _offset_run markname {
 	::offset_run( $item{markname} ); 1
 }
 offset_run_off: _offset_run_off {
-	print "no run offset.\n";
+	::pager2( "no run offset.");
 	::offset_run_mode(0); 1
 }
 view_waveform: _view_waveform { 
@@ -1366,7 +1366,7 @@ view_waveform: _view_waveform {
 			"&";
 		system($cmd) 
 	}
-	else { print "No waveform viewer available (need to install Mhwaveedit?)\n" }
+	else { ::throw("Mhwaveedit not found. No waveform viewer is available.") }
 }
 edit_waveform: _edit_waveform { 
 	
@@ -1380,14 +1380,16 @@ edit_waveform: _edit_waveform {
 		system($cmd);
 		chdir $old_pwd;
 	}
-	else { print "No waveform editor available (need to install Audacity?)\n" }
+	else { ::throw("Audacity not found. No waveform editor available.") }
 	1;
 }
 
 rerecord: _rerecord { 
-		scalar @{$::setup->{_last_rec_tracks}} 
-			?  print "Toggling previous recording tracks to REC\n"
-			:  print "No tracks in REC list. Skipping.\n";
+		::pager2(
+			scalar @{$::setup->{_last_rec_tracks}} 
+				?  "Toggling previous recording tracks to REC"
+				:  "No tracks in REC list. Skipping."
+		);
 		
 		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 
 		::restore_preview_mode();
@@ -1401,11 +1403,11 @@ mode_string: 'preview'
 
 show_track_latency: _show_track_latency {
 	my $node = $::setup->{latency}->{track}->{$::this_track->name};
-	print ::yaml_out($node) if $node;
+	::pager2( ::yaml_out($node)) if $node;
 	1;
 }
 show_latency_all: _show_latency_all { 
-	print ::yaml_out($::setup->{latency}) if $::setup->{latency};
+	::pager2( ::yaml_out($::setup->{latency})) if $::setup->{latency};
 	1;
 }
 # config_key: key {
@@ -1424,16 +1426,16 @@ show_latency_all: _show_latency_all {
 # 	my $key = $item{config_key};
 #  	my $arg = $::project->{config}->{$key};
 #  	if (defined $arg) {
-#  		print "project specific setting for $key: $arg\n";
+#  		::pager2( "project specific setting for $key: $arg");
 #  	}
 #  	return 1;
 # }
 # unset: _unset config_key {
 # 	my $key = $item{config_key};
 # 	my $arg = $::project->{config}->{$key};
-# 	print "removing project-specific setting for $key: $arg\n";
-# 	print "value will default to global config file (.namarc) setting\n";
+# 	::pager2( "removing project-specific setting for $key: $arg");
+# 	::pager2( "value will default to global config file (.namarc) setting");
 # 	delete $::project->{$item{config_key}};
-# 	print "currently ",$::config->$key, "\n";
+# 	::pager2( "currently ",$::config->$key, "");
 # 	1;
 # }
