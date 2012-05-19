@@ -892,15 +892,10 @@ sub capture_latency {
 	my $io = $track->input_object;
 	return $io->capture_latency if ref $io;
 }
-sub capture_latency {
-	my $track = shift;
-	my $io = $track->input_object;
-	return $io->capture_latency if ref $io;
-}
 sub playback_latency {
 	my $track = shift;
 	my $io = $track->input_object;
-	return $io->capture_latency if ref $io;
+	return $io->playback_latency if ref $io;
 }
 } # end package
 

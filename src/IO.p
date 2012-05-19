@@ -393,13 +393,13 @@ sub ports {
 sub capture_latency {
 	my $self = shift;
 	my @names = $self->ports();
-	#say "found ports: @names";
+	say "found ports: @names";
 	::jack_client_node_latency($names[0], 'input');
 }
 sub playback_latency {
 	my $self = shift;
 	my @names = $self->ports();
-	#say "found ports: @names";
+	say "found ports: @names";
 	::jack_client_node_latency($names[0], 'input');
 }
 
