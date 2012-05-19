@@ -127,6 +127,7 @@ sub jack_client : lvalue {
 	$jack->{clients}->{$name}
 
 }
+{ my %reverse = qw(input output output input);
 sub jack_port_latency {
 
 	my ($dir, $name) = @_; 
@@ -145,8 +146,9 @@ sub jack_port_latency {
 		say "$name is client only";
 
 		# replace with a full port descriptor, i.e. "system:playback_1"
-
-		$name = $jack->{clients}->{$name}->{$dir}->[0];
+		# but reverse direction for this:
+		
+		$name = $jack->{clients}->{$name}->{$reverse{$dir}}->[0];
 
 		say "replacing with $name";
 	}
@@ -161,6 +163,7 @@ sub jack_port_latency {
 	and logit('::Latency','info','encountered unmatched latencies', 
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
+}
 }
 sub insert_latency {
 	my $track = shift;
