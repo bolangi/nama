@@ -39,7 +39,7 @@ sub command_process {
 
 	# parse repeatedly until all input is consumed
 	
-	while ($input =~ /\S/) { 
+	while (do { no warnings 'uninitialized'; $input =~ /\S/ }) { 
 		logit('::Grammar','debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
 		{

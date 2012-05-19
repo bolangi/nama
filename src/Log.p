@@ -65,6 +65,7 @@ sub initialize_logger {
 sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
 sub expand_cats {
+	no warnings 'uninitialized';
 	my @cats = @_;
 	map { s/^(!)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
 	map { s/^(!)?/$1::/ unless /^::/ or /^!?ECI/ or /^!?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
