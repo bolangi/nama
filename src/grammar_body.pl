@@ -708,7 +708,7 @@ add_effect: _add_effect effect value(s?) {
 append_effect: _append_effect effect value(s?) {
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
-	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+	::throw(qq{$code: unknown effect. Try "find_effect keyword(s)}), return 1
 		unless ::effect_index($code);
 	my $args = {
 		track  => $::this_track, 
@@ -721,7 +721,7 @@ append_effect: _append_effect effect value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		print "\nAdded $id ($iname)\n\n";
+		::pager2( "Added $id ($iname)");
 		$::this_op = $id;
 	}
  	1;
@@ -731,8 +731,8 @@ insert_effect: _insert_effect before effect value(s?) {
 	my $before = $item{before};
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
-	#print "values: " , ref $values, $/;
-	print join ", ", @{$values} if $values;
+	#::pager2( "values: " , ref $values);
+	::pager2( join ", ", @{$values}) if $values;
 	my $id = ::add_effect({
 		before 	=> $before, 
 		type	=> $code, 
@@ -746,7 +746,7 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $bi = 	::effect_index(::type($before));
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
- 		print "\nInserted $id ($iname) before $before ($bname)\n\n";
+ 		::pager2( "Inserted $id ($iname) before $before ($bname)");
 		$::this_op = $id;
 	}
 	1;}
