@@ -1079,7 +1079,7 @@ fxc_key: 'n'|                #### HARDCODED XX
 		'track_cache'|
 		'bypass'
 
-# [% join " | ", split " ", qx(cat ./effect_chain_fields.pl) %]
+# [% join " | ", split " ", qx(cat ./magical_pixie_operator.pl) %]
 
 
 this_track_op_id: op_id(s) { 
