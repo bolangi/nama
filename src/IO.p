@@ -41,8 +41,8 @@ our %io_class = qw(
 	null_out				::IO::to_null
 	soundcard_in 			::IO::from_soundcard
 	soundcard_out 			::IO::to_soundcard
-	soundcard_device_in 	::IO::from_soundcard_device
-	soundcard_device_out 	::IO::to_soundcard_device
+	soundcard_device_in 	::IO::from_alsa_soundcard_device
+	soundcard_device_out 	::IO::to_alsa_soundcard_device
 	wav_in 					::IO::from_wav
 	wav_out 				::IO::to_wav
 	loop_source				::IO::from_loop
@@ -439,7 +439,7 @@ sub client { $_[0]->source_id }
 }
 
 {
-package ::IO::from_soundcard_device;
+package ::IO::from_alsa_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub ecs_extra { join ' ', $_[0]->rec_route, $_[0]->mono_to_stereo }
 sub device_id { $config->{devices}->{$config->{alsa_capture_device}}->{ecasound_id} }
@@ -459,7 +459,7 @@ sub rec_route {
 }
 }
 {
-package ::IO::to_soundcard_device;
+package ::IO::to_alsa_soundcard_device;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { $config->{devices}->{$config->{alsa_playback_device}}{ecasound_id} }
 sub ecs_extra {route($_[0]->width,$_[0]->output_channel) }

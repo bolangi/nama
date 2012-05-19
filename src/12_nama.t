@@ -174,10 +174,10 @@ my $yaml = q(---
     endpoint: sax_out
   ecs_string: -o:loop,sax_out
 -
-  class: to_soundcard_device
+  class: to_alsa_soundcard_device
   ecs_string: -o:alsa,default
 -
-  class: from_soundcard_device
+  class: from_alsa_soundcard_device
   ecs_string: -i:alsa,default
 -
   class: from_soundcard
@@ -278,10 +278,10 @@ my $io = ::IO->new(track => 'sax');
 
 like( ref $io, qr/IO$/, 'IO base class object');
 
-$io = ::IO::to_soundcard_device->new(track => 'sax'); 
+$io = ::IO::to_alsa_soundcard_device->new(track => 'sax'); 
 
-is($io->ecs_string, '-o:alsa,default', 'IO to_soundcard_device 1');
-is($io->ecs_extra,  ' -chmove:1,5', 'IO to_soundcard_device 2');
+is($io->ecs_string, '-o:alsa,default', 'IO to_alsa_soundcard_device 1');
+is($io->ecs_extra,  ' -chmove:1,5', 'IO to_alsa_soundcard_device 2');
 
 $io = ::IO::to_soundcard->new(track => 'sax'); 
 
