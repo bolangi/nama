@@ -754,18 +754,18 @@ insert_effect: _insert_effect before effect value(s?) {
 before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
+	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
 	::modify_multiple_effects( 
 		[$::this_op], 
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	print ::show_effect($::this_op)
+	::pager2( ::show_effect($::this_op))
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
+	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
-	print ::show_effect($::this_op)
+	::pager2( ::show_effect($::this_op));
 }
 
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
