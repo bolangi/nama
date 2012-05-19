@@ -1081,6 +1081,7 @@ fxc_key: 'n'|                #### HARDCODED XX
 
 # [% join " | ", split " ", qx(cat ./magical_pixie_operator.pl) %]
 
+fxc_val: shellish
 
 this_track_op_id: op_id(s) { 
 	my %ops = map{ $_ => 1 } @{$::this_track->ops};
