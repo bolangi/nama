@@ -5,6 +5,7 @@ use Modern::Perl;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
 use List::Util qw(max);
+use Carp qw(confess);
 
 ###### For etd only adjustment
 #
@@ -128,9 +129,14 @@ sub jack_client : lvalue {
 }
 sub jack_port_latency {
 
-	my ($dir, @names) = @_; 
-	my $name = shift @names; # take one
-	my $direction = ($dir eq 'input') ? 'capture' : 'playback';
+	my ($dir, $name) = @_; 
+	say "name: $name";
+	say "dir: $dir";
+	my $direction;
+	$direction = 'capture' if $dir eq 'input';
+	$direction = 'playback' if $dir eq 'output';
+	$direction or confess "$direction: illegal or missing direction";
+
 	if ($name !~ /:/)
 	{
 		# we have only the client name, i.e. "system"
