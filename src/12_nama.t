@@ -51,6 +51,7 @@ diag("working directory: ",cwd);
 
 definitions();
 process_command_line_options();
+start_logging();
 initialize_interfaces();
 setup_grammar();
 diag "Check representative variable from default .namarc";
