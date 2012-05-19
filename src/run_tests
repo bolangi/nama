@@ -1,0 +1,1 @@
+for t in ../t/*.t; do perl -I ../lib $t; done
