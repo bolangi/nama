@@ -1,39 +1,62 @@
 # ------ Effect Routines -------
 
-package ::;
+package ::Effects; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 no warnings 'uninitialized';
-use Carp qw(cluck);
+use Carp;
+use ::Log qw(logsub logit);
+use ::Globals qw(
+					$fx 
+					$fx_cache 
+					$ui 
+					%ti 
+					%tn 
+					%bn 
+					$config 
+					$setup 
+					$this_op 
+					$this_track);
+*valid_engine_setup = \&::valid_engine_setup;
+*engine_running		= \&::engine_running;
+*eval_iam			= \&::eval_iam;
+*ecasound_select_chain = \&::ecasound_select_chain;
 
-# access routines
-# the lvalue routines can be on the left side of an assignment
+use Exporter qw(import);
+our %EXPORT_TAGS = ( 'all' => [ qw(
 
-sub is_controller { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{belongs_to} 
+					parent
+					chain
+					type
+					bypassed
+					owns
+					fx
+					params
+					is_controller
+					
+					fxindex
+					effect_index
+					ecasound_effect_index
+					name
 
-}
-sub has_read_only_param {
-	my $id = shift;
-	catch_null_id($id);
-	my $entry = $fx_cache->{registry}->[fxindex($id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
-		return unless $id and $entry;
-		for(0..scalar @{$entry->{params}} - 1)
-		{
-			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
-		}
-}
-sub is_read_only {
-    my ($id, $param) = @_;
-	catch_null_id($id);
-    my $entry = $fx_cache->{registry}->[fxindex($id)];
-	logit('::Effects','logcluck',"undefined or unregistered effect id: $id"), 
-		return unless $id and $entry;
-	$entry->{params}->[$param]->{dir} eq 'output'
-}          
+					check_fx_consistency
+
+					cop_add
+					add_effect
+					remove_effect
+					modify_effect
+
+					effect_update_copp_set
+					sync_effect_parameters
+					find_op_offsets
+					apply_ops
+					expanded_ops_list
+
+) ] );
+
+our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
+
+our @EXPORT = ();
 
 sub parent : lvalue { 
 	my $id = shift; 
@@ -90,6 +113,29 @@ sub catch_null_id {
 	my $id = shift;
 	logit('::Effects','logconfess',"null effect id") unless $id;
 }
+
+# access routines
+# the lvalue routines can be on the left side of an assignment
+
+sub is_controller 	{ my $id = shift; parent($id) }
+sub has_read_only_param {
+	my $op_id = shift;
+	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
+		return unless $op_id and $entry;
+		for(0..scalar @{$entry->{params}} - 1)
+		{
+			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
+		}
+}
+sub is_read_only {
+    my ($op_id, $param) = @_;
+    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	logit('::Effects','logcluck',"undefined or unregistered effect id: $op_id"), 
+		return unless $op_id and $entry;
+	$entry->{params}->[$param]->{dir} eq 'output'
+}          
+
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
@@ -322,8 +368,9 @@ sub remove_effect {
 
 	}
 	$ti{$n}->remove_effect_from_track( $id ); 
-	delete $fx->{applied}->{$id}; # remove entry from chain operator list
-	delete $fx->{params }->{$id}; # remove entry from chain operator parameters list
+	# remove entries for chain operator attributes and parameters
+ 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
+    delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
 	$this_op = undef;
 }
 
