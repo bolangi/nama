@@ -131,10 +131,24 @@ sub jack_port_latency {
 	my ($dir, @names) = @_; 
 	my $name = shift @names; # take one
 	my $direction = ($dir eq 'input') ? 'capture' : 'playback';
+	if ($name !~ /:/)
+	{
+		# we have only the client name, i.e. "system"
+		# pick a port from the ports list 
+
+		say "$name is client only";
+
+		# replace with a full port descriptor, i.e. "system:playback_1"
+
+		$name = $jack->{clients}->{$name}->{$dir}->[0];
+
+		say "replacing with $name";
+	}
+	say "name: $name";
 	my ($client, $port) = client_port($name);
 	logit('::Latency','debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
 	my $node = jack_client($client)
-		or logit('::Latency','debug',"$name: non existing JACK client"),
+		or logit('::Latency','info',"$name: non existing JACK client"),
 		return;
 	$node->{$port}->{latency}->{$direction}->{min}
 		ne $node->{$port}->{latency}->{$direction}->{max}
@@ -142,15 +156,6 @@ sub jack_port_latency {
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }
-sub jack_client_playback_latency {
-	my $name = shift;
-	jack_port_latency('output', $name);
-}
-sub jack_client_capture_latency {
-	my $name = shift;
-	jack_port_latency('input', $name);
-}
-	
 sub insert_latency {
 	my $track = shift;
 	my $latency = 0;

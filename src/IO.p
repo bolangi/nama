@@ -392,15 +392,15 @@ sub ports {
 
 sub capture_latency {
 	my $self = shift;
-	my @names = $self->ports();
-	say "found ports: @names";
-	::jack_port_latency('input', @names);
+	my ($port) = $self->ports();
+	say "found port: $port";
+	::jack_port_latency('input', $port);
 }
 sub playback_latency {
 	my $self = shift;
-	my @names = $self->ports();
-	say "found ports: @names";
-	::jack_port_latency('output', @names);
+	my ($port) = $self->ports();
+	say "found port: $port";
+	::jack_port_latency('output', $port);
 }
 
 }
