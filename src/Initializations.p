@@ -441,6 +441,9 @@ sub munge_category {
 }
 
 }
-	
+sub start_logging { 
+	$config->{want_logging} = initialize_logger($config->{opts}->{L})
+}
+
 1;
 __END__
