@@ -58,8 +58,8 @@ diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
 
-is( jack_client_node_latency('LinuxSampler:playback_1','output'), 
-	2048, "get JACK client node latency");
+is( jack_port_latency('output','LinuxSampler:playback_1'), 
+	2048, "get JACK port latency");
 
 
 

@@ -121,15 +121,15 @@ sub jack_client : lvalue {
 	# we require that every call is already known correct
 	# try it till it breaks
 	
-	logit->logconfess("$name: non-existent JACK client") 
+	logit('::Jack','info',"$name: non-existent JACK client") 
 		if not $jack->{clients}->{$name} ;
 	$jack->{clients}->{$name}
 
 }
-sub jack_client_node_latency {
-	my ($names, $dir) = @_; # $names can be array_ref or scalar
-	my $name;
-	$name = ref $names ? $names->[0] : $names;
+sub jack_port_latency {
+
+	my ($dir, @names) = @_; 
+	my $name = shift @names; # take one
 	my $direction = ($dir eq 'input') ? 'capture' : 'playback';
 	my ($client, $port) = client_port($name);
 	logit('::Latency','debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
@@ -144,11 +144,11 @@ sub jack_client_node_latency {
 }
 sub jack_client_playback_latency {
 	my $name = shift;
-	jack_client_node_latency($name,'output');
+	jack_port_latency('output', $name);
 }
 sub jack_client_capture_latency {
 	my $name = shift;
-	jack_client_node_latency($name,'input');
+	jack_port_latency('input', $name);
 }
 	
 sub insert_latency {

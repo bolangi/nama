@@ -123,9 +123,9 @@ sub new {
 }
 
 # latency stubs
-sub capture_latency { die "capture stub" }
-sub playback_latency { die "playback stub" }
-sub ports { die "ports stub" }
+sub capture_latency { die "I'm a capture latency stub and I'm throwing an error!" }
+sub playback_latency { die "I'm a playback latency stub and I'm throwing an error!" }
+sub ports_latency { die "I'm a ports latency stub and I'm throwing an error!" }
 
 sub ecs_string {
 	my $self = shift;
@@ -394,13 +394,13 @@ sub capture_latency {
 	my $self = shift;
 	my @names = $self->ports();
 	say "found ports: @names";
-	::jack_client_node_latency($names[0], 'input');
+	::jack_port_latency('input', @names);
 }
 sub playback_latency {
 	my $self = shift;
 	my @names = $self->ports();
 	say "found ports: @names";
-	::jack_client_node_latency($names[0], 'input');
+	::jack_port_latency('output', @names);
 }
 
 }
