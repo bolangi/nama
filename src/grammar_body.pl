@@ -28,26 +28,25 @@ meta: bang shellcode stopper {
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
 	::pager($output) if $output;
-	print "\n";
 	1;
 }
 
 # execute perl code if leading 'eval'
 
 meta: eval perlcode stopper {
-	::logit('::Grammar','debug',"Evaluating perl code");
+	logit('::Grammar','debug',"Evaluating perl code");
 	::eval_perl($item{perlcode});
 	1
 }
 # execute for each specified track if leading 'for'
 
 meta: for bunch_spec ';' namacode stopper { 
- 	::logit('::Grammar','debug',"namacode: $item{namacode}");
+ 	::logit('Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
  		::leading_track_spec($t);
 		$::text->{parser}->meta($item{namacode});
- 		#print("$t; $item{namacode}\n");
+ 		#::pager2(("$t); $item{namacode}");
 	}
 	1;
 }
@@ -174,7 +173,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 statefile: /[-:\w\.]+/
 marktime: /\d+\.\d+/ # decimal required
 markname: /[A-Za-z]\w*/ { 
-	print("$item[1]: non-existent mark name. Skipping\n"), return undef 
+	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
 		unless $::Mark::by_name{$item[1]};
 	$item[1];
 }
@@ -193,9 +192,9 @@ find_effect: _find_effect anytag(s) {
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { print $::help->{screen} ; 1}
+help: _help { ::pager2( $::help->{screen} ); 1}
 project_name: _project_name { 
-	print "project name: ", $::gui->{_project_name}->{name}, $/; 1}
+	::pager2( "project name: ", $::gui->{_project_name}->{name}); 1}
 create_project: _create_project project_id { 
 	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -224,7 +223,7 @@ get_state: _get_state statefile {
 get_state: _get_state {
  	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
 getpos: _getpos {  
-	print ::d1( ::eval_iam q(getpos) ), $/; 1}
+	::pager2( ::d1( ::eval_iam q(getpos) )); 1}
 setpos: _setpos timevalue {
 	::set_position($item{timevalue}); 1}
 forward: _forward timevalue {
@@ -259,7 +258,7 @@ remove_track: _remove_track quiet(?) {
  	my $name = $::this_track->name; 
  	my $reply = $::text->{term}->readline("remove track $name? [n] ");
  	if ( $reply =~ /y/i ){
- 		print "Removing track. All WAV files will be kept.\n";
+ 		::pager2( "Removing track. All WAV files will be kept.");
  		$::this_track->remove; 
  	}
  	1;
@@ -299,8 +298,8 @@ shift_track: _shift_track start_position {
 		pager2($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
-	} else { print 
-	"Shift value is neither decimal nor mark name. Skipping.\n";
+	} else { 
+		::throw( "Shift value is neither decimal nor mark name. Skipping.");
 	0;
 	}
 }
@@ -318,8 +317,7 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { 
-	print(::eval_iam q(engine-status)); print "\n" ; 1}
+engine_status: _engine_status { ::pager2(::eval_iam q(engine-status)); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::eval_iam('start'); 1}
@@ -327,6 +325,7 @@ ecasound_stop: _ecasound_stop  { ::eval_iam('stop'); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
 	::pager( ::show_tracks(::showlist()));
+
 	1;
 }
 show_tracks_all: _show_tracks_all { 	
@@ -346,7 +345,7 @@ modifiers: _modifiers modifier(s) {
 	@{$item{"modifier(s)"}}, q() ));
 	1;}
 
-modifiers: _modifiers { print $::this_track->modifiers, "\n"; 1}
+modifiers: _modifiers { ::pager2( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 show_io: _show_io { ::ChainSetup::show_io(); 1}
