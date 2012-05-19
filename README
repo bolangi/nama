@@ -8,23 +8,49 @@ B<Nama> is a application and library for multitrack
 recording, mixing and mastering using the Ecasound
 audio engine developed by Kai Vehmanen.
 
-Nama builds signal processing graphs for Ecasound 
-while offering the user familiar concepts of
-of track, bus, effect, preset, send, insert, mark 
-and region, as well as various templates 
-and tools for automating project setup.
+The complementary terminal and Tk GUI interfaces provide
+discoverable access to a audio engineering environment with
+familiar classes for track, bus, effect, preset, send,
+insert, mark, region. 
 
-Wavform editing and display is provided 
-by external applications, such as Audacity or Mhwaveedit.
+Every possible effort has been made to systematize and
+abbreviate the setup process. For this purpose, we provide a
+text command set, a simple, powerful command language
+interpreter, along with some novel templates and tools. 
+Nama now uses git for managing project state, and for
+providing checkpointing, branching and undo cababilities.
 
-A simple and convenient GUI is provided,
-more powerful capabilities available
-at the command prompt. 
+In the back end, nama builds signal processing graphs for
+the engine, manages successive engine configure-run cycles,
+and applies fades, effects and edits to the audio streams.
+
+Connections at the terminals of the graph
+are made using a library of some 20 different
+subclasses of IO objects. 
+
+The chief output target is the Ecasound
+chain setup file, a human readable 
+specification precisely expressing
+the network topology which is used 
+to configure the Ecasound engine.
+
+Nama implements realtime control of the engine through ECI,
+Ecasound's remote command languge.
+
+This allows live effects control from GUI widgets, MIDI
+controllers, text commands (type 'em in pardner!), MIDI
+sequencers, or other avenues.
+
+To reduce manual input, Nama offers various templates and
+tools for automating project setup including effect chains,
+effect profiles, project templates, and track bunches. 
+
+Wavform editing and display is provided by external
+applications, such as Audacity or Mhwaveedit.
 
 Nama runs under JACK and ALSA audio frameworks,
-automatically detects LADSPA and LV2 plugins, 
-uses Git for project management.
-supports Ladish Level 1 session handling.
+automatically detects LADSPA and LV2 plugins, and supports
+Ladish Level 1 session handling.
 
 =head1 INSTALLATION
 
