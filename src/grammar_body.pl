@@ -371,7 +371,7 @@ show_track: _show_track dd {
 	$::ti{$item{dd}};
 	1;}
 
-show_mode: _show_mode { print STDOUT ::show_status; 1}
+show_mode: _show_mode { ::pager2( ::show_status()); 1}
 bus_rec: _bus_rec {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'REC');
