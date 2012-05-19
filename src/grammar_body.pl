@@ -378,8 +378,7 @@ bus_rec: _bus_rec {
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	print "Setting REC-enable for " , $::this_bus ,
-		" bus. You may record member tracks.\n";
+	::pager2( "Setting REC-enable for " , $::this_bus , " bus. You may record member tracks.");
 	1; }
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
@@ -387,8 +386,7 @@ bus_mon: _bus_mon {
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	print "Setting MON mode for " , $::this_bus , 
-		" bus. Monitor only for member tracks.\n";
+	::pager2( "Setting MON mode for " , $::this_bus , " bus. Monitor only for member tracks.");
  	1  
 }
 bus_off: _bus_off {
@@ -397,8 +395,7 @@ bus_off: _bus_off {
 	# turn off mix track
 	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
 	{ $mix->set(rw => 'OFF') }
-	print "Setting OFF mode for " , $::this_bus,
-		" bus. Member tracks disabled.\n"; 1  
+	::pager2( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
 }
 bus_version: _bus_version { 
 	use warnings;
