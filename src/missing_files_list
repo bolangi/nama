@@ -1,0 +1,1 @@
+ grep '\[\%' *p *pl | perl -nE 'm(\.\/([\w\.]+)) and say $1'  | perl -nE 'chomp; say qq(INCLUDE file "$_" not found) if ! -e $_'
