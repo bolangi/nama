@@ -270,22 +270,31 @@ sub start_ecasound {
 						 }	split " ", qx(pgrep ecasound);
 }
 sub select_ecasound_interface {
-	return if $config->{opts}->{E} or $config->{opts}->{A};
-	if ( can_load( modules => { 'Audio::Ecasound' => undef } )
-			and ! $config->{opts}->{n} ){ 
-		say "\nUsing Ecasound via Audio::Ecasound (libecasoundc).";
-		{ no warnings qw(redefine);
-		*eval_iam = \&eval_iam_libecasoundc; }
-		$engine->{ecasound} = Audio::Ecasound->new();
-	} else { 
+	logit('::Engine','info','Not initializing engine: options E or A are set.'),
+			return if $config->{opts}->{E} or $config->{opts}->{A};
 
-		no warnings qw(redefine);
-		launch_ecasound_server($config->{engine_tcp_port});
-		init_ecasound_socket($config->{engine_tcp_port}); 
-		*eval_iam = \&eval_iam_neteci;
-	}
+	# Net-ECI if requested by option, or as fallback 
+	
+	start_ecasound_net_eci(), return if $config->{opts}->{n}
+		or !  can_load( modules => { 'Audio::Ecasound' => undef });
+
+	start_ecasound_libecasoundc();
+}
+
+sub start_ecasound_libecasoundc {
+	logit('::Engine','info',"Using Ecasound via Audio::Ecasound (libecasoundc)");
+	no warnings qw(redefine);
+	*eval_iam = \&eval_iam_libecasoundc;
+	$engine->{ecasound} = Audio::Ecasound->new();
 }
 	
+sub start_ecasound_net_eci {
+	logit('::Engine','info',"Using Ecasound via Net-ECI"); 
+	no warnings qw(redefine);
+	launch_ecasound_server($config->{engine_tcp_port});
+	init_ecasound_socket($config->{engine_tcp_port}); 
+	*eval_iam = \&eval_iam_neteci;
+}
 
 
 sub choose_sleep_routine {
