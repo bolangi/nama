@@ -1080,7 +1080,6 @@ fxc_key: 'n'|                #### HARDCODED XX
 		'bypass'
 
 # [% join " | ", split " ", qx(cat ./effect_chain_fields.pl) %]
-fxc_val: shellish
 
 
 this_track_op_id: op_id(s) { 

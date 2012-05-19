@@ -4,6 +4,8 @@ MD=..
 TD=$MD/lib/Audio/Nama
 TESTD=$MD/t
 
+./missing_files_list
+
 echo "Cleaning output directories"
 rm -rf $TD
 rm -rf $TESTD
