@@ -123,9 +123,16 @@ sub new {
 }
 
 # latency stubs
-sub capture_latency { die "I'm a capture latency stub and I'm throwing an error!" }
-sub playback_latency { die "I'm a playback latency stub and I'm throwing an error!" }
-sub ports_latency { die "I'm a ports latency stub and I'm throwing an error!" }
+sub capture_latency {
+	my $self = shift;
+	::jack_port_latency('input', $self->client || $self->ports);
+}
+sub playback_latency {
+	my $self = shift;
+	::jack_port_latency('output', $self->client || $self->ports);
+}
+sub ports {} # no ports by default
+sub client {} # no JACK client name by default
 
 sub ecs_string {
 	my $self = shift;
@@ -390,19 +397,6 @@ sub ports {
 	::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
 }
 
-sub capture_latency {
-	my $self = shift;
-	my ($port) = $self->ports();
-	say "found port: $port";
-	::jack_port_latency('input', $port);
-}
-sub playback_latency {
-	my $self = shift;
-	my ($port) = $self->ports();
-	say "found port: $port";
-	::jack_port_latency('output', $port);
-}
-
 }
 
 {
@@ -416,6 +410,8 @@ package ::IO::to_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub format_template { $config->{devices}->{jack}->{signal_format} }
 sub device_id { 'jack,,'.$_[0]->port_name.'_out' }
+sub ports { "ecasound:".$_[0]->port_name. '_out_1' } # at least this one port
+	# HARDCODED port name
 }
 
 {
@@ -423,12 +419,15 @@ package ::IO::from_jack_port;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO::to_jack_port';
 sub device_id { 'jack,,'.$_[0]->port_name.'_in' }
 sub ecs_extra { $_[0]->mono_to_stereo }
+sub ports { "ecasound:".$_[0]->port_name. '_in_1' } # at least this one port
+	# HARDCODED port name
 }
 
 {
 package ::IO::to_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
+sub client { $_[0]->send_id }
 }
 
 {
@@ -436,6 +435,7 @@ package ::IO::from_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
 sub ecs_extra { $_[0]->mono_to_stereo}
+sub client { $_[0]->source_id }
 }
 
 {
