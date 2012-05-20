@@ -49,7 +49,7 @@ push @ARGV, q(-T);
 
 diag("working directory: ",cwd);
 
-bootstrap();
+bootstrap_environment();
 
 diag "Check representative variable from default .namarc";
 

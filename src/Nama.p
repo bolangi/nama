@@ -135,14 +135,14 @@ use ::Latency ();
 use ::Log qw(logit logsub initialize_logger);
 
 sub main { 
-	bootstrap() ;
+	bootstrap_environment() ;
 	command_process($config->{execute_on_project_load});
 	reconfigure_engine();
 	command_process($config->{opts}->{X});
 	$ui->loop();
 }
 
-sub bootstrap {
+sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
 	start_logging();
