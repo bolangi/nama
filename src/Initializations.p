@@ -68,12 +68,31 @@ sub definitions {
 	$gui->{_seek_unit} = 1;
 	$gui->{marks} = {};
 
+
+# 
+# use this section to specify 
+# defaults for config variables 
+#
+# These are initial, lowest priority defaults
+# defaults for Nama config. Some variables
+# may be overwritten during subsequent read_config's
+#
+# config variable sources are prioritized as follows
+
+	#
+	#		+   command line -f here_is_namarc argument
+	#		+   project specific namarc  # currently disabled
+	#		+	user namarc (usually ~/.namarc)
+	#		+	internal namarc
+	#		+	internal initialization
+
 	$config = bless {
 		root_dir 						=> join_path( $ENV{HOME}, "nama"),
 		soundcard_channels 				=> 10,
 		memoize 						=> 1,
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
+		use_git							=> 1,
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
 		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport

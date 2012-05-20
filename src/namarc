@@ -122,6 +122,10 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
+#### State management ####
+
+# use_git: 1
+
 # Julien Claassen's Notes on Mastering effect defaults
 # 
 # Eq: All sections are initially off. You can turn them 
