@@ -171,6 +171,20 @@ sub cleanup_exit {
 }
 END { cleanup_exit() }
 
+sub apply_test_harness {
+
+	push @ARGV, qw(-f /dev/null), # force to use internal namarc
+
+				qw(-t), # set text mode 
+
+				qw(-d .), # use cwd as project root
+
+				q(-E), # suppress loading Ecasound
+
+				q(-J), # fake jack client data
+
+				q(-T), # don't initialize terminal
+}
 
 1;
 __DATA__
