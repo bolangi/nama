@@ -23,33 +23,23 @@ BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
-# defeat namarc detection to force using $config->{default} namarc
+push @ARGV, qw(-f /dev/null), # force to use internal namarc
 
-push @ARGV, qw(-f /dev/null);
+			qw(-t), # set text mode 
 
-# set text mode (don't start gui)
+			qw(-d .), # use cwd as project root
 
-push @ARGV, qw(-t); 
+			q(-E), # suppress loading Ecasound
 
-# use cwd as project root
+			q(-J), # fake jack client data
 
-push @ARGV, qw(-d .); 
-
-# suppress loading Ecasound
-
-push @ARGV, q(-E);
-
-# fake jack client data
-
-push @ARGV, q(-J);
-
-# don't initialize terminal
-
-push @ARGV, q(-T);
+			q(-T), # don't initialize terminal
+;
 
 diag("working directory: ",cwd);
 
 bootstrap_environment();
+
 diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
