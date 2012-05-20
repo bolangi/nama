@@ -353,13 +353,13 @@ show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
 	$output .= ::show_region();
-	$output .= ::show_effects();
 	$output .= ::show_versions();
 	$output .= ::show_send();
 	$output .= ::show_bus();
 	$output .= ::show_modifiers();
 	$output .= join "", "Signal width: ", ::width($::this_track->width), "\n";
 	$output .= ::show_inserts();
+	$output .= ::show_effects();
 	::pager( $output );
 	1;}
 show_track: _show_track track_name { 
