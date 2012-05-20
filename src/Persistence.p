@@ -886,7 +886,6 @@ sub restore_effect_chains {
 }
 sub git_snapshot {
 	return unless $config->{use_git};
-	save_state();
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
 }
@@ -894,7 +893,7 @@ sub git_snapshot {
 sub git_tag { 
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	$project->{repo}->tag( '--message',$msg);
+	$project->{repo}->tag( $tag_name, '--message',$msg);
 }
 sub git_checkout {
 	return unless $config->{use_git};
@@ -918,6 +917,8 @@ sub git_branch_exists {
 	map{ s/^\s+//; s/^\* //; $_}
 	$project->{repo}->run("branch");
 }
+
+sub git_save_state { &git_snapshot }
 
 1;
 __END__

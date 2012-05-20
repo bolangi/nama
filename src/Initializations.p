@@ -3,6 +3,23 @@
 package ::;
 use Modern::Perl; use Carp;
 
+sub apply_test_harness {
+
+	push @ARGV, qw(-f /dev/null), # force to use internal namarc
+
+				qw(-t), # set text mode 
+
+				qw(-d .), # use cwd as project root
+				
+				q(-E), # suppress loading Ecasound
+
+				q(-J), # fake jack client data
+
+				q(-T), # don't initialize terminal
+
+				#qw(-L SUB), # logging
+}
+
 sub definitions {
 
 	$| = 1;     # flush STDOUT buffer on every write

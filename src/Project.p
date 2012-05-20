@@ -204,7 +204,7 @@ sub dig_ruins { # only if there are no tracks
 	
 	my @wavs = grep{s/(_\d+)?\.wav//i} readdir $wav;
 
-	closedir $wav;
+	closedir $wav if $wav;
 
 	my %wavs;
 	
