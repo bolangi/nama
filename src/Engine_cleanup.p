@@ -49,7 +49,7 @@ sub new_files_were_recorded {
 		rememoize();
 		say join $/,"recorded:",@recorded;
 	}
-	map{ get_wav_info($_) } @recorded;
+	map{ _get_wav_info($_) } @recorded;
 	@recorded 
 } 
 1;
