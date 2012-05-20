@@ -1,42 +1,20 @@
-# to initialize the environment, we
-
-# 1. use Audio::Nama (pull in the whole application)
-
-# 2. set the current namespace to Audio::Nama 
-#    (so we can put both hands in abdominal cavity)
-
-# 3. declare variables by including the declarations blocks of Nama.pm
-
-package ::;
+package ::; 
+use ::;
 use Test::More qw(no_plan);
-use ::Assign qw(yaml_in yaml_out);
+use Cwd;
+
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+
 our ($expected_setup_lines);
-use Cwd;
-use ::;
-
-use ::Globals qw(:all);
-
-BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
-push @ARGV, qw(-f /dev/null), # force to use internal namarc
-
-			qw(-t), # set text mode 
-
-			qw(-d .), # use cwd as project root
-
-			q(-E), # suppress loading Ecasound
-
-			q(-J), # fake jack client data
-
-			q(-T), # don't initialize terminal
-;
-
 diag("working directory: ",cwd);
+
+apply_test_harness();
+diag "options: @ARGV";
 
 bootstrap_environment();
 

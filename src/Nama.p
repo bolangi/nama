@@ -178,12 +178,14 @@ sub apply_test_harness {
 				qw(-t), # set text mode 
 
 				qw(-d .), # use cwd as project root
-
+				
 				q(-E), # suppress loading Ecasound
 
 				q(-J), # fake jack client data
 
 				q(-T), # don't initialize terminal
+
+				qw(-L Engine), # logging
 }
 
 1;
