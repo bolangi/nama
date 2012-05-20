@@ -125,10 +125,12 @@ sub new {
 # latency stubs
 sub capture_latency {
 	my $self = shift;
+	return unless $self->client;
 	::jack_port_latency('input', $self->client);
 }
 sub playback_latency {
 	my $self = shift;
+	return unless $self->client;
 	::jack_port_latency('output', $self->client);
 }
 sub ports {} # no ports by default
@@ -333,7 +335,7 @@ sub device_id {
 	join(q[,],@modifiers);
 }
 sub ecs_extra { $_[0]->mono_to_stereo}
-sub capture_latency { jack_port_latency('input','system:capture_1') }
+sub client { 'system' if $jack->{jackd_running} } # since we share latency value
 }
 {
 package ::IO::to_wav;
