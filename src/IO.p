@@ -132,7 +132,7 @@ sub playback_latency {
 	::jack_port_latency('output', $self->client);
 }
 sub ports {} # no ports by default
-sub client {} # no JACK client name by default
+sub client {} # not a JACK client by default
 
 sub ecs_string {
 	my $self = shift;
@@ -285,7 +285,11 @@ sub quote_jack_port {
 	my $port = shift;
 	($port =~ /\s/ and $port !~ /^"/) ? qq("$port") : $port
 }
-
+sub rectified { # client name from number
+	$_[0] !~ /D/ 
+		? 'system' # source_id or send_id matching digit
+		: $_[0]
+}
 
 ### subclass definitions
 
@@ -378,6 +382,7 @@ sub client {
 	my $client = $self->direction eq 'input' 
 		? $self->source_id
 		: $self->send_id;
+	::IO::rectified($client);
 }
 sub device_id { 
 	my $self = shift;
@@ -427,7 +432,7 @@ sub ports { "ecasound:".$_[0]->port_name. '_in_1' } # at least this one port
 package ::IO::to_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { "jack," . ::IO::quote_jack_port($_[0]->send_id); }
-sub client { $_[0]->send_id }
+sub client { ::IO::rectified($_[0]->send_id) }
 }
 
 {
@@ -435,7 +440,7 @@ package ::IO::from_jack_client;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub device_id { 'jack,'.  ::IO::quote_jack_port($_[0]->source_id); }
 sub ecs_extra { $_[0]->mono_to_stereo}
-sub client { $_[0]->source_id }
+sub client { ::IO::rectified($_[0]->source_id) }
 }
 
 {
