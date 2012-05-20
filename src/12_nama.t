@@ -23,31 +23,10 @@ BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
-# defeat namarc detection to force using $config->{default} namarc
-
-push @ARGV, qw(-f /dev/null);
-
-# set text mode (don't start gui)
-
-push @ARGV, qw(-t); 
-
-# use cwd as project root
-
-push @ARGV, qw(-d .); 
-
-# suppress loading Ecasound
-
-push @ARGV, q(-E);
-
-# fake jack client data
-
-push @ARGV, q(-J);
-
-# don't initialize terminal
-
-push @ARGV, q(-T);
-
 diag("working directory: ",cwd);
+
+apply_test_harness();
+diag "options: @ARGV";
 
 bootstrap_environment();
 
