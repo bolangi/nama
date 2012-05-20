@@ -52,7 +52,7 @@ sub _update_wav_cache {
 	my $path = shift;
 	return unless _get_modify_time($path) != $setup->{wav_info}->{$path}{modify_time};
 	say qq(WAV file $path has changed! Updating cache.);
-	get_wav_info($path) 
+	_get_wav_info($path) 
 }
 
 sub ecasound_get_info {
