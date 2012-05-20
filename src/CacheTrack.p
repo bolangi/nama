@@ -57,6 +57,7 @@ sub prepare_to_cache {
 		name => $cooked_name,
 		group => 'Temp',
 		target => $track->name,
+		hide => 1,
 	);
 	$output_wav = $cooked->current_wav;
 
