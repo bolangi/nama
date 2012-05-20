@@ -7,19 +7,18 @@
 
 # 3. declare variables by including the declarations blocks of Nama.pm
 
-package ::;
+package ::; 
+use ::;
 use Test::More qw(no_plan);
-use ::Assign qw(yaml_in yaml_out);
+use Cwd;
+
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+
 our ($expected_setup_lines);
-use Cwd;
-use ::;
 
-use ::Globals qw(:all);
 
-BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
