@@ -1,59 +1,23 @@
-# to initialize the environment, we
-
-# 1. use Audio::Nama (pull in the whole application)
-
-# 2. set the current namespace to Audio::Nama 
-#    (so we can put both hands in abdominal cavity)
-
-# 3. declare variables by including the declarations blocks of Nama.pm
-
-package ::;
+package ::; 
+use ::;
 use Test::More qw(no_plan);
-use ::Assign qw(yaml_in yaml_out);
+use Cwd;
+
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+
 our ($expected_setup_lines);
-use Cwd;
-use ::;
-
-use ::Globals qw(:all);
-
-BEGIN { use_ok('::') };
 
 diag ("TESTING $0\n");
 
-# defeat namarc detection to force using $config->{default} namarc
-
-push @ARGV, qw(-f /dev/null);
-
-# set text mode (don't start gui)
-
-push @ARGV, qw(-t); 
-
-# use cwd as project root
-
-push @ARGV, qw(-d .); 
-
-# suppress loading Ecasound
-
-push @ARGV, q(-E);
-
-# fake jack client data
-
-push @ARGV, q(-J);
-
-# don't initialize terminal
-
-push @ARGV, q(-T);
-
 diag("working directory: ",cwd);
 
-definitions();
-process_command_line_options();
-start_logging();
-initialize_interfaces();
-setup_grammar();
+apply_test_harness();
+diag "options: @ARGV";
+
+bootstrap_environment();
+
 diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");

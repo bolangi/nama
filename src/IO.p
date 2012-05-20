@@ -295,25 +295,25 @@ sub quote_jack_port {
 {
 package ::IO::from_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub _device_id { 'null' } # 
+sub _device_id { 'null' }  
 }
 
 {
 package ::IO::to_null;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub _device_id { 'null' }  # underscore for testing
+sub _device_id { 'null' }
 }
 
 {
 package ::IO::from_rtnull;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub _device_id { 'rtnull' } # 
+sub _device_id { 'rtnull' }  
 }
 
 {
 package ::IO::to_rtnull;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub _device_id { 'rtnull' }  # underscore for testing
+sub _device_id { 'rtnull' }  
 }
 
 {

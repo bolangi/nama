@@ -135,16 +135,21 @@ use ::Latency ();
 use ::Log qw(logit logsub initialize_logger);
 
 sub main { 
+	bootstrap_environment() ;
+	command_process($config->{execute_on_project_load});
+	reconfigure_engine();
+	command_process($config->{opts}->{X});
+	$ui->loop();
+}
+
+sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
 	start_logging();
 	setup_grammar();
 	initialize_interfaces();
-	command_process($config->{execute_on_project_load});
-	reconfigure_engine();
-	command_process($config->{opts}->{X});
-	$ui->loop;
 }
+
 sub cleanup_exit {
  	remove_riff_header_stubs();
 	# for each process: 
@@ -166,6 +171,22 @@ sub cleanup_exit {
 }
 END { cleanup_exit() }
 
+sub apply_test_harness {
+
+	push @ARGV, qw(-f /dev/null), # force to use internal namarc
+
+				qw(-t), # set text mode 
+
+				qw(-d .), # use cwd as project root
+				
+				q(-E), # suppress loading Ecasound
+
+				q(-J), # fake jack client data
+
+				q(-T), # don't initialize terminal
+
+				qw(-L Engine), # logging
+}
 
 1;
 __DATA__
