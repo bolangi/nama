@@ -21,47 +21,6 @@ bootstrap_environment();
 diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
-=skip
-# Ecasound dependent
-diag "Check static effects data read";
-is( $::fx_cache->{split}->{cop}{z} > 40, 1, "Verify Ecasound chain operator count");
-
-diag "Check effect hinting and help";
-
-my $want = q(---
-code: epp
-count: 1
-display: scale
-name: Pan
-params:
-  -
-    begin: 0
-    default: 50
-    end: 100
-    name: 'Level %'
-    resolution: 0
-...
-);
-
-
-package ::;
-is( yaml_out($fx_cache->{registry}->[$fx_cache->{full_label_to_index}->{epp}]) ,  $want , "Pan hinting");
-
-is( $fx_cache->{user_help}->[0], 
-	qq(dyn_compress_brutal,  -pn:dyn_compress_brutal:gain-%\n),
-	'Preset help for dyn_compress_brutal');
-
-my @result = ::Fade::spec_to_pairs([0,1,'out']);
-my @expected = ( 0, 1, 0.95, 0.75, 1, 0 );
-
-is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-out");
-
-@result = ::Fade::spec_to_pairs([0,1,'in']);
-@expected = ( 0, 0, 0.05, 0.75, 1, 1 );
-
-is_deeply(\@result, \@expected, "Fade::spec_to_pairs - fade-in");
-
-=cut
 
 # object id => type mappings
 #
