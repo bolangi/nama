@@ -118,7 +118,7 @@ sub new {
 	if($name){
 		$by_name{$name}->{$direction} = $self;
 	}
-	else {say "DOES NOT HAVE ASSOCIATED TRACK"}
+	else {}
 	$self
 }
 
