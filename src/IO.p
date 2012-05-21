@@ -126,12 +126,12 @@ sub new {
 sub capture_latency {
 	my $self = shift;
 	return unless $self->client;
-	::jack_port_latency('input', $self->client);
+	::jack_port_latency('input', rectified($self->client));
 }
 sub playback_latency {
 	my $self = shift;
 	return unless $self->client;
-	::jack_port_latency('output', $self->client);
+	::jack_port_latency('output', rectified($self->client));
 }
 sub ports {} # no ports by default
 sub client {} # not a JACK client by default
