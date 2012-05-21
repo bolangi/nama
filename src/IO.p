@@ -108,7 +108,7 @@ sub new {
 	# join IO objects to graph
 	my $name;
 	try{ $name  = $self->name }
-	catch {  say "name method blew up for this object"  }; 
+	#catch {  say "name method blew up for this object"  }; 
 
 	{ no warnings 'uninitialized';
 	::logit("::IO","debug","I belong to track $name\n",
@@ -118,7 +118,7 @@ sub new {
 	if($name){
 		$by_name{$name}->{$direction} = $self;
 	}
-	else {say "DOES NOT HAVE ASSOCIATED TRACK"}
+	else {}
 	$self
 }
 
