@@ -1,2 +1,4 @@
+PD=`pwd`
 ./myproc
-./run_tests | grep -P '^ok ' | wc -l 
+./rtu
+cd $PD
