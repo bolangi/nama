@@ -1,1 +1,1 @@
- ./myproc; ./rtt | grep -P '^ok ' | wc -l
+./myproc; ./run_tests | grep -P '^ok ' | wc -l
