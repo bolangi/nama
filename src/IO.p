@@ -384,7 +384,6 @@ sub client {
 	my $client = $self->direction eq 'input' 
 		? $self->source_id
 		: $self->send_id;
-	::IO::rectified($client);
 }
 sub device_id { 
 	my $self = shift;
