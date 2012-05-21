@@ -1,0 +1,2 @@
+./myproc
+./run_tests | grep -P '^ok ' | wc -l 
