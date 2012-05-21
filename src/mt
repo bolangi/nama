@@ -1,0 +1,4 @@
+PD=`pwd`
+./myproc
+./rtu
+cd $PD

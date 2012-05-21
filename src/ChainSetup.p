@@ -462,7 +462,7 @@ sub setup_requires_realtime {
 		or grep { has_vertex("$_\_out") } @fields
 
 }
-sub has_vertex { $setup->{final_graph}->has_vertex($_[0]) }
+sub has_vertex { $g->has_vertex($_[0]) }
 
 sub set_buffersize { 
 	my $buffer_type = setup_requires_realtime() ? "realtime" : "nonrealtime";
