@@ -119,7 +119,6 @@ sub new {
 	if($name){
 		$by_name{$name}->{$direction} = $self;
 	}
-	else {}
 	$self
 }
 
