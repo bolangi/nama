@@ -108,7 +108,8 @@ sub new {
 	# join IO objects to graph
 	my $name;
 	try{ $name  = $self->name }
-	catch {  say "name method blew up for this object"  }; 
+	catch {  # we do nothing
+	 }; 
 
 	{ no warnings 'uninitialized';
 	::logit("::IO","debug","I belong to track $name\n",
