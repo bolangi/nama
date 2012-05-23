@@ -281,6 +281,7 @@ exit;
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);
 	select_ecasound_interface();
+	::Effects::import_engine_subs();
 	sleeper(0.2);
 	@{$engine->{pids}} = grep{ 	my $pid = $_; 
 							! grep{ $pid == $_ } @existing_pids
@@ -296,7 +297,6 @@ sub select_ecasound_interface {
 		or !  can_load( modules => { 'Audio::Ecasound' => undef });
 
 	start_ecasound_libecasoundc();
-	::Effects::import_engine_subs();
 }
 
 sub start_ecasound_libecasoundc {
