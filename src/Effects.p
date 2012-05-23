@@ -3,6 +3,7 @@
 package ::Effects; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
+use ::Assign qw(yaml_out);
 no warnings 'uninitialized';
 use Carp;
 use ::Log qw(logsub logit);
@@ -17,10 +18,14 @@ use ::Globals qw(
 					$setup 
 					$this_op 
 					$this_track);
-*valid_engine_setup = \&::valid_engine_setup;
-*engine_running		= \&::engine_running;
-*eval_iam			= \&::eval_iam;
-*ecasound_select_chain = \&::ecasound_select_chain;
+
+sub import_engine_subs {
+
+	*valid_engine_setup = \&::valid_engine_setup;
+	*engine_running		= \&::engine_running;
+	*eval_iam			= \&::eval_iam;
+	*ecasound_select_chain = \&::ecasound_select_chain;
+}
 
 use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(

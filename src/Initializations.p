@@ -296,6 +296,7 @@ sub select_ecasound_interface {
 		or !  can_load( modules => { 'Audio::Ecasound' => undef });
 
 	start_ecasound_libecasoundc();
+	::Effects::import_engine_subs();
 }
 
 sub start_ecasound_libecasoundc {
