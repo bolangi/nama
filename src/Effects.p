@@ -42,6 +42,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					fxindex
 					effect_index
 					ecasound_effect_index
+					full_effect_code
 					name
 
 					check_fx_consistency

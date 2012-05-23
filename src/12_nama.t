@@ -55,6 +55,9 @@ my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
 
+diag("project project dir: ".project_dir());
+diag("project project wav dir: ".this_wav_dir());
+
 #diag(map{ $_->dump} values %::Track::by_index );
 
 is( project_dir(), "./$test_project", "establish project directory");
