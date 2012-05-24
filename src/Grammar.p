@@ -460,4 +460,22 @@ sub pan_check {
 	);
 }
 
+sub remove_track_cmd {
+	my ($track, $quiet) = @_;
+	
+	# avoid having ownerless SlaveTracks.  
+ 	::ChainSetup::remove_temporary_tracks();
+ 	
+	# remove track quietly if requested
+		if ( 	! $quiet 
+			and ! $config->{quietly_remove_tracks}) 
+		{
+			my $name = $track->name; 
+			my $reply = $text->{term}->readline("remove track $name? [n] ");
+			$reply =~ /y/i or return
+			pager2( "Removing track. All WAV files will be kept.")
+		}
+		$track->remove;
+		1
+}
 1;
