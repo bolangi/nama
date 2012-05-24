@@ -21,7 +21,7 @@ sub initialize_logger {
 	#say("negate\n",::yaml_out(\%negate));
 
 	my $layout = "[\%r] %c %m%n"; # backslash to protect from source filter
-	my $logfile = $ENV{NAMA_LOGFILE} || "";
+	my $logfile = $ENV{NAMA_LOGFILE};
 	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
 	
 	$appender = $logfile ? 'FILE' : 'STDERR';
@@ -51,7 +51,7 @@ sub initialize_logger {
 		# file appender
 		log4perl.appender.FILE		= Log::Log4perl::Appender::File
 		log4perl.appender.FILE.filename	= $logfile
-		log4perl.appender.FILE.layout	= Log::Log3perl::Layout::PatternLayout
+		log4perl.appender.FILE.layout	= Log::Log4perl::Layout::PatternLayout
 		log4perl.appender.FILE.layout.ConversionPattern = $layout
 
 		#log4perl.additivity.SUB			= 0 # doesn't work... why?
