@@ -253,6 +253,9 @@ dump_all: _dump_all { ::dump_all(); 1}
 remove_track: _remove_track quiet(?) { 
  	my $quiet = scalar @{$item{'quiet(?)'}};
  	# remove track quietly if requested
+ 	{ local $::this_track;
+ 	::ChainSetup::remove_temporary_tracks();
+	}
  	$::this_track->remove, return 1 if $quiet or $::config->{quietly_remove_tracks};
  
  	my $name = $::this_track->name; 
