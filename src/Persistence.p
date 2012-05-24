@@ -36,7 +36,7 @@ sub save_state {
 		print qx(alsactl -f $filename.alsa store);
 	}
 }
-sub initialize_serialization_arrays {
+sub initialize_marshalling_arrays {
 	@tracks_data = (); # zero based, iterate over these to restore
 	@bus_data = (); # 
 	@marks_data = ();
@@ -62,7 +62,7 @@ sub save_system_state {
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
 
-	initialize_serialization_arrays();
+	initialize_marshalling_arrays();
 	
 	# prepare tracks for storage
 	
@@ -232,7 +232,7 @@ sub restore_state {
 
 	# start marshalling with clean slate	
 	
-	initialize_serialization_arrays();
+	initialize_marshalling_arrays();
 
 	# restore persistent variables
 
@@ -240,7 +240,7 @@ sub restore_state {
 	#my %seen;
 	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
 	# handle old-style State files
-	# handle serialization arrays (used by new-style State files as well)
+	# handle marshalling arrays (used by new-style State files as well)
 	# handle some extra vars (ditto)
 	
 	assign(
@@ -255,7 +255,7 @@ sub restore_state {
 	{
 		my $args = { data => $ref };
 		assign_singletons( $args );
-	#	assign_serialization_arrays( $args );
+	#	assign_marshalling_arrays( $args );
 	#	assign_pronouns( $args);
 	}
 
