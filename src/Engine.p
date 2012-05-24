@@ -180,7 +180,7 @@ sub ecasound_select_chain {
 		return 1 
 
 	} else { 
-		logit('::Engine','debug',
+		logit('::Engine','trace',
 			"c-select $n: attempted to select non-existing Ecasound chain"); 
 		return 0
 	}
