@@ -105,20 +105,24 @@ sub load_project {
 	logit('::Project','debug', sub{yaml_out \%h});
 	print("no project name.. doing nothing.\n"),return 
 		unless $h{name} or $project->{name};
+
 	$project->{name} = $h{name} if $h{name};
 
-	if ( ! -d join_path( project_root(), $project->{name}) ){
-		if ( $h{create} ){
-			map{create_dir($_)} &project_dir, &this_wav_dir ;
-		} else { 
-			print qq(
-Project "$project->{name}" does not exist. 
-Loading project "untitled".
-);
+	if ( ! -d project_dir() )
+	{ 	
+		if ( $h{create} )
+		{ 
+			map{create_dir($_)} project_dir(), this_wav_dir() ;
+		}
+		else 
+		{ logit('::Project','info',
+			qq(Project "$project->{name}" does not exist.\n Loading project "untitled".)
+			);
 			load_project( qw{name untitled create 1} );
 			return;
-		}
-	} 
+		}	
+	}
+
 	# we used to check each project dir for customized .namarc
 	# read_config( global_config() ); 
 	
