@@ -641,12 +641,9 @@ sub check_setup {
 }
 
 sub cleanup { 	
-		unlink './test/Setup.ecs';
-		rmdir './test/.wav';
-		rmdir './test';
-		rmdir './untitled/.wav';
-		rmdir './untitled';
-		unlink './.effects_cache';
+		## WARNING!!! 
+		my $killing_power_up = '-rf';
+		qx(rm $killing_power_up ./test  ./.effects_cache.json);
 }
 
 cleanup();
