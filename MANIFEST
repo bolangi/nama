@@ -16,7 +16,6 @@ lib/Audio/Nama/CacheTrack.pm
 lib/Audio/Nama/ChainSetup.pm
 lib/Audio/Nama/Config.pm
 lib/Audio/Nama/Custom.pm
-lib/Audio/Nama/Debug.pm
 lib/Audio/Nama/Edit.pm
 lib/Audio/Nama/EffectChain.pm
 lib/Audio/Nama/Effects.pm
@@ -25,7 +24,6 @@ lib/Audio/Nama/Engine.pm
 lib/Audio/Nama/Engine_cleanup.pm
 lib/Audio/Nama/Engine_setup.pm
 lib/Audio/Nama/Fade.pm
-lib/Audio/Nama/Git.pm
 lib/Audio/Nama/Globals.pm
 lib/Audio/Nama/Grammar.pm
 lib/Audio/Nama/Graph.pm

@@ -41,6 +41,7 @@ sub add_path_for_rec {
 			target => $track->name,
 			rw => 'OFF',
 			group => 'Temp',
+			hide => 1,
 			name => $name);
 
 		# connect writepath: source --> temptrackname --> wav_out

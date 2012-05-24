@@ -1,6 +1,7 @@
 # --------------------- Command Grammar ----------------------
 
 package ::;
+use ::Effects qw(:all);
 use Modern::Perl;
 
 sub setup_grammar {
@@ -59,7 +60,9 @@ sub command_process {
 	}
 
 	my $result = check_fx_consistency();
-	logit('::Effects','logconfess',"Inconsistency found in effects data\n",::yaml_out($result)) if $result->{is_error};
+	logit(__LINE__,'::Effects',
+		'logcluck',"Inconsistency found in effects data\n",
+		Dumper ($result)) if $result->{is_error};
 		
 }
 sub do_user_command {

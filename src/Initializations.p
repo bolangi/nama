@@ -3,6 +3,23 @@
 package ::;
 use Modern::Perl; use Carp;
 
+sub apply_test_harness {
+
+	push @ARGV, qw(-f /dev/null), # force to use internal namarc
+
+				qw(-t), # set text mode 
+
+				qw(-d .), # use cwd as project root
+				
+				q(-E), # suppress loading Ecasound
+
+				q(-J), # fake jack client data
+
+				q(-T), # don't initialize terminal
+
+				#qw(-L SUB), # logging
+}
+
 sub definitions {
 
 	$| = 1;     # flush STDOUT buffer on every write
@@ -68,12 +85,31 @@ sub definitions {
 	$gui->{_seek_unit} = 1;
 	$gui->{marks} = {};
 
+
+# 
+# use this section to specify 
+# defaults for config variables 
+#
+# These are initial, lowest priority defaults
+# defaults for Nama config. Some variables
+# may be overwritten during subsequent read_config's
+#
+# config variable sources are prioritized as follows
+
+	#
+	#		+   command line -f here_is_namarc argument
+	#		+   project specific namarc  # currently disabled
+	#		+	user namarc (usually ~/.namarc)
+	#		+	internal namarc
+	#		+	internal initialization
+
 	$config = bless {
 		root_dir 						=> join_path( $ENV{HOME}, "nama"),
 		soundcard_channels 				=> 10,
 		memoize 						=> 1,
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
+		use_git							=> 1,
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
 		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
@@ -264,6 +300,7 @@ exit;
 sub start_ecasound {
  	my @existing_pids = split " ", qx(pgrep ecasound);
 	select_ecasound_interface();
+	::Effects::import_engine_subs();
 	sleeper(0.2);
 	@{$engine->{pids}} = grep{ 	my $pid = $_; 
 							! grep{ $pid == $_ } @existing_pids

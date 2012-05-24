@@ -214,7 +214,7 @@ remove_project_template: _remove_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state ident { ::save_state( $item{ident}); 1}
-save_state: _save_state { ::save_state(); 1}
+save_state: _save_state { ::save_state(); ::git_save_state(); 1}
 get_state: _get_state statefile {
  	::load_project( 
  		name => $::gui->{_project_name}->{name},

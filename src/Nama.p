@@ -135,16 +135,21 @@ use ::Latency ();
 use ::Log qw(logit logsub initialize_logger);
 
 sub main { 
+	bootstrap_environment() ;
+	command_process($config->{execute_on_project_load});
+	reconfigure_engine();
+	command_process($config->{opts}->{X});
+	$ui->loop();
+}
+
+sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
 	start_logging();
 	setup_grammar();
 	initialize_interfaces();
-	command_process($config->{execute_on_project_load});
-	reconfigure_engine();
-	command_process($config->{opts}->{X});
-	$ui->loop;
 }
+
 sub cleanup_exit {
  	remove_riff_header_stubs();
 	# for each process: 
@@ -165,7 +170,6 @@ sub cleanup_exit {
 	exit; 
 }
 END { cleanup_exit() }
-
 
 1;
 __DATA__

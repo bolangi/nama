@@ -36,7 +36,7 @@ sub save_state {
 		print qx(alsactl -f $filename.alsa store);
 	}
 }
-sub initialize_serialization_arrays {
+sub initialize_marshalling_arrays {
 	@tracks_data = (); # zero based, iterate over these to restore
 	@bus_data = (); # 
 	@marks_data = ();
@@ -62,7 +62,7 @@ sub save_system_state {
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
 
-	initialize_serialization_arrays();
+	initialize_marshalling_arrays();
 	
 	# prepare tracks for storage
 	
@@ -232,7 +232,7 @@ sub restore_state {
 
 	# start marshalling with clean slate	
 	
-	initialize_serialization_arrays();
+	initialize_marshalling_arrays();
 
 	# restore persistent variables
 
@@ -240,7 +240,7 @@ sub restore_state {
 	#my %seen;
 	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
 	# handle old-style State files
-	# handle serialization arrays (used by new-style State files as well)
+	# handle marshalling arrays (used by new-style State files as well)
 	# handle some extra vars (ditto)
 	
 	assign(
@@ -255,7 +255,7 @@ sub restore_state {
 	{
 		my $args = { data => $ref };
 		assign_singletons( $args );
-	#	assign_serialization_arrays( $args );
+	#	assign_marshalling_arrays( $args );
 	#	assign_pronouns( $args);
 	}
 
@@ -886,7 +886,6 @@ sub restore_effect_chains {
 }
 sub git_snapshot {
 	return unless $config->{use_git};
-	save_state();
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
 }
@@ -894,7 +893,7 @@ sub git_snapshot {
 sub git_tag { 
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	$project->{repo}->tag( '--message',$msg);
+	$project->{repo}->tag( $tag_name, '--message',$msg);
 }
 sub git_checkout {
 	return unless $config->{use_git};
@@ -918,6 +917,8 @@ sub git_branch_exists {
 	map{ s/^\s+//; s/^\* //; $_}
 	$project->{repo}->run("branch");
 }
+
+sub git_save_state { &git_snapshot }
 
 1;
 __END__
