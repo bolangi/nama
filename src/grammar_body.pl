@@ -241,6 +241,12 @@ add_track: _add_track track_name(s) {
 add_tracks: _add_tracks track_name(s) {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
 track_name: ident
+existing_track_name: track_name { 
+	my $track_name = $item{track_name};
+	return $track_name if $::tn{$track_name}; 
+	print("$track_name: track does not exist.\n"),
+	undef
+}
 # was set bus Brass
 move_to_bus: _move_to_bus existing_bus_name {
 	$::this_track->set( group => $item{existing_bus_name}); 1
@@ -250,21 +256,17 @@ set_track: _set_track key someval {
 dump_track: _dump_track { ::pager($::this_track->dump); 1}
 dump_group: _dump_group { ::pager($::bn{Main}->dump); 1}
 dump_all: _dump_all { ::dump_all(); 1}
-remove_track: _remove_track quiet(?) { 
- 	my $quiet = scalar @{$item{'quiet(?)'}};
- 	# remove track quietly if requested
- 	{ local $::this_track;
- 	::ChainSetup::remove_temporary_tracks();
-	}
- 	$::this_track->remove, return 1 if $quiet or $::config->{quietly_remove_tracks};
- 
- 	my $name = $::this_track->name; 
- 	my $reply = $::text->{term}->readline("remove track $name? [n] ");
- 	if ( $reply =~ /y/i ){
- 		::pager2( "Removing track. All WAV files will be kept.");
- 		$::this_track->remove; 
- 	}
- 	1;
+remove_track: _remove_track quiet end {
+	::remove_track_cmd($::this_track, $item{quiet});
+	1
+}
+# remove_track: _remove_track existing_track_name {
+# 		::remove_track_cmd($::tn{$item{existing_track_name}});
+# 		1
+# }
+remove_track: _remove_track end { 
+		::remove_track_cmd($::this_track) ;
+		1
 }
 quiet: 'quiet'
 link_track: _link_track track_name target project {

@@ -65,7 +65,7 @@ press_space_to_start_transport: 0
 
 execute_on_project_load: eval $engine->{events}->{poll_jack} = undef;
 
-quietly_remove_tracks: 1
+quietly_remove_tracks: 0
 
 # volume controls use this effect (must be 'ea' or 'eadb')
 
