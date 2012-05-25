@@ -886,6 +886,8 @@ sub restore_effect_chains {
 }
 sub git_snapshot {
 	return unless $config->{use_git};
+	save_state();
+ 	return unless -e $file->git_state_store;
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
 }
