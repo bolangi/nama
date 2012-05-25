@@ -199,9 +199,9 @@ sub _stop_do_start {
 		eval_iam('start');
 }
 sub restart_ecasound {
-	logit('info',"killing ecasound processes @{$engine->{pids}}");
+	logit('::Engine','info',"killing ecasound processes @{$engine->{pids}}");
 	kill_my_ecasound_processes();
-	logit('info',q(restarting Ecasound engine - your may need to use the "arm" command));	
+	logit('::Engine','info',q(restarting Ecasound engine - your may need to use the "arm" command));	
 	select_ecasound_interface();
 	#$setup->{changed}++;
 	reconfigure_engine();
