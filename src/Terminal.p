@@ -40,7 +40,11 @@ sub prompt {
 	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
 		($this_track ? $this_track->name : '') . "] ('h' for help)> "
 }
-sub check_for_spacebar_hit {
+sub detect_spacebar {
+
+	# create a STDIN watcher to intervene when space
+	# received in column one
+	
 	$engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
 		if ( $text->{term_attribs}->{line_buffer} eq " " ){
@@ -53,10 +57,6 @@ sub check_for_spacebar_hit {
 			&{$text->{term_attribs}->{'callback_read_char'}}();
 		}
 	});
-}
-sub detect_spacebar {
-	$engine->{events}->{stdin} = undef; # clean up after get_edit_mark()
-	check_for_spacebar_hit() # if $config->{press_space_to_start};
 }
 
 sub throw {
