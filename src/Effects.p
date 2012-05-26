@@ -30,33 +30,7 @@ sub import_engine_subs {
 use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
-					parent
-					chain
-					type
-					bypassed
-					owns
-					fx
-					params
-					is_controller
-					
-					fxindex
-					effect_index
-					ecasound_effect_index
-					full_effect_code
-					name
-
-					check_fx_consistency
-
-					cop_add
-					add_effect
-					remove_effect
-					modify_effect
-
-					effect_update_copp_set
-					sync_effect_parameters
-					find_op_offsets
-					apply_ops
-					expanded_ops_list
+[%  qx(grep '^sub' Effects.p | awk '{print \$2}') %] 
 
 ) ] );
 
