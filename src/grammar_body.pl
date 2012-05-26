@@ -326,7 +326,7 @@ engine_status: _engine_status { ::pager2(::eval_iam q(engine-status)); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::eval_iam('start'); 1}
-ecasound_stop: _ecasound_stop  { ::eval_iam('stop'); 1}
+ecasound_stop: _ecasound_stop  { ::eval_iam('stop-sync'); 1}
 restart_ecasound: _restart_ecasound { ::restart_ecasound(); 1 }
 show_tracks: _show_tracks { 	
 	::pager( ::show_tracks(::showlist()));
