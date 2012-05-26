@@ -19,6 +19,10 @@ sub apply_test_harness {
 
 				#qw(-L SUB), # logging
 }
+sub apply_ecasound_test_harness {
+	apply_test_harness();
+	@ARGV = grep { $_ ne q(-E) } @ARGV
+}
 
 sub definitions {
 
