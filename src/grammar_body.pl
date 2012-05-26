@@ -1214,9 +1214,7 @@ remove_fade: _remove_fade fade_index(s) {
 	1
 }
 fade_index: dd 
- { if ( $::Fade::by_index{$item{dd}} ){ return $item{dd}}
-   else { ::pager2("invalid fade number: $item{dd}"); return 0 }
- }
+
 list_fade: _list_fade {  ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
