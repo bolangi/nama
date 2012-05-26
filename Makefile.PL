@@ -9,7 +9,8 @@ use inc::Module::Install;
 	 keywords
 	        'audio',
 	        'recording',
-	        'mixing';
+	        'mixing',
+	        'daw';
 	 repository
 	        'https://github.com/bolangi/nama';
 
