@@ -566,6 +566,25 @@ gen_jack();
 check_setup('Send bus - raw - JACK');
 =cut
 
+###### Timeline tests
+#
+# This table tests how the offset run mode affects
+# other time displacing operations. 
+#
+# If you have a region, the offset could occur
+# before the region, in the middle of the region
+# or after the region. Code for each case
+# is different. There is further an 
+# interaction with playat. 
+#
+# The tests are exhaustive, all possible
+# combinations are covered.
+#
+# The numbers indicate time positions.
+
+# asterisk (*) indicates that no output is available
+# for that specific field
+
 {
 
 diag "Edit mode playat and region endpoints adjustment";
