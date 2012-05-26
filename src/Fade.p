@@ -10,7 +10,7 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logit);
-use ::Effects qw(:all);
+use ::Effects qw(remove_effect add_effect owns effect_update_copp_set);
 use ::Object qw( 
 				 n
 				 type
@@ -72,7 +72,7 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = type($track->fader);
+	my $operator  = ::type($track->fader);
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller; # effect ID
@@ -312,7 +312,7 @@ sub remove {
 	
 	my @track_fades = all_fades($fade->track);
 	if ( ! @track_fades ){ 
-		::remove_effect($track->fader);
+		remove_effect($track->fader);
 		$tn{$fade->track}->set(fader => undef);
 	}
 	else { refresh_fade_controller($track) }
@@ -328,7 +328,7 @@ sub add_fader {
 	
 	if (! $id){	
 		my $first_effect = $track->ops->[0];
-		$id = ::add_effect({
+		$id = add_effect({
 				before 	=> $first_effect, 
 				track	=> $track,
 				type	=> $config->{fader_op}, 
