@@ -133,6 +133,15 @@ sub definitions {
 		enforce_channel_bounds			=> 1,
 		# for save_system_state()
 		serialize_formats               => 'json',
+		latency_op						=> 'delay_n',
+		latency_op_init					=> [0,0],
+		latency_op_set					=> sub
+			{
+				my $id = shift;
+				my $milliseconds = shift();
+				# we need to set two parameters to this value
+				modify_multiple_effects([$id],[1,2],undef,$milliseconds/1000)
+			},
 	}, '::Config';
 
 	{ package ::Config;
