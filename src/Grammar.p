@@ -60,8 +60,7 @@ sub command_process {
 	}
 
 	my $result = check_fx_consistency();
-	logit(__LINE__,'::Effects',
-		'logcluck',"Inconsistency found in effects data\n",
+	logit('::Effects', 'logcluck',"Inconsistency found in effects data",
 		Dumper ($result)) if $result->{is_error};
 		
 }
