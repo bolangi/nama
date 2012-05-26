@@ -616,6 +616,26 @@ my (@projects, @projects_completed, %state_yml, $errors_encountered);
 sub conversion_completed { -e success_file() }
 sub success_file { join_path(project_root(), '.conversion_completed') }
 sub convert_project_format {
+
+# nama> eval convert_project_format
+# 
+# That will go over your whole nama projects
+# tree and convert old projects to the
+# modern format. It also converts the 
+# effect chains, separating global
+# from project specific. 
+# 
+# It makes a tar backup of all .yml files
+# in the nama project tree at the beginning,
+# so I think it's reasonably safe.
+# 
+# What it's picky about is that it wants
+# to actually connect the chain
+# setup before saving in the new format.
+# (A side benefit is that you know which projects
+# have problem.)
+
+
 	say("conversion previously completed.
 To repeat, remove ~/nama/.conversion_completed and try again"), 
 		return if conversion_completed();
