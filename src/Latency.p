@@ -17,21 +17,19 @@ use Carp qw(confess);
 
 sub add_latency_control_op {
 	my $n = shift;
+	return;
 	my $delay = shift || 0;
 	my $id; 
-	stop_do_start(  
-	 sub { $id = 
-					add_effect({
-					chain => $n, 
-					type => 'etd', # ecasound time delay operator
-					cop_id => $ti{$n}->latency_op, # may be undef
-					values => [ $delay,
-								0,    # no surround mode
-								1,    # 1 delay operation
-								100,  # 100% delayed signal
-								100 ],# feedback in each iteration
-				# We will be adjusting the first (delay) parameter
-					}) 
+	stop_do_start( 
+		sub 
+		{ 
+			$id = add_effect(
+				{
+					chain 	=> $n, 
+					type 	=> $config->{latency_op},
+					cop_id 	=> $ti{$n}->latency_op, # may be undef
+					values 	=> $config->{latency_op_init},
+				}) 
 		} 
 	);
 	
