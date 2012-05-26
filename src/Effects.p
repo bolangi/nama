@@ -53,7 +53,7 @@ sub type   : lvalue {
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{type}       
 }
-sub bypassed: lvalue{ 
+sub bypassed : lvalue{ 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{bypassed}   
@@ -279,7 +279,7 @@ sub modify_effect {
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
 		if is_read_only($op_id, $parameter);
-		my $new_value = $value; 
+		my $new_value = $value; # unless $sign
 		if ($sign) {
 			$new_value = 
  			eval (join " ",
