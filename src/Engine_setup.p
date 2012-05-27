@@ -274,7 +274,9 @@ sub connect_transport {
 	logsub("&connect_transport");
 	my $quiet = shift;
 	remove_riff_header_stubs();
-	remove_latency_ops();
+
+	# paired with calculate_and_adjust_latency() below
+	remove_latency_ops() unless $config->{opts}->{O}; 
 
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
