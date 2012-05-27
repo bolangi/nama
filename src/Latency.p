@@ -104,7 +104,11 @@ sub track_latency {
 
 	### track predecessor latency (if has tracks as predecessors)
 
-	$accumulator += ($node->{predecessor} = predecessor_latency($track));
+	my $pl = predecessor_latency($track);
+
+	$accumulator += ($node->{predecessor} = $pl); # zero if no predecessors
+
+	$pl or $accumulator += ($node->{capture}     = $track->capture_latency );
 
 	### track source latency (if track has "live" i.e.  non-WAV input)
 
