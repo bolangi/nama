@@ -17,18 +17,19 @@ use Carp qw(confess);
 
 sub add_latency_control_op {
 	my $n = shift;
+	logsub("&add_latency_control_op: chain $n");	
 	my $delay = shift || 0;
-	my $id; 
-	stop_do_start( 
-		sub 
+	my $id =  stop_do_start( sub 
 		{ 
-			$id = add_effect(
+			my $id = add_effect(
 				{
 					chain 	=> $n, 
 					type 	=> full_effect_code($config->{latency_op}),
 					cop_id 	=> $ti{$n}->latency_op, # may be undef
 					values 	=> $config->{latency_op_init},
-				}) 
+				});
+			$config->{latency_op_set}->($id, $delay);
+			$id;
 		} 
 	);
 	

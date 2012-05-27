@@ -194,9 +194,10 @@ sub stop_do_start {
 sub _stop_do_start {
 	my ($coderef, $delay) = @_;
 		eval_iam('stop-sync');
-		$coderef->();
+		my $result = $coderef->();
 		sleeper($delay) if $delay;
 		eval_iam('start');
+		$result
 }
 sub restart_ecasound {
 	logit('::Engine','info',"killing ecasound processes @{$engine->{pids}}");

@@ -51,6 +51,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					add_effect
 					remove_effect
 					modify_effect
+					modify_multiple_effects
 
 					effect_update_copp_set
 					sync_effect_parameters
