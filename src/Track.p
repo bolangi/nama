@@ -8,7 +8,7 @@ our (
 );
 {
 package ::Track;
-use ::Log qw(logit);
+use ::Log qw(logpkg logsub);
 
 # Objects belonging to Track and its subclasses
 # have a 'class' field that is set when the 
@@ -904,7 +904,7 @@ sub playback_latency {
 
 {
 package ::SimpleTrack; # used for Master track
-use Modern::Perl; use Carp; use ::Log qw(logit);
+use Modern::Perl; use Carp; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status { $_[0]->rw ne 'OFF' ? 'REC' : 'OFF' }
@@ -914,7 +914,7 @@ sub unbusify {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 
-use Modern::Perl; use ::Log qw(logit);
+use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
 
@@ -928,7 +928,7 @@ sub version {0}
 }
 {
 package ::SlaveTrack; # for instrument monitor bus
-use Modern::Perl; use ::Log qw(logit);
+use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub width { $tn{$_[0]->target}->width }
@@ -944,7 +944,7 @@ sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::CacheRecTrack; # for graph generation
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 our @ISA = qw(::SlaveTrack);
 sub current_version {
 	my $track = shift;
@@ -962,7 +962,7 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 }
 {
 package ::MixDownTrack; 
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
@@ -981,7 +981,7 @@ sub rec_status {
 }
 {
 package ::EditTrack; use Carp qw(carp cluck);
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 our @ISA = '::Track';
 our $AUTOLOAD;
 sub AUTOLOAD {
@@ -1008,14 +1008,14 @@ sub playat_time {
 }
 {
 package ::VersionTrack;
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
 }
 {
 package ::MixTrack;
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 our @ISA ='::Track';
 # as a mix track, I have no sources of my own
 # when status is REC
