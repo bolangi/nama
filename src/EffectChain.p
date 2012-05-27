@@ -11,7 +11,7 @@ use Modern::Perl;
 use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
-use ::Log qw(logit);
+use ::Log qw(logpkg logsub);
 
 use ::Globals qw($fx_cache %tn $this_op);
 
@@ -66,7 +66,7 @@ sub new {
 		unless ($vals{global} xor $vals{project});
 	# we expect some effects
 
-	logit('::EffectChain','info',
+	logpkg('info',
 			"expected either non-empty ops_list or insert_data") 
 		unless $vals{ops_list} and scalar @{$vals{ops_list}} 
 		    or $vals{inserts_data} and scalar @{$vals{inserts_data}};
@@ -190,7 +190,7 @@ sub new {
 
 		}, $class;
 	$by_index{$n} = $object;
-	logit('::EffectChain','debug',sub{$object->dump});
+	logpkg('debug',sub{$object->dump});
 	$object;
 }
 
@@ -207,7 +207,7 @@ sub add_ops {
 	local $this_op; # restore to present value on exiting subroutine
 					# i.e. avoid save/restore using $old_this_op 
 
-	logit('::EffectChain','debug',$track->name,
+	logpkg('debug',$track->name,
 			qq(: adding effect chain ), $self->name, Dumper $self
 		 
 		);
@@ -239,7 +239,7 @@ sub add_ops {
 		# whatever value is supplied is guaranteed
 		# to be unique; not to collide with any other effect
 		
-		logit('::EffectChain','debug',"new id: $new_id");
+		logpkg('debug',"new id: $new_id");
 		my $orig_id = $_;
 		if ( $new_id ne $orig_id)
 		# re-write all controllers to belong to new id
