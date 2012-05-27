@@ -9,7 +9,6 @@ no warnings qw(uninitialized);
 our @ISA;
 use vars qw($n %by_name @all);
 use ::Globals qw(:all);
-use ::Log qw(logit);
 use ::Object qw( 
 				 name 
                  time
@@ -81,7 +80,7 @@ sub remove {
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	logit('::Mark','debug', "marks found: ",scalar @all);
+	logpkg('debug', "marks found: ",scalar @all);
 	# @all = (), return if scalar @all
 	@all = grep { $_->time != $mark->time } @all;
 
@@ -151,12 +150,12 @@ sub drop_mark {
 	my $here = eval_iam("getpos");
 
 	if( my $mark = $::Mark::by_name{$name}){
-		say "$name: a mark with this name exists already at: ", 
-			colonize($mark->time);
+		pager2("$name: a mark with this name exists already at: ", 
+			colonize($mark->time));
 		return
 	}
 	if( my ($mark) = grep { $_->time == $here} ::Mark::all()){
-		say q(This position is already marked by "),$mark->name,q(");
+		pager2( q(This position is already marked by "),$mark->name,q(") );
 		 return 
 	}
 
@@ -181,13 +180,14 @@ sub mark { # GUI_CODE
 }
 
 sub next_mark {
+	logsub("&next_mark");
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = eval_iam("cs-get-position");
 	my @marks = ::Mark::all();
 	for my $i ( 0..$#marks ){
 		if ($marks[$i]->time - $here > 0.001 ){
-			logit('::Mark','debug', "here: $here, future time: ", $marks[$i]->time);
+			logpkg('debug', "here: $here, future time: ", $marks[$i]->time);
 			set_position($marks[$i+$jumps]->time);
 			$this_mark = $marks[$i];
 			return;
@@ -195,6 +195,7 @@ sub next_mark {
 	}
 }
 sub previous_mark {
+	logsub("&previous_mark");
 	my $jumps = shift || 0;
 	$jumps and $jumps--;
 	my $here = eval_iam("getpos");
@@ -212,10 +213,12 @@ sub previous_mark {
 ## jump recording head position
 
 sub to_start { 
+	logsub("&to_start");
 	return if ::ChainSetup::really_recording();
 	set_position( 0 );
 }
 sub to_end { 
+	logsub("&to_end");
 	# ten seconds shy of end
 	return if ::ChainSetup::really_recording();
 	my $end = eval_iam('cs-get-length') - 10 ;  
@@ -226,13 +229,14 @@ sub jump {
 	my $delta = shift;
 	logsub("&jump");
 	my $here = eval_iam('getpos');
-	logit('::Mark','debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
+	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
 	$new_pos = $new_pos < $setup->{audio_length} ? $new_pos : $setup->{audio_length} - 10;
 	set_position( $new_pos );
 	sleeper( 0.6) if engine_running();
 }
 sub set_position {
+	logsub("&set_position");
 
     return if ::ChainSetup::really_recording(); # don't allow seek while recording
 
