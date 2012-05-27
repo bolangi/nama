@@ -17,11 +17,14 @@ sub set_preview_mode {
 
 	$mode->{preview} = "preview";
 
-	print "Setting preview mode.\n";
-	print "Using both REC and MON inputs.\n";
-	print "WAV recording is DISABLED.\n\n";
-	print "Type 'arm' to enable recording.\n\n";
-	# reconfigure_engine() will generate setup and start transport
+	pager2( <<'MSG');
+Setting preview mode.
+Using both REC and MON inputs.
+WAV recording is DISABLED.
+
+Type 'arm' to enable recording.
+MSG
+
 }
 sub set_doodle_mode {
 
@@ -33,16 +36,19 @@ sub set_doodle_mode {
 	
 	# reconfigure_engine will generate setup and start transport
 	
-	print "Setting doodle mode.\n";
-	print "Using live inputs only, no duplicate inputs\n";
-	print "Exit using 'preview' or 'arm' commands.\n";
+pager2( <<'MSG' );
+Setting doodle mode.
+Using live inputs only, no duplicate inputs
+Exit using 'preview' or 'arm' commands
+MSG
+
 }
 sub exit_preview_mode { # exit preview and doodle modes
 
 		logsub("&exit_preview_mode");
 		return unless $mode->{preview};
 		stop_transport() if engine_running();
-		logit('::Mode','debug', "Exiting preview/doodle mode");
+		pager2("Exiting preview/doodle mode");
 		$mode->{preview} = 0;
 
 }
