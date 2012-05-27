@@ -12,7 +12,7 @@ sub setup_user_customization {
 		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
-	logit('::Custom','debug','customization :', sub{yaml_out(\%custom)});
+	logpkg('debug','customization :', sub{yaml_out(\%custom)});
 	my $prompt;
 	$prompt = gen_coderef('prompt', $custom{prompt}) if $custom{prompt};
 	{ no warnings 'redefine';
@@ -30,7 +30,7 @@ sub setup_user_customization {
 				$fx_cache->{partial_label_to_full}->{$_} = $longform
 			}
 		 else 
-			{ logit('::Custom','info',
+			{ logpkg('info',
 				"$longform: effect not found, cannot create shortcut") 
 			}
  	} keys %{$custom{fxshortcuts}};
