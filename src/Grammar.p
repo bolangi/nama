@@ -150,6 +150,7 @@ sub eval_perl {
 #### Formatted text output
 
 sub show_versions {
+		no warnings 'uninitialized';
 		if (@{$this_track->versions} ){
 			my $cache_map = $this_track->cache_map;
 			"All versions: ". join(" ", 

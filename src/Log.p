@@ -25,6 +25,7 @@ sub initialize_logger {
 	$SIG{ __DIE__ } = sub { Carp::confess( @_ ) } if $cat_string;
 	
 	$appender = $logfile ? 'FILE' : 'STDERR';
+	$logfile //= "/dev/null";
 
 	my @cats = expand_cats(split ',', $cat_string);
 	#say "log cats: @cats";
