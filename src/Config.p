@@ -32,7 +32,7 @@ sub global_config {
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $config->{opts}->{f} ){
-		print("reading config file $config->{opts}->{f}\n");
+		logpkg('info',"reading config file $config->{opts}->{f}\n");
 		return read_file($config->{opts}->{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );
@@ -90,7 +90,7 @@ sub walk_tree {
 sub substitute{
 	my ($parent, $key)  = @_;
 	my $val = $parent->{$key};
-	#logit('::Config','debug', qq(key: $key val: $val\n) );
+	#logpkg('debug', qq(key: $key val: $val\n) );
 	ref $val and walk_tree($val)
 		or map{$parent->{$key} =~ s/$_/$subst{$_}/} keys %subst;
 }
@@ -98,7 +98,7 @@ sub first_run {
 	return if $config->{opts}->{f};
 	my $config_path = config_file();
 	$config_path = "$ENV{HOME}/$config_path" unless -e $config_path;
-	logit('::Config','debug', "config path: $config_path" );
+	logpkg('debug', "config path: $config_path" );
 	if ( ! -e $config_path and ! -l $config_path  ) {
 
 	# check for missing components
