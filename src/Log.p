@@ -90,5 +90,12 @@ sub logit {
 }
 }
 sub logsub { logit('SUB','debug',$_[0]) }
+
+*loggit = \&logit; # to avoid source filter on logit call below
+
+sub logpkg { 
+	my( $package, $line_no, $level, @message) = @_;
+	loggit($line_no,$package,$level, @message) 
+}
 	
 1;
