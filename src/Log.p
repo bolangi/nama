@@ -4,7 +4,7 @@ package ::Log;
 use Modern::Perl;
 use Log::Log4perl qw(get_logger :levels);
 use Exporter;
-use Carp;
+use Carp qw(carp cluck confess croak);
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(logit logsub initialize_logger);
 our $appender;
@@ -84,7 +84,14 @@ sub logit {
 	#confess("first call to logit");
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	return unless $category;
-	confess "illegal level: $level" unless $is_method{$level};
+
+	# convert Effects.pm to Audio::Nama::Effects to support logpkg
+	if( $category =~ m/\.pm$/)
+	{
+		$category = s/\.pm$//; # remove file suffix
+		$category = "Audio::Nama::$category";  # SKIP_PREPROC
+	}
+	cluck "illegal level: $level" unless $is_method{$level};
 	my $logger = get_logger($category);
 	$logger->$level($line_number_output, @message);
 }

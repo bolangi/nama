@@ -73,6 +73,7 @@ sub process {
 	my $text = $template->fill_in(HASH=>$hash);
 	my $rooted_text = &bestow_module_root($new_root,$text);
 	$rooted_text =~ s/logit\(/logit(__LINE__,/g;
+	$rooted_text =~ s/logpkg\(/logpkg(__FILE__,__LINE__,/g;
 
 # we are going to standardize on using :: as the 
 # root package name, so that coding will be
