@@ -43,7 +43,7 @@ sub calculate_and_adjust_latency {
 	return if $config->{opts}->{O};
 	
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-	logit('::Latency','debug',"starting node: $starting_track_name");
+	logpkg('debug',"starting node: $starting_track_name");
 
 	sibling_latency($starting_track_name);
 	apply_latency_ops();
@@ -142,30 +142,30 @@ sub jack_port_latency {
 	$direction = 'capture' if $dir eq 'input';
 	$direction = 'playback' if $dir eq 'output';
 	$direction or confess "$direction: illegal or missing direction";
-	logit('::Latency','debug', "name: $name, dir: $dir, direction: $direction");
+	logpkg('debug', "name: $name, dir: $dir, direction: $direction");
 
 	if ($name !~ /:/)
 	{
 		# we have only the client name, i.e. "system"
 		# pick a port from the ports list 
 
-		logit('::Latency','debug',"$name is client desriptor, lacks specific port");
+		logpkg('debug',"$name is client desriptor, lacks specific port");
 
 		# replace with a full port descriptor, i.e. "system:playback_1"
 		# but reverse direction for this:
 		
 		$name = $jack->{clients}->{$name}->{$reverse{$dir}}->[0];
 
-		logit('::Latency','debug', "replacing with $name");
+		logpkg('debug', "replacing with $name");
 	}
 	my ($client, $port) = client_port($name);
-	logit('::Latency','debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
+	logpkg('debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
 	my $node = jack_client($client)
-		or logit('::Latency','info',"$name: non existing JACK client"),
+		or logpkg('info',"$name: non existing JACK client"),
 		return;
 	$node->{$port}->{latency}->{$direction}->{min}
 		ne $node->{$port}->{latency}->{$direction}->{max}
-	and logit('::Latency','info','encountered unmatched latencies', 
+	and logpkg('info','encountered unmatched latencies', 
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }
