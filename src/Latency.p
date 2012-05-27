@@ -138,12 +138,11 @@ sub jack_client : lvalue {
 sub jack_port_latency {
 
 	my ($dir, $name) = @_; 
-	say "name: $name";
-	say "dir: $dir";
 	my $direction;
 	$direction = 'capture' if $dir eq 'input';
 	$direction = 'playback' if $dir eq 'output';
 	$direction or confess "$direction: illegal or missing direction";
+	logit('::Latency','debug', "name: $name, dir: $dir, direction: $direction");
 
 	if ($name !~ /:/)
 	{
