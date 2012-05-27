@@ -3,6 +3,7 @@
 
 package ::Bus;
 use Modern::Perl; use Carp; 
+use ::Log qw(logpkg);
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -29,11 +30,11 @@ sub new {
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	if (! $vals{name}){
-		say "missing bus name"; 
+		::pager2("missing bus name");
 		return
 	}
 	if ( $by_name{$vals{name}} ){ 
-		say "$vals{name}: bus name already exists. Skipping.";
+		::pager2("$vals{name}: bus name already exists. Skipping.");
 		return;
 	}
 	my $bus = bless { 
@@ -66,7 +67,7 @@ sub last {
 	$max;
 }
 
-sub remove { say $_[0]->name, " is system bus. No can remove." }
+sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
 { my %allows = (REC => 'REC/MON', MON => 'MON', OFF => 'OFF');
 sub allows { $allows{ $_[0]->rw } }
@@ -292,7 +293,7 @@ sub add_sub_bus {
 		@args
 	);
 
-	$tn{$name} and say qq($name: setting as mix track for bus "$name");
+	$tn{$name} and ::pager2( qq($name: setting as mix track for bus "$name"));
 
 	my $track = $tn{$name} // add_track($name);
 
@@ -313,10 +314,10 @@ sub add_send_bus {
 	
 	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
 	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
-		say($name,": bus name already in use. Aborting."), return;
+		::throw($name,": bus name already in use. Aborting."), return;
 	}
 	if ($bn{$name}){
-		say qq(monitor bus "$name" already exists. Updating with new tracks.");
+		::pager2( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
 	} else {
 	my @args = (
 		name => $name, 
