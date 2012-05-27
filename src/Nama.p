@@ -132,7 +132,7 @@ use ::Bunch ();
 use ::Wavinfo ();
 use ::Midi ();
 use ::Latency ();
-use ::Log qw(logit logsub initialize_logger);
+use ::Log qw(logit loggit logpkg logsub initialize_logger);
 
 sub main { 
 	bootstrap_environment() ;
