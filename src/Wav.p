@@ -5,7 +5,7 @@ use ::Object qw(name version dir);
 use warnings;
 use ::Assign qw(:all);
 use ::Util qw(join_path);
-use ::Log qw(logit);
+use ::Log qw(logsub logpkg);
 use Memoize qw(memoize unmemoize); # called by code in ::Memoize.pm
 no warnings qw(uninitialized);
 use Carp;
@@ -16,10 +16,10 @@ sub get_versions {
 	my ($dir, $basename) = ($self->dir, $self->basename);
 #	print "dir: ", $self->dir(), $/;
 	#print "basename: ", $self->basename(), $/;
-	logit(__PACKAGE__,'debug',"getver: dir $dir basename $basename sep $sep ext $ext");
+	logpkg('debug',"getver: dir $dir basename $basename sep $sep ext $ext");
 	my %versions = ();
 	for my $candidate ( candidates($dir) ) {
-	#	logit(__PACKAGE__,'debug',"candidate: $candidate");
+	#	logpkg('debug',"candidate: $candidate");
 	
 		my( $match, $dummy, $num) = 
 			( $candidate =~ m/^ ( $basename 
@@ -29,7 +29,7 @@ sub get_versions {
 			  ); # regex statement
 		if ( $match ) { $versions{ $num || 'bare' } =  $match }
 	}
-	logit(__PACKAGE__,'debug',sub{"get_version: " , ::yaml_out(\%versions)});
+	logpkg('debug',sub{"get_version: " , ::yaml_out(\%versions)});
 	%versions;
 }
 
@@ -40,7 +40,7 @@ sub candidates {
 	my @candidates = readdir $wavdir;
 	closedir $wavdir;
 	@candidates = grep{ ! (-s join_path($dir, $_) == 44 ) } @candidates;
-	#$logit(__PACKAGE__,'debug',join $/, @candidates);
+	#logpkg('debug',join $/, @candidates);
 	@candidates;
 }
 
@@ -54,7 +54,7 @@ sub targets {
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	logit(__PACKAGE__,'debug',sub{"\%versions\n================\n", yaml_out(\%versions)});
+	logpkg('debug',sub{"\%versions\n================\n", yaml_out(\%versions)});
 	\%versions;
 }
 
