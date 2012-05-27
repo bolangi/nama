@@ -79,7 +79,7 @@ sub prepare_to_cache {
 	{
 		# set the input path
 		$g->add_path('wav_in',$track->name);
-		logit('::CacheTrack','debug', "The graph after setting input path:\n$g");
+		logpkg('debug', "The graph after setting input path:\n$g");
 
 		# update cache map to enable 'uncache' command TODO:
 		# new design
@@ -94,13 +94,13 @@ sub prepare_to_cache {
 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
 	}
 
-	logit('::CacheTrack','debug', "The graph after bus routing:\n$g");
+	logpkg('debug', "The graph after bus routing:\n$g");
 	::ChainSetup::prune_graph();
-	logit('::CacheTrack','debug', "The graph after pruning:\n$g");
+	logpkg('debug', "The graph after pruning:\n$g");
 	::Graph::expand_graph($g); 
-	logit('::CacheTrack','debug', "The graph after adding loop devices:\n$g");
+	logpkg('debug', "The graph after adding loop devices:\n$g");
 	::Graph::add_inserts($g);
-	logit('::CacheTrack','debug', "The graph with inserts:\n$g");
+	logpkg('debug', "The graph with inserts:\n$g");
 	my $success = ::ChainSetup::process_routing_graph();
 	::ChainSetup::write_chains();
 	remove_temporary_tracks();
@@ -143,8 +143,8 @@ sub complete_caching {
 }
 sub update_cache_map {
 
-		logit('::CacheTrack','debug', "updating track cache_map");
-		#logit('::CacheTrack','debug',sub{"cache map\n".yaml_out($track->cache_map)});
+		logpkg('debug', "updating track cache_map");
+		#logpkg('debug',sub{"cache map\n".yaml_out($track->cache_map)});
 		my $cache_map = $track->cache_map;
 		my @inserts_list = ::Insert::get_inserts($track->name);
 		my @ops_list = $track->fancy_ops;
@@ -195,15 +195,15 @@ sub poll_cache_progress {
 	my $status = eval_iam('engine-status'); 
 	my $here   = eval_iam("getpos");
 	update_clock_display();
-	logit('::CacheTrack','debug', "engine time:   ". d2($here));
-	logit('::CacheTrack','debug', "engine status:  $status");
+	logpkg('debug', "engine time:   ". d2($here));
+	logpkg('debug', "engine status:  $status");
 
 	return unless 
 		   $status =~ /finished|error|stopped/ 
 		or $here > $processing_time;
 
 	say "Done.";
-	logit('::CacheTrack','debug', engine_status(current_position(),2,1));
+	logpkg('debug', engine_status(current_position(),2,1));
 	#revise_prompt();
 	stop_polling_cache_progress();
 }
