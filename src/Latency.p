@@ -149,16 +149,15 @@ sub jack_port_latency {
 		# we have only the client name, i.e. "system"
 		# pick a port from the ports list 
 
-		say "$name is client only";
+		logit('::Latency','debug',"$name is client desriptor, lacks specific port");
 
 		# replace with a full port descriptor, i.e. "system:playback_1"
 		# but reverse direction for this:
 		
 		$name = $jack->{clients}->{$name}->{$reverse{$dir}}->[0];
 
-		say "replacing with $name";
+		logit('::Latency','debug', "replacing with $name");
 	}
-	say "name: $name";
 	my ($client, $port) = client_port($name);
 	logit('::Latency','debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
 	my $node = jack_client($client)
