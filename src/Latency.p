@@ -7,7 +7,7 @@ use ::Globals qw(:all);
 use List::Util qw(max);
 use Carp qw(confess);
 
-###### For etd only adjustment
+###### 
 #
 #   remove (or reset) latency operators
 #   generate and connect setup
