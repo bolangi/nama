@@ -205,7 +205,7 @@ sub op_latency {
 	my $op = shift;
 	return 0 if is_controller($op); # skip controllers
 	my $p = latency_param($op);
-	defined $p 
+	defined $p and ! bypassed($op)
 		? get_live_param($op, $p) 
 		: 0
 }
