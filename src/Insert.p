@@ -5,8 +5,9 @@ use Carp;
 no warnings qw(uninitialized redefine);
 our $VERSION = 0.1;
 use vars qw(%by_index);
+use ::Log qw(logpkg);
+use ::Log qw(logpkg);
 use ::Globals qw($jack $setup $config);
-use ::Log qw(logit);
 use ::Object qw(
 [% qx( ./strip_comments ./insert_fields ) %]
 );
@@ -248,7 +249,7 @@ sub latency {
 package ::PostFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 sub add_paths {
 
 	# Since this routine will be called after expand_graph, 
@@ -257,12 +258,12 @@ sub add_paths {
 	
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	logit('::Insert','debug', "add_insert for track: $name");
+	::logpkg('debug', "add_insert for track: $name");
 
 	my $t = $::tn{$name}; 
 
 
-	logit('::Insert','debug', "insert structure: ", sub{$self->dump});
+	::logpkg('debug', "insert structure: ", sub{$self->dump});
 
 	my ($successor) = $g->successors($name);
 
@@ -274,7 +275,7 @@ sub add_paths {
 	my $wet = $::tn{$self->wet_name};
 	my $dry = $::tn{$self->dry_name};
 
-	logit('::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+	::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
 
 	# if no insert target, our insert will 
 	# a parallel effects host with wet/dry dry branches
@@ -300,7 +301,7 @@ sub add_paths {
 		# wet send path (no extra track): track -> loop -> output
 
 		my @edge = ($loop, output_node($self->{send_type}));
-		logit('::Insert','debug', "edge: @edge");
+		::logpkg('debug', "edge: @edge");
 		$g->add_path( $name, @edge);
 		$g->set_vertex_attributes($loop, {n => $t->n});
 		$g->set_edge_attributes(@edge, { 
@@ -331,7 +332,7 @@ sub add_paths {
 package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
-use ::Log qw(logit);
+use ::Log qw(logpkg);
 sub add_paths {
 
 # --- predecessor --+-- wet-send    wet-return ---+-- insert_pre -- track
@@ -341,12 +342,12 @@ sub add_paths {
 
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
-	logit('::Insert','debug', "add_insert for track: $name");
+	::logpkg('debug', "add_insert for track: $name");
 
 	my $t = $::tn{$name}; 
 
 
-	logit('::Insert','debug', "insert structure:", sub{$self->dump});
+	::logpkg('debug', "insert structure:", sub{$self->dump});
 
 		my ($predecessor) = $g->predecessors($name);
 		$g->delete_edge($predecessor, $name);
@@ -354,13 +355,13 @@ sub add_paths {
 		my $wet = $::tn{$self->wet_name};
 		my $dry = $::tn{$self->dry_name};
 
-		logit('::Insert','debug', "found wet: ", $wet->name, " dry: ",$dry->name);
+		::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
 
 
 		#pre:  wet send path (no track): predecessor -> output
 
 		my @edge = ($predecessor, output_node($self->{send_type}));
-		logit('::Insert','debug', "edge: @edge");
+		::logpkg('debug', "edge: @edge");
 		$g->add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
