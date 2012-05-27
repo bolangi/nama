@@ -109,8 +109,8 @@ sub initialize_effects_data {
 sub load_project {
 	logsub("&load_project");
 	my %h = @_;
-	logit('::Project','debug', sub{yaml_out \%h});
-	print("no project name.. doing nothing.\n"),return 
+	logpkg('debug', sub{yaml_out \%h});
+	pager2("no project name.. doing nothing."),return 
 		unless $h{name} or $project->{name};
 
 	$project->{name} = $h{name} if $h{name};
@@ -122,7 +122,7 @@ sub load_project {
 			map{create_dir($_)} project_dir(), this_wav_dir() ;
 		}
 		else 
-		{ logit('::Project','info',
+		{ logpkg('info',
 			qq(Project "$project->{name}" does not exist.\n Loading project "untitled".)
 			);
 			load_project( qw{name untitled create 1} );
@@ -186,9 +186,9 @@ sub load_project {
 	$ui->global_version_buttons(); 
 	$ui->refresh_group;
 
-	logit('::Project','debug', "project_root: ", project_root());
-	logit('::Project','debug', "this_wav_dir: ", this_wav_dir());
-	logit('::Project','debug', "project_dir: ", project_dir());
+	logpkg('debug', "project_root: ", project_root());
+	logpkg('debug', "this_wav_dir: ", this_wav_dir());
+	logpkg('debug', "project_dir: ", project_dir());
 
  1;
 }	
@@ -197,7 +197,7 @@ sub dig_ruins { # only if there are no tracks
 	
 	logsub("&dig_ruins");
 	return if ::Track::user();
-	logit('::Project','debug', "looking for WAV files");
+	logpkg('debug', "looking for WAV files");
 
 	# look for wave files
 		
@@ -215,7 +215,7 @@ sub dig_ruins { # only if there are no tracks
 	map{ $wavs{$_}++ } @wavs;
 	@wavs = keys %wavs;
 
-	logit('::Project','debug', "tracks found: @wavs");
+	logpkg('debug', "tracks found: @wavs");
  
 	$ui->create_master_and_mix_tracks();
 
@@ -231,14 +231,14 @@ sub remove_riff_header_stubs {
 	logsub("&remove_riff_header_stubs");
 	
 
-	logit('::Project','debug', "this wav dir: ", this_wav_dir());
+	logpkg('debug', "this wav dir: ", this_wav_dir());
 	return unless this_wav_dir();
          my @wavs = File::Find::Rule ->name( qr/\.wav$/i )
                                         ->file()
                                         ->size(44)
                                         ->extras( { follow => 1} )
                                      ->in( this_wav_dir() );
-    logit('::Project','debug', join $/, @wavs);
+    logpkg('debug', join $/, @wavs);
 
 	map { unlink $_ } @wavs; 
 }
@@ -291,7 +291,7 @@ sub new_project_template {
 
 	# skip if project is empty
 
-	say("No user tracks found, aborting.\n",
+	throw("No user tracks found, aborting.\n",
 		"Cannot create template from an empty project."), 
 		return if scalar @tracks < 3;
 
@@ -364,7 +364,7 @@ sub use_project_template {
 
 	# skip if project isn't empty
 
-	say("User tracks found, aborting. Use templates in an empty project."), 
+	throw("User tracks found, aborting. Use templates in an empty project."), 
 		return if scalar @tracks > 2;
 
 	# load template
@@ -382,7 +382,7 @@ sub list_project_templates {
 }
 sub remove_project_template {
 	map{my $name = $_; 
-		say "$name: removing template";
+		pager2("$name: removing template");
 		$name .= ".yml" unless $name =~ /\.yml$/;
 		unlink join_path( project_root(), "templates", $name);
 	} @_;
