@@ -13,7 +13,7 @@ sub save_state {
 
 	# some stuff get saved independently of our state file
 	
-	logit('::Persistence','debug', "saving palette");
+	logpkg('debug', "saving palette");
 	$ui->save_palette;
 
 	# do nothing more if only Master and Mixdown
@@ -68,7 +68,7 @@ sub save_system_state {
 	
 	$this_track_name = $this_track->name;
 
-	logit('::Persistence','debug', "copying tracks data");
+	logpkg('debug', "copying tracks data");
 
 	map { push @tracks_data, $_->as_hash } ::Track::all();
 	# print "found ", scalar @tracks_data, "tracks\n";
@@ -79,19 +79,19 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-	logit('::Persistence','debug', "copying bus data");
+	logpkg('debug', "copying bus data");
 
 	@bus_data = map{ $_->as_hash } ::Bus::all();
 
 	# prepare inserts data for storage
 	
-	logit('::Persistence','debug', "copying inserts data");
+	logpkg('debug', "copying inserts data");
 	
 	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
-	logit('::Persistence','debug', "copying marks data");
+	logpkg('debug', "copying marks data");
 	@marks_data = map{ $_->as_hash } ::Mark::all();
 
 	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
@@ -110,7 +110,7 @@ sub save_system_state {
 	my $max = scalar @{$text->{command_history}};
 	$max = 50 if $max > 50;
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
-	logit('::Persistence','debug', "serializing");
+	logpkg('debug', "serializing");
 
 	my @formats = $path =~ /dump_all/ ? 'yaml' : $config->serialize_formats;
 
@@ -161,7 +161,7 @@ sub get_newest {
 			[$_, -M $_, $suffix] 
 		} 
 		glob("$path*");
-	logit('::Persistence','debug', sub{yaml_out \@sorted});
+	logpkg('debug', sub{yaml_out \@sorted});
 	($sorted[0]->[0], $sorted[0]->[2]);
 }
 }
@@ -219,15 +219,15 @@ sub restore_state {
 	# i.e. State.json and State.yml
 	my( $path, $suffix ) = get_newest($filename);
 	
-	logit('::Persistence','debug', "using file: $path");
+	logpkg('debug', "using file: $path");
 
-	say(
+	throw(
 		$path ? "path: == $path.* ==," : "undefined path,"
 			," state file not found"), return if ! -f $path;
 	my $source = read_file($path);
 
-	logit('::Persistence','debug', "suffix: $suffix");	
-	logit('::Persistence','debug', "source: $source");
+	logpkg('debug', "suffix: $suffix");	
+	logpkg('debug', "source: $source");
 	my $ref = decode($source, $suffix);
 
 	# start marshalling with clean slate	
@@ -266,7 +266,7 @@ sub restore_state {
 
 	# remove null entries
 	
-	map { say "deleted null effect $_"; 
+	map { logpkg('debug', "deleting null effect $_"); 
 			delete $fx->{applied}->{$_}; 
 			delete $fx->{params}->{$_} } 
 	grep {     
@@ -294,7 +294,7 @@ sub restore_state {
 	map {
 		my $var = $_;
 		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
-		logit('::Persistence','debug', "want to eval: $eval_text "); 
+		logpkg('debug', "want to eval: $eval_text "); 
 		eval $eval_text;
 	} @vars;
 
@@ -421,7 +421,7 @@ sub restore_state {
 			@tracks_data;
 	}
 
-	logit('::Persistence','debug', "inserts data", sub{yaml_out \@inserts_data});
+	logpkg('debug', "inserts data", sub{yaml_out \@inserts_data});
 
 
 	# make sure Master has reasonable output settings
@@ -563,7 +563,7 @@ sub restore_state {
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
-	logit('::Persistence','debug', sub{ join " ", map{ ref $_, $/ } ::Track::all() });
+	logpkg('debug', sub{ join " ", map{ ref $_, $/ } ::Track::all() });
 
 
 	# restore Alsa mixer settings
@@ -749,9 +749,9 @@ sub convert_effect_chains {
 	return unless $resolved;
 	my $source = read_file($resolved);
 	carp("$resolved: empty file"), return unless $source;
-	logit('::Persistence','debug', "format: $format, source: \n$source");
+	logpkg('debug', "format: $format, source: \n$source");
 	my $ref = decode($source, $format);
-	logit('::Persistence','debug', sub{Dumper $ref});
+	logpkg('debug', sub{Dumper $ref});
 
 	# deal with both existing formats
 	
@@ -894,9 +894,9 @@ sub restore_effect_chains {
 		carp("$resolved: file not found"), return unless $resolved;
 		my $source = read_file($resolved);
 		carp("$resolved: empty file"), return unless $source;
-		logit('::Persistence','debug', "format: $format, source: \n",$source);
+		logpkg('debug', "format: $format, source: \n",$source);
 		my $ref = decode($source, $format);
-		logit('::Persistence','debug', sub{Dumper $ref});
+		logpkg('debug', sub{Dumper $ref});
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
