@@ -85,12 +85,6 @@ sub logit {
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	return unless $category;
 
-	# convert Effects.pm to Audio::Nama::Effects to support logpkg
-	if( $category =~ m/\.pm$/)
-	{
-		$category = s/\.pm$//; # remove file suffix
-		$category = "Audio::Nama::$category";  # SKIP_PREPROC
-	}
 	cluck "illegal level: $level" unless $is_method{$level};
 	my $logger = get_logger($category);
 	$logger->$level($line_number_output, @message);
@@ -101,8 +95,13 @@ sub logsub { logit('SUB','debug',$_[0]) }
 *loggit = \&logit; # to avoid source filter on logit call below
 
 sub logpkg { 
-	my( $package, $line_no, $level, @message) = @_;
-	loggit($line_no,$package,$level, @message) 
+	my( $file, $line_no, $level, @message) = @_;
+	# convert Effects.pm to Audio::Nama::Effects to support logpkg
+	my $pkg = $file;
+	($pkg) = $file =~ m| ([^/]+)\.pm$ |x;
+	$pkg = "Audio::Nama::$pkg";  # SKIP_PREPROC
+	#say "category: $pkg";
+	logit ($line_no,$pkg,$level, @message) 
 }
 	
 1;
