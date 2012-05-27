@@ -53,11 +53,13 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					modify_effect
 					modify_multiple_effects
 
+					effect_update
 					effect_update_copp_set
 					sync_effect_parameters
 					find_op_offsets
 					apply_ops
 					expanded_ops_list
+					
 
 ) ] );
 
