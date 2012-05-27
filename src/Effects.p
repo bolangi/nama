@@ -59,6 +59,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					find_op_offsets
 					apply_ops
 					expanded_ops_list
+				
+					is_read_only
 					
 
 ) ] );
