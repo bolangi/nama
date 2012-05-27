@@ -6,7 +6,7 @@ use Log::Log4perl qw(get_logger :levels);
 use Exporter;
 use Carp qw(carp cluck confess croak);
 our @ISA = 'Exporter';
-our @EXPORT_OK = qw(logit logsub initialize_logger);
+our @EXPORT_OK = qw(logit loggit logpkg logsub initialize_logger);
 our $appender;
 
 sub initialize_logger {
