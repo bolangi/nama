@@ -111,7 +111,7 @@ sub new {
 	catch {};  # we do nothing
 
 	{ no warnings 'uninitialized';
-	::logit("::IO","debug","I belong to track $name\n",
+	::logpkg('debug',"I belong to track $name\n",
 		sub{Dumper($self)} );
 	}
 	
