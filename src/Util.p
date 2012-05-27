@@ -9,7 +9,7 @@ use Carp;
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Globals qw(:all);
-use ::Log qw(logit);
+use ::Log qw(logit logpkg);
 
 no warnings 'uninitialized';
 
@@ -230,7 +230,7 @@ sub dest_type {
 sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
-	logit('::Util','debug',"creating directory [ $dir ]");
+	logpkg('debug',"creating directory [ $dir ]");
 		-e $dir 
 #and (carp "create_dir: '$dir' already exists, skipping...\n") 
 			or system qq( mkdir -p $dir)
