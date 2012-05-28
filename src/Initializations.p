@@ -209,20 +209,19 @@ sub initialize_interfaces {
 
 	$project->{name} = shift @ARGV;
 	{no warnings 'uninitialized';
-	logit('::Config','debug',"project name: $project->{name}");
+	logpkg('debug',"project name: $project->{name}");
 	}
 
-	logit('::Config','debug',
-		sub{"Command line options\n".  yaml_out($config->{opts})});
+	logpkg('debug', sub{"Command line options\n".  yaml_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	
-	logit('::Config','debug',sub{"Config data\n".Dumper $config});
+	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
 
 	start_ecasound();
 
-	logit('::Config','debug',"reading config file");
+	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
 		$config->{root_dir} = $config->{opts}->{d};
@@ -320,7 +319,7 @@ sub start_ecasound {
 						 }	split " ", qx(pgrep ecasound);
 }
 sub select_ecasound_interface {
-	logit('::Engine','info','Not initializing engine: options E or A are set.'),
+	logpkg('info','Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
 
 	# Net-ECI if requested by option, or as fallback 
@@ -332,14 +331,14 @@ sub select_ecasound_interface {
 }
 
 sub start_ecasound_libecasoundc {
-	logit('::Engine','info',"Using Ecasound via Audio::Ecasound (libecasoundc)");
+	logpkg('info',"Using Ecasound via Audio::Ecasound (libecasoundc)");
 	no warnings qw(redefine);
 	*eval_iam = \&eval_iam_libecasoundc;
 	$engine->{ecasound} = Audio::Ecasound->new();
 }
 	
 sub start_ecasound_net_eci {
-	logit('::Engine','info',"Using Ecasound via Net-ECI"); 
+	logpkg('info',"Using Ecasound via Net-ECI"); 
 	no warnings qw(redefine);
 	launch_ecasound_server($config->{engine_tcp_port});
 	init_ecasound_socket($config->{engine_tcp_port}); 
