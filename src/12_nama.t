@@ -1,6 +1,7 @@
 package ::; 
 use ::;
 use Test::More qw(no_plan);
+use File::Path qw(make_path remove_tree);
 use Cwd;
 
 use strict;
@@ -13,7 +14,18 @@ diag ("TESTING $0\n");
 
 diag("working directory: ",cwd);
 
+our $test_dir = "/tmp/nama-test";
+
+cleanup_dirs();
+setup_dirs();
+
+sub cleanup_dirs { 	chdir "/tmp"; remove_tree($test_dir) }
+sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
+
+diag( qx(find $test_dir) );
+
 apply_test_harness();
+
 diag "options: @ARGV";
 
 bootstrap_environment();
@@ -60,7 +72,7 @@ diag("project project wav dir: ".this_wav_dir());
 
 #diag(map{ $_->dump} values %::Track::by_index );
 
-is( project_dir(), "./$test_project", "establish project directory");
+is( project_dir(), "$test_dir/$test_project", "establish project directory");
 
 force_jack();
 
@@ -79,8 +91,8 @@ my $yaml = q(---
   args:
     name: sax
     width: 1
-    full_path: test_dir/sax_1.wav
-  ecs_string: -f:s16_le,1,44100,i -o:test_dir/sax_1.wav
+    full_path: /foo/.wav/sax_1.wav
+  ecs_string: -f:s16_le,1,44100,i -o:/foo/.wav/sax_1.wav
 -
   class: from_wav
   args:
@@ -259,7 +271,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:alsa,default
 -a:3 -o:loop,Master_in
--a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
+-a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
 EXPECTED
 
 check_setup('ALSA basic setup' );
@@ -281,7 +293,7 @@ $expected_setup_lines = <<EXPECTED;
 
 -a:1 -o:jack_multi,system:playback_1,system:playback_2
 -a:3 -o:loop,Master_in
--a:R3 -f:s16_le,1,44100,i -o:test/.wav/sax_1.wav
+-a:R3 -f:s16_le,1,44100,i -o:/tmp/nama-test/test/.wav/sax_1.wav
 
 EXPECTED
 
@@ -378,7 +390,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:loop,Master_out
 -a:3 -o:loop,Master_in
 -a:J1 -o:jack_multi,system:playback_5,system:playback_6
--a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+-a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
 
 check_setup('JACK mixdown setup with main out' );
@@ -402,7 +414,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:1 -o:loop,Master_out
 -a:3 -o:loop,Master_in
 -a:J1 -o:alsa,default
--a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+-a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
 
 check_setup('ALSA mixdown setup with main out' );
@@ -432,7 +444,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:5,6,7 -o:loop,Boost_in
 -a:8 -o:loop,Boost_out
 -a:J8 -o:alsa,default
--a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+-a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
 gen_alsa();
 check_setup('Mixdown in mastering mode - ALSA');
@@ -461,7 +473,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:5,6,7 -o:loop,Boost_in
 -a:8 -o:loop,Boost_out
 -a:J8 -o:jack_multi,system:playback_5,system:playback_6
--a:Mixdown -f:s16_le,2,44100,i -o:test/.wav/Mixdown_1.wav
+-a:Mixdown -f:s16_le,2,44100,i -o:/tmp/nama-test/test/.wav/Mixdown_1.wav
 EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
@@ -659,12 +671,7 @@ sub check_setup {
 		$test_name);
 }
 
-sub cleanup { 	
-		## WARNING!!! 
-		my $killing_power_up = '-rf';
-		qx(rm $killing_power_up ./test  ./.effects_cache.json);
-}
 
-cleanup();
+cleanup_dirs();
 1;
 __END__

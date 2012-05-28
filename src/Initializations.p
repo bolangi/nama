@@ -9,7 +9,7 @@ sub apply_test_harness {
 
 				qw(-t), # set text mode 
 
-				qw(-d .), # use cwd as project root
+				qw(-d /tmp/nama-test),  # HARDCODED
 				
 				q(-E), # suppress loading Ecasound
 

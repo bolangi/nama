@@ -2,12 +2,16 @@ package ::;
 use ::;
 use Test::More qw(no_plan);
 use Cwd;
+use File::Path qw(make_path remove_tree);
 
 use strict;
 use warnings;
 no warnings qw(uninitialized);
 
 our ($expected_setup_lines);
+our $test_dir = "/tmp/nama-test";
+make_path($test_dir);
+
 
 diag ("TESTING $0\n");
 
@@ -52,15 +56,9 @@ sub check_setup {
 		$test_name);
 }
 
-sub cleanup { 	
-		unlink './test/Setup.ecs';
-		rmdir './test/.wav';
-		rmdir './test';
-		rmdir './untitled/.wav';
-		rmdir './untitled';
-		unlink './.effects_cache';
-}
+sub cleanup { 	remove_tree($test_dir) }
 
+chdir "/tmp";
 cleanup();
 1;
 __END__
