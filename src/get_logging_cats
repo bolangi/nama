@@ -1,1 +1,1 @@
-grep 'logit(' *.p | perl -ne '/logit\(.::(\w+)/ and $cat{$1}++; END{ print join $/, keys %cat}'
+ls *.p | perl -pe 's/\.p$//; s/^/Audio::Nama::/'
