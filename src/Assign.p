@@ -127,7 +127,7 @@ sigil:      $sigil
 full_class_path: $full_class_path
 DEBUG
 		if ( ! $sigil ){
-			$logger->logwarn(sub{
+			$logger->debug(sub{
 			"didn't find a match for $key in ", join " ", @vars, $/;
 			});
 		} 
