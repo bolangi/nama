@@ -38,6 +38,7 @@ lib/Audio/Nama/Log.pm
 lib/Audio/Nama/Mark.pm
 lib/Audio/Nama/Memoize.pm
 lib/Audio/Nama/Midi.pm
+lib/Audio/Nama/Mix.pm
 lib/Audio/Nama/Modes.pm
 lib/Audio/Nama/Mute_Solo_Fade.pm
 lib/Audio/Nama/Object.pm

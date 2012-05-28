@@ -116,6 +116,7 @@ use ::Persistence ();
 use ::ChainSetup (); # separate namespace
 use ::Graph ();
 use ::Modes ();
+use ::Mix ();
 use ::Memoize ();
 
 use ::Engine_setup ();
