@@ -235,7 +235,7 @@ sub _insert_effect {  # call only from add_effect
 
 	if ($running){
 		$ui->stop_heartbeat;
-		mute();
+		::mute();
 		eval_iam('stop-sync');
 		sleeper( 0.05); 
 	}
@@ -289,7 +289,7 @@ sub _insert_effect {  # call only from add_effect
 	if ($running){
 		eval_iam('start');	
 		sleeper(0.3);
-		unmute();
+		::unmute();
 		$ui->start_heartbeat;
 	}
 	$op
