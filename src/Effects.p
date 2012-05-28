@@ -25,6 +25,7 @@ sub import_engine_subs {
 	*engine_running		= \&::engine_running;
 	*eval_iam			= \&::eval_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
+	*sleeper			= \&::sleeper;
 }
 
 use Exporter qw(import);
