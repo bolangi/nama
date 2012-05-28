@@ -17,6 +17,7 @@
 	$raw_to_disk_format
 	$cache_to_disk_format
 	$mixer_out_format
+	$sample_rate
 
 # category: engine
 
