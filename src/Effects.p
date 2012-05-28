@@ -62,6 +62,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					expanded_ops_list
 				
 					is_read_only
+					bypass_effects
 					
 
 ) ] );
