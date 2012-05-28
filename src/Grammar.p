@@ -198,6 +198,7 @@ sub show_effect {
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	map
 	{ 
+		no warnings 'uninitialized';
 		my $name = $pnames[$_]->{name};
 		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
 		push @lines, "    ".($_+1).q(. ) . $name . ": ".  params($op_id)->[$_] . "\n";
