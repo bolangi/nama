@@ -6,7 +6,7 @@ use feature 'state';
 use strict;
 use warnings;
 no warnings q(uninitialized);
-use Carp;
+use Carp qw(carp confess croak cluck);
 use YAML::Tiny;
 use File::Slurp;
 use File::HomeDir;
