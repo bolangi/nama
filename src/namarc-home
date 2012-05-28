@@ -2,8 +2,6 @@
 
 project_root: ~/nama
 
-autosave_interval: 0
-
 #eager_mode: doodle
 
 midish_enable: 0
@@ -63,7 +61,7 @@ use_group_numbering: 1
 
 press_space_to_start_transport: 0
 
-execute_on_project_load: eval $engine->{events}->{poll_jack} = undef;
+#execute_on_project_load: eval $engine->{events}->{poll_jack} = undef;
 
 quietly_remove_tracks: 0
 
