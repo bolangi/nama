@@ -76,11 +76,14 @@ sub refresh_fade_controller {
 	my $operator  = ::type($track->fader);
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
-	my $controller; # effect ID
+	my $controller;
 	($controller) = @{owns($track->fader)} if $track->fader;
-
-	logpkg('debug',"removing fade controller");
-	remove_effect($controller) if $controller;
+	if( $controller )
+	{
+		logpkg('debug',$track->name, ": existing controller: $controller");
+		logpkg('debug',"removing fade controller");
+		remove_effect($controller);
+	}
 
 	return unless
 		my @pairs = fader_envelope_pairs($track); 
@@ -91,6 +94,8 @@ sub refresh_fade_controller {
 
 	# add controller
 	logpkg('debug',"applying fade controller");
+
+	# we try to re-use the controller ID
 	add_effect({
 		cop_id		=> $controller,
 		parent_id 	=> $track->fader,

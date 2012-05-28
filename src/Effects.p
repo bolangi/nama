@@ -672,9 +672,14 @@ sub cop_add {
 	#
 	logpkg('debug',"$id: returning existing id") if $id and fx($id);
 	return $id if $id and fx($id);
-	
-	$id = $p->{cop_id} = $fx->{id_counter}  ;
-	logpkg('debug',"$id: cop id issued");
+
+	my 	$allocated = "recycled";
+	if ( ! $id ){ 
+		$id = $p->{cop_id} = $fx->{id_counter};
+		$allocated = "issued";
+	}
+
+	logpkg('debug',"$id: cop id $allocated");
 
 	my $i = effect_index($type);
 
