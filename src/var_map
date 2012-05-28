@@ -286,3 +286,11 @@
 	**								$project->{config}
 	$beep_command 					$config->{beep_command}
 	$enforce_channel_bounds    $config->{enforce_channel_bounds}
+	**								$config->{category}
+	** 								$engine->{jack_seek_delay}
+	**								$config->{want_logging}
+	**								$config->{latency_op}
+	**								$config->{latency_op_init}
+	**								$config->{latency_op_set}
+	**								$jack->{use_jacks}
+
