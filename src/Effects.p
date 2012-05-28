@@ -26,6 +26,10 @@ sub import_engine_subs {
 	*eval_iam			= \&::eval_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
+	*command_process    = \&::command_process;
+	*generate_setup		= \&::generate_setup;
+	*connect_transport  = \&::connect_transport;
+	*update_clock_display = \&::update_clock_display;
 }
 
 use Exporter qw(import);
@@ -63,7 +67,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 				
 					is_read_only
 					bypass_effects
+					automix
 					
+
 
 ) ] );
 
@@ -215,7 +221,7 @@ sub _add_effect {
 		if (engine_running())
 		{ 
 			$ti{$n}->mute;
-			stop_do_start( sub{ apply_op($id) }, 0.05);
+			::stop_do_start( sub{ apply_op($id) }, 0.05);
 			$ti{$n}->unmute;
 		}
 		else { apply_op($id) }
