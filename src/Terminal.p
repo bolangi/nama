@@ -137,9 +137,9 @@ sub process_line {
 		$text->{previous_cmd} = $user_input;
 		command_process( $user_input );
 		reconfigure_engine() 
-			or eval_iam('cs-connected') 
-			and remove_latency_ops() 
-			and calculate_and_adjust_latency();
+			#or eval_iam('cs-connected') 
+			#and remove_latency_ops() 
+			#and calculate_and_adjust_latency();
 		revise_prompt();
 	}
 }
