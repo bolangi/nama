@@ -9,10 +9,6 @@ our @ISA = 'Exporter';
 our @EXPORT_OK = qw(logit loggit logpkg logsub initialize_logger);
 our $appender;
 
-{ my %is_debug;
-
-sub _level { $is_debug{$_[0]} ? 'DEBUG' : 'INFO' }
-
 sub initialize_logger {
 	my $cat_string = shift;
 
@@ -33,7 +29,6 @@ sub initialize_logger {
 
 	my @cats = expand_cats(split ',', $cat_string);
 	#say "log cats: @cats";
-	%is_debug = map{ $_ => 1 } @cats;
 	
 	@cats = grep{ ! $negate{$_} } expand_cats(@all_cats) if grep {$_ eq 'ALL'} @cats;
 	#say "Logging categories: @cats" if @cats;
@@ -63,17 +58,12 @@ sub initialize_logger {
 		#log4perl.additivity.SUB			= 0 # doesn't work... why?
 	);
 	# add lines for the categories we want to log
-	$conf .= join "\n", "", map{ cat_line($_)} @all_cats;
+	$conf .= join "\n", "", map{ cat_line($_)} @cats if @cats;
 	#say $conf; 
 	Log::Log4perl::init(\$conf);
 	return( { map { $_, 1 } @cats } )
 }
-}
-sub cat_line { 
-	my $category = shift;
-	my $level = _level($category);
-	"log4perl.category.$category				= $level, $appender" 
-}
+sub cat_line { "log4perl.category.$_[0]			= DEBUG, $appender" }
 
 sub expand_cats {
 	no warnings 'uninitialized';
