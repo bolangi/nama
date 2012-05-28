@@ -146,6 +146,7 @@ sub reconfigure_engine {
 			# $was_running or
 		transport_status();
 		$ui->flash_ready;
+		1
 	}
 }
 }

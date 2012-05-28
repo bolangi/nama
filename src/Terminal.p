@@ -136,7 +136,8 @@ sub process_line {
 			unless $user_input eq $text->{previous_cmd};
 		$text->{previous_cmd} = $user_input;
 		command_process( $user_input );
-		reconfigure_engine();
+		reconfigure_engine() 
+			or remove_latency_ops() and calculate_and_adjust_latency();
 		revise_prompt();
 	}
 }
