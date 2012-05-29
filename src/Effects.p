@@ -238,7 +238,7 @@ sub _insert_effect {  # call only from add_effect
 	if ($running){
 		$ui->stop_heartbeat;
 		::mute();
-		eval_iam('stop-sync');
+		::stop_command();
 		sleeper( 0.05); 
 	}
 	my $n = chain($before) or 
