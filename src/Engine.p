@@ -7,6 +7,19 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
+{ my $stop_command = undef;
+sub stop_command {
+	return unless engine_running();
+	return eval_iam($stop_command) if $stop_command;
+	$stop_command = 'stop-sync';
+	eval_iam($stop_command);
+	return unless engine_running();
+	$stop_command = 'stop';
+	eval_iam($stop_command);
+}
+}
+
+
 sub valid_engine_setup {
 	eval_iam("cs-selected") and eval_iam("cs-is-valid");
 }
@@ -63,7 +76,7 @@ sub stop_transport {
 	logsub("&stop_transport"); 
 	mute();
 	my $pos = eval_iam('getpos');
-	eval_iam('stop');	
+	stop_command();
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
@@ -73,6 +86,10 @@ sub stop_transport {
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $gui->{_old_bg});
 	eval_iam("setpos $pos");
+}
+sub toggle_transport {
+	if (engine_running()){ stop_transport() } 
+	else { start_transport() }
 }
 
 sub transport_running { eval_iam('engine-status') eq 'running'  }
@@ -193,7 +210,7 @@ sub stop_do_start {
 }
 sub _stop_do_start {
 	my ($coderef, $delay) = @_;
-		eval_iam('stop-sync');
+		stop_command();
 		my $result = $coderef->();
 		sleeper($delay) if $delay;
 		eval_iam('start');
@@ -212,6 +229,7 @@ sub kill_my_ecasound_processes {
 	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
 }
 
+	
 
 1;
 __END__
