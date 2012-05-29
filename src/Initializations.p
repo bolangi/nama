@@ -1,4 +1,9 @@
 # ----------- Initialize --------
+#
+#
+#  These routines are executed once on program startup
+#
+#
 
 package ::;
 use Modern::Perl; use Carp;
@@ -84,7 +89,6 @@ sub definitions {
 
 	}, '::File';
 
-
 	$gui->{_save_id} = "State";
 	$gui->{_seek_unit} = 1;
 	$gui->{marks} = {};
@@ -150,16 +154,8 @@ sub definitions {
 	use Modern::Perl;
 	our @ISA = '::Object'; #  for ->dump and ->as_hash methods
 
-	# special handling of serialize formats to store them as 
-	# space separate tags, must duplicate AUTOLOAD checking
+	sub serialize_formats { split " ", $_[0]->{serialize_formats} }
 
-	sub serialize_formats { 
-			split " ", 
-			(
-				$project->{config}->{serialize_formats} 
-			  || $_[0]->{serialize_formats}
-			)
-	}
 	sub hardware_latency {
 		no warnings 'uninitialized';
 		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
