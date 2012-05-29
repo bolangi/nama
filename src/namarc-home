@@ -49,7 +49,7 @@ sample_rate: frequency
 
 # globals for our chain setups
 
-ecasound_globals_general: -z:mixmode,sum
+ecasound_globals_general: -z:mixmode,sum -G:jack,Nama,send 
 ecasound_globals_realtime: -z:db,100000 -z:nointbuf 
 ecasound_globals_nonrealtime: -z:nodb -z:intbuf
 ecasound_buffersize_realtime: 256
