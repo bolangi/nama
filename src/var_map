@@ -2,6 +2,7 @@
 	$saved_version 				$project->{save_file_version_number}
 	%bunch						$project->{bunch}
 	**							$project->{repo}
+	**							$project->{timebase}
 	
 	$main_bus 					$bn{Main}
 	$main						$bn{Main} 
