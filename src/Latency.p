@@ -15,25 +15,12 @@ use Carp qw(confess);
 #   add (or set) operators 
 #    (to optimize: add operators only to plural sibling edges, not only edges)
 
-sub add_latency_control_op {
+sub set_latency_compensation {
 	my $n = shift;
-	logsub("&add_latency_control_op: chain $n");	
+	add_latency_control($n) if ! $ti{$n}->latency_op;
 	my $delay = shift || 0;
-	my $id =  stop_do_start( sub 
-		{ 
-			my $id = add_effect(
-				{
-					chain 	=> $n, 
-					type 	=> full_effect_code($config->{latency_op}),
-					cop_id 	=> $ti{$n}->latency_op, # may be undef
-					values 	=> $config->{latency_op_init},
-				});
-			$config->{latency_op_set}->($id, $delay);
-			$id;
-		} 
-	);
-	
-	$ti{$n}->set(latency_op => $id);  # save the id for next time
+	my $id = $ti{$n}->latency_op;
+	$config->{latency_op_set}->($id, $delay);
 	$id;
 }
 
@@ -62,8 +49,7 @@ sub apply_latency_ops {
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
 		
-		# apply offset, keeping existing op_id
-		::add_latency_control_op($_->n, $_->latency_offset); # keeps existing op_id
+		set_latency_compensation($_->n, $_->latency_offset);
 
 		# store offset for debugging
 		
