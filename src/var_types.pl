@@ -71,6 +71,8 @@
 
 	$project->{save_file_version_number}
 	$project->{config}
+	$project->{bunch}
+	$project->{timebase}
 	$fx->{id_counter}
 	$fx->{applied}
 	$fx->{params}
@@ -87,7 +89,6 @@
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
 	$setup->{audio_length}
-	$project->{bunch}
 	$text->{command_history}
 	$mode->{mastering}
 	$this_track_name
