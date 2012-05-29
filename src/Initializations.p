@@ -137,7 +137,7 @@ sub definitions {
 		enforce_channel_bounds			=> 1,
 		# for save_system_state()
 		serialize_formats               => 'json',
-		latency_op						=> 'delay_n',
+		latency_op						=> 'el:delay_n',
 		latency_op_init					=> [0,0],
 		latency_op_set					=> sub
 			{

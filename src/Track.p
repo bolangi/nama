@@ -1179,14 +1179,16 @@ sub add_pan_control {
 sub add_latency_control {
 	my $n = shift;
 	logsub("&add_latency_control_op: chain $n");	
-	my $id =  add_effect(
-				{
-					chain 	=> $n, 
-					type 	=> full_effect_code($config->{latency_op}),
-					cop_id 	=> $ti{$n}->latency_op, # may be undef
-					hide	=> 1,
-					values 	=> $config->{latency_op_init},
-				});
+	my $p = {
+				chain 	=> $n, 
+				cop_id	=> $ti{$n}->{latency_op},
+				type 	=> $config->{latency_op},
+				hide	=> 1,
+				values 	=> $config->{latency_op_init},
+			};
+
+
+	my $id =  add_effect($p);
 	 
 	$ti{$n}->set(latency_op => $id);  # save the id for next time
 	$id;
