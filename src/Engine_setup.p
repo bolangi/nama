@@ -82,47 +82,15 @@ sub reconfigure_engine {
 		}
 	}
 	logpkg('debug',"setup change");
-
-
-	##### Restore previous position and running status
-
- 	my $old_pos;
- 	my $was_running;
-	my $restore_position;
-	my $previous_snapshot = $setup->{_old_snapshot};
-
-	# restore previous playback position unless 
-
-	#  - doodle mode
-	#  - change in global version (TODO)
-	#  - change in project
-	#  - new setup involves recording
-	#  - change in edit mode
 	
-	if ( 	$mode->{preview} eq 'doodle' 
-		 or $setup->{_old_snapshot}->{project} ne $project->{name}
-		 or $mode->{offset_run} != $old_offset_run_status
-		# TODO: or change in global version
-	){} # do nothing
-	else
-	{
-		$old_pos = eval_iam('getpos') if eval_iam('cs-selected');
-		$was_running = engine_running();
-		$restore_position++;
-
-# 		say "old_pos: $old_pos";
-# 		say "was_running: $was_running";
-# 		say "restore_position: $restore_position";
-
-	}
+	# restore position/running status
 
 	$setup->{_old_snapshot} = status_snapshot();
 	$old_offset_run_status = $mode->{offset_run};
 
 	command_process('show_tracks');
 
-	stop_transport('quiet') if $was_running;
-
+	stop_transport('quiet');
 
 	if ( generate_setup() ){
 		
@@ -139,10 +107,10 @@ sub reconfigure_engine {
 
 		show_status();
 
-		if( $restore_position and not ::ChainSetup::really_recording()){
-			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};
-		}
-		start_transport('quiet') if $mode->{preview} =~ /doodle/;
+# 		if( $restore_position and not ::ChainSetup::really_recording()){
+# 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};
+# 		}
+#		start_transport('quiet') if $mode->{preview} =~ /doodle/;
 			# $was_running or
 		transport_status();
 		$ui->flash_ready;
