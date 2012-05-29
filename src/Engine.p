@@ -217,9 +217,9 @@ sub _stop_do_start {
 		$result
 }
 sub restart_ecasound {
-	logpkg('info',"killing ecasound processes @{$engine->{pids}}");
+	pager3("killing ecasound processes @{$engine->{pids}}");
 	kill_my_ecasound_processes();
-	logpkg('info',q(restarting Ecasound engine - your may need to use the "arm" command));	
+	pager3(q(restarting Ecasound engine - your may need to use the "arm" command));	
 	select_ecasound_interface();
 	#$setup->{changed}++;
 	reconfigure_engine();

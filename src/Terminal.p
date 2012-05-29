@@ -67,6 +67,8 @@ sub pager2 {
 	logsub("&pager2");
 	pager(join "", @_)
 }
+sub pager3 { map { say, $_ } @_ }
+	
 sub pager {
 	logsub("&pager");
 	my @output = @_;

@@ -66,7 +66,7 @@ sub new {
 		unless ($vals{global} xor $vals{project});
 	# we expect some effects
 
-	logpkg('info',
+	::pager3(
 			"expected either non-empty ops_list or insert_data") 
 		unless $vals{ops_list} and scalar @{$vals{ops_list}} 
 		    or $vals{inserts_data} and scalar @{$vals{inserts_data}};

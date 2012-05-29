@@ -125,16 +125,6 @@ sub track_ops_latency {
 	map { $total += op_latency($_) } $track->fancy_ops;
 	$total
 }
-sub jack_client : lvalue {
-	my $name = shift;
-	# we require that every call is already known correct
-	# try it till it breaks
-	
-	logit('::Jack','info',"$name: non-existent JACK client") 
-		if not $jack->{clients}->{$name} ;
-	$jack->{clients}->{$name}
-
-}
 { my %reverse = qw(input output output input);
 sub jack_port_latency {
 
@@ -154,19 +144,19 @@ sub jack_port_latency {
 
 		# replace with a full port descriptor, i.e. "system:playback_1"
 		# but reverse direction for this:
-		
-		$name = $jack->{clients}->{$name}->{$reverse{$dir}}->[0];
+		my $node = jack_client($name);
+		$name = $node->{$reverse{$dir}}->[0];
 
 		logpkg('debug', "replacing with $name");
 	}
 	my ($client, $port) = client_port($name);
 	logpkg('debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
 	my $node = jack_client($client)
-		or logpkg('info',"$name: non existing JACK client"),
+		or ::pager3("$name: non existing JACK client"),
 		return;
 	$node->{$port}->{latency}->{$direction}->{min}
 		ne $node->{$port}->{latency}->{$direction}->{max}
-	and logpkg('info','encountered unmatched latencies', 
+	and ::pager3('encountered unmatched latencies', 
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }

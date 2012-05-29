@@ -122,7 +122,7 @@ sub load_project {
 			map{create_dir($_)} project_dir(), this_wav_dir() ;
 		}
 		else 
-		{ logpkg('info',
+		{ ::pager3(
 			qq(Project "$project->{name}" does not exist.\n Loading project "untitled".)
 			);
 			load_project( qw{name untitled create 1} );

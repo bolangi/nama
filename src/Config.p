@@ -32,7 +32,7 @@ sub global_config {
 	# 3. .namarc in the home directory, i.e. ~/.namarc
 	# 4. .namarc in the project root directory, i.e. ~/nama/.namarc
 	if( $config->{opts}->{f} ){
-		logpkg('info',"reading config file $config->{opts}->{f}\n");
+		pager3("reading config file $config->{opts}->{f}\n");
 		return read_file($config->{opts}->{f});
 	}
 	my @search_path = (project_dir(), $ENV{HOME}, project_root() );

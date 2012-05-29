@@ -349,6 +349,11 @@ sub start_jack_plumbing {
 
 	){ system('jack.plumbing >/dev/null 2>&1 &') }
 }
+sub jack_client : lvalue {
+	my $name = shift;
+	logit('::Jack','info',"$name: non-existent JACK client") if not $jack->{clients}->{$name} ;
+	$jack->{clients}->{$name}
+}
 1;
 __END__
 	

@@ -30,11 +30,11 @@ sub new {
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	if (! $vals{name}){
-		::pager2("missing bus name");
+		::pager3("missing bus name");
 		return
 	}
 	if ( $by_name{$vals{name}} ){ 
-		::pager2("$vals{name}: bus name already exists. Skipping.");
+		::pager3("$vals{name}: bus name already exists. Skipping.");
 		return;
 	}
 	my $bus = bless { 
@@ -293,7 +293,7 @@ sub add_sub_bus {
 		@args
 	);
 
-	$tn{$name} and ::pager2( qq($name: setting as mix track for bus "$name"));
+	$tn{$name} and ::pager3( qq($name: setting as mix track for bus "$name"));
 
 	my $track = $tn{$name} // add_track($name);
 
@@ -317,7 +317,7 @@ sub add_send_bus {
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
 	if ($bn{$name}){
-		::pager2( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
+		::pager3( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
 	} else {
 	my @args = (
 		name => $name, 

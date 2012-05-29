@@ -191,7 +191,7 @@ sub initialize_interfaces {
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
-		say "Unable to load perl Tk module. Starting in console mode." if $config->{opts}->{g};
+		pager3( "Unable to load perl Tk module. Starting in console mode.") if $config->{opts}->{g};
 		$ui = ::Text->new();
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
@@ -271,24 +271,24 @@ sub initialize_interfaces {
 	and process_is_running('jack.plumbing')
 	){
 
-		say "\nJack.plumbing daemon detected!";
-		print "\nAttempting to stop it (will restart as needed)... ";
+		pager3("Jack.plumbing daemon detected!");
+		pager3("Attempting to stop it (will restart as needed)... ");
 
 		kill_jack_plumbing();
 		sleeper(0.2);
 		if( process_is_running('jack.plumbing') )
 		{
-		say qq(\n\nUnable to stop jack.plumbing daemon.
+		pager3( q(Unable to stop jack.plumbing daemon.
 
 Please do one of the following, then restart Nama:
 
  - kill the jack.plumbing daemon ("killall jack.plumbing")
  - set "use_jack_plumbing: 0" in .namarc
 
-Exiting.);
+....Exiting.) );
 exit;
 		}
-		else { say "Stopped." }
+		else { pager3("Stopped.") }
 	}
 		
 	start_midish() if $config->{use_midish};
@@ -319,7 +319,7 @@ sub start_ecasound {
 						 }	split " ", qx(pgrep ecasound);
 }
 sub select_ecasound_interface {
-	logpkg('info','Not initializing engine: options E or A are set.'),
+	pager3('Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
 
 	# Net-ECI if requested by option, or as fallback 
@@ -331,14 +331,14 @@ sub select_ecasound_interface {
 }
 
 sub start_ecasound_libecasoundc {
-	logpkg('info',"Using Ecasound via Audio::Ecasound (libecasoundc)");
+	pager3("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	no warnings qw(redefine);
 	*eval_iam = \&eval_iam_libecasoundc;
 	$engine->{ecasound} = Audio::Ecasound->new();
 }
 	
 sub start_ecasound_net_eci {
-	logpkg('info',"Using Ecasound via Net-ECI"); 
+	pager3("Using Ecasound via Net-ECI"); 
 	no warnings qw(redefine);
 	launch_ecasound_server($config->{engine_tcp_port});
 	init_ecasound_socket($config->{engine_tcp_port}); 
@@ -376,11 +376,11 @@ sub launch_ecasound_server {
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = ">/dev/null &";
 	my $ps = qx(ps ax);
-	say("Using existing Ecasound server"), return 
+	pager3("Using existing Ecasound server"), return 
 		if  $ps =~ /ecasound/
 		and $ps =~ /--server/
 		and ($ps =~ /tcp-port=$port/ or $port == $default_port);
-	say "Starting Ecasound server";
+	pager3("Starting Ecasound server");
  	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
 	sleep 1;
 }
@@ -388,7 +388,7 @@ sub launch_ecasound_server {
 
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
-	say "Creating socket on port $port.";
+	pager3("Creating socket on port $port.");
 	$engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
