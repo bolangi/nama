@@ -361,11 +361,6 @@ sub select_sleep {
    select( undef, undef, undef, $seconds );
 }
 
-sub toggle_transport {
-	if (engine_running()){ stop_transport() } 
-	else { start_transport() }
-}
-	
 {
 my $default_port = 2868; # Ecasound's default
 sub launch_ecasound_server {
