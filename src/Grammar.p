@@ -40,6 +40,7 @@ sub command_process {
 
 	# parse repeatedly until all input is consumed
 	
+	try {
 	while (do { no warnings 'uninitialized'; $input =~ /\S/ }) { 
 		logpkg('debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
@@ -50,6 +51,9 @@ sub command_process {
 		};
 			
 	}
+	}
+	catch { warn "caught error: $_" };
+		
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
 	# select chain operator if appropriate
