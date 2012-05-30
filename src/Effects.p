@@ -124,7 +124,9 @@ sub name {
  
 sub catch_null_id {
 	my $id = shift;
-	logpkg('logconfess',"null effect id") unless $id;
+	logpkg('debug',"null effect id")  unless $id;
+	logpkg('debug',"$id: effect id does not exist") 
+		unless $fx->{applied}->{$id} and $fx-{params}->{$id}
 }
 
 # access routines
