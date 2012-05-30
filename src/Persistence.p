@@ -267,17 +267,13 @@ sub restore_state {
 
 	my @keys = keys %{$fx->{applied}};
 
-	my @spurious_keys = grep { 
-		! $_  									# undef key ''
-		or ! $fx->{params}->{$_}				# missing params entry 
-		or ! ref $fx->{applied}->{$_} 			# applied entry is not ref 
-		or keys %{$fx->{applied}->{$_}} < 3	# not enough key/val pairs
-	} @keys;
+	my @spurious_keys = grep { effect_entry_is_bad($_) } @keys;
+
 	if (@spurious_keys){
 
-		logpkg('debug',"full key list is @keys"); 
-		logpkg('debug',"spurious effect keys found @spurious_keys"); 
-		logpkg('debug',"deleting them..."); 
+		logpkg('logwarn',"full key list is @keys"); 
+		logpkg('logwarn',"spurious effect keys found @spurious_keys"); 
+		logpkg('logwarn',"deleting them..."); 
 		
 		map{ 
 			delete $fx->{applied}->{$_}; 

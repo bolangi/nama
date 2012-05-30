@@ -48,6 +48,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					name
 
 					catch_null_id
+					effect_entry_is_bad
 					check_fx_consistency
 
 					cop_add
@@ -129,6 +130,13 @@ sub catch_null_id {
 	logpkg('logconfess',"null effect id")  unless $id;
 	logpkg('debug',"$id: effect id does not exist") 
 		unless $fx->{applied}->{$id} and $fx-{params}->{$id}
+}
+sub effect_entry_is_bad {
+		my $id = shift;
+		! $id  									# undef key ''
+		or ! $fx->{params}->{$id}				# missing params entry 
+		or ! ref $fx->{applied}->{$id} 			# applied entry is not ref 
+		or keys %{$fx->{applied}->{$id}} < 3	# not enough key/val pairs
 }
 
 # access routines
@@ -558,6 +566,8 @@ sub apply_op {
 	local $config->{category} = 'ECI_FX';
 	my ($id, $selected_chain) = @_;
 	logpkg('debug', "id: $id");
+	logpkg('logcluck', "$id: expected effect entry not found!"), return
+		if effect_entry_is_bad($id);
 	my $code = type($id);
 	my $dad = parent($id);
 	my $chain = chain($id);
