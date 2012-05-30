@@ -264,14 +264,27 @@ sub restore_state {
 	delete $fx->{applied}->{''};
 	delete $fx->{params}->{''};
 
-	# remove null entries
-	
-	map { logpkg('debug', "deleting null effect $_"); 
+
+	my @keys = keys %{$fx->{applied}};
+
+	my @spurious_keys = grep { 
+		! $_  									# undef key ''
+		or ! $fx->{params}->{$_}				# missing params entry 
+		or ! ref $fx->{applied}->{$_} 			# applied entry is not ref 
+		or keys %{$fx->{applied}->{$_}} < 3	# not enough key/val pairs
+	} @keys;
+	if (@spurious_keys){
+
+		logpkg('debug',"full key list is @keys"); 
+		logpkg('debug',"spurious effect keys found @spurious_keys"); 
+		logpkg('debug',"deleting them..."); 
+		
+		map{ 
 			delete $fx->{applied}->{$_}; 
-			delete $fx->{params}->{$_} } 
-	grep {     
-		$fx->{applied}->{$_} eq undef or ! %{$fx->{applied}->{$_}}
-	} keys %{$fx->{applied}};
+			delete $fx->{params}->{$_}  
+		} @spurious_keys;
+
+	}
 
 	restore_effect_chains();
 
