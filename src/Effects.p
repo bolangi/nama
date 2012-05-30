@@ -47,6 +47,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					full_effect_code
 					name
 
+					catch_null_id
 					check_fx_consistency
 
 					cop_add
@@ -123,8 +124,9 @@ sub name {
 }
  
 sub catch_null_id {
+	return 0;
 	my $id = shift;
-	logpkg('debug',"null effect id")  unless $id;
+	logpkg('logconfess',"null effect id")  unless $id;
 	logpkg('debug',"$id: effect id does not exist") 
 		unless $fx->{applied}->{$id} and $fx-{params}->{$id}
 }
