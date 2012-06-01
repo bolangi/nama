@@ -8,6 +8,7 @@
 
 package ::EffectChain;
 use Modern::Perl;
+use Data::Dumper::Concise;
 use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
@@ -129,6 +130,7 @@ sub new {
 		[ 
 			map
 			{ 
+				logpkg('debug',"insert: ", sub{Dumper $_});
 				my @wet_ops = @{$tn{$_->wet_name}->ops};
 				my @dry_ops = @{$tn{$_->dry_name}->ops};
 				my $wet_effect_chain = ::EffectChain->new(
