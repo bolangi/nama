@@ -936,22 +936,19 @@ additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
 new_effect_chain: _new_effect_chain ident end {
 	my $name = $item{ident};
-	#::pager2( "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}});
-	my @ops = @{$item{'op_id(s?)'}};
-	scalar @ops or @ops = $::this_track->fancy_ops;
-	# include controllers
-	@ops = ::expanded_ops_list(@ops);
+
 	my ($old_entry) = ::EffectChain::find(user => 1, name => $name);
 
 	# overwrite identically named effect chain
+	#
 	my @options;
 	push(@options, 'n' , $old_entry->n) if $old_entry;
 	::EffectChain->new(
 		user   => 1,
 		global => 1,
 		name   => $item{ident},
-		ops_list => [ @ops ],
-		inserts_data => [ $::this_track->inserts ],
+		ops_list => $::this_track->fancy_ops,
+		inserts_data => $::this_track->inserts,
 		@options,
 	);
 	1;
