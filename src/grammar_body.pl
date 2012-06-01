@@ -934,7 +934,7 @@ cache_track: _cache_track additional_time(?) {
 }
 additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
-new_effect_chain: _new_effect_chain ident op_id(s?) {
+new_effect_chain: _new_effect_chain ident end {
 	my $name = $item{ident};
 	#::pager2( "ident $item{ident}, ops: ", @{$item{'op_id(s?)'}});
 	my @ops = @{$item{'op_id(s?)'}};
