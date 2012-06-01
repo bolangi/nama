@@ -133,18 +133,11 @@ sub new {
 				my @dry_ops = @{$tn{$_->dry_name}->ops};
 				my $wet_effect_chain = ::EffectChain->new(
 					project => 1,
-					track_cache => 1, # if we include an insert
-										# does it mean track_cache?
-										# probably not
-										
-				#	track_name => 'brass-1-wet', # don't need this, do we?
 					insert	=> 1,
 					ops_list => \@wet_ops,
 				);
 				my $dry_effect_chain = ::EffectChain->new(
 					project => 1,
-					track_cache => 1,
-				#	track_name => 'brass-1-dry',# don't need this, do we?
 					insert => 1,
 					ops_list => \@dry_ops,
 				);
