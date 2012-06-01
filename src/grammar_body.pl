@@ -951,6 +951,7 @@ new_effect_chain: _new_effect_chain ident op_id(s?) {
 		global => 1,
 		name   => $item{ident},
 		ops_list => [ @ops ],
+		inserts_data => [],
 		@options,
 	);
 	1;
