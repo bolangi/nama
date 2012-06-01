@@ -340,7 +340,7 @@ sub region_is_out_of_bounds {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	my @skip = grep {$_} map { $track->$_ } qw(vol pan fader);
+	my @skip = grep {$_} map { $track->$_ } qw(vol pan fader latency_op );
 	my %skip;
 	map{ $skip{$_}++ } ::expanded_ops_list(@skip);
 	grep{ ! $skip{$_} } @{ $track->ops };
