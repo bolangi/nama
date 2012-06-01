@@ -47,11 +47,12 @@ sub definitions {
 	####### Initialize singletons #######
 
 	# Some of these "singletons" (imported by 'use Globals')
-	# are just hashes, some have object behavior.
-	#
-	# $file belongs to class ::File, and uses
+	# are just hashes, some have object behavior as
+	# the sole instance of their class.
+	
+	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
-	# to various system files, for example $file->state_store
+	# to various system files, such as $file->state_store
 
 	{
 	package ::File;
