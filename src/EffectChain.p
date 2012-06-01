@@ -117,7 +117,7 @@ sub new {
 
 	$vals{ops_data} = $ops_data;
 
-	if( $vals{inserts_data})
+	if( $vals{inserts_data} and @{$vals{inserts_data}})
 	{
 
 		# rewrite inserts to store what we need:
