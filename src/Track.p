@@ -409,7 +409,7 @@ sub has_insert  { $_[0]->prefader_insert or $_[0]->postfader_insert }
 
 sub prefader_insert { ::Insert::get_id($_[0],'pre') }
 sub postfader_insert { ::Insert::get_id($_[0],'post') }
-sub inserts {   map{ $::Insert::by_index{$_} } 
+sub inserts {   map{ $::Insert::by_index{$_} }grep{$_} 
 				map{ ::Insert::get_id($_[0],$_)} qw(pre post) 
 }
 
