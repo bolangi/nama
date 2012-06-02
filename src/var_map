@@ -69,6 +69,7 @@
     %ladspa_unique_id  			$fx_cache->{ladspa_label_to_unique_id}
     %ladspa_label  				$fx_cache->{ladspa_id_to_label}
     %ladspa_help    			$fx_cache->{ladspa_help}
+    **			    			$fx_cache->{lv2_help}
     %e_bound        			$fx_cache->{split}
 
 	$help_screen  				$help->{screen}

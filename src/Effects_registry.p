@@ -41,6 +41,7 @@ sub prepare_static_effects_data{
 		read_in_effects_data();  
 		# cop-register, preset-register, ctrl-register, ladspa-register
 		get_ladspa_hints();     
+		get_lv2_hints();
 		integrate_ladspa_hints();
 		integrate_cop_hints();
 		sort_ladspa_effects();
@@ -431,6 +432,12 @@ sub get_ladspa_hints{
 	logpkg('debug', sub{yaml_out($fx_cache->{ladspa})});
 }
 
+sub get_lv2_hints {
+	my @plugins = split " ", qx(lv2ls);
+	pager3('No LV2 plugins found'), return unless @plugins;
+	map { $fx_cache->{lv2_help}->{"elv2:$_"} = join '', ::AnalyseLV2::lv2_help($_) } @plugins;
+}
+
 sub srate_val {
 	my $input = shift;
 	my $val_re = qr/(
@@ -546,4 +553,5 @@ sub prepare_effects_help {
 	} reverse split "\n",eval_iam("ladspa-register");
 
 }
+
 1;

@@ -113,11 +113,11 @@ sub help_effect {
 		push @output, grep{ /$id/  } @{$fx_cache->{user_help}};
 	}
 
-	# full help for LADSPA plugins
+	# full help for LADSPA/LV2 plugins
 	
-	elsif ( $id =~ /el:/) {
-		@output = $fx_cache->{ladspa_help}->{$id};
-	} else { 
+	elsif ( $id =~ /el:/  ) { @output = $fx_cache->{ladspa_help}->{$id} }
+	elsif ( $id =~ /elv2:/) { @output = $fx_cache->{lv2_help}->{$id}    }
+	else { 
 		@output = qq("$id" is an Ecasound chain operator.
 Type 'man ecasound' at a shell prompt for details.);
 	}
