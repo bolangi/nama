@@ -67,6 +67,8 @@ sub new {
 		unless ($vals{global} xor $vals{project});
 	# we expect some effects
 
+	logpkg('debug','constructor arguments ', sub{ ::json_out(\%vals) });
+
 	::pager3(
 			"expected either non-empty ops_list or insert_data") 
 		unless $vals{ops_list} and scalar @{$vals{ops_list}} 
