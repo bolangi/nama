@@ -13,6 +13,8 @@ use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
 use ::Log qw(logpkg logsub);
+use ::Assign qw(json_out);
+use ::Effects qw(fx);
 
 use ::Globals qw($fx_cache %tn $this_op);
 
@@ -62,17 +64,18 @@ sub new {
 	my $class = shift;	
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
+	$vals{inserts_data} ||= [];
+	$vals{ops_list} 	||= [];
+	$vals{ops_data} 	||= {};
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
 	croak "must have exactly one of 'global' or 'project' fields defined" 
 		unless ($vals{global} xor $vals{project});
 	# we expect some effects
 
-	logpkg('debug','constructor arguments ', sub{ ::json_out(\%vals) });
+	logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
 
-	::pager3(
-			"expected either non-empty ops_list or insert_data") 
-		unless $vals{ops_list} and scalar @{$vals{ops_list}} 
-		    or $vals{inserts_data} and scalar @{$vals{inserts_data}};
+	::pager3( "expected either non-empty ops_list or insert_data") 
+ 		unless scalar @{$vals{ops_list}} or scalar @{$vals{inserts_data}};
 
 	my $n = $vals{n} || ++$n;
 
@@ -120,7 +123,7 @@ sub new {
 
 	$vals{ops_data} = $ops_data;
 
-	if( $vals{inserts_data} and @{$vals{inserts_data}})
+	if( scalar @{$vals{inserts_data}})
 	{
 
 		# rewrite inserts to store what we need:
@@ -209,7 +212,6 @@ sub add_ops {
 		 
 		);
 
-	$self = bless { %$self }, __PACKAGE__;
 	$successor ||= $track->vol; # place effects before volume 
 	map 
 	{	
@@ -219,9 +221,11 @@ sub add_ops {
 			type   		=> $self->type($_),
 			values 		=> $self->params($_),
 			parent_id 	=> $self->parent($_),
-			cop_id 		=> $_,
 		};
 
+		$args->{cop_id} = $_ unless fx($_);
+
+		say "args ", json_out($args);
 		# avoid incorrectly calling _insert_effect 
 		# (and controllers are not positioned relative to other  effects)
 		# 
