@@ -31,9 +31,14 @@ is( jack_port_latency('output','LinuxSampler:playback_1'),
 
 *cmd = \&command_process; # shortcut
 
-cmd("add piano");
-
-
+cmd("add sine; source null; afx sine_fcac 220 0.1");
+cmd("Mixdown rec"); # record the cooked signal
+cmd("arm");
+diag(::ChainSetup::ecasound_chain_setup());
+limit_processing_time(5);
+cmd("start");
+is( -s '/tmp/nama-test/untitled/.wav/Mixdown_1.wav', 315436, 
+		"recorded WAV file, 5s");
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
