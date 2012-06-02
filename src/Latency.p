@@ -23,6 +23,16 @@ sub set_latency_compensation {
 	$config->{latency_op_set}->($id, $delay);
 	$id;
 }
+sub add_latency_control{
+	my $n = shift;
+	my $delay = shift;
+	my $track = $ti{$n};
+	my $p = { type => $config->{latency_op} };
+	$p->{cop_id} = $ti{$n}->latency_op if $ti{$n}->latency_op;
+	$p->{before} = $track->ops->[0];
+	my $id = add_effect($p);
+}
+	
 
 sub calculate_and_adjust_latency {
 
@@ -45,6 +55,7 @@ sub remove_latency_ops {
 }
 sub apply_latency_ops {
 	
+	eval_iam('cs-disconnect');
 	for ( ::ChainSetup::engine_tracks() )
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
