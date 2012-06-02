@@ -128,7 +128,7 @@ sub new {
 	$by_name{ $object->name } = $object;
 	::add_pan_control($n);
 	::add_volume_control($n);
-	::add_latency_control($n);
+	::assign_latency_controller_id($n);
 
 	$this_track = $object;
 	$object;
@@ -1181,22 +1181,12 @@ sub add_pan_control {
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
-sub add_latency_control {
+sub assign_latency_controller_id {
 	my $n = shift;
-	logsub("&add_latency_control_op: chain $n");	
-	my $p = {
-				chain 	=> $n, 
-				cop_id	=> $ti{$n}->{latency_op},
-				type 	=> $config->{latency_op},
-				hide	=> 1,
-				values 	=> $config->{latency_op_init},
-			};
-
-
-	my $id =  add_effect($p);
-	 
-	$ti{$n}->set(latency_op => $id);  # save the id for next time
-	$id;
+	my $track = $ti{$n};
+	return if $track->latency_op;
+	$track->set(latency_op => preallocate_cop_id());
+	logsub("&assign_latency_controller_id: chain $n, id ",$track->latency_op);	
 }
 
 
