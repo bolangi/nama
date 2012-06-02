@@ -947,7 +947,7 @@ new_effect_chain: _new_effect_chain ident end {
 		user   => 1,
 		global => 1,
 		name   => $item{ident},
-		ops_list => $::this_track->fancy_ops,
+		ops_list => [ $::this_track->fancy_ops ],
 		inserts_data => $::this_track->inserts,
 		@options,
 	);
