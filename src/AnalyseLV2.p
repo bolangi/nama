@@ -250,14 +250,14 @@ sub analyse_lv2 {
 	}
 }
 
-sub help_lv2 {
+sub lv2_help {
 	my $uri = shift;
 	find_utils();
 	analyse_lv2($uri);
 	print_lv2();
 }
 
-#print help_lv2('http://plugin.org.uk/swh-plugins/zm1');
-#print help_lv2('urn:50m30n3:plugins:SO-404');
+#print lv2_help('http://plugin.org.uk/swh-plugins/zm1');
+#print lv2_help('urn:50m30n3:plugins:SO-404');
 
 1;
