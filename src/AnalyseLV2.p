@@ -22,21 +22,21 @@ sub _analyse_lv2 {
 
 	$currentport = -1;
 	unless (acquire_lv2($uri)) 
-	{ $plugin{'ERROR'} = "Plugin not found."; return \%plugin; }
+	{ $plugin{error} = "Plugin not found."; return \%plugin; }
 
 	foreach my $line (@contents) {
 		print "Parsing $line" if $debug;
 		$linecount++;
-		$plugin{'GENERAL'}{'URI'} = $line if ($linecount == 1);
+		$plugin{general}{uri} = $line if ($linecount == 1);
 		if ($line =~ /^(\t| )+Name\:(\t| )+(.*+)/
 			&& $currentport == -1)
-		{ $plugin{'GENERAL'}{'NAME'} = $3; }
+		{ $plugin{general}{name} = $3; }
 		if (($line =~ /^(\t| )+Class\:(\t| )+(.*+)/) && !($line =~ /(\:\/\/)/) )
-		{ $plugin{'GENERAL'}{'CLASS'} = $3; }
+		{ $plugin{general}{class} = $3; }
 		if ($line =~ /^(\t| )+Author\:(\t| )+(.*+)/)
-		{ $plugin{'GENERAL'}{'AUTHOR'} = $3; }
+		{ $plugin{general}{author} = $3; }
 		if ($line =~ /^(\t| )+Has latency\:(\t| )+(.*+)/)
-		{ $plugin{'GENERAL'}{'HAS_LATENCY'} = $3; }
+		{ $plugin{general}{has_latency} = $3; }
 		# Next we embark on port data collection.
 		# ...fffirst acquire current port.
 		if ($line =~ /(\t| )+Port (\d+)\:$/) { 
@@ -47,56 +47,56 @@ sub _analyse_lv2 {
 		if ($line =~ /lv2core#(.+)Port$/) {
 			$match = $1;
 			if ($match =~ /Input|Output/) {
-				$plugin{$currentport}{'IOTYPE'} = $match;
-				print "IOTYPE $plugin{$currentport}{'IOTYPE'}\n" if $debug;
+				$plugin{$currentport}{iotype} = $match;
+				print "IOTYPE $plugin{$currentport}{iotype}\n" if $debug;
 			} else {
-				if (exists($plugin{$currentport}{'ETYPE'})) {
-					$plugin{$currentport}{'ETYPE'} .= " ";
+				if (exists($plugin{$currentport}{etype})) {
+					$plugin{$currentport}{etype} .= " ";
 				}
-				$plugin{$currentport}{'ETYPE'} .= $match;
+				$plugin{$currentport}{etype} .= $match;
 				print "Acquired ETYPE $1 \n" if $debug;
 			}
 		}
 		# A special case for events.
 		if ($line =~ /http.+\#(.+)Event$/ ) {
 			$match = $1;
-			if ( exists($plugin{$currentport}{'ETYPE'}) ) {
-				$plugin{$currentport}{'ETYPE'} .= ", ";
+			if ( exists($plugin{$currentport}{etype}) ) {
+				$plugin{$currentport}{etype} .= ", ";
 			}
-			$plugin{$currentport}{'ETYPE'} .= $match;
+			$plugin{$currentport}{etype} .= $match;
 		}
 
 		# Name
 		if ($line =~ /(\t| )+Name\:(\t| )+(.+$)/
 			&& ($currentport != -1)) {
-			$plugin{$currentport}{'NAME'} = $3;
-			print "Port name is $plugin{$currentport}{'NAME'}\n" 
+			$plugin{$currentport}{name} = $3;
+			print "Port name is $plugin{$currentport}{name}\n" 
 			if $debug;	
 		}
 		# MINVAL/MAXVAL/DEFVAL
 		if ($line =~ /(\t| )+Minimum\:(\t| )+(.+$)/) {
-			$plugin{$currentport}{'MINVAL'} = $3;
-			print "Acquired minval $plugin{$currentport}{'MINVAL'}\n" if $debug;
+			$plugin{$currentport}{minval} = $3;
+			print "Acquired minval $plugin{$currentport}{minval}\n" if $debug;
 		}
 		if ($line =~ /(\t| )+Maximum\:(\t| )+(.+$)/) {
-			$plugin{$currentport}{'MAXVAL'} = $3;
+			$plugin{$currentport}{maxval} = $3;
 		}
 		if ($line =~ /(\t| )+Default\:(\t| )+(.+$)/) {
-			$plugin{$currentport}{'DEFVAL'} = $3;
+			$plugin{$currentport}{defval} = $3;
 		}
 		# Properties
 		if ($line =~ /extportinfo#(.+$)/) {
-			if (exists($plugin{$currentport}{'PROPS'})) {
-				$plugin{$currentport}{'PROPS'} .= ", ";
+			if (exists($plugin{$currentport}{props})) {
+				$plugin{$currentport}{props} .= ", ";
 			}
-			$plugin{$currentport}{'PROPS'} .= $1;
+			$plugin{$currentport}{props} .= $1;
 		}
 		if ($currentport != -1 && $line =~ /Scale Points\:/) {
-			$plugin{$currentport}{'SCALEPOINTS'} = 0;
+			$plugin{$currentport}{scalepoints} = 0;
 		}
 		if ($line =~ /(\t+| +)+(-?\d+) = \"(.*)\"$/
-			&& exists($plugin{$currentport}{'SCALEPOINTS'})) {
-			$plugin{$currentport}{'SCALEPOINTS'}++;
+			&& exists($plugin{$currentport}{scalepoints})) {
+			$plugin{$currentport}{scalepoints}++;
 			$scalepoints{$currentport}{$2} = $3;
 		}
 	}
@@ -104,18 +104,18 @@ sub _analyse_lv2 {
 
 
 
-	$plugin{'GENERAL'}{'MAXPORT'} = $currentport;
+	$plugin{general}{maxport} = $currentport;
 	$currentport = -1;
 
 
 # We iterate over the ports to add the selector property.
-	for ($currentport = 0; $currentport <= $plugin{'GENERAL'}{'MAXPORT'};
+	for ($currentport = 0; $currentport <= $plugin{general}{maxport};
 		$currentport++) {
-		if (exists($plugin{$currentport}{'SCALEPOINTS'})) {
-			if (exists($plugin{$currentport}{'PROPS'})) {
-				$plugin{$currentport}{'PROPS'} .= ", ";
+		if (exists($plugin{$currentport}{scalepoints})) {
+			if (exists($plugin{$currentport}{props})) {
+				$plugin{$currentport}{props} .= ", ";
 			}
-			$plugin{$currentport}{'PROPS'} .= $plugin{$currentport}{'SCALEPOINTS'} . "-way Selector";
+			$plugin{$currentport}{props} .= $plugin{$currentport}{scalepoints} . "-way Selector";
 		}
 	}
 
@@ -131,20 +131,20 @@ sub stripzeros {
 
 sub generateportinfo {
 	my $portinfo;
-	$portinfo .= "\"$plugin{$currentport}{'NAME'}\" ";
-	$portinfo .= "$plugin{$currentport}{'IOTYPE'}, ";
-	$portinfo .= "$plugin{$currentport}{'ETYPE'}";
-	$portinfo .= ", " . &stripzeros($plugin{$currentport}{'MINVAL'})
-	if exists($plugin{$currentport}{'MINVAL'});
-	$portinfo .= " to " . &stripzeros($plugin{$currentport}{'MAXVAL'})
-	if exists($plugin{$currentport}{'MAXVAL'});
-	$portinfo .= ", default " . &stripzeros($plugin{$currentport}{'DEFVAL'})
-	if (exists($plugin{$currentport}{'DEFVAL'})
+	$portinfo .= "\"$plugin{$currentport}{name}\" ";
+	$portinfo .= "$plugin{$currentport}{iotype}, ";
+	$portinfo .= "$plugin{$currentport}{etype}";
+	$portinfo .= ", " . &stripzeros($plugin{$currentport}{minval})
+	if exists($plugin{$currentport}{minval});
+	$portinfo .= " to " . &stripzeros($plugin{$currentport}{maxval})
+	if exists($plugin{$currentport}{maxval});
+	$portinfo .= ", default " . &stripzeros($plugin{$currentport}{defval})
+	if (exists($plugin{$currentport}{defval})
 
-		&& $plugin{$currentport}{'DEFVAL'} ne "nan");
-	$portinfo .= ", " . filterprops($plugin{$currentport}{'PROPS'})
-	if (exists($plugin{$currentport}{'PROPS'})
-		&& filterprops($plugin{$currentport}{'PROPS'}) ne "");
+		&& $plugin{$currentport}{defval} ne "nan");
+	$portinfo .= ", " . filterprops($plugin{$currentport}{props})
+	if (exists($plugin{$currentport}{props})
+		&& filterprops($plugin{$currentport}{props}) ne "");
 	$portinfo .= "\n";
 	return $portinfo;
 }
@@ -161,16 +161,16 @@ sub filterprops { # Try to limit output
 
 sub print_lv2 {
 	my @buffer;
-	push @buffer, "Name: $plugin{'GENERAL'}{'NAME'}\n" 
-	if exists($plugin{'GENERAL'}{'NAME'});
-	push @buffer, "URI: $plugin{'GENERAL'}{'URI'}";
-	push @buffer, "Class: $plugin{'GENERAL'}{'CLASS'}\n"
-	if exists($plugin{'GENERAL'}{'CLASS'});
-	push @buffer, "Author: $plugin{'GENERAL'}{'AUTHOR'}\n"
-	if exists($plugin{'GENERAL'}{'AUTHOR'});
-	push @buffer, "Latency: $plugin{'GENERAL'}{'HAS_LATENCY'}\n"
-	if exists($plugin{'GENERAL'}{'HAS_LATENCY'});
-	for ($currentport = 0; $currentport <= $plugin{'GENERAL'}{'MAXPORT'}; $currentport++) {
+	push @buffer, "Name: $plugin{general}{name}\n" 
+	if exists($plugin{general}{name});
+	push @buffer, "URI: $plugin{general}{uri}";
+	push @buffer, "Class: $plugin{general}{class}\n"
+	if exists($plugin{general}{class});
+	push @buffer, "Author: $plugin{general}{author}\n"
+	if exists($plugin{general}{author});
+	push @buffer, "Latency: $plugin{general}{has_latency}\n"
+	if exists($plugin{general}{has_latency});
+	for ($currentport = 0; $currentport <= $plugin{general}{maxport}; $currentport++) {
 		if ($currentport == 0) {
 			push @buffer, "Ports:  ";
 		} else {
@@ -220,7 +220,7 @@ sub trymatch {
 sub print_lv2_scalepoints {
 	my @buffer;
 	if (keys(%scalepoints) > 0) {
-		push @buffer, "Printing full information for ports with scale points in plugin...\n$plugin{'GENERAL'}{'NAME'}\n";
+		push @buffer, "Printing full information for ports with scale points in plugin...\n$plugin{general}{name}\n";
 		foreach my $port (sort(keys(%scalepoints))) {
 			$currentport = $port;
 			push @buffer, "Port $currentport: " . generateportinfo();
@@ -229,7 +229,7 @@ sub print_lv2_scalepoints {
 			}
 		}
 	}
-	else { push @buffer, "Plugin $plugin{'GENERAL'}{'NAME'} does not have any port with scale points.\n\n"; }
+	else { push @buffer, "Plugin $plugin{general}{name} does not have any port with scale points.\n\n"; }
 	return @buffer;
 }
 
@@ -238,7 +238,7 @@ sub analyse_lv2 {
 	if ( find_utils() ) {
 		return _analyse_lv2($uri);
 	} else {
-		$plugin{'ERROR'} = "Utilities not found.";
+		$plugin{error} = "Utilities not found.";
 		return \%plugin;
 	}
 }
