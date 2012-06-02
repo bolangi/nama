@@ -1,3 +1,7 @@
+# ----------------- Analyse LV2 Plugins ------------------
+
+# contributed by S. Massy
+#
 package ::AnalyseLV2;
 # Initialise our global variables:
 # Store the plugin info:
