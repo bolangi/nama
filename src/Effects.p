@@ -66,6 +66,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 				
 					is_read_only
 					bypass_effects
+					preallocate_cop_id
 
 ) ] );
 
@@ -673,6 +674,8 @@ sub root_parent {
 
 ## Nama effects are represented by entries in $fx->{applied}
 ## and by the ops array in each track, $track->ops
+
+sub preallocate_cop_id { $fx->{id_counter}++ } # return value, then increment
 
 sub cop_add {
 	logsub("&cop_add");
