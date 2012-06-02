@@ -102,6 +102,7 @@ use ::EffectChain;
 # and do not execute any code when use'd.
 #
 
+use ::AnalyseLV2;
 use ::Initializations ();
 use ::Options ();
 use ::Config ();

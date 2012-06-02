@@ -1,21 +1,24 @@
-package AnalyseLV2;
+package ::AnalyseLV2;
 # Initialise our global variables:
 # Store the plugin info:
-my %plugin = my %scalepoints;
+
+use strict;
+
+my $debug;
+my %plugin;
+my %scalepoints;
 
 # Path to utilities
-my $lv2info = my $lv2ls;
+my $lv2info;
+my $lv2ls;
 
 # Various internals:
 my $currentport;
 
-# Temporary declaration to make strict happy.
 my @contents;
 
-
-
-
 sub _analyse_lv2 {
+	%plugin = ();
 	# Some variables used here.
 	my ($uri) = @_;
 	my $linecount = my $match;
@@ -242,5 +245,15 @@ sub analyse_lv2 {
 		return \%plugin;
 	}
 }
+
+sub help_lv2 {
+	my $uri = shift;
+	find_utils();
+	analyse_lv2($uri);
+	print_lv2();
+}
+
+#print help_lv2('http://plugin.org.uk/swh-plugins/zm1');
+#print help_lv2('urn:50m30n3:plugins:SO-404');
 
 1;
