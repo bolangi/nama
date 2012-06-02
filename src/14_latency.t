@@ -34,11 +34,14 @@ is( jack_port_latency('output','LinuxSampler:playback_1'),
 cmd("add sine; source null; afx sine_fcac 220 0.1");
 cmd("Mixdown rec"); # record the cooked signal
 cmd("arm");
-diag(::ChainSetup::ecasound_chain_setup());
-limit_processing_time(5);
+#diag(::ChainSetup::ecasound_chain_setup());
+#limit_processing_time(3);
+cmd("cs-set-length 3");
 cmd("start");
-is( -s '/tmp/nama-test/untitled/.wav/Mixdown_1.wav', 315436, 
-		"recorded WAV file, 5s");
+sleeper(0.5);
+sleeper(1) while engine_running();
+is( -s '/tmp/nama-test/untitled/.wav/Mixdown_1.wav', 528428, 
+		"recorded WAV file, 3s");
 
 sub gen_alsa { force_alsa(); command_process('gen')}
 sub gen_jack { force_jack(); command_process('gen')}
@@ -64,6 +67,9 @@ sub check_setup {
 sub cleanup { 	remove_tree($test_dir) }
 
 chdir "/tmp";
+my $testfile = '/tmp/nama-test/untitled/.wav/Mixdown_1.wav';
+diag "$testfile: length ",-s $testfile;
+unlink $testfile;
 cleanup();
 1;
 __END__
