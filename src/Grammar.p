@@ -96,9 +96,10 @@ sub do_script {
 
 sub dump_all {
 	my $tmp = ".dump_all";
+	my $format = "json";
 	my $fname = join_path( project_root(), $tmp);
-	save_system_state($fname);
-	file_pager("$fname.yml");
+	save_system_state($fname,$format);
+	file_pager("$fname.$format");
 }
 
 

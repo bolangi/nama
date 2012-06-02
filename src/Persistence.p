@@ -51,6 +51,7 @@ sub initialize_marshalling_arrays {
 sub save_system_state {
 
 	my $path = shift;
+	my $output_format = shift;
 
 	sync_effect_parameters(); # in case a controller has made a change
 	# we sync read-only parameters, too, but I think that is
@@ -112,7 +113,7 @@ sub save_system_state {
 	@{$text->{command_history}} = @{$text->{command_history}}[-$max..-1];
 	logpkg('debug', "serializing");
 
-	my @formats = $path =~ /dump_all/ ? 'yaml' : $config->serialize_formats;
+	my @formats = $output_format || $config->serialize_formats;
 
 	map{ 	my $format = $_ ;
 			serialize(
