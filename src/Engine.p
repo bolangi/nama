@@ -59,8 +59,15 @@ sub start_transport {
 	schedule_wraparound();
 	mute();
 	eval_iam('start');
-	limit_processing_time($setup->{runtime_limit}) 
-		if mixing_only() or edit_mode() or defined $setup->{runtime_limit};
+
+	# limit engine run time if we are in mixdown or edit mode, 
+	# or if requested by user, set timer to specified time
+	# defaulting to the result of cs-get-length
+	
+	limit_processing_time( $setup->{runtime_limit} || $setup->{audio_length}) 
+		if mixing_only() 
+		or edit_mode() 
+		or defined $setup->{runtime_limit};
 		# TODO and live processing
  	#$engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
@@ -167,7 +174,7 @@ sub cancel_wraparound {
 	$engine->{events}->{wraparound} = undef;
 }
 sub limit_processing_time {
-	my $length = shift // $setup->{audio_length};
+	my $length = shift;
  	$engine->{events}->{processing_time} 
 		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
@@ -229,7 +236,6 @@ sub kill_my_ecasound_processes {
 	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
 }
 
-	
 
 1;
 __END__
