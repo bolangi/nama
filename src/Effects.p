@@ -903,6 +903,7 @@ sub find_op_offsets {
 }
 
 sub expanded_ops_list { # including controllers
+						# we assume existing ops
 	my @ops_list = @_;
 	return () unless @_;
 	my @expanded = ();
