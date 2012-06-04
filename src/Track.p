@@ -903,6 +903,14 @@ sub playback_latency {
 	my $io = $track->input_object;
 	return $io->playback_latency if ref $io;
 }
+sub sibling_latency {
+	my $track = shift;
+	$setup->{latency}->{sibling}->{$track->name}
+}
+sub sibling_count {
+	my $track = shift;
+	$setup->{latency}->{sibling_count}->{$track->name}
+}
 } # end package
 
 # subclasses
