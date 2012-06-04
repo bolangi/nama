@@ -64,15 +64,6 @@ sub apply_latency_ops {
 	for ( ::ChainSetup::engine_tracks() )
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
-		
-		say "track ",$_->name, 
-			", latency_op: ", $_->latency_op, 
-			(fx($_->latency_op) 
-				? " is effect" : " is track entry only",
-			),
-			", op entry is ",Dumper fx($_->latency_op)
-		;
-	
 		fx($_->latency_op) 
 			?  set_latency_compensation($_, $_->latency_offset) 	
 			:  add_latency_controller($_, $_->latency_offset);
