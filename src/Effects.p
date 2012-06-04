@@ -95,12 +95,13 @@ sub bypassed : lvalue{
 	$fx->{applied}->{$id}->{bypassed}   
 }
 
-# ensure owns field is initialized as anonymous array
+# ensure owns field is initialized as anonymous array 
+# bah!!
 
 sub owns   : lvalue { 
 	my $id = shift; 
 	catch_null_id($id);
-	$fx->{applied}->{$id}->{owns} ||= [] 
+	$fx->{applied}->{$id}->{owns}
 } 
 sub fx     : lvalue { 
 	my $id = shift; 
