@@ -23,11 +23,13 @@ sub set_latency_compensation {
 	$config->{latency_op_set}->($id, $delay);
 	$id;
 }
-sub add_latency_control{
+sub add_latency_controller {
 	my $n = shift;
 	my $delay = shift;
 	my $track = $ti{$n};
-	my $p = { type => $config->{latency_op} };
+	my $p = {};
+	$p->{values} = [$delay, $delay];
+	$p->{type} = $config->{latency_op};
 	$p->{cop_id} = $ti{$n}->latency_op if $ti{$n}->latency_op;
 	$p->{before} = $track->ops->[0];
 	my $id = add_effect($p);
@@ -35,32 +37,36 @@ sub add_latency_control{
 	
 
 sub calculate_and_adjust_latency {
+	calculate_latency();
+	apply_latency_ops();
+}
 
+sub calculate_latency {
 	initialize_latency_vars();
-	return if $config->{opts}->{O};
-	
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 	logpkg('debug',"starting node: $starting_track_name");
-
 	sibling_latency($starting_track_name);
-	apply_latency_ops();
+}
+sub adjust_latency {
+		eval_iam('cs-disconnect');
+		apply_latency_ops();
+		connect_transport('quiet');
 }
 
 sub reset_latency_ops {
 	map{ modify_effect($_->latency_op, 0, 0) if $_->latency_op } ::Track::all();
 }
 sub remove_latency_ops {
-	map{::remove_effect($_)} grep{ $_ and fx($_)} map{$_->latency_op} ::Track::all();
+	map{::remove_effect($_)} grep{ fx($_)} grep{$_} map{$_->latency_op} ::Track::all();
 	1
 }
 sub apply_latency_ops {
 	
-	eval_iam('cs-disconnect');
 	for ( ::ChainSetup::engine_tracks() )
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
 		
-		set_latency_compensation($_->n, $_->latency_offset);
+		add_latency_controller($_->n, $_->latency_offset);
 
 		# store offset for debugging
 		
