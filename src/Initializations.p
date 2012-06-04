@@ -145,7 +145,7 @@ sub definitions {
 				my $id = shift;
 				my $milliseconds = shift();
 				# we need to set two parameters to this value
-				modify_multiple_effects([$id],[1,2],undef,$milliseconds/1000)
+				modify_effect($id,1,undef,$milliseconds/1000)
 			},
 	}, '::Config';
 
