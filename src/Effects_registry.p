@@ -41,7 +41,7 @@ sub prepare_static_effects_data{
 		read_in_effects_data();  
 		# cop-register, preset-register, ctrl-register, ladspa-register
 		get_ladspa_hints();     
-		get_lv2_hints();
+		get_lv2_hints() unless $config->{opts}->{J};
 		integrate_ladspa_hints();
 		integrate_cop_hints();
 		sort_ladspa_effects();
@@ -52,7 +52,6 @@ sub prepare_static_effects_data{
 			class => '::',
 			format => 'json');
 	}
-
 	prepare_effect_index();
 }
 
