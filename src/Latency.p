@@ -16,21 +16,19 @@ use Carp qw(confess);
 #    (to optimize: add operators only to plural sibling edges, not only edges)
 
 sub set_latency_compensation {
-	my $n = shift;
-	add_latency_control($n) if ! $ti{$n}->latency_op;
+	my $track = shift;
 	my $delay = shift || 0;
-	my $id = $ti{$n}->latency_op;
+	my $id = $track->latency_op;
 	$config->{latency_op_set}->($id, $delay);
 	$id;
 }
 sub add_latency_controller {
-	my $n = shift;
+	my $track = shift;
 	my $delay = shift;
-	my $track = $ti{$n};
 	my $p = {};
-	$p->{values} = [$delay, $delay];
+	$p->{values} = [$delay, 2 * $track->sibling_latency];
 	$p->{type} = $config->{latency_op};
-	$p->{cop_id} = $ti{$n}->latency_op if $ti{$n}->latency_op;
+	$p->{cop_id} = $track->latency_op if $track->latency_op;
 	$p->{before} = $track->ops->[0];
 	my $id = add_effect($p);
 }
@@ -62,11 +60,24 @@ sub remove_latency_ops {
 }
 sub apply_latency_ops {
 	
+	logsub("&apply_latency_ops");
 	for ( ::ChainSetup::engine_tracks() )
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
 		
-		add_latency_controller($_->n, $_->latency_offset);
+		say "track ",$_->name, 
+			", latency_op: ", $_->latency_op, 
+			(fx($_->latency_op) 
+				? " is effect" : " is track entry only",
+			),
+			", op entry is ",Dumper fx($_->latency_op)
+		;
+	
+		fx($_->latency_op) 
+			?  set_latency_compensation($_, $_->latency_offset) 	
+			:  add_latency_controller($_, $_->latency_offset);
+
+			# and update Ecasound op
 
 		# store offset for debugging
 		
