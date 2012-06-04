@@ -3,7 +3,7 @@
 package ::Effects; # share namespace with Nama.pm and several others
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
-use ::Assign qw(yaml_out);
+use ::Assign qw(yaml_out json_out);
 no warnings 'uninitialized';
 use Carp;
 use ::Log qw(logsub logpkg);
@@ -355,11 +355,12 @@ sub modify_multiple_effects {
 sub remove_effect { 
 	logsub("&remove_effect");
 	my $id = shift;
-	if( ! fx($id) ){
+	if( ! $id or ! fx($id) ){
 		logpkg('logcarp',"$id: does not exist, skipping...\n");
 		return;
 	}
 	my $n 		= chain($id);
+	$n or die ::json_out(fx($id));
 	my $parent 	= parent($id);
 	my $owns	= owns($id);
 	logpkg('debug', "id: $id, parent: $parent");
@@ -393,7 +394,7 @@ sub remove_effect {
 		logpkg('debug',"parent $parent new owns list: ". join ",", @$parent_owns);
 
 	}
-	$ti{$n}->remove_effect_from_track( $id ); 
+	$ti{$n}->remove_effect_from_track( $id ) if $ti{$n};
 	# remove entries for chain operator attributes and parameters
  	delete $fx->{applied}->{$id}; # remove entry from chain operator list
     delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
