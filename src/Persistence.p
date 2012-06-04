@@ -559,10 +559,12 @@ sub restore_state {
 				unless $id eq $ti{$n}->vol
 					or $id eq $ti{$n}->pan;
 			
+			# does this do anything?
 			add_effect({
 						chain => $fx->{applied}->{$id}->{chain},
 						type => $fx->{applied}->{$id}->{type},
 						cop_id => $id,
+						owns => $fx->{applied}->{$id}->{owns},
 						parent_id => $fx->{applied}->{$id}->{belongs_to},
 						});
 
