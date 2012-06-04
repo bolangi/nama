@@ -83,6 +83,8 @@ sub reconfigure_engine {
 	}
 	logpkg('debug',"setup change");
 	
+	remove_latency_ops();
+
 	# restore position/running status
 
 	$setup->{_old_snapshot} = status_snapshot();
@@ -104,7 +106,7 @@ sub reconfigure_engine {
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
-
+		calculate_and_adjust_latency() unless $config->{opts}->{O};
 		show_status();
 
 # 		if( $restore_position and not ::ChainSetup::really_recording()){
@@ -276,7 +278,6 @@ sub connect_transport {
 	transport_status() unless $quiet;
 	$ui->flash_ready();
 	#print eval_iam("fs");
-	calculate_and_adjust_latency() unless $config->{opts}->{O};
 	1;
 	
 }
