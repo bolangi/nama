@@ -341,8 +341,13 @@ sub region_is_out_of_bounds {
 sub fancy_ops { # returns list 
 	my $track = shift;
 	my @skip = grep {$_} map { $track->$_ } qw(vol pan fader latency_op );
+
+	# make a dictionary of ops to exclude
+	# that includes utility ops and their controllers
+	
 	my %skip;
-	map{ $skip{$_}++ } ::expanded_ops_list(@skip);
+	map{ $skip{$_}++ } @skip, ::expanded_ops_list(grep{::fx($_)} @skip);
+
 	grep{ ! $skip{$_} } @{ $track->ops };
 }
 		
