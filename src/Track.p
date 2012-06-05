@@ -997,6 +997,7 @@ sub rec_status {
 	return 'REC' if $track->rw eq 'REC';
 	::Track::rec_status($track);
 }
+sub forbid_user_ops { 1 }
 }
 {
 package ::EditTrack; use Carp qw(carp cluck);

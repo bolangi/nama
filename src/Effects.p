@@ -203,6 +203,8 @@ sub add_effect {
 	
 	set_chain_value($p);
 
+	die "user effects forbidden on this track" if $ti{$p->{chain}} and $ti{$p->{chain}}->forbid_user_ops;
+
 	logpkg('debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
 
 	# either insert or add, depending on 'before' setting

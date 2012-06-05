@@ -300,7 +300,7 @@ shift_track: _shift_track start_position {
 	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
 	elsif ( $::Mark::by_name{$pos} ){
 		my $time = ::Mark::mark_time( $pos );
-		pager2($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
+		::pager2($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
 	} else { 
@@ -700,10 +700,10 @@ add_effect: _add_effect effect value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		print "\nAdded $id ($iname)\n\n";
+		::pager2("Added $id ($iname)");
 		$::this_op = $id;
 	}
- 	1;
+	else { ::pager2("Failed to add effect") } 
 }
 
 # cut-and-paste copy of add_effect, without using 'before' parameter
