@@ -301,7 +301,7 @@ TOP
 $text->{format_divider} = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>  @<<<<<<<<<<<<<<< @>  @<<  @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
+@>>  @<<<<<<<<<<<<<< @>>  @<<  @||||  @|||||||||||||   @<<<<<<<<<  @>>  @>> 
 PICTURE
 
 sub show_tracks_section {
