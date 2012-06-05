@@ -203,7 +203,12 @@ sub add_effect {
 	
 	set_chain_value($p);
 
-	die "user effects forbidden on this track" if $ti{$p->{chain}} and $ti{$p->{chain}}->forbid_user_ops;
+	# forbid_user_ops means forbid all except latency op 
+	
+	die "user effects forbidden on this track" 
+		if $ti{$p->{chain}} 
+		and $ti{$p->{chain}}->forbid_user_ops 
+		and $p->{type} !~ /$config->{latency_op}/; 
 
 	logpkg('debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
 
