@@ -19,6 +19,7 @@ diag ("TESTING $0\n");
 diag("working directory: ",cwd);
 
 apply_ecasound_test_harness();
+push @ARGV, '-L','ECI';
 diag "options: @ARGV";
 
 bootstrap_environment();
@@ -44,7 +45,7 @@ sleeper(0.5);
 sleeper(1) while engine_running();
 rec_cleanup();
 my $wav = join_path(this_wav_dir(),'Mixdown_1.wav');
-is( abs(-s $wav - 528_428) < 30_000, 1, "recorded WAV file, 3s");
+is( abs((-s $wav) - 528_428) < 30_000, 1, "recorded WAV file, 3s");
 is($this_track->rec_status, 'MON', 'Ready to play WAV file after mixdown');
 is($this_track->monitor_version, 1, 'Find WAV file to play, normal track');
 cmd("sine off");
@@ -53,6 +54,8 @@ cmd("sinuous");
 is($this_track->monitor_version, 1, 'Find WAV file to play, link track');
 cmd("arm");
 cmd("setpos 0.5");
+diag(eval_iam("getpos"));
+is( abs(eval_iam("getpos") - 0.5)<0.001, 1, 'Set position');
 cmd("new_mark in1");
 cmd("setpos 1.0");
 cmd("new_mark out1");
