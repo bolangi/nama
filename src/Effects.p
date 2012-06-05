@@ -129,8 +129,8 @@ sub name {
 sub catch_null_id {
 	return 0;
 	my $id = shift;
-	confess "null effect id"   unless $id;
-	confess "$id: effect id does not exist"  
+	logpkg('logconfess',"null effect id")  unless $id;
+	logpkg('debug',"$id: effect id does not exist") 
 		unless $fx->{applied}->{$id} and $fx-{params}->{$id}
 }
 sub effect_entry_is_bad {
