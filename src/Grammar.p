@@ -341,10 +341,14 @@ sub showlist {
 
 	my @list = grep{ ! $_->hide } ::Track::all();
 	my $section = [undef,undef,@list];
-	
-	my ($screen_lines, $columns) = $text->{term}->get_screen_size();
+	my ($screen_lines, $columns);
+	if( $text->{term} )
+	{
+		($screen_lines, $columns) = $text->{term}->get_screen_size();
+	}
 
-	return $section if scalar @list <= $screen_lines - 5;
+	return $section if scalar @list <= $screen_lines - 5
+					or ! $screen_lines; 
 
 	my @sections;
 

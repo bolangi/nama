@@ -103,7 +103,8 @@ sub save_system_state {
 
 	# save history -- 50 entries, maximum
 
-	my @history = $text->{term}->GetHistory;
+	my @history;
+	@history = $text->{term}->GetHistory if $text->{term};
 	my %seen;
 	$text->{command_history} = [];
 	map { push @{$text->{command_history}}, $_ 
