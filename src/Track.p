@@ -482,9 +482,20 @@ sub set_io {
 		# rec_defeat tracks with 'null' input
 
 		when ('null'){ 
-			$track->set(rec_defeat => 1);
-			say $track->name, ": recording disabled by default for 'null' input.";
-			say "Use 'rec_enable' if necessary";
+
+			if ( $direction eq 'source' ){
+				$track->set(rec_defeat => 1);
+				say $track->name, ": recording disabled by default for 'null' input.";
+				say "Use 'rec_enable' if necessary";
+			}
+		}
+		when ('rtnull'){ 
+
+			if ( $direction eq 'source' ){
+				$track->set(rec_defeat => 1);
+				say $track->name, ": recording disabled by default for 'rtnull' input.";
+				say "Use 'rec_enable' if necessary";
+			}
 		}
 
 		# don't allow user to set JACK I/O unless JACK server is running
@@ -541,21 +552,33 @@ sub send { # command for setting, showing track source
 }
 sub set_source { # called from parser 
 	my $track = shift;
-	my ($source, $type) = @_;
+	my ($source, $type) = @_; # we don't usually get $type passed
 	my $old_source = $track->input_object_text;
 	$track->set_io('source',$source, $type);
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
-		print $track->name, ": input unchanged, $object\n";
+		::pager2($track->name, ": input unchanged, $object");
 	} else {
-		print $track->name, ": input set to $object\n";
-		# re-enable recording of null-source tracks
-		# TODO: does null source really get recorded?
-		say($track->name, ": record enabled"),
-		$track->set(rec_defeat => 0) if $old_source eq 'null';
+		::pager2("Track ",$track->name, ": source set to $object");
+		::pager2("Track ",$track->name, ": record enabled"), 
+			$track->set(rec_defeat => 0) 
+			if transition_from_null($old_source,$new_source)
+			and $track->rec_defeat;
 	}
 }
+{
+my $null_re = /^(rt)?null$/;
+sub transition_from_null {
+	my ($old, $new) = @_;
+	$old =~ /$null_re/ and $new !~ /$null_re/
+}
+sub transition_to_null {
+	my ($old, $new) = @_;
+	$old !~ /$null_re/ and $new =~ /$null_re/
+}
+}
+
 
 sub set_version {
 	my ($track, $n) = @_;
@@ -573,15 +596,20 @@ sub set_version {
 
 sub set_send { # wrapper
 	my ($track, $output) = @_;
-	my $old_send = $track->send;
-	my $new_send = $track->send($output);
+	my $old_send = $track->output_object_text;
+	logpkg('debug', "send was $old_send");
+	$track->send($output);
+	my $new_send = $track->output_object_text;
+	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
-		print $track->name, ": send unchanged, ",
-			( $object ?  $object : 'off'), "\n";
+		::pager2("Track ",$track->name, ": send unchanged, ",
+			( $object ?  $object : 'off'));
 	} else {
-		print $track->name, ": aux output ",
-		($object ? "to $object" : 'is off.'), "\n";
+		::pager2("Track ",$track->name, ": ", 
+		$object 
+			? "$object is now a send target" 
+			: "send target is turned off.");
 	}
 }
 

@@ -183,10 +183,6 @@ modifier: 'audioloop' | 'select' | 'reverse' | 'playat' | value
 end: /[;\s]*$/ 		# [space char, semicolon]{0,}
 					# end-of-string
 
-connect_target: connect_type connect_id { [ @item{qw(connect_type connect_id)} ] }
-connect_type: 'track' | 'loop' | 'jack' 
-connect_id: shellish 
-
 help_effect: _help_effect effect { ::help_effect($item{effect}) ; 1}
 find_effect: _find_effect anytag(s) { 
 	::find_effect(@{$item{"anytag(s)"}}); 1}
@@ -427,20 +423,17 @@ exit: _exit {
 	::cleanup_exit();
 	1
 }	
-source: _source connect_target { 
-	$::this_track->set_source(@{$item{connect_target}}); 1 }
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
-	print $::this_track->name, ": input set to ", $::this_track->input_object_text, "\n";
-	print "however track status is ", $::this_track->rec_status, "\n"
+	::pager3($::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
+	"however track status is ", $::this_track->rec_status)
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
-send: _send connect_target { 
-	$::this_track->set_send(@{$item{connect_target}}); 1 }
-send: _send jack_port { $::this_track->set_send($item{jack_port}); 1}
+send: _send send_id { $::this_track->set_send($item{send_id}); 1}
 send: _send { $::this_track->set_send(); 1}
+send_id: shellish
 remove_send: _remove_send {
 					$::this_track->set(send_type => undef);
 					$::this_track->set(send_id => undef); 1

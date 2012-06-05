@@ -213,6 +213,7 @@ sub dest_type {
 
 		when('bus')			 	{ $type = 'bus'			   }
 		when('null')		 	{ $type = 'null'			}
+		when('rtnull')		 	{ $type = 'rtnull'			}
 		when(/^loop,/)		 	{ $type = 'loop'			}
 		when(! /\D/)			{ $type = 'soundcard'	   } # digits only
 
