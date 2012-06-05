@@ -33,6 +33,9 @@ is( jack_port_latency('output','LinuxSampler:playback_1'),
 
 *cmd = \&command_process; # shortcut
 
+# 'send null' doesn't work!! 
+#cmd("Master; send null"); # so engine doesn't actually use JACK
+cmd("sh");
 cmd("add sine; source null; afx sine_fcac 220 0.1");
 cmd("Mixdown rec"); # record the cooked signal
 cmd("arm");
@@ -47,12 +50,7 @@ rec_cleanup();
 my $wav = join_path(this_wav_dir(),'Mixdown_1.wav');
 is( abs((-s $wav) - 528_428) < 30_000, 1, "recorded WAV file, 3s");
 is($this_track->rec_status, 'MON', 'Ready to play WAV file after mixdown');
-is($this_track->monitor_version, 1, 'Find WAV file to play, normal track');
-cmd("sine off");
-cmd("link_track sinuous Mixdown");
-cmd("sinuous");
-is($this_track->monitor_version, 1, 'Find WAV file to play, link track');
-cmd("arm");
+diag(::ChainSetup::ecasound_chain_setup());
 cmd("setpos 0.5");
 diag(eval_iam("getpos"));
 is( abs(eval_iam("getpos") - 0.5)<0.001, 1, 'Set position');
@@ -63,6 +61,12 @@ cmd("setpos 1.5");
 cmd("new_mark in2");
 cmd("setpos 2.0");
 cmd("new_mark out2");
+is($this_track->monitor_version, 1, 'Find WAV file to play, normal track');
+cmd("sine off");
+cmd("link_track sinuous Mixdown");
+cmd("sinuous");
+is($this_track->monitor_version, 1, 'Find WAV file to play, link track');
+cmd("arm");
 
 symlink($wav, join_path(this_wav_dir(),'sinister.wav'));
 cmd("scan");
