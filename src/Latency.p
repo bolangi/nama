@@ -26,7 +26,7 @@ sub add_latency_controller {
 	my $track = shift;
 	my $delay = shift;
 	my $p = {};
-	$p->{values} = [$delay, 2 * $track->sibling_latency];
+	$p->{values} = [$delay, 2];
 	$p->{type} = $config->{latency_op};
 	$p->{cop_id} = $track->latency_op if $track->latency_op;
 	$p->{before} = $track->ops->[0];
