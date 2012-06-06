@@ -43,10 +43,42 @@ sub calculate_and_adjust_latency {
 sub calculate_latency {
 	initialize_latency_vars();
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-	logpkg('debug',"starting node: $starting_track_name");
 	push my(@first_siblings), $starting_track_name;
 	push @first_siblings, 'Mixdown' if $tn{Mixdown}->rec_status eq 'MON';
+	logpkg('debug',"starting nodes: @first_siblings");
 	sibling_latency(@first_siblings);
+}
+sub cl2 {
+
+	initialize_latency_vars();
+=comment
+	get predecessors of all output types (wav_out, etc)
+	sibling latency groups from soundcard_out 
+	start with same as currently (Master/Boost and Mixdown)
+
+
+	each item
+
+	set own latency
+
+	is loop device # set own latency
+	is track	   # set own latency
+	is output
+	is input 
+
+	get predecessors of all output types (wav_out, etc)
+	set outputs
+
+	propagate latency
+	propagate again 
+	
+
+	#walk($coderef_set_own_latency)
+	
+=cut
+
+
+
 }
 sub adjust_latency {
 		eval_iam('cs-disconnect');
