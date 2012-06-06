@@ -103,7 +103,7 @@ sub prepare_to_cache {
 	logpkg('debug', "The graph with inserts:\n$g");
 	my $success = ::ChainSetup::process_routing_graph();
 	::ChainSetup::write_chains();
-	remove_temporary_tracks();
+	::ChainSetup::remove_temporary_tracks();
 	$success
 }
 sub cache_engine_run { # uses shared lexicals
