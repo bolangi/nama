@@ -30,6 +30,7 @@ sub add_latency_controller {
 	$p->{type} = $config->{latency_op};
 	$p->{cop_id} = $track->latency_op if $track->latency_op;
 	$p->{before} = $track->ops->[0];
+	$p->{track} = $track;
 	my $id = add_effect($p);
 }
 	
@@ -43,7 +44,9 @@ sub calculate_latency {
 	initialize_latency_vars();
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 	logpkg('debug',"starting node: $starting_track_name");
-	sibling_latency($starting_track_name);
+	push my(@first_siblings), $starting_track_name;
+	push @first_siblings, 'Mixdown' if $tn{Mixdown}->rec_status eq 'MON';
+	sibling_latency(@first_siblings);
 }
 sub adjust_latency {
 		eval_iam('cs-disconnect');
