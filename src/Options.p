@@ -31,6 +31,7 @@ sub process_command_line_options {
         no-fade-on-transport-start  F
 		log=s                       L
 		no-latency                  O
+		latency                     Q
 		
 );
 
@@ -46,6 +47,7 @@ sub process_command_line_options {
 	#say $getopts;
 
 	eval $getopts or die "Stopped.\n";
+	$config->{opts}->{O} = ! $config->{opts}->{Q};
 	
 	if ($config->{opts}->{h}){
 	say <<HELP; exit; }
