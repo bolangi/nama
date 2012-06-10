@@ -102,8 +102,11 @@ sub prepare_to_cache {
 	::Graph::add_inserts($g);
 	logpkg('debug', "The graph with inserts:\n$g");
 	my $success = ::ChainSetup::process_routing_graph();
-	::ChainSetup::write_chains();
-	::ChainSetup::remove_temporary_tracks();
+	if ($success) 
+	{ 
+		::ChainSetup::write_chains();
+		::ChainSetup::remove_temporary_tracks();
+	}
 	$success
 }
 sub cache_engine_run { # uses shared lexicals
@@ -218,6 +221,8 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	# skip unless MON;
+	::throw($track->name, ": cannot uncache unless track is set to MON"), return
+		unless $track->rec_status eq 'MON';
 	my $cache_map = $track->cache_map;
 	my $version = $track->monitor_version;
 	if(is_cached($track)){
