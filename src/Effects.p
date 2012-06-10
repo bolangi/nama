@@ -320,6 +320,8 @@ sub _insert_effect {  # call only from add_effect
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
+	
+	$parameter--; # convert to zero-based
 	my $cop = fx($op_id)
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
 	my $code = type($op_id);
@@ -345,7 +347,7 @@ sub modify_effect {
 	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
 	effect_update_copp_set( 
 		$op_id, 
-		$parameter, 
+		$parameter,
 		$new_value);
 	1
 }
