@@ -41,7 +41,9 @@ sub cache_track { # launch subparts if conditions are met
 
 	if ( prepare_to_cache() )
 	{ 
+		deactivate_vol_pan();
 		cache_engine_run();
+		reactivate_vol_pan();
 		return $output_wav
 	}
 	else
@@ -50,6 +52,17 @@ sub cache_track { # launch subparts if conditions are met
 		return;
 	}
 
+}
+
+sub deactivate_vol_pan {
+	$orig_volume = params($track->vol)->[0] if params($track->vol);
+	$orig_pan    = params($track->pan)->[0] if params($track->pan);
+	command_process('unity');
+	command_process('pan_center');
+}
+sub reactivate_vol_pan {
+	modify_effect($track->vol, 1, undef, $orig_volume);
+	modify_effect($track->pan, 1, undef, $orig_pan);
 }
 
 sub prepare_to_cache {
