@@ -222,7 +222,7 @@ sub uncache_track {
 	my $version = $track->monitor_version;
 	if(is_cached($track)){
 		# blast away any existing effects, TODO: warn or abort	
-		say $track->name, ": removing effects (except vol/pan)" if $track->fancy_ops;
+		say $track->name, ": removing user effects" if $track->fancy_ops;
 		map{ remove_effect($_)} $track->fancy_ops;
 
 		# original WAV -> WAV case: reset version 
@@ -249,13 +249,13 @@ sub uncache_track {
 			# not really version number, actually just an index
 			($v) = $v =~ /_(\d+)$/; 
 			$ec = ::EffectChain::find(
-				track_track => 1,
+				track_track => 1, # XXXX track_track
 				track_name	=> $track->name,
 				track_version => "V$v",
 				unique		=> 1,
 			);
-			$ec->add($track) if defined $ec;
 		}
+		$ec->add($track) if defined $ec;
 		
 	} 
 	else { print $track->name, ": version $version is not cached\n"}
