@@ -426,7 +426,7 @@ sub group_gui {
 				}
 			]);
 			$dummy->grid($gui->{group_label}, $gui->{group_version}, $gui->{group_rw});
-			$ui->global_version_buttons;
+			#$ui->global_version_buttons;
 
 }
 sub global_version_buttons {
