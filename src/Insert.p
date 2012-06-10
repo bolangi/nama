@@ -153,9 +153,9 @@ sub is_local_effects_host { ! $_[0]->send_id }
 sub set_wetness {
 	my ($self, $p) = @_;
 	$self->{wetness} = $p;
-	::modify_effect($self->wet_vol, 0, undef, $p);
+	::modify_effect($self->wet_vol, 1, undef, $p);
 	::sleeper(0.1);
-	::modify_effect($self->dry_vol, 0, undef, 100 - $p);
+	::modify_effect($self->dry_vol, 1, undef, 100 - $p);
 }
 
 

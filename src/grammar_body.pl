@@ -488,7 +488,7 @@ vol: _vol value {
 		::throw(( $::this_track->name . ": no volume control available")), return;
 	::modify_effect(
 		$::this_track->vol,
-		0,
+		1,
 		undef,
 		$item{value});
 	1;
@@ -498,7 +498,7 @@ vol: _vol sign(?) value {
 		::throw( $::this_track->name . ": no volume control available"), return;
 	::modify_effect(
 		$::this_track->vol,
-		0,
+		1,
 		$item{'sign(?)'}->[0],
 		$item{value});
 	1;
@@ -530,7 +530,7 @@ pan: _pan panval {
 	::effect_update_copp_set( $::this_track->pan, 0, $item{panval});
 	1;} 
 pan: _pan sign panval {
-	::modify_effect( $::this_track->pan, 0, $item{sign}, $item{panval} );
+	::modify_effect( $::this_track->pan, 1, $item{sign}, $item{panval} );
 	1;} 
 panval: float 
       | dd

@@ -319,7 +319,7 @@ sub _insert_effect {  # call only from add_effect
 }
 sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
-		# $parameter: zero based
+		# $parameter: one-based
 	my $cop = fx($op_id)
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
 	my $code = type($op_id);
@@ -353,7 +353,6 @@ sub modify_multiple_effects {
 	my ($op_ids, $parameters, $sign, $value) = @_;
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
-				$parameter--; # convert to zero-base
 				modify_effect($op_id, $parameter, $sign, $value);
 		} @$parameters;
 		$this_op = $op_id; # set current effect

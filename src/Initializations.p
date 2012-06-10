@@ -143,9 +143,8 @@ sub definitions {
 		latency_op_set					=> sub
 			{
 				my $id = shift;
-				my $milliseconds = shift();
-				# we need to set two parameters to this value
-				modify_effect($id,1,undef,$milliseconds/1000)
+				my $frames = shift();
+				modify_effect($id,1,undef,$frames/$config->{sample_rate})
 			},
 	}, '::Config';
 

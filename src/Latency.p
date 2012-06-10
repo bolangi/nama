@@ -86,9 +86,9 @@ sub adjust_latency {
 		connect_transport('quiet');
 }
 
-sub reset_latency_ops {
-	map{ modify_effect($_->latency_op, 0, 0) if $_->latency_op } ::Track::all();
-}
+# sub reset_latency_ops {
+# 	map{ modify_effect($_->latency_op, 0, 0) if $_->latency_op } ::Track::all();
+# }
 sub remove_latency_ops {
 	map{::remove_effect($_)} grep{ fx($_)} grep{$_} map{$_->latency_op} ::Track::all();
 	1
