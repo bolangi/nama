@@ -184,8 +184,8 @@ sub load_project {
 
 	# possible null if Text mode
 	
-	$ui->global_version_buttons(); 
-	$ui->refresh_group;
+	#$ui->global_version_buttons(); 
+	#$ui->refresh_group;
 
 	logpkg('debug', "project_root: ", project_root());
 	logpkg('debug', "this_wav_dir: ", this_wav_dir());

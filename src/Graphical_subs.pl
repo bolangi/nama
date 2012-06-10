@@ -488,7 +488,7 @@ sub track_gui {
 					$ti{$n}->set(rw => "REC");
 					
 					$ui->refresh_track($n);
-					refresh_group();
+					#refresh_group();
 					::reconfigure_engine();
 			}],
 			[ 'command' => "MON",
@@ -496,7 +496,7 @@ sub track_gui {
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
 					$ui->refresh_track($n);
-					refresh_group();
+					#refresh_group();
 					::reconfigure_engine();
 			}],
 			[ 'command' => "OFF", 
@@ -504,7 +504,7 @@ sub track_gui {
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "OFF");
 					$ui->refresh_track($n);
-					refresh_group();
+					#refresh_group();
 					::reconfigure_engine();
 			}],
 		);
@@ -787,7 +787,7 @@ sub create_master_and_mix_tracks {
 
 	$ui->track_gui( $tn{Mixdown}->n); 
 
-	$ui->group_gui('Main');
+	#$ui->group_gui('Main');
 }
 
 sub update_version_button {
