@@ -968,7 +968,7 @@ delete_effect_chain: _delete_effect_chain ident(s) {
 find_effect_chains: _find_effect_chains ident(s?) 
 {
 	my @args;
-	push @args, @{ $item{'ident(s)'} } if $item{'ident(s)'};
+	push @args, @{ $item{'ident(s?)'} } if $item{'ident(s?)'};
 	::pager(map{$_->dump} ::EffectChain::find(@args));
 }
 find_user_effect_chains: _find_user_effect_chains ident(s?)
