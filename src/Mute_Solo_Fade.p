@@ -19,7 +19,7 @@ sub fade {
 	# no fade without Timer::HiRes
 	# no fade unless engine is running
 	if ( ! engine_running() or ! $config->{hires_timer} ){
-		effect_update_copp_set ( $id, $param, $to );
+		effect_update_copp_set ( $id, --$param, $to );
 		return;
 	}
 
@@ -33,7 +33,7 @@ sub fade {
 	}		
 	effect_update_copp_set( 
 		$id, 
-		$param, 
+		--$param, 
 		$to);
 	
 }
