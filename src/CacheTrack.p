@@ -18,7 +18,21 @@ use ::Globals qw(:all);
 		$orig_volume,
 		$orig_pan);
 
+sub initialize_caching_vars {
+	map{ undef $_ } ($track, 
+					$additional_time, 
+					$processing_time, 
+					$orig_version, 
+					$complete_caching_ref,
+					$output_wav,
+					$orig_volume,
+					$orig_pan);
+}
+
 sub cache_track { # launch subparts if conditions are met
+
+	initialize_caching_vars();
+
 	($track, $additional_time) = @_;
 	say $track->name, ": preparing to cache.";
 	
