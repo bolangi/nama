@@ -14,7 +14,9 @@ use ::Globals qw(:all);
 		$processing_time, 
 		$orig_version, 
 		$complete_caching_ref,
-		$output_wav);
+		$output_wav,
+		$orig_volume,
+		$orig_pan);
 
 sub cache_track { # launch subparts if conditions are met
 	($track, $additional_time) = @_;
@@ -37,10 +39,16 @@ sub cache_track { # launch subparts if conditions are met
 				or $track->has_insert
 				or $bn{$track->name};
 
-	prepare_to_cache()
-		or say("Empty routing graph. Aborting."), return;
-	cache_engine_run();
-	$output_wav
+	if ( prepare_to_cache() )
+	{ 
+		cache_engine_run();
+		return $output_wav
+	}
+	else
+	{ 
+		say("Empty routing graph. Aborting."); 
+		return;
+	}
 
 }
 
