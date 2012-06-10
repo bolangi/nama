@@ -81,8 +81,6 @@ sub prepare_to_cache {
 		$g->add_path('wav_in',$track->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
 
-		# update cache map to enable 'uncache' command TODO:
-		# new design
 		$complete_caching_ref = \&update_cache_map;
 	}
 
