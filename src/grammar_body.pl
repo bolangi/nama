@@ -190,7 +190,7 @@ help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
 help: _help { ::pager2( $::help->{screen} ); 1}
 project_name: _project_name { 
-	::pager2( "project name: ", $::gui->{_project_name}->{name}); 1}
+	::pager2( "project name: ", $::project->{name}); 1}
 create_project: _create_project project_id { 
 	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
