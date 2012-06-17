@@ -67,6 +67,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					is_read_only
 					bypass_effects
 					preallocate_cop_id
+			
+					restore_effects
 
 ) ] );
 
