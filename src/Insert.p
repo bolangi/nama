@@ -65,6 +65,7 @@ sub new {
 				rw => 'REC');
 
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
+	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
 	$self->{dry_vol} = ::add_effect({
 		track  => $dry, 
