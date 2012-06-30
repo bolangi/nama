@@ -730,7 +730,7 @@ insert_effect: _insert_effect before effect value(s?) {
 	::pager2( join ", ", @{$values}) if $values;
 	my $id = ::add_effect({
 		before 	=> $before, 
-		type	=> $code, 
+		type	=> ::full_effect_code($code),
 		values	=> $values,
 	});
 	if($id)
