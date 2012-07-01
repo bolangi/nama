@@ -15,7 +15,7 @@ sub initialize_logger {
 	my @all_cats = qw(
 [% qx(./get_logging_cats) %]
 	);
-	push @all_cats, 'ECI';
+	push @all_cats, 'ECI','SUB';
 
 	my %negate = map{ $_ => 1} map{ s/^!//; $_ } grep{ /^!/ } 
 		expand_cats(split q(,), $cat_string);
@@ -29,12 +29,12 @@ sub initialize_logger {
 	$logfile //= "/dev/null";
 
 	my @cats = expand_cats(split ',', $cat_string);
-	logpkg('debug',"log cats: @cats");
-	logpkg('debug',"all cats: @all_cats");
+	#logpkg('debug',"initial logging categories: @cats");
+	#logpkg('trace',"all cats: @all_cats");
 	
 	@cats = grep{ ! $negate{$_} } @all_cats if grep {$_ eq 'ALL'} @cats;
 	
-	logpkg('debug',"Logging categories: @cats");
+	#logpkg('debug',"Final logging categories: @cats");
 
 	my $conf = qq(
 		#log4perl.rootLogger			= DEBUG, $appender
