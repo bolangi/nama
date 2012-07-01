@@ -17,7 +17,7 @@ sub initialize_logger {
 	);
 	push @all_cats, 'ECI','SUB';
 
-	my %negate = map{ $_ => 1} map{ s/^!//; $_ } grep{ /^!/ } 
+	my %negate = map{ $_ => 1} map{ s/^#//; $_ } grep{ /^#/ } 
 		expand_cats(split q(,), $cat_string);
 	#say("negate\n",::yaml_out(\%negate));
 
@@ -71,8 +71,8 @@ sub expand_cats {
 	# Convert !Module -> !::Module -> !Audio::Nama::Module
 	no warnings 'uninitialized';
 	my @cats = @_;
-	map { s/^(!)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
-	map { s/^(!)?/$1::/ unless /^::/ or /^!?ECI/ or /^!?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
+	map { s/^(#)?::/$1Audio::Nama::/; $_}                    # SKIP_PREPROC
+	map { s/^(#)?/$1::/ unless /^::/ or /^#?ECI/ or /^#?SUB/ or /^ALL$/; $_ }# SKIP_PREPROC
 	@cats;
 }
 {
