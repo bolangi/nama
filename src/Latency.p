@@ -19,14 +19,14 @@ sub set_latency_compensation {
 	my $track = shift;
 	my $delay = shift || 0;
 	my $id = $track->latency_op;
-	$config->{latency_op_set}->($id, $delay);
+	$config->{latency_op_set}->($id, frames_to_secs($delay));
 	$id;
 }
 sub add_latency_controller {
 	my $track = shift;
 	my $delay = shift;
 	my $p = {};
-	$p->{values} = [$delay, 2];
+	$p->{values} = [2, frames_to_secs($delay)];
 	$p->{type} = $config->{latency_op};
 	$p->{cop_id} = $track->latency_op if $track->latency_op;
 	$p->{before} = $track->ops->[0];
@@ -159,7 +159,7 @@ sub track_latency {
 
 }
 sub track_ops_latency {
-	# LADSPA plugins return latency in milliseconds
+	# LADSPA plugins return latency in frames
 	my $track = shift;
 	my $total = 0;;
 	map { $total += op_latency($_) } $track->fancy_ops;
@@ -228,8 +228,8 @@ sub sibling_latency {
 	return $max
 }
 sub loop_device_latency { 
-	# results in milliseconds
-	$engine->{buffersize} / $config->{sample_rate} * 1000 
+	# results in frames
+	$engine->{buffersize}; 
 }
 
 sub op_latency {
@@ -263,4 +263,10 @@ sub get_live_param { # for effect, not controller
 	eval_iam("copp-select $param");
 	eval_iam("copp-get")
 }
+
+sub frames_to_secs { # One time conversion for delay op
+	my $frames = shift;
+	$frames / $config->{sample_rate};
+}
+
 1;

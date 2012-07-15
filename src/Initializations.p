@@ -143,8 +143,8 @@ sub definitions {
 		latency_op_set					=> sub
 			{
 				my $id = shift;
-				my $frames = shift();
-				modify_effect($id,1,undef,$frames/$config->{sample_rate})
+				my $delay = shift();
+				modify_effect($id,2,undef,$delay)
 			},
 	}, '::Config';
 
