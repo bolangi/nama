@@ -183,7 +183,8 @@ sub read_in_effects_data {
 
 	#### LV2
 
-	my $lv2 = get_data_section('fake_lv2_register');
+	my $lv2 = eval_iam('lv2-register'); # TODO test fake lv2-register
+										# get_data_section('fake_lv2_register');
 
 	# join wrapped lines
 	$lv2 =~ s/\n  			# newline
@@ -244,7 +245,7 @@ sub read_in_effects_data {
 		^(\d+) # number
 		\.    # dot
 		\s+   # spaces+
-		(\w+) # name
+		(.+?) # name
 		,\s*  # comma spaces* 
 		-(pn:\w+)    # preset_id 
 		:?     # maybe colon (if parameters)
