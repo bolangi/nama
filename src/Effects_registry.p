@@ -69,10 +69,25 @@ sub ladspa_plugin_list {
 	}
 	@plugins
 }
+sub lv2_plugin_list {
+	my @plugins;
+	my %seen;
+	for my $dir ( split ':', lv2_path()){
+		next unless -d $dir;
+		opendir my ($dirh), $dir;
+		push @plugins,  
+			map{"$dir/$_"} 						# full path
+			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins
+			grep{ /\.lv2$/} readdir $dirh;			# get .lv2 files
+		closedir $dirh;
+	}
+	@plugins
+}
 
 sub new_plugins {
 	my $effects_cache = effects_cache();
 	my @filenames = ladspa_plugin_list();	
+	push @filenames, lv2_plugin_list();
 	push @filenames, '/usr/local/share/ecasound/effect_presets',
                  '/usr/share/ecasound/effect_presets',
                  "$ENV{HOME}/.ecasound/effect_presets";
@@ -345,6 +360,9 @@ sub integrate_cop_hints {
 }
 sub ladspa_path {
 	$ENV{LADSPA_PATH} || q(/usr/lib/ladspa);
+}
+sub lv2_path {
+	$ENV{LV2_PATH} || q(/usr/lib/lv2);
 }
 sub get_ladspa_hints{
 	logsub("&get_ladspa_hints");
