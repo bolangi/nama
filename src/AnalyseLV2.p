@@ -5,6 +5,9 @@
 package ::AnalyseLV2;
 # Initialise our global variables:
 # Store the plugin info:
+# Toggle debugging:
+my $debug = 0;
+
 
 use strict;
 
@@ -46,6 +49,13 @@ sub _analyse_lv2 {
 		{ $plugin{general}{has_latency} = $3; }
 		# Next we embark on port data collection.
 		# ...fffirst acquire current port.
+		if ($line =~ /^(\t| )+file\:\/\/.*\.ttl$/ 
+		&& ($currentport == -1) ) {
+			chomp($line);
+			$line =~ s/(\t| )+file\:\/\///;
+			$plugin{'general'}{'datafile'} = $line;
+			print "datafile: $plugin{'general'}{'datafile'}\n" if $debug;
+		}
 		if ($line =~ /(\t| )+Port (\d+)\:$/) { 
 			$currentport = $2;
 			print "Acquiring info for $currentport\n" if $debug;
@@ -126,6 +136,9 @@ sub _analyse_lv2 {
 		}
 	}
 
+	# Gather info from datafile
+	proc_datafile($plugin{'general'}{'datafile'});
+
 	return (\%plugin, \%scalepoints);
 
 } # end of sub crunch
@@ -138,7 +151,12 @@ sub stripzeros {
 
 sub generateportinfo {
 	my $portinfo;
-	$portinfo .= "\"$plugin{$currentport}{name}\" ";
+	$portinfo .= "\"$plugin{$currentport}{'name'}";
+	# For units
+	if (exists($plugin{$currentport}{'units'})) {
+		$portinfo .= " (" . cunits($plugin{$currentport}{'units'}) . ")";
+	}
+	$portinfo .= "\" ";
 	$portinfo .= "$plugin{$currentport}{iotype}, ";
 	$portinfo .= "$plugin{$currentport}{etype}";
 	$portinfo .= ", " . &stripzeros($plugin{$currentport}{minval})
@@ -259,5 +277,30 @@ sub lv2_help {
 
 #print lv2_help('http://plugin.org.uk/swh-plugins/zm1');
 #print lv2_help('urn:50m30n3:plugins:SO-404');
+
+sub proc_datafile {
+	my ($file) = @_;
+	open(my $fh, "<", $file) || return 0;
+	$currentport = -1;
+	while (my $curline = <$fh>) {
+		if ($curline =~ /lv2\:index +(\d+) *;$/ ) {
+			$currentport = $1;
+		}
+		if ($curline =~ /ue\:unit +ue\:([a-zA-Z0-9_]+) *;$/ 
+			&& ($currentport != -1)) {
+			$plugin{$currentport}{'units'} = $1;
+		}
+	}
+	close($fh);
+	$currentport = -1;
+	return 1;
+}
+
+sub cunits {
+	(my $units) = @_;
+	$units =~ s/pc/\%/ if $units =~ /pc/;
+	return $units;
+}
+
 
 1;
