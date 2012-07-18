@@ -947,11 +947,13 @@ new_effect_chain: _new_effect_chain ident end {
 	1;
 }
 add_effect_chain: _add_effect_chain ident {
-	::EffectChain::find(
+	my ($ec) = ::EffectChain::find(
 		unique => 1, 
 		user   => 1, 
 		name   => $item{ident}
-	)->add($::this_track);
+	);
+	if( $ec ){ $ec->add($::this_track) }
+	else { ::throw("$item{ident}: effect chain not found") }
 	1;
 }
 delete_effect_chain: _delete_effect_chain ident(s) {
