@@ -225,7 +225,7 @@ sub add_ops {
 
 		$args->{cop_id} = $_ unless fx($_);
 
-		say "args ", json_out($args);
+		logpkg('debug',"args ", json_out($args));
 		# avoid incorrectly calling _insert_effect 
 		# (and controllers are not positioned relative to other  effects)
 		# 
@@ -364,7 +364,7 @@ sub new_effect_profile {
 	logsub("&new_effect_profile");
 	my ($bunch, $profile) = @_;
 	my @tracks = bunch_tracks($bunch);
-	say qq(effect profile "$profile" created for tracks: @tracks);
+	::pager( qq(effect profile "$profile" created for tracks: @tracks) );
 	map { 
 		::EffectChain->new(
 			profile 	=> $profile,
@@ -378,7 +378,7 @@ sub new_effect_profile {
 sub delete_effect_profile { 
 	logsub("&delete_effect_profile");
 	my $name = shift;
-	say qq(deleting effect profile: $name);
+	::pager( qq(deleting effect profile: $name) );
 	map{ $_->destroy} ::EffectChain::find( profile => $name );
 }
 
@@ -387,7 +387,7 @@ sub apply_effect_profile {  # overwriting current effects
 	my ($profile) = @_;
 	my @chains = ::EffectChain::find(profile => $profile);
 
-	map{ say "adding track $_"; add_track($_) } 
+	map{ ::pager( "adding track $_" ); add_track($_) } 
 	grep{ !$tn{$_} } 
 	map{ $_->track_name } 
 	@chains;	
