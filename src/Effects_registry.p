@@ -227,6 +227,7 @@ sub read_in_effects_data {
 	logpkg('debug', "found ", scalar @preset, " Ecasound presets");
 	logpkg('debug', "found ", scalar @ctrl, " Ecasound controllers");
 	logpkg('debug', "found ", scalar @lad, " LADSPA effects");
+	logpkg('debug', "found ", scalar @lv2, " LV2 effects");
 
 	# index boundaries we need to make effects list and menus
 	$fx_cache->{split}->{cop}{a}   = 1;
