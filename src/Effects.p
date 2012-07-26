@@ -230,6 +230,10 @@ sub _add_effect {
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
+	$p->{values} = fx_defaults($code) 
+		if ! $values 
+		or ref $values and ! scalar @{ $values };
+
 	$id = cop_add($p); 
 	
 	$ui->add_effect_gui($p) unless $ti{$n}->hide;
@@ -556,6 +560,17 @@ sub effect_index {
 	defined $i or $config->{opts}->{E} or warn("$code: effect index not found\n");
 	$i
 }
+
+sub fx_defaults {
+	my $i = effect_index(shift());
+	my $values = [];
+	foreach my $p ( @{ $fx_cache->{registry}->[$i]->{params} })
+	{
+		return [] unless defined $p->{default};
+		push @$values, $p->{default};
+	}
+}
+	
 
 ## Ecasound engine -- apply/remove chain operators
 
