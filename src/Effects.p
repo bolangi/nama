@@ -621,6 +621,7 @@ sub apply_op {
 	eval_iam("c-select $chain") if $selected_chain != $chain;
 	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
 	eval_iam($add_cmd);
+	eval_iam("cop-bypass on") if bypassed($id);
 
 	my $ref = ref owns($id) ;
 	$ref =~ /ARRAY/ or croak "expected array";
