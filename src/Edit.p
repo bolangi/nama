@@ -81,10 +81,12 @@ sub new {
 	::Track->new(
 		name 		=> $self->edit_root_name, # i.e. sax-v5
 	#	rw			=> 'REC',                 # set by ->busify
+	#											# NOT CURRENTLY XXX
 		source_type => 'bus',
 		source_id 	=> 'bus',
 		width		=> 2,                     # default to stereo 
 	#	rec_defeat 	=> 1,                     # set by ->busify
+	#											# NOT CURRENTLY XXX
 		group   	=> $self->host_track,     # i.e. sax
 		hide		=> 1,
 	); 
