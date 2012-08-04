@@ -22,11 +22,12 @@ remove ev
 
 	my $ev = add_effect( { track => $track, type => 'ev' } );
 
-	# turn off audio output
-	
-	$tn{Master}->set(rw => 'OFF');
+	my $old_send_type = $tn{Master}->{send_type};
+	my $old_send_id   = $tn{Master}->{send_id};
 
-	generate_setup('automix') # pass a bit of magic
+	$tn{Master}->set(send_type => 'null', send_id => 'null');
+
+	generate_setup() 
 		or say("automix: generate_setup failed!"), return;
 	connect_transport();
 
@@ -68,7 +69,10 @@ sub automix {
 
 	# turn off audio output
 	
-	$tn{Master}->set(rw => 'OFF');
+	my $old_send_type = $tn{Master}->{send_type};
+	my $old_send_id   = $tn{Master}->{send_id};
+
+	$tn{Master}->set(send_type => 'null', send_id => 'null');
 
 	### Status before mixdown:
 
@@ -129,9 +133,9 @@ sub automix {
 	### mixdown
 	command_process('mixdown; arm; start');
 
-	### turn on audio output
+	### restore audio output
 
-	# command_process('mixplay'); # rec_cleanup does this automatically
+	$tn{Master}->set( send_type => $old_send_type, send_id => $old_send_id); 
 
 	#no Smart::Comments;
 	
