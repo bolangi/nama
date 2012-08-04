@@ -84,7 +84,10 @@ sub save_system_state {
 
 	# separate out cache maps
 	
-	map { $cache_map{$_->{name}} = delete $_->{cache_map} } @tracks_data;
+	# don't remove existing yet
+	map { $cache_map{$_->{name}} = $_->{cache_map} } @tracks_data;
+
+	#### map { $cache_map{$_->{name}} = delete $_->{cache_map} } @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
