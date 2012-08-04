@@ -92,6 +92,24 @@ sub pager {
 	}
 	print "\n\n";
 }
+
+sub mandatory_pager {
+	logsub("&mandatory_pager");
+	my @output = @_;
+	if 
+	( 
+		(ref $ui) =~ /Text/  # pager interferes with GUI
+		and $config->{use_pager} 
+	) { 
+		my $fh = File::Temp->new();
+		my $fname = $fh->filename;
+		print $fh @output;
+		file_pager($fname);
+	} else {
+		print @output;
+	}
+	print "\n\n";
+} 
 sub file_pager {
 	logsub("&file_pager");
 	my $fname = shift;

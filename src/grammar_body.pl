@@ -1403,6 +1403,7 @@ show_latency_all: _show_latency_all {
 	::pager2( ::yaml_out($::setup->{latency})) if $::setup->{latency};
 	1;
 }
+check_level: _check_level { ::check_level($::this_track);1 }
 # config_key: key {
 # 	my $key = $item{key};
 # 	warn("$key: illegal config setting"), return 0

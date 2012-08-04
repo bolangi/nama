@@ -94,6 +94,8 @@ sub show_io {
 sub generate_setup_try {  # TODO: move operations below to buses
 	logsub("&generate_setup_try");
 
+	my $extra_setup_code = shift;
+
 	# in an ideal CS world, all of the following routing
 	# routines (add_paths_for_*) would be accomplished by
 	# the track or bus itself, rather than the Hand of God, as
@@ -103,8 +105,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	# the Hand of God happens to be doing exactly the
 	# right things. :-)
 
-	my $automix = shift; # route Master to null_out if present
-	
 	# start with bus routing
 	
 	map{ $_->apply($g) } ::Bus::all();
@@ -115,17 +115,16 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	add_paths_for_aux_sends();
 	$logger->debug("Graph after aux sends:\n$g");
 
-	add_paths_from_Master(); # do they affect automix?
+	add_paths_from_Master();
 	$logger->debug("Graph with paths from Master:\n$g");
 
-	# re-route Master to null for automix
-	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
-		$g->add_edge(qw[Master null_out]);
-		$logger->debug("Graph with automix mods:\n$g");
-	}
 	add_paths_for_mixdown_handling();
 	$logger->debug("Graph with mixdown mods:\n$g");
+	
+	# run extra setup
+	
+	$extra_setup_code->($g) if $extra_setup_code;
+
 	prune_graph();
 	$setup->{latency_graph} = dclone($g);
 	$logger->debug("Graph after pruning unterminated branches:\n$g");

@@ -1,6 +1,58 @@
 package ::;
 use Modern::Perl;
 
+sub check_level {
+
+=comment
+
+turn off master
+route current track to null
+add ev
+generate setup
+connect
+start
+output
+
+turn on master
+remove ev
+
+
+=cut
+	my $track = shift;
+
+	my $ev = add_effect( { track => $track, type => 'ev' } );
+
+	# disable Master so unused tracks are pruned
+	
+	$tn{Master}->set(rw => 'OFF'); 
+
+	# direct target track to null
+	
+	my $null_routing = 
+	sub { 	my $g = shift;
+			$g->add_path($track->name, output_node('null')) };
+	generate_setup($null_routing) 
+		or say("check_level: generate_setup failed!"), return;
+	connect_transport();
+	
+	eval_iam('start'); # don't use heartbeat
+	sleep 2; # time for engine to stabilize
+	while( eval_iam('engine-status') ne 'finished'){ 
+		print q(.); sleep 1; update_clock_display()}; 
+	print " Done\n";
+
+	my $cs = eval_iam('cop-status');
+
+	my ($level_output) = $cs =~ /Status info:\s*?\n(.+)\z/s;
+	::mandatory_pager($level_output);
+
+	# restore previous state
+	
+	remove_effect($ev);
+	$tn{Master}->set(rw => 'MON'); 
+	$setup->{changed}++;
+}
+
 sub automix {
 
 	# get working track set
@@ -24,7 +76,10 @@ sub automix {
 
 	# turn off audio output
 	
-	$tn{Master}->set(rw => 'OFF');
+	my $old_send_type = $tn{Master}->{send_type};
+	my $old_send_id   = $tn{Master}->{send_id};
+
+	$tn{Master}->set(send_type => 'null', send_id => 'null');
 
 	### Status before mixdown:
 
@@ -85,9 +140,9 @@ sub automix {
 	### mixdown
 	command_process('mixdown; arm; start');
 
-	### turn on audio output
+	### restore audio output
 
-	# command_process('mixplay'); # rec_cleanup does this automatically
+	$tn{Master}->set( send_type => $old_send_type, send_id => $old_send_id); 
 
 	#no Smart::Comments;
 	
