@@ -10,6 +10,9 @@ sub generate_setup {
 	# catch errors from generate_setup_try() and cleanup
 	logsub("&generate_setup");
 
+	# extra argument (setup code) will be passed to generate_setup_try()
+	# my ($extra_setup_code) = @_;
+
 	# save current track
 	local $this_track;
 

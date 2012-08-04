@@ -94,6 +94,8 @@ sub show_io {
 sub generate_setup_try {  # TODO: move operations below to buses
 	logsub("&generate_setup_try");
 
+	my $extra_setup_code = shift;
+
 	# in an ideal CS world, all of the following routing
 	# routines (add_paths_for_*) would be accomplished by
 	# the track or bus itself, rather than the Hand of God, as
@@ -118,6 +120,11 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	add_paths_for_mixdown_handling();
 	$logger->debug("Graph with mixdown mods:\n$g");
+	
+	# run extra setup
+	
+	$extra_setup_code->($g) if $extra_setup_code;
+
 	prune_graph();
 	$setup->{latency_graph} = dclone($g);
 	$logger->debug("Graph after pruning unterminated branches:\n$g");
