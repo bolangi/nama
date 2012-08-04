@@ -863,6 +863,7 @@ sub effect_update_copp_set {
 }
 
 sub sync_effect_parameters {
+	return; ### DIAGNOSTIC FOR TROUBLESHOOTING XXX
 	local $config->{category} = 'ECI_FX';
 	# when a controller changes an effect parameter
 	# the effect state can differ from the state in
