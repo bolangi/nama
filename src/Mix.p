@@ -1,6 +1,50 @@
 package ::;
 use Modern::Perl;
 
+sub check_level {
+
+=comment
+
+turn off master
+route current track to null
+add ev
+generate setup
+connect
+start
+output
+
+turn on master
+remove ev
+
+
+=cut
+	my $track = shift;
+
+	my $ev = add_effect( { track => $track, type => 'ev' } );
+
+	# turn off audio output
+	
+	$tn{Master}->set(rw => 'OFF');
+
+	generate_setup('automix') # pass a bit of magic
+		or say("automix: generate_setup failed!"), return;
+	connect_transport();
+
+	eval_iam('start'); # don't use heartbeat
+	sleep 2; # time for engine to stabilize
+	while( eval_iam('engine-status') ne 'finished'){ 
+		print q(.); sleep 1; update_clock_display()}; 
+	print " Done\n";
+
+	# parse cop status
+	my $cs = eval_iam('cop-status');
+
+	remove_effect($ev);
+
+	$tn{Master}->set(rw => 'MON');
+
+}
+
 sub automix {
 
 	# get working track set
