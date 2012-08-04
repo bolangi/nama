@@ -3,21 +3,6 @@ use Modern::Perl;
 
 sub check_level {
 
-=comment
-
-turn off master
-route current track to null
-add ev
-generate setup
-connect
-start
-output
-
-turn on master
-remove ev
-
-
-=cut
 	my $track = shift;
 
 	my $ev = add_effect( { track => $track, type => 'ev' } );
