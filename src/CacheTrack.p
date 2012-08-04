@@ -85,22 +85,28 @@ sub prepare_to_cache {
  	my $g = ::ChainSetup::initialize();
 	$orig_version = $track->monitor_version;
 
-	# create a temporary track to represent the output file
+	#   We route the signal thusly:
+	#
+	#   Target track --> CacheRecTrack --> wav_out
+	#
+	#   CacheRecTrack slaves to target target
+	#     - same name
+	#     - increments track version by one
 	
-	my $cooked_name = $track->name . '_cooked';
 	my $cooked = ::CacheRecTrack->new(
-		name => $cooked_name,
-		group => 'Temp',
+		name   => $track->name . '_cooked',
+		group  => 'Temp',
 		target => $track->name,
-		hide => 1,
+		hide   => 1,
 	);
-	$output_wav = $cooked->current_wav;
 
-	# connect the temporary track's output path
-	
 	$g->add_path($track->name, $cooked->name, 'wav_out');
 
-	# set the correct output parameters in the graph
+	# save the output file name to return later
+	
+	$output_wav = $cooked->current_wav;
+
+	# set WAV output format
 	
 	$g->set_vertex_attributes(
 		$cooked->name, 
