@@ -22,28 +22,35 @@ remove ev
 
 	my $ev = add_effect( { track => $track, type => 'ev' } );
 
-	my $old_send_type = $tn{Master}->{send_type};
-	my $old_send_id   = $tn{Master}->{send_id};
+	# disable Master so unused tracks are pruned
+	
+	$tn{Master}->set(rw => 'OFF'); 
 
-	$tn{Master}->set(send_type => 'null', send_id => 'null');
-
-	generate_setup() 
-		or say("automix: generate_setup failed!"), return;
+	# direct target track to null
+	
+	my $null_routing = 
+	sub { 	my $g = shift;
+			$g->add_path($track->name, output_node('null')) };
+	generate_setup($null_routing) 
+		or say("check_level: generate_setup failed!"), return;
 	connect_transport();
-
+	
 	eval_iam('start'); # don't use heartbeat
 	sleep 2; # time for engine to stabilize
 	while( eval_iam('engine-status') ne 'finished'){ 
 		print q(.); sleep 1; update_clock_display()}; 
 	print " Done\n";
 
-	# parse cop status
 	my $cs = eval_iam('cop-status');
 
+	my ($level_output) = $cs =~ /Status info:\s*?\n(.+)\z/s;
+	::mandatory_pager($level_output);
+
+	# restore previous state
+	
 	remove_effect($ev);
-
-	$tn{Master}->set(rw => 'MON');
-
+	$tn{Master}->set(rw => 'MON'); 
+	$setup->{changed}++;
 }
 
 sub automix {
