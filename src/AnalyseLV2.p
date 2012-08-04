@@ -111,7 +111,7 @@ sub _analyse_lv2 {
 		if ($currentport != -1 && $line =~ /Scale Points\:/) {
 			$plugin{$currentport}{scalepoints} = 0;
 		}
-		if ($line =~ /(\t+| +)+(-?\d+) = \"(.*)\"$/
+		if ($line =~ /(\t+| +)+(-?\d+\.?\d*) = \"(.*)\"$/
 			&& exists($plugin{$currentport}{scalepoints})) {
 			$plugin{$currentport}{scalepoints}++;
 			$scalepoints{$currentport}{$2} = $3;
@@ -246,10 +246,10 @@ sub print_lv2_scalepoints {
 	my @buffer;
 	if (keys(%scalepoints) > 0) {
 		push @buffer, "Printing full information for ports with scale points in plugin...\n$plugin{general}{name}\n";
-		foreach my $port (sort(keys(%scalepoints))) {
+		foreach my $port (sort {$a <=> $b} (keys(%scalepoints))) {
 			$currentport = $port;
 			push @buffer, "Port $currentport: " . generateportinfo();
-			foreach my $point ( sort(keys(%{ $scalepoints{$currentport} })) ) {
+			foreach my $point ( sort {$a <=> $b} (keys(%{ $scalepoints{$currentport} })) ) {
 				push @buffer, "\t $point \= $scalepoints{$currentport}{$point}\n";
 			}
 		}
