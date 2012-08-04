@@ -46,6 +46,8 @@ sub initialize_marshalling_arrays {
 	@project_effect_chain_data = ();
 	@global_effect_chain_data = ();
 	$text->{command_history} = {};
+
+	%cache_map = ();
 }
 
 sub save_system_state {
@@ -79,6 +81,10 @@ sub save_system_state {
 				map{ delete $t->{$_} } 
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
+
+	# separate out cache maps
+	
+	map { $cache_map{$_->{name}} = delete $_->{cache_map} } @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
@@ -125,6 +131,13 @@ sub save_system_state {
 				);
 
 	} @formats;
+
+	serialize(
+		file => $file->cache_map,
+		format => 'json',
+		vars => [ '%cache_map' ],
+		class => '::',
+	);	
 
 	$path
 }
@@ -547,6 +560,24 @@ sub restore_state {
 	$this_track = $tn{$this_track_name} if $this_track_name;
 	set_current_bus();
 
+	# restore cache_map entries
+	
+	( $path, $suffix ) = get_newest($file->cache_map);
+	if ($path)
+	{
+		$source = read_file($path);
+
+		my $ref = decode($source, $suffix);
+		assign(
+				data	=> $ref,	
+				vars   	=> [ '%cache_map' ],
+				class 	=> '::');
+		map
+		{ my $t = $_;
+		  $t->{cache_map} = $cache_map{$t->{name}} // {};
+		} @tracks_data;
+	}
+	
 	map{ 
 		my $n = $_->{n};
 
