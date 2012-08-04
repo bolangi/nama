@@ -103,8 +103,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	# the Hand of God happens to be doing exactly the
 	# right things. :-)
 
-	my $automix = shift; # route Master to null_out if present
-	
 	# start with bus routing
 	
 	map{ $_->apply($g) } ::Bus::all();
@@ -115,15 +113,9 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	add_paths_for_aux_sends();
 	$logger->debug("Graph after aux sends:\n$g");
 
-	add_paths_from_Master(); # do they affect automix?
+	add_paths_from_Master();
 	$logger->debug("Graph with paths from Master:\n$g");
 
-	# re-route Master to null for automix
-	if( $automix){
-		$g->delete_edges(map{@$_} $g->edges_from('Master')); 
-		$g->add_edge(qw[Master null_out]);
-		$logger->debug("Graph with automix mods:\n$g");
-	}
 	add_paths_for_mixdown_handling();
 	$logger->debug("Graph with mixdown mods:\n$g");
 	prune_graph();
