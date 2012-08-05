@@ -9,3 +9,5 @@
 @global_effect_chain_data
 @project_effect_chain_data
 $this_track_name
+
+%cache_map
