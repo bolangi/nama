@@ -48,6 +48,7 @@ sub initialize {
 	::Graph::initialize_logger();
 	delete $setup->{latency_graph};
 	delete $setup->{final_graph};
+	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();
 	$g = Graph->new(); 	

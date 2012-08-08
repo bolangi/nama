@@ -22,7 +22,6 @@ sub generate_setup {
 
 	::ChainSetup::initialize();
 
-	$setup->{audio_length} = 0;  # TODO replace global with sub
 	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)
 	local $@ unless $config->{opts}->{T}; 
