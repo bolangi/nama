@@ -152,6 +152,11 @@ sub cache_engine_run { # uses shared lexicals
 
 	connect_transport('quiet')
 		or say("Couldn't connect engine! Aborting."), return;
+
+	# remove fades from target track
+	
+	::Effects::remove_op($track->fader) if defined $track->fader;
+
 	$processing_time = $setup->{audio_length} + $additional_time;
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
