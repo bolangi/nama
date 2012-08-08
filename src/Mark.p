@@ -232,7 +232,13 @@ sub jump {
 	my $here = eval_iam('getpos');
 	logpkg('debug', "delta: $delta, here: $here, unit: $gui->{_seek_unit}");
 	my $new_pos = $here + $delta * $gui->{_seek_unit};
-	$new_pos = $new_pos < $setup->{audio_length} ? $new_pos : $setup->{audio_length} - 10;
+	if ( $setup->{audio_length} )
+	{
+		$new_pos = $new_pos < $setup->{audio_length} 
+			? $new_pos 
+			: $setup->{audio_length} - 10
+	}
+	
 	set_position( $new_pos );
 	sleeper( 0.6) if engine_running();
 }
