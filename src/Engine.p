@@ -7,6 +7,8 @@ use Modern::Perl; use Carp;
 no warnings 'uninitialized';
 use ::Util qw(process_is_running);
 
+# support both 'stop' and 'stop-sync' commands
+
 { my $stop_command = undef;
 sub stop_command {
 	return unless engine_running();
@@ -81,8 +83,8 @@ sub stop_transport {
 
 	my $quiet = shift;
 	logsub("&stop_transport"); 
+	my $pos = eval_iam('getpos') if eval_iam('cs-connected');
 	mute();
-	my $pos = eval_iam('getpos');
 	stop_command();
 	disable_length_timer();
 	if ( ! $quiet ){
@@ -92,7 +94,10 @@ sub stop_transport {
 	unmute();
 	stop_heartbeat();
 	$ui->project_label_configure(-background => $gui->{_old_bg});
-	eval_iam("setpos $pos");
+
+	# restore exact position transport stop command was issued
+	
+	eval_iam("setpos $pos") if $pos;
 }
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
