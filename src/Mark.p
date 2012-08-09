@@ -20,6 +20,7 @@ sub initialize {
 	map{ $_->remove} ::Mark::all();
 	@all = ();	
 	%by_name = ();	# return ref to Mark by name
+	$by_name{Here} = bless {}, '::HereMark';
 	@::marks_data = (); # for save/restore
 }
 sub new {
@@ -270,5 +271,13 @@ sub rewind {
 }
 	
 } # end package
+{ package ::HereMark;
+our @ISA = ::Mark;
+our $last_time;
+sub name { 'Here' }
+sub time { ::eval_iam('cs-connected') ? ($last_time = ::eval_iam('getpos')) : $last_time } 
+}
+
+
 1;
 __END__
