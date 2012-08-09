@@ -158,6 +158,7 @@ sub cache_engine_run { # uses shared lexicals
 	::Effects::remove_op($track->fader) if defined $track->fader;
 
 	$processing_time = $setup->{audio_length} + $additional_time;
+	# ??? where is $setup->{audio_length} set??
 
 	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
 	print "Starting cache operation. Please wait.";
