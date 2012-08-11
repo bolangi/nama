@@ -453,7 +453,7 @@ sub get_ladspa_hints{
 
 sub get_lv2_hints {
 	my @plugins = split " ", qx(lv2ls);
-	pager3('No LV2 plugins found'), return unless @plugins;
+	logpkg('debug','No LV2 plugins found'), return unless @plugins;
 	map { $fx_cache->{lv2_help}->{"elv2:$_"} = join '', ::AnalyseLV2::lv2_help($_) } @plugins;
 }
 

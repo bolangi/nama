@@ -30,7 +30,7 @@ sub setup_user_customization {
 				$fx_cache->{partial_label_to_full}->{$_} = $longform
 			}
 		 else 
-			{ pager3("$longform: effect not found, cannot create shortcut") 
+			{ throw("$longform: effect not found, cannot create shortcut") 
 			}
  	} keys %{$custom{fxshortcuts}};
 }

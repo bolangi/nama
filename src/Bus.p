@@ -30,11 +30,11 @@ sub new {
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	if (! $vals{name}){
-		::pager3("missing bus name");
+		::throw("missing bus name");
 		return
 	}
 	if ( $by_name{$vals{name}} ){ 
-		::pager3("$vals{name}: bus name already exists. Skipping.");
+		::throw("$vals{name}: bus name already exists. Skipping.");
 		return;
 	}
 	my $bus = bless { 

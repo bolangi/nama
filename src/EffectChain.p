@@ -74,8 +74,8 @@ sub new {
 
 	logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
 
-	::pager3( "expected either non-empty ops_list or insert_data") 
- 		unless scalar @{$vals{ops_list}} or scalar @{$vals{inserts_data}};
+	logpkg('debug',"Nether ops_list or nor insert_data is present") 
+ 		if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
 
 	my $n = $vals{n} || ++$n;
 
