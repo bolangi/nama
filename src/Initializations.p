@@ -269,7 +269,6 @@ sub initialize_interfaces {
 	and process_is_running('jack.plumbing')
 	){
 
-		pager3("");
 		pager3(<<PLUMB);
 Jack.plumbing daemon detected!
 
