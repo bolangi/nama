@@ -70,14 +70,12 @@
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
-	$project->{config}
-	$project->{bunch}
 	$project->{timebase}
-	$fx->{id_counter}
+
 	$fx->{applied}
 	$fx->{params}
 	$fx->{params_log}}
-	$gui->{_seek_unit}
+
 	@tracks_data
 	@bus_data
 	@groups_data
@@ -85,12 +83,22 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+
 	@project_effect_chain_data
+
+);
+
+	@unversioned_state_vars = qw(
+
+	$fx->{id_counter}
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
+	$mode->{mastering}
+	$project->{config}
+	$project->{bunch}
+	$gui->{_seek_unit}
 	$setup->{audio_length}
 	$text->{command_history}
-	$mode->{mastering}
 	$this_track_name
 	$this_op
 );
