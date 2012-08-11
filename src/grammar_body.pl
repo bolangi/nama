@@ -1404,32 +1404,3 @@ show_latency_all: _show_latency_all {
 	1;
 }
 check_level: _check_level { ::check_level($::this_track);1 }
-# config_key: key {
-# 	my $key = $item{key};
-# 	warn("$key: illegal config setting"), return 0
-# 		unless grep{ /^.$key$/ } keys ::Assign::var_map();
-# 	return $key
-# }
-# config: _config config_key shellish {
-# 	my $arg = $item{shellish};
-# 	my $key = $item{config_key};
-# 	$::project->{config}->{$key} = $arg;
-# 	return 1;
-# }
-# config: _config config_key {
-# 	my $key = $item{config_key};
-#  	my $arg = $::project->{config}->{$key};
-#  	if (defined $arg) {
-#  		::pager2( "project specific setting for $key: $arg");
-#  	}
-#  	return 1;
-# }
-# unset: _unset config_key {
-# 	my $key = $item{config_key};
-# 	my $arg = $::project->{config}->{$key};
-# 	::pager2( "removing project-specific setting for $key: $arg");
-# 	::pager2( "value will default to global config file (.namarc) setting");
-# 	delete $::project->{$item{config_key}};
-# 	::pager2( "currently ",$::config->$key, "");
-# 	1;
-# }
