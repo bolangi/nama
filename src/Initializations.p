@@ -269,14 +269,22 @@ sub initialize_interfaces {
 	and process_is_running('jack.plumbing')
 	){
 
-		pager3("Jack.plumbing daemon detected!");
-		pager3("Attempting to stop it (will restart as needed)... ");
+		pager3("");
+		pager3(<<PLUMB);
+Jack.plumbing daemon detected!
+
+Attempting to stop it...  
+
+(This may break other software that depends in jack.plumbing.)
+
+Nama will restart it as needed for Nama's use only.
+PLUMB
 
 		kill_jack_plumbing();
 		sleeper(0.2);
 		if( process_is_running('jack.plumbing') )
 		{
-		pager3( q(Unable to stop jack.plumbing daemon.
+		throw(q(Unable to stop jack.plumbing daemon.
 
 Please do one of the following, then restart Nama:
 
