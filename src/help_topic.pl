@@ -12,6 +12,8 @@
                     diagnostics
 					edits
 					fades
+					command_line_options
+					man_page
                 ) ;
 
 %{$help->{topic}} = (
@@ -442,4 +444,8 @@ help is available for the following topics:
 11 Diagnostics
 12 Edits
 13 Fades
+14 Command line options
+15 Man page
+911  All other issues
+
 HELP

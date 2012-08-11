@@ -33,10 +33,12 @@ sub helpline {
 }
 sub helptopic {
 	my $index = shift;
-	$index =~ /^(\d+)$/ and $index = $help->{arr_topic}->[$index];
+	my $name = $help->{arr_topic}->[$index];
 	my @output;
-	push @output, "\n-- ", ucfirst $index, " --\n\n";
-	push @output, $help->{topic}->{$index}, $/;
+	push @output, "\n-- ", ucfirst $name, " --\n\n";
+	push @output, $help->{topic}->{$name}, $/;
+	push @output, $help->{usage} if $index == 14;
+	system("man","nama") if $index== 15;
 	@output;
 }
 
