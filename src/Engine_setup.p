@@ -263,7 +263,8 @@ sub connect_transport {
 		print "Failed to launch engine. Engine status: $status\n";
 		return;
 	}
-	$setup->{audio_length} = eval_iam('cs-get-length'); 
+	$setup->{audio_length} = eval_iam('cs-get-length'); # returns zero if unknown
+
 	sync_effect_parameters();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
