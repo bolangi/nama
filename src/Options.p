@@ -49,8 +49,11 @@ sub process_command_line_options {
 	eval $getopts or die "Stopped.\n";
 	$config->{opts}->{O} = ! $config->{opts}->{Q};
 	
-	if ($config->{opts}->{h}){
-	say <<HELP; exit; }
+	if ($config->{opts}->{h}){ say $help->{usage}; exit; }
+
+}
+BEGIN {
+$help->{usage} = <<HELP;
 
 USAGE: nama [options] [project_name]
 
@@ -83,8 +86,8 @@ Debugging options:
 --log, -L                        Categories to log
 
 HELP
-
 }
+
 1;
 __END__
 	

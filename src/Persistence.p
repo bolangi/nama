@@ -129,7 +129,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => \@new_persistent_vars,
+				vars => [@new_persistent_vars, @unversioned_state_vars],
 				class => '::',
 				);
 
