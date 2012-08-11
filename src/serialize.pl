@@ -11,3 +11,4 @@
 $this_track_name
 
 %cache_map
+@unversioned_state_vars
