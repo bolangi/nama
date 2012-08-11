@@ -147,6 +147,9 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+	
+	%cache_map
+
 	@persistent_vars
 	@config_vars
 	@effects_static_vars
