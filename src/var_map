@@ -147,8 +147,10 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+	@project_effect_chains_data
 	
 	%cache_map
+	%track_comments
 
 	@persistent_vars
 	@config_vars

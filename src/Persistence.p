@@ -48,6 +48,7 @@ sub initialize_marshalling_arrays {
 	$text->{command_history} = {};
 
 	%cache_map = ();
+	%track_comments = ();
 }
 
 sub save_system_state {

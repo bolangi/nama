@@ -83,13 +83,13 @@
 	@fade_data
 	@edit_data
 	@inserts_data
-
-	@project_effect_chain_data
-
 );
 
-	@unversioned_state_vars = qw(
+@unversioned_state_vars = qw(
 
+	@project_effect_chain_data
+	%cache_map
+	%track_comments
 	$fx->{id_counter}
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
