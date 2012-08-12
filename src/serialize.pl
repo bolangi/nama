@@ -12,4 +12,5 @@ $this_track_name
 
 %cache_map
 %track_comments
+%track_version_comments
 @unversioned_state_vars
