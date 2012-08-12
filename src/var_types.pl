@@ -94,10 +94,9 @@
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
 	$mode->{mastering}
-	$project->{config}
+	$mode->{preview}
 	$project->{bunch}
 	$gui->{_seek_unit}
-	$setup->{audio_length}
 	$text->{command_history}
 	$this_track_name
 	$this_op
