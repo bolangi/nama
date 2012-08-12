@@ -1,3 +1,4 @@
+__END__
 package ::; 
 use ::;
 use Test::More qw(no_plan);
