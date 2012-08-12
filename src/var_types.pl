@@ -90,6 +90,7 @@
 	@project_effect_chain_data
 	%cache_map
 	%track_comments
+	%track_version_comments
 	$fx->{id_counter}
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
