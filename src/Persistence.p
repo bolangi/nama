@@ -563,7 +563,7 @@ sub restore_state {
 
 	$this_track = $tn{$this_track_name} if $this_track_name;
 	set_current_bus();
-
+=comment
 	# restore cache_map entries
 	
 	( $path, $suffix ) = get_newest($file->cache_map);
@@ -581,6 +581,9 @@ sub restore_state {
 		  $t->{cache_map} = $cache_map{$t->{name}} // {};
 		} @tracks_data;
 	}
+
+=cut
+
 	
 	map{ 
 		my $n = $_->{n};
