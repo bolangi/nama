@@ -72,7 +72,7 @@ for (my $i = 0; $i < $plist->length(); $i++) {
     my $pname = $plist->get($i);
 	my ($client_name,$port_name) = client_port($pname);
 
-	#say qq(client: $client_name, port: $port_name);
+	logpkg('debug',qq(client: $client_name, port: $port_name));
 
     my $port = $jc->getPort($pname);
 
@@ -305,7 +305,7 @@ sub make_connections {
  		my $name = $track->name;
  		my $ecasound_port = "ecasound:$name\_$direction\_";
 		my $file = join_path(project_root(), $track->$ports_list);
-		say($track->name, 
+		throw($track->name, 
 			": JACK ports file $file not found. No sources connected."), 
 			return if ! -e -r $file;
 		my $line_number = 0;
@@ -317,7 +317,8 @@ sub make_connections {
 			# setup shell command
 			
 			if(! $jack->{clients}->{$external_port}){
-				say $track->name, qq(: port "$external_port" not found. Skipping.);
+				throw($track->name, 
+					qq(: port "$external_port" not found. Skipping.));
 				next
 			}
 		
