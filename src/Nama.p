@@ -38,6 +38,7 @@ use Try::Tiny;
 # use Tk;           # loaded conditionally
 # use Event;		# loaded conditionally
 # use AnyEvent;		# loaded after Tk or Event
+# use jacks;		# JACK server API
 
 ########## Nama modules ###########
 #
