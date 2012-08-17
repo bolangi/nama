@@ -83,12 +83,22 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-	# separate out cache maps
-	
-	# don't remove existing yet
-	map { $cache_map{$_->{name}} = $_->{cache_map} } @tracks_data;
+	# separate out accumulating data (comments, project
+	# effect chains) current mode and other data 
+	# not relevant to reverting versions.
 
-	#### map { $cache_map{$_->{name}} = delete $_->{cache_map} } @tracks_data;
+      # This is unversioned state 
+      
+#       # remove data not to be placed under version control 
+#       map { $cache_map{$_->{name}} =          delete $_->{cache_map} ;
+#                 $track_comments{$_->{name}} = delete $_->{comment}; 
+#                 $track_version_comments{$_->{name}} = delete $_->{version_comment
+#               } @tracks_data;
+	
+      map { $cache_map{$_->{name}} =          $_->{cache_map} ;
+                $track_comments{$_->{name}} = $_->{comment}; 
+                $track_version_comments{$_->{name}} = $_->{version_comment} 
+			} @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
@@ -137,9 +147,9 @@ sub save_system_state {
 	} @formats;
 
 	serialize(
-		file => $file->cache_map,
+		file => $file->unversioned_state_store,
 		format => 'json',
-		vars => [ '%cache_map' ],
+		vars => \@unversioned_state_vars,
 		class => '::',
 	);	
 
@@ -564,9 +574,9 @@ sub restore_state {
 	$this_track = $tn{$this_track_name} if $this_track_name;
 	set_current_bus();
 =comment
-	# restore cache_map entries
+	# restore peripheral state
 	
-	( $path, $suffix ) = get_newest($file->cache_map);
+	( $path, $suffix ) = get_newest($file->unversioned_state_store);
 	if ($path)
 	{
 		$source = read_file($path);
@@ -574,7 +584,7 @@ sub restore_state {
 		my $ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
-				vars   	=> [ '%cache_map' ],
+				vars   	=> \@unversioned_state_vars,
 				class 	=> '::');
 		map
 		{ my $t = $_;
@@ -842,7 +852,7 @@ sub convert_effect_chains {
 		} @{ $converted->{$name}->{ops_list} };
 
 	} @keys;
-	say "conveted: ",yaml_out $converted;
+	#say "conveted: ",yaml_out $converted;
 
 	#### separate key by type
 
