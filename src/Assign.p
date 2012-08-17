@@ -381,9 +381,16 @@ sub json_in {
 }
 
 sub yaml_out {
+	# due to bugs related to YAML::Tiny 
+	# we now provide only JSON output
 	
 	logsub("&yaml_out");
 	my ($data_ref) = shift; 
+	return json_out($data_ref);
+	#use Devel::Cycle;
+	#use Data::Dumper::Concise;
+	#say(Dumper $data_ref);
+	find_cycle($data_ref);
 	my $type = ref $data_ref;
 	$logger->debug("data ref type: $type");
 	$logger->logcarp("can't yaml-out a Scalar!!") if ref $data_ref eq 'SCALAR';
