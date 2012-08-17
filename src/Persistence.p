@@ -278,6 +278,26 @@ sub restore_state {
 				var_map => 1,
 				class => '::');
 	
+=comment
+	# restore peripheral state
+	
+	( $path, $suffix ) = get_newest($file->unversioned_state_store);
+	if ($path)
+	{
+		$source = read_file($path);
+
+		my $ref = decode($source, $suffix);
+		assign(
+				data	=> $ref,	
+				vars   	=> \@unversioned_state_vars,
+				class 	=> '::');
+		map
+		{ my $t = $_;
+		  $t->{cache_map} = $cache_map{$t->{name}} // {};
+		} @tracks_data;
+	}
+
+=cut
 	# correctly restore singletons
 	
 	if ( exists $ref->{project}->{save_file_version_number})
@@ -573,26 +593,6 @@ sub restore_state {
 
 	$this_track = $tn{$this_track_name} if $this_track_name;
 	set_current_bus();
-=comment
-	# restore peripheral state
-	
-	( $path, $suffix ) = get_newest($file->unversioned_state_store);
-	if ($path)
-	{
-		$source = read_file($path);
-
-		my $ref = decode($source, $suffix);
-		assign(
-				data	=> $ref,	
-				vars   	=> \@unversioned_state_vars,
-				class 	=> '::');
-		map
-		{ my $t = $_;
-		  $t->{cache_map} = $cache_map{$t->{name}} // {};
-		} @tracks_data;
-	}
-
-=cut
 
 	
 	map{ 
