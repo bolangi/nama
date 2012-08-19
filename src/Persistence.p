@@ -89,16 +89,16 @@ sub save_system_state {
 
       # This is unversioned state 
       
-#       # remove data not to be placed under version control 
-#       map { $cache_map{$_->{name}} =          delete $_->{cache_map} ;
-#                 $track_comments{$_->{name}} = delete $_->{comment}; 
-#                 $track_version_comments{$_->{name}} = delete $_->{version_comment
-#               } @tracks_data;
+      # remove data not to be placed under version control 
+      map { $cache_map{$_->{name}} =          delete $_->{cache_map} ;
+                $track_comments{$_->{name}} = delete $_->{comment}; 
+                $track_version_comments{$_->{name}} = delete $_->{version_comment}
+              } @tracks_data;
 	
-      map { $cache_map{$_->{name}} =          $_->{cache_map} ;
-                $track_comments{$_->{name}} = $_->{comment}; 
-                $track_version_comments{$_->{name}} = $_->{version_comment} 
-			} @tracks_data;
+#       map { $cache_map{$_->{name}} =          $_->{cache_map} ;
+#                 $track_comments{$_->{name}} = $_->{comment}; 
+#                 $track_version_comments{$_->{name}} = $_->{version_comment} 
+# 			} @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
@@ -140,7 +140,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => [@new_persistent_vars, @unversioned_state_vars],
+				vars => \@new_persistent_vars,
 				class => '::',
 				);
 
@@ -263,22 +263,6 @@ sub restore_state {
 	
 	initialize_marshalling_arrays();
 
-	# restore persistent variables
-
-	# get union of old and new lists 
-	#my %seen;
-	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
-	# handle old-style State files
-	# handle marshalling arrays (used by new-style State files as well)
-	# handle some extra vars (ditto)
-	
-	assign(
-				data => $ref,
-				vars   => \@persistent_vars,
-				var_map => 1,
-				class => '::');
-	
-=comment
 	# restore peripheral state
 	
 	( $path, $suffix ) = get_newest($file->unversioned_state_store);
@@ -297,7 +281,15 @@ sub restore_state {
 		} @tracks_data;
 	}
 
-=cut
+
+	# restore persistent variables
+	
+	assign(
+				data => $ref,
+				vars   => \@new_persistent_vars,
+				#var_map => 1,
+				class => '::');
+	
 	# correctly restore singletons
 	
 	if ( exists $ref->{project}->{save_file_version_number})
