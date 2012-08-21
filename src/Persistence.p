@@ -244,6 +244,8 @@ sub restore_state {
 	# get state file, newest if more than one
 	# with same name, differing extensions
 	# i.e. State.json and State.yml
+	initialize_marshalling_arrays();
+
 	my( $path, $suffix ) = get_newest($filename);
 	
 	logpkg('debug', "using file: $path");
@@ -251,15 +253,14 @@ sub restore_state {
 	throw(
 		$path ? "path: == $path.* ==," : "undefined path,"
 			," state file not found"), return if ! -f $path;
-	my $source = read_file($path);
 
+	my $source = read_file($path);
+	my $ref = decode($source, $suffix);
 	logpkg('debug', "suffix: $suffix");	
 	logpkg('debug', "source: $source");
-	my $ref = decode($source, $suffix);
 
 	# start marshalling with clean slate	
 	
-	initialize_marshalling_arrays();
 
 	# restore peripheral state
 	
@@ -278,10 +279,14 @@ sub restore_state {
 
 	# restore persistent variables
 	
+	( $path, $suffix ) = get_newest($file->state_store);
+		$source = read_file($path);
+		$ref = decode($source, $suffix);
+
 	assign(
 				data => $ref,
-				vars   => \@new_persistent_vars,
-				#var_map => 1,
+				vars   => \@persistent_vars,
+				var_map => 1,
 				class => '::');
 	
 	# correctly restore singletons
