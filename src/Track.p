@@ -944,6 +944,15 @@ sub sibling_count {
 	my $track = shift;
 	$setup->{latency}->{sibling_count}->{$track->name}
 }
+
+sub cache_map {
+	
+	my $track = shift;
+	$track->{cache_map} 
+		? $track->{cache_map} 
+		: $project->{cache_map}->{$track->name}
+}
+
 } # end package
 
 # subclasses
