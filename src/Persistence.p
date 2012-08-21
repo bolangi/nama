@@ -81,22 +81,6 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-	# separate out accumulating data (comments, project
-	# effect chains) current mode and other data 
-	# not relevant to reverting versions.
-
-      # This is unversioned state 
-      
-      # remove data not to be placed under version control 
-      map { $cache_map{$_->{name}} =          delete $_->{cache_map} ;
-                $track_comments{$_->{name}} = delete $_->{comment}; 
-                $track_version_comments{$_->{name}} = delete $_->{version_comment}
-              } @tracks_data;
-	
-#       map { $cache_map{$_->{name}} =          $_->{cache_map} ;
-#                 $track_comments{$_->{name}} = $_->{comment}; 
-#                 $track_version_comments{$_->{name}} = $_->{version_comment} 
-# 			} @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
@@ -495,6 +479,7 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
+	
 	if ( $project->{save_file_version_number} <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
@@ -513,6 +498,7 @@ sub restore_state {
 
  		} @tracks_data;
 	}
+
 	if ( $project->{save_file_version_number} <= 1.068){ 
 
 		# initialize version_comment field
@@ -526,6 +512,7 @@ sub restore_state {
 			}
 		} grep { $_->{version_comment} } @tracks_data;
 	}
+
 	# convert to new MixTrack class
 	if ( $project->{save_file_version_number} < 1.069){ 
 		map {
@@ -537,6 +524,22 @@ sub restore_state {
 		  	$_->{source_id}   eq 'bus'
 		} 
 		@tracks_data;
+	}
+
+	if ( $project->{save_file_version_number} < 1.101){ 
+
+		say "uncluttering track data";
+
+		# initialize version_comment field
+		map{ 
+			$project->{track_version_comments}->{$_->{name}} = 
+				delete $_->{version_comment} if $_->{version_comment};
+			 $project->{track_comments}->{$->{name}} = 
+				delete $_->{comment} if $_->{comment};
+			 $project->{cache_map}->{$_->{name}} = 
+				delete $_->{cache_map} if $_->{cache_map}; 
+		} @tracks_data;
+
 	}
 
 	#  destroy and recreate all buses
