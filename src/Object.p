@@ -2,6 +2,7 @@ package ::Object;
 use Modern::Perl;
 use Carp;
 use ::Assign qw(yaml_out); 
+use Data::Dumper::Concise;
 
 =comment
 {
@@ -113,19 +114,11 @@ sub set {
 }
 sub dumpp  {
 	my $self = shift;
-	my $class = ref $self;
-	bless $self, 'HASH'; # easy magic
-	my $output = yaml_out $self;
-	print "Object class: $class\n";
-	print $output, "\n";
-	bless $self, $class; # restore
+	print $self->dump
 }
 sub dump {
 	my $self = shift;
-	my $class = ref $self;
-	bless $self, 'HASH'; # easy magic
-	my $output = yaml_out $self;
-	bless $self, $class; # restore
+	my $output = Dumper($self);
 	return $output;
 }
 sub as_hash {
