@@ -115,9 +115,6 @@ sub new {
 					send_type 		=> undef,
 					send_id   		=> undef,
 					effect_chain_stack => [],
-					cache_map 		=> {},
-					current_edit 	=> {},
-					version_comment => {},
 
 					@_ 			}, $class;
 
