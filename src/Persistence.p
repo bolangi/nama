@@ -136,12 +136,6 @@ sub save_system_state {
 
 	} @formats;
 
-	serialize(
-		file => $file->cache_map,
-		format => 'json',
-		vars => [ '%cache_map' ],
-		class => '::',
-	);	
 
 	$path
 }
