@@ -47,8 +47,6 @@ sub initialize_marshalling_arrays {
 	@global_effect_chain_data = ();
 	$text->{command_history} = {};
 
-	%cache_map = ();
-	%track_comments = ();
 }
 
 sub save_system_state {
@@ -275,10 +273,6 @@ sub restore_state {
 				data	=> $ref,	
 				vars   	=> \@unversioned_state_vars,
 				class 	=> '::');
-		map
-		{ my $t = $_;
-		  $t->{cache_map} = $cache_map{$t->{name}} // {};
-		} @tracks_data;
 	}
 
 
