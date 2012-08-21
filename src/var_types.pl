@@ -71,10 +71,13 @@
 
 	$project->{save_file_version_number}
 	$project->{timebase}
+	$project->{cache_map}
+	$project->{track_version_comments}
+	$project->{track_comments}
 
 	$fx->{applied}
 	$fx->{params}
-	$fx->{params_log}}
+	$fx->{params_log}
 
 	@tracks_data
 	@bus_data
