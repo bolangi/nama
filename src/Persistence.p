@@ -243,10 +243,10 @@ sub restore_state {
 	logpkg('debug', "suffix: $suffix");	
 	logpkg('debug', "source: $source");
 
-	# start marshalling with clean slate	
 	
+	# restore persistent variables
 
-	# restore peripheral state
+	# peripheral state variables - PeripheralState.json
 	
 	( $path, $suffix ) = get_newest($file->unversioned_state_store);
 	if ($path)
@@ -259,18 +259,28 @@ sub restore_state {
 				vars   	=> \@unversioned_state_vars,
 				class 	=> '::');
 	}
+		assign_singletons( { data => $ref });
 
 
-	# restore persistent variables
 	
 	( $path, $suffix ) = get_newest($file->state_store);
 		$source = read_file($path);
 		$ref = decode($source, $suffix);
 
+
+	# State.json old list, for backwards compatibility
+	
 	assign(
 				data => $ref,
 				vars   => \@persistent_vars,
 				var_map => 1,
+				class => '::');
+	
+	# State.json new list
+	
+	assign(
+				data => $ref,
+				vars   => \@new_persistent_vars,
 				class => '::');
 	
 	# correctly restore singletons
