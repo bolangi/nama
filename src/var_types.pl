@@ -70,11 +70,10 @@
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
-	$project->{timebase}
 
 	$fx->{applied}
 	$fx->{params}
-	$fx->{params_log}}
+	$fx->{params_log}
 
 	@tracks_data
 	@bus_data
@@ -87,16 +86,18 @@
 
 @unversioned_state_vars = qw(
 
+	$project->{save_file_version_number}
+	$project->{timebase}
+	$project->{cache_map}
+	$project->{track_version_comments}
+	$project->{track_comments}
+	$project->{bunch}
 	@project_effect_chain_data
-	%cache_map
-	%track_comments
-	%track_version_comments
 	$fx->{id_counter}
 	$setup->{loop_endpoints}
 	$mode->{loop_enable}
 	$mode->{mastering}
 	$mode->{preview}
-	$project->{bunch}
 	$gui->{_seek_unit}
 	$text->{command_history}
 	$this_track_name

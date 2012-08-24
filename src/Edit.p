@@ -817,33 +817,6 @@ sub merge_edits {
 	$this_track = $edit->host;
 	
 }
-sub show_version_comments {
-	my ($t, @v) = @_;
-	return unless @v;
-	::pager(map{ $t->version_comment($_) } @v);
-}
-sub add_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
-	$t->{version_comment}{$v}{user} = $text;
-	$t->version_comment($v);
-}
-sub add_system_version_comment {
-	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
-	$t->{version_comment}{$v}{system} = $text;
-	$t->version_comment($v);
-}
-sub remove_version_comment {
-	my ($t,$v) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
-	delete $t->{version_comment}{$v}{user};
-	$t->version_comment($v) || "$v: [comment deleted]\n";
-}
-sub remove_system_version_comment {
-	my ($t,$v) = @_;
-	delete $t->{version_comment}{$v}{system} if $t->{version_comment}{$v}
-}
 # offset recording
 
 # Note that although we use ->adjusted_* methods, all are

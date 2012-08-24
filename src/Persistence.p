@@ -47,8 +47,6 @@ sub initialize_marshalling_arrays {
 	@global_effect_chain_data = ();
 	$text->{command_history} = {};
 
-	%cache_map = ();
-	%track_comments = ();
 }
 
 sub save_system_state {
@@ -83,12 +81,6 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-	# separate out cache maps
-	
-	# don't remove existing yet
-	map { $cache_map{$_->{name}} = $_->{cache_map} } @tracks_data;
-
-	#### map { $cache_map{$_->{name}} = delete $_->{cache_map} } @tracks_data;
 
 	logpkg('debug', "copying bus data");
 
@@ -130,12 +122,18 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => [@new_persistent_vars, @unversioned_state_vars],
+				vars => \@new_persistent_vars,
 				class => '::',
 				);
 
 	} @formats;
 
+	serialize(
+		file => $file->unversioned_state_store,
+		format => 'json',
+		vars => \@unversioned_state_vars,
+		class => '::',
+	);	
 
 	$path
 }
@@ -230,6 +228,8 @@ sub restore_state {
 	# get state file, newest if more than one
 	# with same name, differing extensions
 	# i.e. State.json and State.yml
+	initialize_marshalling_arrays();
+
 	my( $path, $suffix ) = get_newest($filename);
 	
 	logpkg('debug', "using file: $path");
@@ -237,41 +237,64 @@ sub restore_state {
 	throw(
 		$path ? "path: == $path.* ==," : "undefined path,"
 			," state file not found"), return if ! -f $path;
-	my $source = read_file($path);
 
+	my $source = read_file($path);
+	my $ref = decode($source, $suffix);
 	logpkg('debug', "suffix: $suffix");	
 	logpkg('debug', "source: $source");
-	my $ref = decode($source, $suffix);
 
-	# start marshalling with clean slate	
 	
-	initialize_marshalling_arrays();
-
 	# restore persistent variables
 
-	# get union of old and new lists 
-	#my %seen;
-	#my @persist_vars = grep{ ! $seen{$_}++ } @persistent_vars, @new_persistent_vars; 
-	# handle old-style State files
-	# handle marshalling arrays (used by new-style State files as well)
-	# handle some extra vars (ditto)
+	# peripheral state variables - PeripheralState.json
 	
-	assign(
-				data => $ref,
-				vars   => \@persistent_vars,
-				var_map => 1,
-				class => '::');
-	
-	# correctly restore singletons
-	
-	if ( exists $ref->{project}->{save_file_version_number})
+	( $path, $suffix ) = get_newest($file->unversioned_state_store);
+	if ($path)
 	{
-		my $args = { data => $ref };
-		assign_singletons( $args );
-	#	assign_marshalling_arrays( $args );
-	#	assign_pronouns( $args);
+		$source = read_file($path);
+
+		my $ref = decode($source, $suffix);
+		assign(
+				data	=> $ref,	
+				vars   	=> \@unversioned_state_vars,
+				class 	=> '::');
+		assign_singletons( { data => $ref });
 	}
 
+
+	
+	( $path, $suffix ) = get_newest($file->state_store);
+	if ($path)
+	{
+		$source = read_file($path);
+		$ref = decode($source, $suffix);
+
+
+		# State file, old list, for backwards compatibility
+		
+		assign(
+					data => $ref,
+					vars   => \@persistent_vars,
+					var_map => 1,
+					class => '::');
+		
+		# State file new list
+		
+		assign(
+					data => $ref,
+					vars   => \@new_persistent_vars,
+					class => '::');
+		
+		 
+
+		# perform assignments for singleton
+		# hash entries (such as $fx->{applied});
+		# that that assign() misses
+		
+		assign_singletons({ data => $ref });
+
+	}
+	
 	# remove null keyed entry from $fx->{applied},  $fx->{params}
 
 	delete $fx->{applied}->{''};
@@ -468,6 +491,7 @@ sub restore_state {
 			}
 		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
 	}
+	
 	if ( $project->{save_file_version_number} <= 1.067){ 
 
 		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
@@ -486,6 +510,7 @@ sub restore_state {
 
  		} @tracks_data;
 	}
+
 	if ( $project->{save_file_version_number} <= 1.068){ 
 
 		# initialize version_comment field
@@ -499,6 +524,7 @@ sub restore_state {
 			}
 		} grep { $_->{version_comment} } @tracks_data;
 	}
+
 	# convert to new MixTrack class
 	if ( $project->{save_file_version_number} < 1.069){ 
 		map {
@@ -510,6 +536,22 @@ sub restore_state {
 		  	$_->{source_id}   eq 'bus'
 		} 
 		@tracks_data;
+	}
+
+	if ( $project->{save_file_version_number} < 1.101){ 
+
+		say "uncluttering track data";
+
+		# initialize version_comment field
+		map{ 
+			$project->{track_version_comments}->{$_->{name}} = 
+				delete $_->{version_comment} if $_->{version_comment};
+			 $project->{track_comments}->{$->{name}} = 
+				delete $_->{comment} if $_->{comment};
+			 $project->{cache_map}->{$_->{name}} = 
+				delete $_->{cache_map} if $_->{cache_map}; 
+		} @tracks_data;
+
 	}
 
 	#  destroy and recreate all buses
@@ -557,26 +599,6 @@ sub restore_state {
 
 	$this_track = $tn{$this_track_name} if $this_track_name;
 	set_current_bus();
-=comment
-	# restore cache_map entries
-	
-	( $path, $suffix ) = get_newest($file->cache_map);
-	if ($path)
-	{
-		$source = read_file($path);
-
-		my $ref = decode($source, $suffix);
-		assign(
-				data	=> $ref,	
-				vars   	=> [ '%cache_map' ],
-				class 	=> '::');
-		map
-		{ my $t = $_;
-		  $t->{cache_map} = $cache_map{$t->{name}} // {};
-		} @tracks_data;
-	}
-
-=cut
 
 	
 	map{ 
@@ -836,7 +858,7 @@ sub convert_effect_chains {
 		} @{ $converted->{$name}->{ops_list} };
 
 	} @keys;
-	say "conveted: ",yaml_out $converted;
+	#say "conveted: ",yaml_out $converted;
 
 	#### separate key by type
 

@@ -1213,12 +1213,12 @@ list_fade: _list_fade {  ::pager(join "\n",
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
  	::pager2( $::this_track->name, ": comment: $item{text}"); 
- 	$::this_track->set(comment => $item{text});
+ 	$::this_track->set_comment($item{text});
  	1;
 }
 remove_comment: _remove_comment {
  	::pager2( $::this_track->name, ": comment removed");
- 	$::this_track->set(comment => undef);
+ 	$::this_track->set_comment(undef);
  	1;
 }
 show_comment: _show_comment {
@@ -1232,27 +1232,27 @@ show_comments: _show_comments {
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
 	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
-	::pager2( ::add_version_comment($t,$v,$item{text})); 
+	::pager2( $t->add_version_comment($v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
-	::pager2( ::remove_version_comment($t,$item{dd})); 1
+	::pager2( $t->remove_version_comment($item{dd})); 1
 }
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s?)'}};
 	if(!@v){ @v = $t->monitor_version}
 	@v or return 1;
-	::show_version_comments($t,@v);
+	$t->show_version_comments(@v);
 	 1;
 }
 show_version_comments_all: _show_version_comments_all {
 	my $t = $::this_track;
 	my @v = @{$t->versions};
-	::show_version_comments($t,@v); 1;
+	$t->show_version_comments(@v); 1;
 }
 set_system_version_comment: _set_system_version_comment dd text {
-	::pager2( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
+	::pager2( $::this_track->set_system_version_comment(@item{qw(dd text)}));1;
 }
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1

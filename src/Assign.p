@@ -97,14 +97,20 @@ ASSIGN
 		my ($dummy, $old_identifier) = /^([\$\%\@])([\-\>\w:\[\]{}]+)$/;
 		$var = $var_map->{$var} if $h{var_map} and $var_map->{$var};
 
-		$logger->debug("oldvar: $oldvar, newvar: $var");
+		$logger->debug("oldvar: $oldvar, newvar: $var") unless $oldvar eq $var;
 		my ($sigil, $identifier) = $var =~ /([\$\%\@])(\S+)/;
 			$sigil{$old_identifier} = $sigil;
 			$ident{$old_identifier} = $identifier;
 	} @vars;
 
 	$logger->debug(sub{"SIGIL\n". yaml_out(\%sigil)});
-	$logger->debug(sub{"IDENT\n". yaml_out(\%ident)});
+	#%ident = map{ @$_ } grep{ $_->[0] ne $_->[1] } map{ [$_, $ident{$_}]  }  keys %ident; 
+	my %ident2 = %ident;
+	while ( my ($k,$v) = each %ident2)
+	{
+		delete $ident2{$k} if $k eq $v
+	}
+	$logger->debug(sub{"IDENT\n". yaml_out(\%ident2)});
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
@@ -191,6 +197,7 @@ qw(
 [% qx(cat ./singletons.pl) %]
 );
 sub assign_singletons {
+	logsub('&assign_singletons');
 	my $ref = shift;
 	my $data = $ref->{data} or die "expected data got undefined";
 	my $class = $ref->{class} // '::';
@@ -215,7 +222,7 @@ sub assign_singletons {
 				$logger->logcarp("error during eval: $@") if $@;
 			} keys %{ $data->{$ident} }
 		}
-	} @singleton_idents;
+	} @singleton_idents;  # list of "singleton" variables
 }
 sub assign_pronouns {
 	my $ref = shift;

@@ -3,6 +3,9 @@
 	%bunch						$project->{bunch}
 	**							$project->{repo}
 	**							$project->{timebase}
+	**							$project->{track_comments}
+	** 							$project->{track_version_comments}
+	** 							$project->{cache_map}
 	
 	$main_bus 					$bn{Main}
 	$main						$bn{Main} 
@@ -149,10 +152,6 @@
 	@inserts_data
 	@project_effect_chains_data
 	
-	%cache_map
-	%track_comments
-	%track_version_comments
-
 	@persistent_vars
 	@config_vars
 	@effects_static_vars

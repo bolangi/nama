@@ -115,9 +115,6 @@ sub new {
 					send_type 		=> undef,
 					send_id   		=> undef,
 					effect_chain_stack => [],
-					cache_map 		=> {},
-					current_edit 	=> {},
-					version_comment => {},
 
 					@_ 			}, $class;
 
@@ -890,9 +887,9 @@ sub adjusted_length {
 
 sub version_comment {
 	my ($track, $v) = @_;
-	my $text   = $track->{version_comment}{$v}{user};
+	my $text   = $project->{track_version_comments}->{$track->name}{$v}{user};
 	$text .= " " if $text;
-	my $system = $track->{version_comment}{$v}{system};
+	my $system = $project->{track_version_comments}->{$track->name}{$v}{system};
 	$text .= "* $system" if $system;
 	"$v: $text\n" if $text;
 }
@@ -944,6 +941,44 @@ sub sibling_count {
 	my $track = shift;
 	$setup->{latency}->{sibling_count}->{$track->name}
 }
+
+sub cache_map { $project->{cache_map}->{$_[0]->name} }
+
+sub set_comment {
+	my ($track, $comment) = @_;
+	$project->{track_comments}->{$track->name} = $comment
+}
+sub comment { $project->{track_comments}->{$_[0]->name} }
+
+sub show_version_comments {
+	my ($t, @v) = @_;
+	return unless @v;
+	::pager(map{ $t->version_comment($_) } @v);
+}
+sub add_version_comment {
+	my ($t,$v,$text) = @_;
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	$project->{track_version_comments}->{$t->name}{$v}{user} = $text;
+	$t->version_comment($v);
+}
+sub add_system_version_comment {
+	my ($t,$v,$text) = @_;
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	$project->{track_version_comments}{$t->name}{$v}{system} = $text;
+	$t->version_comment($v);
+}
+sub remove_version_comment {
+	my ($t,$v) = @_;
+	$t->targets->{$v} or say("$v: no such version"), return;	
+	delete $project->{track_version_comments}{$t->name}{$v}{user};
+	$t->version_comment($v) || "$v: [comment deleted]\n";
+}
+sub remove_system_version_comment {
+	my ($t,$v) = @_;
+	delete $project->{track_version_comments}{$t->name}{$v}{system} if
+		$project->{track_version_comments}{$t->name}{$v}
+}
+
 } # end package
 
 # subclasses
