@@ -258,41 +258,43 @@ sub restore_state {
 				data	=> $ref,	
 				vars   	=> \@unversioned_state_vars,
 				class 	=> '::');
-	}
 		assign_singletons( { data => $ref });
+	}
 
 
 	
 	( $path, $suffix ) = get_newest($file->state_store);
+	if ($path)
+	{
 		$source = read_file($path);
 		$ref = decode($source, $suffix);
 
 
-	# State.json old list, for backwards compatibility
-	
-	assign(
-				data => $ref,
-				vars   => \@persistent_vars,
-				var_map => 1,
-				class => '::');
-	
-	# State.json new list
-	
-	assign(
-				data => $ref,
-				vars   => \@new_persistent_vars,
-				class => '::');
-	
-	# correctly restore singletons
-	
-	if ( exists $ref->{project}->{save_file_version_number})
-	{
-		my $args = { data => $ref };
-		assign_singletons( $args );
-	#	assign_marshalling_arrays( $args );
-	#	assign_pronouns( $args);
-	}
+		# State file, old list, for backwards compatibility
+		
+		assign(
+					data => $ref,
+					vars   => \@persistent_vars,
+					var_map => 1,
+					class => '::');
+		
+		# State file new list
+		
+		assign(
+					data => $ref,
+					vars   => \@new_persistent_vars,
+					class => '::');
+		
+		 
 
+		# perform assignments for singleton
+		# hash entries (such as $fx->{applied});
+		# that that assign() misses
+		
+		assign_singletons({ data => $ref });
+
+	}
+	
 	# remove null keyed entry from $fx->{applied},  $fx->{params}
 
 	delete $fx->{applied}->{''};
