@@ -215,7 +215,7 @@ sub assign_singletons {
 				$logger->logcarp("error during eval: $@") if $@;
 			} keys %{ $data->{$ident} }
 		}
-	} @singleton_idents;
+	} @singleton_idents;  # list of "singleton" variables
 }
 sub assign_pronouns {
 	my $ref = shift;
