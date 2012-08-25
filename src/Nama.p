@@ -177,7 +177,7 @@ END { cleanup_exit() }
 1;
 __DATA__
 @@ commands_yml
-[% qx(./strip_all ./commands.yml ) %]
+[% qx(cat ./commands.yml ) %]
 @@ grammar
 [% qx(./strip_all  ./grammar_body.pl) %]
 [% qx(./emit_command_headers headers) %]
