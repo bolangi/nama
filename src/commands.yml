@@ -388,7 +388,7 @@ save_state:
   type: project
   short: keep save
   what: save project settings to disk
-  parameters: [ <s_settings_file> ] 
+  parameters: [-t <s_tag_name>] [-f <s_settings_file> ] [-m <s_quoted_message> ]
 get_state:
   type: project
   short: recall retrieve
