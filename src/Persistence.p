@@ -981,6 +981,10 @@ sub restore_effect_chains {
 sub git_snapshot {
 	return unless $config->{use_git};
  	return unless -e $file->git_state_store;
+	#if( -e $file->unversioned_state_store )
+	# TODO 
+	# cp $file->unversioned_state_store('json')
+	# $file->unversioned_state_store('json-vcs');
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
 }
@@ -1003,7 +1007,11 @@ sub git_create_branch {
 		unless git_branch_exists($branchname);
 }
 
-sub git_diff {  $project->{repo}->run('diff') }
+sub git_diff {  
+	return unless $config->{use_git};
+	$project->{repo}->run('diff') 
+
+}
 
 sub git_branch_exists { 
 	return unless $config->{use_git};
