@@ -7,7 +7,14 @@ use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
 	my $filename = shift;
-	my $path = $file->state_store($filename);
+	if ($filename)
+	{
+		$filename = 
+				$filename =~ m{/} 	
+									? $filename	# as-is if input contains slashes
+									: join_path(project_dir(),$filename) 
+	}
+	my $path = $filename || $file->state_store();
 	logsub("&save_state");
 	$project->{save_file_version_number} = $VERSION;
 
