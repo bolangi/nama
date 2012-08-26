@@ -1026,9 +1026,10 @@ sub git_save_state { &git_snapshot }
 
 sub git_current_branch {
 	my ($actual_current) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
-#}
-	#$project->{git_current_branch}
+	$actual_current eq 'undo' ?  $project->{git_current_branch} : $actual_current
 }
+
+# or maybe just switch to undo
 
 sub autosave {
 	return unless $config->{use_git};
