@@ -239,10 +239,24 @@ save_state: _save_state save_opt(s) {
 	# -b: branch and save
 	elsif (my $branchname = $args{'-b'})
 	{
-	#print "found branch name $branchname\n";
-		::git_create_branch($branchname);
-		::save_state();
-		::git_snapshot();
+
+		if ( ::git_branch_exists($branchname) )
+		{
+			::git_current_branch() ne $branchname and
+				::throw(
+					qq(cannot save to branch "$branchname")
+					. q( because you are currently working on branch ")
+					. ::git_current_branch() .q(")
+				), return;
+			::save_state();
+			::git_snapshot();
+		}
+		else 
+		{
+			::save_state();
+			::git_snapshot();
+			::git_create_branch($branchname) # and checkout
+		}
 	}
 
 	# fallback, normal save for -m option only
@@ -255,7 +269,15 @@ save_state: _save_state save_opt(s) {
 	}
 	1;
 }
-save_state: _save_state ident { ::save_state( $item{ident}); 1}
+save_state: _save_state ident { 
+	if ($::config->{use_git})
+	{
+	} 
+	else
+	{
+		::save_state( $item{ident}); 
+	}
+1}
 save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
 
 save_opt: save_flag save_arg { [ @item[-2, -1] ] }
