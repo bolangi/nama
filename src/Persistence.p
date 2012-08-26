@@ -1018,11 +1018,25 @@ sub git_branch_exists {
 	return unless $config->{use_git};
 	my $branchname = shift;
 	grep{ $_ eq $branchname } 
-	map{ s/^\s+//; s/^\* //; $_}
-	$project->{repo}->run("branch");
+		map{ s/^\s+//; s/^\* //; $_}
+		$project->{repo}->run("branch");
 }
 
 sub git_save_state { &git_snapshot }
+
+sub git_current_branch {
+	my ($actual_current) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
+#}
+	#$project->{git_current_branch}
+}
+
+sub autosave {
+	return unless $config->{use_git};
+	$project->{repo}->run(qw(checkout undo));
+	save_state();
+	git_snapshot();
+}
+
 
 1;
 __END__
