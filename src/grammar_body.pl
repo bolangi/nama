@@ -24,10 +24,15 @@ meta: bang shellcode stopper {
 	::logit('::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
+	my $olddir = ::getcwd();
+	my $prefix = "chdir ". ::project_dir().";";
+	$shellcode = "$prefix $shellcode" if $shellcode =~ /^\s*git /;
+
 	::pager2( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
-	::pager($output) if $output;
+	chdir $olddir;
+	::pager2($output) if $output;
 	1;
 }
 
@@ -209,8 +214,54 @@ list_project_templates: _list_project_templates {
 destroy_project_template: _destroy_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
+save_state: _save_state save_opt(s) { 
+	#print ::json_out(\%item);
+	my %args;
+	map{ ref $_; $args{ $_->[0]} = $_->[1] } @{ $item{'save_opt(s)'} };
+	my $message = $args{'-m'};
+
+	# -t: tag the commit after saving
+	if (my $tagname = $args{'-t'})
+	{
+	#print "found tag item $tagname\n";
+		::save_state();
+		::git_snapshot($message);
+		::git_tag($tagname,$message);
+	}
+
+	# -f: save-to-file only 
+	elsif (my $filename = $args{'-f'})
+	{
+	#print "found filename $filename\n";
+		::save_state($filename) # should save unversioned_vars as well
+	}
+
+	# -b: branch and save
+	elsif (my $branchname = $args{'-b'})
+	{
+	#print "found branch name $branchname\n";
+		::git_create_branch($branchname);
+		::save_state();
+		::git_snapshot();
+	}
+
+	# fallback, normal save for -m option only
+	else
+	{
+	print "trying to save with a message only";
+		::save_state();
+		::git_snapshot($message);
+
+	}
+	1;
+}
 save_state: _save_state ident { ::save_state( $item{ident}); 1}
-save_state: _save_state { ::save_state(); ::git_save_state(); 1}
+save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
+
+save_opt: save_flag save_arg { [ @item[-2, -1] ] }
+save_flag: '-t'|'-m'|'-f'|'-b'
+save_arg: shellish
+
 get_state: _get_state statefile {
  	::load_project( 
  		name => $::gui->{_project_name}->{name},
@@ -1404,3 +1455,7 @@ show_latency_all: _show_latency_all {
 	1;
 }
 analyze_level: _analyze_level { ::check_level($::this_track);1 }
+git: _git shellcode stopper { 
+#print ::json_out(\%item);
+::pager2(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
+}

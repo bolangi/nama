@@ -7,7 +7,14 @@ use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
 	my $filename = shift;
-	my $path = $file->state_store($filename);
+	if ($filename)
+	{
+		$filename = 
+				$filename =~ m{/} 	
+									? $filename	# as-is if input contains slashes
+									: join_path(project_dir(),$filename) 
+	}
+	my $path = $filename || $file->state_store();
 	logsub("&save_state");
 	$project->{save_file_version_number} = $VERSION;
 
@@ -972,17 +979,22 @@ sub restore_effect_chains {
 		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
 sub git_snapshot {
+	my $commit_message = shift() || "no comment";
 	return unless $config->{use_git};
-	save_state();
  	return unless -e $file->git_state_store;
+	return if ! state_changed();
+	#if( -e $file->unversioned_state_store )
+	# TODO 
+	copy $file->unversioned_state_store(), $file->peripheral_state_store_vcs();
 	$project->{repo}->run( add => $file->git_state_store );
-	$project->{repo}->run( commit => '--quiet', '--message', 'commit message');
+	$project->{repo}->run( add => $file->peripheral_state_store_vcs );
+	$project->{repo}->run( commit => '--quiet', '--message', $commit_message);
 }
 
 sub git_tag { 
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	$project->{repo}->tag( $tag_name, '--message',$msg);
+	$project->{repo}->run( tag => $tag_name, '-m', $msg);
 }
 sub git_checkout {
 	return unless $config->{use_git};
@@ -997,7 +1009,10 @@ sub git_create_branch {
 		unless git_branch_exists($branchname);
 }
 
-sub git_diff {  $project->{repo}->run('diff') }
+sub state_changed {  
+	return unless $config->{use_git};
+	$project->{repo}->run("diff", $file->git_state_store());
+}
 
 sub git_branch_exists { 
 	return unless $config->{use_git};
