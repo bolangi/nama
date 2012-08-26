@@ -986,6 +986,7 @@ sub git_snapshot {
 	# TODO 
 	copy $file->unversioned_state_store(), $file->peripheral_state_store_vcs();
 	$project->{repo}->run( add => $file->git_state_store );
+	$project->{repo}->run( add => $file->peripheral_state_store_vcs );
 	$project->{repo}->run( commit => '--quiet', '--message', $commit_message);
 }
 
