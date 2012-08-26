@@ -240,23 +240,8 @@ save_state: _save_state save_opt(s) {
 	elsif (my $branchname = $args{'-b'})
 	{
 
-		if ( ::git_branch_exists($branchname) )
-		{
-			::git_current_branch() ne $branchname and
-				::throw(
-					qq(cannot save to branch "$branchname")
-					. q( because you are currently working on branch ")
-					. ::git_current_branch() .q(")
-				), return;
-			::save_state();
-			::git_snapshot();
-		}
-		else 
-		{
-			::save_state();
-			::git_snapshot();
-			::git_create_branch($branchname) # and checkout
-		}
+	::git_save_and_branch($branchname);
+
 	}
 
 	# fallback, normal save for -m option only

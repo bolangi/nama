@@ -1030,6 +1030,26 @@ sub git_current_branch {
 }
 
 # or maybe just switch to undo
+sub git_save_and_branch {
+	my $branchname = shift;
+		if ( git_branch_exists($branchname) )
+		{
+			git_current_branch() ne $branchname and
+				throw(
+					qq(cannot save to branch "$branchname")
+					. q( because you are currently working on branch ")
+					. git_current_branch() .q(")
+				), return;
+			save_state();
+			git_snapshot();
+		}
+		else 
+		{
+			save_state();
+			git_snapshot();
+			git_create_branch($branchname) # and checkout
+		}
+}
 
 sub autosave {
 	return unless $config->{use_git};
