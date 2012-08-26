@@ -982,6 +982,10 @@ check_level:
   what: print Ecasound amplitude analysis for current track
   parameters: none
   short: cl
+git:
+  type: general
+  what: execute git command (in correct i.e. project directory)
+  parameters: <s_git_command> [<s_argument>,... ]
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)

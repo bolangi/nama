@@ -24,10 +24,15 @@ meta: bang shellcode stopper {
 	::logit('::Grammar','debug',"Evaluating shell commands!");
 	my $shellcode = $item{shellcode};
 	$shellcode =~ s/\$thiswav/$::this_track->full_path/e;
+	my $olddir = ::getcwd();
+	my $prefix = "chdir ". ::project_dir().";";
+	$shellcode = "$prefix $shellcode" if $shellcode =~ /^\s*git /;
+
 	::pager2( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
-	::pager($output) if $output;
+	chdir $olddir;
+	::pager2($output) if $output;
 	1;
 }
 
@@ -1452,5 +1457,5 @@ show_latency_all: _show_latency_all {
 check_level: _check_level { ::check_level($::this_track);1 }
 git: _git shellcode stopper { 
 #print ::json_out(\%item);
-::pager($::project->{repo}->run( split " ", $item{shellcode})) 
+::pager2(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
 }
