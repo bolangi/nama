@@ -1030,7 +1030,7 @@ sub git_current_branch {
 }
 
 # or maybe just switch to undo
-sub git_save_and_branch {
+sub git_branch_and_save {
 	my $branchname = shift;
 		if ( git_branch_exists($branchname) )
 		{
@@ -1045,9 +1045,9 @@ sub git_save_and_branch {
 		}
 		else 
 		{
+			git_create_branch($branchname);
 			save_state();
 			git_snapshot();
-			git_create_branch($branchname) # and checkout
 		}
 }
 

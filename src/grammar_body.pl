@@ -215,39 +215,37 @@ destroy_project_template: _destroy_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state save_opt(s) { 
+
+	# perform save-and-tag, branch-and-save, or save-to-file
+	# depending on options
+	
 	#print ::json_out(\%item);
 	my %args;
 	map{ ref $_; $args{ $_->[0]} = $_->[1] } @{ $item{'save_opt(s)'} };
 	my $message = $args{'-m'};
 
-	# -t: tag the commit after saving
 	if (my $tagname = $args{'-t'})
 	{
-	#print "found tag item $tagname\n";
+		#print "found tag item $tagname\n";
 		::save_state();
 		::git_snapshot($message);
 		::git_tag($tagname,$message);
 	}
 
-	# -f: save-to-file only 
 	elsif (my $filename = $args{'-f'})
 	{
-	#print "found filename $filename\n";
+		#print "found filename $filename\n";
 		::save_state($filename) # should save unversioned_vars as well
 	}
 
-	# -b: branch and save
 	elsif (my $branchname = $args{'-b'})
 	{
-
-	::git_save_and_branch($branchname);
-
+		::git_branch_and_save($branchname);
 	}
 
-	# fallback, normal save for -m option only
 	else
 	{
-	print "trying to save with a message only";
+		#print "saving with a message only";
 		::save_state();
 		::git_snapshot($message);
 
