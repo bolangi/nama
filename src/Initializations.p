@@ -77,9 +77,9 @@ sub definitions {
 	{
 		effects_cache 			=> ['.effects_cache', 		\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
-		state_store 			=> ['State',          		\&project_dir ],
+		state_store 			=> ['State',      		\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
-		unversioned_state_store  => ['PeripheralState',		\&project_dir ],
+		unversioned_state_store  => ['PeripheralState.json',		\&project_dir ],
 		#command_history			=> ['command_history', 		\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
