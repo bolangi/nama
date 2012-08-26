@@ -220,7 +220,7 @@ save_state: _save_state save_opt(s) {
 	{
 	#print "found tag item $tagname\n";
 		::save_state();
-		::git_snapshot();
+		::git_snapshot($message);
 		::git_tag($tagname,$message);
 	}
 
@@ -238,6 +238,15 @@ save_state: _save_state save_opt(s) {
 		::git_create_branch($branchname);
 		::save_state();
 		::git_snapshot();
+	}
+
+	# fallback, normal save for -m option
+	elsif (! $args{'-t'} and ! $args{'-f'} and ! $args{'-b'})
+	{
+	print "trying to save with a message only";
+		::save_state();
+		::git_snapshot($message);
+
 	}
 	1;
 }
