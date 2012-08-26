@@ -210,8 +210,7 @@ remove_project_template: _remove_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state save_opt(s) { 
-	print ::json_out(\%item);
-	my %names = ( '-t' => 'tagname', '-m' => 'message', '-f' => 'filename') ;
+	#print ::json_out(\%item);
 	my %args;
 	map{ ref $_; $args{ $_->[0]} = $_->[1] } @{ $item{'save_opt(s)'} };
 	my $message = $args{'-m'};
@@ -219,7 +218,7 @@ save_state: _save_state save_opt(s) {
 	# -t: tag the commit after saving
 	if (my $tagname = $args{'-t'})
 	{
-	print "found tag item $tagname\n";
+	#print "found tag item $tagname\n";
 		::save_state();
 		::git_snapshot();
 		::git_tag($tagname,$message);
@@ -228,14 +227,14 @@ save_state: _save_state save_opt(s) {
 	# -f: save-to-file only 
 	elsif (my $filename = $args{'-f'})
 	{
-	print "found filename $filename\n";
+	#print "found filename $filename\n";
 		::save_state($filename) # should save unversioned_vars as well
 	}
 
 	# -b: branch and save
 	elsif (my $branchname = $args{'-b'})
 	{
-	print "found branch name $branchname\n";
+	#print "found branch name $branchname\n";
 		::git_create_branch($branchname);
 		::save_state();
 		::git_snapshot();
