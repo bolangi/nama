@@ -245,8 +245,8 @@ save_state: _save_state save_opt(s) {
 		::git_snapshot();
 	}
 
-	# fallback, normal save for -m option
-	elsif (! $args{'-t'} and ! $args{'-f'} and ! $args{'-b'})
+	# fallback, normal save for -m option only
+	else
 	{
 	print "trying to save with a message only";
 		::save_state();
