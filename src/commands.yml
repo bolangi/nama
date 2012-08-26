@@ -1,993 +1,1313 @@
 ---
 help:
-  what: display help 
+  type: help 
+  what: Display help on Nama commands.
   short: h
   parameters: [ <i_help_topic_index> | <s_help_topic_name> | <s_command_name> ]
-  type: help 
+  example: |
+    help marks # display the help category marks and all commands containing marks
+    help 6 # display help on the effects category
+    help mfx # display help on modify_effect - shortcut mfx
 help_effect:
   type: help
+  what: Display detailed help on a LADSPA or LV2 effect or ask a note to consult the Ecasound manpage for Ecasound's internal effects. For LADSPA and LV2 effects use either the analyseplugin oder analyselv2.
   short: hfx he
   parameters: <s_label> | <i_unique_id>
-  what: display analyseplugin output if available or one-line help
+  example: |
+    help_effect 1970 # display help on Fons Adriaensen's parametric EQ (LADSPA)
+    he etd # print a short message to consult Ecasound manpage, because etd is an internal effect
+    hfx lv2-vocProc # display detailed help on the LV2 VocProc effect
 find_effect:
-  type: help 
+  type: help
+  what: Display one-line help for effects matching the search string(s).
   short: ffx fe
-  what: display one-line help for effects matching search strings
   parameters: <s_keyword1> [ <s_keyword2>... ]
+  example: |
+    find_effect compressor # List all effects containing compressor in their name or in parameters
+    fe feedback # List all effects with feedback in their name or parameters (for example a delay with a tweakable feedback)
 exit:
-  short: quit q
-  what: exit program, saving settings
   type: general
+  what: Exit Nama, saving settings (the current project).
+  short: quit q
   parameters: none
 memoize:
   type: general
-  what: enable WAV dir cache
+  what: Enable WAV directory caching, so Nama won't have to scan the entire project folder for new fiels after every run.
   parameters: none
 unmemoize:
   type: general
-  what: disable WAV dir cache
+  what: Disable WAV directory caching.
   parameters: none
 stop:
   type: transport
+  what: Stop transport. Stop the engine, when recording or playing back.
   short: s
-  what: stop transport
   parameters: none
+  example: |
+    rec # Allow the curent track to be recorded.
+    start # Actually start the engne/transport rolling, so you can play.
+    stop # Stop the engine, when you are finished recording your new track.
 start:
   type: transport
+  what: Start transport. Start the engine, to start recording or playing back.
   short: t
-  what: start transport
   parameters: none
+  example: |
+    doodle # Enter doodle mode.
+    start # Start the engine/transport rolling, so you can play.
+    stop # Stop the engine running.
 getpos:
   type: transport
+  what: Get the current playhead position (in seconds).
   short: gp
-  what: get current playhead position (seconds)
   parameters: none
+  example: |
+    start # Start the engine.
+    gp # Get the current position of the playhead. "Where am I?"
 setpos:
+  type: transport
+  what: Set current playhead position (in seconds).
   short: sp
-  what: set current playhead position
-  example: setpos 65 (set play position to 65 seconds from start)
   parameters: <f_position_seconds>
-  type: transport
+  example: setpos 65.0 # set current position to 65.0 seconds.
 forward:
+  type: transport
+  what: Move playback position forwards (in seconds). Oldschool forwarding.
   short: fw
-  what: move playback position forward
   parameters: <f_increment_seconds>
-  type: transport
+  example: fw 23.7 # forward 23.7 seconds from the current position.
 rewind:
+  type: transport
+  what: Move playback position backwards (in seconds). Oldschool rewind.
   short: rw
-  what: move transport position backward
-  parameters: <f_increment_seconds>
-  type: transport
+  parameters: <f_decrement_seconds>
+  example: rewind 6.5 # Move backwards 6.5 seconds from the current position.
 to_start:
-  what: set playback head to start
   type: transport
+  what: Set the playback head to the start. A synonym for setpos 0.0 .
   short: beg
   parameters: none
 to_end:
-  what: set playback head to end minus 10 seconds 
-  short: end
   type: transport
+  what: Set the playback head to end minus 10 seconds.
+  short: end
   parameters: none
 ecasound_start:
   type: transport
+  what: Ecasound-only start. Mainly useful for diagnostics and debugging. Use the command start in normal circumstances.
   short: T
-  what: ecasound-only start
   parameters: none
 ecasound_stop:
   type: transport
+  what: Ecasound-only stop. Mainly useful for diagnostics and debugging. Use command stop in normal circumstances.
   short: S
-  what: ecasound-only stop
   parameters: none
 restart_ecasound:
   type: transport
-  what: re-spawn ecasound engine
+  what: Restart the Ecasound application again, when it has crashed or is behaving oddly.
   parameters: none
 preview:
   type: transport
-  what: start engine with rec_file disabled (for mic test, etc.)
+  what: Enter the preview mode. Configure Nama to allow playback and passthru of inputs (for mic test, rehearsals, etc.). Nothing is recorded to disk!
   parameters: none
+  example: |
+    rec # Set the current track to record from its input.
+    preview # Enter the preview mode.
+    start # You can hear the playback from previously recorded tracks and
+          # play live. No file will be recorded to disk. You can adjust effects
+          # and forward or rewind to suite your needs.
+    stop # Stop the engine/transport.
+    arm # Switch to normal recording/playback mode.
 doodle:
   type: transport
-  what: start engine while monitoring REC-enabled inputs
+  what: Enter the doodle mode. In doodle mode all live inputs from tracks - set to record - are enabled. Nama excludes multiple tracks having the same input. This mode is designed to allow rehearsing and adjusting effects without listening to playback -as in preview.
   parameters: none
+  example: |
+    doodle # Switch into doodle mode.
+    start # start the engine/transport running.
+    stop # Stop the engine.
+    arm # Switch back to normal mode, where you get playback and record.
 mixdown:
   type: mix
+  what: Enter mixdown mode for subsequent engine runs. You will record new mixes, until you leave mixdown mode by mixoff.
   short: mxd
-  what: enable mixdown for subsequent engine runs
   parameters: none
+  example: |
+    mxd # Enter mixdown mode
+    t # Start the engine running. A mix will be recorded into the Mixdown
+      # track. Mixdown will stop automatically, when the longest track is at
+      # its end.
+    mxo # Return to the normal mode.
 mixplay:
   type: mix
+  what: Enter mixdown file playback mode, setting user tracks to OFF and only playing the Mixdown track. You can leave the mixplay mode by using mixoff.
   short: mxp
-  what: Enable mixdown file playback, setting user tracks to OFF
   parameters: none
+  example: |
+    mixplay # Enter the mixplay mode.
+    start # Start playing back the Mixdown track only.
+    stop # Stop playback.
+    mxo # Switch back to normal mode.
 mixoff:
   type: mix
+  what: Leave the mixdown or mixplay mode. Set Mixdown track to OFF, user tracks to MON.
   short: mxo
-  what: Set Mixdown track to OFF, user tracks to MON
   parameters: none
 automix:
   type: mix
-  what: Normalize track vol levels, then mixdown
+  what: Normalize track volume levels and fix DC-offsets. Then mix dwn to the Mixdown track.
   parameters: none
 master_on:
   type: mix
+  what: Turn on the mastering mode, adding tracks Eq, Low, Mid, High and Boost, if necessary. The mastering setup allows for one EQ and a three-band multiband compression and a final boosting stage. Leave the mastering mode by master_off.
   short: mr
-  what: Enter mastering mode. Add tracks Eq, Low, Mid, High and Boost if necessary
   parameters: none
+  example: |
+    mr # Turn on master mode.
+    start # Start the playback.
+          # Now you can adjust the boost or global EQ.
+    stop # Stop the engine.
 master_off:
   type: mix
+  what: Leave mastering mode. Remove the EQ, multi-band compression and Booster.
   short: mro
-  what: Leave mastering mode
   parameters: none
 add_track:
   type: track
+  what: Create a new audio track.
   short: add new
-  what: create a new track
-  example: add_track clarinet group woodwinds
-  parameters: <s_name> [ <s_key1> <s_val1> <s_key2> <s_val2>... ]
+  parameters: <s_name>
+  example: |
+    add_track clarinet # create a mono track called clarinet with input
+                       # from soundcard channel 1.
 add_tracks:
   type: track
-  short: add new
-  what: create one or more new tracks
-  example: add_track sax violin tuba
+  what: Create one or more new tracks in one go.
   parameters: <s_name1> [ <s_name2>... ]
+  example: add_tracks violin viola contra_bass
 link_track:
   type: track
+  what: Create a read-only track, that uses audio files from another track.
   short: link
-  what: create a read-only track that uses .WAV files from another track. 
-  parameters: <s_name> <s_target> [ <s_project> ]
-  example: link_track intro Mixdown song_intro creates a track 'intro' using all .WAV versions from the Mixdown track of 'song_intro' project
+  parameters: <s_dest_name> <s_source_name> [ <s_project> ]
+  example: |
+    link part_1 Mixdown my_long_song_1 # Create a track called "part_1" linked
+                                       # from the project my_long_song_1
+    link_track piano_conp piano # Create a copy of the piano track (to apply
+                                # extra compression to.)
 import_audio:
   type: track
+  what: Import a sound file (wav, ogg, mp3, etc.) to the current track, resampling it, if necessary.
   short: import
-  what: import a sound file (wav, ogg, mp3, etc.) to the current track, resampling if necessary.
-  parameters: <s_wav_file_path> [i_frequency]
+  parameters: <s_full_path_to_file> [ <i_frequency> ]
+  example: |
+    import /home/samples/bells.flac # import the file bells.flac into the
+    import /home/music/song.mp3 44100 # Import song.mp3, where Nama can't find
+           # the original samplerate (of 44.1kHz)
+                                    # current track, making it the current
+                                    # version of this track.
 set_track:
   type: track
-  what: directly set current track parameters (use with care!)
-  parameters: <s_track_field> value
-rec:
+  what: Directly set current track parameters (use with care!).
+  parameters: <s_track_field> <value>
+record:
   type: track
-  what: REC-enable current track
+  what: Set current track to record from its input (also known as REC-enabling).
+  short: rec
   parameters: none
+  example: |
+    rec # Set current track to record.
+    start # Whatever the other tracks are doing, this track will be recorded,
+          # Meaning, that a new version will be recorded to disk.
+    stop # Stop the recording/playback afterwards.
 mon:
   type: track
+  what: Set current track to playback the currently selected version. by default the last version is always played.
   short: on
-  what: set current track to MON
   parameters: none
+  example: mon # Next time you start, the last version will be played back.
 off:
   type: track
+  what: Set current track to OFF (exclude from setup). You can include the track with mon or rec.
   short: z
-  what: set current track to OFF (exclude from chain setup)
   parameters: none
 rec_defeat:
   type: track
+  what: Prevent writing an audio file for the current track. So the track will just pass thru the incoming audio. Useful for tracks connected to internal signal generators.
   short: rd
-  what: prevent writing a WAV file for current track
   parameters: none
 rec_enable:
   type: track
+  what: Allow writing an audio file for the current track. This is the opposite to rec_defeat. Useful to record a metronome or other special track to disk.
   short: re
-  what: allow writing a WAV file for current track
   parameters: none
 source:
   type: track
-  what: set track source
+  what: Set the current track's input (source). This can be a soundcard channel or a JACK client name.
   short: src r
-  parameters: <i_soundcard_channel> | 'null' (for metronome) | <s_jack_client_name> | <s_jack_port_name> | 'jack' (opens ports ecasound:trackname_in_N, connects ports listed in trackname.ports if present in project_root dir)
-  example: source "MPlayer [20120]:out_0" # quotes needed for port names with spaces
+  parameters: <i_soundcard_channel> | 'null' | <s_jack_client_name> | <s_jack_port_name> | 'jack'
+  example: |
+    source 3 # Take input from soundcard channel number 3 (or 3 and 4, if stereo).
+    source null # Track has no real input. this is useful for a metronome or
+                # Ecasound's internal sine generator or some other sound
+                # generator effect.
+    src LinuxSampler # Record input from the JACK client named LinuxSampler.
+    r synth:output_3 # record from the JACK client synth, only use the sound
+                     # port output_3 (see he jackd and jack_lsp manpages
+                     # for more information).
+    src jack # Create connect to all ports listed in current_trackname.ports,
+             # if it exists in the Nama project root directory. Ports are
+             # listed pairwise in the .ports files for stereo tracks. This is
+             # useful to record the mix of several mixrophones or minimalistic
+             # outputs from other applications, such as hydrogen (one port per
+             # sound of a drumkit).
 send:
   type: track
-  what: set aux send
-  short: out aux
-  parameters: <i_soundcard_channel> (3 or above) | <s_jack_client_name>#  |  <s_loop_id>
+  what: Set an aux send for the current track. Remove sends with remove_send .
+  short: aux
+  parameters: <i_soundcard_channel> | <s_jack_client_name> | <s_loop_id>
+  example: |
+    send 3 # Make an aux send to soundcard channel 3.
+    send jconvolver # Make an aux send to the jconvolver JACK client.
 remove_send:
   type: track
-  short: nosend rms
-  what: remove aux send
+  what: Remove an aux send from the current track.
+  short: nosend noaux
   parameters: none
 stereo:
   type: track
-  what: record two channels for current track
+  what: Set the current track to stereo (two channels). Will record two channels or easily import stereo audio files.
   parameters: none
 mono:
   type: track
-  what: record one channel for current track
+  what: Set the current track to mono (one channel). Will record one channel or easily import mono audio files (this is the default, when creating a track).
   parameters: none
 set_version:
   type: track
-  short: version n ver
-  what: set track version number for monitoring (overrides group version setting)
+  what: Set the active version of the current track for playback/monitoring (overrides group version setting).
+  short: version ver
   parameters: <i_version_number>
-  example: sax; version 5; sh
+  example: |
+    piano # Select the piano track.
+    version 2 # Switch the track to play back the second recorded of the
+              # current track.
+    sh # Display all information about the current track, also shows currently
+       # selected version.
 destroy_current_wav:
   type: track
-  what: unlink current track's selected WAV version (use with care!)
+  what: DESTRUCTIVE: Remove the current track's currently selected recording. This removes the underlying  audio file on your disk. USE WITH CARE!
   parameters: none
 list_versions:
   type: track
-  short: lver lv
-  what: list version numbers of current track
+  what: List versions of the current track. This will print the numbers of all versions of this track to the screen.
+  short: lver
   parameters: none
+  example: |
+    list_versions # May print something like: 1 2 5 7 9
+                  # The other versions might have been deleted earlier by you.
 vol:
   type: track
+  what: Change or show the current track's volume.
   short: v
-  what: set, modify or show current track volume
-  parameters: [ [ + | - | * | / ] <f_value> ]
-  example: vol * 1.5 (multiply current volume setting by 1.5)
+  parameters: [ [ + | - | / | * ] <f_volume> ]
+  example: |
+    vol * 1.5 # Multiply the current volume by 1.5
+    vol 75 # Set the current volume to 75 (depending on your setting in namarc
+           # this means 75% of full volume (-ea) or 75 dB (-eadb).
+    vol - 5.7 # Decrease current volume by 5.7 (percent or dB)
+    vol # Display the current volume of the current track.
 mute:
   type: track
+  what: Mute the current track. Turn the current track's volume absolutely down. You can unmute the track with the command unmute.
   short: c cut
-  what: mute current track volume
   parameters: none
 unmute:
   type: track
+  what: Restore previous volume level. It can be used after mute or solo.
   short: C uncut
-  what: restore previous volume level
+  parameters: none
 unity:
   type: track
-  what: set current track volume to unity
+  what: Set the current track's volume to unity. This will change the volume to the default value (100% or 0 dB).
   parameters: none
+  example: |
+    vol 55 # Set volume to 55
+    unity # Set volume to the unity value.
+    vol # Display the current volume (should be 100 or 0, depending on your
+        # settings in namarc.
 solo:
   type: track
-  what: mute all but current track
+  what: Mute all tracks but the current track or the tracks or bunches specified. You can reverse this with nosolo.
   short: sl
-  parameters: [track_name(s)] [bunch_name(s)]
+  parameters: [ <strack_name_1> | <s_bunch_name_1> ] [ <s_track_name_2 | <s_bunch_name_2> ] ...
+  example: |
+    solo # Will mute all tracks but the current track.
+    nosolo # Will unmute all tracks again.
+    solo piano bass Drums # Will mute everything but piano, bass and Drums.
 nosolo:
   type: track
-  what: release solo, previously muted tracks are still muted
+  what: Unjute all tracks, which have been turned down by solo. Tracks, that had beenmuted before the solo command stay muted.
   short: nsl
   parameters: none
 all:
   type: track
-  what: release solo, unmuting all tracks
+  what: Unmute all tracks, this includes tracks muted by solo and other single tracks muted previously by mute.
   parameters: none
+  example: |
+    piano # Select track piano
+    mute # Mute the piano track.
+    sax # Selct the track sax.
+    solo # mute all other tracks, except sax. Remember, that piano was muted
+         # already
+    all # unmute all tracks, including the piano track.
 pan:
   type: track
+  what: Change or display the current panning position of the current track. Panning is moving the audio in the stereo panorama between right and left. Position is given in percent. 0 is hard left and 100 hard right, 50% is dead centre.
   short: p
-  what: get/set current track pan position
-  parameters: [ <f_value> ]
+  parameters: [ <f_pan_position_in_percent> ]
+  example: |
+    pan 75 # Pan the track to a position between centre and hard right
+    p 50 # Move the current track to the centre.
+    pan # Show the current position of teh track in the stereo panorama.
 pan_right:
   type: track
+  what: Pan the current track hard right. this is a synonym for pan 100 . Can be reverse with pan_back .
   short: pr
-  what: pan current track fully right
   parameters: none
 pan_left:
   type: track
+  what: Pan the current track hard left. This is a synonym for pan 0 . Can be reversed with pan_back .
   short: pl
-  what: pan current track fully left
   parameters: none
 pan_center:
   type: track
+  what: Pan the current track to the centre. This is a synonym for pan 50 . Can be reversed with pan_back .
   short: pc
-  what: set pan center
   parameters: none
 pan_back:
   type: track
+  what: Restore the current track's pan position prior to pan_left, pan_right or pan_center .
   short: pb
-  what: restore current track pan setting prior to pan_left, pan_right or pan_center
   parameters: none
 show_tracks:
   type: track 
+  what: Show a list of tracks, including their index number, volume, pan position, recording status and input.
   short: lt show
-  what: show track status
+  parameters: none
 show_tracks_all:
   type: track
-  short: sha showa 
-  what: show status of all tracks, visible and hidden
+  what: Show a list of all tracks, visible and hidden, with their ndex number, recording status, input, volume and pan position. This is mainly useful for diagnostics and debugging.
+  short: sha showa
+  parameters: none
 show_bus_tracks:
   type: track 
-  short: shb
-  what: show tracks in current bus
+  what: Show a list of tracks in the current bus.
+  short: ltb showb
+  parameters: none
 show_track:
   type: track
+  what: Display information about the current track, including index, recording status, effects, inserts, versions, stereo width (a.k.a. channel count) and controllers.
   short: sh
-  what: show current track status
+  parameters: none
 show_mode:
   type: setup
+  what: Display the current record/playback mode. this will indicate the mode - i.e. doodle, preview, etc. - and possible record/playback settings.
   short: shm
-  what: show current record/playback modes
+  parameters: none
 show_track_latency:
   type: track
+  what: display the latency information for the current track.
   short: shl
-  what: show latency data for current track
+  parameters: none
 show_latency_all:
   type: diagnostics
+  what: Dump all latency data.
   short: shla
-  what: dump all latency data
+  parameters: none
 set_region:
   type: track
+  what: Specify a playback region for the current track using marks. Use the command new_region to create more than one region from a track. Can be reversed with remove_region .
   short: srg
-  what: Specify a playback region for the current track using marks. Use 'new_region' for multiple regions.
   parameters: <s_start_mark_name> <s_end_mark_name>
-new_region:
+  example: |
+    sax # Switch to track sax, so it is the current track now.
+    setpos 2.5 # Move the playhead to 2.5 seconds.
+    mark sax_start # Create a mark there, caled sax_start
+    sp 120.5 # Move playhead to 120.5 seconds.
+    mark sax_end # Create a mark there, called sax_end
+    set_region sax_start sax_end # Hide the track sax under a region called
+                                 # sax, which contains the audio of original
+                                 # track from 2.5 to 120.5 seconds.
+add_region:
   type: track
-  short: nrg
-  what: Create a region for the current track using an auxiliary track 
-  parameters: <s_start_mark_name> <s_end_mark_name> [<s_region_name>]
+  what: Create a region for the current track using an auxiliary track. This is a named region, which leaves the original track visible and untouched.
+  short: arg
+  parameters: <s_start_mark_name> | <f_start_time> <s_end_mark_name> | <f_end_time> [ <s_region_name> ]
+  example: |
+    sax # Select track sax as current track.
+    new_region sax_start 66.7 trimmed_sax # Create the region trimmed sax.
+               # This region contains the audio of track sax between the mark
+               # sax_start and 66.7 seconds. You can use the region just like a
+               # track, including commands remove-track and applying effects.
 remove_region:
   type: track
+  what: Remove the current region (including associated the auxiliary track).
   short: rrg
-  what: remove region (including associated auxiliary track)
   parameters: none
 shift_track:
   type: track
+  what: Move the beginning of the track or region, also known as offsetting or shifting. Can be reversed by unshift_track .
   short: shift playat pat
-  what: set playback delay for track or region
-  parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds> 
+  parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds>
+  example: |
+    piano # Select track piano as current track.
+    shift 6.7 # Move the start of track to 6.7 seconds.
 unshift_track:
   type: track
+  what: Move the start of a track or region back to 0.0 seconds (the beginning of the setup.
   short: unshift
-  what: remove playback delay for track or region
   parameters: none
 modifiers:
   type: track
-  short: mods mod 
-  what: set/show modifiers for current track (man ecasound for details)
+  what: Add/show modifiers for the current track (man ecasound for details). This is only useful in rare cases.
+  short: mods mod
   parameters: [ Audio file sequencing parameters ]
-  example: modifiers select 5 15.2
+  example: |
+    modifiers select 5 15.2 # apply Ecasound's select modifier to the
+                            # current track.
 nomodifiers:
   type: track
+  what: Remove modifiers from the current track.
   short: nomods nomod
-  what: remove modifiers from current track
+  parameters: none
 normalize:
   type: track
+  what: Apply ecanormalize to the current track version. This will raise the gain/volume of the current track as far as possible and store it that way on disk. Note: this will permanently change the file.
   short: norm ecanormalize
-  what: apply ecanormalize to current track version
+  parameters: none
 fixdc:
   type: track
-  what: apply ecafixdc to current track version
+  what: Fix the DC-offset of the current track using ecafixdc. Note: This will permanently change the file.
   short: ecafixdc
+  parameters: none
 autofix_tracks:
   type: track 
+  what: apply the commands fixdc and normalize to all current version of all tracks, that are set to playback, i.e. MON .
   short: autofix
-  what: fixdc and normalize selected versions of all MON tracks 
   parameters: none
 remove_track:
   type: track
-  short:
-  what: remove effects, parameters and GUI for current track
-  parameters: none 
+  what: Remove the current track. This will only remove the effects and display. all recorded audio will emain on your disk. The default is to ask, before Nama removes a track. this can be changed in namarc .
+  parameters: none
 bus_rec:
   type: bus
+  what: Set a bus mix_track to record (the default behaviour).
   short: brec grec
-  what: rec-enable bus tracks
+  parameters: none
 bus_mon:
   type: bus
+  what: Set a bus mix_track to playback. This only does anything, if a complete bus has been cached/frozend/bounced before.
   short: bmon gmon
-  what: set group-mon mode for bus tracks
+  parameters: none
 bus_off:
   type: bus
+  what: Set a bus mixtrack to OFF. Can be reversed with bus_rec and bus_mon.
   short: boff goff
-  what: set group-off mode for bus tracks
+  parameters: none
 bus_version:
-  type: group 
-  short: bn bver bv gver gn gv
-  what: set default monitoring version for tracks in current bus
-new_bunch:
   type: group
-  short: nb
-  what: define a bunch of tracks
-  parameters: <s_group_name> [<s_track1> <s_track2>...]
+  what: Set the default monitoring version for tracks in the current bus.
+  short: bver gver
+  parameters: none
+add_bunch:
+  type: group
+  what: Define a bunch of tracks. A bunch is useful for shorter for statements.
+  short: abn
+  parameters: <s_bunch_name> [ <s_track_name_1> | <i_track_index_1> ] ...
+  example: |
+    new_bunch woodwind # Create an empty new bunch called woodwind.
+    nb strings violin cello basso # Create the bunch strings with tracks
+                                  # violin, cello and basso.
+    for strings;mute # Mute all tracks in the strings bunch.
+    for strings;vol * 0.8 # Lower the volume of all tracks in strings by a
+                          # a factor of 0.8 (4/5).
 list_bunches:
   type: group
-  short: lb
-  what: list track bunches
+  what: Dispaly a list of all bunches and their tracks.
+  short: lbn
   parameters: none
-remove_bunches:
-  short: rb
+remove_bunch:
   type: group
-  what: remove the definition of a track bunch
-  parameters: <s_bunch_name> [<s_bunch_name>...]
+  what: Remove the specified bunches. This does not remove the tracks, only the groupings.
+  short: rbn
+  parameters: <s_bunch_name> [ <s_bunch_name> ] ...
 add_to_bunch:
-  short: ab
   type: group
-  what: add track(s) to a bunch
-  parameters: <s_bunch_name> <s_track1> [<s_track2>...]
+  what: Add track(s) to a bunch.
+  short: atbn
+  parameters: <s_bunch_name> <s_track1> [ <s_track2> ] ...
+  example: |
+    add_to_bunch woodwind oboe sax_1 flute # Add oboe sax_1 and flute to the
+                 # woodwind bunch or group of tracks.
 save_state:
   type: project
+  what: Save the project settings to disk. Optionally you can save to a different file for easy reloading of a certain stage in your project.
   short: keep save
-  what: save project settings to disk
-  parameters: [ <s_settings_file> ] 
+  parameters: [ <s_settings_file> ]
+  example: |
+    save_state # Save the current project to disk.
+    save early_mixing # Save the current project configuration to early_mixing
+    # Do some work
+    save # Save again
+    get_state early_mixing # Set the project back to the early mixing stage.
 get_state:
   type: project
+  what: Retrieve project settings. This is allows reloading of project stages saved with save_state filename .
   short: recall retrieve
-  what: retrieve project settings
-  parameters: [ <s_settings_file> ] 
+  parameters: [ <s_settings_file> ]
+  example: |
+    save_state my_special_mix # Save current project state as my_special_mix .
+    # Do some work.
+    save # Save the current project state to the default file.
+    recall my_current_mix # recall or restore the stage of my_special_mix .
 list_projects:
   type: project
+  what: List all projects. This will list all Nama projects, which are stored in the Nama project root directory.
   short: lp
-  what: list projects
-create_project:
+  parameters: none
+new_project:
   type: project
+  what: Create or open a new empty Nama project.
   short: create
-  what: create a new project
   parameters: <s_new_project_name>
+  example: create my_song # Will create empty project my_song.
+    # Now you can start adding your tracks, editing them and mixing them.
 load_project:
   type: project
+  what: Load an existing project. This will load the project from the default project state file. If you wish to load a project state saved to a user specific file, load teh project and then use get_state.
   short: load
-  what: load an existing project using last saved state
-  parameters: <s_project_name>
+  parameters: <s_existing_project_name>
+  example: load my_old_song # Will load my_old_song just as you left it.
 project_name:
   type: project
-  what: show current project name
+  what: Display the name of the current project.
   short: project name
   parameters: none
 new_project_template:
   type: project
-  what: make a project template based on current project
+  what: Make a project template based on the current project. This will include tracks and busses.
   short: npt
-  parameters: <s_template_name> [<s_template_description>]
+  parameters: <s_template_name> [ <s_template_description> ]
+  example: |
+    new_project_template my_band_setup "tracks and busses for bass, drums and me"
 use_project_template:
   type: project
-  what: use a template to create tracks in a newly created, empty project
+  what: Use a template to create tracks in a newly created, empty project.
   short: upt apt
   parameters: <s_template_name>
+  example: |
+    apt my_band_setup # Will add all the tracks for your basic band setup.
 list_project_templates:
   type: project
-  what: list project templates
+  what: List all project templates.
   short: lpt
-remove_project_template:
+  parameters: none
+destroy_project_template:
   type: project
-  what: remove one or more project templates
-  short: rpt dpt
-  parameters: <s_template_name1> [<s_template_name2>... ]
+  what: Remove one or more project templates.
+  parameters: <s_template_name1> [ <s_template_name2> ] ...
 generate:
   type: setup
+  what: Generate an Ecasound chain setup for audio processing manually. Mainly useful for diagnostics and debugging.
   short: gen
-  what: generate chain setup for audio processing
   parameters: none
 arm:
   type: setup
-  what: generate and connect chain setup
+  what: Generate and connect a setup to record or playback. If you are in dodle or preview mode, this will bring you back to normal mode.
   parameters: none
 arm_start:
-  short: arms
   type: setup
-  what: generate/connect chain setup and start engine
+  what: Generate and connect the setup and then start. This means, that you can directly record or listen to your tracks.
+  short: arms
   parameters: none
 connect:
   type: setup
+  what: Connect the setup, so everything is ready to run. Ifusing JACK, this means, that Nama will connect to all the necessary JACK ports.
   short: con
-  what: connect chain setup
   parameters: none
 disconnect:
   type: setup
+  what: Disconnect the setup. If running with JACK, this will disconnect from all JACK ports.
   short: dcon
-  what: disconnect chain setup
   parameters: none
 show_chain_setup:
   type: setup
+  what: Show the underlying Ecasound chain setup for the current working condition. Mainly useful for diagnostics and debugging.
   short: chains
-  what: show current Ecasound chain setup
-loop_enable:
-  type: setup 
-  short: loop
-  what: loop playback between two points
-  parameters: <start> <end> (start, end: mark names, mark indices, decimal seconds)
+  parameters: none
+loop:
+  type: setup
+  what: Loop the playback between two points. Can be stopped with loop_disable
+  short: l
+  parameters: <s_start_mark_name> | <i_start_mark_index> | <f_start_time_in_secs> <s_end_mark_name> | <i_end_mark_index> | <f_end_time_in_secs>
   example: |
-    loop_enable 1.5 10.0  ; loop between 1.5 and 10.0 seconds
-    loop_enable 1 5       ; loop between mark indices 1 and 5 
-    loop_enable start end ; loop between mark ids 'start' and 'end'
-loop_disable:
-  type: setup 
-  short: noloop nl
-  what: disable automatic looping
+    loop 1.5 10.0 # Loop between 1.5 and 10.0 seconds.
+    loop 1 5 # Loop between marks with indeices 1 and 5, see list_marks.
+    loop sax_start 12.6 # Loop between mark sax_start and 12.6 seconds.
+noloop:
+  type: setup
+  what: Disable looping.
+  short: nl
   parameters: none
 add_controller:
   type: effect
-  what: add a controller to an operator (current operator, by default) use mfx to modify, rfx to remove)
-  parameters: [<s_operator_id>] <s_effect_code> [ <f_param1> <f_param2>...]
+  what: Add a controller to an effect (current effect, by default). Controllers can be modified by using mfx and remove using rfx.
   short: acl
+  parameters: [ <s_operator_id> ] <s_effect_code> [ <f_param1> <f_param2> ] ...
+  example: |
+    add_effect etd 100 2 2 50 50 # Add a stero delay of 100ms.
+    # the delay will get the effect ID E .
+    # Now we want to slowly change the delay to 200ms.
+    acl E klg 1 100 200 2 0 100 15 200 # Change the delay time linearly (klg)
+        # from 100ms at the start (0 seconds) to 200ms at 15 seconds. See
+        # help for -klg in the Ecasound manpage.
 add_effect:
+  type: effect
+  what: Add an effect prefader (before vol/pan controls) to the current track. Remove effects with reove_effect.
   short: afx
-  type: effect
-  what: add effect before fader (vol/pan controls)
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
-  example: |2
-    add_effect amp 6     ; LADSPA Simple amp 6dB gain
-    add_effect var_dali  ; preset var_dali. Note that you don't need
-                         ; Ecasound's el: or pn: prefix
+  example: |
+    # We want to add the decimator effect (a LADSPA plugin).
+    help_effect decimator # Print help about its paramters/controls.
+                          # We see two input controls: bitrate and samplerate
+    afx decimator 12 22050 # We have added the decimator with 12bits and a sample
+                         # rate of 22050Hz.
+  # NOTE the message printed to the screen, it can read like this:
+  # Added GO (Decimator)
+  # GO in this case is the unique effect ID, which yo will need to modify it.
 append_effect:
-  short: apfx
   type: effect
-  what: add effect after fader
-  parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
+  what: Add an effect postfader (after vol/pan conrols) to the current track. Remove effect with remove_effect.
+  short: apfx
+  parameters: <s_effect_code> [ <f_param1> <f_param2> ] ...
+  example: |
+    apfx var_dali # Append the Ecasound effect preset var_dali to the current
+                  # track.
 insert_effect:
   type: effect
+  what: Place an effect before the specified unique effect ID. You will experience a short pause in playback.
   short: ifx
-  what: place effect before specified effect (engine stopped, prior to arm only)
-  parameters: <s_insert_point_id> <s_effect_code> [ <f_param1> <f_param2>... ]
+  parameters: <s_insert_point_id> <s_effect_code> [ <f_param1> <f_param2> ] ...
+  example: |
+    # Insert a delay before the reverb.
+    lfx # List all effects. The reverb has unique effect ID AF .
+    ifx AF etd 125 2 2 40 60 # Insert the etd delay before the reverb (AF).
 modify_effect:
   type: effect
-  what: modify an effect parameter
-  parameters: <s_effect_id> <i_parameter> [ + | - | * | / ] <f_value>
+  what: Modify effect parameter(s).
   short: mfx modify_controller mcl
+  parameters: [ <s_effect_id> ] <i_parameter> [ + | - | * | / ] <f_value>
   example: |
-    modify_effect V 1 -1           ; set effect_id V, parameter 1 to -1
-    modify_effect V 1 - 10         ; reduce effect_id V, parameter 1 by 10
-    modify_effect V 1,2,3 + 0.5    ; modify multiple parameters
-    modify_effect V,AC,AD 1,2 3.14 ; set multiple effects/parameters
+    # Modify the roomsize of our reverb.
+    lfx # We see, that reverb has unique effect ID AF and roomsize is the
+    # first parameter.
+    mfx AF 1 62 # change the roomsize of reverb (AF) to 62.
+    # We want to change roomsizes of both reverb AF and BG to 75.
+    mfx AF,BG 1 75 # Change roomsize (parameter 1) of both AF and BG.
+    mfx CE 6,10 -3 # Change parameters 6 and 10 of the effecit, with unique
+                   # effect ID CE to -3 (good for adjusting dependent times
+                   # in delays, volume levels in equalisers...)
+    mfx D 4 + 10 # Increase the fourth parameter of effect D by 10.
+    mfx A,B,C 3,6 * 5 # Adjust parameters 3 and 6 of effect A, B and C by a 
+                      # factor of 5.
 remove_effect:
   type: effect
-  what: remove effects from selected track
+  what: Remove effects. They don't have to be on the current track.
   short: rfx remove_controller rcl
-  parameters: <s_effect_id1> [ <s_effect_id2>...]
+  parameters: <s_effect_id1> [ <s_effect_id2> ] ...
 position_effect:
   type: effect
-  what: position an effect before another effect (use 'ZZZ' for end)
+  what: Position an effect before another effect (use 'ZZZ' for end).
   short: pfx
-  parameters: [<s_id_to_move>, <s_position_id>]
+  parameters: <s_id_to_move> <s_position_id>
+  example: |
+    position_effect G F # Move effecit with unique ID G before F.
 show_effect:
   type: effect
-  what: show effect information
+  what: Show information about an effect. Default is to print information on the current effect.
   short: sfx
-  parameters: <s_effect_id1> [ <s_effect_id2>...]
+  parameters: [ <s_effect_id1> ] [ <s_effect_id2> ] ...
+  example: |
+    sfx # Print name, unique ID and parameters/controls of the current effect.
+    sfx H # Print out all information about effect with unique ID H.
 list_effects:
   type: effect
-  what: short list of effects on current track
+  what: Print a short list of all effects on the current track, only including unique ID and effect name.
   short: lfx
   parameters: none
 add_insert:
   type: effect 
+  what: Add an external send/return insert to current track.
   short: ain
-  what: add an external send/return to current track
-  parameters: ( pre | post ) <s_send_id> [<s_return_id>] -or- local (for wet/dry control)
+  parameters: ( pre | post ) <s_send_id> [ <s_return_id> ] -or- local (for wet/dry control)
+  example: |
+    add_insert pre jconvolver # Add a prefader insert (before vol/pan controls)
+                              # the current track is sent to jconvolver and
+                              # the return is picked up from jconvolver again.
+    ain post jconvolver csound # Send the current track postfader (after vol/pan
+                               # controls to jconvolver and get the return from
+                               # csound. That would mean, that jconvolver and
+                               # csound are somehow connected.
+    guitar # Make guitar the current track.
+    ain local # Create a local insert
+    guitar-1-wet # Make the wet - or insert - track the current track.
+    afx G2reverb 50 5.0 0.6 0.5 0 -16 -20 # add a reverb
+    afx etc 6 100 45 2.5 # add a chorus effect on the reverbed signal
+    guitar # Change back to the main guitar track
+    wet 25 # Set the balance between wet/dry track to 25% wet, 75% dry.
 set_insert_wetness:
   type: effect 
+  what: Set wet/dry balance of the insert for the current track. The balance is given in percent, 0 meaning dry and 100 wet signal only.
   short: wet
-  what: set wet/dry balance for current track insert: 100 = all wet, 0 = all dry
-  parameters: [ pre | post ] <n_wetness> 
+  parameters: [ pre | post ] <n_wetness>
+  example: |
+    wet pre 50 # Set the prefader insert to be balanced 50/50 wet/dry.
+    set_insert_wetness 100 # If there's only one insert on the current track,
+                           # set it to full wetness.
 remove_insert:
   type: effect
+  what: Remove an insert from the current track.
   short: rin
-  what: remove an insert from the current track 
-  parameters: [ pre | post ] 
+  parameters: [ pre | post ]
+  example: |
+    rin # If there is only one insert on the current track, remove it.
+    remove_insert post # Remove the postfader insert from the current track.
 ctrl_register:
   type: effect
-  what: list Ecasound controllers
+  what: List all Ecasound controllers. Controllers include linear controllers and oscillators.
   short: crg
   parameters: none
 preset_register:
   type: effect
-  what: list Ecasound presets 
+  what: List all Ecasound effect presets. See the Ecasound manpage for more detail on effect_presets.
   short: prg
   parameters: none
 ladspa_register:
   type: effect
-  what: list LADSPA plugins
+  what: List all LADSPA plugins, that Ecasound/Nama can find.
   short: lrg
   parameters: none
 list_marks:
   type: mark
+  what: List all marks with index, name and their respective positions in time.
   short: lmk lm
-  what: List all marks
   parameters: none
 to_mark:
   type: mark
+  what: Move the playhead to the named mark or mark index.
   short: tmk tom
-  what: move playhead to named mark or mark index
-  parameters: <s_mark_id> | <i_mark_index> 
-  example: to_mark start (go to mark named 'start')
-new_mark:
+  parameters: <s_mark_name> | <i_mark_index>
+  example: |
+    to_mark sax_start # Jump to the position marked by sax_mark.
+    tmk 2 # Move to the mark with the index 2.
+add_mark:
   type: mark
-  what: drop mark at current playback position
-  short: mark k
+  what: Drop a new mark at the current playback position. this will fail, if a mark is already placed on that exact position.
+  short: mark amk
   parameters: [ <s_mark_id> ]
+  example: |
+    k important # Drop a mark named important at the current position.
 remove_mark:
   type: mark
-  what: Remove mark, default to current mark
+  what: Remove a mark. The default is to remove the current mark, if no parameter is given.
   short: rmk rom
-  parameters: [ <s_mark_id> | <i_mark_index> ]
-  example: remove_mark start (remove mark named 'start')
+  parameters: [ <s_mark_name> | <i_mark_index> ]
+  example: |
+    remove_mark important # remove the mark named important
+    rmk 16 # Remove the mark with the index 16.
 next_mark:
   type: mark
-  short: nmk nm
-  what: Move playback head to next mark
+  what: Move the playhead to the next mark.
+  short: nmk
   parameters: none
 previous_mark:
   type: mark
-  short: pmk pm
-  what: Move playback head to previous mark
+  what: Move the playhead to the previous mark.
+  short: pmk
   parameters: none
 name_mark:
   type: mark
-  short: nmk nom
-  what: Give a name to the current mark
-  parameters: <s_mark_id>
-  example: name_mark start
+  what: Give a name to the current mark.
+  parameters: <s_mark_name>
 modify_mark:
   type: mark
-  short: move_mark mmk mm
-  what: change the time setting of current mark
+  what: Change the position (time) of the current mark.
+  short: move_mark mmk
   parameters: [ + | - ] <f_seconds>
+  example: |
+    move_mark + 2.3 # Move the current mark 2.3 seconds forward from its
+                    # current position.
+    mmk 16.8 # Move the current mark to 16.8 seconds, no matter, where it is now.
 engine_status:
   type: diagnostics
-  what: display Ecasound audio processing engine status
+  what: Display the Ecasound audio processing engine status.
   short: egs
   parameters: none
 dump_track:
   type: diagnostics
-  what: dump current track data
-  short: dumpt dump
+  what: Dump current track data.
+  short: dump
   parameters: none
 dump_group:
   type: diagnostics 
-  what: dump group settings for user tracks 
-  short: dumpgroup dumpg
+  what: Dump group settings for user tracks.
+  short: dumpg
   parameters: none
 dump_all:
   type: diagnostics
-  what: dump most internal state
-  short: dumpall dumpa
+  what: Dump most internal state data.
+  short: dumpa
   parameters: none
-show_io:
+dump_io:
   type: diagnostics
-  short: showio
-  what: show chain inputs and outputs
+  what: Show chain inputs and outputs.
   parameters: none
 list_history:
   type: help
+  what: List the command history. Every project stores its own command history.
   short: lh
-  what: list command history
   parameters: none
 add_send_bus_cooked:
   type: bus
+  what: Add a send bus, that copies all user tracks with effects and inserts (a.k.a. cooked signals). All busses begin with a capital letter!
   short: asbc
-  what: add a send bus that copies all user tracks' processed signals
   parameters: <s_name> <destination>
-  example: asbc Reverb jconv
+  example: |
+    asbc Reverb jconv # Add a send bus called Reverb, that sends all output
+                      # to the jconv JACK client.
 add_send_bus_raw:
   type: bus
+  what: Add a send bus, that copies all user tracks wihtout processing (a.k.a. raw signals). All busses begin with a capital letter!
   short: asbr
-  what: add a send bus that copies all user tracks' raw signals
   parameters: <s_name> <destination>
-  example: asbr Reverb jconv
+  example: |
+    asbr Reverb jconv # Add a raw send bus called Reverb, with its output
+                      # going to the JACK client jconv .
 add_sub_bus:
   type: bus
+  what: Add a sub bus. This is a bus, as known from other DAWs. The default output goes to a mix track and that is routed to the mixer (the Master track). All busses begin with a capital letter!
   short: asub
-  what: add a sub bus (default destination: to mixer via eponymous track)
-  parameters: <s_name> [destination: s_track_name|s_jack_client|n_soundcard channel]
+  parameters: <s_name> [ <s_track_name> | <s_jack_client> | <i_soundcard_channel> ]
   example: |
-    asub Strings_bus
-    asub Strings_bus some_jack_client
+    asub Brass # Add a sub bus Brass, which is routed to tne mixer.
+    asub special csound # Add a sub bus, which is routed to the JACK client
+                        # csound.
 update_send_bus:
   type: bus
+  what: Include tracks added since the send bus was created.
   short: usb
-  what: include tracks added since send bus was created
   parameters: <s_name>
-  example: usb Some_bus 
+  example: |
+    update_send_bus Reverb # Include new tracks in the Reverb send bus.
 remove_bus:
   type: bus
-  short:
-  what: remove a bus
+  what: Remove a bus.
   parameters: <s_bus_name>
 list_buses:
   type: bus
+  what: List buses and their parameters (TODO).
   short: lbs
-  what: list buses and their parameters TODO
   parameters: none
 set_bus:
   type: bus
+  what: Set bus parameters. This command is intended for advanced users.
   short: sbs
-  what: set bus parameters 
-  parameters: <s_busname> <key> <val>
+  parameters: <s_busname> <key> <value>
 new_effect_chain:
   type: effect
+  what: Create a new effect chain. An effect chain i a list of effects with all their parameters stored. Useful for creating small processing templates for frequently used instruments.
   short: nec
-  what: define a reusable sequence of effects (effect chain) with current parameters
-  parameters: <s_name> [<op1>, <op2>,...]
+  parameters: <s_name> [ <effect_id_1>, <effect_id_2> ] ...
+  example: |
+    new_effect_chain my_piano # Create a new effect chain, called my_piano,
+                              # storing all effects and their settings from
+                              # the current track.
+    nec my_guitar A C F G H # Create a new effect chain, calledmy_guitar,
+                            # storing the effects with ID A, C, F, G and H and
+                            # their respective settings.
 add_effect_chain:
   type: effect
+  what: Add an effect chain to the current track.
   short: aec
-  what: add an effect chain to the current track
   parameters: <s_effect_chain_name>
+  example: |
+    aec my_piano # Add the effect chain, called my_piano, to the current track.
+                 # This will add all effects stored in my_piano with their
+                 # respective settings.
 overwrite_effect_chain:
   type: effect
+  what: Add an effect chain, overwriting or replacing the current effects. Current effects are pushed onto the bypass list, so they aren't lost completely.
   short: oec
-  what: add an effect chain overwriting current effects (which are pushed onto the bypass list)
   parameters: <s_effect_chain_name>
 delete_effect_chain:
   type: effect
-  short: dec
-  what: delete an effect chain definition from the list
+  what: Delete an effect chain definition. After that the effect chain will no longer be available to add. Projects, which use the effect chain won't be affected.
+  short: dec destroy_effect_chain
   parameters: <s_effect_chain_name>
 find_effect_chains:
   type: effect
+  what: Dump effect chains, matching key/value pairs if provided
   short: fec
-  what: dump effect chains, matching key/value pairs if provided
-  parameters: [<s_key1> <s_val1>... ]
+  parameters: [ <s_key_1> <s_value_1> ] ...
+  example: |
+    fec # List all effect chains with their effects.
 find_user_effect_chains:
   type: effect
-  short: fuc
-  what: list *user* effect chains, matching key/value pairs if provided
-  parameters: [<s_key1> <s_val1>... ]
+  what: List all *user* created effect chains, matching key/value pairs, if provided.
+  short: fuec
+  parameters: [ <s_key_1> <s_value_1> ] ...
 bypass_effects:
   type: effect
+  what: Bypass effects on the current track. With no parameters default to bypassing the current effect.
   short: bypass bfx
-  what: bypass effects on current track (default to current effect)
-  parameters: [<s_id1> <s_id2>... | 'all' ]
+  parameters: [ <s_effect_id_1> <s_effect_id_2>... | 'all' ]
+  example: |
+    bypass all # Bypass all effects on the current track, except vol and pan.
+    bypass AF # Only bypass the effecht with the unique ID AF.
 bring_back_effects:
   type: effect
+  what: Restore effects. If no parameter is given, the default is to restore the current effect.
   short: restore_effects bbfx
-  what: restore effects (default to current effect)
-  parameters: [<s_id1> <s_id2>... | 'all' ]
+  parameters: [ <s_effect_id_1> <s_effect_id_2> ... | 'all' ]
+  example: |
+    bbfx # Restore the current effect.
+    restore_effect AF # Restore the effect with the unique ID AF.
+    bring_back_effects all # Restore all effects.
 new_effect_profile:
   type: effect
+  what: Create a new effect profile. An effect profile is a named group of effect chains for multiple tracks. Useful for storing a basic template of standard effects for a group of instruments, like a drum kit.
   short: nep
-  what: create a named group of effect chains for multiple tracks
-  parameters: <s_bunch_name> [<s_effect_profile_name>]
+  parameters: <s_bunch_name> [ <s_effect_profile_name> ]
+  example: |
+    new_bunch Drums snare toms kick # Create a buch called Drums.
+    nep Drums my_drum_effects # Create an effect profile, call my_drum_effects
+                              # containing all effects from snare toms and kick.
 apply_effect_profile:
   type: effect
+  what: Apply an effect profile. this will add all the effects in it to the list of tracks stored in the effect profile. Note: You must give the tracks the same names as in the original project, where you created the effect profile.
   short: aep
-  what: use an effect profile to add effects to multiple tracks
   parameters: <s_effect_profile_name>
-delete_effect_profile:
+destroy_effect_profile:
   type: effect
-  short: dep
-  what: delete an effect profile
+  what: Delete an effect profile. This will delete the effect profile definition from your disk. All projects, which use this effect profile will NOT be affected.
   parameters: <s_effect_profile_name>
 list_effect_profiles:
   type: effect
+  what: List all effect profiles.
   short: lep
-  what: list effect profile 
+  parameters: none
 show_effect_profiles:
   type: effect
+  what: List effect profile.
   short: sepr
-  what: list effect profile 
+  parameters: none
 full_effect_profiles:
   type: effect
+  what: Dump effect profile data structure.
   short: fep
-  what: dump effect profile data structure
+  parameters: none
 cache_track:
   type: track
+  what: Cache the current track, a.k.a. freezing or bouncing. Store a version of the current track with all processing to disk. Useful to save on processor power in large projects. Can be reversed by uncache_track .
   short: cache ct
-  what: store an effects-processed track signal as a new version
-  parameters: [<f_additional_processing_time>]
+  parameters: [ <f_additional_processing_time> ]
+  example: |
+      cache 10 # Cache the curent track and append 10 seconds extra time,
+               # to allow a reverb or delay to fade away without being cut.
 uncache_track:
   type: effect
+  what: Select the uncached track version. This restores effects, but not inserts.
   short: uncache unc
-  what: select the uncached track version; restores effects (but not inserts)
   parameters: none
 do_script:
   type: general
+  what: Execute Nama commands from a file in the main project's directory or in the Nama project root directory. A script is a list of Nama commands, just as you would type them on the Nama prompt.
   short: do
-  what: execute Nama commands from a file in project_dir or project_root
   parameters: <s_filename>
+  example: |
+    do prepare_my_drums # Execute the script prepare_my_drums.
 scan:
   type: general
-  what: re-read project's .wav directory
+  what: Re-read the project's .wav directory. Mainly useful for troubleshooting.
   parameters: none
 add_fade:
   type: effect
+  what: Add a fade-in or fade-out to the current track.
   short: afd fade
-  what: add a fade-in or fade-out to current track
-  parameters: in|out marks/times (see examples)
+  parameters: ( in | out ) marks/times (see examples)
   example: |
-    fade in mark1        ; fade in default 0.5s starting at mark1
-    fade out mark2 2     ; fade out over 2s starting at mark2
-    fade out 2 mark2     ; fade out over 2s ending at mark2
-    fade out mark1 mark2 ; fade out from mark1 to mark2
+    fade in mark1 # Fade in,starting at mark1 and using the default fade time
+                  # of 0.5 seconds.
+    fade out mark2 2 # Fade out over 2 seconds, starting at mark2 .
+    fade out 2 mark2 # Fade out over 2 seconds, ending at mark2 .
+    fade in mark1 mark2 # Fade in starting at mark1, ending at mark2 .
 remove_fade:
   type: effect 
+  what: Remove a fade from the current track.
   short: rfd
-  what: remove a fade from the current track
-  parameters: <i_fade_index1> [<i_fade_index2>...]
+  parameters: <i_fade_index_1> [ <i_fade_index_2> ] ...
+  example: |
+    list_fade # Print a list of all fades and their tracks.
+    rfd 2 # Remove the fade with the index (n) 2.
 list_fade:
   type: effect
+  what: List all fades.
   short: lfd
-  what: list fades
+  parameters: none
 add_comment:
   type: track
-  what: add comment to current track (replacing any previous comment)
+  what: Add a comment to the current track (replacing any previous comment). A comment maybe a short discription, notes on instrument settings, etc.
   short: comment ac
+  parameters: <s_comment>
+  example: ac "Guitar, treble on 50%"
 remove_comment:
   type: track
-  what: remove comment from current track
+  what: Remove a comment from the current track.
   short: rc
+  parameters: none
 show_comment:
   type: track
-  what: show comment for current track
+  what: Show the comment for the current track.
   short: sc
+  parameters: none
 show_comments:
   type: track
-  what: show all track comments
-  short: scs
+  what: Show all track comments.
+  short: sca
+  parameters: none
 add_version_comment:
   type: track
-  what: add version comment (replacing any previous user comment)
-  short: comment avc
+  what: Add a version comment (replacing any previous user comment). This will add a comment for the current version of the current track.
+  short: avc
+  parameters: <s_comment>
+  example: avc "The good take with the clear 6/8"
 remove_version_comment:
   type: track
-  what: remove version comment(s) from current track
+  what: Remove version comment(s) from the current track.
   short: rvc
+  parameters: none
 show_version_comment:
   type: track
-  what: show version comment(s)
+  what: Show version comment(s) of the curent track.
   short: svc
+  parameters: none
 show_version_comments_all:
   type: track
-  what: show all version comments for current track
+  what: Show all version comments for the current track.
   short: svca
+  parameters: none
 set_system_version_comment:
   type: track
-  what: set system version comment (for testing only)
-  short: comment ssvc 
+  what: Set a system version comment. Useful for testing and diagnostics.
+  short: ssvc
+  parameters: <s_comment>
 midish_command:
   type: midi
-  what: send command text to 'midish' MIDI sequencer shell
+  what: Send the command text to  the midish MIDI sequencer. Midish must be installed and enabled in namarc. See the midish manpage and fullonline documentation for more.
   short: m
   parameters: <s_command_text>
+  example: m tracknew my_midi_track # create a new MIDI track in midish.
 new_edit:
   type: edit
-  what: create an edit for the current track and version
+  what: Create an edit for the current track and version.
   short: ned
   parameters: none
 set_edit_points:
   type: edit
-  what: mark play-start, record-start and record-end positions
+  what: Mark play-start, record-start and record-end positions for the current edit.
   short: sep
   parameters: none
 list_edits:
   type: edit
-  what: list edits for current track and version
+  what: List all edits for current track and version.
   short: led
   parameters: none
 select_edit:
   type: edit
-  what: select an edit to modify or delete, becomes current edit
+  what: Select an edit to modify or delete. After selection it is the current edit.
   short: sed
   parameters: <i_edit_index>
 end_edit_mode:
   type: edit
-  what: current track plays full length (input from edit sub-bus)
+  what: Switch back to normal playback/record mode. The track will play full length again. Edits are managed via a sub- bus.
   short: eem
   parameters: none
 destroy_edit:
   type: edit
-  what: remove an edit and all associated WAV files (destructive)
-  parameters: [<i_edit_index>] (defaults to current edit)
+  what: Remove an edit and all associated audio files. If no parameter is given, the default is to destroy the current edit. Note: The data will be lost permanently. Use with care!
+  parameters: [ <i_edit_index> ]
 preview_edit_in:
   type: edit
-  what: play the track region without the edit segment 
+  what: Play the track region without the edit segment.
   short: pei
   parameters: none
 preview_edit_out:
   type: edit
-  what: play the removed edit segment
+  what: Play the removed edit segment.
   short: peo
   parameters: none
 play_edit:
   type: edit
-  what: play a completed edit
+  what: Play a completed edit.
   short: ped
   parameters: none
 record_edit:
   type: edit
-  what: record a WAV file for the current edit
+  what: Record an audio file for the current edit.
   short: red
   parameters: none
 edit_track:
   type: edit
-  what: set the edit track as current track
+  what: set the edit track as the current track.
   short: et
   parameters: none
 host_track_alias:
   type: edit
-  what: set the host track alias as the current track
+  what: Set the host track alias as the current track.
   short: hta
   parameters: none
 host_track:
   type: edit
-  what: set the host track (edit sub-bus mix track) as the current track
+  what: Set the host track (edit sub-bus mix track) as the current track.
   short: ht
   parameters: none
 version_mix_track:
   type: edit
-  what: set the version mix track as the current track
-  short: vmt 
+  what: Set the version mix track as the current track.
+  short: vmt
   parameters: none
 play_start_mark:
   type: edit
-  what: select (and move to) play start mark
+  what: Select (and move to) play start mark of the current edit.
   short: psm
   parameters: none
 rec_start_mark:
   type: edit
-  what: select (and move to) rec start mark
+  what: Select (and move to) rec start mark of the current edit.
   short: rsm
   parameters: none
 rec_end_mark:
   type: edit
-  what: select (and move to) rec end mark
+  what: Select (and move to) rec end mark of the current edit.
   short: rem
   parameters: none
 set_play_start_mark:
   type: edit
-  what: set play_start_mark to current engine position
+  what: Set play_start_mark to the current playback position.
   short: spsm
   parameters: none
 set_rec_start_mark:
   type: edit
-  what: set rec_start_mark to current engine position
+  what: Set rec_start_mark to the current playback position.
   short: srsm
   parameters: none
 set_rec_end_mark:
   type: edit
-  what: set rec_end_mark to current engine position
+  what: Set rec_end_mark to current playback position.
   short: srem
   parameters: none
 disable_edits:
   type: edit
+  what: Turn off the edits for the current track and playback the original. This will exclude the edit sub bus.
   short: ded
-  what: disable editing sub-bus, restore standard track behavior
   parameters: none
 merge_edits:
   type: edit
+  what: Mix edits and original into a new host-track. this will write a new audio file to disk and the host track will have a new version for this.
   short: med
-  what: mix edits and original into a new host-track WAV version
+  parameters: none
 explode_track:
   type: track
-  what: make track into a sub-bus, with one track for each version
+  what: Make the current track into a sub bus, with one track for each version.
+  parameters: none
 move_to_bus:
   type: track
-  what: move current track to another bus
+  what: Move the current track to another bus. A new track is always in the Main bus. So to reverse this action use move_to_bus Main .
   short: mtb
   parameters: <s_bus_name>
+  example: |
+    asub Drums # Create a new sub bus, called Drums.
+    snare # Make snare the current track.
+    mtb Drums # Move the snare track into the sub bus Drums.
 promote_version_to_track:
   type: track
-  what: create a read-only track using specified version of current track
+  what: Create a read-only track using the specified version of the current track.
   short: pvt
   parameters: <i_version_number>
 read_user_customizations:
   type: general
-  what: re-read user customizations file 'custom.pl'
+  what: Re-read the user customizations file 'custom.pl'.
   short: ruc
+  parameters: none
 limit_run_time:
   type: setup
-  what: stop recording after last WAV file finishes playing
-  short: lrt
-  parameters: [<f_additional_seconds>]
+  what: Stop recording after the last audio file finishes playing. Can be turned off with limit_run_time_off.
+  short: lr
+  parameters: [ <f_additional_seconds> ]
 limit_run_time_off:
   type: setup
-  what: disable recording stop timer
+  what: Disable the recording stop timer.
   short: lro
+  parameters: none
 offset_run:
   type: setup
+  what: Record/play from a mark, rather than from the start, i.e. 0.0 seconds.
   short: ofr
-  what: record/play from mark position
-  parameters: <s_mark_name>  
+  parameters: <s_mark_name>
 offset_run_off:
   type: setup
-  short: ofo
-  what: clear offset run mode
+  what: Turn back to starting from 0.
+  short: ofro
+  parameters: none
 view_waveform:
   type: general
+  what: Launch mhwavedit to view/edit waveform of the current track and version. This requires to start Nama on a graphical terminal, like xterm or gterm or from GNOME via alt+F2 .
   short: wview
-  what: launch mhwavedit to view/edit waveform of current track/version WAV file
+  parameters: none
 edit_waveform:
   type: general
+  what: Launch audacity to view/edit the waveform of the current track and version. This requires starting Nama on a graphical terminal like xterm or gterm or from GNOME starting Nama using alt+F2 .
   short: wedit
-  what: launch audacity to view/edit waveform of current track/version WAV file
+  parameters: none
 rerecord:
   type: setup
+  what: Record as before. This will set all the tracks to record, which have been recorded just before you listened back.
   short: rerec
-  what: record as previously, restoring tracks to REC
+  parameters: none
+  example: |
+    for piano guitar;rec # Set piano and guitar track to record.
+    # do your recording and ilstening.
+    # You want to record another version of both piano and guitar:
+    rerec # Sets piano and guitar to record again.
 eager:
   type: general
-  what: output signals as soon as possible
+  what: Output audio as soon as possible. This will start playing or recording, as soon as a working setup is created.
   parameters: off | doodle | preview
-check_level:
+  example: |
+    eager doodle # Be eager in doodle mode.
+    eager off # Turn off eagerness. Now you have to start yourself again.
+analyze_level:
   type: track
-  what: print Ecasound amplitude analysis for current track
+  what: Print Ecasound amplitude analysis for current track. This will show highest volume and statistics.
+  short: anl
   parameters: none
-  short: cl
-# config:
-#   type: general
-#   what: get or set project-specific config values (args may be quoted)
-#   parameters: <s_parameter_name> [<s_arguments>]
-# unset:
-#   type: general
-#   what: delete project-specific config values (fall back to global config)
-#   parameters: <s_parameter_name>
+for:
+  type: general
+  what: Execute command(s) for several tracks.
+  parameters: <s_track_name_1> [ <s_track_name_2>} ... ; <s_commands>
+  example: |
+    for piano guitar;vol / 2;pan 75 # For both piano and guitar adjust the
+        # the volume by a factor of 1/2 and move the tracks to the right.
+    for snare kick toms cymbals;mtb Drums # for each of these tracks do mtb Drums.
+      # this will move all those tracks to the sub bus Drums in one command.
 ...

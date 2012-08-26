@@ -191,7 +191,7 @@ help: _help anytag  { ::help($item{anytag}) ; 1}
 help: _help { ::pager2( $::help->{screen} ); 1}
 project_name: _project_name { 
 	::pager2( "project name: ", $::project->{name}); 1}
-create_project: _create_project project_id { 
+new_project: _new_project project_id { 
 	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
 load_project: _load_project project_id {
@@ -206,7 +206,7 @@ use_project_template: _use_project_template key {
 list_project_templates: _list_project_templates {
 	::list_project_templates(); 1;
 }
-remove_project_template: _remove_project_template key(s) {
+destroy_project_template: _destroy_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 save_state: _save_state ident { ::save_state( $item{ident}); 1}
@@ -281,7 +281,7 @@ set_region: _set_region beginning { ::set_region( $item{beginning}, 'END' );
 	1;
 }
 remove_region: _remove_region { ::remove_region(); 1; }
-new_region: _new_region beginning ending track_name(?) {
+add_region: _add_region beginning ending track_name(?) {
 	my $name = $item{'track_name(?)'}->[0];
 	::new_region(@item{qw(beginning ending)}, $name); 1
 }
@@ -349,7 +349,7 @@ modifiers: _modifiers modifier(s) {
 modifiers: _modifiers { ::pager2( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
-show_io: _show_io { ::ChainSetup::show_io(); 1}
+dump_io: _dump_io { ::ChainSetup::show_io(); 1}
 show_track: _show_track {
 	my $output = $::text->{format_top};
 	$output .= ::show_tracks_section($::this_track);
@@ -454,7 +454,7 @@ mono: _mono {
 
 # dummy defs to avoid warnings from command.yml entries
 off: 'Xxx' {}
-rec: 'Xxx' {}
+record: 'Xxx' {}
 mon: 'Xxx' {}
 
 command: rw end # XX 'end' required to make test suite pass
@@ -562,18 +562,18 @@ remove_mark: _remove_mark {
 	return unless (ref $::this_mark) =~ /Mark/;
 	$::this_mark->remove;
 	1;}
-new_mark: _new_mark ident { ::drop_mark $item{ident}; 1}
-new_mark: _new_mark {  ::drop_mark(); 1}
+add_mark: _add_mark ident { ::drop_mark $item{ident}; 1}
+add_mark: _add_mark {  ::drop_mark(); 1}
 next_mark: _next_mark { ::next_mark(); 1}
 previous_mark: _previous_mark { ::previous_mark(); 1}
-loop_enable: _loop_enable someval(s) {
+loop: _loop someval(s) {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
 	#::pager2( @new_endpoints);
 	$::mode->{loop_enable} = 1;
 	@{$::setup->{loop_endpoints}} = (@new_endpoints, @{$::setup->{loop_endpoints}}); 
 	@{$::setup->{loop_endpoints}} = @{$::setup->{loop_endpoints}}[0,1];
 	1;}
-loop_disable: _loop_disable { $::mode->{loop_enable} = 0; 1}
+noloop: _noloop { $::mode->{loop_enable} = 0; 1}
 name_mark: _name_mark ident {$::this_mark->set_name( $item{ident}); 1}
 list_marks: _list_marks { 
 	my $i = 0;
@@ -796,9 +796,9 @@ show_effect: _show_effect {
 	1;
 }
 list_effects: _list_effects { ::pager(::list_effects()); 1}
-new_bunch: _new_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
+add_bunch: _add_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::bunch(); 1}
-remove_bunches: _remove_bunches ident(s) { 
+remove_bunch: _remove_bunch ident(s) { 
  	map{ delete $::gui->{_project_name}->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
@@ -1107,7 +1107,7 @@ existing_effect_profile_name: ident {
 }
 new_effect_profile: _new_effect_profile bunch_name effect_profile_name {
 	::new_effect_profile($item{bunch_name}, $item{effect_profile_name}); 1 }
-delete_effect_profile: _delete_effect_profile existing_effect_profile_name {
+destroy_effect_profile: _destroy_effect_profile existing_effect_profile_name {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile existing_effect_profile_name {
 	::apply_effect_profile($item{effect_profile_name}); 1 }
@@ -1213,12 +1213,12 @@ list_fade: _list_fade {  ::pager(join "\n",
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
  	::pager2( $::this_track->name, ": comment: $item{text}"); 
- 	$::this_track->set_comment($item{text});
+ 	$::this_track->set(comment => $item{text});
  	1;
 }
 remove_comment: _remove_comment {
  	::pager2( $::this_track->name, ": comment removed");
- 	$::this_track->set_comment(undef);
+ 	$::this_track->set(comment => undef);
  	1;
 }
 show_comment: _show_comment {
@@ -1232,27 +1232,27 @@ show_comments: _show_comments {
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
 	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
-	::pager2( $t->add_version_comment($v,$item{text})); 
+	::pager2( ::add_version_comment($t,$v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
-	::pager2( $t->remove_version_comment($item{dd})); 1
+	::pager2( ::remove_version_comment($t,$item{dd})); 1
 }
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
 	my @v = @{$item{'dd(s?)'}};
 	if(!@v){ @v = $t->monitor_version}
 	@v or return 1;
-	$t->show_version_comments(@v);
+	::show_version_comments($t,@v);
 	 1;
 }
 show_version_comments_all: _show_version_comments_all {
 	my $t = $::this_track;
 	my @v = @{$t->versions};
-	$t->show_version_comments(@v); 1;
+	::show_version_comments($t,@v); 1;
 }
 set_system_version_comment: _set_system_version_comment dd text {
-	::pager2( $::this_track->set_system_version_comment(@item{qw(dd text)}));1;
+	::pager2( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
@@ -1403,4 +1403,4 @@ show_latency_all: _show_latency_all {
 	::pager2( ::yaml_out($::setup->{latency})) if $::setup->{latency};
 	1;
 }
-check_level: _check_level { ::check_level($::this_track);1 }
+analyze_level: _analyze_level { ::check_level($::this_track);1 }
