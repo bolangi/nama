@@ -1450,3 +1450,7 @@ show_latency_all: _show_latency_all {
 	1;
 }
 check_level: _check_level { ::check_level($::this_track);1 }
+git: _git shellcode stopper { 
+#print ::json_out(\%item);
+::pager($::project->{repo}->run( split " ", $item{shellcode})) 
+}
