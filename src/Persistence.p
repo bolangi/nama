@@ -982,6 +982,7 @@ sub git_snapshot {
 	my $commit_message = shift() || "no comment";
 	return unless $config->{use_git};
  	return unless -e $file->git_state_store;
+	return if ! state_changed();
 	#if( -e $file->unversioned_state_store )
 	# TODO 
 	copy $file->unversioned_state_store(), $file->peripheral_state_store_vcs();
@@ -1008,10 +1009,9 @@ sub git_create_branch {
 		unless git_branch_exists($branchname);
 }
 
-sub git_diff {  
+sub state_changed {  
 	return unless $config->{use_git};
-	$project->{repo}->run('diff') 
-
+	$project->{repo}->run("diff", $file->git_state_store());
 }
 
 sub git_branch_exists { 
