@@ -80,6 +80,7 @@ sub definitions {
 		state_store 			=> ['State',      		\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
 		unversioned_state_store  => ['PeripheralState.json',		\&project_dir ],
+		peripheral_state_store_vcs  => ['PeripheralState.json-vcs',		\&project_dir ],
 		#command_history			=> ['command_history', 		\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
