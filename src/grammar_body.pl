@@ -213,29 +213,32 @@ save_state: _save_state save_opt(s) {
 	print ::json_out(\%item);
 	my %names = ( '-t' => 'tagname', '-m' => 'message', '-f' => 'filename') ;
 	my %args;
-	map{ $args{ $_->[0]} = $_->[1] } @{ $item{'save_opts(s)'} };
+	map{ ref $_; $args{ $_->[0]} = $_->[1] } @{ $item{'save_opt(s)'} };
 	my $message = $args{'-m'};
 
 	# -t: tag the commit after saving
 	if (my $tagname = $args{'-t'})
 	{
-		save_state();
-		git_snapshot();
-		git_tag($tagname,$message);
+	print "found tag item $tagname\n";
+		::save_state();
+		::git_snapshot();
+		::git_tag($tagname,$message);
 	}
 
 	# -f: save-to-file only 
 	elsif (my $filename = $args{'-f'})
 	{
-		save_state($filename) # should save unversioned_vars as well
+	print "found filename $filename\n";
+		::save_state($filename) # should save unversioned_vars as well
 	}
 
 	# -b: branch and save
 	elsif (my $branchname = $args{'-b'})
 	{
-		git_create_branch($branchname);
-		save_state();
-		git_snapshot();
+	print "found branch name $branchname\n";
+		::git_create_branch($branchname);
+		::save_state();
+		::git_snapshot();
 	}
 	1;
 }
