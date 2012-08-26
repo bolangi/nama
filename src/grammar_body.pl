@@ -264,11 +264,11 @@ save_arg: shellish
 
 get_state: _get_state statefile {
  	::load_project( 
- 		name => $::gui->{_project_name}->{name},
+ 		name => $::project->{name},
  		settings => $item{statefile}
  		); 1}
 get_state: _get_state {
- 	::load_project( name => $::gui->{_project_name}->{name},) ; 1}
+ 	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
 	::pager2( ::d1( ::eval_iam q(getpos) )); 1}
 setpos: _setpos timevalue {
@@ -850,7 +850,7 @@ list_effects: _list_effects { ::pager(::list_effects()); 1}
 add_bunch: _add_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::bunch(); 1}
 remove_bunch: _remove_bunch ident(s) { 
- 	map{ delete $::gui->{_project_name}->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
+ 	map{ delete $::project->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
 	::pager2( join " ", @{$::this_track->versions}); 1}
