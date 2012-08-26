@@ -253,14 +253,20 @@ save_state: _save_state save_opt(s) {
 	1;
 }
 save_state: _save_state ident { 
-	if ($::config->{use_git})
+	if($::config->{use_git})
 	{
+		::git_branch_and_save($item{ident}) 
+			if $::config->{save_to_name_default_behavior} eq 'save_to_branch';
+		::save_state($item{ident}) 
+			if $::config->{save_to_name_default_behavior} eq 'save_to_file';
 	} 
 	else
 	{
-		::save_state( $item{ident}); 
+		::save_state( $item{ident})
+			if $::config->{save_to_name_default_behavior} eq 'save_to_file';
 	}
-1}
+	1;
+}
 save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
 
 save_opt: save_flag save_arg { [ @item[-2, -1] ] }

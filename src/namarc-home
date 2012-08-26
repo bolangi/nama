@@ -88,6 +88,7 @@ limiter: tap_limiter 0 0
 serialize_formats: json yaml perl
 
 use_git: 1
+save_to_name_default_behavior: save_to_branch
 
 beep_command: beep -f 350 -l 700
 

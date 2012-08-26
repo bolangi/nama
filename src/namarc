@@ -121,6 +121,8 @@ limiter: tap_limiter 0 0
 #### State management ####
 
 # use_git: 1
+# save_to_name_default_behavior: save_to_file 
+# -OR- save_to_branch
 
 # Julien Claassen's Notes on Mastering effect defaults
 # 
