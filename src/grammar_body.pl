@@ -232,10 +232,30 @@ min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
 to_start: _to_start { ::to_start(); 1 }
 to_end: _to_end { ::to_end(); 1 }
-add_track: _add_track track_name(s) {
-	::add_track(@{$item{'track_name(s)'}}); 1}
+add_track: _add_track new_track_name {
+	::add_track($item{new_track_name}) if $item{new_track_name}; 
+    1
+}
+arg: anytag
 add_tracks: _add_tracks track_name(s) {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}
+new_track_name: anytag  { #$item{anytag} 
+  	my $proposed = $item{anytag};
+  	::throw( qq(Track name argument "$proposed" needs to start with a letter)), 
+  		return 0 if  $proposed !~ /^[A-Za-z]/;
+ 	::throw( qq(A track named "$proposed" already exists.  Skipping.)), 
+ 		return 0 if $::Track::by_name{$proposed};
+ 	::throw( qq(Track name argument "$proposed" conflicts with Ecasound command keyword. Skipping.)), 
+ 		return 0 if $::text->{iam}->{$proposed};
+ 
+ 	::throw( qq(Track name argument "$proposed" conflicts with user command. Skipping.)), 
+ 		return 0 if $::text->{user_command}->{$proposed};
+ 
+  	::throw( qq(Track name argument "$proposed" conflicts with Nama command or shortcut. Skipping.)), 
+  		return 0 if $::text->{commands}->{$proposed};
+$proposed
+} 
+			
 track_name: ident
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
