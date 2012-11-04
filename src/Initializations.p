@@ -89,6 +89,8 @@ sub definitions {
 		global_effect_chains  	=> ['global_effect_chains', \&project_root],
 		old_effect_chains  		=> ['effect_chains', 		\&project_root],
 		_logfile				=> ['nama.log',				\&project_root],
+		cache_map				=> ['cache_map',			\&project_dir ],
+
 
 	}, '::File';
 
