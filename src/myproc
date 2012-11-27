@@ -17,13 +17,14 @@ fi
 if [ ! -d $TESTD ]; then
    mkdir -p $TESTD;
 fi
-./preproc -r Audio::Nama \
+DEBUG=$1
+./preproc $DEBUG -r Audio::Nama \
 		-s $MD/src \
 		-t $TD \
 		-a p \
 		-b pm 
 mv $TD/Nama.pm $TD/../Nama.pm 
-./preproc  -s $MD/src \
+./preproc $DEBUG -s $MD/src \
          -t $MD/t  \
 		 -r Audio::Nama \
 		 -a t \
