@@ -36,13 +36,14 @@ my(
 	);
 
 my $debug = 0;
-getopts('s:t:f:r:a:b:', \%opts);
+getopts('ds:t:f:r:a:b:', \%opts);
 $source_dir = $opts{s};
 $new_root = $opts{r};
 $target_dir = $opts{t};
 $exta = $opts{a};
 $extb = $opts{b};
 $file = $opts{f};
+$debug = $opts{d};
 
 $debug and print <<PRINT;
 source dir:   $source_dir
@@ -69,9 +70,20 @@ sub process {
 		SOURCE => $file_in,
 		DELIMITERS => [ qw( [% %] ) ],
 	);
+	use Data::Dumper::Concise;
+	$debug and print "Text::Template object is:\n", Dumper $template;
 	my $hash = {name => 'goblin' };
+
+#### Include files and process code in [% %] directives
+
 	my $text = $template->fill_in(HASH=>$hash);
+
+#### Convert ::Something to Audio::Nama::Something
+
 	my $rooted_text = &bestow_module_root($new_root,$text);
+
+#### Hack arguments to logging subroutines 
+
 	$rooted_text =~ s/logit\(/logit(__LINE__,/g;
 	$rooted_text =~ s/logpkg\(/logpkg(__FILE__,__LINE__,/g;
 
