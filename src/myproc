@@ -1,4 +1,6 @@
 #!/bin/sh
+# use -d for debugging output
+
 #./sort_vars > variables.sorted.txt
 MD=..
 TD=$MD/lib/Audio/Nama
