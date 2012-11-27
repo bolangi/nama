@@ -21,6 +21,7 @@ use IO::All;
 use File::Find;
 use strict;
 use Cwd;
+use Storable qw(dclone); 
 
 my(
 	%opts,
@@ -70,8 +71,10 @@ sub process {
 		SOURCE => $file_in,
 		DELIMITERS => [ qw( [% %] ) ],
 	);
+	my $template_dump = dclone($template);
+	delete $template_dump->{SOURCE};
 	use Data::Dumper::Concise;
-	$debug and print "Text::Template object is:\n", Dumper $template;
+	$debug and print "Text::Template object (with source omitted) is:\n", Dumper $template_dump;
 	my $hash = {name => 'goblin' };
 
 #### Include files and process code in [% %] directives
