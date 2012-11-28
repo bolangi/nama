@@ -96,8 +96,8 @@ sub substitute{
 }
 sub first_run {
 	return if $config->{opts}->{f};
-	my $config_path = config_file();
-	$config_path = "$ENV{HOME}/$config_path" unless -e $config_path;
+	my $config_file = '.namarc';
+	my $config_path = "$ENV{HOME}/$config_file";
 	logpkg('debug', "config path: $config_path" );
 	if ( ! -e $config_path and ! -l $config_path  ) {
 
@@ -161,9 +161,11 @@ PROJECT_ROOT
 		#   - project name 'untitled', the default project, and
 		#   - project untitled's hidden directory for holding WAV files
 		
-		mkpath( join_path($ENV{HOME}, qw(nama untitled .wav)) );
-
-		 write_file(user_customization_file(), get_data_section('custom_pl'));
+		my $default_project_root = join_path($ENV{HOME}, 'nama');
+		mkpath( join_path($default_project_root, qw(untitled .wav)) );
+		$config->{root_dir} = $default_project_root; 
+		# needed for $file->user_customization() to resolve in next line
+		write_file($file->user_customization(), get_data_section('custom_pl'));
 		
 	} else {
 		print <<OTHER;
