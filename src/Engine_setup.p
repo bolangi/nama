@@ -267,7 +267,7 @@ sub connect_transport {
 
 	sync_effect_parameters();
 	$ui->length_display(-text => colonize($setup->{audio_length}));
-	# eval_iam("cs-set-length $setup->{audio_length}") unless @record;
+	eval_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq 'REC' and $setup->{audio_length};
 	$ui->clock_config(-text => colonize(0));
 	sleeper(0.2); # time for ecasound engine to launch
 

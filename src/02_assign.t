@@ -34,17 +34,19 @@ for my $c (@test_classes) {
 		# store_vars output as string
 
 	my $expected = <<WANT;
----
-dict:
-  fruit: melon
-face:
-  - 1
-  - 5
-  - 7
-  - 12
-foo: 2
-name: John
-...
+{
+   "dict" : {
+      "fruit" : "melon"
+   },
+   "face" : [
+      1,
+      5,
+      7,
+      12
+   ],
+   "foo" : 2,
+   "name" : "John"
+}
 WANT
 
 	diag("Serializing, storing and recalling data");
