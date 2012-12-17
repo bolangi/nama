@@ -205,8 +205,16 @@ sub add_effect {
 	
 	set_chain_value($p);
 
-	# forbid_user_ops means forbid all except latency op 
-	
+	### We prohibit creating effects on the Mixdown track	
+
+	### We check $track->forbid_user_ops
+	### which is set on the Mixdown track,
+
+	### An alternative would be giving each
+    ### Track its own add_effect method
+
+	### For now this is a single case
+
 	die "user effects forbidden on this track" 
 		if $ti{$p->{chain}} 
 		and $ti{$p->{chain}}->forbid_user_ops 
@@ -700,10 +708,30 @@ sub root_parent {
 	parent($parent) || $parent
 }
 
-## Nama effects are represented by entries in $fx->{applied}
-## and by the ops array in each track, $track->ops
+## Nama effects 
+
+## have a unique ID from capital letters
+## are represented by entries in $fx->{applied}, $fx->{params}
+## IDs are kept in the $track->ops
+
+## Rules for allocating IDs
+## new_cop_id() - issues a new ID
+## cop_add()    - initializes a Nama effect, should be called effect_init()
+## add_effect
+
+
 
 sub preallocate_cop_id { $fx->{id_counter}++ } # return value, then increment
+
+sub new_cop_id { 
+
+		# increment $fx->{id_counter} if necessary
+		# to find an unused effect_id to allocate
+		
+		while( fx( $fx->{id_counter} )){ $fx->{id_counter}++};
+		$fx->{id_counter}
+}
+
 
 sub cop_add {
 	logsub("&cop_add");
@@ -722,7 +750,8 @@ sub cop_add {
 
 	my 	$allocated = "recycled";
 	if ( ! $id ){ 
-		$id = $p->{cop_id} = $fx->{id_counter};
+
+		$id = $p->{cop_id} = new_cop_id();
 		$allocated = "issued";
 	}
 
@@ -795,10 +824,6 @@ sub cop_add {
 	}
 	else { push @{$ti{$n}->ops }, $id; } 
 
-
-	# make sure the counter $fx->{id_counter} will not occupy an
-	# already used value
-	while( fx( $fx->{id_counter} )){$fx->{id_counter}++};
 
 	$id;
 }
