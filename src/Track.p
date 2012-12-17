@@ -1260,6 +1260,7 @@ sub add_pan_control {
 }
 sub assign_latency_controller_id {
 	my $n = shift;
+	return if $config->{opts}->{O};
 	my $track = $ti{$n};
 	return if $track->latency_op;
 	$track->set(latency_op => preallocate_cop_id());
