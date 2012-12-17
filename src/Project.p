@@ -93,8 +93,8 @@ sub initialize_effects_data {
 	# effect variables - no object code (yet)
 	
 	$fx->{id_counter} = "A"; # autoincrement counter
-	%{$fx->{applied}}	= ();  # effect and controller objects (hashes)
-	%{$fx->{params}}   = ();  # chain operator parameters
+	$fx->{applied}	= {};  # effect and controller objects (hashes)
+	$fx->{params}   = {};  # chain operator parameters
 	               # indexed by {$id}->[$param_no]
 	               # zero-based {AB}->[0] (parameter 1)
 
