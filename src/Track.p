@@ -397,9 +397,9 @@ sub input_path { # signal path, not file path
 	}
 }
 
-### remove and destroy
 
-sub remove_effect_from_track { # doesn't touch $fx->{applied} or $fx->{params} data structures 
+sub remove_effect_from_track { 
+	# doesn't touch $fx->{applied} or $fx->{params} data structures 
 	my $track = shift;
 	my @ids = @_;
 	$track->set(ops => [ grep { my $existing = $_; 
