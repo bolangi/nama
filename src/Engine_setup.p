@@ -108,7 +108,7 @@ sub reconfigure_engine {
 		git_snapshot() unless ::ChainSetup::really_recording(); 
 
 		connect_transport('quiet');
-		calculate_and_adjust_latency() unless $config->{opts}->{O};
+		calculate_and_adjust_latency() if $config->{opts}->{Q};
 		show_status();
 
 # 		if( $restore_position and not ::ChainSetup::really_recording()){
