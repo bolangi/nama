@@ -1134,6 +1134,10 @@ sub add_track {
 	say("$name: reserved track name. Skipping"), return
 	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
+	# in order to increment serially
+
+	::ChainSetup::remove_temporary_tracks();
+
 	my $track = $class->new(%vals);
 	return if ! $track; 
 	$this_track = $track;
@@ -1260,7 +1264,7 @@ sub add_pan_control {
 }
 sub assign_latency_controller_id {
 	my $n = shift;
-	return if $config->{opts}->{O};
+	return unless $config->{opts}->{Q};
 	my $track = $ti{$n};
 	return if $track->latency_op;
 	$track->set(latency_op => preallocate_cop_id());
