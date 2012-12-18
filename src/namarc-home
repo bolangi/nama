@@ -85,7 +85,7 @@ limiter: tap_limiter 0 0
 
 # serialization choice
 
-serialize_formats: json yaml perl
+serialize_formats: json
 
 use_git: 1
 save_to_name_default_behavior: save_to_branch
