@@ -47,7 +47,6 @@ sub process_command_line_options {
 	#say $getopts;
 
 	eval $getopts or die "Stopped.\n";
-	$config->{opts}->{O} = ! $config->{opts}->{Q};
 	
 	if ($config->{opts}->{h}){ say $help->{usage}; exit; }
 
