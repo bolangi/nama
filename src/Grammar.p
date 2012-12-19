@@ -35,6 +35,7 @@ sub setup_grammar {
 
 }
 sub command_process {
+	state $total_effects_count;
 	my $input = shift;
 	my $input_was = $input;
 
@@ -66,6 +67,13 @@ sub command_process {
 	my $result = check_fx_consistency();
 	logpkg('logcluck',"Inconsistency found in effects data",
 		Dumper ($result)) if $result->{is_error};
+
+	my $current_count= 0;
+	map{ $current_count++ } keys %{$fx->{applied}};
+	if ($current_count < $total_effects_count){
+		say "Total effects count: $current_count, change: ",$current_count - $total_effects_count; 
+		$total_effects_count = $current_count;
+	}
 		
 }
 sub do_user_command {
