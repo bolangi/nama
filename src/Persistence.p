@@ -979,17 +979,20 @@ sub restore_effect_chains {
 		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
 sub git_snapshot {
-	my $commit_message = shift() || "no comment";
 	return unless $config->{use_git};
- 	return unless -e $file->git_state_store;
-	return if ! state_changed();
-	#if( -e $file->unversioned_state_store )
-	# TODO 
+	return unless state_changed();
+	my $commit_message = shift() || "no comment";
+	git_commit($commit_message);
+}
+	
+sub git_commit {
+	my $commit_message = shift || "empty message";
 	copy $file->unversioned_state_store(), $file->peripheral_state_store_vcs();
 	$project->{repo}->run( add => $file->git_state_store );
 	$project->{repo}->run( add => $file->peripheral_state_store_vcs );
 	$project->{repo}->run( commit => '--quiet', '--message', $commit_message);
 }
+	
 
 sub git_tag { 
 	return unless $config->{use_git};
