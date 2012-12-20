@@ -141,14 +141,19 @@ sub load_project {
 
 	# initialize git repository if necessary
 	
-	Git::Repository->run( init => project_dir())
-		if $config->{use_git} and ! -d join_path( project_dir(). '.git');
+	my $need_git_init = ($config->{use_git} and ! -d join_path( project_dir().  '.git') );
+	if ( $need_git_init ){
+		Git::Repository->run( init => project_dir());
+		write_file($file->git_state_store, "{}\n");
+	}
+	if ( $config->{use_git} ){
+		$project->{repo} = Git::Repository->new( work_tree => project_dir() )
+	}
+	if ( $need_git_init ){
+		$project->{repo}->run( add => $file->git_state_store );
+		$project->{repo}->run( commit => '--quiet', '--message', "initial commit");
+	}
 
-	# load repository
-
-	$project->{repo} = Git::Repository->new( work_tree => project_dir() )
-		if $config->{use_git};
-	
 	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){
 
