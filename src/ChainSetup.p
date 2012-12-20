@@ -12,7 +12,15 @@ use ::Assign qw(yaml_out);
 
 our (
 
-	$g,  # routing graph object
+	$g,  # routing graph object - 
+
+		# based on project data 
+		# the routing graph is generated,
+		# then traversed over, and integrated
+		# with track data to generate
+		# ::IO objects. ::IO objects are iterated
+		# over to generate 
+		# the Ecasound chain setup text (c.f. chains command)
 
 	@io, # IO objects corresponding to chain setup
 
@@ -99,16 +107,12 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	# in an ideal CS world, all of the following routing
 	# routines (add_paths_for_*) would be accomplished by
-	# the track or bus itself, rather than the Hand of God, as
-	# appears below.
-	#
-	# On the other hand (or Hand!), one can't complain if
-	# the Hand of God happens to be doing exactly the
-	# right things. :-)
-
+	# the track or bus itself, rather than handcoded below.
+	
 	# start with bus routing
 	
 	map{ $_->apply($g) } ::Bus::all();
+
 	$logger->debug("Graph after bus routing:\n$g");
 	
 	# now various manual routing
