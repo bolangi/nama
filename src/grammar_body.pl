@@ -214,6 +214,29 @@ list_project_templates: _list_project_templates {
 destroy_project_template: _destroy_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
+
+project_tag: _project_tag tagname message(?) {   
+	::save_state();
+	::git_snapshot();
+	::git_tag($item{tagname},@{$item{'message(?)'}});
+	1;
+}
+project_commit: _project_commit message(?) { 
+	::save_state();
+	::git_snapshot(@{$item{'message(?)'}});
+	1;
+}
+project_branch: _project_branch branchname message(?) { 
+	::save_state();
+	::git_snapshot();
+	::git_branch($item{branchname}, @{$item{'message(?)'}});
+}
+project_file: _project_file { }
+
+tagname: ident
+branchname: ident
+message: /.+/
+
 save_state: _save_state save_opt(s) { 
 
 	# perform save-and-tag, branch-and-save, or save-to-file
@@ -1193,18 +1216,12 @@ destroy_effect_profile: _destroy_effect_profile existing_effect_profile_name {
 	::delete_effect_profile($item{existing_effect_profile_name}); 1 }
 apply_effect_profile: _apply_effect_profile existing_effect_profile_name {
 	::apply_effect_profile($item{effect_profile_name}); 1 }
-list_effect_profiles: _list_effect_profiles ident(?) {
-	my $name;
-	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
-	$name ||= 1;
-	my @output = 
-		map
-		{ 	
-			$name = $_->profile;
-			$_->track_name;
-		} ::EffectChain::find(profile => $name);
+list_effect_profiles: _list_effect_profiles {
+	my %profiles;
+	map{ $profiles{$_->profile}++ } ::EffectChain::find(profile => 1);
+	my @output = keys %profiles;
 	if( @output )
-	{ ::pager( "\nname: $name\ntracks: ", join " ",@output) }
+	{ ::pager( join " ","Effect Profiles available:", @output) }
 	else { ::throw("no match") }
 	1;
 }
@@ -1212,26 +1229,20 @@ show_effect_profiles: _show_effect_profiles ident(?) {
 	my $name;
 	$name = $item{'ident(?)'}->[-1] if $item{'ident(?)'};
 	$name ||= 1;
-	my $old_profile_name;
-	my $profile_name;
-	my @output = 
-		grep{ ! /index:/ }
-		map
-		{ 	
-			
-			# return profile name at top if changed
-			# return summary
+	my %profiles;
+	map{ $profiles{$_->profile}++ } ::EffectChain::find(profile => $name);
+	my @names = keys %profiles;
 
-			my @out;
-			my $profile_name = $_->profile;
-			if ( $profile_name ne $old_profile_name )
-			{
-			 	push @out, "name: $profile_name\n";
-				$old_profile_name = $profile_name 
-			}
-			push @out, $_->summary;
-			@out
+
+	my @output;
+
+
+	for $name (@names) {
+		push @output, "\nprofile name: $name\n";
+		map { 	
+			push @output, $_->summary;
 		} ::EffectChain::find(profile => $name);
+	} @names;
 	if( @output )
 	{ ::pager( @output); }
 	else { ::throw("no match") }
