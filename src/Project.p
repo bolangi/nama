@@ -144,7 +144,7 @@ sub load_project {
 	my $need_git_init = ($config->{use_git} and ! -d join_path( project_dir().  '.git') );
 	if ( $need_git_init ){
 		Git::Repository->run( init => project_dir());
-		write_file($file->git_state_store, "{}\n");
+		write_file($file->git_state_store, "{}\n") if ! -e $file->git_state_store;
 	}
 	if ( $config->{use_git} ){
 		$project->{repo} = Git::Repository->new( work_tree => project_dir() )
