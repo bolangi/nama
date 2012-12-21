@@ -549,6 +549,26 @@ add_to_bunch:
   example: |
     add_to_bunch woodwind oboe sax_1 flute # Add oboe sax_1 and flute to the
                  # woodwind bunch or group of tracks.
+project_commit:
+  type: project
+  what: commit Nama's current state
+  short: pct
+  parameters: <s_message>
+project_tag:
+  type: project
+  short: ptg
+  what: tag the current commit
+  parameters: <s_tag_name> [<s_message>]
+project_branch:
+  type: project
+  what: change to named branch 
+  short: pbr
+  parameters: <s_branch_name> [<s_message>]
+project_file:
+  type: project
+  what: save state as different filename
+  short: pfl
+  parameters: <s_file_name>
 save_state:
   type: project
   what: Save the project settings to disk. Optionally you can save to a different file for easy reloading of a certain stage in your project.

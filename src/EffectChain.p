@@ -346,9 +346,8 @@ sub find {
 sub summary {
 	my $self = shift;
 	my @output;
-	push @output, "index: ". $self->n;
-	push @output, "name: ".$self->name if $self->name;
-	push @output, "track name: ".$self->track_name if $self->track_name;
+	push @output, "  name: ".$self->name if $self->name;
+	push @output, "  track name: ".$self->track_name if $self->track_name;
 	push @output,	
 	map{ 
 		my $i = ::effect_index( $self->{ops_data}->{$_}->{type} ); 
