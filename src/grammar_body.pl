@@ -215,21 +215,27 @@ destroy_project_template: _destroy_project_template key(s) {
 	::remove_project_template(@{$item{'key(s)'}}); 1;
 }
 
-project_tag: _project_tag tagname message(?) {   
+tag: _tag tagname message(?) {   
 	::save_state();
 	::git_snapshot();
 	::git_tag($item{tagname},@{$item{'message(?)'}});
 	1;
 }
-project_commit: _project_commit message(?) { 
+commit: _commit message(?) { 
 	::save_state();
 	::git_snapshot(@{$item{'message(?)'}});
 	1;
 }
-project_branch: _project_branch branchname message(?) { 
-	::save_state();
-	::git_snapshot();
-	::git_branch($item{branchname}, @{$item{'message(?)'}});
+branch: _branch branchname { 
+	::git_checkout($item{branchname});
+	1;
+}
+branch: _branch {
+	::pager(join "\n",$::project->{repo}->run('branch'));
+	1;
+}
+new_branch: _new_branch branchname message(?) { 
+	::git_create_branch($item{branchname}, @{$item{'message(?)'}});
 }
 project_file: _project_file { }
 

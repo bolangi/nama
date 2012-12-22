@@ -549,20 +549,24 @@ add_to_bunch:
   example: |
     add_to_bunch woodwind oboe sax_1 flute # Add oboe sax_1 and flute to the
                  # woodwind bunch or group of tracks.
-project_commit:
+commit:
   type: project
   what: commit Nama's current state
-  short: pct
+  short: ci
   parameters: <s_message>
-project_tag:
+tag:
   type: project
-  short: ptg
   what: tag the current commit
   parameters: <s_tag_name> [<s_message>]
-project_branch:
+branch:
   type: project
-  what: change to named branch 
-  short: pbr
+  what: change to named branch (or list branches if none specified)
+  short: br
+  parameters: <s_branch_name> [<s_message>]
+new_branch:
+  type: project
+  what: create a new branch
+  short: nbr
   parameters: <s_branch_name> [<s_message>]
 project_file:
   type: project
