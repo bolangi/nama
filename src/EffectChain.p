@@ -371,6 +371,7 @@ sub new_effect_profile {
 			global		=> 1,
 			track_name	=> $_,
 			ops_list	=> [ $tn{$_}->fancy_ops ],
+			inserts_data => $tn{$_}->inserts,
 		);
 	} @tracks;
 }
