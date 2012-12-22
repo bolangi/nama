@@ -28,7 +28,7 @@ sub add_latency_controller {
 	my $p = {};
 	$p->{values} = [2, frames_to_secs($delay)];
 	$p->{type} = $config->{latency_op};
-	$p->{cop_id} = $track->latency_op if $track->latency_op;
+	$p->{effect_id} = $track->latency_op if $track->latency_op;
 	$p->{before} = $track->ops->[0];
 	$p->{track} = $track;
 	my $id = add_effect($p);

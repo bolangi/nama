@@ -625,7 +625,7 @@ sub restore_state {
 			add_effect({
 						chain => $fx->{applied}->{$id}->{chain},
 						type => $fx->{applied}->{$id}->{type},
-						cop_id => $id,
+						effect_id => $id,
 						owns => $fx->{applied}->{$id}->{owns},
 						parent_id => $fx->{applied}->{$id}->{belongs_to},
 						});

@@ -596,11 +596,11 @@ sub track_gui {
 
 		my $vol_id = $ti{$n}->vol;
 
-		logpkg('debug', "vol cop_id: $vol_id");
+		logpkg('debug', "vol effect_id: $vol_id");
 		my %p = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
 				type => 'ea',
-				cop_id => $vol_id,
+				effect_id => $vol_id,
 				p_num		=> $p_num,
 				length => 300, 
 				);
@@ -651,12 +651,12 @@ sub track_gui {
 		
 		my $pan_id = $ti{$n}->pan;
 		
-		logpkg('debug', "pan cop_id: $pan_id");
+		logpkg('debug', "pan effect_id: $pan_id");
 		$p_num = 0;           # first parameter
 		my %q = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
 				type => 'epp',
-				cop_id => $pan_id,
+				effect_id => $pan_id,
 				p_num		=> $p_num,
 				);
 		# logpkg('debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) });
@@ -809,14 +809,14 @@ sub add_effect_gui {
 		my $ui = shift;
 		my %p 			= %{shift()};
 		my ($n,$code,$id,$parent_id,$parameter) =
-			@p{qw(chain type cop_id parent_id parameter)};
+			@p{qw(chain type effect_id parent_id parameter)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
 
 		logpkg('debug', sub{yaml_out(\%p)});
 
-		logpkg('debug', "cop_id: $id, parent_id: $parent_id");
+		logpkg('debug', "effect_id: $id, parent_id: $parent_id");
 		# $id is determined by cop_add, which will return the
-		# existing cop_id if supplied
+		# existing effect_id if supplied
 
 		# check display format, may be 'scale' 'field' or 'hidden'
 		
@@ -882,7 +882,7 @@ sub add_effect_gui {
 				$fx_cache->{registry}->[$i]->{params}->[$p]->{name});
 			my $v =  # for argument vector 
 			{	parent => \$frame,
-				cop_id => $id, 
+				effect_id => $id, 
 				p_num  => $p,
 			};
 			push @sliders,make_scale($v);
@@ -973,11 +973,11 @@ sub make_scale {
 	my $ref = shift;
 	my %p = %{$ref};
 # 	%p contains following:
-# 	cop_id   => operator id, to access dynamic effect params in %{$fx->{params}}
+# 	effect_id   => operator id, to access dynamic effect params in %{$fx->{params}}
 # 	parent => parent widget, i.e. the frame
 # 	p_num      => parameter number, starting at 0
 # 	length       => length widget # optional 
-	my $id = $p{cop_id};
+	my $id = $p{effect_id};
 	my $n = $fx->{applied}->{$id}->{chain};
 	my $code = $fx->{applied}->{$id}->{type};
 	my $p  = $p{p_num};

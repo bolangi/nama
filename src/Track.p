@@ -1243,7 +1243,7 @@ sub add_volume_control {
 	my $vol_id = cop_add({
 				chain => $n, 
 				type => $config->{volume_control_operator},
-				cop_id => $ti{$n}->vol, # often undefined
+				effect_id => $ti{$n}->vol, # often undefined
 				});
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
@@ -1256,7 +1256,7 @@ sub add_pan_control {
 	my $pan_id = cop_add({
 				chain => $n, 
 				type => 'epp',
-				cop_id => $ti{$n}->pan, # often undefined
+				effect_id => $ti{$n}->pan, # often undefined
 				});
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
@@ -1267,7 +1267,7 @@ sub assign_latency_controller_id {
 	return unless $config->{opts}->{Q};
 	my $track = $ti{$n};
 	return if $track->latency_op;
-	$track->set(latency_op => preallocate_cop_id());
+	$track->set(latency_op => preallocate_effect_id());
 	logsub("&assign_latency_controller_id: chain $n, id ",$track->latency_op);	
 }
 

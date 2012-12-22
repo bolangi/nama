@@ -30,7 +30,7 @@ use ::Object qw(
 initialize();
 
 # for compatibility with standard effects
-sub cop_id { $_[0]->{id} }  
+sub effect_id { $_[0]->{id} }  
 
 ## sugar for accessing individual effect attributes
 ## similar sugar is used for effects. 
@@ -223,7 +223,7 @@ sub add_ops {
 			parent_id 	=> $self->parent($_),
 		};
 
-		$args->{cop_id} = $_ unless fx($_);
+		$args->{effect_id} = $_ unless fx($_);
 
 		logpkg('debug',"args ", json_out($args));
 		# avoid incorrectly calling _insert_effect 

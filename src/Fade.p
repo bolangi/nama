@@ -97,7 +97,7 @@ sub refresh_fade_controller {
 
 	# we try to re-use the controller ID
 	add_effect({
-		cop_id		=> $controller,
+		effect_id		=> $controller,
 		parent_id 	=> $track->fader,
 		type		=> 'klg',	  		 # Ecasound controller
 		values		=> [	1,				 # Ecasound parameter 1

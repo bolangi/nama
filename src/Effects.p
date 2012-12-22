@@ -66,7 +66,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 				
 					is_read_only
 					bypass_effects
-					preallocate_cop_id
+					preallocate_effect_id
 			
 					restore_effects
 
@@ -234,7 +234,7 @@ sub add_effect {
 sub _add_effect { 
 	my $p = shift;
 	my (    $n,   $before, $code,$parent_id,$id, $values) =
-	@$p{qw( chain before    type parent_id  cop_id values)};
+	@$p{qw( chain before    type parent_id  effect_id values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 
@@ -715,15 +715,15 @@ sub root_parent {
 ## IDs are kept in the $track->ops
 
 ## Rules for allocating IDs
-## new_cop_id() - issues a new ID
+## new_effect_id() - issues a new ID
 ## cop_add()    - initializes a Nama effect, should be called effect_init()
 ## add_effect
 
 
 
-sub preallocate_cop_id { $fx->{id_counter}++ } # return value, then increment
+sub preallocate_effect_id { $fx->{id_counter}++ } # return value, then increment
 
-sub new_cop_id { 
+sub new_effect_id { 
 
 		# increment $fx->{id_counter} if necessary
 		# to find an unused effect_id to allocate
@@ -740,7 +740,7 @@ sub cop_add {
 
 	my ($n,  $type, $id, $parent_id)  = 
 	@$p{qw( 
-	    chain type cop_id parent_id)};
+	    chain type effect_id parent_id)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
@@ -751,15 +751,15 @@ sub cop_add {
 	my 	$allocated = "recycled";
 	if ( ! $id ){ 
 
-		$id = $p->{cop_id} = new_cop_id();
+		$id = $p->{effect_id} = new_effect_id();
 		$allocated = "issued";
 	}
 
-	logpkg('debug',"$id: cop id $allocated");
+	logpkg('debug',"$id: effect id $allocated");
 
 	my $i = effect_index($type);
 
-	logpkg('debug',"Issuing a cop_id for track $n: $id");
+	logpkg('debug',"Issuing a effect_id for track $n: $id");
 	
 	# make entry in $fx->{applied} with chain, code, display-type, children
 

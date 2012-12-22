@@ -252,7 +252,7 @@ sub read_in_effects_data {
 		(\w.+?) # name, starting with word-char,  non-greedy
 		# (\w+) # name
 		,\s*  # comma spaces* 
-		-(\w+)    # cop_id 
+		-(\w+)    # effect_id 
 		:?     # maybe colon (if parameters)
 		(.*$)  # rest
 	/x;

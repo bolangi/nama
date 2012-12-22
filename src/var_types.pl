@@ -115,7 +115,7 @@
 
 # category: effects
 
-	$cop_id 		# autoincrement counter
+	$effect_id 		# autoincrement counter
 					# chain operator id that how we create, 
 					# store find them, adjust them, and destroy them,
 					# per track or per project?
