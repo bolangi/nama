@@ -1002,8 +1002,11 @@ sub git_tag {
 sub git_checkout {
 	return unless $config->{use_git};
 	my $branchname = shift;
-	$project->{repo}->run(checkout => $branchname)
-		if git_branch_exists($branchname);
+	$project->{repo}->run(checkout => $branchname), 
+	#	pager("changing to branch, $branchname."),
+		return if git_branch_exists($branchname);
+	throw("$branchname: branch does not exist. Skipping.");
+	load_project($project->{name});
 }
 sub git_create_branch {
 	return unless $config->{use_git};
@@ -1011,13 +1014,13 @@ sub git_create_branch {
 
 	# change to existing branch
 	
-	pager("branch $branchname already exists, changing to $branchname.\n"),
+	pager("Branch $branchname already exists."),
 			git_checkout($branchname),
 			return if git_branch_exists($branchname);
 
 	# create new branch
 
-	pager("creating branch $branchname.");
+	pager("Creating branch $branchname.");
 	$project->{repo}->run(checkout => '-b',$branchname)
 	
 }
