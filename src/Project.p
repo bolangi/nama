@@ -138,20 +138,20 @@ sub load_project {
 	remove_riff_header_stubs(); 
 	cache_wav_info();
 	rememoize();
-
-	# initialize git repository if necessary
 	
-	my $need_git_init = ($config->{use_git} and ! -d join_path( project_dir().  '.git') );
-	if ( $need_git_init ){
-		Git::Repository->run( init => project_dir());
-		write_file($file->git_state_store, "{}\n") if ! -e $file->git_state_store;
-	}
-	if ( $config->{use_git} ){
-		$project->{repo} = Git::Repository->new( work_tree => project_dir() )
-	}
-	if ( $need_git_init ){
-		$project->{repo}->run( add => $file->git_state_store );
-		$project->{repo}->run( commit => '--quiet', '--message', "initial commit");
+
+	if( $config->{use_git} ){
+		my $initializing_repo;
+		Git::Repository->run( init => project_dir()), $initializing_repo++
+			unless -d join_path( project_dir().  '.git');
+		$project->{repo} = Git::Repository->new( work_tree => project_dir() );
+		write_file($file->git_state_store, "{}\n"), $initializing_repo++
+			if ! -e $file->git_state_store and ! $project->{repo}->run( 'branch' );
+
+		if ($initializing_repo){
+			$project->{repo}->run( add => $file->git_state_store );
+			$project->{repo}->run( commit => '--quiet', '--message', "initial commit");
+		}
 	}
 
 	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
