@@ -1240,7 +1240,7 @@ sub add_volume_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "vol");
 	
-	my $vol_id = cop_add({
+	my $vol_id = effect_init({
 				chain => $n, 
 				type => $config->{volume_control_operator},
 				effect_id => $ti{$n}->vol, # often undefined
@@ -1253,7 +1253,7 @@ sub add_pan_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "pan");
 
-	my $pan_id = cop_add({
+	my $pan_id = effect_init({
 				chain => $n, 
 				type => 'epp',
 				effect_id => $ti{$n}->pan, # often undefined

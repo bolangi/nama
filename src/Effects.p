@@ -51,7 +51,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					effect_entry_is_bad
 					check_fx_consistency
 
-					cop_add
+					effect_init
 					add_effect
 					remove_effect
 					modify_effect
@@ -242,7 +242,7 @@ sub _add_effect {
 		if ! $values 
 		or ref $values and ! scalar @{ $values };
 
-	$id = cop_add($p); 
+	$id = effect_init($p); 
 	
 	$ui->add_effect_gui($p) unless $ti{$n}->hide;
 	if( valid_engine_setup() )
@@ -716,7 +716,7 @@ sub root_parent {
 
 ## Rules for allocating IDs
 ## new_effect_id() - issues a new ID
-## cop_add()    - initializes a Nama effect, should be called effect_init()
+## effect_init()    - initializes a Nama effect, should be called effect_init()
 ## add_effect
 
 
@@ -733,8 +733,8 @@ sub new_effect_id {
 }
 
 
-sub cop_add {
-	logsub("&cop_add");
+sub effect_init {
+	logsub("&effect_init");
 	my $p = shift;
 	logpkg('debug',sub{yaml_out($p)});
 

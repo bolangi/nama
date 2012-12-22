@@ -815,7 +815,7 @@ sub add_effect_gui {
 		logpkg('debug', sub{yaml_out(\%p)});
 
 		logpkg('debug', "effect_id: $id, parent_id: $parent_id");
-		# $id is determined by cop_add, which will return the
+		# $id is determined by effect_init, which will return the
 		# existing effect_id if supplied
 
 		# check display format, may be 'scale' 'field' or 'hidden'
