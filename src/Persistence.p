@@ -1008,8 +1008,18 @@ sub git_checkout {
 sub git_create_branch {
 	return unless $config->{use_git};
 	my $branchname = shift;
+
+	# change to existing branch
+	
+	pager("branch $branchname already exists, changing to $branchname.\n"),
+			git_checkout($branchname),
+			return if git_branch_exists($branchname);
+
+	# create new branch
+
+	pager("creating branch $branchname.");
 	$project->{repo}->run(checkout => '-b',$branchname)
-		unless git_branch_exists($branchname);
+	
 }
 
 sub state_changed {  
