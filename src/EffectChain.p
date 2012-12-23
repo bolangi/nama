@@ -387,10 +387,11 @@ sub apply_effect_profile {  # overwriting current effects
 	my ($profile) = @_;
 	my @chains = ::EffectChain::find(profile => $profile);
 
+	# add missing tracks 
 	map{ ::pager( "adding track $_" ); add_track($_) } 
-	grep{ !$tn{$_} } 
-	map{ $_->track_name } 
-	@chains;	
+		grep{ !$tn{$_} } 
+		map{ $_->track_name } @chains;	
+	# add effect chains
 	map{ $_->add } @chains;
 }
 1;
