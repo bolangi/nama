@@ -227,7 +227,11 @@ commit: _commit message(?) {
 	1;
 }
 branch: _branch branchname { 
+	::throw("$item{branchname}: branch does not exist.  Skipping."), return 0
+		if ! git_branch_exists($item{branchname});
 	::git_checkout($item{branchname});
+	# reload git-altered State.json file
+	::load_project(name => $::project->{name}); 
 	1;
 }
 branch: _branch {

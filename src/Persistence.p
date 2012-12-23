@@ -1006,7 +1006,6 @@ sub git_checkout {
 	#	pager("changing to branch, $branchname."),
 		return if git_branch_exists($branchname);
 	throw("$branchname: branch does not exist. Skipping.");
-	load_project($project->{name});
 }
 sub git_create_branch {
 	return unless $config->{use_git};
