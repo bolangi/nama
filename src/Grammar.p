@@ -41,19 +41,22 @@ sub command_process {
 
 	# parse repeatedly until all input is consumed
 	
+	my $was_error;
+	
 	try {
 	while (do { no warnings 'uninitialized'; $input =~ /\S/ }) { 
 		logpkg('debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
 		{
 			print("bad command: $input_was\n"); 
+			$was_error++;
 			system($config->{beep_command}) if $config->{beep_command};
 			last;
 		};
 			
 	}
 	}
-	catch { warn "caught error: $_" };
+	catch { $was_error++; warn "caught error: $_" };
 		
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
@@ -74,6 +77,10 @@ sub command_process {
 		say "Total effects count: $current_count, change: ",$current_count - $total_effects_count; 
 		$total_effects_count = $current_count;
 	}
+	# return true on complete success
+	# return false on any part of command failure
+	
+	return ! $was_error
 		
 }
 sub do_user_command {
