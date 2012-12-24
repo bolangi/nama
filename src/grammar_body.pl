@@ -228,7 +228,7 @@ commit: _commit message(?) {
 }
 branch: _branch branchname { 
 	::throw("$item{branchname}: branch does not exist.  Skipping."), return 0
-		if ! git_branch_exists($item{branchname});
+		if ! ::git_branch_exists($item{branchname});
 	::git_checkout($item{branchname});
 	# reload git-altered State.json file
 	::load_project(name => $::project->{name}); 
@@ -239,6 +239,8 @@ branch: _branch {
 	1;
 }
 new_branch: _new_branch branchname message(?) { 
+	::throw("$item{branchname}: branch already exists. Doing nothing."), return
+		if ::git_branch_exists($item{branchname});
 	::git_create_branch($item{branchname}, @{$item{'message(?)'}});
 }
 tagname: ident
