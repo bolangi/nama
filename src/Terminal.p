@@ -155,7 +155,13 @@ sub process_line {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd};
 		$text->{previous_cmd} = $user_input;
-		command_process( $user_input );
+		my $success = command_process( $user_input );
+		my $command_and_context =
+			"current bus: $this_bus, current track: ".$this_track->name.
+			", current effect: $this_op, command: $user_input";
+		push @{$text->{undo_buffer}}, $command_and_context
+			unless ! $success 
+				   or $user_input =~ /^\s*(tag|commit|branch|new_branch|load|save)/;
 		reconfigure_engine();
 			#or eval_iam('cs-connected') 
 			#and remove_latency_ops() 

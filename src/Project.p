@@ -87,6 +87,8 @@ sub initialize_project_data {
 	$mode->{preview} = 0;
 
 	::ChainSetup::initialize();
+	$text->{undo_buffer} = []; # for saving with git commits
+
 }
 sub initialize_effects_data {
 
