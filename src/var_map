@@ -134,6 +134,7 @@
 	%user_command 				$text->{user_command}
 	%user_alias   				$text->{user_alias}
 	@command_history 			$text->{command_history}
+	**							$text->{undo_buffer}
 
 	$dummy						$mode->{_eager_opt}
 
