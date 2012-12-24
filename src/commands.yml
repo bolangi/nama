@@ -556,11 +556,11 @@ commit:
   parameters: <s_message>
 tag:
   type: project
-  what: tag the current commit
+  what: git tag the current branch HEAD commit
   parameters: <s_tag_name> [<s_message>]
 branch:
   type: project
-  what: change to named branch (or list branches if none specified)
+  what: change to named branch (list branches when called with no arguments)
   short: br
   parameters: <s_branch_name> [<s_message>]
 new_branch:
@@ -568,33 +568,16 @@ new_branch:
   what: create a new branch
   short: nbr
   parameters: <s_branch_name> [<s_message>]
-project_file:
-  type: project
-  what: save state as different filename
-  short: pfl
-  parameters: <s_file_name>
 save_state:
   type: project
-  what: Save the project settings to disk. Optionally you can save to a different file for easy reloading of a certain stage in your project.
+  what: Save the project settings to disk, either State.json or the file basename, if provided
   short: keep save
-  parameters: [-t <s_tag_name>] [-f <s_settings_file> ] [-m <s_quoted_message> ]
-  example: |
-    save_state # Save the current project to disk.
-    save early_mixing # Save the current project configuration to early_mixing
-    # Do some work
-    save # Save again
-    get_state early_mixing # Set the project back to the early mixing stage.
-  what: save project settings to disk
+  parameters: <s_settings_file>
 get_state:
   type: project
-  what: Retrieve project settings. This is allows reloading of project stages saved with save_state filename .
+  what: Retrieve project settings, from State.json by default
   short: recall retrieve
   parameters: [ <s_settings_file> ]
-  example: |
-    save_state my_special_mix # Save current project state as my_special_mix .
-    # Do some work.
-    save # Save the current project state to the default file.
-    recall my_current_mix # recall or restore the stage of my_special_mix .
 list_projects:
   type: project
   what: List all projects. This will list all Nama projects, which are stored in the Nama project root directory.
