@@ -241,70 +241,16 @@ branch: _branch {
 new_branch: _new_branch branchname message(?) { 
 	::git_create_branch($item{branchname}, @{$item{'message(?)'}});
 }
-project_file: _project_file { }
-
 tagname: ident
 branchname: ident
 message: /.+/
 
-save_state: _save_state save_opt(s) { 
-
-	# perform save-and-tag, branch-and-save, or save-to-file
-	# depending on options
-	
-	#print ::json_out(\%item);
-	my %args;
-	map{ ref $_; $args{ $_->[0]} = $_->[1] } @{ $item{'save_opt(s)'} };
-	my $message = $args{'-m'};
-
-	if (my $tagname = $args{'-t'})
-	{
-		#print "found tag item $tagname\n";
-		::save_state();
-		::git_snapshot($message);
-		::git_tag($tagname,$message);
-	}
-
-	elsif (my $filename = $args{'-f'})
-	{
-		#print "found filename $filename\n";
-		::save_state($filename) # should save unversioned_vars as well
-	}
-
-	elsif (my $branchname = $args{'-b'})
-	{
-		::git_branch_and_save($branchname);
-	}
-
-	else
-	{
-		#print "saving with a message only";
-		::save_state();
-		::git_snapshot($message);
-
-	}
-	1;
-}
 save_state: _save_state ident { 
-	if($::config->{use_git})
-	{
-		::git_branch_and_save($item{ident}) 
-			if $::config->{save_to_name_default_behavior} eq 'save_to_branch';
-		::save_state($item{ident}) 
-			if $::config->{save_to_name_default_behavior} eq 'save_to_file';
-	} 
-	else
 	{
 		::save_state( $item{ident})
-			if $::config->{save_to_name_default_behavior} eq 'save_to_file';
 	}
-	1;
 }
 save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
-
-save_opt: save_flag save_arg { [ @item[-2, -1] ] }
-save_flag: '-t'|'-m'|'-f'|'-b'
-save_arg: shellish
 
 get_state: _get_state statefile {
  	::load_project( 
