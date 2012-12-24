@@ -1037,33 +1037,9 @@ sub git_branch_exists {
 		$project->{repo}->run("branch");
 }
 
-sub git_save_state { &git_snapshot }
-
 sub git_current_branch {
 	my ($actual_current) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
 	$actual_current eq 'undo' ?  $project->{git_current_branch} : $actual_current
-}
-
-# or maybe just switch to undo
-sub git_branch_and_save {
-	my $branchname = shift;
-		if ( git_branch_exists($branchname) )
-		{
-			git_current_branch() ne $branchname and
-				throw(
-					qq(cannot save to branch "$branchname")
-					. q( because you are currently working on branch ")
-					. git_current_branch() .q(")
-				), return;
-			save_state();
-			git_snapshot();
-		}
-		else 
-		{
-			git_create_branch($branchname);
-			save_state();
-			git_snapshot();
-		}
 }
 
 sub autosave {
