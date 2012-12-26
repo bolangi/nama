@@ -32,14 +32,29 @@ sub helpline {
 	
 }
 sub helptopic {
-	my $index = shift;
-	my $name = $help->{arr_topic}->[$index];
+	my $user_input = shift;
+
+	# we expect topic number or topic name
+	
+	my ($index, $name);
+	if( $user_input =~ /(\D+)/ ){ 
+		$name = $1;
+	}
+	else { 
+		$index = $user_input;
+		$name = $help->{arr_topic}->[$index];
+	}
+	#system("man","nama") if $index== 15;
+	format_help_topic($index, $name);
+}
+
+sub format_help_topic {
+	my ($index, $name) = @_;
 	my @output;
 	push @output, "\n-- ", ucfirst $name, " --\n\n";
 	push @output, $help->{topic}->{$name}, $/;
 	push @output, $help->{usage} if $index == 14;
-	system("man","nama") if $index== 15;
-	@output;
+	@output
 }
 
 sub help { 
