@@ -13,6 +13,15 @@ sub setup_grammar {
 	$text->{commands_yml} = get_data_section("commands_yml");
 	$text->{commands_yml} = quote_yaml_scalars($text->{commands_yml});
 	$text->{commands} = yaml_in( $text->{commands_yml}) ;
+	map
+	{ 
+		my $full_name = $_; 
+		my $shortcuts = $text->{commands}->{$full_name}->{short};
+		my @shortcuts = ();
+		@shortcuts = split " ", $shortcuts if $shortcuts;
+		map{ $text->{command_shortcuts}->{$_} = $full_name } @shortcuts;
+
+	} keys %{$text->{commands}};
 
 	$::AUTOSTUB = 1;
 	$::RD_TRACE = 1;

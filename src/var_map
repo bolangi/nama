@@ -120,6 +120,7 @@
 	
 	$commands_yml				$text->{commands_yml}
 	%commands					$text->{commands}
+	**							$text->{command_shortcuts}
 	%iam_cmd					$text->{iam}
 	@nama_commands 				$text->{arr_nama_cmds}
 	%nama_commands				$text->{nama_commands}
