@@ -37,6 +37,16 @@ project => <<PROJECT,
    memoize                   - enable WAV directory cache (default OFF)
    unmemoize                 - disable WAV directory cache
    exit, quit                - exit program, saving state 
+
+ (Version control)
+
+   tag                       - tag the current project state (i.e. commit) 
+                               with a name and message
+   branch, br                - checkout named branch or tag, 
+                               list branches (w/o args)
+   new_branch, nbr           - create a new branch based on current 
+                               state (commit)
+   
 PROJECT
 
 chain_setup => <<SETUP,
