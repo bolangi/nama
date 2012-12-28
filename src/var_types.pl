@@ -85,6 +85,8 @@
 	@inserts_data
 );
 
+# these variables get saved to PeripheralState.json
+
 @unversioned_state_vars = qw(
 
 	$project->{save_file_version_number}
