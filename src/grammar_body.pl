@@ -583,13 +583,7 @@ solo: _solo { ::solo($::this_track->name); 1}
 all: _all { ::all() ; 1}
 nosolo: _nosolo { ::nosolo() ; 1}
 
-unity: _unity { 
-	::effect_update_copp_set( 
-		$::this_track->vol, 
-		0, 
-		$::config->{unity_level}->{::type($::this_track->vol)}
-	);
-	1;}
+unity: _unity { ::unity($::this_track); 1}
 
 pan: _pan panval { 
 	::effect_update_copp_set( $::this_track->pan, 0, $item{panval});
@@ -600,20 +594,10 @@ pan: _pan sign panval {
 panval: float 
       | dd
 pan: _pan { ::pager2( $::fx->{params}->{$::this_track->pan}[0]); 1}
-pan_right: _pan_right { ::pan_check( 100 ); 1}
-pan_left:  _pan_left  { ::pan_check(   0 ); 1}
-pan_center: _pan_center { ::pan_check(  50 ); 1}
-pan_back:  _pan_back {
-	my $old = $::this_track->old_pan_level;
-	if (defined $old){
-		::effect_update_copp_set(
-			$::this_track->pan,	# id
-			0, 					# parameter
-			$old,				# value
-		);
-		$::this_track->set(old_pan_level => undef);
-	}
-1;}
+pan_right: _pan_right { ::pan_check($::this_track, 100 ); 1}
+pan_left:  _pan_left  { ::pan_check($::this_track,    0 ); 1}
+pan_center: _pan_center { ::pan_check($::this_track,   50 ); 1}
+pan_back:  _pan_back { ::pan_back($::this_track); 1;}
 remove_mark: _remove_mark dd {
 	my @marks = ::Mark::all();
 	$marks[$item{dd}]->remove if defined $marks[$item{dd}];

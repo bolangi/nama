@@ -488,12 +488,12 @@ sub destroy_current_wav {
 }
 
 sub pan_check {
-	my $new_position = shift;
-	my $current = $fx->{params}->{ $this_track->pan }->[0];
-	$this_track->set(old_pan_level => $current)
-		unless defined $this_track->old_pan_level;
+	my ($track, $new_position) = @_;
+	my $current = $fx->{params}->{ $track->pan }->[0];
+	$track->set(old_pan_level => $current)
+		unless defined $track->old_pan_level;
 	effect_update_copp_set(
-		$this_track->pan,	# id
+		$track->pan,	# id
 		0, 					# parameter
 		$new_position,		# value
 	);
@@ -517,4 +517,39 @@ sub remove_track_cmd {
 		$track->remove;
 		1
 }
-1;
+sub unity {
+	my ($track, $save_level) = @_;
+	if ($save_level){
+		$track->set(old_vol_level => params($track->vol)->[0]);
+	}
+	effect_update_copp_set( 
+		$track->vol, 
+		0, 
+		$config->{unity_level}->{type($track->vol)}
+	);
+}
+sub vol_back {
+	my $track = shift;
+	my $old = $track->old_vol_level;
+	if (defined $old){
+		effect_update_copp_set(
+			$track->vol,	# id
+			0, 					# parameter
+			$old,				# value
+		);
+		$track->set(old_vol_level => undef);
+	}
+}
+	
+sub pan_back {
+	my $track = shift;
+	my $old = $track->old_pan_level;
+	if (defined $old){
+		effect_update_copp_set(
+			$track->pan,	# id
+			0, 					# parameter
+			$old,				# value
+		);
+		$track->set(old_pan_level => undef);
+	}
+}
