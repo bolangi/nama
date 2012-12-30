@@ -1,4 +1,4 @@
-# -------- TrackCache ------
+# -------- CacheTrack ------
 
 package ::;
 use Modern::Perl;
@@ -31,6 +31,7 @@ sub initialize_caching_vars {
 
 sub cache_track { # launch subparts if conditions are met
 
+	local $this_track;
 	initialize_caching_vars();
 
 	($track, $additional_time) = @_;
@@ -69,14 +70,12 @@ sub cache_track { # launch subparts if conditions are met
 }
 
 sub deactivate_vol_pan {
-	$orig_volume = params($track->vol)->[0] if params($track->vol);
-	$orig_pan    = params($track->pan)->[0] if params($track->pan);
-	command_process('unity');
-	command_process('pan_center');
+	unity($track, 'save_old_vol');
+	pan_check($track, 50);
 }
 sub reactivate_vol_pan {
-	modify_effect($track->vol, 1, undef, $orig_volume);
-	modify_effect($track->pan, 1, undef, $orig_pan);
+	pan_back($track);
+	vol_back($track);
 }
 
 sub prepare_to_cache {
