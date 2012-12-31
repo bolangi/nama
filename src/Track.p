@@ -887,6 +887,7 @@ sub adjusted_length {
 
 sub version_comment {
 	my ($track, $v) = @_;
+	return unless $project->{track_version_comments}->{$track->name}{$v};
 	my $text   = $project->{track_version_comments}->{$track->name}{$v}{user};
 	$text .= " " if $text;
 	my $system = $project->{track_version_comments}->{$track->name}{$v}{system};
