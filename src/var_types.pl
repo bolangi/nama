@@ -71,6 +71,8 @@
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
+	$project->{track_version_comments}
+	$project->{track_comments}
 
 	$fx->{applied}
 	$fx->{params}
