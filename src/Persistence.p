@@ -108,7 +108,7 @@ sub save_system_state {
 
 	@edit_data = map{ $_->as_hash } values %::Edit::by_index;
 
-	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => $project->{name});
+	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => 1);
 
 	# save history -- 50 entries, maximum
 
