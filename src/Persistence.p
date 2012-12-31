@@ -545,18 +545,23 @@ sub restore_state {
 		@tracks_data;
 	}
 
+
 	if ( $project->{save_file_version_number} < 1.101){ 
+
 
 		say "uncluttering track data";
 
 		# initialize version_comment field
 		map{ 
 			$project->{track_version_comments}->{$_->{name}} = 
-				delete $_->{version_comment} if $_->{version_comment};
+				delete $_->{version_comment} 
+				if is_nonempty_hash( $_->{version_comment} );
 			 $project->{track_comments}->{$->{name}} = 
-				delete $_->{comment} if $_->{comment};
+				delete $_->{comment} 
+				if is_nonempty_hash( $_->{comment} );
 			 $project->{cache_map}->{$_->{name}} = 
-				delete $_->{cache_map} if $_->{cache_map}; 
+				delete $_->{cache_map} 
+				if is_nonempty_hash( $_->{cache_map} );
 		} @tracks_data;
 
 	}
@@ -683,6 +688,12 @@ sub restore_state {
 
 ;
 } 
+sub is_nonempty_hash {
+	my $ref = shift;
+	return if (ref $ref) !~ /HASH/;
+	return (keys %$ref);
+}
+	 
 
 {
 my (@projects, @projects_completed, %state_yml, $errors_encountered);
