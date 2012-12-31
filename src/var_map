@@ -86,6 +86,7 @@
     $soloing       				$mode->{soloing}
 	$loop_enable 				$mode->{loop_enable}
 	$mastering_mode				$mode->{mastering}
+	**							$mode->{midish}
 	
 	%event_id    				$engine->{events}
 	$sock 						$engine->{socket}

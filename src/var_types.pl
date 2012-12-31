@@ -101,6 +101,7 @@
 	$mode->{loop_enable}
 	$mode->{mastering}
 	$mode->{preview}
+	$mode->{midish}
 	$gui->{_seek_unit}
 	$text->{command_history}
 	$this_track_name

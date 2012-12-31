@@ -1294,6 +1294,16 @@ set_system_version_comment: _set_system_version_comment dd text {
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
 }
+midish_mode_on: _midish_mode_on { 
+	::pager("Setting midish mode!! Return with 'midish_mode_off'.");
+	$::mode->{midish}++;
+}
+ 
+midish_mode_off: _midish_mode_off { 
+	::pager("Releasing midish mode. Bye!");
+	undef $::mode->{midish} ;
+	1;
+}
 
 new_edit: _new_edit {
 	::new_edit();
