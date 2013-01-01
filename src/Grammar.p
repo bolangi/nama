@@ -181,9 +181,8 @@ sub eval_perl {
 sub show_versions {
 		no warnings 'uninitialized';
 		if (@{$this_track->versions} ){
-			my $cache_map = $this_track->cache_map;
 			"All versions: ". join(" ", 
-				map { $_ . ( $cache_map->{$_} and 'c') } @{$this_track->versions}
+				map { $_ . ( is_cached($this_track, $_)  and 'c') } @{$this_track->versions}
 			). $/
 		} else {}
 }
