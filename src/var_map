@@ -153,7 +153,7 @@
 	@fade_data
 	@edit_data
 	@inserts_data
-	@project_effect_chains_data
+	@project_effect_chain_data
 	
 	@persistent_vars
 	@config_vars
