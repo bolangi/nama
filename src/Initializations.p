@@ -79,7 +79,7 @@ sub definitions {
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      		\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
-		unversioned_state_store  => ['PeripheralState.json',		\&project_dir ],
+		unversioned_state_store  => ['PeripheralState',		\&project_dir ],
 		peripheral_state_store_vcs  => ['PeripheralState.json-vcs',		\&project_dir ],
 		#command_history			=> ['command_history', 		\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
@@ -315,7 +315,6 @@ exit;
 	print "\nproject_name: $project->{name}\n";
 	
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
-	restore_effect_chains();
 	1;	
 }
 sub start_ecasound {
