@@ -64,124 +64,131 @@ sub new {
 	my $class = shift;	
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
-	$vals{inserts_data} ||= [];
-	$vals{ops_list} 	||= [];
-	$vals{ops_data} 	||= {};
-	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	croak "must have exactly one of 'global' or 'project' fields defined" 
-		unless ($vals{global} xor $vals{project});
-	# we expect some effects
+	my $n;
 
-	logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
+	# not need to massage data if we are merely restoring
+	if ($n = $vals{n} ) {} 	
+	else {
 
-	logpkg('debug',"Nether ops_list or nor insert_data is present") 
- 		if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
+		$vals{inserts_data} ||= [];
+		$vals{ops_list} 	||= [];
+		$vals{ops_data} 	||= {};
+		croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
+		croak "must have exactly one of 'global' or 'project' fields defined" 
+			unless ($vals{global} xor $vals{project});
+		# we expect some effects
 
-	my $n = $vals{n} || ++$n;
+		logpkg('debug','constructor arguments ', sub{ json_out(\%vals) });
 
-	my $ops_data = {};
-	# ops data can either be 
-	# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
-	# + or taken from existing effects, e.g. $fx->{applied}
-	#
-	# in either case, we want to clone the data structures
-	# to ensure we don't damage objects in the original
-	# structure.
-	
-	map { 	
+		logpkg('debug',"Nether ops_list or nor insert_data is present") 
+			if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
 
-		if ( $vals{ops_data}->{$_} )
-										
-		{ 	
-			$ops_data->{$_} 		  = dclone($vals{ops_data}->{$_});
-		}
-		else
-		{
-			$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
-			$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
-			# our op IDs are ALL CAPS, so will not conflict
-			# with params when accessing via key
-			#
-			# however this would be wrong:
-			#
-			# map{ show_effect($_) }   keys %{$ops_data}
-			#
-			# because keys includes 'params'
+		my $n = $vals{n} || ++$n;
 
-			
-			# we don't need these attributes
-			# chain will likely change
-			# when applied
-			delete $ops_data->{$_}->{chain};
-			delete $ops_data->{$_}->{display};
-
-			# the 'display' attribute was only used control 
-			# the GUI layout.
-		}
-
-	} @{$vals{ops_list}};
-
-	$vals{ops_data} = $ops_data;
-
-	if( scalar @{$vals{inserts_data}})
-	{
-
-		# rewrite inserts to store what we need:
-		# 1. for general-purpose effects chain use
-		# 2. for track caching use
-	
+		my $ops_data = {};
+		# ops data can either be 
+		# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
+		# + or taken from existing effects, e.g. $fx->{applied}
+		#
+		# in either case, we want to clone the data structures
+		# to ensure we don't damage objects in the original
+		# structure.
 		
-		$vals{inserts_data} = 
-		[ 
-			map
-			{ 
-				logpkg('debug',"insert: ", sub{Dumper $_});
-				my @wet_ops = @{$tn{$_->wet_name}->ops};
-				my @dry_ops = @{$tn{$_->dry_name}->ops};
-				my $wet_effect_chain = ::EffectChain->new(
-					project => 1,
-					insert	=> 1,
-					ops_list => \@wet_ops,
-				);
-				my $dry_effect_chain = ::EffectChain->new(
-					project => 1,
-					insert => 1,
-					ops_list => \@dry_ops,
-				);
-				my $hash = dclone($_->as_hash);
+		map { 	
 
-				$hash->{wet_effect_chain} = $wet_effect_chain->n;
-				$hash->{dry_effect_chain} = $dry_effect_chain->n;
+			if ( $vals{ops_data}->{$_} )
+											
+			{ 	
+				$ops_data->{$_} 		  = dclone($vals{ops_data}->{$_});
+			}
+			else
+			{
+				$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
+				$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
+				# our op IDs are ALL CAPS, so will not conflict
+				# with params when accessing via key
+				#
+				# however this would be wrong:
+				#
+				# map{ show_effect($_) }   keys %{$ops_data}
+				#
+				# because keys includes 'params'
 
-				map{ delete $hash->{$_} } qw(n dry_vol wet_vol track);	
-
-				# Reasons for deleting insert attributes
 				
-				# n: we'll get a new index when we re-apply
-				# dry_vol, wet_vol: will never be re-allocated
-				#    so why not reuse them?
-				#    except for general purpose we'd like to
-				#    re-allocate
-				# track: we already know the track from
-				#    the parent effect chain
+				# we don't need these attributes
+				# chain will likely change
+				# when applied
+				delete $ops_data->{$_}->{chain};
+				delete $ops_data->{$_}->{display};
 
-				# What is left:
-				# 
-				# 	class
-				#	wetness
-				#	send_type
-				#	send_id
-				#	return_type
-				#	return_id
-				#	wet_effect_chain => ec_index,
-				#   dry_effect_chain => ec_index,
-				
-				$hash
-			} @{$vals{inserts_data}}
-		];
+				# the 'display' attribute was only used control 
+				# the GUI layout.
+			}
+
+		} @{$vals{ops_list}};
+
+		$vals{ops_data} = $ops_data;
+
+		if( scalar @{$vals{inserts_data}})
+		{
+
+			# rewrite inserts to store what we need:
+			# 1. for general-purpose effects chain use
+			# 2. for track caching use
+		
+			
+			$vals{inserts_data} = 
+			[ 
+				map
+				{ 
+					logpkg('debug',"insert: ", sub{Dumper $_});
+					my @wet_ops = @{$tn{$_->wet_name}->ops};
+					my @dry_ops = @{$tn{$_->dry_name}->ops};
+					my $wet_effect_chain = ::EffectChain->new(
+						project => 1,
+						insert	=> 1,
+						ops_list => \@wet_ops,
+					);
+					my $dry_effect_chain = ::EffectChain->new(
+						project => 1,
+						insert => 1,
+						ops_list => \@dry_ops,
+					);
+					my $hash = dclone($_->as_hash);
+
+					$hash->{wet_effect_chain} = $wet_effect_chain->n;
+					$hash->{dry_effect_chain} = $dry_effect_chain->n;
+
+					map{ delete $hash->{$_} } qw(n dry_vol wet_vol track);	
+
+					# Reasons for deleting insert attributes
+					
+					# n: we'll get a new index when we re-apply
+					# dry_vol, wet_vol: will never be re-allocated
+					#    so why not reuse them?
+					#    except for general purpose we'd like to
+					#    re-allocate
+					# track: we already know the track from
+					#    the parent effect chain
+
+					# What is left:
+					# 
+					# 	class
+					#	wetness
+					#	send_type
+					#	send_id
+					#	return_type
+					#	return_id
+					#	wet_effect_chain => ec_index,
+					#   dry_effect_chain => ec_index,
+					
+					$hash
+				} @{$vals{inserts_data}}
+			];
+		}
+
+		#say ::yaml_out($vals{inserts_data}) if $vals{inserts_data};
 	}
-
-	#say ::yaml_out($vals{inserts_data}) if $vals{inserts_data};
 
 	my $object = bless 
 		{ 
