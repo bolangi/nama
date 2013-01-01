@@ -325,7 +325,7 @@ sub restore_state {
 
 	}
 
-	restore_effect_chains();
+	restore_global_effect_chains();
 
 	##  print yaml_out \@groups_data; 
 	
@@ -950,9 +950,9 @@ sub save_project_effect_chains {
 	my $project = shift; # allow to cross multiple projects
 	@project_effect_chain_data = map{ $_->as_hash } ::EffectChain::find(project => $project);
 }
-sub restore_effect_chains {
+sub restore_global_effect_chains {
 
-	logsub("&restore_effect_chains");
+	logsub("&restore_global_effect_chains");
 		my $path =  $file->global_effect_chains;
 		my ($resolved, $format) = get_newest($path);  
 		carp("$resolved: file not found"), return unless $resolved;
