@@ -87,7 +87,7 @@
 	$loop_enable 				$mode->{loop_enable}
 	$mastering_mode				$mode->{mastering}
 	**							$mode->{midish_terminal}
-	**							$mode->{midish_sync}
+	**							$mode->{midish_transport_sync}
 	
 	%event_id    				$engine->{events}
 	$sock 						$engine->{socket}
