@@ -103,6 +103,8 @@
 	$mode->{loop_enable}
 	$mode->{mastering}
 	$mode->{preview}
+	$mode->{midish_terminal}
+	$mode->{midish_transport_sync}
 	$gui->{_seek_unit}
 	$text->{command_history}
 	$this_track_name

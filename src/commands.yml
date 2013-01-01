@@ -1125,6 +1125,22 @@ midish_command:
   short: m
   parameters: <s_command_text>
   example: m tracknew my_midi_track # create a new MIDI track in midish.
+midish_mode_on:
+  type: midi
+  what: all users commands sent to midish, until
+  short: mmo
+midish_mode_off:
+  what: exit midish mode, restore default Nama command mode, no midish sync
+  type: midi
+  short: mmx
+midish_mode_off_ready_to_play:
+  what: exit midish mode, sync midish start (p) with Ecasound
+  type: midi
+  short: mmxrp
+midish_mode_off_ready_to_record:
+  what: exit midish mode, sync midish start (r) with Ecasound
+  type: midi
+  short: mmxrr
 new_edit:
   type: edit
   what: Create an edit for the current track and version.

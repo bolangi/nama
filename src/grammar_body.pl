@@ -1294,6 +1294,31 @@ set_system_version_comment: _set_system_version_comment dd text {
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
 }
+midish_mode_on: _midish_mode_on { 
+	::pager("Setting midish terminal mode!! Return with 'midish_mode_off'.");
+	$::mode->{midish_terminal}++;
+}
+ 
+midish_mode_off: _midish_mode_off { 
+	::pager("Releasing midish terminal mode. Sync is not enabled.");
+	undef $::mode->{midish_terminal};
+	undef $::mode->{midish_transport_sync};
+	1;
+}
+midish_mode_off_ready_to_play: _midish_mode_off_ready_to_play { 
+	::pager("Releasing midish terminal mode.
+Will sync playback with Ecasound."); 
+	undef $::mode->{midish_terminal} ;
+	$::mode->{midish_transport_sync} = 'play';
+	1;
+}
+midish_mode_off_ready_to_record: _midish_mode_off_ready_to_record { 
+	::pager("Releasing midish terminal mode. 
+Will sync record with Ecasound.");
+	undef $::mode->{midish_terminal} ;
+	$::mode->{midish_transport_sync} = 'record';
+	1;
+}
 
 new_edit: _new_edit {
 	::new_edit();
