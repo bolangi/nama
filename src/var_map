@@ -7,8 +7,8 @@
 	** 							$project->{track_version_comments}
 	** 							$project->{cache_map}
 	
-	$main_bus 					$bn{Main}
-	$main						$bn{Main} 
+	$main_bus 					$bn{main}
+	$main						$bn{main} 
 	$null_bus					$bn{null}
 
 	%abbreviations				$config->{abbreviations}
@@ -23,6 +23,7 @@
 	%is_system_bus 				$config->{_is_system_bus}
 	**							$config->{sample_rate}
 	$use_git					$config->{use_git}
+	$autosave					$config->{autosave}
 	$save_to_name_default_behavior $config->{save_to_name_default_behavior}
 	**							$config->{no_fade_mute_delay}
 	

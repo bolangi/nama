@@ -44,6 +44,7 @@
 	$eager_mode
 	$serialize_formats
 	$use_git
+	$autosave
 	$save_to_name_default_behavior
 	$beep_command
 	# sync mixdown version numbers to selected track versions
