@@ -267,9 +267,10 @@ sub restore_state {
 				class 	=> '::');
 		assign_singletons( { data => $ref });
 	}
-
-
 	
+	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
+ 	map { my $fx_chain = ::EffectChain->new(%$_) } @project_effect_chain_data;
+
 	( $path, $suffix ) = get_newest($file->state_store);
 	if ($path)
 	{
