@@ -155,9 +155,9 @@ sub process_line {
 		$text->{term}->addhistory($user_input) 
 			unless $user_input eq $text->{previous_cmd};
 		$text->{previous_cmd} = $user_input;
-		if ($mode->{midish}){
-				$user_input =~ /^\s*(midish_mode_off|mmx)\s*$/ 
-					?  command_process('midish_mode_off')
+		if ($mode->{midish_terminal}){
+				$user_input =~ /^\s*(midish_mode_off|mmx)/ 
+					?  command_process($user_input)
 					:  midish_command($user_input);	
 		}
 		else {
@@ -173,7 +173,7 @@ sub process_line {
 				#and remove_latency_ops() 
 				#and calculate_and_adjust_latency();
 		}
-		revise_prompt( $mode->{midish} ? "Midish >" : prompt());
+		revise_prompt( $mode->{midish_terminal} ? "Midish >" : prompt());
 	}
 }
 sub load_keywords {
