@@ -1130,9 +1130,17 @@ midish_mode_on:
   what: all users commands sent to midish, until
   short: mmo
 midish_mode_off:
-  what: restore default Nama command mode
+  what: exit midish mode, restore default Nama command mode, no midish sync
   type: midi
   short: mmx
+midish_mode_off_ready_to_play:
+  what: exit midish mode, sync midish start (p) with Ecasound
+  type: midi
+  short: mmxrp
+midish_mode_off_ready_to_record:
+  what: exit midish mode, sync midish start (r) with Ecasound
+  type: midi
+  short: mmxrr
 new_edit:
   type: edit
   what: Create an edit for the current track and version.
