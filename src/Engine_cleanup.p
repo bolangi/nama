@@ -12,6 +12,8 @@ sub rec_cleanup {
 			? command_process('mixplay') 
 			: post_rec_configure();
 		undef $mode->{offset_run} if ! defined $this_edit;
+		$mode->{midish_transport_sync} = 'play' 
+			if $mode->{midish_transport_sync} eq 'record';
 		reconfigure_engine();
 	}
 }
