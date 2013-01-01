@@ -55,8 +55,8 @@ sub params {
 sub initialize {
 	$n = 1;
 	%by_index = ();	
-	@::global_effect_chains_data = ();  # for save/restore
-    @::project_effect_chains_data = (); 
+	@::global_effect_chain_data = ();  # for save/restore
+    @::project_effect_chain_data = (); 
 }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
