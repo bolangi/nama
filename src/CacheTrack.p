@@ -1,5 +1,5 @@
 # -------- CacheTrack ------
-
+# TODO: wisely handle uncaching a sub-bus mix track 
 package ::;
 use Modern::Perl;
 use ::Globals qw(:all);
@@ -35,6 +35,7 @@ sub cache_track { # launch subparts if conditions are met
 	initialize_caching_vars();
 
 	($track, $additional_time) = @_;
+	$additional_time //= 0;
 	say $track->name, ": preparing to cache.";
 	
 	# abort if sub-bus mix track and bus is OFF 
@@ -279,8 +280,10 @@ sub uncache_track {
 $/;
 	# CASE 2: a sub-bus mix track, set to REC for caching operation.
 
-#			$track->set(rw => 'REC') ;
-#			say $track->name, ": setting sub-bus mix track to REC";
+	if( my $bus = $bn{$track->name}){
+			$track->set(rw => 'REC') ;
+			say $track->name, ": setting sub-bus mix track to REC";
+	}
 
 		$ec->add($track) if defined $ec;
 }
