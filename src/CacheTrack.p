@@ -182,7 +182,6 @@ sub complete_caching {
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		# update cache map 
 		&$complete_caching_ref if defined $complete_caching_ref;
 		post_cache_processing();
 
@@ -192,7 +191,6 @@ sub update_cache_map {
 
 		logpkg('debug', "updating track cache_map");
 		#logpkg('debug',sub{"cache map\n".yaml_out($track->cache_map)});
-		my $cache_map = $track->cache_map;
 		my @inserts_list = ::Insert::get_inserts($track->name);
 		my @ops_list = $track->fancy_ops;
 		if ( @inserts_list or @ops_list )
@@ -210,14 +208,9 @@ sub update_cache_map {
 			map{ remove_effect($_) } @ops_list;
 			map{ $_->remove        } @inserts_list;
 
-			$cache_map->{$track->last} = { 
-				original 			=> $orig_version,
-				effect_chain	=> $ec->n
-			};
-		}
-		#say "cache map",yaml_out($track->cache_map);
 		say qq(Saving effects for cached track "), $track->name, '".';
 		say qq('uncache' will restore effects and set version $orig_version\n);
+		}
 }
 
 sub post_cache_processing {
@@ -233,7 +226,6 @@ sub post_cache_processing {
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		reconfigure_engine();
-		$this_track = $track; # why do we need this?
 		revise_prompt("default"); 
 }
 sub poll_cache_progress {
@@ -265,54 +257,40 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	# skip unless MON;
-	::throw($track->name, ": cannot uncache unless track is set to MON"), return
+	throw($track->name, ": cannot uncache unless track is set to MON"), return
 		unless $track->rec_status eq 'MON';
-	my $cache_map = $track->cache_map;
 	my $version = $track->monitor_version;
-	if(is_cached($track)){
+	my ($ec) = is_cached($track, $version);
+	defined $ec or throw($track->name, ": version $version is not cached"),
+		return;
+
 		# blast away any existing effects, TODO: warn or abort	
 		say $track->name, ": removing user effects" if $track->fancy_ops;
 		map{ remove_effect($_)} $track->fancy_ops;
 
-		# original WAV -> WAV case: reset version 
-		if ( $cache_map->{$version}{original} ){ 
-			$track->set(version => $cache_map->{$version}{original});
-			print $track->name, ": setting uncached version ", $track->version, $/;
+	# CASE 1: an ordinary track, 
+	#
+	# * toggle to the old version
+	# * load the effect chain 
+	#
+			$track->set(version => $ec->track_version_original);
+			print $track->name, ": setting uncached version ", $track->version, 
+$/;
+	# CASE 2: a sub-bus mix track, set to REC for caching operation.
 
-		# assume a sub-bus mix track, i.e. REC -> WAV: set to REC
-		} else { 
-			$track->set(rw => 'REC') ;
-			say $track->name, ": setting sub-bus mix track to REC";
-		} 
+#			$track->set(rw => 'REC') ;
+#			say $track->name, ": setting sub-bus mix track to REC";
 
-		my $v = $cache_map->{$version}{effect_chain};
-
-		# get effect change by index if ID is all digits
-		my $ec;
-		if ($v !~ /\D/) 
-		{ 
-			$ec = ::EffectChain::find(n => $v);
-		}
-		else
-		{   # get version number from name (_waltz/piano_3)
-			# not really version number, actually just an index
-			($v) = $v =~ /_(\d+)$/; 
-			$ec = ::EffectChain::find(
-				track_track => 1, # XXXX track_track
-				track_name	=> $track->name,
-				track_version => "V$v",
-				unique		=> 1,
-			);
-		}
 		$ec->add($track) if defined $ec;
-		
-	} 
-	else { print $track->name, ": version $version is not cached\n"}
 }
 sub is_cached {
-	my $track = shift;
-	my $cache_map = $track->cache_map;
-	$cache_map->{$track->monitor_version}
+	my ($track, $version) = @_;
+	::EffectChain::find(
+		project 				=> 1, 
+		track_cache 			=> 1,
+		track_name 				=> $track->name, 
+		track_version_result 	=> $version,
+	)
 }
 1;
 __END__
