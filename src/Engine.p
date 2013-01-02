@@ -60,7 +60,8 @@ sub start_transport {
 	say "\n\nStarting at ", current_position() unless $quiet;
 	schedule_wraparound();
 	mute();
-	start_midish_transport() if $mode->{midish_transport_sync};
+	start_midish_transport() 
+		if $config->{midish_enable} and $mode->{midish_transport_sync};
 	eval_iam('start');
 
 	# limit engine run time if we are in mixdown or edit mode, 
@@ -87,7 +88,8 @@ sub stop_transport {
 	my $pos = eval_iam('getpos') if eval_iam('cs-connected');
 	mute();
 	stop_command();
-	stop_midish_transport();
+	stop_midish_transport() 
+		if $config->{midish_enable} and $mode->{midish_transport_sync};
 	disable_length_timer();
 	if ( ! $quiet ){
 		sleeper(0.5);
