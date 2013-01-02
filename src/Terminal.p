@@ -173,7 +173,7 @@ sub process_line {
 				#and remove_latency_ops() 
 				#and calculate_and_adjust_latency();
 		}
-		revise_prompt( $mode->{midish_terminal} ? "Midish >" : prompt());
+		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 	}
 }
 sub load_keywords {
