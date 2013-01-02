@@ -256,6 +256,7 @@ sub stop_polling_cache_progress {
 
 sub uncache_track { 
 	my $track = shift;
+	local $this_track;
 	# skip unless MON;
 	throw($track->name, ": cannot uncache unless track is set to MON"), return
 		unless $track->rec_status eq 'MON';
@@ -285,12 +286,13 @@ $/;
 }
 sub is_cached {
 	my ($track, $version) = @_;
-	::EffectChain::find(
+	my @results = ::EffectChain::find(
 		project 				=> 1, 
 		track_cache 			=> 1,
 		track_name 				=> $track->name, 
 		track_version_result 	=> $version,
-	)
+	);
+	$results[-1]
 }
 1;
 __END__
