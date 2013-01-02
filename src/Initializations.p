@@ -124,6 +124,7 @@ sub definitions {
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
 		use_git							=> 1,
+		autosave						=> 1,
 		save_to_name_default_behavior	=> 'save_to_file',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
@@ -142,8 +143,15 @@ sub definitions {
 		fade_resolution 				=> 20, # steps per second
 		no_fade_mute_delay				=> 0.03,
 		enforce_channel_bounds			=> 1,
-		# for save_system_state()
-		serialize_formats               => 'json',
+
+
+		serialize_formats               => 'json',		# for save_system_state()
+
+		engine_globals_general			=> "-z:mixmode,sum",
+		engine_globals_realtime			=> "-z:db,100000 -z:nointbuf",
+		engine_globals_nonrealtime		=> "-z:nodb -z:intbuf",
+		engine_buffersize_realtime		=> 256, 
+		engine_buffersize_nonrealtime	=> 1024,
 		latency_op						=> 'el:delay_n',
 		latency_op_init					=> [0,0],
 		latency_op_set					=> sub
@@ -153,6 +161,7 @@ sub definitions {
 				modify_effect($id,2,undef,$delay)
 			},
 	}, '::Config';
+
 
 	{ package ::Config;
 	use Carp;
