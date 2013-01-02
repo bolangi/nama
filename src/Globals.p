@@ -1,8 +1,11 @@
 package ::Globals;
 use Modern::Perl;
+
+# set aliases for common indices
 *bn = \%::Bus::by_name;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
+
 use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
