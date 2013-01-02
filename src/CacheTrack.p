@@ -292,6 +292,9 @@ sub is_cached {
 		track_name 				=> $track->name, 
 		track_version_result 	=> $version,
 	);
+	scalar @results > 1 
+		and warn ("more than one EffectChain matching query!, found", 
+			map{ json_out($_) } @results);
 	$results[-1]
 }
 1;
