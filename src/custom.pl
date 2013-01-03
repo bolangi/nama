@@ -6,7 +6,7 @@
 
 prompt =>  
 	q{
-	"nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
+	git_branch_display(). "nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
 		($this_track ? $this_track->name : '') . "] > "
 	},
 
