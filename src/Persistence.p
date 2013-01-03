@@ -992,9 +992,8 @@ sub git_tag {
 }
 sub git_checkout {
 	return unless $config->{use_git};
-	my $branchname = shift;
-	$project->{repo}->run(checkout => $branchname), 
-	#	pager("changing to branch, $branchname."),
+	my ($branchname, @args) = @_;
+	$project->{repo}->run(checkout => $branchname, @args), 
 		return if git_branch_exists($branchname);
 	throw("$branchname: branch does not exist. Skipping.");
 }
@@ -1019,16 +1018,19 @@ sub git_branch_exists {
 		$project->{repo}->run("branch");
 }
 
-sub git_current_branch {
-	my ($actual_current) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
-	$actual_current eq 'undo' ?  $project->{git_current_branch} : $actual_current
+sub current_branch {
+	return unless $project->{repo};
+	my ($b) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
+	$b
 }
 
 sub autosave {
-	return unless $config->{use_git};
-	$project->{repo}->run(qw(checkout undo));
+	my ($original_branch) = current_branch();
+	git_checkout(qw{undo --quiet}); 
 	save_state();
 	git_snapshot();
+	git_checkout($original_branch, '--quiet');
+
 }
 
 
