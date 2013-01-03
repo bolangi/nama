@@ -105,10 +105,7 @@ sub reconfigure_engine {
 		# + preview setups
 		# + doodle setups
 		
-		save_state(), git_snapshot() 
-			if $config->{use_git} and $config->{autosave};
-
-			# ::ChainSetup::really_recording();
+		autosave() if $config->{use_git} and $config->{autosave};
 		connect_transport('quiet');
 		calculate_and_adjust_latency() if $config->{opts}->{Q};
 		show_status();
