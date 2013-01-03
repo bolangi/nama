@@ -172,8 +172,8 @@ sub process_line {
 				context => qq(bus: $this_bus, track: ) 
 								. $this_track->name .  qq(, op: $this_op),
 				command => $user_input,
-				commit 	=> $commit 
-			};
+			#	commit 	=> $commit 
+			}
 
 				unless ! $success 
 					   or $user_input =~ /^\s*(tag|commit|branch|new_branch|load|save)/;
