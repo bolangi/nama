@@ -72,9 +72,7 @@
 @new_persistent_vars = qw(
 
 	$project->{save_file_version_number}
-	$project->{track_version_comments}
-	$project->{track_comments}
-
+	
 	$fx->{applied}
 	$fx->{params}
 	$fx->{params_log}
@@ -95,6 +93,7 @@
 	$project->{save_file_version_number}
 	$project->{timebase}
 	$project->{cache_map}
+	$project->{undo_buffer}
 	$project->{track_version_comments}
 	$project->{track_comments}
 	$project->{bunch}
@@ -165,4 +164,3 @@
 	$this_track_name # for save/restore 
 	$this_op      	# current effect
 );
-		 
