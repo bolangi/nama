@@ -92,7 +92,8 @@ sub engine_wav_out_tracks {
 }
 # return file output entries, including Mixdown 
 sub really_recording { 
-	map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup
+	my @files = map{ /-o:(.+?\.wav)$/} grep{ /-o:/ and /\.wav$/} split "\n", $chain_setup;
+	wantarray() ? @files : scalar @files;
 }
 	
 sub show_io {
