@@ -1024,6 +1024,12 @@ sub current_branch {
 	$b
 }
 
+sub git_branch_display {
+	return unless $config->{use_git};
+	return unless current_branch();
+	"( ".current_branch()." ) "
+}
+
 sub autosave {
 	my ($original_branch) = current_branch();
 	git_checkout(qw{undo --quiet}); 
