@@ -306,6 +306,12 @@ sub destroy {
 
 	
 sub find { 
+
+# find(): search for an effect chain by attributes
+#
+# Returns EffectChain objects in list context,
+# number of matches in scalar context.
+
 	my %args = @_;
 	my $unique = delete $args{unique};
 
@@ -347,7 +353,9 @@ sub find {
 
 	warn("unique chain requested but multiple chains found. Skipping.\n"),
 		return if $unique and @found > 1;
-	return $unique ? pop @found : sort{ $a->n cmp $b->n } @found; 
+
+	if( wantarray() ){ $unique ? pop @found : sort{ $a->n cmp $b->n } @found  }
+	else { scalar @found }
 }
 
 sub summary {
