@@ -35,6 +35,14 @@ sub cache_track { # launch subparts if conditions are met
 	initialize_caching_vars();
 
 	($track, $additional_time) = @_;
+	
+	throw("Sorry this track is already cached"), return
+	if ::EffectChain::find(
+		project 				=> 1, 
+		track_cache 			=> 1,
+		track_name 				=> $track->name,
+		track_version_original 	=> $track->monitor_version);
+
 	$additional_time //= 0;
 	say $track->name, ": preparing to cache.";
 	
