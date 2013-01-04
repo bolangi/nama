@@ -345,7 +345,7 @@ sub find {
 		
        } values %by_index;
 
-	warn("unique chain requested by multiple chains found. Skipping.\n"),
+	warn("unique chain requested but multiple chains found. Skipping.\n"),
 		return if $unique and @found > 1;
 	return $unique ? pop @found : sort{ $a->n cmp $b->n } @found; 
 }
