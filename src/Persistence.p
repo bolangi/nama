@@ -227,10 +227,7 @@ sub decode {
 
 sub restore_state {
 	logsub("&restore_state");
-	my $filename = shift;
-
-	# convert it to a path w/o extension
-	$filename = $file->state_store($filename);
+	my $filename = shift || $file->state_store();
 
 	# get state file, newest if more than one
 	# with same name, differing extensions
@@ -250,11 +247,6 @@ sub restore_state {
 	logpkg('debug', "suffix: $suffix");	
 	logpkg('debug', "source: $source");
 
-	
-	# restore persistent variables
-	
-	# first, auxiliary project state information
-	# not placed under VCS
 	
 	( $path, $suffix ) = get_newest($file->unversioned_state_store);
 	if ($path)
