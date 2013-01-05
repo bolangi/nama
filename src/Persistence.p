@@ -252,8 +252,9 @@ sub restore_state {
 
 	
 	# restore persistent variables
-
-	# peripheral state variables - PeripheralState.json
+	
+	# first, auxiliary project state information
+	# not placed under VCS
 	
 	( $path, $suffix ) = get_newest($file->unversioned_state_store);
 	if ($path)
@@ -978,9 +979,7 @@ sub git_snapshot {
 	
 sub git_commit {
 	my $commit_message = shift || "empty message";
-	copy $file->unversioned_state_store(), $file->peripheral_state_store_vcs();
 	$project->{repo}->run( add => $file->git_state_store );
-	$project->{repo}->run( add => $file->peripheral_state_store_vcs );
 	$project->{repo}->run( commit => '--quiet', '--message', $commit_message);
 }
 	
