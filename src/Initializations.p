@@ -77,10 +77,9 @@ sub definitions {
 	{
 		effects_cache 			=> ['.effects_cache', 		\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
-		state_store 			=> ['State',      		\&project_dir ],
+		state_store 			=> ['State',      			\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
-		unversioned_state_store  => ['PeripheralState',		\&project_dir ],
-		peripheral_state_store_vcs  => ['PeripheralState.json-vcs',		\&project_dir ],
+		unversioned_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 		user_customization 		=> ['custom.pl',      		\&project_root],
