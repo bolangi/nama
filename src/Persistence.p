@@ -262,8 +262,10 @@ sub restore_state {
 		assign_singletons( { data => $ref });
 	}
 	
-	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
+	map{ move_effect_chain_attributes($_) } @project_effect_chain_data;
+	say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
  	map { my $fx_chain = ::EffectChain->new(%$_) } @project_effect_chain_data;
+	die "here";
 
 	( $path, $suffix ) = get_newest($file->state_store);
 	if ($path)
@@ -1031,6 +1033,31 @@ sub autosave {
 
 }
 
+sub move_effect_chain_attributes {
+	my $ec_hash = shift;
+
+	state $attributes = [ qw(
+			name
+			bypass
+			id	
+			project			
+			global		
+			profile	
+			user
+			system	
+			track_name
+			track_version_result 
+			track_version_original
+			insert				
+			track_cache	
+	) ] ;
+
+	map{ 
+		$ec_hash->{attrib}->{$_} = delete $ec_hash->{$_}  } 
+		grep{ $ec_hash->{$_} 
+	}
+		@$attributes
+}
 
 1;
 __END__
