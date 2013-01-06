@@ -14,17 +14,14 @@ components: effect chains, effect profiles, and project
 templates. (The mastering network is created from an effect
 profile.)
 
-Nama has its own command language.  Commands have full,
-descriptive names and shortcuts. 
-
-A "for" loop allows commands to be repeated over multiple
-tracks, which can be designated as a list, by the name of
-their bus, or by the name of a user-defined group.
- 
-Nama has concept of a currently selected object. At any
-time, there is usually a current bus, track and effect.
-Track commands will act on the current track, bus commands
-on the current bus.
+Nama has its own command language.  Commands have full names
+and shortcuts. A "for" loop allows commands to be repeated
+over multiple tracks, which can be designated as a list, by
+the name of their bus, or by the name of a user-defined
+group. Nama has the concept of a currently selected object.
+At any time, there is usually a current bus, current track
+and current effect. Track commands will act on the current
+track, bus commands will act on the currently selected bus.
 
 The help system provides searchable access to documentation
 for all Nama commands and shortcuts, and for LADSPA, LV2 and
@@ -33,27 +30,17 @@ Ecasound effects.
 In the back end, Nama builds signal processing graphs for
 the Ecasound engine, applies fades, effects and edits to the
 audio streams, and manages successive configure-run cycles.
-The chief output target is the Ecasound chain setup file, a
-human readable network definition used to configure the
-Ecasound engine. 
-
-Nama also provides realtime control of the engine,
-allowing live effects control from GUI widgets, MIDI
-controllers, or text commands.
+Nama generates an Ecasound chain setup file (a
+human-readable specification for configuring the Ecasound
+engine) then manages the engine's realtime operation.
 
 In addition to executing its own commands, Nama will pass
 commands to Ecasound, Midish, the Perl interpreter or the
 shell. Nama's optional Tk-based GUI can coexist with the
 terminal. It does not display a waveform, however Nama can
 spawn an Audacity or MHWaveedit instance to view/edit a
-waveform.
-
-Nama uses Git to manage project state, which is serialized
-as JSON files. Git provides checkpointing, branching and undo.
-
-Nama runs under JACK and ALSA audio frameworks,
-automatically detects LADSPA and LV2 plugins, and supports
-Ladish Level 1 session handling.
+waveform. Nama uses Git to manage Nama's state files,
+serialized as JSON files.
 
 =head1 INSTALLATION
 
