@@ -18,8 +18,7 @@ use ::Effects qw(fx);
 
 use ::Globals qw($fx_cache %tn $this_op);
 
-our @effect_chain_data;
-
+our $AUTOLOAD;
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
 our @ISA;
@@ -27,6 +26,22 @@ our ($n, %by_index);
 use ::Object qw( 
 [% qx(./strip_comments ./effect_chain_fields) %]
 		);
+our @attributes = qw(
+			name
+			bypass
+			id	
+			project			
+			global		
+			profile	
+			user
+			system	
+			track_name
+			track_version_result 
+			track_version_original
+			insert				
+			track_cache	
+	) ;
+
 initialize();
 
 # for compatibility with standard effects
@@ -69,6 +84,9 @@ sub new {
 	# not need to massage data if we are merely restoring
 	if ($n = $vals{n} ) {} 	
 	else {
+
+		# move attributes to "attrib" hash
+		move_attributes(\%vals);
 
 		$vals{inserts_data} ||= [];
 		$vals{ops_list} 	||= [];
@@ -200,9 +218,14 @@ sub new {
 	logpkg('debug',sub{$object->dump});
 	$object;
 }
+sub AUTOLOAD {
+	my $self = shift;
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call};
+	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
+}
 
 ### apply effect chain to the specified track
-
 
 sub add_ops {
 	my($self, $track, $successor) = @_;
@@ -304,6 +327,7 @@ sub destroy {
 	delete $by_index{$self->n};
 }
 
+#### class routines
 	
 sub find { 
 
@@ -329,18 +353,10 @@ sub find {
 			
 			my @non_matches = grep 
 			{ 
-				# not: arg matches field exactly
 
-				! ($fx_chain->$_ eq $args{$_}) 
+				! ($fx_chain->{attrib}->{$_} eq $args{$_}) 
 
-				and	
-
-				# not:
-				# + arg is 1 (true) 
-				# + field is present
-				# + field is other than version (which must match exactly)
-
-				! ($_ ne 'version' and $args{$_} eq 1 and $fx_chain->$_)
+				#! ($_ ne 'version' and $args{$_} eq 1 and $fx_chain->$_)
 
 			} keys %args;
 
@@ -370,6 +386,14 @@ sub summary {
 	} @{$_->ops_list};
 	map{ $_,"\n"} @output;
 }
+
+sub move_attributes {
+	my $ec_hash = shift;
+	map { $ec_hash->{attrib}->{$_} = delete $ec_hash->{$_}  } 
+	grep{ $ec_hash->{$_} }
+	@attributes;
+}
+
 	
 ####  Effect profile routines
 
@@ -409,5 +433,6 @@ sub apply_effect_profile {  # overwriting current effects
 	# add effect chains
 	map{ $_->add } @chains;
 }
+
 1;
 __END__

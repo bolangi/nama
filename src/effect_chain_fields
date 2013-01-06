@@ -18,33 +18,36 @@
 							# + we need an additional two effect chains
 							#   for each insert to hold effects on wet or dry arm
 							#   maybe wet_effect_chain, dry_effect_chain
+							
+		attrib 				# fields for searching
 
 ### 	Group 2 - attributes for searching and sorting
 
+	# these will be moved to attrib
 
-		name				# for user-defined effect chains
-
-		bypass				# used for identifying effect bypass (obsolete)
-		id					# effect id, for storing single effect with controllers
-							# for bypass (probably obsolete)	
-
-		project				# true value identifies project-specific effect chain
-
-		global				# true value identified global effect chain,
-							# not project specific, usually user-defined
-
-		profile				# name of associated effect profile
-
-		user				# true value identifies user created effect chain
-
-		system				# true value identifies system generated effect chain
-
-		track_name			# applies to a track of this name
-
-		track_version_result 	# WAV version of track caching result 
-
-		track_version_original 	# WAV version of track before caching 
-
-		insert				# true value identifies belonging to an insert
-		
-		track_cache			# true value identifies belonging to track caching
+# 		name				# for user-defined effect chains
+# 
+# 		bypass				# used for identifying effect bypass (obsolete)
+# 		id					# effect id, for storing single effect with controllers
+# 							# for bypass (probably obsolete)	
+# 
+# 		project				# true value identifies project-specific effect chain
+# 
+# 		global				# true value identified global effect chain,
+# 							# not project specific, usually user-defined
+# 
+# 		profile				# name of associated effect profile
+# 
+# 		user				# true value identifies user created effect chain
+# 
+# 		system				# true value identifies system generated effect chain
+# 
+# 		track_name			# applies to a track of this name
+# 
+# 		track_version_result 	# WAV version of track caching result 
+# 
+# 		track_version_original 	# WAV version of track before caching 
+# 
+# 		insert				# true value identifies belonging to an insert
+# 		
+# 		track_cache			# true value identifies belonging to track caching

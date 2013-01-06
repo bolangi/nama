@@ -262,10 +262,9 @@ sub restore_state {
 		assign_singletons( { data => $ref });
 	}
 	
-	map{ move_effect_chain_attributes($_) } @project_effect_chain_data;
+	map{ ::EffectChain::move_attributes($_) } @project_effect_chain_data;
 	say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
  	map { my $fx_chain = ::EffectChain->new(%$_) } @project_effect_chain_data;
-	die "here";
 
 	( $path, $suffix ) = get_newest($file->state_store);
 	if ($path)
@@ -963,6 +962,7 @@ sub restore_global_effect_chains {
 				vars   => \@global_effect_chain_vars, 
 				var_map => 1,
 				class => '::');
+		map{ ::EffectChain::move_attributes($_) } @global_effect_chain_data;
 		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
 sub git_snapshot {
@@ -1031,32 +1031,6 @@ sub autosave {
 	git_snapshot();
 	git_checkout($original_branch, '--quiet');
 
-}
-
-sub move_effect_chain_attributes {
-	my $ec_hash = shift;
-
-	state $attributes = [ qw(
-			name
-			bypass
-			id	
-			project			
-			global		
-			profile	
-			user
-			system	
-			track_name
-			track_version_result 
-			track_version_original
-			insert				
-			track_cache	
-	) ] ;
-
-	map{ 
-		$ec_hash->{attrib}->{$_} = delete $ec_hash->{$_}  } 
-		grep{ $ec_hash->{$_} 
-	}
-		@$attributes
 }
 
 1;
