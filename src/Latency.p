@@ -62,12 +62,12 @@ sub add_latency_compensation_op {
 	$id
 }
 sub calculate_and_adjust_latency {
+	initialize_latency_vars();
 	calculate_latency();
 	adjust_latency();
 }
 
 sub calculate_latency {
-	initialize_latency_vars();
 	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
 	push my(@first_siblings), $starting_track_name;
 	push @first_siblings, 'Mixdown' if $tn{Mixdown}->rec_status eq 'MON';
