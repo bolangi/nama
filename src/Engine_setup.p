@@ -53,7 +53,7 @@ sub reconfigure_engine {
 
 	# don't disturb recording/mixing
 	
-	return if ::ChainSetup::really_recording() or engine_running();
+	return if ::ChainSetup::really_recording() and engine_running();
 	
 	# store recorded trackrefs if any for re-record function
 	
