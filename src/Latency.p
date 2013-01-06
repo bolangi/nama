@@ -16,28 +16,48 @@ use Carp qw(confess);
 #    (to optimize: add operators only to plural sibling edges, not only edges)
 
 sub set_latency_compensation {
+	
 	my $track = shift;
 	my $delay = shift || 0;
-	my $id = $track->latency_op;
-	$config->{latency_op_set}->($id, frames_to_secs($delay));
+	my $units = shift;
+
+	my $id = $track->latency_op || add_latency_compensation_op ( $track->name );
+
+	# execute coderef to modify effect, adjusting for units
+	# assume frames by default
+	
+	$config->{latency_op_set}->( $id, 
+								$units =~ /^s/i ? $delay : frames_to_secs($delay));
 	$id;
 }
-sub add_latency_controller {
-	my $track = shift;
-	my $delay = shift;
-	my $p = {};
-	$p->{values} = [2, frames_to_secs($delay)];
-	$p->{type} = $config->{latency_op};
-	$p->{effect_id} = $track->latency_op if $track->latency_op;
-	$p->{before} = $track->ops->[0];
-	$p->{track} = $track;
-	my $id = add_effect($p);
-}
-	
+sub add_latency_compensation_op {
 
+	# add the effect, and set the track's latency_op field
+	
+	my $name = shift;
+	my @args = @_;
+	my $track = $tn{$name};
+
+	my $id = $track->latency_op;
+
+	# create a delay effect if necessary, place before first effect
+	# if it exists
+	
+	if (! $id){	
+		my $first_effect = $track->ops->[0];
+		$id = add_effect({
+				before 	=> $first_effect, 
+				track	=> $track,
+				type	=> $config->{latency_op}, 
+				values	=> \@args,
+		});
+		$track->set(latency_op => $id);
+	}
+	$id
+}
 sub calculate_and_adjust_latency {
 	calculate_latency();
-	apply_latency_ops();
+	adjust_latency();
 }
 
 sub calculate_latency {
@@ -47,6 +67,21 @@ sub calculate_latency {
 	push @first_siblings, 'Mixdown' if $tn{Mixdown}->rec_status eq 'MON';
 	logpkg('debug',"starting nodes: @first_siblings");
 	sibling_latency(@first_siblings);
+}
+sub adjust_latency {
+	eval_iam('cs-disconnect');
+
+	for ( ::ChainSetup::engine_tracks() )
+	{ 	
+		next unless has_siblings($_) and $_->latency_offset;
+
+		set_latency_compensation($_, $_->latency_offset);
+
+		# store offset for debugging
+		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
+
+  	}
+	connect_transport('quiet');
 }
 sub cl2 {
 
@@ -80,37 +115,10 @@ sub cl2 {
 
 
 }
-sub adjust_latency {
-		eval_iam('cs-disconnect');
-		apply_latency_ops();
-		connect_transport('quiet');
-}
 
-# sub reset_latency_ops {
-# 	map{ modify_effect($_->latency_op, 0, 0) if $_->latency_op } ::Track::all();
-# }
-sub remove_latency_ops {
-	map{::remove_effect($_)} grep{ fx($_)} grep{$_} map{$_->latency_op} ::Track::all();
-	1
-}
-sub apply_latency_ops {
-	
-	logsub("&apply_latency_ops");
-	for ( ::ChainSetup::engine_tracks() )
-	{ 	
-		next unless has_siblings($_) and $_->latency_offset;
-		fx($_->latency_op) 
-			?  set_latency_compensation($_, $_->latency_offset) 	
-			:  add_latency_controller($_, $_->latency_offset);
-
-			# and update Ecasound op
-
-		# store offset for debugging
-		
-		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
-
-  	}
-}
+sub reset_latency_compensation {
+ 	map{ set_latency_compensation($_, 0) } grep{ $_->latency_op } ::Track::all();
+ }
 sub has_siblings { 
 	my $count = $setup->{latency}->{sibling_count}->{$_[0]->name};
 	#say "track: ",$_[0]->name, " siblings: $count";

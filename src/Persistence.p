@@ -80,6 +80,7 @@ sub save_system_state {
 	logpkg('debug', "copying tracks data");
 
 	map { push @tracks_data, $_->as_hash } ::Track::all();
+
 	# print "found ", scalar @tracks_data, "tracks\n";
 
 	# delete obsolete fields

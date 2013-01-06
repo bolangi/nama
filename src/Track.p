@@ -125,7 +125,6 @@ sub new {
 	$by_name{ $object->name } = $object;
 	::add_pan_control($n);
 	::add_volume_control($n);
-	::assign_latency_controller_id($n);
 
 	$this_track = $object;
 	$object;
@@ -1263,16 +1262,6 @@ sub add_pan_control {
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
 }
-sub assign_latency_controller_id {
-	my $n = shift;
-	return unless $config->{opts}->{Q};
-	my $track = $ti{$n};
-	return if $track->latency_op;
-	$track->set(latency_op => preallocate_effect_id());
-	logsub("&assign_latency_controller_id: chain $n, id ",$track->latency_op);	
-}
-
-
 } # end package
 
 1;

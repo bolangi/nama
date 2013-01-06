@@ -85,8 +85,6 @@ sub reconfigure_engine {
 	}
 	logpkg('debug',"setup change");
 	
-	remove_latency_ops();
-
 	# restore position/running status
 
 	$setup->{_old_snapshot} = status_snapshot();
@@ -97,13 +95,10 @@ sub reconfigure_engine {
 	stop_transport('quiet');
 
 	if ( generate_setup() ){
+	
+		reset_latency_compensation() if $config->{opts}->{Q};
 		
 		logpkg('debug',"I generated a new setup");
-		
-		# we save:
-		# + monitoring setups 
-		# + preview setups
-		# + doodle setups
 		
 		autosave() if $config->{use_git} and $config->{autosave};
 		connect_transport('quiet');

@@ -66,7 +66,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 				
 					is_read_only
 					bypass_effects
-					preallocate_effect_id
 			
 					restore_effects
 
@@ -718,10 +717,6 @@ sub root_parent {
 ## new_effect_id() - issues a new ID
 ## effect_init()    - initializes a Nama effect, should be called effect_init()
 ## add_effect
-
-
-
-sub preallocate_effect_id { $fx->{id_counter}++ } # return value, then increment
 
 sub new_effect_id { 
 
