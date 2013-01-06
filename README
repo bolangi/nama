@@ -1,52 +1,55 @@
 =head1 NAME
 
-Nama - Ecasound-based recorder/mixer
+Nama - digital audio workstation
 
 =head1 DESCRIPTION
 
-B<Nama> is a application and library for multitrack
-recording, mixing and mastering using the Ecasound
-audio engine developed by Kai Vehmanen.
+B<Nama> is a lightweight application using Kai Vehmanen's 
+Ecasound to implement a digital audio workstation.
 
-The complementary terminal and Tk GUI interfaces provide
-discoverable access to a audio engineering environment with
-familiar classes for track, bus, effect, preset, send,
-insert, mark, region. 
+New projects begin with a mixer, and can include track, bus,
+effect, send, insert, mark, region and fade objects. Three
+types of templates are available to reuse project
+components: effect chains, effect profiles, and project
+templates. (The mastering network is created from an effect
+profile.)
 
-Every possible effort has been made to systematize and
-abbreviate the setup process. For this purpose, we provide a
-text command set, a simple, powerful command language
-interpreter, along with some novel templates and tools. 
-Nama now uses git for managing project state, and for
-providing checkpointing, branching and undo cababilities.
+Nama has its own command language.  Commands have full,
+descriptive names and shortcuts. 
 
-In the back end, nama builds signal processing graphs for
-the engine, manages successive engine configure-run cycles,
-and applies fades, effects and edits to the audio streams.
+A "for" loop allows commands to be repeated over multiple
+tracks, designated as a list, by the name of their bus, or
+by the name of a user-defined group.
+ 
+Nama has concept of a currently selected object. At any
+time, there is usually a current bus, track and effect.
+Track commands will act on the current track, bus commands
+on the current bus.
 
-Connections at the terminals of the graph
-are made using a library of some 20 different
-subclasses of IO objects. 
+The help system provides searchable access to documentation
+for all Nama commands and shortcuts, and for LADSPA, LV2 and
+Ecasound effects.
 
-The chief output target is the Ecasound
-chain setup file, a human readable 
-specification precisely expressing
-the network topology which is used 
-to configure the Ecasound engine.
+In the back end, Nama builds signal processing graphs for
+the Ecasound engine, applies fades, effects and edits to the
+audio streams, and manages successive configure-run cycles.
+The chief output target is the Ecasound chain setup file, a
+human readable network definition used to configure the
+Ecasound engine. 
 
-Nama implements realtime control of the engine through ECI,
-Ecasound's remote command languge.
+Nama also provides realtime control of the engine,
+allowing live effects control from GUI widgets, MIDI
+controllers, or text commands.
 
-This allows live effects control from GUI widgets, MIDI
-controllers, text commands (type 'em in pardner!), MIDI
-sequencers, or other avenues.
+In addition to executing its own commands, Nama will pass
+commands to Ecasound, Midish, the Perl interpreter or the
+shell. Nama's optional Tk-based GUI can coexist with the
+terminal. It does not display a waveform, however Nama can
+spawn an Audacity or MHWaveedit instance to view/edit a
+waveform.
 
-To reduce manual input, Nama offers various templates and
-tools for automating project setup including effect chains,
-effect profiles, project templates, and track bunches. 
-
-Wavform editing and display is provided by external
-applications, such as Audacity or Mhwaveedit.
+Nama uses Git to manage project state, which is serialized
+as JSON files. Git provides checkpointing, branching and undo.
 
 Nama runs under JACK and ALSA audio frameworks,
 automatically detects LADSPA and LV2 plugins, and supports
