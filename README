@@ -7,7 +7,7 @@ Nama - digital audio workstation
 B<Nama> is a lightweight application using Kai Vehmanen's 
 Ecasound to implement a digital audio workstation.
 
-New projects begin with a mixer, and can include track, bus,
+New projects begin with a mixer, can include track, bus,
 effect, send, insert, mark, region and fade objects. Three
 types of templates are available to reuse project
 components: effect chains, effect profiles, and project
@@ -39,8 +39,8 @@ commands to Ecasound, Midish, the Perl interpreter or the
 shell. Nama's optional Tk-based GUI can coexist with the
 terminal. It does not display a waveform, however Nama can
 spawn an Audacity or MHWaveedit instance to view/edit a
-waveform. Nama uses Git to manage Nama's state files,
-serialized as JSON files.
+waveform. Nama uses Git to manage project state,
+which is serialized as JSON files.
 
 =head1 INSTALLATION
 
