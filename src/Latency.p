@@ -21,7 +21,7 @@ sub set_latency_compensation {
 	my $delay = shift || 0;
 	my $units = shift;
 
-	my $id = $track->latency_op || add_latency_compensation_op ( $track->name );
+	my $id = $track->latency_op || add_latency_compensation_op ( $track );
 
 	# execute coderef to modify effect, adjusting for units
 	# assume frames by default
@@ -34,9 +34,9 @@ sub add_latency_compensation_op {
 
 	# add the effect, and set the track's latency_op field
 	
-	my $name = shift;
+	my $track = shift;
 	my @args = @_;
-	my $track = $tn{$name};
+	@args = (2,0) unless scalar @args;
 
 	my $id = $track->latency_op;
 
@@ -51,6 +51,12 @@ sub add_latency_compensation_op {
 				type	=> $config->{latency_op}, 
 				values	=> \@args,
 		});
+		# sometimes after passing default args,
+		# we see delay parameter of 9e-6 so
+		# set to zero unless caller provided args 
+
+		modify_effect($id, 2, undef, 0) unless @_;
+
 		$track->set(latency_op => $id);
 	}
 	$id
