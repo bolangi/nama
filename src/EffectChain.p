@@ -22,11 +22,11 @@ our $AUTOLOAD;
 our $VERSION = 0.001;
 no warnings qw(uninitialized);
 our @ISA;
-our ($n, %by_index);
+our ($n, %by_index, @attributes, %is_attribute);
 use ::Object qw( 
 [% qx(./strip_comments ./effect_chain_fields) %]
 		);
-our @attributes = qw(
+@attributes = qw(
 			name
 			bypass
 			id	
@@ -72,6 +72,7 @@ sub initialize {
 	%by_index = ();	
 	@::global_effect_chain_data = ();  # for save/restore
     @::project_effect_chain_data = (); 
+	%is_attribute = map{ $_ => 1 } @attributes;
 }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
@@ -221,7 +222,8 @@ sub new {
 sub AUTOLOAD {
 	my $self = shift;
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call};
+	return $self->{attrib}->{$call} if exists $self->{attrib}->{$call}
+		or $is_attribute{$call};
 	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
 }
 
