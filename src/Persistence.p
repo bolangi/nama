@@ -262,9 +262,6 @@ sub restore_state {
 		assign_singletons( { data => $ref });
 	}
 	
-	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
- 	map { my $fx_chain = ::EffectChain->new(%$_) } @project_effect_chain_data;
-
 	( $path, $suffix ) = get_newest($file->state_store);
 	if ($path)
 	{
@@ -539,6 +536,10 @@ sub restore_state {
 		} 
 		@tracks_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.100){ 
+		map{ ::EffectChain::move_attributes($_) } 
+			(@project_effect_chain_data, @global_effect_chain_data)
+	}
 
 	#  destroy and recreate all buses
 
@@ -661,6 +662,11 @@ sub restore_state {
 		if (ref $text->{command_history}) =~ /ARRAY/;
 
 ;
+	# restore effect chains and profiles
+	
+	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
+ 	map { my $fx_chain = ::EffectChain->new(%$_) } 
+		(@project_effect_chain_data, @global_effect_chain_data)
 } 
 sub is_nonempty_hash {
 	my $ref = shift;
@@ -961,7 +967,6 @@ sub restore_global_effect_chains {
 				vars   => \@global_effect_chain_vars, 
 				var_map => 1,
 				class => '::');
-		map { my $fx_chain = ::EffectChain->new(%$_) } @global_effect_chain_data; 
 }
 sub git_snapshot {
 	return unless $config->{use_git};
@@ -1030,7 +1035,6 @@ sub autosave {
 	git_checkout($original_branch, '--quiet');
 
 }
-
 
 1;
 __END__
