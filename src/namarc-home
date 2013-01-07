@@ -2,8 +2,6 @@
 
 project_root: ~/nama
 
-#eager_mode: doodle
-
 midish_enable: 1
 
 # define abbreviations

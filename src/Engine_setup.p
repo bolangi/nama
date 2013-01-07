@@ -108,7 +108,7 @@ sub reconfigure_engine {
 # 		if( $restore_position and not ::ChainSetup::really_recording()){
 # 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};
 # 		}
-#		start_transport('quiet') if $mode->{preview} =~ /doodle/;
+		start_transport('quiet') if $mode->{preview} =~ /doodle/;
 			# $was_running or
 		transport_status();
 		$ui->flash_ready;
