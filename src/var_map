@@ -24,7 +24,7 @@
 	**							$config->{sample_rate}
 	$use_git					$config->{use_git}
 	$autosave					$config->{autosave}
-	$save_to_name_default_behavior $config->{save_to_name_default_behavior}
+	$save_as_file				$config->{save_as_file}
 	**							$config->{no_fade_mute_delay}
 	
 	%ti

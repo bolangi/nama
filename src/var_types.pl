@@ -44,6 +44,7 @@
 	$eager_mode
 	$serialize_formats
 	$use_git
+	$save_as_file
 	$autosave
 	$save_to_name_default_behavior
 	$beep_command
