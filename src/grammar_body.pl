@@ -166,6 +166,7 @@ project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
 anytag: /\S+/
+save_ident: /[-.\w]+/
 ident: /[-\w]+/  #| <error: illegal name!> 
 					# used in: bunch_name, effect_profile,
 					# track_name
@@ -247,12 +248,28 @@ tagname: ident
 branchname: ident
 message: /.+/
 
-save_state: _save_state ident { 
-	{
-		::save_state( $item{ident})
+save_state: _save_state save_ident { 
+	my $name = $item{save_ident};
+	print ":filename: $name\n";
+	
+	::save_state( $name) if $::config->{save_as_file}
+			or $name =~ /\.json$/;
+
+	if ( $::config->{use_git} ){
+
+		::save_state();
+		if (::state_changed() ){
+			::git_commit("user save - $name");
+			::git_tag($name); 
+			::pager3(qw[tagged HEAD commit as "$name"]);
+		}
+		else {
+			::throw("nothing changed, so not committing or tagging")
+		}
+		1
 	}
 }
-save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
+save_state: _save_state { ::save_state(); ::git_snapshot('user save'); 1}
 
 get_state: _get_state statefile {
  	::load_project( 
