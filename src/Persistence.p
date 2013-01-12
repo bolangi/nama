@@ -5,6 +5,8 @@ package ::;
 use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
+sub git { say "VCS command: git @_"; $project->{repo}->run(@_) }
+	
 sub save_state {
 	my $filename = shift;
 	if ($filename)
@@ -969,6 +971,7 @@ sub restore_global_effect_chains {
 				class => '::');
 }
 sub git_snapshot {
+	logsub("&git_snapshot");
 	return unless $config->{use_git};
 	return unless state_changed();
 	my $commit_message = shift() || "no comment";
@@ -976,64 +979,84 @@ sub git_snapshot {
 }
 	
 sub git_commit {
+	logsub("&git_commit");
 	my $commit_message = shift || "empty message";
-	$project->{repo}->run( add => $file->git_state_store );
-	$project->{repo}->run( commit => '--quiet', '--message', $commit_message);
+	git( add => $file->git_state_store );
+	git( commit => '--quiet', '--message', $commit_message);
 }
 	
 
 sub git_tag { 
+	logsub("&git_tag");
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	$project->{repo}->run( tag => $tag_name, '-m', $msg);
+	git( tag => $tag_name, '-m', $msg);
 }
 sub git_checkout {
+	logsub("&git_checkout");
 	return unless $config->{use_git};
 	my ($branchname, @args) = @_;
-	$project->{repo}->run(checkout => $branchname, @args), 
+	git(checkout => $branchname, @args), 
 		return if git_branch_exists($branchname);
 	throw("$branchname: branch does not exist. Skipping.");
 }
 sub git_create_branch {
+	logsub("&git_create_branch");
 	return unless $config->{use_git};
 	my $branchname = shift;
 	# create new branch
 	pager("Creating branch $branchname.");
-	$project->{repo}->run(checkout => '-b',$branchname)
+	git(checkout => '-b',$branchname)
 }
 
 sub state_changed {  
+	logsub("&state_changed");
 	return unless $config->{use_git};
-	$project->{repo}->run("diff", $file->git_state_store());
+	git("diff", $file->git_state_store());
 }
 
 sub git_branch_exists { 
+	logsub("&git_branch_exists");
 	return unless $config->{use_git};
 	my $branchname = shift;
 	grep{ $_ eq $branchname } 
 		map{ s/^\s+//; s/^\* //; $_}
-		$project->{repo}->run("branch");
+		git("branch");
 }
 
 sub current_branch {
+	logsub("&current_branch");
 	return unless $project->{repo};
-	my ($b) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", $project->{repo}->run('branch');
+	my ($b) = map{ /\* (\S+)/ } grep{ /\*/ } split "\n", git('branch');
 	$b
 }
 
 sub git_branch_display {
+	logsub("&git_branch_display");
 	return unless $config->{use_git};
 	return unless current_branch();
 	"( ".current_branch()." ) "
 }
 
 sub autosave {
+	logsub("&autosave");
 	my ($original_branch) = current_branch();
-	git_checkout(qw{undo --quiet}); 
+	my @args = qw(undo --quiet);
+	unshift @args, '-b' if ! git_branch_exists('undo');
+	git(checkout => @args);
 	save_state();
 	git_snapshot();
 	git_checkout($original_branch, '--quiet');
 
+}
+
+sub merge_undo_branch {
+	logsub("&merge_undo_branch");
+	my $this_branch = current_branch();
+	autosave();
+	return unless my $diff = git(diff => $this_branch, 'undo');
+	git( qw{ merge --no-ff undo -m}, q{merge autosave commits} );
+	git( qw{ branch -d undo } );
 }
 
 1;
