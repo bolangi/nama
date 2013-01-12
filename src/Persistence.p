@@ -5,12 +5,19 @@ package ::;
 use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
-sub git { say "VCS command: git @_"; $project->{repo}->run(@_) }
+sub git { logpkg('debug',"VCS command: git @_"); $project->{repo}->run(@_) }
 	
 sub save_state {
 	my $filename = shift;
 	if ($filename)
 	{
+
+		# remove extension if present
+		
+		$filename =~ s/\.json//;
+
+		# append filename if warranted
+		
 		$filename = 
 				$filename =~ m{/} 	
 									? $filename	# as-is if input contains slashes
@@ -28,7 +35,7 @@ sub save_state {
 	# do nothing more if only Master and Mixdown
 	
 	if (scalar @::Track::all == 2 ){
-		print "No user tracks, skipping...\n";
+		throw("No user tracks, skipping...");
 		return;
 	}
 
@@ -982,7 +989,7 @@ sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift || "empty message";
 	git( add => $file->git_state_store );
-	git( commit => '--quiet', '--message', $commit_message);
+	git( commit => '--quiet', '--message', q["$commit_message"]);
 }
 	
 
@@ -1060,4 +1067,31 @@ sub merge_undo_branch {
 }
 
 1;
+=comment
+
+VI-like user reponsibility for save
+
+save # serialize commit if autosave
+
+merge undo branch if autosave
+
+save foo: # serialize tag-foo foo.json
+
+
+save foo: tag-foo.1 foo.json
+
+load foo, prefer highest foo,
+but if foo.json is newer, take
+that. 
+
+load foo      # find
+load foo.json # load the file
+load tag foo  # load the tag
+
+
+
+
+
+
+
 __END__
