@@ -159,7 +159,7 @@ sub load_project {
 		}
 	}
 
-	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
+	restore_state_from_file( $h{settings} ) unless $config->{opts}->{M} ;
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 
