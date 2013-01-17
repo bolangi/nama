@@ -87,7 +87,9 @@ serialize_formats: json
 
 use_git: 1
 
-autosave: setup
+save_as_file: 1
+
+autosave: 0
 
 beep_command: beep -f 350 -l 700
 
