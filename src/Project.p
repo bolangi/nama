@@ -159,7 +159,19 @@ sub load_project {
 		}
 	}
 
-	restore_state_from_file( $h{settings} ) unless $config->{opts}->{M} ;
+	restore_state($h{settings}) unless $config->{opts}->{M} ;
+
+sub restore_state {
+		my $name = shift;
+
+		if( ! $name  or ! $config->{use_git} ){
+			
+			restore_state_from_file($name)
+		}
+		else { restore_state_from_vcs($name)  }
+}
+
+
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 
