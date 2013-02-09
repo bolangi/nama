@@ -250,32 +250,36 @@ message: /.+/
 
 save_state: _save_state save_ident { 
 	my $name = $item{save_ident};
-	print ":filename: $name\n";
+	print "save target name: $name\n";
 	
-	::save_state( $name) if $::config->{save_as_file}
-			or $name =~ /\.json$/;
+	# save as named file
+	
+	print("saving as file\n"), ::save_state( $name), return(1)
+	 if ! $::config->{use_git} or $name =~ /\.json$/;
 
-	if ( $::config->{use_git} ){
+	# save as a tagged commit
 
-		::save_state();
-		if (::state_changed() ){
-			::git_commit("user save - $name");
-			::git_tag($name); 
-			::pager3(qw[tagged HEAD commit as "$name"]);
-		}
-		else {
-			::throw("nothing changed, so not committing or tagging")
-		}
-		1
+	::save_state();
+	if (::state_changed() ){
+		print("saving as a commit\n");
+		::git_commit("user save - $name");
+		::git_tag($name); 
+		::pager3(qq[tagged HEAD commit as "$name"]);
 	}
+	else {
+		::throw("nothing changed, so not committing or tagging")
+	}
+	1
 }
 save_state: _save_state { ::save_state(); ::git_snapshot('user save'); 1}
 
+# load project from named state file
 get_state: _get_state statefile {
  	::load_project( 
  		name => $::project->{name},
  		settings => $item{statefile}
  		); 1}
+# reload project if given with no arguments
 get_state: _get_state {
  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  

@@ -5,7 +5,7 @@
 # + global effect chains - usually user defined, available to all projects
 # + system generated effect chains, per project
 
-
+{
 package ::EffectChain;
 use Modern::Perl;
 use Data::Dumper::Concise;
@@ -396,7 +396,11 @@ sub move_attributes {
 	@attributes;
 }
 
-	
+sub DESTROY {}
+
+}
+
+{	
 ####  Effect profile routines
 
 package ::;
@@ -436,5 +440,6 @@ sub apply_effect_profile {  # overwriting current effects
 	map{ $_->add } @chains;
 }
 
+}
 1;
 __END__
