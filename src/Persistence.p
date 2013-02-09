@@ -240,32 +240,43 @@ sub git_tag_exists {
 	grep { $tag eq $_ } git( 'tag','--list');
 }
 
-sub restore_state_from_tag {
-	logsub("&restore_state_from_tag");
-	my $tag = shift;
-# 	throw("$tag: tag doesn't exist. Cannot checkout."),
-# 		return if ! git_tag_exists($tag);
- 	if (! git_branch_exists($branch_name)){
-# 		pager3("Note: branch $branch_name already exists.");
-# 	}
-# 	git('checkout', $tag); # detached HEAD
-#  	if (! git_branch_exists($branch_name)){
-# 		say "creating branch $branch_name, which is now the current branch";
-# 		git('checkout ', '-b', $branch_name);
-# 	}
-# 	else {
-# 		say "branch $branch_name is already sprouting from
-# this tag. Staying in a detached HEAD state."
-# 	}
-	
-		my @descendents = git('branch','--contains',$tag);
- 		say "Branches are already sprouting from this tag: @descendants"
- 			if @descendents;
-	 	git('checkout', $tag); 
-		say "currently in detached HEAD state";
-		restore_state_from_file();
-}
+sub tag_branch { "$_[0]-branch" }
 
+sub restore_state_from_vcs {
+	logsub("&restore_state_from_vcs");
+	my $name = shift; # tag or branch
+	
+	# checkout branch if matching branch exists
+	
+    if (git_branch_exists($name)){
+		pager3( qq($name: branch exists. Checking out branch $name.) );
+		git_checkout ($name);
+		
+	}
+
+	# checkout branch diverging at tag if matching that tag
+
+	elsif ( git_tag_exists($name) ){
+
+		my $tag = $name;
+		my $branch = tag_branch($tag);
+	
+		if (git_branch_exists($branch)){
+			pager3( qq(tag $tag: matching branch exists. Checking out $branch.) );
+			git_checkout($branch);
+		}
+
+		else {
+			pager3( "Creating and checking out branch $branch from tag $tag");
+			git_create_branch($branch, $tag);
+			
+		}
+	}
+ 	else { throw("$name: tag doesn't exist. Cannot checkout."), return  }
+
+	restore_state_from_file();
+}
+ 
 sub restore_state_from_file {
 	logsub("&restore_state_from_file");
 	my $filename = shift || $file->state_store();
@@ -1042,9 +1053,10 @@ sub git_create_branch {
 	logsub("&git_create_branch");
 	return unless $config->{use_git};
 	my $branchname = shift;
+	my $branchfrom = shift;
 	# create new branch
 	pager("Creating branch $branchname.");
-	git(checkout => '-b',$branchname)
+	git(checkout => '-b',$branchname, $branchfrom)
 }
 
 sub state_changed {  
