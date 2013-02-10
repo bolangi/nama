@@ -152,7 +152,7 @@ sub save_system_state {
 		class => '::',
 	);	
 
-	$path
+	"$path.json";
 }
 {
 my %is_legal_suffix = ( 
