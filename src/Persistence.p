@@ -281,6 +281,8 @@ sub restore_state_from_file {
 	logsub("&restore_state_from_file");
 	my $filename = shift;
 	$filename =~ s/\.json$//;
+	$filename = join_path(project_dir(), $filename) 
+		if $filename and not $filename =~ m(/);
 	$filename ||= $file->state_store();
 
 	# get state file, newest if more than one
