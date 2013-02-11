@@ -1,4 +1,4 @@
-#command: test
+# command: test
 #test: 'test' shellish { 
 #	::pager2( "found $item{shellish}");
 #	}
