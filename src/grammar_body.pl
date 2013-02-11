@@ -166,7 +166,6 @@ project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
 anytag: /\S+/
-save_ident: /[-.\w]+/
 ident: /[-\w]+/  #| <error: illegal name!> 
 					# used in: bunch_name, effect_profile,
 					# track_name
@@ -176,7 +175,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
 
-statefile: /[-:\w\.]+/
+save_target: /[-:\w.]+/
 marktime: /\d+\.\d+/ # decimal required
 markname: /[A-Za-z]\w*/ { 
 	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
@@ -248,36 +247,42 @@ tagname: ident
 branchname: ident
 message: /.+/
 
-save_state: _save_state save_ident { 
-	my $name = $item{save_ident};
+save_state: _save_state save_target  { 
+	my $name = $item{save_target};
 	print "save target name: $name\n";
 	
 	# save as named file
 	
-	print("saving as file\n"), ::save_state( $name), return(1)
-	 if ! $::config->{use_git} or $name =~ /\.json$/;
-
-	# save as a tagged commit
-
-	::save_state();
-	if (::state_changed() ){
-		print("saving as a commit\n");
-		::git_commit("user save - $name");
-		::git_tag($name); 
-		::pager3(qq[tagged HEAD commit as "$name"]);
+	if(  ! $::config->{use_git} or $name =~ /\.json$/ )
+	{
+	 	print("saving as file\n"), ::save_state( $name)
 	}
-	else {
-		::throw("nothing changed, so not committing or tagging")
+	else 
+	{
+		# save as a tagged commit
+
+		::save_state();
+		if (::state_changed() )
+		{
+			print("saving as a commit\n");
+			::git_commit("user save - $name");
+			::git_tag($name); 
+			::pager3(qq[tagged HEAD commit as "$name"]);
+		}
+		else 
+		{
+			::throw("nothing changed, so not committing or tagging")
+		}
 	}
 	1
 }
 save_state: _save_state { ::save_state(); ::git_snapshot('user save'); 1}
 
 # load project from named state file
-get_state: _get_state statefile {
+get_state: _get_state save_target {
  	::load_project( 
  		name => $::project->{name},
- 		settings => $item{statefile}
+ 		settings => $item{save_target}
  		); 1}
 # reload project if given with no arguments
 get_state: _get_state {
