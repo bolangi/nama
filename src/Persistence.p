@@ -279,7 +279,9 @@ sub restore_state_from_vcs {
  
 sub restore_state_from_file {
 	logsub("&restore_state_from_file");
-	my $filename = shift || $file->state_store();
+	my $filename = shift;
+	$filename =~ s/\.json$//;
+	$filename ||= $file->state_store();
 
 	# get state file, newest if more than one
 	# with same name, differing extensions
