@@ -7,30 +7,32 @@ use Cwd;
 use strict;
 use warnings;
 no warnings qw(uninitialized);
+our $debug;
 
 our ($expected_setup_lines);
 
-diag ("TESTING $0\n");
+$debug and diag ("TESTING $0\n");
 
-diag("working directory: ",cwd);
+$debug and diag("working directory: ",cwd);
 
 our $test_dir = "/tmp/nama-test";
 
 cleanup_dirs();
 setup_dirs();
 
-sub cleanup_dirs { 	chdir "/tmp"; remove_tree($test_dir) }
+sub cleanup_dirs { 	chdir '..', remove_tree($test_dir) if -e $test_dir }
 sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
-diag( qx(find $test_dir) );
+$debug and diag( qx(find $test_dir) );
 
 apply_test_harness();
 
-diag "options: @ARGV";
+$debug and diag "options: @ARGV";
 
 bootstrap_environment();
+$config->{use_git} = 0;
 
-diag "Check representative variable from default .namarc";
+$debug and diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
 
@@ -67,8 +69,8 @@ my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
 
-diag("project project dir: ".project_dir());
-diag("project project wav dir: ".this_wav_dir());
+$debug and diag("project project dir: ".project_dir());
+$debug and diag("project project wav dir: ".this_wav_dir());
 
 #diag(map{ $_->dump} values %::Track::by_index );
 
@@ -177,7 +179,7 @@ my $i;
 for (@test) {
 	my %t = %$_;
 	$i++;
-	diag "IO.pm unit test $i";
+	$debug and diag "IO.pm unit test $i";
 	my $class = "Audio::Nama::IO::$t{class}";
 	my $io = $class->new(%{$t{args}});
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
@@ -599,7 +601,7 @@ check_setup('Send bus - raw - JACK');
 
 {
 
-diag "Edit mode playat and region endpoints adjustment";
+$debug and diag "Edit mode playat and region endpoints adjustment";
 my @tests = split "\n",<<TEST_DATA;
 1 12 5 15 4   8  *  *  * 30 out_of_bounds_near region
 2 12 5 15 23 26  *  *  * 30 out_of_bounds_far region
