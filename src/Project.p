@@ -159,7 +159,8 @@ sub load_project {
 		}
 	}
 
-	restore_state( $h{settings} ) unless $config->{opts}->{M} ;
+	restore_state($h{settings}) unless $config->{opts}->{M} ;
+
 	if (! $tn{Master}){
 
 		::SimpleTrack->new( 
@@ -203,6 +204,15 @@ sub load_project {
 
  1;
 }	
+sub restore_state {
+		my $name = shift;
+
+		if( ! $name  or $name =~ /.json$/ or !  $config->{use_git})
+		{
+			restore_state_from_file($name)
+		}
+		else { restore_state_from_vcs($name)  }
+}
 
 sub dig_ruins { # only if there are no tracks 
 	

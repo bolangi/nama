@@ -14,7 +14,7 @@ sub apply_test_harness {
 
 				qw(-t), # set text mode 
 
-				qw(-d /tmp/nama-test),  # HARDCODED
+				qw(-d), $::test_dir,
 				
 				q(-E), # suppress loading Ecasound
 
@@ -71,6 +71,7 @@ sub definitions {
 			my $path = ::join_path($dir_sub->(), $filename);
 			$path;
 		}
+		sub DESTROY {}
 		1;
 	}
 	$file = bless 
@@ -119,7 +120,7 @@ sub definitions {
 		memoize 						=> 1,
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
-		use_git							=> 1,
+		use_git							=> 0,
 		save_as_file					=> 1,
 		autosave						=> 0,
 		volume_control_operator 		=> 'ea', # default to linear scale

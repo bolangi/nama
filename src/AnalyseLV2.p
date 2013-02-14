@@ -8,10 +8,8 @@ package ::AnalyseLV2;
 # Toggle debugging:
 my $debug = 0;
 
-
 use strict;
 
-my $debug;
 my %plugin;
 my %scalepoints;
 

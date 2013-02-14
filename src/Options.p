@@ -74,7 +74,6 @@ Debugging options:
 --no-static-effects-data, -S     Don't load effects data
 --no-static-effects-cache, -C    Bypass effects data cache
 --no-reconfigure-engine, -R      Don't automatically configure engine
---debugging-output, -D           Emit debugging information
 --fake-jack, -J                  Simulate JACK environment
 --fake-alsa, -A                  Simulate ALSA environment
 --no-ecasound, -E                Don't spawn Ecasound process

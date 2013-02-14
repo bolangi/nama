@@ -121,7 +121,7 @@ limiter: tap_limiter 0 0
 #### State management ####
 
 # use_git: 1
-# autosave: undo # or setup
+# autosave: 0
 
 #### Julien Claassen's Notes on Mastering effect defaults
 # 

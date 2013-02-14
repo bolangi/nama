@@ -1,4 +1,4 @@
-#command: test
+# command: test
 #test: 'test' shellish { 
 #	::pager2( "found $item{shellish}");
 #	}
@@ -175,7 +175,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 					 # new_effect_chain add_effect_chain list_effect_chains
 					 # delete_effect_chain overwrite_effect_chain
 
-statefile: /[-:\w\.]+/
+save_target: /[-:\w.]+/
 marktime: /\d+\.\d+/ # decimal required
 markname: /[A-Za-z]\w*/ { 
 	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
@@ -247,18 +247,44 @@ tagname: ident
 branchname: ident
 message: /.+/
 
-save_state: _save_state ident { 
+save_state: _save_state save_target  { 
+	my $name = $item{save_target};
+	print "save target name: $name\n";
+	
+	# save as named file
+	
+	if(  ! $::config->{use_git} or $name =~ /\.json$/ )
 	{
-		::save_state( $item{ident})
+	 	print("saving as file\n"), ::save_state( $name)
 	}
-}
-save_state: _save_state { ::save_state(); ::git_snapshot(); 1}
+	else 
+	{
+		# save as a tagged commit
 
-get_state: _get_state statefile {
+		::save_state();
+		if (::state_changed() )
+		{
+			print("saving as a commit\n");
+			::git_commit("user save - $name");
+			::git_tag($name); 
+			::pager3(qq[tagged HEAD commit as "$name"]);
+		}
+		else 
+		{
+			::throw("nothing changed, so not committing or tagging")
+		}
+	}
+	1
+}
+save_state: _save_state { ::save_state(); ::git_snapshot('user save'); 1}
+
+# load project from named state file
+get_state: _get_state save_target {
  	::load_project( 
  		name => $::project->{name},
- 		settings => $item{statefile}
+ 		settings => $item{save_target}
  		); 1}
+# reload project if given with no arguments
 get_state: _get_state {
  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
