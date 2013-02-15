@@ -237,27 +237,32 @@ branch: _branch branchname {
 }
 branch: _branch {
 	::pager3(
-		"Branches (asterisk marks current branch)",
+		"---Branches--- (asterisk marks current branch)",
 		$::project->{repo}->run('branch'),
 		"",
-		"Tags",
+		"-----Tags-----",
 		$::project->{repo}->run('tag','--list')	
 	);
 	1;
 }
 new_branch: _new_branch branchname branchfrom(?) { 
-	::throw("$item{branchname}: branch already exists. Doing nothing."), return
-		if ::git_branch_exists($item{branchname});
-	::git_create_branch($item{branchname}, @{$item{'branchfrom(?)'}});
+	my $name = $item{branchname};
+	my $from = "@{$item{'branchfrom(?)'}}";
+	::throw("$name: branch already exists. Doing nothing."), return 1
+		if ::git_branch_exists($name);
+	::git_create_branch($name, $from);
 }
 tagname: ident
 branchname: ident
 branchfrom: ident
 message: /.+/
 
-save_state: _save_state save_target  { 
+save_state: _save_state save_target message(?) { 
 	my $name = $item{save_target};
+	my $default_msg = "user save - $name";
+	my $message = "@{$item{'message(?)'}}" || $default_msg;
 	print "save target name: $name\n";
+	print("commit message: $message\n") if $message;
 	
 	# save as named file
 	
@@ -273,8 +278,8 @@ save_state: _save_state save_target  {
 		if (::state_changed() )
 		{
 			print("saving as a commit\n");
-			::git_commit("user save - $name");
-			::git_tag($name); 
+			::git_commit($message);
+			::git_tag($name, $message); 
 			::pager3(qq[tagged HEAD commit as "$name"]);
 		}
 		else 
