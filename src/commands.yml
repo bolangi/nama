@@ -562,7 +562,7 @@ branch:
   type: project
   what: change to named branch (list branches when called with no arguments)
   short: br
-  parameters: <s_branch_name> [<s_message>]
+  parameters: <s_branch_name>
 new_branch:
   type: project
   what: create a new branch
