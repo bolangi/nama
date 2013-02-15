@@ -64,13 +64,13 @@ sub detect_spacebar {
 
 sub throw {
 	logsub("&throw");
-	pager2(@_)
+	pager3(@_)
 }
 sub pager2 {
 	logsub("&pager2");
 	pager(join "", @_)
 }
-sub pager3 { map { say, $_ } @_ }
+sub pager3 { map { my $s = $_; chomp $s; say $s} @_ }
 	
 sub pager {
 	logsub("&pager");
