@@ -6,11 +6,12 @@ use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
 sub git { 
-$config->{use_git} or warn("@_: git command, but git is not enabled.
+	$config->{use_git} or warn("@_: git command, but git is not enabled.
 You may want to set use_git: 1 in .namarc"), return;
-
-logpkg('debug',"VCS command: git @_"); $project->{repo}->run(@_) }
 	
+	logpkg('debug',"VCS command: git @_"); 
+	$project->{repo}->run(@_) }
+		
 sub save_state {
 	my $filename = shift;
 	if ($filename)
@@ -1078,11 +1079,16 @@ these changes, or throw them away."
 }
 sub git_create_branch {
 	logsub("&git_create_branch");
-	return unless $config->{use_git};
 	my ($branchname, $branchfrom) = @_;
+	return unless $config->{use_git};
 	# create new branch
-	pager("Creating branch $branchname.");
-	git(checkout => '-b',$branchname, $branchfrom)
+	my @args;
+	my $from_target;
+	$from_target = "from $branchfrom" if $branchfrom;
+	push @args, $branchname;
+	push(@args, $branchfrom) if $branchfrom;
+	pager("Creating branch $branchname $from_target");
+	git(checkout => '-b', @args)
 }
 
 sub state_changed {  
