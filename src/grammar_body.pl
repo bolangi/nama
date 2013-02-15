@@ -227,24 +227,32 @@ commit: _commit message(?) {
 	1;
 }
 branch: _branch branchname { 
-	::throw("$item{branchname}: branch does not exist.  Skipping."), return 0
+	::throw("$item{branchname}: branch does not exist.  Skipping."), return 1
 		if ! ::git_branch_exists($item{branchname});
-	::git_checkout($item{branchname});
 	# reload git-altered State.json file
-	::load_project(name => $::project->{name}); 
+	if(::git_checkout($item{branchname})){
+		::load_project(name => $::project->{name})
+	} else { } # git_checkout tells us what went wrong
 	1;
 }
 branch: _branch {
-	::pager(join "\n",$::project->{repo}->run('branch'));
+	::pager3(
+		"Branches (asterisk marks current branch)",
+		$::project->{repo}->run('branch'),
+		"",
+		"Tags",
+		$::project->{repo}->run('tag','--list')	
+	);
 	1;
 }
-new_branch: _new_branch branchname message(?) { 
+new_branch: _new_branch branchname branchfrom(?) { 
 	::throw("$item{branchname}: branch already exists. Doing nothing."), return
 		if ::git_branch_exists($item{branchname});
-	::git_create_branch($item{branchname}, @{$item{'message(?)'}});
+	::git_create_branch($item{branchname}, @{$item{'branchfrom(?)'}});
 }
 tagname: ident
 branchname: ident
+branchfrom: ident
 message: /.+/
 
 save_state: _save_state save_target  { 
