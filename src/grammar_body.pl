@@ -297,9 +297,9 @@ get_state: _get_state save_target {
  		name => $::project->{name},
  		settings => $item{save_target}
  		); 1}
-# reload project if given with no arguments
-get_state: _get_state {
- 	::load_project( name => $::project->{name},) ; 1}
+# # reload project if given with no arguments
+# get_state: _get_state {
+#  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
 	::pager2( ::d1( ::eval_iam q(getpos) )); 1}
 setpos: _setpos timevalue {
