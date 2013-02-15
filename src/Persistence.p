@@ -1040,7 +1040,7 @@ sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift || "empty message";
 	git( add => $file->git_state_store );
-	git( commit => '--quiet', '--message', q["$commit_message"]);
+	git( commit => '--quiet', '--message', qq["$commit_message"]);
 }
 	
 
