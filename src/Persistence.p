@@ -5,7 +5,11 @@ package ::;
 use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
-sub git { logpkg('debug',"VCS command: git @_"); $project->{repo}->run(@_) }
+sub git { 
+$config->{use_git} or warn("@_: git command, but git is not enabled.
+You may want to set use_git: 1 in .namarc"), return;
+
+logpkg('debug',"VCS command: git @_"); $project->{repo}->run(@_) }
 	
 sub save_state {
 	my $filename = shift;
@@ -250,7 +254,7 @@ sub restore_state_from_vcs {
 	
     if (git_branch_exists($name)){
 		pager3( qq($name: branch exists. Checking out branch $name.) );
-		git_checkout ($name);
+		git_checkout($name);
 		
 	}
 
@@ -1047,17 +1051,35 @@ sub git_tag {
 }
 sub git_checkout {
 	logsub("&git_checkout");
-	return unless $config->{use_git};
 	my ($branchname, @args) = @_;
-	git(checkout => $branchname, @args), 
-		return if git_branch_exists($branchname);
-	throw("$branchname: branch does not exist. Skipping.");
+	return unless $config->{use_git};
+
+	my $exist_message = git_branch_exists($branchname)
+				?  undef
+				: "$branchname: branch does not exist.";
+	my $dirty_tree_msg  = !! state_changed() 
+		?  "You have changes to working files.
+You cannot switch branches until you commit
+these changes, or throw them away."
+		: undef;
+		
+	my $conjunction = ($dirty_tree_msg and $exist_message) 
+			? "And by the way, "
+			: undef;
+
+	throw( $dirty_tree_msg, 
+			$conjunction, 
+			$exist_message, 
+			"No action taken."), return
+		if $dirty_tree_msg or $exist_message;
+
+	git(checkout => $branchname, @args);
+
 }
 sub git_create_branch {
 	logsub("&git_create_branch");
 	return unless $config->{use_git};
-	my $branchname = shift;
-	my $branchfrom = shift;
+	my ($branchname, $branchfrom) = @_;
 	# create new branch
 	pager("Creating branch $branchname.");
 	git(checkout => '-b',$branchname, $branchfrom)
@@ -1066,7 +1088,7 @@ sub git_create_branch {
 sub state_changed {  
 	logsub("&state_changed");
 	return unless $config->{use_git};
-	git("diff", $file->git_state_store());
+	git("diff");
 }
 
 sub git_branch_exists { 
