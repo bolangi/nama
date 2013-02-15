@@ -115,7 +115,7 @@ sub load_project {
 	logsub("&load_project");
 	my %h = @_;
 	logpkg('debug', sub{yaml_out \%h});
-	pager2("no project name.. doing nothing."),return 
+	throw("no project name.. doing nothing."),return 
 		unless $h{name} or $project->{name};
 
 	$project->{name} = $h{name} if $h{name};
