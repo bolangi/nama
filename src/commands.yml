@@ -577,7 +577,7 @@ get_state:
   type: project
   what: Retrieve project settings from file, branch or tag
   short: get recall retrieve
-  parameters: [ <s_settings_target> ]
+  parameters: <s_settings_target>
 list_projects:
   type: project
   what: List all projects. This will list all Nama projects, which are stored in the Nama project root directory.
