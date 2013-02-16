@@ -165,10 +165,10 @@ limiter: tap_limiter 0 0
 # ~/.namarc						# config file
 # ~/nama/untitled				# project directory
 # ~/nama/untitled/.wav			# wav directory
-# ~/nama/untitled/State.yml		# project state
+# ~/nama/untitled/State.json    # version controlled project state
+# ~/nama/untitled/Aux.json      # additional project state
 # ~/nama/untitled/Setup.ecs		# Ecasound chain setup
 # ~/nama/.effects_cache			# static effects data
-# ~/nama/effect_chains			# Nama effect presets
-# ~/nama/effect_profiles		# Nama effect profiles
-# end
+# ~/nama/global_effect_chains.json # User defined effect chains and profiles
 
+# end
