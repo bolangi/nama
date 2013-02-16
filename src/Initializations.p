@@ -120,7 +120,7 @@ sub definitions {
 		memoize 						=> 1,
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
-		use_git							=> 0,
+		use_git							=> 1,
 		save_as_file					=> 1,
 		autosave						=> 0,
 		volume_control_operator 		=> 'ea', # default to linear scale
