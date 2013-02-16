@@ -188,12 +188,11 @@ track => <<TRACK,
    cache_track,   cache,   ct  - store effects-processed track signal as new version
    uncache_track, uncache, unc - select uncached track version, replace effects
 
- - hazardous commands for advanced users
+ - hazardous or destructive commands for advanced users
 
    set_track               - directly set current track parameters
 
    destroy_current_wav     - unlink current track's selected WAV version.
-                             Destructive command! USE WITH CARE!!
 
 TRACK
 
