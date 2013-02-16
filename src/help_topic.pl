@@ -32,8 +32,8 @@ project => <<PROJECT,
    project_name, name          - show the current project name
    create_project, create    - create a new project directory tree 
    list_projects, lp         - list all Nama projects
-   get_state, recall, retrieve, restore  - retrieve saved settings
-   save_state, keep, save    - save project settings to disk
+   get_state, get            - retrieve named file or tag
+   save_state, keep, save    - save state as file or tag
    memoize                   - enable WAV directory cache (default OFF)
    unmemoize                 - disable WAV directory cache
    exit, quit                - exit program, saving state 
@@ -41,9 +41,9 @@ project => <<PROJECT,
  (Version control)
 
    tag                       - tag the current project state (i.e. commit) 
-                               with a name and message
+                               with a name and optional message
    branch, br                - checkout named branch or tag, 
-                               list branches (w/o args)
+                               list branches, tags
    new_branch, nbr           - create a new branch based on current 
                                state (commit)
    
