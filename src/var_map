@@ -1,5 +1,4 @@
 	$project_name				$project->{name}
-	$saved_version 				$project->{save_file_version_number}
 	%bunch						$project->{bunch}
 	**							$project->{repo}
 	**							$project->{timebase}
@@ -104,10 +103,10 @@
 	%fade_out_level 			$config->{fade_out_level}
 	$fade_resolution 			$config->{fade_resolution}
 	%unity_level				$config->{unity_level}
-	$cop_id 					$fx->{id_counter}
-	%cops		 				$fx->{applied}
-	%copp						$fx->{params}
-	%copp_exp   				$fx->{params_log}
+	**							$fx->{id_counter}
+	**							$fx->{applied}
+	**							$fx->{params}
+	**							$fx->{params_log}
 
 	%midish_command				$midi->{keywords}
 	$midi_input_dev    			$midi->{input_dev}
@@ -115,28 +114,28 @@
 	$controller_ports			$midi->{controller_ports}
     $midi_inputs				$midi->{inputs}
 
-	$grammar					$text->{grammar}
-	$parser						$text->{parser}
-	$text_wrap					$text->{wrap}
-	@format_fields 				$text->{format_fields}
+	**							$text->{grammar}
+	**							$text->{parser}
+	**							$text->{wrap}
+	**							$text->{format_fields}
 	
-	$commands_yml				$text->{commands_yml}
-	%commands					$text->{commands}
+	**							$text->{commands_yml}
+	**							$text->{commands}
 	**							$text->{command_shortcuts}
-	%iam_cmd					$text->{iam}
-	@nama_commands 				$text->{arr_nama_cmds}
-	%nama_commands				$text->{nama_commands}
+	**							$text->{iam}
+	**							$text->{arr_nama_cmds}
+	**							$text->{nama_commands}
 
-	$term 						$text->{term}
-	$previous_text_command 		$text->{previous_cmd}
-	@keywords      				$text->{keywords}
-    $prompt						$text->{prompt}
-	$attribs       				$text->{term_attribs}
-	$format_top    				$text->{format_top}
-	$format_divider				$text->{format_divider}
-	%user_command 				$text->{user_command}
-	%user_alias   				$text->{user_alias}
-	@command_history 			$text->{command_history}
+	**							$text->{term}
+	**							$text->{previous_cmd}
+	**							$text->{keywords}
+    $prompt
+	**							$text->{term_attribs}
+	**							$text->{format_top}
+	**							$text->{format_divider}
+	**							$text->{user_command}
+	**							$text->{user_alias}
+	**							$text->{command_history}
 	**							$text->{undo_buffer}
 
 	$dummy						$mode->{_eager_opt}
