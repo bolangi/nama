@@ -6,4 +6,4 @@ print join $/,
 		grep { my @var = split " ", $_; @var == 2 } # take only substitutions
 		grep{ ! /^\s*$/ }  	# skip blank lines
 		map{ s/#.*$//; $_}  # remove comments
-		split "\n", read_file("./var_map");
+		split "\n", read_file("./config_map");
