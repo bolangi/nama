@@ -11,4 +11,3 @@ $prompt
 $debug
 $debug2
 @persistent_vars
-@project_config_vars
