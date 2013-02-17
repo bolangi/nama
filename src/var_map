@@ -24,7 +24,6 @@
 	**							$config->{sample_rate}
 	$use_git					$config->{use_git}
 	$autosave					$config->{autosave}
-	$save_as_file				$config->{save_as_file}
 	**							$config->{no_fade_mute_delay}
 	
 	%ti
@@ -169,7 +168,6 @@
 	$memoize       					$config->{memoize}
 	$hires        					$config->{hires_timer}
 	%opts          					$config->{opts}
-	$default						$config->{default}	
 	$project_root 	 				$config->{root_dir}
 	$use_group_numbering 			$config->{use_group_numbering}
 	$press_space_to_start_transport $config->{press_space_to_start}
