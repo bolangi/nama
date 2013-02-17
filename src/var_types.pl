@@ -40,7 +40,7 @@
 # note that this includes project-specific effect
 # chains
 
-@untracked_state_vars = qw(
+@persistent_untracked_vars = qw(
 
 	$project->{save_file_version_number}
 	$project->{timebase}

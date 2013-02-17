@@ -19,4 +19,4 @@ $this_track_name
 %track_comments
 %track_version_comments
 @persistent_vars
-@untracked_state_vars
+@persistent_untracked_vars
