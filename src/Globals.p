@@ -39,9 +39,8 @@ our %EXPORT_TAGS =
 
 	var_types => [qw(
 
-						@config_vars
 						@persistent_vars
-						@unversioned_state_vars
+						@untracked_state_vars
 						@global_effect_chain_vars
 	)],
 
