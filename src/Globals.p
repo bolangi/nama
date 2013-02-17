@@ -10,7 +10,7 @@ use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
 
-[% join "\n", split " ",qx(./strip_all ./globals.pl ./singletons.pl ./serialize.pl) %]
+[% join "\n", split " ",qx(./strip_all ./pronouns.pl ./singletons.pl ./serialize.pl) %]
 
 );
 
@@ -31,7 +31,7 @@ our %EXPORT_TAGS =
 
 	globals => [qw( 
 
-[% qx(./strip_all ./globals.pl) %]
+[% qx(./strip_all ./pronouns.pl) %]
 
 	)],
 
