@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
-$/ = undef;
-my $in = <>;
-print strip_all($in);
+use File::Slurp;
+my @files = @ARGV;
+map{ print strip_all(read_file($_)) } @files;
 sub strip_all{ strip_blank_lines( strip_comments(@_) ) }
 
 sub strip_blank_lines {
