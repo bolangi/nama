@@ -35,7 +35,7 @@ sub definitions {
 
 	$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
 
-	[% qx(./strip_all ./var_types.pl) %]
+	[% qx(./strip_all ./var_lists.pl) %]
 
 	$text->{wrap} = new Text::Format {
 		columns 		=> 75,
