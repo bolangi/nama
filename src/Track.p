@@ -1,10 +1,13 @@
 # ---------- Track -----------
 #
-# give all classes (packages) access to global vars 
 
+# By declaring "our", all packages in this file
+# get access to global variables without
+# individually having to ask for them
 package ::;
 our (
-	[% join qq(,\n\t), split " ", qx(cat 	./singletons.pl ./globals.pl  ./serialize.pl ) %]
+	[% join qq(,\n\t), split " ", qx(./strip_all ./singletons.pl ./globals.pl  ./serialize.pl ) %]
+
 );
 {
 package ::Track;

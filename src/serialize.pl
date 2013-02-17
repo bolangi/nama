@@ -10,7 +10,13 @@
 @project_effect_chain_data
 $this_track_name
 
+# these variables get written into track objects
+# on project load, then separated out on
+# project save, so that the data can 
+# be kepts out of VCS
+
 %cache_map
 %track_comments
 %track_version_comments
+@persistent_vars
 @untracked_state_vars

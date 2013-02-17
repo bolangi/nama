@@ -10,4 +10,3 @@ $prompt
 %bn
 $debug
 $debug2
-@persistent_vars

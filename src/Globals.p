@@ -10,9 +10,7 @@ use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
 
-[% qx(cat ./singletons.pl) %]
-[% qx(cat ./globals.pl   ) %]
-[% qx(cat ./serialize.pl ) %]
+[% join "\n", split " ",qx(./strip_all ./globals.pl ./singletons.pl ./serialize.pl) %]
 
 );
 
@@ -20,33 +18,26 @@ our %EXPORT_TAGS =
 (
 	singletons => [qw( 	
 
-[% qx(cat ./singletons.pl) %]
+[% qx(./strip_all ./singletons.pl) %]
 
 	)],
 
-	pronouns => [qw(
-						$this_track
-						$this_bus
-						$this_op
-						$this_param
-						$this_mark
-						$this_edit
-						%tn
-						%ti
-						%bn
-						$prompt
-	)],
-
-	var_types => [qw(
+	var_lists => [qw(
 
 						@persistent_vars
 						@untracked_state_vars
 						@global_effect_chain_vars
 	)],
 
+	globals => [qw( 
+
+[% qx(./strip_all ./globals.pl) %]
+
+	)],
+
 	serialize =>  [qw(
 
-[% qx(cat ./serialize.pl ) %]
+[% qx(./strip_all ./serialize.pl ) %]
 
 	)],
 );
