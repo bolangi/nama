@@ -1,28 +1,90 @@
-	**							$project->{name}
-	**							$project->{bunch}
-	**							$project->{repo}
-	**							$project->{timebase}
-	**							$project->{track_comments}
-	** 							$project->{track_version_comments}
-	** 							$project->{cache_map}
-	**							$project->{config}
-	** 							$project->{save_file_version_number}
-	**							$project->{undo_buffer}
+	%abbreviations					$config->{abbreviations}
+	$serialize_formats  	        $config->{serialize_formats}
+	$mix_to_disk_format 			$config->{mix_to_disk_format}
+	$raw_to_disk_format 			$config->{raw_to_disk_format}
+	$cache_to_disk_format 			$config->{cache_to_disk_format}
+	$mixer_out_format 				$config->{mixer_out_format}
+	$use_pager     					$config->{use_pager}
+	$use_placeholders  				$config->{use_placeholders}
+	%is_system_bus 					$config->{_is_system_bus}
+	**								$config->{sample_rate}
+	$use_git						$config->{use_git}
+	$autosave						$config->{autosave}
+
+	%devices 						$config->{devices}
+	$alsa_playback_device 			$config->{alsa_playback_device}
+	$alsa_capture_device			$config->{alsa_capture_device}
+	$soundcard_channels				$config->{soundcard_channels}
+	$memoize       					$config->{memoize}
+	$hires        					$config->{hires_timer}
+	%opts          					$config->{opts}
+	$project_root 	 				$config->{root_dir}
+	$use_group_numbering 			$config->{use_group_numbering}
+	$press_space_to_start_transport $config->{press_space_to_start}
+	$execute_on_project_load 		$config->{execute_on_project_load}
+	$initial_user_mode 				$config->{initial_mode}
+	$midish_enable 					$config->{use_midish}
+	$use_jack_plumbing 				$config->{use_jack_plumbing}
+	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
+	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
+	$volume_control_operator 		$config->{volume_control_operator}
+	$tk_input_channels 				$config->{soundcard_channels}
+	$disable_auto_reconfigure 		$config->{disable_auto_reconfigure}
+
+    $edit_playback_end_margin  		$config->{edit_playback_end_margin}
+    $edit_crossfade_time  			$config->{edit_crossfade_time}
+	$default_fade_length 			$config->{engine_fade_default_length}
+	$fade_time 						$config->{engine_fade_length_on_start_stop}
+	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
+	$seek_delay    					$config->{engine_jack_seek_delay}
+
+	$ecasound_tcp_port 				$config->{engine_tcp_port}
+	$ecasound_globals_general		$config->{engine_globals_general}
+	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
+	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
+	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
+	$ecasound_buffersize_nonrealtime	$config->{engine_buffersize_nonrealtime}
+ 
+	%mute_level						$config->{mute_level}
+	%fade_out_level 				$config->{fade_out_level}
+	$fade_resolution 				$config->{fade_resolution}
+	%unity_level					$config->{unity_level}
+
+	@mastering_track_names			$mastering->{track_names}
+	@mastering_effect_ids			$mastering->{fx_ids}
+	$eq 							$mastering->{fx_eq}
+	$low_pass 						$mastering->{fx_low_pass}
+	$mid_pass						$mastering->{fx_mid_pass}
+	$high_pass						$mastering->{fx_high_pass}
+	$compressor						$mastering->{fx_compressor}
+	$spatialiser					$mastering->{fx_spatialiser}
+	$limiter						$mastering->{fx_limiter}
+
+	%midish_command					$midi->{keywords}
+	$midi_input_dev    				$midi->{input_dev}
+	$midi_output_dev   				$midi->{output_dev}
+	$controller_ports				$midi->{controller_ports}
+    $midi_inputs					$midi->{inputs}
+
+
+
+	**								$config->{no_fade_mute_delay}
 	
-	%abbreviations				$config->{abbreviations}
-	$serialize_formats          $config->{serialize_formats}
-	$mix_to_disk_format 		$config->{mix_to_disk_format}
-	$raw_to_disk_format 		$config->{raw_to_disk_format}
-	$cache_to_disk_format 		$config->{cache_to_disk_format}
-	$mixer_out_format 			$config->{mixer_out_format}
-	$use_pager     				$config->{use_pager}
-	$use_placeholders  			$config->{use_placeholders}
-	%is_system_bus 				$config->{_is_system_bus}
-	**							$config->{sample_rate}
-	$use_git					$config->{use_git}
-	$autosave					$config->{autosave}
-	**							$config->{no_fade_mute_delay}
-	
+	**								$config->{fade_time1_fraction}
+	**								$config->{fade_down_fraction}
+	**								$config->{fade_time2_fraction}
+	**								$config->{fade_down_fraction}
+	**								$config->{fader_op}
+	**								$config->{serialize_formats}
+	$beep_command 					$config->{beep_command}
+	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
+	**								$config->{category}
+	** 								$engine->{jack_seek_delay}
+	**								$config->{want_logging}
+	**								$config->{latency_op}
+	**								$config->{latency_op_init}
+	**								$config->{latency_op_set}
+
 	%ti
 	%tn
 	%bn
@@ -103,12 +165,6 @@
 	**							$fx->{params}
 	**							$fx->{params_log}
 
-	%midish_command				$midi->{keywords}
-	$midi_input_dev    			$midi->{input_dev}
-	$midi_output_dev   			$midi->{output_dev}
-	$controller_ports			$midi->{controller_ports}
-    $midi_inputs				$midi->{inputs}
-
 	**							$text->{grammar}
 	**							$text->{parser}
 	**							$text->{wrap}
@@ -124,7 +180,6 @@
 	**							$text->{term}
 	**							$text->{previous_cmd}
 	**							$text->{keywords}
-    $prompt
 	**							$text->{term_attribs}
 	**							$text->{format_top}
 	**							$text->{format_divider}
@@ -133,14 +188,25 @@
 	**							$text->{command_history}
 	**							$text->{undo_buffer}
 
-	$dummy						$mode->{_eager_opt}
-
+	**							$project->{name}
+	**							$project->{bunch}
+	**							$project->{repo}
+	**							$project->{timebase}
+	**							$project->{track_comments}
+	** 							$project->{track_version_comments}
+	** 							$project->{cache_map}
+	**							$project->{config}
+	** 							$project->{save_file_version_number}
+	**							$project->{undo_buffer}
+	
 	$this_track
 	$this_mark
 	$this_bus
 	$this_edit
 	$this_track_name 
 	$this_op
+    
+	$prompt
  
 	@tracks_data
 	@bus_data
@@ -155,44 +221,6 @@
 	@config_vars
 	@effects_static_vars
 
-	%devices 						$config->{devices}
-	$alsa_playback_device 			$config->{alsa_playback_device}
-	$alsa_capture_device			$config->{alsa_capture_device}
-	$soundcard_channels				$config->{soundcard_channels}
-	$memoize       					$config->{memoize}
-	$hires        					$config->{hires_timer}
-	%opts          					$config->{opts}
-	$project_root 	 				$config->{root_dir}
-	$use_group_numbering 			$config->{use_group_numbering}
-	$press_space_to_start_transport $config->{press_space_to_start}
-	$execute_on_project_load 		$config->{execute_on_project_load}
-	$initial_user_mode 				$config->{initial_mode}
-	$midish_enable 					$config->{use_midish}
-	$use_jack_plumbing 				$config->{use_jack_plumbing}
-	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
-	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
-	$volume_control_operator 		$config->{volume_control_operator}
-	$tk_input_channels 				$config->{soundcard_channels}
-	$disable_auto_reconfigure 		$config->{disable_auto_reconfigure}
-
-    $edit_playback_end_margin  		$config->{edit_playback_end_margin}
-    $edit_crossfade_time  			$config->{edit_crossfade_time}
-	$default_fade_length 			$config->{engine_fade_default_length}
-	$fade_time 						$config->{engine_fade_length_on_start_stop}
-	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
-	$seek_delay    					$config->{engine_jack_seek_delay}
-
-	$ecasound_tcp_port 				$config->{engine_tcp_port}
-	$ecasound_globals_general		$config->{engine_globals_general}
-	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
-	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
-	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
-	$ecasound_buffersize_nonrealtime	$config->{engine_buffersize_nonrealtime}
- 
-	%mute_level						$config->{mute_level}
-	%fade_out_level 				$config->{fade_out_level}
-	$fade_resolution 				$config->{fade_resolution}
-	%unity_level					$config->{unity_level}
 	
 	**								$file->{effects_cache}
 	** 								$file->{global_effect_chains}
@@ -203,16 +231,6 @@
 	**								$file->{user_customization}
 	**								$file->{gui_palette}
 	**								$file->{custom_pl}
-
-	@mastering_track_names			$mastering->{track_names}
-	@mastering_effect_ids			$mastering->{fx_ids}
-	$eq 							$mastering->{fx_eq}
-	$low_pass 						$mastering->{fx_low_pass}
-	$mid_pass						$mastering->{fx_mid_pass}
-	$high_pass						$mastering->{fx_high_pass}
-	$compressor						$mastering->{fx_compressor}
-	$spatialiser					$mastering->{fx_spatialiser}
-	$limiter						$mastering->{fx_limiter}
 
 	**								$gui->{_seek_unit}
 	**								$gui->{_project_name}
@@ -286,18 +304,4 @@
 	**								$gui->{_old_bg}
 	**								$gui->{_old_abg}
 
-	**								$config->{fade_time1_fraction}
-	**								$config->{fade_down_fraction}
-	**								$config->{fade_time2_fraction}
-	**								$config->{fade_down_fraction}
-	**								$config->{fader_op}
-	**								$config->{serialize_formats}
-	$beep_command 					$config->{beep_command}
-	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
-	**								$config->{category}
-	** 								$engine->{jack_seek_delay}
-	**								$config->{want_logging}
-	**								$config->{latency_op}
-	**								$config->{latency_op_init}
-	**								$config->{latency_op_set}
 	**								$jack->{use_jacks}
