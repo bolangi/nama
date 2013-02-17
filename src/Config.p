@@ -71,7 +71,7 @@ sub read_config {
 	walk_tree(\%cfg); # second pass completes substitutions
 	assign( 
 		data => \%cfg,
-		vars => [ @config_vars ], # config file format doesnt change
+		vars => [ config_vars() ],
 		class => '::',
 		var_map => 1,
 	);
