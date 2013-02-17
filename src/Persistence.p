@@ -379,10 +379,6 @@ sub restore_state_from_file {
 
 	restore_global_effect_chains();
 
-	##  print yaml_out \@groups_data; 
-	
-	# backward compatibility fixes for older projects
-	
 	
 	my @vars = qw(
 				@tracks_data
@@ -403,203 +399,19 @@ sub restore_state_from_file {
 	} @vars;
 
 	if (! $project->{save_file_version_number} ){
-
-		# Tracker group is now called 'Main'
+		warn "State file does not contain version number."
+	} 
 	
-		map{ $_->{name} = 'Main'} grep{ $_->{name} eq 'Tracker' } @groups_data;
-		
-		for my $t (@tracks_data){
-			$t->{group} =~ s/Tracker/Main/;
-			if( $t->{source_select} eq 'soundcard'){
-				$t->{source_type} = 'soundcard' ;
-				$t->{source_id} = $t->{ch_r}
-			}
-			elsif( $t->{source_select} eq 'jack'){
-				$t->{source_type} = 'jack_client' ;
-				$t->{source_id} = $t->{jack_source}
-			}
-			if( $t->{send_select} eq 'soundcard'){
-				$t->{send_type} = 'soundcard' ;
-				$t->{send_id} = $t->{ch_m}
-			}
-			elsif( $t->{send_select} eq 'jack'){
-				$t->{send_type} = 'jack_client' ;
-				$t->{send_id} = $t->{jack_send}
-			}
-		}
-	}
-	if( $project->{save_file_version_number} < 0.9986){
-	
-		map { 	# store insert without intermediate array
 
-				my $t = $_;
+	####### Backward Compatibility ########
 
-				# use new storage format for inserts
-				my $i = $t->{inserts};
-				if($i =~ /ARRAY/){ 
-					$t->{inserts} = scalar @$i ? $i->[0] : {}  }
-				
-				# initialize inserts effect_chain_stack and cache_map
-
-				$t->{inserts} //= {};
-				$t->{effect_chain_stack} //= [];
-				$t->{cache_map} //= {};
-
-				# set class for Mastering tracks
-
-				$t->{class} = '::MasteringTrack' if $t->{group} eq 'Mastering';
-				$t->{class} = '::SimpleTrack' if $t->{name} eq 'Master';
-
-				# rename 'ch_count' field to 'width'
-				
-				$t->{width} = $t->{ch_count};
-				delete $t->{ch_count};
-
-				# set Mixdown track width to 2
-				
-				$t->{width} = 2 if $t->{name} eq 'Mixdown';
-				
-				# remove obsolete fields
-				
-				map{ delete $t->{$_} } qw( 
-											delay 
-											length 
-											start_position 
-											ch_m 
-											ch_r
-											source_select 
-											jack_source   
-											send_select
-											jack_send);
-		}  @tracks_data;
-	}
-
-	# jack_manual is now called jack_port
-	if ( $project->{save_file_version_number} <= 1){
-		map { $_->{source_type} =~ s/jack_manual/jack_port/ } @tracks_data;
-	}
-	if ( $project->{save_file_version_number} <= 1.053){ # convert insert data to object
-		my $n = 0;
-		@inserts_data = ();
-		for my $t (@tracks_data){
-			my $i = $t->{inserts};
-			next unless keys %$i;
-			$t->{postfader_insert} = ++$n;
-			$i->{class} = '::PostFaderInsert';
-			$i->{n} = $n;
-			$i->{wet_name} = $t->{name} . "_wet";
-			$i->{dry_name} = $t->{name} . "_dry";
-			delete $t->{inserts};
-			delete $i->{tracks};
-			push @inserts_data, $i;
-		} 
-	}
-	if ( $project->{save_file_version_number} <= 1.054){ 
-
-		for my $t (@tracks_data){
-
-			# source_type 'track' is now  'bus'
-			$t->{source_type} =~ s/track/bus/;
-
-			# convert 'null' bus to 'Null' (which is eliminated below)
-			$t->{group} =~ s/null/Null/;
-		}
-
-	}
-
-	if ( $project->{save_file_version_number} <= 1.055){ 
-
-	# get rid of Null bus routing
-	
-		map{$_->{group}       = 'Main'; 
-			$_->{source_type} = 'null';
-			$_->{source_id}   = 'null';
-		} grep{$_->{group} eq 'Null'} @tracks_data;
-
-	}
-
-	if ( $project->{save_file_version_number} <= 1.064){ 
-		map{$_->{version} = $_->{active};
-			delete $_->{active}}
-			grep{$_->{active}}
-			@tracks_data;
-	}
-
-	logpkg('debug', "inserts data", sub{yaml_out \@inserts_data});
-
-
-	# make sure Master has reasonable output settings
-	
-	map{ if ( ! $_->{send_type}){
-				$_->{send_type} = 'soundcard',
-				$_->{send_id} = 1
-			}
-		} grep{$_->{name} eq 'Master'} @tracks_data;
-
-	if ( $project->{save_file_version_number} <= 1.064){ 
-
-		map{ 
-			my $default_list = ::IO::default_jack_ports_list($_->{name});
-
-			if( -e join_path(project_root(),$default_list)){
-				$_->{source_type} = 'jack_ports_list';
-				$_->{source_id} = $default_list;
-			} else { 
-				$_->{source_type} = 'jack_manual';
-				$_->{source_id} = ($_->{target}||$_->{name}).'_in';
-			}
-		} grep{ $_->{source_type} eq 'jack_port' } @tracks_data;
-	}
-	
-	if ( $project->{save_file_version_number} <= 1.067){ 
-
-		map{ $_->{current_edit} or $_->{current_edit} = {} } @tracks_data;
-		map{ 
-			delete $_->{active};
-			delete $_->{inserts};
-			delete $_->{prefader_insert};
-			delete $_->{postfader_insert};
-			
-			# eliminate field is_mix_track
-			if ($_->{is_mix_track} ){
-				 $_->{source_type} = 'bus';
-				 $_->{source_id}   = undef;
-			}
-			delete $_->{is_mix_track};
-
- 		} @tracks_data;
-	}
-
-	if ( $project->{save_file_version_number} <= 1.068){ 
-
-		# initialize version_comment field
-		map{ $_->{version_comment} or $_->{version_comment} = {} } @tracks_data;
-
-		# convert existing comments to new format
-		map{ 
-			while ( my($v,$comment) = each %{$_->{version_comment}} )
-			{ 
-				$_->{version_comment}{$v} = { user => $comment }
-			}
-		} grep { $_->{version_comment} } @tracks_data;
-	}
-
-	# convert to new MixTrack class
-	if ( $project->{save_file_version_number} < 1.069){ 
-		map {
-		 	$_->{was_class} = $_->{class};
-			$_->{class} = $_->{'::MixTrack'};
-		} 
-		grep { 
-			$_->{source_type} eq 'bus' or 
-		  	$_->{source_id}   eq 'bus'
-		} 
-		@tracks_data;
-	}
 	if ( $project->{save_file_version_number} <= 1.100){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
+
+	#######################################
+
 
 	#  destroy and recreate all buses
 
