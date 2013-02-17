@@ -1,41 +1,34 @@
-	%abbreviations					$config->{abbreviations}
-	$serialize_formats  	        $config->{serialize_formats}
-	$mix_to_disk_format 			$config->{mix_to_disk_format}
-	$raw_to_disk_format 			$config->{raw_to_disk_format}
-	$cache_to_disk_format 			$config->{cache_to_disk_format}
-	$mixer_out_format 				$config->{mixer_out_format}
-	$use_pager     					$config->{use_pager}
-	$use_placeholders  				$config->{use_placeholders}
-	%is_system_bus 					$config->{_is_system_bus}
-	$use_git						$config->{use_git}
-	$autosave						$config->{autosave}
+############ var_map - Nama's variable registry
+#
+#   Nama variables are listed here for two purposes
+#
+#   1. Mapping from .namarc to internal Nama variable.
+#      This is only required for config file variables.
+#
+#   2. Checking for hash key typos using check_hash_keys script
+
+### Config variables
+
+#   namarc file variable			nama internal variable
+#   ---------------------			-------------------------
+
+#   [external resources]
 
 	%devices 						$config->{devices}
 	$alsa_playback_device 			$config->{alsa_playback_device}
 	$alsa_capture_device			$config->{alsa_capture_device}
 	$soundcard_channels				$config->{soundcard_channels}
-	$memoize       					$config->{memoize}
-	$hires        					$config->{hires_timer}
-	%opts          					$config->{opts}
-	$project_root 	 				$config->{root_dir}
-	$use_group_numbering 			$config->{use_group_numbering}
-	$press_space_to_start_transport $config->{press_space_to_start}
-	$execute_on_project_load 		$config->{execute_on_project_load}
-	$initial_user_mode 				$config->{initial_mode}
-	$midish_enable 					$config->{use_midish}
-	$use_jack_plumbing 				$config->{use_jack_plumbing}
-	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
-	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
-	$volume_control_operator 		$config->{volume_control_operator}
-	$tk_input_channels 				$config->{soundcard_channels}
-	$disable_auto_reconfigure 		$config->{disable_auto_reconfigure}
 
-    $edit_playback_end_margin  		$config->{edit_playback_end_margin}
-    $edit_crossfade_time  			$config->{edit_crossfade_time}
-	$default_fade_length 			$config->{engine_fade_default_length}
-	$fade_time 						$config->{engine_fade_length_on_start_stop}
-	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
-	$seek_delay    					$config->{engine_jack_seek_delay}
+#	[audio formats]
+
+	%abbreviations					$config->{abbreviations}
+	$mix_to_disk_format 			$config->{mix_to_disk_format}
+	$raw_to_disk_format 			$config->{raw_to_disk_format}
+	$cache_to_disk_format 			$config->{cache_to_disk_format}
+	$mixer_out_format 				$config->{mixer_out_format}
+	$sample_rate					$config->{sample_rate}
+
+#	[engine]
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
 	$ecasound_globals_general		$config->{engine_globals_general}
@@ -43,14 +36,9 @@
 	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
 	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
 	$ecasound_buffersize_nonrealtime	$config->{engine_buffersize_nonrealtime}
- 
-	%mute_level						$config->{mute_level}
-	%fade_out_level 				$config->{fade_out_level}
-	$fade_resolution 				$config->{fade_resolution}
-	%unity_level					$config->{unity_level}
 
-	@mastering_track_names			$mastering->{track_names}
-	@mastering_effect_ids			$mastering->{fx_ids}
+#	[mastering]
+
 	$eq 							$mastering->{fx_eq}
 	$low_pass 						$mastering->{fx_low_pass}
 	$mid_pass						$mastering->{fx_mid_pass}
@@ -59,28 +47,75 @@
 	$spatialiser					$mastering->{fx_spatialiser}
 	$limiter						$mastering->{fx_limiter}
 
-	%midish_command					$midi->{keywords}
+#	[other]
+
+	$project_root 	 				$config->{root_dir}
+	$use_group_numbering 			$config->{use_group_numbering}
+	$press_space_to_start_transport $config->{press_space_to_start}
+	$execute_on_project_load 		$config->{execute_on_project_load}
+	$initial_user_mode 				$config->{initial_mode}
+	$midish_enable 					$config->{use_midish}
+	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
+	$use_jack_plumbing 				$config->{use_jack_plumbing}
+	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
+	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
+	$volume_control_operator 		$config->{volume_control_operator}
+	$serialize_formats  	        $config->{serialize_formats}
+	$use_git						$config->{use_git}
+	$autosave						$config->{autosave}
+	$beep_command 					$config->{beep_command}
+
+### configurable in namarc, but not listed
+
+	$use_pager     					$config->{use_pager}
+	$use_placeholders  				$config->{use_placeholders}
+
+    $edit_playback_end_margin  		$config->{edit_playback_end_margin}
+    $edit_crossfade_time  			$config->{edit_crossfade_time}
+	$default_fade_length 			$config->{engine_fade_default_length}
+	$fade_time 						$config->{engine_fade_length_on_start_stop}
+	$seek_delay    					$config->{engine_jack_seek_delay}
+ 
+	%mute_level						$config->{mute_level}
+	%fade_out_level 				$config->{fade_out_level}
+	$fade_resolution 				$config->{fade_resolution}
+	%unity_level					$config->{unity_level}
+
+	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
+
+	# currently unused
+	
 	$midi_input_dev    				$midi->{input_dev}
 	$midi_output_dev   				$midi->{output_dev}
 	$controller_ports				$midi->{controller_ports}
     $midi_inputs					$midi->{inputs}
-	$beep_command 					$config->{beep_command}
-	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
 
-	**								$config->{sample_rate}
+
+
+### Other unmapped variables
+
+	**								$midi->{keywords}
+
+	**								$config->{memoize}
+	**								$config->{hires_timer}
+	**								$config->{opts}
+	**								$config->{soundcard_channels}
+	**								$config->{disable_auto_reconfigure}
+
 	**								$config->{no_fade_mute_delay}
 	**								$config->{fade_time1_fraction}
 	**								$config->{fade_down_fraction}
 	**								$config->{fade_time2_fraction}
 	**								$config->{fade_down_fraction}
 	**								$config->{fader_op}
-	**								$config->{serialize_formats}
 	**								$config->{category}
 	** 								$engine->{jack_seek_delay}
 	**								$config->{want_logging}
 	**								$config->{latency_op}
 	**								$config->{latency_op_init}
 	**								$config->{latency_op_set}
+
+	**								$config->{_is_system_bus}
 
 	**							$jack->{jackd_running}
 	**							$jack->{ports_list_text}
@@ -272,34 +307,5 @@
 
 	**								$jack->{use_jacks}
 
-	$this_track
-	$this_mark
-	$this_bus
-	$this_edit
-	$this_track_name 
-	$this_op
-    
-	$prompt
- 
-	@tracks_data
-	@bus_data
-	@groups_data
-	@marks_data
-	@fade_data
-	@edit_data
-	@inserts_data
-	@project_effect_chain_data
-	
-	@persistent_vars
-	@config_vars
-	@effects_static_vars
-
-	%ti
-	%tn
-	%bn
-	
-	$debug
-	$debug2
-	$debug3
-
-	
+	**								$mastering->{track_names}
+	**								$mastering->{fx_ids}
