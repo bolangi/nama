@@ -27,11 +27,6 @@
 	@edit_data
 	@inserts_data
 
-# category: pronouns
-
-	$this_track_name # for save/restore 
-	$this_op      	# current effect
-
 	$project->{save_file_version_number}
 	
 	$fx->{applied}
@@ -41,8 +36,9 @@
 );
 
 # these variables get saved to Aux.json
+# which is not under version control
 
-@unversioned_state_vars = qw(
+@untracked_state_vars = qw(
 
 	$project->{save_file_version_number}
 	$project->{timebase}

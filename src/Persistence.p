@@ -151,9 +151,9 @@ sub save_system_state {
 	} @formats;
 
 	serialize(
-		file => $file->unversioned_state_store,
+		file => $file->untracked_state_store,
 		format => 'json',
-		vars => \@unversioned_state_vars,
+		vars => \@untracked_state_vars,
 		class => '::',
 	);	
 
@@ -309,7 +309,7 @@ sub restore_state_from_file {
 	logpkg('debug', "source: $source");
 
 	
-	( $path, $suffix ) = get_newest($file->unversioned_state_store);
+	( $path, $suffix ) = get_newest($file->untracked_state_store);
 	if ($path)
 	{
 		$source = read_file($path);
@@ -317,7 +317,7 @@ sub restore_state_from_file {
 		my $ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
-				vars   	=> \@unversioned_state_vars,
+				vars   	=> \@untracked_state_vars,
 				class 	=> '::');
 		assign_singletons( { data => $ref });
 	}

@@ -80,7 +80,7 @@ sub definitions {
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      			\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
-		unversioned_state_store => ['Aux',					\&project_dir ],
+		untracked_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 		user_customization 		=> ['custom.pl',      		\&project_root],
