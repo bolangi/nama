@@ -1,18 +1,16 @@
-	$project_name				$project->{name}
-	%bunch						$project->{bunch}
+	**							$project->{name}
+	**							$project->{bunch}
 	**							$project->{repo}
 	**							$project->{timebase}
 	**							$project->{track_comments}
 	** 							$project->{track_version_comments}
 	** 							$project->{cache_map}
+	**							$project->{config}
+	** 							$project->{save_file_version_number}
+	**							$project->{undo_buffer}
 	
-	$main_bus 					$bn{main}
-	$main						$bn{main} 
-	$null_bus					$bn{null}
-
 	%abbreviations				$config->{abbreviations}
 	$serialize_formats          $config->{serialize_formats}
-
 	$mix_to_disk_format 		$config->{mix_to_disk_format}
 	$raw_to_disk_format 		$config->{raw_to_disk_format}
 	$cache_to_disk_format 		$config->{cache_to_disk_format}
@@ -75,14 +73,15 @@
     **			    			$fx_cache->{lv2_help}
     %e_bound        			$fx_cache->{split}
 
-	$help_screen  				$help->{screen}
-	@help_topic   				$help->{arr_topic}
-	%help_topic   				$help->{topic}
+	**							$help->{screen}
+	**							$help->{arr_topic}
+	**							$help->{topic}
+    **							$help->{usage}
  
-	$preview      				$mode->{preview}
-    $eager_mode					$mode->{eager}
-    $offset_run_flag 			$mode->{offset_run}
-    $soloing       				$mode->{soloing}
+	**							$mode->{preview}
+    **							$mode->{eager}
+    **							$mode->{offset_run}
+    **							$mode->{soloing}
 	$loop_enable 				$mode->{loop_enable}
 	$mastering_mode				$mode->{mastering}
 	**							$mode->{midish_terminal}
@@ -293,9 +292,8 @@
 	**								$config->{fade_down_fraction}
 	**								$config->{fader_op}
 	**								$config->{serialize_formats}
-	**								$project->{config}
 	$beep_command 					$config->{beep_command}
-	$enforce_channel_bounds    $config->{enforce_channel_bounds}
+	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
 	**								$config->{category}
 	** 								$engine->{jack_seek_delay}
 	**								$config->{want_logging}
@@ -303,4 +301,5 @@
 	**								$config->{latency_op_init}
 	**								$config->{latency_op_set}
 	**								$jack->{use_jacks}
+
 
