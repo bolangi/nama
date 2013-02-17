@@ -1,16 +1,9 @@
 # ---------- Track -----------
 #
-
-# By declaring "our", all packages in this file
-# get access to global variables without
-# individually having to ask for them
 package ::;
-our (
-	[% join qq(,\n\t), split " ", qx(./strip_all ./singletons.pl ./globals.pl  ./serialize.pl ) %]
-
-);
 {
 package ::Track;
+use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 
 # Objects belonging to Track and its subclasses
@@ -992,6 +985,7 @@ sub remove_system_version_comment {
 
 {
 package ::SimpleTrack; # used for Master track
+use ::Globals qw(:all);
 use Modern::Perl; use Carp; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -1002,6 +996,7 @@ sub unbusify {}
 }
 {
 package ::MasteringTrack; # used for mastering chains 
+use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::SimpleTrack';
@@ -1016,6 +1011,7 @@ sub version {0}
 }
 {
 package ::SlaveTrack; # for instrument monitor bus
+use ::Globals qw(:all);
 use Modern::Perl; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
@@ -1032,6 +1028,7 @@ sub dir { $tn{$_[0]->target}->dir }
 }
 {
 package ::CacheRecTrack; # for graph generation
+use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = qw(::SlaveTrack);
 sub current_version {
@@ -1050,6 +1047,7 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 }
 {
 package ::MixDownTrack; 
+use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = qw(::Track);
 sub current_version {	
@@ -1070,6 +1068,7 @@ sub forbid_user_ops { 1 }
 }
 {
 package ::EditTrack; use Carp qw(carp cluck);
+use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA = '::Track';
 our $AUTOLOAD;
@@ -1097,6 +1096,7 @@ sub playat_time {
 }
 {
 package ::VersionTrack;
+use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA ='::Track';
 sub set_version {}
@@ -1104,6 +1104,7 @@ sub versions { [$_[0]->version] }
 }
 {
 package ::MixTrack;
+use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA ='::Track';
 # as a mix track, I have no sources of my own
