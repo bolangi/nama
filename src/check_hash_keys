@@ -4,7 +4,7 @@ use File::Slurp;
 # get registered keys by combining contents of two files 
 my %var_map = map{ split " ", $_ } split "\n", qx(./strip_all ./config_map);
 my @vars1 = values %var_map;
-my @vars2 = split "\n", qx(./strip_all ./key_register);
+my @vars2 = split "\n", qx(./strip_all ./singleton_keys);
 my %singletons;
 my %singleton_has_key; 
 {no warnings 'uninitialized';
