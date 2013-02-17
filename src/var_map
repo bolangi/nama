@@ -7,7 +7,6 @@
 	$use_pager     					$config->{use_pager}
 	$use_placeholders  				$config->{use_placeholders}
 	%is_system_bus 					$config->{_is_system_bus}
-	**								$config->{sample_rate}
 	$use_git						$config->{use_git}
 	$autosave						$config->{autosave}
 
@@ -65,33 +64,23 @@
 	$midi_output_dev   				$midi->{output_dev}
 	$controller_ports				$midi->{controller_ports}
     $midi_inputs					$midi->{inputs}
+	$beep_command 					$config->{beep_command}
+	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
 
-
-
+	**								$config->{sample_rate}
 	**								$config->{no_fade_mute_delay}
-	
 	**								$config->{fade_time1_fraction}
 	**								$config->{fade_down_fraction}
 	**								$config->{fade_time2_fraction}
 	**								$config->{fade_down_fraction}
 	**								$config->{fader_op}
 	**								$config->{serialize_formats}
-	$beep_command 					$config->{beep_command}
-	$enforce_channel_bounds    		$config->{enforce_channel_bounds}
 	**								$config->{category}
 	** 								$engine->{jack_seek_delay}
 	**								$config->{want_logging}
 	**								$config->{latency_op}
 	**								$config->{latency_op_init}
 	**								$config->{latency_op_set}
-
-	%ti
-	%tn
-	%bn
-	
-	$debug
-	$debug2
-	$debug3
 
 	**							$jack->{jackd_running}
 	**							$jack->{ports_list_text}
@@ -199,29 +188,6 @@
 	** 							$project->{save_file_version_number}
 	**							$project->{undo_buffer}
 	
-	$this_track
-	$this_mark
-	$this_bus
-	$this_edit
-	$this_track_name 
-	$this_op
-    
-	$prompt
- 
-	@tracks_data
-	@bus_data
-	@groups_data
-	@marks_data
-	@fade_data
-	@edit_data
-	@inserts_data
-	@project_effect_chain_data
-	
-	@persistent_vars
-	@config_vars
-	@effects_static_vars
-
-	
 	**								$file->{effects_cache}
 	** 								$file->{global_effect_chains}
 	**								$file->{state_store}
@@ -305,3 +271,35 @@
 	**								$gui->{_old_abg}
 
 	**								$jack->{use_jacks}
+
+	$this_track
+	$this_mark
+	$this_bus
+	$this_edit
+	$this_track_name 
+	$this_op
+    
+	$prompt
+ 
+	@tracks_data
+	@bus_data
+	@groups_data
+	@marks_data
+	@fade_data
+	@edit_data
+	@inserts_data
+	@project_effect_chain_data
+	
+	@persistent_vars
+	@config_vars
+	@effects_static_vars
+
+	%ti
+	%tn
+	%bn
+	
+	$debug
+	$debug2
+	$debug3
+
+	
