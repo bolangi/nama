@@ -704,7 +704,6 @@ sub restore_global_effect_chains {
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
-				var_map => 1,
 				class => '::');
 }
 sub git_snapshot {
