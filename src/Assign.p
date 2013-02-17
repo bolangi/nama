@@ -23,8 +23,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		serialize
 		assign
 		assign_singletons
-		assign_pronouns
-		assign_serialization_arrays
 		store_vars
 		yaml_out
 		yaml_in
@@ -223,49 +221,6 @@ sub assign_singletons {
 			} keys %{ $data->{$ident} }
 		}
 	} @singleton_idents;  # list of "singleton" variables
-}
-sub assign_pronouns {
-	my $ref = shift;
-	my $data = $ref->{data} or die "expected data got undefined";
-	my $class = $ref->{class} // '::';
-	$class .= '::'; # SKIP_PREPROC
-	my @pronouns = qw(this_op this_track_name);
-	map { 
-		my $ident = @_;
-		if( defined $data->{$ident} ){
-			my $type = ref $data->{$ident};
-			die "$ident: expected scalar, got $type" if $type;
-			my $cmd = q($).$class.$ident. q( = $data->{$ident});
-			$logger->debug("eval: $cmd");
-			eval $cmd;
-			$logger->logcarp("error during eval: $@") if $@;
-		}
-	} @pronouns;
-}
-
-{
-my @arrays = map{ /^.(.+)/; $1 }  # remove leading '@' sigil
-qw(
-[% qx(cat ./serialize.pl) %]
-);
-sub assign_serialization_arrays {
-	my $ref = shift;
-	my $data = $ref->{data} or die "expected data got undefined";
-	my $class = $ref->{class} // '::';
-	$class .= '::'; # SKIP_PREPROC
-	map {
-		my $ident = $_;
-		if( defined $data->{$ident} ){
-			my $type = ref $data->{$ident};
-			$type eq 'ARRAY' or die "$ident: expected ARRAY, got $type";
-			my $cmd = q($).$class.$ident. q( = @{$data->{$ident}});
-			#my $cmd = q(*).$class.$ident. q( = $data->{$ident});
-			$logger->debug("eval: $cmd");
-			eval $cmd;
-			$logger->logcarp("error during eval: $@") if $@;
-		}
-	} @arrays;
-}
 }
 
 our %suffix = 
