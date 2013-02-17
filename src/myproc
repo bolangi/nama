@@ -1,6 +1,7 @@
 #!/bin/sh
 # use -d for debugging output
 
+./check_hash_keys
 #./sort_vars > variables.sorted.txt
 MD=..
 TD=$MD/lib/Audio/Nama
