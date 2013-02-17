@@ -1,5 +1,9 @@
-# list of variables found in namarc
-# these are converted to entries in $config->{ }
+# Nama variables by category
+# This file is preprocessed to remove comments
+# (which would otherwise appear in qw() quoting)
+
+##  Config file variables
+##  These are converted to entries in $config->{ }
 
 @config_vars = qw(
 
@@ -66,15 +70,11 @@
 
 @global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
 
-# list of variables that get saved to State.yml
+# list of variables that get saved to State.json
 
-@new_persistent_vars = qw(
+@persistent_vars = qw(
 
-	$project->{save_file_version_number}
-	
-	$fx->{applied}
-	$fx->{params}
-	$fx->{params_log}
+# category: object serialization
 
 	@tracks_data
 	@bus_data
@@ -83,9 +83,21 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+
+# category: pronouns
+
+	$this_track_name # for save/restore 
+	$this_op      	# current effect
+
+	$project->{save_file_version_number}
+	
+	$fx->{applied}
+	$fx->{params}
+	$fx->{params_log}
+
 );
 
-# these variables get saved to PeripheralState.json
+# these variables get saved to Aux.json
 
 @unversioned_state_vars = qw(
 
@@ -110,24 +122,3 @@
 	$this_op
 );
 
-# this list of variables is 
-# retained for backward compatibility
-# with State.yml file version 1.078 and earlier
-
-@persistent_vars = qw(
-
-# category: object serialization
-
-	@tracks_data
-	@bus_data
-	@groups_data
-	@marks_data
-	@fade_data
-	@edit_data
-	@inserts_data
-
-# category: pronouns
-
-	$this_track_name # for save/restore 
-	$this_op      	# current effect
-);

@@ -41,7 +41,6 @@ our %EXPORT_TAGS =
 
 						@config_vars
 						@persistent_vars
-						@new_persistent_vars
 						@unversioned_state_vars
 						@global_effect_chain_vars
 	)],

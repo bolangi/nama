@@ -144,7 +144,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => \@new_persistent_vars,
+				vars => \@persistent_vars,
 				class => '::',
 				);
 
@@ -334,17 +334,8 @@ sub restore_state_from_file {
 		assign(
 					data => $ref,
 					vars   => \@persistent_vars,
-					var_map => 1,
 					class => '::');
 		
-		# State file new list
-		
-		assign(
-					data => $ref,
-					vars   => \@new_persistent_vars,
-					class => '::');
-		
-		 
 
 		# perform assignments for singleton
 		# hash entries (such as $fx->{applied});
