@@ -116,21 +116,6 @@
 
 @persistent_vars = qw(
 
-# category: effects
-
-	$effect_id 		# autoincrement counter
-					# chain operator id that how we create, 
-					# store find them, adjust them, and destroy them,
-					# per track or per project?
-	%cops			# chain operators stored here
-	%copp			# their parameters for effect update
-	%copp_exp      	# for log-scaled sliders
-
-# category: GUI
-
-	$unit			# jump multiplier, 1 or 60 seconds
-
-	
 # category: object serialization
 
 	@tracks_data
@@ -140,21 +125,6 @@
 	@fade_data
 	@edit_data
 	@inserts_data
-
-# category: engine, realtime operation
-
-	@loop_endpoints # they define the loop
-	$loop_enable 	# whether we automatically loop
-	$length			# maximum duration of the recording/playback if known
-
-# category: text UI
-
-	%bunch			# user collections of tracks
-	@command_history
-
-# category: routing
-
-	$mastering_mode
 
 # category: pronouns
 
