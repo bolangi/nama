@@ -398,10 +398,6 @@ sub restore_state_from_file {
 		eval $eval_text;
 	} @vars;
 
-	if (! $project->{save_file_version_number} ){
-		warn "State file does not contain version number."
-	} 
-	
 
 	####### Backward Compatibility ########
 
