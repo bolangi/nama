@@ -3,65 +3,9 @@
 # (which would otherwise appear in qw() quoting)
 
 ##  Config file variables
-##  These are converted to entries in $config->{ }
 
-@config_vars = qw(
-
-# category: external resources
-
-	%devices
-	$alsa_playback_device
-	$alsa_capture_device	
-	$soundcard_channels
-
-# category: audio formats
-
-	%abbreviations
-	$mix_to_disk_format
-	$raw_to_disk_format
-	$cache_to_disk_format
-	$mixer_out_format
-	$sample_rate
-
-# category: engine
-
-	$ecasound_tcp_port
-	$ecasound_globals_general
-	$ecasound_globals_realtime
-	$ecasound_globals_nonrealtime
-	$ecasound_buffersize_realtime
-	$ecasound_buffersize_nonrealtime
-
-# category: config
-
-	$project_root 	
-	$use_group_numbering
-	$press_space_to_start_transport
-	$execute_on_project_load
-	$initial_user_mode
-	$midish_enable
-	$quietly_remove_tracks
-	$use_jack_plumbing
-	$jack_seek_delay
-	$use_monitor_version_for_mixdown 
-	$volume_control_operator
-	$serialize_formats
-	$use_git
-	$autosave
-	$beep_command
-	# sync mixdown version numbers to selected track versions
-	# not implemented
-
-# category: mastering
-
-	$eq 
-	$low_pass
-	$mid_pass
-	$high_pass
-	$compressor
-	$spatialiser
-	$limiter
-);
+# @config_vars
+# These are now defined as keys (first column) in file var_map 
 					
 # user defined or other globally accessible effect chains 
 # are saved in a separate file to suit version control
