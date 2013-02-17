@@ -45,7 +45,6 @@
 	$jack_seek_delay
 	$use_monitor_version_for_mixdown 
 	$volume_control_operator
-	$eager_mode
 	$serialize_formats
 	$use_git
 	$autosave
