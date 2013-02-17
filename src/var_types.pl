@@ -4,16 +4,17 @@
 
 ##  Config file variables
 
-# @config_vars
-# These are now defined as keys (first column) in file var_map 
+# @config_vars is replaced by config_vars()
+# now taken from keys (first column) of the file
+# src/config_map 
 					
-# user defined or other globally accessible effect chains 
-# are saved in a separate file to suit version control
-# requirements. 
+# user defined and system global effect chains 
+# are saved in a separate file. 
 
 @global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
 
-# list of variables that get saved to State.json
+# variables that get saved to State.json and placed under
+# version control
 
 @persistent_vars = qw(
 
@@ -35,8 +36,9 @@
 
 );
 
-# these variables get saved to Aux.json
-# which is not under version control
+# variables saved to Aux.json, *not* under version control
+# note that this includes project-specific effect
+# chains
 
 @untracked_state_vars = qw(
 

@@ -2,8 +2,8 @@
 
 # To create a new config var:
 #
-# add the symbol e.g. $eager_mode to @config_vars in var_type.pl
-# add the mapping (e.g. $eager_mode $mode->{_eager_opt} ) to file var_map
+# add the mapping, e.g. "$mix_to_disk_format $config->{mix_to_disk_format}"
+# (without quotes) to file config_map
 
 # these subs are in the main namespace
 
