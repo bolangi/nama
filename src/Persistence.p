@@ -328,9 +328,6 @@ sub restore_state_from_file {
 		$source = read_file($path);
 		$ref = decode($source, $suffix);
 
-
-		# State file, old list, for backwards compatibility
-		
 		assign(
 					data => $ref,
 					vars   => \@persistent_vars,
