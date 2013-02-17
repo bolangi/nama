@@ -116,8 +116,6 @@
 
 @persistent_vars = qw(
 
-	$saved_version 	# copy of $VERSION saved with settings in State.yml
-
 # category: effects
 
 	$effect_id 		# autoincrement counter
