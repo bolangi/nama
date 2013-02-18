@@ -108,11 +108,12 @@ sub definitions {
 # config variable sources are prioritized as follows
 
 	#
-	#		+   command line -f here_is_namarc argument
+	#		+   command line argument -f /path/to/namarc 
 	#		+   project specific namarc  # currently disabled
 	#		+	user namarc (usually ~/.namarc)
 	#		+	internal namarc
 	#		+	internal initialization
+
 
 	$config = bless {
 		root_dir 						=> join_path( $ENV{HOME}, "nama"),

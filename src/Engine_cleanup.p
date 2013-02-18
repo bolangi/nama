@@ -9,7 +9,9 @@ sub rec_cleanup {
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
 		(grep /Mixdown/, @files) 
-			? command_process('mixplay') 
+			? do { command_process('mixplay');
+				   symlink_branchname_to_mixdown_file()
+				 }
 			: post_rec_configure();
 		undef $mode->{offset_run} if ! defined $this_edit;
 		$mode->{midish_transport_sync} = 'play' 
@@ -17,6 +19,21 @@ sub rec_cleanup {
 		reconfigure_engine();
 	}
 }
+
+sub symlink_branchname_to_mixdown_file {
+	return if ! $config->{use_git};
+	my $oldfile = $tn{Mixdown}->full_path;
+	my $name = current_branch();
+	my $version = $tn{Mixdown}->monitor_version;
+	$name =~ s/-branch$//;
+	$name .= "_$version.wav";
+	my $newfile = join_path(project_dir(), $name);
+	#say("updating symlink $newfile"), unlink $newfile if -e $newfile;
+	symlink $oldfile, $newfile;
+	my $sha = git_sha();
+	$tn{Mixdown}->add_system_version_comment($version, join " ",$name, $sha);
+}
+		
 sub adjust_offset_recordings {
 	map {
 		$_->set(playat => $setup->{offset_run}->{mark});
