@@ -723,7 +723,9 @@ sub git_tag {
 	logsub("&git_tag");
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	git( tag => $tag_name, '-m', $msg);
+	my @args = ($tag_name);
+	push(@args, '-m',$msg) if $msg;
+	git( tag => @args);
 }
 sub git_checkout {
 	logsub("&git_checkout");
