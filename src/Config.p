@@ -78,7 +78,31 @@ sub read_config {
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
 	$config->{sample_rate} = $cfg{abbreviations}{frequency};
+
+	$config->{use_git} and ! git_executable_found() and 
+		say("Config file requests Git version control,
+but the git executable could not be found.
+Please check that the git executable directory is included
+in your shell's \$PATH variable (currently $ENV{PATH}). 
+
+Falling back to the file paradigm. :-(
+
+Note that the command
+
+  nama> save initial_mix 
+
+creates initial_mix.json, not a tagged commit. 
+
+  nama> get initial_mix
+
+loads initial_mix.json");
+
+	$config->{use_git} = $config->{use_git} && git_executable_found() ? 1 : 0;
+
 }
+
+sub git_executable_found { qx(which git) }
+
 sub walk_tree {
 	#logsub("&walk_tree");
 	my $ref = shift;
