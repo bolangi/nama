@@ -788,6 +788,11 @@ sub current_branch {
 	$b
 }
 
+sub git_sha {
+	my $commit = shift || 'HEAD';
+		my ($sha) = git(show => $commit) =~ /commit ([0-9a-f]{10})/;
+		$sha
+}
 sub git_branch_display {
 	logsub("&git_branch_display");
 	return unless $config->{use_git};
