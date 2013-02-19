@@ -121,12 +121,12 @@ use ::Modes ();
 use ::Mix ();
 use ::Memoize ();
 
-use ::Engine_setup ();
-use ::Engine_cleanup ();
-use ::Effects_registry ();
+use ::EngineSetup ();
+use ::EngineCleanup ();
+use ::EffectsRegistry ();
 use ::Effects ();
 use ::Engine ();
-use ::Mute_Solo_Fade ();
+use ::MuteSoloFade ();
 use ::Jack ();
 
 use ::Regions ();
