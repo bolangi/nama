@@ -9,55 +9,48 @@ sub rec_cleanup {
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
 		if( grep /Mixdown/, @files){
-			command_process('mixplay');
-			mixdown_symlinking_tagging_encoding();
+			mixdown_postprocessing();
 		}
-		else { post_rec_configure() }
-		undef $mode->{offset_run} if ! defined $this_edit;
-		$mode->{midish_transport_sync} = 'play' 
-			if $mode->{midish_transport_sync} eq 'record';
+		post_rec_configure(); 
 		reconfigure_engine();
 	}
 }
 
-sub mixdown_symlinking_tagging_encoding {
-	return if ! $config->{use_git};
-	my $mixdownfile = $tn{Mixdown}->full_path;
-	my $name = current_branch();
-	my $version = $tn{Mixdown}->monitor_version;
-	$name =~ s/-branch$//;
-	$name .= "_$version";
-	my $tag_name = $name;
-	$name .= '.wav';
-	my $symlinkpath = join_path(project_dir(), $name);
-	symlink $mixdownfile, $symlinkpath;
-
-	# tag the commit with the basename for the symlinked or
-	# encoded files
-					
-	# we want to tag the playback mode just before
-	# the mixdown command was given.
-	# we tag it during cleanup so we are
-	# sure that something happened.
-
-	command_process('mixoff');
-	save_state();
-	my $msg = "Settings corresponding to $symlinkpath (".$tn{Mixdown}->full_path. ")";
-	git_snapshot($msg);
-	git_tag($tag_name, $msg);
+sub mixdown_postprocessing {
+	logsub("&mixdown_postprocessing");
 	command_process('mixplay');
+	my $mixdownfile = $tn{Mixdown}->full_path;
+	my $linkname = current_branch() || $project->{name};
+	my $version = $tn{Mixdown}->monitor_version;
+	$linkname =~ s/-branch$//;
+	$linkname .= "_$version";
+	my $tag_name = $linkname;
+	$linkname .= '.wav';
+	my $symlinkpath = join_path(project_dir(), $linkname);
+	symlink $mixdownfile, $symlinkpath;
+	tag_mixdown_commit($tag_name, $symlinkpath, $mixdownfile) if $config->{use_git};
+	my $sha = git_sha(); # possibly undef
+	my $comment = ($config->{use_git} 
+				? "tagged and " 
+				: "" ) . "encoded as $linkname $sha";
 
-	# TODO announce also
-	# will be linked for convenience to initial_mix_2.wav
-	# in the project_dir()
-	# will be encoded as initial_mix_2.mp3
-	#
-					
-
-	my $sha = git_sha();
-	$tn{Mixdown}->add_system_version_comment($version, join " ",$name, $sha);
-	
+	$tn{Mixdown}->add_system_version_comment($version, $comment);
+	pager3($comment);	
 	encode_mixdown_file($mixdownfile,$symlinkpath);
+}
+sub tag_mixdown_commit {
+	my ($name, $symlinkpath, $mixdownfile) = @_;
+
+	# we want to tag the normal playback state
+	command_process('mixoff');
+
+	save_state();
+	my $msg = "Settings used to create $symlinkpath ($mixdownfile)";
+	git_snapshot($msg);
+	git_tag($name, $msg);
+
+	# rec_cleanup wants to audition the mixdown
+	command_process('mixplay');
 }
 sub encode_mixdown_file {
 	state $shell_encode_command = {
@@ -94,6 +87,10 @@ sub post_rec_configure {
 		# toggle recorded tracks to MON for auditioning
 		
 		map{ $_->set(rw => 'MON') } @{$setup->{_last_rec_tracks}};
+		
+		undef $mode->{offset_run} if ! defined $this_edit;
+		$mode->{midish_transport_sync} = 'play' 
+			if $mode->{midish_transport_sync} eq 'record';
 
 		$ui->refresh();
 }
