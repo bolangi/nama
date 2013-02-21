@@ -193,19 +193,19 @@ for (@test) {
 
 force_alsa();
 
-command_process('add sax');
+process_command('add sax');
 
 like(ref $this_track, qr/Track/, "track creation"); 
 
 is( $this_track->name, 'sax', "current track assignment");
 
-command_process('source 2');
+process_command('source 2');
 
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
 
-command_process('send 5');
+process_command('send 5');
 
 # track sax, source 2, send 5
 
@@ -247,17 +247,17 @@ $io = ::IO::to_null->new(track => 'sax', device_id => 'alsa,default');
 
 is($io->device_id, 'alsa,default', 'value overrides method call');
 
-command_process("sax; source Horgand; gen");
+process_command("sax; source Horgand; gen");
 like( ::ChainSetup::ecasound_chain_setup(), qr/Horgand/, 'set JACK client as input');
-command_process("sax; source jack; gen");
+process_command("sax; source jack; gen");
 like( ::ChainSetup::ecasound_chain_setup(), qr/jack,,sax_in/, 'set JACK port for manual input');
 
-command_process("sax; source 2");
+process_command("sax; source 2");
 
 
 force_alsa();
 
-command_process('3; nosend; gen');
+process_command('3; nosend; gen');
 
 $expected_setup_lines = <<EXPECTED;
 
@@ -279,7 +279,7 @@ EXPECTED
 check_setup('ALSA basic setup' );
 
 force_jack();
-command_process('gen');
+process_command('gen');
 $expected_setup_lines = <<EXPECTED;
 
 # audio inputs
@@ -301,7 +301,7 @@ EXPECTED
 
 check_setup('JACK basic setup' );
 
-command_process('3;rec_defeat; gen');
+process_command('3;rec_defeat; gen');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -319,7 +319,7 @@ EXPECTED
 
 check_setup('JACK rec_defeat setup' );
 
-force_alsa(); command_process('gen');
+force_alsa(); process_command('gen');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -337,7 +337,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 
 check_setup('ALSA rec_defeat setup' );
-command_process('Master; send 5;gen');
+process_command('Master; send 5;gen');
 
 $expected_setup_lines = <<EXPECTED;
 
@@ -359,7 +359,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 
 check_setup('ALSA send-Master-to-alternate-channel setup' );
-force_jack(); command_process('gen');
+force_jack(); process_command('gen');
 
 $expected_setup_lines = <<EXPECTED;
 -a:1 -i:loop,Master_in
@@ -376,7 +376,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('JACK send-Master-to-alternate-channel setup' );
 
-command_process('Mixdown; rec; gen');
+process_command('Mixdown; rec; gen');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -421,7 +421,7 @@ EXPECTED
 
 check_setup('ALSA mixdown setup with main out' );
 
-command_process('master_on');
+process_command('master_on');
 $expected_setup_lines = <<EXPECTED;
 -a:1 -i:loop,Master_in
 -a:3 -i:alsa,default
@@ -452,7 +452,7 @@ gen_alsa();
 check_setup('Mixdown in mastering mode - ALSA');
 
 
-command_process('Master; stereo'); # normal output width
+process_command('Master; stereo'); # normal output width
 
 $expected_setup_lines = <<EXPECTED;
 
@@ -480,10 +480,10 @@ EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
 
-command_process('mixoff; master_off');
-command_process('for 4 5 6 7 8; remove_track quiet');
-command_process('Master; send 1');
-command_process('asub Horns; sax move_to_bus Horns; sax stereo');
+process_command('mixoff; master_off');
+process_command('for 4 5 6 7 8; remove_track quiet');
+process_command('Master; send 1');
+process_command('asub Horns; sax move_to_bus Horns; sax stereo');
 
 $expected_setup_lines = <<EXPECTED;
 
@@ -518,8 +518,8 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('Sub-bus - JACK');
 
-command_process('remove_bus Horns');
-command_process('add_send_bus_cooked Vo 5');
+process_command('remove_bus Horns');
+process_command('add_send_bus_cooked Vo 5');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1,4 -i:loop,sax_out
@@ -533,10 +533,10 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Send bus - soundcard - JACK');
-command_process('remove_bus Vo');
-command_process('sax mono');
+process_command('remove_bus Vo');
+process_command('sax mono');
 =comment
-command_process('add_insert post 5');
+process_command('add_insert post 5');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -557,8 +557,8 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Insert via soundcard - JACK');
-command_process('remove_insert'); 
-command_process('add_send_bus_raw Vo 5');
+process_command('remove_insert'); 
+process_command('add_send_bus_raw Vo 5');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -652,8 +652,8 @@ foreach(@tests){
 }
 }
 
-sub gen_alsa { force_alsa(); command_process('gen')}
-sub gen_jack { force_jack(); command_process('gen')}
+sub gen_alsa { force_alsa(); process_command('gen')}
+sub gen_jack { force_jack(); process_command('gen')}
 sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
 sub force_jack{ $config->{opts}->{A} = 0; $config->{opts}->{J} = 1; $jack->{jackd_running} = 1; }
 sub setup_content {

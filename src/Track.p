@@ -1153,7 +1153,7 @@ sub add_track {
 #		$track->send($gui->{_chm}) if $gui->{_chm};
 
 	my $bus = $bn{$track->group}; 
-	command_process('for mon; mon') if $mode->{preview} and $bus->rw eq 'MON';
+	process_command('for mon; mon') if $mode->{preview} and $bus->rw eq 'MON';
 	$bus->set(rw => 'REC') unless $track->target; # not if is alias
 
 	# normal tracks default to 'REC'

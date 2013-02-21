@@ -150,42 +150,6 @@ sub get_ecasound_iam_keywords {
 				grep{ ! $reserved{$_} } split /[\s,]/, eval_iam('int-cmd-list');
 }
 
-sub process_line {
-	logsub("&process_line");
-	my ($user_input) = @_;
-	logpkg('debug',"user input: $user_input");
-	if (defined $user_input and $user_input !~ /^\s*$/) {
-		$text->{term}->addhistory($user_input) 
-			unless $user_input eq $text->{previous_cmd};
-		$text->{previous_cmd} = $user_input;
-		if ($mode->{midish_terminal}){
-				$user_input =~ /^\s*(midish_mode_off|mmx)/ 
-					?  command_process($user_input)
-					:  midish_command($user_input);	
-		}
-		else {
-			my $success = command_process( $user_input );
-				
-			push @{$project->{undo_buffer}}, 
-
-			{
-				context => qq(bus: $this_bus, track: ) 
-								. $this_track->name .  qq(, op: $this_op),
-				command => $user_input,
-			#	commit 	=> $commit 
-			}
-
-				unless ! $success 
-					   or $user_input =~ /^\s*(tag|commit|branch|new_branch|load|save)/;
-			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
-			reconfigure_engine();
-				#or eval_iam('cs-connected') 
-				#and remove_latency_ops() 
-				#and calculate_and_adjust_latency();
-		}
-		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
-	}
-}
 sub load_keywords {
 	@{$text->{keywords}} = keys %{$text->{commands}};
 	push @{$text->{keywords}}, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @{$text->{keywords}};

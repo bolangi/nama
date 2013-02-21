@@ -43,7 +43,43 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
-sub command_process {
+sub process_line {
+	logsub("&process_line");
+	my ($user_input) = @_;
+	logpkg('debug',"user input: $user_input");
+	if (defined $user_input and $user_input !~ /^\s*$/) {
+		$text->{term}->addhistory($user_input) 
+			unless $user_input eq $text->{previous_cmd};
+		$text->{previous_cmd} = $user_input;
+		if ($mode->{midish_terminal}){
+				$user_input =~ /^\s*(midish_mode_off|mmx)/ 
+					?  process_command($user_input)
+					:  midish_command($user_input);	
+		}
+		else {
+			my $success = process_command( $user_input );
+				
+			push @{$project->{undo_buffer}}, 
+
+			{
+				context => qq(bus: $this_bus, track: ) 
+								. $this_track->name .  qq(, op: $this_op),
+				command => $user_input,
+			#	commit 	=> $commit 
+			}
+
+				unless ! $success 
+					   or $user_input =~ /^\s*(tag|commit|branch|new_branch|load|save)/;
+			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
+			reconfigure_engine();
+				#or eval_iam('cs-connected') 
+				#and remove_latency_ops() 
+				#and calculate_and_adjust_latency();
+		}
+		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
+	}
+}
+sub process_command {
 	state $total_effects_count;
 	my $input = shift;
 	my $input_was = $input;
@@ -416,7 +452,7 @@ sub t_load_project {
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
-	::command_process($config->{execute_on_project_load});
+	::process_command($config->{execute_on_project_load});
 }
 sub t_create_project {
 	package ::;

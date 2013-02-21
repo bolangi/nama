@@ -517,7 +517,7 @@ mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
 mixoff:  _mixoff  { ::mixoff(); 1}
 automix: _automix { ::automix(); 1 }
-autofix_tracks: _autofix_tracks { ::command_process("for mon; fixdc; normalize"); 1 }
+autofix_tracks: _autofix_tracks { ::process_command("for mon; fixdc; normalize"); 1 }
 master_on: _master_on { ::master_on(); 1 }
 
 master_off: _master_off { ::master_off(); 1 }

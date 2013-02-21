@@ -117,37 +117,37 @@ sub add_mastering_effects {
 	
 	$this_track = $tn{Eq};
 
-	command_process("add_effect $mastering->{fx_eq}");
+	process_command("add_effect $mastering->{fx_eq}");
 
 	$this_track = $tn{Low};
 
-	command_process("add_effect $mastering->{fx_low_pass}");
-	command_process("add_effect $mastering->{fx_compressor}");
-	command_process("add_effect $mastering->{fx_spatialiser}");
+	process_command("add_effect $mastering->{fx_low_pass}");
+	process_command("add_effect $mastering->{fx_compressor}");
+	process_command("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Mid};
 
-	command_process("add_effect $mastering->{fx_mid_pass}");
-	command_process("add_effect $mastering->{fx_compressor}");
-	command_process("add_effect $mastering->{fx_spatialiser}");
+	process_command("add_effect $mastering->{fx_mid_pass}");
+	process_command("add_effect $mastering->{fx_compressor}");
+	process_command("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{High};
 
-	command_process("add_effect $mastering->{fx_high_pass}");
-	command_process("add_effect $mastering->{fx_compressor}");
-	command_process("add_effect $mastering->{fx_spatialiser}");
+	process_command("add_effect $mastering->{fx_high_pass}");
+	process_command("add_effect $mastering->{fx_compressor}");
+	process_command("add_effect $mastering->{fx_spatialiser}");
 
 	$this_track = $tn{Boost};
 	
-	command_process("add_effect $mastering->{fx_limiter}"); # insert after vol
+	process_command("add_effect $mastering->{fx_limiter}"); # insert after vol
 }
 
 sub unhide_mastering_tracks {
-	command_process("for Mastering; set_track hide 0");
+	process_command("for Mastering; set_track hide 0");
 }
 
 sub hide_mastering_tracks {
-	command_process("for Mastering; set_track hide 1");
+	process_command("for Mastering; set_track hide 1");
  }
 		
 1;

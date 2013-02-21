@@ -26,7 +26,7 @@ sub import_engine_subs {
 	*eval_iam			= \&::eval_iam;
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
-	*command_process    = \&::command_process;
+	*process_command    = \&::process_command;
 }
 
 use Exporter qw(import);
@@ -458,7 +458,7 @@ sub position_effect {
 	$setup->{changed}++;
 	reconfigure_engine();
 	$this_track = $track;
-	command_process('show_track');
+	process_command('show_track');
 }
 
 ## array indices for Nama and Ecasound effects and controllers

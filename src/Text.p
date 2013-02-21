@@ -1,6 +1,7 @@
 # -------- Text Interface -----------
 ## The following subroutines/methods belong to the Text interface class
-## See Grammar.pm for the command grammar and support routines used by 
+## the grammar of the command processor is defined in
+# grammar_body.pl with subroutines in Grammar.p
 
 package ::Text;
 use Modern::Perl; use Carp;

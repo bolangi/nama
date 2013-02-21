@@ -139,9 +139,9 @@ use ::Log qw(logit loggit logpkg logsub initialize_logger);
 
 sub main { 
 	bootstrap_environment() ;
-	command_process($config->{execute_on_project_load});
+	process_command($config->{execute_on_project_load});
 	reconfigure_engine();
-	command_process($config->{opts}->{X});
+	process_command($config->{opts}->{X});
 	$ui->loop();
 }
 

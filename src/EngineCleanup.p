@@ -11,14 +11,15 @@ sub rec_cleanup {
 		if( grep /Mixdown/, @files){
 			mixdown_postprocessing();
 		}
-		post_rec_configure(); 
+		else { post_rec_configure() }
 		reconfigure_engine();
 	}
 }
 
 sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
-	command_process('mixplay');
+	process_command('mixplay');
+	
 	my $mixdownfile = $tn{Mixdown}->full_path;
 	my $linkname = current_branch() || $project->{name};
 	my $version = $tn{Mixdown}->monitor_version;
@@ -28,6 +29,7 @@ sub mixdown_postprocessing {
 	$linkname .= '.wav';
 	my $symlinkpath = join_path(project_dir(), $linkname);
 	symlink $mixdownfile, $symlinkpath;
+	process_command('branch');
 	tag_mixdown_commit($tag_name, $symlinkpath, $mixdownfile) if $config->{use_git};
 	my $sha = git_sha(); # possibly undef
 	my $comment = ($config->{use_git} 
@@ -40,9 +42,10 @@ sub mixdown_postprocessing {
 }
 sub tag_mixdown_commit {
 	my ($name, $symlinkpath, $mixdownfile) = @_;
+	say "tag_mixdown_commit: @_";
 
 	# we want to tag the normal playback state
-	command_process('mixoff');
+	process_command('mixoff');
 
 	save_state();
 	my $msg = "Settings used to create $symlinkpath ($mixdownfile)";
@@ -50,7 +53,7 @@ sub tag_mixdown_commit {
 	git_tag($name, $msg);
 
 	# rec_cleanup wants to audition the mixdown
-	command_process('mixplay');
+	process_command('mixplay');
 }
 sub encode_mixdown_file {
 	state $shell_encode_command = {
