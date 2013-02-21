@@ -121,7 +121,7 @@ command: user_alias predicate {
 user_alias: ident { 
 	#print "alias: $item{ident}\n";
 		$::text->{user_alias}->{$item{ident}} }
-user_command: ident { return $item{ident} if $::text->{user_command}->{$item{ident}} }
+user_command: ident { $return = $item{ident} if $::text->{user_command}->{$item{ident}} }
 
 # other commands (generated automatically)
 #
@@ -309,7 +309,13 @@ forward: _forward timevalue {
 rewind: _rewind timevalue {
 	::rewind( $item{timevalue} ); 1}
 timevalue: min_sec | seconds
-seconds: value
+seconds: samples  # samples returns seconds
+seconds: /\d+/
+samples: /\d+sa/ {
+	my ($samples) = $item[1] =~ /(\d+)/;
+ 	#print "found $samples samples\n";
+ 	$return = $samples/$::config->{sample_rate}
+}
 min_sec: /\d+/ ':' /\d+/ { $item[1] * 60 + $item[3] }
 
 to_start: _to_start { ::to_start(); 1 }
@@ -343,7 +349,7 @@ $proposed
 track_name: ident
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
-	return $track_name if $::tn{$track_name}; 
+	$return = $track_name, return if $::tn{$track_name}; 
 	print("$track_name: track does not exist.\n"),
 	undef
 }
@@ -409,7 +415,7 @@ shift_track: _shift_track start_position {
 	}
 }
 
-start_position:  float | mark_name
+start_position:  float | samples | mark_name
 mark_name: ident
 
 unshift_track: _unshift_track {

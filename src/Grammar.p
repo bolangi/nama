@@ -45,6 +45,7 @@ sub setup_grammar {
 }
 sub process_line {
 	logsub("&process_line");
+	no warnings 'uninitialized';
 	my ($user_input) = @_;
 	logpkg('debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
