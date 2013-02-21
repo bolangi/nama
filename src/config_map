@@ -59,6 +59,7 @@
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
 	$jack_seek_delay    			$config->{engine_base_jack_seek_delay}
 	$use_monitor_version_for_mixdown $config->{sync_mixdown_and_monitor_version_numbers} 
+	$encode_mixdown_files 			$config->{encode_mixdown_files}
 	$volume_control_operator 		$config->{volume_control_operator}
 	$serialize_formats  	        $config->{serialize_formats}
 	$use_git						$config->{use_git}

@@ -42,6 +42,7 @@ mixer_out_format: cd-stereo      # for ALSA/OSS
 mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: f24_le,N,frequency,i
+encode_mixdown_files: ogg #
 
 sample_rate: frequency
 
