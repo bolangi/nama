@@ -19,7 +19,6 @@ sub rec_cleanup {
 sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
 	process_command('mixplay');
-	
 	my $mixdownfile = $tn{Mixdown}->full_path;
 	my $linkname = current_branch() || $project->{name};
 	my $version = $tn{Mixdown}->monitor_version;
@@ -29,31 +28,40 @@ sub mixdown_postprocessing {
 	$linkname .= '.wav';
 	my $symlinkpath = join_path(project_dir(), $linkname);
 	symlink $mixdownfile, $symlinkpath;
-	process_command('branch');
+	#process_command('branch');
 	tag_mixdown_commit($tag_name, $symlinkpath, $mixdownfile) if $config->{use_git};
 	my $sha = git_sha(); # possibly undef
-	my $comment = ($config->{use_git} 
-				? "tagged and " 
-				: "" ) . "encoded as $linkname $sha";
-
+	my $encoding = $config->{mixdown_encodings};
+	my $comment;
+	if ($sha or $encoding){
+		$comment .= "tagged " if $sha;
+		$comment .= "and " if $sha and $encoding;
+		$comment .= "encoded " if $encoding;
+		$comment .= "as $tag_name ";
+		$comment .= "(commit $sha)" if $sha;
+	}
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
 	pager3($comment);	
-	encode_mixdown_file($mixdownfile,$symlinkpath);
+	encode_mixdown_file($mixdownfile,$tag_name);
 }
 sub tag_mixdown_commit {
+	logsub('&tag_mixdown_commit');
 	my ($name, $symlinkpath, $mixdownfile) = @_;
-	say "tag_mixdown_commit: @_";
+	logpkg('debug',"tag_mixdown_commit: @_");
+
+	my ($sym) = $symlinkpath =~ m([^/]+$);
+	my ($mix) = $mixdownfile =~ m([^/]+$);
 
 	# we want to tag the normal playback state
-	process_command('mixoff');
+	mixoff('quiet');
 
 	save_state();
-	my $msg = "Settings used to create $symlinkpath ($mixdownfile)";
+	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
 	git_tag($name, $msg);
 
 	# rec_cleanup wants to audition the mixdown
-	process_command('mixplay');
+	mixplay('quiet');
 }
 sub encode_mixdown_file {
 	state $shell_encode_command = {
@@ -61,7 +69,8 @@ sub encode_mixdown_file {
 		ogg => q(oggenc -o $output_file -a "$artist" -t "$title" -d "$date" $input_file)
 	};	
 	my($mixdownfile, $tag_name, @formats) = @_;
-	@formats or @formats = qw(ogg mp3);  # @{$config->{mixdown_encodings}};
+	@formats or @formats = split " ", $config->{mixdown_encodings};
+	logpkg('debug',"formats: @formats");
 	my $artist = $project->{artist} || qx(whoami);
 	my $title = $project->{name};
 	my $date = qx(date);
@@ -70,8 +79,10 @@ sub encode_mixdown_file {
 	my $input_file = $mixdownfile;
 	for my $format( @formats ){
 		my $output_file = join_path(project_dir(),"$tag_name.$format");
-		say "artist $artist, title $title, date $date, year $year, input file $input_file, output file $output_file";
-		say eval qq(qq($shell_encode_command->{$format}));
+		logpkg('debug',"artist $artist, title $title, date $date, year $year, input file $input_file, output file $output_file");
+		my $cmd = eval qq(qq($shell_encode_command->{$format}));
+		logpkg('debug',"Mixdown encoding command:\n$cmd");
+		system $cmd; 
 	}
 
 }
