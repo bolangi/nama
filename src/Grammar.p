@@ -466,19 +466,22 @@ sub t_create_project {
 
 }
 sub mixdown {
-	print "Enabling mixdown to file.\n";
+	my $quiet = shift;
+	pager3("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'REC'); 
 	$tn{Master}->set(rw => 'OFF'); 
 	$bn{Main}->set(rw => 'REC');
 }
 sub mixplay { 
-	print "Setting mixdown playback mode.\n";
+	my $quiet = shift;
+	pager3("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'MON');
 	$tn{Master}->set(rw => 'MON'); 
 	$bn{Main}->set(rw => 'OFF');
 }
 sub mixoff { 
-	print "Leaving mixdown mode.\n";
+	my $quiet = shift;
+	pager3("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON'); 
 	$bn{Main}->set(rw => 'REC') if $bn{Main}->rw eq 'OFF';
