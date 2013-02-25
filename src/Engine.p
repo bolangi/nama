@@ -129,10 +129,13 @@ sub start_heartbeat {
 }
 
 sub stop_heartbeat {
-	$engine->{events}->{poll_engine} = undef; 
+	# the following test avoids double-tripping rec_cleanup()
+	# following manual stop
+	return unless $engine->{events}->{poll_engine};
+	undef $engine->{events}->{poll_engine};
 	$ui->reset_engine_mode_color_display();
-	rec_cleanup() }
-
+	rec_cleanup() 
+}
 sub heartbeat {
 
 	#	print "heartbeat fired\n";
@@ -142,7 +145,7 @@ sub heartbeat {
 	if( $status =~ /finished|error/ ){
 		engine_status(current_position(),2,1);
 		revise_prompt();
-		stop_heartbeat();
+		stop_heartbeat(); 
 		sleeper(0.2);
 		set_position(0);
 	}
