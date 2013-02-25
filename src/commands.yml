@@ -567,7 +567,7 @@ new_branch:
   type: project
   what: create a new branch
   short: nbr
-  parameters: <s_branch_name> [<s_message>]
+  parameters: <s_new_branch_name> [<s_existing_branch_name>]
 save_state:
   type: project
   what: Save the project settings as file or tagged commit
