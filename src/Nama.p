@@ -9,7 +9,7 @@ use autodie qw(:default);
 
 ########## External dependencies ##########
 
-use Carp;
+use Carp qw(carp cluck confess croak);
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
 use File::Find::Rule;
