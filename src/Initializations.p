@@ -35,7 +35,7 @@ sub definitions {
 
 	$ui eq 'bullwinkle' or die "no \$ui, bullwinkle";
 
-	[% qx(./strip_all ./var_types.pl) %]
+	[% qx(./strip_all ./var_lists.pl) %]
 
 	$text->{wrap} = new Text::Format {
 		columns 		=> 75,
@@ -80,7 +80,7 @@ sub definitions {
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      			\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
-		unversioned_state_store => ['Aux',					\&project_dir ],
+		untracked_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 		user_customization 		=> ['custom.pl',      		\&project_root],
@@ -108,11 +108,12 @@ sub definitions {
 # config variable sources are prioritized as follows
 
 	#
-	#		+   command line -f here_is_namarc argument
+	#		+   command line argument -f /path/to/namarc 
 	#		+   project specific namarc  # currently disabled
 	#		+	user namarc (usually ~/.namarc)
 	#		+	internal namarc
 	#		+	internal initialization
+
 
 	$config = bless {
 		root_dir 						=> join_path( $ENV{HOME}, "nama"),

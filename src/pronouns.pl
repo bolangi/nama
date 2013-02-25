@@ -10,6 +10,3 @@ $prompt
 %bn
 $debug
 $debug2
-@config_vars
-@persistent_vars
-@project_config_vars

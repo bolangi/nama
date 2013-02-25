@@ -1,25 +1,31 @@
 #!/usr/bin/perl
 use Modern::Perl;
 use File::Slurp;
-my @var_map = split "\n", qx(cat ./var_map);
+# get registered keys by combining contents of two files 
+my %var_map = map{ split " ", $_ } split "\n", qx(./strip_all ./config_map);
+my @vars1 = values %var_map;
+my @vars2 = split "\n", qx(./strip_all ./singleton_keys);
 my %singletons;
-my %skeys; 
+my %singleton_has_key; 
 {no warnings 'uninitialized';
-map{ my ($from, $to) = split " ", $_;
-	if ( my ($singleton, $key) = $to =~ /^(\$\w+)->{(\w+)}/)
+
+map{ 
+	my $target = $_;
+	my ($singleton, $key) = $target =~ /^(\$\w+)->{(\w+)}/;
+	
 	{
 		#say "singleton: $singleton, key: $key";
 		$singletons{$singleton}++;
-		$skeys{$singleton} //= {};
-		$skeys{$singleton}{$key}++;
+		$singleton_has_key{$singleton} //= {};
+		$singleton_has_key{$singleton}{$key}++;
 	}
-} @var_map;
+} @vars1, @vars2
 }
 my @files = glob("*.p *.pl *.t");
 =comment
 use Data::Dumper::Concise;
 print Dumper \%singletons;
-print Dumper \%skeys;
+print Dumper \%singleton_has_key;
 
 print join " ", @files;
 =cut
@@ -29,12 +35,12 @@ my $sre = qr/\$($srevars)->{(\w+)}/;
 
 map{ 
 	my $filename = $_;
-	my $file = read_file($filename);
-	while( $file =~ /$sre/g )
+	my $contents = read_file($filename);
+	while( $contents =~ /$sre/g )
 	{
 		my($singleton,$key) = ($1,$2);
 		#say "found $singleton, $key";
 		say "$filename: illegal key ", $singleton, '->{', $key , '}'
-			if ! $skeys{"\$$singleton"}{$key}
+			if ! $singleton_has_key{"\$$singleton"}{$key}
 	}
 } @files;

@@ -151,9 +151,9 @@ sub save_system_state {
 	} @formats;
 
 	serialize(
-		file => $file->unversioned_state_store,
+		file => $file->untracked_state_store,
 		format => 'json',
-		vars => \@unversioned_state_vars,
+		vars => \@persistent_untracked_vars,
 		class => '::',
 	);	
 
@@ -309,7 +309,7 @@ sub restore_state_from_file {
 	logpkg('debug', "source: $source");
 
 	
-	( $path, $suffix ) = get_newest($file->unversioned_state_store);
+	( $path, $suffix ) = get_newest($file->untracked_state_store);
 	if ($path)
 	{
 		$source = read_file($path);
@@ -317,7 +317,7 @@ sub restore_state_from_file {
 		my $ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
-				vars   	=> \@unversioned_state_vars,
+				vars   	=> \@persistent_untracked_vars,
 				class 	=> '::');
 		assign_singletons( { data => $ref });
 	}
@@ -328,9 +328,6 @@ sub restore_state_from_file {
 		$source = read_file($path);
 		$ref = decode($source, $suffix);
 
-
-		# State file, old list, for backwards compatibility
-		
 		assign(
 					data => $ref,
 					vars   => \@persistent_vars,
@@ -704,7 +701,6 @@ sub restore_global_effect_chains {
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
-				var_map => 1,
 				class => '::');
 }
 sub git_snapshot {
@@ -727,7 +723,9 @@ sub git_tag {
 	logsub("&git_tag");
 	return unless $config->{use_git};
 	my ($tag_name,$msg) = @_;
-	git( tag => $tag_name, '-m', $msg);
+	my @args = ($tag_name);
+	push(@args, '-m',$msg) if $msg;
+	git( tag => @args);
 }
 sub git_checkout {
 	logsub("&git_checkout");
@@ -792,6 +790,11 @@ sub current_branch {
 	$b
 }
 
+sub git_sha {
+	my $commit = shift || 'HEAD';
+		my ($sha) = git(show => $commit) =~ /commit ([0-9a-f]{10})/;
+		$sha
+}
 sub git_branch_display {
 	logsub("&git_branch_display");
 	return unless $config->{use_git};

@@ -1,7 +1,7 @@
 package ::;
 require 5.10.0;
 use vars qw($VERSION);
-$VERSION = "1.100";
+$VERSION = "1.101";
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
@@ -9,7 +9,7 @@ use autodie qw(:default);
 
 ########## External dependencies ##########
 
-use Carp;
+use Carp qw(carp cluck confess croak);
 use Cwd;
 use Data::Section::Simple qw(get_data_section);
 use File::Find::Rule;
@@ -121,12 +121,12 @@ use ::Modes ();
 use ::Mix ();
 use ::Memoize ();
 
-use ::Engine_setup ();
-use ::Engine_cleanup ();
-use ::Effects_registry ();
+use ::EngineSetup ();
+use ::EngineCleanup ();
+use ::EffectsRegistry ();
 use ::Effects ();
 use ::Engine ();
-use ::Mute_Solo_Fade ();
+use ::MuteSoloFade ();
 use ::Jack ();
 
 use ::Regions ();
@@ -139,9 +139,9 @@ use ::Log qw(logit loggit logpkg logsub initialize_logger);
 
 sub main { 
 	bootstrap_environment() ;
-	command_process($config->{execute_on_project_load});
+	process_command($config->{execute_on_project_load});
 	reconfigure_engine();
-	command_process($config->{opts}->{X});
+	process_command($config->{opts}->{X});
 	$ui->loop();
 }
 

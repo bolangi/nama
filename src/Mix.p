@@ -68,7 +68,7 @@ sub automix {
 
 	### Status before mixdown:
 
-	command_process('show');
+	process_command('show');
 
 	
 	### reduce track volume levels  to 10%
@@ -82,9 +82,9 @@ sub automix {
 
 	### reduce vol command: $reduce_vol_command
 
-	for (@tracks){ command_process("$_  $reduce_vol_command") }
+	for (@tracks){ process_command("$_  $reduce_vol_command") }
 
-	command_process('show');
+	process_command('show');
 
 	generate_setup('automix') # pass a bit of magic
 		or say("automix: generate_setup failed!"), return;
@@ -113,17 +113,17 @@ sub automix {
 	if ( $multiplier < 0.00001 ){
 
 		say "Signal appears to be silence. Skipping.";
-		for (@tracks){ command_process("$_  $restore_vol_command") }
+		for (@tracks){ process_command("$_  $restore_vol_command") }
 		$tn{Master}->set(rw => 'MON');
 		return;
 	}
 
 	### apply multiplier to individual tracks
 
-	for (@tracks){ command_process( "$_ vol*$multiplier" ) }
+	for (@tracks){ process_command( "$_ vol*$multiplier" ) }
 
 	### mixdown
-	command_process('mixdown; arm; start');
+	process_command('mixdown; arm; start');
 
 	### restore audio output
 

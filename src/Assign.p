@@ -29,6 +29,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		json_in
 		json_out
 		quote_yaml_scalars
+		var_map
+        config_vars
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -47,7 +49,7 @@ my $logger = Log::Log4perl->get_logger();
 ) };
 sub var_map {  $var_map } # to allow outside access while keeping
                           # working lexical
-
+sub config_vars { grep {$_ ne '**' } keys %$var_map }
 
 sub assign {
   # Usage: 
