@@ -109,6 +109,7 @@ $project->{cache_map}
 $project->{config}
 $project->{save_file_version_number}
 $project->{undo_buffer}
+$project->{artist}
 $file->{effects_cache}
 $file->{global_effect_chains}
 $file->{state_store}
