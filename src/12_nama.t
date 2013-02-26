@@ -20,7 +20,7 @@ our $test_dir = "/tmp/nama-test";
 cleanup_dirs();
 setup_dirs();
 
-sub cleanup_dirs { 	chdir '..', remove_tree($test_dir) if -e $test_dir }
+sub cleanup_dirs { 	chdir('..'), remove_tree($test_dir) if -e $test_dir }
 sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
 $debug and diag( qx(find $test_dir) );
