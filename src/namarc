@@ -66,11 +66,12 @@ mixer_out_format: cd-stereo         # for ALSA/OSS
 
 # soundcard_channels: 10            # input/output channel selection range (GUI)
 
-# audio file formats
+# audio file format templates
 
 mix_to_disk_format: s16_le,N,frequency,i
 raw_to_disk_format: s16_le,N,frequency,i
 cache_to_disk_format: f24_le,N,frequency,i
+
 mixdown_encodings: mp3 ogg
 
 sample_rate: frequency
