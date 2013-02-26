@@ -420,7 +420,7 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $config->{engine_globals_general};
+	my $globals = $config->{engine_globals_common};
 	$globals .=  setup_requires_realtime()
 			? join " ", " -b:$config->{engine_buffersize_realtime}", 
 				$config->{engine_globals_realtime}

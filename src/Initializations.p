@@ -144,7 +144,7 @@ sub definitions {
 
 		serialize_formats               => 'json',		# for save_system_state()
 
-		engine_globals_general			=> "-z:mixmode,sum",
+		engine_globals_common			=> "-z:mixmode,sum",
 		engine_globals_realtime			=> "-z:db,100000 -z:nointbuf",
 		engine_globals_nonrealtime		=> "-z:nodb -z:intbuf",
 		engine_buffersize_realtime		=> 256, 

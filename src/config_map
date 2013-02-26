@@ -31,7 +31,7 @@
 #	[engine]
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
-	$ecasound_globals_general		$config->{engine_globals_general}
+	$ecasound_globals_general		$config->{engine_globals_common}
 	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
 	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
 	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
