@@ -185,7 +185,7 @@ sub definitions {
 
 	$mode->{mastering} = 0;
 
-	init_memoize() if $config->{memoize};
+	init_wav_memoize() if $config->{memoize};
 
 }
 

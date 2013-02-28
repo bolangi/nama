@@ -518,7 +518,7 @@ sub destroy_current_wav {
 		delete $this_track->{version_comment}{$this_track->current_version};
 		print "Unlinking.\n";
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
-		rememoize();
+		restart_wav_memoize();
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
 	$this_track->set(version => 0);  # reset

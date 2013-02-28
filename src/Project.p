@@ -142,7 +142,7 @@ sub load_project {
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
-	rememoize();
+	restart_wav_memoize();
 	
 
 	if( $config->{use_git} ){

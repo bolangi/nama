@@ -808,7 +808,7 @@ sub import_audio  {
 		#say $cmd;
 		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
 	} 
-	::rememoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
+	::restart_wav_memoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }
 
 sub port_name { $_[0]->target || $_[0]->name } 

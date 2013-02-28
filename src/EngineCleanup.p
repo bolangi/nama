@@ -124,7 +124,7 @@ sub new_files_were_recorded {
 				}
 		} @files;
 	if(@recorded){
-		rememoize();
+		restart_wav_memoize();
 		say join $/,"recorded:",@recorded;
 	}
 	map{ _get_wav_info($_) } @recorded;

@@ -65,7 +65,7 @@ sub reconfigure_engine {
 		$setup->{_last_rec_tracks} = \@rec_tracks;
 	}
 
-	rememoize(); # check if someone has snuck in some files
+	restart_wav_memoize(); # check if someone has snuck in some files
 	
 	find_duplicate_inputs(); # we will warn the user later
 
