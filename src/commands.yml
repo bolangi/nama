@@ -560,8 +560,13 @@ tag:
   parameters: <s_tag_name> [<s_message>]
 branch:
   type: project
-  what: change to named branch (list branches when called with no arguments)
+  what: change to named branch
   short: br
+  parameters: <s_branch_name>
+list_branches:
+  type: project
+  what: list branches when called with no arguments
+  short: lb lbr
   parameters: <s_branch_name>
 new_branch:
   type: project

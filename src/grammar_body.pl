@@ -235,16 +235,10 @@ branch: _branch branchname {
 	} else { } # git_checkout tells us what went wrong
 	1;
 }
-branch: _branch {
-	::pager3(
-		"---Branches--- (asterisk marks current branch)",
-		$::project->{repo}->run('branch'),
-		"",
-		"-----Tags-----",
-		$::project->{repo}->run('tag','--list')	
-	);
-	1;
-}
+branch: _branch { ::list_branches(); 1}
+
+list_branches: _list_branches end { ::list_branches(); 1}
+
 new_branch: _new_branch branchname branchfrom(?) { 
 	my $name = $item{branchname};
 	my $from = "@{$item{'branchfrom(?)'}}";
@@ -1248,7 +1242,7 @@ full_effect_profiles: _full_effect_profiles ident(?) {
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}
-scan: _scan { ::pager2( "scanning ", ::this_wav_dir()); ::rememoize() }
+scan: _scan { ::pager2( "scanning ", ::this_wav_dir()); ::restart_wav_memoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
