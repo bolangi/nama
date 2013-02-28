@@ -541,7 +541,7 @@ C<save> updates several other data files as well:
 
 F<Aux.json>, in the current project directory, contains
 data that is part of the project (such as command history
-and track comments) with no direct effect on audio.  
+and track comments) with no direct effect on the project audio.  
 
 F<global_effect_chains.json>, in the project root directory,
 contains system and user defined effect chains.
@@ -550,15 +550,27 @@ C<save somename.json> will force saving to a different
 filename. Similarly C<get somename.json> will load
 the corresponding file.
 
-The F<.json> suffix is not necessary if git is not present
-or is disabled in F<.namarc>.  
+(The F<.json> suffix may be omitted if git is not present
+or is disabled in F<.namarc>.)
 
-=head2 Workflow Using Git to Manage Project State
+=head2 Simplified Workflow Using Git to Manage Project State
 
 Use the C<save> command periodically. On each save command,
 changes to F<State.json> will be committed to the
 repository.  The commit message will include a list of
 commands executed since the previous commit.
+
+The C<save> and C<get> commands for branches behave in a
+similar way to save/restore of named files.
+
+C<save initial-mix> will save project state to
+F<State.json>, commit changes to the repository, and create
+a tag named "initial-mix" at the current HEAD.  Successive
+commits take place within the default branch "master".  
+
+Later on, if you type C<get initial-mix>, Nama automatically promotes 
+the tagged commit to a branch named "initial-mix-branch"
+which becomes the current branch.
 
 =head3 Standard git commands
 
@@ -566,66 +578,12 @@ You can issue git commands in the normal way,
 and Nama will stay out of your way. Note that
 merging of branches is untested.
 
-=head3 Nama commands for tagging and branching
-
-Nama provides commands to manage tagging and branching:
-C<save>, C<get>, C<branch>, and C<new_branch>.  The main
-thing Nama does is automatically promotes a tagged commit to
-a branch, so when you C<get foo>, you end up checking out
-"foo-branch". In practice, you can think of tags and
-branches as the same: omit the -branch suffix, and Nama will
-do the right thing.
-
-save tagname 
-  save, commits, and tags with tagname
-
-get tagname
-  switch to branch tagname-branch
-
-new_branch new_branch_name existing_branch_or_tag
-
-branch
-  list branches and tags 
-
-When you've reached a significant milestone, for example,
-after vol/pan settings, you might say C<save volpan>.  The
-commit will be tagged "volpan". 
-
-     volpan
-      /
-------
-
-You continue, creating tags "initial-mix", "tweak-vocals".
-
-     volpan  initial-mix  tweak-vocals
-      /       /           /
---------------------------
-
-
-Now you want to go back and try a different approach to 
-the vocals.
-
-C<new_branch tweak-vocals2 initial-mix> will create branch
-"tweak-vocals2-branch" starting at tag "initial-mix". 
-
-             tweak-vocals2
-               /
-     volpan  initial-mix  tweak-vocals
-      /       /           /
---------------------------
-
-The C<branch> command will switch to the designated
-branch or tag. The "-branch" suffix is automatically
-appended where appropriate.
-
-Without arguments, C<branch> lists tags and branches. 
-
 =head3 Requirements
 
 To use git for version control, you must have git installed and, 
 "use_git: 1" must be set in F<.namarc>.
 
-=head3 Exiting
+=head2 Exiting
 
 When you type C<quit> Nama will automatically save your work
 to F<State.json>. This will overwrite previous settings in
