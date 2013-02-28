@@ -29,23 +29,27 @@ HELP
 
 project => <<PROJECT,
    load_project, load        - load an existing project 
-   project_name, name          - show the current project name
+   project_name, name        - show the current project name
    create_project, create    - create a new project directory tree 
    list_projects, lp         - list all Nama projects
    get_state, get            - retrieve named file or tag
    save_state, keep, save    - save state as file or tag
-   memoize                   - enable WAV directory cache (default OFF)
-   unmemoize                 - disable WAV directory cache
    exit, quit                - exit program, saving state 
 
  (Version control)
 
-   tag                       - tag the current project state (i.e. commit) 
-                               with a name and optional message
-   branch, br                - checkout named branch or tag, 
-                               list branches, tags
-   new_branch, nbr           - create a new branch based on current 
-                               state (commit)
+   save                      - save, commit and tag with <tagname>
+   get                       - checkout tag <tagname> 
+                               or associated branch and load
+   branch, br                - switch to designated branch and load
+   list_branches, lbr        - list branches and tags (without arguments)
+   new_branch, nbr           - create a new branch starting at the current 
+                               commit or a specified commit 
+   tag                       - tag current commit with a name and optional 
+                               message
+   
+   memoize                   - enable WAV directory cache
+   unmemoize                 - disable WAV directory cache
    
 PROJECT
 
