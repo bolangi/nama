@@ -801,6 +801,15 @@ sub git_branch_display {
 	return unless current_branch();
 	"( ".current_branch()." ) "
 }
+sub list_branches {
+	pager3(
+		"---Branches--- (asterisk marks current branch)",
+		$project->{repo}->run('branch'),
+		"",
+		"-----Tags-----",
+		$project->{repo}->run('tag','--list')	
+	);
+}
 
 sub autosave {
 	logsub("&autosave");
