@@ -553,24 +553,10 @@ the corresponding file.
 (The F<.json> suffix may be omitted if git is not present
 or is disabled in F<.namarc>.)
 
-=head2 Simplified Workflow Using Git to Manage Project State
+=head3 Requirements to Use Git for saving projects
 
-Use the C<save> command periodically. On each save command,
-changes to F<State.json> will be committed to the
-repository.  The commit message will include a list of
-commands executed since the previous commit.
-
-The C<save> and C<get> commands for branches behave in a
-similar way to save/restore of named files.
-
-C<save initial-mix> will save project state to
-F<State.json>, commit changes to the repository, and create
-a tag named "initial-mix" at the current HEAD.  Successive
-commits take place within the default branch "master".  
-
-Later on, if you type C<get initial-mix>, Nama automatically promotes 
-the tagged commit to a branch named "initial-mix-branch"
-which becomes the current branch.
+To use git for version control, you must have git installed and, 
+"use_git: 1" must be set in F<.namarc>.
 
 =head3 Standard git commands
 
@@ -578,10 +564,34 @@ You can issue git commands in the normal way,
 and Nama will stay out of your way. Note that
 merging of branches is untested.
 
-=head3 Requirements
+=head3 Simplified Workflow Using Git to Manage Project State
 
-To use git for version control, you must have git installed and, 
-"use_git: 1" must be set in F<.namarc>.
+Use the C<save> command periodically. On each save command,
+changes to F<State.json> will be committed to the
+repository.  The commit message will include a list of
+commands executed since the previous commit.
+
+The C<save> and C<get> commands for branches behave in a
+similar way to save/restore of named files. 
+
+You can say C<save initial-mix> and C<get initial-mix> 
+and have them behave as expected, without being
+familiar with Git.
+
+What actually happens: C<save initial-mix> will save project
+state to F<State.json>, commit changes to that file to the
+git repository, and tag current branch's HEAD commit as
+"initial-mix". The current branch does not change, remains
+in the default branch, "master". 
+
+Later on, on typing C<get initial-mix>, Nama automatically
+promotes the tagged commit "initial-mix" to a branch named
+"initial-mix-branch" which becomes the current branch.
+
+If you want to start a new branch named something else
+at tag "initial-mix" you can say this: 
+
+C<new_branch compressed-mix initial-mix
 
 =head2 Exiting
 
