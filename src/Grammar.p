@@ -43,6 +43,9 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
+{
+my %exclude_from_undo_buffer = map{ $_ => 1} 
+		qw(tag commit branch br new_branch nbr load save get restore);
 sub process_line {
 	logsub("&process_line");
 	no warnings 'uninitialized';
@@ -63,14 +66,14 @@ sub process_line {
 			push @{$project->{undo_buffer}}, 
 
 			{
-				context => qq(bus: $this_bus, track: ) 
-								. $this_track->name .  qq(, op: $this_op),
+				context => context(),
 				command => $user_input,
 			#	commit 	=> $commit 
 			}
 
 				unless ! $success 
-					   or $user_input =~ /^\s*(tag|commit|branch|new_branch|load|save)/;
+					   or $user_input =~ /^\s*([a-z_]+)/
+						and $exclude_from_undo_buffer{$1};
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 				#or eval_iam('cs-connected') 
@@ -80,6 +83,15 @@ sub process_line {
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 	}
 }
+}
+sub context {
+	my $context = {};
+	$context->{track} = $this_track->name;
+	$context->{bus}   = $this_bus;
+	$context->{op}    = $this_op;
+	$context
+}
+	
 sub process_command {
 	state $total_effects_count;
 	my $input = shift;

@@ -713,9 +713,20 @@ sub git_snapshot {
 	
 sub git_commit {
 	logsub("&git_commit");
-	my $commit_message = shift || "empty message";
+	my $commit_message = shift;
+	$commit_message = join "\n", 
+		$commit_message,
+		# context for first command
+		"Context:",
+		" + track: $project->{undo_buffer}->[0]->{context}->{track}",
+		" + bus:   $project->{undo_buffer}->[0]->{context}->{bus}",
+		" + op:    $project->{undo_buffer}->[0]->{context}->{op}",
+		# all commands since last commit
+		map{ $_->{command} } @{$project->{undo_buffer}};
+		
 	git( add => $file->git_state_store );
-	git( commit => '--quiet', '--message', qq["$commit_message"]);
+	git( commit => '--quiet', '--message', $commit_message);
+	$project->{undo_buffer} = [];
 }
 	
 
