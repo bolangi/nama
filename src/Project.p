@@ -113,16 +113,16 @@ sub initialize_effects_data {
 
 sub load_project {
 	logsub("&load_project");
-	my %h = @_;
-	logpkg('debug', sub{yaml_out \%h});
+	my %args = @_;
+	logpkg('debug', sub{yaml_out \%args});
 	throw("no project name.. doing nothing."),return 
-		unless $h{name} or $project->{name};
+		unless $args{name} or $project->{name};
 
-	$project->{name} = $h{name} if $h{name};
+	$project->{name} = $args{name} if $args{name};
 
 	if ( ! -d project_dir() )
 	{ 	
-		if ( $h{create} )
+		if ( $args{create} )
 		{ 
 			map{create_dir($_)} project_dir(), this_wav_dir() ;
 		}
@@ -159,7 +159,7 @@ sub load_project {
 		}
 	}
 
-	restore_state($h{settings}) unless $config->{opts}->{M} ;
+	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
 	if (! $tn{Master}){
 
@@ -190,8 +190,8 @@ sub load_project {
 
 	$config->{opts}->{M} = 0; # enable 
 	
-	# $h{nodig} allow skip for convert_project_format
-	dig_ruins() unless (scalar @::Track::all > 2 ) or $h{nodig};
+	# $args{nodig} allow skip for convert_project_format
+	dig_ruins() unless (scalar @::Track::all > 2 ) or $args{nodig};
 
 	# possible null if Text mode
 	
