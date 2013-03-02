@@ -941,8 +941,6 @@ sub sibling_count {
 	$setup->{latency}->{sibling_count}->{$track->name}
 }
 
-sub cache_map { $project->{cache_map}->{$_[0]->name} }
-
 sub set_comment {
 	my ($track, $comment) = @_;
 	$project->{track_comments}->{$track->name} = $comment

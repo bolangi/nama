@@ -15,7 +15,6 @@ $this_track_name
 # project save, so that the data can 
 # be kepts out of VCS
 
-%cache_map
 %track_comments
 %track_version_comments
 @persistent_vars
