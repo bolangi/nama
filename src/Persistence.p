@@ -692,9 +692,9 @@ sub restore_global_effect_chains {
 	logsub("&restore_global_effect_chains");
 		my $path =  $file->global_effect_chains;
 		my ($resolved, $format) = get_newest($path);  
-		carp("$resolved: file not found"), return unless $resolved;
+		throw("$resolved: file not found"), return unless $resolved;
 		my $source = read_file($resolved);
-		carp("$resolved: empty file"), return unless $source;
+		throw("$resolved: empty file"), return unless $source;
 		logpkg('debug', "format: $format, source: \n",$source);
 		my $ref = decode($source, $format);
 		logpkg('debug', sub{Dumper $ref});
