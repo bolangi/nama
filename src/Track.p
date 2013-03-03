@@ -122,7 +122,7 @@ sub new {
 	::add_pan_control($n);
 	::add_volume_control($n);
 
-	$this_track = $object;
+	$::this_track = $object;
 	$object;
 	
 }
@@ -421,7 +421,7 @@ sub remove {
 	my $track = shift;
 	my $n = $track->n;
 	$ui->remove_track_gui($n); 
- 	$this_track = $ti{::Track::idx() - 1};
+ 	$::this_track = $ti{::Track::idx() - 1};
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
@@ -1145,7 +1145,6 @@ sub add_track {
 
 	my $track = $class->new(%vals);
 	return if ! $track; 
-	$this_track = $track;
 	logpkg('debug', "ref new track: ", ref $track); 
 	$track->source($gui->{_chr}) if $gui->{_chr};
 #		$track->send($gui->{_chm}) if $gui->{_chm};
