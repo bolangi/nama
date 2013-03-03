@@ -258,7 +258,8 @@ sub remove_riff_header_stubs {
                                         ->file()
                                         ->size(44)
                                         ->extras( { follow => 1} )
-                                     ->in( this_wav_dir() );
+                                     	->in( this_wav_dir() )
+									if -d this_wav_dir();
     logpkg('debug', join $/, @wavs);
 
 	map { unlink $_ } @wavs; 
