@@ -29,7 +29,7 @@ our %EXPORT_TAGS =
 						@global_effect_chain_vars
 	)],
 
-	globals => [qw( 
+	pronouns => [qw( 
 
 [% qx(./strip_all ./pronouns.pl) %]
 
