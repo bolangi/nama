@@ -80,8 +80,9 @@ Debugging options:
 --execute-command, -X            Supply a command to execute
 --no-terminal, -T                Don't initialize terminal
 --no-fades, -F                   No fades on transport start/stop
+--latency, -Q                    Apply latency compensation
 --no-latency, -O                 Don't apply latency compensation
---log, -L                        Categories to log
+--log, -L                        Log these (comma separated) categories
 
 HELP
 }
