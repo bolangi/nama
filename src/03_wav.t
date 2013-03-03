@@ -2,9 +2,9 @@ use Test::More qw(no_plan);
 use strict;
 
 BEGIN { 
-	diag ("TESTING $0\n");
 	use_ok('::Wav') ;
 }
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 my $wav = ::Wav->new( qw(	name  	track01.cdda 
 							dir   	/media/sessions/test-abc
 							)) ;

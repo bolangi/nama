@@ -6,7 +6,7 @@ BEGIN { use_ok('::Assign') };
 use ::Assign qw(:all);
 # `make test'. After `make install' it should work as `perl 1.t'
 
-diag ("TESTING $0\n");
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 
 my @test_classes = qw( :: main:: main); # SKIP_PREPROC
 use vars qw( $foo  @face $name %dict);
@@ -23,8 +23,9 @@ my $struct = {
 	face => [1,5,7,12],
 	dict => {fruit => 'melon'}
 };	
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("Serializing, storing$ENV{NAMA_VERBOSE_TEST_OUTPUT} recalling data");
 for my $c (@test_classes) {
-	diag ("testing for class $c");
+	$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("testing for package $c");
 
 	assign (data => $struct, class => $c, vars => \@var_list);
 	#assign($struct, @var_list);
@@ -49,7 +50,6 @@ for my $c (@test_classes) {
 }
 WANT
 
-	diag("Serializing, storing and recalling data");
 	is( $foo, 2, "Scalar number assignment");
 	is( $name, 'John', "Scalar string assignment");
 	my $sum;

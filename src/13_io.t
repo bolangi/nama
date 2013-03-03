@@ -9,7 +9,7 @@ BEGIN { use_ok('::IO') };
 
 # `make test'. After `make install' it should work as `perl 1.t'
 
-diag ("TESTING $0\n");
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 
 =comment
 my $io = ::IO->new( qw[ type raw

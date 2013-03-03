@@ -3,11 +3,10 @@ use strict;
 
 
 BEGIN { 
-	diag ("TESTING $0\n");
 	use_ok('::Object') ;
 }
-
-diag "testing trivial class Apple";
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "testing trivial class Apple";
 package Apple;
 our @ISA; 
 use ::Object qw(color);

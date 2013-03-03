@@ -7,13 +7,12 @@ use Cwd;
 use strict;
 use warnings;
 no warnings qw(uninitialized);
-our $debug;
 
 our ($expected_setup_lines);
 
-$debug and diag ("TESTING $0\n");
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 
-$debug and diag("working directory: ",cwd);
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("working directory: ",cwd);
 
 our $test_dir = "/tmp/nama-test";
 
@@ -23,16 +22,16 @@ setup_dirs();
 sub cleanup_dirs { 	chdir('..'), remove_tree($test_dir) if -e $test_dir }
 sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
-$debug and diag( qx(find $test_dir) );
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );
 
 apply_test_harness();
 
-$debug and diag "options: @ARGV";
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
 
 bootstrap_environment();
 $config->{use_git} = 0;
 
-$debug and diag "Check representative variable from default .namarc";
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
 
 is( $config->{mix_to_disk_format}, "s16_le,N,44100,i", "Read mix_to_disk_format");
 
@@ -69,8 +68,8 @@ my $test_project = 'test';
 
 load_project(name => $test_project, create => 1);
 
-$debug and diag("project project dir: ".project_dir());
-$debug and diag("project project wav dir: ".this_wav_dir());
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project dir: ".project_dir());
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("project project wav dir: ".this_wav_dir());
 
 #diag(map{ $_->dump} values %::Track::by_index );
 
@@ -179,7 +178,7 @@ my $i;
 for (@test) {
 	my %t = %$_;
 	$i++;
-	$debug and diag "IO.pm unit test $i";
+	$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "IO.pm unit test $i";
 	my $class = "Audio::Nama::IO::$t{class}";
 	my $io = $class->new(%{$t{args}});
 	my @keys = sort grep{ $_ ne 'class'} keys %t;
@@ -601,7 +600,7 @@ check_setup('Send bus - raw - JACK');
 
 {
 
-$debug and diag "Edit mode playat and region endpoints adjustment";
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Edit mode playat$ENV{NAMA_VERBOSE_TEST_OUTPUT} region endpoints adjustment";
 my @tests = split "\n",<<TEST_DATA;
 1 12 5 15 4   8  *  *  * 30 out_of_bounds_near region
 2 12 5 15 23 26  *  *  * 30 out_of_bounds_far region

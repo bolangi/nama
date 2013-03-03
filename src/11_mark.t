@@ -2,9 +2,9 @@ use Test::More qw(no_plan);
 use strict;
 
 BEGIN { 
-	diag ("TESTING $0\n");
 	use_ok('::Mark') ;
 }
+$ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 my $mark  = ::Mark->new( name => 'thebeginning');
 
 is(  ref $mark , '::Mark', "Object creation");
@@ -12,7 +12,7 @@ is(  ref $mark , '::Mark', "Object creation");
 1;
 __END__
 
-diag("Serializing, storing and recalling data");
+diag("Serializing, storing$ENV{NAMA_VERBOSE_TEST_OUTPUT} recalling data");
 is( $foo, 2, "Scalar number assignment");
 is( $name, 'John', "Scalar string assignment");
 my $sum;
