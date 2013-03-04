@@ -9,6 +9,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
 inc/Module/Install/Fetch.pm
 lib/Audio/Nama.pm
+lib/Audio/AnalyseLV2.pm
 lib/Audio/Nama/Assign.pm
 lib/Audio/Nama/Bunch.pm
 lib/Audio/Nama/Bus.pm
@@ -20,8 +21,8 @@ lib/Audio/Nama/Edit.pm
 lib/Audio/Nama/EffectChain.pm
 lib/Audio/Nama/Effects.pm
 lib/Audio/Nama/EffectsRegistry.pm
-lib/Audio/Nama/Engine.pm
 lib/Audio/Nama/EngineCleanup.pm
+lib/Audio/Nama/EngineRun.pm
 lib/Audio/Nama/EngineSetup.pm
 lib/Audio/Nama/Fade.pm
 lib/Audio/Nama/Globals.pm
