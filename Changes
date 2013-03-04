@@ -1,5 +1,18 @@
 Changes to Audio::Nama
 
+1.102 March 3, 2013
+
+    * new .namarc option 'use_git' for project management
+       + many internal changes to support git
+       + save/get commands handle branches similar to save/get files 
+    * drop backwards compatibility and project conversion
+       (checkout Rosetta for this)
+    * auto mp3/ogg encoding of mixdown files
+    * name mixdown files using project or branch name
+    * cleanup variable declarations
+    * dismantle eager mode 
+    * internal latency compensation option
+
 1.100 March 9, 2012
 
 	* New serialization format, prefer json
