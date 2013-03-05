@@ -561,7 +561,7 @@ off: 'Xxx' {}
 record: 'Xxx' {}
 mon: 'Xxx' {}
 
-command: rw end # XX 'end' required to make test suite pass
+command: rw end
 
 rw_setting: 'rec'|'mon'|'off'
 rw: rw_setting {
@@ -1134,36 +1134,6 @@ bring_back_effects:   _bring_back_effects 'all' {
 # 						$::this_track->name), return 0;			  
 # 	$id;
 # }
-
-
-effect_chain_id: effect_chain_id_pair(s) {
- 		die " i found an effect chain id";
-  		my @pairs = @{$item{'effect_chain_id_pair(s)'}};
-  		my @found = ::EffectChain::find(@pairs);
-  		@found and 
-  			::pager2(
-				join " ", "found effect chain(s):",
-  				map{ ('name:', $_->name, 'n', $_->n )} @found
-			)
-  			#map{ 1 } @found;
-}
-effect_chain_id_pair: fxc_key fxc_val { return @$item{fxc_key fxc_val} }
-
-fxc_key: 'n'|                #### HARDCODED XX
-		'ops_list'|
-        'ops_dat'|
-		'inserts_data'|
-		'name'|
-		'id'|
-		'project'|
-		'global'|
-		'profile'|
-		'user'|
-		'system'|
-		'track_name'|
-		'track_version'|
-		'track_cache'|
-		'bypass'
 
 # [% join " | ", split " ", qx(cat ./magical_pixie_operator.pl) %]
 
