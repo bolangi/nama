@@ -504,12 +504,10 @@ sub restore_state_from_file {
 	} @fade_data;
 
 	# edits 
-	#
 	
-		# DISABLE EDIT RESTORE FOR CONVERSION XX
 	map{ 
 		my %h = %$_; 
-#		my $edit = ::Edit->new( %h ) ;
+		my $edit = ::Edit->new( %h ) ;
 	} @edit_data;
 
 	# restore command history
