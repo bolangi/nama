@@ -30,20 +30,22 @@ port 2868 if your computer is exposed to the Internet.
 
 =head1 INSTALLATION
 
-The following command, available on Unixlike systems with
+The following commands, available on Unixlike systems with
 Perl installed, will pull in Nama and other Perl libraries
 required for text mode operation:
 
-PERL_MM_USE_DEFAULT=1 cpan Audio::Nama
+C<cpanm Audio::Nama>
+-or-
+C<PERL_MM_USE_DEFAULT=1 cpan Audio::Nama>
 
 To use the GUI, you will need to install Tk:
 
-C<cpan Tk>
+C<cpanm Tk>
 
 You may want to install Audio::Ecasound if you prefer not to
 run Ecasound in server mode:
 
-C<cpan Audio::Ecasound>
+C<cpanm Audio::Ecasound>
 
 You can pull the source code as follows: 
 
@@ -53,17 +55,20 @@ Consult the F<BUILD> file for build instructions.
 
 =head1 SUPPORT
 
-The Ecasound mailing list is a suitable forum for questions
-regarding Nama installation, usage, feature requests, etc.,
-as well as questions relating to Ecasound itself.
+The Nama mailing list is a suitable forum for questions
+regarding Nama installation, usage, bugs, feature requests, etc.
+
+http://www.freelists.org/list/nama
+
+For questions and discussion related to Ecasound 
 
 https://lists.sourceforge.net/lists/listinfo/ecasound-list
 
 =head1 PATCHES
 
-The main module, Nama.pm, and its sister modules are
-concatenations of several source files. Patches against
-these source files are preferred.
+The modules that make up this application are the
+preprocessed output from several source files.  Patches
+against these source files are preferred.
 
 =head1 AUTHOR
 
@@ -71,7 +76,8 @@ Joel Roth, E<lt>joelz@pobox.comE<gt>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright (c) 2009-2010 by Joel Roth.
+Copyright (c) 2009-2013 by Joel Roth.
 
 This is free software; you can redistribute it and/or modify
-it under the terms of the Artistic License, version 2.0.
+it under the terms of the GNU General Public License,
+Version 3.
