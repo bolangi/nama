@@ -1154,7 +1154,7 @@ sub get_saved_colors {
 sub colorset {
 	my ($widgetid, $field) = @_;
 	sub { 
-			my $widget = eval "\$$widgetid";
+			my $widget = $gui->{$widgetid};
 			#print "ancestor: $widgetid\n";
 			my $new_color = colorchooser($field,$widget->cget("-$field"));
 			if( defined $new_color ){
