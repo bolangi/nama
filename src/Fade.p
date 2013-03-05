@@ -237,7 +237,8 @@ sub fader_envelope_pairs {
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
 
-#   XXX results in bug via AUTOLOAD for EditTrack
+#   WEIRD message - try to figure this out
+#   XXX results in bug via AUTOLOAD for Edit
 #	@pairs = (initial_pair($track->name), @pairs, final_pair($track->name)); 
 
 	# add flat segments 
