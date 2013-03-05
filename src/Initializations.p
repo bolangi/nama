@@ -138,7 +138,7 @@ sub definitions {
 		fade_out_level 					=> {ea => 0, 	eadb => -40},
 		unity_level 					=> {ea => 100, 	eadb => 0}, 
 		fade_resolution 				=> 20, # steps per second
-		no_fade_mute_delay				=> 0.03,
+		engine_muting_time				=> 0.03,
 		enforce_channel_bounds			=> 1,
 
 
