@@ -762,7 +762,7 @@ sub effect_init {
 	{
 		chain 	=> $n, 
 		type 	=> $type,
-		display => $fx_cache->{registry}->[$i]->{display}, # XX do we need this???
+		display => $fx_cache->{registry}->[$i]->{display},
 		owns 	=> [],
 	}; 
 
