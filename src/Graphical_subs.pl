@@ -1131,12 +1131,12 @@ sub get_saved_colors {
 
 
 	my $pal = $file->gui_palette;
-	$pal .= '.yml';
+	$pal .= '.json' unless $pal =~ /\.json$/;
 	say "pal $pal";
 	$pal = -f $pal 
 			? scalar read_file($pal)
-			: get_data_section('default_palette_yml');
-	my $ref = decode($pal, 'yaml');
+			: get_data_section('default_palette_json');
+	my $ref = decode($pal, 'json');
 	#say "palette file",yaml_out($ref);
 
 	assign_singletons({ data => $ref });

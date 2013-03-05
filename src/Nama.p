@@ -194,8 +194,8 @@ __DATA__
 [% qx(cat ./fake_jack_latency) %]
 @@ midish_commands
 [% qx(cat ./midish_commands) %]
-@@ default_palette_yml
-[% qx(cat ./palette.yml) %]
+@@ default_palette_json
+[% qx(cat ./palette.json) %]
 __END__
 
 =head1 NAME
