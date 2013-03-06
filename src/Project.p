@@ -74,7 +74,6 @@ sub initialize_project_data {
 	$project->{save_file_version_number} = 0; 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
-	$project->{cache_map} = {};
 	$project->{undo_buffer} = [];
 	
 	$project->{bunch} = {};	
@@ -342,11 +341,7 @@ sub new_project_template {
 				region_end
 			);
 		 map{ $track->set($_ => [])  } 
-			qw(	effect_chain_stack      
-			);
-		 map{ $track->set($_ => {})  } 
-			qw( cache_map 
-			);
+			qw(	effect_chain_stack  );
 		
 	} @tracks;
 

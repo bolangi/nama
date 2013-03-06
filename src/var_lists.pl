@@ -44,7 +44,6 @@
 
 	$project->{save_file_version_number}
 	$project->{timebase}
-	$project->{cache_map}
 	$project->{undo_buffer}
 	$project->{track_version_comments}
 	$project->{track_comments}

@@ -22,7 +22,6 @@ sub init_gui {
 	$gui->{mw}->optionAdd('*BorderWidth' => 1);
 	$gui->{mw}->title("Ecasound/Nama"); 
 	$gui->{mw}->deiconify;
-	$gui->{parents}->{mw} = $gui->{mw};
 
 	### init effect window
 
@@ -30,7 +29,6 @@ sub init_gui {
 	$gui->{ew}->title("Effect Window");
 	$gui->{ew}->deiconify; 
 #	$gui->{ew}->withdraw;
-	$gui->{parents}->{ew} = $gui->{ew};
 
 	### Exit via Ctrl-C 
 

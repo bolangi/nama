@@ -1,134 +1,139 @@
-$midi->{keywords}
-$config->{memoize}
-$config->{hires_timer}
-$config->{opts}
-$config->{soundcard_channels}
-$config->{disable_auto_reconfigure}
-$config->{no_fade_mute_delay}
-$config->{fade_time1_fraction}
+$midi->{keywords} 				# list of Midish commands for the parser to recognize
+$config->{memoize} 				# method caching
+$config->{hires_timer}			# indicates if we are capable
+$config->{opts}					# command line arguments
+$config->{soundcard_channels}	# a constant needed for GUI - can we discover this?
+$config->{disable_auto_reconfigure} # -R option
+$config->{engine_muting_time} 	# delay for engine to mute/unmute
+$config->{fade_time1_fraction}	# two-part fade on engine start/stop
 $config->{fade_down_fraction}
 $config->{fade_time2_fraction}
 $config->{fade_down_fraction}
-$config->{fader_op}
-$config->{category}
-$engine->{jack_seek_delay}
-$config->{want_logging}
-$config->{latency_op}
-$config->{latency_op_init}
-$config->{latency_op_set}
-$config->{_is_system_bus}
-$jack->{jackd_running}
-$jack->{ports_list_text}
-$jack->{fake_ports_list}
-$jack->{clients}
-$jack->{period}
-$setup->{_old_snapshot}
-$setup->{_old_track_rw_status}
-$setup->{inputs_used}
+$config->{fader_op}				# Ecasound operator selected for fader 
+$config->{category}				# hack to change logging category
+$engine->{jack_seek_delay}		# extra time for stop-seek-start process
+$config->{want_logging}			# keys are categories requested for loggin
+$config->{latency_op}			# operator for latency compensation
+$config->{latency_op_init}		# initial values
+$config->{latency_op_set}		# subroutine for setting latency compensation
+$config->{_is_system_bus}		# a hash
+
+$jack->{jackd_running}			# jackd status, but this should be a subroutine
+$jack->{fake_ports_list}		# for testing
+$jack->{clients}				# JACK client information
+$jack->{period}					#
+$setup->{_old_snapshot}			# for checking if engine needs reconfigured
+$setup->{inputs_used}			# we warn if tracks share same input channel
 $setup->{tracks_with_duplicate_inputs}
 $setup->{cooked_record_pending}
-$setup->{track_snapshots}
 $setup->{changed}
-$setup->{wav_info}	
+$setup->{wav_info}				# length and format of each WAV file 
 $setup->{runtime_limit}
-$setup->{loop_endpoints}
+$setup->{loop_endpoints}		# for looping
 $setup->{audio_length}
 $setup->{offset_run}->{start_time}
 $setup->{offset_run}->{end_time}
 $setup->{offset_run}->{mark}
 $setup->{edit_points}
-$setup->{_last_rec_tracks}
-$setup->{latency}
-$setup->{latency_graph}
-$setup->{final_graph}
-$fx_cache->{registry}
-$fx_cache->{full_label_to_index}
-$fx_cache->{partial_label_to_full}
-$fx_cache->{user_help}
-$fx_cache->{ladspa_sorted}
-$fx_cache->{ladspa}
-$fx_cache->{ladspa_id_to_filename}
-$fx_cache->{ladspa_label_to_unique_id}
-$fx_cache->{ladspa_id_to_label}
-$fx_cache->{ladspa_help}
-$fx_cache->{lv2_help}
-$fx_cache->{split}
-$help->{screen}
-$help->{arr_topic}
-$help->{topic}
-$help->{usage}
-$mode->{preview}
-$mode->{eager}
-$mode->{offset_run}
-$mode->{soloing}
-$mode->{loop_enable}
-$mode->{mastering}
-$mode->{midish_terminal}
-$mode->{midish_transport_sync}
-$engine->{events}
-$engine->{socket}
-$engine->{pids}
-$engine->{ecasound}
-$engine->{buffersize}
-$fx->{ecasound_effect_hints}
-$fx->{offset}
-$fx->{muted}
-$fx->{chain}
-$fx->{profile}
-$fx->{id_counter}
-$fx->{applied}
-$fx->{params}
-$fx->{params_log}
-$text->{grammar}
-$text->{parser}
-$text->{wrap}
-$text->{format_fields}
-$text->{commands_yml}
-$text->{commands}
-$text->{command_shortcuts}
-$text->{iam}
-$text->{arr_nama_cmds}
-$text->{nama_commands}
-$text->{term}
-$text->{previous_cmd}
-$text->{keywords}
-$text->{term_attribs}
-$text->{format_top}
-$text->{format_divider}
-$text->{user_command}
-$text->{user_alias}
-$text->{command_history}
-$text->{undo_buffer}
-$project->{name}
-$project->{bunch}
-$project->{repo}
-$project->{timebase}
-$project->{track_comments}
-$project->{track_version_comments}
-$project->{cache_map}
-$project->{config}
-$project->{save_file_version_number}
-$project->{undo_buffer}
-$project->{artist}
-$file->{effects_cache}
-$file->{global_effect_chains}
-$file->{state_store}
-$file->{effect_chain}
-$file->{effect_profile}
-$file->{chain_setup}
-$file->{user_customization}
-$file->{gui_palette}
-$file->{custom_pl}
-$gui->{_seek_unit}
+$setup->{_last_rec_tracks}		# tracks we recorded to last time
+$setup->{latency}				# track latency info
+$setup->{latency_graph}			# a version of the routing graph
+                                # used for latency calculations
+$setup->{final_graph}			# the final routing graph
+
+$fx_cache->{registry}			# effects database
+$fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
+$fx_cache->{partial_label_to_full} # tap_pinknoise -> el:tap_pinknoise
+$fx_cache->{user_help}			
+$fx_cache->{ladspa_sorted}		# 
+$fx_cache->{ladspa}						# store for LADSPA plugin data
+$fx_cache->{ladspa_id_to_filename} 		# 2155 -> tap_pinknoise.so
+$fx_cache->{ladspa_label_to_unique_id}  # tap_pinknoise -> 2155
+$fx_cache->{ladspa_id_to_label}			# 2155 -> tap_pinknoise
+$fx_cache->{ladspa_help}				# store for LADSPA plugin help
+$fx_cache->{lv2_help}					# store for LV2 plugin help
+$fx_cache->{split}				# help divide effects into groups for GUI display
+$help->{screen}					# top-level help output
+$help->{arr_topic}				# sequential array of help pages 
+$help->{topic}					# access help page by name
+$help->{usage}					# usage output
+
+$mode->{preview}				# preview or doodle
+$mode->{eager}					# dismantled
+$mode->{offset_run}				# record starting other than at the beginning
+$mode->{soloing}				# boolean
+$mode->{loop_enable}			# boolean
+$mode->{mastering}				# boolean
+$mode->{midish_terminal}		# unused?
+$mode->{midish_transport_sync}  # not implemented, sync Ecasound start/stop with midish
+$engine->{events}				# timers used during engine run
+$engine->{socket}				# socket for communicating with Ecasound
+$engine->{pids}					# Ecasound process PIDs
+$engine->{ecasound}				# Audio::Ecasound object
+$engine->{buffersize}			# engine buffersize
+
+$fx->{ecasound_effect_hints}	# hints for ecasound effects
+$fx->{offset}					# offset to locate first user-addressable 
+								# chain operator, by track index
+$fx->{muted}					# names of muted tracks
+$fx->{id_counter}				# increments for effects A B C...
+$fx->{applied}					# Nama applied effects info
+								# hash by effect ID
+$fx->{params}					# parameters of applied effects
+								# hash by effect ID
+$fx->{params_log}				# for log scale sliders
+
+$text->{grammar}				# grammar source
+$text->{parser}					# Parse::RecDescent parser
+$text->{wrap}					# Text::Format object for wrapping text
+$text->{format_fields}			# ??
+$text->{commands_yml}			# command description YAML source
+$text->{commands}				# command description, perl data structure
+$text->{command_shortcuts}		# hash: shortcut -> full_command_name
+$text->{iam}					# Ecasound IAM commands
+$text->{term}					# Term::ReadLine object
+$text->{previous_cmd}			# store command history without successive duplicates
+$text->{keywords}				# Nama keywords for autocomplete
+$text->{term_attribs}			# Term::ReadLine's terminal attributes hash
+$text->{format_top}				# format for track display 
+$text->{format_divider}			# 
+$text->{user_command}			# user defined commands
+$text->{user_alias}				# user defined command aliases
+$text->{command_history}		# terminal command history
+
+$project->{name}				# project name
+$project->{bunch}				# track bunches lists
+$project->{repo}				# Git::Repository object
+$project->{timebase}			# seconds or samples, unused
+$project->{track_comments}		# per track comments
+$project->{track_version_comments} # per version comments
+$project->{save_file_version_number} # version of Nama that wrote State.json
+$project->{undo_buffer}			# command history for commit message
+$project->{artist}				# Artist field for mp3/ogg encoding
+
+$file->{effects_cache}			# Name of effects discovery cache
+$file->{global_effect_chains}	# Name of global effect chains file
+$file->{state_store}			# Name of state file
+$file->{chain_setup}			# Name of chain setup file 
+$file->{user_customization}		# Name of user customization file
+$file->{gui_palette}			# Name of GUI color scheme file
+
+$jack->{use_jacks}				# Prefer using jacks library
+$mastering->{track_names}		# Names of mastering tracks
+
+# the following variables are written to by widgets
+$gui->{_seek_unit}				# minutes or seconds
 $gui->{_project_name}
 $gui->{_track_name}
 $gui->{_chr}
 $gui->{_chm}
 $gui->{_save_id}
-$gui->{mw}
-$gui->{ew}
-$gui->{canvas}
-$gui->{load_frame}
+
+# GUI objects
+$gui->{mw}						# main window
+$gui->{ew}						# effects window
+$gui->{canvas}					# canvas
+$gui->{load_frame}				# frames for various parts of the display
 $gui->{add_frame}
 $gui->{group_frame}
 $gui->{time_frame}
@@ -140,20 +145,22 @@ $gui->{perl_frame}
 $gui->{transport_frame}
 $gui->{mark_frame}
 $gui->{seek_frame}
-$gui->{parents}
-$gui->{group_label}
-$gui->{group_rw}
-$gui->{group_version} 
-$gui->{tracks}
-$gui->{tracks_remove}
-$gui->{fx}
-$gui->{marks}
-$gui->{global_version_buttons}
-$gui->{mark_remove}
-$gui->{_markers_armed}
-$gui->{seek_unit}
-$gui->{clock}
-$gui->{setup_length}
+
+$gui->{group_label}				# label for group (Main bus)
+$gui->{group_rw}				# rw setting for Main bus
+$gui->{group_version} 			# version setting for Main bus
+$gui->{tracks}					# track widgets, by index
+$gui->{tracks_remove}			# track widgets list, by index, for destruction
+$gui->{fx}						# effects widgets lists, by effect ID
+$gui->{marks}					# mark widgets, index by position 
+$gui->{global_version_buttons}	# 
+$gui->{mark_remove}				# mark remove widget
+$gui->{_markers_armed}			# boolean, ready to set a mark
+
+$gui->{seek_unit}				# transport jump unit: seconds or minutes
+$gui->{clock}					# clock widget
+$gui->{setup_length}			# setup length display widget
+
 $gui->{project_head}
 $gui->{project_label}
 $gui->{project_entry}
@@ -185,6 +192,3 @@ $gui->{engine_start}
 $gui->{engine_stop}
 $gui->{_old_bg}
 $gui->{_old_abg}
-$jack->{use_jacks}
-$mastering->{track_names}
-$mastering->{fx_ids}
