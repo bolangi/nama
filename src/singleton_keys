@@ -161,34 +161,31 @@ $gui->{seek_unit}				# transport jump unit: seconds or minutes
 $gui->{clock}					# clock widget
 $gui->{setup_length}			# setup length display widget
 
-$gui->{project_head}
+$gui->{project_head}			# project widgets
 $gui->{project_label}
-$gui->{project_entry}
-$gui->{load_project}
-$gui->{new_project}
-$gui->{quit}
-$gui->{palette}
-$gui->{nama_palette}
-$gui->{fx_palette}
-$gui->{savefile_entry}
-$gui->{save_project}	
-$gui->{load_savefile}
-$gui->{_palette_fields}
+$gui->{project_entry}			# project name entry widget
+$gui->{load_project}			# load project button
+$gui->{new_project}				# new project button
+$gui->{quit}					# quit button
+$gui->{palette}					# color scheme selector
+$gui->{nama_palette}			# additional color scheme selector
+$gui->{savefile_entry}			# name for saving
+$gui->{save_project}			# save button
+$gui->{load_savefile}			# load button
+$gui->{_palette_fields}	
 $gui->{_nama_fields}
 $gui->{_nama_palette}
 $gui->{_palette} 
-$gui->{add_track}->{label}
-$gui->{add_track}->{text_entry}
-$gui->{add_track}->{add_mono}
-$gui->{add_track}->{add_stereo}
-$gui->{add_track}->{rec_label}
-$gui->{add_track}->{rec_text}
-$gui->{add_track}->{mon_label}
-$gui->{add_track}->{mon_text}
-$gui->{engine_label}
-$gui->{engine_arm}
-$gui->{engine_disconnect}
-$gui->{engine_start}
-$gui->{engine_stop}
-$gui->{_old_bg}
-$gui->{_old_abg}
+$gui->{add_track}->{label}		# label
+$gui->{add_track}->{text_entry}	# track name entry widget
+$gui->{add_track}->{add_mono}	# add mono track button
+$gui->{add_track}->{add_stereo} # add stereo track button
+$gui->{add_track}->{rec_label}  # source label
+$gui->{add_track}->{rec_text} 	# source text entry widget
+$gui->{engine_label}			# label
+$gui->{engine_arm}				# configure engine button 
+$gui->{engine_disconnect}		# disconnect setup button
+$gui->{engine_start}			# start button
+$gui->{engine_stop}				# stop button
+$gui->{_old_bg}					# default background color
+$gui->{_old_abg}				# default active background color

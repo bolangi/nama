@@ -113,10 +113,6 @@ sub init_gui {
 		->pack( -side => 'left');
 	$gui->{nama_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
 		->pack( -side => 'left');
-	#$gui->{fx_palette} = $gui->{load_frame}->Menubutton(-tearoff => 0)
-	#	->pack( -side => 'left');
-	# $sn_dump = $gui->{load_frame}->Button->pack(-side => 'left');
-
 	$gui->{add_track}->{label} = $gui->{add_frame}->Label(
 		-text => "New track name: ")->pack(-side => 'left');
 	$gui->{add_track}->{text_entry} = $gui->{add_frame}->Entry(
