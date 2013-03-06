@@ -516,7 +516,7 @@ Mixdown proceeds after you start the transport.
 As a convenience, Mixdown_nn.wav will be symlinked to
 F<<branch_name>_nn.wav> in the project directory. (If git is
 disabled or not available F<<project_name>_nn.wav> is used
-instead)  Corresponding encoded files are created if the
+instead.)  Corresponding encoded files are created if the
 "mixdown_encodings" option is set. Acceptable values are a
 space-separated list. The default is "mixdown_encodings: ogg
 mp3".
@@ -546,12 +546,10 @@ and track comments) with no direct effect on the project audio.
 F<global_effect_chains.json>, in the project root directory,
 contains system and user defined effect chains.
 
-C<save somename.json> will force saving to a different
-filename. Similarly C<get somename.json> will load
-the corresponding file.
-
-(The F<.json> suffix may be omitted if git is not present
-or is disabled in F<.namarc>.)
+C<save somename.json> save to a file of that
+name.  Similarly C<get somename.json> will load the
+corresponding file. The F<.json> suffix may be omitted if
+git is disabled in F<.namarc>.
 
 =head3 Requirements to Use Git for saving projects
 
@@ -588,7 +586,7 @@ Later on, on typing C<get initial-mix>, Nama automatically
 promotes the tagged commit "initial-mix" to a branch named
 "initial-mix-branch" which becomes the current branch.
 
-If you want to start a new branch named something else
+If you want to start a new branch 
 at tag "initial-mix" you can say this: 
 
 C<new_branch compressed-mix initial-mix
