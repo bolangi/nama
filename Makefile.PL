@@ -34,6 +34,7 @@ use inc::Module::Install;
 			Graph  0
 			IO::Socket  0
 			IO::Select  0
+			JSON::XS	0
 			IPC::Open3  0
 			List::Util 0
 			Log::Log4perl 0
