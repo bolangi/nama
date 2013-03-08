@@ -1248,7 +1248,7 @@ sub init_palettefields {
 sub save_palette {
  	serialize (
  		file => $file->gui_palette,
-		format => 'yaml',
+		format => 'json',
  		vars => [ qw( $gui->{_palette} $gui->{_nama_palette} ) ],
  		class => '::')
 }
