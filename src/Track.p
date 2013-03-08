@@ -986,7 +986,7 @@ use ::Globals qw(:all);
 use Modern::Perl; use Carp; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status { $_[0]->rw ne 'OFF' ? 'REC' : 'OFF' }
+sub rec_status { $_[0]->rw ne 'OFF' ? 'MON' : 'OFF' }
 #sub rec_status_display { $_[0]->rw ne 'OFF' ? 'MON' : 'OFF' }
 sub busify {}
 sub unbusify {}
