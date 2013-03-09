@@ -1,6 +1,6 @@
 # ------ Effect Routines -------
 
-package ::Effects; # share namespace with Nama.pm and several others
+package ::Effects; 
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 use ::Assign qw(yaml_out json_out);
