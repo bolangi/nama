@@ -569,7 +569,10 @@ sub track_gui {
 						-value => $v,
 						-command => sub { 
 							return if ::eval_iam("engine-status") eq 'running';
-							$ti{$n}->set_send($v);
+							local $this_track = $ti{$n};
+							if( $v eq 'off' )
+								 { process_command('nosend') }
+							else { $this_track->set_send($v) }
 							$ui->refresh_track($n);
 							::reconfigure_engine();
  						}
