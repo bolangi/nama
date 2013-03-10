@@ -886,7 +886,7 @@ sub sync_effect_parameters {
 	local $config->{category} = 'ECI_FX';
 	# when a controller changes an effect parameter
 	# the effect state can differ from the state in
-	# %{$fx->{params}}, Nama's effect parameter store
+	# $fx->{params}, Nama's effect parameter store
 	#
 	# this routine syncs them in prep for save_state()
 	
