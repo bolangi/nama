@@ -50,8 +50,10 @@ sub _get_modify_time {
 }
 sub _update_wav_cache {
 	my $path = shift;
+	{ no warnings 'uninitialized';
 	return unless _get_modify_time($path) != $setup->{wav_info}->{$path}{modify_time};
-	say qq(WAV file $path has changed! Updating cache.);
+	}
+	throw("WAV file $path has changed! Updating cache.");
 	_get_wav_info($path) 
 }
 
