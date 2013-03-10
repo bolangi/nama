@@ -261,6 +261,7 @@ sub jack_multi_route {
 
 sub jack_multi_ports {
 	my ($client, $direction, $start, $width, $trackname)  = @_;
+	no warnings 'uninitialized';
 	::logpkg('debug',"trackname: $trackname, client $client, direction $direction, start: $start, width $width");
 
 	# can we route to these channels?
@@ -274,7 +275,7 @@ sub jack_multi_ports {
 	my $source_or_send = $direction eq 'input' ? 'send' : 'source';
  	die(qq(
 Problem with $source_or_send setting for track $trackname:
-$trackname\'s $source_or_send would extend to channel $end,
+Track\'s $source_or_send would extend to channel $end,
 out of bounds for JACK client "$client", 
 which has $channel_count channels.
 Change $source_or_send setting, or set track OFF.)) if $end > $channel_count;
