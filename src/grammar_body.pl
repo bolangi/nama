@@ -1004,7 +1004,7 @@ remove_insert: _remove_insert prepost(?) {
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	$id or ::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), return 1 ;
-	::pager2( $::this_track->name.": removing $prepost". "fader insert");
+	::pager2( $::this_track->name.": removing ". $prepost ?  "$prepost fader insert" : "insert");
 	$::Insert::by_index{$id}->remove;
 	1;
 }
