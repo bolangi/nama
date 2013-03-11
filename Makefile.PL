@@ -37,6 +37,7 @@ use inc::Module::Install;
 			JSON::XS	0
 			IPC::Open3  0
 			List::Util 0
+			List::MoreUtils 0
 			Log::Log4perl 0
 			Modern::Perl  0
 			Module::Load::Conditional  0 
