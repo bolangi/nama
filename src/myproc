@@ -34,6 +34,10 @@ mv $TD/Nama.pm $TD/../Nama.pm
 		 -b t
 ./generate_executable_stub
 cp makeman $MD/lib/Audio
+cd $MD/lib/Audio
+./makeman
+rm *.tmp
+cd ../../src
 #cd ..
 #perl Makefile.PL
 echo "Now you can go to the nama toplevel directory and type:"
