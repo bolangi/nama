@@ -1,13 +1,15 @@
+BUILD
 Changes
+COPYING
 inc/Module/Install.pm
-inc/Module/Install/Win32.pm
-inc/Module/Install/Makefile.pm
-inc/Module/Install/WriteAll.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
+inc/Module/Install/Fetch.pm
+inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
-inc/Module/Install/Fetch.pm
+inc/Module/Install/Win32.pm
+inc/Module/Install/WriteAll.pm
 lib/Audio/Nama.pm
 lib/Audio/Nama/AnalyseLV2.pm
 lib/Audio/Nama/Assign.pm
@@ -30,9 +32,9 @@ lib/Audio/Nama/Grammar.pm
 lib/Audio/Nama/Graph.pm
 lib/Audio/Nama/Graphical.pm
 lib/Audio/Nama/Help.pm
-lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Initializations.pm
 lib/Audio/Nama/Insert.pm
+lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Jack.pm
 lib/Audio/Nama/Latency.pm
 lib/Audio/Nama/Log.pm
@@ -53,12 +55,13 @@ lib/Audio/Nama/Track.pm
 lib/Audio/Nama/Util.pm
 lib/Audio/Nama/Wav.pm
 lib/Audio/Nama/Wavinfo.pm
-MANIFEST			This list of files
+Makefile
 Makefile.PL
+MANIFEST			This list of files
 META.yml
+MYMETA.json
+MYMETA.yml
 README
-COPYING
-BUILD
 script/nama
 t/02_assign.t
 t/03_wav.t

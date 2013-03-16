@@ -2,8 +2,10 @@ blib/*
 MANIFEST.bak
 MANIFEST.SKIP
 README.html
-Makefile
 Makefile.old
+lib/Audio/makeman
+lib/Audio/nama*
+Audio-Nama-*
 try/*
 .git/*
 src/*
