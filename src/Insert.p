@@ -392,7 +392,7 @@ sub add_paths {
 		my @edge = ($self->wet_send_name, output_node($self->send_type));
 		$g->add_path($predecessor, @edge);
 		::logpkg('debug', "edge: @edge");
-		$g->set_edge_attributes(@edge, { 
+		$g->set_vertex_attributes($self->wet_send_name, { 
 			send_id => $self->{send_id},
 			send_type => $self->{send_type},
 			mono_to_stereo => '', # disable for prefader send path 
