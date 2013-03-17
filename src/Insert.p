@@ -63,7 +63,6 @@ sub new {
 				group => 'Insert',
 				hide => 1,
 				rw => 'REC');
-
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
@@ -335,13 +334,35 @@ package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
+
+
+# --- source ---------- wet_send_track  wet_return_track -+-- insert_pre -- track
+#                                                         |
+# --- source ------------------ dry track ----------------+
+
+sub new {
+	my ($class, %args) = @_;
+	my $self = $class->SUPER::new(%args);
+
+	my $wet_send = ::SlaveTrack->new( 
+				name => $self->wet_send_name,
+				target => $self->track,
+				group => 'Insert',
+				hide => 1,
+				rw => 'REC'
+	);
+	map{ ::remove_effect($_)} $wet_send->vol, $wet_send->pan;
+	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;
+	$self
+} 
+sub wet_send_name {
+	my $self = shift;
+	join('-', $self->track, $self->n, 'wet-send'); 
+}
+	
+	
+
 sub add_paths {
-
-# --- predecessor --+-- wet-send    wet-return ---+-- insert_pre -- track
-#                   |                             |
-#                   +-------------- dry ----------+
-           
-
 	my ($self, $g, $name) = @_;
 	no warnings qw(uninitialized);
 	::logpkg('debug', "add_insert for track: $name");
@@ -351,27 +372,30 @@ sub add_paths {
 
 	::logpkg('debug', "insert structure:", sub{$self->dump});
 
+		# get track source
+		
 		my ($predecessor) = $g->predecessors($name);
+
+		# delete source connection to track
+		
 		$g->delete_edge($predecessor, $name);
 		my $loop = "$name\_insert_pre";
-		my $wet = $::tn{$self->wet_name};
-		my $dry = $::tn{$self->dry_name};
+
+		my $wet 		= $::tn{$self->wet_name};
+		my $dry 		= $::tn{$self->dry_name};
+		my $wet_send 	= $::tn{$self->wet_send_name};
 
 		::logpkg('debug', "found wet: ", $wet->name, " dry: ",$dry->name);
 
+		#pre:  wet send path: wet_send_name (slave) -> output
 
-		#pre:  wet send path (no track): predecessor -> output
-
-		my @edge = ($predecessor, output_node($self->{send_type}));
+		my @edge = ($self->wet_send_name, output_node($self->send_type));
+		$g->add_path($predecessor, @edge);
 		::logpkg('debug', "edge: @edge");
-		$g->add_path(@edge);
 		$g->set_edge_attributes(@edge, { 
 			send_id => $self->{send_id},
 			send_type => $self->{send_type},
-			mono_to_stereo => '', # override
-			width => $t->width,
-			track => $name,
-			n => $t->n,
+			mono_to_stereo => '', # disable for prefader send path 
 		});
 
 		#pre:  wet return path: input -> wet_track (slave) -> loop
@@ -398,5 +422,13 @@ sub add_paths {
 		$g->add_path($predecessor, $dry->name, $loop, $name);
 	}
 	
+}
+sub remove {
+	my $self = shift;
+	local $::this_track;
+	$::tn{ $self->wet_send_name }->remove;
+	$::tn{ $self->dry_name }->remove;
+	$::tn{ $self->wet_name }->remove;
+	delete $::Insert::by_index{$self->n};
 }
 1;
