@@ -475,23 +475,29 @@ sub set_buffersize {
 }
 
 1;
-__END__
+
 =head1 ::ChainSetup - routines for generating Ecasound chain setup
 
 =head2 Overview
 
-An Ecasound chain setup is a graph comprised of multiple
-signal processing chains, each of which consists of exactly
-one input and one output.
+A chain setup is what configures the Ecasound audio engine,
+preparing it for one or more processing runs.  It is a graph
+comprised of multiple signal processing chains, each of
+which consists of exactly one input and one output.
 
-To generate a chain setup, Nama first creates a graph from
-project tracks and buses. The graph is successively
-transformed, then the edges are processed into IO objects,
-which become the inputs and outputs of Ecasound chains.
+When user input requires a change of configuration, Nama
+generates an new chain setup file. These files are
+guaranteed to be consistent with the rules of Ecasound's
+routing language. 
 
-As a result of this design, IO objects can draw from 
-several data sources, and the graph can be influenced at
-several stages before the chain setup is created. 
+After initializing the data structures, Nama iterates over
+project tracks and buses to create a first-stage graph.
+This graph is successively transformed as more routing
+details are added, then each edge of the graph is processed
+into a pair of IO objects--one for input and one for
+output--that together constitute an Ecasound chain. With a
+bit more processing, the configuration is written out 
+as text in the chain setup file.
 
 =head2 The Graph and its Transformations
 
@@ -499,21 +505,27 @@ Generating a chain setup starts with each bus iterating over
 its member tracks, and connecting them to its mix track.
 (See man ::Bus.)
 
-In a simple case, with only the Main bus, the graph
-could be:
+In the case of one track belonging to the Main (default) 
+bus, the initial graph would be:
 
 	soundcard_in -> sax -> Master -> soundcard_out
 
-"soundcard_in" will later be mapped to the appropriate JACK or ALSA
-source, depending on whether jackd is running.
+"soundcard_in" and "soundcard_out" will eventually be mapped
+to the appropriate JACK or ALSA source, depending on whether
+jackd is running. The Master track hosts the master fader,
+connects to the main output, and serves as the mix track for
+the Main bus.
 
-If we've asked to record the input, we get this route
-as well:
-
-	sax -> wav_out
-
-A 'send' providing a monitor for the sax player generates
+If we've asked to record the input, we automatically get
 this route:
+
+	soundcard_in -> sax-rec-file -> wav_out
+
+The track 'sax-rec-file' is a temporary clone (slave) of track 'sax'
+and connects to all the same inputs.
+
+A 'send' (for example, a instrument monitor for
+the sax player) generates this additional route:
 
 	sax -> soundcard_out
 
@@ -524,15 +536,16 @@ out or fan in.
 
 	                       sax_out -> soundcard_out
 
-Here 'sax_out' is a loop device. (To avoid confusion, we
-prohibit track names matching *_out or _in*.)
+Here 'sax_out' is a loop device. (Note that we prohibit
+track names matching *_out or *_in.)
 
-Inserts are implemented by replacing the edge either before
-or after a track with a network of auxiliary tracks and 
+Inserts are incorporated by replacing the edge either before
+or after a track vertex with a network of auxiliary tracks and 
 loop devices.  (See man ::Insert.)
 
-Finally, redundant loop devices are removed from
-the graph to minimize latency.
+Unterminated parts of the network are discarded. Then
+redundant loop devices are removed from the graph to
+minimize latency.
 
 =head2 Dispatch
 
@@ -544,11 +557,12 @@ To create an Ecasound chain from
 
 	Master -> soundcard_out 
 
-Nama looks at the 'Master' track for details, using the track
-index as the chain_id, and the track's send settings
-to get the soundcard channel. 
+Nama uses 'Master' track attributes to provide
+data. For example track index (1) serves as the chain_id,
+and the track's send settings determine the soundcard
+channel or other destination. 
 
-Some edges are without a track as either terminal. For
+Some edges are without a track at either terminal. For
 example this auxiliary send:
 
 	sax_out -> soundcard_out
@@ -556,14 +570,12 @@ example this auxiliary send:
 In this case, the track, chain_id and other data can be
 specified as vertex or edge attributes. 
 
-Edge attributes override vertex attributes,
-which override the attributes of the corresponding
-track, allowing routing to be altered from
-what the track wants. When a temporary
-track is used for recording, for example
+Edge attributes override vertex attributes, which override
+track attributes. This allows routing to be edited and
+annotated to behaviors different from what the track wants.
+When a temporary track is used for recording, for example
 
-      sax-rec -> wav_out
+    sax-rec-file  -> wav_out
 
-the 'sax-rec' vertex can have an attribute { chain_id => 'R3' }
-rather than the track index assigned to 'sax-rec'.
-
+The 'sax-rec-file' vertex is assigned the 'chain_id' attribute 
+'R3' rather than the track index assigned to 'sax-rec-file'. 
