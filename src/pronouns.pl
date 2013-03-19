@@ -8,5 +8,6 @@ $prompt
 %tn
 %ti
 %bn
+$g
 $debug
 $debug2

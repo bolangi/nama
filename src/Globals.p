@@ -6,6 +6,10 @@ use Modern::Perl;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
 
+# and the graph
+
+*g = $::ChainSetup::g;
+
 use Exporter;
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
