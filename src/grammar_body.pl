@@ -1479,3 +1479,13 @@ git: _git shellcode stopper {
 #print ::json_out(\%item);
 ::pager2(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
 }
+edit_rec_setup_hook: _edit_rec_setup_hook { 
+	system("$ENV{EDITOR} ".$::this_track->rec_setup_script() );
+	chmod 0755, $::this_track->rec_setup_script();
+	1
+}
+edit_rec_cleanup_hook: _edit_rec_cleanup_hook { 
+	system("$ENV{EDITOR} ".$::this_track->rec_cleanup_script() );
+	chmod 0755, $::this_track->rec_cleanup_script();
+	1
+}

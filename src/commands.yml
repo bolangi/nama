@@ -1343,6 +1343,16 @@ git:
   type: project
   what: execute git command in the project directory
   parameters: <s_command_name> [argument,...]
+edit_rec_setup_hook:
+  type: track
+  what: edit the REC hook script for current track
+  short: ersh
+  parameters: none
+edit_rec_cleanup_hook:
+  type: track
+  what: edit the REC cleanup hook script for current track
+  short: erch
+  parameters: none
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
