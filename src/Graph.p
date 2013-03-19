@@ -293,11 +293,6 @@ sub is_a_loop{
 		return ($root, $suffix);
 	} 
 }
-sub is_a_jumper { 		! is_terminal($_[0])
-				 	and ! is_a_track($_[0]) 
-					and ! is_a_loop($_[0]) }
-	
-
 sub inputless_tracks {
 	my $g = shift;
 	(grep{ is_a_track($_) and $g->is_source_vertex($_) } $g->vertices)
@@ -337,15 +332,6 @@ sub remove_tracks {
 		} @names;
 }
 
-### we need jack clients latency 
-sub add_jack_io {
-	my $g = shift;
-		
-
-}
-	
-		
-		
 1;
 __END__
 
