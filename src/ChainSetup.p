@@ -359,7 +359,7 @@ sub jumper_count {
 	
 
 sub dispatch { # creates an IO object from a graph edge
-my $edge = shift;
+	my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
 	$logger->debug('dispatch: ',join ' -> ',  @$edge);
 	my($name, $endpoint, $direction) = decode_edge($edge);
