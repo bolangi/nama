@@ -966,6 +966,15 @@ sub remove_system_version_comment {
 	delete $project->{track_version_comments}{$t->name}{$v}{system} if
 		$project->{track_version_comments}{$t->name}{$v}
 }
+sub rec_setup_script { 
+	my $track = shift;
+	join_path(::project_dir(), $track->name."-rec-setup.sh")
+}
+sub rec_cleanup_script { 
+	my $track = shift;
+	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
+}
+	
 
 } # end package
 
