@@ -7,6 +7,7 @@ sub rec_cleanup {
 	logsub("&rec_cleanup");
 	logpkg('debug',"transport still running, can't cleanup"),return if transport_running();
 	map { system($_->rec_cleanup_script) } 
+		grep{ -e $_->rec_cleanup_script }
 		grep{ $_->rec_status eq 'REC' } ::ChainSetup::engine_tracks();
 	if( my (@files) = new_files_were_recorded() ){
 		say join $/, "Now reviewing your recorded files...", (@files);
