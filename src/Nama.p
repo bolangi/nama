@@ -200,17 +200,20 @@ __END__
 
 =head1 NAME
 
-Nama/Audio::Nama - an audio recording, mixing and editing application
+Nama/Audio::Nama - lightweight digital audio workstation
 
 =head1 DESCRIPTION
 
-B<Nama> is an application for multitrack recording,
+B<Nama> performs multitrack recording,
 non-destructive editing, mixing and mastering using the
 Ecasound audio engine developed by Kai Vehmanen.
 
-Features include tracks, buses, effects, presets,
-sends, inserts, marks and regions. Nama runs under JACK and
-ALSA audio frameworks, automatically detects LADSPA plugins,
-and supports Ladish Level 1 session handling.
+It provides tracks with multiple takes, buses, effects,
+presets, sends, inserts, marks, regions, edits,
+fades.
+
+Nama runs under JACK and ALSA audio frameworks,
+automatically detects LADSPA plugins, and supports Ladish
+Level 1 session handling.
 
 Type C<man nama> for details.

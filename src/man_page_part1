@@ -126,9 +126,6 @@ Supply a command to execute
 
 The Ecasound audio engine is configured through use of
 I<chain setups> that specify the signal processing network.
-After lauching the engine, realtime control capabilities are
-available, for example to adjust effect parameters and set playback
-position.
 
 Nama serves as an intermediary, taking high-level commands
 from the user, generating appropriate chain setups for
@@ -143,7 +140,8 @@ current track will get its audio stream from an external
 (usually live) source or whether an existing WAV file will
 be played back. Nama responds to static commands by
 automatically reconfiguring the engine and displaying the
-updated track status.
+updated track status. See 'man ::ChainSetup' for details
+on how the chain setup created.
 
 =head2 Dynamic Commands
 

@@ -480,10 +480,11 @@ sub set_buffersize {
 
 =head2 Overview
 
-A chain setup is what configures the Ecasound audio engine,
-preparing it for one or more processing runs.  It is a graph
-comprised of multiple signal processing chains, each of
-which consists of exactly one input and one output.
+For the Ecasound engine to run, it must be configured into a
+signal processing network. This configuration is called a
+"chain setup".  It is a graph comprised of multiple signal
+processing chains, each of which consists of exactly one
+input and one output.
 
 When user input requires a change of configuration, Nama
 generates an new chain setup file. These files are
