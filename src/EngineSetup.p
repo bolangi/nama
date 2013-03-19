@@ -241,6 +241,8 @@ sub connect_transport {
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
+	map { system($_->rec_setup_script) } 
+		grep{ $_->rec_status eq 'REC' } ::ChainSetup::engine_tracks();
 	find_op_offsets(); 
 	eval_iam('cs-connect');
 		#or say("Failed to connect setup, engine not ready"),return;
