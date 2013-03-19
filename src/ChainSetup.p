@@ -373,7 +373,10 @@ sub dispatch { # creates an IO object from a graph edge
 				chain_id => $tn{$name}->n, # default
 				override($name, $edge));   # priority: edge > node
 	#say "dispatch class: $class";
-	$class->new(@args);
+	my $io = $class->new(@args);
+
+	$g->set_edge_attribute(@$edge, $direction => $io );
+	$io
 }
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
