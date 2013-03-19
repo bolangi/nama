@@ -7,6 +7,63 @@ use ::Globals qw(:all);
 use List::Util qw(max);
 use Carp qw(confess);
 
+sub propagate_latency {   
+    my @sinks = grep{ $g->is_sink_vertex($_) } $g->vertices();
+    for my $sink (@sinks) {
+        report_latency(output_port($sink), predecessor_latency($sink));
+    }
+}
+sub predecessor_latency {
+    my $downstream = shift;
+    my @predecessors = $g->predecessors($downstream);
+    return self_latency(@predecessors) if scalar @predecessors == 1;
+    sibling_latency(@predecessors);
+}
+sub sibling_latency {
+    my @siblings = @_;
+    my $max = max map { self_latency($_) } @siblings;
+    for (@siblings) { compensate_latency($_, $max - self_latency($_) }
+    $max
+}
+
+sub self_latency {
+	my $node = shift;
+	return track_latency($node) if ::Graph::is_a_track($node);
+	return loop_latency($node)  if ::Graph::is_loop($node);
+	return input_latency($node) if ::Graph::is_terminal($node);
+}
+
+sub sibling_latency {
+	
+	
+	my $node = $setup->{latency}->{sibling};
+	#say join " ", "siblings:", @siblings;
+	scalar @siblings or return 0;
+	my $max = max map { track_latency($_) } map{$tn{$_}} @siblings;
+	map { $node->{$_} = $max } @siblings;
+	my $node2 = $setup->{latency}->{sibling_count};
+	map { $node2->{$_} = scalar @siblings } @siblings;
+	return $max
+}
+
+		= grep{ ::Graph::is_a_track($_) } 
+			$setup->{latency_graph}->predecessors($track->name);
+	scalar @predecessors or return 0;
+	#say "track: ",$track->name;
+	sibling_latency(@predecessors) + loop_device_latency();
+}
+
+
+						
+	
+
+
+
+
+
+
+
+
 ###### 
 #
 #   remove (or reset) latency operators
@@ -59,19 +116,13 @@ sub add_latency_compensation_op {
 	}
 	$id
 }
-sub calculate_and_adjust_latency {
-	initialize_latency_vars();
-	calculate_latency();
-	adjust_latency();
-}
 
-sub calculate_latency {
-	my $starting_track_name = $mode->{mastering} ?  'Boost' : 'Master'; 
-	push my(@first_siblings), $starting_track_name;
-	push @first_siblings, 'Mixdown' if $tn{Mixdown}->rec_status eq 'MON';
-	logpkg('debug',"starting nodes: @first_siblings");
-	sibling_latency(@first_siblings);
-}
+
+
+
+
+
+
 sub adjust_latency {
 	eval_iam('cs-disconnect');
 
@@ -123,11 +174,6 @@ sub cl2 {
 sub reset_latency_compensation {
  	map{ set_latency_compensation($_, 0) } grep{ $_->latency_op } ::Track::all();
  }
-sub has_siblings { 
-	my $count = $setup->{latency}->{sibling_count}->{$_[0]->name};
-	#say "track: ",$_[0]->name, " siblings: $count";
-	$setup->{latency}->{sibling_count}->{$_[0]->name} > 1 
-}
 
 sub initialize_latency_vars {
 	$setup->{latency} = {};
@@ -212,32 +258,6 @@ sub jack_port_latency {
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }
-}
-sub insert_latency {
-	my $track = shift;
-	my $latency = 0;
-	map{ $latency += $_->latency} ::Insert::get_inserts($track->name);
-	$latency;
-}
-sub predecessor_latency {
-	my $track = shift;
-	my @predecessors 
-		= grep{ ::Graph::is_a_track($_) } 
-			$setup->{latency_graph}->predecessors($track->name);
-	scalar @predecessors or return 0;
-	#say "track: ",$track->name;
-	sibling_latency(@predecessors) + loop_device_latency();
-}
-sub sibling_latency {
-	my @siblings = grep{ ::Graph::is_a_track($_) } @_; 
-	my $node = $setup->{latency}->{sibling};
-	#say join " ", "siblings:", @siblings;
-	scalar @siblings or return 0;
-	my $max = max map { track_latency($_) } map{$tn{$_}} @siblings;
-	map { $node->{$_} = $max } @siblings;
-	my $node2 = $setup->{latency}->{sibling_count};
-	map { $node2->{$_} = scalar @siblings } @siblings;
-	return $max
 }
 sub loop_device_latency { 
 	# results in frames
