@@ -54,8 +54,6 @@ sub initialize {
 	remove_temporary_tracks();# start clean
 	$logger = Log::Log4perl->get_logger();
 	::Graph::initialize_logger();
-	delete $setup->{latency_graph};
-	delete $setup->{final_graph};
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();
@@ -132,7 +130,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	$extra_setup_code->($g) if $extra_setup_code;
 
 	prune_graph();
-	$setup->{latency_graph} = dclone($g);
 	$logger->debug("Graph after pruning unterminated branches:\n$g");
 
 	::Graph::expand_graph($g); 
@@ -143,11 +140,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	::Graph::add_inserts($g);
 
 	$logger->debug("Graph with inserts:\n$g");
-
-	::Graph::add_jack_io($g);
-	$setup->{final_graph} = dclone($g);
-
-	
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)

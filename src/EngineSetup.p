@@ -102,7 +102,7 @@ sub reconfigure_engine {
 		
 		autosave() if $config->{use_git} and $config->{autosave};
 		connect_transport('quiet');
-		calculate_and_adjust_latency() if $config->{opts}->{Q};
+		propagate_latency() if $config->{opts}->{Q};
 		show_status();
 
 # 		if( $restore_position and not ::ChainSetup::really_recording()){

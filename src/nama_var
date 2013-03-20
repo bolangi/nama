@@ -13,7 +13,7 @@ serialize.pl    Marshalling variables for serializing/deserializing
 singletons.pl   Simple hashes ($config) or objects ($file)
                 encapsulating application data/behaviors
 
-#### Config variables require a mapping in config_map
+#### Config variables require an entry in config_map
 
 config_map      Maps keys in .namarc (e.g. $mix_to_disk_format)
                 to Nama internal variable $config->{mix_to_disk_format}

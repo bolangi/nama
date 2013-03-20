@@ -37,9 +37,6 @@ $setup->{offset_run}->{mark}
 $setup->{edit_points}
 $setup->{_last_rec_tracks}		# tracks we recorded to last time
 $setup->{latency}				# track latency info
-$setup->{latency_graph}			# a version of the routing graph
-                                # used for latency calculations
-$setup->{final_graph}			# the final routing graph
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
