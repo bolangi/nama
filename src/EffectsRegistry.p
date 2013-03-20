@@ -120,7 +120,7 @@ sub prepare_effect_index {
 		}
 		$fx_cache->{partial_label_to_full}->{$code} = $code;
 	} grep{ !/^elv2:/ }keys %{$fx_cache->{full_label_to_index}};
-	#print yaml_out $fx_cache->{partial_label_to_full};
+	#print json_out $fx_cache->{partial_label_to_full};
 }
 sub extract_effects_data {
 	logsub("&extract_effects_data");
@@ -170,7 +170,7 @@ sub extract_effects_data {
 }
 sub sort_ladspa_effects {
 	logsub("&sort_ladspa_effects");
-#	print yaml_out($fx_cache->{split}); 
+#	print json_out($fx_cache->{split}); 
 	my $aa = $fx_cache->{split}->{ladspa}{a};
 	my $zz = $fx_cache->{split}->{ladspa}{z};
 #	print "start: $aa end $zz\n";
@@ -212,12 +212,12 @@ sub read_in_effects_data {
 	# split on newlines
 	my @lv2 = split /\n/,$lv2;
 
-	logpkg('trace',sub{ yaml_out(\@lv2) });
+	logpkg('trace',sub{ json_out(\@lv2) });
 
 	# join pairs of lines
 	@lv2 = map { join " ", splice(@lv2,0,2) } 1..@lv2/2;
 
-	logpkg('trace',sub{ yaml_out(\@lv2) });
+	logpkg('trace',sub{ json_out(\@lv2) });
 
 	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
 	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
@@ -347,7 +347,7 @@ sub read_in_effects_data {
 		 logpkg('debug', "i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}");
 	}
 
-	logpkg('debug', sub{"$fx_cache->{registry}\n======\n", yaml_out($fx_cache->{registry})}); ; 
+	logpkg('debug', sub{"$fx_cache->{registry}\n======\n", json_out($fx_cache->{registry})}); ; 
 }
 
 sub integrate_cop_hints {
@@ -448,7 +448,7 @@ sub get_ladspa_hints{
 		#last if ++$i > 10;
 	}
 
-	logpkg('debug', sub{yaml_out($fx_cache->{ladspa})});
+	logpkg('debug', sub{json_out($fx_cache->{ladspa})});
 }
 
 sub get_lv2_hints {
@@ -530,7 +530,7 @@ logpkg('debug', sub {join "\n", sort keys %{$fx_cache->{ladspa}}});
 logpkg('debug', '-' x 60);
 logpkg('debug', sub{join "\n", grep {/el:/} sort keys %{$fx_cache->{full_label_to_index}}});
 
-#print yaml_out $fx_cache->{registry}; exit;
+#print json_out $fx_cache->{registry}; exit;
 
 }
 

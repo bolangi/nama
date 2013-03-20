@@ -29,8 +29,8 @@ for my $c (@test_classes) {
 
 	assign (data => $struct, class => $c, vars => \@var_list);
 	#assign($struct, @var_list);
-		#print yaml_out(\%dict); 
-		#print yaml_out($struct);
+		#print json_out(\%dict); 
+		#print json_out($struct);
 		my $serialized = serialize( class => $c, vars => \@var_list);  
 		# store_vars output as string
 

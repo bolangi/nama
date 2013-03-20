@@ -76,8 +76,8 @@ sub reconfigure_engine {
 		$setup->{changed} = 0; # reset for next time
 	} 
 	else {
-		my $current = yaml_out(status_snapshot());
-		my $old = yaml_out($setup->{_old_snapshot});
+		my $current = json_out(status_snapshot());
+		my $old = json_out($setup->{_old_snapshot});
 		if ( $current eq $old){
 				logpkg('debug',"no change in setup");
 				return;

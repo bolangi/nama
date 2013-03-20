@@ -24,7 +24,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 		assign
 		assign_singletons
 		store_vars
-		yaml_out
+		json_out
 		yaml_in
 		json_in
 		json_out
@@ -84,7 +84,7 @@ sub assign {
 	class: $class
 	vars: @vars
 ASSIGN
-	#$logger->debug(sub{yaml_out($ref)});
+	#$logger->debug(sub{json_out($ref)});
 
 	# index what sigil an identifier should get
 
@@ -103,14 +103,14 @@ ASSIGN
 			$ident{$old_identifier} = $identifier;
 	} @vars;
 
-	$logger->debug(sub{"SIGIL\n". yaml_out(\%sigil)});
+	$logger->debug(sub{"SIGIL\n". json_out(\%sigil)});
 	#%ident = map{ @$_ } grep{ $_->[0] ne $_->[1] } map{ [$_, $ident{$_}]  }  keys %ident; 
 	my %ident2 = %ident;
 	while ( my ($k,$v) = each %ident2)
 	{
 		delete $ident2{$k} if $k eq $v
 	}
-	$logger->debug(sub{"IDENT\n". yaml_out(\%ident2)});
+	$logger->debug(sub{"IDENT\n". json_out(\%ident2)});
 	
 	#print join " ", "Variables:\n", @vars, $/ ;
 	croak "expected hash" if ref $ref !~ /HASH/;
@@ -235,7 +235,7 @@ our %suffix =
 our %dispatch = 
 	( storable => sub { my($ref, $path) = @_; nstore($ref, $path) },
 	  perl     => sub { my($ref, $path) = @_; write_file($path, Dumper $ref) },
-	  yaml	   => sub { my($ref, $path) = @_; write_file($path, yaml_out($ref))},
+	  yaml	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
 	  json	   => sub { my($ref, $path) = @_; write_file($path, json_out($ref))},
 	);
 
@@ -318,7 +318,7 @@ sub serialize {
 	$logger->debug(sub{join $/,'\%state', Dumper \%state});
 
 	# YAML out for screen dumps
-	return( yaml_out(\%state) ) unless $h{file};
+	return( json_out(\%state) ) unless $h{file};
 
 	# now we serialize %state
 	
@@ -345,12 +345,8 @@ sub json_in {
 }
 
 sub yaml_out {
-	# due to bugs related to YAML::Tiny 
-	# we now provide only JSON output
-	
 	logsub("&yaml_out");
 	my ($data_ref) = shift; 
-	return json_out($data_ref);
 	#use Devel::Cycle;
 	#use Data::Dumper::Concise;
 	#say(Dumper $data_ref);

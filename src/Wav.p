@@ -29,7 +29,7 @@ sub get_versions {
 			  ); # regex statement
 		if ( $match ) { $versions{ $num || 'bare' } =  $match }
 	}
-	logpkg('debug',sub{"get_version: " , ::yaml_out(\%versions)});
+	logpkg('debug',sub{"get_version: " , ::json_out(\%versions)});
 	%versions;
 }
 
@@ -54,7 +54,7 @@ sub targets {
 		if ($versions{bare}) {  $versions{1} = $versions{bare}; 
 			delete $versions{bare};
 		}
-	logpkg('debug',sub{"\%versions\n================\n", yaml_out(\%versions)});
+	logpkg('debug',sub{"\%versions\n================\n", json_out(\%versions)});
 	\%versions;
 }
 

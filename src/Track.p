@@ -116,7 +116,7 @@ sub new {
 
 	#print "object class: $class, object type: ", ref $object, $/;
 	$track_names{$vals{name}}++;
-	#print "names used: ", ::yaml_out( \%track_names );
+	#print "names used: ", ::json_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
 	::add_pan_control($n);
@@ -888,7 +888,7 @@ sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	#print yaml_out $self; return;
+	#print json_out $self; return;
 	my %guts = %{ $self };
 	$guts{class} = $class; # make sure we save the correct class name
 	#print join " ", %guts; return;

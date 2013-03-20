@@ -3,7 +3,7 @@
 package ::Effects; 
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
-use ::Assign qw(yaml_out json_out);
+use ::Assign qw(json_out json_out);
 no warnings 'uninitialized';
 use Carp;
 use ::Log qw(logsub logpkg);
@@ -192,7 +192,7 @@ sub set_chain_value {
 	{
 		$p->{chain} = chain($p->{before});
 	}
-	#logpkg('debug',(yaml_out($p));
+	#logpkg('debug',(json_out($p));
 
 }
 
@@ -200,7 +200,7 @@ sub set_chain_value {
 sub add_effect {
 	my $p = shift;
 	logsub("&add_effect");
-	#logpkg('debug',sub{ "add effect arguments - 0:\n".yaml_out($p)});
+	#logpkg('debug',sub{ "add effect arguments - 0:\n".json_out($p)});
 	
 	set_chain_value($p);
 
@@ -219,7 +219,7 @@ sub add_effect {
 		and $ti{$p->{chain}}->forbid_user_ops 
 		and $p->{type} !~ /$config->{latency_op}/; 
 
-	logpkg('debug',sub{ "add effect arguments - 1:\n".yaml_out($p)});
+	logpkg('debug',sub{ "add effect arguments - 1:\n".json_out($p)});
 
 	# either insert or add, depending on 'before' setting
 	
@@ -339,7 +339,7 @@ sub modify_effect {
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
 	my $code = type($op_id);
 	my $i = effect_index($code);
-	defined $i or croak "undefined effect code for $op_id: ",yaml_out($cop);
+	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
 
 	print("$op_id: effect does not exist, skipping\n"), return 
@@ -731,7 +731,7 @@ sub new_effect_id {
 sub effect_init {
 	logsub("&effect_init");
 	my $p = shift;
-	logpkg('debug',sub{yaml_out($p)});
+	logpkg('debug',sub{json_out($p)});
 
 	my ($n,  $type, $id, $parent_id)  = 
 	@$p{qw( 
@@ -793,9 +793,9 @@ sub effect_init {
 		push @{ owns($parent_id) }, $id;
 		logpkg('debug',"parent owns @{owns($parent_id)}");
 
-		logpkg('debug',sub{join " ", "my attributes:", yaml_out(fx($id))});
+		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
 		parent($id) = $parent_id;
-		logpkg('debug',sub{join " ", "my attributes again:", yaml_out(fx($id))});
+		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
 		#logpkg('debug', "parameter: $parameter");
 
 		# set fx-param to the parameter number, which one

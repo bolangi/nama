@@ -604,7 +604,7 @@ sub track_gui {
 
 
 		 logpkg('debug',sub{my %q = %p; delete $q{parent}; print
-		 "=============\n%p\n",yaml_out(\%q)});
+		 "=============\n%p\n",json_out(\%q)});
 
 		$vol = make_scale ( \%p );
 		# Mute
@@ -656,7 +656,7 @@ sub track_gui {
 				effect_id => $pan_id,
 				p_num		=> $p_num,
 				);
-		# logpkg('debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",yaml_out(\%q) });
+		# logpkg('debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",json_out(\%q) });
 		$pan = make_scale ( \%q );
 
 		# Center
@@ -679,7 +679,7 @@ sub track_gui {
 
 	@{ $gui->{tracks}->{$n} }{qw(name version rw ch_r ch_m mute effects)} 
 		= ($name,  $version, $rw, $ch_r, $ch_m, $mute, \$effects);#a ref to the object
-	#logpkg('debug', "=============$gui->{tracks}\n",sub{yaml_out($gui->{tracks})});
+	#logpkg('debug', "=============$gui->{tracks}\n",sub{json_out($gui->{tracks})});
 	my $independent_effects_frame 
 		= ${ $gui->{tracks}->{$n}->{effects} }->Frame->pack(-fill => 'x');
 
@@ -809,7 +809,7 @@ sub add_effect_gui {
 			@p{qw(chain type effect_id parent_id parameter)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
 
-		logpkg('debug', sub{yaml_out(\%p)});
+		logpkg('debug', sub{json_out(\%p)});
 
 		logpkg('debug', "effect_id: $id, parent_id: $parent_id");
 		# $id is determined by effect_init, which will return the
@@ -1134,18 +1134,18 @@ sub get_saved_colors {
 			? scalar read_file($pal)
 			: get_data_section('default_palette_json');
 	my $ref = decode($pal, 'json');
-	#say "palette file",yaml_out($ref);
+	#say "palette file",json_out($ref);
 
 	assign_singletons({ data => $ref });
 	
 	$gui->{_old_abg} = $gui->{_palette}->{mw}{activeBackground};
 	$gui->{_old_abg} = $gui->{project_head}->cget('-activebackground') unless $gui->{_old_abg};
-	#print "1palette: \n", yaml_out( $gui->{_palette} );
-	#print "\n1namapalette: \n", yaml_out($gui->{_nama_palette});
+	#print "1palette: \n", json_out( $gui->{_palette} );
+	#print "\n1namapalette: \n", json_out($gui->{_nama_palette});
 	my %setformat;
 	map{ $setformat{$_} = $gui->{_palette}->{mw}{$_} if $gui->{_palette}->{mw}{$_}  } 
 		keys %{$gui->{_palette}->{mw}};	
-	#print "\nsetformat: \n", yaml_out(\%setformat);
+	#print "\nsetformat: \n", json_out(\%setformat);
 	$gui->{mw}->setPalette( %setformat );
 }
 sub colorset {

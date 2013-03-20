@@ -206,7 +206,7 @@ sub new {
 			];
 		}
 
-		#say ::yaml_out($vals{inserts_data}) if $vals{inserts_data};
+		#say ::json_out($vals{inserts_data}) if $vals{inserts_data};
 	}
 
 	my $object = bless 
@@ -290,7 +290,7 @@ sub add_inserts {
 	map 
 	{
 		my $insert_data = dclone($_); # copy so safe to modify 
-		#say "found insert data:\n",::yaml_out($insert_data);
+		#say "found insert data:\n",::json_out($insert_data);
 
 		# get effect chain indices for wet/dry arms
 		

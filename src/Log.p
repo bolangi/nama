@@ -19,7 +19,7 @@ sub initialize_logger {
 
 	my %negate = map{ $_ => 1} map{ s/^#//; $_ } grep{ /^#/ } 
 		expand_cats(split q(,), $cat_string);
-	#say("negate\n",::yaml_out(\%negate));
+	#say("negate\n",::json_out(\%negate));
 
 	my $layout = "[\%r] %c %m%n"; # backslash to protect from source filter
 	my $logfile = $ENV{NAMA_LOGFILE};

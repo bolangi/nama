@@ -220,7 +220,7 @@ sub initialize_interfaces {
 	logpkg('debug',"project name: $project->{name}");
 	}
 
-	logpkg('debug', sub{"Command line options\n".  yaml_out($config->{opts})});
+	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
 	

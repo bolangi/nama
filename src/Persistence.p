@@ -194,7 +194,7 @@ sub get_newest {
 			[$_, -M $_, $suffix] 
 		} 
 		glob("$path*");
-	logpkg('debug', sub{yaml_out \@sorted});
+	logpkg('debug', sub{json_out \@sorted});
 	($sorted[0]->[0], $sorted[0]->[2]);
 }
 }

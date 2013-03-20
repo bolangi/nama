@@ -113,7 +113,7 @@ sub initialize_effects_data {
 sub load_project {
 	logsub("&load_project");
 	my %args = @_;
-	logpkg('debug', sub{yaml_out \%args});
+	logpkg('debug', sub{json_out \%args});
 	throw("no project name.. doing nothing."),return 
 		unless $args{name} or $project->{name};
 

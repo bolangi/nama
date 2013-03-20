@@ -1,7 +1,7 @@
 package ::Object;
 use Modern::Perl;
 use Carp;
-use ::Assign qw(yaml_out); 
+use ::Assign qw(json_out); 
 use Data::Dumper::Concise;
 
 =comment
@@ -13,7 +13,7 @@ use Data::Dumper::Concise;
 		my $self = shift;
 		my $class = ref $self;
 		bless $self, 'HASH'; # easy magic
-		#print yaml_out $self; return;
+		#print json_out $self; return;
 		my %guts = %{ $self };
 		#print join " ", %guts; return;
 		#my @keys = keys %guts;
@@ -125,7 +125,7 @@ sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	#print yaml_out $self; return;
+	#print json_out $self; return;
 	my %guts = %{ $self };
 	#print join " ", %guts; return;
 	#my @keys = keys %guts;

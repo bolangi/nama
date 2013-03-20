@@ -1467,11 +1467,11 @@ mode_string: 'preview'
 
 show_track_latency: _show_track_latency {
 	my $node = $::setup->{latency}->{track}->{$::this_track->name};
-	::pager2( ::yaml_out($node)) if $node;
+	::pager2( ::json_out($node)) if $node;
 	1;
 }
 show_latency_all: _show_latency_all { 
-	::pager2( ::yaml_out($::setup->{latency})) if $::setup->{latency};
+	::pager2( ::json_out($::setup->{latency})) if $::setup->{latency};
 	1;
 }
 analyze_level: _analyze_level { ::check_level($::this_track);1 }

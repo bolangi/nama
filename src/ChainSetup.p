@@ -8,7 +8,7 @@ use Data::Dumper::Concise;
 use Storable qw(dclone);
 no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
-use ::Assign qw(yaml_out);
+use ::Assign qw(json_out);
 
 our (
 
@@ -95,7 +95,7 @@ sub really_recording {
 }
 	
 sub show_io {
-	my $output = yaml_out( \%inputs ). yaml_out( \%outputs ); 
+	my $output = json_out( \%inputs ). json_out( \%outputs ); 
 	::pager( $output );
 }
 
@@ -315,10 +315,10 @@ sub non_track_dispatch {
 	my $edge = shift;
 	$logger->debug("non-track IO dispatch:",join ' -> ',@$edge);
 	my $eattr = $g->get_edge_attributes(@$edge) // {};
-	$logger->debug("found edge attributes: ",yaml_out($eattr)) if $eattr;
+	$logger->debug("found edge attributes: ",json_out($eattr)) if $eattr;
 
 	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
-	$logger->debug("found vertex attributes: ",yaml_out($vattr)) if $vattr;
+	$logger->debug("found vertex attributes: ",json_out($vattr)) if $vattr;
 
 	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
 		my $n = $eattr->{n} || $vattr->{n};

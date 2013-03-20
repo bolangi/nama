@@ -667,8 +667,8 @@ sub setup_content {
 }
 sub check_setup {
 	my $test_name = shift;
-	is( yaml_out(setup_content(::ChainSetup::ecasound_chain_setup())), 
-		yaml_out(setup_content($expected_setup_lines)), 
+	is( json_out(setup_content(::ChainSetup::ecasound_chain_setup())), 
+		json_out(setup_content($expected_setup_lines)), 
 		$test_name);
 }
 

@@ -233,7 +233,7 @@ sub fader_envelope_pairs {
 }
 	# sort fades -  may not need this
 	@specs = sort{ $a->[0] <=> $b->[0] } @specs;
-	logpkg('debug',sub{::yaml_out( \@specs)});
+	logpkg('debug',sub{::json_out( \@specs)});
 
 	my @pairs = map{ spec_to_pairs($_) } @specs;
 
