@@ -28,6 +28,7 @@ use Module::Load::Conditional qw(can_load);
 use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;
+use Text::Diff;
 use Text::Format;
 use Try::Tiny;
 # use File::HomeDir;# Assign.pm

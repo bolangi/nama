@@ -69,10 +69,11 @@ sub reconfigure_engine {
 	
 	find_duplicate_inputs(); # we will warn the user later
 
-	# only act if change in configuration
-	# skip check if regenerate_setup flag is already set
-	
+	# reconfigure engine if $setup->{changed} flag is set
+	# or status_snapshot() shows a change in configuration
+
 	if( $setup->{changed} ){ 
+		logpkg('debug',"reconfigure requested");
 		$setup->{changed} = 0; # reset for next time
 	} 
 	else {
@@ -82,9 +83,10 @@ sub reconfigure_engine {
 				logpkg('debug',"no change in setup");
 				return;
 		}
+		logpkg('debug',"reconfigure triggered by change in setup");
+		logpkg('debug', diff(\$old, \$current));
 	}
-	logpkg('debug',"setup change");
-	
+
 	# restore position/running status
 
 	$setup->{_old_snapshot} = status_snapshot();
@@ -101,7 +103,9 @@ sub reconfigure_engine {
 		logpkg('debug',"I generated a new setup");
 		
 		autosave() if $config->{use_git} and $config->{autosave};
+		#trigger_rec_cleanup_hooks();
 		connect_transport('quiet');
+		#trigger_rec_setup_hooks();
 		propagate_latency() if $config->{opts}->{Q};
 		show_status();
 
@@ -241,9 +245,6 @@ sub connect_transport {
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
-	map { system($_->rec_setup_script) } 
-		grep{ -e $_->rec_setup_script }
-		grep{ $_->rec_status eq 'REC' } ::ChainSetup::engine_tracks();
 	find_op_offsets(); 
 	eval_iam('cs-connect');
 		#or say("Failed to connect setup, engine not ready"),return;
@@ -308,5 +309,21 @@ sub transport_status {
 	say "\nPress SPACE to start or stop engine.\n"
 		if $config->{press_space_to_start};
 }
+
+sub trigger_rec_setup_hooks {
+	map { system($_->rec_setup_script) } 
+	grep{ $_->rec_status eq 'REC' 
+		and say(json_out($setup->{_old_snapshot}->{tracks}->[$_->n]))
+		and $setup->{_old_snapshot}->{tracks}->[$_->n]->{rec_status} ne 'REC'
+		and -e $_->rec_setup_script
+	} ::ChainSetup::engine_tracks();
+}	
+sub trigger_rec_cleanup_hooks {
+	map { system($_->rec_cleanup_script) } 
+	grep{ $setup->{_old_snapshot}->{tracks}->[$_->n]->{rec_status} eq 'REC'
+		and $_->rec_status ne 'REC' 
+		and -e $_->rec_cleanup_script
+	} ::Track::all();
+}	
 1;
 __END__
