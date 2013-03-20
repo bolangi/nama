@@ -16,7 +16,7 @@
 # variables that get saved to State.json and placed under
 # version control
 
-@persistent_vars = qw(
+@tracked_vars = qw(
 
 # category: object serialization
 
@@ -40,7 +40,7 @@
 # note that this includes project-specific effect
 # chains
 
-@persistent_untracked_vars = qw(
+@persistent_vars = qw(
 
 	$project->{save_file_version_number}
 	$project->{timebase}

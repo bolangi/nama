@@ -24,8 +24,8 @@ our %EXPORT_TAGS =
 
 	var_lists => [qw(
 
+						@tracked_vars
 						@persistent_vars
-						@persistent_untracked_vars
 						@global_effect_chain_vars
 	)],
 

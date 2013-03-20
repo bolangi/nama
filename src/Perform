@@ -18,7 +18,7 @@ sub retain {
 	my $name = shift;
 	(print "performance $name already exists"), return if -d $name
 	mkdir $name
-	save_persistent_vars
+	save_tracked_vars
 	append actions to file actions every ten seconds
 }
 

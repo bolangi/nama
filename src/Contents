@@ -104,7 +104,7 @@ Preprocessing scripts
   16 strip_all            - strip comments and blank lines
    5 strip_comments       - strip comments
  119 emit_command_headers - generates grammar and docs from commands_yml
-   6 add_persistent_vars  - extract @persistent_vars from var_types.pl
+   6 add_tracked_vars  - extract @tracked_vars from var_types.pl
    6 add_vars             - remove comments from declarations.pl
 
 Variable tracing

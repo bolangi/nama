@@ -1,6 +1,6 @@
 #!/usr/bin/env perl 
 use Modern::Perl;
-use vars qw(@persistent_vars @config_vars @effects_static_vars);
+use vars qw(@tracked_vars @config_vars @effects_static_vars);
 my $var_types_pl = qx(./strip_all var_types.pl);
 eval $var_types_pl;
-say "	$_," for @persistent_vars, @config_vars, @effects_static_vars;
+say "	$_," for @tracked_vars, @config_vars, @effects_static_vars;

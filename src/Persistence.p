@@ -144,7 +144,7 @@ sub save_system_state {
 			serialize(
 				file => $path,
 				format => $format,
-				vars => \@persistent_vars,
+				vars => \@tracked_vars,
 				class => '::',
 				);
 
@@ -153,7 +153,7 @@ sub save_system_state {
 	serialize(
 		file => $file->untracked_state_store,
 		format => 'json',
-		vars => \@persistent_untracked_vars,
+		vars => \@persistent_vars,
 		class => '::',
 	);	
 
@@ -317,7 +317,7 @@ sub restore_state_from_file {
 		my $ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
-				vars   	=> \@persistent_untracked_vars,
+				vars   	=> \@persistent_vars,
 				class 	=> '::');
 		assign_singletons( { data => $ref });
 	}
@@ -330,7 +330,7 @@ sub restore_state_from_file {
 
 		assign(
 					data => $ref,
-					vars   => \@persistent_vars,
+					vars   => \@tracked_vars,
 					class => '::');
 		
 
