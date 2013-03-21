@@ -23,6 +23,7 @@ $jack->{fake_ports_list}		# for testing
 $jack->{clients}				# JACK client information
 $jack->{period}					#
 $setup->{_old_snapshot}			# for checking if engine needs reconfigured
+$setup->{_old_rec_status}		# for checking rec status change hooks
 $setup->{inputs_used}			# we warn if tracks share same input channel
 $setup->{tracks_with_duplicate_inputs}
 $setup->{cooked_record_pending}
