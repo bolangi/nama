@@ -393,6 +393,10 @@ sub restore_state_from_file {
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
+	if ( $project->{save_file_version_number} <= 1.105){ 
+		map{ $_->{class} = 'Audio::Nama::MasteringTrack' } 
+		grep{ $_->{name} eq 'Boost' } @tracks_data;
+	}
 
 	#######################################
 
