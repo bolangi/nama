@@ -122,8 +122,10 @@ sub engine_status {
 	my ($pos, $before_newlines, $after_newlines) = @_;
 	say "\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines;
 }
-sub current_position { colonize(int eval_iam("getpos")) }
-
+sub current_position { 
+	my $pos = eval_iam("getpos"); 
+	colonize(int($pos || 0)) 
+}
 sub start_heartbeat {
  	$engine->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
 }
