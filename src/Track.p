@@ -1025,6 +1025,17 @@ sub send_id { $tn{$_[0]->target}->send_id}
 sub dir { $tn{$_[0]->target}->dir }
 }
 {
+package ::BoostTrack; # for instrument monitor bus
+use ::Globals qw(:all);
+use Modern::Perl; use ::Log qw(logpkg);
+no warnings qw(uninitialized redefine);
+our @ISA = '::SlaveTrack';
+sub rec_status{
+	my $track = shift;
+	$mode->{mastering} ? 'MON' :  'OFF';
+}
+}
+{
 package ::CacheRecTrack; # for graph generation
 use ::Globals qw(:all);
 use ::Log qw(logpkg);

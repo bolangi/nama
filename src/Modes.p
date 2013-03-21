@@ -91,7 +91,6 @@ sub master_off {
 ;
 }
 
-
 sub add_mastering_tracks {
 
 	map{ 
@@ -102,10 +101,18 @@ sub add_mastering_tracks {
 		);
 		$ui->track_gui( $track->n );
 
- 	} @{$mastering->{track_names}};
+ 	} grep{ $_ ne 'Boost' } @{$mastering->{track_names}};
+	my $track = ::BoostTrack->new(
+		name => 'Boost', 
+		rw => 'MON',
+		group => 'Mastering', 
+		target => 'Master',
+	);
+	$ui->track_gui( $track->n );
 
 	
 }
+
 
 sub add_mastering_effects {
 	
