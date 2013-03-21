@@ -84,7 +84,7 @@ sub reconfigure_engine {
 				return;
 		}
 		logpkg('debug',"reconfigure triggered by change in setup");
-		logpkg('debug', diff(\$old, \$current));
+		#logpkg('debug', diff(\$old, \$current));
 	}
 
 	# restore position/running status
