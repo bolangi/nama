@@ -134,13 +134,13 @@ sub reconfigure_engine {
 	# - selected field values of each track
 	
 
-	
 {
 
 	# these track fields will be inspected
 	
 	my @relevant_track_fields = qw(
 		name
+		n
 		width
 		group 
 		playat
@@ -164,10 +164,11 @@ sub status_snapshot {
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
-	::Track::all();
+	grep{ $_->rec_status ne 'OFF' } ::Track::all();
 	\%snapshot;
 }
 }
+	
 sub find_duplicate_inputs { # in Main bus only
 
 	%{$setup->{tracks_with_duplicate_inputs}} = ();
