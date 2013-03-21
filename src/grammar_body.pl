@@ -121,7 +121,7 @@ command: user_alias predicate {
 user_alias: ident { 
 	#print "alias: $item{ident}\n";
 		$::text->{user_alias}->{$item{ident}} }
-user_command: ident { $return = $item{ident} if $::text->{user_command}->{$item{ident}} }
+user_command: ident { return $item{ident} if $::text->{user_command}->{$item{ident}} }
 
 # other commands (generated automatically)
 #
