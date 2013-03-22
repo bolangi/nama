@@ -62,6 +62,8 @@ sub idx { # return first free track index
 }
 sub all { sort{$a->n <=> $b->n } values %by_name }
 
+sub rec_hookable { grep{ $_->group ne 'Temp' and $_->group ne 'Insert' } all() }
+
 { my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
 sub user {
 	grep{ ! $system_track{$_} } map{$_->name} all();

@@ -92,8 +92,8 @@ sub reconfigure_engine {
 	$setup->{_old_snapshot} = status_snapshot();
 	
 	# make sure this is initialized
-	$setup->{_old_rec_status} //= 
-		{ map{$_->name => $_->rec_status } ::Track::all() };
+	#$setup->{_old_rec_status} //= 
+	#	{ map{$_->name => $_->rec_status } ::Track::all() };
 		
 	$old_offset_run_status = $mode->{offset_run};
 
@@ -101,6 +101,11 @@ sub reconfigure_engine {
 
 	stop_transport('quiet');
 
+	trigger_rec_cleanup_hooks();
+	trigger_rec_setup_hooks();
+	$setup->{_old_rec_status} = { 
+		map{$_->name => $_->rec_status } ::Track::rec_hookable()
+	};
 	if ( generate_setup() ){
 	
 		reset_latency_compensation() if $config->{opts}->{Q};
@@ -108,9 +113,6 @@ sub reconfigure_engine {
 		logpkg('debug',"I generated a new setup");
 		
 		autosave() if $config->{use_git} and $config->{autosave};
-		trigger_rec_cleanup_hooks();
-		trigger_rec_setup_hooks();
-	$setup->{_old_rec_status} = { map{$_->name => $_->rec_status } ::Track::all() };
 		connect_transport('quiet');
 		propagate_latency() if $config->{opts}->{Q};
 		show_status();
@@ -319,17 +321,29 @@ sub transport_status {
 
 sub trigger_rec_setup_hooks {
 	map { system($_->rec_setup_script) } 
-	grep{ $_->rec_status eq 'REC' 
+	grep
+	{ 
+		logpkg('debug',
+			join "\n",
+			"track ".$_->name,
+			"rec status is: ".$_->rec_status,
+			"old rec status: ".$setup->{_old_rec_status},
+			"script was ". (-e $_->rec_setup_script ) ? "found" : "not found"
+		);
+		$_->rec_status eq 'REC' 
 		and $setup->{_old_rec_status}->{$_->name} ne 'REC'
 		and -e $_->rec_setup_script
-	} ::ChainSetup::engine_tracks();
+	} 
+	::Track::rec_hookable();
 }	
  sub trigger_rec_cleanup_hooks {
  	map { system($_->rec_cleanup_script) } 
-	grep{ $_->rec_status ne 'REC' 
+	grep
+	{ 	$_->rec_status ne 'REC' 
 		and $setup->{_old_rec_status}->{$_->name} eq 'REC'
 		and -e $_->rec_cleanup_script
-	} ::ChainSetup::engine_tracks();
+	}
+	::Track::rec_hookable();
 }
 1;
 __END__
