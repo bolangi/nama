@@ -155,6 +155,7 @@ sub bootstrap_environment {
 
 sub cleanup_exit {
  	remove_riff_header_stubs();
+	trigger_rec_cleanup_hooks();
 	# for each process: 
 	# - SIGINT (1st time)
 	# - allow time to close down
