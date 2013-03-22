@@ -138,6 +138,7 @@ sub load_project {
 	# read_config( global_config() ); 
 	
 	teardown_engine();
+	trigger_rec_cleanup_hooks();
 	initialize_project_data();
 	remove_riff_header_stubs(); 
 	cache_wav_info();
