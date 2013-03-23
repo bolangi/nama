@@ -385,28 +385,41 @@ sub new {
 {
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub client {
+sub channel {
 	my $self = shift;
-	my $client = $self->direction eq 'input' 
+	my $target_id = $self->direction eq 'input' 
+		? $self->source_id
+		: $self->send_id;
+	only_channel($target_id) 
+}
+sub only_channel { $_[0] =~ /^\d+$/ ? $_[0] : undef }
+
+sub target_id {
+	my $self = shift;
+	$self->direction eq 'input' 
 		? $self->source_id
 		: $self->send_id;
 }
+sub target_type {
+	my $self = shift;
+	$self->direction eq 'input' 
+		? $self->source_type
+		: $self->send_type;
+}
+sub client { 
+	my $self = shift;
+	$self->target_type eq 'soundcard' ? 'system' : $self->target_id
+}
+
 sub device_id { 
 	my $self = shift;
 	::IO::jack_multi_route($self->ports)
 }
 sub ports {
 	my $self = shift;
-	# maybe source_id is an input number
-	my $client = $self->client;
-	my $channel = 1;
-	# we want the direction with respect to the client, i.e.  # reversed
+	my $channel = $self->channel || 1;
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
-	if( ::dest_type($client) eq 'soundcard'){
-		$channel = $client;
-		$client = ::IO::soundcard_input_device_string(); # system, okay for output
-	}
-	::IO::jack_multi_ports($client,$client_direction,$channel,$self->width, ::try{$self->name} );
+	::IO::jack_multi_ports($self->client,$client_direction,$channel,$self->width, ::try{$self->name} );
 }
 
 }
