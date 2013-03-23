@@ -114,7 +114,7 @@ sub reconfigure_engine {
 		
 		autosave() if $config->{use_git} and $config->{autosave};
 		connect_transport('quiet');
-		propagate_latency() if $config->{opts}->{Q};
+		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
 
 # 		if( $restore_position and not ::ChainSetup::really_recording()){
