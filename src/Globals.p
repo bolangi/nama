@@ -8,7 +8,7 @@ use Modern::Perl;
 
 # and the graph
 
-*g = $::ChainSetup::g;
+*g = \$::ChainSetup::g;
 
 use Exporter;
 our @ISA = 'Exporter';
