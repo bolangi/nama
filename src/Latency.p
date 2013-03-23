@@ -8,9 +8,38 @@ use List::Util qw(max);
 use Carp qw(confess);
 
 sub propagate_latency {   
+
+	# start at the outputs
+	
     my @sinks = grep{ $g->is_sink_vertex($_) } $g->vertices();
+
     for my $sink (@sinks) {
-        report_latency(output_port($sink), predecessor_latency($sink));
+        #logpkg('debug')
+		logpkg('debug',"found sink $sink");
+		my @predecessors = $g->predecessors($sink);
+		logpkg('debug',"preceeded by: @predecessors");
+		my @edges = map{ [$_, $sink] } @predecessors;
+		;
+		logpkg('debug',"edges: ",json_out(\@edges));
+
+		# we need to get a list of JACK clients 
+		# we connect to, and then discover
+		# which of Ecasound's JACK ports connect 
+		# to them
+		#
+		for ( @edges ) {
+			my $output = $g->get_edge_attribute(@$_, "output");
+			logpkg('debug',Dumper $output);
+			logpkg('debug', "JACK client: ", $output->client);
+			
+		}
+
+		
+	
+		
+
+		# report_latency(output_port($sink), predecessor_latency($sink));
+
     }
 }
 sub predecessor_latency {
@@ -22,7 +51,7 @@ sub predecessor_latency {
 sub sibling_latency {
     my @siblings = @_;
     my $max = max map { self_latency($_) } @siblings;
-    for (@siblings) { compensate_latency($_, $max - self_latency($_) }
+    for (@siblings) { compensate_latency($_, $max - self_latency($_)) }
     $max
 }
 
@@ -35,6 +64,7 @@ sub self_latency {
 
 sub sibling_latency {
 	
+	my @siblings = @_;
 	
 	my $node = $setup->{latency}->{sibling};
 	#say join " ", "siblings:", @siblings;
@@ -45,22 +75,6 @@ sub sibling_latency {
 	map { $node2->{$_} = scalar @siblings } @siblings;
 	return $max
 }
-
-		= grep{ ::Graph::is_a_track($_) } 
-			$setup->{latency_graph}->predecessors($track->name);
-	scalar @predecessors or return 0;
-	#say "track: ",$track->name;
-	sibling_latency(@predecessors) + loop_device_latency();
-}
-
-
-						
-	
-
-
-
-
-
 
 
 
