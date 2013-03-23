@@ -123,12 +123,14 @@ my $yaml = q(---
   args:
     width: 1
     source_id: 2
+    source_type: soundcard
   ecs_string: -i:jack_multi,system:capture_2
 -
   class: to_soundcard
   args:
     width: 2
     send_id: 5
+    send_type: soundcard
   ecs_string: -o:jack_multi,system:playback_5,system:playback_6
 -
   class: to_jack_port
