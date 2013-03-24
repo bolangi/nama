@@ -134,10 +134,22 @@ sub playback_latency {
 }
 
 # we need these stubs for AUTOLOAD to accept our methods
-sub ports {} 
+
+sub channel {}
 sub client {}
 sub target_id {}
 sub target_type {}
+sub ports {
+	my $self = shift;
+	my $channel = $self->channel || 1;
+	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
+	::IO::jack_multi_ports( $self->client,
+							$client_direction,
+							$channel,$self->width, 
+							::try{$self->name} 
+	) if $self->client
+}
+
 
 
 sub ecs_string {
@@ -412,13 +424,6 @@ sub device_id {
 	my $self = shift;
 	::IO::jack_multi_route($self->ports)
 }
-sub ports {
-	my $self = shift;
-	my $channel = $self->channel || 1;
-	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
-	::IO::jack_multi_ports($self->client,$client_direction,$channel,$self->width, ::try{$self->name} );
-}
-
 }
 
 {
