@@ -145,7 +145,8 @@ sub ports {
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,
-							$channel,$self->width, 
+							$channel,
+							$self->width, 
 							::try{$self->name} 
 	) if $self->client
 }
