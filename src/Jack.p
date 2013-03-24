@@ -355,6 +355,12 @@ sub jack_client : lvalue {
 	logit('::Jack','info',"$name: non-existent JACK client") if not $jack->{clients}->{$name} ;
 	$jack->{clients}->{$name}
 }
+sub port_mapping {
+	my $jack_port = shift;
+	my $own_port;
+	#.....
+	$own_port
+}
 1;
 __END__
 	
