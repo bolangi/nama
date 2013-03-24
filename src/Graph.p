@@ -111,12 +111,12 @@ sub add_path_for_aux_send {
 		# sax-jack_client_out
 		my @edge = ($track->name, output_node($track->send_type));
 		$g->add_edge(@edge);
-		 $g->set_edge_attributes(
-				@edge,
-			  	{	track => $track->name,
-					width => 2, # force stereo output width
-					chain_id => 'S'.$track->n,
-				});
+		 my $attr = {	track => $track->name,
+						chain_id => 'S'.$track->n,
+					};
+		# force stereo output width except for Master
+		$attr->{width} = 2 unless $track->name eq 'Master';
+	 	$g->set_edge_attributes( @edge, $attr);
 }
 {
 my %seen;
