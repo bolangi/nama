@@ -30,7 +30,8 @@ sub propagate_latency {
 		for ( @edges ) {
 			my $output = $g->get_edge_attribute(@$_, "output");
 			logpkg('debug',Dumper $output);
-			logpkg('debug', "JACK client: ", $output->client);
+			logpkg('debug', join " ", 
+				"JACK client:", $output->client, $output->ports);
 			
 		}
 
