@@ -125,15 +125,20 @@ sub new {
 sub capture_latency {
 	my $self = shift;
 	return unless $self->client;
-	::jack_port_latency('input', rectified($self->client));
+	::jack_port_latency('input', $self->client);
 }
 sub playback_latency {
 	my $self = shift;
 	return unless $self->client;
-	::jack_port_latency('output', rectified($self->client));
+	::jack_port_latency('output', $self->client);
 }
-sub ports {} # no ports by default
-sub client {} # not a JACK client by default
+
+# we need these stubs for AUTOLOAD to accept our methods
+sub ports {} 
+sub client {}
+sub target_id {}
+sub target_type {}
+
 
 sub ecs_string {
 	my $self = shift;
@@ -285,20 +290,16 @@ Change $source_or_send setting, or set track OFF.)) if $end > $channel_count;
 
 }
 #sub one_port { $jack->{clients}->{$client}->{$direction}->[$start-1] }
-sub default_jack_ports_list {
-	my ($track_name) = shift;
-	"$track_name.ports"
-}
+
 sub quote_jack_port {
 	my $port = shift;
 	($port =~ /\s/ and $port !~ /^"/) ? qq("$port") : $port
 }
 sub rectified { # client name from number
-	$_[0] !~ /D/ 
-		? 'system' # source_id or send_id matching digit
+	$_[0] =~ /^\d+$/ 
+		? 'system'
 		: $_[0]
 }
-
 ### subclass definitions
 
 ### method names with a preceding underscore 
@@ -387,13 +388,8 @@ package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
 sub channel {
 	my $self = shift;
-	my $target_id = $self->direction eq 'input' 
-		? $self->source_id
-		: $self->send_id;
-	only_channel($target_id) 
+	$self->target_id =~ /^(\d+)$/ ? $1  : undef 
 }
-sub only_channel { $_[0] =~ /^\d+$/ ? $_[0] : undef }
-
 sub target_id {
 	my $self = shift;
 	$self->direction eq 'input' 
@@ -408,9 +404,10 @@ sub target_type {
 }
 sub client { 
 	my $self = shift;
-	$self->target_type eq 'soundcard' ? 'system' : $self->target_id
+#  	say "to_jack_multi: target_id: ",$self->target_id;
+#  	say "to_jack_multi: rectified target_id: ",::IO::rectified($self->target_id);
+	::IO::rectified($self->target_id)
 }
-
 sub device_id { 
 	my $self = shift;
 	::IO::jack_multi_route($self->ports)
