@@ -133,19 +133,36 @@ sub playback_latency {
 	::jack_port_latency('output', $self->client);
 }
 
-# we need these stubs for AUTOLOAD to accept our methods
+# we need at least stubs for subclasses' methods 
+# for AUTOLOAD to be happy - so we include
 
-sub channel {}
 sub client {}
-sub target_id {}
-sub target_type {}
+
+# the following are placed here to be inherited by JACK related classes.
+# They have no function in other classes
+
+sub target_id {
+	my $self = shift;
+	$self->direction eq 'input' 
+		? $self->source_id
+		: $self->send_id;
+}
+sub target_type {
+	my $self = shift;
+	$self->direction eq 'input' 
+		? $self->source_type
+		: $self->send_type;
+}
+sub target_channel {
+	my $self = shift;
+	$self->target_id =~ /^(\d+)$/ ? $1 : 1
+}
 sub ports {
 	my $self = shift;
-	my $channel = $self->channel || 1;
 	my $client_direction = $self->direction eq 'input' ? 'output' : 'input';
 	::IO::jack_multi_ports( $self->client,
 							$client_direction,
-							$channel,
+							$self->target_channel,
 							$self->width, 
 							::try{$self->name} 
 	) if $self->client
@@ -399,22 +416,6 @@ sub new {
 {
 package ::IO::to_jack_multi;
 use Modern::Perl; use vars qw(@ISA); @ISA = '::IO';
-sub channel {
-	my $self = shift;
-	$self->target_id =~ /^(\d+)$/ ? $1  : undef 
-}
-sub target_id {
-	my $self = shift;
-	$self->direction eq 'input' 
-		? $self->source_id
-		: $self->send_id;
-}
-sub target_type {
-	my $self = shift;
-	$self->direction eq 'input' 
-		? $self->source_type
-		: $self->send_type;
-}
 sub client { 
 	my $self = shift;
 #  	say "to_jack_multi: target_id: ",$self->target_id;
