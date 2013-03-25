@@ -383,6 +383,7 @@ sub device_id {
 }
 sub ecs_extra { $_[0]->mono_to_stereo}
 sub client { 'system' if $jack->{jackd_running} } # since we share latency value
+sub ports { 'system:capture_1' }
 }
 {
 package ::IO::to_wav;
