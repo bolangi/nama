@@ -23,13 +23,13 @@ sub jack_update {
 		# reset our clients data 
 		$jack->{clients} = {};
 
-		#$jack->{use_jacks} 
-		#	?  jacks_get_port_latency() 
-		#	:  
-		parse_port_latency();
+		$jack->{use_jacks} 
+			?  jacks_get_port_latency() 
+			:  parse_port_latency();
+		parse_port_connections();
 		parse_ports_list();
 
-		# we know that JACK capture latency is 1 period
+		# JACK capture latency is 1 period
 		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
 
 	} else {  }
@@ -76,6 +76,9 @@ for (my $i = 0; $i < $plist->length(); $i++) {
 
     my $port = $jc->getPort($pname);
 
+	#my @connections = $jc->getAllConnections($client_name, $port_name);
+	#say for @connections;
+
     my $platency = $port->getLatencyRange($jacks::JackPlaybackLatency);
     my $pmin = $platency->min();
     my $pmax = $platency->max();
@@ -96,6 +99,27 @@ for (my $i = 0; $i < $plist->length(); $i++) {
 }
 
 
+}
+
+sub parse_port_connections {
+	my $j = shift || qx(jack_lsp -c 2> /dev/null); 
+
+	# initialize
+	$jack->{connections} = {}; 
+	
+	# convert to single lines
+	$j =~ s/\n\s+/ /sg;
+
+	my @lines = split "\n",$j;
+	#say for @ports;
+
+	for (@lines){
+	
+		my ($port, @connections) = split " ", $_;
+		#say "$port @connections";
+		$jack->{connections}->{$port} = \@connections;
+		
+	}
 }
 sub parse_port_latency {
 	
