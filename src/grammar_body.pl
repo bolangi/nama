@@ -325,6 +325,8 @@ new_track_name: anytag  { #$item{anytag}
   	my $proposed = $item{anytag};
   	::throw( qq(Track name "$proposed" needs to start with a letter)), 
   		return undef if  $proposed !~ /^[A-Za-z]/;
+  	::throw( qq(Track name "$proposed" cannot contain a colon.)), 
+  		return undef if  $proposed =~ /:/;
  	::throw( qq(A track named "$proposed" already exists.)), 
  		return undef if $::Track::by_name{$proposed};
  	::throw( qq(Track name "$proposed" conflicts with Ecasound command keyword.)), 
