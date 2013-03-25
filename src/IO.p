@@ -138,8 +138,18 @@ sub playback_latency {
 
 sub client {}
 
-# the following are placed here to be inherited by JACK related classes.
-# They have no function in other classes
+#### JACK related methods
+
+# inherited by all, the methods defined below are called in 
+# these classes: 
+# 
+#		to_jack_multi, 
+#		from_jack_multi 
+#		to_jack_client
+#		from_jack_client
+#
+# They have no function in other classes.
+
 
 sub target_id {
 	my $self = shift;
