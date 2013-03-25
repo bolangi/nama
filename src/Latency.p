@@ -35,10 +35,6 @@ sub propagate_latency {
 			
 		}
 
-		
-	
-		
-
 		# report_latency(output_port($sink), predecessor_latency($sink));
 
     }
@@ -46,7 +42,13 @@ sub propagate_latency {
 sub predecessor_latency {
     my $downstream = shift;
     my @predecessors = $g->predecessors($downstream);
+
+	# with one predecessor, return its latency
     return self_latency(@predecessors) if scalar @predecessors == 1;
+
+	# if multiple predecessors, equalize the siblings
+	# and return the latency
+	
     sibling_latency(@predecessors);
 }
 sub sibling_latency {
@@ -57,10 +59,10 @@ sub sibling_latency {
 }
 
 sub self_latency {
-	my $node = shift;
-	return track_latency($node) if ::Graph::is_a_track($node);
-	return loop_latency($node)  if ::Graph::is_loop($node);
-	return input_latency($node) if ::Graph::is_terminal($node);
+	my $node_name = shift;
+	return track_latency($node_name) if ::Graph::is_a_track($node_name);
+	return loop_latency($node_name)  if ::Graph::is_loop($node_name);
+	return input_latency($node_name) if ::Graph::is_terminal($node_name);
 }
 
 sub sibling_latency {
