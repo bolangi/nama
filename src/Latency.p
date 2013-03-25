@@ -4,44 +4,90 @@ package ::;
 use Modern::Perl;
 no warnings 'uninitialized';
 use ::Globals qw(:all);
+use Storable qw(dclone);
 use List::Util qw(max);
 use Carp qw(confess);
-
+our $lg; # latency_graph
 sub propagate_latency {   
+	$lg = dclone($g);
+	replace_terminals_by_jack_ports();
+    my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
+} 
 
-	# start at the outputs
-	
-    my @sinks = grep{ $g->is_sink_vertex($_) } $g->vertices();
+sub replace_terminals_by_jack_ports {
+
+    my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
+	my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
 
     for my $sink (@sinks) {
         #logpkg('debug')
 		logpkg('debug',"found sink $sink");
-		my @predecessors = $g->predecessors($sink);
+		my @predecessors = $lg->predecessors($sink);
 		logpkg('debug',"preceeded by: @predecessors");
 		my @edges = map{ [$_, $sink] } @predecessors;
 		;
 		logpkg('debug',"edges: ",json_out(\@edges));
 
-		# we need to get a list of JACK clients 
-		# we connect to, and then discover
-		# which of Ecasound's JACK ports connect 
-		# to them
-		#
-		for ( @edges ) {
-			my $output = $g->get_edge_attribute(@$_, "output");
+		for my $edge ( @edges ) {
+			my $output = $lg->get_edge_attribute(@$edge, "output");
 			logpkg('debug',Dumper $output);
 			logpkg('debug', join " ", 
 				"JACK client:", $output->client, $output->ports);
 			
+			$lg->delete_edge(@$edge);
+			for my $port($output->ports()){
+				$lg->add_edge($edge->[0], $port);
+				#$lg->set_edge_attribute($edge->[0], $port, "output", $output);
+			}
 		}
+    }
+    for my $source (@sources) {
+        #logpkg('debug')
+		logpkg('debug',"found source $source");
+		my @successors = $lg->successors($source);
+		logpkg('debug',"succeeded by: @successors");
+		my @edges = map{ [$source, $_] } @successors;
+		;
+		logpkg('debug',"edges: ",json_out(\@edges));
 
-		# report_latency(output_port($sink), predecessor_latency($sink));
-
+		for my $edge ( @edges ) {
+			my $input = $lg->get_edge_attribute(@$edge, "input");
+			logpkg('debug',Dumper $edge, Dumper $input);
+			logpkg('debug', join " ", 
+				"JACK client:", $input->client, $input->ports);
+			$lg->delete_edge(@$edge);
+			for my $port($input->ports()){
+				$lg->add_edge($port, $edge->[1]);
+				#$lg->set_edge_attribute($port, $edge->[1], "input", $input);
+			}
+		}
+		# remove isolated vertices
+		
+		map{ $lg->delete_vertex($_) } 
+		grep{ $lg->is_isolated_vertex($_) } $lg->vertices();	
+		say "$lg";
     }
 }
 sub predecessor_latency {
-    my $downstream = shift;
-    my @predecessors = $g->predecessors($downstream);
+    my $edge = shift;
+
+	my ($upstream, $downstream) = @$edge;
+	if( ::Graph::is_terminal($downstream) ){
+
+		# report predecessor latency 
+	}
+	elsif( ::Graph::is_terminal($upstream) ){
+
+		# ask for latency
+
+	}
+	# three cases:
+	# 1. downstream vertex is terminal
+	#report_latency(get_output_port($_), 
+	# 2. neither vertex is terminal
+	# 3. upstream vertex is terminal
+	
+    my @predecessors = $lg->predecessors($downstream);
 
 	# with one predecessor, return its latency
     return self_latency(@predecessors) if scalar @predecessors == 1;
@@ -53,32 +99,20 @@ sub predecessor_latency {
 }
 sub sibling_latency {
     my @siblings = @_;
-    my $max = max map { self_latency($_) } @siblings;
-    for (@siblings) { compensate_latency($_, $max - self_latency($_)) }
+	my %self_latency; # cache returned values
+    my $max = max map { $self_latency{$_} = self_latency($_) } @siblings;
+    for (@siblings) { compensate_latency($_, $max - $self_latency{$_}) }
     $max
 }
 
 sub self_latency {
 	my $node_name = shift;
-	return track_latency($node_name) if ::Graph::is_a_track($node_name);
-	return loop_latency($node_name)  if ::Graph::is_loop($node_name);
-	return input_latency($node_name) if ::Graph::is_terminal($node_name);
+	my $latency;
+	$latency = track_latency($node_name) if ::Graph::is_a_track($node_name);
+	$latency = loop_latency($node_name)  if ::Graph::is_loop($node_name);
+	$latency = input_latency($node_name) if ::Graph::is_terminal($node_name);
+	$latency + predecessor_latency($node_name) 
 }
-
-sub sibling_latency {
-	
-	my @siblings = @_;
-	
-	my $node = $setup->{latency}->{sibling};
-	#say join " ", "siblings:", @siblings;
-	scalar @siblings or return 0;
-	my $max = max map { track_latency($_) } map{$tn{$_}} @siblings;
-	map { $node->{$_} = $max } @siblings;
-	my $node2 = $setup->{latency}->{sibling_count};
-	map { $node2->{$_} = scalar @siblings } @siblings;
-	return $max
-}
-
 
 
 ###### 
@@ -89,7 +123,7 @@ sub sibling_latency {
 #   add (or set) operators 
 #    (to optimize: add operators only to plural sibling edges, not only edges)
 
-sub set_latency_compensation {
+sub compensate_latency {
 	
 	my $track = shift;
 	my $delay = shift || 0;
@@ -147,7 +181,7 @@ sub adjust_latency {
 	{ 	
 		next unless has_siblings($_) and $_->latency_offset;
 
-		set_latency_compensation($_, $_->latency_offset);
+		#set_latency_compensation($_, $_->latency_offset);
 
 		# store offset for debugging
 		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
@@ -189,7 +223,7 @@ sub cl2 {
 }
 
 sub reset_latency_compensation {
- 	map{ set_latency_compensation($_, 0) } grep{ $_->latency_op } ::Track::all();
+ 	map{ compensate_latency($_, 0) } grep{ $_->latency_op } ::Track::all();
  }
 
 sub initialize_latency_vars {
@@ -201,37 +235,7 @@ sub initialize_latency_vars {
 
 sub track_latency {
 	my $track = shift;
-
-	# initialize
-	my $node = $setup->{latency}->{track}->{$track->name} = {};
-	my $accumulator = 0;
-
-	### track effects latency
-	
-	$accumulator += ($node->{ops} = track_ops_latency($track));
-
-	### track insert latency
-	
-	$accumulator += ($node->{insert} = insert_latency($track));
-
-	### track's own latency
-	
-	$node->{own} = $accumulator;
-
-	### track predecessor latency (if has tracks as predecessors)
-
-	my $pl = predecessor_latency($track);
-
-	$accumulator += ($node->{predecessor} = $pl); # zero if no predecessors
-
-	$pl or $accumulator += ($node->{capture}     = $track->capture_latency );
-
-	### track source latency (if track has "live" i.e.  non-WAV input)
-
-	### track total latency
-
-	$node->{total} = $accumulator;
-
+	track_ops_latency($track);
 }
 sub track_ops_latency {
 	# LADSPA plugins return latency in frames
