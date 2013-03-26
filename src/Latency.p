@@ -51,10 +51,26 @@ sub self_latency {
 		if ::Graph::is_a_loop($node_name);
 	die "shouldn't reach here\nnodename: $node_name, graph:$g";
 }
-
+sub track_ops_latency {
+	# LADSPA plugins return latency in frames
+	my $track = shift;
+	my $total = 0;;
+	map { $total += op_latency($_) } $track->fancy_ops;
+	$total
+}
+sub op_latency {
+	my $op = shift;
+	return 0 if is_controller($op); # skip controllers
+	my $p = latency_param($op);
+	defined $p and ! bypassed($op)
+		? get_live_param($op, $p) 
+		: 0
+}
+sub loop_device_latency { 
+	# results in frames
+	$engine->{buffersize}; 
+}
 sub input_latency { 222 }
-
-
 
 { my %loop_adjustment;
 sub sibling_latency {
@@ -97,7 +113,6 @@ sub advance_sibling {
 	$head
 }
 }
-	
 sub remove_connections_to_wav_out {
 	my $g = shift;
 	::Graph::remove_branch($g,'wav_out');
@@ -224,55 +239,6 @@ sub add_latency_compensation_op {
 
 
 
-
-sub adjust_latency {
-	eval_iam('cs-disconnect');
-
-	for ( ::ChainSetup::engine_tracks() )
-	{ 	
-		next unless has_siblings($_) and $_->latency_offset;
-
-		#set_latency_compensation($_, $_->latency_offset);
-
-		# store offset for debugging
-		$setup->{latency}->{track}->{$_->name}->{offset} = $_->latency_offset; 
-
-  	}
-	connect_transport('quiet');
-}
-sub cl2 {
-
-	initialize_latency_vars();
-=comment
-	get predecessors of all output types (wav_out, etc)
-	sibling latency groups from soundcard_out 
-	start with same as currently (Master/Boost and Mixdown)
-
-
-	each item
-
-	set own latency
-
-	is loop device # set own latency
-	is track	   # set own latency
-	is output
-	is input 
-
-	get predecessors of all output types (wav_out, etc)
-	set outputs
-
-	propagate latency
-	propagate again 
-	
-
-	#walk($coderef_set_own_latency)
-	
-=cut
-
-
-
-}
-
 sub reset_latency_compensation {
  	map{ compensate_latency($_, 0) } grep{ $_->latency_op } ::Track::all();
  }
@@ -284,13 +250,6 @@ sub initialize_latency_vars {
 	$setup->{latency}->{sibling_count} = {};
 }
 
-sub track_ops_latency {
-	# LADSPA plugins return latency in frames
-	my $track = shift;
-	my $total = 0;;
-	map { $total += op_latency($_) } $track->fancy_ops;
-	$total
-}
 { my %reverse = qw(input output output input);
 sub jack_port_latency {
 
@@ -326,19 +285,6 @@ sub jack_port_latency {
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }
-}
-sub loop_device_latency { 
-	# results in frames
-	$engine->{buffersize}; 
-}
-
-sub op_latency {
-	my $op = shift;
-	return 0 if is_controller($op); # skip controllers
-	my $p = latency_param($op);
-	defined $p and ! bypassed($op)
-		? get_live_param($op, $p) 
-		: 0
 }
 sub latency_param {
 	my $op = shift;
