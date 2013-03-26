@@ -24,7 +24,7 @@ sub propagate_latency {
 	
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
 	logpkg('debug',"recurse through latency graph starting at sinks: sinks");
-	map{ predecessor_latency($lg,$_) } @sinks;
+	map{ latency_of($lg,$_) } @sinks;
 } 
 sub predecessor_latency {
 	scalar @_ > 2 and die "too many args to predecessor_latency: @_";
@@ -33,10 +33,9 @@ sub predecessor_latency {
 	logpkg('debug',"$v: predecessor_latency is $latency");
 	$latency;
 }
-
 sub latency_of {
 	my ($g, @v) = @_;
-	return report_jack_latency(@v, predecessor_latency($g, @v))
+	return report_jack_port_latency(@v, predecessor_latency($g, @v))
 		if scalar @v == 1 and $g->is_sink_vertex(@v);
 	return self_latency($g, @v) if scalar @v == 1;
 	return sibling_latency($g, @v) if scalar @v > 1;
@@ -314,5 +313,11 @@ sub frames_to_secs { # One time conversion for delay op
 	my $frames = shift;
 	$frames / $config->{sample_rate};
 }
-
+sub report_jack_port_latency {
+	my ($port, $latency) = @_;
+	# rather than report directly for system:playback_1
+	# we report our own port latency, something like
+	# Nama:out_1
+	logpkg('debug',"port $port: latency is $latency");
+}
 1;
