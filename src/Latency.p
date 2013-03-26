@@ -108,17 +108,50 @@ sub predecessor_latency {
 	$latency;
 }
 
+
+{ my %loop_adjustment;
 sub sibling_latency {
     my ($g, @siblings) = @_;
+	logpkg('debug',"Siblings were: @siblings");
+	@siblings = map{ advance_sibling($g, $_) } @siblings;
+	logpkg('debug',"Siblings are now: @siblings");
 	my %self_latency; # cache returned values
-    my $max = max map { $self_latency{$_} = self_latency($g, $_) } @siblings;
+    my $max = max map 
+		# we fold into the track the latency of any
+		# loop devices we advanced past to get 
+		# to a track capable of providing latency
+		# compensation
+		{ $self_latency{$_} = 
+			self_latency($g, $_) + $loop_adjustment{$_}  * $engine->{buffersize} 
+		} @siblings;
     for (@siblings) { compensate_latency($tn{$_}, $max - $self_latency{$g, $_}) }
 	logpkg('debug',"max latency among siblings:\n    @siblings\nis $max.");
     $max
 }
 
+### on encountering a loop device in a group
+### of siblings, we advance that sibling
+### to a track, and perform the latency
+### compensation on a group of tracks,
+### which provide a latency_op  
 
-
+sub advance_sibling {
+	my ($g, $head) = @_;
+	my $loop_count = 0;
+	while( ! ::Graph::is_a_track($head) ){
+		my @predecessors = $g->predecessors($head);
+		die "$head: too many predecessors!  @predecessors"
+			if @predecessors > 1;
+		my $predecessor = shift @predecessors;
+		$head = $predecessor;
+		$loop_count++;
+	}
+	$loop_adjustment{$head} = $loop_count;
+	$head
+}
+}
+	
+		
 ###### 
 #
 #   remove (or reset) latency operators
@@ -132,6 +165,11 @@ sub compensate_latency {
 	my $track = shift;
 	my $delay = shift || 0;
 	my $units = shift;
+
+# because of brass_out -> system:playback_1, we
+# need to advance past brass_out and do 
+# latency compensation on 'brass' instead,
+# adding in the loop device.
 
 	my $id = $track->latency_op || add_latency_compensation_op ( $track );
 
