@@ -331,8 +331,10 @@ sub non_track_dispatch {
 		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
 		$logger->debug("non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
-		$class->new($attrib ? %$attrib : () ) } @$edge;
-		# we'd like to $class->new(override($edge->[0], $edge)) } @$edge;
+		my $io = $class->new($attrib ? %$attrib : () ) ;
+		$g->set_edge_attribute(@$edge, $direction, $io);
+		$io;
+	} @$edge;
 }
 
 { 
