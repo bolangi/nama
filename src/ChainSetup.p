@@ -378,13 +378,6 @@ sub dispatch { # creates an IO object from a graph edge
 	my $io = $class->new(@args);
 
 	$g->set_edge_attribute(@$edge, $direction => $io );
-
-	# promote IO attributes closer to the action
-	#
-	$direction eq 'output'  # sax sax_out
-			? $g->set_vertex_attribute($edge->[1], $direction => $io)
-			: $g->set_vertex_attribute($edge->[0], $direction => $io);
-
 	$io
 }
 sub decode_edge {
