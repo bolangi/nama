@@ -346,8 +346,6 @@ sub remove_isolated_vertices {
 	my $g = shift;
 	map{ $g->delete_vertex($_) } 
 	grep{ $g->is_isolated_vertex($_) } $g->vertices();	
-	say "$g";
-
 }
 
 1;

@@ -9,11 +9,11 @@ use List::Util qw(max);
 use Carp qw(confess);
 our $lg; # latency_graph
 sub propagate_latency {   
+	# make our own copy of the graph
 	$lg = dclone($g);
 	remove_connections_to_wav_out($lg);
 	replace_terminals_by_jack_ports($lg);
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
-	"$lg";
 } 
 
 sub remove_connections_to_wav_out {
