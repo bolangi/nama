@@ -7,13 +7,15 @@ use ::Globals qw(:all);
 use Storable qw(dclone);
 use List::Util qw(max);
 use Carp qw(confess);
-our $lg; # latency_graph
 sub propagate_latency {   
-	# make our own copy of the graph
-	$lg = dclone($g);
+	# make our own copy of the latency graph, and an alias
+	my $lg = $jack->{graph} = dclone($g);
 	remove_connections_to_wav_out($lg);
 	replace_terminals_by_jack_ports($lg);
+	
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
+	map{say}@sinks;
+	map{ predecessor_latency($lg,$_) } @sinks;
 } 
 
 sub remove_connections_to_wav_out {
@@ -38,7 +40,9 @@ sub replace_terminals_by_jack_ports {
 		logpkg('debug',"edges: ",json_out(\@edges));
 
 		for my $edge ( @edges ) {
-			my $output = $g->get_edge_attribute(@$edge, "output");
+			logpkg('debug',"edge: @$edge");
+			my $output = $g->get_edge_attribute(@$edge, "output")
+				|| $g->get_vertex_attribute($edge->[0], "output");
 			logpkg('debug',Dumper $output);
 			logpkg('debug', join " ", 
 				"JACK client:", $output->client, $output->ports);
@@ -60,7 +64,7 @@ sub replace_terminals_by_jack_ports {
 		logpkg('debug',"edges: ",json_out(\@edges));
 
 		for my $edge ( @edges ) {
-			my $input = $g->get_edge_attribute(@$edge, "input");
+			my $input = $g->get_edge_attribute(@$edge, "input") ;
 			logpkg('debug',Dumper $edge, Dumper $input);
 			logpkg('debug', join " ", 
 				"JACK client:", $input->client, $input->ports);
@@ -75,51 +79,44 @@ sub replace_terminals_by_jack_ports {
 	::Graph::remove_isolated_vertices($g);
 
 }
-sub predecessor_latency {
-    my $edge = shift;
 
-	my ($upstream, $downstream) = @$edge;
-	if( ::Graph::is_terminal($downstream) ){
-
-		# report predecessor latency 
-	}
-	elsif( ::Graph::is_terminal($upstream) ){
-
-		# ask for latency
-
-	}
-	# three cases:
-	# 1. downstream vertex is terminal
-	#report_latency(get_output_port($_), 
-	# 2. neither vertex is terminal
-	# 3. upstream vertex is terminal
-	
-    my @predecessors = $lg->predecessors($downstream);
-
-	# with one predecessor, return its latency
-    return self_latency(@predecessors) if scalar @predecessors == 1;
-
-	# if multiple predecessors, equalize the siblings
-	# and return the latency
-	
-    sibling_latency(@predecessors);
+sub latency_of {
+	my ($g, @v) = @_;
+	return report_jack_latency(@v, predecessor_latency($g, @v))
+		if scalar @v == 1 and $g->is_sink_vertex(@v);
+	return self_latency($g, @v) if scalar @v == 1;
+	return sibling_latency($g, @v) if scalar @v > 1;
 }
+sub self_latency {
+	my ($g, $node_name) = @_;
+	return input_latency($node_name) if $g->is_source_vertex($node_name);
+	my $predecessor_latency = predecessor_latency($g, $node_name);
+	return($predecessor_latency + track_ops_latency($tn{$node_name}))
+		if ::Graph::is_a_track($node_name);
+	return($predecessor_latency + loop_device_latency()) 
+		if ::Graph::is_a_loop($node_name);
+	die "shouldn't reach here\nnodename: $node_name, graph:$g";
+}
+
+sub input_latency { 222 }
+
+sub predecessor_latency {
+	scalar @_ > 2 and die "too many args to predecessor_latency: @_";
+	my ($g, $v) = @_;
+	my $latency = latency_of($g, $g->predecessors($v));
+	logpkg('debug',"$v: predecessor_latency is $latency");
+	$latency;
+}
+
 sub sibling_latency {
-    my @siblings = @_;
+    my ($g, @siblings) = @_;
 	my %self_latency; # cache returned values
-    my $max = max map { $self_latency{$_} = self_latency($_) } @siblings;
-    for (@siblings) { compensate_latency($_, $max - $self_latency{$_}) }
+    my $max = max map { $self_latency{$_} = self_latency($g, $_) } @siblings;
+    for (@siblings) { compensate_latency($tn{$_}, $max - $self_latency{$g, $_}) }
+	logpkg('debug',"max latency among siblings:\n    @siblings\nis $max.");
     $max
 }
 
-sub self_latency {
-	my $node_name = shift;
-	my $latency;
-	$latency = track_latency($node_name) if ::Graph::is_a_track($node_name);
-	$latency = loop_latency($node_name)  if ::Graph::is_loop($node_name);
-	$latency = input_latency($node_name) if ::Graph::is_terminal($node_name);
-	$latency + predecessor_latency($node_name) 
-}
 
 
 ###### 
@@ -240,10 +237,6 @@ sub initialize_latency_vars {
 	$setup->{latency}->{sibling_count} = {};
 }
 
-sub track_latency {
-	my $track = shift;
-	track_ops_latency($track);
-}
 sub track_ops_latency {
 	# LADSPA plugins return latency in frames
 	my $track = shift;
