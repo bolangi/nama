@@ -333,6 +333,23 @@ sub remove_tracks {
 		} @names;
 }
 
+# for latency-related graph transformations
+
+sub remove_branch {
+	my ($g, $v) = @_;
+	my @p = $g->predecessors($v);
+	$g->delete_vertex($v) if $g->is_sink_vertex($v);
+	remove_branch($g, $_) for @p;
+}
+
+sub remove_isolated_vertices {
+	my $g = shift;
+	map{ $g->delete_vertex($_) } 
+	grep{ $g->is_isolated_vertex($_) } $g->vertices();	
+	say "$g";
+
+}
+
 1;
 __END__
 

@@ -10,63 +10,70 @@ use Carp qw(confess);
 our $lg; # latency_graph
 sub propagate_latency {   
 	$lg = dclone($g);
-	replace_terminals_by_jack_ports();
+	remove_connections_to_wav_out($lg);
+	replace_terminals_by_jack_ports($lg);
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
+	"$lg";
 } 
 
-sub replace_terminals_by_jack_ports {
+sub remove_connections_to_wav_out {
+	my $g = shift;
+	::Graph::remove_branch($g,'wav_out');
+	::Graph::remove_isolated_vertices($g);
+}
 
-    my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
-	my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
+sub replace_terminals_by_jack_ports {
+	my $g = shift;
+
+    my @sinks = grep{ $g->is_sink_vertex($_) } $g->vertices();
+	my @sources = grep{ $g->is_source_vertex($_) } $g->vertices();
 
     for my $sink (@sinks) {
         #logpkg('debug')
 		logpkg('debug',"found sink $sink");
-		my @predecessors = $lg->predecessors($sink);
+		my @predecessors = $g->predecessors($sink);
 		logpkg('debug',"preceeded by: @predecessors");
 		my @edges = map{ [$_, $sink] } @predecessors;
 		;
 		logpkg('debug',"edges: ",json_out(\@edges));
 
 		for my $edge ( @edges ) {
-			my $output = $lg->get_edge_attribute(@$edge, "output");
+			my $output = $g->get_edge_attribute(@$edge, "output");
 			logpkg('debug',Dumper $output);
 			logpkg('debug', join " ", 
 				"JACK client:", $output->client, $output->ports);
 			
-			$lg->delete_edge(@$edge);
+			$g->delete_edge(@$edge);
 			for my $port($output->ports()){
-				$lg->add_edge($edge->[0], $port);
-				#$lg->set_edge_attribute($edge->[0], $port, "output", $output);
+				$g->add_edge($edge->[0], $port);
+				#$g->set_edge_attribute($edge->[0], $port, "output", $output);
 			}
 		}
     }
     for my $source (@sources) {
         #logpkg('debug')
 		logpkg('debug',"found source $source");
-		my @successors = $lg->successors($source);
+		my @successors = $g->successors($source);
 		logpkg('debug',"succeeded by: @successors");
 		my @edges = map{ [$source, $_] } @successors;
 		;
 		logpkg('debug',"edges: ",json_out(\@edges));
 
 		for my $edge ( @edges ) {
-			my $input = $lg->get_edge_attribute(@$edge, "input");
+			my $input = $g->get_edge_attribute(@$edge, "input");
 			logpkg('debug',Dumper $edge, Dumper $input);
 			logpkg('debug', join " ", 
 				"JACK client:", $input->client, $input->ports);
-			$lg->delete_edge(@$edge);
+			$g->delete_edge(@$edge);
 			for my $port($input->ports()){
-				$lg->add_edge($port, $edge->[1]);
-				#$lg->set_edge_attribute($port, $edge->[1], "input", $input);
+				$g->add_edge($port, $edge->[1]);
+				#$g->set_edge_attribute($port, $edge->[1], "input", $input);
 			}
 		}
-		# remove isolated vertices
-		
-		map{ $lg->delete_vertex($_) } 
-		grep{ $lg->is_isolated_vertex($_) } $lg->vertices();	
-		say "$lg";
-    }
+
+	}
+	::Graph::remove_isolated_vertices($g);
+
 }
 sub predecessor_latency {
     my $edge = shift;
