@@ -1,4 +1,3 @@
-	insert_type # obsolete, use class
 	n			# index
 	class
 	send_type
