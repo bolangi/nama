@@ -23,7 +23,7 @@ sub propagate_latency {
 	replace_terminals_by_jack_ports($lg);
 	
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
-	logpkg('debug',"recurse through latency graph starting at sinks: sinks");
+	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
 	map{ latency_of($lg,$_) } @sinks;
 } 
 sub predecessor_latency {
@@ -39,16 +39,6 @@ sub latency_of {
 		if scalar @v == 1 and $g->is_sink_vertex(@v);
 	return self_latency($g, @v) if scalar @v == 1;
 	return sibling_latency($g, @v) if scalar @v > 1;
-}
-sub self_latency {
-	my ($g, $node_name) = @_;
-	return input_latency($node_name) if $g->is_source_vertex($node_name);
-	my $predecessor_latency = predecessor_latency($g, $node_name);
-	return($predecessor_latency + track_ops_latency($tn{$node_name}))
-		if ::Graph::is_a_track($node_name);
-	return($predecessor_latency + loop_device_latency()) 
-		if ::Graph::is_a_loop($node_name);
-	die "shouldn't reach here\nnodename: $node_name, graph:$g";
 }
 sub track_ops_latency {
 	# LADSPA plugins return latency in frames
@@ -78,25 +68,27 @@ sub sibling_latency {
 	@siblings = map{ advance_sibling($g, $_) } @siblings;
 	logpkg('debug',"Siblings are now: @siblings");
 	my %self_latency; # cache returned values
-    my $max = max map 
-		# we fold into the track the latency of any
-		# loop devices we advanced past to get 
-		# to a track capable of providing latency
-		# compensation
-		{ $self_latency{$_} = 
-			self_latency($g, $_) + $loop_adjustment{$_}  * $engine->{buffersize} 
-		} @siblings;
-    for (@siblings) { compensate_latency($tn{$_}, $max - $self_latency{$g, $_}) }
-	logpkg('debug',"max latency among siblings:\n    @siblings\nis $max.");
+
+    my $max = max map { $self_latency{$_} = self_latency($g, $_) } @siblings;
+
+	logpkg('debug',"$max frames max latency among siblings: @siblings");
+    for (@siblings) { 
+		my $delay = $max - $self_latency{$_};
+		logpkg('debug',"$_: self latency: $self_latency{$_} frames");
+		logpkg('debug',"$_: delay $delay frames");
+		compensate_latency($tn{$_},$delay);
+	}
     $max
 }
 
-### on encountering a loop device in a group
-### of siblings, we advance that sibling
-### to a track, and perform the latency
-### compensation on a group of tracks,
-### which provide a latency_op  
-
+# On encountering a loop device in a group of siblings, we
+# advance vertices of that sibling as far as necessary
+# (usually one step) to get to a track vertex, where we will
+# apply latency compensation.
+#
+# We fold into the track the latency of any loop devices we
+# passed.
+	
 sub advance_sibling {
 	my ($g, $head) = @_;
 	my $loop_count = 0;
@@ -108,9 +100,30 @@ sub advance_sibling {
 		$head = $predecessor;
 		$loop_count++;
 	}
-	$loop_adjustment{$head} = $loop_count;
+	$loop_adjustment{$head} += $loop_count * $engine->{buffersize};
 	$head
 }
+sub self_latency {
+	my ($g, $node_name) = @_;
+	return input_latency($node_name) if $g->is_source_vertex($node_name);
+	my $predecessor_latency = predecessor_latency($g, $node_name);
+
+	return( 
+			$predecessor_latency 
+			+ track_ops_latency($tn{$node_name})
+			+ $loop_adjustment{$node_name}
+			+ ::Insert::soundcard_delay($node_name) 
+				# if we're a wet return track and insert is
+				# a hardware type, i.e. via the soundcard 
+	) if ::Graph::is_a_track($node_name);
+
+	return(
+			$predecessor_latency + loop_device_latency()
+	) if ::Graph::is_a_loop($node_name);
+
+	die "shouldn't reach here\nnodename: $node_name, graph:$g";
+}
+	
 }
 sub remove_connections_to_wav_out {
 	my $g = shift;
