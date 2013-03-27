@@ -1,6 +1,0 @@
-package foo;
-our @ISA = 'this';
-package bar;
-our @ISA = 'that';
-package baz;
-our @ISA = 'the_other';
