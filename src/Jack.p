@@ -120,9 +120,9 @@ sub parse_port_connections {
 		
 	}
 }
-sub get_nama_ports {
+sub jack_port_to_nama {
 	my $jack_port = shift;
-	grep{ /Nama/ } @{ $jack->{connections}->{$jack_port} };
+	grep{ /Nama/ and $jack->{is_own_port}->{$_} } @{ $jack->{connections}->{$jack_port} };
 }
 	
 sub parse_port_latency {

@@ -341,15 +341,15 @@ sub frames_to_secs { # One time conversion for delay op
 }
 sub report_jack_playback_latency {
 	my ($pname, $latency) = @_;
-	# rather than report directly for system:playback_1
-	# we report our own port latency, something like
-	# Nama:out_1
 
-	say "Jack port: $pname";
-	my @pnames = get_nama_ports($pname);
-	say "Nama ports: @pnames";
-
+	# starting with a known jack destination port
+	# assign latency to the corresponding Nama playback ports
+	
+	logpkg('debug',"Jack port: $pname");
+	my @pnames = jack_port_to_nama($pname);
+	logpkg('debug',"Nama ports: @pnames");
 	map{ set_playback_latency($_, $latency, $latency) } @pnames;
+	logpkg('warn',"$pname: maps to multiple Nama ports @pnames") if @pnames > 1;
 	logpkg('debug',"port(s) @pnames latency is $latency");
 }
 
