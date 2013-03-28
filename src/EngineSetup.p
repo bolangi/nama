@@ -251,6 +251,7 @@ sub connect_transport {
 	my $quiet = shift;
 	remove_riff_header_stubs();
 
+	register_other_ports(); # that don't belong to my upcoming instance
 	load_ecs() or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
@@ -271,8 +272,8 @@ sub connect_transport {
 		return;
 	}
 	$setup->{audio_length} = eval_iam('cs-get-length'); # returns zero if unknown
-
 	sync_effect_parameters();
+	register_own_ports(); # as distinct from other Nama instances
 	$ui->length_display(-text => colonize($setup->{audio_length}));
 	eval_iam("cs-set-length $setup->{audio_length}") if $tn{Mixdown}->rec_status eq 'REC' and $setup->{audio_length};
 	$ui->clock_config(-text => colonize(0));

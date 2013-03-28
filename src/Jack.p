@@ -389,6 +389,20 @@ sub port_mapping {
 	#.....
 	$own_port
 }
+
+sub register_other_ports { 
+	$jack->{is_other_port} = { map{ chomp; $_ => 1 } qx(jack_lsp) } 
+}
+
+sub register_own_ports { # distinct from other Nama instances 
+	$jack->{is_own_port} = { 
+		map{ chomp; $_ => 1 
+				unless $jack->{is_other_port}->{$_} 
+				or !/^Nama/ 
+		} qx(jack_lsp)} 
+}
+
+
 1;
 __END__
 	
