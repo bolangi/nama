@@ -6,8 +6,11 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 use Storable qw(dclone);
 use List::Util qw(max);
+use Memoize qw(memoize unmemoize);
 use Carp qw(confess);
+memoize ('self_latency','latency_of');
 sub propagate_latency {   
+	logsub('&propagate_latency');
 
 	# make our own copy of the latency graph, and an alias
 	my $lg = $jack->{graph} = dclone($g);
@@ -22,8 +25,12 @@ sub propagate_latency {
 	
 	replace_terminals_by_jack_ports($lg);
 	
+	logpkg('debug',"jack graph\n","$lg");
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
+
 	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
+	unmemoize('self_latency','latency_of');
+	memoize('self_latency','latency_of');
 	map{ latency_of($lg,$_) } @sinks;
 } 
 sub predecessor_latency {
@@ -65,16 +72,16 @@ sub input_latency { 222 }
 sub sibling_latency {
     my ($g, @siblings) = @_;
 	logpkg('debug',"Siblings were: @siblings");
+	%loop_adjustment = ();
 	@siblings = map{ advance_sibling($g, $_) } @siblings;
 	logpkg('debug',"Siblings are now: @siblings");
-	my %self_latency; # cache returned values
 
-    my $max = max map { $self_latency{$_} = self_latency($g, $_) } @siblings;
+    my $max = max map { self_latency($g, $_) } @siblings;
 
 	logpkg('debug',"$max frames max latency among siblings: @siblings");
     for (@siblings) { 
-		my $delay = $max - $self_latency{$_};
-		logpkg('debug',"$_: self latency: $self_latency{$_} frames");
+		my $delay = $max - self_latency($g, $_);
+		logpkg('debug',"$_: self latency: ",self_latency($g, $_)," frames");
 		logpkg('debug',"$_: delay $delay frames");
 		compensate_latency($tn{$_},$delay);
 	}
