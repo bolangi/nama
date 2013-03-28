@@ -199,23 +199,3 @@ __DATA__
 @@ default_palette_json
 [% qx(cat ./palette.json) %]
 __END__
-
-=head1 NAME
-
-Nama/Audio::Nama - lightweight digital audio workstation
-
-=head1 DESCRIPTION
-
-B<Nama> performs multitrack recording,
-non-destructive editing, mixing and mastering using the
-Ecasound audio engine developed by Kai Vehmanen.
-
-It provides tracks with multiple takes, buses, effects,
-presets, sends, inserts, marks, regions, edits,
-fades.
-
-Nama runs under JACK and ALSA audio frameworks,
-automatically detects LADSPA plugins, and supports Ladish
-Level 1 session handling.
-
-Type C<man nama> for details.
