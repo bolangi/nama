@@ -12,6 +12,8 @@ map{ memoize $_ } ('self_latency','latency_of');
 sub propagate_latency {   
 	logsub('&propagate_latency');
 
+	parse_port_connections();
+	start_latency_watcher();
 	# make our own copy of the latency graph, and an alias
 	my $lg = $jack->{graph} = dclone($g);
 
@@ -42,7 +44,7 @@ sub predecessor_latency {
 }
 sub latency_of {
 	my ($g, @v) = @_;
-	return report_jack_port_latency(@v, predecessor_latency($g, @v))
+	return report_jack_playback_latency(@v, predecessor_latency($g, @v))
 		if scalar @v == 1 and $g->is_sink_vertex(@v);
 	return self_latency($g, @v) if scalar @v == 1;
 	return sibling_latency($g, @v) if scalar @v > 1;
@@ -66,8 +68,12 @@ sub loop_device_latency {
 	# results in frames
 	$engine->{buffersize}; 
 }
-sub input_latency { 222 }
-
+sub input_latency { 
+	my $port = shift;
+	my($min, $max) = get_capture_latency($port);
+	carp("port $port, asymmetrical latency [$min $max] found\n") if $min != $max;
+	$max
+}
 { my %loop_adjustment;
 sub sibling_latency {
     my ($g, @siblings) = @_;
@@ -333,11 +339,43 @@ sub frames_to_secs { # One time conversion for delay op
 	my $frames = shift;
 	$frames / $config->{sample_rate};
 }
-sub report_jack_port_latency {
-	my ($port, $latency) = @_;
+sub report_jack_playback_latency {
+	my ($pname, $latency) = @_;
 	# rather than report directly for system:playback_1
 	# we report our own port latency, something like
 	# Nama:out_1
-	logpkg('debug',"port $port: latency is $latency");
+
+	say "Jack port: $pname";
+	my @pnames = get_nama_ports($pname);
+	say "Nama ports: @pnames";
+
+	map{ set_playback_latency($_, $latency, $latency) } @pnames;
+	logpkg('debug',"port(s) @pnames latency is $latency");
+}
+
+sub start_latency_watcher {
+	$jack->{watcher} ||= 
+	jacks::JsClient->new("Nama latency manager", undef, $jacks::JackNullOption, 0);
+}
+
+sub get_capture_latency {
+	my $pname = shift;
+	my $port = $jack->{watcher}->getPort($pname);
+	my $clatency = $port->getLatencyRange($jacks::JackCaptureLatency);
+	my $min = $clatency->min();
+	my $max = $clatency->max();
+	logpkg('debug',"get port $pname, capture latency: $min, $max");
+	($min, $max)
+}
+
+sub set_playback_latency {
+	my ($pname, $min, $max) = @_;
+	my $port = $jack->{watcher}->getPort($pname);
+	logpkg('debug',"set port $pname, playback latency: $min, $max");
+	$port->setLatencyRange($jacks::JackPlaybackLatency, $min, $max);
+}
+
+sub recompute_latencies {
+    	$jack->{watcher}->recomputeLatencies();
 }
 1;
