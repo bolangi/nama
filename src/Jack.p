@@ -26,7 +26,6 @@ sub jack_update {
 		$jack->{use_jacks} 
 			?  jacks_get_port_latency() 
 			:  parse_port_latency();
-		parse_port_connections();
 		parse_ports_list();
 
 		# JACK capture latency is 1 period
@@ -121,6 +120,11 @@ sub parse_port_connections {
 		
 	}
 }
+sub get_nama_ports {
+	my $jack_port = shift;
+	grep{ /Nama/ } @{ $jack->{connections}->{$jack_port} };
+}
+	
 sub parse_port_latency {
 	
 	# default to use output of jack_lsp -l
