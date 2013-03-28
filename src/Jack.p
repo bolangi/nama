@@ -15,7 +15,7 @@ sub poll_jack {
 sub jack_update {
 	logsub("&jack_update");
 	# cache current JACK status
-	#
+	
 	# skip if Ecasound is busy
 	return if engine_running();
 

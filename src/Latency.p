@@ -8,7 +8,7 @@ use Storable qw(dclone);
 use List::Util qw(max);
 use Memoize qw(memoize unmemoize);
 use Carp qw(confess);
-memoize ('self_latency','latency_of');
+map{ memoize $_ } ('self_latency','latency_of');
 sub propagate_latency {   
 	logsub('&propagate_latency');
 
@@ -29,8 +29,8 @@ sub propagate_latency {
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
 
 	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
-	unmemoize('self_latency','latency_of');
-	memoize('self_latency','latency_of');
+	map{ unmemoize $_ }('self_latency','latency_of');
+	map{ memoize $_   }('self_latency','latency_of');
 	map{ latency_of($lg,$_) } @sinks;
 } 
 sub predecessor_latency {
