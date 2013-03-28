@@ -1,5 +1,11 @@
 # --------- Project related subroutines ---------
 
+{
+package ::Project;
+use Modern::Perl; use Carp;
+sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
+}
+
 package ::;
 use Modern::Perl;
 use Carp;
@@ -67,14 +73,18 @@ sub initialize_project_data {
 	initialize_effects_data();
 
 	# $is_armed = 0;
-	
+
 	$setup->{_old_snapshot} = {};
+
 	$mode->{preview} = $config->{initial_mode};
 	$mode->{mastering} = 0;
+
 	$project->{save_file_version_number} = 0; 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
 	$project->{undo_buffer} = [];
+	$project->{repo} = undef;
+	$project->{artist} = undef;
 	
 	$project->{bunch} = {};	
 	
