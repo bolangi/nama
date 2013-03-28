@@ -50,10 +50,11 @@ sub definitions {
 	# are just hashes, some have object behavior as
 	# the sole instance of their class.
 	
+	$project = bless {}, '::Project';
+	
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
 	# to various system files, such as $file->state_store
-
 	{
 	package ::File;
 		use Carp;
