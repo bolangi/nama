@@ -395,11 +395,13 @@ sub register_other_ports {
 }
 
 sub register_own_ports { # distinct from other Nama instances 
-	$jack->{is_own_port} = { 
-		map{ chomp; $_ => 1 
-				unless $jack->{is_other_port}->{$_} 
-				or !/^Nama/ 
-		} qx(jack_lsp)} 
+	$jack->{is_own_port} = 
+	{ 
+		map{chomp; $_ => 1}
+		grep{ ! $jack->{is_other_port}->{$_} }
+		grep{ /^Nama/ } 
+		qx(jack_lsp)
+	} 
 }
 
 
