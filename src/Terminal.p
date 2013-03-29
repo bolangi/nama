@@ -19,7 +19,7 @@ sub initialize_terminal {
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
-	detect_spacebar(); # if $config->{press_space_to_start};
+	detect_spacebar(); 
 
 	revise_prompt();
 	# handle Control-C from terminal
@@ -50,7 +50,8 @@ sub detect_spacebar {
 	
 	$engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
-		if ( $text->{term_attribs}->{line_buffer} eq " " ){
+		if ( $config->{press_space_to_start} and 
+			$text->{term_attribs}->{line_buffer} eq " " ){
 
 			toggle_transport();	
 			$text->{term_attribs}->{line_buffer} = q();
