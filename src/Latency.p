@@ -350,30 +350,59 @@ sub report_jack_playback_latency {
 	logpkg('debug',"Nama ports: @pnames");
 	map{ set_playback_latency($_, $latency, $latency) } @pnames;
 	logpkg('warn',"$pname: maps to multiple Nama ports @pnames") if @pnames > 1;
-	logpkg('debug',"port(s) @pnames latency is $latency");
 }
 
 sub start_latency_watcher {
+#	try {
 	$jack->{watcher} ||= 
 	jacks::JsClient->new("Nama latency manager", undef, $jacks::JackNullOption, 0);
+#	}
 }
-
-sub get_capture_latency {
-	my $pname = shift;
+sub get_latency {
+	my ($pname, $direction) = @_;
+	my %io = ( 
+			capture => $jacks::JackCaptureLatency,
+			playback => $jacks::JackPlaybackLatency,
+	);
 	my $port = $jack->{watcher}->getPort($pname);
-	my $clatency = $port->getLatencyRange($jacks::JackCaptureLatency);
-	my $min = $clatency->min();
-	my $max = $clatency->max();
-	logpkg('debug',"get port $pname, capture latency: $min, $max");
+	my $dir = $io{$direction};
+	die "illegal direction $direction" unless defined $dir;
+	my $latency = $port->getLatencyRange($dir);
+	my $min = $latency->min();
+	my $max = $latency->max();
 	($min, $max)
 }
 
+sub set_latency {
+	my ($pname, $direction, $min, $max) = @_;
+	my %io = ( 
+			capture => $jacks::JackCaptureLatency,
+			playback => $jacks::JackPlaybackLatency,
+	);
+	my $port = $jack->{watcher}->getPort($pname);
+	my $dir = $io{$direction};
+	die "illegal direction $direction" unless defined $io{$direction};
+	$port->setLatencyRange($dir, $min, $max);
+	my ($gmin,$gmax) = get_latency($pname, $direction);
+	logpkg('debug',"set port $pname, $direction latency: $min, $max");
+	logpkg('debug', ($min != $gmin and $max != $gmax)
+			?  "Bad: got port $pname, $direction latency: $gmin, $gmax"
+			:  "Good!"
+	);
+	($gmin, $gmax)
+}
 sub set_playback_latency {
 	my ($pname, $min, $max) = @_;
-	my $port = $jack->{watcher}->getPort($pname);
-	logpkg('debug',"set port $pname, playback latency: $min, $max");
-	$port->setLatencyRange($jacks::JackPlaybackLatency, $min, $max);
+	set_latency($pname, 'playback',$min, $max);
 }
+sub set_capture_latency {
+	my ($pname, $min, $max) = @_;
+	set_latency($pname, 'capture',$min, $max);
+}
+sub get_capture_latency  { get_latency($_[0], 'capture' )}
+
+sub get_playback_latency { get_latency($_[0], 'playback')}
+
 
 sub recompute_latencies {
     	$jack->{watcher}->recomputeLatencies();
