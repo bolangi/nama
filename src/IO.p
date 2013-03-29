@@ -318,11 +318,9 @@ sub jack_multi_ports {
 	
  	my $channel_count = scalar @{$jack->{clients}->{$client}{$direction}};
 	my $source_or_send = $direction eq 'input' ? 'send' : 'source';
- 	die(qq(
-Problem with $source_or_send setting for track $trackname:
-Track\'s $source_or_send would extend to channel $end,
-out of bounds for JACK client "$client", 
-which has $channel_count channels.
+  	die(qq(
+Track $trackname: $source_or_send would cover channels $start - $end,
+out of bounds for JACK client "$client" ($channel_count channels max).
 Change $source_or_send setting, or set track OFF.)) if $end > $channel_count;
 
 		return @{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1]
