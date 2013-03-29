@@ -72,6 +72,7 @@ sub input_latency {
 	my $port = shift;
 	my($min, $max) = get_capture_latency($port);
 	carp("port $port, asymmetrical latency [$min $max] found\n") if $min != $max;
+	set_capture_latency($min, $max, jack_port_to_nama($port));
 	$max
 }
 { my %loop_adjustment;
@@ -348,7 +349,7 @@ sub report_jack_playback_latency {
 	logpkg('debug',"Jack port: $pname");
 	my @pnames = jack_port_to_nama($pname);
 	logpkg('debug',"Nama ports: @pnames");
-	map{ set_playback_latency($_, $latency, $latency) } @pnames;
+	set_playback_latency($latency, $latency, @pnames);
 	logpkg('warn',"$pname: maps to multiple Nama ports @pnames") if @pnames > 1;
 }
 
@@ -392,12 +393,12 @@ sub set_latency {
 	($gmin, $gmax)
 }
 sub set_playback_latency {
-	my ($pname, $min, $max) = @_;
-	set_latency($pname, 'playback',$min, $max);
+	my ($min, $max, @pnames) = @_;
+	map{ set_latency($_, 'playback',$min, $max) } @pnames;
 }
 sub set_capture_latency {
-	my ($pname, $min, $max) = @_;
-	set_latency($pname, 'capture',$min, $max);
+	my ($min, $max, @pnames) = @_;
+	map{ set_latency($_, 'capture',$min, $max) } @pnames;
 }
 sub get_capture_latency  { get_latency($_[0], 'capture' )}
 
