@@ -9,13 +9,14 @@ use List::Util qw(max);
 use Memoize qw(memoize unmemoize);
 use Carp qw(confess);
 map{ memoize $_ } ('self_latency','latency_of');
+my $lg; # latency_graph
 sub propagate_latency {   
 	logsub('&propagate_latency');
 
 	parse_port_connections();
 	start_latency_watcher();
 	# make our own copy of the latency graph, and an alias
-	my $lg = $jack->{graph} = dclone($g);
+	$lg = $jack->{graph} = dclone($g);
 
 	# remove record-to-disk branches of the graph
 	# which are unrelated to latency compensation
@@ -33,21 +34,52 @@ sub propagate_latency {
 	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
 	map{ unmemoize $_ }('self_latency','latency_of');
 	map{ memoize $_   }('self_latency','latency_of');
-	map{ latency_of($lg,$_) } @sinks;
+	map{ latency_of($lg,'capture',$_) } @sinks;
 } 
+
+# sub propagate_playback_latency_backwards {
+# 	logpkg('debug',"jack graph\n","$lg");
+#     my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
+# 
+# 	logpkg('debug',"recurse through latency graph starting at sources: @sources");
+# 	map{ unmemoize $_ }('self_latency','latency_of');
+# 	map{ memoize $_   }('self_latency','latency_of');
+# 	map{ latency_of($lg,'playback',$_) } @sources;
+# }
+
 sub predecessor_latency {
 	scalar @_ > 2 and die "too many args to predecessor_latency: @_";
 	my ($g, $v) = @_;
-	my $latency = latency_of($g, $g->predecessors($v));
-	logpkg('debug',"$v: predecessor_latency is $latency");
+	my $latency = latency_of($g, 'capture', $g->predecessors($v));
+	logpkg('debug',"$v: predecessor latency is $latency");
 	$latency;
 }
+sub successor_latency {
+	scalar @_ > 2 and die "too many args to successor_latency: @_";
+	my ($g, $v) = @_;
+	my $latency = latency_of($g, 'playback', $g->successors($v));
+	logpkg('debug',"$v: successor latency is $latency");
+	$latency;
+}
+
 sub latency_of {
-	my ($g, @v) = @_;
-	return report_jack_playback_latency(@v, predecessor_latency($g, @v))
-		if scalar @v == 1 and $g->is_sink_vertex(@v);
-	return self_latency($g, @v) if scalar @v == 1;
-	return sibling_latency($g, @v) if scalar @v > 1;
+	my ($g, $direction, @v) = @_;
+
+	if ($direction eq 'capture' and $g->is_sink_vertex(@v)){
+
+		die "too many args: @v" if scalar @v > 1;
+		my $latency = predecessor_latency($g, @v);
+		set_capture_latency($latency, $latency, jack_port_to_nama(@v));
+	}
+	elsif($direction eq 'playback' and $g->is_source_vertex(@v)){
+
+		die "too many args: @v" if scalar @v > 1;
+		my $latency = successor_latency(@v);
+		set_playback_latency($latency, $latency, jack_port_to_nama(@v));
+	}
+	elsif(scalar @v == 1){ self_latency($g, $direction, @v) }
+		
+	elsif(scalar @v > 1){ sibling_latency($g, $direction, @v) }
 }
 sub track_ops_latency {
 	# LADSPA plugins return latency in frames
@@ -77,18 +109,20 @@ sub input_latency {
 }
 { my %loop_adjustment;
 sub sibling_latency {
-    my ($g, @siblings) = @_;
+    my ($g, $direction, @siblings) = @_;
+	die "$direction unsupported" if $direction eq 'playback';
 	logpkg('debug',"Siblings were: @siblings");
 	%loop_adjustment = ();
 	@siblings = map{ advance_sibling($g, $_) } @siblings;
 	logpkg('debug',"Siblings are now: @siblings");
 
-    my $max = max map { self_latency($g, $_) } @siblings;
+    my $max = max map { self_latency($g, $direction, $_) } @siblings;
 
 	logpkg('debug',"$max frames max latency among siblings: @siblings");
     for (@siblings) { 
-		my $delay = $max - self_latency($g, $_);
-		logpkg('debug',"$_: self latency: ",self_latency($g, $_)," frames");
+		my $self_latency = self_latency($g, $direction, $_);
+		my $delay = $max - $self_latency;
+		logpkg('debug',"$_: self latency: $self_latency frames");
 		logpkg('debug',"$_: delay $delay frames");
 		compensate_latency($tn{$_},$delay);
 	}
@@ -118,12 +152,15 @@ sub advance_sibling {
 	$head
 }
 sub self_latency {
-	my ($g, $node_name) = @_;
+	my ($g, $direction, $node_name) = @_;
 	return input_latency($node_name) if $g->is_source_vertex($node_name);
-	my $predecessor_latency = predecessor_latency($g, $node_name);
+	my $predecessor_or_successor_latency =
+		$direction eq 'capture'
+			? predecessor_latency($g, $node_name)
+			: successor_latency($g, $node_name);
 
 	return( 
-			$predecessor_latency 
+			$predecessor_or_successor_latency 
 			+ track_ops_latency($tn{$node_name})
 			+ $loop_adjustment{$node_name}
 			+ ::Insert::soundcard_delay($node_name) 
@@ -132,7 +169,7 @@ sub self_latency {
 	) if ::Graph::is_a_track($node_name);
 
 	return(
-			$predecessor_latency + loop_device_latency()
+			$predecessor_or_successor_latency + loop_device_latency()
 	) if ::Graph::is_a_loop($node_name);
 
 	die "shouldn't reach here\nnodename: $node_name, graph:$g";
@@ -340,19 +377,6 @@ sub frames_to_secs { # One time conversion for delay op
 	my $frames = shift;
 	$frames / $config->{sample_rate};
 }
-sub report_jack_playback_latency {
-	my ($pname, $latency) = @_;
-
-	# starting with a known jack destination port
-	# assign latency to the corresponding Nama playback ports
-	
-	logpkg('debug',"Jack port: $pname");
-	my @pnames = jack_port_to_nama($pname);
-	logpkg('debug',"Nama ports: @pnames");
-	set_playback_latency($latency, $latency, @pnames);
-	logpkg('warn',"$pname: maps to multiple Nama ports @pnames") if @pnames > 1;
-}
-
 sub start_latency_watcher {
 #	try {
 	$jack->{watcher} ||= 
