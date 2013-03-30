@@ -9,13 +9,11 @@ use List::Util qw(max);
 use Memoize qw(memoize unmemoize);
 use Carp qw(confess);
 map{ memoize $_ } ('self_latency','latency_of');
-my $lg; # latency_graph
-sub propagate_latency {   
-	logsub('&propagate_latency');
+my $lg; # latency_graph, alias to $jack->{graph}
 
-	parse_port_connections();
-	start_latency_watcher();
-	# make our own copy of the latency graph, and an alias
+sub initialize_jack_graph {
+
+	# make our own copy of the signal network, and an alias
 	$lg = $jack->{graph} = dclone($g);
 
 	# remove record-to-disk branches of the graph
@@ -27,24 +25,37 @@ sub propagate_latency {
 	# so substitute them into the graph
 	
 	replace_terminals_by_jack_ports($lg);
-	
+}
+
+
+sub propagate_latency {   
+	logsub('&propagate_latency');
+
+	initialize_jack_graph();
 	logpkg('debug',"jack graph\n","$lg");
+	parse_port_connections();
+	start_latency_watcher();
+	propagate_capture_latency();
+	#propagate_playback_latency();
+} 
+sub propagate_capture_latency {
+
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
 
 	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
 	map{ unmemoize $_ }('self_latency','latency_of');
 	map{ memoize $_   }('self_latency','latency_of');
 	map{ latency_of($lg,'capture',$_) } @sinks;
-} 
+}
 
 sub propagate_playback_latency {
+	logsub('&propagate_playback_latency'); 
  	logpkg('debug',"jack graph\n","$lg");
     my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
- 
  	logpkg('debug',"recurse through latency graph starting at sources: @sources");
  	map{ unmemoize $_ }('self_latency','latency_of');
  	map{ memoize $_   }('self_latency','latency_of');
- 	map{ latency_of($lg,'playback',$_) } @sources;
+ 	map{ playback_latency_of($lg,'playback',$_) } @sources;
  }
 
 sub predecessor_latency {
