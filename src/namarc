@@ -78,9 +78,10 @@ sample_rate: frequency
 
 # globals for our chain setups
 
-ecasound_globals_common: -z:mixmode,sum -G:jack,Nama,send
-ecasound_globals_realtime: -z:db,100000 -z:nointbuf 
-ecasound_globals_nonrealtime: -z:nodb -z:intbuf
+ecasound_globals:
+  common: -z:mixmode,sum -G:jack,Nama,send
+  realtime: -z:db,100000 -z:nointbuf 
+  nonrealtime: -z:nodb -z:intbuf
 ecasound_buffering:
   realtime:
     jack_period_multiple: 2
