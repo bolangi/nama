@@ -392,13 +392,17 @@ sub set_latency {
 	);
 	($gmin, $gmax)
 }
+sub set_multiport_latency {
+	my ($direction, $min, $max, @pnames) = @_;
+	map{ set_latency($_, $direction,$min, $max) } @pnames;
+}
 sub set_playback_latency {
 	my ($min, $max, @pnames) = @_;
-	map{ set_latency($_, 'playback',$min, $max) } @pnames;
+	set_multiport_latency('playback',$min, $max, @pnames)
 }
 sub set_capture_latency {
 	my ($min, $max, @pnames) = @_;
-	map{ set_latency($_, 'capture',$min, $max) } @pnames;
+	set_multiport_latency('capture',$min, $max, @pnames)
 }
 sub get_capture_latency  { get_latency($_[0], 'capture' )}
 
