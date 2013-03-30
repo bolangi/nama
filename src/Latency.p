@@ -37,15 +37,15 @@ sub propagate_latency {
 	map{ latency_of($lg,'capture',$_) } @sinks;
 } 
 
-# sub propagate_playback_latency_backwards {
-# 	logpkg('debug',"jack graph\n","$lg");
-#     my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
-# 
-# 	logpkg('debug',"recurse through latency graph starting at sources: @sources");
-# 	map{ unmemoize $_ }('self_latency','latency_of');
-# 	map{ memoize $_   }('self_latency','latency_of');
-# 	map{ latency_of($lg,'playback',$_) } @sources;
-# }
+sub propagate_playback_latency {
+ 	logpkg('debug',"jack graph\n","$lg");
+    my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
+ 
+ 	logpkg('debug',"recurse through latency graph starting at sources: @sources");
+ 	map{ unmemoize $_ }('self_latency','latency_of');
+ 	map{ memoize $_   }('self_latency','latency_of');
+ 	map{ latency_of($lg,'playback',$_) } @sources;
+ }
 
 sub predecessor_latency {
 	scalar @_ > 2 and die "too many args to predecessor_latency: @_";
@@ -109,6 +109,33 @@ sub input_latency {
 }
 { my %loop_adjustment;
 sub sibling_latency {
+    my ($g, $direction, @siblings) = @_;
+	die "$direction unsupported" if $direction eq 'playback';
+	logpkg('debug',"Siblings were: @siblings");
+	%loop_adjustment = ();
+	@siblings = map{ advance_sibling($g, $_) } @siblings;
+	logpkg('debug',"Siblings are now: @siblings");
+
+    my $max = max map { self_latency($g, $direction, $_) } @siblings;
+
+	logpkg('debug',"$max frames max latency among siblings: @siblings");
+    for (@siblings) { 
+		my $self_latency = self_latency($g, $direction, $_);
+		my $delay = $max - $self_latency;
+		logpkg('debug',"$_: self latency: $self_latency frames");
+		logpkg('debug',"$_: delay $delay frames");
+		compensate_latency($tn{$_},$delay);
+	}
+    $max
+}
+sub playback_sibling_latency {
+	# if more than one path
+	# get the latency of each branch to any sinks
+	# when combining branches, take the max of the maxes
+	# and min of the mins
+	#
+	# #### GUT THE FOLLOWING 
+	
     my ($g, $direction, @siblings) = @_;
 	die "$direction unsupported" if $direction eq 'playback';
 	logpkg('debug',"Siblings were: @siblings");
@@ -306,13 +333,6 @@ sub reset_latency_compensation {
  	map{ compensate_latency($_, 0) } grep{ $_->latency_op } ::Track::all();
  }
 
-sub initialize_latency_vars {
-	$setup->{latency} = {};
-	$setup->{latency}->{track} = {};
-	$setup->{latency}->{sibling} = {};
-	$setup->{latency}->{sibling_count} = {};
-}
-
 { my %reverse = qw(input output output input);
 sub jack_port_latency {
 
@@ -378,10 +398,8 @@ sub frames_to_secs { # One time conversion for delay op
 	$frames / $config->{sample_rate};
 }
 sub start_latency_watcher {
-#	try {
 	$jack->{watcher} ||= 
 	jacks::JsClient->new("Nama latency manager", undef, $jacks::JackNullOption, 0);
-#	}
 }
 sub get_latency {
 	my ($pname, $direction) = @_;
