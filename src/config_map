@@ -43,7 +43,7 @@
 #	new config format
 
 	$ecasound_globals				$config->{engine_globals}
-	$ecasound_buffering 			$config->{engine_buffering} 
+	$ecasound_buffersize 			$config->{engine_buffersize} 
 
 #	[mastering]
 
