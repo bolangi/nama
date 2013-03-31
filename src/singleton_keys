@@ -187,3 +187,13 @@ $gui->{engine_start}			# start button
 $gui->{engine_stop}				# stop button
 $gui->{_old_bg}					# default background color
 $gui->{_old_abg}				# default active background color
+$config->{soundcard_loopback_delay}
+$jack->{connections}
+$jack->{is_own_port}
+$jack->{connections}
+$jack->{is_other_port}
+$jack->{is_own_port}
+$jack->{is_other_port}
+$jack->{graph}
+$jack->{watcher}
+
