@@ -179,17 +179,17 @@ sub definitions {
  			? ($config->{engine_buffersize}->{realtime}->{jack_period_multiple}
 				&& $jack->{jackd_running}
 				&& $config->{engine_buffersize}->{realtime}->{jack_period_multiple}
-					* $jack->periodsize 
+					* $jack->{periodsize}
 				|| $config->{engine_buffersize}->{realtime}->{default}
  			)
  			: (	$config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
 				&& $jack->{jackd_running}
 				&&  $config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
-					* $jack->periodsize 
+					* $jack->{periodsize}
 				|| $config->{engine_buffersize}->{nonrealtime}->{default}
  			)
  	}
- 	} # end 
+ 	} # end package ::Engine
 
 	$prompt = "nama ('h' for help)> ";
 
