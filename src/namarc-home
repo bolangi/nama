@@ -48,17 +48,17 @@ sample_rate: frequency
 
 # globals for our chain setups
 
+ecasound_buffersize:
+  realtime:
+    jack_period_multiple: 2
+    default: 256
+  nonrealtime:
+    jack_period_multiple: 4
+    default: 2048
 ecasound_globals:
   common: -z:mixmode,sum -G:jack,Nama,send
   realtime: -z:db,100000 -z:nointbuf 
   nonrealtime: -z:nodb -z:intbuf
-ecasound_buffersize:
-  realtime:
-    jack_period_multiple: 1
-    default: 256
-  nonrealtime:
-    jack_period_multiple: 2
-    default: 4096
 
 # ecasound_tcp_port: 2868
 

@@ -87,6 +87,7 @@ ecasound_buffersize:
     jack_period_multiple: 2
     default: 256
   nonrealtime:
+    jack_period_multiple: 4
     default: 2048
 
 # ecasound_tcp_port: 2868  
