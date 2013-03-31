@@ -23,6 +23,8 @@ sub apply_test_harness {
 				q(-T), # don't initialize terminal
 
 				#qw(-L SUB), # logging
+
+	$jack->{periodsize} = 1024;
 }
 sub apply_ecasound_test_harness {
 	apply_test_harness();
@@ -145,11 +147,6 @@ sub definitions {
 
 		serialize_formats               => 'json',		# for save_system_state()
 
-		engine_globals_common			=> "-z:mixmode,sum",
-		engine_globals_realtime			=> "-z:db,100000 -z:nointbuf",
-		engine_globals_nonrealtime		=> "-z:nodb -z:intbuf",
-		engine_buffersize_realtime		=> 256, 
-		engine_buffersize_nonrealtime	=> 1024,
 		latency_op						=> 'el:delay_n',
 		latency_op_init					=> [0,0],
 		latency_op_set					=> sub
@@ -159,7 +156,6 @@ sub definitions {
 				modify_effect($id,2,undef,$delay)
 			},
 	}, '::Config';
-
 
 	{ package ::Config;
 	use Carp;
@@ -173,7 +169,29 @@ sub definitions {
 		no warnings 'uninitialized';
 		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
 	}
-	}
+	} # end ::Config package
+
+	$engine = bless {}, '::Engine';
+
+ 	{ package ::Engine;
+ 
+ 	sub buffersize {
+		package ::;
+ 		::ChainSetup::setup_requires_realtime()
+ 			? ($config->{engine_buffersize}->{realtime}->{jack_period_multiple}
+				&& $jack->{jackd_running}
+				&& $config->{engine_buffersize}->{realtime}->{jack_period_multiple}
+					* $jack->{periodsize}
+				|| $config->{engine_buffersize}->{realtime}->{default}
+ 			)
+ 			: (	$config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
+				&& $jack->{jackd_running}
+				&&  $config->{engine_buffersize}->{nonrealtime}->{jack_period_multiple}
+					* $jack->{periodsize}
+				|| $config->{engine_buffersize}->{nonrealtime}->{default}
+ 			)
+ 	}
+ 	} # end package ::Engine
 
 	$prompt = "nama ('h' for help)> ";
 
@@ -226,7 +244,6 @@ sub initialize_interfaces {
 	read_config(global_config());  # from .namarc if we have one
 	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
-	
 
 	start_ecasound();
 

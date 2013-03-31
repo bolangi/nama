@@ -154,7 +154,6 @@ sub generate_setup_try {  # TODO: move operations below to buses
 
 	if ( process_routing_graph() ){
 		write_chains(); 
-		set_buffersize();
 		1
 	} else { 
 		say("No tracks to record or play.");
@@ -417,21 +416,14 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals = $config->{engine_globals_common};
-	$globals .=  setup_requires_realtime()
-			? join " ", " -b:$config->{engine_buffersize_realtime}", 
-				$config->{engine_globals_realtime}
-			: join " ", " -b:$config->{engine_buffersize_nonrealtime}", 
-				$config->{engine_globals_nonrealtime};
+	my $globals .= join " ",$config->{engine_globals}->{common},
+							"-b",$engine->buffersize,
+							(setup_requires_realtime()
+								? $config->{engine_globals}->{realtime}
+								: $config->{engine_globals}->{nonrealtime});
 
 	# use realtime globals if they exist and we are
 	# recording to a non-mixdown file
-	
-	$globals = $config->{engine_globals_realtime}
-		if $config->{engine_globals_realtime} 
-			and grep{ ! /Mixdown/} really_recording();
-			# we assume there exists latency-sensitive monitor output 
-			# when recording
 	
 	my $format = signal_format($config->{devices}->{jack}->{signal_format},2);
 	$globals .= " -f:$format" if $jack->{jackd_running};
@@ -459,17 +451,9 @@ sub write_chains {
 
 }
 sub setup_requires_realtime {
-	my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
-	grep { has_vertex("$_\_in") } @fields 
-		or grep { has_vertex("$_\_out") } @fields
-
+	scalar grep{ ! $_->is_mix_track and $_->is_user_track and $_->rec_status eq 'REC' } ::Track::all() 
 }
 sub has_vertex { $g->has_vertex($_[0]) }
-
-sub set_buffersize { 
-	my $buffer_type = setup_requires_realtime() ? "realtime" : "nonrealtime";
-	$engine->{buffersize} = $config->{"engine_buffersize_$buffer_type"}	;
-}
 
 1;
 
