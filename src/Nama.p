@@ -96,6 +96,7 @@ use ::Insert;
 use ::Fade;
 use ::Edit;
 use ::EffectChain;
+use ::Lat;
 
 ####### Nama subroutines ######
 #

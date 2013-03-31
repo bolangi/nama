@@ -36,7 +36,7 @@ sub propagate_latency {
 	parse_port_connections();
 	start_latency_watcher();
 	propagate_capture_latency();
-	propagate_playback_latency();
+	#propagate_playback_latency();
 } 
 sub propagate_capture_latency {
 
@@ -108,7 +108,7 @@ sub op_latency {
 		? get_live_param($op, $p) 
 		: 0
 }
-sub loop_device_latency { $engine->buffersize }
+sub loop_device_latency { ::Lat->new($engine->buffersize, $engine->buffersize) }
 
 sub input_latency { 
 	my $port = shift;
@@ -141,7 +141,7 @@ sub sibling_latency {
 			logpkg('debug',"$_: delay $delay frames");
 			compensate_latency($tn{$_},$delay);
 		}
-		$max
+		::Lat->new($max,$max);
 	}
 	elsif ($direction eq 'playback'){
 		my ($final_min, $final_max);
@@ -210,16 +210,17 @@ sub advance_sibling {
 # not object method
 sub loop_adjustment { 
 		my $trackname = shift;
-		my $delta = $loop_adjustment{$trackname};
+		my $delta = $loop_adjustment{$trackname} || 0;
 		::Lat->new($delta, $delta)
 }
 sub self_latency {
 	my ($g, $direction, $node_name) = @_;
 	return input_latency($node_name) if $g->is_source_vertex($node_name);
-	my $predecessor_or_successor_latency =
+	my $latency = my $predecessor_or_successor_latency =
 		$direction eq 'capture'
 			? predecessor_latency($g, $node_name)
 			: successor_latency($g, $node_name);
+	ref $latency eq '::Lat' or die "wrong type for $node_name".Dumper $latency;
 
 	return( 
 			$predecessor_or_successor_latency
