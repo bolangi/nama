@@ -36,7 +36,7 @@ sub propagate_latency {
 	parse_port_connections();
 	start_latency_watcher();
 	propagate_capture_latency();
-	#propagate_playback_latency();
+	propagate_playback_latency();
 } 
 sub propagate_capture_latency {
 
@@ -55,7 +55,7 @@ sub propagate_playback_latency {
  	logpkg('debug',"recurse through latency graph starting at sources: @sources");
  	map{ unmemoize $_ }('self_latency','latency_of');
  	map{ memoize $_   }('self_latency','latency_of');
- 	map{ playback_latency_of($lg,'playback',$_) } @sources;
+ 	map{ latency_of($lg,'playback',$_) } @sources;
  }
 
 sub predecessor_latency {
@@ -70,7 +70,7 @@ sub successor_latency {
 	my ($g, $v) = @_;
 	my $latency = latency_of($g, 'playback', $g->successors($v));
 	logpkg('debug',"$v: successor latency is $latency");
-	$latency;
+	$latency
 }
 
 sub latency_of {
@@ -80,24 +80,25 @@ sub latency_of {
 
 		die "too many args: @v" if scalar @v > 1;
 		my $latency = predecessor_latency($g, @v);
-		set_capture_latency($latency, $latency, jack_port_to_nama(@v));
+		set_capture_latency($latency->values, jack_port_to_nama(@v));
+		$latency
 	}
 	elsif($direction eq 'playback' and $g->is_source_vertex(@v)){
 
 		die "too many args: @v" if scalar @v > 1;
-		my $latency = successor_latency(@v);
-		set_playback_latency($latency, $latency, jack_port_to_nama(@v));
+		my $latency = successor_latency($g,@v);
+		set_playback_latency($latency->values, jack_port_to_nama(@v));
+		$latency
 	}
 	elsif(scalar @v == 1){ self_latency($g, $direction, @v) }
 		
 	elsif(scalar @v > 1){ sibling_latency($g, $direction, @v) }
 }
 sub track_ops_latency {
-	# LADSPA plugins return latency in frames
 	my $track = shift;
 	my $total = 0;;
 	map { $total += op_latency($_) } $track->fancy_ops;
-	$total
+	::Lat->new($total,$total);
 }
 sub op_latency {
 	my $op = shift;
@@ -107,37 +108,54 @@ sub op_latency {
 		? get_live_param($op, $p) 
 		: 0
 }
-sub loop_device_latency { 
-	# results in frames
-	$engine->{buffersize}; 
-}
+sub loop_device_latency { $engine->buffersize }
+
 sub input_latency { 
 	my $port = shift;
-	my($min, $max) = get_capture_latency($port);
-	carp("port $port, asymmetrical latency [$min $max] found\n") if $min != $max;
-	set_capture_latency($min, $max, jack_port_to_nama($port));
-	$max
+	my $latency = get_capture_latency($port);
+	carp("port $port, asymmetrical latency $latency found\n") 
+		if is_asymmetrical($latency);
+	set_capture_latency($latency->values, jack_port_to_nama($port));
+	$latency
 }
+sub is_asymmetrical { my $lat = shift; $lat->min != $lat->max }
+
 { my %loop_adjustment;
 sub sibling_latency {
     my ($g, $direction, @siblings) = @_;
-	die "$direction unsupported" if $direction eq 'playback';
-	logpkg('debug',"Siblings were: @siblings");
-	%loop_adjustment = ();
-	@siblings = map{ advance_sibling($g, $_) } @siblings;
-	logpkg('debug',"Siblings are now: @siblings");
+	logpkg('debug',"direction: $direction, Siblings were: @siblings");
 
-    my $max = max map { self_latency($g, $direction, $_) } @siblings;
+	if ($direction eq 'capture'){
+		%loop_adjustment = ();
+		@siblings = map{ advance_sibling($g, $_) } @siblings;
+		logpkg('debug',"Siblings are now: @siblings");
 
-	logpkg('debug',"$max frames max latency among siblings: @siblings");
-    for (@siblings) { 
-		my $self_latency = self_latency($g, $direction, $_);
-		my $delay = $max - $self_latency;
-		logpkg('debug',"$_: self latency: $self_latency frames");
-		logpkg('debug',"$_: delay $delay frames");
-		compensate_latency($tn{$_},$delay);
+		my $max = max map {$_->max} 
+						map{ self_latency($g, $direction, $_) } @siblings;
+
+		logpkg('debug',"$max frames max latency among siblings: @siblings");
+		for (@siblings) { 
+			my $latency = self_latency($g, $direction, $_);
+			my $delay = $max - $latency->max;
+			logpkg('debug',"$_: self latency: $latency frames");
+			logpkg('debug',"$_: delay $delay frames");
+			compensate_latency($tn{$_},$delay);
+		}
+		$max
 	}
-    $max
+	elsif ($direction eq 'playback'){
+		my ($final_min, $final_max);
+		for (@siblings){
+			my $latency = self_latency($g, $direction, $_);
+			my ($min,$max) = $latency->values;
+			$final_min //= $min;
+			$final_min = $min if $min < $final_min;
+			$final_max //= $max;
+			$final_max = $max if $max > $final_max;
+		}
+		$final_min, $final_max
+	}
+	else { die "missing or illegal direction: $direction" }
 }
 sub playback_sibling_latency {
 	# if more than one path
@@ -189,6 +207,12 @@ sub advance_sibling {
 	$loop_adjustment{$head} += $loop_count * $engine->{buffersize};
 	$head
 }
+# not object method
+sub loop_adjustment { 
+		my $trackname = shift;
+		my $delta = $loop_adjustment{$trackname};
+		::Lat->new($delta, $delta)
+}
 sub self_latency {
 	my ($g, $direction, $node_name) = @_;
 	return input_latency($node_name) if $g->is_source_vertex($node_name);
@@ -198,9 +222,9 @@ sub self_latency {
 			: successor_latency($g, $node_name);
 
 	return( 
-			$predecessor_or_successor_latency 
+			$predecessor_or_successor_latency
 			+ track_ops_latency($tn{$node_name})
-			+ $loop_adjustment{$node_name}
+			+ loop_adjustment($node_name)
 			+ ::Insert::soundcard_delay($node_name) 
 				# if we're a wet return track and insert is
 				# a hardware type, i.e. via the soundcard 
@@ -421,10 +445,10 @@ sub get_latency {
 	my $port = $jack->{watcher}->getPort($pname);
 	my $dir = $io{$direction};
 	die "illegal direction $direction" unless defined $dir;
-	my $latency = $port->getLatencyRange($dir);
-	my $min = $latency->min();
-	my $max = $latency->max();
-	($min, $max)
+	# get latency as Jacks objects
+	my $latency = $port->getLatencyRange($dir); 
+	# convert to Nama object
+	$latency = ::Lat->new($latency->min, $latency->max); 
 }
 
 sub set_latency {
@@ -437,13 +461,13 @@ sub set_latency {
 	my $dir = $io{$direction};
 	die "illegal direction $direction" unless defined $io{$direction};
 	$port->setLatencyRange($dir, $min, $max);
-	my ($gmin,$gmax) = get_latency($pname, $direction);
+	my $latency = get_latency($pname, $direction);
+	my ($gmin,$gmax) = $latency->values;
 	logpkg('debug',"set port $pname, $direction latency: $min, $max");
 	logpkg('debug', ($min != $gmin and $max != $gmax)
 			?  "Bad: got port $pname, $direction latency: $gmin, $gmax"
-			:  "Good!"
+			:  "Verified!"
 	);
-	($gmin, $gmax)
 }
 sub set_multiport_latency {
 	my ($direction, $min, $max, @pnames) = @_;
