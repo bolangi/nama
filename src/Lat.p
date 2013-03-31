@@ -19,6 +19,7 @@ sub add_latency {
 }
 sub min {$_[0]->[0] }
 sub max {$_[0]->[1] }
+sub values { $_[0]->min, $_[0]->max }
 
 1;
 __END__
