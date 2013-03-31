@@ -23,6 +23,8 @@ sub apply_test_harness {
 				q(-T), # don't initialize terminal
 
 				#qw(-L SUB), # logging
+
+	$jack->{periodsize} = 1024;
 }
 sub apply_ecasound_test_harness {
 	apply_test_harness();
