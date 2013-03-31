@@ -12,11 +12,7 @@ sub new {
 	$self;
 }
 sub add_latency {
-	my (@latencies) = @_[0,1]; # XXX avoid extraneous argument
-	#say "found ",scalar @latencies, " latency objects";
-	my $i;
-	# this is why hack is needed
-	#map{say "Addend ",++$i, "\n", Dumper $_} @latencies; 
+	my (@latencies) = @_[0,1]; # skip swap argument
 	my ($min, $max) = (0,0);
 	map{ $min += $_->min; $max += $_->max } @latencies;
 	::Lat->new($min, $max);
