@@ -28,8 +28,8 @@ sub jack_update {
 			:  parse_port_latency();
 		parse_ports_list();
 
-		# JACK capture latency is 1 period
-		$jack->{period} = $jack->{clients}->{system}->{capture}->{max};
+		my ($bufsize) = qx(jack_bufsize);
+		($jack->{periodsize}) = $bufsize =~ /(\d+)/;
 
 	} else {  }
 }
@@ -102,6 +102,7 @@ for (my $i = 0; $i < $plist->length(); $i++) {
 
 sub parse_port_connections {
 	my $j = shift || qx(jack_lsp -c 2> /dev/null); 
+	return unless $j;
 
 	# initialize
 	$jack->{connections} = {}; 
@@ -391,10 +392,12 @@ sub port_mapping {
 }
 
 sub register_other_ports { 
+	return unless $jack->{jackd_running};
 	$jack->{is_other_port} = { map{ chomp; $_ => 1 } qx(jack_lsp) } 
 }
 
 sub register_own_ports { # distinct from other Nama instances 
+	return unless $jack->{jackd_running};
 	$jack->{is_own_port} = 
 	{ 
 		map{chomp; $_ => 1}
