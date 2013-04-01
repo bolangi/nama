@@ -175,9 +175,10 @@ sub is_via_soundcard {
 sub soundcard_delay {
 	my $track_name = shift;
 	my ($insert) = grep{ $_->wet_name eq $track_name } values %by_index;
-	defined $insert or return 0;
-	return $config->{soundcard_loopback_delay} if $insert->is_via_soundcard;
-	0
+	my $delta = 0;
+	$delta = $config->{soundcard_loopback_delay} 
+		if defined $insert and $insert->is_via_soundcard;
+	::Lat->new($delta,$delta)
 }
 }
 {

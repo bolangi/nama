@@ -31,11 +31,20 @@
 #	[engine]
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
-	$ecasound_globals_general		$config->{engine_globals_common}
-	$ecasound_globals_realtime 		$config->{engine_globals_realtime}
-	$ecasound_globals_nonrealtime 	$config->{engine_globals_nonrealtime}
-	$ecasound_buffersize_realtime	$config->{engine_buffersize_realtime}
-	$ecasound_buffersize_nonrealtime	$config->{engine_buffersize_nonrealtime}
+
+	# following are deprecated
+	
+	$ecasound_globals_general 		$config->{engine_globals}->{common}
+	$ecasound_globals_realtime 		$config->{engine_globals}->{realtime}
+	$ecasound_globals_nonrealtime 	$config->{engine_globals}->{nonrealtime}
+	$ecasound_buffersize_realtime   $config->{engine_buffersize}->{realtime}->{default}
+	$ecasound_buffersize_nonrealtime $config->{engine_buffersize}->{nonrealtime}->{default}
+
+#	new config format
+
+	$ecasound_globals				$config->{engine_globals}
+	$ecasound_buffersize 			$config->{engine_buffersize} 
+	$realtime_profile 				$config->{realtime_profile}
 
 #	[mastering]
 

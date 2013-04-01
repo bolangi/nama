@@ -1,3 +1,28 @@
+=head1 REALTIME OPERATION
+
+Nama selects realtime or nonrealtime parameters based on the
+B<realtime_profile>, B<ecasound_buffersize> and
+B<ecasound_globals> fields in F<.namarc>. You can
+optionally specify the buffersizes as a multiple of the JACK
+period size. Note that for best realtime operation under
+JACK you will have to configure jackd appropriately as well.
+
+The B<realtime> and B<auto> profiles are useful when using
+Nama/Ecasound for live fx processing or live monitoring.
+
+The B<realtime> profile sets a small buffersize and other low
+latency settings whenever a soundcard or JACK client is
+connected. 
+
+The B<nonrealtime> profile uses a bigger buffer, providing
+extended margins for stable operation. It is suitable for
+post-processing, or for recording without live monitoring
+responsibilities.
+
+The B<auto> profile defaults to nonrealtime settings. It
+switches to realtime, low-latency settings when a track has
+a live input.
+
 =head1 DIAGNOSTICS
 
 On any change in setup, the GUI display updates and
