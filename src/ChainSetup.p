@@ -416,14 +416,9 @@ sub write_chains {
 
 	## write general options
 	
-	my $globals .= join " ",$config->{engine_globals}->{common},
-							"-b",$engine->buffersize,
-							(setup_requires_realtime()
-								? $config->{engine_globals}->{realtime}
-								: $config->{engine_globals}->{nonrealtime});
-
-	# use realtime globals if they exist and we are
-	# recording to a non-mixdown file
+	my $globals .= join " ", $config->{engine_globals}->{common},
+							"-b",$config->buffersize,
+							$config->globals_realtime;
 	
 	my $format = signal_format($config->{devices}->{jack}->{signal_format},2);
 	$globals .= " -f:$format" if $jack->{jackd_running};
@@ -451,8 +446,20 @@ sub write_chains {
 
 }
 sub setup_requires_realtime {
-	scalar grep{ ! $_->is_mix_track and $_->is_user_track and $_->rec_status eq 'REC' } ::Track::all() 
+	my $prof = $config->{realtime_profile};
+	if( $prof eq 'auto'){
+		grep{ ! $_->is_mix_track 
+				  and $_->is_user_track 
+				  and $_->rec_status eq 'REC' 
+			} ::Track::all() 
+	} elsif ( $prof eq 'realtime') {
+		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
+		grep { has_vertex("$_\_in") } @fields 
+			or grep { has_vertex("$_\_out") } @fields
+	}
+	elsif ( $prof eq 'nonrealtime' or !$prof){ 0 }
 }
+
 sub has_vertex { $g->has_vertex($_[0]) }
 
 1;

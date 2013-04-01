@@ -169,12 +169,6 @@ sub definitions {
 		no warnings 'uninitialized';
 		$config->{devices}->{$config->{alsa_capture_device}}{hardware_latency} || 0
 	}
-	} # end ::Config package
-
-	$engine = bless {}, '::Engine';
-
- 	{ package ::Engine;
- 
  	sub buffersize {
 		package ::;
  		::ChainSetup::setup_requires_realtime()
@@ -191,7 +185,14 @@ sub definitions {
 				|| $config->{engine_buffersize}->{nonrealtime}->{default}
  			)
  	}
- 	} # end package ::Engine
+	sub globals_realtime {
+		::ChainSetup::setup_requires_realtime()
+			? $config->{engine_globals}->{realtime}
+			: $config->{engine_globals}->{nonrealtime}
+	}
+	} # end ::Config package
+
+	$engine = bless {}, '::Engine';
 
 	$prompt = "nama ('h' for help)> ";
 

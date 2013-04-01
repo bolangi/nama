@@ -44,6 +44,7 @@
 
 	$ecasound_globals				$config->{engine_globals}
 	$ecasound_buffersize 			$config->{engine_buffersize} 
+	$realtime_profile 				$config->{realtime_profile}
 
 #	[mastering]
 
