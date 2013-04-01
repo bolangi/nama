@@ -48,13 +48,15 @@ sample_rate: frequency
 
 # globals for our chain setups
 
+realtime_profile: auto
+
 ecasound_buffersize:
   realtime:
     jack_period_multiple: 2
     default: 256
   nonrealtime:
-    jack_period_multiple: 4
-    default: 2048
+    jack_period_multiple: 8
+    default: 1024
 ecasound_globals:
   common: -z:mixmode,sum -G:jack,Nama,send
   realtime: -z:db,100000 -z:nointbuf 
