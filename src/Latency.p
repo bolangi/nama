@@ -6,10 +6,10 @@ no warnings 'uninitialized';
 use ::Globals qw(:all);
 use Storable qw(dclone);
 use List::Util qw(max);
-use Memoize qw(memoize unmemoize);
 use Carp qw(confess);
-map{ memoize $_ } ('self_latency','latency_of');
 my $lg; # latency_graph, alias to $jack->{graph}
+
+latency_memoize();
 
 sub initialize_jack_graph {
 
@@ -43,8 +43,7 @@ sub propagate_capture_latency {
     my @sinks = grep{ $lg->is_sink_vertex($_) } $lg->vertices();
 
 	logpkg('debug',"recurse through latency graph starting at sinks: @sinks");
-	map{ unmemoize $_ }('self_latency','latency_of');
-	map{ memoize $_   }('self_latency','latency_of');
+	latency_rememoize();
 	map{ latency_of($lg,'capture',$_) } @sinks;
 }
 
@@ -53,8 +52,7 @@ sub propagate_playback_latency {
  	logpkg('debug',"jack graph\n","$lg");
     my @sources = grep{ $lg->is_source_vertex($_) } $lg->vertices();
  	logpkg('debug',"recurse through latency graph starting at sources: @sources");
- 	map{ unmemoize $_ }('self_latency','latency_of');
- 	map{ memoize $_   }('self_latency','latency_of');
+	latency_rememoize();
  	map{ latency_of($lg,'playback',$_) } @sources;
  }
 

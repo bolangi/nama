@@ -170,7 +170,7 @@ sub cleanup_exit {
 			} (2,2,9)
 	} @{$engine->{pids}};
  	#kill 15, ecasound_pid() if $engine->{socket};  	
-	close_midish() if $config->{use_midish};
+	#close_midish() if $config->{use_midish};
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit; 
 }
