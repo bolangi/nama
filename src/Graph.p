@@ -106,17 +106,20 @@ sub add_path_for_rec {
 }
 sub add_path_for_aux_send {
 	my ($g, $track) = @_;
+
 		logsub("&add_path_for_aux_send: track ".$track->name);
 		# for track 'sax', send_type 'jack_client', create route as 
-		# sax-jack_client_out
-		my @edge = ($track->name, output_node($track->send_type));
-		$g->add_edge(@edge);
-		 $g->set_edge_attributes(
-				@edge,
-			  	{	track => $track->name,
-					width => 2, # force stereo output width
-					chain_id => 'S'.$track->n,
-				});
+		# sax -> sax_aux_send -> jack_client_out
+		my $name = $track->name . '_aux_send';
+		my $anon = ::SlaveTrack->new( 
+			target => $track->name,
+			rw => 'OFF',
+			group => 'Temp',
+			hide => 1,
+			name => $name);
+
+		my @path= ($track->name, $name, output_node($track->send_type));
+		$g->add_path(@path);
 }
 {
 my %seen;
