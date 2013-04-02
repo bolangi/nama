@@ -108,7 +108,7 @@ sub op_latency {
 		? get_live_param($op, $p) 
 		: 0
 }
-sub loop_device_latency { ::Lat->new($engine->buffersize, $engine->buffersize) }
+sub loop_device_latency { ::Lat->new($config->buffersize, $config->buffersize) }
 
 sub input_latency { 
 	my $port = shift;
@@ -127,7 +127,7 @@ sub sibling_latency {
 
 	if ($direction eq 'capture'){
 		%loop_adjustment = ();
-		@siblings = map{ advance_sibling($g, $_) } @siblings;
+		#@siblings = map{ advance_sibling($g, $_) } @siblings;
 		logpkg('debug',"Siblings are now: @siblings");
 
 		my $max = max map {$_->max} 
@@ -156,56 +156,6 @@ sub sibling_latency {
 		$final_min, $final_max
 	}
 	else { die "missing or illegal direction: $direction" }
-}
-sub playback_sibling_latency {
-	# if more than one path
-	# get the latency of each branch to any sinks
-	# when combining branches, take the max of the maxes
-	# and min of the mins
-	#
-	# #### GUT THE FOLLOWING 
-	
-    my ($g, $direction, @siblings) = @_;
-	die "$direction unsupported" if $direction eq 'playback';
-	logpkg('debug',"Siblings were: @siblings");
-	%loop_adjustment = ();
-	@siblings = map{ advance_sibling($g, $_) } @siblings;
-	logpkg('debug',"Siblings are now: @siblings");
-
-    my $max = max map { self_latency($g, $direction, $_) } @siblings;
-
-	logpkg('debug',"$max frames max latency among siblings: @siblings");
-    for (@siblings) { 
-		my $self_latency = self_latency($g, $direction, $_);
-		my $delay = $max - $self_latency;
-		logpkg('debug',"$_: self latency: $self_latency frames");
-		logpkg('debug',"$_: delay $delay frames");
-		compensate_latency($tn{$_},$delay);
-	}
-    $max
-}
-
-# On encountering a loop device in a group of siblings, we
-# advance vertices of that sibling as far as necessary
-# (usually one step) to get to a track vertex, where we will
-# apply latency compensation.
-#
-# We fold into the track the latency of any loop devices we
-# passed.
-	
-sub advance_sibling {
-	my ($g, $head) = @_;
-	my $loop_count = 0;
-	while( ! ::Graph::is_a_track($head) ){
-		my @predecessors = $g->predecessors($head);
-		die "$head: too many predecessors!  @predecessors"
-			if @predecessors > 1;
-		my $predecessor = shift @predecessors;
-		$head = $predecessor;
-		$loop_count++;
-	}
-	$loop_adjustment{$head} += $loop_count * $engine->{buffersize};
-	$head
 }
 # not object method
 sub loop_adjustment { 
