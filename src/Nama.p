@@ -5,7 +5,7 @@ $VERSION = "1.105";
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
-use autodie qw(:default);
+use autodie qw(:all);
 
 ########## External dependencies ##########
 
@@ -155,6 +155,8 @@ sub bootstrap_environment {
 }
 
 sub cleanup_exit {
+	logsub("&cleanup_exit");
+	no autodie;
  	remove_riff_header_stubs();
 	trigger_rec_cleanup_hooks();
 	# for each process: 
@@ -163,6 +165,7 @@ sub cleanup_exit {
 	# - SIGINT (2nd time)
 	# - allow time to close down
 	# - SIGKILL
+	delete $engine->{events};
 	map{ my $pid = $_; 
 		 map{ my $signal = $_; 
 			  kill $signal, $pid; 
@@ -172,7 +175,7 @@ sub cleanup_exit {
  	#kill 15, ecasound_pid() if $engine->{socket};  	
 	#close_midish() if $config->{use_midish};
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
-	exit; 
+	exit;
 }
 END { cleanup_exit() }
 

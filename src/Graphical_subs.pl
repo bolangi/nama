@@ -32,8 +32,8 @@ sub init_gui {
 
 	### Exit via Ctrl-C 
 
-	$gui->{mw}->bind('<Control-Key-c>' => \&cleanup_exit); 
-	$gui->{ew}->bind('<Control-Key-c>' => \&cleanup_exit);
+	$gui->{mw}->bind('<Control-Key-c>' => sub { exit } ); 
+	$gui->{ew}->bind('<Control-Key-c>' => sub { exit } );
 
     ## Press SPACE to start/stop transport
 
