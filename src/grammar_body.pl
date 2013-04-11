@@ -526,8 +526,7 @@ master_off: _master_off { ::master_off(); 1 }
 
 exit: _exit {   
 	::save_state(); 
-	# ::cleanup_exit(); # triggered by END block
-	exit;
+	CORE::exit;
 }	
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
