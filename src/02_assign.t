@@ -1,4 +1,4 @@
-use Test::More qw(no_plan);
+use Test::More tests => 18;
 use strict;
 
 BEGIN { use_ok('::Assign') };

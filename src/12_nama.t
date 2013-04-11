@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More qw(no_plan);
+use Test::More tests => 110;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
