@@ -21,7 +21,7 @@ $config->{_is_system_bus}		# a hash
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
 $jack->{fake_ports_list}		# for testing
 $jack->{clients}				# JACK client information
-$jack->{period}					#
+$jack->{periodsize}				# 
 $setup->{_old_snapshot}			# for checking if engine needs reconfigured
 $setup->{_old_rec_status}		# for checking rec status change hooks
 $setup->{inputs_used}			# we warn if tracks share same input channel
