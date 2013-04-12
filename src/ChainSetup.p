@@ -64,7 +64,7 @@ sub initialize {
 	undef $chain_setup;
 	::disable_length_timer();
 	reset_aux_chain_counter();
-	{no autodie; unlink $file->chain_setup}
+	unlink $file->chain_setup;
 	$g;
 }
 sub ecasound_chain_setup { $chain_setup } 
@@ -439,7 +439,8 @@ sub write_chains {
 					"# audio outputs",
 					join("\n", @output_chains), "";
 	$logger->debug("Chain setup:\n",$ecs_file);
-	open my $fh, ">", $file->chain_setup;
+	open(my $fh, ">", $file->chain_setup) 
+		or die("can't open chain setup file ".$file->chain_setup.": $!");
 	print $fh $ecs_file;
 	close $fh;
 	$chain_setup = $ecs_file;

@@ -60,7 +60,8 @@ sub ladspa_plugin_list {
 	my %seen;
 	for my $dir ( split ':', ladspa_path()){
 		next unless -d $dir;
-		opendir my ($dirh), $dir;
+		opendir(my $dirh, $dir)
+			or die "can't open directory $dir for read: $!";
 		push @plugins,  
 			map{"$dir/$_"} 						# full path
 			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins
@@ -74,7 +75,8 @@ sub lv2_plugin_list {
 	my %seen;
 	for my $dir ( split ':', lv2_path()){
 		next unless -d $dir;
-		opendir my ($dirh), $dir;
+		opendir(my $dirh, $dir)
+			or die "can't open directory $dir for read: $!";
 		push @plugins,  
 			map{"$dir/$_"} 						# full path
 			grep{ ! $seen{$_} and ++$seen{$_}}  # skip seen plugins

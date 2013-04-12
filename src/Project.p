@@ -233,7 +233,7 @@ sub dig_ruins { # only if there are no tracks
 	# look for wave files
 		
 	my $d = this_wav_dir();
-	opendir my $wav, $d or carp "couldn't open $d: $!";
+	opendir my $wav, $d or carp "couldn't open directory $d: $!";
 
 	# remove version numbers
 	

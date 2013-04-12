@@ -280,7 +280,9 @@ my $jack_connect_code = sub
 		my $debug++;
 		my $cmd = qq(jack_connect $port1 $port2);
 		logpkg('debug', $cmd);
-		system $cmd;
+		system($cmd) == 0
+		   or die "system $cmd failed: $?";
+
 	};
 sub connect_jack_ports_list {
 
@@ -305,7 +307,8 @@ sub connect_jack_ports_list {
 
 		# write config file
 		initialize_jack_plumbing_conf();
-		open $fh, ">>", jack_plumbing_conf();
+		open($fh, ">>", jack_plumbing_conf())
+			or die("can't open ".jack_plumbing_conf()." for append: $!");
 		print $fh $plumbing_header;
 		make_connections($jack_plumbing_code, \@source_tracks, 'in' );
 		make_connections($jack_plumbing_code, \@send_tracks,   'out');
@@ -377,7 +380,9 @@ sub start_jack_plumbing {
 	if ( 	$config->{use_jack_plumbing}				# not disabled in namarc
 			and ! ($config->{opts}->{J} or $config->{opts}->{A})	# we are not testing   
 
-	){ system('jack.plumbing >/dev/null 2>&1 &') }
+	){ system('jack.plumbing >/dev/null 2>&1 &') == 0 
+			or die "can't run jack.plumbing: $?"
+	}
 }
 sub jack_client : lvalue {
 	my $name = shift;

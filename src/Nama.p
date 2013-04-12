@@ -5,7 +5,6 @@ $VERSION = "1.105";
 use Modern::Perl;
 #use Carp::Always;
 no warnings qw(uninitialized syntax);
-use autodie qw(:all);
 
 ########## External dependencies ##########
 
@@ -156,7 +155,6 @@ sub bootstrap_environment {
 
 sub cleanup_exit {
 	logsub("&cleanup_exit");
-	no autodie;
  	remove_riff_header_stubs();
 	trigger_rec_cleanup_hooks();
 	# for each process: 
