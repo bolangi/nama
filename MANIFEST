@@ -37,6 +37,7 @@ lib/Audio/Nama/Insert.pm
 lib/Audio/Nama/IO.pm
 lib/Audio/Nama/Jack.pm
 lib/Audio/Nama/Latency.pm
+lib/Audio/Nama/Lat.pm
 lib/Audio/Nama/Log.pm
 lib/Audio/Nama/Mark.pm
 lib/Audio/Nama/Memoize.pm
