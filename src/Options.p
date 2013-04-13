@@ -32,7 +32,6 @@ sub process_command_line_options {
 		log=s                       L
 		no-latency                  O
 		latency                     Q
-		
 );
 
 	map{$config->{opts}->{$_} = ''} values %options;
@@ -80,12 +79,12 @@ Debugging options:
 --execute-command, -X            Supply a command to execute
 --no-terminal, -T                Don't initialize terminal
 --no-fades, -F                   No fades on transport start/stop
---latency, -Q                    Apply latency compensation
---no-latency, -O                 Don't apply latency compensation
 --log, -L                        Log these (comma separated) categories
 
 HELP
 }
+# --latency, -Q                    Apply latency compensation
+# --no-latency, -O                 Don't apply latency compensation
 
 1;
 __END__
