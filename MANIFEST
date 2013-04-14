@@ -64,9 +64,11 @@ MYMETA.json
 MYMETA.yml
 README
 script/nama
-t/02_assign.t
-t/03_wav.t
-t/04_object.t
-t/11_mark.t
-t/12_nama.t
-t/13_io.t
+01_symbols.t
+02_assign.t
+03_wav.t
+04_object.t
+06_latency.t
+11_mark.t
+12_nama.t
+13_io.t
