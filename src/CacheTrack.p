@@ -191,10 +191,10 @@ sub complete_caching {
 sub update_cache_map {
 
 		logpkg('debug', "updating track cache_map");
-		logpkg('debug',
+		logpkg('debug', "current track cache entries:",
 			sub {
 				join "\n","cache map", 
-				map{json_out($_)} ::EffectChain::find(track_cache => 1)
+				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
 		my @inserts_list = ::Insert::get_inserts($track->name);
 		my @ops_list = $track->fancy_ops;
