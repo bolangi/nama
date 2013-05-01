@@ -713,31 +713,5 @@ sub merge_undo_branch {
 }
 
 1;
-=comment
-
-VI-like user reponsibility for save
-
-save # serialize commit if autosave
-
-merge undo branch if autosave
-
-save foo: # serialize tag-foo foo.json
-
-
-save foo: tag-foo.1 foo.json
-
-load foo, prefer highest foo,
-but if foo.json is newer, take
-that. 
-
-load foo      # find
-load foo.json # load the file
-load tag foo  # load the tag
-
-
-
-
-
-
 
 __END__
