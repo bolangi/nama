@@ -203,31 +203,6 @@ sub heuristic_time {
 	d1($sec) .  ( $sec > 120 ? " (" . colonize( $sec ) . ") "  : " " )
 }
 
-sub dest_type {
-	my $dest = shift;
-	my $type;
-	given( $dest ){
-		when( undef )			{ $type = undef}
-
-		# non JACK related
-
-		when('bus')			 	{ $type = 'bus'			   }
-		when('null')		 	{ $type = 'null'			}
-		when('rtnull')		 	{ $type = 'rtnull'			}
-		when(/^loop,/)		 	{ $type = 'loop'			}
-		when(! /\D/)			{ $type = 'soundcard'	   } # digits only
-
-		# JACK related
-
-		when(/^man/)			{ $type = 'jack_manual'	 }
-		when('jack')			{ $type = 'jack_manual'	 }
-		when(/(^\w+\.)?ports/)	{ $type = 'jack_ports_list' }
-		default					{ $type = 'jack_client'	 } 
-
-	}
-	$type
-}
-
 sub create_dir {
 	my @dirs = @_;
 	map{ my $dir = $_;
