@@ -434,7 +434,8 @@ sub remove {
 sub soundcard_channel { $_[0] // 1 }
 
 sub set_io {
-	my ($track, $direction, $id) = @_;
+	my $track = shift;
+	my ($direction, $id, $type) = @_;
 	# $direction: send | source
 	
 	# unless we are dealing with a simple query,
@@ -454,17 +455,18 @@ sub set_io {
 	my $type_field = $direction."_type";
 	my $id_field   = $direction."_id";
 
-	# respond to a query (no argument)
+	# respond to query
 	if ( ! $id ){ return $track->$type_field ? $track->$id_field : undef }
 
 	# set values, returning new setting
-	my $type = dest_type( $id );
+	$type ||= dest_type( $id );
+	
 	given ($type){
 	
-		# no data changes needed for some settings
-
-		when('soundcard'){}
-		when ('bus')     {}
+		
+		when('track'){}
+		when('soundcard'){} # no changes needed 
+		when ('bus')     {} # -ditto-
 		#when('loop')     {}  # unused at present
 
 		# rec_defeat tracks with 'null' input
@@ -531,12 +533,14 @@ sub set_io {
 	$track->set($id_field => $id);
 } 
 sub source { # command for setting, showing track source
-	my ($track, $id) = @_;
-	$track->set_io( 'source', $id);
+	my $track = shift;
+	my ($id, $type) = @_;
+	$track->set_io( 'source', $id, $type);
 }
 sub send { # command for setting, showing track source
-	my ($track, $id) = @_;
-	$track->set_io( 'send', $id);
+	my $track = shift;
+	my ($id, $type) = @_;
+	$track->set_io( 'send', $id, $type);
 }
 sub set_source { # called from parser 
 	my $track = shift;
