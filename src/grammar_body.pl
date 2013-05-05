@@ -1494,3 +1494,9 @@ edit_rec_cleanup_hook: _edit_rec_cleanup_hook {
 	chmod 0755, $::this_track->rec_cleanup_script();
 	1
 }
+remove_fader_effect: _remove_fader_effect fader_role {
+	::remove_fader_effect($::this_track, $item{fader_role});
+	1
+}
+fader_role: 'vol'|'pan'|'fader'
+	

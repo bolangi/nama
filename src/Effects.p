@@ -54,6 +54,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					effect_init
 					add_effect
 					remove_effect
+					remove_fader_effect
 					modify_effect
 					modify_multiple_effects
 
@@ -1113,6 +1114,11 @@ sub check_fx_consistency {
 		$result->{is_error}++
 	}
 	$result;
+}
+sub remove_fader_effect {
+	my ($track, $role) = @_;
+	remove_effect($track->$role);
+	delete $track->{$role} 
 }
 1;
 __END__
