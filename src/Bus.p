@@ -289,20 +289,16 @@ sub add_sub_bus {
 
 	# create mix track
 	@args = ( 
-		width 		=> 2,     # default to stereo 
 		rec_defeat	=> 1,     # set to rec_defeat (don't record signal)
-		rw 			=> 'REC', # essentially 'on'
+		is_mix_track => 1,
+		rw 			=> 'REC', # live (non WAV file) input
 		@args
 	);
 
 	$tn{$name} and ::pager3( qq($name: setting as mix track for bus "$name"));
 
-	my $track = $tn{$name} // add_track($name);
+	my $track = $tn{$name}// add_track($name, width => 2);
 
-	# convert host track to mix track
-	
-	$track->set(was_class => ref $track); # save the current track (sub)class
-	$track->set_track_class('::MixTrack'); 
 	$track->set( @args );
 	
 }
