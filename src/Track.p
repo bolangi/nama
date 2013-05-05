@@ -236,6 +236,7 @@ sub rec_status {
 	if( $track->rw eq 'REC'){
 
 		given( $track->source_type){
+			when('track')		{ return 'REC' }
 			when('jack_client'){
 
 				# we expect an existing JACK client that
@@ -359,14 +360,16 @@ sub input_path { # signal path, not file path
 	my $track = shift;
 
 	# create edge representing live sound source input
-	
-	if($track->rec_status eq 'REC'){
+	#
+	if($track->source_type eq 'track'){
+		($track->source_id, $track->name)
+	} elsif($track->rec_status eq 'REC'){
 
 			# we skip the source if the track is a 'mix track'
 			# i.e. it gets input from other tracks, not 
 			# the specified source, if any.
 			
-			return () if $track->is_mix_track;
+			return() if $track->is_mix_track;
 
 			# comment: individual tracks of a sub bus
 			# connect their outputs to the mix track
@@ -587,10 +590,10 @@ sub set_version {
 }
 
 sub set_send { # wrapper
-	my ($track, $output) = @_;
+	my ($track, $output, $type) = @_;
 	my $old_send = $track->output_object_text;
 	logpkg('debug', "send was $old_send");
-	$track->send($output);
+	$track->send($output, $type);
 	my $new_send = $track->output_object_text;
 	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;

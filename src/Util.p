@@ -9,7 +9,7 @@ use Carp;
 use Data::Dumper::Concise;
 use ::Assign qw(json_out);
 use ::Globals qw(:all);
-use ::Log qw(logit logpkg);
+use ::Log qw(logit logsub logpkg);
 
 no warnings 'uninitialized';
 
@@ -127,6 +127,7 @@ my %bus_logic = (
 	},
 );
 sub rw_set {
+	logsub("&rw_set");
 	my ($bus,$track,$rw) = @_;
 	my $type = $track->is_mix_track
 		? 'mix_track'

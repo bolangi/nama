@@ -296,8 +296,6 @@ sub create_system_buses {
 	
 	map{ ::Bus->new(name => $_ ) } @system_buses;
 
-	# remember to hide them
-	
 	map{ $config->{_is_system_bus}->{$_}++ } @system_buses;
 
 	# create Main bus (the mixer)
@@ -307,10 +305,11 @@ sub create_system_buses {
 		send_type 	=> 'track', 
 		send_id => 'Master');
 
-	# create Manual bus (for user routed tracks)
-
-	::SubBus->new( name => 'Manual');
-	
+	# Manual bus, routed from track source_* and send_send_* fields 
+	::SubBus->new(
+		name 		=> 'Manual', 
+		send_type => 'null',
+	);
 }
 
 

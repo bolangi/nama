@@ -528,6 +528,7 @@ exit: _exit {
 	::save_state(); 
 	CORE::exit;
 }	
+source: _source 'track' source_id { $::this_track->set_source($item{source_id}, 'track'); 1 }
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
@@ -557,21 +558,6 @@ mono: _mono {
 #rec: 'rec' { $::this_track->set_rec(); 1}
 #mon: 'mon' {$::this_track->set_mon(); 1}
 
-# dummy defs to avoid warnings from command.yml entries
-off: 'Xxx' {}
-record: 'Xxx' {}
-mon: 'Xxx' {}
-
-command: rw end
-
-rw_setting: 'rec'|'mon'|'off'
-rw: rw_setting {
-	# skip fancy logic for system tracks, just set track 'rw' field
-	$::this_track->is_system_track 
-		? $::this_track->set(rw => uc $item{rw_setting}) 
-		: ::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 
-	1
-}
 rec_defeat: _rec_defeat { 
 	$::this_track->set(rec_defeat => 1);
 	print $::this_track->name, ": WAV recording disabled!\n";
@@ -584,6 +570,21 @@ rec_enable: _rec_enable {
 		print qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n),
 		"No WAV file will be recorded.\n";
 	} else { print "!\n" }
+}
+# dummy defs to avoid warnings from command.yml entries
+off: 'Xxx' {}
+record: 'Xxx' {}
+mon: 'Xxx' {}
+
+command: rw end
+
+rw_setting: 'rec'|'mon'|'off' { $return = uc $item[1] }
+rw: rw_setting {
+	# skip fancy logic for system tracks, just set track 'rw' field
+	$::this_track->is_system_track 
+		? $::this_track->set(rw => uc $item{rw_setting}) 
+		: ::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 
+	1
 }
 
 set_version: _set_version dd { $::this_track->set_version($item{dd}); 1}

@@ -140,6 +140,8 @@ my %dispatch = (
 
 	# connect loop device, with verification
 	loop  => sub { $bus->send_id =~ /^\w+_(in|out)$/ },
+
+	null => sub {},
 );
 
 sub apply {
