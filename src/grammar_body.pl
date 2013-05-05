@@ -554,10 +554,6 @@ mono: _mono {
 	print $::this_track->name, ": setting to mono\n";
 	1; }
 
-#off: 'off' {$::this_track->set_off(); 1}
-#rec: 'rec' { $::this_track->set_rec(); 1}
-#mon: 'mon' {$::this_track->set_mon(); 1}
-
 rec_defeat: _rec_defeat { 
 	$::this_track->set(rec_defeat => 1);
 	print $::this_track->name, ": WAV recording disabled!\n";
@@ -576,13 +572,16 @@ off: 'Xxx' {}
 record: 'Xxx' {}
 mon: 'Xxx' {}
 
-command: rw end
+command: mono
+command: rw
 
-rw_setting: 'rec'|'mon'|'off' { $return = uc $item[1] }
+rw_setting: 'rec'|'mon'|'off' { $return = $item[1] }
 rw: rw_setting {
-	# skip fancy logic for system tracks, just set track 'rw' field
 	$::this_track->is_system_track 
+		# for system tracks, just set track 'rw' field
 		? $::this_track->set(rw => uc $item{rw_setting}) 
+
+		# that make sure bus settings are cooperative
 		: ::rw_set($::Bus::by_name{$::this_bus},$::this_track,$item{rw_setting}); 
 	1
 }
