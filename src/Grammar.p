@@ -163,7 +163,7 @@ sub do_script {
 	my @lines = split "\n",read_file($filename);
 	my $old_opt_r = $config->{opts}->{R};
 	$config->{opts}->{R} = 1; # turn off auto reconfigure
-	for my $input (@lines) { process_line($input)};
+	for my $input (@lines) { process_line($input) unless $input =~ /^\s*#/};
 	$config->{opts}->{R} = $old_opt_r;
 }
 
