@@ -353,41 +353,27 @@ sub snapshot {
 }
 
 
-# for graph-style routing
+# create an edge representing sound source
 
-sub input_path { # signal path, not file path
+sub input_path { 
 
 	my $track = shift;
 
-	# create edge representing live sound source input
-	#
-	if($track->source_type eq 'track'){
-		($track->source_id, $track->name)
-	} elsif($track->rec_status eq 'REC'){
+	# the corresponding bus handles input routing for mix tracks
+	return() if $track->is_mix_track and $track->rec_status eq 'REC';
 
-			# we skip the source if the track is a 'mix track'
-			# i.e. it gets input from other tracks, not 
-			# the specified source, if any.
-			
-			return() if $track->is_mix_track;
+	# the track may route to:
+	# + another track
+	# + an external source (soundcard or JACK client)
+	# + a WAV file
 
-			# comment: individual tracks of a sub bus
-			# connect their outputs to the mix track
-			# (the $bus->apply method takes care of this)
-			#
-			# subtrack ---> mix_track
-			#
-			# later:
-			#  
-			#  subtrack --> mix_track_in --> mix_track
+	if($track->source_type eq 'track'){ ($track->source_id, $track->name) } 
 
-			( input_node($track->source_type) , $track->name)
-	} elsif($track->rec_status eq 'MON' and $mode->{preview} ne 'doodle'){
+	elsif($track->rec_status eq 'REC'){ 
+		(input_node($track->source_type), $track->name) } 
 
-	# create edge representing WAV file input
-
+	elsif($track->rec_status eq 'MON' and $mode->{preview} ne 'doodle'){
 		('wav_in', $track->name) 
-
 	}
 }
 
@@ -668,7 +654,6 @@ sub set_off {
 	my $track = shift;
 	$track->set_rw('OFF');
 }
-sub is_mix_track { ref $_[0] =~ /MixTrack/ }
 
 =comment
 mix
@@ -1119,20 +1104,6 @@ use ::Log qw(logpkg);
 our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
-}
-{
-package ::MixTrack;
-use ::Globals qw(:all);
-use ::Log qw(logpkg);
-our @ISA ='::Track';
-# as a mix track, I have no sources of my own
-# when status is REC
-sub input_path { 
-	my $track = shift;
-	return $track->rec_status eq 'MON'
-		?  $track->SUPER::input_path()	
-		:  ()
-}
 }
 
 
