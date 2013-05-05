@@ -572,7 +572,10 @@ off: 'Xxx' {}
 record: 'Xxx' {}
 mon: 'Xxx' {}
 
+# some ordering fixes
 command: mono
+command: rec_defeat
+command: rec_enable
 command: rw
 
 rw_setting: 'rec'|'mon'|'off' { $return = $item[1] }
