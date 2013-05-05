@@ -397,6 +397,16 @@ sub restore_state_from_file {
 		map{ $_->{class} = 'Audio::Nama::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.109){ 
+		map
+		{ 	if ($_->{class} =~ /MixTrack/) { 
+				$_->{is_mix_track}++;
+				$_->{class} = $_->{was_class};
+				$_->{class} = '::Track' if $_->{class} =~ /MixTrack/;
+		  	}
+		  	delete $_->{was_class} 
+		} @tracks_data;
+	}
 
 	#######################################
 
