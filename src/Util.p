@@ -64,32 +64,40 @@ my %bus_logic = (
 		REC => sub
 		{
 			my ($bus, $track) = @_;
+
+			# enable live input 
 			$track->set_rec;
+
+			# enable member tracks
 			$bus->set(rw => 'REC');
 		},
 
 	# setting a mix track to MON 
 	
-	# currently we set feeding bus to OFF
-	
-	# TODO skip connecting forward to
-	# a MON status track.
 	
 		MON => sub
 		{
 			my ($bus, $track) = @_;
+
+			# play a WAV file
 			$track->set_mon;
 
-			
+			# disable member tracks
 			$bus->set(rw => 'OFF');
 		},
+
+	# setting mix track to OFF
+	
 		OFF => sub
 		{
-
-	# setting mix track to OFF 
-	
 			my ($bus, $track) = @_;
+
 			$track->set_off;
+
+			# with the mix track off, 
+			# the member tracks get pruned 
+			# from the graph 
+
 		}
 	},
 	member_track =>
@@ -100,9 +108,12 @@ my %bus_logic = (
 		REC => sub 
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => 'REC');
-			$track->set_rec;
-			$tn{$bus->send_id}->busify;
+
+			$track->set_rec() or return;
+
+			$bus->set(rw => 'REC'); # least restrictive 
+			$tn{$bus->send_id}->busify 
+				if $bus->send_type eq 'track' and $tn{$bus->send_id};
 			::restore_preview_mode();
 			
 		},
@@ -112,6 +123,7 @@ my %bus_logic = (
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
+				# unconstrained members
 			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
 			$track->set_mon;
 
@@ -126,6 +138,10 @@ my %bus_logic = (
 		},
 	},
 );
+# for track commands 'rec', 'mon','off' we 
+# may toggle rw state of the bus as well
+#
+
 sub rw_set {
 	logsub("&rw_set");
 	my ($bus,$track,$rw) = @_;
