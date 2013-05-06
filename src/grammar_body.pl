@@ -528,7 +528,11 @@ exit: _exit {
 	::save_state(); 
 	CORE::exit;
 }	
-source: _source 'track' source_id { $::this_track->set_source($item{source_id}, 'track'); 1 }
+source: _source ('t'|'track') track_name { 
+	print "here we are!";
+	$::this_track->set_source($item{track_name}, 'track'); 1
+} 
+trackname: existing_track_name
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
