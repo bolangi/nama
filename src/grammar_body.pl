@@ -529,7 +529,6 @@ exit: _exit {
 	CORE::exit;
 }	
 source: _source ('t'|'track') track_name { 
-	print "here we are!";
 	$::this_track->set_source($item{track_name}, 'track'); 1
 } 
 trackname: existing_track_name
