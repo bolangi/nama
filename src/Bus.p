@@ -152,20 +152,20 @@ sub apply {
 	$logger->debug( "Expected track as bus destination, found type: (",
 		$bus->send_type, ") id: (", $bus->send_id, q[)] );
 	map{ 
-		# connect signal sources to tracks
+		# connect member track input paths
 		$logger->debug( "track ".$_->name);
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
 		$logger->debug("input path: @path") if scalar @path;
 
+		# connect member track outputs to target
 		try{ $logger->debug( join " ", "bus output:", $_->name, $bus->send_id) };
 		$g->add_edge($_->name, $bus->send_id)
 			if 	try { $dispatch{$bus->send_type}->() } 
 			catch {  warn "caught error: $_" } ;
 		
 		# add paths for recording
-		#
-		#
+		
 		# say "rec status: ",$_->rec_status;
 		# say "rec defeat: ",$_->rec_defeat; 
 		# say q($mode->{preview}: ),$::mode->{preview};
