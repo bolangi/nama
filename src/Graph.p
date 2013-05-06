@@ -108,8 +108,19 @@ sub add_path_for_aux_send {
 	my ($g, $track) = @_;
 
 		logsub("&add_path_for_aux_send: track ".$track->name);
+
+		# for track 'sax', send_type 'track' send_id 'vocal'
+		#
+		my @path;
+
+		if ( $track->send_id eq 'track'){
+			@path = ($track->name, $track->send_id)
+		}
+		else {
+
 		# for track 'sax', send_type 'jack_client', create route as 
 		# sax -> sax_aux_send -> jack_client_out
+		
 		my $name = $track->name . '_aux_send';
 		my $anon = ::SlaveTrack->new( 
 			target => $track->name,
@@ -118,7 +129,8 @@ sub add_path_for_aux_send {
 			hide => 1,
 			name => $name);
 
-		my @path= ($track->name, $name, output_node($track->send_type));
+		@path= ($track->name, $name, output_node($track->send_type));
+		}
 		$g->add_path(@path);
 }
 {
