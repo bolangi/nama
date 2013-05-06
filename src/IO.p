@@ -233,9 +233,10 @@ sub DESTROY {}
 # They retain $track as the $self variable.
 
 sub _mono_to_stereo{
+	
+	# copy mono track to stereo if we have a pan control and a mono source
 
 	# Truth table
-
 	#REC status, Track width stereo: null
 	#REC status, Track width mono:   chcopy
 	#MON status, WAV width mono:   chcopy
@@ -248,10 +249,13 @@ sub _mono_to_stereo{
 	my $nocopy = "";
 	my $is_mono_track = sub { $self->width == 1 };
 	my $is_mono_wav   = sub { ::channels($self->wav_format) == 1};
-	if  (      $status eq 'REC' and $is_mono_track->()
+	if  ( 
+			($self->track and $tn{$self->track}->pan)
+			and
+		  (	$status eq 'REC' and $is_mono_track->() 
 			or $status eq 'MON' and $is_mono_wav->() )
-		 { $copy }
-	else { $nocopy }
+	)
+	{ $copy } else { $nocopy }
 }
 sub _playat_output {
 	my $track = shift;
