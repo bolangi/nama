@@ -540,7 +540,7 @@ source: _source {
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
-send: _source ('track'|'t') track_name { 
+send: _send ('track'|'t') track_name { 
 	$::this_track->set_send($item{track_name}, 'track'); 1
 } 
 send: _send send_id { $::this_track->set_send($item{send_id}); 1}
