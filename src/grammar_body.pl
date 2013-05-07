@@ -345,9 +345,13 @@ $proposed
 track_name: ident
 existing_track_name: track_name { 
 	my $track_name = $item{track_name};
-	$return = $track_name, return if $::tn{$track_name}; 
-	print("$track_name: track does not exist.\n"),
-	undef
+	if ($::tn{$track_name}){
+		$track_name;
+	}
+	else {	
+		print("$track_name: track does not exist.\n");
+		undef
+	}
 }
 # was set bus Brass
 move_to_bus: _move_to_bus existing_bus_name {
@@ -528,8 +532,8 @@ exit: _exit {
 	::save_state(); 
 	CORE::exit;
 }	
-source: _source ('track'|'t') track_name { 
-	$::this_track->set_source($item{track_name}, 'track'); 1
+source: _source ('track'|'t') trackname { 
+	$::this_track->set_source($item{trackname}, 'track'); 1
 } 
 trackname: existing_track_name
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
@@ -540,8 +544,8 @@ source: _source {
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
-send: _send ('track'|'t') track_name { 
-	$::this_track->set_send($item{track_name}, 'track'); 1
+send: _send ('track'|'t') trackname { 
+	$::this_track->set_send($item{trackname}, 'track'); 1
 } 
 send: _send send_id { $::this_track->set_send($item{send_id}); 1}
 send: _send { $::this_track->set_send(); 1}
