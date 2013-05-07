@@ -528,7 +528,7 @@ exit: _exit {
 	::save_state(); 
 	CORE::exit;
 }	
-source: _source ('t'|'track') track_name { 
+source: _source ('track'|'t') track_name { 
 	$::this_track->set_source($item{track_name}, 'track'); 1
 } 
 trackname: existing_track_name
@@ -540,6 +540,9 @@ source: _source {
 		if $::this_track->rec_status ne 'REC';
 	1;
 }
+send: _source ('track'|'t') track_name { 
+	$::this_track->set_send($item{track_name}, 'track'); 1
+} 
 send: _send send_id { $::this_track->set_send($item{send_id}); 1}
 send: _send { $::this_track->set_send(); 1}
 send_id: shellish
