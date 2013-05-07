@@ -484,7 +484,7 @@ sub set_io {
 				,"Cannot set JACK client or port as track source."), 
 					return unless $jack->{jackd_running};
 
-			continue; # don't break out of given/when chain
+			continue;
 		} 
 
 		when ('jack_manual'){
@@ -531,9 +531,9 @@ sub send { # command for setting, showing track source
 	my ($id, $type) = @_;
 	$track->set_io( 'send', $id, $type);
 }
-sub set_source { # called from parser 
+sub set_source {
 	my $track = shift;
-	my ($source, $type) = @_; # we don't usually get $type passed
+	my ($source, $type) = @_;
 	my $old_source = $track->input_object_text;
 	$track->set_io('source',$source, $type);
 	my $new_source = $track->input_object_text;;
@@ -575,8 +575,9 @@ sub set_version {
 	}
 }
 
-sub set_send { # wrapper
-	my ($track, $output, $type) = @_;
+sub set_send {
+	my $track = shift;
+	my ($output, $type) = @_;
 	my $old_send = $track->output_object_text;
 	logpkg('debug', "send was $old_send");
 	$track->send($output, $type);
