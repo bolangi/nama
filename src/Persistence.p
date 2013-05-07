@@ -399,13 +399,19 @@ sub restore_state_from_file {
 	}
 	if ( $project->{save_file_version_number} <= 1.109){ 
 		map
-		{ 	if ($_->{class} =~ /MixTrack/) { 
+		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
 				$_->{class} = $_->{was_class};
-				$_->{class} = '::Track' if $_->{class} =~ /MixTrack/;
+				$_->{class} = '::Track';
 		  	}
 		  	delete $_->{was_class} 
 		} @tracks_data;
+		map
+		{    if($_->{class} eq '::MasterBus') {
+				$_->{class} = '::SubBus';
+			 }
+		} @bus_data;
+
 	}
 
 	#######################################
@@ -415,14 +421,11 @@ sub restore_state_from_file {
 
 	::Bus::initialize();	
 
-	create_system_buses(); 
-
 	# restore user buses
 		
-	# Main exists, therefore is not created, stored values 
-	# are lost.  TODO
-	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
+
+	create_system_buses();  # any that are missing
 
 	# restore user tracks
 	

@@ -300,7 +300,7 @@ sub create_system_buses {
 
 	# create Main bus (the mixer)
 
-	::MasterBus->new(
+	::SubBus->new(
 		name 		=> 'Main',
 		send_type 	=> 'track', 
 		send_id => 'Master');

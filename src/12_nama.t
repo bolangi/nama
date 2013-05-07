@@ -55,7 +55,7 @@ while( my($dest,$type) = splice @id_to_type, 0,2){
 }
 
 
-is( ref $bn{Main}, q(Audio::Nama::MasterBus), 'Bus initializtion');
+is( ref $bn{Main}, q(Audio::Nama::SubBus), 'Bus initializtion');
 
 # SKIP: { 
 # my $cs_got = eval_iam('cs');
