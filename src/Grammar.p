@@ -53,7 +53,7 @@ sub process_line {
 	logpkg('debug',"user input: $user_input");
 	if (defined $user_input and $user_input !~ /^\s*$/) {
 		$text->{term}->addhistory($user_input) 
-			unless $user_input eq $text->{previous_cmd};
+			unless $user_input eq $text->{previous_cmd} or ! $text->{term};
 		$text->{previous_cmd} = $user_input;
 		if ($mode->{midish_terminal}){
 				$user_input =~ /^\s*(midish_mode_off|mmx)/ 

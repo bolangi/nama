@@ -1,0 +1,84 @@
+# Patrick Shirkey's stereo-to-5.1 converter script implemented in Nama
+#
+# This is the algorithm to convert a true stereo track to "fake" 5.1 surround. 
+# You can change the outputs to suit your 5.1 routing
+# 
+# channel 1 - Left Front : left input
+# channel 2 - Right Front : right input
+# channel 3 - Center : left + right + (bandpass 200hz-16000hz) + (amplify 71%)
+# channel 4 - LFE : left + right + (low pass 200hz) + (amplify 71%)
+# channel 5 - Left Rear: inverse left + right  + (amplify 50%) + 20ms delay
+# channel 6 - Right Rear: inverse channel 5
+
+
+# create tracks
+add_tracks Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
+add_bunch all Stereo L_front R_front Center Subwoofer L_inverted Right R-L L_rear R_rear
+
+# create a bus for summing (inverted L) + R
+add_sub_bus R-L
+
+# we'll do our own routing for these tracks
+
+Stereo move_to_bus null
+R-L    move_to_bus null
+
+# no recording to disk, remove volume and pan controls
+
+for all; rec_defeat; remove_fader_effect vol; remove_fader_effect pan
+
+# feed six tracks the stereo source
+
+for L_front R_front Center Subwoofer L_inverted Right; source track Stereo
+
+# prepare sources for R-L ('afx' is an abbreviation for # 'add_effect')
+
+L_inverted afx chmute 2; afx ea -100
+Right afx chmute 1
+
+# feed these two tracks to R-L
+
+for L_inverted Right; move_to_bus R-L
+
+# sum R-L source channels to mono
+
+R-L afx chmix 1
+
+# Center: sum R+L to mono, output at channel 3
+
+Center afx chmix 3; afx efh 200; afx efl 16000; afx ea 70
+
+# Subwoofer: sum R+L to mono, bandpass, output at channel 4
+Subwoofer afx chmix 4; afx efl 200 ; afx ea 70
+
+# L_rear and R_rear get input from R-L 
+
+for L_rear R_rear; source track R-L
+
+# L_rear: output at channel 5
+
+L_rear afx chmove 1 5
+
+# R_rear: output at channel 6
+R_rear afx ea -100;afx chmove 1 6
+
+
+#   ### Patrick Shirkey's script ####
+#   
+#   #!/bin/bash
+#   
+#   ecasound -z:mixmode,sum -f:s16_le,2,48000 \
+#   -a:1,2,3,4,5,6 -i $1 \
+#   -a:1 -chmute:2 \
+#   -a:2 -chmute:1 \
+#   -a:3 -chmix:3 -efh:200 -efl:16000 -ea:70 \
+#   -a:4 -chmix:4 -efl:200 -ea:70 \
+#   -a:5 -chmute:2 -ea:-100 \
+#   -a:6 -chmute:1 \
+#   -a:5,6 -o loop,1 \
+#   -a:7 -i loop,1 \
+#   -a:7 -efh:200 -efl:16000 -etd:20,0,1,100,100 -ea:50 -o loop,2 \
+#   -a:8,9 -i loop,2 \
+#   -a:8 -chmix:5 \
+#   -a:9 -chmix:6 -ea:-100 \
+#   -a:1,2,3,4,8,9 -f:s16_le,6,48000 -o $2

@@ -33,7 +33,8 @@ sub initialize_terminal {
 sub revise_prompt {
 	# hack to allow suppressing prompt
 	$override = $_[0] eq "default" ? undef : $_[0] if defined $_[0];
-    $text->{term}->callback_handler_install($override//prompt(), \&process_line);
+    $text->{term}->callback_handler_install($override//prompt(), \&process_line)
+		if $text->{term}
 }
 }
 

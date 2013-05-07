@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 110;
+use Test::More tests => 111;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
@@ -652,6 +652,47 @@ foreach(@tests){
 	is( ::new_region_end(), $new_region_end, "$index: new_region_end: $case");
 }
 }
+
+
+
+load_project(name => "$test_project-convert51", create => 1);
+my $script = <<CONVERT51;
+[% qx(cat ./stereo51.nms ) %]
+CONVERT51
+
+do_script($script);
+$expected_setup_lines = <<EXPECTED;
+
+# ecasound chainsetup file
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -b 256 -z:db,100000 -z:nointbuf
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:10 -i:loop,R-L_in
+-a:11,12 -i:loop,R-L_out
+-a:3 -i:alsa,default
+-a:4,5,6,7,8,9 -i:loop,Stereo_out
+
+# post-input processing
+
+-a:3
+
+# audio outputs
+
+-a:1 -o:alsa,default
+-a:10 -o:loop,R-L_out
+-a:3 -o:loop,Stereo_out
+-a:4,5,6,7,11,12 -o:loop,Master_in
+-a:8,9 -o:loop,R-L_in
+EXPECTED
+
+force_alsa();
+process_command('gen');
+check_setup('Stereo to 5.1 converter script' );
 
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}
