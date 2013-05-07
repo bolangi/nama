@@ -305,9 +305,9 @@ sub create_system_buses {
 		send_type 	=> 'track', 
 		send_id => 'Master');
 
-	# Manual bus, routed from track source_* and send_send_* fields 
+	# null bus, routed only from track source_* and send_send_* fields 
 	::SubBus->new(
-		name 		=> 'Manual', 
+		name 		=> 'null', 
 		send_type => 'null',
 	);
 }
