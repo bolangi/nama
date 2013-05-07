@@ -158,9 +158,10 @@ sub apply {
 		$g->add_path(@path) if @path;
 		$logger->debug("input path: @path") if scalar @path;
 
-		# connect member track outputs to target
 		try{ $logger->debug( join " ", "bus output:", $_->name, $bus->send_id) };
-		$g->add_edge($_->name, $bus->send_id)
+
+		# connect member track outputs to target
+		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
 			if 	try { $dispatch{$bus->send_type}->() } 
 			catch {  warn "caught error: $_" } ;
 		
@@ -177,7 +178,7 @@ sub apply {
 			and ! $_->rec_defeat
 				and $::mode->{preview} !~ /doodle|preview/ ;
 
-	} grep{ $_->group eq $bus->group} ::Track::all()
+	} grep {$_->rec_status ne 'OFF'} grep{ $_->group eq $bus->group} ::Track::all()
 }
 }
 sub remove {
