@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 use Modern::Perl;
 use File::Slurp;
 # get registered keys by combining contents of two files 
