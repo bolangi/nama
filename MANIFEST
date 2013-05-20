@@ -56,12 +56,9 @@ lib/Audio/Nama/Track.pm
 lib/Audio/Nama/Util.pm
 lib/Audio/Nama/Wav.pm
 lib/Audio/Nama/Wavinfo.pm
-Makefile
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-MYMETA.json
-MYMETA.yml
 README
 script/nama
 t/01_symbols.t
