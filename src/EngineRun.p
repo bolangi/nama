@@ -85,7 +85,8 @@ sub stop_transport {
 
 	my $quiet = shift;
 	logsub("&stop_transport"); 
-	my $pos = eval_iam('getpos') if eval_iam('cs-connected');
+	my $pos;
+	$pos = eval_iam('getpos') if eval_iam('cs-connected');
 	mute();
 	stop_command();
 	stop_midish_transport() 
