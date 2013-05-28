@@ -114,6 +114,7 @@ use ::Help ();
 
 use ::Project ();
 use ::Persistence ();
+use ::Git;
 
 use ::ChainSetup (); # separate namespace
 use ::Graph ();
