@@ -417,7 +417,9 @@ sub remove_effect {
 		logpkg('debug',"parent $parent new owns list: ". join ",", @$parent_owns);
 
 	}
-	$ti{$n}->remove_effect_from_track( $id ) if $ti{$n};
+	# remove effect ID from track
+	@{$ti{$n}->{ops}} = grep { $_ ne $id } @{$ti{$n}->{ops}} if $ti{$n};
+
 	# remove entries for chain operator attributes and parameters
  	delete $fx->{applied}->{$id}; # remove entry from chain operator list
     delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk

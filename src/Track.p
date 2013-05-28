@@ -378,15 +378,6 @@ sub input_path {
 }
 
 
-sub remove_effect_from_track { 
-	# doesn't touch $fx->{applied} or $fx->{params} data structures 
-	my $track = shift;
-	my @ids = @_;
-	$track->set(ops => [ grep { my $existing = $_; 
-									! grep { $existing eq $_
-									} @ids }  
-							@{$track->ops} ]);
-}
 sub has_insert  { $_[0]->prefader_insert or $_[0]->postfader_insert }
 
 sub prefader_insert { ::Insert::get_id($_[0],'pre') }
