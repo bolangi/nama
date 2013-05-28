@@ -5,13 +5,6 @@ package ::;
 use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
-sub git { 
-	$config->{use_git} or warn("@_: git command, but git is not enabled.
-You may want to set use_git: 1 in .namarc"), return;
-	
-	logpkg('debug',"VCS command: git @_"); 
-	$project->{repo}->run(@_) }
-		
 sub save_state {
 	my $filename = shift;
 	if ($filename)
@@ -240,48 +233,6 @@ sub decode {
 }
 }
 
-sub git_tag_exists {
-	my $tag = shift;
-	grep { $tag eq $_ } git( 'tag','--list');
-}
-
-sub tag_branch { "$_[0]-branch" }
-
-sub restore_state_from_vcs {
-	logsub("&restore_state_from_vcs");
-	my $name = shift; # tag or branch
-	
-	# checkout branch if matching branch exists
-	
-    if (git_branch_exists($name)){
-		pager3( qq($name: branch exists. Checking out branch $name.) );
-		git_checkout($name);
-		
-	}
-
-	# checkout branch diverging at tag if matching that tag
-
-	elsif ( git_tag_exists($name) ){
-
-		my $tag = $name;
-		my $branch = tag_branch($tag);
-	
-		if (git_branch_exists($branch)){
-			pager3( qq(tag $tag: matching branch exists. Checking out $branch.) );
-			git_checkout($branch);
-		}
-
-		else {
-			pager3( "Creating and checking out branch $branch from tag $tag");
-			git_create_branch($branch, $tag);
-			
-		}
-	}
- 	else { throw("$name: tag doesn't exist. Cannot checkout."), return  }
-
-	restore_state_from_file();
-}
- 
 sub restore_state_from_file {
 	logsub("&restore_state_from_file");
 	my $filename = shift;
@@ -585,6 +536,57 @@ sub restore_global_effect_chains {
 				vars   => \@global_effect_chain_vars, 
 				class => '::');
 }
+sub git { 
+	$config->{use_git} or warn("@_: git command, but git is not enabled.
+You may want to set use_git: 1 in .namarc"), return;
+	logpkg('debug',"VCS command: git @_"); 
+	$project->{repo}->run(@_) 
+}
+sub git_tag_exists {
+	my $tag = shift;
+	grep { $tag eq $_ } git( 'tag','--list');
+}
+
+# on command "get foo", Nama opens a branch name 'foo-branch', 
+# or returns to HEAD of existing branch 'foo-branch'
+
+sub tag_branch { "$_[0]-branch" }
+
+sub restore_state_from_vcs {
+	logsub("&restore_state_from_vcs");
+	my $name = shift; # tag or branch
+	
+	# checkout branch if matching branch exists
+	
+    if (git_branch_exists($name)){
+		pager3( qq($name: branch exists. Checking out branch $name.) );
+		git_checkout($name);
+		
+	}
+
+	# checkout branch diverging at tag if matching that tag
+
+	elsif ( git_tag_exists($name) ){
+
+		my $tag = $name;
+		my $branch = tag_branch($tag);
+	
+		if (git_branch_exists($branch)){
+			pager3( qq(tag $tag: matching branch exists. Checking out $branch.) );
+			git_checkout($branch);
+		}
+
+		else {
+			pager3( "Creating and checking out branch $branch from tag $tag");
+			git_create_branch($branch, $tag);
+			
+		}
+	}
+ 	else { throw("$name: tag doesn't exist. Cannot checkout."), return  }
+
+	restore_state_from_file();
+}
+ 
 sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
@@ -692,7 +694,7 @@ sub git_branch_display {
 	logsub("&git_branch_display");
 	return unless $config->{use_git};
 	return unless current_branch();
-	"( ".current_branch()." ) "
+	"git:".current_branch()." "
 }
 sub list_branches {
 	pager3(
