@@ -176,6 +176,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 					 # delete_effect_chain overwrite_effect_chain
 
 save_target: /[-:\w.]+/
+decimal_seconds: /\d+(\.\d+)?/ 
 marktime: /\d+\.\d+/ # decimal required
 markname: /[A-Za-z]\w*/ { 
 	::throw("$item[1]: non-existent mark name. Skipping"), return undef 
@@ -302,7 +303,7 @@ forward: _forward timevalue {
 	::forward( $item{timevalue} ); 1}
 rewind: _rewind timevalue {
 	::rewind( $item{timevalue} ); 1}
-timevalue: min_sec | seconds
+timevalue: min_sec | decimal_seconds
 seconds: samples  # samples returns seconds
 seconds: /\d+/
 samples: /\d+sa/ {
