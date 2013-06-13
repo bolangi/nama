@@ -3,7 +3,7 @@
 
 package ::Bus;
 use Modern::Perl; use Carp; 
-use ::Log qw(logpkg);
+use ::Log qw(logsub logpkg);
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -52,7 +52,7 @@ sub tracks { # returns list of track names in bus
 }
 
 sub last {
-	#$logger->debug( "group: @_");
+	#logpkg('debug', "group: @_");
 	my $group = shift;
 	my $max = 0;
 	map{ 
@@ -123,6 +123,7 @@ sub apply {}  # base class does no routing of its own
 {
 package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
+use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
 use Try::Tiny;
 
@@ -148,17 +149,16 @@ sub apply {
 	no warnings 'uninitialized';
 	$bus = shift;
 	$g = shift;
-	$logger->debug( "bus ". $bus->name. ": applying routes");
-	$logger->debug( "Expected track as bus destination, found type: (",
-		$bus->send_type, ") id: (", $bus->send_id, q[)] );
+	logpkg('debug', "bus ". $bus->name. ": applying routes");
+	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
 	map{ 
 		# connect member track input paths
-		$logger->debug( "track ".$_->name);
+		logpkg('debug', "track ".$_->name);
 		my @path = $_->input_path;
 		$g->add_path(@path) if @path;
-		$logger->debug("input path: @path") if scalar @path;
+		logpkg('debug',"input path: @path") if scalar @path;
 
-		try{ $logger->debug( join " ", "bus output:", $_->name, $bus->send_id) };
+		try{ logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id) };
 
 		# connect member track outputs to target
 		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
@@ -206,6 +206,7 @@ sub remove {
 {
 package ::SendBusRaw;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
+use ::Log qw(logsub logpkg);
 sub apply {
 	my $bus = shift;
 	map{ 
@@ -229,6 +230,7 @@ sub remove {
 }
 {
 package ::SendBusCooked;
+use ::Log qw(logsub logpkg);
 use Modern::Perl; use Carp; our @ISA = '::SendBusRaw';
 
 # graphic routing: target -> slave -> bus_send_type

@@ -2,7 +2,7 @@
 
 package ::ChainSetup;
 use ::Globals qw($file $config $jack $setup $engine %tn %bn $mode);
-use ::Log qw(logsub);
+use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;
 use Storable qw(dclone);
@@ -112,34 +112,34 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	
 	map{ $_->apply($g) } ::Bus::all();
 
-	$logger->debug("Graph after bus routing:\n$g");
+	logpkg('debug',"Graph after bus routing:\n$g");
 	
 	# now various manual routing
 
 	add_paths_for_aux_sends();
-	$logger->debug("Graph after aux sends:\n$g");
+	logpkg('debug',"Graph after aux sends:\n$g");
 
 	add_paths_from_Master();
-	$logger->debug("Graph with paths from Master:\n$g");
+	logpkg('debug',"Graph with paths from Master:\n$g");
 
 	add_paths_for_mixdown_handling();
-	$logger->debug("Graph with mixdown mods:\n$g");
+	logpkg('debug',"Graph with mixdown mods:\n$g");
 	
 	# run extra setup
 	
 	$extra_setup_code->($g) if $extra_setup_code;
 
 	prune_graph();
-	$logger->debug("Graph after pruning unterminated branches:\n$g");
+	logpkg('debug',"Graph after pruning unterminated branches:\n$g");
 
 	::Graph::expand_graph($g); 
 
-	$logger->debug("Graph after adding loop devices:\n$g");
+	logpkg('debug',"Graph after adding loop devices:\n$g");
 
 	# insert handling
 	::Graph::add_inserts($g);
 
-	$logger->debug("Graph with inserts:\n$g");
+	logpkg('debug',"Graph with inserts:\n$g");
 
 	# Mix tracks to mono if Master is mono
 	# (instead of just throwing away right channel)
@@ -148,7 +148,7 @@ sub generate_setup_try {  # TODO: move operations below to buses
 	{
 		$g->set_vertex_attribute('Master', 'ecs_extra' => '-chmix:1')
 	}
-	$logger->debug(sub{"Graph object dump:\n",Dumper($g)});
+	#$logger->info(sub{"Graph object dump:\n",Dumper($g)});
 
 	# create IO lists %inputs and %outputs
 
@@ -230,7 +230,7 @@ sub process_routing_graph {
 	# generate a set of IO objects from edges
 	@io = map{ dispatch($_) } $g->edges;
 	
-	$logger->debug( sub{ join "\n",map $_->dump, @io });
+	logpkg('debug', sub{ join "\n",map $_->dump, @io });
 
 	# sort chain_ids by attached input object
 	# one line will show all with that one input
@@ -312,12 +312,12 @@ sub non_track_dispatch {
 	
 	
 	my $edge = shift;
-	$logger->debug("non-track IO dispatch:",join ' -> ',@$edge);
+	logpkg('debug',"non-track IO dispatch:",join ' -> ',@$edge);
 	my $eattr = $g->get_edge_attributes(@$edge) // {};
-	$logger->debug("found edge attributes: ",json_out($eattr)) if $eattr;
+	logpkg('debug',"found edge attributes: ",json_out($eattr)) if $eattr;
 
 	my $vattr = $g->get_vertex_attributes($edge->[0]) // {};
-	$logger->debug("found vertex attributes: ",json_out($vattr)) if $vattr;
+	logpkg('debug',"found vertex attributes: ",json_out($vattr)) if $vattr;
 
 	if ( ! $eattr->{chain_id} and ! $vattr->{chain_id} ){
 		my $n = $eattr->{n} || $vattr->{n};
@@ -329,7 +329,7 @@ sub non_track_dispatch {
 		my $class = ::IO::get_class($_, $direction);
 		my $attrib = {%$vattr, %$eattr};
 		$attrib->{endpoint} //= $_ if ::Graph::is_a_loop($_); 
-		$logger->debug("non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
+		logpkg('debug',"non-track: $_, class: $class, chain_id: $attrib->{chain_id},","device_id: $attrib->{device_id}");
 		my $io = $class->new($attrib ? %$attrib : () ) ;
 		$g->set_edge_attribute(@$edge, $direction, $io);
 		$io;
@@ -362,9 +362,9 @@ sub jumper_count {
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
-	$logger->debug('dispatch: ',join ' -> ',  @$edge);
+	logpkg('debug','dispatch: ',join ' -> ',  @$edge);
 	my($name, $endpoint, $direction) = decode_edge($edge);
-	$logger->debug("name: $name, endpoint: $endpoint, direction: $direction");
+	logpkg('debug',"name: $name, endpoint: $endpoint, direction: $direction");
 	my $track = $tn{$name};
 	my $class = ::IO::get_class( $endpoint, $direction );
 		# we need the $direction because there can be 
@@ -438,7 +438,7 @@ sub write_chains {
 	$ecs_file .= join "\n\n", 
 					"# audio outputs",
 					join("\n", @output_chains), "";
-	$logger->debug("Chain setup:\n",$ecs_file);
+	logpkg('debug',"Chain setup:\n",$ecs_file);
 	open(my $fh, ">", $file->chain_setup) 
 		or die("can't open chain setup file ".$file->chain_setup.": $!");
 	print $fh $ecs_file;
