@@ -41,7 +41,6 @@ our (
 	@pre_output, 	# pre-output chain operators
 
 	$chain_setup,	# final result as string
-	$logger,
 	);
 
 
@@ -52,8 +51,6 @@ sub remove_temporary_tracks {
 sub initialize {
 
 	remove_temporary_tracks();# start clean
-	$logger = Log::Log4perl->get_logger();
-	::Graph::initialize_logger();
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();

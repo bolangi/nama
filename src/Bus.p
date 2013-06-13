@@ -9,7 +9,7 @@ our @ISA = qw( ::Object );
 # share the following variables with subclasses
 
 our $VERSION = 1.0;
-our (%by_name, $logger);
+our (%by_name);
 use ::Object qw(
 					name
 					rw
@@ -21,8 +21,6 @@ use ::Object qw(
 					);
 sub initialize { 
 	%by_name = (); 
-	$logger = Log::Log4perl->get_logger("::Bus");
-	
 };
 sub new {
 	my $class = shift;
