@@ -107,6 +107,7 @@ sub add_path_for_send {
 	my ($g, $name, $send_type, $send_id)  = @_;
 
 	logsub("&add_path_for_aux_send: track ".$name);
+	logpkg('debug',"args: graph: $g, name: $name, send_type, $send_type, send_id: $send_id");
 
 	# for track 'sax', send_type 'track' send_id 'vocal'
 	#
@@ -116,7 +117,7 @@ sub add_path_for_send {
 		@path = ($name, $send_id)
 	}
 	else {
-
+		
 		# for track 'sax', send_type 'jack_client', create route as 
 		# sax -> sax_aux_send -> jack_client_out
 		
