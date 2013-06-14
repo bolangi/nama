@@ -1478,11 +1478,6 @@ rerecord: _rerecord {
 		1;
 }
 
-eager: _eager mode_string { $::mode->{eager} = $item{mode_string} }
-mode_string: 'off'    { 0 }
-mode_string: 'doodle' 
-mode_string: 'preview'
-
 show_track_latency: _show_track_latency {
 	my $node = $::setup->{latency}->{track}->{$::this_track->name};
 	::pager2( ::json_out($node)) if $node;
