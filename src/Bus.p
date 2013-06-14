@@ -123,30 +123,30 @@ package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
-use Try::Tiny;
 
-# graphic routing: track -> mix_track
+# connect source --> member_track --> mix_track
 
-{
+sub output_is_connectable {
+ 	my $bus = shift;
 
-my $g;
-my $bus;
-my %dispatch = (
+	# Either the bus's mix track must be set to REC:
+ 	
+ 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status eq 'REC'
 
-	# connect member tracks to  mix track
-	# if mix track is known and mix track is set to REC
-	track => sub { $::tn{$bus->send_id}->rec_status eq 'REC'  },
+	# Or, during mixdown, we connect bus member tracks to Master
+	# even tho Master may be set to OFF
+	
+	or $bus->send_type eq 'track' 
+				and $bus->send_id eq 'Master' 
+				and $::tn{Mixdown}->rec_status eq 'REC'
 
-	# connect loop device, with verification
-	loop  => sub { $bus->send_id =~ /^\w+_(in|out)$/ },
-
-	null => sub {},
-);
+	
+	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;
+}
 
 sub apply {
 	no warnings 'uninitialized';
-	$bus = shift;
-	$g = shift;
+	my ($bus, $g)  = @_;
 	logpkg('debug', "bus ". $bus->name. ": applying routes");
 	logpkg('debug', "Bus destination is type: $bus->{send_type}, id: $bus->{send_id}");
 	map{ 
@@ -156,12 +156,14 @@ sub apply {
 		$g->add_path(@path) if @path;
 		logpkg('debug',"input path: @path") if scalar @path;
 
-		try{ logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id) };
+		logpkg('debug', join " ", "bus output:", $_->name, $bus->send_id);
 
 		# connect member track outputs to target
+		# disregard Master track rec_status when connecting
+		# Main bus during mixdown handling
+
 		::Graph::add_path_for_send($g, $_->name, $bus->send_type, $bus->send_id )
-			if 	try { $dispatch{$bus->send_type}->() } 
-			catch {  warn "caught error: $_" } ;
+			if $bus->output_is_connectable;
 		
 		# add paths for recording
 		
@@ -177,7 +179,6 @@ sub apply {
 				and $::mode->{preview} !~ /doodle|preview/ ;
 
 	} grep {$_->rec_status ne 'OFF'} grep{ $_->group eq $bus->group} ::Track::all()
-}
 }
 sub remove {
 	my $bus = shift;
