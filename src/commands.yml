@@ -1318,13 +1318,6 @@ rerecord:
     # do your recording and ilstening.
     # You want to record another version of both piano and guitar:
     rerec # Sets piano and guitar to record again.
-eager:
-  type: general
-  what: Output audio as soon as possible. This will start playing or recording, as soon as a working setup is created.
-  parameters: off | doodle | preview
-  example: |
-    eager doodle # Be eager in doodle mode.
-    eager off # Turn off eagerness. Now you have to start yourself again.
 analyze_level:
   type: track
   what: Print Ecasound amplitude analysis for current track. This will show highest volume and statistics.
