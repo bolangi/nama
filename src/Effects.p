@@ -1132,7 +1132,7 @@ sub fxn {
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($fx);
-my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain);
+my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
 sub id 			{ my $self = shift; $self->{id} }
 sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
 sub bypassed 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{bypassed}	}
@@ -1141,12 +1141,14 @@ sub type 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{type} 		}
 sub chain 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{chain} 		}
 sub display 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{display} 	}
 sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
+sub params		{ my $self = shift; $fx->{params }->{$self->{id}}               }
 sub set	{ 
 	my $self = shift; my %args = @_;
 	while(my ($key, $value) = each %args){ 
 		say "effect id $self->{id}: setting $key = $value";
 		$is_field{$key} or die "illegal key: $key for effect id $self->{id}";
-		$fx->{applied}->{$self->{id}}->{$key} = $value;
+		if ($key eq 'params'){ $fx->{params}->{$self->{id}} = $value } 
+		else { $fx->{applied}->{$self->{id}}->{$key} = $value }
 	}
 }
 
