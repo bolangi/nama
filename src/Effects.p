@@ -70,6 +70,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 			
 					restore_effects
 
+					fxn
+
 ) ] );
 
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
@@ -1121,5 +1123,35 @@ sub remove_fader_effect {
 	remove_effect($track->$role);
 	delete $track->{$role} 
 }
+# Object interface for effects
+
+sub fxn {
+	my $id = shift;
+	bless {id => $id}, '::Effect';
+}
+package ::Effect;
+use Modern::Perl;
+use ::Globals qw($fx);
+my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain);
+sub id 			{ my $self = shift; $self->{id} }
+sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
+sub bypassed 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{bypassed}	}
+sub parent 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{parent}		}
+sub type 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{type} 		}
+sub chain 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{chain} 		}
+sub display 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{display} 	}
+sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
+sub set	{ 
+	my $self = shift; my %args = @_;
+	while(my ($key, $value) = each %args){ 
+		say "effect id $self->{id}: setting $key = $value";
+		$is_field{$key} or die "illegal key: $key for effect id $self->{id}";
+		$fx->{applied}->{$self->{id}}->{$key} = $value;
+	}
+}
+
+#	owns($track->fader)
+#	fxn($track->fader)->owns
+
 1;
 __END__
