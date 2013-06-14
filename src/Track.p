@@ -217,8 +217,9 @@ sub rec_status {
 
 	my $bus = $bn{$track->group};
 	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
-	logpkg('debug', "track: ", $track->name, ", source: ",
-		$track->source_id, ", monitor version: $monitor_version");
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $monitor_version");
+	#logpkg('debug', "track: ", $track->name, ", source: ",
+	#	$track->source_id, ", monitor version: $monitor_version");
 
 	# first, check for conditions resulting in status 'OFF'
 
