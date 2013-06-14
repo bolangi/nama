@@ -78,22 +78,22 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-sub parent : lvalue { 
+sub parent { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{belongs_to} 
 }
-sub chain  : lvalue { 
+sub chain  { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{chain}      
 }
-sub type   : lvalue { 
+sub type   { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{type}       
 }
-sub bypassed : lvalue{ 
+sub bypassed {  # XXX expects lvalue sub
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{bypassed}   
@@ -102,17 +102,17 @@ sub bypassed : lvalue{
 # ensure owns field is initialized as anonymous array 
 # bah!!
 
-sub owns   : lvalue { 
+sub owns   { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{owns}
 } 
-sub fx     : lvalue { 
+sub fx     { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}                
 }
-sub params : lvalue { 
+sub params { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{params}->{$id}
@@ -787,7 +787,7 @@ sub effect_init {
 		$p->{values} = \@vals;
 	}
 	
-	params($id) = $p->{values};
+	fxn($id)->set(params => $p->{values});
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
@@ -798,7 +798,7 @@ sub effect_init {
 		logpkg('debug',"parent owns @{owns($parent_id)}");
 
 		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
-		parent($id) = $parent_id;
+		fxn($id)->set(parent => $parent_id);
 		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
 		#logpkg('debug', "parameter: $parameter");
 
@@ -905,7 +905,7 @@ sub sync_one_effect {
 		my $chain = chain($id);
 		eval_iam("c-select $chain");
 		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
-		params($id) = get_cop_params( scalar @{$fx->{params}->{$id}} );
+		fxn($id)->set(params => get_cop_params( scalar @{$fx->{params}->{$id}} ));
 }
 
 	
@@ -1037,7 +1037,7 @@ sub _bypass_effects {
 		my $i = ecasound_effect_index($op);
 		eval_iam("cop-select $i");
 		eval_iam("cop-bypass $off_or_on");
-		bypassed($op) = ($off_or_on eq 'on') ? 1 : 0;
+		fxn($op)->set(bypassed => ($off_or_on eq 'on') ? 1 : 0);
 	}
 	$track->unmute;
 }
