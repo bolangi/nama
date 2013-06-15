@@ -369,7 +369,7 @@ sub get_live_param { # for effect, not controller
 					 # $param is position, starting at one
 	local $config->{category} = 'ECI_FX';
 	my ($op, $param) = @_;
-	my $n = chain($op);
+	my $n = fxn($op)->chain;
 	my $i = ecasound_effect_index($op);
 	eval_iam("c-select $n");
 	eval_iam("cop-select $i");

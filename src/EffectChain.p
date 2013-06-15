@@ -123,7 +123,7 @@ sub new {
 			else
 			{
 				$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
-				$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
+				$ops_data->{$_}->{params} = dclone( ::fxn($_)->params );  # copy;
 				# our op IDs are ALL CAPS, so will not conflict
 				# with params when accessing via key
 				#

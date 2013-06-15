@@ -33,10 +33,8 @@ use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					parent
-					chain
 					owns
 					fx
-					params
 					is_controller
 					
 					fxindex
@@ -81,28 +79,17 @@ sub parent : lvalue {
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{belongs_to} 
 }
-sub chain  { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{chain}      
-}
-
 sub fx     { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}                
-}
-sub params { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{params}->{$id}
 }
 
 # get information from registry
 sub fxindex {
 	my $id = shift;
 	catch_null_id($id);
-	$fx_cache->{full_label_to_index}->{ fnx($id)->type };
+	$fx_cache->{full_label_to_index}->{ fxn($id)->type };
 }
 sub name {
 	my $id = shift;
@@ -115,7 +102,7 @@ sub catch_null_id {
 	my $id = shift;
 	logpkg('logconfess',"null effect id")  unless $id;
 	logpkg('debug',"$id: effect id does not exist") 
-		unless $fx->{applied}->{$id} and $fx-{params}->{$id}
+		unless $fx->{applied}->{$id} and $fx->{params}->{$id}
 }
 sub effect_entry_is_bad {
 		my $id = shift;
@@ -167,13 +154,13 @@ sub set_chain_value {
 	
 	elsif( $p->{parent_id})
 	{ 
-		$p->{chain} = chain($p->{parent_id})
+		$p->{chain} = fxn($p->{parent_id})->chain
 	}
 	# set chain from insert target if known (insert effect)
 	
 	elsif( $p->{before} )
 	{
-		$p->{chain} = chain($p->{before});
+		$p->{chain} = fxn($p->{before})->chain;
 	}
 	#logpkg('debug',(json_out($p));
 
@@ -258,7 +245,7 @@ sub _insert_effect {  # call only from add_effect
 		::stop_command();
 		sleeper( 0.05); 
 	}
-	my $n = chain($before) or 
+	my $n = fxn($before)->chain or 
 		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
 	
@@ -363,7 +350,7 @@ sub remove_effect {
 		logpkg('logcarp',"$id: does not exist, skipping...\n");
 		return;
 	}
-	my $n 		= chain($id);
+	my $n 		= fxn($id)->chain;
 	$n or die ::json_out(fx($id));
 	my $parent 	= parent($id);
 	my $owns	= fxn($id)->owns;
@@ -418,7 +405,7 @@ sub position_effect {
 	# first, modify track data structure
 	
 	print("$op: effect does not exist, skipping.\n"), return unless fx($op);
-	my $track = $ti{chain($op)};
+	my $track = $ti{fxn($op)->chain};
 	my $op_index = nama_effect_index($op);
 	my @new_op_list = @{$track->ops};
 	# remove op
@@ -429,7 +416,7 @@ sub position_effect {
 		push @new_op_list, $op;
 	}
 	else { 
-		my $track2 = $ti{chain($pos)};
+		my $track2 = $ti{fxn($pos)->chain};
 		print("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
 		$new_op_index = nama_effect_index($pos); 
@@ -450,7 +437,7 @@ sub position_effect {
 sub nama_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
 	my $id = shift;
-	my $n = chain($id);
+	my $n = fxn($id)->chain;
 	my $arr = $ti{$n}->ops;
 	logpkg('debug', "id: $id n: $n");
 	logpkg('debug', "@{$ti{$n}->ops}" );
@@ -460,7 +447,7 @@ sub nama_effect_index { # returns nama chain operator index
 }
 sub ecasound_effect_index { 
 	my $id = shift;
-	my $n = chain($id);
+	my $n = fxn($id)->chain;
 	my $opcount;  # one-based
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
@@ -481,7 +468,7 @@ sub ctrl_index {
 sub ecasound_operator_index { # does not include offset
 	my $id = shift;
 	$id or croak "missing effect id";
-	my $chain = chain($id);
+	my $chain = fxn($id)->chain;
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $controller_count = 0;
@@ -497,7 +484,7 @@ sub ecasound_operator_index { # does not include offset
 	
 sub ecasound_controller_index {
 	my $id = shift;
-	my $chain = chain($id);
+	my $chain = fxn($id)->chain;
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $operator_count = 0;
@@ -590,12 +577,12 @@ sub apply_op {
 	my $code = fxn($id)->type;
 	my $dad = fxn($id)->parent;
 	my $chain = fxn($id)->chain; 
-	logpkg('debug', "chain: ".chain($id)." type: $code");
+	logpkg('debug', "chain: ".fxn($id)->chain." type: $code");
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
 	
 	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
-	my @vals = @{ params($id) };
+	my @vals = @{ fxn($id)->params };
 	logpkg('debug', "values: @vals");
 
 	# we start to build iam command
@@ -612,7 +599,7 @@ sub apply_op {
 	eval_iam("c-select $chain") if $selected_chain != $chain;
 	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
 	eval_iam($add_cmd);
-	eval_iam("cop-bypass on") if bypassed($id);
+	eval_iam("cop-bypass on") if fxn($id)->bypassed;
 
 	my $owns = fxn($id)->owns;
 	(ref $owns) =~ /ARRAY/ or croak "expected array";
@@ -629,7 +616,7 @@ sub remove_op {
 	return unless valid_engine_setup();
 
 	my $id = shift;
-	my $n = chain($id);
+	my $n = fxn($id)->chain;
 
 	# select chain
 	
@@ -826,7 +813,7 @@ sub effect_update {
 	my ($id, $param, $val) = @_;
 	$param++; # so the value at $p[0] is applied to parameter 1
 	carp("$id: effect not found. skipping...\n"), return unless fx($id);
-	my $chain = chain($id);
+	my $chain = fxn($id)->chain;
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
 	logpkg('debug', "chain $chain id $id param $param value $val");
@@ -863,7 +850,7 @@ sub effect_update_copp_set {
 	my ($id, $param, $val) = @_;
 	effect_update( @_ );
 	# params($id)->[$param] = $val; # equivalent but confusing
-	$fx->{params}->{$id}->[$param] = $val;
+	fxn($id)->params->[$param] = $val;
 }
 
 sub sync_effect_parameters {
@@ -882,7 +869,7 @@ sub sync_effect_parameters {
 
 sub sync_one_effect {
 		my $id = shift;
-		my $chain = chain($id);
+		my $chain = fxn($id)->chain;
 		eval_iam("c-select $chain");
 		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
 		fxn($id)->set(params => get_cop_params( scalar @{$fx->{params}->{$id}} ));

@@ -120,7 +120,7 @@ sub process_command {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	if ($this_op and $this_track->n eq chain($this_op)){
+	if ($this_op and $this_track->n eq fxn($this_op)->chain){
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  ecasound_effect_index($this_op));
 	}
@@ -287,7 +287,7 @@ sub show_effect {
 	{ 
 		my $name = $pnames[$_]->{name};
 		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
-		push @lines, "    ".($_+1).q(. ) . $name . ": ".  params($op_id)->[$_] . "\n";
+		push @lines, "    ".($_+1).q(. ) . $name . ": ".  fxn($op_id)->params->[$_] . "\n";
 	} (0..scalar @pnames - 1);
 	}
 	map
@@ -579,7 +579,7 @@ sub remove_track_cmd {
 sub unity {
 	my ($track, $save_level) = @_;
 	if ($save_level){
-		$track->set(old_vol_level => params($track->vol)->[0]);
+		$track->set(old_vol_level => fxn($track->vol)->params->[0]);
 	}
 	effect_update_copp_set( 
 		$track->vol, 

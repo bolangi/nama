@@ -77,7 +77,7 @@ sub refresh_fade_controller {
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller;
-	($controller) = @{fxn($track->fader)->owns} if $track->fader;
+	($controller) = @{::fxn($track->fader)->owns} if $track->fader;
 	if( $controller )
 	{
 		logpkg('debug',$track->name, ": existing controller: $controller");
