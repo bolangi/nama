@@ -73,11 +73,11 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = ::type($track->fader);
+	my $operator  = ::fxn($track->fader)->type;
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller;
-	($controller) = @{owns($track->fader)} if $track->fader;
+	($controller) = @{fxn($track->fader)->owns} if $track->fader;
 	if( $controller )
 	{
 		logpkg('debug',$track->name, ": existing controller: $controller");
@@ -228,7 +228,7 @@ sub fader_envelope_pairs {
 		[ 	$marktime1, 
 			$marktime2, 
 			$fade->type, 
-			::type($track->fader),
+			::fxn($track->fader)->type,
 		];
 }
 	# sort fades -  may not need this

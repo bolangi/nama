@@ -744,7 +744,7 @@ add_controller: _add_controller parent effect value(s?) {
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index(::type($parent));
+		my $pi = 	::effect_index(::fxn($parent)->type);
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -769,7 +769,7 @@ add_controller: _add_controller effect value(s?) {
 		my $i = 	::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $pi = 	::effect_index(::type($parent));
+		my $pi = 	::effect_index(::fxn($parent)->type);
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
 		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
@@ -844,7 +844,7 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		my $bi = 	::effect_index(::type($before));
+		my $bi = 	::effect_index(::fxn($before)->type);
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		::pager2( "Inserted $id ($iname) before $before ($bname)");

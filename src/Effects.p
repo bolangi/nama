@@ -34,8 +34,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					parent
 					chain
-					type
-					bypassed
 					owns
 					fx
 					params
@@ -88,22 +86,7 @@ sub chain  {
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{chain}      
 }
-sub type   { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{type}       
-}
-sub bypassed {
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{bypassed}   
-}
 
-sub owns   { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{owns}
-} 
 sub fx     { 
 	my $id = shift; 
 	catch_null_id($id);
@@ -119,7 +102,7 @@ sub params {
 sub fxindex {
 	my $id = shift;
 	catch_null_id($id);
-	$fx_cache->{full_label_to_index}->{ type($id) };
+	$fx_cache->{full_label_to_index}->{ fnx($id)->type };
 }
 sub name {
 	my $id = shift;
@@ -335,9 +318,9 @@ sub modify_effect {
 		# $parameter: one-based
 	
 	$parameter--; # convert to zero-based
-	my $cop = fx($op_id)
+	my $cop = fxn($op_id)
 		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
-	my $code = type($op_id);
+	my $code = $cop->type;
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
@@ -383,7 +366,7 @@ sub remove_effect {
 	my $n 		= chain($id);
 	$n or die ::json_out(fx($id));
 	my $parent 	= parent($id);
-	my $owns	= owns($id);
+	my $owns	= fxn($id)->owns;
 	logpkg('debug', "id: $id, parent: $parent");
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -408,7 +391,7 @@ sub remove_effect {
 
 		# remove parent ownership of deleted controller
 
-		my $parent_owns = owns($parent);
+		my $parent_owns = fxn($parent)->owns;
 		logpkg('debug',"parent $parent owns: ". join ",", @$parent_owns);
 
 		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
@@ -604,9 +587,9 @@ sub apply_op {
 	logpkg('debug', "id: $id");
 	logpkg('logcluck', "$id: expected effect entry not found!"), return
 		if effect_entry_is_bad($id);
-	my $code = type($id);
-	my $dad = parent($id);
-	my $chain = chain($id);
+	my $code = fxn($id)->type;
+	my $dad = fxn($id)->parent;
+	my $chain = fxn($id)->chain; 
 	logpkg('debug', "chain: ".chain($id)." type: $code");
 	#  if code contains colon, then follow with comma (preset, LADSPA)
 	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
@@ -631,10 +614,9 @@ sub apply_op {
 	eval_iam($add_cmd);
 	eval_iam("cop-bypass on") if bypassed($id);
 
-	my $ref = ref owns($id) ;
-	$ref =~ /ARRAY/ or croak "expected array";
-	my @owns = @{ owns($id) }; 
-	logpkg('debug',"children found: ". join ",", @{owns($id)});
+	my $owns = fxn($id)->owns;
+	(ref $owns) =~ /ARRAY/ or croak "expected array";
+	logpkg('debug',"children found: ". join ",", @$owns);
 
 }
 sub remove_op {
@@ -790,8 +772,9 @@ sub effect_init {
 
 		# store relationship
 
-		push @{ owns($parent_id) }, $id;
-		logpkg('debug',"parent owns @{owns($parent_id)}");
+		my $owns = fxn($parent_id)->owns;
+		push @$owns, $id;
+		logpkg('debug',"parent owns @$owns");
 
 		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
 		#fxn($id)->set(parent => $parent_id);
@@ -920,7 +903,7 @@ sub get_cop_params {
 		
 sub ops_with_controller {
 	grep{ ! is_controller($_) }
-	grep{ scalar @{owns($_)} }
+	grep{ scalar @{fxn($_)->owns} }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }
@@ -957,7 +940,7 @@ sub expanded_ops_list { # including controllers
 	map 
 	{ push @expanded, 
 		$_, 
-		expanded_ops_list( reverse @{owns($_)} );
+		expanded_ops_list( reverse @{fxn($_)->owns} );
 
 		# we reverse controllers listing so 
 		# the first controller is applied last
@@ -1105,7 +1088,7 @@ sub check_fx_consistency {
 	# check for incomplete entries in $fx->{applied}
 	
 	my @incomplete_entries = 
-		grep { ! params($_) or ! type($_) or ! chain($_) } 
+		grep { ! fxn($_)->params or ! fxn($_)->type or !  fxn($_)->chain } 
 		grep { $_ } keys %{$fx->{applied}};
 
 	if(@incomplete_entries)
@@ -1148,9 +1131,6 @@ sub set	{
 		else { $fx->{applied}->{$self->{id}}->{$key} = $value }
 	}
 }
-
-#	owns($track->fader)
-#	fxn($track->fader)->owns
 
 1;
 __END__

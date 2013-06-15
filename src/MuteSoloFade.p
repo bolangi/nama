@@ -40,13 +40,13 @@ sub fade {
 
 sub fadein {
 	my ($id, $to) = @_;
-	my $from  = $config->{fade_out_level}->{type($id)};
+	my $from  = $config->{fade_out_level}->{fxn($id)->type};
 	fade( $id, 1, $from, $to, $config->{engine_fade_length_on_start_stop});
 }
 sub fadeout {
 	my $id    = shift;
 	my $from  =	params($id)->[0];
-	my $to	  = $config->{fade_out_level}->{type($id)};
+	my $to	  = $config->{fade_out_level}->{fxn($id)->type};
 	fade( $id, 1, $from, $to, $config->{engine_fade_length_on_start_stop} );
 }
 
