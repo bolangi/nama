@@ -78,7 +78,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-sub parent { 
+sub parent : lvalue { 
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{belongs_to} 
@@ -93,14 +93,11 @@ sub type   {
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{type}       
 }
-sub bypassed {  # XXX expects lvalue sub
+sub bypassed {
 	my $id = shift; 
 	catch_null_id($id);
 	$fx->{applied}->{$id}->{bypassed}   
 }
-
-# ensure owns field is initialized as anonymous array 
-# bah!!
 
 sub owns   { 
 	my $id = shift; 
@@ -738,8 +735,7 @@ sub effect_init {
 	logpkg('debug',sub{json_out($p)});
 
 	my ($n,  $type, $id, $parent_id)  = 
-	@$p{qw( 
-	    chain type effect_id parent_id)};
+	@$p{qw(chain type effect_id parent_id)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
@@ -798,7 +794,8 @@ sub effect_init {
 		logpkg('debug',"parent owns @{owns($parent_id)}");
 
 		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
-		fxn($id)->set(parent => $parent_id);
+		#fxn($id)->set(parent => $parent_id);
+		parent($id) = $parent_id;
 		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
 		#logpkg('debug', "parameter: $parameter");
 

@@ -54,7 +54,7 @@ sub is_controller {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
-sub parent : lvalue {
+sub parent {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
