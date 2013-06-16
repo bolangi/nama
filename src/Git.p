@@ -63,6 +63,7 @@ sub git_snapshot {
 sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift;
+	no warnings 'uninitialized';
 	$commit_message = join "\n", 
 		$commit_message,
 		# context for first command
