@@ -277,8 +277,8 @@ sub show_effect {
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
 	$name .= " (bypassed)" if bypassed($op_id);
-	$name .= "\n";
- 	push @lines, "$op_id: $name";
+	my $trackname = $ti{chain($op_id)}->name;
+ 	push @lines, "$op_id: $name (applied to track $trackname)\n";
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
