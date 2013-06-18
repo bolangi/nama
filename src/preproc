@@ -17,8 +17,8 @@
 
 use Text::Template;
 use Getopt::Std;
-use IO::All;
 use File::Find;
+use File::Slurp;
 use strict;
 use Cwd;
 use Storable qw(dclone); 
@@ -96,7 +96,7 @@ sub process {
 # ::, ::Text will be translated to Audio::Nama, # Audio::Nama::Text
 # after the file includes
 
-	if ( $file_out ) { $rooted_text > io($file_out); }
+	if ( $file_out ) { write_file($file_out, $rooted_text) }
 	else { print $rooted_text }
 }
 sub bestow_module_root {

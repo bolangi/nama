@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
-use IO::All;
+use File::Slurp;
 #$debug = 1;
 my %subs;
 while (my $source = shift @ARGV){
-	my @lines = io($source)->slurp;
+	my @lines = read_file($source);
 	$debug and print "lines: ". scalar @lines, $/;
 	my $sub_re = qr/^sub\s+(\w+)\s*\{/;
 	@subs = map{ /$sub_re/ and $1 } grep {/$sub_re/} @lines;
