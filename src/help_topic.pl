@@ -162,7 +162,7 @@ track => <<TRACK,
                               sax vol * 3  (multiply by 3)
                               sax vol / 2  (cut by half) 
    mute, c, cut            -  mute volume 
-   unmute, uncut, cc       -  restore muted volume
+   unmute, nomute, uncut, C -  restore muted volume
 
  - chain object modifiers
 

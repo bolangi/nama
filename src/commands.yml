@@ -324,7 +324,7 @@ mute:
 unmute:
   type: track
   what: Restore previous volume level. It can be used after mute or solo.
-  short: C uncut
+  short: nomute C uncut
   parameters: none
 unity:
   type: track
