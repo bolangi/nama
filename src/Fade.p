@@ -10,7 +10,7 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
-use ::Effects qw(remove_effect add_effect owns effect_update_copp_set);
+use ::Effects qw(remove_effect add_effect effect_update_copp_set);
 # we don't import 'type' as it would clobber our $fade->type attribute
 use ::Object qw( 
 				 n

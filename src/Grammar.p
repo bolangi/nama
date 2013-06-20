@@ -275,9 +275,9 @@ sub show_effect {
 	return unless $FX;
 	my @lines;
 	my @params;
- 	my $i = fxindex($op_id);
+ 	my $i = $FX->fxindex;
 	my $name = $FX->name;
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{fxn($op_id)->type} ;
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
 	$name .= " (bypassed)" if $FX->bypassed;
 	my $trackname = $ti{$FX->chain}->name;

@@ -32,18 +32,12 @@ sub import_engine_subs {
 use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
-					parent
-					owns
 					fx
-					is_controller
-					
 					fxindex
 					effect_index
 					ecasound_effect_index
 					full_effect_code
-					name
 
-					catch_null_id
 					effect_entry_is_bad
 					check_fx_consistency
 
@@ -74,23 +68,11 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
-sub parent : lvalue { 
-	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}->{belongs_to} 
-}
 sub fx     { 
 	my $id = shift; 
 	$fx->{applied}->{$id} if $id
 }
 
-sub catch_null_id {
-	return 0;
-	my $id = shift;
-	logpkg('logconfess',"null effect id")  unless $id;
-	logpkg('debug',"$id: effect id does not exist") 
-		unless $fx->{applied}->{$id} and $fx->{params}->{$id}
-}
 sub effect_entry_is_bad {
 		my $id = shift;
 		! $id  									# undef key ''
@@ -98,9 +80,6 @@ sub effect_entry_is_bad {
 		or ! ref $fx->{applied}->{$id} 			# applied entry is not ref 
 		or keys %{$fx->{applied}->{$id}} < 3	# not enough key/val pairs
 }
-
-# access routines
-# the lvalue routines can be on the left side of an assignment
 
 sub has_read_only_param {
 	my $op_id = shift;
@@ -619,9 +598,10 @@ sub remove_op {
 
 sub root_parent { 
 	my $id = shift;
-	my $parent = parent($id);
+	my $FX = fxn($id);
+	my $parent = $FX->parent;
 	carp("$id: has no parent, skipping...\n"),return unless $parent;
-	parent($parent) || $parent
+	fxn($parent)->parent || $parent;
 }
 
 ## Nama effects 
@@ -682,6 +662,8 @@ sub effect_init {
 		owns 	=> [],
 	}; 
 
+	my $FX = fxn($id);
+
 	# set defaults for effects only (not controllers)
 	
 	if (! $parent_id and ! $p->{values}){
@@ -699,20 +681,21 @@ sub effect_init {
 		$p->{values} = \@vals;
 	}
 	
-	fxn($id)->set(params => $p->{values});
+	$FX->set(params => $p->{values});
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
 
 		# store relationship
 
-		my $owns = fxn($parent_id)->owns;
+		my $parent = fxn($parent_id);
+		my $owns = $parent->owns;
 		push @$owns, $id;
 		logpkg('debug',"parent owns @$owns");
 
 		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
 		#fxn($id)->set(parent => $parent_id);
-		parent($id) = $parent_id;
+		$FX->set(parent => $parent_id);
 		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
 		#logpkg('debug', "parameter: $parameter");
 
@@ -1107,7 +1090,7 @@ sub ecasound_operator_index { # does not include offset
 sub set	{ 
 	my $self = shift; my %args = @_;
 	while(my ($key, $value) = each %args){ 
-		say "effect id $self->{id}: setting $key = $value";
+		#say "effect id $self->{id}: setting $key = $value";
 		$is_field{$key} or die "illegal key: $key for effect id $self->{id}";
 		if ($key eq 'params'){ $fx->{params}->{$self->{id}} = $value } 
 		else { $fx->{applied}->{$self->{id}}->{$key} = $value }
