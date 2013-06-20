@@ -270,6 +270,7 @@ sub list_effect {
 
 sub show_effect {
  	my $op_id = shift;
+	return unless fx($op_id);
 	my @lines;
 	my @params;
  	my $i = fxindex($op_id);

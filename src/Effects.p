@@ -371,7 +371,6 @@ sub modify_multiple_effects {
 		map{ 	my $parameter = $_;
 				modify_effect($op_id, $parameter, $sign, $value);
 		} @$parameters;
-		$this_op = $op_id; # set current effect
 	} @$op_ids;
 }
 
