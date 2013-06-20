@@ -868,10 +868,8 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
 	::pager2( ::show_effect($::this_op));
 }
-
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
-	# note that 'sign' results in undef value
 	::pager(::show_effect(@{ $item{'op_id(s)'} }))
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
