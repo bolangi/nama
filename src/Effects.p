@@ -1094,7 +1094,7 @@ sub remove_fader_effect {
 
 sub fxn {
 	my $id = shift;
-	bless {id => $id}, '::Effect';
+	bless {id => $id}, '::Effect' if $fx->{applied}->{$id}
 }
 package ::Effect;
 use Modern::Perl;

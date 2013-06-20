@@ -120,7 +120,7 @@ sub process_command {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	if ($this_op and $this_track->n eq fxn($this_op)->chain){
+	if (fxn($this_op) and $this_track->n eq fxn($this_op)->chain){
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  ecasound_effect_index($this_op));
 	}
