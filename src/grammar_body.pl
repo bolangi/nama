@@ -788,8 +788,8 @@ add_effect: _add_effect effect value(s?) {
 		values => $values
 	};
 	# place effect before fader if there is one
-	my $fader = ::fx($::this_track->pan) && $::this_track->pan 
-			|| ::fx($::this_track->vol) && $::this_track->vol; 
+	my $fader = ::fxn($::this_track->pan) && $::this_track->pan 
+			|| ::fxn($::this_track->vol) && $::this_track->vol; 
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));
 	$args->{before} = $fader if $fader;
@@ -889,7 +889,7 @@ new_following_op: op_id
 show_effect: _show_effect op_id(s) {
 	my @lines = 
 		map{ ::show_effect($_) } 
-		grep{ ::fx($_) }
+		grep{ ::fxn($_) }
 		@{ $item{'op_id(s)'}};
 	$::this_op = $item{'op_id(s)'}->[-1];
 	::pager(@lines); 1
@@ -1093,7 +1093,7 @@ find_user_effect_chains: _find_user_effect_chains ident(s?)
 bypass_effects:   _bypass_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	my @illegal = grep { ! ::fxn($_) } @$arr_ref;
 	::throw("@illegal: non-existing effect(s), skipping."), return 0 if @illegal;
  	::pager2( "track ",$::this_track->name,", bypassing effects:");
 	::pager2( ::named_effects_list(@$arr_ref));
@@ -1129,7 +1129,7 @@ bring_back_effects:   _bring_back_effects end {
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
-	my @illegal = grep { ! ::fx($_) } @$arr_ref;
+	my @illegal = grep { ! ::fxn($_) } @$arr_ref;
 	::throw("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
 	::pager2( "restoring effects:");
 	::pager2( ::named_effects_list(@$arr_ref));
@@ -1144,7 +1144,7 @@ bring_back_effects:   _bring_back_effects 'all' {
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
 # 	my $found = 
-# 	$::fx($id) or ::pager2("$id: effect does not exist."), return 0;
+# 	$::fxn($id) or ::pager2("$id: effect does not exist."), return 0;
 # 	grep{$id eq $_  } @{$::this_track->ops} 
 # 			   or ::pager2("$id: effect does not belong to track",
 # 						$::this_track->name), return 0;			  

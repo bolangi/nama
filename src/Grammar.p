@@ -262,23 +262,25 @@ sub list_effects {
 
 sub list_effect {
 	my $op_id = shift;
-	my $name = name($op_id);
-	$name .= q(, bypassed) if bypassed($op_id);
+	my $FX = fxn($op_id);
+	my $name = $FX->name;
+	$name .= q(, bypassed) if $FX->bypassed;
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
 
 sub show_effect {
  	my $op_id = shift;
-	return unless fx($op_id);
+	my $FX = fnx($op_id);
+	return unless $FX;
 	my @lines;
 	my @params;
  	my $i = fxindex($op_id);
-	my $name = name($op_id);
+	my $name = $FX->name;
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{fxn($op_id)->type} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if bypassed($op_id);
-	my $trackname = $ti{chain($op_id)}->name;
+	$name .= " (bypassed)" if $FX->bypassed;
+	my $trackname = $ti{$FX->chain}->name;
  	push @lines, "$op_id: $name (applied to track $trackname)\n";
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
@@ -300,7 +302,7 @@ sub show_effect {
 }
 sub named_effects_list {
 	my @ops = @_;
-	join("\n", map{ "$_ (" . ::name($_). ")" } @ops), "\n";
+	join("\n", map{ "$_ (" . fxn($_)->name. ")" } @ops), "\n";
 }
  
 sub show_modifiers {

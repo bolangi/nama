@@ -100,7 +100,8 @@ sub track_ops_latency {
 }
 sub op_latency {
 	my $op = shift;
-	return 0 if is_controller($op); # skip controllers
+	my $FX = fxn($op);
+	return 0 if $FX->is_controller; # skip controllers
 	my $p = latency_param($op);
 	defined $p and ! bypassed($op)
 		? get_live_param($op, $p) 

@@ -327,8 +327,7 @@ sub region_is_out_of_bounds {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	my @skip = 	grep {::fx($_)}  # must have data structure
-				grep {$_} 	   # must be non null
+	my @skip = 	grep {::fxn($_)}  # must exist
 				map { $track->$_ } qw(vol pan fader latency_op );
 
 	# make a dictionary of ops to exclude

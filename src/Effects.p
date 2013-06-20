@@ -81,22 +81,9 @@ sub parent : lvalue {
 }
 sub fx     { 
 	my $id = shift; 
-	catch_null_id($id);
-	$fx->{applied}->{$id}                
+	$fx->{applied}->{$id} if $id
 }
 
-# get information from registry
-sub fxindex {
-	my $id = shift;
-	catch_null_id($id);
-	$fx_cache->{full_label_to_index}->{ fxn($id)->type };
-}
-sub name {
-	my $id = shift;
-	catch_null_id($id);
-	$fx_cache->{registry}->[fxindex($id)]->{name}
-}
- 
 sub catch_null_id {
 	return 0;
 	my $id = shift;
@@ -115,10 +102,10 @@ sub effect_entry_is_bad {
 # access routines
 # the lvalue routines can be on the left side of an assignment
 
-sub is_controller 	{ my $id = shift; parent($id) }
 sub has_read_only_param {
 	my $op_id = shift;
-	my $entry = $fx_cache->{registry}->[fxindex($op_id)];
+	my $FX = fxn($op_id);
+	my $entry = $fx_cache->{registry}->[$FX->fxindex];
 	logpkg('logcluck',"undefined or unregistered effect id: $op_id"), 
 		return unless $op_id and $entry;
 		for(0..scalar @{$entry->{params}} - 1)
@@ -126,14 +113,6 @@ sub has_read_only_param {
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
 }
-sub is_read_only {
-    my ($op_id, $param) = @_;
-    my $entry = $fx_cache->{registry}->[fxindex($op_id)];
-	logpkg('logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
-	$entry->{params}->[$param]->{dir} eq 'output'
-}          
-
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
@@ -237,7 +216,7 @@ sub _insert_effect {  # call only from add_effect
 	print("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	print("Cannot insert effect before controller.\n"), return 
-		if is_controller($before);
+		if fxn($before)->is_controller;
 
 	if ($running){
 		$ui->stop_heartbeat;
@@ -312,12 +291,10 @@ sub modify_effect {
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
 
-	print("$op_id: effect does not exist, skipping\n"), return 
-		unless fx($op_id);
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
-		if is_read_only($op_id, $parameter);
+		if $cop->is_read_only($parameter);
 		my $new_value = $value; # unless $sign
 		if ($sign) {
 			$new_value = 
@@ -346,14 +323,11 @@ sub modify_multiple_effects {
 sub remove_effect { 
 	logsub("&remove_effect");
 	my $id = shift;
-	if( ! $id or ! fx($id) ){
-		logpkg('logcarp',"$id: does not exist, skipping...\n");
-		return;
-	}
-	my $n 		= fxn($id)->chain;
-	$n or die ::json_out(fx($id));
-	my $parent 	= parent($id);
-	my $owns	= fxn($id)->owns;
+	my $FX = fxn($id)
+		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
+	my $n 		= $FX->chain;
+	my $parent 	= $FX->parent;
+	my $owns	= $FX->owns;
 	logpkg('debug', "id: $id, parent: $parent");
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -400,12 +374,14 @@ sub position_effect {
 	# we cannot handle controllers
 	
 	print("$op or $pos: controller not allowed, skipping.\n"), return 
-		if grep{ is_controller($_) } $op, $pos;
+		if grep{ fxn($_)->is_controller } $op, $pos;
 	
 	# first, modify track data structure
 	
-	print("$op: effect does not exist, skipping.\n"), return unless fx($op);
-	my $track = $ti{fxn($op)->chain};
+	my $FX = fxn($op)
+		or say ("$op: effect does not exist, skipping.\n"), return;
+	my $track = $ti{$FX->chain};
+
 	my $op_index = nama_effect_index($op);
 	my @new_op_list = @{$track->ops};
 	# remove op
@@ -452,7 +428,7 @@ sub ecasound_effect_index {
 	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
-			next if is_controller($op);
+			next if fxn($op)->is_controller;
 			++$opcount;
 			last if $op eq $id
 	} 
@@ -465,37 +441,8 @@ sub ctrl_index {
 
 }
 
-sub ecasound_operator_index { # does not include offset
-	my $id = shift;
-	$id or croak "missing effect id";
-	my $chain = fxn($id)->chain;
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $controller_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$controller_count++ if is_controller($ops[$i]);
-	}
-	$position -= $controller_count; # skip controllers 
-	++$position; # translates 0th to chain-position 1
-}
 	
 	
-sub ecasound_controller_index {
-	my $id = shift;
-	my $chain = fxn($id)->chain;
-	my $track = $ti{$chain};
-	my @ops = @{$track->ops};
-	my $operator_count = 0;
-	my $position;
-	for my $i (0..scalar @ops - 1) {
-		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! is_controller($ops[$i]);
-	}
-	$position -= $operator_count; # skip operators
-	++$position; # translates 0th to chain-position 1
-}
 sub full_effect_code {
 	# get text effect code from user input, which could be
 	# - LADSPA Unique ID (number)
@@ -592,7 +539,7 @@ sub apply_op {
 	$add_cmd .= $code . join ",", @vals;
 
 	# append the -kx  operator for a controller-controller
-	$add_cmd .= " -kx" if $dad and is_controller($dad);
+	$add_cmd .= " -kx" if $dad and fxn($dad)->is_controller;
 
 	logpkg('debug', "command: $add_cmd");
 
@@ -626,7 +573,7 @@ sub remove_op {
 	
 	my $index;
 
-	if ( ! is_controller($id) ){ # chain operator
+	if ( ! fxn($id)->is_controller) { # chain operator
 		logpkg('debug', "no parent, assuming chain operator");
 	
 		$index = ecasound_effect_index( $id );
@@ -693,7 +640,7 @@ sub new_effect_id {
 		# increment $fx->{id_counter} if necessary
 		# to find an unused effect_id to allocate
 		
-		while( fx( $fx->{id_counter} )){ $fx->{id_counter}++};
+		while( $fx->{applied}->{$fx->{id_counter}}){ $fx->{id_counter}++};
 		$fx->{id_counter}
 }
 
@@ -709,8 +656,8 @@ sub effect_init {
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
 	#
-	logpkg('debug',"$id: returning existing id") if $id and fx($id);
-	return $id if $id and fx($id);
+	logpkg('debug',"$id: returning existing id") if $id and fxn($id);
+	return $id if $id and fxn($id);
 
 	my 	$allocated = "recycled";
 	if ( ! $id ){ 
@@ -811,9 +758,10 @@ sub effect_update {
 	#return if $es !~ /not started|stopped|running/;
 
 	my ($id, $param, $val) = @_;
+
+	my $FX = fxn($id) or carp("$id: effect not found. skipping...\n"), return;
 	$param++; # so the value at $p[0] is applied to parameter 1
-	carp("$id: effect not found. skipping...\n"), return unless fx($id);
-	my $chain = fxn($id)->chain;
+	my $chain = $FX->chain;
 	return unless ::ChainSetup::is_ecasound_chain($chain);
 
 	logpkg('debug', "chain $chain id $id param $param value $val");
@@ -825,15 +773,15 @@ sub effect_update {
 	ecasound_select_chain($chain);
 
 	# update Ecasound's copy of the parameter
-	if( is_controller($id)){
-		my $i = ecasound_controller_index($id);
+	if( $FX->is_controller ){
+		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i param: $param, value: $val");
 		eval_iam("ctrl-select $i");
 		eval_iam("ctrlp-select $param");
 		eval_iam("ctrlp-set $val");
 	}
 	else { # is operator
-		my $i = ecasound_operator_index($id);
+		my $i = $FX->ecasound_operator_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".
 		$fx->{offset}->{$chain}. " param $param, value $val");
 		eval_iam("cop-select ". ($fx->{offset}->{$chain} + $i));
@@ -889,8 +837,9 @@ sub get_cop_params {
 }
 		
 sub ops_with_controller {
-	grep{ ! is_controller($_) }
-	grep{ scalar @{fxn($_)->owns} }
+	grep{ ! $_->is_controller }
+	grep{ scalar @{$_->owns} }
+	map{ fxn($_) }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }
@@ -964,8 +913,8 @@ sub ops_data {
 
 	# keep parameters with other fx data
 	map { 	
-		$ops_data->{$_}            = fx($_);
-		$ops_data->{$_}->{params}  = params($_);
+		$ops_data->{$_}            = $fx->{applied}->{$_};
+		$ops_data->{$_}->{params}  = $fx->{params }->{$_};
 	} @ops_list;
 	
 	# we don't need chain (track) number or display type
@@ -1056,7 +1005,7 @@ sub check_fx_consistency {
 		# check for op ids without corresponding entry in $fx->{applied}
 
 		my @uninstantiated_op_ids;
-		map { fx($_) or push @uninstantiated_op_ids, $_ } @ops;
+		map { fxn($_) or push @uninstantiated_op_ids, $_ } @ops;
 
 		$is_track_error++, $result->{track}->{$name}->{uninstantiated_op_ids} 
 			= \@uninstantiated_op_ids if @uninstantiated_op_ids;
@@ -1094,11 +1043,11 @@ sub remove_fader_effect {
 
 sub fxn {
 	my $id = shift;
-	bless {id => $id}, '::Effect' if $fx->{applied}->{$id}
+	bless {id => $id}, '::Effect' if $id and $fx->{applied}->{$id}
 }
 package ::Effect;
 use Modern::Perl;
-use ::Globals qw($fx);
+use ::Globals qw($fx $fx_cache %tn %ti);
 my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
 sub id 			{ my $self = shift; $self->{id} }
 sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
@@ -1109,6 +1058,52 @@ sub chain 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{chain} 		}
 sub display 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{display} 	}
 sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
 sub params		{ my $self = shift; $fx->{params }->{$self->{id}}               }
+sub fxindex {
+	my $self = shift;
+	$fx_cache->{full_label_to_index}->{ $self->type };
+}
+sub name {
+	my $self = shift;
+	$fx_cache->{registry}->[$self->fxindex]->{name}
+}
+sub is_read_only {
+    my ($FX, $param) = @_;
+    my $entry = $fx_cache->{registry}->[$FX->fxindex];
+	$entry->{params}->[$param]->{dir} eq 'output'
+}          
+sub is_controller { my $self = shift; $self->parent } 
+
+sub ecasound_controller_index {
+	my $FX = shift;
+	my $id = $FX->id;
+	my $chain = $FX->chain;
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $operator_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$operator_count++ if ! fxn($ops[$i])->is_controller;
+	}
+	$position -= $operator_count; # skip operators
+	++$position; # translates 0th to chain-position 1
+}
+sub ecasound_operator_index { # does not include offset
+	my $FX = shift;
+	my $id = $FX->id;
+	my $chain = $FX->chain;
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $controller_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$controller_count++ if ::fxn($ops[$i])->is_controller;
+	}
+	$position -= $controller_count; # skip controllers 
+	++$position; # translates 0th to chain-position 1
+}
+
 sub set	{ 
 	my $self = shift; my %args = @_;
 	while(my ($key, $value) = each %args){ 
