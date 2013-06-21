@@ -1,5 +1,5 @@
 # ------ Effect Routines -------
-
+{
 package ::Effects; 
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
@@ -33,7 +33,6 @@ use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					fx
-					fxindex
 					effect_index
 					ecasound_effect_index
 					full_effect_code
@@ -81,17 +80,6 @@ sub effect_entry_is_bad {
 		or keys %{$fx->{applied}->{$id}} < 3	# not enough key/val pairs
 }
 
-sub has_read_only_param {
-	my $op_id = shift;
-	my $FX = fxn($op_id);
-	my $entry = $fx_cache->{registry}->[$FX->fxindex];
-	logpkg('logcluck',"undefined or unregistered effect id: $op_id"), 
-		return unless $op_id and $entry;
-		for(0..scalar @{$entry->{params}} - 1)
-		{
-			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
-		}
-}
 # make sure the chain number (track index) is set
 
 sub set_chain_value {
@@ -268,7 +256,7 @@ sub modify_effect {
 	my $code = $cop->type;
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
-	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
+	my $parameter_count = scalar @{ $cop->registry_params };
 
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
@@ -278,7 +266,7 @@ sub modify_effect {
 		if ($sign) {
 			$new_value = 
  			eval (join " ",
- 				$fx->{params}->{$op_id}->[$parameter], 
+ 				$cop->params->[$parameter], 
  				$sign,
  				$value);
 		};
@@ -307,7 +295,7 @@ sub remove_effect {
 	my $n 		= $FX->chain;
 	my $parent 	= $FX->parent;
 	my $owns	= $FX->owns;
-	logpkg('debug', "id: $id, parent: $parent");
+	logpkg('debug', "id: $id", ($parent ? ". parent: ".$parent->id : '' ));
 
 	my $object = $parent ? q(controller) : q(chain operator); 
 	logpkg('debug', qq(ready to remove $object "$id" from track "$n"));
@@ -331,7 +319,7 @@ sub remove_effect {
 
 		# remove parent ownership of deleted controller
 
-		my $parent_owns = fxn($parent)->owns;
+		my $parent_owns = $parent->owns;
 		logpkg('debug',"parent $parent owns: ". join ",", @$parent_owns);
 
 		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
@@ -361,7 +349,7 @@ sub position_effect {
 		or say ("$op: effect does not exist, skipping.\n"), return;
 	my $track = $ti{$FX->chain};
 
-	my $op_index = nama_effect_index($op);
+	my $op_index = track_effect_index($op);
 	my @new_op_list = @{$track->ops};
 	# remove op
 	splice @new_op_list, $op_index, 1;
@@ -374,7 +362,7 @@ sub position_effect {
 		my $track2 = $ti{fxn($pos)->chain};
 		print("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
-		$new_op_index = nama_effect_index($pos); 
+		$new_op_index = track_effect_index($pos); 
 		# insert op
 		splice @new_op_list, $new_op_index, 0, $op;
 	}
@@ -389,7 +377,7 @@ sub position_effect {
 
 ## array indices for Nama and Ecasound effects and controllers
 
-sub nama_effect_index { # returns nama chain operator index
+sub track_effect_index { # returns nama chain operator index
 						# does not distinguish op/ctrl
 	my $id = shift;
 	my $n = fxn($id)->chain;
@@ -414,11 +402,6 @@ sub ecasound_effect_index {
 	$fx->{offset}->{$n} + $opcount;
 }
 
-sub ctrl_index { 
-	my $id = shift;
-	nama_effect_index($id) - nama_effect_index(root_parent($id));
-
-}
 
 	
 	
@@ -518,12 +501,12 @@ sub apply_op {
 	$add_cmd .= $code . join ",", @vals;
 
 	# append the -kx  operator for a controller-controller
-	$add_cmd .= " -kx" if $dad and fxn($dad)->is_controller;
+	$add_cmd .= " -kx" if $dad and $dad->is_controller;
 
 	logpkg('debug', "command: $add_cmd");
 
 	eval_iam("c-select $chain") if $selected_chain != $chain;
-	eval_iam("cop-select " . ecasound_effect_index($dad)) if $dad;
+	eval_iam("cop-select " . ecasound_effect_index($dad->id)) if $dad;
 	eval_iam($add_cmd);
 	eval_iam("cop-bypass on") if fxn($id)->bypassed;
 
@@ -542,7 +525,8 @@ sub remove_op {
 	return unless valid_engine_setup();
 
 	my $id = shift;
-	my $n = fxn($id)->chain;
+	my $self = fxn($id);
+	my $n = $self->chain;
 
 	# select chain
 	
@@ -552,15 +536,15 @@ sub remove_op {
 	
 	my $index;
 
-	if ( ! fxn($id)->is_controller) { # chain operator
+	if ( ! $self->is_controller) { # chain operator
 		logpkg('debug', "no parent, assuming chain operator");
 	
-		$index = ecasound_effect_index( $id );
+		$index = $self->ecasound_effect_index;
 		logpkg('debug', "ops list for chain $n: @{$ti{$n}->ops}");
 		logpkg('debug', "operator id to remove: $id");
 		logpkg('debug', "ready to remove from chain $n, operator id $id, index $index");
 		logpkg('debug',sub{eval_iam("cs")});
-		eval_iam("cop-select ". ecasound_effect_index($id) );
+		eval_iam("cop-select ".  $self->ecasound_effect_index() );
 		logpkg('debug',sub{"selected operator: ". eval_iam("cop-selected")});
 		eval_iam("cop-remove");
 		logpkg('debug',sub{eval_iam("cs")});
@@ -569,9 +553,9 @@ sub remove_op {
 
 		logpkg('debug', "has parent, assuming controller");
 
-		my $ctrl_index = ctrl_index($id);
+		my $ctrl_index = $self->ecasound_controller_index;
 		logpkg('debug', eval_iam("cs"));
-		eval_iam("cop-select ".  ecasound_effect_index(root_parent($id)));
+		eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index());
 		logpkg('debug', "selected operator: ". eval_iam("cop-selected"));
 		eval_iam("ctrl-select $ctrl_index");
 		eval_iam("ctrl-remove");
@@ -587,7 +571,7 @@ sub remove_op {
 #
 # for Ecasound, chain op index = 3, 
 #               ctrl index     = 2
-#                              = nama_effect_index HH - nama_effect_index C 
+#                              = track_effect_index HH - track_effect_index C 
 #               
 #
 # for Nama, chain op array index 2, 
@@ -595,14 +579,6 @@ sub remove_op {
 #                             = effect index - 1 + ctrl_index 
 #
 #
-
-sub root_parent { 
-	my $id = shift;
-	my $FX = fxn($id);
-	my $parent = $FX->parent;
-	carp("$id: has no parent, skipping...\n"),return unless $parent;
-	fxn($parent)->parent || $parent;
-}
 
 ## Nama effects 
 
@@ -765,9 +741,8 @@ sub effect_update {
 	}
 	else { # is operator
 		my $i = $FX->ecasound_operator_index;
-		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".
-		$fx->{offset}->{$chain}. " param $param, value $val");
-		eval_iam("cop-select ". ($fx->{offset}->{$chain} + $i));
+		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
+		eval_iam("cop-select ". ($FX->offset + $i));
 		eval_iam("copp-select $param");
 		eval_iam("copp-set $val");
 	}
@@ -794,21 +769,13 @@ sub sync_effect_parameters {
 	
  	return unless valid_engine_setup();
 	my $old_chain = eval_iam('c-selected');
-	map{ sync_one_effect($_) } ops_with_controller(), ops_with_read_only_params();
+	map{ $_->sync_one_effect } grep{ $_ }  map{ fxn($_) } ops_with_controller(), ops_with_read_only_params();
 	eval_iam("c-select $old_chain");
-}
-
-sub sync_one_effect {
-		my $id = shift;
-		my $chain = fxn($id)->chain;
-		eval_iam("c-select $chain");
-		eval_iam("cop-select " . ( $fx->{offset}->{$chain} + ecasound_operator_index($id)));
-		fxn($id)->set(params => get_cop_params( scalar @{$fx->{params}->{$id}} ));
 }
 
 	
 
-sub get_cop_params {
+sub get_ecasound_cop_params {
 	local $config->{category} = 'ECI_FX';
 	my $count = shift;
 	my @params;
@@ -827,7 +794,8 @@ sub ops_with_controller {
 	::ChainSetup::engine_tracks();
 }
 sub ops_with_read_only_params {
-	grep{ has_read_only_param($_) }
+	grep{ $_->has_read_only_param() }
+	map{ fxn($_) }
 	map{ @{ $_->ops } } 
 	::ChainSetup::engine_tracks();
 }
@@ -913,17 +881,17 @@ sub ops_data {
 
 sub bypass_effects {
 	my($track, @ops) = @_;
-	_bypass_effects($track, 'on', @ops);
+	set_bypass_state($track, 'on', @ops);
 }
 sub restore_effects {
 	my($track, @ops) = @_;
-	_bypass_effects($track, 'off', @ops);
+	set_bypass_state($track, 'off', @ops);
 }
 
-sub _bypass_effects {
+sub set_bypass_state {
 	
 	local $config->{category} = 'ECI_FX';
-	my($track, $off_or_on, @ops) = @_;
+	my($track, $bypass_state, @ops) = @_;
 
 	# only process ops that belong to this track
 	@ops = intersect_with_track_ops_list($track,@ops);
@@ -933,10 +901,11 @@ sub _bypass_effects {
 
 	foreach my $op ( @ops)
 	{ 
-		my $i = ecasound_effect_index($op);
+		my $FX = fxn($op);
+		my $i = $FX->ecasound_effect_index;
 		eval_iam("cop-select $i");
-		eval_iam("cop-bypass $off_or_on");
-		fxn($op)->set(bypassed => ($off_or_on eq 'on') ? 1 : 0);
+		eval_iam("cop-bypass $bypass_state");
+		$FX->set(bypassed => ($bypass_state eq 'on') ? 1 : 0);
 	}
 	$track->unmute;
 }
@@ -1028,38 +997,54 @@ sub fxn {
 	my $id = shift;
 	bless {id => $id}, '::Effect' if $id and $fx->{applied}->{$id}
 }
+}
+{
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($fx $fx_cache %tn %ti);
+use Carp qw(confess);
+our $AUTOLOAD;
 my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
 sub id 			{ my $self = shift; $self->{id} }
 sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
 sub bypassed 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{bypassed}	}
-sub parent 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{parent}		}
+sub parent 		{ my $self = shift; 
+					my $parent_id = $fx->{applied}->{$self->{id}}->{parent};
+					::fxn($parent_id)}
 sub type 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{type} 		}
 sub chain 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{chain} 		}
 sub display 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{display} 	}
 sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
 sub params		{ my $self = shift; $fx->{params }->{$self->{id}}               }
-sub fxindex {
-	my $self = shift;
-	$fx_cache->{full_label_to_index}->{ $self->type };
-}
-sub name {
-	my $self = shift;
-	$fx_cache->{registry}->[$self->fxindex]->{name}
-}
 sub is_read_only {
-    my ($FX, $param) = @_;
-    my $entry = $fx_cache->{registry}->[$FX->fxindex];
+    my ($self, $param) = @_;
+    my $entry = $fx_cache->{registry}->[$self->registry_index];
 	$entry->{params}->[$param]->{dir} eq 'output'
 }          
 sub is_controller { my $self = shift; $self->parent } 
 
+sub has_read_only_param {
+	my $self = shift;
+	my $entry = $fx_cache->{registry}->[$self->registry_index];
+		for(0..scalar @{$entry->{params}} - 1)
+		{
+			no warnings 'uninitialized';
+			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
+		}
+}
+
+sub registry_index {
+	my $self = shift;
+	$fx_cache->{full_label_to_index}->{ $self->type };
+}
+sub alternative_ecasound_controller_index { 
+	my $self = shift;
+	$self->track_effect_index - $self->root_parent->track_effect_index
+}
 sub ecasound_controller_index {
-	my $FX = shift;
-	my $id = $FX->id;
-	my $chain = $FX->chain;
+	my $self = shift;
+	my $id = $self->id;
+	my $chain = $self->chain;
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $operator_count = 0;
@@ -1072,9 +1057,9 @@ sub ecasound_controller_index {
 	++$position; # translates 0th to chain-position 1
 }
 sub ecasound_operator_index { # does not include offset
-	my $FX = shift;
-	my $id = $FX->id;
-	my $chain = $FX->chain;
+	my $self = shift;
+	my $id = $self->id;
+	my $chain = $self->chain;
 	my $track = $ti{$chain};
 	my @ops = @{$track->ops};
 	my $controller_count = 0;
@@ -1096,6 +1081,39 @@ sub set	{
 		else { $fx->{applied}->{$self->{id}}->{$key} = $value }
 	}
 }
+sub sync_one_effect {
+		my $self= shift;
+		my $chain = $self->chain;
+		eval_iam("c-select $chain");
+		eval_iam("cop-select " .( $self->offset + $self->ecasound_operator_index ) );
+		$self->set(params => get_ecasound_cop_params( scalar @{$self->params} ));
+}
+sub offset {
+	my $self = shift;
+	$fx->{offset}->{$self->chain}
+}
+sub root_parent { 
+	my $self = shift;
+	carp($self->id.": has no parent, skipping...\n"),return unless $self->parent;
+	$self->parent->parent if $self->parent|| $self->parent;
+}
 
+
+sub registry_params {
+	my $self = shift;
+	$fx_cache->{registry}->[$self->registry_index]->{params}
+}
+sub AUTOLOAD {
+	my $self = shift;
+	! defined $self and confess "autoload called on undefined $AUTOLOAD";
+	# get tail of method call
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	# see if this can be satisfied by a field from
+	# the corresponding effects registry entry
+	$fx_cache->{registry}->[$self->registry_index]->{$call}
+}
+sub DESTROY {}
+
+}
 1;
 __END__
