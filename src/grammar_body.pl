@@ -721,7 +721,13 @@ remove_effect: _remove_effect op_id(s) {
 	#print join $/, @{ $item{"op_id(s)"} }; 
 	::mute();
 	map{ 
-		::remove_effect( $_ )
+		my $id = $_;
+		my ($use) = grep{ $id eq $::this_track->$_ } qw(vol pan fader);
+		if($use){
+			print "Effect $id is used as $use by track",$::this_track->name, 
+			".\nSee 'remove_fader_effect to remove it'\n"
+		}
+		else { ::remove_effect( $_ ) }
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
 	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
 	::sleeper(0.5);
