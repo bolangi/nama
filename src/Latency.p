@@ -372,7 +372,7 @@ sub get_live_param { # for effect, not controller
 	my ($op, $param) = @_;
 	my $FX = fxn($op);
 	my $n = $FX->chain;
-	my $i = ecasound_effect_index($op);
+	my $i = $FX->ecasound_effect_index;
 	eval_iam("c-select $n");
 	eval_iam("cop-select $i");
 	eval_iam("copp-select $param");

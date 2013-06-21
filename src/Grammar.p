@@ -120,9 +120,10 @@ sub process_command {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	if (fxn($this_op) and $this_track->n eq fxn($this_op)->chain){
+	my $FX = fxn($this_op);
+	if ($FX and $this_track->n eq $FX->chain){
 		eval_iam("c-select ".$this_track->n);
-		eval_iam("cop-select ".  ecasound_effect_index($this_op));
+		eval_iam("cop-select ".  $FX->ecasound_effect_index);
 	}
 
 	my $result = check_fx_consistency();
@@ -271,11 +272,11 @@ sub list_effect {
 
 sub show_effect {
  	my $op_id = shift;
-	my $FX = fnx($op_id);
+	my $FX = fxn($op_id);
 	return unless $FX;
 	my @lines;
 	my @params;
- 	my $i = $FX->fxindex;
+ 	my $i = $FX->registry_index;
 	my $name = $FX->name;
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
