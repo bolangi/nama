@@ -46,7 +46,9 @@ our (
 
 sub remove_temporary_tracks {
 	logsub("&remove_temporary_tracks");
-	map { $_->remove  } grep{ $_->group eq 'Temp'} ::Track::all();
+	map { logpkg('debug',"removing temporary track ",$_->name); $_->remove  } 
+		grep{ $_->group eq 'Temp'} 
+		::Track::all();
 }
 sub initialize {
 
