@@ -575,12 +575,12 @@ new_branch:
   parameters: <s_new_branch_name> [<s_existing_branch_name>]
 save_state:
   type: project
-  what: Save the project settings as file or tagged commit
+  what: Save the project settings as file or git snapshot
   short: keep save
   parameters: [ <s_settings_target> [ <s_message> ] ]
 get_state:
   type: project
-  what: Retrieve project settings from file, branch or tag
+  what: Retrieve project settings from file or snapshot
   short: get recall retrieve
   parameters: <s_settings_target>
 list_projects:
