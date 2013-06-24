@@ -32,9 +32,7 @@ sub import_engine_subs {
 use Exporter qw(import);
 our %EXPORT_TAGS = ( 'all' => [ qw(
 
-					fx
 					effect_index
-					ecasound_effect_index
 					full_effect_code
 
 					effect_entry_is_bad
@@ -66,11 +64,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
-
-sub fx     { 
-	my $id = shift; 
-	$fx->{applied}->{$id} if $id
-}
 
 sub effect_entry_is_bad {
 		my $id = shift;
@@ -641,10 +634,10 @@ sub effect_init {
 		push @$owns, $id;
 		logpkg('debug',"parent owns @$owns");
 
-		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
+		logpkg('debug',sub{join " ", "my attributes:", json_out($fx->{applied})});
 		#fxn($id)->set(parent => $parent_id);
 		$FX->set(parent => $parent_id);
-		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
+		logpkg('debug',sub{join " ", "my attributes again:", json_out($fx->{applied})});
 		#logpkg('debug', "parameter: $parameter");
 
 		# set fx-param to the parameter number, which one

@@ -14,7 +14,6 @@ use Exporter qw(import);
 use Storable qw(dclone);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
-use ::Effects qw(fx);
 
 use ::Globals qw($fx_cache %tn $this_op $fx);
 
