@@ -58,11 +58,22 @@ sub tag_mixdown_commit {
 	save_state();
 	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
+	
+	delete_existing_mixdown_tag_and_convenience_encodings($name);
+
 	git_tag($name, $msg);
 
 	# rec_cleanup wants to audition the mixdown
 	mixplay('quiet');
 }
+sub delete_existing_mixdown_tag_and_convenience_encodings {
+	my $name = shift;
+		git_tag("-d", $name) if git_tag_exists($name);
+		foreach( qw(mp3 ogg wav) ){
+			my $file = join_path(project_dir(),"$name.$_");
+			unlink $file if -e $file;
+		}
+	}
 sub encode_mixdown_file {
 	state $shell_encode_command = {
 		mp3 => q(lame -h --ta "$artist" --ty $year --tt "$title" $input_file $output_file),
