@@ -388,22 +388,6 @@ sub track_effect_index { # returns nama chain operator index
 			return $pos if $arr->[$pos] eq $id; 
 		};
 }
-sub ecasound_effect_index { 
-	my $id = shift;
-	my $n = fxn($id)->chain;
-	my $opcount;  # one-based
-	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
-	for my $op (@{ $ti{$n}->ops }) { 
-			# increment only for ops, not controllers
-			next if fxn($op)->is_controller;
-			++$opcount;
-			last if $op eq $id
-	} 
-	$fx->{offset}->{$n} + $opcount;
-}
-
-
-	
 	
 sub full_effect_code {
 	# get text effect code from user input, which could be
@@ -506,7 +490,7 @@ sub apply_op {
 	logpkg('debug', "command: $add_cmd");
 
 	eval_iam("c-select $chain") if $selected_chain != $chain;
-	eval_iam("cop-select " . ecasound_effect_index($dad->id)) if $dad;
+	eval_iam("cop-select " . $dad->ecasound_effect_index) if $dad;
 	eval_iam($add_cmd);
 	eval_iam("cop-bypass on") if fxn($id)->bypassed;
 
@@ -544,7 +528,7 @@ sub remove_op {
 		logpkg('debug', "operator id to remove: $id");
 		logpkg('debug', "ready to remove from chain $n, operator id $id, index $index");
 		logpkg('debug',sub{eval_iam("cs")});
-		eval_iam("cop-select ".  $self->ecasound_effect_index() );
+		eval_iam("cop-select ".  $self->ecasound_effect_index);
 		logpkg('debug',sub{"selected operator: ". eval_iam("cop-selected")});
 		eval_iam("cop-remove");
 		logpkg('debug',sub{eval_iam("cs")});
@@ -555,7 +539,7 @@ sub remove_op {
 
 		my $ctrl_index = $self->ecasound_controller_index;
 		logpkg('debug', eval_iam("cs"));
-		eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index());
+		eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index);
 		logpkg('debug', "selected operator: ". eval_iam("cop-selected"));
 		eval_iam("ctrl-select $ctrl_index");
 		eval_iam("ctrl-remove");
@@ -1097,8 +1081,20 @@ sub root_parent {
 	carp($self->id.": has no parent, skipping...\n"),return unless $self->parent;
 	$self->parent->parent if $self->parent|| $self->parent;
 }
-
-
+sub ecasound_effect_index { 
+	my $self = shift;
+	my $id = $self->id;
+	my $n = $self->chain;
+	my $opcount;  # one-based
+	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	for my $op (@{ $ti{$n}->ops }) { 
+			# increment only for ops, not controllers
+			next if fxn($op)->is_controller;
+			++$opcount;
+			last if $op eq $id
+	} 
+	$fx->{offset}->{$n} + $opcount;
+}
 sub registry_params {
 	my $self = shift;
 	$fx_cache->{registry}->[$self->registry_index]->{params}
