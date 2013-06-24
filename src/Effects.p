@@ -347,9 +347,11 @@ sub position_effect {
 	
 	my $FX = fxn($op)
 		or say ("$op: effect does not exist, skipping.\n"), return;
+	my $POS = fxn($pos)
+		or say ("$pos: effect does not exist, skipping.\n"), return;
 	my $track = $ti{$FX->chain};
 
-	my $op_index = track_effect_index($op);
+	my $op_index = $FX->track_effect_index;
 	my @new_op_list = @{$track->ops};
 	# remove op
 	splice @new_op_list, $op_index, 1;
@@ -359,10 +361,10 @@ sub position_effect {
 		push @new_op_list, $op;
 	}
 	else { 
-		my $track2 = $ti{fxn($pos)->chain};
+		my $track2 = $ti{$POS->chain};
 		print("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
-		$new_op_index = track_effect_index($pos); 
+		$new_op_index = $POS->track_effect_index; 
 		# insert op
 		splice @new_op_list, $new_op_index, 0, $op;
 	}
@@ -375,20 +377,6 @@ sub position_effect {
 	process_command('show_track');
 }
 
-## array indices for Nama and Ecasound effects and controllers
-
-sub track_effect_index { # returns nama chain operator index
-						# does not distinguish op/ctrl
-	my $id = shift;
-	my $n = fxn($id)->chain;
-	my $arr = $ti{$n}->ops;
-	logpkg('debug', "id: $id n: $n");
-	logpkg('debug', "@{$ti{$n}->ops}" );
-		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
-			return $pos if $arr->[$pos] eq $id; 
-		};
-}
-	
 sub full_effect_code {
 	# get text effect code from user input, which could be
 	# - LADSPA Unique ID (number)
@@ -1055,7 +1043,31 @@ sub ecasound_operator_index { # does not include offset
 	$position -= $controller_count; # skip controllers 
 	++$position; # translates 0th to chain-position 1
 }
-
+sub ecasound_effect_index { 
+	my $self = shift;
+	my $n = $self->chain;
+	my $id = $self->id;
+	my $opcount;  # one-based
+	#logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	for my $op (@{ $ti{$n}->ops }) { 
+			# increment only for ops, not controllers
+			next if $self->is_controller;
+			++$opcount;
+			last if $op eq $id
+	} 
+	$self->offset + $opcount;
+}
+sub track_effect_index { # the position of the ID in the track's op array
+	my $self = shift;
+	my $id = $self->id;
+	my $n = $self->chain;
+	my $arr = $ti{$n}->ops;
+	logpkg('debug', "id: $id n: $n");
+	logpkg('debug', "@{$ti{$n}->ops}" );
+		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
+			return $pos if $arr->[$pos] eq $id; 
+		};
+}
 sub set	{ 
 	my $self = shift; my %args = @_;
 	while(my ($key, $value) = each %args){ 
@@ -1100,6 +1112,7 @@ sub registry_params {
 	$fx_cache->{registry}->[$self->registry_index]->{params}
 }
 sub AUTOLOAD {
+	warn "AUTOLOAD got @_\n";
 	my $self = shift;
 	! defined $self and confess "autoload called on undefined $AUTOLOAD";
 	# get tail of method call
@@ -1107,6 +1120,7 @@ sub AUTOLOAD {
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
 	$fx_cache->{registry}->[$self->registry_index]->{$call}
+	#$self->registry_entry->{$call}
 }
 sub DESTROY {}
 
