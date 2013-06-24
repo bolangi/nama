@@ -1093,24 +1093,15 @@ sub root_parent {
 	carp($self->id.": has no parent, skipping...\n"),return unless $self->parent;
 	$self->parent->parent if $self->parent|| $self->parent;
 }
-sub ecasound_effect_index { 
-	my $self = shift;
-	my $id = $self->id;
-	my $n = $self->chain;
-	my $opcount;  # one-based
-	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
-	for my $op (@{ $ti{$n}->ops }) { 
-			# increment only for ops, not controllers
-			next if fxn($op)->is_controller;
-			++$opcount;
-			last if $op eq $id
-	} 
-	$fx->{offset}->{$n} + $opcount;
-}
 sub registry_params {
 	my $self = shift;
 	$fx_cache->{registry}->[$self->registry_index]->{params}
 }
+sub registry_entry {
+	my $self = shift;
+	$fx_cache->{registry}->[$self->registry_index]
+}
+	
 sub AUTOLOAD {
 	warn "AUTOLOAD got @_\n";
 	my $self = shift;
@@ -1119,8 +1110,7 @@ sub AUTOLOAD {
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
-	$fx_cache->{registry}->[$self->registry_index]->{$call}
-	#$self->registry_entry->{$call}
+	$self->registry_entry->{$call}
 }
 sub DESTROY {}
 
