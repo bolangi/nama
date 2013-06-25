@@ -249,7 +249,7 @@ sub modify_effect {
 	my $code = $cop->type;
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
-	my $parameter_count = scalar @{ $cop->about->params };
+	my $parameter_count = scalar @{ $cop->about->{params} };
 
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
@@ -1040,12 +1040,12 @@ sub ecasound_effect_index {
 	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
-	my $opcount;  # one-based
+	my $opcount = 0;
 	#logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
 			next if $self->is_controller;
-			++$opcount;
+			++$opcount;   # first index is 1
 			last if $op eq $id
 	} 
 	$self->offset + $opcount;
