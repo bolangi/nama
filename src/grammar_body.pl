@@ -800,8 +800,7 @@ add_effect: _add_effect effect value(s?) {
 	# place effect before fader if there is one
 	my $fader = ::fx($::this_track->pan) && $::this_track->pan 
 			|| ::fx($::this_track->vol) && $::this_track->vol; 
-	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
-	::Dumper($args));
+	#::logpkg('debug',$::this_track->name,": effect insert point is $fader", ::Dumper($args));
 	$args->{before} = $fader if $fader;
  	my $id = ::add_effect($args);
 	if ($id)
