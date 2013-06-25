@@ -75,7 +75,7 @@ sub automix {
 
 	## accommodate ea and eadb volume controls
 
-	my $vol_operator = type($tn{$tracks[0]}->vol);
+	my $vol_operator = fxn($tn{$tracks[0]}->vol)->type;
 
 	my $reduce_vol_command  = $vol_operator eq 'ea' ? 'vol / 10' : 'vol - 10';
 	my $restore_vol_command = $vol_operator eq 'ea' ? 'vol * 10' : 'vol + 10';

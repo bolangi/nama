@@ -67,7 +67,7 @@ sub import {
 		map {
 			defined and ! ref and /^[^\W\d]\w*$/s
 			or die "Invalid accessor name '$_'";
-			"sub $_ : lvalue { \$_[0]->{$_} }"
+			"sub $_ { \$_[0]->{$_} }"
 		} @_;
 	die "Failed to generate $pkg" if $@;
 	return 1;

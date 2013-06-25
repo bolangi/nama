@@ -1,4 +1,4 @@
-use Test::More tests => 5;
+use Test::More tests => 4;
 use strict;
 
 
@@ -23,9 +23,9 @@ $apple->set( color => 'red' );
 
 is( $apple->color, 'red', "mutator" ); 
 
-$apple->color = 'blue'; 
+#$apple->color = 'blue'; 
 
-is( $apple->color, 'blue', "lvalue" ); 
+#is( $apple->color, 'blue', "lvalue" ); 
 
 1;
 

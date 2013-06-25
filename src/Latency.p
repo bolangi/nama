@@ -100,9 +100,10 @@ sub track_ops_latency {
 }
 sub op_latency {
 	my $op = shift;
-	return 0 if is_controller($op); # skip controllers
+	my $FX = fxn($op);
+	return 0 if $FX->is_controller; # skip controllers
 	my $p = latency_param($op);
-	defined $p and ! bypassed($op)
+	defined $p and ! $FX->bypassed
 		? get_live_param($op, $p) 
 		: 0
 }
@@ -369,8 +370,9 @@ sub get_live_param { # for effect, not controller
 					 # $param is position, starting at one
 	local $config->{category} = 'ECI_FX';
 	my ($op, $param) = @_;
-	my $n = chain($op);
-	my $i = ecasound_effect_index($op);
+	my $FX = fxn($op);
+	my $n = $FX->chain;
+	my $i = $FX->ecasound_effect_index;
 	eval_iam("c-select $n");
 	eval_iam("cop-select $i");
 	eval_iam("copp-select $param");

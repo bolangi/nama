@@ -1020,7 +1020,7 @@ sub make_scale {
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
 		  -command => sub { ::effect_update($id, $p, $fx->{params}->{$id}->[$p]) },
-			-state => is_read_only($id,$p) ? 'disabled' : 'normal',
+			-state => fxn($id)->is_read_only($p) ? 'disabled' : 'normal',
 		  );
 
 		# auxiliary field for logarithmic display
