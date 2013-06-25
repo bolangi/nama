@@ -61,14 +61,16 @@ sub tag_mixdown_commit {
 	
 	delete_existing_mixdown_tag_and_convenience_encodings($name);
 
-	git_tag($name, $msg);
+	git('tag', $name, '-m', $msg);
 
 	# rec_cleanup wants to audition the mixdown
 	mixplay('quiet');
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
+	logsub('&delete_existing_mixdown_tag_and_convenience_encodings');
 	my $name = shift;
-		git_tag("-d", $name) if git_tag_exists($name);
+	logpkg('debug',"name: $name");
+		git('tag', '-d', $name);
 		foreach( qw(mp3 ogg wav) ){
 			my $file = join_path(project_dir(),"$name.$_");
 			unlink $file if -e $file;

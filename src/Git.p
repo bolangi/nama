@@ -78,16 +78,7 @@ sub git_commit {
 	git( commit => '--quiet', '--message', $commit_message);
 	$project->{undo_buffer} = [];
 }
-	
 
-sub git_tag { 
-	logsub("&git_tag");
-	return unless $config->{use_git};
-	my ($tag_name,$msg) = @_;
-	my @args = ($tag_name);
-	push(@args, '-m',$msg) if $msg;
-	git( tag => @args);
-}
 sub git_checkout {
 	logsub("&git_checkout");
 	my ($branchname, @args) = @_;
