@@ -475,7 +475,9 @@ sub t_load_project {
 	stop_transport();
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
+	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
+	}
 	::process_command($config->{execute_on_project_load});
 }
 sub t_create_project {
