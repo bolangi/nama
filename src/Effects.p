@@ -966,6 +966,7 @@ sub fxn {
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($fx $fx_cache %tn %ti);
+use ::Log qw(logsub logpkg);
 use Carp qw(confess);
 our $AUTOLOAD;
 my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
@@ -1025,7 +1026,7 @@ sub ecasound_effect_index {
 	my $n = $self->chain;
 	my $id = $self->id;
 	my $opcount = 0;
-	#logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
+	logpkg('debug', "id: $id, n: $n, ops: @{ $ti{$n}->ops }" );
 	for my $op (@{ $ti{$n}->ops }) { 
 			# increment only for ops, not controllers
 			next if $self->is_controller;

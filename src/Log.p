@@ -102,6 +102,7 @@ sub logpkg {
 	# convert Effects.pm to Audio::Nama::Effects to support logpkg
 	my $pkg = $file;
 	($pkg) = $file =~ m| ([^/]+)\.pm$ |x;
+	$pkg //= "Dummy::Pkg";
 	$pkg = "Audio::Nama::$pkg";  # SKIP_PREPROC
 	#say "category: $pkg";
 	logit ($line_no,$pkg,$level, @message) 
