@@ -249,7 +249,7 @@ sub modify_effect {
 	my $code = $cop->type;
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
-	my $parameter_count = scalar @{ $cop->registry_params };
+	my $parameter_count = scalar @{ $cop->about->params };
 
 	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
@@ -1086,15 +1086,10 @@ sub root_parent {
 	carp($self->id.": has no parent, skipping...\n"),return unless $self->parent;
 	$self->parent->parent if $self->parent|| $self->parent;
 }
-sub registry_params {
-	my $self = shift;
-	$fx_cache->{registry}->[$self->registry_index]->{params}
-}
-sub registry_entry {
+sub about {
 	my $self = shift;
 	$fx_cache->{registry}->[$self->registry_index]
 }
-	
 sub AUTOLOAD {
 	warn "AUTOLOAD got @_\n";
 	my $self = shift;
@@ -1103,7 +1098,7 @@ sub AUTOLOAD {
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
-	$self->registry_entry->{$call}
+	$self->about->{$call}
 }
 sub DESTROY {}
 
