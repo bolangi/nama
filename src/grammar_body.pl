@@ -219,7 +219,9 @@ destroy_project_template: _destroy_project_template key(s) {
 tag: _tag tagname message(?) {   
 	::save_state();
 	::git_snapshot();
-	::git_tag($item{tagname},@{$item{'message(?)'}});
+	my @args = ('tag', $item{tagname});
+	push @args, '-m', "@{$item{'message(?)'}}" if @{$item{'message(?)'}};
+	::git(@args);
 	1;
 }
 commit: _commit message(?) { 
@@ -274,7 +276,9 @@ save_state: _save_state save_target message(?) {
 		{
 			print("saving as a commit\n");
 			::git_commit($message);
-			::git_tag($name, $message); 
+			my @args = ('tag', $name);
+			#push @args, '-m', $message) if $message;
+			::git(@args);
 			::pager3(qq[tagged HEAD commit as "$name"]);
 		}
 		else 
