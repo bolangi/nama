@@ -1091,9 +1091,7 @@ sub about {
 	$fx_cache->{registry}->[$self->registry_index]
 }
 sub AUTOLOAD {
-	warn "AUTOLOAD got @_\n";
 	my $self = shift;
-	! defined $self and confess "autoload called on undefined $AUTOLOAD";
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	# see if this can be satisfied by a field from
