@@ -339,10 +339,8 @@ sub position_effect {
 	
 	# first, modify track data structure
 	
-	my $FX = fxn($op)
-		or say ("$op: effect does not exist, skipping.\n"), return;
-	my $POS = fxn($pos)
-		or say ("$pos: effect does not exist, skipping.\n"), return;
+	my $FX = fxn($op);
+	my $POS = fxn($pos);
 	my $track = $ti{$FX->chain};
 
 	my $op_index = $FX->track_effect_index;
