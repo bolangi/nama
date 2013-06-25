@@ -982,8 +982,8 @@ sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
 sub params		{ my $self = shift; $fx->{params }->{$self->{id}}               }
 sub is_read_only {
     my ($self, $param) = @_;
-    my $entry = $fx_cache->{registry}->[$self->registry_index];
-	$entry->{params}->[$param]->{dir} eq 'output'
+	no warnings 'uninitialized';
+	$self->about->{params}->[$param]->{dir} eq 'output'
 }          
 sub is_controller { my $self = shift; $self->parent } 
 
