@@ -55,7 +55,8 @@ sub reconfigure_engine {
 	
 	return if ::ChainSetup::really_recording() and engine_running();
 	
-	# store recorded trackrefs if any for re-record function
+	# store a lists of wav-recording tracks for the rerecord
+	# function
 	
 	# an empty set (e.g. in post-record monitoring)
 	# will not overwrite a previous set
@@ -73,7 +74,7 @@ sub reconfigure_engine {
 	# or status_snapshot() shows a change in configuration
 
 	if( $setup->{changed} ){ 
-		logpkg('debug',"reconfigure requested");
+		logpkg('debug',"reconfigure flag is set");
 		$setup->{changed} = 0; # reset for next time
 	} 
 	else {
@@ -91,10 +92,6 @@ sub reconfigure_engine {
 
 	$setup->{_old_snapshot} = status_snapshot();
 	
-	# make sure this is initialized
-	#$setup->{_old_rec_status} //= 
-	#	{ map{$_->name => $_->rec_status } ::Track::all() };
-		
 	$old_offset_run_status = $mode->{offset_run};
 
 	process_command('show_tracks');
@@ -215,7 +212,7 @@ sub arm {
 	logsub("&arm");
 	exit_preview_mode();
 	$setup->{changed}++;
-	generate_setup() and connect_transport();
+	reconfigure_engine("force");
 }
 
 # substitute all live inputs by clock-sync'ed 
