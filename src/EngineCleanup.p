@@ -19,17 +19,27 @@ sub rec_cleanup {
 sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
 	process_command('mixplay');
-	my $mixdownfile = $tn{Mixdown}->full_path;
-	my $linkname = current_branch() || $project->{name};
+	my ($oldfile) = $tn{Mixdown}->full_path =~ m{([^/]+)$};
+	$oldfile = join_path($project->{name},'.wav',$oldfile);
+	my $tag_name = join '-', $project->{name}, current_branch();
 	my $version = $tn{Mixdown}->monitor_version;
-	$linkname =~ s/-branch$//;
-	$linkname .= "_$version";
-	my $tag_name = $linkname;
-	$linkname .= '.wav';
-	my $symlinkpath = join_path(project_dir(), $linkname);
-	symlink $mixdownfile, $symlinkpath;
-	#process_command('branch');
-	tag_mixdown_commit($tag_name, $symlinkpath, $mixdownfile) if $config->{use_git};
+
+	# simplify the tagname basename 
+	# 
+	# 	untitled-master        -> untitled
+	#   untitled-premix-branch -> untitled-premix
+	
+	$tag_name =~ s/-branch$//;
+	$tag_name =~ s/-master$//;
+	$tag_name .= "_$version";
+
+	my $newfile = join_path($project->{name}, "$tag_name.wav");
+	#say "symlinking oldfile: $oldfile, newfile: $newfile";
+	#symlink $oldfile, $newfile or say "symlink didn't work";
+	# strange result
+	#say -e $newfile ? "found symlink" : "no symlink found!!!"; # not found!!
+	#say `ls -l $newfile`; 										# found
+	tag_mixdown_commit($tag_name, $newfile, $oldfile) if $config->{use_git};
 	my $sha = git_sha(); # possibly undef
 	my $encoding = $config->{mixdown_encodings};
 	my $comment;
@@ -42,14 +52,14 @@ sub mixdown_postprocessing {
 	}
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
 	pager3($comment);	
-	encode_mixdown_file($mixdownfile,$tag_name);
+	encode_mixdown_file($oldfile,$tag_name);
 }
 sub tag_mixdown_commit {
 	logsub('&tag_mixdown_commit');
-	my ($name, $symlinkpath, $mixdownfile) = @_;
+	my ($name, $newfile, $mixdownfile) = @_;
 	logpkg('debug',"tag_mixdown_commit: @_");
 
-	my ($sym) = $symlinkpath =~ m([^/]+$);
+	my ($sym) = $newfile =~ m([^/]+$);
 	my ($mix) = $mixdownfile =~ m([^/]+$);
 
 	# we want to tag the normal playback state
@@ -61,7 +71,7 @@ sub tag_mixdown_commit {
 	
 	delete_existing_mixdown_tag_and_convenience_encodings($name);
 
-	git('tag', $name, '-m', $msg);
+	git('tag', $name, '-m', 'mixdown is tagged');
 
 	# rec_cleanup wants to audition the mixdown
 	mixplay('quiet');
