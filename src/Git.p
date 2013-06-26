@@ -150,7 +150,8 @@ sub git_sha {
 sub git_branch_display {
 	logsub("&git_branch_display");
 	return unless $config->{use_git};
-	return unless current_branch();
+	my $cb = current_branch();
+	return unless $cb and $cb ne 'master';
 	"git:".current_branch()." "
 }
 sub list_branches {
