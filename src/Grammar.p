@@ -470,6 +470,7 @@ sub t_load_project {
 	print("Project $newname does not exist\n"), return
 		unless -d join_path(project_root(), $newname);
 	stop_transport();
+	save_state();
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
