@@ -1,6 +1,7 @@
 # ----------- Engine cleanup (post-recording) -----------
 package ::;
 use Modern::Perl;
+use Cwd;
 use ::Globals qw(:all);
 
 sub rec_cleanup {  
@@ -20,7 +21,7 @@ sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
 	process_command('mixplay');
 	my ($oldfile) = $tn{Mixdown}->full_path =~ m{([^/]+)$};
-	$oldfile = join_path($project->{name},'.wav',$oldfile);
+	$oldfile = join_path('.wav',$oldfile);
 	my $tag_name = join '-', $project->{name}, current_branch();
 	my $version = $tn{Mixdown}->monitor_version;
 
@@ -33,13 +34,17 @@ sub mixdown_postprocessing {
 	$tag_name =~ s/-master$//;
 	$tag_name .= "_$version";
 
-	my $newfile = join_path($project->{name}, "$tag_name.wav");
-	#say "symlinking oldfile: $oldfile, newfile: $newfile";
-	#symlink $oldfile, $newfile or say "symlink didn't work";
-	# strange result
-	#say -e $newfile ? "found symlink" : "no symlink found!!!"; # not found!!
-	#say `ls -l $newfile`; 										# found
+	delete_existing_mixdown_tag_and_convenience_encodings($tag_name);
+
+	# create symlink in project_dir()
+	
+	my $was_in = getcwd;
+	chdir project_dir() or die "couldn't chdir: $!";
+	my $newfile = "$tag_name.wav";
+	logpkg('debug',"symlinking oldfile: $oldfile, newfile: $newfile");
+	symlink $oldfile, $newfile or say "symlink didn't work: $!";
 	tag_mixdown_commit($tag_name, $newfile, $oldfile) if $config->{use_git};
+
 	my $sha = git_sha(); # possibly undef
 	my $encoding = $config->{mixdown_encodings};
 	my $comment;
@@ -53,6 +58,7 @@ sub mixdown_postprocessing {
 	$tn{Mixdown}->add_system_version_comment($version, $comment);
 	pager3($comment);	
 	encode_mixdown_file($oldfile,$tag_name);
+	chdir $was_in;
 }
 sub tag_mixdown_commit {
 	logsub('&tag_mixdown_commit');
@@ -68,10 +74,7 @@ sub tag_mixdown_commit {
 	save_state();
 	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
-	
-	delete_existing_mixdown_tag_and_convenience_encodings($name);
-
-	git('tag', $name, '-m', 'mixdown is tagged');
+	git('tag', $name, '-m', $mix);
 
 	# rec_cleanup wants to audition the mixdown
 	mixplay('quiet');
