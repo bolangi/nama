@@ -53,7 +53,6 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					apply_ops
 					expanded_ops_list
 				
-					is_read_only
 					bypass_effects
 			
 					restore_effects
@@ -1069,8 +1068,8 @@ sub offset {
 }
 sub root_parent { 
 	my $self = shift;
-	carp($self->id.": has no parent, skipping...\n"),return unless $self->parent;
-	$self->parent->parent if $self->parent|| $self->parent;
+	return $self if ! $self->parent;
+	$self->parent->root_parent
 }
 sub about {
 	my $self = shift;
