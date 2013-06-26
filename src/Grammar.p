@@ -76,9 +76,6 @@ sub process_line {
 						and $exclude_from_undo_buffer{$1};
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
-				#or eval_iam('cs-connected') 
-				#and remove_latency_ops() 
-				#and calculate_and_adjust_latency();
 		}
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 	}
