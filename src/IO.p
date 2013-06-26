@@ -192,7 +192,7 @@ sub ecs_string {
 ## (e.g. -f:f32_le,2,48000) if the _format_template() method
 ## returns a signal format template (e.g. f32_le,N,48000)
 
-sub format { 
+sub _format { 
 	my $self = shift;
 	::signal_format($self->format_template, $self->width)
 		if $self->format_template and $self->width
@@ -402,6 +402,7 @@ sub new {
 	my %vals = @_;
 	$class->SUPER::new( %vals, device_id => "loop,$vals{endpoint}");
 }
+sub format {}
 }
 {
 package ::IO::to_loop;
