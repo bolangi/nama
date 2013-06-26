@@ -718,7 +718,7 @@ insert_effect:
 modify_effect:
   type: effect
   what: Modify effect parameter(s).
-  short: mfx modify_controller mcl
+  short: mfx
   parameters: [ <s_effect_id> ] <i_parameter> [ + | - | * | / ] <f_value>
   example: |
     # Modify the roomsize of our reverb.
@@ -736,7 +736,7 @@ modify_effect:
 remove_effect:
   type: effect
   what: Remove effects. They don't have to be on the current track.
-  short: rfx remove_controller rcl
+  short: rfx
   parameters: <s_effect_id1> [ <s_effect_id2> ] ...
 position_effect:
   type: effect

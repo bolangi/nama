@@ -264,12 +264,9 @@ effects => <<EFFECTS,
    add_effect,     afx        - add an effect to the current track
    add_controller, acl        - add an Ecasound controller
    insert_effect,  ifx        - insert an effect before another effect
-   modify_effect,  mfx,
-     modify_controller, mcl   - set, increment or decrement effect parameter
-   remove_effect, rfx         
-     remove_controller, rcl   - remove an effect or controller
-   append_effect              - add effect to the end of current track
-                                effect list 
+   modify_effect,  mfx        - set, increment or decrement effect parameter
+   remove_effect,  rfx        - remove an effect or controller
+   append_effect, apfx        - add effect to the end of current track effect list 
 
 -  send/receive inserts
 
