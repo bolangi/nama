@@ -42,10 +42,10 @@ sub generate_setup {
 { my $old_offset_run_status;
 sub reconfigure_engine {
 
-	my $force = shift;
-
 	logsub("&reconfigure_engine");
-	say("&reconfigure_engine");
+	my $force = shift;
+	my ($package, $filename, $line) = caller();
+    say("check for reconfigure at file $filename:$line");
 
 	# skip if command line option is set
 	# don't skip if $force argument given
@@ -222,7 +222,7 @@ sub arm {
 	logsub("&arm");
 	exit_preview_mode();
 	::request_setup();
-	generate_setup() and connect_transport();
+	reconfigure_engine('force');
 }
 
 # substitute all live inputs by clock-sync'ed 
