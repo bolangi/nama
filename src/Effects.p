@@ -459,7 +459,6 @@ sub position_effect {
 	#say join " - ",@new_op_list;
 	@{$track->ops} = @new_op_list;
 	::request_setup();
-	reconfigure_engine();
 	$this_track = $track;
 	process_command('show_track');
 }

@@ -74,7 +74,7 @@ sub reconfigure_engine {
 	# reconfigure engine if $setup->{changed} flag is set
 	# or status_snapshot() shows a change in configuration
 
-	if( $setup->{changed} ){ 
+	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
 	} 
 	else {
@@ -214,14 +214,8 @@ sub teardown_engine {
 }
 
 sub arm {
-
-	# now that we have reconfigure_engine(), use is limited to 
-	# - exiting preview
-	# - automix	
-	
 	logsub("&arm");
 	exit_preview_mode();
-	::request_setup();
 	reconfigure_engine('force');
 }
 

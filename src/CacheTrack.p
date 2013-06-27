@@ -230,7 +230,6 @@ sub post_cache_processing {
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
-		reconfigure_engine();
 		revise_prompt("default"); 
 }
 sub poll_cache_progress {
