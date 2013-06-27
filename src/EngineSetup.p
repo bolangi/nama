@@ -45,6 +45,7 @@ sub reconfigure_engine {
 	my $force = shift;
 
 	logsub("&reconfigure_engine");
+	say("&reconfigure_engine");
 
 	# skip if command line option is set
 	# don't skip if $force argument given
@@ -83,7 +84,7 @@ sub reconfigure_engine {
 				logpkg('debug',"no change in setup");
 				return;
 		}
-		logpkg('debug',"reconfigure triggered by change in setup");
+		logpkg('debug',"detected configuration change");
 		#logpkg('debug', diff(\$old, \$current));
 	}
 	$setup->{changed} = 0 ; # reset for next time
@@ -131,8 +132,7 @@ sub reconfigure_engine {
 }
 sub request_setup { 
 	my ($package, $filename, $line) = caller();
-	::logit($package,'logwarn', 
-    "reconfigure requested in file $filename:$line");
+    say("reconfigure requested in file $filename:$line");
 	$setup->{changed}++
 } 
 
