@@ -451,7 +451,7 @@ sub edit_action {
 	set_edit_mode();
 	$this_edit->host_alias_track->set(rw => 'MON'); # all 
 	$edit_actions{$action}->();
-	$setup->{changed}++;
+	request_setup();
 
 #   TODO: looping
 # 	my $is_setup = generate_setup(); 
@@ -474,7 +474,7 @@ sub end_edit_mode  	{
 	offset_run_mode(0);	
 	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
-	$setup->{changed}++ 
+	request_setup();
 }
 sub destroy_edit {
 	say("no edit selected"), return unless $this_edit;
@@ -838,7 +838,7 @@ sub offset_run {
 	$setup->{offset_run}->{end_time}   = setup_length();
 	$setup->{offset_run}->{mark} = $markname;
 	offset_run_mode(1);
-	$setup->{changed}++;
+	request_setup();
 }
 sub clear_offset_run_vars {
 	$setup->{offset_run}->{start_time} = 0;
@@ -851,7 +851,7 @@ sub offset_run_mode {
 		when(0){  
 			undef $mode->{offset_run};
 			clear_offset_run_vars();
-			$setup->{changed}++;
+			::request_setup();
 		}
 		when(1){
 			undef $this_edit; 

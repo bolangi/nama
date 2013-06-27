@@ -86,8 +86,6 @@ sub logit {
 	#say qq($line_number, $category, $level, @message) ;
 	#confess("first call to logit");
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
-	return unless $category;
-
 	cluck "illegal level: $level" unless $is_method{$level};
 	my $logger = get_logger($category);
 	$logger->$level($line_number_output, @message);

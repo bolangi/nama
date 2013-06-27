@@ -458,7 +458,7 @@ sub position_effect {
 	# reconfigure the entire engine (inefficient, but easy to do)
 	#say join " - ",@new_op_list;
 	@{$track->ops} = @new_op_list;
-	$setup->{changed}++;
+	::request_setup();
 	reconfigure_engine();
 	$this_track = $track;
 	process_command('show_track');

@@ -2,6 +2,7 @@
 
 package ::;
 use Modern::Perl;
+use ::Log qw(logpkg);
 no warnings 'uninitialized';
 
 sub generate_setup { 
@@ -74,7 +75,6 @@ sub reconfigure_engine {
 
 	if( $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
-		$setup->{changed} = 0; # reset for next time
 	} 
 	else {
 		my $current = json_out(status_snapshot());
@@ -86,6 +86,7 @@ sub reconfigure_engine {
 		logpkg('debug',"reconfigure triggered by change in setup");
 		#logpkg('debug', diff(\$old, \$current));
 	}
+	$setup->{changed} = 0 ; # reset for next time
 
 	# restore position/running status
 
@@ -128,6 +129,12 @@ sub reconfigure_engine {
 	}
 }
 }
+sub request_setup { 
+	my ($package, $filename, $line) = caller();
+	::logit($package,'logwarn', 
+    "reconfigure requested in file $filename:$line");
+	$setup->{changed}++
+} 
 
 
 #### status_snapshot() 
@@ -214,7 +221,7 @@ sub arm {
 	
 	logsub("&arm");
 	exit_preview_mode();
-	$setup->{changed}++;
+	::request_setup();
 	generate_setup() and connect_transport();
 }
 

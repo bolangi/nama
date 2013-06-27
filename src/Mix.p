@@ -35,7 +35,7 @@ sub check_level {
 	
 	remove_effect($ev);
 	$tn{Master}->set(rw => 'MON'); 
-	$setup->{changed}++;
+	::request_setup();
 }
 
 sub automix {

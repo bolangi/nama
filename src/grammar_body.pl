@@ -708,7 +708,7 @@ modify_mark: _modify_mark sign value {
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
-	$::setup->{changed}++;
+	::request_setup();
 	1;
 	}
 modify_mark: _modify_mark value {
@@ -718,7 +718,7 @@ modify_mark: _modify_mark value {
 	print "adjusted to ",$::this_mark->time, "\n" 
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
-	$::setup->{changed}++;
+	::request_setup();
 	1;
 	}		
 remove_effect: _remove_effect op_id(s) {
@@ -1246,7 +1246,7 @@ add_fade: _add_fade in_or_out mark1 duration(?)
 					relation => 'fade_from_mark',
 					track => $::this_track->name,
 	); 
-	++$::setup->{changed};
+	::request_setup();
 }
 add_fade: _add_fade in_or_out duration(?) mark1 
 { 	::Fade->new(  type => $item{in_or_out},
@@ -1256,7 +1256,7 @@ add_fade: _add_fade in_or_out duration(?) mark1
 					track => $::this_track->name,
 					relation => 'fade_to_mark',
 	);
-	++$::setup->{changed};
+	::request_setup();
 }
 add_fade: _add_fade in_or_out mark1 mark2
 { 	::Fade->new(  type => $item{in_or_out},
@@ -1264,7 +1264,7 @@ add_fade: _add_fade in_or_out mark1 mark2
 					mark2 => $item{mark2},
 					track => $::this_track->name,
 	);
-	++$::setup->{changed};
+	::request_setup();
 }
 #add_fade: _add_fade in_or_out time1 time2 # not implemented
 in_or_out: 'in' | 'out'
@@ -1274,7 +1274,7 @@ mark2: markname
 remove_fade: _remove_fade fade_index(s) { 
 	my @i = @{ $item{'fade_index(s)'} };
 	::remove_fade($_) for (@i);
-	$::setup->{changed}++;
+	::request_setup();
 	1
 }
 fade_index: dd 
