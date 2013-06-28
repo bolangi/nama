@@ -175,13 +175,4 @@ sub autosave {
 	git_checkout($original_branch, '--quiet');
 
 }
-
-sub merge_undo_branch {
-	logsub("&merge_undo_branch");
-	my $this_branch = current_branch();
-	autosave();
-	return unless my $diff = git(diff => $this_branch, 'undo');
-	git( qw{ merge --no-ff undo -m}, q{merge autosave commits} );
-	git( qw{ branch -d undo } );
-}
 1
