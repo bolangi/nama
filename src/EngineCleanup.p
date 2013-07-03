@@ -13,8 +13,8 @@ sub rec_cleanup {
 			mixdown_postprocessing();
 		}
 		else { post_rec_configure() }
-		reconfigure_engine();
-	}
+		request_setup();
+}
 }
 
 sub mixdown_postprocessing {

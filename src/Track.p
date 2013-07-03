@@ -960,6 +960,17 @@ sub rec_cleanup_script {
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
+
+#### This code kept as a workaround for a segfault in v5.14 and earlier
+sub remove_effect_from_track { 
+	# doesn't touch $fx->{applied} or $fx->{params} data structures 
+	my $track = shift;
+	my @ids = @_;
+	$track->set(ops => [ grep { my $existing = $_; 
+									! grep { $existing eq $_
+									} @ids }  
+							@{$track->ops} ]);
+}
 	
 
 } # end package
