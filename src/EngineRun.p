@@ -243,8 +243,7 @@ sub restart_ecasound {
 	kill_my_ecasound_processes();
 	pager3(q(restarting Ecasound engine - your may need to use the "arm" command));	
 	select_ecasound_interface();
-	#::request_setup();
-	reconfigure_engine();
+	reconfigure_engine('force');
 }
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
