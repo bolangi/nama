@@ -44,8 +44,6 @@ sub reconfigure_engine {
 
 	logsub("&reconfigure_engine");
 	my $force = shift;
-	my ($package, $filename, $line) = caller();
-    say("check for reconfigure at file $filename:$line");
 
 	# skip if command line option is set
 	# don't skip if $force argument given
@@ -76,22 +74,22 @@ sub reconfigure_engine {
 
 	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
-	} 
+} 
 	else {
-		my $current = json_out(status_snapshot());
-		my $old = json_out($setup->{_old_snapshot});
+		my $old = $setup->{_old_snapshot};
+		my $current = $setup->{_old_snapshot} = status_snapshot_string();	
 		if ( $current eq $old){
 				logpkg('debug',"no change in setup");
 				return;
 		}
 		logpkg('debug',"detected configuration change");
-		#logpkg('debug', diff(\$old, \$current));
+		logpkg('debug', diff(\$old, \$current));
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
 	# restore position/running status
 
-	$setup->{_old_snapshot} = status_snapshot();
+	
 	
 	# make sure this is initialized
 	#$setup->{_old_rec_status} //= 
@@ -171,17 +169,16 @@ sub request_setup {
 		current_version
  );
 sub status_snapshot {
-
-	
 	my %snapshot = ( project 		=> 	$project->{name},
 					 mastering_mode => $mode->{mastering},
 					 preview        => $mode->{preview},
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
-	grep{ $_->rec_status ne 'OFF' } ::Track::all();
+	grep{ $_->rec_status ne 'OFF' } grep { $_->group ne 'Temp' } ::Track::all();
 	\%snapshot;
 }
+sub status_snapshot_string { json_out(status_snapshot()) }
 }
 	
 sub find_duplicate_inputs { # in Main bus only
@@ -325,11 +322,11 @@ sub trigger_rec_setup_hooks {
 	map { system($_->rec_setup_script) } 
 	grep
 	{ 
-		logpkg('debug',
+		logpkg('trace',
 			join "\n",
 			"track ".$_->name,
 			"rec status is: ".$_->rec_status,
-			"old rec status: ".$setup->{_old_rec_status},
+			"old rec status: ".$setup->{_old_rec_status}->{$_->name},
 			"script was ". (-e $_->rec_setup_script ) ? "found" : "not found"
 		);
 		$_->rec_status eq 'REC' 

@@ -43,6 +43,7 @@ use inc::Module::Install;
 			Module::Load::Conditional  0 
 			Parse::RecDescent  0
 			Term::ReadLine::Gnu  0
+			Text::Diff  0
 			Text::Format  0
 			Time::HiRes  0
 			Try::Tiny  0
