@@ -418,21 +418,20 @@ sub remove_effect {
 
 	}
 	# remove effect ID from track
-	if( $ti{$n} ){
+	if( my $track = $ti{$n} ){
+		my @ops_list = @{$track->ops};
 		my $perl_version = $^V;
-		say "perl version: $perl_version";
 		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
-		say "minor version: $minor_version";
+		my @new_list = grep  { $_ ne $id  } @ops_list;
 		if ($minor_version <= 14) 
-			 { $ti{$n}->remove_effect_from_track( $id ) }
-		else { @{$ti{$n}->{ops}} = grep { $_ ne $id } @{$ti{$n}->{ops}} }
+		     {    $track->{ops}   = [ @new_list  ] }
+		else { @{ $track->{ops} } =   @new_list    }
 	}
 	# remove entries for chain operator attributes and parameters
  	delete $fx->{applied}->{$id}; # remove entry from chain operator list
     delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
 	$this_op = undef;
 }
-
 sub position_effect {
 	my($op, $pos) = @_;
 
