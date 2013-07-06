@@ -9,7 +9,6 @@
 
 package ::;
 
-my $logger = Log::Log4perl->get_logger("::Config");
 use Modern::Perl;
 no warnings 'uninitialized';
 

@@ -13,7 +13,7 @@ sub initialize_logger {
 	my $cat_string = shift;
 
 	my @all_cats = qw(
-[% qx(./get_logging_cats) %]
+[% qx(./emit_logging_categories) %]
 	);
 	push @all_cats, 'ECI','SUB';
 
