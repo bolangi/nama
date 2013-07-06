@@ -309,8 +309,8 @@ sub serialize {
 
 		if ($identifier){
 			logpkg('debug',"attempting to eval $eval_string");
-			defined eval($eval_string) 
-				or logpkg('error', "eval failed ($@)");
+			eval($eval_string);
+			logpkg('error', "eval failed ($@)") if $@;
 		}
 	} @vars;
 	logpkg('debug',sub{join $/,'\%state', Dumper \%state});
