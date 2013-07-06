@@ -21,7 +21,7 @@ sub prepare_static_effects_data{
 	logpkg('debug', join "\n", "newplugins:", new_plugins());
 	if ($config->{opts}->{r} or new_plugins()){ 
 
-		eval { unlink $effects_cache};
+		unlink $effects_cache;
 		print "Regenerating effects data cache\n";
 	}
 
