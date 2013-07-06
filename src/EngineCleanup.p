@@ -13,7 +13,6 @@ sub rec_cleanup {
 			mixdown_postprocessing();
 		}
 		else { post_rec_configure() }
-		request_setup();
 }
 }
 

@@ -74,7 +74,7 @@ sub initialize_project_data {
 
 	# $is_armed = 0;
 
-	$setup->{_old_snapshot} = {};
+	$setup->{_old_snapshot} = "";
 
 	$mode->{preview} = $config->{initial_mode};
 	$mode->{mastering} = 0;
