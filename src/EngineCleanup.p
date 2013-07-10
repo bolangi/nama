@@ -8,14 +8,12 @@ sub rec_cleanup {
 	logsub("&rec_cleanup");
 	logpkg('debug',"transport still running, can't cleanup"),return if transport_running();
 	if( my (@files) = new_files_were_recorded() ){
-		say join $/, "Now reviewing your recorded files...", (@files);
 		if( grep /Mixdown/, @files){
 			mixdown_postprocessing();
 		}
 		else { post_rec_configure() }
+	}
 }
-}
-
 sub mixdown_postprocessing {
 	logsub("&mixdown_postprocessing");
 	process_command('mixplay');
@@ -113,10 +111,13 @@ sub encode_mixdown_file {
 }
 		
 sub adjust_offset_recordings {
-	map {
-		$_->set(playat => $setup->{offset_run}->{mark});
-		say $_->name, ": offsetting to $setup->{offset_run}->{mark}";
-	} ::ChainSetup::engine_wav_out_tracks();
+	for( ::ChainSetup::engine_wav_out_tracks()){
+		no warnings 'uninitialized';
+		if (my $mark = $setup->{offset_run}->{mark}){
+			$_->set(playat => $mark);
+			logpkg('debug',$_->name, ": offsetting to $mark");
+		}
+	}
 }
 sub post_rec_configure {
 
@@ -128,6 +129,7 @@ sub post_rec_configure {
 		map{ $_->set(rw => 'MON') } @{$setup->{_last_rec_tracks}};
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
+		no warnings 'uninitialized';
 		$mode->{midish_transport_sync} = 'play' 
 			if $mode->{midish_transport_sync} eq 'record';
 
@@ -150,7 +152,7 @@ sub new_files_were_recorded {
 		} @files;
 	if(@recorded){
 		restart_wav_memoize();
-		say join $/,"recorded:",@recorded;
+		pager(join $/, "recorded:",@recorded);
 	}
 	map{ _get_wav_info($_) } @recorded;
 	@recorded 
