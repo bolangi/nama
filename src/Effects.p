@@ -27,6 +27,7 @@ sub import_engine_subs {
 	*ecasound_select_chain = \&::ecasound_select_chain;
 	*sleeper			= \&::sleeper;
 	*process_command    = \&::process_command;
+	*pager				= \&::pager;
 }
 
 use Exporter qw(import);
@@ -263,12 +264,12 @@ sub _insert_effect {  # call only from add_effect
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
 	my ($before, $code, $values) = @$p{qw(before type values)};
-	say("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
+	pager("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
 	$code = full_effect_code( $code );	
 	my $running = engine_running();
-	print("Cannot insert effect while engine is recording.\n"), return 
+	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
-	print("Cannot insert effect before controller.\n"), return 
+	pager("Cannot insert effect before controller.\n"), return 
 		if is_controller($before);
 
 	if ($running){
@@ -278,7 +279,7 @@ sub _insert_effect {  # call only from add_effect
 		sleeper( 0.05); 
 	}
 	my $n = chain($before) or 
-		print(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
+		pager(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
 		return;
 	
 	my $track = $ti{$n};
@@ -338,17 +339,17 @@ sub modify_effect {
 	
 	$parameter--; # convert to zero-based
 	my $cop = fx($op_id)
-		or print("$op_id: non-existing effect id. Skipping.\n"), return; 
+		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
 	my $code = type($op_id);
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
 	my $parameter_count = scalar @{ $fx_cache->{registry}->[$i]->{params} };
 
-	print("$op_id: effect does not exist, skipping\n"), return 
+	pager("$op_id: effect does not exist, skipping\n"), return 
 		unless fx($op_id);
-	print("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
+	pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
-	print("$op_id: parameter $parameter is read-only, skipping\n"), return 
+	pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
 		if is_read_only($op_id, $parameter);
 		my $new_value = $value; # unless $sign
 		if ($sign) {
@@ -437,12 +438,12 @@ sub position_effect {
 
 	# we cannot handle controllers
 	
-	print("$op or $pos: controller not allowed, skipping.\n"), return 
+	pager("$op or $pos: controller not allowed, skipping.\n"), return 
 		if grep{ is_controller($_) } $op, $pos;
 	
 	# first, modify track data structure
 	
-	print("$op: effect does not exist, skipping.\n"), return unless fx($op);
+	pager("$op: effect does not exist, skipping.\n"), return unless fx($op);
 	my $track = $ti{chain($op)};
 	my $op_index = nama_effect_index($op);
 	my @new_op_list = @{$track->ops};
@@ -455,7 +456,7 @@ sub position_effect {
 	}
 	else { 
 		my $track2 = $ti{chain($pos)};
-		print("$pos: position belongs to a different track, skipping.\n"), return
+		pager("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
 		$new_op_index = nama_effect_index($pos); 
 		# insert op
@@ -947,7 +948,7 @@ sub find_op_offsets {
 	for my $output (@op_offsets){
 		my $chain_id;
 		($chain_id) = $output =~ m/Chain "(\w*\d+)"/;
-		# print "chain_id: $chain_id\n";
+		# "print chain_id: $chain_id\n";
 		next if $chain_id =~ m/\D/; # skip id's containing non-digits
 									# i.e. M1
 		my $quotes = $output =~ tr/"//;
