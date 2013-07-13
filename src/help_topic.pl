@@ -182,7 +182,7 @@ track => <<TRACK,
  - cutting and time shifting
 
    set_region,    srg      - specify a track region using times or mark names
-   new_region,    nrg      - define a region creating an auxiliary track
+   add_region,    arg      - define a region creating an auxiliary track
    remove_region, rrg      - remove auxiliary track or region definition
    shift_track,   shift    - set playback delay for track/region
    unshift_track, unshift  - eliminate playback delay for track/region
