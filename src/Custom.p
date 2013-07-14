@@ -37,7 +37,7 @@ sub setup_user_customization {
 
 sub gen_coderef {
 	my ($cmd,$code) = @_;
-	my $coderef = eval "sub{ use feature ':5.10'; $code }";
+	my $coderef = eval "sub{ use feature ':5.10'; no warnings 'uninitialized'; $code }";
 	say("couldn't parse command $cmd: $@"), return if $@;
 	$coderef
 }
