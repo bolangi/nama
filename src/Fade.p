@@ -112,13 +112,15 @@ sub refresh_fade_controller {
 	# 	first fade is type 'out' : 100%
 	
 	 
-	effect_update_copp_set($track->fader,0, initial_level($track->name))
+	effect_update_copp_set($track->fader,0, initial_level($track->name) * 100)
 }
 
 
 sub all_fades {
 	my $track_name = shift;
-	grep{ $_->track eq $track_name } values %by_index
+	sort { 
+		$::Mark::by_name{$a->mark1}->{time} <=> $::Mark::by_name{$b->mark1}->{time}
+	} grep { $_->track eq $track_name } values %by_index
 }
 sub fades {
 
@@ -127,33 +129,19 @@ sub fades {
 	my $track_name = shift;
 	my $track = $tn{$track_name};
 	my @fades = all_fades($track_name);
+	return @fades if ! $mode->{offset_run};
 
-	
-	if($mode->{offset_run}){
-
-		# get end time
-		
-		my $length = $track->wav_length;
-		my $play_end = ::play_end_time();
+	# handle offset run mode
+	my @in_bounds;
+	my $play_end = ::play_end_time();
+	my $play_start_time = ::play_start_time();
+	my $length = $track->wav_length;
+	for my $fade (@fades){
 		my $play_end_time = $play_end ?  min($play_end, $length) : $length;
-
-		# get start time
-	
-		my $play_start_time = ::play_start_time();
-	
-		# throw away fades that are not in play region
-	
-		@fades = grep
-			{ my $time = $::Mark::by_name{$_->mark1}->{time};
-					$time >= $play_start_time
-				and $time <= $play_end_time
-			} @fades 
+		my $time = $::Mark::by_name{$fade->mark1}->{time};
+		push @in_bounds, $fade if $time >= $play_start_time and $time <= $play_end_time;
 	}
-
-	# sort remaining fades by unadjusted mark1 time
-	sort{ $::Mark::by_name{$a->mark1}->{time} <=>
-		  $::Mark::by_name{$b->mark1}->{time}
-	} @fades;
+	@in_bounds
 }
 
 # our envelope must include a straight segment from the
@@ -339,7 +327,7 @@ sub add_fader {
 				before 	=> $first_effect, 
 				track	=> $track,
 				type	=> $config->{fader_op}, 
-				values	=> [0],
+				values	=> [0], # HARDCODED
 		});
 		$track->set(fader => $id);
 	}
