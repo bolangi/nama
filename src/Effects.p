@@ -805,23 +805,9 @@ sub effect_init {
 		logpkg('debug',sub{join " ", "my attributes:", json_out(fx($id))});
 		parent($id) = $parent_id;
 		logpkg('debug',sub{join " ", "my attributes again:", json_out(fx($id))});
-		#logpkg('debug', "parameter: $parameter");
-
-		# set fx-param to the parameter number, which one
-		# above the zero-based array offset that $parameter represents
-		
-		#$fx->{params}->{$id}->[0] = $parameter + 1;  # XXX
-			# only GUI sets $parameter XXXX
-		
- 		# find position of parent in the track ops array 
- 		# and insert child immediately afterwards
- 		#
- 		# to keep controller order constant for RCS
- 		# controllers must be reverse in order 
- 		# they are stored on effect chain when applied
  		
-		# what if controller has two controllers?
-		# effect chain apply should reverse them, too
+		# find position of parent in the track ops array 
+ 		# and insert child immediately afterwards
 
 		insert_after_string($parent_id, $id, @{$ti{$n}->ops}), 
 

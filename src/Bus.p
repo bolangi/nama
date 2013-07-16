@@ -278,11 +278,10 @@ sub add_sub_bus {
 		send_id	 => $name,
 		) unless $::Bus::by_name{$name};
 
-	# create mix track
 	@args = ( 
-		rec_defeat	=> 1,     # set to rec_defeat (don't record signal)
+		rec_defeat	=> 1,
 		is_mix_track => 1,
-		rw 			=> 'REC', # live (non WAV file) input
+		rw 			=> 'REC',
 		@args
 	);
 

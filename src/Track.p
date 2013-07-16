@@ -828,17 +828,8 @@ sub set_track_class {
 
 
 sub busify {
-
-	# does not set an existing bus to REC or MON!
-	
 	my $track = shift;
-	my $name = $track->name;
-
-	# create the bus if needed
-	# create or convert named track to mix track
-	
-	::add_sub_bus($name) unless $track->is_system_track;
-
+	::add_sub_bus($track->name) unless $track->is_system_track;
 }
 sub unbusify {
 	my $track = shift;
