@@ -165,14 +165,18 @@ sub cleanup_exit {
 	# - allow time to close down
 	# - SIGKILL
 	delete $engine->{events};
-	map{ my $pid = $_; 
-		 map{ my $signal = $_; 
-			  kill $signal, $pid; 
-			  sleeper(0.2) 
-			} (2,2,9)
-	} @{$engine->{pids}};
+	close_midish() if $config->{use_midish};
+	if( @{$engine->{pids}}){
+		#eval_iam('quit');
+		map{ my $pid = $_; 
+			 map{ my $signal = $_; 
+				  kill $signal, $pid; 
+				  sleeper(0.2);
+				} (15); #,15,9);
+			 waitpid $pid, 1;
+		} @{$engine->{pids}};
+	}
  	#kill 15, ecasound_pid() if $engine->{socket};  	
-	#close_midish() if $config->{use_midish};
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
 }

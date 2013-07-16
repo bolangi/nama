@@ -467,6 +467,7 @@ if(	! $return_value == 256 ){
 	restart_ecasound();
 
 }
+	no warnings 'uninitialized';
 	$reply =~ s/\s+$//; 
 
 	if( $type eq 'e')
