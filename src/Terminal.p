@@ -22,12 +22,16 @@ sub initialize_terminal {
 	detect_spacebar(); 
 
 	revise_prompt();
+
 	# handle Control-C from terminal
 
-	$SIG{INT} = \&cleanup_exit;
-	$SIG{USR1} = sub { save_state() };
-	#$engine->{events}->{sigint} = AE::signal('INT', \&cleanup_exit);
+	# does nothing
+	#$SIG{INT} = \&cleanup_exit; 
 
+	# doesn't do anything either
+	#$engine->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+
+	$SIG{USR1} = sub { save_state() };
 }
 {my $override;
 sub revise_prompt {

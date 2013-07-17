@@ -167,7 +167,6 @@ sub cleanup_exit {
 	delete $engine->{events};
 	close_midish() if $config->{use_midish};
 	if( @{$engine->{pids}}){
-		#eval_iam('quit');
 		map{ my $pid = $_; 
 			 map{ my $signal = $_; 
 				  kill $signal, $pid; 

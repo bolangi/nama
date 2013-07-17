@@ -66,7 +66,7 @@ sub close_midish {
 	midish_command("save $save_file");
 	#sleeper(0.2);
 	#say "exiting midish";
-#	midish_command("exit;");
+#	midish_command("exit;"); # isn't necessary, triggers a warning 
 # 	sleeper(0.1);
 # 	kill 15,$pid;
 # 	sleeper(0.1);
