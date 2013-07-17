@@ -8,18 +8,19 @@ use Carp;
 
 my($error,$answer)=('','');
 my ($pid, $sel);
+my ($fh_midish_write, $fh_midish_read, $fh_midish_error) = map{ IO::Handle->new() } 1..3;
 
 sub start_midish {
 	my $executable = qx(which midish);
 	chomp $executable;
 	$executable or say("Midish not found!"), return;
-	$pid = open3(\*MIDISH_WRITE, \*MIDISH_READ,\*MIDISH_ERROR,"$executable -v")
+	$pid = open3($fh_midish_write, $fh_midish_read, $fh_midish_error,"$executable -v")
 		or warn "Midish failed to start!";
 
 	$sel = new IO::Select();
 
-	$sel->add(\*MIDISH_READ);
-	$sel->add(\*MIDISH_ERROR);
+	$sel->add($fh_midish_read);
+	$sel->add($fh_midish_error);
 	midish_command( qq(print "Welcome to Nama/Midish!"\n) );
 }
 sub start_midish_transport {
@@ -41,19 +42,19 @@ sub midish_command {
 	#$query eq 'exit' and say("Will exit Midish on closing Nama."), return;
 
 	#send query to midish
-	print MIDISH_WRITE "$query\n";
+	print $fh_midish_write "$query\n";
 
 	foreach my $h ($sel->can_read)
 	{
 		my $buf = '';
-		if ($h eq \*MIDISH_ERROR)
+		if ($h eq $fh_midish_error)
 		{
-			sysread(MIDISH_ERROR,$buf,4096);
+			sysread($fh_midish_error,$buf,4096);
 			if($buf){print "MIDISH ERR-> $buf\n"}
 		}
 		else
 		{
-			sysread(MIDISH_READ,$buf,4096);
+			sysread($fh_midish_read,$buf,4096);
 			if($buf){map{say} grep{ !/\+ready/ } split "\n", $buf}
 		}
 	}
@@ -64,9 +65,11 @@ sub close_midish {
 	my $save_file = join_path(project_dir(), "$project->{name}.msh");
 	say "saving midish as $save_file";
 	midish_command("save $save_file");
+	#my $fh;
+	#$_->close for $fh_midish_read, $fh_midish_write, $fh_midish_error;
 	#sleeper(0.2);
 	#say "exiting midish";
-#	midish_command("exit;"); # isn't necessary, triggers a warning 
+	#midish_command("exit;"); # isn't necessary, triggers a warning 
 # 	sleeper(0.1);
 # 	kill 15,$pid;
 # 	sleeper(0.1);
