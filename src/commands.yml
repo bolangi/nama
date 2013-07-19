@@ -426,7 +426,7 @@ show_latency_all:
   parameters: none
 set_region:
   type: track
-  what: Specify a playback region for the current track using marks. Use the command new_region to create more than one region from a track. Can be reversed with remove_region .
+  what: Specify a playback region for the current track using marks. Use the command add_region to create more than one region from a track. Can be reversed with remove_region .
   short: srg
   parameters: <s_start_mark_name> <s_end_mark_name>
   example: |
@@ -445,7 +445,7 @@ add_region:
   parameters: <s_start_mark_name> | <f_start_time> <s_end_mark_name> | <f_end_time> [ <s_region_name> ]
   example: |
     sax # Select track sax as current track.
-    new_region sax_start 66.7 trimmed_sax # Create the region trimmed sax.
+    add_region sax_start 66.7 trimmed_sax # Create the region trimmed sax.
                # This region contains the audio of track sax between the mark
                # sax_start and 66.7 seconds. You can use the region just like a
                # track, including commands remove-track and applying effects.
@@ -525,7 +525,7 @@ add_bunch:
   short: abn
   parameters: <s_bunch_name> [ <s_track_name_1> | <i_track_index_1> ] ...
   example: |
-    new_bunch woodwind # Create an empty new bunch called woodwind.
+    add_bunch woodwind # Create an empty new bunch called woodwind.
     nb strings violin cello basso # Create the bunch strings with tracks
                                   # violin, cello and basso.
     for strings;mute # Mute all tracks in the strings bunch.
@@ -1002,7 +1002,7 @@ new_effect_profile:
   short: nep
   parameters: <s_bunch_name> [ <s_effect_profile_name> ]
   example: |
-    new_bunch Drums snare toms kick # Create a buch called Drums.
+    add_bunch Drums snare toms kick # Create a buch called Drums.
     nep Drums my_drum_effects # Create an effect profile, call my_drum_effects
                               # containing all effects from snare toms and kick.
 apply_effect_profile:
