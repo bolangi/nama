@@ -8,7 +8,8 @@ use Carp;
 
 my($error,$answer)=('','');
 my ($pid, $sel);
-my ($fh_midish_write, $fh_midish_read, $fh_midish_error) = map{ IO::Handle->new() } 1..3;
+my @handles = my ($fh_midish_write, $fh_midish_read, $fh_midish_error) = map{ IO::Handle->new() } 1..3;
+#map{ $_->autoflush(1) } @handles; # doesn't help
 
 sub start_midish {
 	my $executable = qx(which midish);
@@ -69,7 +70,8 @@ sub close_midish {
 	#$_->close for $fh_midish_read, $fh_midish_write, $fh_midish_error;
 	#sleeper(0.2);
 	#say "exiting midish";
-	#midish_command("exit;"); # isn't necessary, triggers a warning 
+	#midish_command("exit"); # isn't necessary, triggers a warning 
+	#$_->flush for @handles; # doesn't help warning
 # 	sleeper(0.1);
 # 	kill 15,$pid;
 # 	sleeper(0.1);
