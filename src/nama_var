@@ -10,16 +10,19 @@ pronouns.pl     Pronouns (e.g. $this_track) and
 
 serialize.pl    Marshalling variables for serializing/deserializing
 
-singletons.pl   Simple hashes ($config) or objects ($file)
-                encapsulating application data/behaviors
+singletons.pl   Simple hashes (such as $config) or 
+				objects such as $file. Hash access to
+				underlying fields is expected, and 
+				is necessary for Tk slider widgets.
 
 #### Config variables require an entry in config_map
 
 config_map      Maps keys in .namarc (e.g. $mix_to_disk_format)
                 to Nama internal variable $config->{mix_to_disk_format}
 
-#### Singleton hash keys should be declared unless
-#### already declared in config_map
+#### Hash keys of all variables in ./singletons.pl 
+#### must be declared in singleton_keys or in config_map
+#### This is checked during build
 
 singleton_keys  List of allowed singleton hash keys
 
