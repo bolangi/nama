@@ -758,6 +758,16 @@ list_effects:
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
   short: lfx
   parameters: none
+use_effect_hotkeys:
+  type: effect
+  what: Use hotkeys to control effects
+  short: fxh
+  parameters: none
+no_effect_hotkeys:
+  type: effect
+  what: Use hotkeys to control effects
+  short: fxn
+  parameters: none
 add_insert:
   type: effect 
   what: Add an external send/return insert to current track.
