@@ -67,7 +67,19 @@ sub detect_spacebar {
 		}
 	});
 }
+sub use_effect_hotkeys {
+	delete $engine->{events}->{stdin};
+	$engine->{events}->{stdin} = AE::io(*STDIN, 0, \&process_hotkeys)
+}
+sub no_effect_hotkeys {
+	delete $engine->{events}->{stdin};
+	detect_spacebar();
+}
+sub process_hotkeys {
+	
 
+
+}
 sub throw {
 	logsub("&throw");
 	pager3(@_)

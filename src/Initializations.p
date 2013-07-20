@@ -229,6 +229,8 @@ sub initialize_interfaces {
 	
 	can_load( modules => {AnyEvent => undef})
 			or die "Perl Module 'AnyEvent' not found. Please install it and try again. Stopping.";
+	can_load( modules => {'AnyEvent::TermKey' => undef})
+			or die "Perl Module 'AnyEvent::TermKey' not found. Please install it and try again. Stopping.";
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
 
