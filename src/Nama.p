@@ -24,6 +24,7 @@ use IO::Select;
 use IPC::Open3;
 use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
+use Module::Load;
 use Parse::RecDescent;
 use Storable qw(thaw);
 use Term::ReadLine;

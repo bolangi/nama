@@ -67,18 +67,41 @@ sub detect_spacebar {
 		}
 	});
 }
+{
+my $cv;
 sub use_effect_hotkeys {
 	delete $engine->{events}->{stdin};
-	$engine->{events}->{stdin} = AE::io(*STDIN, 0, \&process_hotkeys)
+	Event::unloop();
+	process_hotkeys();
 }
 sub no_effect_hotkeys {
-	delete $engine->{events}->{stdin};
+	$cv->send; 
+	initialize_terminal();
+	#$engine->{events}->{stdin_termkey}->termkey->stop;
 	detect_spacebar();
+	Event::loop();
 }
 sub process_hotkeys {
 	
+        $cv = AnyEvent->condvar;
+        $engine->{events}->{stdin_termkey} = AnyEvent::TermKey->new(
+           term => \*STDIN,
 
+           on_key => sub {
+              my ( $key ) = @_;
+			  my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
 
+              print "Got key: $key_string\n";
+
+              $cv->send if $key->type_is_unicode and
+                           $key->utf8 eq "C" and
+                           $key->modifiers & KEYMOD_CTRL;
+			  no_effect_hotkeys() if $key_string eq '<Escape>';
+           },
+        );
+
+        $cv->recv;
+}
 }
 sub throw {
 	logsub("&throw");
