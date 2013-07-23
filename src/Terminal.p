@@ -35,6 +35,7 @@ sub initialize_terminal {
 }
 
 sub setup_hotkeys {
+	say "\nHotkeys on!";
 	destroy_readline(); 
 	setup_termkey() 
 }
@@ -103,6 +104,9 @@ sub detect_spacebar {
 			$text->{term_attribs}->{end}   		= 0;
 			$text->{term}->stuff_char(10);
 			&{$text->{term_attribs}->{'callback_read_char'}}();
+		}
+		elsif (  $text->{term_attribs}->{line_buffer} eq "#" ){
+			setup_hotkeys();
 		}
 	});
 }
