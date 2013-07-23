@@ -5,6 +5,7 @@ use Modern::Perl;
 no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
+use ::Log qw(logpkg logsub);
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -47,17 +48,13 @@ sub setup_termkey {
 		term => \*STDIN,
 
 		on_key => sub {
-			my ( $key ) = @_;
+			my $key = shift;
+			$cv->send if $key->type_is_unicode 
+						and $key->utf8 eq "C" 
+						and $key->modifiers & KEYMOD_CTRL;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-
-			print "TermKey got key: $key_string\n";
-
-			$cv->send if $key->type_is_unicode and
-			$key->utf8 eq "C" and
-			$key->modifiers & KEYMOD_CTRL;
-
-			
-			$cv->send, teardown_hotkeys() if $key_string =~ /Escape/;
+			say "got key: $key_string";
+			$cv->send, teardown_hotkeys(), return if $key_string =~ /Escape/;
 			},
 		);
 	$cv->recv;
