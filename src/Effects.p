@@ -17,6 +17,7 @@ use ::Globals qw(
 					$config 
 					$setup 
 					$this_op 
+					$this_param
 					$this_track);
 
 sub import_engine_subs {
@@ -337,6 +338,7 @@ sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
 	
+	$this_param = $parameter;
 	$parameter--; # convert to zero-based
 	my $cop = fx($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
