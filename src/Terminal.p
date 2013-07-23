@@ -43,7 +43,7 @@ sub setup_hotkeys {
 }
 sub setup_termkey {
 	my $cv = AnyEvent->condvar;
-
+	$text->{hotkey_buffer} = undef;
 	$engine->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
 
@@ -55,6 +55,9 @@ sub setup_termkey {
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
 			say "got key: $key_string";
 			$cv->send, teardown_hotkeys(), return if $key_string =~ /Escape/;
+			$text->{hotkey_buffer} .= $key_string;
+# 			$text->{hotkey_parser}->command($setup->{hotkey_buffer})
+# 				and undef $text->{hotkey_buffer};
 			},
 		);
 	$cv->recv;
