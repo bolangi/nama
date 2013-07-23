@@ -77,6 +77,8 @@
 
 ### the following are not included in default namarc
 
+	$hotkeys_always					$config->{hotkeys_always}
+
 	$use_pager     					$config->{use_pager}
 	$use_placeholders  				$config->{use_placeholders}
 
