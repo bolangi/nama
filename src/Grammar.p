@@ -43,6 +43,11 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
+sub setup_hotkey_grammar {
+	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
+	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
+		or croak "Bad grammar!\n";
+}
 {
 my %exclude_from_undo_buffer = map{ $_ => 1} 
 		qw(tag commit branch br new_branch nbr load save get restore);

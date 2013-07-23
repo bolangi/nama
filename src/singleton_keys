@@ -83,8 +83,9 @@ $fx->{params_log}				# for log scale sliders
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
-$text->{hotkeys_grammar} 		# hotkeys grammar source
-$text->{hotkeys_parser} 		# hotkeys grammar source
+$text->{hotkey_grammar} 		# hotkeys grammar source
+$text->{hotkey_parser} 			# hotkeys grammar source
+$text->{hotkey_buffer} 			# hotkeys grammar source
 $text->{wrap}					# Text::Format object for wrapping text
 $text->{format_fields}			# ??
 $text->{commands_yml}			# command description YAML source

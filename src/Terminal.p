@@ -56,8 +56,8 @@ sub setup_termkey {
 			say "got key: $key_string";
 			$cv->send, teardown_hotkeys(), return if $key_string =~ /Escape/;
 			$text->{hotkey_buffer} .= $key_string;
-# 			$text->{hotkey_parser}->command($setup->{hotkey_buffer})
-# 				and undef $text->{hotkey_buffer};
+ 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
+ 				and undef $text->{hotkey_buffer};
 			},
 		);
 	$cv->recv;
