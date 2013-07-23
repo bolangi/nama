@@ -1514,5 +1514,4 @@ remove_fader_effect: _remove_fader_effect fader_role {
 	1
 }
 fader_role: 'vol'|'pan'|'fader'
-use_effect_hotkeys: _use_effect_hotkeys { ::use_effect_hotkeys() }
-no_effect_hotkeys: _no_effect_hotkeys { ::no_effect_hotkeys() }
+hotkeys: _hotkeys { ::setup_hotkeys(); 1 }

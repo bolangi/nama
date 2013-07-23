@@ -758,15 +758,10 @@ list_effects:
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
   short: lfx
   parameters: none
-use_effect_hotkeys:
+hotkeys:
   type: effect
-  what: Use hotkeys to control effects
-  short: fxh
-  parameters: none
-no_effect_hotkeys:
-  type: effect
-  what: Use hotkeys to control effects
-  short: fxn
+  what: Enable hotkeys. Hit Escape key to return to command mode.
+  short: hk 
   parameters: none
 add_insert:
   type: effect 

@@ -16,7 +16,7 @@ sub hello {"hello world!";}
 
 sub loop {
 	package ::;
-	issue_first_prompt();
+	initialize_prompt();
 	$Event::DIED = sub {
 	   my ($event, $errmsg) = @_;
 	   say $errmsg;

@@ -6,7 +6,7 @@ no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
 
-sub issue_first_prompt {
+sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
 	&{$text->{term_attribs}->{'callback_read_char'}}();
 	set_current_bus();
@@ -32,6 +32,45 @@ sub initialize_terminal {
 	#$engine->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 
 	$SIG{USR1} = sub { save_state() };
+}
+
+sub setup_hotkeys {
+	destroy_readline(); 
+	setup_termkey() 
+}
+sub setup_termkey {
+	my $cv = AnyEvent->condvar;
+
+	$engine->{events}->{termkey} = AnyEvent::TermKey->new(
+		term => \*STDIN,
+
+		on_key => sub {
+			my ( $key ) = @_;
+			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
+
+			print "TermKey got key: $key_string\n";
+
+			$cv->send if $key->type_is_unicode and
+			$key->utf8 eq "C" and
+			$key->modifiers & KEYMOD_CTRL;
+
+			
+			$cv->send, teardown_hotkeys() if $key_string =~ /Escape/;
+			},
+		);
+	$cv->recv;
+}
+
+sub teardown_hotkeys {
+	$engine->{events}->{termkey}->termkey->stop();
+	delete $engine->{events}->{termkey};
+	initialize_terminal();
+	initialize_prompt();
+}
+sub destroy_readline {
+	$text->{term}->rl_deprep_terminal();
+	delete $text->{term}; 
+	delete $engine->{events}->{stdin};
 }
 {my $override;
 sub revise_prompt {
@@ -66,42 +105,6 @@ sub detect_spacebar {
 			&{$text->{term_attribs}->{'callback_read_char'}}();
 		}
 	});
-}
-{
-my $cv;
-sub use_effect_hotkeys {
-	delete $engine->{events}->{stdin};
-	Event::unloop();
-	process_hotkeys();
-}
-sub no_effect_hotkeys {
-	$cv->send; 
-	initialize_terminal();
-	#$engine->{events}->{stdin_termkey}->termkey->stop;
-	detect_spacebar();
-	Event::loop();
-}
-sub process_hotkeys {
-	
-        $cv = AnyEvent->condvar;
-        $engine->{events}->{stdin_termkey} = AnyEvent::TermKey->new(
-           term => \*STDIN,
-
-           on_key => sub {
-              my ( $key ) = @_;
-			  my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-
-              print "Got key: $key_string\n";
-
-              $cv->send if $key->type_is_unicode and
-                           $key->utf8 eq "C" and
-                           $key->modifiers & KEYMOD_CTRL;
-			  no_effect_hotkeys() if $key_string eq '<Escape>';
-           },
-        );
-
-        $cv->recv;
-}
 }
 sub throw {
 	logsub("&throw");
