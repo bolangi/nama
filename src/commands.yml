@@ -768,6 +768,11 @@ hotkeys_always:
   what: Activate hotkeys mode after each command.
   short: hka 
   parameters: none
+hotkeys_off:
+  type: general
+  what: disable hotkeys always mode
+  short: hko
+  parameters: none
 add_insert:
   type: effect 
   what: Add an external send/return insert to current track.
