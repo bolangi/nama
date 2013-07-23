@@ -37,7 +37,8 @@ sub initialize_terminal {
 sub setup_hotkeys {
 	say "\nHotkeys on!";
 	destroy_readline(); 
-	setup_termkey() 
+	setup_termkey(); 
+	1
 }
 sub setup_termkey {
 	my $cv = AnyEvent->condvar;

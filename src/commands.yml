@@ -759,9 +759,14 @@ list_effects:
   short: lfx
   parameters: none
 hotkeys:
-  type: effect
+  type: general
   what: Enable hotkeys. Hit Escape key to return to command mode.
-  short: hk 
+  short: hk #
+  parameters: none
+hotkeys_always:
+  type: general 
+  what: Activate hotkeys mode after each command.
+  short: hka 
   parameters: none
 add_insert:
   type: effect 

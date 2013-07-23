@@ -81,6 +81,7 @@ sub process_line {
 				#and calculate_and_adjust_latency();
 		}
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
+		setup_hotkeys() if $config->{hotkeys_always};
 	}
 }
 }
