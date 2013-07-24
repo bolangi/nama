@@ -1015,7 +1015,7 @@ sub ecasound_controller_index {
 	my $position;
 	for my $i (0..scalar @ops - 1) {
 		$position = $i, last if $ops[$i] eq $id;
-		$operator_count++ if ! fxn($ops[$i])->is_controller;
+		$operator_count++ if ! ::fxn($ops[$i])->is_controller;
 	}
 	$position -= $operator_count; # skip operators
 	++$position; # translates 0th to chain-position 1
@@ -1079,6 +1079,7 @@ sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	say "method call is $call";
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
 	$self->about->{$call}
