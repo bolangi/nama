@@ -100,6 +100,7 @@ sub initialize_project_data {
 	$mode->{preview} = 0;
 
 	::ChainSetup::initialize();
+	reset_hotkey_buffers();
 
 }
 sub initialize_effects_data {
@@ -117,8 +118,6 @@ sub initialize_effects_data {
 	$fx->{muted} = [];
 
 }
-
-	
 
 sub load_project {
 	logsub("&load_project");

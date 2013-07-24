@@ -43,26 +43,51 @@ sub setup_hotkeys {
 }
 sub setup_termkey {
 	my $cv = AnyEvent->condvar;
-	$text->{hotkey_buffer} = undef;
 	$engine->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
 
 		on_key => sub {
 			my $key = shift;
+			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
+			say "got key: $key_string";
+
+			# handle <Ctrl-C>
+			 
 			$cv->send if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
 						and $key->modifiers & KEYMOD_CTRL;
-			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			say "got key: $key_string";
-			$cv->send, teardown_hotkeys(), return if $key_string =~ /Escape/;
+
+
+			# exit hotkey mode on <Escape>
+			 
+			$cv->send, teardown_hotkeys(), return if $key_string eq '<Escape>';
+
+			# execute callback if we have one keystroke 
+			# and it has an "instant" mapping
+			 
+			if ( my $coderef = $text->{hotkey_callback}->{$key_string} 
+				and ! scalar @{ $text->{hotkey_object_buffer} }) {
+
+				$coderef->()
+			}
+
+			# otherwise assemble keystrokes and check
+			# them against the grammar
+			 
+			else {
 			$text->{hotkey_buffer} .= $key_string;
+			push $text->{hotkey_object_buffer}, $key;
  			$text->{hotkey_parser}->command($text->{hotkey_buffer})
- 				and undef $text->{hotkey_buffer};
-			},
-		);
+ 				and reset_hotkey_buffers();
+			}
+		},
+	);
 	$cv->recv;
 }
-
+sub reset_hotkey_buffers {
+	$text->{hotkey_buffer} = undef;
+	$text->{hotkey_object_buffer} = [];
+}
 sub teardown_hotkeys {
 	$engine->{events}->{termkey}->termkey->stop();
 	delete $engine->{events}->{termkey};
