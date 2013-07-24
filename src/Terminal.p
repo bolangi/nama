@@ -51,12 +51,10 @@ sub setup_termkey {
 		on_key => sub {
 			my $key = shift;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			say "got key: $key_string";
-
+			#say "got key: $key_string";
 			# remove angle brackets around multi-character
 			# sequences, e.g. <PageUp> -> PageUp
 			$key_string =~ s/[<>]//g if length $key_string > 1;
-			say "got key: $key_string";
 
 			# handle <Ctrl-C>
 			 
@@ -94,7 +92,7 @@ sub setup_termkey {
 }
 sub hotkey_status_bar {
 	join " ", $this_track->name, extended_name($this_track->op), 
-				parameter_info($this_track->op, $this_param - 1);
+				parameter_info($this_track->op, $this_track->param - 1);
 
 	# $this_op, $this_param, params($this_op)->[$this_param - 1];
 }
@@ -125,8 +123,8 @@ sub setup_hotkey_dispatch{
 				Delete => \&next_track,
 				Home	=> \&previous_effect,
 				End		=> \&next_effect,
-				PageUp	=> \&previous_parameter,
-				PageDown =>	\&next_parameter,
+				PageUp	=> \&previous_param,
+				PageDown =>	\&next_param,
 		};
 }
 sub previous_track {
@@ -152,11 +150,13 @@ sub next_effect {
 	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
 }
 sub previous_param {
-	$this_track->param,
-
+	my $param = $this_track->param;
+	$project->{current_param}->{$this_track->name}-- if $param > 1		
 }
 sub next_param {
-
+	my $param = $this_track->param;
+	$project->{current_param}->{$this_track->name}++ 
+		if $param < scalar @{ params($this_track->op) }
 }
 {my $override;
 sub revise_prompt {

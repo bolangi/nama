@@ -293,6 +293,7 @@ sub show_effect {
 	@lines
 }
 sub extended_name {
+	no warnings 'uninitialized';
 	my $op_id = shift;
 	my $name = name($op_id);
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
@@ -301,11 +302,12 @@ sub extended_name {
 	$name;
 }
 sub parameter_info {
+	no warnings 'uninitialized';
 	my ($op_id, $parameter) = @_;  # zero based
 	my $i = fxindex($op_id);
-	my $paraminfo = $fx_cache->{registry}->[ $i ]->{params}->[$parameter];
-	my $name = $paraminfo->{name};
-	$name .= " (read-only)" if $paraminfo->{dir} eq 'output';
+	my $entry = $fx_cache->{registry}->[ $i ]->{params}->[$parameter];
+	my $name = $entry->{name};
+	$name .= " (read-only)" if $entry->{dir} eq 'output';
 	"    ".($parameter+1).q(. ) . $name . ": ".  params($op_id)->[$parameter] . "\n";
 }
 sub named_effects_list {
