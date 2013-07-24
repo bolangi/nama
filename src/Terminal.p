@@ -21,6 +21,7 @@ sub initialize_terminal {
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
 	detect_spacebar(); 
+	setup_hotkey_dispatch();
 
 	revise_prompt();
 
@@ -51,6 +52,11 @@ sub setup_termkey {
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
 			say "got key: $key_string";
 
+			# remove angle brackets around multi-character
+			# sequences, e.g. <PageUp> -> PageUp
+			$key_string =~ s/[<>]//g if length $key_string > 1;
+			say "got key: $key_string";
+
 			# handle <Ctrl-C>
 			 
 			$cv->send if $key->type_is_unicode 
@@ -60,7 +66,7 @@ sub setup_termkey {
 
 			# exit hotkey mode on <Escape>
 			 
-			$cv->send, teardown_hotkeys(), return if $key_string eq '<Escape>';
+			$cv->send, teardown_hotkeys(), return if $key_string eq 'Escape';
 
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
@@ -74,12 +80,12 @@ sub setup_termkey {
 			# otherwise assemble keystrokes and check
 			# them against the grammar
 			 
-			else {
-			$text->{hotkey_buffer} .= $key_string;
-			push $text->{hotkey_object_buffer}, $key;
- 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
- 				and reset_hotkey_buffers();
-			}
+# 			else {
+# 			$text->{hotkey_buffer} .= $key_string;
+# 			push $text->{hotkey_object_buffer}, $key;
+#  			$text->{hotkey_parser}->command($text->{hotkey_buffer})
+#  				and reset_hotkey_buffers();
+# 			}
 		},
 	);
 	$cv->recv;

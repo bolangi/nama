@@ -48,6 +48,25 @@ sub setup_hotkey_grammar {
 	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
 		or croak "Bad grammar!\n";
 }
+sub setup_hotkey_dispatch{
+	$text->{hotkey_callback} = 
+		{
+				Insert =>\&previous_track,
+				Delete => \&next_track,
+				Home	=> \&previous_effect,
+				End		=> \&next_effect,
+				PageUp	=> \&previous_parameter,
+				PageDown =>	\&next_parameter,
+		};
+}
+sub previous_track {
+	return if $this_track->n == 1;
+	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
+}
+sub next_track {
+	return if ! $ti{ $this_track->n + 1 };
+	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
+}
 {
 my %exclude_from_undo_buffer = map{ $_ => 1} 
 		qw(tag commit branch br new_branch nbr load save get restore);
