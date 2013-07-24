@@ -55,7 +55,8 @@ sub reconfigure_engine {
 	
 	return if ::ChainSetup::really_recording() and engine_running();
 	
-	# store recorded trackrefs if any for re-record function
+	# store a lists of wav-recording tracks for the rerecord
+	# function
 	
 	# an empty set (e.g. in post-record monitoring)
 	# will not overwrite a previous set
@@ -91,10 +92,6 @@ sub reconfigure_engine {
 
 	
 	
-	# make sure this is initialized
-	#$setup->{_old_rec_status} //= 
-	#	{ map{$_->name => $_->rec_status } ::Track::all() };
-		
 	$old_offset_run_status = $mode->{offset_run};
 
 	process_command('show_tracks');

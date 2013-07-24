@@ -217,8 +217,9 @@ sub rec_status {
 
 	my $bus = $bn{$track->group};
 	#logpkg('debug', join " ", "bus:",$bus->name, $bus->rw);
-	logpkg('debug', "track: ", $track->name, ", source: ",
-		$track->source_id, ", monitor version: $monitor_version");
+	logpkg('debug', "track: $track->{name}, source: $track->{source_id}, monitor version: $monitor_version");
+	#logpkg('debug', "track: ", $track->name, ", source: ",
+	#	$track->source_id, ", monitor version: $monitor_version");
 
 	# first, check for conditions resulting in status 'OFF'
 
@@ -326,8 +327,7 @@ sub region_is_out_of_bounds {
 
 sub fancy_ops { # returns list 
 	my $track = shift;
-	my @skip = 	grep {::fx($_)}  # must have data structure
-				grep {$_} 	   # must be non null
+	my @skip = 	grep {::fxn($_)}  # must exist
 				map { $track->$_ } qw(vol pan fader latency_op );
 
 	# make a dictionary of ops to exclude

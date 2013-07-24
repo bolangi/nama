@@ -10,7 +10,7 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
-use ::Effects qw(remove_effect add_effect owns effect_update_copp_set);
+use ::Effects qw(remove_effect add_effect effect_update_copp_set);
 # we don't import 'type' as it would clobber our $fade->type attribute
 use ::Object qw( 
 				 n
@@ -73,11 +73,11 @@ sub new {
 
 sub refresh_fade_controller {
 	my $track = shift;
-	my $operator  = ::type($track->fader);
+	my $operator  = ::fxn($track->fader)->type;
 	my $off_level = $config->{mute_level}->{$operator};
 	my $on_level  = $config->{unity_level}->{$operator};
 	my $controller;
-	($controller) = @{owns($track->fader)} if $track->fader;
+	($controller) = @{::fxn($track->fader)->owns} if $track->fader;
 	if( $controller )
 	{
 		logpkg('debug',$track->name, ": existing controller: $controller");
@@ -216,7 +216,7 @@ sub fader_envelope_pairs {
 		[ 	$marktime1, 
 			$marktime2, 
 			$fade->type, 
-			::type($track->fader),
+			::fxn($track->fader)->type,
 		];
 }
 	# sort fades -  may not need this

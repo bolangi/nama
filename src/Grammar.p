@@ -81,9 +81,6 @@ sub process_line {
 						and $exclude_from_undo_buffer{$1};
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
-				#or eval_iam('cs-connected') 
-				#and remove_latency_ops() 
-				#and calculate_and_adjust_latency();
 		}
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
@@ -126,9 +123,10 @@ sub process_command {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	if ($this_op and fx($this_op) and $this_track->n eq chain($this_op)){
+	my $FX = fxn($this_op);
+	if ($FX and $this_track->n eq $FX->chain){
 		eval_iam("c-select ".$this_track->n);
-		eval_iam("cop-select ".  ecasound_effect_index($this_op));
+		eval_iam("cop-select ".  $FX->ecasound_effect_index);
 	}
 
 	my $result = check_fx_consistency();
@@ -268,23 +266,25 @@ sub list_effects {
 
 sub list_effect {
 	my $op_id = shift;
-	my $name = name($op_id);
-	$name .= q(, bypassed) if bypassed($op_id);
+	my $FX = fxn($op_id);
+	my $name = $FX->name;
+	$name .= q(, bypassed) if $FX->bypassed;
 	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
 }
 
 
 sub show_effect {
  	my $op_id = shift;
-	return unless fx($op_id);
+	my $FX = fxn($op_id);
+	return unless $FX;
 	my @lines;
 	my @params;
- 	my $i = fxindex($op_id);
-	my $name = name($op_id);
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+ 	my $i = $FX->registry_index;
+	my $name = $FX->name;
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if bypassed($op_id);
-	my $trackname = $ti{chain($op_id)}->name;
+	$name .= " (bypassed)" if $FX->bypassed;
+	my $trackname = $ti{$FX->chain}->name;
  	push @lines, "$op_id: $name (applied to track $trackname)\n";
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
@@ -293,7 +293,7 @@ sub show_effect {
 	{ 
 		my $name = $pnames[$_]->{name};
 		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
-		push @lines, "    ".($_+1).q(. ) . $name . ": ".  params($op_id)->[$_] . "\n";
+		push @lines, "    ".($_+1).q(. ) . $name . ": ".  fxn($op_id)->params->[$_] . "\n";
 	} (0..scalar @pnames - 1);
 	}
 	map
@@ -306,7 +306,7 @@ sub show_effect {
 }
 sub named_effects_list {
 	my @ops = @_;
-	join("\n", map{ "$_ (" . ::name($_). ")" } @ops), "\n";
+	join("\n", map{ "$_ (" . fxn($_)->name. ")" } @ops), "\n";
 }
  
 sub show_modifiers {
@@ -479,7 +479,9 @@ sub t_load_project {
 	save_state();
 	load_project( name => $newname );
 	print "loaded project: $project->{name}\n";
+	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
+	}
 	::process_command($config->{execute_on_project_load});
 }
 sub t_create_project {
@@ -586,12 +588,12 @@ sub remove_track_cmd {
 sub unity {
 	my ($track, $save_level) = @_;
 	if ($save_level){
-		$track->set(old_vol_level => params($track->vol)->[0]);
+		$track->set(old_vol_level => fxn($track->vol)->params->[0]);
 	}
 	effect_update_copp_set( 
 		$track->vol, 
 		0, 
-		$config->{unity_level}->{type($track->vol)}
+		$config->{unity_level}->{fxn($track->vol)->type}
 	);
 }
 sub vol_back {

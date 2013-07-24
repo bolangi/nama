@@ -14,9 +14,8 @@ use Exporter qw(import);
 use Storable qw(dclone);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
-use ::Effects qw(fx);
 
-use ::Globals qw($fx_cache %tn $this_op);
+use ::Globals qw($fx_cache %tn $this_op $fx);
 
 our $AUTOLOAD;
 our $VERSION = 0.001;
@@ -54,7 +53,7 @@ sub is_controller {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
-sub parent : lvalue {
+sub parent {
 	my ($self, $id) = @_;
 	$self->{ops_data}->{$id}->{belongs_to}
 }
@@ -122,8 +121,8 @@ sub new {
 			}
 			else
 			{
-				$ops_data->{$_} 		  = dclone( ::fx(    $_) );  # copy
-				$ops_data->{$_}->{params} = dclone( ::params($_) );  # copy;
+				$ops_data->{$_} 		  = dclone( $fx->{applied}->{$_} );# copy
+				$ops_data->{$_}->{params} = dclone( $fx->{params }->{$_} );# copy;
 				# our op IDs are ALL CAPS, so will not conflict
 				# with params when accessing via key
 				#
@@ -255,7 +254,7 @@ sub add_ops {
 			parent_id 	=> $self->parent($_),
 		};
 
-		$args->{effect_id} = $_ unless fx($_);
+		$args->{effect_id} = $_ unless fxn($_);
 
 		logpkg('debug',"args ", json_out($args));
 		# avoid incorrectly calling _insert_effect 
