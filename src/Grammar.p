@@ -299,29 +299,38 @@ sub show_effect {
 	my @lines;
 	my @params;
  	my $i = fxindex($op_id);
-	my $name = name($op_id);
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
-	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if bypassed($op_id);
+
+	my $name = extended_name($op_id);
 	my $trackname = $ti{chain($op_id)}->name;
  	push @lines, "$op_id: $name (applied to track $trackname)\n";
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
-	map
-	{ 
-		my $name = $pnames[$_]->{name};
-		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
-		push @lines, "    ".($_+1).q(. ) . $name . ": ".  params($op_id)->[$_] . "\n";
-	} (0..scalar @pnames - 1);
+	map { push @lines, parameter_info($op_id, $_) } (0..scalar @pnames - 1) 
 	}
 	map
-	{ 	push @lines,
-	 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+	{ 	push @lines, parameter_info($op_id, $_) 
+	 	
 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
 		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
 	#push @lines, join("; ", @params) . "\n";
 	@lines
+}
+sub extended_name {
+	my $op_id = shift;
+	my $name = name($op_id);
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+	$name .= " ($ladspa_id)" if $ladspa_id;
+	$name .= " (bypassed)" if bypassed($op_id);
+	$name;
+}
+sub parameter_info {
+	my ($op_id, $parameter) = @_;  # zero based
+	my $i = fxindex($op_id);
+	my $paraminfo = $fx_cache->{registry}->[ $i ]->{params}->[$parameter];
+	my $name = $paraminfo->{name};
+	$name .= " (read-only)" if $paraminfo->{dir} eq 'output';
+	"    ".($parameter+1).q(. ) . $name . ": ".  params($op_id)->[$parameter] . "\n";
 }
 sub named_effects_list {
 	my @ops = @_;

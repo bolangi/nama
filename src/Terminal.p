@@ -86,9 +86,15 @@ sub setup_termkey {
 #  			$text->{hotkey_parser}->command($text->{hotkey_buffer})
 #  				and reset_hotkey_buffers();
 # 			}
+			say hotkey_status_bar();
 		},
 	);
 	$cv->recv;
+}
+sub hotkey_status_bar {
+	join " ", $this_track->name, extended_name($this_op), parameter_info($this_op, $this_param - 1)
+
+	# $this_op, $this_param, params($this_op)->[$this_param - 1];
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = undef;
