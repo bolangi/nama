@@ -84,8 +84,10 @@ $fx->{params_log}				# for log scale sliders
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
 $text->{hotkey_grammar} 		# hotkeys grammar source
-$text->{hotkey_parser} 			# hotkeys grammar source
-$text->{hotkey_buffer} 			# hotkeys grammar source
+$text->{hotkey_parser} 			# 
+$text->{hotkey_buffer} 			#
+$text->{hotkey_object_buffer} 	# 
+$text->{hotkey_callback}		#
 $text->{wrap}					# Text::Format object for wrapping text
 $text->{format_fields}			# ??
 $text->{commands_yml}			# command description YAML source
@@ -111,6 +113,8 @@ $project->{track_version_comments} # per version comments
 $project->{save_file_version_number} # version of Nama that wrote State.json
 $project->{undo_buffer}			# command history for commit message
 $project->{artist}				# Artist field for mp3/ogg encoding
+$project->{current_op}			# current effect, per track
+$project->{current_param}		# current parameter, per track
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
