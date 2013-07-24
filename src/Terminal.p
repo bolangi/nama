@@ -92,7 +92,8 @@ sub setup_termkey {
 	$cv->recv;
 }
 sub hotkey_status_bar {
-	join " ", $this_track->name, extended_name($this_op), parameter_info($this_op, $this_param - 1)
+	join " ", $this_track->name, extended_name($this_track->op), 
+				parameter_info($this_track->op, $this_param - 1);
 
 	# $this_op, $this_param, params($this_op)->[$this_param - 1];
 }

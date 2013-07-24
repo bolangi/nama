@@ -67,6 +67,14 @@ sub next_track {
 	return if ! $ti{ $this_track->n + 1 };
 	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
 }
+sub previous_effect {
+	$this_track->op, 
+	$this_track->param,
+
+}
+sub next_effect {
+
+}
 {
 my %exclude_from_undo_buffer = map{ $_ => 1} 
 		qw(tag commit branch br new_branch nbr load save get restore);
