@@ -6,6 +6,7 @@ no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
+use List::MoreUtils qw(first_index);
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -111,6 +112,51 @@ sub destroy_readline {
 	$text->{term}->rl_deprep_terminal();
 	delete $text->{term}; 
 	delete $engine->{events}->{stdin};
+}
+sub setup_hotkey_grammar {
+	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
+	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
+		or croak "Bad grammar!\n";
+}
+sub setup_hotkey_dispatch{
+	$text->{hotkey_callback} = 
+		{
+				Insert =>\&previous_track,
+				Delete => \&next_track,
+				Home	=> \&previous_effect,
+				End		=> \&next_effect,
+				PageUp	=> \&previous_parameter,
+				PageDown =>	\&next_parameter,
+		};
+}
+sub previous_track {
+	return if $this_track->n == 1;
+	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
+}
+sub next_track {
+	return if ! $ti{ $this_track->n + 1 };
+	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
+}
+sub previous_effect {
+	my $op = $this_track->op;
+	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	return if $pos == 0;
+	$pos--;
+	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+}
+sub next_effect {
+	my $op = $this_track->op;
+	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	return if $pos == scalar @{ $this_track->ops } - 1;
+	$pos++;
+	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+}
+sub previous_param {
+	$this_track->param,
+
+}
+sub next_param {
+
 }
 {my $override;
 sub revise_prompt {
