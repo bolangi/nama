@@ -810,7 +810,9 @@ sub version_has_edits {
 }	
 sub op { $project->{current_op}->{$_[0]->name} //= $_[0]->{ops}->[-1] }
 
-sub param { $project->{current_param}->{$_[0]->name} //= 1 }
+sub param { $project->{current_param}->{$_[0]->op} //= 1 }
+
+sub unit { $project->{current_unit}->{$_[0]->op}->{$_[0]->param} }
 
 #### UNUSED 
 sub edits_enabled {

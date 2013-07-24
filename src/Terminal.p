@@ -151,12 +151,12 @@ sub next_effect {
 }
 sub previous_param {
 	my $param = $this_track->param;
-	$project->{current_param}->{$this_track->name}-- if $param > 1		
+	$project->{current_param}->{$this_track->op}-- if $param > 1		
 }
 sub next_param {
 	my $param = $this_track->param;
-	$project->{current_param}->{$this_track->name}++ 
-		if $param < scalar @{ params($this_track->op) }
+	$project->{current_param}->{$this_track->op}++ 
+		 if $param < scalar @{ params($this_track->op) }
 }
 {my $override;
 sub revise_prompt {

@@ -36,6 +36,7 @@ sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
 	$project->{name} and join_path( project_root(), $project->{name}) 
 }
+sub this_op { $this_track->op if $this_track}
 
 sub list_projects {
 	my $projects = join "\n", sort map{
