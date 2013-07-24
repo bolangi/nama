@@ -43,11 +43,6 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
-sub setup_hotkey_grammar {
-	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
-	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
-		or croak "Bad grammar!\n";
-}
 {
 my %exclude_from_undo_buffer = map{ $_ => 1} 
 		qw(tag commit branch br new_branch nbr load save get restore);
@@ -289,20 +284,33 @@ sub show_effect {
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
-	map
-	{ 
-		my $name = $pnames[$_]->{name};
-		$name .= " (read-only)" if $pnames[$_]->{dir} eq 'output';
-		push @lines, "    ".($_+1).q(. ) . $name . ": ".  fxn($op_id)->params->[$_] . "\n";
-	} (0..scalar @pnames - 1);
+	map { push @lines, parameter_info($op_id, $_) } (0..scalar @pnames - 1) 
 	}
 	map
-	{ 	push @lines,
-	 	"    ".($_+1).": ".  $fx->{params}->{$op_id}->[$_] . "\n";
+	{ 	push @lines, parameter_info($op_id, $_) 
+	 	
 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
 		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
 	#push @lines, join("; ", @params) . "\n";
 	@lines
+}
+sub extended_name {
+	no warnings 'uninitialized';
+	my $op_id = shift;
+	my $name = name($op_id);
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+	$name .= " ($ladspa_id)" if $ladspa_id;
+	$name .= " (bypassed)" if bypassed($op_id);
+	$name;
+}
+sub parameter_info {
+	no warnings 'uninitialized';
+	my ($op_id, $parameter) = @_;  # zero based
+	my $i = fxindex($op_id);
+	my $entry = $fx_cache->{registry}->[ $i ]->{params}->[$parameter];
+	my $name = $entry->{name};
+	$name .= " (read-only)" if $entry->{dir} eq 'output';
+	"    ".($parameter+1).q(. ) . $name . ": ".  params($op_id)->[$parameter] . "\n";
 }
 sub named_effects_list {
 	my @ops = @_;

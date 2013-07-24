@@ -16,6 +16,7 @@ use ::Globals qw(
 					%bn 
 					$config 
 					$setup 
+					$project
 					$this_op 
 					$this_param
 					$this_track);
@@ -244,7 +245,6 @@ sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
 	
-	$this_param = $parameter;
 	$parameter--; # convert to zero-based
 	my $cop = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
@@ -273,11 +273,18 @@ sub modify_effect {
 		$new_value);
 	1
 }
+# we set current effect/parameter here, since
+# modify_multiple_effects()
+# is used only by the grammar, i.e. by direct user command.
+
 sub modify_multiple_effects {
 	my ($op_ids, $parameters, $sign, $value) = @_;
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
 				modify_effect($op_id, $parameter, $sign, $value);
+				
+				$this_param = $project->{current_param}->{$ti{chain($op_id)}->name } = $parameter;
+				$this_op = $project->{current_op}->{$ti{chain($op_id)}->name } = $op_id;
 		} @$parameters;
 	} @$op_ids;
 }

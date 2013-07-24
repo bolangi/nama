@@ -6,6 +6,7 @@ no warnings 'uninitialized';
 use Carp;
 use ::Globals qw(:singletons $this_bus $this_track);
 use ::Log qw(logpkg logsub);
+use List::MoreUtils qw(first_index);
 
 sub initialize_prompt {
 	$text->{term}->stuff_char(10); # necessary to respond to Ctrl-C at first prompt 
@@ -21,6 +22,7 @@ sub initialize_terminal {
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
 	detect_spacebar(); 
+	setup_hotkey_dispatch();
 
 	revise_prompt();
 
@@ -49,7 +51,10 @@ sub setup_termkey {
 		on_key => sub {
 			my $key = shift;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			say "got key: $key_string";
+			#say "got key: $key_string";
+			# remove angle brackets around multi-character
+			# sequences, e.g. <PageUp> -> PageUp
+			$key_string =~ s/[<>]//g if length $key_string > 1;
 
 			# handle <Ctrl-C>
 			 
@@ -60,7 +65,7 @@ sub setup_termkey {
 
 			# exit hotkey mode on <Escape>
 			 
-			$cv->send, teardown_hotkeys(), return if $key_string eq '<Escape>';
+			$cv->send, teardown_hotkeys(), return if $key_string eq 'Escape';
 
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
@@ -74,15 +79,22 @@ sub setup_termkey {
 			# otherwise assemble keystrokes and check
 			# them against the grammar
 			 
-			else {
-			$text->{hotkey_buffer} .= $key_string;
-			push $text->{hotkey_object_buffer}, $key;
- 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
- 				and reset_hotkey_buffers();
-			}
+# 			else {
+# 			$text->{hotkey_buffer} .= $key_string;
+# 			push $text->{hotkey_object_buffer}, $key;
+#  			$text->{hotkey_parser}->command($text->{hotkey_buffer})
+#  				and reset_hotkey_buffers();
+# 			}
+			say hotkey_status_bar();
 		},
 	);
 	$cv->recv;
+}
+sub hotkey_status_bar {
+	join " ", $this_track->name, extended_name($this_track->op), 
+				parameter_info($this_track->op, $this_track->param - 1);
+
+	# $this_op, $this_param, params($this_op)->[$this_param - 1];
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = undef;
@@ -98,6 +110,53 @@ sub destroy_readline {
 	$text->{term}->rl_deprep_terminal();
 	delete $text->{term}; 
 	delete $engine->{events}->{stdin};
+}
+sub setup_hotkey_grammar {
+	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
+	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
+		or croak "Bad grammar!\n";
+}
+sub setup_hotkey_dispatch{
+	$text->{hotkey_callback} = 
+		{
+				Insert =>\&previous_track,
+				Delete => \&next_track,
+				Home	=> \&previous_effect,
+				End		=> \&next_effect,
+				PageUp	=> \&previous_param,
+				PageDown =>	\&next_param,
+		};
+}
+sub previous_track {
+	return if $this_track->n == 1;
+	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
+}
+sub next_track {
+	return if ! $ti{ $this_track->n + 1 };
+	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
+}
+sub previous_effect {
+	my $op = $this_track->op;
+	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	return if $pos == 0;
+	$pos--;
+	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+}
+sub next_effect {
+	my $op = $this_track->op;
+	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	return if $pos == scalar @{ $this_track->ops } - 1;
+	$pos++;
+	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+}
+sub previous_param {
+	my $param = $this_track->param;
+	$project->{current_param}->{$this_track->op}-- if $param > 1		
+}
+sub next_param {
+	my $param = $this_track->param;
+	$project->{current_param}->{$this_track->op}++ 
+		 if $param < scalar @{ params($this_track->op) }
 }
 {my $override;
 sub revise_prompt {
