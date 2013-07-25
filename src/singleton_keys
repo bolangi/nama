@@ -114,7 +114,8 @@ $project->{save_file_version_number} # version of Nama that wrote State.json
 $project->{undo_buffer}			# command history for commit message
 $project->{artist}				# Artist field for mp3/ogg encoding
 $project->{current_op}			# current effect, per track
-$project->{current_param}		# current parameter, per track
+$project->{current_param}		# current parameter, per effect
+$project->{current_unit}		# current unit, per effect/parameter
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
