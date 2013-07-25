@@ -1093,7 +1093,6 @@ sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	say "method call is $call";
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
 	$self->about->{$call}

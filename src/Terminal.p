@@ -51,7 +51,7 @@ sub setup_termkey {
 		on_key => sub {
 			my $key = shift;
 			my $key_string = $key->termkey->format_key( $key, FORMAT_VIM );
-			#say "got key: $key_string";
+			logpkg('debug',"got key: $key_string");
 			# remove angle brackets around multi-character
 			# sequences, e.g. <PageUp> -> PageUp
 			$key_string =~ s/[<>]//g if length $key_string > 1;
@@ -65,7 +65,13 @@ sub setup_termkey {
 
 			# exit hotkey mode on <Escape>
 			 
-			$cv->send, teardown_hotkeys(), return if $key_string eq 'Escape';
+			if ($key_string eq 'Escape') {
+					$cv->send;
+					teardown_hotkeys();
+					initialize_terminal(); 
+					initialize_prompt();
+					return 
+			} 
 
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
@@ -103,11 +109,9 @@ sub reset_hotkey_buffers {
 sub teardown_hotkeys {
 	$engine->{events}->{termkey}->termkey->stop();
 	delete $engine->{events}->{termkey};
-	initialize_terminal();
-	initialize_prompt();
 }
 sub destroy_readline {
-	$text->{term}->rl_deprep_terminal();
+	$text->{term}->rl_deprep_terminal() if $text->{term};
 	delete $text->{term}; 
 	delete $engine->{events}->{stdin};
 }
@@ -156,7 +160,7 @@ sub previous_param {
 sub next_param {
 	my $param = $this_track->param;
 	$project->{current_param}->{$this_track->op}++ 
-		 if $param < scalar @{ params($this_track->op) }
+		 if $param < scalar @{ fxn($this_track->op)->params }
 }
 {my $override;
 sub revise_prompt {

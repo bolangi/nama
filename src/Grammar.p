@@ -298,6 +298,7 @@ sub extended_name {
 	no warnings 'uninitialized';
 	my $op_id = shift;
 	my $FX = fxn($op_id);
+	return unless $FX;
 	my $name = $FX->name;
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type};
 	$name .= " ($ladspa_id)" if $ladspa_id;
@@ -308,6 +309,7 @@ sub parameter_info {
 	no warnings 'uninitialized';
 	my ($op_id, $parameter) = @_;  # zero based
 	my $FX = fxn($op_id);
+	return unless $FX;
 	my $entry = $FX->about->{params}->[$parameter];
 	my $name = $entry->{name};
 	$name .= " (read-only)" if $entry->{dir} eq 'output';
