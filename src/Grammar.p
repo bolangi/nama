@@ -86,7 +86,7 @@ sub context {
 	my $context = {};
 	$context->{track} = $this_track->name;
 	$context->{bus}   = $this_bus;
-	$context->{op}    = $this_op;
+	$context->{op}    = $this_track->op;
 	$context
 }
 	
@@ -118,7 +118,7 @@ sub process_command {
 	set_current_bus();
 	# select chain operator if appropriate
 	no warnings 'uninitialized';
-	my $FX = fxn($this_op);
+	my $FX = fxn($this_track->op);
 	if ($FX and $this_track->n eq $FX->chain){
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  $FX->ecasound_effect_index);
@@ -264,7 +264,7 @@ sub list_effect {
 	my $FX = fxn($op_id);
 	my $name = $FX->name;
 	$name .= q(, bypassed) if $FX->bypassed;
-	($op_id eq $this_op ? '*' : '') . "$op_id ($name)";
+	($op_id eq $this_track->op ? '*' : '') . "$op_id ($name)";
 }
 
 

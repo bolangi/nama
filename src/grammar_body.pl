@@ -763,9 +763,9 @@ add_controller: _add_controller parent effect value(s?) {
 	1;
 }
 add_controller: _add_controller effect value(s?) {
-	print("current effect is undefined, skipping\n"), return 1 if ! $::this_op;
+	print("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
 	my $code = $item{effect};
-	my $parent = $::this_op;
+	my $parent = ::this_op();
 	my $values = $item{"value(s?)"};
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
@@ -810,7 +810,7 @@ add_effect: _add_effect effect value(s?) {
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
 		::pager2("Added $id ($iname)");
-		$::this_op = $id;
+		::set_current_op($id);
 	}
 	else { ::pager2("Failed to add effect") } 
 }
@@ -833,7 +833,7 @@ append_effect: _append_effect effect value(s?) {
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
 		::pager2( "Added $id ($iname)");
-		$::this_op = $id;
+		::set_current_op($id);
 	}
  	1;
 }
@@ -858,25 +858,25 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
  		::pager2( "Inserted $id ($iname) before $before ($bname)");
-		$::this_op = $id;
+		::set_current_op($id);
 	}
 	1;}
 
 before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
-	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( 
-		[$::this_op], 
+		[::this_op()], 
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	::pager2( ::show_effect($::this_op))
+	::pager2( ::show_effect(::this_op()))
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
-	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
-	::modify_multiple_effects( [$::this_op], @item{qw(parameter(s) sign value)});
-	::pager2( ::show_effect($::this_op));
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
+	::pager2( ::show_effect(::this_op()));
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
@@ -890,6 +890,7 @@ position_effect: _position_effect op_to_move new_following_op {
 	my $op = $item{op_to_move};
 	my $pos = $item{new_following_op};
 	::position_effect($op, $pos);
+	::set_current_op($op);
 	1;
 }
 
@@ -901,12 +902,12 @@ show_effect: _show_effect op_id(s) {
 		map{ ::show_effect($_) } 
 		grep{ ::fxn($_) }
 		@{ $item{'op_id(s)'}};
-	$::this_op = $item{'op_id(s)'}->[-1];
+	::set_current_op($item{'op_id(s)'}->[-1]);
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
-	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
-	::pager2( ::show_effect($::this_op));
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::pager2( ::show_effect(::this_op()));
 	1;
 }
 list_effects: _list_effects { ::pager(::list_effects()); 1}
@@ -1109,7 +1110,7 @@ bypass_effects:   _bypass_effects op_id(s) {
 	::pager2( ::named_effects_list(@$arr_ref));
 	::bypass_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
-	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
+	::set_current_op($arr_ref->[0]) if scalar @$arr_ref == 1;
 }
 #
 #  all effects on current track
@@ -1124,17 +1125,17 @@ bypass_effects: _bypass_effects 'all' {
 #  current effect 
 #
 bypass_effects: _bypass_effects { 
-	::throw("current effect is undefined, skipping"), return 1 if ! $::this_op;
+	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
  	::pager2( "track ",$::this_track->name,", bypassing effects:"); 
-	::pager2( ::named_effects_list($::this_op));
- 	::bypass_effects($::this_track, $::this_op);  
+	::pager2( ::named_effects_list(::this_op()));
+ 	::bypass_effects($::this_track, ::this_op());  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	::pager2("current effect is undefined, skipping"), return 1 if ! $::this_op;
+	::pager2("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::pager2( "restoring effects:");
-	::pager2( ::named_effects_list($::this_op));
-	::restore_effects( $::this_track, $::this_op);
+	::pager2( ::named_effects_list(::this_op()));
+	::restore_effects( $::this_track, ::this_op());
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
 	my $arr_ref = $item{'op_id(s)'};
@@ -1145,7 +1146,7 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	::pager2( ::named_effects_list(@$arr_ref));
 	::restore_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
-	$::this_op = $arr_ref->[0] if scalar @$arr_ref == 1;
+	::set_current_op($arr_ref->[0]) if scalar @$arr_ref == 1;
 }
 bring_back_effects:   _bring_back_effects 'all' { 
 	::pager2( "restoring all effects");

@@ -15,7 +15,7 @@ use Storable qw(dclone);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
 
-use ::Globals qw($fx_cache %tn $this_op $fx);
+use ::Globals qw($fx_cache %tn $fx);
 
 our $AUTOLOAD;
 our $VERSION = 0.001;
@@ -235,9 +235,6 @@ sub add_ops {
 	# Lower priority:  effect chain's own track name attribute
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
 	
-	local $this_op; # restore to present value on exiting subroutine
-					# i.e. avoid save/restore using $old_this_op 
-
 	logpkg('debug',$track->name,
 			qq(: adding effect chain ), $self->name, Dumper $self
 		 

@@ -17,8 +17,6 @@ use ::Globals qw(
 					$config 
 					$setup 
 					$project
-					$this_op 
-					$this_param
 					$this_track);
 
 sub import_engine_subs {
@@ -61,6 +59,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					restore_effects
 
 					fxn
+
+					set_current_op
+					set_current_param
 
 ) ] );
 
@@ -265,7 +266,6 @@ sub modify_effect {
  				$sign,
  				$value);
 		};
-	$this_op = $op_id;
 	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
 	effect_update_copp_set( 
 		$op_id, 
@@ -282,9 +282,8 @@ sub modify_multiple_effects {
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
 				modify_effect($op_id, $parameter, $sign, $value);
-				
-				$this_param = $project->{current_param}->{$ti{chain($op_id)}->name } = $parameter;
-				$this_op = $project->{current_op}->{$ti{chain($op_id)}->name } = $op_id;
+				set_current_op($op_id);
+				set_current_param($parameter);	
 		} @$parameters;
 	} @$op_ids;
 }
@@ -341,7 +340,8 @@ sub remove_effect {
 	# remove entries for chain operator attributes and parameters
  	delete $fx->{applied}->{$id}; # remove entry from chain operator list
     delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
-	$this_op = undef;
+	set_current_op($this_track->ops->[0]);
+	set_current_param(1);
 }
 sub position_effect {
 	my($op, $pos) = @_;
@@ -973,6 +973,17 @@ sub remove_fader_effect {
 sub fxn {
 	my $id = shift;
 	bless {id => $id}, '::Effect' if $id and $fx->{applied}->{$id}
+}
+sub set_current_op {
+	my $op_id = shift;
+	my $FX = fxn($op_id);
+	return unless $FX;
+	my $track = $ti{$FX->chain};
+	$project->{current_op}->{$track->name} = $op_id;
+}
+sub set_current_param {
+	my $parameter = shift;
+	$project->{current_param}->{::this_op()} = $parameter;
 }
 }
 {
