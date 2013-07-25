@@ -297,20 +297,21 @@ sub show_effect {
 sub extended_name {
 	no warnings 'uninitialized';
 	my $op_id = shift;
-	my $name = name($op_id);
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{type($op_id)} ;
+	my $FX = fxn($op_id);
+	my $name = $FX->name;
+	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type};
 	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if bypassed($op_id);
+	$name .= " (bypassed)" if $FX->bypassed;
 	$name;
 }
 sub parameter_info {
 	no warnings 'uninitialized';
 	my ($op_id, $parameter) = @_;  # zero based
-	my $i = fxindex($op_id);
-	my $entry = $fx_cache->{registry}->[ $i ]->{params}->[$parameter];
+	my $FX = fxn($op_id);
+	my $entry = $FX->about->{params}->[$parameter];
 	my $name = $entry->{name};
 	$name .= " (read-only)" if $entry->{dir} eq 'output';
-	"    ".($parameter+1).q(. ) . $name . ": ".  params($op_id)->[$parameter] . "\n";
+	"    ".($parameter+1).q(. ) . $name . ": ".  $FX->params->[$parameter] . "\n";
 }
 sub named_effects_list {
 	my @ops = @_;
