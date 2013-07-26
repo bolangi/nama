@@ -100,6 +100,8 @@ autosave: 0
 
 beep_command: beep -f 350 -l 700
 
+hotkey_beep: beep -f 250 -l 200
+
 # end
 
 

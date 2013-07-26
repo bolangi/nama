@@ -74,6 +74,7 @@
 	$use_git						$config->{use_git}
 	$autosave						$config->{autosave}
 	$beep_command 					$config->{beep_command}
+	$hotkey_beep					$config->{hotkey_beep}
 
 ### the following are not included in default namarc
 

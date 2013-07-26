@@ -44,7 +44,7 @@ sub setup_hotkeys {
 	1
 }
 sub setup_termkey {
-	my $cv = AnyEvent->condvar;
+	$engine->{events}->{termkey_condvar} = AnyEvent->condvar;
 	$engine->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
 
@@ -56,28 +56,15 @@ sub setup_termkey {
 			# sequences, e.g. <PageUp> -> PageUp
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
-			# handle <Ctrl-C>
-			 
-			$cv->send if $key->type_is_unicode 
+			$engine->{events}->{termkey_condvar}->send if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
 						and $key->modifiers & KEYMOD_CTRL;
-
-
-			# exit hotkey mode on <Escape>
 			 
-			if ($key_string eq 'Escape') {
-					$cv->send;
-					teardown_hotkeys();
-					initialize_terminal(); 
-					initialize_prompt();
-					return 
-			} 
-
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
 			 
 			if ( my $coderef = $text->{hotkey_callback}->{$key_string} 
-				and ! scalar @{ $text->{hotkey_object_buffer} }) {
+				and ! length $text->{hotkey_buffer}) {
 
 				$coderef->()
 			}
@@ -85,27 +72,35 @@ sub setup_termkey {
 			# otherwise assemble keystrokes and check
 			# them against the grammar
 			 
-# 			else {
-# 			$text->{hotkey_buffer} .= $key_string;
-# 			push $text->{hotkey_object_buffer}, $key;
-#  			$text->{hotkey_parser}->command($text->{hotkey_buffer})
-#  				and reset_hotkey_buffers();
-# 			}
-			say hotkey_status_bar();
+			else {
+			$text->{hotkey_buffer} .= $key_string;
+			print $key_string if length $key_string == 1;
+#			push $text->{hotkey_object_buffer}, $key;
+			$text->{hotkey_parser}->command($text->{hotkey_buffer})
+ 				and reset_hotkey_buffers();
+ 			}
+			say "\n",hotkey_status_bar() if $text->{hotkey_buffer} eq undef;
 		},
 	);
-	$cv->recv;
+	$engine->{events}->{termkey_condvar}->recv;
 }
 sub hotkey_status_bar {
 	join " ", $this_track->name, extended_name($this_track->op), 
 				parameter_info($this_track->op, $this_track->param - 1);
 }
 sub reset_hotkey_buffers {
-	$text->{hotkey_buffer} = undef;
+	$text->{hotkey_buffer} = "";
 	$text->{hotkey_object_buffer} = [];
 }
+sub exit_hotkey_mode {
+	teardown_hotkeys();
+	initialize_terminal(); 
+	initialize_prompt();
+};
 sub teardown_hotkeys {
+	$engine->{events}->{termkey_condvar}->send;
 	$engine->{events}->{termkey}->termkey->stop();
+	delete $engine->{events}->{termkey_condvar};
 	delete $engine->{events}->{termkey};
 }
 sub destroy_readline {
@@ -121,44 +116,58 @@ sub setup_hotkey_grammar {
 sub setup_hotkey_dispatch{
 	$text->{hotkey_callback} = 
 		{
+
+
+			Escape => \&exit_hotkey_mode,
+			
+
 				Insert =>\&previous_track,
 				Delete => \&next_track,
 				Home	=> \&previous_effect,
 				End		=> \&next_effect,
 				PageUp	=> \&previous_param,
 				PageDown =>	\&next_param,
+
+				Left	=> \&previous_param,
+				Right	=> \&next_param,
+				Up		=> \&increment_param,
+				Down	=> \&decrement_param,
 		};
 }
+sub end_of_list_sound { system( $config->{hotkey_beep} ) }
+
 sub previous_track {
-	return if $this_track->n == 1;
+	end_of_list_sound(), return if $this_track->n == 1;
 	do{ $this_track = $ti{$this_track->n - 1} } until !  $this_track->hide;
 }
 sub next_track {
-	return if ! $ti{ $this_track->n + 1 };
+	end_of_list_sound(), return if ! $ti{ $this_track->n + 1 };
 	do{ $this_track = $ti{$this_track->n + 1} } until ! $this_track->hide;
 }
 sub previous_effect {
 	my $op = $this_track->op;
 	my $pos = first_index{$_ eq $op} @{$this_track->ops};
-	return if $pos == 0;
+	end_of_list_sound(), return if $pos == 0;
 	$pos--;
 	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
 }
 sub next_effect {
 	my $op = $this_track->op;
 	my $pos = first_index{$_ eq $op} @{$this_track->ops};
-	return if $pos == scalar @{ $this_track->ops } - 1;
+	end_of_list_sound(),return if $pos == scalar @{ $this_track->ops } - 1;
 	$pos++;
 	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
 }
 sub previous_param {
 	my $param = $this_track->param;
-	$project->{current_param}->{$this_track->op}-- if $param > 1		
+	$param > 1  ? $project->{current_param}->{$this_track->op}--
+				: end_of_list_sound()
 }
 sub next_param {
 	my $param = $this_track->param;
-	$project->{current_param}->{$this_track->op}++ 
-		 if $param < scalar @{ fxn($this_track->op)->params }
+	$param < scalar @{ fxn($this_track->op)->params }
+		? $project->{current_param}->{$this_track->op}++ 
+		: end_of_list_sound()
 }
 {my $override;
 sub revise_prompt {

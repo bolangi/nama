@@ -112,6 +112,8 @@ volume_control_operator: eadb # must be 'ea' or 'eadb'
 
 # beep_command: beep -f 350 -l 700
 
+# hotkey_beep: beep -f 250 -l 200
+
 # effects for use in mastering mode
 
 eq: Parametric1 1 0 0 40 1 0 0 200 1 0 0 600 1 0 0 3300 1 0
