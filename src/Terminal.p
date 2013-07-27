@@ -62,9 +62,11 @@ sub setup_termkey {
 			# execute callback if we have one keystroke 
 			# and it has an "instant" mapping
 			 
+			my $suppress_status;
 			if ( my $coderef = $text->{hotkey_callback}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
+				$suppress_status++ if $key_string eq 'Escape';
 				$coderef->()
 			}
 
@@ -78,7 +80,8 @@ sub setup_termkey {
 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
  				and reset_hotkey_buffers();
  			}
-			say "\n",hotkey_status_bar() if $text->{hotkey_buffer} eq undef;
+			say "\n",hotkey_status_bar() if $text->{hotkey_buffer} eq undef
+				and ! $suppress_status;
 		},
 	);
 }
