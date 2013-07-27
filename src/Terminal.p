@@ -44,7 +44,6 @@ sub setup_hotkeys {
 	1
 }
 sub setup_termkey {
-	$engine->{events}->{termkey_condvar} = AnyEvent->condvar;
 	$engine->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
 
@@ -56,7 +55,7 @@ sub setup_termkey {
 			# sequences, e.g. <PageUp> -> PageUp
 			$key_string =~ s/[<>]//g if length $key_string > 1;
 
-			$engine->{events}->{termkey_condvar}->send if $key->type_is_unicode 
+			exit_hotkey_mode(), cleanup_exit() if $key->type_is_unicode 
 						and $key->utf8 eq "C" 
 						and $key->modifiers & KEYMOD_CTRL;
 			 
@@ -82,7 +81,6 @@ sub setup_termkey {
 			say "\n",hotkey_status_bar() if $text->{hotkey_buffer} eq undef;
 		},
 	);
-	$engine->{events}->{termkey_condvar}->recv;
 }
 sub hotkey_status_bar {
 	join " ", "[".$this_track->name."]", extended_name($this_track->op), 
@@ -101,10 +99,8 @@ sub exit_hotkey_mode {
 	initialize_prompt();
 };
 sub teardown_hotkeys {
-	$engine->{events}->{termkey_condvar}->send;
-	$engine->{events}->{termkey}->termkey->stop();
-	delete $engine->{events}->{termkey_condvar};
-	delete $engine->{events}->{termkey};
+	$engine->{events}->{termkey}->termkey->stop(),
+		delete $engine->{events}->{termkey} if $engine->{events}->{termkey}
 }
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
