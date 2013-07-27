@@ -66,7 +66,8 @@ sub setup_termkey {
 			if ( my $coderef = $text->{hotkey_callback}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
-				$suppress_status++ if $key_string eq 'Escape';
+				$suppress_status++ if $key_string eq 'Escape'
+									or $key_string eq ' ';
 				$coderef->()
 			}
 
@@ -150,6 +151,7 @@ sub setup_hotkey_dispatch{
 				o		=> \&next_track,
 				I		=> \&previous_effect,
 				O		=> \&next_effect,
+				' '		=> \&toggle_transport,
 
 		};
 }
