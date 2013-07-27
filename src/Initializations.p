@@ -155,6 +155,9 @@ sub definitions {
 				my $delay = shift();
 				modify_effect($id,2,undef,$delay)
 			},
+		hotkey_beep					=> 'beep -f 250 -l 200',
+		beep_command					=> 'beep -f 350 -l 700',
+
 	}, '::Config';
 
 	{ package ::Config;
