@@ -284,10 +284,10 @@ sub show_effect {
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
-	map { push @lines, parameter_info($op_id, $_) } (0..scalar @pnames - 1) 
+	map { push @lines, parameter_info_padded($op_id, $_) } (0..scalar @pnames - 1) 
 	}
 	map
-	{ 	push @lines, parameter_info($op_id, $_) 
+	{ 	push @lines, parameter_info_padded($op_id, $_) 
 	 	
 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
 		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
@@ -313,7 +313,10 @@ sub parameter_info {
 	my $entry = $FX->about->{params}->[$parameter];
 	my $name = $entry->{name};
 	$name .= " (read-only)" if $entry->{dir} eq 'output';
-	"    ".($parameter+1).q(. ) . $name . ": ".  $FX->params->[$parameter] . "\n";
+	($parameter+1).q(. ) . $name . ": ".  $FX->params->[$parameter];
+}
+sub parameter_info_padded {
+	" "x 4 . parameter_info(@_) . "\n";
 }
 sub named_effects_list {
 	my @ops = @_;

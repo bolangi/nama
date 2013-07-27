@@ -85,9 +85,9 @@ sub setup_termkey {
 	$engine->{events}->{termkey_condvar}->recv;
 }
 sub hotkey_status_bar {
-	join " ", $this_track->name, extended_name($this_track->op), 
+	join " ", "[".$this_track->name."]", extended_name($this_track->op), 
 				parameter_info($this_track->op, $this_track->param - 1),
-				"stepsize: ",$this_track->stepsize;
+				"Stepsize: ",$this_track->stepsize;
 				
 ;
 }
