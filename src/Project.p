@@ -5,7 +5,7 @@ package ::Project;
 use Modern::Perl; use Carp;
 sub hello { my $self = shift; say "hello $self: ",::Dumper $::project}
 }
-
+{
 package ::;
 use Modern::Perl;
 use Carp;
@@ -417,5 +417,6 @@ sub remove_project_template {
 	} @_;
 	
 }
+} # end package ::
 1;
 __END__
