@@ -50,7 +50,7 @@
 	$project->{bunch}
 	$project->{current_op}
 	$project->{current_param}
-	$project->{current_unit}
+	$project->{current_stepsize}
 	@project_effect_chain_data
 	$fx->{id_counter}
 	$setup->{loop_endpoints}

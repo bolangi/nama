@@ -37,6 +37,8 @@ sub project_dir {
 	$project->{name} and join_path( project_root(), $project->{name}) 
 }
 sub this_op { $this_track->op if $this_track}
+sub this_param { $this_track->param if $this_track}
+sub this_stepsize { $this_track->stepsize if $this_track}
 
 sub list_projects {
 	my $projects = join "\n", sort map{

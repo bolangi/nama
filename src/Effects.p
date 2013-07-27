@@ -62,6 +62,9 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					set_current_op
 					set_current_param
+					set_current_stepsize
+					increment_param
+					decrement_param
 
 ) ] );
 
@@ -985,8 +988,18 @@ sub set_current_param {
 	my $parameter = shift;
 	$project->{current_param}->{::this_op()} = $parameter;
 }
+sub set_current_stepsize {
+	my $stepsize = shift;
+	$project->{current_stepsize}->{::this_op()}->[::this_param()] = $stepsize;
 }
-{
+sub increment_param {
+	modify_effect(::this_op(), ::this_param(), '+', ::this_stepsize())
+}
+sub decrement_param {
+	modify_effect(::this_op(), ::this_param(), '-', ::this_stepsize())
+}
+} # end package ::Effects
+{ 
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($fx $fx_cache %tn %ti);

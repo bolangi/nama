@@ -812,7 +812,10 @@ sub op { $project->{current_op}->{$_[0]->name} //= $_[0]->{ops}->[-1] }
 
 sub param { $project->{current_param}->{$_[0]->op} //= 1 }
 
-sub unit { $project->{current_unit}->{$_[0]->op}->{$_[0]->param} }
+sub stepsize {
+	$project->{current_stepsize}->{$_[0]->op}->[$_[0]->param] //= 0.01 
+	# TODO use hint if available
+}
 
 #### UNUSED 
 sub edits_enabled {

@@ -86,7 +86,10 @@ sub setup_termkey {
 }
 sub hotkey_status_bar {
 	join " ", $this_track->name, extended_name($this_track->op), 
-				parameter_info($this_track->op, $this_track->param - 1);
+				parameter_info($this_track->op, $this_track->param - 1),
+				"stepsize: ",$this_track->stepsize;
+				
+;
 }
 sub reset_hotkey_buffers {
 	$text->{hotkey_buffer} = "";

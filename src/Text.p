@@ -18,11 +18,13 @@ sub loop {
 	package ::;
 	initialize_prompt();
 	$Event::DIED = sub {
-	   my ($event, $errmsg) = @_;
-	   say $errmsg;
-	   $text->{term_attribs}->{line_buffer} = q();
-	   $text->{term}->clear_message();
-	   $text->{term}->rl_reset_line_state();
+		my ($event, $errmsg) = @_;
+		say $errmsg;
+		$text->{term_attribs}->{line_buffer} = q();
+		if($text->{term}){
+			$text->{term}->clear_message();
+			$text->{term}->rl_reset_line_state();
+		}
 	};
 	use Data::Dumper::Concise;
 	Event::loop();
