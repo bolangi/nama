@@ -9,6 +9,6 @@ effect_id: lower_case_effect_id { $return = uc $item{lower_case_effect_id} }
 lower_case_effect_id: /[a-z]+/
 set_stepsize: 'm' digit  { ::set_current_stepsize(10**$item{digit})}
 set_stepsize: 'm-' digit { ::set_current_stepsize(10**-$item{digit})}
-set_parameter: 'p' value 'Enter' {::set_parameter_value($item{value})}
+set_parameter: '=' value 'Enter' {::set_parameter_value($item{value})}
 digit: /\d/
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
