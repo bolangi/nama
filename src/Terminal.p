@@ -135,6 +135,23 @@ sub setup_hotkey_dispatch{
 				Right	=> \&next_param,
 				Up		=> \&increment_param,
 				Down	=> \&decrement_param,
+
+
+				j		=> \&decrement_param,
+				k		=> \&increment_param,
+				h		=> \&previous_param,
+				l		=> \&next_param,
+
+				a		=> \&previous_track,
+				s		=> \&previous_effect,
+				d		=> \&next_effect,
+				f		=> \&next_track,
+
+				i		=> \&previous_track,
+				o		=> \&next_track,
+				I		=> \&previous_effect,
+				O		=> \&next_effect,
+
 		};
 }
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
@@ -149,21 +166,21 @@ sub next_track {
 }
 sub previous_effect {
 	my $op = $this_track->op;
-	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	my $pos = $this_track->pos;
 	end_of_list_sound(), return if $pos == 0;
 	$pos--;
-	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+	set_current_op($this_track->ops->[$pos]);
 }
 sub next_effect {
 	my $op = $this_track->op;
-	my $pos = first_index{$_ eq $op} @{$this_track->ops};
+	my $pos = $this_track->pos;
 	end_of_list_sound(),return if $pos == scalar @{ $this_track->ops } - 1;
 	$pos++;
-	$project->{current_op}->{$this_track->name} = $this_track->ops->[$pos];
+	set_current_op($this_track->ops->[$pos]);
 }
 sub previous_param {
 	my $param = $this_track->param;
-	$param > 1  ? $project->{current_param}->{$this_track->op}--
+	$param > 1  ? set_current_param($this_track->param - 1)
 				: end_of_list_sound()
 }
 sub next_param {

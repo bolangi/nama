@@ -5,7 +5,7 @@ package ::;
 package ::Track;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
-
+use List::MoreUtils qw(first_index);
 # Objects belonging to Track and its subclasses
 # have a 'class' field that is set when the 
 # object is created, and used when restoring
@@ -815,6 +815,10 @@ sub param { $project->{current_param}->{$_[0]->op} //= 1 }
 sub stepsize {
 	$project->{current_stepsize}->{$_[0]->op}->[$_[0]->param] //= 0.01 
 	# TODO use hint if available
+}
+sub pos {
+	my $track = shift;
+	first_index{$_ eq $track->op} @{$track->ops};
 }
 
 #### UNUSED 
