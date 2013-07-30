@@ -156,7 +156,8 @@ sub definitions {
 				modify_effect($id,2,undef,$delay)
 			},
 		hotkey_beep					=> 'beep -f 250 -l 200',
-		beep_command					=> 'beep -f 350 -l 700',
+	#	this causes beeping during make test
+	#	beep_command					=> 'beep -f 350 -l 700',
 
 	}, '::Config';
 
