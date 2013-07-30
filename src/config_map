@@ -77,7 +77,7 @@
 	$hotkey_beep					$config->{hotkey_beep}
 
 	$alias							$config->{alias}
-	
+	$hotkeys						$config->{hotkeys}
 
 ### the following variables may also be set 
 

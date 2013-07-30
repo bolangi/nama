@@ -130,57 +130,30 @@ spatialiser: matrixSpatialiser 0
 
 limiter: tap_limiter 0 0
 
-#### State management ####
-
-# use_git: 1
-# autosave: 0
-
-#### Julien Claassen's Notes on Mastering effect defaults
-# 
-# Eq: All sections are initially off. You can turn them 
-# on as needed, one at a time. 
-# 
-# Bandpass: Default settings are courtesy of Fons
-# Adriaensen, who says they will be within 1.5dB of
-# flat settings. 
-# 
-# Compressor is turned off, with reasonable default values 
-# set. 
-# 
-# Spatialiser and limiter: both initially off so you can start out
-# clean and slowly work your way from there.
- 
-# MIDI support
-#
-# midish_enable: 0  
-# 
-# midi_input_dev: 
-# 
-# midi_output_dev:
- 
-# jack.plumbing - a daemon for auto-connecting JACK clients
-# (The default is to use 'jack_connect' which is more reliable)
-#
-# use_jack_plumbing: 0
-#
-# increase the following to 0.5 or more if you suffer 2 - 3
-# second delays when seeking playback position under JACK
-#
-# jack_seek_delay: 0.1 # user override for default 
-#
-# quietly_remove_tracks: 0 # generally ask user to confirm
-#
-# eager_mode: doodle | preview
-
-# Nama directory structure and files
-
-# ~/.namarc						# config file
-# ~/nama/untitled				# project directory
-# ~/nama/untitled/.wav			# wav directory
-# ~/nama/untitled/State.json    # version controlled project state
-# ~/nama/untitled/Aux.json      # additional project state
-# ~/nama/untitled/Setup.ecs		# Ecasound chain setup
-# ~/nama/.effects_cache			# static effects data
-# ~/nama/global_effect_chains.json # User defined effect chains and profiles
+hotkeys:
+  Escape: exit_hotkey_mode
+  Insert: previous_track
+  Delete: next_track
+  Home: previous_effect
+  End: next_effect
+  PageUp: previous_param
+  PageDown: next_param
+  Left: previous_param
+  Right: next_param
+  Up: increment_param
+  Down: decrement_param
+  j: decrement_param
+  k: increment_param
+  h: previous_param
+  l: next_param
+  a: previous_track
+  s: previous_effect
+  d: next_effect
+  f: next_track
+  i: previous_track
+  o: next_track
+  I: previous_effect
+  O: next_effect
+  Space: toggle_transport
 
 # end

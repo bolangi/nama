@@ -77,6 +77,7 @@ sub read_config {
 	$config->{root_dir} = $config->{opts}->{d} if $config->{opts}->{d};
 	$config->{root_dir} = expand_tilde($config->{root_dir});
 	$config->{sample_rate} = $cfg{abbreviations}{frequency};
+	$config->{hotkeys}->{' '} = $config->{hotkeys}->{Space}; 
 
 	$config->{use_git} and ! git_executable_found() and 
 		say("Config file requests Git version control,

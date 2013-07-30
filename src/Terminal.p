@@ -22,7 +22,6 @@ sub initialize_terminal {
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
 	detect_spacebar(); 
-	setup_hotkey_dispatch();
 
 	revise_prompt();
 
@@ -63,12 +62,13 @@ sub setup_termkey {
 			# and it has an "instant" mapping
 			 
 			my $suppress_status;
-			if ( my $coderef = $text->{hotkey_callback}->{$key_string} 
+			if ( my $command = $config->{hotkeys}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
 				$suppress_status++ if $key_string eq 'Escape'
 									or $key_string eq ' ';
-				$coderef->()
+				try { eval "$command()" }
+				catch { throw("$key_string: subroutine \"$command\" not found, error: $_") }
 			}
 
 			# otherwise assemble keystrokes and check
@@ -115,45 +115,6 @@ sub setup_hotkey_grammar {
 	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
 	$text->{hotkey_parser} = Parse::RecDescent->new($text->{hotkey_grammar})
 		or croak "Bad grammar!\n";
-}
-sub setup_hotkey_dispatch{
-	$text->{hotkey_callback} = 
-		{
-
-
-			Escape => \&exit_hotkey_mode,
-			
-
-				Insert =>\&previous_track,
-				Delete => \&next_track,
-				Home	=> \&previous_effect,
-				End		=> \&next_effect,
-				PageUp	=> \&previous_param,
-				PageDown =>	\&next_param,
-
-				Left	=> \&previous_param,
-				Right	=> \&next_param,
-				Up		=> \&increment_param,
-				Down	=> \&decrement_param,
-
-
-				j		=> \&decrement_param,
-				k		=> \&increment_param,
-				h		=> \&previous_param,
-				l		=> \&next_param,
-
-				a		=> \&previous_track,
-				s		=> \&previous_effect,
-				d		=> \&next_effect,
-				f		=> \&next_track,
-
-				i		=> \&previous_track,
-				o		=> \&next_track,
-				I		=> \&previous_effect,
-				O		=> \&next_effect,
-				' '		=> \&toggle_transport,
-
-		};
 }
 sub end_of_list_sound { system( $config->{hotkey_beep} ) }
 
