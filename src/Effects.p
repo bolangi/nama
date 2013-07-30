@@ -397,6 +397,7 @@ sub full_effect_code {
 	# - Ecasound operator (something)
 	# - abbreviated Ecasound preset (something)
 	# - Ecasound preset (pn:something)
+	# - user alias
 	
 	# there is no interference in these labels at present,
 	# so we offer the convenience of using them without

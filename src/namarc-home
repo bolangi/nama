@@ -102,6 +102,13 @@ beep_command: beep -f 350 -l 700
 
 hotkey_beep: beep -f 250 -l 200
 
+alias:
+  command:
+    mbs: move_to_bus
+    pcv: promote_current_version
+    djp: disable_jack_polling
+  effect:
+    reverb: gverb
 # end
 
 

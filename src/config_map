@@ -76,7 +76,10 @@
 	$beep_command 					$config->{beep_command}
 	$hotkey_beep					$config->{hotkey_beep}
 
-### the following are not included in default namarc
+	$alias							$config->{alias}
+	
+
+### the following variables may also be set 
 
 	$hotkeys_always					$config->{hotkeys_always}
 
