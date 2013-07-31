@@ -36,9 +36,13 @@ sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
 	$project->{name} and join_path( project_root(), $project->{name}) 
 }
-sub this_op { $this_track->op if $this_track}
-sub this_param { $this_track->param if $this_track}
-sub this_stepsize { $this_track->stepsize if $this_track}
+sub this_op { $this_track ? $this_track->op : "" }
+sub this_param { $this_track ? $this_track->param : ""}
+sub this_stepsize { $this_track ? $this_track->stepsize : ""}
+sub this_track_name { $this_track ? $this_track->name : "" }
+
+# we prepend a slash 
+sub this_bus_display { $this_bus eq "Main" ? "": "/$this_bus"  }
 
 sub list_projects {
 	my $projects = join "\n", sort map{

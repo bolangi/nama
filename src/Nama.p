@@ -198,7 +198,7 @@ __DATA__
 @@ default_namarc
 [% qx(cat ./namarc) %]
 @@ custom_pl
-[% qx(cat ./custom.pl) %]
+[% qx(cat ./customize.pl) %]
 @@ fake_jack_lsp
 [% qx(cat ./fake_jack_lsp) %]
 @@ fake_lv2_register

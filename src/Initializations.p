@@ -86,7 +86,7 @@ sub definitions {
 		untracked_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
 		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
-		user_customization 		=> ['custom.pl',      		\&project_root],
+		user_customization 		=> ['customize.pl',    		\&project_root],
 		project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
 		global_effect_chains  	=> ['global_effect_chains', \&project_root],
 		old_effect_chains  		=> ['effect_chains', 		\&project_root],
