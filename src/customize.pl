@@ -1,4 +1,4 @@
-### customize.pl - Nama user customization file
+### customize.pl - user code
 
 # test this by typing:
 #
