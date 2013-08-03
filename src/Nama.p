@@ -209,4 +209,6 @@ __DATA__
 [% qx(cat ./midish_commands) %]
 @@ default_palette_json
 [% qx(cat ./palette.json) %]
+@@ hotkey_bindings
+[% qx(cat ./hotkeys.yaml) %]
 __END__

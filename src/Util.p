@@ -223,6 +223,7 @@ sub heuristic_time {
 sub dest_type {
 	my $dest = shift;
 	my $type;
+	no if $] >= 5.018, "experimental::smartmatch";
 	given( $dest ){
 		when( undef )			{ $type = undef}
 

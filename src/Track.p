@@ -236,6 +236,7 @@ sub rec_status {
 	
 	if( $track->rw eq 'REC'){
 
+		no if $] >= 5.018, "experimental::smartmatch";
 		given( $track->source_type){
 			when('track')		{ return 'REC' }
 			when('jack_client'){

@@ -6,9 +6,9 @@ use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;
 use Storable qw(dclone);
-no warnings 'uninitialized';
 use ::Util qw(signal_format input_node output_node);
 use ::Assign qw(json_out);
+no warnings 'uninitialized';
 
 our (
 
@@ -77,11 +77,9 @@ sub is_engine_track {
 		# returns object if corresponding track belongs to current chain setup
 	my $t = shift;
 	my $n;
-	given($t){
-	when( (ref $_) =~ /Track/){ $n = $_->n     }
-	when( ! /\D/ )            { $n = $_        }
-	when(   /\D/ and $tn{$_} ){ $n = $::tn{$_}->n}
-	}
+	if( (ref $t) =~ /Track/){ $n = $t->n     }
+	if( $t =~ ! /\D/ )      { $n = $t        }
+	if( $t =~ /\D/ and $tn{$_} ){ $n = $::tn{$t}->n}
 	$::ti{$n} if $is_ecasound_chain{$n}
 }
 sub engine_wav_out_tracks {

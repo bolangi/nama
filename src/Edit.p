@@ -846,16 +846,13 @@ sub clear_offset_run_vars {
 }
 sub offset_run_mode {
 	my $set = shift;
-	given($set){
-		when(0){  
+	if ($set == 1){
+		undef $this_edit; 
+		$mode->{offset_run}++
+	} elsif ($set == 0) {
 			undef $mode->{offset_run};
 			clear_offset_run_vars();
 			::request_setup();
-		}
-		when(1){
-			undef $this_edit; 
-			$mode->{offset_run}++
-		}
 	}
 	$mode->{offset_run} and ! defined $this_edit
 }
