@@ -1439,11 +1439,11 @@ limit_run_time_off: _limit_run_time_off {
 	1;
 }
 offset_run: _offset_run markname {
-	::offset_run( $item{markname} ); 1
+	::set_offset_run_mark( $item{markname} ); 1
 }
 offset_run_off: _offset_run_off {
 	::pager2( "no run offset.");
-	::offset_run_mode(0); 1
+	::disable_offset_run_mode(); 
 }
 view_waveform: _view_waveform { 
 	

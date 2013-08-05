@@ -470,7 +470,7 @@ sub end_edit_mode  	{
 	
 	$mode->{offset_run} = 0; 
 	$mode->{loop_enable} = 0;
-	offset_run_mode(0);	
+	disable_offset_run_mode();	
 	$this_track = $this_edit->host if defined $this_edit;
 	undef $this_edit;
 	request_setup();
@@ -828,7 +828,7 @@ sub setup_length {
 	::ChainSetup::engine_tracks();
 	$setup_length
 }
-sub offset_run {
+sub set_offset_run_mark {
 	say("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
@@ -836,7 +836,7 @@ sub offset_run {
 	$setup->{offset_run}->{start_time} = $::Mark::by_name{$markname}->time;
 	$setup->{offset_run}->{end_time}   = setup_length();
 	$setup->{offset_run}->{mark} = $markname;
-	offset_run_mode(1);
+	enable_offset_run_mode();
 	request_setup();
 }
 sub clear_offset_run_vars {
@@ -844,18 +844,16 @@ sub clear_offset_run_vars {
 	$setup->{offset_run}->{end_time}   = undef;
 	$setup->{offset_run}->{mark} 		   = undef;
 }
-sub offset_run_mode {
-	my $set = shift;
-	if ($set == 1){
-		undef $this_edit; 
-		$mode->{offset_run}++
-	} elsif ($set == 0) {
-			undef $mode->{offset_run};
-			clear_offset_run_vars();
-			::request_setup();
-	}
-	$mode->{offset_run} and ! defined $this_edit
+sub enable_offset_run_mode {
+	undef $this_edit; 
+	$mode->{offset_run}++
 }
+sub disable_offset_run_mode {
+	undef $mode->{offset_run};
+	clear_offset_run_vars();
+	::request_setup();
+}
+sub is_offset_run_mode { $mode->{offset_run} and ! defined $this_edit }
 	
 sub select_edit_track {
 	my $track_selector_method = shift;

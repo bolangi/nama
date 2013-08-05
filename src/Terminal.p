@@ -68,7 +68,7 @@ sub setup_termkey {
 				$suppress_status++ if $key_string eq 'Escape'
 									or $key_string eq ' ';
 				try { eval "$command()" }
-				catch { throw("$key_string: subroutine \"$command\" not found, error: $_") }
+				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
 			}
 
 			# otherwise assemble keystrokes and check

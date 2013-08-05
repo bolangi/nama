@@ -248,6 +248,12 @@ sub initialize_interfaces {
 	logpkg('debug', sub{"Command line options\n".  json_out($config->{opts})});
 
 	read_config(global_config());  # from .namarc if we have one
+
+	# overwrite default hotkey bindings by those in .namarc 
+	$config->{hotkeys} = {
+		%{yaml_in(get_data_section 'hotkey_bindings' ) },
+		%{$config->{hotkeys} } 
+	};
 	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 

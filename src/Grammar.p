@@ -356,7 +356,7 @@ sub show_status {
 	push @modes, $mode->{preview} if $mode->{preview};
 	push @modes, "master" if $mode->{mastering};
 	push @modes, "edit"   if ::edit_mode();
-	push @modes, "offset run" if ::offset_run_mode();
+	push @modes, "offset run" if ::is_offset_run_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
