@@ -236,10 +236,9 @@ sub rec_status {
 	
 	if( $track->rw eq 'REC'){
 
-		no if $] >= 5.018, "experimental::smartmatch";
-		given( $track->source_type){
-			when('track')		{ return 'REC' }
-			when('jack_client'){
+		my $source_type = $track->source_type;
+		if ($source_type eq 'track'){ return 'REC' }
+		elsif ($source_type eq 'jack_client'){
 
 				# we expect an existing JACK client that
 				# *outputs* a signal for our track input
@@ -248,16 +247,12 @@ sub rec_status {
 					?  return 'REC'
 					:  return 'OFF'
 			}
-			when('jack_manual')		{ return 'REC' }
-			when('jack_ports_list')	{ return 'REC' }
-			when('null')			{ return 'REC' }
-			when('soundcard')		{ return 'REC' }
-			when('bus')				{ return 'REC' } # maybe $track->rw ??
-			default 				{ return 'OFF' }
-			#default { croak $track->name. ": missing source type" }
-			# fall back to MON
-			#default {  maybe_monitor($monitor_version)  }
-		}
+		elsif ($source_type eq 'jack_manual'){ return 'REC' }
+		elsif ($source_type eq 'jack_ports_list'){ return 'REC' }
+		elsif ($source_type eq 'null')	{ return 'REC' }
+		elsif ($source_type eq 'soundcard'){ return 'REC' }
+		elsif ($source_type eq 'bus')	{ return 'REC' } # maybe $track->rw ??
+		else { return 'OFF' }
 	}
 	# third, set MON status if possible
 	
@@ -442,53 +437,47 @@ sub set_io {
 	# set values, returning new setting
 	$type ||= dest_type( $id );
 	
-	given ($type){
+	if( $type eq 'track')		{}
+	elsif( $type eq 'soundcard'){} # no changes needed 
+	elsif( $type eq 'bus')     	{} # -ditto-
+	#elsif( $type eq 'loop')    {}  # unused at present
+
+	# rec_defeat tracks with 'null' input
+
+	elsif( $type eq 'null'){ 
+
+		if ( $direction eq 'source' ){
+			$track->set(rec_defeat => 1);
+			say $track->name, ": recording disabled by default for 'null' input.";
+			say "Use 'rec_enable' if necessary";
+		}
+	}
+	elsif( $type eq 'rtnull'){ 
+
+		if ( $direction eq 'source' ){
+			$track->set(rec_defeat => 1);
+			say $track->name, ": recording disabled by default for 'rtnull' input.";
+			say "Use 'rec_enable' if necessary";
+		}
+	}
+
+	# don't allow user to set JACK I/O unless JACK server is running
 	
-		
-		when('track'){}
-		when('soundcard'){} # no changes needed 
-		when ('bus')     {} # -ditto-
-		#when('loop')     {}  # unused at present
+	if( $type =~ /jack/ ){
+		say("JACK server not running! "
+			,"Cannot set JACK client or port as track source."), 
+				return unless $jack->{jackd_running};
 
-		# rec_defeat tracks with 'null' input
-
-		when ('null'){ 
-
-			if ( $direction eq 'source' ){
-				$track->set(rec_defeat => 1);
-				say $track->name, ": recording disabled by default for 'null' input.";
-				say "Use 'rec_enable' if necessary";
-			}
-		}
-		when ('rtnull'){ 
-
-			if ( $direction eq 'source' ){
-				$track->set(rec_defeat => 1);
-				say $track->name, ": recording disabled by default for 'rtnull' input.";
-				say "Use 'rec_enable' if necessary";
-			}
-		}
-
-		# don't allow user to set JACK I/O unless JACK server is running
-		
- 		when ( /jack/ ){
-			say("JACK server not running! "
-				,"Cannot set JACK client or port as track source."), 
-					return unless $jack->{jackd_running};
-
-			continue;
-		} 
-
-		when ('jack_manual'){
+		if( $type eq 'jack_manual'){
 
 			my $port_name = $track->jack_manual_port($direction);
 
- 			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
 			$id = 'manual';
 			$id = $port_name;
 			$type = 'jack_manual';
 		}
-		when ('jack_client'){
+		elsif( $type eq 'jack_client'){
 			my $client_direction = $direction eq 'source' ? 'output' : 'input';
 
 			my $name = $track->name;
@@ -500,7 +489,7 @@ sub set_io {
 				$track->name, ": track set to ", ::width($track->width),
 				qq(, but JACK source "$id" is ), ::width($width), '.';
 		}
-		when( 'jack_ports_list' ){
+		elsif( $type eq 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
 			my $ports_file_name = ($1 || $track->name) .  '.ports';
 			$id = $ports_file_name;

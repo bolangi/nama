@@ -222,28 +222,22 @@ sub heuristic_time {
 
 sub dest_type {
 	my $dest = shift;
-	my $type;
-	no if $] >= 5.018, "experimental::smartmatch";
-	given( $dest ){
-		when( undef )			{ $type = undef}
+	if($dest eq undef )			{ undef			}
 
-		# non JACK related
+	# non JACK related
 
-		when('bus')			 	{ $type = 'bus'			   }
-		when('null')		 	{ $type = 'null'			}
-		when('rtnull')		 	{ $type = 'rtnull'			}
-		when(/^loop,/)		 	{ $type = 'loop'			}
-		when(! /\D/)			{ $type = 'soundcard'	   } # digits only
+	if($dest eq 'bus')		 	{ 'bus'			}
+	elsif($dest eq 'null')	 	{ 'null'		}
+	elsif($dest eq 'rtnull')	{ 'rtnull'		}
+	elsif($dest =~ /^loop,/)	{ 'loop'		}
+	elsif($dest !~ /\D/)		{ 'soundcard'	} # digits only
 
-		# JACK related
+	# JACK related
 
-		when(/^man/)			{ $type = 'jack_manual'	 }
-		when('jack')			{ $type = 'jack_manual'	 }
-		when(/(^\w+\.)?ports/)	{ $type = 'jack_ports_list' }
-		default					{ $type = 'jack_client'	 } 
-
-	}
-	$type
+	elsif($dest =~ /^man/)		{ 'jack_manual'	}
+	elsif($dest eq 'jack')		{ 'jack_manual'	}
+	elsif($dest =~  /(^\w+\.)?ports/)	{ 'jack_ports_list' }
+	else 						{ 'jack_client'	} 
 }
 
 sub create_dir {
