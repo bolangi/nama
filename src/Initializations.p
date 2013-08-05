@@ -251,7 +251,7 @@ sub initialize_interfaces {
 
 	# overwrite default hotkey bindings by those in .namarc 
 	$config->{hotkeys} = {
-		%{yaml_in(get_data_section 'hotkey_bindings' ) },
+		%{yaml_in(get_data_section 'hotkey_bindings')->{hotkeys} },
 		%{$config->{hotkeys} } 
 	};
 	
