@@ -1,0 +1,23 @@
+hotkeys:
+  Escape: exit_hotkey_mode
+  Insert: previous_track
+  Delete: next_track
+  Home: previous_effect
+  End: next_effect
+  PageUp: previous_param
+  PageDown: next_param
+  Left: previous_param
+  Right: next_param
+  Up: increment_param
+  Down: decrement_param
+  j: decrement_param
+  k: increment_param
+  h: previous_param
+  l: next_param
+  a: previous_track
+  s: previous_effect
+  d: next_effect
+  f: next_track
+  i: previous_track
+  o: next_track
+  Space: toggle_transport
