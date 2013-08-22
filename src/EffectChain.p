@@ -12,6 +12,7 @@ use Data::Dumper::Concise;
 use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
+use ::Effects qw(fxn);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
 
