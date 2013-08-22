@@ -113,6 +113,7 @@ sub prepare_to_cache {
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
 		}
 	); 
+	$complete_caching_ref = \&update_cache_map;
 
 	# Case 1: Caching a standard track
 	
@@ -121,8 +122,6 @@ sub prepare_to_cache {
 		# set the input path
 		$g->add_path('wav_in',$track->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
-
-		$complete_caching_ref = \&update_cache_map;
 	}
 
 	# Case 2: Caching a sub-bus mix track
