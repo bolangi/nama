@@ -725,7 +725,7 @@ sub effect_update {
 		eval_iam("ctrlp-set $val");
 	}
 	else { # is operator
-		my $i = $FX->ecasound_effect_index - $FX->offset;
+		my $i = $FX->ecasound_operator_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
 		eval_iam("cop-select ". ($FX->offset + $i));
 		eval_iam("copp-select $param");
@@ -1067,6 +1067,21 @@ sub ecasound_controller_index {
 	$position -= $operator_count; # skip operators
 	++$position; # translates 0th to chain-position 1
 }
+sub ecasound_operator_index { # does not include offset
+	my $self = shift;
+	my $id = $self->id;
+	my $chain = $self->chain;
+	my $track = $ti{$chain};
+	my @ops = @{$track->ops};
+	my $controller_count = 0;
+	my $position;
+	for my $i (0..scalar @ops - 1) {
+		$position = $i, last if $ops[$i] eq $id;
+		$controller_count++ if ::fxn($ops[$i])->is_controller;
+	}
+	$position -= $controller_count; # skip controllers 
+	++$position; # translates 0th to chain-position 1
+}
 sub ecasound_effect_index { 
 	my $self = shift;
 	my $n = $self->chain;
@@ -1079,7 +1094,6 @@ sub ecasound_effect_index {
 			++$opcount;   # first index is 1
 			last if $op eq $id
 	} 
-	no warnings 'uninitialized';
 	$self->offset + $opcount;
 }
 sub track_effect_index { # the position of the ID in the track's op array
@@ -1106,7 +1120,7 @@ sub sync_one_effect {
 		my $self= shift;
 		my $chain = $self->chain;
 		eval_iam("c-select $chain");
-		eval_iam("cop-select " .( $self->ecasound_effect_index ) );
+		eval_iam("cop-select " .( $self->offset + $self->ecasound_operator_index ) );
 		$self->set(params => get_ecasound_cop_params( scalar @{$self->params} ));
 }
 sub offset {
