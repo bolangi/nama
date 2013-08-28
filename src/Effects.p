@@ -1094,6 +1094,7 @@ sub ecasound_effect_index {
 			++$opcount;   # first index is 1
 			last if $op eq $id
 	} 
+	no warnings 'uninitialized';
 	$self->offset + $opcount;
 }
 sub track_effect_index { # the position of the ID in the track's op array
