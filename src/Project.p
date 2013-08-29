@@ -409,9 +409,9 @@ sub use_project_template {
 	save_state();
 }
 sub list_project_templates {
-	my $read = read_file(join_path(project_root(), "templates"));
-	push my @templates, "\nTemplates:\n", map{ m|([^/]+).yml$|; $1, "\n"} $read;        
-	pager(@templates);
+	my @templates= map{ /(.+?)\.json$/; $1}  read_dir(join_path(project_root(), "templates"));
+	
+	pager(join "\n","Templates:",@templates);
 }
 sub remove_project_template {
 	map{my $name = $_; 
