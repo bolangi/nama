@@ -334,7 +334,7 @@ sub new_project_template {
 
 	# save current project status to temp state file 
 	
-	my $previous_state = '_previous_state.yml';
+	my $previous_state = '_previous_state.json';
 	save_state($previous_state);
 
 	# edit current project into a template
@@ -375,7 +375,7 @@ sub new_project_template {
 
 	# save to template name
 	
-	save_state( join_path(project_root(), "templates", "$template_name.yml"));
+	save_state( join_path(project_root(), "templates", "$template_name.json"));
 
 	# add description, but where?
 	
@@ -388,7 +388,7 @@ sub new_project_template {
 
 	# remove temp state file
 	
-	unlink join_path( project_dir(), "$previous_state.yml") ;
+	unlink join_path( project_dir(), $previous_state) ;
 	
 }
 sub use_project_template {
@@ -404,7 +404,7 @@ sub use_project_template {
 	
  	load_project(
  		name     => $project->{name},
- 		settings => join_path(project_root(),"templates",$name),
+ 		settings => join_path(project_root(),"templates","$name.json"),
 	);
 	save_state();
 }
