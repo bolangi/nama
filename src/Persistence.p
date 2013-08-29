@@ -241,31 +241,21 @@ sub restore_state_from_file {
 		if $filename and not $filename =~ m(/);
 	$filename ||= $file->state_store();
 
+	my ($ref, $path, $source, $suffix); 
+
 	# get state file, newest if more than one
 	# with same name, differing extensions
 	# i.e. State.json and State.yml
 	initialize_marshalling_arrays();
 
-	my( $path, $suffix ) = get_newest($filename);
-	
-	logpkg('debug', "using file: $path");
-
-	throw(
-		$path ? "path: == $path.* ==," : "undefined path,"
-			," state file not found"), return if ! -f $path;
-
-	my $source = read_file($path);
-	my $ref = decode($source, $suffix);
-	logpkg('debug', "suffix: $suffix");	
-	logpkg('debug', "source: $source");
-
+	# restore from default filenames	
 	
 	( $path, $suffix ) = get_newest($file->untracked_state_store);
 	if ($path)
 	{
 		$source = read_file($path);
 
-		my $ref = decode($source, $suffix);
+		$ref = decode($source, $suffix);
 		assign(
 				data	=> $ref,	
 				vars   	=> \@persistent_vars,
@@ -273,7 +263,7 @@ sub restore_state_from_file {
 		assign_singletons( { data => $ref });
 	}
 	
-	( $path, $suffix ) = get_newest($file->state_store);
+	( $path, $suffix ) = get_newest($filename);
 	if ($path)
 	{
 		$source = read_file($path);
