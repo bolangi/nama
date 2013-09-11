@@ -250,6 +250,7 @@ sub rec_status {
 		elsif ($source_type eq 'jack_manual'){ return 'REC' }
 		elsif ($source_type eq 'jack_ports_list'){ return 'REC' }
 		elsif ($source_type eq 'null')	{ return 'REC' }
+		elsif ($source_type eq 'rtnull')	{ return 'REC' }
 		elsif ($source_type eq 'soundcard'){ return 'REC' }
 		elsif ($source_type eq 'bus')	{ return 'REC' } # maybe $track->rw ??
 		else { return 'OFF' }
