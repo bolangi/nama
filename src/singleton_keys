@@ -103,6 +103,8 @@ $text->{format_divider}			#
 $text->{user_command}			# user defined commands
 $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
+$text->{screen_lines}			# 
+$text->{screen_columns}			#
 
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists

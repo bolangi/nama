@@ -21,6 +21,8 @@ sub initialize_terminal {
 	$text->{term_attribs} = $text->{term}->Attribs;
 	$text->{term_attribs}->{attempted_completion_function} = \&complete;
 	$text->{term_attribs}->{already_prompted} = 1;
+	($text->{screen_lines}, $text->{screen_columns}) 
+		= $text->{term}->get_screen_size();
 	detect_spacebar(); 
 
 	revise_prompt();
@@ -81,8 +83,11 @@ sub setup_termkey {
 			$text->{hotkey_parser}->command($text->{hotkey_buffer})
  				and reset_hotkey_buffers();
  			}
-			say "\n",hotkey_status_bar() if $text->{hotkey_buffer} eq undef
-				and ! $suppress_status;
+			print(
+				"\x1b[$text->{screen_lines};0H", # go to screen bottom line, column 0
+				"\x1b[2K",  # erase line
+				hotkey_status_bar(), 
+			) if $text->{hotkey_buffer} eq undef and ! $suppress_status;
 		},
 	);
 }
@@ -201,8 +206,6 @@ sub pager3 { map { my $s = $_; chomp $s; say $s} @_ }
 sub pager {
 	logsub("&pager");
 	my @output = @_;
-	my ($screen_lines, $columns) =
-	$text->{term} ? $text->{term}->get_screen_size() : (); 
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if 
@@ -210,7 +213,7 @@ sub pager {
 		(ref $ui) =~ /Text/  # pager interferes with GUI
 		and $config->{use_pager} 
 		and ! $config->{opts}->{T}
-		and $line_count > $screen_lines - 2
+		and $line_count > $text->{screen_lines} - 2
 	) { 
 		my $fh = File::Temp->new();
 		my $fname = $fh->filename;
