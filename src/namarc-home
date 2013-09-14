@@ -66,7 +66,7 @@ ecasound_globals:
 
 use_group_numbering: 1
 
-press_space_to_start_transport: 0
+press_space_to_start_transport: 1
 
 #execute_on_project_load: eval $engine->{events}->{poll_jack} = undef;
 
