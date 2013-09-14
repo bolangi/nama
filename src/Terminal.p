@@ -64,11 +64,15 @@ sub setup_termkey {
 			# and it has an "instant" mapping
 			 
 			my $suppress_status;
+			$key_string =~ s/ /Space/; # to suit our mapping file
 			if ( my $command = $config->{hotkeys}->{$key_string} 
 				and ! length $text->{hotkey_buffer}) {
 
+
 				$suppress_status++ if $key_string eq 'Escape'
-									or $key_string eq ' ';
+									or $key_string eq 'Space';
+
+
 				try { eval "$command()" }
 				catch { throw( qq(cannot execute subroutine "$command" for key "$key_string": $_") ) }
 			}
@@ -77,6 +81,7 @@ sub setup_termkey {
 			# them against the grammar
 			 
 			else {
+			$key_string =~ s/Space/ /; # back to the character
 			$text->{hotkey_buffer} .= $key_string;
 			print $key_string if length $key_string == 1;
 #			push $text->{hotkey_object_buffer}, $key;
