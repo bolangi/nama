@@ -269,6 +269,12 @@ sub rewind {
 	my $delta = shift;
 	forward( -$delta );
 }
+sub jump_forward {
+	my $multiplier = shift;
+	forward( $multiplier * $text->{hotkey_playback_jumpsize})
+	}
+sub jump_backward { jump_forward( - shift()) }
+
 	
 } # end package
 { package ::HereMark;
