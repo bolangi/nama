@@ -1,5 +1,6 @@
 command: set_current_effect
 command: set_stepsize
+command: set_jumpsize
 command: set_parameter
 command: cancel
 cancel: /.+Escape/
@@ -10,5 +11,6 @@ lower_case_effect_id: /[a-z]+/
 set_stepsize: 'm' digit  { ::set_current_stepsize(10**$item{digit})}
 set_stepsize: 'm-' digit { ::set_current_stepsize(10**-$item{digit})}
 set_parameter: '=' value 'Enter' {::set_parameter_value($item{value})}
+set_jumpsize: 'j' value 'Enter' {$::text->{hotkey_playback_jumpsize} = $item{value}}
 digit: /\d/
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
