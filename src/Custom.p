@@ -25,7 +25,7 @@ sub setup_user_customization {
 		say "couldn't parse $filename: $@\n" if $@;
 		return;
 	}
-	logpkg('debug','customization :', sub{json_out(\%custom)});
+	logpkg('debug','customization :', sub{Dumper \%custom });
 	my $prompt;
 	{ no warnings 'redefine';
 		*prompt = $custom{prompt} if $custom{prompt};
