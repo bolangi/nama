@@ -210,4 +210,4 @@ __DATA__
 @@ default_palette_json
 [% qx(cat ./palette.json) %]
 @@ hotkey_bindings
-[% qx(cat ./hotkeys.yaml) %]
+[% qx(cat ./hotkeys.json) %]
