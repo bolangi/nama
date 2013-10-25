@@ -907,7 +907,7 @@ list_history:
   parameters: none
 add_send_bus_cooked:
   type: bus
-  what: Add a send bus, that copies all user tracks with effects and inserts (a.k.a. cooked signals). All busses begin with a capital letter!
+  what: Add a send bus that copies all user tracks with effects and inserts
   short: asbc
   parameters: <s_name> <destination>
   example: |
@@ -915,7 +915,7 @@ add_send_bus_cooked:
                       # to the jconv JACK client.
 add_send_bus_raw:
   type: bus
-  what: Add a send bus, that copies all user tracks wihtout processing (a.k.a. raw signals). All busses begin with a capital letter!
+  what: Add a send bus that copies all user tracks' unprocessed inputs
   short: asbr
   parameters: <s_name> <destination>
   example: |
