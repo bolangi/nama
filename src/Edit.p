@@ -13,7 +13,7 @@ our $VERSION = 1.0;
 use Carp;
 no warnings qw(uninitialized);
 our @ISA;
-use vars qw(%n %by_index %by_name );
+use vars qw($n %by_index %by_name );
 use ::Object qw( 
 				n
 				play_start_mark_name
@@ -25,30 +25,23 @@ use ::Object qw(
 				 );
 
 sub initialize {
-	%n = ();
+	$n = 0;
 	%by_name = ();
 	%by_index = ();
 	@::edits_data = (); # for save/restore
 }
 
-sub next_n {
-	my ($trackname, $version) = @_;
-	++$n{$trackname}{$version}
-}
+sub next_n { ++$n }
 
 sub new {
 	my $class = shift;	
 	my %vals = @_;
 
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	
-	# increment edit version number by host track and host version
-	
-	my $n = next_n(@vals{qw(host_track host_version)});
 
 	my $self = bless 
 		{ 
-			n 		=> $n,
+			n 		=> next_n(),
 		  	fades 	=> [],
 			@_ 
 		}, $class;
