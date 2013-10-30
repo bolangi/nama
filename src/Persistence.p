@@ -354,6 +354,11 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
+	
+
+	# make sure current_edit field is initialized
+	
+	map {	$_->{current_edit} //= {} } @tracks_data;
 
 	#######################################
 
