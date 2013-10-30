@@ -333,9 +333,13 @@ sub add_fader {
 	}
 	$id
 }
-
 package ::;
 
+sub fade_uses_mark {
+	my $mark_name = shift;
+	grep{ $_->mark1 eq $mark_name or $_->mark2 eq $mark_name } values %::Fade::by_index;
+}
+	
 sub apply_fades { 
 	# use info from Fade objects in %::Fade::by_name
 	# applying to tracks that are part of current

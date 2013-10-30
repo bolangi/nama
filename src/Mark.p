@@ -79,13 +79,12 @@ sub adjusted_time {  # for marks within current edit
 }
 sub remove {
 	my $mark = shift;
+	::throw('Fades depend on this mark. Remove failed.'), return	
+		if ::fade_uses_mark($mark->name);
 	if ( $mark->name ) {
 		delete $by_name{$mark->name};
 	}
-	logpkg('debug', "marks found: ",scalar @all);
-	# @all = (), return if scalar @all
 	@all = grep { $_->time != $mark->time } @all;
-
 }
 sub next { 
 	my $mark = shift;
