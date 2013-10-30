@@ -841,18 +841,19 @@ to_mark:
 add_mark:
   type: mark
   what: Drop a new mark at the current playback position. this will fail, if a mark is already placed on that exact position.
-  short: mark amk
+  short: mark amk k
   parameters: [ <s_mark_id> ]
   example: |
-    k important # Drop a mark named important at the current position.
+    mark start # Create a mark named "start" at the current position.
 remove_mark:
   type: mark
-  what: Remove a mark. The default is to remove the current mark, if no parameter is given.
-  short: rmk rom
+  what: Remove a mark
+  short: rmk
   parameters: [ <s_mark_name> | <i_mark_index> ]
   example: |
-    remove_mark important # remove the mark named important
+    remove_mark start # remove the mark named start
     rmk 16 # Remove the mark with the index 16.
+    rmk    # Remove the current mark
 next_mark:
   type: mark
   what: Move the playhead to the next mark.
