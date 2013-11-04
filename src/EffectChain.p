@@ -86,7 +86,8 @@ sub new {
 	if ($n = $vals{n} ) {} 	
 	else {
 
-		# move attributes to "attrib" hash
+		# backward compatibility
+		# move attributes to $self->{attrib}->{...}
 		move_attributes(\%vals);
 
 		$vals{inserts_data} ||= [];
