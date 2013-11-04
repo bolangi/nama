@@ -68,28 +68,29 @@ sub params {
 }
 
 sub initialize {
-	$n = 1;
+	$n = 0;
 	%by_index = ();	
 	@::global_effect_chain_data = ();  # for save/restore
     @::project_effect_chain_data = (); 
 	%is_attribute = map{ $_ => 1 } @attributes;
 }
+sub new_sequence_number { ++$n }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
 	my $class = shift;	
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
-	my $n;
 
 	# not need to massage data if we are merely restoring
-	if ($n = $vals{n} ) {} 	
+	if ($vals{n} ) {} 	
 	else {
 
 		# backward compatibility
 		# move attributes to $self->{attrib}->{...}
 		move_attributes(\%vals);
 
+		$vals{n} = new_sequence_number();
 		$vals{inserts_data} ||= [];
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
@@ -102,8 +103,6 @@ sub new {
 		# we expect some effects
 		logpkg('warn',"Nether ops_list or nor insert_data is present") 
 			if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
-
-		my $n = $vals{n} || ++$n;
 
 		my $ops_data = {};
 		# ops data can either be 
@@ -209,14 +208,8 @@ sub new {
 
 		#say ::json_out($vals{inserts_data}) if $vals{inserts_data};
 	}
-
-	my $object = bless 
-		{ 
-			n => $n, 
-			%vals,
-
-		}, $class;
-	$by_index{$n} = $object;
+	my $object = bless { %vals }, $class;
+	$by_index{$vals{n}} = $object;
 	logpkg('debug',sub{$object->dump});
 	$object;
 }
