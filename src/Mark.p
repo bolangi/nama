@@ -23,6 +23,10 @@ sub initialize {
 	$by_name{Here} = bless {}, '::HereMark';
 	@::marks_data = (); # for save/restore
 }
+sub next_sequence {
+	$project->{mark_sequence_counter} ||= '0000';
+	$project->{mark_sequence_counter}++
+}
 sub new {
 	my $class = shift;	
 	my %vals = @_;

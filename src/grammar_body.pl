@@ -1268,7 +1268,25 @@ add_fade: _add_fade in_or_out mark1 mark2
 	);
 	::request_setup();
 }
-#add_fade: _add_fade in_or_out time1 time2 # not implemented
+add_fade: _add_fade in_or_out time1 time2 
+{ 	
+	my $mark1 = ::Mark->new( 
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		time => $item{time1}
+	);
+	my $mark2 = ::Mark->new( 
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		time => $item{time2}
+	);
+	::Fade->new(  type => $item{in_or_out},
+					mark1 => $mark1->name,
+					mark2 => $mark2->name,
+					track => $::this_track->name,
+	);
+	::request_setup();
+}
+time1: value
+time2: value
 in_or_out: 'in' | 'out'
 duration: value
 mark1: markname
