@@ -341,11 +341,12 @@ sub fade_uses_mark {
 }
 	
 sub apply_fades { 
-	# use info from Fade objects in %::Fade::by_name
-	# applying to tracks that are part of current
-	# chain setup
+	# + data from Fade objects residing in %::Fade::by_name
+	# + apply to tracks 
+	#     * that are part of current chain setup
+	#     * that have a fade operator (i.e. most user tracks)
 	map{ ::Fade::refresh_fade_controller($_) }
-	grep{$_->{fader} }  # only if already exists
+	grep{$_->{fader} }
 	::ChainSetup::engine_tracks();
 }
 	
