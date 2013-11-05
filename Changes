@@ -1,5 +1,10 @@
 Changes to Audio::Nama
 
+1.111 Octor 24, 2013
+    * add hotkey mode
+    * do not delete marks that fades depend on
+    * many fixes - git repository is the authoritative source
+
 1.102 March 3, 2013
 
     * new .namarc option 'use_git' for project management
