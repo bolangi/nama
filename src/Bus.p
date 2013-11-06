@@ -247,6 +247,49 @@ sub apply {
 
 
 }
+
+{ package ::Sequence;
+use Modern::Perl; use Carp; 
+use ::Log qw(logsub logpkg);
+our @ISA = '::SubBus';
+
+# share the following variables with subclasses
+
+our $VERSION = 1.0;
+use ::Object qw( clips );
+use SUPER;
+sub new { 
+	my $self = super();
+	$self->{clips} = [];
+} 
+sub remove {
+	my $sequence = shift;
+
+	# delete all clips
+	map{$::tn{$_}->destroy } $by_name{$sequence->name}->tracks;
+
+	# delete clip array
+	delete $sequence->{clips};
+	
+	my $mix_track = $::tn{$sequence->name};
+
+	if ( defined $mix_track ){
+	 
+		$mix_track->unbusify;
+	
+		# remove mix track unless it has some WAV files
+
+		$mix_track->remove unless scalar @{ $mix_track->versions };
+	}
+
+	# remove sequence from index
+	
+	delete $by_name{$sequence->name};
+} 
+} # end package
+
+
+
 # ---------- Bus routines --------
 {
 package ::;

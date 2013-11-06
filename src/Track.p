@@ -1091,7 +1091,34 @@ our @ISA ='::Track';
 sub set_version {}
 sub versions { [$_[0]->version] }
 }
+{
+package ::Clip;
 
+# we're going to get (sequence, index) arguments
+# for methods that need to identify position and order information
+# in sequences
+
+# and version args to identify source
+
+use ::Globals qw(:all);
+use ::Log qw(logpkg);
+our @ISA ='::Track';
+sub playat {
+	my $self = shift;
+	my ($sequence, $index) = (shift, shift);
+	$sequence->clip($index)->predecessor->endpoint;
+}
+sub duration {
+
+
+}
+sub endpoint { 
+	my $self = shift;
+	my ($sequence, $index) = (shift, shift);
+	$sequence->clip($index)->duration + 
+	$sequence->clip($index)->predecessor->endpoint;
+}
+} # end package
 
 # ----------- Track_subs -------------
 {
