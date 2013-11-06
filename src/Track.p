@@ -1094,11 +1094,9 @@ sub versions { [$_[0]->version] }
 {
 package ::Clip;
 
-# we're going to get (sequence, index) arguments
-# for methods that need to identify position and order information
-# in sequences
-
-# and version args to identify source
+# during routing
+# clip will get (sequence, index) arguments
+# needed by endpoint method
 
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
@@ -1106,7 +1104,9 @@ our @ISA ='::Track';
 sub playat {
 	my $self = shift;
 	my ($sequence, $index) = (shift, shift);
-	$sequence->clip($index)->predecessor->endpoint;
+	$sequence->item($index)->predecessor 
+		? $sequence->item($index)->predecessor->endpoint
+		: 0
 }
 sub duration {
 
@@ -1116,7 +1116,14 @@ sub endpoint {
 	my $self = shift;
 	my ($sequence, $index) = (shift, shift);
 	$sequence->clip($index)->duration + 
-	$sequence->clip($index)->predecessor->endpoint;
+		($sequence->clip($index)->predecessor
+			?  $sequence->clip($index)->predecessor->endpoint
+			: 0 )
+}
+sub predecessor {
+	my $self = shift;
+	my ($sequence, $index) = (shift, shift);
+	$sequence->clip($index - 1)
 }
 } # end package
 

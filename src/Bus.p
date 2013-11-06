@@ -256,12 +256,39 @@ our @ISA = '::SubBus';
 # share the following variables with subclasses
 
 our $VERSION = 1.0;
-use ::Object qw( clips );
+use ::Object qw( items );
 use SUPER;
 sub new { 
+	my ($class,%args) = @_;
+	my $items = delete $args{items} || [];
+	@_ = ($class, %args);
 	my $self = super();
-	$self->{clips} = [];
+	$self->{items} = $items;
+	$self;
 } 
+# perl indexes arrays at zero, nama numbers items from one
+sub insert_item {
+	my $self = shift;
+	my ($item, $index) = (shift, shift);
+	splice(@{$self->{items}}, $index - 1,0, $item);
+}
+sub delete_item {
+	my $self = shift;
+	my ($item, $index) = (shift, shift);
+	splice(@{$self->{items}}, $index - 1, 1);
+}
+sub append_item {
+	my $self = shift;
+	my $item = shift;
+	push( @{$self->{items}}, $item);
+}
+sub item {
+	my $self = shift;
+	my $index = shift;
+	return 0 if $index <= 0;
+	$self->{items}->[$index - 1];
+}
+	
 sub remove {
 	my $sequence = shift;
 
