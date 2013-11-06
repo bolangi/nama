@@ -1367,6 +1367,39 @@ remove_fader_effect:
   short: rffx
   what: remove vol pan or fader on current track
   parameters: vol | pan | fader
+new_sequence:
+  type: sequence
+  short: nsq
+  what: define a new sequence
+  parameters: <s_name> <track1, track2,...>
+select_sequence:
+  type: sequence
+  short: ssq
+  what: select named sequence as current sequence
+  parameter: <s_name>
+list_sequences:
+  type: sequence
+  short: lsq
+  what: list sequences
+append_to_sequence:
+  type: sequence
+  short: asq
+  what: append items to sequence
+insert_in_sequence:
+  type: sequence
+  short: isq
+  what: insert items into sequence before index i
+  parameter: <s_name> <i_index>
+remove_from_sequence:
+  type: sequence
+  short: rsq
+  what: remove item from sequence
+  parameter: <i_index>
+delete_sequence:
+  type: sequence
+  short: dsq
+  what: delete entire sequence
+  parameter: <s_sequence>
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
