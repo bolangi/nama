@@ -1537,3 +1537,35 @@ fader_role: 'vol'|'pan'|'fader'
 hotkeys: _hotkeys { ::setup_hotkeys()}
 hotkeys_always: _hotkeys_always { $::config->{hotkeys_always}++; ::setup_hotkeys(); }
 hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
+
+select_sequence: _select_sequence existing_sequence_name { 
+	$::this_sequence = $item{existing_sequence_name}
+} 
+existing_sequence_name: ident { 
+		my $buslike = $::bn{$item{ident}};
+		(ref $buslike) =~ /Sequence/
+}
+new_sequence: _new_sequence sequence_name track_identifier(s?) {
+	my @items = @{ $item{'track_identifiers(s?)'} };
+	my $seq = ::Sequence->new(
+		name => $item{sequence_name},
+		items => \@items);
+	$::this_sequence = $seq->name;
+}
+sequence_name: ident
+
+track_identifier: tid { 
+	if( $return = $::tn{$item{tid}} || $::ti{$item{tid}} )
+	{ 	return 1 }
+	else 
+	{ 	print "$item{tid}: track name or index not found."; 
+		return 0
+	}
+}
+tid: ident
+list_sequences: _list_sequences 
+append_to_sequence: _append_to_sequence
+insert_in_sequence: _insert_in_sequence
+remove_from_sequence: _remove_from_sequence
+delete_sequence: _delete_sequence
+
