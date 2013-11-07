@@ -1101,29 +1101,33 @@ package ::Clip;
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
 our @ISA ='::Track';
-sub playat {
-	my $self = shift;
-	my ($sequence, $index) = (shift, shift);
-	$sequence->item($index)->predecessor 
-		? $sequence->item($index)->predecessor->endpoint
-		: 0
-}
-sub duration {
 
+sub sequence { my $self = shift; $::bn{$self->group} };
 
-}
-sub endpoint { 
-	my $self = shift;
-	my ($sequence, $index) = (shift, shift);
-	$sequence->clip($index)->duration + 
-		($sequence->clip($index)->predecessor
-			?  $sequence->clip($index)->predecessor->endpoint
-			: 0 )
+sub index { my $self = shift; my $i = -1;
+	for( @{$self->sequence->items} ){
+		$i++;
+		return $i if $self->name eq $_->name
+	}
 }
 sub predecessor {
 	my $self = shift;
-	my ($sequence, $index) = (shift, shift);
-	$sequence->clip($index - 1)
+	$self->sequence->clip($self->index - 1)
+}
+sub duration {
+	my $self = shift;
+	$self->adjusted_length;
+}
+sub endpoint { 
+	my $self = shift;
+	my $sequence = $self->sequence;
+	my $index = $self->index;
+	$self->duration + ( $self->predecessor ?  $self->predecessor->endpoint : 0 )
+}
+sub playat {
+	my $self = shift;
+	my $previous = $self->sequence->predecessor;
+	$previous ? $previous->endpoint : 0
 }
 } # end package
 
