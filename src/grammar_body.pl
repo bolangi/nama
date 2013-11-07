@@ -1546,7 +1546,7 @@ existing_sequence_name: ident {
 		(ref $buslike) =~ /Sequence/
 }
 new_sequence: _new_sequence sequence_name track_identifier(s?) {
-	my @items = @{ $item{'track_identifiers(s?)'} };
+	my @items = @{ $item{'track_identifier(s?)'} };
 	my $seq = ::Sequence->new(
 		name => $item{sequence_name},
 		items => \@items);
@@ -1564,8 +1564,23 @@ track_identifier: tid {
 }
 tid: ident
 list_sequences: _list_sequences 
-append_to_sequence: _append_to_sequence
-insert_in_sequence: _insert_in_sequence
-remove_from_sequence: _remove_from_sequence
-delete_sequence: _delete_sequence
-
+append_to_sequence: _append_to_sequence track_identifier(s) { 
+	my $seq = $::bn{$::this_sequence};
+	my $items = $item{'track_identifier(s)'};
+	for ( @$items ){ $seq->append_item($_) }
+}
+insert_in_sequence: _insert_in_sequence position track_identifier(s) {
+	my $seq = $::bn{$::this_sequence};
+	my $items = $item{'track_identifier(s)'};
+	my $position = $item{position};
+	for ( reverse @$items ){ $seq->insert_item($position,$_) }
+}
+remove_from_sequence: _remove_from_sequence position(s) {
+	my $seq = $::bn{$::this_sequence};
+	my @positions = sort { $a <=> $b } @{ $item{'position(s)'}};
+	$seq->delete_item($_) for reverse @positions;
+}
+delete_sequence: _delete_sequence existing_sequence_name {
+	$::bn{$item{existing_sequence_name}}->remove
+}
+position: /\d+/
