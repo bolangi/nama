@@ -256,21 +256,27 @@ our @ISA = '::SubBus';
 # share the following variables with subclasses
 
 our $VERSION = 1.0;
-use ::Object qw( items );
+use ::Object qw( items clip_counter );
 use SUPER;
 sub new { 
 	my ($class,%args) = @_;
 	my $items = delete $args{items} || [];
 	@_ = ($class, %args);
 	my $self = super();
-	$self->{items} = $items;
+	$self->{clip_counter} = 0;
+	$::this_sequence = $self;
+	$self->{items} = [ map {$self->create_clip($_)} @$items ];
 	$self;
 } 
+sub clip {
+	my ($self, $index) = @_;
+	$self->{items}->[$index - 1]
+}
 # perl indexes arrays at zero, nama numbers items from one
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = (shift, shift);
-	splice(@{$self->{items}}, $index - 1,0, $item);
+	splice(@{$self->{items}}, $index - 1,0, $self->create_clip($item));
 }
 sub delete_item {
 	my $self = shift;
@@ -280,7 +286,7 @@ sub delete_item {
 sub append_item {
 	my $self = shift;
 	my $item = shift;
-	push( @{$self->{items}}, $item);
+	push( @{$self->{items}}, $self->create_clip($item) );
 }
 sub item {
 	my $self = shift;
@@ -313,8 +319,20 @@ sub remove {
 	
 	delete $by_name{$sequence->name};
 } 
+sub create_clip {
+	my $self = shift;
+	my $track = shift;
+	ref $track or $track = $::tn{$track};	 # can be object or name
+	my $clip = ::Clip->new(
+		target => $track->basename,
+		name => $self->unique_clip_name($track),
+	);
+}
+sub unique_clip_name {
+	my ($self, $track) = @_;
+	join '-', $self->name , ++$self->{clip_counter}, $track->name, 'v'.$track->monitor_version;
+}
 } # end package
-
 
 
 # ---------- Bus routines --------

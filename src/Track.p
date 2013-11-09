@@ -1094,9 +1094,9 @@ sub versions { [$_[0]->version] }
 {
 package ::Clip;
 
-# during routing
-# clip will get (sequence, index) arguments
-# needed by endpoint method
+# Clips differ from tracks in that clips know
+# their position (index) in the sequence items array.
+# index is one-based.
 
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
@@ -1124,9 +1124,9 @@ sub endpoint {
 	my $index = $self->index;
 	$self->duration + ( $self->predecessor ?  $self->predecessor->endpoint : 0 )
 }
-sub playat {
+sub playat_time {
 	my $self = shift;
-	my $previous = $self->sequence->predecessor;
+	my $previous = $self->predecessor;
 	$previous ? $previous->endpoint : 0
 }
 } # end package
