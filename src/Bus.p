@@ -333,6 +333,8 @@ sub new_clip {
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track),
+		rw => 'MON',
+		group => $self->name,
 	);
 }
 sub unique_clip_name {

@@ -1546,16 +1546,25 @@ existing_sequence_name: ident {
 		(ref $buslike) =~ /Sequence/
 }
 new_sequence: _new_sequence sequence_name track_identifier(s?) {
+
+	# as with sub-buses, use the same name for
+	# the bus and the bus mix track
+	
 	my @items = @{ $item{'track_identifier(s?)'} };
+	::add_track($item{sequence_name});
 	$::this_sequence = ::Sequence->new(
 		name => $item{sequence_name},
-		items => \@items);
+		items => \@items,
+		send_type => 'track',
+		send_id	 => $item{sequence_name},
+	);
+	1
 }
 sequence_name: ident
 
 track_identifier: tid { 
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
-	if ($tid) { $return = $tid; return $tid } # one of these should work! 
+	if ($tid) { $return = $tid }
 	else 
 	{ 	print "$item{tid}: track name or index not found."; 
 		return 0
