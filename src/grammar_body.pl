@@ -1554,8 +1554,8 @@ new_sequence: _new_sequence sequence_name track_identifier(s?) {
 sequence_name: ident
 
 track_identifier: tid { 
-	if( $return = $::tn{$item{tid}} || $::ti{$item{tid}} )
-	{ 	return 1 }
+	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
+	if ($tid) { $return = $tid; return $tid } # one of these should work! 
 	else 
 	{ 	print "$item{tid}: track name or index not found."; 
 		return 0

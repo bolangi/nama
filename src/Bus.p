@@ -250,6 +250,7 @@ sub apply {
 
 { package ::Sequence;
 use Modern::Perl; use Carp; 
+use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
 our @ISA = '::SubBus';
 
@@ -260,12 +261,17 @@ use ::Object qw( items clip_counter );
 use SUPER;
 sub new { 
 	my ($class,%args) = @_;
-	my $items = delete $args{items} || [];
+	my $items = $args{items};
+	logpkg('debug', "items: ",json_out($items));
+	delete $args{items};
+	$items //= [];
 	@_ = ($class, %args);
 	my $self = super();
+	logpkg('debug',"new object: ", json_out($self->as_hash));
+	logpkg('debug', "items: ",json_out($items));
 	$self->{clip_counter} = 0;
 	$::this_sequence = $self;
-	$self->{items} = [ map {$self->create_clip($_)} @$items ];
+	$self->{items} = [ map {$self->new_clip($_)} @$items ];
 	$self;
 } 
 sub clip {
@@ -276,7 +282,7 @@ sub clip {
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = (shift, shift);
-	splice(@{$self->{items}}, $index - 1,0, $self->create_clip($item));
+	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item));
 }
 sub delete_item {
 	my $self = shift;
@@ -286,7 +292,7 @@ sub delete_item {
 sub append_item {
 	my $self = shift;
 	my $item = shift;
-	push( @{$self->{items}}, $self->create_clip($item) );
+	push( @{$self->{items}}, $self->new_clip($item) );
 }
 sub item {
 	my $self = shift;
@@ -319,10 +325,11 @@ sub remove {
 	
 	delete $by_name{$sequence->name};
 } 
-sub create_clip {
+sub new_clip {
 	my $self = shift;
 	my $track = shift;
-	ref $track or $track = $::tn{$track};	 # can be object or name
+	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
+	#ref $track or $track = $::tn{$track};	 # can be object or name
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track),
