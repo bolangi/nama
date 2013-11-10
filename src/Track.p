@@ -1100,7 +1100,7 @@ package ::Clip;
 
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
-our @ISA ='::Track';
+our @ISA = qw( ::Track ::VersionTrack );
 
 sub sequence { my $self = shift; $::bn{$self->group} };
 
