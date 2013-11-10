@@ -1551,7 +1551,10 @@ new_sequence: _new_sequence sequence_name track_identifier(s?) {
 	# the bus and the bus mix track
 	
 	my @items = @{ $item{'track_identifier(s?)'} };
-	::add_track($item{sequence_name});
+	my $mix_track = ::add_track($item{sequence_name},
+						rec_defeat	=> 1,
+						is_mix_track => 1,
+						rw 			=> 'REC');
 	$::this_sequence = ::Sequence->new(
 		name => $item{sequence_name},
 		items => \@items,
@@ -1562,7 +1565,7 @@ new_sequence: _new_sequence sequence_name track_identifier(s?) {
 }
 sequence_name: ident
 
-track_identifier: tid { 
+track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
 	if ($tid) { $return = $tid }
 	else 

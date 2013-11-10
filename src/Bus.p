@@ -326,8 +326,7 @@ sub remove {
 	delete $by_name{$sequence->name};
 } 
 sub new_clip {
-	my $self = shift;
-	my $track = shift;
+	my ($self, $track, %args) = @_;
 	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
 	#ref $track or $track = $::tn{$track};	 # can be object or name
 	my $clip = ::Clip->new(
@@ -335,6 +334,7 @@ sub new_clip {
 		name => $self->unique_clip_name($track),
 		rw => 'MON',
 		group => $self->name,
+		version => $track->monitor_version,
 	);
 }
 sub unique_clip_name {
