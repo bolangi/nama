@@ -1567,27 +1567,28 @@ sequence_name: ident
 
 track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
-	if ($tid) { $return = $tid }
+	if ($tid) { $tid }
 	else 
 	{ 	print "$item{tid}: track name or index not found."; 
-		return 0
+		0
 	}
 }
 tid: ident
 list_sequences: _list_sequences 
 append_to_sequence: _append_to_sequence track_identifier(s) { 
-	my $seq = $::bn{$::this_sequence};
+	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
-	for ( @$items ){ $seq->append_item($_) }
+	map { $seq->append_item($_) } map{ $::tn{$_} } @$items; 
+	1;
 }
 insert_in_sequence: _insert_in_sequence position track_identifier(s) {
-	my $seq = $::bn{$::this_sequence};
+	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
 	my $position = $item{position};
 	for ( reverse @$items ){ $seq->insert_item($position,$_) }
 }
 remove_from_sequence: _remove_from_sequence position(s) {
-	my $seq = $::bn{$::this_sequence};
+	my $seq = $::this_sequence;
 	my @positions = sort { $a <=> $b } @{ $item{'position(s)'}};
 	$seq->delete_item($_) for reverse @positions;
 }
