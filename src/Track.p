@@ -1120,7 +1120,6 @@ sub duration {
 }
 sub endpoint { 
 	my $self = shift;
-	my $duration = 
 	$self->duration + ( $self->predecessor ?  $self->predecessor->endpoint : 0 )
 }
 sub playat_time {
