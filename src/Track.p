@@ -1104,7 +1104,7 @@ our @ISA = qw( ::VersionTrack ::Track );
 
 sub sequence { my $self = shift; $::bn{$self->group} };
 
-sub index { my $self = shift; my $i = -1;
+sub index { my $self = shift; my $i = 0;
 	for( @{$self->sequence->items} ){
 		$i++;
 		return $i if $self->name eq $_->name
@@ -1116,12 +1116,11 @@ sub predecessor {
 }
 sub duration {
 	my $self = shift;
-	$self->adjusted_length;
+	$self->wav_length;
 }
 sub endpoint { 
 	my $self = shift;
-	my $sequence = $self->sequence;
-	my $index = $self->index;
+	my $duration = 
 	$self->duration + ( $self->predecessor ?  $self->predecessor->endpoint : 0 )
 }
 sub playat_time {

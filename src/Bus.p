@@ -276,6 +276,7 @@ sub new {
 } 
 sub clip {
 	my ($self, $index) = @_;
+	return 0 if $index <= 0;
 	$self->{items}->[$index - 1]
 }
 # perl indexes arrays at zero, nama numbers items from one
