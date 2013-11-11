@@ -1578,7 +1578,7 @@ list_sequences: _list_sequences
 append_to_sequence: _append_to_sequence track_identifier(s) { 
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
-	map { $seq->append_item($_) } map{ $::tn{$_} } @$items; 
+	map { $seq->append_item($_) } @$items; 
 	1;
 }
 insert_in_sequence: _insert_in_sequence position track_identifier(s) {
