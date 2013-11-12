@@ -1129,6 +1129,15 @@ sub playat_time {
 	my $previous = $self->predecessor;
 	$previous ? $previous->endpoint : 0
 }
+
+# we currently are not compatible with offset run mode
+# perhaps we can enforce OFF status for clips under 
+# offset run mode
+
+sub shifted_playat_time 	  {	$_[0]->playat_time 			}
+sub shifted_region_start_time { $_[0]->region_start_time() 	}
+sub shifted_region_end_time   { $_[0]->region_end_time() 	} 
+#sub shifted_length 		  #  provided by ::Track class
 } # end package
 
 # ----------- Track_subs -------------
