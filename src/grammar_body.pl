@@ -1585,7 +1585,7 @@ insert_in_sequence: _insert_in_sequence position track_identifier(s) {
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
 	my $position = $item{position};
-	for ( reverse @$items ){ $seq->insert_item($position,$_) }
+	for ( reverse @$items ){ $seq->insert_item($_,$position) }
 }
 remove_from_sequence: _remove_from_sequence position(s) {
 	my $seq = $::this_sequence;
