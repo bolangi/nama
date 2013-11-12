@@ -1137,7 +1137,6 @@ sub playat_time {
 sub shifted_playat_time 	  {	$_[0]->playat_time 			}
 sub shifted_region_start_time { $_[0]->region_start_time() 	}
 sub shifted_region_end_time   { $_[0]->region_end_time() 	} 
-#sub shifted_length 		  #  provided by ::Track class
 } # end package
 
 # ----------- Track_subs -------------
