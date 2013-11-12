@@ -271,35 +271,35 @@ sub new {
 	logpkg('debug', "items: ",json_out($items));
 	$self->{clip_counter} = 0;
 	$::this_sequence = $self;
-	$self->{items} = [ map {$self->new_clip($_)} @$items ];
+	$self->{items} = [ map {$self->new_clip($_)->name} @$items ];
 	$self;
 } 
 sub clip {
 	my ($self, $index) = @_;
 	return 0 if $index <= 0;
-	$self->{items}->[$index - 1]
+	$::tn{$self->{items}->[$index - 1]}
 }
 # perl indexes arrays at zero, nama numbers items from one
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = (shift, shift);
-	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item));
+	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item)->name);
 }
 sub delete_item {
 	my $self = shift;
-	my ($item, $index) = (shift, shift);
+	my $index = shift;
 	splice(@{$self->{items}}, $index - 1, 1);
 }
 sub append_item {
 	my $self = shift;
 	my $item = shift;
-	push( @{$self->{items}}, $self->new_clip($item) );
+	push( @{$self->{items}}, $self->new_clip($item)->name );
 }
 sub item {
 	my $self = shift;
 	my $index = shift;
 	return 0 if $index <= 0;
-	$self->{items}->[$index - 1];
+	$::tn{$self->{items}->[$index - 1]};
 }
 	
 sub remove {

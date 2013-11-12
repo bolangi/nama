@@ -1109,7 +1109,7 @@ sub sequence { my $self = shift; $::bn{$self->group} };
 sub index { my $self = shift; my $i = 0;
 	for( @{$self->sequence->items} ){
 		$i++;
-		return $i if $self->name eq $_->name
+		return $i if $self->name eq $_
 	}
 }
 sub predecessor {
