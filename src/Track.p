@@ -273,7 +273,7 @@ sub region_start_time {
 	my $track = shift;
 	#return if $track->rec_status ne 'MON';
 	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
-	::Mark::unadjusted_mark_time( $track->region_start )
+	::Mark::unshifted_mark_time( $track->region_start )
 }
 sub region_end_time {
 	my $track = shift;
@@ -282,33 +282,33 @@ sub region_end_time {
 	if ( $track->region_end eq 'END' ){
 		return $track->wav_length;
 	} else {
-		::Mark::unadjusted_mark_time( $track->region_end )
+		::Mark::unshifted_mark_time( $track->region_end )
 	}
 }
 sub playat_time {
 	my $track = shift;
 	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
 	#return if $track->rec_status ne 'MON';
-	::Mark::unadjusted_mark_time( $track->playat )
+	::Mark::unshifted_mark_time( $track->playat )
 }
 
 # the following methods adjust
 # region start and playat values during edit mode
 
-sub adjusted_region_start_time {
+sub shifted_region_start_time {
 	my $track = shift;
 	return $track->region_start_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_region_start();
 	
 }
-sub adjusted_playat_time { 
+sub shifted_playat_time { 
 	my $track = shift;
 	return $track->playat_time unless $mode->{offset_run};
 	::set_edit_vars($track);
 	::new_playat();
 }
-sub adjusted_region_end_time {
+sub shifted_region_end_time {
 	my $track = shift;
 	return $track->region_end_time unless $mode->{offset_run};
 	::set_edit_vars($track);
@@ -357,6 +357,8 @@ sub input_path {
 	my $track = shift;
 
 	# the corresponding bus handles input routing for mix tracks
+	
+	# the mix track set to REC doesn't need to setup 
 	return() if $track->is_mix_track and $track->rec_status eq 'REC';
 
 	# the track may route to:
@@ -843,16 +845,16 @@ sub unbusify {
 	$track->set_track_class($track->was_class // '::Track');
 }
 
-sub adjusted_length {
+sub shifted_length {
 	my $track = shift;
 	my $setup_length;
 	if ($track->region_start){
-		$setup_length = 	$track->adjusted_region_end_time
-				  - $track->adjusted_region_start_time
+		$setup_length = 	$track->shifted_region_end_time
+				  - $track->shifted_region_start_time
 	} else {
 		$setup_length = 	$track->wav_length;
 	}
-	$setup_length += $track->adjusted_playat_time;
+	$setup_length += $track->shifted_playat_time;
 }
 
 sub version_comment {

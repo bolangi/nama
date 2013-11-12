@@ -811,12 +811,12 @@ sub merge_edits {
 }
 # offset recording
 
-# Note that although we use ->adjusted_* methods, all are
+# Note that although we use ->shifted_* methods, all are
 # executed outside of edit mode, so we get unadjusted values.
 
 sub setup_length {
 	my $setup_length;
-	map{  my $l = $_->adjusted_length; $setup_length = $l if $l > $setup_length }
+	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
 	grep{ $_-> rec_status eq 'MON' }
 	::ChainSetup::engine_tracks();
 	$setup_length

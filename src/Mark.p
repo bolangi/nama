@@ -75,7 +75,7 @@ sub jump_here {
 	::set_position($mark->time);
 	$::this_mark = $mark;
 }
-sub adjusted_time {  # for marks within current edit
+sub shifted_time {  # for marks within current edit
 	my $mark = shift;
 	return $mark->time unless $mode->{offset_run};
 	my $time = $mark->time - ::play_start_time();
@@ -114,7 +114,7 @@ sub loop_end {
 		grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
 	$points[1];
 }
-sub unadjusted_mark_time {
+sub unshifted_mark_time {
 	my $tag = shift;
 	$tag or $tag = '';
 	#print "tag: $tag\n";
@@ -135,7 +135,7 @@ sub unadjusted_mark_time {
 }
 sub mark_time {
 	my $tag = shift;
-	my $time = unadjusted_mark_time($tag);
+	my $time = unshifted_mark_time($tag);
 	return unless defined $time;
 	$time -= ::play_start_time() if $mode->{offset_run};
 	$time
