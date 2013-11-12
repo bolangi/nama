@@ -643,6 +643,23 @@ sub set_edit_vars {
 	$edit_play_end	= play_end_time();
 	$setup_length 		= wav_length($track->full_path);
 }
+# depends on $this_edit and $track
+sub edit_vars {
+	my $this_edit = shift;
+	::throw("current edit is undefined"), return unless $this_edit;
+	my $track = $::tn{$this_edit}->{host_track};
+	{
+	trackname      	=> $track->name,
+	playat 			=> $track->playat_time,
+	region_start   	=> $track->region_start_time,
+	region_end 		=> $track->region_end_time,
+	edit_play_start => $this_edit->play_start_time(),
+	edit_play_end	=> $this_edit->play_end_time(),
+	setup_length 	=> $track->wav_length(),
+	}
+}
+
+
 sub play_start_time {
 	defined $this_edit 
 		? $this_edit->play_start_time 
