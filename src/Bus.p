@@ -301,7 +301,14 @@ sub item {
 	return 0 if $index <= 0;
 	$::tn{$self->{items}->[$index - 1]};
 }
-	
+sub list {
+	my $self = shift;
+	map{ $::tn{$_}->target} @{$self->items};
+}
+sub list_output {
+	my $self = shift;
+	join "\n","Sequence $self->{name} clips:", $self->list, '';
+}
 sub remove {
 	my $sequence = shift;
 
