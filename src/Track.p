@@ -1134,9 +1134,6 @@ sub playat_time {
 # perhaps we can enforce OFF status for clips under 
 # offset run mode
 
-sub shifted_playat_time 	  {	$_[0]->playat_time 			}
-sub shifted_region_start_time { $_[0]->region_start_time() 	}
-sub shifted_region_end_time   { $_[0]->region_end_time() 	} 
 } # end package
 
 # ----------- Track_subs -------------
