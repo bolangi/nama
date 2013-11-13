@@ -957,6 +957,7 @@ sub rec_cleanup_script {
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
+sub is_region { defined $_[0]->region_start_time }
 
 } # end package
 
@@ -1118,7 +1119,11 @@ sub predecessor {
 }
 sub duration {
 	my $self = shift;
-	$self->wav_length;
+	$self->{duration} 
+		? ::Mark::duration_from_tag($self->{duration})
+		: $self->is_region 
+			? $self->region_end_time - $self->region_start_time 
+			: $self->wav_length;
 }
 sub endpoint { 
 	my $self = shift;
@@ -1134,6 +1139,22 @@ sub playat_time {
 # perhaps we can enforce OFF status for clips under 
 # offset run mode
 
+} # end package
+{ package ::Spacer;
+use SUPER;
+our @ISA = '::Clip';
+sub rec_status { 'OFF' }
+sub new { 
+	my ($class,%args) = @_;
+	# take out args we will process
+	my $duration = delete $args{duration};
+	@_ = ($class, %args);
+	my $self = super();
+	#logpkg('debug',"new object: ", json_out($self->as_hash));
+	#logpkg('debug', "items: ",json_out($items));
+	$self->{duration} = $duration;
+	$self;
+}
 } # end package
 
 # ----------- Track_subs -------------
