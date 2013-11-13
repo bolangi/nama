@@ -1271,11 +1271,11 @@ add_fade: _add_fade in_or_out mark1 mark2
 add_fade: _add_fade in_or_out time1 time2 
 { 	
 	my $mark1 = ::Mark->new( 
-		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_id()),
 		time => $item{time1}
 	);
 	my $mark2 = ::Mark->new( 
-		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_id()),
 		time => $item{time2}
 	);
 	::Fade->new(  type => $item{in_or_out},
