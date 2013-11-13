@@ -261,17 +261,18 @@ use ::Object qw( items clip_counter );
 use SUPER;
 sub new { 
 	my ($class,%args) = @_;
-	my $items = $args{items};
+	# take out args we will process
+	my $items = delete $args{items};
+	my $counter = delete $args{clip_counter};
 	logpkg('debug', "items: ",json_out($items));
-	delete $args{items};
 	$items //= [];
 	@_ = ($class, %args);
 	my $self = super();
 	logpkg('debug',"new object: ", json_out($self->as_hash));
 	logpkg('debug', "items: ",json_out($items));
-	$self->{clip_counter} = 0;
-	$::this_sequence = $self;
+	$self->{clip_counter} = $counter;
 	$self->{items} = [ map {$self->new_clip($_)->name} @$items ];
+	$::this_sequence = $self;
 	$self;
 } 
 sub clip {
@@ -283,12 +284,19 @@ sub clip {
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = (shift, shift);
+	$self->verify_item($index) or die "$index: sequence index out of range";
 	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item)->name);
+}
+sub verify_item {
+	my ($self, $index) = @_;
+	$index >= 1 and $index <= scalar @{$self->items} 
 }
 sub delete_item {
 	my $self = shift;
 	my $index = shift;
-	splice(@{$self->{items}}, $index - 1, 1);
+	$self->verify_item($index) or die "$index: sequence index out of range";
+	my $trackname = splice(@{$self->{items}}, $index - 1, 1);
+	$::tn{$trackname} and $::tn{$trackname}->remove;
 }
 sub append_item {
 	my $self = shift;
