@@ -273,7 +273,7 @@ sub region_start_time {
 	my $track = shift;
 	#return if $track->rec_status ne 'MON';
 	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
-	::Mark::unshifted_mark_time( $track->region_start )
+	::Mark::time_from_tag( $track->region_start )
 }
 sub region_end_time {
 	my $track = shift;
@@ -282,14 +282,14 @@ sub region_end_time {
 	if ( $track->region_end eq 'END' ){
 		return $track->wav_length;
 	} else {
-		::Mark::unshifted_mark_time( $track->region_end )
+		::Mark::time_from_tag( $track->region_end )
 	}
 }
 sub playat_time {
 	my $track = shift;
 	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
 	#return if $track->rec_status ne 'MON';
-	::Mark::unshifted_mark_time( $track->playat )
+	::Mark::time_from_tag( $track->playat )
 }
 
 # the following methods adjust

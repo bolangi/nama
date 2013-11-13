@@ -114,7 +114,7 @@ sub loop_end {
 		grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
 	$points[1];
 }
-sub unshifted_mark_time {
+sub time_from_tag {
 	my $tag = shift;
 	$tag or $tag = '';
 	#print "tag: $tag\n";
@@ -135,7 +135,7 @@ sub unshifted_mark_time {
 }
 sub mark_time {
 	my $tag = shift;
-	my $time = unshifted_mark_time($tag);
+	my $time = time_from_tag($tag);
 	return unless defined $time;
 	$time -= ::play_start_time() if $mode->{offset_run};
 	$time
@@ -281,12 +281,18 @@ sub jump_backward { jump_forward( - shift()) }
 	
 } # end package
 { package ::HereMark;
-our @ISA = ::Mark;
+our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
 sub time { ::eval_iam('cs-connected') ? ($last_time = ::eval_iam('getpos')) : $last_time } 
 }
 
+{ package ::ClipMark;
+use Modern::Perl;
+our @ISA = '::Mark';
+
+
+}
 
 1;
 __END__
