@@ -1574,7 +1574,11 @@ track_identifier: tid {  # allow either index or name
 	}
 }
 tid: ident
-list_sequences: _list_sequences 
+list_sequences: _list_sequences { 
+	::pager( map {::json_out($_->as_hash)} 
+			grep {$_->{class} =~ /Sequence/} ::Bus::all() );
+}
+show_sequence: _show_sequence { $::this_sequence->list }
 append_to_sequence: _append_to_sequence track_identifier(s) { 
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
@@ -1590,9 +1594,12 @@ insert_in_sequence: _insert_in_sequence position track_identifier(s) {
 remove_from_sequence: _remove_from_sequence position(s) {
 	my $seq = $::this_sequence;
 	my @positions = sort { $a <=> $b } @{ $item{'position(s)'}};
-	$seq->delete_item($_) for reverse @positions;
+	$seq->verify_item($_) 
+		?  $seq->delete_item($_) 
+		: ::throw("skipping index $_: out of bounds")
+	for reverse @positions
 }
 delete_sequence: _delete_sequence existing_sequence_name {
 	$::bn{$item{existing_sequence_name}}->remove
 }
-position: /\d+/
+position: dd { $::this_sequence->verify_item($item{dd}) and $return = $item{dd} }
