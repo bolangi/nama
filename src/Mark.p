@@ -133,6 +133,22 @@ sub time_from_tag {
 	#print "mark time: ", $mark->time, $/;
 	return $mark->time;
 }
+sub duration_from_tag {
+	my $tag = shift;
+	$tag or $tag = '';
+	#print "tag: $tag\n";
+	my $mark;
+	if ($tag =~ /[\d.-]+/) { # we assume time 
+		#print "mark time: ", $tag, $/;
+		return $tag;
+	} else {
+		#print "mark name found\n";
+		$mark = $::Mark::by_name{$tag};
+	}
+	return undef if ! defined $mark;
+	#print "mark time: ", $mark->time, $/;
+	return $mark->time;
+}
 sub mark_time {
 	my $tag = shift;
 	my $time = time_from_tag($tag);
