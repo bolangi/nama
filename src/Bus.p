@@ -390,8 +390,14 @@ sub set_current_bus {
 	#say "this_track: $this_track";
 	#say "master: $tn{Master}";
 	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
-	elsif( $bn{$track->name} ){$this_bus = $track->name }
-	else { $this_bus = $track->group }
+	elsif( $bn{$track->name} ){
+		$this_bus = $track->name;
+		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+}
+	else { 
+		$this_bus = $track->group;
+		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+ 	}
 }
 sub add_sub_bus {
 	my ($name, @args) = @_; 
