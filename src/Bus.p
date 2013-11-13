@@ -264,14 +264,14 @@ sub new {
 	# take out args we will process
 	my $items = delete $args{items};
 	my $counter = delete $args{clip_counter};
-	logpkg('debug', "items: ",json_out($items));
+	#logpkg('debug', "items: ",map{json_out($_->as_hash)}map{$::tn{$_}}@$items) if $items;
 	$items //= [];
 	@_ = ($class, %args);
 	my $self = super();
 	logpkg('debug',"new object: ", json_out($self->as_hash));
 	logpkg('debug', "items: ",json_out($items));
 	$self->{clip_counter} = $counter;
-	$self->{items} = [ map {$self->new_clip($_)->name} @$items ];
+	$self->{items} = $items;
 	$::this_sequence = $self;
 	$self;
 } 
@@ -283,7 +283,7 @@ sub clip {
 # perl indexes arrays at zero, nama numbers items from one
 sub insert_item {
 	my $self = shift;
-	my ($item, $index) = (shift, shift);
+	my ($item, $index) = @_;
 	$self->verify_item($index) or die "$index: sequence index out of range";
 	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item)->name);
 }
@@ -358,8 +358,6 @@ sub unique_clip_name {
 	join '-', $self->name , ++$self->{clip_counter}, $track->name, 'v'.$track->monitor_version;
 }
 } # end package
-
-
 # ---------- Bus routines --------
 {
 package ::;
