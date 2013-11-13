@@ -347,15 +347,28 @@ sub new_clip {
 	#ref $track or $track = $::tn{$track};	 # can be object or name
 	my $clip = ::Clip->new(
 		target => $track->basename,
-		name => $self->unique_clip_name($track),
+		name => $self->unique_clip_name($track->name, $track->monitor_version),
 		rw => 'MON',
 		group => $self->name,
 		version => $track->monitor_version,
 	);
 }
+sub new_spacer {
+	my $self = shift;
+	my $spacer = ::Spacer->new( 
+		duration => 0,
+		name => $self->unique_spacer_name(),
+		rw => 'OFF',
+		group => $self->name,
+	);
+}
 sub unique_clip_name {
-	my ($self, $track) = @_;
-	join '-', $self->name , ++$self->{clip_counter}, $track->name, 'v'.$track->monitor_version;
+	my ($self, $trackname, $version) = @_;
+	join '-', $self->name , ++$self->{clip_counter}, $trackname, 'v'.$version;
+}
+sub unique_spacer_name {
+	my $self = shift;
+	join '-', $self->name, ++$self->{clip_counter}, 'spacer';
 }
 } # end package
 # ---------- Bus routines --------
