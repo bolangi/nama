@@ -1545,26 +1545,32 @@ existing_sequence_name: ident {
 		my $buslike = $::bn{$item{ident}};
 		(ref $buslike) =~ /Sequence/
 }
-new_sequence: _new_sequence sequence_name track_identifier(s?) {
+new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 
 	# as with sub-buses, use the same name for
 	# the bus and the bus mix track
 	
 	my @items = @{ $item{'track_identifier(s?)'} };
-	my $mix_track = ::add_track($item{sequence_name},
+	use Data::Dumper::Concise;
+	print Dumper \@items;
+	my $mix_track = ::add_track($item{new_sequence_name},
 						rec_defeat	=> 1,
 						is_mix_track => 1,
 						rw 			=> 'REC');
 	$::this_sequence = ::Sequence->new(
-		name => $item{sequence_name},
-		items => \@items,
+		name => $item{new_sequence_name},
 		send_type => 'track',
-		send_id	 => $item{sequence_name},
+		send_id	 => $item{new_sequence_name},
 	);
+	map{ $::this_sequence->append_item($_) } @items; 
 	1
 }
-sequence_name: ident
-
+new_sequence_name: ident { $return = 
+	($::tn{$item{ident}} || $::bn{$item{ident}}
+		? do { print "$item{ident}: name already in use\n"; undef}
+		: $item{ident} 
+	)
+}
 track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
 	if ($tid) { $tid }
