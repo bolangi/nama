@@ -354,9 +354,9 @@ sub new_clip {
 	);
 }
 sub new_spacer {
-	my $self = shift;
+	my( $self, %args ) = @_;
 	my $spacer = ::Spacer->new( 
-		duration => 0,
+		duration => $args{duration},
 		name => $self->unique_spacer_name(),
 		rw => 'OFF',
 		group => $self->name,

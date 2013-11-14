@@ -1609,3 +1609,5 @@ delete_sequence: _delete_sequence existing_sequence_name {
 	$::bn{$item{existing_sequence_name}}->remove
 }
 position: dd { $::this_sequence->verify_item($item{dd}) and $return = $item{dd} }
+add_spacer: _add_spacer value { 
+	$::this_sequence->new_spacer(duration => $item{value}) }
