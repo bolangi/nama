@@ -355,12 +355,14 @@ sub new_clip {
 }
 sub new_spacer {
 	my( $self, %args ) = @_;
+	my $position = delete $args{position};
 	my $spacer = ::Spacer->new( 
 		duration => $args{duration},
 		name => $self->unique_spacer_name(),
 		rw => 'OFF',
 		group => $self->name,
 	);
+	splice @{ $self->{items} }, $position, 0, $spacer if $position;
 }
 sub unique_clip_name {
 	my ($self, $trackname, $version) = @_;

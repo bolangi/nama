@@ -1146,12 +1146,17 @@ our @ISA = '::Clip';
 sub rec_status { 'OFF' }
 sub new { 
 	my ($class,%args) = @_;
-	# take out args we will process
+
+	# remove args we will process
 	my $duration = delete $args{duration};
+
+	# give the remainder to the superclass constructor
 	@_ = ($class, %args);
 	my $self = super();
 	#logpkg('debug',"new object: ", json_out($self->as_hash));
 	#logpkg('debug', "items: ",json_out($items));
+
+	# set the args removed above
 	$self->{duration} = $duration;
 	$self;
 }
