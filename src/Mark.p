@@ -23,7 +23,7 @@ sub initialize {
 	$by_name{Here} = bless {}, '::HereMark';
 	@::marks_data = (); # for save/restore
 }
-sub next_sequence {
+sub next_id { # returns incremented 4-digit 
 	$project->{mark_sequence_counter} ||= '0000';
 	$project->{mark_sequence_counter}++
 }
@@ -75,7 +75,7 @@ sub jump_here {
 	::set_position($mark->time);
 	$::this_mark = $mark;
 }
-sub adjusted_time {  # for marks within current edit
+sub shifted_time {  # for marks within current edit
 	my $mark = shift;
 	return $mark->time unless $mode->{offset_run};
 	my $time = $mark->time - ::play_start_time();
@@ -114,7 +114,7 @@ sub loop_end {
 		grep{ $_ } map{ mark_time($_)} @{$setup->{loop_endpoints}}[0,1];
 	$points[1];
 }
-sub unadjusted_mark_time {
+sub time_from_tag {
 	my $tag = shift;
 	$tag or $tag = '';
 	#print "tag: $tag\n";
@@ -133,9 +133,25 @@ sub unadjusted_mark_time {
 	#print "mark time: ", $mark->time, $/;
 	return $mark->time;
 }
+sub duration_from_tag {
+	my $tag = shift;
+	$tag or $tag = '';
+	#print "tag: $tag\n";
+	my $mark;
+	if ($tag =~ /[\d.-]+/) { # we assume time 
+		#print "mark time: ", $tag, $/;
+		return $tag;
+	} else {
+		#print "mark name found\n";
+		$mark = $::Mark::by_name{$tag};
+	}
+	return undef if ! defined $mark;
+	#print "mark time: ", $mark->time, $/;
+	return $mark->time;
+}
 sub mark_time {
 	my $tag = shift;
-	my $time = unadjusted_mark_time($tag);
+	my $time = time_from_tag($tag);
 	return unless defined $time;
 	$time -= ::play_start_time() if $mode->{offset_run};
 	$time
@@ -281,12 +297,18 @@ sub jump_backward { jump_forward( - shift()) }
 	
 } # end package
 { package ::HereMark;
-our @ISA = ::Mark;
+our @ISA = '::Mark';
 our $last_time;
 sub name { 'Here' }
 sub time { ::eval_iam('cs-connected') ? ($last_time = ::eval_iam('getpos')) : $last_time } 
 }
 
+{ package ::ClipMark;
+use Modern::Perl;
+our @ISA = '::Mark';
+
+
+}
 
 1;
 __END__

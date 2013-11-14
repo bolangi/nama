@@ -259,16 +259,16 @@ sub _mono_to_stereo{
 }
 sub _playat_output {
 	my $track = shift;
-	return unless $track->adjusted_playat_time;
+	return unless $track->shifted_playat_time;
 		# or $track->latency_offset;
-	join ',',"playat" , $track->adjusted_playat_time 
+	join ',',"playat" , $track->shifted_playat_time 
 		# + $track->latency_offset
 }
 sub _select_output {
 	my $track = shift;
 	no warnings 'uninitialized';
-	my $start = $track->adjusted_region_start_time + $config->hardware_latency();
-	my $end   = $track->adjusted_region_end_time;
+	my $start = $track->shifted_region_start_time + $config->hardware_latency();
+	my $end   = $track->shifted_region_end_time;
 	return unless $config->hardware_latency() or defined $start and defined $end;
 	my $setup_length;
 	# CASE 1: a region is defined 

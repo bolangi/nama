@@ -1271,11 +1271,11 @@ add_fade: _add_fade in_or_out mark1 mark2
 add_fade: _add_fade in_or_out time1 time2 
 { 	
 	my $mark1 = ::Mark->new( 
-		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_id()),
 		time => $item{time1}
 	);
 	my $mark2 = ::Mark->new( 
-		name => join('_',$::this_track->name, 'fade', ::Mark::next_sequence()),
+		name => join('_',$::this_track->name, 'fade', ::Mark::next_id()),
 		time => $item{time2}
 	);
 	::Fade->new(  type => $item{in_or_out},
@@ -1537,3 +1537,87 @@ fader_role: 'vol'|'pan'|'fader'
 hotkeys: _hotkeys { ::setup_hotkeys()}
 hotkeys_always: _hotkeys_always { $::config->{hotkeys_always}++; ::setup_hotkeys(); }
 hotkeys_off: _hotkeys_off { undef $::config->{hotkeys_always}; 1 }
+
+select_sequence: _select_sequence existing_sequence_name { 
+	$::this_sequence = $::bn{$item{existing_sequence_name}}
+} 
+existing_sequence_name: ident { 
+		my $buslike = $::bn{$item{ident}};
+		$return = $item{ident} if (ref $buslike) =~ /Sequence/
+}
+new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
+
+	# as with sub-buses, use the same name for
+	# the bus and the bus mix track
+	
+	# TODO handle existing track (as when upgrading track to sequence)
+	my $mix_track = ::add_track($item{new_sequence_name},
+						rec_defeat	=> 1,
+						is_mix_track => 1,
+						rw 			=> 'REC');
+	$::this_sequence = ::Sequence->new(
+		name => $item{new_sequence_name},
+		send_type => 'track',
+		send_id	 => $item{new_sequence_name},
+	);
+	my @items = map{ $::this_sequence->new_clip($_)} @{ $item{'track_identifier(s?)'} };
+	map{ $::this_sequence->append_item($_) } @items; 
+	1
+}
+new_sequence_name: ident { $return = 
+	($::tn{$item{ident}} || $::bn{$item{ident}}
+		? do { print "$item{ident}: name already in use\n"; undef}
+		: $item{ident} 
+	)
+}
+track_identifier: tid {  # allow either index or name
+	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
+	if ($tid) { $tid }
+	else 
+	{ 	print "$item{tid}: track name or index not found."; 
+		0
+	}
+}
+tid: ident
+list_sequences: _list_sequences { 
+	::pager( map {::json_out($_->as_hash)} 
+			grep {$_->{class} =~ /Sequence/} ::Bus::all() );
+}
+show_sequence: _show_sequence { $::this_sequence->list }
+append_to_sequence: _append_to_sequence track_identifier(s) { 
+	my $seq = $::this_sequence;
+	my $items = $item{'track_identifier(s)'};
+	map { my $clip = $seq->new_clip($_); $seq->append_item($clip) } @$items; 
+	1;
+}
+insert_in_sequence: _insert_in_sequence position track_identifier(s) {
+	my $seq = $::this_sequence;
+	my $items = $item{'track_identifier(s)'};
+	my $position = $item{position};
+	for ( reverse map{ $seq->new_clip($_) } @$items ){ $seq->insert_item($_,$position) }
+}
+remove_from_sequence: _remove_from_sequence position(s) {
+	my $seq = $::this_sequence;
+	my @positions = sort { $a <=> $b } @{ $item{'position(s)'}};
+	$seq->verify_item($_) 
+		?  $seq->delete_item($_) 
+		: ::throw("skipping index $_: out of bounds")
+	for reverse @positions
+}
+delete_sequence: _delete_sequence existing_sequence_name {
+	$::bn{$item{existing_sequence_name}}->remove
+}
+position: dd { $::this_sequence->verify_item($item{dd}) and $return = $item{dd} }
+add_spacer: _add_spacer value position {
+	$::this_sequence->new_spacer(
+		duration => $item{value},
+		position => $item{position},
+	);
+	1
+}
+add_spacer: _add_spacer value { 
+	$::this_sequence->new_spacer(
+		duration => $item{value},
+	);
+	1
+}

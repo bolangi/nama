@@ -332,15 +332,15 @@ sub show_region {
 	return unless $t->rec_status eq 'MON';
 	my @lines;
 	push @lines,join " ",
-		"Length:",time2($t->adjusted_length),"\n";
+		"Length:",time2($t->shifted_length),"\n";
 	$t->playat and push @lines,join " ",
-		"Play at:",time2($t->adjusted_playat_time),
+		"Play at:",time2($t->shifted_playat_time),
 		join($t->playat, qw[ ( ) ])."\n";
 	$t->region_start and push @lines,join " ",
-		"Region start:",time2($t->adjusted_region_start_time),
+		"Region start:",time2($t->shifted_region_start_time),
 		join($t->region_start, qw[ ( ) ])."\n";
 	$t->region_end and push @lines,join " ",
-		"Region end:",time2($t->adjusted_region_end_time),
+		"Region end:",time2($t->shifted_region_end_time),
 		join($t->region_end, qw[ ( ) ])."\n";
 	return(join "", @lines);
 }

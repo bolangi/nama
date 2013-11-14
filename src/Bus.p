@@ -199,7 +199,7 @@ sub remove {
 
 	# remove bus from index
 	
-	delete $by_name{$bus->name};
+	delete $::bn{$bus->name};
 } 
 }
 {
@@ -247,6 +247,133 @@ sub apply {
 
 
 }
+
+{ package ::Sequence;
+use Modern::Perl; use Carp; 
+use ::Assign qw(json_out);
+use ::Log qw(logsub logpkg);
+our @ISA = '::SubBus';
+
+# share the following variables with subclasses
+
+our $VERSION = 1.0;
+use ::Object qw( items clip_counter );
+use SUPER;
+sub new { 
+	my ($class,%args) = @_;
+	# take out args we will process
+	my $items = delete $args{items};
+	my $counter = delete $args{clip_counter};
+	#logpkg('debug', "items: ",map{json_out($_->as_hash)}map{$::tn{$_}}@$items) if $items;
+	$items //= [];
+	@_ = ($class, %args);
+	my $self = super();
+	logpkg('debug',"new object: ", json_out($self->as_hash));
+	logpkg('debug', "items: ",json_out($items));
+	$self->{clip_counter} = $counter;
+	$self->{items} = $items;
+	$::this_sequence = $self;
+	$self;
+} 
+sub clip {
+	my ($self, $index) = @_;
+	return 0 if $index <= 0;
+	$::tn{$self->{items}->[$index - 1]}
+}
+# perl indexes arrays at zero, nama numbers items from one
+sub insert_item {
+	my $self = shift;
+	my ($item, $index) = @_;
+	$self->append_item($item), return if $index == @{$self->{items}} + 1;
+	$self->verify_item($index) or die "$index: sequence index out of range";
+	splice @{$self->{items}}, $index - 1,0, $item->name 
+}
+sub verify_item {
+	my ($self, $index) = @_;
+	$index >= 1 and $index <= scalar @{$self->items} 
+}
+sub delete_item {
+	my $self = shift;
+	my $index = shift;
+	$self->verify_item($index) or die "$index: sequence index out of range";
+	my $trackname = splice(@{$self->{items}}, $index - 1, 1);
+	$::tn{$trackname} and $::tn{$trackname}->remove;
+}
+sub append_item {
+	my $self = shift;
+	my $item = shift;
+	push( @{$self->{items}}, $item->name );
+}
+sub item {
+	my $self = shift;
+	my $index = shift;
+	return 0 if $index <= 0;
+	$::tn{$self->{items}->[$index - 1]};
+}
+sub list {
+	my $self = shift;
+	map{ $::tn{$_}->target} @{$self->items};
+}
+sub list_output {
+	my $self = shift;
+	join "\n","Sequence $self->{name} clips:", $self->list, '';
+}
+sub remove {
+	my $sequence = shift;
+
+	# delete all clips
+	map{$::tn{$_}->remove } $by_name{$sequence->name}->tracks;
+
+	# delete clip array
+	delete $sequence->{items};
+	
+	my $mix_track = $::tn{$sequence->name};
+
+	if ( defined $mix_track ){
+	 
+		$mix_track->unbusify;
+	
+		# remove mix track unless it has some WAV files
+
+		$mix_track->remove unless scalar @{ $mix_track->versions };
+	}
+
+	# remove sequence from index
+	
+	delete $by_name{$sequence->name};
+} 
+sub new_clip {
+	my ($self, $track, %args) = @_;
+	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
+	#ref $track or $track = $::tn{$track};	 # can be object or name
+	my $clip = ::Clip->new(
+		target => $track->basename,
+		name => $self->unique_clip_name($track->name, $track->monitor_version),
+		rw => 'MON',
+		group => $self->name,
+		version => $track->monitor_version,
+	);
+}
+sub new_spacer {
+	my( $self, %args ) = @_;
+	my $position = delete $args{position};
+	my $spacer = ::Spacer->new( 
+		duration => $args{duration},
+		name => $self->unique_spacer_name(),
+		rw => 'OFF',
+		group => $self->name,
+	);
+	$self->insert_item( $spacer, $position || ( scalar @{ $self->{items} } + 1 ))
+}
+sub unique_clip_name {
+	my ($self, $trackname, $version) = @_;
+	join '-', $self->name , ++$self->{clip_counter}, $trackname, 'v'.$version;
+}
+sub unique_spacer_name {
+	my $self = shift;
+	join '-', $self->name, ++$self->{clip_counter}, 'spacer';
+}
+} # end package
 # ---------- Bus routines --------
 {
 package ::;
@@ -266,8 +393,14 @@ sub set_current_bus {
 	#say "this_track: $this_track";
 	#say "master: $tn{Master}";
 	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
-	elsif( $bn{$track->name} ){$this_bus = $track->name }
-	else { $this_bus = $track->group }
+	elsif( $bn{$track->name} ){
+		$this_bus = $track->name;
+		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+}
+	else { 
+		$this_bus = $track->group;
+		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+ 	}
 }
 sub add_sub_bus {
 	my ($name, @args) = @_; 
