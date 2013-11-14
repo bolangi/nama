@@ -316,6 +316,7 @@ sub list_output {
 	join "\n","Sequence $self->{name} clips:",
 		map { 
 			join " ", ++$i, 
+					$::tn{$_}->n,
 					$_,
 					::heuristic_time($::tn{$_}->duration), 
 					::heuristic_time($::tn{$_}->endpoint)

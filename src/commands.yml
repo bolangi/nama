@@ -1409,8 +1409,8 @@ delete_sequence:
 add_spacer:
   type: sequence
   short: asp
-  what: add a spacer to the current sequence
-  parameters: <f_duration>
+  what: add a spacer to the current sequence, in specified position, or appending (if no position is given)
+  parameters: <f_duration> [<i_position>]
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
