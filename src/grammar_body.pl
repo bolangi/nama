@@ -1583,7 +1583,7 @@ list_sequences: _list_sequences {
 	::pager( map {::json_out($_->as_hash)} 
 			grep {$_->{class} =~ /Sequence/} ::Bus::all() );
 }
-show_sequence: _show_sequence { $::this_sequence->list }
+show_sequence: _show_sequence { ::pager($::this_sequence->list_output) }
 append_to_sequence: _append_to_sequence track_identifier(s) { 
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
