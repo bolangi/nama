@@ -199,7 +199,7 @@ sub remove {
 
 	# remove bus from index
 	
-	delete $by_name{$bus->name};
+	delete $::bn{$bus->name};
 } 
 }
 {
@@ -284,8 +284,9 @@ sub clip {
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = @_;
+	$self->append_item($item), return if $index == @{$self->{items}} + 1;
 	$self->verify_item($index) or die "$index: sequence index out of range";
-	splice(@{$self->{items}}, $index - 1,0, $self->new_clip($item)->name);
+	splice @{$self->{items}}, $index - 1,0, $item->name 
 }
 sub verify_item {
 	my ($self, $index) = @_;
@@ -301,7 +302,7 @@ sub delete_item {
 sub append_item {
 	my $self = shift;
 	my $item = shift;
-	push( @{$self->{items}}, $self->new_clip($item)->name );
+	push( @{$self->{items}}, $item->name );
 }
 sub item {
 	my $self = shift;
@@ -321,10 +322,10 @@ sub remove {
 	my $sequence = shift;
 
 	# delete all clips
-	map{$::tn{$_}->destroy } $by_name{$sequence->name}->tracks;
+	map{$::tn{$_}->remove } $by_name{$sequence->name}->tracks;
 
 	# delete clip array
-	delete $sequence->{clips};
+	delete $sequence->{items};
 	
 	my $mix_track = $::tn{$sequence->name};
 
@@ -362,7 +363,7 @@ sub new_spacer {
 		rw => 'OFF',
 		group => $self->name,
 	);
-	splice @{ $self->{items} }, $position, 0, $spacer if $position;
+	$self->insert_item( $spacer, $position || ( scalar @{ $self->{items} } + 1 ))
 }
 sub unique_clip_name {
 	my ($self, $trackname, $version) = @_;

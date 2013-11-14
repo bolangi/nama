@@ -1543,16 +1543,14 @@ select_sequence: _select_sequence existing_sequence_name {
 } 
 existing_sequence_name: ident { 
 		my $buslike = $::bn{$item{ident}};
-		(ref $buslike) =~ /Sequence/
+		$return = $item{ident} if (ref $buslike) =~ /Sequence/
 }
 new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 
 	# as with sub-buses, use the same name for
 	# the bus and the bus mix track
 	
-	my @items = @{ $item{'track_identifier(s?)'} };
-	use Data::Dumper::Concise;
-	print Dumper \@items;
+	# TODO handle existing track (as when upgrading track to sequence)
 	my $mix_track = ::add_track($item{new_sequence_name},
 						rec_defeat	=> 1,
 						is_mix_track => 1,
@@ -1562,6 +1560,7 @@ new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 		send_type => 'track',
 		send_id	 => $item{new_sequence_name},
 	);
+	my @items = map{ $::this_sequence->new_clip($_)} @{ $item{'track_identifier(s?)'} };
 	map{ $::this_sequence->append_item($_) } @items; 
 	1
 }
@@ -1588,14 +1587,14 @@ show_sequence: _show_sequence { $::this_sequence->list }
 append_to_sequence: _append_to_sequence track_identifier(s) { 
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
-	map { $seq->append_item($_) } @$items; 
+	map { my $clip = $seq->new_clip($_); $seq->append_item($clip) } @$items; 
 	1;
 }
 insert_in_sequence: _insert_in_sequence position track_identifier(s) {
 	my $seq = $::this_sequence;
 	my $items = $item{'track_identifier(s)'};
 	my $position = $item{position};
-	for ( reverse @$items ){ $seq->insert_item($_,$position) }
+	for ( reverse map{ $seq->new_clip($_) } @$items ){ $seq->insert_item($_,$position) }
 }
 remove_from_sequence: _remove_from_sequence position(s) {
 	my $seq = $::this_sequence;
