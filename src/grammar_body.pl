@@ -1613,9 +1613,11 @@ add_spacer: _add_spacer value position {
 		duration => $item{value},
 		position => $item{position},
 	);
+	1
 }
 add_spacer: _add_spacer value { 
 	$::this_sequence->new_spacer(
 		duration => $item{value},
-	)
+	);
+	1
 }
