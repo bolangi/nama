@@ -468,16 +468,6 @@ sub showlist {
 }
 
 
-format STDOUT_TOP =
-Track Name      Ver. Setting  Status   Source           Send        Vol  Pan 
-=============================================================================
-.
-format STDOUT =
-@>>   @<<<<<<<<< @>    @<<     @<< @|||||||||||||| @||||||||||||||  @>>  @>> ~~
-splice @{$text->{format_fields}}, 0, 9
-.
-
-
 #### Some Text Commands
 
 sub t_load_project {
