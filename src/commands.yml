@@ -1411,6 +1411,16 @@ add_spacer:
   short: asp
   what: add a spacer to the current sequence, in specified position, or appending (if no position is given)
   parameters: <f_duration> [<i_position>]
+convert_to_sequence:
+  type: sequence
+  short: csq
+  what: convert the current track to a sequence
+  parameters: none
+merge_sequence:
+  type: sequence
+  short: csq
+  what: cache and MON the current sequence mix track, disable the sequence
+  parameters: none
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)

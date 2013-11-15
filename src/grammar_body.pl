@@ -1545,14 +1545,24 @@ existing_sequence_name: ident {
 		my $buslike = $::bn{$item{ident}};
 		$return = $item{ident} if (ref $buslike) =~ /Sequence/
 }
+convert_to_sequence: _convert_to_sequence {
+	my $sequence_name = $::this_track->name;
+	::process_command("nsq $sequence_name");
+	$::this_sequence->new_clip($::this_track);
+	1
+}
+merge_sequence: _merge_sequence {
+	# cache mix track of current sequence
+}
+	
 new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 
 	# as with sub-buses, use the same name for
 	# the bus and the bus mix track
-	
-	# TODO handle existing track (as when upgrading track to sequence)
-	my $mix_track = ::add_track($item{new_sequence_name},
-						rec_defeat	=> 1,
+
+	my $mix_track = $::tn{$item{new_sequence_name}} 
+					|| ::add_track($item{new_sequence_name});
+	$mix_track->set( rec_defeat	=> 1,
 						is_mix_track => 1,
 						rw 			=> 'REC');
 	$::this_sequence = ::Sequence->new(
@@ -1565,10 +1575,9 @@ new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 	1
 }
 new_sequence_name: ident { $return = 
-	($::tn{$item{ident}} || $::bn{$item{ident}}
+	$::bn{$item{ident}}
 		? do { print "$item{ident}: name already in use\n"; undef}
 		: $item{ident} 
-	)
 }
 track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
