@@ -192,7 +192,7 @@ DEBUG
  
 my @singleton_idents = map{ /^.(.+)/; $1 }  # remove leading '$' sigil
 qw(
-[% qx(cat ./singletons.pl) %]
+[% qx(./strip_all ./singletons.pl) %]
 );
 sub assign_singletons {
 	logsub('&assign_singletons');
