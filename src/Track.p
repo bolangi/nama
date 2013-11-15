@@ -957,7 +957,7 @@ sub rec_cleanup_script {
 	my $track = shift;
 	join_path(::project_dir(), $track->name."-rec-cleanup.sh")
 }
-sub is_region { defined $_[0]->region_start_time }
+sub is_region { defined $_[0]->{region_start} }
 
 } # end package
 

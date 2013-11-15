@@ -1,6 +1,5 @@
 # ------------  Bus --------------------
 
-
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Log qw(logsub logpkg);
@@ -252,6 +251,7 @@ sub apply {
 use Modern::Perl; use Carp; 
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
+use ::Effects qw(fxn modify_effect);
 our @ISA = '::SubBus';
 
 # share the following variables with subclasses
@@ -361,6 +361,17 @@ sub new_clip {
 		group => $self->name,
 		version => $track->monitor_version,
 	);
+	# copy region definition
+	# we may in future decide to copy region marks as well
+	# so clip region can be altered independent of original track
+	if ($track->is_region) {
+		my @fields = qw(region_start region_end);
+		
+		@{$clip}{@fields} = map{::Mark::time_from_tag($_)}@{$track}{@fields}
+	}
+	modify_effect( $clip->vol, 1, undef, fxn($track->vol)->params->[0]);
+	modify_effect( $clip->pan, 1, undef, fxn($track->pan)->params->[0]);
+	$clip
 }
 sub new_spacer {
 	my( $self, %args ) = @_;
