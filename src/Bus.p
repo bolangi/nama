@@ -318,12 +318,11 @@ sub list_output {
 	my $self = shift;
 	my $i;
 	join "\n","Sequence $self->{name} clips:",
-		map { 
-			join " ", ++$i, 
-					$::tn{$_}->n,
-					$_,
-					::heuristic_time($::tn{$_}->duration), 
-					::heuristic_time($::tn{$_}->endpoint)
+		map { join " ", 
+				++$i, 
+				$::tn{$_}->n,
+				$_,
+				sprintf("%.3f %.3f", $::tn{$_}->duration, $::tn{$_}->endpoint),
 		} @{$self->items}
 }
 sub remove {
