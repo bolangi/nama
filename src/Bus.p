@@ -280,7 +280,11 @@ sub clip {
 	return 0 if $index <= 0;
 	$::tn{$self->{items}->[$index - 1]}
 }
-# perl indexes arrays at zero, nama numbers items from one
+sub rw { 
+	my $self = shift;
+	$::mode->{offset_run} ? 'OFF' : $self->{rw}
+}
+# perl indexes arrays at zero, for nama users we number items from one
 sub insert_item {
 	my $self = shift;
 	my ($item, $index) = @_;
