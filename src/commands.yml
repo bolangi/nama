@@ -1421,6 +1421,15 @@ merge_sequence:
   short: csq
   what: cache and MON the current sequence mix track, disable the sequence
   parameters: none
+snip:
+  type: sequence
+  what: create a sequence by removing region(s) defined by mark pair(s) from current track
+  parameters: <mark_pair1> [<mark_pair2>...]
+compose:
+  type: sequence
+  short: comp
+  what: create a sequence using region(s) defined by mark pair(s) from current track
+  parameters: <mark_pair1> [<mark_pair2>...]
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
