@@ -7,10 +7,16 @@ use ::Globals qw(:all);
 sub rec_cleanup {  
 	logsub("&rec_cleanup");
 	logpkg('debug',"transport still running, can't cleanup"),return if transport_running();
-	if( my (@files) = new_files_were_recorded() ){
-		if( grep /Mixdown/, @files){
-			mixdown_postprocessing();
+	if( my (@files) = new_files_were_recorded() )
+	{
+		if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
+		{
+			say "wav_out_tracks found";
+			$setup->{_last_rec_tracks} = \@rec_tracks;
+			say ::Dumper \@rec_tracks;
 		}
+
+		if( grep /Mixdown/, @files) { mixdown_postprocessing() }
 		else { post_rec_configure() }
 	}
 }
@@ -134,6 +140,8 @@ sub post_rec_configure {
 			if $mode->{midish_transport_sync} eq 'record';
 
 		$ui->refresh();
+		request_setup();
+		reconfigure_engine();
 }
 sub new_files_were_recorded {
  	return unless my @files = ::ChainSetup::really_recording();

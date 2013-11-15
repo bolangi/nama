@@ -58,14 +58,6 @@ sub reconfigure_engine {
 	# store a lists of wav-recording tracks for the rerecord
 	# function
 	
-	# an empty set (e.g. in post-record monitoring)
-	# will not overwrite a previous set
-	
-	if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
-	{
-		$setup->{_last_rec_tracks} = \@rec_tracks;
-	}
-
 	restart_wav_memoize(); # check if someone has snuck in some files
 	
 	find_duplicate_inputs(); # we will warn the user later
