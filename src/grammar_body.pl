@@ -1630,3 +1630,18 @@ add_spacer: _add_spacer value {
 	);
 	1
 }
+snip: _snip mark_pair(s) { 
+	# convert this track to sequence, removing regions
+	
+}
+mark_pair: mark1 mark2 { 
+	my @marks = map{ $::mn{$_}} @item{qw(mark1 mark2)};
+	print "items:", ::Dumper \@marks;
+# 	::throw(join " ",map{$_->name},": pair must be ascending in time"), return 0
+# 	 	if ! $marks[0]->time < $marks[1]->time;
+# 	\@marks
+}
+mark1: ident { $return = $::mn{$item{ident}} }
+mark2: mark1
+
+snip: _snip sequence_name mark_pair(s) {}
