@@ -5,6 +5,7 @@ use Modern::Perl;
 *bn = \%::Bus::by_name;
 *tn = \%::Track::by_name;
 *ti = \%::Track::by_index;
+*mn = \%::Mark::by_name;
 
 # and the graph
 
