@@ -1636,12 +1636,12 @@ snip: _snip mark_pair(s) {
 }
 mark_pair: mark1 mark2 { 
 	my @marks = map{ $::mn{$_}} @item{qw(mark1 mark2)};
-	print "items:", ::Dumper \@marks;
-# 	::throw(join " ",map{$_->name},": pair must be ascending in time"), return 0
-# 	 	if ! $marks[0]->time < $marks[1]->time;
-# 	\@marks
+ 	::throw(join" ",(map{$_->name} @marks), 
+		": pair must be ascending in time"), return 0
+ 	 	if not $marks[0]->time < $marks[1]->time;
+ 	\@marks
 }
-mark1: ident { $return = $::mn{$item{ident}} }
+mark1: ident { print ::Dumper $return = $::mn{$item{ident}} }
 mark2: mark1
 
 snip: _snip sequence_name mark_pair(s) {}
