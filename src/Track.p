@@ -1141,8 +1141,9 @@ sub playat_time {
 
 } # end package
 { package ::Spacer;
-use SUPER;
 our @ISA = '::Clip';
+use SUPER;
+use ::Object qw(duration);
 sub rec_status { 'OFF' }
 sub new { 
 	my ($class,%args) = @_;
@@ -1311,6 +1312,52 @@ sub add_pan_control {
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
+}
+sub rename_track {
+	use Cwd;
+	use File::Slurp;
+	my ($oldname, $newname, $statefile, $dir) = @_;
+	save_state();
+	my $old_dir = cwd();
+	chdir $dir;
+
+	# rename audio files
+	
+	qx(rename 's/^$oldname(?=[_.])/$newname/' *.wav);
+
+
+	# rename in State.json when candidate key
+	# is part of the specified set and the value 
+	# exactly matches $oldname
+	
+	my $state = read_file($statefile);
+
+	$state =~ s/
+		"					# open quote
+		(track| 		# one of specified fields
+		name| 
+		group| 
+		source| 
+		send_id| 
+		target| 
+		current_edit| 
+		send_id| 
+		return_id| 
+		wet_track| 
+		dry_track| 
+		track| 
+		host_track)
+		"				# close quote
+		\ 				# space
+		:				# colon
+		\ 				# space
+		"$oldname"/"$1" : "$newname"/gx;
+
+	write_file($statefile, $state);
+	my $msg = "Rename track $oldname -> $newname";
+	git_commit($msg);
+	pager($msg);
+	load_project(name => $::project->{name});
 }
 } # end package
 

@@ -1367,6 +1367,10 @@ remove_fader_effect:
   short: rffx
   what: remove vol pan or fader on current track
   parameters: vol | pan | fader
+rename_track:
+  type: track
+  what: rename a track and its WAV files
+  parameters: <s_old_track> <s_new_track>
 new_sequence:
   type: sequence
   short: nsq
