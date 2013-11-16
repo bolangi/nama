@@ -351,22 +351,35 @@ sub remove {
 } 
 sub new_clip {
 	my ($self, $track, %args) = @_;
+	my $markpair = delete $args{region};
 	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
 	#ref $track or $track = $::tn{$track};	 # can be object or name
+	my %region_args;
+	if( $markpair ){
+		%region_args = (
+			region_start => $markpair->[0]->name,
+			region_end	 => $markpair->[1]->name,
+		);
+	}
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track->name, $track->monitor_version),
 		rw => 'MON',
 		group => $self->name,
 		version => $track->monitor_version,
+		%region_args,
+		%args
 	);
+	# when making clip from
+	# region: copy region to clip
+	# markpair: ignore region
 	# copy region definition
 	# we may in future decide to copy region marks as well
 	# so clip region can be altered independent of original track
-	if ($track->is_region) {
+	if ($track->is_region and not keys %region_args) {
 		my @fields = qw(region_start region_end);
-		
-		@{$clip}{@fields} = map{::Mark::time_from_tag($_)}@{$track}{@fields}
+		# convert to time? # map{::Mark::time_from_tag($_)}
+		@{$clip}{@fields} = @{$track}{@fields};
 	}
 	modify_effect( $clip->vol, 1, undef, fxn($track->vol)->params->[0]);
 	modify_effect( $clip->pan, 1, undef, fxn($track->pan)->params->[0]);
