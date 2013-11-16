@@ -150,10 +150,11 @@ sub git_sha {
 }
 sub git_branch_display {
 	logsub("&git_branch_display");
-	return unless $config->{use_git};
+	my $display = $::project->{name};
+	return $display unless $config->{use_git};
 	my $cb = current_branch();
-	return "" unless $cb and $cb ne 'master';
-	"branch:".current_branch()." "
+	$display .= ":$cb" if $cb;
+	$display
 }
 sub list_branches {
 	pager3(

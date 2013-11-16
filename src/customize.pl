@@ -20,11 +20,8 @@ prompt => sub {
 							# are working on;
 							# suppressed if you are on
 							# the 'master' (default) branch.
-	"[". 
-	this_track_name().		# the name of the current track 
-	this_bus_display(). 	# The name of the current bus;
-							 # suppressed if you the current
-							 # track is in the 'Main' bus.
+	" [". 
+	bus_track_display().
  	"] > "
  	},
 

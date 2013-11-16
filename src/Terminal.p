@@ -172,9 +172,7 @@ sub revise_prompt {
 
 	
 sub prompt {
-
-		git_branch_display(). "nama [". ($this_bus eq 'Main' ? '': "$this_bus/").  
-		($this_track ? $this_track->name : '') . "] ('h' for help)> "
+		join '', 'nama ',git_branch_display(), " [", bus_track_display() , "] ('h' for help)> "
 }
 sub detect_spacebar {
 

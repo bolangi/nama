@@ -42,8 +42,10 @@ sub this_stepsize { $this_track ? $this_track->stepsize : ""}
 sub this_track_name { $this_track ? $this_track->name : "" }
 
 # we prepend a slash 
-sub this_bus_display { $this_bus eq "Main" ? "": "/$this_bus"  }
-
+sub bus_track_display { 
+	my ($busname, $trackname) = ($this_bus, $this_track && $this_track->name || '');
+	($busname eq "Main" ? "": "$busname/" ). $trackname
+}
 sub list_projects {
 	my $projects = join "\n", sort map{
 			my ($vol, $dir, $lastdir) = File::Spec->splitpath($_); $lastdir
