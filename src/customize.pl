@@ -14,16 +14,9 @@ use Audio::Nama::Globals qw(:all);
 my @user_customization = (
 
 prompt => sub { 
-
-	"nama ".
- 	git_branch_display().   # The name of the project branch you 
-							# are working on;
-							# suppressed if you are on
-							# the 'master' (default) branch.
-	" [". 
-	bus_track_display().
- 	"] > "
- 	},
+	no warnings 'uninitialized';
+	join ' ', 'nama', git_branch_display(), bus_track_display(), '> ' 
+},
 
 ## user defined commands
 

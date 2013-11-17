@@ -171,8 +171,8 @@ sub revise_prompt {
 }
 
 	
-sub prompt {
-		join '', 'nama ',git_branch_display(), " [", bus_track_display() , "] ('h' for help)> "
+sub prompt { join ' ', 'nama', git_branch_display(), 
+						bus_track_display() ," ('h' for help)> "
 }
 sub detect_spacebar {
 
