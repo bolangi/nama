@@ -153,7 +153,7 @@ sub git_branch_display {
 	my $display = $::project->{name};
 	return $display unless $config->{use_git};
 	my $cb = current_branch();
-	$display .= ":$cb" if $cb;
+	$display .= ":$cb" if $cb and $cb ne 'master';
 	$display
 }
 sub list_branches {

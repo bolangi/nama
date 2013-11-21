@@ -1621,13 +1621,17 @@ add_spacer: _add_spacer value position {
 	$::this_sequence->new_spacer(
 		duration => $item{value},
 		position => $item{position},
+		hidden   => 1,
 	);
+	::request_setup();
 	1
 }
 add_spacer: _add_spacer value { 
 	$::this_sequence->new_spacer(
 		duration => $item{value},
+        hidden   => 1,
 	);
+	::request_setup();
 	1
 }
 snip: _snip mark_pair(s) { 

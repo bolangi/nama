@@ -367,6 +367,7 @@ sub new_clip {
 		rw => 'MON',
 		group => $self->name,
 		version => $track->monitor_version,
+		hidden  => 1,
 		%region_args,
 		%args
 	);
