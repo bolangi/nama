@@ -362,6 +362,12 @@ sub new_clip {
 			region_end	 => $markpair->[1]->name,
 		);
 	}
+	else {
+		%region_args = (
+			region_start => $track->region_start,
+			region_end	 => $track->region_end,
+		);
+	}
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track->name, $track->monitor_version),
