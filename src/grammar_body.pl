@@ -1583,8 +1583,8 @@ track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
 	if ($tid) { $tid }
 	else 
-	{ 	print "$item{tid}: track name or index not found."; 
-		0
+	{ 	print "$item{tid}: track name or index not found.\n"; 
+		undef
 	}
 }
 tid: ident
