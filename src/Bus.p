@@ -350,10 +350,11 @@ sub remove {
 	delete $by_name{$sequence->name};
 } 
 sub new_clip {
-	my ($self, $track, %args) = @_;
+	my ($self, $track, %args) = @_; # $track can be object or name
 	my $markpair = delete $args{region};
 	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
-	#ref $track or $track = $::tn{$track};	 # can be object or name
+	ref $track or $track = $::tn{$track} 
+		or die("$track: track not found."); 
 	my %region_args;
 	if( $markpair ){
 		%region_args = (
@@ -367,7 +368,7 @@ sub new_clip {
 		rw => 'MON',
 		group => $self->name,
 		version => $track->monitor_version,
-		hidden  => 1,
+		hide => 1,
 		%region_args,
 		%args
 	);
