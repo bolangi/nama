@@ -18,7 +18,7 @@
 							# + we need an additional two effect chains
 							#   for each insert to hold effects on wet or dry arm
 							#   maybe wet_effect_chain, dry_effect_chain
-		region_data			# array ref with [region_start, region_end]
+		region				# array ref with [region_start, region_end]
 							
 		attrib 				# fields for searching
 
