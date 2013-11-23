@@ -85,8 +85,7 @@ sub new {
 	if (! $vals{n} ) {
 		# we are initializing (not restoring)
 
-		# backward compatibility
-		# move attributes to $self->{attrib}->{...}
+		# move secondary attributes to $self->{attrib}->{...}
 		move_attributes(\%vals);
 
 		$vals{n} = new_sequence_number();
