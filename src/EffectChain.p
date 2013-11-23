@@ -104,13 +104,12 @@ sub new {
 			if ! scalar @{$vals{ops_list}} and ! scalar @{$vals{inserts_data}};
 
 		my $ops_data = {};
-		# ops data can either be 
-		# + provided explicitly with ops_data argument, e.g.convert_effect_chains() 
-		# + or taken from existing effects, e.g. $fx->{applied}
-		#
-		# in either case, we want to clone the data structures
-		# to ensure we don't damage objects in the original
-		# structure.
+		# ops data is taken preferentially 
+		# from ops_data argument, with fallback
+		# to existing effects, e.g. $fx->{applied}
+		
+		# in both cases, we clone the data structures
+		# to ensure we don't damage the original
 		
 		map { 	
 
