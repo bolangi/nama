@@ -1097,8 +1097,16 @@ sub versions { [$_[0]->version] }
 {
 package ::Clip;
 
-# Clips differ from tracks in that clips know
-# their position (index) in the sequence items array.
+# Clips are the units of audio used to 
+#  to make sequences. 
+
+# A clip is created from a track. Clips extend the Track
+# class in providing a position which derives from the
+# object's ordinal position in an array (clips attribute) of
+# the parent sequence object.
+ 
+# Clips differ from tracks in that clips
+# their one-based position (index) in the sequence items array.
 # index is one-based.
 
 use ::Globals qw(:all);
