@@ -1559,19 +1559,23 @@ new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 
 	# as with sub-buses, use the same name for
 	# the bus and the bus mix track
+	
+	my $name = $item{new_sequence_name};
+	my @tracks = @{ $item{'track_identifier(s?)'} };
 
-	my $mix_track = $::tn{$item{new_sequence_name}} 
-					|| ::add_track($item{new_sequence_name});
+	my $mix_track = $::tn{$name} 
+					|| ::add_track($name);
 	$mix_track->set( rec_defeat	=> 1,
 						is_mix_track => 1,
 						rw 			=> 'REC');
 	$::this_sequence = ::Sequence->new(
-		name => $item{new_sequence_name},
+		name => $name,
 		send_type => 'track',
-		send_id	 => $item{new_sequence_name},
+		send_id	 => $name,
 	);
-	my @items = map{ $::this_sequence->new_clip($_)} @{ $item{'track_identifier(s?)'} };
-	map{ $::this_sequence->append_item($_) } @items; 
+;
+	map{ $::this_sequence->append_item($_) }
+	map{ $::this_sequence->new_clip($_)} @tracks;
 	1
 }
 new_sequence_name: ident { $return = 
