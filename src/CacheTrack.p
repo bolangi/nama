@@ -197,9 +197,10 @@ sub update_cache_map {
 			});
 		my @inserts_list = ::Insert::get_inserts($track->name);
 		my @ops_list = $track->fancy_ops;
-		if ( @inserts_list or @ops_list )
+		if ( @inserts_list or @ops_list or $track->is_region)
 		{
-			my $ec = ::EffectChain->new(
+			my %args = 
+			(
 				track_cache => 1,
 				track_name	=> $track->name,
 				track_version_original => $orig_version,
@@ -209,8 +210,12 @@ sub update_cache_map {
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
 			);
+			$args{region} = [ $track->region_start, $track->region_end ] 
+				if $track->is_region;
+			my $ec = ::EffectChain->new( %args );
 			map{ remove_effect($_) } @ops_list;
 			map{ $_->remove        } @inserts_list;
+			$track->set(region_start => undef, region_end => undef);
 
 		say qq(Saving effects for cached track "), $track->name, '".';
 		say qq('uncache' will restore effects and set version $orig_version\n);
