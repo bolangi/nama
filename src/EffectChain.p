@@ -292,6 +292,14 @@ sub add_inserts {
 		#$::by_index{$dry_effect_chain}->add($insert->dry_name, $tn{$insert->dry_name}->vol)
 	} @{$self->inserts_data};
 }
+sub add_region {
+	my ($self, $track) = @_;
+	::throw($track->name.": track already has region definition\n",
+		"failed to apply region @$self->{region}\n"), return
+		if $track->is_region;
+	$track->set(region_start => $self->{region}->[0],
+				region_end	 => $self->{region}->[1]);
+}
 
 sub add_all {
 	my($self, $track, $successor) = @_;
@@ -310,6 +318,7 @@ sub add {
 	my ($self, $track, $successor) = @_;
 	$self->add_ops($track, $successor);
 	$self->add_inserts($track);
+	$self->add_region($track) if $self->region;
 
 }
 sub destroy {
