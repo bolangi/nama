@@ -507,7 +507,28 @@ sub update_send_bus {
 						 $bn{$name}->send_id),
 						 "dummy",
 }
+sub new_sequence {
 
+	my %args = @_;
+	my $name = $args{name};
+	my @tracks = @{ $args{tracks} };	
+	my $group = $args{group};
+	
+	my $mix_track = $tn{$name} 
+					|| add_track($name);
+	$mix_track->set( rec_defeat	=> 1,
+						is_mix_track => 1,
+						rw 			=> 'REC');
+	$this_sequence = ::Sequence->new(
+		name => $name,
+		send_type => 'track',
+		send_id	 => $name,
+	);
+;
+	map{ $this_sequence->append_item($_) }
+	map{ $this_sequence->new_clip($_)} @tracks;
+
+}
 } # end package
 
 1;
