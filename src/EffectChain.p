@@ -82,9 +82,8 @@ sub new {
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 
-	# not need to massage data if we are merely restoring
-	if ($vals{n} ) {} 	
-	else {
+	if (! $vals{n} ) {
+		# we are initializing (not restoring)
 
 		# backward compatibility
 		# move attributes to $self->{attrib}->{...}
