@@ -1378,7 +1378,7 @@ new_sequence:
   parameters: <s_name> <track1, track2,...>
 select_sequence:
   type: sequence
-  short: ssq
+  short: slsq
   what: select named sequence as current sequence
   parameter: <s_name>
 list_sequences:
@@ -1425,7 +1425,7 @@ convert_to_sequence:
   parameters: none
 merge_sequence:
   type: sequence
-  short: csq
+  short: msq
   what: cache and MON the current sequence mix track, disable the sequence
   parameters: none
 snip:
