@@ -1628,12 +1628,12 @@ snip: _snip mark_pair(s) {
 	# convert this track to sequence, removing regions
 }
 compose: _compose ident track_identifier mark_pair(s) {
-	::compose_sequence(@item{qw/ident track_identifier mark_pairs(s)/})
+	::compose_sequence(@item{qw/ident track_identifier mark_pair(s)/});
 }
 mark_pair: mark1 mark2 { 
 	my @marks = map{ $::mn{$_}} @item{qw(mark1 mark2)};
  	::throw(join" ",(map{$_->name} @marks), 
-		": pair must be ascending in time"), return 0
+		": pair must be ascending in time"), return undef
  	 	if not $marks[0]->time < $marks[1]->time;
  	\@marks
 }
