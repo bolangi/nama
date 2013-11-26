@@ -167,7 +167,7 @@ sub new_sequence {
 }
 sub compose_sequence {
 	my ($sequence_name, $track, $markpairs) = @_;
-	my $sequence = ::new_sequence( name   => $sequence_name);
+	my $sequence = ::new_sequence( name => $sequence_name);
 	my @clips = map { 
 		$sequence->new_clip($track, region => $_) 
 	} @$markpairs
