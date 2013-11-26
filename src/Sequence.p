@@ -3,10 +3,12 @@ use Modern::Perl; use Carp;
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
 use ::Effects qw(fxn modify_effect);
+use ::Object qw( items clip_counter );
 our @ISA = '::SubBus';
 our $VERSION = 1.0;
-use ::Object qw( items clip_counter );
 use SUPER;
+our %by_name; # alias to %::Bus::by_name
+*by_name = \%::Bus::by_name; 
 
 sub new { 
 	my ($class,%args) = @_;
