@@ -1430,20 +1430,27 @@ merge_sequence:
   parameters: none
 snip:
   type: sequence
-  what: create a sequence by removing region(s) defined by mark pair(s) from current track
+  what: |
+    create a sequence from the current track by removing 
+    the region(s) defined by mark pair(s). Not supported if 
+    the current track is already a sequence.
+  example: |
+    snip cut1-start cut1-end cut2-start cut2-end
+    This removes cut1 and cut2 regions from the current track
+    by creating a sequence. 
   parameters: <mark_pair1> [<mark_pair2>...]
 compose:
   type: sequence
   short: compose_sequence compose_into_sequence
   what: |
-    compose a new sequence using the region(s) defined by mark pair(s) 
-    applied to the named track. If the sequence of that name exists, 
-    append the regions to that sequence (compose_into_sequence)
+    compose a new sequence using the region(s) of the named track
+    defined by mark pair(s). If the sequence of that name exists, 
+    append the regions to that sequence (compose_into_sequence).
   parameters: <s_sequence_name> <s_trackname> <mark_pair1> [<mark_pair2>...]
   example: |
-    compose speeches-only conference-audio speaker1-start speaker1-end 
+    compose speeches conference-audio speaker1-start speaker1-end 
     speaker2-start speaker2-end
-    This creates a "speeches-only" sequence with two clips
+    This creates a "speeches" sequence with two clips
     for speaker1 and speaker2.
 # config:
 #   type: general
