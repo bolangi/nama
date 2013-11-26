@@ -149,28 +149,35 @@ sub new_sequence {
 
 	my %args = @_;
 	my $name = $args{name};
-	my @tracks = @{ $args{tracks} };
+	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
 	$mix_track->set( rec_defeat	=> 1,
 						is_mix_track => 1,
 						rw 			=> 'REC');
-	$this_sequence = ::Sequence->new(
+	my $sequence = ::Sequence->new(
 		name => $name,
 		send_type => 'track',
 		send_id	 => $name,
 	);
 ;
-	map{ $this_sequence->append_item($_) }
-	map{ $this_sequence->new_clip($_)} @tracks;
+	map{ $sequence->append_item($_) }
+	map{ $sequence->new_clip($_)} @tracks;
+	$this_sequence = $sequence;
 
 }
 sub compose_sequence {
 	my ($sequence_name, $track, $markpairs) = @_;
-	my $sequence = ::new_sequence( name => $sequence_name);
+	logpkg('debug',"sequence_name: $sequence_name, track:", $track->name, 
+			", markpairs: ",::Dumper $markpairs);
+
+	my $sequence = new_sequence( name => $sequence_name);
+	logpkg('debug',"sequence\n",::Dumper $sequence);
 	my @clips = map { 
 		$sequence->new_clip($track, region => $_) 
-	} @$markpairs
+	} @$markpairs;
+	map{ $sequence->append_item($_) } @clips;
+	$sequence
 }
 1
 __END__

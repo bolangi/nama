@@ -1637,7 +1637,7 @@ mark_pair: mark1 mark2 {
  	 	if not $marks[0]->time < $marks[1]->time;
  	\@marks
 }
-mark1: ident { print ::Dumper $return = $::mn{$item{ident}} }
+mark1: ident { $::mn{$item{ident}} }
 mark2: mark1
 
 snip: _snip new_sequence_name mark_pair(s) {}
