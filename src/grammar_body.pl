@@ -1624,8 +1624,15 @@ add_spacer: _add_spacer value {
 	::request_setup();
 	1
 }
-snip: _snip mark_pair(s) { 
+snip: _snip track_identifier mark_pair(s) { 
 	# convert this track to sequence, removing regions
+	my $track = $item{track_identifier};
+	my @pairs = $item{'mark_pair(s)'};
+	my @list = map{ @$_ } @pairs;	
+	@list = (0, @list, $track->length);
+	@pairs = ();
+	while ( scalar @list ){ push @pairs, [splice( @list, 0, 2)] }
+	::compose_sequence($track->name, $track, \@pairs);
 }
 compose: _compose ident track_identifier mark_pair(s) {
 	::compose_sequence(@item{qw/ident track_identifier mark_pair(s)/});
