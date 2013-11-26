@@ -90,6 +90,7 @@ sub new { my $class = shift; return bless {@_}, $class }
 
 use ::Track;
 use ::Bus;    
+use ::Sequence;
 use ::Mark;
 use ::IO;
 use ::Wav;
