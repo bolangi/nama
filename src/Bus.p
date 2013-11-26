@@ -355,19 +355,10 @@ sub new_clip {
 	logpkg('debug',json_out($self->as_hash), json_out($track->as_hash));
 	ref $track or $track = $::tn{$track} 
 		or die("$track: track not found."); 
-	my %region_args;
-	if( $markpair ){
-		%region_args = (
-			region_start => $markpair->[0]->name,
-			region_end	 => $markpair->[1]->name,
-		);
-	}
-	else {
-		%region_args = (
-			region_start => $track->region_start,
-			region_end	 => $track->region_end,
-		);
-	}
+	my %region_args = (
+		region_start => $markpair && $markpair->[0]->name || $track->region_start,
+		region_end	 => $markpair && $markpair->[1]->name || $track->region_end
+	);
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track->name, $track->monitor_version),
@@ -378,17 +369,6 @@ sub new_clip {
 		%region_args,
 		%args
 	);
-	# when making clip from
-	# region: copy region to clip
-	# markpair: ignore region
-	# copy region definition
-	# we may in future decide to copy region marks as well
-	# so clip region can be altered independent of original track
-	if ($track->is_region and not keys %region_args) {
-		my @fields = qw(region_start region_end);
-		# convert to time? # map{::Mark::time_from_tag($_)}
-		@{$clip}{@fields} = @{$track}{@fields};
-	}
 	modify_effect( $clip->vol, 1, undef, fxn($track->vol)->params->[0]);
 	modify_effect( $clip->pan, 1, undef, fxn($track->pan)->params->[0]);
 	$clip
@@ -511,11 +491,9 @@ sub new_sequence {
 
 	my %args = @_;
 	my $name = $args{name};
-	my @tracks = @{ $args{tracks} };	
-	my $group = $args{group};
-	
-	my $mix_track = $tn{$name} 
-					|| add_track($name);
+	my @tracks = @{ $args{tracks} };
+	my $group = $args{group} || 'Main';
+	my $mix_track = $tn{$name} || add_track($name, group => $group);
 	$mix_track->set( rec_defeat	=> 1,
 						is_mix_track => 1,
 						rw 			=> 'REC');
@@ -529,6 +507,14 @@ sub new_sequence {
 	map{ $this_sequence->new_clip($_)} @tracks;
 
 }
+sub compose_sequence {
+	my ($sequence_name, $track, $markpairs) = @_;
+	my $sequence = ::new_sequence( name   => $sequence_name);
+	my @clips = map { 
+		$sequence->new_clip($track, region => $_) 
+	} @$markpairs
+}
+
 } # end package
 
 1;
