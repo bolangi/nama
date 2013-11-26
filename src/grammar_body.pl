@@ -1627,18 +1627,9 @@ add_spacer: _add_spacer value {
 snip: _snip mark_pair(s) { 
 	# convert this track to sequence, removing regions
 }
-compose: _compose new_sequence_name existing_track_name mark_pair(s) {
-# new_sequence_name could be existing track
-# in which case we promote it to a sequence.
-	process_command("add_sequence $item{new_sequence_name}");
-	my $track = $::tn{$item{existing_track_name}};
-	my @markpairs = @{$item{'markpair(s)'}};
-	my @clips = map { 
-		$::this_sequence->new_clip($track, region => $_) 
-	} @markpairs
+compose: _compose ident track_identifier mark_pair(s) {
+	::compose_sequence(@item{qw/ident track_identifier mark_pairs(s)/})
 }
-
-
 mark_pair: mark1 mark2 { 
 	my @marks = map{ $::mn{$_}} @item{qw(mark1 mark2)};
  	::throw(join" ",(map{$_->name} @marks), 
