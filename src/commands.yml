@@ -1431,9 +1431,17 @@ snip:
   parameters: <mark_pair1> [<mark_pair2>...]
 compose:
   type: sequence
-  short: comp
-  what: create a sequence using region(s) defined by mark pair(s) from current track
-  parameters: <mark_pair1> [<mark_pair2>...]
+  short: compose_sequence compose_into_sequence
+  what: |
+    compose a new sequence using the region(s) defined by mark pair(s) 
+    applied to the named track. If the sequence of that name exists, 
+    append the regions to that sequence (compose_into_sequence)
+  parameters: <s_sequence_name> <s_trackname> <mark_pair1> [<mark_pair2>...]
+  example: |
+    compose speeches-only conference-audio speaker1-start speaker1-end 
+    speaker2-start speaker2-end
+    This creates a "speeches-only" sequence with two clips
+    for speaker1 and speaker2.
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
