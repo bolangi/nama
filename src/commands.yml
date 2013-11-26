@@ -1394,7 +1394,10 @@ append_to_sequence:
   type: sequence
   short: asq
   what: append items to sequence
-  parameters: <s_name1> [<s_name2>,...]
+  parameters: [<s_name1>,...]
+  example: |
+    asq chorus # append chorus track to current sequence
+    asq # append current track to current sequence
 insert_in_sequence:
   type: sequence
   short: isq
