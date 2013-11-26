@@ -1551,9 +1551,7 @@ convert_to_sequence: _convert_to_sequence {
 	$::this_sequence->new_clip($::this_track);
 	1
 }
-merge_sequence: _merge_sequence {
-	# cache mix track of current sequence
-}
+merge_sequence: _merge_sequence { cache_track($::tn{$::this_sequence->name}); 1 }
 	
 new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 
