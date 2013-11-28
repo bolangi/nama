@@ -91,10 +91,8 @@ sub initialize_project_data {
 	$project->{save_file_version_number} = 0; 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
-	$project->{undo_buffer} = [];
 	$project->{repo} = undef;
 	$project->{artist} = undef;
-	
 	$project->{bunch} = {};	
 	
 	create_system_buses();
@@ -110,6 +108,7 @@ sub initialize_project_data {
 
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
+	reset_undo_buffer();
 
 }
 sub initialize_effects_data {

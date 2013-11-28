@@ -55,11 +55,11 @@ sub restore_state_from_vcs {
 sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
-	return unless state_changed();
+	reset_undo_buffer(), return unless state_changed();
 	my $commit_message = shift() || "no comment";
 	git_commit($commit_message);
 }
-	
+sub reset_undo_buffer { $project->{undo_buffer} = [] } 
 sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift;
@@ -77,7 +77,7 @@ sub git_commit {
 		
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
-	$project->{undo_buffer} = [];
+	reset_undo_buffer();
 }
 
 sub git_checkout {
