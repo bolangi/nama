@@ -56,11 +56,11 @@ sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
 	save_state();
-	reset_undo_buffer(), return unless state_changed();
+	reset_last_command_buffer(), return unless state_changed();
 	my $commit_message = shift() || "no comment";
 	git_commit($commit_message);
 }
-sub reset_undo_buffer { $project->{undo_buffer} = [] } 
+sub reset_last_command_buffer { $project->{command_context_buffer} = [] } 
 sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift;
@@ -70,15 +70,15 @@ sub git_commit {
 		$commit_message,
 		# context for first command
 		"Context:",
-		" + track: $project->{undo_buffer}->[0]->{context}->{track}",
-		" + bus:   $project->{undo_buffer}->[0]->{context}->{bus}",
-		" + op:    $project->{undo_buffer}->[0]->{context}->{op}",
+		" + track: $project->{last_command}->[0]->{context}->{track}",
+		" + bus:   $project->{last_command}->[0]->{context}->{bus}",
+		" + op:    $project->{last_command}->[0]->{context}->{op}",
 		# all commands since last commit
-		map{ $_->{command} } @{$project->{undo_buffer}};
+		map{ $_->{command} } @{$project->{last_command}};
 		
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
-	reset_undo_buffer();
+	reset_last_command_buffer();
 }
 
 sub git_checkout {

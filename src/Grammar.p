@@ -44,7 +44,7 @@ sub setup_grammar {
 
 }
 {
-my %exclude_from_undo_buffer = map{ $_ => 1} 
+my %exclude_from_last_command = map{ $_ => 1} 
 		qw(tag commit branch br new_branch nbr load save get restore);
 sub process_line {
 	logsub("&process_line");
@@ -63,7 +63,7 @@ sub process_line {
 		else {
 			my $success = process_command( $user_input );
 				
-			push @{$project->{undo_buffer}}, 
+			push @{$project->{last_command}}, 
 
 			{
 				context => context(),
@@ -73,7 +73,7 @@ sub process_line {
 
 				unless ! $success 
 					   or $user_input =~ /^\s*([a-z_]+)/
-						and $exclude_from_undo_buffer{$1};
+						and $exclude_from_last_command{$1};
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
