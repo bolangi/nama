@@ -168,13 +168,7 @@ sub list_branches {
 
 sub autosave {
 	logsub("&autosave");
-	my ($original_branch) = current_branch();
-	my @args = qw(undo --quiet);
-	unshift @args, '-b' if ! git_branch_exists('undo');
-	git(checkout => @args);
 	save_state();
 	git_snapshot();
-	git_checkout($original_branch, '--quiet');
-
 }
 1
