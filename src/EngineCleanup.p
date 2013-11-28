@@ -74,7 +74,6 @@ sub tag_mixdown_commit {
 	# we want to tag the normal playback state
 	mixoff('quiet');
 
-	save_state();
 	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
 	git('tag', $name, '-m', $mix);

@@ -55,6 +55,7 @@ sub restore_state_from_vcs {
 sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
+	save_state();
 	reset_undo_buffer(), return unless state_changed();
 	my $commit_message = shift() || "no comment";
 	git_commit($commit_message);
@@ -168,7 +169,6 @@ sub list_branches {
 
 sub autosave {
 	logsub("&autosave");
-	save_state();
 	git_snapshot();
 }
 1

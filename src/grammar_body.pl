@@ -217,7 +217,6 @@ destroy_project_template: _destroy_project_template key(s) {
 }
 
 tag: _tag tagname message(?) {   
-	::save_state();
 	::git_snapshot();
 	my @args = ('tag', $item{tagname});
 	push @args, '-m', "@{$item{'message(?)'}}" if @{$item{'message(?)'}};
@@ -225,7 +224,6 @@ tag: _tag tagname message(?) {
 	1;
 }
 commit: _commit message(?) { 
-	::save_state();
 	::git_snapshot(@{$item{'message(?)'}});
 	1;
 }
@@ -288,7 +286,7 @@ save_state: _save_state save_target message(?) {
 	}
 	1
 }
-save_state: _save_state { ::save_state(); ::git_snapshot('user save'); 1}
+save_state: _save_state { ::git_snapshot('user save'); 1}
 
 # load project from named state file
 get_state: _get_state save_target {
