@@ -96,7 +96,7 @@ serialize_formats: json
 
 use_git: 1
 
-autosave: 1
+autosave: undo
 
 beep_command: beep -f 350 -l 700
 
