@@ -59,14 +59,15 @@ sub process_line {
 		}
 		else {
 			my $success = process_command( $user_input );
-				
-			push @{$project->{command_buffer}}, 
-
-			{
-				context => context(),
-				command => $user_input,
-			#	commit 	=> $commit 
-			} unless ! $success ;
+		
+			if ($success and undo_behavior($user_input) eq 'store')
+			{	
+				push @{$project->{command_buffer}}, 
+				{
+					context => context(),
+					command => $user_input,
+				}
+			}
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
@@ -74,6 +75,7 @@ sub process_line {
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
 }
+sub undo_behavior { 'store' }
 sub context {
 	my $context = {};
 	$context->{track} = $this_track->name;

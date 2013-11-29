@@ -57,7 +57,7 @@ sub git_snapshot {
 	return unless $config->{use_git};
 	save_state();
 	return unless state_changed();
-	my $commit_message = shift() || "no comment";
+	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
 sub reset_command_buffer { $project->{command_buffer} = [] } 
@@ -169,7 +169,14 @@ sub list_branches {
 }
 
 sub autosave {
-	logsub("&autosave");
-	git_snapshot();
+		logsub("&autosave");
+		local $this_track;
+        #return if engine_running();
+        #save engine position
+        ::ChainSetup::remove_temporary_tracks(); # needed for a quiet diff between successive sav
+        git_snapshot();
+        generate_setup(); # recreate temporary tracks
+        #restore_engine_position();
+
 }
 1
