@@ -60,7 +60,7 @@ sub process_line {
 		else {
 			my $success = process_command( $user_input );
 				
-			push @{$project->{last_command}}, 
+			push @{$project->{command_buffer}}, 
 
 			{
 				context => context(),

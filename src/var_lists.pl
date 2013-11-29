@@ -44,7 +44,7 @@
 
 	$project->{save_file_version_number}
 	$project->{timebase}
-	$project->{last_command}
+	$project->{command_buffer}
 	$project->{track_version_comments}
 	$project->{track_comments}
 	$project->{bunch}

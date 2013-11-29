@@ -60,7 +60,7 @@ sub git_snapshot {
 	my $commit_message = shift() || "no comment";
 	git_commit($commit_message);
 }
-sub reset_last_command_buffer { $project->{last_command} = [] } 
+sub reset_command_buffer { $project->{command_buffer} = [] } 
 
 sub git_commit {
 	logsub("&git_commit");
@@ -71,15 +71,15 @@ sub git_commit {
 		$commit_message,
 		# context for first command
 		"Context:",
-		" + track: $project->{last_command}->[0]->{context}->{track}",
-		" + bus:   $project->{last_command}->[0]->{context}->{bus}",
-		" + op:    $project->{last_command}->[0]->{context}->{op}",
+		" + track: $project->{command_buffer}->[0]->{context}->{track}",
+		" + bus:   $project->{command_buffer}->[0]->{context}->{bus}",
+		" + op:    $project->{command_buffer}->[0]->{context}->{op}",
 		# all commands since last commit
-		map{ $_->{command} } @{$project->{last_command}};
+		map{ $_->{command} } @{$project->{command_buffer}};
 		
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
-	reset_last_command_buffer();
+	reset_command_buffer();
 }
 
 sub git_checkout {
