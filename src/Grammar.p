@@ -66,10 +66,7 @@ sub process_line {
 				context => context(),
 				command => $user_input,
 			#	commit 	=> $commit 
-			}
-
-				unless ! $success 
-					   or $user_input =~ /^\s*([a-z_]+)/;
+			} unless ! $success ;
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
