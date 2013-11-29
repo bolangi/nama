@@ -118,6 +118,7 @@ $project->{artist}				# Artist field for mp3/ogg encoding
 $project->{current_op}			# current effect, per track
 $project->{current_param}		# current parameter, per effect
 $project->{current_stepsize}	# stepsize, per effect/parameter
+$project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 
 $file->{effects_cache}			# Name of effects discovery cache

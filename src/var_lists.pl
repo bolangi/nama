@@ -51,6 +51,7 @@
 	$project->{current_op}
 	$project->{current_param}
 	$project->{current_stepsize}
+	$project->{playback_position}
 	@project_effect_chain_data
 	$fx->{id_counter}
 	$setup->{loop_endpoints}
