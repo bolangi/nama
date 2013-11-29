@@ -393,13 +393,17 @@ sub remove {
 	my $track = shift;
 	my $n = $track->n;
 	$ui->remove_track_gui($n); 
- 	$::this_track = $ti{::Track::idx() - 1};
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
  	map{ ::remove_effect($_) } @{ $track->ops };
  	delete $by_index{$n};
  	delete $by_name{$track->name};
+
+	# reset $this_track if it is not defined or 
+	# if it is no longer indexed
+	
+	$::this_track = $ti{::Track::idx() - 1} if ! $this_track or ! $by_name{$::this_track->name} 
 }
 
 	

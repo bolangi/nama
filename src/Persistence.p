@@ -6,6 +6,7 @@ use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
+	logsub("&save_state");
 	my $filename = shift;
 	if ($filename)
 	{
@@ -22,8 +23,10 @@ sub save_state {
 									: join_path(project_dir(),$filename) 
 	}
 	my $path = $filename || $file->state_store();
-	logsub("&save_state");
 	$project->{save_file_version_number} = $VERSION;
+
+	# store playback position, if possible
+	$project->{playback_position} = eval_iam("getpos") if valid_engine_setup();
 
 	# some stuff get saved independently of our state file
 	
