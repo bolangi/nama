@@ -59,16 +59,15 @@ sub process_line {
 		}
 		else {
 			my $success = process_command( $user_input );
+
+			# but later ignore it because failure
+			# may still bring changes
 		
-			if ($success and undo_behavior($user_input) eq 'store')
-			{	
-				push @{$project->{command_buffer}}, 
-				{
-					context => context(),
-					command => $user_input,
-				}
-			}
-			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
+			# even an unsuccessful command may have had
+			# effects, so try to autosave/reconfigure anyway
+			
+			autosave( $user_input, { context => context(), command => $user_input } ) 
+				if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
