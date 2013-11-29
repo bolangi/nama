@@ -101,7 +101,7 @@ sub reconfigure_engine {
 		
 		logpkg('debug',"I generated a new setup");
 		
-		autosave() if $config->{use_git} and $config->{autosave};
+		autosave() if $config->{use_git} and $config->{autosave} eq 'setup';
 		connect_transport('quiet');
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
