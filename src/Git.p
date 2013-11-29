@@ -56,7 +56,7 @@ sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
 	save_state();
-	return unless state_changed();
+	reset_command_buffer(), return unless state_changed();
 	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
@@ -170,13 +170,19 @@ sub list_branches {
 
 sub autosave {
 		logsub("&autosave");
-		local $this_track;
-        #return if engine_running();
-        #save engine position
-        ::ChainSetup::remove_temporary_tracks(); # needed for a quiet diff between successive sav
-        git_snapshot();
-        generate_setup(); # recreate temporary tracks
-        #restore_engine_position();
-
+		my ($user_input, $command_stamp) = @_;
+		push(@{$project->{command_buffer}}, $command_stamp)
+			if undo_behavior($user_input) eq 'store';
+		if( engine_running()){
+			return
+		}
+		else { 
+			# The engine is stopped, so we can do anything 
+			# if we leave the engine how we found it
+			# needed for a quiet diff between successive sav
+        	::ChainSetup::remove_temporary_tracks(); 
+        	git_snapshot();
+        	request_setup(); # needed to recreate temporary tracks
+		}
 }
 1
