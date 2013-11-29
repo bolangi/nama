@@ -82,7 +82,7 @@ sub save_system_state {
 	
 	# prepare tracks for storage
 	
-	$this_track_name = $this_track->name;
+	$this_track_name = $this_track->name if $this_track;
 
 	logpkg('debug', "copying tracks data");
 
