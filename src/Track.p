@@ -403,7 +403,7 @@ sub remove {
 	# reset $this_track if it is not defined or 
 	# if it is no longer indexed
 	
-	$::this_track = $ti{::Track::idx() - 1} if ! $this_track or ! $by_name{$::this_track->name} 
+	$::this_track = $ti{1} if ! $this_track or ref $this_track and ! $by_name{$::this_track->name} 
 }
 
 	
