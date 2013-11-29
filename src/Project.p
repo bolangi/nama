@@ -108,7 +108,6 @@ sub initialize_project_data {
 
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
-	reset_last_command_buffer();
 
 }
 sub initialize_effects_data {
