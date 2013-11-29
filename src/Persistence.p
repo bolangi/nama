@@ -99,18 +99,18 @@ sub save_system_state {
 
 	logpkg('debug', "copying bus data");
 
-	@bus_data = map{ $_->as_hash } ::Bus::all();
+	@bus_data = map{ $_->as_hash } sort { $a->name cmp $b->name} ::Bus::all();
 
 	# prepare inserts data for storage
 	
 	logpkg('debug', "copying inserts data");
 	
-	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
+	@inserts_data = map{ $_->as_hash } sort values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	logpkg('debug', "copying marks data");
-	@marks_data = map{ $_->as_hash } ::Mark::all();
+	@marks_data = sort { $a->{n} <=> $b->{n} } map{ $_->as_hash } ::Mark::all();
 
 	@fade_data = map{ $_->as_hash } sort values %::Fade::by_index;
 
