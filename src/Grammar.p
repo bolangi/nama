@@ -43,9 +43,6 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
-{
-my %exclude_from_last_command = map{ $_ => 1} 
-		qw(tag commit branch br new_branch nbr load save get restore);
 sub process_line {
 	logsub("&process_line");
 	no warnings 'uninitialized';
@@ -72,15 +69,13 @@ sub process_line {
 			}
 
 				unless ! $success 
-					   or $user_input =~ /^\s*([a-z_]+)/
-						and $exclude_from_last_command{$1};
+					   or $user_input =~ /^\s*([a-z_]+)/;
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
-}
 }
 sub context {
 	my $context = {};
