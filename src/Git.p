@@ -56,7 +56,7 @@ sub git_snapshot {
 	logsub("&git_snapshot");
 	return unless $config->{use_git};
 	save_state();
-	my $commit_message = shift() || "no comment";
+	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
 sub git_commit {
@@ -66,13 +66,10 @@ sub git_commit {
 	use utf8;
 	$commit_message = join "\n", 
 		$commit_message,
-		# context for first command
-		"Context:",
-		" + track: $project->{last_command}->[0]->{context}->{track}",
-		" + bus:   $project->{last_command}->[0]->{context}->{bus}",
-		" + op:    $project->{last_command}->[0]->{context}->{op}",
-		# all commands since last commit
-		map{ $_->{command} } @{$project->{last_command}};
+		$project->{last_command}->{command},
+		" + track: $project->{last_command}->{context}->{track}",
+		" + bus:   $project->{last_command}->{context}->{bus}",
+		" + op: $project->{last_command}->{context}->{op}";
 		
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);

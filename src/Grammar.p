@@ -60,11 +60,11 @@ sub process_line {
 		else {
 			my $success = process_command( $user_input );
 				
-			$project->{last_command} = [ {
+			$project->{last_command} = {
 				context => context(),
 				command => $user_input,
 			#	commit 	=> $commit 
-			} ] unless ! $success or $user_input =~ /^\s*([a-z_]+)/;
+			};
 			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
