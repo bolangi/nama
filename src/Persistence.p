@@ -112,9 +112,9 @@ sub save_system_state {
 	logpkg('debug', "copying marks data");
 	@marks_data = map{ $_->as_hash } ::Mark::all();
 
-	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
+	@fade_data = map{ $_->as_hash } sort values %::Fade::by_index;
 
-	@edit_data = map{ $_->as_hash } values %::Edit::by_index;
+	@edit_data = map{ $_->as_hash } sort values %::Edit::by_index;
 
 	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => 1);
 
