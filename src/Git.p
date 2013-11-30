@@ -170,9 +170,6 @@ sub list_branches {
 
 sub autosave {
 		logsub("&autosave");
-		my ($user_input, $command_stamp) = @_;
-		push(@{$project->{command_buffer}}, $command_stamp)
-			if undo_behavior($user_input) eq 'store';
 		engine_running() ? return : git_snapshot();
 }
 1

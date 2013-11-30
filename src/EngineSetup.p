@@ -27,11 +27,10 @@ sub generate_setup {
 	# this is our chance to save state without the noise
 	# of temporary tracks, avoiding the issue of getting diffs 
 	# in the project data from each new chain setup.
-	autosave($user_input, { context => context(), command => $user_input } ) 
-		if $config->{autosave} eq 'setup'
-		and $project->{name}
-		and $config->{use_git} 
-		and $project->{repo};
+	autosave() if $config->{autosave} eq 'setup'
+					and $project->{name}
+					and $config->{use_git} 
+					and $project->{repo};
 	
 	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)

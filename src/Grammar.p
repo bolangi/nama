@@ -59,17 +59,23 @@ sub process_line {
 		}
 		else {
 			my $success = process_command( $user_input );
-
-			# but later ignore it because failure
-			# may still bring changes
-		
-			# even an unsuccessful command may have had
-			# effects, so try to autosave/reconfigure anyway
+			my $command_stamp = { context => context(), 
+								  command => $user_input };
+			push(@{$project->{command_buffer}}, $command_stamp);
 			
-			autosave( $user_input, { context => context(), command => $user_input } ) 
-				if $config->{use_git} and $config->{autosave} eq 'undo';
+			::ChainSetup::remove_temporary_tracks(), autosave()
+				if $config->{autosave} eq 'undo'
+				and $project->{name}
+				and $config->{use_git} 
+				and $project->{repo};
+
 			reconfigure_engine();
 		}
+		# reset current track to Master if it is
+		# undefined, or the track has been removed
+		# from the index
+		$this_track = $tn{Master} if ! $this_track or
+			(ref $this_track and ! $tn{$this_track->name});
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
 	}

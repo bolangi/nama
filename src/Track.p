@@ -399,15 +399,7 @@ sub remove {
  	map{ ::remove_effect($_) } @{ $track->ops };
  	delete $by_index{$n};
  	delete $by_name{$track->name};
-
-	# reset $this_track if it is not defined or 
-	# if it is no longer indexed
-	
-	$::this_track = $ti{1} if ! $this_track or ref $this_track and ! $by_name{$::this_track->name} 
 }
-
-	
-	
 
 ### object methods for text-based commands 
 
