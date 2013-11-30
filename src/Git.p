@@ -70,10 +70,9 @@ sub git_commit {
 	$commit_message = join "\n", 
 		$commit_message,
 		# context for first command
-		"Context:",
-		" + track: $project->{command_buffer}->[0]->{context}->{track}",
-		" + bus:   $project->{command_buffer}->[0]->{context}->{bus}",
-		" + op:    $project->{command_buffer}->[0]->{context}->{op}",
+		"* track: $project->{command_buffer}->[0]->{context}->{track}",
+		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
+		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
 		# all commands since last commit
 		map{ $_->{command} } @{$project->{command_buffer}};
 		

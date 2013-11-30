@@ -1658,5 +1658,5 @@ show_head_commit: _show_head_commit {
 	my $show = ::git(qw/show HEAD/);	
 	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
 	my (undef,$msg)    = split "\n\n",$show;
-	::pager("commit: $commit\nmessage: $msg");
+	::pager3("commit: $commit",$msg);
 }
