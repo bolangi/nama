@@ -31,7 +31,8 @@ sub new {
 		return
 	}
 	if ( $by_name{$vals{name}} ){ 
-		::throw("$vals{name}: bus name already exists. Skipping.");
+		::throw("$vals{name}: bus name already exists. Skipping.")
+			unless $::quiet;
 		return;
 	}
 	my $bus = bless { 
