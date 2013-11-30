@@ -1452,6 +1452,14 @@ compose:
     speaker2-start speaker2-end
     This creates a "speeches" sequence with two clips
     for speaker1 and speaker2.
+undo:
+  type: general
+  what: |
+    roll back last commit (use "git log" to see specific commands)
+    Note: redo is not supported yet
+redo: 
+  type: general
+  what: restore the last undone commit (TODO)
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)

@@ -1652,3 +1652,4 @@ rename_track: _rename_track existing_track_name new_track_name {
 		::this_wav_dir()
 	);
 }
+undo: _undo { ::pager("removing last commit"); ::git(qw/reset --hard HEAD^/); 1 }
