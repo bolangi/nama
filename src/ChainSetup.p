@@ -53,13 +53,6 @@ sub remove_temporary_tracks {
 sub initialize {
 
 	remove_temporary_tracks(); # we will generate them again
-	
-	# this is our chance to save state without the noise
-	# of temporary tracks, avoiding the issue of getting diffs 
-	# in the project data from each new chain setup.
-	
-	#::autosave() if $config->{use_git} and $config->{autosave} eq 'setup';
-	
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();
