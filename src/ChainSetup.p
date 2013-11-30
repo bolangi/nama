@@ -58,7 +58,7 @@ sub initialize {
 	# of temporary tracks, avoiding the issue of getting diffs 
 	# in the project data from each new chain setup.
 	
-	::autosave() if $config->{use_git} and $config->{autosave} eq 'setup';
+	#::autosave() if $config->{use_git} and $config->{autosave} eq 'setup';
 	
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
