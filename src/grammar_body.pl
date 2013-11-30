@@ -1653,3 +1653,10 @@ rename_track: _rename_track existing_track_name new_track_name {
 	);
 }
 undo: _undo { ::pager("removing last commit"); ::git(qw/reset --hard HEAD^/); 1 }
+redo: _redo { 1 }
+show_head_commit: _show_head_commit {
+	my $show = ::git(qw/show HEAD/);	
+	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+	my (undef,$msg)    = split "\n\n",$show;
+	::pager("commit: $commit\nmessage: $msg");
+}

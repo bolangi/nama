@@ -1460,6 +1460,14 @@ undo:
 redo: 
   type: general
   what: restore the last undone commit (TODO)
+show_head_commit:
+  type: general
+  short: show_head last_command last
+  what: |
+    show the last commit, which undo will roll back.
+    A commit may contain multiple commands. 
+    The last_* aliases are meaningful when autosave: undo is set.
+    In that case each commit contains only a single command
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
