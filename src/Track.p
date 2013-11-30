@@ -1199,7 +1199,6 @@ sub add_track {
 	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
 	# in order to increment serially
-
 	::ChainSetup::remove_temporary_tracks();
 
 	my $track = $class->new(%vals);

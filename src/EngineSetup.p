@@ -80,10 +80,6 @@ sub reconfigure_engine {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	# restore position/running status
-
-	
-	
 	$old_offset_run_status = $mode->{offset_run};
 
 	process_command('show_tracks');
@@ -101,7 +97,6 @@ sub reconfigure_engine {
 		
 		logpkg('debug',"I generated a new setup");
 		
-		autosave() if $config->{use_git} and $config->{autosave} eq 'setup';
 		connect_transport('quiet');
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
