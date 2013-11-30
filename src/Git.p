@@ -173,16 +173,6 @@ sub autosave {
 		my ($user_input, $command_stamp) = @_;
 		push(@{$project->{command_buffer}}, $command_stamp)
 			if undo_behavior($user_input) eq 'store';
-		if( engine_running()){
-			return
-		}
-		else { 
-			# The engine is stopped, so we can do anything 
-			# if we leave the engine how we found it
-			# needed for a quiet diff between successive sav
-        	::ChainSetup::remove_temporary_tracks(); 
-        	git_snapshot();
-        	request_setup(); # needed to recreate temporary tracks
-		}
+		engine_running() ? return : git_snapshot();
 }
 1
