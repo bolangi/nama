@@ -63,12 +63,15 @@ sub process_line {
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
+			if ( ! engine_running() ){
+				local $quiet = 1;
 			::ChainSetup::remove_temporary_tracks(), autosave()
 				if $config->{autosave} eq 'undo'
 				and $project->{name}
 				and $config->{use_git} 
 				and $project->{repo};
-
+				reconfigure_engine();
+			}
 			reconfigure_engine();
 		}
 		# reset current track to Master if it is
