@@ -72,14 +72,16 @@ sub tag_mixdown_commit {
 	my ($mix) = $mixdownfile =~ m([^/]+$);
 
 	# we want to tag the normal playback state
-	mixoff('quiet');
+	
+	local $quiet = 1;
+	mixoff();
 
 	my $msg = "State for $sym ($mix)";
 	git_snapshot($msg);
 	git('tag', $name, '-m', $mix);
 
 	# rec_cleanup wants to audition the mixdown
-	mixplay('quiet');
+	mixplay();
 }
 sub delete_existing_mixdown_tag_and_convenience_encodings {
 	logsub('&delete_existing_mixdown_tag_and_convenience_encodings');

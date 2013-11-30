@@ -149,7 +149,7 @@ sub prepare_to_cache {
 }
 sub cache_engine_run { # uses shared lexicals
 
-	connect_transport('quiet')
+	connect_transport()
 		or say("Couldn't connect engine! Aborting."), return;
 
 	# remove fades from target track

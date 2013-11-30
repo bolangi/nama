@@ -93,7 +93,7 @@ sub reconfigure_engine {
 
 	process_command('show_tracks');
 
-	stop_transport('quiet');
+	{ local $quiet = 1; stop_transport() }
 
 	trigger_rec_cleanup_hooks();
 	trigger_rec_setup_hooks();
@@ -106,7 +106,7 @@ sub reconfigure_engine {
 		
 		logpkg('debug',"I generated a new setup");
 		
-		connect_transport('quiet');
+		{ local $quiet = 1; connect_transport() }
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
 
@@ -239,7 +239,6 @@ arm();
 
 sub connect_transport {
 	logsub("&connect_transport");
-	my $quiet = shift;
 	remove_riff_header_stubs();
 
 	register_other_ports(); # that don't belong to my upcoming instance

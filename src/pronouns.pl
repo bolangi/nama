@@ -11,3 +11,4 @@ $prompt
 $g
 $debug
 $debug2
+$quiet

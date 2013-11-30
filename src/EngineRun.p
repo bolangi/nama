@@ -42,8 +42,6 @@ sub mixing_only {
 	
 sub start_transport { 
 
-	my $quiet = shift;
-
 	# set up looping event if needed
 	# mute unless recording
 	# start
@@ -83,7 +81,6 @@ sub start_transport {
 }
 sub stop_transport { 
 
-	my $quiet = shift;
 	logsub("&stop_transport"); 
 	my $pos;
 	$pos = eval_iam('getpos') if eval_iam('cs-connected');
