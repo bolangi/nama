@@ -40,8 +40,7 @@ sub save_state {
 		return;
 	}
 
-	print "\nSaving state as ",
-	save_system_state($path), "\n";
+	logpkg('debug',"Saving state as ", save_system_state($path));
 	save_global_effect_chains();
 
 	# store alsa settings
