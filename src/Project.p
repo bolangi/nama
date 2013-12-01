@@ -72,9 +72,9 @@ sub initialize_project_data {
 	$gui->{_markers_armed} = 0;
 
 	map{ $_->initialize() } qw(
-							::Mark
-							::Fade
 							::Edit
+							::Fade
+							::Mark
 							::Bus
 							::Track
 							::Insert
