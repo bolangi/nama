@@ -96,7 +96,7 @@ sub show_io {
 	::pager( $output );
 }
 
-sub generate_setup_try {  # TODO: move operations below to buses
+sub generate_setup_try {
 	logsub("&generate_setup_try");
 
 	my $extra_setup_code = shift;
