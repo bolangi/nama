@@ -345,7 +345,6 @@ sub new_project_template {
 	#	- version (still called 'active')
 	# 	- track caching
 	# 	- region start/end points
-	# 	- effect_chain_stack
 	# Also
 	# 	- unmute all tracks
 	# 	- throw away any pan caching
@@ -358,9 +357,6 @@ sub new_project_template {
 				region_start
 				region_end
 			);
-		 map{ $track->set($_ => [])  } 
-			qw(	effect_chain_stack  );
-		
 	} @tracks;
 
 	# Throw away command history
