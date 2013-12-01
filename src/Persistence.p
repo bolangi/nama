@@ -103,22 +103,28 @@ sub save_system_state {
 
 	@bus_data = map{ $_->as_hash } sort { $a->name cmp $b->name} ::Bus::all();
 
+
+	my $by_n = sub { $a->{n} <=> $b->{n} };
+
 	# prepare inserts data for storage
 	
 	logpkg('debug', "copying inserts data");
 	
-	@inserts_data = map{ $_->as_hash } sort values %::Insert::by_index;
+	@inserts_data = sort $by_n map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	logpkg('debug', "copying marks data");
-	@marks_data = sort { $a->{n} <=> $b->{n} } map{ $_->as_hash } ::Mark::all();
 
-	@fade_data = map{ $_->as_hash } sort values %::Fade::by_index;
 
-	@edit_data = map{ $_->as_hash } sort values %::Edit::by_index;
+	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
 
-	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => 1);
+	@fade_data = sort $by_n map{ $_->as_hash } values %::Fade::by_index;
+
+	@edit_data = sort $by_n map{ $_->as_hash } values %::Edit::by_index;
+
+	@project_effect_chain_data = sort $by_n map { $_->as_hash } 
+		::EffectChain::find(project => 1);
 
 	# save history -- 50 entries, maximum
 
