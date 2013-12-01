@@ -98,7 +98,6 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-
 	logpkg('debug', "copying bus data");
 
 	@bus_data = map{ $_->as_hash } sort { $a->name cmp $b->name} ::Bus::all();

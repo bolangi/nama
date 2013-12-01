@@ -172,7 +172,6 @@ sub load_project {
 
 		if ($initializing_repo){
 			$project->{repo}->run( add => $file->git_state_store );
-			$project->{repo}->run( commit => '--quiet', '--message', "initial commit");
 		}
 	}
 

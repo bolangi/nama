@@ -109,10 +109,10 @@ sub new {
 					modifiers 		=> q(), # start, reverse, audioloop, playat
 					looping 		=> undef, # do we repeat our sound sample
 					source_type 	=> q(soundcard),
-					source_id   	=> 1,
+					source_id   	=> "1",
 					send_type 		=> undef,
 					send_id   		=> undef,
-					effect_chain_stack => [],
+					old_vol_level	=> undef,
 
 					@_ 			}, $class;
 

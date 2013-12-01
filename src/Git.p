@@ -54,10 +54,10 @@ sub restore_state_from_vcs {
  
 sub git_snapshot {
 	logsub("&git_snapshot");
+	my $commit_message = shift() || "";
 	return unless $config->{use_git};
 	save_state();
 	reset_command_buffer(), return unless state_changed();
-	my $commit_message = shift() || "";
 	git_commit($commit_message);
 }
 sub reset_command_buffer { $project->{command_buffer} = [] } 
@@ -67,15 +67,13 @@ sub git_commit {
 	my $commit_message = shift;
 	no warnings 'uninitialized';
 	use utf8;
-	$commit_message = join "\n", 
-		$commit_message,
+	scalar @{$project->{command_buffer}} and $commit_message .= join "\n", 
+		undef,
 		# context for first command
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
 		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-		# all commands since last commit
 		map{ $_->{command} } @{$project->{command_buffer}};
-		
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
