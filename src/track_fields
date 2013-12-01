@@ -58,8 +58,6 @@
 					
 					rec_defeat		# don't record me!
 
-					effect_chain_stack # for bypass and friends
-
 					comment			# describe track
 					version_comment # describe a version { 1 => 'comment text' }
 
