@@ -64,14 +64,16 @@ sub process_line {
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
-			if ( ! engine_running() ){
+			if ( 		$config->{autosave} eq 'undo'
+					and $config->{use_git} 
+					and $project->{name}
+					and $project->{repo}
+					and ! engine_running() 
+			){
 				local $quiet = 1;
-			::ChainSetup::remove_temporary_tracks(), autosave()
-				if $config->{autosave} eq 'undo'
-				and $project->{name}
-				and $config->{use_git} 
-				and $project->{repo};
-				reconfigure_engine();
+				::ChainSetup::remove_temporary_tracks();
+				autosave(); 
+				reconfigure_engine(); # quietly, avoiding noisy reconfig below
 			}
 			reconfigure_engine();
 		}
