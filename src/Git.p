@@ -69,11 +69,11 @@ sub git_commit {
 	use utf8;
 	scalar @{$project->{command_buffer}} and $commit_message .= join "\n", 
 		undef,
+		(map{ $_->{command} } @{$project->{command_buffer}}),
 		# context for first command
 		"* track: $project->{command_buffer}->[0]->{context}->{track}",
 		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
 		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
-		map{ $_->{command} } @{$project->{command_buffer}};
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
 	reset_command_buffer();
