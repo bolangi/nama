@@ -110,8 +110,7 @@ sub reconfigure_engine {
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
 
-		eval_iam("setpos $project->{playback_position}"), 
-			$project->{playback_position} = 0
+		eval_iam("setpos $project->{playback_position}")
  				if $project->{playback_position}
 					and not ::ChainSetup::really_recording();
 # 			start_transport('quiet') if $mode->{preview} =~ /doodle/;
