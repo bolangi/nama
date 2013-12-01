@@ -171,4 +171,33 @@ sub autosave {
 		logsub("&autosave");
 		engine_running() ? return : git_snapshot();
 }
+sub redo {
+	if ($project->{redo}){
+		git('cherry-pick',$project->{redo});
+		load_project(name => $project->{name});
+		delete $project->{redo};
+	} else {throw("nothing to redo")}
+	1
+}
+sub undo {
+	pager("removing last commit"); 
+	local $quiet = 1;
+
+	# get the commit id
+	my $show = git(qw/show HEAD/);	
+	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+
+	# blow it away
+	git(qw/reset --hard HEAD^/); 
+	load_project( name => $project->{name});
+
+	# remember it 
+	$project->{redo} = $commit;
+}
+sub show_head_commit {
+	my $show = git(qw/show HEAD/);	
+	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+	my (undef,$msg)    = split "\n\n",$show;
+	pager3("commit: $commit",$msg);
+}
 1
