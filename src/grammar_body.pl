@@ -1653,7 +1653,13 @@ rename_track: _rename_track existing_track_name new_track_name {
 		::this_wav_dir()
 	);
 }
-undo: _undo { ::pager("removing last commit"); ::git(qw/reset --hard HEAD^/); 1 }
+undo: _undo {
+	::pager("removing last commit"); 
+	local $::quiet = 1;
+	::git(qw/reset --hard HEAD^/); 
+	::load_project( name => $::project->{name});
+	1 
+}
 redo: _redo { 1 }
 show_head_commit: _show_head_commit {
 	my $show = ::git(qw/show HEAD/);	
