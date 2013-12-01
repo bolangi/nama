@@ -58,8 +58,9 @@ sub process_line {
 					:  midish_command($user_input);	
 		}
 		else {
+			my $context = context();
 			my $success = process_command( $user_input );
-			my $command_stamp = { context => context(), 
+			my $command_stamp = { context => $context, 
 								  command => $user_input };
 			push(@{$project->{command_buffer}}, $command_stamp);
 			
