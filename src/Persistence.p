@@ -351,9 +351,9 @@ sub restore_state_from_file {
 				$_->{is_mix_track}++;
 				$_->{class} = $_->{was_class};
 				$_->{class} = '::Track';
-				delete $_->{effect_chain_stack} ;
 		  	}
-		  	delete $_->{was_class} 
+		  	delete $_->{was_class};
+			delete $_->{effect_chain_stack} ;
 		} @tracks_data;
 		map
 		{    if($_->{class} eq '::MasterBus') {
