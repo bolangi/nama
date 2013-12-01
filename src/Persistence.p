@@ -352,6 +352,7 @@ sub restore_state_from_file {
 				$_->{is_mix_track}++;
 				$_->{class} = $_->{was_class};
 				$_->{class} = '::Track';
+				delete $_->{effect_chain_stack} ;
 		  	}
 		  	delete $_->{was_class} 
 		} @tracks_data;
@@ -362,11 +363,6 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	
-
-	# make sure current_edit field is initialized
-	
-	map {	$_->{current_edit} //= {} } @tracks_data;
 
 	#######################################
 
