@@ -178,7 +178,7 @@ sub load_project {
 
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
-	if (! $tn{Master}){
+	if (! $tn{Master}){ # new project
 
 		::SimpleTrack->new( 
 			group => 'Master', 
@@ -209,6 +209,8 @@ sub load_project {
 	
 	# $args{nodig} allow skip for convert_project_format
 	dig_ruins() unless (scalar @::Track::all > 2 ) or $args{nodig};
+
+	git_snapshot("initialize new project");
 
 	# possible null if Text mode
 	
