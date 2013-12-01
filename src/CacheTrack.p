@@ -1,5 +1,4 @@
 # -------- CacheTrack ------
-# TODO: wisely handle uncaching a sub-bus mix track 
 package ::;
 use Modern::Perl;
 use ::Globals qw(:all);
