@@ -955,6 +955,7 @@ sub rec_cleanup_script {
 }
 sub is_region { defined $_[0]->{region_start} }
 
+sub current_edit { $_[0]->{current_edit}//={} }
 } # end package
 
 # subclasses
