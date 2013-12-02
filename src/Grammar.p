@@ -359,7 +359,7 @@ sub show_status {
 	package ::;
 	my @modes;
 	push @modes, $mode->{preview} if $mode->{preview};
-	push @modes, "master" if $mode->{mastering};
+	push @modes, "master" if $mode->mastering;
 	push @modes, "edit"   if ::edit_mode();
 	push @modes, "offset run" if ::is_offset_run_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
@@ -460,7 +460,7 @@ sub showlist {
 		push @sections, [undef,undef, map $tn{$_},qw(Master Mixdown)];
 		push @sections, [$tn{Master},$bn{Main},map $tn{$_},$bn{Main}->tracks ];
 
-	if( $mode->{mastering} ){
+	if( $mode->mastering ){
 
 		push @sections, [undef,undef, map $tn{$_},$bn{Mastering}->tracks]
 
