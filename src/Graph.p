@@ -319,8 +319,7 @@ sub remove_out_of_bounds_tracks {
 	my @names = $g->successors('wav_in');  # MON status tracks
 	map{ remove_tracks($g, $_) } 
 	grep{
-		::set_edit_vars($::tn{$_});
-		::edit_case() =~ /out_of_bounds/
+		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/
 	} @names;
 }
 
