@@ -37,7 +37,7 @@ sub cache_track { # launch subparts if conditions are met
 	$additional_time //= 0;
 	say $track->name, ": preparing to cache.";
 	
-	# abort if sub-bus mix track and bus is OFF 
+	# abort if track is a mix track for a sub-bus and the bus is OFF 
 	if( my $bus = $bn{$track->name}
 		and $track->rec_status eq 'REC' 
 	 ){ 
