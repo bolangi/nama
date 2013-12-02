@@ -484,6 +484,7 @@ sub restore_state_from_file {
 ;
 	# restore effect chains and profiles
 	
+	::EffectChain::initialize();
 	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
  	map { my $fx_chain = ::EffectChain->new(%$_) } 
 		(@project_effect_chain_data, @global_effect_chain_data)
