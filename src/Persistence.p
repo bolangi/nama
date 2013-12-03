@@ -353,7 +353,6 @@ sub restore_state_from_file {
 				$_->{class} = '::Track';
 		  	}
 		  	delete $_->{was_class};
-			delete $_->{effect_chain_stack} ;
 		} @tracks_data;
 		map
 		{    if($_->{class} eq '::MasterBus') {
@@ -362,7 +361,12 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-
+	if ( $project->{save_file_version_number} <= 1.111){ 
+		map
+		{
+			delete $_->{effect_chain_stack} ;
+		} @tracks_data;
+	}
 	#######################################
 
 
