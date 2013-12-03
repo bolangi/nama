@@ -558,63 +558,63 @@ sub region_start_dispatch {
 	my ($args, $key) = @_;
 	my %table = (
 
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
+    out_of_bounds_near				=> "*",
+    out_of_bounds_far				=> "*",	
 
-	play_start_during_playat_delay	=> sub {$args->{region_start} },
-	no_region_play_start_during_playat_delay => sub { 0 },
+	play_start_during_playat_delay	=> $args->{region_start},
+	no_region_play_start_during_playat_delay =>  0,
 
 	play_start_within_region 
-				=> sub {$args->{region_start} + $args->{edit_play_start} - $args->{playat} },
+				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
 	no_region_play_start_after_playat_delay
-				=> sub {$args->{region_start} + $args->{edit_play_start} - $args->{playat} },
+				=> $args->{region_start} + $args->{edit_play_start} - $args->{playat},
 	);
 	$table{$key}
 }
 sub playat_dispatch {
 	my ($args, $key) = @_;
 	my %table = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
+    out_of_bounds_near				=> "*",
+    out_of_bounds_far				=> "*",	
 
-	play_start_during_playat_delay	=> sub{ $args->{playat} - $args->{edit_play_start} },
+	play_start_during_playat_delay	=> $args->{playat} - $args->{edit_play_start},
 	no_region_play_start_during_playat_delay
-									=> sub{ $args->{playat} - $args->{edit_play_start} },
+									=> $args->{playat} - $args->{edit_play_start},
 
-	play_start_within_region   				=> sub{ 0 },
-	no_region_play_start_after_playat_delay => sub{ 0 },
+	play_start_within_region   				=> 0,
+	no_region_play_start_after_playat_delay => 0,
 	);
 	$table{$key}
 }
 sub region_end_dispatch {
 	my ($args, $key) = @_;
 	my %table = (
-    out_of_bounds_near				=> sub{ "*" },
-    out_of_bounds_far				=> sub{ "*" },	
+    out_of_bounds_near				=> "*",
+    out_of_bounds_far				=> "*",	
 
 	play_start_during_playat_delay	
-		=> sub { $args->{region_start} + $args->{edit_play_end} - $args->{playat} },
+		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
 	no_region_play_start_during_playat_delay 
-		=> sub {                 $args->{edit_play_end} - $args->{playat} },
+		=>                  $args->{edit_play_end} - $args->{playat},
 
 	play_start_within_region 
-		=> sub { $args->{region_start} + $args->{edit_play_end} - $args->{playat} },
+		=>  $args->{region_start} + $args->{edit_play_end} - $args->{playat},
 	no_region_play_start_after_playat_delay
-		=> sub {                 $args->{edit_play_end} - $args->{playat} },
+		=>                  $args->{edit_play_end} - $args->{playat},
 	);
 	$table{$key}
 }
 sub new_playat {
 	my $args = shift;
-	playat_dispatch($args, edit_case($args))->();
+	playat_dispatch($args, edit_case($args));
 }
 sub new_region_start { 
 	my $args = shift;
-	region_start_dispatch($args, edit_case($args))->();
+	region_start_dispatch($args, edit_case($args));
 }
 sub new_region_end {   
 	my $args = shift;
-	my $end = region_end_dispatch($args, edit_case($args))->();
+	my $end = region_end_dispatch($args, edit_case($args));
 	return $end if $end eq '*';
 	$end < $args->{setup_length} ? $end : $args->{setup_length}
 };
