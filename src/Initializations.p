@@ -54,7 +54,7 @@ sub definitions {
 	
 	$project = bless {}, '::Project';
 	$mode = bless {}, '::Mode';
-	{ package ::Mode; sub mastering { ! $::tn{Eq}->{hide} } }
+	{ package ::Mode; sub mastering { $::tn{Eq} and ! $::tn{Eq}->{hide} } }
 	
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
