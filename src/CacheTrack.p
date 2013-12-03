@@ -3,63 +3,50 @@ package ::;
 use Modern::Perl;
 use ::Globals qw(:all);
 
-# some common variables for cache_track and merge_track
-# related routines
+# The $args hashref passed among the subroutines in this file
+# has these fields:
 
-{ # begin shared lexicals for cache_track and merge_edits
-
-	my ($track, 
-		$additional_time, 
-		$processing_time, 
-		$orig_version, 
-		$complete_caching_ref,
-		$output_wav,
-		$orig_volume,
-		$orig_pan);
-
-sub initialize_caching_vars {
-	map{ undef $_ } ($track, 
-					$additional_time, 
-					$processing_time, 
-					$orig_version, 
-					$complete_caching_ref,
-					$output_wav,
-					$orig_volume,
-					$orig_pan);
-}
+# track
+# additional_time
+# processing_time
+# orig_version
+# complete_caching_ref
+# output_wav
+# orig_volume
+# orig_pan
 
 sub cache_track { # launch subparts if conditions are met
 
 	local $this_track;
-	initialize_caching_vars();
-
-	($track, $additional_time) = @_;
-	$additional_time //= 0;
-	say $track->name, ": preparing to cache.";
+	my $args = {}; # initialize args
+	($args->{track}, $args->{additional_time}) = @_;
+	$args->{additional_time} //= 0;
+	
+	say $args->{track}->name, ": preparing to cache.";
 	
 	# abort if track is a mix track for a sub-bus and the bus is OFF 
-	if( my $bus = $bn{$track->name}
-		and $track->rec_status eq 'REC' 
+	if( my $bus = $bn{$args->{track}->name}
+		and $args->{track}->rec_status eq 'REC' 
 	 ){ 
 		$bus->rw eq 'OFF' and say(
 			$bus->name, ": status is OFF. Aborting."), return;
 
 	# check conditions for normal track
 	} else { 
-		$track->rec_status eq 'MON' or say(
-			$track->name, ": track caching requires MON status. Aborting."), return;
+		$args->{track}->rec_status eq 'MON' or say(
+			$args->{track}->name, ": track caching requires MON status. Aborting."), return;
 	}
-	say($track->name, ": no effects to cache!  Skipping."), return 
-		unless 	$track->fancy_ops 
-				or $track->has_insert
-				or $bn{$track->name};
+	say($args->{track}->name, ": no effects to cache!  Skipping."), return 
+		unless 	$args->{track}->fancy_ops 
+				or $args->{track}->has_insert
+				or $bn{$args->{track}->name};
 
-	if ( prepare_to_cache() )
+	if ( prepare_to_cache($args) )
 	{ 
-		deactivate_vol_pan();
-		cache_engine_run();
-		reactivate_vol_pan();
-		return $output_wav
+		deactivate_vol_pan($args);
+		cache_engine_run($args);
+		reactivate_vol_pan($args);
+		return $args->{output_wav}
 	}
 	else
 	{ 
@@ -70,19 +57,20 @@ sub cache_track { # launch subparts if conditions are met
 }
 
 sub deactivate_vol_pan {
-	unity($track, 'save_old_vol');
-	pan_check($track, 50);
+	my $args = shift;
+	unity($args->{track}, 'save_old_vol');
+	pan_check($args->{track}, 50);
 }
 sub reactivate_vol_pan {
-	pan_back($track);
-	vol_back($track);
+	my $args = shift;
+	pan_back($args->{track});
+	vol_back($args->{track});
 }
 
 sub prepare_to_cache {
-	# uses shared lexicals
-	
+	my $args = shift;
  	my $g = ::ChainSetup::initialize();
-	$orig_version = $track->monitor_version;
+	$args->{orig_version} = $args->{track}->monitor_version;
 
 	#   We route the signal thusly:
 	#
@@ -93,17 +81,17 @@ sub prepare_to_cache {
 	#     - increments track version by one
 	
 	my $cooked = ::CacheRecTrack->new(
-		name   => $track->name . '_cooked',
+		name   => $args->{track}->name . '_cooked',
 		group  => 'Temp',
-		target => $track->name,
+		target => $args->{track}->name,
 		hide   => 1,
 	);
 
-	$g->add_path($track->name, $cooked->name, 'wav_out');
+	$g->add_path($args->{track}->name, $cooked->name, 'wav_out');
 
 	# save the output file name to return later
 	
-	$output_wav = $cooked->current_wav;
+	$args->{output_wav} = $cooked->current_wav;
 
 	# set WAV output format
 	
@@ -112,20 +100,20 @@ sub prepare_to_cache {
 		{ format => signal_format($config->{cache_to_disk_format},$cooked->width),
 		}
 	); 
-	$complete_caching_ref = \&update_cache_map;
+	$args->{complete_caching_ref} = \&update_cache_map;
 
 	# Case 1: Caching a standard track
 	
-	if($track->rec_status eq 'MON')
+	if($args->{track}->rec_status eq 'MON')
 	{
 		# set the input path
-		$g->add_path('wav_in',$track->name);
+		$g->add_path('wav_in',$args->{track}->name);
 		logpkg('debug', "The graph after setting input path:\n$g");
 	}
 
 	# Case 2: Caching a sub-bus mix track
 
-	elsif($track->rec_status eq 'REC'){
+	elsif($args->{track}->rec_status eq 'REC'){
 
 		# apply all sub-buses (unneeded ones will be pruned)
 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
@@ -146,97 +134,97 @@ sub prepare_to_cache {
 	}
 	$success
 }
-sub cache_engine_run { # uses shared lexicals
-
+sub cache_engine_run {
+	my $args = shift;
 	connect_transport()
 		or say("Couldn't connect engine! Aborting."), return;
 
 	# remove fades from target track
 	
-	::Effects::remove_op($track->fader) if defined $track->fader;
+	::Effects::remove_op($args->{track}->fader) if defined $args->{track}->fader;
 
-	$processing_time = $setup->{audio_length} + $additional_time;
-	# ??? where is $setup->{audio_length} set??
+	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	say $/,$track->name,": processing time: ". d2($processing_time). " seconds";
+	say $/,$args->{track}->name,": processing time: ". d2($args->{processing_time}). " seconds";
 	print "Starting cache operation. Please wait.";
 	
 	revise_prompt(" "); 
 
 	# we try to set processing time this way
-	eval_iam("cs-set-length $processing_time"); 
+	eval_iam("cs-set-length $args->{processing_time}"); 
 
 	eval_iam("start");
 
 	# ensure that engine stops at completion time
+	$setup->{cache_track_args} = $args;
  	$engine->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
 
 	# complete_caching() contains the remainder of the caching code.
 	# It is triggered by stop_polling_cache_progress()
 }
 sub complete_caching {
-	# uses shared lexicals
-	
-	my $name = $track->name;
+	my $args = shift;	
+	my $name = $args->{track}->name;
 	my @files = grep{/$name/} new_files_were_recorded();
 	if (@files ){ 
 		
-		&$complete_caching_ref if defined $complete_caching_ref;
-		post_cache_processing();
+		$args->{complete_caching_ref}->($args) if defined $args->{complete_caching_ref};
+		post_cache_processing($args);
 
 	} else { say "track cache operation failed!"; }
+	undef $setup->{cache_track_args};
 }
 sub update_cache_map {
-
+	my $args = shift;
 		logpkg('debug', "updating track cache_map");
 		logpkg('debug', "current track cache entries:",
 			sub {
 				join "\n","cache map", 
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
-		my @inserts_list = ::Insert::get_inserts($track->name);
-		my @ops_list = $track->fancy_ops;
-		if ( @inserts_list or @ops_list or $track->is_region)
+		my @inserts_list = ::Insert::get_inserts($args->{track}->name);
+		my @ops_list = $args->{track}->fancy_ops;
+		if ( @inserts_list or @ops_list or $args->{track}->is_region)
 		{
 			my %args = 
 			(
 				track_cache => 1,
-				track_name	=> $track->name,
-				track_version_original => $orig_version,
-				track_version_result => $track->last,
+				track_name	=> $args->{track}->name,
+				track_version_original => $args->{orig_version},
+				track_version_result => $args->{track}->last,
 				project => 1,
 				system => 1,
 				ops_list => \@ops_list,
 				inserts_data => \@inserts_list,
 			);
-			$args{region} = [ $track->region_start, $track->region_end ] 
-				if $track->is_region;
+			$args{region} = [ $args->{track}->region_start, $args->{track}->region_end ] 
+				if $args->{track}->is_region;
 			my $ec = ::EffectChain->new( %args );
 			map{ remove_effect($_) } @ops_list;
 			map{ $_->remove        } @inserts_list;
-			$track->set(region_start => undef, region_end => undef);
+			$args->{track}->set(region_start => undef, region_end => undef);
 
-		say qq(Saving effects for cached track "), $track->name, '".';
-		say qq('uncache' will restore effects and set version $orig_version\n);
+		say qq(Saving effects for cached track "), $args->{track}->name, '".';
+		say qq('uncache' will restore effects and set version $args->{orig_version}\n);
 		}
 }
 
 sub post_cache_processing {
-
+	my $args = shift;
 		# only set to MON tracks that would otherwise remain
 		# in a REC status
 		#
 		# track:REC bus:MON -> keep current state
 		# track:REC bus:REC -> set track to MON
 
-		$track->set(rw => 'MON') if $track->rec_status eq 'REC';
+		$args->{track}->set(rw => 'MON') if $args->{track}->rec_status eq 'REC';
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
 		revise_prompt("default"); 
 }
 sub poll_cache_progress {
-
+	my $args = $setup->{cache_track_args};
 	print ".";
 	my $status = eval_iam('engine-status'); 
 	my $here   = eval_iam("getpos");
@@ -246,20 +234,20 @@ sub poll_cache_progress {
 
 	return unless 
 		   $status =~ /finished|error|stopped/ 
-		or $here > $processing_time;
+		or $here > $args->{processing_time};
 
 	say "Done.";
 	logpkg('debug', engine_status(current_position(),2,1));
 	#revise_prompt();
-	stop_polling_cache_progress();
+	stop_polling_cache_progress($args);
 }
 sub stop_polling_cache_progress {
+	my $args = shift;
 	$engine->{events}->{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
-	complete_caching();
+	complete_caching($args);
 
 }
-} # end shared lexicals for cache_track and merge_edits
 
 sub uncache_track { 
 	my $track = shift;
