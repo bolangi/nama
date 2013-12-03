@@ -162,7 +162,7 @@ sub request_setup {
  );
 sub status_snapshot {
 	my %snapshot = ( project 		=> 	$project->{name},
-					 mastering_mode => $mode->{mastering},
+					 mastering_mode => $mode->mastering,
 					 preview        => $mode->{preview},
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );

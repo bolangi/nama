@@ -178,12 +178,12 @@ sub add_paths_for_aux_sends {
 sub add_paths_from_Master {
 	logsub("&add_paths_from_Master");
 
-	if ($mode->{mastering}){
+	if ($mode->mastering){
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 	}
-	my $final_leg_origin = $mode->{mastering} ?  'Boost' : 'Master';
+	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Master';
 	$g->add_path($final_leg_origin, output_node($tn{Master}->send_type)) 
 		if $tn{Master}->rw ne 'OFF'
 
@@ -192,7 +192,7 @@ sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
 		  	format_template		=> $config->{mix_to_disk_format},

@@ -636,20 +636,18 @@ foreach(@tests){
 		$comment,
 	) = split " ", $_;
 
-	::set_edit_vars_testing( 
-		$playat, 
-		$region_start, 
-		$region_end, 
-		$edit_play_start,
-		$edit_play_end,
-		$length,
-	);
-
-		
-	is( ::edit_case(), $case, "$index: $case $comment");
-	is( ::new_playat(), $new_playat, "$index: new_playat: $case");
-	is( ::new_region_start(), $new_region_start, "$index: new_region_start: $case");
-	is( ::new_region_end(), $new_region_end, "$index: new_region_end: $case");
+	my $args = {
+		playat 			=> $playat, 
+		region_start 	=> $region_start, 
+		region_end 		=> $region_end, 
+		edit_play_start => $edit_play_start,
+		edit_play_end 	=> $edit_play_end,
+		setup_length 	=> $length,
+	};
+	is( ::edit_case($args), $case, "$index: $case $comment");
+	is( ::new_playat($args), $new_playat, "$index: new_playat: $case");
+	is( ::new_region_start($args), $new_region_start, "$index: new_region_start: $case");
+	is( ::new_region_end($args), $new_region_end, "$index: new_region_end: $case");
 }
 }
 

@@ -53,6 +53,8 @@ sub definitions {
 	# the sole instance of their class.
 	
 	$project = bless {}, '::Project';
+	$mode = bless {}, '::Mode';
+	{ package ::Mode; sub mastering { $::tn{Eq} and ! $::tn{Eq}->{hide} } }
 	
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
@@ -206,8 +208,6 @@ sub definitions {
 	$setup->{_last_rec_tracks} = [];
 
 	$mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
-
-	$mode->{mastering} = 0;
 
 	init_wav_memoize() if $config->{memoize};
 
