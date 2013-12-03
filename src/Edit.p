@@ -666,10 +666,6 @@ sub play_end_time {
 		? $this_edit->play_end_time 
 		: $setup->{offset_run}->{end_time}   # undef unless offset run mode
 }
-sub set_edit_vars_testing {
-	my $args = shift;
-	($args->{playat}, $args->{region_start}, $args->{region_end}, $args->{edit_play_start}, $args->{edit_play_end}, $args->{setup_length}) = @_;
-}
 sub edit_vars {
 	my $edit = shift || $this_edit;
 	::throw("edit is undefined"), return unless $edit;
