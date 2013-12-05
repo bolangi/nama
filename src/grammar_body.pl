@@ -1161,8 +1161,6 @@ bring_back_effects:   _bring_back_effects 'all' {
 # 	$id;
 # }
 
-# [% join " | ", split " ", qx(cat ./magical_pixie_operator.pl) %]
-
 fxc_val: shellish
 
 this_track_op_id: op_id(s) { 
