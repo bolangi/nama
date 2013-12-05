@@ -105,6 +105,7 @@ $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
+$text->{hotkey_playback_jumpsize}
 
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists
@@ -209,4 +210,3 @@ $jack->{is_own_port}
 $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
-
