@@ -14,9 +14,13 @@ help_effect:
   short: hfx he
   parameters: <s_label> | <i_unique_id>
   example: |
-    help_effect 1970 # display help on Fons Adriaensen's parametric EQ (LADSPA)
-    he etd # print a short message to consult Ecasound manpage, because etd is an internal effect
-    hfx lv2-vocProc # display detailed help on the LV2 VocProc effect
+    help_effect 1970 
+    ! display help on Fons Adriaensen's parametric EQ (LADSPA)
+    help_effect etd 
+    ! prints a short message to consult Ecasound manpage, 
+    ! where the etd chain operator is documented.
+    hfx lv2-vocProc 
+    ! display detailed help on the LV2 VocProc effect
 find_effect:
   type: help
   what: Display one-line help for effects matching the search string(s).
@@ -189,37 +193,51 @@ link_track:
   type: track
   what: Create a read-only track, that uses audio files from another track.
   short: link
-  parameters: <s_dest_name> <s_source_name> [ <s_project> ]
+  parameters: [<s_project>:]<s_source_name> <s_dest_name>
   example: |
-    link part_1 Mixdown my_long_song_1 # Create a track called "part_1" linked
-                                       # from the project my_long_song_1
-    link_track piano_conp piano # Create a copy of the piano track (to apply
-                                # extra compression to.)
+    link song_part_1:Mixdown part_1  
+    ! create a track part_1 using files from track Mixdown 
+    ! in project song_part_1
+    link_track piano_compressed piano
+    ! create piano_compressed using files from piano.
+    ! This is one way to provide wet and dry 
+    ! processed and unprocessed versions of same source.
+    ! (Another way would be to use inserts.)
 import_audio:
   type: track
-  what: Import a sound file (wav, ogg, mp3, etc.) to the current track, resampling it, if necessary.
+  what: |
+    Import a sound file (wav, ogg, mp3, etc.) to the
+    current track, resampling it if necessary. The 
+    imported file is set as current version.
   short: import
   parameters: <s_full_path_to_file> [ <i_frequency> ]
   example: |
-    import /home/samples/bells.flac # import the file bells.flac into the
-    import /home/music/song.mp3 44100 # Import song.mp3, where Nama can't find
-           # the original samplerate (of 44.1kHz)
-                                    # current track, making it the current
-                                    # version of this track.
+    import /home/samples/bells.flac 
+    ! import the file bells.flac to the current track
+    import /home/music/song.mp3 44100 
+    ! import song.mp3, specifying the frequency
 set_track:
   type: track
   what: Directly set current track parameters (use with care!).
   parameters: <s_track_field> <value>
 record:
   type: track
-  what: Set current track to record from its input (also known as REC-enabling).
+  what: |
+    Set the current track source to its live input.
+    The signal will be written to disk during
+    the engine run. The rec_defeat command prevents 
+    writing the file, rec_enable restores it.
   short: rec
   parameters: none
   example: |
-    rec # Set current track to record.
-    start # Whatever the other tracks are doing, this track will be recorded,
-          # Meaning, that a new version will be recorded to disk.
-    stop # Stop the recording/playback afterwards.
+    rec
+    ! Set the current track to record.
+    start 
+    ! A new version (take) will be written to disk, 
+    ! creating a file such as sax_1.wav. Other tracks 
+    ! may be recording or playing back as well.
+    stop 
+    ! Stop the recording/playback, automatically enter playback mode
 mon:
   type: track
   what: Set current track to playback the currently selected version. by default the last version is always played.
@@ -247,20 +265,27 @@ source:
   short: src r
   parameters: <i_soundcard_channel> | 'null' | <s_jack_client_name> | <s_jack_port_name> | 'jack'
   example: |
-    source 3 # Take input from soundcard channel number 3 (or 3 and 4, if stereo).
-    source null # Track has no real input. this is useful for a metronome or
-                # Ecasound's internal sine generator or some other sound
-                # generator effect.
-    src LinuxSampler # Record input from the JACK client named LinuxSampler.
-    r synth:output_3 # record from the JACK client synth, only use the sound
-                     # port output_3 (see he jackd and jack_lsp manpages
-                     # for more information).
-    src jack # Create connect to all ports listed in current_trackname.ports,
-             # if it exists in the Nama project root directory. Ports are
-             # listed pairwise in the .ports files for stereo tracks. This is
-             # useful to record the mix of several mixrophones or minimalistic
-             # outputs from other applications, such as hydrogen (one port per
-             # sound of a drumkit).
+    source 3 
+    ! Take input from soundcard channel number 3 (or 3 and 4, if stereo).
+    !
+    source null 
+    ! Track's input is silence. This is useful for when an effect such 
+    ! as a metronome or signal generator provides a source.
+    ! 
+    source LinuxSampler 
+    ! Record input from the JACK client named LinuxSampler.
+    ! 
+    source synth:output_3 
+    ! record from the JACK client synth, using the 
+    ! port output_3 (see he jackd and jack_lsp manpages
+    ! for more information).
+    !
+    source jack 
+    ! Create connections to all ports listed in current_trackname.ports,
+    ! if it exists in the Nama project root directory. Ports are
+    ! listed pairwise in the .ports files for stereo tracks.
+    ! This is convenient for use with the Hydrogen drumkit, 
+    ! whose outputs use one JACK port per voice.
 send:
   type: track
   what: Set an aux send for the current track. Remove sends with remove_send .
@@ -777,18 +802,19 @@ add_insert:
   type: effect 
   what: Add an external send/return insert to current track.
   short: ain
-  parameters: ( pre | post ) <s_send_id> [ <s_return_id> ] -or- local (for wet/dry control)
+  parameters: |
+      External: ( pre | post ) <s_send_id> [ <s_return_id> ]
+      Local wet/dry: local
   example: |
-    add_insert pre jconvolver # Add a prefader insert (before vol/pan controls)
-                              # the current track is sent to jconvolver and
-                              # the return is picked up from jconvolver again.
-    ain post jconvolver csound # Send the current track postfader (after vol/pan
-                               # controls to jconvolver and get the return from
-                               # csound. That would mean, that jconvolver and
-                               # csound are somehow connected.
-    guitar # Make guitar the current track.
+    add_insert pre jconvolver 
+    ! Add a prefader insert. The current track signal is sent 
+    ! to jconvolver and returned to the vol/pan controls.
+    add_insert post jconvolver csound 
+    ! Send the current track postfader signal (after vol/pan
+    ! controls) to jconvolver, getting the return from csound.
+    guitar # Select the guitar track
     ain local # Create a local insert
-    guitar-1-wet # Make the wet - or insert - track the current track.
+    guitar-1-wet # Select the wet arm 
     afx G2reverb 50 5.0 0.6 0.5 0 -16 -20 # add a reverb
     afx etc 6 100 45 2.5 # add a chorus effect on the reverbed signal
     guitar # Change back to the main guitar track
@@ -800,8 +826,7 @@ set_insert_wetness:
   parameters: [ pre | post ] <n_wetness>
   example: |
     wet pre 50 # Set the prefader insert to be balanced 50/50 wet/dry.
-    set_insert_wetness 100 # If there's only one insert on the current track,
-                           # set it to full wetness.
+    wet 100 # Simpler if there's only one insert
 remove_insert:
   type: effect
   what: Remove an insert from the current track.
