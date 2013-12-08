@@ -998,11 +998,6 @@ add_effect_chain:
     aec my_piano # Add the effect chain, called my_piano, to the current track.
                  # This will add all effects stored in my_piano with their
                  # respective settings.
-overwrite_effect_chain:
-  type: effect
-  what: Add an effect chain, overwriting or replacing the current effects. Current effects are pushed onto the bypass list, so they aren't lost completely.
-  short: oec
-  parameters: <s_effect_chain_name>
 delete_effect_chain:
   type: effect
   what: Delete an effect chain definition. After that the effect chain will no longer be available to add. Projects, which use the effect chain won't be affected.

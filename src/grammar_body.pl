@@ -173,7 +173,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 					# save_state, get_state
 					 # remove_mark new_mark name_mark to_mark
 					 # new_effect_chain add_effect_chain list_effect_chains
-					 # delete_effect_chain overwrite_effect_chain
+					 # delete_effect_chain 
 
 save_target: /[-:\w.]+/
 decimal_seconds: /\d+(\.\d+)?/ 
@@ -1172,9 +1172,6 @@ this_track_op_id: op_id(s) {
 	@belonging	
 }
 
-overwrite_effect_chain: _overwrite_effect_chain ident {
-	::overwrite_effect_chain($::this_track, $item{ident}); 1;
-}
 bunch_name: ident { 
 	::is_bunch($item{ident}) or ::bunch_tracks($item{ident})
 		or ::throw("$item{ident}: no such bunch name."), return; 
