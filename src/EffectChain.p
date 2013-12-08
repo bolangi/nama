@@ -42,6 +42,7 @@ use ::Object qw(
 			track_cache	
 	) ;
 
+%is_attribute = map{ $_ => 1 } @attributes;
 initialize();
 
 # for compatibility with standard effects
@@ -70,11 +71,8 @@ sub params {
 sub initialize {
 	$n = 0;
 	%by_index = ();	
-	@::global_effect_chain_data = ();  # for save/restore
-    @::project_effect_chain_data = (); 
-	%is_attribute = map{ $_ => 1 } @attributes;
 }
-sub new_sequence_number { ++$n }
+sub new_sequence_number { $n++; $by_index{$n} ?  new_sequence_number() : $n }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
@@ -304,16 +302,6 @@ sub add_region {
 sub add_all {
 	my($self, $track, $successor) = @_;
 }
-sub clobber_ops {
-	my($self, $track) = @_;
-}
-sub clobber_inserts {
-	my($self, $track) = @_;
-}
-sub clobber_all {
-	my($self, $track) = @_;
-}
-
 sub add {
 	my ($self, $track, $successor) = @_;
 	$self->add_ops($track, $successor);

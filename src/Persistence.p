@@ -517,12 +517,6 @@ sub save_global_effect_chains {
 	} $config->serialize_formats;
 
 }
-
-# unneeded after conversion - DEPRECATED
-sub save_project_effect_chains {
-	my $project = shift; # allow to cross multiple projects
-	@project_effect_chain_data = map{ $_->as_hash } ::EffectChain::find(project => $project);
-}
 sub restore_global_effect_chains {
 
 	logsub("&restore_global_effect_chains");
