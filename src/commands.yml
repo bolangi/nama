@@ -537,30 +537,38 @@ add_region:
     ! from mark "sax_start" to 66.7 seconds. 
 remove_region:
   type: track
-  what: Remove the current region (including associated the auxiliary track).
+  what: |
+    Remove the region definition from the current track.
+    Remove the current track if it is an auxiliary track.
   short: rrg
   parameters: none
 shift_track:
   type: track
-  what: Move the beginning of the track or region, also known as offsetting or shifting. Can be reversed by unshift_track .
+  what: |
+    Choose an initial delay before playing a track or region.
+    Can be reversed by unshift_track.
   short: shift playat pat
   parameters: <s_start_mark_name> | <i_start_mark_index | <f_start_seconds>
   example: |
-    piano # Select track piano as current track.
+    piano     # Select "piano" as current track.
     shift 6.7 # Move the start of track to 6.7 seconds.
 unshift_track:
   type: track
-  what: Move the start of a track or region back to 0.0 seconds (the beginning of the setup.
+  what: Restore the playback start time of a track or region to 0. 
   short: unshift
   parameters: none
 modifiers:
   type: track
-  what: Add/show modifiers for the current track (man ecasound for details). This is only useful in rare cases.
+  what: |
+    Add/show modifiers for the current track (man ecasound for details). 
+    This provides direct control over Ecasound track modifiers   
+    It is not needed for normal work.
   short: mods mod
   parameters: [ Audio file sequencing parameters ]
   example: |
-    modifiers select 5 15.2 # apply Ecasound's select modifier to the
-                            # current track.
+    modifiers select 5 15.2 
+    ! Apply Ecasound's select modifier to the current track.
+    ! The usual way to accomplish this is with a region definition. 
 nomodifiers:
   type: track
   what: Remove modifiers from the current track.
@@ -568,22 +576,30 @@ nomodifiers:
   parameters: none
 normalize:
   type: track
-  what: Apply ecanormalize to the current track version. This will raise the gain/volume of the current track as far as possible and store it that way on disk. Note: this will permanently change the file.
-  short: norm ecanormalize
+  what: |
+    Apply ecanormalize to the current track version. This will
+    raise the gain/volume of the current track as far as
+    possible without clipping and store it that way on disk. 
+    Note: this will permanently change the file.
+  short: ecanormalize
   parameters: none
 fixdc:
   type: track
-  what: Fix the DC-offset of the current track using ecafixdc. Note: This will permanently change the file.
+  what: |
+    Fix the DC-offset of the current track using ecafixdc. 
+    Note: This will permanently change the file.
   short: ecafixdc
   parameters: none
 autofix_tracks:
   type: track 
-  what: apply the commands fixdc and normalize to all current version of all tracks, that are set to playback, i.e. MON .
+  what: Apply ecafixdc and ecanormalize to all current versions of all tracks, set to playback (MON).
   short: autofix
   parameters: none
 remove_track:
   type: track
-  what: Remove the current track. This will only remove the effects and display. all recorded audio will emain on your disk. The default is to ask, before Nama removes a track. this can be changed in namarc .
+  what: |
+    Remove the current track with its effects, inserts, etc.
+    Audio files are unchanged. 
   parameters: none
 bus_rec:
   type: bus
