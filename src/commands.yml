@@ -129,24 +129,33 @@ preview:
     arm     # Restore to normal recording/playback mode.
 doodle:
   type: transport
-  what: Enter the doodle mode. In doodle mode all live inputs from tracks - set to record - are enabled. Nama excludes multiple tracks having the same input. This mode is designed to allow rehearsing and adjusting effects without listening to playback -as in preview.
+  what: |
+    Enter doodle mode. Passthru of live inputs without
+    recording. No playback. Intended for rehearsing and
+    adjusting effects.
   parameters: none
   example: |
     doodle # Switch into doodle mode.
-    start # start the engine/transport running.
-    stop # Stop the engine.
-    arm # Switch back to normal mode, where you get playback and record.
+    start  # start the engine/transport running.
+    (fool around)
+    stop   # Stop the engine.
+    arm    # Return to normal mode, allowing play and record to disk
 mixdown:
   type: mix
-  what: Enter mixdown mode for subsequent engine runs. You will record new mixes, until you leave mixdown mode by mixoff.
+  what: |
+    Enter mixdown mode for subsequent engine runs. You will
+    record a new mix each time you use the start command 
+    until you leave the mixdown mode using "mixoff" 
   short: mxd
   parameters: none
   example: |
-    mxd # Enter mixdown mode
-    t # Start the engine running. A mix will be recorded into the Mixdown
-      # track. Mixdown will stop automatically, when the longest track is at
-      # its end.
-    mxo # Return to the normal mode.
+    mixdown # Enter mixdown mode
+    start   # Start the transport. The mix will be recorded by the
+    !       # Mixdown track. The engine will run until the
+    !       # longest track ends. (After mixdown Nama places 
+    !       # a symlink to the WAV file and possibly ogg/mp3 
+    !       # encoded versions in the project directory.)
+    mixoff  # Return to the normal mode.
 mixplay:
   type: mix
   what: Enter mixdown file playback mode, setting user tracks to OFF and only playing the Mixdown track. You can leave the mixplay mode by using mixoff.
