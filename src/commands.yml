@@ -379,7 +379,9 @@ vol:
     vol       # Display the volume setting of the current track.
 mute:
   type: track
-  what: Mute the current track. Turn the current track's volume absolutely down. You can unmute the track with the command unmute.
+  what: |
+    Mute the current track. Turn the current track's volume 
+    absolutely down. Use "unmute" to restore the former volume level.
   short: c cut
   parameters: none
 unmute:
@@ -393,34 +395,39 @@ unity:
   parameters: none
   example: |
     vol 55 # Set volume to 55
-    unity # Set volume to the unity value.
-    vol # Display the current volume (should be 100 or 0, depending on your
-        # settings in namarc.
+    unity  # Set volume to the unity value.
+    vol    # Display the current volume (should be 100 or 0, 
+    !      # depending on your settings in namarc.)
 solo:
   type: track
-  what: Mute all tracks but the current track or the tracks or bunches specified. You can reverse this with nosolo.
+  what: |
+    Mute all tracks but the current track or the tracks or 
+    bunches specified. You can reverse this with nosolo.
   short: sl
   parameters: [ <strack_name_1> | <s_bunch_name_1> ] [ <s_track_name_2 | <s_bunch_name_2> ] ...
   example: |
-    solo # Will mute all tracks but the current track.
-    nosolo # Will unmute all tracks again.
-    solo piano bass Drums # Will mute everything but piano, bass and Drums.
+    solo   # Mute all tracks but the current track.
+    nosolo # Unmute all tracks, restoring prior state.
+    solo piano bass Drums # Mute everything but piano, bass and Drums.
 nosolo:
   type: track
-  what: Unjute all tracks, which have been turned down by solo. Tracks, that had beenmuted before the solo command stay muted.
+  what: |
+    Unmute all tracks which have been muted by a solo command.
+    Tracks that had been muted before the solo command stay muted.
   short: nsl
   parameters: none
 all:
   type: track
-  what: Unmute all tracks, this includes tracks muted by solo and other single tracks muted previously by mute.
+  what: |
+    Unmute all tracks that are currently muted
   parameters: none
   example: |
     piano # Select track piano
-    mute # Mute the piano track.
-    sax # Selct the track sax.
-    solo # mute all other tracks, except sax. Remember, that piano was muted
-         # already
-    all # unmute all tracks, including the piano track.
+    mute  # Mute the piano track.
+    sax   # Select the track sax.
+    solo  # Mute other tracks
+    nosolo # Unmute other tracks (piano is still muted)
+    all   # all tracks play
 pan:
   type: track
   what: Change or display the current panning position of the current track. Panning is moving the audio in the stereo panorama between right and left. Position is given in percent. 0 is hard left and 100 hard right, 50% is dead centre.
