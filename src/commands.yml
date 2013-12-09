@@ -380,8 +380,8 @@ vol:
 mute:
   type: track
   what: |
-    Mute the current track. Turn the current track's volume 
-    absolutely down. Use "unmute" to restore the former volume level.
+    Mute the current track by reducing the volume parameter.
+    Use "unmute" to restore the former volume level.
   short: c cut
   parameters: none
 unmute:
@@ -430,41 +430,55 @@ all:
     all   # all tracks play
 pan:
   type: track
-  what: Change or display the current panning position of the current track. Panning is moving the audio in the stereo panorama between right and left. Position is given in percent. 0 is hard left and 100 hard right, 50% is dead centre.
+  what: |
+    Change or display the current panning position of the 
+    current track. Panning is moving the audio in the stereo 
+    panorama between right and left. Position is given in percent. 
+    0 is hard left and 100 hard right, 50% is dead centre.
   short: p
   parameters: [ <f_pan_position_in_percent> ]
   example: |
     pan 75 # Pan the track to a position between centre and hard right
-    p 50 # Move the current track to the centre.
-    pan # Show the current position of teh track in the stereo panorama.
+    p 50   # Move the current track to the centre.
+    pan    # Show the current position of teh track in the stereo panorama.
 pan_right:
   type: track
-  what: Pan the current track hard right. this is a synonym for pan 100 . Can be reverse with pan_back .
+  what: |
+    Pan the current track hard right. this is a synonym for pan 100. 
+    Can be reversed with pan_back.
   short: pr
   parameters: none
 pan_left:
   type: track
-  what: Pan the current track hard left. This is a synonym for pan 0 . Can be reversed with pan_back .
+  what: |
+    Pan the current track hard left. This is a synonym for pan 0. 
+    Can be reversed with pan_back.
   short: pl
   parameters: none
 pan_center:
   type: track
-  what: Pan the current track to the centre. This is a synonym for pan 50 . Can be reversed with pan_back .
+  what: |
+    Pan the current track to the centre. This is a synonym for pan 50.
+    Can be reversed with pan_back.
   short: pc
   parameters: none
 pan_back:
   type: track
-  what: Restore the current track's pan position prior to pan_left, pan_right or pan_center .
+  what: |
+    Restore the current track's pan position prior to pan_left, 
+    pan_right or pan_center commands.
   short: pb
   parameters: none
 show_tracks:
   type: track 
-  what: Show a list of tracks, including their index number, volume, pan position, recording status and input.
+  what: |
+    Show a list of tracks, including their index number, volume, 
+    pan position, recording status and source.
   short: lt show
   parameters: none
 show_tracks_all:
   type: track
-  what: Show a list of all tracks, visible and hidden, with their ndex number, recording status, input, volume and pan position. This is mainly useful for diagnostics and debugging.
+  what: Like show_tracks, but includes hidden tracks as well. Useful for debugging.
   short: sha showa
   parameters: none
 show_bus_tracks:
@@ -474,7 +488,10 @@ show_bus_tracks:
   parameters: none
 show_track:
   type: track
-  what: Display information about the current track, including index, recording status, effects, inserts, versions, stereo width (a.k.a. channel count) and controllers.
+  what: |
+    Display full information about the current track: index, recording 
+    status, effects and controllers, inserts, the selected
+    WAV version, and signal width (channel count).
   short: sh
   parameters: none
 show_mode:
