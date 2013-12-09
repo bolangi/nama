@@ -115,16 +115,18 @@ restart_ecasound:
   parameters: none
 preview:
   type: transport
-  what: Enter the preview mode. Configure Nama to allow playback and passthru of inputs (for mic test, rehearsals, etc.). Nothing is recorded to disk!
+  what: |
+    Enter the preview mode. Configure Nama for playback and 
+    passthru of live inputs without recording (for mic test, 
+    rehearsal, etc.)
   parameters: none
   example: |
-    rec # Set the current track to record from its input.
+    rec     # Set the current track to record from its source.
     preview # Enter the preview mode.
-    start # You can hear the playback from previously recorded tracks and
-          # play live. No file will be recorded to disk. You can adjust effects
-          # and forward or rewind to suite your needs.
-    stop # Stop the engine/transport.
-    arm # Switch to normal recording/playback mode.
+    start   # Playback begins. You can play live, adjust effects, 
+    !       # forward, rewind, etc.
+    stop    # Stop the engine/transport.
+    arm     # Restore to normal recording/playback mode.
 doodle:
   type: transport
   what: Enter the doodle mode. In doodle mode all live inputs from tracks - set to record - are enabled. Nama excludes multiple tracks having the same input. This mode is designed to allow rehearsing and adjusting effects without listening to playback -as in preview.
