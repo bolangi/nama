@@ -511,29 +511,30 @@ show_latency_all:
   parameters: none
 set_region:
   type: track
-  what: Specify a playback region for the current track using marks. Use the command add_region to create more than one region from a track. Can be reversed with remove_region .
+  what: |
+    Specify a playback region for the current track using marks. 
+    Can be reversed with remove_region.
   short: srg
   parameters: <s_start_mark_name> <s_end_mark_name>
   example: |
-    sax # Switch to track sax, so it is the current track now.
-    setpos 2.5 # Move the playhead to 2.5 seconds.
-    mark sax_start # Create a mark there, caled sax_start
-    sp 120.5 # Move playhead to 120.5 seconds.
-    mark sax_end # Create a mark there, called sax_end
-    set_region sax_start sax_end # Hide the track sax under a region called
-                                 # sax, which contains the audio of original
-                                 # track from 2.5 to 120.5 seconds.
+    sax            # Select "sax" as the current track.
+    setpos 2.5     # Move the playhead to 2.5 seconds.
+    mark sax_start # Create a mark
+    sp 120.5       # Move playhead to 120.5 seconds.
+    mark sax_end   # Create another mark
+    set_region sax_start sax_end 
+    !  Play only the audio from 2.5 to 120.5 seconds.
 add_region:
   type: track
-  what: Create a region for the current track using an auxiliary track. This is a named region, which leaves the original track visible and untouched.
-  short: arg
+  what: |
+    Make a copy of the current track using the supplied a region 
+    definition. The original track is untouched.
   parameters: <s_start_mark_name> | <f_start_time> <s_end_mark_name> | <f_end_time> [ <s_region_name> ]
   example: |
-    sax # Select track sax as current track.
-    add_region sax_start 66.7 trimmed_sax # Create the region trimmed sax.
-               # This region contains the audio of track sax between the mark
-               # sax_start and 66.7 seconds. You can use the region just like a
-               # track, including commands remove-track and applying effects.
+    sax # Select "sax" as the current track.
+    add_region sax_start 66.7 trimmed_sax 
+    ! Create "trimmed_sax", a copy of "sax" with a region defined
+    ! from mark "sax_start" to 66.7 seconds. 
 remove_region:
   type: track
   what: Remove the current region (including associated the auxiliary track).
