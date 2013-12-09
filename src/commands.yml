@@ -27,8 +27,11 @@ find_effect:
   short: ffx fe
   parameters: <s_keyword1> [ <s_keyword2>... ]
   example: |
-    find_effect compressor # List all effects containing compressor in their name or in parameters
-    fe feedback # List all effects with feedback in their name or parameters (for example a delay with a tweakable feedback)
+    find_effect compressor 
+    ! List all effects containing "compressor" in their name or parameters
+    fe feedback 
+    ! List all effects matching "feedback" 
+    ! (for example a delay with a feedback parameter)
 exit:
   type: general
   what: Exit Nama, saving settings (the current project).
@@ -47,19 +50,15 @@ stop:
   what: Stop transport. Stop the engine, when recording or playing back.
   short: s
   parameters: none
-  example: |
-    rec # Allow the curent track to be recorded.
-    start # Actually start the engne/transport rolling, so you can play.
-    stop # Stop the engine, when you are finished recording your new track.
 start:
   type: transport
-  what: Start transport. Start the engine, to start recording or playing back.
+  what: Start the transport rolling
   short: t
   parameters: none
   example: |
-    doodle # Enter doodle mode.
-    start # Start the engine/transport rolling, so you can play.
-    stop # Stop the engine running.
+    rec   # prepare the curent track to be recorded.
+    start # Start the engine/transport rolling (play now!)
+    stop  # Stop the engine, cleanup, prepare to review
 getpos:
   type: transport
   what: Get the current playhead position (in seconds).
@@ -67,13 +66,13 @@ getpos:
   parameters: none
   example: |
     start # Start the engine.
-    gp # Get the current position of the playhead. "Where am I?"
+    gp    # Get the current position of the playhead. Where am I?
 setpos:
   type: transport
   what: Set current playhead position (in seconds).
   short: sp
   parameters: <f_position_seconds>
-  example: setpos 65.0 # set current position to 65.0 seconds.
+  example: setpos 65.5 # set current position to 65.5 seconds.
 forward:
   type: transport
   what: Move playback position forwards (in seconds). Oldschool forwarding.
@@ -88,7 +87,7 @@ rewind:
   example: rewind 6.5 # Move backwards 6.5 seconds from the current position.
 to_start:
   type: transport
-  what: Set the playback head to the start. A synonym for setpos 0.0 .
+  what: Set the playback head to the start. A synonym for setpos 0.
   short: beg
   parameters: none
 to_end:
@@ -98,17 +97,21 @@ to_end:
   parameters: none
 ecasound_start:
   type: transport
-  what: Ecasound-only start. Mainly useful for diagnostics and debugging. Use the command start in normal circumstances.
-  short: T
+  what: |
+    Ecasound-only start. Nama will not monitor the transport.
+    For diagnostic use.
   parameters: none
 ecasound_stop:
   type: transport
-  what: Ecasound-only stop. Mainly useful for diagnostics and debugging. Use command stop in normal circumstances.
-  short: S
+  what: |
+    Ecasound-only stop. Nama will not monitor the transport.
+    For diagnostic use.
   parameters: none
 restart_ecasound:
   type: transport
-  what: Restart the Ecasound application again, when it has crashed or is behaving oddly.
+  what: |
+    Restart the Ecasound process. May help if Ecasound has crashed 
+    or is behaving oddly.
   parameters: none
 preview:
   type: transport
