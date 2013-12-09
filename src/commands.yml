@@ -145,7 +145,7 @@ mixdown:
   what: |
     Enter mixdown mode for subsequent engine runs. You will
     record a new mix each time you use the start command 
-    until you leave the mixdown mode using "mixoff" 
+    until you leave the mixdown mode using "mixoff".
   short: mxd
   parameters: none
   example: |
@@ -158,36 +158,45 @@ mixdown:
     mixoff  # Return to the normal mode.
 mixplay:
   type: mix
-  what: Enter mixdown file playback mode, setting user tracks to OFF and only playing the Mixdown track. You can leave the mixplay mode by using mixoff.
+  what: |
+    Enter Mixdown play mode, setting user tracks to OFF 
+    and only playing the Mixdown track. Use "mixoff" to
+    leave this mode.
   short: mxp
   parameters: none
   example: |
-    mixplay # Enter the mixplay mode.
-    start # Start playing back the Mixdown track only.
-    stop # Stop playback.
-    mxo # Switch back to normal mode.
+    mixplay # Enter the Mixdown play mode.
+    start   # Play the Mixdown track.
+    stop    # Stop playback.
+    mixoff  # Return to normal mode.
 mixoff:
   type: mix
-  what: Leave the mixdown or mixplay mode. Set Mixdown track to OFF, user tracks to MON.
+  what: |
+    Leave the mixdown or mixplay mode. Sets Mixdown track to OFF, 
+    user tracks to MON.
   short: mxo
   parameters: none
 automix:
   type: mix
-  what: Normalize track volume levels and fix DC-offsets. Then mix dwn to the Mixdown track.
+  what: Normalize track volume levels and fix DC-offsets, then mixdown.
   parameters: none
 master_on:
   type: mix
-  what: Turn on the mastering mode, adding tracks Eq, Low, Mid, High and Boost, if necessary. The mastering setup allows for one EQ and a three-band multiband compression and a final boosting stage. Leave the mastering mode by master_off.
+  what: |
+    Turn on the mastering mode, adding tracks Eq, Low, Mid, High
+    and Boost, if necessary. The mastering setup allows for one
+    EQ and a three-band multiband compression and a final
+    boosting stage. Using "master_off" to leave the mastering mode. 
   short: mr
   parameters: none
   example: |
-    mr # Turn on master mode.
+    mr    # Turn on master mode.
     start # Start the playback.
-          # Now you can adjust the boost or global EQ.
-    stop # Stop the engine.
+    !     # Now you can adjust the Boost or global EQ.
+    stop  # Stop the engine.
 master_off:
   type: mix
-  what: Leave mastering mode. Remove the EQ, multi-band compression and Booster.
+  what: Leave mastering mode. The mastering network is disabled.
   short: mro
   parameters: none
 add_track:
@@ -196,8 +205,9 @@ add_track:
   short: add new
   parameters: <s_name>
   example: |
-    add_track clarinet # create a mono track called clarinet with input
-                       # from soundcard channel 1.
+    add_track clarinet 
+    ! create a mono track called clarinet with input 
+    ! from soundcard channel 1.
 add_tracks:
   type: track
   what: Create one or more new tracks in one go.
@@ -254,33 +264,38 @@ record:
     ! Stop the recording/playback, automatically enter playback mode
 mon:
   type: track
-  what: Set current track to playback the currently selected version. by default the last version is always played.
-  short: on
+  what: Set the current track to playback the currently selected version. 
   parameters: none
   example: mon # Next time you start, the last version will be played back.
 off:
   type: track
-  what: Set current track to OFF (exclude from setup). You can include the track with mon or rec.
-  short: z
+  what: |
+    Set current track to OFF (exclude it from setup). 
+    You can re-include it using "mon" or "rec" commands.
   parameters: none
 rec_defeat:
   type: track
-  what: Prevent writing an audio file for the current track. So the track will just pass thru the incoming audio. Useful for tracks connected to internal signal generators.
+  what: |
+    Prevent writing an audio file for the current track. The track will 
+    just pass thru the incoming audio. 
   short: rd
   parameters: none
 rec_enable:
   type: track
-  what: Allow writing an audio file for the current track. This is the opposite to rec_defeat. Useful to record a metronome or other special track to disk.
+  what: | 
+    Allow the current track to write an audio file to disk. 
+    This is the opposite of rec_defeat. 
   short: re
   parameters: none
 source:
   type: track
   what: Set the current track's input (source). This can be a soundcard channel or a JACK client name.
   short: src r
-  parameters: <i_soundcard_channel> | 'null' | <s_jack_client_name> | <s_jack_port_name> | 'jack'
+  parameters: |
+    <i_soundcard_channel> | 'null' | <s_jack_client_name> | <s_jack_port_name> | 'jack'
   example: |
     source 3 
-    ! Take input from soundcard channel number 3 (or 3 and 4, if stereo).
+    ! Take input from soundcard channel 3 (3 & 4 if stereo)
     !
     source null 
     ! Track's input is silence. This is useful for when an effect such 
@@ -306,44 +321,50 @@ send:
   short: aux
   parameters: <i_soundcard_channel> | <s_jack_client_name> | <s_loop_id>
   example: |
-    send 3 # Make an aux send to soundcard channel 3.
-    send jconvolver # Make an aux send to the jconvolver JACK client.
+    send 3 # Send the track output to soundcard channel 3.
+    send jconvolver # Send the track output to the jconvolver JACK client.
 remove_send:
   type: track
-  what: Remove an aux send from the current track.
+  what: Remove aux send from the current track.
   short: nosend noaux
   parameters: none
 stereo:
   type: track
-  what: Set the current track to stereo (two channels). Will record two channels or easily import stereo audio files.
+  what: Configure the current track to record two channels of audio
   parameters: none
 mono:
   type: track
-  what: Set the current track to mono (one channel). Will record one channel or easily import mono audio files (this is the default, when creating a track).
+  what: Configure the current track to record one channel of audio
   parameters: none
 set_version:
   type: track
-  what: Set the active version of the current track for playback/monitoring (overrides group version setting).
+  what: |
+    Select a WAV file, by version number, for current track playback
+    (Overrides a bus-level version setting)
   short: version ver
   parameters: <i_version_number>
   example: |
-    piano # Select the piano track.
-    version 2 # Switch the track to play back the second recorded of the
-              # current track.
-    sh # Display all information about the current track, also shows currently
-       # selected version.
+    piano     # Select the piano track.
+    version 2 # Select the second recorded version
+    sh        # Display information about the current track
 destroy_current_wav:
   type: track
-  what: DESTRUCTIVE: Remove the current track's currently selected recording. This removes the underlying  audio file on your disk. USE WITH CARE!
+  what: |
+    Remove the currently selected recording version from the
+    current track after confirming user intent. This DESTRUCTIVE
+    command removes the underlying audio file from your disk.
+    Use with caution.
   parameters: none
 list_versions:
   type: track
-  what: List versions of the current track. This will print the numbers of all versions of this track to the screen.
+  what: |
+    List WAV versions of the current track. This will print the 
+    numbers. 
   short: lver
   parameters: none
   example: |
     list_versions # May print something like: 1 2 5 7 9
-                  # The other versions might have been deleted earlier by you.
+    !             # The other versions might have been deleted earlier by you.
 vol:
   type: track
   what: Change or show the current track's volume.
@@ -351,10 +372,11 @@ vol:
   parameters: [ [ + | - | / | * ] <f_volume> ]
   example: |
     vol * 1.5 # Multiply the current volume by 1.5
-    vol 75 # Set the current volume to 75 (depending on your setting in namarc
-           # this means 75% of full volume (-ea) or 75 dB (-eadb).
+    vol 75    # Set the current volume to 75
+    !         # Depending on your namarc configuration, this means
+    !         # either 75% of full volume (-ea) or 75 dB (-eadb).
     vol - 5.7 # Decrease current volume by 5.7 (percent or dB)
-    vol # Display the current volume of the current track.
+    vol       # Display the volume setting of the current track.
 mute:
   type: track
   what: Mute the current track. Turn the current track's volume absolutely down. You can unmute the track with the command unmute.
