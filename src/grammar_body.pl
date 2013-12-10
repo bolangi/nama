@@ -274,14 +274,14 @@ save_state: _save_state save_target message(?) {
 		{
 			print("saving as a commit\n");
 			::git_commit($message);
-			my @args = ('tag', $name);
-			#push @args, '-m', $message) if $message;
-			::git(@args);
-			::pager3(qq[tagged HEAD commit as "$name"]);
 		}
 		else 
 		{
-			::throw("nothing changed, so not committing or tagging")
+			my @args = ('tag', $name);
+			push @args, '-m', $message if $message;
+			::git(@args);
+			::pager3(qq/tagged HEAD commit as "$name"/,
+				qq/type "get $name" to return to this commit./)
 		}
 	}
 	1
