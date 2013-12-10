@@ -496,7 +496,9 @@ show_track:
   parameters: none
 show_mode:
   type: setup
-  what: Display the current record/playback mode. this will indicate the mode - i.e. doodle, preview, etc. - and possible record/playback settings.
+  what: |
+    Display the current record/playback mode. this will indicate the 
+    mode (doodle, preview, etc.) and possible record/playback settings.
   short: shm
   parameters: none
 show_track_latency:
@@ -673,9 +675,8 @@ branch:
   parameters: <s_branch_name>
 list_branches:
   type: project
-  what: list branches when called with no arguments
+  what: list branches
   short: lb lbr
-  parameters: <s_branch_name>
 new_branch:
   type: project
   what: create a new branch
