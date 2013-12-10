@@ -267,22 +267,15 @@ save_state: _save_state save_target message(?) {
 	}
 	else 
 	{
-		# save as a tagged commit
+		# save state if necessary
+		::git_snapshot();
 
-		::save_state();
-		if (::state_changed() )
-		{
-			print("saving as a commit\n");
-			::git_commit($message);
-		}
-		else 
-		{
-			my @args = ('tag', $name);
-			push @args, '-m', $message if $message;
-			::git(@args);
-			::pager3(qq/tagged HEAD commit as "$name"/,
-				qq/type "get $name" to return to this commit./)
-		}
+		# tag the current commit
+		my @args = ('tag', $name);
+		push @args, '-m', $message if $message;
+		::git(@args);
+		::pager3(qq/tagged HEAD commit as "$name"/,
+			qq/type "get $name" to return to this commit./)
 	}
 	1
 }
