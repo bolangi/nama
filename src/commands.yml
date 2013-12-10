@@ -603,18 +603,23 @@ remove_track:
   parameters: none
 bus_rec:
   type: bus
-  what: Set a bus mix_track to record (the default behaviour).
-  short: brec grec
+  what: Set the current bus mix_track to record (the default behaviour).
+  short: brec
   parameters: none
 bus_mon:
   type: bus
-  what: Set a bus mix_track to playback. This only does anything, if a complete bus has been cached/frozend/bounced before.
-  short: bmon gmon
+  what: |
+    Set the current bus mix_track to playback. An audio file
+    will likely exist only the mix_track has been previously
+    cached (frozen/bounced.)
+  short: bmon
   parameters: none
 bus_off:
   type: bus
-  what: Set a bus mixtrack to OFF. Can be reversed with bus_rec and bus_mon.
-  short: boff goff
+  what: |
+    Set current bus mixtrack to OFF. Can be reversed
+    with bus_rec or bus_mon.
+  short: boff
   parameters: none
 bus_version:
   type: group
@@ -623,34 +628,35 @@ bus_version:
   parameters: none
 add_bunch:
   type: group
-  what: Define a bunch of tracks. A bunch is useful for shorter for statements.
+  what: 
   short: abn
   parameters: <s_bunch_name> [ <s_track_name_1> | <i_track_index_1> ] ...
   example: |
-    add_bunch woodwind # Create an empty new bunch called woodwind.
-    nb strings violin cello basso # Create the bunch strings with tracks
-                                  # violin, cello and basso.
-    for strings;mute # Mute all tracks in the strings bunch.
-    for strings;vol * 0.8 # Lower the volume of all tracks in strings by a
-                          # a factor of 0.8 (4/5).
+    add_bunch strings violin cello bass
+    ! Create a bunch "strings" with tracks violin, cello and bass.
+    for strings; mute # Mute all tracks in the strings bunch.
+    for strings; vol * 0.8 
+    ! Lower the volume of all tracks in bunch "strings" by a
+    ! a factor of 0.8.
 list_bunches:
   type: group
-  what: Dispaly a list of all bunches and their tracks.
+  what: Display a list of all bunches and their tracks.
   short: lbn
   parameters: none
 remove_bunch:
   type: group
-  what: Remove the specified bunches. This does not remove the tracks, only the groupings.
+  what: |
+    Remove the specified bunches. This does not remove 
+    the tracks, only the grouping.
   short: rbn
   parameters: <s_bunch_name> [ <s_bunch_name> ] ...
 add_to_bunch:
   type: group
-  what: Add track(s) to a bunch.
+  what: Add track(s) to an existing bunch.
   short: atbn
   parameters: <s_bunch_name> <s_track1> [ <s_track2> ] ...
   example: |
-    add_to_bunch woodwind oboe sax_1 flute # Add oboe sax_1 and flute to the
-                 # woodwind bunch or group of tracks.
+    add_to_bunch woodwind oboe sax flute 
 commit:
   type: project
   what: commit Nama's current state
