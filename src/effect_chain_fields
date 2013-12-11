@@ -22,6 +22,8 @@
 							
 		attrib 				# fields for searching
 
+		class				# for restore
+
 ### 	Group 2 - attributes for searching and sorting
 
 	# these will be moved to attrib
