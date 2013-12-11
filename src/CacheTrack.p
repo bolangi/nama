@@ -183,7 +183,7 @@ sub update_cache_map {
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
 		my @inserts_list = ::Insert::get_inserts($args->{track}->name);
-		my @ops_list = $args->{track}->fancy_ops;
+		my @ops_list = $args->{track}->ops;
 		if ( @inserts_list or @ops_list or $args->{track}->is_region)
 		{
 			my %args = 
