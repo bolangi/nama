@@ -1,6 +1,7 @@
 # -------- CacheTrack ------
 package ::;
 use Modern::Perl;
+use Storable 'dclone';
 use ::Globals qw(:all);
 
 # The $args hashref passed among the subroutines in this file
@@ -183,7 +184,12 @@ sub update_cache_map {
 				map{($_->dump)} ::EffectChain::find(track_cache => 1)
 			});
 		my @inserts_list = ::Insert::get_inserts($args->{track}->name);
-		my @ops_list = $args->{track}->ops;
+
+		# include all ops, include vol/pan operators 
+		# which serve as placeholders, won't overwrite
+		# the track's current vol/pan operators
+		 
+		my @ops_list = $args->{track}->ops; # shouldn't this be @{$args->{track}->ops} ?
 		if ( @inserts_list or @ops_list or $args->{track}->is_region)
 		{
 			my %args = 
@@ -259,10 +265,11 @@ sub uncache_track {
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"),
 		return;
-
-		# blast away any existing effects, TODO: warn or abort	
-		say $track->name, ": removing user effects" if $track->fancy_ops;
-		map{ remove_effect($_)} $track->fancy_ops;
+	if ($track->fancy_ops){
+		pager($track->name, ": cannot cache while user effects are present\n",
+			"Delete them or stash them and try again.");
+		return
+	}
 
 	# CASE 1: an ordinary track, 
 	#
@@ -280,6 +287,8 @@ $/;
 	}
 
 		$ec->add($track) if defined $ec;
+		# replace track's effect list with ours
+		$track->{ops} = dclone($ec->ops_list); # copy
 }
 sub is_cached {
 	my ($track, $version) = @_;
