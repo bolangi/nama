@@ -233,6 +233,8 @@ sub add_ops {
 		);
 
 	$successor ||= $track->vol; # place effects before volume 
+
+	
 	map 
 	{	
 		my $args = 
@@ -268,10 +270,15 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-		
-	} @{$self->ops_list};
-
-
+	# we exclude restoring these as a hack until
+	# a subclassed EffectChain can serve the needs
+	# of track cache/uncache
+	#
+	# not the right place, as it will
+	# will break if someone explicitly includes vol/pan when
+	# creating an effect chain
+	#
+	} grep{ $_ ne $track->vol and $_ ne $track->pan } @{$self->ops_list};
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -395,6 +402,59 @@ sub move_attributes {
 
 sub DESTROY {}
 
+}
+{ package TrackCacheEffectChain;
+
+sub add_ops {
+	my($self, $track, $successor) = @_;
+	
+	# Higher priority: track argument 
+	# Lower priority:  effect chain's own track name attribute
+	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
+	
+	logpkg('debug',$track->name,
+			qq(: adding effect chain ), $self->name, Dumper $self
+		 
+		);
+
+	map 
+	{	
+		my $args = 
+		{
+			chain  		=> $track->n,
+			type   		=> $self->type($_),
+			values 		=> $self->params($_),
+			parent_id 	=> $self->parent($_),
+		};
+
+		$args->{effect_id} = $_ unless fxn($_);
+
+		logpkg('debug',"args ", json_out($args));
+		# avoid incorrectly calling _insert_effect 
+		# (and controllers are not positioned relative to other  effects)
+		# 
+		
+		$args->{before} = $successor unless $args->{parent_id};
+
+
+		my $new_id = ::add_effect($args);
+		
+		# the effect ID may be new, or it may be previously 
+		# assigned ID, 
+		# whatever value is supplied is guaranteed
+		# to be unique; not to collide with any other effect
+		
+		logpkg('debug',"new id: $new_id");
+		my $orig_id = $_;
+		if ( $new_id ne $orig_id)
+		# re-write all controllers to belong to new id
+		{
+			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
+		}
+		
+	} grep{ $_ ne $track->vol and $_ ne $track->pan } @{$self->ops_list};
+	$track->{ops} = dclone($self->ops_list);
+}
 }
 
 {	
