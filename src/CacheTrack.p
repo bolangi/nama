@@ -190,6 +190,8 @@ sub update_cache_map {
 		# the track's current vol/pan operators
 		 
 		my @ops_list = @{$args->{track}->ops};
+		my @ops_remove_list = $args->{track}->fancy_ops;
+		
 		if ( @inserts_list or @ops_list or $args->{track}->is_region)
 		{
 			my %args = 
@@ -206,7 +208,7 @@ sub update_cache_map {
 			$args{region} = [ $args->{track}->region_start, $args->{track}->region_end ] 
 				if $args->{track}->is_region;
 			my $ec = ::EffectChain->new( %args );
-			map{ remove_effect($_) } @ops_list;
+			map{ remove_effect($_) } @ops_remove_list;
 			map{ $_->remove        } @inserts_list;
 			$args->{track}->set(region_start => undef, region_end => undef);
 
