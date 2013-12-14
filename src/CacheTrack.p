@@ -189,7 +189,7 @@ sub update_cache_map {
 		# which serve as placeholders, won't overwrite
 		# the track's current vol/pan operators
 		 
-		my @ops_list = $args->{track}->ops; # shouldn't this be @{$args->{track}->ops} ?
+		my @ops_list = @{$args->{track}->ops};
 		if ( @inserts_list or @ops_list or $args->{track}->is_region)
 		{
 			my %args = 
