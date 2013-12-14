@@ -42,6 +42,7 @@ use ::Object qw(
 			track_cache	
 	) ;
 
+%is_attribute = map{ $_ => 1 } @attributes;
 initialize();
 
 # for compatibility with standard effects
@@ -70,9 +71,6 @@ sub params {
 sub initialize {
 	$n = 0;
 	%by_index = ();	
-	@::global_effect_chain_data = ();  # for save/restore
-    @::project_effect_chain_data = (); 
-	%is_attribute = map{ $_ => 1 } @attributes;
 }
 sub new_sequence_number { ++$n }
 sub new {
