@@ -1067,21 +1067,23 @@ new_effect_chain:
   short: nec
   parameters: <s_name> [ <effect_id_1>, <effect_id_2> ] ...
   example: |
-    new_effect_chain my_piano # Create a new effect chain, called my_piano,
-                              # storing all effects and their settings from
-                              # the current track.
-    nec my_guitar A C F G H # Create a new effect chain, calledmy_guitar,
-                            # storing the effects with ID A, C, F, G and H and
-                            # their respective settings.
+    new_effect_chain my_piano 
+    ! Create a new effect chain, "my_piano", storing all 
+    ! effects and their settings from the current track.
+    nec my_guitar A C F G H 
+    ! Create a new effect chain, "my_guitar",
+    ! storing the effects with IDs A, C, F, G, H and
+    ! their respective settings.
 add_effect_chain:
   type: effect
   what: Add an effect chain to the current track.
   short: aec
   parameters: <s_effect_chain_name>
   example: |
-    aec my_piano # Add the effect chain, called my_piano, to the current track.
-                 # This will add all effects stored in my_piano with their
-                 # respective settings.
+    aec my_piano 
+    ! Add the effect chain "my_piano", to the current track.
+    ! This will add all effects stored in my_piano with their
+    ! respective settings.
 delete_effect_chain:
   type: effect
   what: Delete an effect chain definition. After that the effect chain will no longer be available to add. Projects, which use the effect chain won't be affected.
@@ -1151,8 +1153,23 @@ full_effect_profiles:
   parameters: none
 cache_track:
   type: track
-  what: Cache the current track, a.k.a. freezing or bouncing. Store a version of the current track with all processing to disk. Useful to save on processor power in large projects. Can be reversed by uncache_track .
-  short: cache ct
+  what: |
+    Cache the current track. Same as freezing or bouncing. This
+    is useful for larger projects or low-power CPUs, since
+    effects do not have to be recomputed for subsequent engine
+    runs.
+    
+    Cache_track stores the effects-processed output of the
+    current track as a new version (WAV file) which becomes the
+    current version.  The current effects, inserts and region
+    definition are removed and stored. 
+
+    To go back to the original track state, use the
+    uncache_track command.  The show_track display appends a "c"
+    to version numbers created by cache_track (and therefore
+    reversible by uncache) 
+    
+  short: cache ct bounce freeze
   parameters: [ <f_additional_processing_time> ]
   example: |
       cache 10 # Cache the curent track and append 10 seconds extra time,
