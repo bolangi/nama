@@ -1061,15 +1061,26 @@ set_bus:
   what: Set bus parameters. This command is intended for advanced users.
   short: sbs
   parameters: <s_busname> <key> <value>
+overwrite_effect_chain:
+  type: effect
+  what: |
+    Create a new effect chain, overwriting an existing one
+    of the same name.
+  short: oec
+  parameters: Same as for new_effect_chain
 new_effect_chain:
   type: effect
-  what: Create a new effect chain. An effect chain i a list of effects with all their parameters stored. Useful for creating small processing templates for frequently used instruments.
+  what: | 
+    Create an effect chain, a named list of effects with all 
+    parameter settings. Useful for storing effect setups
+    for particular instruments.
   short: nec
-  parameters: <s_name> [ <effect_id_1>, <effect_id_2> ] ...
+  parameters: <s_name> [ <effect_id_1> <effect_id_2>... ] 
   example: |
     new_effect_chain my_piano 
     ! Create a new effect chain, "my_piano", storing all 
-    ! effects and their settings from the current track.
+    ! effects and their settings from the current track
+    ! except the fader (vol/pan) settings.
     nec my_guitar A C F G H 
     ! Create a new effect chain, "my_guitar",
     ! storing the effects with IDs A, C, F, G, H and
@@ -1078,16 +1089,23 @@ add_effect_chain:
   type: effect
   what: Add an effect chain to the current track.
   short: aec
-  parameters: <s_effect_chain_name>
+  parameters: <s_effect_chain_name> <s_successor_effect_id | ZZZ>
   example: |
     aec my_piano 
     ! Add the effect chain "my_piano", to the current track.
     ! This will add all effects stored in my_piano with their
     ! respective settings.
+    aec my_piano AE
+    ! Add the effect chain, positioning it before before 
+    ! effect id AE
+    aec my_piano ZZZ
+    ! Append the effect chain to the current track effects
 delete_effect_chain:
   type: effect
-  what: Delete an effect chain definition. After that the effect chain will no longer be available to add. Projects, which use the effect chain won't be affected.
-  short: dec destroy_effect_chain
+  what: |
+    Delete an effect chain definition. Does not affect the
+    project state. This command is not reversible by undo.
+  short: destroy_effect_chain
   parameters: <s_effect_chain_name>
 find_effect_chains:
   type: effect
