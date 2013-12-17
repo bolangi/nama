@@ -1105,7 +1105,7 @@ delete_effect_chain:
   what: |
     Delete an effect chain definition. Does not affect the
     project state. This command is not reversible by undo.
-  short: destroy_effect_chain
+  short: dec destroy_effect_chain
   parameters: <s_effect_chain_name>
 find_effect_chains:
   type: effect
