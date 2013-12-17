@@ -72,7 +72,7 @@ sub initialize {
 	$n = 0;
 	%by_index = ();	
 }
-sub new_sequence_number { ++$n }
+sub new_index { $n++; $by_index{$n} ?  new_index() : $n }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
@@ -80,13 +80,16 @@ sub new {
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 
+	# we need to so some preparation if we are creating
+	# an effect chain for the first time (as opposed
+	# to restoring a serialized effect chain)
+
 	if (! $vals{n} ) {
-		# we are initializing (not restoring)
 
 		# move secondary attributes to $self->{attrib}->{...}
 		move_attributes(\%vals);
 
-		$vals{n} = new_sequence_number();
+		$vals{n} = new_index();
 		$vals{inserts_data} ||= [];
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
