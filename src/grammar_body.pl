@@ -1053,16 +1053,16 @@ new_effect_chain: _new_effect_chain ident end {
 	);
 	1;
 }
-add_effect_chain: _add_effect_chain ident {
-	my ($ec) = ::EffectChain::find(
-		unique => 1, 
-		user   => 1, 
-		name   => $item{ident}
-	);
-	if( $ec ){ $ec->add($::this_track) }
-	else { ::throw("$item{ident}: effect chain not found") }
-	1;
+add_effect_chain: _add_effect_chain ident { 
+	::add_effect_chain($item{ident}, $::this_track);
+	1
 }
+add_effect_chain: _add_effect_chain ident successor {
+	::add_effect_chain($item{ident}, $::this_track, $item{successor});
+	1
+}
+successor: op_id
+
 delete_effect_chain: _delete_effect_chain ident(s) {
 	map{ 
 		::EffectChain::find(
