@@ -575,9 +575,9 @@ rec_enable: _rec_enable {
 	} else { print "!\n" }
 }
 # dummy defs to avoid warnings from command.yml entries
-off: 'Xxx' {}
-record: 'Xxx' {}
-mon: 'Xxx' {}
+off: 'dummy'
+record: 'dummy'
+mon: 'dummy'
 
 # some ordering fixes
 command: mono
@@ -1034,20 +1034,26 @@ cache_track: _cache_track additional_time(?) {
 }
 additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
-new_effect_chain: _new_effect_chain ident end {
-	my $name = $item{ident};
+overwrite_effect_chain: 'dummy' # avoid warnings
+new_effect_chain: (_new_effect_chain | _overwrite_effect_chain ) ident op_id(s?) end {
+ 	my $name = $item{ident};
+	my @existing = ::EffectChain::find(user => 1, name => $name);
+	if ( scalar @existing ){
+		$item[1] eq 'overwrite_effect_chain'
+ 			? ::process_command("delete_effect_chain $name")
+ 			: ::throw(qq/$name: effect chain with this name is already defined. 
+Use a different name, or use "overwrite_effect_chain"/) && return;
+	}
 
-	my ($old_entry) = ::EffectChain::find(user => 1, name => $name);
-
-	# overwrite identically named effect chain
-	#
+	my $ops = scalar @{$item{'op_id(s?)'}}
+				?  $item{'op_id(s?)'} 
+				: [ $::this_track->fancy_ops ];
 	my @options;
-	push(@options, 'n' , $old_entry->n) if $old_entry;
 	::EffectChain->new(
 		user   => 1,
 		global => 1,
 		name   => $item{ident},
-		ops_list => [ $::this_track->fancy_ops ],
+		ops_list => $ops,
 		inserts_data => $::this_track->inserts,
 		@options,
 	);
@@ -1064,13 +1070,8 @@ add_effect_chain: _add_effect_chain ident successor {
 successor: op_id
 
 delete_effect_chain: _delete_effect_chain ident(s) {
-	map{ 
-		::EffectChain::find(
-			unique => 1, 
-			user   => 1,
-			name   => $_
-		)->destroy() 
-
+	map { 
+		map{$_->destroy()} ::EffectChain::find( user => 1, name => $_);
 	} @{ $item{'ident(s)'} };
 	1;
 }
