@@ -456,9 +456,20 @@ sub add_ops {
 }
 
 {	
-####  Effect profile routines
+####  Effect-chain and -profile routines
 
 package ::;
+sub add_effect_chain {
+	my ($name, $track, $successor) = @_;
+	my ($ec) = ::EffectChain::find(
+		unique => 1, 
+		user   => 1, 
+		name   => $name,
+	);
+	if( $ec ){ $ec->add($::this_track, $successor) }
+	else { ::throw("$name: effect chain not found") }
+	1;
+}
 sub new_effect_profile {
 	logsub("&new_effect_profile");
 	my ($bunch, $profile) = @_;
