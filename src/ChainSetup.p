@@ -214,7 +214,7 @@ sub add_paths_for_mixdown_handling {
 }
 sub prune_graph {
 	logsub("&prune_graph");
-	::Graph::eliminate_superfluous_helper_tracks($g);
+	::Graph::simplify_send_routing($g);
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
 	::Graph::recursively_remove_inputless_tracks($g);
 	::Graph::recursively_remove_outputless_tracks($g); 

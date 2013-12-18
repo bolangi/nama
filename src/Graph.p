@@ -363,9 +363,8 @@ sub remove_isolated_vertices {
 	grep{ $g->is_isolated_vertex($_) } $g->vertices();	
 }
 
-sub eliminate_superfluous_helper_tracks {
+sub simplify_send_routing {
 	my $g = shift;
-
 	for( grep { is_a_track($_) } $g->vertices ){
 		my $aux = "$_\_aux_send";
 		my @successors;
