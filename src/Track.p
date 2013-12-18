@@ -237,7 +237,7 @@ sub rec_status {
 	if( $track->rw eq 'REC'){
 
 		my $source_type = $track->source_type;
-		if ($source_type eq 'track'){ return 'REC' }
+		if ($source_type eq 'track' or $source_type eq 'loop'){ return 'REC' }
 		elsif ($source_type eq 'jack_client'){
 
 				# we expect an existing JACK client that
