@@ -354,8 +354,6 @@ sub jumper_count {
 	$try1 . $counter++;
 }
 }
-	
-
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
@@ -366,8 +364,9 @@ sub dispatch { # creates an IO object from a graph edge
 	my $class = ::IO::get_class( $endpoint, $direction );
 		# we need the $direction because there can be 
 		# edges to and from loop,Master_in
+		
 	my @args = (track => $name,
-			endpoint => $endpoint, # for loops
+				endpoint => massaged_endpoint($track, $endpoint, $direction),
 				chain_id => $tn{$name}->n, # default
 				override($name, $edge));   # priority: edge > node
 	#say "dispatch class: $class";
@@ -375,6 +374,14 @@ sub dispatch { # creates an IO object from a graph edge
 
 	$g->set_edge_attribute(@$edge, $direction => $io );
 	$io
+}
+sub massaged_endpoint {
+	my ($track, $endpoint, $direction) = @_;
+	if ( $endpoint =~ /^(loop_in|loop_out)$/ ){
+		my $final = ($direction eq 'input' ?  $track->source_id : $track->send_id );
+		$final =~ s/^loop,//;
+		$final		
+	} else { $endpoint }
 }
 sub decode_edge {
 	# assume track-endpoint or endpoint-track
