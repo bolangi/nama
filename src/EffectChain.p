@@ -233,9 +233,21 @@ sub add_ops {
 		 
 		);
 
-	$successor ||= $track->vol; # place effects before volume 
+	# default to placing effects before fader
+	$successor ||= ( $track->pan || $track->vol ); 
 
+	# Exclude restoring vol/pan for track_caching.
+	# (This conditional is a hack that would be better 
+	# implemented by subclassing EffectChain 
+	# for cache/uncache)
 	
+	my @restore_ops_list;
+	if( $self->track_cache ){
+		@restore_ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
+								@{$self->ops_list}
+	} else {
+		@restore_ops_list = @{$self->ops_list};
+	}
 	map 
 	{	
 		my $args = 
@@ -271,15 +283,7 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	# we exclude restoring these as a hack until
-	# a subclassed EffectChain can serve the needs
-	# of track cache/uncache
-	#
-	# not the right place, as it will
-	# will break if someone explicitly includes vol/pan when
-	# creating an effect chain
-	#
-	} grep{ $_ ne $track->vol and $_ ne $track->pan } @{$self->ops_list};
+	} @restore_ops_list
 }
 sub add_inserts {
 	my ($self, $track) = @_;
