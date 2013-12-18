@@ -127,7 +127,7 @@ sub definitions {
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
 		use_git							=> 1,
-		autosave						=> 0,
+		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
 		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport

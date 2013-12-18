@@ -122,7 +122,7 @@ sub reconfigure_engine {
 }
 sub request_setup { 
 	my ($package, $filename, $line) = caller();
-    say("reconfigure requested in file $filename:$line");
+    logpkg('debug',"reconfigure requested in file $filename:$line");
 	$setup->{changed}++
 } 
 

@@ -173,7 +173,7 @@ ident: /[-\w]+/  #| <error: illegal name!>
 					# save_state, get_state
 					 # remove_mark new_mark name_mark to_mark
 					 # new_effect_chain add_effect_chain list_effect_chains
-					 # delete_effect_chain overwrite_effect_chain
+					 # delete_effect_chain 
 
 save_target: /[-:\w.]+/
 decimal_seconds: /\d+(\.\d+)?/ 
@@ -267,22 +267,15 @@ save_state: _save_state save_target message(?) {
 	}
 	else 
 	{
-		# save as a tagged commit
+		# save state if necessary
+		::git_snapshot();
 
-		::save_state();
-		if (::state_changed() )
-		{
-			print("saving as a commit\n");
-			::git_commit($message);
-			my @args = ('tag', $name);
-			#push @args, '-m', $message) if $message;
-			::git(@args);
-			::pager3(qq[tagged HEAD commit as "$name"]);
-		}
-		else 
-		{
-			::throw("nothing changed, so not committing or tagging")
-		}
+		# tag the current commit
+		my @args = ('tag', $name);
+		push @args, '-m', $message if $message;
+		::git(@args);
+		::pager3(qq/tagged HEAD commit as "$name"/,
+			qq/type "get $name" to return to this commit./)
 	}
 	1
 }
@@ -582,9 +575,9 @@ rec_enable: _rec_enable {
 	} else { print "!\n" }
 }
 # dummy defs to avoid warnings from command.yml entries
-off: 'Xxx' {}
-record: 'Xxx' {}
-mon: 'Xxx' {}
+off: 'dummy'
+record: 'dummy'
+mon: 'dummy'
 
 # some ordering fixes
 command: mono
@@ -1041,43 +1034,44 @@ cache_track: _cache_track additional_time(?) {
 }
 additional_time: float | dd
 uncache_track: _uncache_track { ::uncache_track($::this_track); 1 }
-new_effect_chain: _new_effect_chain ident end {
-	my $name = $item{ident};
+overwrite_effect_chain: 'dummy' # avoid warnings
+new_effect_chain: (_new_effect_chain | _overwrite_effect_chain ) ident op_id(s?) end {
+ 	my $name = $item{ident};
+	my @existing = ::EffectChain::find(user => 1, name => $name);
+	if ( scalar @existing ){
+		$item[1] eq 'overwrite_effect_chain'
+ 			? ::process_command("delete_effect_chain $name")
+ 			: ::throw(qq/$name: effect chain with this name is already defined. 
+Use a different name, or use "overwrite_effect_chain"/) && return;
+	}
 
-	my ($old_entry) = ::EffectChain::find(user => 1, name => $name);
-
-	# overwrite identically named effect chain
-	#
+	my $ops = scalar @{$item{'op_id(s?)'}}
+				?  $item{'op_id(s?)'} 
+				: [ $::this_track->fancy_ops ];
 	my @options;
-	push(@options, 'n' , $old_entry->n) if $old_entry;
 	::EffectChain->new(
 		user   => 1,
 		global => 1,
 		name   => $item{ident},
-		ops_list => [ $::this_track->fancy_ops ],
+		ops_list => $ops,
 		inserts_data => $::this_track->inserts,
 		@options,
 	);
 	1;
 }
-add_effect_chain: _add_effect_chain ident {
-	my ($ec) = ::EffectChain::find(
-		unique => 1, 
-		user   => 1, 
-		name   => $item{ident}
-	);
-	if( $ec ){ $ec->add($::this_track) }
-	else { ::throw("$item{ident}: effect chain not found") }
-	1;
+add_effect_chain: _add_effect_chain ident { 
+	::add_effect_chain($item{ident}, $::this_track);
+	1
 }
-delete_effect_chain: _delete_effect_chain ident(s) {
-	map{ 
-		::EffectChain::find(
-			unique => 1, 
-			user   => 1,
-			name   => $_
-		)->destroy() 
+add_effect_chain: _add_effect_chain ident successor {
+	::add_effect_chain($item{ident}, $::this_track, $item{successor});
+	1
+}
+successor: op_id
 
+delete_effect_chain: _delete_effect_chain ident(s) {
+	map { 
+		map{$_->destroy()} ::EffectChain::find( user => 1, name => $_);
 	} @{ $item{'ident(s)'} };
 	1;
 }
@@ -1172,9 +1166,6 @@ this_track_op_id: op_id(s) {
 	@belonging	
 }
 
-overwrite_effect_chain: _overwrite_effect_chain ident {
-	::overwrite_effect_chain($::this_track, $item{ident}); 1;
-}
 bunch_name: ident { 
 	::is_bunch($item{ident}) or ::bunch_tracks($item{ident})
 		or ::throw("$item{ident}: no such bunch name."), return; 

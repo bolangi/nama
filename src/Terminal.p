@@ -35,7 +35,7 @@ sub initialize_terminal {
 	# doesn't do anything either
 	#$engine->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 
-	$SIG{USR1} = sub { save_state() };
+	$SIG{USR1} = sub { git_snapshot() };
 }
 
 sub setup_hotkeys {
