@@ -363,6 +363,23 @@ sub remove_isolated_vertices {
 	grep{ $g->is_isolated_vertex($_) } $g->vertices();	
 }
 
+sub eliminate_superfluous_helper_tracks {
+	my $g = shift;
+
+	for( grep { is_a_track($_) } $g->vertices ){
+		my $aux = "$_\_aux_send";
+		my @successors;
+		if( $g->has_edge($_, $aux)
+			and @successors = $g->successors($_)
+			and scalar @successors == 1
+		){
+			my ($output) = $g->successors($aux);
+			$g->delete_path($_, $aux, $output);
+			$g->add_edge($_, $output);
+		}	
+	}
+}
+
 1;
 __END__
 
