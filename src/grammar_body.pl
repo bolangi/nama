@@ -1059,12 +1059,12 @@ Use a different name, or use "overwrite_effect_chain"/) && return;
 	);
 	1;
 }
-add_effect_chain: _add_effect_chain ident { 
-	::add_effect_chain($item{ident}, $::this_track);
-	1
-}
 add_effect_chain: _add_effect_chain ident successor {
 	::add_effect_chain($item{ident}, $::this_track, $item{successor});
+	1
+}
+add_effect_chain: _add_effect_chain ident { 
+	::add_effect_chain($item{ident}, $::this_track);
 	1
 }
 successor: op_id
