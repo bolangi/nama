@@ -1,4 +1,5 @@
 # command: test
+command: 'a-test' { print "aa-test" }
 #test: 'test' shellish { 
 #	::pager2( "found $item{shellish}");
 #	}
@@ -49,7 +50,7 @@ meta: for bunch_spec ';' namacode stopper {
  	::logit('Grammar','debug',"namacode: $item{namacode}");
  	my @tracks = ::bunch_tracks($item{bunch_spec});
  	for my $t(@tracks) {
- 		::leading_track_spec($t);
+ 		::user_set_current_track($t);
 		$::text->{parser}->meta($item{namacode});
  		#::pager2(("$t); $item{namacode}");
 	}
@@ -77,14 +78,15 @@ nosemi: text { $::text->{parser}->do_part($item{text}) }
 text: /[^;]+/ 
 semicolon: ';'
 
+do_part: command end
 do_part: track_spec command end
 do_part: track_spec end
-do_part: command end
 
 predicate: nonsemi end { $item{nonsemi}}
 predicate: /$/
 iam_cmd: ident { $item{ident} if $::text->{iam}->{$item{ident}} }
-track_spec: ident { ::leading_track_spec($item{ident}) }
+#track_spec: existing_track_name { ::user_set_current_track($item{existing_track_name}) }
+track_spec: ident { ::user_set_current_track($item{ident}) }
 bang: '!'
 eval: 'eval'
 for: 'for'

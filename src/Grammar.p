@@ -187,7 +187,7 @@ sub dump_all {
 }
 
 
-sub leading_track_spec {
+sub user_set_current_track {
 	my $cmd = shift;
 	if( my $track = $tn{$cmd} || $ti{$cmd} ){
 		logpkg('debug',"Selecting track ",$track->name);
