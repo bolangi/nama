@@ -146,7 +146,6 @@ sub definitions {
 		engine_muting_time				=> 0.03,
 		enforce_channel_bounds			=> 1,
 
-
 		serialize_formats               => 'json',		# for save_system_state()
 
 		latency_op						=> 'el:delay_n',
@@ -258,6 +257,7 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
+	start_osc($config->{osc_listener_port});
 
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
@@ -361,6 +361,23 @@ sub start_ecasound {
 	@{$engine->{pids}} = grep{ 	my $pid = $_; 
 							! grep{ $pid == $_ } @existing_pids
 						 }	split " ", qx(pgrep ecasound);
+}
+sub start_osc { 
+	my $port = shift;
+	# because this presents a security risk, user must
+	# configure their port number
+	return unless $ port;
+	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
+	$project->{osc} = Protocol::OSC->new;
+}
+
+sub process_osc_command {
+	my $in = $project->{osc_socket};
+	my $osc = $project->{osc};
+ 	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
+    my $p = $osc->parse(($osc->from_stream($packet))[0]);
+	say "got OSC: ", Dumper $p;
 }
 sub select_ecasound_interface {
 	pager3('Not initializing engine: options E or A are set.'),
@@ -533,6 +550,5 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-
 1;
 __END__

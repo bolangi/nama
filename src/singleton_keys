@@ -17,6 +17,7 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
+$config->{osc_listener_port}
 
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
 $jack->{fake_ports_list}		# for testing
