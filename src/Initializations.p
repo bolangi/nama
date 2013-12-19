@@ -235,7 +235,6 @@ sub initialize_interfaces {
 	use AnyEvent::TermKey qw( FORMAT_VIM KEYMOD_CTRL ); 
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
-
 	choose_sleep_routine();
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
@@ -257,8 +256,8 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc($config->{osc_listener_port});
-
+	start_osc() if $config->{osc_listener_port} 
+				and can_load(modules => {'Protocol::OSC' => undef});
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -445,8 +444,6 @@ sub launch_ecasound_server {
  	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
 	sleep 1;
 }
-
-
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
 	pager3("Creating socket on port $port.");
