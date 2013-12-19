@@ -39,6 +39,7 @@ $setup->{offset_run}->{mark}
 $setup->{edit_points}
 $setup->{_last_rec_tracks}		# tracks we recorded to last time
 $setup->{latency}				# track latency info
+$setup->{cache_track_args}
 
 $fx_cache->{registry}			# effects database
 $fx_cache->{full_label_to_index}# el:tap_pinknoise -> effect index
@@ -123,6 +124,8 @@ $project->{current_stepsize}	# stepsize, per effect/parameter
 $project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
+$project->{osc_socket}			# OSC listener socket
+$project->{osc}					# Protocol::OSC object
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
