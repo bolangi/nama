@@ -1,5 +1,7 @@
 # command: test
-command: 'a-test' { print "aa-test" }
+#command: 'a-test' { print "aa-test" }
+command: _a_test { print "aaa-test" }
+_a_test: /something_else\b/ | /a-test\b/
 #test: 'test' shellish { 
 #	::pager2( "found $item{shellish}");
 #	}
