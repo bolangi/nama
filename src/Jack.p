@@ -335,7 +335,7 @@ sub make_connections {
 	map{  
 		my $track = $_; 
  		my $name = $track->name;
- 		my $ecasound_port = "ecasound:$name\_$direction\_";
+ 		my $ecasound_port = "Nama:$name\_$direction\_";
 		my $file = join_path(project_root(), $track->$ports_list);
 		throw($track->name, 
 			": JACK ports file $file not found. No sources connected."), 
