@@ -42,6 +42,7 @@ use ::Object qw(
 			track_cache	
 	) ;
 
+%is_attribute = map{ $_ => 1 } @attributes;
 initialize();
 
 # for compatibility with standard effects
@@ -70,11 +71,8 @@ sub params {
 sub initialize {
 	$n = 0;
 	%by_index = ();	
-	@::global_effect_chain_data = ();  # for save/restore
-    @::project_effect_chain_data = (); 
-	%is_attribute = map{ $_ => 1 } @attributes;
 }
-sub new_sequence_number { ++$n }
+sub new_index { $n++; $by_index{$n} ?  new_index() : $n }
 sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
@@ -82,13 +80,16 @@ sub new {
 	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 
+	# we need to so some preparation if we are creating
+	# an effect chain for the first time (as opposed
+	# to restoring a serialized effect chain)
+
 	if (! $vals{n} ) {
-		# we are initializing (not restoring)
 
 		# move secondary attributes to $self->{attrib}->{...}
 		move_attributes(\%vals);
 
-		$vals{n} = new_sequence_number();
+		$vals{n} = new_index();
 		$vals{inserts_data} ||= [];
 		$vals{ops_list} 	||= [];
 		$vals{ops_data} 	||= {};
@@ -232,7 +233,21 @@ sub add_ops {
 		 
 		);
 
-	$successor ||= $track->vol; # place effects before volume 
+	# default to placing effects before fader
+	$successor ||= ( $track->pan || $track->vol ); 
+
+	# Exclude restoring vol/pan for track_caching.
+	# (This conditional is a hack that would be better 
+	# implemented by subclassing EffectChain 
+	# for cache/uncache)
+	
+	my @restore_ops_list;
+	if( $self->track_cache ){
+		@restore_ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
+								@{$self->ops_list}
+	} else {
+		@restore_ops_list = @{$self->ops_list};
+	}
 	map 
 	{	
 		my $args = 
@@ -268,10 +283,7 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-		
-	} @{$self->ops_list};
-
-
+	} @restore_ops_list
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -304,16 +316,6 @@ sub add_region {
 sub add_all {
 	my($self, $track, $successor) = @_;
 }
-sub clobber_ops {
-	my($self, $track) = @_;
-}
-sub clobber_inserts {
-	my($self, $track) = @_;
-}
-sub clobber_all {
-	my($self, $track) = @_;
-}
-
 sub add {
 	my ($self, $track, $successor) = @_;
 	$self->add_ops($track, $successor);
@@ -396,11 +398,75 @@ sub move_attributes {
 sub DESTROY {}
 
 }
+{ package TrackCacheEffectChain;
+
+sub add_ops {
+	my($self, $track, $successor) = @_;
+	
+	# Higher priority: track argument 
+	# Lower priority:  effect chain's own track name attribute
+	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
+	
+	logpkg('debug',$track->name,
+			qq(: adding effect chain ), $self->name, Dumper $self
+		 
+		);
+
+	map 
+	{	
+		my $args = 
+		{
+			chain  		=> $track->n,
+			type   		=> $self->type($_),
+			values 		=> $self->params($_),
+			parent_id 	=> $self->parent($_),
+		};
+
+		$args->{effect_id} = $_ unless fxn($_);
+
+		logpkg('debug',"args ", json_out($args));
+		# avoid incorrectly calling _insert_effect 
+		# (and controllers are not positioned relative to other  effects)
+		# 
+		
+		$args->{before} = $successor unless $args->{parent_id};
+
+
+		my $new_id = ::add_effect($args);
+		
+		# the effect ID may be new, or it may be previously 
+		# assigned ID, 
+		# whatever value is supplied is guaranteed
+		# to be unique; not to collide with any other effect
+		
+		logpkg('debug',"new id: $new_id");
+		my $orig_id = $_;
+		if ( $new_id ne $orig_id)
+		# re-write all controllers to belong to new id
+		{
+			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
+		}
+		
+	} grep{ $_ ne $track->vol and $_ ne $track->pan } @{$self->ops_list};
+	$track->{ops} = dclone($self->ops_list);
+}
+}
 
 {	
-####  Effect profile routines
+####  Effect-chain and -profile routines
 
 package ::;
+sub add_effect_chain {
+	my ($name, $track, $successor) = @_;
+	my ($ec) = ::EffectChain::find(
+		unique => 1, 
+		user   => 1, 
+		name   => $name,
+	);
+	if( $ec ){ $ec->add($::this_track, $successor) }
+	else { ::throw("$name: effect chain not found") }
+	1;
+}
 sub new_effect_profile {
 	logsub("&new_effect_profile");
 	my ($bunch, $profile) = @_;

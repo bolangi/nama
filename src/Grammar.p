@@ -43,9 +43,6 @@ sub setup_grammar {
 	# print remove_spaces("bulwinkle is a...");
 
 }
-{
-my %exclude_from_undo_buffer = map{ $_ => 1} 
-		qw(tag commit branch br new_branch nbr load save get restore);
 sub process_line {
 	logsub("&process_line");
 	no warnings 'uninitialized';
@@ -61,27 +58,35 @@ sub process_line {
 					:  midish_command($user_input);	
 		}
 		else {
+			my $context = context();
 			my $success = process_command( $user_input );
-				
-			push @{$project->{undo_buffer}}, 
-
-			{
-				context => context(),
-				command => $user_input,
-			#	commit 	=> $commit 
+			my $command_stamp = { context => $context, 
+								  command => $user_input };
+			push(@{$project->{command_buffer}}, $command_stamp);
+			
+			if ( 		$config->{autosave} eq 'undo'
+					and $config->{use_git} 
+					and $project->{name}
+					and $project->{repo}
+					and ! engine_running() 
+			){
+				local $quiet = 1;
+				::ChainSetup::remove_temporary_tracks();
+				autosave(); 
+				reconfigure_engine(); # quietly, avoiding noisy reconfig below
 			}
-
-				unless ! $success 
-					   or $user_input =~ /^\s*([a-z_]+)/
-						and $exclude_from_undo_buffer{$1};
-			autosave() if $config->{use_git} and $config->{autosave} eq 'undo';
 			reconfigure_engine();
 		}
+		# reset current track to Master if it is
+		# undefined, or the track has been removed
+		# from the index
+		$this_track = $tn{Master} if ! $this_track or
+			(ref $this_track and ! $tn{$this_track->name});
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
 }
-}
+sub undo_behavior { 'store' }
 sub context {
 	my $context = {};
 	$context->{track} = $this_track->name;
@@ -354,7 +359,7 @@ sub show_status {
 	package ::;
 	my @modes;
 	push @modes, $mode->{preview} if $mode->{preview};
-	push @modes, "master" if $mode->{mastering};
+	push @modes, "master" if $mode->mastering;
 	push @modes, "edit"   if ::edit_mode();
 	push @modes, "offset run" if ::is_offset_run_mode();
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
@@ -455,7 +460,7 @@ sub showlist {
 		push @sections, [undef,undef, map $tn{$_},qw(Master Mixdown)];
 		push @sections, [$tn{Master},$bn{Main},map $tn{$_},$bn{Main}->tracks ];
 
-	if( $mode->{mastering} ){
+	if( $mode->mastering ){
 
 		push @sections, [undef,undef, map $tn{$_},$bn{Mastering}->tracks]
 
@@ -499,21 +504,18 @@ sub t_create_project {
 
 }
 sub mixdown {
-	my $quiet = shift;
 	pager3("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'REC'); 
 	$tn{Master}->set(rw => 'OFF'); 
 	$bn{Main}->set(rw => 'REC');
 }
 sub mixplay { 
-	my $quiet = shift;
 	pager3("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'MON');
 	$tn{Master}->set(rw => 'MON'); 
 	$bn{Main}->set(rw => 'OFF');
 }
 sub mixoff { 
-	my $quiet = shift;
 	pager3("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON'); 
@@ -572,20 +574,11 @@ sub pan_check {
 }
 
 sub remove_track_cmd {
-	my ($track, $quiet) = @_;
+	my ($track) = @_;
 	
 	# avoid having ownerless SlaveTracks.  
  	::ChainSetup::remove_temporary_tracks();
- 	
-	# remove track quietly if requested
-		if ( 	! $quiet 
-			and ! $config->{quietly_remove_tracks}) 
-		{
-			my $name = $track->name; 
-			my $reply = $text->{term}->readline("remove track $name? [n] ");
-			$reply =~ /y/i or return
-			pager2( "Removing track. All WAV files will be kept.")
-		}
+		$quiet or pager( "Removing track /",$track->name,"/.  All WAV files will be kept.");
 		$track->remove;
 		1
 }

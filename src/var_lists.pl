@@ -44,13 +44,14 @@
 
 	$project->{save_file_version_number}
 	$project->{timebase}
-	$project->{undo_buffer}
+	$project->{command_buffer}
 	$project->{track_version_comments}
 	$project->{track_comments}
 	$project->{bunch}
 	$project->{current_op}
 	$project->{current_param}
 	$project->{current_stepsize}
+	$project->{playback_position}
 	@project_effect_chain_data
 	$fx->{id_counter}
 	$setup->{loop_endpoints}

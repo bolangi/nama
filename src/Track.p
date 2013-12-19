@@ -109,10 +109,10 @@ sub new {
 					modifiers 		=> q(), # start, reverse, audioloop, playat
 					looping 		=> undef, # do we repeat our sound sample
 					source_type 	=> q(soundcard),
-					source_id   	=> 1,
+					source_id   	=> "1",
 					send_type 		=> undef,
 					send_id   		=> undef,
-					effect_chain_stack => [],
+					old_vol_level	=> undef,
 
 					@_ 			}, $class;
 
@@ -237,7 +237,7 @@ sub rec_status {
 	if( $track->rw eq 'REC'){
 
 		my $source_type = $track->source_type;
-		if ($source_type eq 'track'){ return 'REC' }
+		if ($source_type eq 'track' or $source_type eq 'loop'){ return 'REC' }
 		elsif ($source_type eq 'jack_client'){
 
 				# we expect an existing JACK client that
@@ -298,28 +298,24 @@ sub playat_time {
 sub shifted_region_start_time {
 	my $track = shift;
 	return $track->region_start_time unless $mode->{offset_run};
-	::set_edit_vars($track);
-	::new_region_start();
+	::new_region_start(::edit_vars($track));
 	
 }
 sub shifted_playat_time { 
 	my $track = shift;
 	return $track->playat_time unless $mode->{offset_run};
-	::set_edit_vars($track);
-	::new_playat();
+	::new_playat(::edit_vars($track));
 }
 sub shifted_region_end_time {
 	my $track = shift;
 	return $track->region_end_time unless $mode->{offset_run};
-	::set_edit_vars($track);
-	::new_region_end();
+	::new_region_end(::edit_vars($track));
 }
 
 sub region_is_out_of_bounds {
 	return unless $mode->{offset_run};
 	my $track = shift;
-	::set_edit_vars($track);
-	::case() =~ /out_of_bounds/
+	::case(::edit_vars($track)) =~ /out_of_bounds/
 }
 
 sub fancy_ops { # returns list 
@@ -393,7 +389,6 @@ sub remove {
 	my $track = shift;
 	my $n = $track->n;
 	$ui->remove_track_gui($n); 
- 	$::this_track = $ti{::Track::idx() - 1};
 	# remove corresponding fades
 	map{ $_->remove } grep { $_->track eq $track->name } values %::Fade::by_index;
 	# remove effects
@@ -401,9 +396,6 @@ sub remove {
  	delete $by_index{$n};
  	delete $by_name{$track->name};
 }
-
-	
-	
 
 ### object methods for text-based commands 
 
@@ -959,6 +951,7 @@ sub rec_cleanup_script {
 }
 sub is_region { defined $_[0]->{region_start} }
 
+sub current_edit { $_[0]->{current_edit}//={} }
 } # end package
 
 # subclasses
@@ -1195,7 +1188,6 @@ sub add_track {
 	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
 	# in order to increment serially
-
 	::ChainSetup::remove_temporary_tracks();
 
 	my $track = $class->new(%vals);

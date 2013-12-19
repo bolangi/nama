@@ -53,6 +53,8 @@ sub definitions {
 	# the sole instance of their class.
 	
 	$project = bless {}, '::Project';
+	$mode = bless {}, '::Mode';
+	{ package ::Mode; sub mastering { $::tn{Eq} and ! $::tn{Eq}->{hide} } }
 	
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
@@ -125,7 +127,7 @@ sub definitions {
 		use_pager 						=> 1,
 		use_placeholders 				=> 1,
 		use_git							=> 1,
-		autosave						=> 0,
+		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
 		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
@@ -143,7 +145,6 @@ sub definitions {
 		fade_resolution 				=> 20, # steps per second
 		engine_muting_time				=> 0.03,
 		enforce_channel_bounds			=> 1,
-
 
 		serialize_formats               => 'json',		# for save_system_state()
 
@@ -207,8 +208,6 @@ sub definitions {
 
 	$mastering->{track_names} = [ qw(Eq Low Mid High Boost) ];
 
-	$mode->{mastering} = 0;
-
 	init_wav_memoize() if $config->{memoize};
 
 }
@@ -258,6 +257,7 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
+	start_osc($config->{osc_listener_port});
 
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
@@ -361,6 +361,23 @@ sub start_ecasound {
 	@{$engine->{pids}} = grep{ 	my $pid = $_; 
 							! grep{ $pid == $_ } @existing_pids
 						 }	split " ", qx(pgrep ecasound);
+}
+sub start_osc { 
+	my $port = shift;
+	# because this presents a security risk, user must
+	# configure their port number
+	return unless $ port;
+	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
+	$project->{osc} = Protocol::OSC->new;
+}
+
+sub process_osc_command {
+	my $in = $project->{osc_socket};
+	my $osc = $project->{osc};
+ 	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
+    my $p = $osc->parse(($osc->from_stream($packet))[0]);
+	say "got OSC: ", Dumper $p;
 }
 sub select_ecasound_interface {
 	pager3('Not initializing engine: options E or A are set.'),
@@ -533,6 +550,5 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
-
 1;
 __END__

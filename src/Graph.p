@@ -319,8 +319,7 @@ sub remove_out_of_bounds_tracks {
 	my @names = $g->successors('wav_in');  # MON status tracks
 	map{ remove_tracks($g, $_) } 
 	grep{
-		::set_edit_vars($::tn{$_});
-		::edit_case() =~ /out_of_bounds/
+		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/
 	} @names;
 }
 
@@ -362,6 +361,22 @@ sub remove_isolated_vertices {
 	my $g = shift;
 	map{ $g->delete_vertex($_) } 
 	grep{ $g->is_isolated_vertex($_) } $g->vertices();	
+}
+
+sub simplify_send_routing {
+	my $g = shift;
+	for( grep { is_a_track($_) } $g->vertices ){
+		my $aux = "$_\_aux_send";
+		my @successors;
+		if( $g->has_edge($_, $aux)
+			and @successors = $g->successors($_)
+			and scalar @successors == 1
+		){
+			my ($output) = $g->successors($aux);
+			$g->delete_path($_, $aux, $output);
+			$g->add_edge($_, $output);
+		}	
+	}
 }
 
 1;

@@ -49,7 +49,8 @@ if ($output eq 'headers'){
 		my $full = shift @parts;
 		my @short = @parts;
 		my $end_anchor = "end";
-		push @abbrevs,	"_$full: " . join(" | " , add_break(@all_parts))  ;
+		my $grammar_entry = "_$full: " . join(" | " , add_break(@all_parts)) . qq( { "$full" } );
+		push @abbrevs, $grammar_entry;
 		#push @stubs,   	"$full: _$full $end_anchor { 1 }";
 		push @commands,	"command: $full";
 	} @keys;

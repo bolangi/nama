@@ -17,6 +17,7 @@ $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
+$config->{osc_listener_port}
 
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
 $jack->{fake_ports_list}		# for testing
@@ -105,6 +106,7 @@ $text->{user_alias}				# user defined command aliases
 $text->{command_history}		# terminal command history
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
+$text->{hotkey_playback_jumpsize}
 
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists
@@ -113,12 +115,14 @@ $project->{timebase}			# seconds or samples, unused
 $project->{track_comments}		# per track comments
 $project->{track_version_comments} # per version comments
 $project->{save_file_version_number} # version of Nama that wrote State.json
-$project->{undo_buffer}			# command history for commit message
+$project->{command_buffer}			# command history for commit message
 $project->{artist}				# Artist field for mp3/ogg encoding
 $project->{current_op}			# current effect, per track
 $project->{current_param}		# current parameter, per effect
 $project->{current_stepsize}	# stepsize, per effect/parameter
+$project->{playback_position}	# in order to restore position after a reconfigure
 $project->{mark_sequence_counter} # used for system assigned mark names
+$project->{redo}				# last commit removed by undo
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file
@@ -207,4 +211,3 @@ $jack->{is_own_port}
 $jack->{is_other_port}
 $jack->{graph}
 $jack->{watcher}
-

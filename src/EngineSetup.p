@@ -23,6 +23,15 @@ sub generate_setup {
 
 	::ChainSetup::initialize();
 
+	
+	# this is our chance to save state without the noise
+	# of temporary tracks, avoiding the issue of getting diffs 
+	# in the project data from each new chain setup.
+	autosave() if $config->{autosave} eq 'setup'
+					and $project->{name}
+					and $config->{use_git} 
+					and $project->{repo};
+	
 	# TODO: use try/catch
 	# catch errors unless testing (no-terminal option)
 	local $@ unless $config->{opts}->{T}; 
@@ -80,15 +89,11 @@ sub reconfigure_engine {
 	}
 	$setup->{changed} = 0 ; # reset for next time
 
-	# restore position/running status
-
-	
-	
 	$old_offset_run_status = $mode->{offset_run};
 
 	process_command('show_tracks');
 
-	stop_transport('quiet');
+	{ local $quiet = 1; stop_transport() }
 
 	trigger_rec_cleanup_hooks();
 	trigger_rec_setup_hooks();
@@ -101,16 +106,14 @@ sub reconfigure_engine {
 		
 		logpkg('debug',"I generated a new setup");
 		
-		autosave() if $config->{use_git} and $config->{autosave};
-		connect_transport('quiet');
+		{ local $quiet = 1; connect_transport() }
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
 
-# 		if( $restore_position and not ::ChainSetup::really_recording()){
-# 			eval_iam("setpos $old_pos") if $old_pos and $old_pos < $setup->{audio_length};
-# 		}
-		start_transport('quiet') if $mode->{preview} =~ /doodle/;
-			# $was_running or
+		eval_iam("setpos $project->{playback_position}")
+ 				if $project->{playback_position}
+					and not ::ChainSetup::really_recording();
+# 			start_transport('quiet') if $mode->{preview} =~ /doodle/;
 		transport_status();
 		$ui->flash_ready;
 		1
@@ -119,7 +122,7 @@ sub reconfigure_engine {
 }
 sub request_setup { 
 	my ($package, $filename, $line) = caller();
-    say("reconfigure requested in file $filename:$line");
+    logpkg('debug',"reconfigure requested in file $filename:$line");
 	$setup->{changed}++
 } 
 
@@ -159,7 +162,7 @@ sub request_setup {
  );
 sub status_snapshot {
 	my %snapshot = ( project 		=> 	$project->{name},
-					 mastering_mode => $mode->{mastering},
+					 mastering_mode => $mode->mastering,
 					 preview        => $mode->{preview},
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
@@ -235,7 +238,6 @@ arm();
 
 sub connect_transport {
 	logsub("&connect_transport");
-	my $quiet = shift;
 	remove_riff_header_stubs();
 
 	register_other_ports(); # that don't belong to my upcoming instance

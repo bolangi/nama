@@ -26,6 +26,7 @@ use Log::Log4perl qw(get_logger :levels);
 use Module::Load::Conditional qw(can_load); 
 use Module::Load;
 use Parse::RecDescent;
+use Protocol::OSC;
 use Storable qw(thaw);
 use Term::ReadLine;
 use Text::Diff;

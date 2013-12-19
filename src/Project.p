@@ -72,9 +72,9 @@ sub initialize_project_data {
 	$gui->{_markers_armed} = 0;
 
 	map{ $_->initialize() } qw(
-							::Mark
-							::Fade
 							::Edit
+							::Fade
+							::Mark
 							::Bus
 							::Track
 							::Insert
@@ -91,10 +91,8 @@ sub initialize_project_data {
 	$project->{save_file_version_number} = 0; 
 	$project->{track_comments} = {};
 	$project->{track_version_comments} = {};
-	$project->{undo_buffer} = [];
 	$project->{repo} = undef;
 	$project->{artist} = undef;
-	
 	$project->{bunch} = {};	
 	
 	create_system_buses();
@@ -110,6 +108,7 @@ sub initialize_project_data {
 
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
+	reset_command_buffer();
 
 }
 sub initialize_effects_data {
@@ -173,13 +172,12 @@ sub load_project {
 
 		if ($initializing_repo){
 			$project->{repo}->run( add => $file->git_state_store );
-			$project->{repo}->run( commit => '--quiet', '--message', "initial commit");
 		}
 	}
 
 	restore_state($args{settings}) unless $config->{opts}->{M} ;
 
-	if (! $tn{Master}){
+	if (! $tn{Master}){ # new project
 
 		::SimpleTrack->new( 
 			group => 'Master', 
@@ -210,6 +208,8 @@ sub load_project {
 	
 	# $args{nodig} allow skip for convert_project_format
 	dig_ruins() unless (scalar @::Track::all > 2 ) or $args{nodig};
+
+	git_snapshot("initialize new project");
 
 	# possible null if Text mode
 	
@@ -345,7 +345,6 @@ sub new_project_template {
 	#	- version (still called 'active')
 	# 	- track caching
 	# 	- region start/end points
-	# 	- effect_chain_stack
 	# Also
 	# 	- unmute all tracks
 	# 	- throw away any pan caching
@@ -358,9 +357,6 @@ sub new_project_template {
 				region_start
 				region_end
 			);
-		 map{ $track->set($_ => [])  } 
-			qw(	effect_chain_stack  );
-		
 	} @tracks;
 
 	# Throw away command history

@@ -61,12 +61,8 @@ sub restore_preview_mode {
 
 sub master_on {
 
-	return if $mode->{mastering};
+	return if $mode->mastering;
 	
-	# set $mode->{mastering}	
-	
-	$mode->{mastering}++;
-
 	# create mastering tracks if needed
 	
 	if ( ! $tn{Eq} ){  
@@ -80,10 +76,8 @@ sub master_on {
 	}
 
 }
-	
 sub master_off {
-
-	$mode->{mastering} = 0;
+	return if ! $mode->mastering;
 	hide_mastering_tracks();
 	map{ $ui->remove_track_gui($tn{$_}->n) 
 		} @{$mastering->{track_names}};
@@ -144,11 +138,11 @@ sub add_mastering_effects {
 }
 
 sub unhide_mastering_tracks {
-	process_command("for Mastering; set_track hide 0");
+	process_command("for Mastering; set_track hide 0 rw MON");
 }
 
 sub hide_mastering_tracks {
-	process_command("for Mastering; set_track hide 1");
+	process_command("for Mastering; set_track hide 1 rw OFF");
  }
 		
 1;

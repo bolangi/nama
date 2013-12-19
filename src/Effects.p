@@ -143,14 +143,14 @@ sub add_effect {
 
 	# either insert or add, depending on 'before' setting
 	
-	my $id = $p->{before} ?  _insert_effect($p) : _add_effect($p);
-	
-	# return effect ID
+	my $id = (defined $p->{before} and $p->{before} ne 'ZZZ')
+				?_insert_effect($p) 
+				: _add_effect($p);
 	$id
 }
 
 
-sub _add_effect { 
+sub _add_effect {  # append effect
 	my $p = shift;
 	my (    $n,   $before, $code,$parent_id,$id, $values) =
 	@$p{qw( chain before    type parent_id  effect_id values)};

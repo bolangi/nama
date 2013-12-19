@@ -6,6 +6,7 @@ use File::Copy;
 use Modern::Perl; no warnings 'uninitialized';
 
 sub save_state {
+	logsub("&save_state");
 	my $filename = shift;
 	if ($filename)
 	{
@@ -22,8 +23,10 @@ sub save_state {
 									: join_path(project_dir(),$filename) 
 	}
 	my $path = $filename || $file->state_store();
-	logsub("&save_state");
 	$project->{save_file_version_number} = $VERSION;
+
+	# store playback position, if possible
+	$project->{playback_position} = eval_iam("getpos") if valid_engine_setup();
 
 	# some stuff get saved independently of our state file
 	
@@ -37,8 +40,7 @@ sub save_state {
 		return;
 	}
 
-	print "\nSaving state as ",
-	save_system_state($path), "\n";
+	logpkg('debug',"Saving state as ", save_system_state($path));
 	save_global_effect_chains();
 
 	# store alsa settings
@@ -82,7 +84,7 @@ sub save_system_state {
 	
 	# prepare tracks for storage
 	
-	$this_track_name = $this_track->name;
+	$this_track_name = $this_track->name if $this_track;
 
 	logpkg('debug', "copying tracks data");
 
@@ -96,27 +98,32 @@ sub save_system_state {
 					qw(ch_r ch_m source_select send_select jack_source jack_send);
 	} @tracks_data;
 
-
 	logpkg('debug', "copying bus data");
 
-	@bus_data = map{ $_->as_hash } ::Bus::all();
+	@bus_data = map{ $_->as_hash } sort { $a->name cmp $b->name} ::Bus::all();
+
+
+	my $by_n = sub { $a->{n} <=> $b->{n} };
 
 	# prepare inserts data for storage
 	
 	logpkg('debug', "copying inserts data");
 	
-	@inserts_data = map{ $_->as_hash } values %::Insert::by_index;
+	@inserts_data = sort $by_n map{ $_->as_hash } values %::Insert::by_index;
 
 	# prepare marks data for storage (new Mark objects)
 
 	logpkg('debug', "copying marks data");
-	@marks_data = map{ $_->as_hash } ::Mark::all();
 
-	@fade_data = map{ $_->as_hash } values %::Fade::by_index;
 
-	@edit_data = map{ $_->as_hash } values %::Edit::by_index;
+	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
 
-	@project_effect_chain_data = map { $_->as_hash } ::EffectChain::find(project => 1);
+	@fade_data = sort $by_n map{ $_->as_hash } values %::Fade::by_index;
+
+	@edit_data = sort $by_n map{ $_->as_hash } values %::Edit::by_index;
+
+	@project_effect_chain_data = sort $by_n map { $_->as_hash } 
+		::EffectChain::find(project => 1);
 
 	# save history -- 50 entries, maximum
 
@@ -345,7 +352,7 @@ sub restore_state_from_file {
 				$_->{class} = $_->{was_class};
 				$_->{class} = '::Track';
 		  	}
-		  	delete $_->{was_class} 
+		  	delete $_->{was_class};
 		} @tracks_data;
 		map
 		{    if($_->{class} eq '::MasterBus') {
@@ -354,12 +361,12 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	
-
-	# make sure current_edit field is initialized
-	
-	map {	$_->{current_edit} //= {} } @tracks_data;
-
+	if ( $project->{save_file_version_number} <= 1.111){ 
+		map
+		{
+			delete $_->{effect_chain_stack} ;
+		} @tracks_data;
+	}
 	#######################################
 
 
@@ -481,6 +488,7 @@ sub restore_state_from_file {
 ;
 	# restore effect chains and profiles
 	
+	%::EffectChain::by_index = ();
 	#say "Project Effect Chain Data\n", json_out( \@project_effect_chain_data);
  	map { my $fx_chain = ::EffectChain->new(%$_) } 
 		(@project_effect_chain_data, @global_effect_chain_data)
@@ -508,12 +516,6 @@ sub save_global_effect_chains {
 			);
 	} $config->serialize_formats;
 
-}
-
-# unneeded after conversion - DEPRECATED
-sub save_project_effect_chains {
-	my $project = shift; # allow to cross multiple projects
-	@project_effect_chain_data = map{ $_->as_hash } ::EffectChain::find(project => $project);
 }
 sub restore_global_effect_chains {
 

@@ -52,7 +52,7 @@ sub remove_temporary_tracks {
 }
 sub initialize {
 
-	remove_temporary_tracks();# start clean
+	remove_temporary_tracks(); # we will generate them again
 	$setup->{audio_length} = 0;  
 	@io = (); 			# IO object list
 	::IO::initialize();
@@ -96,7 +96,7 @@ sub show_io {
 	::pager( $output );
 }
 
-sub generate_setup_try {  # TODO: move operations below to buses
+sub generate_setup_try {
 	logsub("&generate_setup_try");
 
 	my $extra_setup_code = shift;
@@ -178,12 +178,12 @@ sub add_paths_for_aux_sends {
 sub add_paths_from_Master {
 	logsub("&add_paths_from_Master");
 
-	if ($mode->{mastering}){
+	if ($mode->mastering){
 		$g->add_path(qw[Master Eq Low Boost]);
 		$g->add_path(qw[Eq Mid Boost]);
 		$g->add_path(qw[Eq High Boost]);
 	}
-	my $final_leg_origin = $mode->{mastering} ?  'Boost' : 'Master';
+	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Master';
 	$g->add_path($final_leg_origin, output_node($tn{Master}->send_type)) 
 		if $tn{Master}->rw ne 'OFF'
 
@@ -192,7 +192,7 @@ sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
 	if ($tn{Mixdown}->rec_status eq 'REC'){
-		my @p = (($mode->{mastering} ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
+		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
 		  	format_template		=> $config->{mix_to_disk_format},
@@ -214,7 +214,7 @@ sub add_paths_for_mixdown_handling {
 }
 sub prune_graph {
 	logsub("&prune_graph");
-	# prune graph: remove tracks lacking inputs or outputs
+	::Graph::simplify_send_routing($g);
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
 	::Graph::recursively_remove_inputless_tracks($g);
 	::Graph::recursively_remove_outputless_tracks($g); 
@@ -354,8 +354,6 @@ sub jumper_count {
 	$try1 . $counter++;
 }
 }
-	
-
 sub dispatch { # creates an IO object from a graph edge
 	my $edge = shift;
 	return non_track_dispatch($edge) if not grep{ $tn{$_} } @$edge ;
@@ -366,8 +364,9 @@ sub dispatch { # creates an IO object from a graph edge
 	my $class = ::IO::get_class( $endpoint, $direction );
 		# we need the $direction because there can be 
 		# edges to and from loop,Master_in
+		
 	my @args = (track => $name,
-			endpoint => $endpoint, # for loops
+				endpoint => massaged_endpoint($track, $endpoint, $direction),
 				chain_id => $tn{$name}->n, # default
 				override($name, $edge));   # priority: edge > node
 	#say "dispatch class: $class";
@@ -375,6 +374,14 @@ sub dispatch { # creates an IO object from a graph edge
 
 	$g->set_edge_attribute(@$edge, $direction => $io );
 	$io
+}
+sub massaged_endpoint {
+	my ($track, $endpoint, $direction) = @_;
+	if ( $endpoint =~ /^(loop_in|loop_out)$/ ){
+		my $final = ($direction eq 'input' ?  $track->source_id : $track->send_id );
+		$final =~ s/^loop,//;
+		$final		
+	} else { $endpoint }
 }
 sub decode_edge {
 	# assume track-endpoint or endpoint-track

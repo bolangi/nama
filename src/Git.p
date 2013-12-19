@@ -54,30 +54,29 @@ sub restore_state_from_vcs {
  
 sub git_snapshot {
 	logsub("&git_snapshot");
+	my $commit_message = shift() || "";
 	return unless $config->{use_git};
-	return unless state_changed();
-	my $commit_message = shift() || "no comment";
+	save_state();
+	reset_command_buffer(), return unless state_changed();
 	git_commit($commit_message);
 }
-	
+sub reset_command_buffer { $project->{command_buffer} = [] } 
+
 sub git_commit {
 	logsub("&git_commit");
 	my $commit_message = shift;
 	no warnings 'uninitialized';
 	use utf8;
-	$commit_message = join "\n", 
-		$commit_message,
+	scalar @{$project->{command_buffer}} and $commit_message .= join "\n", 
+		undef,
+		(map{ $_->{command} } @{$project->{command_buffer}}),
 		# context for first command
-		"Context:",
-		" + track: $project->{undo_buffer}->[0]->{context}->{track}",
-		" + bus:   $project->{undo_buffer}->[0]->{context}->{bus}",
-		" + op:    $project->{undo_buffer}->[0]->{context}->{op}",
-		# all commands since last commit
-		map{ $_->{command} } @{$project->{undo_buffer}};
-		
+		"* track: $project->{command_buffer}->[0]->{context}->{track}",
+		"* bus:   $project->{command_buffer}->[0]->{context}->{bus}",
+		"* op:    $project->{command_buffer}->[0]->{context}->{op}",
 	git( add => $file->git_state_store );
 	git( commit => '--quiet', '--message', $commit_message);
-	$project->{undo_buffer} = [];
+	reset_command_buffer();
 }
 
 sub git_checkout {
@@ -167,14 +166,36 @@ sub list_branches {
 }
 
 sub autosave {
-	logsub("&autosave");
-	my ($original_branch) = current_branch();
-	my @args = qw(undo --quiet);
-	unshift @args, '-b' if ! git_branch_exists('undo');
-	git(checkout => @args);
-	save_state();
-	git_snapshot();
-	git_checkout($original_branch, '--quiet');
+		logsub("&autosave");
+		engine_running() ? return : git_snapshot();
+}
+sub redo {
+	if ($project->{redo}){
+		git('cherry-pick',$project->{redo});
+		load_project(name => $project->{name});
+		delete $project->{redo};
+	} else {throw("nothing to redo")}
+	1
+}
+sub undo {
+	pager("removing last commit"); 
+	local $quiet = 1;
 
+	# get the commit id
+	my $show = git(qw/show HEAD/);	
+	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+
+	# blow it away
+	git(qw/reset --hard HEAD^/); 
+	load_project( name => $project->{name});
+
+	# remember it 
+	$project->{redo} = $commit;
+}
+sub show_head_commit {
+	my $show = git(qw/show HEAD/);	
+	my ($commit) = $show =~ /commit ([a-z0-9]{10})/;
+	my (undef,$msg)    = split "\n\n",$show;
+	pager3("commit: $commit",$msg);
 }
 1
