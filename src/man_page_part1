@@ -9,9 +9,9 @@ B<nama> [I<options>] [I<project_name>]
 =head1 DESCRIPTION
 
 B<Nama> is an application for multitrack recording,
-non-destructive editing, mixing and mastering using the
-Ecasound audio engine developed by Kai Vehmanen.
-Primarily text-based, it also has a simple Tk based GUI.
+non-destructive editing, mixing, mastering, live performance
+and general-purpose audio processing using the Ecasound
+audio engine developed by Kai Vehmanen.
  
 Features include tracks with multiple versions (AKA takes)
 buses, effects, presets, sends, inserts, marks, regions,
@@ -23,6 +23,9 @@ Nama's audio processing is non-destructive by default:
 effects are applied in realtime; edits are accomplished
 through crossfades. These modifications to a track can be
 frozen as a new version for that track.
+
+For interfaces, Nama offers a terminal command prompt, a Tk
+GUI, and experimental OSC and remote-command modes.
  
 The command prompt accepts Nama commands, Ecasound
 interactive-mode commands, shell commands and perl code,
@@ -32,7 +35,7 @@ covering Nama commands and effects.
 
 By default, Nama displays a simple graphic interface while
 the command processor runs in a terminal window. The B<-t>
-option provides a text-only interface for console users.
+option provides only a terminal interface.
 
 =head1 OPTIONS
 
@@ -270,8 +273,6 @@ Track REC/MON/OFF status guides audio processing.
 
 Each track, including Master and Mixdown, has its own
 REC/MON/OFF setting and displays its own REC/MON/OFF status.
-Each bus also has REC, MON and OFF settings that
-influence the behavior of user tracks.
 
 =head3 Track status
 
@@ -289,6 +290,7 @@ will show OFF status, even if set to MON.
 
 =head3 Bus setting
 
+Buses can force the status of their member tracks to OFF.
 Nama provides MON and OFF settings for buses.
 OFF (set by C<bus_off>) removes all member tracks from the chain
 setup, MON (set by C<bus_mon> restores them.
@@ -303,7 +305,7 @@ Multiple WAV files ("takes") can be recorded for each track. These are
 distinguished by a version number that increments with each
 recording run, i.e. F<sax_1.wav>, F<sax_2.wav>, etc.  All
 WAV files recorded in the same run have the same version
-numbers. 
+numbers.
 
 The version numbers of files for playback can be selected at
 the bus or track level. By setting the bus version
@@ -322,7 +324,7 @@ numbers for each separately if desired.
 =head2 Marks
 
 Marks in Nama are similar to those in other audio editing
-software, with one small caveat: Mark positions are relative
+software. One limitation is that mark positions are relative
 to the beginning of an Ecasound chain setup. If your project
 involves a single track, and you will be shortening the
 stream by setting a region to play, set any marks you need
