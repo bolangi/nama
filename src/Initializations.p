@@ -380,7 +380,8 @@ sub process_osc_command {
 }
 sub sanitize_osc_input {
 	my $input = shift;
-	$input = "" and my $error_msg = "error: perl/shell code are not allowed"
+	my $error_msg;
+	do{ $input = "" ; $error_msg = "error: perl/shell code are not allowed"}
 		if $input =~ /(^|;)\s*(!|eval\b)/;
 	say $error_msg;
 	$input;
