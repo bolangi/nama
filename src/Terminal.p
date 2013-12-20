@@ -281,12 +281,12 @@ sub get_ecasound_iam_keywords {
 	%{$text->{iam}} = map{$_,1 } 
 				grep{ ! $reserved{$_} } split /[\s,]/, eval_iam('int-cmd-list');
 }
-
 sub load_keywords {
 	my @keywords = keys %{$text->{commands}};
  	# complete hyphenated forms as well
-    push @keywords, map{my $k = $_; $k =~ s/_/-/g; $k }grep{ /_/ } @keywords;
-	map{ say } "keywords: ", @keywords;
+ 	my %hyphenated = map{my $h = $_; $h =~ s/_/-/g; $h => $_ }grep{ /_/ } @keywords;
+	$text->{hyphenated_commands} = \%hyphenated;
+	push @keywords, keys %hyphenated;
 	push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
 	push @keywords, keys %{$text->{iam}};
 	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
