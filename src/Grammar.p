@@ -47,6 +47,7 @@ sub process_line {
 	logsub("&process_line");
 	no warnings 'uninitialized';
 	my ($user_input) = @_;
+	# convert hyphenated commands to underscore form
 	while( my ($from, $to) = each %{$text->{hyphenated_commands}})
 	{ $user_input =~ s/$from/$to/g }
 	logpkg('debug',"user input: $user_input");

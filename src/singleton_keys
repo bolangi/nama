@@ -108,6 +108,7 @@ $text->{command_history}		# terminal command history
 $text->{screen_lines}			# 
 $text->{screen_columns}			#
 $text->{hotkey_playback_jumpsize}
+$text->{hyphenated_commands}	# remove-track => remove_track
 
 $project->{name}				# project name
 $project->{bunch}				# track bunches lists
