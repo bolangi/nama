@@ -105,7 +105,11 @@
 	$midi_output_dev   				$midi->{output_dev}
 	$controller_ports				$midi->{controller_ports}
     $midi_inputs					$midi->{inputs}
+
+	
 	$osc_listener_port 				$config->{osc_listener_port}
+	$remote_command_port 			$config->{remote_command_port}
+
 
 	# end
 
