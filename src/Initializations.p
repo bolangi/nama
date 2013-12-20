@@ -214,10 +214,7 @@ sub definitions {
 
 sub initialize_interfaces {
 	
-	logsub("&prepare");
-
-	say
-[% qx(cat ./banner.pl) %]
+	logsub("&intialize_interfaces");
 
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
@@ -256,8 +253,9 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc($config->{osc_listener_port}) if $config->{osc_listener_port} 
+	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
+	start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -361,7 +359,7 @@ sub start_ecasound {
 							! grep{ $pid == $_ } @existing_pids
 						 }	split " ", qx(pgrep ecasound);
 }
-sub start_osc { 
+sub start_osc_listener {
 	my $port = shift;
 	# because this presents a security risk, user must
 	# configure their port number

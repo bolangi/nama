@@ -378,7 +378,8 @@ sub show_status {
 	
 	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
 	say "Pending actions:  ", join(", ", @actions) if @actions;
-	say "Main bus allows:  ", $bn{Main}->allows, " track status";
+	#say "Main bus allows:  ", $bn{Main}->allows, " track status";
+	# not so important 
 	say "Main bus version: ",$bn{Main}->version if $bn{Main}->version;
 	say "Setup length is:  ", ::heuristic_time($setup->{audio_length}); 
 	say "Run time limit:   ", ::heuristic_time($setup->{runtime_limit})

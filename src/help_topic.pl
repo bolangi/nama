@@ -456,6 +456,5 @@ help is available for the following topics:
 13 Fades
 14 Command line options
 15 Man page
-911  All other issues
 
 HELP
