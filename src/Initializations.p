@@ -377,11 +377,14 @@ sub process_osc_command {
  	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
     my $p = $osc->parse(($osc->from_stream($packet))[0]);
 	say "got OSC: ", Dumper $p;
+	my $input = $p->[0];
+	$input =~ s(/)( )g;
+	process_command(sanitize_osc_input($input));
 }
 sub sanitize_osc_input {
 	my $input = shift;
 	my $error_msg;
-	do{ $input = "" ; $error_msg = "error: perl/shell code are not allowed"}
+	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
 		if $input =~ /(^|;)\s*(!|eval\b)/;
 	say $error_msg;
 	$input;
