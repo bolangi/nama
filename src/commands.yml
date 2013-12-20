@@ -492,7 +492,7 @@ show_track:
     Display full information about the current track: index, recording 
     status, effects and controllers, inserts, the selected
     WAV version, and signal width (channel count).
-  short: sh
+  short: sh -fart
   parameters: none
 show_mode:
   type: setup

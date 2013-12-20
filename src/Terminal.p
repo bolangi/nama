@@ -283,12 +283,16 @@ sub get_ecasound_iam_keywords {
 }
 
 sub load_keywords {
-	@{$text->{keywords}} = keys %{$text->{commands}};
-	push @{$text->{keywords}}, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @{$text->{keywords}};
-	push @{$text->{keywords}}, keys %{$text->{iam}};
-	push @{$text->{keywords}}, keys %{$fx_cache->{partial_label_to_full}};
-	push @{$text->{keywords}}, keys %{$midi->{keywords}} if $config->{use_midish};
-	push @{$text->{keywords}}, "Audio::Nama::";
+	my @keywords = keys %{$text->{commands}};
+ 	# complete hyphenated forms as well
+    push @keywords, map{my $k = $_; $k =~ s/_/-/g; $k }grep{ /_/ } @keywords;
+	map{ say } "keywords: ", @keywords;
+	push @keywords, grep{$_} map{split " ", $text->{commands}->{$_}->{short}} @keywords;
+	push @keywords, keys %{$text->{iam}};
+	push @keywords, keys %{$fx_cache->{partial_label_to_full}};
+	push @keywords, keys %{$midi->{keywords}} if $config->{use_midish};
+	push @keywords, "Audio::Nama::";
+	@{$text->{keywords}} = @keywords
 }
 
 sub complete {
