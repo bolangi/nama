@@ -97,7 +97,6 @@ sub context {
 	$context->{op}    = $this_track->op;
 	$context
 }
-	
 sub process_command {
 	state $total_effects_count;
 	my $input = shift;

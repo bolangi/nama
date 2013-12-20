@@ -256,8 +256,8 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc() if $config->{osc_listener_port} 
-				and can_load(modules => {'Protocol::OSC' => undef});
+	start_osc($config->{osc_listener_port}) if $config->{osc_listener_port} 
+		and can_load(modules => {'Protocol::OSC' => undef});
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -377,6 +377,13 @@ sub process_osc_command {
  	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
     my $p = $osc->parse(($osc->from_stream($packet))[0]);
 	say "got OSC: ", Dumper $p;
+}
+sub sanitize_osc_input {
+	my $input = shift;
+	$input = "" and my $error_msg = "error: perl/shell code are not allowed"
+		if $input =~ /(^|;)\s*(!|eval\b)/;
+	say $error_msg;
+	$input;
 }
 sub select_ecasound_interface {
 	pager3('Not initializing engine: options E or A are set.'),
