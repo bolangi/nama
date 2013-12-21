@@ -130,7 +130,7 @@ sub definitions {
 		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
-		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
+		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
 		edit_playback_end_margin 		=> 3,
@@ -142,7 +142,7 @@ sub definitions {
 		mute_level 						=> {ea => 0, 	eadb => -96}, 
 		fade_out_level 					=> {ea => 0, 	eadb => -40},
 		unity_level 					=> {ea => 100, 	eadb => 0}, 
-		fade_resolution 				=> 20, # steps per second
+		fade_resolution 				=> 100, # steps per second
 		engine_muting_time				=> 0.03,
 		enforce_channel_bounds			=> 1,
 
@@ -255,7 +255,7 @@ sub initialize_interfaces {
 	start_ecasound();
 	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
+	#start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -371,8 +371,25 @@ sub start_osc_listener {
 sub start_remote {
 	my $port = shift;
 	return unless $ port;
-	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_command );
+	my $in = $engine->{remote_control_socket} = new IO::Socket::INET (
+		LocalAddr => 'localhost', 
+		LocalPort => $port, 
+		Proto => 'tcp', 
+		Listen => 1,
+		Type => SOCK_STREAM,
+		Reuse => 1,
+	); 
+	die "Could not create socket: $!\n" unless $project->{remote_control_socket}; 
+# 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command );
+}
+sub process_remote_command {
+	my $in = $project->{remote_control_socket};
+	$project->{client_socket} //= $in->accept;
+	my $input;
+	$project->{client_socket}->recv($input, 65536);
+	defined $input and $input =~ /\S/ or return;
+	process_command($input);
 }
 
 sub process_osc_command {
