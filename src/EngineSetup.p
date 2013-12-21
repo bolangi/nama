@@ -71,9 +71,6 @@ sub reconfigure_engine {
 	
 	find_duplicate_inputs(); # we will warn the user later
 
-	# reconfigure engine if $setup->{changed} flag is set
-	# or status_snapshot() shows a change in configuration
-
 	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
 } 
