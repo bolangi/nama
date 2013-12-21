@@ -740,7 +740,6 @@ sub effect_update {
 sub effect_update_copp_set {
 	my ($id, $param, $val) = @_;
 	effect_update( @_ );
-	# params($id)->[$param] = $val; # equivalent but confusing
 	fxn($id)->params->[$param] = $val;
 }
 

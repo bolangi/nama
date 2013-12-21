@@ -31,11 +31,6 @@ sub fade {
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
-	effect_update_copp_set( 
-		$id, 
-		--$param, 
-		$to);
-	
 }
 
 sub fadein {
