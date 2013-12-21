@@ -345,11 +345,11 @@ sub jack_port_latency {
 	my ($client, $port) = client_port($name);
 	logpkg('debug',"name: $name, client: $client, port: $port, dir: $dir, direction: $direction");
 	my $node = jack_client($client)
-		or ::pager3("$name: non existing JACK client"),
+		or ::pager_newline("$name: non existing JACK client"),
 		return;
 	$node->{$port}->{latency}->{$direction}->{min}
 		ne $node->{$port}->{latency}->{$direction}->{max}
-	and ::pager3('encountered unmatched latencies', 
+	and ::pager_newline('encountered unmatched latencies', 
 		sub{ json_out($node) });
 	$node->{$port}->{latency}->{$direction}->{min}
 }

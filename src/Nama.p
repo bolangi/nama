@@ -143,6 +143,7 @@ use ::Latency ();
 use ::Log qw(logit loggit logpkg logsub initialize_logger);
 
 sub main { 
+	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
 	process_command($config->{execute_on_project_load});
 	reconfigure_engine();
@@ -213,3 +214,5 @@ __DATA__
 [% qx(cat ./palette.json) %]
 @@ hotkey_bindings
 [% qx(cat ./hotkeys.json) %]
+@@ banner
+[% qx(cat ./banner.pl) %]

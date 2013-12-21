@@ -18,6 +18,7 @@ $config->{latency_op_init}		# initial values
 $config->{latency_op_set}		# subroutine for setting latency compensation
 $config->{_is_system_bus}		# a hash
 $config->{osc_listener_port}
+$config->{remote_control_port}
 
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
 $jack->{fake_ports_list}		# for testing
@@ -127,6 +128,7 @@ $project->{mark_sequence_counter} # used for system assigned mark names
 $project->{redo}				# last commit removed by undo
 $project->{osc_socket}			# OSC listener socket
 $project->{osc}					# Protocol::OSC object
+$project->{remote_control_socket} # text command listener socket
 
 $file->{effects_cache}			# Name of effects discovery cache
 $file->{global_effect_chains}	# Name of global effect chains file

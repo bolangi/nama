@@ -3,8 +3,6 @@
 package ::;
 use Modern::Perl;
 {
-my $old_group_rw; # for restore on exiting doodle/preview mode
-
 sub set_preview_mode {
 
 	# set preview mode, releasing doodle mode if necessary
@@ -17,7 +15,7 @@ sub set_preview_mode {
 
 	$mode->{preview} = "preview";
 
-	pager2( <<'MSG');
+	pager_join( <<'MSG');
 Setting preview mode.
 Using both REC and MON inputs.
 WAV recording is DISABLED.
@@ -36,7 +34,7 @@ sub set_doodle_mode {
 	
 	# reconfigure_engine will generate setup and start transport
 	
-pager2( <<'MSG' );
+pager_join( <<'MSG' );
 Setting doodle mode.
 Using live inputs only, no duplicate inputs
 Exit using 'preview' or 'arm' commands
@@ -48,7 +46,7 @@ sub exit_preview_mode { # exit preview and doodle modes
 		logsub("&exit_preview_mode");
 		return unless $mode->{preview};
 		stop_transport() if engine_running();
-		pager2("Exiting preview/doodle mode");
+		pager_join("Exiting preview/doodle mode");
 		$mode->{preview} = 0;
 
 }

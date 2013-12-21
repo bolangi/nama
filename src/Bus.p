@@ -292,7 +292,7 @@ sub add_sub_bus {
 		@args
 	);
 
-	$tn{$name} and ::pager3( qq($name: setting as mix track for bus "$name"));
+	$tn{$name} and ::pager_newline( qq($name: setting as mix track for bus "$name"));
 
 	my $track = $tn{$name}// add_track($name, width => 2);
 
@@ -312,7 +312,7 @@ sub add_send_bus {
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
 	if ($bn{$name}){
-		::pager3( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
+		::pager_newline( qq(monitor bus "$name" already exists.  Updating with new tracks.) );
 	} else {
 	my @args = (
 		name => $name, 

@@ -130,7 +130,7 @@ sub definitions {
 		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
-		engine_fade_length_on_start_stop => 0.3, # when starting/stopping transport
+		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
 		edit_playback_end_margin 		=> 3,
@@ -142,7 +142,7 @@ sub definitions {
 		mute_level 						=> {ea => 0, 	eadb => -96}, 
 		fade_out_level 					=> {ea => 0, 	eadb => -40},
 		unity_level 					=> {ea => 100, 	eadb => 0}, 
-		fade_resolution 				=> 20, # steps per second
+		fade_resolution 				=> 100, # steps per second
 		engine_muting_time				=> 0.03,
 		enforce_channel_bounds			=> 1,
 
@@ -214,15 +214,12 @@ sub definitions {
 
 sub initialize_interfaces {
 	
-	logsub("&prepare");
-
-	say
-[% qx(cat ./banner.pl) %]
+	logsub("&intialize_interfaces");
 
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
-		pager3( "Unable to load perl Tk module. Starting in console mode.") if $config->{opts}->{g};
+		pager_newline( "Unable to load perl Tk module. Starting in console mode.") if $config->{opts}->{g};
 		$ui = ::Text->new();
 		can_load( modules =>{ Event => undef})
 			or die "Perl Module 'Event' not found. Please install it and try again. Stopping.";
@@ -256,8 +253,9 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc($config->{osc_listener_port}) if $config->{osc_listener_port} 
+	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
+	#start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -308,7 +306,7 @@ sub initialize_interfaces {
 	and process_is_running('jack.plumbing')
 	){
 
-		pager3(<<PLUMB);
+		pager_newline(<<PLUMB);
 Jack.plumbing daemon detected!
 
 Attempting to stop it...  
@@ -332,7 +330,7 @@ Please do one of the following, then restart Nama:
 ....Exiting.) );
 exit;
 		}
-		else { pager3("Stopped.") }
+		else { pager_newline("Stopped.") }
 	}
 		
 	start_midish() if $config->{use_midish};
@@ -361,7 +359,7 @@ sub start_ecasound {
 							! grep{ $pid == $_ } @existing_pids
 						 }	split " ", qx(pgrep ecasound);
 }
-sub start_osc { 
+sub start_osc_listener {
 	my $port = shift;
 	# because this presents a security risk, user must
 	# configure their port number
@@ -369,6 +367,29 @@ sub start_osc {
 	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
+}
+sub start_remote {
+	my $port = shift;
+	return unless $ port;
+	my $in = $engine->{remote_control_socket} = new IO::Socket::INET (
+		LocalAddr => 'localhost', 
+		LocalPort => $port, 
+		Proto => 'tcp', 
+		Listen => 1,
+		Type => SOCK_STREAM,
+		Reuse => 1,
+	); 
+	die "Could not create socket: $!\n" unless $project->{remote_control_socket}; 
+# 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command );
+}
+sub process_remote_command {
+	my $in = $project->{remote_control_socket};
+	$project->{client_socket} //= $in->accept;
+	my $input;
+	$project->{client_socket}->recv($input, 65536);
+	defined $input and $input =~ /\S/ or return;
+	process_command($input);
 }
 
 sub process_osc_command {
@@ -390,7 +411,7 @@ sub sanitize_osc_input {
 	$input;
 }
 sub select_ecasound_interface {
-	pager3('Not initializing engine: options E or A are set.'),
+	pager_newline('Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
 
 	# Net-ECI if requested by option, or as fallback 
@@ -402,14 +423,14 @@ sub select_ecasound_interface {
 }
 
 sub start_ecasound_libecasoundc {
-	pager3("Using Ecasound via Audio::Ecasound (libecasoundc)");
+	pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	no warnings qw(redefine);
 	*eval_iam = \&eval_iam_libecasoundc;
 	$engine->{ecasound} = Audio::Ecasound->new();
 }
 	
 sub start_ecasound_net_eci {
-	pager3("Using Ecasound via Net-ECI"); 
+	pager_newline("Using Ecasound via Net-ECI"); 
 	no warnings qw(redefine);
 	launch_ecasound_server($config->{engine_tcp_port});
 	init_ecasound_socket($config->{engine_tcp_port}); 
@@ -447,17 +468,17 @@ sub launch_ecasound_server {
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = ">/dev/null &";
 	my $ps = qx(ps ax);
-	pager3("Using existing Ecasound server"), return 
+	pager_newline("Using existing Ecasound server"), return 
 		if  $ps =~ /ecasound/
 		and $ps =~ /--server/
 		and ($ps =~ /tcp-port=$port/ or $port == $default_port);
-	pager3("Starting Ecasound server");
+	pager_newline("Starting Ecasound server");
  	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
 	sleep 1;
 }
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
-	pager3("Creating socket on port $port.");
+	pager_newline("Creating socket on port $port.");
 	$engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 

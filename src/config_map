@@ -62,7 +62,7 @@
 	$use_group_numbering 			$config->{use_group_numbering}
 	$press_space_to_start_transport $config->{press_space_to_start}
 	$execute_on_project_load 		$config->{execute_on_project_load}
-	$initial_user_mode 				$config->{initial_mode}
+	$initial_mode 					$config->{initial_mode}
 	$midish_enable 					$config->{use_midish}
 	$quietly_remove_tracks 			$config->{quietly_remove_tracks}
 	$use_jack_plumbing 				$config->{use_jack_plumbing}
@@ -105,7 +105,11 @@
 	$midi_output_dev   				$midi->{output_dev}
 	$controller_ports				$midi->{controller_ports}
     $midi_inputs					$midi->{inputs}
+
+	
 	$osc_listener_port 				$config->{osc_listener_port}
+	$remote_control_port 			$config->{remote_control_port}
+
 
 	# end
 

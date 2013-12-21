@@ -198,13 +198,13 @@ sub detect_spacebar {
 }
 sub throw {
 	logsub("&throw");
-	pager3(@_)
+	pager_newline(@_)
 }
-sub pager2 {
-	logsub("&pager2");
+sub pager_join {
+	logsub("&pager_join");
 	pager(join "", @_)
 }
-sub pager3 { map { my $s = $_; chomp $s; say $s} @_ }
+sub pager_newline { map { my $s = $_; chomp $s; say $s} @_ }
 	
 sub pager {
 	logsub("&pager");
