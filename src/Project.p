@@ -143,7 +143,7 @@ sub load_project {
 			map{create_dir($_)} project_dir(), this_wav_dir() ;
 		}
 		else 
-		{ ::pager3(
+		{ ::pager_newline(
 			qq(Project "$project->{name}" does not exist.\n Loading project "untitled".)
 			);
 			load_project( qw{name untitled create 1} );
@@ -413,7 +413,7 @@ sub list_project_templates {
 }
 sub remove_project_template {
 	map{my $name = $_; 
-		pager2("$name: removing template");
+		pager_join("$name: removing template");
 		$name .= ".yml" unless $name =~ /\.yml$/;
 		unlink join_path( project_root(), "templates", $name);
 	} @_;

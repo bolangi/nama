@@ -515,10 +515,10 @@ sub set_source {
 	my $new_source = $track->input_object_text;;
 	my $object = $new_source;
 	if ( $old_source  eq $new_source ){
-		::pager2($track->name, ": input unchanged, $object");
+		::pager_join($track->name, ": input unchanged, $object");
 	} else {
-		::pager2("Track ",$track->name, ": source set to $object");
-		::pager2("Track ",$track->name, ": record enabled"), 
+		::pager_join("Track ",$track->name, ": source set to $object");
+		::pager_join("Track ",$track->name, ": record enabled"), 
 			$track->set(rec_defeat => 0) 
 			if transition_from_null($old_source,$new_source)
 			and $track->rec_defeat;
@@ -561,10 +561,10 @@ sub set_send {
 	logpkg('debug', "send is now $new_send");
 	my $object = $track->output_object_text;
 	if ( $old_send  eq $new_send ){
-		::pager2("Track ",$track->name, ": send unchanged, ",
+		::pager_join("Track ",$track->name, ": send unchanged, ",
 			( $object ?  $object : 'off'));
 	} else {
-		::pager2("Track ",$track->name, ": ", 
+		::pager_join("Track ",$track->name, ": ", 
 		$object 
 			? "$object is now a send target" 
 			: "send target is turned off.");
