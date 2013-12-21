@@ -143,7 +143,7 @@ use ::Latency ();
 use ::Log qw(logit loggit logpkg logsub initialize_logger);
 
 sub main { 
-	say get_data_section('banner');
+	say eval join(get_data_section('banner'), qw(" "));
 	bootstrap_environment() ;
 	process_command($config->{execute_on_project_load});
 	reconfigure_engine();
