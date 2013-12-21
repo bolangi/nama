@@ -3,8 +3,6 @@
 package ::;
 use Modern::Perl;
 {
-my $old_group_rw; # for restore on exiting doodle/preview mode
-
 sub set_preview_mode {
 
 	# set preview mode, releasing doodle mode if necessary
