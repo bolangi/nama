@@ -56,6 +56,7 @@ sub definitions {
 	$mode = bless {}, '::Mode';
 	{ package ::Mode; 
 		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
+		no warnings 'uninitialized';
 		sub eager 		{ $::mode->{eager} 					}
 		sub doodle 		{ $::mode->{preview} eq 'doodle' 	}
 		sub preview 	{ $::mode->{preview} eq 'preview' 	}
