@@ -509,16 +509,16 @@ bus_off: _bus_off {
 	{ $mix->set(rw => 'OFF') }
 	::pager_join( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
 }
-bus_version: _bus_version { 
-	use warnings;
-	no warnings qw(uninitialized);
-	print $::this_bus, " bus default version is: ", 
-		$::bn{$::this_bus}->version, "\n" ; 1}
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
 	$n = undef if $n == 0;
 	$::bn{$::this_bus}->set( version => $n ); 
 	print $::this_bus, " bus default version set to: ", 
+		$::bn{$::this_bus}->version, "\n" ; 1}
+bus_version: _bus_version { 
+	use warnings;
+	no warnings qw(uninitialized);
+	print $::this_bus, " bus default version is: ", 
 		$::bn{$::this_bus}->version, "\n" ; 1}
 mixdown: _mixdown { ::mixdown(); 1}
 mixplay: _mixplay { ::mixplay(); 1}
