@@ -64,6 +64,7 @@ sub definitions {
 			$::mode->{preview} eq 'doodle' 	}
 		sub preview 	{ $::mode->{preview} eq 'preview' 	}
 		sub song 		{ $::mode->eager and $::mode->preview }
+		sub live		{ $::mode->eager and $::mode->doodle  }
 	}
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
