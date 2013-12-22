@@ -51,12 +51,6 @@ sub exit_preview_mode { # exit preview and doodle modes
 
 }
 
-sub restore_preview_mode { 
-	$mode->{preview} = $mode->{eager};
-}
-
-}
-
 sub master_on {
 
 	return if $mode->mastering;
@@ -142,6 +136,7 @@ sub unhide_mastering_tracks {
 sub hide_mastering_tracks {
 	process_command("for Mastering; set_track hide 1 rw OFF");
  }
+}
 		
 1;
 __END__

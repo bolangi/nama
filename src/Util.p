@@ -114,7 +114,6 @@ my %bus_logic = (
 			$bus->set(rw => 'REC'); # least restrictive 
 			$tn{$bus->send_id}->busify 
 				if $bus->send_type eq 'track' and $tn{$bus->send_id};
-			::restore_preview_mode();
 			
 		},
 
