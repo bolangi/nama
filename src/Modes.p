@@ -11,7 +11,7 @@ sub set_preview_mode {
 
 	# do nothing if already in 'preview' mode
 	
-	if ( $mode->preview ){ return }
+	return if $mode->preview;
 
 	$mode->{preview} = "preview";
 

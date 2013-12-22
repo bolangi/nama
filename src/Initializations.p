@@ -58,8 +58,12 @@ sub definitions {
 		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
 		no warnings 'uninitialized';
 		sub eager 		{ $::mode->{eager} 					}
-		sub doodle 		{ $::mode->{preview} eq 'doodle' 	}
+		sub doodle 		{ 
+			#my $set = shift;
+			#if (defined $set){ $::mode->{preview} = $set ? 'doodle' : 0 }
+			$::mode->{preview} eq 'doodle' 	}
 		sub preview 	{ $::mode->{preview} eq 'preview' 	}
+		sub gig_live 	{ $::mode->eager and $::mode->preview }
 	}
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
