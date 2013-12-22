@@ -258,11 +258,11 @@ sub jump {
 			? $new_pos 
 			: $setup->{audio_length} - 10
 	}
-	
 	set_position( $new_pos );
-	sleeper( 0.6) if engine_running();
 }
-sub set_position {
+sub set_position { fade_around(\&_set_position, @_) }
+
+sub _set_position {
 	logsub("&set_position");
 
     return if ::ChainSetup::really_recording(); # don't allow seek while recording

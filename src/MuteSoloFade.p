@@ -13,6 +13,16 @@ sub unmute {
 	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
 	$tn{Master}->unmute;
 }
+sub fade_around {
+	my ($coderef, @args) = @_;
+	if( engine_running() )
+	{
+		mute();
+		$coderef->(@args);
+		unmute();
+	}
+	else { $coderef->(@args) }
+}
 sub fade {
 	my ($id, $param, $from, $to, $seconds) = @_;
 
