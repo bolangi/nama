@@ -119,6 +119,7 @@ preview:
     Enter the preview mode. Configure Nama for playback and 
     passthru of live inputs without recording (for mic test, 
     rehearsal, etc.)
+  short: song
   parameters: none
   example: |
     rec     # Set the current track to record from its source.
@@ -129,6 +130,7 @@ preview:
     arm     # Restore to normal recording/playback mode.
 doodle:
   type: transport
+  short: live
   what: |
     Enter doodle mode. Passthru of live inputs without
     recording. No playback. Intended for rehearsing and
