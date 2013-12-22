@@ -541,7 +541,7 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		print "$name: following latest version\n";
+		print "$name: following bus default\n";
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
 		print "$name: anchoring version $n\n";
