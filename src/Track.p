@@ -204,7 +204,7 @@ sub monitor_version {
 
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! ($mode->{preview} eq 'doodle');
+	return 'MON' if $monitor_version and ! $mode->doodle;
 	return 'OFF';
 }
 
@@ -225,7 +225,7 @@ sub rec_status {
 
 	if ( $bus->rw eq 'OFF'
 		or $track->rw eq 'OFF'
-		or $mode->{preview} eq 'doodle' and $track->rw eq 'REC' and 
+		or $mode->doodle and ! $mode->eager and $track->rw eq 'REC' and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name}
 	){ 	return			  'OFF' }
 
@@ -367,7 +367,7 @@ sub input_path {
 	elsif($track->rec_status eq 'REC'){ 
 		(input_node($track->source_type), $track->name) } 
 
-	elsif($track->rec_status eq 'MON' and $mode->{preview} ne 'doodle'){
+	elsif($track->rec_status eq 'MON' and ! $mode->doodle){
 		('wav_in', $track->name) 
 	}
 }

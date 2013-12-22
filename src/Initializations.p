@@ -54,8 +54,12 @@ sub definitions {
 	
 	$project = bless {}, '::Project';
 	$mode = bless {}, '::Mode';
-	{ package ::Mode; sub mastering { $::tn{Eq} and ! $::tn{Eq}->{hide} } }
-	
+	{ package ::Mode; 
+		sub mastering 	{ $::tn{Eq} and ! $::tn{Eq}->{hide} } 
+		sub eager 		{ $::mode->{eager} 					}
+		sub doodle 		{ $::mode->{preview} eq 'doodle' 	}
+		sub preview 	{ $::mode->{preview} eq 'preview' 	}
+	}
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path
 	# to various system files, such as $file->state_store

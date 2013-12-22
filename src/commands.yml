@@ -1607,6 +1607,10 @@ show_head_commit:
     A commit may contain multiple commands. 
     The last_* aliases are meaningful when autosave: undo is set.
     In that case each commit contains only a single command
+eager:
+  type: mode
+  what: set eager mode
+  parameters: on | off
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)

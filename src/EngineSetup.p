@@ -110,7 +110,7 @@ sub reconfigure_engine {
 		eval_iam("setpos $project->{playback_position}")
  				if $project->{playback_position}
 					and not ::ChainSetup::really_recording();
-# 			start_transport('quiet') if $mode->{preview} =~ /doodle/;
+		start_transport('quiet') if $mode->eager;
 		transport_status();
 		$ui->flash_ready;
 		1

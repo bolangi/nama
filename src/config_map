@@ -75,6 +75,7 @@
 	$autosave						$config->{autosave}
 	$beep_command 					$config->{beep_command}
 	$hotkey_beep					$config->{hotkey_beep}
+	$eager							$mode->{eager}
 
 	$alias							$config->{alias}
 	$hotkeys						$config->{hotkeys}

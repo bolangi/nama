@@ -85,7 +85,6 @@ sub initialize_project_data {
 
 	$setup->{_old_snapshot} = "";
 
-	$mode->{preview} = $config->{initial_mode};
 	$mode->{mastering} = 0;
 
 	$project->{save_file_version_number} = 0; 
@@ -104,7 +103,7 @@ sub initialize_project_data {
 	$mode->{offset_run} = 0;
 	$this_edit = undef;
 	
-	$mode->{preview} = 0;
+	$mode->{preview} = $config->{initial_mode};
 
 	::ChainSetup::initialize();
 	reset_hotkey_buffers();
