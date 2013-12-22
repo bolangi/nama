@@ -63,7 +63,7 @@ sub definitions {
 			#if (defined $set){ $::mode->{preview} = $set ? 'doodle' : 0 }
 			$::mode->{preview} eq 'doodle' 	}
 		sub preview 	{ $::mode->{preview} eq 'preview' 	}
-		sub gig_live 	{ $::mode->eager and $::mode->preview }
+		sub song 		{ $::mode->eager and $::mode->preview }
 	}
 	# for example, $file belongs to class ::File, and uses
 	# AUTOLOAD to generate methods to provide full path

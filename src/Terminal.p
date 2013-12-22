@@ -182,8 +182,7 @@ sub detect_spacebar {
 	$engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
 		if ( $config->{press_space_to_start} and 
-			$text->{term_attribs}->{line_buffer} eq " "
-			and ! $mode->gig_live )
+			$text->{term_attribs}->{line_buffer} eq " " and ! $mode->song )
 		{ 	
 			toggle_transport();	
 			$text->{term_attribs}->{line_buffer} = q();
