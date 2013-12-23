@@ -390,8 +390,7 @@ sub process_remote_command {
 	my $in = $project->{remote_control_socket};
  	$in->accept->recv(my $input, $in->sockopt(SO_RCVBUF));
 	#defined $input and $input =~ /\S/ or return;
-	say "got input: $input";
-	#process_command($input);
+	process_command(sanitize_remote_input($input));
 }
 
 sub process_osc_command {
@@ -402,9 +401,9 @@ sub process_osc_command {
 	say "got OSC: ", Dumper $p;
 	my $input = $p->[0];
 	$input =~ s(/)( )g;
-	process_command(sanitize_osc_input($input));
+	process_command(sanitize_remote_input($input));
 }
-sub sanitize_osc_input {
+sub sanitize_remote_input {
 	my $input = shift;
 	my $error_msg;
 	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
