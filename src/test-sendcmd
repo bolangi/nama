@@ -1,0 +1,28 @@
+   # Sending
+    #   make packet
+use Modern::Perl;
+use Protocol::OSC;
+use IO::Socket::INET;
+use Time::HiRes 'time';
+my $osc = Protocol::OSC->new;
+#my @specs = ("/o", "foo\ bar", 9, "baz",  );
+my @specs = ("/show_track", "dummy", 9);
+		#qw"/nama eval foo bar";
+my $data = $osc->message(@specs);
+#my $data = $osc->message(my @specs);
+use Data::Dumper::Concise;
+#say Dumper $data;
+           # or
+#my $data = $osc->bundle(time, [@specs]);
+say Dumper $data;
+my $tcp = IO::Socket::INET->new( PeerAddr => 'localhost', PeerPort => '57121', Proto => 'tcp', Type => SOCK_STREAM) || die $!;
+           $tcp->send("show_track\n");
+
+__END__
+    #   via UDP
+
+           my $udp = IO::Socket::INET->new( PeerAddr => 'localhost', PeerPort => '57120', Proto => 'udp', Type => SOCK_DGRAM) || die $!;
+           $udp->send($data);
+
+    #   via TCP
+
