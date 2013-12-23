@@ -705,5 +705,33 @@ Behind the scenes, the host track becomes the mix track to a
 sub-bus. Sources for the bus are the original audio track, and
 zero or more edits, each represented by one track object.
 
+=head1 REMOTE CONTROL
+
+You can send now send commands from a remote process, and
+also get information back. Understand that this code opens a
+remote execution hole.
+
+In F<.namarc> you need something like:
+
+      remote_control_port: 57121
+
+Then Nama will set up a listener for remote commands.
+
+The usual return value will be a single newline.
+
+However, if you send an 'eval' command followed by perl
+code, the return value will be the result of the perl code
+executed with a newline appended. If the result is a list,
+the items will be joined by spaces into a single string.
+
+If the result is an object or data structure, it will be
+returned in a serialized form. 
+
+For example, if you send this string:
+
+      eval $this_track->name
+
+The return value will be the name of the current track.
+
 =head1 TEXT COMMANDS
 
