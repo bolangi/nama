@@ -384,10 +384,14 @@ sub start_remote {
 }
 sub process_remote_command {
 	my $in = $project->{remote_control_socket};
- 	$in->accept->recv(my $input, $in->sockopt(SO_RCVBUF));
+	my $socket = $in->accept;
+	$socket->recv(my $input, $in->sockopt(SO_RCVBUF));
 	defined $input and $input =~ /\S/ or return;
 	logpkg('debug',"Got remote control input: $input");
+	undef $text->{eval_result};
 	process_command($input);
+	my $out = $text->{eval_result} . "\n";
+	$socket->send($out);
 }
 
 sub process_osc_command {

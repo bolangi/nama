@@ -225,6 +225,7 @@ sub eval_perl {
 	my $code = shift;
 	map{ $code =~ s/(^|[^A-Za-z])::$_/$1$namespace_root\::$_/ } @namespace_abbreviations; # SKIP_PREPROC
 	my $err;
+	undef $text->{eval_result};
 	my @result = eval $code;
 	if ($@){
 		print( "Perl command failed: \ncode: $code\nerror: $@");
@@ -233,6 +234,7 @@ sub eval_perl {
 	else { 
 		no warnings 'uninitialized';
 		@result = map{ dumper($_) } @result;
+		$text->{eval_result} = join " ", @result;
 		pager(join "\n", @result) 
 	}	
 }
