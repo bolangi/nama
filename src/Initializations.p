@@ -263,9 +263,9 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
+	start_osc_listener() if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
+	start_remote() if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -370,27 +370,24 @@ sub start_ecasound {
 						 }	split " ", qx(pgrep ecasound);
 }
 sub start_osc_listener {
-	my $port = shift;
-	# because this presents a security risk, user must
-	# configure their port number
-	return unless $ port;
+	my $port = $config->{osc_listener_port};
+	say "Starting OSC listener on port $port";
 	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub start_remote {
-	my $port = shift;
-	# because this presents a security risk, user must
-	# configure their port number
-	return unless $ port;
+	my $port = $config->{remote_control_port};
+	say "Starting remote control listener on port $port";
 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
 }
 sub process_remote_command {
 	my $in = $project->{remote_control_socket};
  	$in->accept->recv(my $input, $in->sockopt(SO_RCVBUF));
-	#defined $input and $input =~ /\S/ or return;
-	process_command(sanitize_remote_input($input));
+	defined $input and $input =~ /\S/ or return;
+	logpkg('debug',"Got remote control input: $input");
+	process_command($input);
 }
 
 sub process_osc_command {
@@ -479,7 +476,7 @@ sub launch_ecasound_server {
 }
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
-	pager_newline("Creating socket on port $port.");
+	pager_newline("Creating engine socket on port $port.");
 	$engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
