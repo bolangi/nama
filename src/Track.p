@@ -196,9 +196,6 @@ sub monitor_version {
 	my $bus = $bn{$track->group};
 	return $track->version if $track->version 
 				and grep {$track->version  == $_ } @{$track->versions} ;
-	return $bus->version if $bus->version 
-				and grep {$bus->version  == $_ } @{$track->versions};
-	return undef if $bus->version;
 	$track->last;
 }
 
