@@ -390,8 +390,10 @@ sub process_remote_command {
 	logpkg('debug',"Got remote control input: $input");
 	undef $text->{eval_result};
 	process_command($input);
+	{ no warnings 'uninitialized';
 	my $out = $text->{eval_result} . "\n";
 	$socket->send($out);
+	}
 }
 
 sub process_osc_command {
