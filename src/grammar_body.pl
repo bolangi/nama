@@ -558,11 +558,11 @@ mono: _mono {
 	print $::this_track->name, ": setting to mono\n";
 	1; }
 
-rec_defeat: _rec_defeat { 
+write_defeat: _write_defeat { 
 	$::this_track->set(rec_defeat => 1);
 	print $::this_track->name, ": WAV recording disabled!\n";
 }
-rec_enable: _rec_enable { 
+write_enable: _write_enable { 
 	$::this_track->set(rec_defeat => 0);
 	print $::this_track->name, ": WAV recording enabled";
 	my $rw = $::bn{$::this_track->group}->rw;
@@ -578,8 +578,8 @@ mon: 'dummy'
 
 # some ordering fixes
 command: mono
-command: rec_defeat
-command: rec_enable
+command: write_defeat
+command: write_enable
 command: rw
 
 rw_setting: 'rec'|'mon'|'off' { $return = $item[1] }

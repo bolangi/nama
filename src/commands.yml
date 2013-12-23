@@ -252,7 +252,7 @@ record:
     Set the current track source to its live input.
     The signal will be written to disk during
     the engine run. The rec_defeat command prevents 
-    writing the file, rec_enable restores it.
+    writing the file, write_enable restores it.
   short: rec
   parameters: none
   example: |
@@ -275,29 +275,33 @@ off:
     Set current track to OFF (exclude it from setup). 
     You can re-include it using "mon" or "rec" commands.
   parameters: none
-rec_defeat:
+write_defeat:
   type: track
   what: |
     Prevent writing an audio file for the current track. The track will 
     just pass thru the incoming audio. 
-  short: rd
+  short: wd rec_defeat
   parameters: none
-rec_enable:
+write_enable:
   type: track
   what: | 
     Allow the current track to write an audio file to disk. 
-    This is the opposite of rec_defeat. 
-  short: re
+    This is the opposite of write_defeat. 
+  short: we rec_enable
   parameters: none
 source:
   type: track
-  what: Set the current track's input (source). This can be a soundcard channel or a JACK client name.
+  what: |
+    Set the current track's input (source), for example
+    to a soundcard channel, or JACK client name
   short: src r
   parameters: |
-    <i_soundcard_channel> | 'null' | <s_jack_client_name> | <s_jack_port_name> | 'jack'
+    <i_soundcard_channel> | <s_jack_client_name> 
+    | <s_jack_port_name> <s_jack_ports_list> | 
+    | <s_track_name> | <s_loop_id> | 'jack' | 'null' 
   example: |
     source 3 
-    ! Take input from soundcard channel 3 (3 & 4 if stereo)
+    ! Take input from soundcard channel 3 (3/4 if track is stereo)
     !
     source null 
     ! Track's input is silence. This is useful for when an effect such 
@@ -312,9 +316,16 @@ source:
     ! for more information).
     !
     source jack 
-    ! Create connections to all ports listed in current_trackname.ports,
-    ! if it exists in the Nama project root directory. Ports are
-    ! listed pairwise in the .ports files for stereo tracks.
+    ! This leaves the track input exposed as a JACK ports
+    ! such as Nama:sax_in_1 for manual connection.
+    !
+    source kit.ports
+    ! If there exists a file, kit.ports, 
+    ! in the Nama project root directory, 
+    ! the JACK ports listed in that file
+    ! will be connected to that input.
+    !
+    ! Ports are listed pairwise in the .ports files for stereo tracks.
     ! This is convenient for use with the Hydrogen drumkit, 
     ! whose outputs use one JACK port per voice.
 send:
