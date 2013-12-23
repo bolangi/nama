@@ -3,6 +3,7 @@ $this_bus
 $this_mark
 $this_edit
 $this_sequence
+$this_engine
 $prompt
 %tn
 %ti
