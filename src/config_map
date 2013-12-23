@@ -91,7 +91,6 @@
     $edit_crossfade_time  			$config->{edit_crossfade_time}
 	$default_fade_length 			$config->{engine_fade_default_length}
 	$fade_time 						$config->{engine_fade_length_on_start_stop}
-	$seek_delay    					$config->{engine_jack_seek_delay}
  
 	%mute_level						$config->{mute_level}
 	%fade_out_level 				$config->{fade_out_level}
