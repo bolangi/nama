@@ -265,7 +265,7 @@ sub initialize_interfaces {
 	start_ecasound();
 	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	#start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
+	start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -380,26 +380,17 @@ sub start_osc_listener {
 }
 sub start_remote {
 	my $port = shift;
+	# because this presents a security risk, user must
+	# configure their port number
 	return unless $ port;
-	my $in = $engine->{remote_control_socket} = new IO::Socket::INET (
-		LocalAddr => 'localhost', 
-		LocalPort => $port, 
-		Proto => 'tcp', 
-		Listen => 1,
-		Type => SOCK_STREAM,
-		Reuse => 1,
-	); 
-	die "Could not create socket: $!\n" unless $project->{remote_control_socket}; 
-# 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command );
+	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
 }
 sub process_remote_command {
 	my $in = $project->{remote_control_socket};
-	$project->{client_socket} //= $in->accept;
-	my $input;
-	$project->{client_socket}->recv($input, 65536);
-	defined $input and $input =~ /\S/ or return;
-	process_command($input);
+ 	$in->accept->recv(my $input, $in->sockopt(SO_RCVBUF));
+	#defined $input and $input =~ /\S/ or return;
+	process_command(sanitize_remote_input($input));
 }
 
 sub process_osc_command {
@@ -410,9 +401,9 @@ sub process_osc_command {
 	say "got OSC: ", Dumper $p;
 	my $input = $p->[0];
 	$input =~ s(/)( )g;
-	process_command(sanitize_osc_input($input));
+	process_command(sanitize_remote_input($input));
 }
-sub sanitize_osc_input {
+sub sanitize_remote_input {
 	my $input = shift;
 	my $error_msg;
 	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
