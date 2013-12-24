@@ -1648,4 +1648,20 @@ show_head_commit: _show_head_commit { ::show_head_commit() }
 eager: _eager on_or_off { $::mode->{eager} = $item{on_or_off} =~ /[1n]/ ? 1 : 0 }
 on_or_off: 'on' | '1' | 'off' | '0'
 
+new_engine: _new_engine ident port { ::Engine->new(name => $item{ident}, port => $item{port}) }
 
+port: dd
+
+select_engine: _select_engine ident {
+	my $new_choice = $::Engine::by_name{$item{ident}};
+	$::this_engine = $new_choice if defined $new_choice;
+	::pager("Current engine is ".$::this_engine->name)
+}
+set_track_engine_group: _set_track_engine_group ident {
+	$::this_track->set(engine_group => $item{ident});
+	::pager($::this_track->name. ": engine group set to $item{ident}");
+}
+set_bus_engine_group: _set_bus_engine_group ident {
+	$::bn{$::this_bus}->set(engine_group => $item{ident});
+ 	::pager("$::this_bus: bus engine group set to $item{ident}");
+}

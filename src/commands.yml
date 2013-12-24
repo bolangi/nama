@@ -1624,6 +1624,26 @@ eager:
   type: mode
   what: set eager mode
   parameters: on | off
+new_engine:
+  type: engine
+  what: Start a named Ecasound engine, or bind to an existing engine
+  short: neg
+  parameters: <s_engine_name> <i_port>
+select_engine:
+  type: engine
+  what: Select an ecasound engine (advanced users only!)
+  short: seg
+  parameters: <s_engine_name>
+set_track_engine_group:
+  type: track
+  what: set the current track's engine affiliation
+  short: steg
+  parameters: <s_engine_name>
+set_bus_engine_group:
+  type: bus
+  what: set the current bus's engine affiliation
+  short: sbeg
+  parameters: <s_engine_name>
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)
