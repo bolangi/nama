@@ -27,7 +27,7 @@ commands =>
 				my ($name,$adjective) = @_;
 				print ("Hello $name! You look $adjective today!!\n");
 		},
-		disable_jack_polling => sub{ $engine->{events}->{poll_jack} = undef },
+		disable_jack_polling => sub{ $this_engine->{events}->{poll_jack} = undef },
 
 		promote_current_version => sub {
 				my $v = $this_track->monitor_version;

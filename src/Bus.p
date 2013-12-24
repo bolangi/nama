@@ -15,6 +15,7 @@ use ::Object qw(
 					version 
 					send_type
 					send_id
+					engine_group
 					class
 
 					);

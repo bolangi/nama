@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup $engine %tn %bn $mode);
+use ::Globals qw($file $config $jack $setup $this_engine %tn %bn $mode);
 use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;

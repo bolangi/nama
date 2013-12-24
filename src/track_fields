@@ -62,6 +62,7 @@
 					version_comment # describe a version { 1 => 'comment text' }
 
 					forbid_user_ops	# declare that we prohibit user from adding ops
+					engine_group
 
 					# new API:
 					# { 1 => 

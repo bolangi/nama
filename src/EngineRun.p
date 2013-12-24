@@ -71,7 +71,7 @@ sub start_transport {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+ 	#$this_engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
 	sleeper(0.5);
@@ -125,14 +125,14 @@ sub current_position {
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
- 	$engine->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+ 	$this_engine->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
 }
 
 sub stop_heartbeat {
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
-	return unless $engine->{events}->{poll_engine};
-	undef $engine->{events}->{poll_engine};
+	return unless $this_engine->{events}->{poll_engine};
+	undef $this_engine->{events}->{poll_engine};
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }
@@ -183,23 +183,23 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$engine->{events}->{wraparound} = undef;
+	$this_engine->{events}->{wraparound} = undef;
 }
 sub limit_processing_time {
 	my $length = shift;
- 	$engine->{events}->{processing_time} 
+ 	$this_engine->{events}->{processing_time} 
 		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
-	$engine->{events}->{processing_time} = undef; 
+	$this_engine->{events}->{processing_time} = undef; 
 	undef $setup->{runtime_limit};
 }
 sub wraparound {
 	package ::;
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$engine->{events}->{wraparound} = undef;
-	$engine->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	$this_engine->{events}->{wraparound} = undef;
+	$this_engine->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 sub ecasound_select_chain {
 	my $n = shift;
@@ -236,7 +236,7 @@ sub _stop_do_start {
 		$result
 }
 sub restart_ecasound {
-	pager_newline("killing ecasound processes @{$engine->{pids}}");
+	pager_newline("killing ecasound processes @{$this_engine->{pids}}");
 	kill_my_ecasound_processes();
 	pager_newline(q(restarting Ecasound engine - your may need to use the "arm" command));	
 	select_ecasound_interface();
@@ -244,7 +244,7 @@ sub restart_ecasound {
 }
 sub kill_my_ecasound_processes {
 	my @signals = (15, 9);
-	map{ kill $_, @{$engine->{pids}}; sleeper(1)} @signals;
+	map{ kill $_, @{$this_engine->{pids}}; sleeper(1)} @signals;
 }
 
 

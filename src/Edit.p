@@ -259,7 +259,7 @@ our (
 	
 
 sub detect_keystroke_p {
-	$engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
+	$this_engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
 		
 		abort_set_edit_points(), return
@@ -334,7 +334,7 @@ sub set_edit_points {
 
 Engine will start in 2 seconds.);
 	initialize_edit_points();
- 	$engine->{events}->{set_edit_points} = AE::timer(2, 0, 
+ 	$this_engine->{events}->{set_edit_points} = AE::timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();

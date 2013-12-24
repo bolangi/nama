@@ -100,6 +100,7 @@ use ::Fade;
 use ::Edit;
 use ::EffectChain;
 use ::Lat;
+use ::Engine;
 
 ####### Nama subroutines ######
 #
@@ -127,10 +128,10 @@ use ::Mix ();
 use ::Memoize ();
 
 use ::EngineSetup ();
+use ::EngineRun ();
 use ::EngineCleanup ();
 use ::EffectsRegistry ();
-use ::Effects ();
-use ::EngineRun ();
+use ::Effects;
 use ::MuteSoloFade ();
 use ::Jack ();
 
@@ -170,18 +171,18 @@ sub cleanup_exit {
 	# - SIGINT (2nd time)
 	# - allow time to close down
 	# - SIGKILL
-	delete $engine->{events};
+	delete $this_engine->{events};
 	close_midish() if $config->{use_midish};
-	if( @{$engine->{pids}}){
+	if( @{$this_engine->{pids}}){
 		map{ my $pid = $_; 
 			 map{ my $signal = $_; 
 				  kill $signal, $pid; 
 				  sleeper(0.2);
 				} (15); #,15,9);
 			 waitpid $pid, 1;
-		} @{$engine->{pids}};
+		} @{$this_engine->{pids}};
 	}
- 	#kill 15, ecasound_pid() if $engine->{socket};  	
+ 	#kill 15, ecasound_pid() if $this_engine->{socket};  	
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
 }

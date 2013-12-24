@@ -9,6 +9,7 @@ $prompt
 %ti
 %bn
 %mn
+%en
 $g
 $debug
 $debug2

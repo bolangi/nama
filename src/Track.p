@@ -205,6 +205,16 @@ sub maybe_monitor { # ordinary sub, not object method
 	return 'OFF';
 }
 
+# if you belong to a bus with an opinion, go that way
+sub engine_group {
+	my $track = shift;
+	my $bus = $bn{$track->group};
+	$bus->engine_group || $track->{engine_group} || 'default'
+}
+sub engine {
+	my $track = shift;
+	$en{$track->engine_group}
+}
 sub rec_status {
 #	logsub("&rec_status");
 	my $track = shift;
@@ -224,6 +234,7 @@ sub rec_status {
 		or $track->rw eq 'OFF'
 		or $mode->doodle and ! $mode->eager and $track->rw eq 'REC' and 
 			$setup->{tracks_with_duplicate_inputs}->{$track->name}
+		or $track->engine_group ne $::this_engine->name
 	){ 	return			  'OFF' }
 
 	# having reached here, we know $bus->rw and $track->rw are REC or MON
@@ -960,7 +971,11 @@ use ::Globals qw(:all);
 use Modern::Perl; use Carp; use ::Log qw(logpkg);
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
-sub rec_status { $_[0]->rw ne 'OFF' ? 'REC' : 'OFF' }
+sub rec_status {
+	my $track = shift;
+ 	$track->rw ne 'OFF' and $track->engine_group eq $this_engine->name 
+		? 'REC' : 'OFF' 
+}
 #sub rec_status_display { $_[0]->rw ne 'OFF' ? 'MON' : 'OFF' }
 sub busify {}
 sub unbusify {}
@@ -974,6 +989,7 @@ our @ISA = '::SimpleTrack';
 
 sub rec_status{
 	my $track = shift;
+ 	return 'OFF' if $track->engine_group ne $this_engine->name;
 	$mode->{mastering} ? 'MON' :  'OFF';
 }
 sub source_status {}

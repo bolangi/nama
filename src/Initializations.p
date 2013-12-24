@@ -207,8 +207,6 @@ sub definitions {
 	}
 	} # end ::Config package
 
-	$engine = bless {}, '::Engine';
-
 	$prompt = "nama ('h' for help)> ";
 
 	$this_bus = 'Main';
@@ -261,8 +259,11 @@ sub initialize_interfaces {
 	};
 	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
+	
+	select_ecasound_interface(); # Net-ECI
+		
+	$this_engine = ::Engine->new(name => 'default', port => 57000);
 
-	start_ecasound();
 	start_osc_listener() if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
 	start_remote() if $config->{remote_control_port};
@@ -360,27 +361,18 @@ exit;
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	1;	
 }
-sub start_ecasound {
- 	my @existing_pids = split " ", qx(pgrep ecasound);
-	select_ecasound_interface();
-	::Effects::import_engine_subs();
-	sleeper(0.2);
-	@{$engine->{pids}} = grep{ 	my $pid = $_; 
-							! grep{ $pid == $_ } @existing_pids
-						 }	split " ", qx(pgrep ecasound);
-}
 sub start_osc_listener {
 	my $port = $config->{osc_listener_port};
 	say "Starting OSC listener on port $port";
 	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
+	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub start_remote {
 	my $port = $config->{remote_control_port};
 	say "Starting remote control listener on port $port";
 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
+	$this_engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
 }
 sub process_remote_command {
 	my $in = $project->{remote_control_socket};
@@ -417,31 +409,15 @@ sub sanitize_remote_input {
 sub select_ecasound_interface {
 	pager_newline('Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
-
-	# Net-ECI if requested by option, or as fallback 
-	
-	start_ecasound_net_eci(), return if $config->{opts}->{n}
-		or !  can_load( modules => { 'Audio::Ecasound' => undef });
-
-	start_ecasound_libecasoundc();
+	*eval_iam = \&eval_iam_neteci;
+	::Effects::import_engine_subs();
 }
-
 sub start_ecasound_libecasoundc {
 	pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	no warnings qw(redefine);
 	*eval_iam = \&eval_iam_libecasoundc;
-	$engine->{ecasound} = Audio::Ecasound->new();
+	$this_engine->{ecasound} = Audio::Ecasound->new();
 }
-	
-sub start_ecasound_net_eci {
-	pager_newline("Using Ecasound via Net-ECI"); 
-	no warnings qw(redefine);
-	launch_ecasound_server($config->{engine_tcp_port});
-	init_ecasound_socket($config->{engine_tcp_port}); 
-	*eval_iam = \&eval_iam_neteci;
-}
-
-
 sub choose_sleep_routine {
 	if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
 		 { *sleeper = *finesleep;
@@ -483,18 +459,18 @@ sub launch_ecasound_server {
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
 	pager_newline("Creating engine socket on port $port.");
-	$engine->{socket} = new IO::Socket::INET (
+	$this_engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
 		Proto => 'tcp', 
 	); 
-	die "Could not create socket: $!\n" unless $engine->{socket}; 
+	die "Could not create socket: $!\n" unless $this_engine->{socket}; 
 }
 
 sub ecasound_pid {
 	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
 	my ($pid) = split " ", $ps; 
-	$pid if $engine->{socket}; # conditional on using socket i.e. Net-ECI
+	$pid if $this_engine->{socket}; # conditional on using socket i.e. Net-ECI
 }
 
 
@@ -507,10 +483,10 @@ sub eval_iam_neteci {
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
-	$engine->{socket}->send("$cmd\r\n");
+	$this_engine->{socket}->send("$cmd\r\n");
 	my $buf;
 	# get socket reply, restart ecasound on error
-	my $result = $engine->{socket}->recv($buf, 65536);
+	my $result = $this_engine->{socket}->recv($buf, 65536);
 	defined $result or restart_ecasound(), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
@@ -550,13 +526,13 @@ sub eval_iam_libecasoundc {
 	
 	logit($category,'debug',"ECI sent: $cmd");
 
-	my (@result) = $engine->{ecasound}->eci($cmd);
+	my (@result) = $this_engine->{ecasound}->eci($cmd);
 	logit($category, 'debug',"ECI  got: @result") 
 		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $engine->{ecasound}->errmsg();
+	my $errmsg = $this_engine->{ecasound}->errmsg();
 	if( $errmsg ){
 		restart_ecasound() if $errmsg =~ /in engine-status/;
-		$engine->{ecasound}->errmsg(''); 
+		$this_engine->{ecasound}->errmsg(''); 
 		# Audio::Ecasound already prints error
 	}
 	"@result";

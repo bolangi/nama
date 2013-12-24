@@ -14,9 +14,11 @@ use ::Globals qw(
 					%ti 
 					%tn 
 					%bn 
+					%en
 					$config 
 					$setup 
 					$project
+					$this_engine
 					$this_track);
 
 sub import_engine_subs {
@@ -164,7 +166,7 @@ sub _add_effect {  # append effect
 	$id = effect_init($p); 
 	
 	$ui->add_effect_gui($p) unless $ti{$n}->hide;
-	if( valid_engine_setup() )
+	if( ::valid_engine_setup() )
 	{
 		if (engine_running())
 		{ 
@@ -256,6 +258,7 @@ sub modify_effect {
 	$parameter--; # convert to zero-based
 	my $cop = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
+	#local $this_engine = $cop->track->engine;
 	my $code = $cop->type;
 	my $i = effect_index($code);
 	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
@@ -507,7 +510,7 @@ sub remove_op {
 	local $config->{category} = 'ECI_FX';
 
 	# only if engine is configured
-	return unless valid_engine_setup();
+	return unless ::valid_engine_setup();
 
 	my $id = shift;
 	my $self = fxn($id);
@@ -696,7 +699,7 @@ sub effect_update {
 	
 	#logsub("&effect_update");
 
-	return unless valid_engine_setup();
+	return unless ::valid_engine_setup();
 	#my $es = eval_iam("engine-status");
 	#logpkg('debug', "engine is $es");
 	#return if $es !~ /not started|stopped|running/;
@@ -713,7 +716,7 @@ sub effect_update {
 	# $param is zero-based. 
 	# %{$fx->{params}} is  zero-based.
 
-	my $old_chain = eval_iam('c-selected') if valid_engine_setup();
+	my $old_chain = eval_iam('c-selected') if ::valid_engine_setup();
 	ecasound_select_chain($chain);
 
 	# update Ecasound's copy of the parameter
@@ -751,7 +754,7 @@ sub sync_effect_parameters {
 	#
 	# this routine syncs them in prep for save_state()
 	
- 	return unless valid_engine_setup();
+ 	return unless ::valid_engine_setup();
 	my $old_chain = eval_iam('c-selected');
 	map{ $_->sync_one_effect } grep{ $_ }  map{ fxn($_) } ops_with_controller(), ops_with_read_only_params();
 	eval_iam("c-select $old_chain");
@@ -990,17 +993,17 @@ sub set_current_op {
 }
 sub set_current_param {
 	my $parameter = shift;
-	$project->{current_param}->{this_op()} = $parameter;
+	$project->{current_param}->{::this_op()} = $parameter;
 }
 sub set_current_stepsize {
 	my $stepsize = shift;
-	$project->{current_stepsize}->{this_op()}->[this_param()] = $stepsize;
+	$project->{current_stepsize}->{::this_op()}->[this_param()] = $stepsize;
 }
-sub increment_param { modify_effect(this_op(), this_param(),'+',this_stepsize())}
-sub decrement_param { modify_effect(this_op(), this_param(),'-',this_stepsize())}
+sub increment_param { modify_effect(::this_op(), this_param(),'+',this_stepsize())}
+sub decrement_param { modify_effect(::this_op(), this_param(),'-',this_stepsize())}
 sub set_parameter_value {
 	my $value = shift;
-	modify_effect(this_op(), this_param(), undef, $value)
+	modify_effect(::this_op(), this_param(), undef, $value)
 }
 } # end package ::Effects
 { 
@@ -1136,6 +1139,8 @@ sub about {
 	my $self = shift;
 	$fx_cache->{registry}->[$self->registry_index]
 }
+sub track { $ti{$_[0]->chain} }
+
 sub AUTOLOAD {
 	my $self = shift;
 	# get tail of method call

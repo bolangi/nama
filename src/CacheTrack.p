@@ -158,7 +158,7 @@ sub cache_engine_run {
 
 	# ensure that engine stops at completion time
 	$setup->{cache_track_args} = $args;
- 	$engine->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
+ 	$this_engine->{events}->{poll_engine} = AE::timer(1, 0.5, \&poll_cache_progress);
 
 	# complete_caching() contains the remainder of the caching code.
 	# It is triggered by stop_polling_cache_progress()
@@ -251,7 +251,7 @@ sub poll_cache_progress {
 }
 sub stop_polling_cache_progress {
 	my $args = shift;
-	$engine->{events}->{poll_engine} = undef; 
+	$this_engine->{events}->{poll_engine} = undef; 
 	$ui->reset_engine_mode_color_display();
 	complete_caching($args);
 
