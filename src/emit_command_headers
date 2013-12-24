@@ -88,9 +88,8 @@ elsif ($output eq 'pod'){
 			# convert literal !n to double newlines
 			# add C<> tags to command text
 
-			my @example = split '!n', $example;
-			#print "found ", scalar @example, "lines\n";
-			$example = join "", map{ $_ = "C<$_>\n\n" } @example;
+			$example = munge_help($example);
+			$example = "C<$example>";
 
 			print "$example\n\n";
 		}
@@ -99,6 +98,12 @@ elsif ($output eq 'pod'){
 
 } else { die "$0: parameter 'headers' or 'pod' required" }
 
+sub munge_help {
+	my $text = shift;
+	$text =~ s/(^\s*)!(\s*#)/$1 $2/mg;
+	$text =~ s/(^\s*!)/#/mg;
+	$text
+}
 
 sub yaml_in {
 	

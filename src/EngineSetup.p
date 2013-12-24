@@ -267,6 +267,8 @@ sub connect_transport {
 	sleeper(0.2); # time for ecasound engine to launch
 
 	# set delay for seeking under JACK
+	# we use a heuristic based on the number of tracks
+	# but it should be based on the number of MON tracks
 	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
 	$engine->{jack_seek_delay} = $jack->{jackd_running}

@@ -592,7 +592,7 @@ Ctrl-C to exit Nama.
 
 =head2 Jack ports list file
 
-Use I<source ports> or I<source filename.ports> to ask Nama
+Use I<source filename.ports> to ask Nama
 to connect multiple JACK ports listed in a file
 (F<trackname.ports> or F<filename.ports>) to the input
 ports for that track, which will be set to
@@ -600,9 +600,8 @@ I<ecasound:trackname_in_1> for mono. A stereo track will
 use I<ecasound:trackname_in_2> as well.
 
 If the track is stereo, ports from the list are alternately
-connected to left and right channels. Larger numbers
-of channels are handled similarly.
-
+connected to left and right channels.
+ 
 =head2 Track edits
 
 An edit is an audio clip associated with a particular track
@@ -704,6 +703,34 @@ I<destroy_edit>
 Behind the scenes, the host track becomes the mix track to a
 sub-bus. Sources for the bus are the original audio track, and
 zero or more edits, each represented by one track object.
+
+=head1 REMOTE CONTROL
+
+You can send now send commands from a remote process, and
+also get information back. Understand that this code opens a
+remote execution hole.
+
+In F<.namarc> you need something like:
+
+      remote_control_port: 57121
+
+Then Nama will set up a listener for remote commands.
+
+The usual return value will be a single newline.
+
+However, if you send an 'eval' command followed by perl
+code, the return value will be the result of the perl code
+executed with a newline appended. If the result is a list,
+the items will be joined by spaces into a single string.
+
+If the result is an object or data structure, it will be
+returned in a serialized form. 
+
+For example, if you send this string:
+
+      eval $this_track->name
+
+The return value will be the name of the current track.
 
 =head1 TEXT COMMANDS
 

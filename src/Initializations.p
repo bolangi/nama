@@ -263,9 +263,9 @@ sub initialize_interfaces {
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 
 	start_ecasound();
-	start_osc_listener($config->{osc_listener_port}) if $config->{osc_listener_port} 
+	start_osc_listener() if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	#start_remote($config->{remote_control_port}) if $config->{remote_control_port} ;
+	start_remote() if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -370,36 +370,30 @@ sub start_ecasound {
 						 }	split " ", qx(pgrep ecasound);
 }
 sub start_osc_listener {
-	my $port = shift;
-	# because this presents a security risk, user must
-	# configure their port number
-	return unless $ port;
+	my $port = $config->{osc_listener_port};
+	say "Starting OSC listener on port $port";
 	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub start_remote {
-	my $port = shift;
-	return unless $ port;
-	my $in = $engine->{remote_control_socket} = new IO::Socket::INET (
-		LocalAddr => 'localhost', 
-		LocalPort => $port, 
-		Proto => 'tcp', 
-		Listen => 1,
-		Type => SOCK_STREAM,
-		Reuse => 1,
-	); 
-	die "Could not create socket: $!\n" unless $project->{remote_control_socket}; 
-# 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command );
+	my $port = $config->{remote_control_port};
+	say "Starting remote control listener on port $port";
+	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	$engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
 }
 sub process_remote_command {
 	my $in = $project->{remote_control_socket};
-	$project->{client_socket} //= $in->accept;
-	my $input;
-	$project->{client_socket}->recv($input, 65536);
+	my $socket = $in->accept;
+	$socket->recv(my $input, $in->sockopt(SO_RCVBUF));
 	defined $input and $input =~ /\S/ or return;
+	logpkg('debug',"Got remote control input: $input");
+	undef $text->{eval_result};
 	process_command($input);
+	{ no warnings 'uninitialized';
+	my $out = $text->{eval_result} . "\n";
+	$socket->send($out);
+	}
 }
 
 sub process_osc_command {
@@ -410,9 +404,9 @@ sub process_osc_command {
 	say "got OSC: ", Dumper $p;
 	my $input = $p->[0];
 	$input =~ s(/)( )g;
-	process_command(sanitize_osc_input($input));
+	process_command(sanitize_remote_input($input));
 }
-sub sanitize_osc_input {
+sub sanitize_remote_input {
 	my $input = shift;
 	my $error_msg;
 	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
@@ -488,7 +482,7 @@ sub launch_ecasound_server {
 }
 sub init_ecasound_socket {
 	my $port = shift // $default_port;
-	pager_newline("Creating socket on port $port.");
+	pager_newline("Creating engine socket on port $port.");
 	$engine->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 

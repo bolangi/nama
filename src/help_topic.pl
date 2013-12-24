@@ -143,10 +143,11 @@ track => <<TRACK,
 
  - rw_status
 
-   rec                     -  set track to REC  
-   mon                     -  set track to MON
-   off, z                  -  set track OFF (omit from setup)
-   rec_defeat, rd          -  toggle track WAV recording on/off
+   rec                     -  set track to REC (live signal source)
+   mon                     -  set track to MON (WAV file playback)
+   off                     -  set track OFF (omit from setup)
+   write_defeat, wd        -  toggle track WAV recording off
+   write_enable, we        -  toggle track WAV recording on
 
  - vol/pan 
 
@@ -267,6 +268,8 @@ effects => <<EFFECTS,
    modify_effect,  mfx        - set, increment or decrement effect parameter
    remove_effect,  rfx        - remove an effect or controller
    append_effect, apfx        - add effect to the end of current track effect list 
+   bypass_effects, bypass, bye   - suspend current track effects except vol/pan
+   restore_effects, restore, ref - restore track effects
 
 -  send/receive inserts
 
@@ -277,12 +280,11 @@ effects => <<EFFECTS,
 
 -  effect chains (presets, each consisting of multiple effects)
 
-   new_effect_chain, nec         - define a new effect chain
-   add_effect_chain, aec         - add an effect chain to the current track
-   delete_effect_chain, dec      - delete an effect chain
-   list_effect_chains, lec       - list effect chains and their parameters
-   bypass_effects, bypass, bye   - suspend current track effects except vol/pan
-   restore_effects, restore, ref - restore track effects
+   list_effect_chains,     lec   - list effect chains and their parameters
+   new_effect_chain,       nec   - define a new effect chain
+   overwrite_effect_chain, oec   - as above, but overwite existing definition
+   add_effect_chain,       aec   - add an effect chain to the current track
+   delete_effect_chain,    dec   - delete an effect chain definition
 
 -  effect profiles (effect chains for a group of tracks)
 
@@ -325,6 +327,7 @@ group => <<GROUP,
 GROUP
 
 bus => <<BUS,
+   list_buses,          lbs   - list bus data
    add_send_bus_raw,    asbr  - create bus and slave tracks for 
                                 sending pre-fader track signals
    add_send_bus_cooked, asbc  - as above, for post-fader signals
