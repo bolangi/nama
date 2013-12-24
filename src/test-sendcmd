@@ -1,8 +1,11 @@
 use Modern::Perl;
 use IO::Socket::INET;
 my $tcp = IO::Socket::INET->new( PeerAddr => 'localhost', PeerPort => '57121', Proto => 'tcp', Type => SOCK_STREAM) || die $!;
-my $cmd = 'eval $this_track->name';
+my $i;
+while(++$i){
+my $cmd = qq(eval $i);
 $tcp->send($cmd);
 sleep 1; 
 $tcp->recv(my $result, 65536);
 say "command: $cmd, result: $result";
+}
