@@ -140,6 +140,7 @@ sub definitions {
 		autosave						=> 'undo',
 		volume_control_operator 		=> 'ea', # default to linear scale
 		sync_mixdown_and_monitor_version_numbers => 1, # not implemented yet
+		engine_tcp_port					=> 2868, # 'default' engine
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
@@ -262,7 +263,10 @@ sub initialize_interfaces {
 	
 	select_ecasound_interface(); # Net-ECI
 		
-	$this_engine = ::Engine->new(name => 'default', port => 57000);
+	$this_engine = ::Engine->new(
+		name => 'default', 
+		port => $config->{engine_tcp_port},
+	);
 
 	start_osc_listener() if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
