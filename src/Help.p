@@ -18,6 +18,7 @@ sub helpline {
 	}
 	$out .= "\n";
 	my $example = $text->{commands}->{$cmd}->{example};
+	$example = munge_help($example);
 	#$example =~ s/!n/\n/g;
 	if ($example){
 		$out .=  "Example: ";
@@ -30,6 +31,12 @@ sub helpline {
 	}
 	($/, ucfirst $out, $/);
 	
+}
+sub munge_help {
+	my $text = shift;
+	$text =~ s/(^\s*)!(\s*#)/$1 $2/mg;
+	$text =~ s/(^\s*!)/#/mg;
+	$text
 }
 sub helptopic {
 	my $user_input = shift;
