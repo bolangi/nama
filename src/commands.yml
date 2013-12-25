@@ -1644,6 +1644,19 @@ set_bus_engine_group:
   what: set the current bus's engine affiliation
   short: sbeg
   parameters: <s_engine_name>
+select_user:
+  type: bus
+  short: user
+  what: Set the target for the trim command
+  parameters: <s_send_bus_name>
+trim_user:
+  type: bus
+  what: control a send-bus fader
+  short: trim
+  example: |
+    # reduce vol of current track in in_ear_monitor by 3dB
+    user in_ear_monitor1
+    trim vol - 3 
 # config:
 #   type: general
 #   what: get or set project-specific config values (args may be quoted)

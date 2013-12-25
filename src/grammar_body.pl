@@ -1665,3 +1665,14 @@ set_bus_engine_group: _set_bus_engine_group ident {
 	$::bn{$::this_bus}->set(engine_group => $item{ident});
  	::pager("$::this_bus: bus engine group set to $item{ident}");
 }
+select_user: _select_user existing_bus_name { 
+	$::this_user = $::bn{$item{existing_bus_name}}
+}
+trim_user: _trim_user effect parameter sign(?) value { 
+	#my($nick, $real) = @{$item{fx_alias}};
+	my $real_track = join '_', $::this_user->name, $::this_track->name;
+	print "real track: $real_track\n";
+	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
+ 	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
+}
+#fx_alias: ident { [$item{ident}, $::config->{alias}->{effect}->{$item{ident}}] }

@@ -4,6 +4,7 @@ $this_mark
 $this_edit
 $this_sequence
 $this_engine
+$this_user
 $prompt
 %tn
 %ti
