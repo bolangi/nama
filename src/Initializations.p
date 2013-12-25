@@ -264,7 +264,7 @@ sub initialize_interfaces {
 	select_ecasound_interface(); # Net-ECI
 		
 	$this_engine = ::Engine->new(
-		name => 'default', 
+		name => 'Nama', 
 		port => $config->{engine_tcp_port},
 		jack_operation_mode => 'send',
 	);

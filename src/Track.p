@@ -209,7 +209,7 @@ sub maybe_monitor { # ordinary sub, not object method
 sub engine_group {
 	my $track = shift;
 	my $bus = $bn{$track->group};
-	$bus->engine_group || $track->{engine_group} || 'default'
+	$bus->engine_group || $track->{engine_group} || 'Nama'
 }
 sub engine {
 	my $track = shift;
