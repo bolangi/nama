@@ -156,4 +156,13 @@ hotkeys:
   O: next_effect
   Space: toggle_transport
 
+alias:
+  command:
+    mbs: move_to_bus
+    pcv: promote_current_version
+    djp: disable_jack_polling
+  effect:
+    reverb: gverb
+# end
+
 # end
