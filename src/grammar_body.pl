@@ -941,7 +941,7 @@ list_history: _list_history {
 	my %seen;
 	::pager_join( grep{ ! $seen{$_}; $seen{$_}++ } @history );
 }
-add_send_bus_cooked: _add_send_bus_cooked bus_name destination {
+add_user: _add_user bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
 	1;
 
