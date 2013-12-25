@@ -14,6 +14,7 @@ use ::Object qw(
 				name
 				port
 				jack_seek_delay
+				jack_operation_mode
 				events
 				socket
 				pids
