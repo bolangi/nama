@@ -715,7 +715,9 @@ new_project:
   what: Create or open a new empty Nama project.
   short: create
   parameters: <s_new_project_name>
-  example: create my_song # Will create empty project my_song.
+  example: |
+    create jam 
+    # creates empty project call "jam".
     # Now you can start adding your tracks, editing them and mixing them.
 load_project:
   type: project
@@ -801,8 +803,8 @@ add_controller:
   parameters: [ <s_operator_id> ] <s_effect_code> [ <f_param1> <f_param2> ] ...
   example: |
     add_effect etd 100 2 2 50 50 # Add a stero delay of 100ms.
-    # the delay will get the effect ID E .
-    # Now we want to slowly change the delay to 200ms.
+    ! the delay will get the effect ID E .
+    ! Now we want to slowly change the delay to 200ms.
     acl E klg 1 100 200 2 0 100 15 200 # Change the delay time linearly (klg)
         # from 100ms at the start (0 seconds) to 200ms at 15 seconds. See
         # help for -klg in the Ecasound manpage.
@@ -812,49 +814,54 @@ add_effect:
   short: afx
   parameters: <s_effect_code> [ <f_param1> <f_param2>... ]
   example: |
-    # We want to add the decimator effect (a LADSPA plugin).
+    We want to add the decimator effect (a LADSPA plugin).
     help_effect decimator # Print help about its paramters/controls.
-                          # We see two input controls: bitrate and samplerate
-    afx decimator 12 22050 # We have added the decimator with 12bits and a sample
-                         # rate of 22050Hz.
-  # NOTE the message printed to the screen, it can read like this:
-  # Added GO (Decimator)
-  # GO in this case is the unique effect ID, which yo will need to modify it.
+    !                     # We see two input controls: bitrate and samplerate
+    afx decimator 12 22050  #  prints "Added GO (Decimator)"
+    ! We have added the decimator with 12bits and a sample rate of 22050Hz.
+    ! GO is the effect ID, which you will need to modify it.
 append_effect:
   type: effect
   what: Add an effect postfader (after vol/pan conrols) to the current track. Remove effect with remove_effect.
   short: apfx
   parameters: <s_effect_code> [ <f_param1> <f_param2> ] ...
   example: |
-    apfx var_dali # Append the Ecasound effect preset var_dali to the current
-                  # track.
+    apfx var_dali  
+    ! Append the Ecasound effect preset var_dali to the current track
 insert_effect:
   type: effect
   what: Place an effect before the specified unique effect ID. You will experience a short pause in playback.
   short: ifx
   parameters: <s_insert_point_id> <s_effect_code> [ <f_param1> <f_param2> ] ...
   example: |
-    # Insert a delay before the reverb.
-    lfx # List all effects. The reverb has unique effect ID AF .
-    ifx AF etd 125 2 2 40 60 # Insert the etd delay before the reverb (AF).
+    To insert a delay before the reverb 
+    lfx 
+    ! List track effects. (We find the reverb's effect ID is AF.)
+    ifx AF etd 125 2 2 40 60 
+    ! Insert the etd delay before the reverb (AF).
 modify_effect:
   type: effect
   what: Modify effect parameter(s).
   short: mfx
   parameters: [ <s_effect_id> ] <i_parameter> [ + | - | * | / ] <f_value>
   example: |
-    # Modify the roomsize of our reverb.
-    lfx # We see, that reverb has unique effect ID AF and roomsize is the
-    # first parameter.
-    mfx AF 1 62 # change the roomsize of reverb (AF) to 62.
-    # We want to change roomsizes of both reverb AF and BG to 75.
-    mfx AF,BG 1 75 # Change roomsize (parameter 1) of both AF and BG.
-    mfx CE 6,10 -3 # Change parameters 6 and 10 of the effecit, with unique
-                   # effect ID CE to -3 (good for adjusting dependent times
-                   # in delays, volume levels in equalisers...)
-    mfx D 4 + 10 # Increase the fourth parameter of effect D by 10.
-    mfx A,B,C 3,6 * 5 # Adjust parameters 3 and 6 of effect A, B and C by a 
-                      # factor of 5.
+    To change the roomsize of our reverb effect to 62
+    lfx 
+    ! We see that reverb has unique effect ID AF and roomsize is the
+    ! first parameter.
+    mfx AF 1 62 
+    ! 
+    mfx AF,BG 1 75 
+    ! Change the first parameter of both AF and BG to 75.
+    !
+    mfx CE 6,10 -3 
+    ! Change parameters 6 and 10 of effect CE to -3
+    !
+    mfx D 4 + 10 
+    ! Increase the fourth parameter of effect D by 10.
+    ! 
+    mfx A,B,C 3,6 * 5 
+    ! Adjust parameters 3 and 6 of effect A, B and C by a factor of 5.
 remove_effect:
   type: effect
   what: Remove effects. They don't have to be on the current track.
@@ -1028,14 +1035,16 @@ list_history:
   what: List the command history. Every project stores its own command history.
   short: lh
   parameters: none
-add_send_bus_cooked:
+add_user:
   type: bus
-  what: Add a send bus that copies all user tracks with effects and inserts
-  short: asbc
+  what: Create a custom mix including all tracks in bus "Main"
+  parameters: <s_name> <destination>
+  short: au add_send_bus_cooked asbc 
   parameters: <s_name> <destination>
   example: |
-    asbc Reverb jconv # Add a send bus called Reverb, that sends all output
-                      # to the jconv JACK client.
+    add_user front_of_house 7
+    ! send a custom mix named "front_of_house"
+    ! to soundcard channels 7/8
 add_send_bus_raw:
   type: bus
   what: Add a send bus that copies all user tracks' unprocessed inputs
@@ -1483,8 +1492,8 @@ rerecord:
   parameters: none
   example: |
     for piano guitar;rec # Set piano and guitar track to record.
-    # do your recording and ilstening.
-    # You want to record another version of both piano and guitar:
+    ! do your recording and ilstening.
+    ! You want to record another version of both piano and guitar:
     rerec # Sets piano and guitar to record again.
 analyze_level:
   type: track
@@ -1654,15 +1663,7 @@ trim_user:
   what: control a send-bus fader
   short: trim
   example: |
-    # reduce vol of current track in in_ear_monitor by 3dB
+    ! reduce vol of current track in in_ear_monitor by 3dB
     user in_ear_monitor1
     trim vol - 3 
-# config:
-#   type: general
-#   what: get or set project-specific config values (args may be quoted)
-#   parameters: <s_parameter_name> [<s_arguments>]
-# unset:
-#   type: general
-#   what: delete project-specific config values (fall back to global config)
-#   parameters: <s_parameter_name>
 ...
