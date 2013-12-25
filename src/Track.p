@@ -960,6 +960,16 @@ sub rec_cleanup_script {
 sub is_region { defined $_[0]->{region_start} }
 
 sub current_edit { $_[0]->{current_edit}//={} }
+
+sub first_effect_of_type {
+	my $track = shift;
+	my $type = shift;
+	for my $op ( @{$track->ops} ){
+		my $FX = ::fxn($op);
+		return $FX if $type eq $FX->type
+	}
+}
+
 } # end package
 
 # subclasses
