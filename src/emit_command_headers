@@ -10,7 +10,7 @@ use YAML::Tiny;
 
 my $output = shift @ARGV;
 
-my $in = qx(./strip_all  ./commands.yml);
+my $in = qx(cat ./commands.yml);
 
 # preserve order for generating docs
 
