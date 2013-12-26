@@ -76,6 +76,11 @@ sub definitions {
 			my $self = shift;
 			$ENV{NAMA_LOGFILE} || $self->_logfile
 		}
+		sub chain_setup {
+			my $self = shift;
+			my $name = defined $::this_engine ?  $::this_engine->name : 'Setup';
+			::join_path(::project_dir(), "$name.ecs")
+		}
 		sub AUTOLOAD {
 			my ($self, $filename) = @_;
 			# get tail of method call
@@ -97,7 +102,6 @@ sub definitions {
 		git_state_store 		=> ['State.json',      		\&project_dir ],
 		untracked_state_store => ['Aux',					\&project_dir ],
 		effect_profile 			=> ['effect_profiles',		\&project_root],
-		chain_setup 			=> ['Setup.ecs',      		\&project_dir ],
 		user_customization 		=> ['customize.pl',    		\&project_root],
 		project_effect_chains 	=> ['project_effect_chains',\&project_dir ],
 		global_effect_chains  	=> ['global_effect_chains', \&project_root],
