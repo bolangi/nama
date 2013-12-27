@@ -20,6 +20,8 @@ use ::Object qw(
 				pids
 				ecasound
 				buffersize
+				on_reconfigure
+    			on_exit
 				 );
 
 initialize();
