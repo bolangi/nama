@@ -270,7 +270,7 @@ sub initialize_interfaces {
 	$this_engine = ::Engine->new(
 		name => 'Nama', 
 		port => $config->{engine_tcp_port},
-		jack_operation_mode => 'send',
+		jack_transport_mode => 'send',
 	);
 
 	start_osc_listener() if $config->{osc_listener_port} 

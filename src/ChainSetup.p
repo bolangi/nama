@@ -421,7 +421,7 @@ sub write_chains {
 	## write general options
 	
 	my $globals .= join " ", $config->{engine_globals}->{common},
-							join(',', '-G:jack',$this_engine->name,$this_engine->jack_operation_mode),
+							join(',', '-G:jack',$this_engine->name,$this_engine->jack_transport_mode),
 							"-b",$config->buffersize,
 							$config->globals_realtime;
 	
