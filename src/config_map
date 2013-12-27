@@ -109,7 +109,7 @@
 	
 	$osc_listener_port 				$config->{osc_listener_port}
 	$remote_control_port 			$config->{remote_control_port}
-
+	$engines						$config->{engines}
 
 	# end
 
