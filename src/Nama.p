@@ -175,15 +175,15 @@ sub cleanup_exit {
 	close_midish() if $config->{use_midish};
 	my @engines = values %::Engine::by_name;
 	for (@engines){
-	if( @{$_->{pids}}){
-		map{ my $pid = $_; 
-			 map{ my $signal = $_; 
-				  kill $signal, $pid; 
-				  sleeper(0.2);
-				} (15); #,15,9);
-			 waitpid $pid, 1;
-		} @{$_->{pids}};
-	}
+		if( @{$_->{pids}}){
+			map{ my $pid = $_; 
+				 map{ my $signal = $_; 
+					  kill $signal, $pid; 
+					  sleeper(0.2);
+					} (15); #,15,9);
+				 waitpid $pid, 1;
+			} @{$_->{pids}};
+		}
 	}
  	#kill 15, ecasound_pid() if $this_engine->{socket};  	
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
