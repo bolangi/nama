@@ -89,7 +89,7 @@ sub new {
 	# To ensure that users don't get into trouble, we would like to 
 	# restrict this track:
 	#  - version number must *not* be allowed to change
-	#  - rw setting must be fixed to 'MON' #
+	#  - rw setting must be fixed to 'PLAY' #
 	#  The easiest way may be to subclass the 'set' routine
 	
 	my $host_track_alias = $::tn{$self->host_alias} // 
@@ -97,7 +97,7 @@ sub new {
 			name 	=> $self->host_alias,
 			version => $host->monitor_version, # static
 			target  => $host->name,
-			rw		=> 'MON',                  # do not REC
+			rw		=> 'PLAY',                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
 			hide 	=> 1,
 		);
@@ -397,9 +397,9 @@ sub new_edit {
 	my $editre = qr($name-v\d+-edit\d+);
 	say("$name: editing of edits is not currently allowed."),
 		return if $name =~ /-v\d+-edit\d+/;
-	say("$name: must be in MON mode.
+	say("$name: must be in PLAY mode.
 Edits will be applied against current version"), 
-		return unless $this_track->rec_status eq 'MON' 
+		return unless $this_track->rec_status eq 'PLAY' 
 			or $this_track->rec_status eq 'REC' and
 			grep{ /$editre/ } keys %::Track::by_name;
 
@@ -424,7 +424,7 @@ Edits will be applied against current version"),
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
 		play_edit => sub {
-			$this_edit->edit_track->set(rw => 'MON');
+			$this_edit->edit_track->set(rw => 'PLAY');
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
 		preview_edit_in => sub {
@@ -441,7 +441,7 @@ sub edit_action {
 	my $action = shift;
 	defined $this_edit or say("Please select an edit and try again."), return;
 	set_edit_mode();
-	$this_edit->host_alias_track->set(rw => 'MON'); # all 
+	$this_edit->host_alias_track->set(rw => 'PLAY'); # all 
 	$edit_actions{$action}->();
 	request_setup();
 
@@ -485,9 +485,9 @@ sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or say('No edit is defined'), return;
 	defined $this_edit->play_start_time or say('No edit points defined'), return;
-	$this_edit->host_alias_track->rec_status eq 'MON'
+	$this_edit->host_alias_track->rec_status eq 'PLAY'
 		or say('host alias track : ',$this_edit->host_alias,
-				" status must be MON"), return;
+				" status must be PLAY"), return;
 
 	# the following conditions should never be triggered 
 	
@@ -768,9 +768,9 @@ Set the correct version and try again."), return
 
 	$edit->version_mix->busify;
 
-	$edit->host_alias_track->set(rw => 'MON');
+	$edit->host_alias_track->set(rw => 'PLAY');
 
-	$edit->edit_track->set(rw => 'MON');
+	$edit->edit_track->set(rw => 'PLAY');
 	
 	$this_track = $edit->host;
 }
@@ -793,8 +793,8 @@ sub merge_edits {
 	my $edit = $this_edit;
 	say("Please select an edit and try again."), return
 		unless defined $edit;
-	say($edit->host_alias, ": track must be MON status.  Aborting."), return
-		unless $edit->host_alias_track->rec_status eq 'MON';
+	say($edit->host_alias, ": track must be PLAY status.  Aborting."), return
+		unless $edit->host_alias_track->rec_status eq 'PLAY';
 	say("Use exit_edit_mode and try again."), return if edit_mode();
 
 	# create merge message
@@ -803,7 +803,7 @@ sub merge_edits {
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
 			 my $ver  = $tn{$_}->monitor_version;
 			 $edit => $ver
-		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'MON'} 
+		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'PLAY'} 
 		$edit->version_bus->tracks; 
 	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
@@ -840,7 +840,7 @@ sub merge_edits {
 sub setup_length {
 	my $setup_length;
 	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
-	grep{ $_-> rec_status eq 'MON' }
+	grep{ $_-> rec_status eq 'PLAY' }
 	::ChainSetup::engine_tracks();
 	$setup_length
 }

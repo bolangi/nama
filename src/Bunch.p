@@ -12,8 +12,8 @@ sub is_bunch {
 
 {
 my %set_stat = ( 
-				 (map{ $_ => 'rw' } qw(rec mon off) ), 
-				 map{ $_ => 'rec_status' } qw(REC MON OFF)
+				 (map{ $_ => 'rw' } qw(rec play mon off) ), 
+				 map{ $_ => 'rec_status' } qw(REC PLAY MON OFF )
 				 );
 
 sub bunch {

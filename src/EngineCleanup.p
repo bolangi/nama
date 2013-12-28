@@ -131,9 +131,9 @@ sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
 
-		# toggle recorded tracks to MON for auditioning
+		# toggle recorded tracks to PLAY for auditioning
 		
-		map{ $_->set(rw => 'MON') } @{$setup->{_last_rec_tracks}};
+		map{ $_->set(rw => 'PLAY') } @{$setup->{_last_rec_tracks}};
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
 		no warnings 'uninitialized';

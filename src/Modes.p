@@ -17,7 +17,7 @@ sub set_preview_mode {
 
 	pager_join( <<'MSG');
 Setting preview mode.
-Using both REC and MON inputs.
+Using both REC and PLAY inputs.
 WAV recording is DISABLED.
 
 Type 'arm' to enable recording.

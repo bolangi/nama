@@ -338,7 +338,7 @@ sub show_modifiers {
 }
 sub show_region {
 	my $t = $::this_track;
-	return unless $t->rec_status eq 'MON';
+	return unless $t->rec_status eq 'PLAY';
 	my @lines;
 	push @lines,join " ",
 		"Length:",time2($t->shifted_length),"\n";
@@ -369,7 +369,7 @@ sub show_status {
 	say   "Modes settings:   ", join(", ", @modes) if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
-	push @actions, "playback" if grep { $_->rec_status eq 'MON' } 
+	push @actions, "playback" if grep { $_->rec_status eq 'PLAY' } 
 		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
@@ -516,7 +516,7 @@ sub mixdown {
 }
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
-	$tn{Mixdown}->set(rw => 'MON');
+	$tn{Mixdown}->set(rw => 'PLAY');
 	$tn{Master}->set(rw => 'MON'); 
 	$bn{Main}->set(rw => 'OFF');
 }
@@ -541,12 +541,12 @@ sub import_audio {
 
 	# check that track is audible
 
-	$track->set(rw => 'MON');
+	$track->set(rw => 'PLAY');
 
 }
 sub destroy_current_wav {
-	carp($this_track->name.": must be set to MON."), return
-		unless $this_track->rec_status eq 'MON';
+	carp($this_track->name.": must be set to PLAY."), return
+		unless $this_track->rec_status eq 'PLAY';
 	$this_track->current_version or
 		say($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;

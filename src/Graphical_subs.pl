@@ -339,7 +339,7 @@ sub engine_mode_color {
 		} else { $gui->{_old_bg} } 
 }
 sub user_rec_tracks { some_user_tracks('REC') }
-sub user_mon_tracks { some_user_tracks('MON') }
+sub user_mon_tracks { some_user_tracks('PLAY') }
 
 sub some_user_tracks {
 	my $which = shift;
@@ -389,16 +389,6 @@ sub group_gui {
 
 		
 		$gui->{group_rw}->AddItems([
-			'command' => 'REC',
-			-background => $gui->{_old_bg},
-			-command => sub { 
-				return if ::eval_iam("engine-status") eq 'running';
-				$group->set(rw => 'REC');
-				$gui->{group_rw}->configure(-text => 'REC');
-				refresh();
-				::reconfigure_engine()
-				}
-			],[
 			'command' => 'MON',
 			-background => $gui->{_old_bg},
 			-command => sub { 
@@ -485,10 +475,20 @@ sub track_gui {
 					#refresh_group();
 					::reconfigure_engine();
 			}],
+			[ 'command' => "PLAY",
+				-command  => sub { 
+					return if ::eval_iam("engine-status") eq 'running';
+					$ti{$n}->set(rw => "PLAY");
+					$ui->refresh_track($n);
+					#refresh_group();
+					::reconfigure_engine();
+			}],
 			[ 'command' => "MON",
+				-foreground => 'red',
 				-command  => sub { 
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
+					
 					$ui->refresh_track($n);
 					#refresh_group();
 					::reconfigure_engine();

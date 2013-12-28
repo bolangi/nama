@@ -163,7 +163,7 @@ sub current_wav {
 	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
 		$track->name . '_' . $last . '.wav'
-	} elsif ( $track->rec_status eq 'MON'){ 
+	} elsif ( $track->rec_status eq 'PLAY'){ 
 		my $filename = $track->targets->{ $track->monitor_version } ;
 		$filename
 	} else {
@@ -177,7 +177,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 
-	# two possible version numbers, depending on REC/MON status
+	# two possible version numbers, depending on REC/PLAY status
 	
 	if 	($status eq 'REC' and ! $track->rec_defeat)
 	{ 
@@ -186,7 +186,7 @@ sub current_version {
 					: $track->last;
 		return ++$last
 	}
-	elsif ( $status eq 'MON'){ return $track->monitor_version } 
+	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
 }
 
@@ -201,7 +201,7 @@ sub monitor_version {
 
 sub maybe_monitor { # ordinary sub, not object method
 	my $monitor_version = shift;
-	return 'MON' if $monitor_version and ! $mode->doodle;
+	return 'PLAY' if $monitor_version and ! $mode->doodle;
 	return 'OFF';
 }
 
@@ -237,8 +237,8 @@ sub rec_status {
 		or $track->engine_group ne $::this_engine->name
 	){ 	return			  'OFF' }
 
-	# having reached here, we know $bus->rw and $track->rw are REC or MON
-	# so the result will be REC or MON if conditions are met
+	# having reached here, we know $bus->rw and $track->rw are REC or PLAY
+	# so the result will be REC or PLAY if conditions are met
 
 	# second, set REC status if possible
 	
@@ -263,7 +263,7 @@ sub rec_status {
 		elsif ($source_type eq 'bus')	{ return 'REC' } # maybe $track->rw ??
 		else { return 'OFF' }
 	}
-	# third, set MON status if possible
+	# third, set PLAY status if possible
 	
 	else { 			maybe_monitor($monitor_version)
 
@@ -279,14 +279,14 @@ sub rec_status_display {
 
 sub region_start_time {
 	my $track = shift;
-	#return if $track->rec_status ne 'MON';
-	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
+	#return if $track->rec_status ne 'PLAY';
+	carp $track->name, ": expected PLAY status" if $track->rec_status ne 'PLAY';
 	::Mark::time_from_tag( $track->region_start )
 }
 sub region_end_time {
 	my $track = shift;
-	#return if $track->rec_status ne 'MON';
-	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
+	#return if $track->rec_status ne 'PLAY';
+	carp $track->name, ": expected PLAY status" if $track->rec_status ne 'PLAY';
 	if ( $track->region_end eq 'END' ){
 		return $track->wav_length;
 	} else {
@@ -295,8 +295,8 @@ sub region_end_time {
 }
 sub playat_time {
 	my $track = shift;
-	carp $track->name, ": expected MON status" if $track->rec_status ne 'MON';
-	#return if $track->rec_status ne 'MON';
+	carp $track->name, ": expected PLAY status" if $track->rec_status ne 'PLAY';
+	#return if $track->rec_status ne 'PLAY';
 	::Mark::time_from_tag( $track->playat )
 }
 
@@ -375,7 +375,7 @@ sub input_path {
 	elsif($track->rec_status eq 'REC'){ 
 		(input_node($track->source_type), $track->name) } 
 
-	elsif($track->rec_status eq 'MON' and ! $mode->doodle){
+	elsif($track->rec_status eq 'PLAY' and ! $mode->doodle){
 		('wav_in', $track->name) 
 	}
 }
@@ -633,7 +633,7 @@ sub set_rec {
 }
 sub set_mon {
 	my $track = shift;
-	$track->set_rw('MON');
+	$track->set_rw('PLAY');
 }
 sub set_off {
 	my $track = shift;
@@ -643,13 +643,13 @@ sub set_off {
 =comment
 mix
 self bus      brothers
-REC  MON 
-MON  OFF
+REC  PLAY 
+PLAY  OFF
 OFF  OFF
 
 member
-REC  REC      REC->MON
-MON  OFF->MON REC/MON->OFF
+REC  REC      REC->PLAY
+PLAY  OFF->PLAY REC/PLAY->OFF
 OFF  --       --
 
 =cut
@@ -669,11 +669,11 @@ sub set_rw {
 
 sub normalize {
 	my $track = shift;
-	if ($track->rec_status ne 'MON'){
-		print $track->name, ": You must set track to MON before normalizing, skipping.\n";
+	if ($track->rec_status ne 'PLAY'){
+		print $track->name, ": You must set track to PLAY before normalizing, skipping.\n";
 		return;
 	} 
-	# track version will exist if MON status
+	# track version will exist if PLAY status
 	my $cmd = 'ecanormalize ';
 	$cmd .= $track->full_path;
 	print "executing: $cmd\n";
@@ -681,8 +681,8 @@ sub normalize {
 }
 sub fixdc {
 	my $track = shift;
-	if ($track->rec_status ne 'MON'){
-		print $track->name, ": You must set track to MON before fixing dc level, skipping.\n";
+	if ($track->rec_status ne 'PLAY'){
+		print $track->name, ": You must set track to PLAY before fixing dc level, skipping.\n";
 		return;
 	} 
 
@@ -840,7 +840,7 @@ sub busify {
 sub unbusify {
 	my $track = shift;
 	return if $track->is_system_track;
-	$track->set( rw => 'MON',
+	$track->set( rw => 'PLAY',
                  rec_defeat => 0);
 	$track->set_track_class($track->was_class // '::Track');
 }
@@ -986,7 +986,7 @@ sub rec_status {
  	$track->rw ne 'OFF' and $track->engine_group eq $this_engine->name 
 		? 'REC' : 'OFF' 
 }
-#sub rec_status_display { $_[0]->rw ne 'OFF' ? 'MON' : 'OFF' }
+#sub rec_status_display { $_[0]->rw ne 'OFF' ? 'PLAY' : 'OFF' }
 sub busify {}
 sub unbusify {}
 }
@@ -1043,7 +1043,7 @@ sub current_version {
 	my $track = shift;
 	my $target = $tn{$track->target};
 		$target->last + 1
-# 	if ($target->rec_status eq 'MON'
+# 	if ($target->rec_status eq 'PLAY'
 # 		or $target->rec_status eq 'REC' and $bn{$track->target}){
 # 	}
 }
@@ -1064,7 +1064,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq 'REC'){ return ++$last}
-	elsif ( $status eq 'MON'){ return $track->monitor_version } 
+	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
 }
 sub rec_status {
@@ -1094,7 +1094,7 @@ sub current_version {
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
 	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
-	elsif ( $status eq 'MON'){ return $track->monitor_version } 
+	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
 }
 sub playat_time {
@@ -1221,12 +1221,13 @@ sub add_track {
 
 	my $bus = $bn{$track->group}; 
 	process_command('for mon; mon') if $mode->{preview} and $bus->rw eq 'MON';
+	# TODO ???
 	$bus->set(rw => 'REC') unless $track->target; # not if is alias
 
 	# normal tracks default to 'REC'
-	# track aliases default to 'MON'
+	# track aliases default to 'PLAY'
 	$track->set(rw => $track->target
-					?  'MON'
+					?  'PLAY'
 					:  'REC') ;
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 

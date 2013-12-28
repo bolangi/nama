@@ -239,8 +239,8 @@ sub _mono_to_stereo{
 	# Truth table
 	#REC status, Track width stereo: null
 	#REC status, Track width mono:   chcopy
-	#MON status, WAV width mono:   chcopy
-	#MON status, WAV width stereo: null
+	#PLAY status, WAV width mono:   chcopy
+	#PLAY status, WAV width stereo: null
 	#Higher channel count (WAV or Track): null
 
 	my $self   = shift;
@@ -253,7 +253,7 @@ sub _mono_to_stereo{
 			($self->track and $tn{$self->track}->pan)
 			and
 		  (	$status eq 'REC' and $is_mono_track->() 
-			or $status eq 'MON' and $is_mono_wav->() )
+			or $status eq 'PLAY' and $is_mono_wav->() )
 	)
 	{ $copy } else { $nocopy }
 }

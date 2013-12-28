@@ -316,7 +316,7 @@ sub inputless_tracks {
 }	
 sub remove_out_of_bounds_tracks {
 	my $g = shift;
-	my @names = $g->successors('wav_in');  # MON status tracks
+	my @names = $g->successors('wav_in');  # PLAY status tracks
 	map{ remove_tracks($g, $_) } 
 	grep{
 		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/

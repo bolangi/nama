@@ -34,8 +34,8 @@ sub cache_track { # launch subparts if conditions are met
 
 	# check conditions for normal track
 	} else { 
-		$args->{track}->rec_status eq 'MON' or say(
-			$args->{track}->name, ": track caching requires MON status. Aborting."), return;
+		$args->{track}->rec_status eq 'PLAY' or say(
+			$args->{track}->name, ": track caching requires PLAY status. Aborting."), return;
 	}
 	say($args->{track}->name, ": no effects to cache!  Skipping."), return 
 		unless 	$args->{track}->fancy_ops 
@@ -105,7 +105,7 @@ sub prepare_to_cache {
 
 	# Case 1: Caching a standard track
 	
-	if($args->{track}->rec_status eq 'MON')
+	if($args->{track}->rec_status eq 'PLAY')
 	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
@@ -219,13 +219,10 @@ sub update_cache_map {
 
 sub post_cache_processing {
 	my $args = shift;
-		# only set to MON tracks that would otherwise remain
+		# only set to PLAY tracks that would otherwise remain
 		# in a REC status
-		#
-		# track:REC bus:MON -> keep current state
-		# track:REC bus:REC -> set track to MON
 
-		$args->{track}->set(rw => 'MON') if $args->{track}->rec_status eq 'REC';
+		$args->{track}->set(rw => 'PLAY') if $args->{track}->rec_status eq 'REC';
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
@@ -260,9 +257,9 @@ sub stop_polling_cache_progress {
 sub uncache_track { 
 	my $track = shift;
 	local $this_track;
-	# skip unless MON;
-	throw($track->name, ": cannot uncache unless track is set to MON"), return
-		unless $track->rec_status eq 'MON';
+	# skip unless PLAY;
+	throw($track->name, ": cannot uncache unless track is set to PLAY"), return
+		unless $track->rec_status eq 'PLAY';
 	my $version = $track->monitor_version;
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"),

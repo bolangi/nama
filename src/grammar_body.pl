@@ -1420,7 +1420,7 @@ promote_version_to_track: _promote_version_to_track version {
 		name 	=> $t->name.":$v",
 		version => $v, # fixed
 		target  => $t->name,
-		rw		=> 'MON',
+		rw		=> 'PLAY',
 		group   => $t->group,
 	);
 }

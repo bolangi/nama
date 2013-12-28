@@ -202,7 +202,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->rec_status eq 'MON'){ 
+	} elsif ($tn{Mixdown}->rec_status eq 'PLAY'){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Master}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
