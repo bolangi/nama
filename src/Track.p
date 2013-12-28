@@ -263,7 +263,9 @@ sub rec_status {
 		elsif ($source_type eq 'bus')	{ return 'REC' } # maybe $track->rw ??
 		else { return 'OFF' }
 	}
-	# third, set PLAY status if possible
+	elsif( $track->rw eq 'MON'){ 'MON' }
+
+	# set PLAY status if possible
 	
 	else { 			maybe_monitor($monitor_version)
 
@@ -631,9 +633,13 @@ sub set_rec {
 	}
 	$track->set_rw('REC');
 }
-sub set_mon {
+sub set_play {
 	my $track = shift;
 	$track->set_rw('PLAY');
+}
+sub set_mon {
+	my $track = shift;
+	$track->set_rw('MON');
 }
 sub set_off {
 	my $track = shift;

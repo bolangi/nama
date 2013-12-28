@@ -249,10 +249,10 @@ set_track:
 record:
   type: track
   what: |
-    Set the current track source to its live input.
-    The signal will be written to disk during
-    the engine run. The rec_defeat command prevents 
-    writing the file, write_enable restores it.
+    Set the current track to record its source.  Creates the
+    monitoring route if necessary. Recording to disk will begin
+    on the next engine start. Use the "mon" or "off" commands to
+    disable recording.
   short: rec
   parameters: none
   example: |
@@ -264,30 +264,25 @@ record:
     ! may be recording or playing back as well.
     stop 
     ! Stop the recording/playback, automatically enter playback mode
+play:
+  type: track
+  what: |
+    Set the current track to playback the currently selected version. 
+    Creates the monitoring route if necessary. The selected audio file 
+    will play the next time the engine starts.
+  parameters: none
 mon:
   type: track
-  what: Set the current track to playback the currently selected version. 
+  what: |
+    Create a monitoring route for the current track at
+    the next opportunity.
   parameters: none
-  example: mon # Next time you start, the last version will be played back.
 off:
   type: track
   what: |
-    Set current track to OFF (exclude it from setup). 
-    You can re-include it using "mon" or "rec" commands.
-  parameters: none
-write_defeat:
-  type: track
-  what: |
-    Prevent writing an audio file for the current track. The track will 
-    just pass thru the incoming audio. 
-  short: wd rec_defeat
-  parameters: none
-write_enable:
-  type: track
-  what: | 
-    Allow the current track to write an audio file to disk. 
-    This is the opposite of write_defeat. 
-  short: we rec_enable
+    Remove the monitoring route for the current track and all
+    track I/O at the next opportunity.  You can re-include it
+    using "mon", "play" or "rec" commands.
   parameters: none
 source:
   type: track

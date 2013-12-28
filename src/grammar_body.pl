@@ -558,31 +558,17 @@ mono: _mono {
 	print $::this_track->name, ": setting to mono\n";
 	1; }
 
-write_defeat: _write_defeat { 
-	$::this_track->set(rec_defeat => 1);
-	print $::this_track->name, ": WAV recording disabled!\n";
-}
-write_enable: _write_enable { 
-	$::this_track->set(rec_defeat => 0);
-	print $::this_track->name, ": WAV recording enabled";
-	my $rw = $::bn{$::this_track->group}->rw;
-	if ( $rw ne 'REC'){
-		print qq(, but bus "),$::this_track->group, qq(" has rw setting of $rw.\n),
-		"No WAV file will be recorded.\n";
-	} else { print "!\n" }
-}
 # dummy defs to avoid warnings from command.yml entries
 off: 'dummy'
 record: 'dummy'
 mon: 'dummy'
+play: 'dummy'
 
 # some ordering fixes
 command: mono
-command: write_defeat
-command: write_enable
 command: rw
 
-rw_setting: 'rec'|'mon'|'off' { $return = $item[1] }
+rw_setting: 'rec'|'play'|'mon'|'off' { $return = $item[1] }
 rw: rw_setting {
 	$::this_track->is_system_track 
 		# for system tracks, just set track 'rw' field
