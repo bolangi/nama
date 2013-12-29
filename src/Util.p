@@ -123,11 +123,21 @@ my %bus_logic = (
 		{ 
 			my ($bus, $track) = @_;
 				# unconstrained members
-			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
+			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
 			$track->set_mon;
 
 		},
 
+	# setting member track to PLAY
+	
+		PLAY => sub
+		{ 
+			my ($bus, $track) = @_;
+				# unconstrained members
+			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
+			$track->set_play;
+
+		},
 	# setting member track to OFF 
 
 		OFF => sub
