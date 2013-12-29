@@ -22,7 +22,7 @@ plugins, and supports Ladish Level 1 session handling.
 Nama's audio processing is non-destructive by default:
 effects are applied in realtime; edits are accomplished
 through crossfades. These modifications to a track can be
-frozen as a new version for that track.
+frozen (bounced) as a new version for that track.
 
 For interfaces, Nama offers a terminal command prompt, a Tk
 GUI, and experimental OSC and remote-command modes.
@@ -135,26 +135,26 @@ from the user, generating appropriate chain setups for
 recording, playback, mixing, etc. and running the audio
 engine.
 
-=head2 Static Commands
+=head2 Configuration Commands
 
-Static commands affect I<future> runs of the audio engine.
-For example, B<rec, mon> and B<off> determine whether the
-current track will get its audio stream from an external
-(usually live) source or whether an existing WAV file will
-be played back. Nama responds to static commands by
-automatically reconfiguring the engine and displaying the
-updated track status. See 'man ::ChainSetup' for details
-on how the chain setup created.
+Configuration commands affect I<future> runs of the audio
+engine.  For example, B<rec, play, mon> and B<off> determine
+whether the current track will get its audio stream from an
+external (e.g. live) source, whether an existing WAV file
+will be played back, and whether a new WAV file will be
+recorded. Nama responds to these commands by reconfiguring
+the engine and displaying the updated track status. See 'man
+::ChainSetup' for details on how the chain setup created.
 
-=head2 Dynamic Commands
+=head2 Realtime Commands
 
 Once a chain setup is loaded and the engine is launched,
-another set of commands controls the realtime behavior of
-the audio processing engine. Commonly used I<dynamic
-commands> include transport C<start> and C<stop>, 
-playback repositioning commands such C<forward>, C<rewind> and
-C<setpos>. Effects may be added, modified or removed 
-while the engine is running.
+commands can be issued to control the realtime behavior of
+the audio processing engine. These commands include
+transport C<start> and C<stop>, playback repositioning
+commands such C<forward>, C<rewind> and C<setpos>. Effects
+may be added, modified or removed while the engine is
+running.
 
 =head2 Configuration
 
@@ -171,18 +171,16 @@ windows:
 
 =head2 Main Window
 
-The top section has buttons for creating, loading
-and saving projects, adding tracks,
-adding effects to tracks.
-In short, for setup.
+The top section has buttons for creating, loading and saving
+projects, adding tracks, adding effects to tracks. In
+short, for setup.
 
 Below are buttons for controlling the transport (start, stop
 and friends) and for setting marks. 
 
-The GUI project name bar and time display change color to indicate
-whether the upcoming operation will include live recording
-(red), mixdown only (yellow) or playback only (green).  Live
-recording and mixdown can take place simultaneously.
+The GUI project name bar and time display change color to
+indicate whether the upcoming operation will include live
+recording (red), mixdown (yellow) or playback (green).
 
 =head2 Effects Window
 
@@ -190,13 +188,14 @@ The B<effects window> provides sliders for each effect
 parameter of each track. Parameter range, defaults, and log/linear
 scaling hints are automatically detected. Text-entry widgets
 are used to enter parameters values for plugins without
-hinted ranges.
+hinted ranges. Any parameter label can be clicked to 
+add a parameter controller.
 
 =head2 Terminal Window 
 
-The command prompt appears in the terminal window during GUI
-operation. Text commands are used to access Nama's more
-advanced functions.
+The command prompt is available in the terminal window
+during GUI operation. Text commands are used to access
+Nama's more advanced functions.
 
 =head1 TEXT USER INTERFACE
 
@@ -205,7 +204,7 @@ command prompt, which will look something like this:
 
 =over 12
 
-C<nama [sax] ('h' for help)E<gt>>
+C<nama sax ('h' for help)E<gt>>
 
 =back
 
@@ -216,7 +215,7 @@ the track:
 
 =over 12
 
-C<nama [Strings/violin] ('h' for help)E<gt>>
+C<nama Strings/violin ('h' for help)E<gt>>
 
 =back
 
@@ -261,32 +260,37 @@ will be recorded as a mono WAV file. Mono track signals are
 automatically duplicated to stereo and a pan effect is provided.
 
 Specifying 'stereo' for a track means that two channels of
-audio input will be recorded as an interleaved stereo WAV file.
+audio input will be recorded as an interleaved stereo WAV
+file.  You can also use a 'stereo' declaration to avoid the
+automatic channel copy usually applied to single-channel
+sources.
 
-Specifying N channels for a track ('set width N') means
-N successive input channels will be recorded as an N-channel 
+Specifying N channels for a track ('set width N') means N
+successive input channels will be recorded as an N-channel
 interleaved WAV file.
 
-=head2 REC/MON/OFF
-
-Track REC/MON/OFF status guides audio processing.
+=head2 REC/PLAY/MON/OFF
 
 Each track, including Master and Mixdown, has its own
-REC/MON/OFF setting and displays its own REC/MON/OFF status.
+REC/MON/PLAY/OFF setting.
+ 
+The I<MON> setting means that the track source is connected to
+the track input, and the track output is supplied for
+monitoring by the Main bus and other submixes if any.
 
-=head3 Track status
+The I<REC> setting prepares the track is ready to record a
+WAV file.
 
-As the name suggests, I<REC> status indicates that a track
-is ready to record a WAV file. 
+The I<PLAY> setting enqueues an audio file for playback
+from disk as the track source.
+ 
+I<REC> and I<PLAY> settings also create the monitoring
+routes associated with I<MON> status.
 
-I<MON> status indicates an audio stream is available from
-disk. This status requires the presence of a file matching
-the bus or track version number, if specified. A track set
-to REC with no live input will default to MON status.
-
-I<OFF> status means that no audio is available for the track
-from any source. A track with no recorded WAV files 
-will show OFF status, even if set to MON.
+I<OFF> setting tells Nama to remove the track from the audio
+network. I<OFF> status also results when no audio source is
+available. A track with no recorded WAV files
+will show OFF status, even if set to PLAY.
 
 =head3 Bus setting
 
@@ -294,12 +298,11 @@ Buses can force the status of their member tracks to OFF.
 Nama provides MON and OFF settings for buses.
 OFF (set by C<bus_off>) removes all member tracks from the chain
 setup, MON (set by C<bus_mon> restores them.
-(The bus REC setting is obsolete, now equivalent to MON.) 
 
-The B<mixplay> command sets the Mixdown track to MON and the
+The B<mixplay> command sets the Mixdown track to PLAY and the
 Main bus to OFF.
 
-=head2 Version Number
+=head2 Version Numbers
 
 Multiple WAV files ("takes") can be recorded for each track. These are
 distinguished by a version number that increments with each
@@ -332,14 +335,14 @@ I<after> defining the region.
 
 =head2 Regions
 
-The C<region> command allows you to define endpoints
-for a portion of an audio file. Use the C<shift> command
-to specify a delay for starting playback.
+The C<region> command allows you to define endpoints for a
+portion of an audio file. You can then use the C<shift>
+command to move the region to the desired time position.
 
-Each track can have one region definition. For multiple
-regions, the C<new_region> command takes a pair of marks to
-create a read-only copy of the current track with region
-definition. 
+Each track can have one region definition. To create
+multiple regions, the C<new_region> command takes a pair of
+marks to create a read-only copy of the current track with
+the specified region definition. 
 
 You can control this region as you would any other other
 track, applying effects, adjusting volume, etc.
@@ -355,16 +358,16 @@ another track, which may belong to a different project.
 =head2 Effects
 
 Each track gets volume and pan effects by default.  New
-effects added using C<add_effect> are applied after pan 
-volume controls.  You can position effects anywhere you choose
-using C<insert_effect>.
+effects added using C<add_effect> are applied before pan
+volume controls.  You can position effects anywhere you
+choose using C<insert_effect> or C<position_effect>.
 
 =head3 Fades
 
 Nama allows you to place fades on any track. Fades are
-logarithmic, defined by a mark position and a duration. An
-additional volume operator, -eadb, is applied to each track
-to host the envelope controller that implements fades.
+defined by mark position and duration. An additional volume
+operator, -eadb, is applied to each track to host the
+envelope controller that implements fades.
 
 =head3 Sends and Inserts
 
@@ -394,10 +397,6 @@ Finally, several system defined bunches are available:
 
 All tracks with the corresponding I<setting> in the current bus
 
-=item B<REC>, B<MON>, B<OFF>
-
-All tracks with the corresponding I<status> in the current bus
-
 =back
 
 =head2 Buses
@@ -405,30 +404,30 @@ All tracks with the corresponding I<status> in the current bus
 =head3 Sub Buses
 
 B<Sub buses> enable multiple tracks to be routed through a
-single mix track before feeding the main mixer bus (or
-possibly another sub bus.) 
+single mix track before feeding the Main mixer bus (or
+possibly, another sub bus.) 
 
 The following commands create a sub bus and assign
 three tracks to it. The mix track takes the name of
 the bus and is stereo by default.
 
-	# create a bus named Strings feeding a mix track named Strings
+	# create a sub bus named Strings with a same-named mix track
 	add_sub_bus Strings 
 
-	# create tracks for the sub-bus
+	# create tracks for the sub bus
 	add_tracks violin cello bass
 
 	# move the tracks from the Main bus (default) to the Strings bus
-	for violin cello bass; set bus Strings
+	for violin cello bass; move_to_bus Strings
 
 	# use the mix track to control bus output volume
 	Strings vol - 10
 
-=head3 Send Buses
+=head3 Submixes
 
-B<Send buses> can be used as instrument monitors,
-or to send pre- or post-fader signals from multiple
-user tracks to an external program such as jconverter
+B<Submixes> are a type of bus used to provide instrument
+monitors, or to send the outputs from multiple user tracks
+to an external program such as jconverter.
 
 =head1 ROUTING
 
@@ -440,12 +439,16 @@ the chain setups use the track number exclusively.
 The Master track (mixer output control) is always
 chain 1, the Mixdown track is always chain 2.
 
-Nama uses Ecasound loop devices where necessary to connect
-two tracks, or to allow one track to have multiple inputs or
-outputs. Each loop device adds one buffer, which increases
-latency.
+In single-engine mode, Nama uses Ecasound loop devices where
+necessary to connect two tracks, or to allow one track to
+have multiple inputs or outputs. Each loop device adds one
+buffer, which increases latency.  In dual-engine mode, JACK
+ports are used for interconnections instead of loop devices. 
 
 =head2 Flow Diagrams
+
+The following diagrams apply to Nama's single-engine, mode.
+(The same topology is used in dual-engine mode.)
 
 Let's examine the signal flow from track 3, the first 
 available user track. Assume track 3 is named "sax".
@@ -507,9 +510,10 @@ in the configuration file F<.namarc>.
 
 =head2 Mixdown
 
-The C<mixdown> command configures Nama for mixdown. 
-The Mixdown track is set to REC (equivalent to C<Mixdown rec>) and the audio
-monitoring output is turned off (equivalent to C<Main off>).
+The C<mixdown> command configures Nama for mixdown. The
+Mixdown track is set to REC (equivalent to C<Mixdown rec>)
+and the audio monitoring output is turned off (equivalent to
+C<Master off>).
 
 Mixdown proceeds after you start the transport.
 
@@ -521,93 +525,100 @@ instead.)  Corresponding encoded files are created if the
 space-separated list. The default is "mixdown_encodings: ogg
 mp3".
 
-=head2 Preview and Doodle Modes
+=head2 The Preview and Doodle Modes, and the Eager Setting
 
-These non-recording modes, invoked by C<preview> and C<doodle> commands
-tweak the routing rules for special purposes.  B<Preview
-mode> disables recording of WAV files to disk.  B<Doodle
-mode> disables MON inputs while enabling only one REC track per
-signal source. The C<arm> command releases both preview
-and doodle modes.
+These non-recording modes, invoked by C<preview> and
+C<doodle> commands tweak the routing rules for special
+purposes. B<Preview mode> disables recording of WAV files
+to disk. B<Doodle mode> disables PLAY inputs while
+excluding any tracks with the same source as a currently
+routed track. The C<arm> command releases both preview and
+doodle modes.
+
+The eager setting causes the engine to start immediately
+following a reconfiguration.
+
+These modes are unnecessary in Nama's dual-engine mode.
 
 =head2 Saving Projects
 
-The C<save> command is the usual way to save your work.
-Settings related to the state of the current mix
-are saved in the file F<State.json> in the
-current project directory. F<State.json> is tracked by git.
+The C<save> command is the usual way to
+save your work.
+
+When you type C<save>, Settings related to the state of the
+project are saved in the file F<State.json> in the current
+project directory. F<State.json> is tracked by git.
 
 C<save> updates several other data files as well:
 
 F<Aux.json>, in the current project directory, contains
-data that is part of the project (such as command history
-and track comments) with no direct effect on the project audio.  
+data that is part of the project (such as command history,
+track comments, and current operating modes) but with no direct 
+effect on the project audio.  
 
 F<global_effect_chains.json>, in the project root directory,
 contains system and user defined effect chains.
 
-C<save somename.json> save to a file of that
-name.  Similarly C<get somename.json> will load the
-corresponding file. The F<.json> suffix may be omitted if
-git is disabled in F<.namarc>.
-
-=head3 Requirements to Use Git for saving projects
+=head3 Save with Git
 
 To use git for version control, you must have git installed and, 
 "use_git: 1" must be set in F<.namarc>.
 
-=head3 Standard git commands
+When git is enabled, Nama retains every step in the history
+of your project. 
 
-You can issue git commands in the normal way,
-and Nama will stay out of your way. 
+Use the C<save> command to save specific snapshots by name,
+for example, C<save initial-mix>. That creates a
+a named snapshot named F<initial-mix> that you can recall
+later with the command C<get initial-mix>. 
 
-=head3 How to create and manage snapshots
+You can save a comment as well:
 
-When you issue the C<save> command, Nama stores the project
-state as the file F<State.json>. Each change is also stored
-in the project's git repository.
+C<save initial-mix "sounds good enough to send to the front office">
 
-C<save initial-mix> creates a snapshot (actually a tag)
-named "initial mix".
+From the user standpoint, named snapshots are saved and
+loaded just as with files. 
 
-You apply the C<save> and C<get> commands to snapshots in a
-the similar way as you would to files:
+Unlike files, however named snapshots retain their history
+and are never overwritten. Nama also lets you create new
+branches, starting at any snapshot (tag.)
 
-You create a snapshot with C<save initial-mix>. Some time
-later, you can go back with C<get initial-mix>. Subsequent
-C<save> commands will store project state will on a branch
-named I<initial-mix>. 
-
-To start a new branch called I<compressed_mix> at tag
-I<initial-mix> you would say:
+To start a new branch called I<compressed-mix> starting at a
+snapshot called I<initial-mix> you would say:
 
 C<new_branch compressed-mix initial-mix>
+
+You can also issue native git commands at the Nama prompt.
+
+=head3 Save without Git
+
+C<save somename.json> will save project state to a file of
+that name.  Similarly C<get somename.json> will load the
+corresponding file. The F<.json> suffix may be omitted if
+"use_git: 0" is set in F<.namarc>.
 
 =head2 Exiting
 
 When you type C<quit> Nama will automatically save your work
-to F<State.json>. This will overwrite previous settings in
-F<State.json>. If you I<don't> want this behavior, use
+to F<State.json>. If you I<don't> want this behavior, use
 Ctrl-C to exit Nama.
 
 =head2 Jack ports list file
 
 Use I<source filename.ports> to ask Nama
 to connect multiple JACK ports listed in a file
-(F<trackname.ports> or F<filename.ports>) to the input
-ports for that track, which will be set to
-I<ecasound:trackname_in_1> for mono. A stereo track will
-use I<ecasound:trackname_in_2> as well.
+F<filename.ports> to the input
+port(s) of that track.
 
 If the track is stereo, ports from the list are alternately
 connected to left and right channels.
  
 =head2 Track edits
 
-An edit is an audio clip associated with a particular track
-and version. The edit replaces part of the original WAV
-file, allowing you to fix wrong notes, or substitute one
-phrase for another.
+An edit consists of audio clips and data structures
+associated with a particular track and version. The edit
+replaces part of the original WAV file, allowing you to fix
+wrong notes, or substitute one phrase for another.
 
 Each track can host multiple edits. Edits are
 non-destructive; they are achieved by using Ecasound's
@@ -712,7 +723,7 @@ remote execution hole.
 
 In F<.namarc> you need something like:
 
-      remote_control_port: 57121
+      remote_control_port: 57000
 
 Then Nama will set up a listener for remote commands.
 
