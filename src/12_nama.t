@@ -302,7 +302,7 @@ EXPECTED
 
 check_setup('JACK basic setup' );
 
-process_command('3;write_defeat; gen');
+process_command('3; mon; gen');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -318,7 +318,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:3 -o:loop,Master_in
 EXPECTED
 
-check_setup('JACK write_defeat setup' );
+check_setup('JACK mon setup' );
 
 force_alsa(); process_command('gen');
 $expected_setup_lines = <<EXPECTED;
@@ -337,7 +337,7 @@ $expected_setup_lines = <<EXPECTED;
 
 EXPECTED
 
-check_setup('ALSA write_defeat setup' );
+check_setup('ALSA mon setup' );
 process_command('Master; send 5;gen');
 
 $expected_setup_lines = <<EXPECTED;
