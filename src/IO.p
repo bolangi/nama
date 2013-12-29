@@ -247,7 +247,7 @@ sub _mono_to_stereo{
 	if  ( 
 			($self->track and $tn{$self->track}->pan)
 			and
-		  (	$status eq 'REC' and $is_mono_track->() 
+		  (	$status =~ /REC|MON/ and $is_mono_track->() 
 			or $status eq 'PLAY' and $is_mono_wav->() )
 	)
 	{ $copy } else { $nocopy }
