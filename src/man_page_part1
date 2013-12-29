@@ -579,9 +579,9 @@ C<save initial-mix "sounds good enough to send to the front office">
 From the user standpoint, named snapshots are saved and
 loaded just as with files. 
 
-Unlike files, however named snapshots retain their history
-and are never overwritten. Nama also lets you create new
-branches, starting at any snapshot (tag.)
+Unlike files, however named snapshots can branch, they
+retain their history and are never overwritten. Nama also
+lets you create new branches, starting at any snapshot.
 
 To start a new branch called I<compressed-mix> starting at a
 snapshot called I<initial-mix> you would say:
