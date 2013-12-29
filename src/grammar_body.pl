@@ -362,14 +362,14 @@ set_track: _set_track key someval {
 dump_track: _dump_track { ::pager($::this_track->dump); 1}
 dump_group: _dump_group { ::pager($::bn{Main}->dump); 1}
 dump_all: _dump_all { ::dump_all(); 1}
-remove_track: _remove_track existing_track_name {
-		::remove_track_cmd($::tn{$item{existing_track_name}});
-		1
-}
 remove_track: _remove_track quiet end {
 	local $::quiet = 1;
 	::remove_track_cmd($::this_track);
 	1
+}
+remove_track: _remove_track existing_track_name {
+		::remove_track_cmd($::tn{$item{existing_track_name}});
+		1
 }
 remove_track: _remove_track end { 
 		::remove_track_cmd($::this_track) ;
