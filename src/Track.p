@@ -374,7 +374,7 @@ sub input_path {
 
 	if($track->source_type eq 'track'){ ($track->source_id, $track->name) } 
 
-	elsif($track->rec_status eq 'REC'){ 
+	elsif($track->rec_status =~ /REC|MON/){ 
 		(input_node($track->source_type), $track->name) } 
 
 	elsif($track->rec_status eq 'PLAY' and ! $mode->doodle){
@@ -990,7 +990,7 @@ our @ISA = '::Track';
 sub rec_status {
 	my $track = shift;
  	$track->rw ne 'OFF' and $track->engine_group eq $this_engine->name 
-		? 'REC' : 'OFF' 
+		? 'MON' : 'OFF' 
 }
 #sub rec_status_display { $_[0]->rw ne 'OFF' ? 'PLAY' : 'OFF' }
 sub busify {}
