@@ -227,11 +227,6 @@ sub AUTOLOAD {
 
 sub DESTROY {}
 
-
-# The following methods were moved here from the Track class
-# because they are only used in generating chain setups.
-# They retain $track as the $self variable.
-
 sub _mono_to_stereo{
 	
 	# copy mono track to stereo if we have a pan control and a mono source
