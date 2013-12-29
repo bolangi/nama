@@ -364,8 +364,8 @@ sub input_path {
 
 	# the corresponding bus handles input routing for mix tracks
 	
-	# the mix track set to REC doesn't need to setup 
-	return() if $track->is_mix_track and $track->rec_status eq 'REC';
+	# bus mix tracks don't usually need to be connected
+	return() if $track->is_mix_track and $track->rec_status ne 'PLAY';
 
 	# the track may route to:
 	# + another track
