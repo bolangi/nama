@@ -38,7 +38,7 @@ sub new {
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
-		rw   	=> 'REC', # for group control
+		rw   	=> 'MON', # for group control
 		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
@@ -130,16 +130,16 @@ use ::Util qw(input_node);
 sub output_is_connectable {
  	my $bus = shift;
 
-	# Either the bus's mix track must be set to REC:
+	# Either the bus's mix track must be set to REC/MON
  	
- 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status eq 'REC'
+ 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status =~ /REC|MON/
 
 	# Or, during mixdown, we connect bus member tracks to Master
 	# even tho Master may be set to OFF
 	
 	or $bus->send_type eq 'track' 
 				and $bus->send_id eq 'Master' 
-				and $::tn{Mixdown}->rec_status eq 'REC'
+				and $::tn{Mixdown}->rec_status eq /REC|MON/
 
 	
 	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;
@@ -168,15 +168,8 @@ sub apply {
 		
 		# add paths for recording
 		
-		# say "rec status: ",$_->rec_status;
-		# say "rec defeat: ",$_->rec_defeat; 
-		# say q($mode->{preview}: ),$::mode->{preview};
-		# say "result", $_->rec_status eq 'REC' and ! $_->rec_defeat
-		# 		and ! ( $::mode->{preview} eq 'doodle' );
-			
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq 'REC' 
-			and ! $_->rec_defeat
+			if $_->rec_status eq 'REC'
 				and ! $::mode->preview and ! $::mode->doodle;
 
 	} grep {$_->rec_status ne 'OFF'} grep{ $_->group eq $bus->group} ::Track::all()
@@ -287,9 +280,8 @@ sub add_sub_bus {
 		) unless $::Bus::by_name{$name};
 
 	@args = ( 
-		rec_defeat	=> 1,
 		is_mix_track => 1,
-		rw 			=> 'REC',
+		rw 			=> 'MON',
 		@args
 	);
 
