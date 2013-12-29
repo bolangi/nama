@@ -145,7 +145,7 @@ sub generate_setup_try {
 	{
 		$g->set_vertex_attribute('Master', 'ecs_extra' => '-chmix:1')
 	}
-	logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
+	#logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
 
 	# create IO lists %inputs and %outputs
 
