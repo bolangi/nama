@@ -25,7 +25,7 @@ R-L    move_to_bus null
 
 # no recording to disk, remove volume and pan controls
 
-for all; rec_defeat; remove_fader_effect vol; remove_fader_effect pan
+for all; mon; remove_fader_effect vol; remove_fader_effect pan
 
 # feed six tracks the stereo source
 
