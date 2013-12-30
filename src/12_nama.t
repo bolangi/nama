@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 111;
+use Test::More tests => 120;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
@@ -654,6 +654,8 @@ foreach(@tests){
 
 
 load_project(name => "$test_project-convert51", create => 1);
+
+# REDUNDANT
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
 CONVERT51
@@ -691,6 +693,10 @@ EXPECTED
 force_alsa();
 process_command('gen');
 check_setup('Stereo to 5.1 converter script' );
+
+load_project(name => "$test_project-convert51-incremental", create => 1);
+
+[% qx(cat ./stereo51.pl ) %]
 
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}

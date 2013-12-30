@@ -1,0 +1,35 @@
+package Audio::Nama;
+use Modern::Perl;
+my @output;
+my @script_lines = grep{ !/afx/ } grep{ /^\w/ } split "\n",
+qx( cat /home/jroth/build/nama/src/stereo51.nms );
+map{say}@script_lines;
+my $count;
+
+for( @script_lines ){
+
+	$count++;
+	my ($setup) = run_command($_);
+	boilerplate($_,$setup);
+}
+use File::Slurp;
+write_file('/home/jroth/build/nama/src/51-test-code',map{"$_\n"}@output);
+
+sub run_command {
+	my $command = shift;
+	process_command($command);
+	process_command("gen");
+	$Audio::Nama::ChainSetup::chain_setup
+}
+sub join10 { join $/,@_ }
+sub boilerplate {
+	my ($cmd, $setup) = @_;
+	my $expect_begin = qq{process_command("$cmd");\n};
+	$expect_begin .= '$expected_setup_lines = <'.'<EXPECTED;';
+	my $expect_end = qq{EXPECTED
+gen_alsa();
+check_setup("Stereo to 5.1 converter
+   line $count: $cmd");
+};
+   push @output, join10($expect_begin, $setup, $expect_end)
+}
