@@ -215,9 +215,13 @@ sub add_paths_for_mixdown_handling {
 sub prune_graph {
 	logsub("&prune_graph");
 	::Graph::simplify_send_routing($g);
+	logpkg('debug',"Graph after simplify_send_routing:\n$g");
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
+	logpkg('debug',"Graph after remove_out_of_bounds_tracks:\n$g");
 	::Graph::recursively_remove_inputless_tracks($g);
+	logpkg('debug',"Graph after recursively_remove_inputless_tracks:\n$g");
 	::Graph::recursively_remove_outputless_tracks($g); 
+	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
 }
 # object based dispatch from routing graph
 	
