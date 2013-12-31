@@ -273,9 +273,10 @@ sub initialize_interfaces {
 		jack_transport_mode => 'send',
 	);
 
-	start_osc_listener() if $config->{osc_listener_port} 
+	start_osc_listener($config->{osc_listener_port}) 
+		if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	start_remote() if $config->{remote_control_port};
+	start_remote($config->{remote_control_port}) if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -371,14 +372,14 @@ exit;
 	1;	
 }
 sub start_osc_listener {
-	my $port = $config->{osc_listener_port};
+	my $port = shift;
 	say "Starting OSC listener on port $port";
 	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub start_remote {
-	my $port = $config->{remote_control_port};
+	my $port = shift;
 	say "Starting remote control listener on port $port";
 	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
 	$this_engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
