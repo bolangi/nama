@@ -276,7 +276,7 @@ sub initialize_interfaces {
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
-	start_remote($config->{remote_control_port}) if $config->{remote_control_port};
+	start_remote_listener($config->{remote_control_port}) if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
 		print "project_root $config->{opts}->{d} specified on command line\n";
@@ -378,24 +378,59 @@ sub start_osc_listener {
 	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
-sub start_remote {
-	my $port = shift;
-	say "Starting remote control listener on port $port";
-	my $in = $project->{remote_control_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$this_engine->{events}->{remote_control} = AE::io( $in, 0, \&process_remote_command )
+{ my $is_connected;
+sub start_remote_listener {
+    my $port = shift;
+    say "Starting remote control listener on port $port";
+    $project->{remote_control_socket} = IO::Socket::INET->new( 
+        LocalAddr   => 'localhost',
+        LocalPort   => $port, 
+        Proto       => 'tcp',
+        Type        => SOCK_STREAM,
+        Listen      => 1,
+        Reuse       => 1) || die $!;
+    start_remote_watcher();
+}
+sub start_remote_watcher {
+    $this_engine->{events}->{remote_control} = AE::io(
+        $project->{remote_control_socket}, 0, \&process_remote_command )
+}
+sub remove_remote_watcher {
+    undef $this_engine->{events}->{remote_control};
 }
 sub process_remote_command {
-	my $in = $project->{remote_control_socket};
-	my $socket = $in->accept;
-	$socket->recv(my $input, $in->sockopt(SO_RCVBUF));
-	defined $input and $input =~ /\S/ or return;
-	logpkg('debug',"Got remote control input: $input");
-	undef $text->{eval_result};
+    if ( ! $is_connected++ ){
+        say "making connection";
+        $project->{remote_control_socket} =
+            $project->{remote_control_socket}->accept();
+		remove_remote_watcher();
+        $this_engine->{events}->{remote_control} = AE::io(
+            $project->{remote_control_socket}, 0, \&process_remote_command );
+    }
+    my $input;
+    eval {     
+        $project->{remote_control_socket}->recv($input, $project->{remote_control_socket}->sockopt(SO_RCVBUF));
+    };
+    $@ and say("caught error: $@"), reset_remote_control_socket(), return;
+    logpkg('debug',"Got remote control socketput: $input");
 	process_command($input);
+	my $out;
 	{ no warnings 'uninitialized';
-	my $out = $text->{eval_result} . "\n";
-	$socket->send($out);
+		$out = $text->{eval_result} . "\n";
 	}
+    eval {
+        $project->{remote_control_socket}->send($out);
+    };
+    $@ and say("caught error: $@"), reset_remote_control_socket(), return;
+}
+sub reset_remote_control_socket { 
+    undef $is_connected;
+    undef $@;
+    $project->{remote_control_socket}->shutdown(2);
+    undef $project->{remote_control_socket};
+    remove_remote_watcher();
+	start_remote_listener($config->{remote_control_port});
+}
 }
 
 sub process_osc_command {
