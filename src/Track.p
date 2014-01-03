@@ -275,7 +275,9 @@ sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
 	my $setting = $track->rw;
-	$status . ($status ne $setting ?  lc " ($setting)" : "" );
+	$status .= lc " ($setting)" if $status ne $setting;  
+	$status .= " v".$track->current_version if $status eq 'REC';
+	$status
 }
 # these settings will only affect WAV playback
 
@@ -589,14 +591,36 @@ sub output_object_text {   # text for user display
 	$track->object_as_text('send');
 
 }
+sub bus_name { 
+	my $track = shift;
+	return unless $track->is_mix_track;
+	$track->name eq 'Master' 
+		? 'Main'
+		: $track->name
+}
 sub source_status {
 	my $track = shift;
-	my $id = $track->source_id;
-	return unless $id;
-	$track->rec_status eq 'REC' ? $id : "[$id]"
-	
+	return $track->current_wav if $track->rec_status eq 'PLAY' ;
+	return $track->bus_name if $track->is_mix_track;
+	return $track->source_id unless $track->source_type eq 'soundcard';
+	my $ch = $track->source_id;
+	my @channels;
+	push @channels, $_ for $ch .. ($ch + $track->width - 1);
+	join '/', @channels
 }
-
+sub destination {
+	my $track = shift;
+	return $track->group unless $track->is_mix_track;
+	return $track->group unless $track->group eq 'null';
+	my $send_id = $track->send_id;
+	my $send_type = $track->send_type;
+	say "send type: $send_type, send id: $send_id";
+	return $send_id unless $send_type eq 'soundcard';
+	my $ch = $send_id;
+	my @channels;
+	push @channels, $_ for $ch .. ($ch + $track->width - 1);
+	join '/', @channels
+}
 sub set_rec {
 	my $track = shift;
 	if (my $t = $track->target){
@@ -939,7 +963,7 @@ sub first_effect_of_type {
 }
 sub is_mix_track {
 	my $track = shift;
-	$bn{$track->name} and $track->rw eq 'MON'
+	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq 'MON'
 }
 } # end package
 

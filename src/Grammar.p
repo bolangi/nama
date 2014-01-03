@@ -404,14 +404,14 @@ sub show_inserts {
 }
 
 $text->{format_top} = <<TOP;
- No. Name            Stat         Source           Bus         Vol  Pan
-========================================================================
+ No. Name            Status     Source            Destination   Vol   Pan
+=========================================================================
 TOP
 
 $text->{format_divider} = '-' x 77 . "\n";
 
 my $format_picture = <<PICTURE;
-@>>  @<<<<<<<<<<<<<< @<<<<<<<<<<< @<<<<<<<<<<<<<   @<<<<<<<<<  @>>  @>> 
+@>>  @<<<<<<<<<<<<<< @<<<<<<<<< @<<<<<<<<<<<<<<<< @<<<<<<<<<<< @>>>  @>>>
 PICTURE
 
 sub show_tracks_section {
@@ -423,7 +423,7 @@ sub show_tracks_section {
             $_->name,
             $_->rec_status_display,
 			placeholder($_->source_status),
-			placeholder($_->group),
+			placeholder($_->destination),
 			placeholder($fx->{params}->{$_->vol}->[0]),
 			placeholder($fx->{params}->{$_->pan}->[0]),
         } @tracks;

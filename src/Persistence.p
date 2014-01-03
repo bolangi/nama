@@ -369,6 +369,7 @@ sub restore_state_from_file {
             delete $_->{rec_defeat};
             delete $_->{was_class};
 			delete $_->{is_mix_track};
+			$_->{rw} = 'MON', $_->{group} = 'null' if $_->{name} eq 'Master';
 		} @tracks_data;
 		map
 		{
