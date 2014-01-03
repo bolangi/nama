@@ -376,13 +376,23 @@ remove_track: _remove_track end {
 		1
 }
 quiet: 'quiet'
-link_track: _link_track track_name target project {
-	::add_track_alias_project($item{track_name}, $item{target}, $item{project}); 1
+link_track: _link_track existing_project_name track_name new_track_name end
+{
+	::add_track_alias_project(
+		$item{new_track_name},
+		$item{track_name}, 
+		$item{existing_project_name}
+	); 
+1
 }
-link_track: _link_track track_name target {
+link_track: _link_track target track_name end {
 	::add_track_alias($item{track_name}, $item{target}); 1
 }
-target: track_name
+target: existing_track_name
+
+existing_project_name: ident {
+	$item{ident} if -d ::join_path(::project_root(),$item{ident})
+}
 project: ident
 set_region: _set_region beginning ending { 
 	::set_region( @item{ qw( beginning ending ) } );

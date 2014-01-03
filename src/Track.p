@@ -1223,13 +1223,14 @@ sub add_track_alias {
 
 sub add_track_alias_project {
 	my ($name, $track, $project_name) = @_;
+	$project_name //= $::project->{name}; 
 	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
 			print "Found target WAV files.\n";
 			my @params = (target => $track, project => $project_name);
 			add_track( $name, @params );
-		} else { print "No WAV files found.  Skipping.\n"; return; }
+		} else { print "$project_name:$track - No WAV files found.  Skipping.\n"; return; }
 	} else { 
 		print("$project_name: project does not exist.  Skipping.\n");
 		return;

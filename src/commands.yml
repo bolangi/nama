@@ -219,16 +219,17 @@ link_track:
   type: track
   what: Create a read-only track, that uses audio files from another track.
   short: link
-  parameters: [<string:project>:]<string:source_name> <string:dest_name>
+  parameters: [<string:project_name>] <string:track_name> <string:link_name>
   example: |
-    link song_part_1:Mixdown part_1  
-    ! create a track part_1 using files from track Mixdown 
-    ! in project song_part_1
-    link_track piano_compressed piano
-    ! create piano_compressed using files from piano.
-    ! This is one way to provide wet and dry 
-    ! processed and unprocessed versions of same source.
-    ! (Another way would be to use inserts.)
+    link my_song_part1 Mixdown part_1  
+    ! Create a read-only track "part_1" in the current project
+    ! using files from track "Mixdown" in project "my_song_part_1".
+    !
+    link_track compressed_piano piano
+    ! Create a read-only track "compressed_piano" using files from
+    ! track "piano". This is one way to provide wet and dry
+    ! (processed and unprocessed) versions of same source.
+    ! Another way would be to use inserts.
 import_audio:
   type: track
   what: |
