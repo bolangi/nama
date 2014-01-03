@@ -154,7 +154,6 @@ sub request_setup {
 		source_type
 		send_id
 		send_type
-		rec_defeat
 		rec_status
 		current_version
  );

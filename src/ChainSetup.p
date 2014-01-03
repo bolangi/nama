@@ -83,7 +83,7 @@ sub is_engine_track {
 	$::ti{$n} if $is_ecasound_chain{$n}
 }
 sub engine_wav_out_tracks {
-	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
+	grep{$_->rec_status eq 'REC'} engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 

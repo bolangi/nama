@@ -184,8 +184,7 @@ sub load_project {
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => 'REC',
-			rec_defeat => 1,
+			rw => 'MON',
 			source_type => undef,
 			source_id => undef); 
 

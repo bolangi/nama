@@ -71,7 +71,6 @@ sub add_path_for_rec {
 
 		# generally a sub bus 
 
-		# - has 'rec_defeat' set (therefore doesn't reach here)
 		# - receives a stereo input
 		# - mix track width is set to stereo (default)
 

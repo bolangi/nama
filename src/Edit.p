@@ -78,7 +78,6 @@ sub new {
 		source_type => 'bus',
 		source_id 	=> 'bus',
 		width		=> 2,                     # default to stereo 
-	#	rec_defeat 	=> 1,                     # set by ->busify
 		group   	=> $self->host_track,     # i.e. sax
 		hide		=> 1,
 	); 

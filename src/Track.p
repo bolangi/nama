@@ -1060,7 +1060,7 @@ sub current_version {
 	my $last = $track->last;
 	my $status = $track->rec_status;
 	#logpkg('debug', "last: $last status: $status");
-	if 	($status eq 'REC' and ! $track->rec_defeat){ return ++$last}
+	if 	($status eq 'REC'){ return ++$last}
 	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
 }
