@@ -337,15 +337,15 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} <= 1.100){ 
+	if ( $project->{save_file_version_number} lt "1.100"){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
-	if ( $project->{save_file_version_number} <= 1.105){ 
+	if ( $project->{save_file_version_number} lt 1.105){ 
 		map{ $_->{class} = 'Audio::Nama::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
-	if ( $project->{save_file_version_number} <= 1.109){ 
+	if ( $project->{save_file_version_number} lt "1.109"){ 
 		map
 		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
@@ -361,12 +361,13 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} lt 1.111){ 
+	if ( $project->{save_file_version_number} lt "1.111"){ 
 		map
 		{
 			delete $_->{effect_chain_stack} ;
             delete $_->{rec_defeat};
             delete $_->{was_class};
+			delete $_->{is_mix_track};
 		} @tracks_data;
 	}
 	#######################################
