@@ -274,9 +274,9 @@ sub rec_status {
 sub rec_status_display {
 	my $track = shift;
 	my $status = $track->rec_status;
-	($track->rw eq 'REC' and $track->rec_defeat) ? "($status)" : $status;
+	my $setting = $track->rw;
+	$status . ($status ne $setting ?  lc " ($setting)" : "" );
 }
-
 # these settings will only affect WAV playback
 
 sub region_start_time {
