@@ -1,8 +1,16 @@
 Changes to Audio::Nama
 
-1.111 Octor 24, 2013
+1.110 Jan 1, 2014
+    * basic implementation of sequences/clips
+    * use git is now default: retain project history,
+      with tagging and branching of significant snapshots
+    * add undo/redo
+    * add remote control interface
+    * add multi engine support
     * add hotkey mode
     * do not delete marks that fades depend on
+    * retain playback position on project save/load
+    * wrap seeks in fades for smooth transitions
     * many fixes - git repository is the authoritative source
 
 1.102 March 3, 2013
