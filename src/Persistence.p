@@ -361,10 +361,12 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} <= 1.111){ 
+	if ( $project->{save_file_version_number} lt 1.111){ 
 		map
 		{
 			delete $_->{effect_chain_stack} ;
+            delete $_->{rec_defeat};
+            delete $_->{was_class};
 		} @tracks_data;
 	}
 	#######################################
