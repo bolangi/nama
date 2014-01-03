@@ -364,6 +364,7 @@ sub restore_state_from_file {
 	if ( $project->{save_file_version_number} lt "1.111"){ 
 		map
 		{
+			convert_rw($_);
 			delete $_->{effect_chain_stack} ;
             delete $_->{rec_defeat};
             delete $_->{was_class};
@@ -371,8 +372,11 @@ sub restore_state_from_file {
 		} @tracks_data;
 	}
 	#######################################
-
-
+sub convert_rw {
+	my $h = shift;
+	$h->{rw} = 'MON', return if $h->{rw} eq 'REC' and ($h->{rechdefeat} or $h->{ishmixhtrack});
+	$h->{rw} = 'PLAY', return if $h->{rw} eq 'MON';
+}
 	#  destroy and recreate all buses
 
 	::Bus::initialize();	
