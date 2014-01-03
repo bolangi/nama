@@ -367,6 +367,14 @@ sub restore_state_from_file {
 			delete $_->{effect_chain_stack} ;
 		} @tracks_data;
 	}
+	if ( $project->{save_file_version_number} <= 1.109){ 
+		map
+		{ 	$_->{rw} = 'MON', return 
+				if $_->{rw} eq 'REC' and ($_->{rec_defeat} or $_->{is_mix_track});
+			$_->{rw} = 'PLAY', return 
+				if $_->{rw} eq 'MON' and ! $_->{is_mix_track} and $_->{version};
+		} @tracks_data;
+	}
 	#######################################
 
 
