@@ -152,8 +152,7 @@ sub new_sequence {
 	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
-	$mix_track->set( is_mix_track => 1,
-						rw 			=> 'MON');
+	$mix_track->set( rw 			=> 'MON');
 	my $sequence = ::Sequence->new(
 		name => $name,
 		send_type => 'track',

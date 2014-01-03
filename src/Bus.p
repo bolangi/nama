@@ -280,7 +280,6 @@ sub add_sub_bus {
 		) unless $::Bus::by_name{$name};
 
 	@args = ( 
-		is_mix_track => 1,
 		rw 			=> 'MON',
 		@args
 	);

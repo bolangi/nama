@@ -937,6 +937,10 @@ sub first_effect_of_type {
 		return $FX if $type eq $FX->type
 	}
 }
+sub is_mix_track {
+	my $track = shift;
+	$bn{$track->name} and $track->rw eq 'MON'
+}
 } # end package
 
 # subclasses
