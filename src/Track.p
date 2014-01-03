@@ -179,7 +179,7 @@ sub current_version {
 
 	# two possible version numbers, depending on REC/PLAY status
 	
-	if 	($status eq 'REC' and ! $track->rec_defeat)
+	if 	($status eq 'REC')
 	{ 
 		my $last = $config->{use_group_numbering} 
 					? ::Bus::overall_last()
@@ -447,28 +447,9 @@ sub set_io {
 	elsif( $type eq 'bus')     	{} # -ditto-
 	#elsif( $type eq 'loop')    {}  # unused at present
 
-	# rec_defeat tracks with 'null' input
-
-	elsif( $type eq 'null'){ 
-
-		if ( $direction eq 'source' ){
-			$track->set(rec_defeat => 1);
-			say $track->name, ": recording disabled by default for 'null' input.";
-			say "Use 'rec_enable' if necessary";
-		}
-	}
-	elsif( $type eq 'rtnull'){ 
-
-		if ( $direction eq 'source' ){
-			$track->set(rec_defeat => 1);
-			say $track->name, ": recording disabled by default for 'rtnull' input.";
-			say "Use 'rec_enable' if necessary";
-		}
-	}
-
 	# don't allow user to set JACK I/O unless JACK server is running
 	
-	if( $type =~ /jack/ ){
+	elsif( $type =~ /jack/ ){
 		say("JACK server not running! "
 			,"Cannot set JACK client or port as track source."), 
 				return unless $jack->{jackd_running};
@@ -529,9 +510,6 @@ sub set_source {
 	} else {
 		::pager_join("Track ",$track->name, ": source set to $object");
 		::pager_join("Track ",$track->name, ": record enabled"), 
-			$track->set(rec_defeat => 0) 
-			if transition_from_null($old_source,$new_source)
-			and $track->rec_defeat;
 	}
 }
 {
@@ -820,25 +798,11 @@ sub pos {
 	first_index{$_ eq $track->op} @{$track->ops};
 }
 
-#### UNUSED 
-sub edits_enabled {
-	my $track = shift;
-	my $bus;
-	$bus = $bn{$track->name}
-	and $bus->rw ne 'OFF'
-	and $track->rec_status eq 'REC' 
-	and $track->rec_defeat
-	and $track->is_mix_track
-}
-##### 
-
 sub set_track_class {
 	my ($track, $class) = @_;
 	bless $track, $class;
 	$track->set(class => $class);
 }
-
-
 sub busify {
 	my $track = shift;
 	::add_sub_bus($track->name) unless $track->is_system_track;
@@ -846,9 +810,7 @@ sub busify {
 sub unbusify {
 	my $track = shift;
 	return if $track->is_system_track;
-	$track->set( rw => 'PLAY',
-                 rec_defeat => 0);
-	$track->set_track_class($track->was_class // '::Track');
+	$track->set( rw => 'PLAY');
 }
 
 sub shifted_length {
@@ -975,7 +937,6 @@ sub first_effect_of_type {
 		return $FX if $type eq $FX->type
 	}
 }
-
 } # end package
 
 # subclasses
