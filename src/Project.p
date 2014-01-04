@@ -179,7 +179,7 @@ sub load_project {
 	if (! $tn{Master}){ # new project
 
 		::SimpleTrack->new( 
-			group => 'null', 
+			group => 'Master', 
 			name => 'Master',
 			send_type => 'soundcard',
 			send_id => 1,
