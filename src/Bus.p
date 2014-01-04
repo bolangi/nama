@@ -299,7 +299,7 @@ sub add_send_bus {
 
 	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
 	
-	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
+	logpkg('debug',"name: $name, dest_type: $dest_type, dest_id: $dest_id");
 	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
