@@ -3,6 +3,8 @@
 package ::;
 use Modern::Perl;
 
+{
+no warnings 'uninitialized';
 sub helpline {
 	my $cmd = shift;
 	my $out = "Command: $cmd\n";
@@ -38,6 +40,7 @@ sub munge_help {
 	$text =~ s/(^\s*)!(\s*#)/$1 $2/mg;
 	$text =~ s/(^\s*!)/#/mg;
 	$text
+}
 }
 sub helptopic {
 	my $user_input = shift;
