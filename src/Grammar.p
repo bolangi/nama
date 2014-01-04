@@ -510,19 +510,18 @@ sub mixdown {
 	pager_newline("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'REC'); 
 	$tn{Master}->set(rw => 'OFF'); 
-	$bn{Main}->set(rw => 'REC');
 }
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'PLAY');
-	$tn{Master}->set(rw => 'MON'); 
+	$tn{Master}->set(rw => 'OFF'); 
 	$bn{Main}->set(rw => 'OFF');
 }
 sub mixoff { 
 	pager_newline("Leaving mixdown mode.") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'OFF');
 	$tn{Master}->set(rw => 'MON'); 
-	$bn{Main}->set(rw => 'REC') if $bn{Main}->rw eq 'OFF';
+	$bn{Main}->set(rw => 'MON');
 }
 sub remove_fade {
 	my $i = shift;
