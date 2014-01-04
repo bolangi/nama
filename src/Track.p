@@ -782,9 +782,13 @@ sub import_audio  {
 	} else {	
 		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
 		say "importing $path as $destination, converting to $format";
-		my $cmd = qq(ecasound -f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
-		#say $cmd;
-		system($cmd) == 0 or say("Ecasound exited with error: ", $?>>8), return;
+		::teardown_setup();
+		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
+		my $path = join_path(::project_dir()."convert.ecs");
+		write_file($path, $ecs);
+		load_ecs($path) or ::throw("$path: load failed, aborting"), return;
+		eval_iam('start');
+		::sleeper(0.2); sleep 1 while ::engine_running();
 	} 
 	::restart_wav_memoize() if $config->{opts}->{R}; # usually handled by reconfigure_engine() 
 }

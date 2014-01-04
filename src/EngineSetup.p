@@ -184,7 +184,7 @@ sub find_duplicate_inputs { # in Main bus only
 	$bn{Main}->tracks(); # track names;
 }
 sub load_ecs {
-	my $setup = $file->chain_setup;
+	my $setup = shift;
 	#say "setup file: $setup " . ( -e $setup ? "exists" : "");
 	return unless -e $setup;
 	#say "passed conditional";
@@ -238,7 +238,7 @@ sub connect_transport {
 	remove_riff_header_stubs();
 
 	register_other_ports(); # that don't belong to my upcoming instance
-	load_ecs() or say("No chain setup, engine not ready."), return;
+	load_ecs($file->chain_setup) or say("No chain setup, engine not ready."), return;
 	valid_engine_setup()
 		or say("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
