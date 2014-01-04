@@ -322,6 +322,7 @@ sub add_send_bus {
 							rw => 'MON',
 							target => $_,
 							group  => $name,
+							width => 2,
 							hide	=> 1,
 						)
    } $bn{Main}->tracks;
