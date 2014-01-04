@@ -34,6 +34,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	time_tag
 	heuristic_time
 	dest_type
+	dest_string
 
 	create_dir
 	join_path
@@ -240,6 +241,16 @@ sub dest_type {
 	elsif($dest eq 'jack')		{ 'jack_manual'	}
 	elsif($dest =~  /(^\w+\.)?ports/)	{ 'jack_ports_list' }
 	else 						{ 'jack_client'	} 
+}
+sub dest_string {
+	my ($type, $id, $width) = @_;
+	if ($type eq 'soundcard'){
+		my $ch = $id;
+		my @channels;
+		push @channels, $_ for $ch .. ($ch + $width - 1);
+		join '/', @channels
+	}
+	else { $id }
 }
 
 sub create_dir {

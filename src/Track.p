@@ -29,7 +29,7 @@ use Memoize qw(memoize unmemoize);
 no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 
-use ::Util qw(freq input_node dest_type join_path);
+use ::Util qw(freq input_node dest_type dest_string join_path);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(
@@ -619,15 +619,15 @@ sub destination {
 	# for these mix tracks, we use the
 	# track's own send_type/send_id
 	
-	return $track->group unless $track->group eq 'null';
+	my $out;
+	$out .= $track->group unless $track->group eq 'null';
 	my $send_id = $track->send_id;
-	my $send_type = $track->send_type;
 	#say "send type: $send_type, send id: $send_id";
-	return $send_id unless $send_type eq 'soundcard';
-	my $ch = $send_id;
-	my @channels;
-	push @channels, $_ for $ch .. ($ch + $track->width - 1);
-	join '/', @channels
+	my $send_type = $track->send_type;
+	return $out if ! $send_type;
+	$out .=	', ' if $out;
+	$out .= dest_string($send_type, $send_id, $track->width);
+	$out
 }
 sub set_rec {
 	my $track = shift;
@@ -977,6 +977,8 @@ sub is_mix_track {
 	my $track = shift;
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq 'MON'
 }
+sub bus { $bn{$_[0]->group} }
+	
 } # end package
 
 # subclasses
@@ -1017,6 +1019,22 @@ sub rec_status{
 sub source_status {}
 sub group_last {0}
 sub version {0}
+}
+{package ::EarTrack; # for submix helper tracks
+use ::Globals qw(:all);
+use ::Util qw(dest_string);
+use Modern::Perl; use ::Log qw(logpkg);
+use SUPER;
+no warnings qw(uninitialized redefine);
+our @ISA = '::SlaveTrack';
+sub destination {
+	my $track = shift;
+	my $bus = $track->bus;
+	dest_string($bus->send_type,$bus->send_id, $track->width);
+}
+sub source_status { $_[0]->target }
+sub rec_status { $_[0]->rw }
+sub width { $_[0]->{width} }
 }
 {
 package ::SlaveTrack; # for instrument monitor bus

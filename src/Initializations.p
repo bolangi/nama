@@ -454,6 +454,7 @@ sub sanitize_remote_input {
 sub select_ecasound_interface {
 	pager_newline('Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
+	no warnings 'redefine';
 	*eval_iam = \&eval_iam_neteci;
 	::Effects::import_engine_subs();
 }
