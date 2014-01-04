@@ -610,7 +610,14 @@ sub source_status {
 }
 sub destination {
 	my $track = shift;
-	return $track->group unless $track->is_mix_track;
+	# display logic 
+	# always show the bus
+	# except for tracks that belongs to the bus null.
+	# in that case, show the specific source.
+	#
+	# for these mix tracks, we use the
+	# track's own send_type/send_id
+	
 	return $track->group unless $track->group eq 'null';
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
