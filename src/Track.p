@@ -619,7 +619,7 @@ sub destination {
 	# for these mix tracks, we use the
 	# track's own send_type/send_id
 	
-	return $track->group unless $track->group eq 'null';
+	return $track->group . ' bus' unless $track->group eq 'null';
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
 	#say "send type: $send_type, send id: $send_id";
