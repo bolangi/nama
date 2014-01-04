@@ -601,7 +601,8 @@ sub bus_name {
 sub source_status {
 	my $track = shift;
 	return $track->current_wav if $track->rec_status eq 'PLAY' ;
-	return $track->bus_name if $track->is_mix_track;
+	#return $track->name eq 'Master' ? $track->bus_name : '' if $track->is_mix_track;
+	return $track->bus_name . " bus" if $track->is_mix_track;
 	return $track->source_id unless $track->source_type eq 'soundcard';
 	my $ch = $track->source_id;
 	my @channels;
@@ -621,7 +622,7 @@ sub destination {
 	return $track->group unless $track->group eq 'null';
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
-	say "send type: $send_type, send id: $send_id";
+	#say "send type: $send_type, send id: $send_id";
 	return $send_id unless $send_type eq 'soundcard';
 	my $ch = $send_id;
 	my @channels;
