@@ -390,7 +390,7 @@ sub show_status {
 }
 sub placeholder { 
 	my $val = shift;
-	return $val if defined $val;
+	return $val if defined $val and $val !~ /^\s*$/;
 	$config->{use_placeholders} ? q(--) : q() 
 }
 

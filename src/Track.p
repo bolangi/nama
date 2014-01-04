@@ -986,12 +986,17 @@ sub is_mix_track {
 package ::SimpleTrack; # used for Master track
 use ::Globals qw(:all);
 use Modern::Perl; use Carp; use ::Log qw(logpkg);
+use SUPER;
 no warnings qw(uninitialized redefine);
 our @ISA = '::Track';
 sub rec_status {
 	my $track = shift;
- 	$track->rw ne 'OFF' and $track->engine_group eq $this_engine->name 
-		? 'MON' : 'OFF' 
+ 	$track->rw ne 'OFF' ? 'MON' : 'OFF' 
+}
+sub destination {
+	my $track = shift; 
+	my $super = $track->super('destination');
+	$super->($track) if $track->rec_status ne 'OFF'
 }
 #sub rec_status_display { $_[0]->rw ne 'OFF' ? 'PLAY' : 'OFF' }
 sub busify {}
