@@ -1069,6 +1069,7 @@ sub full_path { my $track = shift; ::join_path( $track->dir, $track->current_wav
 package ::MixDownTrack; 
 use ::Globals qw(:all);
 use ::Log qw(logpkg);
+use SUPER;
 our @ISA = qw(::Track);
 sub current_version {	
 	my $track = shift;
@@ -1078,6 +1079,12 @@ sub current_version {
 	if 	($status eq 'REC'){ return ++$last}
 	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
+}
+sub source_status { 
+	my $track = shift; 
+	return 'Master' if $track->rec_status eq 'REC';
+	my $super = $track->super('source_status');
+	$super->($track)
 }
 sub destination {
 	my $track = shift; 
