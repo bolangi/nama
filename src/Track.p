@@ -619,7 +619,7 @@ sub destination {
 	# for these mix tracks, we use the
 	# track's own send_type/send_id
 	
-	return $track->group . ' bus' unless $track->group eq 'null';
+	return $track->group unless $track->group eq 'null';
 	my $send_id = $track->send_id;
 	my $send_type = $track->send_type;
 	#say "send type: $send_type, send id: $send_id";
@@ -1073,6 +1073,10 @@ sub current_version {
 	if 	($status eq 'REC'){ return ++$last}
 	elsif ( $status eq 'PLAY'){ return $track->monitor_version } 
 	else { return 0 }
+}
+sub destination {
+	my $track = shift; 
+	$tn{Master}->destination if $track->rec_status eq 'PLAY'
 }
 sub rec_status {
 	my $track = shift;
