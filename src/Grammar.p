@@ -581,7 +581,9 @@ sub remove_track_cmd {
 	# avoid having ownerless SlaveTracks.  
  	::ChainSetup::remove_temporary_tracks();
 		$quiet or pager( "Removing track /",$track->name,"/.  All WAV files will be kept.");
+		remove_submix_helper_tracks($track->name);
 		$track->remove;
+		$this_track = $tn{Master};
 		1
 }
 sub unity {

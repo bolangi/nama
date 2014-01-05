@@ -118,6 +118,7 @@ sub trackslist {
 
 sub apply {}  # base class does no routing of its own
 
+
 ### subclasses
 {
 package ::SubBus;
@@ -243,7 +244,6 @@ sub apply {
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
 
-
 }
 
 # ---------- Bus routines --------
@@ -340,8 +340,24 @@ sub update_send_bus {
 						 $bn{$name}->send_id),
 						 "dummy",
 }
+sub remove_submix_helper_tracks {
+	my $name = shift;
+	say "got name: $name";
+	my @submixes = submixes(); 
+	say "got submixes:", Dumper \@submixes;
+	for my $sm ( @submixes ){ 
+		my $to_remove = join '_', $sm->name, $name;
+		say "to_remove: $to_remove";
+		local $quiet;
+		$quiet++;
+		for my $name ($sm->tracks) { 
+			$tn{$name}->remove, last if $name eq $to_remove
+		}
+	}
 
-} # end package
+}
+sub submixes { grep { (ref $_) =~ /SendBusCooked/ } values %::Bus::by_name }
 
+}
 1;
 __END__
