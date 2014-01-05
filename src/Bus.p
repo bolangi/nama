@@ -234,6 +234,7 @@ sub apply {
 	map{ my @edge = ($_->name, ::output_node($bus->send_type));
 		 $g->add_path( $_->target, @edge);
 		 $g->set_edge_attributes( @edge, { 
+				send_type => $bus->send_type,
 				send_id => $bus->send_id,
 				width => 2})
 	} grep{ $_->group eq $bus->group} ::Track::all()
@@ -318,7 +319,7 @@ sub add_send_bus {
 	$bus or carp("can't create bus!\n"), return;
 
 	}
-	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
+	map{ ::EarTrack->new(	name => "$name\_$_", # BusName_TrackName
 							rw => 'MON',
 							target => $_,
 							group  => $name,
