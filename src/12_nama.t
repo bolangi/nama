@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 120;
+use Test::More tests => 123;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
@@ -697,6 +697,104 @@ check_setup('Stereo to 5.1 converter script' );
 load_project(name => "$test_project-convert51-incremental", create => 1);
 
 [% qx(cat ./stereo51.pl ) %]
+
+load_project(name => "$test_project-convert51-incremental", create => 1);
+
+do_script(' add mic
+            add guitar
+            for 3 4; mon
+            add_send_bus_cooked ear 7
+');
+$expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1,5 -i:loop,mic_out
+-a:1,6 -i:loop,guitar_out
+-a:3,4 -i:alsa,default
+
+# post-input processing
+
+-a:3  -chcopy:1,2
+-a:4  -chcopy:1,2
+
+# pre-output processing
+
+-a:5  -chmove:2,8 -chmove:1,7
+-a:6  -chmove:2,8 -chmove:1,7
+
+# audio outputs
+
+-a:1,5,6 -o:alsa,default
+-a:3 -o:loop,mic_out
+-a:4 -o:loop,guitar_out
+EXPECTED
+force_alsa();
+process_command('gen');
+check_setup('Submix - ALSA');
+
+force_jack();
+process_command('gen');
+$expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1,5 -i:loop,mic_out
+-a:1,6 -i:loop,guitar_out
+-a:3,4 -i:jack_multi,system:capture_1
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:4 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,mic_out
+-a:4 -o:loop,guitar_out
+-a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+EXPECTED
+check_setup('Submix, AKA add_send_bus_cooked - JACK');
+
+load_project(name => "add_send_bus_raw", create => 1);
+
+process_command("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; asbr raw-user 7");
+
+$expected_setup_lines = <<EXPECTED;
+
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,5 -i:jack_multi,system:capture_1
+-a:4,6 -i:jack_multi,system:capture_2,system:capture_3
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:5 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3,4 -o:loop,Master_in
+-a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+EXPECTED
+
+force_jack();
+process_command('gen');
+check_setup('Send Bus, Raw - JACK');
 
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}
