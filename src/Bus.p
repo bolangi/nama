@@ -203,7 +203,10 @@ use ::Log qw(logsub logpkg);
 sub apply {
 	my $bus = shift;
 	map{ 
-		$::g->add_edge($_->input_path);
+		my @input_path = $_->input_path;
+		$::g->add_edge(@input_path);
+		$::g->set_edge_attributes( @input_path, 
+			{ width => $::tn{$_->target}->width });
 		my @edge = ($_->name, ::output_node($bus->send_type));
 		$::g->add_edge(@edge);
 		$::g->set_edge_attributes( @edge, { 
