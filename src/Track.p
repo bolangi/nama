@@ -1033,7 +1033,7 @@ sub destination {
 	dest_string($bus->send_type,$bus->send_id, $track->width);
 }
 sub source_status { $_[0]->target }
-sub rec_status { $_[0]->rw }
+sub rec_status { $_[0]->{rw} }
 sub width { $_[0]->{width} }
 }
 {
