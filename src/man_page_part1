@@ -543,7 +543,7 @@ These modes are unnecessary in Nama's dual-engine mode.
 =head2 Saving Projects
 
 The C<save> command is the usual way to
-save your work.
+preserve your work.
 
 When you type C<save>, Settings related to the state of the
 project are saved in the file F<State.json> in the current
@@ -559,43 +559,104 @@ effect on the project audio.
 F<global_effect_chains.json>, in the project root directory,
 contains system and user defined effect chains.
 
-=head3 Save with Git
-
-To use git for version control, you must have git installed and, 
-"use_git: 1" must be set in F<.namarc>.
-
-When git is enabled, Nama retains every step in the history
-of your project. 
-
-Use the C<save> command to save specific snapshots by name,
-for example, C<save initial-mix>. That creates a
-a named snapshot named F<initial-mix> that you can recall
-later with the command C<get initial-mix>. 
-
-You can save a comment as well:
-
-C<save initial-mix "sounds good enough to send to the front office">
-
-From the user standpoint, named snapshots are saved and
-loaded just as with files. 
-
-Unlike files, however named snapshots can branch, they
-retain their history and are never overwritten. Nama also
-lets you create new branches, starting at any snapshot.
-
-To start a new branch called I<compressed-mix> starting at a
-snapshot called I<initial-mix> you would say:
-
-C<new_branch compressed-mix initial-mix>
-
-You can also issue native git commands at the Nama prompt.
-
 =head3 Save without Git
 
 C<save somename.json> will save project state to a file of
 that name.  Similarly C<get somename.json> will load the
 corresponding file. The F<.json> suffix may be omitted if
 "use_git: 0" is set in F<.namarc>.
+
+=head3 Save with Git
+
+When git is installed, Nama uses it to store snapshots of
+every step in the history of your project.
+
+While you can continue using the same C<save> and C<get> 
+with snapshots, the underlying version control gives
+them huge advantages over files: (1) they can sprout
+branches, (2) they retain their history and (3) they are
+never overwritten. 
+
+When you type C<save initial-mix>, the latest snapshot is
+tagged with the name "initial-mix", which you can recall
+later with the command C<get initial-mix>. 
+
+You can include a comment with the snapshot:
+
+C<save initial-mix "sounds good enough to send to the front office">
+
+Nama lets you create new branches, starting at any snapshot.
+
+To start a new branch called I<compressed-mix> starting at a
+snapshot called I<initial-mix> you would say:
+
+C<new_branch compressed-mix initial-mix>
+
+If you want to go back to working on the master branch, use
+C<branch master>.
+
+You can also issue native git commands at the Nama prompt.
+
+=head3 Git history example
+
+All projects begin on the "master" branch. Because this is
+the default branch, it is not displayed in the prompt.
+Otherwise "master" is not special in any way.
+
+In the graphs below, the letters indicate
+named snapshots.
+
+    create test-project
+    ...
+    save a
+    ...
+    save b
+    ...
+    save c
+    
+    ---a---b---c (master)
+    
+    get a
+    ...
+    save d
+    ...
+    save e
+    ...
+    save f
+    
+           d---e---f (a-branch)
+          /
+    -----a----b---c (master)
+    
+Now, you want to go back to try something different at "c":
+
+    get c
+    ...
+    save g
+    
+          d---e---f (a-branch)
+         /
+    ----a----b---c (master)
+                  \
+                   g (c-branch CURRENT HEAD)
+    
+You could also go back to master, and restart
+from there:
+
+    branch master
+    ...
+    save h
+    ...
+    save i
+    
+          d---e---f (a-branch)
+         /
+    ----a----b---c---h---i (master CURRENT HEAD)
+                  \
+                   g (c-branch)
+    
+While the merging of branches may be possible, 
+the function has not been tested.
 
 =head2 Exiting
 
