@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 123;
+use Test::More tests => 124;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
@@ -796,6 +796,32 @@ force_jack();
 process_command('gen');
 check_setup('Send Bus, Raw - JACK');
 
+force_alsa();
+process_command('gen');
+$expected_setup_lines = <<EXPECTED;
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,4,5,6 -i:alsa,default
+
+# post-input processing
+
+-a:3  -chcopy:1,2
+-a:4 -chmove:2,1 -chmove:3,2
+-a:5  -chcopy:1,2
+-a:6 -chmove:2,1 -chmove:3,2
+
+# pre-output processing
+
+-a:5  -chmove:2,8 -chmove:1,7
+-a:6  -chmove:2,8 -chmove:1,7
+
+# audio outputs
+
+-a:1,5,6 -o:alsa,default
+-a:3,4 -o:loop,Master_in
+EXPECTED
+check_setup('Send Bus, Raw - ALSA');
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}
 sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
