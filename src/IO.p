@@ -320,8 +320,8 @@ sub jack_multi_ports {
   	die(qq(
 Track $trackname: $source_or_send would cover channels $start - $end,
 out of bounds for JACK client "$client" ($channel_count channels max).
-Change $source_or_send setting, or set track OFF.)) if $end > $channel_count;
-
+Change $source_or_send setting, or set track OFF.)) 
+	if $end > $channel_count and $config->{enforce_channel_bounds};
 		return @{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1]
 		 	if $jack->{clients}->{$client}{$direction};
 
