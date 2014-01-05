@@ -494,23 +494,14 @@ show_track: _show_track dd {
 	1;}
 
 show_mode: _show_mode { ::pager_join( ::show_status()); 1}
-bus_rec: _bus_rec {
+bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'REC');
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	::pager_join( "Setting REC-enable for " , $::this_bus , " bus. You may record member tracks.");
+	::pager_join( "Setting MON mode for $::this_bus bus.");
 	1; }
-bus_mon: _bus_mon {
-	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => 'MON');
-	# set up mix track
-	$::tn{$bus->send_id}->busify
-		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	::pager_join( "Setting MON mode for " , $::this_bus , " bus. Monitor only for member tracks.");
- 	1  
-}
 bus_off: _bus_off {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'OFF');

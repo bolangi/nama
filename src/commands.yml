@@ -612,17 +612,9 @@ remove_track:
     Remove the current track with its effects, inserts, etc.
     Audio files are unchanged. 
   parameters: none
-bus_rec:
-  type: bus
-  what: Set the current bus mix_track to record (the default behaviour).
-  short: brec
-  parameters: none
 bus_mon:
   type: bus
-  what: |
-    Set the current bus mix_track to playback. An audio file
-    will likely exist only the mix_track has been previously
-    cached (frozen/bounced.)
+  what: Set the current bus mix_track to monitor (the default behaviour).
   short: bmon
   parameters: none
 bus_off:
