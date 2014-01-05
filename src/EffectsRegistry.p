@@ -307,11 +307,9 @@ sub read_in_effects_data {
 		$fx_cache->{split}->{cop}{a},
 		$fx_cache->{split}->{cop}{z},
 		$cop_re,
-		q(','),
+		q(,),
 		@cop,
 	);
-
-
 	extract_effects_data(
 		$fx_cache->{split}->{ladspa}{a},
 		$fx_cache->{split}->{ladspa}{z},
