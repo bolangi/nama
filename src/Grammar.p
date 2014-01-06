@@ -40,7 +40,7 @@ sub setup_grammar {
 			map{ $_, 1} split " ", get_data_section("midish_commands")
 	};
 
-	# print remove_spaces("bulwinkle is a...");
+	throw("bulwinkle is a...");
 
 }
 sub process_line {
@@ -89,7 +89,6 @@ sub process_line {
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
 }
-sub undo_behavior { 'store' }
 sub context {
 	my $context = {};
 	$context->{track} = $this_track->name;
@@ -111,7 +110,7 @@ sub process_command {
 		logpkg('debug',"input: $input");
 		$text->{parser}->meta(\$input) or do
 		{
-			print("bad command: $input_was\n"); 
+			throw("bad command: $input_was\n"); 
 			$was_error++;
 			system($config->{beep_command}) if $config->{beep_command};
 			last;
@@ -138,7 +137,8 @@ sub process_command {
 	my $current_count= 0;
 	map{ $current_count++ } keys %{$fx->{applied}};
 	if ($current_count < $total_effects_count){
-		say "Total effects count: $current_count, change: ",$current_count - $total_effects_count; 
+		pager("Total effects count: $current_count, change: ",
+			$current_count - $total_effects_count);
 		$total_effects_count = $current_count;
 	}
 	# return true on complete success
@@ -148,7 +148,6 @@ sub process_command {
 		
 }
 sub do_user_command {
-	#say "args: @_";
 	my($cmd, @args) = @_;
 	$text->{user_command}->{$cmd}->(@args);
 }	
@@ -170,7 +169,7 @@ sub do_script {
 			if(-e $filename){}
 			else{ $filename = join_path(project_root(),$name) }
 		}
-		-e $filename or say("$filename: file not found. Skipping"), return;
+		-e $filename or throw("$filename: file not found. Skipping"), return;
 		$script = read_file($filename)
 	}
 	my @lines = split "\n",$script;
@@ -228,7 +227,7 @@ sub eval_perl {
 	undef $text->{eval_result};
 	my @result = eval $code;
 	if ($@){
-		print( "Perl command failed: \ncode: $code\nerror: $@");
+		throw( "Perl command failed: \ncode: $code\nerror: $@");
 		undef $@;
 	}
 	else { 
@@ -359,14 +358,14 @@ sub time2 {
 	dn($n,3),"/",colonize(int ($n + 0.5));
 }
 sub show_status {
-	print "\n";
 	package ::;
+	my @output;
 	my @modes;
 	push @modes, $mode->{preview} if $mode->{preview};
 	push @modes, "master" if $mode->mastering;
 	push @modes, "edit"   if ::edit_mode();
 	push @modes, "offset run" if ::is_offset_run_mode();
-	say   "Modes settings:   ", join(", ", @modes) if @modes;
+	push @output, "Modes settings:   ", join(", ", @modes), $/ if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
 	push @actions, "playback" if grep { $_->rec_status eq 'PLAY' } 
@@ -379,14 +378,11 @@ sub show_status {
 	
 	
 	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
-	say "Pending actions:  ", join(", ", @actions) if @actions;
-	#say "Main bus allows:  ", $bn{Main}->allows, " track status";
-	# not so important 
-	say "Main bus version: ",$bn{Main}->version if $bn{Main}->version;
-	say "Setup length is:  ", ::heuristic_time($setup->{audio_length}); 
-	say "Run time limit:   ", ::heuristic_time($setup->{runtime_limit})
+	push @output, "Pending actions:  ", join(", ", @actions), $/ if @actions;
+	push @output, "Main bus version: ",$bn{Main}->version, $/ if $bn{Main}->version;
+	push @output, "Setup length is:  ", ::heuristic_time($setup->{audio_length}), $/; 
+	push @output, "Run time limit:   ", ::heuristic_time($setup->{runtime_limit}), $/
       if $setup->{runtime_limit};
-		
 }
 sub placeholder { 
 	my $val = shift;
@@ -482,15 +478,15 @@ sub t_load_project {
 	package ::;
 	return if engine_running() and ::ChainSetup::really_recording();
 	my $name = shift;
-	print "input name: $name\n";
+	pager("input name: $name\n");
 	my $newname = remove_spaces($name);
 	$newname =~ s(/$)(); # remove trailing slash
-	print("Project $newname does not exist\n"), return
+	throw("Project $newname does not exist\n"), return
 		unless -d join_path(project_root(), $newname);
 	stop_transport();
 	save_state();
 	load_project( name => $newname );
-	print "loaded project: $project->{name}\n";
+	pager("loaded project: $project->{name}\n");
 	{no warnings 'uninitialized';
 	logpkg('debug',"load hook: $config->{execute_on_project_load}");
 	}
@@ -503,7 +499,7 @@ sub t_create_project {
 		name => remove_spaces($name),
 		create => 1,
 	);
-	print "created project: $project->{name}\n";
+	pager("created project: $project->{name}\n");
 
 }
 sub mixdown {
@@ -526,8 +522,8 @@ sub mixoff {
 sub remove_fade {
 	my $i = shift;
 	my $fade = $::Fade::by_index{$i}
-		or print("fade index $i not found. Aborting."), return 1;
-	print "removing fade $i from track " .$fade->track ."\n"; 
+		or throw("fade index $i not found. Aborting."), return 1;
+	pager("removing fade $i from track " .$fade->track ."\n");
 	$fade->remove;
 }
 sub import_audio {
@@ -545,7 +541,7 @@ sub destroy_current_wav {
 	carp($this_track->name.": must be set to PLAY."), return
 		unless $this_track->rec_status eq 'PLAY';
 	$this_track->current_version or
-		say($this_track->name, 
+		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;
 	my $wav = $this_track->full_path;
 	my $reply = $text->{term}->readline("delete WAV file $wav? [n] ");
@@ -553,7 +549,7 @@ sub destroy_current_wav {
 	if ( $reply =~ /y/i ){
 		# remove version comments, if any
 		delete $this_track->{version_comment}{$this_track->current_version};
-		print "Unlinking.\n";
+		pager("Unlinking.\n");
 		unlink $wav or warn "couldn't unlink $wav: $!\n";
 		restart_wav_memoize();
 	}
