@@ -40,8 +40,6 @@ sub setup_grammar {
 			map{ $_, 1} split " ", get_data_section("midish_commands")
 	};
 
-	throw("bulwinkle is a...");
-
 }
 sub process_line {
 	logsub("&process_line");
