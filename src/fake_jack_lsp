@@ -76,6 +76,14 @@ ecasound:out_1
 	properties: output,
 ecasound:out_2
 	properties: output,
+jconvolver:out_1
+	properties: output,
+jconvolver:out_2
+	properties: output,
+jconvolver:in_1
+	properties: input,
+jconvolver:in_2
+	properties: input,
 LinuxSampler:0
 	properties: output,
 LinuxSampler:1
