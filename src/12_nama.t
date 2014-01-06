@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 124;
+use Test::More tests => 125;
 use File::Path qw(make_path remove_tree);
 use Cwd;
 
@@ -822,6 +822,62 @@ $expected_setup_lines = <<EXPECTED;
 -a:3,4 -o:loop,Master_in
 EXPECTED
 check_setup('Send Bus, Raw - ALSA');
+
+force_jack();
+load_project(name => "add_insert_post", create => 1);
+
+process_command("add sax; mon; add_insert post jconvolver; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 8192 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_1
+-a:4 -i:jack,jconvolver
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+-a:J3 -o:jack,jconvolver
+EXPECTED
+
+check_setup('Postfader insert - JACK');
+
+load_project(name => "add_insert_pre", create => 1);
+process_command("add sax; mon; add_insert pre jconvolver; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4 -i:jack,jconvolver
+-a:5,6 -i:jack_multi,system:capture_1
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+-a:6 -o:jack,jconvolver
+EXPECTED
+check_setup('Prefader insert - JACK');
+
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}
 sub force_alsa { $config->{opts}->{A} = 1; $config->{opts}->{J} = 0; $jack->{jackd_running} = 0; }
