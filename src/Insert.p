@@ -52,7 +52,7 @@ sub new {
 				name => $self->wet_name,
 				target => $name,
 				group => 'Insert',
-				rw => 'REC',
+				rw => 'MON',
 	
 				# don't hide wet track if used for hosting effects
 				
@@ -63,7 +63,7 @@ sub new {
 				target => $name,
 				group => 'Insert',
 				hide => 1,
-				rw => 'REC');
+				rw => 'MON');
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
