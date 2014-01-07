@@ -261,7 +261,7 @@ sub modify_effect {
 	#local $this_engine = $cop->track->engine;
 	my $code = $cop->type;
 	my $i = effect_index($code);
-	defined $i or croak "undefined effect code for $op_id: ",json_out($cop);
+	defined $i or croak "undefined effect code for $op_id: ",::Dumper $cop;
 	my $parameter_count = scalar @{ $cop->about->{params} };
 
 	pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
