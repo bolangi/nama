@@ -620,7 +620,7 @@ sub destination {
 	# track's own send_type/send_id
 	
 	my $out;
-	$out .= $track->group unless $track->group eq 'null';
+	$out .= $track->group unless $track->group =~ /^(null|Master)$/;
 	my $send_id = $track->send_id;
 	#say "send type: $send_type, send id: $send_id";
 	my $send_type = $track->send_type;
@@ -997,8 +997,7 @@ sub rec_status {
 }
 sub destination {
 	my $track = shift; 
-	my $super = $track->super('destination');
-	$super->($track) if $track->rec_status ne 'OFF'
+	$track->SUPER() if $track->rec_status ne 'OFF'
 }
 #sub rec_status_display { $_[0]->rw ne 'OFF' ? 'PLAY' : 'OFF' }
 sub busify {}
