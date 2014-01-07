@@ -23,6 +23,8 @@ sub apply_test_harness {
 				q(-T), # don't initialize terminal
                        # load fake effects cache
 
+				q(-S), # don't load static effects data
+
 				#qw(-L SUB), # logging
 
 	$jack->{periodsize} = 1024;
@@ -293,9 +295,9 @@ sub initialize_interfaces {
 	
 	first_run() unless $config->{opts}->{d}; 
 
-	my $fx_cache_json;
-	$fx_cache_json = get_data_section("fx_cache") if $config->{opts}->{T};
-	prepare_static_effects_data($fx_cache_json) unless $config->{opts}->{S};
+	#my $fx_cache_json;
+	#$fx_cache_json = get_data_section("fx_cache") if $config->{opts}->{T};
+	prepare_static_effects_data() unless $config->{opts}->{S};
 	setup_user_customization();	# depends on effect_index() in above
 
 	get_ecasound_iam_keywords();
