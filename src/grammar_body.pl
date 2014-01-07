@@ -776,8 +776,10 @@ add_effect: _add_effect effect value(s?) {
 	# place effect before fader if there is one
 	my $fader = ::fxn($::this_track->pan) && $::this_track->pan 
 			|| ::fxn($::this_track->vol) && $::this_track->vol; 
+	{ no warnings 'uninitialized';
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));
+	}
 	$args->{before} = $fader if $fader;
  	my $id = ::add_effect($args);
 	if ($id)
