@@ -2,12 +2,14 @@ package ::;
 use ::;
 use Test::More tests => 126;
 use File::Path qw(make_path remove_tree);
+use File::Slurp;
 use Cwd;
 
 use strict;
 use warnings;
 no warnings qw(uninitialized);
 
+our $fx_cache_json = read_file("t/data/fake_effect_cache.json");
 our ($expected_setup_lines);
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
@@ -29,6 +31,7 @@ apply_test_harness();
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
 
 bootstrap_environment();
+prepare_static_effects_data($fx_cache_json);
 $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
