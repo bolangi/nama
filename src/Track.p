@@ -116,9 +116,7 @@ sub new {
 
 					@_ 			}, $class;
 
-	#print "object class: $class, object type: ", ref $object, $/;
 	$track_names{$vals{name}}++;
-	#print "names used: ", ::json_out( \%track_names );
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
 	::add_pan_control($n);
@@ -151,7 +149,6 @@ sub full_path { my $track = shift; join_path($track->dir, $track->current_wav) }
 sub group_last {
 	my $track = shift;
 	my $bus = $bn{$track->group}; 
-	#print join " ", 'searching tracks:', $bus->tracks, $/;
 	$bus->last;
 }
 
@@ -160,7 +157,6 @@ sub last { $_[0]->versions->[-1] || 0 }
 sub current_wav {
 	my $track = shift;
 	my $last = $track->current_version;
-	#print "last found is $last\n"; 
 	if 	($track->rec_status eq 'REC'){ 
 		$track->name . '_' . $last . '.wav'
 	} elsif ( $track->rec_status eq 'PLAY'){ 
@@ -352,7 +348,6 @@ sub snapshot {
 	my $i = 0;
 	for(@$fields){
 		$snap{$_} = $track->$_;
-		#say "key: $_, val: ",$track->$_;
 	}
 	\%snap;
 }
@@ -452,7 +447,7 @@ sub set_io {
 	# don't allow user to set JACK I/O unless JACK server is running
 	
 	elsif( $type =~ /jack/ ){
-		say("JACK server not running! "
+		::throw("JACK server not running! "
 			,"Cannot set JACK client or port as track source."), 
 				return unless $jack->{jackd_running};
 
@@ -460,7 +455,7 @@ sub set_io {
 
 			my $port_name = $track->jack_manual_port($direction);
 
-			say $track->name, ": JACK $direction port is $port_name. Make connections manually.";
+			::pager($track->name, ": JACK $direction port is $port_name. Make connections manually.");
 			$id = 'manual';
 			$id = $port_name;
 			$type = 'jack_manual';
@@ -470,19 +465,19 @@ sub set_io {
 
 			my $name = $track->name;
 			my $width = scalar @{ ::jack_client_array($id, $client_direction) };
-			$width or say 
-				qq($name: $direction port for JACK client "$id" not found.);
+			$width or ::pager(
+				qq($name: $direction port for JACK client "$id" not found.));
 			$width or return;
-			$width ne $track->width and say 
+			$width ne $track->width and ::pager(
 				$track->name, ": track set to ", ::width($track->width),
-				qq(, but JACK source "$id" is ), ::width($width), '.';
+				qq(, but JACK source "$id" is ), ::width($width), '.');
 		}
 		elsif( $type eq 'jack_ports_list' ){
 			$id =~ /(\w+)\.ports/;
 			my $ports_file_name = ($1 || $track->name) .  '.ports';
 			$id = $ports_file_name;
 			# warn if ports do not exist
-			say($track->name, qq(: ports file "$id" not found in ),::project_root(),". Skipping."), 
+			::throw($track->name, qq(: ports file "$id" not found in ),::project_root(),". Skipping."), 
 				return unless -e join_path( ::project_root(), $id );
 			# check if ports file parses
 		}
@@ -531,13 +526,13 @@ sub set_version {
 	my ($track, $n) = @_;
 	my $name = $track->name;
 	if ($n == 0){
-		print "$name: following bus default\n";
+		::pager("$name: following bus default\n");
 		$track->set(version => $n)
 	} elsif ( grep{ $n == $_ } @{$track->versions} ){
-		print "$name: anchoring version $n\n";
+		::pager("$name: anchoring version $n\n");
 		$track->set(version => $n)
 	} else { 
-		print "$name: version $n does not exist, skipping.\n"
+		::throw("$name: version $n does not exist, skipping.\n")
 	}
 }
 
@@ -622,7 +617,6 @@ sub destination {
 	my $out;
 	$out .= $track->group unless $track->group =~ /^(null|Master)$/;
 	my $send_id = $track->send_id;
-	#say "send type: $send_type, send id: $send_id";
 	my $send_type = $track->send_type;
 	return $out if ! $send_type;
 	$out .=	', ' if $out;
@@ -638,7 +632,7 @@ sub set_rec {
 				if $track->project;
 			$msg .= qq(.\n);
 			$msg .= "Can't set a track alias to REC.\n";
-		print $msg;
+		::throw($msg);
 		return;
 	}
 	$track->set_rw('REC');
@@ -675,8 +669,8 @@ sub set_rw {
 	#my $already = $track->rw eq $setting ? " already" : "";
 	$track->set(rw => $setting);
 	my $status = $track->rec_status();
-	say $track->name, " set to $setting", 
-		($status ne $setting ? ", but current status is $status" : "");
+	::pager($track->name, " set to $setting", 
+		($status ne $setting ? ", but current status is $status" : ""));
 
 }
 	
@@ -686,25 +680,25 @@ sub set_rw {
 sub normalize {
 	my $track = shift;
 	if ($track->rec_status ne 'PLAY'){
-		print $track->name, ": You must set track to PLAY before normalizing, skipping.\n";
+		::throw($track->name, ": You must set track to PLAY before normalizing, skipping.\n");
 		return;
 	} 
 	# track version will exist if PLAY status
 	my $cmd = 'ecanormalize ';
 	$cmd .= $track->full_path;
-	print "executing: $cmd\n";
+	::pager("executing: $cmd\n");
 	system $cmd;
 }
 sub fixdc {
 	my $track = shift;
 	if ($track->rec_status ne 'PLAY'){
-		print $track->name, ": You must set track to PLAY before fixing dc level, skipping.\n";
+		::throw($track->name, ": You must set track to PLAY before fixing dc level, skipping.\n");
 		return;
 	} 
 
 	my $cmd = 'ecafixdc ';
 	$cmd .= $track->full_path;
-	print "executing: $cmd\n";
+	::pager("executing: $cmd\n");
 	system $cmd;
 }
 sub wav_length {
@@ -767,29 +761,27 @@ sub import_audio  {
 	my $track = shift;
 	my ($path, $frequency) = @_; 
 	$path = ::expand_tilde($path);
-	#say "path: $path";
 	my $version  = $track->last + 1;
 	if ( ! -r $path ){
-		print "$path: non-existent or unreadable file. No action.\n";
+		::throw("$path: non-existent or unreadable file. No action.\n");
 		return;
 	}
 	my ($depth,$width,$freq) = split ',', ::wav_format($path);
-	say "format: ", ::wav_format($path);
+	::pager_newline("format: ", ::wav_format($path));
 	$frequency ||= $freq;
 	if ( ! $frequency ){
-		say "Cannot detect sample rate of $path. Skipping.";
-		say "Use 'import_audio <path> <frequency>' if possible.";
+		::throw("Cannot detect sample rate of $path. Skipping.",
+		"Maybe 'import_audio <path> <frequency>' will help.");
 		return 
 	}
 	my $desired_frequency = freq( $config->{raw_to_disk_format} );
 	my $destination = join_path(::this_wav_dir(),$track->name."_$version.wav");
-	#say "destination: $destination";
 	if ( $frequency == $desired_frequency and $path =~ /.wav$/i){
-		say "copying $path to $destination";
+		::pager_newline("copying $path to $destination");
 		copy($path, $destination) or die "copy failed: $!";
 	} else {	
 		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
-		say "importing $path as $destination, converting to $format";
+		::pager_newline("importing $path as $destination, converting to $format");
 		::teardown_setup();
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		my $path = join_path(::project_dir()."convert.ecs");
@@ -871,16 +863,13 @@ sub version_comment {
 	"$v: $text\n" if $text;
 }
 # Modified from Object.p to save class
+# should this be used in other classes?
 sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	#print json_out $self; return;
 	my %guts = %{ $self };
 	$guts{class} = $class; # make sure we save the correct class name
-	#print join " ", %guts; return;
-	#my @keys = keys %guts;
-	#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
 	bless $self, $class; # restore
 	return \%guts;
 }
@@ -932,19 +921,19 @@ sub show_version_comments {
 }
 sub add_version_comment {
 	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
+	$t->targets->{$v} or ::throw("$v: no such version"), return;	
 	$project->{track_version_comments}->{$t->name}{$v}{user} = $text;
 	$t->version_comment($v);
 }
 sub add_system_version_comment {
 	my ($t,$v,$text) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
+	$t->targets->{$v} or ::throw("$v: no such version"), return;	
 	$project->{track_version_comments}{$t->name}{$v}{system} = $text;
 	$t->version_comment($v);
 }
 sub remove_version_comment {
 	my ($t,$v) = @_;
-	$t->targets->{$v} or say("$v: no such version"), return;	
+	$t->targets->{$v} or ::throw("$v: no such version"), return;	
 	delete $project->{track_version_comments}{$t->name}{$v}{user};
 	$t->version_comment($v) || "$v: [comment deleted]\n";
 }
@@ -1253,9 +1242,9 @@ sub add_track {
 	{ no warnings 'uninitialized';	
 	logpkg('debug', "name: $name, ch_r: $gui->{_chr}, ch_m: $gui->{_chm}");
 	}	
-	say("$name: track name already in use. Skipping."), return 
+	::throw("$name: track name already in use. Skipping."), return 
 		if $tn{$name};
-	say("$name: reserved track name. Skipping"), return
+	::throw("$name: reserved track name. Skipping"), return
 	 	if grep $name eq $_, @{$mastering->{track_names}}; 
 
 	# in order to increment serially
@@ -1304,12 +1293,12 @@ sub add_track_alias_project {
 	my $dir =  join_path(project_root(), $project_name, '.wav'); 
 	if ( -d $dir ){
 		if ( glob "$dir/$track*.wav"){
-			print "Found target WAV files.\n";
+			::pager("Found target WAV files.\n");
 			my @params = (target => $track, project => $project_name);
 			add_track( $name, @params );
-		} else { print "$project_name:$track - No WAV files found.  Skipping.\n"; return; }
+		} else { ::throw("$project_name:$track - No WAV files found.  Skipping.\n"), return; }
 	} else { 
-		print("$project_name: project does not exist.  Skipping.\n");
+		::throw("$project_name: project does not exist.  Skipping.\n");
 		return;
 	}
 }
@@ -1429,7 +1418,7 @@ sub rename_track {
 	write_file($statefile, $state);
 	my $msg = "Rename track $oldname -> $newname";
 	git_commit($msg);
-	pager($msg);
+	::pager($msg);
 	load_project(name => $::project->{name});
 }
 } # end package
