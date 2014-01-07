@@ -1,1 +1,1 @@
-cd ../t; for t in *.t;  do perl -MCarp::Always -I ../lib $t; done
+cd $MD; for t in t/*.t;  do perl -MCarp::Always -I lib $t; done; cd $PD
