@@ -925,6 +925,23 @@ EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - ALSA');
 gen_jack();
 $expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4 -i:jack_multi,system:capture_7
+-a:5,6 -i:jack_multi,system:capture_2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+-a:6 -o:jack_multi,system:playback_5
 EXPECTED
 check_setup('Hardware insert via soundcard, prefader  - JACK');
 
