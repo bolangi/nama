@@ -13,6 +13,7 @@ sub effects_cache {
 	$file->effects_cache . ".$registry_format";
 }
 sub prepare_static_effects_data{
+	my $source = shift; 
 	
 	logsub("&prepare_static_effects_data");
 
@@ -27,7 +28,7 @@ sub prepare_static_effects_data{
 
 	if (-f $effects_cache and ! $config->{opts}->{C}){  
 		logpkg('debug', "found effects cache: $effects_cache");
-		my $source = read_file($effects_cache); # scalar assign
+		$source //= read_file($effects_cache); # scalar assign
 		assign(
 			data => decode($source, 'json'),
 			vars => [qw($fx_cache)],
