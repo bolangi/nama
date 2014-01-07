@@ -168,7 +168,7 @@ sub _add_effect {  # append effect
 	$ui->add_effect_gui($p) unless $ti{$n}->hide;
 	if( ::valid_engine_setup() )
 	{
-		if (engine_running())
+		if (::engine_running())
 		{ 
 			$ti{$n}->mute;
 			::stop_do_start( sub{ apply_op($id) }, 0.05);
@@ -185,7 +185,7 @@ sub _insert_effect {  # call only from add_effect
 	my ($before, $code, $values) = @$p{qw(before type values)};
 	pager("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
 	$code = full_effect_code( $code );	
-	my $running = engine_running();
+	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	pager("Cannot insert effect before controller.\n"), return 
@@ -216,7 +216,7 @@ sub _insert_effect {  # call only from add_effect
 
 	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
 	logpkg('debug',"ops to remove and re-apply: @ops");
-	my $connected = eval_iam('cs-connected');
+	my $connected = ::eval_iam('cs-connected');
 	if ( $connected ){  
 		map{ remove_op($_)} reverse @ops; # reverse order for correct index
 	}
@@ -244,7 +244,7 @@ sub _insert_effect {  # call only from add_effect
 	}
 		
 	if ($running){
-		eval_iam('start');	
+		::eval_iam('start');	
 		sleeper(0.3);
 		::unmute();
 		$ui->start_heartbeat;
@@ -493,10 +493,10 @@ sub apply_op {
 
 	logpkg('debug', "command: $add_cmd");
 
-	eval_iam("c-select $chain") if $selected_chain != $chain;
-	eval_iam("cop-select " . $dad->ecasound_effect_index) if $dad;
-	eval_iam($add_cmd);
-	eval_iam("cop-bypass on") if fxn($id)->bypassed;
+	::eval_iam("c-select $chain") if $selected_chain != $chain;
+	::eval_iam("cop-select " . $dad->ecasound_effect_index) if $dad;
+	::eval_iam($add_cmd);
+	::eval_iam("cop-bypass on") if fxn($id)->bypassed;
 
 	my $owns = fxn($id)->owns;
 	(ref $owns) =~ /ARRAY/ or croak "expected array";
@@ -531,23 +531,23 @@ sub remove_op {
 		logpkg('debug', "ops list for chain $n: @{$ti{$n}->ops}");
 		logpkg('debug', "operator id to remove: $id");
 		logpkg('debug', "ready to remove from chain $n, operator id $id, index $index");
-		logpkg('debug',sub{eval_iam("cs")});
-		eval_iam("cop-select ".  $self->ecasound_effect_index);
-		logpkg('debug',sub{"selected operator: ". eval_iam("cop-selected")});
-		eval_iam("cop-remove");
-		logpkg('debug',sub{eval_iam("cs")});
+		logpkg('debug',sub{::eval_iam("cs")});
+		::eval_iam("cop-select ".  $self->ecasound_effect_index);
+		logpkg('debug',sub{"selected operator: ". ::eval_iam("cop-selected")});
+		::eval_iam("cop-remove");
+		logpkg('debug',sub{::eval_iam("cs")});
 
 	} else { # controller
 
 		logpkg('debug', "has parent, assuming controller");
 
 		my $ctrl_index = $self->ecasound_controller_index;
-		logpkg('debug', eval_iam("cs"));
-		eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index);
-		logpkg('debug', "selected operator: ". eval_iam("cop-selected"));
-		eval_iam("ctrl-select $ctrl_index");
-		eval_iam("ctrl-remove");
-		logpkg('debug', eval_iam("cs"));
+		logpkg('debug', ::eval_iam("cs"));
+		::eval_iam("cop-select ".  $self->root_parent->ecasound_effect_index);
+		logpkg('debug', "selected operator: ". ::eval_iam("cop-selected"));
+		::eval_iam("ctrl-select $ctrl_index");
+		::eval_iam("ctrl-remove");
+		logpkg('debug', ::eval_iam("cs"));
 	}
 }
 
@@ -700,7 +700,7 @@ sub effect_update {
 	#logsub("&effect_update");
 
 	return unless ::valid_engine_setup();
-	#my $es = eval_iam("engine-status");
+	#my $es = ::eval_iam("engine-status");
 	#logpkg('debug', "engine is $es");
 	#return if $es !~ /not started|stopped|running/;
 
@@ -716,23 +716,23 @@ sub effect_update {
 	# $param is zero-based. 
 	# %{$fx->{params}} is  zero-based.
 
-	my $old_chain = eval_iam('c-selected') if ::valid_engine_setup();
+	my $old_chain = ::eval_iam('c-selected') if ::valid_engine_setup();
 	ecasound_select_chain($chain);
 
 	# update Ecasound's copy of the parameter
 	if( $FX->is_controller ){
 		my $i = $FX->ecasound_controller_index;
 		logpkg('debug', "controller $id: track: $chain, index: $i param: $param, value: $val");
-		eval_iam("ctrl-select $i");
-		eval_iam("ctrlp-select $param");
-		eval_iam("ctrlp-set $val");
+		::eval_iam("ctrl-select $i");
+		::eval_iam("ctrlp-select $param");
+		::eval_iam("ctrlp-set $val");
 	}
 	else { # is operator
 		my $i = $FX->ecasound_operator_index;
 		logpkg('debug', "operator $id: track $chain, index: $i, offset: ".  $FX->offset . " param $param, value $val");
-		eval_iam("cop-select ". ($FX->offset + $i));
-		eval_iam("copp-select $param");
-		eval_iam("copp-set $val");
+		::eval_iam("cop-select ". ($FX->offset + $i));
+		::eval_iam("copp-select $param");
+		::eval_iam("copp-set $val");
 	}
 	ecasound_select_chain($old_chain);
 }
@@ -755,9 +755,9 @@ sub sync_effect_parameters {
 	# this routine syncs them in prep for save_state()
 	
  	return unless ::valid_engine_setup();
-	my $old_chain = eval_iam('c-selected');
+	my $old_chain = ::eval_iam('c-selected');
 	map{ $_->sync_one_effect } grep{ $_ }  map{ fxn($_) } ops_with_controller(), ops_with_read_only_params();
-	eval_iam("c-select $old_chain");
+	::eval_iam("c-select $old_chain");
 }
 
 	
@@ -767,8 +767,8 @@ sub get_ecasound_cop_params {
 	my $count = shift;
 	my @params;
 	for (1..$count){
-		eval_iam("copp-select $_");
-		push @params, eval_iam("copp-get");
+		::eval_iam("copp-select $_");
+		push @params, ::eval_iam("copp-get");
 	}
 	\@params
 }
@@ -792,7 +792,7 @@ sub find_op_offsets {
 
 	local $config->{category} = 'ECI_FX';
 	logsub("&find_op_offsets");
-	my @op_offsets = grep{ /"\d+"/} split "\n",eval_iam("cs");
+	my @op_offsets = grep{ /"\d+"/} split "\n",::eval_iam("cs");
 	logpkg('debug', join "\n\n",@op_offsets);
 	for my $output (@op_offsets){
 		my $chain_id;
@@ -884,14 +884,14 @@ sub set_bypass_state {
 	@ops = intersect_with_track_ops_list($track,@ops);
 
 	$track->mute;
-	eval_iam("c-select ".$track->n);
+	::eval_iam("c-select ".$track->n);
 
 	foreach my $op ( @ops)
 	{ 
 		my $FX = fxn($op);
 		my $i = $FX->ecasound_effect_index;
-		eval_iam("cop-select $i");
-		eval_iam("cop-bypass $bypass_state");
+		::eval_iam("cop-select $i");
+		::eval_iam("cop-bypass $bypass_state");
 		$FX->set(bypassed => ($bypass_state eq 'on') ? 1 : 0);
 	}
 	$track->unmute;
@@ -1122,8 +1122,8 @@ sub set	{
 sub sync_one_effect {
 		my $self= shift;
 		my $chain = $self->chain;
-		eval_iam("c-select $chain");
-		eval_iam("cop-select " .( $self->offset + $self->ecasound_operator_index ) );
+		::eval_iam("c-select $chain");
+		::eval_iam("cop-select " .( $self->offset + $self->ecasound_operator_index ) );
 		$self->set(params => get_ecasound_cop_params( scalar @{$self->params} ));
 }
 sub offset {
