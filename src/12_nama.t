@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 126;
+use Test::More tests => 130;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -813,7 +813,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:J3 -o:jack,jconvolver
 EXPECTED
 
-check_setup('Postfader insert - JACK');
+check_setup('JACK client as postfader insert');
 
 load_project(name => "add_insert_pre", create => 1);
 process_command("add sax; mon; add_insert pre jconvolver; gen");
@@ -837,7 +837,96 @@ $expected_setup_lines = <<EXPECTED;
 -a:4,5 -o:loop,sax_insert_pre
 -a:6 -o:jack,jconvolver
 EXPECTED
-check_setup('Prefader insert - JACK');
+check_setup('JACK client as pre-fader insert');
+
+load_project(name => "add_insert_via_soundcard-postfader", create => 1);
+process_command("add sax; mon; source 2; add_insert post 5; gen");
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:4 -i:jack_multi,system:capture_7,system:capture_8
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+-a:J3 -o:jack_multi,system:playback_5,system:playback_6
+
+EXPECTED
+check_setup('Insert via soundcard, postfader - JACK');
+
+force_alsa();
+process_command("gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,4 -i:alsa,default
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+-a:4 -chmove:7,1 -chmove:8,2 
+
+# pre-output processing
+
+-a:J3  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1,J3 -o:alsa,default
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+EXPECTED
+check_setup('Insert via soundcard, postfader - ALSA');
+
+load_project(name => "add_insert_via_soundcard_pre", create => 1);
+process_command("add sax; mon; source 2; add_insert pre 5; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4,5,6 -i:alsa,default
+
+# post-input processing
+
+-a:4 -chmove:7,1 
+-a:5 -chmove:2,1 
+-a:6 -chmove:2,1 
+
+# pre-output processing
+
+-a:6  -chmove:1,5
+
+# audio outputs
+
+-a:1,6 -o:alsa,default
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+EXPECTED
+check_setup('Hardware insert via soundcard, prefader  - ALSA');
+gen_jack();
+$expected_setup_lines = <<EXPECTED;
+EXPECTED
+check_setup('Hardware insert via soundcard, prefader  - JACK');
 
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}
