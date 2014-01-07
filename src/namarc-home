@@ -95,6 +95,7 @@ limiter: tap_limiter 0 0
 serialize_formats: json
 
 use_git: 1
+enforce_channel_bounds: 0
 
 autosave: undo
 
