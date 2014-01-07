@@ -9,7 +9,7 @@ use strict;
 use warnings;
 no warnings qw(uninitialized);
 
-our $fx_cache_json = read_file("t/data/fake_effect_cache.json");
+our $fx_cache_json = read_file("t/data/fake_effects_cache.json");
 our ($expected_setup_lines);
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");

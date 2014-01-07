@@ -220,5 +220,3 @@ __DATA__
 [% qx(cat ./hotkeys.json) %]
 @@ banner
 [% qx(cat ./banner.pl) %]
-@@ fx_cache
-[% qx(cat ./fake_effects_cache.json) %]

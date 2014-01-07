@@ -11,7 +11,7 @@ TESTD=$MD/t
 
 echo "Cleaning output directories"
 rm -rf $TD
-rm -rf $TESTD
+rm -rf $TESTD/*.t
 CUR_DIR=`dirname $0`
 cd "$CUR_DIR"
 if [ ! -d $TD ]; then
