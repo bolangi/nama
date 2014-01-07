@@ -1019,7 +1019,8 @@ sub source_status {}
 sub group_last {0}
 sub version {0}
 }
-{package ::EarTrack; # for submix helper tracks
+{
+package ::EarTrack; # for submix helper tracks
 use ::Globals qw(:all);
 use ::Util qw(dest_string);
 use Modern::Perl; use ::Log qw(logpkg);
@@ -1204,7 +1205,8 @@ sub playat_time {
 # offset run mode
 
 } # end package
-{ package ::Spacer;
+{ 
+package ::Spacer;
 our @ISA = '::Clip';
 use SUPER;
 use ::Object qw(duration);
@@ -1226,6 +1228,12 @@ sub new {
 	$self;
 }
 } # end package
+{ 
+package ::WetTrack; # for inserts
+use ::Globals qw(:all);
+use Modern::Perl; use ::Log qw(logpkg);
+our @ISA = '::SlaveTrack';
+}
 
 # ----------- Track_subs -------------
 {
