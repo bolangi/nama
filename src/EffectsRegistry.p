@@ -20,13 +20,13 @@ sub prepare_static_effects_data{
 	my $effects_cache = effects_cache();
 
 	logpkg('debug', join "\n", "newplugins:", new_plugins());
-	if ($config->{opts}->{r} or new_plugins()){ 
+	if (! $source and ($config->{opts}->{r} or new_plugins())){ 
 
 		unlink $effects_cache;
 		print "Regenerating effects data cache\n";
 	}
 
-	if (-f $effects_cache and ! $config->{opts}->{C}){  
+	if ( ($source or -f $effects_cache) and ! $config->{opts}->{C}){  
 		logpkg('debug', "found effects cache: $effects_cache");
 		$source //= read_file($effects_cache); # scalar assign
 		assign(
