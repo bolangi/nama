@@ -536,50 +536,6 @@ gen_jack();
 check_setup('Send bus - soundcard - JACK');
 process_command('remove_bus Vo');
 process_command('sax mono');
-=comment
-process_command('add_insert post 5');
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Master_in
--a:3 -i:jack_multi,system:capture_2
--a:4 -i:jack_multi,system:capture_7,system:capture_8
--a:J3,5 -i:loop,sax_insert_post
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Master_in
--a:J3 -o:jack_multi,system:playback_5,system:playback_6
-EXPECTED
-gen_jack();
-check_setup('Insert via soundcard - JACK');
-process_command('remove_insert'); 
-process_command('add_send_bus_raw Vo 5');
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Master_in
--a:3,4 -i:jack_multi,system:capture_2
-
-# post-input processing
-
--a:3 -chcopy:1,2
--a:4 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
--a:4 -o:jack_multi,system:playback_5,system:playback_6
-EXPECTED
-gen_jack();
-
-check_setup('Send bus - raw - JACK');
-=cut
 
 ###### Timeline tests
 #
@@ -698,7 +654,7 @@ load_project(name => "$test_project-convert51-incremental", create => 1);
 
 [% qx(cat ./stereo51.pl ) %]
 
-load_project(name => "$test_project-convert51-incremental", create => 1);
+load_project(name => "$test_project-sendbus-cooked", create => 1);
 
 do_script(' add mic
             add guitar
@@ -738,6 +694,7 @@ check_setup('Submix - ALSA');
 
 force_jack();
 process_command('gen');
+
 $expected_setup_lines = <<EXPECTED;
 # general
 
@@ -824,9 +781,10 @@ EXPECTED
 check_setup('Send Bus, Raw - ALSA');
 
 force_jack();
-load_project(name => "add_insert_post", create => 1);
+load_project(name => "$test_project-add_insert_post", create => 1);
 
-process_command("add sax; mon; add_insert post jconvolver; gen");
+process_command("add sax; mon; gen");
+process_command("add_insert post jconvolver; gen");
 $expected_setup_lines = <<EXPECTED;
 
 # general
