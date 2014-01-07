@@ -19,7 +19,7 @@ devices:
   jack:
     signal_format: f32_le,N,frequency
   consumer:
-    ecasound_id: alsahw,Intel
+    ecasound_id: alsa,default
     input_format: cd-stereo
     output_format: cd-stereo
     hardware_latency: 0
