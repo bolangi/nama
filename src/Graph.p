@@ -241,11 +241,6 @@ sub add_loop {
 #  with, for example, multiple edges to a soundcard.
 #
 #  Send buses create new tracks to provide connections.
-#
-# I will be moving edges (along with their attributes)
-# but I cannot assign chain_id them because I have
-# no way of knowing which is the edge that will use
-# the track number and will therefore get the track effects
 
  	my ($g, $a, $b, $loop) = @_;
  	logpkg('debug',"$a-$b: insert near side loop");
