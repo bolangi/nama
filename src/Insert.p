@@ -4,7 +4,7 @@ use Modern::Perl;
 use Carp;
 no warnings qw(uninitialized redefine);
 our $VERSION = 0.1;
-use vars qw(%by_index);
+our %by_index;
 use ::Log qw(logpkg);
 use ::Log qw(logpkg);
 use ::Globals qw($jack $setup $config);
@@ -86,13 +86,7 @@ sub new {
 
 sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
 
-sub remove {
-	my $self = shift;
-	local $::this_track;
-	$::tn{ $self->wet_name }->remove;
-	$::tn{ $self->dry_name }->remove;
-	delete $by_index{$self->n};
-}
+#sub remove {}
 # subroutine
 #
 sub add_insert {
@@ -263,6 +257,12 @@ sub add_paths {
 	$g->add_path($loop, $dry->name, $successor);
 	}
 	
+sub remove {
+	my $self = shift;
+	$::tn{ $self->wet_name }->remove;
+	$::tn{ $self->dry_name }->remove;
+	delete $::Insert::by_index{$self->n};
+}
 }
 {
 package ::PreFaderInsert;
@@ -357,13 +357,12 @@ sub add_paths {
 		$g->add_path($predecessor, $dry->name, $loop, $name);
 	}
 	
-}
 sub remove {
 	my $self = shift;
-	local $::this_track;
 	$::tn{ $self->wet_send_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	$::tn{ $self->wet_name }->remove;
 	delete $::Insert::by_index{$self->n};
+}
 }
 1;
