@@ -503,7 +503,6 @@ sub t_create_project {
 sub mixdown {
 	pager_newline("Enabling mixdown to file") if ! $quiet;
 	$tn{Mixdown}->set(rw => 'REC'); 
-	$tn{Master}->set(rw => 'OFF'); 
 }
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
