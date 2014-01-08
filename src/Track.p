@@ -1270,13 +1270,13 @@ sub add_track {
 	my $bus = $bn{$track->group}; 
 	process_command('for mon; mon') if $mode->{preview} and $bus->rw eq 'MON';
 	# TODO ???
-	$bus->set(rw => 'REC') unless $track->target; # not if is alias
+	$bus->set(rw => 'MON') unless $track->target; # not if is alias
 
-	# normal tracks default to 'REC'
+	# normal tracks default to 'MON'
 	# track aliases default to 'PLAY'
 	$track->set(rw => $track->target
 					?  'PLAY'
-					:  'REC') ;
+					:  'MON') ;
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();
