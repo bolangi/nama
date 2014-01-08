@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 130;
+use Test::More tests => 121;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -256,7 +256,7 @@ like( ::ChainSetup::ecasound_chain_setup(), qr/Horgand/, 'set JACK client as inp
 process_command("sax; source jack; gen");
 like( ::ChainSetup::ecasound_chain_setup(), qr/jack,,sax_in/, 'set JACK port for manual input');
 
-process_command("sax; source 2");
+process_command("sax; rec; source 2");
 
 
 force_alsa();
@@ -614,7 +614,6 @@ foreach(@tests){
 
 load_project(name => "$test_project-convert51", create => 1);
 
-# REDUNDANT
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
 CONVERT51
@@ -652,10 +651,6 @@ EXPECTED
 force_alsa();
 process_command('gen');
 check_setup('Stereo to 5.1 converter script' );
-
-load_project(name => "$test_project-convert51-incremental", create => 1);
-
-[% qx(cat ./stereo51.pl ) %]
 
 load_project(name => "$test_project-sendbus-cooked", create => 1);
 
