@@ -201,9 +201,11 @@ sub throw {
 	logsub("&throw");
 	pager_newline(@_)
 }
-sub pager_join {
-	logsub("&pager_join");
-	pager(join "", @_)
+sub pagers {
+	logsub("&pagers");
+	my $output = join "", @_; 
+	chomp $output;
+	pager($output, $/)
 }
 sub pager_newline { map { my $s = $_; chomp $s; say $s} @_ }
 	
