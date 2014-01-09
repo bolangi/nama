@@ -158,23 +158,33 @@ sub _add_effect {  # append effect
 	@$p{qw( chain before    type parent_id  effect_id values)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
+	my $add_effects_sub;
+	if( my $fxc = ::is_effect_chain($code))
+	{
+		$add_effects_sub = sub{ $fxc->add($ti{$n})};
+	}
+	else 
+	{
+		$p->{values} = fx_defaults($code) 
+			if ! $values 
+			or ref $values and ! scalar @{ $values };
 
-	$p->{values} = fx_defaults($code) 
-		if ! $values 
-		or ref $values and ! scalar @{ $values };
+		$id = effect_init($p); 
+		
+		$ui->add_effect_gui($p) unless $ti{$n}->hide;
 
-	$id = effect_init($p); 
-	
-	$ui->add_effect_gui($p) unless $ti{$n}->hide;
+		$add_effects_sub = sub{ apply_op($id) };
+	}
 	if( ::valid_engine_setup() )
 	{
 		if (::engine_running())
 		{ 
 			$ti{$n}->mute;
-			::stop_do_start( sub{ apply_op($id) }, 0.05);
+			::stop_do_start($add_effects_sub, 0.05);
 			$ti{$n}->unmute;
+
 		}
-		else { apply_op($id) }
+		else { $add_effects_sub->() }
 	}
 	$id;
 
