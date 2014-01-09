@@ -502,7 +502,11 @@ sub apply_effect_profile {  # overwriting current effects
 	# add effect chains
 	map{ $_->add } @chains;
 }
-
+sub is_effect_chain {
+	my $name = shift;
+	my ($fxc) = ::EffectChain::find(name => $name, unique => 1);
+	$fxc
+}
 }
 1;
 __END__
