@@ -763,9 +763,10 @@ add_controller: _add_controller effect value(s?) {
 	}
 	1;
 }
-add_effect: _add_effect existing_effect_chain {
+add_effect: _add_effect existing_effect_chain end {
 	my $fxc = $item{existing_effect_chain};
 	$fxc->add($::this_track);
+	1
 }
 existing_effect_chain: ident { ::is_effect_chain($item{ident}) }
 
