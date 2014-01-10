@@ -154,14 +154,14 @@ sub add_effect {
 
 sub _add_effect {  # append effect
 	my $p = shift;
-	my (    $n,   $before, $code,$parent_id,$id, $values) =
-	@$p{qw( chain before    type parent_id  effect_id values)};
+	my (    $n,   $before, $code,$parent_id,$id, $values,$effect_chain) =
+	@$p{qw( chain before    type parent_id  effect_id values effect_chain)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 	my $add_effects_sub;
-	if( my $fxc = ::is_effect_chain($code))
+	if( $effect_chain)
 	{
-		$add_effects_sub = sub{ $fxc->add($ti{$n})};
+		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
 	}
 	else 
 	{
@@ -192,9 +192,8 @@ sub _add_effect {  # append effect
 sub _insert_effect {  # call only from add_effect
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
-	my ($before, $code, $values) = @$p{qw(before type values)};
-	pager("$code: unknown effect. Skipping.\n"), return if !  full_effect_code($code);
-	$code = full_effect_code( $code );	
+	my ($before, $code, $values, $effect_chain) 
+		= @$p{qw(before type values effect_chain)};
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -222,35 +221,26 @@ sub _insert_effect {  # call only from add_effect
 		$offset++;
 	}
 
-	# remove ops after insertion point if engine is connected
+	# remove ops after insertion point 
 
-	my @ops = @{$track->ops}[$offset..$#{$track->ops}];
-	logpkg('debug',"ops to remove and re-apply: @ops");
+	my @after_ops = splice @{$track->ops}, $offset;
+	logpkg('debug',"ops to remove and re-apply: @after_ops");
 	my $connected = ::eval_iam('cs-connected');
 	if ( $connected ){  
-		map{ remove_op($_)} reverse @ops; # reverse order for correct index
+		map{ remove_op($_)} reverse @after_ops; # reverse order for correct index
 	}
 
-	_add_effect($p);
+	my $op = _add_effect($p);
 
 	logpkg('debug',"@{$track->ops}");
 
-	# the new op_id is added to the end of the $track->ops list
-	# so we need to move it to specified insertion point
-
-	my $op = pop @{$track->ops}; 
-
-	# the above acts directly on $track, because ->ops returns 
-	# a reference to the array
-
-	# insert the effect id 
-	splice 	@{$track->ops}, $offset, 0, $op;
+	# replace the ops that had been removed
+	push @{$track->ops}, @after_ops;
 
 	logpkg('debug',sub{"@{$track->ops}"});
 
-	# replace the ops that had been removed
 	if ($connected ){  
-		map{ apply_op($_, $n) } @ops;
+		map{ apply_op($_, $n) } @after_ops;
 	}
 		
 	if ($running){
