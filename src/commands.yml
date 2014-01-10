@@ -798,7 +798,7 @@ add_controller:
         # help for -klg in the Ecasound manpage.
 add_effect:
   type: effect
-  what: Add an effect prefader (before vol/pan controls) to the current track. Remove effects with reove_effect.
+  what: Add an effect prefader (before vol/pan controls) to the current track. Remove effects with remove_effect.
   short: afx
   parameters: <string:effect_code> [ <float:param1> <float:param2>... ]
   example: |
