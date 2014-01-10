@@ -136,7 +136,9 @@ sub extract_effects_data {
 	my $j = $lower - 1;
 	while(my $line = shift @lines){
 		$j++;
-		$line =~ /$regex/ or carp("bad effect data line: $line\n"),next;
+		$line =~ /$regex/ or 
+		carp("bad effect data line: $line\n", 
+			join " ", map{ ord($_) } split //, $line), next;
 		my ($no, $name, $id, $rest) = ($1, $2, $3, $4);
 		# $no is unimportant; it from the list numbering
 		logpkg('debug', "Number: $no Name: $name Code: $id Rest: $rest");
