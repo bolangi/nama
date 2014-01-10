@@ -1044,6 +1044,8 @@ sub is_read_only {
 	no warnings 'uninitialized';
 	$self->about->{params}->[$param]->{dir} eq 'output'
 }          
+sub nick        { my $self = shift; $fx->{applied}->{$self->{id}}->{nick}     	}
+sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
 sub is_controller { my $self = shift; $self->parent } 
 
 sub has_read_only_param {
