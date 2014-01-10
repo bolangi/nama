@@ -165,7 +165,7 @@ shellish: anytag | <error>
 					# used in: help, do_script
 					 # 
 jack_port: shellish
-effect: /\w[^, ]+/ | <error: illegal identifier, only word characters and colon allowed>
+effect: /\w[^, ]+/ | <error: comma not allowed>
 project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
@@ -763,34 +763,26 @@ add_controller: _add_controller effect value(s?) {
 	}
 	1;
 }
-add_effect: _add_effect existing_effect_chain end {
-	my $fxc = $item{existing_effect_chain};
-	$fxc->add($::this_track);
-	1
-}
 existing_effect_chain: ident { ::is_effect_chain($item{ident}) }
 
-add_effect: _add_effect effect value(s?) {
-	my $code = $item{effect};
-	my $effect_chain = ::is_effect_chain($code);
+fx_or_fxc: existing_effect_chain | known_effect_type
+
+known_effect_type: effect { 
+	::full_effect_code($item{effect})
+	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
+	undef
+}
+add_effect: _add_effect fx_or_fxc value(s?) {
+	my ($code, $effect_chain);
 	my $values = $item{"value(s?)"};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
-	if ( $effect_chain)
-	{
-		$args->{effect_chain} = $effect_chain;
-	}
-	elsif ($code = ::full_effect_code($code))
-	{
-		$args->{type} = $code;
-	}
-	else 
-	{
-		::throw(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
-	}
+	if( ref $item{fx_or_fxc} ) 	{ $args->{effect_chain}	= $item{fx_or_fxc} }
+	else 						{ $args->{type}			= $item{fx_or_fxc} }
 	# place effect before fader if there is one
-	my $fader = ::fxn($::this_track->pan) && $::this_track->pan 
-			|| ::fxn($::this_track->vol) && $::this_track->vol; 
+	my $fader = 
+			   ::fxn($::this_track->pan) && $::this_track->pan
+			|| ::fxn($::this_track->vol) && $::this_track->vol;
 	{ no warnings 'uninitialized';
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));
