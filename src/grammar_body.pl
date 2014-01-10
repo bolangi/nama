@@ -772,14 +772,22 @@ existing_effect_chain: ident { ::is_effect_chain($item{ident}) }
 
 add_effect: _add_effect effect value(s?) {
 	my $code = $item{effect};
+	my $effect_chain = ::is_effect_chain($code);
 	my $values = $item{"value(s?)"};
-	print(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
-		unless ::effect_index($code);
-	my $args = {
-		track  => $::this_track, 
-		type   => ::full_effect_code($code),
-		values => $values
-	};
+	my $args = { 	track  => $::this_track, 
+					values => $values };
+	if ( $effect_chain)
+	{
+		$args->{effect_chain} = $effect_chain;
+	}
+	elsif ($code = ::full_effect_code($code))
+	{
+		$args->{type} = $code;
+	}
+	else 
+	{
+		::throw(qq{$code: unknown effect. Try "find_effect keyword(s)\n}), return 1
+	}
 	# place effect before fader if there is one
 	my $fader = ::fxn($::this_track->pan) && $::this_track->pan 
 			|| ::fxn($::this_track->vol) && $::this_track->vol; 
@@ -789,6 +797,7 @@ add_effect: _add_effect effect value(s?) {
 	}
 	$args->{before} = $fader if $fader;
  	my $id = ::add_effect($args);
+	return 1 if $effect_chain;
 	if ($id)
 	{
 		my $i = ::effect_index($code);
