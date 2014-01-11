@@ -772,7 +772,8 @@ known_effect_type: effect {
 	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
 	undef
 }
-add_effect: _add_effect fx_or_fxc value(s?) {
+before: op_id
+add_effect: _add_effect fx_or_fxc before(?) value(s?) {
 	my ($code, $effect_chain);
 	my $values = $item{"value(s?)"};
 	my $args = { 	track  => $::this_track, 
@@ -787,7 +788,8 @@ add_effect: _add_effect fx_or_fxc value(s?) {
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));
 	}
-	$args->{before} = $fader if $fader;
+	my $predecessor = (join "",@{$item{'before(?)'}}) || $fader;
+	$args->{before} = $predecessor if $predecessor; 
  	my $id = ::add_effect($args);
 	return 1 if $effect_chain;
 	if ($id)
