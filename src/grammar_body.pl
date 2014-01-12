@@ -772,7 +772,22 @@ known_effect_type: effect {
 	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
 	undef
 }
-before: op_id
+before: op_id | this_track_effect_chain
+this_track_effect_chain: ident # return op_id of insertion point
+{
+	for my $FX ($::this_track->fancy_ops_o)
+	{ return $FX->id 
+		if $FX->name eq $item{ident} 
+	 	or $FX->surname eq $item{ident}
+		or do
+		{ 
+			my ($suffix) = $FX->surname =~ /$item{ident}(\d*)/;
+			$suffix    //= $FX->name    =~ /$item{ident}(\d*)/;
+			$suffix and $::this_track->effect_nickname_count eq 1
+		}
+	}
+}
+
 add_effect: _add_effect fx_or_fxc before(?) value(s?) {
 	my ($code, $effect_chain);
 	my $values = $item{"value(s?)"};
@@ -850,7 +865,6 @@ insert_effect: _insert_effect before effect value(s?) {
 	}
 	1;}
 
-before: op_id
 parent: op_id
 modify_effect: _modify_effect parameter(s /,/) value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
