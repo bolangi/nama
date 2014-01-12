@@ -344,6 +344,10 @@ sub fancy_ops { # returns list
 
 	grep{ ! $skip{$_} } @{ $track->ops };
 }
+sub fancy_ops_o {
+	my $track = shift;
+	map{ ::fxn($_) } fancy_ops();
+}
 		
 sub snapshot {
 	my $track = shift;
