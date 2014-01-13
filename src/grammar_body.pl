@@ -809,6 +809,7 @@ add_effect: _add_effect fx_or_fxc before(?) value(s?) {
 	return 1 if $effect_chain;
 	if ($id)
 	{
+		no warnings 'uninitialized';
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
