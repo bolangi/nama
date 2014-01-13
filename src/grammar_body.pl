@@ -953,7 +953,7 @@ frequency: value
 list_history: _list_history {
 	my @history = $::text->{term}->GetHistory;
 	my %seen;
-	::pager_join( grep{ ! $seen{$_}; $seen{$_}++ } @history );
+	::pager_join( grep{ ! $seen{$_} and $seen{$_}++ } @history );
 }
 add_user: _add_user bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
@@ -1632,7 +1632,7 @@ mark_pair: mark1 mark2 {
 	my @marks = map{ $::mn{$_}} @item{qw(mark1 mark2)};
  	::throw(join" ",(map{$_->name} @marks), 
 		": pair must be ascending in time"), return undef
- 	 	if not $marks[0]->time < $marks[1]->time;
+ 	 	if not( $marks[0]->time < $marks[1]->time );
  	\@marks
 }
 mark1: ident { $::mn{$item{ident}} }
