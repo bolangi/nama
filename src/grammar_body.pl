@@ -1211,17 +1211,11 @@ show_effect_profiles: _show_effect_profiles ident(?) {
 	my %profiles;
 	map{ $profiles{$_->profile}++ } ::EffectChain::find(profile => $name);
 	my @names = keys %profiles;
-
-
 	my @output;
-
-
 	for $name (@names) {
 		push @output, "\nprofile name: $name\n";
-		map { 	
-			push @output, $_->summary;
-		} ::EffectChain::find(profile => $name);
-	} @names;
+		map { push @output, $_->summary } ::EffectChain::find(profile => $name)
+	}
 	if( @output )
 	{ ::pager( @output); }
 	else { ::throw("no match") }
