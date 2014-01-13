@@ -411,8 +411,6 @@ sub full_effect_code {
     if ($input !~ /\D/) # i.e. $input is all digits
 	{
 		$code = $fx_cache->{ladspa_id_to_label}->{$input};
-		defined $code or carp("$input: LADSPA plugin not found.  Aborting.\n"),
-			return;
 	}
 	elsif ( $fx_cache->{full_label_to_index}->{$input} )
 	{
@@ -422,9 +420,7 @@ sub full_effect_code {
 	{ 
 		$code = $fx_cache->{partial_label_to_full}->{$input} 
 	}
-	defined $code or ($config->{opts}->{E} or
-		warn("$input: effect code not found.  Skipping.\n")),
-		return unless 	$code;
+	$code
 }
 
 
