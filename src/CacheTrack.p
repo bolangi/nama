@@ -23,21 +23,21 @@ sub cache_track { # launch subparts if conditions are met
 	($args->{track}, $args->{additional_time}) = @_;
 	$args->{additional_time} //= 0;
 	
-	say $args->{track}->name, ": preparing to cache.";
+	pagers($args->{track}->name, ": preparing to cache.");
 	
 	# abort if track is a mix track for a sub-bus and the bus is OFF 
 	if( my $bus = $bn{$args->{track}->name}
 		and $args->{track}->rec_status eq 'REC' 
 	 ){ 
-		$bus->rw eq 'OFF' and say(
+		$bus->rw eq 'OFF' and pagers(
 			$bus->name, ": status is OFF. Aborting."), return;
 
 	# check conditions for normal track
 	} else { 
-		$args->{track}->rec_status eq 'PLAY' or say(
+		$args->{track}->rec_status eq 'PLAY' or pagers(
 			$args->{track}->name, ": track caching requires PLAY status. Aborting."), return;
 	}
-	say($args->{track}->name, ": no effects to cache!  Skipping."), return 
+	pagers($args->{track}->name, ": no effects to cache!  Skipping."), return 
 		unless 	$args->{track}->fancy_ops 
 				or $args->{track}->has_insert
 				or $bn{$args->{track}->name};
@@ -51,7 +51,7 @@ sub cache_track { # launch subparts if conditions are met
 	}
 	else
 	{ 
-		say("Empty routing graph. Aborting."); 
+		throw("Empty routing graph. Aborting."); 
 		return;
 	}
 
@@ -138,7 +138,7 @@ sub prepare_to_cache {
 sub cache_engine_run {
 	my $args = shift;
 	connect_transport()
-		or say("Couldn't connect engine! Aborting."), return;
+		or throw("Couldn't connect engine! Aborting."), return;
 
 	# remove fades from target track
 	
@@ -146,8 +146,8 @@ sub cache_engine_run {
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 
-	say $/,$args->{track}->name,": processing time: ". d2($args->{processing_time}). " seconds";
-	print "Starting cache operation. Please wait.";
+	pagers($args->{track}->name,": processing time: ". d2($args->{processing_time}). " seconds");
+	pagers("Starting cache operation. Please wait.");
 	
 	revise_prompt(" "); 
 
@@ -172,7 +172,7 @@ sub complete_caching {
 		$args->{complete_caching_ref}->($args) if defined $args->{complete_caching_ref};
 		post_cache_processing($args);
 
-	} else { say "track cache operation failed!"; }
+	} else { throw("track cache operation failed!") }
 	undef $setup->{cache_track_args};
 }
 sub update_cache_map {
@@ -212,8 +212,8 @@ sub update_cache_map {
 			map{ $_->remove        } @inserts_list;
 			$args->{track}->set(region_start => undef, region_end => undef);
 
-		say qq(Saving effects for cached track "), $args->{track}->name, '".';
-		say qq('uncache' will restore effects and set version $args->{orig_version}\n);
+		pagers(qq(Saving effects for cached track "), $args->{track}->name, '".');
+		pagers(qq('uncache' will restore effects and set version $args->{orig_version}\n));
 		}
 }
 
@@ -241,7 +241,7 @@ sub poll_cache_progress {
 		   $status =~ /finished|error|stopped/ 
 		or $here > $args->{processing_time};
 
-	say "Done.";
+	pagers("Done.");
 	logpkg('debug', engine_status(current_position(),2,1));
 	#revise_prompt();
 	stop_polling_cache_progress($args);
@@ -276,13 +276,12 @@ sub uncache_track {
 	# * load the effect chain 
 	#
 			$track->set(version => $ec->track_version_original);
-			print $track->name, ": setting uncached version ", $track->version, 
-$/;
+			pager($track->name, ": setting uncached version ", $track->version, $/);
 	# CASE 2: a sub-bus mix track, set to REC for caching operation.
 
 	if( my $bus = $bn{$track->name}){
 			$track->set(rw => 'REC') ;
-			say $track->name, ": setting sub-bus mix track to REC";
+			pagers($track->name, ": setting sub-bus mix track to REC");
 	}
 
 		$ec->add($track) if defined $ec;

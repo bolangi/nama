@@ -411,7 +411,7 @@ sub list_project_templates {
 }
 sub remove_project_template {
 	map{my $name = $_; 
-		pager_join("$name: removing template");
+		pager("$name: removing template");
 		$name .= ".yml" unless $name =~ /\.yml$/;
 		unlink join_path( project_root(), "templates", $name);
 	} @_;

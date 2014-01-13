@@ -152,7 +152,7 @@ sub init_gui {
 		 -command => sub { 
 				return if transport_running();
 				save_state($gui->{_save_id});
-				print "Exiting... \n";		
+				pager("Exiting... \n");
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
@@ -1094,9 +1094,9 @@ sub arm_mark_toggle {
 sub marker {
 	my $ui = shift;
 	my $mark = shift; # Mark
-	#print "mark is ", ref $mark, $/;
+	logpkg('debug',"mark is ", ref $mark);
 	my $pos = $mark->time;
-	#print $pos, " ", int $pos, $/;
+	logpkg('debug',$pos, " ", int $pos);
 		$gui->{marks}->{$pos} = $gui->{mark_frame}->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $gui->{_nama_palette}->{OffBackground},
@@ -1129,7 +1129,7 @@ sub get_saved_colors {
 
 	my $pal = $file->gui_palette;
 	$pal .= '.json' unless $pal =~ /\.json$/;
-	say "pal $pal";
+	pager("pal $pal");
 	$pal = -f $pal 
 			? scalar read_file($pal)
 			: get_data_section('default_palette_json');

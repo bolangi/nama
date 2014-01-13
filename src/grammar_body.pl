@@ -3,7 +3,7 @@
 command: _a_test { print "aaa-test" }
 _a_test: /something_else\b/ | /a-test\b/
 #test: 'test' shellish { 
-#	::pager_join( "found $item{shellish}");
+#	::pager( "found $item{shellish}");
 #	}
 
 # CASE 0: Midish command 
@@ -31,11 +31,11 @@ meta: bang shellcode stopper {
 	my $prefix = "chdir ". ::project_dir().";";
 	$shellcode = "$prefix $shellcode" if $shellcode =~ /^\s*git /;
 
-	::pager_join( "executing this shell code:  $shellcode" )
+	::pager( "executing this shell code:  $shellcode" )
 		if $shellcode ne $item{shellcode};
 	my $output = qx( $shellcode );
 	chdir $olddir;
-	::pager_join($output) if $output;
+	::pager($output) if $output;
 	1;
 }
 
@@ -54,7 +54,7 @@ meta: for bunch_spec ';' namacode stopper {
  	for my $t(@tracks) {
  		::user_set_current_track($t);
 		$::text->{parser}->meta($item{namacode});
- 		#::pager_join(("$t); $item{namacode}");
+ 		#::pager(("$t); $item{namacode}");
 	}
 	1;
 }
@@ -198,9 +198,9 @@ find_effect: _find_effect anytag(s) {
 	::find_effect(@{$item{"anytag(s)"}}); 1}
 help: _help 'yml' { ::pager($::text->{commands_yml}); 1}
 help: _help anytag  { ::help($item{anytag}) ; 1}
-help: _help { ::pager_join( $::help->{screen} ); 1}
+help: _help { ::pager( $::help->{screen} ); 1}
 project_name: _project_name { 
-	::pager_join( "project name: ", $::project->{name}); 1}
+	::pager( "project name: ", $::project->{name}); 1}
 new_project: _new_project project_id { 
 	::t_create_project $item{project_id} ; 1}
 list_projects: _list_projects { ::list_projects() ; 1}
@@ -295,7 +295,7 @@ get_state: _get_state save_target {
 # get_state: _get_state {
 #  	::load_project( name => $::project->{name},) ; 1}
 getpos: _getpos {  
-	::pager_join( ::d1( ::eval_iam q(getpos) )); 1}
+	::pager( ::d1( ::eval_iam q(getpos) )); 1}
 setpos: _setpos timevalue {
 	::set_position($item{timevalue}); 1}
 forward: _forward timevalue {
@@ -410,14 +410,14 @@ add_region: _add_region beginning ending track_name(?) {
 shift_track: _shift_track start_position {
 	my $pos = $item{start_position};
 	if ( $pos =~ /\d+\.\d+/ ){
-		::pager_join($::this_track->name, ": Shifting start time to $pos seconds");
+		::pager($::this_track->name, ": Shifting start time to $pos seconds");
 		$::this_track->set(playat => $pos);
 		1;
 	}
 	# elsif ( pos =~ /^\d+$/ ) { # skip the mark index case
 	elsif ( $::Mark::by_name{$pos} ){
 		my $time = ::Mark::mark_time( $pos );
-		::pager_join($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
+		::pager($::this_track->name, qq(: Shifting start time to mark "$pos", $time seconds));
 		$::this_track->set(playat => $pos);
 		1;
 	} else { 
@@ -439,7 +439,7 @@ arm: _arm { ::arm(); 1}
 arm_start: _arm_start { ::arm(); ::start_transport(); 1 }
 connect: _connect { ::connect_transport(); 1}
 disconnect: _disconnect { ::disconnect_transport(); 1}
-engine_status: _engine_status { ::pager_join(::eval_iam q(engine-status)); 1}
+engine_status: _engine_status { ::pager(::eval_iam q(engine-status)); 1}
 start: _start { ::start_transport(); 1}
 stop: _stop { ::stop_transport(); 1}
 ecasound_start: _ecasound_start { ::eval_iam('start'); 1}
@@ -467,7 +467,7 @@ modifiers: _modifiers modifier(s) {
 	@{$item{"modifier(s)"}}, q() ));
 	1;}
 
-modifiers: _modifiers { ::pager_join( $::this_track->modifiers); 1}
+modifiers: _modifiers { ::pager( $::this_track->modifiers); 1}
 nomodifiers: _nomodifiers { $::this_track->set(modifiers => ""); 1}
 show_chain_setup: _show_chain_setup { ::pager(::ChainSetup::ecasound_chain_setup); 1}
 dump_io: _dump_io { ::ChainSetup::show_io(); 1}
@@ -493,14 +493,14 @@ show_track: _show_track dd {
 	$::ti{$item{dd}};
 	1;}
 
-show_mode: _show_mode { ::pager_join( ::show_status()); 1}
+show_mode: _show_mode { ::pager( ::show_status()); 1}
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
 	$bus->set(rw => 'REC');
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
-	::pager_join( "Setting MON mode for $::this_bus bus.");
+	::pager( "Setting MON mode for $::this_bus bus.");
 	1; }
 bus_off: _bus_off {
 	my $bus = $::bn{$::this_bus}; 
@@ -508,7 +508,7 @@ bus_off: _bus_off {
 	# turn off mix track
 	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
 	{ $mix->set(rw => 'OFF') }
-	::pager_join( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
+	::pager( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
 }
 bus_version: _bus_version dd { 
 	my $n = $item{dd};
@@ -602,7 +602,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { ::pager_join( $::fx->{params}->{$::this_track->vol}[0]); 1}
+vol: _vol { ::pager( $::fx->{params}->{$::this_track->vol}[0]); 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -627,7 +627,7 @@ pan: _pan sign panval {
 	1;} 
 panval: float 
       | dd
-pan: _pan { ::pager_join( $::fx->{params}->{$::this_track->pan}[0]); 1}
+pan: _pan { ::pager( $::fx->{params}->{$::this_track->pan}[0]); 1}
 pan_right: _pan_right { ::pan_check($::this_track, 100 ); 1}
 pan_left:  _pan_left  { ::pan_check($::this_track,    0 ); 1}
 pan_center: _pan_center { ::pan_check($::this_track,   50 ); 1}
@@ -651,7 +651,7 @@ next_mark: _next_mark { ::next_mark(); 1}
 previous_mark: _previous_mark { ::previous_mark(); 1}
 loop: _loop someval(s) {
 	my @new_endpoints = @{ $item{"someval(s)"}}; # names or indexes of marks
-	#::pager_join( @new_endpoints);
+	#::pager( @new_endpoints);
 	$::mode->{loop_enable} = 1;
 	@{$::setup->{loop_endpoints}} = (@new_endpoints, @{$::setup->{loop_endpoints}}); 
 	@{$::setup->{loop_endpoints}} = @{$::setup->{loop_endpoints}}[0,1];
@@ -813,10 +813,10 @@ add_effect: _add_effect fx_or_fxc before(?) value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		::pager_join("Added $id ($iname)");
+		::pager("Added $id ($iname)");
 		::set_current_op($id);
 	}
-	else { ::pager_join("Failed to add effect") } 
+	else { ::pager("Failed to add effect") } 
 }
 
 # cut-and-paste copy of add_effect, without using 'before' parameter
@@ -836,7 +836,7 @@ append_effect: _append_effect effect value(s?) {
 		my $i = ::effect_index($code);
 		my $iname = $::fx_cache->{registry}->[$i]->{name};
 
-		::pager_join( "Added $id ($iname)");
+		::pager( "Added $id ($iname)");
 		::set_current_op($id);
 	}
  	1;
@@ -846,8 +846,8 @@ insert_effect: _insert_effect before effect value(s?) {
 	my $before = $item{before};
 	my $code = $item{effect};
 	my $values = $item{"value(s?)"};
-	#::pager_join( "values: " , ref $values);
-	::pager_join( join ", ", @{$values}) if $values;
+	#::pager( "values: " , ref $values);
+	::pager( join ", ", @{$values}) if $values;
 	my $id = ::add_effect({
 		before 	=> $before, 
 		type	=> ::full_effect_code($code),
@@ -861,7 +861,7 @@ insert_effect: _insert_effect before effect value(s?) {
 		my $bi = 	::effect_index(::fxn($before)->type);
 		my $bname = $::fx_cache->{registry}->[$bi]->{name};
 
- 		::pager_join( "Inserted $id ($iname) before $before ($bname)");
+ 		::pager( "Inserted $id ($iname) before $before ($bname)");
 		::set_current_op($id);
 	}
 	1;}
@@ -874,12 +874,12 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	::pager_join( ::show_effect(::this_op()))
+	::pager( ::show_effect(::this_op()))
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
-	::pager_join( ::show_effect(::this_op()));
+	::pager( ::show_effect(::this_op()));
 }
 modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
@@ -910,7 +910,7 @@ show_effect: _show_effect op_id(s) {
 }
 show_effect: _show_effect {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::pager_join( ::show_effect(::this_op()));
+	::pager( ::show_effect(::this_op()));
 	1;
 }
 list_effects: _list_effects { ::pager(::list_effects()); 1}
@@ -920,7 +920,7 @@ remove_bunch: _remove_bunch ident(s) {
  	map{ delete $::project->{bunch}->{$_} } @{$item{'ident(s)'}}; 1}
 add_to_bunch: _add_to_bunch ident(s) { ::add_to_bunch( @{$item{'ident(s)'}});1 }
 list_versions: _list_versions { 
-	::pager_join( join " ", @{$::this_track->versions}); 1}
+	::pager( join " ", @{$::this_track->versions}); 1}
 ladspa_register: _ladspa_register { 
 	::pager( ::eval_iam("ladspa-register")); 1}
 preset_register: _preset_register { 
@@ -953,7 +953,7 @@ frequency: value
 list_history: _list_history {
 	my @history = $::text->{term}->GetHistory;
 	my %seen;
-	::pager_join( grep{ ! $seen{$_} and $seen{$_}++ } @history );
+	::pager( grep{ ! $seen{$_} and $seen{$_}++ } @history );
 }
 add_user: _add_user bus_name destination {
 	::add_send_bus( $item{bus_name}, $item{destination}, 'cooked' );
@@ -1023,7 +1023,7 @@ set_insert_wetness: _set_insert_wetness prepost(?) {
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	$id or ::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), return 1 ;
 	my $i = $::Insert::by_index{$id};
-	 ::pager_join( "The insert is ", $i->wetness, "% wet, ", (100 - $i->wetness), "% dry.");
+	 ::pager( "The insert is ", $i->wetness, "% wet, ", (100 - $i->wetness), "% dry.");
 }
 
 remove_insert: _remove_insert prepost(?) { 
@@ -1034,7 +1034,7 @@ remove_insert: _remove_insert prepost(?) {
 	my $prepost = $item{'prepost(?)'}->[0];
 	my $id = ::Insert::get_id($::this_track,$prepost);
 	$id or ::throw($::this_track->name.  ": Missing or ambiguous insert. Skipping"), return 1 ;
-	::pager_join( $::this_track->name.": removing ". $prepost ?  "$prepost fader insert" : "insert");
+	::pager( $::this_track->name.": removing ". $prepost ?  "$prepost fader insert" : "insert");
 	$::Insert::by_index{$id}->remove;
 	1;
 }
@@ -1110,8 +1110,8 @@ bypass_effects:   _bypass_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fxn($_) } @$arr_ref;
 	::throw("@illegal: non-existing effect(s), skipping."), return 0 if @illegal;
- 	::pager_join( "track ",$::this_track->name,", bypassing effects:");
-	::pager_join( ::named_effects_list(@$arr_ref));
+ 	::pager( "track ",$::this_track->name,", bypassing effects:");
+	::pager( ::named_effects_list(@$arr_ref));
 	::bypass_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	::set_current_op($arr_ref->[0]) if scalar @$arr_ref == 1;
@@ -1120,7 +1120,7 @@ bypass_effects:   _bypass_effects op_id(s) {
 #  all effects on current track
 #
 bypass_effects: _bypass_effects 'all' { 
-	::pager_join( "track ",$::this_track->name,", bypassing all effects (except vol/pan)");
+	::pager( "track ",$::this_track->name,", bypassing all effects (except vol/pan)");
 	::bypass_effects($::this_track, $::this_track->fancy_ops)
 		if $::this_track->fancy_ops;
 	1; 
@@ -1130,15 +1130,15 @@ bypass_effects: _bypass_effects 'all' {
 #
 bypass_effects: _bypass_effects { 
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
- 	::pager_join( "track ",$::this_track->name,", bypassing effects:"); 
-	::pager_join( ::named_effects_list(::this_op()));
+ 	::pager( "track ",$::this_track->name,", bypassing effects:"); 
+	::pager( ::named_effects_list(::this_op()));
  	::bypass_effects($::this_track, ::this_op());  
  	1; 
 }
 bring_back_effects:   _bring_back_effects end { 
-	::pager_join("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::pager_join( "restoring effects:");
-	::pager_join( ::named_effects_list(::this_op()));
+	::pager("current effect is undefined, skipping"), return 1 if ! ::this_op();
+	::pager( "restoring effects:");
+	::pager( ::named_effects_list(::this_op()));
 	::restore_effects( $::this_track, ::this_op());
 }
 bring_back_effects:   _bring_back_effects op_id(s) { 
@@ -1146,22 +1146,22 @@ bring_back_effects:   _bring_back_effects op_id(s) {
 	return unless (ref $arr_ref) =~ /ARRAY/  and scalar @{$arr_ref};
 	my @illegal = grep { ! ::fxn($_) } @$arr_ref;
 	::throw("@illegal: non-existing effect(s), aborting."), return 0 if @illegal;
-	::pager_join( "restoring effects:");
-	::pager_join( ::named_effects_list(@$arr_ref));
+	::pager( "restoring effects:");
+	::pager( ::named_effects_list(@$arr_ref));
 	::restore_effects($::this_track,@$arr_ref);
 	# set current effect in special case of one op only
 	::set_current_op($arr_ref->[0]) if scalar @$arr_ref == 1;
 }
 bring_back_effects:   _bring_back_effects 'all' { 
-	::pager_join( "restoring all effects");
+	::pager( "restoring all effects");
 	::restore_effects( $::this_track, $::this_track->fancy_ops);
 }
 # effect_on_current_track: op_id { 
 # 	my $id = $item{op_id};
 # 	my $found = 
-# 	$::fxn($id) or ::pager_join("$id: effect does not exist."), return 0;
+# 	$::fxn($id) or ::pager("$id: effect does not exist."), return 0;
 # 	grep{$id eq $_  } @{$::this_track->ops} 
-# 			   or ::pager_join("$id: effect does not belong to track",
+# 			   or ::pager("$id: effect does not belong to track",
 # 						$::this_track->name), return 0;			  
 # 	$id;
 # }
@@ -1173,7 +1173,7 @@ this_track_op_id: op_id(s) {
 	my @ids = @{$item{'op_id(s)'}};
 	my @belonging 	= grep {   $ops{$_} } @ids;
 	my @alien 		= grep { ! $ops{$_} } @ids;
-	@alien and ::pager_join("@alien: don't belong to track ",$::this_track->name, "skipping."); 
+	@alien and ::pager("@alien: don't belong to track ",$::this_track->name, "skipping."); 
 	@belonging	
 }
 
@@ -1185,7 +1185,7 @@ bunch_name: ident {
 
 effect_profile_name: ident
 existing_effect_profile_name: ident {
-	::pager_join("$item{ident}: no such effect profile"), return
+	::pager("$item{ident}: no such effect profile"), return
 		unless ::EffectChain::find(profile => $item{ident});
 	$item{ident}
 }
@@ -1232,7 +1232,7 @@ full_effect_profiles: _full_effect_profiles ident(?) {
 	1;
 }
 do_script: _do_script shellish { ::do_script($item{shellish});1}
-scan: _scan { ::pager_join( "scanning ", ::this_wav_dir()); ::restart_wav_memoize() }
+scan: _scan { ::pager( "scanning ", ::this_wav_dir()); ::restart_wav_memoize() }
 add_fade: _add_fade in_or_out mark1 duration(?)
 { 	::Fade->new(  type => $item{in_or_out},
 					mark1 => $item{mark1},
@@ -1296,31 +1296,31 @@ list_fade: _list_fade {  ::pager(join "\n",
 		map{ s/^---//; s/...\s$//; $_} map{$_->dump}
 		sort{$a->n <=> $b->n} values %::Fade::by_index) }
 add_comment: _add_comment text { 
- 	::pager_join( $::this_track->name, ": comment: $item{text}"); 
+ 	::pager( $::this_track->name, ": comment: $item{text}"); 
  	$::project->{track_comments}->{$::this_track->name} = $item{text};
  	1;
 }
 remove_comment: _remove_comment {
- 	::pager_join( $::this_track->name, ": comment removed");
+ 	::pager( $::this_track->name, ": comment removed");
  	delete $::project->{track_comments}->{$::this_track->name};
  	1;
 }
 show_comment: _show_comment {
-	map{ ::pager_join( "(",$_->group,") ", $_->name, ": ", $_->comment) } $::this_track;
+	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } $::this_track;
 	1;
 }
 show_comments: _show_comments {
-	map{ ::pager_join( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::Track::all();
+	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::Track::all();
 	1;
 }
 add_version_comment: _add_version_comment dd(?) text {
 	my $t = $::this_track;
 	my $v = $item{'dd(?)'}->[0] // $t->monitor_version // return 1;
-	::pager_join( $t->add_version_comment($v,$item{text})); 
+	::pager( $t->add_version_comment($v,$item{text})); 
 }	
 remove_version_comment: _remove_version_comment dd {
 	my $t = $::this_track;
-	::pager_join( $t->remove_version_comment($item{dd})); 1
+	::pager( $t->remove_version_comment($item{dd})); 1
 }
 show_version_comment: _show_version_comment dd(s?) {
 	my $t = $::this_track;
@@ -1336,7 +1336,7 @@ show_version_comments_all: _show_version_comments_all {
 	$t->show_version_comments(@v); 1;
 }
 set_system_version_comment: _set_system_version_comment dd text {
-	::pager_join( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
+	::pager( ::set_system_version_comment($::this_track,@item{qw(dd text)}));1;
 }
 midish_command: _midish_command text {
 	::midish_command( $item{text} ); 1
@@ -1422,7 +1422,7 @@ explode_track: _explode_track {
 promote_version_to_track: _promote_version_to_track version {
 	my $v = $item{version};
 	my $t = $::this_track;
-	$t->versions->[$v] or ::pager_join($t->name,": version $v does not exist."),
+	$t->versions->[$v] or ::pager($t->name,": version $v does not exist."),
 		return;
 	::VersionTrack->new(
 		name 	=> $t->name.":$v",
@@ -1442,10 +1442,10 @@ limit_run_time: _limit_run_time sign(?) dd {
 	$::setup->{runtime_limit} = $sign
 		? eval "$::setup->{audio_length} $sign $item{dd}"
 		: $item{dd};
-	::pager_join( "Run time limit: ", ::heuristic_time($::setup->{runtime_limit})); 1;
+	::pager( "Run time limit: ", ::heuristic_time($::setup->{runtime_limit})); 1;
 }
 limit_run_time_off: _limit_run_time_off { 
-	::pager_join( "Run timer disabled");
+	::pager( "Run timer disabled");
 	::disable_length_timer();
 	1;
 }
@@ -1453,7 +1453,7 @@ offset_run: _offset_run markname {
 	::set_offset_run_mark( $item{markname} ); 1
 }
 offset_run_off: _offset_run_off {
-	::pager_join( "no run offset.");
+	::pager( "no run offset.");
 	::disable_offset_run_mode(); 
 }
 view_waveform: _view_waveform { 
@@ -1487,7 +1487,7 @@ edit_waveform: _edit_waveform {
 }
 
 rerecord: _rerecord { 
-		::pager_join(
+		::pager(
 			scalar @{$::setup->{_last_rec_tracks}} 
 				?  "Toggling previous recording tracks to REC"
 				:  "No tracks in REC list. Skipping."
@@ -1500,17 +1500,17 @@ rerecord: _rerecord {
 
 show_track_latency: _show_track_latency {
 	my $node = $::setup->{latency}->{track}->{$::this_track->name};
-	::pager_join( ::json_out($node)) if $node;
+	::pager( ::json_out($node)) if $node;
 	1;
 }
 show_latency_all: _show_latency_all { 
-	::pager_join( ::json_out($::setup->{latency})) if $::setup->{latency};
+	::pager( ::json_out($::setup->{latency})) if $::setup->{latency};
 	1;
 }
 analyze_level: _analyze_level { ::check_level($::this_track);1 }
 git: _git shellcode stopper { 
 #print ::json_out(\%item);
-::pager_join(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
+::pager(map {$_.="\n"} $::project->{repo}->run( split " ", $item{shellcode})) 
 }
 edit_rec_setup_hook: _edit_rec_setup_hook { 
 	system("$ENV{EDITOR} ".$::this_track->rec_setup_script() );
