@@ -355,7 +355,7 @@ sub yaml_in {
 	$yaml =~ s/^\n+//  ; # remove leading newline at start of file
 	$yaml =~ s/\n*$/\n/; # make sure file ends with newline
 	my $y = YAML::Tiny->read_string($yaml);
-	print "YAML::Tiny read error: $YAML::Tiny::errstr\n" if $YAML::Tiny::errstr;
+	::throw("YAML::Tiny read error: $YAML::Tiny::errstr\n") if $YAML::Tiny::errstr;
 	$y->[0];
 }
 

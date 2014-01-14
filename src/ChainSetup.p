@@ -153,7 +153,7 @@ sub generate_setup_try {
 		write_chains(); 
 		1
 	} else { 
-		say("No tracks to record or play.");
+		throw("No tracks to record or play.");
 		0
 	}
 }

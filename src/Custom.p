@@ -19,10 +19,10 @@ sub setup_user_customization {
 			}
  	} 
 	return unless -r $filename;
-	say "reading user customization file $filename";
+	say("reading user customization file $filename");
 	my %custom;
 	unless (%custom = do $filename) {
-		say "couldn't parse $filename: $@\n" if $@;
+		throw("couldn't parse $filename: $@\n") if $@;
 		return;
 	}
 	logpkg('debug','customization :', sub{Dumper \%custom });
@@ -41,7 +41,7 @@ sub setup_user_customization {
 sub gen_coderef {
 	my ($cmd,$code) = @_;
 	my $coderef = eval "sub{ use feature ':5.10'; no warnings 'uninitialized'; $code }";
-	say("couldn't parse command $cmd: $@"), return if $@;
+	throw("couldn't parse command $cmd: $@"), return if $@;
 	$coderef
 }
 1;

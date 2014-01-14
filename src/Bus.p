@@ -342,12 +342,12 @@ sub update_send_bus {
 }
 sub remove_submix_helper_tracks {
 	my $name = shift;
-	say "got name: $name";
+	#say "got name: $name";
 	my @submixes = submixes(); 
-	say "got submixes:", Dumper \@submixes;
+	#say "got submixes:", Dumper \@submixes;
 	for my $sm ( @submixes ){ 
 		my $to_remove = join '_', $sm->name, $name;
-		say "to_remove: $to_remove";
+		#say "to_remove: $to_remove";
 		local $quiet;
 		$quiet++;
 		for my $name ($sm->tracks) { 
