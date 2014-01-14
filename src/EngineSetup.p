@@ -41,7 +41,7 @@ sub generate_setup {
 		:  eval { ::ChainSetup::generate_setup_try(@_) }; 
 	track_unmemoize(); 			# unfreeze track state
 	if ($@){
-		say("error caught while generating setup: $@");
+		throw("error caught while generating setup: $@");
 		::ChainSetup::initialize();
 		return
 	}
@@ -238,23 +238,23 @@ sub connect_transport {
 	remove_riff_header_stubs();
 
 	register_other_ports(); # that don't belong to my upcoming instance
-	load_ecs($file->chain_setup) or say("No chain setup, engine not ready."), return;
+	load_ecs($file->chain_setup) or throw("No chain setup, engine not ready."), return;
 	valid_engine_setup()
-		or say("Invalid chain setup, engine not ready."),return;
+		or throw("Invalid chain setup, engine not ready."),return;
 	find_op_offsets(); 
 	eval_iam('cs-connect');
-		#or say("Failed to connect setup, engine not ready"),return;
+		#or throw("Failed to connect setup, engine not ready"),return;
 	apply_ops();
 	apply_fades();
 	my $status = eval_iam("engine-status");
 	if ($status ne 'not started'){
-		print("Invalid chain setup, cannot connect engine.\n");
+		throw("Invalid chain setup, cannot connect engine.\n");
 		return;
 	}
 	eval_iam('engine-launch');
 	$status = eval_iam("engine-status");
 	if ($status ne 'stopped'){
-		print "Failed to launch engine. Engine status: $status\n";
+		throw("Failed to launch engine. Engine status: $status\n");
 		return;
 	}
 	$setup->{audio_length} = eval_iam('cs-get-length'); # returns zero if unknown
@@ -283,7 +283,7 @@ sub connect_transport {
 sub transport_status {
 	
 	map{ 
-		say("Warning: $_: input ",$tn{$_}->source,
+		pager("Warning: $_: input ",$tn{$_}->source,
 		" is already used by track ",$setup->{inputs_used}->{$tn{$_}->source},".")
 		if $setup->{tracks_with_duplicate_inputs}->{$_};
 	} grep { $tn{$_}->rec_status eq 'REC' } $bn{Main}->tracks;
@@ -295,16 +295,16 @@ sub transport_status {
 	my $end    = ::Mark::loop_end();
 	#print "start: $start, end: $end, loop_enable: $mode->{loop_enable}\n";
 	if (ref $setup->{cooked_record_pending} and %{$setup->{cooked_record_pending}}){
-		say join(" ", keys %{$setup->{cooked_record_pending}}), ": ready for caching";
+		pager(join(" ", keys %{$setup->{cooked_record_pending}}), ": ready for caching");
 	}
 	if ($mode->{loop_enable} and $start and $end){
 		#if (! $end){  $end = $start; $start = 0}
-		say "looping from ", heuristic_time($start),
-				 	"to ",   heuristic_time($end);
+		pager("looping from ", heuristic_time($start),
+				 	"to ",   heuristic_time($end));
 	}
-	say "\nNow at: ", current_position();
-	say "Engine is ". ( engine_running() ? "running." : "ready.");
-	say "\nPress SPACE to start or stop engine.\n"
+	pager("\nNow at: ", current_position());
+	pager("Engine is ". ( engine_running() ? "running." : "ready."));
+	pager("\nPress SPACE to start or stop engine.\n")
 		if $config->{press_space_to_start};
 }
 
