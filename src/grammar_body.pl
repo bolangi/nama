@@ -260,14 +260,14 @@ save_state: _save_state save_target message(?) {
 	my $name = $item{save_target};
 	my $default_msg = "user save - $name";
 	my $message = "@{$item{'message(?)'}}" || $default_msg;
-	print "save target name: $name\n";
-	print("commit message: $message\n") if $message;
+	::pager("save target name: $name\n");
+	::pager("commit message: $message\n") if $message;
 	
 	# save as named file
 	
 	if(  ! $::config->{use_git} or $name =~ /\.json$/ )
 	{
-	 	print("saving as file\n"), ::save_state( $name)
+	 	::pager("saving as file\n"), ::save_state( $name)
 	}
 	else 
 	{
@@ -349,7 +349,7 @@ existing_track_name: track_name {
 		$track_name;
 	}
 	else {	
-		print("$track_name: track does not exist.\n");
+		::throw("$track_name: track does not exist.\n");
 		undef
 	}
 }
@@ -551,12 +551,12 @@ remove_send: _remove_send {
 }
 stereo: _stereo { 
 	$::this_track->set(width => 2); 
-	print $::this_track->name, ": setting to stereo\n";
+	::pager($::this_track->name, ": setting to stereo\n");
 	1;
 }
 mono: _mono { 
 	$::this_track->set(width => 1); 
-	print $::this_track->name, ": setting to mono\n";
+	::pager($::this_track->name, ": setting to mono\n");
 	1; }
 
 # dummy defs to avoid warnings from command.yml entries
@@ -680,8 +680,8 @@ to_mark: _to_mark ident {
 modify_mark: _modify_mark sign value {
 	my $newtime = eval($::this_mark->{time} . $item{sign} . $item{value});
 	$::this_mark->set( time => $newtime );
-	print $::this_mark->name, ": set to ", ::d2( $newtime), "\n";
-	print "adjusted to ",$::this_mark->time, "\n" 
+	::pager($::this_mark->name, ": set to ", ::d2( $newtime), "\n");
+	::pager("adjusted to ",$::this_mark->time, "\n") 
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
 	::request_setup();
@@ -690,8 +690,8 @@ modify_mark: _modify_mark sign value {
 modify_mark: _modify_mark value {
 	$::this_mark->set( time => $item{value} );
 	my $newtime = $item{value};
-	print $::this_mark->name, ": set to ", ::d2($newtime),"\n";
-	print "adjusted to ",$::this_mark->time, "\n" 
+	::pager($::this_mark->name, ": set to ", ::d2($newtime),"\n");
+	::pager("adjusted to ",$::this_mark->time, "\n")
 		if $::this_mark->time != $newtime;
 	::set_position($::this_mark->time);
 	::request_setup();
@@ -704,8 +704,8 @@ remove_effect: _remove_effect op_id(s) {
 		my $id = $_;
 		my ($use) = grep{ $id eq $::this_track->$_ } qw(vol pan fader);
 		if($use){
-			print "Effect $id is used as $use by track",$::this_track->name, 
-			".\nSee 'remove_fader_effect to remove it'\n"
+			::throw("Effect $id is used as $use by track",$::this_track->name, 
+			".\nSee 'remove_fader_effect to remove it'\n")
 		}
 		else { ::remove_effect( $_ ) }
 	} grep { $_ }  @{ $item{"op_id(s)"}} ;
@@ -733,13 +733,13 @@ add_controller: _add_controller parent effect value(s?) {
 		my $pi = 	::effect_index(::fxn($parent)->type);
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
-		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
+		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
 
 	}
 	1;
 }
 add_controller: _add_controller effect value(s?) {
-	print("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
+	::throw("current effect is undefined, skipping\n"), return 1 if ! ::this_op();
 	my $code = $item{effect};
 	my $parent = ::this_op();
 	my $values = $item{"value(s?)"};
@@ -758,7 +758,7 @@ add_controller: _add_controller effect value(s?) {
 		my $pi = 	::effect_index(::fxn($parent)->type);
 		my $pname = $::fx_cache->{registry}->[$pi]->{name};
 
-		print "\nAdded $id ($iname) to $parent ($pname)\n\n";
+		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
 
 	}
 	1;
@@ -1557,7 +1557,7 @@ new_sequence: _new_sequence new_sequence_name track_identifier(s?) {
 }
 new_sequence_name: ident { $return = 
 	$::bn{$item{ident}}
-		? do { print "$item{ident}: name already in use\n"; undef}
+		? do { ::pager("$item{ident}: name already in use\n"), undef}
 		: $item{ident} 
 }
 track_identifier: tid {  # allow either index or name
