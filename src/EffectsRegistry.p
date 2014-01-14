@@ -146,7 +146,7 @@ sub extract_effects_data {
 		map{s/'//g}@p_names; # remove leading and trailing q(') in ladspa strings
 		logpkg('debug', "Parameter names: @p_names");
 		$fx_cache->{registry}->[$j]={};
-		$fx_cache->{registry}->[$j]->{number} = $no;
+		#$fx_cache->{registry}->[$j]->{number} = $no;
 		$fx_cache->{registry}->[$j]->{code} = $id;
 		$fx_cache->{registry}->[$j]->{name} = $name;
 		$fx_cache->{registry}->[$j]->{count} = scalar @p_names;
