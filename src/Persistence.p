@@ -48,8 +48,8 @@ sub save_state {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename;
 		$filename =~ s/\.yml$//;
-		print "storing ALSA settings\n";
-		print qx(alsactl -f $filename.alsa store);
+		pager("storing ALSA settings\n");
+		pager(qx(alsactl -f $filename.alsa store))
 	}
 }
 sub initialize_marshalling_arrays {
@@ -462,8 +462,8 @@ sub convert_rw {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename; 
 		$filename =~ s/\.yml$//;
-		print "restoring ALSA settings\n";
-		print qx(alsactl -f $filename.alsa restore);
+		pager("restoring ALSA settings\n");
+		pager(qx(alsactl -f $filename.alsa restore));
 	}
 
 	# text mode marks 

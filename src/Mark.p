@@ -60,7 +60,7 @@ sub new {
 sub set_name {
 	my $mark = shift;
 	my $name = shift;
-	print "name: $name\n";
+	pager("name: $name\n");
 	if ( defined $by_name{ $name } ){
 	carp "you attempted to assign to name already in use\n";
 	}
