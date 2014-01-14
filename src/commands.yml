@@ -1654,4 +1654,48 @@ trim_user:
     ! reduce vol of current track in in_ear_monitor by 3dB
     user in_ear_monitor1
     trim vol - 3 
+nickname_effect:
+  type: effect
+  short: nfx nick
+  what: Add a nickname to the current effect (and create an alias)
+  parameters: <lower_case_string:nickname>
+  example: |
+    add_track guitar
+    afx Plate
+    nick reverb        # current effect gets name "reverb1"
+                       # "reverb" becomes an alias for "Plate"
+    mfx reverb1 1 0.05 # modify first reverb effect on current track 
+    mfx reverb 1 2     # works, because current track has one effect named "reverb"
+    afx reverb         # add another Plate effect, gets name "reverb2"
+    
+    rfx reverb         # Error, multiple reverb effects are present on this track.  Please use a numerical suffix.
+    mfx reverb2 1 3    # modify second reverb effect
+    rfx reverb1        # removes reverb1
+    ifx reverb2 reverb # insert another reverb effect (reverb3) before reverb2
+    rfx reverb3        # remove reverb3
+    rfx reverb         # removes reverb2, as it is the sole remain reverb effect
+delete_nickname_definition:
+  type: effect
+  short: dnd
+  what: delete a nickname definition. Previously named effects keep their names.
+  example: |
+    afx Plate  # add Plate effect
+    nick reverb# name it "reverb", and create a nickname for Plate
+    dnd reverb # removes nickname definition
+    afx reverb # error
+remove_nickname:
+  type: effect
+  what: remove the "name" attribute of the current effect
+  short: rnick
+  example: |
+    afx Plate
+    nick reverb
+    mfx reverb 1 3
+    rnick
+    mfx reverb 1 3 # Error: effect named "reverb" not found on current track
+list_nickname_definitions:
+  type: effect
+  what: list all defined nicknames
+  short: lnd
+  parameters: none
 ...
