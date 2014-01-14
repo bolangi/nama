@@ -767,6 +767,21 @@ existing_effect_chain: ident { ::is_effect_chain($item{ident}) }
 
 fx_or_fxc: existing_effect_chain | known_effect_type
 
+nick: /\w+/ { ::effect_index($item[1]) ? undef : $item[1] }
+
+nickname_effect: _nickname_effect nick {
+	$::fx->{applied}->{$::this_op}->{name} = $item{nick} if defined $::this_op;
+	1
+}
+remove_nickname: _remove_nickname {
+	delete $::fx->{applied}->{$::this_op}->{name}
+}
+list_nickname_definitions: _list_nickname_definitions
+{
+}
+delete_nickname_definition: _delete_nickname_definition existing_effect_chain
+{
+}
 known_effect_type: effect { 
 	::full_effect_code($item{effect})
 	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
