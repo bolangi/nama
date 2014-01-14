@@ -1564,7 +1564,7 @@ track_identifier: tid {  # allow either index or name
 	my $tid = $::tn{$item{tid}} || $::ti{$item{tid}} ;
 	if ($tid) { $tid }
 	else 
-	{ 	print "$item{tid}: track name or index not found.\n"; 
+	{ 	::throw("$item{tid}: track name or index not found.\n"); 
 		undef
 	}
 }
@@ -1679,7 +1679,7 @@ select_user: _select_user existing_bus_name {
 trim_user: _trim_user effect parameter sign(?) value { 
 	#my($nick, $real) = @{$item{fx_alias}};
 	my $real_track = join '_', $::this_user->name, $::this_track->name;
-	print "real track: $real_track\n";
+	::pager("real track: $real_track\n");
 	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
