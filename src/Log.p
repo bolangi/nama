@@ -17,8 +17,9 @@ sub initialize_logger {
 	);
 	push @all_cats, 'ECI','SUB';
 
-	my %negate = map{ $_ => 1} map{ s/^#//; $_ } grep{ /^#/ } 
-		expand_cats(split q(,), $cat_string);
+	my %negate;
+	%negate = map{ $_ => 1} map{ s/^#//; $_ } grep{ /^#/ } 
+		expand_cats(split q(,), $cat_string) if $cat_string;
 	#say("negate\n",::json_out(\%negate));
 
 	my $layout = "[\%r] %c %m%n"; # backslash to protect from source filter
@@ -28,7 +29,8 @@ sub initialize_logger {
 	$appender = $logfile ? 'FILE' : 'STDERR';
 	$logfile //= "/dev/null";
 
-	my @cats = expand_cats(split ',', $cat_string);
+	my @cats;
+	@cats = expand_cats(split ',', $cat_string) if $cat_string;
 	#logpkg('debug',"initial logging categories: @cats");
 	#logpkg('trace',"all cats: @all_cats");
 	

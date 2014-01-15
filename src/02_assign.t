@@ -4,6 +4,8 @@ use strict;
 BEGIN { use_ok('::Assign') };
 
 use ::Assign qw(:all);
+use ::Log;
+::Log::initialize_logger();
 # `make test'. After `make install' it should work as `perl 1.t'
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
@@ -64,7 +66,7 @@ WANT
 		face => [],
 		dict => {},
 	};	
-	diag("scalar array: ",scalar @face, " scalar hash: ", scalar %dict); 
+	#diag("scalar array: ",scalar @face, " scalar hash: ", scalar %dict); 
 	assign (data => $nulls, class => 'main', vars => \@var_list);
 	is( scalar @face, 0, "Null array assignment");
 	is( scalar %dict, 0, "Null hash assignment");
