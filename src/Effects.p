@@ -1031,6 +1031,7 @@ sub is_read_only {
 	$self->about->{params}->[$param]->{dir} eq 'output'
 }          
 sub name        { my $self = shift; $fx->{applied}->{$self->{id}}->{name}     	}
+sub remove_name { my $self = shift; delete $fx->{applied}->{$self->{id}}->{name}}
 sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
 sub is_controller { my $self = shift; $self->parent } 
 
