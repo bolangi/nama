@@ -268,26 +268,20 @@ sub set_current_bus {
 	
 	$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
 
-	# Set 'Main' as current for Master/Mixdown
+	my $bus_name = 
+		$track->name =~ /Master|Mixdown/ 	
+		? 'Main'
+		: $track->is_mix_track()			
+			? $track->name 
+			: $track->group;
 	
-	if( $track->name =~ /Master|Mixdown/){
-		$this_bus = 'Main'; 
-		$this_bus_o = $bn{$this_bus};
-	}
-
-	# Select the same named bus if track is a mix track
-	
-	elsif( $track->is_mix_track() ){
-		$this_bus = $track->name;
-		$this_bus_o = $bn{$track->name};
-	}
-
-	# Select the current track's bus
-	
-	else { 
-		$this_bus = $track->group;
-		$this_bus_o = $track->bus;
- 	}
+	select_bus($bus_name);
+}
+sub select_bus {
+	my $name = shift;
+	my $bus = $bn{$name} or '::throw("$name: is not a bus")', return;
+	$this_bus = $name;
+	$this_bus_o = $bus;
 }
 sub add_sub_bus {
 	my ($name, @args) = @_; 
