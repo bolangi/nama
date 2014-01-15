@@ -279,7 +279,7 @@ sub set_current_bus {
 }
 sub select_bus {
 	my $name = shift;
-	my $bus = $bn{$name} or '::throw("$name: is not a bus")', return;
+	my $bus = $bn{$name} or return;
 	$this_bus = $name;
 	$this_bus_o = $bus;
 }
