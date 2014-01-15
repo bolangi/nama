@@ -420,12 +420,6 @@ sub convert_rw {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
-	$ui->create_master_and_mix_tracks();
-
-	$this_track = $tn{$this_track_name} if $this_track_name;
-	set_current_bus();
-
-	
 	map{ 
 		my $n = $_->{n};
 
@@ -451,7 +445,10 @@ sub convert_rw {
 		}
 	} @tracks_data;
 
+	$ui->create_master_and_mix_tracks();
 
+	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
+	
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
