@@ -1115,7 +1115,7 @@ delete_effect_chain:
   what: |
     Delete an effect chain definition. Does not affect the
     project state. This command is not reversible by undo.
-  short: dec destroy_effect_chain
+  short: dec destroy_effect_chain delete_nickname_definition dnd
   parameters: <string:effect_chain_name>
 find_effect_chains:
   type: effect
@@ -1127,7 +1127,7 @@ find_effect_chains:
 find_user_effect_chains:
   type: effect
   what: List all *user* created effect chains, matching key/value pairs, if provided.
-  short: fuec
+  short: fuec list_nickname_definitions lnd
   parameters: [ <string:key_1> <string:value_1> ] ...
 bypass_effects:
   type: effect
