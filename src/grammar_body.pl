@@ -770,18 +770,15 @@ fx_or_fxc: existing_effect_chain | known_effect_type
 nick: /\w+/ { ::effect_index($item[1]) ? undef : $item[1] }
 
 nickname_effect: _nickname_effect nick {
-	$::fx->{applied}->{$::this_op}->{name} = $item{nick} if defined $::this_op;
+	$::fx->{applied}->{::this_op()}->{name} = $item{nick} if defined ::this_op();
 	1
 }
 remove_nickname: _remove_nickname {
-	delete $::fx->{applied}->{$::this_op}->{name}
+	delete $::fx->{applied}->{::this_op()}->{name}
 }
-list_nickname_definitions: _list_nickname_definitions
-{
-}
-delete_nickname_definition: _delete_nickname_definition existing_effect_chain
-{
-}
+#remove_nickname: _remove_nickname { ::this_op_o()->remove_nickname() }
+delete_nickname_definition: 'dummy' # keep grammar quiet
+list_nickname_definitions: 'dummy'
 known_effect_type: effect { 
 	::full_effect_code($item{effect})
 	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
@@ -1699,3 +1696,4 @@ trim_user: _trim_user effect parameter sign(?) value {
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
 #fx_alias: ident { [$item{ident}, $::config->{alias}->{effect}->{$item{ident}}] }
+
