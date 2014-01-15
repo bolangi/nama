@@ -260,18 +260,33 @@ our (
 
 sub set_current_bus {
 	my $track = shift || ($this_track ||= $tn{Master});
-	return unless $track;
-	#say "track: $track";
-	#say "this_track: $this_track";
-	#say "master: $tn{Master}";
-	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
-	elsif( $bn{$track->name} ){
+
+	return unless $track; # needed for test environment
+
+	# The current sequence changes when the user touches a
+	# track that belongs to another sequence.
+	
+	$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+
+	# Set 'Main' as current for Master/Mixdown
+	
+	if( $track->name =~ /Master|Mixdown/){
+		$this_bus = 'Main'; 
+		$this_bus_o = $bn{$this_bus};
+	}
+
+	# Select the same named bus if track is a mix track
+	
+	elsif( $track->is_mix_track() ){
 		$this_bus = $track->name;
-		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
-}
+		$this_bus_o = $bn{$track->name};
+	}
+
+	# Select the current track's bus
+	
 	else { 
 		$this_bus = $track->group;
-		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+		$this_bus_o = $track->bus;
  	}
 }
 sub add_sub_bus {
