@@ -763,7 +763,7 @@ add_controller: _add_controller effect value(s?) {
 	}
 	1;
 }
-existing_effect_chain: ident { ::is_effect_chain($item{ident}) }
+existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
 fx_or_fxc: existing_effect_chain | known_effect_type
 
@@ -785,24 +785,37 @@ known_effect_type: effect {
 	undef
 }
 before: op_id | this_track_effect_chain
-this_track_effect_chain: ident # return op_id of insertion point
-{
-	for my $FX ($::this_track->fancy_ops_o)
-	{ return $FX->id 
-		if $FX->name eq $item{ident} 
-	 	or $FX->surname eq $item{ident}
-		or do
-		{ 
-			my ($suffix) = $FX->surname =~ /$item{ident}(\d*)/;
-			$suffix    //= $FX->name    =~ /$item{ident}(\d*)/;
-			$suffix and $::this_track->effect_nickname_count eq 1
-		}
-	}
-}
+this_track_effect_chain: ident
+{ $::this_track->effect_chain_leading_id($item{ident}) }
 
-add_effect: _add_effect fx_or_fxc before(?) value(s?) {
+add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
+	my $command = join " ", 
+		qw(add_effect), $::this_track->{ops}->[0],
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
+}
+add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
+	my $command = join " ", 
+		qw(add_effect ZZZ),
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
+}
+add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
+	my $command = join " ", 
+		qw(add_effect),
+		$item{before},
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
+}
+add_effect: _add_effect before(?) fx_or_fxc value(s?) {
 	my ($code, $effect_chain);
-	my $values = $item{"value(s?)"};
+	my $values = $item{'value(s?)'};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
 	if( ref $item{fx_or_fxc} ) 	{ $args->{effect_chain}	= $item{fx_or_fxc} }
