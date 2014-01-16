@@ -165,7 +165,7 @@ shellish: anytag | <error>
 					# used in: help, do_script
 					 # 
 jack_port: shellish
-effect: /\w[^, ]+/ | <error: comma not allowed>
+effect: /\w[^, ]+/
 project_id: ident slash(?) { $item{ident} }
 slash: '/'
 					# used in create_project, load_project
@@ -781,7 +781,7 @@ delete_nickname_definition: 'dummy' # keep grammar quiet
 list_nickname_definitions: 'dummy'
 known_effect_type: effect { 
 	::full_effect_code($item{effect})
-	or ::throw(qq{$$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
+	or ::throw(qq{$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
 	undef
 }
 before: op_id | this_track_effect_chain
