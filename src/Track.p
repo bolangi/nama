@@ -342,7 +342,7 @@ sub fancy_ops { # returns list
 }
 sub fancy_ops_o {
 	my $track = shift;
-	map{ ::fxn($_) } fancy_ops();
+	map{ ::fxn($_) } $track->fancy_ops();
 }
 		
 sub snapshot {
@@ -971,6 +971,29 @@ sub is_mix_track {
 	($bn{$track->name} or $track->name eq 'Master') and $track->rw eq 'MON'
 }
 sub bus { $bn{$_[0]->group} }
+
+sub effect_chain_leading_id {
+	my $track = shift;
+	my $ident = shift;
+	for my $FX ($track->fancy_ops_o)
+	{ return $FX->id 
+		if $FX->name eq $ident 
+	 	or $FX->surname eq $ident
+		or do
+		{ 
+			my ($suffix) = $FX->surname =~ /$ident(\d*)/;
+			$suffix    //= $FX->name    =~ /$ident(\d*)/;
+			$suffix and $track->effect_nickname_count eq 1
+		}
+	}
+}
+sub effect_nickname_count {
+	my ($track, $nick) = @_;
+	my $count = 0;
+	for my $FX ($track->fancy_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
+	$count
+}
+		
 	
 } # end package
 
