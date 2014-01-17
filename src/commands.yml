@@ -1708,4 +1708,12 @@ set_effect_surname:
   what: set an effect surname
   short: ses
   parameters: <string:surname>
+remove_effect_name:
+  type: effect
+  what: remove current effect name
+  short: ren
+remove_effect_surname:
+  type: effect
+  what: remove current effect surname
+  short: res
 ...

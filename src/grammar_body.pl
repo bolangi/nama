@@ -697,8 +697,8 @@ modify_mark: _modify_mark value {
 	::request_setup();
 	1;
 	}		
-remove_effect: _remove_effect fx_alias(s) {
-	#print join $/, @{ $item{"fx_alias(s)"} }; 
+remove_effect: _remove_effect fx_alias_remove(s) {
+	#print join $/, @{ $item{"fx_alias_remove(s)"} }; 
 	::mute();
 	map{ 
 		my $id = $_;
@@ -708,8 +708,8 @@ remove_effect: _remove_effect fx_alias(s) {
 			".\nSee 'remove_fader_effect to remove it'\n")
 		}
 		else { ::remove_effect( $_ ) }
-	} grep { $_ }  @{ $item{"fx_alias(s)"}} ;
-	# map{ print "fx_alias: $_\n"; ::remove_effect( $_ )}  @{ $item{"fx_alias(s)"}} ;
+	} grep { $_ }  map{ split ' ', $_} @{ $item{"fx_alias_remove(s)"}} ;
+	# map{ print "fx_alias_remove: $_\n"; ::remove_effect( $_ )}  @{ $item{"fx_alias_remove(s)"}} ;
 	::sleeper(0.5);
 	::unmute();
 	1;}
@@ -917,6 +917,7 @@ fx_alias3: ident {
 	map{ $_->id } 
 	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
+fx_alias_remove: fx_alias1 | fx_alias3
 fx_alias: fx_alias2 | fx_alias1
 fx_alias1: op_id
 fx_alias1: fx_pos
@@ -1722,5 +1723,7 @@ trim_user: _trim_user effect parameter sign(?) value {
 	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
-set_effect_name: _set_effect_name ident { ::this_op_o->set_name($item{ident}) }
-set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{ident})}
+set_effect_name: _set_effect_name ident { ::this_op_o->set_name($item{ident}); 1}
+remove_effect_name: _remove_effect_name { ::this_op_o->set_name(); 1 			  }
+set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{ident}); 1}
+remove_effect_surname: _remove_effect_surname { ::this_op_o()->set_surname(); 1} 
