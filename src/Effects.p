@@ -1161,6 +1161,7 @@ sub AUTOLOAD {
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	# see if this can be satisfied by a field from
 	# the corresponding effects registry entry
+	$call = 'name' if $call eq 'fxname';
 	$self->about->{$call}
 }
 sub DESTROY {}
