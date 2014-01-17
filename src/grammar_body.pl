@@ -697,8 +697,8 @@ modify_mark: _modify_mark value {
 	::request_setup();
 	1;
 	}		
-remove_effect: _remove_effect op_id(s) {
-	#print join $/, @{ $item{"op_id(s)"} }; 
+remove_effect: _remove_effect fx_alias(s) {
+	#print join $/, @{ $item{"fx_alias(s)"} }; 
 	::mute();
 	map{ 
 		my $id = $_;
@@ -708,8 +708,8 @@ remove_effect: _remove_effect op_id(s) {
 			".\nSee 'remove_fader_effect to remove it'\n")
 		}
 		else { ::remove_effect( $_ ) }
-	} grep { $_ }  @{ $item{"op_id(s)"}} ;
-	# map{ print "op_id: $_\n"; ::remove_effect( $_ )}  @{ $item{"op_id(s)"}} ;
+	} grep { $_ }  @{ $item{"fx_alias(s)"}} ;
+	# map{ print "fx_alias: $_\n"; ::remove_effect( $_ )}  @{ $item{"fx_alias(s)"}} ;
 	::sleeper(0.5);
 	::unmute();
 	1;}
@@ -781,38 +781,11 @@ delete_nickname_definition: 'dummy' # keep grammar quiet
 list_nickname_definitions: 'dummy'
 known_effect_type: effect { 
 	::full_effect_code($item{effect})
-	or ::throw(qq{$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
-	undef
+	#::throw(qq{$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
 }
-before: op_id | this_track_effect_chain
+before: fx_alias
 this_track_effect_chain: ident { my $id = $::this_track->effect_chain_leading_id($item{ident}) }
-
-add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
-	my $command = join " ", 
-		qw(add_effect), $::this_track->{ops}->[0],
-		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
-		print "command is $command\n";
-	::process_command($command)
-}
-add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
-	my $command = join " ", 
-		qw(add_effect ZZZ),
-		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
-		print "command is $command\n";
-	::process_command($command)
-}
-add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
-	my $command = join " ", 
-		qw(add_effect),
-		$item{before},
-		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
-		print "command is $command\n";
-	::process_command($command)
-}
-add_effect: _add_effect before(?) fx_or_fxc value(s?) {
+add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	my ($code, $effect_chain);
 	my $values = $item{'value(s?)'};
 	my $args = { 	track  => $::this_track, 
@@ -841,6 +814,32 @@ add_effect: _add_effect before(?) fx_or_fxc value(s?) {
 		::set_current_op($id);
 	}
 	else { ::pager("Failed to add effect") } 
+}
+
+add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
+	my $command = join " ", 
+		qw(add_effect), $::this_track->{ops}->[0],
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
+}
+add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
+	my $command = join " ", 
+		qw(add_effect ZZZ),
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
+}
+add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
+	my $command = join " ", 
+		qw(add_effect),
+		$item{before},
+		$item{fx_or_fxc},
+		@{$item{'value(s?)'}};
+		print "command is $command\n";
+	::process_command($command)
 }
 
 # cut-and-paste copy of add_effect, without using 'before' parameter
@@ -913,6 +912,11 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
 	::pager( ::show_effect(::this_op()));
 }
+fx_alias3: nick { 
+	join " ", 
+	map{ $_->id } 
+	grep { $_->surname eq $item{nick} } $::this_track->fancy_ops_o;
+}
 fx_alias: fx_alias2 | fx_alias1
 fx_alias1: op_id
 fx_alias1: fx_pos
@@ -935,12 +939,12 @@ position_effect: _position_effect op_to_move new_following_op {
 op_to_move: op_id
 new_following_op: op_id
 	
-show_effect: _show_effect op_id(s) {
+show_effect: _show_effect fx_alias(s) {
 	my @lines = 
 		map{ ::show_effect($_) } 
 		grep{ ::fxn($_) }
-		@{ $item{'op_id(s)'}};
-	::set_current_op($item{'op_id(s)'}->[-1]);
+		@{ $item{'fx_alias(s)'}};
+	::set_current_op($item{'fx_alias(s)'}->[-1]);
 	::pager(@lines); 1
 }
 show_effect: _show_effect {
@@ -1718,3 +1722,5 @@ trim_user: _trim_user effect parameter sign(?) value {
 	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
+set_effect_name: _set_effect_name ident { ::this_op_o->set_name($item{ident}) }
+set_effect_surname: _set_effect_surname ident { ::this_op_o->set_surname($item{ident})}
