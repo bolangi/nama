@@ -276,17 +276,23 @@ sub list_effect {
 
 sub show_effect {
  	my $op_id = shift;
+	my $with_track = shift;
 	my $FX = fxn($op_id);
 	return unless $FX;
 	my @lines;
 	my @params;
  	my $i = $FX->registry_index;
-	my $name = $FX->name;
+	my $name = $FX->fxname;
 	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type} ;
 	$name .= " ($ladspa_id)" if $ladspa_id;
 	$name .= " (bypassed)" if $FX->bypassed;
+	my $namesurname = undef;
+	$namesurname = join ':', $FX->name, $FX->surname
+		if $FX->name or $FX->surname;
+	$name .= " ($namesurname)" if $namesurname;
 	my $trackname = $ti{$FX->chain}->name;
- 	push @lines, "$op_id: $name (applied to track $trackname)\n";
+	my $opline = "$op_id: $name".($with_track ? " (applied to track $trackname)" : "") .  "\n";
+ 	push @lines, $opline;
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
