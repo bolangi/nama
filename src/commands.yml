@@ -798,9 +798,11 @@ add_controller:
         # help for -klg in the Ecasound manpage.
 add_effect:
   type: effect
-  what: Add an effect prefader (before vol/pan controls) to the current track. Remove effects with remove_effect.
+  what: Add an effect 
   short: afx
-  parameters: <string:effect_code> [ <float:param1> <float:param2>... ]
+  parameters: |
+    [ (before <fx_alias> | first | last ) ] <fx_alias> [ <float:param1> <float:param2>... ]
+    "before", "first" and "last" can be abbreviated "b", "f" and "l", respectively.
   example: |
     We want to add the decimator effect (a LADSPA plugin).
     help_effect decimator # Print help about its paramters/controls.
@@ -812,7 +814,9 @@ modify_effect:
   type: effect
   what: Modify effect parameter(s).
   short: mfx
-  parameters: [ <string:effect_id> ] <integer:parameter> [ + | - | * | / ] <float:value>
+  parameters: |
+    [ <fx_alias> ] <integer:parameter> [ + | - | * | / ] <float:value>
+    fx_alias can be: a position, effect ID, nickname or effect code
   example: |
     To change the roomsize of our reverb effect to 62
     lfx 
@@ -835,7 +839,7 @@ remove_effect:
   type: effect
   what: Remove effects. They don't have to be on the current track.
   short: rfx
-  parameters: <string:effect_id1> [ <string:effect_id2> ] ...
+  parameters: <fx_alias1> [ <fx_alias2> ] ...
 position_effect:
   type: effect
   what: Position an effect before another effect (use 'ZZZ' for end).
