@@ -912,10 +912,10 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
 	::pager( ::show_effect(::this_op()));
 }
-fx_alias3: nick { 
+fx_alias3: ident { 
 	join " ", 
 	map{ $_->id } 
-	grep { $_->surname eq $item{nick} } $::this_track->fancy_ops_o;
+	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
 fx_alias: fx_alias2 | fx_alias1
 fx_alias1: op_id
