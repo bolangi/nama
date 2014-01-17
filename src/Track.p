@@ -963,7 +963,7 @@ sub first_effect_of_type {
 	my $type = shift;
 	for my $op ( @{$track->ops} ){
 		my $FX = ::fxn($op);
-		return $FX if $type eq $FX->type
+		return $FX if $FX->type =~ /$type/ # Plate matches el:Plate
 	}
 }
 sub is_mix_track {
