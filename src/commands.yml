@@ -808,25 +808,6 @@ add_effect:
     afx decimator 12 22050  #  prints "Added GO (Decimator)"
     ! We have added the decimator with 12bits and a sample rate of 22050Hz.
     ! GO is the effect ID, which you will need to modify it.
-append_effect:
-  type: effect
-  what: Add an effect postfader (after vol/pan conrols) to the current track. Remove effect with remove_effect.
-  short: apfx
-  parameters: <string:effect_code> [ <float:param1> <float:param2> ] ...
-  example: |
-    apfx var_dali  
-    ! Append the Ecasound effect preset var_dali to the current track
-insert_effect:
-  type: effect
-  what: Place an effect before the specified unique effect ID. You will experience a short pause in playback.
-  short: ifx
-  parameters: <string:insert_point_id> <string:effect_code> [ <float:param1> <float:param2> ] ...
-  example: |
-    To insert a delay before the reverb 
-    lfx 
-    ! List track effects. (We find the reverb's effect ID is AF.)
-    ifx AF etd 125 2 2 40 60 
-    ! Insert the etd delay before the reverb (AF).
 modify_effect:
   type: effect
   what: Modify effect parameter(s).
@@ -1099,21 +1080,6 @@ new_effect_chain:
     ! Create a new effect chain, "my_guitar",
     ! storing the effects with IDs A, C, F, G, H and
     ! their respective settings.
-add_effect_chain:
-  type: effect
-  what: Add an effect chain to the current track.
-  short: aec
-  parameters: <string:effect_chain_name> <string:successor_effect_id | ZZZ>
-  example: |
-    aec my_piano 
-    ! Add the effect chain "my_piano", to the current track.
-    ! This will add all effects stored in my_piano with their
-    ! respective settings.
-    aec my_piano AE
-    ! Add the effect chain, positioning it before before 
-    ! effect id AE
-    aec my_piano ZZZ
-    ! Append the effect chain to the current track effects
 delete_effect_chain:
   type: effect
   what: |

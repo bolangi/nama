@@ -844,53 +844,6 @@ add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
 	::process_command($command)
 }
 
-# cut-and-paste copy of add_effect, without using 'before' parameter
-append_effect: _append_effect effect value(s?) {
-	my $code = $item{effect};
-	my $values = $item{"value(s?)"};
-	::throw(qq{$code: unknown effect. Try "find_effect keyword(s)}), return 1
-		unless ::effect_index($code);
-	my $args = {
-		track  => $::this_track, 
-		type   => ::full_effect_code($code),
-		values => $values
-	};
- 	my $id = ::add_effect($args);
-	if ($id)
-	{
-		my $i = ::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
-
-		::pager( "Added $id ($iname)");
-		::set_current_op($id);
-	}
- 	1;
-}
-
-insert_effect: _insert_effect before effect value(s?) {
-	my $before = $item{before};
-	my $code = $item{effect};
-	my $values = $item{"value(s?)"};
-	#::pager( "values: " , ref $values);
-	::pager( join ", ", @{$values}) if $values;
-	my $id = ::add_effect({
-		before 	=> $before, 
-		type	=> ::full_effect_code($code),
-		values	=> $values,
-	});
-	if($id)
-	{
-		my $i = ::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
-
-		my $bi = 	::effect_index(::fxn($before)->type);
-		my $bname = $::fx_cache->{registry}->[$bi]->{name};
-
- 		::pager( "Inserted $id ($iname) before $before ($bname)");
-		::set_current_op($id);
-	}
-	1;}
-
 parent: op_id
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
 	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
@@ -1113,16 +1066,6 @@ Use a different name, or use "overwrite_effect_chain"/) && return;
 	);
 	1;
 }
-add_effect_chain: _add_effect_chain ident successor {
-	::add_effect_chain($item{ident}, $::this_track, $item{successor});
-	1
-}
-add_effect_chain: _add_effect_chain ident { 
-	::add_effect_chain($item{ident}, $::this_track);
-	1
-}
-successor: op_id
-
 delete_effect_chain: _delete_effect_chain ident(s) {
 	map { 
 		map{$_->destroy()} ::EffectChain::find( user => 1, name => $_);
