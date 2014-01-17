@@ -785,8 +785,7 @@ known_effect_type: effect {
 	undef
 }
 before: op_id | this_track_effect_chain
-this_track_effect_chain: ident
-{ $::this_track->effect_chain_leading_id($item{ident}) }
+this_track_effect_chain: ident { my $id = $::this_track->effect_chain_leading_id($item{ident}) }
 
 add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
 	my $command = join " ", 
@@ -892,6 +891,14 @@ insert_effect: _insert_effect before effect value(s?) {
 	1;}
 
 parent: op_id
+modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
+	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} }))
+}
+modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) sign value {
+	::modify_multiple_effects( @item{qw(fx_alias(s) parameter(s) sign value)});
+	::pager(::show_effect(@{ $item{'fx_alias(s)'} }));
+}
 modify_effect: _modify_effect parameter(s /,/) value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
 	::modify_multiple_effects( 
@@ -906,13 +913,16 @@ modify_effect: _modify_effect parameter(s /,/) sign value {
 	::modify_multiple_effects( [::this_op()], @item{qw(parameter(s) sign value)});
 	::pager( ::show_effect(::this_op()));
 }
-modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) value {
-	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'op_id(s)'} }))
-}
-modify_effect: _modify_effect op_id(s /,/) parameter(s /,/) sign value {
-	::modify_multiple_effects( @item{qw(op_id(s) parameter(s) sign value)});
-	::pager(::show_effect(@{ $item{'op_id(s)'} }));
+fx_alias: fx_alias2 | fx_alias1
+fx_alias1: op_id
+fx_alias1: fx_pos
+fx_alias1: this_track_effect_chain 
+fx_alias2: fx_type
+#fx_pos |fx_type | this_track_effect_chain |  op_id { $item[-1] }
+fx_pos: dd { $::this_track->{ops}->[$item{dd} - 1] }
+fx_type: effect { 
+	my $FX = $::this_track->first_effect_of_type($item{effect});
+	$FX ? $FX->id : undef
 }
 position_effect: _position_effect op_to_move new_following_op {
 	my $op = $item{op_to_move};
@@ -1708,5 +1718,3 @@ trim_user: _trim_user effect parameter sign(?) value {
 	my $FX = $::tn{$real_track}->first_effect_of_type(::full_effect_code($item{effect}));
  	::modify_effect($FX->id, $item{parameter}, @{$item{'sign(?)'}}, $item{value});
 }
-#fx_alias: ident { [$item{ident}, $::config->{alias}->{effect}->{$item{ident}}] }
-
