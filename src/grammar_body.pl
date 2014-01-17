@@ -767,10 +767,11 @@ existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
 fx_or_fxc: existing_effect_chain | known_effect_type
 
-nick: /\w+/ { ::effect_index($item[1]) ? undef : $item[1] }
+#nick: /\w+/ { ::effect_index($item[1]) ? undef : $item[1] }
 
-nickname_effect: _nickname_effect nick {
-	$::fx->{applied}->{::this_op()}->{name} = $item{nick} if defined ::this_op();
+nickname_effect: _nickname_effect ident {
+	::this_op_o()->set_name($item{ident}) if defined ::this_op();
+	::process_command("new_effect_chain $item{ident} ". ::this_op_o()->id);
 	1
 }
 remove_nickname: _remove_nickname {
@@ -954,6 +955,7 @@ show_effect: _show_effect {
 	::pager( ::show_effect(::this_op()));
 	1;
 }
+dump_effect: _dump_effect { ::pager( ::json_out(::this_op_o()->as_hash) )}
 list_effects: _list_effects { ::pager(::list_effects()); 1}
 add_bunch: _add_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::bunch(); 1}

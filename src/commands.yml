@@ -870,6 +870,10 @@ show_effect:
   example: |
     sfx # Print name, unique ID and parameters/controls of the current effect.
     sfx H # Print out all information about effect with unique ID H.
+dump_effect:
+  type: effect
+  what: Dump all data of current effect object
+  short: dfx
 list_effects:
   type: effect
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
