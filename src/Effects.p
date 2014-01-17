@@ -1033,14 +1033,16 @@ sub is_read_only {
 sub name        { my $self = shift; $fx->{applied}->{$self->{id}}->{name}     	}
 sub remove_name { my $self = shift; delete $fx->{applied}->{$self->{id}}->{name}}
 sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
+sub set_name    { my $self = shift; $fx->{applied}->{$self->{id}}->{name} = shift}
+sub set_surname { my $self = shift; $fx->{applied}->{$self->{id}}->{surname} = shift}
 sub is_controller { my $self = shift; $self->parent } 
 
 sub has_read_only_param {
 	my $self = shift;
+	no warnings 'uninitialized';
 	my $entry = $fx_cache->{registry}->[$self->registry_index];
 		for(0..scalar @{$entry->{params}} - 1)
 		{
-			no warnings 'uninitialized';
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
 		}
 }
