@@ -1698,4 +1698,14 @@ list_nickname_definitions:
   what: list all defined nicknames
   short: lnd
   parameters: none
+set_effect_name:
+  type: effect
+  what: set a nickname only (don't creating an alias)
+  short: sen
+  parameters: <string:name>
+set_effect_surname:
+  type: effect
+  what: set an effect surname
+  short: ses
+  parameters: <string:surname>
 ...
