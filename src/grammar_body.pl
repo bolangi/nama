@@ -818,26 +818,27 @@ add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 
 add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
 	my $command = join " ", 
-		qw(add_effect), $::this_track->{ops}->[0],
+		qw(add_effect), 
 		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
+		@{$item{'value(s?)'}},
+		$::this_track->{ops}->[0];
 		print "command is $command\n";
 	::process_command($command)
 }
 add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
 	my $command = join " ", 
-		qw(add_effect ZZZ),
 		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
+		@{$item{'value(s?)'}},
+		qw(add_effect ZZZ);
 		print "command is $command\n";
 	::process_command($command)
 }
 add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
-		$item{before},
 		$item{fx_or_fxc},
-		@{$item{'value(s?)'}};
+		@{$item{'value(s?)'}},
+		$item{before};
 		print "command is $command\n";
 	::process_command($command)
 }
