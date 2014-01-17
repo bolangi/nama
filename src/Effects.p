@@ -1008,6 +1008,17 @@ use Modern::Perl;
 use ::Globals qw($fx $fx_cache %tn %ti);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
+our @keys = qw( 	id
+					owns
+					bypassed
+					parent
+					type
+					chain
+					params
+					name
+					surname );
+
+
 our $AUTOLOAD;
 *this_op			= \&::this_op;
 *this_param			= \&::this_param;
@@ -1035,6 +1046,8 @@ sub remove_name { my $self = shift; delete $fx->{applied}->{$self->{id}}->{name}
 sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
 sub set_name    { my $self = shift; $fx->{applied}->{$self->{id}}->{name} = shift}
 sub set_surname { my $self = shift; $fx->{applied}->{$self->{id}}->{surname} = shift}
+
+
 sub is_controller { my $self = shift; $self->parent } 
 
 sub has_read_only_param {
@@ -1151,6 +1164,12 @@ sub AUTOLOAD {
 	$self->about->{$call}
 }
 sub DESTROY {}
+sub as_hash {
+	my $self = shift;
+	my $hash = {};
+	for (@keys){ $hash->{$_} = $self->$_ }
+	$hash
+}
 }
 1;
 __END__
