@@ -227,7 +227,7 @@ sub destroy {
 	# remove edit track WAV files if we've reached here
 	map{ 
 		my $path = ::join_path(::this_wav_dir(), $_);
-		say "removing $path";
+		::pager("removing $path");
 		#unlink $path;
 	} @wavs;
 }
@@ -287,7 +287,7 @@ sub initialize_edit_points {
     @_edit_points = ();
 }
 sub abort_set_edit_points {
-	say "...Aborting!";
+	::throw("...Aborting!");
 	reset_input_line();
 	eval_iam('stop');
 	initialize_edit_points();
@@ -299,7 +299,7 @@ sub get_edit_mark {
 	if($p <= 3){  # record mark
 		my $pos = eval_iam('getpos');
 		push @_edit_points, $pos;
-		say " got $names[$p] position ".d1($pos);
+		::pager(" got $names[$p] position ".d1($pos));
 		reset_input_line();
 		if( $p == 3){ complete_edit_points() }
 		else{
@@ -311,39 +311,39 @@ sub get_edit_mark {
 sub complete_edit_points {
 	@{$setup->{edit_points}} = @_edit_points; # save to global
 	eval_iam('stop');
-	say "\nEngine is stopped\n";
+	::pager("\nEngine is stopped\n");
 	detect_spacebar();
 	print prompt(), " ";
 }
 }
 sub set_edit_points {
 	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
-	say("You must use a playback-only mode to setup edit marks. Aborting"), 
+	::throw("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if ::ChainSetup::really_recording();
-	say("You need stop the engine first. Aborting"), 
+	::throw("You need stop the engine first. Aborting"), 
 		return 1 if engine_running();
-	say "Ready to set edit points!";
+	::pager("Ready to set edit points!");
 	sleeper(0.2);
-	say q(Press the "P" key three times to mark positions for:
+	::pager(q(Press the "P" key three times to mark positions for:
     + play-start
     + record-start
     + record-end
 
-	say q(Press "Q" to quit.)
+Press "Q" to quit.
 
-Engine will start in 2 seconds.);
+Engine will start in 2 seconds.));
 	initialize_edit_points();
  	$this_engine->{events}->{set_edit_points} = AE::timer(2, 0, 
 	sub {
 		reset_input_line();
 		detect_keystroke_p();
 		eval_iam('start');
-		say "\n\nEngine is running\n";
+		::pager("\n\nEngine is running\n");
 		print prompt();
 	});
 }
 sub transfer_edit_points {
-	say("Use 'set_edit_points' command to specify edit region"), return
+	::throw("Use 'set_edit_points' command to specify edit region"), return
 		 unless scalar @{$setup->{edit_points}};
 	my $edit = shift;
 	::Mark->new( name => $edit->play_start_name, time => $setup->{edit_points}->[0]);
@@ -367,7 +367,7 @@ sub new_edit {
 
 	# abort for many different reasons
 	
-	say("You must use 'set_edit_points' before creating a new edit. Aborting."),
+	::throw("You must use 'set_edit_points' before creating a new edit. Aborting."),
 		return unless @{$setup->{edit_points}};
 	my $overlap = grep { 
 		my $fail;
@@ -379,24 +379,24 @@ sub new_edit {
 		my $ret1 = d1($ret);
 		my $nst1 = d1($nst);
 		my $net1 = d1($net);
-		say("New rec-start time $nst1 conflicts with Edit ",
+		::throw("New rec-start time $nst1 conflicts with Edit ",
 			$_->n, ": $rst1 < $nst1 < $ret1"), $fail++
 			if $rst < $nst and $nst < $ret;
-		say("New rec-end time $net1 conflicts with Edit ",
+		::throw("New rec-end time $net1 conflicts with Edit ",
 			$_->n, ": $rst1 < $net1 < $ret1"), $fail++
 			if $rst < $net and $net < $ret;
-		say("New rec interval $nst1 - $net1 conflicts with Edit ",
+		::throw("New rec interval $nst1 - $net1 conflicts with Edit ",
 			$_->n, ": $rst1 - $ret1"), $fail++
 			if $nst < $rst and $ret < $net;
 		$fail
 	} grep{ $_->host_track eq $this_track->name} 
 		values %Audio::Nama::Edit::by_name;
-	say("Aborting."), return if $overlap;
+	::throw("Aborting."), return if $overlap;
 	my $name = $this_track->name;
 	my $editre = qr($name-v\d+-edit\d+);
-	say("$name: editing of edits is not currently allowed."),
+	::throw("$name: editing of edits is not currently allowed."),
 		return if $name =~ /-v\d+-edit\d+/;
-	say("$name: must be in PLAY mode.
+	::throw("$name: must be in PLAY mode.
 Edits will be applied against current version"), 
 		return unless $this_track->rec_status eq 'PLAY' 
 			or $this_track->rec_status eq 'REC' and
@@ -405,7 +405,7 @@ Edits will be applied against current version"),
 	# create edit
 	
 	my $v = $this_track->monitor_version;
-	say "$name: creating new edit against version $v";
+	::pager("$name: creating new edit against version $v");
 	my $edit = ::Edit->new(
 		host_track 		=> $this_track->name,
 		host_version	=> $v,
@@ -438,7 +438,7 @@ Edits will be applied against current version"),
 
 sub edit_action {
 	my $action = shift;
-	defined $this_edit or say("Please select an edit and try again."), return;
+	defined $this_edit or ::throw("Please select an edit and try again."), return;
 	set_edit_mode();
 	$this_edit->host_alias_track->set(rw => 'PLAY'); # all 
 	$edit_actions{$action}->();
@@ -468,11 +468,11 @@ sub end_edit_mode  	{
 	request_setup();
 }
 sub destroy_edit {
-	say("no edit selected"), return unless $this_edit;
+	::throw("no edit selected"), return unless $this_edit;
 	my $reply = $text->{term}->readline('destroy edit "'.$this_edit->edit_name.
 		qq(" and all its WAV files?? [n] ));
 	if ( $reply =~ /y/i ){
-		say "permanently removing edit";
+		::pager("permanently removing edit");
 		$this_edit->destroy;
 	}
 	$text->{term}->remove_history($text->{term}->where_history);
@@ -482,10 +482,10 @@ sub destroy_edit {
 sub set_edit_mode 	{ $mode->{offset_run} = edit_mode_conditions() ?  1 : 0 }
 sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
-	defined $this_edit or say('No edit is defined'), return;
-	defined $this_edit->play_start_time or say('No edit points defined'), return;
+	defined $this_edit or ::throw('No edit is defined'), return;
+	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
 	$this_edit->host_alias_track->rec_status eq 'PLAY'
-		or say('host alias track : ',$this_edit->host_alias,
+		or ::throw('host alias track : ',$this_edit->host_alias,
 				" status must be PLAY"), return;
 
 	# the following conditions should never be triggered 
@@ -686,21 +686,21 @@ sub list_edits {
 		map{ $_->dump }
 		sort{$a->n <=> $b->n} 
 		values %::Edit::by_index;
-	pager(@edit_data);
+	::pager(@edit_data);
 }
 sub explode_track {
 	my $track = shift;
 	
 	# quit if I am already a mix track
 
-	say($track->name,": I am already a mix track. I cannot explode!"),return
+	::throw($track->name,": I am already a mix track. I cannot explode!"),return
 		if $track->is_mix_track;
 
 	my @versions = @{ $track->versions };
 
 	# quit if I have only one version
 
-	say($track->name,": Only one version. Skipping."), return
+	::throw($track->name,": Only one version. Skipping."), return
 		if scalar @versions == 1;
 
 	$track->busify;
@@ -708,7 +708,7 @@ sub explode_track {
 	my $host = $track->name;
 	my @names = map{ "$host-v$_"} @versions;
 	my @exists = grep{ $::tn{$_} } @names;
-	say("@exists: tracks already exist. Aborting."), return if @exists;
+	::throw("@exists: tracks already exist. Aborting."), return if @exists;
 	my $current = cwd;
 	chdir this_wav_dir();
 	for my $i (@versions){
@@ -737,8 +737,8 @@ sub select_edit {
 
 	# check that conditions are met
 	
-	say("Edit $n not found. Skipping."),return if ! $edit;
- 	say( qq(Edit $n applies to track "), $edit->host_track, 
+	::throw("Edit $n not found. Skipping."),return if ! $edit;
+ 	::throw( qq(Edit $n applies to track "), $edit->host_track, 
  		 qq(" version ), $edit->host_version, ".
 This does does not match the current monitor version (",
 $edit->host->monitor_version,"). 
@@ -775,7 +775,7 @@ Set the correct version and try again."), return
 }
 sub disable_edits {
 
-	say("Please select an edit and try again."), return
+	::throw("Please select an edit and try again."), return
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
@@ -790,11 +790,11 @@ sub disable_edits {
 }
 sub merge_edits {
 	my $edit = $this_edit;
-	say("Please select an edit and try again."), return
+	::throw("Please select an edit and try again."), return
 		unless defined $edit;
-	say($edit->host_alias, ": track must be PLAY status.  Aborting."), return
+	::throw($edit->host_alias, ": track must be PLAY status.  Aborting."), return
 		unless $edit->host_alias_track->rec_status eq 'PLAY';
-	say("Use exit_edit_mode and try again."), return if edit_mode();
+	::throw("Use exit_edit_mode and try again."), return if edit_mode();
 
 	# create merge message
 	my $v = $edit->host_version;
@@ -808,7 +808,7 @@ sub merge_edits {
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
 	# merges mic_1.wav w/mic-v1-edits 1_2 2_1 
 	
-	say $msg;
+	::pager($msg);
 
 	# cache at version_mix level
 	
@@ -844,7 +844,7 @@ sub setup_length {
 	$setup_length
 }
 sub set_offset_run_mark {
-	say("This function not available in edit mode.  Aborting."), 
+	::throw("This function not available in edit mode.  Aborting."), 
 		return if edit_mode();
 	my $markname = shift;
 	
@@ -872,7 +872,7 @@ sub is_offset_run_mode { $mode->{offset_run} and ! defined $this_edit }
 	
 sub select_edit_track {
 	my $track_selector_method = shift;
-	print("You need to select an edit first (list_edits, select_edit)\n"),
+	::throw("You need to select an edit first (list_edits, select_edit)\n"),
 		return unless defined $this_edit;
 	$this_track = $this_edit->$track_selector_method; 
 	process_command('show_track');
