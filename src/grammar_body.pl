@@ -791,8 +791,14 @@ add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	my $values = $item{'value(s?)'};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
-	if( ref $item{fx_or_fxc} ) 	{ $args->{effect_chain}	= $item{fx_or_fxc} }
-	else 						{ $args->{type}			= $item{fx_or_fxc} }
+	if( my $fxc = ::is_effect_chain($item{fx_or_fxc}) )
+	{ 
+		if( $fxc->ops_data and $item{'values(s?)'} and
+			scalar @{$fxc->ops_data} == 1 and scalar @{$item{'values(s?)'}})
+			{ $args->{type} 		= $fxc->ops_data->[0]->{type} 	}
+		else{ $args->{effect_chain}	= $fxc 					}
+	}
+	else{ 	  $args->{type}			= $item{fx_or_fxc}				}
 	# place effect before fader if there is one
 	my $fader = 
 			   ::fxn($::this_track->pan) && $::this_track->pan
@@ -828,9 +834,10 @@ add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
 }
 add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
 	my $command = join " ", 
+		qw(add_effect),
 		$item{fx_or_fxc},
 		@{$item{'value(s?)'}},
-		qw(add_effect ZZZ);
+		qw(ZZZ);
 		print "command is $command\n";
 	::process_command($command)
 }
@@ -908,7 +915,8 @@ show_effect: _show_effect {
 	::pager( ::show_effect(::this_op()));
 	1;
 }
-dump_effect: _dump_effect { ::pager( ::json_out(::this_op_o()->as_hash) )}
+dump_effect: _dump_effect fx_alias { ::pager( ::json_out(::fxn($item{fx_alias})->as_hash) ); 1}
+dump_effect: _dump_effect { ::pager( ::json_out(::this_op_o()->as_hash) ); 1}
 list_effects: _list_effects { ::pager(::list_effects()); 1}
 add_bunch: _add_bunch ident(s) { ::bunch( @{$item{'ident(s)'}}); 1}
 list_bunches: _list_bunches { ::bunch(); 1}
