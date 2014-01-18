@@ -221,8 +221,9 @@ sub AUTOLOAD {
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
 	}
-	print $self->dump;
-	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
+	my $msg = "Autoload fell through. Object type: ". (ref $self). " illegal method call: $call\n";
+	::throw($msg,$self->dump);
+	croak
 }
 
 sub DESTROY {}

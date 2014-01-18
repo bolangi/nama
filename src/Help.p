@@ -72,7 +72,7 @@ sub help {
 	my $name = shift;
 	chomp $name;
 	#print "seeking help for argument: $name\n";
-	$text->{iam}->{$name} and print <<IAM;
+	$text->{iam}->{$name} and pager(<<IAM);
 
 $name is an Ecasound command.  See 'man ecasound-iam'.
 IAM
@@ -112,7 +112,7 @@ IAM
 	}
 	if (@output){
 		::pager( @output ); 
-	} else { print "$name: no help found.\n"; }
+	} else { throw("$name: no help found.\n"); }
 	
 }
 sub help_effect {
@@ -150,7 +150,7 @@ sub help_effect {
 Type 'man ecasound' at a shell prompt for details.);
 	}
 
-	if( $no_match ){ print "No effects were found matching: $input\n\n"; }
+	if( $no_match ){ throw("No effects were found matching: $input\n\n"); }
 	else { ::pager(@output) }
 }
 
@@ -166,7 +166,7 @@ sub find_effect {
 	} @{$fx_cache->{user_help}};
 	if ( @matches ){
 	::pager( $text->{wrap}->paragraphs(@matches) , "\n" );
-	} else { print join " ", "No effects were found matching:",@keys,"\n\n" }
+	} else { throw(join " ", "No effects were found matching:",@keys,"\n\n") }
 }
 
 
