@@ -3,10 +3,9 @@
 # contributed by S. Massy
 #
 package ::AnalyseLV2;
+use ::Log qw(logpkg);
 # Initialise our global variables:
 # Store the plugin info:
-# Toggle debugging:
-my $debug = 0;
 
 use strict;
 
@@ -33,7 +32,7 @@ sub _analyse_lv2 {
 	{ $plugin{error} = "Plugin not found."; return \%plugin; }
 
 	foreach my $line (@contents) {
-		print "Parsing $line" if $debug;
+		logpkg('debug',"Parsing $line");
 		$linecount++;
 		$plugin{general}{uri} = $line if ($linecount == 1);
 		if ($line =~ /^(\t| )+Name\:(\t| )+(.*+)/
@@ -52,24 +51,24 @@ sub _analyse_lv2 {
 			chomp($line);
 			$line =~ s/(\t| )+file\:\/\///;
 			$plugin{'general'}{'datafile'} = $line;
-			print "datafile: $plugin{'general'}{'datafile'}\n" if $debug;
+			logpkg('debug',"datafile: $plugin{'general'}{'datafile'}\n");
 		}
 		if ($line =~ /(\t| )+Port (\d+)\:$/) { 
 			$currentport = $2;
-			print "Acquiring info for $currentport\n" if $debug;
+			logpkg('debug',"Acquiring info for $currentport\n");
 		}
 		# type
 		if ($line =~ /lv2core#(.+)Port$/) {
 			$match = $1;
 			if ($match =~ /Input|Output/) {
 				$plugin{$currentport}{iotype} = $match;
-				print "IOTYPE $plugin{$currentport}{iotype}\n" if $debug;
+				logpkg('debug',"IOTYPE $plugin{$currentport}{iotype}\n");
 			} else {
 				if (exists($plugin{$currentport}{etype})) {
 					$plugin{$currentport}{etype} .= " ";
 				}
 				$plugin{$currentport}{etype} .= $match;
-				print "Acquired ETYPE $1 \n" if $debug;
+				logpkg('debug',"Acquired ETYPE $1 \n");
 			}
 		}
 		# A special case for events.
@@ -85,13 +84,12 @@ sub _analyse_lv2 {
 		if ($line =~ /(\t| )+Name\:(\t| )+(.+$)/
 			&& ($currentport != -1)) {
 			$plugin{$currentport}{name} = $3;
-			print "Port name is $plugin{$currentport}{name}\n" 
-			if $debug;	
+			logpkg('debug',"Port name is $plugin{$currentport}{name}\n");
 		}
 		# MINVAL/MAXVAL/DEFVAL
 		if ($line =~ /(\t| )+Minimum\:(\t| )+(.+$)/) {
 			$plugin{$currentport}{minval} = $3;
-			print "Acquired minval $plugin{$currentport}{minval}\n" if $debug;
+			logpkg('debug',"Acquired minval $plugin{$currentport}{minval}\n");
 		}
 		if ($line =~ /(\t| )+Maximum\:(\t| )+(.+$)/) {
 			$plugin{$currentport}{maxval} = $3;
@@ -178,7 +176,7 @@ sub filterprops { # Try to limit output
 	$props =~ s/, hasStrictBounds|hasStrictBounds, |hasStrictBounds//;
 	# Don't just leave a comma and space
 	$props =~ s/^, $|^ +$//;
-	print "props: $props\n" if $debug;
+	logpkg('debug',"props: $props\n");
 	return $props;;
 }
 
@@ -208,8 +206,8 @@ sub print_lv2 {
 sub acquire_lv2 {
 	my ($uri) = @_;
 	@contents = `$lv2info $uri`;
-	print "Acquiring contents for $uri\n" if $debug;
-#	print "$contents[0]\n";
+	logpkg('debug',"Acquiring contents for $uri\n");
+#	logpkg('debug',"$contents[0]\n";
 	return 0 if ($contents[0] eq "");
 	return 1;
 }

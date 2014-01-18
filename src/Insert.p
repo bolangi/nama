@@ -93,7 +93,7 @@ sub add_insert {
 	my ($track, $type, $send_id, $return_id) = @_;
 	local $::this_track;
 	# $type : prefader_insert | postfader_insert
-	say "\n",$track->name , ": adding $type\n";
+	::pager("\n",$track->name , ": adding $type\n");
 	my $name = $track->name;
 
 	# the input fields will be ignored, since the track will get input
