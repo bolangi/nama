@@ -83,6 +83,7 @@ $fx->{applied}					# Nama applied effects info
 $fx->{params}					# parameters of applied effects
 								# hash by effect ID
 $fx->{params_log}				# for log scale sliders
+$fx->{alias}
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
