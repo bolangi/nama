@@ -836,7 +836,8 @@ add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 		::pager("Added $id ($iname)");
 		::set_current_op($id);
 	}
-	else { ::pager("Failed to add effect") } 
+	else { } 
+	1
 }
 
 add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
