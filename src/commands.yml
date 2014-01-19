@@ -1089,7 +1089,7 @@ delete_effect_chain:
   what: |
     Delete an effect chain definition. Does not affect the
     project state. This command is not reversible by undo.
-  short: dec destroy_effect_chain delete_nickname_definition dnd
+  short: dec destroy_effect_chain 
   parameters: <string:effect_chain_name>
 find_effect_chains:
   type: effect
