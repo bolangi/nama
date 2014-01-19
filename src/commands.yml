@@ -1101,7 +1101,7 @@ find_effect_chains:
 find_user_effect_chains:
   type: effect
   what: List all *user* created effect chains, matching key/value pairs, if provided.
-  short: fuec list_nickname_definitions lnd
+  short: fuec
   parameters: [ <string:key_1> <string:value_1> ] ...
 bypass_effects:
   type: effect
@@ -1648,6 +1648,10 @@ nickname_effect:
     ifx reverb2 reverb # insert another reverb effect (reverb3) before reverb2
     rfx reverb3        # remove reverb3
     rfx reverb         # removes reverb2, as it is the sole remain reverb effect
+list_nickname_definitions:
+  type: effect
+  short: lnd
+  what: list effect nicknames
 delete_nickname_definition:
   type: effect
   short: dnd

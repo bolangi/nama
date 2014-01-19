@@ -767,19 +767,31 @@ existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
 fx_or_fxc: existing_effect_chain | known_effect_type
 
-#nick: /\w+/ { ::effect_index($item[1]) ? undef : $item[1] }
-
 nickname_effect: _nickname_effect ident {
-	::this_op_o()->set_name($item{ident}) if defined ::this_op();
-	::process_command("new_effect_chain $item{ident} ". ::this_op_o()->id);
+	my $ident = $item{ident};
+	::this_op_o()->set_name($ident);
+	::throw("$ident: no such nickname. Skipping."), return unless defined ::this_op_o();
+	my $type = ::this_op_o()->type;
+	my $fxname = ::this_op_o()->fxname;
+	$::fx->{alias}->{$ident} = $type;
+	::pager_newline("$ident: nickname created for $type ($fxname)");
 	1
 }
-remove_nickname: _remove_nickname {
-	delete $::fx->{applied}->{::this_op()}->{name}
+remove_nickname: _remove_nickname { ::this_op_o()->remove_name() }
+delete_nickname_definition: _delete_nickname_definition ident {
+	my $was = delete $::fx->{alias}->{$item{ident}};
+	$was or ::throw("$item{ident}: no such nickname"), return 0;
+	::pager_newline("$item{ident}: effect nickname deleted");
 }
-#remove_nickname: _remove_nickname { ::this_op_o()->remove_nickname() }
-delete_nickname_definition: 'dummy' # keep grammar quiet
-list_nickname_definitions: 'dummy'
+list_nickname_definitions: _list_nickname_definitions {
+	my @lines;
+	while( my($nick,$code) = each %{ $::fx->{alias} } )
+	{
+		push @lines, join " ","$nick:",::fxn($code)->fxname, "($code)";
+	}
+	::pager_newline(@lines);
+	1
+}
 known_effect_type: effect { 
 	::full_effect_code($item{effect})
 	#::throw(qq{$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
