@@ -765,7 +765,7 @@ add_controller: _add_controller effect value(s?) {
 }
 existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
-fx_or_fxc: existing_effect_chain | known_effect_type
+fx_or_fxc: fx_nick | existing_effect_chain | known_effect_type
 
 nickname_effect: _nickname_effect ident {
 	my $ident = $item{ident};
@@ -787,9 +787,13 @@ list_nickname_definitions: _list_nickname_definitions {
 	my @lines;
 	while( my($nick,$code) = each %{ $::fx->{alias} } )
 	{
-		push @lines, join " ","$nick:",::fxn($code)->fxname, "($code)";
+		#push @lines, join " ","$nick:",::fxn($code)->fxname, "($code)";
+		push @lines, join " ",
+			"$nick:",
+			$::fx_cache->{registry}->[::effect_index($code)]->{name},
+			"($code)\n";
 	}
-	::pager_newline(@lines);
+	::pager(@lines);
 	1
 }
 known_effect_type: effect { 
@@ -893,6 +897,7 @@ fx_alias3: ident {
 }
 fx_alias_remove: fx_alias1 | fx_alias3
 fx_alias: fx_alias2 | fx_alias1
+fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id
 fx_alias1: fx_pos
 fx_alias1: this_track_effect_chain 
