@@ -884,7 +884,7 @@ modify_effect: _modify_effect parameter(s /,/) value {
 		$item{'parameter(s)'},
 		undef,
 		$item{value});
-	::pager( ::show_effect(::this_op()))
+	::pager( ::show_effect(::this_op(), "with track affiliation"))
 }
 modify_effect: _modify_effect parameter(s /,/) sign value {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
@@ -922,7 +922,7 @@ new_following_op: op_id
 	
 show_effect: _show_effect fx_alias(s) {
 	my @lines = 
-		map{ ::show_effect($_) } 
+		map{ ::show_effect($_, "with track affiliation") } 
 		grep{ ::fxn($_) }
 		@{ $item{'fx_alias(s)'}};
 	::set_current_op($item{'fx_alias(s)'}->[-1]);
@@ -930,7 +930,7 @@ show_effect: _show_effect fx_alias(s) {
 }
 show_effect: _show_effect {
 	::throw("current effect is undefined, skipping"), return 1 if ! ::this_op();
-	::pager( ::show_effect(::this_op()));
+	::pager( ::show_effect(::this_op(), "with track affiliation"));
 	1;
 }
 dump_effect: _dump_effect fx_alias { ::pager( ::json_out(::fxn($item{fx_alias})->as_hash) ); 1}
