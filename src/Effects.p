@@ -148,6 +148,9 @@ sub add_effect {
 	my $id = (defined $p->{before} and $p->{before} ne 'ZZZ')
 				?_insert_effect($p) 
 				: _add_effect($p);
+	my $FX = fxn($id);
+	while( my($alias,$code) = each %{$fx->{alias}} )
+	{ $FX->set_name($alias), last if $code eq $FX->type }
 	$id
 }
 
