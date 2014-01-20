@@ -148,10 +148,6 @@ sub add_effect {
 	my $id = (defined $p->{before} and $p->{before} ne 'ZZZ')
 				?_insert_effect($p) 
 				: _add_effect($p);
-	my $FX = fxn($id);
-	while( my($alias,$code) = each %{$fx->{alias}} )
-	{ $FX->set_name($alias), last if $code eq $FX->type }
-	$id
 }
 
 
@@ -173,6 +169,9 @@ sub _add_effect {  # append effect
 			or ref $values and ! scalar @{ $values };
 
 		$id = effect_init($p); 
+		my $FX = fxn($id);
+		while( my ($alias, $code) = each %{$fx->{alias}} )
+		{ $FX->set_name($alias), last if $code eq $FX->type }
 		
 		$ui->add_effect_gui($p) unless $ti{$n}->hide;
 
@@ -1049,8 +1048,9 @@ sub remove_name { my $self = shift; delete $fx->{applied}->{$self->{id}}->{name}
 sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
 sub set_name    { my $self = shift; $fx->{applied}->{$self->{id}}->{name} = shift}
 sub set_surname { my $self = shift; $fx->{applied}->{$self->{id}}->{surname} = shift}
-
-
+sub set_names    { 
+	my $self = shift; 
+}
 sub is_controller { my $self = shift; $self->parent } 
 
 sub has_read_only_param {
