@@ -823,7 +823,7 @@ add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	::logpkg('debug',$::this_track->name,": effect insert point is $fader", 
 	::Dumper($args));
 	}
-	my $predecessor = (join "",@{$item{'before(?)'}}) || $fader;
+	my $predecessor = $item{'before(?)'}->[0] || $fader;
 	$args->{before} = $predecessor if $predecessor; 
  	my $id = ::add_effect($args);
 	return 1 if $effect_chain;
