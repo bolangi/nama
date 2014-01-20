@@ -153,8 +153,8 @@ sub add_effect {
 
 sub _add_effect {  # append effect
 	my $p = shift;
-	my (    $n,   $before, $code,$parent_id,$id, $values,$effect_chain) =
-	@$p{qw( chain before    type parent_id  effect_id values effect_chain)};
+	my (    $n,   $before, $code,$parent_id,$id, $values,$effect_chain, $surname) =
+	@$p{qw( chain before    type parent_id  effect_id values effect_chain surname)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 	my $add_effects_sub;
@@ -592,8 +592,8 @@ sub effect_init {
 	my $p = shift;
 	logpkg('debug',sub{json_out($p)});
 
-	my ($n,  $type, $id, $parent_id)  = 
-	@$p{qw(chain type effect_id parent_id)};
+	my ($n,  $type, $id, $parent_id, $surname)  = 
+	@$p{qw(chain type effect_id parent_id surname)};
 
 	# return existing op_id if effect already exists
 	# unless effect chain asks us to get a new id
@@ -616,13 +616,15 @@ sub effect_init {
 	
 	# make entry in $fx->{applied} with chain, code, display-type, children
 
-	$fx->{applied}->{$id} = 
+	my $entry =
 	{
 		chain 	=> $n, 
 		type 	=> $type,
 		display => $fx_cache->{registry}->[$i]->{display},
 		owns 	=> [],
 	}; 
+	$entry->{surname} = $surname if $surname;
+	$fx->{applied}->{$id} = $entry;
 
 	my $FX = fxn($id);
 
