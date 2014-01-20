@@ -73,7 +73,7 @@ sub process_line {
 			){
 				local $quiet = 1;
 				::ChainSetup::remove_temporary_tracks();
-				autosave(); 
+				autosave() unless $config->{opts}->{R};
 				reconfigure_engine(); # quietly, avoiding noisy reconfig below
 			}
 			reconfigure_engine();
