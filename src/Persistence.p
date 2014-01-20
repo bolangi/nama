@@ -39,8 +39,8 @@ sub save_state {
 		throw("No user tracks, skipping...");
 		return;
 	}
-
-	logpkg('debug',"Saving state as ", save_system_state($path));
+	logpkg('debug',"Saving state as ", $path);
+	save_system_state($path);
 	save_global_effect_chains();
 
 	# store alsa settings
