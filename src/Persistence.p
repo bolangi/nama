@@ -541,6 +541,7 @@ sub restore_global_effect_chains {
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
 				class => '::');
+		assign_singletons({ data => $ref });
 }
 1;
 
