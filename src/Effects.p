@@ -160,7 +160,7 @@ sub _add_effect {  # append effect
 	my $add_effects_sub;
 	if( $effect_chain)
 	{
-		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
+		$add_effects_sub = sub{ $effect_chain->add($ti{$n}, $before)};
 	}
 	else 
 	{
