@@ -972,26 +972,38 @@ sub is_mix_track {
 }
 sub bus { $bn{$_[0]->group} }
 
-sub effect_chain_leading_id {
+sub effect_id_by_name {
 	my $track = shift;
 	my $ident = shift;
-	for my $FX ($track->fancy_ops_o)
-	{ return $FX->id 
-		if $FX->name eq $ident 
-	 	or $FX->surname eq $ident
-		or do
-		{ 
-			my ($suffix) = $FX->surname =~ /$ident(\d*)/;
-			$suffix    //= $FX->name    =~ /$ident(\d*)/;
-			$suffix and $track->effect_nickname_count eq 1
-		}
-	}
+	for my $FX (map{::fxn($_)}@{$track->ops})
+	{ return $FX->id if $FX->name eq $ident }
 }
 sub effect_nickname_count {
 	my ($track, $nick) = @_;
 	my $count = 0;
 	for my $FX ($track->fancy_ops_o){ $count++ if $FX->name =~ /^$nick\d*$/ }
 	$count
+}
+sub unique_surname {
+	my ($track, $surname) = @_;
+	my $i;
+	my @found;
+	for my $FX ($track->fancy_ops_o)
+	{ 
+		if( $FX->surname =~ /^$surname(\d*)$/)
+		{
+			push @found, $FX->surname; 
+			$i = $1 if $1 and $1 > $i
+		}
+	}
+	"$surname$i", join ' ',@found
+}
+sub with_surname {
+	my ($track, $surname) = @_;
+	my @found;
+	for my $FX ($track->fancy_ops_o)
+	{ push @found, $FX->id if $FX->surname eq $surname }
+	"@found"
 }
 		
 	

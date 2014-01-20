@@ -623,7 +623,19 @@ sub effect_init {
 		display => $fx_cache->{registry}->[$i]->{display},
 		owns 	=> [],
 	}; 
-	$entry->{surname} = $surname if $surname;
+	if ($surname)
+	{
+		my $track = $ti{$n};
+		my ($new_surname, $existing) = $track->unique_surname($surname);
+		if ( $new_surname ne $surname)
+		{
+		::pager_newline(
+			"track ".
+			$track->name.qq(: other effects with surname "$surname" found,),
+			qq(using "$new_surname". Others are: $existing.));
+		}
+		$entry->{surname} ||= $surname;
+	}	
 	$fx->{applied}->{$id} = $entry;
 
 	my $FX = fxn($id);
