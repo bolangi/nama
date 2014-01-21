@@ -803,7 +803,7 @@ known_effect_type: effect {
 }
 before: fx_alias
 fx_name: ident { my $id = $::this_track->effect_id_by_name($item{ident}) }
-fx_surname: ident { $::this_track->with_surname() }
+fx_surname: ident { $::this_track->with_surname($item{ident}) }
 add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	my ($code, $effect_chain);
 	my $values = $item{'value(s?)'};
@@ -898,7 +898,7 @@ fx_alias3: ident {
 	map{ $_->id } 
 	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
-fx_alias_remove: fx_alias1 | fx_surname
+fx_alias_remove: fx_surname | fx_alias1
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id

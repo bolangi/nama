@@ -629,12 +629,13 @@ sub effect_init {
 		my ($new_surname, $existing) = $track->unique_surname($surname);
 		if ( $new_surname ne $surname)
 		{
-		::pager_newline(
-			"track ".
-			$track->name.qq(: other effects with surname "$surname" found,),
-			qq(using "$new_surname". Others are: $existing.));
+			::pager_newline(
+				"track ".
+				$track->name.qq(: other effects with surname "$surname" found,),
+				qq(using "$new_surname". Others are: $existing.));
+			$entry->{surname} = $new_surname;
 		}
-		$entry->{surname} ||= $surname;
+		else{ $entry->{surname} = $surname }
 	}	
 	$fx->{applied}->{$id} = $entry;
 

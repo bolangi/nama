@@ -986,7 +986,7 @@ sub effect_nickname_count {
 }
 sub unique_surname {
 	my ($track, $surname) = @_;
-	my $i;
+	my $i = 0;
 	my @found;
 	for my $FX ($track->fancy_ops_o)
 	{ 
@@ -996,7 +996,7 @@ sub unique_surname {
 			$i = $1 if $1 and $1 > $i
 		}
 	}
-	"$surname$i", join ' ',@found
+	$surname. (@found ? ++$i : ""), join ' ',@found
 }
 sub with_surname {
 	my ($track, $surname) = @_;
