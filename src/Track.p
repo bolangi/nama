@@ -1003,7 +1003,7 @@ sub with_surname {
 	my @found;
 	for my $FX ($track->fancy_ops_o)
 	{ push @found, $FX->id if $FX->surname eq $surname }
-	"@found"
+	@found ? "@found" : undef
 }
 		
 	

@@ -697,8 +697,8 @@ modify_mark: _modify_mark value {
 	::request_setup();
 	1;
 	}		
-remove_effect: _remove_effect fx_alias_remove(s) {
-	#print join $/, @{ $item{"fx_alias_remove(s)"} }; 
+remove_effect: _remove_effect remove_target(s) {
+	#print join $/, @{ $item{"remove_target(s)"} }; 
 	::mute();
 	map{ 
 		my $id = $_;
@@ -708,8 +708,8 @@ remove_effect: _remove_effect fx_alias_remove(s) {
 			".\nSee 'remove_fader_effect to remove it'\n")
 		}
 		else { ::remove_effect( $_ ) }
-	} grep { $_ }  map{ split ' ', $_} @{ $item{"fx_alias_remove(s)"}} ;
-	# map{ print "fx_alias_remove: $_\n"; ::remove_effect( $_ )}  @{ $item{"fx_alias_remove(s)"}} ;
+	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
+	# map{ print "remove_target: $_\n"; ::remove_effect( $_ )}  @{ $item{"remove_target(s)"}} ;
 	::sleeper(0.5);
 	::unmute();
 	1;}
@@ -802,7 +802,7 @@ known_effect_type: effect {
 	#::throw(qq{$item{effect}: unknown effect. Try "find_effect keyword(s)\n}), 
 }
 before: fx_alias
-fx_name: ident { my $id = $::this_track->effect_id_by_name($item{ident}) }
+fx_name: ident { $::this_track->effect_id_by_name($item{ident}) }
 fx_surname: ident { $::this_track->with_surname($item{ident}) }
 add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	my ($code, $effect_chain);
@@ -898,7 +898,9 @@ fx_alias3: ident {
 	map{ $_->id } 
 	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
-fx_alias_remove: fx_surname | fx_alias1
+remove_target: op_id | fx_pos | fx_surname | fx_name
+#fx_name | fx_surname { $item[-1] }
+# 
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id
