@@ -998,6 +998,20 @@ sub unique_surname {
 	}
 	$surname. (@found ? ++$i : ""), join ' ',@found
 }
+sub unique_nickname {
+	my ($track, $nickname) = @_;
+	my $i = 0;
+	my @found;
+	for my $FX ($track->fancy_ops_o)
+	{ 
+		if( $FX->name =~ /^$nickname(\d*)$/)
+		{
+			push @found, $FX->name; 
+			$i = $1 if $1 and $1 > $i
+		}
+	}
+	$nickname. (@found ? ++$i : ""), "@found"
+}
 sub with_surname {
 	my ($track, $surname) = @_;
 	my @found;

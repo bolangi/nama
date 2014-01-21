@@ -171,7 +171,7 @@ sub _add_effect {  # append effect
 		$id = effect_init($p); 
 		my $FX = fxn($id);
 		while( my ($alias, $code) = each %{$fx->{alias}} )
-		{ $FX->set_name($alias), last if $code eq $FX->type }
+		{ $FX->set_name($::this_track->unique_nickname($alias)), last if $code eq $FX->type }
 		
 		$ui->add_effect_gui($p) unless $ti{$n}->hide;
 

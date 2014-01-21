@@ -766,7 +766,7 @@ add_controller: _add_controller effect value(s?) {
 # an existing user-defined effect chain 
 existing_effect_chain: ident { $item{ident} if ::is_effect_chain($item{ident}) }
 
-fx_or_fxc: fx_nick | existing_effect_chain | known_effect_type
+add_target: fx_nick | existing_effect_chain | known_effect_type
 
 nickname_effect: _nickname_effect ident {
 	my $ident = $item{ident};
@@ -804,19 +804,19 @@ known_effect_type: effect {
 before: fx_alias
 fx_name: ident { $::this_track->effect_id_by_name($item{ident}) }
 fx_surname: ident { $::this_track->with_surname($item{ident}) }
-add_effect: _add_effect fx_or_fxc value(s?) before(?) {
+add_effect: _add_effect add_target value(s?) before(?) {
 	my ($code, $effect_chain);
 	my $values = $item{'value(s?)'};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
-	if( my $fxc = ::is_effect_chain($item{fx_or_fxc}) )
+	if( my $fxc = ::is_effect_chain($item{add_target}) )
 	{ 
 		if( $fxc->ops_data and $item{'values(s?)'} and
 			scalar @{$fxc->ops_data} == 1 and scalar @{$item{'values(s?)'}})
 			{ $args->{type} 		= $fxc->ops_data->[0]->{type} 	}
 		else{ $args->{effect_chain}	= $fxc 					}
 	}
-	else{ 	  $args->{type}			= $item{fx_or_fxc}				}
+	else{ 	  $args->{type}			= $item{add_target}				}
 	# place effect before fader if there is one
 	my $fader = 
 			   ::fxn($::this_track->pan) && $::this_track->pan
@@ -842,28 +842,28 @@ add_effect: _add_effect fx_or_fxc value(s?) before(?) {
 	1
 }
 
-add_effect: _add_effect ('first'  | 'f')  fx_or_fxc value(s?) {
+add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
 	my $command = join " ", 
 		qw(add_effect), 
-		$item{fx_or_fxc},
+		$item{add_target},
 		@{$item{'value(s?)'}},
 		$::this_track->{ops}->[0];
 		print "command is $command\n";
 	::process_command($command)
 }
-add_effect: _add_effect ('last'   | 'l')  fx_or_fxc value(s?) { 
+add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
 	my $command = join " ", 
 		qw(add_effect),
-		$item{fx_or_fxc},
+		$item{add_target},
 		@{$item{'value(s?)'}},
 		qw(ZZZ);
 		print "command is $command\n";
 	::process_command($command)
 }
-add_effect: _add_effect ('before' | 'b')  before fx_or_fxc value(s?) {
+add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 	my $command = join " ", 
 		qw(add_effect),
-		$item{fx_or_fxc},
+		$item{add_target},
 		@{$item{'value(s?)'}},
 		$item{before};
 		print "command is $command\n";
@@ -899,8 +899,6 @@ fx_alias3: ident {
 	grep { $_->surname eq $item{ident} } $::this_track->fancy_ops_o;
 }
 remove_target: op_id | fx_pos | fx_surname | fx_name
-#fx_name | fx_surname { $item[-1] }
-# 
 fx_alias: fx_alias2 | fx_alias1
 fx_nick: ident { $::fx->{alias}->{$item{ident}} }
 fx_alias1: op_id
