@@ -170,9 +170,10 @@ sub _add_effect {  # append effect
 
 		$id = effect_init($p); 
 		my $FX = fxn($id);
+		if( ! $FX->name ){
 		while( my ($alias, $code) = each %{$fx->{alias}} )
 		{ $FX->set_name($::this_track->unique_nickname($alias)), last if $code eq $FX->type }
-		
+		}
 		$ui->add_effect_gui($p) unless $ti{$n}->hide;
 
 		$add_effects_sub = sub{ apply_op($id) };
@@ -1044,7 +1045,8 @@ our $AUTOLOAD;
 my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
 sub id 			{ my $self = shift; $self->{id} }
 sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
-sub bypassed 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{bypassed}	}
+sub bypassed 	{ my $self = shift; 
+				  $fx->{applied}->{$self->{id}}->{bypassed} ? 'bypassed' : undef}
 sub parent 		{ my $self = shift; 
 					my $parent_id = $fx->{applied}->{$self->{id}}->{parent};
 					::fxn($parent_id)}
@@ -1172,6 +1174,7 @@ sub about {
 	$fx_cache->{registry}->[$self->registry_index]
 }
 sub track { $ti{$_[0]->chain} }
+sub trackname { $_[0]->track->name }
 
 sub AUTOLOAD {
 	my $self = shift;
@@ -1189,6 +1192,17 @@ sub as_hash {
 	for (@keys){ $hash->{$_} = $self->$_ }
 	$hash
 }
+sub ladspa_id {
+	my $self = shift;
+	$::fx_cache->{ladspa_label_to_unique_id}->{$self->type} 
 }
+sub nameline {
+	my $self = shift;
+	my @attr_keys = qw( name surname fxname type ladspa_id bypassed trackname);
+	my $nameline = $self->id. ": ". join q(, ), grep{$_} map{$self->$_} @attr_keys;
+	$nameline .= "\n";
+	$nameline
+}
+} # end package
 1;
 __END__
