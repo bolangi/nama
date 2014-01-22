@@ -376,19 +376,6 @@ exit;
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	1;	
 }
-sub start_osc_listener {
-	my $port = shift;
-	pager_newline("Starting OSC listener on port $port");
-	my $in = $project->{osc_socket} = IO::Socket::INET->new( 
-		LocalAddr => 'localhost',
-		LocalPort => $port, 
-		Proto	  => 'udp',
-		Type 	  => SOCK_STREAM,
-		Listen 	  => 1,
-		Reuse 	  => 1) or die $!; 
-	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
-	$project->{osc} = Protocol::OSC->new;
-}
 { my $is_connected_remote;
 sub start_remote_listener {
     my $port = shift;
@@ -444,16 +431,25 @@ sub reset_remote_control_socket {
 }
 }
 
+sub start_osc_listener {
+	my $port = shift;
+	say("Starting OSC listener on port $port");
+	my $osc_in = $project->{osc_socket} = IO::Socket::INET->new(
+		LocalAddr => 'localhost',
+		LocalPort => $port,
+		Proto	  => 'udp',
+		Type	  =>  SOCK_DGRAM) || die $!;
+	$this_engine->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
+	$project->{osc} = Protocol::OSC->new;
+}
 sub process_osc_command {
 	my $in = $project->{osc_socket};
 	my $osc = $project->{osc};
- 	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
-    my $p = $osc->parse(($osc->from_stream($packet))[0]);
-	#say "got OSC: ", Dumper $p;
-	my $input = $p->[0];
-	$input =~ s(/)( )g;
-	process_command(sanitize_remote_input($input));
+	$in->recv(my $packet, $in->sockopt(SO_RCVBUF));
+	my $p = $osc->parse($packet);
+	say "got OSC: ", Dumper $p;
 }
+
 sub sanitize_remote_input {
 	my $input = shift;
 	my $error_msg;
