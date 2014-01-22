@@ -707,7 +707,11 @@ remove_effect: _remove_effect remove_target(s) {
 			::throw("Effect $id is used as $use by track",$::this_track->name, 
 			".\nSee 'remove_fader_effect to remove it'\n")
 		}
-		else { ::remove_effect( $_ ) }
+		else { 
+			my $FX = ::fxn($id);
+			::pager_newline("removing effect $id:");
+			::remove_effect( $_ ) 
+		}
 	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
 	# map{ print "remove_target: $_\n"; ::remove_effect( $_ )}  @{ $item{"remove_target(s)"}} ;
 	::sleeper(0.5);
