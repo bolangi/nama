@@ -379,11 +379,17 @@ exit;
 sub start_osc_listener {
 	my $port = shift;
 	pager_newline("Starting OSC listener on port $port");
-	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
+	my $in = $project->{osc_socket} = IO::Socket::INET->new( 
+		LocalAddr => 'localhost',
+		LocalPort => $port, 
+		Proto	  => 'udp',
+		Type 	  => SOCK_STREAM,
+		Listen 	  => 1,
+		Reuse 	  => 1) or die $!; 
 	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
-{ my $is_connected;
+{ my $is_connected_remote;
 sub start_remote_listener {
     my $port = shift;
     pager_newline("Starting remote control listener on port $port");
@@ -404,7 +410,7 @@ sub remove_remote_watcher {
     undef $this_engine->{events}->{remote_control};
 }
 sub process_remote_command {
-    if ( ! $is_connected++ ){
+    if ( ! $is_connected_remote++ ){
         pager_newline("making connection");
         $project->{remote_control_socket} =
             $project->{remote_control_socket}->accept();
@@ -429,7 +435,7 @@ sub process_remote_command {
     $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), return;
 }
 sub reset_remote_control_socket { 
-    undef $is_connected;
+    undef $is_connected_remote;
     undef $@;
     $project->{remote_control_socket}->shutdown(2);
     undef $project->{remote_control_socket};
