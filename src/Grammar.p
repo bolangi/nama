@@ -273,26 +273,14 @@ sub list_effect {
 	($op_id eq $this_track->op ? '*' : '') . "$op_id ($name)";
 }
 
-
 sub show_effect {
  	my $op_id = shift;
 	my $with_track = shift;
 	my $FX = fxn($op_id);
 	return unless $FX;
-	my @lines;
-	my @params;
+	my @lines = $FX->nameline;
+	#EQ: GVerb, gverb, 1216, bypassed, famp5, neap
  	my $i = $FX->registry_index;
-	my $name = $FX->fxname;
-	my $ladspa_id = $fx_cache->{ladspa_label_to_unique_id}->{$FX->type} ;
-	$name .= " ($ladspa_id)" if $ladspa_id;
-	$name .= " (bypassed)" if $FX->bypassed;
-	my $namesurname = undef;
-	$namesurname = join ':', $FX->name, $FX->surname
-		if $FX->name or $FX->surname;
-	$name .= " ($namesurname)" if $namesurname;
-	my $trackname = $ti{$FX->chain}->name;
-	my $opline = "$op_id: $name".($with_track ? " (applied to track $trackname)" : "") .  "\n";
- 	push @lines, $opline;
 	my @pnames = @{$fx_cache->{registry}->[ $i ]->{params}};
 	{
 	no warnings 'uninitialized';
@@ -303,7 +291,6 @@ sub show_effect {
 	 	
 	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
 		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
-	#push @lines, join("; ", @params) . "\n";
 	@lines
 }
 sub extended_name {
