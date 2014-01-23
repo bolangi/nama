@@ -5,8 +5,8 @@ use Protocol::OSC;
 use IO::Socket::INET;
 use Time::HiRes 'time';
 my $osc = Protocol::OSC->new;
-#my @specs = ("/o", "foo\ bar", 9, "baz",  );
-my @specs = ("/show_track", "dummy", 9);
+#my @specs = ("/o", "is", 9, "baz");
+my @specs = ("/show_track", "si", "foo", 3);
 		#qw"/nama eval foo bar";
 my $data = $osc->message(@specs);
 #my $data = $osc->message(my @specs);
@@ -15,8 +15,9 @@ use Data::Dumper::Concise;
            # or
 #my $data = $osc->bundle(time, [@specs]);
 say Dumper $data;
-my $tcp = IO::Socket::INET->new( PeerAddr => 'localhost', PeerPort => '57120', Proto => 'tcp', Type => SOCK_STREAM) || die $!;
-           $tcp->send($osc->to_stream($data));
+my $udp = IO::Socket::INET->new( PeerAddr => 'localhost',
+PeerPort => '2870', Proto => 'udp', Type => SOCK_DGRAM) || die $!;
+$udp->send($data);
 
 __END__
     #   via UDP
