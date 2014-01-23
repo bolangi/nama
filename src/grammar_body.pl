@@ -709,7 +709,7 @@ remove_effect: _remove_effect remove_target(s) {
 		}
 		else { 
 			my $FX = ::fxn($id);
-			::pager_newline("removing effect $id:");
+			::pager_newline("removing effect ".$FX->nameline);
 			::remove_effect( $_ ) 
 		}
 	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
