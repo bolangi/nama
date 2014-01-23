@@ -447,7 +447,21 @@ sub process_osc_command {
 	my $osc = $project->{osc};
 	$in->recv(my $packet, $in->sockopt(SO_RCVBUF));
 	my $p = $osc->parse($packet);
+	my @args = @$p;
+	#say "args: @args";
+	my ($path, $template, $command, @vals) = @args;
+	$path =~ s(^/)();
+	$path =~ s(/$)();
+	#say "path: $path";
+	my ($trackname, $fx, $param) = split '/', $path;
+	#say "trackname: $trackname, fxname: $fx, param: $param";
+	process_command($trackname);
+	process_command("$command @vals") if $command;
+	process_command("show_effect $fx") if $fx; # select
+	process_command("show_track") if $trackname and not $fx;
+	process_command("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
+	say "got args: @args";
 }
 
 sub sanitize_remote_input {
