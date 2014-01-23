@@ -86,6 +86,9 @@ sub process_line {
 		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
+	my $output = delete $text->{output_buffer};
+	#print @$output if $output;
+	#print prompt();
 }
 sub context {
 	my $context = {};

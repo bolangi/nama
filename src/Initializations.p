@@ -462,6 +462,8 @@ sub process_osc_command {
 	process_command("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
 	say "got args: @args";
+	$in->send(join "",@{$text->{output_buffer}});
+	delete $text->{output_buffer};
 }
 
 sub sanitize_remote_input {

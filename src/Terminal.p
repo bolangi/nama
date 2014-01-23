@@ -207,11 +207,18 @@ sub pagers {
 	chomp $output;
 	pager($output, $/)
 }
-sub pager_newline { map { my $s = $_; chomp $s; say $s} @_ }
-	
+sub pager_newline { 
+	my @lines = map { my $s = $_; chomp $s; $s .="\n"; $s } @_;
+	push @{$text->{output_buffer}}, @lines;
+	print @lines;
+}
 sub pager {
 	logsub("&pager");
 	my @output = @_;
+	# for returning via OSC
+	$text->{output_buffer} //= [];
+	push @{$text->{output_buffer}}, @output, "\n\n";
+	#return;
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if 
