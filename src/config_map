@@ -108,6 +108,7 @@
 
 	
 	$osc_listener_port 				$config->{osc_listener_port}
+	$osc_reply_port 				$config->{osc_reply_port}
 	$remote_control_port 			$config->{remote_control_port}
 	$engines						$config->{engines}
 

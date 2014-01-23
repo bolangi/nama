@@ -64,6 +64,7 @@ ecasound_globals:
 
 # ecasound_tcp_port: 2868
 osc_listener_port: 2870
+osc_reply_port: 2871
 
 use_group_numbering: 1
 

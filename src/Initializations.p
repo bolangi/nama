@@ -7,6 +7,7 @@
 
 package ::;
 use Modern::Perl; use Carp;
+use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
 sub apply_test_harness {
 
@@ -445,16 +446,14 @@ sub start_osc_listener {
 sub process_osc_command {
 	my $in = $project->{osc_socket};
 	my $osc = $project->{osc};
-	$in->recv(my $packet, $in->sockopt(SO_RCVBUF));
+	my $source_ip = $in->recv(my $packet, $in->sockopt(SO_RCVBUF));
+	my($err, $hostname, $servicename) = getnameinfo($source_ip, NI_NUMERICHOST);
 	my $p = $osc->parse($packet);
 	my @args = @$p;
-	#say "args: @args";
 	my ($path, $template, $command, @vals) = @args;
 	$path =~ s(^/)();
 	$path =~ s(/$)();
-	#say "path: $path";
 	my ($trackname, $fx, $param) = split '/', $path;
-	#say "trackname: $trackname, fxname: $fx, param: $param";
 	process_command($trackname);
 	process_command("$command @vals") if $command;
 	process_command("show_effect $fx") if $fx; # select
@@ -462,7 +461,12 @@ sub process_osc_command {
 	process_command("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
 	say "got args: @args";
-	$in->send(join "",@{$text->{output_buffer}});
+ 	my $osc_out = IO::Socket::INET->new(
+ 		PeerAddr => $hostname,
+ 		PeerPort => $config->{osc_reply_port},
+ 		Proto	  => 'udp',
+ 		Type	  =>  SOCK_DGRAM) || die $!;
+	$osc_out->send(join "",@{$text->{output_buffer}});
 	delete $text->{output_buffer};
 }
 
