@@ -83,9 +83,9 @@ sub process_line {
 		# from the index
 		$this_track = $tn{Master} if ! $this_track or
 			(ref $this_track and ! $tn{$this_track->name});
-		revise_prompt( $mode->{midish_terminal} ? "Midish > " : prompt());
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
+	revise_prompt( $mode->{midish_terminal} and "Midish > " );
 	my $output = delete $text->{output_buffer};
 	#print @$output if $output;
 	#print prompt();
