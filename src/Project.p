@@ -44,8 +44,8 @@ sub this_track_name { $this_track ? $this_track->name : "" }
 
 # we prepend a slash 
 sub bus_track_display { 
-	my ($busname, $trackname) = ($this_bus, $this_track && $this_track->name || '');
-	($busname eq "Main" ? "": "$busname/" ). $trackname
+	my ($busname, $trackname) = ($this_bus, $this_track && $this_track->name );
+	($busname ne "Main" and "$busname/" ) . $trackname
 }
 sub list_projects {
 	my $projects = join "\n", sort map{
