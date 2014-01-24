@@ -221,16 +221,12 @@ sub AUTOLOAD {
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
 	}
-	print $self->dump;
-	croak "Autoload fell through. Object type: ", (ref $self), ", illegal method call: $call\n";
+	my $msg = "Autoload fell through. Object type: ". (ref $self). " illegal method call: $call\n";
+	::throw($msg,$self->dump);
+	croak
 }
 
 sub DESTROY {}
-
-
-# The following methods were moved here from the Track class
-# because they are only used in generating chain setups.
-# They retain $track as the $self variable.
 
 sub _mono_to_stereo{
 	
@@ -239,8 +235,8 @@ sub _mono_to_stereo{
 	# Truth table
 	#REC status, Track width stereo: null
 	#REC status, Track width mono:   chcopy
-	#MON status, WAV width mono:   chcopy
-	#MON status, WAV width stereo: null
+	#PLAY status, WAV width mono:   chcopy
+	#PLAY status, WAV width stereo: null
 	#Higher channel count (WAV or Track): null
 
 	my $self   = shift;
@@ -252,8 +248,8 @@ sub _mono_to_stereo{
 	if  ( 
 			($self->track and $tn{$self->track}->pan)
 			and
-		  (	$status eq 'REC' and $is_mono_track->() 
-			or $status eq 'MON' and $is_mono_wav->() )
+		  (	$status =~ /REC|MON/ and $is_mono_track->() 
+			or $status eq 'PLAY' and $is_mono_wav->() )
 	)
 	{ $copy } else { $nocopy }
 }
@@ -325,8 +321,8 @@ sub jack_multi_ports {
   	die(qq(
 Track $trackname: $source_or_send would cover channels $start - $end,
 out of bounds for JACK client "$client" ($channel_count channels max).
-Change $source_or_send setting, or set track OFF.)) if $end > $channel_count;
-
+Change $source_or_send setting, or set track OFF.)) 
+	if $end > $channel_count and $config->{enforce_channel_bounds};
 		return @{$jack->{clients}->{$client}{$direction}}[$start-1..$end-1]
 		 	if $jack->{clients}->{$client}{$direction};
 

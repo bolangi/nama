@@ -12,8 +12,8 @@ sub is_bunch {
 
 {
 my %set_stat = ( 
-				 (map{ $_ => 'rw' } qw(rec mon off) ), 
-				 map{ $_ => 'rec_status' } qw(REC MON OFF)
+				 (map{ $_ => 'rw' } qw(rec play mon off) ), 
+				 map{ $_ => 'rec_status' } qw(REC PLAY MON OFF )
 				 );
 
 sub bunch {
@@ -22,10 +22,10 @@ sub bunch {
 		::pager(json_out( $project->{bunch} ));
 	} elsif (! @tracks){
 		$project->{bunch}->{$bunchname} 
-			and print "bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n" 
-			or  print "bunch $bunchname: does not exist.\n";
+			and pager("bunch $bunchname: @{$project->{bunch}->{$bunchname}}\n") 
+			or  throw("bunch $bunchname: does not exist.\n");
 	} elsif (my @mispelled = grep { ! $tn{$_} and ! $ti{$_}} @tracks){
-		print "@mispelled: mispelled track(s), skipping.\n";
+		::throw("@mispelled: mispelled track(s), skipping.\n");
 	} else {
 	$project->{bunch}->{$bunchname} = [ @tracks ];
 	}
@@ -48,7 +48,7 @@ sub bunch_tracks {
 			my @track_ids = split " ", $bunchy;
 			my @illegal = grep{ ! track_from_name_or_index($_) } @track_ids;
 			if ( @illegal ){
-				say("Invalid track ids: @illegal.  Skipping.");
+				throw("Invalid track ids: @illegal.  Skipping.");
 			} else { @tracks = map{ $_->name} 
 							   map{ track_from_name_or_index($_)} @track_ids; }
 
@@ -59,7 +59,7 @@ sub bunch_tracks {
 				$bn{$this_bus}->tracks
 	} elsif ( $project->{bunch}->{$bunchy} and @tracks = @{$project->{bunch}->{$bunchy}}  ) {
 		logpkg('debug', "bunch tracks: @tracks");
-	} else { say "$bunchy: no matching bunch identifier found" }
+	} else { throw("$bunchy: no matching bunch identifier found") }
 	@tracks;
 }
 }

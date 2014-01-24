@@ -144,7 +144,7 @@ track => <<TRACK,
  - rw_status
 
    rec                     -  set track to REC (live signal source)
-   mon                     -  set track to MON (WAV file playback)
+   mon                     -  set track to PLAY (WAV file playback)
    off                     -  set track OFF (omit from setup)
    write_defeat, wd        -  toggle track WAV recording off
    write_enable, we        -  toggle track WAV recording on
@@ -177,7 +177,7 @@ track => <<TRACK,
    ecanormalize, normalize, norm 
                            - run ecanormalize on current track version
    ecafixdc, fixdc         - run ecafixdc on current track version
-   autofix_tracks, autofix - fixdc and normalize selected versions of all MON
+   autofix_tracks, autofix - fixdc and normalize selected versions of all PLAY
                              tracks
 
  - cutting and time shifting
@@ -299,7 +299,7 @@ EFFECTS
 
 group => <<GROUP,
    group_rec, grec, R         - group REC mode 
-   group_mon, gmon, M         - group MON mode 
+   group_mon, gmon, M         - group PLAY mode 
    group_off, goff, Z         - group OFF mode 
    group_version, gver, gv    - select default group version 
                               - used for switching among 

@@ -113,7 +113,7 @@ sub new_clip {
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track->name, $track->monitor_version),
-		rw => 'MON',
+		rw => 'PLAY',
 		group => $self->name,
 		version => $track->monitor_version,
 		hide => 1,
@@ -152,9 +152,7 @@ sub new_sequence {
 	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
-	$mix_track->set( rec_defeat	=> 1,
-						is_mix_track => 1,
-						rw 			=> 'REC');
+	$mix_track->set( rw 			=> 'MON');
 	my $sequence = ::Sequence->new(
 		name => $name,
 		send_type => 'track',

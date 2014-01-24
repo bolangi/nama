@@ -83,7 +83,7 @@ sub is_engine_track {
 	$::ti{$n} if $is_ecasound_chain{$n}
 }
 sub engine_wav_out_tracks {
-	grep{$_->rec_status eq 'REC' and ! $_->rec_defeat } engine_tracks();
+	grep{$_->rec_status eq 'REC'} engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 
@@ -145,7 +145,7 @@ sub generate_setup_try {
 	{
 		$g->set_vertex_attribute('Master', 'ecs_extra' => '-chmix:1')
 	}
-	logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
+	#logpkg('info',sub{"Graph object dump:\n",Dumper($g)});
 
 	# create IO lists %inputs and %outputs
 
@@ -153,7 +153,7 @@ sub generate_setup_try {
 		write_chains(); 
 		1
 	} else { 
-		say("No tracks to record or play.");
+		throw("No tracks to record or play.");
 		0
 	}
 }
@@ -202,7 +202,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->rec_status eq 'MON'){ 
+	} elsif ($tn{Mixdown}->rec_status eq 'PLAY'){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Master}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
@@ -215,9 +215,13 @@ sub add_paths_for_mixdown_handling {
 sub prune_graph {
 	logsub("&prune_graph");
 	::Graph::simplify_send_routing($g);
+	logpkg('debug',"Graph after simplify_send_routing:\n$g");
 	::Graph::remove_out_of_bounds_tracks($g) if ::edit_mode();
+	logpkg('debug',"Graph after remove_out_of_bounds_tracks:\n$g");
 	::Graph::recursively_remove_inputless_tracks($g);
+	logpkg('debug',"Graph after recursively_remove_inputless_tracks:\n$g");
 	::Graph::recursively_remove_outputless_tracks($g); 
+	logpkg('debug',"Graph after recursively_remove_outputless_tracks:\n$g");
 }
 # object based dispatch from routing graph
 	
@@ -233,23 +237,23 @@ sub process_routing_graph {
 	# one line will show all with that one input
 	# -a:3,5,6 -i:foo
 	
-	map{ $inputs{$_->ecs_string} //= [];
+	map { 
+		$inputs{$_->ecs_string} //= [];
 		push @{$inputs{$_->ecs_string}}, $_->chain_id;
-
-	# supplemental post-input modifiers
-	
+		# post-input modifiers
 		$post_input{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
-	} grep { $_->direction eq 'input' } @io;
+	} 
+	grep { $_->direction eq 'input' } @io;
 
 	# sort chain_ids by output
 
-	map{ $outputs{$_->ecs_string} //= [];
+	map { 
+		$outputs{$_->ecs_string} //= [];
 		push @{$outputs{$_->ecs_string}}, $_->chain_id;
-
-	# pre-output modifers
-	
+		# pre-output modifers
 		$pre_output{$_->chain_id} = $_->ecs_extra if $_->ecs_extra;
-	} grep { $_->direction eq 'output' } @io;
+	} 
+	grep { $_->direction eq 'output' } @io;
 
 	no warnings 'numeric';
 	my @in_keys = values %inputs;

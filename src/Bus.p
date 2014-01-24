@@ -38,7 +38,7 @@ sub new {
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
-		rw   	=> 'REC', # for group control
+		rw   	=> 'MON', # for group control
 		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
@@ -118,6 +118,7 @@ sub trackslist {
 
 sub apply {}  # base class does no routing of its own
 
+
 ### subclasses
 {
 package ::SubBus;
@@ -130,16 +131,16 @@ use ::Util qw(input_node);
 sub output_is_connectable {
  	my $bus = shift;
 
-	# Either the bus's mix track must be set to REC:
+	# Either the bus's mix track must be set to REC/MON
  	
- 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status eq 'REC'
+ 	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status =~ /REC|MON/
 
 	# Or, during mixdown, we connect bus member tracks to Master
 	# even tho Master may be set to OFF
 	
 	or $bus->send_type eq 'track' 
 				and $bus->send_id eq 'Master' 
-				and $::tn{Mixdown}->rec_status eq 'REC'
+				and $::tn{Mixdown}->rec_status eq /REC|MON/
 
 	
 	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;
@@ -168,15 +169,8 @@ sub apply {
 		
 		# add paths for recording
 		
-		# say "rec status: ",$_->rec_status;
-		# say "rec defeat: ",$_->rec_defeat; 
-		# say q($mode->{preview}: ),$::mode->{preview};
-		# say "result", $_->rec_status eq 'REC' and ! $_->rec_defeat
-		# 		and ! ( $::mode->{preview} eq 'doodle' );
-			
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq 'REC' 
-			and ! $_->rec_defeat
+			if $_->rec_status eq 'REC'
 				and ! $::mode->preview and ! $::mode->doodle;
 
 	} grep {$_->rec_status ne 'OFF'} grep{ $_->group eq $bus->group} ::Track::all()
@@ -210,7 +204,10 @@ use ::Log qw(logsub logpkg);
 sub apply {
 	my $bus = shift;
 	map{ 
-		$::g->add_edge($_->input_path);
+		my @input_path = $_->input_path;
+		$::g->add_edge(@input_path);
+		$::g->set_edge_attributes( @input_path, 
+			{ width => $::tn{$_->target}->width });
 		my @edge = ($_->name, ::output_node($bus->send_type));
 		$::g->add_edge(@edge);
 		$::g->set_edge_attributes( @edge, { 
@@ -241,11 +238,11 @@ sub apply {
 	map{ my @edge = ($_->name, ::output_node($bus->send_type));
 		 $g->add_path( $_->target, @edge);
 		 $g->set_edge_attributes( @edge, { 
+				send_type => $bus->send_type,
 				send_id => $bus->send_id,
 				width => 2})
 	} grep{ $_->group eq $bus->group} ::Track::all()
 }
-
 
 }
 
@@ -263,19 +260,28 @@ our (
 
 sub set_current_bus {
 	my $track = shift || ($this_track ||= $tn{Master});
-	return unless $track;
-	#say "track: $track";
-	#say "this_track: $this_track";
-	#say "master: $tn{Master}";
-	if( $track->name =~ /Master|Mixdown/){ $this_bus = 'Main' }
-	elsif( $bn{$track->name} ){
-		$this_bus = $track->name;
-		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+
+	return unless $track; # needed for test environment
+
+	# The current sequence changes when the user touches a
+	# track that belongs to another sequence.
+	
+	$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
+
+	my $bus_name = 
+		$track->name =~ /Master|Mixdown/ 	
+		? 'Main'
+		: $track->is_mix_track()			
+			? $track->name 
+			: $track->group;
+	
+	select_bus($bus_name);
 }
-	else { 
-		$this_bus = $track->group;
-		$this_sequence = $bn{$track->group} if (ref $bn{$track->group}) =~ /Sequence/;
- 	}
+sub select_bus {
+	my $name = shift;
+	my $bus = $bn{$name} or return;
+	$this_bus = $name;
+	$this_bus_o = $bus;
 }
 sub add_sub_bus {
 	my ($name, @args) = @_; 
@@ -287,9 +293,7 @@ sub add_sub_bus {
 		) unless $::Bus::by_name{$name};
 
 	@args = ( 
-		rec_defeat	=> 1,
-		is_mix_track => 1,
-		rw 			=> 'REC',
+		rw 			=> 'MON',
 		@args
 	);
 
@@ -308,7 +312,7 @@ sub add_send_bus {
 
 	# dest_type: soundcard | jack_client | loop | jack_port | jack_multi
 	
-	print "name: $name: dest_type: $dest_type dest_id: $dest_id\n";
+	logpkg('debug',"name: $name, dest_type: $dest_type, dest_id: $dest_id");
 	if ($bn{$name} and (ref $bn{$name}) !~ /SendBus/){
 		::throw($name,": bus name already in use. Aborting."), return;
 	}
@@ -327,10 +331,11 @@ sub add_send_bus {
 	$bus or carp("can't create bus!\n"), return;
 
 	}
-	map{ ::SlaveTrack->new(	name => "$name\_$_", # BusName_TrackName
+	map{ ::EarTrack->new(	name => "$name\_$_", # BusName_TrackName
 							rw => 'MON',
 							target => $_,
 							group  => $name,
+							width => 2,
 							hide	=> 1,
 						)
    } $bn{Main}->tracks;
@@ -344,8 +349,24 @@ sub update_send_bus {
 						 $bn{$name}->send_id),
 						 "dummy",
 }
+sub remove_submix_helper_tracks {
+	my $name = shift;
+	#say "got name: $name";
+	my @submixes = submixes(); 
+	#say "got submixes:", Dumper \@submixes;
+	for my $sm ( @submixes ){ 
+		my $to_remove = join '_', $sm->name, $name;
+		#say "to_remove: $to_remove";
+		local $quiet;
+		$quiet++;
+		for my $name ($sm->tracks) { 
+			$tn{$name}->remove, last if $name eq $to_remove
+		}
+	}
 
-} # end package
+}
+sub submixes { grep { (ref $_) =~ /SendBusCooked/ } values %::Bus::by_name }
 
+}
 1;
 __END__

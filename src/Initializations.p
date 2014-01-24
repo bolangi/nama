@@ -7,6 +7,7 @@
 
 package ::;
 use Modern::Perl; use Carp;
+use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
 sub apply_test_harness {
 
@@ -21,6 +22,9 @@ sub apply_test_harness {
 				q(-J), # fake jack client data
 
 				q(-T), # don't initialize terminal
+                       # load fake effects cache
+
+				q(-S), # don't load static effects data
 
 				#qw(-L SUB), # logging
 
@@ -273,17 +277,18 @@ sub initialize_interfaces {
 		jack_transport_mode => 'send',
 	);
 
-	start_osc_listener() if $config->{osc_listener_port} 
+	start_osc_listener($config->{osc_listener_port}) 
+		if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
 	start_remote_listener($config->{remote_control_port}) if $config->{remote_control_port};
 	logpkg('debug',"reading config file");
 	if ($config->{opts}->{d}){
-		print "project_root $config->{opts}->{d} specified on command line\n";
+		pager("project_root $config->{opts}->{d} specified on command line\n");
 		$config->{root_dir} = $config->{opts}->{d};
 	}
 	if ($config->{opts}->{p}){
 		$config->{root_dir} = getcwd();
-		print "placing all files in current working directory ($config->{root_dir})\n";
+		pager("placing all files in current working directory ($config->{root_dir})\n");
 	}
 
 	# skip initializations if user (test) supplies project
@@ -291,6 +296,8 @@ sub initialize_interfaces {
 	
 	first_run() unless $config->{opts}->{d}; 
 
+	#my $fx_cache_json;
+	#$fx_cache_json = get_data_section("fx_cache") if $config->{opts}->{T};
 	prepare_static_effects_data() unless $config->{opts}->{S};
 	setup_user_customization();	# depends on effect_index() in above
 
@@ -365,22 +372,15 @@ exit;
 		$project->{name} = "untitled";
 		$config->{opts}->{c}++; 
 	}
-	print "\nproject_name: $project->{name}\n";
+	pager("\nproject_name: $project->{name}\n");
 	
 	load_project( name => $project->{name}, create => $config->{opts}->{c}) ;
 	1;	
 }
-sub start_osc_listener {
-	my $port = $config->{osc_listener_port};
-	say "Starting OSC listener on port $port";
-	my $in = $project->{osc_socket} = IO::Socket::INET->new( qw(LocalAddr localhost LocalPort), $port, qw(Proto tcp Type), SOCK_STREAM, qw(Listen 1 Reuse 1) ) || die $!;
-	$this_engine->{events}->{osc} = AE::io( $in, 0, \&process_osc_command );
-	$project->{osc} = Protocol::OSC->new;
-}
-{ my $is_connected;
+{ my $is_connected_remote;
 sub start_remote_listener {
     my $port = shift;
-    say "Starting remote control listener on port $port";
+    pager_newline("Starting remote control listener on port $port");
     $project->{remote_control_socket} = IO::Socket::INET->new( 
         LocalAddr   => 'localhost',
         LocalPort   => $port, 
@@ -398,8 +398,8 @@ sub remove_remote_watcher {
     undef $this_engine->{events}->{remote_control};
 }
 sub process_remote_command {
-    if ( ! $is_connected++ ){
-        say "making connection";
+    if ( ! $is_connected_remote++ ){
+        pager_newline("making connection");
         $project->{remote_control_socket} =
             $project->{remote_control_socket}->accept();
 		remove_remote_watcher();
@@ -410,7 +410,7 @@ sub process_remote_command {
     eval {     
         $project->{remote_control_socket}->recv($input, $project->{remote_control_socket}->sockopt(SO_RCVBUF));
     };
-    $@ and say("caught error: $@"), reset_remote_control_socket(), return;
+    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), return;
     logpkg('debug',"Got remote control socketput: $input");
 	process_command($input);
 	my $out;
@@ -420,10 +420,10 @@ sub process_remote_command {
     eval {
         $project->{remote_control_socket}->send($out);
     };
-    $@ and say("caught error: $@"), reset_remote_control_socket(), return;
+    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), return;
 }
 sub reset_remote_control_socket { 
-    undef $is_connected;
+    undef $is_connected_remote;
     undef $@;
     $project->{remote_control_socket}->shutdown(2);
     undef $project->{remote_control_socket};
@@ -432,27 +432,56 @@ sub reset_remote_control_socket {
 }
 }
 
+sub start_osc_listener {
+	my $port = shift;
+	say("Starting OSC listener on port $port");
+	my $osc_in = $project->{osc_socket} = IO::Socket::INET->new(
+		LocalAddr => 'localhost',
+		LocalPort => $port,
+		Proto	  => 'udp',
+		Type	  =>  SOCK_DGRAM) || die $!;
+	$this_engine->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
+	$project->{osc} = Protocol::OSC->new;
+}
 sub process_osc_command {
 	my $in = $project->{osc_socket};
 	my $osc = $project->{osc};
- 	$in->accept->recv(my $packet, $in->sockopt(SO_RCVBUF));
-    my $p = $osc->parse(($osc->from_stream($packet))[0]);
+	my $source_ip = $in->recv(my $packet, $in->sockopt(SO_RCVBUF));
+	my($err, $hostname, $servicename) = getnameinfo($source_ip, NI_NUMERICHOST);
+	my $p = $osc->parse($packet);
+	my @args = @$p;
+	my ($path, $template, $command, @vals) = @args;
+	$path =~ s(^/)();
+	$path =~ s(/$)();
+	my ($trackname, $fx, $param) = split '/', $path;
+	process_command($trackname);
+	process_command("$command @vals") if $command;
+	process_command("show_effect $fx") if $fx; # select
+	process_command("show_track") if $trackname and not $fx;
+	process_command("show_tracks") if ! $trackname;
 	say "got OSC: ", Dumper $p;
-	my $input = $p->[0];
-	$input =~ s(/)( )g;
-	process_command(sanitize_remote_input($input));
+	say "got args: @args";
+ 	my $osc_out = IO::Socket::INET->new(
+ 		PeerAddr => $hostname,
+ 		PeerPort => $config->{osc_reply_port},
+ 		Proto	  => 'udp',
+ 		Type	  =>  SOCK_DGRAM) || die $!;
+	$osc_out->send(join "",@{$text->{output_buffer}});
+	delete $text->{output_buffer};
 }
+
 sub sanitize_remote_input {
 	my $input = shift;
 	my $error_msg;
 	do{ $input = "" ; $error_msg = "error: perl/shell code is not allowed"}
 		if $input =~ /(^|;)\s*(!|eval\b)/;
-	say $error_msg;
-	$input;
+	throw($error_msg) if $error_msg;
+	$input
 }
 sub select_ecasound_interface {
 	pager_newline('Not initializing engine: options E or A are set.'),
 			return if $config->{opts}->{E} or $config->{opts}->{A};
+	no warnings 'redefine';
 	*eval_iam = \&eval_iam_neteci;
 	::Effects::import_engine_subs();
 }

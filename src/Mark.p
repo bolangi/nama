@@ -60,7 +60,7 @@ sub new {
 sub set_name {
 	my $mark = shift;
 	my $name = shift;
-	print "name: $name\n";
+	pager("name: $name\n");
 	if ( defined $by_name{ $name } ){
 	carp "you attempted to assign to name already in use\n";
 	}
@@ -171,12 +171,12 @@ sub drop_mark {
 	my $here = eval_iam("getpos");
 
 	if( my $mark = $::Mark::by_name{$name}){
-		pager_join("$name: a mark with this name exists already at: ", 
+		pager("$name: a mark with this name exists already at: ", 
 			colonize($mark->time));
 		return
 	}
 	if( my ($mark) = grep { $_->time == $here} ::Mark::all()){
-		pager_join( q(This position is already marked by "),$mark->name,q(") );
+		pager( q(This position is already marked by "),$mark->name,q(") );
 		 return 
 	}
 

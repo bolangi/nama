@@ -36,7 +36,8 @@ sub project_dir {
 	$config->{opts}->{p} and return $config->{root_dir}; # cwd
 	$project->{name} and join_path( project_root(), $project->{name}) 
 }
-sub this_op { $this_track ? $this_track->op : "" }
+sub this_op { $this_track and $this_track->op }
+sub this_op_o { $this_track and $this_track->op and fxn($this_track->op) }
 sub this_param { $this_track ? $this_track->param : ""}
 sub this_stepsize { $this_track ? $this_track->stepsize : ""}
 sub this_track_name { $this_track ? $this_track->name : "" }
@@ -184,8 +185,7 @@ sub load_project {
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => 'REC',
-			rec_defeat => 1,
+			rw => 'MON',
 			source_type => undef,
 			source_id => undef); 
 
@@ -412,7 +412,7 @@ sub list_project_templates {
 }
 sub remove_project_template {
 	map{my $name = $_; 
-		pager_join("$name: removing template");
+		pager("$name: removing template");
 		$name .= ".yml" unless $name =~ /\.yml$/;
 		unlink join_path( project_root(), "templates", $name);
 	} @_;

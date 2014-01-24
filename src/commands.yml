@@ -219,16 +219,17 @@ link_track:
   type: track
   what: Create a read-only track, that uses audio files from another track.
   short: link
-  parameters: [<string:project>:]<string:source_name> <string:dest_name>
+  parameters: [<string:project_name>] <string:track_name> <string:link_name>
   example: |
-    link song_part_1:Mixdown part_1  
-    ! create a track part_1 using files from track Mixdown 
-    ! in project song_part_1
-    link_track piano_compressed piano
-    ! create piano_compressed using files from piano.
-    ! This is one way to provide wet and dry 
-    ! processed and unprocessed versions of same source.
-    ! (Another way would be to use inserts.)
+    link my_song_part1 Mixdown part_1  
+    ! Create a read-only track "part_1" in the current project
+    ! using files from track "Mixdown" in project "my_song_part_1".
+    !
+    link_track compressed_piano piano
+    ! Create a read-only track "compressed_piano" using files from
+    ! track "piano". This is one way to provide wet and dry
+    ! (processed and unprocessed) versions of same source.
+    ! Another way would be to use inserts.
 import_audio:
   type: track
   what: |
@@ -249,10 +250,10 @@ set_track:
 record:
   type: track
   what: |
-    Set the current track source to its live input.
-    The signal will be written to disk during
-    the engine run. The rec_defeat command prevents 
-    writing the file, write_enable restores it.
+    Set the current track to record its source.  Creates the
+    monitoring route if necessary. Recording to disk will begin
+    on the next engine start. Use the "mon" or "off" commands to
+    disable recording.
   short: rec
   parameters: none
   example: |
@@ -264,30 +265,25 @@ record:
     ! may be recording or playing back as well.
     stop 
     ! Stop the recording/playback, automatically enter playback mode
+play:
+  type: track
+  what: |
+    Set the current track to playback the currently selected version. 
+    Creates the monitoring route if necessary. The selected audio file 
+    will play the next time the engine starts.
+  parameters: none
 mon:
   type: track
-  what: Set the current track to playback the currently selected version. 
+  what: |
+    Create a monitoring route for the current track at
+    the next opportunity.
   parameters: none
-  example: mon # Next time you start, the last version will be played back.
 off:
   type: track
   what: |
-    Set current track to OFF (exclude it from setup). 
-    You can re-include it using "mon" or "rec" commands.
-  parameters: none
-write_defeat:
-  type: track
-  what: |
-    Prevent writing an audio file for the current track. The track will 
-    just pass thru the incoming audio. 
-  short: wd rec_defeat
-  parameters: none
-write_enable:
-  type: track
-  what: | 
-    Allow the current track to write an audio file to disk. 
-    This is the opposite of write_defeat. 
-  short: we rec_enable
+    Remove the monitoring route for the current track and all
+    track I/O at the next opportunity.  You can re-include it
+    using "mon", "play" or "rec" commands.
   parameters: none
 source:
   type: track
@@ -616,17 +612,9 @@ remove_track:
     Remove the current track with its effects, inserts, etc.
     Audio files are unchanged. 
   parameters: none
-bus_rec:
-  type: bus
-  what: Set the current bus mix_track to record (the default behaviour).
-  short: brec
-  parameters: none
 bus_mon:
   type: bus
-  what: |
-    Set the current bus mix_track to playback. An audio file
-    will likely exist only the mix_track has been previously
-    cached (frozen/bounced.)
+  what: Set the current bus mix_track to monitor (the default behaviour).
   short: bmon
   parameters: none
 bus_off:
@@ -810,9 +798,11 @@ add_controller:
         # help for -klg in the Ecasound manpage.
 add_effect:
   type: effect
-  what: Add an effect prefader (before vol/pan controls) to the current track. Remove effects with reove_effect.
+  what: Add an effect 
   short: afx
-  parameters: <string:effect_code> [ <float:param1> <float:param2>... ]
+  parameters: |
+    [ (before <fx_alias> | first | last ) ] <fx_alias> [ <float:param1> <float:param2>... ]
+    "before", "first" and "last" can be abbreviated "b", "f" and "l", respectively.
   example: |
     We want to add the decimator effect (a LADSPA plugin).
     help_effect decimator # Print help about its paramters/controls.
@@ -820,30 +810,13 @@ add_effect:
     afx decimator 12 22050  #  prints "Added GO (Decimator)"
     ! We have added the decimator with 12bits and a sample rate of 22050Hz.
     ! GO is the effect ID, which you will need to modify it.
-append_effect:
-  type: effect
-  what: Add an effect postfader (after vol/pan conrols) to the current track. Remove effect with remove_effect.
-  short: apfx
-  parameters: <string:effect_code> [ <float:param1> <float:param2> ] ...
-  example: |
-    apfx var_dali  
-    ! Append the Ecasound effect preset var_dali to the current track
-insert_effect:
-  type: effect
-  what: Place an effect before the specified unique effect ID. You will experience a short pause in playback.
-  short: ifx
-  parameters: <string:insert_point_id> <string:effect_code> [ <float:param1> <float:param2> ] ...
-  example: |
-    To insert a delay before the reverb 
-    lfx 
-    ! List track effects. (We find the reverb's effect ID is AF.)
-    ifx AF etd 125 2 2 40 60 
-    ! Insert the etd delay before the reverb (AF).
 modify_effect:
   type: effect
   what: Modify effect parameter(s).
   short: mfx
-  parameters: [ <string:effect_id> ] <integer:parameter> [ + | - | * | / ] <float:value>
+  parameters: |
+    [ <fx_alias> ] <integer:parameter> [ + | - | * | / ] <float:value>
+    fx_alias can be: a position, effect ID, nickname or effect code
   example: |
     To change the roomsize of our reverb effect to 62
     lfx 
@@ -866,7 +839,7 @@ remove_effect:
   type: effect
   what: Remove effects. They don't have to be on the current track.
   short: rfx
-  parameters: <string:effect_id1> [ <string:effect_id2> ] ...
+  parameters: <fx_alias1> [ <fx_alias2> ] ...
 position_effect:
   type: effect
   what: Position an effect before another effect (use 'ZZZ' for end).
@@ -882,6 +855,10 @@ show_effect:
   example: |
     sfx # Print name, unique ID and parameters/controls of the current effect.
     sfx H # Print out all information about effect with unique ID H.
+dump_effect:
+  type: effect
+  what: Dump all data of current effect object
+  short: dfx
 list_effects:
   type: effect
   what: Print a short list of all effects on the current track, only including unique ID and effect name.
@@ -1107,27 +1084,12 @@ new_effect_chain:
     ! Create a new effect chain, "my_guitar",
     ! storing the effects with IDs A, C, F, G, H and
     ! their respective settings.
-add_effect_chain:
-  type: effect
-  what: Add an effect chain to the current track.
-  short: aec
-  parameters: <string:effect_chain_name> <string:successor_effect_id | ZZZ>
-  example: |
-    aec my_piano 
-    ! Add the effect chain "my_piano", to the current track.
-    ! This will add all effects stored in my_piano with their
-    ! respective settings.
-    aec my_piano AE
-    ! Add the effect chain, positioning it before before 
-    ! effect id AE
-    aec my_piano ZZZ
-    ! Append the effect chain to the current track effects
 delete_effect_chain:
   type: effect
   what: |
     Delete an effect chain definition. Does not affect the
     project state. This command is not reversible by undo.
-  short: dec destroy_effect_chain
+  short: dec destroy_effect_chain 
   parameters: <string:effect_chain_name>
 find_effect_chains:
   type: effect
@@ -1666,4 +1628,70 @@ trim_user:
     ! reduce vol of current track in in_ear_monitor by 3dB
     user in_ear_monitor1
     trim vol - 3 
+nickname_effect:
+  type: effect
+  short: nfx nick
+  what: Add a nickname to the current effect (and create an alias)
+  parameters: <lower_case_string:nickname>
+  example: |
+    add_track guitar
+    afx Plate
+    nick reverb        # current effect gets name "reverb1"
+                       # "reverb" becomes an alias for "Plate"
+    mfx reverb1 1 0.05 # modify first reverb effect on current track 
+    mfx reverb 1 2     # works, because current track has one effect named "reverb"
+    afx reverb         # add another Plate effect, gets name "reverb2"
+    
+    rfx reverb         # Error, multiple reverb effects are present on this track.  Please use a numerical suffix.
+    mfx reverb2 1 3    # modify second reverb effect
+    rfx reverb1        # removes reverb1
+    ifx reverb2 reverb # insert another reverb effect (reverb3) before reverb2
+    rfx reverb3        # remove reverb3
+    rfx reverb         # removes reverb2, as it is the sole remain reverb effect
+list_nickname_definitions:
+  type: effect
+  short: lnd
+  what: list effect nicknames
+delete_nickname_definition:
+  type: effect
+  short: dnd
+  what: delete a nickname definition. Previously named effects keep their names.
+  example: |
+    afx Plate  # add Plate effect
+    nick reverb# name it "reverb", and create a nickname for Plate
+    dnd reverb # removes nickname definition
+    afx reverb # error
+remove_nickname:
+  type: effect
+  what: remove the "name" attribute of the current effect
+  short: rnick
+  example: |
+    afx Plate
+    nick reverb
+    mfx reverb 1 3
+    rnick
+    mfx reverb 1 3 # Error: effect named "reverb" not found on current track
+list_nickname_definitions:
+  type: effect
+  what: list all defined nicknames
+  short: lnd
+  parameters: none
+set_effect_name:
+  type: effect
+  what: set a nickname only (don't creating an alias)
+  short: sen
+  parameters: <string:name>
+set_effect_surname:
+  type: effect
+  what: set an effect surname
+  short: ses
+  parameters: <string:surname>
+remove_effect_name:
+  type: effect
+  what: remove current effect name
+  short: ren
+remove_effect_surname:
+  type: effect
+  what: remove current effect surname
+  short: res
 ...

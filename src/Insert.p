@@ -4,7 +4,7 @@ use Modern::Perl;
 use Carp;
 no warnings qw(uninitialized redefine);
 our $VERSION = 0.1;
-use vars qw(%by_index);
+our %by_index;
 use ::Log qw(logpkg);
 use ::Log qw(logpkg);
 use ::Globals qw($jack $setup $config);
@@ -52,7 +52,7 @@ sub new {
 				name => $self->wet_name,
 				target => $name,
 				group => 'Insert',
-				rw => 'REC',
+				rw => 'MON',
 	
 				# don't hide wet track if used for hosting effects
 				
@@ -63,7 +63,7 @@ sub new {
 				target => $name,
 				group => 'Insert',
 				hide => 1,
-				rw => 'REC');
+				rw => 'MON');
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
@@ -86,20 +86,14 @@ sub new {
 
 sub type { (ref $_[0]) =~ /Pre/ ? 'prefader_insert' : 'postfader_insert' }
 
-sub remove {
-	my $self = shift;
-	local $::this_track;
-	$::tn{ $self->wet_name }->remove;
-	$::tn{ $self->dry_name }->remove;
-	delete $by_index{$self->n};
-}
+#sub remove {}
 # subroutine
 #
 sub add_insert {
 	my ($track, $type, $send_id, $return_id) = @_;
 	local $::this_track;
 	# $type : prefader_insert | postfader_insert
-	say "\n",$track->name , ": adding $type\n";
+	::pager("\n",$track->name , ": adding $type\n");
 	my $name = $track->name;
 
 	# the input fields will be ignored, since the track will get input
@@ -263,6 +257,12 @@ sub add_paths {
 	$g->add_path($loop, $dry->name, $successor);
 	}
 	
+sub remove {
+	my $self = shift;
+	$::tn{ $self->wet_name }->remove;
+	$::tn{ $self->dry_name }->remove;
+	delete $::Insert::by_index{$self->n};
+}
 }
 {
 package ::PreFaderInsert;
@@ -357,13 +357,12 @@ sub add_paths {
 		$g->add_path($predecessor, $dry->name, $loop, $name);
 	}
 	
-}
 sub remove {
 	my $self = shift;
-	local $::this_track;
 	$::tn{ $self->wet_send_name }->remove;
 	$::tn{ $self->dry_name }->remove;
 	$::tn{ $self->wet_name }->remove;
 	delete $::Insert::by_index{$self->n};
+}
 }
 1;

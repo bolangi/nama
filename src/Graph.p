@@ -71,7 +71,6 @@ sub add_path_for_rec {
 
 		# generally a sub bus 
 
-		# - has 'rec_defeat' set (therefore doesn't reach here)
 		# - receives a stereo input
 		# - mix track width is set to stereo (default)
 
@@ -242,11 +241,6 @@ sub add_loop {
 #  with, for example, multiple edges to a soundcard.
 #
 #  Send buses create new tracks to provide connections.
-#
-# I will be moving edges (along with their attributes)
-# but I cannot assign chain_id them because I have
-# no way of knowing which is the edge that will use
-# the track number and will therefore get the track effects
 
  	my ($g, $a, $b, $loop) = @_;
  	logpkg('debug',"$a-$b: insert near side loop");
@@ -316,7 +310,7 @@ sub inputless_tracks {
 }	
 sub remove_out_of_bounds_tracks {
 	my $g = shift;
-	my @names = $g->successors('wav_in');  # MON status tracks
+	my @names = $g->successors('wav_in');  # PLAY status tracks
 	map{ remove_tracks($g, $_) } 
 	grep{
 		::edit_case(::edit_vars($::tn{$_})) =~ /out_of_bounds/

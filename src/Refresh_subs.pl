@@ -3,12 +3,12 @@
 sub set_widget_color {
 	my ($widget, $status) = @_;
 	my %rw_foreground = (	REC  => $gui->{_nama_palette}->{RecForeground},
-						 	MON => $gui->{_nama_palette}->{MonForeground},
+						 	PLAY => $gui->{_nama_palette}->{MonForeground},
 						 	OFF => $gui->{_nama_palette}->{OffForeground},
 						);
 
 	my %rw_background =  (	REC  => $gui->{_nama_palette}->{RecBackground},
-							MON  => $gui->{_nama_palette}->{MonBackground},
+							PLAY  => $gui->{_nama_palette}->{MonBackground},
 							OFF  => $gui->{_nama_palette}->{OffBackground});
 
 	$widget->configure( -background => $rw_background{$status} );
@@ -29,11 +29,11 @@ sub refresh_group {
 
 			$status = 'REC'
 
-		}elsif(	grep{ $_->rec_status eq 'MON'} 
+		}elsif(	grep{ $_->rec_status eq 'PLAY'} 
 				map{ $tn{$_} }
 				$bn{Main}->tracks ){
 
-			$status = 'MON'
+			$status = 'PLAY'
 
 		}else{ 
 		

@@ -52,10 +52,10 @@ sub start_transport {
 	# sleep 1s
 
 	logsub("&start_transport");
-	say("\nCannot start. Engine is not configured.\n"),return 
+	throw("\nCannot start. Engine is not configured.\n"),return 
 		unless eval_iam("cs-connected");
 
-	say "\n\nStarting at ", current_position() unless $quiet;
+	pager("\n\nStarting at ", current_position()) unless $quiet;
 	schedule_wraparound();
 	mute();
 	start_midish_transport() 
@@ -118,7 +118,7 @@ sub engine_is {
 }
 sub engine_status { 
 	my ($pos, $before_newlines, $after_newlines) = @_;
-	say "\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines;
+	pager("\n" x $before_newlines, engine_is($pos), "\n" x $after_newlines);
 }
 sub current_position { 
 	my $pos = eval_iam("getpos"); 

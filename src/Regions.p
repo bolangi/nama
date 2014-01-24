@@ -24,10 +24,10 @@ sub new_region_name {
 }
 sub remove_region {
 	if (! $this_track->region_start){
-		say $this_track->name, ": no region is defined. Skipping.";
+		throw($this_track->name, ": no region is defined. Skipping.");
 		return;
 	} elsif ($this_track->target ){
-		say $this_track->name, ": looks like a region...  removing.";
+		pager($this_track->name, ": looks like a region...  removing.");
 		$this_track->remove;
 	} else { undefine_region() }
 }
@@ -35,7 +35,7 @@ sub remove_region {
 sub undefine_region {
 	$this_track->set(region_start => undef );
 	$this_track->set(region_end => undef );
-	print $this_track->name, ": Region definition removed. Full track will play.\n";
+	pager($this_track->name, ": Region definition removed.  Full track will play.\n");
 }
 1;
 __END__

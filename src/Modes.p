@@ -15,9 +15,9 @@ sub set_preview_mode {
 
 	$mode->{preview} = "preview";
 
-	pager_join( <<'MSG');
+	pager( <<'MSG');
 Setting preview mode.
-Using both REC and MON inputs.
+Using both REC and PLAY inputs.
 WAV recording is DISABLED.
 
 Type 'arm' to enable recording.
@@ -34,7 +34,7 @@ sub set_doodle_mode {
 	
 	# reconfigure_engine will generate setup and start transport
 	
-pager_join( <<'MSG' );
+pager( <<'MSG' );
 Setting doodle mode.
 Using live inputs only, no duplicate inputs
 Exit using 'preview' or 'arm' commands
@@ -46,7 +46,7 @@ sub exit_preview_mode { # exit preview and doodle modes
 		logsub("&exit_preview_mode");
 		return unless $mode->{preview};
 		stop_transport() if engine_running();
-		pager_join("Exiting preview/doodle mode");
+		pager("Exiting preview/doodle mode");
 		$mode->{preview} = 0;
 
 }

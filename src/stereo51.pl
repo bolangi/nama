@@ -272,7 +272,7 @@ gen_alsa();
 check_setup("Stereo to 5.1 converter
    line 5: R-L    move_to_bus null");
 
-process_command("for all; rec_defeat; remove_fader_effect vol; remove_fader_effect pan");
+process_command("for all; mon; remove_fader_effect vol; remove_fader_effect pan");
 $expected_setup_lines = <<EXPECTED;
 # ecasound chainsetup file
 
@@ -305,7 +305,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_alsa();
 check_setup("Stereo to 5.1 converter
-   line 6: for all; rec_defeat; remove_fader_effect vol; remove_fader_effect pan");
+   line 6: for all; mon; remove_fader_effect vol; remove_fader_effect pan");
 
 process_command("for L_front R_front Center Subwoofer L_inverted Right; source track Stereo");
 $expected_setup_lines = <<EXPECTED;

@@ -19,7 +19,7 @@ sub loop {
 	initialize_prompt();
 	$Event::DIED = sub {
 		my ($event, $errmsg) = @_;
-		say $errmsg;
+		throw($errmsg);
 		$text->{term_attribs}->{line_buffer} = q();
 		if($text->{term}){
 			$text->{term}->clear_message();

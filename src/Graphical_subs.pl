@@ -152,7 +152,7 @@ sub init_gui {
 		 -command => sub { 
 				return if transport_running();
 				save_state($gui->{_save_id});
-				print "Exiting... \n";		
+				pager("Exiting... \n");
 				#$text->{term}->tkRunning(0);
 				#$gui->{ew}->destroy;
 				#$gui->{mw}->destroy;
@@ -339,7 +339,7 @@ sub engine_mode_color {
 		} else { $gui->{_old_bg} } 
 }
 sub user_rec_tracks { some_user_tracks('REC') }
-sub user_mon_tracks { some_user_tracks('MON') }
+sub user_mon_tracks { some_user_tracks('PLAY') }
 
 sub some_user_tracks {
 	my $which = shift;
@@ -389,16 +389,6 @@ sub group_gui {
 
 		
 		$gui->{group_rw}->AddItems([
-			'command' => 'REC',
-			-background => $gui->{_old_bg},
-			-command => sub { 
-				return if ::eval_iam("engine-status") eq 'running';
-				$group->set(rw => 'REC');
-				$gui->{group_rw}->configure(-text => 'REC');
-				refresh();
-				::reconfigure_engine()
-				}
-			],[
 			'command' => 'MON',
 			-background => $gui->{_old_bg},
 			-command => sub { 
@@ -485,10 +475,20 @@ sub track_gui {
 					#refresh_group();
 					::reconfigure_engine();
 			}],
+			[ 'command' => "PLAY",
+				-command  => sub { 
+					return if ::eval_iam("engine-status") eq 'running';
+					$ti{$n}->set(rw => "PLAY");
+					$ui->refresh_track($n);
+					#refresh_group();
+					::reconfigure_engine();
+			}],
 			[ 'command' => "MON",
+				-foreground => 'red',
 				-command  => sub { 
 					return if ::eval_iam("engine-status") eq 'running';
 					$ti{$n}->set(rw => "MON");
+					
 					$ui->refresh_track($n);
 					#refresh_group();
 					::reconfigure_engine();
@@ -1094,9 +1094,9 @@ sub arm_mark_toggle {
 sub marker {
 	my $ui = shift;
 	my $mark = shift; # Mark
-	#print "mark is ", ref $mark, $/;
+	logpkg('debug',"mark is ", ref $mark);
 	my $pos = $mark->time;
-	#print $pos, " ", int $pos, $/;
+	logpkg('debug',$pos, " ", int $pos);
 		$gui->{marks}->{$pos} = $gui->{mark_frame}->Button( 
 			-text => (join " ",  colonize( int $pos ), $mark->name),
 			-background => $gui->{_nama_palette}->{OffBackground},
@@ -1129,7 +1129,7 @@ sub get_saved_colors {
 
 	my $pal = $file->gui_palette;
 	$pal .= '.json' unless $pal =~ /\.json$/;
-	say "pal $pal";
+	pager("pal $pal");
 	$pal = -f $pal 
 			? scalar read_file($pal)
 			: get_data_section('default_palette_json');

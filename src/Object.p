@@ -4,51 +4,6 @@ use Carp;
 use ::Assign qw(json_out); 
 use Data::Dumper::Concise;
 
-=comment
-{
-	package ::Does::Serialize;
-	use Role::Basic;
-	requires 'as_hash';
-	sub as_hash {
-		my $self = shift;
-		my $class = ref $self;
-		bless $self, 'HASH'; # easy magic
-		#print json_out $self; return;
-		my %guts = %{ $self };
-		#print join " ", %guts; return;
-		#my @keys = keys %guts;
-		#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
-		bless $self, $class; # restore
-		return \%guts; # *not* a copy, a risk, but we
-                       # are serializing, not altering 
-	}
-}
-
-::Does::Persist
-	# later,
-	# for the class, provides an
-	# (possibly filtered, altered) 
-	# array of objects.
-
-
-
-  In a role:
-
-1;
-
-  In your class:
-           
-           package My::Class;
-           use Role::Basic 'with';
-           
-           with qw(
-               Does::Serialize::AsYAML
-           );
-           
-           sub as_hash { ... } # because the role requires it
-
-=cut
-
 no strict; # Enable during dev and testing
 BEGIN {
 	require 5.004;

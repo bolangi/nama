@@ -34,6 +34,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 	time_tag
 	heuristic_time
 	dest_type
+	dest_string
 
 	create_dir
 	join_path
@@ -64,26 +65,23 @@ my %bus_logic = (
 		REC => sub
 		{
 			my ($bus, $track) = @_;
-
-			# enable live input 
 			$track->set_rec;
-
-			# enable member tracks
-			$bus->set(rw => 'REC');
 		},
 
-	# setting a mix track to MON 
+	# setting a mix track to PLAY
 	
+		PLAY => sub
+		{
+			my ($bus, $track) = @_;
+			$track->set_play;
+		},
+
+	# setting a mix track to MON
 	
 		MON => sub
 		{
 			my ($bus, $track) = @_;
-
-			# play a WAV file
 			$track->set_mon;
-
-			# disable member tracks
-			$bus->set(rw => 'OFF');
 		},
 
 	# setting mix track to OFF
@@ -97,7 +95,6 @@ my %bus_logic = (
 			# with the mix track off, 
 			# the member tracks get pruned 
 			# from the graph 
-
 		}
 	},
 	member_track =>
@@ -111,7 +108,7 @@ my %bus_logic = (
 
 			$track->set_rec() or return;
 
-			$bus->set(rw => 'REC'); # least restrictive 
+			$bus->set(rw => 'MON');
 			$tn{$bus->send_id}->busify 
 				if $bus->send_type eq 'track' and $tn{$bus->send_id};
 			
@@ -122,12 +119,19 @@ my %bus_logic = (
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
-				# unconstrained members
-			$bus->set(rw => 'REC') if $bus->rw eq 'OFF';
+			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
 			$track->set_mon;
-
 		},
 
+	# setting member track to PLAY
+	
+		PLAY => sub
+		{ 
+			my ($bus, $track) = @_;
+			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
+			$track->set_play;
+
+		},
 	# setting member track to OFF 
 
 		OFF => sub
@@ -237,6 +241,16 @@ sub dest_type {
 	elsif($dest eq 'jack')		{ 'jack_manual'	}
 	elsif($dest =~  /(^\w+\.)?ports/)	{ 'jack_ports_list' }
 	else 						{ 'jack_client'	} 
+}
+sub dest_string {
+	my ($type, $id, $width) = @_;
+	if ($type eq 'soundcard'){
+		my $ch = $id;
+		my @channels;
+		push @channels, $_ for $ch .. ($ch + $width - 1);
+		join '/', @channels
+	}
+	else { $id }
 }
 
 sub create_dir {

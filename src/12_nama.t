@@ -1,13 +1,15 @@
 package ::; 
 use ::;
-use Test::More tests => 120;
+use Test::More tests => 121;
 use File::Path qw(make_path remove_tree);
+use File::Slurp;
 use Cwd;
 
 use strict;
 use warnings;
 no warnings qw(uninitialized);
 
+our $fx_cache_json = read_file("t/data/fake_effects_cache.json");
 our ($expected_setup_lines);
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
@@ -29,6 +31,7 @@ apply_test_harness();
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
 
 bootstrap_environment();
+prepare_static_effects_data($fx_cache_json);
 $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
@@ -253,7 +256,7 @@ like( ::ChainSetup::ecasound_chain_setup(), qr/Horgand/, 'set JACK client as inp
 process_command("sax; source jack; gen");
 like( ::ChainSetup::ecasound_chain_setup(), qr/jack,,sax_in/, 'set JACK port for manual input');
 
-process_command("sax; source 2");
+process_command("sax; rec; source 2");
 
 
 force_alsa();
@@ -302,7 +305,7 @@ EXPECTED
 
 check_setup('JACK basic setup' );
 
-process_command('3;write_defeat; gen');
+process_command('3; mon; gen');
 $expected_setup_lines = <<EXPECTED;
 
 -a:1 -i:loop,Master_in
@@ -318,7 +321,7 @@ $expected_setup_lines = <<EXPECTED;
 -a:3 -o:loop,Master_in
 EXPECTED
 
-check_setup('JACK write_defeat setup' );
+check_setup('JACK mon setup' );
 
 force_alsa(); process_command('gen');
 $expected_setup_lines = <<EXPECTED;
@@ -337,7 +340,7 @@ $expected_setup_lines = <<EXPECTED;
 
 EXPECTED
 
-check_setup('ALSA write_defeat setup' );
+check_setup('ALSA mon setup' );
 process_command('Master; send 5;gen');
 
 $expected_setup_lines = <<EXPECTED;
@@ -536,50 +539,6 @@ gen_jack();
 check_setup('Send bus - soundcard - JACK');
 process_command('remove_bus Vo');
 process_command('sax mono');
-=comment
-process_command('add_insert post 5');
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Master_in
--a:3 -i:jack_multi,system:capture_2
--a:4 -i:jack_multi,system:capture_7,system:capture_8
--a:J3,5 -i:loop,sax_insert_post
-
-# post-input processing
-
--a:3 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,sax_insert_post
--a:4,5 -o:loop,Master_in
--a:J3 -o:jack_multi,system:playback_5,system:playback_6
-EXPECTED
-gen_jack();
-check_setup('Insert via soundcard - JACK');
-process_command('remove_insert'); 
-process_command('add_send_bus_raw Vo 5');
-$expected_setup_lines = <<EXPECTED;
-
--a:1 -i:loop,Master_in
--a:3,4 -i:jack_multi,system:capture_2
-
-# post-input processing
-
--a:3 -chcopy:1,2
--a:4 -chcopy:1,2
-
-# audio outputs
-
--a:1 -o:jack_multi,system:playback_1,system:playback_2
--a:3 -o:loop,Master_in
--a:4 -o:jack_multi,system:playback_5,system:playback_6
-EXPECTED
-gen_jack();
-
-check_setup('Send bus - raw - JACK');
-=cut
 
 ###### Timeline tests
 #
@@ -655,7 +614,6 @@ foreach(@tests){
 
 load_project(name => "$test_project-convert51", create => 1);
 
-# REDUNDANT
 my $script = <<CONVERT51;
 [% qx(cat ./stereo51.nms ) %]
 CONVERT51
@@ -694,9 +652,293 @@ force_alsa();
 process_command('gen');
 check_setup('Stereo to 5.1 converter script' );
 
-load_project(name => "$test_project-convert51-incremental", create => 1);
+load_project(name => "$test_project-sendbus-cooked", create => 1);
 
-[% qx(cat ./stereo51.pl ) %]
+do_script(' add mic
+            add guitar
+            for 3 4; mon
+            add_send_bus_cooked ear 7
+');
+$expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1,5 -i:loop,mic_out
+-a:1,6 -i:loop,guitar_out
+-a:3,4 -i:alsa,default
+
+# post-input processing
+
+-a:3  -chcopy:1,2
+-a:4  -chcopy:1,2
+
+# pre-output processing
+
+-a:5  -chmove:2,8 -chmove:1,7
+-a:6  -chmove:2,8 -chmove:1,7
+
+# audio outputs
+
+-a:1,5,6 -o:alsa,default
+-a:3 -o:loop,mic_out
+-a:4 -o:loop,guitar_out
+EXPECTED
+force_alsa();
+process_command('gen');
+check_setup('Submix - ALSA');
+
+force_jack();
+process_command('gen');
+
+$expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1,5 -i:loop,mic_out
+-a:1,6 -i:loop,guitar_out
+-a:3,4 -i:jack_multi,system:capture_1
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:4 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,mic_out
+-a:4 -o:loop,guitar_out
+-a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+EXPECTED
+check_setup('Submix, AKA add_send_bus_cooked - JACK');
+
+load_project(name => "add_send_bus_raw", create => 1);
+
+process_command("add_tracks mic guitar; for 3 4; mon;; 4 source 2; stereo; asbr raw-user 7");
+
+$expected_setup_lines = <<EXPECTED;
+
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,5 -i:jack_multi,system:capture_1
+-a:4,6 -i:jack_multi,system:capture_2,system:capture_3
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+-a:5 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3,4 -o:loop,Master_in
+-a:5,6 -o:jack_multi,system:playback_7,system:playback_8
+EXPECTED
+
+force_jack();
+process_command('gen');
+check_setup('Send Bus, Raw - JACK');
+
+force_alsa();
+process_command('gen');
+$expected_setup_lines = <<EXPECTED;
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,4,5,6 -i:alsa,default
+
+# post-input processing
+
+-a:3  -chcopy:1,2
+-a:4 -chmove:2,1 -chmove:3,2
+-a:5  -chcopy:1,2
+-a:6 -chmove:2,1 -chmove:3,2
+
+# pre-output processing
+
+-a:5  -chmove:2,8 -chmove:1,7
+-a:6  -chmove:2,8 -chmove:1,7
+
+# audio outputs
+
+-a:1,5,6 -o:alsa,default
+-a:3,4 -o:loop,Master_in
+EXPECTED
+check_setup('Send Bus, Raw - ALSA');
+
+force_jack();
+load_project(name => "$test_project-add_insert_post", create => 1);
+
+process_command("add sax; mon; gen");
+process_command("add_insert post jconvolver; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 8192 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_1
+-a:4 -i:jack,jconvolver
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+-a:J3 -o:jack,jconvolver
+EXPECTED
+
+check_setup('JACK client as postfader insert');
+
+load_project(name => "add_insert_pre", create => 1);
+process_command("add sax; mon; add_insert pre jconvolver; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4 -i:jack,jconvolver
+-a:5,6 -i:jack_multi,system:capture_1
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+-a:6 -o:jack,jconvolver
+EXPECTED
+check_setup('JACK client as pre-fader insert');
+
+load_project(name => "add_insert_via_soundcard-postfader", create => 1);
+process_command("add sax; mon; source 2; add_insert post 5; gen");
+$expected_setup_lines = <<EXPECTED;
+-a:1 -i:loop,Master_in
+-a:3 -i:jack_multi,system:capture_2
+-a:4 -i:jack_multi,system:capture_7,system:capture_8
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chcopy:1,2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+-a:J3 -o:jack_multi,system:playback_5,system:playback_6
+
+EXPECTED
+check_setup('Insert via soundcard, postfader - JACK');
+
+force_alsa();
+process_command("gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3,4 -i:alsa,default
+-a:J3,5 -i:loop,sax_insert_post
+
+# post-input processing
+
+-a:3 -chmove:2,1 -chcopy:1,2
+-a:4 -chmove:7,1 -chmove:8,2 
+
+# pre-output processing
+
+-a:J3  -chmove:2,6 -chmove:1,5
+
+# audio outputs
+
+-a:1,J3 -o:alsa,default
+-a:3 -o:loop,sax_insert_post
+-a:4,5 -o:loop,Master_in
+EXPECTED
+check_setup('Insert via soundcard, postfader - ALSA');
+
+load_project(name => "add_insert_via_soundcard_pre", create => 1);
+process_command("add sax; mon; source 2; add_insert pre 5; gen");
+$expected_setup_lines = <<EXPECTED;
+
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4,5,6 -i:alsa,default
+
+# post-input processing
+
+-a:4 -chmove:7,1 
+-a:5 -chmove:2,1 
+-a:6 -chmove:2,1 
+
+# pre-output processing
+
+-a:6  -chmove:1,5
+
+# audio outputs
+
+-a:1,6 -o:alsa,default
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+EXPECTED
+check_setup('Hardware insert via soundcard, prefader  - ALSA');
+gen_jack();
+$expected_setup_lines = <<EXPECTED;
+# general
+
+-z:mixmode,sum -G:jack,Nama,send -G:jack,Nama,send -b 1024 -z:nodb -z:intbuf -f:f32_le,2,44100
+
+# audio inputs
+
+-a:1 -i:loop,Master_in
+-a:3 -i:loop,sax_insert_pre
+-a:4 -i:jack_multi,system:capture_7
+-a:5,6 -i:jack_multi,system:capture_2
+
+# audio outputs
+
+-a:1 -o:jack_multi,system:playback_1,system:playback_2
+-a:3 -o:loop,Master_in
+-a:4,5 -o:loop,sax_insert_pre
+-a:6 -o:jack_multi,system:playback_5
+EXPECTED
+check_setup('Hardware insert via soundcard, prefader  - JACK');
 
 sub gen_alsa { force_alsa(); process_command('gen')}
 sub gen_jack { force_jack(); process_command('gen')}

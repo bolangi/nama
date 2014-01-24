@@ -11,7 +11,12 @@
 # user defined and system global effect chains 
 # are saved in a separate file. 
 
-@global_effect_chain_vars  = qw(@global_effect_chain_data $::EffectChain::n );
+@global_effect_chain_vars  = qw(
+
+	@global_effect_chain_data 
+	$::EffectChain::n 
+	$fx->{alias}
+);
 
 # variables that get saved to State.json and placed under
 # version control

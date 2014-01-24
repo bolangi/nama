@@ -39,8 +39,8 @@ sub save_state {
 		throw("No user tracks, skipping...");
 		return;
 	}
-
-	logpkg('debug',"Saving state as ", save_system_state($path));
+	logpkg('debug',"Saving state as ", $path);
+	save_system_state($path);
 	save_global_effect_chains();
 
 	# store alsa settings
@@ -48,8 +48,8 @@ sub save_state {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename;
 		$filename =~ s/\.yml$//;
-		print "storing ALSA settings\n";
-		print qx(alsactl -f $filename.alsa store);
+		pager("storing ALSA settings\n");
+		pager(qx(alsactl -f $filename.alsa store))
 	}
 }
 sub initialize_marshalling_arrays {
@@ -337,15 +337,15 @@ sub restore_state_from_file {
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} <= 1.100){ 
+	if ( $project->{save_file_version_number} lt "1.100"){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
-	if ( $project->{save_file_version_number} <= 1.105){ 
+	if ( $project->{save_file_version_number} lt 1.105){ 
 		map{ $_->{class} = 'Audio::Nama::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
-	if ( $project->{save_file_version_number} <= 1.109){ 
+	if ( $project->{save_file_version_number} lt "1.109"){ 
 		map
 		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
@@ -361,15 +361,27 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} <= 1.111){ 
+	if ( $project->{save_file_version_number} lt "1.111"){ 
 		map
 		{
+			convert_rw($_);
 			delete $_->{effect_chain_stack} ;
+            delete $_->{rec_defeat};
+            delete $_->{was_class};
+			delete $_->{is_mix_track};
+			$_->{rw} = 'MON' if $_->{name} eq 'Master';
 		} @tracks_data;
+		map
+		{
+			$_->{rw} = 'MON' if $_->{rw} eq 'REC'
+		} @bus_data;
 	}
 	#######################################
-
-
+sub convert_rw {
+	my $h = shift;
+	$h->{rw} = 'MON', return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
+	$h->{rw} = 'PLAY', return if $h->{rw} eq 'MON';
+}
 	#  destroy and recreate all buses
 
 	::Bus::initialize();	
@@ -408,12 +420,6 @@ sub restore_state_from_file {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
-	$ui->create_master_and_mix_tracks();
-
-	$this_track = $tn{$this_track_name} if $this_track_name;
-	set_current_bus();
-
-	
 	map{ 
 		my $n = $_->{n};
 
@@ -439,7 +445,10 @@ sub restore_state_from_file {
 		}
 	} @tracks_data;
 
+	$ui->create_master_and_mix_tracks();
 
+	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
+	
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
 	$did_apply and $ui->manifest;
@@ -450,8 +459,8 @@ sub restore_state_from_file {
 	if ( $config->{opts}->{a} ) {
 		my $filename = $filename; 
 		$filename =~ s/\.yml$//;
-		print "restoring ALSA settings\n";
-		print qx(alsactl -f $filename.alsa restore);
+		pager("restoring ALSA settings\n");
+		pager(qx(alsactl -f $filename.alsa restore));
 	}
 
 	# text mode marks 
@@ -532,6 +541,7 @@ sub restore_global_effect_chains {
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
 				class => '::');
+		assign_singletons({ data => $ref });
 }
 1;
 

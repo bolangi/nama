@@ -19,7 +19,7 @@ devices:
   jack:
     signal_format: f32_le,N,frequency
   consumer:
-    ecasound_id: alsahw,Intel
+    ecasound_id: alsa,default
     input_format: cd-stereo
     output_format: cd-stereo
     hardware_latency: 0
@@ -63,6 +63,8 @@ ecasound_globals:
   nonrealtime: -z:nodb -z:intbuf
 
 # ecasound_tcp_port: 2868
+osc_listener_port: 2870
+osc_reply_port: 2871
 
 use_group_numbering: 1
 
@@ -95,6 +97,7 @@ limiter: tap_limiter 0 0
 serialize_formats: json
 
 use_git: 1
+enforce_channel_bounds: 0
 
 autosave: undo
 

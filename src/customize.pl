@@ -25,7 +25,7 @@ commands =>
 		# usage: greet <name> <adjective>
 		greet => sub { 
 				my ($name,$adjective) = @_;
-				print ("Hello $name! You look $adjective today!!\n");
+				pager("Hello $name! You look $adjective today!!");
 		},
 		disable_jack_polling => sub{ $this_engine->{events}->{poll_jack} = undef },
 

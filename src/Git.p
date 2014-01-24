@@ -55,7 +55,7 @@ sub restore_state_from_vcs {
 sub git_snapshot {
 	logsub("&git_snapshot");
 	my $commit_message = shift() || "";
-	return unless $config->{use_git};
+	return unless $config->{use_git} and ! $config->{opts}->{R};
 	save_state();
 	reset_command_buffer(), return unless state_changed();
 	git_commit($commit_message);

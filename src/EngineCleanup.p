@@ -11,9 +11,9 @@ sub rec_cleanup {
 	{
 		if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
 		{
-			say "wav_out_tracks found";
+			pager("wav_out_tracks found");
 			$setup->{_last_rec_tracks} = \@rec_tracks;
-			say ::Dumper \@rec_tracks;
+			pager(::Dumper \@rec_tracks);
 		}
 
 		if( grep /Mixdown/, @files) { mixdown_postprocessing() }
@@ -45,7 +45,7 @@ sub mixdown_postprocessing {
 	chdir project_dir() or die "couldn't chdir: $!";
 	my $newfile = "$tag_name.wav";
 	logpkg('debug',"symlinking oldfile: $oldfile, newfile: $newfile");
-	symlink $oldfile, $newfile or say "symlink didn't work: $!";
+	symlink $oldfile, $newfile or throw("symlink didn't work: $!");
 	tag_mixdown_commit($tag_name, $newfile, $oldfile) if $config->{use_git};
 
 	my $sha = git_sha(); # possibly undef
@@ -131,9 +131,9 @@ sub post_rec_configure {
 		$ui->global_version_buttons(); # recreate
 		adjust_offset_recordings();
 
-		# toggle recorded tracks to MON for auditioning
+		# toggle recorded tracks to PLAY for auditioning
 		
-		map{ $_->set(rw => 'MON') } @{$setup->{_last_rec_tracks}};
+		map{ $_->set(rw => 'PLAY') } @{$setup->{_last_rec_tracks}};
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
 		no warnings 'uninitialized';
