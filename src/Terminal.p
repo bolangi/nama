@@ -163,15 +163,18 @@ sub next_param {
 }
 {my $override;
 sub revise_prompt {
+	logsub('&revise_prompt');
 	# hack to allow suppressing prompt
-	$override = $_[0] eq "default" ? undef : $_[0] if defined $_[0];
+	$override = ($_[0] eq "default" ? undef : $_[0]) if defined $_[0];
     $text->{term}->callback_handler_install($override//prompt(), \&process_line)
 		if $text->{term}
 }
 }
 
 	
-sub prompt { join ' ', 'nama', git_branch_display(), 
+sub prompt { 
+	logsub('&prompt');
+	join ' ', 'nama', git_branch_display(), 
 						bus_track_display() ," ('h' for help)> "
 }
 sub detect_spacebar {
