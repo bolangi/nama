@@ -786,7 +786,7 @@ sub import_audio  {
 	} else {	
 		my $format = ::signal_format($config->{raw_to_disk_format}, $width);
 		::pager_newline("importing $path as $destination, converting to $format");
-		::teardown_setup();
+		::teardown_engine();
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		my $path = join_path(::project_dir()."convert.ecs");
 		write_file($path, $ecs);
