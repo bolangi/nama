@@ -410,7 +410,7 @@ sub process_remote_command {
     eval {     
         $project->{remote_control_socket}->recv($input, $project->{remote_control_socket}->sockopt(SO_RCVBUF));
     };
-    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), return;
+    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
     logpkg('debug',"Got remote control socketput: $input");
 	process_command($input);
 	my $out;
@@ -420,7 +420,8 @@ sub process_remote_command {
     eval {
         $project->{remote_control_socket}->send($out);
     };
-    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), return;
+    $@ and throw("caught error: $@, resetting..."), reset_remote_control_socket(), revise_prompt(), return;
+	revise_prompt();
 }
 sub reset_remote_control_socket { 
     undef $is_connected_remote;
