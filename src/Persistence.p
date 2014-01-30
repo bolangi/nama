@@ -57,6 +57,7 @@ sub initialize_marshalling_arrays {
 	@marks_data = ();
 	@fade_data = ();
 	@inserts_data = ();
+	@effects_data = ();
 	@edit_data = ();
 	@project_effect_chain_data = ();
 	@global_effect_chain_data = ();
@@ -114,6 +115,15 @@ sub save_system_state {
 
 	logpkg('debug', "copying marks data");
 
+	if ( $fx->{applied} )
+	{
+		@effects_data = 
+			map{ $_->{class} = '::FX'; $_}
+			map{ $_->as_hash }
+			map{fxn($_)}
+			keys %{$fx->{applied}};
+		say "effects data: ", json_out \@effects_data;
+	}
 
 	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
 
