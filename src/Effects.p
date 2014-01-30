@@ -1208,6 +1208,13 @@ sub nameline {
 package ::FX;
 use Modern::Perl;
 our @ISA = '::Effect';
+our %by_id;
+sub new {
+	my ($class, %args) = @_;
+	my $self = bless \%args, $class;
+	$by_id{ $self->id } = $self;
+	$self
+}
 use ::Object qw(  
 [% qx( cat ./effect_fields ) %]
 				);

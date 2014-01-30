@@ -429,6 +429,14 @@ sub convert_rw {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
+	# restore effects
+	
+	map
+	{ my %args = %$_;
+		my $class = delete $args{class};
+		my $fx = $class->new(%args);
+	} @effects_data;
+	
 	map{ 
 		my $n = $_->{n};
 
