@@ -1032,15 +1032,9 @@ use Modern::Perl;
 use ::Globals qw($fx $fx_cache %tn %ti);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
-our @keys = qw( 	id
-					owns
-					bypassed
-					parent
-					type
-					chain
-					params
-					name
-					surname );
+our @keys = qw( 	
+[% qx( cat ./effect_fields ) %]
+);
 
 
 our $AUTOLOAD;
@@ -1209,6 +1203,14 @@ sub nameline {
 	$nameline .= "\n";
 	$nameline
 }
+} # end package
+{ 
+package ::FX;
+use Modern::Perl;
+our @ISA = '::Effect';
+use ::Object qw(  
+[% qx( cat ./effect_fields ) %]
+				);
 } # end package
 1;
 __END__
