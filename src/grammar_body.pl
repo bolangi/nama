@@ -852,7 +852,7 @@ add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		$::this_track->{ops}->[0];
-		print "command is $command\n";
+		#print "command is $command\n";
 	::process_command($command)
 }
 add_effect: _add_effect ('last'   | 'l')  add_target value(s?) { 
@@ -861,7 +861,7 @@ add_effect: _add_effect ('last'   | 'l')  add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		qw(ZZZ);
-		print "command is $command\n";
+		#print "command is $command\n";
 	::process_command($command)
 }
 add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
@@ -870,7 +870,7 @@ add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 		$item{add_target},
 		@{$item{'value(s?)'}},
 		$item{before};
-		print "command is $command\n";
+		#print "command is $command\n";
 	::process_command($command)
 }
 

@@ -224,24 +224,30 @@ sub _insert_effect {  # call only from add_effect
 		$offset++;
 	}
 
-	# remove ops after insertion point 
+	# note ops after insertion point 
+	my @after_ops = @{$track->ops}[$offset..$#{$track->ops}];
 
-	my @after_ops = splice @{$track->ops}, $offset;
+	# temporarily remove the corresponding Ecasound chain operators
 	logpkg('debug',"ops to remove and re-apply: @after_ops");
 	my $connected = ::eval_iam('cs-connected');
 	if ( $connected ){  
 		map{ remove_op($_)} reverse @after_ops; # reverse order for correct index
 	}
 
+	# temporarily remove the effects
+	splice @{$track->ops}, $offset;
+
+	# add the new effect in the proper position
 	my $op = _add_effect($p);
 
 	logpkg('debug',"@{$track->ops}");
 
-	# replace the ops that had been removed
+	# replace the effects that had been removed
 	push @{$track->ops}, @after_ops;
 
 	logpkg('debug',sub{"@{$track->ops}"});
 
+	# replace the corresponding Ecasound chain operators
 	if ($connected ){  
 		map{ apply_op($_, $n) } @after_ops;
 	}
