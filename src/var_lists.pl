@@ -13,6 +13,7 @@
 	@fade_data
 	@edit_data
 	@inserts_data
+	@effects_data
 
 	$project->{save_file_version_number}
 	
