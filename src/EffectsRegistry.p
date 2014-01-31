@@ -131,7 +131,7 @@ sub extract_effects_data {
 	carp ("incorrect number of lines ", join ' ',$upper-$lower,scalar @lines)
 		if $lower + @lines - 1 != $upper;
 	logpkg('debug',"lower: $lower upper: $upper  separator: $separator");
-	#logpkg('debug', "lines: ". join "\n",@lines);
+	logpkg('debug', "lines: ". join "\n",@lines);
 	logpkg('debug', "regex: $regex");
 	my $j = $lower - 1;
 	while(my $line = shift @lines){
