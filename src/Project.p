@@ -79,6 +79,7 @@ sub initialize_project_data {
 							::Bus
 							::Track
 							::Insert
+							::Engine
 							);
 	initialize_effects_data();
 
