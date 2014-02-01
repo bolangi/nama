@@ -554,13 +554,28 @@ sub eval_iam_neteci {
 
 	$cmd =~ s/\s*$//s; # remove trailing white space
 	$this_engine->{socket}->send("$cmd\r\n");
+	my $result = "";
 	my $buf;
-	# get socket reply, restart ecasound on error
-	my $result = $this_engine->{socket}->recv($buf, 65536);
+	# get socket reply
+	# + blocking read for the first reply
+	$this_engine->{socket}->recv( 
+		$buf,
+		$this_engine->{socket}->sockopt(SO_RCVBUF),
+	);
+	# + non-blocking read for subsequent replies
+ 	while (length($buf) > 0) {
+ 		$result .= $buf;
+		undef $buf;
+ 		$this_engine->{socket}->recv( 
+ 			$buf,
+ 			$this_engine->{socket}->sockopt(SO_RCVBUF),
+ 			MSG_DONTWAIT,
+ 		);	
+ 	}
 	defined $result or restart_ecasound(), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
-		$buf =~ /(\d+)# digits
+		$result =~ /(\d+)# digits
 				 \    # space
 				 (\d+)# digits
 				 \    # space
