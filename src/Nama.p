@@ -156,7 +156,7 @@ sub bootstrap_environment {
 	definitions();
 	process_command_line_options();
 	start_logging();
-	setup_grammar();
+	#setup_grammar();
 	setup_hotkey_grammar();
 	initialize_interfaces();
 }
