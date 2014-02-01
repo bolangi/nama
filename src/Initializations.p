@@ -471,14 +471,16 @@ sub sanitize_remote_input {
 }
 sub select_ecasound_interface {
 	::Effects::import_engine_subs();
-	pager_newline('Not initializing engine: options E or A are set.'),
-			return if $config->{opts}->{E} or $config->{opts}->{A};
-
-	# Net-ECI if requested by option, or as fallback 
-	
 	my %args;
-
-	if (
+	if ($config->{opts}->{A} or $config->{opts}->{E})
+	{
+		%args = (
+			name => 'Nama', 
+			jack_transport_mode => 'send',
+		);
+		::Engine->new(%args);
+	}
+	elsif (
 		$config->{opts}->{l} 
 #		and say("'l' option present")
 		and can_load( modules => { 'Audio::Ecasound' => undef })
