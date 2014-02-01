@@ -497,7 +497,7 @@ sub select_ecasound_interface {
 			jack_transport_mode => 'send',
 		);
 	}
-	::Engine->new(%args)
+	::NetEngine->new(%args)
 }
 
 
@@ -540,5 +540,6 @@ sub munge_category {
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
+sub eval_iam { $this_engine and $this_engine->eval_iam(@_) }
 1;
 __END__

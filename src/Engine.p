@@ -29,13 +29,12 @@ initialize();
 
 sub initialize {
 	%by_name = ();	
-	*pager_newline = \&::pager_newline;
 }
 sub new {
 	my $class = shift;	
 	my %vals = @_;
 	croak "undeclared field: @_" if grep{ ! $_is_field{$_} } keys %vals;
-	pager_newline("$vals{name}: returning existing engine"), 
+	::pager_newline("$vals{name}: returning existing engine"), 
 		return $by_name{$vals{name}} if $by_name{$vals{name}};
 	my $self = bless { name => 'default', %vals }, $class;
 	#print "object class: $class, object type: ", ref $self, $/;
@@ -53,6 +52,7 @@ sub initialize_ecasound {
 	];
 }
 sub launch_ecasound_server {}
+sub eval_iam {}
 }
 {
 package ::NetEngine;
@@ -60,13 +60,14 @@ our $VERSION = 1.0;
 use Modern::Perl;
 use ::Log qw(logpkg);
 use ::Globals qw(:all);
+use ::Log qw(logit);
 use Carp qw(carp);
 our @ISA = '::Engine';
 
 sub init_ecasound_socket {
 	my $self = shift;
 	my $port = $self->port;
-	pager_newline("Creating socket on port $port.");
+	::pager_newline("Creating socket on port $port.");
 	$self->{socket} = new IO::Socket::INET (
 		PeerAddr => 'localhost', 
 		PeerPort => $port, 
@@ -87,19 +88,22 @@ sub launch_ecasound_server {
 	my $command = "ecasound -K -C --server --server-tcp-port=$port";
 	my $redirect = ">/dev/null &";
 	my $ps = qx(ps ax);
-	pager_newline("Using existing Ecasound server"), return 
-		if  $ps =~ /ecasound/
-		and $ps =~ /--server/
-		and ($ps =~ /tcp-port=$port/);
-	pager_newline("Starting Ecasound server");
- 	system("$command $redirect") == 0 or carp("system $command failed: $?\n");
+	if ( $ps =~ /ecasound/ and $ps =~ /--server/ and ($ps =~ /tcp-port=$port/) )
+	{ 
+		::pager_newline("Starting Ecasound server") 
+	}
+	else 
+	{ 
+		system("$command $redirect") == 0 or carp("system $command failed: $?\n")
+	}
 	$self->init_ecasound_socket();
 	sleep 1;
 }
 sub eval_iam {
 	my $self = shift;
 	my $cmd = shift;
-	my $category = ::munge_category(shift());
+	#my $category = ::munge_category(shift());
+	my $category = "ECI";
 
 	logit($category, 'debug', "Net-ECI sent: $cmd");
 
@@ -145,10 +149,11 @@ package ::LibEngine;
 our $VERSION = 1.0;
 use Modern::Perl;
 use ::Globals qw(:all);
+use ::Log qw(logit);
 our @ISA = '::Engine';
 sub launch_ecasound_server {
 	my $self = shift;
-	pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
+	::pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
 	$self->{ecasound} = Audio::Ecasound->new();
 }
 sub eval_iam {
