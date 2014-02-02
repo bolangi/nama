@@ -98,8 +98,8 @@ sub launch_ecasound_server {
 		::pager_newline("Starting Ecasound server on port $port");
 		system("$command $redirect") == 0 or carp("system $command failed: $?\n")
 	}
-	$self->init_ecasound_socket();
 	sleep 1;
+	$self->init_ecasound_socket();
 }
 sub eval_iam {
 	my $self = shift;
