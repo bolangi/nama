@@ -265,7 +265,7 @@ sub initialize_interfaces {
 	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	select_ecasound_interface(); # Net-ECI
+	select_ecasound_interface();
 		
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
@@ -496,7 +496,7 @@ sub select_ecasound_interface {
 		$class = '::LibEngine';
 	}
 	else { 
-		pager_newline("Starting Ecasound server for Net-ECI");
+		pager_newline("Starting Net-ECI");
 		%args = (
 			name => 'Nama', 
 			port => $config->{engine_tcp_port},

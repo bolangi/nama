@@ -90,10 +90,12 @@ sub launch_ecasound_server {
 	my $ps = qx(ps ax);
 	if ( $ps =~ /ecasound/ and $ps =~ /--server/ and ($ps =~ /tcp-port=$port/) )
 	{ 
-		::pager_newline("Starting Ecasound server") 
+		::pager_newline("Found existing Ecasound server on port $port") 
 	}
 	else 
 	{ 
+		
+		::pager_newline("Starting Ecasound server on port $port");
 		system("$command $redirect") == 0 or carp("system $command failed: $?\n")
 	}
 	$self->init_ecasound_socket();
