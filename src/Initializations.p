@@ -484,11 +484,9 @@ sub select_ecasound_interface {
 	}
 	elsif (
 		$config->{opts}->{l} 
-		and say("'l' option present")
 		and can_load( modules => { 'Audio::Ecasound' => undef })
 		and say("loaded Audio::Ecasound")
 	){  
-		pager_newline("Starting Ecasound via libecasoundc"); 
 		%args = (
 			name => 'Nama', 
 			jack_transport_mode => 'send',
@@ -496,7 +494,6 @@ sub select_ecasound_interface {
 		$class = '::LibEngine';
 	}
 	else { 
-		pager_newline("Starting Net-ECI");
 		%args = (
 			name => 'Nama', 
 			port => $config->{engine_tcp_port},
