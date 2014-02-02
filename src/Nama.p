@@ -171,7 +171,7 @@ sub cleanup_exit {
 	# - SIGINT (2nd time)
 	# - allow time to close down
 	# - SIGKILL
-	delete $this_engine->{events};
+	delete $project->{events};
 	close_midish() if $config->{use_midish};
 	my @engines = values %::Engine::by_name;
 	for (@engines){

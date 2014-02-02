@@ -71,7 +71,7 @@ sub start_transport {
 		or edit_mode() 
 		or defined $setup->{runtime_limit};
 		# TODO and live processing
- 	#$this_engine->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
+ 	#$project->{events}->{post_start_unmute} = AE::timer(0.5, 0, sub{unmute()});
 	sleeper(0.5);
 	unmute();
 	sleeper(0.5);
@@ -125,14 +125,14 @@ sub current_position {
 	colonize(int($pos || 0)) 
 }
 sub start_heartbeat {
- 	$this_engine->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
+ 	$project->{events}->{poll_engine} = AE::timer(0, 1, \&::heartbeat);
 }
 
 sub stop_heartbeat {
 	# the following test avoids double-tripping rec_cleanup()
 	# following manual stop
-	return unless $this_engine->{events}->{poll_engine};
-	undef $this_engine->{events}->{poll_engine};
+	return unless $project->{events}->{poll_engine};
+	undef $project->{events}->{poll_engine};
 	$ui->reset_engine_mode_color_display();
 	rec_cleanup() 
 }
@@ -183,23 +183,23 @@ sub schedule_wraparound {
 	}
 }
 sub cancel_wraparound {
-	$this_engine->{events}->{wraparound} = undef;
+	$project->{events}->{wraparound} = undef;
 }
 sub limit_processing_time {
 	my $length = shift;
- 	$this_engine->{events}->{processing_time} 
+ 	$project->{events}->{processing_time} 
 		= AE::timer($length, 0, sub { ::stop_transport(); print prompt() });
 }
 sub disable_length_timer {
-	$this_engine->{events}->{processing_time} = undef; 
+	$project->{events}->{processing_time} = undef; 
 	undef $setup->{runtime_limit};
 }
 sub wraparound {
 	package ::;
 	my ($diff, $start) = @_;
 	#print "diff: $diff, start: $start\n";
-	$this_engine->{events}->{wraparound} = undef;
-	$this_engine->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
+	$project->{events}->{wraparound} = undef;
+	$project->{events}->{wraparound} = AE::timer($diff,0, sub{set_position($start)});
 }
 sub ecasound_select_chain {
 	my $n = shift;

@@ -381,11 +381,11 @@ sub start_remote_listener {
     start_remote_watcher();
 }
 sub start_remote_watcher {
-    $this_engine->{events}->{remote_control} = AE::io(
+    $project->{events}->{remote_control} = AE::io(
         $project->{remote_control_socket}, 0, \&process_remote_command )
 }
 sub remove_remote_watcher {
-    undef $this_engine->{events}->{remote_control};
+    undef $project->{events}->{remote_control};
 }
 sub process_remote_command {
     if ( ! $is_connected_remote++ ){
@@ -393,7 +393,7 @@ sub process_remote_command {
         $project->{remote_control_socket} =
             $project->{remote_control_socket}->accept();
 		remove_remote_watcher();
-        $this_engine->{events}->{remote_control} = AE::io(
+        $project->{events}->{remote_control} = AE::io(
             $project->{remote_control_socket}, 0, \&process_remote_command );
     }
     my $input;
@@ -431,7 +431,7 @@ sub start_osc_listener {
 		LocalPort => $port,
 		Proto	  => 'udp',
 		Type	  =>  SOCK_DGRAM) || die $!;
-	$this_engine->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
+	$project->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub process_osc_command {

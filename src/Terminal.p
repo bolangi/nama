@@ -33,7 +33,7 @@ sub initialize_terminal {
 	#$SIG{INT} = \&cleanup_exit; 
 
 	# doesn't do anything either
-	#$this_engine->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+	#$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 
 	$SIG{USR1} = sub { git_snapshot() };
 }
@@ -45,7 +45,7 @@ sub setup_hotkeys {
 	1
 }
 sub setup_termkey {
-	$this_engine->{events}->{termkey} = AnyEvent::TermKey->new(
+	$project->{events}->{termkey} = AnyEvent::TermKey->new(
 		term => \*STDIN,
 
 		on_key => sub {
@@ -113,13 +113,13 @@ sub exit_hotkey_mode {
 	initialize_prompt();
 };
 sub teardown_hotkeys {
-	$this_engine->{events}->{termkey}->termkey->stop(),
-		delete $this_engine->{events}->{termkey} if $this_engine->{events}->{termkey}
+	$project->{events}->{termkey}->termkey->stop(),
+		delete $project->{events}->{termkey} if $project->{events}->{termkey}
 }
 sub destroy_readline {
 	$text->{term}->rl_deprep_terminal() if $text->{term};
 	delete $text->{term}; 
-	delete $this_engine->{events}->{stdin};
+	delete $project->{events}->{stdin};
 }
 sub setup_hotkey_grammar {
 	$text->{hotkey_grammar} = get_data_section('hotkey_grammar');
@@ -182,7 +182,7 @@ sub detect_spacebar {
 	# create a STDIN watcher to intervene when space
 	# received in column one
 	
-	$this_engine->{events}->{stdin} = AE::io(*STDIN, 0, sub {
+	$project->{events}->{stdin} = AE::io(*STDIN, 0, sub {
 		&{$text->{term_attribs}->{'callback_read_char'}}();
 		if ( $config->{press_space_to_start} and 
 			$text->{term_attribs}->{line_buffer} eq " " 

@@ -9,7 +9,7 @@ no warnings 'uninitialized';
 sub poll_jack { 
 		jack_update(); # first time
 		# then repeat
-		$this_engine->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) 
+		$project->{events}->{poll_jack} = AE::timer(0,5,\&jack_update) 
 }
 
 sub jack_update {
