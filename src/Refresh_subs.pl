@@ -4,19 +4,18 @@ sub set_widget_color {
 	my ($widget, $status) = @_;
 	my %rw_foreground = (	REC  => $gui->{_nama_palette}->{RecForeground},
 						 	PLAY => $gui->{_nama_palette}->{MonForeground},
+						 	MON => $gui->{_nama_palette}->{MonForeground},
 						 	OFF => $gui->{_nama_palette}->{OffForeground},
 						);
 
 	my %rw_background =  (	REC  => $gui->{_nama_palette}->{RecBackground},
 							PLAY  => $gui->{_nama_palette}->{MonBackground},
+						 	MON => $gui->{_nama_palette}->{MonBackground},
 							OFF  => $gui->{_nama_palette}->{OffBackground});
 
 	$widget->configure( -background => $rw_background{$status} );
 	$widget->configure( -foreground => $rw_foreground{$status} );
 }
-
-
-	
 sub refresh_group { 
 	# main group, in this case we want to skip null group
 	logsub("&refresh_group");

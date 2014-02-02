@@ -123,8 +123,8 @@ sub new {
 	::add_volume_control($n);
 
 	$::this_track = $object;
+	$::ui->track_gui($object->n) unless $object->hide;
 	$object;
-	
 }
 
 
@@ -1322,7 +1322,6 @@ sub add_track {
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();
-	$ui->track_gui($track->n);
 	logpkg('debug', "Added new track!\n", sub{$track->dump});
 	$track;
 }
