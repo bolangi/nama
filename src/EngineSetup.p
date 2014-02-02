@@ -270,7 +270,7 @@ sub connect_transport {
 	# but it should be based on the number of PLAY tracks
 	
 	my $track_count; map{ $track_count++ } ::ChainSetup::engine_tracks();
-	$this_engine->{jack_seek_delay} = $jack->{jackd_running}
+	$jack->{seek_delay} = $jack->{jackd_running}
 		?  $config->{engine_base_jack_seek_delay} * ( 1 + $track_count / 20 )
 		:  0;
 	connect_jack_ports_list();

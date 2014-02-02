@@ -19,6 +19,7 @@ $config->{_is_system_bus}		# a hash
 $config->{osc_listener_port}
 $config->{remote_control_port}
 
+$jack->{seek_delay}				# extra time for stop-seek-start process
 $jack->{jackd_running}			# jackd status, but this should be a subroutine
 $jack->{fake_ports_list}		# for testing
 $jack->{clients}				# JACK client information
@@ -71,7 +72,6 @@ $this_engine->{socket}			# socket for Ecasound command I/O (Net-ECI)
 $this_engine->{pids}			# Ecasound process PIDs
 $this_engine->{ecasound}		# Audio::Ecasound object (libecasoundc)
 $this_engine->{buffersize}		# engine buffersize
-$this_engine->{jack_seek_delay}		# extra time for stop-seek-start process
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 

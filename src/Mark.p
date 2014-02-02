@@ -271,7 +271,7 @@ sub _set_position {
     my $coderef = sub{ eval_iam("setpos $seconds") };
 
 	$jack->{jackd_running} 
-		?  ::stop_do_start( $coderef, $this_engine->{jack_seek_delay} )
+		?  ::stop_do_start( $coderef, $jack->{seek_delay} )
 		:  $coderef->();
 
 	update_clock_display();
