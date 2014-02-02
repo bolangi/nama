@@ -11,7 +11,6 @@ $config->{fade_time2_fraction}
 $config->{fade_down_fraction}
 $config->{fader_op}				# Ecasound operator selected for fader 
 $config->{category}				# hack to change logging category
-$this_engine->{jack_seek_delay}		# extra time for stop-seek-start process
 $config->{want_logging}			# keys are categories requested for loggin
 $config->{latency_op}			# operator for latency compensation
 $config->{latency_op_init}		# initial values
@@ -68,10 +67,11 @@ $mode->{mastering}				# boolean
 $mode->{midish_terminal}		# unused?
 $mode->{midish_transport_sync}  # not implemented, sync Ecasound start/stop with midish
 $project->{events}				# timers used during engine run
-$this_engine->{socket}				# socket for communicating with Ecasound
-$this_engine->{pids}					# Ecasound process PIDs
-$this_engine->{ecasound}				# Audio::Ecasound object
-$this_engine->{buffersize}			# engine buffersize
+$this_engine->{socket}			# socket for Ecasound command I/O (Net-ECI)
+$this_engine->{pids}			# Ecasound process PIDs
+$this_engine->{ecasound}		# Audio::Ecasound object (libecasoundc)
+$this_engine->{buffersize}		# engine buffersize
+$this_engine->{jack_seek_delay}		# extra time for stop-seek-start process
 
 $fx->{ecasound_effect_hints}	# hints for ecasound effects
 $fx->{offset}					# offset to locate first user-addressable 
