@@ -209,7 +209,7 @@ sub load_project {
 	# $args{nodig} allow skip for convert_project_format
 	dig_ruins() unless (scalar @::Track::all > 2 ) or $args{nodig};
 
-	git_commit("initialize new project");
+	git_commit("initialize new project") if $config->{use_git};
 
 	# possible null if Text mode
 	
