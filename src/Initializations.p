@@ -472,34 +472,39 @@ sub sanitize_remote_input {
 sub select_ecasound_interface {
 	::Effects::import_engine_subs();
 	my %args;
+	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})
 	{
+		pager_newline("Starting dummy engine only"); 
 		%args = (
 			name => 'Nama', 
 			jack_transport_mode => 'send',
 		);
-		::Engine->new(%args);
+		$class = '::Engine';
 	}
 	elsif (
 		$config->{opts}->{l} 
-#		and say("'l' option present")
+		and say("'l' option present")
 		and can_load( modules => { 'Audio::Ecasound' => undef })
-#		and say("loaded Audio::Ecasound")
+		and say("loaded Audio::Ecasound")
 	){  
+		pager_newline("Starting Ecasound via libecasoundc"); 
 		%args = (
 			name => 'Nama', 
 			jack_transport_mode => 'send',
 		);
+		$class = '::LibEngine';
 	}
 	else { 
-		pager_newline("Using Ecasound via Net-ECI"); 
+		pager_newline("Starting Ecasound server for Net-ECI");
 		%args = (
 			name => 'Nama', 
 			port => $config->{engine_tcp_port},
 			jack_transport_mode => 'send',
 		);
+		$class = '::NetEngine';
 	}
-	::NetEngine->new(%args)
+	$class->new(%args);
 }
 
 
