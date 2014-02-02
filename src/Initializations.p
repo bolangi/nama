@@ -265,14 +265,8 @@ sub initialize_interfaces {
 	
 	logpkg('debug',sub{"Config data\n".Dumper $config});
 	
-	select_ecasound_interface(); # Net-ECI
+	select_ecasound_interface();
 		
-	$this_engine = ::Engine->new(
-		name => 'Nama', 
-		port => $config->{engine_tcp_port},
-		jack_transport_mode => 'send',
-	);
-
 	start_osc_listener($config->{osc_listener_port}) 
 		if $config->{osc_listener_port} 
 		and can_load(modules => {'Protocol::OSC' => undef});
@@ -387,11 +381,11 @@ sub start_remote_listener {
     start_remote_watcher();
 }
 sub start_remote_watcher {
-    $this_engine->{events}->{remote_control} = AE::io(
+    $project->{events}->{remote_control} = AE::io(
         $project->{remote_control_socket}, 0, \&process_remote_command )
 }
 sub remove_remote_watcher {
-    undef $this_engine->{events}->{remote_control};
+    undef $project->{events}->{remote_control};
 }
 sub process_remote_command {
     if ( ! $is_connected_remote++ ){
@@ -399,7 +393,7 @@ sub process_remote_command {
         $project->{remote_control_socket} =
             $project->{remote_control_socket}->accept();
 		remove_remote_watcher();
-        $this_engine->{events}->{remote_control} = AE::io(
+        $project->{events}->{remote_control} = AE::io(
             $project->{remote_control_socket}, 0, \&process_remote_command );
     }
     my $input;
@@ -437,7 +431,7 @@ sub start_osc_listener {
 		LocalPort => $port,
 		Proto	  => 'udp',
 		Type	  =>  SOCK_DGRAM) || die $!;
-	$this_engine->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
+	$project->{events}->{osc} = AE::io( $osc_in, 0, \&process_osc_command );
 	$project->{osc} = Protocol::OSC->new;
 }
 sub process_osc_command {
@@ -476,18 +470,42 @@ sub sanitize_remote_input {
 	$input
 }
 sub select_ecasound_interface {
-	pager_newline('Not initializing engine: options E or A are set.'),
-			return if $config->{opts}->{E} or $config->{opts}->{A};
-	no warnings 'redefine';
-	*eval_iam = \&eval_iam_neteci;
 	::Effects::import_engine_subs();
+	my %args;
+	my $class;
+	if ($config->{opts}->{A} or $config->{opts}->{E})
+	{
+		pager_newline("Starting dummy engine only"); 
+		%args = (
+			name => 'Nama', 
+			jack_transport_mode => 'send',
+		);
+		$class = '::Engine';
+	}
+	elsif (
+		$config->{opts}->{l} 
+		and can_load( modules => { 'Audio::Ecasound' => undef })
+		and say("loaded Audio::Ecasound")
+	){  
+		%args = (
+			name => 'Nama', 
+			jack_transport_mode => 'send',
+		);
+		$class = '::LibEngine';
+	}
+	else { 
+		%args = (
+			name => 'Nama', 
+			port => $config->{engine_tcp_port},
+			jack_transport_mode => 'send',
+		);
+		$class = '::NetEngine';
+	}
+	$class->new(%args);
 }
-sub start_ecasound_libecasoundc {
-	pager_newline("Using Ecasound via Audio::Ecasound (libecasoundc)");
-	no warnings qw(redefine);
-	*eval_iam = \&eval_iam_libecasoundc;
-	$this_engine->{ecasound} = Audio::Ecasound->new();
-}
+
+
+
 sub choose_sleep_routine {
 	if ( can_load(modules => {'Time::HiRes'=> undef} ) ) 
 		 { *sleeper = *finesleep;
@@ -501,126 +519,6 @@ sub finesleep {
 sub select_sleep {
    my $seconds = shift;
    select( undef, undef, undef, $seconds );
-}
-
-{
-my $default_port = 2868; # Ecasound's default
-sub launch_ecasound_server {
-
-	# we'll try to communicate with an existing ecasound
-	# process provided:
-	#
-	# started with --server option
-	# --server-tcp-port option matches --or--
-	# nama is using Ecasound's default port 2868
-	
-	my $port = shift // $default_port;
-	my $command = "ecasound -K -C --server --server-tcp-port=$port";
-	my $redirect = ">/dev/null &";
-	my $ps = qx(ps ax);
-	pager_newline("Using existing Ecasound server"), return 
-		if  $ps =~ /ecasound/
-		and $ps =~ /--server/
-		and ($ps =~ /tcp-port=$port/ or $port == $default_port);
-	pager_newline("Starting Ecasound server");
- 	system("$command $redirect") == 0 or carp "system $command failed: $?\n";
-	sleep 1;
-}
-sub init_ecasound_socket {
-	my $port = shift // $default_port;
-	pager_newline("Creating engine socket on port $port.");
-	$this_engine->{socket} = new IO::Socket::INET (
-		PeerAddr => 'localhost', 
-		PeerPort => $port, 
-		Proto => 'tcp', 
-	); 
-	die "Could not create socket: $!\n" unless $this_engine->{socket}; 
-}
-
-sub ecasound_pid {
-	my ($ps) = grep{ /ecasound/ and /server/ } qx(ps ax);
-	my ($pid) = split " ", $ps; 
-	$pid if $this_engine->{socket}; # conditional on using socket i.e. Net-ECI
-}
-
-
-sub eval_iam { } # stub
-
-sub eval_iam_neteci {
-	my $cmd = shift;
-	my $category = munge_category(shift());
-
-	logit($category, 'debug', "Net-ECI sent: $cmd");
-
-	$cmd =~ s/\s*$//s; # remove trailing white space
-	$this_engine->{socket}->send("$cmd\r\n");
-	my $result = "";
-	my $buf;
-	# get socket reply
-	# + blocking read for the first reply
-	$this_engine->{socket}->recv( 
-		$buf,
-		$this_engine->{socket}->sockopt(SO_RCVBUF),
-	);
-	# + non-blocking read for subsequent replies
- 	while (length($buf) > 0) {
- 		$result .= $buf;
-		undef $buf;
- 		$this_engine->{socket}->recv( 
- 			$buf,
- 			$this_engine->{socket}->sockopt(SO_RCVBUF),
- 			MSG_DONTWAIT,
- 		);	
- 	}
-	defined $result or restart_ecasound(), return;
-
-	my ($return_value, $setup_length, $type, $reply) =
-		$result =~ /(\d+)# digits
-				 \    # space
-				 (\d+)# digits
-				 \    # space
- 				 ([^\r\n]+) # a line of text, probably one character 
-				\r\n    # newline
-				(.+)  # rest of string
-				/sx;  # s-flag: . matches newline
-
-if(	! $return_value == 256 ){
-	logit($category,'error',"Net-ECI bad return value: $return_value (expected 256)");
-	restart_ecasound();
-
-}
-	no warnings 'uninitialized';
-	$reply =~ s/\s+$//; 
-
-	if( $type eq 'e')
-	{
-		logit($category,'error',"ECI error! Command: $cmd. Reply: $reply");
-		#restart_ecasound() if $reply =~ /in engine-status/;
-	}
-	else
-	{ 	logit($category,'debug',"Net-ECI  got: $reply");
-		$reply
-	}
-	
-}
-
-sub eval_iam_libecasoundc {
-	#logsub("&eval_iam");
-	my $cmd = shift;
-	my $category = munge_category(shift());
-	
-	logit($category,'debug',"ECI sent: $cmd");
-
-	my (@result) = $this_engine->{ecasound}->eci($cmd);
-	logit($category, 'debug',"ECI  got: @result") 
-		if $result[0] and not $cmd =~ /register/ and not $cmd =~ /int-cmd-list/; 
-	my $errmsg = $this_engine->{ecasound}->errmsg();
-	if( $errmsg ){
-		restart_ecasound() if $errmsg =~ /in engine-status/;
-		$this_engine->{ecasound}->errmsg(''); 
-		# Audio::Ecasound already prints error
-	}
-	"@result";
 }
 sub munge_category {
 	
@@ -640,9 +538,9 @@ sub munge_category {
 	$cat
 }
 
-}
 sub start_logging { 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L})
 }
+sub eval_iam { $this_engine and $this_engine->eval_iam(@_) }
 1;
 __END__

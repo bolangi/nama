@@ -11,7 +11,6 @@ $config
 $jack
 $fx
 $fx_cache
-$this_engine
 $text
 $gui
 $midi

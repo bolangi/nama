@@ -357,7 +357,7 @@ sub flash_ready {
 	logpkg('debug', "flash color: $color");
 	$ui->length_display(-background => $color);
 	$ui->project_label_configure(-background => $color) unless $mode->{preview};
- 	$this_engine->{events}->{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
+ 	$project->{events}->{heartbeat} = AE::timer(5, 0, \&reset_engine_mode_color_display);
 }
 sub reset_engine_mode_color_display { $ui->project_label_configure(
 	-background => $gui->{_nama_palette}->{OffBackground} )

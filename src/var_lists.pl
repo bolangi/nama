@@ -1,29 +1,10 @@
-# Nama variables by category
-# This file is preprocessed to remove comments
-# (which would otherwise appear in qw() quoting)
-
-##  Config file variables
-
-# @config_vars is replaced by config_vars()
-# now taken from keys (first column) of the file
-# src/config_map 
-					
-# user defined and system global effect chains 
-# are saved in a separate file. 
-
 @global_effect_chain_vars  = qw(
 
 	@global_effect_chain_data 
 	$::EffectChain::n 
 	$fx->{alias}
 );
-
-# variables that get saved to State.json and placed under
-# version control
-
 @tracked_vars = qw(
-
-# category: object serialization
 
 	@tracks_data
 	@bus_data
@@ -40,11 +21,6 @@
 	$fx->{params_log}
 
 );
-
-# variables saved to Aux.json, *not* under version control
-# note that this includes project-specific effect
-# chains
-
 @persistent_vars = qw(
 
 	$project->{save_file_version_number}
