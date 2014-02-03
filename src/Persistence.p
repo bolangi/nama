@@ -351,7 +351,7 @@ sub restore_state_from_file {
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
 	if ( $project->{save_file_version_number} lt 1.105){ 
-		map{ $_->{class} = 'Audio::Nama::BoostTrack' } 
+		map{ $_->{class} = '::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
 	if ( $project->{save_file_version_number} lt "1.109"){ 
