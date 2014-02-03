@@ -106,7 +106,7 @@ sub new {
 		my $ops_data = {};
 		# ops data is taken preferentially 
 		# from ops_data argument, with fallback
-		# to existing effects, e.g. $fx->{applied}
+		# to existing effects
 		
 		# in both cases, we clone the data structures
 		# to ensure we don't damage the original
@@ -120,29 +120,14 @@ sub new {
 			}
 			else
 			{
-				$ops_data->{$_} 		  = dclone( $fx->{applied}->{$_} );# copy
-				$ops_data->{$_}->{params} = dclone( $fx->{params }->{$_} );# copy;
-				# our op IDs are ALL CAPS, so will not conflict
-				# with params when accessing via key
-				#
-				# however this would be wrong:
-				#
-				# map{ show_effect($_) }   keys %{$ops_data}
-				#
-				# because keys includes 'params'
-
-				
-				# we don't need these attributes
-				# chain will likely change
-				# when applied
-				delete $ops_data->{$_}->{chain};
-				delete $ops_data->{$_}->{display};
-
-				# the 'display' attribute was only used control 
-				# the GUI layout.
+				my $filtered_op_data = dclone( fxn($_)->as_hash );# copy
+				my @unwanted_keys = qw( chain bypassed name surname display);
+				delete $filtered_op_data->{$_} for @unwanted_keys;
+				$ops_data->{$_} = $filtered_op_data;
 			}
 
 		} @{$vals{ops_list}};
+		
 
 		$vals{ops_data} = $ops_data;
 
