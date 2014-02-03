@@ -262,37 +262,11 @@ sub modify_effect {
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
 	
-	$parameter--; # convert to zero-based
 	my $FX = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
-	#local $this_engine = $FX->track->engine;
-	my $code = $FX->type;
-	my $i = effect_index($code);
-	defined $i or croak "undefined effect code for $op_id: ",::Dumper $FX;
-	my $parameter_count = scalar @{ $FX->about->{params} };
-
-	pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
-		unless ($parameter >= 0 and $parameter < $parameter_count);
-	pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
-		if $FX->is_read_only($parameter);
-		my $new_value = $value; # unless $sign
-		if ($sign) {
-			$new_value = 
- 			eval (join " ",
- 				$FX->params->[$parameter], 
- 				$sign,
- 				$value);
-		};
-	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
-	effect_update_copp_set( 
-		$op_id, 
-		$parameter,
-		$new_value);
-	1
+	$FX->modify_effect($parameter, $sign, $value);
 }
-# we set current effect/parameter here, since
-# modify_multiple_effects()
-# is used only by the grammar, i.e. by direct user command.
+
 
 sub modify_multiple_effects {
 	my ($op_ids, $parameters, $sign, $value) = @_;
@@ -310,95 +284,13 @@ sub remove_effect {
 	my $id = shift;
 	my $FX = fxn($id)
 		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
-	my $n 		= $FX->chain;
-	my $parent 	= $FX->parent;
-	my $owns	= $FX->owns;
-	logpkg('debug', "id: $id", ($parent ? ". parent: ".$parent->id : '' ));
-
-	my $object = $parent ? q(controller) : q(chain operator); 
-	logpkg('debug', qq(ready to remove $object "$id" from track "$n"));
-
-	$ui->remove_effect_gui($id);
-
-	# recursively remove children
-	logpkg('debug',"children found: ". join ",",@$owns) if defined $owns;
-	map{ remove_effect($_) } @$owns if defined $owns;
-;
-
-	# remove chain operator
-	
-	if ( ! $parent ) { remove_op($id) } 
-
-	# remove controller
-	
-	else { 
- 			
- 		remove_op($id);
-
-		# remove parent ownership of deleted controller
-
-		my $parent_owns = $parent->owns;
-		logpkg('debug',"parent $parent owns: ". join ",", @$parent_owns);
-
-		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
-		logpkg('debug',"parent $parent new owns list: ". join ",", @$parent_owns);
-
-	}
-	# remove effect ID from track
-	if( my $track = $ti{$n} ){
-		my @ops_list = @{$track->ops};
-		my $perl_version = $^V;
-		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
-		my @new_list = grep  { $_ ne $id  } @ops_list;
-		if ($minor_version <= 14) 
-		     {    $track->{ops}   = [ @new_list  ] }
-		else { @{ $track->{ops} } =   @new_list    }
-	}
-	# remove entries for chain operator attributes and parameters
- 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
-    delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
-	set_current_op($this_track->ops->[0]);
-	set_current_param(1);
+	$FX->remove
 }
 sub position_effect {
-	my($op, $pos) = @_;
-
-	# we cannot handle controllers
-	
-	pager("$op or $pos: controller not allowed, skipping.\n"), return 
-		if grep{ fxn($_)->is_controller } $op, $pos;
-	
-	# first, modify track data structure
-	
-	my $FX = fxn($op);
-	my $POS = fxn($pos);
-	my $track = $ti{$FX->chain};
-
-	my $op_index = $FX->track_effect_index;
-	my @new_op_list = @{$track->ops};
-	# remove op
-	splice @new_op_list, $op_index, 1;
-	my $new_op_index;
-	if ( $pos eq 'ZZZ'){
-		# put it at the end
-		push @new_op_list, $op;
-	}
-	else { 
-		my $track2 = $ti{$POS->chain};
-		pager("$pos: position belongs to a different track, skipping.\n"), return
-			unless $track eq $track2;
-		$new_op_index = $POS->track_effect_index; 
-		# insert op
-		splice @new_op_list, $new_op_index, 0, $op;
-	}
-	# reconfigure the entire engine (inefficient, but easy to do)
-	#say join " - ",@new_op_list;
-	@{$track->ops} = @new_op_list;
-	::request_setup();
-	$this_track = $track;
-	process_command('show_track');
+	my($id, $pos) = @_;
+	my $FX = fxn($id);
+	$FX->position_effect($pos);
 }
-
 sub full_effect_code {
 	# get text effect code from user input, which could be
 	# - LADSPA Unique ID (number)

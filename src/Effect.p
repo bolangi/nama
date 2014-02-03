@@ -1,8 +1,8 @@
 { 
 package ::Effect;
 use Modern::Perl;
-use ::Globals qw($fx $fx_cache %tn %ti);
-use ::Effects qw(effect_init fxn);
+use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
+use ::Effects qw(effect_init fxn effect_update_copp_set);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
 our @keys = qw( 	
@@ -180,6 +180,131 @@ sub nameline {
 	my $nameline = $self->id. ": ". join q(, ), grep{$_} map{$self->$_} @attr_keys;
 	$nameline .= "\n";
 	$nameline
+}
+sub effect_index { 
+	my $self = shift;
+	::effect_index($self->type)
+}
+sub modify_effect {
+	my ($self, $parameter, $sign, $value) = @_;
+	my $op_id = $self->id;
+
+	$parameter--; # convert to zero-based
+	my $code = $self->type;
+	my $i = $self->effect_index;
+	defined $i or confess "undefined effect code for $op_id: ",::Dumper $self;
+	my $parameter_count = scalar @{ $self->about->{params} };
+	::pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
+		unless ($parameter >= 0 and $parameter < $parameter_count);
+	::pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
+		if $self->is_read_only($parameter);
+		my $new_value = $value; # unless $sign
+		if ($sign) {
+			$new_value = 
+ 			eval (join " ",
+ 				$self->params->[$parameter], 
+ 				$sign,
+ 				$value);
+		};
+	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
+	effect_update_copp_set( 
+		$op_id, 
+		$parameter,
+		$new_value);
+	1
+}
+sub remove_effect { 
+	logsub("&remove_effect");
+	my $id = shift;
+	my $FX = fxn($id)
+		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
+	my $n 		= $FX->chain;
+	my $parent 	= $FX->parent;
+	my $owns	= $FX->owns;
+	logpkg('debug', "id: $id", ($parent ? ". parent: ".$parent->id : '' ));
+
+	my $object = $parent ? q(controller) : q(chain operator); 
+	logpkg('debug', qq(ready to remove $object "$id" from track "$n"));
+
+	$ui->remove_effect_gui($id);
+
+	# recursively remove children
+	logpkg('debug',"children found: ". join ",",@$owns) if defined $owns;
+	map{ remove_effect($_) } @$owns if defined $owns;
+;
+
+	# remove chain operator
+	
+	if ( ! $parent ) { remove_op($id) } 
+
+	# remove controller
+	
+	else { 
+ 			
+ 		remove_op($id);
+
+		# remove parent ownership of deleted controller
+
+		my $parent_owns = $parent->owns;
+		logpkg('debug',"parent $parent owns: ". join ",", @$parent_owns);
+
+		@$parent_owns = (grep {$_ ne $id} @$parent_owns);
+		logpkg('debug',"parent $parent new owns list: ". join ",", @$parent_owns);
+
+	}
+	# remove effect ID from track
+	if( my $track = $ti{$n} ){
+		my @ops_list = @{$track->ops};
+		my $perl_version = $^V;
+		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
+		my @new_list = grep  { $_ ne $id  } @ops_list;
+		if ($minor_version <= 14) 
+		     {    $track->{ops}   = [ @new_list  ] }
+		else { @{ $track->{ops} } =   @new_list    }
+	}
+	# remove entries for chain operator attributes and parameters
+ 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
+    delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
+	set_current_op($this_track->ops->[0]);
+	set_current_param(1);
+}
+sub position_effect {
+	my($self, $pos) = @_;
+
+	my $op = $self->id;
+	# we cannot handle controllers
+	
+	::pager("$op or $pos: controller not allowed, skipping.\n"), return 
+		if grep{ fxn($_)->is_controller } $op, $pos;
+	
+	# first, modify track data structure
+	
+	my $POS = fxn($pos);
+	my $track = $ti{$self->chain};
+
+	my $op_index = $self->track_effect_index;
+	my @new_op_list = @{$track->ops};
+	# remove op
+	splice @new_op_list, $op_index, 1;
+	my $new_op_index;
+	if ( $pos eq 'ZZZ'){
+		# put it at the end
+		push @new_op_list, $op;
+	}
+	else { 
+		my $track2 = $ti{$POS->chain};
+		::pager("$pos: position belongs to a different track, skipping.\n"), return
+			unless $track eq $track2;
+		$new_op_index = $POS->track_effect_index; 
+		# insert op
+		splice @new_op_list, $new_op_index, 0, $op;
+	}
+	# reconfigure the entire engine (inefficient, but easy to do)
+	#say join " - ",@new_op_list;
+	@{$track->ops} = @new_op_list;
+	::request_setup();
+	$this_track = $track;
+	process_command('show_track');
 }
 } # end package
 { 
