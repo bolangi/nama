@@ -7,6 +7,7 @@ use Modern::Perl;
 *ti = \%::Track::by_index;
 *mn = \%::Mark::by_name;
 *en = \%::Engine::by_name;
+*fi = \%::Effect::by_id;
 
 # and the graph
 
