@@ -122,7 +122,7 @@ sub save_system_state {
 			map{ $_->as_hash }
 			map{fxn($_)}
 			keys %{$fx->{applied}};
-		say "effects data: ", json_out \@effects_data;
+		#say "effects data: ", json_out \@effects_data;
 	}
 
 	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
