@@ -82,6 +82,7 @@ sub as_hash {
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
 	my $guts = dclone $self; 
+	$guts->{class} = $class if $self->is_legal_key('class');
 	bless $self, $class; # restore
 	$guts->{class} = $class if $self->is_legal_key('class');
 	return \%guts;
