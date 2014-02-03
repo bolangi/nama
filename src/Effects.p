@@ -47,6 +47,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					effect_init
 					add_effect
 					remove_effect
+					remove_op
 					position_effect
 					remove_fader_effect
 					modify_effect

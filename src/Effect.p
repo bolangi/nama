@@ -2,7 +2,7 @@
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
-use ::Effects qw(effect_init fxn effect_update_copp_set);
+use ::Effects qw(effect_init fxn effect_update_copp_set remove_op);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
 our @keys = qw( 	
@@ -215,12 +215,11 @@ sub modify_effect {
 }
 sub remove_effect { 
 	logsub("&remove_effect");
-	my $id = shift;
-	my $FX = fxn($id)
-		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
-	my $n 		= $FX->chain;
-	my $parent 	= $FX->parent;
-	my $owns	= $FX->owns;
+	my $self = shift;
+	my $id = $self->id;
+	my $n 		= $self->chain;
+	my $parent 	= $self->parent;
+	my $owns	= $self->owns;
 	logpkg('debug', "id: $id", ($parent ? ". parent: ".$parent->id : '' ));
 
 	my $object = $parent ? q(controller) : q(chain operator); 
@@ -232,7 +231,6 @@ sub remove_effect {
 	logpkg('debug',"children found: ". join ",",@$owns) if defined $owns;
 	map{ remove_effect($_) } @$owns if defined $owns;
 ;
-
 	# remove chain operator
 	
 	if ( ! $parent ) { remove_op($id) } 
@@ -255,9 +253,11 @@ sub remove_effect {
 	# remove effect ID from track
 	if( my $track = $ti{$n} ){
 		my @ops_list = @{$track->ops};
+		say "ops_list: @ops_list";
 		my $perl_version = $^V;
 		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
 		my @new_list = grep  { $_ ne $id  } @ops_list;
+		say "new_list: @new_list";
 		if ($minor_version <= 14) 
 		     {    $track->{ops}   = [ @new_list  ] }
 		else { @{ $track->{ops} } =   @new_list    }
