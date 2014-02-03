@@ -132,6 +132,7 @@ use ::EngineRun ();
 use ::EngineCleanup ();
 use ::EffectsRegistry ();
 use ::Effects;
+use ::Effect;
 use ::MuteSoloFade ();
 use ::Jack ();
 
