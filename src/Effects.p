@@ -576,7 +576,6 @@ sub remove_op {
 ## Nama effects 
 
 ## have a unique ID from capital letters
-## are represented by entries in $fx->{applied}, $fx->{params}
 ## IDs are kept in the $track->ops
 
 ## Rules for allocating IDs
@@ -681,21 +680,6 @@ sub effect_init {
 		#fxn($id)->set(parent => $parent_id);
 		$FX->set(parent => $parent_id);
 		logpkg('debug',sub{join " ", "my attributes again:", json_out($fx->{applied})});
-		#logpkg('debug', "parameter: $parameter");
-
-		# set fx-param to the parameter number, which one
-		# above the zero-based array offset that $parameter represents
-		
-		#$fx->{params}->{$id}->[0] = $parameter + 1;  # XXX
-			# only GUI sets $parameter XXXX
-		
- 		# find position of parent in the track ops array 
- 		# and insert child immediately afterwards
- 		#
- 		# to keep controller order constant for RCS
- 		# controllers must be reverse in order 
- 		# they are stored on effect chain when applied
- 		
 		# find position of parent in the track ops array 
  		# and insert child immediately afterwards
 
@@ -734,7 +718,7 @@ sub effect_update {
 	logpkg('debug', "chain $chain id $id param $param value $val");
 
 	# $param is zero-based. 
-	# %{$fx->{params}} is  zero-based.
+	# $FX->params is  zero-based.
 
 	my $old_chain = ::eval_iam('c-selected') if ::valid_engine_setup();
 	ecasound_select_chain($chain);
@@ -768,9 +752,10 @@ sub effect_update_copp_set {
 
 sub sync_effect_parameters {
 	local $config->{category} = 'ECI_FX';
-	# when a controller changes an effect parameter
-	# the effect state can differ from the state in
-	# $fx->{params}, Nama's effect parameter store
+
+	# when a controller changes an effect parameter, the
+	# parameter value can differ from Nama's value for that
+	# parameter.
 	#
 	# this routine syncs them in prep for save_state()
 	
@@ -861,30 +846,6 @@ sub intersect_with_track_ops_list {
 			". skipping." if @outersection;
 	@intersection
 }
-
-
-	
-
-sub ops_data {
-	my @ops_list = expanded_ops_list(@_);
-	my $ops_data = {};
-
-	# keep parameters with other fx data
-	map { 	
-		$ops_data->{$_}            = $fx->{applied}->{$_};
-		$ops_data->{$_}->{params}  = $fx->{params }->{$_};
-	} @ops_list;
-	
-	# we don't need chain (track) number or display type
-	
-	map { 
-		delete $ops_data->{$_}{chain};
-		delete $ops_data->{$_}{display};
-	} @ops_list;
-	$ops_data;
-}
-
-
 
 sub bypass_effects {
 	my($track, @ops) = @_;
@@ -1073,7 +1034,7 @@ sub is_controller { my $self = shift; $self->parent }
 sub has_read_only_param {
 	my $self = shift;
 	no warnings 'uninitialized';
-	my $entry = $fx_cache->{registry}->[$self->registry_index];
+	my $entry = $self->about;
 		for(0..scalar @{$entry->{params}} - 1)
 		{
 			return 1 if $entry->{params}->[$_]->{dir} eq 'output' 
@@ -1083,10 +1044,6 @@ sub has_read_only_param {
 sub registry_index {
 	my $self = shift;
 	$fx_cache->{full_label_to_index}->{ $self->type };
-}
-sub alternative_ecasound_controller_index { 
-	my $self = shift;
-	$self->track_effect_index - $self->root_parent->track_effect_index
 }
 sub ecasound_controller_index {
 	my $self = shift;
@@ -1144,6 +1101,7 @@ sub track_effect_index { # the position of the ID in the track's op array
 			return $pos if $arr->[$pos] eq $id; 
 		};
 }
+# TODO
 sub set	{ 
 	my $self = shift; my %args = @_;
 	while(my ($key, $value) = each %args){ 
