@@ -6,21 +6,7 @@ package ::Track;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
 use List::MoreUtils qw(first_index);
-# Objects belonging to Track and its subclasses
-# have a 'class' field that is set when the 
-# object is created, and used when restoring
-# the object from a serialized state.
-
-# the ->set_track_class() method re-blesses
-# the object to a different subclass when necessary
-# changing the 'class' field as well as the object
-# class affiliation
-#
-# the ->as_hash() method (in Object.p) 
-# used to serialize will
-# sync the class field to the current object 
-# class, hopefully saving a painful error
-
+use Try::Tiny;
 use Modern::Perl;
 use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
@@ -991,10 +977,10 @@ sub with_surname {
 	{ push @found, $FX->id if $FX->surname eq $surname }
 	@found ? "@found" : undef
 }
-{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
-sub is_user_track { ! $system_track{$_[0]->name} }
-sub is_system_track { $system_track{$_[0]->name} } 
-}
+sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
+sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
+sub vol_o { my $self = shift; fxn($self->vol) }
+sub pan_o { my $self = shift; fxn($self->pan) }
 } # end package
 
 # subclasses
