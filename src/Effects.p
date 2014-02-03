@@ -591,6 +591,7 @@ sub new_effect_id {
 		while( $fx->{applied}->{$fx->{id_counter}}){ $fx->{id_counter}++};
 		$fx->{id_counter}
 }
+# TODO
 
 
 sub effect_init {
