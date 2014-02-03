@@ -263,23 +263,23 @@ sub modify_effect {
 		# $parameter: one-based
 	
 	$parameter--; # convert to zero-based
-	my $cop = fxn($op_id)
+	my $FX = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
-	#local $this_engine = $cop->track->engine;
-	my $code = $cop->type;
+	#local $this_engine = $FX->track->engine;
+	my $code = $FX->type;
 	my $i = effect_index($code);
-	defined $i or croak "undefined effect code for $op_id: ",::Dumper $cop;
-	my $parameter_count = scalar @{ $cop->about->{params} };
+	defined $i or croak "undefined effect code for $op_id: ",::Dumper $FX;
+	my $parameter_count = scalar @{ $FX->about->{params} };
 
 	pager("$op_id: parameter (", $parameter + 1, ") out of range, skipping.\n"), return 
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
-		if $cop->is_read_only($parameter);
+		if $FX->is_read_only($parameter);
 		my $new_value = $value; # unless $sign
 		if ($sign) {
 			$new_value = 
  			eval (join " ",
- 				$cop->params->[$parameter], 
+ 				$FX->params->[$parameter], 
  				$sign,
  				$value);
 		};
