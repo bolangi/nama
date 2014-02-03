@@ -2,6 +2,7 @@ package ::Object;
 use Modern::Perl;
 use Carp;
 use ::Assign qw(json_out); 
+use Storable qw(dclone);
 use Data::Dumper::Concise;
 
 no strict; # Enable during dev and testing
@@ -80,11 +81,8 @@ sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	#print json_out $self; return;
-	my %guts = %{ $self };
-	#print join " ", %guts; return;
-	#my @keys = keys %guts;
-	#map{ $output->{$_} or $output->{$_} = '~'   } @keys; 
+	my $guts = dclone $self; 
+	$guts->{class} = $class if $self->is_legal_key('class');
 	bless $self, $class; # restore
 	return \%guts;
 }
