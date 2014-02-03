@@ -77,16 +77,16 @@ sub dump {
 	my $output = Dumper($self);
 	return $output;
 }
+
 sub as_hash {
 	my $self = shift;
 	my $class = ref $self;
 	bless $self, 'HASH'; # easy magic
-	my $guts = dclone $self; 
-	bless $self, $class; # restore
-	$guts->{class} = $class if $self->is_legal_key('class');
+	my %guts = %{ $self };
+	bless $self, $class;
+	$guts{class} = $class if is_legal_key(ref $self, 'class');
 	return \%guts;
 }
-
 1;
 
 __END__
