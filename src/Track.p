@@ -5,6 +5,7 @@ package ::;
 package ::Track;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
+use ::Effects qw(fxn);
 use List::MoreUtils qw(first_index);
 use Try::Tiny;
 use Modern::Perl;
@@ -679,9 +680,9 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $fx->{params}->{$track->vol}[0] != $track->mute_level
-		and $fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $fx->{params}->{$track->vol}[0]);
+	if ( 	$track->vol_o->params->[0] != $track->mute_level
+		and $track->vol_o->params->[0] != $track->fade_out_level){   
+		$track->set(old_vol_level => $track->vol_o->params->[0]);
 		fadeout( $track->vol ) unless $nofade;
 	}
 	$track->set_vol($track->mute_level);
@@ -704,20 +705,16 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$config->{mute_level}->{$track->vol_type}
+	$config->{mute_level}->{$track->vol_o->type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$config->{fade_out_level}->{$track->vol_type}
+	$config->{fade_out_level}->{$track->vol_o->type}
 }
 sub set_vol {
 	my $track = shift;
 	my $val = shift;
 	::effect_update_copp_set($track->vol, 0, $val);
-}
-sub vol_type {
-	my $track = shift;
-	$fx->{applied}->{$track->vol}->{type}
 }
 sub import_audio  { 
 	my $track = shift;
