@@ -80,6 +80,7 @@ sub initialize_project_data {
 							::Track
 							::Insert
 							::Engine
+							::EffectChain
 							);
 	initialize_effects_data();
 
