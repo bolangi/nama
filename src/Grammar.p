@@ -141,6 +141,7 @@ sub process_command {
 		eval_iam("c-select ".$this_track->n);
 		eval_iam("cop-select ".  $FX->ecasound_effect_index);
 	}
+=comment
 	# skip unconverted projects
 	return unless scalar %::Effect::by_id;
 
@@ -148,7 +149,7 @@ sub process_command {
 	# return false on any part of command failure
 	
 	return ! $was_error
-		
+=cut
 }
 sub do_user_command {
 	my($cmd, @args) = @_;
