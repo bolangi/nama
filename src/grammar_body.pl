@@ -501,7 +501,7 @@ show_track: _show_track dd {
 show_mode: _show_mode { ::pager( ::show_status()); 1}
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => ::REC);
+	$bus->set(rw => 'MON');
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
