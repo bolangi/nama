@@ -3,6 +3,7 @@
 package ::Bus;
 use Modern::Perl; use Carp; 
 use ::Log qw(logsub logpkg);
+use ::Globals qw(:trackrw); 
 our @ISA = qw( ::Object );
 
 # share the following variables with subclasses
@@ -38,7 +39,7 @@ sub new {
 	}
 	my $bus = bless { 
 		class => $class, # for serialization, may be overridden
-		rw   	=> 'MON', # for group control
+		rw   	=> MON, # for group control
 		@_ }, $class;
 	$by_name{$bus->name} = $bus;
 }
@@ -68,7 +69,7 @@ sub last {
 
 sub remove { ::throw($_[0]->name, " is system bus. No can remove.") }
 
-{ my %allows = (REC => 'REC/MON', MON => 'MON', OFF => 'OFF');
+{ my %allows = (REC => 'REC/MON', MON => MON, OFF => 'OFF');
 sub allows { $allows{ $_[0]->rw } }
 }
 { my %forces = (
@@ -125,6 +126,7 @@ package ::SubBus;
 use Modern::Perl; use Carp; our @ISA = '::Bus';
 use ::Log qw(logsub logpkg);
 use ::Util qw(input_node);
+use ::Globals qw(:trackrw);
 
 # connect source --> member_track --> mix_track
 
@@ -170,10 +172,10 @@ sub apply {
 		# add paths for recording
 		
 		::Graph::add_path_for_rec($g,$_) 
-			if $_->rec_status eq 'REC'
+			if $_->rec_status eq REC
 				and ! $::mode->preview and ! $::mode->doodle;
 
-	} grep {$_->rec_status ne 'OFF'} grep{ $_->group eq $bus->group} ::Track::all()
+	} grep {$_->rec_status ne OFF} grep{ $_->group eq $bus->group} ::Track::all()
 }
 sub remove {
 	my $bus = shift;
@@ -293,7 +295,7 @@ sub add_sub_bus {
 		) unless $::Bus::by_name{$name};
 
 	@args = ( 
-		rw 			=> 'MON',
+		rw 			=> MON,
 		@args
 	);
 
@@ -332,7 +334,7 @@ sub add_send_bus {
 
 	}
 	map{ ::EarTrack->new(	name => "$name\_$_", # BusName_TrackName
-							rw => 'MON',
+							rw => MON,
 							target => $_,
 							group  => $name,
 							width => 2,

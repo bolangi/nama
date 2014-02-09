@@ -369,18 +369,18 @@ sub restore_state_from_file {
             delete $_->{rec_defeat};
             delete $_->{was_class};
 			delete $_->{is_mix_track};
-			$_->{rw} = 'MON' if $_->{name} eq 'Master';
+			$_->{rw} = MON if $_->{name} eq 'Master';
 		} @tracks_data;
 		map
 		{
-			$_->{rw} = 'MON' if $_->{rw} eq 'REC'
+			$_->{rw} = MON if $_->{rw} eq 'REC'
 		} @bus_data;
 	}
 	#######################################
 sub convert_rw {
 	my $h = shift;
-	$h->{rw} = 'MON', return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
-	$h->{rw} = 'PLAY', return if $h->{rw} eq 'MON';
+	$h->{rw} = MON, return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
+	$h->{rw} = PLAY, return if $h->{rw} eq 'MON';
 }
 	#  destroy and recreate all buses
 

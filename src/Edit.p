@@ -1,6 +1,6 @@
 {
 package ::Edit;
-use ::Globals qw(:singletons);
+use ::Globals qw(:singletons :trackrw);
 
 # each edit is identified by:
 #  -  host track name
@@ -74,7 +74,7 @@ sub new {
 	my $version_mix = ::Track->new(
 
 		name 		=> $self->edit_root_name, # i.e. sax-v5
-	#	rw			=> 'REC',                 # set by ->busify
+	#	rw			=> REC,                 # set by ->busify
 		source_type => 'bus',
 		source_id 	=> 'bus',
 		width		=> 2,                     # default to stereo 
@@ -88,7 +88,7 @@ sub new {
 	# To ensure that users don't get into trouble, we would like to 
 	# restrict this track:
 	#  - version number must *not* be allowed to change
-	#  - rw setting must be fixed to 'PLAY' #
+	#  - rw setting must be fixed to PLAY #
 	#  The easiest way may be to subclass the 'set' routine
 	
 	my $host_track_alias = $::tn{$self->host_alias} // 
@@ -96,7 +96,7 @@ sub new {
 			name 	=> $self->host_alias,
 			version => $host->monitor_version, # static
 			target  => $host->name,
-			rw		=> 'PLAY',                  # do not REC
+			rw		=> PLAY,                  # do not REC
 			group   => $self->edit_root_name,  # i.e. sax-v5
 			hide 	=> 1,
 		);
@@ -108,7 +108,7 @@ sub new {
 	
 	my $edit_track = ::EditTrack->new(
 		name		=> $self->edit_name,
-		rw			=> 'REC',
+		rw			=> REC,
 		source_type => $host->source_type,
 		source_id	=> $host->source_id,
 		group		=> $self->edit_root_name,  # i.e. sax-v5
@@ -317,7 +317,7 @@ sub complete_edit_points {
 }
 }
 sub set_edit_points {
-	$tn{$this_edit->edit_name}->set(rw => 'OFF') if defined $this_edit;
+	$tn{$this_edit->edit_name}->set(rw => OFF) if defined $this_edit;
 	::throw("You must use a playback-only mode to setup edit marks. Aborting"), 
 		return 1 if ::ChainSetup::really_recording();
 	::throw("You need stop the engine first. Aborting"), 
@@ -398,8 +398,8 @@ sub new_edit {
 		return if $name =~ /-v\d+-edit\d+/;
 	::throw("$name: must be in PLAY mode.
 Edits will be applied against current version"), 
-		return unless $this_track->rec_status eq 'PLAY' 
-			or $this_track->rec_status eq 'REC' and
+		return unless $this_track->rec_status eq PLAY 
+			or $this_track->rec_status eq REC and
 			grep{ /$editre/ } keys %::Track::by_name;
 
 	# create edit
@@ -419,19 +419,19 @@ Edits will be applied against current version"),
 {my %edit_actions = 
 	(
 		record_edit => sub { 
-			$this_edit->edit_track->set(rw => 'REC');
+			$this_edit->edit_track->set(rw => REC);
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
 		play_edit => sub {
-			$this_edit->edit_track->set(rw => 'PLAY');
+			$this_edit->edit_track->set(rw => PLAY);
 			$this_edit->store_fades(std_host_fades(), edit_fades());
 		},
 		preview_edit_in => sub {
-			$this_edit->edit_track->set(rw => 'OFF');
+			$this_edit->edit_track->set(rw => OFF);
 			$this_edit->store_fades(std_host_fades());
 		},
 		preview_edit_out => sub {
-			$this_edit->edit_track->set(rw => 'OFF');
+			$this_edit->edit_track->set(rw => OFF);
 			$this_edit->store_fades(reverse_host_fades());
 		},
 	);
@@ -440,7 +440,7 @@ sub edit_action {
 	my $action = shift;
 	defined $this_edit or ::throw("Please select an edit and try again."), return;
 	set_edit_mode();
-	$this_edit->host_alias_track->set(rw => 'PLAY'); # all 
+	$this_edit->host_alias_track->set(rw => PLAY); # all 
 	$edit_actions{$action}->();
 	request_setup();
 
@@ -484,7 +484,7 @@ sub edit_mode		{ $mode->{offset_run} and defined $this_edit}
 sub edit_mode_conditions {        
 	defined $this_edit or ::throw('No edit is defined'), return;
 	defined $this_edit->play_start_time or ::throw('No edit points defined'), return;
-	$this_edit->host_alias_track->rec_status eq 'PLAY'
+	$this_edit->host_alias_track->rec_status eq PLAY
 		or ::throw('host alias track : ',$this_edit->host_alias,
 				" status must be PLAY"), return;
 
@@ -718,7 +718,7 @@ sub explode_track {
 		my $name = "$host-v$i";
 		::Track->new(
 			name 	=> $name, 
-			rw		=> 'MON',
+			rw		=> MON,
 			group	=> $host,
 		);
 
@@ -751,25 +751,25 @@ Set the correct version and try again."), return
 
 	# turn on top-level bus and mix track
 	
-	$edit->host_bus->set(rw => 'REC');
+	$edit->host_bus->set(rw => REC);
 
 	$edit->host->busify;
 
 	# turn off all version level buses/mix_tracks
 	
-	map{ $tn{$_}->set(rw => 'OFF');  # version mix tracks
-	      $bn{$_}->set(rw => 'OFF'); # version buses
+	map{ $tn{$_}->set(rw => OFF);  # version mix tracks
+	      $bn{$_}->set(rw => OFF); # version buses
 	} $this_edit->host_bus->tracks;  # use same name for track/bus
 
 	# turn on what we want
 	
-	$edit->version_bus->set(rw => 'REC');
+	$edit->version_bus->set(rw => REC);
 
 	$edit->version_mix->busify;
 
-	$edit->host_alias_track->set(rw => 'PLAY');
+	$edit->host_alias_track->set(rw => PLAY);
 
-	$edit->edit_track->set(rw => 'PLAY');
+	$edit->edit_track->set(rw => PLAY);
 	
 	$this_track = $edit->host;
 }
@@ -779,9 +779,9 @@ sub disable_edits {
 		unless defined $this_edit;
 	my $edit = $this_edit;
 
-	$edit->host_bus->set( rw => 'OFF');
+	$edit->host_bus->set( rw => OFF);
 
-	$edit->version_bus->set( rw => 'OFF');
+	$edit->version_bus->set( rw => OFF);
 
 	# reset host track
 	
@@ -793,7 +793,7 @@ sub merge_edits {
 	::throw("Please select an edit and try again."), return
 		unless defined $edit;
 	::throw($edit->host_alias, ": track must be PLAY status.  Aborting."), return
-		unless $edit->host_alias_track->rec_status eq 'PLAY';
+		unless $edit->host_alias_track->rec_status eq PLAY;
 	::throw("Use exit_edit_mode and try again."), return if edit_mode();
 
 	# create merge message
@@ -802,7 +802,7 @@ sub merge_edits {
 		map{ my ($edit) = $tn{$_}->name =~ /edit(\d+)$/;
 			 my $ver  = $tn{$_}->monitor_version;
 			 $edit => $ver
-		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq 'PLAY'} 
+		} grep{ $tn{$_}->name =~ /edit\d+$/ and $tn{$_}->rec_status eq PLAY} 
 		$edit->version_bus->tracks; 
 	my $msg = "merges ".$edit->host_track."_$v.wav w/edits ".
 		join " ",map{$_."v$edits{$_}"} sort{$a<=>$b} keys %edits;
@@ -839,7 +839,7 @@ sub merge_edits {
 sub setup_length {
 	my $setup_length;
 	map{  my $l = $_->shifted_length; $setup_length = $l if $l > $setup_length }
-	grep{ $_-> rec_status eq 'PLAY' }
+	grep{ $_-> rec_status eq PLAY }
 	::ChainSetup::engine_tracks();
 	$setup_length
 }

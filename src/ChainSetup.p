@@ -1,7 +1,7 @@
 # ---------- ChainSetup-----------
 
 package ::ChainSetup;
-use ::Globals qw($file $config $jack $setup $this_engine %tn %bn $mode);
+use ::Globals qw($file $config $jack $setup $this_engine %tn %bn $mode :trackrw);
 use ::Log qw(logsub logpkg);
 use Modern::Perl;
 use Data::Dumper::Concise;
@@ -83,7 +83,7 @@ sub is_engine_track {
 	$::ti{$n} if $is_ecasound_chain{$n}
 }
 sub engine_wav_out_tracks {
-	grep{$_->rec_status eq 'REC'} engine_tracks();
+	grep{$_->rec_status eq REC} engine_tracks();
 }
 # return file output entries, including Mixdown 
 sub really_recording { 
@@ -171,7 +171,7 @@ sub add_paths_for_aux_sends {
 	grep { (ref $_) !~ /Slave/ 
 			and $_->group !~ /Mixdown|Master/
 			and $_->send_type 
-			and $_->rec_status ne 'OFF' } ::Track::all();
+			and $_->rec_status ne OFF } ::Track::all();
 }
 
 
@@ -185,13 +185,13 @@ sub add_paths_from_Master {
 	}
 	my $final_leg_origin = $mode->mastering ?  'Boost' : 'Master';
 	$g->add_path($final_leg_origin, output_node($tn{Master}->send_type)) 
-		if $tn{Master}->rw ne 'OFF'
+		if $tn{Master}->rw ne OFF
 
 }
 sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
-	if ($tn{Mixdown}->rec_status eq 'REC'){
+	if ($tn{Mixdown}->rec_status eq REC){
 		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
@@ -202,7 +202,7 @@ sub add_paths_for_mixdown_handling {
 												 
 	# Mixdown handling - playback
 	
-	} elsif ($tn{Mixdown}->rec_status eq 'PLAY'){ 
+	} elsif ($tn{Mixdown}->rec_status eq PLAY){ 
 			my @e = ('wav_in','Mixdown',output_node($tn{Master}->send_type));
 			$g->add_path(@e);
 			$g->set_vertex_attributes('Mixdown', {
@@ -460,7 +460,7 @@ sub setup_requires_realtime {
 	if( $prof eq 'auto'){
 		grep{ ! $_->is_mix_track 
 				  and $_->is_user_track 
-				  and $_->rec_status eq 'REC' 
+				  and $_->rec_status eq REC 
 			} ::Track::all() 
 	} elsif ( $prof eq 'realtime') {
 		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);

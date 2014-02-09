@@ -9,7 +9,7 @@ sub check_level {
 
 	# disable Master so unused tracks are pruned
 	
-	$tn{Master}->set(rw => 'OFF'); 
+	$tn{Master}->set(rw => OFF); 
 
 	# direct target track to null
 	
@@ -34,7 +34,7 @@ sub check_level {
 	# restore previous state
 	
 	remove_effect($ev);
-	$tn{Master}->set(rw => 'MON'); 
+	$tn{Master}->set(rw => MON); 
 	::request_setup();
 }
 
@@ -43,8 +43,8 @@ sub automix {
 	# get working track set
 	
 	my @tracks = grep{
-					$tn{$_}->rec_status eq 'PLAY' or
-					$bn{$_} and $tn{$_}->rec_status eq 'REC'
+					$tn{$_}->rec_status eq PLAY or
+					$bn{$_} and $tn{$_}->rec_status eq REC
 				 } $bn{Main}->tracks;
 
 	pager("tracks: @tracks");
@@ -114,7 +114,7 @@ sub automix {
 
 		throw("Signal appears to be silence. Skipping.");
 		for (@tracks){ process_command("$_  $restore_vol_command") }
-		$tn{Master}->set(rw => 'MON');
+		$tn{Master}->set(rw => MON);
 		return;
 	}
 

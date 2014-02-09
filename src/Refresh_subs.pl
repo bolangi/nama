@@ -22,21 +22,21 @@ sub refresh_group {
 	
 	
 		my $status;
-		if ( 	grep{ $_->rec_status eq 'REC'} 
+		if ( 	grep{ $_->rec_status eq REC} 
 				map{ $tn{$_} }
 				$bn{Main}->tracks ){
 
-			$status = 'REC'
+			$status = REC
 
-		}elsif(	grep{ $_->rec_status eq 'PLAY'} 
+		}elsif(	grep{ $_->rec_status eq PLAY} 
 				map{ $tn{$_} }
 				$bn{Main}->tracks ){
 
-			$status = 'PLAY'
+			$status = PLAY
 
 		}else{ 
 		
-			$status = 'OFF' }
+			$status = OFF }
 
 logit('::Refresh','debug', "group status: $status");
 
@@ -76,17 +76,17 @@ sub refresh_track {
 	
 	set_widget_color( 	$gui->{tracks}->{$n}->{ch_r},
 				
- 							($rec_status eq 'REC'
+ 							($rec_status eq REC
 								and $n > 2 )
- 								? 'REC'
- 								: 'OFF');
+ 								? REC
+ 								: OFF);
 	
 	set_widget_color( $gui->{tracks}->{$n}->{ch_m},
-							$rec_status eq 'OFF' 
-								? 'OFF'
+							$rec_status eq OFF 
+								? OFF
 								: $ti{$n}->send 
-									? 'MON'
-									: 'OFF');
+									? MON
+									: OFF);
 }
 
 sub refresh {  

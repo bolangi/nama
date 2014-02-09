@@ -496,7 +496,7 @@ show_track: _show_track dd {
 show_mode: _show_mode { ::pager( ::show_status()); 1}
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => 'REC');
+	$bus->set(rw => ::REC);
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
@@ -504,10 +504,10 @@ bus_mon: _bus_mon {
 	1; }
 bus_off: _bus_off {
 	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => 'OFF');
+	$bus->set(rw => ::OFF);
 	# turn off mix track
 	if($bus->send_type eq 'track' and my $mix = $::tn{$bus->send_id})
-	{ $mix->set(rw => 'OFF') }
+	{ $mix->set(rw => ::OFF) }
 	::pager( "Setting OFF mode for " , $::this_bus, " bus. Member tracks disabled."); 1  
 }
 bus_version: _bus_version dd { 
@@ -536,7 +536,7 @@ source_id: shellish
 source: _source { 
 	::pager_newline($::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
 	"however track status is ", $::this_track->rec_status)
-		if $::this_track->rec_status ne 'REC';
+		if $::this_track->rec_status ne ::REC;
 	1;
 }
 send: _send ('track'|'t') trackname { 
@@ -1446,7 +1446,7 @@ promote_version_to_track: _promote_version_to_track version {
 		name 	=> $t->name.":$v",
 		version => $v, # fixed
 		target  => $t->name,
-		rw		=> 'PLAY',
+		rw		=> ::PLAY,
 		group   => $t->group,
 	);
 }
@@ -1511,7 +1511,7 @@ rerecord: _rerecord {
 				:  "No tracks in REC list. Skipping."
 		);
 		
-		map{ $_->set(rw => 'REC') } @{$::setup->{_last_rec_tracks}}; 
+		map{ $_->set(rw => ::REC) } @{$::setup->{_last_rec_tracks}}; 
 		::restore_preview_mode();
 		1;
 }

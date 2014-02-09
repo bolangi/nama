@@ -288,7 +288,7 @@ sub connect_jack_ports_list {
 
 	my @source_tracks = 
 		grep{ 	$_->source_type eq 'jack_ports_list' and
-	  	  		$_->rec_status  eq 'REC' 
+	  	  		$_->rec_status  eq REC 
 			} ::ChainSetup::engine_tracks();
 
 	my @send_tracks = 

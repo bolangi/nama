@@ -4,6 +4,7 @@ use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
 use ::Effects qw(fxn modify_effect);
 use ::Object qw( items clip_counter );
+use ::Globals qw(:trackrw);
 our @ISA = '::SubBus';
 our $VERSION = 1.0;
 use SUPER;
@@ -33,7 +34,7 @@ sub clip {
 }
 sub rw { 
 	my $self = shift;
-	$::mode->{offset_run} ? 'OFF' : $self->{rw}
+	$::mode->{offset_run} ? OFF : $self->{rw}
 }
 # perl indexes arrays at zero, for nama users we number items from one
 sub insert_item {
@@ -113,7 +114,7 @@ sub new_clip {
 	my $clip = ::Clip->new(
 		target => $track->basename,
 		name => $self->unique_clip_name($track->name, $track->monitor_version),
-		rw => 'PLAY',
+		rw => PLAY,
 		group => $self->name,
 		version => $track->monitor_version,
 		hide => 1,
@@ -130,7 +131,7 @@ sub new_spacer {
 	my $spacer = ::Spacer->new( 
 		duration => $args{duration},
 		name => $self->unique_spacer_name(),
-		rw => 'OFF',
+		rw => OFF,
 		group => $self->name,
 	);
 	$self->insert_item( $spacer, $position || ( scalar @{ $self->{items} } + 1 ))
@@ -152,7 +153,7 @@ sub new_sequence {
 	my @tracks = defined $args{tracks} ? @{ $args{tracks} } : ();
 	my $group = $args{group} || 'Main';
 	my $mix_track = $tn{$name} || add_track($name, group => $group);
-	$mix_track->set( rw 			=> 'MON');
+	$mix_track->set( rw 			=> MON);
 	my $sequence = ::Sequence->new(
 		name => $name,
 		send_type => 'track',

@@ -108,7 +108,7 @@ my %bus_logic = (
 
 			$track->set_rec() or return;
 
-			$bus->set(rw => 'MON');
+			$bus->set(rw => MON);
 			$tn{$bus->send_id}->busify 
 				if $bus->send_type eq 'track' and $tn{$bus->send_id};
 			
@@ -119,7 +119,7 @@ my %bus_logic = (
 		MON => sub
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
+			$bus->set(rw => MON) if $bus->rw eq 'OFF';
 			$track->set_mon;
 		},
 
@@ -128,7 +128,7 @@ my %bus_logic = (
 		PLAY => sub
 		{ 
 			my ($bus, $track) = @_;
-			$bus->set(rw => 'MON') if $bus->rw eq 'OFF';
+			$bus->set(rw => MON) if $bus->rw eq 'OFF';
 			$track->set_play;
 
 		},

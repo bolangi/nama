@@ -7,7 +7,7 @@ our $VERSION = 0.1;
 our %by_index;
 use ::Log qw(logpkg);
 use ::Log qw(logpkg);
-use ::Globals qw($jack $setup $config);
+use ::Globals qw($jack $setup $config :trackrw);
 use ::Object qw(
 [% qx( ./strip_comments ./insert_fields ) %]
 );
@@ -52,7 +52,7 @@ sub new {
 				name => $self->wet_name,
 				target => $name,
 				group => 'Insert',
-				rw => 'MON',
+				rw => MON,
 	
 				# don't hide wet track if used for hosting effects
 				
@@ -63,7 +63,7 @@ sub new {
 				target => $name,
 				group => 'Insert',
 				hide => 1,
-				rw => 'MON');
+				rw => MON);
 	map{ ::remove_effect($_)} $wet->vol, $wet->pan, $dry->vol, $dry->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet, $dry;
 
@@ -269,6 +269,7 @@ package ::PreFaderInsert;
 use Modern::Perl; use Carp; our @ISA = qw(::Insert);
 use ::Util qw(input_node output_node dest_type);
 use ::Log qw(logpkg);
+use ::Globals qw(:trackrw);
 
 
 # --- source ---------- wet_send_track  wet_return_track -+-- insert_pre -- track
@@ -284,7 +285,7 @@ sub new {
 				target => $self->track,
 				group => 'Insert',
 				hide => 1,
-				rw => 'REC'
+				rw => REC
 	);
 	map{ ::remove_effect($_)} $wet_send->vol, $wet_send->pan;
 	map{ my $track = $_;  map{ delete $track->{$_} } qw(vol pan) } $wet_send;

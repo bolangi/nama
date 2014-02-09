@@ -186,7 +186,7 @@ sub load_project {
 			send_type => 'soundcard',
 			send_id => 1,
 			width => 2,
-			rw => 'MON',
+			rw => MON,
 			source_type => undef,
 			source_id => undef); 
 
@@ -194,7 +194,7 @@ sub load_project {
 			group => 'Mixdown', 
 			name => 'Mixdown', 
 			width => 2,
-			rw => 'OFF',
+			rw => OFF,
 			source_type => undef,
 			source_id => undef); 
 

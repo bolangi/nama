@@ -253,7 +253,7 @@ sub show_versions {
 
 
 sub show_send { "Send: ". $this_track->send_id. $/ 
-					if $this_track->rec_status ne 'OFF'
+					if $this_track->rec_status ne OFF
 						and $this_track->send_id
 }
 
@@ -331,7 +331,7 @@ sub show_modifiers {
 }
 sub show_region {
 	my $t = $::this_track;
-	return unless $t->rec_status eq 'PLAY';
+	return unless $t->rec_status eq PLAY;
 	my @lines;
 	push @lines,join " ",
 		"Length:",time2($t->shifted_length),"\n";
@@ -362,7 +362,7 @@ sub show_status {
 	push @output, "Modes settings:   ", join(", ", @modes), $/ if @modes;
 	my @actions;
 	push @actions, "record" if grep{ ! /Mixdown/ } ::ChainSetup::really_recording();
-	push @actions, "playback" if grep { $_->rec_status eq 'PLAY' } 
+	push @actions, "playback" if grep { $_->rec_status eq PLAY } 
 		map{ $tn{$_} } $bn{Main}->tracks, q(Mixdown);
 
 	# We only check Main bus for playback. 
@@ -371,7 +371,7 @@ sub show_status {
 	# tracks are set to REC (with rec-to-file disabled)
 	
 	
-	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq 'REC';
+	push @actions, "mixdown" if $tn{Mixdown}->rec_status eq REC;
 	push @output, "Pending actions:  ", join(", ", @actions), $/ if @actions;
 	push @output, "Main bus version: ",$bn{Main}->version, $/ if $bn{Main}->version;
 	push @output, "Setup length is:  ", ::heuristic_time($setup->{audio_length}), $/; 
@@ -498,19 +498,19 @@ sub t_create_project {
 }
 sub mixdown {
 	pager_newline("Enabling mixdown to file") if ! $quiet;
-	$tn{Mixdown}->set(rw => 'REC'); 
+	$tn{Mixdown}->set(rw => REC); 
 }
 sub mixplay { 
 	pager_newline("Setting mixdown playback mode.") if ! $quiet;
-	$tn{Mixdown}->set(rw => 'PLAY');
-	$tn{Master}->set(rw => 'OFF'); 
-	$bn{Main}->set(rw => 'OFF');
+	$tn{Mixdown}->set(rw => PLAY);
+	$tn{Master}->set(rw => OFF); 
+	$bn{Main}->set(rw => OFF);
 }
 sub mixoff { 
 	pager_newline("Leaving mixdown mode.") if ! $quiet;
-	$tn{Mixdown}->set(rw => 'OFF');
-	$tn{Master}->set(rw => 'MON'); 
-	$bn{Main}->set(rw => 'MON');
+	$tn{Mixdown}->set(rw => OFF);
+	$tn{Master}->set(rw => MON); 
+	$bn{Main}->set(rw => MON);
 }
 sub remove_fade {
 	my $i = shift;
@@ -527,12 +527,12 @@ sub import_audio {
 
 	# check that track is audible
 
-	$track->set(rw => 'PLAY');
+	$track->set(rw => PLAY);
 
 }
 sub destroy_current_wav {
 	carp($this_track->name.": must be set to PLAY."), return
-		unless $this_track->rec_status eq 'PLAY';
+		unless $this_track->rec_status eq PLAY;
 	$this_track->current_version or
 		throw($this_track->name, 
 			": No current version (track set to OFF?) Skipping."), return;

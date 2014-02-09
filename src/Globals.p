@@ -28,6 +28,7 @@ our @EXPORT_OK = qw(
 
 our %EXPORT_TAGS = 
 (
+	trackrw => [qw(REC PLAY MON OFF)],
 	singletons => [qw( 	
 
 [% qx(./strip_all ./singletons.pl) %]

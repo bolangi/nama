@@ -27,14 +27,14 @@ sub cache_track { # launch subparts if conditions are met
 	
 	# abort if track is a mix track for a sub-bus and the bus is OFF 
 	if( my $bus = $bn{$args->{track}->name}
-		and $args->{track}->rec_status eq 'REC' 
+		and $args->{track}->rec_status eq REC 
 	 ){ 
-		$bus->rw eq 'OFF' and pagers(
+		$bus->rw eq OFF and pagers(
 			$bus->name, ": status is OFF. Aborting."), return;
 
 	# check conditions for normal track
 	} else { 
-		$args->{track}->rec_status eq 'PLAY' or pagers(
+		$args->{track}->rec_status eq PLAY or pagers(
 			$args->{track}->name, ": track caching requires PLAY status. Aborting."), return;
 	}
 	pagers($args->{track}->name, ": no effects to cache!  Skipping."), return 
@@ -105,7 +105,7 @@ sub prepare_to_cache {
 
 	# Case 1: Caching a standard track
 	
-	if($args->{track}->rec_status eq 'PLAY')
+	if($args->{track}->rec_status eq PLAY)
 	{
 		# set the input path
 		$g->add_path('wav_in',$args->{track}->name);
@@ -114,7 +114,7 @@ sub prepare_to_cache {
 
 	# Case 2: Caching a sub-bus mix track
 
-	elsif($args->{track}->rec_status eq 'REC'){
+	elsif($args->{track}->rec_status eq REC){
 
 		# apply all sub-buses (unneeded ones will be pruned)
 		map{ $_->apply($g) } grep{ (ref $_) =~ /Sub/ } ::Bus::all()
@@ -222,7 +222,7 @@ sub post_cache_processing {
 		# only set to PLAY tracks that would otherwise remain
 		# in a REC status
 
-		$args->{track}->set(rw => 'PLAY') if $args->{track}->rec_status eq 'REC';
+		$args->{track}->set(rw => PLAY) if $args->{track}->rec_status eq 'REC';
 
 		$ui->global_version_buttons(); # recreate
 		$ui->refresh();
@@ -259,7 +259,7 @@ sub uncache_track {
 	local $this_track;
 	# skip unless PLAY;
 	throw($track->name, ": cannot uncache unless track is set to PLAY"), return
-		unless $track->rec_status eq 'PLAY';
+		unless $track->rec_status eq PLAY;
 	my $version = $track->monitor_version;
 	my ($ec) = is_cached($track, $version);
 	defined $ec or throw($track->name, ": version $version is not cached"),
@@ -280,7 +280,7 @@ sub uncache_track {
 	# CASE 2: a sub-bus mix track, set to REC for caching operation.
 
 	if( my $bus = $bn{$track->name}){
-			$track->set(rw => 'REC') ;
+			$track->set(rw => REC) ;
 			pagers($track->name, ": setting sub-bus mix track to REC");
 	}
 

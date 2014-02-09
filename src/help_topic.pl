@@ -323,7 +323,7 @@ group => <<GROUP,
                            example: for rec; off
                             (operates on tracks in current bus set to 'rec')
                            example: for OFF; off
-                            (operates on tracks in current bus w/status 'OFF')
+                            (operates on tracks in current bus w/status OFF)
 GROUP
 
 bus => <<BUS,

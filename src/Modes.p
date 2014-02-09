@@ -30,7 +30,7 @@ sub set_doodle_mode {
 	return if engine_running() and ::ChainSetup::really_recording();
 	$mode->{preview} = "doodle";
 
-	$tn{Mixdown}->set(rw => 'OFF');
+	$tn{Mixdown}->set(rw => OFF);
 	
 	# reconfigure_engine will generate setup and start transport
 	
@@ -82,7 +82,7 @@ sub add_mastering_tracks {
 	map{ 
 		my $track = ::MasteringTrack->new(
 			name => $_,
-			rw => 'MON',
+			rw => MON,
 			group => 'Mastering', 
 		);
 		$ui->track_gui( $track->n );
@@ -90,7 +90,7 @@ sub add_mastering_tracks {
  	} grep{ $_ ne 'Boost' } @{$mastering->{track_names}};
 	my $track = ::BoostTrack->new(
 		name => 'Boost', 
-		rw => 'MON',
+		rw => MON,
 		group => 'Mastering', 
 		target => 'Master',
 	);

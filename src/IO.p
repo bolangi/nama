@@ -28,7 +28,7 @@ our $VERSION = 1.0;
 # provide following vars to all packages
 our ($config, $jack, %tn);
 our (%by_name); # index for $by_name{trackname}->{input} = $object
-use ::Globals qw($config $jack %tn $setup);
+use ::Globals qw($config $jack %tn $setup :trackrw);
 use Try::Tiny;
 
 sub initialize { %by_name = () }
@@ -249,7 +249,7 @@ sub _mono_to_stereo{
 			($self->track and $tn{$self->track}->pan)
 			and
 		  (	$status =~ /REC|MON/ and $is_mono_track->() 
-			or $status eq 'PLAY' and $is_mono_wav->() )
+			or $status eq PLAY and $is_mono_wav->() )
 	)
 	{ $copy } else { $nocopy }
 }

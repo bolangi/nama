@@ -133,7 +133,7 @@ sub post_rec_configure {
 
 		# toggle recorded tracks to PLAY for auditioning
 		
-		map{ $_->set(rw => 'PLAY') } @{$setup->{_last_rec_tracks}};
+		map{ $_->set(rw => PLAY) } @{$setup->{_last_rec_tracks}};
 		
 		undef $mode->{offset_run} if ! defined $this_edit;
 		no warnings 'uninitialized';

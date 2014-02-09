@@ -4,6 +4,7 @@ use Carp;
 use Graph;
 use ::Util qw(input_node output_node);
 use ::Log qw(logsub logpkg);
+use ::Globals qw(:trackrw);
 use vars qw(%reserved);
 # this dispatch table also identifies labels reserved
 # for signal sources and sinks.
@@ -34,7 +35,7 @@ sub add_path_for_rec {
 		my $name = $track->name . '_rec_file';
 		my $anon = ::SlaveTrack->new( 
 			target => $track->name,
-			rw => 'OFF',
+			rw => OFF,
 			group => 'Temp',
 			hide => 1,
 			name => $name);
@@ -123,7 +124,7 @@ sub add_path_for_send {
 		my $nameof = $name . '_aux_send';
 		my $anon = ::SlaveTrack->new( 
 			target => $name,
-			rw => 'OFF',
+			rw => OFF,
 			group => 'Temp',
 			hide => 1,
 			name => $nameof);

@@ -5,12 +5,12 @@ use Modern::Perl;
 
 sub mute {
 	return if $config->{opts}->{F};
-	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
+	return if $tn{Master}->rw eq OFF or ::ChainSetup::really_recording();
 	$tn{Master}->mute;
 }
 sub unmute {
 	return if $config->{opts}->{F};
-	return if $tn{Master}->rw eq 'OFF' or ::ChainSetup::really_recording();
+	return if $tn{Master}->rw eq OFF or ::ChainSetup::really_recording();
 	$tn{Master}->unmute;
 }
 sub fade_around {
