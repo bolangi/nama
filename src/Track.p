@@ -510,7 +510,6 @@ sub set_source {
 		::pager($track->name, ": input unchanged, $object");
 	} else {
 		::pager("Track ",$track->name, ": source set to $object");
-		::pager("Track ",$track->name, ": record enabled"), 
 	}
 }
 {
@@ -654,20 +653,6 @@ sub set_off {
 	$track->set_rw(OFF);
 }
 
-=comment
-mix
-self bus      brothers
-REC  PLAY 
-PLAY  OFF
-OFF  OFF
-
-member
-REC  REC      REC->PLAY
-PLAY  OFF->PLAY REC/PLAY->OFF
-OFF  --       --
-
-=cut
-	
 sub set_rw {
 	my ($track, $setting) = @_;
 	#my $already = $track->rw eq $setting ? " already" : "";
