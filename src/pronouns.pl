@@ -16,3 +16,7 @@ $g
 $debug
 $debug2
 $quiet
+REC
+MON
+PLAY
+OFF

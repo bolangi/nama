@@ -13,6 +13,12 @@ use Modern::Perl;
 *g = \$::ChainSetup::g;
 
 use Exporter;
+use constant {
+	REC	=> 'REC',
+	PLAY => 'PLAY',
+	MON => 'MON',
+	OFF => 'OFF',
+};
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
 
