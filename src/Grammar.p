@@ -87,8 +87,6 @@ sub process_line {
 	}
 	revise_prompt( $mode->{midish_terminal} and "Midish > " );
 	my $output = delete $text->{output_buffer};
-	#print @$output if $output;
-	#print prompt();
 }
 sub context {
 	my $context = {};
