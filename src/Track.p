@@ -99,7 +99,6 @@ sub new {
 					class	=> $class,
 					name 	=> "Audio_$n", 
 					group	=> 'Main', 
-		#			rw   	=> REC, # ::add_track() sets REC if necessary
 					n    	=> $n,
 					ops     => [],
 					width => 1,
@@ -1266,7 +1265,6 @@ our @ISA = '::SlaveTrack';
 {
 package ::;
 use Modern::Perl;
-use ::Effects qw(:all);
 
 # usual track
 
@@ -1303,7 +1301,7 @@ sub add_track {
 	# track aliases default to PLAY
 	$track->set(rw => $track->target
 					?  PLAY
-					:  MON) ;
+					:  $config->{new_track_rw} || MON );
 	$gui->{_track_name} = $gui->{_chm} = $gui->{_chr} = undef;
 
 	set_current_bus();

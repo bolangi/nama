@@ -105,6 +105,8 @@ beep_command: beep -f 350 -l 700
 
 hotkey_beep: beep -f 250 -l 200
 
+new_track_rw: REC
+
 alias:
   command:
     mbs: move_to_bus

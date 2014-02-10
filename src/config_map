@@ -79,6 +79,7 @@
 
 	$alias							$config->{alias}
 	$hotkeys						$config->{hotkeys}
+	$new_track_rw					$config->{new_track_rw}
 
 ### the following variables may also be set 
 
