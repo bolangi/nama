@@ -810,6 +810,21 @@ add_effect:
     afx decimator 12 22050  #  prints "Added GO (Decimator)"
     ! We have added the decimator with 12bits and a sample rate of 22050Hz.
     ! GO is the effect ID, which you will need to modify it.
+add_effect_last:
+  type: effect
+  what: same as add-effect last
+  short: afxl
+  parameters: <fx_alias> [ <float:param1> <float:param2>... ]
+add_effect_first:
+  type: effect
+  what: same as add-effect first
+  short: afxf
+  parameters: <fx_alias> [ <float:param1> <float:param2>... ]
+add_effect_before:
+  type: effect
+  what: same as add-effect before
+  short: afxb
+  parameters: <fx_alias> <fx_alias> [ <float:param1> <float:param2>... ]
 modify_effect:
   type: effect
   what: Modify effect parameter(s).

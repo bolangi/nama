@@ -873,6 +873,34 @@ add_effect: _add_effect ('before' | 'b')  before add_target value(s?) {
 		#print "command is $command\n";
 	::process_command($command)
 }
+add_effect_first: _add_effect_first add_target value(s?) {
+	my $command = join " ", 
+		qw(add_effect),
+		"last",
+		$item{add_target},
+		@{$item{'value(s?)'}};
+		#print "command is $command\n";
+	::process_command($command)
+}
+add_effect_last: _add_effect_last add_target value(s?) {
+	my $command = join " ", 
+		qw(add_effect),
+		"last",
+		$item{add_target},
+		@{$item{'value(s?)'}};
+		#print "command is $command\n";
+	::process_command($command)
+}
+add_effect_before: _add_effect_before before add_target value(s?) {
+	my $command = join " ", 
+		qw(add_effect),
+		"before",
+		$item{before},		
+		$item{add_target},
+		@{$item{'value(s?)'}};
+		#print "command is $command\n";
+	::process_command($command)
+}
 
 parent: op_id
 modify_effect: _modify_effect fx_alias(s /,/) parameter(s /,/) value {
