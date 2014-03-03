@@ -215,6 +215,11 @@ add_tracks:
   what: Create one or more new tracks in one go.
   parameters: <string:name1> [ <string:name2>... ]
   example: add_tracks violin viola contra_bass
+add_midi_track:
+  type: track
+  what: Create a new MIDI track.
+  short: amt
+  parameters: <string:name>
 link_track:
   type: track
   what: Create a read-only track, that uses audio files from another track.
