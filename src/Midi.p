@@ -22,7 +22,8 @@ sub start_midish {
 
 	$sel->add($fh_midish_read);
 	$sel->add($fh_midish_error);
-	midish_command( qq(print "Welcome to Nama/Midish!"\n) );
+	midish_command( qq(print "Welcome to Nama/Midish!") );
+	midish_command( qq(print "Midish is ready.") );
 }
 sub start_midish_transport {
 	my $sync = $mode->{midish_transport_sync};
