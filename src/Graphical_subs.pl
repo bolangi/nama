@@ -343,7 +343,7 @@ sub user_mon_tracks { some_user_tracks(PLAY) }
 
 sub some_user_tracks {
 	my $which = shift;
-	my @user_tracks = ::Track::all();
+	my @user_tracks = ::audio_tracks();
 	splice @user_tracks, 0, 2; # drop Master and Mixdown tracks
 	return unless @user_tracks;
 	my @selected_user_tracks = grep { $_->rec_status eq $which } @user_tracks;
@@ -437,7 +437,7 @@ sub global_version_buttons {
 	# the highest version number of all tracks in the
 	# $bn{Main} group
 	
-	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::Track::all();
+	my @user_track_indices = grep { $_ > 2 } map {$_->n} ::audio_tracks();
 	
 		next unless grep{  grep{ $v == $_ } @{ $ti{$_}->versions } }
 			@user_track_indices;
@@ -758,7 +758,7 @@ sub paint_mute_buttons {
 			-background 		=> $gui->{_nama_palette}->{Mute},
 
 			)} grep { $ti{$_}->old_vol_level}# muted tracks
-				map { $_->n } ::Track::all();  # track numbers
+				map { $_->n } ::audio_tracks();  # track numbers
 }
 
 sub create_master_and_mix_tracks { 

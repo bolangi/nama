@@ -60,18 +60,6 @@ sub idx { # return first free track index
 		return $n if not $by_index{$n}
 	}
 }
-sub all { sort{$a->n <=> $b->n } values %by_name }
-
-sub rec_hookable { grep{ $_->group ne 'Temp' and $_->group ne 'Insert' } all() }
-
-{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
-sub user {
-	grep{ ! $system_track{$_} } map{$_->name} all();
-}
-sub is_user_track   { !  $system_track{$_[0]->name} } 
-sub is_system_track {    $system_track{$_[0]->name} } 
-}
-
 sub new {
 	# returns a reference to an object 
 	#
@@ -1003,8 +991,10 @@ sub with_surname {
 	{ push @found, $FX->id if $FX->surname eq $surname }
 	@found ? "@found" : undef
 }
-		
-	
+{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
+sub is_user_track { ! $system_track{$_[0]->name} }
+sub is_system_track { $system_track{$_[0]->name} } 
+}
 } # end package
 
 # subclasses
@@ -1456,6 +1446,19 @@ sub rename_track {
 	::pager($msg);
 	load_project(name => $::project->{name});
 }
+sub user_tracks_present {
+	my $i = 0;
+	$i++ for user_tracks();
+	$i
+}
+sub all_tracks { sort{$a->n <=> $b->n } values %::Track::by_name }
+sub audio_tracks { grep { $_->class !~ /Midi/ } all_tracks() }
+sub midi_tracks { grep { $_->class =~ /Midi/ } all_tracks() }
+sub rec_hookable_tracks { 
+	grep{ $_->group ne 'Temp' and $_->group ne 'Insert' } all_tracks() 
+}
+sub user_tracks { grep { ! $_->is_system_track } all_tracks() }
+sub system_tracks { grep { $_->is_system_track } all_tracks() }
 } # end package
 {
 package ::MidiTrack; 

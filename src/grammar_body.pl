@@ -319,7 +319,7 @@ add_track: _add_track new_track_name {
     1
 }
 add_midi_track: _add_midi_track new_track_name {
-	::MidiTrack->new(name => $item{new_track_name});
+	::MidiTrack->new(name => $item{new_track_name}, group => 'Midi');
 	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
 	1
 }
@@ -456,7 +456,7 @@ show_tracks: _show_tracks {
 	1;
 }
 show_tracks_all: _show_tracks_all { 	
-	my $list = [undef, undef, sort{$a->n <=> $b->n} ::Track::all()];
+	my $list = [undef, undef, sort{$a->n <=> $b->n} ::all_tracks()];
 	::pager(::show_tracks($list));
 	1;
 }
@@ -1361,7 +1361,7 @@ show_comment: _show_comment {
 	1;
 }
 show_comments: _show_comments {
-	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::Track::all();
+	map{ ::pager( "(",$_->group,") ", $_->name, ": ", $_->comment) } ::all_tracks();
 	1;
 }
 add_version_comment: _add_version_comment dd(?) text {

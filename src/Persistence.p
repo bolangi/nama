@@ -35,10 +35,9 @@ sub save_state {
 
 	# do nothing more if only Master and Mixdown
 	
-	if (scalar @::Track::all == 2 ){
-		throw("No user tracks, skipping...");
-		return;
-	}
+
+	user_tracks_present() or throw("No user tracks, skipping..."), return;
+	
 	logpkg('debug',"Saving state as ", $path);
 	save_system_state($path);
 	save_global_effect_chains();
@@ -88,7 +87,7 @@ sub save_system_state {
 
 	logpkg('debug', "copying tracks data");
 
-	map { push @tracks_data, $_->as_hash } ::Track::all();
+	map { push @tracks_data, $_->as_hash } all_tracks();
 
 	# print "found ", scalar @tracks_data, "tracks\n";
 
@@ -450,9 +449,9 @@ sub convert_rw {
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
 	#print "\n---\n", $main->dump;  
-	#print "\n---\n", map{$_->dump} ::Track::all();# exit; 
+	#print "\n---\n", map{$_->dump} ::audio_tracks();# exit; 
 	$did_apply and $ui->manifest;
-	logpkg('debug', sub{ join " ", map{ ref $_, $/ } ::Track::all() });
+	logpkg('debug', sub{ join " ", map{ ref $_, $/ } all_tracks() });
 
 
 	# restore Alsa mixer settings

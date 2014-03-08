@@ -457,7 +457,7 @@ sub fx_defaults {
 sub apply_ops {  # in addition to operators in .ecs file
 	
 	logsub("&apply_ops");
-	for my $n ( map{ $_->n } ::Track::all() ) {
+	for my $n ( map{ $_->n } ::audio_tracks() ) {
 	logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
  		next unless ::ChainSetup::is_ecasound_chain($n);
 
@@ -971,7 +971,7 @@ sub check_fx_consistency {
 
 		$result->{track}->{$name}->{is_error}++ if $is_track_error;
 		$result->{is_error}++ if $is_track_error;
-	} ::Track::all();
+	} ::audio_tracks();
 
 	# check entries in $fx->{applied}
 	

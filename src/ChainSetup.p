@@ -48,7 +48,7 @@ sub remove_temporary_tracks {
 	logsub("&remove_temporary_tracks");
 	map { logpkg('debug',"removing temporary track ",$_->name); $_->remove  } 
 		grep{ $_->group eq 'Temp'} 
-		::Track::all();
+		::audio_tracks();
 }
 sub initialize {
 
@@ -171,7 +171,7 @@ sub add_paths_for_aux_sends {
 	grep { (ref $_) !~ /Slave/ 
 			and $_->group !~ /Mixdown|Master/
 			and $_->send_type 
-			and $_->rec_status ne OFF } ::Track::all();
+			and $_->rec_status ne OFF } ::audio_tracks();
 }
 
 
@@ -461,7 +461,7 @@ sub setup_requires_realtime {
 		grep{ ! $_->is_mix_track 
 				  and $_->is_user_track 
 				  and $_->rec_status eq REC 
-			} ::Track::all() 
+			} ::audio_tracks() 
 	} elsif ( $prof eq 'realtime') {
 		my @fields = qw(soundcard jack_client jack_manual jack_ports_list);
 		grep { has_vertex("$_\_in") } @fields 

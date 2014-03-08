@@ -315,7 +315,7 @@ sub add_latency_compensation_op {
 
 
 sub reset_latency_compensation {
- 	map{ compensate_latency($_, 0) } grep{ $_->latency_op } ::Track::all();
+ 	map{ compensate_latency($_, 0) } grep{ $_->latency_op } ::audio_tracks();
  }
 
 { my %reverse = qw(input output output input);

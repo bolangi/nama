@@ -235,7 +235,7 @@ sub restore_state {
 sub dig_ruins { # only if there are no tracks 
 	
 	logsub("&dig_ruins");
-	return if ::Track::user();
+	return if user_tracks_present();
 	logpkg('debug', "looking for WAV files");
 
 	# look for wave files
@@ -326,13 +326,13 @@ sub create_system_buses {
 sub new_project_template {
 	my ($template_name, $template_description) = @_;
 
-	my @tracks = ::Track::all();
+	my @tracks = all_tracks();
 
 	# skip if project is empty
 
 	throw("No user tracks found, aborting.\n",
 		"Cannot create template from an empty project."), 
-		return if scalar @tracks < 3;
+		return if ! user_tracks_present();
 
 	# save current project status to temp state file 
 	

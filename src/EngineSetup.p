@@ -95,7 +95,7 @@ sub reconfigure_engine {
 	trigger_rec_cleanup_hooks();
 	trigger_rec_setup_hooks();
 	$setup->{_old_rec_status} = { 
-		map{$_->name => $_->rec_status } ::Track::rec_hookable()
+		map{$_->name => $_->rec_status } rec_hookable_tracks()
 	};
 	if ( generate_setup() ){
 	
@@ -164,7 +164,7 @@ sub status_snapshot {
 					 jack_running	=> $jack->{jackd_running},
 					 tracks			=> [], );
 	map { push @{$snapshot{tracks}}, $_->snapshot(\@relevant_track_fields) }
-	grep{ $_->rec_status ne OFF } grep { $_->group ne 'Temp' } ::Track::all();
+	grep{ $_->rec_status ne OFF } grep { $_->group ne 'Temp' } ::all_tracks();
 	\%snapshot;
 }
 sub status_snapshot_string { json_out(status_snapshot()) }
@@ -323,7 +323,7 @@ sub trigger_rec_setup_hooks {
 		and $setup->{_old_rec_status}->{$_->name} ne REC
 		and -e $_->rec_setup_script
 	} 
-	::Track::rec_hookable();
+	rec_hookable_tracks();
 }	
  sub trigger_rec_cleanup_hooks {
  	map { system($_->rec_cleanup_script) } 
@@ -332,7 +332,7 @@ sub trigger_rec_setup_hooks {
 		and $setup->{_old_rec_status}->{$_->name} eq REC
 		and -e $_->rec_cleanup_script
 	}
-	::Track::rec_hookable();
+	rec_hookable_tracks();
 }
 1;
 __END__

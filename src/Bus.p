@@ -52,7 +52,7 @@ sub tracks { # returns list of track names in bus
 }
 sub track_o { 
 	my $bus = shift;
-	grep{ $_->group eq $bus->name } ::Track::all();
+	grep{ $_->group eq $bus->name } ::all_tracks();
 }
 sub last {
 	#logpkg('debug', "group: @_");

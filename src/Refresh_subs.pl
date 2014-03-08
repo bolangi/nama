@@ -92,8 +92,8 @@ sub refresh_track {
 sub refresh {  
 	::remove_riff_header_stubs();
  	#$ui->refresh_group(); 
-	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::Track::all();
-	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::Track::all();
-	map{ $ui->refresh_track($_) } map{$_->n}  ::Track::all();
+	#map{ $ui->refresh_track($_) } map{$_->n} grep{!  $_->hide} ::audio_tracks();
+	#map{ $ui->refresh_track($_) } grep{$remove_track_widget{$_} map{$_->n}  ::audio_tracks();
+	map{ $ui->refresh_track($_) } map{$_->n}  ::audio_tracks();
 }
 ### end

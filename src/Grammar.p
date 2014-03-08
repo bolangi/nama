@@ -435,7 +435,7 @@ sub show_tracks {
 sub showlist {
 	package ::;
 
-	my @list = grep{ ! $_->hide } ::Track::all();
+	my @list = grep{ ! $_->hide } ::all_tracks();
 	my $section = [undef,undef,@list];
 	my ($screen_lines, $columns);
 	if( $text->{term} )
