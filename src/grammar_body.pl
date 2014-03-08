@@ -318,6 +318,11 @@ add_track: _add_track new_track_name {
 	::add_track($item{new_track_name});
     1
 }
+add_midi_track: _add_midi_track new_track_name {
+	::MidiTrack->new(name => $item{new_track_name});
+	::pager_newline(qq(creating MIDI track "$item{new_track_name}"));
+	1
+}
 arg: anytag
 add_tracks: _add_tracks track_name(s) {
 	map{ ::add_track($_)  } @{$item{'track_name(s)'}}; 1}

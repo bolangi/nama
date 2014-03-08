@@ -1457,6 +1457,12 @@ sub rename_track {
 	load_project(name => $::project->{name});
 }
 } # end package
+{
+package ::MidiTrack; 
+use ::Globals qw(:all);
+use ::Log qw(logpkg);
+our @ISA = qw(::Track);
+}
 
 1;
 __END__
