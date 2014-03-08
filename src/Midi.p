@@ -9,7 +9,7 @@ use Carp;
 my($error,$answer)=('','');
 my ($pid, $sel);
 my @handles = my ($fh_midish_write, $fh_midish_read, $fh_midish_error) = map{ IO::Handle->new() } 1..3;
-#map{ $_->autoflush(1) } @handles; # doesn't help
+map{ $_->autoflush(1) } @handles;
 
 sub start_midish {
 	my $executable = qx(which midish);
@@ -18,11 +18,9 @@ sub start_midish {
 	$pid = open3($fh_midish_write, $fh_midish_read, $fh_midish_error,"$executable -v")
 		or warn "Midish failed to start!";
 
-	$sel = new IO::Select();
-
+	$sel = IO::Select->new();
 	$sel->add($fh_midish_read);
 	$sel->add($fh_midish_error);
-	midish_command( qq(print "Welcome to Nama/Midish!") );
 	midish_command( qq(print "Midish is ready.") );
 }
 sub start_midish_transport {
@@ -46,17 +44,19 @@ sub midish_command {
 	#send query to midish
 	print $fh_midish_write "$query\n";
 
-	foreach my $h ($sel->can_read)
+	my $length = 2**16;
+	sleeper(0.05);
+	foreach my $h ($sel->can_read) 
 	{
 		my $buf = '';
 		if ($h eq $fh_midish_error)
 		{
-			sysread($fh_midish_error,$buf,4096);
+			sysread($fh_midish_error,$buf,$length);
 			if($buf){print "MIDISH ERR-> $buf\n"}
 		}
 		else
 		{
-			sysread($fh_midish_read,$buf,4096);
+			sysread($fh_midish_read,$buf,$length);
 			if($buf){map{say} grep{ !/\+ready/ } split "\n", $buf}
 		}
 	}
