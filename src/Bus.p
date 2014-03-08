@@ -48,12 +48,15 @@ sub group { $_[0]->name }
 
 sub tracks { # returns list of track names in bus
 	my $bus = shift;
-	map{ $_->name } grep{ $_->group eq $bus->name } ::Track::all();
+	map{ $_->name } $bus->track_o;
 }
-
+sub track_o { 
+	my $bus = shift;
+	grep{ $_->group eq $bus->name } ::Track::all();
+}
 sub last {
 	#logpkg('debug', "group: @_");
-	my $group = shift;
+	my $bus = shift;
 	my $max = 0;
 	map{ 
 		my $track = $_;
@@ -63,7 +66,7 @@ sub last {
 
 		$max = $last if $last > $max;
 
-	}	map { $::Track::by_name{$_} } $group->tracks;
+	} $bus->track_o;
 	$max;
 }
 
@@ -175,13 +178,13 @@ sub apply {
 			if $_->rec_status eq REC
 				and ! $::mode->preview and ! $::mode->doodle;
 
-	} grep {$_->rec_status ne OFF} grep{ $_->group eq $bus->group} ::Track::all()
+	} grep {$_->rec_status ne OFF} $bus->track_o;
 }
 sub remove {
 	my $bus = shift;
 
 	# all tracks returned to Main group
-	map{$::tn{$_}->set(group => 'Main') } $by_name{$bus->name}->tracks;
+	map{$_->set(group => 'Main') } $bus->track_o;
 
 	my $mix_track = $::tn{$bus->name};
 
@@ -215,13 +218,13 @@ sub apply {
 		$::g->set_edge_attributes( @edge, { 
 			send_id => $bus->send_id,
 			width => 2 }); # force to stereo 
-	} grep{ $_->group eq $bus->group and $_->input_path} ::Track::all()
+	} grep{ $_->input_path } $bus->track_o;
 }
 sub remove {
 	my $bus = shift;
 
-	# delete all (slave) tracks
-	map{$::tn{$_}->remove } $by_name{$bus->name}->tracks;
+	# delete all tracks
+	map{$_->remove } $bus->track_o;
 
 	# remove bus
 	delete $by_name{$bus->name};
@@ -243,7 +246,7 @@ sub apply {
 				send_type => $bus->send_type,
 				send_id => $bus->send_id,
 				width => 2})
-	} grep{ $_->group eq $bus->group} ::Track::all()
+	} $bus->track_o;
 }
 
 }
