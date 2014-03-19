@@ -643,7 +643,7 @@ Now, you want to go back to try something different at "c":
 You could also go back to master, and restart
 from there:
 
-    branch master
+    get master
     ...
     save h
     ...
