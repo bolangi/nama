@@ -49,6 +49,7 @@ lib/Audio/Nama/Object.pm
 lib/Audio/Nama/Options.pm
 lib/Audio/Nama/Persistence.pm
 lib/Audio/Nama/Project.pm
+lib/Audio/Nama/Sequence.pm
 lib/Audio/Nama/Regions.pm
 lib/Audio/Nama/Terminal.pm
 lib/Audio/Nama/Text.pm
