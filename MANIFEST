@@ -25,8 +25,10 @@ lib/Audio/Nama/Effects.pm
 lib/Audio/Nama/EffectsRegistry.pm
 lib/Audio/Nama/EngineCleanup.pm
 lib/Audio/Nama/EngineRun.pm
+lib/Audio/Nama/Engine.pm
 lib/Audio/Nama/EngineSetup.pm
 lib/Audio/Nama/Fade.pm
+lib/Audio/Nama/Git.pm
 lib/Audio/Nama/Globals.pm
 lib/Audio/Nama/Grammar.pm
 lib/Audio/Nama/Graph.pm
@@ -70,3 +72,4 @@ t/06_latency.t
 t/11_mark.t
 t/12_nama.t
 t/13_io.t
+t/data/fake_effects_cache.json
