@@ -43,6 +43,7 @@ use inc::Module::Install;
 			Modern::Perl  0
 			Module::Load::Conditional  0 
 			Parse::RecDescent  0
+			SUPER 0
 			Term::ReadLine::Gnu  0
 			Text::Diff  0
 			Text::Format  0
