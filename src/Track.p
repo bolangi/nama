@@ -978,6 +978,11 @@ sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
 sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
 sub vol_o { my $self = shift; fxn($self->vol) }
 sub pan_o { my $self = shift; fxn($self->pan) }
+{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
+Mid High Boost );
+sub is_user_track { ! $system_track{$_[0]->name} }
+sub is_system_track { $system_track{$_[0]->name} } 
+}
 } # end package
 
 # subclasses
