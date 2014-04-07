@@ -93,8 +93,8 @@ sub new {
 	$track_names{$vals{name}}++;
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_pan_control($n);
-	::add_volume_control($n);
+	#::add_pan_control($n);
+	#::add_volume_control($n);
 
 	$::this_track = $object;
 	$::ui->track_gui($object->n) unless $object->hide;
@@ -680,7 +680,8 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( 	$track->vol_o->params->[0] != $track->mute_level
+	if (defined $track->vol_o 	
+		and $track->vol_o->params->[0] != $track->mute_level
 		and $track->vol_o->params->[0] != $track->fade_out_level){   
 		$track->set(old_vol_level => $track->vol_o->params->[0]);
 		fadeout( $track->vol ) unless $nofade;
@@ -705,6 +706,7 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
+	return unless defined $track->vol_o;
 	$config->{mute_level}->{$track->vol_o->type}
 }
 sub fade_out_level {
