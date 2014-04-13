@@ -42,6 +42,7 @@ sub setup_grammar {
 
 }
 sub process_line {
+	state $total_effects_count;
 	logsub("&process_line");
 	no warnings 'uninitialized';
 	my ($user_input) = @_;
@@ -85,6 +86,19 @@ sub process_line {
 			(ref $this_track and ! $tn{$this_track->name});
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
+	if (! engine_running() ){
+		my $result = check_fx_consistency();
+		logpkg('logcluck',"Inconsistency found in effects data",
+			Dumper ($result)) if $result->{is_error};
+
+		my $current_count= 0;
+		map{ $current_count++ } keys %{$fx->{applied}};
+		if ($current_count < $total_effects_count){
+			pager("Total effects count: $current_count, change: ",
+				$current_count - $total_effects_count);
+			$total_effects_count = $current_count;
+		}
+	}
 	revise_prompt( $mode->{midish_terminal} and "Midish > " );
 	my $output = delete $text->{output_buffer};
 }
@@ -96,7 +110,6 @@ sub context {
 	$context
 }
 sub process_command {
-	state $total_effects_count;
 	my $input = shift;
 	my $input_was = $input;
 
@@ -129,17 +142,6 @@ sub process_command {
 		eval_iam("cop-select ".  $FX->ecasound_effect_index);
 	}
 
-	my $result = check_fx_consistency();
-	logpkg('logcluck',"Inconsistency found in effects data",
-		Dumper ($result)) if $result->{is_error};
-
-	my $current_count= 0;
-	map{ $current_count++ } keys %{$fx->{applied}};
-	if ($current_count < $total_effects_count){
-		pager("Total effects count: $current_count, change: ",
-			$current_count - $total_effects_count);
-		$total_effects_count = $current_count;
-	}
 	# return true on complete success
 	# return false on any part of command failure
 	
