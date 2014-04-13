@@ -23,8 +23,9 @@ sub apply_test_harness {
 
 				q(-T), # don't initialize terminal
                        # load fake effects cache
+#                q(-c), 'test-project',
 
-				q(-S), # don't load static effects data
+				q(-S); # don't load static effects data
 
 				#qw(-L SUB), # logging
 
