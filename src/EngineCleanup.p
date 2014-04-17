@@ -11,9 +11,9 @@ sub rec_cleanup {
 	{
 		if( my @rec_tracks = ::ChainSetup::engine_wav_out_tracks() )
 		{
-			pager("wav_out_tracks found");
 			$setup->{_last_rec_tracks} = \@rec_tracks;
-			pager(::Dumper \@rec_tracks);
+			pager(join " ", "Files recorded for these tracks:",
+				map{ $_->name } @rec_tracks);
 		}
 
 		if( grep /Mixdown/, @files) { mixdown_postprocessing() }
