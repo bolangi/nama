@@ -265,15 +265,15 @@ sub show_effects {
 }
 sub list_effects {
 	::sync_effect_parameters();
-	join " ", "Effects on", $this_track->name.':', map{ list_effect($_) } @{ $this_track->ops };
+	join "", "Effects on ", $this_track->name,":\n", map{ list_effect($_) } @{ $this_track->ops };
 }
 
 sub list_effect {
 	my $op_id = shift;
 	my $FX = fxn($op_id);
-	my $name = $FX->name;
-	$name .= q(, bypassed) if $FX->bypassed;
-	($op_id eq $this_track->op ? '*' : '') . "$op_id ($name)";
+	my $line = $FX->nameline;
+	$line .= q(, bypassed) if $FX->bypassed;
+	($op_id eq $this_track->op ? ' *' : '  ') . $line;
 }
 
 sub show_effect {

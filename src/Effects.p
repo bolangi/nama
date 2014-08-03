@@ -1204,7 +1204,7 @@ sub ladspa_id {
 }
 sub nameline {
 	my $self = shift;
-	my @attr_keys = qw( name surname fxname type ladspa_id bypassed trackname);
+	my @attr_keys = qw( name surname fxname type ladspa_id bypassed);
 	my $nameline = $self->id. ": ". join q(, ), grep{$_} map{$self->$_} @attr_keys;
 	$nameline .= "\n";
 	$nameline
