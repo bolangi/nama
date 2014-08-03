@@ -192,8 +192,6 @@ sub add_paths_for_mixdown_handling {
 	logsub("&add_paths_for_mixdown_handling");
 
 	if ($tn{Mixdown}->rec_status eq REC){
-		# don't monitor via soundcard
-		$g->delete_edge('Master','soundcard_out');
 		my @p = (($mode->mastering ? 'Boost' : 'Master'), ,'Mixdown', 'wav_out');
 		$g->add_path(@p);
 		$g->set_vertex_attributes('Mixdown', {
