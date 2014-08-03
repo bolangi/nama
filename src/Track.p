@@ -1013,7 +1013,8 @@ sub rec_status {
 }
 sub destination {
 	my $track = shift; 
-	$track->SUPER() if $track->rec_status ne OFF
+	return 'Mixdown' if $tn{Mixdown}->rec_status eq 'REC';
+	return $track->SUPER() if $track->rec_status ne OFF
 }
 #sub rec_status_display { $_[0]->rw ne OFF ? 'PLAY' : 'OFF' }
 sub busify {}
