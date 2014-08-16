@@ -762,7 +762,7 @@ sub import_audio  {
 		my $ecs = qq(-f:$format -i:resample-hq,$frequency,"$path" -o:$destination);
 		my $path = join_path(::project_dir()."convert.ecs");
 		write_file($path, $ecs);
-		load_ecs($path) or ::throw("$path: load failed, aborting"), return;
+		::load_ecs($path) or ::throw("$path: load failed, aborting"), return;
 		eval_iam('start');
 		::sleeper(0.2); sleep 1 while ::engine_running();
 	} 
