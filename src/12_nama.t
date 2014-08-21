@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 121;
+use Test::More tests => 117;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -380,6 +380,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 check_setup('JACK send-Master-to-alternate-channel setup' );
 
+=comment
 process_command('Mixdown; rec; gen');
 $expected_setup_lines = <<EXPECTED;
 
@@ -483,6 +484,7 @@ $expected_setup_lines = <<EXPECTED;
 EXPECTED
 gen_jack();
 check_setup('Mixdown in mastering mode - JACK');
+=cut
 
 process_command('mixoff; master_off');
 process_command('for 4 5 6 7 8; remove_track quiet');
