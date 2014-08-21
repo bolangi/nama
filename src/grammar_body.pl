@@ -539,9 +539,10 @@ trackname: existing_track_name
 source: _source source_id { $::this_track->set_source($item{source_id}); 1 }
 source_id: shellish
 source: _source { 
+	my $status = $::this_track->rec_status;
 	::pager_newline($::this_track->name, ": input set to ", $::this_track->input_object_text, "\n",
-	"however track status is ", $::this_track->rec_status)
-		if $::this_track->rec_status ne ::REC;
+	"however track status is ", $status)
+		if $status ne ::REC and $status ne ::MON;
 	1;
 }
 send: _send ('track'|'t') trackname { 
