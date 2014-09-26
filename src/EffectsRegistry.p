@@ -266,7 +266,7 @@ sub read_in_effects_data {
 		^(\d+) # number
 		\.    # dot
 		\s+   # spaces+
-		(.+?) # name
+		 (\w+) # name
 		,\s*  # comma spaces* 
 		-(pn:\w+)    # preset_id 
 		:?     # maybe colon (if parameters)
