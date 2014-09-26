@@ -212,15 +212,15 @@ sub read_in_effects_data {
 						\x20		# a space
 						//gx;      # delete, multiple times, expanded regex
 
+	# join pairs of lines
+	$lv2 =~ s/\n\s*(-elv2)/ $1/g;
+
 	# now we can handle similar to LADSPA	
 	
 	# split on newlines
 	my @lv2 = split /\n/,$lv2;
 
-	logpkg('trace',sub{ json_out(\@lv2) });
-
-	# join pairs of lines
-	@lv2 = map { join " ", splice(@lv2,0,2) } 1..@lv2/2;
+#	logpkg('debug',sub{ json_out(\@lv2) });
 
 	logpkg('trace',sub{ json_out(\@lv2) });
 
