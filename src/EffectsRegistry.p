@@ -192,6 +192,7 @@ sub read_in_effects_data {
 	#### LADSPA
 
 	my $lr = eval_iam("ladspa-register");
+	logpkg('debug',"ladpsa-register output:\n",$lr);
 
 	#print $lr; 
 	
@@ -199,12 +200,14 @@ sub read_in_effects_data {
 	
 	# join the two lines of each entry
 	my @lad = map { join " ", splice(@ladspa,0,2) } 1..@ladspa/2; 
+	#logpkg('debug',join "\n","ladpsa-register processed output:",@lad);
 
 
 	#### LV2
 
 	my $lv2 = eval_iam('lv2-register'); # TODO test fake lv2-register
 										# get_data_section('fake_lv2_register');
+	logpkg('debug',"lv2-register output:\n",$lv2);
 
 	# join wrapped lines
 	$lv2 =~ s/\n  			# newline
@@ -224,9 +227,17 @@ sub read_in_effects_data {
 
 	logpkg('trace',sub{ json_out(\@lv2) });
 
-	my @preset = grep {! /^\w*$/ } split "\n", eval_iam("preset-register");
-	my @ctrl  = grep {! /^\w*$/ } split "\n", eval_iam("ctrl-register");
-	my @cop = grep {! /^\w*$/ } split "\n", eval_iam("cop-register");
+	my $preset = eval_iam("preset-register");
+	my @preset = grep {! /^\s*$/ } split "\n", $preset;
+	logpkg('debug',"preset-register output:\n",$preset);
+
+	my $ctrl = 	eval_iam("ctrl-register");
+	my @ctrl  = grep {! /^\s*$/ } split "\n", $ctrl;
+	logpkg('debug',"ctrl-register output:\n",$ctrl);
+
+	my $cop = eval_iam("cop-register");
+	my @cop = grep {! /^\s*$/ } split "\n", $cop;
+	logpkg('debug',"cop-register output:\n",$cop);
 
 	logpkg('debug', "found ", scalar @cop, " Ecasound chain operators");
 	logpkg('debug', "found ", scalar @preset, " Ecasound presets");
