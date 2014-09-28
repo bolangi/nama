@@ -148,6 +148,7 @@ sub definitions {
 		engine_fade_length_on_start_stop => 0.18,# when starting/stopping transport
 		engine_fade_default_length 		=> 0.5, # for fade-in, fade-out
 		engine_base_jack_seek_delay 	=> 0.1, # seconds
+		engine_command_output_buffer_size => 2**22, # 4 MB
 		edit_playback_end_margin 		=> 3,
 		edit_crossfade_time 			=> 0.03,
 		fade_down_fraction 				=> 0.75,

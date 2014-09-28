@@ -113,7 +113,7 @@ sub eval_iam {
 	$this_engine->{socket}->send("$cmd\r\n");
 	my $buf;
 	# get socket reply, restart ecasound on error
-	my $result = $this_engine->{socket}->recv($buf, 2**22); # 4 MB
+	my $result = $this_engine->{socket}->recv($buf, $config->{engine_command_output_buffer_size});
 	defined $result or restart_ecasound(), return;
 
 	my ($return_value, $setup_length, $type, $reply) =
