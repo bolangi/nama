@@ -312,10 +312,6 @@ package ::FX;
 use Modern::Perl;
 use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
 use ::Effects qw(effect_init fxn effect_update_copp_set remove_op);
-sub effect_init {}
-sub fxn {}
-sub effect_update_copp_set {}
-sub remove_op {}
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
 use ::Object qw(  
