@@ -343,11 +343,12 @@ sub new {
 }
 
 sub bypassed 	{ my $self = shift; 
-				  $fx->{applied}->{$self->{id}}->{bypassed} ? 'bypassed' : undef}
-sub parent 		{ my $self = shift; 
-					my $parent_id = $fx->{applied}->{$self->{id}}->{parent};
-					::fxn($parent_id)}
-sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
+				  $self->{bypassed} ? 'bypassed' : undef}
+sub parent 		{ my $self = shift; ::fxn($self->parent)}
+
+# fx method delivers hash, previously via $fx->{applied}->{$id}
+sub fx	 		{ my $self = shift; $self }	
+
 sub is_read_only {
     my ($self, $param) = @_;
 	no warnings 'uninitialized';
