@@ -265,7 +265,7 @@ sub restore_state_from_file {
 		
 
 		# perform assignments for singleton
-		# hash entries (such as $fx->{applied});
+		# hash entries (such as $fx->{ applied});
 		# that that assign() misses
 		
 		assign_singletons({ data => $ref });
@@ -338,7 +338,6 @@ sub restore_state_from_file {
 
 	# convert effect object format
 	
-	
 	if ( $fx->{applied} ) # save version < 1.201
 	{
 		@effects_data = 
@@ -354,11 +353,6 @@ sub restore_state_from_file {
 	}
 
 	#######################################
-sub convert_rw {
-	my $h = shift;
-	$h->{rw} = MON, return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
-	$h->{rw} = PLAY, return if $h->{rw} eq 'MON';
-}
 	#  destroy and recreate all buses
 
 	::Bus::initialize();	
@@ -487,6 +481,11 @@ sub convert_rw {
  	map { my $fx_chain = ::EffectChain->new(%$_) } 
 		(@project_effect_chain_data, @global_effect_chain_data)
 } 
+sub convert_rw {
+	my $h = shift;
+	$h->{rw} = MON, return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
+	$h->{rw} = PLAY, return if $h->{rw} eq 'MON';
+}
 sub is_nonempty_hash {
 	my $ref = shift;
 	return if (ref $ref) !~ /HASH/;
