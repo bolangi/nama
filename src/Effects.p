@@ -81,10 +81,8 @@ our @EXPORT = ();
 
 sub effect_entry_is_bad {
 		my $id = shift;
-		! $id  									# undef key ''
-		or ! $fx->{params}->{$id}				# missing params entry 
-		or ! ref $fx->{applied}->{$id} 			# applied entry is not ref 
-		or keys %{$fx->{applied}->{$id}} < 3	# not enough key/val pairs
+		! defined $id
+		or ! $::Effect::by_id{$id}
 }
 
 # make sure the chain number (track index) is set
@@ -477,12 +475,11 @@ sub remove_op {
 sub new_effect_id { 
 
 		# increment $fx->{id_counter} if necessary
-		# to find an unused effect_id to allocate
+		# to find an unused effect_id 
 		
-		while( $fx->{applied}->{$fx->{id_counter}}){ $fx->{id_counter}++};
+		while( ::FX::by_id($fx->{id_counter})){ $fx->{id_counter}++};
 		$fx->{id_counter}
 }
-# TODO
 
 
 sub effect_init {
