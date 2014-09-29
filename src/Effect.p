@@ -26,39 +26,39 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 sub new {
-	logsub("&effect_init");
-	my $p = shift;
-	logpkg('debug',sub{json_out($p)});
+	my ($class, %args) = @_;
+	my ($n,  $type, $id, $parent_id, $surname, $values)  = 
+	@args{qw(chain type effect_id parent_id surname values)};
 
-	my ($n,  $type, $id, $parent_id, $surname)  = 
-	@$p{qw(chain type effect_id parent_id surname)};
+	delete $args{effect_id};
+	delete $args{values};
 
-	# return existing op_id if effect already exists
-	# unless effect chain asks us to get a new id
-	#
-	logpkg('debug',"$id: returning existing id") if $id and fxn($id);
-	return $id if $id and fxn($id);
+	# we will introduce the ID later, if needed as the 'id' field
 
-	my 	$allocated = "recycled";
-	if ( ! $id ){ 
+	my $self;
 
-		$id = $p->{effect_id} = new_effect_id();
-		$allocated = "issued";
+	# return existing object if effect already exists
+	if ($self = fxn($id)){
+		logpkg('debug',"$id: returning existing object"); 
+		return $self
 	}
 
-	logpkg('debug',"$id: effect id $allocated");
+	# allocate effect ID
+	my	$how_allocated = "recycled";
+	if ( ! $id ){ 
+		$id = $args{id} = new_effect_id();
+		$how_allocated = "issued";
+	}
+	logpkg('debug',"$id: effect id $how_allocated");
 
 	my $i = effect_index($type);
 
-	logpkg('debug',"Issuing a effect_id for track $n: $id");
+	logpkg('debug',"$id: Issuing effect id for track $n");
 	
-	my $entry =
-	{
-		chain 	=> $n, 
-		type 	=> $type,
-		display => $fx_cache->{registry}->[$i]->{display},
-		owns 	=> [],
-	}; 
+	$args{id}		= $id;
+	$args{display} 	= $fx_cache->{registry}->[$i]->{display};
+	$args{owns}		= [];
+
 	if ($surname)
 	{
 		my $track = $ti{$n};
@@ -69,14 +69,19 @@ sub new {
 				"track ".
 				$track->name.qq(: other effects with surname "$surname" found,),
 				qq(using "$new_surname". Others are: $existing.));
-			$entry->{surname} = $new_surname;
+			$args{surname} = $new_surname;
 		}
-		else{ $entry->{surname} = $surname }
+		else{ $args{surname} = $surname }
 	}	
 
-	# set defaults for effects only (not controllers)
+	# set values
 	
-	if (! $parent_id and ! $p->{values}){
+	$args{params} = $values; # maybe undefined
+
+	# set defaults for effects without values provided
+	# but skip controllers
+	
+	if (! $parent_id and ! $values){
 		my @vals;
 		logpkg('debug', "no settings found, loading defaults if present");
 		
@@ -88,12 +93,11 @@ sub new {
 			push @vals, $fx_cache->{registry}->[$i]->{params}->[$j]->{default};
 		}
 		logpkg('debug', "copid: $id defaults: @vals");
-		$p->{values} = \@vals;
+		$args{params} = \@vals;
 	}
 	
-	$entry->{params}  = $p->{values};
-
-	my $FX = ::FX->new(p => $entry);
+	$self = bless \%args, $class;
+	$by_id{$self->id} = $self;
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
@@ -105,9 +109,9 @@ sub new {
 		push @$owns, $id;
 		logpkg('debug',"parent owns @$owns");
 
-		logpkg('debug',sub{join " ", "my attributes:", json_out($FX->as_hash)});
-		$FX->set(parent => $parent_id);
-		logpkg('debug',sub{join " ", "my attributes again:", json_out($FX->as_hash)});
+		logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
+		$self->set(parent => $parent_id);
+		logpkg('debug',sub{join " ", "my attributes again:", json_out($self->as_hash)});
 		# find position of parent in the track ops array 
  		# and insert child immediately afterwards
 
@@ -116,9 +120,7 @@ sub new {
 	}
 	else { push @{$ti{$n}->ops }, $id; } 
 
-
-	$id;
-
+	$self
 }
 
 sub bypassed 	{ my $self = shift; 
