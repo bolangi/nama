@@ -1369,11 +1369,11 @@ sub add_volume_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "vol");
 	
-	my $vol_id = effect_init({
+	my $vol_id = ::Effect->new(
 				chain => $n, 
 				type => $config->{volume_control_operator},
 				effect_id => $ti{$n}->vol, # often undefined
-				});
+				)->id;
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
 	$vol_id;
@@ -1382,11 +1382,11 @@ sub add_pan_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "pan");
 
-	my $pan_id = effect_init({
+	my $pan_id = ::Effect->new(
 				chain => $n, 
 				type => 'epp',
 				effect_id => $ti{$n}->pan, # often undefined
-				});
+				)->id;
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;
