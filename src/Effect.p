@@ -38,6 +38,7 @@ sub bypassed 	{ my $self = shift;
 sub parent 		{ my $self = shift; ::fxn($self->parent)}
 
 # fx method delivers hash, previously via $fx->{applied}->{$id}
+# TODO: get rid of this entirely
 sub fx	 		{ my $self = shift; $self }	
 
 sub is_read_only {
