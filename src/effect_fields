@@ -1,6 +1,7 @@
 				id
 				type
 				chain
+				class
 				params
 				params_log
 				display
