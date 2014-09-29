@@ -115,16 +115,6 @@ sub save_system_state {
 
 	logpkg('debug', "copying marks data");
 
-	if ( $fx->{applied} )
-	{
-		@effects_data = 
-			map{ $_->{class} = '::FX'; $_}
-			map{ $_->as_hash }
-			map{fxn($_)}
-			keys %{$fx->{applied}};
-		#say "effects data: ", json_out \@effects_data;
-	}
-
 	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
 
 	@fade_data = sort $by_n map{ $_->as_hash } values %::Fade::by_index;
@@ -385,6 +375,22 @@ sub restore_state_from_file {
 			$_->{rw} = MON if $_->{rw} eq 'REC'
 		} @bus_data;
 	}
+
+	# convert effect object format
+	
+	
+	if ( $fx->{applied} ) # save version < 1.201
+	{
+		@effects_data = 
+			map{ $_->{class} = '::FX'; $_}
+			map{ $_->as_hash }
+			map{fxn($_)}
+			keys %{$fx->{applied}};
+		#say "effects data: ", json_out \@effects_data;
+		delete $fx->{applied};
+		delete $fx->{params};
+	}
+
 	#######################################
 sub convert_rw {
 	my $h = shift;
