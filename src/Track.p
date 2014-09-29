@@ -93,8 +93,8 @@ sub new {
 	$track_names{$vals{name}}++;
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	#::add_pan_control($n);
-	#::add_volume_control($n);
+	::add_pan_control($n);
+	::add_volume_control($n);
 
 	$::this_track = $object;
 	$::ui->track_gui($object->n) unless $object->hide;
