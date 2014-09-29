@@ -198,20 +198,9 @@ sub get_newest {
 		yaml => sub 
 		{ 
 			my $yaml = shift;
-			# remove empty key hash lines # fixes YAML::Tiny bug
+
+			# remove empty key hash lines to satisfy YAML::Tiny
 			$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
-
-			# rewrite obsolete null hash/array substitution
-			$yaml =~ s/~NULL_HASH/{}/g;
-			$yaml =~ s/~NULL_ARRAY/[]/g;
-
-			# rewrite $fx->{applied} 'owns' field to []
-			
-			# Note: this should be fixed at initialization
-			# however we should leave this code 
-			# for compatibility with past projects.
-			
-			$yaml =~ s/owns: ~/owns: []/g;
 
 			$yaml = quote_yaml_scalars( $yaml );
 
