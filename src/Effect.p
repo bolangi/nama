@@ -26,10 +26,7 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 sub new {
-	my ($class, %args) = @_;
-	my $self = bless \%args, $class;
-	$by_id{$self->id} = $self;
-	$self
+
 }
 
 sub bypassed 	{ my $self = shift; 
