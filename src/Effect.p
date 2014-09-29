@@ -2,7 +2,7 @@
 package ::Effect;
 use Modern::Perl;
 use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
-use ::Effects qw(effect_init fxn effect_update_copp_set remove_op);
+use ::Effects qw(new_effect_id fxn effect_update_copp_set remove_op);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
 use ::Object qw(  
@@ -51,7 +51,7 @@ sub new {
 	}
 	logpkg('debug',"$id: effect id $how_allocated");
 
-	my $i = effect_index($type);
+	my $i = ::Effects::effect_index($type);
 
 	logpkg('debug',"$id: Issuing effect id for track $n");
 	
@@ -247,7 +247,7 @@ sub nameline {
 }
 sub effect_index { 
 	my $self = shift;
-	::effect_index($self->type)
+	::Effects::effect_index($self->type)
 }
 sub modify_effect {
 	my ($self, $parameter, $sign, $value) = @_;

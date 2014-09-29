@@ -44,7 +44,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					effect_entry_is_bad
 					check_fx_consistency
 
-					effect_init
+					new_effect_id
 					add_effect
 					remove_effect
 					remove_op
@@ -477,7 +477,7 @@ sub new_effect_id {
 		# increment $fx->{id_counter} if necessary
 		# to find an unused effect_id 
 		
-		while( ::Effect::by_id($fx->{id_counter})){ $fx->{id_counter}++};
+		while( fxn($fx->{id_counter})){ $fx->{id_counter}++};
 		$fx->{id_counter}
 }
 
@@ -679,7 +679,7 @@ sub remove_fader_effect {
 
 sub fxn {
 	my $id = shift;
- 	::Effect::by_id{$id};
+ 	$::Effect::by_id{$id};
 }
 sub set_current_op {
 	my $op_id = shift;
