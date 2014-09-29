@@ -166,7 +166,7 @@ sub _add_effect {  # append effect
 		$p->{values} = fx_defaults($code) 
 			if ! $values 
 			or ref $values and ! scalar @{ $values };
-		$FX = ::Effect->new($p);
+		$FX = ::Effect->new(%$p);
 		if( ! $FX->name ){
 		while( my ($alias, $code) = each %{$fx->{alias}} )
 		{ $FX->set_name($::this_track->unique_nickname($alias)), last if $code eq $FX->type }
