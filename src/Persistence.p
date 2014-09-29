@@ -382,7 +382,7 @@ sub restore_state_from_file {
 	if ( $fx->{applied} ) # save version < 1.201
 	{
 		@effects_data = 
-			map{ $_->{class} = '::FX'; $_}
+			map{ $_->{class} = '::Effect'; $_}
 			map{ $_->as_hash }
 			map{fxn($_)}
 			keys %{$fx->{applied}};

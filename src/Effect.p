@@ -1,5 +1,5 @@
 { 
-package ::FX;
+package ::Effect;
 use Modern::Perl;
 use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
 use ::Effects qw(effect_init fxn effect_update_copp_set remove_op);

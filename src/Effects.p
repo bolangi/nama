@@ -477,7 +477,7 @@ sub new_effect_id {
 		# increment $fx->{id_counter} if necessary
 		# to find an unused effect_id 
 		
-		while( ::FX::by_id($fx->{id_counter})){ $fx->{id_counter}++};
+		while( ::Effect::by_id($fx->{id_counter})){ $fx->{id_counter}++};
 		$fx->{id_counter}
 }
 
