@@ -1,53 +1,53 @@
 { 
-package ::Effect;
+package ::FX;
 use Modern::Perl;
 use ::Globals qw($this_track $ui $fx $fx_cache %tn %ti);
 use ::Effects qw(effect_init fxn effect_update_copp_set remove_op);
 use ::Log qw(logsub logpkg);
 use Carp qw(confess);
-our @keys = qw( 	
+use ::Object qw(  
 [% qx( cat ./effect_fields ) %]
 );
-
-
-our $AUTOLOAD;
 *this_op			= \&::this_op;
 *this_param			= \&::this_param;
 *this_stepsize		= \&::this_stepsize;
+our %by_id;
+our $AUTOLOAD;
+sub AUTOLOAD {
+	my $self = shift;
+	say "got self: $self", ::Dumper $self;
+	# get tail of method call
+	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
+	# see if this can be satisfied by a field from
+	# the corresponding effects registry entry
+	$call = 'name' if $call eq 'fxname';
+	$self->about->{$call}
+}
+sub DESTROY {}
 
-my %is_field = map{ $_ => 1} qw(id owns bypassed parent type chain params);
-
-sub new { 
-	my ($class, $p) = @_;
-	my $id = ::effect_init($p); 
-	::fxn($id)
+sub new {
+	my ($class, %args) = @_;
+	my $self = bless \%args, $class;
+	$self->{id} = ::effect_init($args{p});
+	$by_id{ $self->{id} } = $self;
+	$self
 }
 
-sub id 			{ my $self = shift; $self->{id} }
-sub owns 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{owns}		}
 sub bypassed 	{ my $self = shift; 
-				  $fx->{applied}->{$self->{id}}->{bypassed} ? 'bypassed' : undef}
-sub parent 		{ my $self = shift; 
-					my $parent_id = $fx->{applied}->{$self->{id}}->{parent};
-					::fxn($parent_id)}
-sub type 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{type} 		}
-sub chain 		{ my $self = shift; $fx->{applied}->{$self->{id}}->{chain} 		}
-sub display 	{ my $self = shift; $fx->{applied}->{$self->{id}}->{display} 	}
-sub fx	 		{ my $self = shift; $fx->{applied}->{$self->{id}}		 		}
-sub params		{ my $self = shift; $fx->{params }->{$self->{id}}               }
+				  $self->{bypassed} ? 'bypassed' : undef}
+sub parent 		{ my $self = shift; ::fxn($self->parent)}
+
+# fx method delivers hash, previously via $fx->{applied}->{$id}
+sub fx	 		{ my $self = shift; $self }	
+
 sub is_read_only {
     my ($self, $param) = @_;
 	no warnings 'uninitialized';
 	$self->about->{params}->[$param]->{dir} eq 'output'
 }          
-sub name        { my $self = shift; $fx->{applied}->{$self->{id}}->{name}     	}
-sub remove_name { my $self = shift; delete $fx->{applied}->{$self->{id}}->{name}}
-sub surname		{ my $self = shift; $fx->{applied}->{$self->{id}}->{surname}    }
-sub set_name    { my $self = shift; $fx->{applied}->{$self->{id}}->{name} = shift}
-sub set_surname { my $self = shift; $fx->{applied}->{$self->{id}}->{surname} = shift}
-sub set_names    { 
-	my $self = shift; 
-}
+sub remove_name { my $self = shift; delete $self->{name} }
+sub set_name    { my $self = shift; $self->{name} = shift }
+sub set_surname { my $self = shift; $self->{surname} = shift}
 sub is_controller { my $self = shift; $self->parent } 
 
 sub has_read_only_param {
@@ -120,16 +120,6 @@ sub track_effect_index { # the position of the ID in the track's op array
 			return $pos if $arr->[$pos] eq $id; 
 		};
 }
-# TODO
-sub set	{ 
-	my $self = shift; my %args = @_;
-	while(my ($key, $value) = each %args){ 
-		#say "effect id $self->{id}: setting $key = $value";
-		$is_field{$key} or die "illegal key: $key for effect id $self->{id}";
-		if ($key eq 'params'){ $fx->{params}->{$self->{id}} = $value } 
-		else { $fx->{applied}->{$self->{id}}->{$key} = $value }
-	}
-}
 sub sync_one_effect {
 		my $self= shift;
 		my $chain = $self->chain;
@@ -153,23 +143,6 @@ sub about {
 sub track { $ti{$_[0]->chain} }
 sub trackname { $_[0]->track->name }
 
-sub AUTOLOAD {
-	my $self = shift;
-	say "got self: $self", ::Dumper $self;
-	# get tail of method call
-	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
-	# see if this can be satisfied by a field from
-	# the corresponding effects registry entry
-	$call = 'name' if $call eq 'fxname';
-	$self->about->{$call}
-}
-sub DESTROY {}
-sub as_hash {
-	my $self = shift;
-	my $hash = {};
-	for (@keys){ $hash->{$_} = $self->$_ }
-	$hash
-}
 sub ladspa_id {
 	my $self = shift;
 	$::fx_cache->{ladspa_label_to_unique_id}->{$self->type} 
@@ -228,6 +201,7 @@ sub remove_effect {
 	$ui->remove_effect_gui($id);
 
 	# recursively remove children
+	
 	logpkg('debug',"children found: ". join ",",@$owns) if defined $owns;
 	map{ remove_effect($_) } @$owns if defined $owns;
 ;
@@ -251,6 +225,7 @@ sub remove_effect {
 
 	}
 	# remove effect ID from track
+	
 	if( my $track = $ti{$n} ){
 		my @ops_list = @{$track->ops};
 		say "ops_list: @ops_list";
@@ -262,11 +237,10 @@ sub remove_effect {
 		     {    $track->{ops}   = [ @new_list  ] }
 		else { @{ $track->{ops} } =   @new_list    }
 	}
-	# remove entries for chain operator attributes and parameters
- 	delete $fx->{applied}->{$id}; # remove entry from chain operator list
-    delete $fx->{params }->{$id}; # remove entry from chain operator parameters likk
 	set_current_op($this_track->ops->[0]);
 	set_current_param(1);
+	delete $by_id{$self->id};
+	return(); 
 }
 sub position_effect {
 	my($self, $pos) = @_;
