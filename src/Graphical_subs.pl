@@ -611,8 +611,9 @@ sub track_gui {
 
 		$mute = $gui->{track_frame}->Button(
 			-command => sub { 
-				if ($fx->{params}->{$vol_id}->[0] != $config->{mute_level}->{$fx->{applied}->{$vol_id}->{type}} and
-					$fx->{params}->{$vol_id}->[0] != $config->{fade_out_level}->{$fx->{applied}->{$vol_id}->{type}}
+				my $FX = fxn($vol_id);
+				if (	$FX->params->[0] != $config->{mute_level}->{$FX->type} 
+					and $FX->params->[0] != $config->{fade_out_level}->{$FX->type} 
 				) {  # non-zero volume
 					$ti{$n}->mute;
 					$mute->configure(-background => $gui->{_nama_palette}->{Mute});
@@ -628,10 +629,11 @@ sub track_gui {
 
 		$unity = $gui->{track_frame}->Button(
 				-command => sub { 
+					my $FX = fxn($vol_id);
 					::effect_update_copp_set(
 						$vol_id, 
 						0, 
-						$config->{unity_level}->{$fx->{applied}->{$vol_id}->{type}});
+						$config->{unity_level}->{$FX->type});
 				}
 		  );
 	} else {
@@ -808,6 +810,7 @@ sub add_effect_gui {
 		my ($n,$code,$id,$parent_id,$parameter) =
 			@p{qw(chain type effect_id parent_id parameter)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
+		my $FX = fxn($id);
 
 		logpkg('debug', sub{json_out(\%p)});
 
@@ -817,7 +820,7 @@ sub add_effect_gui {
 
 		# check display format, may be 'scale' 'field' or 'hidden'
 		
-		my $display_type = $fx->{applied}->{$id}->{display}; # individual setting
+		my $display_type = $FX->display; # individual setting
 		defined $display_type or $display_type = $fx_cache->{registry}->[$i]->{display}; # template
 		logpkg('debug', "display type: $display_type");
 
@@ -839,8 +842,9 @@ sub add_effect_gui {
 
 		# here add menu items for Add Controller, and Remove
 
-		my $parentage = $fx_cache->{registry}->[ $fx_cache->{full_label_to_index}->{ $fx->{applied}->{$parent_id}->{type}} ]
-			->{name};
+		my $parentage = $fx_cache->{registry}->[
+			$fx_cache->{full_label_to_index}->{$FX->type} 
+		]->{name};
 		$parentage and $parentage .=  " - ";
 		logpkg('debug', "parentage: $parentage");
 		my $eff = $frame->Menubutton(
@@ -921,7 +925,8 @@ sub remove_effect_gui {
 	my $ui = shift;
 	logsub("&remove_effect_gui");
 	my $id = shift;
-	my $n = $fx->{applied}->{$id}->{chain};
+	my $FX = fxn($id);
+	my $n = $FX->chain;
 	logpkg('debug', "id: $id, chain: $n");
 
 	logpkg('debug', "i have widgets for these ids: ", join " ",keys %{$gui->{fx}});
@@ -975,8 +980,9 @@ sub make_scale {
 # 	p_num      => parameter number, starting at 0
 # 	length       => length widget # optional 
 	my $id = $p{effect_id};
-	my $n = $fx->{applied}->{$id}->{chain};
-	my $code = $fx->{applied}->{$id}->{type};
+	my $FX = fxn($id);
+	my $n = $FX->chain;
+	my $code = $FX->type;
 	my $p  = $p{p_num};
 	my $i  = $fx_cache->{full_label_to_index}->{$code};
 
@@ -986,7 +992,7 @@ sub make_scale {
 	# check display format, may be text-field or hidden,
 
 	logpkg('debug',"i: $i code: $fx_cache->{registry}->[$i]->{code} display: $fx_cache->{registry}->[$i]->{display}");
-	my $display_type = $fx->{applied}->{$id}->{display};
+	my $display_type = $FX->display;
 	defined $display_type or $display_type = $fx_cache->{registry}->[$i]->{display};
 	logpkg('debug', "display type: $display_type");
 	return if $display_type eq q(hidden);
@@ -1012,15 +1018,15 @@ sub make_scale {
 		my $log_display;
 		
 		my $controller = $frame->Scale(
-			-variable => \$fx->{params}->{$id}->[$p],
+			-variable => \$FX->{params}->[$p],
 			-orient => 'horizontal',
 			-from   =>  $fx_cache->{registry}->[$i]->{params}->[$p]->{begin},
 			-to     =>  $fx_cache->{registry}->[$i]->{params}->[$p]->{end},
 			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { ::effect_update($id, $p, $fx->{params}->{$id}->[$p]) },
-			-state => fxn($id)->is_read_only($p) ? 'disabled' : 'normal',
+		  -command => sub { ::effect_update($id, $p, $FX->params->[$p]) },
+			-state => $FX->is_read_only($p) ? 'disabled' : 'normal',
 		  );
 
 		# auxiliary field for logarithmic display
@@ -1032,15 +1038,15 @@ sub make_scale {
 				-width => 5,
 				);
 			$controller->configure(
-				-variable => \$fx->{params_log}->{$id}->[$p],
+				-variable => \$FX->{params_log}->[$p],
 		  		-command => sub { 
-					$fx->{params}->{$id}->[$p] = exp $fx->{params_log}->{$id}->[$p];
-					::effect_update($id, $p, $fx->{params}->{$id}->[$p]);
+					$FX->params->[$p] = exp $FX->params_log->[$p];
+					::effect_update($id, $p, $FX->params->[$p]);
 					$log_display->configure(
 						-text => 
 						$fx_cache->{registry}->[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
-							? int $fx->{params}->{$id}->[$p]
-							: dn($fx->{params}->{$id}->[$p], 1)
+							? int $FX->params->[$p]
+							: dn($FX->params->[$p], 1)
 						);
 					}
 				);
@@ -1057,9 +1063,9 @@ sub make_scale {
 	 	# then return field type controller widget
 
 		return ${ $p{parent} }->Entry(
-			-textvariable =>\$fx->{params}->{$id}->[$p],
+			-textvariable =>\$FX->params->[$p],
 			-width => 6,
-	#		-command => sub { ::effect_update($id, $p, $fx->{params}->{$id}->[$p]) },
+	#		-command => sub { ::effect_update($id, $p, $FX->params->[$p]) },
 			# doesn't work with Entry widget
 			);	
 
