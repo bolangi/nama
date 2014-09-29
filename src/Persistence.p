@@ -74,12 +74,6 @@ sub save_system_state {
 	# we sync read-only parameters, too, but I think that is
 	# harmless
 
-	# remove null keys in $fx->{applied} and $fx->{params}
-	# would be better to find where they come from
-	
-	delete $fx->{applied}->{''};
-	delete $fx->{params}->{''};
-
 	initialize_marshalling_arrays();
 	
 	# prepare tracks for storage
@@ -289,29 +283,6 @@ sub restore_state_from_file {
 
 	}
 	
-	# remove null keyed entry from $fx->{applied},  $fx->{params}
-
-	delete $fx->{applied}->{''};
-	delete $fx->{params}->{''};
-
-
-	my @keys = keys %{$fx->{applied}};
-
-	my @spurious_keys = grep { effect_entry_is_bad($_) } @keys;
-
-	if (@spurious_keys){
-
-		logpkg('logwarn',"full key list is @keys"); 
-		logpkg('logwarn',"spurious effect keys found @spurious_keys"); 
-		logpkg('logwarn',"deleting them..."); 
-		
-		map{ 
-			delete $fx->{applied}->{$_}; 
-			delete $fx->{params}->{$_}  
-		} @spurious_keys;
-
-	}
-
 	restore_global_effect_chains();
 
 	
@@ -382,9 +353,11 @@ sub restore_state_from_file {
 	if ( $fx->{applied} ) # save version < 1.201
 	{
 		@effects_data = 
-			map{ $_->{class} = '::Effect'; $_}
-			map{ $_->as_hash }
-			map{fxn($_)}
+			map{ my $hashref = $fx->{applied}->{$_}; 
+					$hashref->{params} = $fx->{params}->{$_}; 
+					$hashref->{class} = '::Effect';
+					$hashref }
+			grep { defined $_ } 
 			keys %{$fx->{applied}};
 		#say "effects data: ", json_out \@effects_data;
 		delete $fx->{applied};
@@ -435,7 +408,7 @@ sub convert_rw {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
-	# restore effects
+	# restore effects XXX
 	
 	map
 	{ my %args = %$_;
