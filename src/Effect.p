@@ -16,6 +16,7 @@ our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
 	say "got self: $self", ::Dumper $self;
+	die 'not object' unless ref $self;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
 	# see if this can be satisfied by a field from
@@ -327,8 +328,8 @@ sub remove_effect {
 		     {    $track->{ops}   = [ @new_list  ] }
 		else { @{ $track->{ops} } =   @new_list    }
 	}
-	set_current_op($this_track->ops->[0]);
-	set_current_param(1);
+	#set_current_op($this_track->ops->[0]);
+	#set_current_param(1);
 	delete $by_id{$self->id};
 	return(); 
 }
