@@ -28,7 +28,7 @@ sub DESTROY {}
 sub new {
 	my ($class, %args) = @_;
 	my $self = bless \%args, $class;
-	$self->{id} = ::effect_init($args{p});
+	$self->{id} = ::effect_init($args{p}); # TODO handle hashref XXX
 	$by_id{ $self->{id} } = $self;
 	$self
 }

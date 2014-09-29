@@ -509,8 +509,6 @@ sub effect_init {
 
 	logpkg('debug',"Issuing a effect_id for track $n: $id");
 	
-	# make entry in $fx->{applied} with chain, code, display-type, children
-
 	my $entry =
 	{
 		chain 	=> $n, 
@@ -532,9 +530,6 @@ sub effect_init {
 		}
 		else{ $entry->{surname} = $surname }
 	}	
-	$fx->{applied}->{$id} = $entry;
-
-	my $FX = fxn($id);
 
 	# set defaults for effects only (not controllers)
 	
@@ -553,7 +548,9 @@ sub effect_init {
 		$p->{values} = \@vals;
 	}
 	
-	$FX->set(params => $p->{values});
+	$entry->{params}  = $p->{values};
+
+	my $FX = ::FX->new(p => $entry);
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
@@ -565,10 +562,9 @@ sub effect_init {
 		push @$owns, $id;
 		logpkg('debug',"parent owns @$owns");
 
-		logpkg('debug',sub{join " ", "my attributes:", json_out($fx->{applied})});
-		#fxn($id)->set(parent => $parent_id);
+		logpkg('debug',sub{join " ", "my attributes:", json_out($FX->as_hash)});
 		$FX->set(parent => $parent_id);
-		logpkg('debug',sub{join " ", "my attributes again:", json_out($fx->{applied})});
+		logpkg('debug',sub{join " ", "my attributes again:", json_out($FX->as_hash)});
 		# find position of parent in the track ops array 
  		# and insert child immediately afterwards
 
@@ -767,83 +763,7 @@ sub set_bypass_state {
 	}
 	$track->unmute;
 }
-sub check_fx_consistency {
 
-	my $result = {};
-	my %seen_ids;
-	my $is_error;
-	map
-	{     
-		my $track = $_;
-		my $name = $track->name;
-		my @ops = @{ $track->{ops} };
-		my $is_track_error;
-
-		# check for missing special-purpose ops
-
-		my $no_vol_op 		= ! $track->vol;
-		my $no_pan_op 		= ! $track->pan;
-		my $no_latency_op 	= ! $track->latency_op;
-
-		# check for orphan special-purpose op entries
-
-		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol 
-			if $track->vol and !  grep { $track->vol eq $_ } @ops;
-		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
-			if $track->pan and !  grep { $track->pan eq $_ } @ops;
-
-		# we don't check for orphan latency ops as this is
-		# allowed in order to keep constant $op_id over
-		# time (slower incrementing of fx counter)
-		
-		#$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
-		#	if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
-
-		# check for undefined op ids 
-		
-		my @track_undef_op_pos;
-
-		my $i = 0;
-		map { defined $_ or push @track_undef_op_pos, $i; $i++ } @ops;
-		$is_track_error++,$result->{track}->{$name}->{undef_op_pos}
-			= \@track_undef_op_pos if @track_undef_op_pos;
-
-		# remove undefined op ids from list
-		
-		@ops = grep{ $_ } @ops;
-
-		# check for op ids without corresponding entry in $fx->{applied}
-
-		my @uninstantiated_op_ids;
-		map { fxn($_) or push @uninstantiated_op_ids, $_ } @ops;
-
-		$is_track_error++, $result->{track}->{$name}->{uninstantiated_op_ids} 
-			= \@uninstantiated_op_ids if @uninstantiated_op_ids;
-
-		$result->{track}->{$name}->{is_error}++ if $is_track_error;
-		$result->{is_error}++ if $is_track_error;
-	} ::audio_tracks();
-
-	# check entries in $fx->{applied}
-	
-	# check for null op_id
-	
-
-	$result->{applied}->{is_undef_entry}++ if $fx->{applied}->{undef};
-
-	# check for incomplete entries in $fx->{applied}
-	
-	my @incomplete_entries = 
-		grep { ! fxn($_)->params or ! fxn($_)->type or !  fxn($_)->chain } 
-		grep { $_ } keys %{$fx->{applied}};
-
-	if(@incomplete_entries)
-	{
-		$result->{applied}->{incomplete_entries} = \@incomplete_entries;
-		$result->{is_error}++
-	}
-	$result;
-}
 sub remove_fader_effect {
 	my ($track, $role) = @_;
 	remove_effect($track->$role);
@@ -853,7 +773,7 @@ sub remove_fader_effect {
 
 sub fxn {
 	my $id = shift;
-	bless {id => $id}, '::Effect' if $id and $fx->{applied}->{$id}
+ 	::Effect::by_id{$id};
 }
 sub set_current_op {
 	my $op_id = shift;
