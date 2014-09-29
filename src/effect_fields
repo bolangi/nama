@@ -2,6 +2,8 @@
 				type
 				chain
 				params
+				params_log
+				display
 				parent
 				owns
 				bypassed
