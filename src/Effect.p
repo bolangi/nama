@@ -164,6 +164,7 @@ sub AUTOLOAD {
 	$self->about->{$call}
 }
 sub DESTROY {}
+
 sub as_hash {
 	my $self = shift;
 	my $hash = {};
