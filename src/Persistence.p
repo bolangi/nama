@@ -338,7 +338,7 @@ sub restore_state_from_file {
 
 	# convert effect object format
 	
-	if ( $fx->{applied} ) # save version < 1.201
+	if ( $fx->{applied } ) # save version < 1.201
 	{
 		@effects_data = 
 			map{ my $hashref = $fx->{applied}->{$_}; 
@@ -391,12 +391,12 @@ sub restore_state_from_file {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
-	# restore effects XXX
+	# restore effects
 	
 	map
 	{ my %args = %$_;
 		my $class = delete $args{class};
-		my $fx = $class->new(%args);
+		my $FX = $class->new(%args);
 	} @effects_data;
 	
 	map{ 
@@ -411,14 +411,14 @@ sub restore_state_from_file {
 			$did_apply++  # need to show GUI effect window
 				unless $id eq $ti{$n}->vol
 					or $id eq $ti{$n}->pan;
+			my $FX = fxn($id);
 			
-			# does this do anything?
 			add_effect({
-						chain => $fx->{applied}->{$id}->{chain},
-						type => $fx->{applied}->{$id}->{type},
+						chain => $FX->chain,
+						type => $FX->type,
 						effect_id => $id,
-						owns => $fx->{applied}->{$id}->{owns},
-						parent_id => $fx->{applied}->{$id}->{belongs_to},
+						owns => $FX->owns,
+						parent_id => $FX->belongs_to,
 						});
 
 		}
