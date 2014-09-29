@@ -26,6 +26,98 @@ sub AUTOLOAD {
 sub DESTROY {}
 
 sub new {
+	logsub("&effect_init");
+	my $p = shift;
+	logpkg('debug',sub{json_out($p)});
+
+	my ($n,  $type, $id, $parent_id, $surname)  = 
+	@$p{qw(chain type effect_id parent_id surname)};
+
+	# return existing op_id if effect already exists
+	# unless effect chain asks us to get a new id
+	#
+	logpkg('debug',"$id: returning existing id") if $id and fxn($id);
+	return $id if $id and fxn($id);
+
+	my 	$allocated = "recycled";
+	if ( ! $id ){ 
+
+		$id = $p->{effect_id} = new_effect_id();
+		$allocated = "issued";
+	}
+
+	logpkg('debug',"$id: effect id $allocated");
+
+	my $i = effect_index($type);
+
+	logpkg('debug',"Issuing a effect_id for track $n: $id");
+	
+	my $entry =
+	{
+		chain 	=> $n, 
+		type 	=> $type,
+		display => $fx_cache->{registry}->[$i]->{display},
+		owns 	=> [],
+	}; 
+	if ($surname)
+	{
+		my $track = $ti{$n};
+		my ($new_surname, $existing) = $track->unique_surname($surname);
+		if ( $new_surname ne $surname)
+		{
+			::pager_newline(
+				"track ".
+				$track->name.qq(: other effects with surname "$surname" found,),
+				qq(using "$new_surname". Others are: $existing.));
+			$entry->{surname} = $new_surname;
+		}
+		else{ $entry->{surname} = $surname }
+	}	
+
+	# set defaults for effects only (not controllers)
+	
+	if (! $parent_id and ! $p->{values}){
+		my @vals;
+		logpkg('debug', "no settings found, loading defaults if present");
+		
+		# if the effect is a controller (has a parent), we don't 
+		# initialize the first parameter (the control target)
+		
+		for my $j (0..$fx_cache->{registry}->[$i]->{count} - 1) {
+		
+			push @vals, $fx_cache->{registry}->[$i]->{params}->[$j]->{default};
+		}
+		logpkg('debug', "copid: $id defaults: @vals");
+		$p->{values} = \@vals;
+	}
+	
+	$entry->{params}  = $p->{values};
+
+	my $FX = ::FX->new(p => $entry);
+
+	if ($parent_id) {
+		logpkg('debug', "parent found: $parent_id");
+
+		# store relationship
+
+		my $parent = fxn($parent_id);
+		my $owns = $parent->owns;
+		push @$owns, $id;
+		logpkg('debug',"parent owns @$owns");
+
+		logpkg('debug',sub{join " ", "my attributes:", json_out($FX->as_hash)});
+		$FX->set(parent => $parent_id);
+		logpkg('debug',sub{join " ", "my attributes again:", json_out($FX->as_hash)});
+		# find position of parent in the track ops array 
+ 		# and insert child immediately afterwards
+
+		insert_after_string($parent_id, $id, @{$ti{$n}->ops}), 
+
+	}
+	else { push @{$ti{$n}->ops }, $id; } 
+
+
+	$id;
 
 }
 
