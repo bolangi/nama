@@ -220,6 +220,8 @@ sub AUTOLOAD {
 		return $track->$call if $track->can($call) 
 		# ->can is reliable here because Track has no AUTOLOAD
 	}
+	# suppress error XXX
+	return undef if $call eq 'name' or $call eq 'surname';
 	}
 	my $msg = "Autoload fell through. Object type: ". (ref $self). " illegal method call: $call\n";
 	::throw($msg,$self->dump);
