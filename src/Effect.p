@@ -15,7 +15,7 @@ our %by_id;
 our $AUTOLOAD;
 sub AUTOLOAD {
 	my $self = shift;
-	say "got self: $self", ::Dumper $self;
+	#say "got self: $self", ::Dumper $self;
 	die 'not object' unless ref $self;
 	# get tail of method call
 	my ($call) = $AUTOLOAD =~ /([^:]+)$/;
@@ -52,7 +52,8 @@ sub new {
 	}
 	logpkg('debug',"$id: effect id $how_allocated");
 
-	my $i = ::Effects::effect_index($type);
+	my $i = ::effect_index($type);
+	defined $i or confess "$type: effect index not found.";
 
 	logpkg('debug',"$id: Issuing effect id for track $n");
 	
@@ -198,7 +199,6 @@ sub ecasound_operator_index { # does not include offset
 sub ecasound_effect_index { 
 	logsub("&ecasound_effect_index");
 	my $self = shift;
-	confess "missing argument" unless $self;
 	my $n = $self->chain;
 	my $id = $self->id;
 	my $opcount = 0;
@@ -259,7 +259,7 @@ sub nameline {
 }
 sub effect_index { 
 	my $self = shift;
-	::Effects::effect_index($self->type)
+	::effect_index($self->type)
 }
 sub modify_effect {
 	my ($self, $parameter, $sign, $value) = @_;
@@ -331,11 +331,11 @@ sub remove_effect {
 	
 	if( my $track = $ti{$n} ){
 		my @ops_list = @{$track->ops};
-		say "ops_list: @ops_list";
+		#say "ops_list: @ops_list";
 		my $perl_version = $^V;
 		my ($minor_version) = $perl_version =~ /^v5\.(\d+)/;
 		my @new_list = grep  { $_ ne $id  } @ops_list;
-		say "new_list: @new_list";
+		#say "new_list: @new_list";
 		if ($minor_version <= 14) 
 		     {    $track->{ops}   = [ @new_list  ] }
 		else { @{ $track->{ops} } =   @new_list    }
