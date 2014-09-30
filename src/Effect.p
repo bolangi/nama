@@ -107,20 +107,28 @@ sub new {
 
 		my $parent = fxn($parent_id);
 		my $owns = $parent->owns;
-		push @$owns, $id;
 		logpkg('debug',"parent owns @$owns");
 
-		logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
+		# register effect_id with parent unless it is already there
+		if (! grep { $id eq $_ } @$owns) {
+			push @$owns, $id;
+			logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
+		}
 		$self->set(parent => $parent_id);
 		logpkg('debug',sub{join " ", "my attributes again:", json_out($self->as_hash)});
-		# find position of parent in the track ops array 
- 		# and insert child immediately afterwards
+		# find position of parent id in the track ops array 
+ 		# and insert child id immediately afterwards
+ 		# unless already present
 
-		insert_after_string($parent_id, $id, @{$ti{$n}->ops}), 
-
+		insert_after_string($parent_id, $id, @{$ti{$n}->ops})
+			unless grep {$id eq $_} @{$ti{$n}->ops}
 	}
-	else { push @{$ti{$n}->ops }, $id; } 
+	else { 
 
+		# append effect_id to track list unless already present
+		push @{$ti{$n}->ops}, $id 
+			unless grep {$id eq $_} @{$ti{$n}->ops}
+	} 
 	$self
 }
 
@@ -156,6 +164,7 @@ sub registry_index {
 	$fx_cache->{full_label_to_index}->{ $self->type };
 }
 sub ecasound_controller_index {
+	logsub("&ecasound_controller_index");
 	my $self = shift;
 	my $id = $self->id;
 	my $chain = $self->chain;
@@ -171,6 +180,7 @@ sub ecasound_controller_index {
 	++$position; # translates 0th to chain-position 1
 }
 sub ecasound_operator_index { # does not include offset
+	logsub("&ecasound_operator_index");
 	my $self = shift;
 	my $id = $self->id;
 	my $chain = $self->chain;
@@ -186,6 +196,7 @@ sub ecasound_operator_index { # does not include offset
 	++$position; # translates 0th to chain-position 1
 }
 sub ecasound_effect_index { 
+	logsub("&ecasound_effect_index");
 	my $self = shift;
 	my $n = $self->chain;
 	my $id = $self->id;
