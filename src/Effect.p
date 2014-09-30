@@ -198,6 +198,7 @@ sub ecasound_operator_index { # does not include offset
 sub ecasound_effect_index { 
 	logsub("&ecasound_effect_index");
 	my $self = shift;
+	confess "missing argument" unless $self;
 	my $n = $self->chain;
 	my $id = $self->id;
 	my $opcount = 0;
