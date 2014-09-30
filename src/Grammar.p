@@ -87,9 +87,10 @@ sub process_line {
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
 	if (! engine_running() ){
-		my $result = check_fx_consistency();
-		logpkg('logcluck',"Inconsistency found in effects data",
-			Dumper ($result)) if $result->{is_error};
+		# disable consistency check
+		#my $result = check_fx_consistency();
+		#logpkg('logcluck',"Inconsistency found in effects data",
+		#	Dumper ($result)) if $result->{is_error};
 
 		my $current_count= 0;
 		map{ $current_count++ } keys %{$fx->{applied}};
