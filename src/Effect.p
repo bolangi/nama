@@ -33,6 +33,7 @@ sub new {
 
 	delete $args{effect_id};
 	delete $args{values};
+	delete $args{before};
 
 	# we will introduce the ID later, if needed as the 'id' field
 
