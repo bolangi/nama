@@ -392,6 +392,16 @@ sub restore_state_from_file {
 		$::Insert::by_index{$_->{n}} = $_;
 	} @inserts_data;
 
+	map{ 
+		my $n = $_->{n};
+
+		# create gui
+		$ui->track_gui($n) unless $n <= 2;
+
+	} @tracks_data;
+
+	$ui->create_master_and_mix_tracks();
+
 	# restore effects
 	
 	map
@@ -400,33 +410,6 @@ sub restore_state_from_file {
 		my $FX = $class->new(%args);
 	} @effects_data;
 	
-	map{ 
-		my $n = $_->{n};
-
-		# create gui
-		$ui->track_gui($n) unless $n <= 2;
-
-		# restore effects
-		
-		for my $id (@{$ti{$n}->ops}){
-			$did_apply++  # need to show GUI effect window
-				unless $id eq $ti{$n}->vol
-					or $id eq $ti{$n}->pan;
-			my $FX = fxn($id);
-			
-			add_effect({
-						chain => $FX->chain,
-						type => $FX->type,
-						effect_id => $id,
-						owns => $FX->owns,
-						parent_id => $FX->belongs_to,
-						});
-
-		}
-	} @tracks_data;
-
-	$ui->create_master_and_mix_tracks();
-
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
 	#print "\n---\n", $main->dump;  
