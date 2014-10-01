@@ -110,7 +110,8 @@ sub save_system_state {
 	logpkg('debug', "copying marks data");
 
 	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
-
+	@effects_data = sort { $a->{id} cmp $b->{id} } map{ $_->as_hash } values %::Effect::by_id;
+	
 	@fade_data = sort $by_n map{ $_->as_hash } values %::Fade::by_index;
 
 	@edit_data = sort $by_n map{ $_->as_hash } values %::Edit::by_index;
