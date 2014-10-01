@@ -17,6 +17,7 @@ no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 
 use ::Util qw(freq input_node dest_type dest_string join_path);
+use ::Assign qw(json_out);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(
@@ -59,6 +60,8 @@ sub new {
 
 	my $class = shift;
 	my %vals = @_;
+	my $novol = delete $vals{novol};
+	my $nopan = delete $vals{nopan};
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
@@ -93,11 +96,12 @@ sub new {
 	$track_names{$vals{name}}++;
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_pan_control($n);
-	::add_volume_control($n);
+	::add_pan_control($n) unless $nopan;
+	::add_volume_control($n) unless $novol;
 
 	$::this_track = $object;
 	$::ui->track_gui($object->n) unless $object->hide;
+	logpkg('debug',$object->name, ": ","newly created track",$/,json_out($object->as_hash));
 	$object;
 }
 
