@@ -3,7 +3,7 @@
 package ::Effects; 
 use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
-use ::Assign qw(json_out json_out);
+use ::Assign qw(json_out);
 no warnings 'uninitialized';
 use Carp;
 use ::Log qw(logsub logpkg);
@@ -331,7 +331,8 @@ sub effect_index {
 }
 
 sub fx_defaults {
-	my $i = effect_index(shift());
+	my $id = shift;
+	my $i = effect_index($id);
 	my $values = [];
 	foreach my $p ( @{ $fx_cache->{registry}->[$i]->{params} })
 	{
