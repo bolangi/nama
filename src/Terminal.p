@@ -97,9 +97,10 @@ sub setup_termkey {
 	);
 }
 sub hotkey_status_bar {
-	join " ", "[".$this_track->name."]", extended_name($this_track->op), 
-				parameter_info($this_track->op, $this_track->param - 1),
-				"Stepsize: ",$this_track->stepsize;
+	join " ", "[".$this_track->name."]", 
+				"Stepsize: ",$this_track->stepsize,
+				fxn($this_track->op)->fxname,
+				parameter_info($this_track->op, $this_track->param - 1);
 				
 ;
 }
