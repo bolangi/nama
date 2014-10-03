@@ -737,14 +737,10 @@ add_controller: _add_controller parent effect value(s?) {
 	});
 	if($id)
 	{
-		my $i = 	::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
+		my $iname = ::fxn($id)->fxname;
+		my $pname = ::fxn($id)->fxname;
 
-		my $pi = 	::effect_index(::fxn($parent)->type);
-		my $pname = $::fx_cache->{registry}->[$pi]->{name};
-
-		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
-
+		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
 	}
 	1;
 }
@@ -762,13 +758,10 @@ add_controller: _add_controller effect value(s?) {
 	});
 	if($id)
 	{
-		my $i = 	::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
+		my $iname = ::fxn($id)->fxname;
+		my $pname = ::fxn($id)->fxname;
 
-		my $pi = 	::effect_index(::fxn($parent)->type);
-		my $pname = $::fx_cache->{registry}->[$pi]->{name};
-
-		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
+		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
 
 	}
 	1;
@@ -842,10 +835,8 @@ add_effect: _add_effect add_target value(s?) before(?) {
 	if ($id)
 	{
 		no warnings 'uninitialized';
-		my $i = ::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
-
-		::pager("Added $id ($iname)");
+		my $iname = ::fxn($id)->fxname;
+		::pager("Added $id, $iname");
 		::set_current_op($id);
 	}
 	else { } 
