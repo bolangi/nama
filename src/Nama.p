@@ -131,7 +131,7 @@ use ::EngineSetup ();
 use ::EngineRun ();
 use ::EngineCleanup ();
 use ::EffectsRegistry ();
-use ::Effects;
+use ::Effects q(:all);
 use ::Effect;
 use ::MuteSoloFade ();
 use ::Jack ();
