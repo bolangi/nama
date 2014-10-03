@@ -10,7 +10,10 @@ no warnings 'uninitialized';
 
 sub effects_cache {
 	state $registry_format = 'json';
-	$file->effects_cache . ".$registry_format";
+	is_test_script() 
+		? './nama/t/data/fake_effects_cache.json' # XXX bad hack for testing
+												# may not work for others 
+		: $file->effects_cache . ".$registry_format";
 }
 sub prepare_static_effects_data{
 	my $source = shift; 
@@ -19,11 +22,13 @@ sub prepare_static_effects_data{
 
 	my $effects_cache = effects_cache();
 
+	if (not is_test_script() ){
 	logpkg('debug', join "\n", "newplugins:", new_plugins());
 	if (! $source and ($config->{opts}->{r} or new_plugins())){ 
 
 		unlink $effects_cache;
 		print "Regenerating effects data cache\n";
+	}
 	}
 
 	if ( ($source or -f $effects_cache) and ! $config->{opts}->{C}){  
