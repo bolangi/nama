@@ -9,6 +9,10 @@ package ::;
 use Modern::Perl; use Carp;
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
+sub is_test_script { $config->{opts}->{J} }
+	# if we are using fake JACK client data, 
+	# probably a test script is running
+
 sub apply_test_harness {
 
 	push @ARGV, qw(-f /dev/null), # force to use internal namarc
@@ -24,8 +28,6 @@ sub apply_test_harness {
 				q(-T), # don't initialize terminal
                        # load fake effects cache
 #                q(-c), 'test-project',
-
-				q(-S); # don't load static effects data
 
 				#qw(-L SUB), # logging
 
