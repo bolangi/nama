@@ -943,7 +943,8 @@ fx_type: effect {
 position_effect: _position_effect op_to_move new_following_op {
 	my $op = $item{op_to_move};
 	my $pos = $item{new_following_op};
-	::position_effect($op, $pos);
+	my $FX = ::fxn($op);
+	$FX->position_effect($pos);
 	::set_current_op($op);
 	1;
 }

@@ -2,7 +2,7 @@ package ::Sequence;
 use Modern::Perl; use Carp; 
 use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
-use ::Effects qw(fxn modify_effect);
+use ::Effect  qw(fxn modify_effect);
 use ::Object qw( items clip_counter );
 use ::Globals qw(:trackrw);
 our @ISA = '::SubBus';

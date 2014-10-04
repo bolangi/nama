@@ -142,7 +142,7 @@ sub cache_engine_run {
 
 	# remove fades from target track
 	
-	::Effects::remove_op($args->{track}->fader) if defined $args->{track}->fader;
+	::Effect::remove_op($args->{track}->fader) if defined $args->{track}->fader;
 
 	$args->{processing_time} = $setup->{audio_length} + $args->{additional_time};
 

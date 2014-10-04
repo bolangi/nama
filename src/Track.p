@@ -5,7 +5,7 @@ package ::;
 package ::Track;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
-use ::Effects qw(fxn);
+use ::Effect  qw(fxn);
 use List::MoreUtils qw(first_index);
 use Try::Tiny;
 use Modern::Perl;

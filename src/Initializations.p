@@ -474,7 +474,6 @@ sub sanitize_remote_input {
 	$input
 }
 sub select_ecasound_interface {
-	::Effects::import_engine_subs();
 	my %args;
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})
