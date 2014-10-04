@@ -135,13 +135,19 @@ sub process_command {
 		
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
+
 	# select chain operator if appropriate
-	no warnings 'uninitialized';
-	my $FX = fxn($this_track->op);
-	if ($FX and $this_track->n eq $FX->chain){
-		eval_iam("c-select ".$this_track->n);
-		eval_iam("cop-select ".  $FX->ecasound_effect_index);
+	# and there is a current track
+
+
+	if ($this_track){
+		my $FX = fxn($this_track->op);
+		if ($FX and $this_track->n eq $FX->chain){
+			eval_iam("c-select ".$this_track->n);
+			eval_iam("cop-select ".  $FX->ecasound_effect_index);
+		}
 	}
+
 =comment
 	# skip unconverted projects
 	return unless scalar %::Effect::by_id;
