@@ -23,6 +23,7 @@ sub initialize_terminal {
 	$text->{term_attribs}->{already_prompted} = 1;
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $text->{term}->get_screen_size();
+	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 	detect_spacebar(); 
 
 	revise_prompt();
@@ -219,10 +220,13 @@ sub pager_newline {
 sub pager {
 	logsub("&pager");
 	my @output = @_;
-	# for returning via OSC
+
+	# this buffer is used to return results of OSC commands 
+	# the OSC client clears it after sending
+	
 	$text->{output_buffer} //= [];
 	push @{$text->{output_buffer}}, @output, "\n\n";
-	#return;
+
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if 
