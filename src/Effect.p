@@ -471,6 +471,7 @@ our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 
 our @EXPORT = ();
 
+no warnings 'uninitialized'; # needed to avoid confusing test TAP output
 sub effect_entry_is_bad {
 		my $id = shift;
 		! defined $id
