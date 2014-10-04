@@ -703,6 +703,86 @@ sub set_parameter_value {
 	my $value = shift;
 	modify_effect(::this_op(), this_param(), undef, $value)
 }
+
+
+sub check_fx_consistency {
+
+	my $result = {};
+	my %seen_ids;
+	my $is_error;
+	map
+	{     
+		my $track = $_;
+		my $name = $track->name;
+		my @ops = @{ $track->{ops} };
+		my $is_track_error;
+
+		# check for missing special-purpose ops
+
+		my $no_vol_op 		= ! $track->vol;
+		my $no_pan_op 		= ! $track->pan;
+		my $no_latency_op 	= ! $track->latency_op;
+
+		# check for orphan special-purpose op entries
+
+		$is_track_error++, $result->{track}->{$name}->{orphan_vol} = $track->vol 
+			if $track->vol and !  grep { $track->vol eq $_ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{orphan_pan} = $track->pan 
+			if $track->pan and !  grep { $track->pan eq $_ } @ops;
+
+		# we don't check for orphan latency ops as this is
+		# allowed in order to keep constant $op_id over
+		# time (slower incrementing of fx counter)
+		
+		#$is_track_error++,$result->{track}->{$name}->{orphan_latency_op} = $track->latency_op 
+		#	if $track->latency_op and !  grep { $track->latency_op eq $_ } @ops;
+
+		# check for undefined op ids 
+		
+		my @track_undef_op_pos;
+
+		my $i = 0;
+		map { defined $_ or push @track_undef_op_pos, $i; $i++ } @ops;
+		$is_track_error++,$result->{track}->{$name}->{undef_op_pos}
+			= \@track_undef_op_pos if @track_undef_op_pos;
+
+		# remove undefined op ids from list
+		
+		@ops = grep{ $_ } @ops;
+
+		# check for op ids without corresponding entry in $fx->{applied}
+
+		my @uninstantiated_op_ids;
+		map { fxn($_) or push @uninstantiated_op_ids, $_ } @ops;
+
+		$is_track_error++, $result->{track}->{$name}->{uninstantiated_op_ids} 
+			= \@uninstantiated_op_ids if @uninstantiated_op_ids;
+
+		$result->{track}->{$name}->{is_error}++ if $is_track_error;
+		$result->{is_error}++ if $is_track_error;
+	} ::audio_tracks();
+
+	# check entries in $fx->{applied}
+	
+	# check for null op_id
+	
+
+	$result->{applied}->{is_undef_entry}++ if $fx->{applied}->{undef};
+
+	# check for incomplete entries in $fx->{applied}
+	
+	my @incomplete_entries = 
+		grep { ! fxn($_)->params or ! fxn($_)->type or !  fxn($_)->chain } 
+		grep { $_ } keys %{$fx->{applied}};
+
+	if(@incomplete_entries)
+	{
+		$result->{applied}->{incomplete_entries} = \@incomplete_entries;
+		$result->{is_error}++
+	}
+	$result;
+}
+
 } # end package ::Effects
 1;
 __END__
