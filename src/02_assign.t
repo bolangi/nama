@@ -4,8 +4,6 @@ use strict;
 BEGIN { use_ok('::Assign') };
 
 use ::Assign qw(:all);
-use ::Log;
-::Log::initialize_logger();
 # `make test'. After `make install' it should work as `perl 1.t'
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
