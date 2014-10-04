@@ -750,7 +750,7 @@ sub check_fx_consistency {
 		
 		@ops = grep{ $_ } @ops;
 
-		# check for op ids without corresponding entry in $fx->{applied}
+		# check for op ids without corresponding entry 
 
 		my @uninstantiated_op_ids;
 		map { fxn($_) or push @uninstantiated_op_ids, $_ } @ops;
@@ -762,22 +762,15 @@ sub check_fx_consistency {
 		$result->{is_error}++ if $is_track_error;
 	} ::audio_tracks();
 
-	# check entries in $fx->{applied}
-	
-	# check for null op_id
-	
-
-	$result->{applied}->{is_undef_entry}++ if $fx->{applied}->{undef};
-
-	# check for incomplete entries in $fx->{applied}
+	# check for objects missing fields
 	
 	my @incomplete_entries = 
 		grep { ! fxn($_)->params or ! fxn($_)->type or !  fxn($_)->chain } 
-		grep { $_ } keys %{$fx->{applied}};
+		grep { $_ } keys %::Effect::by_id;
 
 	if(@incomplete_entries)
 	{
-		$result->{applied}->{incomplete_entries} = \@incomplete_entries;
+		$result->{incomplete_entries} = \@incomplete_entries;
 		$result->{is_error}++
 	}
 	$result;
