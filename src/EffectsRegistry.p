@@ -52,6 +52,7 @@ sub prepare_static_effects_data{
 		integrate_cop_hints();
 		sort_ladspa_effects();
 		prepare_effects_help();
+		logpkg('debug', "updating effects cache on disk: $effects_cache");
 		serialize (
 			file => $effects_cache, 
 			vars => [qw($fx_cache)],
