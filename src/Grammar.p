@@ -88,9 +88,9 @@ sub process_line {
 	}
 	if (! engine_running() ){
 		# disable consistency check
-		#my $result = check_fx_consistency();
-		#logpkg('logcluck',"Inconsistency found in effects data",
-		#	Dumper ($result)) if $result->{is_error};
+		my $result = check_fx_consistency();
+		logpkg('logcluck',"Inconsistency found in effects data",
+			Dumper ($result)) if $result->{is_error};
 
 		my $current_count= 0;
 		map{ $current_count++ } keys %{$fx->{applied}};
