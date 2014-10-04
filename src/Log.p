@@ -89,12 +89,11 @@ sub logit {
 	#confess("first call to logit");
 	my $line_number_output  = $line_number ? " (L $line_number) ": "";
 	cluck "illegal level: $level" unless $is_method{$level};
-	::diag(@message), return if ::is_test_script();
 	my $logger = get_logger($category);
 	$logger->$level($line_number_output, @message);
 }
 }
-sub logsub { ::is_test_script() ? ::diag(@_) :  logit('SUB','debug',@_) }
+sub logsub { logit('SUB','debug',$_[0]) }
 
 *loggit = \&logit; # to avoid source filter on logit call below
 
