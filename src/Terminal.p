@@ -214,7 +214,7 @@ sub pagers {
 sub pager_newline { 
 	my @lines = map { my $s = $_; chomp $s; $s .="\n"; $s } @_;
 	push @{$text->{output_buffer}}, @lines;
-	print @lines;
+	pager(@lines);
 }
 sub pager {
 	logsub("&pager");
@@ -237,7 +237,7 @@ sub pager {
 		print $fh @output;
 		file_pager($fname);
 	} else {
-		print @output;
+		is_test_script() ? diag(@output) : print @output;
 	}
 	print "\n\n";
 }
