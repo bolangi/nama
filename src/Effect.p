@@ -675,7 +675,7 @@ sub remove_effect {
 	my $id = shift;
 	my $FX = fxn($id)
 		or logpkg('logcarp',"$id: does not exist, skipping...\n"), return;
-	$FX->_remove
+	$FX->_remove_effect;
 }
 
 sub full_effect_code {

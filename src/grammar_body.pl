@@ -716,10 +716,9 @@ remove_effect: _remove_effect remove_target(s) {
 		else { 
 			my $FX = ::fxn($id);
 			::pager_newline("removing effect ".$FX->nameline);
-			$FX->remove_effect();
+			$FX->_remove_effect();
 		}
 	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
-	# map{ print "remove_target: $_\n"; ::remove_effect( $_ )}  @{ $item{"remove_target(s)"}} ;
 	::sleeper(0.5);
 	::unmute();
 	1;}
