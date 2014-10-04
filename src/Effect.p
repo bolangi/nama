@@ -13,6 +13,16 @@ use ::Object qw(
 *this_stepsize		= \&::this_stepsize;
 our %by_id;
 our $AUTOLOAD;
+sub initialize { 
+
+	%by_id = () ;
+	
+	# effect variables - no object code (yet)
+	$fx->{id_counter} = "A"; # autoincrement counter
+
+	# volume settings
+	$fx->{muted} = [];
+}
 sub AUTOLOAD {
 	my $self = shift;
 	#say "got self: $self", ::Dumper $self;
