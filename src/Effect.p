@@ -373,7 +373,7 @@ sub _remove_effect {
 	delete $by_id{$self->id};
 	return(); 
 }
-sub _position_effect {
+sub position_effect {
 	my($self, $pos) = @_;
 
 	my $op = $self->id;
