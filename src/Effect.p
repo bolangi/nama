@@ -377,35 +377,37 @@ sub position_effect {
 	my($self, $pos) = @_;
 
 	my $op = $self->id;
-	# we cannot handle controllers
 	
-	::pager("$op or $pos: controller not allowed, skipping.\n"), return 
-		if grep{ fxn($_)->is_controller } $op, $pos;
+	# disabled, debugging needed
+	# we cannot handle controllers
+	#::pager("$op or $pos: controller not allowed, skipping.\n"), return 
+	#	if grep{ fxn($_)->is_controller } $op, $pos;
 	
 	# first, modify track data structure
 	
-	my $POS = fxn($pos);
 	my $track = $ti{$self->chain};
 
 	my $op_index = $self->track_effect_index;
 	my @new_op_list = @{$track->ops};
+
 	# remove op
 	splice @new_op_list, $op_index, 1;
-	my $new_op_index;
+
 	if ( $pos eq 'ZZZ'){
 		# put it at the end
 		push @new_op_list, $op;
 	}
 	else { 
+		my $POS = fxn($pos);
 		my $track2 = $ti{$POS->chain};
 		::pager("$pos: position belongs to a different track, skipping.\n"), return
 			unless $track eq $track2;
-		$new_op_index = $POS->track_effect_index; 
+		my $new_op_index = $POS->track_effect_index; 
 		# insert op
 		splice @new_op_list, $new_op_index, 0, $op;
 	}
 	# reconfigure the entire engine (inefficient, but easy to do)
-	#say join " - ",@new_op_list;
+	say join " - ",@new_op_list;
 	@{$track->ops} = @new_op_list;
 	::request_setup();
 	$this_track = $track;
