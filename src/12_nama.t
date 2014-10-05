@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 117;
+use Test::More tests => 122;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -203,8 +203,26 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
-process_command('source 2');
+{ # effect tests, confine lexical variables
+my ($vol_id) = $this_track->vol;
 
+ok(   defined $vol_id and $::Effect::by_id{$vol_id} , "apply volume control");
+
+process_command('add_effect time_reverb3');
+
+like( this_op_o()->code, qr/time_reverb3/, "apply preset");
+
+is ($this_track->ops->[0], this_op_o()->id, "positioned before vol/pan faders");
+
+process_command('add_effect decimator 1 2');
+
+like( this_op_o()->code, qr/decimator/, "apply LADSPA effect");
+
+is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
+
+}
+
+process_command('source 2');
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");
