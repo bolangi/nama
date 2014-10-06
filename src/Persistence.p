@@ -486,7 +486,6 @@ sub restore_global_effect_chains {
 		throw("$resolved: empty file"), return unless $source;
 		logpkg('debug', "format: $format, source: \n",$source);
 		my $ref = decode($source, $format);
-		logpkg('debug', sub{Dumper $ref});
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 
