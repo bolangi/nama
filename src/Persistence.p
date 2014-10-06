@@ -276,24 +276,6 @@ sub restore_state_from_file {
 	restore_global_effect_chains();
 
 	
-	my @vars = qw(
-				@tracks_data
-				@bus_data
-				@groups_data
-				@marks_data
-				@fade_data
-				@edit_data
-				@inserts_data
-	);
-
-	# remove non HASH entries
-	map {
-		my $var = $_;
-		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
-		logpkg('debug', "want to eval: $eval_text "); 
-		eval $eval_text;
-	} @vars;
-
 
 	####### Backward Compatibility ########
 
