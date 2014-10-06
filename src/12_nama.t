@@ -212,7 +212,7 @@ process_command('add_effect time_reverb3');
 
 like( this_op_o()->code, qr/time_reverb3/, "apply preset");
 
-is ($this_track->ops->[0], this_op_o()->id, "positioned before vol/pan faders");
+is (this_op_o()->track_effect_index, 0, "positioned before vol/pan faders");
 
 process_command('add_effect decimator 1 2');
 
