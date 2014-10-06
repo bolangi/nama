@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 122;
+use Test::More tests => 123;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -221,6 +221,10 @@ like( this_op_o()->code, qr/decimator/, "apply LADSPA effect");
 is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
 
 }
+
+process_command('vol -2');
+
+is( $this_track->vol_o->params->[0], -2, "modify effect" );
 
 process_command('source 2');
 
