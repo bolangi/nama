@@ -658,7 +658,7 @@ sub modify_effect {
 	
 	my $FX = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
-	$FX->modify_effect($parameter, $sign, $value);
+	$FX->_modify_effect($parameter, $sign, $value);
 }
 
 
