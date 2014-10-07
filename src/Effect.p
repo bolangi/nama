@@ -161,9 +161,6 @@ sub new {
 	$self
 }
 
-sub bypassed 	{ my $self = shift; 
-				  $self->{bypassed} ? 'bypassed' : undef}
-
 # fx method delivers hash, previously via $fx->{ applied}->{$id}
 # TODO: get rid of this entirely
 sub fx	 		{ my $self = shift; $self }	
