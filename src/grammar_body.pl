@@ -608,7 +608,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { ::pager( $::fx->{params}->{$::this_track->vol}[0]); 1}
+vol: _vol { ::pager( $::this_track->vol_level); 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -633,7 +633,7 @@ pan: _pan sign panval {
 	1;} 
 panval: float 
       | dd
-pan: _pan { ::pager( $::fx->{params}->{$::this_track->pan}[0]); 1}
+pan: _pan { ::pager( $::this_track->pan_level); 1}
 pan_right: _pan_right { ::pan_check($::this_track, 100 ); 1}
 pan_left:  _pan_left  { ::pan_check($::this_track,    0 ); 1}
 pan_center: _pan_center { ::pan_check($::this_track,   50 ); 1}
