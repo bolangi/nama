@@ -333,35 +333,38 @@ sub restore_state_from_file {
 		delete $fx->{params};
 	}
 
-	#######################################
-	#  destroy and recreate all buses
 
-	::Bus::initialize();	
-
+	# restore effects, no change to track objects needed
+	
+	map
+	{ my %args = %$_;
+		my $class = delete $args{class};
+		my $FX = $class->new(%args, restore => 1);
+	} @effects_data;
+	
 	# restore user buses
 		
+	::Bus::initialize();	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
-
-	create_system_buses();  # any that are missing
-
-	# restore user tracks
-	
-	my $did_apply = 0;
+	create_system_buses();  # needed to avoid missing bus error
+							# shouldn't they be saved?
 
 	# temporary turn on mastering mode to enable
 	# recreating mastering tracksk
 
-	my $current_master_mode = $mode->{mastering};
-	$mode->{mastering} = 1;
+	#my $current_master_mode = $mode->{mastering};
+	#$mode->{mastering} = 1;
 
+	# convert field "latency" to "latency_op"
 	map{ $_->{latency_op} = delete $_->{latency} if $_->{latency} } @tracks_data;
+
+	# restore tracks
 	map{ 
-		my %h = %$_; 
-		my $class = $h{class} || "::Track";
-		my $track = $class->new( %h );
+		my %args = %$_; 
+		my $class = $args{class} || "::Track";
+		my $track = $class->new( %args, restore => 1 );
 	} @tracks_data;
 
-	$mode->{mastering} = $current_master_mode;
 
 	# restore inserts
 	
@@ -381,20 +384,12 @@ sub restore_state_from_file {
 	} @tracks_data;
 
 	$ui->create_master_and_mix_tracks();
-
-	# restore effects
-	
-	map
-	{ my %args = %$_;
-		my $class = delete $args{class};
-		my $FX = $class->new(%args);
-	} @effects_data;
 	
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::audio_tracks();# exit; 
-	$did_apply and $ui->manifest;
+	$ui->manifest;
 	logpkg('debug', sub{ join " ", map{ ref $_, $/ } all_tracks() });
 
 
