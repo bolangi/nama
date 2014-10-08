@@ -4,6 +4,7 @@ use Modern::Perl;
 use List::MoreUtils qw(insert_after_string);
 use ::Assign qw(json_out);
 use Carp qw(carp cluck croak confess);
+use Data::Dumper::Concise;
 use ::Log qw(logsub logpkg);
 use ::Globals qw(
 					$fx 
@@ -125,6 +126,8 @@ sub new {
 		logpkg('debug', "copid: $id defaults: @vals");
 		$args{params} = \@vals;
 	}
+	
+	logpkg('debug', "effect args: ",Dumper \%args);
 	
 	$self = bless \%args, $class;
 	$by_id{$self->id} = $self;
