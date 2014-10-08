@@ -275,19 +275,17 @@ sub restore_state_from_file {
 	
 	restore_global_effect_chains();
 
-	
-
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} lt "1.100"){ 
+	if ( $project->{save_file_version_number} < 1.100){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
-	if ( $project->{save_file_version_number} lt 1.105){ 
+	if ( $project->{save_file_version_number} < 1.105){ 
 		map{ $_->{class} = '::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
-	if ( $project->{save_file_version_number} lt "1.109"){ 
+	if ( $project->{save_file_version_number} < 1.109){ 
 		map
 		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
@@ -303,7 +301,7 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} lt "1.111"){ 
+	if ( $project->{save_file_version_number} < 1.111){ 
 		map
 		{
 			convert_rw($_);
@@ -321,7 +319,7 @@ sub restore_state_from_file {
 
 	# convert effect object format
 	
-	if ( $fx->{applied } ) # save version < 1.201
+	if ( $project->{save_file_version_number} < 1.201 )
 	{
 		@effects_data = 
 			map{ my $hashref = $fx->{applied}->{$_}; 
