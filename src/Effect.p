@@ -56,12 +56,16 @@ sub DESTROY {}
 
 sub new {
 	my ($class, %args) = @_;
-	my ($n,  $type, $id, $parent_id, $surname, $values)  = 
-	@args{qw(chain type effect_id parent_id surname values)};
+	my ($n,  $type, $parent_id, $surname, $values)  = 
+	@args{qw(chain type parent_id surname values)};
+
+	# we want to changeover to just using "id" 
+	my $id = $args{id}||$args{effect_id};
 
 	delete $args{effect_id};
 	delete $args{values};
 	delete $args{before};
+	my $restore = delete $args{restore};
 
 	# we will introduce the ID later, if needed as the 'id' field
 
@@ -131,6 +135,8 @@ sub new {
 	
 	$self = bless \%args, $class;
 	$by_id{$self->id} = $self;
+	
+	return $self if $restore;
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
