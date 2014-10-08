@@ -62,6 +62,8 @@ sub new {
 	my %vals = @_;
 	my $novol = delete $vals{novol};
 	my $nopan = delete $vals{nopan};
+	my $restore = delete $vals{restore};
+	say "restoring track $vals{name}" if $restore;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
@@ -96,8 +98,8 @@ sub new {
 	$track_names{$vals{name}}++;
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_pan_control($n) unless $nopan;
-	::add_volume_control($n) unless $novol;
+	::add_pan_control($n) unless $nopan or $restore;
+	::add_volume_control($n) unless $novol or $restore;
 
 	$::this_track = $object;
 	$::ui->track_gui($object->n) unless $object->hide;
