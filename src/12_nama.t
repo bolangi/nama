@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 123;
+use Test::More tests => 124;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -203,7 +203,6 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
-{ # effect tests, confine lexical variables
 my ($vol_id) = $this_track->vol;
 
 ok(   defined $vol_id and $::Effect::by_id{$vol_id} , "apply volume control");
@@ -220,11 +219,14 @@ like( this_op_o()->code, qr/decimator/, "apply LADSPA effect");
 
 is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
 
-}
-
 process_command('vol -2');
 
 is( $this_track->vol_o->params->[0], -2, "modify effect" );
+
+process_command(join " ", 'position_effect', this_op_o()->id, 'ZZZ');
+
+is( $this_track->ops->[-1], this_op_o()->id, 
+	'position effect at end, using ZZZ pseudo-id');
 
 process_command('source 2');
 
