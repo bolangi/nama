@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 125;
+use Test::More tests => 126;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -232,6 +232,11 @@ process_command(join " ", 'position_effect', this_op_o()->id, $vol_id);
 
 is( $this_track->ops->[this_op_o()->track_effect_index + 1], $vol_id, 
 	"position effect before another effect");
+
+my $op_id = this_op_o()->id;
+process_command("remove_effect $op_id");
+
+ok( (not grep { $_ eq $op_id } @{$this_track->ops}), 'remove effect');
 
 process_command('source 2');
 
