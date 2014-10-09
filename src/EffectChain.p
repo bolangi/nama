@@ -77,7 +77,6 @@ sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
 	my $class = shift;	
-	defined $n or die 'key var $n is undefined';
 	my %vals = @_;
 
 	# we need to so some preparation if we are creating
