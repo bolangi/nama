@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 124;
+use Test::More tests => 125;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -227,6 +227,11 @@ process_command(join " ", 'position_effect', this_op_o()->id, 'ZZZ');
 
 is( $this_track->ops->[-1], this_op_o()->id, 
 	'position effect at end, using ZZZ pseudo-id');
+
+process_command(join " ", 'position_effect', this_op_o()->id, $vol_id);
+
+is( $this_track->ops->[this_op_o()->track_effect_index + 1], $vol_id, 
+	"position effect before another effect");
 
 process_command('source 2');
 
