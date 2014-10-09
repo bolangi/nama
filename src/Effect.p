@@ -564,9 +564,17 @@ sub _add_effect {  # append effect
 	}
 	else 
 	{
-		$p->{values} = fx_defaults($code) 
-			if ! $values 
-			or ref $values and ! scalar @{ $values };
+		# assign defaults if no values supplied
+		my $count = $fx_cache->{registry}->[effect_index($code)]->{count} ;
+		my @values = @$values;
+		my @defaults = fx_defaults($code); 
+		for my $i (0..$count - 1)
+		{
+			$values[$_] = (! defined $values[$_] or $values[$_] eq '*') 
+						? $defaults[$_]
+						: $values[$_] 
+		}  
+		$p->{values} = \@values if @values;
 		$FX = ::Effect->new(%$p);
 		if( ! $FX->name ){
 		while( my ($alias, $code) = each %{$fx->{alias}} )
@@ -728,14 +736,15 @@ sub effect_index {
 }
 
 sub fx_defaults {
-	my $id = shift;
-	my $i = effect_index($id);
+	my $code = shift;
+	my $i = effect_index($code);
 	my $values = [];
 	foreach my $p ( @{ $fx_cache->{registry}->[$i]->{params} })
 	{
 		return [] unless defined $p->{default};
 		push @$values, $p->{default};
 	}
+	$values
 }
 	
 
