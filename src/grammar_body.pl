@@ -139,6 +139,7 @@ someval: /[\w.+-]+/ # [word character, period, plus, minus] {1,}
 					# used in: set_track, loop_enable
 sign: '+' | '-' | '*' | '/' 
 					# [plus, minus, times, divide] {1}
+parameter_value: '*' | value
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 					# used in: mark times and effect_parameter values
 					# optional sign
@@ -806,9 +807,9 @@ known_effect_type: effect {
 before: fx_alias
 fx_name: ident { $::this_track->effect_id_by_name($item{ident}) }
 fx_surname: ident { $::this_track->with_surname($item{ident}) }
-add_effect: _add_effect add_target value(s?) before(?) {
+add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	my ($code, $effect_chain);
-	my $values = $item{'value(s?)'};
+	my $values = $item{'parameter_value(s?)'};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
 	if( my $fxc = ::is_effect_chain($item{add_target}) )

@@ -567,12 +567,10 @@ sub _add_effect {  # append effect
 		# assign defaults if no values supplied
 		my $count = $fx_cache->{registry}->[effect_index($code)]->{count} ;
 		my @values = @$values;
-		my @defaults = fx_defaults($code); 
+		my @defaults = @{fx_defaults($code)};
 		for my $i (0..$count - 1)
 		{
-			$values[$_] = (! defined $values[$_] or $values[$_] eq '*') 
-						? $defaults[$_]
-						: $values[$_] 
+		$values[$i] = $defaults[$i] if ! defined $values[$i] or $values[$i] eq '*' 
 		}  
 		$p->{values} = \@values if @values;
 		$FX = ::Effect->new(%$p);
