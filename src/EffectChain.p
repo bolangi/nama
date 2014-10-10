@@ -295,9 +295,6 @@ sub add_region {
 				region_end	 => $self->{region}->[1]);
 }
 
-sub add_all {
-	my($self, $track, $successor) = @_;
-}
 sub add {
 	my ($self, $track, $successor) = @_;
 	my $args = {};

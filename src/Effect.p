@@ -556,7 +556,7 @@ sub _add_effect {  # append effect
 	@$p{qw( chain before    type parent_id  effect_id values effect_chain surname)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
-	my $add_effects_sub;
+	my $add_effects_sub; # we will execute this with engine stopped
 	my $FX;
 	if( $effect_chain)
 	{
