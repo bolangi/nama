@@ -57,7 +57,8 @@ sub prepare_static_effects_data{
 			file => $effects_cache, 
 			vars => [qw($fx_cache)],
 			class => '::',
-			format => 'json');
+			format => 'json') unless is_test_script();
+				
 	}
 	prepare_effect_index();
 }
