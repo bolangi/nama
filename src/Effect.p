@@ -594,8 +594,7 @@ sub _add_effect {  # append effect
 sub _insert_effect {  # call only from add_effect
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
-	my ($before, $code, $values, $effect_chain) 
-		= @$p{qw(before type values effect_chain)};
+	my ($before, $code, $values, $effect_chain) = @$p{qw(before type values effect_chain)};
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -616,18 +615,19 @@ sub _insert_effect {  # call only from add_effect
 	#logpkg('debug', "@{$track->ops}")
 
 	my $offset = fxn($before)->track_effect_index;
+	my $last_index = $#{$track->ops};
 
 	# note ops after insertion point 
-	my @after_ops = @{$track->ops}[$offset..$#{$track->ops}];
+	my @after_ops = @{$track->ops}[$offset..$last_index];
 
-	# temporarily remove the corresponding Ecasound chain operators
+	# remove corresponding chain operators from the engine
 	logpkg('debug',"ops to remove and re-apply: @after_ops");
 	my $connected = ::eval_iam('cs-connected');
 	if ( $connected ){  
 		map{ remove_op($_)} reverse @after_ops; # reverse order for correct index
 	}
 
-	# temporarily remove the effects
+	# remove the corresponding ids from the track list
 	splice @{$track->ops}, $offset;
 
 	# add the new effect in the proper position
