@@ -1,7 +1,7 @@
 { 
 package ::Effect;
 use Modern::Perl;
-use List::MoreUtils qw(insert_after_string);
+use List::MoreUtils qw(first_index insert_after_string);
 use ::Assign qw(json_out);
 use Carp qw(carp cluck croak confess);
 use Data::Dumper::Concise;
@@ -620,13 +620,7 @@ sub _insert_effect {  # call only from add_effect
 	#logpkg('debug', $track->name, $/;
 	#logpkg('debug', "@{$track->ops}")
 
-	# find offset 
-	
-	my $offset = 0;
-	for my $id ( @{$track->ops} ){
-		last if $id eq $before;
-		$offset++;
-	}
+	my $offset = first_index {$before eq $_} @{$track->ops} ;
 
 	# note ops after insertion point 
 	my @after_ops = @{$track->ops}[$offset..$#{$track->ops}];
