@@ -292,6 +292,7 @@ sub _effect_index {
 }
 sub _modify_effect {
 	my ($self, $parameter, $sign, $value) = @_;
+	$sign //= "";
 	my $op_id = $self->id;
 
 	$parameter--; # convert to zero-based
@@ -303,14 +304,16 @@ sub _modify_effect {
 		unless ($parameter >= 0 and $parameter < $parameter_count);
 	::pager("$op_id: parameter $parameter is read-only, skipping\n"), return 
 		if $self->is_read_only($parameter);
-		my $new_value = $value; # unless $sign
+		my $new_value;
 		if ($sign) {
-			$new_value = 
- 			eval (join " ",
+			$new_value = eval 
+			(	join " ",
  				$self->params->[$parameter], 
  				$sign,
- 				$value);
-		};
+ 				$value
+			);
+		}
+		else { $new_value = $value }
 	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
 	effect_update_copp_set( 
 		$op_id, 
