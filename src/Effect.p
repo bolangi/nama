@@ -249,13 +249,8 @@ sub ecasound_effect_index {
 sub track_effect_index { # the position of the ID in the track's op array
 	my $self = shift;
 	my $id = $self->id;
-	my $n = $self->chain;
-	my $arr = $ti{$n}->ops;
-	logpkg('debug', "id: $id n: $n");
-	logpkg('debug', "@{$ti{$n}->ops}" );
-		for my $pos ( 0.. scalar @{ $ti{$n}->ops } - 1  ) {
-			return $pos if $arr->[$pos] eq $id; 
-		};
+	my $pos = first_index {$id eq $_} @{$self->track->ops} ;
+	$pos
 }
 sub sync_one_effect {
 		my $self= shift;
@@ -620,7 +615,7 @@ sub _insert_effect {  # call only from add_effect
 	#logpkg('debug', $track->name, $/;
 	#logpkg('debug', "@{$track->ops}")
 
-	my $offset = first_index {$before eq $_} @{$track->ops} ;
+	my $offset = fxn($before)->track_effect_index;
 
 	# note ops after insertion point 
 	my @after_ops = @{$track->ops}[$offset..$#{$track->ops}];
