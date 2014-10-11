@@ -87,7 +87,6 @@ sub process_line {
 		setup_hotkeys() if $config->{hotkeys_always};
 	}
 	if (! engine_running() ){
-		# disable consistency check
 		my $result = check_fx_consistency();
 		logpkg('logcluck',"Inconsistency found in effects data",
 			Dumper ($result)) if $result->{is_error};
@@ -115,6 +114,8 @@ sub process_command {
 	my $input_was = $input;
 
 	# parse repeatedly until all input is consumed
+	# return true on complete success
+	# return false if any part of command fails
 	
 	my $was_error;
 	
@@ -148,15 +149,7 @@ sub process_command {
 		}
 	}
 
-=comment
-	# skip unconverted projects
-	return unless scalar %::Effect::by_id;
-
-	# return true on complete success
-	# return false on any part of command failure
-	
-	return ! $was_error
-=cut
+	! $was_error
 }
 sub do_user_command {
 	my($cmd, @args) = @_;
