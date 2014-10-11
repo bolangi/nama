@@ -2,6 +2,7 @@
 package ::;
 use Modern::Perl;
 sub git { 
+	return if is_test_script();
 	$config->{use_git} or warn("@_: git command, but git is not enabled.
 You may want to set use_git: 1 in .namarc"), return;
 	logpkg('debug',"VCS command: git @_"); 

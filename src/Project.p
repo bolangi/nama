@@ -147,7 +147,7 @@ sub load_project {
 	restart_wav_memoize();
 	
 
-	if( $config->{use_git} ){
+	if( $config->{use_git} and not is_test_script()){
 		my $initializing_repo;
 		Git::Repository->run( init => project_dir()), $initializing_repo++
 			unless -d join_path( project_dir().  '.git');
