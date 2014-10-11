@@ -205,7 +205,7 @@ is( $this_track->name, 'sax', "current track assignment");
 
 my ($vol_id) = $this_track->vol;
 
-ok(   defined $vol_id and $::Effect::by_id{$vol_id} , "apply volume control");
+ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");
 
 process_command('add_effect time_reverb3');
 
