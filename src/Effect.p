@@ -415,7 +415,6 @@ sub position_effect {
 	process_command('show_track');
 }
 
-
 #### Effect related routines, some exported, non-OO
 
 sub import_engine_subs {
@@ -513,7 +512,6 @@ sub set_chain_value {
 
 }
 
-
 sub add_effect {
 	my $p = shift;
 	logsub("&add_effect");
@@ -541,21 +539,21 @@ sub add_effect {
 	# either insert or add, depending on 'before' setting
 	
 	my $id = (defined $p->{before} and $p->{before} ne 'ZZZ')
-				?_insert_effect($p) 
-				: _add_effect($p);
+				? insert_effect($p) 
+				: append_effect($p);
 }
 
-sub _add_effect {  # append effect
+sub append_effect {
 	my $p = shift;
-	my (    $n,   $before, $code,$parent_id,$id, $values,$effect_chain, $surname) =
-	@$p{qw( chain before    type parent_id  effect_id values effect_chain surname)};
+	my (    $n,    $code,$parent_id,$id, $values,$effect_chain, $surname) =
+	@$p{qw( chain type parent_id  effect_id values effect_chain surname)};
 	! $p->{chain} and
 		carp("effect id: $code is missing track number, skipping\n"), return ;
 	my $add_effects_sub; # we will execute this with engine stopped
 	my $FX;
 	if( $effect_chain)
 	{
-		$add_effects_sub = sub{ $effect_chain->add($ti{$n}, $before)};
+		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
 	}
 	else 
 	{
@@ -591,7 +589,7 @@ sub _add_effect {  # append effect
 	$FX->id
 
 }
-sub _insert_effect {  # call only from add_effect
+sub insert_effect {
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
 	my ($before, $code, $values, $effect_chain) = @$p{qw(before type values effect_chain)};
@@ -631,7 +629,7 @@ sub _insert_effect {  # call only from add_effect
 	splice @{$track->ops}, $offset;
 
 	# add the new effect in the proper position
-	my $op = _add_effect($p);
+	my $op = append_effect($p);
 
 	logpkg('debug',"@{$track->ops}");
 
