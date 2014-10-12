@@ -2,9 +2,9 @@
 package ::Effect;
 use Modern::Perl;
 use List::MoreUtils qw(first_index insert_after_string);
-use ::Assign qw(json_out);
 use Carp qw(carp cluck croak confess);
 use Data::Dumper::Concise;
+use ::Assign qw(json_out);
 use ::Log qw(logsub logpkg);
 use ::Globals qw(
 					$fx 
