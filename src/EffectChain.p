@@ -12,7 +12,7 @@ use Data::Dumper::Concise;
 use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
-use ::Effect  qw(fxn);
+use ::Effect  qw(fxn append_effect);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
 

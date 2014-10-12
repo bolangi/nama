@@ -486,6 +486,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					new_effect_id
 					add_effect
+					append_effect
 					remove_effect
 					remove_fader_effect
 					modify_effect
@@ -598,6 +599,9 @@ sub append_effect {
 	if( $effect_chain)
 	{
 		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
+		$FX = fxn($ti{$n}->op); 
+		# we return a single effect object (last applied)
+		# even though we are applying multiple effects
 	}
 	else 
 	{
