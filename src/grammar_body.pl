@@ -812,14 +812,14 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	my $values = $item{'parameter_value(s?)'};
 	my $args = { 	track  => $::this_track, 
 					values => $values };
+
+	# add_target may be the name of an effect chain
+	
 	if( my $fxc = ::is_effect_chain($item{add_target}) )
 	{ 
-		if( $fxc->ops_data and $item{'values(s?)'} and
-			scalar @{$fxc->ops_data} == 1 and scalar @{$item{'values(s?)'}})
-			{ $args->{type} 		= $fxc->ops_data->[0]->{type} 	}
-		else{ $args->{effect_chain}	= $fxc 					}
+				$args->{effect_chain}	= $fxc
 	}
-	else{ 	  $args->{type}			= $item{add_target}				}
+	else{ 	  	$args->{type}			= $item{add_target}				}
 	# place effect before fader if there is one
 	my $fader = 
 			   ::fxn($::this_track->pan) && $::this_track->pan
