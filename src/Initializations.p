@@ -254,7 +254,7 @@ sub initialize_interfaces {
 
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
-	$project->{name} = shift @ARGV unless is_test_script();
+	$project->{name} = shift @ARGV;
 	{no warnings 'uninitialized';
 	logpkg('debug',"project name: $project->{name}");
 	}
