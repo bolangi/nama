@@ -596,6 +596,7 @@ sub insert_effect {
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
 	my ($before, $code, $values, $effect_chain) = @$p{qw(before type values effect_chain)};
+	append_effect($p), return if $before eq 'ZZZ';
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -607,15 +608,14 @@ sub insert_effect {
 		::stop_command();
 		sleeper( 0.05); 
 	}
-	my $n = fxn($before)->chain or 
-		pager(qq[Insertion point "$before" does not exist.  Skipping.\n]), 
-		return;
-	
-	my $track = $ti{$n};
+	my $FX = fxn($before) or die "$before: effect ID not found";
+	my $track = $FX->track;
+	$this_track eq $FX->track or die "$before is not on current track";
+	#
 	#logpkg('debug', $track->name, $/;
 	#logpkg('debug', "@{$track->ops}")
 
-	my $offset = fxn($before)->track_effect_index;
+	my $offset = $FX->track_effect_index;
 	my $last_index = $#{$track->ops};
 
 	# note ops after insertion point 
@@ -643,7 +643,7 @@ sub insert_effect {
 
 	# replace the corresponding Ecasound chain operators
 	if ($connected ){  
-		map{ apply_op($_, $n) } @after_ops;
+		map{ apply_op($_, $FX->chain) } @after_ops;
 	}
 		
 	if ($running){
