@@ -599,7 +599,6 @@ sub append_effect {
 	if( $effect_chain)
 	{
 		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
-		$FX = fxn($ti{$n}->op); 
 		# we return a single effect object (last applied)
 		# even though we are applying multiple effects
 	}
@@ -614,7 +613,7 @@ sub append_effect {
 			$values[$i] = $defaults[$i] if ! defined $values[$i] or $values[$i] eq '*' 
 		}  
 		$p->{values} = \@values if @values;
-		$FX = ::Effect->new(%$p);
+		$fx->{last} = $FX = ::Effect->new(%$p);
 		if( ! $FX->name ){
 		while( my ($alias, $code) = each %{$fx->{alias}} )
 		{ $FX->set_name($::this_track->unique_nickname($alias)), last if $code eq $FX->type }
@@ -632,7 +631,9 @@ sub append_effect {
 			$ti{$n}->unmute;
 
 		}
-		else { $add_effects_sub->() }
+		else { $add_effects_sub->(); }
+
+		$FX = $fx->{last};
 	}
 	$FX->id
 
