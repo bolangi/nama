@@ -29,7 +29,7 @@ sub apply_test_harness {
                        # load fake effects cache
 #                q(-c), 'test-project',
 
-				#qw(-L SUB), # logging
+				#qw(-L SUB); # logging
 
 	$jack->{periodsize} = 1024;
 }
