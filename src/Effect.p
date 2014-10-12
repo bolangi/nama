@@ -418,6 +418,47 @@ sub position_effect {
 	process_command('show_track');
 }
 
+sub apply_op {
+	logsub("&apply_op");
+	my $self = shift;
+	local $config->{category} = 'ECI_FX';
+	my $id = $self->id;
+	logpkg('debug', "id: $id");
+	logpkg('logcluck', "$id: expected effect entry not found!"), return
+		if effect_entry_is_bad($id);
+	my $code = $self->type;
+	my $dad = $self->parent;
+	my $chain = $self->chain; 
+	logpkg('debug', "chain: $chain, type: $code");
+	#  if code contains colon, then follow with comma (preset, LADSPA)
+	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
+	
+	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
+	my @vals = @{ $self->params };
+	logpkg('debug', "values: @vals");
+
+	# we start to build iam command
+
+	my $add_cmd = $dad ? "ctrl-add " : "cop-add "; 
+	
+	$add_cmd .= $code . join ",", @vals;
+
+	# append the -kx  operator for a controller-controller
+	$add_cmd .= " -kx" if $dad and $dad->is_controller;
+
+	logpkg('debug', "command: $add_cmd");
+
+	::eval_iam("c-select $chain"); 
+	::eval_iam("cop-select " . $dad->ecasound_effect_index) if $dad;
+	::eval_iam($add_cmd);
+	::eval_iam("cop-bypass on") if $self->bypassed;
+
+	my $owns = $self->owns;
+	(ref $owns) =~ /ARRAY/ or croak "expected array";
+	logpkg('debug',"children found: ". join ",", @$owns);
+
+}
+
 #### Effect related routines, some exported, non-OO
 
 sub import_engine_subs {
@@ -576,7 +617,7 @@ sub append_effect {
 		}
 		$ui->add_effect_gui($p) unless $ti{$n}->hide;
 
-		$add_effects_sub = sub{ apply_op($FX->id) };
+		$add_effects_sub = sub{ $FX->apply_op };
 	}
 	if( ::valid_engine_setup() )
 	{
@@ -643,7 +684,7 @@ sub insert_effect {
 
 	# replace the corresponding Ecasound chain operators
 	if ($connected ){  
-		map{ apply_op($_, $FX->chain) } @after_ops;
+		map{ fxn($_)->apply_op } @after_ops;
 	}
 		
 	if ($running){
@@ -739,59 +780,20 @@ sub fx_defaults {
 ## Ecasound engine -- apply/remove chain operators
 
 sub apply_ops {  # in addition to operators in .ecs file
-	
 	logsub("&apply_ops");
 	for my $n ( map{ $_->n } ::audio_tracks() ) {
 	logpkg('debug', "chain: $n, offset: $fx->{offset}->{$n}");
  		next unless ::ChainSetup::is_ecasound_chain($n);
 
-	# controllers will follow ops, so safe to apply all in order
-		for my $id ( @{ $ti{$n}->ops } ) {
-		apply_op($id);
-		}
+		# controllers will follow ops, so safe to apply all in order
+		map{ $_->apply_op }	# add operator to the ecasound chain
+		grep{$_} 			# exclude any null values (needed?)
+		map{ fxn($_) } 		# convert to objects
+		@{ $ti{$n}->ops }; 	# start with track ops list
 	}
 	ecasound_select_chain($this_track->n) if defined $this_track;
 }
 
-sub apply_op {
-	logsub("&apply_op");
-	local $config->{category} = 'ECI_FX';
-	my ($id, $selected_chain) = @_;
-	logpkg('debug', "id: $id");
-	logpkg('logcluck', "$id: expected effect entry not found!"), return
-		if effect_entry_is_bad($id);
-	my $code = fxn($id)->type;
-	my $dad = fxn($id)->parent;
-	my $chain = fxn($id)->chain; 
-	logpkg('debug', "chain: ".fxn($id)->chain." type: $code");
-	#  if code contains colon, then follow with comma (preset, LADSPA)
-	#  if code contains no colon, then follow with colon (ecasound,  ctrl)
-	
-	$code = '-' . $code . ($code =~ /:/ ? q(,) : q(:) );
-	my @vals = @{ fxn($id)->params };
-	logpkg('debug', "values: @vals");
-
-	# we start to build iam command
-
-	my $add_cmd = $dad ? "ctrl-add " : "cop-add "; 
-	
-	$add_cmd .= $code . join ",", @vals;
-
-	# append the -kx  operator for a controller-controller
-	$add_cmd .= " -kx" if $dad and $dad->is_controller;
-
-	logpkg('debug', "command: $add_cmd");
-
-	::eval_iam("c-select $chain") if $selected_chain != $chain;
-	::eval_iam("cop-select " . $dad->ecasound_effect_index) if $dad;
-	::eval_iam($add_cmd);
-	::eval_iam("cop-bypass on") if fxn($id)->bypassed;
-
-	my $owns = fxn($id)->owns;
-	(ref $owns) =~ /ARRAY/ or croak "expected array";
-	logpkg('debug',"children found: ". join ",", @$owns);
-
-}
 sub remove_op {
 	# remove chain operator from Ecasound engine
 
