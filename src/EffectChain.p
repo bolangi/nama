@@ -242,18 +242,6 @@ sub add_ops {
 		$args->{effect_id} = $_ unless fxn($_);
 
 		logpkg('debug',"args ", json_out($args));
-		# avoid incorrectly calling _insert_effect 
-		# (and controllers are not positioned relative to other  effects)
-		
-		# don't set before flag at all
-		# add_effect(effect_chain) calls # insert_effect(effect chain) 
-		# which removes operators, calls
-		# append_effect(effect_chain) 
-		# which calls append_effect(effect1)
-		# append_effect(effect2)
-		# then  insert_effect restores the operators
-		 
-		#$args->{before} = $ec_args->{before} unless $args->{parent_id};
 
 		$args->{surname} = $ec_args->{surname} if $ec_args->{surname};
 
