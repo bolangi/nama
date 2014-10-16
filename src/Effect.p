@@ -119,6 +119,9 @@ sub new {
 	# set defaults for effects without values provided
 	# but skip controllers
 	
+	# append_effect() also assigns defaults, so why not
+	# do all the assigning here?
+	
 	if (! $parent_id and ! $args{params}){
 		my @vals;
 		logpkg('debug', "no settings found, loading defaults if present");
