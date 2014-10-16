@@ -561,6 +561,16 @@ sub set_chain_value {
 
 }
 
+#		How effect chains are added (by default before fader)
+#		user command: add_effect <effect_chain_name>
+#		add_effect(effect_chain => $fxc) calls insert_effect() 
+#		insert_effect()
+#				* removes preceding operators 
+#				* calls append_effect(effect_chain => $fxc) 
+#					+ which calls $fxc->add
+#					+ which calls append_effect() for each effect
+#				* restores the operators
+		 
 sub add_effect {
 	my $p = shift;
 	logsub("&add_effect");
