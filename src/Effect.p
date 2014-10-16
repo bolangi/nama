@@ -648,7 +648,7 @@ sub append_effect {
 sub insert_effect {
 	my $p = shift;
 	local $config->{category} = 'ECI_FX';
-	my ($before, $code, $values, $effect_chain) = @$p{qw(before type values effect_chain)};
+	my ($before, $code, $values) = @$p{qw(before type values)};
 	append_effect($p), return if $before eq 'ZZZ';
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
