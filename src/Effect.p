@@ -56,20 +56,25 @@ sub DESTROY {}
 
 sub new {
 	my ($class, %args) = @_;
-	my ($n,  $type, $parent_id, $surname, $values)  = 
-	@args{qw(chain type parent_id surname values)};
 
-	# we want to changeover to just using "id" 
-	my $id = $args{id}||$args{effect_id};
+	#convert obsolete field names
+	#
+	# 	effect_id -> id 
+	# 	values -> params
+	# 	parent_id -> parent
+	
+	$args{id} //= $args{effect_id};
+	$args{params} //= $args{values};
+	$args{parent} //= $args{parent_id};
+	my $is_restore = $args{restore};
+	
 
-	delete $args{effect_id};
-	delete $args{values};
-	delete $args{before};
-	my $restore = delete $args{restore};
-
-	# we will introduce the ID later, if needed as the 'id' field
-
+	# remove arguments that won't be part of object
+	delete $args{$_} for qw(effect_id values parent_id restore before);
+	
 	my $self;
+
+	my $id = $args{id};
 
 	# return existing object if effect already exists
 	if ($self = fxn($id)){
@@ -80,43 +85,41 @@ sub new {
 	# allocate effect ID
 	my	$how_allocated = "recycled";
 	if ( ! $id ){ 
-		$id = $args{id} = new_effect_id();
+		$id = new_effect_id();
 		$how_allocated = "issued";
 	}
 	logpkg('debug',"$id: effect id $how_allocated");
 
-	my $i = effect_index($type);
-	defined $i or confess "$type: effect index not found.";
+	my $i = effect_index($args{type});
+	defined $i or confess "$args{type}: effect index not found.";
 
-	logpkg('debug',"$id: Issuing effect id for track $n");
+	logpkg('debug',"$id: Issuing effect id for track $args{chain}");
 	
 	$args{id}		= $id;
 	$args{display} 	= $fx_cache->{registry}->[$i]->{display};
 	$args{owns}		= [];
 
-	if ($surname)
+	my $track = $ti{$args{chain}};
+
+	if ($args{surname} and ! $is_restore)
 	{
-		my $track = $ti{$n};
-		my ($new_surname, $existing) = $track->unique_surname($surname);
-		if ( $new_surname ne $surname)
+		my ($new_surname, $existing) = $track->unique_surname($args{surname});
+		if ( $new_surname ne $args{surname})
 		{
 			::pager_newline(
 				"track ".
-				$track->name.qq(: other effects with surname "$surname" found,),
+				$track->name.qq(: other effects with surname "$args{surname}" found,),
 				qq(using "$new_surname". Others are: $existing.));
 			$args{surname} = $new_surname;
 		}
-		else{ $args{surname} = $surname }
 	}	
 
-	# set values
-	
-	$args{params} = $values; # maybe undefined
+	my $parent_id = $args{parent};
 
 	# set defaults for effects without values provided
 	# but skip controllers
 	
-	if (! $parent_id and ! $values){
+	if (! $parent_id and ! $args{params}){
 		my @vals;
 		logpkg('debug', "no settings found, loading defaults if present");
 		
@@ -130,13 +133,13 @@ sub new {
 		logpkg('debug', "copid: $id defaults: @vals");
 		$args{params} = \@vals;
 	}
-	
+
 	logpkg('debug', "effect args: ",Dumper \%args);
 	
 	$self = bless \%args, $class;
 	$by_id{$self->id} = $self;
 	
-	return $self if $restore;
+	return $self if $is_restore;
 
 	if ($parent_id) {
 		logpkg('debug', "parent found: $parent_id");
@@ -152,20 +155,18 @@ sub new {
 			push @$owns, $id;
 			logpkg('debug',sub{join " ", "my attributes:", json_out($self->as_hash)});
 		}
-		$self->set(parent => $parent_id);
 		logpkg('debug',sub{join " ", "my attributes again:", json_out($self->as_hash)});
 		# find position of parent id in the track ops array 
  		# and insert child id immediately afterwards
  		# unless already present
 
-		insert_after_string($parent_id, $id, @{$ti{$n}->ops})
-			unless grep {$id eq $_} @{$ti{$n}->ops}
+		insert_after_string($parent_id, $id, @{$track->ops})
+			unless grep {$id eq $_} @{$track->ops}
 	}
 	else { 
 
 		# append effect_id to track list unless already present
-		push @{$ti{$n}->ops}, $id 
-			unless grep {$id eq $_} @{$ti{$n}->ops}
+		push @{$track->ops}, $id unless grep {$id eq $_} @{$track->ops}
 	} 
 	$self
 }
