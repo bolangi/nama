@@ -608,11 +608,14 @@ sub append_effect {
 		my $count = $fx_cache->{registry}->[effect_index($code)]->{count} ;
 		my @values = @$values;
 		my @defaults = @{fx_defaults($code)};
-		for my $i (0..$count - 1)
+		if( @defaults )  
 		{
-			$values[$i] = $defaults[$i] if ! defined $values[$i] or $values[$i] eq '*' 
-		}  
-		$p->{values} = \@values if @values;
+			for my $i (0..$count - 1)
+			{
+				$values[$i] = $defaults[$i] if ! defined $values[$i] or $values[$i] eq '*' 
+			}  
+			$p->{values} = \@values if @values;
+		}
 		$fx->{last} = $FX = ::Effect->new(%$p);
 		if( ! $FX->name ){
 		while( my ($alias, $code) = each %{$fx->{alias}} )
