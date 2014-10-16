@@ -85,6 +85,7 @@ $fx->{params}					# parameters of applied effects
 								# hash by effect ID
 $fx->{params_log}				# for log scale sliders
 $fx->{alias}
+$fx->{last}						# last assigned effect ID
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser
