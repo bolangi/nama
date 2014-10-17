@@ -866,11 +866,11 @@ sub add_effect_gui {
 		for my $j ($fx_cache->{split}->{ctrl}{a}..$fx_cache->{split}->{ctrl}{z}) {   
 			push @items, 				
 				[ 'command' => $fx_cache->{registry}->[$j]->{name},
-					-command => sub { add_effect ({
-							parent_id => $id,
-							chain => $n,
-							values => [ $p  + 1 ],
-							type => $fx_cache->{registry}->[$j]->{code} } )  }
+					-command => sub { add_effect({
+							parent 	=> $id,
+							chain 	=> $n,
+							params 	=> [ $p  + 1 ],
+							type 	=> $fx_cache->{registry}->[$j]->{code} })  }
 				];
 
 		}

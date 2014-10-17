@@ -301,7 +301,7 @@ sub add_latency_compensation_op {
 				before 	=> $first_effect, 
 				track	=> $track,
 				type	=> $config->{latency_op}, 
-				values	=> \@args,
+				params 	=> \@args,
 		});
 
 		$track->set(latency_op => $id);

@@ -604,38 +604,37 @@ sub add_effect {
 
 sub append_effect {
 	my $p = shift;
-	my (    $n,    $code,$parent_id,$id, $values,$effect_chain, $surname) =
-	@$p{qw( chain type parent_id  effect_id values effect_chain surname)};
-	! $p->{chain} and
-		carp("effect id: $code is missing track number, skipping\n"), return ;
+	my %args = %$p;
+	$args{params} //= [];
+	my $track = $ti{$args{chain}};
 	my $add_effects_sub; # we will execute this with engine stopped
 	my $FX;
-	if( $effect_chain)
+	if( $args{effect_chain})
 	{
-		$add_effects_sub = sub{ $effect_chain->add($ti{$n})};
+		$add_effects_sub = sub{ $args{effect_chain}->add($track)};
 		# we return a single effect object (last applied)
 		# even though we are applying multiple effects
 	}
 	else 
 	{
 		# assign defaults if no values supplied
-		my $count = $fx_cache->{registry}->[effect_index($code)]->{count} ;
-		my @values = @$values;
-		my @defaults = @{fx_defaults($code)};
+		my $count = $fx_cache->{registry}->[effect_index($args{type})]->{count} ;
+		my @defaults = @{fx_defaults($args{type})};
 		if( @defaults )  
 		{
 			for my $i (0..$count - 1)
 			{
-				$values[$i] = $defaults[$i] if ! defined $values[$i] or $values[$i] eq '*' 
+				$args{params}[$i] = $defaults[$i] 
+					if ! defined $args{params}[$i] or $args{params}[$i] eq '*' 
 			}  
-			$p->{values} = \@values if @values;
 		}
-		$fx->{last} = $FX = ::Effect->new(%$p);
+		$fx->{last} = $FX = ::Effect->new(%args);
 		if( ! $FX->name ){
-		while( my ($alias, $code) = each %{$fx->{alias}} )
-		{ $FX->set_name($::this_track->unique_nickname($alias)), last if $code eq $FX->type }
+		while( my($alias, $type) = each %{$fx->{alias}} )
+		{ $FX->set_name($::this_track->unique_nickname($alias)), 
+			last if $type eq $FX->type }
 		}
-		$ui->add_effect_gui($p) unless $ti{$n}->hide;
+		$ui->add_effect_gui(\%args) unless $track->hide;
 
 		$add_effects_sub = sub{ $FX->apply_op };
 	}
@@ -643,9 +642,9 @@ sub append_effect {
 	{
 		if (::engine_running())
 		{ 
-			$ti{$n}->mute;
+			$track->mute;
 			::stop_do_start($add_effects_sub, 0.05);
-			$ti{$n}->unmute;
+			$track->unmute;
 
 		}
 		else { $add_effects_sub->(); }
@@ -657,28 +656,28 @@ sub append_effect {
 }
 sub insert_effect {
 	my $p = shift;
+	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
-	my ($before, $code, $values) = @$p{qw(before type values)};
-	append_effect($p), return if $before eq 'ZZZ';
+	append_effect($p), return if $args{before} eq 'ZZZ';
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
 	pager("Cannot insert effect before controller.\n"), return 
-		if fxn($before)->is_controller;
+		if fxn($args{before})->is_controller;
 	if ($running){
 		$ui->stop_heartbeat;
 		::mute();
 		::stop_command();
 		sleeper( 0.05); 
 	}
-	my $FX = fxn($before) or die "$before: effect ID not found";
-	my $track = $FX->track;
-	$this_track eq $FX->track or die "$before is not on current track";
+	my $pos = fxn($args{before}) or die "$args{before}: effect ID not found";
+	my $track = $pos->track;
+	$this_track eq $pos->track or die "$args{before} is not on current track";
 	#
 	#logpkg('debug', $track->name, $/;
 	#logpkg('debug', "@{$track->ops}")
 
-	my $offset = $FX->track_effect_index;
+	my $offset = $pos->track_effect_index;
 	my $last_index = $#{$track->ops};
 
 	# note ops after insertion point 

@@ -731,9 +731,9 @@ add_controller: _add_controller parent effect value(s?) {
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
-		parent_id => $parent, 
-		type	  => $code, 
-		values	  => $values,
+		parent	=> $parent, 
+		type 	=> $code, 
+		params	=> $values,
 	});
 	if($id)
 	{
@@ -752,9 +752,9 @@ add_controller: _add_controller effect value(s?) {
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
-		parent_id	=> $parent, 
-		type		=> $code, 
-		values		=> $values,
+		parent	=> $parent, 
+		type	=> $code, 
+		params 	=> $values,
 	});
 	if($id)
 	{
@@ -811,7 +811,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	my ($code, $effect_chain);
 	my $values = $item{'parameter_value(s?)'};
 	my $args = { 	track  => $::this_track, 
-					values => $values };
+					params	=> $values };
 
 	# add_target may be the name of an effect chain
 	
