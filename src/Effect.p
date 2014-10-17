@@ -63,14 +63,10 @@ sub new {
 	# 	values -> params
 	# 	parent_id -> parent
 	
-	$args{id} //= $args{effect_id};
-	$args{params} //= $args{values};
-	$args{parent} //= $args{parent_id};
 	my $is_restore = $args{restore};
-	
 
 	# remove arguments that won't be part of object
-	delete $args{$_} for qw(effect_id values parent_id restore before);
+	delete $args{$_} for qw(restore before);
 	
 	my $self;
 
