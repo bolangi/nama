@@ -654,7 +654,7 @@ sub insert_effect {
 	my $p = shift;
 	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
-	append_effect($p), return if $args{before} eq 'ZZZ';
+	append_effect(\%args), return if $args{before} eq 'ZZZ';
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -690,7 +690,7 @@ sub insert_effect {
 	splice @{$track->ops}, $offset;
 
 	# add the new effect in the proper position
-	my $op = append_effect($p);
+	my $op = append_effect(\%args);
 
 	logpkg('debug',"@{$track->ops}");
 
