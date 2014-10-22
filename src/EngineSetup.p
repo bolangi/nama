@@ -109,7 +109,7 @@ sub reconfigure_engine {
 		show_status();
 
 		eval_iam("setpos $project->{playback_position}")
- 				if $project->{playback_position}
+ 				if defined $project->{playback_position}
 					and not ::ChainSetup::really_recording();
 		start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
