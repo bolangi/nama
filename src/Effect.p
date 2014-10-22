@@ -57,12 +57,6 @@ sub DESTROY {}
 sub new {
 	my ($class, %args) = @_;
 
-	#convert obsolete field names
-	#
-	# 	effect_id -> id 
-	# 	values -> params
-	# 	parent_id -> parent
-	
 	my $is_restore = $args{restore};
 
 	# remove arguments that won't be part of object
