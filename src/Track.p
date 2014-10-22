@@ -1378,7 +1378,7 @@ sub add_volume_control {
 	my $vol_id = ::Effect->new(
 				chain => $n, 
 				type => $config->{volume_control_operator},
-				effect_id => $ti{$n}->vol, # often undefined
+				id => $ti{$n}->vol, # often undefined
 				)->id;
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
@@ -1391,7 +1391,7 @@ sub add_pan_control {
 	my $pan_id = ::Effect->new(
 				chain => $n, 
 				type => 'epp',
-				effect_id => $ti{$n}->pan, # often undefined
+				id => $ti{$n}->pan, # often undefined
 				)->id;
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time

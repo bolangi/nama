@@ -45,9 +45,6 @@ use ::Object qw(
 %is_attribute = map{ $_ => 1 } @attributes;
 initialize();
 
-# for compatibility with standard effects
-sub effect_id { $_[0]->{id} }  
-
 ## sugar for accessing individual effect attributes
 ## similar sugar is used for effects. 
 
@@ -235,11 +232,11 @@ sub add_ops {
 		{
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
-			values 		=> $self->params($_),
-			parent_id 	=> $self->parent($_),
+			params 		=> $self->params($_),
+			parent		=> $self->parent($_),
 		};
 
-		$args->{effect_id} = $_ unless fxn($_);
+		$args->{id} = $_ unless fxn($_);
 
 		logpkg('debug',"args ", json_out($args));
 

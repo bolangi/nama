@@ -597,7 +597,7 @@ sub track_gui {
 		my %p = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
 				type => 'ea',
-				effect_id => $vol_id,
+				id => $vol_id,
 				p_num		=> $p_num,
 				length => 300, 
 				);
@@ -655,7 +655,7 @@ sub track_gui {
 		my %q = ( 	parent => \$gui->{track_frame},
 				chain  => $n,
 				type => 'epp',
-				effect_id => $pan_id,
+				id => $pan_id,
 				p_num		=> $p_num,
 				);
 		# logpkg('debug',sub{ my %q = %p; delete $q{parent}; print "x=============\n%p\n",json_out(\%q) });
@@ -807,16 +807,16 @@ sub add_effect_gui {
 		logsub("&add_effect_gui");
 		my $ui = shift;
 		my %p 			= %{shift()};
-		my ($n,$code,$id,$parent_id,$parameter) =
-			@p{qw(chain type effect_id parent_id parameter)};
+		my ($n,$code,$id,$parent,$parameter) =
+			@p{qw(chain type id parent parameter)};
 		my $i = $fx_cache->{full_label_to_index}->{$code};
 		my $FX = fxn($id);
 
 		logpkg('debug', sub{json_out(\%p)});
 
-		logpkg('debug', "effect_id: $id, parent_id: $parent_id");
+		logpkg('debug', "id: $id, parent: $parent");
 		# $id is determined by effect_init, which will return the
-		# existing effect_id if supplied
+		# existing id if supplied
 
 		# check display format, may be 'scale' 'field' or 'hidden'
 		
@@ -827,7 +827,7 @@ sub add_effect_gui {
 		return if $display_type eq q(hidden);
 
 		my $frame ;
-		if ( ! $parent_id ){ # independent effect
+		if ( ! $parent ){ # independent effect
 			$frame = $gui->{tracks}->{$n}->{parents}->Frame->pack(
 				-side => 'left', 
 				-anchor => 'nw',)
@@ -883,7 +883,7 @@ sub add_effect_gui {
 				$fx_cache->{registry}->[$i]->{params}->[$p]->{name});
 			my $v =  # for argument vector 
 			{	parent => \$frame,
-				effect_id => $id, 
+				id => $id, 
 				p_num  => $p,
 			};
 			push @sliders,make_scale($v);
@@ -975,11 +975,11 @@ sub make_scale {
 	my $ref = shift;
 	my %p = %{$ref};
 # 	%p contains following:
-# 	effect_id   => operator id, to access dynamic effect params in %{$fx->{params}}
+# 	id   => operator id
 # 	parent => parent widget, i.e. the frame
 # 	p_num      => parameter number, starting at 0
 # 	length       => length widget # optional 
-	my $id = $p{effect_id};
+	my $id = $p{id};
 	my $FX = fxn($id);
 	my $n = $FX->chain;
 	my $code = $FX->type;
