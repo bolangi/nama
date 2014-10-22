@@ -73,6 +73,7 @@ sub reconfigure_engine {
 
 	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
+		$setup->{_old_snapshot} = status_snapshot_string();
 } 
 	else {
 		my $old = $setup->{_old_snapshot};
