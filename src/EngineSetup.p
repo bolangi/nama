@@ -167,7 +167,13 @@ sub status_snapshot {
 	grep{ $_->rec_status ne OFF } grep { $_->group ne 'Temp' } ::all_tracks();
 	\%snapshot;
 }
-sub status_snapshot_string { json_out(status_snapshot()) }
+sub status_snapshot_string { 
+	my $json = json_out(status_snapshot());
+	# hack to avoid false diff due to string/numerical
+	# representation 
+	$json =~ s/: "(\d+)"/: $1/g; 
+	$json
+}
 }
 	
 sub find_duplicate_inputs { # in Main bus only
