@@ -82,8 +82,14 @@ sub start_transport {
 sub stop_transport { 
 
 	logsub("&stop_transport"); 
+
+	# Since the playback position advances slightly during
+	# the fade, we restore the position to exactly where the
+	# stop command was issued.
+	
 	my $pos;
-	$pos = eval_iam('getpos') if eval_iam('cs-connected');
+	$pos = eval_iam('getpos') if eval_iam('cs-connected')
+		and ! ::ChainSetup::really_recording();
 	mute();
 	stop_command();
 	stop_midish_transport() 
@@ -99,7 +105,7 @@ sub stop_transport {
 
 	# restore exact position transport stop command was issued
 	
-	eval_iam("setpos $pos") if $pos;
+	set_position($pos) if $pos
 }
 sub toggle_transport {
 	if (engine_running()){ stop_transport() } 
