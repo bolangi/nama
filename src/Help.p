@@ -114,6 +114,7 @@ IAM
 		}
 	}
 	if (@output){
+		map{ s/_/-/g } @output;
 		::pager( @output ); 
 	} else { throw("$name: no help found.\n"); }
 	
