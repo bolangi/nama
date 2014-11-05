@@ -79,7 +79,6 @@ sub initialize_project_data {
 							::Bus
 							::Track
 							::Insert
-							::Engine
 							::Effect
 							::EffectChain
 							);
