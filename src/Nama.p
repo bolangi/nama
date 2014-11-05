@@ -180,16 +180,15 @@ sub cleanup_exit {
 				 map{ my $signal = $_; 
 					  kill $signal, $pid; 
 					  sleeper(0.2);
-					} (15); #,15,9);
+					} (15,9);
 				 waitpid $pid, 1;
 			} @{$_->{pids}};
 		}
 	}
- 	#kill 15, ecasound_pid() if $this_engine->{socket};  	
 	$text->{term}->rl_deprep_terminal() if defined $text->{term};
 	exit;
 }
-END { cleanup_exit() }
+END { }
 
 1;
 __DATA__

@@ -30,8 +30,7 @@ sub initialize_terminal {
 
 	# handle Control-C from terminal
 
-	# does nothing
-	#$SIG{INT} = \&cleanup_exit; 
+	$SIG{INT} = \&cleanup_exit; 
 
 	# doesn't do anything either
 	#$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
