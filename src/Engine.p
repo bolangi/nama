@@ -25,11 +25,6 @@ use ::Object qw(
     			on_exit
 				 );
 
-initialize();
-
-sub initialize {
-	%by_name = ();	
-}
 sub new {
 	my $class = shift;	
 	my %vals = @_;
