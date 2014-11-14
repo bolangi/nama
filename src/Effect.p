@@ -286,7 +286,7 @@ sub _effect_index {
 }
 sub _modify_effect {
 	my ($self, $parameter, $sign, $value) = @_;
-	$sign //= "";
+	no warnings 'uninitialized';
 	my $op_id = $self->id;
 
 	$parameter--; # convert to zero-based
