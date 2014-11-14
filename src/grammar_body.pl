@@ -628,7 +628,7 @@ nosolo: _nosolo { ::nosolo() ; 1}
 unity: _unity { ::unity($::this_track); 1}
 
 pan: _pan panval { 
-	::effect_update_copp_set( $::this_track->pan, 0, $item{panval});
+	::update_effect( $::this_track->pan, 0, $item{panval});
 	1;} 
 pan: _pan sign panval {
 	::modify_effect( $::this_track->pan, 1, $item{sign}, $item{panval} );

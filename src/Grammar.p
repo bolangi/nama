@@ -560,7 +560,7 @@ sub pan_check {
 	my $current = $track->pan_o->params->[0];
 	$track->set(old_pan_level => $current)
 		unless defined $track->old_pan_level;
-	effect_update_copp_set(
+	update_effect(
 		$track->pan,	# id
 		0, 					# parameter
 		$new_position,		# value
@@ -583,7 +583,7 @@ sub unity {
 	if ($save_level){
 		$track->set(old_vol_level => fxn($track->vol)->params->[0]);
 	}
-	effect_update_copp_set( 
+	update_effect( 
 		$track->vol, 
 		0, 
 		$config->{unity_level}->{fxn($track->vol)->type}
@@ -593,7 +593,7 @@ sub vol_back {
 	my $track = shift;
 	my $old = $track->old_vol_level;
 	if (defined $old){
-		effect_update_copp_set(
+		update_effect(
 			$track->vol,	# id
 			0, 					# parameter
 			$old,				# value
@@ -606,7 +606,7 @@ sub pan_back {
 	my $track = shift;
 	my $old = $track->old_pan_level;
 	if (defined $old){
-		effect_update_copp_set(
+		update_effect(
 			$track->pan,	# id
 			0, 					# parameter
 			$old,				# value

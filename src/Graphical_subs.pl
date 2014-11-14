@@ -630,7 +630,7 @@ sub track_gui {
 		$unity = $gui->{track_frame}->Button(
 				-command => sub { 
 					my $FX = fxn($vol_id);
-					::effect_update_copp_set(
+					::update_effect(
 						$vol_id, 
 						0, 
 						$config->{unity_level}->{$FX->type});
@@ -665,7 +665,7 @@ sub track_gui {
 
 		$center = $gui->{track_frame}->Button(
 			-command => sub { 
-				::effect_update_copp_set($pan_id, 0, 50);
+				::update_effect($pan_id, 0, 50);
 			}
 		  );
 	} else { 
@@ -1025,7 +1025,7 @@ sub make_scale {
 			-resolution => resolution($i, $p),
 		  -width => 12,
 		  -length => $p{length} ? $p{length} : 100,
-		  -command => sub { ::_effect_update($id, $p, $FX->params->[$p]) },
+		  -command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
 			-state => $FX->is_read_only($p) ? 'disabled' : 'normal',
 		  );
 
@@ -1041,7 +1041,7 @@ sub make_scale {
 				-variable => \$FX->{params_log}->[$p],
 		  		-command => sub { 
 					$FX->params->[$p] = exp $FX->params_log->[$p];
-					::_effect_update($id, $p, $FX->params->[$p]);
+					::_update_effect($id, $p, $FX->params->[$p]);
 					$log_display->configure(
 						-text => 
 						$fx_cache->{registry}->[$i]->{params}->[$p]->{name} =~ /hz|frequency/i
@@ -1065,7 +1065,7 @@ sub make_scale {
 		return ${ $p{parent} }->Entry(
 			-textvariable =>\$FX->params->[$p],
 			-width => 6,
-	#		-command => sub { ::_effect_update($id, $p, $FX->params->[$p]) },
+	#		-command => sub { ::_update_effect($id, $p, $FX->params->[$p]) },
 			# doesn't work with Entry widget
 			);	
 

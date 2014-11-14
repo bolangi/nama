@@ -722,7 +722,7 @@ sub fade_out_level {
 sub set_vol {
 	my $track = shift;
 	my $val = shift;
-	::effect_update_copp_set($track->vol, 0, $val);
+	::update_effect($track->vol, 0, $val);
 }
 sub import_audio  { 
 	my $track = shift;

@@ -309,7 +309,7 @@ sub _modify_effect {
 		}
 		else { $new_value = $value }
 	logpkg('debug', "id $op_id p: $parameter, sign: $sign value: $value");
-	effect_update_copp_set( 
+	update_effect( 
 		$op_id, 
 		$parameter,
 		$new_value);
@@ -486,8 +486,8 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 					modify_effect
 					modify_multiple_effects
 
-					_effect_update
-					effect_update_copp_set
+					_update_effect
+					update_effect
 					sync_effect_parameters
 					find_op_offsets
 					apply_ops
@@ -894,13 +894,13 @@ sub new_effect_id {
 ## synchronize Ecasound chain operator parameters 
 #  with Nama effect parameter
 
-sub _effect_update {
+sub _update_effect {
 	local $config->{category} = 'ECI_FX';
 
 	# update the parameters of the Ecasound chain operator
 	# referred to by a Nama operator_id
 	
-	#logsub("&effect_update");
+	#logsub("&update_effect");
 
 	return unless ::valid_engine_setup();
 	#my $es = ::eval_iam("engine-status");
@@ -943,9 +943,9 @@ sub _effect_update {
 # set both Nama effect and Ecasound chain operator
 # parameters
 
-sub effect_update_copp_set {
+sub update_effect {
 	my ($id, $param, $val) = @_;
-	_effect_update( @_ );
+	_update_effect( @_ );
 	return if ! defined fxn($id);
 	fxn($id)->params->[$param] = $val;
 }

@@ -10,7 +10,7 @@ our @ISA;
 use vars qw($n %by_index);
 use ::Globals qw(:singletons %tn @fade_data); 
 use ::Log qw(logsub logpkg);
-use ::Effect  qw(remove_effect add_effect effect_update_copp_set);
+use ::Effect  qw(remove_effect add_effect update_effect);
 # we don't import 'type' as it would clobber our $fade->type attribute
 use ::Object qw( 
 				 n
@@ -112,7 +112,7 @@ sub refresh_fade_controller {
 	# 	first fade is type 'out' : 100%
 	
 	 
-	effect_update_copp_set($track->fader,0, initial_level($track->name) * 100)
+	update_effect($track->fader,0, initial_level($track->name) * 100)
 }
 
 
