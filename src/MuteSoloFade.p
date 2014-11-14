@@ -37,10 +37,13 @@ sub fade {
 	my $wink  = 1/$config->{fade_resolution};
 	my $size = ($to - $from)/$steps;
 	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
+	# first step by step
 	for (1..$steps - 1){
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
+	# then to precisely the last value
+	modify_effect($id, $param, $to)
 }
 
 sub fadein {
