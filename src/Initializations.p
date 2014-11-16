@@ -13,7 +13,7 @@ sub is_test_script { $config->{opts}->{J} }
 	# if we are using fake JACK client data, 
 	# probably a test script is running
 
-sub apply_test_harness {
+sub apply_test_args {
 
 	push @ARGV, qw(-f /dev/null), # force to use internal namarc
 
@@ -33,8 +33,8 @@ sub apply_test_harness {
 
 	$jack->{periodsize} = 1024;
 }
-sub apply_ecasound_test_harness {
-	apply_test_harness();
+sub apply_ecasound_test_args {
+	apply_test_args();
 	@ARGV = grep { $_ ne q(-E) } @ARGV
 }
 

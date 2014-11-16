@@ -26,7 +26,7 @@ sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );
 
-apply_test_harness();
+apply_test_args();
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
 
