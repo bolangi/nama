@@ -938,7 +938,7 @@ sub bus { $bn{$_[0]->group} }
 sub effect_id_by_name {
 	my $track = shift;
 	my $ident = shift;
-	for my $FX (map{::fxn($_)}@{$track->ops})
+	for my $FX ($track->fancy_ops_o)
 	{ return $FX->id if $FX->name eq $ident }
 }
 sub effect_nickname_count {
