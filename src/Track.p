@@ -950,16 +950,17 @@ sub effect_nickname_count {
 sub unique_surname {
 	my ($track, $surname) = @_;
 	my $i = 0;
+	my $max = undef;
 	my @found;
 	for my $FX ($track->fancy_ops_o)
 	{ 
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
-			push @found, $FX->surname; 
-			$i = $1 if $1 and $1 > $i
+			push @found, $FX->surname;
+			$max = $1 if $1 > $max;
 		}
 	}
-	$surname. (@found ? ++$i : ""), join ' ',@found
+	"$surname$max", join ' ',@found
 }
 sub unique_nickname {
 	my ($track, $nickname) = @_;
@@ -975,6 +976,7 @@ sub unique_nickname {
 	}
 	$nickname. (@found ? ++$i : ""), "@found"
 }
+# return effect IDs matching a surname
 sub with_surname {
 	my ($track, $surname) = @_;
 	my @found;
