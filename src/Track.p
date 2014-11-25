@@ -957,10 +957,11 @@ sub unique_surname {
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
 			push @found, $FX->surname;
+			no warnings 'uninitialized';
 			$max = $1 if $1 > $max;
 		}
 	}
-	"$surname$max", join ' ',@found
+	$surname.++$max, join ' ',@found
 }
 sub unique_nickname {
 	my ($track, $nickname) = @_;
