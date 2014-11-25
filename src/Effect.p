@@ -91,19 +91,6 @@ sub new {
 
 	my $track = $ti{$args{chain}};
 
-	if ($args{surname} and ! $is_restore)
-	{
-		my ($new_surname, $existing) = $track->unique_surname($args{surname});
-		if ( $new_surname ne $args{surname})
-		{
-			::pager_newline(
-				"track ".
-				$track->name.qq(: other effects with surname "$args{surname}" found,),
-				qq(using "$new_surname". Others are: $existing.));
-			$args{surname} = $new_surname;
-		}
-	}	
-
 	my $parent_id = $args{parent};
 
 	# set defaults for effects without values provided
