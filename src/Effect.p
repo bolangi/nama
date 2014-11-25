@@ -581,6 +581,7 @@ sub add_effect {
 
 sub append_effect {
 	my $p = shift;
+	logsub("&append_effect",Dumper $p);
 	my %args = %$p;
 	$args{params} //= [];
 	my $track = $ti{$args{chain}};
@@ -608,7 +609,7 @@ sub append_effect {
 		$fx->{last} = $FX = ::Effect->new(%args);
 		if( ! $FX->name ){
 		while( my($alias, $type) = each %{$fx->{alias}} )
-		{ $FX->set_name($::this_track->unique_nickname($alias)), 
+		{ $FX->set_name($track->unique_nickname($alias)), 
 			last if $type eq $FX->type }
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
@@ -633,6 +634,7 @@ sub append_effect {
 }
 sub insert_effect {
 	my $p = shift;
+	logsub("&insert_effect",Dumper $p);
 	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
 	append_effect(\%args), return if $args{before} eq 'ZZZ';
@@ -694,6 +696,7 @@ sub insert_effect {
 	$op
 }
 sub modify_effect {
+	logsub("&modify_effect");
 	my ($op_id, $parameter, $sign, $value) = @_;
 		# $parameter: one-based
 	
@@ -704,6 +707,7 @@ sub modify_effect {
 
 
 sub modify_multiple_effects {
+	logsub("&modify_multiple_effects");
 	my ($op_ids, $parameters, $sign, $value) = @_;
 	map{ my $op_id = $_;
 		map{ 	my $parameter = $_;
@@ -755,6 +759,7 @@ sub full_effect_code {
 
 
 # get integer effect index for Nama effect registry
+# e.g. ea => 2
 sub effect_index {
 	my $code = shift;
 	my $i = $fx_cache->{full_label_to_index}->{full_effect_code($code)};
