@@ -204,10 +204,24 @@ sub AUTOLOAD {
 
 sub add_ops {
 	my($self, $track, $ec_args) = @_;
-	
+
 	# Higher priority: track argument 
 	# Lower priority:  effect chain's own track name attribute
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
+	
+
+	# make sure surname is unique
+	
+	my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
+	if ( $new_surname ne $ec_args->{surname})
+	{
+		::pager_newline(
+			"track ".
+			$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
+			qq(using "$new_surname". Others are: $existing.));
+		$ec_args->{surname} = $new_surname;
+	}
+
 	
 	logpkg('debug',$track->name,
 			qq(: adding effect chain ), $self->name, Dumper $self
@@ -219,12 +233,12 @@ sub add_ops {
 	# implemented by subclassing EffectChain 
 	# for cache/uncache)
 	
-	my @restore_ops_list;
+	my @ops_list;
 	if( $self->track_cache ){
-		@restore_ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
+		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
 								@{$self->ops_list}
 	} else {
-		@restore_ops_list = @{$self->ops_list};
+		@ops_list = @{$self->ops_list};
 	}
 	map 
 	{	
@@ -257,7 +271,7 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	} @restore_ops_list
+	} @ops_list
 }
 sub add_inserts {
 	my ($self, $track) = @_;
