@@ -42,7 +42,7 @@ sub fade {
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
-	# then to precisely the last value
+	# then the last value
 	modify_effect($id, $param, $to)
 }
 
