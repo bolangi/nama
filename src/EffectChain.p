@@ -250,6 +250,8 @@ sub add_ops {
 			parent		=> $self->parent($_),
 		};
 
+		
+		# drop the ID if it is already used
 		$args->{id} = $_ unless fxn($_);
 
 		logpkg('debug',"args ", json_out($args));

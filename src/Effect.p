@@ -607,10 +607,12 @@ sub append_effect {
 			}  
 		}
 		$fx->{last} = $FX = ::Effect->new(%args);
-		if( ! $FX->name ){
-		while( my($alias, $type) = each %{$fx->{alias}} )
-		{ $FX->set_name($track->unique_nickname($alias)), 
-			last if $type eq $FX->type }
+		if( ! $FX->name )
+		{
+			while( my($alias, $type) = each %{$fx->{alias}} )
+			{	$FX->set_name($track->unique_nickname($alias)), 
+				last if $type eq $FX->type 
+			}
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
 
