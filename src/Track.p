@@ -949,7 +949,9 @@ sub effect_nickname_count {
 }
 sub unique_surname {
 	my ($track, $surname) = @_;
-	my $i = 0;
+	# increment supplied surname to be unique to the track if necessary 
+	# return arguments:
+	# $surname, $previous_surnames
 	my $max = undef;
 	my @found;
 	for my $FX ($track->fancy_ops_o)
@@ -961,7 +963,7 @@ sub unique_surname {
 			$max = $1 if $1 > $max;
 		}
 	}
-	$surname.++$max, join ' ',@found
+	if (@found){ $surname.++$max, join ' ',@found } else { $surname }
 }
 sub unique_nickname {
 	my ($track, $nickname) = @_;
