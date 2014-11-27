@@ -550,11 +550,9 @@ sub set_chain_value {
 #				* restores the operators
 		 
 sub add_effect {
-	logsub('&add_effect');
+	#logsub('&add_effect');
 	my $args = shift;
-	say Dumper $args;
 	my $added = _add_effect($args);
-	say Dumper $added;
 	$added->[0]->id
 }
 sub _add_effect {
@@ -622,8 +620,10 @@ sub append_effect {
 		if( ! $FX->name )
 		{
 			while( my($alias, $type) = each %{$fx->{alias}} )
-			{	$FX->set_name($track->unique_nickname($alias)), 
-				last if $type eq $FX->type 
+			{	
+				$FX->set_name($track->unique_nickname($alias)), 
+				# need to reset 'each'
+				keys %{$fx->{alias}}, last if $type eq $FX->type 
 			}
 		}
 		$ui->add_effect_gui(\%args) unless $track->hide;
