@@ -836,7 +836,7 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	{
 		my $iname = $FX->fxname;
 		my $id = $FX->id;
-		::pager("Added $id, $iname");
+		::pager_newline("Added $id, $iname");
 		::set_current_op($id);
 	}
 }
