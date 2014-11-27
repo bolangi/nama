@@ -959,7 +959,7 @@ sub unique_surname {
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
 			push @found, $FX->surname;
-			no warnings 'uninitialized';
+			no warnings qw(uninitialized numeric);
 			$max = $1 if $1 > $max;
 		}
 	}
