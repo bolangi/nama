@@ -549,8 +549,16 @@ sub set_chain_value {
 #				* restores the operators
 		 
 sub add_effect {
+	logsub('&add_effect');
+	my $args = shift;
+	say Dumper $args;
+	my $added = _add_effect($args);
+	say Dumper $added;
+	$added->[0]->id
+}
+sub _add_effect {
 	my $p = shift;
-	logsub("&add_effect");
+	logsub("&_add_effect");
 	#logpkg('debug',sub{ "add effect arguments - 0:\n".json_out($p)});
 	
 	set_chain_value($p);
@@ -574,7 +582,7 @@ sub add_effect {
 
 	# either insert or add, depending on 'before' setting
 	
-	my $id = (defined $p->{before} and $p->{before} ne 'ZZZ')
+	my $added = (defined $p->{before} and $p->{before} ne 'ZZZ')
 				? insert_effect($p) 
 				: append_effect($p);
 }
@@ -586,15 +594,17 @@ sub append_effect {
 	$args{params} //= [];
 	my $track = $ti{$args{chain}};
 	my $add_effects_sub; # we will execute this with engine stopped
-	my $FX;
+	my @added;
 	if( $args{effect_chain})
 	{
+		# we will create and apply the effects later
+
 		$add_effects_sub = sub{ $args{effect_chain}->add($track)};
-		# we return a single effect object (last applied)
-		# even though we are applying multiple effects
 	}
 	else 
 	{
+		# create the effect now, apply it later
+		
 		# assign defaults if no values supplied
 		my $count = $fx_cache->{registry}->[effect_index($args{type})]->{count} ;
 		my @defaults = @{fx_defaults($args{type})};
@@ -606,7 +616,8 @@ sub append_effect {
 					if ! defined $args{params}[$i] or $args{params}[$i] eq '*' 
 			}  
 		}
-		$fx->{last} = $FX = ::Effect->new(%args);
+		my $FX = ::Effect->new(%args);
+		push @added, $FX;
 		if( ! $FX->name )
 		{
 			while( my($alias, $type) = each %{$fx->{alias}} )
@@ -623,23 +634,25 @@ sub append_effect {
 		if (::engine_running())
 		{ 
 			$track->mute;
-			::stop_do_start($add_effects_sub, 0.05);
+			my $result = ::stop_do_start($add_effects_sub, 0.05);
+			push @added, @$result if is_array($result);
 			$track->unmute;
-
 		}
-		else { $add_effects_sub->(); }
-
-		$FX = $fx->{last};
+		else { 
+			my $result = $add_effects_sub->(); 
+			push @added, @$result if is_array($result);
+		}
 	}
-	$FX->id
+	\@added
 
 }
+sub is_array { ref $_[0] eq 'ARRAY' }
 sub insert_effect {
 	my $p = shift;
 	logsub("&insert_effect",Dumper $p);
 	my %args = %$p;
 	local $config->{category} = 'ECI_FX';
-	append_effect(\%args), return if $args{before} eq 'ZZZ';
+	return(append_effect(\%args)) if $args{before} eq 'ZZZ';
 	my $running = ::engine_running();
 	pager("Cannot insert effect while engine is recording.\n"), return 
 		if $running and ::ChainSetup::really_recording();
@@ -675,7 +688,7 @@ sub insert_effect {
 	splice @{$track->ops}, $offset;
 
 	# add the new effect in the proper position
-	my $op = append_effect(\%args);
+	my $added = append_effect(\%args);
 
 	logpkg('debug',"@{$track->ops}");
 
@@ -695,7 +708,7 @@ sub insert_effect {
 		::unmute();
 		$ui->start_heartbeat;
 	}
-	$op
+	$added;
 }
 sub modify_effect {
 	logsub("&modify_effect");
