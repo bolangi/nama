@@ -234,6 +234,7 @@ sub add_ops {
 	# for cache/uncache)
 	
 	my @ops_list;
+	my @added;
 	if( $self->track_cache ){
 		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
 								@{$self->ops_list}
@@ -258,7 +259,9 @@ sub add_ops {
 
 		$args->{surname} = $ec_args->{surname} if $ec_args->{surname};
 
-		my $new_id = append_effect($args);
+		my $FX = append_effect($args)->[0];
+		push @added, $FX;
+		my $new_id = $FX->id;
 		
 		# the effect ID may be new, or it may be previously 
 		# assigned ID, 
@@ -273,7 +276,8 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	} @ops_list
+	} @ops_list;
+	\@added
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -305,12 +309,15 @@ sub add_region {
 
 sub add {
 	my ($self, $track, $successor) = @_;
+	# TODO stop_do_start should take place at this level
+	# possibly reconfiguring engine
 	my $args = {};
 	$args->{before} = $successor;
 	$args->{surname} = $self->name if $self->name;
-	$self->add_ops($track, $args);
+	my $added = $self->add_ops($track, $args);
 	$self->add_inserts($track);
 	$self->add_region($track) if $self->region;
+	$added
 
 }
 sub destroy {
