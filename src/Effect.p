@@ -467,6 +467,7 @@ our %EXPORT_TAGS = ( 'all' => [ qw(
 
 					new_effect_id
 					add_effect
+					_add_effect
 					append_effect
 					remove_effect
 					remove_fader_effect

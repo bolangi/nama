@@ -831,17 +831,14 @@ add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	}
 	my $predecessor = $item{'before(?)'}->[0] || $fader;
 	$args->{before} = $predecessor if $predecessor; 
- 	my $id = ::add_effect($args);
-	return 1 if $effect_chain;
-	if ($id)
+	my $added = ::_add_effect($args);
+	for my $FX(@$added)
 	{
-		no warnings 'uninitialized';
-		my $iname = ::fxn($id)->fxname;
+		my $iname = $FX->fxname;
+		my $id = $FX->id;
 		::pager("Added $id, $iname");
 		::set_current_op($id);
 	}
-	else { } 
-	1
 }
 
 add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
