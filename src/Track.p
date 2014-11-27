@@ -953,17 +953,17 @@ sub unique_surname {
 	# return arguments:
 	# $surname, $previous_surnames
 	my $max = undef;
-	my @found;
+	my %found;
 	for my $FX ($track->fancy_ops_o)
 	{ 
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
-			push @found, $FX->surname;
+			$found{$FX->surname}++;
 			no warnings qw(uninitialized numeric);
 			$max = $1 if $1 > $max;
 		}
 	}
-	if (@found){ $surname.++$max, join ' ',@found } else { $surname }
+	if (%found){ $surname.++$max, join ' ',sort keys %found } else { $surname }
 }
 sub unique_nickname {
 	my ($track, $nickname) = @_;
