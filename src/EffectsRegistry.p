@@ -8,40 +8,42 @@ no warnings 'uninitialized';
 ## register data about LADSPA plugins, and Ecasound effects and
 #  presets (names, ids, parameters, hints) 
 
-sub effects_cache {
-	state $registry_format = 'json';
-	is_test_script() 
-		? './nama/t/data/fake_effects_cache.json' # XXX bad hack for testing
-												# may not work for others 
-		: $file->effects_cache . ".$registry_format";
-}
 sub prepare_static_effects_data{
 	my $source = shift; 
 	
 	logsub("&prepare_static_effects_data");
 
-	my $effects_cache = effects_cache();
-
 	if (not is_test_script() ){
 		logpkg('debug', join "\n", "newplugins:", new_plugins());
 		if (! $source and ($config->{opts}->{r} or new_plugins())){ 
 
-			unlink $effects_cache;
+			unlink $file->effects_cache;
 			print "Regenerating effects data cache\n";
 		}
 	}
 
-	if ( ($source or -f $effects_cache) and ! $config->{opts}->{C}){  
-		logpkg('debug', "found effects cache: $effects_cache");
-		$source //= read_file($effects_cache); # scalar assign
+	# maybe $source
+	
+	if ($config->{opts}->{T} )
+	{
+		logpkg('debug', "using dummy effects data");
+		$source = $fx_cache->{fake};
+	}
+	elsif (-f $file->effects_cache and ! $config->{opts}->{C})
+	{  
+		logpkg('debug', "found effects cache: ",$file->effects_cache);
+		$source = read_file($file->effects_cache); # scalar assign
+	} 
+	if ($source)
+	{
 		assign(
 			data => decode($source, 'json'),
 			vars => [qw($fx_cache)],
 			class => '::'
 		);
-			
-	} else {
-		
+	}
+	else 
+	{
 		logpkg('debug', "reading in effects data, please wait...");
 		initialize_effect_index();
 		read_in_effects_data();  
@@ -52,9 +54,9 @@ sub prepare_static_effects_data{
 		integrate_cop_hints();
 		sort_ladspa_effects();
 		prepare_effects_help();
-		logpkg('debug', "updating effects cache on disk: $effects_cache");
+		logpkg('debug', "updating effects cache on disk: ",$file->effects_cache);
 		serialize (
-			file => $effects_cache, 
+			file => $file->effects_cache, 
 			vars => [qw($fx_cache)],
 			class => '::',
 			format => 'json') unless is_test_script();
@@ -95,13 +97,12 @@ sub lv2_plugin_list {
 }
 
 sub new_plugins {
-	my $effects_cache = effects_cache();
 	my @filenames = ladspa_plugin_list();	
 	push @filenames, lv2_plugin_list();
 	push @filenames, '/usr/local/share/ecasound/effect_presets',
                  '/usr/share/ecasound/effect_presets',
                  "$ENV{HOME}/.ecasound/effect_presets";
-	my $effects_cache_stamp = modified_stamp($effects_cache);
+	my $effects_cache_stamp = modified_stamp($file->effects_cache);
 	my $latest;
 	map{ my $mod = modified_stamp($_);
 		 $latest = $mod if $mod > $latest } @filenames;

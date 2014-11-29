@@ -9,7 +9,6 @@ use strict;
 use warnings;
 no warnings qw(uninitialized);
 
-our $fx_cache_json = read_file("t/data/fake_effects_cache.json");
 our ($expected_setup_lines);
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
@@ -17,6 +16,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("working directory: ",cwd);
 
 our $test_dir = "/tmp/nama-test";
+$fx_cache->{fake} = read_file("t/data/fake_effects_cache.json");
 
 cleanup_dirs();
 setup_dirs();
@@ -29,9 +29,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );
 apply_test_args();
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
-
 bootstrap_environment();
-prepare_static_effects_data($fx_cache_json);
 $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";

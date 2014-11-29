@@ -98,7 +98,7 @@ sub definitions {
 	}
 	$file = bless 
 	{
-		effects_cache 			=> ['.effects_cache', 		\&project_root],
+		effects_cache 			=> ['.effects_cache.json',	\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      			\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
@@ -232,7 +232,7 @@ sub definitions {
 sub initialize_interfaces {
 	
 	logsub("&intialize_interfaces");
-
+	
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
