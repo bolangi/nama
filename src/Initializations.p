@@ -9,7 +9,11 @@ package ::;
 use Modern::Perl; use Carp;
 use Socket qw(getnameinfo NI_NUMERICHOST) ;
 
-sub apply_test_harness {
+sub is_test_script { $config->{opts}->{J} }
+	# if we are using fake JACK client data, 
+	# probably a test script is running
+
+sub apply_test_args {
 
 	push @ARGV, qw(-f /dev/null), # force to use internal namarc
 
@@ -23,15 +27,14 @@ sub apply_test_harness {
 
 				q(-T), # don't initialize terminal
                        # load fake effects cache
+#                q(-c), 'test-project',
 
-				q(-S), # don't load static effects data
-
-				#qw(-L SUB), # logging
+				#qw(-L SUB); # logging
 
 	$jack->{periodsize} = 1024;
 }
-sub apply_ecasound_test_harness {
-	apply_test_harness();
+sub apply_ecasound_test_args {
+	apply_test_args();
 	@ARGV = grep { $_ ne q(-E) } @ARGV
 }
 
@@ -95,7 +98,7 @@ sub definitions {
 	}
 	$file = bless 
 	{
-		effects_cache 			=> ['.effects_cache', 		\&project_root],
+		effects_cache 			=> ['.effects_cache.json',	\&project_root],
 		gui_palette 			=> ['palette',        		\&project_root],
 		state_store 			=> ['State',      			\&project_dir ],
 		git_state_store 		=> ['State.json',      		\&project_dir ],
@@ -229,7 +232,7 @@ sub definitions {
 sub initialize_interfaces {
 	
 	logsub("&intialize_interfaces");
-
+	
 	if ( ! $config->{opts}->{t} and ::Graphical::initialize_tk() ){ 
 		$ui = ::Graphical->new();
 	} else {
@@ -247,6 +250,8 @@ sub initialize_interfaces {
 	can_load( modules => {jacks => undef})
 		and $jack->{use_jacks}++;
 	choose_sleep_routine();
+	initialize_terminal() unless $config->{opts}->{T};
+
 	$config->{want_logging} = initialize_logger($config->{opts}->{L});
 
 	$project->{name} = shift @ARGV;
@@ -352,8 +357,6 @@ exit;
 	}
 		
 	start_midish() if $config->{use_midish};
-
-	initialize_terminal() unless $config->{opts}->{T};
 
 	# set default project to "untitled"
 	
@@ -471,7 +474,6 @@ sub sanitize_remote_input {
 	$input
 }
 sub select_ecasound_interface {
-	::Effects::import_engine_subs();
 	my %args;
 	my $class;
 	if ($config->{opts}->{A} or $config->{opts}->{E})

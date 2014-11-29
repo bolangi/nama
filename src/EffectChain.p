@@ -12,7 +12,7 @@ use Data::Dumper::Concise;
 use Carp;
 use Exporter qw(import);
 use Storable qw(dclone);
-use ::Effects qw(fxn);
+use ::Effect  qw(fxn append_effect);
 use ::Log qw(logpkg logsub);
 use ::Assign qw(json_out);
 
@@ -45,9 +45,6 @@ use ::Object qw(
 %is_attribute = map{ $_ => 1 } @attributes;
 initialize();
 
-# for compatibility with standard effects
-sub effect_id { $_[0]->{id} }  
-
 ## sugar for accessing individual effect attributes
 ## similar sugar is used for effects. 
 
@@ -77,7 +74,6 @@ sub new {
 	# arguments: ops_list, ops_data, inserts_data
 	# ops_list => [id1, id2, id3,...];
 	my $class = shift;	
-	defined $n or die "key var $n is undefined";
 	my %vals = @_;
 
 	# we need to so some preparation if we are creating
@@ -106,7 +102,7 @@ sub new {
 		my $ops_data = {};
 		# ops data is taken preferentially 
 		# from ops_data argument, with fallback
-		# to existing effects, e.g. $fx->{applied}
+		# to existing effects
 		
 		# in both cases, we clone the data structures
 		# to ensure we don't damage the original
@@ -120,29 +116,14 @@ sub new {
 			}
 			else
 			{
-				$ops_data->{$_} 		  = dclone( $fx->{applied}->{$_} );# copy
-				$ops_data->{$_}->{params} = dclone( $fx->{params }->{$_} );# copy;
-				# our op IDs are ALL CAPS, so will not conflict
-				# with params when accessing via key
-				#
-				# however this would be wrong:
-				#
-				# map{ show_effect($_) }   keys %{$ops_data}
-				#
-				# because keys includes 'params'
-
-				
-				# we don't need these attributes
-				# chain will likely change
-				# when applied
-				delete $ops_data->{$_}->{chain};
-				delete $ops_data->{$_}->{display};
-
-				# the 'display' attribute was only used control 
-				# the GUI layout.
+				my $filtered_op_data = dclone( fxn($_)->as_hash );# copy
+				my @unwanted_keys = qw( chain bypassed name surname display);
+				delete $filtered_op_data->{$_} for @unwanted_keys;
+				$ops_data->{$_} = $filtered_op_data;
 			}
 
 		} @{$vals{ops_list}};
+		
 
 		$vals{ops_data} = $ops_data;
 
@@ -223,10 +204,24 @@ sub AUTOLOAD {
 
 sub add_ops {
 	my($self, $track, $ec_args) = @_;
-	
+
 	# Higher priority: track argument 
 	# Lower priority:  effect chain's own track name attribute
 	$track ||= $tn{$self->track_name} if $tn{$self->track_name};
+	
+
+	# make sure surname is unique
+	
+	my ($new_surname, $existing) = $track->unique_surname($ec_args->{surname});
+	if ( $new_surname ne $ec_args->{surname})
+	{
+		::pager_newline(
+			"track ".
+			$track->name.qq(: other effects with surname "$ec_args->{surname}" found,),
+			qq(using "$new_surname". Others are: $existing.));
+		$ec_args->{surname} = $new_surname;
+	}
+
 	
 	logpkg('debug',$track->name,
 			qq(: adding effect chain ), $self->name, Dumper $self
@@ -238,12 +233,13 @@ sub add_ops {
 	# implemented by subclassing EffectChain 
 	# for cache/uncache)
 	
-	my @restore_ops_list;
+	my @ops_list;
+	my @added;
 	if( $self->track_cache ){
-		@restore_ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
+		@ops_list = grep{ $_ ne $track->vol and $_ ne $track->pan }
 								@{$self->ops_list}
 	} else {
-		@restore_ops_list = @{$self->ops_list};
+		@ops_list = @{$self->ops_list};
 	}
 	map 
 	{	
@@ -251,22 +247,21 @@ sub add_ops {
 		{
 			chain  		=> $track->n,
 			type   		=> $self->type($_),
-			values 		=> $self->params($_),
-			parent_id 	=> $self->parent($_),
+			params 		=> $self->params($_),
+			parent		=> $self->parent($_),
 		};
 
-		$args->{effect_id} = $_ unless fxn($_);
+		
+		# drop the ID if it is already used
+		$args->{id} = $_ unless fxn($_);
 
 		logpkg('debug',"args ", json_out($args));
-		# avoid incorrectly calling _insert_effect 
-		# (and controllers are not positioned relative to other  effects)
-		# 
-		
-		$args->{before} = $ec_args->{before} unless $args->{parent_id};
+
 		$args->{surname} = $ec_args->{surname} if $ec_args->{surname};
 
-
-		my $new_id = ::add_effect($args);
+		my $FX = append_effect($args)->[0];
+		push @added, $FX;
+		my $new_id = $FX->id;
 		
 		# the effect ID may be new, or it may be previously 
 		# assigned ID, 
@@ -281,7 +276,8 @@ sub add_ops {
 			map{ $self->parent($_) =~ s/^$orig_id$/$new_id/  } @{$self->ops_list}
 		}
 		
-	} @restore_ops_list
+	} @ops_list;
+	\@added
 }
 sub add_inserts {
 	my ($self, $track) = @_;
@@ -311,17 +307,17 @@ sub add_region {
 				region_end	 => $self->{region}->[1]);
 }
 
-sub add_all {
-	my($self, $track, $successor) = @_;
-}
 sub add {
 	my ($self, $track, $successor) = @_;
+	# TODO stop_do_start should take place at this level
+	# possibly reconfiguring engine
 	my $args = {};
 	$args->{before} = $successor;
 	$args->{surname} = $self->name if $self->name;
-	$self->add_ops($track, $args);
+	my $added = $self->add_ops($track, $args);
 	$self->add_inserts($track);
 	$self->add_region($track) if $self->region;
+	$added
 
 }
 sub destroy {

@@ -1,7 +1,7 @@
 # --------------------- Command Grammar ----------------------
 
 package ::;
-use ::Effects qw(:all);
+use ::Effect  qw(:all);
 use Modern::Perl;
 
 sub setup_grammar {
@@ -114,6 +114,8 @@ sub process_command {
 	my $input_was = $input;
 
 	# parse repeatedly until all input is consumed
+	# return true on complete success
+	# return false if any part of command fails
 	
 	my $was_error;
 	
@@ -134,19 +136,20 @@ sub process_command {
 		
 	$ui->refresh; # in case we have a graphic environment
 	set_current_bus();
+
 	# select chain operator if appropriate
-	no warnings 'uninitialized';
-	my $FX = fxn($this_track->op);
-	if ($FX and $this_track->n eq $FX->chain){
-		eval_iam("c-select ".$this_track->n);
-		eval_iam("cop-select ".  $FX->ecasound_effect_index);
+	# and there is a current track
+
+
+	if ($this_track){
+		my $FX = fxn($this_track->op);
+		if ($FX and $this_track->n eq $FX->chain){
+			eval_iam("c-select ".$this_track->n);
+			eval_iam("cop-select ".  $FX->ecasound_effect_index);
+		}
 	}
 
-	# return true on complete success
-	# return false on any part of command failure
-	
-	return ! $was_error
-		
+	! $was_error
 }
 sub do_user_command {
 	my($cmd, @args) = @_;
@@ -201,7 +204,7 @@ sub user_set_current_track {
 		
 }
 
-### allow commands to abbreviate Audio::Nama::Class as ::Class
+### allow commands to abbreviate Audio :: Nama :: Class as ::Class
 
 { my @namespace_abbreviations = qw(
 	Assign 
@@ -292,8 +295,8 @@ sub show_effect {
 	map
 	{ 	push @lines, parameter_info_padded($op_id, $_) 
 	 	
-	} (scalar @pnames .. (scalar @{$fx->{params}->{$op_id}} - 1)  )
-		if scalar @{$fx->{params}->{$op_id}} - scalar @pnames - 1; 
+	} (scalar @pnames .. (scalar @{$FX->params} - 1)  )
+		if scalar @{$FX->params} - scalar @pnames - 1; 
 	@lines
 }
 sub extended_name {
@@ -414,8 +417,8 @@ sub show_tracks_section {
             $_->rec_status_display,
 			placeholder($_->source_status),
 			placeholder($_->destination),
-			placeholder($fx->{params}->{$_->vol}->[0]),
-			placeholder($fx->{params}->{$_->pan}->[0]),
+			placeholder($_->vol_level),
+			placeholder($_->pan_level),
         } @tracks;
         
 	my $output = $^A;
@@ -554,10 +557,10 @@ sub destroy_current_wav {
 
 sub pan_check {
 	my ($track, $new_position) = @_;
-	my $current = $fx->{params}->{ $track->pan }->[0];
+	my $current = $track->pan_o->params->[0];
 	$track->set(old_pan_level => $current)
 		unless defined $track->old_pan_level;
-	effect_update_copp_set(
+	update_effect(
 		$track->pan,	# id
 		0, 					# parameter
 		$new_position,		# value
@@ -580,7 +583,7 @@ sub unity {
 	if ($save_level){
 		$track->set(old_vol_level => fxn($track->vol)->params->[0]);
 	}
-	effect_update_copp_set( 
+	update_effect( 
 		$track->vol, 
 		0, 
 		$config->{unity_level}->{fxn($track->vol)->type}
@@ -590,7 +593,7 @@ sub vol_back {
 	my $track = shift;
 	my $old = $track->old_vol_level;
 	if (defined $old){
-		effect_update_copp_set(
+		update_effect(
 			$track->vol,	# id
 			0, 					# parameter
 			$old,				# value
@@ -603,7 +606,7 @@ sub pan_back {
 	my $track = shift;
 	my $old = $track->old_pan_level;
 	if (defined $old){
-		effect_update_copp_set(
+		update_effect(
 			$track->pan,	# id
 			0, 					# parameter
 			$old,				# value

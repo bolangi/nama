@@ -73,6 +73,7 @@ sub reconfigure_engine {
 
 	if( $force or $setup->{changed} ){ 
 		logpkg('debug',"reconfigure requested");
+		$setup->{_old_snapshot} = status_snapshot_string();
 } 
 	else {
 		my $old = $setup->{_old_snapshot};
@@ -107,9 +108,14 @@ sub reconfigure_engine {
 		propagate_latency() if $config->{opts}->{Q} and $jack->{jackd_running};
 		show_status();
 
-		eval_iam("setpos $project->{playback_position}")
- 				if $project->{playback_position}
-					and not ::ChainSetup::really_recording();
+		if ( ::ChainSetup::really_recording() )
+		{
+			$project->{playback_position} = 0
+		}
+		else 
+		{ 
+			set_position($project->{playback_position}) if $project->{playback_position} 
+		}
 		start_transport('quiet') if $mode->eager 
 								and ($mode->doodle or $mode->preview);
 		transport_status();
@@ -167,7 +173,13 @@ sub status_snapshot {
 	grep{ $_->rec_status ne OFF } grep { $_->group ne 'Temp' } ::all_tracks();
 	\%snapshot;
 }
-sub status_snapshot_string { json_out(status_snapshot()) }
+sub status_snapshot_string { 
+	my $json = json_out(status_snapshot());
+	# hack to avoid false diff due to string/numerical
+	# representation 
+	$json =~ s/: "(\d+)"/: $1/g; 
+	$json
+}
 }
 	
 sub find_duplicate_inputs { # in Main bus only

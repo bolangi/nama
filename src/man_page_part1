@@ -9,29 +9,58 @@ B<nama> [I<options>] [I<project_name>]
 =head1 DESCRIPTION
 
 B<Nama> is an application for multitrack recording,
-non-destructive editing, mixing, mastering, live performance
-and general-purpose audio processing using the Ecasound
-audio engine developed by Kai Vehmanen.
+effects processing, editing, mixing, mastering, live performance
+and general-purpose audio processing using Ecasound,
+a realtime audio engine developed by Kai Vehmanen.
  
-Features include tracks with multiple versions (AKA takes)
-buses, effects, presets, sends, inserts, marks, regions,
-edits, templates and user-defined commands. Nama runs under
-JACK and ALSA audio frameworks, automatically detects LADSPA
-plugins, and supports Ladish Level 1 session handling.
+=head2 Audio Functionality
 
-Nama's audio processing is non-destructive by default:
-effects are applied in realtime; edits are accomplished
-through crossfades. These modifications to a track can be
-frozen (bounced) as a new version for that track.
+Audio projects are developed using tracks, buses,
+effects, sends, inserts, marks, regions, fades and edits.
+Each track may contain one or more WAV files, which may be
+recorded or imported.
 
-For interfaces, Nama offers a terminal command prompt, a Tk
+Effects processing by LADSPA, LV2 and Ecasound
+plugins may be performed in realtime, or cached (e.g.
+frozen) to a file. The user may toggle between cached and
+dynamic processing for a track. Audio regions may be
+altered, duplicated, time-shifted or replaced.  
+
+=head2 Presets and templates
+
+To facilitate reuse, a track's plugins, inserts and/or 
+region settings can be stored as an "effect chain".
+Effect profiles and project templates provide templating 
+for groups of tracks and entire projects, respectively.
+
+=head2 Audio framework
+
+Audio IO is via JACK or ALSA. Soundcard IO is normally routed
+to JACK with transparent fallback to ALSA.
+
+=head2 Persistence
+
+Project data parameters related to audio configuration are
+serialized as JSON and tracked using Git when available. The
+entire project history is retained and may be managed using
+branches and tags.
+
+Nama supports Ladish Level 1 session handling.
+
+=head2 User interfaces
+
+Nama has fully featured terminal command prompt, a Tk
 GUI, and experimental OSC and remote-command modes.
  
 The command prompt accepts Nama commands, Ecasound
-interactive-mode commands, shell commands and perl code,
-with command history and autocompletion.  The help
+interactive-mode commands, shell commands and perl code.
+
+It has command history and autocompletion.  The help
 system provides documentation and keyword search 
 covering Nama commands and effects.
+
+The hotkey mode provides a convenient way to select, view,
+and modify effect parameters.
 
 By default, Nama displays a simple graphic interface while
 the command processor runs in a terminal window. The B<-t>
@@ -131,9 +160,9 @@ The Ecasound audio engine is configured through use of
 I<chain setups> that specify the signal processing network.
 
 Nama serves as an intermediary, taking high-level commands
-from the user, generating appropriate chain setups for
-recording, playback, mixing, etc. and running the audio
-engine.
+from the user, generating appropriate chain setups for user
+tasks such as recording, playback, mixing, etc., and running
+the audio engine.
 
 =head2 Configuration Commands
 

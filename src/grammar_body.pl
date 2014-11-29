@@ -139,6 +139,7 @@ someval: /[\w.+-]+/ # [word character, period, plus, minus] {1,}
 					# used in: set_track, loop_enable
 sign: '+' | '-' | '*' | '/' 
 					# [plus, minus, times, divide] {1}
+parameter_value: '*' | value
 value: /[+-]?([\d_]+(\.\d*)?|\.\d+)([eE][+-]?\d+)?/
 					# used in: mark times and effect_parameter values
 					# optional sign
@@ -501,7 +502,7 @@ show_track: _show_track dd {
 show_mode: _show_mode { ::pager( ::show_status()); 1}
 bus_mon: _bus_mon {
 	my $bus = $::bn{$::this_bus}; 
-	$bus->set(rw => ::REC);
+	$bus->set(rw => 'MON');
 	# set up mix track
 	$::tn{$bus->send_id}->busify
 		if $bus->send_type eq 'track' and $::tn{$bus->send_id};
@@ -530,6 +531,7 @@ master_off: _master_off { ::master_off(); 1 }
 
 exit: _exit {   
 	::save_state(); 
+	::cleanup_exit();
 	CORE::exit;
 }	
 source: _source ('track'|'t') trackname { 
@@ -608,7 +610,7 @@ vol: _vol sign(?) value {
 		$item{value});
 	1;
 } 
-vol: _vol { ::pager( $::fx->{params}->{$::this_track->vol}[0]); 1}
+vol: _vol { ::pager( $::this_track->vol_level); 1}
 
 mute: _mute { $::this_track->mute; 1}
 
@@ -626,14 +628,14 @@ nosolo: _nosolo { ::nosolo() ; 1}
 unity: _unity { ::unity($::this_track); 1}
 
 pan: _pan panval { 
-	::effect_update_copp_set( $::this_track->pan, 0, $item{panval});
+	::update_effect( $::this_track->pan, 0, $item{panval});
 	1;} 
 pan: _pan sign panval {
 	::modify_effect( $::this_track->pan, 1, $item{sign}, $item{panval} );
 	1;} 
 panval: float 
       | dd
-pan: _pan { ::pager( $::fx->{params}->{$::this_track->pan}[0]); 1}
+pan: _pan { ::pager( $::this_track->pan_level); 1}
 pan_right: _pan_right { ::pan_check($::this_track, 100 ); 1}
 pan_left:  _pan_left  { ::pan_check($::this_track,    0 ); 1}
 pan_center: _pan_center { ::pan_check($::this_track,   50 ); 1}
@@ -716,10 +718,9 @@ remove_effect: _remove_effect remove_target(s) {
 		else { 
 			my $FX = ::fxn($id);
 			::pager_newline("removing effect ".$FX->nameline);
-			::remove_effect( $_ ) 
+			$FX->_remove_effect();
 		}
 	} grep { $_ }  map{ split ' ', $_} @{ $item{"remove_target(s)"}} ;
-	# map{ print "remove_target: $_\n"; ::remove_effect( $_ )}  @{ $item{"remove_target(s)"}} ;
 	::sleeper(0.5);
 	::unmute();
 	1;}
@@ -731,20 +732,16 @@ add_controller: _add_controller parent effect value(s?) {
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
-		parent_id => $parent, 
-		type	  => $code, 
-		values	  => $values,
+		parent	=> $parent, 
+		type 	=> $code, 
+		params	=> $values,
 	});
 	if($id)
 	{
-		my $i = 	::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
+		my $iname = ::fxn($id)->fxname;
+		my $pname = ::fxn($id)->fxname;
 
-		my $pi = 	::effect_index(::fxn($parent)->type);
-		my $pname = $::fx_cache->{registry}->[$pi]->{name};
-
-		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
-
+		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
 	}
 	1;
 }
@@ -756,19 +753,16 @@ add_controller: _add_controller effect value(s?) {
 	#print "values: " , ref $values, $/;
 	#print join ", ", @{$values} if $values;
 	my $id = ::add_effect({
-		parent_id	=> $parent, 
-		type		=> $code, 
-		values		=> $values,
+		parent	=> $parent, 
+		type	=> $code, 
+		params 	=> $values,
 	});
 	if($id)
 	{
-		my $i = 	::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
+		my $iname = ::fxn($id)->fxname;
+		my $pname = ::fxn($id)->fxname;
 
-		my $pi = 	::effect_index(::fxn($parent)->type);
-		my $pname = $::fx_cache->{registry}->[$pi]->{name};
-
-		::pager("\nAdded $id ($iname) to $parent ($pname)\n\n");
+		::pager("\nAdded $id, $iname to $parent, $pname\n\n");
 
 	}
 	1;
@@ -814,19 +808,19 @@ known_effect_type: effect {
 before: fx_alias
 fx_name: ident { $::this_track->effect_id_by_name($item{ident}) }
 fx_surname: ident { $::this_track->with_surname($item{ident}) }
-add_effect: _add_effect add_target value(s?) before(?) {
+add_effect: _add_effect add_target parameter_value(s?) before(?) {
 	my ($code, $effect_chain);
-	my $values = $item{'value(s?)'};
+	my $values = $item{'parameter_value(s?)'};
 	my $args = { 	track  => $::this_track, 
-					values => $values };
+					params	=> $values };
+
+	# add_target may be the name of an effect chain
+	
 	if( my $fxc = ::is_effect_chain($item{add_target}) )
 	{ 
-		if( $fxc->ops_data and $item{'values(s?)'} and
-			scalar @{$fxc->ops_data} == 1 and scalar @{$item{'values(s?)'}})
-			{ $args->{type} 		= $fxc->ops_data->[0]->{type} 	}
-		else{ $args->{effect_chain}	= $fxc 					}
+				$args->{effect_chain}	= $fxc
 	}
-	else{ 	  $args->{type}			= $item{add_target}				}
+	else{ 	  	$args->{type}			= $item{add_target}				}
 	# place effect before fader if there is one
 	my $fader = 
 			   ::fxn($::this_track->pan) && $::this_track->pan
@@ -837,19 +831,14 @@ add_effect: _add_effect add_target value(s?) before(?) {
 	}
 	my $predecessor = $item{'before(?)'}->[0] || $fader;
 	$args->{before} = $predecessor if $predecessor; 
- 	my $id = ::add_effect($args);
-	return 1 if $effect_chain;
-	if ($id)
+	my $added = ::_add_effect($args);
+	for my $FX(@$added)
 	{
-		no warnings 'uninitialized';
-		my $i = ::effect_index($code);
-		my $iname = $::fx_cache->{registry}->[$i]->{name};
-
-		::pager("Added $id ($iname)");
+		my $iname = $FX->fxname;
+		my $id = $FX->id;
+		::pager_newline("Added $id, $iname");
 		::set_current_op($id);
 	}
-	else { } 
-	1
 }
 
 add_effect: _add_effect ('first'  | 'f')  add_target value(s?) {
@@ -952,7 +941,8 @@ fx_type: effect {
 position_effect: _position_effect op_to_move new_following_op {
 	my $op = $item{op_to_move};
 	my $pos = $item{new_following_op};
-	::position_effect($op, $pos);
+	my $FX = ::fxn($op);
+	$FX->position_effect($pos);
 	::set_current_op($op);
 	1;
 }

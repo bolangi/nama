@@ -57,6 +57,7 @@ sub initialize_marshalling_arrays {
 	@marks_data = ();
 	@fade_data = ();
 	@inserts_data = ();
+	@effects_data = ();
 	@edit_data = ();
 	@project_effect_chain_data = ();
 	@global_effect_chain_data = ();
@@ -72,12 +73,6 @@ sub save_system_state {
 	sync_effect_parameters(); # in case a controller has made a change
 	# we sync read-only parameters, too, but I think that is
 	# harmless
-
-	# remove null keys in $fx->{applied} and $fx->{params}
-	# would be better to find where they come from
-	
-	delete $fx->{applied}->{''};
-	delete $fx->{params}->{''};
 
 	initialize_marshalling_arrays();
 	
@@ -114,9 +109,9 @@ sub save_system_state {
 
 	logpkg('debug', "copying marks data");
 
-
 	@marks_data = sort {$a->{time} <=> $b->{time} } map{ $_->as_hash } ::Mark::all();
-
+	@effects_data = sort { $a->{id} cmp $b->{id} } map{ $_->as_hash } values %::Effect::by_id;
+	
 	@fade_data = sort $by_n map{ $_->as_hash } values %::Fade::by_index;
 
 	@edit_data = sort $by_n map{ $_->as_hash } values %::Edit::by_index;
@@ -204,20 +199,9 @@ sub get_newest {
 		yaml => sub 
 		{ 
 			my $yaml = shift;
-			# remove empty key hash lines # fixes YAML::Tiny bug
+
+			# remove empty key hash lines to satisfy YAML::Tiny
 			$yaml = join $/, grep{ ! /^\s*:/ } split $/, $yaml;
-
-			# rewrite obsolete null hash/array substitution
-			$yaml =~ s/~NULL_HASH/{}/g;
-			$yaml =~ s/~NULL_ARRAY/[]/g;
-
-			# rewrite $fx->{applied} 'owns' field to []
-			
-			# Note: this should be fixed at initialization
-			# however we should leave this code 
-			# for compatibility with past projects.
-			
-			$yaml =~ s/owns: ~/owns: []/g;
 
 			$yaml = quote_yaml_scalars( $yaml );
 
@@ -282,69 +266,26 @@ sub restore_state_from_file {
 		
 
 		# perform assignments for singleton
-		# hash entries (such as $fx->{applied});
+		# hash entries (such as $fx->{ applied});
 		# that that assign() misses
 		
 		assign_singletons({ data => $ref });
 
 	}
 	
-	# remove null keyed entry from $fx->{applied},  $fx->{params}
-
-	delete $fx->{applied}->{''};
-	delete $fx->{params}->{''};
-
-
-	my @keys = keys %{$fx->{applied}};
-
-	my @spurious_keys = grep { effect_entry_is_bad($_) } @keys;
-
-	if (@spurious_keys){
-
-		logpkg('logwarn',"full key list is @keys"); 
-		logpkg('logwarn',"spurious effect keys found @spurious_keys"); 
-		logpkg('logwarn',"deleting them..."); 
-		
-		map{ 
-			delete $fx->{applied}->{$_}; 
-			delete $fx->{params}->{$_}  
-		} @spurious_keys;
-
-	}
-
 	restore_global_effect_chains();
-
-	
-	my @vars = qw(
-				@tracks_data
-				@bus_data
-				@groups_data
-				@marks_data
-				@fade_data
-				@edit_data
-				@inserts_data
-	);
-
-	# remove non HASH entries
-	map {
-		my $var = $_;
-		my $eval_text  = qq($var  = grep{ ref =~ /HASH/ } $var );
-		logpkg('debug', "want to eval: $eval_text "); 
-		eval $eval_text;
-	} @vars;
-
 
 	####### Backward Compatibility ########
 
-	if ( $project->{save_file_version_number} lt "1.100"){ 
+	if ( $project->{save_file_version_number} < 1.100){ 
 		map{ ::EffectChain::move_attributes($_) } 
 			(@project_effect_chain_data, @global_effect_chain_data)
 	}
-	if ( $project->{save_file_version_number} lt 1.105){ 
-		map{ $_->{class} = 'Audio::Nama::BoostTrack' } 
+	if ( $project->{save_file_version_number} < 1.105){ 
+		map{ $_->{class} = '::BoostTrack' } 
 		grep{ $_->{name} eq 'Boost' } @tracks_data;
 	}
-	if ( $project->{save_file_version_number} lt "1.109"){ 
+	if ( $project->{save_file_version_number} < 1.109){ 
 		map
 		{ 	if ($_->{class} eq '::MixTrack') { 
 				$_->{is_mix_track}++;
@@ -360,7 +301,7 @@ sub restore_state_from_file {
 		} @bus_data;
 
 	}
-	if ( $project->{save_file_version_number} lt "1.111"){ 
+	if ( $project->{save_file_version_number} < 1.111){ 
 		map
 		{
 			convert_rw($_);
@@ -375,40 +316,55 @@ sub restore_state_from_file {
 			$_->{rw} = MON if $_->{rw} eq 'REC'
 		} @bus_data;
 	}
-	#######################################
-sub convert_rw {
-	my $h = shift;
-	$h->{rw} = MON, return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
-	$h->{rw} = PLAY, return if $h->{rw} eq 'MON';
-}
-	#  destroy and recreate all buses
 
-	::Bus::initialize();	
+	# convert effect object format
+	
+	if ( $project->{save_file_version_number} < 1.201 )
+	{
+		@effects_data = 
+			map{ my $hashref = $fx->{applied}->{$_}; 
+					$hashref->{params} = $fx->{params}->{$_}; 
+					$hashref->{class} = '::Effect';
+					$hashref }
+			grep { defined $_ } 
+			keys %{$fx->{applied}};
+		#say "effects data: ", json_out \@effects_data;
+		delete $fx->{applied};
+		delete $fx->{params};
+	}
 
+
+	# restore effects, no change to track objects needed
+	
+	map
+	{ my %args = %$_;
+		my $class = delete $args{class};
+		my $FX = $class->new(%args, restore => 1);
+	} @effects_data;
+	
 	# restore user buses
 		
+	::Bus::initialize();	
 	map{ my $class = $_->{class}; $class->new( %$_ ) } @bus_data;
-
-	create_system_buses();  # any that are missing
-
-	# restore user tracks
-	
-	my $did_apply = 0;
+	create_system_buses();  # needed to avoid missing bus error
+							# shouldn't they be saved?
 
 	# temporary turn on mastering mode to enable
 	# recreating mastering tracksk
 
-	my $current_master_mode = $mode->{mastering};
-	$mode->{mastering} = 1;
+	#my $current_master_mode = $mode->{mastering};
+	#$mode->{mastering} = 1;
 
+	# convert field "latency" to "latency_op"
 	map{ $_->{latency_op} = delete $_->{latency} if $_->{latency} } @tracks_data;
+
+	# restore tracks
 	map{ 
-		my %h = %$_; 
-		my $class = $h{class} || "::Track";
-		my $track = $class->new( %h );
+		my %args = %$_; 
+		my $class = $args{class} || "::Track";
+		my $track = $class->new( %args, restore => 1 );
 	} @tracks_data;
 
-	$mode->{mastering} = $current_master_mode;
 
 	# restore inserts
 	
@@ -425,32 +381,15 @@ sub convert_rw {
 		# create gui
 		$ui->track_gui($n) unless $n <= 2;
 
-		# restore effects
-		
-		for my $id (@{$ti{$n}->ops}){
-			$did_apply++  # need to show GUI effect window
-				unless $id eq $ti{$n}->vol
-					or $id eq $ti{$n}->pan;
-			
-			# does this do anything?
-			add_effect({
-						chain => $fx->{applied}->{$id}->{chain},
-						type => $fx->{applied}->{$id}->{type},
-						effect_id => $id,
-						owns => $fx->{applied}->{$id}->{owns},
-						parent_id => $fx->{applied}->{$id}->{belongs_to},
-						});
-
-		}
 	} @tracks_data;
 
 	$ui->create_master_and_mix_tracks();
-
+	
 	$this_track = $tn{$this_track_name}, set_current_bus() if $this_track_name;
 	
 	#print "\n---\n", $main->dump;  
 	#print "\n---\n", map{$_->dump} ::audio_tracks();# exit; 
-	$did_apply and $ui->manifest;
+	$ui->manifest;
 	logpkg('debug', sub{ join " ", map{ ref $_, $/ } all_tracks() });
 
 
@@ -501,6 +440,11 @@ sub convert_rw {
  	map { my $fx_chain = ::EffectChain->new(%$_) } 
 		(@project_effect_chain_data, @global_effect_chain_data)
 } 
+sub convert_rw {
+	my $h = shift;
+	$h->{rw} = MON, return if $h->{rw} eq 'REC' and ($h->{rec_defeat} or $h->{is_mix_track});
+	$h->{rw} = PLAY, return if $h->{rw} eq 'MON';
+}
 sub is_nonempty_hash {
 	my $ref = shift;
 	return if (ref $ref) !~ /HASH/;
@@ -535,7 +479,6 @@ sub restore_global_effect_chains {
 		throw("$resolved: empty file"), return unless $source;
 		logpkg('debug', "format: $format, source: \n",$source);
 		my $ref = decode($source, $format);
-		logpkg('debug', sub{Dumper $ref});
 		assign(
 				data => $ref,
 				vars   => \@global_effect_chain_vars, 

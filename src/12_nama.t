@@ -1,6 +1,6 @@
 package ::; 
 use ::;
-use Test::More tests => 117;
+use Test::More tests => 126;
 use File::Path qw(make_path remove_tree);
 use File::Slurp;
 use Cwd;
@@ -9,7 +9,6 @@ use strict;
 use warnings;
 no warnings qw(uninitialized);
 
-our $fx_cache_json = read_file("t/data/fake_effects_cache.json");
 our ($expected_setup_lines);
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
@@ -17,6 +16,7 @@ $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag ("TESTING $0\n");
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag("working directory: ",cwd);
 
 our $test_dir = "/tmp/nama-test";
+$fx_cache->{fake} = read_file("t/data/fake_effects_cache.json");
 
 cleanup_dirs();
 setup_dirs();
@@ -26,12 +26,10 @@ sub setup_dirs{ make_path("$test_dir/test/.wav", "$test_dir/untitled/.wav") }
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag( qx(find $test_dir) );
 
-apply_test_harness();
+apply_test_args();
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "options: @ARGV";
-
 bootstrap_environment();
-prepare_static_effects_data($fx_cache_json);
 $config->{use_git} = 0;
 
 $ENV{NAMA_VERBOSE_TEST_OUTPUT} and diag "Check representative variable from default .namarc";
@@ -203,8 +201,42 @@ like(ref $this_track, qr/Track/, "track creation");
 
 is( $this_track->name, 'sax', "current track assignment");
 
-process_command('source 2');
+my ($vol_id) = $this_track->vol;
 
+ok(   (defined $vol_id and $::Effect::by_id{$vol_id}) , "apply volume control");
+
+process_command('add_effect time_reverb3');
+
+like( this_op_o()->code, qr/time_reverb3/, "apply preset");
+
+is (this_op_o()->track_effect_index, 0, "positioned before vol/pan faders");
+
+process_command('add_effect decimator 1 2');
+
+like( this_op_o()->code, qr/decimator/, "apply LADSPA effect");
+
+is( this_op_o()->track_effect_index, 1, "position before faders, after other effects");
+
+process_command('vol -2');
+
+is( $this_track->vol_o->params->[0], -2, "modify effect" );
+
+process_command(join " ", 'position_effect', this_op_o()->id, 'ZZZ');
+
+is( $this_track->ops->[-1], this_op_o()->id, 
+	'position effect at end, using ZZZ pseudo-id');
+
+process_command(join " ", 'position_effect', this_op_o()->id, $vol_id);
+
+is( $this_track->ops->[this_op_o()->track_effect_index + 1], $vol_id, 
+	"position effect before another effect");
+
+my $op_id = this_op_o()->id;
+process_command("remove_effect $op_id");
+
+ok( (not grep { $_ eq $op_id } @{$this_track->ops}), 'remove effect');
+
+process_command('source 2');
 
 is( $this_track->source_type, 'soundcard', "set soundcard input");
 is( $this_track->source_id,  2, "set input channel");

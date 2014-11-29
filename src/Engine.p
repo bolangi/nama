@@ -25,11 +25,6 @@ use ::Object qw(
     			on_exit
 				 );
 
-initialize();
-
-sub initialize {
-	%by_name = ();	
-}
 sub new {
 	my $class = shift;	
 	my %vals = @_;
@@ -40,7 +35,7 @@ sub new {
 	#print "object class: $class, object type: ", ref $self, $/;
 	$by_name{ $self->name } = $self;
 	$self->initialize_ecasound();
-	$::this_engine = $self;
+	$this_engine = $self;
 }
 sub initialize_ecasound { 
 	my $self = shift;

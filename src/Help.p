@@ -70,6 +70,7 @@ sub format_help_topic {
 
 sub help { 
 	my $name = shift;
+	$name =~ s/-/_/g;  # help indices require underscores
 	chomp $name;
 	#print "seeking help for argument: $name\n";
 	$text->{iam}->{$name} and pager(<<IAM);
@@ -95,7 +96,9 @@ IAM
 			my $cmd = $_ ;
 			if ($cmd =~ /$name/ )
 			{
-				push @help, helpline($cmd) unless $helped{$cmd}; 
+				push @help, helpline($cmd) unless $helped{$cmd}
+					or $cmd =~ /-/; # skip hyphenated command forms
+									# which lack full help
 				$helped{$cmd}++ ;
 			}
 			no warnings 'uninitialized';
@@ -111,6 +114,7 @@ IAM
 		}
 	}
 	if (@output){
+		map{ s/_/-/g } @output;
 		::pager( @output ); 
 	} else { throw("$name: no help found.\n"); }
 	

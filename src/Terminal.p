@@ -23,17 +23,17 @@ sub initialize_terminal {
 	$text->{term_attribs}->{already_prompted} = 1;
 	($text->{screen_lines}, $text->{screen_columns}) 
 		= $text->{term}->get_screen_size();
+	logpkg('debug', "screensize is $text->{screen_lines} lines x $text->{screen_columns} columns");
 	detect_spacebar(); 
 
 	revise_prompt();
 
 	# handle Control-C from terminal
 
-	# does nothing
 	#$SIG{INT} = \&cleanup_exit; 
 
-	# doesn't do anything either
-	#$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
+	# responds in a more timely way than abovce
+	$project->{events}->{sigint} = AE::signal('INT', \&cleanup_exit); 
 
 	$SIG{USR1} = sub { git_snapshot() };
 }
@@ -97,9 +97,10 @@ sub setup_termkey {
 	);
 }
 sub hotkey_status_bar {
-	join " ", "[".$this_track->name."]", extended_name($this_track->op), 
-				parameter_info($this_track->op, $this_track->param - 1),
-				"Stepsize: ",$this_track->stepsize;
+	join " ", "[".$this_track->name."]", 
+				"Stepsize: ",$this_track->stepsize,
+				fxn($this_track->op)->fxname,
+				parameter_info($this_track->op, $this_track->param - 1);
 				
 ;
 }
@@ -218,10 +219,13 @@ sub pager_newline {
 sub pager {
 	logsub("&pager");
 	my @output = @_;
-	# for returning via OSC
+
+	# this buffer is used to return results of OSC commands 
+	# the OSC client clears it after sending
+	
 	$text->{output_buffer} //= [];
 	push @{$text->{output_buffer}}, @output, "\n\n";
-	#return;
+
 	my $line_count = 0;
 	map{ $line_count += $_ =~ tr(\n)(\n) } @output;
 	if 

@@ -55,6 +55,7 @@ $fx_cache->{ladspa_id_to_label}			# 2155 -> tap_pinknoise
 $fx_cache->{ladspa_help}				# store for LADSPA plugin help
 $fx_cache->{lv2_help}					# store for LV2 plugin help
 $fx_cache->{split}				# help divide effects into groups for GUI display
+$fx_cache->{fake}				# dummy effects data for testing
 $help->{screen}					# top-level help output
 $help->{arr_topic}				# sequential array of help pages 
 $help->{topic}					# access help page by name
@@ -85,6 +86,7 @@ $fx->{params}					# parameters of applied effects
 								# hash by effect ID
 $fx->{params_log}				# for log scale sliders
 $fx->{alias}
+$fx->{last}						# last assigned effect ID
 
 $text->{grammar}				# grammar source
 $text->{parser}					# Parse::RecDescent parser

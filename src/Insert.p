@@ -70,12 +70,12 @@ sub new {
 	$self->{dry_vol} = ::add_effect({
 		track  => $dry, 
 		type   => 'ea',
-		values => [0]
+		params => [0]
 	});
 	$self->{wet_vol} = ::add_effect({
 		track  => $wet, 
 		type   => 'ea',
-		values => [100],
+		params => [100],
 	});
 	# synchronize effects with wetness setting
 	$self->set_wetness($self->{wetness}); 

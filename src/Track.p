@@ -5,22 +5,9 @@ package ::;
 package ::Track;
 use ::Globals qw(:all);
 use ::Log qw(logpkg logsub);
+use ::Effect  qw(fxn);
 use List::MoreUtils qw(first_index);
-# Objects belonging to Track and its subclasses
-# have a 'class' field that is set when the 
-# object is created, and used when restoring
-# the object from a serialized state.
-
-# the ->set_track_class() method re-blesses
-# the object to a different subclass when necessary
-# changing the 'class' field as well as the object
-# class affiliation
-#
-# the ->as_hash() method (in Object.p) 
-# used to serialize will
-# sync the class field to the current object 
-# class, hopefully saving a painful error
-
+use Try::Tiny;
 use Modern::Perl;
 use Carp qw(carp cluck croak);
 use File::Copy qw(copy);
@@ -30,6 +17,7 @@ no warnings qw(uninitialized redefine);
 our $VERSION = 1.0;
 
 use ::Util qw(freq input_node dest_type dest_string join_path);
+use ::Assign qw(json_out);
 use vars qw($n %by_name @by_index %track_names %by_index);
 our @ISA = '::Wav';
 use ::Object qw(
@@ -72,6 +60,10 @@ sub new {
 
 	my $class = shift;
 	my %vals = @_;
+	my $novol = delete $vals{novol};
+	my $nopan = delete $vals{nopan};
+	my $restore = delete $vals{restore};
+	say "restoring track $vals{name}" if $restore;
 	my @undeclared = grep{ ! $_is_field{$_} } keys %vals;
     croak "undeclared field: @undeclared" if @undeclared;
 	
@@ -106,11 +98,12 @@ sub new {
 	$track_names{$vals{name}}++;
 	$by_index{$n} = $object;
 	$by_name{ $object->name } = $object;
-	::add_pan_control($n);
-	::add_volume_control($n);
+	::add_pan_control($n) unless $nopan or $restore;
+	::add_volume_control($n) unless $novol or $restore;
 
 	$::this_track = $object;
 	$::ui->track_gui($object->n) unless $object->hide;
+	logpkg('debug',$object->name, ": ","newly created track",$/,json_out($object->as_hash));
 	$object;
 }
 
@@ -693,9 +686,10 @@ sub mute {
 	my $nofade = shift;
 	# do nothing if already muted
 	return if defined $track->old_vol_level();
-	if ( $fx->{params}->{$track->vol}[0] != $track->mute_level
-		and $fx->{params}->{$track->vol}[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $fx->{params}->{$track->vol}[0]);
+	if (defined $track->vol_o 	
+		and $track->vol_o->params->[0] != $track->mute_level
+		and $track->vol_o->params->[0] != $track->fade_out_level){   
+		$track->set(old_vol_level => $track->vol_o->params->[0]);
 		fadeout( $track->vol ) unless $nofade;
 	}
 	$track->set_vol($track->mute_level);
@@ -718,20 +712,17 @@ sub unmute {
 
 sub mute_level {
 	my $track = shift;
-	$config->{mute_level}->{$track->vol_type}
+	return unless defined $track->vol_o;
+	$config->{mute_level}->{$track->vol_o->type}
 }
 sub fade_out_level {
 	my $track = shift;
-	$config->{fade_out_level}->{$track->vol_type}
+	$config->{fade_out_level}->{$track->vol_o->type}
 }
 sub set_vol {
 	my $track = shift;
 	my $val = shift;
-	::effect_update_copp_set($track->vol, 0, $val);
-}
-sub vol_type {
-	my $track = shift;
-	$fx->{applied}->{$track->vol}->{type}
+	::update_effect($track->vol, 0, $val);
 }
 sub import_audio  { 
 	my $track = shift;
@@ -947,7 +938,7 @@ sub bus { $bn{$_[0]->group} }
 sub effect_id_by_name {
 	my $track = shift;
 	my $ident = shift;
-	for my $FX (map{::fxn($_)}@{$track->ops})
+	for my $FX ($track->fancy_ops_o)
 	{ return $FX->id if $FX->name eq $ident }
 }
 sub effect_nickname_count {
@@ -958,17 +949,21 @@ sub effect_nickname_count {
 }
 sub unique_surname {
 	my ($track, $surname) = @_;
-	my $i = 0;
-	my @found;
+	# increment supplied surname to be unique to the track if necessary 
+	# return arguments:
+	# $surname, $previous_surnames
+	my $max = undef;
+	my %found;
 	for my $FX ($track->fancy_ops_o)
 	{ 
 		if( $FX->surname =~ /^$surname(\d*)$/)
 		{
-			push @found, $FX->surname; 
-			$i = $1 if $1 and $1 > $i
+			$found{$FX->surname}++;
+			no warnings qw(uninitialized numeric);
+			$max = $1 if $1 > $max;
 		}
 	}
-	$surname. (@found ? ++$i : ""), join ' ',@found
+	if (%found){ $surname.++$max, join ' ',sort keys %found } else { $surname }
 }
 sub unique_nickname {
 	my ($track, $nickname) = @_;
@@ -984,6 +979,7 @@ sub unique_nickname {
 	}
 	$nickname. (@found ? ++$i : ""), "@found"
 }
+# return effect IDs matching a surname
 sub with_surname {
 	my ($track, $surname) = @_;
 	my @found;
@@ -991,7 +987,12 @@ sub with_surname {
 	{ push @found, $FX->id if $FX->surname eq $surname }
 	@found ? "@found" : undef
 }
-{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low Mid High Boost );
+sub vol_level { my $self = shift; try { $self->vol_o->params->[0] } }
+sub pan_level { my $self = shift; try { $self->pan_o->params->[0] } }
+sub vol_o { my $self = shift; fxn($self->vol) }
+sub pan_o { my $self = shift; fxn($self->pan) }
+{ my %system_track = map{ $_, 1} qw( Master Mixdown Eq Low
+Mid High Boost );
 sub is_user_track { ! $system_track{$_[0]->name} }
 sub is_system_track { $system_track{$_[0]->name} } 
 }
@@ -1379,11 +1380,11 @@ sub add_volume_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "vol");
 	
-	my $vol_id = effect_init({
+	my $vol_id = ::Effect->new(
 				chain => $n, 
 				type => $config->{volume_control_operator},
-				effect_id => $ti{$n}->vol, # often undefined
-				});
+				id => $ti{$n}->vol, # often undefined
+				)->id;
 	
 	$ti{$n}->set(vol => $vol_id);  # save the id for next time
 	$vol_id;
@@ -1392,11 +1393,11 @@ sub add_pan_control {
 	my $n = shift;
 	return unless need_vol_pan($ti{$n}->name, "pan");
 
-	my $pan_id = effect_init({
+	my $pan_id = ::Effect->new(
 				chain => $n, 
 				type => 'epp',
-				effect_id => $ti{$n}->pan, # often undefined
-				});
+				id => $ti{$n}->pan, # often undefined
+				)->id;
 	
 	$ti{$n}->set(pan => $pan_id);  # save the id for next time
 	$pan_id;

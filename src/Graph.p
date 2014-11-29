@@ -38,6 +38,8 @@ sub add_path_for_rec {
 			rw => OFF,
 			group => 'Temp',
 			hide => 1,
+			novol => 1,
+			nopan => 1,
 			name => $name);
 
 		# connect writepath: source --> temptrackname --> wav_out

@@ -79,10 +79,9 @@ sub initialize_project_data {
 							::Bus
 							::Track
 							::Insert
-							::Engine
+							::Effect
+							::EffectChain
 							);
-	initialize_effects_data();
-
 	# $is_armed = 0;
 
 	$setup->{_old_snapshot} = "";
@@ -112,22 +111,6 @@ sub initialize_project_data {
 	reset_command_buffer();
 
 }
-sub initialize_effects_data {
-
-	# effect variables - no object code (yet)
-	
-	$fx->{id_counter} = "A"; # autoincrement counter
-	$fx->{applied}	= {};  # effect and controller objects (hashes)
-	$fx->{params}   = {};  # chain operator parameters
-	               # indexed by {$id}->[$param_no]
-	               # zero-based {AB}->[0] (parameter 1)
-
-	# volume settings
-	
-	$fx->{muted} = [];
-
-}
-
 sub load_project {
 	logsub("&load_project");
 	my %args = @_;
@@ -163,7 +146,7 @@ sub load_project {
 	restart_wav_memoize();
 	
 
-	if( $config->{use_git} ){
+	if( $config->{use_git} and not is_test_script()){
 		my $initializing_repo;
 		Git::Repository->run( init => project_dir()), $initializing_repo++
 			unless -d join_path( project_dir().  '.git');

@@ -29,7 +29,7 @@ sub fade {
 	# no fade without Timer::HiRes
 	# no fade unless engine is running
 	if ( ! engine_running() or ! $config->{hires_timer} ){
-		effect_update_copp_set ( $id, --$param, $to );
+		update_effect ( $id, --$param, $to );
 		return;
 	}
 
@@ -37,10 +37,13 @@ sub fade {
 	my $wink  = 1/$config->{fade_resolution};
 	my $size = ($to - $from)/$steps;
 	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
+	# first step by step
 	for (1..$steps - 1){
 		modify_effect( $id, $param, '+', $size);
 		sleeper( $wink );
 	}		
+	# then the last value
+	modify_effect($id, $param, $to)
 }
 
 sub fadein {

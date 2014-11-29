@@ -9,7 +9,6 @@ using Kai Vehmanen's Ecasound as the audio engine.
 
 New projects begin with a mixer, can include track, bus,
 effect, send, insert, mark, region and fade objects.
-Facilities are provides for mixdown, and mastering.
 
 =head2 Command language and help system
 

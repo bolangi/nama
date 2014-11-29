@@ -12,6 +12,7 @@ $prompt
 %bn
 %mn
 %en
+%fi
 $g
 $debug
 $debug2
