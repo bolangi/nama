@@ -1,6 +1,0 @@
-#!/usr/bin/perl -p 
-s/\t{2}/\t\t\t/ ; 
-s/^\t(?!\t)/\t-\n\t\t/;
-s/\t/  /g;
-s/\s+$/\n/g;
-
