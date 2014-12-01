@@ -136,7 +136,7 @@ use ::Globals qw(:trackrw);
 sub output_is_connectable {
  	my $bus = shift;
 
-	# Either the bus's mix track must be set to REC/MON
+	# Either the bus's mix track is set to REC or MON
  	
  	$bus->send_type eq 'track' and $::tn{$bus->send_id}->rec_status =~ /REC|MON/
 
@@ -145,9 +145,9 @@ sub output_is_connectable {
 	
 	or $bus->send_type eq 'track' 
 				and $bus->send_id eq 'Master' 
-				and $::tn{Mixdown}->rec_status eq /REC|MON/
-
+				and $::tn{Mixdown}->rec_status eq 'REC'
 	
+	# or we are connecting directly to a loop device
 	or $bus->send_type eq 'loop' and $bus->send_id =~ /^\w+_(in|out)$/;
 }
 

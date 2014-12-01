@@ -1,7 +1,0 @@
-#!/bin/sh
-git-clone git://github.com/bolangi/nama.git
-mkdir -p nama/lib/Audio/Ecasound/Multitrack
-cd nama/src
-./build
-./ui -t
-
