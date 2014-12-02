@@ -104,12 +104,12 @@ with object properties as need be.
 Maps keys in F<.namarc> (e.g. I<mix_to_disk_format>) to the
 corresponding Nama internal scalar (e.g. C<$config-E<gt>{mix_to_disk_format}>
 
-=item F<singleton_keys>
+=item F<var_keys>
 
 List of allowed singleton hash keys. 
 
 Keys of variables appearing in ./var_singletons 
-should be listed in singleton_keys or in var_config.
+should be listed in var_keys or in var_config.
 Undeclared keys will trigger warnings during build.
 
 =head2 F<var_lists>
