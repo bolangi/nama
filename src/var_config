@@ -1,13 +1,4 @@
 ############ var_config - Nama's configuration variables
-#
-#   Nama variables are listed here for two purposes
-#
-#   1. Mapping from .namarc to internal Nama variable.
-#      This is only required for config file variables.
-#
-#   2. Checking for hash key typos using check_hash_keys script
-
-### Config variables
 
 #   namarc file variable			nama internal variable
 #   ---------------------			-------------------------
@@ -31,17 +22,6 @@
 #	[engine]
 
 	$ecasound_tcp_port 				$config->{engine_tcp_port}
-
-	# following are deprecated
-	
-	$ecasound_globals_general 		$config->{engine_globals}->{common}
-	$ecasound_globals_realtime 		$config->{engine_globals}->{realtime}
-	$ecasound_globals_nonrealtime 	$config->{engine_globals}->{nonrealtime}
-	$ecasound_buffersize_realtime   $config->{engine_buffersize}->{realtime}->{default}
-	$ecasound_buffersize_nonrealtime $config->{engine_buffersize}->{nonrealtime}->{default}
-
-#	new config format
-
 	$ecasound_globals				$config->{engine_globals}
 	$ecasound_buffersize 			$config->{engine_buffersize} 
 	$realtime_profile 				$config->{realtime_profile}
