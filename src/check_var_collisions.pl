@@ -35,7 +35,7 @@ map{ my $file = $_;
 } @target_files;
 
 sub singletons {
-	my $singletons = read_file("./singletons.pl");
+	my $singletons = read_file("./var_singletons");
 	map{ s/,//; $_ } split " ", $singletons;
 }
 

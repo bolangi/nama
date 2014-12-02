@@ -23,7 +23,7 @@ use constant {
 our @ISA = 'Exporter';
 our @EXPORT_OK = qw(
 
-[% join "\n", split " ",qx(./strip_all ./pronouns.pl ./singletons.pl ./serialize.pl) %]
+[% join "\n", split " ",qx(./strip_all ./var_pronouns ./var_singletons ./var_serialize) %]
 
 );
 
@@ -32,7 +32,7 @@ our %EXPORT_TAGS =
 	trackrw => [qw(REC PLAY MON OFF)],
 	singletons => [qw( 	
 
-[% qx(./strip_all ./singletons.pl) %]
+[% qx(./strip_all ./var_singletons) %]
 
 	)],
 
@@ -45,13 +45,13 @@ our %EXPORT_TAGS =
 
 	pronouns => [qw( 
 
-[% qx(./strip_all ./pronouns.pl) %]
+[% qx(./strip_all ./var_pronouns) %]
 
 	)],
 
 	serialize =>  [qw(
 
-[% qx(./strip_all ./serialize.pl ) %]
+[% qx(./strip_all ./var_serialize ) %]
 
 	)],
 );
@@ -78,16 +78,16 @@ of the following files:
 
 =over
 
-=item F<pronouns.pl>
+=item F<var_pronouns>
 
 Pronouns (e.g. C<$this_track>) and 
 indices (e.g. C<%tn>, get track by name)
 
-=item F<serialize.pl>
+=item F<var_serialize>
 
 Marshalling variables for serializing/deserializing (e.g. C<@tracks_data>)
 
-=item F<singletons.pl> 
+=item F<var_singletons> 
 
 Simple hash structures (such as C<$config>) or objects such
 as F<$file> that aggregate data.  The hashes can be invested
@@ -108,11 +108,11 @@ corresponding Nama internal scalar (e.g. C<$config-E<gt>{mix_to_disk_format}>
 
 List of allowed singleton hash keys. 
 
-Keys of variables appearing in ./singletons.pl 
+Keys of variables appearing in ./var_singletons 
 should be listed in singleton_keys or in var_config.
 Undeclared keys will trigger warnings during build.
 
-=head2 F<var_lists.pl>
+=head2 F<var_lists>
 
 Declares lists of variables used in
 serializing/deserializing.

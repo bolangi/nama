@@ -5,12 +5,12 @@ Globals.p       Module for exporting Nama globals, merges
 
 #### Nama variables are declared in one of the following files
 
-pronouns.pl     Pronouns (e.g. $this_track) and 
+var_pronouns     Pronouns (e.g. $this_track) and 
                 indices (e.g. %tn, get track by name)
 
-serialize.pl    Marshalling variables for serializing/deserializing
+var_serialize    Marshalling variables for serializing/deserializing
 
-singletons.pl   Simple hashes (such as $config) or 
+var_singletons   Simple hashes (such as $config) or 
 				objects such as $file. Hash access to
 				underlying fields is expected, and 
 				is necessary for Tk slider widgets.
@@ -20,7 +20,7 @@ singletons.pl   Simple hashes (such as $config) or
 var_config      Maps keys in .namarc (e.g. $mix_to_disk_format)
                 to Nama internal variable $config->{mix_to_disk_format}
 
-#### Hash keys of all variables in ./singletons.pl 
+#### Hash keys of all variables in ./var_singletons 
 #### must be declared in singleton_keys or in var_config
 #### This is checked during build
 
@@ -28,4 +28,4 @@ singleton_keys  List of allowed singleton hash keys
 
 #### Lists of variables used for serializing
 
-var_lists.pl    Initializes variable lists for serializing/deserializing
+var_lists    Initializes variable lists for serializing/deserializing

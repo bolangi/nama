@@ -218,4 +218,4 @@ __DATA__
 @@ hotkey_bindings
 [% qx(cat ./hotkeys.json) %]
 @@ banner
-[% qx(cat ./banner.pl) %]
+[% qx(cat ./banner) %]
