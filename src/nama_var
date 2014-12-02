@@ -15,13 +15,13 @@ singletons.pl   Simple hashes (such as $config) or
 				underlying fields is expected, and 
 				is necessary for Tk slider widgets.
 
-#### Config variables require an entry in config_map
+#### Config variables require an entry in var_config
 
-config_map      Maps keys in .namarc (e.g. $mix_to_disk_format)
+var_config      Maps keys in .namarc (e.g. $mix_to_disk_format)
                 to Nama internal variable $config->{mix_to_disk_format}
 
 #### Hash keys of all variables in ./singletons.pl 
-#### must be declared in singleton_keys or in config_map
+#### must be declared in singleton_keys or in var_config
 #### This is checked during build
 
 singleton_keys  List of allowed singleton hash keys

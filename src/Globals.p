@@ -99,7 +99,7 @@ with object properties as need be.
 
 =over
 
-=item F<config_map>
+=item F<var_config>
 
 Maps keys in F<.namarc> (e.g. I<mix_to_disk_format>) to the
 corresponding Nama internal scalar (e.g. C<$config-E<gt>{mix_to_disk_format}>
@@ -109,7 +109,7 @@ corresponding Nama internal scalar (e.g. C<$config-E<gt>{mix_to_disk_format}>
 List of allowed singleton hash keys. 
 
 Keys of variables appearing in ./singletons.pl 
-should be listed in singleton_keys or in config_map.
+should be listed in singleton_keys or in var_config.
 Undeclared keys will trigger warnings during build.
 
 =head2 F<var_lists.pl>

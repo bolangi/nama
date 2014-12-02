@@ -3,7 +3,7 @@
 # To create a new config var:
 #
 # add the mapping, e.g. "$mix_to_disk_format $config->{mix_to_disk_format}"
-# (without quotes) to file config_map
+# (without quotes) to file var_config
 
 # these subs are in the main namespace
 
