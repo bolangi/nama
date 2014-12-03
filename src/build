@@ -1,33 +1,9 @@
 #!/bin/sh
-CUR_DIR=`dirname $0`
-cd "$CUR_DIR"
-MD=..
-#"$MD/src/sort_vars" > "$MD/src/variables.sorted.txt"
-TD=$MD/lib/Audio/Nama
-if [ ! -d $TD ]; then
-   mkdir -p $TD;
-fi
-if [ ! -d $MD/t ]		
-then
-   mkdir $MD/t
-fi
-
-./preproc -r Audio::Nama \
-		-s $MD/src \
-		-t $TD \
-		-a p \
-		-b pm 
-mv $TD/Nama.pm $TD/../Nama.pm 
-./preproc  -s $MD/src \
-         -t $MD/t  \
-		 -r Audio::Nama \
-		 -a t \
-		 -b t
-./generate_executable_stub
+./myproc
 cd ..
 perl Makefile.PL
 echo "Now you can go to the nama toplevel directory and type:"
-echo -e "\tmake; make test"
+echo "\tmake; make test"
 echo "If you're happy with the result you can do:"
-echo -e "\tmake install"
+echo "\tmake install"
 echo "****************************************"

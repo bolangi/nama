@@ -1,32 +1,33 @@
 #!/bin/sh
 # use -d for debugging output
 
+# change to build directory nama/src
+
+CUR_DIR=`dirname $0`
+cd "$CUR_DIR"
+
 ./check_hash_keys
-#./sort_vars > variables.sorted.txt
+
 MD=..
-TD=$MD/lib/Audio/Nama
-TESTD=$MD/t
+LIBPATH=$MD/lib/Audio/Nama
+LD=$MD/lib
+TD=$MD/t
+SD=$MD/script
 
 ./missing_files_list
 
 echo "Cleaning output directories"
-rm -rf $TD
-rm -rf $TESTD/*.t
-CUR_DIR=`dirname $0`
-cd "$CUR_DIR"
-if [ ! -d $TD ]; then
-   mkdir -p $TD;
-fi
-if [ ! -d $TESTD ]; then
-   mkdir -p $TESTD;
-fi
+for d in $LD $SD; do rm -rf $d; mkdir -p $d; done
+rm $TD/*.t
+mkdir -p $LIBPATH
+
 DEBUG=$1
 ./preproc $DEBUG -r Audio::Nama \
 		-s $MD/src \
-		-t $TD \
+		-t $LIBPATH \
 		-a p \
 		-b pm 
-mv $TD/Nama.pm $TD/../Nama.pm 
+mv $LIBPATH/Nama.pm $LIBPATH/../Nama.pm 
 ./preproc $DEBUG -s $MD/src \
          -t $MD/t  \
 		 -r Audio::Nama \
@@ -38,10 +39,3 @@ cd $MD/lib/Audio
 ./makeman
 rm *.tmp
 cd ../../src
-#cd ..
-#perl Makefile.PL
-echo "Now you can go to the nama toplevel directory and type:"
-echo -e "\tmake; make test"
-echo "If you're happy with the result you can do:"
-echo -e "\tmake install"
-echo "****************************************"
