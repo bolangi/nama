@@ -319,12 +319,13 @@ sub restore_state_from_file {
 
 	# convert effect object format
 	
-	if ( $project->{save_file_version_number} < 1.201 )
+	if ( $project->{save_file_version_number} < 1.200 )
 	{
 		@effects_data = 
 			map{ my $hashref = $fx->{applied}->{$_}; 
 					$hashref->{params} = $fx->{params}->{$_}; 
 					$hashref->{class} = '::Effect';
+					$hashref->{owns} ||= [];
 					$hashref }
 			grep { defined $_ } 
 			keys %{$fx->{applied}};
