@@ -681,49 +681,38 @@ sub wav_format{
 
 	
 sub mute {
-	package ::;
+	
 	my $track = shift;
 	my $nofade = shift;
-	# do nothing if already muted
+
+	# do nothing if track is already muted
 	return if defined $track->old_vol_level();
-	if (defined $track->vol_o 	
-		and $track->vol_o->params->[0] != $track->mute_level
-		and $track->vol_o->params->[0] != $track->fade_out_level){   
-		$track->set(old_vol_level => $track->vol_o->params->[0]);
-		fadeout( $track->vol ) unless $nofade;
-	}
-	$track->set_vol($track->mute_level);
+
+	# do nothing if track has no volume operator
+	my $vol = $track->vol_o;
+	return unless $vol;
+
+	# store vol level for unmute
+	$track->set(old_vol_level => $vol->params->[0]);
+	
+	$nofade 
+		? $vol->_modify_effect(1, $track->mute_level)
+		: $vol->fadeout
 }
 sub unmute {
-	package ::;
 	my $track = shift;
 	my $nofade = shift;
+
 	# do nothing if we are not muted
 	return if ! defined $track->old_vol_level;
-	if ( $nofade ){
-		$track->set_vol($track->old_vol_level);
-	} 
-	else { 
-		$track->set_vol($track->fade_out_level);
-		fadein($track->vol, $track->old_vol_level);
-	}
+
+	$nofade
+		? $track->vol_o->_modify_effect(1, $track->old_vol_level)
+		: $track->vol_o->fadein($track->old_vol_level);
+
 	$track->set(old_vol_level => undef);
 }
 
-sub mute_level {
-	my $track = shift;
-	return unless defined $track->vol_o;
-	$config->{mute_level}->{$track->vol_o->type}
-}
-sub fade_out_level {
-	my $track = shift;
-	$config->{fade_out_level}->{$track->vol_o->type}
-}
-sub set_vol {
-	my $track = shift;
-	my $val = shift;
-	::update_effect($track->vol, 0, $val);
-}
 sub import_audio  { 
 	my $track = shift;
 	my ($path, $frequency) = @_; 

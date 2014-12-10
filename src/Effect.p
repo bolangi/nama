@@ -272,7 +272,7 @@ sub _effect_index {
 	effect_index($self->type)
 }
 sub _modify_effect {
-	my ($self, $parameter, $sign, $value) = @_;
+	my ($self, $parameter, $value, $sign) = @_;
 	no warnings 'uninitialized';
 	my $op_id = $self->id;
 
@@ -718,7 +718,7 @@ sub modify_effect {
 	
 	my $FX = fxn($op_id)
 		or pager("$op_id: non-existing effect id. Skipping.\n"), return; 
-	$FX->_modify_effect($parameter, $sign, $value);
+	$FX->_modify_effect($parameter, $value, $sign);
 }
 
 
@@ -1189,6 +1189,54 @@ sub check_fx_consistency {
 		$result->{is_error}++
 	}
 	$result;
+}
+
+sub fade {
+	my $self = shift;
+	# parameter starts at one
+	my ($param, $from, $to, $seconds) = @_;
+
+	my $id = $self->id;
+	# no fade without Timer::HiRes
+	# no fade unless engine is running
+	if ( engine_running() and $config->{hires_timer} )
+	{
+		my $steps = $seconds * $config->{fade_resolution};
+		my $wink  = 1/$config->{fade_resolution};
+		my $size = ($to - $from)/$steps;
+		logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
+		# first step by step
+		for (1..$steps - 1){
+			$self->_modify_effect($param, $size, '+');
+			sleeper( $wink );
+		}		
+	}
+	$self->_modify_effect($param, $to)
+}
+
+sub fadein {
+	my $self = shift;
+	my $to = shift;
+	my $from  = $config->{fade_out_level}->{$self->type};
+	$self->_modify_effect(1, $from);
+	$self->fade(1, $from, $to, $config->{engine_fade_length_on_start_stop});
+}
+sub fadeout {
+	my $self = shift;
+	my $from  =	$self->params->[0];
+	my $to	  = $config->{fade_out_level}->{$self->type};
+	$self->fade(1, $from, $to, $config->{engine_fade_length_on_start_stop} );
+	$self->_modify_effect(1, $config->{mute_level}->{$self->type});
+}
+sub mute_level {
+	my $self = shift;
+	my $level = $config->{mute_level}->{$self->type};
+	#defined $level or die $self->nameline .  " cannot be muted."
+	$level
+}
+sub fade_out_level {
+	my $self = shift;
+	$config->{fade_out_level}->{$self->type}
 }
 
 } # end package Effect

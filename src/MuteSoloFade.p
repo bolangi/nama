@@ -23,41 +23,6 @@ sub fade_around {
 	}
 	else { $coderef->(@args) }
 }
-sub fade {
-	my ($id, $param, $from, $to, $seconds) = @_;
-
-	# no fade without Timer::HiRes
-	# no fade unless engine is running
-	if ( ! engine_running() or ! $config->{hires_timer} ){
-		update_effect ( $id, --$param, $to );
-		return;
-	}
-
-	my $steps = $seconds * $config->{fade_resolution};
-	my $wink  = 1/$config->{fade_resolution};
-	my $size = ($to - $from)/$steps;
-	logpkg('debug', "id: $id, param: $param, from: $from, to: $to, seconds: $seconds");
-	# first step by step
-	for (1..$steps - 1){
-		modify_effect( $id, $param, '+', $size);
-		sleeper( $wink );
-	}		
-	# then the last value
-	modify_effect($id, $param, $to)
-}
-
-sub fadein {
-	my ($id, $to) = @_;
-	my $from  = $config->{fade_out_level}->{fxn($id)->type};
-	fade( $id, 1, $from, $to, $config->{engine_fade_length_on_start_stop});
-}
-sub fadeout {
-	my $id    = shift;
-	my $from  =	fxn($id)->params->[0];
-	my $to	  = $config->{fade_out_level}->{fxn($id)->type};
-	fade( $id, 1, $from, $to, $config->{engine_fade_length_on_start_stop} );
-}
-
 sub solo {
 	my @args = @_;
 
