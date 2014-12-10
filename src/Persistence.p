@@ -333,6 +333,10 @@ sub restore_state_from_file {
 		delete $fx->{applied};
 		delete $fx->{params};
 	}
+	if ( $project->{save_file_version_number} <= 1.201 )
+	{
+		map{ $_->{owns} ||= [] } @effects_data;
+	}
 
 
 	# restore effects, no change to track objects needed
