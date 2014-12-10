@@ -292,8 +292,6 @@ sub initialize_interfaces {
 	
 	first_run() unless $config->{opts}->{d}; 
 
-	#my $fx_cache_json;
-	#$fx_cache_json = get_data_section("fx_cache") if $config->{opts}->{T};
 	prepare_static_effects_data() unless $config->{opts}->{S};
 	setup_user_customization();	# depends on effect_index() in above
 
@@ -306,7 +304,6 @@ sub initialize_interfaces {
 	$ui->init_gui;
 	$ui->transport_gui;
 	$ui->time_gui;
-
 	
 	# fake JACK for testing environment
 
