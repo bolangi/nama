@@ -46,11 +46,11 @@ sub solo {
 	
 	# get dependent tracks
 	
-	my @d = map{ $tn{$_}->bus_tree() } @names;
+	my @dependents = map{ $tn{$_}->bus_tree() } @names;
 
 	# store solo tracks and dependent tracks that we won't mute
 
-	map{ $not_mute{$_}++ } @names, @d;
+	map{ $not_mute{$_}++ } @names, @dependents;
 
 	# find all siblings tracks not in depends list
 
